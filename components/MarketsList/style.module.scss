@@ -1,0 +1,34 @@
+.container {
+  max-width: var(--maxWidth);
+  width: 100%;
+  margin: var(--u2) auto;
+  background-color: var(--white);
+  box-shadow: var(--shadow);
+  border-radius: var(--smallUnit);
+
+  h2 {
+    margin: var(--u) 0 var(--u3) 0;
+    padding: var(--u3) var(--u3) 0;
+  }
+  .tableRow {
+    display: flex;
+    padding: 0 var(--u3);
+
+    justify-content: space-between;
+    margin-bottom: var(--u2);
+    font-weight: bold;
+    color: var(--gray-100);
+    font-size: 0.8em;
+    .symbol {
+      width: 20%;
+    }
+
+    .address {
+      width: 50%;
+    }
+
+    .collateralFactor {
+      width: 20%;
+    }
+  }
+}

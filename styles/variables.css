@@ -1,0 +1,20 @@
+:root {
+  /* GRID */
+  --smallUnit: 4px;
+  --u: 8px;
+  --u2: 16px;
+  --u3: 24px;
+  --u4: 32px;
+  --u5: 40px;
+  --u6: 48px;
+
+  /* WIDTH */
+  --maxWidth: 1000px;
+
+  /* COLORS */
+  --background: #f9fafb;
+  --gray-100: #aab8c1;
+  --white: #fff;
+  --shadow: 0px 2px 4px rgb(16 21 24 / 5%);
+  --primary: #4d4de8;
+}

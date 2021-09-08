@@ -1,0 +1,13 @@
+.alertContainer {
+  width: 100%;
+  height: var(--u6);
+  background-color: gray;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+}
+
+.error {
+  background-color: red;
+}
