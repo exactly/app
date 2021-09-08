@@ -15,7 +15,7 @@ import { Market } from "types/Market";
 
 const Home: NextPage = () => {
   const [markets, setMarkets] = useState<Array<Market>>([]);
-  const { contract, contractWithSigner } = useContract(
+  const { contractWithSigner } = useContract(
     exaFrontContract?.address,
     exaFrontContract?.abi
   );

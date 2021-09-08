@@ -1,0 +1,13 @@
+.container {
+  width: var(--maxWidth);
+  margin: auto;
+  .fieldContainer {
+    display: flex;
+    flex-direction: column;
+    .inputContainer {
+      width: 300px;
+      margin-top: var(--u);
+      height: var(--u4);
+    }
+  }
+}
