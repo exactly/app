@@ -19,7 +19,8 @@
       "pages/*": ["./pages/*"],
       "hooks/*": ["./hooks/*"],
       "contracts/*": ["./contracts/*"],
-      "types/*": ["./types/*"]
+      "types/*": ["./types/*"],
+      "utils/*": ["./utils/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],

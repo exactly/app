@@ -1,13 +1,14 @@
 .container {
   width: var(--maxWidth);
   margin: auto;
-  .fieldContainer {
+  .dataContainer {
     display: flex;
-    flex-direction: column;
-    .inputContainer {
-      width: 300px;
-      margin-top: var(--u);
-      height: var(--u4);
+    justify-content: space-between;
+    .left {
+      width: 30%;
+    }
+    .right {
+      width: 60%;
     }
   }
 }

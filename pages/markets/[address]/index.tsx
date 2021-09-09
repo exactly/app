@@ -1,23 +1,33 @@
 import React, { useState, useEffect, ChangeEventHandler } from "react";
+import { ethers } from "ethers";
 
 import CurrentNetwork from "components/CurrentNetwork";
-import Input from "components/common/Input";
+import Breadcrumb from "components/common/Breadcrumb";
+import SupplyForm from "components/SupplyForm";
 
 import useContract from "hooks/useContract";
 
 import exafin from "contracts/exafin.json";
 import exaFrontContractData from "contracts/exaFront.json";
 
-import style from "./style.module.scss";
 import { Market } from "types/Market";
-import { ethers } from "ethers";
+import { SupplyRate } from "types/SupplyRate";
+
+import style from "./style.module.scss";
 
 type Props = {
   address: string;
 };
 
 function Exafin({ address }: Props) {
+  const [potentialRate, setPotentialRate] = useState<string | undefined>(
+    undefined
+  );
+  const [poolSupply, setPoolSupply] = useState<string | undefined>(undefined);
+  const [poolLend, setPoolLend] = useState<string | undefined>(undefined);
+
   const [exafinData, setExafinData] = useState<Market | undefined>(undefined);
+  const [hasRate, setHasRate] = useState<boolean>(false);
 
   const { contractWithSigner } = useContract(address, exafin.abi);
 
@@ -70,30 +80,60 @@ function Exafin({ address }: Props) {
     setExafinData(formattedMarketData);
   }
 
-  function handleDate(e: React.ChangeEvent<HTMLInputElement>) {
-    console.log(Math.floor(Date.parse(e.target.value) / 1000));
+  function handleResult(data: SupplyRate) {
+    setHasRate(true);
+    setPotentialRate(data.potentialRate);
+    setPoolSupply(data.poolSupply);
+    setPoolLend(data.poolLend);
   }
+
   return (
     <div>
       <CurrentNetwork />
-      <section className={style.container}>
-        <h1>
-          {exafinData?.name} ({exafinData?.symbol})
-        </h1>
 
-        <section>
-          <div className={style.fieldContainer}>
-            <span>Cantidad a depositar</span>
-            <div className={style.inputContainer}>
-              <Input type="number" />
-            </div>
-          </div>
-          <div className={style.fieldContainer}>
-            <span>Fecha de fin</span>
-            <div className={style.inputContainer}>
-              <Input type="date" onChange={handleDate} />
-            </div>
-          </div>
+      <section className={style.container}>
+        <Breadcrumb
+          steps={[
+            {
+              value: exafinData?.symbol,
+              url: `/markets/${exafinData?.address}`,
+            },
+          ]}
+        />
+        {exafinData?.name && (
+          <h1>
+            {exafinData.name}{" "}
+            {exafinData?.symbol && <>({exafinData?.symbol})</>}
+          </h1>
+        )}
+
+        <section className={style.dataContainer}>
+          <section className={style.left}>
+            <SupplyForm
+              contractWithSigner={contractWithSigner!}
+              handleResult={handleResult}
+              hasRate={hasRate}
+            />
+          </section>
+          {hasRate && (
+            <section className={style.right}>
+              <p>
+                Tu interes anual es de: <strong>{potentialRate}</strong>
+              </p>
+              <p>
+                Despues de tu deposito la pool va a tener{" "}
+                <strong>
+                  {poolSupply} {exafinData?.symbol}
+                </strong>
+              </p>
+              <p>
+                Despues de tu deposito la pool va a haber prestado{" "}
+                <strong>
+                  {poolLend} {exafinData?.symbol}
+                </strong>
+              </p>
+            </section>
+          )}
         </section>
       </section>
     </div>

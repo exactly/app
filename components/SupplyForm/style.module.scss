@@ -1,0 +1,16 @@
+.fieldContainer {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin-bottom: var(--u2);
+  .inputContainer {
+    width: 100%;
+    margin-top: var(--u);
+    height: var(--u4);
+  }
+
+  .buttonContainer {
+    height: var(--u4);
+    width: 100%;
+  }
+}
