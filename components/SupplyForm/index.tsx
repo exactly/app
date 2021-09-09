@@ -18,7 +18,7 @@ type Props = {
 function SupplyForm({ contractWithSigner, handleResult, hasRate }: Props) {
   const [qty, setQty] = useState<string | undefined>(undefined);
   const [dueDate, setDueDate] = useState<number | undefined>(undefined);
-  const daiContract = useContract('0x6B175474E89094C44Da98b954EedeAC495271d0F', daiAbi);
+  const daiContract = useContract('0x95b58a6bff3d14b7db2f5cb5f0ad413dc2940658', daiAbi);
 
   function handleDate(e: React.ChangeEvent<HTMLInputElement>) {
     setDueDate(Math.floor(Date.parse(e.target.value) / 1000));
