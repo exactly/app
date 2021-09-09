@@ -2,6 +2,9 @@ import style from "./style.module.scss";
 import Input from "components/common/Input";
 import Button from "components/common/Button";
 
+import useContract from "hooks/useContract";
+import daiAbi from 'contracts/abi/dai.json'
+
 import { useState } from "react";
 import { ethers } from "ethers";
 import { SupplyRate } from "types/SupplyRate";
@@ -15,6 +18,7 @@ type Props = {
 function SupplyForm({ contractWithSigner, handleResult, hasRate }: Props) {
   const [qty, setQty] = useState<string | undefined>(undefined);
   const [dueDate, setDueDate] = useState<number | undefined>(undefined);
+  const daiContract = useContract('0x6B175474E89094C44Da98b954EedeAC495271d0F', daiAbi);
 
   function handleDate(e: React.ChangeEvent<HTMLInputElement>) {
     setDueDate(Math.floor(Date.parse(e.target.value) / 1000));
@@ -36,6 +40,8 @@ function SupplyForm({ contractWithSigner, handleResult, hasRate }: Props) {
   async function deposit() {
     const provider = new ethers.providers.Web3Provider(window.ethereum, "any");
     const from = await provider.getSigner().getAddress();
+
+    await daiContract?.contractWithSigner?.approve("0xCa2Be8268A03961F40E29ACE9aa7f0c2503427Ae", ethers.utils.parseUnits(qty!));
 
     const depositTx = await contractWithSigner?.supply(
       from,
