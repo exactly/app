@@ -1,0 +1,16 @@
+.navBar {
+  width: 100%;
+  height: 80px;
+  padding: 10px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  box-shadow: var(--shadow);
+  background: var(--white);
+
+  .buttonContainer {
+    width: 150px;
+    height: 50px;
+  }
+}

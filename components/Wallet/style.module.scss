@@ -1,0 +1,16 @@
+.container {
+  background: var(--primary);
+  color: var(--white);
+  font-weight: bold;
+  display: flex;
+  padding: 0px 10px;
+  height: 100%;
+  width: 100%;
+  align-items: center;
+  border-radius: var(--smallUnit);
+
+  .icon {
+    margin-right: 5px;
+    height: 20px;
+  }
+}

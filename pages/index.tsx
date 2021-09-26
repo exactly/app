@@ -6,10 +6,11 @@ import { ethers } from "ethers";
 
 import CurrentNetwork from "components/CurrentNetwork";
 import MarketsList from "components/MarketsList";
+import Navbar from "components/Navbar";
 
 import useContract from "hooks/useContract";
 
-import exaFrontContract from "contracts/local/exaFront.json";
+import exaFrontContract from "contracts/rinkeby/exaFront.json";
 
 import { Market } from "types/Market";
 
@@ -64,6 +65,7 @@ const Home: NextPage = () => {
   //   "0x1c7B43a0bbab0a5EA0A1435F31D1c8e05Cc6aE98",
   //   2
   // );
+
   return (
     <div>
       <Head>
@@ -76,8 +78,8 @@ const Home: NextPage = () => {
         />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <button>connect</button>
-      <CurrentNetwork />
+      <Navbar />
+      {/* <CurrentNetwork /> */}
       <MarketsList markets={markets} />
     </div>
   );
