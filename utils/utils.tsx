@@ -8,3 +8,15 @@ export const transformClasses = (style: any, classes: string) => {
     })
     .join(" ");
 };
+
+export const getContractsByEnv = () => {
+  const env = process?.env?.NET ?? "local";
+
+  const exaFront = require(`contracts/${env}/exaFront.json`);
+  const exafin = require(`contracts/${env}/exafin.json`);
+
+  return {
+    exaFront,
+    exafin,
+  };
+};

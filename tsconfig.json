@@ -20,7 +20,8 @@
       "hooks/*": ["./hooks/*"],
       "contracts/*": ["./contracts/*"],
       "types/*": ["./types/*"],
-      "utils/*": ["./utils/*"]
+      "utils/*": ["./utils/*"],
+      "contexts/*": ["./contexts/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],

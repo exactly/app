@@ -3,9 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "NODE_ENV=development NET=local next dev",
     "build": "next build",
-    "start": "next start",
+    "rinkeby": "NODE_ENV=production NET=rinkeby next start",
+    "start": "NODE_ENV=production NET=mainnet next start",
     "lint": "next lint"
   },
   "dependencies": {

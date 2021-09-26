@@ -1,4 +1,4 @@
-import React, { useState, useEffect, ChangeEventHandler } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { ethers } from "ethers";
 
 import CurrentNetwork from "components/CurrentNetwork";
@@ -7,8 +7,7 @@ import SupplyForm from "components/SupplyForm";
 
 import useContract from "hooks/useContract";
 
-import exafin from "contracts/exafin.json";
-import exaFrontContractData from "contracts/exaFront.json";
+import ContractContext from "contexts/ContractContext";
 
 import { Market } from "types/Market";
 import { SupplyRate } from "types/SupplyRate";
@@ -20,6 +19,8 @@ type Props = {
 };
 
 function Exafin({ address }: Props) {
+  const contracts = useContext(ContractContext);
+
   const [potentialRate, setPotentialRate] = useState<string | undefined>(
     undefined
   );
@@ -29,11 +30,11 @@ function Exafin({ address }: Props) {
   const [exafinData, setExafinData] = useState<Market | undefined>(undefined);
   const [hasRate, setHasRate] = useState<boolean>(false);
 
-  const { contractWithSigner } = useContract(address, exafin.abi);
+  const { contractWithSigner } = useContract(address, contracts?.exafin?.abi);
 
   const exaFrontContract = useContract(
-    exaFrontContractData?.address,
-    exaFrontContractData?.abi
+    contracts?.exaFront?.address,
+    contracts?.exaFront?.abi
   );
 
   useEffect(() => {
