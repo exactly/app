@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect } from "react";
 import type { NextPage } from "next";
 import Head from "next/head";
 
@@ -9,27 +9,25 @@ import MarketsList from "components/MarketsList";
 
 import useContract from "hooks/useContract";
 
-import ContractContext from "contexts/ContractContext";
+import exaFrontContract from "contracts/local/exaFront.json";
+
 import { Market } from "types/Market";
 
 const Home: NextPage = () => {
-  const contracts = useContext(ContractContext);
-
   const [markets, setMarkets] = useState<Array<Market>>([]);
-  const { contractWithSigner } = useContract(
-    contracts?.exaFront?.address,
-    contracts?.exaFront?.abi
+  const { contract } = useContract(
+    exaFrontContract?.address,
+    exaFrontContract?.abi
   );
 
-  console.log(contractWithSigner);
   useEffect(() => {
-    if (contractWithSigner) {
+    if (contract) {
       getMarkets();
     }
-  }, [contractWithSigner]);
+  }, [contract]);
 
   async function getMarkets() {
-    const marketsData = await contractWithSigner?.getMarkets();
+    const marketsData = await contract?.getMarkets();
     setMarkets(formatMarkets(marketsData));
   }
 
@@ -45,7 +43,7 @@ const Home: NextPage = () => {
         symbol: "",
         name: "",
         isListed: false,
-        collateralFactor: 0,
+        collateralFactor: 0
       };
 
       market["address"] = addresses[i];
@@ -78,7 +76,7 @@ const Home: NextPage = () => {
         />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-
+      <button>connect</button>
       <CurrentNetwork />
       <MarketsList markets={markets} />
     </div>

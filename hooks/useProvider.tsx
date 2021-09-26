@@ -8,18 +8,29 @@ declare global {
 }
 
 export default function useProvider() {
-  const [provider, setProvider] = useState<ethers.providers.Web3Provider>();
+  // const [web3Provider, setWeb3Provider] =
+  //   useState<ethers.providers.Web3Provider>();
+  const [alchemyProvider, setAlchemyProvider] =
+    useState<ethers.providers.AlchemyProvider>();
 
   useEffect(() => {
     getProvider();
   }, []);
 
   async function getProvider() {
-    await window.ethereum.enable();
-    const provider = new ethers.providers.Web3Provider(window.ethereum, "any");
+    // await window.ethereum.enable();
+    // const web3Provider = new ethers.providers.Web3Provider(
+    //   window.ethereum,
+    //   "any"
+    // );
 
-    setProvider(provider);
+    const alchemyProvider = await new ethers.providers.AlchemyProvider(
+      "rinkeby"
+    );
+
+    // setWeb3Provider(web3Provider);
+    setAlchemyProvider(alchemyProvider);
   }
 
-  return provider;
+  return alchemyProvider;
 }
