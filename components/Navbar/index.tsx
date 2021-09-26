@@ -31,7 +31,7 @@ function Navbar() {
   function addWalletListener() {
     //we listen to any change in wallet
     if (window.ethereum) {
-      window.ethereum.on("accountsChanged", (accounts) => {
+      window.ethereum.on("accountsChanged", (accounts: any) => {
         if (accounts.length > 0) {
           setWallet(accounts[0]);
         } else {
