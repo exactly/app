@@ -15,7 +15,14 @@ export default function useContract(
   }, []);
 
   async function getContract() {
-    const provider = ethers.getDefaultProvider("rinkeby");
+    console.log(process.env.NEXT_PUBLIC_NETWORK)
+
+    let provider;
+    if (process.env.NEXT_PUBLIC_NETWORK == 'local') {
+      provider = new ethers.providers.JsonRpcProvider();
+    } else {
+      provider = ethers.getDefaultProvider("rinkeby");
+    }
     let contract = new ethers.Contract(address, abi, provider);
 
     contract = contract.connect(provider);

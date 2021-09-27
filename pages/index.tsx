@@ -10,7 +10,7 @@ import Navbar from "components/Navbar";
 
 import useContract from "hooks/useContract";
 
-import exaFrontContract from "contracts/rinkeby/exaFront.json";
+import exaFrontContract from "contracts/local/exaFront.json";
 
 import { Market } from "types/Market";
 
