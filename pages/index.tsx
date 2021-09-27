@@ -29,6 +29,7 @@ const Home: NextPage = () => {
 
   async function getMarkets() {
     const marketsData = await contract?.getMarkets();
+    console.log(marketsData, 123);
     setMarkets(formatMarkets(marketsData));
   }
 
@@ -61,11 +62,6 @@ const Home: NextPage = () => {
     return formattedMarkets;
   }
 
-  // contractWithSigner?.enableMarket(
-  //   "0x1c7B43a0bbab0a5EA0A1435F31D1c8e05Cc6aE98",
-  //   2
-  // );
-
   return (
     <div>
       <Head>
@@ -76,7 +72,7 @@ const Home: NextPage = () => {
           name="description"
           content="Exactly App - Fixed interest rates lending & borrowing protocol"
         />
-        <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" href="/icon.ico" />
       </Head>
       <Navbar />
       {/* <CurrentNetwork /> */}

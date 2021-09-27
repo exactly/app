@@ -14,7 +14,7 @@ function Item({ market }: Props) {
           <span className={style.primary}>{market?.symbol}</span>
           <span className={style.secondary}>{market?.name}</span>
         </div>
-        <span className={style.address}>{market?.address}</span>
+        {/* <span className={style.address}>{market?.address}</span> */}
         <span className={style.collateralFactor}>
           {market?.collateralFactor}
         </span>

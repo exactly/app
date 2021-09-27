@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useContext } from "react";
 import { ethers } from "ethers";
 
-import CurrentNetwork from "components/CurrentNetwork";
 import Breadcrumb from "components/common/Breadcrumb";
 import SupplyForm from "components/SupplyForm";
+import Navbar from "components/Navbar";
 
-import useContract from "hooks/useContract";
+import useContractWithSigner from "hooks/useContractWithSigner";
 
 import ContractContext from "contexts/ContractContext";
 
@@ -30,12 +30,19 @@ function Exafin({ address }: Props) {
   const [exafinData, setExafinData] = useState<Market | undefined>(undefined);
   const [hasRate, setHasRate] = useState<boolean>(false);
 
-  const { contractWithSigner } = useContract(address, contracts?.exafin?.abi);
+  const { contractWithSigner } = useContractWithSigner(
+    address,
+    contracts?.exafin?.abi
+  );
 
-  const exaFrontContract = useContract(
+  console.log({ contractWithSigner });
+
+  const exaFrontContract = useContractWithSigner(
     contracts?.exaFront?.address,
     contracts?.exaFront?.abi
   );
+
+  console.log({ exaFrontContract });
 
   useEffect(() => {
     if (exaFrontContract.contractWithSigner) {
@@ -43,27 +50,24 @@ function Exafin({ address }: Props) {
     }
   }, [exaFrontContract.contractWithSigner]);
 
-  useEffect(() => {
-    if (contractWithSigner) {
-      getNextMonth();
-    }
-  }, [contractWithSigner]);
+  // useEffect(() => {
+  //   if (contractWithSigner) {
+  //     getNextMonth();
+  //   }
+  // }, [contractWithSigner]);
 
-  async function getNextMonth() {
-    const now = Math.floor(Date.now() / 1000);
-    const oneDay: number = 86400;
-    const thirtyDays: number = 86400 * 30;
+  // async function getNextMonth() {
+  //   const now = Math.floor(Date.now() / 1000);
+  //   const oneDay: number = 86400;
+  //   const thirtyDays: number = 86400 * 30;
 
-    const nextMonth = now + thirtyDays;
+  //   const nextMonth = now + thirtyDays;
 
-    const test = await contractWithSigner?.rateForSupply(
-      ethers.utils.parseUnits("0.00000001"),
-      nextMonth
-    );
-
-    console.log(ethers.utils.formatEther(test[0]));
-    console.log(ethers.utils.formatEther(test[1][1]));
-  }
+  //   const test = await contractWithSigner?.rateForSupply(
+  //     ethers.utils.parseUnits("0.00000001"),
+  //     nextMonth
+  //   );
+  // }
 
   async function getMarketByAddress(contractAddress: string) {
     const [address, symbol, isListed, collateralFactor, name] =
@@ -75,9 +79,9 @@ function Exafin({ address }: Props) {
       symbol,
       isListed,
       collateralFactor,
-      name,
+      name
     };
-
+    console.log(formattedMarketData, 1234);
     setExafinData(formattedMarketData);
   }
 
@@ -90,15 +94,14 @@ function Exafin({ address }: Props) {
 
   return (
     <div>
-      <CurrentNetwork />
-
+      <Navbar />
       <section className={style.container}>
         <Breadcrumb
           steps={[
             {
               value: exafinData?.symbol,
-              url: `/markets/${exafinData?.address}`,
-            },
+              url: `/markets/${exafinData?.address}`
+            }
           ]}
         />
         {exafinData?.name && (
@@ -146,8 +149,8 @@ export async function getServerSideProps({ query }: any) {
 
   return {
     props: {
-      address,
-    },
+      address
+    }
   };
 }
 

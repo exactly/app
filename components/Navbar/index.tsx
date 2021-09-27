@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import styles from "./style.module.scss";
 
 import useProvider from "hooks/useProvider";
@@ -43,7 +44,9 @@ function Navbar() {
 
   return (
     <nav className={styles.navBar}>
-      <img src="/img/logo.svg" alt="Exactly Logo" />
+      <Link href="/">
+        <img src="/img/logo.svg" alt="Exactly Logo" className={styles.link} />
+      </Link>
       {!walletAddress ? (
         <div className={styles.buttonContainer}>
           <Button

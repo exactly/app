@@ -1,6 +1,5 @@
 import { ethers } from "ethers";
 import { useEffect, useState } from "react";
-import useProvider from "./useProvider";
 
 export default function useContract(
   address: string,

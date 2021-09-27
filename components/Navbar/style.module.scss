@@ -9,6 +9,10 @@
   box-shadow: var(--shadow);
   background: var(--white);
 
+  .link {
+    cursor: pointer;
+  }
+
   .buttonContainer {
     width: 150px;
     height: 50px;
