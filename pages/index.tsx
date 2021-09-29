@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import type { NextPage } from "next";
 import Head from "next/head";
 
@@ -9,16 +9,17 @@ import MarketsList from "components/MarketsList";
 import Navbar from "components/Navbar";
 
 import useContract from "hooks/useContract";
-
-import exaFrontContract from "contracts/local/exaFront.json";
+import ContractContext from "contexts/ContractContext";
 
 import { Market } from "types/Market";
 
 const Home: NextPage = () => {
+  const contracts = useContext(ContractContext);
+
   const [markets, setMarkets] = useState<Array<Market>>([]);
   const { contract } = useContract(
-    exaFrontContract?.address,
-    exaFrontContract?.abi
+    contracts.exaFront?.address,
+    contracts.exaFront?.abi
   );
 
   useEffect(() => {
@@ -44,7 +45,7 @@ const Home: NextPage = () => {
         symbol: "",
         name: "",
         isListed: false,
-        collateralFactor: 0
+        collateralFactor: 0,
       };
 
       market["address"] = addresses[i];
