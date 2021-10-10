@@ -1,13 +1,12 @@
 import styles from "./style.module.scss";
+import { formatWallet } from "utils/utils";
 
 type Props = {
   walletAddress: String;
 };
 
 function Wallet({ walletAddress }: Props) {
-  const formatedWallet = `${String(walletAddress).substring(0, 6)}...${String(
-    walletAddress
-  ).substring(38)}`;
+  const formatedWallet = formatWallet(walletAddress);
 
   return (
     <div className={styles.container}>

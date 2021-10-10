@@ -12,11 +12,11 @@ export default function useProvider() {
     useState<ethers.providers.Web3Provider>();
 
   async function getProvider() {
+    await window?.ethereum.enable();
     const web3Provider = new ethers.providers.Web3Provider(
       window.ethereum,
       "any"
     );
-
     setWeb3Provider(web3Provider);
   }
 

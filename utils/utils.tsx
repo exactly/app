@@ -17,6 +17,10 @@ export const getContractsByEnv = () => {
 
   return {
     exaFront,
-    exafin,
+    exafin
   };
+};
+
+export const formatWallet = (walletAddress: String) => {
+  return `${walletAddress.substring(0, 6)}...${walletAddress.substring(38)}`;
 };

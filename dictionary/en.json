@@ -1,0 +1,12 @@
+{
+  "asset": "Asset",
+  "collateral": "Collateral Factor",
+  "lend": "Despues de tu deposito la pool va a haber prestado",
+  "supply": "Despues de tu deposito la pool va a tener",
+  "annualRate": "Tu interes anual es de",
+  "endDate": "Fecha de finalización",
+  "deposit": "Depositar",
+  "calculateRate": "Calcular tasa",
+  "depositTitle": "Cantidad a depositar",
+  "selectDefaultText": "Choose Date"
+}

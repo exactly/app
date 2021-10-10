@@ -1,0 +1,10 @@
+.modal {
+  position: absolute;
+  width: 250px;
+  height: fit-content;
+  left: calc(50% - 125px);
+  top: 25%;
+  background: var(--background);
+  box-shadow: var(--shadow-2);
+  padding: 20px;
+}

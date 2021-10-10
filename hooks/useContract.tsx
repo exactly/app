@@ -14,10 +14,8 @@ export default function useContract(
   }, []);
 
   async function getContract() {
-    console.log(process.env.NEXT_PUBLIC_NETWORK)
-
     let provider;
-    if (process.env.NEXT_PUBLIC_NETWORK == 'local') {
+    if (process.env.NEXT_PUBLIC_NETWORK == "local") {
       provider = new ethers.providers.JsonRpcProvider();
     } else {
       provider = ethers.getDefaultProvider("rinkeby");

@@ -1,20 +1,26 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import type { NextPage } from "next";
 import Head from "next/head";
 
 import { ethers } from "ethers";
 
-import CurrentNetwork from "components/CurrentNetwork";
 import MarketsList from "components/MarketsList";
 import Navbar from "components/Navbar";
 
 import useContract from "hooks/useContract";
+import useModal from "hooks/useModal";
+import useOnClickOutside from "hooks/useOnClickOutside";
 
 import exaFrontContract from "contracts/local/exaFront.json";
 
 import { Market } from "types/Market";
+import Modal from "components/Modal";
 
 const Home: NextPage = () => {
+  const { modal, handleModal, modalContent } = useModal();
+  const ref = useRef<HTMLInputElement>(null);
+  useOnClickOutside(ref, () => handleModal({}));
+
   const [markets, setMarkets] = useState<Array<Market>>([]);
   const { contract } = useContract(
     exaFrontContract?.address,
@@ -29,7 +35,7 @@ const Home: NextPage = () => {
 
   async function getMarkets() {
     const marketsData = await contract?.getMarkets();
-    console.log(marketsData, 123);
+
     setMarkets(formatMarkets(marketsData));
   }
 
@@ -62,6 +68,10 @@ const Home: NextPage = () => {
     return formattedMarkets;
   }
 
+  function showModal(address: Market["address"]) {
+    handleModal({ content: address });
+  }
+
   return (
     <div>
       <Head>
@@ -74,9 +84,13 @@ const Home: NextPage = () => {
         />
         <link rel="icon" href="/icon.ico" />
       </Head>
+      {modal && (
+        <div ref={ref}>
+          <Modal address={modalContent} />
+        </div>
+      )}
       <Navbar />
-      {/* <CurrentNetwork /> */}
-      <MarketsList markets={markets} />
+      <MarketsList markets={markets} showModal={showModal} />
     </div>
   );
 };

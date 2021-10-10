@@ -10,6 +10,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "dayjs": "^1.10.7",
     "ethers": "^5.4.6",
     "next": "11.1.2",
     "react": "17.0.2",
