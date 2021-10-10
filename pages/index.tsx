@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useContext } from "react";
 import type { NextPage } from "next";
 import Head from "next/head";
 
@@ -11,7 +11,7 @@ import useContract from "hooks/useContract";
 import useModal from "hooks/useModal";
 import useOnClickOutside from "hooks/useOnClickOutside";
 
-import exaFrontContract from "contracts/local/exaFront.json";
+import ContractContext from "contexts/ContractContext";
 
 import { Market } from "types/Market";
 import Modal from "components/Modal";
@@ -20,11 +20,12 @@ const Home: NextPage = () => {
   const { modal, handleModal, modalContent } = useModal();
   const ref = useRef<HTMLInputElement>(null);
   useOnClickOutside(ref, () => handleModal({}));
+  const contracts = useContext(ContractContext);
 
   const [markets, setMarkets] = useState<Array<Market>>([]);
   const { contract } = useContract(
-    exaFrontContract?.address,
-    exaFrontContract?.abi
+    contracts.auditor?.address,
+    contracts.auditor?.abi
   );
 
   useEffect(() => {

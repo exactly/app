@@ -1,4 +1,4 @@
-import { useContext, useState, useEffect, useRef } from "react";
+import { useContext, useState, useEffect } from "react";
 import style from "./style.module.scss";
 
 import SupplyForm from "components/SupplyForm";
@@ -25,28 +25,28 @@ function Modal({ address }: Props) {
   const [poolSupply, setPoolSupply] = useState<string | undefined>(undefined);
   const [poolLend, setPoolLend] = useState<string | undefined>(undefined);
 
-  const [exafinData, setExafinData] = useState<Market | undefined>(undefined);
+  const [auditorData, setAuditorData] = useState<Market | undefined>(undefined);
   const [hasRate, setHasRate] = useState<boolean>(false);
 
   const { contractWithSigner } = useContractWithSigner(
     address,
-    contracts?.exafin?.abi
+    contracts?.auditor?.abi
   );
 
-  const exaFrontContract = useContractWithSigner(
-    contracts?.exaFront?.address,
-    contracts?.exaFront?.abi
+  const auditorContract = useContractWithSigner(
+    contracts?.auditor?.address,
+    contracts?.auditor?.abi
   );
 
   useEffect(() => {
-    if (exaFrontContract.contractWithSigner) {
+    if (auditorContract.contractWithSigner) {
       getMarketByAddress(address);
     }
-  }, [exaFrontContract.contractWithSigner]);
+  }, [auditorContract.contractWithSigner]);
 
   async function getMarketByAddress(contractAddress: string) {
     const [address, symbol, isListed, collateralFactor, name] =
-      await exaFrontContract?.contractWithSigner?.getMarketByAddress(
+      await auditorContract?.contractWithSigner?.getMarketByAddress(
         contractAddress
       );
     const formattedMarketData: Market = {
@@ -57,7 +57,7 @@ function Modal({ address }: Props) {
       name
     };
 
-    setExafinData(formattedMarketData);
+    setAuditorData(formattedMarketData);
   }
 
   function handleResult(data: SupplyRate) {
@@ -69,7 +69,7 @@ function Modal({ address }: Props) {
 
   return (
     <div className={style.modal}>
-      <p>{exafinData?.symbol}</p>
+      <p>{auditorData?.symbol}</p>
       <SupplyForm
         contractWithSigner={contractWithSigner!}
         handleResult={handleResult}
@@ -83,13 +83,13 @@ function Modal({ address }: Props) {
           <p>
             {dictionary.supply}{" "}
             <strong>
-              {poolSupply} {exafinData?.symbol}
+              {poolSupply} {auditorData?.symbol}
             </strong>
           </p>
           <p>
             {dictionary.lend}{" "}
             <strong>
-              {poolLend} {exafinData?.symbol}
+              {poolLend} {auditorData?.symbol}
             </strong>
           </p>
         </section>

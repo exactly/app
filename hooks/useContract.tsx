@@ -15,10 +15,12 @@ export default function useContract(
 
   async function getContract() {
     let provider;
-    if (process.env.NEXT_PUBLIC_NETWORK == "local") {
+    const publicNetwork = process.env.NEXT_PUBLIC_NETWORK;
+
+    if (publicNetwork == "local") {
       provider = new ethers.providers.JsonRpcProvider();
     } else {
-      provider = ethers.getDefaultProvider("rinkeby");
+      provider = ethers.getDefaultProvider(publicNetwork);
     }
     let contract = new ethers.Contract(address, abi, provider);
 
