@@ -12,7 +12,7 @@ export default function useNetwork() {
 
   async function getNetwork() {
     const provider = await promiseProvider;
-    const network = await provider?.getNetwork();
+    const network = await provider?.web3Provider?.getNetwork();
 
     setNetwork(network);
   }
