@@ -1,14 +1,14 @@
 import { useState } from "react";
 
 type Props = {
-  content?: String;
+  content?: any;
 };
 
 export default () => {
   let [modal, setModal] = useState(false);
   let [modalContent, setModalContent] = useState<String>("");
 
-  let handleModal = ({ content = "" }: Props) => {
+  let handleModal = ({ content = {} }: Props) => {
     setModal(!modal);
     if (content) {
       setModalContent(content);

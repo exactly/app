@@ -1,5 +1,5 @@
 export type SupplyRate = {
   potentialRate: string;
-  poolSupply: string;
-  poolLend: string;
+  // poolSupply: string;
+  // poolLend: string;
 };

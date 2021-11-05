@@ -1,0 +1,12 @@
+.select {
+  border: 1px solid var(--primary);
+  border-radius: var(--smallUnit);
+  color: var(--black);
+  font-weight: bold;
+  height: 100%;
+  padding: var(--u2);
+
+  .option {
+    color: var(--black);
+  }
+}

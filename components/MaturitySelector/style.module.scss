@@ -1,0 +1,15 @@
+.container {
+  max-width: var(--maxWidth);
+  width: 100%;
+  margin: var(--u2) auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 40px;
+  text-align: center;
+  align-items: center;
+
+  .title {
+    font-size: 1.25em;
+    font-weight: bold;
+  }
+}

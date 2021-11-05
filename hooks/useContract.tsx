@@ -1,10 +1,7 @@
 import { ethers } from "ethers";
 import { useEffect, useState } from "react";
 
-export default function useContract(
-  address: string,
-  abi: ethers.ContractInterface
-) {
+const useContract = (address: string, abi: ethers.ContractInterface) => {
   const [contract, setContract] = useState<ethers.Contract | undefined>(
     undefined
   );
@@ -30,4 +27,6 @@ export default function useContract(
   }
 
   return { contract };
-}
+};
+
+export default useContract;

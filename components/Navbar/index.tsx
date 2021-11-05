@@ -49,11 +49,7 @@ function Navbar() {
       </Link>
       {!walletAddress ? (
         <div className={styles.buttonContainer}>
-          <Button
-            text="Conectar"
-            onClick={handleClick}
-            className={styles.connectButton}
-          />
+          <Button text="Conectar" onClick={handleClick} />
         </div>
       ) : (
         <div className={styles.buttonContainer}>

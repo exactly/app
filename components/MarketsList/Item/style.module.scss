@@ -1,28 +1,40 @@
 .container {
   display: flex;
   justify-content: space-between;
-  border-top: 1px solid var(--gray-100);
-  border-bottom: 1px solid var(--gray-100);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
   padding: var(--u2) var(--u3);
   align-items: center;
   border-left: 2px solid var(--white);
+  cursor: pointer;
 
-  &:hover {
-    border-left: 2px solid var(--primary);
-    cursor: pointer;
-  }
   .symbol {
     width: 20%;
     font-weight: bold;
     display: flex;
-    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+
+    .assetImage {
+      width: 40px;
+      height: 40px;
+    }
+
     .primary {
       margin-bottom: var(--smallUnit);
+      font-size: 1em;
     }
     .secondary {
       font-size: 0.8em;
       color: var(--gray-100);
     }
+  }
+
+  .buttonContainer {
+    width: 100px;
+    height: 40px;
+    font-weight: 600;
+    font-size: 0.9375em;
   }
 
   .address {
@@ -31,5 +43,17 @@
 
   .collateralFactor {
     width: 20%;
+  }
+}
+
+.primaryContainer {
+  &:hover {
+    border-left: var(--smallUnit) solid var(--primary);
+  }
+}
+
+.secondaryContainer {
+  &:hover {
+    border-left: var(--smallUnit) solid var(--secondary);
   }
 }

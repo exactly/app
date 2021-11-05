@@ -11,7 +11,6 @@ type Props = {
 function MarketsList({ markets, showModal }: Props) {
   return (
     <section className={style.container}>
-      {/* <h2>All markets</h2> */}
       <div className={style.market}>
         <div className={style.column}>
           <div className={style.tableRow}>
@@ -19,9 +18,17 @@ function MarketsList({ markets, showModal }: Props) {
             <span className={style.collateralFactor}>
               {dictionary.collateral}
             </span>
+            <span className={style.collateralFactor} />
           </div>
           {markets?.map((market, key) => {
-            return <Item market={market} key={key} showModal={showModal} />;
+            return (
+              <Item
+                market={market}
+                key={key}
+                showModal={showModal}
+                type="deposit"
+              />
+            );
           })}
         </div>
       </div>
@@ -32,9 +39,17 @@ function MarketsList({ markets, showModal }: Props) {
             <span className={style.collateralFactor}>
               {dictionary.collateral}
             </span>
+            <span className={style.collateralFactor} />
           </div>
           {markets?.map((market, key) => {
-            return <Item market={market} key={key} showModal={showModal} />;
+            return (
+              <Item
+                market={market}
+                key={key}
+                showModal={showModal}
+                type="borrow"
+              />
+            );
           })}
         </div>
       </div>

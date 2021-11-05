@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { cloneElement, useEffect, useState } from "react";
 import { ethers } from "ethers";
 import dayjs from "dayjs";
 
 import style from "./style.module.scss";
 import Input from "components/common/Input";
 import Button from "components/common/Button";
+import Select from "components/common/Select";
 
 import useContractWithSigner from "hooks/useContractWithSigner";
 import daiAbi from "contracts/abi/dai.json";
@@ -13,61 +14,65 @@ import { SupplyRate } from "types/SupplyRate";
 import { Error } from "types/Error";
 
 import dictionary from "../../dictionary/en.json";
-import Select from "components/common/Select";
+
+import { getContractsByEnv } from "utils/utils";
+import useContract from "hooks/useContract";
 
 type Props = {
   contractWithSigner: ethers.Contract;
   handleResult: (data: SupplyRate) => void;
   hasRate: boolean;
+  address: string;
 };
 
-function SupplyForm({ contractWithSigner, handleResult, hasRate }: Props) {
+function SupplyForm({
+  contractWithSigner,
+  handleResult,
+  hasRate,
+  address
+}: Props) {
   const [qty, setQty] = useState<string | undefined>(undefined);
   const [dueDate, setDueDate] = useState<number | undefined>(undefined);
   const [error, setError] = useState<Error | undefined>({
     status: false,
     msg: ""
   });
+
   const daiContract = useContractWithSigner(
     "0x6B175474E89094C44Da98b954EedeAC495271d0F",
     daiAbi
   );
-  const [dates, setDates] = useState<Array<number>>([]);
+
+  const { exafin, auditor } = getContractsByEnv();
+  const exafinContract = useContract(exafin.address, exafin.abi);
+  const exafinWithSigner = useContract(exafin.address, exafin.abi);
+  const auditorContract = useContract(auditor.address, auditor.abi);
+  const [dates, setDates] = useState<Array<string>>([]);
 
   function handleDate(e: React.ChangeEvent<HTMLInputElement>) {
     setDueDate(parseInt(e.target.value));
     setError({ status: false, msg: "" });
   }
 
-  useEffect(() => {
-    getPools();
-  }, []);
-
-  useEffect(() => {
-    calculateRate();
-  }, [dueDate, qty]);
-
   async function calculateRate() {
-    if (!qty) {
-      setError({ status: true, msg: "Ingrese una Cantidad" });
-      return;
+    if (!dueDate || !qty) {
+      setError({ status: true, msg: "Error" });
     }
 
-    if (!dueDate) {
-      setError({ status: true, msg: "Ingrese una fecha" });
-      return;
+    try {
+      const supplyRate = await exafinContract?.contract?.getRateToSupply(
+        ethers.utils.parseUnits(qty!),
+        dueDate
+      );
+
+      if (supplyRate) {
+        const potentialRate = ethers.utils.formatEther(supplyRate);
+
+        handleResult({ potentialRate });
+      }
+    } catch (e) {
+      console.log(e);
     }
-
-    const rateForSupply = await contractWithSigner?.rateForSupply(
-      ethers.utils.parseUnits(qty!),
-      dueDate
-    );
-
-    const potentialRate = ethers.utils.formatEther(rateForSupply[0]);
-    const poolSupply = ethers.utils.formatEther(rateForSupply[1][1]);
-    const poolLend = ethers.utils.formatEther(rateForSupply[1][0]);
-
-    handleResult({ potentialRate, poolSupply, poolLend });
   }
 
   async function deposit() {
@@ -79,7 +84,7 @@ function SupplyForm({ contractWithSigner, handleResult, hasRate }: Props) {
       ethers.utils.parseUnits(qty!)
     );
 
-    const depositTx = await contractWithSigner?.supply(
+    const depositTx = await exafinWithSigner?.contract?.supply(
       from,
       ethers.utils.parseUnits(qty!),
       dueDate
@@ -87,23 +92,12 @@ function SupplyForm({ contractWithSigner, handleResult, hasRate }: Props) {
   }
 
   async function getPools() {
-    const datesArray = await generateDates();
-    setDates(datesArray);
-  }
+    const pools = await auditorContract?.contract?.getFuturePools();
+    const dates = pools?.map((pool: any) => {
+      return pool.toString();
+    });
 
-  function generateDates() {
-    const timestamp = dayjs().unix();
-    const trimmedCycle = timestamp - (timestamp % 1209600);
-    let lastCheck = dayjs.unix(trimmedCycle).add(14, "days");
-
-    const dateList = [];
-
-    for (let i = 0; i < 5; i++) {
-      dateList.push(dayjs(lastCheck).unix());
-      lastCheck = dayjs(lastCheck).add(14, "days");
-    }
-
-    return dateList;
+    setDates(dates ?? []);
   }
 
   return (
@@ -123,7 +117,7 @@ function SupplyForm({ contractWithSigner, handleResult, hasRate }: Props) {
       <div className={style.fieldContainer}>
         <span>{dictionary.endDate}</span>
         <div className={style.inputContainer}>
-          <Select options={dates} onChange={handleDate} />
+          <Select options={dates} onChange={handleDate} onClick={getPools} />
         </div>
       </div>
       {error?.status && <p className={style.error}>{error?.msg}</p>}

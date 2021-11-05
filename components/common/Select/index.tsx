@@ -6,17 +6,19 @@ import dictionary from "dictionary/en.json";
 type Props = {
   className?: string;
   onChange?: ChangeEventHandler;
+  onClick?: any;
   placeholder?: string;
   value?: string;
   name?: string;
   style?: CSSProperties;
   disabled?: boolean;
-  options: Array<number>;
+  options: Array<string>;
 };
 
 function Select({
   className = "",
   onChange,
+  onClick,
   placeholder,
   value,
   name,
@@ -26,7 +28,7 @@ function Select({
 }: Props) {
   return (
     <select
-      className={`${styles.input} ${className}`}
+      className={`${styles.select} ${className}`}
       style={style}
       placeholder={placeholder}
       value={value}
@@ -34,14 +36,15 @@ function Select({
       name={name}
       disabled={disabled}
       defaultValue={1}
+      onClick={onClick}
     >
       <option value={1} disabled hidden>
         {dictionary.selectDefaultText}
       </option>
-      {options.map((option: number) => {
+      {options.map((option: string) => {
         return (
-          <option value={option} key={option}>
-            {dayjs.unix(option).format("DD/MM/YYYY")}
+          <option value={option} key={option} className={styles.option}>
+            {dayjs.unix(parseInt(option)).format("DD/MM/YYYY")}
           </option>
         );
       })}

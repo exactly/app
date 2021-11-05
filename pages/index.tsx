@@ -5,6 +5,8 @@ import Head from "next/head";
 import { ethers } from "ethers";
 
 import MarketsList from "components/MarketsList";
+import MaturitySelector from "components/MaturitySelector";
+import Modal from "components/Modal";
 import Navbar from "components/Navbar";
 
 import useContract from "hooks/useContract";
@@ -14,7 +16,6 @@ import useOnClickOutside from "hooks/useOnClickOutside";
 import ContractContext from "contexts/ContractContext";
 
 import { Market } from "types/Market";
-import Modal from "components/Modal";
 
 const Home: NextPage = () => {
   const { modal, handleModal, modalContent } = useModal();
@@ -35,14 +36,20 @@ const Home: NextPage = () => {
   }, [contract]);
 
   async function getMarkets() {
-    const marketsData = await contract?.getMarkets();
+    const marketsAddresses = await contract?.getMarketAddresses();
 
-    setMarkets(formatMarkets(marketsData));
+    const marketsParsed = marketsAddresses.map(async (address: string) => {
+      const marketData = await contract?.markets(address);
+      return { ...marketData, address };
+    });
+
+    Promise.all(marketsParsed).then((data: Array<any>) => {
+      setMarkets(formatMarkets(data));
+    });
   }
 
-  function formatMarkets(markets: Array<Array<any>>) {
-    const [addresses, symbols, areListed, collateralFactors, names] = markets;
-    const length = addresses.length;
+  function formatMarkets(markets: any) {
+    const length = markets.length;
 
     let formattedMarkets: Array<Market> = [];
 
@@ -55,12 +62,12 @@ const Home: NextPage = () => {
         collateralFactor: 0
       };
 
-      market["address"] = addresses[i];
-      market["symbol"] = symbols[i];
-      market["name"] = names[i];
-      market["isListed"] = areListed[i];
+      market["address"] = markets[i].address;
+      market["symbol"] = markets[i].symbol;
+      market["name"] = markets[i][0];
+      market["isListed"] = markets[i].isListed;
       market["collateralFactor"] = parseFloat(
-        ethers.utils.formatEther(collateralFactors[i])
+        ethers.utils.formatEther(markets[i].collateralFactor)
       );
 
       formattedMarkets = [...formattedMarkets, market];
@@ -70,7 +77,10 @@ const Home: NextPage = () => {
   }
 
   function showModal(address: Market["address"]) {
-    handleModal({ content: address });
+    const data = markets.find((market) => {
+      return market.address === address;
+    });
+    handleModal({ content: data });
   }
 
   return (
@@ -87,10 +97,11 @@ const Home: NextPage = () => {
       </Head>
       {modal && (
         <div ref={ref}>
-          <Modal address={modalContent} />
+          <Modal contractData={modalContent} />
         </div>
       )}
       <Navbar />
+      <MaturitySelector />
       <MarketsList markets={markets} showModal={showModal} />
     </div>
   );
