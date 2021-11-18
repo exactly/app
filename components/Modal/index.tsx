@@ -1,22 +1,23 @@
-import { useContext, useState } from "react";
-import style from "./style.module.scss";
+import { useContext, useEffect, useState } from 'react';
+import styles from './style.module.scss';
 
-import SupplyForm from "components/SupplyForm";
+import SupplyForm from 'components/SupplyForm';
 
-import useContractWithSigner from "hooks/useContractWithSigner";
+import useContractWithSigner from 'hooks/useContractWithSigner';
 
-import ContractContext from "contexts/ContractContext";
+import ContractContext from 'contexts/ContractContext';
 
-import { Market } from "types/Market";
-import { SupplyRate } from "types/SupplyRate";
+import { Market } from 'types/Market';
+import { SupplyRate } from 'types/SupplyRate';
 
-import dictionary from "../../dictionary/en.json";
+import dictionary from '../../dictionary/en.json';
 
 type Props = {
   contractData: any;
+  closeModal: any;
 };
 
-function Modal({ contractData }: Props) {
+function Modal({ contractData, closeModal }: Props) {
   const contracts = useContext(ContractContext);
 
   const [potentialRate, setPotentialRate] = useState<string | undefined>(
@@ -36,14 +37,31 @@ function Modal({ contractData }: Props) {
     contracts?.auditor?.abi
   );
 
-  function handleResult(data: SupplyRate) {
-    setHasRate(true);
-    setPotentialRate(data.potentialRate);
+  useEffect(() => {}, [hasRate, potentialRate]);
+
+  function handleResult(data: SupplyRate | undefined) {
+    setHasRate(data?.potentialRate ? true : false);
+    setPotentialRate(data?.potentialRate);
+  }
+
+  function handleClose() {
+    closeModal({});
   }
 
   return (
-    <div className={style.modal}>
-      <p>{auditorData?.symbol}</p>
+    <div className={styles.modal}>
+      <div className={styles.closeContainer}>
+        <span className={styles.closeButton} onClick={handleClose}>
+          X
+        </span>
+      </div>
+      <div className={styles.asset}>
+        <img
+          src={`./img/assets/${auditorData?.symbol?.toLowerCase()}.png`}
+          className={styles.assetImage}
+        />
+        <p>{auditorData?.symbol}</p>
+      </div>
       {contractWithSigner && (
         <SupplyForm
           contractWithSigner={contractWithSigner!}
@@ -53,7 +71,7 @@ function Modal({ contractData }: Props) {
         />
       )}
       {hasRate && (
-        <section className={style.right}>
+        <section className={styles.right}>
           <p>
             {dictionary.annualRate}: <strong>{potentialRate}</strong>
           </p>

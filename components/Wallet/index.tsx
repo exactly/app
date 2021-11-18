@@ -1,5 +1,5 @@
-import styles from "./style.module.scss";
-import { formatWallet } from "utils/utils";
+import styles from './style.module.scss';
+import { formatWallet } from 'utils/utils';
 
 type Props = {
   walletAddress: String;
@@ -10,8 +10,8 @@ function Wallet({ walletAddress }: Props) {
 
   return (
     <div className={styles.container}>
-      <img src="/img/metamask.svg" alt="metamask" className={styles.icon} />
       <p>{formatedWallet}</p>
+      <img src="/img/icons/cogwheel.svg" alt="settings" />
     </div>
   );
 }

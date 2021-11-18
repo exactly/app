@@ -4,7 +4,31 @@
   height: fit-content;
   left: calc(50% - 125px);
   top: 25%;
-  background: var(--background);
-  box-shadow: var(--shadow-2);
+  background: var(--white);
+  box-shadow: var(--shadow-3);
   padding: 20px;
+  display: flex;
+  flex-direction: column;
+  z-index: 3;
+
+  .closeContainer {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    .closeButton {
+      color: var(--primary);
+      cursor: pointer;
+    }
+  }
+
+  .asset {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    .assetImage {
+      height: 30px;
+      width: 30px;
+    }
+  }
 }

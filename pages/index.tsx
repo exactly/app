@@ -1,26 +1,26 @@
-import { useState, useEffect, useRef, useContext } from "react";
-import type { NextPage } from "next";
-import Head from "next/head";
+import { useState, useEffect, useRef, useContext } from 'react';
+import type { NextPage } from 'next';
 
-import { ethers } from "ethers";
+import { ethers } from 'ethers';
 
-import MarketsList from "components/MarketsList";
-import MaturitySelector from "components/MaturitySelector";
-import Modal from "components/Modal";
-import Navbar from "components/Navbar";
+import MarketsList from 'components/MarketsList';
+import MaturitySelector from 'components/MaturitySelector';
+import Modal from 'components/Modal';
+import Navbar from 'components/Navbar';
+import Hero from 'components/Hero';
+import CurrentNetwork from 'components/CurrentNetwork';
+import Footer from 'components/Footer';
 
-import useContract from "hooks/useContract";
-import useModal from "hooks/useModal";
-import useOnClickOutside from "hooks/useOnClickOutside";
+import useContract from 'hooks/useContract';
+import useModal from 'hooks/useModal';
 
-import ContractContext from "contexts/ContractContext";
+import ContractContext from 'contexts/ContractContext';
 
-import { Market } from "types/Market";
+import { Market } from 'types/Market';
+import Overlay from 'components/Overlay';
 
 const Home: NextPage = () => {
   const { modal, handleModal, modalContent } = useModal();
-  const ref = useRef<HTMLInputElement>(null);
-  useOnClickOutside(ref, () => handleModal({}));
   const contracts = useContext(ContractContext);
 
   const [markets, setMarkets] = useState<Array<Market>>([]);
@@ -55,18 +55,18 @@ const Home: NextPage = () => {
 
     for (let i = 0; i < length; i++) {
       const market: Market = {
-        address: "",
-        symbol: "",
-        name: "",
+        address: '',
+        symbol: '',
+        name: '',
         isListed: false,
         collateralFactor: 0
       };
 
-      market["address"] = markets[i].address;
-      market["symbol"] = markets[i].symbol;
-      market["name"] = markets[i][0];
-      market["isListed"] = markets[i].isListed;
-      market["collateralFactor"] = parseFloat(
+      market['address'] = markets[i].address;
+      market['symbol'] = markets[i].symbol;
+      market['name'] = markets[i][0];
+      market['isListed'] = markets[i].isListed;
+      market['collateralFactor'] = parseFloat(
         ethers.utils.formatEther(markets[i].collateralFactor)
       );
 
@@ -76,33 +76,28 @@ const Home: NextPage = () => {
     return formattedMarkets;
   }
 
-  function showModal(address: Market["address"]) {
+  function showModal(address: Market['address']) {
     const data = markets.find((market) => {
       return market.address === address;
     });
+
     handleModal({ content: data });
   }
 
   return (
     <div>
-      <Head>
-        <title>
-          Exactly App - Fixed interest rates lending & borrowing protocol
-        </title>
-        <meta
-          name="description"
-          content="Exactly App - Fixed interest rates lending & borrowing protocol"
-        />
-        <link rel="icon" href="/icon.ico" />
-      </Head>
       {modal && (
-        <div ref={ref}>
-          <Modal contractData={modalContent} />
-        </div>
+        <>
+          <Modal contractData={modalContent} closeModal={handleModal} />
+          <Overlay closeModal={handleModal} />
+        </>
       )}
       <Navbar />
+      <CurrentNetwork />
+      <Hero />
       <MaturitySelector />
       <MarketsList markets={markets} showModal={showModal} />
+      <Footer />
     </div>
   );
 };

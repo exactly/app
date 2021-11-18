@@ -1,0 +1,32 @@
+.container {
+  max-width: var(--maxWidth);
+  width: 100%;
+  margin: var(--u2) auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--u3);
+
+  .title {
+    font-size: var(--font-20);
+    font-weight: bold;
+    margin: 0;
+  }
+
+  .selectContainer {
+    max-width: 160px;
+    .labelContainer {
+      display: flex;
+      align-items: center;
+      gap: var(--u);
+
+      .marketImage {
+        height: var(--u3);
+        width: var(--u3);
+        object-fit: cover;
+      }
+      .marketName {
+        font-size: var(--font-14);
+      }
+    }
+  }
+}

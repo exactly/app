@@ -3,17 +3,27 @@ import { useEffect, useState } from "react";
 import useProvider from "./useProvider";
 
 export default function useNetwork() {
-  const promiseProvider = useProvider();
+  const { web3Provider, getProvider } = useProvider();
   const [network, setNetwork] = useState<Network | undefined>(undefined);
 
   useEffect(() => {
+    if (window.ethereum) {
+      window.ethereum.on("chainChanged", () => {
+        getProvider();
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    getProvider();
+  }, []);
+
+  useEffect(() => {
     getNetwork();
-  }, [promiseProvider]);
+  }, [web3Provider]);
 
   async function getNetwork() {
-    const provider = await promiseProvider;
-    const network = await provider?.web3Provider?.getNetwork();
-
+    const network = await web3Provider?.getNetwork();
     setNetwork(network);
   }
 

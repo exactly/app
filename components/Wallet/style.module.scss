@@ -1,16 +1,8 @@
 .container {
-  background: var(--primary);
-  color: var(--white);
-  font-weight: bold;
+  color: var(--black);
+  font-size: var(--font-14);
   display: flex;
-  padding: 0px var(--u2);
-  height: 100%;
-  width: 100%;
-  align-items: center;
-  border-radius: var(--smallUnit);
-
-  .icon {
-    margin-right: var(--smallUnit);
-    height: 20px;
-  }
+  gap: var(--u);
+  user-select: none;
+  cursor: pointer;
 }

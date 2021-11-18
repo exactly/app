@@ -1,54 +1,49 @@
-import { ChangeEventHandler, CSSProperties } from "react";
-import styles from "./style.module.scss";
-import dayjs from "dayjs";
-import dictionary from "dictionary/en.json";
+import { MouseEventHandler, ChangeEventHandler, CSSProperties } from 'react';
+import styles from './style.module.scss';
+import Dropdown from 'react-dropdown';
+import 'react-dropdown/style.css';
 
 type Props = {
   className?: string;
-  onChange?: ChangeEventHandler;
-  onClick?: any;
-  placeholder?: string;
-  value?: string;
+  onChange: ChangeEventHandler;
+  onClick?: MouseEventHandler;
+  placeholder?: any;
+  value?: any;
   name?: string;
   style?: CSSProperties;
   disabled?: boolean;
-  options: Array<string>;
+  options: Array<any>;
 };
 
 function Select({
-  className = "",
+  className = '',
   onChange,
   onClick,
-  placeholder,
-  value,
-  name,
-  style,
   disabled,
-  options
+  options,
+  placeholder,
+  value
 }: Props) {
+  function handleChange(option: any) {
+    onChange(option);
+  }
+
   return (
-    <select
-      className={`${styles.select} ${className}`}
-      style={style}
-      placeholder={placeholder}
-      value={value}
-      onChange={onChange}
-      name={name}
-      disabled={disabled}
-      defaultValue={1}
-      onClick={onClick}
-    >
-      <option value={1} disabled hidden>
-        {dictionary.selectDefaultText}
-      </option>
-      {options.map((option: string) => {
-        return (
-          <option value={option} key={option} className={styles.option}>
-            {dayjs.unix(parseInt(option)).format("DD/MM/YYYY")}
-          </option>
-        );
-      })}
-    </select>
+    <div onClick={onClick}>
+      <Dropdown
+        options={options}
+        onChange={(option) => handleChange(option)}
+        disabled={disabled}
+        value={value}
+        placeholder={placeholder}
+        className={styles.container}
+        placeholderClassName={styles.placeholder}
+        controlClassName={`${styles.select} ${className}`}
+        menuClassName={styles.menu}
+        arrowClassName={styles.arrow}
+        arrowClosed={<span className={styles.arrowClosed} />}
+      />
+    </div>
   );
 }
 

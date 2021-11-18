@@ -22,10 +22,10 @@
 
     .primary {
       margin-bottom: var(--smallUnit);
-      font-size: 1em;
+      font-size: var(--font-16);
     }
     .secondary {
-      font-size: 0.8em;
+      font-size: var(--font-12);
       color: var(--gray-100);
     }
   }
@@ -34,7 +34,7 @@
     width: 100px;
     height: 40px;
     font-weight: 600;
-    font-size: 0.9375em;
+    font-size: var(--font-14);
   }
 
   .address {
@@ -48,12 +48,12 @@
 
 .primaryContainer {
   &:hover {
-    border-left: var(--smallUnit) solid var(--primary);
+    border-left: var(--smallestUnit) solid var(--primary);
   }
 }
 
 .secondaryContainer {
   &:hover {
-    border-left: var(--smallUnit) solid var(--secondary);
+    border-left: var(--smallestUnit) solid var(--secondary);
   }
 }

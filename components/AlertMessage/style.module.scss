@@ -1,13 +1,17 @@
 .alertContainer {
   width: 100%;
   height: var(--u6);
-  background-color: gray;
+  background: var(--primary);
   display: flex;
   justify-content: center;
   align-items: center;
-  color: white;
+  color: var(--white);
 }
 
 .error {
-  background-color: red;
+  background: var(--error);
+}
+
+.success {
+  background: var(--success);
 }

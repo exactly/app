@@ -1,26 +1,26 @@
-import { cloneElement, useEffect, useState } from "react";
-import { ethers } from "ethers";
-import dayjs from "dayjs";
+import { cloneElement, useEffect, useState } from 'react';
+import { ethers } from 'ethers';
+import dayjs from 'dayjs';
 
-import style from "./style.module.scss";
-import Input from "components/common/Input";
-import Button from "components/common/Button";
-import Select from "components/common/Select";
+import style from './style.module.scss';
+import Input from 'components/common/Input';
+import Button from 'components/common/Button';
+import Select from 'components/common/Select';
 
-import useContractWithSigner from "hooks/useContractWithSigner";
-import daiAbi from "contracts/abi/dai.json";
+import useContractWithSigner from 'hooks/useContractWithSigner';
+import daiAbi from 'contracts/abi/dai.json';
 
-import { SupplyRate } from "types/SupplyRate";
-import { Error } from "types/Error";
+import { SupplyRate } from 'types/SupplyRate';
+import { Error } from 'types/Error';
 
-import dictionary from "../../dictionary/en.json";
+import dictionary from '../../dictionary/en.json';
 
-import { getContractsByEnv } from "utils/utils";
-import useContract from "hooks/useContract";
+import { getContractsByEnv } from 'utils/utils';
+import useContract from 'hooks/useContract';
 
 type Props = {
   contractWithSigner: ethers.Contract;
-  handleResult: (data: SupplyRate) => void;
+  handleResult: (data: SupplyRate | undefined) => void;
   hasRate: boolean;
   address: string;
 };
@@ -35,11 +35,11 @@ function SupplyForm({
   const [dueDate, setDueDate] = useState<number | undefined>(undefined);
   const [error, setError] = useState<Error | undefined>({
     status: false,
-    msg: ""
+    msg: ''
   });
 
   const daiContract = useContractWithSigner(
-    "0x6B175474E89094C44Da98b954EedeAC495271d0F",
+    '0x6B175474E89094C44Da98b954EedeAC495271d0F',
     daiAbi
   );
 
@@ -49,14 +49,24 @@ function SupplyForm({
   const auditorContract = useContract(auditor.address, auditor.abi);
   const [dates, setDates] = useState<Array<string>>([]);
 
-  function handleDate(e: React.ChangeEvent<HTMLInputElement>) {
-    setDueDate(parseInt(e.target.value));
-    setError({ status: false, msg: "" });
+  useEffect(() => {
+    if (dates.length === 0) {
+      getPools();
+    }
+  }, [auditorContract]);
+
+  useEffect(() => {
+    handleResult(undefined);
+  }, [qty, dueDate]);
+
+  function handleDate(date: any) {
+    setDueDate(parseInt(date.value));
+    setError({ status: false, msg: '' });
   }
 
   async function calculateRate() {
-    if (!dueDate || !qty) {
-      setError({ status: true, msg: "Error" });
+    if (!qty) {
+      setError({ status: true, msg: 'Please fill the amount' });
     }
 
     try {
@@ -71,16 +81,16 @@ function SupplyForm({
         handleResult({ potentialRate });
       }
     } catch (e) {
-      console.log(e);
+      return;
     }
   }
 
   async function deposit() {
-    const provider = new ethers.providers.Web3Provider(window.ethereum, "any");
+    const provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
     const from = await provider.getSigner().getAddress();
 
     await daiContract?.contractWithSigner?.approve(
-      "0xCa2Be8268A03961F40E29ACE9aa7f0c2503427Ae",
+      '0xCa2Be8268A03961F40E29ACE9aa7f0c2503427Ae',
       ethers.utils.parseUnits(qty!)
     );
 
@@ -97,7 +107,17 @@ function SupplyForm({
       return pool.toString();
     });
 
-    setDates(dates ?? []);
+    const formattedDates = dates?.map((date: any) => {
+      return {
+        value: date,
+        label: dayjs.unix(parseInt(date)).format('DD-MMM-YY')
+      };
+    });
+
+    if (formattedDates) {
+      setDates(formattedDates);
+      setDueDate(formattedDates[0].value);
+    }
   }
 
   return (
@@ -109,7 +129,7 @@ function SupplyForm({
             type="number"
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               setQty(e.target.value);
-              setError({ status: false, msg: "" });
+              setError({ status: false, msg: '' });
             }}
           />
         </div>
@@ -117,7 +137,12 @@ function SupplyForm({
       <div className={style.fieldContainer}>
         <span>{dictionary.endDate}</span>
         <div className={style.inputContainer}>
-          <Select options={dates} onChange={handleDate} onClick={getPools} />
+          <Select
+            options={dates}
+            onChange={handleDate}
+            placeholder={dates[0]?.label}
+            value={dates[0]?.value}
+          />
         </div>
       </div>
       {error?.status && <p className={style.error}>{error?.msg}</p>}

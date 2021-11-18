@@ -1,11 +1,11 @@
-import { Market } from "types/Market";
-import Item from "components/MarketsList/Item";
-import style from "./style.module.scss";
-import dictionary from "dictionary/en.json";
+import { Market } from 'types/Market';
+import Item from 'components/MarketsList/Item';
+import style from './style.module.scss';
+import dictionary from 'dictionary/en.json';
 
 type Props = {
   markets: Array<Market>;
-  showModal: Function;
+  showModal: FunctionStringCallback;
 };
 
 function MarketsList({ markets, showModal }: Props) {
