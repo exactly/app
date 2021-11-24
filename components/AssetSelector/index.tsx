@@ -27,16 +27,14 @@ function AssetSelector({ title }: Props) {
   }, [contract]);
 
   async function getMarkets() {
-    const marketsAddresses = await contract?.getMarketAddresses();
-
-    const marketsParsed = marketsAddresses.map(async (address: string) => {
-      const marketData = await contract?.markets(address);
-      return { ...marketData, address };
-    });
-
-    Promise.all(marketsParsed).then((data: Array<any>) => {
-      setMarkets(formatMarkets(data));
-    });
+    // const marketsAddresses = await contract?.getMarketAddresses();
+    // const marketsParsed = marketsAddresses.map(async (address: string) => {
+    //   const marketData = await contract?.markets(address);
+    //   return { ...marketData, address };
+    // });
+    // Promise.all(marketsParsed).then((data: Array<any>) => {
+    //   setMarkets(formatMarkets(data));
+    // });
   }
 
   function formatMarkets(markets: Array<Market>) {

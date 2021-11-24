@@ -19,7 +19,8 @@ import ContractContext from 'contexts/ContractContext';
 import { Market } from 'types/Market';
 import Overlay from 'components/Overlay';
 
-const Home: NextPage = () => {
+const Home: NextPage = (props: any) => {
+  const { walletAddress, network } = props;
   const { modal, handleModal, modalContent } = useModal();
   const contracts = useContext(ContractContext);
 
@@ -39,13 +40,13 @@ const Home: NextPage = () => {
     const marketsAddresses = await contract?.getMarketAddresses();
 
     const marketsParsed = marketsAddresses.map(async (address: string) => {
-      const marketData = await contract?.markets(address);
-      return { ...marketData, address };
+      // const marketData = await contract?.markets(address);
+      // return { ...marketData, address };
     });
 
-    Promise.all(marketsParsed).then((data: Array<any>) => {
-      setMarkets(formatMarkets(data));
-    });
+    // Promise.all(marketsParsed).then((data: Array<any>) => {
+    //   setMarkets(formatMarkets(data));
+    // });
   }
 
   function formatMarkets(markets: any) {
@@ -92,8 +93,8 @@ const Home: NextPage = () => {
           <Overlay closeModal={handleModal} />
         </>
       )}
-      <Navbar />
-      <CurrentNetwork />
+      <Navbar walletAddress={walletAddress} />
+      <CurrentNetwork network={network} />
       <Hero />
       <MaturitySelector />
       <MarketsList markets={markets} showModal={showModal} />

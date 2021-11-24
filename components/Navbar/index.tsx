@@ -9,8 +9,12 @@ import { getCurrentWalletConnected } from 'hooks/useWallet';
 import Button from 'components/common/Button';
 import Wallet from 'components/Wallet';
 
-function Navbar() {
-  const [walletAddress, setWallet] = useState('');
+type Props = {
+  walletAddress?: String;
+};
+
+function Navbar({ walletAddress }: Props) {
+  const [currentWallet, setWallet] = useState(walletAddress || '');
   const { getProvider } = useProvider();
   const router = useRouter();
   const { pathname } = router;
@@ -87,7 +91,7 @@ function Navbar() {
             </div>
           ) : (
             <div className={styles.buttonContainer}>
-              <Wallet walletAddress={walletAddress} />
+              <Wallet walletAddress={currentWallet} />
             </div>
           )}
         </div>
