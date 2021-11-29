@@ -1,0 +1,11 @@
+.tooltipAction {
+  cursor: pointer;
+  margin-left: var(--u);
+}
+
+.tooltip {
+  user-select: none !important;
+  background: var(--tertiary) !important;
+  border-radius: var(--smallUnit) !important;
+  font-weight: normal !important;
+}

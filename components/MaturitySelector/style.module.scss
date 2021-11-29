@@ -11,5 +11,7 @@
   .title {
     font-size: var(--font-20);
     font-weight: bold;
+    display: flex;
+    align-items: center;
   }
 }

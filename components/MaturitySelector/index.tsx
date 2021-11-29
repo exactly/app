@@ -8,6 +8,7 @@ import useContract from 'hooks/useContract';
 import { getContractsByEnv } from 'utils/utils';
 
 import style from './style.module.scss';
+import Tooltip from 'components/common/Tooltip';
 
 type Props = {};
 
@@ -44,7 +45,11 @@ function MaturitySelector({}: Props) {
 
   return (
     <section className={style.container}>
-      <p className={style.title}>Maturity Pools</p>
+      <p className={style.title}>
+        Maturity Pools{' '}
+        <Tooltip id="maturity-pool" text="This is a maturity pool tooltip" />
+      </p>
+
       <Select
         options={dates}
         onChange={handleChange}
