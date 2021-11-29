@@ -18,6 +18,7 @@ function MyApp({ Component, pageProps }: AppProps) {
 
   useEffect(() => {
     handleWallet();
+    addWalletListener();
   }, []);
 
   function getContractByEnv() {
@@ -29,6 +30,19 @@ function MyApp({ Component, pageProps }: AppProps) {
     //this function gets the wallet address
     const { address } = await getCurrentWalletConnected();
     setWallet(address);
+  }
+
+  function addWalletListener() {
+    //we listen to any change in wallet
+    if (window.ethereum) {
+      window.ethereum.on('accountsChanged', (accounts: any) => {
+        if (accounts.length > 0) {
+          setWallet(accounts[0]);
+        } else {
+          setWallet('');
+        }
+      });
+    }
   }
 
   const props = { ...pageProps, walletAddress, network };
