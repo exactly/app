@@ -8,6 +8,7 @@ import { getContractsByEnv } from 'utils/utils';
 import assets from 'dictionary/assets.json';
 
 import { Market } from 'types/Market';
+import { Assets } from 'types/Assets';
 
 import style from './style.module.scss';
 
@@ -39,14 +40,14 @@ function AssetSelector({ title }: Props) {
 
   function formatMarkets(markets: Array<Market>) {
     const formattedMarkets = markets.map((market: Market) => {
+      const symbol: keyof Market = market.symbol;
+      const assetsData: Assets<symbol> = assets;
+      const src = assetsData[symbol];
+
       return {
         label: (
           <div className={style.labelContainer}>
-            <img
-              src={assets[market?.symbol]}
-              alt={market.symbol}
-              className={style.marketImage}
-            />{' '}
+            <img src={src} alt={market.symbol} className={style.marketImage} />{' '}
             <span className={style.marketName}>{market.symbol}</span>
           </div>
         ),
