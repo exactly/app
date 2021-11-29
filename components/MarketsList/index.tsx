@@ -1,7 +1,12 @@
-import { Market } from 'types/Market';
 import Item from 'components/MarketsList/Item';
+
 import style from './style.module.scss';
+
 import dictionary from 'dictionary/en.json';
+import assets from 'dictionary/assets.json';
+
+import { Market } from 'types/Market';
+import { Assets } from 'types/Assets';
 
 type Props = {
   markets: Array<Market>;
@@ -21,12 +26,16 @@ function MarketsList({ markets, showModal }: Props) {
             <span className={style.collateralFactor} />
           </div>
           {markets?.map((market, key) => {
+            const symbol: keyof Market = market.symbol;
+            const assetsData: Assets<symbol> = assets;
+            const src = assetsData[symbol];
             return (
               <Item
                 market={market}
                 key={key}
                 showModal={showModal}
                 type="deposit"
+                src={src}
               />
             );
           })}
@@ -42,12 +51,16 @@ function MarketsList({ markets, showModal }: Props) {
             <span className={style.collateralFactor} />
           </div>
           {markets?.map((market, key) => {
+            const symbol: keyof Market = market.symbol;
+            const assetsData: Assets<symbol> = assets;
+            const src = assetsData[symbol];
             return (
               <Item
                 market={market}
                 key={key}
                 showModal={showModal}
                 type="borrow"
+                src={src}
               />
             );
           })}
