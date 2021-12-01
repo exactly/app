@@ -18,6 +18,7 @@ import ContractContext from 'contexts/ContractContext';
 
 import { Market } from 'types/Market';
 import Overlay from 'components/Overlay';
+import MobileNavbar from 'components/MobileNavbar';
 
 const Home: NextPage = (props: any) => {
   const { walletAddress, network } = props;
@@ -93,8 +94,12 @@ const Home: NextPage = (props: any) => {
           <Overlay closeModal={handleModal} />
         </>
       )}
-      <Navbar walletAddress={walletAddress} />
-      <CurrentNetwork network={network} />
+
+      <MobileNavbar walletAddress={walletAddress} network={network} />
+
+      {/* <Navbar walletAddress={walletAddress} /> */}
+      {/* <CurrentNetwork network={network} /> */}
+
       <Hero />
       <MaturitySelector />
       <MarketsList markets={markets} showModal={showModal} />

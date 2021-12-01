@@ -1,0 +1,75 @@
+.navBar {
+  width: 100%;
+  height: var(--navbarHeight);
+  padding: var(--u2);
+  box-sizing: border-box;
+  box-shadow: var(--shadow);
+  background: var(--white);
+
+  .wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    width: 100%;
+    margin: 0 auto;
+
+    .logo {
+      cursor: pointer;
+      width: 40%;
+      max-width: 200px;
+    }
+
+    .buttonContainer {
+      width: 150px;
+      height: 50px;
+    }
+  }
+}
+
+.icon {
+  cursor: pointer;
+}
+
+.menu {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  list-style: none;
+  font-weight: 600;
+  background: var(--white);
+  margin: 0;
+  padding: 0;
+  text-align: center;
+  padding: 20px 0px;
+
+  .link {
+    color: var(--tertiary);
+    opacity: var(--defaultOpacity);
+    cursor: pointer;
+    padding: 5px;
+  }
+
+  .active {
+    @extend .link;
+    opacity: 100%;
+    font-weight: bold;
+  }
+
+  .button {
+    cursor: pointer;
+    background: var(--gray-100);
+    border: none;
+    color: var(--tertiary);
+    font-size: 0.875em;
+    width: fit-content;
+    border-radius: 100px;
+    padding: var(--u) var(--u2);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--smallUnit);
+  }
+}
