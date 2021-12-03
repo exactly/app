@@ -1,14 +1,14 @@
-import { Network } from "@ethersproject/networks";
-import { useEffect, useState } from "react";
-import useProvider from "./useProvider";
+import { Network } from '@ethersproject/networks';
+import { useEffect, useState } from 'react';
+import useProvider from './useProvider';
 
-export default function useNetwork() {
+function useNetwork() {
   const { web3Provider, getProvider } = useProvider();
   const [network, setNetwork] = useState<Network | undefined>(undefined);
 
   useEffect(() => {
     if (window.ethereum) {
-      window.ethereum.on("chainChanged", () => {
+      window.ethereum.on('chainChanged', () => {
         getProvider();
       });
     }
@@ -29,3 +29,5 @@ export default function useNetwork() {
 
   return network;
 }
+
+export default useNetwork;

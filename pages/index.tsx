@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useContext } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import type { NextPage } from 'next';
 
 import { ethers } from 'ethers';
@@ -10,6 +10,7 @@ import Navbar from 'components/Navbar';
 import Hero from 'components/Hero';
 import CurrentNetwork from 'components/CurrentNetwork';
 import Footer from 'components/Footer';
+import Overlay from 'components/Overlay';
 
 import useContract from 'hooks/useContract';
 import useModal from 'hooks/useModal';
@@ -17,10 +18,14 @@ import useModal from 'hooks/useModal';
 import ContractContext from 'contexts/ContractContext';
 
 import { Market } from 'types/Market';
-import Overlay from 'components/Overlay';
+import { Network } from 'types/Network';
 
-const Home: NextPage = (props: any) => {
-  const { walletAddress, network } = props;
+interface Props {
+  walletAddress: string;
+  network: Network;
+}
+
+const Home: NextPage<Props> = ({ walletAddress, network }) => {
   const { modal, handleModal, modalContent } = useModal();
   const contracts = useContext(ContractContext);
 

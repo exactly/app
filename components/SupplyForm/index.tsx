@@ -1,4 +1,4 @@
-import { cloneElement, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ethers } from 'ethers';
 import dayjs from 'dayjs';
 
@@ -8,15 +8,17 @@ import Button from 'components/common/Button';
 import Select from 'components/common/Select';
 
 import useContractWithSigner from 'hooks/useContractWithSigner';
+import useContract from 'hooks/useContract';
+
 import daiAbi from 'contracts/abi/dai.json';
 
 import { SupplyRate } from 'types/SupplyRate';
 import { Error } from 'types/Error';
+import { Date } from 'types/Date';
 
 import dictionary from '../../dictionary/en.json';
 
 import { getContractsByEnv } from 'utils/utils';
-import useContract from 'hooks/useContract';
 
 type Props = {
   contractWithSigner: ethers.Contract;
@@ -47,7 +49,7 @@ function SupplyForm({
   const exafinContract = useContract(exafin.address, exafin.abi);
   const exafinWithSigner = useContract(exafin.address, exafin.abi);
   const auditorContract = useContract(auditor.address, auditor.abi);
-  const [dates, setDates] = useState<Array<string>>([]);
+  const [dates, setDates] = useState<Array<Date>>([]);
 
   useEffect(() => {
     if (dates.length === 0) {
