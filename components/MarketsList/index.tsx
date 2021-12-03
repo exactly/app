@@ -28,7 +28,8 @@ function MarketsList({ markets, showModal }: Props) {
           {markets?.map((market, key) => {
             const symbol: keyof Market = market.symbol;
             const assetsData: Assets<symbol> = assets;
-            const src = assetsData[symbol];
+            const src: string = assetsData[symbol];
+
             return (
               <Item
                 market={market}
@@ -53,7 +54,8 @@ function MarketsList({ markets, showModal }: Props) {
           {markets?.map((market, key) => {
             const symbol: keyof Market = market.symbol;
             const assetsData: Assets<symbol> = assets;
-            const src = assetsData[symbol];
+            const src: string = assetsData[symbol];
+
             return (
               <Item
                 market={market}

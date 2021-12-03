@@ -42,7 +42,7 @@ function AssetSelector({ title }: Props) {
     const formattedMarkets = markets.map((market: Market) => {
       const symbol: keyof Market = market.symbol;
       const assetsData: Assets<symbol> = assets;
-      const src = assetsData[symbol];
+      const src: string = assetsData[symbol];
 
       return {
         label: (
