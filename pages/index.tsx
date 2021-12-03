@@ -45,13 +45,13 @@ const Home: NextPage<Props> = ({ walletAddress, network }) => {
     const marketsAddresses = await contract?.getMarketAddresses();
 
     const marketsParsed = marketsAddresses.map(async (address: string) => {
-      // const marketData = await contract?.markets(address);
-      // return { ...marketData, address };
+      const marketData = await contract?.getMarketData(address);
+      return { ...marketData, address };
     });
 
-    // Promise.all(marketsParsed).then((data: Array<any>) => {
-    //   setMarkets(formatMarkets(data));
-    // });
+    Promise.all(marketsParsed).then((data: Array<any>) => {
+      setMarkets(formatMarkets(data));
+    });
   }
 
   function formatMarkets(markets: any) {
@@ -69,11 +69,11 @@ const Home: NextPage<Props> = ({ walletAddress, network }) => {
       };
 
       market['address'] = markets[i].address;
-      market['symbol'] = markets[i].symbol;
-      market['name'] = markets[i][0];
-      market['isListed'] = markets[i].isListed;
+      market['symbol'] = markets[i][0];
+      market['name'] = markets[i][1];
+      market['isListed'] = markets[i][2];
       market['collateralFactor'] = parseFloat(
-        ethers.utils.formatEther(markets[i].collateralFactor)
+        ethers.utils.formatEther(markets[i][3])
       );
 
       formattedMarkets = [...formattedMarkets, market];
