@@ -13,7 +13,7 @@ import { getCurrentWalletConnected } from 'hooks/useWallet';
 import useNetwork from 'hooks/useNetwork';
 
 function MyApp({ Component, pageProps }: AppProps) {
-  const [walletAddress, setWallet] = useState('');
+  const [walletAddress, setWallet] = useState<string | undefined>(undefined);
   const network = useNetwork();
 
   useEffect(() => {
@@ -39,7 +39,7 @@ function MyApp({ Component, pageProps }: AppProps) {
         if (accounts.length > 0) {
           setWallet(accounts[0]);
         } else {
-          setWallet('');
+          setWallet(undefined);
         }
       });
     }
