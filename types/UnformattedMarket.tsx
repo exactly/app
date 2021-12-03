@@ -1,6 +1,6 @@
 import { BigNumber } from '@ethersproject/bignumber';
 
-export type UnformatedMarket = {
+export type UnformattedMarket = {
   0: string;
   1: string;
   2: boolean;

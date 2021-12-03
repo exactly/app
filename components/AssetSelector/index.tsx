@@ -9,7 +9,7 @@ import assets from 'dictionary/assets.json';
 
 import { Market } from 'types/Market';
 import { Assets } from 'types/Assets';
-import { UnformatedMarket } from 'types/UnformattedMarket';
+import { UnformattedMarket } from 'types/UnformattedMarket';
 
 import style from './style.module.scss';
 
@@ -40,8 +40,8 @@ function AssetSelector({ title }: Props) {
     });
   }
 
-  function formatMarkets(markets: Array<UnformatedMarket>) {
-    const formattedMarkets = markets.map((market: UnformatedMarket) => {
+  function formatMarkets(markets: Array<UnformattedMarket>) {
+    const formattedMarkets = markets.map((market: UnformattedMarket) => {
       const symbol: keyof Market = market[0];
       const assetsData: Assets<symbol> = assets;
       const src: string = assetsData[symbol];
