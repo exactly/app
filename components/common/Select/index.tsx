@@ -1,6 +1,8 @@
 import { MouseEventHandler, ChangeEventHandler, CSSProperties } from 'react';
+
 import styles from './style.module.scss';
-import Dropdown from 'react-dropdown';
+import Dropdown, { Option } from 'react-dropdown';
+
 import 'react-dropdown/style.css';
 
 type Props = {
@@ -12,7 +14,7 @@ type Props = {
   name?: string;
   style?: CSSProperties;
   disabled?: boolean;
-  options: Array<any>;
+  options: Array<Option>;
 };
 
 function Select({

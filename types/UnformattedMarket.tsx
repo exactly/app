@@ -6,5 +6,5 @@ export type UnformattedMarket = {
   2: boolean;
   3: BigNumber;
   4: number;
-  address: string;
+  5: string;
 };

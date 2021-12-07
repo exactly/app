@@ -9,13 +9,12 @@ import { getContractsByEnv } from 'utils/utils';
 
 import style from './style.module.scss';
 
-import { Date } from 'types/Date';
-
+import { Option } from 'react-dropdown';
 
 type Props = {};
 
 function MaturitySelector({}: Props) {
-  const [dates, setDates] = useState<Array<Date>>([]);
+  const [dates, setDates] = useState<Array<Option>>([]);
   const { auditor } = getContractsByEnv();
   const auditorContract = useContract(auditor.address, auditor.abi);
 

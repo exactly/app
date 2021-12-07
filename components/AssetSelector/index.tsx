@@ -10,6 +10,7 @@ import assets from 'dictionary/assets.json';
 import { Market } from 'types/Market';
 import { Assets } from 'types/Assets';
 import { UnformattedMarket } from 'types/UnformattedMarket';
+import { Option } from 'react-dropdown';
 
 import style from './style.module.scss';
 
@@ -20,7 +21,7 @@ type Props = {
 function AssetSelector({ title }: Props) {
   const { auditor } = getContractsByEnv();
   const { contract } = useContract(auditor.address, auditor.abi);
-  const [markets, setMarkets] = useState<Array<any>>([]);
+  const [selectOptions, setSelectOptions] = useState<Array<Option>>([]);
 
   useEffect(() => {
     if (contract) {
@@ -30,30 +31,43 @@ function AssetSelector({ title }: Props) {
 
   async function getMarkets() {
     const marketsAddresses = await contract?.getMarketAddresses();
-    const marketsParsed = marketsAddresses.map(async (address: string) => {
-      const marketData = await contract?.getMarketData(address);
-      return { ...marketData, address };
+    const marketsData: Array<UnformattedMarket> = [];
+
+    marketsAddresses.map((address: string) => {
+      return marketsData.push(contract?.getMarketData(address));
     });
 
-    Promise.all(marketsParsed).then((data: Array<any>) => {
-      setMarkets(formatMarkets(data));
+    Promise.all(marketsData).then((data: Array<UnformattedMarket>) => {
+      setSelectOptions(formatMarkets(data));
     });
   }
 
   function formatMarkets(markets: Array<UnformattedMarket>) {
     const formattedMarkets = markets.map((market: UnformattedMarket) => {
-      const symbol: keyof Market = market[0];
+      const marketData: Market = {
+        symbol: market[0],
+        name: market[1],
+        address: market[5],
+        isListed: market[2],
+        collateralFactor: market[4]
+      };
+
+      const symbol: keyof Market = marketData.symbol;
       const assetsData: Assets<symbol> = assets;
       const src: string = assetsData[symbol];
 
       return {
         label: (
           <div className={style.labelContainer}>
-            <img src={src} alt={market[1]} className={style.marketImage} />{' '}
-            <span className={style.marketName}>{market[1]}</span>
+            <img
+              src={src}
+              alt={marketData.name}
+              className={style.marketImage}
+            />{' '}
+            <span className={style.marketName}>{marketData.name}</span>
           </div>
         ),
-        value: market.address
+        value: marketData.address
       };
     });
 
@@ -69,10 +83,10 @@ function AssetSelector({ title }: Props) {
       {title && <p className={style.title}>Maturity pool</p>}
       <div className={style.selectContainer}>
         <Select
-          options={markets}
+          options={selectOptions}
           onChange={handleChange}
-          placeholder={markets[0]}
-          value={markets[0]}
+          placeholder={selectOptions[0]}
+          value={selectOptions[0]}
         />
       </div>
     </section>
