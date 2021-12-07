@@ -19,6 +19,7 @@ import { Date } from 'types/Date';
 import dictionary from '../../dictionary/en.json';
 
 import { getContractsByEnv } from 'utils/utils';
+import { Option } from 'react-dropdown';
 
 type Props = {
   contractWithSigner: ethers.Contract;
@@ -49,7 +50,7 @@ function SupplyForm({
   const exafinContract = useContract(exafin.address, exafin.abi);
   const exafinWithSigner = useContract(exafin.address, exafin.abi);
   const auditorContract = useContract(auditor.address, auditor.abi);
-  const [dates, setDates] = useState<Array<Date>>([]);
+  const [dates, setDates] = useState<Array<Option>>([]);
 
   useEffect(() => {
     if (dates.length === 0) {
