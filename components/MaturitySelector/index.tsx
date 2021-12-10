@@ -5,18 +5,18 @@ import Select from 'components/common/Select';
 
 import useContract from 'hooks/useContract';
 
-import { getContractsByEnv } from 'utils/utils';
-
 import style from './style.module.scss';
 
 import { Date } from 'types/Date';
+import { Contract } from 'types/Contract';
 
 
-type Props = {};
+type Props = {
+  auditor: Contract
+};
 
-function MaturitySelector({}: Props) {
+function MaturitySelector({auditor}: Props) {
   const [dates, setDates] = useState<Array<Date>>([]);
-  const { auditor } = getContractsByEnv();
   const auditorContract = useContract(auditor.address, auditor.abi);
 
   async function getPools() {

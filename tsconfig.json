@@ -21,7 +21,8 @@
       "contracts/*": ["./contracts/*"],
       "types/*": ["./types/*"],
       "utils/*": ["./utils/*"],
-      "contexts/*": ["./contexts/*"]
+      "contexts/*": ["./contexts/*"],
+      "data/*": ["./data/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],

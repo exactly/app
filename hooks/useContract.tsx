@@ -19,6 +19,8 @@ const useContract = (address: string, abi: ethers.ContractInterface) => {
     } else {
       provider = ethers.getDefaultProvider(publicNetwork);
     }
+
+    console.log(1, address, abi)
     let contract = new ethers.Contract(address, abi, provider);
 
     contract = contract.connect(provider);

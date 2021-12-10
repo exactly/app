@@ -1,10 +1,16 @@
 import { useEffect, useState } from 'react';
 
 import AssetSelector from 'components/AssetSelector';
+import { Contract } from 'types/Contract';
 
 import style from './style.module.scss';
 
-const Hero = () => {
+
+interface Props {
+  auditor: Contract
+}
+
+const Hero = ({auditor}: Props) => {
   const [status, setStatus] = useState(true);
 
   useEffect(() => {
@@ -51,7 +57,7 @@ const Hero = () => {
           </div>
         </div>
         <div className={style.left}>
-          <AssetSelector />
+          <AssetSelector auditor={auditor} />
         </div>
       </section>
     </>

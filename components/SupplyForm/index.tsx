@@ -18,7 +18,7 @@ import { Date } from 'types/Date';
 
 import dictionary from '../../dictionary/en.json';
 
-import { getContractsByEnv } from 'utils/utils';
+import { getContractsByEnv, getUnderlyingByEnv } from 'utils/utils';
 
 type Props = {
   contractWithSigner: ethers.Contract;
@@ -41,7 +41,7 @@ function SupplyForm({
   });
 
   const daiContract = useContractWithSigner(
-    '0x6B175474E89094C44Da98b954EedeAC495271d0F',
+    getUnderlyingByEnv('dai'),
     daiAbi
   );
 

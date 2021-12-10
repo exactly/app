@@ -1,5 +1,6 @@
 import { useState, useEffect, useContext } from 'react';
 import type { NextPage } from 'next';
+import axios from 'axios'
 
 import { ethers } from 'ethers';
 
@@ -19,20 +20,22 @@ import ContractContext from 'contexts/ContractContext';
 
 import { Market } from 'types/Market';
 import { Network } from 'types/Network';
+import { Contract } from 'types/Contract';
 
 interface Props {
   walletAddress: string;
   network: Network;
+  auditor: Contract
 }
 
-const Home: NextPage<Props> = ({ walletAddress, network }) => {
+const Home: NextPage<Props> = ({ walletAddress, network, auditor }) => {
   const { modal, handleModal, modalContent } = useModal();
   const contracts = useContext(ContractContext);
 
   const [markets, setMarkets] = useState<Array<Market>>([]);
   const { contract } = useContract(
-    contracts.auditor?.address,
-    contracts.auditor?.abi
+    auditor?.address,
+    auditor?.abi
   );
 
   useEffect(() => {
@@ -100,12 +103,28 @@ const Home: NextPage<Props> = ({ walletAddress, network }) => {
       )}
       <Navbar walletAddress={walletAddress} />
       <CurrentNetwork network={network} />
-      <Hero />
-      <MaturitySelector />
+      <Hero auditor={auditor} />
+      <MaturitySelector auditor={auditor}/>
       <MarketsList markets={markets} showModal={showModal} />
       <Footer />
     </div>
   );
 };
+
+
+export async function getStaticProps() {
+  const getAuditorAbi = await axios.get('https://abi-versions.s3.amazonaws.com/latest/contracts/Auditor.sol/Auditor.json')
+  const addresses = await axios.get('https://abi-versions.s3.amazonaws.com/latest/addresses.json');
+  const auditorAddress = addresses?.data?.auditor;
+
+  return {
+    props: {
+      auditor: {
+        abi: getAuditorAbi.data,
+        address: auditorAddress
+      }
+    },
+  }
+}
 
 export default Home;

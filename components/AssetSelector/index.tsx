@@ -4,20 +4,20 @@ import Select from 'components/common/Select';
 
 import useContract from 'hooks/useContract';
 
-import { getContractsByEnv } from 'utils/utils';
 import assets from 'dictionary/assets.json';
 
 import { Market } from 'types/Market';
 import { Assets } from 'types/Assets';
+import { Contract } from 'types/Contract';
 
 import style from './style.module.scss';
 
 type Props = {
   title?: Boolean;
+  auditor: Contract
 };
 
-function AssetSelector({ title }: Props) {
-  const { auditor } = getContractsByEnv();
+function AssetSelector({ title, auditor }: Props) {
   const { contract } = useContract(auditor.address, auditor.abi);
   const [markets, setMarkets] = useState<Array<string>>([]);
 
