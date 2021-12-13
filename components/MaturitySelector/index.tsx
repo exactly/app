@@ -39,7 +39,7 @@ function MaturitySelector({ title }: Props) {
     setDates(formattedDates ?? []);
   }
 
-  function handleChange(option: any) {
+  function handleChange(option: Option) {
     setDate(option);
   }
 

@@ -24,10 +24,10 @@
 
 .disabled {
   background: var(--gray-medium);
-  color: white;
+  color: var(--white);
 
   &:hover {
     background: var(--gray-medium);
-    color: white;
+    color: var(--white);
   }
 }
