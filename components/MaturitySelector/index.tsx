@@ -37,6 +37,7 @@ function MaturitySelector({ title }: Props) {
     });
 
     setDates(formattedDates ?? []);
+    !date && formattedDates && setDate(formattedDates[0]);
   }
 
   function handleChange(option: Option) {
@@ -55,8 +56,8 @@ function MaturitySelector({ title }: Props) {
       <Select
         options={dates}
         onChange={handleChange}
-        placeholder={date?.label ?? dates[0]?.label}
-        value={date?.value ?? dates[0]?.value}
+        placeholder={date?.value ?? dates[0]?.label}
+        value={date?.label ?? dates[0]?.value}
       />
     </section>
   );

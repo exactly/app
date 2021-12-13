@@ -10,10 +10,7 @@ import { Assets } from 'types/Assets';
 
 type Props = {
   markets: Array<Market>;
-  showModal: (params: {
-    address: Market['address'];
-    type: 'borrow' | 'deposit';
-  }) => void;
+  showModal: (address: Market['address'], type: 'borrow' | 'deposit') => void;
 };
 
 function MarketsList({ markets, showModal }: Props) {

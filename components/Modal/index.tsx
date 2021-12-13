@@ -79,13 +79,11 @@ function Modal({ contractData, closeModal }: Props) {
         />
       )}
 
-      {hasRate && (
-        <section className={styles.right}>
-          <p>
-            {dictionary.annualRate}: <strong>{potentialRate}</strong>
-          </p>
-        </section>
-      )}
+      <section className={styles.right}>
+        <p>
+          {dictionary.annualRate}: <strong>{potentialRate || '0.0'}</strong>
+        </p>
+      </section>
     </div>
   );
 }

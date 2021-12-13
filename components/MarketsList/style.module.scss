@@ -13,7 +13,7 @@
     border-radius: var(--u);
     display: flex;
     flex-wrap: wrap;
-    width: calc(50% - 10px);
+    width: calc(50% - var(--u2));
 
     h2 {
       margin: var(--u) 0 var(--u3) 0;

@@ -68,18 +68,16 @@ function BorrowForm({
       await exafinWithSigner?.contractWithSigner?.maturityPools(
         parseInt(date.value)
       );
-    const smartPool = await exafinWithSigner?.contractWithSigner?.smartPool();
 
+    const smartPool = await exafinWithSigner?.contractWithSigner?.smartPool();
     //Borrow
     try {
-      const borrowCondition: Boolean = qty > maturityPools.available;
-
       const borrowRate =
         await interestRateModelContract?.contract?.getRateToBorrow(
           parseInt(date.value),
           maturityPools,
           smartPool,
-          borrowCondition
+          false
         );
 
       const formattedBorrowRate =
