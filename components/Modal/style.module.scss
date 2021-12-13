@@ -26,7 +26,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 20px;
+    gap: var(--u3);
 
     p {
       font-weight: bold;

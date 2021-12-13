@@ -11,7 +11,7 @@ import ContractContext from 'contexts/ContractContext';
 import { Market } from 'types/Market';
 import { SupplyRate } from 'types/SupplyRate';
 
-import dictionary from '../../dictionary/en.json';
+import dictionary from 'dictionary/en.json';
 import BorrowForm from 'components/BorrowForm';
 
 type Props = {

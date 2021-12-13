@@ -14,7 +14,7 @@ import daiAbi from 'contracts/abi/dai.json';
 import { SupplyRate } from 'types/SupplyRate';
 import { Error } from 'types/Error';
 
-import dictionary from '../../dictionary/en.json';
+import dictionary from 'dictionary/en.json';
 
 import { getContractsByEnv } from 'utils/utils';
 
@@ -61,7 +61,7 @@ function SupplyForm({
 
   async function calculateRate() {
     if (!qty) {
-      setError({ status: true, msg: 'Please fill the amount' });
+      return setError({ status: true, msg: dictionary.amountError });
     }
 
     const maturityPools =
@@ -80,13 +80,17 @@ function SupplyForm({
       const formattedRate = supplyRate && ethers.utils.formatEther(supplyRate);
       formattedRate && handleResult({ potentialRate: formattedRate });
     } catch (e) {
-      setError({ status: true, msg: 'Oops, there was a problem!' });
+      return setError({ status: true, msg: dictionary.defaultError });
     }
   }
 
   async function deposit() {
     const provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
     const from = await provider.getSigner().getAddress();
+
+    if (!qty) {
+      return setError({ status: true, msg: dictionary.defaultError });
+    }
 
     await daiContract?.contractWithSigner?.approve(
       '0xCa2Be8268A03961F40E29ACE9aa7f0c2503427Ae',
@@ -128,7 +132,7 @@ function SupplyForm({
             text={dictionary.deposit}
             onClick={deposit}
             className={parseFloat(qty) > 0 ? 'primary' : 'disabled'}
-            disabled={parseFloat(qty) > 0 ? false : true}
+            disabled={parseFloat(qty) <= 0}
           />
         </div>
       </div>

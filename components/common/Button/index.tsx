@@ -2,6 +2,8 @@ import { CSSProperties, MouseEventHandler } from 'react';
 import styles from './style.module.scss';
 import { transformClasses } from 'utils/utils';
 
+import dictionary from 'dictionary/en.json';
+
 type Props = {
   text: string;
   onClick?: MouseEventHandler;
@@ -24,7 +26,7 @@ function Button({ text, onClick, className, style, loading, disabled }: Props) {
       onClick={onClick}
       disabled={disabled ?? false}
     >
-      {loading ? 'Loading' : text}
+      {loading ? dictionary.loading : text}
     </button>
   );
 }

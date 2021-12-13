@@ -6,7 +6,7 @@ type Props = {
   className?: string;
   onChange?: ChangeEventHandler;
   placeholder?: string;
-  value?: string;
+  value?: string | number;
   name?: string;
   style?: CSSProperties;
   disabled?: boolean;

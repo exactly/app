@@ -5,9 +5,13 @@
   "supply": "Total supplied",
   "annualRate": "Annual rate",
   "endDate": "End date",
+  "maturityPools": "Maturity pools",
   "deposit": "Deposit",
   "borrow": "Borrow",
   "calculateRate": "Calculate rate",
   "depositTitle": "Amount to deposit",
-  "selectDefaultText": "Choose Date"
+  "selectDefaultText": "Choose Date",
+  "defaultError": "Oops, there was a problem!",
+  "amountError": "Please fill the amount",
+  "loading": "Loading"
 }

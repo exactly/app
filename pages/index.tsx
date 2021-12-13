@@ -21,6 +21,8 @@ import { Market } from 'types/Market';
 import { Network } from 'types/Network';
 import { UnformattedMarket } from 'types/UnformattedMarket';
 
+import dictionary from 'dictionary/en.json';
+
 interface Props {
   walletAddress: string;
   network: Network;
@@ -102,7 +104,7 @@ const Home: NextPage<Props> = ({ walletAddress, network }) => {
       <Navbar walletAddress={walletAddress} />
       <CurrentNetwork network={network} />
       <Hero />
-      <MaturitySelector title="Maturity Pools" />
+      <MaturitySelector title={dictionary.maturityPools} />
       <MarketsList markets={markets} showModal={showModal} />
       <Footer />
     </div>

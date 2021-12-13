@@ -7,7 +7,7 @@ import 'react-dropdown/style.css';
 
 type Props = {
   className?: string;
-  onChange: ChangeEventHandler;
+  onChange: Function;
   onClick?: MouseEventHandler;
   placeholder?: any;
   value?: any;
@@ -26,7 +26,7 @@ function Select({
   placeholder,
   value
 }: Props) {
-  function handleChange(option: any) {
+  function handleChange(option: Option) {
     onChange(option);
   }
 

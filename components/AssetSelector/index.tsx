@@ -38,6 +38,11 @@ function AssetSelector({ title, defaultAddress }: Props) {
     const marketsAddresses = await contract?.getMarketAddresses();
     const marketsData: Array<UnformattedMarket> = [];
 
+    if (!marketsAddresses) {
+      //in case the contract doesn't return any market data
+      return;
+    }
+
     marketsAddresses.map((address: string) => {
       return marketsData.push(contract?.getMarketData(address));
     });
@@ -47,8 +52,7 @@ function AssetSelector({ title, defaultAddress }: Props) {
       setSelectOptions(formattedMarkets);
 
       const defaultOption = data?.find((market) => {
-        const marketAddress = market[5];
-        return marketAddress == defaultAddress;
+        return market[5] == defaultAddress;
       });
 
       const formatDefault = defaultOption && formatDefaultOption(defaultOption);
@@ -112,7 +116,7 @@ function AssetSelector({ title, defaultAddress }: Props) {
     return formattedMarkets;
   }
 
-  function handleChange(option: any) {
+  function handleChange(option: Option) {
     setAddress(option);
   }
 
