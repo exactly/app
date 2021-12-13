@@ -12,7 +12,7 @@ type Props = {
 
 function Item({ market, showModal, type, src }: Props) {
   function handleClick() {
-    showModal(market?.address);
+    showModal(market?.address, type);
   }
 
   return (

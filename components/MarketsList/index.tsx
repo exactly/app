@@ -10,7 +10,7 @@ import { Assets } from 'types/Assets';
 
 type Props = {
   markets: Array<Market>;
-  showModal: FunctionStringCallback;
+  showModal: Function;
 };
 
 function MarketsList({ markets, showModal }: Props) {

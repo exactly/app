@@ -2,6 +2,7 @@ import { useContext, useEffect, useState } from 'react';
 import styles from './style.module.scss';
 
 import SupplyForm from 'components/SupplyForm';
+import AssetSelector from 'components/AssetSelector';
 
 import useContractWithSigner from 'hooks/useContractWithSigner';
 
@@ -11,6 +12,7 @@ import { Market } from 'types/Market';
 import { SupplyRate } from 'types/SupplyRate';
 
 import dictionary from '../../dictionary/en.json';
+import BorrowForm from 'components/BorrowForm';
 
 type Props = {
   contractData: any;
@@ -55,14 +57,11 @@ function Modal({ contractData, closeModal }: Props) {
           X
         </span>
       </div>
-      <div className={styles.asset}>
-        <img
-          src={`./img/assets/${auditorData?.symbol?.toLowerCase()}.png`}
-          className={styles.assetImage}
-        />
-        <p>{auditorData?.symbol}</p>
+      <div className={styles.assets}>
+        <p>{contractData.type == 'desposit' ? 'Borrow' : 'Deposit'}</p>
+        <AssetSelector defaultAddress={contractData.address} />
       </div>
-      {contractWithSigner && (
+      {contractWithSigner && contractData.type == 'deposit' && (
         <SupplyForm
           contractWithSigner={contractWithSigner!}
           handleResult={handleResult}
@@ -70,6 +69,16 @@ function Modal({ contractData, closeModal }: Props) {
           address={contractData.address}
         />
       )}
+
+      {contractWithSigner && contractData.type == 'borrow' && (
+        <BorrowForm
+          contractWithSigner={contractWithSigner!}
+          handleResult={handleResult}
+          hasRate={hasRate}
+          address={contractData.address}
+        />
+      )}
+
       {hasRate && (
         <section className={styles.right}>
           <p>

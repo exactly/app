@@ -1,5 +1,5 @@
-import { ChangeEventHandler, CSSProperties } from "react";
-import styles from "./style.module.scss";
+import { ChangeEventHandler, CSSProperties } from 'react';
+import styles from './style.module.scss';
 
 type Props = {
   type?: string;
@@ -13,8 +13,8 @@ type Props = {
 };
 
 function Input({
-  type = "text",
-  className = "",
+  type = 'text',
+  className = '',
   onChange,
   placeholder,
   value,

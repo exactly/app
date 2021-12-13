@@ -8,6 +8,7 @@ import Head from 'next/head';
 
 import { getContractsByEnv } from 'utils/utils';
 import { ContractProvider } from 'contexts/ContractContext';
+import { AddressProvider } from 'contexts/AddressContext';
 
 import { getCurrentWalletConnected } from 'hooks/useWallet';
 import useNetwork from 'hooks/useNetwork';
@@ -60,7 +61,9 @@ function MyApp({ Component, pageProps }: AppProps) {
         <link rel="icon" href="/icon.ico" />
       </Head>
       <ContractProvider value={getContractByEnv()}>
-        <Component {...props} />
+        <AddressProvider>
+          <Component {...props} />
+        </AddressProvider>
       </ContractProvider>
     </>
   );

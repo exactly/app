@@ -1,6 +1,6 @@
 .modal {
-  position: absolute;
-  width: 250px;
+  position: fixed;
+  width: 350px;
   height: fit-content;
   left: calc(50% - 125px);
   top: 25%;
@@ -10,6 +10,7 @@
   display: flex;
   flex-direction: column;
   z-index: 3;
+  border-radius: var(--smallUnit);
 
   .closeContainer {
     width: 100%;
@@ -21,14 +22,14 @@
     }
   }
 
-  .asset {
+  .assets {
     display: flex;
+    justify-content: center;
     align-items: center;
-    gap: 10px;
+    gap: 20px;
 
-    .assetImage {
-      height: 30px;
-      width: 30px;
+    p {
+      font-weight: bold;
     }
   }
 }

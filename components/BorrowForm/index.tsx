@@ -27,7 +27,7 @@ type Props = {
   address: string;
 };
 
-function SupplyForm({
+function BorrowForm({
   contractWithSigner,
   handleResult,
   hasRate,
@@ -68,23 +68,29 @@ function SupplyForm({
       await exafinWithSigner?.contractWithSigner?.maturityPools(
         parseInt(date.value)
       );
+    const smartPool = await exafinWithSigner?.contractWithSigner?.smartPool();
 
-    //Supply
+    //Borrow
     try {
-      const supplyRate =
-        await interestRateModelContract?.contract?.getRateToSupply(
+      const borrowRate =
+        await interestRateModelContract?.contract?.getRateToBorrow(
           parseInt(date.value),
-          maturityPools
+          maturityPools,
+          smartPool,
+          false
         );
 
-      const formattedRate = supplyRate && ethers.utils.formatEther(supplyRate);
-      formattedRate && handleResult({ potentialRate: formattedRate });
+      const formattedBorrowRate =
+        borrowRate && ethers.utils.formatEther(borrowRate);
+
+      formattedBorrowRate &&
+        handleResult({ potentialRate: formattedBorrowRate });
     } catch (e) {
       setError({ status: true, msg: 'Oops, there was a problem!' });
     }
   }
 
-  async function deposit() {
+  async function borrow() {
     const provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
     const from = await provider.getSigner().getAddress();
 
@@ -93,11 +99,11 @@ function SupplyForm({
       ethers.utils.parseUnits(qty!)
     );
 
-    const depositTx =
-      await exafinWithSigner?.contractWithSigner?.depositToMaturityPool(
-        ethers.utils.parseUnits(qty!),
-        parseInt(date.value)
-      );
+    const borrowTx = await exafinWithSigner?.contract?.borrow(
+      from,
+      ethers.utils.parseUnits(qty!),
+      parseInt(date.value)
+    );
   }
 
   return (
@@ -126,8 +132,8 @@ function SupplyForm({
         <div className={style.buttonContainer}>
           <Button
             text={dictionary.deposit}
-            onClick={deposit}
-            className={parseFloat(qty) > 0 ? 'primary' : 'disabled'}
+            onClick={borrow}
+            className={parseFloat(qty) > 0 ? 'secondary' : 'disabled'}
             disabled={parseFloat(qty) > 0 ? false : true}
           />
         </div>
@@ -136,4 +142,4 @@ function SupplyForm({
   );
 }
 
-export default SupplyForm;
+export default BorrowForm;

@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import dayjs from 'dayjs';
+import { Option } from 'react-dropdown';
 
 import Select from 'components/common/Select';
 
@@ -9,11 +10,15 @@ import { getContractsByEnv } from 'utils/utils';
 
 import style from './style.module.scss';
 
-import { Option } from 'react-dropdown';
+import { AddressContext } from 'contexts/AddressContext';
 
-type Props = {};
+type Props = {
+  title?: String;
+};
 
-function MaturitySelector({}: Props) {
+function MaturitySelector({ title }: Props) {
+  const { date, setDate } = useContext(AddressContext);
+
   const [dates, setDates] = useState<Array<Option>>([]);
   const { auditor } = getContractsByEnv();
   const auditorContract = useContract(auditor.address, auditor.abi);
@@ -35,7 +40,7 @@ function MaturitySelector({}: Props) {
   }
 
   function handleChange(option: any) {
-    console.log(option, 2134);
+    setDate(option);
   }
 
   useEffect(() => {
@@ -46,12 +51,12 @@ function MaturitySelector({}: Props) {
 
   return (
     <section className={style.container}>
-      <p className={style.title}>Maturity Pools</p>
+      {title && <p className={style.title}>{title}</p>}
       <Select
         options={dates}
         onChange={handleChange}
-        placeholder={dates[0]?.label}
-        value={dates[0]?.value}
+        placeholder={date?.value ?? dates[0]?.label}
+        value={date?.label ?? dates[0]?.value}
       />
     </section>
   );
