@@ -12,6 +12,8 @@ import style from './style.module.scss';
 
 import { AddressContext } from 'contexts/AddressContext';
 
+import { Date } from 'types/Date';
+
 type Props = {
   title?: String;
 };
@@ -40,7 +42,7 @@ function MaturitySelector({ title }: Props) {
     !date && formattedDates && setDate(formattedDates[0]);
   }
 
-  function handleChange(option: Option) {
+  function handleChange(option: Date) {
     setDate(option);
   }
 

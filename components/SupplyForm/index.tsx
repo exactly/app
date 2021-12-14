@@ -60,7 +60,7 @@ function SupplyForm({
   }, [qty, date]);
 
   async function calculateRate() {
-    if (!qty) {
+    if (!qty || !date) {
       return setError({ status: true, msg: dictionary.amountError });
     }
 
@@ -88,7 +88,7 @@ function SupplyForm({
     const provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
     const from = await provider.getSigner().getAddress();
 
-    if (!qty) {
+    if (!qty || !date) {
       return setError({ status: true, msg: dictionary.defaultError });
     }
 
