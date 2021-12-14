@@ -1,18 +1,17 @@
 import Button from 'components/common/Button';
 import { Market } from 'types/Market';
 import style from './style.module.scss';
-import assets from 'dictionary/assets.json';
 
 type Props = {
   market: Market;
-  showModal: Function;
-  type: String;
+  showModal: (address: Market['address'], type: 'borrow' | 'deposit') => void;
+  type: 'borrow' | 'deposit';
   src: string;
 };
 
 function Item({ market, showModal, type, src }: Props) {
   function handleClick() {
-    showModal(market?.address);
+    showModal(market?.address, type);
   }
 
   return (

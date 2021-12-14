@@ -12,7 +12,7 @@
     width: 20%;
     font-weight: bold;
     display: flex;
-    gap: 20px;
+    gap: var(--u3);
     align-items: center;
 
     .assetImage {

@@ -27,7 +27,7 @@ type Props = {
   address: string;
 };
 
-function SupplyForm({
+function BorrowForm({
   contractWithSigner,
   handleResult,
   hasRate,
@@ -69,22 +69,28 @@ function SupplyForm({
         parseInt(date.value)
       );
 
-    //Supply
+    const smartPool = await exafinWithSigner?.contractWithSigner?.smartPool();
+    //Borrow
     try {
-      const supplyRate =
-        await interestRateModelContract?.contract?.getRateToSupply(
+      const borrowRate =
+        await interestRateModelContract?.contract?.getRateToBorrow(
           parseInt(date.value),
-          maturityPools
+          maturityPools,
+          smartPool,
+          false
         );
 
-      const formattedRate = supplyRate && ethers.utils.formatEther(supplyRate);
-      formattedRate && handleResult({ potentialRate: formattedRate });
+      const formattedBorrowRate =
+        borrowRate && ethers.utils.formatEther(borrowRate);
+
+      formattedBorrowRate &&
+        handleResult({ potentialRate: formattedBorrowRate });
     } catch (e) {
       return setError({ status: true, msg: dictionary.defaultError });
     }
   }
 
-  async function deposit() {
+  async function borrow() {
     const provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
     const from = await provider.getSigner().getAddress();
 
@@ -97,11 +103,11 @@ function SupplyForm({
       ethers.utils.parseUnits(qty!.toString())
     );
 
-    const depositTx =
-      await exafinWithSigner?.contractWithSigner?.depositToMaturityPool(
-        ethers.utils.parseUnits(qty!.toString()),
-        parseInt(date.value)
-      );
+    const borrowTx = await exafinWithSigner?.contract?.borrow(
+      from,
+      ethers.utils.parseUnits(qty!.toString()),
+      parseInt(date.value)
+    );
   }
 
   return (
@@ -130,8 +136,8 @@ function SupplyForm({
         <div className={style.buttonContainer}>
           <Button
             text={dictionary.deposit}
-            onClick={deposit}
-            className={qty > 0 ? 'primary' : 'disabled'}
+            onClick={borrow}
+            className={qty > 0 ? 'secondary' : 'disabled'}
             disabled={qty <= 0}
           />
         </div>
@@ -140,4 +146,4 @@ function SupplyForm({
   );
 }
 
-export default SupplyForm;
+export default BorrowForm;

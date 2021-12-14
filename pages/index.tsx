@@ -21,6 +21,8 @@ import { Market } from 'types/Market';
 import { Network } from 'types/Network';
 import { UnformattedMarket } from 'types/UnformattedMarket';
 
+import dictionary from 'dictionary/en.json';
+
 interface Props {
   walletAddress: string;
   network: Network;
@@ -83,12 +85,12 @@ const Home: NextPage<Props> = ({ walletAddress, network }) => {
     return formattedMarkets;
   }
 
-  function showModal(address: Market['address']) {
+  function showModal(address: Market['address'], type: 'borrow' | 'deposit') {
     const data = markets.find((market) => {
       return market.address === address;
     });
 
-    handleModal({ content: data });
+    handleModal({ content: { ...data, type } });
   }
 
   return (
@@ -102,7 +104,7 @@ const Home: NextPage<Props> = ({ walletAddress, network }) => {
       <Navbar walletAddress={walletAddress} />
       <CurrentNetwork network={network} />
       <Hero />
-      <MaturitySelector />
+      <MaturitySelector title={dictionary.maturityPools} />
       <MarketsList markets={markets} showModal={showModal} />
       <Footer />
     </div>
