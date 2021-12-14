@@ -35,7 +35,7 @@ function BorrowForm({
 }: Props) {
   const { date } = useContext(AddressContext);
 
-  const [qty, setQty] = useState<string>('0');
+  const [qty, setQty] = useState<number>(0);
 
   const [error, setError] = useState<Error | undefined>({
     status: false,
@@ -100,12 +100,12 @@ function BorrowForm({
 
     await daiContract?.contractWithSigner?.approve(
       '0xCa2Be8268A03961F40E29ACE9aa7f0c2503427Ae',
-      ethers.utils.parseUnits(qty!)
+      ethers.utils.parseUnits(qty!.toString())
     );
 
     const borrowTx = await exafinWithSigner?.contract?.borrow(
       from,
-      ethers.utils.parseUnits(qty!),
+      ethers.utils.parseUnits(qty!.toString()),
       parseInt(date.value)
     );
   }
@@ -118,7 +118,7 @@ function BorrowForm({
           <Input
             type="number"
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              setQty(e.target.value);
+              setQty(e.target.valueAsNumber);
               setError({ status: false, msg: '' });
             }}
             value={qty}
@@ -137,8 +137,8 @@ function BorrowForm({
           <Button
             text={dictionary.deposit}
             onClick={borrow}
-            className={parseFloat(qty) > 0 ? 'secondary' : 'disabled'}
-            disabled={parseFloat(qty) <= 0}
+            className={qty > 0 ? 'secondary' : 'disabled'}
+            disabled={qty <= 0}
           />
         </div>
       </div>

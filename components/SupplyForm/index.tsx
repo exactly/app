@@ -35,7 +35,7 @@ function SupplyForm({
 }: Props) {
   const { date } = useContext(AddressContext);
 
-  const [qty, setQty] = useState<string>('0');
+  const [qty, setQty] = useState<number>(0);
 
   const [error, setError] = useState<Error | undefined>({
     status: false,
@@ -94,12 +94,12 @@ function SupplyForm({
 
     await daiContract?.contractWithSigner?.approve(
       '0xCa2Be8268A03961F40E29ACE9aa7f0c2503427Ae',
-      ethers.utils.parseUnits(qty!)
+      ethers.utils.parseUnits(qty!.toString())
     );
 
     const depositTx =
       await exafinWithSigner?.contractWithSigner?.depositToMaturityPool(
-        ethers.utils.parseUnits(qty!),
+        ethers.utils.parseUnits(qty!.toString()),
         parseInt(date.value)
       );
   }
@@ -112,7 +112,7 @@ function SupplyForm({
           <Input
             type="number"
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              setQty(e.target.value);
+              setQty(e.target.valueAsNumber);
               setError({ status: false, msg: '' });
             }}
             value={qty}
@@ -131,8 +131,8 @@ function SupplyForm({
           <Button
             text={dictionary.deposit}
             onClick={deposit}
-            className={parseFloat(qty) > 0 ? 'primary' : 'disabled'}
-            disabled={parseFloat(qty) <= 0}
+            className={qty > 0 ? 'primary' : 'disabled'}
+            disabled={qty <= 0}
           />
         </div>
       </div>
