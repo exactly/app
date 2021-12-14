@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
-import type { NextPage, GetServerSideProps } from 'next';
+import type { NextPage } from 'next';
 
 import { ethers } from 'ethers';
 
