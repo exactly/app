@@ -9,7 +9,6 @@
     flex-wrap: wrap;
     margin: 0 auto;
     padding: 10px;
-    width: 100%;
 
     .left {
       display: flex;
@@ -50,9 +49,10 @@
 @media (max-width: 769px) {
   .footer {
     .container {
+      width: 90%;
       justify-content: center;
       align-items: center;
-      gap: 20px;
+      gap: var(--u3);
     }
   }
 }

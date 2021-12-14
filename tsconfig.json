@@ -21,9 +21,15 @@
       "contracts/*": ["./contracts/*"],
       "types/*": ["./types/*"],
       "utils/*": ["./utils/*"],
-      "contexts/*": ["./contexts/*"]
+      "contexts/*": ["./contexts/*"],
+      "dictionary/*": ["./dictionary/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    "contexts/AddressContext.js"
+  ],
   "exclude": ["node_modules"]
 }

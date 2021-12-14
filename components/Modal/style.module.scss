@@ -1,6 +1,6 @@
 .modal {
-  position: absolute;
-  width: 250px;
+  position: fixed;
+  width: 350px;
   height: fit-content;
   left: calc(50% - 125px);
   top: 25%;
@@ -9,7 +9,8 @@
   padding: 20px;
   display: flex;
   flex-direction: column;
-  z-index: 3;
+  z-index: 5;
+  border-radius: var(--smallUnit);
 
   .closeContainer {
     width: 100%;
@@ -21,14 +22,24 @@
     }
   }
 
-  .asset {
+  .assets {
     display: flex;
+    justify-content: center;
     align-items: center;
-    gap: 10px;
+    gap: var(--u3);
 
-    .assetImage {
-      height: 30px;
-      width: 30px;
+    p {
+      font-weight: bold;
     }
+  }
+}
+
+@media (max-width: 426px) {
+  .modal {
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 7;
   }
 }

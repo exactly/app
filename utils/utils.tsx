@@ -14,10 +14,12 @@ export function getContractsByEnv() {
 
   const auditor = require(`contracts/${env}/auditor.json`);
   const exafin = require(`contracts/${env}/exafin.json`);
+  const interestRateModel = require(`contracts/${env}/interestRateModel.json`);
 
   return {
     auditor,
-    exafin
+    exafin,
+    interestRateModel
   };
 }
 

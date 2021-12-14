@@ -1,12 +1,12 @@
-import { useState } from "react";
+import { useState } from 'react';
 
 type Props = {
   content?: any;
 };
 
-export default () => {
+const useModal = () => {
   let [modal, setModal] = useState(false);
-  let [modalContent, setModalContent] = useState<String>("");
+  let [modalContent, setModalContent] = useState<String | undefined>(undefined);
 
   let handleModal = ({ content = {} }: Props) => {
     setModal(!modal);
@@ -17,3 +17,5 @@ export default () => {
 
   return { modal, handleModal, modalContent };
 };
+
+export default useModal;

@@ -1,10 +1,16 @@
+import type { NextPage } from 'next';
+
 import AssetSelector from 'components/AssetSelector';
 import CurrentNetwork from 'components/CurrentNetwork';
 import Navbar from 'components/Navbar';
 
-function Asset(props: any) {
-  const { walletAddress, network } = props;
+import { Network } from 'types/Network';
+interface Props {
+  walletAddress: string;
+  network: Network;
+}
 
+const Asset: NextPage<Props> = ({ walletAddress, network }) => {
   return (
     <div>
       <Navbar walletAddress={walletAddress} />
@@ -12,6 +18,6 @@ function Asset(props: any) {
       <AssetSelector title={true} />
     </div>
   );
-}
+};
 
 export default Asset;

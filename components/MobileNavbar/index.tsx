@@ -67,6 +67,7 @@ function MobileNavbar({ walletAddress, network }: Props) {
 
   return (
     <>
+      {open && <Overlay closeModal={handleMenu} />}
       <nav className={styles.navBar}>
         <div className={styles.wrapper}>
           <Link href="/">
@@ -126,7 +127,6 @@ function MobileNavbar({ walletAddress, network }: Props) {
           </button>
         </ul>
       )}
-      {open && <Overlay closeModal={handleMenu} />}
     </>
   );
 }

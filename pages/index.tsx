@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef, useContext } from 'react';
-import type { NextPage } from 'next';
+import { useState, useEffect, useContext } from 'react';
+import type { NextPage, GetServerSideProps } from 'next';
 
 import { ethers } from 'ethers';
 
@@ -10,6 +10,8 @@ import Navbar from 'components/Navbar';
 import Hero from 'components/Hero';
 import CurrentNetwork from 'components/CurrentNetwork';
 import Footer from 'components/Footer';
+import Overlay from 'components/Overlay';
+import MobileNavbar from 'components/MobileNavbar';
 
 import useContract from 'hooks/useContract';
 import useModal from 'hooks/useModal';
@@ -17,15 +19,24 @@ import useModal from 'hooks/useModal';
 import ContractContext from 'contexts/ContractContext';
 
 import { Market } from 'types/Market';
-import Overlay from 'components/Overlay';
-import MobileNavbar from 'components/MobileNavbar';
 
-const Home: NextPage = (props: any) => {
-  const { walletAddress, network } = props;
+import { Network } from 'types/Network';
+import { UnformattedMarket } from 'types/UnformattedMarket';
+
+import dictionary from 'dictionary/en.json';
+
+interface Props {
+  walletAddress: string;
+  network: Network;
+}
+
+const Home: NextPage<Props> = ({ walletAddress, network }) => {
   const { modal, handleModal, modalContent } = useModal();
+
   const contracts = useContext(ContractContext);
 
   const [markets, setMarkets] = useState<Array<Market>>([]);
+
   const { contract } = useContract(
     contracts.auditor?.address,
     contracts.auditor?.abi
@@ -39,18 +50,18 @@ const Home: NextPage = (props: any) => {
 
   async function getMarkets() {
     const marketsAddresses = await contract?.getMarketAddresses();
+    const marketsData: Array<UnformattedMarket> = [];
 
-    const marketsParsed = marketsAddresses.map(async (address: string) => {
-      // const marketData = await contract?.markets(address);
-      // return { ...marketData, address };
+    marketsAddresses.map((address: string) => {
+      marketsData.push(contract?.getMarketData(address));
     });
 
-    // Promise.all(marketsParsed).then((data: Array<any>) => {
-    //   setMarkets(formatMarkets(data));
-    // });
+    Promise.all(marketsData).then((data: Array<UnformattedMarket>) => {
+      setMarkets(formatMarkets(data));
+    });
   }
 
-  function formatMarkets(markets: any) {
+  function formatMarkets(markets: Array<UnformattedMarket>) {
     const length = markets.length;
 
     let formattedMarkets: Array<Market> = [];
@@ -64,12 +75,12 @@ const Home: NextPage = (props: any) => {
         collateralFactor: 0
       };
 
-      market['address'] = markets[i].address;
-      market['symbol'] = markets[i].symbol;
-      market['name'] = markets[i][0];
-      market['isListed'] = markets[i].isListed;
+      market['address'] = markets[i][5];
+      market['symbol'] = markets[i][0];
+      market['name'] = markets[i][1];
+      market['isListed'] = markets[i][2];
       market['collateralFactor'] = parseFloat(
-        ethers.utils.formatEther(markets[i].collateralFactor)
+        ethers.utils.formatEther(markets[i][3])
       );
 
       formattedMarkets = [...formattedMarkets, market];
@@ -78,12 +89,12 @@ const Home: NextPage = (props: any) => {
     return formattedMarkets;
   }
 
-  function showModal(address: Market['address']) {
+  function showModal(address: Market['address'], type: 'borrow' | 'deposit') {
     const data = markets.find((market) => {
       return market.address === address;
     });
 
-    handleModal({ content: data });
+    handleModal({ content: { ...data, type } });
   }
 
   return (
@@ -96,12 +107,11 @@ const Home: NextPage = (props: any) => {
       )}
 
       <MobileNavbar walletAddress={walletAddress} network={network} />
-
-      {/* <Navbar walletAddress={walletAddress} /> */}
-      {/* <CurrentNetwork network={network} /> */}
+      <Navbar walletAddress={walletAddress} />
+      <CurrentNetwork network={network} />
 
       <Hero />
-      <MaturitySelector />
+      <MaturitySelector title={dictionary.maturityPools} />
       <MarketsList markets={markets} showModal={showModal} />
       <Footer />
     </div>

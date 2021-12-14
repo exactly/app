@@ -1,0 +1,12 @@
+.network {
+  width: 100%;
+  position: fixed;
+  top: var(--navbarHeight);
+  z-index: 3;
+}
+
+@media (max-width: 769px) {
+  .network {
+    display: none;
+  }
+}

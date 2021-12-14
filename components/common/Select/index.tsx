@@ -1,18 +1,20 @@
 import { MouseEventHandler, ChangeEventHandler, CSSProperties } from 'react';
+
 import styles from './style.module.scss';
-import Dropdown from 'react-dropdown';
+import Dropdown, { Option } from 'react-dropdown';
+
 import 'react-dropdown/style.css';
 
 type Props = {
   className?: string;
-  onChange: ChangeEventHandler;
+  onChange: Function;
   onClick?: MouseEventHandler;
   placeholder?: any;
   value?: any;
   name?: string;
   style?: CSSProperties;
   disabled?: boolean;
-  options: Array<any>;
+  options: Array<Option>;
 };
 
 function Select({
@@ -24,7 +26,7 @@ function Select({
   placeholder,
   value
 }: Props) {
-  function handleChange(option: any) {
+  function handleChange(option: Option) {
     onChange(option);
   }
 

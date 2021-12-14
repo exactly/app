@@ -1,10 +1,13 @@
 .navBar {
+  position: fixed;
   width: 100%;
   height: var(--navbarHeight);
   padding: var(--u2);
   box-sizing: border-box;
   box-shadow: var(--shadow);
   background: var(--white);
+  top: 0;
+  z-index: 3;
 
   .wrapper {
     display: flex;
@@ -54,5 +57,11 @@
         align-items: center;
       }
     }
+  }
+}
+
+@media (max-width: 769px) {
+  .navBar {
+    display: none;
   }
 }

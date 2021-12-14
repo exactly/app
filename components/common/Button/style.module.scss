@@ -21,3 +21,13 @@
     background: var(--secondaryHover);
   }
 }
+
+.disabled {
+  background: var(--gray-medium);
+  color: var(--white);
+
+  &:hover {
+    background: var(--gray-medium);
+    color: var(--white);
+  }
+}
