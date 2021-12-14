@@ -15,6 +15,7 @@ import { UnformattedMarket } from 'types/UnformattedMarket';
 import { Option } from 'react-dropdown';
 
 import style from './style.module.scss';
+import { Address } from 'types/Address';
 
 type Props = {
   title?: Boolean;
@@ -116,7 +117,7 @@ function AssetSelector({ title, defaultAddress }: Props) {
     return formattedMarkets;
   }
 
-  function handleChange(option: Option) {
+  function handleChange(option: Address) {
     setAddress(option);
   }
 
