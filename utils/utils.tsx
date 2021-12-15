@@ -32,7 +32,6 @@ export async function getContractsByEnv() {
     const getContracts = await axios.get('https://abi-versions.s3.amazonaws.com/latest/addresses.json');
     const contractsData = getContracts.data;
 
-    console.log(contractsData);
 
     auditor = contractsData['auditor']
     fixedLender = contractsData['fixedLenderDAI'];

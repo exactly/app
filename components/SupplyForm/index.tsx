@@ -92,7 +92,7 @@ function SupplyForm({
     const from = await provider.getSigner().getAddress();
 
     await daiContract?.contractWithSigner?.approve(
-      '0xCa2Be8268A03961F40E29ACE9aa7f0c2503427Ae',
+      '0xCa2Be8268A03961F40E29ACE9aa7f0c2503427Ae', //FixedLender
       ethers.utils.parseUnits(qty!)
     );
 

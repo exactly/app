@@ -59,9 +59,7 @@ function MyApp({ Component, pageProps }: AppProps) {
         />
         <link rel="icon" href="/icon.ico" />
       </Head>
-      <ContractProvider value={getContractByEnv()}>
-        <Component {...props} />
-      </ContractProvider>
+      <Component {...props} />
     </>
   );
 }

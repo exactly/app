@@ -18,7 +18,7 @@ type Props = {
 };
 
 function AssetSelector({ title, auditor }: Props) {
-  const { contract } = useContract(auditor.address, auditor.abi);
+  const { contract } = useContract(auditor?.address, auditor?.abi);
   const [markets, setMarkets] = useState<Array<string>>([]);
 
   useEffect(() => {
