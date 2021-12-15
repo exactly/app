@@ -6,13 +6,13 @@ import Select from 'components/common/Select';
 
 import useContract from 'hooks/useContract';
 
-import { getContractsByEnv } from 'utils/utils';
-
 import style from './style.module.scss';
 
 import { AddressContext } from 'contexts/AddressContext';
+import AuditorContext from 'contexts/AuditorContext';
 
 import { Date } from 'types/Date';
+import { Contract } from 'types/Contract';
 
 type Props = {
   title?: String;
@@ -20,10 +20,10 @@ type Props = {
 
 function MaturitySelector({ title }: Props) {
   const { date, setDate } = useContext(AddressContext);
+  const auditor = useContext(AuditorContext);
 
   const [dates, setDates] = useState<Array<Option>>([]);
-  const { auditor } = getContractsByEnv();
-  const auditorContract = useContract(auditor.address, auditor.abi);
+  const auditorContract = useContract(auditor.address!, auditor.abi!);
 
   async function getPools() {
     const pools = await auditorContract?.contract?.getFuturePools();

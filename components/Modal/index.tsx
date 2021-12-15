@@ -6,7 +6,7 @@ import AssetSelector from 'components/AssetSelector';
 
 import useContractWithSigner from 'hooks/useContractWithSigner';
 
-import ContractContext from 'contexts/ContractContext';
+import AuditorContext from 'contexts/AuditorContext';
 
 import { Market } from 'types/Market';
 import { SupplyRate } from 'types/SupplyRate';
@@ -20,7 +20,7 @@ type Props = {
 };
 
 function Modal({ contractData, closeModal }: Props) {
-  const contracts = useContext(ContractContext);
+  const auditor = useContext(AuditorContext);
 
   const [potentialRate, setPotentialRate] = useState<string | undefined>(
     undefined
@@ -36,10 +36,10 @@ function Modal({ contractData, closeModal }: Props) {
 
   const { contractWithSigner } = useContractWithSigner(
     contractData?.address,
-    contracts?.auditor?.abi
+    auditor?.abi!
   );
 
-  useEffect(() => {}, [hasRate, potentialRate]);
+  useEffect(() => { }, [hasRate, potentialRate]);
 
   function handleResult(data: SupplyRate | undefined) {
     setHasRate(data?.potentialRate ? true : false);

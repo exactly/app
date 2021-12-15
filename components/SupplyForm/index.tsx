@@ -19,6 +19,8 @@ import dictionary from 'dictionary/en.json';
 import { getContractsByEnv } from 'utils/utils';
 
 import { AddressContext } from 'contexts/AddressContext';
+import FixedLenderContext from 'contexts/FixedLenderContext';
+import InterestRateModelContext from 'contexts/InterestRateModelContext';
 
 type Props = {
   contractWithSigner: ethers.Contract;
@@ -34,6 +36,8 @@ function SupplyForm({
   address
 }: Props) {
   const { date } = useContext(AddressContext);
+  const fixedLender = useContext(FixedLenderContext);
+  const interestRateModel = useContext(InterestRateModelContext);
 
   const [qty, setQty] = useState<number>(0);
 
@@ -47,13 +51,12 @@ function SupplyForm({
     daiAbi
   );
 
-  const { exafin, interestRateModel } = getContractsByEnv();
 
   const interestRateModelContract = useContract(
-    interestRateModel.address,
-    interestRateModel.abi
+    interestRateModel.address!,
+    interestRateModel.abi!
   );
-  const exafinWithSigner = useContractWithSigner(exafin.address, exafin.abi);
+  const fixedLenderWithSigner = useContractWithSigner(address, fixedLender?.abi!);
 
   useEffect(() => {
     calculateRate();
@@ -65,7 +68,7 @@ function SupplyForm({
     }
 
     const maturityPools =
-      await exafinWithSigner?.contractWithSigner?.maturityPools(
+      await fixedLenderWithSigner?.contractWithSigner?.maturityPools(
         parseInt(date.value)
       );
 
@@ -98,7 +101,7 @@ function SupplyForm({
     );
 
     const depositTx =
-      await exafinWithSigner?.contractWithSigner?.depositToMaturityPool(
+      await fixedLenderWithSigner?.contractWithSigner?.depositToMaturityPool(
         ethers.utils.parseUnits(qty!.toString()),
         parseInt(date.value)
       );
