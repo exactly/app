@@ -21,19 +21,22 @@ import { getContractsByEnv } from 'utils/utils';
 import { AddressContext } from 'contexts/AddressContext';
 import FixedLenderContext from 'contexts/FixedLenderContext';
 import InterestRateModelContext from 'contexts/InterestRateModelContext';
+import { Market } from 'types/Market';
 
 type Props = {
   contractWithSigner: ethers.Contract;
   handleResult: (data: SupplyRate | undefined) => void;
   hasRate: boolean;
   address: string;
+  assetData: Market | undefined;
 };
 
 function BorrowForm({
   contractWithSigner,
   handleResult,
   hasRate,
-  address
+  address,
+  assetData
 }: Props) {
 
   const { date } = useContext(AddressContext);

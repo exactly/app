@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import useProvider from "./useProvider";
 
 export default function useContractWithSigner(
-  address: string,
+  address: string | undefined,
   abi: ethers.ContractInterface
 ) {
   const { web3Provider, getProvider } = useProvider();

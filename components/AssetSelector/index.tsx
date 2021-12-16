@@ -7,7 +7,6 @@ import useContract from 'hooks/useContract';
 import { AddressContext } from 'contexts/AddressContext';
 import AuditorContext from 'contexts/AuditorContext';
 
-import { getContractsByEnv } from 'utils/utils';
 import assets from 'dictionary/assets.json';
 
 import { Market } from 'types/Market';
@@ -21,14 +20,16 @@ import { Address } from 'types/Address';
 type Props = {
   title?: Boolean;
   defaultAddress?: String;
+  onChange?: (marketData: Market) => void;
 };
 
-function AssetSelector({ title, defaultAddress }: Props) {
+function AssetSelector({ title, defaultAddress, onChange }: Props) {
   const { address, setAddress } = useContext(AddressContext);
   const auditor = useContext(AuditorContext);
 
   const { contract } = useContract(auditor.address!, auditor.abi!);
   const [selectOptions, setSelectOptions] = useState<Array<Option>>([]);
+  const [allMarketsData, setAllMarketsData] = useState<Array<Market>>([]);
 
   useEffect(() => {
     if (contract) {
@@ -75,6 +76,8 @@ function AssetSelector({ title, defaultAddress }: Props) {
     const assetsData: Assets<symbol> = assets;
     const src: string = assetsData[symbol];
 
+    onChange && onChange(marketData);
+
     return {
       label: (
         <div className={style.labelContainer}>
@@ -100,6 +103,8 @@ function AssetSelector({ title, defaultAddress }: Props) {
       const assetsData: Assets<symbol> = assets;
       const src: string = assetsData[symbol];
 
+      setAllMarketsData(prevState => [...prevState, marketData]);
+
       return {
         label: (
           <div className={style.labelContainer}>
@@ -118,7 +123,14 @@ function AssetSelector({ title, defaultAddress }: Props) {
     return formattedMarkets;
   }
 
+  function getDataByAddress(address: string) {
+    const marketData = allMarketsData.find((market) => market.address == address);
+
+    (onChange && marketData) && onChange(marketData)
+  }
+
   function handleChange(option: Address) {
+    getDataByAddress(option.value);
     setAddress(option);
   }
 

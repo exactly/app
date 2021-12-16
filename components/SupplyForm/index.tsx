@@ -10,7 +10,6 @@ import useContractWithSigner from 'hooks/useContractWithSigner';
 import useContract from 'hooks/useContract';
 
 import daiAbi from 'contracts/abi/dai.json';
-import underlyings from 'data/underlying.json'
 
 
 import { SupplyRate } from 'types/SupplyRate';
@@ -18,25 +17,29 @@ import { Error } from 'types/Error';
 
 import dictionary from 'dictionary/en.json';
 
-import { getContractsByEnv } from 'utils/utils';
+import { getUnderlyingAddress } from 'utils/utils';
 
 import { AddressContext } from 'contexts/AddressContext';
 import FixedLenderContext from 'contexts/FixedLenderContext';
 import InterestRateModelContext from 'contexts/InterestRateModelContext';
 import { Dictionary } from 'types/Dictionary';
+import { UnderlyingNetwork, Underlying } from 'types/Underlying';
+import { Market } from 'types/Market';
 
 type Props = {
   contractWithSigner: ethers.Contract;
   handleResult: (data: SupplyRate | undefined) => void;
   hasRate: boolean;
   address: string;
+  assetData: Market | undefined;
 };
 
 function SupplyForm({
   contractWithSigner,
   handleResult,
   hasRate,
-  address
+  address,
+  assetData
 }: Props) {
   const { date } = useContext(AddressContext);
   const fixedLender = useContext(FixedLenderContext);
@@ -49,8 +52,16 @@ function SupplyForm({
     msg: ''
   });
 
+
+  let underlyingAddress: string | undefined = undefined;
+
+  if (assetData?.symbol) {
+    underlyingAddress = getUnderlyingAddress(process.env.NEXT_PUBLIC_NETWORK!, assetData.symbol);
+  }
+
+
   const daiContract = useContractWithSigner(
-    '0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa',
+    underlyingAddress,
     daiAbi
   );
 

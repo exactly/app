@@ -32,6 +32,8 @@ function Modal({ contractData, closeModal }: Props) {
     contractData
   );
 
+  const [assetData, setAssetData] = useState<Market | undefined>(undefined);
+
   const [hasRate, setHasRate] = useState<boolean>(false);
 
   const { contractWithSigner } = useContractWithSigner(
@@ -59,7 +61,7 @@ function Modal({ contractData, closeModal }: Props) {
       </div>
       <div className={styles.assets}>
         <p>{contractData.type == 'desposit' ? 'Borrow' : 'Deposit'}</p>
-        <AssetSelector defaultAddress={contractData.address} />
+        <AssetSelector defaultAddress={contractData.address} onChange={marketData => setAssetData(marketData)} />
       </div>
       {contractWithSigner && contractData.type == 'deposit' && (
         <SupplyForm
@@ -67,6 +69,7 @@ function Modal({ contractData, closeModal }: Props) {
           handleResult={handleResult}
           hasRate={hasRate}
           address={contractData.address}
+          assetData={assetData}
         />
       )}
 
@@ -76,6 +79,7 @@ function Modal({ contractData, closeModal }: Props) {
           handleResult={handleResult}
           hasRate={hasRate}
           address={contractData.address}
+          assetData={assetData}
         />
       )}
 
