@@ -135,11 +135,11 @@ export async function getStaticProps() {
     props: {
       auditor: {
         abi: getAuditorAbi.data,
-        address: "0xAD60089a2783642dd2d5650800884705264a2CA1"
+        address: auditorAddress
       },
       interestRateModel: {
         abi: getInterestRateModelAbi.data,
-        address: "0x91e8Ef7979A6C0E02b5095d8f6C69e931f4Ca9BE"
+        address: interestRateModelAddress
       },
       assetsAddresses: addresses.data,
       fixedLender: {

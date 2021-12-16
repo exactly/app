@@ -53,7 +53,7 @@ function SupplyForm({
   // const daiAddress = underlyings[currentNetwork!].dai;
 
   const daiContract = useContractWithSigner(
-    '0x6b175474e89094c44da98b954eedeac495271d0f',
+    '0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa',
     daiAbi
   );
 
