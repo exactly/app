@@ -102,11 +102,6 @@ function BorrowForm({
       return setError({ status: true, msg: dictionary.defaultError });
     }
 
-    // await daiContract?.contractWithSigner?.approve(
-    //   address,
-    //   ethers.utils.parseUnits(qty!.toString())
-    // );
-
     await fixedLenderWithSigner?.contractWithSigner?.borrowFromMaturityPool(
       ethers.utils.parseUnits(qty!.toString()),
       parseInt(date.value),

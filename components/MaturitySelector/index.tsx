@@ -26,7 +26,6 @@ function MaturitySelector({ title }: Props) {
   const auditorContract = useContract(auditor.address!, auditor.abi!);
 
   async function getPools() {
-    console.log(auditorContract.contract)
     const pools = await auditorContract?.contract?.getFuturePools();
     const dates = pools?.map((pool: any) => {
       return pool.toString();
