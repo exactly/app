@@ -75,7 +75,6 @@ function SupplyForm({
       await fixedLenderWithSigner?.contractWithSigner?.maturityPools(
         parseInt(date.value)
       );
-    console.log(maturityPools, 1234);
 
     //Supply
     try {
