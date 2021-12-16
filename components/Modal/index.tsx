@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useState } from 'react';
 import styles from './style.module.scss';
 
 import SupplyForm from 'components/SupplyForm';
@@ -10,7 +10,6 @@ import useContractWithSigner from 'hooks/useContractWithSigner';
 
 import AuditorContext from 'contexts/AuditorContext';
 
-import { Market } from 'types/Market';
 import { SupplyRate } from 'types/SupplyRate';
 
 import dictionary from 'dictionary/en.json';
@@ -25,7 +24,7 @@ function Modal({ contractData, closeModal }: Props) {
 
   const [potentialRate, setPotentialRate] = useState<string | undefined>('0');
 
-  const [hasRate, setHasRate] = useState<boolean>(false);
+  const [hasRate, setHasRate] = useState<boolean | undefined>(true);
 
   const { contractWithSigner } = useContractWithSigner(
     contractData?.address,
@@ -33,7 +32,7 @@ function Modal({ contractData, closeModal }: Props) {
   );
 
   function handleResult(data: SupplyRate | undefined) {
-    setHasRate(data?.potentialRate ? true : false);
+    setHasRate(data?.hasRate);
     setPotentialRate(data?.potentialRate);
   }
 
@@ -49,7 +48,7 @@ function Modal({ contractData, closeModal }: Props) {
         </span>
       </div>
       <div className={styles.assets}>
-        <p>{contractData.type == 'desposit' ? 'Borrow' : 'Deposit'}</p>
+        <p>{contractData.type == 'borrow' ? 'Borrow' : 'Deposit'}</p>
         <AssetSelector defaultAddress={contractData.address} />
       </div>
       {contractWithSigner && contractData.type == 'deposit' && (
@@ -72,15 +71,18 @@ function Modal({ contractData, closeModal }: Props) {
 
       {!contractWithSigner && <Loading />}
 
-      {potentialRate ? (
+      {potentialRate && (
         <section className={styles.right}>
           <p>
-            {dictionary.annualRate}: <strong>{potentialRate}</strong>
+            <span className={styles.detail}> {dictionary.annualRate}</span>
+            <span className={styles.value}>
+              {(parseFloat(potentialRate) * 100).toFixed(4)} %
+            </span>
           </p>
         </section>
-      ) : (
-        <Loading />
       )}
+
+      {!hasRate && <Loading />}
     </div>
   );
 }

@@ -17,17 +17,14 @@ import { Error } from 'types/Error';
 
 import dictionary from 'dictionary/en.json';
 
-import { getContractsByEnv } from 'utils/utils';
-
 import { AddressContext } from 'contexts/AddressContext';
 import FixedLenderContext from 'contexts/FixedLenderContext';
 import InterestRateModelContext from 'contexts/InterestRateModelContext';
-import { Dictionary } from 'types/Dictionary';
 
 type Props = {
   contractWithSigner: ethers.Contract;
   handleResult: (data: SupplyRate | undefined) => void;
-  hasRate: boolean;
+  hasRate: boolean | undefined;
   address: string;
 };
 
@@ -41,7 +38,7 @@ function SupplyForm({
   const fixedLender = useContext(FixedLenderContext);
   const interestRateModel = useContext(InterestRateModelContext);
 
-  const [qty, setQty] = useState<number>(0);
+  const [qty, setQty] = useState<number | undefined>(undefined);
 
   const [error, setError] = useState<Error | undefined>({
     status: false,
@@ -68,11 +65,11 @@ function SupplyForm({
 
   async function calculateRate() {
     if (!qty || !date) {
+      handleLoading(true);
       return setError({ status: true, msg: dictionary.amountError });
     }
 
-    //this is to properly render loading
-    handleResult(undefined);
+    handleLoading(false);
 
     const maturityPools =
       await fixedLenderWithSigner?.contractWithSigner?.maturityPools(
@@ -88,7 +85,8 @@ function SupplyForm({
         );
 
       const formattedRate = supplyRate && ethers.utils.formatEther(supplyRate);
-      formattedRate && handleResult({ potentialRate: formattedRate });
+      formattedRate &&
+        handleResult({ potentialRate: formattedRate, hasRate: true });
     } catch (e) {
       return setError({ status: true, msg: dictionary.defaultError });
     }
@@ -116,6 +114,10 @@ function SupplyForm({
     );
   }
 
+  function handleLoading(hasRate: boolean) {
+    handleResult({ potentialRate: undefined, hasRate: hasRate });
+  }
+
   return (
     <>
       <div className={style.fieldContainer}>
@@ -128,6 +130,7 @@ function SupplyForm({
               setError({ status: false, msg: '' });
             }}
             value={qty}
+            placeholder="0"
           />
         </div>
       </div>
@@ -143,8 +146,8 @@ function SupplyForm({
           <Button
             text={dictionary.deposit}
             onClick={deposit}
-            className={qty > 0 ? 'primary' : 'disabled'}
-            disabled={qty <= 0}
+            className={qty && qty > 0 ? 'primary' : 'disabled'}
+            disabled={!qty || qty <= 0}
           />
         </div>
       </div>
