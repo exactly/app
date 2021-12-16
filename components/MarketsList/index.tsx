@@ -7,6 +7,7 @@ import assets from 'dictionary/assets.json';
 
 import { Market } from 'types/Market';
 import { Assets } from 'types/Assets';
+import Loading from 'components/common/Loading';
 
 type Props = {
   markets: Array<Market>;
@@ -40,6 +41,7 @@ function MarketsList({ markets, showModal }: Props) {
               />
             );
           })}
+          {markets.length === 0 && <Loading />}
         </div>
       </div>
       <div className={style.market}>
@@ -66,6 +68,7 @@ function MarketsList({ markets, showModal }: Props) {
               />
             );
           })}
+          {markets.length === 0 && <Loading />}
         </div>
       </div>
     </section>

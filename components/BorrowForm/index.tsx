@@ -35,7 +35,6 @@ function BorrowForm({
   hasRate,
   address
 }: Props) {
-
   const { date } = useContext(AddressContext);
   const fixedLender = useContext(FixedLenderContext);
   const interestRateModel = useContext(InterestRateModelContext);
@@ -52,12 +51,14 @@ function BorrowForm({
     daiAbi
   );
 
-
   const interestRateModelContract = useContract(
     interestRateModel.address!,
     interestRateModel.abi!
   );
-  const fixedLenderWithSigner = useContractWithSigner(address, fixedLender?.abi!);
+  const fixedLenderWithSigner = useContractWithSigner(
+    address,
+    fixedLender?.abi!
+  );
 
   useEffect(() => {
     calculateRate();
@@ -68,12 +69,16 @@ function BorrowForm({
       return setError({ status: true, msg: dictionary.amountError });
     }
 
+    //this is to properly render loading
+    handleResult(undefined);
+
     const maturityPools =
       await fixedLenderWithSigner?.contractWithSigner?.maturityPools(
         parseInt(date.value)
       );
 
-    const smartPool = await fixedLenderWithSigner?.contractWithSigner?.smartPool();
+    const smartPool =
+      await fixedLenderWithSigner?.contractWithSigner?.smartPool();
     //Borrow
     try {
       const borrowRate =
@@ -105,7 +110,7 @@ function BorrowForm({
     await fixedLenderWithSigner?.contractWithSigner?.borrowFromMaturityPool(
       ethers.utils.parseUnits(qty!.toString()),
       parseInt(date.value),
-      ethers.utils.parseUnits("1000")
+      ethers.utils.parseUnits('1000')
     );
   }
 

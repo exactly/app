@@ -3,6 +3,8 @@ import styles from './style.module.scss';
 
 import SupplyForm from 'components/SupplyForm';
 import AssetSelector from 'components/AssetSelector';
+import BorrowForm from 'components/BorrowForm';
+import Loading from 'components/common/Loading';
 
 import useContractWithSigner from 'hooks/useContractWithSigner';
 
@@ -12,7 +14,6 @@ import { Market } from 'types/Market';
 import { SupplyRate } from 'types/SupplyRate';
 
 import dictionary from 'dictionary/en.json';
-import BorrowForm from 'components/BorrowForm';
 
 type Props = {
   contractData: any;
@@ -22,15 +23,7 @@ type Props = {
 function Modal({ contractData, closeModal }: Props) {
   const auditor = useContext(AuditorContext);
 
-  const [potentialRate, setPotentialRate] = useState<string | undefined>(
-    undefined
-  );
-  const [poolSupply, setPoolSupply] = useState<string | undefined>(undefined);
-  const [poolLend, setPoolLend] = useState<string | undefined>(undefined);
-
-  const [auditorData, setAuditorData] = useState<Market | undefined | any>(
-    contractData
-  );
+  const [potentialRate, setPotentialRate] = useState<string | undefined>('0');
 
   const [hasRate, setHasRate] = useState<boolean>(false);
 
@@ -38,8 +31,6 @@ function Modal({ contractData, closeModal }: Props) {
     contractData?.address,
     auditor?.abi!
   );
-
-  useEffect(() => { }, [hasRate, potentialRate]);
 
   function handleResult(data: SupplyRate | undefined) {
     setHasRate(data?.potentialRate ? true : false);
@@ -79,11 +70,17 @@ function Modal({ contractData, closeModal }: Props) {
         />
       )}
 
-      <section className={styles.right}>
-        <p>
-          {dictionary.annualRate}: <strong>{potentialRate || '0.0'}</strong>
-        </p>
-      </section>
+      {!contractWithSigner && <Loading />}
+
+      {potentialRate ? (
+        <section className={styles.right}>
+          <p>
+            {dictionary.annualRate}: <strong>{potentialRate}</strong>
+          </p>
+        </section>
+      ) : (
+        <Loading />
+      )}
     </div>
   );
 }

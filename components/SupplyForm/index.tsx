@@ -10,8 +10,7 @@ import useContractWithSigner from 'hooks/useContractWithSigner';
 import useContract from 'hooks/useContract';
 
 import daiAbi from 'contracts/abi/dai.json';
-import underlyings from 'data/underlying.json'
-
+import underlyings from 'data/underlying.json';
 
 import { SupplyRate } from 'types/SupplyRate';
 import { Error } from 'types/Error';
@@ -54,12 +53,14 @@ function SupplyForm({
     daiAbi
   );
 
-
   const interestRateModelContract = useContract(
     interestRateModel.address!,
     interestRateModel.abi!
   );
-  const fixedLenderWithSigner = useContractWithSigner(address, fixedLender?.abi!);
+  const fixedLenderWithSigner = useContractWithSigner(
+    address,
+    fixedLender?.abi!
+  );
 
   useEffect(() => {
     calculateRate();
@@ -69,6 +70,9 @@ function SupplyForm({
     if (!qty || !date) {
       return setError({ status: true, msg: dictionary.amountError });
     }
+
+    //this is to properly render loading
+    handleResult(undefined);
 
     const maturityPools =
       await fixedLenderWithSigner?.contractWithSigner?.maturityPools(
@@ -108,7 +112,7 @@ function SupplyForm({
     await fixedLenderWithSigner?.contractWithSigner?.depositToMaturityPool(
       ethers.utils.parseUnits(qty!.toString()),
       parseInt(date.value),
-      "0"
+      '0'
     );
   }
 
