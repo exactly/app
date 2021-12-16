@@ -11,8 +11,8 @@
     position: absolute;
     width: 64px;
     height: 64px;
-    margin: 8px;
-    border: 8px solid var(--primary);
+    margin: var(--u);
+    border: var(--u) solid var(--primary);
     border-radius: 50%;
     animation: loading 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
     border-color: var(--primary) transparent transparent transparent;
