@@ -1,6 +1,8 @@
-import { CSSProperties, MouseEventHandler } from "react";
-import styles from "./style.module.scss";
-import { transformClasses } from "utils/utils";
+import { CSSProperties, MouseEventHandler } from 'react';
+import styles from './style.module.scss';
+import { transformClasses } from 'utils/utils';
+
+import dictionary from 'dictionary/en.json';
 
 type Props = {
   text: string;
@@ -8,10 +10,11 @@ type Props = {
   className?: string;
   style?: CSSProperties;
   loading?: boolean;
+  disabled?: boolean;
 };
 
-function Button({ text, onClick, className, style, loading }: Props) {
-  let parsedClassName = "";
+function Button({ text, onClick, className, style, loading, disabled }: Props) {
+  let parsedClassName = '';
 
   if (className) {
     parsedClassName = transformClasses(styles, className);
@@ -21,8 +24,9 @@ function Button({ text, onClick, className, style, loading }: Props) {
       style={style ?? undefined}
       className={`${styles.button} ${parsedClassName}`}
       onClick={onClick}
+      disabled={disabled ?? false}
     >
-      {loading ? "Loading" : text}
+      {loading ? dictionary.loading : text}
     </button>
   );
 }

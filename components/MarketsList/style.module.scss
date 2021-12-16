@@ -2,33 +2,49 @@
   max-width: var(--maxWidth);
   width: 100%;
   margin: var(--u2) auto;
-  background-color: var(--white);
-  box-shadow: var(--shadow);
-  border-radius: var(--smallUnit);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--u3);
+  text-align: center;
 
-  h2 {
-    margin: var(--u) 0 var(--u3) 0;
-    padding: var(--u3) var(--u3) 0;
-  }
-  .tableRow {
+  .market {
+    background-color: var(--white);
+    box-shadow: var(--shadow);
+    border-radius: var(--u);
     display: flex;
-    padding: 0 var(--u3);
+    flex-wrap: wrap;
+    width: calc(50% - var(--u2));
 
-    justify-content: space-between;
-    margin-bottom: var(--u2);
-    font-weight: bold;
-    color: var(--gray-100);
-    font-size: 0.8em;
-    .symbol {
-      width: 20%;
+    h2 {
+      margin: var(--u) 0 var(--u3) 0;
+      padding: var(--u3) var(--u3) 0;
+      width: 100%;
     }
 
-    .address {
-      width: 50%;
-    }
+    .column {
+      width: 100%;
 
-    .collateralFactor {
-      width: 20%;
+      .tableRow {
+        display: flex;
+        padding: var(--u) var(--u3);
+        justify-content: space-between;
+        font-weight: bold;
+        color: var(--gray-100);
+        font-size: var(--font-12);
+        align-items: center;
+
+        .symbol {
+          width: 20%;
+        }
+
+        .address {
+          width: 50%;
+        }
+
+        .collateralFactor {
+          width: 20%;
+        }
+      }
     }
   }
 }

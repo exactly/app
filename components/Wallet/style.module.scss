@@ -1,0 +1,8 @@
+.container {
+  color: var(--black);
+  font-size: var(--font-14);
+  display: flex;
+  gap: var(--u);
+  user-select: none;
+  cursor: pointer;
+}

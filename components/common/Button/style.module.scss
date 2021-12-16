@@ -13,3 +13,21 @@
     transition: 0.25s all;
   }
 }
+
+.secondary {
+  background: var(--secondary);
+
+  &:hover {
+    background: var(--secondaryHover);
+  }
+}
+
+.disabled {
+  background: var(--gray-medium);
+  color: var(--white);
+
+  &:hover {
+    background: var(--gray-medium);
+    color: var(--white);
+  }
+}

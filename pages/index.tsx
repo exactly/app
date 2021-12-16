@@ -1,59 +1,90 @@
-import { useState, useEffect, useContext } from "react";
-import type { NextPage } from "next";
-import Head from "next/head";
+import { useState, useEffect, useContext } from 'react';
+import type { NextPage } from 'next';
 
-import { ethers } from "ethers";
+import { ethers } from 'ethers';
+import axios from 'axios';
 
-import CurrentNetwork from "components/CurrentNetwork";
-import MarketsList from "components/MarketsList";
+import MarketsList from 'components/MarketsList';
+import MaturitySelector from 'components/MaturitySelector';
+import Modal from 'components/Modal';
+import Navbar from 'components/Navbar';
+import Hero from 'components/Hero';
+import CurrentNetwork from 'components/CurrentNetwork';
+import Footer from 'components/Footer';
+import Overlay from 'components/Overlay';
 
-import useContract from "hooks/useContract";
+import useContract from 'hooks/useContract';
+import useModal from 'hooks/useModal';
 
-import ContractContext from "contexts/ContractContext";
-import { Market } from "types/Market";
+import { AuditorProvider } from 'contexts/AuditorContext';
+import { FixedLenderProvider } from 'contexts/FixedLenderContext';
+import { InterestRateModelProvider } from 'contexts/InterestRateModelContext';
 
-const Home: NextPage = () => {
-  const contracts = useContext(ContractContext);
+import { Market } from 'types/Market';
+import { Network } from 'types/Network';
+import { UnformattedMarket } from 'types/UnformattedMarket';
+import { Contract } from 'types/Contract';
+
+import dictionary from 'dictionary/en.json';
+import { Dictionary } from 'types/Dictionary';
+
+interface Props {
+  walletAddress: string;
+  network: Network;
+  auditor: Contract;
+  assetsAddresses: Dictionary<string>,
+  fixedLender: Contract;
+  interestRateModel: Contract
+}
+
+const Home: NextPage<Props> = ({ walletAddress, network, auditor, assetsAddresses, fixedLender, interestRateModel }) => {
+  const { modal, handleModal, modalContent } = useModal();
 
   const [markets, setMarkets] = useState<Array<Market>>([]);
-  const { contractWithSigner } = useContract(
-    contracts?.exaFront?.address,
-    contracts?.exaFront?.abi
+  const { contract } = useContract(
+    auditor?.address,
+    auditor?.abi
   );
 
-  console.log(contractWithSigner);
   useEffect(() => {
-    if (contractWithSigner) {
+    if (contract) {
       getMarkets();
     }
-  }, [contractWithSigner]);
+  }, [contract]);
 
   async function getMarkets() {
-    const marketsData = await contractWithSigner?.getMarkets();
-    setMarkets(formatMarkets(marketsData));
+    const marketsAddresses = await contract?.getMarketAddresses();
+    const marketsData: Array<UnformattedMarket> = [];
+
+    marketsAddresses.map((address: string) => {
+      marketsData.push(contract?.getMarketData(address));
+    });
+
+    Promise.all(marketsData).then((data: Array<UnformattedMarket>) => {
+      setMarkets(formatMarkets(data));
+    });
   }
 
-  function formatMarkets(markets: Array<Array<any>>) {
-    const [addresses, symbols, areListed, collateralFactors, names] = markets;
-    const length = addresses.length;
+  function formatMarkets(markets: Array<UnformattedMarket>) {
+    const length = markets.length;
 
     let formattedMarkets: Array<Market> = [];
 
     for (let i = 0; i < length; i++) {
       const market: Market = {
-        address: "",
-        symbol: "",
-        name: "",
+        address: '',
+        symbol: '',
+        name: '',
         isListed: false,
-        collateralFactor: 0,
+        collateralFactor: 0
       };
 
-      market["address"] = addresses[i];
-      market["symbol"] = symbols[i];
-      market["name"] = names[i];
-      market["isListed"] = areListed[i];
-      market["collateralFactor"] = parseFloat(
-        ethers.utils.formatEther(collateralFactors[i])
+      market['address'] = markets[i][5];
+      market['symbol'] = markets[i][0];
+      market['name'] = markets[i][1];
+      market['isListed'] = markets[i][2];
+      market['collateralFactor'] = parseFloat(
+        ethers.utils.formatEther(markets[i][3])
       );
 
       formattedMarkets = [...formattedMarkets, market];
@@ -62,27 +93,60 @@ const Home: NextPage = () => {
     return formattedMarkets;
   }
 
-  // contractWithSigner?.enableMarket(
-  //   "0x1c7B43a0bbab0a5EA0A1435F31D1c8e05Cc6aE98",
-  //   2
-  // );
-  return (
-    <div>
-      <Head>
-        <title>
-          Exactly App - Fixed interest rates lending & borrowing protocol
-        </title>
-        <meta
-          name="description"
-          content="Exactly App - Fixed interest rates lending & borrowing protocol"
-        />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
+  function showModal(address: Market['address'], type: 'borrow' | 'deposit') {
+    const data = markets.find((market) => {
+      return market.address === address;
+    });
 
-      <CurrentNetwork />
-      <MarketsList markets={markets} />
-    </div>
+    handleModal({ content: { ...data, type } });
+  }
+
+  return (
+    <AuditorProvider value={auditor}>
+      <FixedLenderProvider value={{ addresses: assetsAddresses, abi: fixedLender.abi }}>
+        <InterestRateModelProvider value={interestRateModel}>
+          {modal && (
+            <>
+              <Modal contractData={modalContent} closeModal={handleModal} />
+              <Overlay closeModal={handleModal} />
+            </>
+          )}
+          <Navbar walletAddress={walletAddress} />
+          <CurrentNetwork network={network} />
+          <Hero />
+          <MaturitySelector title={dictionary.maturityPools} />
+          <MarketsList markets={markets} showModal={showModal} />
+          <Footer />
+        </InterestRateModelProvider>
+      </FixedLenderProvider>
+    </AuditorProvider>
   );
 };
+
+export async function getStaticProps() {
+  const getAuditorAbi = await axios.get('https://abi-versions2.s3.amazonaws.com/latest/contracts/Auditor.sol/Auditor.json')
+  const getFixedLenderAbi = await axios.get('https://abi-versions2.s3.amazonaws.com/latest/contracts/FixedLender.sol/FixedLender.json')
+  const getInterestRateModelAbi = await axios.get('https://abi-versions2.s3.amazonaws.com/latest/contracts/InterestRateModel.sol/InterestRateModel.json')
+  const addresses = await axios.get('https://abi-versions2.s3.amazonaws.com/latest/addresses.json');
+  const auditorAddress = addresses?.data?.auditor;
+  const interestRateModelAddress = addresses?.data?.interestRateModel;
+
+  return {
+    props: {
+      auditor: {
+        abi: getAuditorAbi.data,
+        address: auditorAddress
+      },
+      interestRateModel: {
+        abi: getInterestRateModelAbi.data,
+        address: interestRateModelAddress
+      },
+      assetsAddresses: addresses.data,
+      fixedLender: {
+        abi: getFixedLenderAbi.data,
+      }
+    },
+  }
+}
 
 export default Home;

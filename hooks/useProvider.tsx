@@ -1,5 +1,5 @@
 import { ethers } from "ethers";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 declare global {
   interface Window {
@@ -8,18 +8,17 @@ declare global {
 }
 
 export default function useProvider() {
-  const [provider, setProvider] = useState<ethers.providers.Web3Provider>();
-
-  useEffect(() => {
-    getProvider();
-  }, []);
+  const [web3Provider, setWeb3Provider] =
+    useState<ethers.providers.Web3Provider>();
 
   async function getProvider() {
-    await window.ethereum.enable();
-    const provider = new ethers.providers.Web3Provider(window.ethereum, "any");
-
-    setProvider(provider);
+    await window?.ethereum?.request({ method: "eth_requestAccounts" });
+    const web3Provider = new ethers.providers.Web3Provider(
+      window.ethereum,
+      "any"
+    );
+    setWeb3Provider(web3Provider);
   }
 
-  return provider;
+  return { web3Provider, getProvider };
 }

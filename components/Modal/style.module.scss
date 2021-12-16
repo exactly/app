@@ -1,0 +1,50 @@
+.modal {
+  position: fixed;
+  width: 350px;
+  height: fit-content;
+  left: calc(50% - 125px);
+  top: 25%;
+  background: var(--white);
+  box-shadow: var(--shadow-3);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  z-index: 3;
+  border-radius: var(--smallUnit);
+
+  .closeContainer {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    .closeButton {
+      color: var(--primary);
+      cursor: pointer;
+    }
+  }
+
+  .assets {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--u3);
+
+    p {
+      font-weight: bold;
+    }
+  }
+
+  .right {
+    color: var(--tertiary);
+    p {
+      display: flex;
+      justify-content: space-between;
+
+      .detail {
+        opacity: var(--defaultOpacity);
+      }
+      .value {
+        font-weight: bold;
+      }
+    }
+  }
+}

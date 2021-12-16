@@ -1,5 +1,4 @@
 export type SupplyRate = {
-  potentialRate: string;
-  poolSupply: string;
-  poolLend: string;
+  potentialRate: string | undefined;
+  hasRate: boolean;
 };

@@ -1,0 +1,56 @@
+.navBar {
+  width: 100%;
+  height: var(--navbarHeight);
+  padding: var(--u2);
+  box-sizing: border-box;
+  box-shadow: var(--shadow);
+  background: var(--white);
+
+  .wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: var(--maxWidth);
+    margin: 0 auto;
+
+    .left {
+      display: flex;
+      align-items: center;
+      .logo {
+        cursor: pointer;
+      }
+
+      .linksContainer {
+        display: flex;
+        gap: 40px;
+        list-style: none;
+        font-weight: 600;
+
+        .link {
+          color: var(--tertiary);
+          opacity: var(--defaultOpacity);
+          cursor: pointer;
+          padding: 5px;
+        }
+
+        .active {
+          @extend .link;
+          opacity: 100%;
+          border-bottom: 2px solid;
+          border-image: linear-gradient(90deg, #7bf5e1 0.29%, #4d4de8 100.29%);
+          border-image-slice: 1;
+        }
+      }
+    }
+
+    .right {
+      display: flex;
+      align-items: center;
+
+      .buttonContainer {
+        width: 150px;
+        height: 50px;
+      }
+    }
+  }
+}

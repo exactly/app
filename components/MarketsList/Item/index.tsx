@@ -1,25 +1,38 @@
-import { Market } from "types/Market";
-import style from "./style.module.scss";
-import Link from "next/link";
+import Button from 'components/common/Button';
+import { Market } from 'types/Market';
+import style from './style.module.scss';
 
 type Props = {
   market: Market;
+  showModal: (address: Market['address'], type: 'borrow' | 'deposit') => void;
+  type: 'borrow' | 'deposit';
+  src: string;
 };
 
-function Item({ market }: Props) {
+function Item({ market, showModal, type, src }: Props) {
+  function handleClick() {
+    showModal(market?.address, type);
+  }
+
   return (
-    <Link href={`/markets/${market?.address}`}>
-      <div className={style.container}>
-        <div className={style.symbol}>
-          <span className={style.primary}>{market?.symbol}</span>
-          <span className={style.secondary}>{market?.name}</span>
-        </div>
-        <span className={style.address}>{market?.address}</span>
-        <span className={style.collateralFactor}>
-          {market?.collateralFactor}
-        </span>
+    <div
+      className={`${style.container} ${
+        type == 'borrow' ? style.secondaryContainer : style.primaryContainer
+      }`}
+      onClick={handleClick}
+    >
+      <div className={style.symbol}>
+        <img src={src} className={style.assetImage} />
+        <span className={style.primary}>{market?.symbol}</span>
       </div>
-    </Link>
+      <span className={style.collateralFactor}>{market?.collateralFactor}</span>
+      <div className={style.buttonContainer}>
+        <Button
+          text={type == 'borrow' ? 'Borrow' : 'Deposit'}
+          className={type == 'borrow' ? 'secondary' : 'primary'}
+        />
+      </div>
+    </div>
   );
 }
 

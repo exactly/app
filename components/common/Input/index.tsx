@@ -1,26 +1,26 @@
-import { ChangeEventHandler, CSSProperties } from "react";
-import styles from "./style.module.scss";
+import { ChangeEventHandler, CSSProperties } from 'react';
+import styles from './style.module.scss';
 
 type Props = {
   type?: string;
   className?: string;
   onChange?: ChangeEventHandler;
   placeholder?: string;
-  value?: string;
+  value?: string | number;
   name?: string;
   style?: CSSProperties;
   disabled?: boolean;
 };
 
 function Input({
-  type = "text",
-  className = "",
+  type = 'text',
+  className = '',
   onChange,
   placeholder,
   value,
   name,
   style,
-  disabled,
+  disabled
 }: Props) {
   return (
     <input

@@ -1,8 +1,18 @@
 .input {
-  height: var(--u3);
   border-radius: var(--smallUnit);
   border: 1px solid var(--black);
   padding-left: var(--u);
   width: 100%;
+  min-width: 170px;
   height: 100%;
+  min-height: 55px;
+  text-align: center;
+  font-size: var(--font-32);
+  opacity: 50%;
+
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
 }
