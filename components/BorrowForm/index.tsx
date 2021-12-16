@@ -16,8 +16,6 @@ import { Error } from 'types/Error';
 
 import dictionary from 'dictionary/en.json';
 
-import { getContractsByEnv } from 'utils/utils';
-
 import { AddressContext } from 'contexts/AddressContext';
 import FixedLenderContext from 'contexts/FixedLenderContext';
 import InterestRateModelContext from 'contexts/InterestRateModelContext';
@@ -25,7 +23,7 @@ import InterestRateModelContext from 'contexts/InterestRateModelContext';
 type Props = {
   contractWithSigner: ethers.Contract;
   handleResult: (data: SupplyRate | undefined) => void;
-  hasRate: boolean;
+  hasRate: boolean | undefined;
   address: string;
 };
 
@@ -35,12 +33,11 @@ function BorrowForm({
   hasRate,
   address
 }: Props) {
-
   const { date } = useContext(AddressContext);
   const fixedLender = useContext(FixedLenderContext);
   const interestRateModel = useContext(InterestRateModelContext);
 
-  const [qty, setQty] = useState<number>(0);
+  const [qty, setQty] = useState<number | undefined>(undefined);
 
   const [error, setError] = useState<Error | undefined>({
     status: false,
@@ -52,12 +49,14 @@ function BorrowForm({
     daiAbi
   );
 
-
   const interestRateModelContract = useContract(
     interestRateModel.address!,
     interestRateModel.abi!
   );
-  const fixedLenderWithSigner = useContractWithSigner(address, fixedLender?.abi!);
+  const fixedLenderWithSigner = useContractWithSigner(
+    address,
+    fixedLender?.abi!
+  );
 
   useEffect(() => {
     calculateRate();
@@ -65,15 +64,20 @@ function BorrowForm({
 
   async function calculateRate() {
     if (!qty || !date) {
+      handleLoading(true);
       return setError({ status: true, msg: dictionary.amountError });
     }
+
+    handleLoading(false);
 
     const maturityPools =
       await fixedLenderWithSigner?.contractWithSigner?.maturityPools(
         parseInt(date.value)
       );
 
-    const smartPool = await fixedLenderWithSigner?.contractWithSigner?.smartPool();
+    const smartPool =
+      await fixedLenderWithSigner?.contractWithSigner?.smartPool();
+
     //Borrow
     try {
       const borrowRate =
@@ -88,7 +92,7 @@ function BorrowForm({
         borrowRate && ethers.utils.formatEther(borrowRate);
 
       formattedBorrowRate &&
-        handleResult({ potentialRate: formattedBorrowRate });
+        handleResult({ potentialRate: formattedBorrowRate, hasRate: true });
     } catch (e) {
       return setError({ status: true, msg: dictionary.defaultError });
     }
@@ -105,14 +109,18 @@ function BorrowForm({
     await fixedLenderWithSigner?.contractWithSigner?.borrowFromMaturityPool(
       ethers.utils.parseUnits(qty!.toString()),
       parseInt(date.value),
-      ethers.utils.parseUnits("1000")
+      ethers.utils.parseUnits('1000')
     );
+  }
+
+  function handleLoading(hasRate: boolean) {
+    handleResult({ potentialRate: undefined, hasRate: hasRate });
   }
 
   return (
     <>
       <div className={style.fieldContainer}>
-        <span>{dictionary.depositTitle}</span>
+        <span>{dictionary.borrowTitle}</span>
         <div className={style.inputContainer}>
           <Input
             type="number"
@@ -121,6 +129,7 @@ function BorrowForm({
               setError({ status: false, msg: '' });
             }}
             value={qty}
+            placeholder="0"
           />
         </div>
       </div>
@@ -136,8 +145,8 @@ function BorrowForm({
           <Button
             text={dictionary.borrow}
             onClick={borrow}
-            className={qty > 0 ? 'secondary' : 'disabled'}
-            disabled={qty <= 0}
+            className={qty && qty > 0 ? 'secondary' : 'disabled'}
+            disabled={!qty || qty <= 0}
           />
         </div>
       </div>

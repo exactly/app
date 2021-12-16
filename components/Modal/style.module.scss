@@ -32,4 +32,19 @@
       font-weight: bold;
     }
   }
+
+  .right {
+    color: var(--tertiary);
+    p {
+      display: flex;
+      justify-content: space-between;
+
+      .detail {
+        opacity: var(--defaultOpacity);
+      }
+      .value {
+        font-weight: bold;
+      }
+    }
+  }
 }
