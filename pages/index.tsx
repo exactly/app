@@ -124,10 +124,10 @@ const Home: NextPage<Props> = ({ walletAddress, network, auditor, assetsAddresse
 };
 
 export async function getStaticProps() {
-  const getAuditorAbi = await axios.get('https://abi-versions.s3.amazonaws.com/latest/contracts/Auditor.sol/Auditor.json')
-  const getFixedLenderAbi = await axios.get('https://abi-versions.s3.amazonaws.com/latest/contracts/FixedLender.sol/FixedLender.json')
-  const getInterestRateModelAbi = await axios.get('https://abi-versions.s3.amazonaws.com/latest/contracts/InterestRateModel.sol/InterestRateModel.json')
-  const addresses = await axios.get('https://abi-versions.s3.amazonaws.com/latest/addresses.json');
+  const getAuditorAbi = await axios.get('https://abi-versions2.s3.amazonaws.com/latest/contracts/Auditor.sol/Auditor.json')
+  const getFixedLenderAbi = await axios.get('https://abi-versions2.s3.amazonaws.com/latest/contracts/FixedLender.sol/FixedLender.json')
+  const getInterestRateModelAbi = await axios.get('https://abi-versions2.s3.amazonaws.com/latest/contracts/InterestRateModel.sol/InterestRateModel.json')
+  const addresses = await axios.get('https://abi-versions2.s3.amazonaws.com/latest/addresses.json');
   const auditorAddress = addresses?.data?.auditor;
   const interestRateModelAddress = addresses?.data?.interestRateModel;
 
@@ -135,11 +135,11 @@ export async function getStaticProps() {
     props: {
       auditor: {
         abi: getAuditorAbi.data,
-        address: auditorAddress
+        address: "0x9dC9Ab9E7147DFA8Be828bB910f63976dCB382Fb"
       },
       interestRateModel: {
         abi: getInterestRateModelAbi.data,
-        address: interestRateModelAddress
+        address: "0xD871D6b52C6151008CB3aD79Cb83fE62d4Db14aF"
       },
       assetsAddresses: addresses.data,
       fixedLender: {
