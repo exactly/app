@@ -10,6 +10,7 @@
   "borrow": "Borrow",
   "calculateRate": "Calculate rate",
   "depositTitle": "Amount to deposit",
+  "borrowTitle": "Amount to borrow",
   "selectDefaultText": "Choose Date",
   "defaultError": "Oops, there was a problem!",
   "amountError": "Please fill the amount",

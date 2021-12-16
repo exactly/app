@@ -1,18 +1,18 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useState } from 'react';
 import styles from './style.module.scss';
 
 import SupplyForm from 'components/SupplyForm';
 import AssetSelector from 'components/AssetSelector';
+import BorrowForm from 'components/BorrowForm';
+import Loading from 'components/common/Loading';
 
 import useContractWithSigner from 'hooks/useContractWithSigner';
 
-import ContractContext from 'contexts/ContractContext';
+import AuditorContext from 'contexts/AuditorContext';
 
-import { Market } from 'types/Market';
 import { SupplyRate } from 'types/SupplyRate';
 
 import dictionary from 'dictionary/en.json';
-import BorrowForm from 'components/BorrowForm';
 
 type Props = {
   contractData: any;
@@ -20,29 +20,19 @@ type Props = {
 };
 
 function Modal({ contractData, closeModal }: Props) {
-  const contracts = useContext(ContractContext);
+  const auditor = useContext(AuditorContext);
 
-  const [potentialRate, setPotentialRate] = useState<string | undefined>(
-    undefined
-  );
-  const [poolSupply, setPoolSupply] = useState<string | undefined>(undefined);
-  const [poolLend, setPoolLend] = useState<string | undefined>(undefined);
+  const [potentialRate, setPotentialRate] = useState<string | undefined>('0');
 
-  const [auditorData, setAuditorData] = useState<Market | undefined | any>(
-    contractData
-  );
-
-  const [hasRate, setHasRate] = useState<boolean>(false);
+  const [hasRate, setHasRate] = useState<boolean | undefined>(true);
 
   const { contractWithSigner } = useContractWithSigner(
     contractData?.address,
-    contracts?.auditor?.abi
+    auditor?.abi!
   );
 
-  useEffect(() => {}, [hasRate, potentialRate]);
-
   function handleResult(data: SupplyRate | undefined) {
-    setHasRate(data?.potentialRate ? true : false);
+    setHasRate(data?.hasRate);
     setPotentialRate(data?.potentialRate);
   }
 
@@ -58,7 +48,7 @@ function Modal({ contractData, closeModal }: Props) {
         </span>
       </div>
       <div className={styles.assets}>
-        <p>{contractData.type == 'desposit' ? 'Borrow' : 'Deposit'}</p>
+        <p>{contractData.type == 'borrow' ? 'Borrow' : 'Deposit'}</p>
         <AssetSelector defaultAddress={contractData.address} />
       </div>
       {contractWithSigner && contractData.type == 'deposit' && (
@@ -79,11 +69,20 @@ function Modal({ contractData, closeModal }: Props) {
         />
       )}
 
-      <section className={styles.right}>
-        <p>
-          {dictionary.annualRate}: <strong>{potentialRate || '0.0'}</strong>
-        </p>
-      </section>
+      {!contractWithSigner && <Loading />}
+
+      {potentialRate && (
+        <section className={styles.right}>
+          <p>
+            <span className={styles.detail}> {dictionary.annualRate}</span>
+            <span className={styles.value}>
+              {(parseFloat(potentialRate) * 100).toFixed(4)} %
+            </span>
+          </p>
+        </section>
+      )}
+
+      {!hasRate && <Loading />}
     </div>
   );
 }

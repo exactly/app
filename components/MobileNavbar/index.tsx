@@ -121,10 +121,10 @@ function MobileNavbar({ walletAddress, network }: Props) {
               </li>
             );
           })}
-          <button className={styles.button}>
+          {/* <button className={styles.button}>
             <img src="./img/icons/power.svg" />
             Cerrar sesión
-          </button>
+          </button> */}
         </ul>
       )}
     </>

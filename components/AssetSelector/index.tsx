@@ -5,6 +5,7 @@ import Select from 'components/common/Select';
 import useContract from 'hooks/useContract';
 
 import { AddressContext } from 'contexts/AddressContext';
+import AuditorContext from 'contexts/AuditorContext';
 
 import { getContractsByEnv } from 'utils/utils';
 import assets from 'dictionary/assets.json';
@@ -24,9 +25,9 @@ type Props = {
 
 function AssetSelector({ title, defaultAddress }: Props) {
   const { address, setAddress } = useContext(AddressContext);
+  const auditor = useContext(AuditorContext);
 
-  const { auditor } = getContractsByEnv();
-  const { contract } = useContract(auditor.address, auditor.abi);
+  const { contract } = useContract(auditor.address!, auditor.abi!);
   const [selectOptions, setSelectOptions] = useState<Array<Option>>([]);
 
   useEffect(() => {

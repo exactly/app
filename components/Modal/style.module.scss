@@ -2,8 +2,8 @@
   position: fixed;
   width: 350px;
   height: fit-content;
-  left: calc(50% - 125px);
-  top: 25%;
+  left: calc(50% - 175px);
+  top: 15%;
   background: var(--white);
   box-shadow: var(--shadow-3);
   padding: 20px;
@@ -30,6 +30,21 @@
 
     p {
       font-weight: bold;
+    }
+  }
+
+  .right {
+    color: var(--tertiary);
+    p {
+      display: flex;
+      justify-content: space-between;
+
+      .detail {
+        opacity: var(--defaultOpacity);
+      }
+      .value {
+        font-weight: bold;
+      }
     }
   }
 }

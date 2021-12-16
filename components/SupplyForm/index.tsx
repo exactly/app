@@ -10,20 +10,21 @@ import useContractWithSigner from 'hooks/useContractWithSigner';
 import useContract from 'hooks/useContract';
 
 import daiAbi from 'contracts/abi/dai.json';
+import underlyings from 'data/underlying.json';
 
 import { SupplyRate } from 'types/SupplyRate';
 import { Error } from 'types/Error';
 
 import dictionary from 'dictionary/en.json';
 
-import { getContractsByEnv } from 'utils/utils';
-
 import { AddressContext } from 'contexts/AddressContext';
+import FixedLenderContext from 'contexts/FixedLenderContext';
+import InterestRateModelContext from 'contexts/InterestRateModelContext';
 
 type Props = {
   contractWithSigner: ethers.Contract;
   handleResult: (data: SupplyRate | undefined) => void;
-  hasRate: boolean;
+  hasRate: boolean | undefined;
   address: string;
 };
 
@@ -34,8 +35,10 @@ function SupplyForm({
   address
 }: Props) {
   const { date } = useContext(AddressContext);
+  const fixedLender = useContext(FixedLenderContext);
+  const interestRateModel = useContext(InterestRateModelContext);
 
-  const [qty, setQty] = useState<number>(0);
+  const [qty, setQty] = useState<number | undefined>(undefined);
 
   const [error, setError] = useState<Error | undefined>({
     status: false,
@@ -43,17 +46,18 @@ function SupplyForm({
   });
 
   const daiContract = useContractWithSigner(
-    '0x6B175474E89094C44Da98b954EedeAC495271d0F',
+    '0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa',
     daiAbi
   );
 
-  const { exafin, interestRateModel } = getContractsByEnv();
-
   const interestRateModelContract = useContract(
-    interestRateModel.address,
-    interestRateModel.abi
+    interestRateModel.address!,
+    interestRateModel.abi!
   );
-  const exafinWithSigner = useContractWithSigner(exafin.address, exafin.abi);
+  const fixedLenderWithSigner = useContractWithSigner(
+    address,
+    fixedLender?.abi!
+  );
 
   useEffect(() => {
     calculateRate();
@@ -61,11 +65,14 @@ function SupplyForm({
 
   async function calculateRate() {
     if (!qty || !date) {
+      handleLoading(true);
       return setError({ status: true, msg: dictionary.amountError });
     }
 
+    handleLoading(false);
+
     const maturityPools =
-      await exafinWithSigner?.contractWithSigner?.maturityPools(
+      await fixedLenderWithSigner?.contractWithSigner?.maturityPools(
         parseInt(date.value)
       );
 
@@ -78,7 +85,8 @@ function SupplyForm({
         );
 
       const formattedRate = supplyRate && ethers.utils.formatEther(supplyRate);
-      formattedRate && handleResult({ potentialRate: formattedRate });
+      formattedRate &&
+        handleResult({ potentialRate: formattedRate, hasRate: true });
     } catch (e) {
       return setError({ status: true, msg: dictionary.defaultError });
     }
@@ -92,16 +100,22 @@ function SupplyForm({
       return setError({ status: true, msg: dictionary.defaultError });
     }
 
-    await daiContract?.contractWithSigner?.approve(
-      '0xCa2Be8268A03961F40E29ACE9aa7f0c2503427Ae',
+    const approval = await daiContract?.contractWithSigner?.approve(
+      address,
       ethers.utils.parseUnits(qty!.toString())
     );
 
-    const depositTx =
-      await exafinWithSigner?.contractWithSigner?.depositToMaturityPool(
-        ethers.utils.parseUnits(qty!.toString()),
-        parseInt(date.value)
-      );
+    await approval.wait();
+
+    await fixedLenderWithSigner?.contractWithSigner?.depositToMaturityPool(
+      ethers.utils.parseUnits(qty!.toString()),
+      parseInt(date.value),
+      '0'
+    );
+  }
+
+  function handleLoading(hasRate: boolean) {
+    handleResult({ potentialRate: undefined, hasRate: hasRate });
   }
 
   return (
@@ -116,6 +130,7 @@ function SupplyForm({
               setError({ status: false, msg: '' });
             }}
             value={qty}
+            placeholder="0"
           />
         </div>
       </div>
@@ -131,8 +146,8 @@ function SupplyForm({
           <Button
             text={dictionary.deposit}
             onClick={deposit}
-            className={qty > 0 ? 'primary' : 'disabled'}
-            disabled={qty <= 0}
+            className={qty && qty > 0 ? 'primary' : 'disabled'}
+            disabled={!qty || qty <= 0}
           />
         </div>
       </div>

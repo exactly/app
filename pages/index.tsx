@@ -2,6 +2,7 @@ import { useState, useEffect, useContext } from 'react';
 import type { NextPage } from 'next';
 
 import { ethers } from 'ethers';
+import axios from 'axios';
 
 import MarketsList from 'components/MarketsList';
 import MaturitySelector from 'components/MaturitySelector';
@@ -16,31 +17,41 @@ import MobileNavbar from 'components/MobileNavbar';
 import useContract from 'hooks/useContract';
 import useModal from 'hooks/useModal';
 
-import ContractContext from 'contexts/ContractContext';
+import { AuditorProvider } from 'contexts/AuditorContext';
+import { FixedLenderProvider } from 'contexts/FixedLenderContext';
+import { InterestRateModelProvider } from 'contexts/InterestRateModelContext';
 
 import { Market } from 'types/Market';
 
 import { Network } from 'types/Network';
 import { UnformattedMarket } from 'types/UnformattedMarket';
+import { Contract } from 'types/Contract';
 
 import dictionary from 'dictionary/en.json';
+import { Dictionary } from 'types/Dictionary';
 
 interface Props {
   walletAddress: string;
   network: Network;
+  auditor: Contract;
+  assetsAddresses: Dictionary<string>;
+  fixedLender: Contract;
+  interestRateModel: Contract;
 }
 
-const Home: NextPage<Props> = ({ walletAddress, network }) => {
+const Home: NextPage<Props> = ({
+  walletAddress,
+  network,
+  auditor,
+  assetsAddresses,
+  fixedLender,
+  interestRateModel
+}) => {
   const { modal, handleModal, modalContent } = useModal();
-
-  const contracts = useContext(ContractContext);
 
   const [markets, setMarkets] = useState<Array<Market>>([]);
 
-  const { contract } = useContract(
-    contracts.auditor?.address,
-    contracts.auditor?.abi
-  );
+  const { contract } = useContract(auditor?.address, auditor?.abi);
 
   useEffect(() => {
     if (contract) {
@@ -98,24 +109,62 @@ const Home: NextPage<Props> = ({ walletAddress, network }) => {
   }
 
   return (
-    <div>
-      {modal && (
-        <>
-          <Modal contractData={modalContent} closeModal={handleModal} />
-          <Overlay closeModal={handleModal} />
-        </>
-      )}
-
-      <MobileNavbar walletAddress={walletAddress} network={network} />
-      <Navbar walletAddress={walletAddress} />
-      <CurrentNetwork network={network} />
-
-      <Hero />
-      <MaturitySelector title={dictionary.maturityPools} />
-      <MarketsList markets={markets} showModal={showModal} />
-      <Footer />
-    </div>
+    <AuditorProvider value={auditor}>
+      <FixedLenderProvider
+        value={{ addresses: assetsAddresses, abi: fixedLender.abi }}
+      >
+        <InterestRateModelProvider value={interestRateModel}>
+          {modal && (
+            <>
+              <Modal contractData={modalContent} closeModal={handleModal} />
+              <Overlay closeModal={handleModal} />
+            </>
+          )}
+          <MobileNavbar walletAddress={walletAddress} network={network} />
+          <Navbar walletAddress={walletAddress} />
+          <CurrentNetwork network={network} />
+          <Hero />
+          <MaturitySelector title={dictionary.maturityPools} />
+          <MarketsList markets={markets} showModal={showModal} />
+          <Footer />
+        </InterestRateModelProvider>
+      </FixedLenderProvider>
+    </AuditorProvider>
   );
 };
+
+export async function getStaticProps() {
+  const getAuditorAbi = await axios.get(
+    'https://abi-versions2.s3.amazonaws.com/latest/contracts/Auditor.sol/Auditor.json'
+  );
+  const getFixedLenderAbi = await axios.get(
+    'https://abi-versions2.s3.amazonaws.com/latest/contracts/FixedLender.sol/FixedLender.json'
+  );
+  const getInterestRateModelAbi = await axios.get(
+    'https://abi-versions2.s3.amazonaws.com/latest/contracts/InterestRateModel.sol/InterestRateModel.json'
+  );
+  const addresses = await axios.get(
+    'https://abi-versions2.s3.amazonaws.com/latest/addresses.json'
+  );
+  const auditorAddress = addresses?.data?.auditor;
+  const interestRateModelAddress = addresses?.data?.interestRateModel;
+
+  return {
+    props: {
+      auditor: {
+        abi: getAuditorAbi.data,
+        address: auditorAddress
+      },
+      interestRateModel: {
+        abi: getInterestRateModelAbi.data,
+        address: interestRateModelAddress
+      },
+      assetsAddresses: addresses.data,
+      fixedLender: {
+        abi: getFixedLenderAbi.data
+      }
+    }
+  };
+}
 
 export default Home;
