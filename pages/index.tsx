@@ -32,19 +32,23 @@ interface Props {
   walletAddress: string;
   network: Network;
   auditor: Contract;
-  assetsAddresses: Dictionary<string>,
+  assetsAddresses: Dictionary<string>;
   fixedLender: Contract;
-  interestRateModel: Contract
+  interestRateModel: Contract;
 }
 
-const Home: NextPage<Props> = ({ walletAddress, network, auditor, assetsAddresses, fixedLender, interestRateModel }) => {
+const Home: NextPage<Props> = ({
+  walletAddress,
+  network,
+  auditor,
+  assetsAddresses,
+  fixedLender,
+  interestRateModel
+}) => {
   const { modal, handleModal, modalContent } = useModal();
 
   const [markets, setMarkets] = useState<Array<Market>>([]);
-  const { contract } = useContract(
-    auditor?.address,
-    auditor?.abi
-  );
+  const { contract } = useContract(auditor?.address, auditor?.abi);
 
   useEffect(() => {
     if (contract) {
@@ -103,7 +107,9 @@ const Home: NextPage<Props> = ({ walletAddress, network, auditor, assetsAddresse
 
   return (
     <AuditorProvider value={auditor}>
-      <FixedLenderProvider value={{ addresses: assetsAddresses, abi: fixedLender.abi }}>
+      <FixedLenderProvider
+        value={{ addresses: assetsAddresses, abi: fixedLender.abi }}
+      >
         <InterestRateModelProvider value={interestRateModel}>
           {modal && (
             <>
@@ -124,10 +130,18 @@ const Home: NextPage<Props> = ({ walletAddress, network, auditor, assetsAddresse
 };
 
 export async function getStaticProps() {
-  const getAuditorAbi = await axios.get('https://abi-versions2.s3.amazonaws.com/latest/contracts/Auditor.sol/Auditor.json')
-  const getFixedLenderAbi = await axios.get('https://abi-versions2.s3.amazonaws.com/latest/contracts/FixedLender.sol/FixedLender.json')
-  const getInterestRateModelAbi = await axios.get('https://abi-versions2.s3.amazonaws.com/latest/contracts/InterestRateModel.sol/InterestRateModel.json')
-  const addresses = await axios.get('https://abi-versions2.s3.amazonaws.com/latest/addresses.json');
+  const getAuditorAbi = await axios.get(
+    'https://abi-versions2.s3.amazonaws.com/latest/contracts/Auditor.sol/Auditor.json'
+  );
+  const getFixedLenderAbi = await axios.get(
+    'https://abi-versions2.s3.amazonaws.com/latest/contracts/FixedLender.sol/FixedLender.json'
+  );
+  const getInterestRateModelAbi = await axios.get(
+    'https://abi-versions2.s3.amazonaws.com/latest/contracts/InterestRateModel.sol/InterestRateModel.json'
+  );
+  const addresses = await axios.get(
+    'https://abi-versions2.s3.amazonaws.com/latest/addresses.json'
+  );
   const auditorAddress = addresses?.data?.auditor;
   const interestRateModelAddress = addresses?.data?.interestRateModel;
 
@@ -143,10 +157,10 @@ export async function getStaticProps() {
       },
       assetsAddresses: addresses.data,
       fixedLender: {
-        abi: getFixedLenderAbi.data,
+        abi: getFixedLenderAbi.data
       }
-    },
-  }
+    }
+  };
 }
 
 export default Home;

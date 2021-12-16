@@ -1,4 +1,5 @@
 import Item from 'components/MarketsList/Item';
+import Loading from 'components/common/Loading';
 
 import style from './style.module.scss';
 
@@ -7,7 +8,6 @@ import assets from 'dictionary/assets.json';
 
 import { Market } from 'types/Market';
 import { Assets } from 'types/Assets';
-import Loading from 'components/common/Loading';
 
 type Props = {
   markets: Array<Market>;
@@ -21,10 +21,8 @@ function MarketsList({ markets, showModal }: Props) {
         <div className={style.column}>
           <div className={style.tableRow}>
             <span className={style.symbol}>{dictionary.asset}</span>
-            <span className={style.collateralFactor}>
-              {dictionary.collateral}
-            </span>
-            <span className={style.collateralFactor} />
+            <span className={style.title}>{dictionary.marketSize}</span>
+            <span className={style.title} />
           </div>
           {markets?.map((market, key) => {
             const symbol: keyof Market = market.symbol;
@@ -48,10 +46,8 @@ function MarketsList({ markets, showModal }: Props) {
         <div className={style.column}>
           <div className={style.tableRow}>
             <span className={style.symbol}>{dictionary.asset}</span>
-            <span className={style.collateralFactor}>
-              {dictionary.collateral}
-            </span>
-            <span className={style.collateralFactor} />
+            <span className={style.title}>{dictionary.marketSize}</span>
+            <span className={style.title} />
           </div>
           {markets?.map((market, key) => {
             const symbol: keyof Market = market.symbol;
