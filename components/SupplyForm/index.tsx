@@ -10,6 +10,8 @@ import useContractWithSigner from 'hooks/useContractWithSigner';
 import useContract from 'hooks/useContract';
 
 import daiAbi from 'contracts/abi/dai.json';
+import underlyings from 'data/underlying.json'
+
 
 import { SupplyRate } from 'types/SupplyRate';
 import { Error } from 'types/Error';
@@ -21,6 +23,7 @@ import { getContractsByEnv } from 'utils/utils';
 import { AddressContext } from 'contexts/AddressContext';
 import FixedLenderContext from 'contexts/FixedLenderContext';
 import InterestRateModelContext from 'contexts/InterestRateModelContext';
+import { Dictionary } from 'types/Dictionary';
 
 type Props = {
   contractWithSigner: ethers.Contract;
@@ -47,7 +50,7 @@ function SupplyForm({
   });
 
   const daiContract = useContractWithSigner(
-    '0x6B175474E89094C44Da98b954EedeAC495271d0F',
+    '0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa',
     daiAbi
   );
 
@@ -95,16 +98,18 @@ function SupplyForm({
       return setError({ status: true, msg: dictionary.defaultError });
     }
 
-    await daiContract?.contractWithSigner?.approve(
-      '0xCa2Be8268A03961F40E29ACE9aa7f0c2503427Ae',
+    const approval = await daiContract?.contractWithSigner?.approve(
+      address,
       ethers.utils.parseUnits(qty!.toString())
     );
 
-    const depositTx =
-      await fixedLenderWithSigner?.contractWithSigner?.depositToMaturityPool(
-        ethers.utils.parseUnits(qty!.toString()),
-        parseInt(date.value)
-      );
+    await approval.wait();
+
+    await fixedLenderWithSigner?.contractWithSigner?.depositToMaturityPool(
+      ethers.utils.parseUnits(qty!.toString()),
+      parseInt(date.value),
+      "0"
+    );
   }
 
   return (
