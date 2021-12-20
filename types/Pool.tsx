@@ -1,6 +1,6 @@
 export type Pool = {
-  available: number;
-  borrowed: number;
-  debt: number;
-  supplied: number;
+  available: number | undefined;
+  borrowed: number | undefined;
+  debt: number | undefined;
+  supplied: number | undefined;
 };

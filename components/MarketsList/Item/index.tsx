@@ -26,12 +26,7 @@ function Item({ market, showModal, type, src }: Props) {
 
   const { contract } = useContract(market?.address, fixedLender?.abi!);
 
-  const [poolData, setPoolData] = useState<Pool>({
-    available: 0,
-    borrowed: 0,
-    debt: 0,
-    supplied: 0
-  });
+  const [poolData, setPoolData] = useState<Pool | undefined>();
 
   useEffect(() => {
     if (date?.value && contract) {
@@ -44,24 +39,20 @@ function Item({ market, showModal, type, src }: Props) {
   }
 
   async function getMarketData() {
-    const poolFields = await contract?.maturityPools(date?.value);
+    const { available, borrowed, debt, supplied } =
+      await contract?.maturityPools(date?.value);
 
-    //we have to see wich ones we want to show, meanwhile I leave everything here
+    //we have to see which ones we want to show, meanwhile I leave everything here
+    const newPoolData = {
+      available: Math.round(
+        parseInt(await ethers.utils.formatEther(available))
+      ),
+      borrowed: Math.round(parseInt(await ethers.utils.formatEther(borrowed))),
+      debt: Math.round(parseInt(await ethers.utils.formatEther(debt))),
+      supplied: Math.round(parseInt(await ethers.utils.formatEther(supplied)))
+    };
 
-    const available = Math.round(
-      parseInt(await ethers.utils.formatEther(poolFields?.available))
-    );
-    const borrowed = Math.round(
-      parseInt(await ethers.utils.formatEther(poolFields?.borrowed))
-    );
-    const debt = Math.round(
-      parseInt(await ethers.utils.formatEther(poolFields?.debt))
-    );
-    const supplied = Math.round(
-      parseInt(await ethers.utils.formatEther(poolFields?.supplied))
-    );
-
-    setPoolData({ available, borrowed, debt, supplied });
+    setPoolData(newPoolData);
   }
 
   return (
