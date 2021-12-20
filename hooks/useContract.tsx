@@ -1,5 +1,5 @@
-import { ethers } from "ethers";
-import { useEffect, useState } from "react";
+import { ethers } from 'ethers';
+import { useEffect, useState } from 'react';
 
 const useContract = (address: string, abi: ethers.ContractInterface) => {
   const [contract, setContract] = useState<ethers.Contract | undefined>(
@@ -14,7 +14,7 @@ const useContract = (address: string, abi: ethers.ContractInterface) => {
     let provider;
     const publicNetwork = process.env.NEXT_PUBLIC_NETWORK;
 
-    if (publicNetwork == "local") {
+    if (publicNetwork == 'local') {
       provider = new ethers.providers.JsonRpcProvider();
     } else {
       provider = ethers.getDefaultProvider(publicNetwork);

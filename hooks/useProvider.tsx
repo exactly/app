@@ -1,5 +1,5 @@
-import { ethers } from "ethers";
-import { useState } from "react";
+import { ethers } from 'ethers';
+import { useState } from 'react';
 
 declare global {
   interface Window {
@@ -12,10 +12,10 @@ export default function useProvider() {
     useState<ethers.providers.Web3Provider>();
 
   async function getProvider() {
-    await window?.ethereum?.request({ method: "eth_requestAccounts" });
+    await window?.ethereum?.request({ method: 'eth_requestAccounts' });
     const web3Provider = new ethers.providers.Web3Provider(
       window.ethereum,
-      "any"
+      'any'
     );
     setWeb3Provider(web3Provider);
   }

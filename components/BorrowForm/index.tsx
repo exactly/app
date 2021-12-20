@@ -5,6 +5,7 @@ import style from './style.module.scss';
 import Input from 'components/common/Input';
 import Button from 'components/common/Button';
 import MaturitySelector from 'components/MaturitySelector';
+import Loading from 'components/common/Loading';
 
 import useContractWithSigner from 'hooks/useContractWithSigner';
 import useContract from 'hooks/useContract';
@@ -19,6 +20,7 @@ import dictionary from 'dictionary/en.json';
 import { AddressContext } from 'contexts/AddressContext';
 import FixedLenderContext from 'contexts/FixedLenderContext';
 import InterestRateModelContext from 'contexts/InterestRateModelContext';
+import { AlertContext } from 'contexts/AlertContext';
 
 type Props = {
   contractWithSigner: ethers.Contract;
@@ -36,6 +38,7 @@ function BorrowForm({
   const { date } = useContext(AddressContext);
   const fixedLender = useContext(FixedLenderContext);
   const interestRateModel = useContext(InterestRateModelContext);
+  const { setAlert } = useContext(AlertContext);
 
   const [qty, setQty] = useState<number | undefined>(undefined);
 
@@ -43,6 +46,8 @@ function BorrowForm({
     status: false,
     msg: ''
   });
+
+  const [loading, setLoading] = useState<Boolean>(false);
 
   const daiContract = useContractWithSigner(
     '0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa',
@@ -99,18 +104,27 @@ function BorrowForm({
   }
 
   async function borrow() {
-    const provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
-    const from = await provider.getSigner().getAddress();
-
     if (!qty || !date) {
       return setError({ status: true, msg: dictionary.defaultError });
     }
+    try {
+      setLoading(true);
 
-    await fixedLenderWithSigner?.contractWithSigner?.borrowFromMaturityPool(
-      ethers.utils.parseUnits(qty!.toString()),
-      parseInt(date.value),
-      ethers.utils.parseUnits('1000')
-    );
+      await fixedLenderWithSigner?.contractWithSigner?.borrowFromMaturityPool(
+        ethers.utils.parseUnits(qty!.toString()),
+        parseInt(date.value),
+        ethers.utils.parseUnits('1000')
+      );
+
+      setLoading(false);
+    } catch (e: any) {
+      console.log(e);
+      setLoading(false);
+      setAlert({
+        type: 'error',
+        code: e?.code ?? dictionary.defaultError
+      });
+    }
   }
 
   function handleLoading(hasRate: boolean) {
@@ -140,16 +154,20 @@ function BorrowForm({
         </div>
       </div>
       {error?.status && <p className={style.error}>{error?.msg}</p>}
-      <div className={style.fieldContainer}>
-        <div className={style.buttonContainer}>
-          <Button
-            text={dictionary.borrow}
-            onClick={borrow}
-            className={qty && qty > 0 ? 'secondary' : 'disabled'}
-            disabled={!qty || qty <= 0}
-          />
+      {!loading ? (
+        <div className={style.fieldContainer}>
+          <div className={style.buttonContainer}>
+            <Button
+              text={dictionary.borrow}
+              onClick={borrow}
+              className={qty && qty > 0 ? 'secondary' : 'disabled'}
+              disabled={!qty || qty <= 0}
+            />
+          </div>
         </div>
-      </div>
+      ) : (
+        <Loading />
+      )}
     </>
   );
 }

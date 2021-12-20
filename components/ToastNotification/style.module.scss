@@ -1,0 +1,34 @@
+.toast {
+  position: fixed;
+  top: 5%;
+  right: -150px;
+  z-index: 99;
+  padding: var(--u2);
+  min-width: 150px;
+  animation: slide-left 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+  box-shadow: var(--shadow);
+
+  .message {
+    padding: 0;
+    margin: 0;
+    color: var(--white);
+    text-align: center;
+  }
+
+  .close {
+    position: absolute;
+    top: 0;
+    right: 10px;
+    color: var(--white);
+    cursor: pointer;
+  }
+}
+
+@keyframes slide-left {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-160px);
+  }
+}

@@ -6,8 +6,8 @@ import '../styles/variables.css';
 import type { AppProps } from 'next/app';
 import Head from 'next/head';
 
-import { getContractsByEnv } from 'utils/utils';
 import { AddressProvider } from 'contexts/AddressContext';
+import { AlertProvider } from 'contexts/AlertContext';
 
 import { getCurrentWalletConnected } from 'hooks/useWallet';
 import useNetwork from 'hooks/useNetwork';
@@ -20,11 +20,6 @@ function MyApp({ Component, pageProps }: AppProps) {
     handleWallet();
     addWalletListener();
   }, []);
-
-  function getContractByEnv() {
-    const contracts = getContractsByEnv();
-    return contracts;
-  }
 
   async function handleWallet() {
     //this function gets the wallet address
@@ -41,6 +36,9 @@ function MyApp({ Component, pageProps }: AppProps) {
         } else {
           setWallet(undefined);
         }
+      });
+      window.ethereum.on('message', (message) => {
+        console.log(message, 1);
       });
     }
   }
@@ -60,7 +58,9 @@ function MyApp({ Component, pageProps }: AppProps) {
         <link rel="icon" href="/icon.ico" />
       </Head>
       <AddressProvider>
-        <Component {...props} />
+        <AlertProvider>
+          <Component {...props} />
+        </AlertProvider>
       </AddressProvider>
     </>
   );

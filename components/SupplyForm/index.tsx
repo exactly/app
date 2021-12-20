@@ -5,6 +5,7 @@ import style from './style.module.scss';
 import Input from 'components/common/Input';
 import Button from 'components/common/Button';
 import MaturitySelector from 'components/MaturitySelector';
+import Loading from 'components/common/Loading';
 
 import useContractWithSigner from 'hooks/useContractWithSigner';
 import useContract from 'hooks/useContract';
@@ -20,6 +21,7 @@ import dictionary from 'dictionary/en.json';
 import { AddressContext } from 'contexts/AddressContext';
 import FixedLenderContext from 'contexts/FixedLenderContext';
 import InterestRateModelContext from 'contexts/InterestRateModelContext';
+import { AlertContext } from 'contexts/AlertContext';
 
 type Props = {
   contractWithSigner: ethers.Contract;
@@ -37,13 +39,15 @@ function SupplyForm({
   const { date } = useContext(AddressContext);
   const fixedLender = useContext(FixedLenderContext);
   const interestRateModel = useContext(InterestRateModelContext);
-
+  const { setAlert } = useContext(AlertContext);
   const [qty, setQty] = useState<number | undefined>(undefined);
 
   const [error, setError] = useState<Error | undefined>({
     status: false,
     msg: ''
   });
+
+  const [loading, setLoading] = useState<Boolean>(false);
 
   const daiContract = useContractWithSigner(
     '0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa',
@@ -93,25 +97,38 @@ function SupplyForm({
   }
 
   async function deposit() {
-    const provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
-    const from = await provider.getSigner().getAddress();
-
     if (!qty || !date) {
       return setError({ status: true, msg: dictionary.defaultError });
     }
 
-    const approval = await daiContract?.contractWithSigner?.approve(
-      address,
-      ethers.utils.parseUnits(qty!.toString())
-    );
+    try {
+      setLoading(true);
+      const approval = await daiContract?.contractWithSigner?.approve(
+        address,
+        ethers.utils.parseUnits(qty!.toString())
+      );
 
-    await approval.wait();
+      await approval.wait();
 
-    await fixedLenderWithSigner?.contractWithSigner?.depositToMaturityPool(
-      ethers.utils.parseUnits(qty!.toString()),
-      parseInt(date.value),
-      '0'
-    );
+      setLoading(false);
+
+      await fixedLenderWithSigner?.contractWithSigner?.depositToMaturityPool(
+        ethers.utils.parseUnits(qty!.toString()),
+        parseInt(date.value),
+        '0'
+      );
+
+      setAlert({
+        type: 'success',
+        code: dictionary.success
+      });
+    } catch (e: any) {
+      setLoading(false);
+      setAlert({
+        type: 'error',
+        code: e?.code ?? dictionary.defaultError
+      });
+    }
   }
 
   function handleLoading(hasRate: boolean) {
@@ -141,16 +158,20 @@ function SupplyForm({
         </div>
       </div>
       {error?.status && <p className={style.error}>{error?.msg}</p>}
-      <div className={style.fieldContainer}>
-        <div className={style.buttonContainer}>
-          <Button
-            text={dictionary.deposit}
-            onClick={deposit}
-            className={qty && qty > 0 ? 'primary' : 'disabled'}
-            disabled={!qty || qty <= 0}
-          />
+      {!loading ? (
+        <div className={style.fieldContainer}>
+          <div className={style.buttonContainer}>
+            <Button
+              text={dictionary.deposit}
+              onClick={deposit}
+              className={qty && qty > 0 ? 'primary' : 'disabled'}
+              disabled={!qty || qty <= 0}
+            />
+          </div>
         </div>
-      </div>
+      ) : (
+        <Loading />
+      )}
     </>
   );
 }
