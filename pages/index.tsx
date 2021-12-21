@@ -50,7 +50,6 @@ const Home: NextPage<Props> = ({
   const { modal, handleModal, modalContent } = useModal();
 
   const [markets, setMarkets] = useState<Array<Market>>([]);
-
   const { contract } = useContract(auditor?.address, auditor?.abi);
 
   useEffect(() => {

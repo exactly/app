@@ -12,7 +12,6 @@ import { AddressContext } from 'contexts/AddressContext';
 import AuditorContext from 'contexts/AuditorContext';
 
 import { Date } from 'types/Date';
-import { Contract } from 'types/Contract';
 
 type Props = {
   title?: String;
@@ -27,6 +26,7 @@ function MaturitySelector({ title }: Props) {
 
   async function getPools() {
     const pools = await auditorContract?.contract?.getFuturePools();
+
     const dates = pools?.map((pool: any) => {
       return pool.toString();
     });
