@@ -18,7 +18,7 @@ type Props = {
 };
 
 function MobileNavbar({ walletAddress, network }: Props) {
-  const [currentWallet, setWallet] = useState(walletAddress || '');
+  const [currentWallet, setWallet] = useState<String>(walletAddress || '');
   const [open, setOpen] = useState<Boolean>(false);
   const { getProvider } = useProvider();
   const router = useRouter();
@@ -121,10 +121,6 @@ function MobileNavbar({ walletAddress, network }: Props) {
               </li>
             );
           })}
-          {/* <button className={styles.button}>
-            <img src="./img/icons/power.svg" />
-            Cerrar sesión
-          </button> */}
         </ul>
       )}
     </>

@@ -26,7 +26,7 @@
 
     .buttonContainer {
       width: 150px;
-      height: 50px;
+      height: var(--u6);
       display: flex;
       justify-content: center;
       align-items: center;
@@ -68,21 +68,6 @@
     @extend .link;
     opacity: 100%;
     font-weight: bold;
-  }
-
-  .button {
-    cursor: pointer;
-    background: var(--gray-100);
-    border: none;
-    color: var(--tertiary);
-    font-size: var(--font-14);
-    width: fit-content;
-    border-radius: 100px;
-    padding: var(--u) var(--u2);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: var(--smallUnit);
   }
 }
 

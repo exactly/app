@@ -15,7 +15,6 @@ const Asset: NextPage<Props> = ({ walletAddress, network }) => {
     <div>
       <Navbar walletAddress={walletAddress} />
       <CurrentNetwork network={network} />
-      {/* <AssetSelector title={true} /> */}
     </div>
   );
 };
