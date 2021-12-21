@@ -14,5 +14,6 @@
   "selectDefaultText": "Choose Date",
   "defaultError": "Oops, there was a problem!",
   "amountError": "Please fill the amount",
-  "loading": "Loading"
+  "loading": "Loading",
+  "marketSize": "Market size"
 }
