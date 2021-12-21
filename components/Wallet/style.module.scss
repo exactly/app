@@ -2,7 +2,31 @@
   color: var(--black);
   font-size: var(--font-14);
   display: flex;
+  flex-wrap: wrap;
   gap: var(--u);
   user-select: none;
   cursor: pointer;
+
+  .wallet {
+    margin: 0;
+  }
+
+  .networkContainer {
+    display: flex;
+    gap: var(--smallUnit);
+    align-items: center;
+
+    .network {
+      margin: 0;
+      opacity: var(--defaultOpacity);
+      color: var(--black);
+    }
+
+    .dot {
+      background: var(--success);
+      border-radius: 50%;
+      width: var(--u);
+      height: var(--u);
+    }
+  }
 }

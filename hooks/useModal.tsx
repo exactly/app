@@ -4,7 +4,7 @@ type Props = {
   content?: any;
 };
 
-export default () => {
+const useModal = () => {
   let [modal, setModal] = useState(false);
   let [modalContent, setModalContent] = useState<String | undefined>(undefined);
 
@@ -17,3 +17,5 @@ export default () => {
 
   return { modal, handleModal, modalContent };
 };
+
+export default useModal;

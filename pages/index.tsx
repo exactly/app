@@ -12,6 +12,7 @@ import Hero from 'components/Hero';
 import CurrentNetwork from 'components/CurrentNetwork';
 import Footer from 'components/Footer';
 import Overlay from 'components/Overlay';
+import MobileNavbar from 'components/MobileNavbar';
 
 import useContract from 'hooks/useContract';
 import useModal from 'hooks/useModal';
@@ -21,6 +22,7 @@ import { FixedLenderProvider } from 'contexts/FixedLenderContext';
 import { InterestRateModelProvider } from 'contexts/InterestRateModelContext';
 
 import { Market } from 'types/Market';
+
 import { Network } from 'types/Network';
 import { UnformattedMarket } from 'types/UnformattedMarket';
 import { Contract } from 'types/Contract';
@@ -117,6 +119,7 @@ const Home: NextPage<Props> = ({
               <Overlay closeModal={handleModal} />
             </>
           )}
+          <MobileNavbar walletAddress={walletAddress} network={network} />
           <Navbar walletAddress={walletAddress} />
           <CurrentNetwork network={network} />
           <Hero />

@@ -13,3 +13,9 @@
     font-weight: bold;
   }
 }
+
+@media (max-width: 769px) {
+  .container {
+    width: 90%;
+  }
+}
