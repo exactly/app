@@ -54,7 +54,7 @@ function Modal({ contractData, closeModal }: Props) {
         <p>{contractData.type == 'borrow' ? 'Borrow' : 'Deposit'}</p>
         <AssetSelector defaultAddress={contractData.address} onChange={marketData => setAssetData(marketData)} />
       </div >
-      {contractWithSigner && contractData.type == 'deposit' && (
+      {contractWithSigner && contractData.type == 'deposit' && assetData && (
         <SupplyForm
           contractWithSigner={contractWithSigner!}
           handleResult={handleResult}
@@ -66,7 +66,7 @@ function Modal({ contractData, closeModal }: Props) {
       }
 
       {
-        contractWithSigner && contractData.type == 'borrow' && (
+        contractWithSigner && contractData.type == 'borrow' && assetData && (
           <BorrowForm
             contractWithSigner={contractWithSigner!}
             handleResult={handleResult}

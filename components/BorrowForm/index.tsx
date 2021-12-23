@@ -9,16 +9,17 @@ import MaturitySelector from 'components/MaturitySelector';
 import useContractWithSigner from 'hooks/useContractWithSigner';
 import useContract from 'hooks/useContract';
 
-import daiAbi from 'contracts/abi/dai.json';
 
 import { SupplyRate } from 'types/SupplyRate';
 import { Error } from 'types/Error';
 
 import dictionary from 'dictionary/en.json';
 
+
 import { AddressContext } from 'contexts/AddressContext';
 import FixedLenderContext from 'contexts/FixedLenderContext';
 import InterestRateModelContext from 'contexts/InterestRateModelContext';
+
 import { Market } from 'types/Market';
 
 type Props = {
@@ -46,11 +47,6 @@ function BorrowForm({
     status: false,
     msg: ''
   });
-
-  const daiContract = useContractWithSigner(
-    '0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa',
-    daiAbi
-  );
 
   const interestRateModelContract = useContract(
     interestRateModel.address!,

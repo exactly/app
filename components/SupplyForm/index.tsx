@@ -9,8 +9,6 @@ import MaturitySelector from 'components/MaturitySelector';
 import useContractWithSigner from 'hooks/useContractWithSigner';
 import useContract from 'hooks/useContract';
 
-import daiAbi from 'contracts/abi/dai.json';
-
 import { SupplyRate } from 'types/SupplyRate';
 import { Error } from 'types/Error';
 
@@ -57,8 +55,7 @@ function SupplyForm({
     underlyingData = getUnderlyingData(process.env.NEXT_PUBLIC_NETWORK!, assetData.symbol);
   }
 
-
-  const daiContract = useContractWithSigner(
+  const underlyingContract = useContractWithSigner(
     underlyingData!.address,
     underlyingData!.abi
   );
@@ -113,7 +110,7 @@ function SupplyForm({
       return setError({ status: true, msg: dictionary.defaultError });
     }
 
-    const approval = await daiContract?.contractWithSigner?.approve(
+    const approval = await underlyingContract?.contractWithSigner?.approve(
       address,
       ethers.utils.parseUnits(qty!.toString())
     );

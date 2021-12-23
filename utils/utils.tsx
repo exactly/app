@@ -1,4 +1,6 @@
 import { UnderlyingNetwork } from "types/Underlying";
+import daiAbi from 'contracts/abi/dai.json';
+import wethAbi from 'contracts/abi/weth.json';
 
 export function transformClasses(style: any, classes: string) {
   if (!style) return 'style object is mandatory';
@@ -35,13 +37,13 @@ export function getUnderlyingData(network: string | undefined, symbol: string | 
 
   const baseData: UnderlyingNetwork = {
     "kovan": {
-      "dai": {address: "0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa", abi: ''},
-      "usdc": {address: "0xdcfab8057d08634279f8201b55d311c2a67897d2", abi: ''},
-      "usdt": {address:"0xf3e0d7bf58c5d455d31ef1c2d5375904df525105", abi: ''},
-      "weth": {address:"0xd0a1e359811322d97991e03f863a0c30c2cf029c", abi: ''}
+      "dai": { address: "0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa", abi: daiAbi },
+      "usdc": { address: "0xdcfab8057d08634279f8201b55d311c2a67897d2", abi: '' },
+      "usdt": { address: "0xf3e0d7bf58c5d455d31ef1c2d5375904df525105", abi: '' },
+      "weth": { address: "0xd0a1e359811322d97991e03f863a0c30c2cf029c", abi: wethAbi }
     },
     "rinkeby": {
-      "dai": {address: "0x6B175474E89094C44Da98b954EedeAC495271d0F", abi: ''}
+      "dai": { address: "0x6B175474E89094C44Da98b954EedeAC495271d0F", abi: '' }
     },
     "mainnet": {}
   }

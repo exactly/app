@@ -21,7 +21,6 @@ export default function useContractWithSigner(
   >(undefined);
 
   useEffect(() => {
-    console.log('llego')
     if (address && abi && web3Provider) {
       getContract();
     }
@@ -36,7 +35,6 @@ export default function useContractWithSigner(
   }
 
   async function getContract() {
-    console.log('llego al getContract')
     const contract = new ethers.Contract(address!, abi, web3Provider);
 
     const signer = web3Provider?.getSigner();
