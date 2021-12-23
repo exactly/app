@@ -16,12 +16,13 @@ import { Error } from 'types/Error';
 
 import dictionary from 'dictionary/en.json';
 
-import { getUnderlyingAddress } from 'utils/utils';
+import { getUnderlyingData } from 'utils/utils';
 
 import { AddressContext } from 'contexts/AddressContext';
 import FixedLenderContext from 'contexts/FixedLenderContext';
 import InterestRateModelContext from 'contexts/InterestRateModelContext';
 import { Market } from 'types/Market';
+import { UnderlyingData } from 'types/Underlying';
 
 type Props = {
   contractWithSigner: ethers.Contract;
@@ -50,16 +51,16 @@ function SupplyForm({
   });
 
 
-  let underlyingAddress: string | undefined = undefined;
+  let underlyingData: UnderlyingData | undefined = undefined;
 
   if (assetData?.symbol) {
-    underlyingAddress = getUnderlyingAddress(process.env.NEXT_PUBLIC_NETWORK!, assetData.symbol);
+    underlyingData = getUnderlyingData(process.env.NEXT_PUBLIC_NETWORK!, assetData.symbol);
   }
 
 
   const daiContract = useContractWithSigner(
-    underlyingAddress,
-    daiAbi
+    underlyingData!.address,
+    underlyingData!.abi
   );
 
   const interestRateModelContract = useContract(
