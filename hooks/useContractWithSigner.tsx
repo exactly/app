@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import useProvider from "./useProvider";
 
 export default function useContractWithSigner(
-  address: string,
+  address: string | undefined,
   abi: ethers.ContractInterface
 ) {
   const { web3Provider, getProvider } = useProvider();
@@ -21,7 +21,9 @@ export default function useContractWithSigner(
   >(undefined);
 
   useEffect(() => {
-    getContract();
+    if (address && abi && web3Provider) {
+      getContract();
+    }
   }, [web3Provider]);
 
   useEffect(() => {
@@ -33,7 +35,7 @@ export default function useContractWithSigner(
   }
 
   async function getContract() {
-    const contract = new ethers.Contract(address, abi, web3Provider);
+    const contract = new ethers.Contract(address!, abi, web3Provider);
 
     const signer = web3Provider?.getSigner();
     let contractWithSigner = undefined;

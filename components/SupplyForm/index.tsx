@@ -9,30 +9,33 @@ import MaturitySelector from 'components/MaturitySelector';
 import useContractWithSigner from 'hooks/useContractWithSigner';
 import useContract from 'hooks/useContract';
 
-import daiAbi from 'contracts/abi/dai.json';
-import underlyings from 'data/underlying.json';
-
 import { SupplyRate } from 'types/SupplyRate';
 import { Error } from 'types/Error';
 
 import dictionary from 'dictionary/en.json';
 
+import { getUnderlyingData } from 'utils/utils';
+
 import { AddressContext } from 'contexts/AddressContext';
 import FixedLenderContext from 'contexts/FixedLenderContext';
 import InterestRateModelContext from 'contexts/InterestRateModelContext';
+import { Market } from 'types/Market';
+import { UnderlyingData } from 'types/Underlying';
 
 type Props = {
   contractWithSigner: ethers.Contract;
   handleResult: (data: SupplyRate | undefined) => void;
   hasRate: boolean | undefined;
   address: string;
+  assetData: Market | undefined;
 };
 
 function SupplyForm({
   contractWithSigner,
   handleResult,
   hasRate,
-  address
+  address,
+  assetData
 }: Props) {
   const { date } = useContext(AddressContext);
   const fixedLender = useContext(FixedLenderContext);
@@ -45,9 +48,16 @@ function SupplyForm({
     msg: ''
   });
 
-  const daiContract = useContractWithSigner(
-    '0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa',
-    daiAbi
+
+  let underlyingData: UnderlyingData | undefined = undefined;
+
+  if (assetData?.symbol) {
+    underlyingData = getUnderlyingData(process.env.NEXT_PUBLIC_NETWORK!, assetData.symbol);
+  }
+
+  const underlyingContract = useContractWithSigner(
+    underlyingData!.address,
+    underlyingData!.abi
   );
 
   const interestRateModelContract = useContract(
@@ -100,7 +110,7 @@ function SupplyForm({
       return setError({ status: true, msg: dictionary.defaultError });
     }
 
-    const approval = await daiContract?.contractWithSigner?.approve(
+    const approval = await underlyingContract?.contractWithSigner?.approve(
       address,
       ethers.utils.parseUnits(qty!.toString())
     );

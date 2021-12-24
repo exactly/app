@@ -11,6 +11,7 @@ import useContractWithSigner from 'hooks/useContractWithSigner';
 import AuditorContext from 'contexts/AuditorContext';
 
 import { SupplyRate } from 'types/SupplyRate';
+import { Market } from 'types/Market';
 
 import dictionary from 'dictionary/en.json';
 
@@ -23,6 +24,8 @@ function Modal({ contractData, closeModal }: Props) {
   const auditor = useContext(AuditorContext);
 
   const [potentialRate, setPotentialRate] = useState<string | undefined>('0');
+
+  const [assetData, setAssetData] = useState<Market | undefined>(undefined);
 
   const [hasRate, setHasRate] = useState<boolean | undefined>(true);
 
@@ -49,41 +52,48 @@ function Modal({ contractData, closeModal }: Props) {
       </div>
       <div className={styles.assets}>
         <p>{contractData.type == 'borrow' ? 'Borrow' : 'Deposit'}</p>
-        <AssetSelector defaultAddress={contractData.address} />
-      </div>
-      {contractWithSigner && contractData.type == 'deposit' && (
+        <AssetSelector defaultAddress={contractData.address} onChange={marketData => setAssetData(marketData)} />
+      </div >
+      {contractWithSigner && contractData.type == 'deposit' && assetData && (
         <SupplyForm
           contractWithSigner={contractWithSigner!}
           handleResult={handleResult}
           hasRate={hasRate}
           address={contractData.address}
+          assetData={assetData}
         />
-      )}
+      )
+      }
 
-      {contractWithSigner && contractData.type == 'borrow' && (
-        <BorrowForm
-          contractWithSigner={contractWithSigner!}
-          handleResult={handleResult}
-          hasRate={hasRate}
-          address={contractData.address}
-        />
-      )}
+      {
+        contractWithSigner && contractData.type == 'borrow' && assetData && (
+          <BorrowForm
+            contractWithSigner={contractWithSigner!}
+            handleResult={handleResult}
+            hasRate={hasRate}
+            address={contractData.address}
+            assetData={assetData}
+          />
+        )
+      }
 
       {!contractWithSigner && <Loading />}
 
-      {potentialRate && (
-        <section className={styles.right}>
-          <p>
-            <span className={styles.detail}> {dictionary.annualRate}</span>
-            <span className={styles.value}>
-              {(parseFloat(potentialRate) * 100).toFixed(4)} %
-            </span>
-          </p>
-        </section>
-      )}
+      {
+        potentialRate && (
+          <section className={styles.right}>
+            <p>
+              <span className={styles.detail}> {dictionary.annualRate}</span>
+              <span className={styles.value}>
+                {(parseFloat(potentialRate) * 100).toFixed(4)} %
+              </span>
+            </p>
+          </section>
+        )
+      }
 
       {!hasRate && <Loading />}
-    </div>
+    </div >
   );
 }
 
