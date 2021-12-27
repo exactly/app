@@ -108,19 +108,32 @@ function SupplyForm({
         ethers.utils.parseUnits(qty!.toString())
       );
 
-      await approval.wait();
+      const txApproval = await approval.wait();
 
       setLoading(false);
+      setAlert({
+        type: 'success',
+        code: dictionary.success,
+        tx: txApproval?.from
+      });
 
-      await fixedLenderWithSigner?.contractWithSigner?.depositToMaturityPool(
-        ethers.utils.parseUnits(qty!.toString()),
-        parseInt(date.value),
-        '0'
-      );
+      const tx =
+        await fixedLenderWithSigner?.contractWithSigner?.depositToMaturityPool(
+          ethers.utils.parseUnits(qty!.toString()),
+          parseInt(date.value),
+          '0'
+        );
+      console.log(tx, 1234); //this shows de tx hash
+
+      //this notifies us when the transaction is completed
+      //there is a property called status that returns a number, have to figure out it's values
+
+      const txDetails = await tx.wait();
 
       setAlert({
         type: 'success',
-        code: dictionary.success
+        code: dictionary.success,
+        tx: txDetails?.from
       });
     } catch (e: any) {
       setLoading(false);
