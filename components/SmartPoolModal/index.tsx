@@ -15,6 +15,8 @@ import { Market } from 'types/Market';
 import { Error } from 'types/Error';
 
 import dictionary from 'dictionary/en.json';
+import { UnderlyingData } from 'types/Underlying';
+import { getUnderlyingData } from 'utils/utils';
 
 type Props = {
   contractData: any;
@@ -23,7 +25,7 @@ type Props = {
 
 function SmartPoolModal({ contractData, closeModal }: Props) {
   const fixedLender = useContext(FixedLenderContext);
-  const [assetData, setAssetData] = useState<Market | undefined>(undefined);
+  const [assetData, setAssetData] = useState<Market>(contractData);
 
   const [qty, setQty] = useState<number>(0);
 
@@ -31,6 +33,20 @@ function SmartPoolModal({ contractData, closeModal }: Props) {
     status: false,
     msg: ''
   });
+
+  let underlyingData: UnderlyingData | undefined = undefined;
+
+  if (assetData?.symbol) {
+    underlyingData = getUnderlyingData(
+      process.env.NEXT_PUBLIC_NETWORK!,
+      assetData.symbol
+    );
+  }
+
+  const underlyingContract = useContractWithSigner(
+    underlyingData!.address,
+    underlyingData!.abi
+  );
 
   const fixedLenderWithSigner = useContractWithSigner(
     contractData.address,
@@ -47,6 +63,13 @@ function SmartPoolModal({ contractData, closeModal }: Props) {
     }
 
     try {
+      const approval = await underlyingContract?.contractWithSigner?.approve(
+        assetData.address,
+        ethers.utils.parseUnits(qty!.toString())
+      );
+
+      await approval.wait();
+
       await fixedLenderWithSigner?.contractWithSigner?.depositToSmartPool(
         ethers.utils.parseUnits(qty!.toString())
       );

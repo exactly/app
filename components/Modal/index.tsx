@@ -52,8 +52,11 @@ function Modal({ contractData, closeModal }: Props) {
       </div>
       <div className={styles.assets}>
         <p>{contractData.type == 'borrow' ? 'Borrow' : 'Deposit'}</p>
-        <AssetSelector defaultAddress={contractData.address} onChange={marketData => setAssetData(marketData)} />
-      </div >
+        <AssetSelector
+          defaultAddress={contractData.address}
+          onChange={(marketData) => setAssetData(marketData)}
+        />
+      </div>
       {contractWithSigner && contractData.type == 'deposit' && assetData && (
         <SupplyForm
           contractWithSigner={contractWithSigner!}
@@ -62,38 +65,33 @@ function Modal({ contractData, closeModal }: Props) {
           address={contractData.address}
           assetData={assetData}
         />
-      )
-      }
+      )}
 
-      {
-        contractWithSigner && contractData.type == 'borrow' && assetData && (
-          <BorrowForm
-            contractWithSigner={contractWithSigner!}
-            handleResult={handleResult}
-            hasRate={hasRate}
-            address={contractData.address}
-            assetData={assetData}
-          />
-        )
-      }
+      {contractWithSigner && contractData.type == 'borrow' && assetData && (
+        <BorrowForm
+          contractWithSigner={contractWithSigner!}
+          handleResult={handleResult}
+          hasRate={hasRate}
+          address={contractData.address}
+          assetData={assetData}
+        />
+      )}
 
       {!contractWithSigner && <Loading />}
 
-      {
-        potentialRate && (
-          <section className={styles.right}>
-            <p>
-              <span className={styles.detail}> {dictionary.annualRate}</span>
-              <span className={styles.value}>
-                {(parseFloat(potentialRate) * 100).toFixed(4)} %
-              </span>
-            </p>
-          </section>
-        )
-      }
+      {potentialRate && (
+        <section className={styles.right}>
+          <p>
+            <span className={styles.detail}> {dictionary.annualRate}</span>
+            <span className={styles.value}>
+              {(parseFloat(potentialRate) * 100).toFixed(4)} %
+            </span>
+          </p>
+        </section>
+      )}
 
       {!hasRate && <Loading />}
-    </div >
+    </div>
   );
 }
 
