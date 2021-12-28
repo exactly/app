@@ -1,0 +1,15 @@
+.container {
+  padding-top: var(--u2);
+  width: 1366px;
+  margin: var(--navbarHeight) auto;
+  .assetData {
+    display: flex;
+    align-items: flex-end;
+    .assetContainer{
+      width: 300px;
+    }
+    .assetMetrics {
+      margin: 30px 10px;
+    }
+  }
+}
