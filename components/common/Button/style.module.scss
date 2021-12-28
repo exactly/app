@@ -22,6 +22,19 @@
   }
 }
 
+.tertiary {
+  background: var(--white);
+  color: var(--primary);
+  border: 1px solid var(--primary);
+
+  &:hover {
+    /*couldn't find another way to make this work without declaring a new variable that contemplates the alpha directly 
+      rgba(var(--primary), 0.08) doesn't work. This does.
+    */
+    background-color: rgba(#4d4de8, 0.08);
+  }
+}
+
 .disabled {
   background: var(--gray-medium);
   color: var(--white);

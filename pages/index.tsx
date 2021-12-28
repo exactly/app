@@ -13,6 +13,8 @@ import CurrentNetwork from 'components/CurrentNetwork';
 import Footer from 'components/Footer';
 import Overlay from 'components/Overlay';
 import MobileNavbar from 'components/MobileNavbar';
+import SmartPoolList from 'components/SmartPoolList';
+import SmartPoolModal from 'components/SmartPoolModal';
 
 import useContract from 'hooks/useContract';
 import useModal from 'hooks/useModal';
@@ -99,7 +101,10 @@ const Home: NextPage<Props> = ({
     return formattedMarkets;
   }
 
-  function showModal(address: Market['address'], type: 'borrow' | 'deposit') {
+  function showModal(
+    address: Market['address'],
+    type: 'borrow' | 'deposit' | 'smartDeposit'
+  ) {
     const data = markets.find((market) => {
       return market.address === address;
     });
@@ -113,9 +118,18 @@ const Home: NextPage<Props> = ({
         value={{ addresses: assetsAddresses, abi: fixedLender.abi }}
       >
         <InterestRateModelProvider value={interestRateModel}>
-          {modal && (
+          {modal && modalContent?.type != 'smartDeposit' && (
             <>
               <Modal contractData={modalContent} closeModal={handleModal} />
+              <Overlay closeModal={handleModal} />
+            </>
+          )}
+          {modal && modalContent?.type == 'smartDeposit' && (
+            <>
+              <SmartPoolModal
+                contractData={modalContent}
+                closeModal={handleModal}
+              />
               <Overlay closeModal={handleModal} />
             </>
           )}
@@ -125,6 +139,7 @@ const Home: NextPage<Props> = ({
           <Hero />
           <MaturitySelector title={dictionary.maturityPools} />
           <MarketsList markets={markets} showModal={showModal} />
+          <SmartPoolList markets={markets} showModal={showModal} />
           <Footer />
         </InterestRateModelProvider>
       </FixedLenderProvider>

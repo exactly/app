@@ -23,9 +23,10 @@
   --font-80: 5em;
 
   /* COLORS */
-  --background: #f9fafb;
+  --background: #ffffff;
   --line: #e1e1e1;
   --gray-100: #aab8c1;
+  --gray-120: #fafafa;
   --gray-medium: #cccccc;
   --white: #fff;
   --black: #000;

@@ -6,7 +6,7 @@ type Props = {
 
 const useModal = () => {
   let [modal, setModal] = useState(false);
-  let [modalContent, setModalContent] = useState<String | undefined>(undefined);
+  let [modalContent, setModalContent] = useState<any | undefined>(undefined);
 
   let handleModal = ({ content = {} }: Props) => {
     setModal(!modal);
