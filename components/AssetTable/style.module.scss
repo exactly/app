@@ -8,7 +8,14 @@
     height: 100px;
     width: 100%;
     border-bottom: 1px solid var(--line);
+    display: flex;
+    &:first-of-type {
+      height: var(--u6);
+      color: var(--gray-200);
+      font-size: 14px;
+    }
     .maturity {
+      width: 40%;
       span {
         display: block;
         margin: var(--u) 0;

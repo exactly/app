@@ -27,7 +27,6 @@ function AssetSelector({ title, defaultAddress, onChange }: Props) {
   const { address, setAddress } = useContext(AddressContext);
   const auditor = useContext(AuditorContext);
 
-  console.log(auditor)
   const { contract } = useContract(auditor.address!, auditor.abi!);
   const [selectOptions, setSelectOptions] = useState<Array<Option>>([]);
   const [allMarketsData, setAllMarketsData] = useState<Array<Market>>([]);

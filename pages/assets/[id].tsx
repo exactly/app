@@ -36,7 +36,7 @@ const Asset: NextPage<Props> = ({ walletAddress, network, auditor }) => {
     const formattedDates = dates?.map((date: any) => {
       return {
         value: date,
-        label: dayjs.unix(parseInt(date)).format('DD-MMM-YY')
+        label: dayjs.unix(parseInt(date)).format('DD-MMM-YYYY')
       };
     });
 
