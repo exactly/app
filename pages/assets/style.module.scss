@@ -1,15 +1,30 @@
 .container {
   padding-top: var(--u2);
-  width: 1366px;
+  width: var(--maxWidth);
   margin: var(--navbarHeight) auto;
   .assetData {
     display: flex;
     align-items: flex-end;
     .assetContainer{
-      width: 300px;
+      width: 250px;
     }
-    .assetMetrics {
-      margin: 30px 10px;
+    .assetMetricsContainer {
+      margin: var(--u3) 0px;
+      display: flex;
+      .assetMetrics {
+        margin: 0 var(--u3);
+        .title {
+          color: var(--gray-500);
+          display: block;
+          font-size: 12px;
+          font-weight: 600;
+        }
+        .value {
+          color: var(--gray-500);
+          margin-top: var(--u);
+          display: block;
+        }
+      }
     }
   }
 }

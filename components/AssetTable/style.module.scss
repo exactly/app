@@ -1,0 +1,24 @@
+.table {
+  max-width: 60%;
+  width: 100%;
+  box-shadow: var(--shadow);
+  border-radius: var(--u);
+  .row {
+    padding: var(--u2);
+    height: 100px;
+    width: 100%;
+    border-bottom: 1px solid var(--line);
+    .maturity {
+      span {
+        display: block;
+        margin: var(--u) 0;
+        font-weight: bold;
+        &.liquidity {
+          color: var(--gray-200);
+          font-weight: normal;
+
+        }
+      }
+    }
+  }
+}
