@@ -101,10 +101,7 @@ const Home: NextPage<Props> = ({
     return formattedMarkets;
   }
 
-  function showModal(
-    address: Market['address'],
-    type: 'borrow' | 'deposit' | 'smartDeposit'
-  ) {
+  function showModal(address: Market['address'], type: String) {
     const data = markets.find((market) => {
       return market.address === address;
     });

@@ -13,9 +13,10 @@ import FixedLenderContext from 'contexts/FixedLenderContext';
 
 import { Market } from 'types/Market';
 import { Error } from 'types/Error';
+import { UnderlyingData } from 'types/Underlying';
 
 import dictionary from 'dictionary/en.json';
-import { UnderlyingData } from 'types/Underlying';
+
 import { getUnderlyingData } from 'utils/utils';
 
 type Props = {

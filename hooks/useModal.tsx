@@ -1,12 +1,15 @@
 import { useState } from 'react';
+import { Dictionary } from 'types/Dictionary';
 
 type Props = {
-  content?: any;
+  content?: Dictionary<String | Boolean | undefined>;
 };
 
 const useModal = () => {
   let [modal, setModal] = useState(false);
-  let [modalContent, setModalContent] = useState<any | undefined>(undefined);
+  let [modalContent, setModalContent] = useState<
+    Dictionary<String | Boolean | undefined> | undefined
+  >(undefined);
 
   let handleModal = ({ content = {} }: Props) => {
     setModal(!modal);

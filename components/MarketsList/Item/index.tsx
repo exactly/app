@@ -26,7 +26,7 @@ function Item({ market, showModal, type, src }: Props) {
 
   const { contract } = useContract(market?.address, fixedLender?.abi!);
 
-  const [poolData, setPoolData] = useState<Pool | undefined>();
+  const [poolData, setPoolData] = useState<Pool | undefined>(undefined);
 
   useEffect(() => {
     if (date?.value && contract) {

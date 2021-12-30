@@ -13,9 +13,11 @@ import { AddressContext } from 'contexts/AddressContext';
 
 import useContract from 'hooks/useContract';
 
+import dictionary from 'dictionary/en.json';
+
 type Props = {
   market: Market;
-  showModal: (address: Market['address'], type: 'smartDeposit') => void;
+  showModal: (address: Market['address'], type: String) => void;
   src: string;
 };
 
@@ -25,7 +27,7 @@ function Item({ market, showModal, src }: Props) {
 
   const { contract } = useContract(market?.address, fixedLender?.abi!);
 
-  const [poolData, setPoolData] = useState<Pool | undefined>();
+  const [poolData, setPoolData] = useState<Pool | undefined>(undefined);
 
   useEffect(() => {
     if (date?.value && contract) {
@@ -59,7 +61,7 @@ function Item({ market, showModal, src }: Props) {
       </div>
       <span className={style.value}>{poolData?.supplied}</span>
       <div className={style.buttonContainer}>
-        <Button text={'Deposit'} className={'tertiary'} />
+        <Button text={dictionary.deposit} className={'tertiary'} />
       </div>
     </div>
   );

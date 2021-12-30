@@ -13,13 +13,13 @@ import { Assets } from 'types/Assets';
 
 type Props = {
   markets: Array<Market>;
-  showModal: (address: Market['address'], type: 'smartDeposit') => void;
+  showModal: (address: Market['address'], type: String) => void;
 };
 
 function SmartPoolList({ markets, showModal }: Props) {
   return (
     <section className={styles.container}>
-      <p className={styles.sectionTitle}>Smart Pool</p>
+      <p className={styles.sectionTitle}>{dictionary.smartPool}</p>
       <div className={styles.market}>
         <div className={styles.column}>
           <div className={styles.tableRow}>
