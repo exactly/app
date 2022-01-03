@@ -11,6 +11,7 @@ import { AddressProvider } from 'contexts/AddressContext';
 
 import { getCurrentWalletConnected } from 'hooks/useWallet';
 import useNetwork from 'hooks/useNetwork';
+import { LangProvider } from 'contexts/LangContext';
 
 function MyApp({ Component, pageProps }: AppProps) {
   const [walletAddress, setWallet] = useState<string | undefined>(undefined);
@@ -59,9 +60,11 @@ function MyApp({ Component, pageProps }: AppProps) {
         />
         <link rel="icon" href="/icon.ico" />
       </Head>
-      <AddressProvider>
-        <Component {...props} />
-      </AddressProvider>
+      <LangProvider value={"en"}>
+        <AddressProvider>
+          <Component {...props} />
+        </AddressProvider>
+      </LangProvider>
     </>
   );
 }

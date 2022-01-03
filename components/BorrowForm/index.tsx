@@ -14,13 +14,15 @@ import { SupplyRate } from 'types/SupplyRate';
 import { Error } from 'types/Error';
 
 import dictionary from 'dictionary/en.json';
-
+import keys from "./translations.json";
 
 import { AddressContext } from 'contexts/AddressContext';
 import FixedLenderContext from 'contexts/FixedLenderContext';
 import InterestRateModelContext from 'contexts/InterestRateModelContext';
 
 import { Market } from 'types/Market';
+import LangContext from 'contexts/LangContext';
+import { LangKeys } from 'types/Lang';
 
 type Props = {
   contractWithSigner: ethers.Contract;
@@ -37,6 +39,10 @@ function BorrowForm({
   address,
   assetData
 }: Props) {
+  const lang: string = useContext(LangContext);
+  const translations: { [key: string]: LangKeys } = keys;
+
+
   const { date } = useContext(AddressContext);
   const fixedLender = useContext(FixedLenderContext);
   const interestRateModel = useContext(InterestRateModelContext);
@@ -64,7 +70,7 @@ function BorrowForm({
   async function calculateRate() {
     if (!qty || !date) {
       handleLoading(true);
-      return setError({ status: true, msg: dictionary.amountError });
+      return setError({ status: true, msg: translations[lang].amountError });
     }
 
     handleLoading(false);
@@ -93,7 +99,7 @@ function BorrowForm({
       formattedBorrowRate &&
         handleResult({ potentialRate: formattedBorrowRate, hasRate: true });
     } catch (e) {
-      return setError({ status: true, msg: dictionary.defaultError });
+      return setError({ status: true, msg: translations[lang].defaultError });
     }
   }
 
@@ -102,7 +108,7 @@ function BorrowForm({
     const from = await provider.getSigner().getAddress();
 
     if (!qty || !date) {
-      return setError({ status: true, msg: dictionary.defaultError });
+      return setError({ status: true, msg: translations[lang].defaultError });
     }
 
     await fixedLenderWithSigner?.contractWithSigner?.borrowFromMaturityPool(
@@ -119,7 +125,7 @@ function BorrowForm({
   return (
     <>
       <div className={style.fieldContainer}>
-        <span>{dictionary.borrowTitle}</span>
+        <span>{translations[lang].borrowTitle}</span>
         <div className={style.inputContainer}>
           <Input
             type="number"
@@ -133,7 +139,7 @@ function BorrowForm({
         </div>
       </div>
       <div className={style.fieldContainer}>
-        <span>{dictionary.endDate}</span>
+        <span>{translations[lang].endDate}</span>
         <div className={style.inputContainer}>
           <MaturitySelector />
         </div>
