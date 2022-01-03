@@ -13,14 +13,15 @@ import { AddressContext } from 'contexts/AddressContext';
 
 import useContract from 'hooks/useContract';
 
+import dictionary from 'dictionary/en.json';
+
 type Props = {
   market: Market;
-  showModal: (address: Market['address'], type: 'borrow' | 'deposit') => void;
-  type: 'borrow' | 'deposit';
+  showModal: (address: Market['address'], type: String) => void;
   src: string;
 };
 
-function Item({ market, showModal, type, src }: Props) {
+function Item({ market, showModal, src }: Props) {
   const { date } = useContext(AddressContext);
   const fixedLender = useContext(FixedLenderContext);
 
@@ -35,20 +36,14 @@ function Item({ market, showModal, type, src }: Props) {
   }, [date, contract]);
 
   function handleClick() {
-    showModal(market?.address, type);
+    showModal(market?.address, 'smartDeposit');
   }
 
   async function getMarketData() {
-    const { available, borrowed, debt, supplied } =
-      await contract?.maturityPools(date?.value);
+    const { borrowed, supplied } = await contract?.smartPool();
 
-    //we have to see which ones we want to show, meanwhile I leave everything here
     const newPoolData = {
-      available: Math.round(
-        parseInt(await ethers.utils.formatEther(available))
-      ),
       borrowed: Math.round(parseInt(await ethers.utils.formatEther(borrowed))),
-      debt: Math.round(parseInt(await ethers.utils.formatEther(debt))),
       supplied: Math.round(parseInt(await ethers.utils.formatEther(supplied)))
     };
 
@@ -57,23 +52,16 @@ function Item({ market, showModal, type, src }: Props) {
 
   return (
     <div
-      className={`${style.container} ${
-        type == 'borrow' ? style.secondaryContainer : style.primaryContainer
-      }`}
+      className={`${style.container} ${style.primaryContainer}`}
       onClick={handleClick}
     >
       <div className={style.symbol}>
         <img src={src} className={style.assetImage} />
         <span className={style.primary}>{market?.symbol}</span>
       </div>
-      <span className={style.value}>
-        {type == 'borrow' ? poolData?.borrowed : poolData?.supplied}
-      </span>
+      <span className={style.value}>{poolData?.supplied}</span>
       <div className={style.buttonContainer}>
-        <Button
-          text={type == 'borrow' ? 'Borrow' : 'Deposit'}
-          className={type == 'borrow' ? 'secondary' : 'primary'}
-        />
+        <Button text={dictionary.deposit} className={'tertiary'} />
       </div>
     </div>
   );

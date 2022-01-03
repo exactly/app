@@ -1,12 +1,12 @@
 .container {
   display: flex;
   justify-content: space-between;
-  border-top: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
   padding: var(--u2) var(--u3);
   align-items: center;
   border-left: 2px solid var(--white);
   cursor: pointer;
+  background: var(--white);
+  margin: var(--smallUnit);
 
   .symbol {
     width: 20%;

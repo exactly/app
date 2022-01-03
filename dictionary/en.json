@@ -15,5 +15,6 @@
   "defaultError": "Oops, there was a problem!",
   "amountError": "Please fill the amount",
   "loading": "Loading",
-  "marketSize": "Market size"
+  "marketSize": "Market size",
+  "smartPool": "Smart pool"
 }

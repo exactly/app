@@ -48,11 +48,13 @@ function SupplyForm({
     msg: ''
   });
 
-
   let underlyingData: UnderlyingData | undefined = undefined;
 
   if (assetData?.symbol) {
-    underlyingData = getUnderlyingData(process.env.NEXT_PUBLIC_NETWORK!, assetData.symbol);
+    underlyingData = getUnderlyingData(
+      process.env.NEXT_PUBLIC_NETWORK!,
+      assetData.symbol
+    );
   }
 
   const underlyingContract = useContractWithSigner(
