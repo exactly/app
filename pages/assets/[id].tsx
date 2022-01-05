@@ -78,7 +78,7 @@ const Asset: NextPage<Props> = ({ walletAddress, network, auditor }) => {
             </div>
           </div>
         </section>
-        <AssetTable maturities={maturities} />
+        <AssetTable maturities={maturities?.slice(0, 5)} />
         <h2>Asset details</h2>
         <div className={style.assetInfoContainer}>
           <AssetInfo title="Price" value="$4,213.62" />
