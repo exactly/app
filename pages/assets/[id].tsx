@@ -15,6 +15,7 @@ import useContract from 'hooks/useContract';
 import AssetTable from 'components/AssetTable';
 import { useEffect, useState } from 'react';
 import { Maturity } from 'types/Maturity';
+import AssetInfo from 'components/AssetInfo';
 
 interface Props {
   walletAddress: string;
@@ -77,7 +78,13 @@ const Asset: NextPage<Props> = ({ walletAddress, network, auditor }) => {
             </div>
           </div>
         </section>
-        <AssetTable maturities={maturities}/>
+        <AssetTable maturities={maturities} />
+        <h2>Asset details</h2>
+        <div className={style.assetInfoContainer}>
+          <AssetInfo title="Price" value="$4,213.62" />
+          <AssetInfo title="Reserve Factor" value="20%" />
+          <AssetInfo title="Collateral Factor" value="75%" />
+        </div>
       </section>
     </AuditorProvider>
   );

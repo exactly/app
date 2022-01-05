@@ -6,7 +6,7 @@
     display: flex;
     align-items: flex-end;
     .assetContainer{
-      width: 250px;
+      width: 200px;
     }
     .assetMetricsContainer {
       margin: var(--u3) 0px;
@@ -26,5 +26,10 @@
         }
       }
     }
+  }
+  .assetInfoContainer {
+    display: flex;
+    max-width: 45%;
+    justify-content: space-between;
   }
 }
