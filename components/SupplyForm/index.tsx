@@ -121,40 +121,56 @@ function SupplyForm({
       return setError({ status: true, msg: translations[lang].error });
     }
 
-    const tx =
-      await fixedLenderWithSigner?.contractWithSigner?.depositToMaturityPool(
-        ethers.utils.parseUnits(qty!.toString()),
-        parseInt(date.value),
-        '0'
-      );
+    try {
+      const tx =
+        await fixedLenderWithSigner?.contractWithSigner?.depositToMaturityPool(
+          ethers.utils.parseUnits(qty!.toString()),
+          parseInt(date.value),
+          '0'
+        );
 
-    handleTx({ status: 'processing', hash: tx?.hash });
+      handleTx({ status: 'processing', hash: tx?.hash });
 
-    const status = await tx.wait();
+      const status = await tx.wait();
 
-    handleTx({ status: 'success', hash: status?.transactionHash });
+      handleTx({ status: 'success', hash: status?.transactionHash });
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   async function approve() {
-    const approval = await underlyingContract?.contractWithSigner?.approve(
-      address,
-      ethers.utils.parseUnits(99999999999999999999!.toString())
-    );
+    try {
+      const approval = await underlyingContract?.contractWithSigner?.approve(
+        address,
+        ethers.utils.parseUnits(99999999999999999999!.toString())
+      );
 
-    //we set the transaction as pending
-    setPending((pending) => !pending);
+      //we set the transaction as pending
+      setPending((pending) => !pending);
 
-    await approval.wait();
+      await approval.wait();
 
-    //we set the transaction as done
-    setPending((pending) => !pending);
+      //we set the transaction as done
+      setPending((pending) => !pending);
 
-    //once the tx is done we update the step
-    setStep((step) => step + 1);
+      //once the tx is done we update the step
+      setStep((step) => step + 1);
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   function handleLoading(hasRate: boolean) {
     handleResult({ potentialRate: undefined, hasRate: hasRate });
+  }
+
+  function handleClickAction() {
+    if (step === 1 && !pending) {
+      return approve();
+    } else if (!pending) {
+      return deposit();
+    }
   }
 
   return (
@@ -192,12 +208,14 @@ function SupplyForm({
         {pending && <p>{translations[lang].pendingTransaction}</p>}
         <div className={style.buttonContainer}>
           <Button
-            text={translations[lang].deposit}
-            onClick={
-              step == 1 && !pending ? approve : !pending ? deposit : () => {}
+            text={
+              step == 1
+                ? translations[lang].approve
+                : translations[lang].deposit
             }
-            className={qty && qty > 0 ? 'primary' : 'disabled'}
-            disabled={!qty || qty <= 0}
+            onClick={handleClickAction}
+            className={qty && qty > 0 && !pending ? 'primary' : 'disabled'}
+            disabled={(!qty || qty <= 0) && !pending}
           />
         </div>
       </div>

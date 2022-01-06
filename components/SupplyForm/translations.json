@@ -7,7 +7,8 @@
     "maturityPool": "Maturity Pool",
     "permissionApprove": "Please approve before depositing",
     "permissionDeposit": "Verify your data and Deposit",
-    "pendingTransaction": "Transaction Pending..."
+    "pendingTransaction": "Transaction Pending...",
+    "approve": "Approve"
   },
   "es": {}
 }

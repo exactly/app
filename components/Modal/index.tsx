@@ -55,14 +55,6 @@ function Modal({ contractData, closeModal }: Props) {
     closeModal({});
   }
 
-  function handleMinimize() {
-    setMinimized((prev) => !prev);
-  }
-
-  function handleTx(data: Transaction) {
-    setTx(data);
-  }
-
   return (
     <>
       {!minimized && (
@@ -71,7 +63,11 @@ function Modal({ contractData, closeModal }: Props) {
             <span
               className={styles.closeButton}
               onClick={
-                !tx || tx.status == 'success' ? handleClose : handleMinimize
+                !tx || tx.status == 'success'
+                  ? handleClose
+                  : () => {
+                      setMinimized((prev) => !prev);
+                    }
               }
             >
               X
@@ -99,7 +95,7 @@ function Modal({ contractData, closeModal }: Props) {
                     hasRate={hasRate}
                     address={contractData.address}
                     assetData={assetData}
-                    handleTx={handleTx}
+                    handleTx={(data: Transaction) => setTx(data)}
                   />
                 )}
 
@@ -112,7 +108,7 @@ function Modal({ contractData, closeModal }: Props) {
                     hasRate={hasRate}
                     address={contractData.address}
                     assetData={assetData}
-                    handleTx={handleTx}
+                    handleTx={(data: Transaction) => setTx(data)}
                   />
                 )}
 
@@ -139,13 +135,22 @@ function Modal({ contractData, closeModal }: Props) {
       )}
 
       {tx && minimized && (
-        <MinimizedModal tx={tx} handleMinimize={handleMinimize} />
+        <MinimizedModal
+          tx={tx}
+          handleMinimize={() => {
+            setMinimized((prev) => !prev);
+          }}
+        />
       )}
 
       {!minimized && (
         <Overlay
           closeModal={
-            !tx || tx.status == 'success' ? handleClose : handleMinimize
+            !tx || tx.status == 'success'
+              ? handleClose
+              : () => {
+                  setMinimized((prev) => !prev);
+                }
           }
         />
       )}

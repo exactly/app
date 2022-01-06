@@ -79,34 +79,45 @@ function SmartPoolModal({ contractData, closeModal }: Props) {
     if (!qty) {
       return setError({ status: true, msg: translations[lang].error });
     }
+    try {
+      const tx =
+        await fixedLenderWithSigner?.contractWithSigner?.depositToSmartPool(
+          ethers.utils.parseUnits(qty!.toString())
+        );
 
-    const tx =
-      await fixedLenderWithSigner?.contractWithSigner?.depositToSmartPool(
-        ethers.utils.parseUnits(qty!.toString())
-      );
+      setTx({ status: 'processing', hash: tx?.hash });
 
-    setTx({ status: 'processing', hash: tx?.hash });
+      const status = await tx.wait();
 
-    const status = await tx.wait();
-
-    setTx({ status: 'success', hash: status?.transactionHash });
+      setTx({ status: 'success', hash: status?.transactionHash });
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   async function approve() {
-    const approval = await underlyingContract?.contractWithSigner?.approve(
-      assetData.address,
-      ethers.utils.parseUnits(qty!.toString())
-    );
-    setPending((pending) => !pending);
+    try {
+      const approval = await underlyingContract?.contractWithSigner?.approve(
+        assetData.address,
+        ethers.utils.parseUnits(qty!.toString())
+      );
+      setPending((pending) => !pending);
 
-    await approval.wait();
+      await approval.wait();
 
-    setPending((pending) => !pending);
-    setStep((step) => step + 1);
+      setPending((pending) => !pending);
+      setStep((step) => step + 1);
+    } catch (e) {
+      console.log(e);
+    }
   }
 
-  function handleMinimize() {
-    setMinimized((prev) => !prev);
+  function handleClickAction() {
+    if (step === 1 && !pending) {
+      return approve();
+    } else if (!pending) {
+      return deposit();
+    }
   }
 
   return (
@@ -162,17 +173,11 @@ function SmartPoolModal({ contractData, closeModal }: Props) {
                           ? translations[lang].approve
                           : translations[lang].deposit
                       }
-                      onClick={
-                        step == 1 && !pending
-                          ? approve
-                          : !pending
-                          ? deposit
-                          : () => {}
-                      }
+                      onClick={handleClickAction}
                       className={
                         qty && qty > 0 && !pending ? 'primary' : 'disabled'
                       }
-                      disabled={!qty || qty <= 0}
+                      disabled={(!qty || qty <= 0) && !pending}
                     />
                   </div>
                 </div>
@@ -184,13 +189,22 @@ function SmartPoolModal({ contractData, closeModal }: Props) {
       )}
 
       {tx && minimized && (
-        <MinimizedModal tx={tx} handleMinimize={handleMinimize} />
+        <MinimizedModal
+          tx={tx}
+          handleMinimize={() => {
+            setMinimized((prev) => !prev);
+          }}
+        />
       )}
 
       {!minimized && (
         <Overlay
           closeModal={
-            !tx || tx.status == 'success' ? handleClose : handleMinimize
+            !tx || tx.status == 'success'
+              ? handleClose
+              : () => {
+                  setMinimized((prev) => !prev);
+                }
           }
         />
       )}

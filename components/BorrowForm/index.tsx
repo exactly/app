@@ -107,18 +107,22 @@ function BorrowForm({
       return setError({ status: true, msg: translations[lang].error });
     }
 
-    const tx =
-      await fixedLenderWithSigner?.contractWithSigner?.borrowFromMaturityPool(
-        ethers.utils.parseUnits(qty!.toString()),
-        parseInt(date.value),
-        ethers.utils.parseUnits('1000')
-      );
+    try {
+      const tx =
+        await fixedLenderWithSigner?.contractWithSigner?.borrowFromMaturityPool(
+          ethers.utils.parseUnits(qty!.toString()),
+          parseInt(date.value),
+          ethers.utils.parseUnits('1000')
+        );
 
-    handleTx({ status: 'processing', hash: tx?.hash });
+      handleTx({ status: 'processing', hash: tx?.hash });
 
-    const status = await tx.wait();
+      const status = await tx.wait();
 
-    handleTx({ status: 'success', hash: status?.transactionHash });
+      handleTx({ status: 'success', hash: status?.transactionHash });
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   function handleLoading(hasRate: boolean) {

@@ -5,6 +5,7 @@ import styles from './style.module.scss';
 import { Dictionary } from 'types/Dictionary';
 import { Transaction } from 'types/Transaction';
 import { LangKeys } from 'types/Lang';
+import { ModalCases } from 'types/ModalCases';
 
 import keys from './translations.json';
 
@@ -18,7 +19,7 @@ function ModalGif({ tx }: Props) {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
-  const options: Dictionary<Dictionary<string>> = {
+  const options: Dictionary<ModalCases> = {
     processing: {
       img: '',
       title: translations[lang].loadingTitle

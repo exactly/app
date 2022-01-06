@@ -5,6 +5,7 @@ import styles from './style.module.scss';
 import { Dictionary } from 'types/Dictionary';
 import { Transaction } from 'types/Transaction';
 import { LangKeys } from 'types/Lang';
+import { ModalCases } from 'types/ModalCases';
 
 import keys from './translations.json';
 
@@ -19,7 +20,7 @@ function MinimizedModal({ tx, handleMinimize }: Props) {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
-  const options: Dictionary<Dictionary<string>> = {
+  const options: Dictionary<ModalCases> = {
     processing: {
       img: '',
       title: translations[lang].loadingTitle
@@ -35,16 +36,12 @@ function MinimizedModal({ tx, handleMinimize }: Props) {
     }
   };
 
-  function handleClick() {
-    handleMinimize();
-  }
-
   return (
     <div className={styles.container}>
       <img
         src="./img/icons/open.svg"
         className={styles.open}
-        onClick={handleClick}
+        onClick={() => handleMinimize()}
       />
       <h3 className={styles.title}>{options[tx.status].title}</h3>
       <div className={styles.loading}>
