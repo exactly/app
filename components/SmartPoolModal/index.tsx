@@ -106,67 +106,70 @@ function SmartPoolModal({ contractData, closeModal }: Props) {
 
   return (
     <>
-      <div className={styles.modal}>
-        <div className={styles.closeContainer}>
-          <span className={styles.closeButton} onClick={handleClose}>
-            X
-          </span>
-        </div>
-        {!tx && (
-          <>
-            <div className={styles.assets}>
-              <p>{contractData.type == 'borrow' ? 'Borrow' : 'Deposit'}</p>
-              <AssetSelector
-                defaultAddress={contractData.address}
-                onChange={(marketData) => setAssetData(marketData)}
-              />
-            </div>
-            <div className={styles.fieldContainer}>
-              <span>{dictionary.depositTitle}</span>
-              <div className={styles.inputContainer}>
-                <Input
-                  type="number"
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    setQty(e.target.valueAsNumber);
-                    setError({ status: false, msg: '' });
-                  }}
-                  value={qty}
-                  placeholder="0"
+      {!minimized && (
+        <div className={styles.modal}>
+          <div className={styles.closeContainer}>
+            <span className={styles.closeButton} onClick={handleClose}>
+              X
+            </span>
+          </div>
+          {!tx && (
+            <>
+              <div className={styles.assets}>
+                <p>{contractData.type == 'borrow' ? 'Borrow' : 'Deposit'}</p>
+                <AssetSelector
+                  defaultAddress={contractData.address}
+                  onChange={(marketData) => setAssetData(marketData)}
                 />
               </div>
-              {error?.status && <p className={styles.error}>{error?.msg}</p>}
-              <Stepper currentStep={step} totalSteps={3} />
               <div className={styles.fieldContainer}>
-                {!pending && (
-                  <p>
-                    {step == 1
-                      ? dictionary.permissionApprove
-                      : dictionary.permissionDeposit}
-                  </p>
-                )}
-                {pending && <p>{dictionary.pendingTransaction}</p>}
-                <div className={styles.buttonContainer}>
-                  <Button
-                    text={step == 1 ? dictionary.approve : dictionary.deposit}
-                    onClick={
-                      step == 1 && !pending
-                        ? approve
-                        : !pending
-                        ? deposit
-                        : () => {}
-                    }
-                    className={
-                      qty && qty > 0 && !pending ? 'primary' : 'disabled'
-                    }
-                    disabled={!qty || qty <= 0}
+                <span>{dictionary.depositTitle}</span>
+                <div className={styles.inputContainer}>
+                  <Input
+                    type="number"
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      setQty(e.target.valueAsNumber);
+                      setError({ status: false, msg: '' });
+                    }}
+                    value={qty}
+                    placeholder="0"
                   />
                 </div>
+                {error?.status && <p className={styles.error}>{error?.msg}</p>}
+                <Stepper currentStep={step} totalSteps={3} />
+                <div className={styles.fieldContainer}>
+                  {!pending && (
+                    <p>
+                      {step == 1
+                        ? dictionary.permissionApprove
+                        : dictionary.permissionDeposit}
+                    </p>
+                  )}
+                  {pending && <p>{dictionary.pendingTransaction}</p>}
+                  <div className={styles.buttonContainer}>
+                    <Button
+                      text={step == 1 ? dictionary.approve : dictionary.deposit}
+                      onClick={
+                        step == 1 && !pending
+                          ? approve
+                          : !pending
+                          ? deposit
+                          : () => {}
+                      }
+                      className={
+                        qty && qty > 0 && !pending ? 'primary' : 'disabled'
+                      }
+                      disabled={!qty || qty <= 0}
+                    />
+                  </div>
+                </div>
               </div>
-            </div>
-          </>
-        )}
-        {tx && <ModalGif tx={tx} />}
-      </div>
+            </>
+          )}
+          {tx && <ModalGif tx={tx} />}
+        </div>
+      )}
+
       {tx && minimized && (
         <MinimizedModal tx={tx} handleMinimize={handleMinimize} />
       )}

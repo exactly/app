@@ -11,7 +11,6 @@ import Navbar from 'components/Navbar';
 import Hero from 'components/Hero';
 import CurrentNetwork from 'components/CurrentNetwork';
 import Footer from 'components/Footer';
-import Overlay from 'components/Overlay';
 import MobileNavbar from 'components/MobileNavbar';
 import SmartPoolList from 'components/SmartPoolList';
 import SmartPoolModal from 'components/SmartPoolModal';

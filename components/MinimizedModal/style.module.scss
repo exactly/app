@@ -14,6 +14,7 @@
     position: absolute;
     right: var(--u2);
     top: var(--u2);
+    cursor: pointer;
   }
 
   .title {
@@ -31,23 +32,30 @@
     align-items: center;
     align-content: center;
     justify-content: flex-start;
-  }
-
-  .loadingLine {
-    height: var(--smallUnit);
-    width: 100%;
-    background: var(--back-color);
-    overflow: hidden;
-    position: relative;
-
-    &:before {
-      content: '';
-      display: block;
-      background-color: var(--primary);
+    .loadingLine {
       height: var(--smallUnit);
-      width: 30%;
-      animation: getWidth 2s linear infinite;
-      position: absolute;
+      width: 100%;
+      background: var(--back-color);
+      overflow: hidden;
+      position: relative;
+
+      &:before {
+        content: '';
+        display: block;
+        background-color: var(--primary);
+        height: var(--smallUnit);
+        width: 30%;
+        animation: getWidth 2s linear infinite;
+        position: absolute;
+      }
+    }
+
+    .doneLine {
+      height: var(--smallUnit);
+      width: 100%;
+      background: var(--success);
+      overflow: hidden;
+      position: relative;
     }
   }
 

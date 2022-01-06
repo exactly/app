@@ -14,6 +14,7 @@ function Stepper({ currentStep, totalSteps }: Props) {
             className={
               currentStep >= step + 1 ? styles.selectedStep : styles.step
             }
+            key={step}
           ></div>
         );
       })}

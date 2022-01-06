@@ -48,7 +48,11 @@ function MinimizedModal({ tx, handleMinimize }: Props) {
       />
       <h3 className={styles.title}>{options[tx.status].title}</h3>
       <div className={styles.loading}>
-        <div className={styles.loadingLine}></div>
+        {tx.status != 'success' ? (
+          <div className={styles.loadingLine}></div>
+        ) : (
+          <div className={styles.doneLine}></div>
+        )}
       </div>
       <p className={styles.link}>
         {translations[lang].etherscanText}{' '}
