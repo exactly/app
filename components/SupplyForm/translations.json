@@ -1,0 +1,10 @@
+{
+  "en": {
+    "error": "Oops, there was a problem!",
+    "deposit": "Deposit",
+    "depositTitle": "Amount to deposit",
+    "amountError": "Please fill the amount",
+    "maturityPool": "Maturity Pool"
+  },
+  "es": {}
+}

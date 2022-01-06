@@ -9,11 +9,13 @@ import Loading from 'components/common/Loading';
 import useContractWithSigner from 'hooks/useContractWithSigner';
 
 import AuditorContext from 'contexts/AuditorContext';
+import LangContext from 'contexts/LangContext';
 
 import { SupplyRate } from 'types/SupplyRate';
 import { Market } from 'types/Market';
+import { LangKeys } from 'types/Lang';
 
-import dictionary from 'dictionary/en.json';
+import keys from './translations.json';
 
 type Props = {
   contractData: any;
@@ -22,6 +24,8 @@ type Props = {
 
 function Modal({ contractData, closeModal }: Props) {
   const auditor = useContext(AuditorContext);
+  const lang: string = useContext(LangContext);
+  const translations: { [key: string]: LangKeys } = keys;
 
   const [potentialRate, setPotentialRate] = useState<string | undefined>('0');
 
@@ -82,7 +86,9 @@ function Modal({ contractData, closeModal }: Props) {
       {potentialRate && (
         <section className={styles.right}>
           <p>
-            <span className={styles.detail}> {dictionary.annualRate}</span>
+            <span className={styles.detail}>
+              {translations[lang].annualRate}
+            </span>
             <span className={styles.value}>
               {(parseFloat(potentialRate) * 100).toFixed(4)} %
             </span>

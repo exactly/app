@@ -1,14 +1,21 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import styles from './style.module.scss';
 
 import useProvider from 'hooks/useProvider';
 import { getCurrentWalletConnected } from 'hooks/useWallet';
 
+import LangContext from 'contexts/LangContext';
+
 import Button from 'components/common/Button';
 import Wallet from 'components/Wallet';
 import Overlay from 'components/Overlay';
+
+import { LangKeys } from 'types/Lang';
+
+import styles from './style.module.scss';
+
+import keys from './translations.json';
 
 type Props = {
   walletAddress?: String;
@@ -18,6 +25,9 @@ type Props = {
 };
 
 function MobileNavbar({ walletAddress, network }: Props) {
+  const lang: string = useContext(LangContext);
+  const translations: { [key: string]: LangKeys } = keys;
+
   const [currentWallet, setWallet] = useState<String>(walletAddress || '');
   const [open, setOpen] = useState<Boolean>(false);
   const { getProvider } = useProvider();
@@ -59,10 +69,10 @@ function MobileNavbar({ walletAddress, network }: Props) {
   }
 
   const routes = [
-    { pathname: '/', href: '/', name: 'Markets' },
-    { pathname: '/assets', href: '/assets', name: 'Assets' },
-    { pathname: '/dashboard', href: '/', name: 'Dashboard' },
-    { pathname: '/nerd-mode', href: '/', name: 'Nerd Mode' }
+    { pathname: '/', href: '/', name: translations[lang].markets },
+    { pathname: '/assets', href: '/assets', name: translations[lang].assets },
+    { pathname: '/dashboard', href: '/', name: translations[lang].dashboard },
+    { pathname: '/nerd-mode', href: '/', name: translations[lang].nerdMode }
   ];
 
   return (

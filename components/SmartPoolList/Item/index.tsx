@@ -3,17 +3,19 @@ import { ethers } from 'ethers';
 
 import Button from 'components/common/Button';
 
-import style from './style.module.scss';
-
 import { Market } from 'types/Market';
 import { Pool } from 'types/Pool';
+import { LangKeys } from 'types/Lang';
 
 import FixedLenderContext from 'contexts/FixedLenderContext';
 import { AddressContext } from 'contexts/AddressContext';
+import LangContext from 'contexts/LangContext';
 
 import useContract from 'hooks/useContract';
 
-import dictionary from 'dictionary/en.json';
+import style from './style.module.scss';
+
+import keys from './translations.json';
 
 type Props = {
   market: Market;
@@ -24,6 +26,8 @@ type Props = {
 function Item({ market, showModal, src }: Props) {
   const { date } = useContext(AddressContext);
   const fixedLender = useContext(FixedLenderContext);
+  const lang: string = useContext(LangContext);
+  const translations: { [key: string]: LangKeys } = keys;
 
   const { contract } = useContract(market?.address, fixedLender?.abi!);
 
@@ -61,7 +65,7 @@ function Item({ market, showModal, src }: Props) {
       </div>
       <span className={style.value}>{poolData?.supplied}</span>
       <div className={style.buttonContainer}>
-        <Button text={dictionary.deposit} className={'tertiary'} />
+        <Button text={translations[lang].deposit} className={'tertiary'} />
       </div>
     </div>
   );

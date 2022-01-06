@@ -9,12 +9,10 @@ import MaturitySelector from 'components/MaturitySelector';
 import useContractWithSigner from 'hooks/useContractWithSigner';
 import useContract from 'hooks/useContract';
 
-
 import { SupplyRate } from 'types/SupplyRate';
 import { Error } from 'types/Error';
 
-import dictionary from 'dictionary/en.json';
-import keys from "./translations.json";
+import keys from './translations.json';
 
 import { AddressContext } from 'contexts/AddressContext';
 import FixedLenderContext from 'contexts/FixedLenderContext';
@@ -41,7 +39,6 @@ function BorrowForm({
 }: Props) {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
-
 
   const { date } = useContext(AddressContext);
   const fixedLender = useContext(FixedLenderContext);
@@ -99,7 +96,7 @@ function BorrowForm({
       formattedBorrowRate &&
         handleResult({ potentialRate: formattedBorrowRate, hasRate: true });
     } catch (e) {
-      return setError({ status: true, msg: translations[lang].defaultError });
+      return setError({ status: true, msg: translations[lang].error });
     }
   }
 
@@ -108,7 +105,7 @@ function BorrowForm({
     const from = await provider.getSigner().getAddress();
 
     if (!qty || !date) {
-      return setError({ status: true, msg: translations[lang].defaultError });
+      return setError({ status: true, msg: translations[lang].error });
     }
 
     await fixedLenderWithSigner?.contractWithSigner?.borrowFromMaturityPool(
@@ -148,7 +145,7 @@ function BorrowForm({
       <div className={style.fieldContainer}>
         <div className={style.buttonContainer}>
           <Button
-            text={dictionary.borrow}
+            text={translations[lang].borrow}
             onClick={borrow}
             className={qty && qty > 0 ? 'secondary' : 'disabled'}
             disabled={!qty || qty <= 0}

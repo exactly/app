@@ -10,14 +10,16 @@ import Button from 'components/common/Button';
 import useContractWithSigner from 'hooks/useContractWithSigner';
 
 import FixedLenderContext from 'contexts/FixedLenderContext';
+import LangContext from 'contexts/LangContext';
 
 import { Market } from 'types/Market';
 import { Error } from 'types/Error';
 import { UnderlyingData } from 'types/Underlying';
-
-import dictionary from 'dictionary/en.json';
+import { LangKeys } from 'types/Lang';
 
 import { getUnderlyingData } from 'utils/utils';
+
+import keys from './translations.json';
 
 type Props = {
   contractData: any;
@@ -26,6 +28,9 @@ type Props = {
 
 function SmartPoolModal({ contractData, closeModal }: Props) {
   const fixedLender = useContext(FixedLenderContext);
+  const lang: string = useContext(LangContext);
+  const translations: { [key: string]: LangKeys } = keys;
+
   const [assetData, setAssetData] = useState<Market>(contractData);
 
   const [qty, setQty] = useState<number>(0);
@@ -60,7 +65,7 @@ function SmartPoolModal({ contractData, closeModal }: Props) {
 
   async function deposit() {
     if (!qty) {
-      return setError({ status: true, msg: dictionary.defaultError });
+      return setError({ status: true, msg: translations[lang].error });
     }
 
     try {
@@ -94,7 +99,7 @@ function SmartPoolModal({ contractData, closeModal }: Props) {
         />
       </div>
       <div className={styles.fieldContainer}>
-        <span>{dictionary.depositTitle}</span>
+        <span>{translations[lang].depositTitle}</span>
         <div className={styles.inputContainer}>
           <Input
             type="number"
@@ -110,7 +115,7 @@ function SmartPoolModal({ contractData, closeModal }: Props) {
         <div className={styles.fieldContainer}>
           <div className={styles.buttonContainer}>
             <Button
-              text={dictionary.deposit}
+              text={translations[lang].deposit}
               onClick={deposit}
               className={qty && qty > 0 ? 'primary' : 'disabled'}
               disabled={!qty || qty <= 0}
