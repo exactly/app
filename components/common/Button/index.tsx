@@ -1,8 +1,13 @@
-import { CSSProperties, MouseEventHandler } from 'react';
+import { CSSProperties, MouseEventHandler, useContext } from 'react';
 import styles from './style.module.scss';
+
 import { transformClasses } from 'utils/utils';
 
-import dictionary from 'dictionary/en.json';
+import LangContext from 'contexts/LangContext';
+
+import { LangKeys } from 'types/Lang';
+
+import keys from './translations.json';
 
 type Props = {
   text: string;
@@ -14,6 +19,9 @@ type Props = {
 };
 
 function Button({ text, onClick, className, style, loading, disabled }: Props) {
+  const lang: string = useContext(LangContext);
+  const translations: { [key: string]: LangKeys } = keys;
+
   let parsedClassName = '';
 
   if (className) {
@@ -26,7 +34,7 @@ function Button({ text, onClick, className, style, loading, disabled }: Props) {
       onClick={onClick}
       disabled={disabled ?? false}
     >
-      {loading ? dictionary.loading : text}
+      {loading ? translations[lang].loading : text}
     </button>
   );
 }

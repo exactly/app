@@ -28,9 +28,9 @@ import { Market } from 'types/Market';
 import { Network } from 'types/Network';
 import { UnformattedMarket } from 'types/UnformattedMarket';
 import { Contract } from 'types/Contract';
+import { Dictionary } from 'types/Dictionary';
 
 import dictionary from 'dictionary/en.json';
-import { Dictionary } from 'types/Dictionary';
 
 interface Props {
   walletAddress: string;

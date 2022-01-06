@@ -1,9 +1,10 @@
 {
   "en": {
     "amountError": "Please fill the amount",
-    "defaultError": "Oops, there was a problem!",
+    "error": "Oops, there was a problem!",
     "borrowTitle": "Amount to borrow",
-    "endDate": "End date"
+    "endDate": "End date",
+    "borrow": "Borrow"
   },
   "es": {}
 }

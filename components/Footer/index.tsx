@@ -1,6 +1,17 @@
+import { useContext } from 'react';
+
+import LangContext from 'contexts/LangContext';
+
+import { LangKeys } from 'types/Lang';
+
 import style from './style.module.scss';
 
+import keys from './translations.json';
+
 const Footer = () => {
+  const lang: string = useContext(LangContext);
+  const translations: { [key: string]: LangKeys } = keys;
+
   const date = new Date();
 
   return (
@@ -54,7 +65,7 @@ const Footer = () => {
               rel="noreferrer"
               className={style.link}
             >
-              Blog
+              {translations[lang].blog}
             </a>
             <a
               href="mailto: info@exactly.finance"
@@ -62,7 +73,7 @@ const Footer = () => {
               rel="noreferrer"
               className={style.link}
             >
-              Contact
+              {translations[lang].blog}
             </a>
             <a
               href="https://github.com/exactly-finance/about/tree/main/jobs"
@@ -70,7 +81,7 @@ const Footer = () => {
               rel="noreferrer"
               className={style.link}
             >
-              Careers
+              {translations[lang].careers}
             </a>
           </div>
         </div>
