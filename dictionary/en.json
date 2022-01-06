@@ -4,7 +4,7 @@
   "lend": "Total lent",
   "supply": "Total supplied",
   "annualRate": "Annual rate",
-  "endDate": "End date",
+  "endDate": "Maturity Pool",
   "maturityPools": "Maturity pools",
   "deposit": "Deposit",
   "borrow": "Borrow",
@@ -16,5 +16,9 @@
   "amountError": "Please fill the amount",
   "loading": "Loading",
   "marketSize": "Market size",
-  "smartPool": "Smart pool"
+  "smartPool": "Smart pool",
+  "approve": "Approve",
+  "permissionApprove": "Please approve before depositing",
+  "permissionDeposit": "Verify your data and Deposit",
+  "pendingTransaction": "Transaction Pending..."
 }

@@ -5,6 +5,7 @@ import style from './style.module.scss';
 import Input from 'components/common/Input';
 import Button from 'components/common/Button';
 import MaturitySelector from 'components/MaturitySelector';
+import Stepper from 'components/Stepper';
 
 import useContractWithSigner from 'hooks/useContractWithSigner';
 import useContract from 'hooks/useContract';
@@ -19,8 +20,10 @@ import { getUnderlyingData } from 'utils/utils';
 import { AddressContext } from 'contexts/AddressContext';
 import FixedLenderContext from 'contexts/FixedLenderContext';
 import InterestRateModelContext from 'contexts/InterestRateModelContext';
+
 import { Market } from 'types/Market';
 import { UnderlyingData } from 'types/Underlying';
+import { Transaction } from 'types/Transaction';
 
 type Props = {
   contractWithSigner: ethers.Contract;
@@ -28,6 +31,7 @@ type Props = {
   hasRate: boolean | undefined;
   address: string;
   assetData: Market | undefined;
+  handleTx: (data: Transaction) => void;
 };
 
 function SupplyForm({
@@ -35,7 +39,8 @@ function SupplyForm({
   handleResult,
   hasRate,
   address,
-  assetData
+  assetData,
+  handleTx
 }: Props) {
   const { date } = useContext(AddressContext);
   const fixedLender = useContext(FixedLenderContext);
@@ -47,6 +52,9 @@ function SupplyForm({
     status: false,
     msg: ''
   });
+
+  const [step, setStep] = useState<number>(1);
+  const [pending, setPending] = useState<boolean>(false);
 
   let underlyingData: UnderlyingData | undefined = undefined;
 
@@ -105,25 +113,40 @@ function SupplyForm({
   }
 
   async function deposit() {
-    const provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
-    const from = await provider.getSigner().getAddress();
-
     if (!qty || !date) {
       return setError({ status: true, msg: dictionary.defaultError });
     }
 
+    const tx =
+      await fixedLenderWithSigner?.contractWithSigner?.depositToMaturityPool(
+        ethers.utils.parseUnits(qty!.toString()),
+        parseInt(date.value),
+        '0'
+      );
+
+    handleTx({ status: 'processing', hash: tx?.hash });
+
+    const status = await tx.wait();
+
+    handleTx({ status: 'success', hash: status?.transactionHash });
+  }
+
+  async function approve() {
     const approval = await underlyingContract?.contractWithSigner?.approve(
       address,
-      ethers.utils.parseUnits(qty!.toString())
+      ethers.utils.parseUnits(99999999999999999999!.toString())
     );
+
+    //we set the transaction as pending
+    setPending((pending) => !pending);
 
     await approval.wait();
 
-    await fixedLenderWithSigner?.contractWithSigner?.depositToMaturityPool(
-      ethers.utils.parseUnits(qty!.toString()),
-      parseInt(date.value),
-      '0'
-    );
+    //we set the transaction as done
+    setPending((pending) => !pending);
+
+    //once the tx is done we update the step
+    setStep((step) => step + 1);
   }
 
   function handleLoading(hasRate: boolean) {
@@ -153,12 +176,23 @@ function SupplyForm({
         </div>
       </div>
       {error?.status && <p className={style.error}>{error?.msg}</p>}
+      <Stepper currentStep={step} totalSteps={3} />
       <div className={style.fieldContainer}>
+        {!pending && (
+          <p>
+            {step == 1
+              ? dictionary.permissionApprove
+              : dictionary.permissionDeposit}
+          </p>
+        )}
+        {pending && <p>{dictionary.pendingTransaction}</p>}
         <div className={style.buttonContainer}>
           <Button
-            text={dictionary.deposit}
-            onClick={deposit}
-            className={qty && qty > 0 ? 'primary' : 'disabled'}
+            text={step == 1 ? dictionary.approve : dictionary.deposit}
+            onClick={
+              step == 1 && !pending ? approve : !pending ? deposit : () => {}
+            }
+            className={qty && qty > 0 && !pending ? 'primary' : 'disabled'}
             disabled={!qty || qty <= 0}
           />
         </div>

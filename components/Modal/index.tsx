@@ -5,6 +5,9 @@ import SupplyForm from 'components/SupplyForm';
 import AssetSelector from 'components/AssetSelector';
 import BorrowForm from 'components/BorrowForm';
 import Loading from 'components/common/Loading';
+import ModalGif from 'components/ModalGif';
+import MinimizedModal from 'components/MinimizedModal';
+import Overlay from 'components/Overlay';
 
 import useContractWithSigner from 'hooks/useContractWithSigner';
 
@@ -12,6 +15,7 @@ import AuditorContext from 'contexts/AuditorContext';
 
 import { SupplyRate } from 'types/SupplyRate';
 import { Market } from 'types/Market';
+import { Transaction } from 'types/Transaction';
 
 import dictionary from 'dictionary/en.json';
 
@@ -29,6 +33,10 @@ function Modal({ contractData, closeModal }: Props) {
 
   const [hasRate, setHasRate] = useState<boolean | undefined>(true);
 
+  const [tx, setTx] = useState<Transaction | undefined>(undefined);
+
+  const [minimized, setMinimized] = useState<Boolean>(false);
+
   const { contractWithSigner } = useContractWithSigner(
     contractData?.address,
     auditor?.abi!
@@ -43,55 +51,98 @@ function Modal({ contractData, closeModal }: Props) {
     closeModal({});
   }
 
+  function handleMinimize() {
+    setMinimized((prev) => !prev);
+  }
+
+  function handleTx(data: Transaction) {
+    setTx(data);
+  }
+
   return (
-    <div className={styles.modal}>
-      <div className={styles.closeContainer}>
-        <span className={styles.closeButton} onClick={handleClose}>
-          X
-        </span>
-      </div>
-      <div className={styles.assets}>
-        <p>{contractData.type == 'borrow' ? 'Borrow' : 'Deposit'}</p>
-        <AssetSelector
-          defaultAddress={contractData.address}
-          onChange={(marketData) => setAssetData(marketData)}
-        />
-      </div>
-      {contractWithSigner && contractData.type == 'deposit' && assetData && (
-        <SupplyForm
-          contractWithSigner={contractWithSigner!}
-          handleResult={handleResult}
-          hasRate={hasRate}
-          address={contractData.address}
-          assetData={assetData}
-        />
-      )}
-
-      {contractWithSigner && contractData.type == 'borrow' && assetData && (
-        <BorrowForm
-          contractWithSigner={contractWithSigner!}
-          handleResult={handleResult}
-          hasRate={hasRate}
-          address={contractData.address}
-          assetData={assetData}
-        />
-      )}
-
-      {!contractWithSigner && <Loading />}
-
-      {potentialRate && (
-        <section className={styles.right}>
-          <p>
-            <span className={styles.detail}> {dictionary.annualRate}</span>
-            <span className={styles.value}>
-              {(parseFloat(potentialRate) * 100).toFixed(4)} %
+    <>
+      {!minimized && (
+        <div className={styles.modal}>
+          <div className={styles.closeContainer}>
+            <span
+              className={styles.closeButton}
+              onClick={
+                !tx || tx.status == 'success' ? handleClose : handleMinimize
+              }
+            >
+              X
             </span>
-          </p>
-        </section>
+          </div>
+          {!tx && (
+            <>
+              <div className={styles.assets}>
+                <p>{contractData.type == 'borrow' ? 'Borrow' : 'Deposit'}</p>
+                <AssetSelector
+                  defaultAddress={contractData.address}
+                  onChange={(marketData) => setAssetData(marketData)}
+                />
+              </div>
+              {contractWithSigner &&
+                contractData.type == 'deposit' &&
+                assetData && (
+                  <SupplyForm
+                    contractWithSigner={contractWithSigner!}
+                    handleResult={handleResult}
+                    hasRate={hasRate}
+                    address={contractData.address}
+                    assetData={assetData}
+                    handleTx={handleTx}
+                  />
+                )}
+
+              {contractWithSigner &&
+                contractData.type == 'borrow' &&
+                assetData && (
+                  <BorrowForm
+                    contractWithSigner={contractWithSigner!}
+                    handleResult={handleResult}
+                    hasRate={hasRate}
+                    address={contractData.address}
+                    assetData={assetData}
+                    handleTx={handleTx}
+                  />
+                )}
+
+              {!contractWithSigner && <Loading />}
+
+              {potentialRate && (
+                <section className={styles.right}>
+                  <p>
+                    <span className={styles.detail}>
+                      {' '}
+                      {dictionary.annualRate}
+                    </span>
+                    <span className={styles.value}>
+                      {(parseFloat(potentialRate) * 100).toFixed(4)} %
+                    </span>
+                  </p>
+                </section>
+              )}
+
+              {!hasRate && <Loading />}
+            </>
+          )}
+          {tx && <ModalGif tx={tx} />}
+        </div>
       )}
 
-      {!hasRate && <Loading />}
-    </div>
+      {tx && minimized && (
+        <MinimizedModal tx={tx} handleMinimize={handleMinimize} />
+      )}
+
+      {!minimized && (
+        <Overlay
+          closeModal={
+            !tx || tx.status == 'success' ? handleClose : handleMinimize
+          }
+        />
+      )}
+    </>
   );
 }
 

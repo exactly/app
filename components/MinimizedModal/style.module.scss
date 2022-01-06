@@ -1,0 +1,87 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: fixed;
+  right: var(--u2);
+  bottom: var(--u2);
+  background: var(--white);
+  box-shadow: var(--shadow-3);
+  width: 250px;
+  padding: var(--u2);
+
+  .open {
+    position: absolute;
+    right: var(--u2);
+    top: var(--u2);
+  }
+
+  .title {
+    text-align: center;
+    font-size: var(--font-20);
+    margin: var(--smallUnit);
+  }
+
+  .loading {
+    background-color: var(--line);
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    align-content: center;
+    justify-content: flex-start;
+  }
+
+  .loadingLine {
+    height: var(--smallUnit);
+    width: 100%;
+    background: var(--back-color);
+    overflow: hidden;
+    position: relative;
+
+    &:before {
+      content: '';
+      display: block;
+      background-color: var(--primary);
+      height: var(--smallUnit);
+      width: 30%;
+      animation: getWidth 2s linear infinite;
+      position: absolute;
+    }
+  }
+
+  .link {
+    text-align: center;
+    margin: var(--smallUnit);
+    font-size: var(--font-12);
+
+    .etherscan {
+      color: var(--primary);
+      font-weight: 500;
+      cursor: pointer;
+    }
+  }
+}
+
+@keyframes getWidth {
+  100% {
+    left: 100%;
+  }
+
+  70% {
+    left: 70%;
+  }
+
+  40% {
+    left: 40%;
+  }
+
+  10% {
+    left: 10%;
+  }
+
+  0% {
+    left: 0%;
+  }
+}
