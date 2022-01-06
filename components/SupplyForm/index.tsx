@@ -13,17 +13,19 @@ import useContract from 'hooks/useContract';
 import { SupplyRate } from 'types/SupplyRate';
 import { Error } from 'types/Error';
 
-import dictionary from 'dictionary/en.json';
-
 import { getUnderlyingData } from 'utils/utils';
 
 import { AddressContext } from 'contexts/AddressContext';
 import FixedLenderContext from 'contexts/FixedLenderContext';
 import InterestRateModelContext from 'contexts/InterestRateModelContext';
+import LangContext from 'contexts/LangContext';
 
 import { Market } from 'types/Market';
 import { UnderlyingData } from 'types/Underlying';
 import { Transaction } from 'types/Transaction';
+import { LangKeys } from 'types/Lang';
+
+import keys from './translations.json';
 
 type Props = {
   contractWithSigner: ethers.Contract;
@@ -45,6 +47,8 @@ function SupplyForm({
   const { date } = useContext(AddressContext);
   const fixedLender = useContext(FixedLenderContext);
   const interestRateModel = useContext(InterestRateModelContext);
+  const lang: string = useContext(LangContext);
+  const translations: { [key: string]: LangKeys } = keys;
 
   const [qty, setQty] = useState<number | undefined>(undefined);
 
@@ -86,7 +90,7 @@ function SupplyForm({
   async function calculateRate() {
     if (!qty || !date) {
       handleLoading(true);
-      return setError({ status: true, msg: dictionary.amountError });
+      return setError({ status: true, msg: translations[lang].amountError });
     }
 
     handleLoading(false);
@@ -108,13 +112,13 @@ function SupplyForm({
       formattedRate &&
         handleResult({ potentialRate: formattedRate, hasRate: true });
     } catch (e) {
-      return setError({ status: true, msg: dictionary.defaultError });
+      return setError({ status: true, msg: translations[lang].error });
     }
   }
 
   async function deposit() {
     if (!qty || !date) {
-      return setError({ status: true, msg: dictionary.defaultError });
+      return setError({ status: true, msg: translations[lang].error });
     }
 
     const tx =
@@ -156,7 +160,7 @@ function SupplyForm({
   return (
     <>
       <div className={style.fieldContainer}>
-        <span>{dictionary.depositTitle}</span>
+        <span>{translations[lang].depositTitle}</span>
         <div className={style.inputContainer}>
           <Input
             type="number"
@@ -170,7 +174,7 @@ function SupplyForm({
         </div>
       </div>
       <div className={style.fieldContainer}>
-        <span>{dictionary.endDate}</span>
+        <span>{translations[lang].maturityPool}</span>
         <div className={style.inputContainer}>
           <MaturitySelector />
         </div>
@@ -181,18 +185,18 @@ function SupplyForm({
         {!pending && (
           <p>
             {step == 1
-              ? dictionary.permissionApprove
-              : dictionary.permissionDeposit}
+              ? translations[lang].permissionApprove
+              : translations[lang].permissionDeposit}
           </p>
         )}
-        {pending && <p>{dictionary.pendingTransaction}</p>}
+        {pending && <p>{translations[lang].pendingTransaction}</p>}
         <div className={style.buttonContainer}>
           <Button
-            text={step == 1 ? dictionary.approve : dictionary.deposit}
+            text={translations[lang].deposit}
             onClick={
               step == 1 && !pending ? approve : !pending ? deposit : () => {}
             }
-            className={qty && qty > 0 && !pending ? 'primary' : 'disabled'}
+            className={qty && qty > 0 ? 'primary' : 'disabled'}
             disabled={!qty || qty <= 0}
           />
         </div>

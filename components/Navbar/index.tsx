@@ -1,17 +1,28 @@
+import { useContext } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import styles from './style.module.scss';
 
 import useProvider from 'hooks/useProvider';
 
 import Button from 'components/common/Button';
 import Wallet from 'components/Wallet';
 
+import { LangKeys } from 'types/Lang';
+
+import LangContext from 'contexts/LangContext';
+
+import styles from './style.module.scss';
+
+import keys from './translations.json';
+
 type Props = {
   walletAddress?: String;
 };
 
 function Navbar({ walletAddress }: Props) {
+  const lang: string = useContext(LangContext);
+  const translations: { [key: string]: LangKeys } = keys;
+
   const { getProvider } = useProvider();
   const router = useRouter();
   const { pathname } = router;
@@ -22,10 +33,10 @@ function Navbar({ walletAddress }: Props) {
   }
 
   const routes = [
-    { pathname: '/', href: '/', name: 'Markets' },
-    { pathname: '/assets', href: '/assets', name: 'Assets' },
-    { pathname: '/dashboard', href: '/', name: 'Dashboard' },
-    { pathname: '/nerd-mode', href: '/', name: 'Nerd Mode' }
+    { pathname: '/', href: '/', name: translations[lang].markets },
+    { pathname: '/assets', href: '/assets', name: translations[lang].assets },
+    { pathname: '/dashboard', href: '/', name: translations[lang].dashboard },
+    { pathname: '/nerd-mode', href: '/', name: translations[lang].nerdMode }
   ];
 
   return (

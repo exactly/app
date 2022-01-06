@@ -1,24 +1,3 @@
 {
-  "asset": "Asset",
-  "collateral": "Collateral Factor",
-  "lend": "Total lent",
-  "supply": "Total supplied",
-  "annualRate": "Annual rate",
-  "endDate": "Maturity Pool",
-  "maturityPools": "Maturity pools",
-  "deposit": "Deposit",
-  "borrow": "Borrow",
-  "calculateRate": "Calculate rate",
-  "depositTitle": "Amount to deposit",
-  "borrowTitle": "Amount to borrow",
-  "selectDefaultText": "Choose Date",
-  "defaultError": "Oops, there was a problem!",
-  "amountError": "Please fill the amount",
-  "loading": "Loading",
-  "marketSize": "Market size",
-  "smartPool": "Smart pool",
-  "approve": "Approve",
-  "permissionApprove": "Please approve before depositing",
-  "permissionDeposit": "Verify your data and Deposit",
-  "pendingTransaction": "Transaction Pending..."
+  "maturityPools": "Maturity pools"
 }

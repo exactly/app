@@ -15,7 +15,6 @@ import { Market } from 'types/Market';
 import { LangKeys } from 'types/Lang';
 import { Transaction } from 'types/Transaction';
 
-import dictionary from 'dictionary/en.json';
 import keys from './translations.json';
 
 import { AddressContext } from 'contexts/AddressContext';
@@ -99,13 +98,13 @@ function BorrowForm({
       formattedBorrowRate &&
         handleResult({ potentialRate: formattedBorrowRate, hasRate: true });
     } catch (e) {
-      return setError({ status: true, msg: translations[lang].defaultError });
+      return setError({ status: true, msg: translations[lang].error });
     }
   }
 
   async function borrow() {
     if (!qty || !date) {
-      return setError({ status: true, msg: translations[lang].defaultError });
+      return setError({ status: true, msg: translations[lang].error });
     }
 
     const tx =
@@ -152,7 +151,7 @@ function BorrowForm({
       <div className={style.fieldContainer}>
         <div className={style.buttonContainer}>
           <Button
-            text={dictionary.borrow}
+            text={translations[lang].borrow}
             onClick={borrow}
             className={qty && qty > 0 ? 'secondary' : 'disabled'}
             disabled={!qty || qty <= 0}

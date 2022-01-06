@@ -12,12 +12,14 @@ import Overlay from 'components/Overlay';
 import useContractWithSigner from 'hooks/useContractWithSigner';
 
 import AuditorContext from 'contexts/AuditorContext';
+import LangContext from 'contexts/LangContext';
 
 import { SupplyRate } from 'types/SupplyRate';
 import { Market } from 'types/Market';
 import { Transaction } from 'types/Transaction';
+import { LangKeys } from 'types/Lang';
 
-import dictionary from 'dictionary/en.json';
+import keys from './translations.json';
 
 type Props = {
   contractData: any;
@@ -26,6 +28,8 @@ type Props = {
 
 function Modal({ contractData, closeModal }: Props) {
   const auditor = useContext(AuditorContext);
+  const lang: string = useContext(LangContext);
+  const translations: { [key: string]: LangKeys } = keys;
 
   const [potentialRate, setPotentialRate] = useState<string | undefined>('0');
 
@@ -76,7 +80,11 @@ function Modal({ contractData, closeModal }: Props) {
           {!tx && (
             <>
               <div className={styles.assets}>
-                <p>{contractData.type == 'borrow' ? 'Borrow' : 'Deposit'}</p>
+                <p>
+                  {contractData.type == 'borrow'
+                    ? translations[lang].borrow
+                    : translations[lang].deposit}
+                </p>
                 <AssetSelector
                   defaultAddress={contractData.address}
                   onChange={(marketData) => setAssetData(marketData)}
@@ -114,8 +122,7 @@ function Modal({ contractData, closeModal }: Props) {
                 <section className={styles.right}>
                   <p>
                     <span className={styles.detail}>
-                      {' '}
-                      {dictionary.annualRate}
+                      {translations[lang].annualRate}
                     </span>
                     <span className={styles.value}>
                       {(parseFloat(potentialRate) * 100).toFixed(4)} %
