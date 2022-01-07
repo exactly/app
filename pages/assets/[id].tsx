@@ -60,7 +60,6 @@ const Asset: NextPage<Props> = ({ walletAddress, network, auditor }) => {
   return (
     <AuditorProvider value={auditor}>
       <Navbar walletAddress={walletAddress} />
-      {/* <CurrentNetwork network={network} /> */}
       <section className={style.container}>
         <section className={style.assetData}>
           <div className={style.assetContainer}>

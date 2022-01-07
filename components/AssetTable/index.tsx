@@ -39,10 +39,10 @@ function AssetTable({ maturities }: Props) {
                 </div>
                 <div className={styles.actions}>
                   <div className={styles.buttonContainer}>
-                    <Button text="Deposit" className="primary" />
+                    <Button text={translations[lang].deposit} className="primary" />
                   </div>
                   <div className={styles.buttonContainer}>
-                    <Button text="Borrow" className="secondary" />
+                    <Button text={translations[lang].borrow} className="secondary" />
                   </div>
                 </div>
 
