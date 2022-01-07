@@ -26,6 +26,8 @@ import { getUnderlyingData } from 'utils/utils';
 
 import keys from './translations.json';
 
+import numbers from 'config/numbers.json';
+
 type Props = {
   contractData: any;
   closeModal: any;
@@ -99,7 +101,7 @@ function SmartPoolModal({ contractData, closeModal }: Props) {
     try {
       const approval = await underlyingContract?.contractWithSigner?.approve(
         assetData.address,
-        ethers.utils.parseUnits(qty!.toString())
+        ethers.utils.parseUnits(numbers.approvalAmount!.toString())
       );
       setPending((pending) => !pending);
 

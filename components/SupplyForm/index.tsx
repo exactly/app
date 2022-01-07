@@ -27,6 +27,8 @@ import { LangKeys } from 'types/Lang';
 
 import keys from './translations.json';
 
+import numbers from 'config/numbers.json';
+
 type Props = {
   contractWithSigner: ethers.Contract;
   handleResult: (data: SupplyRate | undefined) => void;
@@ -143,7 +145,7 @@ function SupplyForm({
     try {
       const approval = await underlyingContract?.contractWithSigner?.approve(
         address,
-        ethers.utils.parseUnits(99999999999999999999!.toString())
+        ethers.utils.parseUnits(numbers.approvalAmount!.toString())
       );
 
       //we set the transaction as pending

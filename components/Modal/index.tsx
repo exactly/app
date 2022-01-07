@@ -21,6 +21,8 @@ import { LangKeys } from 'types/Lang';
 
 import keys from './translations.json';
 
+import numbers from 'config/numbers.json';
+
 type Props = {
   contractData: any;
   closeModal: any;
@@ -121,7 +123,10 @@ function Modal({ contractData, closeModal }: Props) {
                       {translations[lang].annualRate}
                     </span>
                     <span className={styles.value}>
-                      {(parseFloat(potentialRate) * 100).toFixed(4)} %
+                      {(parseFloat(potentialRate) * 100).toFixed(
+                        numbers.decimals
+                      )}{' '}
+                      %
                     </span>
                   </p>
                 </section>
