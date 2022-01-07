@@ -1,0 +1,25 @@
+import styles from './style.module.scss';
+
+type Props = {
+  currentStep: Number;
+  totalSteps: Number;
+};
+
+function Stepper({ currentStep, totalSteps }: Props) {
+  return (
+    <div className={styles.steps}>
+      {Array.from(Array(totalSteps).keys()).map((step) => {
+        return (
+          <div
+            className={
+              currentStep >= step + 1 ? styles.selectedStep : styles.step
+            }
+            key={step}
+          ></div>
+        );
+      })}
+    </div>
+  );
+}
+
+export default Stepper;

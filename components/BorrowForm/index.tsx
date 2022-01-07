@@ -11,16 +11,16 @@ import useContract from 'hooks/useContract';
 
 import { SupplyRate } from 'types/SupplyRate';
 import { Error } from 'types/Error';
+import { Market } from 'types/Market';
+import { LangKeys } from 'types/Lang';
+import { Transaction } from 'types/Transaction';
 
 import keys from './translations.json';
 
 import { AddressContext } from 'contexts/AddressContext';
 import FixedLenderContext from 'contexts/FixedLenderContext';
 import InterestRateModelContext from 'contexts/InterestRateModelContext';
-
-import { Market } from 'types/Market';
 import LangContext from 'contexts/LangContext';
-import { LangKeys } from 'types/Lang';
 
 type Props = {
   contractWithSigner: ethers.Contract;
@@ -28,6 +28,7 @@ type Props = {
   hasRate: boolean | undefined;
   address: string;
   assetData: Market | undefined;
+  handleTx: (data: Transaction) => void;
 };
 
 function BorrowForm({
@@ -35,7 +36,8 @@ function BorrowForm({
   handleResult,
   hasRate,
   address,
-  assetData
+  assetData,
+  handleTx
 }: Props) {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
@@ -101,18 +103,26 @@ function BorrowForm({
   }
 
   async function borrow() {
-    const provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
-    const from = await provider.getSigner().getAddress();
-
     if (!qty || !date) {
       return setError({ status: true, msg: translations[lang].error });
     }
 
-    await fixedLenderWithSigner?.contractWithSigner?.borrowFromMaturityPool(
-      ethers.utils.parseUnits(qty!.toString()),
-      parseInt(date.value),
-      ethers.utils.parseUnits('1000')
-    );
+    try {
+      const tx =
+        await fixedLenderWithSigner?.contractWithSigner?.borrowFromMaturityPool(
+          ethers.utils.parseUnits(qty!.toString()),
+          parseInt(date.value),
+          ethers.utils.parseUnits('1000')
+        );
+
+      handleTx({ status: 'processing', hash: tx?.hash });
+
+      const status = await tx.wait();
+
+      handleTx({ status: 'success', hash: status?.transactionHash });
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   function handleLoading(hasRate: boolean) {

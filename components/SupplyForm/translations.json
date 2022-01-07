@@ -4,7 +4,11 @@
     "deposit": "Deposit",
     "depositTitle": "Amount to deposit",
     "amountError": "Please fill the amount",
-    "maturityPool": "Maturity Pool"
+    "maturityPool": "Maturity Pool",
+    "permissionApprove": "Please approve before depositing",
+    "permissionDeposit": "Verify your data and Deposit",
+    "pendingTransaction": "Transaction Pending...",
+    "approve": "Approve"
   },
   "es": {}
 }

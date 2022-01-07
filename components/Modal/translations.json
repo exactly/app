@@ -1,6 +1,8 @@
 {
   "en": {
-    "annualRate": "Annual rate"
+    "annualRate": "Annual rate",
+    "borrow": "Borrow",
+    "deposit": "Deposit"
   },
   "es": {}
 }

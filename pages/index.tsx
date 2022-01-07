@@ -11,7 +11,6 @@ import Navbar from 'components/Navbar';
 import Hero from 'components/Hero';
 import CurrentNetwork from 'components/CurrentNetwork';
 import Footer from 'components/Footer';
-import Overlay from 'components/Overlay';
 import MobileNavbar from 'components/MobileNavbar';
 import SmartPoolList from 'components/SmartPoolList';
 import SmartPoolModal from 'components/SmartPoolModal';
@@ -102,6 +101,11 @@ const Home: NextPage<Props> = ({
   }
 
   function showModal(address: Market['address'], type: String) {
+    if (modalContent?.type) {
+      //in the future we should handle the minimized modal status through a context here
+      return;
+    }
+
     const data = markets.find((market) => {
       return market.address === address;
     });
@@ -116,19 +120,13 @@ const Home: NextPage<Props> = ({
       >
         <InterestRateModelProvider value={interestRateModel}>
           {modal && modalContent?.type != 'smartDeposit' && (
-            <>
-              <Modal contractData={modalContent} closeModal={handleModal} />
-              <Overlay closeModal={handleModal} />
-            </>
+            <Modal contractData={modalContent} closeModal={handleModal} />
           )}
           {modal && modalContent?.type == 'smartDeposit' && (
-            <>
-              <SmartPoolModal
-                contractData={modalContent}
-                closeModal={handleModal}
-              />
-              <Overlay closeModal={handleModal} />
-            </>
+            <SmartPoolModal
+              contractData={modalContent}
+              closeModal={handleModal}
+            />
           )}
           <MobileNavbar walletAddress={walletAddress} network={network} />
           <Navbar walletAddress={walletAddress} />

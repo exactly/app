@@ -13,6 +13,7 @@
   --maxWidth: 1250px;
 
   /* FONT SIZES */
+  --font-10: 0.625em;
   --font-12: 0.75em;
   --font-14: 0.875em;
   --font-16: 1em;
@@ -39,7 +40,7 @@
   --secondaryHover: #1dac95;
   --tertiary: #1f1939;
   --error: #af0606;
-  --success: #8cc789;
+  --success: #63ca10;
 
   /* NAVBAR */
   --navbarHeight: 88px;
