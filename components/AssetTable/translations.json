@@ -1,0 +1,12 @@
+{
+  "en": {
+    "lastFixedRate": "Last fixed rate",
+    "liquidity": "Liquidity",
+    "maturity": "Maturity"
+  },
+  "es": {
+    "lastFixedRate": "Última tasa fija",
+    "liquidity": "Liquidez",
+    "maturity": "Madurez"
+  }
+}

@@ -3,7 +3,6 @@ import axios from 'axios';
 import dayjs from 'dayjs';
 
 import AssetSelector from 'components/AssetSelector';
-import CurrentNetwork from 'components/CurrentNetwork';
 import Navbar from 'components/Navbar';
 
 import { Network } from 'types/Network';
@@ -17,6 +16,11 @@ import { useEffect, useState } from 'react';
 import { Maturity } from 'types/Maturity';
 import AssetInfo from 'components/AssetInfo';
 
+import keys from "./translations.json";
+import { LangKeys } from 'types/Lang';
+import { useContext } from 'react';
+import LangContext from 'contexts/LangContext';
+
 interface Props {
   walletAddress: string;
   network: Network;
@@ -24,6 +28,9 @@ interface Props {
 }
 
 const Asset: NextPage<Props> = ({ walletAddress, network, auditor }) => {
+  const lang: string = useContext(LangContext);
+  const translations: { [key: string]: LangKeys } = keys;
+
   const auditorContract = useContract(auditor.address, auditor.abi);
   const [maturities, setMaturities] = useState<Array<Maturity> | undefined>(undefined);
 
@@ -61,29 +68,29 @@ const Asset: NextPage<Props> = ({ walletAddress, network, auditor }) => {
           </div>
           <div className={style.assetMetricsContainer}>
             <div className={style.assetMetrics}>
-              <span className={style.title}>Net rate</span>
+              <span className={style.title}>{translations[lang].netRate}</span>
               <span className={style.value}>0.19%</span>
             </div>
             <div className={style.assetMetrics}>
-              <span className={style.title}>Supply APY</span>
+              <span className={style.title}>{translations[lang].supplyAPY}</span>
               <span className={style.value}>0.08%</span>
             </div>
             <div className={style.assetMetrics}>
-              <span className={style.title}>Distribution APY</span>
+              <span className={style.title}>{translations[lang].distributionAPY}</span>
               <span className={style.value}>0.11%</span>
             </div>
             <div className={style.assetMetrics}>
-              <span className={style.title}>Total supply</span>
+              <span className={style.title}>{translations[lang].totalSupply}</span>
               <span className={style.value}>$6,123,456</span>
             </div>
           </div>
         </section>
         <AssetTable maturities={maturities?.slice(0, 5)} />
-        <h2>Asset details</h2>
+        <h2>{translations[lang].assetDetails}</h2>
         <div className={style.assetInfoContainer}>
-          <AssetInfo title="Price" value="$4,213.62" />
-          <AssetInfo title="Reserve Factor" value="20%" />
-          <AssetInfo title="Collateral Factor" value="75%" />
+          <AssetInfo title={translations[lang].price} value="$4,213.62" />
+          <AssetInfo title={translations[lang].reserveFactor} value="20%" />
+          <AssetInfo title={translations[lang].collateralFactor} value="75%" />
         </div>
       </section>
     </AuditorProvider>
