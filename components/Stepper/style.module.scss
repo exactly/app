@@ -13,7 +13,7 @@
     &:not(:first-child):after {
       content: '';
       position: absolute;
-      left: -900%;
+      right: 0;
       top: 50%;
       width: 1000%;
       border-bottom: solid 2px var(--gray-medium);
@@ -27,7 +27,7 @@
     &:not(:first-child):after {
       content: '';
       position: absolute;
-      left: -900%;
+      right: 0;
       top: 50%;
       width: 1000%;
       border-bottom: solid 2px var(--primary);

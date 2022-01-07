@@ -101,6 +101,11 @@ const Home: NextPage<Props> = ({
   }
 
   function showModal(address: Market['address'], type: String) {
+    if (modalContent?.type) {
+      //in the future we should handle the minimized modal status through a context here
+      return;
+    }
+
     const data = markets.find((market) => {
       return market.address === address;
     });
