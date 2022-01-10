@@ -9,6 +9,7 @@ import { LangKeys } from 'types/Lang';
 import style from './style.module.scss';
 
 import keys from './translations.json';
+import PoolsChart from 'components/PoolsChart';
 
 const Hero = () => {
   const lang: string = useContext(LangContext);
@@ -57,6 +58,7 @@ const Hero = () => {
         </div>
         <div className={style.left}>
           <AssetSelector />
+          <PoolsChart />
         </div>
       </section>
     </>
