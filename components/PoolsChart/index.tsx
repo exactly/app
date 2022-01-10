@@ -9,6 +9,8 @@ import {
   Legend
 } from 'recharts';
 
+import styles from './style.module.scss';
+
 function PoolsChart() {
   const deposit = [
     { date: '12-Jan-22', apr: 4, z: 41 },
@@ -29,7 +31,7 @@ function PoolsChart() {
   ];
 
   return (
-    <div style={{ width: '100%', height: 350 }}>
+    <div className={styles.chartContainer}>
       <ResponsiveContainer width="100%" height="100%">
         <ScatterChart
           margin={{
