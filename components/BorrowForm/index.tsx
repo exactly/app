@@ -9,30 +9,39 @@ import MaturitySelector from 'components/MaturitySelector';
 import useContractWithSigner from 'hooks/useContractWithSigner';
 import useContract from 'hooks/useContract';
 
-import daiAbi from 'contracts/abi/dai.json';
-
 import { SupplyRate } from 'types/SupplyRate';
 import { Error } from 'types/Error';
+import { Market } from 'types/Market';
+import { LangKeys } from 'types/Lang';
+import { Transaction } from 'types/Transaction';
 
-import dictionary from 'dictionary/en.json';
+import keys from './translations.json';
 
 import { AddressContext } from 'contexts/AddressContext';
 import FixedLenderContext from 'contexts/FixedLenderContext';
 import InterestRateModelContext from 'contexts/InterestRateModelContext';
+import LangContext from 'contexts/LangContext';
 
 type Props = {
   contractWithSigner: ethers.Contract;
   handleResult: (data: SupplyRate | undefined) => void;
   hasRate: boolean | undefined;
   address: string;
+  assetData: Market | undefined;
+  handleTx: (data: Transaction) => void;
 };
 
 function BorrowForm({
   contractWithSigner,
   handleResult,
   hasRate,
-  address
+  address,
+  assetData,
+  handleTx
 }: Props) {
+  const lang: string = useContext(LangContext);
+  const translations: { [key: string]: LangKeys } = keys;
+
   const { date } = useContext(AddressContext);
   const fixedLender = useContext(FixedLenderContext);
   const interestRateModel = useContext(InterestRateModelContext);
@@ -43,11 +52,6 @@ function BorrowForm({
     status: false,
     msg: ''
   });
-
-  const daiContract = useContractWithSigner(
-    '0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa',
-    daiAbi
-  );
 
   const interestRateModelContract = useContract(
     interestRateModel.address!,
@@ -65,7 +69,7 @@ function BorrowForm({
   async function calculateRate() {
     if (!qty || !date) {
       handleLoading(true);
-      return setError({ status: true, msg: dictionary.amountError });
+      return setError({ status: true, msg: translations[lang].amountError });
     }
 
     handleLoading(false);
@@ -94,23 +98,31 @@ function BorrowForm({
       formattedBorrowRate &&
         handleResult({ potentialRate: formattedBorrowRate, hasRate: true });
     } catch (e) {
-      return setError({ status: true, msg: dictionary.defaultError });
+      return setError({ status: true, msg: translations[lang].error });
     }
   }
 
   async function borrow() {
-    const provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
-    const from = await provider.getSigner().getAddress();
-
     if (!qty || !date) {
-      return setError({ status: true, msg: dictionary.defaultError });
+      return setError({ status: true, msg: translations[lang].error });
     }
 
-    await fixedLenderWithSigner?.contractWithSigner?.borrowFromMaturityPool(
-      ethers.utils.parseUnits(qty!.toString()),
-      parseInt(date.value),
-      ethers.utils.parseUnits('1000')
-    );
+    try {
+      const tx =
+        await fixedLenderWithSigner?.contractWithSigner?.borrowFromMaturityPool(
+          ethers.utils.parseUnits(qty!.toString()),
+          parseInt(date.value),
+          ethers.utils.parseUnits('1000')
+        );
+
+      handleTx({ status: 'processing', hash: tx?.hash });
+
+      const status = await tx.wait();
+
+      handleTx({ status: 'success', hash: status?.transactionHash });
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   function handleLoading(hasRate: boolean) {
@@ -120,7 +132,7 @@ function BorrowForm({
   return (
     <>
       <div className={style.fieldContainer}>
-        <span>{dictionary.borrowTitle}</span>
+        <span>{translations[lang].borrowTitle}</span>
         <div className={style.inputContainer}>
           <Input
             type="number"
@@ -134,7 +146,7 @@ function BorrowForm({
         </div>
       </div>
       <div className={style.fieldContainer}>
-        <span>{dictionary.endDate}</span>
+        <span>{translations[lang].endDate}</span>
         <div className={style.inputContainer}>
           <MaturitySelector />
         </div>
@@ -143,7 +155,7 @@ function BorrowForm({
       <div className={style.fieldContainer}>
         <div className={style.buttonContainer}>
           <Button
-            text={dictionary.borrow}
+            text={translations[lang].borrow}
             onClick={borrow}
             className={qty && qty > 0 ? 'secondary' : 'disabled'}
             disabled={!qty || qty <= 0}

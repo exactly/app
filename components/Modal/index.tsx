@@ -5,14 +5,23 @@ import SupplyForm from 'components/SupplyForm';
 import AssetSelector from 'components/AssetSelector';
 import BorrowForm from 'components/BorrowForm';
 import Loading from 'components/common/Loading';
+import ModalGif from 'components/ModalGif';
+import MinimizedModal from 'components/MinimizedModal';
+import Overlay from 'components/Overlay';
 
 import useContractWithSigner from 'hooks/useContractWithSigner';
 
 import AuditorContext from 'contexts/AuditorContext';
+import LangContext from 'contexts/LangContext';
 
 import { SupplyRate } from 'types/SupplyRate';
+import { Market } from 'types/Market';
+import { Transaction } from 'types/Transaction';
+import { LangKeys } from 'types/Lang';
 
-import dictionary from 'dictionary/en.json';
+import keys from './translations.json';
+
+import numbers from 'config/numbers.json';
 
 type Props = {
   contractData: any;
@@ -21,10 +30,18 @@ type Props = {
 
 function Modal({ contractData, closeModal }: Props) {
   const auditor = useContext(AuditorContext);
+  const lang: string = useContext(LangContext);
+  const translations: { [key: string]: LangKeys } = keys;
 
   const [potentialRate, setPotentialRate] = useState<string | undefined>('0');
 
+  const [assetData, setAssetData] = useState<Market | undefined>(undefined);
+
   const [hasRate, setHasRate] = useState<boolean | undefined>(true);
+
+  const [tx, setTx] = useState<Transaction | undefined>(undefined);
+
+  const [minimized, setMinimized] = useState<Boolean>(false);
 
   const { contractWithSigner } = useContractWithSigner(
     contractData?.address,
@@ -41,49 +58,108 @@ function Modal({ contractData, closeModal }: Props) {
   }
 
   return (
-    <div className={styles.modal}>
-      <div className={styles.closeContainer}>
-        <span className={styles.closeButton} onClick={handleClose}>
-          X
-        </span>
-      </div>
-      <div className={styles.assets}>
-        <p>{contractData.type == 'borrow' ? 'Borrow' : 'Deposit'}</p>
-        <AssetSelector defaultAddress={contractData.address} />
-      </div>
-      {contractWithSigner && contractData.type == 'deposit' && (
-        <SupplyForm
-          contractWithSigner={contractWithSigner!}
-          handleResult={handleResult}
-          hasRate={hasRate}
-          address={contractData.address}
-        />
-      )}
-
-      {contractWithSigner && contractData.type == 'borrow' && (
-        <BorrowForm
-          contractWithSigner={contractWithSigner!}
-          handleResult={handleResult}
-          hasRate={hasRate}
-          address={contractData.address}
-        />
-      )}
-
-      {!contractWithSigner && <Loading />}
-
-      {potentialRate && (
-        <section className={styles.right}>
-          <p>
-            <span className={styles.detail}> {dictionary.annualRate}</span>
-            <span className={styles.value}>
-              {(parseFloat(potentialRate) * 100).toFixed(4)} %
+    <>
+      {!minimized && (
+        <div className={styles.modal}>
+          <div className={styles.closeContainer}>
+            <span
+              className={styles.closeButton}
+              onClick={
+                !tx || tx.status == 'success'
+                  ? handleClose
+                  : () => {
+                      setMinimized((prev) => !prev);
+                    }
+              }
+            >
+              X
             </span>
-          </p>
-        </section>
+          </div>
+          {!tx && (
+            <>
+              <div className={styles.assets}>
+                <p>
+                  {contractData.type == 'borrow'
+                    ? translations[lang].borrow
+                    : translations[lang].deposit}
+                </p>
+                <AssetSelector
+                  defaultAddress={contractData.address}
+                  onChange={(marketData) => setAssetData(marketData)}
+                />
+              </div>
+              {contractWithSigner &&
+                contractData.type == 'deposit' &&
+                assetData && (
+                  <SupplyForm
+                    contractWithSigner={contractWithSigner!}
+                    handleResult={handleResult}
+                    hasRate={hasRate}
+                    address={contractData.address}
+                    assetData={assetData}
+                    handleTx={(data: Transaction) => setTx(data)}
+                  />
+                )}
+
+              {contractWithSigner &&
+                contractData.type == 'borrow' &&
+                assetData && (
+                  <BorrowForm
+                    contractWithSigner={contractWithSigner!}
+                    handleResult={handleResult}
+                    hasRate={hasRate}
+                    address={contractData.address}
+                    assetData={assetData}
+                    handleTx={(data: Transaction) => setTx(data)}
+                  />
+                )}
+
+              {!contractWithSigner && <Loading />}
+
+              {potentialRate && (
+                <section className={styles.right}>
+                  <p>
+                    <span className={styles.detail}>
+                      {translations[lang].annualRate}
+                    </span>
+                    <span className={styles.value}>
+                      {(parseFloat(potentialRate) * 100).toFixed(
+                        numbers.decimals
+                      )}{' '}
+                      %
+                    </span>
+                  </p>
+                </section>
+              )}
+
+              {!hasRate && <Loading />}
+            </>
+          )}
+          {tx && <ModalGif tx={tx} />}
+        </div>
       )}
 
-      {!hasRate && <Loading />}
-    </div>
+      {tx && minimized && (
+        <MinimizedModal
+          tx={tx}
+          handleMinimize={() => {
+            setMinimized((prev) => !prev);
+          }}
+        />
+      )}
+
+      {!minimized && (
+        <Overlay
+          closeModal={
+            !tx || tx.status == 'success'
+              ? handleClose
+              : () => {
+                  setMinimized((prev) => !prev);
+                }
+          }
+        />
+      )}
+    </>
   );
 }
 

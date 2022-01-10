@@ -9,6 +9,7 @@
     flex-wrap: wrap;
     margin: 0 auto;
     padding: 10px;
+
     .left {
       display: flex;
       flex-wrap: wrap;
@@ -48,6 +49,7 @@
 @media (max-width: 769px) {
   .footer {
     .container {
+      width: 90%;
       justify-content: center;
       align-items: center;
       gap: var(--u3);

@@ -1,0 +1,16 @@
+{
+  "en": {
+    "lastFixedRate": "Last fixed rate",
+    "liquidity": "Liquidity",
+    "maturity": "Maturity",
+    "deposit": "Deposit",
+    "borrow": "Borrow"
+  },
+  "es": {
+    "lastFixedRate": "Última tasa fija",
+    "liquidity": "Liquidez",
+    "maturity": "Madurez",
+    "deposit": "Depositar",
+    "borrow": "Pedir prestado"
+  }
+}

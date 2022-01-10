@@ -13,6 +13,7 @@
   --maxWidth: 1250px;
 
   /* FONT SIZES */
+  --font-10: 0.625em;
   --font-12: 0.75em;
   --font-14: 0.875em;
   --font-16: 1em;
@@ -23,9 +24,12 @@
   --font-80: 5em;
 
   /* COLORS */
-  --background: #f9fafb;
+  --background: #ffffff;
   --line: #e1e1e1;
+  --gray: #fafafa;
   --gray-100: #aab8c1;
+  --gray-200: #899298;
+  --gray-500: #1F1939;
   --gray-medium: #cccccc;
   --white: #fff;
   --black: #000;
@@ -38,7 +42,7 @@
   --secondaryHover: #1dac95;
   --tertiary: #1f1939;
   --error: #af0606;
-  --success: #4bb543;
+  --success: #63ca10;
 
   /* NAVBAR */
   --navbarHeight: 88px;

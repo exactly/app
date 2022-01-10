@@ -1,0 +1,22 @@
+{
+  "en": {
+    "price": "Price",
+    "reserveFactor": "Reserve Factor",
+    "collateralFactor": "Collateral Factor",
+    "assetDetails": "Asset Details",
+    "netRate": "Net Rate",
+    "supplyAPY": "Supply APY",
+    "distributionAPY": "Distribution APY",
+    "totalSupply": "Total Supply"
+  },
+  "es": {
+    "price": "Precio",
+    "reserveFactor": "Factor de reserva",
+    "collateralFactor": "Factor de colateral",
+    "assetDetails": "Detalle del activo",
+    "netRate": "Tarifa neta",
+    "supplyAPY": "",
+    "distributionAPY": "",
+    "totalSupply": "Suministro total"
+  }
+}

@@ -1,10 +1,20 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 
 import AssetSelector from 'components/AssetSelector';
 
+import LangContext from 'contexts/LangContext';
+
+import { LangKeys } from 'types/Lang';
+
 import style from './style.module.scss';
 
+import keys from './translations.json';
+import PoolsChart from 'components/PoolsChart';
+
 const Hero = () => {
+  const lang: string = useContext(LangContext);
+  const translations: { [key: string]: LangKeys } = keys;
+
   const [status, setStatus] = useState(true);
 
   useEffect(() => {
@@ -22,11 +32,7 @@ const Hero = () => {
           <h1 className={style.title}>
             <span className={style.bolder}>DeFi</span>xed <br /> Income
           </h1>
-          <p className={style.subtitle}>
-            Exactly is building an open source, non-custodial protocol on
-            Ethereum, that will bring fixed-income solutions for lenders and
-            borrowers.
-          </p>
+          <p className={style.subtitle}>{translations[lang].description}</p>
           <div className={style.specialText}>
             <p className={style.first}>
               <span
@@ -52,6 +58,7 @@ const Hero = () => {
         </div>
         <div className={style.left}>
           <AssetSelector />
+          <PoolsChart />
         </div>
       </section>
     </>

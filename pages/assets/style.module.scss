@@ -1,0 +1,43 @@
+.container {
+  padding-top: var(--u2);
+  width: var(--maxWidth);
+  margin: var(--navbarHeight) auto;
+  .assetData {
+    display: flex;
+    align-items: flex-end;
+    .assetContainer {
+      width: 200px;
+    }
+    .assetMetricsContainer {
+      margin: var(--u3) 0px;
+      display: flex;
+      .assetMetrics {
+        margin: 0 var(--u3);
+        .title {
+          color: var(--gray-500);
+          display: block;
+          font-size: var(--font-12);
+          font-weight: 600;
+        }
+        .value {
+          color: var(--gray-500);
+          margin-top: var(--u);
+          display: block;
+        }
+      }
+    }
+  }
+
+  .graphContainer {
+    display: flex;
+
+    .assetGraph {
+      width: 100%;
+    }
+  }
+  .assetInfoContainer {
+    display: flex;
+    max-width: 45%;
+    justify-content: space-between;
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "en": {
+    "loadingTitle": "Waiting...",
+    "transactionHash": "Transaction Hash",
+    "successTitle": "Done!",
+    "errorTitle": "There was an error",
+    "etherscanText": "View at",
+    "errorButton": "Try again"
+  },
+  "es": {}
+}
