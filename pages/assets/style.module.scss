@@ -5,7 +5,7 @@
   .assetData {
     display: flex;
     align-items: flex-end;
-    .assetContainer{
+    .assetContainer {
       width: 200px;
     }
     .assetMetricsContainer {
@@ -25,6 +25,14 @@
           display: block;
         }
       }
+    }
+  }
+
+  .graphContainer {
+    display: flex;
+
+    .assetGraph {
+      width: 100%;
     }
   }
   .assetInfoContainer {
