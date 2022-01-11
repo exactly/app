@@ -36,6 +36,7 @@ type Props = {
   address: string;
   assetData: Market | undefined;
   handleTx: (data: Transaction) => void;
+  walletAddress: string;
 };
 
 function SupplyForm({
@@ -44,7 +45,8 @@ function SupplyForm({
   hasRate,
   address,
   assetData,
-  handleTx
+  handleTx,
+  walletAddress
 }: Props) {
   const { date } = useContext(AddressContext);
   const fixedLender = useContext(FixedLenderContext);
@@ -175,6 +177,16 @@ function SupplyForm({
     }
   }
 
+  async function getMaxAmount() {
+    const balance = await underlyingContract?.contract?.balanceOf(
+      walletAddress
+    );
+
+    const max = balance && ethers.utils.formatEther(balance);
+
+    max && setQty(max);
+  }
+
   return (
     <>
       <div className={style.fieldContainer}>
@@ -189,6 +201,9 @@ function SupplyForm({
             value={qty}
             placeholder="0"
           />
+          <span className={style.maxButton} onClick={getMaxAmount}>
+            MAX
+          </span>
         </div>
       </div>
       <div className={style.fieldContainer}>

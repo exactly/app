@@ -120,12 +120,17 @@ const Home: NextPage<Props> = ({
       >
         <InterestRateModelProvider value={interestRateModel}>
           {modal && modalContent?.type != 'smartDeposit' && (
-            <Modal contractData={modalContent} closeModal={handleModal} />
+            <Modal
+              contractData={modalContent}
+              closeModal={handleModal}
+              walletAddress={walletAddress}
+            />
           )}
           {modal && modalContent?.type == 'smartDeposit' && (
             <SmartPoolModal
               contractData={modalContent}
               closeModal={handleModal}
+              walletAddress={walletAddress}
             />
           )}
           <MobileNavbar walletAddress={walletAddress} network={network} />
