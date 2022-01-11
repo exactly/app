@@ -1,6 +1,6 @@
-import { ethers } from "ethers";
-import { useEffect, useState } from "react";
-import useProvider from "./useProvider";
+import { ethers } from 'ethers';
+import { useEffect, useState } from 'react';
+import useProvider from './useProvider';
 
 export default function useContractWithSigner(
   address: string | undefined,
@@ -24,7 +24,7 @@ export default function useContractWithSigner(
     if (address && abi && web3Provider) {
       getContract();
     }
-  }, [web3Provider]);
+  }, [web3Provider, address, abi]);
 
   useEffect(() => {
     setProvider();
