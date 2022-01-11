@@ -45,6 +45,16 @@
       height: 100%;
       margin-top: var(--u);
       margin-bottom: var(--u2);
+      display: flex;
+      align-items: flex-end;
+      gap: var(--u2);
+
+      .maxButton {
+        color: var(--primary);
+        font-weight: 600;
+        font-size: var(--font-12);
+        cursor: pointer;
+      }
     }
 
     .buttonContainer {
