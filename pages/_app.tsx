@@ -10,12 +10,10 @@ import { getContractsByEnv } from 'utils/utils';
 import { AddressProvider } from 'contexts/AddressContext';
 
 import { getCurrentWalletConnected } from 'hooks/useWallet';
-import useNetwork from 'hooks/useNetwork';
 import { LangProvider } from 'contexts/LangContext';
 
 function MyApp({ Component, pageProps }: AppProps) {
   const [walletAddress, setWallet] = useState<string | undefined>(undefined);
-  const network = useNetwork();
 
   useEffect(() => {
     handleWallet();
@@ -46,7 +44,7 @@ function MyApp({ Component, pageProps }: AppProps) {
     }
   }
 
-  const props = { ...pageProps, walletAddress, network };
+  const props = { ...pageProps, walletAddress };
 
   return (
     <>
