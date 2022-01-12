@@ -61,12 +61,30 @@ export async function getMetamaskAccounts() {
 
 export async function handleMetamaskLogin() {
   try {
-    const accounts = await window.ethereum.request({
-      method: "eth_requestAccounts",
-    });
+    const hasMetamask = await isMetamaskInstalled();
+    if (hasMetamask) {
+      const accounts = await window.ethereum.request({
+        method: "eth_requestAccounts",
+      });
 
-    return accounts ?? []
-  } catch (err: any) {
-    console.log(err?.code);
+      return accounts ?? []
+    } else {
+      //TODO: Lets ask the design team for a modal to handle this
+      alert('Please install metamask')
+    }
+
+  } catch (err: unknown) {
+    console.log(err);
   }
+}
+
+export async function isMetamaskInstalled() {
+  return window.ethereum ? true : false
+}
+
+export async function getChainId() {
+  const hasMetamask = await isMetamaskInstalled();
+  if (!hasMetamask) return false;
+
+  return await window.ethereum.request({ method: 'eth_chainId' });
 }
