@@ -1,6 +1,7 @@
 import { UnderlyingNetwork } from "types/Underlying";
 import daiAbi from 'contracts/abi/dai.json';
 import wethAbi from 'contracts/abi/weth.json';
+import { ethers } from "ethers";
 
 export function transformClasses(style: any, classes: string) {
   if (!style) return 'style object is mandatory';
@@ -51,3 +52,21 @@ export function getUnderlyingData(network: string | undefined, symbol: string | 
   return baseData[network.toLowerCase()][symbol.toLowerCase()]
 }
 
+export async function getMetamaskAccounts() {
+  const provider = new ethers.providers.Web3Provider(window.ethereum, "any");
+  const accounts = await provider.listAccounts();
+
+  return accounts ?? []
+}
+
+export async function handleMetamaskLogin() {
+  try {
+    const accounts = await window.ethereum.request({
+      method: "eth_requestAccounts",
+    });
+
+    return accounts ?? []
+  } catch (err: any) {
+    console.log(err?.code);
+  }
+}
