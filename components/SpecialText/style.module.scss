@@ -33,7 +33,7 @@
   }
 
   .space {
-    padding-left: 3px;
-    padding-right: 3px;
+    padding-left: var(--smallUnit);
+    padding-right: var(--smallUnit);
   }
 }
