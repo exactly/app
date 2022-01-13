@@ -3,7 +3,7 @@ body {
   padding: 0;
   margin: 0;
   font-family: 'Source Sans Pro', sans-serif;
-  background-color: var(--background);
+  background-color: var(--white);
 }
 
 a {

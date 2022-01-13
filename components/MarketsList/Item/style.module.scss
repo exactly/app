@@ -1,8 +1,8 @@
 .container {
   display: flex;
   justify-content: space-between;
-  border-top: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
+  border-top: 1px solid var(--gray-100);
+  border-bottom: 1px solid var(--gray-100);
   padding: var(--u2) var(--u3);
   align-items: center;
   border-left: 2px solid var(--white);
@@ -43,7 +43,7 @@
 
   .value {
     width: 20%;
-    color: var(--tertiary);
+    color: var(--gray-900);
   }
 }
 

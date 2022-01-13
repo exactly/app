@@ -7,7 +7,7 @@
     width: var(--u2);
     height: var(--u2);
     border-radius: 50%;
-    background: var(--gray-medium);
+    background: var(--gray-200);
     position: relative;
 
     &:not(:first-child):after {
@@ -16,7 +16,7 @@
       right: 0;
       top: 50%;
       width: 1000%;
-      border-bottom: solid 2px var(--gray-medium);
+      border-bottom: solid 2px var(--gray-200);
       z-index: -1;
     }
   }
