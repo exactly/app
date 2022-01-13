@@ -1,8 +1,8 @@
 .assetInfoContainer {
   width: 175px;
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-tables);
   border-radius: var(--u);
-  background-color: var(--gray);
+  background-color: var(--gray-50);
 
   .titleContainer {
     border-radius: var(--u);
@@ -16,12 +16,12 @@
   .value {
     border-radius: var(--u);
     display: flex;
-    padding: var(--u) ;
+    padding: var(--u);
     margin: 0 var(--u) var(--u) var(--u);
     background-color: var(--white);
     height: var(--u6);
-    align-items: center; 
-    font-size: var(--font-14); 
+    align-items: center;
+    font-size: var(--font-14);
     font-weight: 600;
   }
 }

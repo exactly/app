@@ -4,7 +4,7 @@
   height: var(--navbarHeight);
   padding: var(--u2);
   box-sizing: border-box;
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-header-mob);
   background: var(--white);
   top: 0;
   z-index: 3;
@@ -30,7 +30,7 @@
         font-weight: 600;
 
         .link {
-          color: var(--tertiary);
+          color: var(--gray-900);
           opacity: var(--defaultOpacity);
           cursor: pointer;
           padding: 5px;
