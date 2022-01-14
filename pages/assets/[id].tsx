@@ -111,7 +111,7 @@ const Asset: NextPage<Props> = ({ walletAddress, network, auditor }) => {
         </div>
         <div className={style.maturitiesContainer}>
           {maturities?.slice(0, 3)?.map((maturity) => {
-            return <MaturityInfo maturity={maturity} />;
+            return <MaturityInfo maturity={maturity} key={maturity.value} />;
           })}
         </div>
         <div className={style.smartPoolContainer}>
