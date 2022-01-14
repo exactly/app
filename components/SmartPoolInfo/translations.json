@@ -1,0 +1,18 @@
+{
+  "en": {
+    "days": "days",
+    "totalBorrowed": "Total Borrowed",
+    "liquidity": "Liquidity",
+    "utilizationRate": "Utilization Rate",
+    "suppliers": "# of suppliers",
+    "borrowers": "# of borrowers"
+  },
+  "es": {
+    "days": "días",
+    "totalBorrowed": "Total Prestado",
+    "liquidity": "Liquidez",
+    "utilizationRate": "Tasa de Utilización",
+    "suppliers": "# de proveedores",
+    "borrowers": "# de prestamistas"
+  }
+}

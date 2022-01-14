@@ -1,26 +1,30 @@
+import { useContext, useEffect, useState } from 'react';
 import type { NextPage } from 'next';
 import axios from 'axios';
 import dayjs from 'dayjs';
 
 import AssetSelector from 'components/AssetSelector';
 import Navbar from 'components/Navbar';
+import PoolsChart from 'components/PoolsChart';
+import MaturityInfo from 'components/MaturityInfo';
+import AssetInfo from 'components/AssetInfo';
+import AssetTable from 'components/AssetTable';
+import SmartPoolInfo from 'components/SmartPoolInfo';
 
 import { Network } from 'types/Network';
 import { Contract } from 'types/Contract';
+import { Maturity } from 'types/Maturity';
+import { LangKeys } from 'types/Lang';
+
 import { AuditorProvider } from 'contexts/AuditorContext';
+import LangContext from 'contexts/LangContext';
 
 import style from './style.module.scss';
+
 import useContract from 'hooks/useContract';
-import AssetTable from 'components/AssetTable';
-import { useEffect, useState } from 'react';
-import { Maturity } from 'types/Maturity';
-import AssetInfo from 'components/AssetInfo';
 
 import keys from './translations.json';
-import { LangKeys } from 'types/Lang';
-import { useContext } from 'react';
-import LangContext from 'contexts/LangContext';
-import PoolsChart from 'components/PoolsChart';
+import SmartPoolChart from 'components/SmartPoolChart';
 
 interface Props {
   walletAddress: string;
@@ -104,6 +108,15 @@ const Asset: NextPage<Props> = ({ walletAddress, network, auditor }) => {
           <AssetInfo title={translations[lang].price} value="$4,213.62" />
           <AssetInfo title={translations[lang].reserveFactor} value="20%" />
           <AssetInfo title={translations[lang].collateralFactor} value="75%" />
+        </div>
+        <div className={style.maturitiesContainer}>
+          {maturities?.slice(0, 3)?.map((maturity) => {
+            return <MaturityInfo maturity={maturity} />;
+          })}
+        </div>
+        <div className={style.smartPoolContainer}>
+          <SmartPoolInfo />
+          <SmartPoolChart />
         </div>
       </section>
     </AuditorProvider>
