@@ -9,6 +9,8 @@ import styles from './style.module.scss';
 
 import keys from './translations.json';
 
+import numbers from 'config/numbers.json';
+
 interface Props {
   maturity: Maturity;
 }
@@ -22,7 +24,11 @@ function MaturityInfo({ maturity }: Props) {
     (1000 * 3600 * 24);
 
   const color =
-    days < 0 ? styles.error : days < 5 ? styles.warning : styles.status;
+    days < numbers.daysToError
+      ? styles.error
+      : days < numbers.daysToWarning
+      ? styles.warning
+      : styles.status;
 
   return (
     <div className={styles.maturityContainer}>

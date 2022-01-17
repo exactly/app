@@ -5,7 +5,9 @@
     "liquidity": "Liquidity",
     "utilizationRate": "Utilization Rate",
     "suppliers": "# of suppliers",
-    "borrowers": "# of borrowers"
+    "borrowers": "# of borrowers",
+    "deposit": "Deposit",
+    "smartPool": "Smart Pool"
   },
   "es": {
     "days": "días",
@@ -13,6 +15,8 @@
     "liquidity": "Liquidez",
     "utilizationRate": "Tasa de Utilización",
     "suppliers": "# de proveedores",
-    "borrowers": "# de prestamistas"
+    "borrowers": "# de prestamistas",
+    "deposit": "Depositar",
+    "smartPool": "Smart Pool"
   }
 }

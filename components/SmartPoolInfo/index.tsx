@@ -15,7 +15,7 @@ function SmartPoolInfo() {
 
   return (
     <div className={styles.maturityContainer}>
-      <p className={styles.titleContainer}>Smart Pool</p>
+      <p className={styles.titleContainer}> {translations[lang].smartPool}</p>
       <ul className={styles.table}>
         <li className={styles.header}>
           <div className={styles.assetInfo}>
@@ -27,7 +27,7 @@ function SmartPoolInfo() {
             <p className={styles.asset}>DAI</p>
           </div>
           <div className={styles.buttonContainer}>
-            <Button text="Deposit" className="tertiary" />
+            <Button text={translations[lang].deposit} className="tertiary" />
           </div>
         </li>
         <li className={styles.row}>
