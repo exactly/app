@@ -69,7 +69,7 @@ const Asset: NextPage<Props> = ({ walletAddress, network, auditor }) => {
             <AssetSelector title={true} />
           </div>
           <div className={style.assetMetricsContainer}>
-            <div className={style.assetMetrics}>
+            {/* <div className={style.assetMetrics}>
               <span className={style.title}>{translations[lang].netRate}</span>
               <span className={style.value}>0.19%</span>
             </div>
@@ -90,7 +90,7 @@ const Asset: NextPage<Props> = ({ walletAddress, network, auditor }) => {
                 {translations[lang].totalSupply}
               </span>
               <span className={style.value}>$6,123,456</span>
-            </div>
+            </div> */}
           </div>
         </section>
         <section className={style.graphContainer}>

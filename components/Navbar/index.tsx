@@ -33,7 +33,6 @@ function Navbar({ walletAddress }: Props) {
   }
 
   const routes = [
-    { pathname: '/', href: '/', name: translations[lang].markets },
     {
       pathname: '/assets/[id]',
       href: '/assets/dai',

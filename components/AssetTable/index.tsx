@@ -31,7 +31,7 @@ function AssetTable({ maturities }: Props) {
               <div className={styles.row} key={key}>
                 <div className={styles.maturity}>
                   <span>{maturity.label}</span>
-                  <span className={styles.liquidity}>{translations[lang].liquidity}: </span>
+                  <span className={styles.liquidity}>{translations[lang].liquidity}: $1.3B</span>
                 </div>
                 <div className={styles.lastFixedRate}>
                   <div className={styles.deposit}>4,41%</div>
