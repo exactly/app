@@ -50,11 +50,7 @@ function Item({ market, showModal, type, src }: Props) {
 
     //we have to see which ones we want to show, meanwhile I leave everything here
     const newPoolData = {
-      available: Math.round(
-        parseInt(await ethers.utils.formatEther(available))
-      ),
       borrowed: Math.round(parseInt(await ethers.utils.formatEther(borrowed))),
-      debt: Math.round(parseInt(await ethers.utils.formatEther(debt))),
       supplied: Math.round(parseInt(await ethers.utils.formatEther(supplied)))
     };
 
@@ -63,9 +59,8 @@ function Item({ market, showModal, type, src }: Props) {
 
   return (
     <div
-      className={`${style.container} ${
-        type == 'borrow' ? style.secondaryContainer : style.primaryContainer
-      }`}
+      className={`${style.container} ${type == 'borrow' ? style.secondaryContainer : style.primaryContainer
+        }`}
       onClick={handleClick}
     >
       <div className={style.symbol}>
