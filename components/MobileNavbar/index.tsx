@@ -67,8 +67,11 @@ function MobileNavbar({ walletAddress, network }: Props) {
   }
 
   const routes = [
-    { pathname: '/', href: '/', name: translations[lang].markets },
-    { pathname: '/assets', href: '/assets', name: translations[lang].assets },
+    {
+      pathname: '/assets/[id]',
+      href: '/assets/dai',
+      name: translations[lang].assets
+    },
     { pathname: '/dashboard', href: '/', name: translations[lang].dashboard },
     { pathname: '/nerd-mode', href: '/', name: translations[lang].nerdMode }
   ];

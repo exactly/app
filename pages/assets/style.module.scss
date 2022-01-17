@@ -1,7 +1,8 @@
 .container {
   padding-top: var(--u2);
-  width: var(--maxWidth);
+  max-width: var(--maxWidth);
   margin: var(--navbarHeight) auto;
+
   .assetData {
     display: flex;
     align-items: flex-end;
@@ -45,7 +46,7 @@
   .maturitiesContainer {
     display: flex;
     flex-wrap: wrap;
-    width: var(--maxWidth);
+    max-width: var(--maxWidth);
     gap: var(--u4);
     justify-content: space-between;
   }

@@ -10,6 +10,8 @@ import MaturityInfo from 'components/MaturityInfo';
 import AssetInfo from 'components/AssetInfo';
 import AssetTable from 'components/AssetTable';
 import SmartPoolInfo from 'components/SmartPoolInfo';
+import SmartPoolChart from 'components/SmartPoolChart';
+import MobileNavbar from 'components/MobileNavbar';
 
 import { Network } from 'types/Network';
 import { Contract } from 'types/Contract';
@@ -24,7 +26,6 @@ import style from './style.module.scss';
 import useContract from 'hooks/useContract';
 
 import keys from './translations.json';
-import SmartPoolChart from 'components/SmartPoolChart';
 
 interface Props {
   walletAddress: string;
@@ -66,6 +67,7 @@ const Asset: NextPage<Props> = ({ walletAddress, network, auditor }) => {
 
   return (
     <AuditorProvider value={auditor}>
+      <MobileNavbar walletAddress={walletAddress} network={network} />
       <Navbar walletAddress={walletAddress} />
       <section className={style.container}>
         <section className={style.assetData}>

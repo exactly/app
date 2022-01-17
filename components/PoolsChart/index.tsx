@@ -12,7 +12,7 @@ import {
 import styles from './style.module.scss';
 
 function PoolsChart() {
-  const deposit = [
+  const borrow = [
     { date: '12-Jan-22', apr: 4, z: 41 },
     { date: '19-Jan-22', apr: 6, z: 100 },
     { date: '26-Jan-22', apr: 8, z: 110 },
@@ -21,7 +21,7 @@ function PoolsChart() {
     { date: '16-Feb-22', apr: 20, z: 210 }
   ];
 
-  const borrow = [
+  const deposit = [
     { date: '12-Jan-22', apr: 1, z: 35 },
     { date: '19-Jan-22', apr: 4, z: 50 },
     { date: '26-Jan-22', apr: 6, z: 20 },
