@@ -79,7 +79,7 @@ function BorrowForm({
         parseInt(date.value)
       );
 
-    const smartPoolBorrowed = await fixedLenderWithSigner?.contractWithSigner?.smartPoolBorrowed;
+    const smartPoolBorrowed = await fixedLenderWithSigner?.contractWithSigner?.smartPoolBorrowed();
     const smartPoolSupplied = 0;
 
     //Borrow
