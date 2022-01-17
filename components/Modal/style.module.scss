@@ -5,7 +5,7 @@
   left: calc(50% - 175px);
   top: 15%;
   background: var(--white);
-  box-shadow: var(--shadow-3);
+  box-shadow: var(--shadow-tables);
   padding: 20px;
   display: flex;
   flex-direction: column;
@@ -34,7 +34,7 @@
   }
 
   .right {
-    color: var(--tertiary);
+    color: var(--gray-900);
     p {
       display: flex;
       justify-content: space-between;

@@ -6,7 +6,7 @@
   right: var(--u2);
   bottom: var(--u2);
   background: var(--white);
-  box-shadow: var(--shadow-3);
+  box-shadow: var(--shadow-tables);
   width: 250px;
   padding: var(--u2);
 
@@ -24,7 +24,7 @@
   }
 
   .loading {
-    background-color: var(--line);
+    background-color: var(--gray-100);
     overflow: hidden;
     width: 100%;
     height: 100%;

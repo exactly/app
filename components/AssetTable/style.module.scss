@@ -1,13 +1,13 @@
 .table {
   max-width: 60%;
   width: 100%;
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-tables);
   border-radius: var(--u);
   .row {
     padding: var(--u2);
     height: 110px;
     width: 100%;
-    border-bottom: 1px solid var(--line);
+    border-bottom: 1px solid var(--gray-100);
     display: flex;
     justify-content: space-between;
     &:first-of-type {
@@ -24,7 +24,6 @@
         &.liquidity {
           color: var(--gray-200);
           font-weight: normal;
-
         }
       }
     }
