@@ -44,7 +44,8 @@ function Item({ market, showModal, src }: Props) {
   }
 
   async function getMarketData() {
-    const { borrowed, supplied } = await contract?.smartPool();
+    const borrowed = await contract?.smartPoolBorrowed();
+    const supplied = 0;
 
     const newPoolData = {
       borrowed: Math.round(parseInt(await ethers.utils.formatEther(borrowed))),

@@ -79,8 +79,8 @@ function BorrowForm({
         parseInt(date.value)
       );
 
-    const smartPool =
-      await fixedLenderWithSigner?.contractWithSigner?.smartPool();
+    const smartPoolBorrowed = await fixedLenderWithSigner?.contractWithSigner?.smartPoolBorrowed();
+    const smartPoolSupplied = 0;
 
     //Borrow
     try {
@@ -88,7 +88,8 @@ function BorrowForm({
         await interestRateModelContract?.contract?.getRateToBorrow(
           parseInt(date.value),
           maturityPools,
-          smartPool,
+          smartPoolBorrowed,
+          smartPoolSupplied,
           false
         );
 

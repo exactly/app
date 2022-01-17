@@ -79,6 +79,7 @@ function SmartPoolModal({ contractData, closeModal, walletAddress }: Props) {
   }
 
   async function deposit() {
+
     if (!qty) {
       return setError({ status: true, msg: translations[lang].error });
     }
@@ -219,8 +220,8 @@ function SmartPoolModal({ contractData, closeModal, walletAddress }: Props) {
             !tx || tx.status == 'success'
               ? handleClose
               : () => {
-                  setMinimized((prev) => !prev);
-                }
+                setMinimized((prev) => !prev);
+              }
           }
         />
       )}
