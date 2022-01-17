@@ -1,10 +1,6 @@
 .specialText {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  grid-template-rows: 1fr 1fr;
-  grid-template-areas:
-    'first first .'
-    '. second second';
+  width: 60%;
+  text-align: center;
   margin-bottom: 40px;
 
   .text {
@@ -12,11 +8,9 @@
   }
 
   .second {
-    grid-area: second;
     margin: 0;
   }
   .first {
-    grid-area: first;
     margin: 0;
   }
 
@@ -35,5 +29,11 @@
   .space {
     padding-left: var(--smallUnit);
     padding-right: var(--smallUnit);
+  }
+}
+
+@media (max-width: 769px) {
+  .specialText {
+    width: 100%;
   }
 }

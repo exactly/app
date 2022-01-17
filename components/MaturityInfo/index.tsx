@@ -45,7 +45,10 @@ function MaturityInfo({ maturity }: Props) {
           </div>
           <p className={color}>
             <img src="/img/icons/clock.svg" alt="clock" />
-            {Math.floor(days)} {translations[lang].days}
+            {Math.floor(days)}{' '}
+            {Math.floor(days) != 1
+              ? translations[lang].days
+              : translations[lang].day}
           </p>
         </li>
         <li className={styles.row}>

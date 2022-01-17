@@ -1,6 +1,7 @@
 {
   "en": {
     "days": "days",
+    "day": "day",
     "totalBorrowed": "Total Borrowed",
     "liquidity": "Liquidity",
     "utilizationRate": "Utilization Rate",
@@ -9,6 +10,7 @@
   },
   "es": {
     "days": "días",
+    "day": "día",
     "totalBorrowed": "Total Prestado",
     "liquidity": "Liquidez",
     "utilizationRate": "Tasa de Utilización",
