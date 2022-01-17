@@ -53,10 +53,16 @@ export function getUnderlyingData(network: string | undefined, symbol: string | 
 }
 
 export async function getMetamaskAccounts() {
-  const provider = new ethers.providers.Web3Provider(window.ethereum, "any");
-  const accounts = await provider.listAccounts();
+  const hasMetamask = await isMetamaskInstalled();
+  if (hasMetamask) {
+    const provider = new ethers.providers.Web3Provider(window.ethereum, "any");
+    const accounts = await provider.listAccounts();
 
-  return accounts ?? []
+    return accounts ?? []
+  } else {
+    return []
+  }
+
 }
 
 export async function handleMetamaskLogin() {

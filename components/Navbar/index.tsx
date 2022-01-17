@@ -30,7 +30,6 @@ function Navbar({ walletAddress }: Props) {
 
   async function handleClick() {
     //this function generates the connection to the provider
-    // await getProvider();
     await handleMetamaskLogin();
   }
 

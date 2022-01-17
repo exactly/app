@@ -19,9 +19,7 @@ import keys from './translations.json';
 
 type Props = {
   walletAddress?: String;
-  network: {
-    name: String;
-  };
+  network: String
 };
 
 function MobileNavbar({ walletAddress, network }: Props) {

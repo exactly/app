@@ -4,9 +4,7 @@ import { formatWallet } from 'utils/utils';
 type Props = {
   walletAddress: String;
   cogwheel?: Boolean;
-  network?: {
-    name: String;
-  };
+  network?: String;
 };
 
 function Wallet({ walletAddress, cogwheel = true, network }: Props) {
@@ -19,7 +17,7 @@ function Wallet({ walletAddress, cogwheel = true, network }: Props) {
       {network && (
         <div className={styles.networkContainer}>
           <div className={styles.dot} />
-          <p className={styles.network}> {network?.name}</p>
+          <p className={styles.network}> {network}</p>
         </div>
       )}
     </div>
