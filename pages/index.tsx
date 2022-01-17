@@ -148,17 +148,18 @@ const Home: NextPage<Props> = ({
 
 export async function getStaticProps() {
   const getAuditorAbi = await axios.get(
-    'https://abi-versions2.s3.amazonaws.com/latest/contracts/Auditor.sol/Auditor.json'
+    'https://exactly-abi.s3.amazonaws.com/latest/contracts/Auditor.sol/Auditor.json'
   );
   const getFixedLenderAbi = await axios.get(
-    'https://abi-versions2.s3.amazonaws.com/latest/contracts/FixedLender.sol/FixedLender.json'
+    'https://exactly-abi.s3.amazonaws.com/latest/contracts/FixedLender.sol/FixedLender.json'
   );
   const getInterestRateModelAbi = await axios.get(
-    'https://abi-versions2.s3.amazonaws.com/latest/contracts/InterestRateModel.sol/InterestRateModel.json'
+    'https://exactly-abi.s3.amazonaws.com/latest/contracts/InterestRateModel.sol/InterestRateModel.json'
   );
   const addresses = await axios.get(
-    'https://abi-versions2.s3.amazonaws.com/latest/addresses.json'
+    'https://exactly-abi.s3.amazonaws.com/latest/addresses.json'
   );
+
   const auditorAddress = addresses?.data?.auditor;
   const interestRateModelAddress = addresses?.data?.interestRateModel;
 
