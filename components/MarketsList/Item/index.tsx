@@ -45,10 +45,8 @@ function Item({ market, showModal, type, src }: Props) {
   }
 
   async function getMarketData() {
-    const { available, borrowed, debt, supplied } =
-      await contract?.maturityPools(date?.value);
+    const { borrowed, supplied } = await contract?.maturityPools(date?.value);
 
-    //we have to see which ones we want to show, meanwhile I leave everything here
     const newPoolData = {
       borrowed: Math.round(parseInt(await ethers.utils.formatEther(borrowed))),
       supplied: Math.round(parseInt(await ethers.utils.formatEther(supplied)))
