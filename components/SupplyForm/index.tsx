@@ -87,7 +87,6 @@ function SupplyForm({
     fixedLender?.abi!
   );
 
-  console.log(fixedLenderWithSigner)
 
   useEffect(() => {
     if (fixedLenderWithSigner) {
