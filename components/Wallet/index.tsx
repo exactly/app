@@ -7,7 +7,7 @@ import { Network } from 'types/Network';
 type Props = {
   walletAddress: String;
   cogwheel?: Boolean;
-  network?: Network;
+  network?: string;
 };
 
 function Wallet({ walletAddress, cogwheel = true, network }: Props) {

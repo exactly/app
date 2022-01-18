@@ -20,7 +20,7 @@ import keys from './translations.json';
 
 type Props = {
   walletAddress?: String;
-  network: Network;
+  network: string;
 };
 
 function MobileNavbar({ walletAddress, network }: Props) {
