@@ -1,7 +1,8 @@
 import { useContext, useEffect, useState } from 'react';
-import type { NextPage } from 'next';
+import type { NextApiRequest, NextPage } from 'next';
 import axios from 'axios';
 import dayjs from 'dayjs';
+import { ethers } from 'ethers';
 
 import AssetSelector from 'components/AssetSelector';
 import Navbar from 'components/Navbar';
@@ -26,21 +27,44 @@ import style from './style.module.scss';
 import useContract from 'hooks/useContract';
 
 import keys from './translations.json';
+import Modal from 'components/Modal';
+import useModal from 'hooks/useModal';
+import { Market } from 'types/Market';
+import { UnformattedMarket } from 'types/UnformattedMarket';
 
 interface Props {
   walletAddress: string;
-  network: Network;
+  network: string;
   auditor: Contract;
+  tokenAddress: string;
 }
 
-const Asset: NextPage<Props> = ({ walletAddress, network, auditor }) => {
+const Asset: NextPage<Props> = ({ walletAddress, network, auditor, tokenAddress }) => {
   const lang: string = useContext(LangContext);
+  const { modal, handleModal, modalContent } = useModal();
+
   const translations: { [key: string]: LangKeys } = keys;
 
   const auditorContract = useContract(auditor.address, auditor.abi);
   const [maturities, setMaturities] = useState<Array<Maturity> | undefined>(
     undefined
   );
+
+  const [marketData, setMarketData] = useState<UnformattedMarket | undefined>(undefined);
+
+  useEffect(() => {
+    if (!maturities) {
+      getMarketData();
+      getPools();
+    }
+  }, [auditorContract]);
+
+
+  async function getMarketData() {
+    const marketData = await auditorContract?.contract?.getMarketData(tokenAddress);
+    setMarketData(marketData)
+  }
+
 
   async function getPools() {
     const pools = await auditorContract?.contract?.getFuturePools();
@@ -59,16 +83,40 @@ const Asset: NextPage<Props> = ({ walletAddress, network, auditor }) => {
     setMaturities(formattedDates);
   }
 
-  useEffect(() => {
-    if (!maturities) {
-      getPools();
+
+
+  function showModal(type: String) {
+    if (modalContent?.type) {
+      //in the future we should handle the minimized modal status through a context here
+      return;
     }
-  }, [auditorContract]);
+
+    if (marketData) {
+      const market = {
+        address: marketData[5],
+        symbol: marketData[0],
+        name: marketData[1],
+        isListed: marketData[2],
+        collateralFactor: parseFloat(
+          ethers.utils.formatEther(marketData[3])
+        )
+      };
+
+      handleModal({ content: { ...market, type } });
+    }
+  }
 
   return (
     <AuditorProvider value={auditor}>
       <MobileNavbar walletAddress={walletAddress} network={network} />
       <Navbar walletAddress={walletAddress} />
+      {modal && modalContent?.type != 'smartDeposit' && (
+        <Modal
+          contractData={modalContent}
+          closeModal={handleModal}
+          walletAddress={walletAddress}
+        />
+      )}
       <section className={style.container}>
         <section className={style.assetData}>
           <div className={style.assetContainer}>
@@ -100,7 +148,7 @@ const Asset: NextPage<Props> = ({ walletAddress, network, auditor }) => {
           </div>
         </section>
         <section className={style.graphContainer}>
-          <AssetTable maturities={maturities?.slice(0, 5)} />
+          <AssetTable maturities={maturities?.slice(0, 5)} showModal={(type: string) => showModal(type)} />
           <div className={style.assetGraph}>
             <PoolsChart />
           </div>
@@ -127,7 +175,9 @@ const Asset: NextPage<Props> = ({ walletAddress, network, auditor }) => {
 
 export default Asset;
 
-export async function getServerSideProps() {
+export async function getServerSideProps(req: NextApiRequest) {
+  const tokenSymbol: string = req?.query?.id as string;
+
   const getAuditorAbi = await axios.get(
     'https://abi-versions2.s3.amazonaws.com/latest/contracts/Auditor.sol/Auditor.json'
   );
@@ -156,7 +206,8 @@ export async function getServerSideProps() {
       assetsAddresses: addresses.data,
       fixedLender: {
         abi: getFixedLenderAbi.data
-      }
+      },
+      tokenAddress: addresses.data[`FixedLender${tokenSymbol.toUpperCase()}`]
     }
   };
 }

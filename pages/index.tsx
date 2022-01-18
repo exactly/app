@@ -32,7 +32,7 @@ import dictionary from 'dictionary/en.json';
 
 interface Props {
   walletAddress: string;
-  network: Network;
+  network: string;
   auditor: Contract;
   assetsAddresses: Dictionary<string>;
   fixedLender: Contract;
