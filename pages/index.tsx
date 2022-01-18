@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect } from 'react';
 import type { NextPage } from 'next';
 
 import { ethers } from 'ethers';
@@ -23,16 +23,16 @@ import { FixedLenderProvider } from 'contexts/FixedLenderContext';
 import { InterestRateModelProvider } from 'contexts/InterestRateModelContext';
 
 import { Market } from 'types/Market';
-
 import { UnformattedMarket } from 'types/UnformattedMarket';
 import { Contract } from 'types/Contract';
 import { Dictionary } from 'types/Dictionary';
+import { Network } from 'types/Network';
 
 import dictionary from 'dictionary/en.json';
 
 interface Props {
   walletAddress: string;
-  network: string;
+  network: Network;
   auditor: Contract;
   assetsAddresses: Dictionary<string>;
   fixedLender: Contract;

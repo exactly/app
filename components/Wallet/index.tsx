@@ -1,10 +1,13 @@
 import styles from './style.module.scss';
+
 import { formatWallet } from 'utils/utils';
+
+import { Network } from 'types/Network';
 
 type Props = {
   walletAddress: String;
   cogwheel?: Boolean;
-  network?: String;
+  network?: Network;
 };
 
 function Wallet({ walletAddress, cogwheel = true, network }: Props) {

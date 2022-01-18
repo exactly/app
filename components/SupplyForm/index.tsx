@@ -116,6 +116,7 @@ function SupplyForm({
       formattedRate &&
         handleResult({ potentialRate: formattedRate, hasRate: true });
     } catch (e) {
+      console.log(e);
       return setError({ status: true, msg: translations[lang].error });
     }
   }
