@@ -6,7 +6,7 @@ import '../styles/variables.css';
 import type { AppProps } from 'next/app';
 import Head from 'next/head';
 
-import { getChainId, getContractsByEnv } from 'utils/utils';
+import { getChainId } from 'utils/utils';
 import { AddressProvider } from 'contexts/AddressContext';
 
 import { getCurrentWalletConnected } from 'hooks/useWallet';
@@ -15,11 +15,10 @@ import { Dictionary } from 'types/Dictionary';
 
 import { useRouter } from 'next/router';
 
-
 function MyApp({ Component, pageProps }: AppProps) {
   const [walletAddress, setWallet] = useState<string | undefined>(undefined);
-  const [network, setNetwork] = useState<string | undefined>(undefined)
-  const router = useRouter()
+  const [network, setNetwork] = useState<string | undefined>(undefined);
+  const router = useRouter();
 
   useEffect(() => {
     getNetwork();
@@ -27,7 +26,7 @@ function MyApp({ Component, pageProps }: AppProps) {
     addWalletListener();
 
     window.ethereum.on('chainChanged', () => {
-      router.reload()
+      router.reload();
     });
   }, []);
 
@@ -35,12 +34,12 @@ function MyApp({ Component, pageProps }: AppProps) {
     const chainId = await getChainId();
 
     const chainMap: Dictionary<string> = {
-      "0x1": "Mainnet",
-      "0x4": "Rinkeby",
-      "0x2a": "Kovan"
-    }
+      '0x1': 'Mainnet',
+      '0x4': 'Rinkeby',
+      '0x2a': 'Kovan'
+    };
 
-    setNetwork(chainMap[chainId] ?? undefined)
+    setNetwork(chainMap[chainId] ?? undefined);
   }
 
   async function handleWallet() {

@@ -12,6 +12,7 @@ import Wallet from 'components/Wallet';
 import Overlay from 'components/Overlay';
 
 import { LangKeys } from 'types/Lang';
+import { Network } from 'types/Network';
 
 import styles from './style.module.scss';
 
@@ -19,7 +20,7 @@ import keys from './translations.json';
 
 type Props = {
   walletAddress?: String;
-  network: String
+  network: Network;
 };
 
 function MobileNavbar({ walletAddress, network }: Props) {
