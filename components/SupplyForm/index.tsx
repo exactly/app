@@ -87,8 +87,12 @@ function SupplyForm({
     fixedLender?.abi!
   );
 
+  console.log(fixedLenderWithSigner)
+
   useEffect(() => {
-    calculateRate();
+    if (fixedLenderWithSigner) {
+      calculateRate();
+    }
   }, [qty, date]);
 
   async function calculateRate() {

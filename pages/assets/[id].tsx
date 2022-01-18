@@ -21,6 +21,8 @@ import { LangKeys } from 'types/Lang';
 
 import { AuditorProvider } from 'contexts/AuditorContext';
 import LangContext from 'contexts/LangContext';
+import { FixedLenderProvider } from 'contexts/FixedLenderContext';
+import { InterestRateModelProvider } from 'contexts/InterestRateModelContext';
 
 import style from './style.module.scss';
 
@@ -31,15 +33,19 @@ import Modal from 'components/Modal';
 import useModal from 'hooks/useModal';
 import { Market } from 'types/Market';
 import { UnformattedMarket } from 'types/UnformattedMarket';
+import { Dictionary } from 'types/Dictionary';
 
 interface Props {
   walletAddress: string;
   network: string;
   auditor: Contract;
   tokenAddress: string;
+  assetsAddresses: Dictionary<string>;
+  fixedLender: Contract;
+  interestRateModel: Contract;
 }
 
-const Asset: NextPage<Props> = ({ walletAddress, network, auditor, tokenAddress }) => {
+const Asset: NextPage<Props> = ({ walletAddress, network, auditor, tokenAddress, assetsAddresses, fixedLender, interestRateModel }) => {
   const lang: string = useContext(LangContext);
   const { modal, handleModal, modalContent } = useModal();
 
@@ -108,22 +114,27 @@ const Asset: NextPage<Props> = ({ walletAddress, network, auditor, tokenAddress 
 
   return (
     <AuditorProvider value={auditor}>
-      <MobileNavbar walletAddress={walletAddress} network={network} />
-      <Navbar walletAddress={walletAddress} />
-      {modal && modalContent?.type != 'smartDeposit' && (
-        <Modal
-          contractData={modalContent}
-          closeModal={handleModal}
-          walletAddress={walletAddress}
-        />
-      )}
-      <section className={style.container}>
-        <section className={style.assetData}>
-          <div className={style.assetContainer}>
-            <AssetSelector title={true} />
-          </div>
-          <div className={style.assetMetricsContainer}>
-            {/* <div className={style.assetMetrics}>
+      <FixedLenderProvider
+        value={{ addresses: assetsAddresses, abi: fixedLender.abi }}
+      >
+        <InterestRateModelProvider value={interestRateModel}>
+
+          <MobileNavbar walletAddress={walletAddress} network={network} />
+          <Navbar walletAddress={walletAddress} />
+          {modal && modalContent?.type != 'smartDeposit' && (
+            <Modal
+              contractData={modalContent}
+              closeModal={handleModal}
+              walletAddress={walletAddress}
+            />
+          )}
+          <section className={style.container}>
+            <section className={style.assetData}>
+              <div className={style.assetContainer}>
+                <AssetSelector title={true} />
+              </div>
+              <div className={style.assetMetricsContainer}>
+                {/* <div className={style.assetMetrics}>
               <span className={style.title}>{translations[lang].netRate}</span>
               <span className={style.value}>0.19%</span>
             </div>
@@ -145,30 +156,32 @@ const Asset: NextPage<Props> = ({ walletAddress, network, auditor, tokenAddress 
               </span>
               <span className={style.value}>$6,123,456</span>
             </div> */}
-          </div>
-        </section>
-        <section className={style.graphContainer}>
-          <AssetTable maturities={maturities?.slice(0, 5)} showModal={(type: string) => showModal(type)} />
-          <div className={style.assetGraph}>
-            <PoolsChart />
-          </div>
-        </section>
-        <h2>{translations[lang].assetDetails}</h2>
-        <div className={style.assetInfoContainer}>
-          <AssetInfo title={translations[lang].price} value="$4,213.62" />
-          <AssetInfo title={translations[lang].reserveFactor} value="20%" />
-          <AssetInfo title={translations[lang].collateralFactor} value="75%" />
-        </div>
-        <div className={style.maturitiesContainer}>
-          {maturities?.slice(0, 3)?.map((maturity) => {
-            return <MaturityInfo maturity={maturity} key={maturity.value} />;
-          })}
-        </div>
-        <div className={style.smartPoolContainer}>
-          <SmartPoolInfo />
-          <SmartPoolChart />
-        </div>
-      </section>
+              </div>
+            </section>
+            <section className={style.graphContainer}>
+              <AssetTable maturities={maturities?.slice(0, 5)} showModal={(type: string) => showModal(type)} />
+              <div className={style.assetGraph}>
+                <PoolsChart />
+              </div>
+            </section>
+            <h2>{translations[lang].assetDetails}</h2>
+            <div className={style.assetInfoContainer}>
+              <AssetInfo title={translations[lang].price} value="$4,213.62" />
+              <AssetInfo title={translations[lang].reserveFactor} value="20%" />
+              <AssetInfo title={translations[lang].collateralFactor} value="75%" />
+            </div>
+            <div className={style.maturitiesContainer}>
+              {maturities?.slice(0, 3)?.map((maturity) => {
+                return <MaturityInfo maturity={maturity} key={maturity.value} />;
+              })}
+            </div>
+            <div className={style.smartPoolContainer}>
+              <SmartPoolInfo />
+              <SmartPoolChart />
+            </div>
+          </section>
+        </InterestRateModelProvider>
+      </FixedLenderProvider>
     </AuditorProvider>
   );
 };
