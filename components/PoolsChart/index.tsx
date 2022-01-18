@@ -32,6 +32,7 @@ function PoolsChart() {
 
   return (
     <div className={styles.chartContainer}>
+      <p className={styles.title}>Yield Curve</p>
       <ResponsiveContainer width="100%" height="100%">
         <ScatterChart
           margin={{
