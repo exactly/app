@@ -34,6 +34,7 @@ function Modal({ contractData, closeModal, walletAddress }: Props) {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
+
   const [potentialRate, setPotentialRate] = useState<string | undefined>('0');
 
   const [assetData, setAssetData] = useState<Market | undefined>(undefined);
@@ -69,8 +70,8 @@ function Modal({ contractData, closeModal, walletAddress }: Props) {
                 !tx || tx.status == 'success'
                   ? handleClose
                   : () => {
-                      setMinimized((prev) => !prev);
-                    }
+                    setMinimized((prev) => !prev);
+                  }
               }
             >
               X
@@ -156,8 +157,8 @@ function Modal({ contractData, closeModal, walletAddress }: Props) {
             !tx || tx.status == 'success'
               ? handleClose
               : () => {
-                  setMinimized((prev) => !prev);
-                }
+                setMinimized((prev) => !prev);
+              }
           }
         />
       )}

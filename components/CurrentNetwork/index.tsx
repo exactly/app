@@ -12,7 +12,7 @@ import styles from './style.module.scss';
 import keys from './translations.json';
 
 type Props = {
-  network: Network;
+  network: string;
 };
 
 function CurrentNetwork({ network }: Props) {
@@ -22,9 +22,8 @@ function CurrentNetwork({ network }: Props) {
   return (
     <div className={styles.network}>
       <AlertMessage
-        label={`<span>${translations[lang].connectedTo} <strong>${
-          network ?? 'unknown'
-        }</strong> ${translations[lang].network}</span>`}
+        label={`<span>${translations[lang].connectedTo} <strong>${network ?? 'unknown'
+          }</strong> ${translations[lang].network}</span>`}
         status={network ? 'success' : 'error'}
       />
     </div>
