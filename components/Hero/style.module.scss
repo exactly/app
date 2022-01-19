@@ -43,46 +43,6 @@
     width: 80%;
     height: 100%;
   }
-
-  .specialText {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    grid-template-rows: 1fr 1fr;
-    grid-template-areas:
-      'first first .'
-      '. second second';
-    margin-bottom: 40px;
-
-    .text {
-      opacity: var(--defaultOpacity);
-    }
-
-    .second {
-      grid-area: second;
-      margin: 0;
-    }
-    .first {
-      grid-area: first;
-      margin: 0;
-    }
-
-    .blue {
-      background: var(--primary);
-      color: var(--white);
-      transition: all 500ms linear;
-    }
-
-    .green {
-      background: var(--secondary);
-      color: var(--white);
-      transition: all 500ms linear;
-    }
-
-    .space {
-      padding-left: 3px;
-      padding-right: 3px;
-    }
-  }
 }
 
 @media (max-width: 769px) {
@@ -102,6 +62,10 @@
       .subtitle {
         min-width: 100%;
       }
+    }
+
+    .left {
+      min-width: 100%;
     }
   }
 

@@ -18,7 +18,7 @@
     display: flex;
     flex-wrap: wrap;
     width: calc(50% - var(--u2));
-    background: var(--gray);
+    background: var(--gray-50);
 
     h2 {
       margin: var(--u) 0 var(--u3) 0;
@@ -34,13 +34,9 @@
         padding: var(--u) var(--u3);
         justify-content: space-between;
         font-weight: bold;
-        color: var(--tertiary);
+        color: var(--gray-500);
         font-size: var(--font-12);
         align-items: center;
-
-        span {
-          opacity: 50%;
-        }
 
         .symbol {
           width: 20%;

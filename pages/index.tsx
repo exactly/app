@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect } from 'react';
 import type { NextPage } from 'next';
 
 import { ethers } from 'ethers';
@@ -23,17 +23,16 @@ import { FixedLenderProvider } from 'contexts/FixedLenderContext';
 import { InterestRateModelProvider } from 'contexts/InterestRateModelContext';
 
 import { Market } from 'types/Market';
-
-import { Network } from 'types/Network';
 import { UnformattedMarket } from 'types/UnformattedMarket';
 import { Contract } from 'types/Contract';
 import { Dictionary } from 'types/Dictionary';
+import { Network } from 'types/Network';
 
 import dictionary from 'dictionary/en.json';
 
 interface Props {
   walletAddress: string;
-  network: Network;
+  network: string;
   auditor: Contract;
   assetsAddresses: Dictionary<string>;
   fixedLender: Contract;
@@ -120,12 +119,17 @@ const Home: NextPage<Props> = ({
       >
         <InterestRateModelProvider value={interestRateModel}>
           {modal && modalContent?.type != 'smartDeposit' && (
-            <Modal contractData={modalContent} closeModal={handleModal} />
+            <Modal
+              contractData={modalContent}
+              closeModal={handleModal}
+              walletAddress={walletAddress}
+            />
           )}
           {modal && modalContent?.type == 'smartDeposit' && (
             <SmartPoolModal
               contractData={modalContent}
               closeModal={handleModal}
+              walletAddress={walletAddress}
             />
           )}
           <MobileNavbar walletAddress={walletAddress} network={network} />

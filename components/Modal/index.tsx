@@ -26,12 +26,14 @@ import numbers from 'config/numbers.json';
 type Props = {
   contractData: any;
   closeModal: any;
+  walletAddress: string;
 };
 
-function Modal({ contractData, closeModal }: Props) {
+function Modal({ contractData, closeModal, walletAddress }: Props) {
   const auditor = useContext(AuditorContext);
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
+
 
   const [potentialRate, setPotentialRate] = useState<string | undefined>('0');
 
@@ -68,8 +70,8 @@ function Modal({ contractData, closeModal }: Props) {
                 !tx || tx.status == 'success'
                   ? handleClose
                   : () => {
-                      setMinimized((prev) => !prev);
-                    }
+                    setMinimized((prev) => !prev);
+                  }
               }
             >
               X
@@ -98,6 +100,7 @@ function Modal({ contractData, closeModal }: Props) {
                     address={contractData.address}
                     assetData={assetData}
                     handleTx={(data: Transaction) => setTx(data)}
+                    walletAddress={walletAddress}
                   />
                 )}
 
@@ -154,8 +157,8 @@ function Modal({ contractData, closeModal }: Props) {
             !tx || tx.status == 'success'
               ? handleClose
               : () => {
-                  setMinimized((prev) => !prev);
-                }
+                setMinimized((prev) => !prev);
+              }
           }
         />
       )}

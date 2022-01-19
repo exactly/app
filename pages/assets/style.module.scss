@@ -1,7 +1,8 @@
 .container {
   padding-top: var(--u2);
-  width: var(--maxWidth);
+  max-width: var(--maxWidth);
   margin: var(--navbarHeight) auto;
+
   .assetData {
     display: flex;
     align-items: flex-end;
@@ -20,7 +21,7 @@
           font-weight: 600;
         }
         .value {
-          color: var(--gray-500);
+          color: var(--gray-900);
           margin-top: var(--u);
           display: block;
         }
@@ -33,11 +34,27 @@
 
     .assetGraph {
       width: 100%;
+      padding: 0 var(--u4);
     }
   }
   .assetInfoContainer {
     display: flex;
     max-width: 45%;
     justify-content: space-between;
+    margin-bottom: var(--u5);
+  }
+
+  .maturitiesContainer {
+    display: flex;
+    flex-wrap: wrap;
+    max-width: var(--maxWidth);
+    gap: var(--u4);
+    justify-content: space-between;
+  }
+
+  .smartPoolContainer {
+    display: flex;
+    gap: var(--u4);
+    margin-top: 80px;
   }
 }

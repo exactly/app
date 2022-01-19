@@ -14,6 +14,7 @@ import LangContext from 'contexts/LangContext';
 import styles from './style.module.scss';
 
 import keys from './translations.json';
+import { handleMetamaskLogin } from 'utils/utils';
 
 type Props = {
   walletAddress?: String;
@@ -29,11 +30,10 @@ function Navbar({ walletAddress }: Props) {
 
   async function handleClick() {
     //this function generates the connection to the provider
-    await getProvider();
+    await handleMetamaskLogin();
   }
 
   const routes = [
-    { pathname: '/', href: '/', name: translations[lang].markets },
     {
       pathname: '/assets/[id]',
       href: '/assets/dai',

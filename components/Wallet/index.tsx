@@ -1,12 +1,13 @@
 import styles from './style.module.scss';
+
 import { formatWallet } from 'utils/utils';
+
+import { Network } from 'types/Network';
 
 type Props = {
   walletAddress: String;
   cogwheel?: Boolean;
-  network?: {
-    name: String;
-  };
+  network?: string;
 };
 
 function Wallet({ walletAddress, cogwheel = true, network }: Props) {
@@ -19,7 +20,7 @@ function Wallet({ walletAddress, cogwheel = true, network }: Props) {
       {network && (
         <div className={styles.networkContainer}>
           <div className={styles.dot} />
-          <p className={styles.network}> {network?.name}</p>
+          <p className={styles.network}> {network}</p>
         </div>
       )}
     </div>

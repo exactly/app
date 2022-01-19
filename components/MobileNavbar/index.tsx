@@ -12,6 +12,7 @@ import Wallet from 'components/Wallet';
 import Overlay from 'components/Overlay';
 
 import { LangKeys } from 'types/Lang';
+import { Network } from 'types/Network';
 
 import styles from './style.module.scss';
 
@@ -19,9 +20,7 @@ import keys from './translations.json';
 
 type Props = {
   walletAddress?: String;
-  network: {
-    name: String;
-  };
+  network: string;
 };
 
 function MobileNavbar({ walletAddress, network }: Props) {
@@ -69,8 +68,11 @@ function MobileNavbar({ walletAddress, network }: Props) {
   }
 
   const routes = [
-    { pathname: '/', href: '/', name: translations[lang].markets },
-    { pathname: '/assets', href: '/assets', name: translations[lang].assets },
+    {
+      pathname: '/assets/[id]',
+      href: '/assets/dai',
+      name: translations[lang].assets
+    },
     { pathname: '/dashboard', href: '/', name: translations[lang].dashboard },
     { pathname: '/nerd-mode', href: '/', name: translations[lang].nerdMode }
   ];

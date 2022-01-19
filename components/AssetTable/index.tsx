@@ -10,9 +10,10 @@ import LangContext from 'contexts/LangContext';
 
 interface Props {
   maturities: Array<Maturity> | undefined;
+  showModal: (type: string) => void;
 }
 
-function AssetTable({ maturities }: Props) {
+function AssetTable({ maturities, showModal }: Props) {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
@@ -31,7 +32,7 @@ function AssetTable({ maturities }: Props) {
               <div className={styles.row} key={key}>
                 <div className={styles.maturity}>
                   <span>{maturity.label}</span>
-                  <span className={styles.liquidity}>{translations[lang].liquidity}: </span>
+                  <span className={styles.liquidity}>{translations[lang].liquidity}: $1.3B</span>
                 </div>
                 <div className={styles.lastFixedRate}>
                   <div className={styles.deposit}>4,41%</div>
@@ -39,10 +40,10 @@ function AssetTable({ maturities }: Props) {
                 </div>
                 <div className={styles.actions}>
                   <div className={styles.buttonContainer}>
-                    <Button text={translations[lang].deposit} className="primary" />
+                    <Button text={translations[lang].deposit} className="primary" onClick={() => showModal('deposit')} />
                   </div>
                   <div className={styles.buttonContainer}>
-                    <Button text={translations[lang].borrow} className="secondary" />
+                    <Button text={translations[lang].borrow} className="secondary" onClick={() => showModal('borrow')} />
                   </div>
                 </div>
 

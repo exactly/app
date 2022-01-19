@@ -31,9 +31,10 @@ import numbers from 'config/numbers.json';
 type Props = {
   contractData: any;
   closeModal: any;
+  walletAddress: string;
 };
 
-function SmartPoolModal({ contractData, closeModal }: Props) {
+function SmartPoolModal({ contractData, closeModal, walletAddress }: Props) {
   const fixedLender = useContext(FixedLenderContext);
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
@@ -78,6 +79,7 @@ function SmartPoolModal({ contractData, closeModal }: Props) {
   }
 
   async function deposit() {
+
     if (!qty) {
       return setError({ status: true, msg: translations[lang].error });
     }
@@ -122,6 +124,16 @@ function SmartPoolModal({ contractData, closeModal }: Props) {
     }
   }
 
+  async function getMaxAmount() {
+    const balance = await underlyingContract?.contract?.balanceOf(
+      walletAddress
+    );
+
+    const max = balance && ethers.utils.formatEther(balance);
+
+    max && setQty(max);
+  }
+
   return (
     <>
       {!minimized && (
@@ -156,6 +168,9 @@ function SmartPoolModal({ contractData, closeModal }: Props) {
                     value={qty}
                     placeholder="0"
                   />
+                  <span className={styles.maxButton} onClick={getMaxAmount}>
+                    MAX
+                  </span>
                 </div>
                 {error?.status && <p className={styles.error}>{error?.msg}</p>}
                 <Stepper currentStep={step} totalSteps={3} />
@@ -205,8 +220,8 @@ function SmartPoolModal({ contractData, closeModal }: Props) {
             !tx || tx.status == 'success'
               ? handleClose
               : () => {
-                  setMinimized((prev) => !prev);
-                }
+                setMinimized((prev) => !prev);
+              }
           }
         />
       )}

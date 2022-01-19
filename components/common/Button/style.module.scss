@@ -9,7 +9,7 @@
   transition: 0.25s all;
 
   &:hover {
-    background-color: var(--primaryHover);
+    background-color: var(--primary-hover);
     transition: 0.25s all;
   }
 }
@@ -18,7 +18,7 @@
   background: var(--secondary);
 
   &:hover {
-    background: var(--secondaryHover);
+    background: var(--secondary-hover);
   }
 }
 
@@ -36,11 +36,11 @@
 }
 
 .disabled {
-  background: var(--gray-medium);
+  background: var(--gray-200);
   color: var(--white);
 
   &:hover {
-    background: var(--gray-medium);
+    background: var(--gray-200);
     color: var(--white);
   }
 }
