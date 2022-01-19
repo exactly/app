@@ -1,3 +1,4 @@
+import { useContext } from 'react';
 import {
   ScatterChart,
   Scatter,
@@ -9,9 +10,18 @@ import {
   Legend
 } from 'recharts';
 
+import LangContext from 'contexts/LangContext';
+
+import { LangKeys } from 'types/Lang';
+
 import styles from './style.module.scss';
 
+import keys from './translations.json';
+
 function PoolsChart() {
+  const lang: string = useContext(LangContext);
+  const translations: { [key: string]: LangKeys } = keys;
+
   const borrow = [
     { date: '12-Jan-22', apr: 4, z: 41 },
     { date: '19-Jan-22', apr: 6, z: 100 },
@@ -32,6 +42,7 @@ function PoolsChart() {
 
   return (
     <div className={styles.chartContainer}>
+      <p className={styles.title}>{translations[lang].yieldCurve}</p>
       <ResponsiveContainer width="100%" height="100%">
         <ScatterChart
           margin={{
