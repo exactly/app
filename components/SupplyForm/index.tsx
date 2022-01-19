@@ -87,7 +87,6 @@ function SupplyForm({
     fixedLender?.abi!
   );
 
-
   useEffect(() => {
     if (fixedLenderWithSigner) {
       calculateRate();
@@ -102,22 +101,22 @@ function SupplyForm({
 
     handleLoading(false);
 
-    const maturityPools =
-      await fixedLenderWithSigner?.contractWithSigner?.maturityPools(
-        parseInt(date.value)
-      );
+    // const maturityPools =
+    //   await fixedLenderWithSigner?.contractWithSigner?.maturityPools(
+    //     parseInt(date.value)
+    //   );
 
     //Supply
     try {
-      const supplyRate =
-        await interestRateModelContract?.contract?.getRateToSupply(
-          parseInt(date.value),
-          maturityPools
-        );
+      // const supplyRate =
+      //   await interestRateModelContract?.contract?.getRateToSupply(
+      //     parseInt(date.value),
+      //     maturityPools
+      //   );
 
-      const formattedRate = supplyRate && ethers.utils.formatEther(supplyRate);
-      formattedRate &&
-        handleResult({ potentialRate: formattedRate, hasRate: true });
+      // const formattedRate = supplyRate && ethers.utils.formatEther(supplyRate);
+      // formattedRate &&
+      handleResult({ potentialRate: '0.00', hasRate: true });
     } catch (e) {
       console.log(e);
       return setError({ status: true, msg: translations[lang].error });
