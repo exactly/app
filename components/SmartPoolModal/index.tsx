@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import { ethers } from 'ethers';
 
 import styles from './style.module.scss';
@@ -74,12 +74,27 @@ function SmartPoolModal({ contractData, closeModal, walletAddress }: Props) {
     fixedLender?.abi!
   );
 
+  useEffect(() => {
+    checkAllowance();
+  }, [contractData.address, walletAddress, underlyingContract]);
+
+  async function checkAllowance() {
+    const allowance = await underlyingContract?.contractWithSigner?.allowance(
+      walletAddress,
+      contractData.address
+    );
+    const formattedAllowance = allowance && ethers.utils.formatEther(allowance);
+
+    if (formattedAllowance >= numbers.approvalAmount) {
+      setStep(2);
+    }
+  }
+
   function handleClose() {
     closeModal({});
   }
 
   async function deposit() {
-
     if (!qty) {
       return setError({ status: true, msg: translations[lang].error });
     }
@@ -220,8 +235,8 @@ function SmartPoolModal({ contractData, closeModal, walletAddress }: Props) {
             !tx || tx.status == 'success'
               ? handleClose
               : () => {
-                setMinimized((prev) => !prev);
-              }
+                  setMinimized((prev) => !prev);
+                }
           }
         />
       )}

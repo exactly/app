@@ -93,6 +93,22 @@ function SupplyForm({
     }
   }, [qty, date]);
 
+  useEffect(() => {
+    checkAllowance();
+  }, [address, walletAddress, underlyingContract]);
+
+  async function checkAllowance() {
+    const allowance = await underlyingContract?.contractWithSigner?.allowance(
+      walletAddress,
+      address
+    );
+    const formattedAllowance = allowance && ethers.utils.formatEther(allowance);
+
+    if (formattedAllowance >= numbers.approvalAmount) {
+      setStep(2);
+    }
+  }
+
   async function calculateRate() {
     if (!qty || !date) {
       handleLoading(true);
