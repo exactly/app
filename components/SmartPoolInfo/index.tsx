@@ -7,7 +7,9 @@ import { LangKeys } from 'types/Lang';
 import styles from './style.module.scss';
 
 import keys from './translations.json';
+
 import Button from 'components/common/Button';
+import Tooltip from 'components/Tooltip';
 
 function SmartPoolInfo() {
   const lang: string = useContext(LangContext);
@@ -15,7 +17,10 @@ function SmartPoolInfo() {
 
   return (
     <div className={styles.maturityContainer}>
-      <p className={styles.titleContainer}> {translations[lang].smartPool}</p>
+      <div className={styles.titleContainer}>
+        <p className={styles.title}>{translations[lang].smartPool}</p>
+        <Tooltip />
+      </div>
       <ul className={styles.table}>
         <li className={styles.header}>
           <div className={styles.assetInfo}>

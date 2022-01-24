@@ -24,6 +24,12 @@
     height: var(--u4);
     width: 100%;
   }
+
+  .titleContainer {
+    display: flex;
+    align-items: center;
+    gap: var(--u);
+  }
 }
 
 .error {

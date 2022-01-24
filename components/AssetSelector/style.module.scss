@@ -6,12 +6,18 @@
   flex-direction: column;
   gap: var(--u3);
 
-  .title {
-    font-size: var(--font-20);
-    font-weight: bold;
-    margin: 0;
-  }
+  .titleContainer {
+    display: flex;
+    gap: var(--u);
+    text-align: center;
+    align-items: center;
 
+    .title {
+      font-size: var(--font-20);
+      font-weight: bold;
+      margin: 0;
+    }
+  }
   .selectContainer {
     max-width: 200px;
     .labelContainer {

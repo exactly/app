@@ -5,6 +5,7 @@ import style from './style.module.scss';
 import Input from 'components/common/Input';
 import Button from 'components/common/Button';
 import MaturitySelector from 'components/MaturitySelector';
+import Tooltip from 'components/Tooltip';
 
 import useContractWithSigner from 'hooks/useContractWithSigner';
 import useContract from 'hooks/useContract';
@@ -79,7 +80,8 @@ function BorrowForm({
         parseInt(date.value)
       );
 
-    const smartPoolBorrowed = await fixedLenderWithSigner?.contractWithSigner?.smartPoolBorrowed();
+    const smartPoolBorrowed =
+      await fixedLenderWithSigner?.contractWithSigner?.smartPoolBorrowed();
     const smartPoolSupplied = 0;
 
     //Borrow
@@ -147,7 +149,10 @@ function BorrowForm({
         </div>
       </div>
       <div className={style.fieldContainer}>
-        <span>{translations[lang].endDate}</span>
+        <div className={style.titleContainer}>
+          <span>{translations[lang].endDate}</span>
+          <Tooltip />
+        </div>
         <div className={style.inputContainer}>
           <MaturitySelector />
         </div>

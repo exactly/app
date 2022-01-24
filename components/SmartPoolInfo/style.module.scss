@@ -4,10 +4,16 @@
   flex-wrap: wrap;
 
   .titleContainer {
-    width: 100%;
-    font-size: var(--font-20);
-    color: var(--gray-900);
-    font-weight: 700;
+    display: flex;
+    gap: var(--u);
+    align-items: center;
+
+    .title {
+      width: 100%;
+      font-size: var(--font-20);
+      color: var(--gray-900);
+      font-weight: 700;
+    }
   }
 
   .table {

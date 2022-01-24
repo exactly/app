@@ -4,13 +4,20 @@
   margin: 0 auto;
   display: flex;
   flex-wrap: wrap;
-  gap: 40px;
+  gap: var(--u5);
   text-align: center;
   align-items: center;
 
-  .title {
-    font-size: var(--font-20);
-    font-weight: bold;
+  .titleContainer {
+    display: flex;
+    gap: var(--u);
+    text-align: center;
+    align-items: center;
+
+    .title {
+      font-size: var(--font-20);
+      font-weight: bold;
+    }
   }
 }
 

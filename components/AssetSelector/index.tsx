@@ -1,6 +1,7 @@
 import { useEffect, useState, useContext } from 'react';
 
 import Select from 'components/common/Select';
+import Tooltip from 'components/Tooltip';
 
 import useContract from 'hooks/useContract';
 
@@ -12,10 +13,10 @@ import assets from 'dictionary/assets.json';
 import { Market } from 'types/Market';
 import { Assets } from 'types/Assets';
 import { UnformattedMarket } from 'types/UnformattedMarket';
+import { Address } from 'types/Address';
 import { Option } from 'react-dropdown';
 
 import style from './style.module.scss';
-import { Address } from 'types/Address';
 
 type Props = {
   title?: Boolean;
@@ -103,7 +104,7 @@ function AssetSelector({ title, defaultAddress, onChange }: Props) {
       const assetsData: Assets<symbol> = assets;
       const src: string = assetsData[symbol];
 
-      setAllMarketsData(prevState => [...prevState, marketData]);
+      setAllMarketsData((prevState) => [...prevState, marketData]);
 
       return {
         label: (
@@ -124,9 +125,11 @@ function AssetSelector({ title, defaultAddress, onChange }: Props) {
   }
 
   function getDataByAddress(address: string) {
-    const marketData = allMarketsData.find((market) => market.address == address);
+    const marketData = allMarketsData.find(
+      (market) => market.address == address
+    );
 
-    (onChange && marketData) && onChange(marketData)
+    onChange && marketData && onChange(marketData);
   }
 
   function handleChange(option: Address) {
@@ -136,7 +139,12 @@ function AssetSelector({ title, defaultAddress, onChange }: Props) {
 
   return (
     <section className={style.container}>
-      {title && <p className={style.title}>Maturity pool</p>}
+      {title && (
+        <div className={style.titleContainer}>
+          <p className={style.title}>Maturity pool</p>
+          <Tooltip />
+        </div>
+      )}
       <div className={style.selectContainer}>
         <Select
           options={selectOptions}

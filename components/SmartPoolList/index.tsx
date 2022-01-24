@@ -14,6 +14,7 @@ import LangContext from 'contexts/LangContext';
 import styles from './style.module.scss';
 
 import keys from './translations.json';
+import Tooltip from 'components/Tooltip';
 
 type Props = {
   markets: Array<Market>;
@@ -26,7 +27,10 @@ function SmartPoolList({ markets, showModal }: Props) {
 
   return (
     <section className={styles.container}>
-      <p className={styles.sectionTitle}>{translations[lang].smartPool}</p>
+      <div className={styles.sectionTitleContainer}>
+        <p className={styles.sectionTitle}>{translations[lang].smartPool}</p>
+        <Tooltip />
+      </div>
       <div className={styles.market}>
         <div className={styles.column}>
           <div className={styles.tableRow}>
