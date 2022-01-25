@@ -34,6 +34,7 @@ import useModal from 'hooks/useModal';
 import { Market } from 'types/Market';
 import { UnformattedMarket } from 'types/UnformattedMarket';
 import { Dictionary } from 'types/Dictionary';
+import Paginator from 'components/Paginator';
 
 interface Props {
   walletAddress: string;
@@ -45,17 +46,12 @@ interface Props {
   interestRateModel: Contract;
 }
 
-const Asset: NextPage<Props> = ({
-  walletAddress,
-  network,
-  auditor,
-  tokenAddress,
-  assetsAddresses,
-  fixedLender,
-  interestRateModel
-}) => {
+const Asset: NextPage<Props> = ({ walletAddress, network, auditor, tokenAddress, assetsAddresses, fixedLender, interestRateModel }) => {
+  const [page, setPage] = useState<number>(1)
   const lang: string = useContext(LangContext);
   const { modal, handleModal, modalContent } = useModal();
+
+  const itemsPerPage = 5;
 
   const translations: { [key: string]: LangKeys } = keys;
 
@@ -164,10 +160,10 @@ const Asset: NextPage<Props> = ({
               </div>
             </section>
             <section className={style.graphContainer}>
-              <AssetTable
-                maturities={maturities?.slice(0, 5)}
-                showModal={(type: string) => showModal(type)}
-              />
+              <div className={style.leftColumn}>
+                <AssetTable maturities={maturities?.slice(itemsPerPage * (page - 1), itemsPerPage * page)} showModal={(type: string) => showModal(type)} />
+                <Paginator total={maturities?.length ?? 0} itemsPerPage={5} handleChange={(page) => setPage(page)} currentPage={page} />
+              </div>
               <div className={style.assetGraph}>
                 <PoolsChart />
               </div>
