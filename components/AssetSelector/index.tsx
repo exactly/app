@@ -142,7 +142,7 @@ function AssetSelector({ title, defaultAddress, onChange }: Props) {
       {title && (
         <div className={style.titleContainer}>
           <p className={style.title}>Maturity pool</p>
-          <Tooltip />
+          <Tooltip value="Maturity Pool" />
         </div>
       )}
       <div className={style.selectContainer}>

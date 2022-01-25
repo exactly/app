@@ -58,7 +58,7 @@ function MaturitySelector({ title }: Props) {
       {title && (
         <div className={style.titleContainer}>
           <p className={style.title}>{title}</p>
-          <Tooltip />
+          <Tooltip value={title} />
         </div>
       )}
       <Select

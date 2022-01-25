@@ -3,7 +3,7 @@ import { useState } from 'react';
 import styles from './style.module.scss';
 
 type Props = {
-  value?: String;
+  value: String;
 };
 
 function Tooltip({ value }: Props) {
@@ -20,7 +20,7 @@ function Tooltip({ value }: Props) {
         className={`${styles.tooltip} ${show ? styles.show : styles.hidden}`}
       >
         <div className={styles.arrowUp}></div>
-        <p className={styles.text}>{value || 'Placeholder tooltip'}</p>
+        <p className={styles.text}>{value}</p>
       </div>
     </div>
   );

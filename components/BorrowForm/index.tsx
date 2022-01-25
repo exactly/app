@@ -151,7 +151,7 @@ function BorrowForm({
       <div className={style.fieldContainer}>
         <div className={style.titleContainer}>
           <span>{translations[lang].endDate}</span>
-          <Tooltip />
+          <Tooltip value={translations[lang].endDate} />
         </div>
         <div className={style.inputContainer}>
           <MaturitySelector />
