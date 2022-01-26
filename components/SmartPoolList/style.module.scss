@@ -7,6 +7,11 @@
   gap: var(--u3);
   text-align: center;
 
+  .sectionTitleContainer {
+    display: flex;
+    gap: var(--u);
+    align-items: center;
+  }
   .sectionTitle {
     font-size: var(--font-20);
     font-weight: bold;

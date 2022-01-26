@@ -6,6 +6,7 @@ import Input from 'components/common/Input';
 import Button from 'components/common/Button';
 import MaturitySelector from 'components/MaturitySelector';
 import Stepper from 'components/Stepper';
+import Tooltip from 'components/Tooltip';
 
 import useContractWithSigner from 'hooks/useContractWithSigner';
 import useContract from 'hooks/useContract';
@@ -226,7 +227,10 @@ function SupplyForm({
         </div>
       </div>
       <div className={style.fieldContainer}>
-        <span>{translations[lang].maturityPool}</span>
+        <div className={style.titleContainer}>
+          <span>{translations[lang].endDate}</span>
+          <Tooltip value={translations[lang].endDate} />
+        </div>
         <div className={style.inputContainer}>
           <MaturitySelector />
         </div>
