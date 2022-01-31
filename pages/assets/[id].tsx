@@ -34,6 +34,7 @@ import useModal from 'hooks/useModal';
 import { Market } from 'types/Market';
 import { UnformattedMarket } from 'types/UnformattedMarket';
 import { Dictionary } from 'types/Dictionary';
+import Paginator from 'components/Paginator';
 
 interface Props {
   walletAddress: string;
@@ -46,8 +47,11 @@ interface Props {
 }
 
 const Asset: NextPage<Props> = ({ walletAddress, network, auditor, tokenAddress, assetsAddresses, fixedLender, interestRateModel }) => {
+  const [page, setPage] = useState<number>(1)
   const lang: string = useContext(LangContext);
   const { modal, handleModal, modalContent } = useModal();
+
+  const itemsPerPage = 5;
 
   const translations: { [key: string]: LangKeys } = keys;
 
@@ -56,7 +60,9 @@ const Asset: NextPage<Props> = ({ walletAddress, network, auditor, tokenAddress,
     undefined
   );
 
-  const [marketData, setMarketData] = useState<UnformattedMarket | undefined>(undefined);
+  const [marketData, setMarketData] = useState<UnformattedMarket | undefined>(
+    undefined
+  );
 
   useEffect(() => {
     if (!maturities) {
@@ -65,12 +71,12 @@ const Asset: NextPage<Props> = ({ walletAddress, network, auditor, tokenAddress,
     }
   }, [auditorContract]);
 
-
   async function getMarketData() {
-    const marketData = await auditorContract?.contract?.getMarketData(tokenAddress);
-    setMarketData(marketData)
+    const marketData = await auditorContract?.contract?.getMarketData(
+      tokenAddress
+    );
+    setMarketData(marketData);
   }
-
 
   async function getPools() {
     const pools = await auditorContract?.contract?.getFuturePools();
@@ -89,8 +95,6 @@ const Asset: NextPage<Props> = ({ walletAddress, network, auditor, tokenAddress,
     setMaturities(formattedDates);
   }
 
-
-
   function showModal(type: String) {
     if (modalContent?.type) {
       //in the future we should handle the minimized modal status through a context here
@@ -103,9 +107,7 @@ const Asset: NextPage<Props> = ({ walletAddress, network, auditor, tokenAddress,
         symbol: marketData[0],
         name: marketData[1],
         isListed: marketData[2],
-        collateralFactor: parseFloat(
-          ethers.utils.formatEther(marketData[3])
-        )
+        collateralFactor: parseFloat(ethers.utils.formatEther(marketData[3]))
       };
 
       handleModal({ content: { ...market, type } });
@@ -118,7 +120,6 @@ const Asset: NextPage<Props> = ({ walletAddress, network, auditor, tokenAddress,
         value={{ addresses: assetsAddresses, abi: fixedLender.abi }}
       >
         <InterestRateModelProvider value={interestRateModel}>
-
           <MobileNavbar walletAddress={walletAddress} network={network} />
           <Navbar walletAddress={walletAddress} />
           {modal && modalContent?.type != 'smartDeposit' && (
@@ -159,20 +160,30 @@ const Asset: NextPage<Props> = ({ walletAddress, network, auditor, tokenAddress,
               </div>
             </section>
             <section className={style.graphContainer}>
-              <AssetTable maturities={maturities?.slice(0, 5)} showModal={(type: string) => showModal(type)} />
+              <div className={style.leftColumn}>
+                <AssetTable maturities={maturities?.slice(itemsPerPage * (page - 1), itemsPerPage * page)} showModal={(type: string) => showModal(type)} />
+                <Paginator total={maturities?.length ?? 0} itemsPerPage={5} handleChange={(page) => setPage(page)} currentPage={page} />
+              </div>
               <div className={style.assetGraph}>
                 <PoolsChart />
               </div>
             </section>
-            <h2>{translations[lang].assetDetails}</h2>
+            <h2 className={style.assetTitle}>
+              {translations[lang].assetDetails}
+            </h2>
             <div className={style.assetInfoContainer}>
               <AssetInfo title={translations[lang].price} value="$4,213.62" />
               <AssetInfo title={translations[lang].reserveFactor} value="20%" />
-              <AssetInfo title={translations[lang].collateralFactor} value="75%" />
+              <AssetInfo
+                title={translations[lang].collateralFactor}
+                value="75%"
+              />
             </div>
             <div className={style.maturitiesContainer}>
               {maturities?.slice(0, 3)?.map((maturity) => {
-                return <MaturityInfo maturity={maturity} key={maturity.value} />;
+                return (
+                  <MaturityInfo maturity={maturity} key={maturity.value} />
+                );
               })}
             </div>
             <div className={style.smartPoolContainer}>

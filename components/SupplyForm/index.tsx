@@ -6,6 +6,7 @@ import Input from 'components/common/Input';
 import Button from 'components/common/Button';
 import MaturitySelector from 'components/MaturitySelector';
 import Stepper from 'components/Stepper';
+import Tooltip from 'components/Tooltip';
 
 import useContractWithSigner from 'hooks/useContractWithSigner';
 import useContract from 'hooks/useContract';
@@ -92,6 +93,22 @@ function SupplyForm({
       calculateRate();
     }
   }, [qty, date]);
+
+  useEffect(() => {
+    checkAllowance();
+  }, [address, walletAddress, underlyingContract]);
+
+  async function checkAllowance() {
+    const allowance = await underlyingContract?.contractWithSigner?.allowance(
+      walletAddress,
+      address
+    );
+    const formattedAllowance = allowance && ethers.utils.formatEther(allowance);
+
+    if (formattedAllowance >= numbers.approvalAmount) {
+      setStep(2);
+    }
+  }
 
   async function calculateRate() {
     if (!qty || !date) {
@@ -210,7 +227,10 @@ function SupplyForm({
         </div>
       </div>
       <div className={style.fieldContainer}>
-        <span>{translations[lang].maturityPool}</span>
+        <div className={style.titleContainer}>
+          <span>{translations[lang].endDate}</span>
+          <Tooltip value={translations[lang].endDate} />
+        </div>
         <div className={style.inputContainer}>
           <MaturitySelector />
         </div>

@@ -12,6 +12,7 @@ import { AddressContext } from 'contexts/AddressContext';
 import AuditorContext from 'contexts/AuditorContext';
 
 import { Date } from 'types/Date';
+import Tooltip from 'components/Tooltip';
 
 type Props = {
   title?: String;
@@ -54,7 +55,12 @@ function MaturitySelector({ title }: Props) {
 
   return (
     <section className={style.container}>
-      {title && <p className={style.title}>{title}</p>}
+      {title && (
+        <div className={style.titleContainer}>
+          <p className={style.title}>{title}</p>
+          <Tooltip value={title} />
+        </div>
+      )}
       <Select
         options={dates}
         onChange={handleChange}

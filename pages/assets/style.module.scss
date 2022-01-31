@@ -31,12 +31,21 @@
 
   .graphContainer {
     display: flex;
-
+    .leftColumn {
+      max-width: 60%;
+      width: 100%;
+    }
     .assetGraph {
       width: 100%;
       padding: 0 var(--u4);
     }
   }
+
+  .assetTitle {
+    font-size: var(--font-20);
+    color: var(--gray-900);
+  }
+
   .assetInfoContainer {
     display: flex;
     max-width: 45%;
