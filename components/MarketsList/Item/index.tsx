@@ -16,6 +16,7 @@ import useContract from 'hooks/useContract';
 import style from './style.module.scss';
 
 import keys from './translations.json';
+import PoolAccountingContext from 'contexts/PoolAccountingContext';
 
 type Props = {
   market: Market;
@@ -27,9 +28,11 @@ type Props = {
 function Item({ market, showModal, type, src }: Props) {
   const { date } = useContext(AddressContext);
   const fixedLender = useContext(FixedLenderContext);
+  const poolAccountingData = useContext(PoolAccountingContext);
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
+  const poolAccounting = useContract(poolAccountingData?.address!, poolAccountingData.abi!)
   const { contract } = useContract(market?.address, fixedLender?.abi!);
 
   const [poolData, setPoolData] = useState<Pool | undefined>(undefined);
@@ -45,7 +48,7 @@ function Item({ market, showModal, type, src }: Props) {
   }
 
   async function getMarketData() {
-    const { borrowed, supplied } = await contract?.maturityPools(date?.value);
+    const { borrowed, supplied } = await poolAccounting.contract?.maturityPools(date?.value);
 
     const newPoolData = {
       borrowed: Math.round(parseInt(await ethers.utils.formatEther(borrowed))),
