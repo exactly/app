@@ -1,0 +1,22 @@
+.tabs {
+  display: flex;
+  text-align: center;
+  align-items: center;
+  width: 300px;
+
+  .tab {
+    padding: var(--smallUnit) var(--u2);
+    cursor: pointer;
+    color: var(--gray-500);
+    width: 50%;
+    margin: 0;
+  }
+
+  .selected {
+    border-bottom: 2px solid;
+    border-image: linear-gradient(90deg, #7bf5e1 0.29%, #4d4de8 100.29%);
+    border-image-slice: 1;
+    color: var(--gray-900);
+    font-weight: 600;
+  }
+}

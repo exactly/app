@@ -1,0 +1,10 @@
+{
+  "en": {
+    "maturityPools": "Maturity Pools",
+    "deposit": "Deposit",
+    "borrow": "Borrow",
+    "filterAsset": "Filter by Asset",
+    "filterMaturity": "Filter by Maturity"
+  },
+  "es": {}
+}

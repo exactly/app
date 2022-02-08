@@ -1,0 +1,21 @@
+.pieChart {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  margin: 0 auto 2rem;
+  border-radius: 100%;
+
+  .center {
+    background: #394264;
+    position: absolute;
+    text-align: center;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    width: 80px;
+    height: 80px;
+    margin: auto;
+    border-radius: 50%;
+  }
+}
