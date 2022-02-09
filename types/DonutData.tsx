@@ -1,4 +1,6 @@
 export type DonutData = {
-  label: string;
+  label?: string;
   value: number;
+  color: string;
+  image?: string;
 };
