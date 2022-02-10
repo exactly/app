@@ -1,9 +1,16 @@
+import { useContext } from 'react';
+
 import Button from 'components/common/Button';
 
-import { Option } from 'react-dropdown';
+import LangContext from 'contexts/LangContext';
+
+import { LangKeys } from 'types/Lang';
 import { Market } from 'types/Market';
+import { Option } from 'react-dropdown';
 
 import styles from './style.module.scss';
+
+import keys from './translations.json';
 
 type Props = {
   market?: Market;
@@ -13,6 +20,9 @@ type Props = {
 };
 
 function Item({ market, showModal, type, src }: Props) {
+  const lang: string = useContext(LangContext);
+  const translations: { [key: string]: LangKeys } = keys;
+
   return (
     <div className={styles.container}>
       <div className={styles.symbol}>
@@ -31,7 +41,11 @@ function Item({ market, showModal, type, src }: Props) {
 
       <div className={styles.buttonContainer}>
         <Button
-          text={type?.value == 'borrow' ? 'Borrow' : 'Deposit'}
+          text={
+            type?.value == 'borrow'
+              ? translations[lang].borrow
+              : translations[lang].deposit
+          }
           className={type?.value == 'borrow' ? 'secondary' : 'primary'}
         />
       </div>

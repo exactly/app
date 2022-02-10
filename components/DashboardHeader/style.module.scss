@@ -5,7 +5,7 @@
   gap: var(--u5);
 
   .container {
-    width: calc(50% - 20px);
+    width: calc(50% - var(--u3));
     display: flex;
     justify-content: space-between;
     align-items: center;
