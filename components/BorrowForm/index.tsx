@@ -2,6 +2,7 @@ import { useEffect, useState, useContext } from 'react';
 import { ethers } from 'ethers';
 
 import style from './style.module.scss';
+
 import Input from 'components/common/Input';
 import Button from 'components/common/Button';
 import MaturitySelector from 'components/MaturitySelector';
@@ -22,6 +23,7 @@ import { AddressContext } from 'contexts/AddressContext';
 import FixedLenderContext from 'contexts/FixedLenderContext';
 import InterestRateModelContext from 'contexts/InterestRateModelContext';
 import LangContext from 'contexts/LangContext';
+import PoolAccountingContext from 'contexts/PoolAccountingContext';
 
 type Props = {
   contractWithSigner: ethers.Contract;
@@ -46,6 +48,12 @@ function BorrowForm({
   const { date } = useContext(AddressContext);
   const fixedLender = useContext(FixedLenderContext);
   const interestRateModel = useContext(InterestRateModelContext);
+
+  const poolAccountingData = useContext(PoolAccountingContext);
+  const poolAccounting = useContract(
+    poolAccountingData?.address!,
+    poolAccountingData.abi!
+  );
 
   const [qty, setQty] = useState<number | undefined>(undefined);
 
@@ -75,14 +83,15 @@ function BorrowForm({
 
     handleLoading(false);
 
-    const maturityPools =
-      await fixedLenderWithSigner?.contractWithSigner?.maturityPools(
-        parseInt(date.value)
-      );
+    const maturityPools = await poolAccounting.contract?.maturityPools(
+      parseInt(date.value)
+    );
 
     const smartPoolBorrowed =
-      await fixedLenderWithSigner?.contractWithSigner?.smartPoolBorrowed();
-    const smartPoolSupplied = 0;
+      await poolAccounting.contract?.smartPoolBorrowed();
+
+    const smartPoolSupplied =
+      await fixedLenderWithSigner?.contract?.getSmartPoolDeposits();
 
     //Borrow
     try {
