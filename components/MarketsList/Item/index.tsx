@@ -32,7 +32,10 @@ function Item({ market, showModal, type, src }: Props) {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
-  const poolAccounting = useContract(poolAccountingData?.address!, poolAccountingData.abi!)
+  const poolAccounting = useContract(
+    poolAccountingData?.address!,
+    poolAccountingData.abi!
+  );
   const { contract } = useContract(market?.address, fixedLender?.abi!);
 
   const [poolData, setPoolData] = useState<Pool | undefined>(undefined);
@@ -48,7 +51,9 @@ function Item({ market, showModal, type, src }: Props) {
   }
 
   async function getMarketData() {
-    const { borrowed, supplied } = await poolAccounting.contract?.maturityPools(date?.value);
+    const { borrowed, supplied } = await poolAccounting.contract?.maturityPools(
+      date?.value
+    );
 
     const newPoolData = {
       borrowed: Math.round(parseInt(await ethers.utils.formatEther(borrowed))),
@@ -60,8 +65,9 @@ function Item({ market, showModal, type, src }: Props) {
 
   return (
     <div
-      className={`${style.container} ${type == 'borrow' ? style.secondaryContainer : style.primaryContainer
-        }`}
+      className={`${style.container} ${
+        type == 'borrow' ? style.secondaryContainer : style.primaryContainer
+      }`}
       onClick={handleClick}
     >
       <div className={style.symbol}>
