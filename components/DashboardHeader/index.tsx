@@ -124,8 +124,8 @@ function DashboardHeader() {
         <div className={styles.chartContainer}>
           <DonutChart data={defaultDepositData} small />
           <div className={styles.detail}>
-            {defaultDepositData.map((asset) => {
-              return <Tooltip value={'$1234'} image={asset.image} />;
+            {defaultDepositData.map((asset, key) => {
+              return <Tooltip key={key} value={'$1234'} image={asset.image} />;
             })}
           </div>
         </div>
