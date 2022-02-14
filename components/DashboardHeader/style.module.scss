@@ -37,7 +37,7 @@
       }
 
       .subvalue {
-        color: var(--gray-500);
+        color: var(--gray-900);
         display: flex;
         align-items: center;
         gap: var(--smallUnit);
@@ -47,10 +47,39 @@
           width: var(--u2);
         }
       }
+      .informationContainer {
+        display: flex;
+        gap: var(--u2);
+        .information {
+          .informationTitle {
+            font-size: var(--font-12);
+            font-weight: 600;
+            color: var(--gray-500);
+          }
+          .informationValue {
+            font-size: var(--font-14);
+            color: var(--gray-900);
+            font-weight: 400;
+          }
+        }
+      }
     }
 
     .chartContainer {
       margin-left: var(--u);
+      display: flex;
+      flex-direction: column;
+
+      .detail {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        img {
+          height: var(--u2);
+          width: var(--u2);
+        }
+      }
     }
   }
 

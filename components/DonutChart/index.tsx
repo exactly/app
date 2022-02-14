@@ -1,4 +1,3 @@
-import { useCallback, useState } from 'react';
 import { Cell, Pie, PieChart, ResponsiveContainer, Sector } from 'recharts';
 
 import { DonutData } from 'types/DonutData';
@@ -7,100 +6,59 @@ import styles from './style.module.scss';
 
 type Props = {
   data: Array<DonutData>;
-  hideValue?: boolean;
+  small?: boolean;
+  insideValue?: string;
 };
 
-function DonutChart({ data, hideValue }: Props) {
-  const [activeIndex, setActiveIndex] = useState<number>(-1);
+type ActiveShape = {
+  cx: number;
+  cy: number;
+  innerRadius: number;
+  outerRadius: number;
+  startAngle: number;
+  endAngle: number;
+  fill: string;
+};
 
-  const onPieEnter = useCallback(
-    (_, index) => {
-      setActiveIndex(index);
-    },
-    [setActiveIndex]
-  );
-
-  const onPieLeave = () => {
-    setActiveIndex(-1);
-  };
-
-  const renderActiveShape = (props: any) => {
-    const {
-      cx,
-      cy,
-      innerRadius,
-      outerRadius,
-      startAngle,
-      endAngle,
-      fill,
-      payload
-    } = props;
+function DonutChart({ data, small, insideValue }: Props) {
+  const renderActiveShape = (props: ActiveShape) => {
+    const { cx, cy, innerRadius, outerRadius, startAngle, endAngle, fill } =
+      props;
 
     return (
-      <g className={styles.pointer}>
-        <text x={cx} y={cy - 10} dy={8} textAnchor="middle">
-          {payload.label}
+      <g className={styles.innerValue}>
+        <text x={cx} y={cy - 4} dy={8} textAnchor="middle">
+          {insideValue}
         </text>
-
-        {!hideValue && (
-          <text x={cx} y={cy + 10} dy={8} textAnchor="middle">
-            {payload.value}
-          </text>
-        )}
 
         <Sector
           cx={cx}
           cy={cy}
-          innerRadius={innerRadius}
-          outerRadius={outerRadius}
-          startAngle={startAngle}
-          endAngle={endAngle}
+          innerRadius={innerRadius - 1}
+          outerRadius={outerRadius + 1}
+          startAngle={startAngle + 0.5}
+          endAngle={endAngle - 0.5}
           fill={fill}
         />
       </g>
     );
   };
 
-  const label = (props: any) => {
-    const { cx, cy, midAngle, innerRadius, outerRadius, payload } = props;
-    if (!payload.image) {
-      return;
-    }
-    const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
-    const RADIAN = Math.PI / 180;
-    const x = cx + radius * Math.cos(-midAngle * RADIAN);
-    const y = cy + radius * Math.sin(-midAngle * RADIAN);
-
-    return (
-      <g className={styles.pointer}>
-        <image
-          x={x - 10}
-          y={y - 10}
-          href={payload.image}
-          height="22"
-          width="22"
-        />
-      </g>
-    );
-  };
-
   return (
-    <div className={styles.pieChart} onMouseLeave={onPieLeave}>
-      <ResponsiveContainer>
-        <PieChart width={150} height={150}>
+    <>
+      <ResponsiveContainer width={small ? 100 : 150} height={small ? 100 : 150}>
+        <PieChart>
           <Pie
+            activeIndex={insideValue ? 0 : -1}
             labelLine={false}
-            label={label}
-            activeIndex={activeIndex}
             data={data}
             cx={'50%'}
-            cy={'50%'}
-            innerRadius={40}
-            outerRadius={70}
+            cy={'40%'}
+            innerRadius={small ? 20 : 40}
+            outerRadius={small ? 40 : 60}
             dataKey="value"
-            onMouseEnter={onPieEnter}
-            activeShape={renderActiveShape}
             isAnimationActive={false}
+            activeShape={renderActiveShape}
           >
             {data.map((entry, i) => (
               <Cell key={`cell-${i}`} fill={entry.color} stroke={entry.color} />
@@ -108,7 +66,7 @@ function DonutChart({ data, hideValue }: Props) {
           </Pie>
         </PieChart>
       </ResponsiveContainer>
-    </div>
+    </>
   );
 }
 

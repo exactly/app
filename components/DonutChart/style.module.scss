@@ -1,9 +1,5 @@
-.pieChart {
-  width: 150px;
-  height: 150px;
-}
-
-.pointer {
-  cursor: pointer;
-  pointer-events: visibleFill;
+.innerValue {
+  text {
+    fill: var(--gray-500);
+  }
 }

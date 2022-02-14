@@ -58,12 +58,12 @@ function DashboardHeader() {
   const defaultHealthFactorData = [
     {
       label: '',
-      value: 75,
+      value: 50,
       color: '#63CA10'
     },
     {
       label: '',
-      value: 25,
+      value: 50,
       color: '#AF0606'
     }
   ];
@@ -77,10 +77,15 @@ function DashboardHeader() {
             <Tooltip value={translations[lang].deposits} />
           </h3>
           <p className={styles.value}>$6,724</p>
-          <p className={styles.subvalue}>2.14% APR</p>
+          <p className={styles.subvalue}>2.14% {translations[lang].apr}</p>
         </div>
         <div className={styles.chartContainer}>
-          <DonutChart data={defaultDepositData} />
+          <DonutChart data={defaultDepositData} small />
+          <div className={styles.detail}>
+            {defaultDepositData.map((asset) => {
+              return <Tooltip value={'$1234'} image={asset.image} />;
+            })}
+          </div>
         </div>
         <div className={styles.line}></div>
         <div className={styles.box}>
@@ -88,6 +93,20 @@ function DashboardHeader() {
             {translations[lang].rateComposition}{' '}
             <Tooltip value={translations[lang].rateComposition} />
           </h3>
+          <div className={styles.informationContainer}>
+            <div className={styles.information}>
+              <p className={styles.informationTitle}>
+                {translations[lang].variable}
+              </p>
+              <p className={styles.informationValue}>50%</p>
+            </div>
+            <div className={styles.information}>
+              <p className={styles.informationTitle}>
+                {translations[lang].fixed}
+              </p>
+              <p className={styles.informationValue}>50%</p>
+            </div>
+          </div>
         </div>
         <div className={styles.chartContainer}>
           <DonutChart data={defaultRateData} />
@@ -100,10 +119,15 @@ function DashboardHeader() {
             <Tooltip value={translations[lang].borrows} />
           </h3>
           <p className={styles.value}>$6,724</p>
-          <p className={styles.subvalue}>2.14% APR</p>
+          <p className={styles.subvalue}>2.14% {translations[lang].apr}</p>
         </div>
         <div className={styles.chartContainer}>
-          <DonutChart data={defaultDepositData} />
+          <DonutChart data={defaultDepositData} small />
+          <div className={styles.detail}>
+            {defaultDepositData.map((asset) => {
+              return <Tooltip value={'$1234'} image={asset.image} />;
+            })}
+          </div>
         </div>
         <div className={styles.line}></div>
         <div className={styles.box}>
@@ -111,14 +135,23 @@ function DashboardHeader() {
             {translations[lang].healthFactor}{' '}
             <Tooltip value={translations[lang].healthFactor} />
           </h3>
-          <p className={styles.value}>6,6%</p>
-          <p className={styles.subvalue}>
-            <img className={styles.asset} src="/img/assets/dai.png" />
-            DAI
-          </p>
+          <div className={styles.informationContainer}>
+            <div className={styles.information}>
+              <p className={styles.informationTitle}>
+                {translations[lang].deposited}
+              </p>
+              <p className={styles.informationValue}>50%</p>
+            </div>
+            <div className={styles.information}>
+              <p className={styles.informationTitle}>
+                {translations[lang].borrowed}
+              </p>
+              <p className={styles.informationValue}>50%</p>
+            </div>
+          </div>
         </div>
         <div className={styles.chartContainer}>
-          <DonutChart data={defaultHealthFactorData} hideValue />
+          <DonutChart data={defaultHealthFactorData} insideValue={'6,6%'} />
         </div>
       </div>
     </section>

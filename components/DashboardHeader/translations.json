@@ -3,7 +3,12 @@
     "deposits": "Deposits",
     "borrows": "Borrows",
     "rateComposition": "Rate Composition",
-    "healthFactor": "Health Factor"
+    "healthFactor": "Health Factor",
+    "apr": "APR",
+    "variable": "Variable",
+    "fixed": "Fixed",
+    "deposited": "Deposited",
+    "borrowed": "Borrowed"
   },
   "es": {}
 }
