@@ -4,9 +4,10 @@ import styles from './style.module.scss';
 
 type Props = {
   value: String;
+  image?: string;
 };
 
-function Tooltip({ value }: Props) {
+function Tooltip({ value, image }: Props) {
   const [show, setShow] = useState<Boolean>(false);
 
   return (
@@ -15,7 +16,7 @@ function Tooltip({ value }: Props) {
       onMouseEnter={() => setShow(true)}
       onMouseLeave={() => setShow(false)}
     >
-      <img src="/img/icons/tooltip.svg" />
+      <img src={image ?? '/img/icons/tooltip.svg'} />
       <div
         className={`${styles.tooltip} ${show ? styles.show : styles.hidden}`}
       >
