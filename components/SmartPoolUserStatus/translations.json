@@ -1,0 +1,11 @@
+{
+  "en": {
+    "asset": "Asset",
+    "utilizationRate": "Utilization Rate",
+    "lastRate": "Last Rate",
+    "liquidity": "Liquidity",
+    "apr": "APR (Variable)",
+    "collateral": "Collateral"
+  },
+  "es": {}
+}

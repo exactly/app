@@ -19,6 +19,7 @@ import { Contract } from 'types/Contract';
 import { Dictionary } from 'types/Dictionary';
 
 import dictionary from 'dictionary/en.json';
+import SmartPoolDashboard from 'components/SmartPoolDashboard';
 
 interface Props {
   walletAddress: string;
@@ -46,6 +47,7 @@ const DashBoard: NextPage<Props> = ({
           <MobileNavbar walletAddress={walletAddress} network={network} />
           <Navbar walletAddress={walletAddress} />
           <MaturityPoolDashboard />
+          <SmartPoolDashboard />
           <Footer />
         </InterestRateModelProvider>
       </FixedLenderProvider>
