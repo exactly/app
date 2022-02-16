@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react';
 import type { NextPage } from 'next';
+import { request } from 'graphql-request'
 
 import { ethers } from 'ethers';
 import axios from 'axios';
 
 import Navbar from 'components/Navbar';
-
-import CurrentNetwork from 'components/CurrentNetwork';
 import Footer from 'components/Footer';
 import MobileNavbar from 'components/MobileNavbar';
 import MaturityPoolDashboard from 'components/MaturityPoolDashboard';
@@ -18,8 +17,10 @@ import { InterestRateModelProvider } from 'contexts/InterestRateModelContext';
 import { Contract } from 'types/Contract';
 import { Dictionary } from 'types/Dictionary';
 
-import dictionary from 'dictionary/en.json';
+import { getCurrentWalletConnected } from 'hooks/useWallet';
 
+import { getDepositsQuery } from 'queries/getDeposits';
+import dictionary from 'dictionary/en.json';
 interface Props {
   walletAddress: string;
   network: string;
@@ -29,6 +30,7 @@ interface Props {
   interestRateModel: Contract;
 }
 
+
 const DashBoard: NextPage<Props> = ({
   walletAddress,
   network,
@@ -37,6 +39,17 @@ const DashBoard: NextPage<Props> = ({
   fixedLender,
   interestRateModel
 }) => {
+
+  useEffect(() => {
+    getData();
+  }, [])
+
+  async function getData() {
+    const { address } = await getCurrentWalletConnected();
+    const getDeposits = await request('https://api.thegraph.com/subgraphs/name/juanigallo/exactly-kovan', getDepositsQuery(address))
+    console.log(getDeposits);
+  }
+
   return (
     <AuditorProvider value={auditor}>
       <FixedLenderProvider
