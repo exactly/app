@@ -41,7 +41,7 @@ function SmartPoolModal({ contractData, closeModal, walletAddress }: Props) {
 
   const [assetData, setAssetData] = useState<Market>(contractData);
 
-  const [qty, setQty] = useState<number>(0);
+  const [qty, setQty] = useState<number | undefined>(undefined);
 
   const [error, setError] = useState<Error | undefined>({
     status: false,
