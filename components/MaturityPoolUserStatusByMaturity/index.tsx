@@ -10,11 +10,13 @@ import { Option } from 'react-dropdown';
 import styles from './style.module.scss';
 
 import keys from './translations.json';
+import { Deposit } from 'types/Deposit';
+import { Borrow } from 'types/Borrow';
 
 type Props = {
   type: Option;
-  deposits: any,
-  borrows: any
+  deposits: Deposit[],
+  borrows: Borrow[]
 };
 
 function MaturityPoolUserStatusByMaturity({ type, deposits, borrows }: Props) {

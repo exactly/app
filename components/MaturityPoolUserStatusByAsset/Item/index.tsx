@@ -26,15 +26,13 @@ function Item({ type, amount, fee, maturityDate }: Props) {
 
   const oneHour = 3600;
   const oneDay = oneHour * 24;
-  const maturityLife = oneDay * 7 * 12; // Make this dynamic, currently one week in seconds
-
-  // console.log(oneMaturity, (parseInt(maturityDate) * 1000) - Date.now())
+  const maturityLife = oneDay * 7 * 12;
   const nowInSeconds = Date.now() / 1000;
-
-  const startDate = parseInt(maturityDate) - maturityLife; //Start date
+  const startDate = parseInt(maturityDate) - maturityLife;
   const current = nowInSeconds - startDate
   const progress = current * 100 / maturityLife;
   const fixedRate = parseInt(fee) * 100 / parseInt(amount);
+
   return (
     <div className={styles.container}>
       <div className={styles.symbol}>

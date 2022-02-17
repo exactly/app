@@ -4,4 +4,5 @@ export type Deposit = {
   amount: string,
   fee: string,
   id: string
+  maturityDate: string
 }
