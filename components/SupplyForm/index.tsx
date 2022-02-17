@@ -103,9 +103,12 @@ function SupplyForm({
       walletAddress,
       address
     );
+
     const formattedAllowance = allowance && ethers.utils.formatEther(allowance);
 
-    if (formattedAllowance >= numbers.approvalAmount) {
+    const amount = qty ?? 0;
+
+    if (formattedAllowance >= amount) {
       setStep(2);
     }
   }
