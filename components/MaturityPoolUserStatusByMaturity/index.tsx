@@ -10,12 +10,16 @@ import { Option } from 'react-dropdown';
 import styles from './style.module.scss';
 
 import keys from './translations.json';
+import { Deposit } from 'types/Deposit';
+import { Borrow } from 'types/Borrow';
 
 type Props = {
   type: Option;
+  deposits: Deposit[],
+  borrows: Borrow[]
 };
 
-function MaturityPoolUserStatusByMaturity({ type }: Props) {
+function MaturityPoolUserStatusByMaturity({ type, deposits, borrows }: Props) {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 

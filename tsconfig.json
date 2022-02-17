@@ -1,7 +1,11 @@
 {
   "compilerOptions": {
     "target": "es5",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -15,16 +19,39 @@
     "jsx": "preserve",
     "baseUrl": "./",
     "paths": {
-      "components/*": ["./components/*"],
-      "pages/*": ["./pages/*"],
-      "hooks/*": ["./hooks/*"],
-      "contracts/*": ["./contracts/*"],
-      "types/*": ["./types/*"],
-      "utils/*": ["./utils/*"],
-      "contexts/*": ["./contexts/*"],
-      "dictionary/*": ["./dictionary/*"],
-      "data/*": ["./data/*"],
-      "config/*": ["./config/*"]
+      "components/*": [
+        "./components/*"
+      ],
+      "pages/*": [
+        "./pages/*"
+      ],
+      "hooks/*": [
+        "./hooks/*"
+      ],
+      "contracts/*": [
+        "./contracts/*"
+      ],
+      "types/*": [
+        "./types/*"
+      ],
+      "utils/*": [
+        "./utils/*"
+      ],
+      "contexts/*": [
+        "./contexts/*"
+      ],
+      "dictionary/*": [
+        "./dictionary/*"
+      ],
+      "data/*": [
+        "./data/*"
+      ],
+      "config/*": [
+        "./config/*"
+      ],
+      "queries/*": [
+        "./queries/*"
+      ]
     }
   },
   "include": [
@@ -33,5 +60,7 @@
     "**/*.tsx",
     "contexts/AddressContext.js"
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules"
+  ]
 }

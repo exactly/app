@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react';
 import type { NextPage } from 'next';
+import { request } from 'graphql-request'
 
 import { ethers } from 'ethers';
 import axios from 'axios';
 
 import Navbar from 'components/Navbar';
-
-import CurrentNetwork from 'components/CurrentNetwork';
 import Footer from 'components/Footer';
 import MobileNavbar from 'components/MobileNavbar';
 import MaturityPoolDashboard from 'components/MaturityPoolDashboard';
@@ -17,9 +16,14 @@ import { InterestRateModelProvider } from 'contexts/InterestRateModelContext';
 
 import { Contract } from 'types/Contract';
 import { Dictionary } from 'types/Dictionary';
+import { Borrow } from 'types/Borrow';
+import { Deposit } from 'types/Deposit';
+
+import { getCurrentWalletConnected } from 'hooks/useWallet';
+
+import { getMaturityPoolBorrowsQuery, getMaturityPoolDepositsQuery } from 'queries';
 
 import dictionary from 'dictionary/en.json';
-
 interface Props {
   walletAddress: string;
   network: string;
@@ -37,6 +41,22 @@ const DashBoard: NextPage<Props> = ({
   fixedLender,
   interestRateModel
 }) => {
+  const [maturityPoolDeposits, setMaturityPoolDeposits] = useState<Array<Deposit>>([]);
+  const [maturityPoolBorrows, setMaturityPoolBorrows] = useState<Array<Borrow>>([]);
+
+  useEffect(() => {
+    getData();
+  }, [])
+
+  async function getData() {
+    const { address } = await getCurrentWalletConnected();
+    const getMaturityPoolDeposits = await request('https://api.thegraph.com/subgraphs/name/juanigallo/exactly-kovan', getMaturityPoolDepositsQuery(address))
+    const getMaturityPoolBorrows = await request('https://api.thegraph.com/subgraphs/name/juanigallo/exactly-kovan', getMaturityPoolBorrowsQuery(address))
+
+    setMaturityPoolDeposits(getMaturityPoolDeposits.deposits)
+    setMaturityPoolBorrows(getMaturityPoolBorrows.borrows)
+  }
+
   return (
     <AuditorProvider value={auditor}>
       <FixedLenderProvider
@@ -45,7 +65,7 @@ const DashBoard: NextPage<Props> = ({
         <InterestRateModelProvider value={interestRateModel}>
           <MobileNavbar walletAddress={walletAddress} network={network} />
           <Navbar walletAddress={walletAddress} />
-          <MaturityPoolDashboard />
+          <MaturityPoolDashboard deposits={maturityPoolDeposits} borrows={maturityPoolBorrows} />
           <Footer />
         </InterestRateModelProvider>
       </FixedLenderProvider>

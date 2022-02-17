@@ -12,7 +12,7 @@ import { AddressContext } from 'contexts/AddressContext';
 import AuditorContext from 'contexts/AuditorContext';
 
 import { Date } from 'types/Date';
-
+import UtilsContext from 'contexts/UtilsContext';
 import parseTimeStamp from 'utils/parseTimestamp';
 
 type Props = {
@@ -21,13 +21,13 @@ type Props = {
 
 function MaturitySelector({ title }: Props) {
   const { date, setDate } = useContext(AddressContext);
-  const auditor = useContext(AuditorContext);
+  const utils = useContext(UtilsContext);
 
   const [dates, setDates] = useState<Array<Option>>([]);
-  const auditorContract = useContract(auditor.address!, auditor.abi!);
+  const utilsContract = useContract(utils.address!, utils.abi!);
 
   async function getPools() {
-    const pools = await auditorContract?.contract?.getFuturePools();
+    const pools = await utilsContract?.contract?.futurePools(12);
 
     const dates = pools?.map((pool: any) => {
       return pool.toString();
@@ -52,7 +52,7 @@ function MaturitySelector({ title }: Props) {
     if (dates.length == 0) {
       getPools();
     }
-  }, [auditorContract]);
+  }, [utilsContract]);
 
   return (
     <section className={style.container}>
