@@ -1,8 +1,12 @@
 import styles from './style.module.scss';
 
-function Loading() {
+type Props = {
+  size?: string;
+};
+
+function Loading({ size = 'normal' }: Props) {
   return (
-    <div className={styles.loading}>
+    <div className={size == 'normal' ? styles.loading : styles.loadingSmall}>
       <div></div>
       <div></div>
       <div></div>
