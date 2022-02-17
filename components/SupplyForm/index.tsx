@@ -204,7 +204,10 @@ function SupplyForm({
 
     const max = balance && ethers.utils.formatEther(balance);
 
-    max && setQty(max);
+    if (max) {
+      setQty(max);
+      setError({ status: false, msg: '' });
+    }
   }
 
   return (
