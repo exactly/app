@@ -13,6 +13,7 @@ import AuditorContext from 'contexts/AuditorContext';
 
 import { Date } from 'types/Date';
 import UtilsContext from 'contexts/UtilsContext';
+import parseTimeStamp from 'utils/parseTimestamp';
 
 type Props = {
   title?: String;

@@ -5,14 +5,13 @@ import Button from 'components/common/Button';
 import LangContext from 'contexts/LangContext';
 
 import { LangKeys } from 'types/Lang';
-import { Market } from 'types/Market';
 import { Option } from 'react-dropdown';
 
 import styles from './style.module.scss';
 
 import keys from './translations.json';
 import { ethers } from 'ethers';
-import dayjs from 'dayjs'
+import parseTimestamp from 'utils/parseTimestamp'
 
 type Props = {
   type?: Option;
@@ -44,7 +43,7 @@ function Item({ type, amount, fee, maturityDate }: Props) {
       </div>
       <span className={styles.value}>{ethers.utils.formatUnits(amount, 18)}</span>
       <span className={styles.value}>{fixedRate}%</span>
-      <span className={styles.value}>{maturityDate}</span>
+      <span className={styles.value}>{parseTimestamp(maturityDate)}</span>
 
       <span className={styles.value}>
         <div className={styles.line}>
