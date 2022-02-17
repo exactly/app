@@ -1,7 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
 import type { NextApiRequest, NextPage } from 'next';
 import axios from 'axios';
-import dayjs from 'dayjs';
 import { ethers } from 'ethers';
 
 import AssetSelector from 'components/AssetSelector';
@@ -36,6 +35,8 @@ import { UnformattedMarket } from 'types/UnformattedMarket';
 import { Dictionary } from 'types/Dictionary';
 import Paginator from 'components/Paginator';
 
+import parseTimestamp from 'utils/parseTimestamp';
+
 interface Props {
   walletAddress: string;
   network: string;
@@ -46,8 +47,16 @@ interface Props {
   interestRateModel: Contract;
 }
 
-const Asset: NextPage<Props> = ({ walletAddress, network, auditor, tokenAddress, assetsAddresses, fixedLender, interestRateModel }) => {
-  const [page, setPage] = useState<number>(1)
+const Asset: NextPage<Props> = ({
+  walletAddress,
+  network,
+  auditor,
+  tokenAddress,
+  assetsAddresses,
+  fixedLender,
+  interestRateModel
+}) => {
+  const [page, setPage] = useState<number>(1);
   const lang: string = useContext(LangContext);
   const { modal, handleModal, modalContent } = useModal();
 
@@ -88,7 +97,7 @@ const Asset: NextPage<Props> = ({ walletAddress, network, auditor, tokenAddress,
     const formattedDates = dates?.map((date: any) => {
       return {
         value: date,
-        label: dayjs.unix(parseInt(date)).format('DD-MMM-YYYY')
+        label: parseTimestamp(date)
       };
     });
 
@@ -161,8 +170,19 @@ const Asset: NextPage<Props> = ({ walletAddress, network, auditor, tokenAddress,
             </section>
             <section className={style.graphContainer}>
               <div className={style.leftColumn}>
-                <AssetTable maturities={maturities?.slice(itemsPerPage * (page - 1), itemsPerPage * page)} showModal={(type: string) => showModal(type)} />
-                <Paginator total={maturities?.length ?? 0} itemsPerPage={5} handleChange={(page) => setPage(page)} currentPage={page} />
+                <AssetTable
+                  maturities={maturities?.slice(
+                    itemsPerPage * (page - 1),
+                    itemsPerPage * page
+                  )}
+                  showModal={(type: string) => showModal(type)}
+                />
+                <Paginator
+                  total={maturities?.length ?? 0}
+                  itemsPerPage={5}
+                  handleChange={(page) => setPage(page)}
+                  currentPage={page}
+                />
               </div>
               <div className={style.assetGraph}>
                 <PoolsChart />
