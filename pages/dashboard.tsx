@@ -16,10 +16,13 @@ import { InterestRateModelProvider } from 'contexts/InterestRateModelContext';
 
 import { Contract } from 'types/Contract';
 import { Dictionary } from 'types/Dictionary';
+import { Borrow } from 'types/Borrow';
+import { Deposit } from 'types/Deposit';
 
 import { getCurrentWalletConnected } from 'hooks/useWallet';
 
-import { getDepositsQuery } from 'queries/getDeposits';
+import { getMaturityPoolBorrowsQuery, getMaturityPoolDepositsQuery } from 'queries';
+
 import dictionary from 'dictionary/en.json';
 interface Props {
   walletAddress: string;
@@ -30,7 +33,6 @@ interface Props {
   interestRateModel: Contract;
 }
 
-
 const DashBoard: NextPage<Props> = ({
   walletAddress,
   network,
@@ -39,6 +41,9 @@ const DashBoard: NextPage<Props> = ({
   fixedLender,
   interestRateModel
 }) => {
+  //TODO: Type this
+  const [maturityPoolDeposits, setMaturityPoolDeposits] = useState<Array<Deposit>>([]);
+  const [maturityPoolBorrows, setMaturityPoolBorrows] = useState<Array<Borrow>>([]);
 
   useEffect(() => {
     getData();
@@ -46,8 +51,11 @@ const DashBoard: NextPage<Props> = ({
 
   async function getData() {
     const { address } = await getCurrentWalletConnected();
-    const getDeposits = await request('https://api.thegraph.com/subgraphs/name/juanigallo/exactly-kovan', getDepositsQuery(address))
-    console.log(getDeposits);
+    const getMaturityPoolDeposits = await request('https://api.thegraph.com/subgraphs/name/juanigallo/exactly-kovan', getMaturityPoolDepositsQuery(address))
+    const getMaturityPoolBorrows = await request('https://api.thegraph.com/subgraphs/name/juanigallo/exactly-kovan', getMaturityPoolBorrowsQuery(address))
+
+    setMaturityPoolDeposits(getMaturityPoolDeposits.deposits)
+    setMaturityPoolBorrows(getMaturityPoolBorrows.borrows)
   }
 
   return (
@@ -58,7 +66,7 @@ const DashBoard: NextPage<Props> = ({
         <InterestRateModelProvider value={interestRateModel}>
           <MobileNavbar walletAddress={walletAddress} network={network} />
           <Navbar walletAddress={walletAddress} />
-          <MaturityPoolDashboard />
+          <MaturityPoolDashboard deposits={maturityPoolDeposits} borrows={maturityPoolBorrows} />
           <Footer />
         </InterestRateModelProvider>
       </FixedLenderProvider>

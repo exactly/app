@@ -13,9 +13,11 @@ import keys from './translations.json';
 
 type Props = {
   type: Option;
+  deposits: any,
+  borrows: any
 };
 
-function MaturityPoolUserStatusByMaturity({ type }: Props) {
+function MaturityPoolUserStatusByMaturity({ type, deposits, borrows }: Props) {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 

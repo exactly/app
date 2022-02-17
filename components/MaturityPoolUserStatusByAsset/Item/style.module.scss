@@ -51,6 +51,7 @@
     .progress {
       @extend .line;
       background: var(--primary);
+      border-radius: var(--u2);
     }
   }
 }
