@@ -1,8 +1,8 @@
 import { useEffect, useState, useContext } from 'react';
-import dayjs from 'dayjs';
 import { Option } from 'react-dropdown';
 
 import Select from 'components/common/Select';
+import Tooltip from 'components/Tooltip';
 
 import useContract from 'hooks/useContract';
 
@@ -12,7 +12,8 @@ import { AddressContext } from 'contexts/AddressContext';
 import AuditorContext from 'contexts/AuditorContext';
 
 import { Date } from 'types/Date';
-import Tooltip from 'components/Tooltip';
+
+import parseTimeStamp from 'utils/parseTimestamp';
 
 type Props = {
   title?: String;
@@ -35,7 +36,7 @@ function MaturitySelector({ title }: Props) {
     const formattedDates = dates?.map((date: any) => {
       return {
         value: date,
-        label: dayjs.unix(parseInt(date)).format('DD-MMM-YY')
+        label: parseTimeStamp(date)
       };
     });
 
