@@ -83,25 +83,23 @@ function BorrowForm({
 
     handleLoading(false);
 
-    const maturityPools = await poolAccounting.contract?.maturityPools(
-      parseInt(date.value)
-    );
-
     const smartPoolBorrowed =
       await poolAccounting.contract?.smartPoolBorrowed();
 
     const smartPoolSupplied =
       await fixedLenderWithSigner?.contract?.getSmartPoolDeposits();
 
+    const currentTimestamp = Math.floor(Date.now() / 1000);
+
     //Borrow
     try {
       const borrowRate =
         await interestRateModelContract?.contract?.getRateToBorrow(
           parseInt(date.value),
-          maturityPools,
+          currentTimestamp,
           smartPoolBorrowed,
           smartPoolSupplied,
-          false
+          ethers.utils.parseUnits('2000', 18)
         );
 
       const formattedBorrowRate =
@@ -110,6 +108,7 @@ function BorrowForm({
       formattedBorrowRate &&
         handleResult({ potentialRate: formattedBorrowRate, hasRate: true });
     } catch (e) {
+      console.log(e);
       return setError({ status: true, msg: translations[lang].error });
     }
   }
