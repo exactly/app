@@ -16,12 +16,6 @@
   position: relative;
   border: 1px solid var(--primary);
 
-  &:active {
-    .button {
-      width: var(--u6);
-    }
-  }
-
   .button {
     content: '';
     position: absolute;
@@ -29,7 +23,7 @@
     width: var(--u2);
     height: var(--u2);
     border-radius: 100%;
-    transition: 0.5s ease-in-out;
+    transition: 0.2s ease-in-out;
     background: var(--primary);
     box-shadow: 0 0 2px 0 rgba(10, 10, 10, 0.29);
   }
