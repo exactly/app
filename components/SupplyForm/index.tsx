@@ -103,19 +103,17 @@ function SupplyForm({
       walletAddress,
       address
     );
+
     const formattedAllowance = allowance && ethers.utils.formatEther(allowance);
 
-    if (formattedAllowance >= numbers.approvalAmount) {
+    const amount = qty ?? 0;
+
+    if (formattedAllowance >= amount) {
       setStep(2);
     }
   }
 
   async function calculateRate() {
-    if (!qty || !date) {
-      handleLoading(true);
-      return setError({ status: true, msg: translations[lang].amountError });
-    }
-
     handleLoading(false);
 
     // const maturityPools =
@@ -204,7 +202,10 @@ function SupplyForm({
 
     const max = balance && ethers.utils.formatEther(balance);
 
-    max && setQty(max);
+    if (max) {
+      setQty(max);
+      setError({ status: false, msg: '' });
+    }
   }
 
   return (

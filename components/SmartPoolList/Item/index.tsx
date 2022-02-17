@@ -31,7 +31,10 @@ function Item({ market, showModal, src }: Props) {
   const translations: { [key: string]: LangKeys } = keys;
 
   const poolAccountingData = useContext(PoolAccountingContext);
-  const poolAccounting = useContract(poolAccountingData?.address!, poolAccountingData.abi!)
+  const poolAccounting = useContract(
+    poolAccountingData?.address!,
+    poolAccountingData.abi!
+  );
 
   const { contract } = useContract(market?.address, fixedLender?.abi!);
 
@@ -49,7 +52,7 @@ function Item({ market, showModal, src }: Props) {
 
   async function getMarketData() {
     const borrowed = await poolAccounting.contract?.smartPoolBorrowed();
-    const supplied = 0;
+    const supplied = await contract?.getSmartPoolDeposits();
 
     const newPoolData = {
       borrowed: Math.round(parseInt(await ethers.utils.formatEther(borrowed))),

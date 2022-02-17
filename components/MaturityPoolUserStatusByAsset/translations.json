@@ -1,0 +1,10 @@
+{
+  "en": {
+    "asset": "Asset",
+    "amount": "Current Balance",
+    "fixedRate": "Fixed Rate",
+    "maturityDate": "Maturity Date",
+    "progress": "Progress"
+  },
+  "es": {}
+}

@@ -73,7 +73,11 @@ function MobileNavbar({ walletAddress, network }: Props) {
       href: '/assets/dai',
       name: translations[lang].assets
     },
-    { pathname: '/dashboard', href: '/', name: translations[lang].dashboard },
+    {
+      pathname: '/dashboard',
+      href: '/dashboard',
+      name: translations[lang].dashboard
+    },
     { pathname: '/nerd-mode', href: '/', name: translations[lang].nerdMode }
   ];
 

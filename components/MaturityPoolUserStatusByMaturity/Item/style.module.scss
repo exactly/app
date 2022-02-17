@@ -1,0 +1,68 @@
+.container {
+  display: flex;
+  border-top: 1px solid var(--gray-100);
+  border-bottom: 1px solid var(--gray-100);
+  padding: var(--u2) var(--u3);
+  align-items: center;
+  border-left: 2px solid var(--white);
+  cursor: pointer;
+
+  .symbol {
+    width: calc(100% / 5);
+    font-weight: bold;
+    display: flex;
+    gap: var(--u3);
+    align-items: center;
+
+    .assetImage {
+      width: var(--u5);
+      height: var(--u5);
+    }
+
+    .primary {
+      margin-bottom: var(--smallUnit);
+      font-size: var(--font-16);
+    }
+    .secondary {
+      font-size: var(--font-12);
+      color: var(--gray-100);
+    }
+  }
+
+  .buttonContainer {
+    width: 100px;
+    height: var(--u5);
+    font-weight: 600;
+    font-size: var(--font-14);
+    margin: 0 auto;
+  }
+
+  .value {
+    width: calc(100% / 5);
+    color: var(--gray-900);
+
+    .line {
+      height: var(--smallUnit);
+      width: 90%;
+      background: var(--gray-100);
+      border-radius: var(--u2);
+      height: var(--u);
+    }
+    .progress {
+      @extend .line;
+      background: var(--primary);
+    }
+  }
+}
+
+.primaryContainer {
+  &:hover {
+    border-left: var(--smallestUnit) solid var(--primary);
+  }
+}
+
+.secondaryContainer {
+  &:hover {
+    border-left: var(--smallestUnit) solid var(--secondary);
+  }
+}
