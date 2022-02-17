@@ -111,11 +111,6 @@ function SupplyForm({
   }
 
   async function calculateRate() {
-    if (!qty || !date) {
-      handleLoading(true);
-      return setError({ status: true, msg: translations[lang].amountError });
-    }
-
     handleLoading(false);
 
     // const maturityPools =
