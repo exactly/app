@@ -45,18 +45,11 @@ interface Props {
   assetsAddresses: Dictionary<string>;
   fixedLender: Contract;
   interestRateModel: Contract;
+  utils: Contract;
 }
 
-const Asset: NextPage<Props> = ({
-  walletAddress,
-  network,
-  auditor,
-  tokenAddress,
-  assetsAddresses,
-  fixedLender,
-  interestRateModel
-}) => {
-  const [page, setPage] = useState<number>(1);
+const Asset: NextPage<Props> = ({ walletAddress, network, auditor, tokenAddress, assetsAddresses, fixedLender, interestRateModel, utils }) => {
+  const [page, setPage] = useState<number>(1)
   const lang: string = useContext(LangContext);
   const { modal, handleModal, modalContent } = useModal();
 
@@ -65,6 +58,8 @@ const Asset: NextPage<Props> = ({
   const translations: { [key: string]: LangKeys } = keys;
 
   const auditorContract = useContract(auditor.address, auditor.abi);
+  const utilsContract = useContract(utils.address, utils.abi);
+
   const [maturities, setMaturities] = useState<Array<Maturity> | undefined>(
     undefined
   );
@@ -78,7 +73,7 @@ const Asset: NextPage<Props> = ({
       getMarketData();
       getPools();
     }
-  }, [auditorContract]);
+  }, [auditorContract, utilsContract]);
 
   async function getMarketData() {
     const marketData = await auditorContract?.contract?.getMarketData(
@@ -88,7 +83,7 @@ const Asset: NextPage<Props> = ({
   }
 
   async function getPools() {
-    const pools = await auditorContract?.contract?.getFuturePools();
+    const pools = await utilsContract?.contract?.futurePools(12);
 
     const dates = pools?.map((pool: any) => {
       return pool.toString();
@@ -231,12 +226,14 @@ export async function getServerSideProps(req: NextApiRequest) {
   const getInterestRateModelAbi = await axios.get(
     'https://abi-versions2.s3.amazonaws.com/latest/contracts/InterestRateModel.sol/InterestRateModel.json'
   );
+  const getUtilsAbi = await axios.get("https://abi-versions2.s3.amazonaws.com/latest/contracts/utils/TSUtils.sol/TSUtils.json");
+
   const addresses = await axios.get(
     'https://abi-versions2.s3.amazonaws.com/latest/addresses.json'
   );
   const auditorAddress = addresses?.data?.auditor;
   const interestRateModelAddress = addresses?.data?.interestRateModel;
-
+  const utilsAddress = addresses?.data?.utils;
   return {
     props: {
       auditor: {
@@ -250,6 +247,10 @@ export async function getServerSideProps(req: NextApiRequest) {
       assetsAddresses: addresses.data,
       fixedLender: {
         abi: getFixedLenderAbi.data
+      },
+      utils: {
+        abi: getUtilsAbi.data,
+        address: utilsAddress
       },
       tokenAddress: addresses.data[`FixedLender${tokenSymbol.toUpperCase()}`]
     }
