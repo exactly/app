@@ -40,7 +40,7 @@ function Item({ type, amount, fee, maturityDate }: Props) {
         <span className={styles.primary}>DAI</span>
       </div>
       <span className={styles.value}>{ethers.utils.formatUnits(amount, 18)}</span>
-      <span className={styles.value}>{fixedRate}%</span>
+      <span className={styles.value}>{fixedRate.toFixed(2)}%</span>
       <span className={styles.value}>{parseTimestamp(maturityDate)}</span>
 
       <span className={styles.value}>
