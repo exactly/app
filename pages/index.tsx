@@ -194,7 +194,6 @@ export async function getStaticProps() {
       },
       poolAccounting: {
         abi: getPoolAccountingAbi.data,
-        address: poolAccountingAddress
       },
       utils: {
         abi: getUtilsAbi.data,
