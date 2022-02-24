@@ -21,6 +21,7 @@ import { Error } from 'types/Error';
 import { UnderlyingData } from 'types/Underlying';
 import { Transaction } from 'types/Transaction';
 import { LangKeys } from 'types/Lang';
+import { Gas } from 'types/Gas';
 
 import { getUnderlyingData } from 'utils/utils';
 
@@ -55,6 +56,8 @@ function SmartPoolModal({ contractData, closeModal, walletAddress }: Props) {
 
   const [minimized, setMinimized] = useState<Boolean>(false);
 
+  const [gas, setGas] = useState<Gas | undefined>(undefined);
+
   let underlyingData: UnderlyingData | undefined = undefined;
 
   if (assetData?.symbol) {
@@ -77,6 +80,12 @@ function SmartPoolModal({ contractData, closeModal, walletAddress }: Props) {
   useEffect(() => {
     checkAllowance();
   }, [contractData.address, walletAddress, underlyingContract]);
+
+  useEffect(() => {
+    if (fixedLenderWithSigner && !gas) {
+      estimateGas();
+    }
+  }, [fixedLenderWithSigner]);
 
   async function checkAllowance() {
     const allowance = await underlyingContract?.contractWithSigner?.allowance(
@@ -154,6 +163,24 @@ function SmartPoolModal({ contractData, closeModal, walletAddress }: Props) {
     }
   }
 
+  async function estimateGas() {
+    const gasPriceInGwei =
+      await fixedLenderWithSigner?.contractWithSigner?.provider.getGasPrice();
+
+    const estimatedGasCost =
+      await fixedLenderWithSigner?.contractWithSigner?.estimateGas.depositToSmartPool(
+        ethers.utils.parseUnits(1!.toString())
+      );
+
+    if (gasPriceInGwei && estimatedGasCost) {
+      const gwei = await ethers.utils.formatUnits(gasPriceInGwei, 'gwei');
+      const gasCost = await ethers.utils.formatUnits(estimatedGasCost, 'gwei');
+      const eth = parseFloat(gwei) * parseFloat(gasCost);
+
+      setGas({ eth: eth.toFixed(8), gwei: parseFloat(gwei).toFixed(1) });
+    }
+  }
+
   return (
     <>
       {!minimized && (
@@ -192,6 +219,14 @@ function SmartPoolModal({ contractData, closeModal, walletAddress }: Props) {
                     MAX
                   </span>
                 </div>
+                {gas && (
+                  <p className={styles.txCost}>
+                    <span>Aproximate tx cost</span>
+                    <span>
+                      {gas.eth} ETH / {gas.gwei} GWEI
+                    </span>
+                  </p>
+                )}
                 {error?.status && <p className={styles.error}>{error?.msg}</p>}
                 <Stepper currentStep={step} totalSteps={3} />
                 <div className={styles.fieldContainer}>
