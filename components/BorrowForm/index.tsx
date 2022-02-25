@@ -68,7 +68,6 @@ function BorrowForm({
     fixedLender?.abi!
   );
 
-  console.log(fixedLenderWithSigner)
   const poolAccounting = useContract(
     fixedLenderWithSigner?.contract?.poolAccounting(),
     poolAccountingData.abi!
@@ -76,7 +75,6 @@ function BorrowForm({
 
 
   useEffect(() => {
-    console.log(fixedLenderWithSigner?.contract?.poolAccounting(), poolAccounting)
     if (poolAccounting?.contract) {
       calculateRate();
     }
