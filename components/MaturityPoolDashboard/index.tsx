@@ -15,8 +15,15 @@ import LangContext from 'contexts/LangContext';
 import styles from './style.module.scss';
 
 import keys from './translations.json';
+import { Deposit } from 'types/Deposit';
+import { Borrow } from 'types/Borrow';
 
-function MaturityPoolDashboard() {
+interface Props {
+  deposits: Deposit[],
+  borrows: Borrow[]
+}
+
+function MaturityPoolDashboard({ deposits, borrows }: Props) {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
@@ -73,9 +80,9 @@ function MaturityPoolDashboard() {
       </div>
 
       {filter?.value == 'asset' ? (
-        <MaturityPoolUserStatusByAsset type={tab} />
+        <MaturityPoolUserStatusByAsset type={tab} deposits={deposits} borrows={borrows} />
       ) : (
-        <MaturityPoolUserStatusByMaturity type={tab} />
+        <MaturityPoolUserStatusByMaturity type={tab} deposits={deposits} borrows={borrows} />
       )}
     </section>
   );

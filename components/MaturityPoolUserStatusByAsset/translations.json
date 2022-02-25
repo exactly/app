@@ -1,7 +1,7 @@
 {
   "en": {
     "asset": "Asset",
-    "marketSize": "Market Size",
+    "amount": "Current Balance",
     "fixedRate": "Fixed Rate",
     "maturityDate": "Maturity Date",
     "progress": "Progress"

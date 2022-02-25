@@ -41,7 +41,7 @@ function SmartPoolModal({ contractData, closeModal, walletAddress }: Props) {
 
   const [assetData, setAssetData] = useState<Market>(contractData);
 
-  const [qty, setQty] = useState<number>(0);
+  const [qty, setQty] = useState<number | undefined>(undefined);
 
   const [error, setError] = useState<Error | undefined>({
     status: false,
@@ -85,7 +85,9 @@ function SmartPoolModal({ contractData, closeModal, walletAddress }: Props) {
     );
     const formattedAllowance = allowance && ethers.utils.formatEther(allowance);
 
-    if (formattedAllowance >= numbers.approvalAmount) {
+    const amount = qty ?? 0;
+
+    if (formattedAllowance >= amount) {
       setStep(2);
     }
   }
@@ -146,7 +148,10 @@ function SmartPoolModal({ contractData, closeModal, walletAddress }: Props) {
 
     const max = balance && ethers.utils.formatEther(balance);
 
-    max && setQty(max);
+    if (max) {
+      setQty(max);
+      setError({ status: false, msg: '' });
+    }
   }
 
   return (
