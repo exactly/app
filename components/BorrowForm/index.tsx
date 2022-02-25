@@ -188,7 +188,7 @@ function BorrowForm({
         </div>
         {gas && (
           <p className={style.txCost}>
-            <span>Aproximate tx cost</span>
+            <span>{translations[lang].txCost}</span>
             <span>
               {gas.eth} ETH / {gas.gwei} GWEI
             </span>

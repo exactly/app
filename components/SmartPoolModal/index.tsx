@@ -221,7 +221,7 @@ function SmartPoolModal({ contractData, closeModal, walletAddress }: Props) {
                 </div>
                 {gas && (
                   <p className={styles.txCost}>
-                    <span>Aproximate tx cost</span>
+                    <span>{translations[lang].txCost}</span>
                     <span>
                       {gas.eth} ETH / {gas.gwei} GWEI
                     </span>

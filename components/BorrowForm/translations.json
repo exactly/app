@@ -4,7 +4,8 @@
     "error": "Oops, there was a problem!",
     "borrowTitle": "Amount to borrow",
     "endDate": "End date",
-    "borrow": "Borrow"
+    "borrow": "Borrow",
+    "txCost": "Aproximate tx cost"
   },
   "es": {}
 }
