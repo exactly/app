@@ -18,9 +18,10 @@ type Props = {
   amount: string;
   fee: string;
   maturityDate: string;
+  symbol: string;
 };
 
-function Item({ type, amount, fee, maturityDate }: Props) {
+function Item({ symbol, type, amount, fee, maturityDate }: Props) {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
@@ -36,8 +37,8 @@ function Item({ type, amount, fee, maturityDate }: Props) {
   return (
     <div className={styles.container}>
       <div className={styles.symbol}>
-        <img src={'/img/assets/dai.png'} className={styles.assetImage} />
-        <span className={styles.primary}>DAI</span>
+        <img src={`/img/assets/${symbol}.png`} className={styles.assetImage} />
+        <span className={styles.primary}>{symbol}</span>
       </div>
       <span className={styles.value}>{ethers.utils.formatUnits(amount, 18)}</span>
       <span className={styles.value}>{fixedRate.toFixed(2)}%</span>
