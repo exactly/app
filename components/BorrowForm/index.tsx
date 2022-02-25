@@ -51,10 +51,7 @@ function BorrowForm({
   const interestRateModel = useContext(InterestRateModelContext);
 
   const poolAccountingData = useContext(PoolAccountingContext);
-  const poolAccounting = useContract(
-    poolAccountingData?.address!,
-    poolAccountingData.abi!
-  );
+
 
   const [qty, setQty] = useState<number | undefined>(undefined);
 
@@ -74,8 +71,16 @@ function BorrowForm({
     fixedLender?.abi!
   );
 
+  const poolAccounting = useContract(
+    fixedLenderWithSigner?.contract?.poolAccounting(),
+    poolAccountingData.abi!
+  );
+
+
   useEffect(() => {
-    calculateRate();
+    if (poolAccounting?.contract) {
+      calculateRate();
+    }
   }, [qty, date]);
 
   useEffect(() => {

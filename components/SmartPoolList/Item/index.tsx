@@ -31,28 +31,29 @@ function Item({ market, showModal, src }: Props) {
   const translations: { [key: string]: LangKeys } = keys;
 
   const poolAccountingData = useContext(PoolAccountingContext);
+
+
+  const fixedLenderContract = useContract(market?.address, fixedLender?.abi!);
+
   const poolAccounting = useContract(
-    poolAccountingData?.address!,
+    fixedLenderContract?.contract?.poolAccounting(),
     poolAccountingData.abi!
   );
-
-  const { contract } = useContract(market?.address, fixedLender?.abi!);
-
   const [poolData, setPoolData] = useState<Pool | undefined>(undefined);
 
   useEffect(() => {
-    if (date?.value && contract) {
+    if (date?.value && fixedLenderContract?.contract && poolAccounting?.contract) {
       getMarketData();
     }
-  }, [date, contract]);
+  }, [date, fixedLenderContract?.contract]);
 
   function handleClick() {
     showModal(market?.address, 'smartDeposit');
   }
 
   async function getMarketData() {
-    const borrowed = await poolAccounting.contract?.smartPoolBorrowed();
-    const supplied = await contract?.getSmartPoolDeposits();
+    const borrowed = await poolAccounting?.contract?.smartPoolBorrowed();
+    const supplied = await fixedLenderContract?.contract?.getSmartPoolDeposits();
 
     const newPoolData = {
       borrowed: Math.round(parseInt(await ethers.utils.formatEther(borrowed))),

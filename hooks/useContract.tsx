@@ -19,11 +19,13 @@ const useContract = (address: string, abi: ethers.ContractInterface) => {
     } else {
       provider = ethers.getDefaultProvider(publicNetwork);
     }
-    let contract = new ethers.Contract(address, abi, provider);
+    if (address && abi && provider) {
+      let contract = new ethers.Contract(address, abi, provider);
 
-    contract = contract.connect(provider);
+      contract = contract.connect(provider);
 
-    setContract(contract);
+      setContract(contract);
+    }
   }
 
   return { contract };

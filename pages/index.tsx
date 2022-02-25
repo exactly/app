@@ -175,7 +175,6 @@ export async function getStaticProps() {
   );
   const auditorAddress = addresses?.data?.auditor;
   const interestRateModelAddress = addresses?.data?.interestRateModel;
-  const poolAccountingAddress = addresses?.data?.PoolAccounting
   const utilsAddress = addresses?.data?.utils;
 
   return {
@@ -194,7 +193,6 @@ export async function getStaticProps() {
       },
       poolAccounting: {
         abi: getPoolAccountingAbi.data,
-        address: poolAccountingAddress
       },
       utils: {
         abi: getUtilsAbi.data,
