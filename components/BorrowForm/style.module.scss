@@ -20,6 +20,16 @@
     align-items: center;
     gap: var(--u);
   }
+
+  .txCost {
+    margin-top: var(--u);
+    margin: 0;
+    font-size: var(--font-12);
+    color: var(--gray-900);
+    display: flex;
+    justify-content: space-between;
+    max-width: 270px;
+  }
 }
 
 .error {

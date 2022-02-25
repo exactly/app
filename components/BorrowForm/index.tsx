@@ -16,6 +16,7 @@ import { Error } from 'types/Error';
 import { Market } from 'types/Market';
 import { LangKeys } from 'types/Lang';
 import { Transaction } from 'types/Transaction';
+import { Gas } from 'types/Gas';
 
 import keys from './translations.json';
 
@@ -62,6 +63,8 @@ function BorrowForm({
     msg: ''
   });
 
+  const [gas, setGas] = useState<Gas | undefined>(undefined);
+
   const interestRateModelContract = useContract(
     interestRateModel.address!,
     interestRateModel.abi!
@@ -74,6 +77,12 @@ function BorrowForm({
   useEffect(() => {
     calculateRate();
   }, [qty, date]);
+
+  useEffect(() => {
+    if (fixedLenderWithSigner && !gas) {
+      estimateGas();
+    }
+  }, [fixedLenderWithSigner]);
 
   async function calculateRate() {
     if (!qty || !date) {
@@ -140,6 +149,28 @@ function BorrowForm({
     handleResult({ potentialRate: undefined, hasRate: hasRate });
   }
 
+  async function estimateGas() {
+    if (!date) return;
+
+    const gasPriceInGwei =
+      await fixedLenderWithSigner?.contractWithSigner?.provider.getGasPrice();
+
+    const estimatedGasCost =
+      await fixedLenderWithSigner?.contractWithSigner?.estimateGas.borrowFromMaturityPool(
+        ethers.utils.parseUnits(1!.toString()),
+        parseInt(date.value),
+        ethers.utils.parseUnits('1000')
+      );
+
+    if (gasPriceInGwei && estimatedGasCost) {
+      const gwei = await ethers.utils.formatUnits(gasPriceInGwei, 'gwei');
+      const gasCost = await ethers.utils.formatUnits(estimatedGasCost, 'gwei');
+      const eth = parseFloat(gwei) * parseFloat(gasCost);
+
+      setGas({ eth: eth.toFixed(8), gwei: parseFloat(gwei).toFixed(1) });
+    }
+  }
+
   return (
     <>
       <div className={style.fieldContainer}>
@@ -155,6 +186,14 @@ function BorrowForm({
             placeholder="0"
           />
         </div>
+        {gas && (
+          <p className={style.txCost}>
+            <span>{translations[lang].txCost}</span>
+            <span>
+              {gas.eth} ETH / {gas.gwei} GWEI
+            </span>
+          </p>
+        )}
       </div>
       <div className={style.fieldContainer}>
         <div className={style.titleContainer}>

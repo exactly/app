@@ -13,6 +13,7 @@ import useContract from 'hooks/useContract';
 
 import { SupplyRate } from 'types/SupplyRate';
 import { Error } from 'types/Error';
+import { Gas } from 'types/Gas';
 
 import { getUnderlyingData } from 'utils/utils';
 
@@ -65,6 +66,8 @@ function SupplyForm({
   const [step, setStep] = useState<number>(1);
   const [pending, setPending] = useState<boolean>(false);
 
+  const [gas, setGas] = useState<Gas | undefined>(undefined);
+
   let underlyingData: UnderlyingData | undefined = undefined;
 
   if (assetData?.symbol) {
@@ -95,6 +98,12 @@ function SupplyForm({
   }, [qty, date]);
 
   useEffect(() => {
+    if (fixedLenderWithSigner && !gas) {
+      estimateGas();
+    }
+  }, [fixedLenderWithSigner]);
+
+  useEffect(() => {
     checkAllowance();
   }, [address, walletAddress, underlyingContract]);
 
@@ -115,6 +124,28 @@ function SupplyForm({
       !isNaN(formattedAllowance)
     ) {
       setStep(2);
+    }
+  }
+
+  async function estimateGas() {
+    if (!date) return;
+
+    const gasPriceInGwei =
+      await fixedLenderWithSigner?.contractWithSigner?.provider.getGasPrice();
+
+    const estimatedGasCost =
+      await fixedLenderWithSigner?.contractWithSigner?.estimateGas.depositToMaturityPool(
+        ethers.utils.parseUnits(1!.toString()),
+        parseInt(date.value),
+        '0'
+      );
+
+    if (gasPriceInGwei && estimatedGasCost) {
+      const gwei = await ethers.utils.formatUnits(gasPriceInGwei, 'gwei');
+      const gasCost = await ethers.utils.formatUnits(estimatedGasCost, 'gwei');
+      const eth = parseFloat(gwei) * parseFloat(gasCost);
+
+      setGas({ eth: eth.toFixed(8), gwei: parseFloat(gwei).toFixed(1) });
     }
   }
 
@@ -213,6 +244,7 @@ function SupplyForm({
     }
   }
 
+  console.log(gas);
   return (
     <>
       <div className={style.fieldContainer}>
@@ -231,6 +263,14 @@ function SupplyForm({
             MAX
           </span>
         </div>
+        {gas && (
+          <p className={style.txCost}>
+            <span>{translations[lang].txCost}</span>
+            <span>
+              {gas.eth} ETH / {gas.gwei} GWEI
+            </span>
+          </p>
+        )}
       </div>
       <div className={style.fieldContainer}>
         <div className={style.titleContainer}>
