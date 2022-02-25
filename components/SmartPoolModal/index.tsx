@@ -83,11 +83,17 @@ function SmartPoolModal({ contractData, closeModal, walletAddress }: Props) {
       walletAddress,
       contractData.address
     );
-    const formattedAllowance = allowance && ethers.utils.formatEther(allowance);
+
+    const formattedAllowance =
+      allowance && parseFloat(ethers.utils.formatEther(allowance));
 
     const amount = qty ?? 0;
 
-    if (formattedAllowance >= amount) {
+    if (
+      formattedAllowance > amount &&
+      !isNaN(amount) &&
+      !isNaN(formattedAllowance)
+    ) {
       setStep(2);
     }
   }
