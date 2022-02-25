@@ -1,0 +1,45 @@
+.container {
+  width: var(--max-width);
+
+  .date {
+    color: var(--gray-500);
+    font-weight: bold;
+  }
+
+  .market {
+    background-color: var(--gray-50);
+    border-radius: var(--u);
+    display: flex;
+    flex-wrap: wrap;
+
+    h2 {
+      margin: var(--u) 0 var(--u3) 0;
+      padding: var(--u3) var(--u3) 0;
+      width: 100%;
+    }
+
+    .column {
+      width: 100%;
+      gap: var(--smallUnit);
+      display: flex;
+      flex-direction: column;
+
+      .tableRow {
+        display: flex;
+        padding: var(--u) var(--u3);
+        font-weight: bold;
+        color: var(--gray-500);
+        font-size: var(--font-12);
+        align-items: center;
+
+        .symbol {
+          width: 12.5%;
+        }
+
+        .title {
+          width: 12.5%;
+        }
+      }
+    }
+  }
+}

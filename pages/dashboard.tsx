@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
 import type { NextPage } from 'next';
-import { request } from 'graphql-request'
+import { request } from 'graphql-request';
 
-import { ethers } from 'ethers';
 import axios from 'axios';
 
 import Navbar from 'components/Navbar';
 import Footer from 'components/Footer';
 import MobileNavbar from 'components/MobileNavbar';
 import MaturityPoolDashboard from 'components/MaturityPoolDashboard';
+import SmartPoolDashboard from 'components/SmartPoolDashboard';
 
 import { AuditorProvider } from 'contexts/AuditorContext';
 import { FixedLenderProvider } from 'contexts/FixedLenderContext';
@@ -21,9 +21,11 @@ import { Deposit } from 'types/Deposit';
 
 import { getCurrentWalletConnected } from 'hooks/useWallet';
 
-import { getMaturityPoolBorrowsQuery, getMaturityPoolDepositsQuery } from 'queries';
+import {
+  getMaturityPoolBorrowsQuery,
+  getMaturityPoolDepositsQuery
+} from 'queries';
 
-import dictionary from 'dictionary/en.json';
 interface Props {
   walletAddress: string;
   network: string;
@@ -41,20 +43,30 @@ const DashBoard: NextPage<Props> = ({
   fixedLender,
   interestRateModel
 }) => {
-  const [maturityPoolDeposits, setMaturityPoolDeposits] = useState<Array<Deposit>>([]);
-  const [maturityPoolBorrows, setMaturityPoolBorrows] = useState<Array<Borrow>>([]);
+  const [maturityPoolDeposits, setMaturityPoolDeposits] = useState<
+    Array<Deposit>
+  >([]);
+  const [maturityPoolBorrows, setMaturityPoolBorrows] = useState<Array<Borrow>>(
+    []
+  );
 
   useEffect(() => {
     getData();
-  }, [])
+  }, []);
 
   async function getData() {
     const { address } = await getCurrentWalletConnected();
-    const getMaturityPoolDeposits = await request('https://api.thegraph.com/subgraphs/name/juanigallo/exactly-kovan', getMaturityPoolDepositsQuery(address))
-    const getMaturityPoolBorrows = await request('https://api.thegraph.com/subgraphs/name/juanigallo/exactly-kovan', getMaturityPoolBorrowsQuery(address))
+    const getMaturityPoolDeposits = await request(
+      'https://api.thegraph.com/subgraphs/name/juanigallo/exactly-kovan',
+      getMaturityPoolDepositsQuery(address)
+    );
+    const getMaturityPoolBorrows = await request(
+      'https://api.thegraph.com/subgraphs/name/juanigallo/exactly-kovan',
+      getMaturityPoolBorrowsQuery(address)
+    );
 
-    setMaturityPoolDeposits(getMaturityPoolDeposits.deposits)
-    setMaturityPoolBorrows(getMaturityPoolBorrows.borrows)
+    setMaturityPoolDeposits(getMaturityPoolDeposits.deposits);
+    setMaturityPoolBorrows(getMaturityPoolBorrows.borrows);
   }
 
   return (
@@ -65,7 +77,11 @@ const DashBoard: NextPage<Props> = ({
         <InterestRateModelProvider value={interestRateModel}>
           <MobileNavbar walletAddress={walletAddress} network={network} />
           <Navbar walletAddress={walletAddress} />
-          <MaturityPoolDashboard deposits={maturityPoolDeposits} borrows={maturityPoolBorrows} />
+          <MaturityPoolDashboard
+            deposits={maturityPoolDeposits}
+            borrows={maturityPoolBorrows}
+          />
+          <SmartPoolDashboard />
           <Footer />
         </InterestRateModelProvider>
       </FixedLenderProvider>

@@ -31,6 +31,17 @@
   }
 }
 
+.loadingSmall {
+  @extend .loading;
+  width: var(--u5);
+  height: var(--u5);
+
+  div {
+    width: var(--u5);
+    height: var(--u5);
+  }
+}
+
 @keyframes loading {
   0% {
     transform: rotate(0deg);

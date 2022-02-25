@@ -1,0 +1,27 @@
+.container {
+  padding-top: var(--u2);
+  max-width: var(--maxWidth);
+  margin: var(--navbarHeight) auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--u2);
+
+  .titleContainer {
+    display: flex;
+    align-items: center;
+    gap: var(--smallUnit);
+    .title {
+      color: var(--gray-900);
+      font-size: var(--font-20);
+      font-weight: bold;
+    }
+  }
+  .selectContainer {
+    max-width: 200px;
+  }
+
+  .line {
+    border-bottom: 1px solid var(--gray-100);
+    width: 100%;
+  }
+}
