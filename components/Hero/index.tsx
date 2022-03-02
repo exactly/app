@@ -1,10 +1,9 @@
 import { useContext } from 'react';
-
-import AssetSelector from 'components/AssetSelector';
-import PoolsChart from 'components/PoolsChart';
-import SpecialText from 'components/SpecialText';
+import Link from 'next/link';
 
 import LangContext from 'contexts/LangContext';
+
+import Button from 'components/common/Button';
 
 import { LangKeys } from 'types/Lang';
 
@@ -24,11 +23,14 @@ const Hero = () => {
             <span className={style.bolder}>DeFi</span>xed <br /> Income
           </h1>
           <p className={style.subtitle}>{translations[lang].description}</p>
-          <SpecialText />
+          <div className={style.buttonContainer}>
+            <Link href="/pools">
+              <Button text={translations[lang].open} />
+            </Link>
+          </div>
         </div>
         <div className={style.left}>
-          <AssetSelector />
-          <PoolsChart />
+          <img src="/img/graphs/assets.svg" className={style.image} />
         </div>
       </section>
     </>
