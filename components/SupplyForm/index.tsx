@@ -244,7 +244,6 @@ function SupplyForm({
     }
   }
 
-  console.log(gas);
   return (
     <>
       <div className={style.fieldContainer}>
