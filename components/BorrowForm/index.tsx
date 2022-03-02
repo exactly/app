@@ -52,7 +52,6 @@ function BorrowForm({
 
   const poolAccountingData = useContext(PoolAccountingContext);
 
-
   const [qty, setQty] = useState<number | undefined>(undefined);
 
   const [error, setError] = useState<Error | undefined>({
@@ -62,20 +61,13 @@ function BorrowForm({
 
   const [gas, setGas] = useState<Gas | undefined>(undefined);
 
-  const interestRateModelContract = useContract(
-    interestRateModel.address!,
-    interestRateModel.abi!
-  );
-  const fixedLenderWithSigner = useContractWithSigner(
-    address,
-    fixedLender?.abi!
-  );
+  const interestRateModelContract = useContract(interestRateModel.address!, interestRateModel.abi!);
+  const fixedLenderWithSigner = useContractWithSigner(address, fixedLender?.abi!);
 
   const poolAccounting = useContract(
     fixedLenderWithSigner?.contract?.poolAccounting(),
     poolAccountingData.abi!
   );
-
 
   useEffect(() => {
     if (poolAccounting?.contract) {
@@ -97,30 +89,25 @@ function BorrowForm({
 
     handleLoading(false);
 
-    const smartPoolBorrowed =
-      await poolAccounting.contract?.smartPoolBorrowed();
+    const smartPoolBorrowed = await poolAccounting.contract?.smartPoolBorrowed();
 
-    const smartPoolSupplied =
-      await fixedLenderWithSigner?.contract?.getSmartPoolDeposits();
+    const smartPoolSupplied = await fixedLenderWithSigner?.contract?.getSmartPoolDeposits();
 
     const currentTimestamp = Math.floor(Date.now() / 1000);
 
     //Borrow
     try {
-      const borrowRate =
-        await interestRateModelContract?.contract?.getRateToBorrow(
-          parseInt(date.value),
-          currentTimestamp,
-          smartPoolBorrowed,
-          smartPoolSupplied,
-          ethers.utils.parseUnits('2000', 18)
-        );
+      const borrowRate = await interestRateModelContract?.contract?.getRateToBorrow(
+        parseInt(date.value),
+        currentTimestamp,
+        smartPoolBorrowed,
+        smartPoolSupplied,
+        ethers.utils.parseUnits('2000', 18)
+      );
 
-      const formattedBorrowRate =
-        borrowRate && ethers.utils.formatEther(borrowRate);
+      const formattedBorrowRate = borrowRate && ethers.utils.formatEther(borrowRate);
 
-      formattedBorrowRate &&
-        handleResult({ potentialRate: formattedBorrowRate, hasRate: true });
+      formattedBorrowRate && handleResult({ potentialRate: formattedBorrowRate, hasRate: true });
     } catch (e) {
       console.log(e);
       return setError({ status: true, msg: translations[lang].error });
@@ -133,12 +120,11 @@ function BorrowForm({
     }
 
     try {
-      const tx =
-        await fixedLenderWithSigner?.contractWithSigner?.borrowFromMaturityPool(
-          ethers.utils.parseUnits(qty!.toString()),
-          parseInt(date.value),
-          ethers.utils.parseUnits('1000')
-        );
+      const tx = await fixedLenderWithSigner?.contractWithSigner?.borrowFromMaturityPool(
+        ethers.utils.parseUnits(qty!.toString()),
+        parseInt(date.value),
+        ethers.utils.parseUnits('1000')
+      );
 
       handleTx({ status: 'processing', hash: tx?.hash });
 
@@ -157,8 +143,7 @@ function BorrowForm({
   async function estimateGas() {
     if (!date) return;
 
-    const gasPriceInGwei =
-      await fixedLenderWithSigner?.contractWithSigner?.provider.getGasPrice();
+    const gasPriceInGwei = await fixedLenderWithSigner?.contractWithSigner?.provider.getGasPrice();
 
     const estimatedGasCost =
       await fixedLenderWithSigner?.contractWithSigner?.estimateGas.borrowFromMaturityPool(

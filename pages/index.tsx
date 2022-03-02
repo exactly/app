@@ -1,4 +1,6 @@
 import Hero from 'components/Hero';
+import HowItWorks from 'components/HowItWorks';
+import Investors from 'components/Investors';
 import NavbarHome from 'components/NavbarHome';
 
 function Home() {
@@ -6,6 +8,8 @@ function Home() {
     <>
       <NavbarHome />
       <Hero />
+      <HowItWorks />
+      <Investors />
     </>
   );
 }
