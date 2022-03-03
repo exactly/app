@@ -17,12 +17,13 @@ import keys from './translations.json';
 import useContractWithSigner from 'hooks/useContractWithSigner';
 
 type Props = {
-  market?: Market;
-  showModal?: (address: Market['address'], type: 'borrow' | 'deposit') => void;
-  src?: string;
+  market: Market;
+  symbol: string,
+  liquidity: string,
+  currentBalance: string
 };
 
-function Item({ market, showModal, src }: Props) {
+function Item({ market, symbol, liquidity, currentBalance }: Props) {
   const auditor = useContext(AuditorContext);
 
   const lang: string = useContext(LangContext);
@@ -38,7 +39,6 @@ function Item({ market, showModal, src }: Props) {
     try {
       let tx;
 
-      //we show loading
       setLoading(true);
 
       if (!toggle) {
@@ -68,14 +68,11 @@ function Item({ market, showModal, src }: Props) {
   return (
     <div className={styles.container}>
       <div className={styles.symbol}>
-        <img src={'/img/assets/dai.png'} className={styles.assetImage} />
-        <span className={styles.primary}>DAI</span>
+        <img src={`/img/assets/${symbol}.png`} className={styles.assetImage} />
+        <span className={styles.primary}>{symbol}</span>
       </div>
-      <span className={styles.value}>17,18</span>
-      <span className={styles.value}>4.41%</span>
-      <span className={styles.value}>21-feb-22</span>
-
-      <span className={styles.value}>4.41%</span>
+      <span className={styles.value}>{currentBalance}</span>
+      <span className={styles.value}>{liquidity}</span>
 
       <span className={styles.value}>
         {!loading ? (
@@ -92,13 +89,14 @@ function Item({ market, showModal, src }: Props) {
           <Loading size="small" />
         )}
       </span>
+      <div className={styles.actions}>
+        <div className={styles.buttonContainer}>
+          <Button text={translations[lang].deposit} className="primary" />
+        </div>
 
-      <div className={styles.buttonContainer}>
-        <Button text={translations[lang].deposit} className="primary" />
-      </div>
-
-      <div className={styles.buttonContainer}>
-        <Button text={translations[lang].withdraw} className="tertiary" />
+        <div className={styles.buttonContainer}>
+          <Button text={translations[lang].withdraw} className="tertiary" />
+        </div>
       </div>
     </div>
   );
