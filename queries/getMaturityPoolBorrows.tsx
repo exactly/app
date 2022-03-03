@@ -7,6 +7,7 @@ export function getMaturityPoolBorrowsQuery(address: string) {
       amount
       fee
       maturityDate
+      symbol
     }
   }`
 }

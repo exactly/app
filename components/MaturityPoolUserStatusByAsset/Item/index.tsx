@@ -37,7 +37,7 @@ function Item({ symbol, type, amount, fee, maturityDate }: Props) {
   return (
     <div className={styles.container}>
       <div className={styles.symbol}>
-        <img src={`/img/assets/${symbol}.png`} className={styles.assetImage} />
+        <img src={`/img/assets/${symbol.toLowerCase()}.png`} className={styles.assetImage} />
         <span className={styles.primary}>{symbol}</span>
       </div>
       <span className={styles.value}>{ethers.utils.formatUnits(amount, 18)}</span>
@@ -46,7 +46,7 @@ function Item({ symbol, type, amount, fee, maturityDate }: Props) {
 
       <span className={styles.value}>
         <div className={styles.line}>
-          <div className={styles.progress} style={{ width: `${progress}%` }} />
+          <div className={styles.progress} style={{ width: `${progress > 100 ? 100 : progress}%` }} />
         </div>
       </span>
 
