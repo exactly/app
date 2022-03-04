@@ -10,10 +10,14 @@ import { Option } from 'react-dropdown';
 import styles from './style.module.scss';
 
 import keys from './translations.json';
+import { Deposit } from 'types/Deposit';
 
-type Props = {};
+type Props = {
+  deposits: Deposit[],
+};
 
-function SmartPoolUserStatus({ }: Props) {
+function SmartPoolUserStatus({ deposits }: Props) {
+  console.log(deposits)
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
@@ -34,9 +38,12 @@ function SmartPoolUserStatus({ }: Props) {
             <span className={styles.title} />
           </div>
 
-          <Item />
-          <Item />
-          <Item />
+          {deposits.map((deposit: Deposit, key: number) => {
+            return (
+              <Item key={key} amount={deposit.amount} fee={deposit.fee} maturityDate={deposit.maturityDate} symbol={deposit.symbol} />
+            )
+          })}
+
         </div>
       </div>
     </div>
