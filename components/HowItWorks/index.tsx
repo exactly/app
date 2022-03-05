@@ -1,26 +1,34 @@
+import { useContext } from 'react';
+
 import Title from 'components/Title';
 import Circle from './Circle';
 
+import LangContext from 'contexts/LangContext';
+
+import { LangKeys } from 'types/Lang';
+
 import styles from './style.module.scss';
 
+import keys from './translations.json';
+
 function HowItWorks() {
+  const lang: string = useContext(LangContext);
+  const translations: { [key: string]: LangKeys } = keys;
+
   const bullets = [
     {
-      title: 'Deposit at variable rate',
-      description:
-        'Deposit an asset in the Smart Pool and receive a variable rate. They will receive an Exactly Token (eToken) as the voucher of their deposit.',
+      title: translations[lang].titleDepositVariable,
+      description: translations[lang].descriptionDepositVariable,
       icon: '/img/icons/depositVariable.svg'
     },
     {
-      title: 'Deposit at fixed rate',
-      description:
-        'Deposit an asset in a specific Maturity Pool and receive a fixed interest rate at maturity. They will also be able to withdraw the deposit before the expiration date.',
+      title: translations[lang].titleDepositFixed,
+      description: translations[lang].descriptionDepositFixed,
       icon: '/img/icons/depositFixed.svg'
     },
     {
-      title: 'Borrow at fixed rate',
-      description:
-        'Borrow an asset from a specific Maturity Pool and pay a fixed interest rate if they already have deposited an asset in the Smart Pool as collateral of the loan. They will also be able to repay the loan before the expiration date.',
+      title: translations[lang].titleBorrow,
+      description: translations[lang].descriptionBorrow,
       icon: '/img/icons/borrow.svg',
       type: 'secondary'
     }
@@ -29,13 +37,14 @@ function HowItWorks() {
   return (
     <section>
       <Title
-        title={'How It Works'}
-        subtitle={'Exactly users will be able to choose between 3 different options'}
+        title={translations[lang].howItWorks}
+        subtitle={translations[lang].howItWorksSubtitle}
       />
       <div className={styles.circlesContainer}>
-        {bullets.map((bullet) => {
+        {bullets.map((bullet, key) => {
           return (
             <Circle
+              key={key}
               title={bullet.title}
               description={bullet.description}
               icon={bullet.icon}
