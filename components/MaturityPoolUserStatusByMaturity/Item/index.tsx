@@ -17,16 +17,17 @@ type Props = {
   showModal?: (address: Market['address'], type: 'borrow' | 'deposit') => void;
   type?: Option;
   src?: string;
+  symbol: string;
 };
 
-function Item({ market, showModal, type, src }: Props) {
+function Item({ market, showModal, type, src, symbol }: Props) {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
   return (
     <div className={styles.container}>
       <div className={styles.symbol}>
-        <img src={'/img/assets/dai.png'} className={styles.assetImage} />
+        <img src={`/img/assets/${symbol.toLowerCase()}.png`} className={styles.assetImage} />
         <span className={styles.primary}>DAI</span>
       </div>
       <span className={styles.value}>17,18</span>

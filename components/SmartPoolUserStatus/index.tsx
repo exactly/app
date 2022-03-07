@@ -17,7 +17,6 @@ type Props = {
 };
 
 function SmartPoolUserStatus({ deposits }: Props) {
-  console.log(deposits)
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 

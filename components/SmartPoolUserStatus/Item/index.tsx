@@ -1,5 +1,5 @@
 import { useContext, useState } from 'react';
-
+import { ethers } from 'ethers';
 import Button from 'components/common/Button';
 import Switch from 'components/common/Switch';
 import Loading from 'components/common/Loading';
@@ -20,10 +20,11 @@ type Props = {
   market: Market;
   symbol: string,
   liquidity: string,
-  currentBalance: string
+  currentBalance: string,
+  amount: string
 };
 
-function Item({ market, symbol, liquidity, currentBalance }: Props) {
+function Item({ market, symbol, liquidity, currentBalance, amount }: Props) {
   const auditor = useContext(AuditorContext);
 
   const lang: string = useContext(LangContext);
@@ -68,11 +69,11 @@ function Item({ market, symbol, liquidity, currentBalance }: Props) {
   return (
     <div className={styles.container}>
       <div className={styles.symbol}>
-        <img src={`/img/assets/${symbol}.png`} className={styles.assetImage} />
+        <img src={`/img/assets/${symbol.toLowerCase()}.png`} className={styles.assetImage} />
         <span className={styles.primary}>{symbol}</span>
       </div>
       <span className={styles.value}>{currentBalance}</span>
-      <span className={styles.value}>{liquidity}</span>
+      <span className={styles.value}>{ethers.utils.formatUnits(amount, 18)}</span>
 
       <span className={styles.value}>
         {!loading ? (
