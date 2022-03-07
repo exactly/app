@@ -11,11 +11,7 @@ import keys from './translations.json';
 import Button from 'components/common/Button';
 import Tooltip from 'components/Tooltip';
 
-type Props = {
-  symbol: string
-}
-
-function SmartPoolInfo({ symbol }: Props) {
+function SmartPoolInfo() {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
@@ -30,7 +26,7 @@ function SmartPoolInfo({ symbol }: Props) {
           <div className={styles.assetInfo}>
             <img
               className={styles.assetImage}
-              src={`/img/assets/${symbol.toLowerCase()}.png`}
+              src="/img/assets/dai.png"
               alt="dai"
             />
             <p className={styles.asset}>DAI</p>

@@ -43,9 +43,9 @@ function MaturityPoolUserStatusByMaturity({ type, deposits, borrows }: Props) {
               <span className={styles.title} />
             </div>
 
-            <Item type={type} />
-            <Item type={type} />
-            <Item type={type} />
+            <Item type={type} symbol="DAI" />
+            <Item type={type} symbol="DAI" />
+            <Item type={type} symbol="DAI" />
           </div>
         </div>
       </div>
@@ -67,9 +67,9 @@ function MaturityPoolUserStatusByMaturity({ type, deposits, borrows }: Props) {
               <span className={styles.title} />
             </div>
 
-            <Item type={type} />
-            <Item type={type} />
-            <Item type={type} />
+            <Item type={type} symbol="DAI" />
+            <Item type={type} symbol="DAI" />
+            <Item type={type} symbol="DAI" />
           </div>
         </div>
       </div>

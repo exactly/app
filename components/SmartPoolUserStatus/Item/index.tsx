@@ -15,16 +15,16 @@ import styles from './style.module.scss';
 import keys from './translations.json';
 
 import useContractWithSigner from 'hooks/useContractWithSigner';
+import { getUnderlyingData } from 'utils/utils';
 
 type Props = {
-  market: Market;
+  currentBalance?: string,
   symbol: string,
-  liquidity: string,
-  currentBalance: string,
   amount: string
 };
 
-function Item({ market, symbol, liquidity, currentBalance, amount }: Props) {
+function Item({ symbol, currentBalance, amount }: Props) {
+  // getUnderlyingData
   const auditor = useContext(AuditorContext);
 
   const lang: string = useContext(LangContext);
@@ -35,6 +35,7 @@ function Item({ market, symbol, liquidity, currentBalance, amount }: Props) {
   const [loading, setLoading] = useState<boolean>(false);
 
   const auditorContract = useContractWithSigner(auditor.address!, auditor.abi!);
+  const underlyingData = getUnderlyingData(process.env.NEXT_PUBLIC_NETWORK!, symbol)
 
   async function handleMarket() {
     try {
@@ -83,7 +84,7 @@ function Item({ market, symbol, liquidity, currentBalance, amount }: Props) {
               setToggle((prev) => !prev);
               handleMarket();
             }}
-            id={market?.address || Math.random().toString()}
+            id={underlyingData?.address || Math.random().toString()}
             disabled={disabled}
           />
         ) : (

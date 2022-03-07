@@ -39,7 +39,7 @@ function SmartPoolUserStatus({ deposits }: Props) {
 
           {deposits.map((deposit: Deposit, key: number) => {
             return (
-              <Item key={key} amount={deposit.amount} fee={deposit.fee} maturityDate={deposit.maturityDate} symbol={deposit.symbol} />
+              <Item key={key} amount={deposit.amount} symbol={deposit.symbol} />
             )
           })}
 
