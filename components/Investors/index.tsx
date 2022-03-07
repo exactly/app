@@ -20,9 +20,9 @@ function Investors() {
     <section className={styles.container}>
       <Title title={translations[lang].investors} subtitle={translations[lang].investorsSubtitle} />
       <div className={styles.imagesContainer}>
-        {investors.map((investor) => {
+        {investors.map((investor, key) => {
           return (
-            <a href={investor.web} target="_blank" rel="noopener noreferrer">
+            <a href={investor.web} target="_blank" rel="noopener noreferrer" key={key}>
               <img src={`/img/investors/${investor.name}.svg`} alt={investor.name} />
             </a>
           );

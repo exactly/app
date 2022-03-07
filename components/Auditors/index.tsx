@@ -20,9 +20,9 @@ function Auditors() {
     <section className={styles.container}>
       <Title title={translations[lang].auditors} subtitle={translations[lang].auditorsSubtitle} />
       <div className={styles.imagesContainer}>
-        {auditors.map((auditor) => {
+        {auditors.map((auditor, key) => {
           return (
-            <a href={auditor.web} target="_blank" rel="noopener noreferrer">
+            <a href={auditor.web} target="_blank" rel="noopener noreferrer" key={key}>
               <img src={`/img/auditors/${auditor.name}.svg`} />
             </a>
           );
