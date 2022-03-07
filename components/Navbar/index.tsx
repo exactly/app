@@ -35,6 +35,11 @@ function Navbar({ walletAddress }: Props) {
 
   const routes = [
     {
+      pathname: '/pools',
+      href: '/pools',
+      name: translations[lang].pools
+    },
+    {
       pathname: '/assets/[id]',
       href: '/assets/dai',
       name: translations[lang].assets
