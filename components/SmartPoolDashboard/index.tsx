@@ -14,9 +14,10 @@ import { Deposit } from 'types/Deposit';
 
 type Props = {
   deposits: Deposit[],
+  walletAddress: string
 }
 
-function SmartPoolDashboard({ deposits }: Props) {
+function SmartPoolDashboard({ deposits, walletAddress }: Props) {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
@@ -26,7 +27,7 @@ function SmartPoolDashboard({ deposits }: Props) {
         <p className={styles.title}>{translations[lang].smartPool}</p>
         <Tooltip value={translations[lang].smartPool} />
       </div>
-      <SmartPoolUserStatus deposits={deposits} />
+      <SmartPoolUserStatus deposits={deposits} walletAddress={walletAddress} />
     </section>
   );
 }

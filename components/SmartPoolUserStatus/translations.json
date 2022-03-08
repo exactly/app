@@ -6,7 +6,8 @@
     "lastRate": "Last Rate",
     "liquidity": "Liquidity",
     "apr": "APR (Variable)",
-    "collateral": "Collateral"
+    "collateral": "Collateral",
+    "walletBalance": "Wallet Balance"
   },
   "es": {}
 }
