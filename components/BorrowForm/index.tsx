@@ -112,20 +112,17 @@ function BorrowForm({
 
     //Borrow
     try {
-      const borrowRate =
-        await interestRateModelContract?.contract?.getRateToBorrow(
-          parseInt(date.value),
-          currentTimestamp,
-          smartPoolBorrowed,
-          smartPoolSupplied,
-          ethers.utils.parseUnits('2000', 18)
-        );
+      const borrowRate = await interestRateModelContract?.contract?.getRateToBorrow(
+        parseInt(date.value),
+        currentTimestamp,
+        smartPoolBorrowed,
+        smartPoolSupplied,
+        ethers.utils.parseUnits('2000', 18)
+      );
 
-      const formattedBorrowRate =
-        borrowRate && ethers.utils.formatEther(borrowRate);
+      const formattedBorrowRate = borrowRate && ethers.utils.formatEther(borrowRate);
 
-      formattedBorrowRate &&
-        handleResult({ potentialRate: formattedBorrowRate, hasRate: true });
+      formattedBorrowRate && handleResult({ potentialRate: formattedBorrowRate, hasRate: true });
     } catch (e) {
       console.log(e);
       return setError({ status: true, msg: translations[lang].error });
@@ -138,12 +135,11 @@ function BorrowForm({
     }
 
     try {
-      const tx =
-        await fixedLenderWithSigner?.contractWithSigner?.borrowFromMaturityPool(
-          ethers.utils.parseUnits(qty!.toString()),
-          parseInt(date.value),
-          ethers.utils.parseUnits('1000')
-        );
+      const tx = await fixedLenderWithSigner?.contractWithSigner?.borrowFromMaturityPool(
+        ethers.utils.parseUnits(qty!.toString()),
+        parseInt(date.value),
+        ethers.utils.parseUnits('1000')
+      );
 
       handleTx({ status: 'processing', hash: tx?.hash });
 
@@ -162,8 +158,7 @@ function BorrowForm({
   async function estimateGas() {
     if (!date) return;
 
-    const gasPriceInGwei =
-      await fixedLenderWithSigner?.contractWithSigner?.provider.getGasPrice();
+    const gasPriceInGwei = await fixedLenderWithSigner?.contractWithSigner?.provider.getGasPrice();
 
     const estimatedGasCost =
       await fixedLenderWithSigner?.contractWithSigner?.estimateGas.borrowFromMaturityPool(

@@ -2,10 +2,7 @@ import { useContext } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 
-import useProvider from 'hooks/useProvider';
-
 import Button from 'components/common/Button';
-import Wallet from 'components/Wallet';
 
 import { LangKeys } from 'types/Lang';
 
@@ -14,24 +11,13 @@ import LangContext from 'contexts/LangContext';
 import styles from './style.module.scss';
 
 import keys from './translations.json';
-import { handleMetamaskLogin } from 'utils/utils';
 
-type Props = {
-  walletAddress?: String;
-};
-
-function Navbar({ walletAddress }: Props) {
+function NavbarHome() {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
-  const { getProvider } = useProvider();
   const router = useRouter();
   const { pathname } = router;
-
-  async function handleClick() {
-    //this function generates the connection to the provider
-    await handleMetamaskLogin();
-  }
 
   const routes = [
     {
@@ -81,19 +67,15 @@ function Navbar({ walletAddress }: Props) {
           </ul>
         </div>
         <div className={styles.right}>
-          {!walletAddress ? (
-            <div className={styles.buttonContainer}>
-              <Button text="Conectar" onClick={handleClick} />
-            </div>
-          ) : (
-            <div className={styles.buttonContainer}>
-              <Wallet walletAddress={walletAddress} />
-            </div>
-          )}
+          <div className={styles.buttonContainer}>
+            <Link href="/pools">
+              <Button text={translations[lang].open} />
+            </Link>
+          </div>
         </div>
       </div>
     </nav>
   );
 }
 
-export default Navbar;
+export default NavbarHome;

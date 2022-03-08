@@ -1,0 +1,7 @@
+.postsContainer {
+  display: flex;
+  flex-wrap: wrap;
+  max-width: var(--maxWidth);
+  gap: var(--u6);
+  margin: 0 auto;
+}

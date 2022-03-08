@@ -1,0 +1,15 @@
+.titleContainer {
+  text-align: center;
+  margin-bottom: var(--u6);
+
+  .title {
+    font-size: var(--font-42);
+    font-weight: 600;
+    color: var(--gray-900);
+    margin: 0;
+  }
+  .subtitle {
+    font-size: var(--font-20);
+    color: var(--gray-500);
+  }
+}

@@ -12,7 +12,7 @@ import Wallet from 'components/Wallet';
 import Overlay from 'components/Overlay';
 
 import { LangKeys } from 'types/Lang';
-import { Network } from 'types/Network';
+
 
 import styles from './style.module.scss';
 
@@ -66,8 +66,13 @@ function MobileNavbar({ walletAddress, network }: Props) {
   function handleMenu() {
     setOpen((prev) => !prev);
   }
-
+  
   const routes = [
+    {
+      pathname: '/pools',
+      href: '/pools',
+      name: translations[lang].pools
+    },
     {
       pathname: '/assets/[id]',
       href: '/assets/dai',
