@@ -14,9 +14,10 @@ import { Deposit } from 'types/Deposit';
 
 type Props = {
   deposits: Deposit[],
+  walletAddress: string
 };
 
-function SmartPoolUserStatus({ deposits }: Props) {
+function SmartPoolUserStatus({ deposits, walletAddress }: Props) {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
@@ -26,6 +27,9 @@ function SmartPoolUserStatus({ deposits }: Props) {
         <div className={styles.column}>
           <div className={styles.tableRow}>
             <span className={styles.symbol}>{translations[lang].asset}</span>
+            <span className={styles.title}>
+              {translations[lang].walletBalance}
+            </span>
             <span className={styles.title}>
               {translations[lang].currentBalance}
             </span>
@@ -39,7 +43,7 @@ function SmartPoolUserStatus({ deposits }: Props) {
 
           {deposits.map((deposit: Deposit, key: number) => {
             return (
-              <Item key={key} amount={deposit.amount} symbol={deposit.symbol} />
+              <Item key={key} amount={deposit.amount} symbol={deposit.symbol} walletAddress={walletAddress} />
             )
           })}
 

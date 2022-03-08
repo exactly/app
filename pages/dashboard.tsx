@@ -89,7 +89,7 @@ const DashBoard: NextPage<Props> = ({
             deposits={maturityPoolDeposits}
             borrows={maturityPoolBorrows}
           />
-          <SmartPoolDashboard deposits={smartPoolDeposits} />
+          <SmartPoolDashboard deposits={smartPoolDeposits} walletAddress={walletAddress} />
           <Footer />
         </InterestRateModelProvider>
       </FixedLenderProvider>

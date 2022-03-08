@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { ethers } from 'ethers';
 import Button from 'components/common/Button';
 import Switch from 'components/common/Switch';
@@ -16,15 +16,15 @@ import keys from './translations.json';
 
 import useContractWithSigner from 'hooks/useContractWithSigner';
 import { getUnderlyingData } from 'utils/utils';
+import { getContractData } from 'utils/contracts';
 
 type Props = {
-  currentBalance?: string,
   symbol: string,
-  amount: string
+  amount: string,
+  walletAddress: string
 };
 
-function Item({ symbol, currentBalance, amount }: Props) {
-  // getUnderlyingData
+function Item({ symbol, amount, walletAddress }: Props) {
   const auditor = useContext(AuditorContext);
 
   const lang: string = useContext(LangContext);
@@ -33,9 +33,24 @@ function Item({ symbol, currentBalance, amount }: Props) {
   const [toggle, setToggle] = useState<boolean>(false);
   const [disabled, setDisabled] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
-
+  const [walletBalance, setWalletBalance] = useState<string | undefined>(undefined)
   const auditorContract = useContractWithSigner(auditor.address!, auditor.abi!);
   const underlyingData = getUnderlyingData(process.env.NEXT_PUBLIC_NETWORK!, symbol)
+
+  useEffect(() => {
+    getCurrentBalance()
+  }, [])
+
+  async function getCurrentBalance() {
+    const contractData = await getContractData(underlyingData!.address, underlyingData!.abi, false);
+    const balance = await contractData?.balanceOf(
+      walletAddress
+    );
+
+    if (balance) {
+      setWalletBalance(ethers.utils.formatEther(balance))
+    }
+  }
 
   async function handleMarket() {
     try {
@@ -73,7 +88,8 @@ function Item({ symbol, currentBalance, amount }: Props) {
         <img src={`/img/assets/${symbol.toLowerCase()}.png`} className={styles.assetImage} />
         <span className={styles.primary}>{symbol}</span>
       </div>
-      <span className={styles.value}>{currentBalance}</span>
+      <span className={styles.value}>{walletBalance}</span>
+      <span className={styles.value}>{0}</span>
       <span className={styles.value}>{ethers.utils.formatUnits(amount, 18)}</span>
 
       <span className={styles.value}>
