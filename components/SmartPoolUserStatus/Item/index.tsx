@@ -1,5 +1,5 @@
 import { useContext, useState } from 'react';
-
+import { ethers } from 'ethers';
 import Button from 'components/common/Button';
 import Switch from 'components/common/Switch';
 import Loading from 'components/common/Loading';
@@ -15,14 +15,16 @@ import styles from './style.module.scss';
 import keys from './translations.json';
 
 import useContractWithSigner from 'hooks/useContractWithSigner';
+import { getUnderlyingData } from 'utils/utils';
 
 type Props = {
-  market?: Market;
-  showModal?: (address: Market['address'], type: 'borrow' | 'deposit') => void;
-  src?: string;
+  currentBalance?: string,
+  symbol: string,
+  amount: string
 };
 
-function Item({ market, showModal, src }: Props) {
+function Item({ symbol, currentBalance, amount }: Props) {
+  // getUnderlyingData
   const auditor = useContext(AuditorContext);
 
   const lang: string = useContext(LangContext);
@@ -33,12 +35,12 @@ function Item({ market, showModal, src }: Props) {
   const [loading, setLoading] = useState<boolean>(false);
 
   const auditorContract = useContractWithSigner(auditor.address!, auditor.abi!);
+  const underlyingData = getUnderlyingData(process.env.NEXT_PUBLIC_NETWORK!, symbol)
 
   async function handleMarket() {
     try {
       let tx;
 
-      //we show loading
       setLoading(true);
 
       if (!toggle) {
@@ -68,14 +70,11 @@ function Item({ market, showModal, src }: Props) {
   return (
     <div className={styles.container}>
       <div className={styles.symbol}>
-        <img src={'/img/assets/dai.png'} className={styles.assetImage} />
-        <span className={styles.primary}>DAI</span>
+        <img src={`/img/assets/${symbol.toLowerCase()}.png`} className={styles.assetImage} />
+        <span className={styles.primary}>{symbol}</span>
       </div>
-      <span className={styles.value}>17,18</span>
-      <span className={styles.value}>4.41%</span>
-      <span className={styles.value}>21-feb-22</span>
-
-      <span className={styles.value}>4.41%</span>
+      <span className={styles.value}>{currentBalance}</span>
+      <span className={styles.value}>{ethers.utils.formatUnits(amount, 18)}</span>
 
       <span className={styles.value}>
         {!loading ? (
@@ -85,20 +84,21 @@ function Item({ market, showModal, src }: Props) {
               setToggle((prev) => !prev);
               handleMarket();
             }}
-            id={market?.address || Math.random().toString()}
+            id={underlyingData?.address || Math.random().toString()}
             disabled={disabled}
           />
         ) : (
           <Loading size="small" />
         )}
       </span>
+      <div className={styles.actions}>
+        <div className={styles.buttonContainer}>
+          <Button text={translations[lang].deposit} className="primary" />
+        </div>
 
-      <div className={styles.buttonContainer}>
-        <Button text={translations[lang].deposit} className="primary" />
-      </div>
-
-      <div className={styles.buttonContainer}>
-        <Button text={translations[lang].withdraw} className="tertiary" />
+        <div className={styles.buttonContainer}>
+          <Button text={translations[lang].withdraw} className="tertiary" />
+        </div>
       </div>
     </div>
   );

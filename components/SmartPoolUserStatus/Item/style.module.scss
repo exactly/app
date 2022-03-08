@@ -6,13 +6,12 @@
   align-items: center;
   cursor: pointer;
   background: var(--white);
-
   &:last-child {
     margin-bottom: var(--smallUnit);
   }
 
   .symbol {
-    width: calc(100% / 8);
+    width: calc(100% / 5);
     font-weight: bold;
     display: flex;
     gap: var(--u3);
@@ -33,16 +32,19 @@
     }
   }
 
-  .buttonContainer {
-    width: 100px;
-    height: var(--u5);
-    font-weight: 600;
-    font-size: var(--font-14);
-    margin: 0 auto;
+  .actions {
+    display: flex;
+    .buttonContainer {
+      width: 100px;
+      height: var(--u5);
+      font-weight: 600;
+      font-size: var(--font-14);
+      margin: 0 var(--u2);
+    }
   }
 
   .value {
-    width: calc(100% / 8);
+    width: calc(100% / 5);
     color: var(--gray-900);
 
     .line {

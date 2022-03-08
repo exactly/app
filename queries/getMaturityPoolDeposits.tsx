@@ -7,6 +7,7 @@ export function getMaturityPoolDepositsQuery(address: string) {
       amount
       fee
       maturityDate
+      symbol
     }
   }`
 }

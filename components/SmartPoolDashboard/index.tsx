@@ -10,8 +10,13 @@ import styles from './style.module.scss';
 
 import keys from './translations.json';
 import SmartPoolUserStatus from 'components/SmartPoolUserStatus';
+import { Deposit } from 'types/Deposit';
 
-function SmartPoolDashboard() {
+type Props = {
+  deposits: Deposit[],
+}
+
+function SmartPoolDashboard({ deposits }: Props) {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
@@ -21,7 +26,7 @@ function SmartPoolDashboard() {
         <p className={styles.title}>{translations[lang].smartPool}</p>
         <Tooltip value={translations[lang].smartPool} />
       </div>
-      <SmartPoolUserStatus />
+      <SmartPoolUserStatus deposits={deposits} />
     </section>
   );
 }

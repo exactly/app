@@ -23,7 +23,8 @@ import { getCurrentWalletConnected } from 'hooks/useWallet';
 
 import {
   getMaturityPoolBorrowsQuery,
-  getMaturityPoolDepositsQuery
+  getMaturityPoolDepositsQuery,
+  getSmartPoolDepositsQuery
 } from 'queries';
 
 interface Props {
@@ -49,6 +50,7 @@ const DashBoard: NextPage<Props> = ({
   const [maturityPoolBorrows, setMaturityPoolBorrows] = useState<Array<Borrow>>(
     []
   );
+  const [smartPoolDeposits, setSmartPoolDeposits] = useState<Array<Deposit>>([])
 
   useEffect(() => {
     getData();
@@ -65,8 +67,14 @@ const DashBoard: NextPage<Props> = ({
       getMaturityPoolBorrowsQuery(address)
     );
 
+    const getSmartPoolDeposits = await request(
+      'https://api.thegraph.com/subgraphs/name/juanigallo/exactly-kovan',
+      getSmartPoolDepositsQuery(address)
+    );
+
     setMaturityPoolDeposits(getMaturityPoolDeposits.deposits);
     setMaturityPoolBorrows(getMaturityPoolBorrows.borrows);
+    setSmartPoolDeposits(getSmartPoolDeposits.deposits)
   }
 
   return (
@@ -81,7 +89,7 @@ const DashBoard: NextPage<Props> = ({
             deposits={maturityPoolDeposits}
             borrows={maturityPoolBorrows}
           />
-          <SmartPoolDashboard />
+          <SmartPoolDashboard deposits={smartPoolDeposits} />
           <Footer />
         </InterestRateModelProvider>
       </FixedLenderProvider>

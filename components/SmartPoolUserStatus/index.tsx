@@ -10,10 +10,13 @@ import { Option } from 'react-dropdown';
 import styles from './style.module.scss';
 
 import keys from './translations.json';
+import { Deposit } from 'types/Deposit';
 
-type Props = {};
+type Props = {
+  deposits: Deposit[],
+};
 
-function SmartPoolUserStatus({}: Props) {
+function SmartPoolUserStatus({ deposits }: Props) {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
@@ -24,11 +27,9 @@ function SmartPoolUserStatus({}: Props) {
           <div className={styles.tableRow}>
             <span className={styles.symbol}>{translations[lang].asset}</span>
             <span className={styles.title}>
-              {translations[lang].utilizationRate}
+              {translations[lang].currentBalance}
             </span>
-            <span className={styles.title}>{translations[lang].lastRate}</span>
             <span className={styles.title}>{translations[lang].liquidity}</span>
-            <span className={styles.title}>{translations[lang].apr}</span>
             <span className={styles.title}>
               {translations[lang].collateral}
             </span>
@@ -36,9 +37,12 @@ function SmartPoolUserStatus({}: Props) {
             <span className={styles.title} />
           </div>
 
-          <Item />
-          <Item />
-          <Item />
+          {deposits.map((deposit: Deposit, key: number) => {
+            return (
+              <Item key={key} amount={deposit.amount} symbol={deposit.symbol} />
+            )
+          })}
+
         </div>
       </div>
     </div>

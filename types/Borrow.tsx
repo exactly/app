@@ -4,5 +4,7 @@ export type Borrow = {
   amount: string,
   fee: string,
   id: string,
-  maturityDate: string
+  maturityDate: string,
+  symbol: string,
+  isSmartPool: boolean
 }
