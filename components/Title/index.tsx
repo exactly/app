@@ -2,7 +2,7 @@ import styles from './style.module.scss';
 
 type Props = {
   title: string;
-  subtitle: string;
+  subtitle?: string;
 };
 
 function Title({ title, subtitle }: Props) {
@@ -10,7 +10,7 @@ function Title({ title, subtitle }: Props) {
     <div className={styles.titleContainer}>
       <img src="/img/icons/diamond.svg" />
       <h3 className={styles.title}>{title}</h3>
-      <p className={styles.subtitle}>{subtitle}</p>
+    {subtitle &&  <p className={styles.subtitle}>{subtitle}</p>}
     </div>
   );
 }

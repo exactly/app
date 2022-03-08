@@ -34,9 +34,7 @@ const Footer = () => {
             <a href="https://docs.exactly.finance/" target="_blank" rel="noreferrer noopener">
               <img alt="gitbook" src="./img/social/gitbook.png" />
             </a>
-            {/* <a href="" target="_blank"   rel="noreferrer noopener">
-              <img alt="letter" src="./img/social/letter.png" />
-            </a> */}
+
           </div>
           <div>
             <a

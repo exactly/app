@@ -26,7 +26,7 @@ function FeaturedPosts() {
       <div className={styles.postsContainer}>
         {posts.map((post, key) => {
           return (
-            <a href={post.link} target="_blank" rel="noopener noreferrer"  key={key}>
+            <a href={post.link} target="_blank" rel="noopener noreferrer" key={key}>
               <Post title={post.title} description={post.description} />
             </a>
           );
