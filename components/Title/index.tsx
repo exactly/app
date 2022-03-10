@@ -10,7 +10,7 @@ function Title({ title, subtitle }: Props) {
     <div className={styles.titleContainer}>
       <img src="/img/icons/diamond.svg" />
       <h3 className={styles.title}>{title}</h3>
-    {subtitle &&  <p className={styles.subtitle}>{subtitle}</p>}
+      {subtitle && <p className={styles.subtitle}>{subtitle}</p>}
     </div>
   );
 }

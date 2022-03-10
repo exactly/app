@@ -10,6 +10,7 @@ import { LangKeys } from 'types/Lang';
 import styles from './style.module.scss';
 
 import keys from './translations.json';
+import Button from 'components/common/Button';
 
 function HowItWorks() {
   const lang: string = useContext(LangContext);
@@ -52,6 +53,13 @@ function HowItWorks() {
             />
           );
         })}
+      </div>
+      <div className={styles.buttonContainer}>
+        <Button text={translations[lang].openApp} />
+        <a href="" target="_blank" rel="noopener noreferrer" className={styles.faq}>
+          <img src="./img/icons/question.svg" />
+          <p>{translations[lang].faq}</p>
+        </a>
       </div>
     </section>
   );
