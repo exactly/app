@@ -5,3 +5,20 @@
   text-align: center;
   justify-content: center;
 }
+
+.buttonContainer {
+  max-width: 350px;
+  height: var(--u6);
+  margin: var(--u5) auto;
+
+  .faq {
+    font-weight: 600;
+    font-size: var(--font-18);
+    color: var(--primary);
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--u2);
+  }
+}
