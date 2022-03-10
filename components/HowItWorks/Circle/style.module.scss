@@ -1,0 +1,36 @@
+.circleContainer {
+  width: 340px;
+  display: flex;
+  flex-direction: column;
+
+  .circle {
+    width: 140px;
+    height: 140px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    margin: 0 auto;
+    margin-bottom: var(--u3);
+  }
+
+  .primary {
+    background: var(--primary);
+  }
+  .secondary {
+    background: var(--secondary);
+  }
+
+  .title {
+    font-size: var(--font-20);
+    font-weight: 600;
+    color: var(--black);
+    margin: 0;
+    margin-bottom: var(--u);
+  }
+
+  .description {
+    color: var(--gray-500);
+    margin: 0;
+  }
+}

@@ -43,7 +43,7 @@ function MaturityPoolUserStatusByAsset({ type, deposits, borrows }: Props) {
           {type.value == 'borrow' && (
             borrows.map((borrow: Borrow, key: number) => {
               return (
-                <Item type={type} key={key} amount={borrow.amount} fee={borrow.fee} maturityDate={borrow.maturityDate} />
+                <Item type={type} key={key} amount={borrow.amount} fee={borrow.fee} maturityDate={borrow.maturityDate} symbol={borrow.symbol} />
               )
             })
           )}
@@ -51,7 +51,7 @@ function MaturityPoolUserStatusByAsset({ type, deposits, borrows }: Props) {
           {type.value == 'deposit' && (
             deposits.map((deposit: Deposit, key: number) => {
               return (
-                <Item type={type} key={key} amount={deposit.amount} fee={deposit.fee} maturityDate={deposit.maturityDate} />
+                <Item type={type} key={key} amount={deposit.amount} fee={deposit.fee} maturityDate={deposit.maturityDate} symbol={deposit.symbol} />
               )
             })
           )}

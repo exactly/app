@@ -55,7 +55,7 @@ function MaturitySelector({ title }: Props) {
   }, [utilsContract]);
 
   return (
-    <section className={style.container}>
+    <section className={style.sectionContainer}>
       {title && (
         <div className={style.titleContainer}>
           <p className={style.title}>{title}</p>

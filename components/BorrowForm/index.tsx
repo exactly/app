@@ -1,5 +1,5 @@
 import { useEffect, useState, useContext } from 'react';
-import { ethers } from 'ethers';
+import { Contract, ethers } from 'ethers';
 
 import style from './style.module.scss';
 
@@ -16,6 +16,7 @@ import { Error } from 'types/Error';
 import { Market } from 'types/Market';
 import { LangKeys } from 'types/Lang';
 import { Transaction } from 'types/Transaction';
+import { Gas } from 'types/Gas';
 
 import keys from './translations.json';
 
@@ -24,6 +25,7 @@ import FixedLenderContext from 'contexts/FixedLenderContext';
 import InterestRateModelContext from 'contexts/InterestRateModelContext';
 import LangContext from 'contexts/LangContext';
 import PoolAccountingContext from 'contexts/PoolAccountingContext';
+import { getContractData } from 'utils/contracts';
 
 type Props = {
   contractWithSigner: ethers.Contract;
@@ -46,34 +48,51 @@ function BorrowForm({
   const translations: { [key: string]: LangKeys } = keys;
 
   const { date } = useContext(AddressContext);
-  const fixedLender = useContext(FixedLenderContext);
   const interestRateModel = useContext(InterestRateModelContext);
-
+  const fixedLenderData = useContext(FixedLenderContext);
   const poolAccountingData = useContext(PoolAccountingContext);
-  const poolAccounting = useContract(
-    poolAccountingData?.address!,
-    poolAccountingData.abi!
-  );
 
   const [qty, setQty] = useState<number | undefined>(undefined);
-
   const [error, setError] = useState<Error | undefined>({
     status: false,
     msg: ''
   });
+  const [gas, setGas] = useState<Gas | undefined>(undefined);
 
   const interestRateModelContract = useContract(
     interestRateModel.address!,
     interestRateModel.abi!
   );
-  const fixedLenderWithSigner = useContractWithSigner(
-    address,
-    fixedLender?.abi!
-  );
+
+  const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(undefined);
+  const [poolAccounting, setPoolAccounting] = useState<Contract | undefined>(undefined);
+
+  async function getFixedLenderContract() {
+    const fixedLenderWithSigner = await getContractData(address, fixedLenderData?.abi!, true)
+    setFixedLenderWithSigner(fixedLenderWithSigner)
+    getPoolAccountingContract(fixedLenderWithSigner)
+  }
+
+  async function getPoolAccountingContract(fixedLenderWithSigner: Contract | undefined) {
+    const poolAccounting = await getContractData(fixedLenderWithSigner?.poolAccounting(), poolAccountingData.abi!, false);
+    setPoolAccounting(poolAccounting);
+  }
 
   useEffect(() => {
-    calculateRate();
+    getFixedLenderContract();
+  }, [])
+
+  useEffect(() => {
+    if (poolAccounting) {
+      calculateRate();
+    }
   }, [qty, date]);
+
+  useEffect(() => {
+    if (fixedLenderWithSigner && !gas) {
+      estimateGas();
+    }
+  }, [fixedLenderWithSigner]);
 
   async function calculateRate() {
     if (!qty || !date) {
@@ -84,29 +103,26 @@ function BorrowForm({
     handleLoading(false);
 
     const smartPoolBorrowed =
-      await poolAccounting.contract?.smartPoolBorrowed();
+      await poolAccounting!.smartPoolBorrowed();
 
     const smartPoolSupplied =
-      await fixedLenderWithSigner?.contract?.getSmartPoolDeposits();
+      await fixedLenderWithSigner?.getSmartPoolDeposits();
 
     const currentTimestamp = Math.floor(Date.now() / 1000);
 
     //Borrow
     try {
-      const borrowRate =
-        await interestRateModelContract?.contract?.getRateToBorrow(
-          parseInt(date.value),
-          currentTimestamp,
-          smartPoolBorrowed,
-          smartPoolSupplied,
-          ethers.utils.parseUnits('2000', 18)
-        );
+      const borrowRate = await interestRateModelContract?.contract?.getRateToBorrow(
+        parseInt(date.value),
+        currentTimestamp,
+        smartPoolBorrowed,
+        smartPoolSupplied,
+        ethers.utils.parseUnits('2000', 18)
+      );
 
-      const formattedBorrowRate =
-        borrowRate && ethers.utils.formatEther(borrowRate);
+      const formattedBorrowRate = borrowRate && ethers.utils.formatEther(borrowRate);
 
-      formattedBorrowRate &&
-        handleResult({ potentialRate: formattedBorrowRate, hasRate: true });
+      formattedBorrowRate && handleResult({ potentialRate: formattedBorrowRate, hasRate: true });
     } catch (e) {
       console.log(e);
       return setError({ status: true, msg: translations[lang].error });
@@ -119,12 +135,11 @@ function BorrowForm({
     }
 
     try {
-      const tx =
-        await fixedLenderWithSigner?.contractWithSigner?.borrowFromMaturityPool(
-          ethers.utils.parseUnits(qty!.toString()),
-          parseInt(date.value),
-          ethers.utils.parseUnits('1000')
-        );
+      const tx = await fixedLenderWithSigner?.contractWithSigner?.borrowFromMaturityPool(
+        ethers.utils.parseUnits(qty!.toString()),
+        parseInt(date.value),
+        ethers.utils.parseUnits('1000')
+      );
 
       handleTx({ status: 'processing', hash: tx?.hash });
 
@@ -138,6 +153,27 @@ function BorrowForm({
 
   function handleLoading(hasRate: boolean) {
     handleResult({ potentialRate: undefined, hasRate: hasRate });
+  }
+
+  async function estimateGas() {
+    if (!date) return;
+
+    const gasPriceInGwei = await fixedLenderWithSigner?.contractWithSigner?.provider.getGasPrice();
+
+    const estimatedGasCost =
+      await fixedLenderWithSigner?.contractWithSigner?.estimateGas.borrowFromMaturityPool(
+        ethers.utils.parseUnits(1!.toString()),
+        parseInt(date.value),
+        ethers.utils.parseUnits('1000')
+      );
+
+    if (gasPriceInGwei && estimatedGasCost) {
+      const gwei = await ethers.utils.formatUnits(gasPriceInGwei, 'gwei');
+      const gasCost = await ethers.utils.formatUnits(estimatedGasCost, 'gwei');
+      const eth = parseFloat(gwei) * parseFloat(gasCost);
+
+      setGas({ eth: eth.toFixed(8), gwei: parseFloat(gwei).toFixed(1) });
+    }
   }
 
   return (
@@ -155,6 +191,14 @@ function BorrowForm({
             placeholder="0"
           />
         </div>
+        {gas && (
+          <p className={style.txCost}>
+            <span>{translations[lang].txCost}</span>
+            <span>
+              {gas.eth} ETH / {gas.gwei} GWEI
+            </span>
+          </p>
+        )}
       </div>
       <div className={style.fieldContainer}>
         <div className={style.titleContainer}>

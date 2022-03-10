@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { ethers } from 'ethers';
+import { Contract, ethers } from 'ethers';
 
 import Button from 'components/common/Button';
 
@@ -11,12 +11,11 @@ import FixedLenderContext from 'contexts/FixedLenderContext';
 import { AddressContext } from 'contexts/AddressContext';
 import LangContext from 'contexts/LangContext';
 
-import useContract from 'hooks/useContract';
-
 import style from './style.module.scss';
 
 import keys from './translations.json';
 import PoolAccountingContext from 'contexts/PoolAccountingContext';
+import { getContractData } from 'utils/contracts';
 
 type Props = {
   market: Market;
@@ -26,33 +25,46 @@ type Props = {
 
 function Item({ market, showModal, src }: Props) {
   const { date } = useContext(AddressContext);
-  const fixedLender = useContext(FixedLenderContext);
   const lang: string = useContext(LangContext);
-  const translations: { [key: string]: LangKeys } = keys;
 
+  const fixedLenderData = useContext(FixedLenderContext);
   const poolAccountingData = useContext(PoolAccountingContext);
-  const poolAccounting = useContract(
-    poolAccountingData?.address!,
-    poolAccountingData.abi!
-  );
 
-  const { contract } = useContract(market?.address, fixedLender?.abi!);
+  const translations: { [key: string]: LangKeys } = keys;
 
   const [poolData, setPoolData] = useState<Pool | undefined>(undefined);
 
+  const [fixedLender, setFixedLender] = useState<Contract | undefined>(undefined);
+  const [poolAccounting, setPoolAccounting] = useState<Contract | undefined>(undefined);
+
+  async function getFixedLenderContract() {
+    const fixedLender = await getContractData(market?.address, fixedLenderData?.abi!, false)
+    setFixedLender(fixedLender)
+    getPoolAccountingContract(fixedLender)
+  }
+
+  async function getPoolAccountingContract(fixedLender: Contract | undefined) {
+    const poolAccounting = await getContractData(fixedLender?.poolAccounting(), poolAccountingData.abi!, false);
+    setPoolAccounting(poolAccounting);
+  }
+
   useEffect(() => {
-    if (date?.value && contract) {
+    getFixedLenderContract();
+  }, [])
+
+  useEffect(() => {
+    if (date?.value && fixedLender && poolAccounting) {
       getMarketData();
     }
-  }, [date, contract]);
+  }, [date, fixedLender, poolAccounting]);
 
   function handleClick() {
     showModal(market?.address, 'smartDeposit');
   }
 
   async function getMarketData() {
-    const borrowed = await poolAccounting.contract?.smartPoolBorrowed();
-    const supplied = await contract?.getSmartPoolDeposits();
+    const borrowed = await poolAccounting?.smartPoolBorrowed();
+    const supplied = await fixedLender?.getSmartPoolDeposits();
 
     const newPoolData = {
       borrowed: Math.round(parseInt(await ethers.utils.formatEther(borrowed))),

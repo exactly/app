@@ -69,8 +69,8 @@ function Modal({ contractData, closeModal, walletAddress }: Props) {
                 !tx || tx.status == 'success'
                   ? handleClose
                   : () => {
-                      setMinimized((prev) => !prev);
-                    }
+                    setMinimized((prev) => !prev);
+                  }
               }
             >
               X
@@ -156,8 +156,8 @@ function Modal({ contractData, closeModal, walletAddress }: Props) {
             !tx || tx.status == 'success'
               ? handleClose
               : () => {
-                  setMinimized((prev) => !prev);
-                }
+                setMinimized((prev) => !prev);
+              }
           }
         />
       )}

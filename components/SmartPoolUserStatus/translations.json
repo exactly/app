@@ -1,0 +1,13 @@
+{
+  "en": {
+    "asset": "Asset",
+    "currentBalance": "Current Balance",
+    "utilizationRate": "Utilization Rate",
+    "lastRate": "Last Rate",
+    "liquidity": "Liquidity",
+    "apr": "APR (Variable)",
+    "collateral": "Collateral",
+    "walletBalance": "Wallet Balance"
+  },
+  "es": {}
+}

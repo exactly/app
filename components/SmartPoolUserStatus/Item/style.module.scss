@@ -1,0 +1,74 @@
+.container {
+  display: flex;
+  padding: var(--u2) var(--u3);
+  margin: 0 var(--smallUnit);
+  border-radius: var(--u);
+  align-items: center;
+  cursor: pointer;
+  background: var(--white);
+  &:last-child {
+    margin-bottom: var(--smallUnit);
+  }
+
+  .symbol {
+    width: calc(100% / 6);
+    font-weight: bold;
+    display: flex;
+    gap: var(--u3);
+    align-items: center;
+
+    .assetImage {
+      width: var(--u5);
+      height: var(--u5);
+    }
+
+    .primary {
+      margin-bottom: var(--smallUnit);
+      font-size: var(--font-16);
+    }
+    .secondary {
+      font-size: var(--font-12);
+      color: var(--gray-100);
+    }
+  }
+
+  .actions {
+    display: flex;
+    .buttonContainer {
+      width: 100px;
+      height: var(--u5);
+      font-weight: 600;
+      font-size: var(--font-14);
+      margin: 0 var(--u2);
+    }
+  }
+
+  .value {
+    width: calc(100% / 6);
+    color: var(--gray-900);
+
+    .line {
+      height: var(--smallUnit);
+      width: 90%;
+      background: var(--gray-100);
+      border-radius: var(--u2);
+      height: var(--u);
+    }
+    .progress {
+      @extend .line;
+      background: var(--primary);
+    }
+  }
+}
+
+.primaryContainer {
+  &:hover {
+    border-left: var(--smallestUnit) solid var(--primary);
+  }
+}
+
+.secondaryContainer {
+  &:hover {
+    border-left: var(--smallestUnit) solid var(--secondary);
+  }
+}
