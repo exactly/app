@@ -21,7 +21,7 @@
     "react-dropdown": "^1.9.2",
     "recharts": "^2.1.8",
     "sass": "^1.39.0",
-    "protocol": "git+https://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:x-oauth-basic@github.com/exactly-finance/protocol.git#main"
+    "protocol": "git+https://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:x-oauth-basic@github.com/exactly-finance/protocol.git#feature/dep-compat"
   },
   "devDependencies": {
     "@types/react": "17.0.19",
