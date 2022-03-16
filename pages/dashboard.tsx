@@ -73,7 +73,6 @@ const DashBoard: NextPage<Props> = ({
     );
 
     const smartPoolDeposits = formatSmartPoolDeposits(getSmartPoolDeposits.deposits)
-    // console.log(getSmartPoolDeposits.deposits)
     setMaturityPoolDeposits(getMaturityPoolDeposits.deposits);
     setMaturityPoolBorrows(getMaturityPoolBorrows.borrows);
     setSmartPoolDeposits(smartPoolDeposits)
