@@ -15,11 +15,12 @@ import { Borrow } from 'types/Borrow';
 
 type Props = {
   type: Option;
-  deposits: Deposit[],
-  borrows: Borrow[]
+  deposits: Deposit[];
+  borrows: Borrow[];
+  showModal: (props: any) => void;
 };
 
-function MaturityPoolUserStatusByAsset({ type, deposits, borrows }: Props) {
+function MaturityPoolUserStatusByAsset({ type, deposits, borrows, showModal }: Props) {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
@@ -29,33 +30,44 @@ function MaturityPoolUserStatusByAsset({ type, deposits, borrows }: Props) {
         <div className={styles.column}>
           <div className={styles.tableRow}>
             <span className={styles.symbol}>{translations[lang].asset}</span>
-            <span className={styles.title}>
-              {translations[lang].amount}
-            </span>
+            <span className={styles.title}>{translations[lang].amount}</span>
             <span className={styles.title}>{translations[lang].fixedRate}</span>
-            <span className={styles.title}>
-              {translations[lang].maturityDate}
-            </span>
+            <span className={styles.title}>{translations[lang].maturityDate}</span>
             <span className={styles.title}>{translations[lang].progress}</span>
             <span className={styles.title} />
           </div>
 
-          {type.value == 'borrow' && (
+          {type.value == 'borrow' &&
             borrows.map((borrow: Borrow, key: number) => {
               return (
-                <Item type={type} key={key} amount={borrow.amount} fee={borrow.fee} maturityDate={borrow.maturityDate} symbol={borrow.symbol} />
-              )
-            })
-          )}
+                <Item
+                  type={type}
+                  key={key}
+                  amount={borrow.amount}
+                  fee={borrow.fee}
+                  maturityDate={borrow.maturityDate}
+                  symbol={borrow.symbol}
+                  showModal={showModal}
+                  market={borrow}
+                />
+              );
+            })}
 
-          {type.value == 'deposit' && (
+          {type.value == 'deposit' &&
             deposits.map((deposit: Deposit, key: number) => {
               return (
-                <Item type={type} key={key} amount={deposit.amount} fee={deposit.fee} maturityDate={deposit.maturityDate} symbol={deposit.symbol} />
-              )
-            })
-          )}
-
+                <Item
+                  type={type}
+                  key={key}
+                  amount={deposit.amount}
+                  fee={deposit.fee}
+                  maturityDate={deposit.maturityDate}
+                  symbol={deposit.symbol}
+                  showModal={showModal}
+                  market={deposit}
+                />
+              );
+            })}
         </div>
       </div>
     </div>

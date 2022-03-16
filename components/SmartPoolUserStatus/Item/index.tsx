@@ -8,7 +8,7 @@ import AuditorContext from 'contexts/AuditorContext';
 import LangContext from 'contexts/LangContext';
 
 import { LangKeys } from 'types/Lang';
-import { Market } from 'types/Market';
+import { Deposit } from 'types/Deposit';
 
 import styles from './style.module.scss';
 
@@ -19,12 +19,14 @@ import { getUnderlyingData } from 'utils/utils';
 import { getContractData } from 'utils/contracts';
 
 type Props = {
-  symbol: string,
-  amount: string,
-  walletAddress: string
+  symbol: string;
+  amount: string;
+  walletAddress: string;
+  deposit: Deposit;
+  showModal: any;
 };
 
-function Item({ symbol, amount, walletAddress }: Props) {
+function Item({ symbol, amount, walletAddress, deposit, showModal }: Props) {
   const auditor = useContext(AuditorContext);
 
   const lang: string = useContext(LangContext);
@@ -33,22 +35,20 @@ function Item({ symbol, amount, walletAddress }: Props) {
   const [toggle, setToggle] = useState<boolean>(false);
   const [disabled, setDisabled] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
-  const [walletBalance, setWalletBalance] = useState<string | undefined>(undefined)
+  const [walletBalance, setWalletBalance] = useState<string | undefined>(undefined);
   const auditorContract = useContractWithSigner(auditor.address!, auditor.abi!);
-  const underlyingData = getUnderlyingData(process.env.NEXT_PUBLIC_NETWORK!, symbol)
+  const underlyingData = getUnderlyingData(process.env.NEXT_PUBLIC_NETWORK!, symbol);
 
   useEffect(() => {
-    getCurrentBalance()
-  }, [])
+    getCurrentBalance();
+  }, []);
 
   async function getCurrentBalance() {
     const contractData = await getContractData(underlyingData!.address, underlyingData!.abi, false);
-    const balance = await contractData?.balanceOf(
-      walletAddress
-    );
+    const balance = await contractData?.balanceOf(walletAddress);
 
     if (balance) {
-      setWalletBalance(ethers.utils.formatEther(balance))
+      setWalletBalance(ethers.utils.formatEther(balance));
     }
   }
 
@@ -113,7 +113,11 @@ function Item({ symbol, amount, walletAddress }: Props) {
         </div>
 
         <div className={styles.buttonContainer}>
-          <Button text={translations[lang].withdraw} className="tertiary" />
+          <Button
+            text={translations[lang].withdraw}
+            className="tertiary"
+            onClick={() => showModal(deposit, 'withdrawSP')}
+          />
         </div>
       </div>
     </div>

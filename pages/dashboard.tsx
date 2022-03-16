@@ -9,6 +9,9 @@ import Footer from 'components/Footer';
 import MobileNavbar from 'components/MobileNavbar';
 import MaturityPoolDashboard from 'components/MaturityPoolDashboard';
 import SmartPoolDashboard from 'components/SmartPoolDashboard';
+import RepayModal from 'components/RepayModal';
+import WithdrawModalMP from 'components/WithdrawModalMP';
+import WithdrawModalSP from 'components/WithdrawModalSP';
 
 import { AuditorProvider } from 'contexts/AuditorContext';
 import { FixedLenderProvider } from 'contexts/FixedLenderContext';
@@ -20,6 +23,7 @@ import { Borrow } from 'types/Borrow';
 import { Deposit } from 'types/Deposit';
 
 import { getCurrentWalletConnected } from 'hooks/useWallet';
+import useModal from 'hooks/useModal';
 
 import {
   getMaturityPoolBorrowsQuery,
@@ -44,13 +48,11 @@ const DashBoard: NextPage<Props> = ({
   fixedLender,
   interestRateModel
 }) => {
-  const [maturityPoolDeposits, setMaturityPoolDeposits] = useState<
-    Array<Deposit>
-  >([]);
-  const [maturityPoolBorrows, setMaturityPoolBorrows] = useState<Array<Borrow>>(
-    []
-  );
-  const [smartPoolDeposits, setSmartPoolDeposits] = useState<Array<Deposit>>([])
+  const { modal, handleModal, modalContent } = useModal();
+
+  const [maturityPoolDeposits, setMaturityPoolDeposits] = useState<Array<Deposit>>([]);
+  const [maturityPoolBorrows, setMaturityPoolBorrows] = useState<Array<Borrow>>([]);
+  const [smartPoolDeposits, setSmartPoolDeposits] = useState<Array<Deposit>>([]);
 
   useEffect(() => {
     getData();
@@ -74,22 +76,56 @@ const DashBoard: NextPage<Props> = ({
 
     setMaturityPoolDeposits(getMaturityPoolDeposits.deposits);
     setMaturityPoolBorrows(getMaturityPoolBorrows.borrows);
-    setSmartPoolDeposits(getSmartPoolDeposits.deposits)
+    setSmartPoolDeposits(getSmartPoolDeposits.deposits);
+  }
+
+  function showModal(data: Deposit | Borrow, type: String) {
+    console.log(type);
+    if (modalContent?.type) {
+      //in the future we should handle the minimized modal status through a context here
+      return;
+    }
+
+    handleModal({ content: { ...data, type } });
   }
 
   return (
     <AuditorProvider value={auditor}>
-      <FixedLenderProvider
-        value={{ addresses: assetsAddresses, abi: fixedLender.abi }}
-      >
+      <FixedLenderProvider value={{ addresses: assetsAddresses, abi: fixedLender.abi }}>
         <InterestRateModelProvider value={interestRateModel}>
+          {modal && modalContent?.type == 'borrow' && (
+            <RepayModal
+              data={modalContent}
+              closeModal={handleModal}
+              walletAddress={walletAddress}
+            />
+          )}
+          {modal && modalContent?.type == 'deposit' && (
+            <WithdrawModalMP
+              data={modalContent}
+              closeModal={handleModal}
+              walletAddress={walletAddress}
+            />
+          )}
+          {modal && modalContent?.type == 'withdrawSP' && (
+            <WithdrawModalSP
+              data={modalContent}
+              closeModal={handleModal}
+              walletAddress={walletAddress}
+            />
+          )}
           <MobileNavbar walletAddress={walletAddress} network={network} />
           <Navbar walletAddress={walletAddress} />
           <MaturityPoolDashboard
             deposits={maturityPoolDeposits}
             borrows={maturityPoolBorrows}
+            showModal={showModal}
           />
-          <SmartPoolDashboard deposits={smartPoolDeposits} walletAddress={walletAddress} />
+          <SmartPoolDashboard
+            deposits={smartPoolDeposits}
+            walletAddress={walletAddress}
+            showModal={showModal}
+          />
           <Footer />
         </InterestRateModelProvider>
       </FixedLenderProvider>
@@ -107,9 +143,7 @@ export async function getStaticProps() {
   const getInterestRateModelAbi = await axios.get(
     'https://abi-versions2.s3.amazonaws.com/latest/contracts/InterestRateModel.sol/InterestRateModel.json'
   );
-  const addresses = await axios.get(
-    'https://abi-versions2.s3.amazonaws.com/latest/addresses.json'
-  );
+  const addresses = await axios.get('https://abi-versions2.s3.amazonaws.com/latest/addresses.json');
   const auditorAddress = addresses?.data?.auditor;
   const interestRateModelAddress = addresses?.data?.interestRateModel;
 

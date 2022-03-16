@@ -93,9 +93,7 @@ const Pools: NextPage<Props> = ({
       market['symbol'] = markets[i][0];
       market['name'] = markets[i][1];
       market['isListed'] = markets[i][2];
-      market['collateralFactor'] = parseFloat(
-        ethers.utils.formatEther(markets[i][3])
-      );
+      market['collateralFactor'] = parseFloat(ethers.utils.formatEther(markets[i][3]));
 
       formattedMarkets = [...formattedMarkets, market];
     }
@@ -119,9 +117,7 @@ const Pools: NextPage<Props> = ({
   return (
     <UtilsProvider value={utils}>
       <AuditorProvider value={auditor}>
-        <FixedLenderProvider
-          value={{ addresses: assetsAddresses, abi: fixedLender.abi }}
-        >
+        <FixedLenderProvider value={{ addresses: assetsAddresses, abi: fixedLender.abi }}>
           <PoolAccountingProvider value={poolAccounting}>
             <InterestRateModelProvider value={interestRateModel}>
               {modal && modalContent?.type != 'smartDeposit' && (
@@ -172,9 +168,7 @@ export async function getStaticProps() {
     'https://abi-versions2.s3.amazonaws.com/latest/contracts/utils/TSUtils.sol/TSUtils.json'
   );
 
-  const addresses = await axios.get(
-    'https://abi-versions2.s3.amazonaws.com/latest/addresses.json'
-  );
+  const addresses = await axios.get('https://abi-versions2.s3.amazonaws.com/latest/addresses.json');
   const auditorAddress = addresses?.data?.auditor;
   const interestRateModelAddress = addresses?.data?.interestRateModel;
   const utilsAddress = addresses?.data?.utils;

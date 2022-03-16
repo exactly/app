@@ -15,8 +15,9 @@ import { Borrow } from 'types/Borrow';
 
 type Props = {
   type: Option;
-  deposits: Deposit[],
-  borrows: Borrow[]
+  deposits: Deposit[];
+  borrows: Borrow[];
+  showModal: (props: any) => void;
 };
 
 function MaturityPoolUserStatusByMaturity({ type, deposits, borrows }: Props) {
@@ -31,15 +32,9 @@ function MaturityPoolUserStatusByMaturity({ type, deposits, borrows }: Props) {
           <div className={styles.column}>
             <div className={styles.tableRow}>
               <span className={styles.symbol}>{translations[lang].asset}</span>
-              <span className={styles.title}>
-                {translations[lang].marketSize}
-              </span>
-              <span className={styles.title}>
-                {translations[lang].fixedRate}
-              </span>
-              <span className={styles.title}>
-                {translations[lang].progress}
-              </span>
+              <span className={styles.title}>{translations[lang].marketSize}</span>
+              <span className={styles.title}>{translations[lang].fixedRate}</span>
+              <span className={styles.title}>{translations[lang].progress}</span>
               <span className={styles.title} />
             </div>
 
@@ -55,15 +50,9 @@ function MaturityPoolUserStatusByMaturity({ type, deposits, borrows }: Props) {
           <div className={styles.column}>
             <div className={styles.tableRow}>
               <span className={styles.symbol}>{translations[lang].asset}</span>
-              <span className={styles.title}>
-                {translations[lang].marketSize}
-              </span>
-              <span className={styles.title}>
-                {translations[lang].fixedRate}
-              </span>
-              <span className={styles.title}>
-                {translations[lang].progress}
-              </span>
+              <span className={styles.title}>{translations[lang].marketSize}</span>
+              <span className={styles.title}>{translations[lang].fixedRate}</span>
+              <span className={styles.title}>{translations[lang].progress}</span>
               <span className={styles.title} />
             </div>
 

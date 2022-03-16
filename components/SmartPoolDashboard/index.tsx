@@ -13,11 +13,12 @@ import SmartPoolUserStatus from 'components/SmartPoolUserStatus';
 import { Deposit } from 'types/Deposit';
 
 type Props = {
-  deposits: Deposit[],
-  walletAddress: string
-}
+  deposits: Deposit[];
+  walletAddress: string;
+  showModal: any;
+};
 
-function SmartPoolDashboard({ deposits, walletAddress }: Props) {
+function SmartPoolDashboard({ deposits, walletAddress, showModal }: Props) {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
@@ -27,7 +28,11 @@ function SmartPoolDashboard({ deposits, walletAddress }: Props) {
         <p className={styles.title}>{translations[lang].smartPool}</p>
         <Tooltip value={translations[lang].smartPool} />
       </div>
-      <SmartPoolUserStatus deposits={deposits} walletAddress={walletAddress} />
+      <SmartPoolUserStatus
+        deposits={deposits}
+        walletAddress={walletAddress}
+        showModal={showModal}
+      />
     </section>
   );
 }
