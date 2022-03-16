@@ -11,10 +11,11 @@ import styles from './style.module.scss';
 import keys from './translations.json';
 import SmartPoolUserStatus from 'components/SmartPoolUserStatus';
 import { Deposit } from 'types/Deposit';
+import { Dictionary } from 'types/Dictionary';
 
 type Props = {
-  deposits: Deposit[],
   walletAddress: string
+  deposits: Dictionary<number> | undefined,
 }
 
 function SmartPoolDashboard({ deposits, walletAddress }: Props) {

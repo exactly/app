@@ -89,8 +89,8 @@ function Item({ symbol, amount, walletAddress }: Props) {
         <span className={styles.primary}>{symbol}</span>
       </div>
       <span className={styles.value}>{walletBalance}</span>
-      <span className={styles.value}>{0}</span>
       <span className={styles.value}>{ethers.utils.formatUnits(amount, 18)}</span>
+      <span className={styles.value}>{0}</span>
 
       <span className={styles.value}>
         {!loading ? (
