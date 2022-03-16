@@ -50,7 +50,7 @@ const DashBoard: NextPage<Props> = ({
   const [maturityPoolBorrows, setMaturityPoolBorrows] = useState<Array<Borrow>>(
     []
   );
-  const [smartPoolDeposits, setSmartPoolDeposits] = useState<Array<Deposit>>([])
+  const [smartPoolDeposits, setSmartPoolDeposits] = useState<Dictionary<number>>()
 
   useEffect(() => {
     getData();
@@ -72,9 +72,23 @@ const DashBoard: NextPage<Props> = ({
       getSmartPoolDepositsQuery(address)
     );
 
+    const smartPoolDeposits = formatSmartPoolDeposits(getSmartPoolDeposits.deposits)
+    // console.log(getSmartPoolDeposits.deposits)
     setMaturityPoolDeposits(getMaturityPoolDeposits.deposits);
     setMaturityPoolBorrows(getMaturityPoolBorrows.borrows);
-    setSmartPoolDeposits(getSmartPoolDeposits.deposits)
+    setSmartPoolDeposits(smartPoolDeposits)
+  }
+
+  function formatSmartPoolDeposits(rawDeposits: Deposit[]) {
+    let depositsDict: Dictionary<number> = {}
+
+
+    rawDeposits.forEach((deposit) => {
+      const oldAmount = depositsDict[deposit.symbol] ?? 0;
+      depositsDict[deposit.symbol] = oldAmount + parseInt(deposit.amount)
+    })
+
+    return depositsDict
   }
 
   return (

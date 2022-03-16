@@ -11,10 +11,11 @@ import styles from './style.module.scss';
 
 import keys from './translations.json';
 import { Deposit } from 'types/Deposit';
+import { Dictionary } from 'types/Dictionary';
 
 type Props = {
-  deposits: Deposit[],
   walletAddress: string
+  deposits: Dictionary<number> | undefined,
 };
 
 function SmartPoolUserStatus({ deposits, walletAddress }: Props) {
@@ -41,9 +42,10 @@ function SmartPoolUserStatus({ deposits, walletAddress }: Props) {
             <span className={styles.title} />
           </div>
 
-          {deposits.map((deposit: Deposit, key: number) => {
+          {deposits && Object.keys(deposits).map((symbol: string, key: number) => {
+            const amount: string = JSON.stringify(deposits[symbol])
             return (
-              <Item key={key} amount={deposit.amount} symbol={deposit.symbol} walletAddress={walletAddress} />
+              <Item key={key} amount={amount} symbol={symbol} walletAddress={walletAddress} />
             )
           })}
 
