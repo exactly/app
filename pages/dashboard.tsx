@@ -52,7 +52,7 @@ const DashBoard: NextPage<Props> = ({
 
   const [maturityPoolDeposits, setMaturityPoolDeposits] = useState<Array<Deposit>>([]);
   const [maturityPoolBorrows, setMaturityPoolBorrows] = useState<Array<Borrow>>([]);
-  const [smartPoolDeposits, setSmartPoolDeposits] = useState<Array<Deposit>>([]);
+  const [smartPoolDeposits, setSmartPoolDeposits] = useState<Dictionary<number>>();
 
   useEffect(() => {
     getData();
@@ -74,19 +74,31 @@ const DashBoard: NextPage<Props> = ({
       getSmartPoolDepositsQuery(address)
     );
 
+    const smartPoolDeposits = formatSmartPoolDeposits(getSmartPoolDeposits.deposits);
     setMaturityPoolDeposits(getMaturityPoolDeposits.deposits);
     setMaturityPoolBorrows(getMaturityPoolBorrows.borrows);
     setSmartPoolDeposits(getSmartPoolDeposits.deposits);
   }
 
   function showModal(data: Deposit | Borrow, type: String) {
-    console.log(type);
     if (modalContent?.type) {
       //in the future we should handle the minimized modal status through a context here
       return;
     }
 
     handleModal({ content: { ...data, type } });
+    setSmartPoolDeposits(smartPoolDeposits);
+  }
+
+  function formatSmartPoolDeposits(rawDeposits: Deposit[]) {
+    let depositsDict: Dictionary<number> = {};
+
+    rawDeposits.forEach((deposit) => {
+      const oldAmount = depositsDict[deposit.symbol] ?? 0;
+      depositsDict[deposit.symbol] = oldAmount + parseInt(deposit.amount);
+    });
+
+    return depositsDict;
   }
 
   return (

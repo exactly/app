@@ -1,20 +1,20 @@
 import { useContext } from 'react';
 
 import { LangKeys } from 'types/Lang';
+import { Dictionary } from 'types/Dictionary';
 
 import Tooltip from 'components/Tooltip';
+import SmartPoolUserStatus from 'components/SmartPoolUserStatus';
 
 import LangContext from 'contexts/LangContext';
 
 import styles from './style.module.scss';
 
 import keys from './translations.json';
-import SmartPoolUserStatus from 'components/SmartPoolUserStatus';
-import { Deposit } from 'types/Deposit';
 
 type Props = {
-  deposits: Deposit[];
   walletAddress: string;
+  deposits: Dictionary<number> | undefined;
   showModal: any;
 };
 

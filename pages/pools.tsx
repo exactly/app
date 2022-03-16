@@ -137,7 +137,9 @@ const Pools: NextPage<Props> = ({
               <MobileNavbar walletAddress={walletAddress} network={network} />
               <Navbar walletAddress={walletAddress} />
               <CurrentNetwork network={network} />
-              <MaturitySelector title={dictionary.maturityPools} />
+              <div style={{ marginTop: '180px' }}>
+                <MaturitySelector title={dictionary.maturityPools} />
+              </div>
               <MarketsList markets={markets} showModal={showModal} />
               <SmartPoolList markets={markets} showModal={showModal} />
               <Footer />

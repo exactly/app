@@ -8,7 +8,6 @@ import AuditorContext from 'contexts/AuditorContext';
 import LangContext from 'contexts/LangContext';
 
 import { LangKeys } from 'types/Lang';
-import { Deposit } from 'types/Deposit';
 
 import styles from './style.module.scss';
 
@@ -22,7 +21,7 @@ type Props = {
   symbol: string;
   amount: string;
   walletAddress: string;
-  deposit: Deposit;
+  deposit: any;
   showModal: any;
 };
 
@@ -89,8 +88,8 @@ function Item({ symbol, amount, walletAddress, deposit, showModal }: Props) {
         <span className={styles.primary}>{symbol}</span>
       </div>
       <span className={styles.value}>{walletBalance}</span>
+      {/* <span className={styles.value}>{ethers.utils.formatUnits(amount, 18)}</span> */}
       <span className={styles.value}>{0}</span>
-      <span className={styles.value}>{ethers.utils.formatUnits(amount, 18)}</span>
 
       <span className={styles.value}>
         {!loading ? (
@@ -116,7 +115,7 @@ function Item({ symbol, amount, walletAddress, deposit, showModal }: Props) {
           <Button
             text={translations[lang].withdraw}
             className="tertiary"
-            onClick={() => showModal(deposit, 'withdrawSP')}
+            // onClick={() => showModal(deposit, 'withdrawSP')}
           />
         </div>
       </div>

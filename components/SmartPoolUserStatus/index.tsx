@@ -5,15 +5,15 @@ import Item from './Item';
 import LangContext from 'contexts/LangContext';
 
 import { LangKeys } from 'types/Lang';
+import { Dictionary } from 'types/Dictionary';
 
 import styles from './style.module.scss';
 
 import keys from './translations.json';
-import { Deposit } from 'types/Deposit';
 
 type Props = {
-  deposits: Deposit[];
   walletAddress: string;
+  deposits: Dictionary<number> | undefined;
   showModal: any;
 };
 
@@ -35,18 +35,20 @@ function SmartPoolUserStatus({ deposits, walletAddress, showModal }: Props) {
             <span className={styles.title} />
           </div>
 
-          {deposits.map((deposit: Deposit, key: number) => {
-            return (
-              <Item
-                key={key}
-                amount={deposit.amount}
-                symbol={deposit.symbol}
-                walletAddress={walletAddress}
-                deposit={deposit}
-                showModal={showModal}
-              />
-            );
-          })}
+          {deposits &&
+            Object.keys(deposits).map((symbol: string, key: number) => {
+              const amount: string = JSON.stringify(deposits[symbol]);
+              return (
+                <Item
+                  key={key}
+                  amount={amount}
+                  symbol={symbol}
+                  walletAddress={walletAddress}
+                  deposit={deposits[key]}
+                  showModal={showModal}
+                />
+              );
+            })}
         </div>
       </div>
     </div>
