@@ -22,7 +22,6 @@ import { LangKeys } from 'types/Lang';
 import keys from './translations.json';
 
 import numbers from 'config/numbers.json';
-import RepayModal from 'components/RepayModal';
 
 type Props = {
   contractData: any;
@@ -60,7 +59,73 @@ function Modal({ contractData, closeModal, walletAddress }: Props) {
     <>
       {!minimized && (
         <div className={styles.modal}>
-          <RepayModal />
+          <div className={styles.closeContainer}>
+            <span
+              className={styles.closeButton}
+              onClick={
+                !tx || tx.status == 'success'
+                  ? handleClose
+                  : () => {
+                      setMinimized((prev) => !prev);
+                    }
+              }
+            >
+              X
+            </span>
+          </div>
+          {!tx && (
+            <>
+              <div className={styles.assets}>
+                <p>
+                  {contractData.type == 'borrow'
+                    ? translations[lang].borrow
+                    : translations[lang].deposit}
+                </p>
+                <AssetSelector
+                  defaultAddress={contractData.address}
+                  onChange={(marketData) => setAssetData(marketData)}
+                />
+              </div>
+              {contractWithSigner && contractData.type == 'deposit' && assetData && (
+                <SupplyForm
+                  contractWithSigner={contractWithSigner!}
+                  handleResult={handleResult}
+                  hasRate={hasRate}
+                  address={contractData.address}
+                  assetData={assetData}
+                  handleTx={(data: Transaction) => setTx(data)}
+                  walletAddress={walletAddress}
+                />
+              )}
+
+              {contractWithSigner && contractData.type == 'borrow' && assetData && (
+                <BorrowForm
+                  contractWithSigner={contractWithSigner!}
+                  handleResult={handleResult}
+                  hasRate={hasRate}
+                  address={contractData.address}
+                  assetData={assetData}
+                  handleTx={(data: Transaction) => setTx(data)}
+                />
+              )}
+
+              {!contractWithSigner && <Loading />}
+
+              {potentialRate && (
+                <section className={styles.right}>
+                  <p>
+                    <span className={styles.detail}>{translations[lang].annualRate}</span>
+                    <span className={styles.value}>
+                      {(parseFloat(potentialRate) * 100).toFixed(numbers.decimals)} %
+                    </span>
+                  </p>
+                </section>
+              )}
+
+              {!hasRate && <Loading />}
+            </>
+          )}
+          {tx && <ModalGif tx={tx} />}
         </div>
       )}
 

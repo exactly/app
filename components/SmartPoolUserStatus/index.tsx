@@ -5,19 +5,18 @@ import Item from './Item';
 import LangContext from 'contexts/LangContext';
 
 import { LangKeys } from 'types/Lang';
-import { Dictionary } from 'types/Dictionary';
 
 import styles from './style.module.scss';
 
 import keys from './translations.json';
+import { Dictionary } from 'types/Dictionary';
 
 type Props = {
   walletAddress: string;
   deposits: Dictionary<number> | undefined;
-  showModal: any;
 };
 
-function SmartPoolUserStatus({ deposits, walletAddress, showModal }: Props) {
+function SmartPoolUserStatus({ deposits, walletAddress }: Props) {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
@@ -39,14 +38,7 @@ function SmartPoolUserStatus({ deposits, walletAddress, showModal }: Props) {
             Object.keys(deposits).map((symbol: string, key: number) => {
               const amount: string = JSON.stringify(deposits[symbol]);
               return (
-                <Item
-                  key={key}
-                  amount={amount}
-                  symbol={symbol}
-                  walletAddress={walletAddress}
-                  deposit={deposits[key]}
-                  showModal={showModal}
-                />
+                <Item key={key} amount={amount} symbol={symbol} walletAddress={walletAddress} />
               );
             })}
         </div>
