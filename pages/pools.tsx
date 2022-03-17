@@ -30,31 +30,31 @@ import dictionary from 'dictionary/en.json';
 import { PoolAccountingProvider } from 'contexts/PoolAccountingContext';
 import { UtilsProvider } from 'contexts/UtilsContext';
 
+
+//Contracts
+import InterestRateModel from 'protocol/deployments/kovan/InterestRateModel.json'
+import Auditor from 'protocol/deployments/kovan/Auditor.json'
+import Utils from 'protocol/deployments/kovan/TSUtils.json'
+
 interface Props {
   walletAddress: string;
   network: string;
-  auditor: Contract;
   assetsAddresses: Dictionary<string>;
   fixedLender: Contract;
-  interestRateModel: Contract;
   poolAccounting: Contract;
-  utils: Contract;
 }
 
 const Pools: NextPage<Props> = ({
   walletAddress,
   network,
-  auditor,
   assetsAddresses,
   fixedLender,
-  interestRateModel,
   poolAccounting,
-  utils
 }) => {
   const { modal, handleModal, modalContent } = useModal();
 
   const [markets, setMarkets] = useState<Array<Market>>([]);
-  const { contract } = useContract(auditor?.address, auditor?.abi);
+  const { contract } = useContract(Auditor?.address, Auditor?.abi);
 
   useEffect(() => {
     if (contract) {
@@ -115,11 +115,11 @@ const Pools: NextPage<Props> = ({
   }
 
   return (
-    <UtilsProvider value={utils}>
-      <AuditorProvider value={auditor}>
+    <UtilsProvider value={Utils}>
+      <AuditorProvider value={Auditor}>
         <FixedLenderProvider value={{ addresses: assetsAddresses, abi: fixedLender.abi }}>
           <PoolAccountingProvider value={poolAccounting}>
-            <InterestRateModelProvider value={interestRateModel}>
+            <InterestRateModelProvider value={InterestRateModel}>
               {modal && modalContent?.type != 'smartDeposit' && (
                 <Modal
                   contractData={modalContent}
@@ -152,39 +152,20 @@ const Pools: NextPage<Props> = ({
 };
 
 export async function getStaticProps() {
-  const getAuditorAbi = await axios.get(
-    'https://abi-versions2.s3.amazonaws.com/latest/contracts/Auditor.sol/Auditor.json'
-  );
+
   const getFixedLenderAbi = await axios.get(
     'https://abi-versions2.s3.amazonaws.com/latest/contracts/FixedLender.sol/FixedLender.json'
-  );
-  const getInterestRateModelAbi = await axios.get(
-    'https://abi-versions2.s3.amazonaws.com/latest/contracts/InterestRateModel.sol/InterestRateModel.json'
   );
 
   const getPoolAccountingAbi = await axios.get(
     'https://abi-versions2.s3.amazonaws.com/latest/contracts/PoolAccounting.sol/PoolAccounting.json'
   );
 
-  const getUtilsAbi = await axios.get(
-    'https://abi-versions2.s3.amazonaws.com/latest/contracts/utils/TSUtils.sol/TSUtils.json'
-  );
 
   const addresses = await axios.get('https://abi-versions2.s3.amazonaws.com/latest/addresses.json');
-  const auditorAddress = addresses?.data?.auditor;
-  const interestRateModelAddress = addresses?.data?.interestRateModel;
-  const utilsAddress = addresses?.data?.utils;
 
   return {
     props: {
-      auditor: {
-        abi: getAuditorAbi.data,
-        address: auditorAddress
-      },
-      interestRateModel: {
-        abi: getInterestRateModelAbi.data,
-        address: interestRateModelAddress
-      },
       assetsAddresses: addresses.data,
       fixedLender: {
         abi: getFixedLenderAbi.data
@@ -192,10 +173,6 @@ export async function getStaticProps() {
       poolAccounting: {
         abi: getPoolAccountingAbi.data
       },
-      utils: {
-        abi: getUtilsAbi.data,
-        address: utilsAddress
-      }
     }
   };
 }
