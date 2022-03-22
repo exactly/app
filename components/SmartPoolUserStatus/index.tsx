@@ -13,10 +13,11 @@ import { Dictionary } from 'types/Dictionary';
 
 type Props = {
   walletAddress: string;
-  deposits: Dictionary<number> | undefined;
+  deposits: Dictionary<any> | undefined;
+  showModal: any;
 };
 
-function SmartPoolUserStatus({ deposits, walletAddress }: Props) {
+function SmartPoolUserStatus({ deposits, walletAddress, showModal }: Props) {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
@@ -36,9 +37,16 @@ function SmartPoolUserStatus({ deposits, walletAddress }: Props) {
 
           {deposits &&
             Object.keys(deposits).map((symbol: string, key: number) => {
-              const amount: string = JSON.stringify(deposits[symbol]);
+              const amount: string = JSON.stringify(deposits[symbol].amount);
               return (
-                <Item key={key} amount={amount} symbol={symbol} walletAddress={walletAddress} />
+                <Item
+                  key={key}
+                  amount={amount}
+                  symbol={symbol}
+                  walletAddress={walletAddress}
+                  deposit={deposits[symbol]}
+                  showModal={showModal}
+                />
               );
             })}
         </div>

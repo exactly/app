@@ -77,7 +77,7 @@ const DashBoard: NextPage<Props> = ({
     const smartPoolDeposits = formatSmartPoolDeposits(getSmartPoolDeposits.deposits);
     setMaturityPoolDeposits(getMaturityPoolDeposits.deposits);
     setMaturityPoolBorrows(getMaturityPoolBorrows.borrows);
-    setSmartPoolDeposits(getSmartPoolDeposits.deposits);
+    setSmartPoolDeposits(smartPoolDeposits);
   }
 
   function showModal(data: Deposit | Borrow, type: String) {
@@ -91,11 +91,12 @@ const DashBoard: NextPage<Props> = ({
   }
 
   function formatSmartPoolDeposits(rawDeposits: Deposit[]) {
-    let depositsDict: Dictionary<number> = {};
+    let depositsDict: Dictionary<any> = {};
 
     rawDeposits.forEach((deposit) => {
-      const oldAmount = depositsDict[deposit.symbol] ?? 0;
-      depositsDict[deposit.symbol] = oldAmount + parseInt(deposit.amount);
+      const oldAmount = depositsDict[deposit.symbol]?.amount ?? 0;
+      const newAmount = oldAmount + parseInt(deposit.amount);
+      depositsDict[deposit.symbol] = { ...deposit, amount: newAmount };
     });
 
     return depositsDict;

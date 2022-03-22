@@ -28,7 +28,11 @@ function SmartPoolDashboard({ deposits, walletAddress, showModal }: Props) {
         <p className={styles.title}>{translations[lang].smartPool}</p>
         <Tooltip value={translations[lang].smartPool} />
       </div>
-      <SmartPoolUserStatus deposits={deposits} walletAddress={walletAddress} />
+      <SmartPoolUserStatus
+        deposits={deposits}
+        walletAddress={walletAddress}
+        showModal={showModal}
+      />
     </section>
   );
 }
