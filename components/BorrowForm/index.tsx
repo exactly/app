@@ -68,7 +68,8 @@ function BorrowForm({
   const [poolAccounting, setPoolAccounting] = useState<Contract | undefined>(undefined);
 
   async function getFixedLenderContract() {
-    const fixedLenderWithSigner = await getContractData(address, fixedLenderData?.abi!, true)
+    const filteredFixedLender = fixedLenderData.find(fl => fl.address == address)
+    const fixedLenderWithSigner = await getContractData(address, filteredFixedLender?.abi!, true)
     setFixedLenderWithSigner(fixedLenderWithSigner)
     getPoolAccountingContract(fixedLenderWithSigner)
   }
@@ -206,7 +207,7 @@ function BorrowForm({
           <Tooltip value={translations[lang].endDate} />
         </div>
         <div className={style.inputContainer}>
-          <MaturitySelector />
+          <MaturitySelector address={address} />
         </div>
       </div>
       {error?.status && <p className={style.error}>{error?.msg}</p>}

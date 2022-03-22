@@ -28,13 +28,14 @@ import { Dictionary } from 'types/Dictionary';
 
 import dictionary from 'dictionary/en.json';
 import { PoolAccountingProvider } from 'contexts/PoolAccountingContext';
-import { UtilsProvider } from 'contexts/UtilsContext';
 
 
 //Contracts
 import InterestRateModel from 'protocol/deployments/kovan/InterestRateModel.json'
 import Auditor from 'protocol/deployments/kovan/Auditor.json'
-import Utils from 'protocol/deployments/kovan/TSUtils.json'
+import FixedLenderDAI from 'protocol/deployments/kovan/FixedLenderDAI.json'
+import FixedLenderWETH from 'protocol/deployments/kovan/FixedLenderWETH.json'
+
 
 interface Props {
   walletAddress: string;
@@ -47,8 +48,6 @@ interface Props {
 const Pools: NextPage<Props> = ({
   walletAddress,
   network,
-  assetsAddresses,
-  fixedLender,
   poolAccounting,
 }) => {
   const { modal, handleModal, modalContent } = useModal();
@@ -115,47 +114,42 @@ const Pools: NextPage<Props> = ({
   }
 
   return (
-    <UtilsProvider value={Utils}>
-      <AuditorProvider value={Auditor}>
-        <FixedLenderProvider value={{ addresses: assetsAddresses, abi: fixedLender.abi }}>
-          <PoolAccountingProvider value={poolAccounting}>
-            <InterestRateModelProvider value={InterestRateModel}>
-              {modal && modalContent?.type != 'smartDeposit' && (
-                <Modal
-                  contractData={modalContent}
-                  closeModal={handleModal}
-                  walletAddress={walletAddress}
-                />
-              )}
-              {modal && modalContent?.type == 'smartDeposit' && (
-                <SmartPoolModal
-                  contractData={modalContent}
-                  closeModal={handleModal}
-                  walletAddress={walletAddress}
-                />
-              )}
-              <MobileNavbar walletAddress={walletAddress} network={network} />
-              <Navbar walletAddress={walletAddress} />
-              <CurrentNetwork network={network} />
-              <div style={{ marginTop: '180px' }}>
-                <MaturitySelector title={dictionary.maturityPools} />
-              </div>
-              <MarketsList markets={markets} showModal={showModal} />
-              <SmartPoolList markets={markets} showModal={showModal} />
-              <Footer />
-            </InterestRateModelProvider>
-          </PoolAccountingProvider>
-        </FixedLenderProvider>
-      </AuditorProvider>
-    </UtilsProvider>
+    <AuditorProvider value={Auditor}>
+      <FixedLenderProvider value={[FixedLenderDAI, FixedLenderWETH]}>
+        <PoolAccountingProvider value={poolAccounting}>
+          <InterestRateModelProvider value={InterestRateModel}>
+            {modal && modalContent?.type != 'smartDeposit' && (
+              <Modal
+                contractData={modalContent}
+                closeModal={handleModal}
+                walletAddress={walletAddress}
+              />
+            )}
+            {modal && modalContent?.type == 'smartDeposit' && (
+              <SmartPoolModal
+                contractData={modalContent}
+                closeModal={handleModal}
+                walletAddress={walletAddress}
+              />
+            )}
+            <MobileNavbar walletAddress={walletAddress} network={network} />
+            <Navbar walletAddress={walletAddress} />
+            <CurrentNetwork network={network} />
+            <div style={{ marginTop: '180px' }}>
+              <MaturitySelector title={dictionary.maturityPools} />
+            </div>
+            <MarketsList markets={markets} showModal={showModal} />
+            <SmartPoolList markets={markets} showModal={showModal} />
+            <Footer />
+          </InterestRateModelProvider>
+        </PoolAccountingProvider>
+      </FixedLenderProvider>
+    </AuditorProvider>
   );
 };
 
 export async function getStaticProps() {
 
-  const getFixedLenderAbi = await axios.get(
-    'https://abi-versions2.s3.amazonaws.com/latest/contracts/FixedLender.sol/FixedLender.json'
-  );
 
   const getPoolAccountingAbi = await axios.get(
     'https://abi-versions2.s3.amazonaws.com/latest/contracts/PoolAccounting.sol/PoolAccounting.json'
@@ -167,9 +161,7 @@ export async function getStaticProps() {
   return {
     props: {
       assetsAddresses: addresses.data,
-      fixedLender: {
-        abi: getFixedLenderAbi.data
-      },
+
       poolAccounting: {
         abi: getPoolAccountingAbi.data
       },

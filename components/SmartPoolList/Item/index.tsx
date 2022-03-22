@@ -38,7 +38,8 @@ function Item({ market, showModal, src }: Props) {
   const [poolAccounting, setPoolAccounting] = useState<Contract | undefined>(undefined);
 
   async function getFixedLenderContract() {
-    const fixedLender = await getContractData(market?.address, fixedLenderData?.abi!, false)
+    const filteredFixedLender = fixedLenderData.find(fl => fl.address == market.address)
+    const fixedLender = await getContractData(market.address, filteredFixedLender?.abi!, false)
     setFixedLender(fixedLender)
     getPoolAccountingContract(fixedLender)
   }

@@ -86,9 +86,12 @@ function SupplyForm({
     interestRateModel.address!,
     interestRateModel.abi!
   );
+
+  const filteredFixedLender = fixedLender.find((fl) => fl.address == address)
+
   const fixedLenderWithSigner = useContractWithSigner(
     address,
-    fixedLender?.abi!
+    filteredFixedLender?.abi!
   );
 
   useEffect(() => {
@@ -277,7 +280,7 @@ function SupplyForm({
           <Tooltip value={translations[lang].endDate} />
         </div>
         <div className={style.inputContainer}>
-          <MaturitySelector />
+          <MaturitySelector address={address} />
         </div>
       </div>
       {error?.status && <p className={style.error}>{error?.msg}</p>}
