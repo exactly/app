@@ -28,22 +28,12 @@ import PoolAccountingContext from 'contexts/PoolAccountingContext';
 import { getContractData } from 'utils/contracts';
 
 type Props = {
-  contractWithSigner: ethers.Contract;
   handleResult: (data: SupplyRate | undefined) => void;
-  hasRate: boolean | undefined;
   address: string;
-  assetData: Market | undefined;
   handleTx: (data: Transaction) => void;
 };
 
-function BorrowForm({
-  contractWithSigner,
-  handleResult,
-  hasRate,
-  address,
-  assetData,
-  handleTx
-}: Props) {
+function BorrowForm({ handleResult, address, handleTx }: Props) {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
@@ -59,28 +49,31 @@ function BorrowForm({
   });
   const [gas, setGas] = useState<Gas | undefined>(undefined);
 
-  const interestRateModelContract = useContract(
-    interestRateModel.address!,
-    interestRateModel.abi!
-  );
+  const interestRateModelContract = useContract(interestRateModel.address!, interestRateModel.abi!);
 
-  const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(undefined);
+  const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
+    undefined
+  );
   const [poolAccounting, setPoolAccounting] = useState<Contract | undefined>(undefined);
 
   async function getFixedLenderContract() {
-    const fixedLenderWithSigner = await getContractData(address, fixedLenderData?.abi!, true)
-    setFixedLenderWithSigner(fixedLenderWithSigner)
-    getPoolAccountingContract(fixedLenderWithSigner)
+    const fixedLenderWithSigner = await getContractData(address, fixedLenderData?.abi!, true);
+    setFixedLenderWithSigner(fixedLenderWithSigner);
+    getPoolAccountingContract(fixedLenderWithSigner);
   }
 
   async function getPoolAccountingContract(fixedLenderWithSigner: Contract | undefined) {
-    const poolAccounting = await getContractData(fixedLenderWithSigner?.poolAccounting(), poolAccountingData.abi!, false);
+    const poolAccounting = await getContractData(
+      fixedLenderWithSigner?.poolAccounting(),
+      poolAccountingData.abi!,
+      false
+    );
     setPoolAccounting(poolAccounting);
   }
 
   useEffect(() => {
     getFixedLenderContract();
-  }, [])
+  }, []);
 
   useEffect(() => {
     if (poolAccounting) {
@@ -102,11 +95,9 @@ function BorrowForm({
 
     handleLoading(false);
 
-    const smartPoolBorrowed =
-      await poolAccounting!.smartPoolBorrowed();
+    const smartPoolBorrowed = await poolAccounting!.smartPoolBorrowed();
 
-    const smartPoolSupplied =
-      await fixedLenderWithSigner?.getSmartPoolDeposits();
+    const smartPoolSupplied = await fixedLenderWithSigner?.getSmartPoolDeposits();
 
     const currentTimestamp = Math.floor(Date.now() / 1000);
 

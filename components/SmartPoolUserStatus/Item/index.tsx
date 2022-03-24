@@ -19,9 +19,9 @@ import { getUnderlyingData } from 'utils/utils';
 import { getContractData } from 'utils/contracts';
 
 type Props = {
-  symbol: string,
-  amount: string,
-  walletAddress: string
+  symbol: string;
+  amount: string;
+  walletAddress: string | null | undefined;
 };
 
 function Item({ symbol, amount, walletAddress }: Props) {
@@ -33,22 +33,20 @@ function Item({ symbol, amount, walletAddress }: Props) {
   const [toggle, setToggle] = useState<boolean>(false);
   const [disabled, setDisabled] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
-  const [walletBalance, setWalletBalance] = useState<string | undefined>(undefined)
+  const [walletBalance, setWalletBalance] = useState<string | undefined>(undefined);
   const auditorContract = useContractWithSigner(auditor.address!, auditor.abi!);
-  const underlyingData = getUnderlyingData(process.env.NEXT_PUBLIC_NETWORK!, symbol)
+  const underlyingData = getUnderlyingData(process.env.NEXT_PUBLIC_NETWORK!, symbol);
 
   useEffect(() => {
-    getCurrentBalance()
-  }, [])
+    getCurrentBalance();
+  }, []);
 
   async function getCurrentBalance() {
     const contractData = await getContractData(underlyingData!.address, underlyingData!.abi, false);
-    const balance = await contractData?.balanceOf(
-      walletAddress
-    );
+    const balance = await contractData?.balanceOf(walletAddress);
 
     if (balance) {
-      setWalletBalance(ethers.utils.formatEther(balance))
+      setWalletBalance(ethers.utils.formatEther(balance));
     }
   }
 

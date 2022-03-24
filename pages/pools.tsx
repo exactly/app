@@ -31,8 +31,6 @@ import { PoolAccountingProvider } from 'contexts/PoolAccountingContext';
 import { UtilsProvider } from 'contexts/UtilsContext';
 
 interface Props {
-  walletAddress: string;
-  network: string;
   auditor: Contract;
   assetsAddresses: Dictionary<string>;
   fixedLender: Contract;
@@ -42,8 +40,6 @@ interface Props {
 }
 
 const Pools: NextPage<Props> = ({
-  walletAddress,
-  network,
   auditor,
   assetsAddresses,
   fixedLender,
@@ -121,22 +117,14 @@ const Pools: NextPage<Props> = ({
           <PoolAccountingProvider value={poolAccounting}>
             <InterestRateModelProvider value={interestRateModel}>
               {modal && modalContent?.type != 'smartDeposit' && (
-                <Modal
-                  contractData={modalContent}
-                  closeModal={handleModal}
-                  walletAddress={walletAddress}
-                />
+                <Modal contractData={modalContent} closeModal={handleModal} />
               )}
               {modal && modalContent?.type == 'smartDeposit' && (
-                <SmartPoolModal
-                  contractData={modalContent}
-                  closeModal={handleModal}
-                  walletAddress={walletAddress}
-                />
+                <SmartPoolModal contractData={modalContent} closeModal={handleModal} />
               )}
-              <MobileNavbar walletAddress={walletAddress} network={network} />
-              <Navbar walletAddress={walletAddress} />
-              <CurrentNetwork network={network} />
+              <MobileNavbar />
+              <Navbar />
+              <CurrentNetwork />
               <div style={{ marginTop: '180px' }}>
                 <MaturitySelector title={dictionary.maturityPools} />
               </div>

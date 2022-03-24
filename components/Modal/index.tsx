@@ -13,6 +13,7 @@ import useContractWithSigner from 'hooks/useContractWithSigner';
 
 import AuditorContext from 'contexts/AuditorContext';
 import LangContext from 'contexts/LangContext';
+import { useWeb3Context } from 'contexts/Web3Context';
 
 import { SupplyRate } from 'types/SupplyRate';
 import { Market } from 'types/Market';
@@ -26,11 +27,11 @@ import numbers from 'config/numbers.json';
 type Props = {
   contractData: any;
   closeModal: any;
-  walletAddress: string;
 };
 
-function Modal({ contractData, closeModal, walletAddress }: Props) {
+function Modal({ contractData, closeModal }: Props) {
   const auditor = useContext(AuditorContext);
+  const { address } = useWeb3Context();
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
@@ -44,10 +45,7 @@ function Modal({ contractData, closeModal, walletAddress }: Props) {
 
   const [minimized, setMinimized] = useState<Boolean>(false);
 
-  const { contractWithSigner } = useContractWithSigner(
-    contractData?.address,
-    auditor?.abi!
-  );
+  const { contractWithSigner } = useContractWithSigner(contractData?.address, auditor?.abi!);
 
   function handleResult(data: SupplyRate | undefined) {
     setHasRate(data?.hasRate);
@@ -69,8 +67,8 @@ function Modal({ contractData, closeModal, walletAddress }: Props) {
                 !tx || tx.status == 'success'
                   ? handleClose
                   : () => {
-                    setMinimized((prev) => !prev);
-                  }
+                      setMinimized((prev) => !prev);
+                    }
               }
             >
               X
@@ -89,46 +87,32 @@ function Modal({ contractData, closeModal, walletAddress }: Props) {
                   onChange={(marketData) => setAssetData(marketData)}
                 />
               </div>
-              {contractWithSigner &&
-                contractData.type == 'deposit' &&
-                assetData && (
-                  <SupplyForm
-                    contractWithSigner={contractWithSigner!}
-                    handleResult={handleResult}
-                    hasRate={hasRate}
-                    address={contractData.address}
-                    assetData={assetData}
-                    handleTx={(data: Transaction) => setTx(data)}
-                    walletAddress={walletAddress}
-                  />
-                )}
+              {contractWithSigner && contractData.type == 'deposit' && assetData && (
+                <SupplyForm
+                  handleResult={handleResult}
+                  address={contractData.address}
+                  assetData={assetData}
+                  handleTx={(data: Transaction) => setTx(data)}
+                  walletAddress={address}
+                />
+              )}
 
-              {contractWithSigner &&
-                contractData.type == 'borrow' &&
-                assetData && (
-                  <BorrowForm
-                    contractWithSigner={contractWithSigner!}
-                    handleResult={handleResult}
-                    hasRate={hasRate}
-                    address={contractData.address}
-                    assetData={assetData}
-                    handleTx={(data: Transaction) => setTx(data)}
-                  />
-                )}
+              {contractWithSigner && contractData.type == 'borrow' && assetData && (
+                <BorrowForm
+                  handleResult={handleResult}
+                  address={contractData.address}
+                  handleTx={(data: Transaction) => setTx(data)}
+                />
+              )}
 
               {!contractWithSigner && <Loading />}
 
               {potentialRate && (
                 <section className={styles.right}>
                   <p>
-                    <span className={styles.detail}>
-                      {translations[lang].annualRate}
-                    </span>
+                    <span className={styles.detail}>{translations[lang].annualRate}</span>
                     <span className={styles.value}>
-                      {(parseFloat(potentialRate) * 100).toFixed(
-                        numbers.decimals
-                      )}{' '}
-                      %
+                      {(parseFloat(potentialRate) * 100).toFixed(numbers.decimals)} %
                     </span>
                   </p>
                 </section>
@@ -156,8 +140,8 @@ function Modal({ contractData, closeModal, walletAddress }: Props) {
             !tx || tx.status == 'success'
               ? handleClose
               : () => {
-                setMinimized((prev) => !prev);
-              }
+                  setMinimized((prev) => !prev);
+                }
           }
         />
       )}

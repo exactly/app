@@ -2,8 +2,6 @@ import { useContext } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 
-import useProvider from 'hooks/useProvider';
-
 import Button from 'components/common/Button';
 import Wallet from 'components/Wallet';
 
@@ -14,24 +12,15 @@ import LangContext from 'contexts/LangContext';
 import styles from './style.module.scss';
 
 import keys from './translations.json';
-import { handleMetamaskLogin } from 'utils/utils';
+import { useWeb3Context } from 'contexts/Web3Context';
 
-type Props = {
-  walletAddress?: String;
-};
-
-function Navbar({ walletAddress }: Props) {
+function Navbar() {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
+  const { web3Provider, connect, disconnect, address } = useWeb3Context();
 
-  const { getProvider } = useProvider();
   const router = useRouter();
   const { pathname } = router;
-
-  async function handleClick() {
-    //this function generates the connection to the provider
-    await handleMetamaskLogin();
-  }
 
   const routes = [
     {
@@ -57,20 +46,14 @@ function Navbar({ walletAddress }: Props) {
       <div className={styles.wrapper}>
         <div className={styles.left}>
           <Link href="/">
-            <img
-              src="/img/logo.svg"
-              alt="Exactly Logo"
-              className={styles.logo}
-            />
+            <img src="/img/logo.svg" alt="Exactly Logo" className={styles.logo} />
           </Link>
           <ul className={styles.linksContainer}>
             {routes.map((route) => {
               return (
                 <li
                   className={
-                    route.pathname === pathname
-                      ? `${styles.link} ${styles.active}`
-                      : styles.link
+                    route.pathname === pathname ? `${styles.link} ${styles.active}` : styles.link
                   }
                   key={route.pathname}
                 >
@@ -80,15 +63,18 @@ function Navbar({ walletAddress }: Props) {
             })}
           </ul>
         </div>
+
         <div className={styles.right}>
-          {!walletAddress ? (
+          {!web3Provider && connect ? (
             <div className={styles.buttonContainer}>
-              <Button text="Conectar" onClick={handleClick} />
+              <Button text="Conectar" onClick={() => connect()} />
             </div>
           ) : (
-            <div className={styles.buttonContainer}>
-              <Wallet walletAddress={walletAddress} />
-            </div>
+            disconnect && (
+              <div className={styles.buttonContainer}>
+                <Wallet walletAddress={address} disconnect={() => disconnect()} />
+              </div>
+            )
           )}
         </div>
       </div>

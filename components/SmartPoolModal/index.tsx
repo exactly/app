@@ -15,6 +15,7 @@ import useContractWithSigner from 'hooks/useContractWithSigner';
 
 import FixedLenderContext from 'contexts/FixedLenderContext';
 import LangContext from 'contexts/LangContext';
+import { useWeb3Context } from 'contexts/Web3Context';
 
 import { Market } from 'types/Market';
 import { Error } from 'types/Error';
@@ -32,11 +33,11 @@ import numbers from 'config/numbers.json';
 type Props = {
   contractData: any;
   closeModal: any;
-  walletAddress: string;
 };
 
-function SmartPoolModal({ contractData, closeModal, walletAddress }: Props) {
+function SmartPoolModal({ contractData, closeModal }: Props) {
   const fixedLender = useContext(FixedLenderContext);
+  const { address } = useWeb3Context();
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
@@ -61,25 +62,16 @@ function SmartPoolModal({ contractData, closeModal, walletAddress }: Props) {
   let underlyingData: UnderlyingData | undefined = undefined;
 
   if (assetData?.symbol) {
-    underlyingData = getUnderlyingData(
-      process.env.NEXT_PUBLIC_NETWORK!,
-      assetData.symbol
-    );
+    underlyingData = getUnderlyingData(process.env.NEXT_PUBLIC_NETWORK!, assetData.symbol);
   }
 
-  const underlyingContract = useContractWithSigner(
-    underlyingData!.address,
-    underlyingData!.abi
-  );
+  const underlyingContract = useContractWithSigner(underlyingData!.address, underlyingData!.abi);
 
-  const fixedLenderWithSigner = useContractWithSigner(
-    contractData.address,
-    fixedLender?.abi!
-  );
+  const fixedLenderWithSigner = useContractWithSigner(contractData.address, fixedLender?.abi!);
 
   useEffect(() => {
     checkAllowance();
-  }, [contractData.address, walletAddress, underlyingContract]);
+  }, [contractData.address, address, underlyingContract]);
 
   useEffect(() => {
     if (fixedLenderWithSigner && !gas) {
@@ -89,20 +81,15 @@ function SmartPoolModal({ contractData, closeModal, walletAddress }: Props) {
 
   async function checkAllowance() {
     const allowance = await underlyingContract?.contractWithSigner?.allowance(
-      walletAddress,
+      address,
       contractData.address
     );
 
-    const formattedAllowance =
-      allowance && parseFloat(ethers.utils.formatEther(allowance));
+    const formattedAllowance = allowance && parseFloat(ethers.utils.formatEther(allowance));
 
     const amount = qty ?? 0;
 
-    if (
-      formattedAllowance > amount &&
-      !isNaN(amount) &&
-      !isNaN(formattedAllowance)
-    ) {
+    if (formattedAllowance > amount && !isNaN(amount) && !isNaN(formattedAllowance)) {
       setStep(2);
     }
   }
@@ -116,10 +103,9 @@ function SmartPoolModal({ contractData, closeModal, walletAddress }: Props) {
       return setError({ status: true, msg: translations[lang].error });
     }
     try {
-      const tx =
-        await fixedLenderWithSigner?.contractWithSigner?.depositToSmartPool(
-          ethers.utils.parseUnits(qty!.toString())
-        );
+      const tx = await fixedLenderWithSigner?.contractWithSigner?.depositToSmartPool(
+        ethers.utils.parseUnits(qty!.toString())
+      );
 
       setTx({ status: 'processing', hash: tx?.hash });
 
@@ -157,9 +143,7 @@ function SmartPoolModal({ contractData, closeModal, walletAddress }: Props) {
   }
 
   async function getMaxAmount() {
-    const balance = await underlyingContract?.contract?.balanceOf(
-      walletAddress
-    );
+    const balance = await underlyingContract?.contract?.balanceOf(address);
 
     const max = balance && ethers.utils.formatEther(balance);
 
@@ -170,8 +154,7 @@ function SmartPoolModal({ contractData, closeModal, walletAddress }: Props) {
   }
 
   async function estimateGas() {
-    const gasPriceInGwei =
-      await fixedLenderWithSigner?.contractWithSigner?.provider.getGasPrice();
+    const gasPriceInGwei = await fixedLenderWithSigner?.contractWithSigner?.provider.getGasPrice();
 
     const estimatedGasCost =
       await fixedLenderWithSigner?.contractWithSigner?.estimateGas.depositToSmartPool(
@@ -246,15 +229,9 @@ function SmartPoolModal({ contractData, closeModal, walletAddress }: Props) {
                   {pending && <p>{translations[lang].pendingTransaction}</p>}
                   <div className={styles.buttonContainer}>
                     <Button
-                      text={
-                        step == 1
-                          ? translations[lang].approve
-                          : translations[lang].deposit
-                      }
+                      text={step == 1 ? translations[lang].approve : translations[lang].deposit}
                       onClick={handleClickAction}
-                      className={
-                        qty && qty > 0 && !pending ? 'primary' : 'disabled'
-                      }
+                      className={qty && qty > 0 && !pending ? 'primary' : 'disabled'}
                       disabled={(!qty || qty <= 0) && !pending}
                     />
                   </div>
