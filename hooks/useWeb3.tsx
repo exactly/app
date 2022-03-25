@@ -53,7 +53,7 @@ export const useWeb3 = () => {
 
   const disconnect = useCallback(async () => {
     if (web3Modal) {
-      web3Modal.clearCachedProvider();
+      await web3Modal.clearCachedProvider();
       if (provider?.disconnect && typeof provider.disconnect === 'function') {
         await provider.disconnect();
       }

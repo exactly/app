@@ -4,7 +4,7 @@ import { formatWallet } from 'utils/utils';
 import { Network } from 'types/Network';
 
 type Props = {
-  walletAddress: string | undefined | null;
+  walletAddress: string;
   cogwheel?: Boolean;
   network?: Network | null | undefined;
   disconnect: () => Promise<void>;

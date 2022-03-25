@@ -65,12 +65,13 @@ function Navbar() {
         </div>
 
         <div className={styles.right}>
-          {!web3Provider && connect ? (
+          {connect && !address ? (
             <div className={styles.buttonContainer}>
               <Button text="Conectar" onClick={() => connect()} />
             </div>
           ) : (
-            disconnect && (
+            disconnect &&
+            address && (
               <div className={styles.buttonContainer}>
                 <Wallet walletAddress={address} disconnect={() => disconnect()} />
               </div>

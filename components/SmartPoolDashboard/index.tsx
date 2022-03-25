@@ -22,6 +22,7 @@ function SmartPoolDashboard({ deposits }: Props) {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
   const { address } = useWeb3Context();
+
   return (
     <section className={styles.container}>
       <div className={styles.titleContainer}>
