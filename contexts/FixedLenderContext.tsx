@@ -1,6 +1,5 @@
-import { ethers, } from "ethers";
+import { ethers } from "ethers";
 import { createContext } from "react";
-import { Dictionary } from "types/Dictionary";
 
 type ContextValues = {
   address: string | undefined;
