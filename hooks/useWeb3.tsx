@@ -57,6 +57,7 @@ export const useWeb3 = () => {
       if (provider?.disconnect && typeof provider.disconnect === 'function') {
         await provider.disconnect();
       }
+
       dispatch({
         type: 'RESET_WEB3_PROVIDER'
       } as Web3Action);

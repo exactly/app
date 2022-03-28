@@ -12,11 +12,14 @@ import AssetTable from 'components/AssetTable';
 import SmartPoolInfo from 'components/SmartPoolInfo';
 import SmartPoolChart from 'components/SmartPoolChart';
 import MobileNavbar from 'components/MobileNavbar';
+import Modal from 'components/Modal';
+import Paginator from 'components/Paginator';
 
-import { Network } from 'types/Network';
 import { Contract } from 'types/Contract';
 import { Maturity } from 'types/Maturity';
 import { LangKeys } from 'types/Lang';
+import { Dictionary } from 'types/Dictionary';
+import { UnformattedMarket } from 'types/UnformattedMarket';
 
 import { AuditorProvider } from 'contexts/AuditorContext';
 import LangContext from 'contexts/LangContext';
@@ -27,20 +30,13 @@ import { UtilsProvider } from 'contexts/UtilsContext';
 import style from './style.module.scss';
 
 import useContract from 'hooks/useContract';
+import useModal from 'hooks/useModal';
 
 import keys from './translations.json';
-import Modal from 'components/Modal';
-import useModal from 'hooks/useModal';
-import { Market } from 'types/Market';
-import { UnformattedMarket } from 'types/UnformattedMarket';
-import { Dictionary } from 'types/Dictionary';
-import Paginator from 'components/Paginator';
 
 import parseTimestamp from 'utils/parseTimestamp';
 
 interface Props {
-  walletAddress: string;
-  network: string;
   auditor: Contract;
   tokenAddress: string;
   assetsAddresses: Dictionary<string>;
@@ -50,8 +46,6 @@ interface Props {
 }
 
 const Asset: NextPage<Props> = ({
-  walletAddress,
-  network,
   auditor,
   tokenAddress,
   assetsAddresses,
@@ -70,13 +64,9 @@ const Asset: NextPage<Props> = ({
   const auditorContract = useContract(auditor.address, auditor.abi);
   const utilsContract = useContract(utils.address, utils.abi);
 
-  const [maturities, setMaturities] = useState<Array<Maturity> | undefined>(
-    undefined
-  );
+  const [maturities, setMaturities] = useState<Array<Maturity> | undefined>(undefined);
 
-  const [marketData, setMarketData] = useState<UnformattedMarket | undefined>(
-    undefined
-  );
+  const [marketData, setMarketData] = useState<UnformattedMarket | undefined>(undefined);
 
   useEffect(() => {
     if (!maturities) {
@@ -86,9 +76,7 @@ const Asset: NextPage<Props> = ({
   }, [auditorContract, utilsContract]);
 
   async function getMarketData() {
-    const marketData = await auditorContract?.contract?.getMarketData(
-      tokenAddress
-    );
+    const marketData = await auditorContract?.contract?.getMarketData(tokenAddress);
     setMarketData(marketData);
   }
 
@@ -131,56 +119,24 @@ const Asset: NextPage<Props> = ({
   return (
     <UtilsProvider value={utils}>
       <AuditorProvider value={auditor}>
-        <FixedLenderProvider
-          value={{ addresses: assetsAddresses, abi: fixedLender.abi }}
-        >
+        <FixedLenderProvider value={{ addresses: assetsAddresses, abi: fixedLender.abi }}>
           <InterestRateModelProvider value={interestRateModel}>
-            <MobileNavbar walletAddress={walletAddress} network={network} />
-            <Navbar walletAddress={walletAddress} />
+            <MobileNavbar />
+            <Navbar />
             {modal && modalContent?.type != 'smartDeposit' && (
-              <Modal
-                contractData={modalContent}
-                closeModal={handleModal}
-                walletAddress={walletAddress}
-              />
+              <Modal contractData={modalContent} closeModal={handleModal} />
             )}
             <section className={style.container}>
               <section className={style.assetData}>
                 <div className={style.assetContainer}>
                   <AssetSelector title={true} />
                 </div>
-                <div className={style.assetMetricsContainer}>
-                  {/* <div className={style.assetMetrics}>
-              <span className={style.title}>{translations[lang].netRate}</span>
-              <span className={style.value}>0.19%</span>
-            </div>
-            <div className={style.assetMetrics}>
-              <span className={style.title}>
-                {translations[lang].supplyAPY}
-              </span>
-              <span className={style.value}>0.08%</span>
-            </div>
-            <div className={style.assetMetrics}>
-              <span className={style.title}>
-                {translations[lang].distributionAPY}
-              </span>
-              <span className={style.value}>0.11%</span>
-            </div>
-            <div className={style.assetMetrics}>
-              <span className={style.title}>
-                {translations[lang].totalSupply}
-              </span>
-              <span className={style.value}>$6,123,456</span>
-            </div> */}
-                </div>
+                <div className={style.assetMetricsContainer}></div>
               </section>
               <section className={style.graphContainer}>
                 <div className={style.leftColumn}>
                   <AssetTable
-                    maturities={maturities?.slice(
-                      itemsPerPage * (page - 1),
-                      itemsPerPage * page
-                    )}
+                    maturities={maturities?.slice(itemsPerPage * (page - 1), itemsPerPage * page)}
                     showModal={(type: string) => showModal(type)}
                   />
                   <Paginator
@@ -194,25 +150,15 @@ const Asset: NextPage<Props> = ({
                   <PoolsChart />
                 </div>
               </section>
-              <h2 className={style.assetTitle}>
-                {translations[lang].assetDetails}
-              </h2>
+              <h2 className={style.assetTitle}>{translations[lang].assetDetails}</h2>
               <div className={style.assetInfoContainer}>
                 <AssetInfo title={translations[lang].price} value="$4,213.62" />
-                <AssetInfo
-                  title={translations[lang].reserveFactor}
-                  value="20%"
-                />
-                <AssetInfo
-                  title={translations[lang].collateralFactor}
-                  value="75%"
-                />
+                <AssetInfo title={translations[lang].reserveFactor} value="20%" />
+                <AssetInfo title={translations[lang].collateralFactor} value="75%" />
               </div>
               <div className={style.maturitiesContainer}>
                 {maturities?.slice(0, 3)?.map((maturity) => {
-                  return (
-                    <MaturityInfo maturity={maturity} key={maturity.value} />
-                  );
+                  return <MaturityInfo maturity={maturity} key={maturity.value} />;
                 })}
               </div>
               <div className={style.smartPoolContainer}>
@@ -245,9 +191,7 @@ export async function getServerSideProps(req: NextApiRequest) {
     'https://abi-versions2.s3.amazonaws.com/latest/contracts/utils/TSUtils.sol/TSUtils.json'
   );
 
-  const addresses = await axios.get(
-    'https://abi-versions2.s3.amazonaws.com/latest/addresses.json'
-  );
+  const addresses = await axios.get('https://abi-versions2.s3.amazonaws.com/latest/addresses.json');
   const auditorAddress = addresses?.data?.auditor;
   const interestRateModelAddress = addresses?.data?.interestRateModel;
   const utilsAddress = addresses?.data?.utils;

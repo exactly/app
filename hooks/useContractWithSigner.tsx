@@ -6,7 +6,7 @@ export default function useContractWithSigner(
   address: string | undefined,
   abi: ethers.ContractInterface
 ) {
-  const { web3Provider } = useWeb3Context();
+  const { web3Provider, connect } = useWeb3Context();
 
   const [contract, setContract] = useState<ethers.Contract | undefined>(undefined);
 
@@ -19,8 +19,10 @@ export default function useContractWithSigner(
   useEffect(() => {
     if (address && abi && web3Provider) {
       getContract();
+    } else if (!web3Provider && connect) {
+      connect();
     }
-  }, [web3Provider, address, abi]);
+  }, [web3Provider, address, abi, connect]);
 
   async function getContract() {
     try {
