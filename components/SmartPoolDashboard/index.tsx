@@ -2,6 +2,7 @@ import { useContext } from 'react';
 
 import { LangKeys } from 'types/Lang';
 import { Dictionary } from 'types/Dictionary';
+import { Deposit } from 'types/Deposit';
 
 import Tooltip from 'components/Tooltip';
 import SmartPoolUserStatus from 'components/SmartPoolUserStatus';
@@ -15,7 +16,7 @@ import keys from './translations.json';
 type Props = {
   walletAddress: string;
   deposits: Dictionary<number> | undefined;
-  showModal: any;
+  showModal: (data: Deposit, type: String) => void;
 };
 
 function SmartPoolDashboard({ deposits, walletAddress, showModal }: Props) {

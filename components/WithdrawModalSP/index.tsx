@@ -1,4 +1,4 @@
-import { ChangeEvent, useState } from 'react';
+import { ChangeEvent, useContext, useState } from 'react';
 import { ethers } from 'ethers';
 
 import Button from 'components/common/Button';
@@ -11,10 +11,13 @@ import Overlay from 'components/Overlay';
 
 import { Borrow } from 'types/Borrow';
 import { Deposit } from 'types/Deposit';
-
-import parseTimestamp from 'utils/parseTimestamp';
+import { LangKeys } from 'types/Lang';
 
 import styles from './style.module.scss';
+
+import LangContext from 'contexts/LangContext';
+
+import keys from './translations.json';
 
 type Props = {
   data: Borrow | Deposit;
@@ -24,6 +27,9 @@ type Props = {
 
 function WithdrawModalSP({ data, closeModal, walletAddress }: Props) {
   const { address, symbol, amount } = data;
+
+  const lang: string = useContext(LangContext);
+  const translations: { [key: string]: LangKeys } = keys;
 
   const [qty, setQty] = useState<string>('0');
 
@@ -42,17 +48,17 @@ function WithdrawModalSP({ data, closeModal, walletAddress }: Props) {
   return (
     <>
       <section className={styles.formContainer}>
-        <ModalTitle title={'Withdraw'} />
+        <ModalTitle title={translations[lang].withdraw} />
         <ModalAsset asset={symbol} />
         <ModalClose closeModal={closeModal} />
 
         <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} />
-        <ModalRow text="Exactly Balance" value={parsedAmount} line />
-        <ModalRow text="Health Factor" values={['1.1', '1.8']} line />
-        <ModalRow text="Borrow limit" values={['1000', '2000']} />
+        <ModalRow text={translations[lang].exactlyBalance} value={parsedAmount} line />
+        <ModalRow text={translations[lang].healthFactor} values={['1.1', '1.8']} line />
+        <ModalRow text={translations[lang].borrowLimit} values={['1000', '2000']} />
         <div className={styles.buttonContainer}>
           <Button
-            text="Withdraw"
+            text={translations[lang].withdraw}
             className={qty <= '0' || !qty ? 'secondaryDisabled' : 'tertiary'}
           />
         </div>

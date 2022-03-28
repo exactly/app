@@ -21,7 +21,7 @@ import { Borrow } from 'types/Borrow';
 interface Props {
   deposits: Deposit[];
   borrows: Borrow[];
-  showModal: any;
+  showModal: (data: Deposit, type: String) => void;
 }
 
 function MaturityPoolDashboard({ deposits, borrows, showModal }: Props) {

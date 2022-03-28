@@ -17,7 +17,7 @@ type Props = {
   type: Option;
   deposits: Deposit[];
   borrows: Borrow[];
-  showModal: (props: any) => void;
+  showModal: (data: Deposit, type: String) => void;
 };
 
 function MaturityPoolUserStatusByAsset({ type, deposits, borrows, showModal }: Props) {

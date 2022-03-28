@@ -5,16 +5,17 @@ import Item from './Item';
 import LangContext from 'contexts/LangContext';
 
 import { LangKeys } from 'types/Lang';
+import { Deposit } from 'types/Deposit';
+import { Dictionary } from 'types/Dictionary';
 
 import styles from './style.module.scss';
 
 import keys from './translations.json';
-import { Dictionary } from 'types/Dictionary';
 
 type Props = {
   walletAddress: string;
   deposits: Dictionary<any> | undefined;
-  showModal: any;
+  showModal: (data: Deposit, type: String) => void;
 };
 
 function SmartPoolUserStatus({ deposits, walletAddress, showModal }: Props) {

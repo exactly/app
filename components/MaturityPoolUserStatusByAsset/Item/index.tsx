@@ -22,7 +22,7 @@ type Props = {
   fee: string;
   maturityDate: string;
   symbol: string;
-  showModal: any;
+  showModal: (data: Deposit, type: String) => void;
   market: Deposit | Borrow;
 };
 
@@ -59,13 +59,15 @@ function Item({ symbol, type, amount, fee, maturityDate, showModal, market }: Pr
       </span>
 
       <div className={styles.buttonContainer}>
-        <Button
-          text={type?.value == 'borrow' ? translations[lang].borrow : translations[lang].deposit}
-          className={type?.value == 'borrow' ? 'secondary' : 'primary'}
-          onClick={() => {
-            showModal(market, type?.value);
-          }}
-        />
+        {type && (
+          <Button
+            text={type.value == 'borrow' ? translations[lang].borrow : translations[lang].deposit}
+            className={type.value == 'borrow' ? 'secondary' : 'primary'}
+            onClick={() => {
+              showModal(market, type.value);
+            }}
+          />
+        )}
       </div>
     </div>
   );

@@ -22,7 +22,7 @@ type Props = {
   symbol: string;
   amount: string;
   walletAddress: string;
-  showModal: any;
+  showModal: (data: Deposit, type: String) => void;
   deposit: Deposit;
 };
 

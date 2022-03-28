@@ -1,4 +1,4 @@
-import { ChangeEvent, useState } from 'react';
+import { ChangeEvent, useContext, useState } from 'react';
 import { ethers } from 'ethers';
 
 import Button from 'components/common/Button';
@@ -11,10 +11,15 @@ import Overlay from 'components/Overlay';
 
 import { Borrow } from 'types/Borrow';
 import { Deposit } from 'types/Deposit';
+import { LangKeys } from 'types/Lang';
 
 import parseTimestamp from 'utils/parseTimestamp';
 
 import styles from './style.module.scss';
+
+import LangContext from 'contexts/LangContext';
+
+import keys from './translations.json';
 
 type Props = {
   data: Borrow | Deposit;
@@ -24,6 +29,9 @@ type Props = {
 
 function WithdrawModalMP({ data, closeModal, walletAddress }: Props) {
   const { address, symbol, maturityDate, amount } = data;
+
+  const lang: string = useContext(LangContext);
+  const translations: { [key: string]: LangKeys } = keys;
 
   const [qty, setQty] = useState<string>('0');
 
@@ -42,17 +50,17 @@ function WithdrawModalMP({ data, closeModal, walletAddress }: Props) {
   return (
     <>
       <section className={styles.formContainer}>
-        <ModalTitle title={'Withdraw'} />
+        <ModalTitle title={translations[lang].withdraw} />
         <ModalAsset asset={symbol} amount={parsedAmount} />
         <ModalClose closeModal={closeModal} />
-        <ModalRow text="Maturity Pool" value={parseTimestamp(maturityDate)} />
+        <ModalRow text={translations[lang].maturityPool} value={parseTimestamp(maturityDate)} />
         <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} />
-        <ModalRow text="Exactly Balance" value={parsedAmount} line />
-        <ModalRow text="Interest Rate" value="X %" line />
-        <ModalRow text="Interest Rate Slippage" value={'X %'} />
+        <ModalRow text={translations[lang].exactlyBalance} value={parsedAmount} line />
+        <ModalRow text={translations[lang].interestRate} value="X %" line />
+        <ModalRow text={translations[lang].interestRateSlippage} value={'X %'} />
         <div className={styles.buttonContainer}>
           <Button
-            text="Withdraw"
+            text={translations[lang].withdraw}
             className={qty <= '0' || !qty ? 'secondaryDisabled' : 'tertiary'}
           />
         </div>
