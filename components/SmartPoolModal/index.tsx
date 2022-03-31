@@ -72,9 +72,11 @@ function SmartPoolModal({ contractData, closeModal, walletAddress }: Props) {
     underlyingData!.abi
   );
 
+  const filteredFixedLender = fixedLender.find(fl => fl.address == contractData.address)
+
   const fixedLenderWithSigner = useContractWithSigner(
     contractData.address,
-    fixedLender?.abi!
+    filteredFixedLender?.abi!
   );
 
   useEffect(() => {
@@ -281,8 +283,8 @@ function SmartPoolModal({ contractData, closeModal, walletAddress }: Props) {
             !tx || tx.status == 'success'
               ? handleClose
               : () => {
-                  setMinimized((prev) => !prev);
-                }
+                setMinimized((prev) => !prev);
+              }
           }
         />
       )}

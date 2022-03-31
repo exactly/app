@@ -9,25 +9,30 @@ import useContract from 'hooks/useContract';
 import style from './style.module.scss';
 
 import { AddressContext } from 'contexts/AddressContext';
-import AuditorContext from 'contexts/AuditorContext';
 
 import { Date } from 'types/Date';
-import UtilsContext from 'contexts/UtilsContext';
 import parseTimeStamp from 'utils/parseTimestamp';
+import FixedLenderContext from 'contexts/FixedLenderContext';
 
 type Props = {
-  title?: String;
+  title?: string;
+  address?: string;
 };
 
-function MaturitySelector({ title }: Props) {
+function MaturitySelector({ title, address }: Props) {
   const { date, setDate } = useContext(AddressContext);
-  const utils = useContext(UtilsContext);
+  const fixedLender = useContext(FixedLenderContext);
 
   const [dates, setDates] = useState<Array<Option>>([]);
-  const utilsContract = useContract(utils.address!, utils.abi!);
+
+  //Kinda hacky but all the fixedLender will have the same futurePools for Exactly V1
+  const filteredFixedLender = fixedLender.find(fl => fl.address == address)
+  const fixedLenderAddress = filteredFixedLender ? filteredFixedLender.address! : fixedLender[0].address!
+  const fixedLenderABI = filteredFixedLender ? filteredFixedLender.abi! : fixedLender[0].abi!
+  const fixedLenderContract = useContract(fixedLenderAddress, fixedLenderABI);
 
   async function getPools() {
-    const pools = await utilsContract?.contract?.futurePools(12);
+    const pools = await fixedLenderContract?.contract?.getFuturePools();
 
     const dates = pools?.map((pool: any) => {
       return pool.toString();
@@ -52,7 +57,7 @@ function MaturitySelector({ title }: Props) {
     if (dates.length == 0) {
       getPools();
     }
-  }, [utilsContract]);
+  }, [fixedLenderContract]);
 
   return (
     <section className={style.sectionContainer}>
