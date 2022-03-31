@@ -20,7 +20,6 @@ const useContract = (address: string, abi: ethers.ContractInterface) => {
       if (web3Provider) {
         provider = web3Provider;
       } else {
-        //defaults to kovan for now, should default to homestead on release
         provider = ethers.getDefaultProvider(publicNetwork);
       }
     }

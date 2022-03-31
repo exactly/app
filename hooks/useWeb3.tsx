@@ -7,9 +7,9 @@ import { Web3ProviderState, Web3Action, web3InitialState, web3Reducer } from 're
 
 const providerOptions = {
   walletconnect: {
-    package: WalletConnectProvider, // required
+    package: WalletConnectProvider,
     options: {
-      infuraId: '77a2479dc2bd4436aa3edb374f3019d2'
+      infuraId: `${process.env.NEXT_INFURA_ID}`
     }
   }
 };
@@ -17,9 +17,9 @@ const providerOptions = {
 let web3Modal: Web3Modal | null;
 if (typeof window !== 'undefined') {
   web3Modal = new Web3Modal({
-    network: 'kovan', // optional
+    network: `${process.env.NEXT_PUBLIC_NETWORK}`,
     cacheProvider: true,
-    providerOptions // required
+    providerOptions
   });
 }
 
@@ -85,15 +85,11 @@ export const useWeb3 = () => {
 
       const handleChainChanged = (_hexChainId: string) => {
         if (typeof window !== 'undefined') {
-          console.log('switched to chain...', _hexChainId);
           window.location.reload();
-        } else {
-          console.log('window is undefined');
         }
       };
 
       const handleDisconnect = (error: { code: number; message: string }) => {
-        console.log('disconnect', error);
         disconnect();
       };
 
