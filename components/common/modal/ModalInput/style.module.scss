@@ -1,0 +1,39 @@
+.inputSection {
+  position: relative;
+  border: 1px solid var(--gray-200);
+  padding: var(--u);
+  border-radius: var(--smallUnit);
+
+  .input {
+    width: 100%;
+    height: 70%;
+    border: none;
+    outline: none;
+    font-size: var(--font-32);
+    text-align: center;
+    color: var(--gray-900);
+
+    &::-webkit-outer-spin-button,
+    &::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+  }
+
+  .translatedValue {
+    margin: 0;
+    text-align: center;
+    font-size: var(--font-14);
+    color: var(--gray-500);
+  }
+
+  .max {
+    position: absolute;
+    margin: 0;
+    top: 40%;
+    right: -40px;
+    cursor: pointer;
+    color: var(--primary);
+    font-size: var(--font-12);
+  }
+}

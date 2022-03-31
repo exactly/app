@@ -44,10 +44,7 @@ function Modal({ contractData, closeModal, walletAddress }: Props) {
 
   const [minimized, setMinimized] = useState<Boolean>(false);
 
-  const { contractWithSigner } = useContractWithSigner(
-    contractData?.address,
-    auditor?.abi!
-  );
+  const { contractWithSigner } = useContractWithSigner(contractData?.address, auditor?.abi!);
 
   function handleResult(data: SupplyRate | undefined) {
     setHasRate(data?.hasRate);
@@ -69,8 +66,8 @@ function Modal({ contractData, closeModal, walletAddress }: Props) {
                 !tx || tx.status == 'success'
                   ? handleClose
                   : () => {
-                    setMinimized((prev) => !prev);
-                  }
+                      setMinimized((prev) => !prev);
+                    }
               }
             >
               X
@@ -89,46 +86,37 @@ function Modal({ contractData, closeModal, walletAddress }: Props) {
                   onChange={(marketData) => setAssetData(marketData)}
                 />
               </div>
-              {contractWithSigner &&
-                contractData.type == 'deposit' &&
-                assetData && (
-                  <SupplyForm
-                    contractWithSigner={contractWithSigner!}
-                    handleResult={handleResult}
-                    hasRate={hasRate}
-                    address={contractData.address}
-                    assetData={assetData}
-                    handleTx={(data: Transaction) => setTx(data)}
-                    walletAddress={walletAddress}
-                  />
-                )}
+              {contractWithSigner && contractData.type == 'deposit' && assetData && (
+                <SupplyForm
+                  contractWithSigner={contractWithSigner!}
+                  handleResult={handleResult}
+                  hasRate={hasRate}
+                  address={contractData.address}
+                  assetData={assetData}
+                  handleTx={(data: Transaction) => setTx(data)}
+                  walletAddress={walletAddress}
+                />
+              )}
 
-              {contractWithSigner &&
-                contractData.type == 'borrow' &&
-                assetData && (
-                  <BorrowForm
-                    contractWithSigner={contractWithSigner!}
-                    handleResult={handleResult}
-                    hasRate={hasRate}
-                    address={contractData.address}
-                    assetData={assetData}
-                    handleTx={(data: Transaction) => setTx(data)}
-                  />
-                )}
+              {contractWithSigner && contractData.type == 'borrow' && assetData && (
+                <BorrowForm
+                  contractWithSigner={contractWithSigner!}
+                  handleResult={handleResult}
+                  hasRate={hasRate}
+                  address={contractData.address}
+                  assetData={assetData}
+                  handleTx={(data: Transaction) => setTx(data)}
+                />
+              )}
 
               {!contractWithSigner && <Loading />}
 
               {potentialRate && (
                 <section className={styles.right}>
                   <p>
-                    <span className={styles.detail}>
-                      {translations[lang].annualRate}
-                    </span>
+                    <span className={styles.detail}>{translations[lang].annualRate}</span>
                     <span className={styles.value}>
-                      {(parseFloat(potentialRate) * 100).toFixed(
-                        numbers.decimals
-                      )}{' '}
-                      %
+                      {(parseFloat(potentialRate) * 100).toFixed(numbers.decimals)} %
                     </span>
                   </p>
                 </section>
@@ -156,8 +144,8 @@ function Modal({ contractData, closeModal, walletAddress }: Props) {
             !tx || tx.status == 'success'
               ? handleClose
               : () => {
-                setMinimized((prev) => !prev);
-              }
+                  setMinimized((prev) => !prev);
+                }
           }
         />
       )}

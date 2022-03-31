@@ -35,6 +35,16 @@
   }
 }
 
+.quaternary {
+  background: var(--white);
+  color: var(--secondary);
+  border: 1px solid var(--secondary);
+
+  &:hover {
+    background-color: rgba(#53d3be, 0.08);
+  }
+}
+
 .disabled {
   background: var(--gray-200);
   color: var(--white);
@@ -42,5 +52,17 @@
   &:hover {
     background: var(--gray-200);
     color: var(--white);
+  }
+}
+
+.secondaryDisabled {
+  color: var(--gray-200);
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+
+  &:hover {
+    color: var(--gray-200);
+    background: var(--white);
+    border: 1px solid var(--gray-200);
   }
 }

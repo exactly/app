@@ -1,24 +1,25 @@
 import { useContext } from 'react';
 
 import { LangKeys } from 'types/Lang';
+import { Dictionary } from 'types/Dictionary';
+import { Deposit } from 'types/Deposit';
 
 import Tooltip from 'components/Tooltip';
+import SmartPoolUserStatus from 'components/SmartPoolUserStatus';
 
 import LangContext from 'contexts/LangContext';
 
 import styles from './style.module.scss';
 
 import keys from './translations.json';
-import SmartPoolUserStatus from 'components/SmartPoolUserStatus';
-import { Deposit } from 'types/Deposit';
-import { Dictionary } from 'types/Dictionary';
 
 type Props = {
-  walletAddress: string
-  deposits: Dictionary<number> | undefined,
-}
+  walletAddress: string;
+  deposits: Dictionary<number> | undefined;
+  showModal: (data: Deposit, type: String) => void;
+};
 
-function SmartPoolDashboard({ deposits, walletAddress }: Props) {
+function SmartPoolDashboard({ deposits, walletAddress, showModal }: Props) {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
@@ -28,7 +29,11 @@ function SmartPoolDashboard({ deposits, walletAddress }: Props) {
         <p className={styles.title}>{translations[lang].smartPool}</p>
         <Tooltip value={translations[lang].smartPool} />
       </div>
-      <SmartPoolUserStatus deposits={deposits} walletAddress={walletAddress} />
+      <SmartPoolUserStatus
+        deposits={deposits}
+        walletAddress={walletAddress}
+        showModal={showModal}
+      />
     </section>
   );
 }

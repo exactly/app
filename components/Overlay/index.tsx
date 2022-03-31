@@ -1,4 +1,3 @@
-import { MouseEventHandler } from 'react';
 import styles from './style.module.scss';
 
 type Props = {

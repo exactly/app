@@ -1,0 +1,12 @@
+{
+  "en": {
+    "lateRepay": "Late Repay",
+    "earlyRepay": "Early Repay",
+    "maturityPool": "Maturity Pool",
+    "remainingDebt": "Remaining Debt",
+    "debtSlippage": "Debt Slippage",
+    "healthFactor": "Health Factor",
+    "repay": "Repay"
+  },
+  "es": {}
+}

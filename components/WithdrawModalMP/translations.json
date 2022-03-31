@@ -1,0 +1,10 @@
+{
+  "en": {
+    "withdraw": "Withdraw",
+    "maturityPool": "Maturity Pool",
+    "exactlyBalance": "Exactly Balance",
+    "interestRate": "Interest Rate",
+    "interestRateSlippage": "Interest Rate Slippage"
+  },
+  "es": {}
+}
