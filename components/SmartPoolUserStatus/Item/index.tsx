@@ -8,7 +8,7 @@ import AuditorContext from 'contexts/AuditorContext';
 import LangContext from 'contexts/LangContext';
 
 import { LangKeys } from 'types/Lang';
-import { Market } from 'types/Market';
+import { Deposit } from 'types/Deposit';
 
 import styles from './style.module.scss';
 
@@ -22,11 +22,12 @@ type Props = {
   symbol: string;
   amount: string;
   walletAddress: string | null | undefined;
+  showModal: (data: Deposit, type: String) => void;
+  deposit: Deposit;
 };
 
-function Item({ symbol, amount, walletAddress }: Props) {
+function Item({ symbol, amount, walletAddress, showModal, deposit }: Props) {
   const auditor = useContext(AuditorContext);
-
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
@@ -111,7 +112,13 @@ function Item({ symbol, amount, walletAddress }: Props) {
         </div>
 
         <div className={styles.buttonContainer}>
-          <Button text={translations[lang].withdraw} className="tertiary" />
+          <Button
+            text={translations[lang].withdraw}
+            className="tertiary"
+            onClick={() =>
+              showModal({ ...deposit, amount: JSON.stringify(deposit.amount) }, 'withdrawSP')
+            }
+          />
         </div>
       </div>
     </div>

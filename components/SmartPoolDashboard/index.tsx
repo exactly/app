@@ -1,8 +1,11 @@
 import { useContext } from 'react';
 
 import { LangKeys } from 'types/Lang';
+import { Dictionary } from 'types/Dictionary';
+import { Deposit } from 'types/Deposit';
 
 import Tooltip from 'components/Tooltip';
+import SmartPoolUserStatus from 'components/SmartPoolUserStatus';
 
 import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
@@ -10,15 +13,13 @@ import { useWeb3Context } from 'contexts/Web3Context';
 import styles from './style.module.scss';
 
 import keys from './translations.json';
-import SmartPoolUserStatus from 'components/SmartPoolUserStatus';
-
-import { Dictionary } from 'types/Dictionary';
 
 type Props = {
-  deposits: Dictionary<number> | undefined;
+  deposits: Dictionary<Deposit> | undefined;
+  showModal: (data: Deposit, type: String) => void;
 };
 
-function SmartPoolDashboard({ deposits }: Props) {
+function SmartPoolDashboard({ deposits, showModal }: Props) {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
   const { address } = useWeb3Context();
@@ -29,7 +30,7 @@ function SmartPoolDashboard({ deposits }: Props) {
         <p className={styles.title}>{translations[lang].smartPool}</p>
         <Tooltip value={translations[lang].smartPool} />
       </div>
-      <SmartPoolUserStatus deposits={deposits} walletAddress={address} />
+      <SmartPoolUserStatus deposits={deposits} walletAddress={address} showModal={showModal} />
     </section>
   );
 }

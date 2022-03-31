@@ -19,11 +19,12 @@ import { Deposit } from 'types/Deposit';
 import { Borrow } from 'types/Borrow';
 
 interface Props {
-  deposits: Deposit[],
-  borrows: Borrow[]
+  deposits: Deposit[];
+  borrows: Borrow[];
+  showModal: (data: Deposit, type: String) => void;
 }
 
-function MaturityPoolDashboard({ deposits, borrows }: Props) {
+function MaturityPoolDashboard({ deposits, borrows, showModal }: Props) {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
@@ -80,9 +81,19 @@ function MaturityPoolDashboard({ deposits, borrows }: Props) {
       </div>
 
       {filter?.value == 'asset' ? (
-        <MaturityPoolUserStatusByAsset type={tab} deposits={deposits} borrows={borrows} />
+        <MaturityPoolUserStatusByAsset
+          type={tab}
+          deposits={deposits}
+          borrows={borrows}
+          showModal={showModal}
+        />
       ) : (
-        <MaturityPoolUserStatusByMaturity type={tab} deposits={deposits} borrows={borrows} />
+        <MaturityPoolUserStatusByMaturity
+          type={tab}
+          deposits={deposits}
+          borrows={borrows}
+          showModal={showModal}
+        />
       )}
     </section>
   );

@@ -1,0 +1,19 @@
+.row {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--u2) 0;
+
+  .text {
+    margin: 0;
+    color: var(--gray-500);
+  }
+  .value {
+    margin: 0;
+    color: var(--gray-900);
+    font-weight: 600;
+  }
+}
+
+.line {
+  border-bottom: 1px solid var(--gray-100);
+}
