@@ -13,8 +13,8 @@ import styles from './style.module.scss';
 import keys from './translations.json';
 
 type Props = {
-  walletAddress: string;
-  deposits: Dictionary<any> | undefined;
+  walletAddress: string | null | undefined;
+  deposits: Dictionary<Deposit> | undefined;
   showModal: (data: Deposit, type: String) => void;
 };
 
@@ -39,6 +39,7 @@ function SmartPoolUserStatus({ deposits, walletAddress, showModal }: Props) {
           {deposits &&
             Object.keys(deposits).map((symbol: string, key: number) => {
               const amount: string = JSON.stringify(deposits[symbol].amount);
+
               return (
                 <Item
                   key={key}

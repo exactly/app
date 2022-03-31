@@ -1,10 +1,10 @@
-import { ethers } from "ethers";
-import { useEffect, useState } from "react";
+import { ethers } from 'ethers';
+import { useEffect, useState } from 'react';
+import { useWeb3Context } from 'contexts/Web3Context';
 
 const useContract = (address: string, abi: ethers.ContractInterface) => {
-  const [contract, setContract] = useState<ethers.Contract | undefined>(
-    undefined
-  );
+  const [contract, setContract] = useState<ethers.Contract | undefined>(undefined);
+  const { web3Provider } = useWeb3Context();
 
   useEffect(() => {
     getContract();
@@ -14,11 +14,16 @@ const useContract = (address: string, abi: ethers.ContractInterface) => {
     let provider;
     const publicNetwork = process.env.NEXT_PUBLIC_NETWORK;
 
-    if (publicNetwork == "local") {
+    if (publicNetwork == 'local') {
       provider = new ethers.providers.JsonRpcProvider();
     } else {
-      provider = ethers.getDefaultProvider(publicNetwork);
+      if (web3Provider) {
+        provider = web3Provider;
+      } else {
+        provider = ethers.getDefaultProvider(publicNetwork);
+      }
     }
+
     if (address && abi && provider) {
       let contract = new ethers.Contract(address, abi, provider);
 

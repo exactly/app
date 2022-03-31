@@ -22,10 +22,9 @@ import keys from './translations.json';
 type Props = {
   data: Borrow | Deposit;
   closeModal: (props: any) => void;
-  walletAddress: string;
 };
 
-function WithdrawModalSP({ data, closeModal, walletAddress }: Props) {
+function WithdrawModalSP({ data, closeModal }: Props) {
   const { address, symbol, amount } = data;
 
   const lang: string = useContext(LangContext);

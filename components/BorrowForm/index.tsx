@@ -12,7 +12,6 @@ import useContract from 'hooks/useContract';
 
 import { SupplyRate } from 'types/SupplyRate';
 import { Error } from 'types/Error';
-import { Market } from 'types/Market';
 import { LangKeys } from 'types/Lang';
 import { Transaction } from 'types/Transaction';
 import { Gas } from 'types/Gas';
@@ -27,22 +26,12 @@ import PoolAccountingContext from 'contexts/PoolAccountingContext';
 import { getContractData } from 'utils/contracts';
 
 type Props = {
-  contractWithSigner: ethers.Contract;
   handleResult: (data: SupplyRate | undefined) => void;
-  hasRate: boolean | undefined;
   address: string;
-  assetData: Market | undefined;
   handleTx: (data: Transaction) => void;
 };
 
-function BorrowForm({
-  contractWithSigner,
-  handleResult,
-  hasRate,
-  address,
-  assetData,
-  handleTx
-}: Props) {
+function BorrowForm({ handleResult, address, handleTx }: Props) {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 

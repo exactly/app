@@ -20,7 +20,6 @@ import { Dictionary } from 'types/Dictionary';
 import { Borrow } from 'types/Borrow';
 import { Deposit } from 'types/Deposit';
 
-import { getCurrentWalletConnected } from 'hooks/useWallet';
 import useModal from 'hooks/useModal';
 
 import {
@@ -29,6 +28,7 @@ import {
   getSmartPoolDepositsQuery
 } from 'queries';
 
+import { useWeb3Context } from 'contexts/Web3Context';
 //Contracts
 import InterestRateModel from 'protocol/deployments/kovan/InterestRateModel.json';
 import Auditor from 'protocol/deployments/kovan/Auditor.json';
@@ -36,29 +36,29 @@ import FixedLenderDAI from 'protocol/deployments/kovan/FixedLenderDAI.json';
 import FixedLenderWETH from 'protocol/deployments/kovan/FixedLenderWETH.json';
 
 interface Props {
-  walletAddress: string;
-  network: string;
   auditor: Contract;
   assetsAddresses: Dictionary<string>;
   fixedLender: Contract;
   interestRateModel: Contract;
 }
 
-const DashBoard: NextPage<Props> = ({ walletAddress, network }) => {
+const DashBoard: NextPage<Props> = () => {
+  const { address } = useWeb3Context();
   const { modal, handleModal, modalContent } = useModal();
 
   const [maturityPoolDeposits, setMaturityPoolDeposits] = useState<Array<Deposit>>([]);
   const [maturityPoolBorrows, setMaturityPoolBorrows] = useState<Array<Borrow>>([]);
-  const [smartPoolDeposits, setSmartPoolDeposits] = useState<Dictionary<number>>();
+  const [smartPoolDeposits, setSmartPoolDeposits] = useState<Dictionary<Deposit>>();
 
   const fixedLenders = [FixedLenderDAI, FixedLenderWETH];
 
   useEffect(() => {
     getData();
-  }, []);
+  }, [address]);
 
   async function getData() {
-    const { address } = await getCurrentWalletConnected();
+    if (!address) return;
+
     const getMaturityPoolDeposits = await request(
       'https://api.thegraph.com/subgraphs/name/juanigallo/exactly-kovan',
       getMaturityPoolDepositsQuery(address)
@@ -106,38 +106,22 @@ const DashBoard: NextPage<Props> = ({ walletAddress, network }) => {
       <FixedLenderProvider value={fixedLenders}>
         <InterestRateModelProvider value={InterestRateModel}>
           {modal && modalContent?.type == 'borrow' && (
-            <RepayModal
-              data={modalContent}
-              closeModal={handleModal}
-              walletAddress={walletAddress}
-            />
+            <RepayModal data={modalContent} closeModal={handleModal} />
           )}
           {modal && modalContent?.type == 'deposit' && (
-            <WithdrawModalMP
-              data={modalContent}
-              closeModal={handleModal}
-              walletAddress={walletAddress}
-            />
+            <WithdrawModalMP data={modalContent} closeModal={handleModal} />
           )}
           {modal && modalContent?.type == 'withdrawSP' && (
-            <WithdrawModalSP
-              data={modalContent}
-              closeModal={handleModal}
-              walletAddress={walletAddress}
-            />
+            <WithdrawModalSP data={modalContent} closeModal={handleModal} />
           )}
-          <MobileNavbar walletAddress={walletAddress} network={network} />
-          <Navbar walletAddress={walletAddress} />
+          <MobileNavbar />
+          <Navbar />
           <MaturityPoolDashboard
             deposits={maturityPoolDeposits}
             borrows={maturityPoolBorrows}
             showModal={showModal}
           />
-          <SmartPoolDashboard
-            deposits={smartPoolDeposits}
-            walletAddress={walletAddress}
-            showModal={showModal}
-          />
+          <SmartPoolDashboard deposits={smartPoolDeposits} showModal={showModal} />
           <Footer />
         </InterestRateModelProvider>
       </FixedLenderProvider>

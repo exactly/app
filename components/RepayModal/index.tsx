@@ -24,10 +24,9 @@ import keys from './translations.json';
 type Props = {
   data: Borrow | Deposit;
   closeModal: (props: any) => void;
-  walletAddress: string;
 };
 
-function RepayModal({ data, closeModal, walletAddress }: Props) {
+function RepayModal({ data, closeModal }: Props) {
   const { address, symbol, maturityDate, amount } = data;
 
   const lang: string = useContext(LangContext);

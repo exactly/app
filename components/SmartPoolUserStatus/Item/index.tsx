@@ -21,7 +21,7 @@ import { getContractData } from 'utils/contracts';
 type Props = {
   symbol: string;
   amount: string;
-  walletAddress: string;
+  walletAddress: string | null | undefined;
   showModal: (data: Deposit, type: String) => void;
   deposit: Deposit;
 };

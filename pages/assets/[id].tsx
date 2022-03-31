@@ -11,9 +11,12 @@ import AssetTable from 'components/AssetTable';
 import SmartPoolInfo from 'components/SmartPoolInfo';
 import SmartPoolChart from 'components/SmartPoolChart';
 import MobileNavbar from 'components/MobileNavbar';
+import Modal from 'components/Modal';
+import Paginator from 'components/Paginator';
 
 import { Maturity } from 'types/Maturity';
 import { LangKeys } from 'types/Lang';
+import { UnformattedMarket } from 'types/UnformattedMarket';
 
 import { AuditorProvider } from 'contexts/AuditorContext';
 import LangContext from 'contexts/LangContext';
@@ -23,34 +26,24 @@ import { InterestRateModelProvider } from 'contexts/InterestRateModelContext';
 import style from './style.module.scss';
 
 import useContract from 'hooks/useContract';
+import useModal from 'hooks/useModal';
 
 import keys from './translations.json';
-import Modal from 'components/Modal';
-import useModal from 'hooks/useModal';
-import { UnformattedMarket } from 'types/UnformattedMarket';
-import Paginator from 'components/Paginator';
 
 import parseTimestamp from 'utils/parseTimestamp';
 
 //Contracts
-import InterestRateModel from 'protocol/deployments/kovan/InterestRateModel.json'
-import Auditor from 'protocol/deployments/kovan/Auditor.json'
-import FixedLenderDAI from 'protocol/deployments/kovan/FixedLenderDAI.json'
-import FixedLenderWETH from 'protocol/deployments/kovan/FixedLenderWETH.json'
+import InterestRateModel from 'protocol/deployments/kovan/InterestRateModel.json';
+import Auditor from 'protocol/deployments/kovan/Auditor.json';
+import FixedLenderDAI from 'protocol/deployments/kovan/FixedLenderDAI.json';
+import FixedLenderWETH from 'protocol/deployments/kovan/FixedLenderWETH.json';
 
 interface Props {
-  walletAddress: string;
-  network: string;
   tokenAddress: string;
-  symbol: String
+  symbol: String;
 }
 
-const Asset: NextPage<Props> = ({
-  walletAddress,
-  network,
-  tokenAddress,
-  symbol
-}) => {
+const Asset: NextPage<Props> = ({ tokenAddress, symbol }) => {
   const [page, setPage] = useState<number>(1);
   const lang: string = useContext(LangContext);
   const { modal, handleModal, modalContent } = useModal();
@@ -62,16 +55,12 @@ const Asset: NextPage<Props> = ({
   const auditorContract = useContract(Auditor.address, Auditor.abi);
   const fixedLenders = [FixedLenderDAI, FixedLenderWETH];
 
-  const filteredFixedLender = fixedLenders.find(fl => fl.args[1].toUpperCase() == symbol)
+  const filteredFixedLender = fixedLenders.find((fl) => fl.args[1].toUpperCase() == symbol);
   const fixedLenderContract = useContract(filteredFixedLender?.address!, filteredFixedLender?.abi!);
 
-  const [maturities, setMaturities] = useState<Array<Maturity> | undefined>(
-    undefined
-  );
+  const [maturities, setMaturities] = useState<Array<Maturity> | undefined>(undefined);
 
-  const [marketData, setMarketData] = useState<UnformattedMarket | undefined>(
-    undefined
-  );
+  const [marketData, setMarketData] = useState<UnformattedMarket | undefined>(undefined);
 
   useEffect(() => {
     if (!maturities) {
@@ -81,9 +70,7 @@ const Asset: NextPage<Props> = ({
   }, [auditorContract]);
 
   async function getMarketData() {
-    const marketData = await auditorContract?.contract?.getMarketData(
-      tokenAddress
-    );
+    const marketData = await auditorContract?.contract?.getMarketData(tokenAddress);
     setMarketData(marketData);
   }
 
@@ -127,52 +114,22 @@ const Asset: NextPage<Props> = ({
     <AuditorProvider value={Auditor}>
       <FixedLenderProvider value={fixedLenders}>
         <InterestRateModelProvider value={InterestRateModel}>
-          <MobileNavbar walletAddress={walletAddress} network={network} />
-          <Navbar walletAddress={walletAddress} />
+          <MobileNavbar />
+          <Navbar />
           {modal && modalContent?.type != 'smartDeposit' && (
-            <Modal
-              contractData={modalContent}
-              closeModal={handleModal}
-              walletAddress={walletAddress}
-            />
+            <Modal contractData={modalContent} closeModal={handleModal} />
           )}
           <section className={style.container}>
             <section className={style.assetData}>
               <div className={style.assetContainer}>
                 <AssetSelector title={true} />
               </div>
-              <div className={style.assetMetricsContainer}>
-                {/* <div className={style.assetMetrics}>
-              <span className={style.title}>{translations[lang].netRate}</span>
-              <span className={style.value}>0.19%</span>
-            </div>
-            <div className={style.assetMetrics}>
-              <span className={style.title}>
-                {translations[lang].supplyAPY}
-              </span>
-              <span className={style.value}>0.08%</span>
-            </div>
-            <div className={style.assetMetrics}>
-              <span className={style.title}>
-                {translations[lang].distributionAPY}
-              </span>
-              <span className={style.value}>0.11%</span>
-            </div>
-            <div className={style.assetMetrics}>
-              <span className={style.title}>
-                {translations[lang].totalSupply}
-              </span>
-              <span className={style.value}>$6,123,456</span>
-            </div> */}
-              </div>
+              <div className={style.assetMetricsContainer}></div>
             </section>
             <section className={style.graphContainer}>
               <div className={style.leftColumn}>
                 <AssetTable
-                  maturities={maturities?.slice(
-                    itemsPerPage * (page - 1),
-                    itemsPerPage * page
-                  )}
+                  maturities={maturities?.slice(itemsPerPage * (page - 1), itemsPerPage * page)}
                   showModal={(type: string) => showModal(type)}
                 />
                 <Paginator
@@ -186,25 +143,15 @@ const Asset: NextPage<Props> = ({
                 <PoolsChart />
               </div>
             </section>
-            <h2 className={style.assetTitle}>
-              {translations[lang].assetDetails}
-            </h2>
+            <h2 className={style.assetTitle}>{translations[lang].assetDetails}</h2>
             <div className={style.assetInfoContainer}>
               <AssetInfo title={translations[lang].price} value="$4,213.62" />
-              <AssetInfo
-                title={translations[lang].reserveFactor}
-                value="20%"
-              />
-              <AssetInfo
-                title={translations[lang].collateralFactor}
-                value="75%"
-              />
+              <AssetInfo title={translations[lang].reserveFactor} value="20%" />
+              <AssetInfo title={translations[lang].collateralFactor} value="75%" />
             </div>
             <div className={style.maturitiesContainer}>
               {maturities?.slice(0, 3)?.map((maturity) => {
-                return (
-                  <MaturityInfo maturity={maturity} key={maturity.value} />
-                );
+                return <MaturityInfo maturity={maturity} key={maturity.value} />;
               })}
             </div>
             <div className={style.smartPoolContainer}>
@@ -225,8 +172,7 @@ export async function getServerSideProps(req: NextApiRequest) {
     props: {
       symbol: tokenSymbol.toUpperCase()
     }
-  }
-};
+  };
+}
 
 export default Asset;
-

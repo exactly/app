@@ -46,8 +46,6 @@ interface Props {
 }
 
 const Pools: NextPage<Props> = ({
-  walletAddress,
-  network,
   poolAccounting,
 }) => {
   const { modal, handleModal, modalContent } = useModal();
@@ -117,31 +115,23 @@ const Pools: NextPage<Props> = ({
     <AuditorProvider value={Auditor}>
       <FixedLenderProvider value={[FixedLenderDAI, FixedLenderWETH]}>
         <PoolAccountingProvider value={poolAccounting}>
-          <InterestRateModelProvider value={InterestRateModel}>
-            {modal && modalContent?.type != 'smartDeposit' && (
-              <Modal
-                contractData={modalContent}
-                closeModal={handleModal}
-                walletAddress={walletAddress}
-              />
-            )}
-            {modal && modalContent?.type == 'smartDeposit' && (
-              <SmartPoolModal
-                contractData={modalContent}
-                closeModal={handleModal}
-                walletAddress={walletAddress}
-              />
-            )}
-            <MobileNavbar walletAddress={walletAddress} network={network} />
-            <Navbar walletAddress={walletAddress} />
-            <CurrentNetwork network={network} />
-            <div style={{ marginTop: '180px' }}>
-              <MaturitySelector title={dictionary.maturityPools} />
-            </div>
-            <MarketsList markets={markets} showModal={showModal} />
-            <SmartPoolList markets={markets} showModal={showModal} />
-            <Footer />
-          </InterestRateModelProvider>
+        <InterestRateModelProvider value={InterestRateModel}>
+              {modal && modalContent?.type != 'smartDeposit' && (
+                <Modal contractData={modalContent} closeModal={handleModal} />
+              )}
+              {modal && modalContent?.type == 'smartDeposit' && (
+                <SmartPoolModal contractData={modalContent} closeModal={handleModal} />
+              )}
+              <MobileNavbar />
+              <Navbar />
+              <CurrentNetwork />
+              <div style={{ marginTop: '180px' }}>
+                <MaturitySelector title={dictionary.maturityPools} />
+              </div>
+              <MarketsList markets={markets} showModal={showModal} />
+              <SmartPoolList markets={markets} showModal={showModal} />
+              <Footer />
+            </InterestRateModelProvider>
         </PoolAccountingProvider>
       </FixedLenderProvider>
     </AuditorProvider>

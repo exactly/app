@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import styles from './style.module.scss';
 
 import SupplyForm from 'components/SupplyForm';
@@ -13,6 +13,7 @@ import useContractWithSigner from 'hooks/useContractWithSigner';
 
 import AuditorContext from 'contexts/AuditorContext';
 import LangContext from 'contexts/LangContext';
+import { useWeb3Context } from 'contexts/Web3Context';
 
 import { SupplyRate } from 'types/SupplyRate';
 import { Market } from 'types/Market';
@@ -26,11 +27,11 @@ import numbers from 'config/numbers.json';
 type Props = {
   contractData: any;
   closeModal: any;
-  walletAddress: string;
 };
 
-function Modal({ contractData, closeModal, walletAddress }: Props) {
+function Modal({ contractData, closeModal }: Props) {
   const auditor = useContext(AuditorContext);
+  const { address } = useWeb3Context();
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
@@ -88,23 +89,18 @@ function Modal({ contractData, closeModal, walletAddress }: Props) {
               </div>
               {contractWithSigner && contractData.type == 'deposit' && assetData && (
                 <SupplyForm
-                  contractWithSigner={contractWithSigner!}
                   handleResult={handleResult}
-                  hasRate={hasRate}
                   address={contractData.address}
                   assetData={assetData}
                   handleTx={(data: Transaction) => setTx(data)}
-                  walletAddress={walletAddress}
+                  walletAddress={address}
                 />
               )}
 
               {contractWithSigner && contractData.type == 'borrow' && assetData && (
                 <BorrowForm
-                  contractWithSigner={contractWithSigner!}
                   handleResult={handleResult}
-                  hasRate={hasRate}
                   address={contractData.address}
-                  assetData={assetData}
                   handleTx={(data: Transaction) => setTx(data)}
                 />
               )}
