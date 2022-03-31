@@ -2,8 +2,6 @@ import { useState, useEffect } from 'react';
 import type { NextPage } from 'next';
 import { request } from 'graphql-request';
 
-import axios from 'axios';
-
 import Navbar from 'components/Navbar';
 import Footer from 'components/Footer';
 import MobileNavbar from 'components/MobileNavbar';
@@ -26,6 +24,11 @@ import {
 } from 'queries';
 
 import { useWeb3Context } from 'contexts/Web3Context';
+//Contracts
+import InterestRateModel from 'protocol/deployments/kovan/InterestRateModel.json';
+import Auditor from 'protocol/deployments/kovan/Auditor.json';
+import FixedLenderDAI from 'protocol/deployments/kovan/FixedLenderDAI.json';
+import FixedLenderWETH from 'protocol/deployments/kovan/FixedLenderWETH.json';
 
 interface Props {
   auditor: Contract;
@@ -34,17 +37,14 @@ interface Props {
   interestRateModel: Contract;
 }
 
-const DashBoard: NextPage<Props> = ({
-  auditor,
-  assetsAddresses,
-  fixedLender,
-  interestRateModel
-}) => {
+const DashBoard: NextPage<Props> = () => {
   const { address } = useWeb3Context();
 
   const [maturityPoolDeposits, setMaturityPoolDeposits] = useState<Array<Deposit>>([]);
   const [maturityPoolBorrows, setMaturityPoolBorrows] = useState<Array<Borrow>>([]);
   const [smartPoolDeposits, setSmartPoolDeposits] = useState<Dictionary<number>>();
+
+  const fixedLenders = [FixedLenderDAI, FixedLenderWETH];
 
   useEffect(() => {
     getData();
@@ -85,9 +85,9 @@ const DashBoard: NextPage<Props> = ({
   }
 
   return (
-    <AuditorProvider value={auditor}>
-      <FixedLenderProvider value={{ addresses: assetsAddresses, abi: fixedLender.abi }}>
-        <InterestRateModelProvider value={interestRateModel}>
+    <AuditorProvider value={Auditor}>
+      <FixedLenderProvider value={fixedLenders}>
+        <InterestRateModelProvider value={InterestRateModel}>
           <MobileNavbar />
           <Navbar />
           <MaturityPoolDashboard deposits={maturityPoolDeposits} borrows={maturityPoolBorrows} />
@@ -98,37 +98,5 @@ const DashBoard: NextPage<Props> = ({
     </AuditorProvider>
   );
 };
-
-export async function getStaticProps() {
-  const getAuditorAbi = await axios.get(
-    'https://abi-versions2.s3.amazonaws.com/latest/contracts/Auditor.sol/Auditor.json'
-  );
-  const getFixedLenderAbi = await axios.get(
-    'https://abi-versions2.s3.amazonaws.com/latest/contracts/FixedLender.sol/FixedLender.json'
-  );
-  const getInterestRateModelAbi = await axios.get(
-    'https://abi-versions2.s3.amazonaws.com/latest/contracts/InterestRateModel.sol/InterestRateModel.json'
-  );
-  const addresses = await axios.get('https://abi-versions2.s3.amazonaws.com/latest/addresses.json');
-  const auditorAddress = addresses?.data?.auditor;
-  const interestRateModelAddress = addresses?.data?.interestRateModel;
-
-  return {
-    props: {
-      auditor: {
-        abi: getAuditorAbi.data,
-        address: auditorAddress
-      },
-      interestRateModel: {
-        abi: getInterestRateModelAbi.data,
-        address: interestRateModelAddress
-      },
-      assetsAddresses: addresses.data,
-      fixedLender: {
-        abi: getFixedLenderAbi.data
-      }
-    }
-  };
-}
 
 export default DashBoard;

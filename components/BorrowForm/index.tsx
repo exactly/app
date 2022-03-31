@@ -8,12 +8,10 @@ import Button from 'components/common/Button';
 import MaturitySelector from 'components/MaturitySelector';
 import Tooltip from 'components/Tooltip';
 
-import useContractWithSigner from 'hooks/useContractWithSigner';
 import useContract from 'hooks/useContract';
 
 import { SupplyRate } from 'types/SupplyRate';
 import { Error } from 'types/Error';
-import { Market } from 'types/Market';
 import { LangKeys } from 'types/Lang';
 import { Transaction } from 'types/Transaction';
 import { Gas } from 'types/Gas';
@@ -57,7 +55,8 @@ function BorrowForm({ handleResult, address, handleTx }: Props) {
   const [poolAccounting, setPoolAccounting] = useState<Contract | undefined>(undefined);
 
   async function getFixedLenderContract() {
-    const fixedLenderWithSigner = await getContractData(address, fixedLenderData?.abi!, true);
+    const filteredFixedLender = fixedLenderData.find((fl) => fl.address == address);
+    const fixedLenderWithSigner = await getContractData(address, filteredFixedLender?.abi!, true);
     setFixedLenderWithSigner(fixedLenderWithSigner);
     getPoolAccountingContract(fixedLenderWithSigner);
   }
@@ -197,7 +196,7 @@ function BorrowForm({ handleResult, address, handleTx }: Props) {
           <Tooltip value={translations[lang].endDate} />
         </div>
         <div className={style.inputContainer}>
-          <MaturitySelector />
+          <MaturitySelector address={address} />
         </div>
       </div>
       {error?.status && <p className={style.error}>{error?.msg}</p>}

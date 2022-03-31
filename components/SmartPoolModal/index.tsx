@@ -67,7 +67,12 @@ function SmartPoolModal({ contractData, closeModal }: Props) {
 
   const underlyingContract = useContractWithSigner(underlyingData!.address, underlyingData!.abi);
 
-  const fixedLenderWithSigner = useContractWithSigner(contractData.address, fixedLender?.abi!);
+  const filteredFixedLender = fixedLender.find((fl) => fl.address == contractData.address);
+
+  const fixedLenderWithSigner = useContractWithSigner(
+    contractData.address,
+    filteredFixedLender?.abi!
+  );
 
   useEffect(() => {
     checkAllowance();

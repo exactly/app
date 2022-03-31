@@ -29,6 +29,7 @@ import { LangKeys } from 'types/Lang';
 import keys from './translations.json';
 
 import numbers from 'config/numbers.json';
+import useContract from 'hooks/useContract';
 
 type Props = {
   handleResult: (data: SupplyRate | undefined) => void;
@@ -41,6 +42,7 @@ type Props = {
 function SupplyForm({ handleResult, address, assetData, handleTx, walletAddress }: Props) {
   const { date } = useContext(AddressContext);
   const fixedLender = useContext(FixedLenderContext);
+  const interestRateModel = useContext(InterestRateModelContext);
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
@@ -64,7 +66,11 @@ function SupplyForm({ handleResult, address, assetData, handleTx, walletAddress 
 
   const underlyingContract = useContractWithSigner(underlyingData!.address, underlyingData!.abi);
 
-  const fixedLenderWithSigner = useContractWithSigner(address, fixedLender?.abi!);
+  const interestRateModelContract = useContract(interestRateModel.address!, interestRateModel.abi!);
+
+  const filteredFixedLender = fixedLender.find((fl) => fl.address == address);
+
+  const fixedLenderWithSigner = useContractWithSigner(address, filteredFixedLender?.abi!);
 
   useEffect(() => {
     if (fixedLenderWithSigner) {
@@ -243,7 +249,7 @@ function SupplyForm({ handleResult, address, assetData, handleTx, walletAddress 
           <Tooltip value={translations[lang].endDate} />
         </div>
         <div className={style.inputContainer}>
-          <MaturitySelector />
+          <MaturitySelector address={address} />
         </div>
       </div>
       {error?.status && <p className={style.error}>{error?.msg}</p>}
