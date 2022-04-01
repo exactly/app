@@ -39,11 +39,10 @@ import FixedLenderDAI from 'protocol/deployments/kovan/FixedLenderDAI.json';
 import FixedLenderWETH from 'protocol/deployments/kovan/FixedLenderWETH.json';
 
 interface Props {
-  tokenAddress: string;
   symbol: String;
 }
 
-const Asset: NextPage<Props> = ({ tokenAddress, symbol }) => {
+const Asset: NextPage<Props> = ({ symbol }) => {
   const [page, setPage] = useState<number>(1);
   const lang: string = useContext(LangContext);
   const { modal, handleModal, modalContent } = useModal();
@@ -70,7 +69,8 @@ const Asset: NextPage<Props> = ({ tokenAddress, symbol }) => {
   }, [auditorContract]);
 
   async function getMarketData() {
-    const marketData = await auditorContract?.contract?.getMarketData(tokenAddress);
+    const marketData = await auditorContract?.contract?.getMarketData(filteredFixedLender?.address);
+
     setMarketData(marketData);
   }
 
