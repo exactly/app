@@ -60,16 +60,16 @@ const DashBoard: NextPage<Props> = () => {
     if (!address) return;
 
     const getMaturityPoolDeposits = await request(
-      'https://api.thegraph.com/subgraphs/name/juanigallo/exactly-kovan',
+      'https://api.thegraph.com/subgraphs/name/nicolascastrogarcia/exa-kovan',
       getMaturityPoolDepositsQuery(address)
     );
     const getMaturityPoolBorrows = await request(
-      'https://api.thegraph.com/subgraphs/name/juanigallo/exactly-kovan',
+      'https://api.thegraph.com/subgraphs/name/nicolascastrogarcia/exa-kovan',
       getMaturityPoolBorrowsQuery(address)
     );
 
     const getSmartPoolDeposits = await request(
-      'https://api.thegraph.com/subgraphs/name/juanigallo/exactly-kovan',
+      'https://api.thegraph.com/subgraphs/name/nicolascastrogarcia/exa-kovan',
       getSmartPoolDepositsQuery(address)
     );
 
