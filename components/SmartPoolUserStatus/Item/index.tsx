@@ -59,8 +59,11 @@ function Item({ symbol, amount, walletAddress, showModal, deposit }: Props) {
 
       setLoading(true);
 
-      const filteredFixedLender = fixedLender.find((contract: any) => {
-        return contract?.args[1] === symbol;
+      const filteredFixedLender = fixedLender.find((contract) => {
+        const args: Array<string> | undefined = contract?.args;
+        const contractSymbol: string | undefined = args && args[1];
+
+        return contractSymbol === symbol;
       });
 
       const fixedLenderAddress = filteredFixedLender?.address;
