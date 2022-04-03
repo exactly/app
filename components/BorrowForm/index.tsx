@@ -23,6 +23,7 @@ import FixedLenderContext from 'contexts/FixedLenderContext';
 import InterestRateModelContext from 'contexts/InterestRateModelContext';
 import LangContext from 'contexts/LangContext';
 import PoolAccountingContext from 'contexts/PoolAccountingContext';
+
 import { getContractData } from 'utils/contracts';
 
 type Props = {
