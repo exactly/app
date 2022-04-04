@@ -109,10 +109,11 @@ function SupplyForm({ handleResult, address, assetData, handleTx, walletAddress 
     const gasPriceInGwei = await fixedLenderWithSigner?.contractWithSigner?.provider.getGasPrice();
 
     const estimatedGasCost =
-      await fixedLenderWithSigner?.contractWithSigner?.estimateGas.depositToMaturityPool(
-        ethers.utils.parseUnits(1!.toString()),
+      await fixedLenderWithSigner?.contractWithSigner?.estimateGas.depositAtMaturity(
         parseInt(date.value),
-        '0'
+        ethers.utils.parseUnits(1!.toString()),
+        ethers.utils.parseUnits(1!.toString()),
+        walletAddress
       );
 
     if (gasPriceInGwei && estimatedGasCost) {
@@ -155,10 +156,17 @@ function SupplyForm({ handleResult, address, assetData, handleTx, walletAddress 
     }
 
     try {
-      const tx = await fixedLenderWithSigner?.contractWithSigner?.depositToMaturityPool(
-        ethers.utils.parseUnits(qty!.toString()),
+      console.log(
         parseInt(date.value),
-        '0'
+        ethers.utils.parseUnits(qty!.toString()),
+        ethers.utils.parseUnits(qty!.toString()),
+        walletAddress
+      );
+      const tx = await fixedLenderWithSigner?.contractWithSigner?.depositAtMaturity(
+        parseInt(date.value),
+        ethers.utils.parseUnits(qty!.toString()),
+        ethers.utils.parseUnits(qty!.toString()),
+        walletAddress
       );
 
       handleTx({ status: 'processing', hash: tx?.hash });

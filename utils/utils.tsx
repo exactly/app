@@ -32,28 +32,23 @@ export function formatWallet(walletAddress: String) {
   return `${walletAddress.substring(0, 6)}...${walletAddress.substring(38)}`;
 }
 
-export function getUnderlyingData(
-  network: string | undefined,
-  symbol: string | undefined
-) {
+export function getUnderlyingData(network: string | undefined, symbol: string | undefined) {
   if (!network || !symbol) return;
 
   const baseData: UnderlyingNetwork = {
     kovan: {
       dai: {
-        address: '0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa',
+        address: '0x3b89713BB731D9263FeD4b72a9B01B629a584cC7',
         abi: daiAbi
       },
       usdc: { address: '0xdcfab8057d08634279f8201b55d311c2a67897d2', abi: '' },
       usdt: { address: '0xf3e0d7bf58c5d455d31ef1c2d5375904df525105', abi: '' },
       weth: {
-        address: '0xd0a1e359811322d97991e03f863a0c30c2cf029c',
+        address: '0x37ef4ad938E01640156AC0d5D4e7656891949F04',
         abi: wethAbi
       }
     },
-    rinkeby: {
-      dai: { address: '0x6B175474E89094C44Da98b954EedeAC495271d0F', abi: '' }
-    },
+    rinkeby: {},
     mainnet: {}
   };
 

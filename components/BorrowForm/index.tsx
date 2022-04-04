@@ -22,7 +22,6 @@ import { AddressContext } from 'contexts/AddressContext';
 import FixedLenderContext from 'contexts/FixedLenderContext';
 import InterestRateModelContext from 'contexts/InterestRateModelContext';
 import LangContext from 'contexts/LangContext';
-import PoolAccountingContext from 'contexts/PoolAccountingContext';
 import { getContractData } from 'utils/contracts';
 
 type Props = {
@@ -38,7 +37,6 @@ function BorrowForm({ handleResult, address, handleTx }: Props) {
   const { date } = useContext(AddressContext);
   const interestRateModel = useContext(InterestRateModelContext);
   const fixedLenderData = useContext(FixedLenderContext);
-  const poolAccountingData = useContext(PoolAccountingContext);
 
   const [qty, setQty] = useState<number | undefined>(undefined);
   const [error, setError] = useState<Error | undefined>({
@@ -52,22 +50,11 @@ function BorrowForm({ handleResult, address, handleTx }: Props) {
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
     undefined
   );
-  const [poolAccounting, setPoolAccounting] = useState<Contract | undefined>(undefined);
 
   async function getFixedLenderContract() {
     const filteredFixedLender = fixedLenderData.find((fl) => fl.address == address);
     const fixedLenderWithSigner = await getContractData(address, filteredFixedLender?.abi!, true);
     setFixedLenderWithSigner(fixedLenderWithSigner);
-    getPoolAccountingContract(fixedLenderWithSigner);
-  }
-
-  async function getPoolAccountingContract(fixedLenderWithSigner: Contract | undefined) {
-    const poolAccounting = await getContractData(
-      fixedLenderWithSigner?.poolAccounting(),
-      poolAccountingData.abi!,
-      false
-    );
-    setPoolAccounting(poolAccounting);
   }
 
   useEffect(() => {
@@ -75,10 +62,10 @@ function BorrowForm({ handleResult, address, handleTx }: Props) {
   }, []);
 
   useEffect(() => {
-    if (poolAccounting) {
+    if (fixedLenderWithSigner) {
       calculateRate();
     }
-  }, [qty, date]);
+  }, [qty, date, fixedLenderWithSigner]);
 
   useEffect(() => {
     if (fixedLenderWithSigner && !gas) {
@@ -94,9 +81,9 @@ function BorrowForm({ handleResult, address, handleTx }: Props) {
 
     handleLoading(false);
 
-    const smartPoolBorrowed = await poolAccounting!.smartPoolBorrowed();
+    const smartPoolBorrowed = await fixedLenderWithSigner?.smartPoolBorrowed();
 
-    const smartPoolSupplied = await fixedLenderWithSigner?.getSmartPoolDeposits();
+    const smartPoolSupplied = await fixedLenderWithSigner?.smartPoolBalance();
 
     const currentTimestamp = Math.floor(Date.now() / 1000);
 

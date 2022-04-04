@@ -39,7 +39,7 @@ function AssetSelector({ title, defaultAddress, onChange }: Props) {
   }, [contract]);
 
   async function getMarkets() {
-    const marketsAddresses = await contract?.getMarketAddresses();
+    const marketsAddresses = await contract?.getAllMarkets();
     const marketsData: Array<UnformattedMarket> = [];
 
     if (!marketsAddresses) {
@@ -109,11 +109,7 @@ function AssetSelector({ title, defaultAddress, onChange }: Props) {
       return {
         label: (
           <div className={style.labelContainer}>
-            <img
-              src={src}
-              alt={marketData.name}
-              className={style.marketImage}
-            />{' '}
+            <img src={src} alt={marketData.name} className={style.marketImage} />{' '}
             <span className={style.marketName}>{marketData.name}</span>
           </div>
         ),
@@ -125,9 +121,7 @@ function AssetSelector({ title, defaultAddress, onChange }: Props) {
   }
 
   function getDataByAddress(address: string) {
-    const marketData = allMarketsData.find(
-      (market) => market.address == address
-    );
+    const marketData = allMarketsData.find((market) => market.address == address);
 
     onChange && marketData && onChange(marketData);
   }

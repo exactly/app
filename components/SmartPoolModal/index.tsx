@@ -108,8 +108,9 @@ function SmartPoolModal({ contractData, closeModal }: Props) {
       return setError({ status: true, msg: translations[lang].error });
     }
     try {
-      const tx = await fixedLenderWithSigner?.contractWithSigner?.depositToSmartPool(
-        ethers.utils.parseUnits(qty!.toString())
+      const tx = await fixedLenderWithSigner?.contractWithSigner?.deposit(
+        ethers.utils.parseUnits(qty!.toString()),
+        address
       );
 
       setTx({ status: 'processing', hash: tx?.hash });
@@ -161,10 +162,10 @@ function SmartPoolModal({ contractData, closeModal }: Props) {
   async function estimateGas() {
     const gasPriceInGwei = await fixedLenderWithSigner?.contractWithSigner?.provider.getGasPrice();
 
-    const estimatedGasCost =
-      await fixedLenderWithSigner?.contractWithSigner?.estimateGas.depositToSmartPool(
-        ethers.utils.parseUnits(1!.toString())
-      );
+    const estimatedGasCost = await fixedLenderWithSigner?.contractWithSigner?.estimateGas.deposit(
+      ethers.utils.parseUnits(1!.toString()),
+      address
+    );
 
     if (gasPriceInGwei && estimatedGasCost) {
       const gwei = await ethers.utils.formatUnits(gasPriceInGwei, 'gwei');
