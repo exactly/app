@@ -8,10 +8,10 @@
   cursor: pointer;
 
   .symbol {
-    width: calc(100% / 6);
+    width: calc(100% / 5);
     font-weight: bold;
     display: flex;
-    gap: var(--u3);
+    gap: var(--u2);
     align-items: center;
 
     .assetImage {
@@ -38,7 +38,7 @@
   }
 
   .value {
-    width: calc(100% / 6);
+    width: calc(100% / 5);
     color: var(--gray-900);
 
     .line {
