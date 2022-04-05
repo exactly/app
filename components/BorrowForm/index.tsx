@@ -156,14 +156,13 @@ function BorrowForm({ handleResult, address, handleTx }: Props) {
   async function estimateGas() {
     if (!date) return;
 
-    const gasPriceInGwei = await fixedLenderWithSigner?.contractWithSigner?.provider.getGasPrice();
+    const gasPriceInGwei = await fixedLenderWithSigner?.provider.getGasPrice();
 
-    const estimatedGasCost =
-      await fixedLenderWithSigner?.contractWithSigner?.estimateGas.borrowFromMaturityPool(
-        ethers.utils.parseUnits(1!.toString()),
-        parseInt(date.value),
-        ethers.utils.parseUnits('1000')
-      );
+    const estimatedGasCost = await fixedLenderWithSigner?.estimateGas.borrowFromMaturityPool(
+      ethers.utils.parseUnits(1!.toString()),
+      parseInt(date.value),
+      ethers.utils.parseUnits('1000')
+    );
 
     if (gasPriceInGwei && estimatedGasCost) {
       const gwei = await ethers.utils.formatUnits(gasPriceInGwei, 'gwei');
