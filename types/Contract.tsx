@@ -1,6 +1,6 @@
-import { ethers } from "ethers";
+import { ethers } from 'ethers';
 
 export type Contract = {
-  abi: ethers.ContractInterface,
-  address: string
-}
+  abi: ethers.ContractInterface;
+  address: string;
+};

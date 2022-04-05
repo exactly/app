@@ -5,6 +5,7 @@ import Switch from 'components/common/Switch';
 import Loading from 'components/common/Loading';
 
 import AuditorContext from 'contexts/AuditorContext';
+import FixedLenderContext from 'contexts/FixedLenderContext';
 import LangContext from 'contexts/LangContext';
 
 import { LangKeys } from 'types/Lang';
@@ -28,6 +29,7 @@ type Props = {
 
 function Item({ symbol, amount, walletAddress, showModal, deposit }: Props) {
   const auditor = useContext(AuditorContext);
+  const fixedLender = useContext(FixedLenderContext);
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
@@ -57,16 +59,21 @@ function Item({ symbol, amount, walletAddress, showModal, deposit }: Props) {
 
       setLoading(true);
 
-      if (!toggle) {
-        //if it's untoggled we need to ENTER
-        tx = await auditorContract.contractWithSigner?.enterMarkets([
-          '0xe9A7A6886f1577c280CFEbb116fF5859Aa65bdA1'
-        ]);
-      } else {
+      const filteredFixedLender = fixedLender.find((contract) => {
+        const args: Array<string> | undefined = contract?.args;
+        const contractSymbol: string | undefined = args && args[1];
+
+        return contractSymbol === symbol;
+      });
+
+      const fixedLenderAddress = filteredFixedLender?.address;
+
+      if (!toggle && fixedLenderAddress) {
+        //if it's not toggled we need to ENTER
+        tx = await auditorContract.contractWithSigner?.enterMarkets([fixedLenderAddress]);
+      } else if (fixedLenderAddress) {
         //if it's toggled we need to EXIT
-        tx = await auditorContract.contractWithSigner?.exitMarket(
-          '0xe9A7A6886f1577c280CFEbb116fF5859Aa65bdA1'
-        );
+        tx = await auditorContract.contractWithSigner?.exitMarket(fixedLenderAddress);
       }
 
       //waiting for tx to end
