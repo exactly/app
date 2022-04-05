@@ -3,7 +3,7 @@ import { ethers } from 'ethers';
 export async function getContractData(
   address: string,
   abi: ethers.ContractInterface,
-  providerData?: any
+  providerData?: ethers.Signer
 ) {
   if (!address || !abi) return;
 

@@ -46,14 +46,17 @@ function Item({ market, showModal, type, src }: Props) {
   }, [date, fixedLender, poolAccounting]);
 
   async function getFixedLenderContract() {
-    const filteredFixedLender = fixedLenderData.find(fl => fl.address == market.address)
-    const fixedLender = await getContractData(market.address, filteredFixedLender?.abi!, false)
-    setFixedLender(fixedLender)
-    getPoolAccountingContract(fixedLender)
+    const filteredFixedLender = fixedLenderData.find((fl) => fl.address == market.address);
+    const fixedLender = await getContractData(market.address, filteredFixedLender?.abi!);
+    setFixedLender(fixedLender);
+    getPoolAccountingContract(fixedLender);
   }
 
   async function getPoolAccountingContract(fixedLender: Contract | undefined) {
-    const poolAccounting = await getContractData(fixedLender?.poolAccounting(), poolAccountingData.abi!, false);
+    const poolAccounting = await getContractData(
+      fixedLender?.poolAccounting(),
+      poolAccountingData.abi!
+    );
     setPoolAccounting(poolAccounting);
   }
 
@@ -62,9 +65,7 @@ function Item({ market, showModal, type, src }: Props) {
   }
 
   async function getMarketData() {
-    const { borrowed, supplied } = await poolAccounting?.maturityPools(
-      date?.value
-    );
+    const { borrowed, supplied } = await poolAccounting?.maturityPools(date?.value);
 
     const newPoolData = {
       borrowed: Math.round(parseInt(await ethers.utils.formatEther(borrowed))),
@@ -76,8 +77,9 @@ function Item({ market, showModal, type, src }: Props) {
 
   return (
     <div
-      className={`${style.container} ${type == 'borrow' ? style.secondaryContainer : style.primaryContainer
-        }`}
+      className={`${style.container} ${
+        type == 'borrow' ? style.secondaryContainer : style.primaryContainer
+      }`}
       onClick={handleClick}
     >
       <div className={style.symbol}>
@@ -89,11 +91,7 @@ function Item({ market, showModal, type, src }: Props) {
       </span>
       <div className={style.buttonContainer}>
         <Button
-          text={
-            type == 'borrow'
-              ? translations[lang].borrow
-              : translations[lang].deposit
-          }
+          text={type == 'borrow' ? translations[lang].borrow : translations[lang].deposit}
           className={type == 'borrow' ? 'secondary' : 'primary'}
         />
       </div>

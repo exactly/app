@@ -1,5 +1,5 @@
 import { ChangeEvent, useContext, useEffect, useState } from 'react';
-import { ethers } from 'ethers';
+import { Contract, ethers } from 'ethers';
 
 import Button from 'components/common/Button';
 import ModalAsset from 'components/common/modal/ModalAsset';
@@ -14,12 +14,15 @@ import { Deposit } from 'types/Deposit';
 import { LangKeys } from 'types/Lang';
 
 import parseTimestamp from 'utils/parseTimestamp';
+import { getContractData } from 'utils/contracts';
 
 import styles from './style.module.scss';
 
 import LangContext from 'contexts/LangContext';
+import { useWeb3Context } from 'contexts/Web3Context';
 
 import keys from './translations.json';
+import FixedLenderContext from 'contexts/FixedLenderContext';
 
 type Props = {
   data: Borrow | Deposit;
@@ -29,9 +32,16 @@ type Props = {
 function RepayModal({ data, closeModal }: Props) {
   const { address, symbol, maturityDate, amount } = data;
 
+  const { web3Provider } = useWeb3Context();
+
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
+  const fixedLenderData = useContext(FixedLenderContext);
+
+  const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
+    undefined
+  );
   const [qty, setQty] = useState<string>('0');
   const [isLateRepay, setIsLateRepay] = useState<boolean>(false);
   const parsedAmount = ethers.utils.formatUnits(amount, 18);
@@ -42,6 +52,27 @@ function RepayModal({ data, closeModal }: Props) {
     setIsLateRepay(repay);
   }, [maturityDate]);
 
+  useEffect(() => {
+    getFixedLenderContract();
+  }, []);
+
+  async function getFixedLenderContract() {
+    const filteredFixedLender = fixedLenderData.find((contract) => {
+      const args: Array<string> | undefined = contract?.args;
+      const contractSymbol: string | undefined = args && args[1];
+
+      return contractSymbol == symbol;
+    });
+
+    const fixedLender = await getContractData(
+      filteredFixedLender?.address!,
+      filteredFixedLender?.abi!,
+      web3Provider?.getSigner()
+    );
+
+    setFixedLenderWithSigner(fixedLender);
+  }
+
   function onMax() {
     setQty(parsedAmount);
   }
@@ -50,7 +81,13 @@ function RepayModal({ data, closeModal }: Props) {
     setQty(e.target.value);
   }
 
-  function repay() {}
+  async function repay() {
+    const repay = await fixedLenderWithSigner?.withdrawFromMaturity(
+      address,
+      ethers.utils.parseUnits(qty!),
+      maturityDate
+    );
+  }
 
   return (
     <>
@@ -69,6 +106,7 @@ function RepayModal({ data, closeModal }: Props) {
           <Button
             text={translations[lang].repay}
             className={qty <= '0' || !qty ? 'secondaryDisabled' : 'quaternary'}
+            onClick={repay}
           />
         </div>
       </section>
