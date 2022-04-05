@@ -10,6 +10,7 @@ import SmartPoolDashboard from 'components/SmartPoolDashboard';
 import RepayModal from 'components/RepayModal';
 import WithdrawModalMP from 'components/WithdrawModalMP';
 import WithdrawModalSP from 'components/WithdrawModalSP';
+import Modal from 'components/Modal';
 
 import { AuditorProvider } from 'contexts/AuditorContext';
 import { FixedLenderProvider } from 'contexts/FixedLenderContext';
@@ -105,11 +106,14 @@ const DashBoard: NextPage<Props> = () => {
     <AuditorProvider value={Auditor}>
       <FixedLenderProvider value={fixedLenders}>
         <InterestRateModelProvider value={InterestRateModel}>
-          {modal && modalContent?.type == 'borrow' && (
+          {modal && modalContent?.type == 'repay' && (
             <RepayModal data={modalContent} closeModal={handleModal} />
           )}
-          {modal && modalContent?.type == 'deposit' && (
+          {modal && modalContent?.type == 'withdraw' && (
             <WithdrawModalMP data={modalContent} closeModal={handleModal} />
+          )}
+          {modal && modalContent?.type == 'deposit' && (
+            <Modal contractData={modalContent} closeModal={handleModal} />
           )}
           {modal && modalContent?.type == 'withdrawSP' && (
             <WithdrawModalSP data={modalContent} closeModal={handleModal} />
