@@ -12,7 +12,7 @@
     width: 20%;
     font-weight: bold;
     display: flex;
-    gap: var(--u3);
+    gap: var(--u2);
     align-items: center;
 
     .assetImage {
@@ -21,7 +21,6 @@
     }
 
     .primary {
-      margin-bottom: var(--smallUnit);
       font-size: var(--font-16);
     }
     .secondary {

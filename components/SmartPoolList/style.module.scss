@@ -1,10 +1,9 @@
 .container {
   max-width: var(--maxWidth);
   width: 100%;
-  margin: var(--u2) auto;
+  margin: var(--u4) auto;
   display: flex;
   flex-direction: column;
-  gap: var(--u3);
   text-align: center;
 
   .sectionTitleContainer {
