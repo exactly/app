@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { Contract, ethers } from 'ethers';
+import { ethers } from 'ethers';
 
 import Button from 'components/common/Button';
 
@@ -10,6 +10,7 @@ import { LangKeys } from 'types/Lang';
 import FixedLenderContext from 'contexts/FixedLenderContext';
 import { AddressContext } from 'contexts/AddressContext';
 import LangContext from 'contexts/LangContext';
+import { useWeb3Context } from 'contexts/Web3Context';
 
 import style from './style.module.scss';
 
@@ -29,6 +30,8 @@ function Item({ market, showModal, type, src }: Props) {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
+  const { web3Provider } = useWeb3Context();
+
   const [poolData, setPoolData] = useState<Pool | undefined>(undefined);
   const [fixedLender, setFixedLender] = useState<ethers.Contract | undefined>(undefined);
 
@@ -44,7 +47,12 @@ function Item({ market, showModal, type, src }: Props) {
 
   async function getFixedLenderContract() {
     const filteredFixedLender = fixedLenderData.find((fl) => fl.address == market.address);
-    const fixedLender = await getContractData(market.address, filteredFixedLender?.abi!, false);
+    const fixedLender = await getContractData(
+      market.address,
+      filteredFixedLender?.abi!,
+      web3Provider?.getSigner()
+    );
+
     setFixedLender(fixedLender);
   }
 

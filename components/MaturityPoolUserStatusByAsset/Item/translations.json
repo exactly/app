@@ -1,7 +1,9 @@
 {
   "en": {
     "borrow": "Borrow",
-    "deposit": "Deposit"
+    "deposit": "Deposit",
+    "withdraw": "Withdraw",
+    "repay": "Repay"
   },
   "es": {}
 }

@@ -8,8 +8,6 @@ import Button from 'components/common/Button';
 import MaturitySelector from 'components/MaturitySelector';
 import Tooltip from 'components/Tooltip';
 
-import useContract from 'hooks/useContract';
-
 import { SupplyRate } from 'types/SupplyRate';
 import { Error } from 'types/Error';
 import { LangKeys } from 'types/Lang';
@@ -22,38 +20,56 @@ import { AddressContext } from 'contexts/AddressContext';
 import FixedLenderContext from 'contexts/FixedLenderContext';
 import InterestRateModelContext from 'contexts/InterestRateModelContext';
 import LangContext from 'contexts/LangContext';
+import { useWeb3Context } from 'contexts/Web3Context';
+
 import { getContractData } from 'utils/contracts';
 
 type Props = {
   handleResult: (data: SupplyRate | undefined) => void;
-  address: string;
+  contractAddress: string;
   handleTx: (data: Transaction) => void;
 };
 
-function BorrowForm({ handleResult, address, handleTx }: Props) {
+function BorrowForm({ handleResult, contractAddress, handleTx }: Props) {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
+
+  const { web3Provider, address } = useWeb3Context();
 
   const { date } = useContext(AddressContext);
   const interestRateModel = useContext(InterestRateModelContext);
   const fixedLenderData = useContext(FixedLenderContext);
 
-  const [qty, setQty] = useState<number | undefined>(undefined);
+  const [qty, setQty] = useState<string | undefined>(undefined);
   const [error, setError] = useState<Error | undefined>({
     status: false,
     msg: ''
   });
   const [gas, setGas] = useState<Gas | undefined>(undefined);
 
-  const interestRateModelContract = useContract(interestRateModel.address!, interestRateModel.abi!);
-
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
     undefined
   );
 
+  const [interestRateModelContract, setInterestRateModelContract] = useState<Contract | undefined>(
+    undefined
+  );
+
   async function getFixedLenderContract() {
-    const filteredFixedLender = fixedLenderData.find((fl) => fl.address == address);
-    const fixedLenderWithSigner = await getContractData(address, filteredFixedLender?.abi!, true);
+    const filteredFixedLender = fixedLenderData.find((fl) => fl.address == contractAddress);
+    const fixedLenderWithSigner = await getContractData(
+      contractAddress,
+      filteredFixedLender?.abi!,
+      web3Provider?.getSigner()
+    );
+
+    const interestRateModelContract = await getContractData(
+      interestRateModel.address!,
+      interestRateModel.abi!
+    );
+
+    setInterestRateModelContract(interestRateModelContract);
+
     setFixedLenderWithSigner(fixedLenderWithSigner);
   }
 
@@ -81,28 +97,32 @@ function BorrowForm({ handleResult, address, handleTx }: Props) {
 
     handleLoading(false);
 
-    const smartPoolBorrowed = await fixedLenderWithSigner?.smartPoolBorrowed();
-
     const smartPoolSupplied = await fixedLenderWithSigner?.smartPoolBalance();
+
+    const maturityPoolStatus = await fixedLenderWithSigner?.maturityPools(parseInt(date.value));
 
     const currentTimestamp = Math.floor(Date.now() / 1000);
 
+    //b 0 / s 1 / smS 202
+    //
     //Borrow
     try {
-      const borrowRate = await interestRateModelContract?.contract?.getRateToBorrow(
+      const borrowRate = await interestRateModelContract?.getRateToBorrow(
         parseInt(date.value),
         currentTimestamp,
-        smartPoolBorrowed,
-        smartPoolSupplied,
-        ethers.utils.parseUnits('2000', 18)
+        ethers.utils.parseUnits(qty!, 18),
+        maturityPoolStatus.borrowed,
+        maturityPoolStatus.supplied,
+        smartPoolSupplied
       );
 
       const formattedBorrowRate = borrowRate && ethers.utils.formatEther(borrowRate);
-
       formattedBorrowRate && handleResult({ potentialRate: formattedBorrowRate, hasRate: true });
-    } catch (e) {
-      console.log(e);
-      return setError({ status: true, msg: translations[lang].error });
+    } catch (error: any) {
+      return setError({
+        status: true,
+        msg: translations[lang][error?.errorName?.toLowerCase()] ?? translations[lang].error
+      });
     }
   }
 
@@ -112,10 +132,12 @@ function BorrowForm({ handleResult, address, handleTx }: Props) {
     }
 
     try {
-      const tx = await fixedLenderWithSigner?.contractWithSigner?.borrowFromMaturityPool(
-        ethers.utils.parseUnits(qty!.toString()),
+      const tx = await fixedLenderWithSigner?.borrowAtMaturity(
         parseInt(date.value),
-        ethers.utils.parseUnits('1000')
+        ethers.utils.parseUnits(qty!.toString()),
+        ethers.utils.parseUnits(qty!.toString()),
+        address,
+        address
       );
 
       handleTx({ status: 'processing', hash: tx?.hash });
@@ -135,14 +157,15 @@ function BorrowForm({ handleResult, address, handleTx }: Props) {
   async function estimateGas() {
     if (!date) return;
 
-    const gasPriceInGwei = await fixedLenderWithSigner?.contractWithSigner?.provider.getGasPrice();
+    const gasPriceInGwei = await fixedLenderWithSigner?.provider.getGasPrice();
 
-    const estimatedGasCost =
-      await fixedLenderWithSigner?.contractWithSigner?.estimateGas.borrowFromMaturityPool(
-        ethers.utils.parseUnits(1!.toString()),
-        parseInt(date.value),
-        ethers.utils.parseUnits('1000')
-      );
+    const estimatedGasCost = await fixedLenderWithSigner?.estimateGas.borrowAtMaturity(
+      parseInt(date.value),
+      ethers.utils.parseUnits(1!.toString()),
+      ethers.utils.parseUnits(1!.toString()),
+      address,
+      address
+    );
 
     if (gasPriceInGwei && estimatedGasCost) {
       const gwei = await ethers.utils.formatUnits(gasPriceInGwei, 'gwei');
@@ -161,7 +184,7 @@ function BorrowForm({ handleResult, address, handleTx }: Props) {
           <Input
             type="number"
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              setQty(e.target.valueAsNumber);
+              setQty(e.target.value);
               setError({ status: false, msg: '' });
             }}
             value={qty}
@@ -183,7 +206,7 @@ function BorrowForm({ handleResult, address, handleTx }: Props) {
           <Tooltip value={translations[lang].endDate} />
         </div>
         <div className={style.inputContainer}>
-          <MaturitySelector address={address} />
+          <MaturitySelector address={contractAddress} />
         </div>
       </div>
       {error?.status && <p className={style.error}>{error?.msg}</p>}
@@ -192,8 +215,8 @@ function BorrowForm({ handleResult, address, handleTx }: Props) {
           <Button
             text={translations[lang].borrow}
             onClick={borrow}
-            className={qty && qty > 0 ? 'secondary' : 'disabled'}
-            disabled={!qty || qty <= 0}
+            className={qty && parseFloat(qty) > 0 ? 'secondary' : 'disabled'}
+            disabled={!qty || parseFloat(qty) <= 0}
           />
         </div>
       </div>

@@ -39,7 +39,6 @@ function MaturitySelector({ title, address }: Props) {
     const interval = 604800;
     let timestamp = currentTimestamp - (currentTimestamp % interval);
     const maxPools = await fixedLenderContract?.contract?.maxFuturePools();
-    console.log(await fixedLenderContract.contract?.asset());
     const pools = [];
 
     for (let i = 0; i < maxPools; i++) {

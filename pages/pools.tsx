@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import type { NextPage } from 'next';
 
 import { ethers } from 'ethers';
-import axios from 'axios';
 
 import MarketsList from 'components/MarketsList';
 import MaturitySelector from 'components/MaturitySelector';
@@ -23,11 +22,8 @@ import { InterestRateModelProvider } from 'contexts/InterestRateModelContext';
 
 import { Market } from 'types/Market';
 import { UnformattedMarket } from 'types/UnformattedMarket';
-import { Contract } from 'types/Contract';
-import { Dictionary } from 'types/Dictionary';
 
 import dictionary from 'dictionary/en.json';
-import { PoolAccountingProvider } from 'contexts/PoolAccountingContext';
 
 //Contracts
 import InterestRateModel from 'protocol/deployments/kovan/InterestRateModel.json';

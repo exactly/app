@@ -73,8 +73,7 @@ function DashboardHeader() {
       <div className={styles.container}>
         <div className={styles.box}>
           <h3 className={styles.title}>
-            {translations[lang].deposits}{' '}
-            <Tooltip value={translations[lang].deposits} />
+            {translations[lang].deposits} <Tooltip value={translations[lang].deposits} />
           </h3>
           <p className={styles.value}>$6,724</p>
           <p className={styles.subvalue}>2.14% {translations[lang].apr}</p>
@@ -96,12 +95,14 @@ function DashboardHeader() {
           <div className={styles.informationContainer}>
             <div className={styles.information}>
               <p className={styles.informationTitle}>
+                <span className={styles.variable} />
                 {translations[lang].variable}
               </p>
               <p className={styles.informationValue}>50%</p>
             </div>
             <div className={styles.information}>
               <p className={styles.informationTitle}>
+                <span className={styles.fixed} />
                 {translations[lang].fixed}
               </p>
               <p className={styles.informationValue}>50%</p>
@@ -115,8 +116,7 @@ function DashboardHeader() {
       <div className={styles.container}>
         <div className={styles.box}>
           <h3 className={styles.title}>
-            {translations[lang].borrows}{' '}
-            <Tooltip value={translations[lang].borrows} />
+            {translations[lang].borrows} <Tooltip value={translations[lang].borrows} />
           </h3>
           <p className={styles.value}>$6,724</p>
           <p className={styles.subvalue}>2.14% {translations[lang].apr}</p>
@@ -132,18 +132,19 @@ function DashboardHeader() {
         <div className={styles.line}></div>
         <div className={styles.box}>
           <h3 className={styles.title}>
-            {translations[lang].healthFactor}{' '}
-            <Tooltip value={translations[lang].healthFactor} />
+            {translations[lang].healthFactor} <Tooltip value={translations[lang].healthFactor} />
           </h3>
           <div className={styles.informationContainer}>
             <div className={styles.information}>
               <p className={styles.informationTitle}>
+                <span className={styles.fixed} />
                 {translations[lang].deposited}
               </p>
               <p className={styles.informationValue}>50%</p>
             </div>
             <div className={styles.information}>
               <p className={styles.informationTitle}>
+                <span className={styles.variable} />
                 {translations[lang].borrowed}
               </p>
               <p className={styles.informationValue}>50%</p>

@@ -36,7 +36,7 @@ function Item({ market, showModal, src }: Props) {
 
   async function getFixedLenderContract() {
     const filteredFixedLender = fixedLenderData.find((fl) => fl.address == market.address);
-    const fixedLender = await getContractData(market.address, filteredFixedLender?.abi!, false);
+    const fixedLender = await getContractData(market.address, filteredFixedLender?.abi!);
     setFixedLender(fixedLender);
   }
 

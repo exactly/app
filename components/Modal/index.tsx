@@ -100,7 +100,7 @@ function Modal({ contractData, closeModal }: Props) {
               {contractWithSigner && contractData.type == 'borrow' && assetData && (
                 <BorrowForm
                   handleResult={handleResult}
-                  address={contractData.address}
+                  contractAddress={contractData.address}
                   handleTx={(data: Transaction) => setTx(data)}
                 />
               )}
