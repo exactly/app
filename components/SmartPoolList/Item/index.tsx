@@ -38,20 +38,23 @@ function Item({ market, showModal, src }: Props) {
   const [poolAccounting, setPoolAccounting] = useState<Contract | undefined>(undefined);
 
   async function getFixedLenderContract() {
-    const filteredFixedLender = fixedLenderData.find(fl => fl.address == market.address)
-    const fixedLender = await getContractData(market.address, filteredFixedLender?.abi!, false)
-    setFixedLender(fixedLender)
-    getPoolAccountingContract(fixedLender)
+    const filteredFixedLender = fixedLenderData.find((fl) => fl.address == market.address);
+    const fixedLender = await getContractData(market.address, filteredFixedLender?.abi!);
+    setFixedLender(fixedLender);
+    getPoolAccountingContract(fixedLender);
   }
 
   async function getPoolAccountingContract(fixedLender: Contract | undefined) {
-    const poolAccounting = await getContractData(fixedLender?.poolAccounting(), poolAccountingData.abi!, false);
+    const poolAccounting = await getContractData(
+      fixedLender?.poolAccounting(),
+      poolAccountingData.abi!
+    );
     setPoolAccounting(poolAccounting);
   }
 
   useEffect(() => {
     getFixedLenderContract();
-  }, [])
+  }, []);
 
   useEffect(() => {
     if (date?.value && fixedLender && poolAccounting) {
@@ -76,10 +79,7 @@ function Item({ market, showModal, src }: Props) {
   }
 
   return (
-    <div
-      className={`${style.container} ${style.primaryContainer}`}
-      onClick={handleClick}
-    >
+    <div className={`${style.container} ${style.primaryContainer}`} onClick={handleClick}>
       <div className={style.symbol}>
         <img src={src} className={style.assetImage} />
         <span className={style.primary}>{market?.symbol}</span>
