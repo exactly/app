@@ -30,9 +30,8 @@ type Props = {
 };
 
 function RepayModal({ data, closeModal }: Props) {
-  const { address, symbol, maturityDate, amount } = data;
-
-  const { web3Provider } = useWeb3Context();
+  const { symbol, maturityDate, amount } = data;
+  const { address, web3Provider } = useWeb3Context();
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
@@ -42,9 +41,14 @@ function RepayModal({ data, closeModal }: Props) {
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
     undefined
   );
+
   const [qty, setQty] = useState<string>('0');
   const [isLateRepay, setIsLateRepay] = useState<boolean>(false);
   const parsedAmount = ethers.utils.formatUnits(amount, 18);
+
+  useEffect(() => {
+    getFixedLenderContract();
+  }, []);
 
   useEffect(() => {
     const repay = Date.now() / 1000 > parseInt(maturityDate);
