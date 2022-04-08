@@ -38,13 +38,23 @@ function RepayModal({ data, closeModal }: Props) {
 
   const fixedLenderData = useContext(FixedLenderContext);
 
+  const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
+    undefined
+  );
+
   const [qty, setQty] = useState<string>('0');
   const [isLateRepay, setIsLateRepay] = useState<boolean>(false);
   const parsedAmount = ethers.utils.formatUnits(amount, 18);
 
-  const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
-    undefined
-  );
+  useEffect(() => {
+    getFixedLenderContract();
+  }, []);
+
+  useEffect(() => {
+    const repay = Date.now() / 1000 > parseInt(maturityDate);
+
+    setIsLateRepay(repay);
+  }, [maturityDate]);
 
   useEffect(() => {
     getFixedLenderContract();
@@ -67,12 +77,6 @@ function RepayModal({ data, closeModal }: Props) {
     setFixedLenderWithSigner(fixedLender);
   }
 
-  useEffect(() => {
-    const repay = Date.now() / 1000 > parseInt(maturityDate);
-
-    setIsLateRepay(repay);
-  }, [maturityDate]);
-
   function onMax() {
     setQty(parsedAmount);
   }
@@ -82,10 +86,10 @@ function RepayModal({ data, closeModal }: Props) {
   }
 
   async function repay() {
-    const repay = await fixedLenderWithSigner?.repayToMaturityPool(
+    const repay = await fixedLenderWithSigner?.withdrawFromMaturity(
       address,
-      maturityDate,
-      ethers.utils.parseUnits(qty!)
+      ethers.utils.parseUnits(qty!),
+      maturityDate
     );
   }
 

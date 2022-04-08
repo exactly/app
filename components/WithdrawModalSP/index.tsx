@@ -1,5 +1,5 @@
-import { ChangeEvent, useContext, useState } from 'react';
-import { ethers } from 'ethers';
+import { ChangeEvent, useContext, useEffect, useState } from 'react';
+import { ethers, Contract } from 'ethers';
 
 import Button from 'components/common/Button';
 import ModalAsset from 'components/common/modal/ModalAsset';
@@ -16,6 +16,10 @@ import { LangKeys } from 'types/Lang';
 import styles from './style.module.scss';
 
 import LangContext from 'contexts/LangContext';
+import FixedLenderContext from 'contexts/FixedLenderContext';
+import { useWeb3Context } from 'contexts/Web3Context';
+
+import { getContractData } from 'utils/contracts';
 
 import keys from './translations.json';
 
@@ -25,14 +29,25 @@ type Props = {
 };
 
 function WithdrawModalSP({ data, closeModal }: Props) {
-  const { address, symbol, amount } = data;
+  const { symbol, amount } = data;
+
+  const { web3Provider } = useWeb3Context();
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
+  const fixedLenderData = useContext(FixedLenderContext);
+
   const [qty, setQty] = useState<string>('0');
+  const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
+    undefined
+  );
 
   const parsedAmount = ethers.utils.formatUnits(amount, 18);
+
+  useEffect(() => {
+    getFixedLenderContract();
+  }, []);
 
   function onMax() {
     setQty(parsedAmount);
@@ -42,7 +57,28 @@ function WithdrawModalSP({ data, closeModal }: Props) {
     setQty(e.target.value);
   }
 
-  function withdrawFromMaturity() {}
+  async function withdraw() {
+    const withdraw = await fixedLenderWithSigner?.withdrawFromSmartPool(
+      ethers.utils.parseUnits(qty!)
+    );
+  }
+
+  async function getFixedLenderContract() {
+    const filteredFixedLender = fixedLenderData.find((contract) => {
+      const args: Array<string> | undefined = contract?.args;
+      const contractSymbol: string | undefined = args && args[1];
+
+      return contractSymbol == symbol;
+    });
+
+    const fixedLender = await getContractData(
+      filteredFixedLender?.address!,
+      filteredFixedLender?.abi!,
+      web3Provider?.getSigner()
+    );
+
+    setFixedLenderWithSigner(fixedLender);
+  }
 
   return (
     <>
@@ -59,6 +95,7 @@ function WithdrawModalSP({ data, closeModal }: Props) {
           <Button
             text={translations[lang].withdraw}
             className={qty <= '0' || !qty ? 'secondaryDisabled' : 'tertiary'}
+            onClick={withdraw}
           />
         </div>
       </section>
