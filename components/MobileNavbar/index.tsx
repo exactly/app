@@ -1,11 +1,9 @@
-import { useState, useEffect, useContext } from 'react';
+import { useState, useContext } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 
-import useProvider from 'hooks/useProvider';
-import { getCurrentWalletConnected } from 'hooks/useWallet';
-
 import LangContext from 'contexts/LangContext';
+import { useWeb3Context } from 'contexts/Web3Context';
 
 import Button from 'components/common/Button';
 import Wallet from 'components/Wallet';
@@ -13,60 +11,24 @@ import Overlay from 'components/Overlay';
 
 import { LangKeys } from 'types/Lang';
 
-
 import styles from './style.module.scss';
 
 import keys from './translations.json';
 
-type Props = {
-  walletAddress?: String;
-  network: string;
-};
-
-function MobileNavbar({ walletAddress, network }: Props) {
+function MobileNavbar() {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
+  const { network, address, connect, disconnect } = useWeb3Context();
 
-  const [currentWallet, setWallet] = useState<String>(walletAddress || '');
   const [open, setOpen] = useState<Boolean>(false);
-  const { getProvider } = useProvider();
+
   const router = useRouter();
   const { pathname } = router;
-
-  useEffect(() => {
-    handleWallet();
-    addWalletListener();
-  }, []);
-
-  async function handleWallet() {
-    //this function gets the wallet address
-    const { address } = await getCurrentWalletConnected();
-
-    setWallet(address);
-  }
-
-  async function handleClick() {
-    //this function generates the connection to the provider
-    await getProvider();
-  }
-
-  function addWalletListener() {
-    //we listen to any change in wallet
-    if (window.ethereum) {
-      window.ethereum.on('accountsChanged', (accounts: any) => {
-        if (accounts.length > 0) {
-          setWallet(accounts[0]);
-        } else {
-          setWallet('');
-        }
-      });
-    }
-  }
 
   function handleMenu() {
     setOpen((prev) => !prev);
   }
-  
+
   const routes = [
     {
       pathname: '/pools',
@@ -92,37 +54,29 @@ function MobileNavbar({ walletAddress, network }: Props) {
       <nav className={styles.navBar}>
         <div className={styles.wrapper}>
           <Link href="/">
-            <img
-              src="/img/logo.svg"
-              alt="Exactly Logo"
-              className={styles.logo}
-            />
+            <img src="/img/logo.svg" alt="Exactly Logo" className={styles.logo} />
           </Link>
-          {!walletAddress ? (
+          {connect && !address ? (
             <div className={styles.buttonContainer}>
-              <Button text="Conectar" onClick={handleClick} />
+              <Button text="Conectar" onClick={connect} />
             </div>
           ) : (
-            <div className={styles.buttonContainer}>
-              <Wallet
-                walletAddress={currentWallet}
-                cogwheel={false}
-                network={network}
-              />
-            </div>
+            disconnect &&
+            address && (
+              <div className={styles.buttonContainer}>
+                <Wallet
+                  walletAddress={address}
+                  cogwheel={false}
+                  network={network}
+                  disconnect={disconnect}
+                />
+              </div>
+            )
           )}
           {!open ? (
-            <img
-              src="./img/icons/hamburger.svg"
-              onClick={handleMenu}
-              className={styles.icon}
-            />
+            <img src="./img/icons/hamburger.svg" onClick={handleMenu} className={styles.icon} />
           ) : (
-            <img
-              src="./img/icons/close.svg"
-              onClick={handleMenu}
-              className={styles.icon}
-            />
+            <img src="./img/icons/close.svg" onClick={handleMenu} className={styles.icon} />
           )}
         </div>
       </nav>
@@ -132,9 +86,7 @@ function MobileNavbar({ walletAddress, network }: Props) {
             return (
               <li
                 className={
-                  route.pathname === pathname
-                    ? `${styles.link} ${styles.active}`
-                    : styles.link
+                  route.pathname === pathname ? `${styles.link} ${styles.active}` : styles.link
                 }
                 key={route.pathname}
               >

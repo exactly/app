@@ -1,0 +1,12 @@
+.values {
+  margin: 0;
+  display: flex;
+  gap: var(--u2);
+  position: relative;
+  font-weight: 600;
+
+  .imageContainer {
+    width: var(--u2);
+    height: var(--u2);
+  }
+}

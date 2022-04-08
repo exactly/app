@@ -27,6 +27,8 @@
         display: flex;
         align-items: center;
         gap: var(--smallUnit);
+        margin: 0;
+        margin-bottom: var(--u2);
       }
 
       .value {
@@ -41,6 +43,7 @@
         display: flex;
         align-items: center;
         gap: var(--smallUnit);
+        margin: 0;
 
         .asset {
           height: var(--u2);
@@ -51,15 +54,37 @@
         display: flex;
         gap: var(--u2);
         .information {
+          display: flex;
+          flex-direction: column;
+          gap: var(--u);
+
           .informationTitle {
             font-size: var(--font-12);
             font-weight: 600;
             color: var(--gray-500);
+            display: flex;
+            align-items: center;
+            margin: 0;
+
+            .fixed {
+              display: inline-block;
+              width: var(--u);
+              height: var(--u);
+              border-radius: 50%;
+              background: var(--primary);
+              margin-right: var(--smallUnit);
+            }
+
+            .variable {
+              @extend .fixed;
+              background: var(--secondary);
+            }
           }
           .informationValue {
             font-size: var(--font-14);
             color: var(--gray-900);
             font-weight: 400;
+            margin: 0;
           }
         }
       }
@@ -72,8 +97,9 @@
 
       .detail {
         display: flex;
-        justify-content: space-between;
+        justify-content: center;
         align-items: center;
+        gap: var(--u);
 
         img {
           height: var(--u2);
@@ -84,7 +110,7 @@
   }
 
   .line {
-    height: 80%;
+    height: 100%;
     background: var(--gray-100);
     width: 1px;
     margin: var(--u2);

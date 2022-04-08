@@ -30,18 +30,27 @@
         font-weight: 600;
 
         .link {
-          color: var(--gray-900);
-          opacity: var(--defaultOpacity);
+          color: var(--gray-500);
           cursor: pointer;
           padding: 5px;
+
+          &:hover {
+            border-bottom: 2px solid var(--gray-900);
+            a {
+              color: var(--gray-900);
+            }
+          }
         }
 
         .active {
           @extend .link;
-          opacity: 100%;
           border-bottom: 2px solid;
           border-image: linear-gradient(90deg, #7bf5e1 0.29%, #4d4de8 100.29%);
           border-image-slice: 1;
+
+          a {
+            color: var(--gray-900);
+          }
         }
       }
     }

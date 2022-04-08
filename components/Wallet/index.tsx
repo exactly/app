@@ -1,26 +1,26 @@
 import styles from './style.module.scss';
 
 import { formatWallet } from 'utils/utils';
-
 import { Network } from 'types/Network';
 
 type Props = {
-  walletAddress: String;
+  walletAddress: string;
   cogwheel?: Boolean;
-  network?: string;
+  network?: Network | null | undefined;
+  disconnect: () => Promise<void>;
 };
 
-function Wallet({ walletAddress, cogwheel = true, network }: Props) {
-  const formatedWallet = formatWallet(walletAddress);
+function Wallet({ walletAddress, cogwheel = true, network, disconnect }: Props) {
+  const formattedWallet = walletAddress && formatWallet(walletAddress);
 
   return (
     <div className={styles.container}>
-      <p className={styles.wallet}>{formatedWallet}</p>
-      {cogwheel && <img src="/img/icons/cogwheel.svg" alt="settings" />}
+      <p className={styles.wallet}>{formattedWallet}</p>
+      {cogwheel && <img src="/img/icons/cogwheel.svg" alt="settings" onClick={disconnect} />}
       {network && (
         <div className={styles.networkContainer}>
           <div className={styles.dot} />
-          <p className={styles.network}> {network}</p>
+          <p className={styles.network}> {network?.name}</p>
         </div>
       )}
     </div>

@@ -36,7 +36,7 @@ function HowItWorks() {
   ];
 
   return (
-    <section>
+    <section className={styles.howItWorks}>
       <Title
         title={translations[lang].howItWorks}
         subtitle={translations[lang].howItWorksSubtitle}

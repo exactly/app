@@ -2,13 +2,15 @@ import { useState, useEffect } from 'react';
 import type { NextPage } from 'next';
 import { request } from 'graphql-request';
 
-import axios from 'axios';
-
 import Navbar from 'components/Navbar';
 import Footer from 'components/Footer';
 import MobileNavbar from 'components/MobileNavbar';
 import MaturityPoolDashboard from 'components/MaturityPoolDashboard';
 import SmartPoolDashboard from 'components/SmartPoolDashboard';
+import RepayModal from 'components/RepayModal';
+import WithdrawModalMP from 'components/WithdrawModalMP';
+import WithdrawModalSP from 'components/WithdrawModalSP';
+import Modal from 'components/Modal';
 
 import { AuditorProvider } from 'contexts/AuditorContext';
 import { FixedLenderProvider } from 'contexts/FixedLenderContext';
@@ -19,7 +21,7 @@ import { Dictionary } from 'types/Dictionary';
 import { Borrow } from 'types/Borrow';
 import { Deposit } from 'types/Deposit';
 
-import { getCurrentWalletConnected } from 'hooks/useWallet';
+import useModal from 'hooks/useModal';
 
 import {
   getMaturityPoolBorrowsQuery,
@@ -27,108 +29,108 @@ import {
   getSmartPoolDepositsQuery
 } from 'queries';
 
+import { useWeb3Context } from 'contexts/Web3Context';
+//Contracts
+import InterestRateModel from 'protocol/deployments/kovan/InterestRateModel.json';
+import Auditor from 'protocol/deployments/kovan/Auditor.json';
+import FixedLenderDAI from 'protocol/deployments/kovan/FixedLenderDAI.json';
+import FixedLenderWETH from 'protocol/deployments/kovan/FixedLenderWETH.json';
+
 interface Props {
-  walletAddress: string;
-  network: string;
   auditor: Contract;
   assetsAddresses: Dictionary<string>;
   fixedLender: Contract;
   interestRateModel: Contract;
 }
 
-const DashBoard: NextPage<Props> = ({
-  walletAddress,
-  network,
-  auditor,
-  assetsAddresses,
-  fixedLender,
-  interestRateModel
-}) => {
-  const [maturityPoolDeposits, setMaturityPoolDeposits] = useState<
-    Array<Deposit>
-  >([]);
-  const [maturityPoolBorrows, setMaturityPoolBorrows] = useState<Array<Borrow>>(
-    []
-  );
-  const [smartPoolDeposits, setSmartPoolDeposits] = useState<Array<Deposit>>([])
+const DashBoard: NextPage<Props> = () => {
+  const { address } = useWeb3Context();
+  const { modal, handleModal, modalContent } = useModal();
+
+  const [maturityPoolDeposits, setMaturityPoolDeposits] = useState<Array<Deposit>>([]);
+  const [maturityPoolBorrows, setMaturityPoolBorrows] = useState<Array<Borrow>>([]);
+  const [smartPoolDeposits, setSmartPoolDeposits] = useState<Dictionary<Deposit>>();
+
+  const fixedLenders = [FixedLenderDAI, FixedLenderWETH];
 
   useEffect(() => {
     getData();
-  }, []);
+  }, [address]);
 
   async function getData() {
-    const { address } = await getCurrentWalletConnected();
+    if (!address) return;
+
     const getMaturityPoolDeposits = await request(
-      'https://api.thegraph.com/subgraphs/name/juanigallo/exactly-kovan',
+      'https://api.thegraph.com/subgraphs/name/nicolascastrogarcia/exa-kovan',
       getMaturityPoolDepositsQuery(address)
     );
     const getMaturityPoolBorrows = await request(
-      'https://api.thegraph.com/subgraphs/name/juanigallo/exactly-kovan',
+      'https://api.thegraph.com/subgraphs/name/nicolascastrogarcia/exa-kovan',
       getMaturityPoolBorrowsQuery(address)
     );
 
     const getSmartPoolDeposits = await request(
-      'https://api.thegraph.com/subgraphs/name/juanigallo/exactly-kovan',
+      'https://api.thegraph.com/subgraphs/name/nicolascastrogarcia/exa-kovan',
       getSmartPoolDepositsQuery(address)
     );
 
+    const smartPoolDeposits = formatSmartPoolDeposits(getSmartPoolDeposits.deposits);
     setMaturityPoolDeposits(getMaturityPoolDeposits.deposits);
     setMaturityPoolBorrows(getMaturityPoolBorrows.borrows);
-    setSmartPoolDeposits(getSmartPoolDeposits.deposits)
+    setSmartPoolDeposits(smartPoolDeposits);
+  }
+
+  function showModal(data: Deposit | Borrow, type: String) {
+    if (modalContent?.type) {
+      //in the future we should handle the minimized modal status through a context here
+      return;
+    }
+
+    handleModal({ content: { ...data, type } });
+    setSmartPoolDeposits(smartPoolDeposits);
+  }
+
+  function formatSmartPoolDeposits(rawDeposits: Deposit[]) {
+    let depositsDict: Dictionary<any> = {};
+
+    rawDeposits.forEach((deposit) => {
+      const oldAmount = depositsDict[deposit.symbol]?.amount ?? 0;
+      const newAmount = oldAmount + parseInt(deposit.amount);
+      depositsDict[deposit.symbol] = { ...deposit, amount: newAmount };
+    });
+
+    return depositsDict;
   }
 
   return (
-    <AuditorProvider value={auditor}>
-      <FixedLenderProvider
-        value={{ addresses: assetsAddresses, abi: fixedLender.abi }}
-      >
-        <InterestRateModelProvider value={interestRateModel}>
-          <MobileNavbar walletAddress={walletAddress} network={network} />
-          <Navbar walletAddress={walletAddress} />
+    <AuditorProvider value={Auditor}>
+      <FixedLenderProvider value={fixedLenders}>
+        <InterestRateModelProvider value={InterestRateModel}>
+          {modal && modalContent?.type == 'repay' && (
+            <RepayModal data={modalContent} closeModal={handleModal} />
+          )}
+          {modal && modalContent?.type == 'withdraw' && (
+            <WithdrawModalMP data={modalContent} closeModal={handleModal} />
+          )}
+          {modal && modalContent?.type == 'deposit' && (
+            <Modal contractData={modalContent} closeModal={handleModal} />
+          )}
+          {modal && modalContent?.type == 'withdrawSP' && (
+            <WithdrawModalSP data={modalContent} closeModal={handleModal} />
+          )}
+          <MobileNavbar />
+          <Navbar />
           <MaturityPoolDashboard
             deposits={maturityPoolDeposits}
             borrows={maturityPoolBorrows}
+            showModal={showModal}
           />
-          <SmartPoolDashboard deposits={smartPoolDeposits} walletAddress={walletAddress} />
+          <SmartPoolDashboard deposits={smartPoolDeposits} showModal={showModal} />
           <Footer />
         </InterestRateModelProvider>
       </FixedLenderProvider>
     </AuditorProvider>
   );
 };
-
-export async function getStaticProps() {
-  const getAuditorAbi = await axios.get(
-    'https://abi-versions2.s3.amazonaws.com/latest/contracts/Auditor.sol/Auditor.json'
-  );
-  const getFixedLenderAbi = await axios.get(
-    'https://abi-versions2.s3.amazonaws.com/latest/contracts/FixedLender.sol/FixedLender.json'
-  );
-  const getInterestRateModelAbi = await axios.get(
-    'https://abi-versions2.s3.amazonaws.com/latest/contracts/InterestRateModel.sol/InterestRateModel.json'
-  );
-  const addresses = await axios.get(
-    'https://abi-versions2.s3.amazonaws.com/latest/addresses.json'
-  );
-  const auditorAddress = addresses?.data?.auditor;
-  const interestRateModelAddress = addresses?.data?.interestRateModel;
-
-  return {
-    props: {
-      auditor: {
-        abi: getAuditorAbi.data,
-        address: auditorAddress
-      },
-      interestRateModel: {
-        abi: getInterestRateModelAbi.data,
-        address: interestRateModelAddress
-      },
-      assetsAddresses: addresses.data,
-      fixedLender: {
-        abi: getFixedLenderAbi.data
-      }
-    }
-  };
-}
 
 export default DashBoard;

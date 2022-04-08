@@ -9,7 +9,6 @@ import Stepper from 'components/Stepper';
 import Tooltip from 'components/Tooltip';
 
 import useContractWithSigner from 'hooks/useContractWithSigner';
-import useContract from 'hooks/useContract';
 
 import { SupplyRate } from 'types/SupplyRate';
 import { Error } from 'types/Error';
@@ -30,26 +29,17 @@ import { LangKeys } from 'types/Lang';
 import keys from './translations.json';
 
 import numbers from 'config/numbers.json';
+import useContract from 'hooks/useContract';
 
 type Props = {
-  contractWithSigner: ethers.Contract;
   handleResult: (data: SupplyRate | undefined) => void;
-  hasRate: boolean | undefined;
   address: string;
   assetData: Market | undefined;
   handleTx: (data: Transaction) => void;
-  walletAddress: string;
+  walletAddress: string | null | undefined;
 };
 
-function SupplyForm({
-  contractWithSigner,
-  handleResult,
-  hasRate,
-  address,
-  assetData,
-  handleTx,
-  walletAddress
-}: Props) {
+function SupplyForm({ handleResult, address, assetData, handleTx, walletAddress }: Props) {
   const { date } = useContext(AddressContext);
   const fixedLender = useContext(FixedLenderContext);
   const interestRateModel = useContext(InterestRateModelContext);
@@ -71,25 +61,16 @@ function SupplyForm({
   let underlyingData: UnderlyingData | undefined = undefined;
 
   if (assetData?.symbol) {
-    underlyingData = getUnderlyingData(
-      process.env.NEXT_PUBLIC_NETWORK!,
-      assetData.symbol
-    );
+    underlyingData = getUnderlyingData(process.env.NEXT_PUBLIC_NETWORK!, assetData.symbol);
   }
 
-  const underlyingContract = useContractWithSigner(
-    underlyingData!.address,
-    underlyingData!.abi
-  );
+  const underlyingContract = useContractWithSigner(underlyingData!.address, underlyingData!.abi);
 
-  const interestRateModelContract = useContract(
-    interestRateModel.address!,
-    interestRateModel.abi!
-  );
-  const fixedLenderWithSigner = useContractWithSigner(
-    address,
-    fixedLender?.abi!
-  );
+  const interestRateModelContract = useContract(interestRateModel.address!, interestRateModel.abi!);
+
+  const filteredFixedLender = fixedLender.find((fl) => fl.address == address);
+
+  const fixedLenderWithSigner = useContractWithSigner(address, filteredFixedLender?.abi!);
 
   useEffect(() => {
     if (fixedLenderWithSigner) {
@@ -113,16 +94,11 @@ function SupplyForm({
       address
     );
 
-    const formattedAllowance =
-      allowance && parseFloat(ethers.utils.formatEther(allowance));
+    const formattedAllowance = allowance && parseFloat(ethers.utils.formatEther(allowance));
 
     const amount = qty ?? 0;
 
-    if (
-      formattedAllowance > amount &&
-      !isNaN(amount) &&
-      !isNaN(formattedAllowance)
-    ) {
+    if (formattedAllowance > amount && !isNaN(amount) && !isNaN(formattedAllowance)) {
       setStep(2);
     }
   }
@@ -130,8 +106,7 @@ function SupplyForm({
   async function estimateGas() {
     if (!date) return;
 
-    const gasPriceInGwei =
-      await fixedLenderWithSigner?.contractWithSigner?.provider.getGasPrice();
+    const gasPriceInGwei = await fixedLenderWithSigner?.contractWithSigner?.provider.getGasPrice();
 
     const estimatedGasCost =
       await fixedLenderWithSigner?.contractWithSigner?.estimateGas.depositToMaturityPool(
@@ -180,12 +155,11 @@ function SupplyForm({
     }
 
     try {
-      const tx =
-        await fixedLenderWithSigner?.contractWithSigner?.depositToMaturityPool(
-          ethers.utils.parseUnits(qty!.toString()),
-          parseInt(date.value),
-          '0'
-        );
+      const tx = await fixedLenderWithSigner?.contractWithSigner?.depositToMaturityPool(
+        ethers.utils.parseUnits(qty!.toString()),
+        parseInt(date.value),
+        '0'
+      );
 
       handleTx({ status: 'processing', hash: tx?.hash });
 
@@ -232,9 +206,7 @@ function SupplyForm({
   }
 
   async function getMaxAmount() {
-    const balance = await underlyingContract?.contract?.balanceOf(
-      walletAddress
-    );
+    const balance = await underlyingContract?.contract?.balanceOf(walletAddress);
 
     const max = balance && ethers.utils.formatEther(balance);
 
@@ -277,7 +249,7 @@ function SupplyForm({
           <Tooltip value={translations[lang].endDate} />
         </div>
         <div className={style.inputContainer}>
-          <MaturitySelector />
+          <MaturitySelector address={address} />
         </div>
       </div>
       {error?.status && <p className={style.error}>{error?.msg}</p>}
@@ -293,11 +265,7 @@ function SupplyForm({
         {pending && <p>{translations[lang].pendingTransaction}</p>}
         <div className={style.buttonContainer}>
           <Button
-            text={
-              step == 1
-                ? translations[lang].approve
-                : translations[lang].deposit
-            }
+            text={step == 1 ? translations[lang].approve : translations[lang].deposit}
             onClick={handleClickAction}
             className={qty && qty > 0 && !pending ? 'primary' : 'disabled'}
             disabled={(!qty || qty <= 0) && !pending}

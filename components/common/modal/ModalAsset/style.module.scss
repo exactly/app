@@ -1,0 +1,45 @@
+.assetContainer {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: var(--u3);
+  padding-bottom: var(--u2);
+  border-bottom: 1px solid var(--gray-100);
+  text-align: right;
+
+  .informationContainer {
+    width: 50%;
+    align-self: center;
+    display: flex;
+    gap: var(--u);
+    align-items: center;
+
+    .assetName {
+      margin: 0;
+      color: var(--gray-900);
+      font-weight: 600;
+      font-size: var(--font-20);
+    }
+  }
+
+  .assetPriceContainer {
+    display: flex;
+    gap: var(--u);
+    justify-content: center;
+    flex-direction: column;
+    gap: var(--smallestUnit);
+
+    .price {
+      margin: 0;
+      color: var(--gray-900);
+      font-weight: 600;
+    }
+
+    .secondaryPrice {
+      margin: 0;
+      font-size: var(--font-12);
+      color: var(--gray-500);
+    }
+  }
+}

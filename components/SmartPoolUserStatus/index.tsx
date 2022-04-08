@@ -5,19 +5,20 @@ import Item from './Item';
 import LangContext from 'contexts/LangContext';
 
 import { LangKeys } from 'types/Lang';
-import { Option } from 'react-dropdown';
+import { Deposit } from 'types/Deposit';
+import { Dictionary } from 'types/Dictionary';
 
 import styles from './style.module.scss';
 
 import keys from './translations.json';
-import { Deposit } from 'types/Deposit';
 
 type Props = {
-  deposits: Deposit[],
-  walletAddress: string
+  walletAddress: string | null | undefined;
+  deposits: Dictionary<Deposit> | undefined;
+  showModal: (data: Deposit, type: String) => void;
 };
 
-function SmartPoolUserStatus({ deposits, walletAddress }: Props) {
+function SmartPoolUserStatus({ deposits, walletAddress, showModal }: Props) {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
@@ -27,26 +28,29 @@ function SmartPoolUserStatus({ deposits, walletAddress }: Props) {
         <div className={styles.column}>
           <div className={styles.tableRow}>
             <span className={styles.symbol}>{translations[lang].asset}</span>
-            <span className={styles.title}>
-              {translations[lang].walletBalance}
-            </span>
-            <span className={styles.title}>
-              {translations[lang].currentBalance}
-            </span>
+            <span className={styles.title}>{translations[lang].walletBalance}</span>
+            <span className={styles.title}>{translations[lang].currentBalance}</span>
             <span className={styles.title}>{translations[lang].liquidity}</span>
-            <span className={styles.title}>
-              {translations[lang].collateral}
-            </span>
+            <span className={styles.title}>{translations[lang].collateral}</span>
 
             <span className={styles.title} />
           </div>
 
-          {deposits.map((deposit: Deposit, key: number) => {
-            return (
-              <Item key={key} amount={deposit.amount} symbol={deposit.symbol} walletAddress={walletAddress} />
-            )
-          })}
+          {deposits &&
+            Object.keys(deposits).map((symbol: string, key: number) => {
+              const amount: string = JSON.stringify(deposits[symbol].amount);
 
+              return (
+                <Item
+                  key={key}
+                  amount={amount}
+                  symbol={symbol}
+                  walletAddress={walletAddress}
+                  deposit={deposits[symbol]}
+                  showModal={showModal}
+                />
+              );
+            })}
         </div>
       </div>
     </div>
