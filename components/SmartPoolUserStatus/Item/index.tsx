@@ -45,7 +45,7 @@ function Item({ symbol, amount, walletAddress, showModal, deposit }: Props) {
   }, []);
 
   async function getCurrentBalance() {
-    const contractData = await getContractData(underlyingData!.address, underlyingData!.abi, false);
+    const contractData = await getContractData(underlyingData!.address, underlyingData!.abi);
     const balance = await contractData?.balanceOf(walletAddress);
 
     if (balance) {

@@ -23,6 +23,8 @@ import FixedLenderContext from 'contexts/FixedLenderContext';
 import InterestRateModelContext from 'contexts/InterestRateModelContext';
 import LangContext from 'contexts/LangContext';
 import PoolAccountingContext from 'contexts/PoolAccountingContext';
+import { useWeb3Context } from 'contexts/Web3Context';
+
 import { getContractData } from 'utils/contracts';
 
 type Props = {
@@ -34,6 +36,8 @@ type Props = {
 function BorrowForm({ handleResult, address, handleTx }: Props) {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
+
+  const { web3Provider } = useWeb3Context();
 
   const { date } = useContext(AddressContext);
   const interestRateModel = useContext(InterestRateModelContext);
@@ -56,7 +60,12 @@ function BorrowForm({ handleResult, address, handleTx }: Props) {
 
   async function getFixedLenderContract() {
     const filteredFixedLender = fixedLenderData.find((fl) => fl.address == address);
-    const fixedLenderWithSigner = await getContractData(address, filteredFixedLender?.abi!, true);
+    const fixedLenderWithSigner = await getContractData(
+      address,
+      filteredFixedLender?.abi!,
+      web3Provider?.getSigner()
+    );
+
     setFixedLenderWithSigner(fixedLenderWithSigner);
     getPoolAccountingContract(fixedLenderWithSigner);
   }
@@ -64,8 +73,7 @@ function BorrowForm({ handleResult, address, handleTx }: Props) {
   async function getPoolAccountingContract(fixedLenderWithSigner: Contract | undefined) {
     const poolAccounting = await getContractData(
       fixedLenderWithSigner?.poolAccounting(),
-      poolAccountingData.abi!,
-      false
+      poolAccountingData.abi!
     );
     setPoolAccounting(poolAccounting);
   }
@@ -125,7 +133,7 @@ function BorrowForm({ handleResult, address, handleTx }: Props) {
     }
 
     try {
-      const tx = await fixedLenderWithSigner?.contractWithSigner?.borrowFromMaturityPool(
+      const tx = await fixedLenderWithSigner?.borrowFromMaturityPool(
         ethers.utils.parseUnits(qty!.toString()),
         parseInt(date.value),
         ethers.utils.parseUnits('1000')
@@ -148,14 +156,13 @@ function BorrowForm({ handleResult, address, handleTx }: Props) {
   async function estimateGas() {
     if (!date) return;
 
-    const gasPriceInGwei = await fixedLenderWithSigner?.contractWithSigner?.provider.getGasPrice();
+    const gasPriceInGwei = await fixedLenderWithSigner?.provider.getGasPrice();
 
-    const estimatedGasCost =
-      await fixedLenderWithSigner?.contractWithSigner?.estimateGas.borrowFromMaturityPool(
-        ethers.utils.parseUnits(1!.toString()),
-        parseInt(date.value),
-        ethers.utils.parseUnits('1000')
-      );
+    const estimatedGasCost = await fixedLenderWithSigner?.estimateGas.borrowFromMaturityPool(
+      ethers.utils.parseUnits(1!.toString()),
+      parseInt(date.value),
+      ethers.utils.parseUnits('1000')
+    );
 
     if (gasPriceInGwei && estimatedGasCost) {
       const gwei = await ethers.utils.formatUnits(gasPriceInGwei, 'gwei');
