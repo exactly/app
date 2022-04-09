@@ -55,10 +55,11 @@ function BorrowForm({ handleResult, contractAddress, handleTx }: Props) {
     undefined
   );
 
-  async function getFixedLenderContract() {
+  async function getContracts() {
     const filteredFixedLender = fixedLenderData.find((fl) => fl.address == contractAddress);
+
     const fixedLenderWithSigner = await getContractData(
-      contractAddress,
+      filteredFixedLender?.address!,
       filteredFixedLender?.abi!,
       web3Provider?.getSigner()
     );
@@ -74,7 +75,7 @@ function BorrowForm({ handleResult, contractAddress, handleTx }: Props) {
   }
 
   useEffect(() => {
-    getFixedLenderContract();
+    getContracts();
   }, []);
 
   useEffect(() => {
@@ -83,11 +84,11 @@ function BorrowForm({ handleResult, contractAddress, handleTx }: Props) {
     }
   }, [qty, date, fixedLenderWithSigner]);
 
-  useEffect(() => {
-    if (fixedLenderWithSigner && !gas) {
-      estimateGas();
-    }
-  }, [fixedLenderWithSigner]);
+  // useEffect(() => {
+  //   if (fixedLenderWithSigner && !gas) {
+  //     estimateGas();
+  //   }
+  // }, [fixedLenderWithSigner]);
 
   async function calculateRate() {
     if (!qty || !date) {
@@ -103,8 +104,6 @@ function BorrowForm({ handleResult, contractAddress, handleTx }: Props) {
 
     const currentTimestamp = Math.floor(Date.now() / 1000);
 
-    //b 0 / s 1 / smS 202
-    //
     //Borrow
     try {
       const borrowRate = await interestRateModelContract?.getRateToBorrow(
@@ -117,6 +116,7 @@ function BorrowForm({ handleResult, contractAddress, handleTx }: Props) {
       );
 
       const formattedBorrowRate = borrowRate && ethers.utils.formatEther(borrowRate);
+
       formattedBorrowRate && handleResult({ potentialRate: formattedBorrowRate, hasRate: true });
     } catch (error: any) {
       return setError({

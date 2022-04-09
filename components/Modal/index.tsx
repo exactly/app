@@ -90,10 +90,9 @@ function Modal({ contractData, closeModal }: Props) {
               {contractWithSigner && contractData.type == 'deposit' && assetData && (
                 <SupplyForm
                   handleResult={handleResult}
-                  address={contractData.address}
+                  contractAddress={contractData.address}
                   assetData={assetData}
                   handleTx={(data: Transaction) => setTx(data)}
-                  walletAddress={address}
                 />
               )}
 

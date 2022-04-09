@@ -29,6 +29,7 @@ import { getUnderlyingData } from 'utils/utils';
 import keys from './translations.json';
 
 import numbers from 'config/numbers.json';
+import { getContractData } from 'utils/contracts';
 
 type Props = {
   contractData: any;
@@ -37,7 +38,9 @@ type Props = {
 
 function SmartPoolModal({ contractData, closeModal }: Props) {
   const fixedLender = useContext(FixedLenderContext);
-  const { address } = useWeb3Context();
+
+  const { address, web3Provider } = useWeb3Context();
+
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
@@ -65,13 +68,18 @@ function SmartPoolModal({ contractData, closeModal }: Props) {
     underlyingData = getUnderlyingData(process.env.NEXT_PUBLIC_NETWORK!, assetData.symbol);
   }
 
-  const underlyingContract = useContractWithSigner(underlyingData!.address, underlyingData!.abi);
+  const underlyingContract = getContractData(
+    underlyingData!.address,
+    underlyingData!.abi,
+    web3Provider?.getSigner()
+  );
 
   const filteredFixedLender = fixedLender.find((fl) => fl.address == contractData.address);
 
-  const fixedLenderWithSigner = useContractWithSigner(
-    contractData.address,
-    filteredFixedLender?.abi!
+  const fixedLenderWithSigner = getContractData(
+    filteredFixedLender?.address!,
+    filteredFixedLender?.abi!,
+    web3Provider?.getSigner()
   );
 
   useEffect(() => {
@@ -85,10 +93,7 @@ function SmartPoolModal({ contractData, closeModal }: Props) {
   }, [fixedLenderWithSigner]);
 
   async function checkAllowance() {
-    const allowance = await underlyingContract?.contractWithSigner?.allowance(
-      address,
-      contractData.address
-    );
+    const allowance = await underlyingContract?.allowance(address, contractData.address);
 
     const formattedAllowance = allowance && parseFloat(ethers.utils.formatEther(allowance));
 
@@ -108,7 +113,7 @@ function SmartPoolModal({ contractData, closeModal }: Props) {
       return setError({ status: true, msg: translations[lang].error });
     }
     try {
-      const tx = await fixedLenderWithSigner?.contractWithSigner?.deposit(
+      const tx = await fixedLenderWithSigner?.deposit(
         ethers.utils.parseUnits(qty!.toString()),
         address
       );
@@ -125,10 +130,11 @@ function SmartPoolModal({ contractData, closeModal }: Props) {
 
   async function approve() {
     try {
-      const approval = await underlyingContract?.contractWithSigner?.approve(
+      const approval = await underlyingContract?.approve(
         assetData.address,
         ethers.utils.parseUnits(numbers.approvalAmount!.toString())
       );
+
       setPending((pending) => !pending);
 
       await approval.wait();
@@ -149,7 +155,7 @@ function SmartPoolModal({ contractData, closeModal }: Props) {
   }
 
   async function getMaxAmount() {
-    const balance = await underlyingContract?.contract?.balanceOf(address);
+    const balance = await underlyingContract?.balanceOf(address);
 
     const max = balance && ethers.utils.formatEther(balance);
 
@@ -160,9 +166,9 @@ function SmartPoolModal({ contractData, closeModal }: Props) {
   }
 
   async function estimateGas() {
-    const gasPriceInGwei = await fixedLenderWithSigner?.contractWithSigner?.provider.getGasPrice();
+    const gasPriceInGwei = await fixedLenderWithSigner?.provider.getGasPrice();
 
-    const estimatedGasCost = await fixedLenderWithSigner?.contractWithSigner?.estimateGas.deposit(
+    const estimatedGasCost = await fixedLenderWithSigner?.estimateGas.deposit(
       ethers.utils.parseUnits(1!.toString()),
       address
     );

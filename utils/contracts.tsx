@@ -1,6 +1,6 @@
 import { ethers } from 'ethers';
 
-export async function getContractData(
+export function getContractData(
   address: string,
   abi: ethers.ContractInterface,
   providerData?: ethers.Signer
