@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useState } from 'react';
 import styles from './style.module.scss';
 
 import SupplyForm from 'components/SupplyForm';
@@ -9,9 +9,6 @@ import ModalGif from 'components/ModalGif';
 import MinimizedModal from 'components/MinimizedModal';
 import Overlay from 'components/Overlay';
 
-import useContractWithSigner from 'hooks/useContractWithSigner';
-
-import AuditorContext from 'contexts/AuditorContext';
 import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 
@@ -23,6 +20,7 @@ import { LangKeys } from 'types/Lang';
 import keys from './translations.json';
 
 import numbers from 'config/numbers.json';
+import { getContractData } from 'utils/contracts';
 
 type Props = {
   contractData: any;
@@ -30,7 +28,6 @@ type Props = {
 };
 
 function Modal({ contractData, closeModal }: Props) {
-  const auditor = useContext(AuditorContext);
   const { address } = useWeb3Context();
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
@@ -44,8 +41,6 @@ function Modal({ contractData, closeModal }: Props) {
   const [tx, setTx] = useState<Transaction | undefined>(undefined);
 
   const [minimized, setMinimized] = useState<Boolean>(false);
-
-  const { contractWithSigner } = useContractWithSigner(contractData?.address, auditor?.abi!);
 
   function handleResult(data: SupplyRate | undefined) {
     setHasRate(data?.hasRate);
@@ -87,7 +82,7 @@ function Modal({ contractData, closeModal }: Props) {
                   onChange={(marketData) => setAssetData(marketData)}
                 />
               </div>
-              {contractWithSigner && contractData.type == 'deposit' && assetData && (
+              {address && contractData.type == 'deposit' && assetData && (
                 <SupplyForm
                   handleResult={handleResult}
                   contractAddress={contractData.address}
@@ -96,7 +91,7 @@ function Modal({ contractData, closeModal }: Props) {
                 />
               )}
 
-              {contractWithSigner && contractData.type == 'borrow' && assetData && (
+              {address && contractData.type == 'borrow' && assetData && (
                 <BorrowForm
                   handleResult={handleResult}
                   contractAddress={contractData.address}
@@ -104,7 +99,7 @@ function Modal({ contractData, closeModal }: Props) {
                 />
               )}
 
-              {!contractWithSigner && <Loading />}
+              {(!contractData || !address) && <Loading />}
 
               {potentialRate && (
                 <section className={styles.right}>

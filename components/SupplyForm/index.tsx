@@ -111,7 +111,7 @@ function SupplyForm({ handleResult, contractAddress, assetData, handleTx }: Prop
     if (!date) return;
 
     const gasPriceInGwei = await fixedLenderWithSigner?.provider.getGasPrice();
-
+    console.log(gasPriceInGwei);
     const estimatedGasCost = await fixedLenderWithSigner?.estimateGas.depositAtMaturity(
       parseInt(date.value),
       ethers.utils.parseUnits(1!.toString()),

@@ -84,11 +84,11 @@ function BorrowForm({ handleResult, contractAddress, handleTx }: Props) {
     }
   }, [qty, date, fixedLenderWithSigner]);
 
-  // useEffect(() => {
-  //   if (fixedLenderWithSigner && !gas) {
-  //     estimateGas();
-  //   }
-  // }, [fixedLenderWithSigner]);
+  useEffect(() => {
+    if (fixedLenderWithSigner && !gas) {
+      estimateGas();
+    }
+  }, [fixedLenderWithSigner]);
 
   async function calculateRate() {
     if (!qty || !date) {
@@ -130,6 +130,8 @@ function BorrowForm({ handleResult, contractAddress, handleTx }: Props) {
     if (!qty || !date) {
       return setError({ status: true, msg: translations[lang].error });
     }
+
+    const asset = await fixedLenderWithSigner;
 
     try {
       const tx = await fixedLenderWithSigner?.borrowAtMaturity(

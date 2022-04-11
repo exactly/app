@@ -52,7 +52,7 @@ const DashBoard: NextPage<Props> = () => {
   const [smartPoolDeposits, setSmartPoolDeposits] = useState<Dictionary<Deposit>>();
 
   const fixedLenders = [FixedLenderDAI, FixedLenderWETH];
-  console.log(fixedLenders, 1234);
+
   useEffect(() => {
     getData();
   }, [address]);

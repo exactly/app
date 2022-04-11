@@ -86,10 +86,11 @@ function RepayModal({ data, closeModal }: Props) {
   }
 
   async function repay() {
-    const repay = await fixedLenderWithSigner?.withdrawFromMaturity(
-      address,
+    const repay = await fixedLenderWithSigner?.repayAtMaturity(
+      maturityDate,
       ethers.utils.parseUnits(qty!),
-      maturityDate
+      ethers.utils.parseUnits(qty!),
+      address
     );
   }
 

@@ -3,8 +3,6 @@ import { useEffect, useState, useContext } from 'react';
 import Select from 'components/common/Select';
 import Tooltip from 'components/Tooltip';
 
-import useContract from 'hooks/useContract';
-
 import { AddressContext } from 'contexts/AddressContext';
 import AuditorContext from 'contexts/AuditorContext';
 
@@ -17,6 +15,7 @@ import { Address } from 'types/Address';
 import { Option } from 'react-dropdown';
 
 import style from './style.module.scss';
+import { getContractData } from 'utils/contracts';
 
 type Props = {
   title?: Boolean;
@@ -26,20 +25,20 @@ type Props = {
 
 function AssetSelector({ title, defaultAddress, onChange }: Props) {
   const { address, setAddress } = useContext(AddressContext);
-  const auditor = useContext(AuditorContext);
+  const auditorData = useContext(AuditorContext);
 
-  const { contract } = useContract(auditor.address!, auditor.abi!);
+  const auditorContract = getContractData(auditorData.address!, auditorData.abi!);
   const [selectOptions, setSelectOptions] = useState<Array<Option>>([]);
   const [allMarketsData, setAllMarketsData] = useState<Array<Market>>([]);
 
   useEffect(() => {
-    if (contract) {
+    if (auditorContract) {
       getMarkets();
     }
-  }, [contract]);
+  }, []);
 
   async function getMarkets() {
-    const marketsAddresses = await contract?.getAllMarkets();
+    const marketsAddresses = await auditorContract?.getAllMarkets();
     const marketsData: Array<UnformattedMarket> = [];
 
     if (!marketsAddresses) {
@@ -48,7 +47,7 @@ function AssetSelector({ title, defaultAddress, onChange }: Props) {
     }
 
     marketsAddresses.map((address: string) => {
-      return marketsData.push(contract?.getMarketData(address));
+      return marketsData.push(auditorContract?.getMarketData(address));
     });
 
     Promise.all(marketsData).then((data: Array<UnformattedMarket>) => {

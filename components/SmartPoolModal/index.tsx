@@ -11,8 +11,6 @@ import ModalGif from 'components/ModalGif';
 import MinimizedModal from 'components/MinimizedModal';
 import Overlay from 'components/Overlay';
 
-import useContractWithSigner from 'hooks/useContractWithSigner';
-
 import FixedLenderContext from 'contexts/FixedLenderContext';
 import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';

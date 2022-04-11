@@ -13,7 +13,6 @@ import MobileNavbar from 'components/MobileNavbar';
 import SmartPoolList from 'components/SmartPoolList';
 import SmartPoolModal from 'components/SmartPoolModal';
 
-import useContract from 'hooks/useContract';
 import useModal from 'hooks/useModal';
 
 import { AuditorProvider } from 'contexts/AuditorContext';
@@ -24,6 +23,8 @@ import { Market } from 'types/Market';
 import { UnformattedMarket } from 'types/UnformattedMarket';
 
 import dictionary from 'dictionary/en.json';
+
+import { getContractData } from 'utils/contracts';
 
 //Contracts
 import InterestRateModel from 'protocol/deployments/kovan/InterestRateModel.json';
@@ -37,20 +38,22 @@ const Pools: NextPage<Props> = () => {
   const { modal, handleModal, modalContent } = useModal();
 
   const [markets, setMarkets] = useState<Array<Market>>([]);
-  const { contract } = useContract(Auditor?.address, Auditor?.abi);
+
+  const auditorContract = getContractData(Auditor.address!, Auditor.abi!);
 
   useEffect(() => {
-    if (contract) {
+    if (auditorContract) {
       getMarkets();
     }
-  }, [contract]);
+  }, []);
 
   async function getMarkets() {
-    const marketsAddresses = await contract?.getAllMarkets();
+    const marketsAddresses = await auditorContract?.getAllMarkets();
+
     const marketsData: Array<UnformattedMarket> = [];
 
     marketsAddresses.map((address: string) => {
-      marketsData.push(contract?.getMarketData(address));
+      marketsData.push(auditorContract?.getMarketData(address));
     });
 
     Promise.all(marketsData).then((data: Array<UnformattedMarket>) => {
