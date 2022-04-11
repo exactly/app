@@ -131,8 +131,6 @@ function BorrowForm({ handleResult, contractAddress, handleTx }: Props) {
       return setError({ status: true, msg: translations[lang].error });
     }
 
-    const asset = await fixedLenderWithSigner;
-
     try {
       const tx = await fixedLenderWithSigner?.borrowAtMaturity(
         parseInt(date.value),
@@ -163,8 +161,8 @@ function BorrowForm({ handleResult, contractAddress, handleTx }: Props) {
 
     const estimatedGasCost = await fixedLenderWithSigner?.estimateGas.borrowAtMaturity(
       parseInt(date.value),
-      ethers.utils.parseUnits(1!.toString()),
-      ethers.utils.parseUnits(1!.toString()),
+      ethers.utils.parseUnits(0.1!.toString()),
+      ethers.utils.parseUnits(0.1!.toString()),
       address,
       address
     );
