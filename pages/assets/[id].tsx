@@ -12,8 +12,10 @@ import AssetTable from 'components/AssetTable';
 import SmartPoolInfo from 'components/SmartPoolInfo';
 import SmartPoolChart from 'components/SmartPoolChart';
 import MobileNavbar from 'components/MobileNavbar';
-import Modal from 'components/Modal';
 import Paginator from 'components/Paginator';
+import DepositModalMP from 'components/DepositModalMP';
+import BorrowModal from 'components/BorrowModal';
+import DepositModalSP from 'components/DepositModalSP';
 
 import { Maturity } from 'types/Maturity';
 import { LangKeys } from 'types/Lang';
@@ -129,9 +131,19 @@ const Asset: NextPage<Props> = ({ symbol }) => {
         <InterestRateModelProvider value={InterestRateModel}>
           <MobileNavbar />
           <Navbar />
-          {modal && modalContent?.type != 'smartDeposit' && (
-            <Modal contractData={modalContent} closeModal={handleModal} />
+
+          {modal && modalContent?.type == 'deposit' && (
+            <DepositModalMP data={modalContent} closeModal={handleModal} />
           )}
+
+          {modal && modalContent?.type == 'smartDeposit' && (
+            <DepositModalSP data={modalContent} closeModal={handleModal} />
+          )}
+
+          {modal && modalContent?.type == 'borrow' && (
+            <BorrowModal data={modalContent} closeModal={handleModal} />
+          )}
+
           <section className={style.container}>
             <section className={style.assetData}>
               <div className={style.assetContainer}>
@@ -168,7 +180,7 @@ const Asset: NextPage<Props> = ({ symbol }) => {
               })}
             </div>
             <div className={style.smartPoolContainer}>
-              <SmartPoolInfo />
+              <SmartPoolInfo showModal={(type: string) => showModal(type)} />
               <SmartPoolChart />
             </div>
           </section>

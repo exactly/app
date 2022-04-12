@@ -10,7 +10,8 @@ import SmartPoolDashboard from 'components/SmartPoolDashboard';
 import RepayModal from 'components/RepayModal';
 import WithdrawModalMP from 'components/WithdrawModalMP';
 import WithdrawModalSP from 'components/WithdrawModalSP';
-import Modal from 'components/Modal';
+import DepositModalMP from 'components/DepositModalMP';
+import DepositModalSP from 'components/DepositModalSP';
 
 import { AuditorProvider } from 'contexts/AuditorContext';
 import { FixedLenderProvider } from 'contexts/FixedLenderContext';
@@ -44,7 +45,7 @@ interface Props {
 }
 
 const DashBoard: NextPage<Props> = () => {
-  const { address } = useWeb3Context();
+  const { walletAddress } = useWeb3Context();
   const { modal, handleModal, modalContent } = useModal();
 
   const [maturityPoolDeposits, setMaturityPoolDeposits] = useState<Array<Deposit>>([]);
@@ -55,23 +56,23 @@ const DashBoard: NextPage<Props> = () => {
 
   useEffect(() => {
     getData();
-  }, [address]);
+  }, [walletAddress]);
 
   async function getData() {
-    if (!address) return;
+    if (!walletAddress) return;
 
     const getMaturityPoolDeposits = await request(
       'https://api.thegraph.com/subgraphs/name/nicolascastrogarcia/exa-kovan',
-      getMaturityPoolDepositsQuery(address)
+      getMaturityPoolDepositsQuery(walletAddress)
     );
     const getMaturityPoolBorrows = await request(
       'https://api.thegraph.com/subgraphs/name/nicolascastrogarcia/exa-kovan',
-      getMaturityPoolBorrowsQuery(address)
+      getMaturityPoolBorrowsQuery(walletAddress)
     );
 
     const getSmartPoolDeposits = await request(
       'https://api.thegraph.com/subgraphs/name/nicolascastrogarcia/exa-kovan',
-      getSmartPoolDepositsQuery(address)
+      getSmartPoolDepositsQuery(walletAddress)
     );
 
     const smartPoolDeposits = formatSmartPoolDeposits(getSmartPoolDeposits.deposits);
@@ -109,15 +110,23 @@ const DashBoard: NextPage<Props> = () => {
           {modal && modalContent?.type == 'repay' && (
             <RepayModal data={modalContent} closeModal={handleModal} />
           )}
+
+          {modal && modalContent?.type == 'deposit' && (
+            <DepositModalMP data={modalContent} closeModal={handleModal} />
+          )}
+
           {modal && modalContent?.type == 'withdraw' && (
             <WithdrawModalMP data={modalContent} closeModal={handleModal} />
           )}
-          {modal && modalContent?.type == 'deposit' && (
-            <Modal contractData={modalContent} closeModal={handleModal} />
+
+          {modal && modalContent?.type == 'smartDeposit' && (
+            <DepositModalSP data={modalContent} closeModal={handleModal} />
           )}
+
           {modal && modalContent?.type == 'withdrawSP' && (
             <WithdrawModalSP data={modalContent} closeModal={handleModal} />
           )}
+
           <MobileNavbar />
           <Navbar />
           <MaturityPoolDashboard

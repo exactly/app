@@ -22,7 +22,7 @@ type Props = {
 function SmartPoolDashboard({ deposits, showModal }: Props) {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
-  const { address } = useWeb3Context();
+  const { walletAddress } = useWeb3Context();
 
   return (
     <section className={styles.container}>
@@ -30,7 +30,11 @@ function SmartPoolDashboard({ deposits, showModal }: Props) {
         <p className={styles.title}>{translations[lang].smartPool}</p>
         <Tooltip value={translations[lang].smartPool} />
       </div>
-      <SmartPoolUserStatus deposits={deposits} walletAddress={address} showModal={showModal} />
+      <SmartPoolUserStatus
+        deposits={deposits}
+        walletAddress={walletAddress}
+        showModal={showModal}
+      />
     </section>
   );
 }

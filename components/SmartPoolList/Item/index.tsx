@@ -18,7 +18,7 @@ import { getContractData } from 'utils/contracts';
 
 type Props = {
   market: Market;
-  showModal: (address: Market['address'], type: String) => void;
+  showModal: (marketData: Market, type: String) => void;
   src: string;
 };
 
@@ -51,7 +51,7 @@ function Item({ market, showModal, src }: Props) {
   }, [date, fixedLender]);
 
   function handleClick() {
-    showModal(market?.address, 'smartDeposit');
+    showModal(market, 'smartDeposit');
   }
 
   async function getMarketData() {

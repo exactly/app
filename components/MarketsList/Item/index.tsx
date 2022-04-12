@@ -19,13 +19,14 @@ import { getContractData } from 'utils/contracts';
 
 type Props = {
   market: Market;
-  showModal: (address: Market['address'], type: 'borrow' | 'deposit') => void;
+  showModal: (marketData: Market, type: 'borrow' | 'deposit') => void;
   type: 'borrow' | 'deposit';
   src: string;
 };
 
 function Item({ market, showModal, type, src }: Props) {
   const { date } = useContext(AddressContext);
+
   const fixedLenderData = useContext(FixedLenderContext);
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
@@ -57,7 +58,7 @@ function Item({ market, showModal, type, src }: Props) {
   }
 
   function handleClick() {
-    showModal(market?.address, type);
+    showModal(market, type);
   }
 
   async function getMarketData() {

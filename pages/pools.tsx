@@ -5,13 +5,14 @@ import { ethers } from 'ethers';
 
 import MarketsList from 'components/MarketsList';
 import MaturitySelector from 'components/MaturitySelector';
-import Modal from 'components/Modal';
 import Navbar from 'components/Navbar';
 import CurrentNetwork from 'components/CurrentNetwork';
 import Footer from 'components/Footer';
 import MobileNavbar from 'components/MobileNavbar';
 import SmartPoolList from 'components/SmartPoolList';
-import SmartPoolModal from 'components/SmartPoolModal';
+import DepositModalMP from 'components/DepositModalMP';
+import BorrowModal from 'components/BorrowModal';
+import DepositModalSP from 'components/DepositModalSP';
 
 import useModal from 'hooks/useModal';
 
@@ -87,14 +88,14 @@ const Pools: NextPage<Props> = () => {
     return formattedMarkets;
   }
 
-  function showModal(address: Market['address'], type: String) {
+  function showModal(marketData: Market, type: String) {
     if (modalContent?.type) {
       //in the future we should handle the minimized modal status through a context here
       return;
     }
 
     const data = markets.find((market) => {
-      return market.address === address;
+      return market.address === marketData.address;
     });
 
     handleModal({ content: { ...data, type } });
@@ -104,12 +105,19 @@ const Pools: NextPage<Props> = () => {
     <AuditorProvider value={Auditor}>
       <FixedLenderProvider value={[FixedLenderDAI, FixedLenderWETH]}>
         <InterestRateModelProvider value={InterestRateModel}>
-          {modal && modalContent?.type != 'smartDeposit' && (
-            <Modal contractData={modalContent} closeModal={handleModal} />
+          
+          {modal && modalContent?.type == 'deposit' && (
+            <DepositModalMP data={modalContent} closeModal={handleModal} />
           )}
+
           {modal && modalContent?.type == 'smartDeposit' && (
-            <SmartPoolModal contractData={modalContent} closeModal={handleModal} />
+            <DepositModalSP data={modalContent} closeModal={handleModal} />
           )}
+
+          {modal && modalContent?.type == 'borrow' && (
+            <BorrowModal data={modalContent} closeModal={handleModal} />
+          )}
+
           <MobileNavbar />
           <Navbar />
           <CurrentNetwork />

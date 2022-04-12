@@ -114,7 +114,13 @@ function Item({ symbol, amount, walletAddress, showModal, deposit }: Props) {
       </span>
       <div className={styles.actions}>
         <div className={styles.buttonContainer}>
-          <Button text={translations[lang].deposit} className="primary" />
+          <Button
+            text={translations[lang].deposit}
+            className="primary"
+            onClick={() =>
+              showModal({ ...deposit, amount: JSON.stringify(deposit.amount) }, 'smartDeposit')
+            }
+          />
         </div>
 
         <div className={styles.buttonContainer}>

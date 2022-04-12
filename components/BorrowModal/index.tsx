@@ -15,17 +15,19 @@ import Overlay from 'components/Overlay';
 import { Borrow } from 'types/Borrow';
 import { Deposit } from 'types/Deposit';
 import { LangKeys } from 'types/Lang';
+import { UnderlyingData } from 'types/Underlying';
 import { Gas } from 'types/Gas';
 import { Transaction } from 'types/Transaction';
 
-import parseTimestamp from 'utils/parseTimestamp';
 import { getContractData } from 'utils/contracts';
+import { getUnderlyingData } from 'utils/utils';
 
 import styles from './style.module.scss';
 
 import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 import FixedLenderContext from 'contexts/FixedLenderContext';
+import { AddressContext } from 'contexts/AddressContext';
 
 import keys from './translations.json';
 
@@ -34,9 +36,12 @@ type Props = {
   closeModal: (props: any) => void;
 };
 
-function RepayModal({ data, closeModal }: Props) {
-  const { symbol, maturityDate, amount } = data;
-  const { walletAddress, web3Provider } = useWeb3Context();
+function BorrowModal({ data, closeModal }: Props) {
+  const { symbol } = data;
+
+  const { web3Provider, walletAddress } = useWeb3Context();
+
+  const { date } = useContext(AddressContext);
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
@@ -44,18 +49,26 @@ function RepayModal({ data, closeModal }: Props) {
   const fixedLenderData = useContext(FixedLenderContext);
 
   const [qty, setQty] = useState<string>('0');
-  const [isLateRepay, setIsLateRepay] = useState<boolean>(false);
-  const parsedAmount = ethers.utils.formatUnits(amount, 18);
-  const [gas, setGas] = useState<Gas | undefined>();
+  const [walletBalance, setWalletBalance] = useState<string | undefined>(undefined);
+  const [gas, setGas] = useState<Gas | undefined>(undefined);
   const [tx, setTx] = useState<Transaction | undefined>(undefined);
-  const [minimized, setMinimized] = useState<boolean>(false);
+  const [minimized, setMinimized] = useState<Boolean>(false);
 
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
     undefined
   );
 
+  let underlyingData: UnderlyingData | undefined = undefined;
+
+  if (symbol) {
+    underlyingData = getUnderlyingData(process.env.NEXT_PUBLIC_NETWORK!, symbol.toLowerCase());
+  }
+
+  const underlyingContract = getContractData(underlyingData!.address, underlyingData!.abi);
+
   useEffect(() => {
     getFixedLenderContract();
+    getWalletBalance();
   }, []);
 
   useEffect(() => {
@@ -64,15 +77,59 @@ function RepayModal({ data, closeModal }: Props) {
     }
   }, [fixedLenderWithSigner]);
 
-  useEffect(() => {
-    const repay = Date.now() / 1000 > parseInt(maturityDate);
+  async function getWalletBalance() {
+    const walletBalance = await underlyingContract?.balanceOf(walletAddress);
 
-    setIsLateRepay(repay);
-  }, [maturityDate]);
+    const formattedBalance = walletBalance && ethers.utils.formatEther(walletBalance);
 
-  useEffect(() => {
-    getFixedLenderContract();
-  }, []);
+    if (formattedBalance) {
+      setWalletBalance(formattedBalance);
+    }
+  }
+
+  async function onMax() {
+    walletBalance && setQty(walletBalance);
+  }
+
+  function handleInputChange(e: ChangeEvent<HTMLInputElement>) {
+    setQty(e.target.value);
+  }
+
+  async function borrow() {
+    const borrow = await fixedLenderWithSigner?.borrowAtMaturity(
+      parseInt(date!.value),
+      ethers.utils.parseUnits(qty!),
+      ethers.utils.parseUnits(qty!),
+      walletAddress,
+      walletAddress
+    );
+
+    setTx({ status: 'processing', hash: borrow?.hash });
+
+    const status = await borrow.wait();
+
+    setTx({ status: 'success', hash: status?.transactionHash });
+  }
+
+  async function estimateGas() {
+    const gasPriceInGwei = await fixedLenderWithSigner?.provider.getGasPrice();
+
+    const estimatedGasCost = await fixedLenderWithSigner?.estimateGas.borrowAtMaturity(
+      parseInt(date!.value),
+      ethers.utils.parseUnits(qty!),
+      ethers.utils.parseUnits(qty!),
+      walletAddress,
+      walletAddress
+    );
+
+    if (gasPriceInGwei && estimatedGasCost) {
+      const gwei = await ethers.utils.formatUnits(gasPriceInGwei, 'gwei');
+      const gasCost = await ethers.utils.formatUnits(estimatedGasCost, 'gwei');
+      const eth = parseFloat(gwei) * parseFloat(gasCost);
+
+      setGas({ eth: eth.toFixed(8), gwei: parseFloat(gwei).toFixed(1) });
+    }
+  }
 
   async function getFixedLenderContract() {
     const filteredFixedLender = fixedLenderData.find((contract) => {
@@ -91,73 +148,27 @@ function RepayModal({ data, closeModal }: Props) {
     setFixedLenderWithSigner(fixedLender);
   }
 
-  function onMax() {
-    setQty(parsedAmount);
-  }
-
-  function handleInputChange(e: ChangeEvent<HTMLInputElement>) {
-    setQty(e.target.value);
-  }
-
-  async function repay() {
-    const repay = await fixedLenderWithSigner?.repayAtMaturity(
-      maturityDate,
-      ethers.utils.parseUnits(qty!),
-      ethers.utils.parseUnits(qty!),
-      walletAddress
-    );
-
-    setTx({ status: 'processing', hash: repay?.hash });
-
-    const status = await repay.wait();
-
-    setTx({ status: 'success', hash: status?.transactionHash });
-  }
-
-  async function estimateGas() {
-    const gasPriceInGwei = await fixedLenderWithSigner?.provider.getGasPrice();
-
-    const estimatedGasCost = await fixedLenderWithSigner?.estimateGas.repayAtMaturity(
-      maturityDate,
-      ethers.utils.parseUnits(qty!),
-      ethers.utils.parseUnits(qty!),
-      walletAddress
-    );
-
-    if (gasPriceInGwei && estimatedGasCost) {
-      const gwei = await ethers.utils.formatUnits(gasPriceInGwei, 'gwei');
-      const gasCost = await ethers.utils.formatUnits(estimatedGasCost, 'gwei');
-      const eth = parseFloat(gwei) * parseFloat(gasCost);
-
-      setGas({ eth: eth.toFixed(8), gwei: parseFloat(gwei).toFixed(1) });
-    }
-  }
-
   return (
     <>
       {!minimized && (
         <section className={styles.formContainer}>
           {!tx && (
             <>
-              <ModalTitle
-                title={isLateRepay ? translations[lang].lateRepay : translations[lang].earlyRepay}
-              />
-              <ModalAsset asset={symbol} amount={parsedAmount} />
+              <ModalTitle title={translations[lang].borrow} />
+              <ModalAsset asset={symbol} amount={walletBalance} />
               <ModalClose closeModal={closeModal} />
-              <ModalRow
-                text={translations[lang].maturityPool}
-                value={parseTimestamp(maturityDate)}
-              />
+              <ModalRow text={translations[lang].maturityPool} value={date?.label} />
               <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} />
               {gas && <ModalTxCost gas={gas} />}
-              <ModalRow text={translations[lang].remainingDebt} value={parsedAmount} line />
-              <ModalRow text={translations[lang].debtSlippage} value="X %" line />
-              <ModalRow text={translations[lang].healthFactor} values={['1.1', '1.8']} />
+              <ModalRow text={translations[lang].interestRate} value="X %" line />
+              <ModalRow text={translations[lang].interestRateSlippage} value={'X %'} line />
+              <ModalRow text={translations[lang].maturityDebt} value={'X %'} line />
+              <ModalRow text={translations[lang].healthFactor} values={['1,1', '1,8']} />
               <div className={styles.buttonContainer}>
                 <Button
-                  text={translations[lang].repay}
-                  className={qty <= '0' || !qty ? 'secondaryDisabled' : 'quaternary'}
-                  onClick={repay}
+                  text={translations[lang].borrow}
+                  className={qty <= '0' || !qty ? 'disabled' : 'secondary'}
+                  onClick={borrow}
                 />
               </div>
             </>
@@ -190,4 +201,4 @@ function RepayModal({ data, closeModal }: Props) {
   );
 }
 
-export default RepayModal;
+export default BorrowModal;
