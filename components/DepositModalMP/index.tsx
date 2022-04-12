@@ -10,6 +10,7 @@ import ModalTitle from 'components/common/modal/ModalTitle';
 import ModalTxCost from 'components/common/modal/ModalTxCost';
 import ModalMinimized from 'components/common/modal/ModalMinimized';
 import ModalGif from 'components/common/modal/ModalGif';
+import ModalStepper from 'components/common/modal/ModalStepper';
 import Overlay from 'components/Overlay';
 
 import { Borrow } from 'types/Borrow';
@@ -21,6 +22,9 @@ import { Transaction } from 'types/Transaction';
 
 import { getContractData } from 'utils/contracts';
 import { getUnderlyingData } from 'utils/utils';
+import parseTimestamp from 'utils/parseTimestamp';
+
+import numbers from 'config/numbers.json';
 
 import styles from './style.module.scss';
 
@@ -37,7 +41,7 @@ type Props = {
 };
 
 function DepositModalMP({ data, closeModal }: Props) {
-  const { symbol } = data;
+  const { maturityDate, address, symbol } = data;
 
   const { web3Provider, walletAddress } = useWeb3Context();
 
@@ -53,6 +57,8 @@ function DepositModalMP({ data, closeModal }: Props) {
   const [gas, setGas] = useState<Gas | undefined>();
   const [tx, setTx] = useState<Transaction | undefined>(undefined);
   const [minimized, setMinimized] = useState<boolean>(false);
+  const [step, setStep] = useState<number>(1);
+  const [pending, setPending] = useState<boolean>(false);
 
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
     undefined
@@ -64,7 +70,11 @@ function DepositModalMP({ data, closeModal }: Props) {
     underlyingData = getUnderlyingData(process.env.NEXT_PUBLIC_NETWORK!, symbol.toLowerCase());
   }
 
-  const underlyingContract = getContractData(underlyingData!.address, underlyingData!.abi);
+  const underlyingContract = getContractData(
+    underlyingData!.address,
+    underlyingData!.abi,
+    web3Provider?.getSigner()
+  );
 
   useEffect(() => {
     getFixedLenderContract();
@@ -76,6 +86,44 @@ function DepositModalMP({ data, closeModal }: Props) {
       estimateGas();
     }
   }, [fixedLenderWithSigner]);
+
+  useEffect(() => {
+    checkAllowance();
+  }, [address, walletAddress, underlyingContract]);
+
+  async function checkAllowance() {
+    const allowance = await underlyingContract?.allowance(walletAddress, address);
+
+    const formattedAllowance = allowance && parseFloat(ethers.utils.formatEther(allowance));
+
+    const amount = parseFloat(qty) ?? 0;
+
+    if (formattedAllowance > amount && !isNaN(amount) && !isNaN(formattedAllowance)) {
+      setStep(2);
+    }
+  }
+
+  async function approve() {
+    try {
+      const approval = await underlyingContract?.approve(
+        address,
+        ethers.utils.parseUnits(numbers.approvalAmount!.toString())
+      );
+
+      //we set the transaction as pending
+      setPending((pending) => !pending);
+
+      await approval.wait();
+
+      //we set the transaction as done
+      setPending((pending) => !pending);
+
+      //once the tx is done we update the step
+      setStep((step) => step + 1);
+    } catch (e) {
+      console.log(e);
+    }
+  }
 
   async function getWalletBalance() {
     const walletBalance = await underlyingContract?.balanceOf(walletAddress);
@@ -97,7 +145,7 @@ function DepositModalMP({ data, closeModal }: Props) {
 
   async function deposit() {
     const deposit = await fixedLenderWithSigner?.depositAtMaturity(
-      parseInt(date!.value),
+      parseInt(date?.value ?? maturityDate),
       ethers.utils.parseUnits(qty!),
       ethers.utils.parseUnits(qty!),
       walletAddress
@@ -114,7 +162,7 @@ function DepositModalMP({ data, closeModal }: Props) {
     const gasPriceInGwei = await fixedLenderWithSigner?.provider.getGasPrice();
 
     const estimatedGasCost = await fixedLenderWithSigner?.estimateGas.depositAtMaturity(
-      parseInt(date!.value),
+      parseInt(date?.value ?? maturityDate),
       ethers.utils.parseUnits(qty!),
       ethers.utils.parseUnits(qty!),
       walletAddress
@@ -126,6 +174,14 @@ function DepositModalMP({ data, closeModal }: Props) {
       const eth = parseFloat(gwei) * parseFloat(gasCost);
 
       setGas({ eth: eth.toFixed(8), gwei: parseFloat(gwei).toFixed(1) });
+    }
+  }
+
+  function handleClickAction() {
+    if (step === 1 && !pending) {
+      return approve();
+    } else if (!pending) {
+      return deposit();
     }
   }
 
@@ -155,16 +211,21 @@ function DepositModalMP({ data, closeModal }: Props) {
               <ModalTitle title={translations[lang].deposit} />
               <ModalAsset asset={symbol} amount={walletBalance} />
               <ModalClose closeModal={closeModal} />
-              <ModalRow text={translations[lang].maturityPool} value={date?.label} />
+              <ModalRow
+                text={translations[lang].maturityPool}
+                value={date?.label ?? parseTimestamp(maturityDate)}
+              />
               <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} />
               {gas && <ModalTxCost gas={gas} />}
               <ModalRow text={translations[lang].interestRate} value="X %" line />
               <ModalRow text={translations[lang].interestRateSlippage} value={'X %'} />
+              <ModalStepper currentStep={step} totalSteps={3} />
               <div className={styles.buttonContainer}>
                 <Button
-                  text={translations[lang].deposit}
-                  className={qty <= '0' || !qty ? 'disabled' : 'primary'}
-                  onClick={deposit}
+                  text={step == 1 ? translations[lang].approve : translations[lang].deposit}
+                  className={qty && qty > '0' && !pending ? 'primary' : 'disabled'}
+                  disabled={(!qty || qty <= '0') && !pending}
+                  onClick={handleClickAction}
                 />
               </div>
             </>

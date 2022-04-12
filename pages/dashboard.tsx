@@ -12,6 +12,7 @@ import WithdrawModalMP from 'components/WithdrawModalMP';
 import WithdrawModalSP from 'components/WithdrawModalSP';
 import DepositModalMP from 'components/DepositModalMP';
 import DepositModalSP from 'components/DepositModalSP';
+import BorrowModal from 'components/BorrowModal';
 
 import { AuditorProvider } from 'contexts/AuditorContext';
 import { FixedLenderProvider } from 'contexts/FixedLenderContext';
@@ -88,7 +89,6 @@ const DashBoard: NextPage<Props> = () => {
     }
 
     handleModal({ content: { ...data, type } });
-    setSmartPoolDeposits(smartPoolDeposits);
   }
 
   function formatSmartPoolDeposits(rawDeposits: Deposit[]) {
@@ -107,6 +107,10 @@ const DashBoard: NextPage<Props> = () => {
     <AuditorProvider value={Auditor}>
       <FixedLenderProvider value={fixedLenders}>
         <InterestRateModelProvider value={InterestRateModel}>
+          {modal && modalContent?.type == 'borrow' && (
+            <BorrowModal data={modalContent} closeModal={handleModal} />
+          )}
+
           {modal && modalContent?.type == 'repay' && (
             <RepayModal data={modalContent} closeModal={handleModal} />
           )}

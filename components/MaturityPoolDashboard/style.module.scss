@@ -16,8 +16,23 @@
       font-weight: bold;
     }
   }
-  .selectContainer {
-    max-width: 200px;
+
+  .sectionContainer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .selectContainer {
+      max-width: 200px;
+    }
+
+    .buttonContainer {
+      width: 100px;
+      height: var(--u5);
+      font-weight: 600;
+      font-size: var(--font-14);
+      margin-right: 6%;
+    }
   }
 
   .line {

@@ -21,6 +21,7 @@ import { Transaction } from 'types/Transaction';
 
 import { getContractData } from 'utils/contracts';
 import { getUnderlyingData } from 'utils/utils';
+import parseTimestamp from 'utils/parseTimestamp';
 
 import styles from './style.module.scss';
 
@@ -37,7 +38,7 @@ type Props = {
 };
 
 function BorrowModal({ data, closeModal }: Props) {
-  const { symbol } = data;
+  const { maturityDate, symbol } = data;
 
   const { web3Provider, walletAddress } = useWeb3Context();
 
@@ -97,7 +98,7 @@ function BorrowModal({ data, closeModal }: Props) {
 
   async function borrow() {
     const borrow = await fixedLenderWithSigner?.borrowAtMaturity(
-      parseInt(date!.value),
+      parseInt(date?.value ?? maturityDate),
       ethers.utils.parseUnits(qty!),
       ethers.utils.parseUnits(qty!),
       walletAddress,
@@ -115,7 +116,7 @@ function BorrowModal({ data, closeModal }: Props) {
     const gasPriceInGwei = await fixedLenderWithSigner?.provider.getGasPrice();
 
     const estimatedGasCost = await fixedLenderWithSigner?.estimateGas.borrowAtMaturity(
-      parseInt(date!.value),
+      parseInt(date?.value ?? maturityDate),
       ethers.utils.parseUnits(qty!),
       ethers.utils.parseUnits(qty!),
       walletAddress,
@@ -157,7 +158,10 @@ function BorrowModal({ data, closeModal }: Props) {
               <ModalTitle title={translations[lang].borrow} />
               <ModalAsset asset={symbol} amount={walletBalance} />
               <ModalClose closeModal={closeModal} />
-              <ModalRow text={translations[lang].maturityPool} value={date?.label} />
+              <ModalRow
+                text={translations[lang].maturityPool}
+                value={date?.label ?? parseTimestamp(maturityDate)}
+              />
               <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} />
               {gas && <ModalTxCost gas={gas} />}
               <ModalRow text={translations[lang].interestRate} value="X %" line />

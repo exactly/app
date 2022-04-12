@@ -10,6 +10,7 @@ import ModalTitle from 'components/common/modal/ModalTitle';
 import ModalTxCost from 'components/common/modal/ModalTxCost';
 import ModalMinimized from 'components/common/modal/ModalMinimized';
 import ModalGif from 'components/common/modal/ModalGif';
+import ModalStepper from 'components/common/modal/ModalStepper';
 import Overlay from 'components/Overlay';
 
 import { Borrow } from 'types/Borrow';
@@ -208,6 +209,7 @@ function DepositModalSP({ data, closeModal }: Props) {
               <ModalRow text={translations[lang].interestRate} value="X %" line />
               <ModalRow text={translations[lang].healthFactor} values={['1.1', '1.8']} line />
               <ModalRow text={translations[lang].borrowLimit} values={['100K', '150K']} />
+              <ModalStepper currentStep={step} totalSteps={3} />
               <div className={styles.buttonContainer}>
                 <Button
                   text={step == 1 ? translations[lang].approve : translations[lang].deposit}

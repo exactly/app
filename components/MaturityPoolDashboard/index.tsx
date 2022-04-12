@@ -17,6 +17,7 @@ import styles from './style.module.scss';
 import keys from './translations.json';
 import { Deposit } from 'types/Deposit';
 import { Borrow } from 'types/Borrow';
+import Button from 'components/common/Button';
 
 interface Props {
   deposits: Deposit[];
@@ -69,16 +70,27 @@ function MaturityPoolDashboard({ deposits, borrows, showModal }: Props) {
         />
         <div className={styles.line} />
       </div>
+      <section className={styles.sectionContainer}>
+        <div className={styles.selectContainer}>
+          <Select
+            onChange={(option: Option) => {
+              setFilter(option);
+            }}
+            options={[filterByAsset, filterByMaturity]}
+            value={filter}
+          />
+        </div>
 
-      <div className={styles.selectContainer}>
-        <Select
-          onChange={(option: Option) => {
-            setFilter(option);
-          }}
-          options={[filterByAsset, filterByMaturity]}
-          value={filter}
-        />
-      </div>
+        <div className={styles.buttonContainer}>
+          <Button
+            text={
+              tab.value == 'borrow' ? translations[lang].newBorrow : translations[lang].newDeposit
+            }
+            className={tab.value == 'borrow' ? 'secondary' : 'primary'}
+            onClick={() => showModal(tab.value == 'borrow' ? borrows[0] : deposits[0], tab.value)}
+          />
+        </div>
+      </section>
 
       {filter?.value == 'asset' ? (
         <MaturityPoolUserStatusByAsset
