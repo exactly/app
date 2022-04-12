@@ -2,47 +2,46 @@ import { useEffect, useState, useContext } from 'react';
 import { ethers } from 'ethers';
 
 import style from './style.module.scss';
+
 import Input from 'components/common/Input';
 import Button from 'components/common/Button';
 import MaturitySelector from 'components/MaturitySelector';
 import Stepper from 'components/Stepper';
 import Tooltip from 'components/Tooltip';
 
-import useContractWithSigner from 'hooks/useContractWithSigner';
-
 import { SupplyRate } from 'types/SupplyRate';
 import { Error } from 'types/Error';
 import { Gas } from 'types/Gas';
-
-import { getUnderlyingData } from 'utils/utils';
-
-import { AddressContext } from 'contexts/AddressContext';
-import FixedLenderContext from 'contexts/FixedLenderContext';
-import InterestRateModelContext from 'contexts/InterestRateModelContext';
-import LangContext from 'contexts/LangContext';
-
 import { Market } from 'types/Market';
 import { UnderlyingData } from 'types/Underlying';
 import { Transaction } from 'types/Transaction';
 import { LangKeys } from 'types/Lang';
 
+import { getUnderlyingData } from 'utils/utils';
+import { getContractData } from 'utils/contracts';
+
+import { AddressContext } from 'contexts/AddressContext';
+import FixedLenderContext from 'contexts/FixedLenderContext';
+import LangContext from 'contexts/LangContext';
+import { useWeb3Context } from 'contexts/Web3Context';
+
 import keys from './translations.json';
 
 import numbers from 'config/numbers.json';
-import useContract from 'hooks/useContract';
 
 type Props = {
   handleResult: (data: SupplyRate | undefined) => void;
-  address: string;
+  contractAddress: string;
   assetData: Market | undefined;
   handleTx: (data: Transaction) => void;
-  walletAddress: string | null | undefined;
 };
 
-function SupplyForm({ handleResult, address, assetData, handleTx, walletAddress }: Props) {
+function SupplyForm({ handleResult, contractAddress, assetData, handleTx }: Props) {
   const { date } = useContext(AddressContext);
-  const fixedLender = useContext(FixedLenderContext);
-  const interestRateModel = useContext(InterestRateModelContext);
+  const { address, web3Provider } = useWeb3Context();
+
+  const fixedLenderData = useContext(FixedLenderContext);
+
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
@@ -64,35 +63,40 @@ function SupplyForm({ handleResult, address, assetData, handleTx, walletAddress 
     underlyingData = getUnderlyingData(process.env.NEXT_PUBLIC_NETWORK!, assetData.symbol);
   }
 
-  const underlyingContract = useContractWithSigner(underlyingData!.address, underlyingData!.abi);
+  const underlyingContract = getContractData(
+    underlyingData!.address,
+    underlyingData!.abi,
+    web3Provider?.getSigner()
+  );
 
-  const interestRateModelContract = useContract(interestRateModel.address!, interestRateModel.abi!);
+  const filteredFixedLender = fixedLenderData.find((fl) => fl.address == contractAddress);
 
-  const filteredFixedLender = fixedLender.find((fl) => fl.address == address);
-
-  const fixedLenderWithSigner = useContractWithSigner(address, filteredFixedLender?.abi!);
+  const fixedLenderWithSigner = getContractData(
+    filteredFixedLender?.address!,
+    filteredFixedLender?.abi!,
+    web3Provider?.getSigner()
+  );
 
   useEffect(() => {
     if (fixedLenderWithSigner) {
       calculateRate();
     }
-  }, [qty, date]);
+  }, [qty, date, fixedLenderWithSigner]);
 
   useEffect(() => {
     if (fixedLenderWithSigner && !gas) {
       estimateGas();
     }
-  }, [fixedLenderWithSigner]);
+  }, [fixedLenderWithSigner, address, date]);
 
   useEffect(() => {
-    checkAllowance();
-  }, [address, walletAddress, underlyingContract]);
+    if (underlyingContract) {
+      checkAllowance();
+    }
+  }, [address, contractAddress, underlyingContract]);
 
   async function checkAllowance() {
-    const allowance = await underlyingContract?.contractWithSigner?.allowance(
-      walletAddress,
-      address
-    );
+    const allowance = await underlyingContract?.allowance(address, contractAddress);
 
     const formattedAllowance = allowance && parseFloat(ethers.utils.formatEther(allowance));
 
@@ -106,14 +110,14 @@ function SupplyForm({ handleResult, address, assetData, handleTx, walletAddress 
   async function estimateGas() {
     if (!date) return;
 
-    const gasPriceInGwei = await fixedLenderWithSigner?.contractWithSigner?.provider.getGasPrice();
-
-    const estimatedGasCost =
-      await fixedLenderWithSigner?.contractWithSigner?.estimateGas.depositToMaturityPool(
-        ethers.utils.parseUnits(1!.toString()),
-        parseInt(date.value),
-        '0'
-      );
+    const gasPriceInGwei = await fixedLenderWithSigner?.provider.getGasPrice();
+    console.log(gasPriceInGwei);
+    const estimatedGasCost = await fixedLenderWithSigner?.estimateGas.depositAtMaturity(
+      parseInt(date.value),
+      ethers.utils.parseUnits(1!.toString()),
+      ethers.utils.parseUnits(1!.toString()),
+      address
+    );
 
     if (gasPriceInGwei && estimatedGasCost) {
       const gwei = await ethers.utils.formatUnits(gasPriceInGwei, 'gwei');
@@ -127,21 +131,8 @@ function SupplyForm({ handleResult, address, assetData, handleTx, walletAddress 
   async function calculateRate() {
     handleLoading(false);
 
-    // const maturityPools =
-    //   await fixedLenderWithSigner?.contractWithSigner?.maturityPools(
-    //     parseInt(date.value)
-    //   );
-
     //Supply
     try {
-      // const supplyRate =
-      //   await interestRateModelContract?.contract?.getRateToSupply(
-      //     parseInt(date.value),
-      //     maturityPools
-      //   );
-
-      // const formattedRate = supplyRate && ethers.utils.formatEther(supplyRate);
-      // formattedRate &&
       handleResult({ potentialRate: '0.00', hasRate: true });
     } catch (e) {
       console.log(e);
@@ -155,10 +146,11 @@ function SupplyForm({ handleResult, address, assetData, handleTx, walletAddress 
     }
 
     try {
-      const tx = await fixedLenderWithSigner?.contractWithSigner?.depositToMaturityPool(
-        ethers.utils.parseUnits(qty!.toString()),
+      const tx = await fixedLenderWithSigner?.depositAtMaturity(
         parseInt(date.value),
-        '0'
+        ethers.utils.parseUnits(1!.toString()),
+        ethers.utils.parseUnits(1!.toString()),
+        address
       );
 
       handleTx({ status: 'processing', hash: tx?.hash });
@@ -173,8 +165,8 @@ function SupplyForm({ handleResult, address, assetData, handleTx, walletAddress 
 
   async function approve() {
     try {
-      const approval = await underlyingContract?.contractWithSigner?.approve(
-        address,
+      const approval = await underlyingContract?.approve(
+        contractAddress,
         ethers.utils.parseUnits(numbers.approvalAmount!.toString())
       );
 
@@ -206,7 +198,7 @@ function SupplyForm({ handleResult, address, assetData, handleTx, walletAddress 
   }
 
   async function getMaxAmount() {
-    const balance = await underlyingContract?.contract?.balanceOf(walletAddress);
+    const balance = await underlyingContract?.balanceOf(address);
 
     const max = balance && ethers.utils.formatEther(balance);
 

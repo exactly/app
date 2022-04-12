@@ -5,7 +5,8 @@
     "borrowTitle": "Amount to borrow",
     "endDate": "End date",
     "borrow": "Borrow",
-    "txCost": "Aproximate tx cost"
+    "txCost": "Aproximate tx cost",
+    "utilizationrateexceeded": "There is not enough money to borrow"
   },
   "es": {}
 }

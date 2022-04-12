@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import type { NextPage } from 'next';
 
 import { ethers } from 'ethers';
-import axios from 'axios';
 
 import MarketsList from 'components/MarketsList';
 import MaturitySelector from 'components/MaturitySelector';
@@ -14,7 +13,6 @@ import MobileNavbar from 'components/MobileNavbar';
 import SmartPoolList from 'components/SmartPoolList';
 import SmartPoolModal from 'components/SmartPoolModal';
 
-import useContract from 'hooks/useContract';
 import useModal from 'hooks/useModal';
 
 import { AuditorProvider } from 'contexts/AuditorContext';
@@ -23,48 +21,39 @@ import { InterestRateModelProvider } from 'contexts/InterestRateModelContext';
 
 import { Market } from 'types/Market';
 import { UnformattedMarket } from 'types/UnformattedMarket';
-import { Contract } from 'types/Contract';
-import { Dictionary } from 'types/Dictionary';
 
 import dictionary from 'dictionary/en.json';
-import { PoolAccountingProvider } from 'contexts/PoolAccountingContext';
 
+import { getContractData } from 'utils/contracts';
 
 //Contracts
-import InterestRateModel from 'protocol/deployments/kovan/InterestRateModel.json'
-import Auditor from 'protocol/deployments/kovan/Auditor.json'
-import FixedLenderDAI from 'protocol/deployments/kovan/FixedLenderDAI.json'
-import FixedLenderWETH from 'protocol/deployments/kovan/FixedLenderWETH.json'
+import InterestRateModel from 'protocol/deployments/kovan/InterestRateModel.json';
+import Auditor from 'protocol/deployments/kovan/Auditor.json';
+import FixedLenderDAI from 'protocol/deployments/kovan/FixedLenderDAI.json';
+import FixedLenderWETH from 'protocol/deployments/kovan/FixedLenderWETH.json';
 
+interface Props {}
 
-interface Props {
-  walletAddress: string;
-  network: string;
-  assetsAddresses: Dictionary<string>;
-  fixedLender: Contract;
-  poolAccounting: Contract;
-}
-
-const Pools: NextPage<Props> = ({
-  poolAccounting,
-}) => {
+const Pools: NextPage<Props> = () => {
   const { modal, handleModal, modalContent } = useModal();
 
   const [markets, setMarkets] = useState<Array<Market>>([]);
-  const { contract } = useContract(Auditor?.address, Auditor?.abi);
+
+  const auditorContract = getContractData(Auditor.address!, Auditor.abi!);
 
   useEffect(() => {
-    if (contract) {
+    if (auditorContract) {
       getMarkets();
     }
-  }, [contract]);
+  }, []);
 
   async function getMarkets() {
-    const marketsAddresses = await contract?.getMarketAddresses();
+    const marketsAddresses = await auditorContract?.getAllMarkets();
+
     const marketsData: Array<UnformattedMarket> = [];
 
     marketsAddresses.map((address: string) => {
-      marketsData.push(contract?.getMarketData(address));
+      marketsData.push(auditorContract?.getMarketData(address));
     });
 
     Promise.all(marketsData).then((data: Array<UnformattedMarket>) => {
@@ -114,49 +103,26 @@ const Pools: NextPage<Props> = ({
   return (
     <AuditorProvider value={Auditor}>
       <FixedLenderProvider value={[FixedLenderDAI, FixedLenderWETH]}>
-        <PoolAccountingProvider value={poolAccounting}>
         <InterestRateModelProvider value={InterestRateModel}>
-              {modal && modalContent?.type != 'smartDeposit' && (
-                <Modal contractData={modalContent} closeModal={handleModal} />
-              )}
-              {modal && modalContent?.type == 'smartDeposit' && (
-                <SmartPoolModal contractData={modalContent} closeModal={handleModal} />
-              )}
-              <MobileNavbar />
-              <Navbar />
-              <CurrentNetwork />
-              <div style={{ marginTop: '180px' }}>
-                <MaturitySelector title={dictionary.maturityPools} />
-              </div>
-              <MarketsList markets={markets} showModal={showModal} />
-              <SmartPoolList markets={markets} showModal={showModal} />
-              <Footer />
-            </InterestRateModelProvider>
-        </PoolAccountingProvider>
+          {modal && modalContent?.type != 'smartDeposit' && (
+            <Modal contractData={modalContent} closeModal={handleModal} />
+          )}
+          {modal && modalContent?.type == 'smartDeposit' && (
+            <SmartPoolModal contractData={modalContent} closeModal={handleModal} />
+          )}
+          <MobileNavbar />
+          <Navbar />
+          <CurrentNetwork />
+          <div style={{ marginTop: '180px' }}>
+            <MaturitySelector title={dictionary.maturityPools} />
+          </div>
+          <MarketsList markets={markets} showModal={showModal} />
+          <SmartPoolList markets={markets} showModal={showModal} />
+          <Footer />
+        </InterestRateModelProvider>
       </FixedLenderProvider>
     </AuditorProvider>
   );
 };
-
-export async function getStaticProps() {
-
-
-  const getPoolAccountingAbi = await axios.get(
-    'https://abi-versions2.s3.amazonaws.com/latest/contracts/PoolAccounting.sol/PoolAccounting.json'
-  );
-
-
-  const addresses = await axios.get('https://abi-versions2.s3.amazonaws.com/latest/addresses.json');
-
-  return {
-    props: {
-      assetsAddresses: addresses.data,
-
-      poolAccounting: {
-        abi: getPoolAccountingAbi.data
-      },
-    }
-  };
-}
 
 export default Pools;

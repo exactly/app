@@ -59,10 +59,12 @@ function WithdrawModalMP({ data, closeModal }: Props) {
   }
 
   async function withdraw() {
-    const withdraw = await fixedLenderWithSigner?.withdrawFromMaturityPool(
-      address,
+    const withdraw = await fixedLenderWithSigner?.withdrawAtMaturity(
+      maturityDate,
       ethers.utils.parseUnits(qty!),
-      maturityDate
+      ethers.utils.parseUnits(qty!),
+      address,
+      address
     );
   }
 

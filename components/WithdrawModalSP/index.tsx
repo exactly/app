@@ -31,7 +31,7 @@ type Props = {
 function WithdrawModalSP({ data, closeModal }: Props) {
   const { symbol, amount } = data;
 
-  const { web3Provider } = useWeb3Context();
+  const { address, web3Provider } = useWeb3Context();
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
@@ -58,8 +58,10 @@ function WithdrawModalSP({ data, closeModal }: Props) {
   }
 
   async function withdraw() {
-    const withdraw = await fixedLenderWithSigner?.withdrawFromSmartPool(
-      ethers.utils.parseUnits(qty!)
+    const withdraw = await fixedLenderWithSigner?.withdraw(
+      ethers.utils.parseUnits(qty!),
+      address,
+      address
     );
   }
 

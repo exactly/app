@@ -1,18 +1,19 @@
 import { useEffect, useState, useContext } from 'react';
 import { Option } from 'react-dropdown';
+import dayjs from 'dayjs';
 
 import Select from 'components/common/Select';
 import Tooltip from 'components/Tooltip';
 
-import useContract from 'hooks/useContract';
-
 import style from './style.module.scss';
 
 import { AddressContext } from 'contexts/AddressContext';
+import FixedLenderContext from 'contexts/FixedLenderContext';
 
 import { Date } from 'types/Date';
+
 import parseTimeStamp from 'utils/parseTimestamp';
-import FixedLenderContext from 'contexts/FixedLenderContext';
+import { getContractData } from 'utils/contracts';
 
 type Props = {
   title?: string;
@@ -26,13 +27,33 @@ function MaturitySelector({ title, address }: Props) {
   const [dates, setDates] = useState<Array<Option>>([]);
 
   //Kinda hacky but all the fixedLender will have the same futurePools for Exactly V1
-  const filteredFixedLender = fixedLender.find(fl => fl.address == address)
-  const fixedLenderAddress = filteredFixedLender ? filteredFixedLender.address! : fixedLender[0].address!
-  const fixedLenderABI = filteredFixedLender ? filteredFixedLender.abi! : fixedLender[0].abi!
-  const fixedLenderContract = useContract(fixedLenderAddress, fixedLenderABI);
+  const filteredFixedLender = fixedLender.find((fl) => fl.address == address);
+
+  const fixedLenderAddress = filteredFixedLender
+    ? filteredFixedLender.address!
+    : fixedLender[0].address!;
+
+  const fixedLenderABI = filteredFixedLender ? filteredFixedLender.abi! : fixedLender[0].abi!;
+
+  const fixedLenderContract = getContractData(fixedLenderAddress, fixedLenderABI);
+
+  useEffect(() => {
+    if (dates.length == 0) {
+      getPools();
+    }
+  }, [fixedLenderContract, dates]);
 
   async function getPools() {
-    const pools = await fixedLenderContract?.contract?.getFuturePools();
+    const currentTimestamp = dayjs().unix();
+    const interval = 604800;
+    let timestamp = currentTimestamp - (currentTimestamp % interval);
+    const maxPools = await fixedLenderContract?.maxFuturePools();
+    const pools = [];
+
+    for (let i = 0; i < maxPools; i++) {
+      timestamp += interval;
+      pools.push(timestamp);
+    }
 
     const dates = pools?.map((pool: any) => {
       return pool.toString();
@@ -44,7 +65,6 @@ function MaturitySelector({ title, address }: Props) {
         label: parseTimeStamp(date)
       };
     });
-
     setDates(formattedDates ?? []);
     !date && formattedDates && setDate(formattedDates[0]);
   }
@@ -52,12 +72,6 @@ function MaturitySelector({ title, address }: Props) {
   function handleChange(option: Date) {
     setDate(option);
   }
-
-  useEffect(() => {
-    if (dates.length == 0) {
-      getPools();
-    }
-  }, [fixedLenderContract]);
 
   return (
     <section className={style.sectionContainer}>

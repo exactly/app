@@ -4,7 +4,7 @@ import { createContext } from 'react';
 type ContextValues = {
   address: string | undefined;
   abi: ethers.ContractInterface | undefined;
-  args: Array<string> | undefined;
+  args?: any;
 };
 
 const defaultValues: ContextValues[] = [];

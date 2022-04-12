@@ -15,7 +15,6 @@ import styles from './style.module.scss';
 
 import keys from './translations.json';
 
-import useContractWithSigner from 'hooks/useContractWithSigner';
 import { getUnderlyingData } from 'utils/utils';
 import { getContractData } from 'utils/contracts';
 
@@ -37,7 +36,7 @@ function Item({ symbol, amount, walletAddress, showModal, deposit }: Props) {
   const [disabled, setDisabled] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [walletBalance, setWalletBalance] = useState<string | undefined>(undefined);
-  const auditorContract = useContractWithSigner(auditor.address!, auditor.abi!);
+  const auditorContract = getContractData(auditor.address!, auditor.abi!);
   const underlyingData = getUnderlyingData(process.env.NEXT_PUBLIC_NETWORK!, symbol);
 
   useEffect(() => {
@@ -70,10 +69,10 @@ function Item({ symbol, amount, walletAddress, showModal, deposit }: Props) {
 
       if (!toggle && fixedLenderAddress) {
         //if it's not toggled we need to ENTER
-        tx = await auditorContract.contractWithSigner?.enterMarkets([fixedLenderAddress]);
+        tx = await auditorContract?.enterMarkets([fixedLenderAddress]);
       } else if (fixedLenderAddress) {
         //if it's toggled we need to EXIT
-        tx = await auditorContract.contractWithSigner?.exitMarket(fixedLenderAddress);
+        tx = await auditorContract?.exitMarket(fixedLenderAddress);
       }
 
       //waiting for tx to end

@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
 import type { NextApiRequest, NextPage } from 'next';
 import { ethers } from 'ethers';
+import dayjs from 'dayjs';
 
 import AssetSelector from 'components/AssetSelector';
 import Navbar from 'components/Navbar';
@@ -25,12 +26,12 @@ import { InterestRateModelProvider } from 'contexts/InterestRateModelContext';
 
 import style from './style.module.scss';
 
-import useContract from 'hooks/useContract';
 import useModal from 'hooks/useModal';
 
 import keys from './translations.json';
 
 import parseTimestamp from 'utils/parseTimestamp';
+import { getContractData } from 'utils/contracts';
 
 //Contracts
 import InterestRateModel from 'protocol/deployments/kovan/InterestRateModel.json';
@@ -50,12 +51,15 @@ const Asset: NextPage<Props> = ({ symbol }) => {
   const itemsPerPage = 5;
 
   const translations: { [key: string]: LangKeys } = keys;
-
-  const auditorContract = useContract(Auditor.address, Auditor.abi);
+  getContractData;
+  const auditorContract = getContractData(Auditor.address, Auditor.abi);
   const fixedLenders = [FixedLenderDAI, FixedLenderWETH];
 
-  const filteredFixedLender = fixedLenders.find((fl) => fl.args[1].toUpperCase() == symbol);
-  const fixedLenderContract = useContract(filteredFixedLender?.address!, filteredFixedLender?.abi!);
+  const filteredFixedLender = fixedLenders.find((fl) => fl.args[1] === symbol);
+  const fixedLenderContract = getContractData(
+    filteredFixedLender?.address!,
+    filteredFixedLender?.abi!
+  );
 
   const [maturities, setMaturities] = useState<Array<Maturity> | undefined>(undefined);
 
@@ -69,13 +73,22 @@ const Asset: NextPage<Props> = ({ symbol }) => {
   }, [auditorContract]);
 
   async function getMarketData() {
-    const marketData = await auditorContract?.contract?.getMarketData(filteredFixedLender?.address);
+    const marketData = await auditorContract?.getMarketData(filteredFixedLender?.address);
 
     setMarketData(marketData);
   }
 
   async function getPools() {
-    const pools = await fixedLenderContract?.contract?.getFuturePools();
+    const currentTimestamp = dayjs().unix();
+    const interval = 604800;
+    let timestamp = currentTimestamp - (currentTimestamp % interval);
+    const maxPools = await fixedLenderContract?.maxFuturePools();
+    const pools = [];
+
+    for (let i = 0; i < maxPools; i++) {
+      timestamp += interval;
+      pools.push(timestamp);
+    }
 
     const dates = pools?.map((pool: any) => {
       return pool.toString();
