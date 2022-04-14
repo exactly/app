@@ -29,6 +29,7 @@ import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 import FixedLenderContext from 'contexts/FixedLenderContext';
 import { AddressContext } from 'contexts/AddressContext';
+import InterestRateModelContext from 'contexts/InterestRateModelContext';
 
 import keys from './translations.json';
 
@@ -48,12 +49,14 @@ function BorrowModal({ data, closeModal }: Props) {
   const translations: { [key: string]: LangKeys } = keys;
 
   const fixedLenderData = useContext(FixedLenderContext);
+  const interestRateModelData = useContext(InterestRateModelContext);
 
   const [qty, setQty] = useState<string>('0');
   const [walletBalance, setWalletBalance] = useState<string | undefined>(undefined);
   const [gas, setGas] = useState<Gas | undefined>(undefined);
   const [tx, setTx] = useState<Transaction | undefined>(undefined);
   const [minimized, setMinimized] = useState<Boolean>(false);
+  const [rate, setRate] = useState<string | undefined>('0');
 
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
     undefined
@@ -67,9 +70,16 @@ function BorrowModal({ data, closeModal }: Props) {
 
   const underlyingContract = getContractData(underlyingData!.address, underlyingData!.abi);
 
+  const interestRateModelContract = getContractData(
+    interestRateModelData.address!,
+    interestRateModelData.abi!
+  );
+
   useEffect(() => {
-    getFixedLenderContract();
-    getWalletBalance();
+    if (fixedLenderData && !fixedLenderWithSigner) {
+      getFixedLenderContract();
+      getWalletBalance();
+    }
   }, []);
 
   useEffect(() => {
@@ -77,6 +87,12 @@ function BorrowModal({ data, closeModal }: Props) {
       estimateGas();
     }
   }, [fixedLenderWithSigner]);
+
+  useEffect(() => {
+    if (qty) {
+      calculateRate();
+    }
+  }, [qty, date, maturityDate]);
 
   async function getWalletBalance() {
     const walletBalance = await underlyingContract?.balanceOf(walletAddress);
@@ -94,6 +110,36 @@ function BorrowModal({ data, closeModal }: Props) {
 
   function handleInputChange(e: ChangeEvent<HTMLInputElement>) {
     setQty(e.target.value);
+  }
+
+  async function calculateRate() {
+    if (qty <= '0') return;
+
+    const smartPoolSupplied = await fixedLenderWithSigner?.smartPoolBalance();
+
+    const maturityPoolStatus = await fixedLenderWithSigner?.maturityPools(
+      parseInt(date?.value ?? maturityDate)
+    );
+
+    const currentTimestamp = Math.floor(Date.now() / 1000);
+
+    //Borrow
+    try {
+      const borrowRate = await interestRateModelContract?.getRateToBorrow(
+        parseInt(date?.value ?? maturityDate),
+        currentTimestamp,
+        ethers.utils.parseUnits(qty!, 18),
+        maturityPoolStatus.borrowed,
+        maturityPoolStatus.supplied,
+        smartPoolSupplied
+      );
+
+      const formattedBorrowRate = borrowRate && ethers.utils.formatEther(borrowRate);
+
+      setRate(formattedBorrowRate);
+    } catch (error: any) {
+      console.log(error);
+    }
   }
 
   async function borrow() {
@@ -117,8 +163,8 @@ function BorrowModal({ data, closeModal }: Props) {
 
     const estimatedGasCost = await fixedLenderWithSigner?.estimateGas.borrowAtMaturity(
       parseInt(date?.value ?? maturityDate),
-      ethers.utils.parseUnits(qty!),
-      ethers.utils.parseUnits(qty!),
+      ethers.utils.parseUnits('1'),
+      ethers.utils.parseUnits('1'),
       walletAddress,
       walletAddress
     );
@@ -164,7 +210,7 @@ function BorrowModal({ data, closeModal }: Props) {
               />
               <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} />
               {gas && <ModalTxCost gas={gas} />}
-              <ModalRow text={translations[lang].interestRate} value="X %" line />
+              <ModalRow text={translations[lang].interestRate} value={rate} line />
               <ModalRow text={translations[lang].interestRateSlippage} value={'X %'} line />
               <ModalRow text={translations[lang].maturityDebt} value={'X %'} line />
               <ModalRow text={translations[lang].healthFactor} values={['1,1', '1,8']} />
