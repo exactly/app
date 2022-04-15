@@ -15,17 +15,21 @@ import Overlay from 'components/Overlay';
 import { Borrow } from 'types/Borrow';
 import { Deposit } from 'types/Deposit';
 import { LangKeys } from 'types/Lang';
+import { UnderlyingData } from 'types/Underlying';
 import { Gas } from 'types/Gas';
 import { Transaction } from 'types/Transaction';
 
-import parseTimestamp from 'utils/parseTimestamp';
 import { getContractData } from 'utils/contracts';
+import { getUnderlyingData } from 'utils/utils';
+import parseTimestamp from 'utils/parseTimestamp';
 
 import styles from './style.module.scss';
 
 import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 import FixedLenderContext from 'contexts/FixedLenderContext';
+import { AddressContext } from 'contexts/AddressContext';
+import InterestRateModelContext from 'contexts/InterestRateModelContext';
 
 import keys from './translations.json';
 
@@ -34,29 +38,48 @@ type Props = {
   closeModal: (props: any) => void;
 };
 
-function WithdrawModalMP({ data, closeModal }: Props) {
-  const { symbol, maturityDate, amount } = data;
+function BorrowModal({ data, closeModal }: Props) {
+  const { maturityDate, symbol } = data;
 
   const { web3Provider, walletAddress } = useWeb3Context();
+
+  const { date } = useContext(AddressContext);
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
   const fixedLenderData = useContext(FixedLenderContext);
+  const interestRateModelData = useContext(InterestRateModelContext);
 
   const [qty, setQty] = useState<string>('0');
-  const [gas, setGas] = useState<Gas | undefined>();
+  const [walletBalance, setWalletBalance] = useState<string | undefined>(undefined);
+  const [gas, setGas] = useState<Gas | undefined>(undefined);
   const [tx, setTx] = useState<Transaction | undefined>(undefined);
   const [minimized, setMinimized] = useState<Boolean>(false);
+  const [rate, setRate] = useState<string | undefined>('0');
 
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
     undefined
   );
 
-  const parsedAmount = ethers.utils.formatUnits(amount, 18);
+  let underlyingData: UnderlyingData | undefined = undefined;
+
+  if (symbol) {
+    underlyingData = getUnderlyingData(process.env.NEXT_PUBLIC_NETWORK!, symbol.toLowerCase());
+  }
+
+  const underlyingContract = getContractData(underlyingData!.address, underlyingData!.abi);
+
+  const interestRateModelContract = getContractData(
+    interestRateModelData.address!,
+    interestRateModelData.abi!
+  );
 
   useEffect(() => {
-    getFixedLenderContract();
+    if (fixedLenderData && !fixedLenderWithSigner) {
+      getFixedLenderContract();
+      getWalletBalance();
+    }
   }, []);
 
   useEffect(() => {
@@ -65,26 +88,72 @@ function WithdrawModalMP({ data, closeModal }: Props) {
     }
   }, [fixedLenderWithSigner]);
 
-  function onMax() {
-    setQty(parsedAmount);
+  useEffect(() => {
+    if (qty) {
+      calculateRate();
+    }
+  }, [qty, date, maturityDate]);
+
+  async function getWalletBalance() {
+    const walletBalance = await underlyingContract?.balanceOf(walletAddress);
+
+    const formattedBalance = walletBalance && ethers.utils.formatEther(walletBalance);
+
+    if (formattedBalance) {
+      setWalletBalance(formattedBalance);
+    }
+  }
+
+  async function onMax() {
+    walletBalance && setQty(walletBalance);
   }
 
   function handleInputChange(e: ChangeEvent<HTMLInputElement>) {
     setQty(e.target.value);
   }
 
-  async function withdraw() {
-    const withdraw = await fixedLenderWithSigner?.withdrawAtMaturity(
-      maturityDate,
+  async function calculateRate() {
+    if (qty <= '0') return;
+
+    const smartPoolSupplied = await fixedLenderWithSigner?.smartPoolBalance();
+
+    const maturityPoolStatus = await fixedLenderWithSigner?.maturityPools(
+      parseInt(date?.value ?? maturityDate)
+    );
+
+    const currentTimestamp = Math.floor(Date.now() / 1000);
+
+    //Borrow
+    try {
+      const borrowRate = await interestRateModelContract?.getRateToBorrow(
+        parseInt(date?.value ?? maturityDate),
+        currentTimestamp,
+        ethers.utils.parseUnits(qty!, 18),
+        maturityPoolStatus.borrowed,
+        maturityPoolStatus.supplied,
+        smartPoolSupplied
+      );
+
+      const formattedBorrowRate = borrowRate && ethers.utils.formatEther(borrowRate);
+
+      setRate(formattedBorrowRate);
+    } catch (error: any) {
+      console.log(error);
+    }
+  }
+
+  async function borrow() {
+    const borrow = await fixedLenderWithSigner?.borrowAtMaturity(
+      parseInt(date?.value ?? maturityDate),
       ethers.utils.parseUnits(qty!),
       ethers.utils.parseUnits(qty!),
       walletAddress,
       walletAddress
     );
 
-    setTx({ status: 'processing', hash: withdraw?.hash });
+    setTx({ status: 'processing', hash: borrow?.hash });
 
-    const status = await withdraw.wait();
+    const status = await borrow.wait();
 
     setTx({ status: 'success', hash: status?.transactionHash });
   }
@@ -92,10 +161,10 @@ function WithdrawModalMP({ data, closeModal }: Props) {
   async function estimateGas() {
     const gasPriceInGwei = await fixedLenderWithSigner?.provider.getGasPrice();
 
-    const estimatedGasCost = await fixedLenderWithSigner?.estimateGas.withdrawAtMaturity(
-      maturityDate,
-      ethers.utils.parseUnits(qty!),
-      ethers.utils.parseUnits(qty!),
+    const estimatedGasCost = await fixedLenderWithSigner?.estimateGas.borrowAtMaturity(
+      parseInt(date?.value ?? maturityDate),
+      ethers.utils.parseUnits('1'),
+      ethers.utils.parseUnits('1'),
       walletAddress,
       walletAddress
     );
@@ -132,23 +201,24 @@ function WithdrawModalMP({ data, closeModal }: Props) {
         <section className={styles.formContainer}>
           {!tx && (
             <>
-              <ModalTitle title={translations[lang].withdraw} />
-              <ModalAsset asset={symbol} amount={parsedAmount} />
+              <ModalTitle title={translations[lang].borrow} />
+              <ModalAsset asset={symbol} amount={walletBalance} />
               <ModalClose closeModal={closeModal} />
               <ModalRow
                 text={translations[lang].maturityPool}
-                value={parseTimestamp(maturityDate)}
+                value={date?.label ?? parseTimestamp(maturityDate)}
               />
               <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} />
               {gas && <ModalTxCost gas={gas} />}
-              <ModalRow text={translations[lang].exactlyBalance} value={parsedAmount} line />
-              <ModalRow text={translations[lang].interestRate} value="X %" line />
-              <ModalRow text={translations[lang].interestRateSlippage} value={'X %'} />
+              <ModalRow text={translations[lang].interestRate} value={rate} line />
+              <ModalRow text={translations[lang].interestRateSlippage} value={'X %'} line />
+              <ModalRow text={translations[lang].maturityDebt} value={'X %'} line />
+              <ModalRow text={translations[lang].healthFactor} values={['1,1', '1,8']} />
               <div className={styles.buttonContainer}>
                 <Button
-                  text={translations[lang].withdraw}
-                  className={qty <= '0' || !qty ? 'secondaryDisabled' : 'tertiary'}
-                  onClick={withdraw}
+                  text={translations[lang].borrow}
+                  className={qty <= '0' || !qty ? 'disabled' : 'secondary'}
+                  onClick={borrow}
                 />
               </div>
             </>
@@ -181,4 +251,4 @@ function WithdrawModalMP({ data, closeModal }: Props) {
   );
 }
 
-export default WithdrawModalMP;
+export default BorrowModal;

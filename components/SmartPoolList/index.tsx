@@ -18,7 +18,7 @@ import Tooltip from 'components/Tooltip';
 
 type Props = {
   markets: Array<Market>;
-  showModal: (address: Market['address'], type: String) => void;
+  showModal: (marketData: Market, type: String) => void;
 };
 
 function SmartPoolList({ markets, showModal }: Props) {
@@ -35,9 +35,7 @@ function SmartPoolList({ markets, showModal }: Props) {
         <div className={styles.column}>
           <div className={styles.tableRow}>
             <span className={styles.symbol}>{translations[lang].asset}</span>
-            <span className={styles.title}>
-              {translations[lang].marketSize}
-            </span>
+            <span className={styles.title}>{translations[lang].marketSize}</span>
             <span className={styles.title} />
           </div>
           {markets?.map((market, key) => {
@@ -45,9 +43,7 @@ function SmartPoolList({ markets, showModal }: Props) {
             const assetsData: Assets<symbol> = assets;
             const src: string = assetsData[symbol];
 
-            return (
-              <Item market={market} key={key} showModal={showModal} src={src} />
-            );
+            return <Item market={market} key={key} showModal={showModal} src={src} />;
           })}
           {markets.length === 0 && <Loading />}
         </div>

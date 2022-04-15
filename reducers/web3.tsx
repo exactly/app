@@ -3,7 +3,7 @@ import { ethers } from 'ethers';
 export type Web3ProviderState = {
   provider: any;
   web3Provider: ethers.providers.Web3Provider | undefined;
-  address: string | undefined;
+  walletAddress: string | undefined;
   network: ethers.providers.Network | undefined;
   connect: (() => Promise<void>) | null;
   disconnect: (() => Promise<void>) | null;
@@ -12,7 +12,7 @@ export type Web3ProviderState = {
 export const web3InitialState: Web3ProviderState = {
   provider: null,
   web3Provider: undefined,
-  address: undefined,
+  walletAddress: undefined,
   network: undefined,
   connect: null,
   disconnect: null
@@ -23,12 +23,12 @@ export type Web3Action =
       type: 'SET_WEB3_PROVIDER';
       provider?: Web3ProviderState['provider'];
       web3Provider?: Web3ProviderState['web3Provider'];
-      address?: Web3ProviderState['address'];
+      walletAddress?: Web3ProviderState['walletAddress'];
       network?: Web3ProviderState['network'];
     }
   | {
       type: 'SET_ADDRESS';
-      address?: Web3ProviderState['address'];
+      walletAddress?: Web3ProviderState['walletAddress'];
     }
   | {
       type: 'SET_NETWORK';
@@ -45,13 +45,13 @@ export function web3Reducer(state: Web3ProviderState, action: Web3Action): Web3P
         ...state,
         provider: action.provider,
         web3Provider: action.web3Provider,
-        address: action.address,
+        walletAddress: action.walletAddress,
         network: action.network
       };
     case 'SET_ADDRESS':
       return {
         ...state,
-        address: action.address
+        walletAddress: action.walletAddress
       };
     case 'SET_NETWORK':
       return {

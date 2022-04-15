@@ -57,18 +57,7 @@ function Item({ symbol, type, amount, fee, maturityDate, showModal, market }: Pr
           />
         </div>
       </span>
-      {type && progress < 100 && (
-        <div className={styles.buttonContainer}>
-          <Button
-            text={type.value == 'borrow' ? translations[lang].borrow : translations[lang].deposit}
-            className={type.value == 'borrow' ? 'secondary' : 'primary'}
-            onClick={() => {
-              showModal(market, type.value);
-            }}
-          />
-        </div>
-      )}
-      {type && progress >= 100 && (
+      {type && (
         <div className={styles.buttonContainer}>
           <Button
             text={type.value == 'borrow' ? translations[lang].repay : translations[lang].withdraw}

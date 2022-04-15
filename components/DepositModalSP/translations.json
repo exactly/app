@@ -1,0 +1,11 @@
+{
+  "en": {
+    "deposit": "Deposit",
+    "approve": "Approve",
+    "exactlyBalance": "Exactly Balance",
+    "interestRate": "Interest Rate",
+    "healthFactor": "Health Factor",
+    "borrowLimit": "Borrow Limit"
+  },
+  "es": {}
+}

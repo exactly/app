@@ -1,5 +1,5 @@
 import { ChangeEvent, useContext, useEffect, useState } from 'react';
-import { ethers, Contract } from 'ethers';
+import { Contract, ethers } from 'ethers';
 
 import Button from 'components/common/Button';
 import ModalAsset from 'components/common/modal/ModalAsset';
@@ -10,21 +10,26 @@ import ModalTitle from 'components/common/modal/ModalTitle';
 import ModalTxCost from 'components/common/modal/ModalTxCost';
 import ModalMinimized from 'components/common/modal/ModalMinimized';
 import ModalGif from 'components/common/modal/ModalGif';
+import ModalStepper from 'components/common/modal/ModalStepper';
 import Overlay from 'components/Overlay';
 
 import { Borrow } from 'types/Borrow';
 import { Deposit } from 'types/Deposit';
 import { LangKeys } from 'types/Lang';
+import { UnderlyingData } from 'types/Underlying';
 import { Gas } from 'types/Gas';
 import { Transaction } from 'types/Transaction';
+
+import { getContractData } from 'utils/contracts';
+import { getUnderlyingData } from 'utils/utils';
+
+import numbers from 'config/numbers.json';
 
 import styles from './style.module.scss';
 
 import LangContext from 'contexts/LangContext';
-import FixedLenderContext from 'contexts/FixedLenderContext';
 import { useWeb3Context } from 'contexts/Web3Context';
-
-import { getContractData } from 'utils/contracts';
+import FixedLenderContext from 'contexts/FixedLenderContext';
 
 import keys from './translations.json';
 
@@ -33,10 +38,10 @@ type Props = {
   closeModal: (props: any) => void;
 };
 
-function WithdrawModalSP({ data, closeModal }: Props) {
-  const { symbol, amount } = data;
+function DepositModalSP({ data, closeModal }: Props) {
+  const { address, symbol } = data;
 
-  const { walletAddress, web3Provider } = useWeb3Context();
+  const { web3Provider, walletAddress } = useWeb3Context();
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
@@ -44,18 +49,32 @@ function WithdrawModalSP({ data, closeModal }: Props) {
   const fixedLenderData = useContext(FixedLenderContext);
 
   const [qty, setQty] = useState<string>('0');
+  const [walletBalance, setWalletBalance] = useState<string | undefined>(undefined);
   const [gas, setGas] = useState<Gas | undefined>();
   const [tx, setTx] = useState<Transaction | undefined>(undefined);
-  const [minimized, setMinimized] = useState<Boolean>(false);
+  const [minimized, setMinimized] = useState<boolean>(false);
+  const [step, setStep] = useState<number>(1);
+  const [pending, setPending] = useState<boolean>(false);
 
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
     undefined
   );
 
-  const parsedAmount = ethers.utils.formatUnits(amount, 18);
+  let underlyingData: UnderlyingData | undefined = undefined;
+
+  if (symbol) {
+    underlyingData = getUnderlyingData(process.env.NEXT_PUBLIC_NETWORK!, symbol.toLowerCase());
+  }
+
+  const underlyingContract = getContractData(
+    underlyingData!.address,
+    underlyingData!.abi,
+    web3Provider?.getSigner()
+  );
 
   useEffect(() => {
     getFixedLenderContract();
+    getWalletBalance();
   }, []);
 
   useEffect(() => {
@@ -64,23 +83,71 @@ function WithdrawModalSP({ data, closeModal }: Props) {
     }
   }, [fixedLenderWithSigner]);
 
-  function onMax() {
-    setQty(parsedAmount);
+  useEffect(() => {
+    checkAllowance();
+  }, [address, walletAddress, underlyingContract]);
+
+  async function checkAllowance() {
+    const allowance = await underlyingContract?.allowance(walletAddress, address);
+
+    const formattedAllowance = allowance && parseFloat(ethers.utils.formatEther(allowance));
+
+    const amount = parseFloat(qty) ?? 0;
+
+    if (formattedAllowance > amount && !isNaN(amount) && !isNaN(formattedAllowance)) {
+      setStep(2);
+    }
+  }
+
+  async function approve() {
+    try {
+      const approval = await underlyingContract?.approve(
+        address,
+        ethers.utils.parseUnits(numbers.approvalAmount!.toString())
+      );
+
+      //we set the transaction as pending
+      setPending((pending) => !pending);
+
+      await approval.wait();
+
+      //we set the transaction as done
+      setPending((pending) => !pending);
+
+      //once the tx is done we update the step
+      setStep((step) => step + 1);
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+  async function getWalletBalance() {
+    const walletBalance = await underlyingContract?.balanceOf(walletAddress);
+
+    const formattedBalance = walletBalance && ethers.utils.formatEther(walletBalance);
+
+    if (formattedBalance) {
+      setWalletBalance(formattedBalance);
+    }
+  }
+
+  async function onMax() {
+    walletBalance && setQty(walletBalance);
   }
 
   function handleInputChange(e: ChangeEvent<HTMLInputElement>) {
     setQty(e.target.value);
   }
 
-  async function withdraw() {
-    const withdraw = await fixedLenderWithSigner?.withdraw(
-      ethers.utils.parseUnits(qty!),
-      walletAddress,
+  async function deposit() {
+    const deposit = await fixedLenderWithSigner?.deposit(
+      ethers.utils.parseUnits(qty!.toString()),
       walletAddress
     );
-    setTx({ status: 'processing', hash: withdraw?.hash });
 
-    const status = await withdraw.wait();
+    setTx({ status: 'processing', hash: deposit?.hash });
+
+    const status = await deposit.wait();
 
     setTx({ status: 'success', hash: status?.transactionHash });
   }
@@ -88,9 +155,8 @@ function WithdrawModalSP({ data, closeModal }: Props) {
   async function estimateGas() {
     const gasPriceInGwei = await fixedLenderWithSigner?.provider.getGasPrice();
 
-    const estimatedGasCost = await fixedLenderWithSigner?.estimateGas.withdraw(
-      ethers.utils.parseUnits(qty!),
-      walletAddress,
+    const estimatedGasCost = await fixedLenderWithSigner?.estimateGas.deposit(
+      ethers.utils.parseUnits(1!.toString()),
       walletAddress
     );
 
@@ -100,6 +166,14 @@ function WithdrawModalSP({ data, closeModal }: Props) {
       const eth = parseFloat(gwei) * parseFloat(gasCost);
 
       setGas({ eth: eth.toFixed(8), gwei: parseFloat(gwei).toFixed(1) });
+    }
+  }
+
+  function handleClickAction() {
+    if (step === 1 && !pending) {
+      return approve();
+    } else if (!pending) {
+      return deposit();
     }
   }
 
@@ -126,19 +200,22 @@ function WithdrawModalSP({ data, closeModal }: Props) {
         <section className={styles.formContainer}>
           {!tx && (
             <>
-              <ModalTitle title={translations[lang].withdraw} />
-              <ModalAsset asset={symbol} />
+              <ModalTitle title={translations[lang].deposit} />
+              <ModalAsset asset={symbol} amount={walletBalance} />
               <ModalClose closeModal={closeModal} />
               <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} />
               {gas && <ModalTxCost gas={gas} />}
-              <ModalRow text={translations[lang].exactlyBalance} value={parsedAmount} line />
+              <ModalRow text={translations[lang].exactlyBalance} value="$ XXXX" line />
+              <ModalRow text={translations[lang].interestRate} value="X %" line />
               <ModalRow text={translations[lang].healthFactor} values={['1.1', '1.8']} line />
-              <ModalRow text={translations[lang].borrowLimit} values={['1000', '2000']} />
+              <ModalRow text={translations[lang].borrowLimit} values={['100K', '150K']} />
+              <ModalStepper currentStep={step} totalSteps={3} />
               <div className={styles.buttonContainer}>
                 <Button
-                  text={translations[lang].withdraw}
-                  className={qty <= '0' || !qty ? 'secondaryDisabled' : 'tertiary'}
-                  onClick={withdraw}
+                  text={step == 1 ? translations[lang].approve : translations[lang].deposit}
+                  className={qty && qty > '0' && !pending ? 'primary' : 'disabled'}
+                  disabled={(!qty || qty <= '0') && !pending}
+                  onClick={handleClickAction}
                 />
               </div>
             </>
@@ -171,4 +248,4 @@ function WithdrawModalSP({ data, closeModal }: Props) {
   );
 }
 
-export default WithdrawModalSP;
+export default DepositModalSP;

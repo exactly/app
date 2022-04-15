@@ -17,7 +17,7 @@ import { useWeb3Context } from 'contexts/Web3Context';
 function Navbar() {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
-  const { web3Provider, connect, disconnect, address } = useWeb3Context();
+  const { connect, disconnect, walletAddress } = useWeb3Context();
 
   const router = useRouter();
   const { pathname } = router;
@@ -65,15 +65,15 @@ function Navbar() {
         </div>
 
         <div className={styles.right}>
-          {connect && !address ? (
+          {connect && !walletAddress ? (
             <div className={styles.buttonContainer}>
               <Button text="Conectar" onClick={() => connect()} />
             </div>
           ) : (
             disconnect &&
-            address && (
+            walletAddress && (
               <div className={styles.buttonContainer}>
-                <Wallet walletAddress={address} disconnect={() => disconnect()} />
+                <Wallet walletAddress={walletAddress} disconnect={() => disconnect()} />
               </div>
             )
           )}

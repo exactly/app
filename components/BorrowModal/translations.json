@@ -1,0 +1,12 @@
+{
+  "en": {
+    "borrow": "Borrow",
+    "maturityPool": "Maturity Pool",
+    "exactlyBalance": "Exactly Balance",
+    "interestRate": "Interest Rate",
+    "interestRateSlippage": "Interest Rate Slippage",
+    "maturityDebt": "Maturity Debt",
+    "healthFactor": "Health Factor"
+  },
+  "es": {}
+}

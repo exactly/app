@@ -18,7 +18,7 @@ import keys from './translations.json';
 function MobileNavbar() {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
-  const { network, address, connect, disconnect } = useWeb3Context();
+  const { network, walletAddress, connect, disconnect } = useWeb3Context();
 
   const [open, setOpen] = useState<Boolean>(false);
 
@@ -56,16 +56,16 @@ function MobileNavbar() {
           <Link href="/">
             <img src="/img/logo.svg" alt="Exactly Logo" className={styles.logo} />
           </Link>
-          {connect && !address ? (
+          {connect && !walletAddress ? (
             <div className={styles.buttonContainer}>
               <Button text="Conectar" onClick={connect} />
             </div>
           ) : (
             disconnect &&
-            address && (
+            walletAddress && (
               <div className={styles.buttonContainer}>
                 <Wallet
-                  walletAddress={address}
+                  walletAddress={walletAddress}
                   cogwheel={false}
                   network={network}
                   disconnect={disconnect}

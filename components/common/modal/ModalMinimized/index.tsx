@@ -16,7 +16,7 @@ type Props = {
   handleMinimize: () => void;
 };
 
-function MinimizedModal({ tx, handleMinimize }: Props) {
+function ModalMinimized({ tx, handleMinimize }: Props) {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
@@ -38,11 +38,7 @@ function MinimizedModal({ tx, handleMinimize }: Props) {
 
   return (
     <div className={styles.container}>
-      <img
-        src="./img/icons/open.svg"
-        className={styles.open}
-        onClick={() => handleMinimize()}
-      />
+      <img src="./img/icons/open.svg" className={styles.open} onClick={() => handleMinimize()} />
       <h3 className={styles.title}>{options[tx.status].title}</h3>
       <div className={styles.loading}>
         {tx.status != 'success' ? (
@@ -66,4 +62,4 @@ function MinimizedModal({ tx, handleMinimize }: Props) {
   );
 }
 
-export default MinimizedModal;
+export default ModalMinimized;
