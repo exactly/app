@@ -22,7 +22,7 @@
     "recharts": "^2.1.8",
     "sass": "^1.39.0",
     "web3modal": "^1.9.5",
-    "protocol": "git+https://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:x-oauth-basic@github.com/exactly-finance/protocol.git#kovan"
+    "protocol": "git+https://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:x-oauth-basic@github.com/exactly-finance/protocol.git#deploy"
   },
   "devDependencies": {
     "@types/react": "17.0.19",
