@@ -65,8 +65,8 @@ function Item({ market, showModal, type, src }: Props) {
     const { borrowed, supplied } = await fixedLender?.maturityPools(date?.value);
 
     const newPoolData = {
-      borrowed: Math.round(parseInt(await ethers.utils.formatEther(borrowed))),
-      supplied: Math.round(parseInt(await ethers.utils.formatEther(supplied)))
+      borrowed: parseFloat(await ethers.utils.formatEther(borrowed)),
+      supplied: parseFloat(await ethers.utils.formatEther(supplied))
     };
 
     setPoolData(newPoolData);

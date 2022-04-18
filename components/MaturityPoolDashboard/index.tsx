@@ -5,10 +5,8 @@ import { LangKeys } from 'types/Lang';
 
 import Select from 'components/common/Select';
 import Tooltip from 'components/Tooltip';
-import Tabs from 'components/Tabs';
 import MaturityPoolUserStatusByAsset from 'components/MaturityPoolUserStatusByAsset';
 import MaturityPoolUserStatusByMaturity from 'components/MaturityPoolUserStatusByMaturity';
-import DashboardHeader from 'components/DashboardHeader';
 
 import LangContext from 'contexts/LangContext';
 
@@ -23,9 +21,10 @@ interface Props {
   deposits: Deposit[];
   borrows: Borrow[];
   showModal: (data: Deposit, type: String) => void;
+  tab: Option;
 }
 
-function MaturityPoolDashboard({ deposits, borrows, showModal }: Props) {
+function MaturityPoolDashboard({ deposits, borrows, showModal, tab }: Props) {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
@@ -39,36 +38,13 @@ function MaturityPoolDashboard({ deposits, borrows, showModal }: Props) {
     value: 'maturity'
   };
 
-  const tabDeposit = {
-    label: translations[lang].deposit,
-    value: 'deposit'
-  };
-
-  const tabBorrow = {
-    label: translations[lang].borrow,
-    value: 'borrow'
-  };
-
   const [filter, setFilter] = useState<Option>(filterByAsset);
-
-  const [tab, setTab] = useState<Option>(tabDeposit);
 
   return (
     <section className={styles.container}>
-      <DashboardHeader />
       <div className={styles.titleContainer}>
         <p className={styles.title}>{translations[lang].maturityPools}</p>
         <Tooltip value={translations[lang].maturityPools} />
-      </div>
-      <div className={styles.optionsContainer}>
-        <Tabs
-          values={[tabDeposit, tabBorrow]}
-          selected={tab}
-          handleTab={(value: Option) => {
-            setTab(value);
-          }}
-        />
-        <div className={styles.line} />
       </div>
       <section className={styles.sectionContainer}>
         <div className={styles.selectContainer}>

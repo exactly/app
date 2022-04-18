@@ -145,6 +145,10 @@ const Asset: NextPage<Props> = ({ symbol }) => {
           )}
 
           <section className={style.container}>
+            <div className={style.smartPoolContainer}>
+              <SmartPoolInfo showModal={(type: string) => showModal(type)} />
+              <SmartPoolChart />
+            </div>
             <section className={style.assetData}>
               <div className={style.assetContainer}>
                 <AssetSelector title={true} />
@@ -178,10 +182,6 @@ const Asset: NextPage<Props> = ({ symbol }) => {
               {maturities?.slice(0, 3)?.map((maturity) => {
                 return <MaturityInfo maturity={maturity} key={maturity.value} />;
               })}
-            </div>
-            <div className={style.smartPoolContainer}>
-              <SmartPoolInfo showModal={(type: string) => showModal(type)} />
-              <SmartPoolChart />
             </div>
           </section>
         </InterestRateModelProvider>

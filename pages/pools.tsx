@@ -105,7 +105,6 @@ const Pools: NextPage<Props> = () => {
     <AuditorProvider value={Auditor}>
       <FixedLenderProvider value={[FixedLenderDAI, FixedLenderWETH]}>
         <InterestRateModelProvider value={InterestRateModel}>
-          
           {modal && modalContent?.type == 'deposit' && (
             <DepositModalMP data={modalContent} closeModal={handleModal} />
           )}
@@ -121,11 +120,14 @@ const Pools: NextPage<Props> = () => {
           <MobileNavbar />
           <Navbar />
           <CurrentNetwork />
+
           <div style={{ marginTop: '180px' }}>
-            <MaturitySelector title={dictionary.maturityPools} />
+            <SmartPoolList markets={markets} showModal={showModal} />
           </div>
+
+          <MaturitySelector title={dictionary.maturityPools} />
+
           <MarketsList markets={markets} showModal={showModal} />
-          <SmartPoolList markets={markets} showModal={showModal} />
           <Footer />
         </InterestRateModelProvider>
       </FixedLenderProvider>

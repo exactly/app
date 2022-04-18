@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { NextPage } from 'next';
 import { request } from 'graphql-request';
+import { Option } from 'react-dropdown';
 
 import Navbar from 'components/Navbar';
 import Footer from 'components/Footer';
@@ -13,6 +14,8 @@ import WithdrawModalSP from 'components/WithdrawModalSP';
 import DepositModalMP from 'components/DepositModalMP';
 import DepositModalSP from 'components/DepositModalSP';
 import BorrowModal from 'components/BorrowModal';
+import DashboardHeader from 'components/DashboardHeader';
+import Tabs from 'components/Tabs';
 
 import { AuditorProvider } from 'contexts/AuditorContext';
 import { FixedLenderProvider } from 'contexts/FixedLenderContext';
@@ -32,11 +35,14 @@ import {
 } from 'queries';
 
 import { useWeb3Context } from 'contexts/Web3Context';
+
 //Contracts
 import InterestRateModel from 'protocol/deployments/kovan/InterestRateModel.json';
 import Auditor from 'protocol/deployments/kovan/Auditor.json';
 import FixedLenderDAI from 'protocol/deployments/kovan/FixedLenderDAI.json';
 import FixedLenderWETH from 'protocol/deployments/kovan/FixedLenderWETH.json';
+
+import translations from 'dictionary/en.json';
 
 interface Props {
   auditor: Contract;
@@ -54,6 +60,18 @@ const DashBoard: NextPage<Props> = () => {
   const [smartPoolDeposits, setSmartPoolDeposits] = useState<Dictionary<Deposit>>();
 
   const fixedLenders = [FixedLenderDAI, FixedLenderWETH];
+
+  const tabDeposit = {
+    label: translations.deposit,
+    value: 'deposit'
+  };
+
+  const tabBorrow = {
+    label: translations.borrow,
+    value: 'borrow'
+  };
+
+  const [tab, setTab] = useState<Option>(tabDeposit);
 
   useEffect(() => {
     getData();
@@ -133,12 +151,25 @@ const DashBoard: NextPage<Props> = () => {
 
           <MobileNavbar />
           <Navbar />
+          <DashboardHeader />
+          <Tabs
+            values={[tabDeposit, tabBorrow]}
+            selected={tab}
+            handleTab={(value: Option) => {
+              setTab(value);
+            }}
+          />
+
+          {tab.value == 'deposit' && (
+            <SmartPoolDashboard deposits={smartPoolDeposits} showModal={showModal} />
+          )}
+
           <MaturityPoolDashboard
             deposits={maturityPoolDeposits}
             borrows={maturityPoolBorrows}
             showModal={showModal}
+            tab={tab}
           />
-          <SmartPoolDashboard deposits={smartPoolDeposits} showModal={showModal} />
           <Footer />
         </InterestRateModelProvider>
       </FixedLenderProvider>
