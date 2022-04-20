@@ -32,6 +32,8 @@ import { AddressContext } from 'contexts/AddressContext';
 import InterestRateModelContext from 'contexts/InterestRateModelContext';
 
 import keys from './translations.json';
+import AuditorContext from 'contexts/AuditorContext';
+import ModalRowEditable from 'components/common/modal/ModalRowEditable';
 
 type Props = {
   data: Borrow | Deposit;
@@ -57,6 +59,8 @@ function BorrowModal({ data, closeModal }: Props) {
   const [tx, setTx] = useState<Transaction | undefined>(undefined);
   const [minimized, setMinimized] = useState<Boolean>(false);
   const [rate, setRate] = useState<string | undefined>('0');
+  const [slippage, setSlippage] = useState<number>(0.5);
+  const [editSlippage, setEditSlippage] = useState<boolean>(false);
 
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
     undefined
@@ -143,10 +147,12 @@ function BorrowModal({ data, closeModal }: Props) {
   }
 
   async function borrow() {
+    const maxAmount = parseFloat(qty!) * (1 + slippage / 100);
+
     const borrow = await fixedLenderWithSigner?.borrowAtMaturity(
       parseInt(date?.value ?? maturityDate),
       ethers.utils.parseUnits(qty!),
-      ethers.utils.parseUnits(qty!),
+      ethers.utils.parseUnits(`${maxAmount}`),
       walletAddress,
       walletAddress
     );
@@ -164,7 +170,7 @@ function BorrowModal({ data, closeModal }: Props) {
     const estimatedGasCost = await fixedLenderWithSigner?.estimateGas.borrowAtMaturity(
       parseInt(date?.value ?? maturityDate),
       ethers.utils.parseUnits('1'),
-      ethers.utils.parseUnits('1'),
+      ethers.utils.parseUnits('2'),
       walletAddress,
       walletAddress
     );
@@ -211,7 +217,17 @@ function BorrowModal({ data, closeModal }: Props) {
               <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} />
               {gas && <ModalTxCost gas={gas} />}
               <ModalRow text={translations[lang].interestRate} value={rate} line />
-              <ModalRow text={translations[lang].interestRateSlippage} value={'X %'} line />
+              <ModalRowEditable
+                text={translations[lang].interestRateSlippage}
+                value={slippage}
+                editable={editSlippage}
+                symbol="%"
+                onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                  setSlippage(e.target.valueAsNumber);
+                }}
+                onClick={() => setEditSlippage((prev) => !prev)}
+                line
+              />
               <ModalRow text={translations[lang].maturityDebt} value={'X %'} line />
               <ModalRow text={translations[lang].healthFactor} values={['1,1', '1,8']} />
               <div className={styles.buttonContainer}>
