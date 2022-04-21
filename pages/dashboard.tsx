@@ -20,21 +20,26 @@ import Tabs from 'components/Tabs';
 import { AuditorProvider } from 'contexts/AuditorContext';
 import { FixedLenderProvider } from 'contexts/FixedLenderContext';
 import { InterestRateModelProvider } from 'contexts/InterestRateModelContext';
+import { useWeb3Context } from 'contexts/Web3Context';
 
 import { Contract } from 'types/Contract';
 import { Dictionary } from 'types/Dictionary';
 import { Borrow } from 'types/Borrow';
 import { Deposit } from 'types/Deposit';
+import { Withdraw } from 'types/Withdraw';
+// import { Repay } from 'types/Repay';
+// import { WithdrawMP } from 'types/WithdrawMP';
 
 import useModal from 'hooks/useModal';
 
 import {
   getMaturityPoolBorrowsQuery,
   getMaturityPoolDepositsQuery,
-  getSmartPoolDepositsQuery
+  // getMaturityPoolRepaysQuery,
+  // getMaturityPoolWithdrawsQuery,
+  getSmartPoolDepositsQuery,
+  getSmartPoolWithdrawsQuery
 } from 'queries';
-
-import { useWeb3Context } from 'contexts/Web3Context';
 
 //Contracts
 import InterestRateModel from 'protocol/deployments/kovan/InterestRateModel.json';
@@ -43,6 +48,7 @@ import FixedLenderDAI from 'protocol/deployments/kovan/FixedLenderDAI.json';
 import FixedLenderWETH from 'protocol/deployments/kovan/FixedLenderWETH.json';
 
 import translations from 'dictionary/en.json';
+
 import { getSymbol } from 'utils/utils';
 
 interface Props {
@@ -57,8 +63,11 @@ const DashBoard: NextPage<Props> = () => {
   const { modal, handleModal, modalContent } = useModal();
 
   const [maturityPoolDeposits, setMaturityPoolDeposits] = useState<Array<Deposit>>([]);
+  // const [getMaturityPoolWithdraws, setMaturityPoolWithdraws] = useState<Array<WithdrawMP>>([]);
   const [maturityPoolBorrows, setMaturityPoolBorrows] = useState<Array<Borrow>>([]);
+  // const [maturityPoolRepays, setMaturityPoolRepays] = useState<Array<Repay>>([]);
   const [smartPoolDeposits, setSmartPoolDeposits] = useState<Dictionary<Deposit>>();
+  // const [smartPoolWithdraws, setSmartPoolWithdraws] = useState<Dictionary<Withdraw>>();
 
   const fixedLenders = [FixedLenderDAI, FixedLenderWETH];
 
@@ -81,20 +90,44 @@ const DashBoard: NextPage<Props> = () => {
   async function getData() {
     if (!walletAddress) return;
 
+    //MP
+
     const getMaturityPoolDeposits = await request(
       'https://api.thegraph.com/subgraphs/name/exactly-finance/exactly',
       getMaturityPoolDepositsQuery(walletAddress)
     );
+
+    // const getMaturityPoolWithdraws = await request(
+    //   'https://api.thegraph.com/subgraphs/name/exactly-finance/exactly',
+    //   getMaturityPoolWithdrawsQuery(walletAddress)
+    // );
+
     const getMaturityPoolBorrows = await request(
       'https://api.thegraph.com/subgraphs/name/exactly-finance/exactly',
       getMaturityPoolBorrowsQuery(walletAddress)
     );
+
+    // const getMaturityPoolRepays = await request(
+    //   'https://api.thegraph.com/subgraphs/name/exactly-finance/exactly',
+    //   getMaturityPoolRepaysQuery(walletAddress)
+    // );
+
+    //SP
     const getSmartPoolDeposits = await request(
       'https://api.thegraph.com/subgraphs/name/exactly-finance/exactly',
       getSmartPoolDepositsQuery(walletAddress)
     );
 
-    const smartPoolDeposits = formatSmartPoolDeposits(getSmartPoolDeposits.deposits);
+    const getSmartPoolWithdraws = await request(
+      'https://api.thegraph.com/subgraphs/name/exactly-finance/exactly',
+      getSmartPoolWithdrawsQuery(walletAddress)
+    );
+
+    const smartPoolDeposits = formatSmartPoolDeposits(
+      getSmartPoolDeposits.deposits,
+      getSmartPoolWithdraws.withdraws
+    );
+
     setSmartPoolDeposits(smartPoolDeposits);
 
     setMaturityPoolDeposits(getMaturityPoolDeposits.depositAtMaturities);
@@ -110,15 +143,23 @@ const DashBoard: NextPage<Props> = () => {
     handleModal({ content: { ...data, type } });
   }
 
-  function formatSmartPoolDeposits(rawDeposits: Deposit[]) {
+  function formatSmartPoolDeposits(rawDeposits: Deposit[], rawWithdraws: Withdraw[]) {
     let depositsDict: Dictionary<any> = {};
 
     rawDeposits.forEach((deposit) => {
       const symbol = getSymbol(deposit.market);
 
-      const oldAmount = depositsDict[symbol]?.amount ?? 0;
+      const oldAmount = depositsDict[symbol]?.assets ?? 0;
       const newAmount = oldAmount + parseInt(deposit.assets);
       depositsDict[symbol] = { ...deposit, assets: newAmount };
+    });
+
+    rawWithdraws.forEach((withdraw) => {
+      const symbol = getSymbol(withdraw.market);
+
+      const oldAmount = depositsDict[symbol]?.assets;
+      const newAmount = oldAmount - parseInt(withdraw.assets);
+      depositsDict[symbol] = { ...withdraw, assets: newAmount };
     });
 
     return depositsDict;
