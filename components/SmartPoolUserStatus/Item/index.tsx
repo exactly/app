@@ -37,7 +37,7 @@ function Item({ symbol, amount, walletAddress, showModal, deposit }: Props) {
   const [walletBalance, setWalletBalance] = useState<string | undefined>(undefined);
   const auditorContract = getContractData(auditor.address!, auditor.abi!);
   const underlyingData = getUnderlyingData(process.env.NEXT_PUBLIC_NETWORK!, symbol);
-  console.log({ symbol });
+
   useEffect(() => {
     getCurrentBalance();
   }, []);

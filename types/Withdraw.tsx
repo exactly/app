@@ -1,10 +1,9 @@
-export type Deposit = {
+export type Withdraw = {
   assets: string;
   caller: string;
-  fee: string;
+  receiver: string;
   id: string;
   market: string;
-  maturity: string;
   owner: string;
-  symbol?: string;
+  shares: string;
 };
