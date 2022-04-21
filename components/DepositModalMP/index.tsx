@@ -41,8 +41,7 @@ type Props = {
 };
 
 function DepositModalMP({ data, closeModal }: Props) {
-  const { maturityDate, address, symbol } = data;
-
+  const { maturity, market, symbol } = data;
   const { web3Provider, walletAddress } = useWeb3Context();
 
   const { date } = useContext(AddressContext);
@@ -68,6 +67,8 @@ function DepositModalMP({ data, closeModal }: Props) {
 
   if (symbol) {
     underlyingData = getUnderlyingData(process.env.NEXT_PUBLIC_NETWORK!, symbol.toLowerCase());
+  } else {
+    underlyingData = getUnderlyingData(process.env.NEXT_PUBLIC_NETWORK!, 'DAI'.toLowerCase());
   }
 
   const underlyingContract = getContractData(
@@ -89,10 +90,10 @@ function DepositModalMP({ data, closeModal }: Props) {
 
   useEffect(() => {
     checkAllowance();
-  }, [address, walletAddress, underlyingContract]);
+  }, [market, walletAddress, underlyingContract]);
 
   async function checkAllowance() {
-    const allowance = await underlyingContract?.allowance(walletAddress, address);
+    const allowance = await underlyingContract?.allowance(walletAddress, market);
 
     const formattedAllowance = allowance && parseFloat(ethers.utils.formatEther(allowance));
 
@@ -106,7 +107,7 @@ function DepositModalMP({ data, closeModal }: Props) {
   async function approve() {
     try {
       const approval = await underlyingContract?.approve(
-        address,
+        market,
         ethers.utils.parseUnits(numbers.approvalAmount!.toString())
       );
 
@@ -145,7 +146,7 @@ function DepositModalMP({ data, closeModal }: Props) {
 
   async function deposit() {
     const deposit = await fixedLenderWithSigner?.depositAtMaturity(
-      parseInt(date?.value ?? maturityDate),
+      parseInt(date?.value ?? maturity),
       ethers.utils.parseUnits(qty!),
       ethers.utils.parseUnits(qty!),
       walletAddress
@@ -162,7 +163,7 @@ function DepositModalMP({ data, closeModal }: Props) {
     const gasPriceInGwei = await fixedLenderWithSigner?.provider.getGasPrice();
 
     const estimatedGasCost = await fixedLenderWithSigner?.estimateGas.depositAtMaturity(
-      parseInt(date?.value ?? maturityDate),
+      parseInt(date?.value ?? maturity),
       ethers.utils.parseUnits(qty!),
       ethers.utils.parseUnits(qty!),
       walletAddress
@@ -209,11 +210,11 @@ function DepositModalMP({ data, closeModal }: Props) {
           {!tx && (
             <>
               <ModalTitle title={translations[lang].deposit} />
-              <ModalAsset asset={symbol} amount={walletBalance} />
+              <ModalAsset asset={symbol!} amount={walletBalance} />
               <ModalClose closeModal={closeModal} />
               <ModalRow
                 text={translations[lang].maturityPool}
-                value={date?.label ?? parseTimestamp(maturityDate)}
+                value={date?.label ?? parseTimestamp(maturity)}
               />
               <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} />
               {gas && <ModalTxCost gas={gas} />}

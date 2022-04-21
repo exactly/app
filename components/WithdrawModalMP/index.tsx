@@ -35,7 +35,7 @@ type Props = {
 };
 
 function WithdrawModalMP({ data, closeModal }: Props) {
-  const { symbol, maturityDate, amount } = data;
+  const { symbol, maturity, assets } = data;
 
   const { web3Provider, walletAddress } = useWeb3Context();
 
@@ -53,7 +53,7 @@ function WithdrawModalMP({ data, closeModal }: Props) {
     undefined
   );
 
-  const parsedAmount = ethers.utils.formatUnits(amount, 18);
+  const parsedAmount = ethers.utils.formatUnits(assets, 18);
 
   useEffect(() => {
     getFixedLenderContract();
@@ -75,7 +75,7 @@ function WithdrawModalMP({ data, closeModal }: Props) {
 
   async function withdraw() {
     const withdraw = await fixedLenderWithSigner?.withdrawAtMaturity(
-      maturityDate,
+      maturity,
       ethers.utils.parseUnits(qty!),
       ethers.utils.parseUnits(qty!),
       walletAddress,
@@ -93,7 +93,7 @@ function WithdrawModalMP({ data, closeModal }: Props) {
     const gasPriceInGwei = await fixedLenderWithSigner?.provider.getGasPrice();
 
     const estimatedGasCost = await fixedLenderWithSigner?.estimateGas.withdrawAtMaturity(
-      maturityDate,
+      maturity,
       ethers.utils.parseUnits(qty!),
       ethers.utils.parseUnits(qty!),
       walletAddress,
@@ -133,12 +133,9 @@ function WithdrawModalMP({ data, closeModal }: Props) {
           {!tx && (
             <>
               <ModalTitle title={translations[lang].withdraw} />
-              <ModalAsset asset={symbol} amount={parsedAmount} />
+              <ModalAsset asset={symbol!} amount={parsedAmount} />
               <ModalClose closeModal={closeModal} />
-              <ModalRow
-                text={translations[lang].maturityPool}
-                value={parseTimestamp(maturityDate)}
-              />
+              <ModalRow text={translations[lang].maturityPool} value={parseTimestamp(maturity)} />
               <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} />
               {gas && <ModalTxCost gas={gas} />}
               <ModalRow text={translations[lang].exactlyBalance} value={parsedAmount} line />

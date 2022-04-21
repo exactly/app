@@ -47,9 +47,10 @@ function Item({ market, showModal, type, src }: Props) {
   }, [date, fixedLender]);
 
   async function getFixedLenderContract() {
-    const filteredFixedLender = fixedLenderData.find((fl) => fl.address == market.address);
+    const filteredFixedLender = fixedLenderData.find((fl) => fl.address == market.market);
+
     const fixedLender = await getContractData(
-      market.address,
+      filteredFixedLender?.address!,
       filteredFixedLender?.abi!,
       web3Provider?.getSigner()
     );

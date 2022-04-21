@@ -1,9 +1,10 @@
 export type Deposit = {
-  address: string;
-  amount: string;
+  assets: string;
+  caller: string;
   fee: string;
   id: string;
-  maturityDate: string;
-  symbol: string;
-  isSmartPool: boolean;
+  market: string;
+  maturity: string;
+  owner: boolean;
+  symbol?: string;
 };

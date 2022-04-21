@@ -39,7 +39,7 @@ type Props = {
 };
 
 function DepositModalSP({ data, closeModal }: Props) {
-  const { address, symbol } = data;
+  const { market, symbol } = data;
 
   const { web3Provider, walletAddress } = useWeb3Context();
 
@@ -85,10 +85,10 @@ function DepositModalSP({ data, closeModal }: Props) {
 
   useEffect(() => {
     checkAllowance();
-  }, [address, walletAddress, underlyingContract]);
+  }, [market, walletAddress, underlyingContract]);
 
   async function checkAllowance() {
-    const allowance = await underlyingContract?.allowance(walletAddress, address);
+    const allowance = await underlyingContract?.allowance(walletAddress, market);
 
     const formattedAllowance = allowance && parseFloat(ethers.utils.formatEther(allowance));
 
@@ -102,7 +102,7 @@ function DepositModalSP({ data, closeModal }: Props) {
   async function approve() {
     try {
       const approval = await underlyingContract?.approve(
-        address,
+        market,
         ethers.utils.parseUnits(numbers.approvalAmount!.toString())
       );
 
@@ -201,7 +201,7 @@ function DepositModalSP({ data, closeModal }: Props) {
           {!tx && (
             <>
               <ModalTitle title={translations[lang].deposit} />
-              <ModalAsset asset={symbol} amount={walletBalance} />
+              <ModalAsset asset={symbol!} amount={walletBalance} />
               <ModalClose closeModal={closeModal} />
               <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} />
               {gas && <ModalTxCost gas={gas} />}

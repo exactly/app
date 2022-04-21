@@ -31,14 +31,13 @@ function Item({ symbol, amount, walletAddress, showModal, deposit }: Props) {
   const fixedLender = useContext(FixedLenderContext);
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
-
   const [toggle, setToggle] = useState<boolean>(false);
   const [disabled, setDisabled] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [walletBalance, setWalletBalance] = useState<string | undefined>(undefined);
   const auditorContract = getContractData(auditor.address!, auditor.abi!);
   const underlyingData = getUnderlyingData(process.env.NEXT_PUBLIC_NETWORK!, symbol);
-
+  console.log({ symbol });
   useEffect(() => {
     getCurrentBalance();
   }, []);
@@ -118,7 +117,10 @@ function Item({ symbol, amount, walletAddress, showModal, deposit }: Props) {
             text={translations[lang].deposit}
             className="primary"
             onClick={() =>
-              showModal({ ...deposit, amount: JSON.stringify(deposit.amount) }, 'smartDeposit')
+              showModal(
+                { ...deposit, assets: JSON.stringify(deposit.assets), symbol },
+                'smartDeposit'
+              )
             }
           />
         </div>
@@ -128,7 +130,10 @@ function Item({ symbol, amount, walletAddress, showModal, deposit }: Props) {
             text={translations[lang].withdraw}
             className="tertiary"
             onClick={() =>
-              showModal({ ...deposit, amount: JSON.stringify(deposit.amount) }, 'withdrawSP')
+              showModal(
+                { ...deposit, assets: JSON.stringify(deposit.assets), symbol },
+                'withdrawSP'
+              )
             }
           />
         </div>

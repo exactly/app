@@ -35,7 +35,7 @@ type Props = {
 };
 
 function RepayModal({ data, closeModal }: Props) {
-  const { symbol, maturityDate, amount } = data;
+  const { symbol, maturity, assets } = data;
   const { walletAddress, web3Provider } = useWeb3Context();
 
   const lang: string = useContext(LangContext);
@@ -45,7 +45,7 @@ function RepayModal({ data, closeModal }: Props) {
 
   const [qty, setQty] = useState<string>('0');
   const [isLateRepay, setIsLateRepay] = useState<boolean>(false);
-  const parsedAmount = ethers.utils.formatUnits(amount, 18);
+  const parsedAmount = ethers.utils.formatUnits(assets, 18);
   const [gas, setGas] = useState<Gas | undefined>();
   const [tx, setTx] = useState<Transaction | undefined>(undefined);
   const [minimized, setMinimized] = useState<boolean>(false);
@@ -65,10 +65,10 @@ function RepayModal({ data, closeModal }: Props) {
   }, [fixedLenderWithSigner]);
 
   useEffect(() => {
-    const repay = Date.now() / 1000 > parseInt(maturityDate);
+    const repay = Date.now() / 1000 > parseInt(maturity);
 
     setIsLateRepay(repay);
-  }, [maturityDate]);
+  }, [maturity]);
 
   useEffect(() => {
     getFixedLenderContract();
@@ -101,7 +101,7 @@ function RepayModal({ data, closeModal }: Props) {
 
   async function repay() {
     const repay = await fixedLenderWithSigner?.repayAtMaturity(
-      maturityDate,
+      maturity,
       ethers.utils.parseUnits(qty!),
       ethers.utils.parseUnits(qty!),
       walletAddress
@@ -118,7 +118,7 @@ function RepayModal({ data, closeModal }: Props) {
     const gasPriceInGwei = await fixedLenderWithSigner?.provider.getGasPrice();
 
     const estimatedGasCost = await fixedLenderWithSigner?.estimateGas.repayAtMaturity(
-      maturityDate,
+      maturity,
       ethers.utils.parseUnits(qty!),
       ethers.utils.parseUnits(qty!),
       walletAddress
@@ -142,12 +142,9 @@ function RepayModal({ data, closeModal }: Props) {
               <ModalTitle
                 title={isLateRepay ? translations[lang].lateRepay : translations[lang].earlyRepay}
               />
-              <ModalAsset asset={symbol} amount={parsedAmount} />
+              <ModalAsset asset={symbol!} amount={parsedAmount} />
               <ModalClose closeModal={closeModal} />
-              <ModalRow
-                text={translations[lang].maturityPool}
-                value={parseTimestamp(maturityDate)}
-              />
+              <ModalRow text={translations[lang].maturityPool} value={parseTimestamp(maturity)} />
               <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} />
               {gas && <ModalTxCost gas={gas} />}
               <ModalRow text={translations[lang].remainingDebt} value={parsedAmount} line />

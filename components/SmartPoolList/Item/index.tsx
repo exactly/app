@@ -35,8 +35,11 @@ function Item({ market, showModal, src }: Props) {
   const [fixedLender, setFixedLender] = useState<Contract | undefined>(undefined);
 
   async function getFixedLenderContract() {
-    const filteredFixedLender = fixedLenderData.find((fl) => fl.address == market.address);
-    const fixedLender = await getContractData(market.address, filteredFixedLender?.abi!);
+    const filteredFixedLender = fixedLenderData.find((fl) => fl.address == market.market);
+    const fixedLender = await getContractData(
+      filteredFixedLender?.address!,
+      filteredFixedLender?.abi!
+    );
     setFixedLender(fixedLender);
   }
 
