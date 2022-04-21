@@ -8,7 +8,6 @@ type Props = {
   valueTooltip?: string;
   line?: boolean;
   values?: Array<string>;
-  editable?: Boolean;
 };
 
 function ModalRow({ text, value, values, line }: Props) {
