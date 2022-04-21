@@ -1,13 +1,16 @@
 export function getMaturityPoolBorrowsQuery(address: string) {
   return `
   {
-    borrows(where: {address: "${address}", isSmartPool: false}) {
+    borrowAtMaturities(where:{caller: "${address}"}){
       id
-      address
-      amount
+      market
+      maturity
+      caller
+      receiver
+      borrower
+      assets
       fee
-      maturityDate
-      symbol
     }
-  }`
+  }
+  `;
 }

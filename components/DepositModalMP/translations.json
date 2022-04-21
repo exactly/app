@@ -1,0 +1,10 @@
+{
+  "en": {
+    "deposit": "Deposit",
+    "approve": "Approve",
+    "maturityPool": "Maturity Pool",
+    "interestRate": "Interest Rate",
+    "interestRateSlippage": "Interest Rate Slippage"
+  },
+  "es": {}
+}

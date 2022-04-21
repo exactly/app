@@ -7,11 +7,16 @@ import ModalClose from 'components/common/modal/ModalClose';
 import ModalInput from 'components/common/modal/ModalInput';
 import ModalRow from 'components/common/modal/ModalRow';
 import ModalTitle from 'components/common/modal/ModalTitle';
+import ModalTxCost from 'components/common/modal/ModalTxCost';
+import ModalMinimized from 'components/common/modal/ModalMinimized';
+import ModalGif from 'components/common/modal/ModalGif';
 import Overlay from 'components/Overlay';
 
 import { Borrow } from 'types/Borrow';
 import { Deposit } from 'types/Deposit';
 import { LangKeys } from 'types/Lang';
+import { Gas } from 'types/Gas';
+import { Transaction } from 'types/Transaction';
 
 import styles from './style.module.scss';
 
@@ -29,9 +34,9 @@ type Props = {
 };
 
 function WithdrawModalSP({ data, closeModal }: Props) {
-  const { symbol, amount } = data;
+  const { symbol, assets } = data;
 
-  const { web3Provider } = useWeb3Context();
+  const { walletAddress, web3Provider } = useWeb3Context();
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
@@ -39,15 +44,25 @@ function WithdrawModalSP({ data, closeModal }: Props) {
   const fixedLenderData = useContext(FixedLenderContext);
 
   const [qty, setQty] = useState<string>('0');
+  const [gas, setGas] = useState<Gas | undefined>();
+  const [tx, setTx] = useState<Transaction | undefined>(undefined);
+  const [minimized, setMinimized] = useState<Boolean>(false);
+
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
     undefined
   );
 
-  const parsedAmount = ethers.utils.formatUnits(amount, 18);
+  const parsedAmount = ethers.utils.formatUnits(assets, 18);
 
   useEffect(() => {
     getFixedLenderContract();
   }, []);
+
+  useEffect(() => {
+    if (fixedLenderWithSigner && !gas) {
+      estimateGas();
+    }
+  }, [fixedLenderWithSigner]);
 
   function onMax() {
     setQty(parsedAmount);
@@ -58,9 +73,34 @@ function WithdrawModalSP({ data, closeModal }: Props) {
   }
 
   async function withdraw() {
-    const withdraw = await fixedLenderWithSigner?.withdrawFromSmartPool(
-      ethers.utils.parseUnits(qty!)
+    const withdraw = await fixedLenderWithSigner?.withdraw(
+      ethers.utils.parseUnits(qty!),
+      walletAddress,
+      walletAddress
     );
+    setTx({ status: 'processing', hash: withdraw?.hash });
+
+    const status = await withdraw.wait();
+
+    setTx({ status: 'success', hash: status?.transactionHash });
+  }
+
+  async function estimateGas() {
+    const gasPriceInGwei = await fixedLenderWithSigner?.provider.getGasPrice();
+
+    const estimatedGasCost = await fixedLenderWithSigner?.estimateGas.withdraw(
+      ethers.utils.parseUnits(qty!),
+      walletAddress,
+      walletAddress
+    );
+
+    if (gasPriceInGwei && estimatedGasCost) {
+      const gwei = await ethers.utils.formatUnits(gasPriceInGwei, 'gwei');
+      const gasCost = await ethers.utils.formatUnits(estimatedGasCost, 'gwei');
+      const eth = parseFloat(gwei) * parseFloat(gasCost);
+
+      setGas({ eth: eth.toFixed(8), gwei: parseFloat(gwei).toFixed(1) });
+    }
   }
 
   async function getFixedLenderContract() {
@@ -82,24 +122,51 @@ function WithdrawModalSP({ data, closeModal }: Props) {
 
   return (
     <>
-      <section className={styles.formContainer}>
-        <ModalTitle title={translations[lang].withdraw} />
-        <ModalAsset asset={symbol} />
-        <ModalClose closeModal={closeModal} />
+      {!minimized && (
+        <section className={styles.formContainer}>
+          {!tx && (
+            <>
+              <ModalTitle title={translations[lang].withdraw} />
+              <ModalAsset asset={symbol!} />
+              <ModalClose closeModal={closeModal} />
+              <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} />
+              {gas && <ModalTxCost gas={gas} />}
+              <ModalRow text={translations[lang].exactlyBalance} value={parsedAmount} line />
+              <ModalRow text={translations[lang].healthFactor} values={['1.1', '1.8']} line />
+              <ModalRow text={translations[lang].borrowLimit} values={['1000', '2000']} />
+              <div className={styles.buttonContainer}>
+                <Button
+                  text={translations[lang].withdraw}
+                  className={qty <= '0' || !qty ? 'secondaryDisabled' : 'tertiary'}
+                  onClick={withdraw}
+                />
+              </div>
+            </>
+          )}
+          {tx && <ModalGif tx={tx} />}
+        </section>
+      )}
 
-        <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} />
-        <ModalRow text={translations[lang].exactlyBalance} value={parsedAmount} line />
-        <ModalRow text={translations[lang].healthFactor} values={['1.1', '1.8']} line />
-        <ModalRow text={translations[lang].borrowLimit} values={['1000', '2000']} />
-        <div className={styles.buttonContainer}>
-          <Button
-            text={translations[lang].withdraw}
-            className={qty <= '0' || !qty ? 'secondaryDisabled' : 'tertiary'}
-            onClick={withdraw}
-          />
-        </div>
-      </section>
-      <Overlay closeModal={closeModal} />
+      {tx && minimized && (
+        <ModalMinimized
+          tx={tx}
+          handleMinimize={() => {
+            setMinimized((prev) => !prev);
+          }}
+        />
+      )}
+
+      {!minimized && (
+        <Overlay
+          closeModal={
+            !tx || tx.status == 'success'
+              ? closeModal
+              : () => {
+                  setMinimized((prev) => !prev);
+                }
+          }
+        />
+      )}
     </>
   );
 }

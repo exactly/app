@@ -25,7 +25,7 @@ if (typeof window !== 'undefined') {
 
 export const useWeb3 = () => {
   const [state, dispatch] = useReducer(web3Reducer, web3InitialState);
-  const { provider, web3Provider, address, network } = state;
+  const { provider, web3Provider, walletAddress, network } = state;
 
   const connect = useCallback(async () => {
     if (web3Modal) {
@@ -33,14 +33,14 @@ export const useWeb3 = () => {
         const provider = await web3Modal.connect();
         const web3Provider = new ethers.providers.Web3Provider(provider);
         const signer = web3Provider.getSigner();
-        const address = await signer.getAddress();
+        const walletAddress = await signer.getAddress();
         const network = await web3Provider.getNetwork();
 
         dispatch({
           type: 'SET_WEB3_PROVIDER',
           provider,
           web3Provider,
-          address,
+          walletAddress,
           network
         } as Web3Action);
       } catch (err) {
@@ -79,7 +79,7 @@ export const useWeb3 = () => {
       const handleAccountsChanged = (accounts: string[]) => {
         dispatch({
           type: 'SET_ADDRESS',
-          address: accounts[0]
+          walletAddress: accounts[0]
         } as Web3Action);
       };
 
@@ -116,7 +116,7 @@ export const useWeb3 = () => {
   return {
     provider,
     web3Provider,
-    address,
+    walletAddress,
     network,
     connect,
     disconnect

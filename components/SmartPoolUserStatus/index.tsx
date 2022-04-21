@@ -38,7 +38,7 @@ function SmartPoolUserStatus({ deposits, walletAddress, showModal }: Props) {
 
           {deposits &&
             Object.keys(deposits).map((symbol: string, key: number) => {
-              const amount: string = JSON.stringify(deposits[symbol].amount);
+              const amount: string = JSON.stringify(deposits[symbol].assets);
 
               return (
                 <Item

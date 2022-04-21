@@ -15,7 +15,6 @@ import styles from './style.module.scss';
 
 import keys from './translations.json';
 
-import useContractWithSigner from 'hooks/useContractWithSigner';
 import { getUnderlyingData } from 'utils/utils';
 import { getContractData } from 'utils/contracts';
 
@@ -32,14 +31,13 @@ function Item({ symbol, amount, walletAddress, showModal, deposit }: Props) {
   const fixedLender = useContext(FixedLenderContext);
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
-
   const [toggle, setToggle] = useState<boolean>(false);
   const [disabled, setDisabled] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [walletBalance, setWalletBalance] = useState<string | undefined>(undefined);
-  const auditorContract = useContractWithSigner(auditor.address!, auditor.abi!);
+  const auditorContract = getContractData(auditor.address!, auditor.abi!);
   const underlyingData = getUnderlyingData(process.env.NEXT_PUBLIC_NETWORK!, symbol);
-
+  console.log({ symbol });
   useEffect(() => {
     getCurrentBalance();
   }, []);
@@ -70,10 +68,10 @@ function Item({ symbol, amount, walletAddress, showModal, deposit }: Props) {
 
       if (!toggle && fixedLenderAddress) {
         //if it's not toggled we need to ENTER
-        tx = await auditorContract.contractWithSigner?.enterMarkets([fixedLenderAddress]);
+        tx = await auditorContract?.enterMarkets([fixedLenderAddress]);
       } else if (fixedLenderAddress) {
         //if it's toggled we need to EXIT
-        tx = await auditorContract.contractWithSigner?.exitMarket(fixedLenderAddress);
+        tx = await auditorContract?.exitMarket(fixedLenderAddress);
       }
 
       //waiting for tx to end
@@ -115,7 +113,16 @@ function Item({ symbol, amount, walletAddress, showModal, deposit }: Props) {
       </span>
       <div className={styles.actions}>
         <div className={styles.buttonContainer}>
-          <Button text={translations[lang].deposit} className="primary" />
+          <Button
+            text={translations[lang].deposit}
+            className="primary"
+            onClick={() =>
+              showModal(
+                { ...deposit, assets: JSON.stringify(deposit.assets), symbol },
+                'smartDeposit'
+              )
+            }
+          />
         </div>
 
         <div className={styles.buttonContainer}>
@@ -123,7 +130,10 @@ function Item({ symbol, amount, walletAddress, showModal, deposit }: Props) {
             text={translations[lang].withdraw}
             className="tertiary"
             onClick={() =>
-              showModal({ ...deposit, amount: JSON.stringify(deposit.amount) }, 'withdrawSP')
+              showModal(
+                { ...deposit, assets: JSON.stringify(deposit.assets), symbol },
+                'withdrawSP'
+              )
             }
           />
         </div>

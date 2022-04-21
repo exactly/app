@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
 import type { NextApiRequest, NextPage } from 'next';
 import { ethers } from 'ethers';
+import dayjs from 'dayjs';
 
 import AssetSelector from 'components/AssetSelector';
 import Navbar from 'components/Navbar';
@@ -11,8 +12,10 @@ import AssetTable from 'components/AssetTable';
 import SmartPoolInfo from 'components/SmartPoolInfo';
 import SmartPoolChart from 'components/SmartPoolChart';
 import MobileNavbar from 'components/MobileNavbar';
-import Modal from 'components/Modal';
 import Paginator from 'components/Paginator';
+import DepositModalMP from 'components/DepositModalMP';
+import BorrowModal from 'components/BorrowModal';
+import DepositModalSP from 'components/DepositModalSP';
 
 import { Maturity } from 'types/Maturity';
 import { LangKeys } from 'types/Lang';
@@ -25,12 +28,12 @@ import { InterestRateModelProvider } from 'contexts/InterestRateModelContext';
 
 import style from './style.module.scss';
 
-import useContract from 'hooks/useContract';
 import useModal from 'hooks/useModal';
 
 import keys from './translations.json';
 
 import parseTimestamp from 'utils/parseTimestamp';
+import { getContractData } from 'utils/contracts';
 
 //Contracts
 import InterestRateModel from 'protocol/deployments/kovan/InterestRateModel.json';
@@ -50,12 +53,15 @@ const Asset: NextPage<Props> = ({ symbol }) => {
   const itemsPerPage = 5;
 
   const translations: { [key: string]: LangKeys } = keys;
-
-  const auditorContract = useContract(Auditor.address, Auditor.abi);
+  getContractData;
+  const auditorContract = getContractData(Auditor.address, Auditor.abi);
   const fixedLenders = [FixedLenderDAI, FixedLenderWETH];
 
-  const filteredFixedLender = fixedLenders.find((fl) => fl.args[1].toUpperCase() == symbol);
-  const fixedLenderContract = useContract(filteredFixedLender?.address!, filteredFixedLender?.abi!);
+  const filteredFixedLender = fixedLenders.find((fl) => fl.args[1] === symbol);
+  const fixedLenderContract = getContractData(
+    filteredFixedLender?.address!,
+    filteredFixedLender?.abi!
+  );
 
   const [maturities, setMaturities] = useState<Array<Maturity> | undefined>(undefined);
 
@@ -69,13 +75,22 @@ const Asset: NextPage<Props> = ({ symbol }) => {
   }, [auditorContract]);
 
   async function getMarketData() {
-    const marketData = await auditorContract?.contract?.getMarketData(filteredFixedLender?.address);
+    const marketData = await auditorContract?.getMarketData(filteredFixedLender?.address);
 
     setMarketData(marketData);
   }
 
   async function getPools() {
-    const pools = await fixedLenderContract?.contract?.getFuturePools();
+    const currentTimestamp = dayjs().unix();
+    const interval = 604800;
+    let timestamp = currentTimestamp - (currentTimestamp % interval);
+    const maxPools = await fixedLenderContract?.maxFuturePools();
+    const pools = [];
+
+    for (let i = 0; i < maxPools; i++) {
+      timestamp += interval;
+      pools.push(timestamp);
+    }
 
     const dates = pools?.map((pool: any) => {
       return pool.toString();
@@ -116,10 +131,24 @@ const Asset: NextPage<Props> = ({ symbol }) => {
         <InterestRateModelProvider value={InterestRateModel}>
           <MobileNavbar />
           <Navbar />
-          {modal && modalContent?.type != 'smartDeposit' && (
-            <Modal contractData={modalContent} closeModal={handleModal} />
+
+          {modal && modalContent?.type == 'deposit' && (
+            <DepositModalMP data={modalContent} closeModal={handleModal} />
           )}
+
+          {modal && modalContent?.type == 'smartDeposit' && (
+            <DepositModalSP data={modalContent} closeModal={handleModal} />
+          )}
+
+          {modal && modalContent?.type == 'borrow' && (
+            <BorrowModal data={modalContent} closeModal={handleModal} />
+          )}
+
           <section className={style.container}>
+            <div className={style.smartPoolContainer}>
+              <SmartPoolInfo showModal={(type: string) => showModal(type)} />
+              <SmartPoolChart />
+            </div>
             <section className={style.assetData}>
               <div className={style.assetContainer}>
                 <AssetSelector title={true} />
@@ -153,10 +182,6 @@ const Asset: NextPage<Props> = ({ symbol }) => {
               {maturities?.slice(0, 3)?.map((maturity) => {
                 return <MaturityInfo maturity={maturity} key={maturity.value} />;
               })}
-            </div>
-            <div className={style.smartPoolContainer}>
-              <SmartPoolInfo />
-              <SmartPoolChart />
             </div>
           </section>
         </InterestRateModelProvider>

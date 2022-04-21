@@ -3,6 +3,9 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--u5);
+  max-width: var(--maxWidth);
+  margin: 0 auto;
+  margin-top: calc(var(--navbarHeight) * 1.5);
 
   .container {
     width: calc(50% - var(--u3));

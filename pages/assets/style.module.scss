@@ -1,5 +1,4 @@
 .container {
-  padding-top: var(--u2);
   max-width: var(--maxWidth);
   margin: var(--navbarHeight) auto;
 
@@ -31,6 +30,8 @@
 
   .graphContainer {
     display: flex;
+    margin-bottom: var(--u6);
+
     .leftColumn {
       max-width: 60%;
       width: 100%;
@@ -64,6 +65,7 @@
   .smartPoolContainer {
     display: flex;
     gap: var(--u4);
-    margin-top: 80px;
+    margin-top: calc(var(--navbarHeight) * 1.5);
+    margin-bottom: var(--u6);
   }
 }

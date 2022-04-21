@@ -1,13 +1,15 @@
 export function getMaturityPoolDepositsQuery(address: string) {
   return `
   {
-    deposits(where: {address: "${address}", isSmartPool: false}) {
+    depositAtMaturities(where:{caller: "${address}"}){
       id
-      address
-      amount
+      market
+      maturity
+      caller
+      owner
+      assets
       fee
-      maturityDate
-      symbol
     }
-  }`
+  }
+  `;
 }

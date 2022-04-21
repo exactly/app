@@ -14,12 +14,11 @@ import LangContext from 'contexts/LangContext';
 import style from './style.module.scss';
 
 import keys from './translations.json';
-import PoolAccountingContext from 'contexts/PoolAccountingContext';
 import { getContractData } from 'utils/contracts';
 
 type Props = {
   market: Market;
-  showModal: (address: Market['address'], type: String) => void;
+  showModal: (marketData: Market, type: String) => void;
   src: string;
 };
 
@@ -28,28 +27,20 @@ function Item({ market, showModal, src }: Props) {
   const lang: string = useContext(LangContext);
 
   const fixedLenderData = useContext(FixedLenderContext);
-  const poolAccountingData = useContext(PoolAccountingContext);
 
   const translations: { [key: string]: LangKeys } = keys;
 
   const [poolData, setPoolData] = useState<Pool | undefined>(undefined);
 
   const [fixedLender, setFixedLender] = useState<Contract | undefined>(undefined);
-  const [poolAccounting, setPoolAccounting] = useState<Contract | undefined>(undefined);
 
   async function getFixedLenderContract() {
-    const filteredFixedLender = fixedLenderData.find((fl) => fl.address == market.address);
-    const fixedLender = await getContractData(market.address, filteredFixedLender?.abi!);
-    setFixedLender(fixedLender);
-    getPoolAccountingContract(fixedLender);
-  }
-
-  async function getPoolAccountingContract(fixedLender: Contract | undefined) {
-    const poolAccounting = await getContractData(
-      fixedLender?.poolAccounting(),
-      poolAccountingData.abi!
+    const filteredFixedLender = fixedLenderData.find((fl) => fl.address == market.market);
+    const fixedLender = await getContractData(
+      filteredFixedLender?.address!,
+      filteredFixedLender?.abi!
     );
-    setPoolAccounting(poolAccounting);
+    setFixedLender(fixedLender);
   }
 
   useEffect(() => {
@@ -57,18 +48,18 @@ function Item({ market, showModal, src }: Props) {
   }, []);
 
   useEffect(() => {
-    if (date?.value && fixedLender && poolAccounting) {
+    if (date?.value && fixedLender) {
       getMarketData();
     }
-  }, [date, fixedLender, poolAccounting]);
+  }, [date, fixedLender]);
 
   function handleClick() {
-    showModal(market?.address, 'smartDeposit');
+    showModal(market, 'smartDeposit');
   }
 
   async function getMarketData() {
-    const borrowed = await poolAccounting?.smartPoolBorrowed();
-    const supplied = await fixedLender?.getSmartPoolDeposits();
+    const borrowed = await fixedLender?.smartPoolBorrowed();
+    const supplied = await fixedLender?.smartPoolBalance();
 
     const newPoolData = {
       borrowed: Math.round(parseInt(await ethers.utils.formatEther(borrowed))),

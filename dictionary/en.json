@@ -1,3 +1,5 @@
 {
-  "maturityPools": "Maturity pools"
+  "maturityPools": "Maturity pools",
+  "deposit": "Deposit",
+  "borrow": "Borrow"
 }

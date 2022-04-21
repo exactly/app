@@ -17,7 +17,7 @@ import keys from './translations.json';
 
 type Props = {
   markets: Array<Market>;
-  showModal: (address: Market['address'], type: 'borrow' | 'deposit') => void;
+  showModal: (marketData: Market, type: 'borrow' | 'deposit') => void;
 };
 
 function MarketsList({ markets, showModal }: Props) {
@@ -39,13 +39,7 @@ function MarketsList({ markets, showModal }: Props) {
             const src: string = assetsData[symbol];
 
             return (
-              <Item
-                market={market}
-                key={key}
-                showModal={showModal}
-                type="deposit"
-                src={src}
-              />
+              <Item market={market} key={key} showModal={showModal} type="deposit" src={src} />
             );
           })}
           {markets.length === 0 && <Loading />}
@@ -63,15 +57,7 @@ function MarketsList({ markets, showModal }: Props) {
             const assetsData: Assets<symbol> = assets;
             const src: string = assetsData[symbol];
 
-            return (
-              <Item
-                market={market}
-                key={key}
-                showModal={showModal}
-                type="borrow"
-                src={src}
-              />
-            );
+            return <Item market={market} key={key} showModal={showModal} type="borrow" src={src} />;
           })}
           {markets.length === 0 && <Loading />}
         </div>

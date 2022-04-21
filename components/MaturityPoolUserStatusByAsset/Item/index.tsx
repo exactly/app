@@ -15,18 +15,19 @@ import styles from './style.module.scss';
 import keys from './translations.json';
 
 import parseTimestamp from 'utils/parseTimestamp';
+import { getSymbol } from 'utils/utils';
 
 type Props = {
   type?: Option;
   amount: string;
   fee: string;
   maturityDate: string;
-  symbol: string;
-  showModal: (data: Deposit, type: String) => void;
-  market: Deposit | Borrow;
+  showModal: (data: Deposit | Borrow, type: String) => void;
+  market: string;
+  data: Deposit | Borrow;
 };
 
-function Item({ symbol, type, amount, fee, maturityDate, showModal, market }: Props) {
+function Item({ type, amount, fee, maturityDate, showModal, market, data }: Props) {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
@@ -38,11 +39,12 @@ function Item({ symbol, type, amount, fee, maturityDate, showModal, market }: Pr
   const current = nowInSeconds - startDate;
   const progress = (current * 100) / maturityLife;
   const fixedRate = (parseInt(fee) * 100) / parseInt(amount);
+  const symbol = getSymbol(market);
 
   return (
     <div className={styles.container}>
       <div className={styles.symbol}>
-        <img src={`/img/assets/${symbol.toLowerCase()}.png`} className={styles.assetImage} />
+        <img src={`/img/assets/${symbol?.toLowerCase()}.png`} className={styles.assetImage} />
         <span className={styles.primary}>{symbol}</span>
       </div>
       <span className={styles.value}>{ethers.utils.formatUnits(amount, 18)}</span>
@@ -57,24 +59,14 @@ function Item({ symbol, type, amount, fee, maturityDate, showModal, market }: Pr
           />
         </div>
       </span>
-      {type && progress < 100 && (
-        <div className={styles.buttonContainer}>
-          <Button
-            text={type.value == 'borrow' ? translations[lang].borrow : translations[lang].deposit}
-            className={type.value == 'borrow' ? 'secondary' : 'primary'}
-            onClick={() => {
-              showModal(market, type.value);
-            }}
-          />
-        </div>
-      )}
-      {type && progress >= 100 && (
+
+      {type && (
         <div className={styles.buttonContainer}>
           <Button
             text={type.value == 'borrow' ? translations[lang].repay : translations[lang].withdraw}
             className={type.value == 'borrow' ? 'quaternary' : 'tertiary'}
             onClick={() => {
-              showModal(market, type.value == 'borrow' ? 'repay' : 'withdraw');
+              showModal({ ...data, symbol }, type.value == 'borrow' ? 'repay' : 'withdraw');
             }}
           />
         </div>

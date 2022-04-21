@@ -1,0 +1,45 @@
+.steps {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: var(--u) 0;
+
+  .step {
+    width: var(--u2);
+    height: var(--u2);
+    border-radius: 50%;
+    background: var(--gray-200);
+    position: relative;
+
+    &:not(:first-child):after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 50%;
+      width: 800%;
+      border-bottom: solid 2px var(--gray-200);
+      z-index: -1;
+    }
+  }
+
+  .selectedStep {
+    @extend .step;
+    background: var(--primary);
+    &:not(:first-child):after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 50%;
+      width: 800%;
+      border-bottom: solid 2px var(--primary);
+      z-index: -1;
+    }
+  }
+}
+
+.text {
+  font-size: var(--font-12);
+  color: var(--gray-900);
+  margin-top: 0;
+  margin-bottom: var(--u4);
+}

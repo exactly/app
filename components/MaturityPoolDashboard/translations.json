@@ -4,7 +4,9 @@
     "deposit": "Deposit",
     "borrow": "Borrow",
     "filterAsset": "Filter by Asset",
-    "filterMaturity": "Filter by Maturity"
+    "filterMaturity": "Filter by Maturity",
+    "newBorrow": "New Borrow",
+    "newDeposit": "New Deposit"
   },
   "es": {}
 }
