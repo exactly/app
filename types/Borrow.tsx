@@ -1,10 +1,11 @@
-
 export type Borrow = {
-  address: string,
-  amount: string,
-  fee: string,
-  id: string,
-  maturityDate: string,
-  symbol: string,
-  isSmartPool: boolean
-}
+  id: string;
+  market: string;
+  maturity: string;
+  caller: string;
+  receiver: string;
+  borrower: string;
+  assets: string;
+  fee: string;
+  symbol?: string;
+};

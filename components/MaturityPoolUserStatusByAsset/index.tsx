@@ -17,7 +17,7 @@ type Props = {
   type: Option;
   deposits: Deposit[];
   borrows: Borrow[];
-  showModal: (data: Deposit, type: String) => void;
+  showModal: (data: Deposit | Borrow, type: String) => void;
 };
 
 function MaturityPoolUserStatusByAsset({ type, deposits, borrows, showModal }: Props) {
@@ -43,12 +43,12 @@ function MaturityPoolUserStatusByAsset({ type, deposits, borrows, showModal }: P
                 <Item
                   type={type}
                   key={key}
-                  amount={borrow.amount}
+                  amount={borrow.assets}
                   fee={borrow.fee}
-                  maturityDate={borrow.maturityDate}
-                  symbol={borrow.symbol}
+                  maturityDate={borrow.maturity}
                   showModal={showModal}
-                  market={borrow}
+                  market={borrow.market}
+                  data={borrow}
                 />
               );
             })}
@@ -59,12 +59,12 @@ function MaturityPoolUserStatusByAsset({ type, deposits, borrows, showModal }: P
                 <Item
                   type={type}
                   key={key}
-                  amount={deposit.amount}
+                  amount={deposit.assets}
                   fee={deposit.fee}
-                  maturityDate={deposit.maturityDate}
-                  symbol={deposit.symbol}
+                  maturityDate={deposit.maturity}
                   showModal={showModal}
-                  market={deposit}
+                  market={deposit.market}
+                  data={deposit}
                 />
               );
             })}

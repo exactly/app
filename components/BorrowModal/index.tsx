@@ -39,7 +39,7 @@ type Props = {
 };
 
 function BorrowModal({ data, closeModal }: Props) {
-  const { maturityDate, symbol } = data;
+  const { maturity, symbol } = data;
 
   const { web3Provider, walletAddress } = useWeb3Context();
 
@@ -92,7 +92,7 @@ function BorrowModal({ data, closeModal }: Props) {
     if (qty) {
       calculateRate();
     }
-  }, [qty, date, maturityDate]);
+  }, [qty, date, maturity]);
 
   async function getWalletBalance() {
     const walletBalance = await underlyingContract?.balanceOf(walletAddress);
@@ -118,7 +118,7 @@ function BorrowModal({ data, closeModal }: Props) {
     const smartPoolSupplied = await fixedLenderWithSigner?.smartPoolBalance();
 
     const maturityPoolStatus = await fixedLenderWithSigner?.maturityPools(
-      parseInt(date?.value ?? maturityDate)
+      parseInt(date?.value ?? maturity)
     );
 
     const currentTimestamp = Math.floor(Date.now() / 1000);
@@ -126,7 +126,7 @@ function BorrowModal({ data, closeModal }: Props) {
     //Borrow
     try {
       const borrowRate = await interestRateModelContract?.getRateToBorrow(
-        parseInt(date?.value ?? maturityDate),
+        parseInt(date?.value ?? maturity),
         currentTimestamp,
         ethers.utils.parseUnits(qty!, 18),
         maturityPoolStatus.borrowed,
@@ -144,7 +144,7 @@ function BorrowModal({ data, closeModal }: Props) {
 
   async function borrow() {
     const borrow = await fixedLenderWithSigner?.borrowAtMaturity(
-      parseInt(date?.value ?? maturityDate),
+      parseInt(date?.value ?? maturity),
       ethers.utils.parseUnits(qty!),
       ethers.utils.parseUnits(qty!),
       walletAddress,
@@ -162,7 +162,7 @@ function BorrowModal({ data, closeModal }: Props) {
     const gasPriceInGwei = await fixedLenderWithSigner?.provider.getGasPrice();
 
     const estimatedGasCost = await fixedLenderWithSigner?.estimateGas.borrowAtMaturity(
-      parseInt(date?.value ?? maturityDate),
+      parseInt(date?.value ?? maturity),
       ethers.utils.parseUnits('1'),
       ethers.utils.parseUnits('1'),
       walletAddress,
@@ -202,11 +202,11 @@ function BorrowModal({ data, closeModal }: Props) {
           {!tx && (
             <>
               <ModalTitle title={translations[lang].borrow} />
-              <ModalAsset asset={symbol} amount={walletBalance} />
+              <ModalAsset asset={symbol!} amount={walletBalance} />
               <ModalClose closeModal={closeModal} />
               <ModalRow
                 text={translations[lang].maturityPool}
-                value={date?.label ?? parseTimestamp(maturityDate)}
+                value={date?.label ?? parseTimestamp(maturity)}
               />
               <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} />
               {gas && <ModalTxCost gas={gas} />}

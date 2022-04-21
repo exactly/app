@@ -1,13 +1,14 @@
 export function getSmartPoolDepositsQuery(address: string) {
   return `
   {
-    deposits(where: {address: "${address}", isSmartPool: true}) {
+    deposits(where:{caller: "${address}"}){
       id
-      address
-      amount
-      fee
-      maturityDate
-      symbol
+      market   
+      caller
+      owner
+      assets
+      shares
     }
-  }`
+  }
+  `;
 }

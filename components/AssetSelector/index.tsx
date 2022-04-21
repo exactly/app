@@ -67,7 +67,7 @@ function AssetSelector({ title, defaultAddress, onChange }: Props) {
     const marketData: Market = {
       symbol: market[0],
       name: market[1],
-      address: market[5],
+      market: market[5],
       isListed: market[2],
       collateralFactor: market[4]
     };
@@ -85,7 +85,7 @@ function AssetSelector({ title, defaultAddress, onChange }: Props) {
           <span className={style.marketName}>{marketData.name}</span>
         </div>
       ),
-      value: marketData.address
+      value: marketData.market
     };
   }
 
@@ -94,7 +94,7 @@ function AssetSelector({ title, defaultAddress, onChange }: Props) {
       const marketData: Market = {
         symbol: market[0],
         name: market[1],
-        address: market[5],
+        market: market[5],
         isListed: market[2],
         collateralFactor: market[4]
       };
@@ -112,7 +112,7 @@ function AssetSelector({ title, defaultAddress, onChange }: Props) {
             <span className={style.marketName}>{marketData.name}</span>
           </div>
         ),
-        value: marketData.address
+        value: marketData.market
       };
     });
 

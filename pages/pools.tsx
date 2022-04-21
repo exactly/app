@@ -69,14 +69,14 @@ const Pools: NextPage<Props> = () => {
 
     for (let i = 0; i < length; i++) {
       const market: Market = {
-        address: '',
+        market: '',
         symbol: '',
         name: '',
         isListed: false,
         collateralFactor: 0
       };
 
-      market['address'] = markets[i][5];
+      market['market'] = markets[i][5];
       market['symbol'] = markets[i][0];
       market['name'] = markets[i][1];
       market['isListed'] = markets[i][2];
@@ -95,7 +95,7 @@ const Pools: NextPage<Props> = () => {
     }
 
     const data = markets.find((market) => {
-      return market.address === marketData.address;
+      return market.market === marketData.market;
     });
 
     handleModal({ content: { ...data, type } });

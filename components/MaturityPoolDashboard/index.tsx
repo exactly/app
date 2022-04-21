@@ -20,7 +20,7 @@ import Button from 'components/common/Button';
 interface Props {
   deposits: Deposit[];
   borrows: Borrow[];
-  showModal: (data: Deposit, type: String) => void;
+  showModal: (data: Deposit | Borrow, type: String) => void;
   tab: Option;
 }
 
@@ -63,7 +63,14 @@ function MaturityPoolDashboard({ deposits, borrows, showModal, tab }: Props) {
               tab.value == 'borrow' ? translations[lang].newBorrow : translations[lang].newDeposit
             }
             className={tab.value == 'borrow' ? 'secondary' : 'primary'}
-            onClick={() => showModal(tab.value == 'borrow' ? borrows[0] : deposits[0], tab.value)}
+            onClick={() =>
+              showModal(
+                tab.value == 'borrow'
+                  ? { ...borrows[0], symbol: 'DAI' }
+                  : { ...deposits[0], symbol: 'DAI' },
+                tab.value
+              )
+            }
           />
         </div>
       </section>

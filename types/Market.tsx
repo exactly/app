@@ -4,7 +4,7 @@ export type Market = {
   [key: string]: number | string | boolean | Date;
   symbol: string;
   name: string;
-  address: string;
+  market: string;
   isListed: boolean;
   collateralFactor: number;
 };

@@ -34,7 +34,7 @@ type Props = {
 };
 
 function WithdrawModalSP({ data, closeModal }: Props) {
-  const { symbol, amount } = data;
+  const { symbol, assets } = data;
 
   const { walletAddress, web3Provider } = useWeb3Context();
 
@@ -52,7 +52,7 @@ function WithdrawModalSP({ data, closeModal }: Props) {
     undefined
   );
 
-  const parsedAmount = ethers.utils.formatUnits(amount, 18);
+  const parsedAmount = ethers.utils.formatUnits(assets, 18);
 
   useEffect(() => {
     getFixedLenderContract();
@@ -127,7 +127,7 @@ function WithdrawModalSP({ data, closeModal }: Props) {
           {!tx && (
             <>
               <ModalTitle title={translations[lang].withdraw} />
-              <ModalAsset asset={symbol} />
+              <ModalAsset asset={symbol!} />
               <ModalClose closeModal={closeModal} />
               <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} />
               {gas && <ModalTxCost gas={gas} />}
