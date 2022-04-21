@@ -106,7 +106,7 @@ const DashBoard: NextPage<Props> = () => {
       //in the future we should handle the minimized modal status through a context here
       return;
     }
-    console.log(data);
+
     handleModal({ content: { ...data, type } });
   }
 
