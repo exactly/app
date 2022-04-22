@@ -3,6 +3,21 @@
   flex-direction: column;
   align-items: center;
 
+  .mediaContainer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    .video {
+      border-radius: 50%;
+      height: 125px;
+    }
+
+    .img {
+      position: absolute;
+      z-index: -1;
+    }
+  }
+
   .title {
     text-align: center;
     font-size: var(--font-20);

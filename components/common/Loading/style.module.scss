@@ -33,12 +33,20 @@
 
 .loadingSmall {
   @extend .loading;
-  width: var(--u5);
-  height: var(--u5);
+  width: var(--u3);
+  height: var(--u3);
 
   div {
-    width: var(--u5);
-    height: var(--u5);
+    width: var(--u3);
+    height: var(--u3);
+    margin: 0;
+  }
+}
+
+.white {
+  div {
+    border: var(--u) solid var(--white);
+    border-color: var(--white) transparent transparent transparent;
   }
 }
 
