@@ -10,10 +10,21 @@ import styles from './style.module.scss';
 
 import keys from './translations.json';
 import Tooltip from 'components/Tooltip';
+import { useWeb3Context } from 'contexts/Web3Context';
 
 function DashboardHeader() {
   const lang: string = useContext(LangContext);
+  const { walletAddress } = useWeb3Context();
   const translations: { [key: string]: LangKeys } = keys;
+
+  const notConnected = [
+    {
+      label: '',
+      value: 100,
+      color: '#E1E1E1',
+      image: ''
+    }
+  ];
 
   const defaultDepositData = [
     {
@@ -75,16 +86,24 @@ function DashboardHeader() {
           <h3 className={styles.title}>
             {translations[lang].deposits} <Tooltip value={translations[lang].deposits} />
           </h3>
-          <p className={styles.value}>$6,724</p>
-          <p className={styles.subvalue}>2.14% {translations[lang].apr}</p>
+          {walletAddress ? (
+            <>
+              <p className={styles.value}>$6,724</p>
+              <p className={styles.subvalue}>2.14% {translations[lang].apr}</p>
+            </>
+          ) : (
+            <p className={styles.disabledValue}>$0</p>
+          )}
         </div>
         <div className={styles.chartContainer}>
-          <DonutChart data={defaultDepositData} small />
-          <div className={styles.detail}>
-            {defaultDepositData.map((asset, key) => {
-              return <Tooltip key={key} value={'$1234'} image={asset.image} />;
-            })}
-          </div>
+          <DonutChart data={walletAddress ? defaultDepositData : notConnected} small />
+          {walletAddress && (
+            <div className={styles.detail}>
+              {defaultDepositData.map((asset, key) => {
+                return <Tooltip key={key} value={'$1234'} image={asset.image} />;
+              })}
+            </div>
+          )}
         </div>
         <div className={styles.line}></div>
         <div className={styles.box}>
@@ -92,25 +111,27 @@ function DashboardHeader() {
             {translations[lang].rateComposition}{' '}
             <Tooltip value={translations[lang].rateComposition} />
           </h3>
-          <div className={styles.informationContainer}>
-            <div className={styles.information}>
-              <p className={styles.informationTitle}>
-                <span className={styles.variable} />
-                {translations[lang].variable}
-              </p>
-              <p className={styles.informationValue}>50%</p>
+          {walletAddress && (
+            <div className={styles.informationContainer}>
+              <div className={styles.information}>
+                <p className={styles.informationTitle}>
+                  <span className={styles.variable} />
+                  {translations[lang].variable}
+                </p>
+                <p className={styles.informationValue}>50%</p>
+              </div>
+              <div className={styles.information}>
+                <p className={styles.informationTitle}>
+                  <span className={styles.fixed} />
+                  {translations[lang].fixed}
+                </p>
+                <p className={styles.informationValue}>50%</p>
+              </div>
             </div>
-            <div className={styles.information}>
-              <p className={styles.informationTitle}>
-                <span className={styles.fixed} />
-                {translations[lang].fixed}
-              </p>
-              <p className={styles.informationValue}>50%</p>
-            </div>
-          </div>
+          )}
         </div>
         <div className={styles.chartContainer}>
-          <DonutChart data={defaultRateData} />
+          <DonutChart data={walletAddress ? defaultRateData : notConnected} />
         </div>
       </div>
       <div className={styles.container}>
@@ -118,41 +139,54 @@ function DashboardHeader() {
           <h3 className={styles.title}>
             {translations[lang].borrows} <Tooltip value={translations[lang].borrows} />
           </h3>
-          <p className={styles.value}>$6,724</p>
-          <p className={styles.subvalue}>2.14% {translations[lang].apr}</p>
+          {walletAddress ? (
+            <>
+              <p className={styles.value}>$6,724</p>
+              <p className={styles.subvalue}>2.14% {translations[lang].apr}</p>
+            </>
+          ) : (
+            <p className={styles.disabledValue}>$0</p>
+          )}
         </div>
         <div className={styles.chartContainer}>
-          <DonutChart data={defaultDepositData} small />
-          <div className={styles.detail}>
-            {defaultDepositData.map((asset, key) => {
-              return <Tooltip key={key} value={'$1234'} image={asset.image} />;
-            })}
-          </div>
+          <DonutChart data={walletAddress ? defaultDepositData : notConnected} small />
+          {walletAddress && (
+            <div className={styles.detail}>
+              {defaultDepositData.map((asset, key) => {
+                return <Tooltip key={key} value={'$1234'} image={asset.image} />;
+              })}
+            </div>
+          )}
         </div>
         <div className={styles.line}></div>
         <div className={styles.box}>
           <h3 className={styles.title}>
             {translations[lang].healthFactor} <Tooltip value={translations[lang].healthFactor} />
           </h3>
-          <div className={styles.informationContainer}>
-            <div className={styles.information}>
-              <p className={styles.informationTitle}>
-                <span className={styles.fixed} />
-                {translations[lang].deposited}
-              </p>
-              <p className={styles.informationValue}>50%</p>
+          {walletAddress && (
+            <div className={styles.informationContainer}>
+              <div className={styles.information}>
+                <p className={styles.informationTitle}>
+                  <span className={styles.fixed} />
+                  {translations[lang].deposited}
+                </p>
+                <p className={styles.informationValue}>50%</p>
+              </div>
+              <div className={styles.information}>
+                <p className={styles.informationTitle}>
+                  <span className={styles.variable} />
+                  {translations[lang].borrowed}
+                </p>
+                <p className={styles.informationValue}>50%</p>
+              </div>
             </div>
-            <div className={styles.information}>
-              <p className={styles.informationTitle}>
-                <span className={styles.variable} />
-                {translations[lang].borrowed}
-              </p>
-              <p className={styles.informationValue}>50%</p>
-            </div>
-          </div>
+          )}
         </div>
         <div className={styles.chartContainer}>
-          <DonutChart data={defaultHealthFactorData} insideValue={'6,6%'} />
+          <DonutChart
+            data={walletAddress ? defaultHealthFactorData : notConnected}
+            insideValue={walletAddress ? '6,6%' : ''}
+          />
         </div>
       </div>
     </section>

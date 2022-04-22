@@ -41,6 +41,11 @@
         margin: 0;
       }
 
+      .disabledValue {
+        @extend .value;
+        color: var(--gray-100);
+      }
+
       .subvalue {
         color: var(--gray-900);
         display: flex;

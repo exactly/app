@@ -22,8 +22,7 @@ type ActiveShape = {
 
 function DonutChart({ data, small, insideValue }: Props) {
   const renderActiveShape = (props: ActiveShape) => {
-    const { cx, cy, innerRadius, outerRadius, startAngle, endAngle, fill } =
-      props;
+    const { cx, cy, innerRadius, outerRadius, startAngle, endAngle, fill } = props;
 
     return (
       <g className={styles.innerValue}>
