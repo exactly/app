@@ -11,6 +11,7 @@ import ModalTxCost from 'components/common/modal/ModalTxCost';
 import ModalMinimized from 'components/common/modal/ModalMinimized';
 import ModalGif from 'components/common/modal/ModalGif';
 import Overlay from 'components/Overlay';
+import ModalRowEditable from 'components/common/modal/ModalRowEditable';
 
 import { Borrow } from 'types/Borrow';
 import { Deposit } from 'types/Deposit';
@@ -32,8 +33,6 @@ import { AddressContext } from 'contexts/AddressContext';
 import InterestRateModelContext from 'contexts/InterestRateModelContext';
 
 import keys from './translations.json';
-import AuditorContext from 'contexts/AuditorContext';
-import ModalRowEditable from 'components/common/modal/ModalRowEditable';
 
 type Props = {
   data: Borrow | Deposit;
