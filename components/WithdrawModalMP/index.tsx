@@ -11,6 +11,7 @@ import ModalTxCost from 'components/common/modal/ModalTxCost';
 import ModalMinimized from 'components/common/modal/ModalMinimized';
 import ModalGif from 'components/common/modal/ModalGif';
 import Overlay from 'components/Overlay';
+import ModalRowEditable from 'components/common/modal/ModalRowEditable';
 
 import { Borrow } from 'types/Borrow';
 import { Deposit } from 'types/Deposit';
@@ -48,6 +49,8 @@ function WithdrawModalMP({ data, closeModal }: Props) {
   const [gas, setGas] = useState<Gas | undefined>();
   const [tx, setTx] = useState<Transaction | undefined>(undefined);
   const [minimized, setMinimized] = useState<Boolean>(false);
+  const [slippage, setSlippage] = useState<number>(0.5);
+  const [editSlippage, setEditSlippage] = useState<boolean>(false);
 
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
     undefined
@@ -74,10 +77,12 @@ function WithdrawModalMP({ data, closeModal }: Props) {
   }
 
   async function withdraw() {
+    const minAmount = parseFloat(qty!) * (1 - slippage / 100);
+
     const withdraw = await fixedLenderWithSigner?.withdrawAtMaturity(
       maturity,
       ethers.utils.parseUnits(qty!),
-      ethers.utils.parseUnits(qty!),
+      ethers.utils.parseUnits(`${minAmount}`),
       walletAddress,
       walletAddress
     );
@@ -94,8 +99,8 @@ function WithdrawModalMP({ data, closeModal }: Props) {
 
     const estimatedGasCost = await fixedLenderWithSigner?.estimateGas.withdrawAtMaturity(
       maturity,
-      ethers.utils.parseUnits(qty!),
-      ethers.utils.parseUnits(qty!),
+      ethers.utils.parseUnits('1'),
+      ethers.utils.parseUnits('0'),
       walletAddress,
       walletAddress
     );
@@ -140,7 +145,17 @@ function WithdrawModalMP({ data, closeModal }: Props) {
               {gas && <ModalTxCost gas={gas} />}
               <ModalRow text={translations[lang].exactlyBalance} value={parsedAmount} line />
               <ModalRow text={translations[lang].interestRate} value="X %" line />
-              <ModalRow text={translations[lang].interestRateSlippage} value={'X %'} />
+              <ModalRowEditable
+                text={translations[lang].interestRateSlippage}
+                value={slippage}
+                editable={editSlippage}
+                symbol="%"
+                onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                  setSlippage(e.target.valueAsNumber);
+                }}
+                onClick={() => setEditSlippage((prev) => !prev)}
+                line
+              />
               <div className={styles.buttonContainer}>
                 <Button
                   text={translations[lang].withdraw}
