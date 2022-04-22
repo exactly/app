@@ -8,6 +8,7 @@ import LangContext from 'contexts/LangContext';
 import { LangKeys } from 'types/Lang';
 
 import keys from './translations.json';
+import Loading from '../Loading';
 
 type Props = {
   text: string;
@@ -34,7 +35,7 @@ function Button({ text, onClick, className, style, loading, disabled }: Props) {
       onClick={onClick}
       disabled={disabled ?? false}
     >
-      {loading ? translations[lang].loading : text}
+      {loading ? <Loading size="small" white /> : text}
     </button>
   );
 }
