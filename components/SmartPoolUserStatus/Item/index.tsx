@@ -17,6 +17,7 @@ import keys from './translations.json';
 
 import { getUnderlyingData } from 'utils/utils';
 import { getContractData } from 'utils/contracts';
+import { useWeb3Context } from 'contexts/Web3Context';
 
 type Props = {
   symbol: string;
@@ -27,6 +28,7 @@ type Props = {
 };
 
 function Item({ symbol, amount, walletAddress, showModal, deposit }: Props) {
+  const { web3Provider } = useWeb3Context();
   const auditor = useContext(AuditorContext);
   const fixedLender = useContext(FixedLenderContext);
   const lang: string = useContext(LangContext);
@@ -35,7 +37,13 @@ function Item({ symbol, amount, walletAddress, showModal, deposit }: Props) {
   const [disabled, setDisabled] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [walletBalance, setWalletBalance] = useState<string | undefined>(undefined);
-  const auditorContract = getContractData(auditor.address!, auditor.abi!);
+
+  const auditorContract = getContractData(
+    auditor.address!,
+    auditor.abi!,
+    web3Provider?.getSigner()
+  );
+
   const underlyingData = getUnderlyingData(process.env.NEXT_PUBLIC_NETWORK!, symbol);
 
   useEffect(() => {
@@ -108,7 +116,9 @@ function Item({ symbol, amount, walletAddress, showModal, deposit }: Props) {
             disabled={disabled}
           />
         ) : (
-          <Loading size="small" />
+          <div className={styles.loadingContainer}>
+            <Loading size="small" />
+          </div>
         )}
       </span>
       <div className={styles.actions}>
