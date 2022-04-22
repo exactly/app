@@ -43,8 +43,6 @@ function ModalGif({ tx }: Props) {
     }
   };
 
-  console.log(options[tx.status].video);
-
   return (
     <div className={styles.container}>
       <div className={styles.mediaContainer}>
