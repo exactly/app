@@ -58,6 +58,10 @@
       @extend .line;
       background: var(--primary);
     }
+
+    .loadingContainer {
+      margin-left: var(--u2);
+    }
   }
 }
 
