@@ -224,9 +224,10 @@ function DepositModalMP({ data, closeModal }: Props) {
               <div className={styles.buttonContainer}>
                 <Button
                   text={step == 1 ? translations[lang].approve : translations[lang].deposit}
-                  className={qty && qty > '0' && !pending ? 'primary' : 'disabled'}
+                  className={qty && qty > '0' ? 'primary' : 'disabled'}
                   disabled={(!qty || qty <= '0') && !pending}
                   onClick={handleClickAction}
+                  loading={pending}
                 />
               </div>
             </>

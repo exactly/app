@@ -7,6 +7,9 @@
   border: 0;
   border-radius: var(--smallUnit);
   transition: 0.25s all;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   &:hover {
     background-color: var(--primary-hover);

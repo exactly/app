@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { useContext, useEffect, useRef } from 'react';
 
 import styles from './style.module.scss';
 
@@ -18,35 +18,53 @@ type Props = {
 function ModalGif({ tx }: Props) {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
+  const videoRef = useRef(null);
+
+  // useEffect(() => {
+  //   videoRef.current?.load();
+  // }, [tx.status]);
 
   const options: Dictionary<ModalCases> = {
     processing: {
-      img: '',
+      img: '/img/modals/img/waiting.png',
+      video: '/img/modals/video/waiting.mp4',
       title: translations[lang].loadingTitle
     },
     success: {
-      img: '',
+      img: '/img/modals/img/success.png',
+      video: '/img/modals/video/success.mp4',
       title: translations[lang].successTitle
     },
     error: {
-      img: '',
+      img: '/img/modals/img/error.png',
+      video: '/img/modals/video/error.mp4',
       title: translations[lang].errorTitle,
       text: translations[lang].errorText
     }
   };
 
+  console.log(options[tx.status].video);
+
   return (
     <div className={styles.container}>
-      <img src={options[tx.status].img} className={styles.img} />
+      <div className={styles.mediaContainer}>
+        <img src="/img/icons/circles.svg" className={styles.img} />
+        <video
+          ref={videoRef}
+          autoPlay
+          loop
+          poster={options[tx.status].img}
+          className={styles.video}
+          src={options[tx.status].video}
+        />
+      </div>
       <h3 className={styles.title}>{options[tx.status].title}</h3>
 
       {tx.status == 'error' ? (
         <p className={styles.text}>{options[tx.status].text}</p>
       ) : (
         <p className={styles.hash}>
-          <span className={styles.hashTitle}>
-            {translations[lang].transactionHash}{' '}
-          </span>
+          <span className={styles.hashTitle}>{translations[lang].transactionHash} </span>
           {tx.hash}
         </p>
       )}
@@ -65,9 +83,7 @@ function ModalGif({ tx }: Props) {
         </p>
       )}
 
-      {tx.status == 'error' && (
-        <button> {translations[lang].errorButton}</button>
-      )}
+      {tx.status == 'error' && <button> {translations[lang].errorButton}</button>}
     </div>
   );
 }

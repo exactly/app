@@ -211,12 +211,15 @@ function DepositModalSP({ data, closeModal }: Props) {
               <ModalRow text={translations[lang].borrowLimit} values={['100K', '150K']} />
               <ModalStepper currentStep={step} totalSteps={3} />
               <div className={styles.buttonContainer}>
-                <Button
-                  text={step == 1 ? translations[lang].approve : translations[lang].deposit}
-                  className={qty && qty > '0' && !pending ? 'primary' : 'disabled'}
-                  disabled={(!qty || qty <= '0') && !pending}
-                  onClick={handleClickAction}
-                />
+                {
+                  <Button
+                    text={step == 1 ? translations[lang].approve : translations[lang].deposit}
+                    loading={pending}
+                    className={qty && qty > '0' ? 'primary' : 'disabled'}
+                    disabled={(!qty || qty <= '0') && !pending}
+                    onClick={handleClickAction}
+                  />
+                }
               </div>
             </>
           )}
