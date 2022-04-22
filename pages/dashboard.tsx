@@ -50,6 +50,7 @@ import FixedLenderWETH from 'protocol/deployments/kovan/FixedLenderWETH.json';
 import translations from 'dictionary/en.json';
 
 import { getSymbol } from 'utils/utils';
+import EmptyState from 'components/EmptyState';
 
 interface Props {
   auditor: Contract;
@@ -204,16 +205,21 @@ const DashBoard: NextPage<Props> = () => {
             }}
           />
 
-          {tab.value == 'deposit' && (
-            <SmartPoolDashboard deposits={smartPoolDeposits} showModal={showModal} />
+          {walletAddress ? (
+            <>
+              {tab.value == 'deposit' && (
+                <SmartPoolDashboard deposits={smartPoolDeposits} showModal={showModal} />
+              )}
+              <MaturityPoolDashboard
+                deposits={maturityPoolDeposits}
+                borrows={maturityPoolBorrows}
+                showModal={showModal}
+                tab={tab}
+              />
+            </>
+          ) : (
+            <EmptyState />
           )}
-
-          <MaturityPoolDashboard
-            deposits={maturityPoolDeposits}
-            borrows={maturityPoolBorrows}
-            showModal={showModal}
-            tab={tab}
-          />
           <Footer />
         </InterestRateModelProvider>
       </FixedLenderProvider>

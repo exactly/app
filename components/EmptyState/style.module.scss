@@ -1,0 +1,25 @@
+.container {
+  padding-top: var(--u2);
+  max-width: var(--maxWidth);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+  gap: var(--u2);
+  padding-top: var(--u5);
+
+  .title {
+    font-size: var(--font-20);
+    color: var(--grey-900);
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .description {
+    color: var(--grey-900);
+    font-weight: normal;
+    margin: 0;
+  }
+}
