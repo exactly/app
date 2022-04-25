@@ -1,5 +1,7 @@
 import Image from 'next/image';
 
+import formatNumber from 'utils/formatNumber';
+
 import styles from './style.module.scss';
 
 type Props = {
@@ -17,7 +19,7 @@ function ModalAsset({ asset, amount }: Props) {
       {amount && (
         <div className={styles.assetPriceContainer}>
           <p className={styles.price}>
-            {amount} {asset}
+            {formatNumber(amount, asset)} {asset}
           </p>
           <p className={styles.secondaryPrice}>$ 1M</p>
         </div>
