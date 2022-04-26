@@ -1,7 +1,7 @@
 {
   "en": {
     "withdraw": "Withdraw",
-    "exactlyBalance": "Exactly Balance",
+    "exactlyBalance": "Deposited Amount",
     "healthFactor": "Health Factor",
     "borrowLimit": "Borrow Limit"
   },
