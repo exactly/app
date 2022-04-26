@@ -16,6 +16,7 @@ import style from './style.module.scss';
 
 import keys from './translations.json';
 import { getContractData } from 'utils/contracts';
+import formatNumber from 'utils/formatNumber';
 
 type Props = {
   market: Market;
@@ -85,7 +86,9 @@ function Item({ market, showModal, type, src }: Props) {
         <span className={style.primary}>{market?.symbol}</span>
       </div>
       <span className={style.value}>
-        {type == 'borrow' ? poolData?.borrowed : poolData?.supplied}
+        {type == 'borrow'
+          ? formatNumber(poolData?.borrowed!, market?.symbol)
+          : formatNumber(poolData?.supplied!, market?.symbol)}
       </span>
       <div className={style.buttonContainer}>
         <Button
