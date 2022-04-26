@@ -96,7 +96,10 @@ function DepositModalMP({ data, closeModal }: Props) {
   }, [market, walletAddress, underlyingContract]);
 
   async function checkAllowance() {
-    const allowance = await underlyingContract?.allowance(walletAddress, market);
+    const allowance = await underlyingContract?.allowance(
+      walletAddress,
+      market ?? fixedLenderData[0].address
+    );
 
     const formattedAllowance = allowance && parseFloat(ethers.utils.formatEther(allowance));
 
@@ -110,7 +113,7 @@ function DepositModalMP({ data, closeModal }: Props) {
   async function approve() {
     try {
       const approval = await underlyingContract?.approve(
-        market,
+        market ?? fixedLenderData[0].address,
         ethers.utils.parseUnits(numbers.approvalAmount!.toString())
       );
 

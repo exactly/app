@@ -1,4 +1,5 @@
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
+import dayjs from 'dayjs';
 
 import { Option } from 'react-dropdown';
 import { LangKeys } from 'types/Lang';
@@ -7,6 +8,7 @@ import Select from 'components/common/Select';
 import Tooltip from 'components/Tooltip';
 import MaturityPoolUserStatusByAsset from 'components/MaturityPoolUserStatusByAsset';
 import MaturityPoolUserStatusByMaturity from 'components/MaturityPoolUserStatusByMaturity';
+import Button from 'components/common/Button';
 
 import LangContext from 'contexts/LangContext';
 
@@ -15,7 +17,6 @@ import styles from './style.module.scss';
 import keys from './translations.json';
 import { Deposit } from 'types/Deposit';
 import { Borrow } from 'types/Borrow';
-import Button from 'components/common/Button';
 
 interface Props {
   deposits: Deposit[];
@@ -39,6 +40,21 @@ function MaturityPoolDashboard({ deposits, borrows, showModal, tab }: Props) {
   };
 
   const [filter, setFilter] = useState<Option>(filterByAsset);
+  const [defaultMaturity, setDefaultMaturity] = useState<string>();
+
+  useEffect(() => {
+    if (!defaultMaturity) {
+      getDefaultMaturity();
+    }
+  }, [defaultMaturity]);
+
+  async function getDefaultMaturity() {
+    const currentTimestamp = dayjs().unix();
+    const interval = 604800;
+    const timestamp = currentTimestamp - (currentTimestamp % interval);
+
+    setDefaultMaturity(timestamp.toString());
+  }
 
   return (
     <section className={styles.container}>
@@ -66,8 +82,8 @@ function MaturityPoolDashboard({ deposits, borrows, showModal, tab }: Props) {
             onClick={() =>
               showModal(
                 tab.value == 'borrow'
-                  ? { ...borrows[0], symbol: 'DAI' }
-                  : { ...deposits[0], symbol: 'DAI' },
+                  ? { ...{ ...borrows[0], maturity: defaultMaturity! }, symbol: 'DAI' }
+                  : { ...{ ...deposits[0], maturity: defaultMaturity! }, symbol: 'DAI' },
                 tab.value
               )
             }
