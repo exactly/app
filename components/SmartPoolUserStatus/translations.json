@@ -1,7 +1,7 @@
 {
   "en": {
     "asset": "Asset",
-    "currentBalance": "Exactly Balance",
+    "currentBalance": "Deposited Amount",
     "utilizationRate": "Utilization Rate",
     "lastRate": "Last Rate",
     "liquidity": "Liquidity",
