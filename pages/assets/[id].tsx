@@ -53,7 +53,7 @@ const Asset: NextPage<Props> = ({ symbol }) => {
   const itemsPerPage = 5;
 
   const translations: { [key: string]: LangKeys } = keys;
-  getContractData;
+
   const auditorContract = getContractData(Auditor.address, Auditor.abi);
   const fixedLenders = [FixedLenderDAI, FixedLenderWETH];
 
