@@ -39,7 +39,7 @@ function Item({ type, amount, fee, maturityDate, showModal, market, data }: Prop
   const startDate = parseInt(maturityDate) - maturityLife;
   const current = nowInSeconds - startDate;
   const progress = (current * 100) / maturityLife;
-  const fixedRate = (parseInt(fee) * 100) / parseInt(amount);
+  const fixedRate = (parseFloat(fee) * 100) / parseFloat(amount);
   const symbol = getSymbol(market);
 
   return (
