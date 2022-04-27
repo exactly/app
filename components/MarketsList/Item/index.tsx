@@ -27,8 +27,9 @@ type Props = {
 
 function Item({ market, showModal, type, src }: Props) {
   const { date } = useContext(AddressContext);
-
+  const { walletAddress, connect } = useWeb3Context();
   const fixedLenderData = useContext(FixedLenderContext);
+
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
@@ -60,6 +61,8 @@ function Item({ market, showModal, type, src }: Props) {
   }
 
   function handleClick() {
+    if (!walletAddress && connect) return connect();
+
     showModal(market, type);
   }
 
