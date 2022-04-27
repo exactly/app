@@ -16,6 +16,7 @@ import { Option } from 'react-dropdown';
 
 import style from './style.module.scss';
 import { getContractData } from 'utils/contracts';
+import parseSymbol from 'utils/parseSymbol';
 
 type Props = {
   title?: Boolean;
@@ -82,7 +83,7 @@ function AssetSelector({ title, defaultAddress, onChange }: Props) {
       label: (
         <div className={style.labelContainer}>
           <img src={src} alt={marketData.name} className={style.marketImage} />{' '}
-          <span className={style.marketName}>{marketData.name}</span>
+          <span className={style.marketName}>{parseSymbol(marketData.name)}</span>
         </div>
       ),
       value: marketData.market
@@ -108,8 +109,8 @@ function AssetSelector({ title, defaultAddress, onChange }: Props) {
       return {
         label: (
           <div className={style.labelContainer}>
-            <img src={src} alt={marketData.name} className={style.marketImage} />{' '}
-            <span className={style.marketName}>{marketData.name}</span>
+            <img src={src} alt={parseSymbol(marketData.name)} className={style.marketImage} />{' '}
+            <span className={style.marketName}>{parseSymbol(marketData.name)}</span>
           </div>
         ),
         value: marketData.market

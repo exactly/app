@@ -17,6 +17,7 @@ import style from './style.module.scss';
 import keys from './translations.json';
 import { getContractData } from 'utils/contracts';
 import formatNumber from 'utils/formatNumber';
+import parseSymbol from 'utils/parseSymbol';
 
 type Props = {
   market: Market;
@@ -27,8 +28,9 @@ type Props = {
 
 function Item({ market, showModal, type, src }: Props) {
   const { date } = useContext(AddressContext);
-
+  const { walletAddress, connect } = useWeb3Context();
   const fixedLenderData = useContext(FixedLenderContext);
+
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
@@ -60,6 +62,8 @@ function Item({ market, showModal, type, src }: Props) {
   }
 
   function handleClick() {
+    if (!walletAddress && connect) return connect();
+
     showModal(market, type);
   }
 
@@ -83,7 +87,7 @@ function Item({ market, showModal, type, src }: Props) {
     >
       <div className={style.symbol}>
         <img src={src} alt={market?.symbol} className={style.assetImage} />
-        <span className={style.primary}>{market?.symbol}</span>
+        <span className={style.primary}>{parseSymbol(market?.symbol)}</span>
       </div>
       <span className={style.value}>
         {type == 'borrow'

@@ -10,12 +10,15 @@ import { LangKeys } from 'types/Lang';
 import FixedLenderContext from 'contexts/FixedLenderContext';
 import { AddressContext } from 'contexts/AddressContext';
 import LangContext from 'contexts/LangContext';
+import { useWeb3Context } from 'contexts/Web3Context';
 
 import style from './style.module.scss';
 
 import keys from './translations.json';
+
 import { getContractData } from 'utils/contracts';
 import formatNumber from 'utils/formatNumber';
+import parseSymbol from 'utils/parseSymbol';
 
 type Props = {
   market: Market;
@@ -25,10 +28,11 @@ type Props = {
 
 function Item({ market, showModal, src }: Props) {
   const { date } = useContext(AddressContext);
-  const lang: string = useContext(LangContext);
+  const { walletAddress, connect } = useWeb3Context();
 
   const fixedLenderData = useContext(FixedLenderContext);
 
+  const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
   const [poolData, setPoolData] = useState<Pool | undefined>(undefined);
@@ -55,6 +59,8 @@ function Item({ market, showModal, src }: Props) {
   }, [date, fixedLender]);
 
   function handleClick() {
+    if (!walletAddress && connect) return connect();
+
     showModal(market, 'smartDeposit');
   }
 
@@ -74,7 +80,7 @@ function Item({ market, showModal, src }: Props) {
     <div className={`${style.container} ${style.primaryContainer}`} onClick={handleClick}>
       <div className={style.symbol}>
         <img src={src} className={style.assetImage} alt={market?.symbol} />
-        <span className={style.primary}>{market?.symbol}</span>
+        <span className={style.primary}>{parseSymbol(market?.symbol)}</span>
       </div>
       <span className={style.value}>{formatNumber(poolData?.supplied!, market?.symbol)}</span>
       <div className={style.buttonContainer}>
