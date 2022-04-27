@@ -6,6 +6,7 @@ import ModalAsset from 'components/common/modal/ModalAsset';
 import ModalClose from 'components/common/modal/ModalClose';
 import ModalInput from 'components/common/modal/ModalInput';
 import ModalRow from 'components/common/modal/ModalRow';
+import ModalRowEditable from 'components/common/modal/ModalRowEditable';
 import ModalTitle from 'components/common/modal/ModalTitle';
 import ModalTxCost from 'components/common/modal/ModalTxCost';
 import ModalMinimized from 'components/common/modal/ModalMinimized';
@@ -35,7 +36,7 @@ type Props = {
 };
 
 function RepayModal({ data, closeModal }: Props) {
-  const { symbol, maturity, assets } = data;
+  const { symbol, maturity, assets, fee } = data;
   const { walletAddress, web3Provider } = useWeb3Context();
 
   const lang: string = useContext(LangContext);
@@ -43,12 +44,16 @@ function RepayModal({ data, closeModal }: Props) {
 
   const fixedLenderData = useContext(FixedLenderContext);
 
-  const [qty, setQty] = useState<string>('0');
+  const [qty, setQty] = useState<string>('');
+  const [slippage, setSlippage] = useState<string>('0.5');
   const [isLateRepay, setIsLateRepay] = useState<boolean>(false);
+  const parsedFee = ethers.utils.formatUnits(fee, 18);
   const parsedAmount = ethers.utils.formatUnits(assets, 18);
+  const finalAmount = (parseFloat(parsedAmount) + parseFloat(parsedFee)).toString();
   const [gas, setGas] = useState<Gas | undefined>();
   const [tx, setTx] = useState<Transaction | undefined>(undefined);
   const [minimized, setMinimized] = useState<boolean>(false);
+  const [editSlippage, setEditSlippage] = useState<boolean>(false);
 
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
     undefined
@@ -92,7 +97,7 @@ function RepayModal({ data, closeModal }: Props) {
   }
 
   function onMax() {
-    setQty(parsedAmount);
+    setQty(finalAmount);
   }
 
   function handleInputChange(e: ChangeEvent<HTMLInputElement>) {
@@ -119,8 +124,8 @@ function RepayModal({ data, closeModal }: Props) {
 
     const estimatedGasCost = await fixedLenderWithSigner?.estimateGas.repayAtMaturity(
       maturity,
-      ethers.utils.parseUnits(qty!),
-      ethers.utils.parseUnits(qty!),
+      ethers.utils.parseUnits('1'),
+      ethers.utils.parseUnits('2'),
       walletAddress
     );
 
@@ -142,18 +147,32 @@ function RepayModal({ data, closeModal }: Props) {
               <ModalTitle
                 title={isLateRepay ? translations[lang].lateRepay : translations[lang].earlyRepay}
               />
-              <ModalAsset asset={symbol!} amount={parsedAmount} />
+              <ModalAsset asset={symbol!} amount={finalAmount} />
               <ModalClose closeModal={closeModal} />
               <ModalRow text={translations[lang].maturityPool} value={parseTimestamp(maturity)} />
               <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} />
               {gas && <ModalTxCost gas={gas} />}
-              <ModalRow text={translations[lang].remainingDebt} value={parsedAmount} line />
-              <ModalRow text={translations[lang].debtSlippage} value="X %" line />
+              <ModalRow text={translations[lang].remainingDebt} value={finalAmount} line />
+              <ModalRowEditable
+                text={translations[lang].debtSlippage}
+                value={slippage}
+                editable={editSlippage}
+                symbol="%"
+                onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                  setSlippage(e.target.value);
+                }}
+                onClick={() => {
+                  if (slippage == '') setSlippage('0.5');
+                  setEditSlippage((prev) => !prev);
+                }}
+                line
+              />
               <ModalRow text={translations[lang].healthFactor} values={['1.1', '1.8']} />
               <div className={styles.buttonContainer}>
                 <Button
                   text={translations[lang].repay}
                   className={qty <= '0' || !qty ? 'secondaryDisabled' : 'quaternary'}
+                  disabled={qty <= '0' || !qty}
                   onClick={repay}
                 />
               </div>

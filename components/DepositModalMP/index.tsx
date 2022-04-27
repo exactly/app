@@ -52,14 +52,14 @@ function DepositModalMP({ data, closeModal }: Props) {
 
   const fixedLenderData = useContext(FixedLenderContext);
 
-  const [qty, setQty] = useState<string>('0');
+  const [qty, setQty] = useState<string>('');
   const [walletBalance, setWalletBalance] = useState<string | undefined>(undefined);
   const [gas, setGas] = useState<Gas | undefined>();
   const [tx, setTx] = useState<Transaction | undefined>(undefined);
   const [minimized, setMinimized] = useState<boolean>(false);
   const [step, setStep] = useState<number>(1);
   const [pending, setPending] = useState<boolean>(false);
-  const [slippage, setSlippage] = useState<number>(0.5);
+  const [slippage, setSlippage] = useState<string>('0.5');
   const [editSlippage, setEditSlippage] = useState<boolean>(false);
 
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
@@ -100,7 +100,7 @@ function DepositModalMP({ data, closeModal }: Props) {
 
     const formattedAllowance = allowance && parseFloat(ethers.utils.formatEther(allowance));
 
-    const amount = parseFloat(qty) ?? 0;
+    const amount = qty == '' ? 0 : parseFloat(qty);
 
     if (formattedAllowance > amount && !isNaN(amount) && !isNaN(formattedAllowance)) {
       setStep(2);
@@ -148,7 +148,7 @@ function DepositModalMP({ data, closeModal }: Props) {
   }
 
   async function deposit() {
-    const minAmount = parseFloat(qty!) * (1 - slippage / 100);
+    const minAmount = parseFloat(qty!) * (1 - parseFloat(slippage) / 100);
 
     const deposit = await fixedLenderWithSigner?.depositAtMaturity(
       parseInt(date?.value ?? maturity),
@@ -184,6 +184,8 @@ function DepositModalMP({ data, closeModal }: Props) {
   }
 
   function handleClickAction() {
+    if ((!qty || qty <= '0') && !pending) return;
+
     if (step === 1 && !pending) {
       return approve();
     } else if (!pending) {
@@ -225,14 +227,17 @@ function DepositModalMP({ data, closeModal }: Props) {
               {gas && <ModalTxCost gas={gas} />}
               <ModalRow text={translations[lang].interestRate} value="X %" line />
               <ModalRowEditable
-                text={translations[lang].interestRateSlippage}
+                text={translations[lang].minimumDepositRate}
                 value={slippage}
                 editable={editSlippage}
                 symbol="%"
                 onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                  setSlippage(e.target.valueAsNumber);
+                  setSlippage(e.target.value);
                 }}
-                onClick={() => setEditSlippage((prev) => !prev)}
+                onClick={() => {
+                  if (slippage == '') setSlippage('0.5');
+                  setEditSlippage((prev) => !prev);
+                }}
                 line
               />
               <ModalStepper currentStep={step} totalSteps={3} />

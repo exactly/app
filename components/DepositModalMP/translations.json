@@ -4,7 +4,7 @@
     "approve": "Approve",
     "maturityPool": "Maturity Pool",
     "interestRate": "Interest Rate",
-    "interestRateSlippage": "Interest Rate Slippage"
+    "minimumDepositRate": "Minimun Deposit Rate"
   },
   "es": {}
 }

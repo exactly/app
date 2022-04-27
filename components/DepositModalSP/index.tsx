@@ -48,7 +48,7 @@ function DepositModalSP({ data, closeModal }: Props) {
 
   const fixedLenderData = useContext(FixedLenderContext);
 
-  const [qty, setQty] = useState<string>('0');
+  const [qty, setQty] = useState<string>('');
   const [walletBalance, setWalletBalance] = useState<string | undefined>(undefined);
   const [gas, setGas] = useState<Gas | undefined>();
   const [tx, setTx] = useState<Transaction | undefined>(undefined);
@@ -92,7 +92,7 @@ function DepositModalSP({ data, closeModal }: Props) {
 
     const formattedAllowance = allowance && parseFloat(ethers.utils.formatEther(allowance));
 
-    const amount = parseFloat(qty) ?? 0;
+    const amount = qty == '' ? 0 : parseFloat(qty);
 
     if (formattedAllowance > amount && !isNaN(amount) && !isNaN(formattedAllowance)) {
       setStep(2);
