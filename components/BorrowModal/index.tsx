@@ -218,7 +218,7 @@ function BorrowModal({ data, closeModal }: Props) {
               {gas && <ModalTxCost gas={gas} />}
               <ModalRow text={translations[lang].interestRate} value={rate} line />
               <ModalRowEditable
-                text={translations[lang].MaximumBorrowRate}
+                text={translations[lang].maximumBorrowRate}
                 value={slippage}
                 editable={editSlippage}
                 symbol="%"

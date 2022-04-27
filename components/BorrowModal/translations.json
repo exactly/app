@@ -4,7 +4,7 @@
     "maturityPool": "Maturity Pool",
     "exactlyBalance": "Exactly Balance",
     "interestRate": "Interest Rate",
-    "MaximumBorrowRate": "Maximum Borrow Rate",
+    "maximumBorrowRate": "Maximum Borrow Rate",
     "maturityDebt": "Maturity Debt",
     "healthFactor": "Health Factor"
   },
