@@ -45,7 +45,11 @@ function Item({ type, amount, fee, maturityDate, showModal, market, data }: Prop
   return (
     <div className={styles.container}>
       <div className={styles.symbol}>
-        <img src={`/img/assets/${symbol?.toLowerCase()}.png`} className={styles.assetImage} />
+        <img
+          src={`/img/assets/${symbol?.toLowerCase()}.png`}
+          alt={symbol}
+          className={styles.assetImage}
+        />
         <span className={styles.primary}>{symbol}</span>
       </div>
       <span className={styles.value}>

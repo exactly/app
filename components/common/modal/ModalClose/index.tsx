@@ -13,7 +13,7 @@ function ModalClose({ closeModal }: Props) {
         closeModal({});
       }}
     >
-      <Image src="/img/icons/close.svg" layout="fill" />
+      <Image src="/img/icons/close.svg" alt="close" layout="fill" />
     </div>
   );
 }

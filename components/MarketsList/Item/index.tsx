@@ -82,7 +82,7 @@ function Item({ market, showModal, type, src }: Props) {
       onClick={handleClick}
     >
       <div className={style.symbol}>
-        <img src={src} className={style.assetImage} />
+        <img src={src} alt={market?.symbol} className={style.assetImage} />
         <span className={style.primary}>{market?.symbol}</span>
       </div>
       <span className={style.value}>

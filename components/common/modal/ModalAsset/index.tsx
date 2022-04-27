@@ -13,7 +13,7 @@ function ModalAsset({ asset, amount }: Props) {
   return (
     <div className={styles.assetContainer}>
       <div className={styles.informationContainer}>
-        <Image src={`/img/assets/${asset.toLowerCase()}.png`} width="24" height="24" />
+        <Image src={`/img/assets/${asset.toLowerCase()}.png`} alt={asset} width="24" height="24" />
         <p className={styles.assetName}>{asset}</p>
       </div>
       {amount && (

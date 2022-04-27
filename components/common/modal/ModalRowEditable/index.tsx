@@ -40,6 +40,7 @@ function ModalRowEditable({ text, value, line, editable, symbol, onChange, onCli
         <img
           className={styles.arrow}
           src={`/img/icons/${editable ? 'arrowUp' : 'arrowDown'}.svg`}
+          alt="arrow"
           onClick={onClick}
         />
       </section>

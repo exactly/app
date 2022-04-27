@@ -30,7 +30,7 @@ const Hero = () => {
           </div>
         </div>
         <div className={style.left}>
-          <img src="/img/graphs/assets.svg" className={style.image} />
+          <img src="/img/graphs/assets.svg" alt="assets" className={style.image} />
         </div>
       </section>
     </>

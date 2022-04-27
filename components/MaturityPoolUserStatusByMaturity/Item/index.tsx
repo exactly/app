@@ -27,7 +27,11 @@ function Item({ market, showModal, type, src, symbol }: Props) {
   return (
     <div className={styles.container}>
       <div className={styles.symbol}>
-        <img src={`/img/assets/${symbol.toLowerCase()}.png`} className={styles.assetImage} />
+        <img
+          src={`/img/assets/${symbol.toLowerCase()}.png`}
+          alt="symbol"
+          className={styles.assetImage}
+        />
         <span className={styles.primary}>DAI</span>
       </div>
       <span className={styles.value}>17,18</span>
@@ -41,11 +45,7 @@ function Item({ market, showModal, type, src, symbol }: Props) {
 
       <div className={styles.buttonContainer}>
         <Button
-          text={
-            type?.value == 'borrow'
-              ? translations[lang].borrow
-              : translations[lang].deposit
-          }
+          text={type?.value == 'borrow' ? translations[lang].borrow : translations[lang].deposit}
           className={type?.value == 'borrow' ? 'secondary' : 'primary'}
         />
       </div>
