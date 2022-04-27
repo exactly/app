@@ -36,7 +36,7 @@ type Props = {
 };
 
 function WithdrawModalMP({ data, closeModal }: Props) {
-  const { symbol, maturity, assets } = data;
+  const { symbol, maturity, assets, fee } = data;
 
   const { web3Provider, walletAddress } = useWeb3Context();
 
@@ -45,18 +45,20 @@ function WithdrawModalMP({ data, closeModal }: Props) {
 
   const fixedLenderData = useContext(FixedLenderContext);
 
-  const [qty, setQty] = useState<string>('0');
+  const [qty, setQty] = useState<string>('');
   const [gas, setGas] = useState<Gas | undefined>();
   const [tx, setTx] = useState<Transaction | undefined>(undefined);
   const [minimized, setMinimized] = useState<Boolean>(false);
-  const [slippage, setSlippage] = useState<number>(0.5);
+  const [slippage, setSlippage] = useState<string>('0.5');
   const [editSlippage, setEditSlippage] = useState<boolean>(false);
 
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
     undefined
   );
 
+  const parsedFee = ethers.utils.formatUnits(fee, 18);
   const parsedAmount = ethers.utils.formatUnits(assets, 18);
+  const finalAmount = (parseFloat(parsedAmount) + parseFloat(parsedFee)).toString();
 
   useEffect(() => {
     getFixedLenderContract();
@@ -69,7 +71,7 @@ function WithdrawModalMP({ data, closeModal }: Props) {
   }, [fixedLenderWithSigner]);
 
   function onMax() {
-    setQty(parsedAmount);
+    setQty(finalAmount);
   }
 
   function handleInputChange(e: ChangeEvent<HTMLInputElement>) {
@@ -77,7 +79,7 @@ function WithdrawModalMP({ data, closeModal }: Props) {
   }
 
   async function withdraw() {
-    const minAmount = parseFloat(qty!) * (1 - slippage / 100);
+    const minAmount = parseFloat(qty!) * (1 - parseFloat(slippage) / 100);
 
     const withdraw = await fixedLenderWithSigner?.withdrawAtMaturity(
       maturity,
@@ -138,12 +140,12 @@ function WithdrawModalMP({ data, closeModal }: Props) {
           {!tx && (
             <>
               <ModalTitle title={translations[lang].withdraw} />
-              <ModalAsset asset={symbol!} amount={parsedAmount} />
+              <ModalAsset asset={symbol!} amount={finalAmount} />
               <ModalClose closeModal={closeModal} />
               <ModalRow text={translations[lang].maturityPool} value={parseTimestamp(maturity)} />
               <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} />
               {gas && <ModalTxCost gas={gas} />}
-              <ModalRow text={translations[lang].exactlyBalance} value={parsedAmount} line />
+              <ModalRow text={translations[lang].exactlyBalance} value={finalAmount} line />
               <ModalRow text={translations[lang].interestRate} value="X %" line />
               <ModalRowEditable
                 text={translations[lang].interestRateSlippage}
@@ -151,15 +153,19 @@ function WithdrawModalMP({ data, closeModal }: Props) {
                 editable={editSlippage}
                 symbol="%"
                 onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                  setSlippage(e.target.valueAsNumber);
+                  setSlippage(e.target.value);
                 }}
-                onClick={() => setEditSlippage((prev) => !prev)}
+                onClick={() => {
+                  if (slippage == '') setSlippage('0.5');
+                  setEditSlippage((prev) => !prev);
+                }}
                 line
               />
               <div className={styles.buttonContainer}>
                 <Button
                   text={translations[lang].withdraw}
                   className={qty <= '0' || !qty ? 'secondaryDisabled' : 'tertiary'}
+                  disabled={qty <= '0' || !qty}
                   onClick={withdraw}
                 />
               </div>

@@ -43,7 +43,7 @@ function WithdrawModalSP({ data, closeModal }: Props) {
 
   const fixedLenderData = useContext(FixedLenderContext);
 
-  const [qty, setQty] = useState<string>('0');
+  const [qty, setQty] = useState<string>('');
   const [gas, setGas] = useState<Gas | undefined>();
   const [tx, setTx] = useState<Transaction | undefined>(undefined);
   const [minimized, setMinimized] = useState<Boolean>(false);
@@ -89,7 +89,7 @@ function WithdrawModalSP({ data, closeModal }: Props) {
     const gasPriceInGwei = await fixedLenderWithSigner?.provider.getGasPrice();
 
     const estimatedGasCost = await fixedLenderWithSigner?.estimateGas.withdraw(
-      ethers.utils.parseUnits(qty!),
+      ethers.utils.parseUnits('1'),
       walletAddress,
       walletAddress
     );
@@ -138,6 +138,7 @@ function WithdrawModalSP({ data, closeModal }: Props) {
                 <Button
                   text={translations[lang].withdraw}
                   className={qty <= '0' || !qty ? 'secondaryDisabled' : 'tertiary'}
+                  disabled={qty <= '0' || !qty}
                   onClick={withdraw}
                 />
               </div>

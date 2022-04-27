@@ -52,13 +52,13 @@ function BorrowModal({ data, closeModal }: Props) {
   const fixedLenderData = useContext(FixedLenderContext);
   const interestRateModelData = useContext(InterestRateModelContext);
 
-  const [qty, setQty] = useState<string>('0');
+  const [qty, setQty] = useState<string>('');
   const [walletBalance, setWalletBalance] = useState<string | undefined>(undefined);
   const [gas, setGas] = useState<Gas | undefined>(undefined);
   const [tx, setTx] = useState<Transaction | undefined>(undefined);
   const [minimized, setMinimized] = useState<Boolean>(false);
   const [rate, setRate] = useState<string | undefined>('0');
-  const [slippage, setSlippage] = useState<number>(0.5);
+  const [slippage, setSlippage] = useState<string>('0.5');
   const [editSlippage, setEditSlippage] = useState<boolean>(false);
 
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
@@ -146,7 +146,8 @@ function BorrowModal({ data, closeModal }: Props) {
   }
 
   async function borrow() {
-    const maxAmount = parseFloat(qty!) * (1 + slippage / 100);
+    if (qty <= '0' || !qty) return;
+    const maxAmount = parseFloat(qty!) * (1 + parseFloat(slippage) / 100);
 
     const borrow = await fixedLenderWithSigner?.borrowAtMaturity(
       parseInt(date?.value ?? maturity),
@@ -217,14 +218,17 @@ function BorrowModal({ data, closeModal }: Props) {
               {gas && <ModalTxCost gas={gas} />}
               <ModalRow text={translations[lang].interestRate} value={rate} line />
               <ModalRowEditable
-                text={translations[lang].interestRateSlippage}
+                text={translations[lang].maximumBorrowRate}
                 value={slippage}
                 editable={editSlippage}
                 symbol="%"
                 onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                  setSlippage(e.target.valueAsNumber);
+                  setSlippage(e.target.value);
                 }}
-                onClick={() => setEditSlippage((prev) => !prev)}
+                onClick={() => {
+                  if (slippage == '') setSlippage('0.5');
+                  setEditSlippage((prev) => !prev);
+                }}
                 line
               />
               <ModalRow text={translations[lang].maturityDebt} value={'X %'} line />
@@ -234,6 +238,7 @@ function BorrowModal({ data, closeModal }: Props) {
                   text={translations[lang].borrow}
                   className={qty <= '0' || !qty ? 'disabled' : 'secondary'}
                   onClick={borrow}
+                  disabled={qty <= '0' || !qty}
                 />
               </div>
             </>

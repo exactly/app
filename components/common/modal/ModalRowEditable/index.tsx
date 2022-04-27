@@ -3,7 +3,7 @@ import styles from './style.module.scss';
 
 type Props = {
   text: string;
-  value?: string | number;
+  value?: string;
   valueTooltip?: string;
   line?: boolean;
   editable: boolean;
@@ -20,14 +20,14 @@ function ModalRowEditable({ text, value, line, editable, symbol, onChange, onCli
     <section className={rowStyles}>
       <p className={styles.text}>{text}</p>
       <section className={styles.editable}>
-        {!editable && <p className={styles.value}>{`${value} ${symbol}`}</p>}
+        {!editable && <p className={styles.value}>{`${value == '' ? '0.5' : value} ${symbol}`}</p>}
         {editable && (
           <div className={styles.inputContainer}>
             <input
               min={0.0}
               type="number"
               placeholder={'0.5'}
-              value={value}
+              value={value !== '' ? parseFloat(value!) : ''}
               onChange={onChange}
               name={text}
               className={styles.input}
