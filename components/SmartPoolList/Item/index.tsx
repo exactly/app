@@ -14,8 +14,10 @@ import LangContext from 'contexts/LangContext';
 import style from './style.module.scss';
 
 import keys from './translations.json';
+
 import { getContractData } from 'utils/contracts';
 import formatNumber from 'utils/formatNumber';
+import parseSymbol from 'utils/parseSymbol';
 
 type Props = {
   market: Market;
@@ -74,7 +76,7 @@ function Item({ market, showModal, src }: Props) {
     <div className={`${style.container} ${style.primaryContainer}`} onClick={handleClick}>
       <div className={style.symbol}>
         <img src={src} className={style.assetImage} />
-        <span className={style.primary}>{market?.symbol}</span>
+        <span className={style.primary}>{parseSymbol(market?.symbol)}</span>
       </div>
       <span className={style.value}>{formatNumber(poolData?.supplied!, market?.symbol)}</span>
       <div className={style.buttonContainer}>

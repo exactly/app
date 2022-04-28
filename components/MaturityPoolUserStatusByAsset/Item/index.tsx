@@ -17,6 +17,7 @@ import keys from './translations.json';
 import parseTimestamp from 'utils/parseTimestamp';
 import { getSymbol } from 'utils/utils';
 import formatNumber from 'utils/formatNumber';
+import parseSymbol from 'utils/parseSymbol';
 
 type Props = {
   type?: Option;
@@ -46,7 +47,7 @@ function Item({ type, amount, fee, maturityDate, showModal, market, data }: Prop
     <div className={styles.container}>
       <div className={styles.symbol}>
         <img src={`/img/assets/${symbol?.toLowerCase()}.png`} className={styles.assetImage} />
-        <span className={styles.primary}>{symbol}</span>
+        <span className={styles.primary}>{parseSymbol(symbol)}</span>
       </div>
       <span className={styles.value}>
         {formatNumber(ethers.utils.formatUnits(amount, 18), symbol)}
