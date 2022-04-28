@@ -10,14 +10,22 @@ import keys from './translations.json';
 
 import Button from 'components/common/Button';
 import Tooltip from 'components/Tooltip';
+import { useWeb3Context } from 'contexts/Web3Context';
 
 interface Props {
   showModal: (type: string) => void;
 }
 
 function SmartPoolInfo({ showModal }: Props) {
+  const { walletAddress, connect } = useWeb3Context();
+
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
+
+  function handleClick() {
+    if (!walletAddress && connect) return connect();
+    showModal('smartDeposit');
+  }
 
   return (
     <div className={styles.maturityContainer}>
@@ -35,7 +43,7 @@ function SmartPoolInfo({ showModal }: Props) {
             <Button
               text={translations[lang].deposit}
               className="tertiary"
-              onClick={() => showModal('smartDeposit')}
+              onClick={() => handleClick()}
             />
           </div>
         </li>

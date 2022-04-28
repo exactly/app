@@ -10,6 +10,7 @@ import { LangKeys } from 'types/Lang';
 import FixedLenderContext from 'contexts/FixedLenderContext';
 import { AddressContext } from 'contexts/AddressContext';
 import LangContext from 'contexts/LangContext';
+import { useWeb3Context } from 'contexts/Web3Context';
 
 import style from './style.module.scss';
 
@@ -27,10 +28,11 @@ type Props = {
 
 function Item({ market, showModal, src }: Props) {
   const { date } = useContext(AddressContext);
-  const lang: string = useContext(LangContext);
+  const { walletAddress, connect } = useWeb3Context();
 
   const fixedLenderData = useContext(FixedLenderContext);
 
+  const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
   const [poolData, setPoolData] = useState<Pool | undefined>(undefined);
@@ -57,6 +59,8 @@ function Item({ market, showModal, src }: Props) {
   }, [date, fixedLender]);
 
   function handleClick() {
+    if (!walletAddress && connect) return connect();
+
     showModal(market, 'smartDeposit');
   }
 
