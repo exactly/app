@@ -54,6 +54,7 @@ function RepayModal({ data, closeModal }: Props) {
   const [tx, setTx] = useState<Transaction | undefined>(undefined);
   const [minimized, setMinimized] = useState<boolean>(false);
   const [editSlippage, setEditSlippage] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
     undefined
@@ -105,18 +106,26 @@ function RepayModal({ data, closeModal }: Props) {
   }
 
   async function repay() {
-    const repay = await fixedLenderWithSigner?.repayAtMaturity(
-      maturity,
-      ethers.utils.parseUnits(qty!),
-      ethers.utils.parseUnits(qty!),
-      walletAddress
-    );
+    setLoading(true);
+    try {
+      const repay = await fixedLenderWithSigner?.repayAtMaturity(
+        maturity,
+        ethers.utils.parseUnits(qty!),
+        ethers.utils.parseUnits(qty!),
+        walletAddress
+      );
 
-    setTx({ status: 'processing', hash: repay?.hash });
+      setTx({ status: 'processing', hash: repay?.hash });
 
-    const status = await repay.wait();
+      const status = await repay.wait();
 
-    setTx({ status: 'success', hash: status?.transactionHash });
+      setLoading(false);
+
+      setTx({ status: 'success', hash: status?.transactionHash });
+    } catch (e) {
+      setLoading(false);
+      console.log(e);
+    }
   }
 
   async function estimateGas() {
@@ -172,8 +181,10 @@ function RepayModal({ data, closeModal }: Props) {
                 <Button
                   text={translations[lang].repay}
                   className={qty <= '0' || !qty ? 'secondaryDisabled' : 'quaternary'}
-                  disabled={qty <= '0' || !qty}
+                  disabled={qty <= '0' || !qty || loading}
                   onClick={repay}
+                  loading={loading}
+                  color="secondary"
                 />
               </div>
             </>

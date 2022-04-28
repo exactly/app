@@ -55,6 +55,7 @@ function DepositModalSP({ data, closeModal }: Props) {
   const [minimized, setMinimized] = useState<boolean>(false);
   const [step, setStep] = useState<number>(1);
   const [pending, setPending] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
     undefined
@@ -113,10 +114,12 @@ function DepositModalSP({ data, closeModal }: Props) {
 
       //we set the transaction as done
       setPending((pending) => !pending);
+      setLoading(false);
 
       //once the tx is done we update the step
       setStep((step) => step + 1);
     } catch (e) {
+      setLoading(false);
       console.log(e);
     }
   }
@@ -140,16 +143,21 @@ function DepositModalSP({ data, closeModal }: Props) {
   }
 
   async function deposit() {
-    const deposit = await fixedLenderWithSigner?.deposit(
-      ethers.utils.parseUnits(qty!.toString()),
-      walletAddress
-    );
+    try {
+      const deposit = await fixedLenderWithSigner?.deposit(
+        ethers.utils.parseUnits(qty!.toString()),
+        walletAddress
+      );
 
-    setTx({ status: 'processing', hash: deposit?.hash });
+      setTx({ status: 'processing', hash: deposit?.hash });
 
-    const status = await deposit.wait();
+      const status = await deposit.wait();
 
-    setTx({ status: 'success', hash: status?.transactionHash });
+      setTx({ status: 'success', hash: status?.transactionHash });
+    } catch (e) {
+      setLoading(false);
+      console.log(e);
+    }
   }
 
   async function estimateGas() {
@@ -170,6 +178,7 @@ function DepositModalSP({ data, closeModal }: Props) {
   }
 
   function handleClickAction() {
+    setLoading(true);
     if (step === 1 && !pending) {
       return approve();
     } else if (!pending) {
@@ -214,9 +223,9 @@ function DepositModalSP({ data, closeModal }: Props) {
                 {
                   <Button
                     text={step == 1 ? translations[lang].approve : translations[lang].deposit}
-                    loading={pending}
+                    loading={loading}
                     className={qty && qty > '0' ? 'primary' : 'disabled'}
-                    disabled={(!qty || qty <= '0') && !pending}
+                    disabled={((!qty || qty <= '0') && !pending) || loading}
                     onClick={handleClickAction}
                   />
                 }

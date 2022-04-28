@@ -50,6 +50,20 @@
   }
 }
 
+.primary {
+  div {
+    border: var(--u) solid var(--primary);
+    border-color: var(--primary) transparent transparent transparent;
+  }
+}
+
+.secondary {
+  div {
+    border: var(--u) solid var(--secondary);
+    border-color: var(--secondary) transparent transparent transparent;
+  }
+}
+
 @keyframes loading {
   0% {
     transform: rotate(0deg);

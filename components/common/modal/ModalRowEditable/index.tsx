@@ -33,6 +33,7 @@ function ModalRowEditable({ text, value, line, editable, symbol, onChange, onCli
               className={styles.input}
               onKeyDown={(e) => blockedCharacters.includes(e.key) && e.preventDefault()}
               step="any"
+              autoFocus
             />
             {symbol && <p className={styles.symbol}>{symbol}</p>}
           </div>

@@ -2,16 +2,16 @@ import styles from './style.module.scss';
 
 type Props = {
   size?: string;
-  white?: boolean;
+  color?: string;
 };
 
-function Loading({ size = 'normal', white = false }: Props) {
+function Loading({ size = 'normal', color = 'white' }: Props) {
   return (
     <div
       className={
         size == 'normal'
-          ? `${styles.loading} ${white && styles.white}`
-          : `${styles.loadingSmall}  ${white && styles.white}`
+          ? `${styles.loading} ${styles[color]}`
+          : `${styles.loadingSmall}  ${styles[color]}`
       }
     >
       <div></div>
