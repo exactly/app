@@ -17,9 +17,10 @@ type Props = {
   style?: CSSProperties;
   loading?: boolean;
   disabled?: boolean;
+  color?: string;
 };
 
-function Button({ text, onClick, className, style, loading, disabled }: Props) {
+function Button({ text, onClick, className, style, loading, disabled, color }: Props) {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
@@ -35,7 +36,7 @@ function Button({ text, onClick, className, style, loading, disabled }: Props) {
       onClick={onClick}
       disabled={disabled ?? false}
     >
-      {loading ? <Loading size="small" white /> : text}
+      {loading ? <Loading size="small" color={color} /> : text}
     </button>
   );
 }

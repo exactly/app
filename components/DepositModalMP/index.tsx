@@ -59,6 +59,7 @@ function DepositModalMP({ data, closeModal }: Props) {
   const [minimized, setMinimized] = useState<boolean>(false);
   const [step, setStep] = useState<number>(1);
   const [pending, setPending] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
   const [slippage, setSlippage] = useState<string>('0.5');
   const [editSlippage, setEditSlippage] = useState<boolean>(false);
 
@@ -124,10 +125,12 @@ function DepositModalMP({ data, closeModal }: Props) {
 
       //we set the transaction as done
       setPending((pending) => !pending);
+      setLoading(false);
 
       //once the tx is done we update the step
       setStep((step) => step + 1);
     } catch (e) {
+      setLoading(false);
       console.log(e);
     }
   }
@@ -151,20 +154,25 @@ function DepositModalMP({ data, closeModal }: Props) {
   }
 
   async function deposit() {
-    const minAmount = parseFloat(qty!) * (1 - parseFloat(slippage) / 100);
+    try {
+      const minAmount = parseFloat(qty!) * (1 - parseFloat(slippage) / 100);
 
-    const deposit = await fixedLenderWithSigner?.depositAtMaturity(
-      parseInt(date?.value ?? maturity),
-      ethers.utils.parseUnits(qty!),
-      ethers.utils.parseUnits(`${minAmount}`),
-      walletAddress
-    );
+      const deposit = await fixedLenderWithSigner?.depositAtMaturity(
+        parseInt(date?.value ?? maturity),
+        ethers.utils.parseUnits(qty!),
+        ethers.utils.parseUnits(`${minAmount}`),
+        walletAddress
+      );
 
-    setTx({ status: 'processing', hash: deposit?.hash });
+      setTx({ status: 'processing', hash: deposit?.hash });
 
-    const status = await deposit.wait();
+      const status = await deposit.wait();
 
-    setTx({ status: 'success', hash: status?.transactionHash });
+      setTx({ status: 'success', hash: status?.transactionHash });
+    } catch (e) {
+      setLoading(false);
+      console.log(e);
+    }
   }
 
   async function estimateGas() {
@@ -187,8 +195,7 @@ function DepositModalMP({ data, closeModal }: Props) {
   }
 
   function handleClickAction() {
-    if ((!qty || qty <= '0') && !pending) return;
-
+    setLoading(true);
     if (step === 1 && !pending) {
       return approve();
     } else if (!pending) {
@@ -248,9 +255,9 @@ function DepositModalMP({ data, closeModal }: Props) {
                 <Button
                   text={step == 1 ? translations[lang].approve : translations[lang].deposit}
                   className={qty && qty > '0' ? 'primary' : 'disabled'}
-                  disabled={(!qty || qty <= '0') && !pending}
+                  disabled={((!qty || qty <= '0') && !pending) || loading}
                   onClick={handleClickAction}
-                  loading={pending}
+                  loading={loading}
                 />
               </div>
             </>

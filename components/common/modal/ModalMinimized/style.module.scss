@@ -9,6 +9,7 @@
   box-shadow: var(--shadow-tables);
   width: 250px;
   padding: var(--u2);
+  z-index: 6;
 
   .open {
     position: absolute;

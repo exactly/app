@@ -51,6 +51,7 @@ function WithdrawModalMP({ data, closeModal }: Props) {
   const [minimized, setMinimized] = useState<Boolean>(false);
   const [slippage, setSlippage] = useState<string>('0.5');
   const [editSlippage, setEditSlippage] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
     undefined
@@ -79,21 +80,28 @@ function WithdrawModalMP({ data, closeModal }: Props) {
   }
 
   async function withdraw() {
-    const minAmount = parseFloat(qty!) * (1 - parseFloat(slippage) / 100);
+    setLoading(true);
+    try {
+      const minAmount = parseFloat(qty!) * (1 - parseFloat(slippage) / 100);
 
-    const withdraw = await fixedLenderWithSigner?.withdrawAtMaturity(
-      maturity,
-      ethers.utils.parseUnits(qty!),
-      ethers.utils.parseUnits(`${minAmount}`),
-      walletAddress,
-      walletAddress
-    );
+      const withdraw = await fixedLenderWithSigner?.withdrawAtMaturity(
+        maturity,
+        ethers.utils.parseUnits(qty!),
+        ethers.utils.parseUnits(`${minAmount}`),
+        walletAddress,
+        walletAddress
+      );
 
-    setTx({ status: 'processing', hash: withdraw?.hash });
+      setTx({ status: 'processing', hash: withdraw?.hash });
 
-    const status = await withdraw.wait();
+      const status = await withdraw.wait();
+      setLoading(false);
 
-    setTx({ status: 'success', hash: status?.transactionHash });
+      setTx({ status: 'success', hash: status?.transactionHash });
+    } catch (e) {
+      setLoading(false);
+      console.log(e);
+    }
   }
 
   async function estimateGas() {
@@ -165,8 +173,10 @@ function WithdrawModalMP({ data, closeModal }: Props) {
                 <Button
                   text={translations[lang].withdraw}
                   className={qty <= '0' || !qty ? 'secondaryDisabled' : 'tertiary'}
-                  disabled={qty <= '0' || !qty}
+                  disabled={qty <= '0' || !qty || loading}
                   onClick={withdraw}
+                  loading={loading}
+                  color="primary"
                 />
               </div>
             </>

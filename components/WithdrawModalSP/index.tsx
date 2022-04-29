@@ -47,6 +47,7 @@ function WithdrawModalSP({ data, closeModal }: Props) {
   const [gas, setGas] = useState<Gas | undefined>();
   const [tx, setTx] = useState<Transaction | undefined>(undefined);
   const [minimized, setMinimized] = useState<Boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
     undefined
@@ -73,16 +74,23 @@ function WithdrawModalSP({ data, closeModal }: Props) {
   }
 
   async function withdraw() {
-    const withdraw = await fixedLenderWithSigner?.withdraw(
-      ethers.utils.parseUnits(qty!),
-      walletAddress,
-      walletAddress
-    );
-    setTx({ status: 'processing', hash: withdraw?.hash });
+    setLoading(true);
+    try {
+      const withdraw = await fixedLenderWithSigner?.withdraw(
+        ethers.utils.parseUnits(qty!),
+        walletAddress,
+        walletAddress
+      );
+      setTx({ status: 'processing', hash: withdraw?.hash });
 
-    const status = await withdraw.wait();
+      const status = await withdraw.wait();
+      setLoading(false);
 
-    setTx({ status: 'success', hash: status?.transactionHash });
+      setTx({ status: 'success', hash: status?.transactionHash });
+    } catch (e) {
+      setLoading(false);
+      console.log(e);
+    }
   }
 
   async function estimateGas() {
@@ -138,8 +146,10 @@ function WithdrawModalSP({ data, closeModal }: Props) {
                 <Button
                   text={translations[lang].withdraw}
                   className={qty <= '0' || !qty ? 'secondaryDisabled' : 'tertiary'}
-                  disabled={qty <= '0' || !qty}
+                  disabled={qty <= '0' || !qty || loading}
                   onClick={withdraw}
+                  loading={loading}
+                  color="primary"
                 />
               </div>
             </>

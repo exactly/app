@@ -60,6 +60,7 @@ function BorrowModal({ data, closeModal }: Props) {
   const [rate, setRate] = useState<string | undefined>('0');
   const [slippage, setSlippage] = useState<string>('0.5');
   const [editSlippage, setEditSlippage] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
     undefined
@@ -146,22 +147,28 @@ function BorrowModal({ data, closeModal }: Props) {
   }
 
   async function borrow() {
-    if (qty <= '0' || !qty) return;
-    const maxAmount = parseFloat(qty!) * (1 + parseFloat(slippage) / 100);
+    setLoading(true);
+    try {
+      const maxAmount = parseFloat(qty!) * (1 + parseFloat(slippage) / 100);
 
-    const borrow = await fixedLenderWithSigner?.borrowAtMaturity(
-      parseInt(date?.value ?? maturity),
-      ethers.utils.parseUnits(qty!),
-      ethers.utils.parseUnits(`${maxAmount}`),
-      walletAddress,
-      walletAddress
-    );
+      const borrow = await fixedLenderWithSigner?.borrowAtMaturity(
+        parseInt(date?.value ?? maturity),
+        ethers.utils.parseUnits(qty!),
+        ethers.utils.parseUnits(`${maxAmount}`),
+        walletAddress,
+        walletAddress
+      );
 
-    setTx({ status: 'processing', hash: borrow?.hash });
+      setTx({ status: 'processing', hash: borrow?.hash });
 
-    const status = await borrow.wait();
+      const status = await borrow.wait();
+      setLoading(false);
 
-    setTx({ status: 'success', hash: status?.transactionHash });
+      setTx({ status: 'success', hash: status?.transactionHash });
+    } catch (e) {
+      setLoading(false);
+      console.log(e);
+    }
   }
 
   async function estimateGas() {
@@ -238,7 +245,8 @@ function BorrowModal({ data, closeModal }: Props) {
                   text={translations[lang].borrow}
                   className={qty <= '0' || !qty ? 'disabled' : 'secondary'}
                   onClick={borrow}
-                  disabled={qty <= '0' || !qty}
+                  disabled={qty <= '0' || !qty || loading}
+                  loading={loading}
                 />
               </div>
             </>
