@@ -33,6 +33,7 @@ import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 import FixedLenderContext from 'contexts/FixedLenderContext';
 import { AddressContext } from 'contexts/AddressContext';
+import PreviewerContext from 'contexts/PreviewerContext';
 
 import keys from './translations.json';
 
@@ -51,6 +52,7 @@ function DepositModalMP({ data, closeModal }: Props) {
   const translations: { [key: string]: LangKeys } = keys;
 
   const fixedLenderData = useContext(FixedLenderContext);
+  const previewerData = useContext(PreviewerContext);
 
   const [qty, setQty] = useState<string>('');
   const [walletBalance, setWalletBalance] = useState<string | undefined>(undefined);
@@ -62,6 +64,7 @@ function DepositModalMP({ data, closeModal }: Props) {
   const [loading, setLoading] = useState<boolean>(false);
   const [slippage, setSlippage] = useState<string>('0.5');
   const [editSlippage, setEditSlippage] = useState<boolean>(false);
+  const [fixedRate, setFixedRate] = useState<string>('0.00');
 
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
     undefined
@@ -81,6 +84,8 @@ function DepositModalMP({ data, closeModal }: Props) {
     web3Provider?.getSigner()
   );
 
+  const previewerContract = getContractData(previewerData.address!, previewerData.abi!);
+
   useEffect(() => {
     getFixedLenderContract();
     getWalletBalance();
@@ -95,6 +100,10 @@ function DepositModalMP({ data, closeModal }: Props) {
   useEffect(() => {
     checkAllowance();
   }, [market, walletAddress, underlyingContract]);
+
+  useEffect(() => {
+    getYieldAtMaturity();
+  }, [fixedLenderWithSigner, qty, maturity, date]);
 
   async function checkAllowance() {
     const allowance = await underlyingContract?.allowance(
@@ -178,10 +187,12 @@ function DepositModalMP({ data, closeModal }: Props) {
   async function estimateGas() {
     const gasPriceInGwei = await fixedLenderWithSigner?.provider.getGasPrice();
 
+    const minAmount = parseFloat('1') * (1 - parseFloat(slippage) / 100);
+
     const estimatedGasCost = await fixedLenderWithSigner?.estimateGas.depositAtMaturity(
       parseInt(date?.value ?? maturity),
       ethers.utils.parseUnits('1'),
-      ethers.utils.parseUnits('2'),
+      ethers.utils.parseUnits(`${minAmount}`),
       walletAddress
     );
 
@@ -201,6 +212,20 @@ function DepositModalMP({ data, closeModal }: Props) {
     } else if (!pending) {
       return deposit();
     }
+  }
+
+  async function getYieldAtMaturity() {
+    if (!qty) return;
+
+    const yieldAtMaturity = await previewerContract?.previewYieldAtMaturity(
+      fixedLenderWithSigner!.address,
+      parseInt(date?.value ?? maturity),
+      ethers.utils.parseUnits(qty)
+    );
+
+    const fixedRate = (parseFloat(yieldAtMaturity) * 100) / parseFloat(qty);
+
+    setFixedRate(fixedRate.toFixed(2));
   }
 
   async function getFixedLenderContract() {
@@ -235,7 +260,7 @@ function DepositModalMP({ data, closeModal }: Props) {
               />
               <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} />
               {gas && <ModalTxCost gas={gas} />}
-              <ModalRow text={translations[lang].interestRate} value="X %" line />
+              <ModalRow text={translations[lang].interestRate} value={`${fixedRate}%`} line />
               <ModalRowEditable
                 text={translations[lang].minimumDepositRate}
                 value={slippage}
