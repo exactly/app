@@ -31,6 +31,7 @@ function MarketsList({ markets, showModal }: Props) {
           <div className={style.tableRow}>
             <span className={style.symbol}>{translations[lang].asset}</span>
             <span className={style.title}>{translations[lang].marketSize}</span>
+            <span className={style.title}>{translations[lang].lastFixedRate}</span>
             <span className={style.title} />
           </div>
           {markets?.map((market, key) => {
@@ -50,6 +51,7 @@ function MarketsList({ markets, showModal }: Props) {
           <div className={style.tableRow}>
             <span className={style.symbol}>{translations[lang].asset}</span>
             <span className={style.title}>{translations[lang].marketSize}</span>
+            <span className={style.title}>{translations[lang].lastFixedRate}</span>
             <span className={style.title} />
           </div>
           {markets?.map((market, key) => {
