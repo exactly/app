@@ -51,6 +51,7 @@ import translations from 'dictionary/en.json';
 
 import { getSymbol } from 'utils/utils';
 import EmptyState from 'components/EmptyState';
+import getSubgraph from 'utils/getSubgraph';
 
 interface Props {
   auditor: Contract;
@@ -90,37 +91,36 @@ const DashBoard: NextPage<Props> = () => {
 
   async function getData() {
     if (!walletAddress) return;
-
+    const subgraphUrl = getSubgraph();
     //MP
-
     const getMaturityPoolDeposits = await request(
-      'https://api.thegraph.com/subgraphs/name/exactly-finance/exactly',
+      subgraphUrl,
       getMaturityPoolDepositsQuery(walletAddress)
     );
 
     // const getMaturityPoolWithdraws = await request(
-    //   'https://api.thegraph.com/subgraphs/name/exactly-finance/exactly',
+    //   subgraphUrl,
     //   getMaturityPoolWithdrawsQuery(walletAddress)
     // );
 
     const getMaturityPoolBorrows = await request(
-      'https://api.thegraph.com/subgraphs/name/exactly-finance/exactly',
+      subgraphUrl,
       getMaturityPoolBorrowsQuery(walletAddress)
     );
 
     // const getMaturityPoolRepays = await request(
-    //   'https://api.thegraph.com/subgraphs/name/exactly-finance/exactly',
+    //  subgraphUrl,
     //   getMaturityPoolRepaysQuery(walletAddress)
     // );
 
     //SP
     const getSmartPoolDeposits = await request(
-      'https://api.thegraph.com/subgraphs/name/exactly-finance/exactly',
+      subgraphUrl,
       getSmartPoolDepositsQuery(walletAddress)
     );
 
     const getSmartPoolWithdraws = await request(
-      'https://api.thegraph.com/subgraphs/name/exactly-finance/exactly',
+      subgraphUrl,
       getSmartPoolWithdrawsQuery(walletAddress)
     );
 
