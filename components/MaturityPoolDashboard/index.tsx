@@ -51,7 +51,7 @@ function MaturityPoolDashboard({ deposits, borrows, showModal, tab }: Props) {
   async function getDefaultMaturity() {
     const currentTimestamp = dayjs().unix();
     const interval = 604800;
-    const timestamp = currentTimestamp - (currentTimestamp % interval);
+    const timestamp = currentTimestamp - (currentTimestamp % interval) + interval;
 
     setDefaultMaturity(timestamp.toString());
   }
