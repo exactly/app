@@ -10,6 +10,7 @@ import ModalRowEditable from 'components/common/modal/ModalRowEditable';
 import ModalTitle from 'components/common/modal/ModalTitle';
 import ModalTxCost from 'components/common/modal/ModalTxCost';
 import ModalMinimized from 'components/common/modal/ModalMinimized';
+import ModalWrapper from 'components/common/modal/ModalWrapper';
 import ModalGif from 'components/common/modal/ModalGif';
 import Overlay from 'components/Overlay';
 
@@ -150,7 +151,7 @@ function RepayModal({ data, closeModal }: Props) {
   return (
     <>
       {!minimized && (
-        <section className={styles.formContainer}>
+        <ModalWrapper>
           {!tx && (
             <>
               <ModalTitle
@@ -190,7 +191,7 @@ function RepayModal({ data, closeModal }: Props) {
             </>
           )}
           {tx && <ModalGif tx={tx} />}
-        </section>
+        </ModalWrapper>
       )}
 
       {tx && minimized && (
