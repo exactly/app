@@ -11,7 +11,7 @@ import { useWeb3Context } from 'contexts/Web3Context';
 
 interface Props {
   maturities: Array<Maturity> | undefined;
-  showModal: (type: string) => void;
+  showModal: (type: string, maturity: string | undefined) => void;
 }
 
 function AssetTable({ maturities, showModal }: Props) {
@@ -19,9 +19,9 @@ function AssetTable({ maturities, showModal }: Props) {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
-  function handleClick(type: string) {
+  function handleClick(type: string, maturity: string) {
     if (!walletAddress && connect) return connect();
-    showModal(type);
+    showModal(type, maturity);
   }
 
   return (
@@ -49,14 +49,14 @@ function AssetTable({ maturities, showModal }: Props) {
                     <Button
                       text={translations[lang].deposit}
                       className="primary"
-                      onClick={() => handleClick('deposit')}
+                      onClick={() => handleClick('deposit', maturity.value)}
                     />
                   </div>
                   <div className={styles.buttonContainer}>
                     <Button
                       text={translations[lang].borrow}
                       className="secondary"
-                      onClick={() => handleClick('borrow')}
+                      onClick={() => handleClick('borrow', maturity.value)}
                     />
                   </div>
                 </div>

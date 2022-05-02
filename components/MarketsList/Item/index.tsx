@@ -1,5 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
 import { ethers } from 'ethers';
+import { request } from 'graphql-request';
 
 import Button from 'components/common/Button';
 
@@ -18,6 +19,8 @@ import keys from './translations.json';
 import { getContractData } from 'utils/contracts';
 import formatNumber from 'utils/formatNumber';
 import parseSymbol from 'utils/parseSymbol';
+
+import { getLastMaturityPoolBorrowRate, getLastMaturityPoolDepositRate } from 'queries';
 
 type Props = {
   market: Market;
@@ -38,6 +41,7 @@ function Item({ market, showModal, type, src }: Props) {
 
   const [poolData, setPoolData] = useState<Pool | undefined>(undefined);
   const [fixedLender, setFixedLender] = useState<ethers.Contract | undefined>(undefined);
+  const [rate, setRate] = useState<string>('0');
 
   useEffect(() => {
     getFixedLenderContract();
@@ -75,6 +79,31 @@ function Item({ market, showModal, type, src }: Props) {
       supplied: parseFloat(await ethers.utils.formatEther(supplied))
     };
 
+    let fee;
+    let amount;
+
+    if (type == 'borrow') {
+      const getLastBorrowRate = await request(
+        'https://api.thegraph.com/subgraphs/name/exactly-finance/exactly',
+        getLastMaturityPoolBorrowRate(market.market, date?.value!)
+      );
+
+      fee = getLastBorrowRate?.borrowAtMaturities[0]?.fee;
+      amount = getLastBorrowRate?.borrowAtMaturities[0]?.assets;
+    } else if (type == 'deposit') {
+      const getLastDepositRate = await request(
+        'https://api.thegraph.com/subgraphs/name/exactly-finance/exactly',
+        getLastMaturityPoolDepositRate(market.market, date?.value!)
+      );
+
+      fee = getLastDepositRate?.depositAtMaturities[0]?.fee;
+      amount = getLastDepositRate?.depositAtMaturities[0]?.assets;
+    }
+
+    const fixedRate = (parseFloat(fee) * 100) / parseFloat(amount);
+
+    setRate(isNaN(fixedRate) ? '0.00' : fixedRate.toFixed(2));
+
     setPoolData(newPoolData);
   }
 
@@ -94,6 +123,7 @@ function Item({ market, showModal, type, src }: Props) {
           ? formatNumber(poolData?.borrowed!, market?.symbol)
           : formatNumber(poolData?.supplied!, market?.symbol)}
       </span>
+      <span className={style.value}>{rate}%</span>
       <div className={style.buttonContainer}>
         <Button
           text={type == 'borrow' ? translations[lang].borrow : translations[lang].deposit}

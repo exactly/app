@@ -44,7 +44,7 @@ import FixedLenderWETH from 'protocol/deployments/kovan/FixedLenderWETH.json';
 import Previewer from 'protocol/deployments/kovan/Previewer.json';
 
 interface Props {
-  symbol: String;
+  symbol: string;
 }
 
 const Asset: NextPage<Props> = ({ symbol }) => {
@@ -74,7 +74,7 @@ const Asset: NextPage<Props> = ({ symbol }) => {
       getMarketData();
       getPools();
     }
-  }, [auditorContract]);
+  }, [auditorContract, symbol]);
 
   async function getMarketData() {
     const marketData = await auditorContract?.getMarketData(filteredFixedLender?.address);
@@ -108,7 +108,7 @@ const Asset: NextPage<Props> = ({ symbol }) => {
     setMaturities(formattedDates);
   }
 
-  function showModal(type: String) {
+  function showModal(type: string, maturity: string | undefined) {
     if (modalContent?.type) {
       //in the future we should handle the minimized modal status through a context here
       return;
@@ -116,11 +116,12 @@ const Asset: NextPage<Props> = ({ symbol }) => {
 
     if (marketData) {
       const market = {
-        address: marketData[5],
+        market: marketData[5],
         symbol: marketData[0],
         name: marketData[1],
         isListed: marketData[2],
-        collateralFactor: parseFloat(ethers.utils.formatEther(marketData[3]))
+        collateralFactor: parseFloat(ethers.utils.formatEther(marketData[3])),
+        maturity: maturity ?? undefined
       };
 
       handleModal({ content: { ...market, type } });
@@ -149,12 +150,12 @@ const Asset: NextPage<Props> = ({ symbol }) => {
 
             <section className={style.container}>
               <div className={style.smartPoolContainer}>
-                <SmartPoolInfo showModal={(type: string) => showModal(type)} />
+                <SmartPoolInfo showModal={showModal} symbol={symbol} />
                 <SmartPoolChart />
               </div>
               <section className={style.assetData}>
                 <div className={style.assetContainer}>
-                  <AssetSelector title={true} />
+                  {marketData && <AssetSelector title={true} defaultAddress={marketData[5]} />}
                 </div>
                 <div className={style.assetMetricsContainer}></div>
               </section>
@@ -162,7 +163,7 @@ const Asset: NextPage<Props> = ({ symbol }) => {
                 <div className={style.leftColumn}>
                   <AssetTable
                     maturities={maturities?.slice(itemsPerPage * (page - 1), itemsPerPage * page)}
-                    showModal={(type: string) => showModal(type)}
+                    showModal={showModal}
                   />
                   <Paginator
                     total={maturities?.length ?? 0}
@@ -171,19 +172,29 @@ const Asset: NextPage<Props> = ({ symbol }) => {
                     currentPage={page}
                   />
                 </div>
-                <div className={style.assetGraph}>
-                  <PoolsChart />
+                <div className={style.maturitiesContainer}>
+                  {maturities?.slice(0, 3)?.map((maturity) => {
+                    return (
+                      <MaturityInfo maturity={maturity} key={maturity.value} symbol={symbol} />
+                    );
+                  })}
                 </div>
               </section>
               <h2 className={style.assetTitle}>{translations[lang].assetDetails}</h2>
               <div className={style.assetInfoContainer}>
                 <AssetInfo title={translations[lang].price} value="$4,213.62" />
                 <AssetInfo title={translations[lang].reserveFactor} value="20%" />
-                <AssetInfo title={translations[lang].collateralFactor} value="75%" />
+                {marketData && (
+                  <AssetInfo
+                    title={translations[lang].collateralFactor}
+                    value={parseFloat(ethers.utils.formatEther(marketData[3])) * 100}
+                    symbol="%"
+                  />
+                )}
               </div>
               <div className={style.maturitiesContainer}>
                 {maturities?.slice(0, 3)?.map((maturity) => {
-                  return <MaturityInfo maturity={maturity} key={maturity.value} />;
+                  return <MaturityInfo maturity={maturity} key={maturity.value} symbol={symbol} />;
                 })}
               </div>
             </section>

@@ -10,18 +10,18 @@ import styles from './style.module.scss';
 import keys from './translations.json';
 
 import numbers from 'config/numbers.json';
+import parseSymbol from 'utils/parseSymbol';
 
 interface Props {
   maturity: Maturity;
+  symbol: string;
 }
 
-function MaturityInfo({ maturity }: Props) {
+function MaturityInfo({ maturity, symbol }: Props) {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
-  const days =
-    (new Date(maturity.label).getTime() - new Date().getTime()) /
-    (1000 * 3600 * 24);
+  const days = (new Date(maturity.label).getTime() - new Date().getTime()) / (1000 * 3600 * 24);
 
   const color =
     days < numbers.daysToError
@@ -38,23 +38,19 @@ function MaturityInfo({ maturity }: Props) {
           <div className={styles.assetInfo}>
             <img
               className={styles.assetImage}
-              src="/img/assets/dai.png"
-              alt="dai"
+              src={`/img/assets/${symbol.toLowerCase()}.png`}
+              alt={symbol}
             />
-            <p className={styles.asset}>DAI</p>
+            <p className={styles.asset}>{parseSymbol(symbol)}</p>
           </div>
           <p className={color}>
             <img src="/img/icons/clock.svg" alt="clock" />
             {Math.floor(days)}{' '}
-            {Math.floor(days) != 1
-              ? translations[lang].days
-              : translations[lang].day}
+            {Math.floor(days) != 1 ? translations[lang].days : translations[lang].day}
           </p>
         </li>
         <li className={styles.row}>
-          <span className={styles.title}>
-            {translations[lang].totalBorrowed}
-          </span>{' '}
+          <span className={styles.title}>{translations[lang].totalBorrowed}</span>{' '}
           <p className={styles.value}>1.553.612.280,17</p>
         </li>
         <li className={styles.row}>
@@ -62,9 +58,7 @@ function MaturityInfo({ maturity }: Props) {
           <p className={styles.value}>384.186.120,43</p>
         </li>
         <li className={styles.row}>
-          <span className={styles.title}>
-            {translations[lang].utilizationRate}
-          </span>{' '}
+          <span className={styles.title}>{translations[lang].utilizationRate}</span>{' '}
           <p className={styles.value}>80%</p>
         </li>
         <li className={styles.row}>
