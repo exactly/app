@@ -1,8 +1,8 @@
-import React from 'react';
+import { ReactNode } from 'react';
 import styles from './style.module.scss';
 
 interface Props {
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 function ModalWrapper({ children }: Props) {
