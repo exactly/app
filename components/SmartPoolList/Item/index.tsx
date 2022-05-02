@@ -79,7 +79,7 @@ function Item({ market, showModal, src }: Props) {
   return (
     <div className={`${style.container} ${style.primaryContainer}`} onClick={handleClick}>
       <div className={style.symbol}>
-        <img src={src} className={style.assetImage} />
+        <img src={src} className={style.assetImage} alt={market?.symbol} />
         <span className={style.primary}>{parseSymbol(market?.symbol)}</span>
       </div>
       <span className={style.value}>{formatNumber(poolData?.supplied!, market?.symbol)}</span>
