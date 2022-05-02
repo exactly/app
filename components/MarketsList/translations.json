@@ -1,7 +1,8 @@
 {
   "en": {
     "asset": "Asset",
-    "marketSize": "Market size"
+    "marketSize": "Market size",
+    "lastFixedRate": "Last Fixed Rate"
   },
   "es": {}
 }
