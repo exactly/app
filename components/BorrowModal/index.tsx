@@ -133,7 +133,7 @@ function BorrowModal({ data, closeModal }: Props) {
       const borrowRate = await interestRateModelContract?.getRateToBorrow(
         parseInt(date?.value ?? maturity),
         currentTimestamp,
-        ethers.utils.parseUnits(qty!, 18),
+        ethers.utils.parseUnits(qty!),
         maturityPoolStatus.borrowed,
         maturityPoolStatus.supplied,
         smartPoolSupplied

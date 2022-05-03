@@ -21,12 +21,14 @@ import { LangKeys } from 'types/Lang';
 import { UnderlyingData } from 'types/Underlying';
 import { Gas } from 'types/Gas';
 import { Transaction } from 'types/Transaction';
+import { Decimals } from 'types/Decimals';
 
 import { getContractData } from 'utils/contracts';
 import { getUnderlyingData } from 'utils/utils';
 import parseTimestamp from 'utils/parseTimestamp';
 
 import numbers from 'config/numbers.json';
+import decimals from 'config/decimals.json';
 
 import styles from './style.module.scss';
 
@@ -224,7 +226,10 @@ function DepositModalMP({ data, closeModal }: Props) {
       ethers.utils.parseUnits(qty)
     );
 
-    const fixedRate = (parseFloat(yieldAtMaturity) * 100) / parseFloat(qty);
+    const fixedRate =
+      (parseFloat(ethers.utils.formatUnits(yieldAtMaturity, decimals[symbol! as keyof Decimals])) *
+        100) /
+      parseFloat(qty);
 
     setFixedRate(fixedRate.toFixed(2));
   }

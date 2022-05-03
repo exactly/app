@@ -8,6 +8,7 @@ import LangContext from 'contexts/LangContext';
 import { LangKeys } from 'types/Lang';
 import { Deposit } from 'types/Deposit';
 import { Borrow } from 'types/Borrow';
+import { Decimals } from 'types/Decimals';
 import { Option } from 'react-dropdown';
 
 import styles from './style.module.scss';
@@ -18,6 +19,8 @@ import parseTimestamp from 'utils/parseTimestamp';
 import { getSymbol } from 'utils/utils';
 import formatNumber from 'utils/formatNumber';
 import parseSymbol from 'utils/parseSymbol';
+
+import decimals from 'config/decimals.json';
 
 type Props = {
   type?: Option;
@@ -54,7 +57,10 @@ function Item({ type, amount, fee, maturityDate, showModal, market, data }: Prop
         <span className={styles.primary}>{parseSymbol(symbol)}</span>
       </div>
       <span className={styles.value}>
-        {formatNumber(ethers.utils.formatUnits(amount, 18), symbol)}
+        {formatNumber(
+          ethers.utils.formatUnits(amount, decimals[symbol! as keyof Decimals]),
+          symbol
+        )}
       </span>
       <span className={styles.value}>{fixedRate.toFixed(2)}%</span>
       <span className={styles.value}>{parseTimestamp(maturityDate)}</span>
