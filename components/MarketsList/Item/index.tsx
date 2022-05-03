@@ -80,32 +80,36 @@ function Item({ market, showModal, type, src }: Props) {
       supplied: parseFloat(await ethers.utils.formatEther(supplied))
     };
 
-    let fee;
-    let amount;
+    try {
+      let fee;
+      let amount;
 
-    const subgraphUrl = getSubgraph();
+      const subgraphUrl = getSubgraph();
 
-    if (type == 'borrow') {
-      const getLastBorrowRate = await request(
-        subgraphUrl,
-        getLastMaturityPoolBorrowRate(market.market, date?.value!)
-      );
+      if (type == 'borrow') {
+        const getLastBorrowRate = await request(
+          subgraphUrl,
+          getLastMaturityPoolBorrowRate(market.market, date?.value!)
+        );
 
-      fee = getLastBorrowRate?.borrowAtMaturities[0]?.fee;
-      amount = getLastBorrowRate?.borrowAtMaturities[0]?.assets;
-    } else if (type == 'deposit') {
-      const getLastDepositRate = await request(
-        subgraphUrl,
-        getLastMaturityPoolDepositRate(market.market, date?.value!)
-      );
+        fee = getLastBorrowRate?.borrowAtMaturities[0]?.fee;
+        amount = getLastBorrowRate?.borrowAtMaturities[0]?.assets;
+      } else if (type == 'deposit') {
+        const getLastDepositRate = await request(
+          subgraphUrl,
+          getLastMaturityPoolDepositRate(market.market, date?.value!)
+        );
 
-      fee = getLastDepositRate?.depositAtMaturities[0]?.fee;
-      amount = getLastDepositRate?.depositAtMaturities[0]?.assets;
+        fee = getLastDepositRate?.depositAtMaturities[0]?.fee;
+        amount = getLastDepositRate?.depositAtMaturities[0]?.assets;
+      }
+
+      const fixedRate = (parseFloat(fee) * 100) / parseFloat(amount);
+
+      setRate(isNaN(fixedRate) ? '0.00' : fixedRate.toFixed(2));
+    } catch (e) {
+      console.log(e);
     }
-
-    const fixedRate = (parseFloat(fee) * 100) / parseFloat(amount);
-
-    setRate(isNaN(fixedRate) ? '0.00' : fixedRate.toFixed(2));
 
     setPoolData(newPoolData);
   }
