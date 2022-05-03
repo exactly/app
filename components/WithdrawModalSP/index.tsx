@@ -18,6 +18,7 @@ import { Deposit } from 'types/Deposit';
 import { LangKeys } from 'types/Lang';
 import { Gas } from 'types/Gas';
 import { Transaction } from 'types/Transaction';
+import { Decimals } from 'types/Decimals';
 
 import styles from './style.module.scss';
 
@@ -26,6 +27,8 @@ import FixedLenderContext from 'contexts/FixedLenderContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 
 import { getContractData } from 'utils/contracts';
+
+import decimals from 'config/decimals.json';
 
 import keys from './translations.json';
 
@@ -54,7 +57,7 @@ function WithdrawModalSP({ data, closeModal }: Props) {
     undefined
   );
 
-  const parsedAmount = ethers.utils.formatUnits(assets, 18);
+  const parsedAmount = ethers.utils.formatUnits(assets, decimals[symbol! as keyof Decimals]);
 
   useEffect(() => {
     getFixedLenderContract();

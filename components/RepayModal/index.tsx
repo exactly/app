@@ -19,6 +19,7 @@ import { Deposit } from 'types/Deposit';
 import { LangKeys } from 'types/Lang';
 import { Gas } from 'types/Gas';
 import { Transaction } from 'types/Transaction';
+import { Decimals } from 'types/Decimals';
 
 import parseTimestamp from 'utils/parseTimestamp';
 import { getContractData } from 'utils/contracts';
@@ -28,6 +29,8 @@ import styles from './style.module.scss';
 import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 import FixedLenderContext from 'contexts/FixedLenderContext';
+
+import decimals from 'config/decimals.json';
 
 import keys from './translations.json';
 
@@ -48,8 +51,8 @@ function RepayModal({ data, closeModal }: Props) {
   const [qty, setQty] = useState<string>('');
   const [slippage, setSlippage] = useState<string>('0.5');
   const [isLateRepay, setIsLateRepay] = useState<boolean>(false);
-  const parsedFee = ethers.utils.formatUnits(fee, 18);
-  const parsedAmount = ethers.utils.formatUnits(assets, 18);
+  const parsedFee = ethers.utils.formatUnits(fee, decimals[symbol! as keyof Decimals]);
+  const parsedAmount = ethers.utils.formatUnits(assets, decimals[symbol! as keyof Decimals]);
   const finalAmount = (parseFloat(parsedAmount) + parseFloat(parsedFee)).toString();
   const [gas, setGas] = useState<Gas | undefined>();
   const [tx, setTx] = useState<Transaction | undefined>(undefined);

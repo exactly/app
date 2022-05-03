@@ -11,10 +11,13 @@ import { useWeb3Context } from 'contexts/Web3Context';
 
 import { LangKeys } from 'types/Lang';
 import { Deposit } from 'types/Deposit';
+import { Decimals } from 'types/Decimals';
 
 import styles from './style.module.scss';
 
 import keys from './translations.json';
+
+import decimals from 'config/decimals.json';
 
 import { getUnderlyingData } from 'utils/utils';
 import { getContractData } from 'utils/contracts';
@@ -107,7 +110,10 @@ function Item({ symbol, amount, walletAddress, showModal, deposit }: Props) {
       </div>
       <span className={styles.value}>{formatNumber(walletBalance!, symbol)}</span>
       <span className={styles.value}>
-        {formatNumber(ethers.utils.formatUnits(amount, 18), symbol)}
+        {formatNumber(
+          ethers.utils.formatUnits(amount, decimals[symbol! as keyof Decimals]),
+          symbol
+        )}
       </span>
       <span className={styles.value}>{0}</span>
 
