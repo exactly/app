@@ -172,12 +172,8 @@ const Asset: NextPage<Props> = ({ symbol }) => {
                     currentPage={page}
                   />
                 </div>
-                <div className={style.maturitiesContainer}>
-                  {maturities?.slice(0, 3)?.map((maturity) => {
-                    return (
-                      <MaturityInfo maturity={maturity} key={maturity.value} symbol={symbol} />
-                    );
-                  })}
+                <div className={style.assetGraph}>
+                  <PoolsChart />
                 </div>
               </section>
               <h2 className={style.assetTitle}>{translations[lang].assetDetails}</h2>
