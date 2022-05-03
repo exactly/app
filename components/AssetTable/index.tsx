@@ -11,7 +11,7 @@ import { useWeb3Context } from 'contexts/Web3Context';
 
 interface Props {
   maturities: Array<Maturity> | undefined;
-  showModal: (type: string, maturity: string) => void;
+  showModal: (type: string, maturity: string | undefined) => void;
 }
 
 function AssetTable({ maturities, showModal }: Props) {
