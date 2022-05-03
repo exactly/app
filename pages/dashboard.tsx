@@ -16,11 +16,13 @@ import DepositModalSP from 'components/DepositModalSP';
 import BorrowModal from 'components/BorrowModal';
 import DashboardHeader from 'components/DashboardHeader';
 import Tabs from 'components/Tabs';
+import EmptyState from 'components/EmptyState';
 
 import { AuditorProvider } from 'contexts/AuditorContext';
 import { FixedLenderProvider } from 'contexts/FixedLenderContext';
 import { InterestRateModelProvider } from 'contexts/InterestRateModelContext';
 import { useWeb3Context } from 'contexts/Web3Context';
+import { PreviewerProvider } from 'contexts/PreviewerContext';
 
 import { Contract } from 'types/Contract';
 import { Dictionary } from 'types/Dictionary';
@@ -46,11 +48,11 @@ import InterestRateModel from 'protocol/deployments/kovan/InterestRateModel.json
 import Auditor from 'protocol/deployments/kovan/Auditor.json';
 import FixedLenderDAI from 'protocol/deployments/kovan/FixedLenderDAI.json';
 import FixedLenderWETH from 'protocol/deployments/kovan/FixedLenderWETH.json';
+import Previewer from 'protocol/deployments/kovan/Previewer.json';
 
 import translations from 'dictionary/en.json';
 
 import { getSymbol } from 'utils/utils';
-import EmptyState from 'components/EmptyState';
 import getSubgraph from 'utils/getSubgraph';
 
 interface Props {
@@ -167,63 +169,65 @@ const DashBoard: NextPage<Props> = () => {
   }
 
   return (
-    <AuditorProvider value={Auditor}>
-      <FixedLenderProvider value={fixedLenders}>
-        <InterestRateModelProvider value={InterestRateModel}>
-          {modal && modalContent?.type == 'borrow' && (
-            <BorrowModal data={modalContent} closeModal={handleModal} />
-          )}
+    <PreviewerProvider value={Previewer}>
+      <AuditorProvider value={Auditor}>
+        <FixedLenderProvider value={fixedLenders}>
+          <InterestRateModelProvider value={InterestRateModel}>
+            {modal && modalContent?.type == 'borrow' && (
+              <BorrowModal data={modalContent} closeModal={handleModal} />
+            )}
 
-          {modal && modalContent?.type == 'repay' && (
-            <RepayModal data={modalContent} closeModal={handleModal} />
-          )}
+            {modal && modalContent?.type == 'repay' && (
+              <RepayModal data={modalContent} closeModal={handleModal} />
+            )}
 
-          {modal && modalContent?.type == 'deposit' && (
-            <DepositModalMP data={modalContent} closeModal={handleModal} />
-          )}
+            {modal && modalContent?.type == 'deposit' && (
+              <DepositModalMP data={modalContent} closeModal={handleModal} />
+            )}
 
-          {modal && modalContent?.type == 'withdraw' && (
-            <WithdrawModalMP data={modalContent} closeModal={handleModal} />
-          )}
+            {modal && modalContent?.type == 'withdraw' && (
+              <WithdrawModalMP data={modalContent} closeModal={handleModal} />
+            )}
 
-          {modal && modalContent?.type == 'smartDeposit' && (
-            <DepositModalSP data={modalContent} closeModal={handleModal} />
-          )}
+            {modal && modalContent?.type == 'smartDeposit' && (
+              <DepositModalSP data={modalContent} closeModal={handleModal} />
+            )}
 
-          {modal && modalContent?.type == 'withdrawSP' && (
-            <WithdrawModalSP data={modalContent} closeModal={handleModal} />
-          )}
+            {modal && modalContent?.type == 'withdrawSP' && (
+              <WithdrawModalSP data={modalContent} closeModal={handleModal} />
+            )}
 
-          <MobileNavbar />
-          <Navbar />
-          <DashboardHeader />
-          <Tabs
-            values={[tabDeposit, tabBorrow]}
-            selected={tab}
-            handleTab={(value: Option) => {
-              setTab(value);
-            }}
-          />
+            <MobileNavbar />
+            <Navbar />
+            <DashboardHeader />
+            <Tabs
+              values={[tabDeposit, tabBorrow]}
+              selected={tab}
+              handleTab={(value: Option) => {
+                setTab(value);
+              }}
+            />
 
-          {walletAddress ? (
-            <>
-              {tab.value == 'deposit' && (
-                <SmartPoolDashboard deposits={smartPoolDeposits} showModal={showModal} />
-              )}
-              <MaturityPoolDashboard
-                deposits={maturityPoolDeposits}
-                borrows={maturityPoolBorrows}
-                showModal={showModal}
-                tab={tab}
-              />
-            </>
-          ) : (
-            <EmptyState />
-          )}
-          <Footer />
-        </InterestRateModelProvider>
-      </FixedLenderProvider>
-    </AuditorProvider>
+            {walletAddress ? (
+              <>
+                {tab.value == 'deposit' && (
+                  <SmartPoolDashboard deposits={smartPoolDeposits} showModal={showModal} />
+                )}
+                <MaturityPoolDashboard
+                  deposits={maturityPoolDeposits}
+                  borrows={maturityPoolBorrows}
+                  showModal={showModal}
+                  tab={tab}
+                />
+              </>
+            ) : (
+              <EmptyState />
+            )}
+            <Footer />
+          </InterestRateModelProvider>
+        </FixedLenderProvider>
+      </AuditorProvider>
+    </PreviewerProvider>
   );
 };
 

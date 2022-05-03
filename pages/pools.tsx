@@ -19,6 +19,7 @@ import useModal from 'hooks/useModal';
 import { AuditorProvider } from 'contexts/AuditorContext';
 import { FixedLenderProvider } from 'contexts/FixedLenderContext';
 import { InterestRateModelProvider } from 'contexts/InterestRateModelContext';
+import { PreviewerProvider } from 'contexts/PreviewerContext';
 
 import { Market } from 'types/Market';
 import { UnformattedMarket } from 'types/UnformattedMarket';
@@ -32,6 +33,7 @@ import InterestRateModel from 'protocol/deployments/kovan/InterestRateModel.json
 import Auditor from 'protocol/deployments/kovan/Auditor.json';
 import FixedLenderDAI from 'protocol/deployments/kovan/FixedLenderDAI.json';
 import FixedLenderWETH from 'protocol/deployments/kovan/FixedLenderWETH.json';
+import Previewer from 'protocol/deployments/kovan/Previewer.json';
 
 interface Props {}
 
@@ -102,36 +104,38 @@ const Pools: NextPage<Props> = () => {
   }
 
   return (
-    <AuditorProvider value={Auditor}>
-      <FixedLenderProvider value={[FixedLenderDAI, FixedLenderWETH]}>
-        <InterestRateModelProvider value={InterestRateModel}>
-          {modal && modalContent?.type == 'deposit' && (
-            <DepositModalMP data={modalContent} closeModal={handleModal} />
-          )}
+    <PreviewerProvider value={Previewer}>
+      <AuditorProvider value={Auditor}>
+        <FixedLenderProvider value={[FixedLenderDAI, FixedLenderWETH]}>
+          <InterestRateModelProvider value={InterestRateModel}>
+            {modal && modalContent?.type == 'deposit' && (
+              <DepositModalMP data={modalContent} closeModal={handleModal} />
+            )}
 
-          {modal && modalContent?.type == 'smartDeposit' && (
-            <DepositModalSP data={modalContent} closeModal={handleModal} />
-          )}
+            {modal && modalContent?.type == 'smartDeposit' && (
+              <DepositModalSP data={modalContent} closeModal={handleModal} />
+            )}
 
-          {modal && modalContent?.type == 'borrow' && (
-            <BorrowModal data={modalContent} closeModal={handleModal} />
-          )}
+            {modal && modalContent?.type == 'borrow' && (
+              <BorrowModal data={modalContent} closeModal={handleModal} />
+            )}
 
-          <MobileNavbar />
-          <Navbar />
-          <CurrentNetwork />
+            <MobileNavbar />
+            <Navbar />
+            <CurrentNetwork />
 
-          <div style={{ marginTop: '180px' }}>
-            <SmartPoolList markets={markets} showModal={showModal} />
-          </div>
+            <div style={{ marginTop: '180px' }}>
+              <SmartPoolList markets={markets} showModal={showModal} />
+            </div>
 
-          <MaturitySelector title={dictionary.maturityPools} />
+            <MaturitySelector title={dictionary.maturityPools} />
 
-          <MarketsList markets={markets} showModal={showModal} />
-          <Footer />
-        </InterestRateModelProvider>
-      </FixedLenderProvider>
-    </AuditorProvider>
+            <MarketsList markets={markets} showModal={showModal} />
+            <Footer />
+          </InterestRateModelProvider>
+        </FixedLenderProvider>
+      </AuditorProvider>
+    </PreviewerProvider>
   );
 };
 
