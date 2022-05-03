@@ -19,6 +19,7 @@ import keys from './translations.json';
 import { getContractData } from 'utils/contracts';
 import formatNumber from 'utils/formatNumber';
 import parseSymbol from 'utils/parseSymbol';
+import getSubgraph from 'utils/getSubgraph';
 
 import { getLastMaturityPoolBorrowRate, getLastMaturityPoolDepositRate } from 'queries';
 
@@ -82,9 +83,11 @@ function Item({ market, showModal, type, src }: Props) {
     let fee;
     let amount;
 
+    const subgraphUrl = getSubgraph();
+
     if (type == 'borrow') {
       const getLastBorrowRate = await request(
-        'https://api.thegraph.com/subgraphs/name/exactly-finance/exactly',
+        subgraphUrl,
         getLastMaturityPoolBorrowRate(market.market, date?.value!)
       );
 
@@ -92,7 +95,7 @@ function Item({ market, showModal, type, src }: Props) {
       amount = getLastBorrowRate?.borrowAtMaturities[0]?.assets;
     } else if (type == 'deposit') {
       const getLastDepositRate = await request(
-        'https://api.thegraph.com/subgraphs/name/exactly-finance/exactly',
+        subgraphUrl,
         getLastMaturityPoolDepositRate(market.market, date?.value!)
       );
 
