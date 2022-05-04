@@ -24,7 +24,6 @@ import { UnformattedMarket } from 'types/UnformattedMarket';
 import { AuditorProvider } from 'contexts/AuditorContext';
 import LangContext from 'contexts/LangContext';
 import { FixedLenderProvider } from 'contexts/FixedLenderContext';
-import { InterestRateModelProvider } from 'contexts/InterestRateModelContext';
 import { PreviewerProvider } from 'contexts/PreviewerContext';
 
 import style from './style.module.scss';
@@ -37,7 +36,6 @@ import parseTimestamp from 'utils/parseTimestamp';
 import { getContractData } from 'utils/contracts';
 
 //Contracts
-import InterestRateModel from 'protocol/deployments/kovan/InterestRateModel.json';
 import Auditor from 'protocol/deployments/kovan/Auditor.json';
 import FixedLenderDAI from 'protocol/deployments/kovan/FixedLenderDAI.json';
 import FixedLenderWETH from 'protocol/deployments/kovan/FixedLenderWETH.json';
@@ -132,69 +130,67 @@ const Asset: NextPage<Props> = ({ symbol }) => {
     <PreviewerProvider value={Previewer}>
       <AuditorProvider value={Auditor}>
         <FixedLenderProvider value={fixedLenders}>
-          <InterestRateModelProvider value={InterestRateModel}>
-            <MobileNavbar />
-            <Navbar />
+          <MobileNavbar />
+          <Navbar />
 
-            {modal && modalContent?.type == 'deposit' && (
-              <DepositModalMP data={modalContent} closeModal={handleModal} />
-            )}
+          {modal && modalContent?.type == 'deposit' && (
+            <DepositModalMP data={modalContent} closeModal={handleModal} />
+          )}
 
-            {modal && modalContent?.type == 'smartDeposit' && (
-              <DepositModalSP data={modalContent} closeModal={handleModal} />
-            )}
+          {modal && modalContent?.type == 'smartDeposit' && (
+            <DepositModalSP data={modalContent} closeModal={handleModal} />
+          )}
 
-            {modal && modalContent?.type == 'borrow' && (
-              <BorrowModal data={modalContent} closeModal={handleModal} />
-            )}
+          {modal && modalContent?.type == 'borrow' && (
+            <BorrowModal data={modalContent} closeModal={handleModal} />
+          )}
 
-            <section className={style.container}>
-              <div className={style.smartPoolContainer}>
-                <SmartPoolInfo showModal={showModal} symbol={symbol} />
-                <SmartPoolChart />
+          <section className={style.container}>
+            <div className={style.smartPoolContainer}>
+              <SmartPoolInfo showModal={showModal} symbol={symbol} />
+              <SmartPoolChart />
+            </div>
+            <section className={style.assetData}>
+              <div className={style.assetContainer}>
+                {marketData && <AssetSelector title={true} defaultAddress={marketData[5]} />}
               </div>
-              <section className={style.assetData}>
-                <div className={style.assetContainer}>
-                  {marketData && <AssetSelector title={true} defaultAddress={marketData[5]} />}
-                </div>
-                <div className={style.assetMetricsContainer}></div>
-              </section>
-              <section className={style.graphContainer}>
-                <div className={style.leftColumn}>
-                  <AssetTable
-                    maturities={maturities?.slice(itemsPerPage * (page - 1), itemsPerPage * page)}
-                    showModal={showModal}
-                  />
-                  <Paginator
-                    total={maturities?.length ?? 0}
-                    itemsPerPage={5}
-                    handleChange={(page) => setPage(page)}
-                    currentPage={page}
-                  />
-                </div>
-                <div className={style.assetGraph}>
-                  <PoolsChart />
-                </div>
-              </section>
-              <h2 className={style.assetTitle}>{translations[lang].assetDetails}</h2>
-              <div className={style.assetInfoContainer}>
-                <AssetInfo title={translations[lang].price} value="$4,213.62" />
-                <AssetInfo title={translations[lang].reserveFactor} value="20%" />
-                {marketData && (
-                  <AssetInfo
-                    title={translations[lang].collateralFactor}
-                    value={parseFloat(ethers.utils.formatEther(marketData[3])) * 100}
-                    symbol="%"
-                  />
-                )}
+              <div className={style.assetMetricsContainer}></div>
+            </section>
+            <section className={style.graphContainer}>
+              <div className={style.leftColumn}>
+                <AssetTable
+                  maturities={maturities?.slice(itemsPerPage * (page - 1), itemsPerPage * page)}
+                  showModal={showModal}
+                />
+                <Paginator
+                  total={maturities?.length ?? 0}
+                  itemsPerPage={5}
+                  handleChange={(page) => setPage(page)}
+                  currentPage={page}
+                />
               </div>
-              <div className={style.maturitiesContainer}>
-                {maturities?.slice(0, 3)?.map((maturity) => {
-                  return <MaturityInfo maturity={maturity} key={maturity.value} symbol={symbol} />;
-                })}
+              <div className={style.assetGraph}>
+                <PoolsChart />
               </div>
             </section>
-          </InterestRateModelProvider>
+            <h2 className={style.assetTitle}>{translations[lang].assetDetails}</h2>
+            <div className={style.assetInfoContainer}>
+              <AssetInfo title={translations[lang].price} value="$4,213.62" />
+              <AssetInfo title={translations[lang].reserveFactor} value="20%" />
+              {marketData && (
+                <AssetInfo
+                  title={translations[lang].collateralFactor}
+                  value={parseFloat(ethers.utils.formatEther(marketData[3])) * 100}
+                  symbol="%"
+                />
+              )}
+            </div>
+            <div className={style.maturitiesContainer}>
+              {maturities?.slice(0, 3)?.map((maturity) => {
+                return <MaturityInfo maturity={maturity} key={maturity.value} symbol={symbol} />;
+              })}
+            </div>
+          </section>
         </FixedLenderProvider>
       </AuditorProvider>
     </PreviewerProvider>

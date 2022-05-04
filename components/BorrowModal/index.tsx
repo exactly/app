@@ -20,6 +20,7 @@ import { LangKeys } from 'types/Lang';
 import { UnderlyingData } from 'types/Underlying';
 import { Gas } from 'types/Gas';
 import { Transaction } from 'types/Transaction';
+import { Decimals } from 'types/Decimals';
 
 import { getContractData } from 'utils/contracts';
 import { getUnderlyingData } from 'utils/utils';
@@ -31,7 +32,9 @@ import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 import FixedLenderContext from 'contexts/FixedLenderContext';
 import { AddressContext } from 'contexts/AddressContext';
-import InterestRateModelContext from 'contexts/InterestRateModelContext';
+import PreviewerContext from 'contexts/PreviewerContext';
+
+import decimals from 'config/decimals.json';
 
 import keys from './translations.json';
 
@@ -51,14 +54,14 @@ function BorrowModal({ data, closeModal }: Props) {
   const translations: { [key: string]: LangKeys } = keys;
 
   const fixedLenderData = useContext(FixedLenderContext);
-  const interestRateModelData = useContext(InterestRateModelContext);
+  const previewerData = useContext(PreviewerContext);
 
   const [qty, setQty] = useState<string>('');
   const [walletBalance, setWalletBalance] = useState<string | undefined>(undefined);
   const [gas, setGas] = useState<Gas | undefined>(undefined);
   const [tx, setTx] = useState<Transaction | undefined>(undefined);
   const [minimized, setMinimized] = useState<Boolean>(false);
-  const [rate, setRate] = useState<string | undefined>('0');
+  const [fixedRate, setFixedRate] = useState<string | undefined>('0.00');
   const [slippage, setSlippage] = useState<string>('0.5');
   const [editSlippage, setEditSlippage] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
@@ -75,10 +78,7 @@ function BorrowModal({ data, closeModal }: Props) {
 
   const underlyingContract = getContractData(underlyingData!.address, underlyingData!.abi);
 
-  const interestRateModelContract = getContractData(
-    interestRateModelData.address!,
-    interestRateModelData.abi!
-  );
+  const previewerContract = getContractData(previewerData.address!, previewerData.abi!);
 
   useEffect(() => {
     if (fixedLenderData && !fixedLenderWithSigner) {
@@ -95,7 +95,7 @@ function BorrowModal({ data, closeModal }: Props) {
 
   useEffect(() => {
     if (qty) {
-      calculateRate();
+      getFeeAtMaturity();
     }
   }, [qty, date, maturity]);
 
@@ -117,38 +117,9 @@ function BorrowModal({ data, closeModal }: Props) {
     setQty(e.target.value);
   }
 
-  async function calculateRate() {
-    if (qty <= '0') return;
-
-    const smartPoolSupplied = await fixedLenderWithSigner?.smartPoolBalance();
-
-    const maturityPoolStatus = await fixedLenderWithSigner?.maturityPools(
-      parseInt(date?.value ?? maturity)
-    );
-
-    const currentTimestamp = Math.floor(Date.now() / 1000);
-
-    //Borrow
-    try {
-      const borrowRate = await interestRateModelContract?.getRateToBorrow(
-        parseInt(date?.value ?? maturity),
-        currentTimestamp,
-        ethers.utils.parseUnits(qty!),
-        maturityPoolStatus.borrowed,
-        maturityPoolStatus.supplied,
-        smartPoolSupplied
-      );
-
-      const formattedBorrowRate = borrowRate && ethers.utils.formatEther(borrowRate);
-
-      setRate(formattedBorrowRate);
-    } catch (error: any) {
-      console.log(error);
-    }
-  }
-
   async function borrow() {
     setLoading(true);
+
     try {
       const maxAmount = parseFloat(qty!) * (1 + parseFloat(slippage) / 100);
 
@@ -175,10 +146,12 @@ function BorrowModal({ data, closeModal }: Props) {
   async function estimateGas() {
     const gasPriceInGwei = await fixedLenderWithSigner?.provider.getGasPrice();
 
+    const maxAmount = 1 * (1 + parseFloat(slippage) / 100);
+
     const estimatedGasCost = await fixedLenderWithSigner?.estimateGas.borrowAtMaturity(
       parseInt(date?.value ?? maturity),
       ethers.utils.parseUnits('1'),
-      ethers.utils.parseUnits('2'),
+      ethers.utils.parseUnits(`${maxAmount}`),
       walletAddress,
       walletAddress
     );
@@ -190,6 +163,23 @@ function BorrowModal({ data, closeModal }: Props) {
 
       setGas({ eth: eth.toFixed(8), gwei: parseFloat(gwei).toFixed(1) });
     }
+  }
+
+  async function getFeeAtMaturity() {
+    if (!qty) return;
+
+    const feeAtMaturity = await previewerContract?.previewFeeAtMaturity(
+      fixedLenderWithSigner!.address,
+      parseInt(date?.value ?? maturity),
+      ethers.utils.parseUnits(qty)
+    );
+
+    const fixedRate =
+      (parseFloat(ethers.utils.formatUnits(feeAtMaturity, decimals[symbol! as keyof Decimals])) *
+        100) /
+      parseFloat(qty);
+
+    setFixedRate(fixedRate.toFixed(2));
   }
 
   async function getFixedLenderContract() {
@@ -224,7 +214,7 @@ function BorrowModal({ data, closeModal }: Props) {
               />
               <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} />
               {gas && <ModalTxCost gas={gas} />}
-              <ModalRow text={translations[lang].interestRate} value={rate} line />
+              <ModalRow text={translations[lang].interestRate} value={`${fixedRate}%`} line />
               <ModalRowEditable
                 text={translations[lang].maximumBorrowRate}
                 value={slippage}

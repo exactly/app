@@ -18,7 +18,6 @@ import useModal from 'hooks/useModal';
 
 import { AuditorProvider } from 'contexts/AuditorContext';
 import { FixedLenderProvider } from 'contexts/FixedLenderContext';
-import { InterestRateModelProvider } from 'contexts/InterestRateModelContext';
 import { PreviewerProvider } from 'contexts/PreviewerContext';
 
 import { Market } from 'types/Market';
@@ -29,7 +28,6 @@ import dictionary from 'dictionary/en.json';
 import { getContractData } from 'utils/contracts';
 
 //Contracts
-import InterestRateModel from 'protocol/deployments/kovan/InterestRateModel.json';
 import Auditor from 'protocol/deployments/kovan/Auditor.json';
 import FixedLenderDAI from 'protocol/deployments/kovan/FixedLenderDAI.json';
 import FixedLenderWETH from 'protocol/deployments/kovan/FixedLenderWETH.json';
@@ -107,32 +105,30 @@ const Pools: NextPage<Props> = () => {
     <PreviewerProvider value={Previewer}>
       <AuditorProvider value={Auditor}>
         <FixedLenderProvider value={[FixedLenderDAI, FixedLenderWETH]}>
-          <InterestRateModelProvider value={InterestRateModel}>
-            {modal && modalContent?.type == 'deposit' && (
-              <DepositModalMP data={modalContent} closeModal={handleModal} />
-            )}
+          {modal && modalContent?.type == 'deposit' && (
+            <DepositModalMP data={modalContent} closeModal={handleModal} />
+          )}
 
-            {modal && modalContent?.type == 'smartDeposit' && (
-              <DepositModalSP data={modalContent} closeModal={handleModal} />
-            )}
+          {modal && modalContent?.type == 'smartDeposit' && (
+            <DepositModalSP data={modalContent} closeModal={handleModal} />
+          )}
 
-            {modal && modalContent?.type == 'borrow' && (
-              <BorrowModal data={modalContent} closeModal={handleModal} />
-            )}
+          {modal && modalContent?.type == 'borrow' && (
+            <BorrowModal data={modalContent} closeModal={handleModal} />
+          )}
 
-            <MobileNavbar />
-            <Navbar />
-            <CurrentNetwork />
+          <MobileNavbar />
+          <Navbar />
+          <CurrentNetwork />
 
-            <div style={{ marginTop: '180px' }}>
-              <SmartPoolList markets={markets} showModal={showModal} />
-            </div>
+          <div style={{ marginTop: '180px' }}>
+            <SmartPoolList markets={markets} showModal={showModal} />
+          </div>
 
-            <MaturitySelector title={dictionary.maturityPools} />
+          <MaturitySelector title={dictionary.maturityPools} />
 
-            <MarketsList markets={markets} showModal={showModal} />
-            <Footer />
-          </InterestRateModelProvider>
+          <MarketsList markets={markets} showModal={showModal} />
+          <Footer />
         </FixedLenderProvider>
       </AuditorProvider>
     </PreviewerProvider>

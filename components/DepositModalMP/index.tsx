@@ -190,7 +190,7 @@ function DepositModalMP({ data, closeModal }: Props) {
   async function estimateGas() {
     const gasPriceInGwei = await fixedLenderWithSigner?.provider.getGasPrice();
 
-    const minAmount = parseFloat('1') * (1 - parseFloat(slippage) / 100);
+    const minAmount = 1 * (1 - parseFloat(slippage) / 100);
 
     const estimatedGasCost = await fixedLenderWithSigner?.estimateGas.depositAtMaturity(
       parseInt(date?.value ?? maturity),
