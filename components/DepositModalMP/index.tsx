@@ -266,7 +266,7 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
                 asset={symbol}
                 amount={walletBalance}
                 editable={editable}
-                defaultAddress={address?.value ?? market}
+                defaultAddress={marketAddress}
               />
               <ModalClose closeModal={closeModal} />
               <ModalMaturityEditable
