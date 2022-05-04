@@ -174,7 +174,7 @@ const DashBoard: NextPage<Props> = () => {
         <FixedLenderProvider value={fixedLenders}>
           <InterestRateModelProvider value={InterestRateModel}>
             {modal && modalContent?.type == 'borrow' && (
-              <BorrowModal data={modalContent} closeModal={handleModal} />
+              <BorrowModal data={modalContent} closeModal={handleModal} editable />
             )}
 
             {modal && modalContent?.type == 'repay' && (
@@ -182,7 +182,7 @@ const DashBoard: NextPage<Props> = () => {
             )}
 
             {modal && modalContent?.type == 'deposit' && (
-              <DepositModalMP data={modalContent} closeModal={handleModal} />
+              <DepositModalMP data={modalContent} closeModal={handleModal} editable />
             )}
 
             {modal && modalContent?.type == 'withdraw' && (

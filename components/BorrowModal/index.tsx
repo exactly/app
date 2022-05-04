@@ -13,6 +13,7 @@ import ModalWrapper from 'components/common/modal/ModalWrapper';
 import ModalGif from 'components/common/modal/ModalGif';
 import Overlay from 'components/Overlay';
 import ModalRowEditable from 'components/common/modal/ModalRowEditable';
+import ModalMaturityEditable from 'components/common/modal/ModalMaturityEditable';
 
 import { Borrow } from 'types/Borrow';
 import { Deposit } from 'types/Deposit';
@@ -38,9 +39,10 @@ import keys from './translations.json';
 type Props = {
   data: Borrow | Deposit;
   closeModal: (props: any) => void;
+  editable?: boolean;
 };
 
-function BorrowModal({ data, closeModal }: Props) {
+function BorrowModal({ data, closeModal, editable }: Props) {
   const { maturity, symbol } = data;
 
   const { web3Provider, walletAddress } = useWeb3Context();
@@ -216,11 +218,16 @@ function BorrowModal({ data, closeModal }: Props) {
           {!tx && (
             <>
               <ModalTitle title={translations[lang].borrow} />
-              <ModalAsset asset={symbol!} amount={walletBalance} />
+              <ModalAsset asset={symbol!} amount={walletBalance} editable={editable} />
               <ModalClose closeModal={closeModal} />
-              <ModalRow
+              {/* <ModalRow
                 text={translations[lang].maturityPool}
                 value={date?.label ?? parseTimestamp(maturity)}
+              /> */}
+              <ModalMaturityEditable
+                text={translations[lang].maturityPool}
+                value={date?.label ?? parseTimestamp(maturity)}
+                editable={editable}
               />
               <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} />
               {gas && <ModalTxCost gas={gas} />}

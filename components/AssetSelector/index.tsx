@@ -22,9 +22,10 @@ type Props = {
   title?: Boolean;
   defaultAddress?: String;
   onChange?: (marketData: Market) => void;
+  editable?: boolean;
 };
 
-function AssetSelector({ title, defaultAddress, onChange }: Props) {
+function AssetSelector({ title, defaultAddress, onChange, editable }: Props) {
   const { address, setAddress } = useContext(AddressContext);
   const auditorData = useContext(AuditorContext);
 
