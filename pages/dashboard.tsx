@@ -93,48 +93,53 @@ const DashBoard: NextPage<Props> = () => {
 
   async function getData() {
     if (!walletAddress) return;
-    const subgraphUrl = getSubgraph();
-    //MP
-    const getMaturityPoolDeposits = await request(
-      subgraphUrl,
-      getMaturityPoolDepositsQuery(walletAddress)
-    );
+    try {
+      const subgraphUrl = getSubgraph();
 
-    // const getMaturityPoolWithdraws = await request(
-    //   subgraphUrl,
-    //   getMaturityPoolWithdrawsQuery(walletAddress)
-    // );
+      //MP
+      const getMaturityPoolDeposits = await request(
+        subgraphUrl,
+        getMaturityPoolDepositsQuery(walletAddress)
+      );
 
-    const getMaturityPoolBorrows = await request(
-      subgraphUrl,
-      getMaturityPoolBorrowsQuery(walletAddress)
-    );
+      // const getMaturityPoolWithdraws = await request(
+      //   subgraphUrl,
+      //   getMaturityPoolWithdrawsQuery(walletAddress)
+      // );
 
-    // const getMaturityPoolRepays = await request(
-    //  subgraphUrl,
-    //   getMaturityPoolRepaysQuery(walletAddress)
-    // );
+      const getMaturityPoolBorrows = await request(
+        subgraphUrl,
+        getMaturityPoolBorrowsQuery(walletAddress)
+      );
 
-    //SP
-    const getSmartPoolDeposits = await request(
-      subgraphUrl,
-      getSmartPoolDepositsQuery(walletAddress)
-    );
+      // const getMaturityPoolRepays = await request(
+      //  subgraphUrl,
+      //   getMaturityPoolRepaysQuery(walletAddress)
+      // );
 
-    const getSmartPoolWithdraws = await request(
-      subgraphUrl,
-      getSmartPoolWithdrawsQuery(walletAddress)
-    );
+      //SP
+      const getSmartPoolDeposits = await request(
+        subgraphUrl,
+        getSmartPoolDepositsQuery(walletAddress)
+      );
 
-    const smartPoolDeposits = formatSmartPoolDeposits(
-      getSmartPoolDeposits.deposits,
-      getSmartPoolWithdraws.withdraws
-    );
+      const getSmartPoolWithdraws = await request(
+        subgraphUrl,
+        getSmartPoolWithdrawsQuery(walletAddress)
+      );
 
-    setSmartPoolDeposits(smartPoolDeposits);
+      const smartPoolDeposits = formatSmartPoolDeposits(
+        getSmartPoolDeposits.deposits,
+        getSmartPoolWithdraws.withdraws
+      );
 
-    setMaturityPoolDeposits(getMaturityPoolDeposits.depositAtMaturities);
-    setMaturityPoolBorrows(getMaturityPoolBorrows.borrowAtMaturities);
+      setSmartPoolDeposits(smartPoolDeposits);
+
+      setMaturityPoolDeposits(getMaturityPoolDeposits.depositAtMaturities);
+      setMaturityPoolBorrows(getMaturityPoolBorrows.borrowAtMaturities);
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   function showModal(data: Deposit | Borrow, type: String) {
