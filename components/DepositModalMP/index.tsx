@@ -43,7 +43,7 @@ import keys from './translations.json';
 
 type Props = {
   data: Borrow | Deposit;
-  editable: boolean;
+  editable?: boolean;
   closeModal: (props: any) => void;
 };
 
