@@ -23,7 +23,7 @@ import { Gas } from 'types/Gas';
 import { Transaction } from 'types/Transaction';
 
 import { getContractData } from 'utils/contracts';
-import { getUnderlyingData } from 'utils/utils';
+import { getUnderlyingData, getSymbol } from 'utils/utils';
 import parseTimestamp from 'utils/parseTimestamp';
 
 import styles from './style.module.scss';
@@ -38,16 +38,16 @@ import keys from './translations.json';
 
 type Props = {
   data: Borrow | Deposit;
-  closeModal: (props: any) => void;
   editable?: boolean;
+  closeModal: (props: any) => void;
 };
 
-function BorrowModal({ data, closeModal, editable }: Props) {
-  const { maturity, symbol } = data;
+function BorrowModal({ data, editable, closeModal }: Props) {
+  const { maturity, market } = data;
 
   const { web3Provider, walletAddress } = useWeb3Context();
 
-  const { date } = useContext(AddressContext);
+  const { date, address } = useContext(AddressContext);
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
@@ -69,11 +69,13 @@ function BorrowModal({ data, closeModal, editable }: Props) {
     undefined
   );
 
-  let underlyingData: UnderlyingData | undefined = undefined;
+  const marketAddress = editable ? address?.value ?? market : market;
+  const symbol = getSymbol(marketAddress);
 
-  if (symbol) {
-    underlyingData = getUnderlyingData(process.env.NEXT_PUBLIC_NETWORK!, symbol.toLowerCase());
-  }
+  const underlyingData: UnderlyingData | undefined = getUnderlyingData(
+    process.env.NEXT_PUBLIC_NETWORK!,
+    symbol.toLowerCase()
+  );
 
   const underlyingContract = getContractData(underlyingData!.address, underlyingData!.abi);
 
@@ -83,11 +85,14 @@ function BorrowModal({ data, closeModal, editable }: Props) {
   );
 
   useEffect(() => {
-    if (fixedLenderData && !fixedLenderWithSigner) {
-      getFixedLenderContract();
+    getFixedLenderContract();
+  }, [address, market]);
+
+  useEffect(() => {
+    if (underlyingContract && fixedLenderWithSigner) {
       getWalletBalance();
     }
-  }, []);
+  }, [underlyingContract, fixedLenderWithSigner]);
 
   useEffect(() => {
     if (fixedLenderWithSigner && !gas) {
@@ -218,12 +223,13 @@ function BorrowModal({ data, closeModal, editable }: Props) {
           {!tx && (
             <>
               <ModalTitle title={translations[lang].borrow} />
-              <ModalAsset asset={symbol!} amount={walletBalance} editable={editable} />
+              <ModalAsset
+                asset={symbol!}
+                amount={walletBalance}
+                editable={editable}
+                defaultAddress={marketAddress}
+              />
               <ModalClose closeModal={closeModal} />
-              {/* <ModalRow
-                text={translations[lang].maturityPool}
-                value={date?.label ?? parseTimestamp(maturity)}
-              /> */}
               <ModalMaturityEditable
                 text={translations[lang].maturityPool}
                 value={date?.label ?? parseTimestamp(maturity)}

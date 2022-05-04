@@ -22,7 +22,6 @@ type Props = {
   title?: Boolean;
   defaultAddress?: String;
   onChange?: (marketData: Market) => void;
-  editable?: boolean;
 };
 
 function AssetSelector({ title, defaultAddress, onChange }: Props) {

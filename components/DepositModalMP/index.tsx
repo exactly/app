@@ -75,7 +75,8 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
     undefined
   );
 
-  const marketAddress = editable ? address?.value ?? market : market;
+  const marketAddress = editable ? address?.value ?? market ?? fixedLenderData[0].address : market;
+
   const symbol = getSymbol(marketAddress);
 
   const underlyingData: UnderlyingData | undefined = getUnderlyingData(
@@ -126,6 +127,8 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
 
     if (formattedAllowance > amount && !isNaN(amount) && !isNaN(formattedAllowance)) {
       setStep(2);
+    } else {
+      setStep(1);
     }
   }
 
