@@ -25,7 +25,7 @@ type Props = {
   editable?: boolean;
 };
 
-function AssetSelector({ title, defaultAddress, onChange, editable }: Props) {
+function AssetSelector({ title, defaultAddress, onChange }: Props) {
   const { address, setAddress } = useContext(AddressContext);
   const auditorData = useContext(AuditorContext);
 

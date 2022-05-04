@@ -11,9 +11,10 @@ type Props = {
   asset: string;
   amount?: string;
   editable?: boolean;
+  defaultAddress?: string;
 };
 
-function ModalAsset({ asset, amount, editable }: Props) {
+function ModalAsset({ asset, amount, editable, defaultAddress }: Props) {
   const parsedSymbol = parseSymbol(asset);
 
   return (
@@ -30,7 +31,7 @@ function ModalAsset({ asset, amount, editable }: Props) {
             <p className={styles.assetName}>{parsedSymbol}</p>
           </>
         )}
-        {editable && <AssetSelector editable={editable} />}
+        {editable && <AssetSelector defaultAddress={defaultAddress} />}
       </div>
       {amount && (
         <div className={styles.assetPriceContainer}>
