@@ -75,11 +75,13 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
     undefined
   );
 
-  let underlyingData: UnderlyingData | undefined = undefined;
   const marketAddress = editable ? address?.value ?? market : market;
   const symbol = getSymbol(marketAddress);
 
-  underlyingData = getUnderlyingData(process.env.NEXT_PUBLIC_NETWORK!, symbol.toLowerCase());
+  const underlyingData: UnderlyingData | undefined = getUnderlyingData(
+    process.env.NEXT_PUBLIC_NETWORK!,
+    symbol.toLowerCase()
+  );
 
   const underlyingContract = getContractData(
     underlyingData!.address,
