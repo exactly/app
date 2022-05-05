@@ -30,11 +30,6 @@ function ModalStepper({ currentStep, totalSteps }: Props) {
         })}
       </div>
       {currentStep == 1 && <p className={styles.text}>{translations[lang].approval}</p>}
-      {currentStep == 2 && (
-        <p className={styles.text}>
-          {translations[lang].deposit} <strong>{translations[lang].collateral}</strong>
-        </p>
-      )}
     </>
   );
 }

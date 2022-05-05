@@ -8,7 +8,6 @@
   margin-top: calc(var(--navbarHeight) * 1.5);
 
   .container {
-    width: calc(50% - var(--u3));
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -17,6 +16,7 @@
     padding: var(--u3);
     border-radius: var(--u);
     position: relative;
+    margin: 0 auto;
 
     .box {
       display: flex;
@@ -122,5 +122,34 @@
     background: var(--gray-100);
     width: 1px;
     margin: var(--u2);
+  }
+}
+
+@media (max-width: 769px) {
+  .section {
+    .container {
+      width: 90%;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      gap: var(--u3);
+
+      .box {
+        align-items: center;
+        justify-content: center;
+      }
+
+      .chartContainer {
+        align-items: center;
+        justify-content: center;
+      }
+    }
+
+    .line {
+      display: none;
+    }
   }
 }

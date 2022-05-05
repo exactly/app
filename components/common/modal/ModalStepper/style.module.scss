@@ -43,3 +43,12 @@
   margin-top: 0;
   margin-bottom: var(--u4);
 }
+
+@media (max-width: 769px) {
+  .formContainer {
+    width: 90%;
+    height: 90%;
+    left: 5%;
+    top: 5%;
+  }
+}
