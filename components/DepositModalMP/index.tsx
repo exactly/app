@@ -14,6 +14,7 @@ import ModalGif from 'components/common/modal/ModalGif';
 import ModalStepper from 'components/common/modal/ModalStepper';
 import Overlay from 'components/Overlay';
 import ModalRowEditable from 'components/common/modal/ModalRowEditable';
+import ModalMaturityEditable from 'components/common/modal/ModalMaturityEditable';
 
 import { Borrow } from 'types/Borrow';
 import { Deposit } from 'types/Deposit';
@@ -24,7 +25,7 @@ import { Transaction } from 'types/Transaction';
 import { Decimals } from 'types/Decimals';
 
 import { getContractData } from 'utils/contracts';
-import { getUnderlyingData } from 'utils/utils';
+import { getSymbol, getUnderlyingData } from 'utils/utils';
 import parseTimestamp from 'utils/parseTimestamp';
 
 import numbers from 'config/numbers.json';
@@ -42,14 +43,15 @@ import keys from './translations.json';
 
 type Props = {
   data: Borrow | Deposit;
+  editable?: boolean;
   closeModal: (props: any) => void;
 };
 
-function DepositModalMP({ data, closeModal }: Props) {
-  const { maturity, market, symbol } = data;
+function DepositModalMP({ data, editable, closeModal }: Props) {
+  const { maturity, market } = data;
   const { web3Provider, walletAddress } = useWeb3Context();
 
-  const { date } = useContext(AddressContext);
+  const { date, address } = useContext(AddressContext);
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
@@ -73,13 +75,14 @@ function DepositModalMP({ data, closeModal }: Props) {
     undefined
   );
 
-  let underlyingData: UnderlyingData | undefined = undefined;
+  const marketAddress = editable ? address?.value ?? market ?? fixedLenderData[0].address : market;
 
-  if (symbol) {
-    underlyingData = getUnderlyingData(process.env.NEXT_PUBLIC_NETWORK!, symbol.toLowerCase());
-  } else {
-    underlyingData = getUnderlyingData(process.env.NEXT_PUBLIC_NETWORK!, 'DAI'.toLowerCase());
-  }
+  const symbol = getSymbol(marketAddress);
+
+  const underlyingData: UnderlyingData | undefined = getUnderlyingData(
+    process.env.NEXT_PUBLIC_NETWORK!,
+    symbol.toLowerCase()
+  );
 
   const underlyingContract = getContractData(
     underlyingData!.address,
@@ -91,8 +94,13 @@ function DepositModalMP({ data, closeModal }: Props) {
 
   useEffect(() => {
     getFixedLenderContract();
-    getWalletBalance();
-  }, []);
+  }, [address, market]);
+
+  useEffect(() => {
+    if (underlyingContract && fixedLenderWithSigner) {
+      getWalletBalance();
+    }
+  }, [underlyingContract, fixedLenderWithSigner]);
 
   useEffect(() => {
     if (fixedLenderWithSigner && !gas) {
@@ -102,17 +110,16 @@ function DepositModalMP({ data, closeModal }: Props) {
 
   useEffect(() => {
     checkAllowance();
-  }, [market, walletAddress, underlyingContract]);
+  }, [address, market, walletAddress, underlyingContract]);
 
   useEffect(() => {
-    getYieldAtMaturity();
-  }, [fixedLenderWithSigner, qty, maturity, date]);
+    if (underlyingContract) {
+      getYieldAtMaturity();
+    }
+  }, [underlyingContract, qty, maturity, date, market]);
 
   async function checkAllowance() {
-    const allowance = await underlyingContract?.allowance(
-      walletAddress,
-      market ?? fixedLenderData[0].address
-    );
+    const allowance = await underlyingContract?.allowance(walletAddress, marketAddress);
 
     const formattedAllowance = allowance && parseFloat(ethers.utils.formatEther(allowance));
 
@@ -120,13 +127,15 @@ function DepositModalMP({ data, closeModal }: Props) {
 
     if (formattedAllowance > amount && !isNaN(amount) && !isNaN(formattedAllowance)) {
       setStep(2);
+    } else {
+      setStep(1);
     }
   }
 
   async function approve() {
     try {
       const approval = await underlyingContract?.approve(
-        market ?? fixedLenderData[0].address,
+        marketAddress,
         ethers.utils.parseUnits(numbers.approvalAmount!.toString())
       );
 
@@ -210,6 +219,7 @@ function DepositModalMP({ data, closeModal }: Props) {
 
   function handleClickAction() {
     setLoading(true);
+
     if (step === 1 && !pending) {
       return approve();
     } else if (!pending) {
@@ -221,7 +231,7 @@ function DepositModalMP({ data, closeModal }: Props) {
     if (!qty) return;
 
     const yieldAtMaturity = await previewerContract?.previewYieldAtMaturity(
-      fixedLenderWithSigner!.address,
+      marketAddress,
       parseInt(date?.value ?? maturity),
       ethers.utils.parseUnits(qty)
     );
@@ -236,10 +246,7 @@ function DepositModalMP({ data, closeModal }: Props) {
 
   async function getFixedLenderContract() {
     const filteredFixedLender = fixedLenderData.find((contract) => {
-      const args: Array<string> | undefined = contract?.args;
-      const contractSymbol: string | undefined = args && args[1];
-
-      return contractSymbol == symbol;
+      return contract.address == marketAddress;
     });
 
     const fixedLender = await getContractData(
@@ -258,11 +265,17 @@ function DepositModalMP({ data, closeModal }: Props) {
           {!tx && (
             <>
               <ModalTitle title={translations[lang].deposit} />
-              <ModalAsset asset={symbol!} amount={walletBalance} />
+              <ModalAsset
+                asset={symbol}
+                amount={walletBalance}
+                editable={editable}
+                defaultAddress={marketAddress}
+              />
               <ModalClose closeModal={closeModal} />
-              <ModalRow
+              <ModalMaturityEditable
                 text={translations[lang].maturityPool}
                 value={date?.label ?? parseTimestamp(maturity)}
+                editable={editable}
               />
               <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} />
               {gas && <ModalTxCost gas={gas} />}

@@ -15,6 +15,7 @@ type Props = {
   style?: CSSProperties;
   disabled?: boolean;
   options: Array<Option>;
+  editable?: boolean;
 };
 
 function Select({
@@ -24,11 +25,16 @@ function Select({
   disabled,
   options,
   placeholder,
-  value
+  value,
+  editable
 }: Props) {
   function handleChange(option: Option) {
     onChange(option);
   }
+  const containerClass = editable ? 'containerEditable' : 'container';
+  const selectClass = editable ? 'selectEditable' : 'select';
+  const arrowClass = editable ? 'arrowEditable' : 'arrow';
+  const menuClass = editable ? 'menuEditable' : 'menu';
 
   return (
     <div onClick={onClick}>
@@ -38,11 +44,11 @@ function Select({
         disabled={disabled}
         value={value}
         placeholder={placeholder}
-        className={styles.container}
+        className={styles[containerClass]}
         placeholderClassName={styles.placeholder}
-        controlClassName={`${styles.select} ${className}`}
-        menuClassName={styles.menu}
-        arrowClassName={styles.arrow}
+        controlClassName={`${styles[selectClass]} ${className}`}
+        menuClassName={styles[menuClass]}
+        arrowClassName={styles[arrowClass]}
         arrowClosed={<span className={styles.arrowClosed} />}
       />
     </div>

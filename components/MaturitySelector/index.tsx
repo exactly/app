@@ -18,9 +18,10 @@ import { getContractData } from 'utils/contracts';
 type Props = {
   title?: string;
   address?: string;
+  editable?: boolean;
 };
 
-function MaturitySelector({ title, address }: Props) {
+function MaturitySelector({ title, address, editable }: Props) {
   const { date, setDate } = useContext(AddressContext);
   const fixedLender = useContext(FixedLenderContext);
 
@@ -73,8 +74,10 @@ function MaturitySelector({ title, address }: Props) {
     setDate(option);
   }
 
+  const sectionContainerClass = editable ? 'sectionContainerEditable' : 'sectionContainer';
+
   return (
-    <section className={style.sectionContainer}>
+    <section className={style[sectionContainerClass]}>
       {title && (
         <div className={style.titleContainer}>
           <p className={style.title}>{title}</p>
@@ -86,6 +89,7 @@ function MaturitySelector({ title, address }: Props) {
         onChange={handleChange}
         placeholder={date?.value ?? dates[0]?.label}
         value={date?.label ?? dates[0]?.value}
+        editable={editable}
       />
     </section>
   );

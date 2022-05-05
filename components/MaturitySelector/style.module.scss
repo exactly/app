@@ -21,6 +21,12 @@
   }
 }
 
+.sectionContainerEditable {
+  @extend .sectionContainer;
+  justify-content: right;
+  width: 65%;
+}
+
 @media (max-width: 769px) {
   .container {
     width: 90%;

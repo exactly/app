@@ -82,8 +82,8 @@ function MaturityPoolDashboard({ deposits, borrows, showModal, tab }: Props) {
             onClick={() =>
               showModal(
                 tab.value == 'borrow'
-                  ? { ...{ ...borrows[0], maturity: defaultMaturity! }, symbol: 'DAI' }
-                  : { ...{ ...deposits[0], maturity: defaultMaturity! }, symbol: 'DAI' },
+                  ? { ...{ ...borrows[0], maturity: defaultMaturity! } }
+                  : { ...{ ...deposits[0], maturity: defaultMaturity! } },
                 tab.value
               )
             }

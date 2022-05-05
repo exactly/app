@@ -13,6 +13,7 @@ import ModalWrapper from 'components/common/modal/ModalWrapper';
 import ModalGif from 'components/common/modal/ModalGif';
 import Overlay from 'components/Overlay';
 import ModalRowEditable from 'components/common/modal/ModalRowEditable';
+import ModalMaturityEditable from 'components/common/modal/ModalMaturityEditable';
 
 import { Borrow } from 'types/Borrow';
 import { Deposit } from 'types/Deposit';
@@ -23,7 +24,7 @@ import { Transaction } from 'types/Transaction';
 import { Decimals } from 'types/Decimals';
 
 import { getContractData } from 'utils/contracts';
-import { getUnderlyingData } from 'utils/utils';
+import { getUnderlyingData, getSymbol } from 'utils/utils';
 import parseTimestamp from 'utils/parseTimestamp';
 
 import styles from './style.module.scss';
@@ -40,15 +41,16 @@ import keys from './translations.json';
 
 type Props = {
   data: Borrow | Deposit;
+  editable?: boolean;
   closeModal: (props: any) => void;
 };
 
-function BorrowModal({ data, closeModal }: Props) {
-  const { maturity, symbol } = data;
+function BorrowModal({ data, editable, closeModal }: Props) {
+  const { maturity, market } = data;
 
   const { web3Provider, walletAddress } = useWeb3Context();
 
-  const { date } = useContext(AddressContext);
+  const { date, address } = useContext(AddressContext);
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
@@ -70,22 +72,27 @@ function BorrowModal({ data, closeModal }: Props) {
     undefined
   );
 
-  let underlyingData: UnderlyingData | undefined = undefined;
+  const marketAddress = editable ? address?.value ?? market : market;
+  const symbol = getSymbol(marketAddress);
 
-  if (symbol) {
-    underlyingData = getUnderlyingData(process.env.NEXT_PUBLIC_NETWORK!, symbol.toLowerCase());
-  }
+  const underlyingData: UnderlyingData | undefined = getUnderlyingData(
+    process.env.NEXT_PUBLIC_NETWORK!,
+    symbol.toLowerCase()
+  );
 
   const underlyingContract = getContractData(underlyingData!.address, underlyingData!.abi);
 
   const previewerContract = getContractData(previewerData.address!, previewerData.abi!);
 
   useEffect(() => {
-    if (fixedLenderData && !fixedLenderWithSigner) {
-      getFixedLenderContract();
+    getFixedLenderContract();
+  }, [address, market]);
+
+  useEffect(() => {
+    if (underlyingContract && fixedLenderWithSigner) {
       getWalletBalance();
     }
-  }, []);
+  }, [underlyingContract, fixedLenderWithSigner]);
 
   useEffect(() => {
     if (fixedLenderWithSigner && !gas) {
@@ -206,11 +213,17 @@ function BorrowModal({ data, closeModal }: Props) {
           {!tx && (
             <>
               <ModalTitle title={translations[lang].borrow} />
-              <ModalAsset asset={symbol!} amount={walletBalance} />
+              <ModalAsset
+                asset={symbol!}
+                amount={walletBalance}
+                editable={editable}
+                defaultAddress={marketAddress}
+              />
               <ModalClose closeModal={closeModal} />
-              <ModalRow
+              <ModalMaturityEditable
                 text={translations[lang].maturityPool}
                 value={date?.label ?? parseTimestamp(maturity)}
+                editable={editable}
               />
               <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} />
               {gas && <ModalTxCost gas={gas} />}
