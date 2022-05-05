@@ -5,21 +5,22 @@ import WalletConnectProvider from '@walletconnect/web3-provider';
 
 import { Web3ProviderState, Web3Action, web3InitialState, web3Reducer } from 'reducers/web3';
 
-const providerOptions = {
-  walletconnect: {
-    package: WalletConnectProvider,
-    options: {
-      infuraId: `${process.env.NEXT_INFURA_ID}`
-    }
-  }
-};
-
 let web3Modal: Web3Modal | null;
+
 if (typeof window !== 'undefined') {
   web3Modal = new Web3Modal({
-    network: `${process.env.NEXT_PUBLIC_NETWORK}`,
     cacheProvider: true,
-    providerOptions
+    providerOptions: {
+      walletconnect: {
+        package: WalletConnectProvider,
+        options: {
+          rpc: {
+            1: `${process.env.NEXT_MAINNET_URL}`,
+            42: `${process.env.NEXT_KOVAN_URL}`
+          }
+        }
+      }
+    }
   });
 }
 
