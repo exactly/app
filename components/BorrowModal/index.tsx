@@ -22,10 +22,12 @@ import { UnderlyingData } from 'types/Underlying';
 import { Gas } from 'types/Gas';
 import { Transaction } from 'types/Transaction';
 import { Decimals } from 'types/Decimals';
+import { Dictionary } from 'types/Dictionary';
 
 import { getContractData } from 'utils/contracts';
 import { getUnderlyingData, getSymbol } from 'utils/utils';
 import parseTimestamp from 'utils/parseTimestamp';
+import parseHealthFactor from 'utils/parseHealthFactor';
 
 import styles from './style.module.scss';
 
@@ -34,6 +36,7 @@ import { useWeb3Context } from 'contexts/Web3Context';
 import FixedLenderContext from 'contexts/FixedLenderContext';
 import { AddressContext } from 'contexts/AddressContext';
 import PreviewerContext from 'contexts/PreviewerContext';
+import AuditorContext from 'contexts/AuditorContext';
 
 import decimals from 'config/decimals.json';
 
@@ -57,6 +60,7 @@ function BorrowModal({ data, editable, closeModal }: Props) {
 
   const fixedLenderData = useContext(FixedLenderContext);
   const previewerData = useContext(PreviewerContext);
+  const auditorData = useContext(AuditorContext);
 
   const [qty, setQty] = useState<string>('');
   const [walletBalance, setWalletBalance] = useState<string | undefined>(undefined);
@@ -67,6 +71,7 @@ function BorrowModal({ data, editable, closeModal }: Props) {
   const [slippage, setSlippage] = useState<string>('0.5');
   const [editSlippage, setEditSlippage] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
+  const [healthFactor, setHealthFactor] = useState<Dictionary<number>>();
 
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
     undefined
@@ -106,6 +111,11 @@ function BorrowModal({ data, editable, closeModal }: Props) {
     }
   }, [qty, date, maturity]);
 
+  useEffect(() => {
+    if (!walletAddress) return;
+    getHealthFactor();
+  }, [walletAddress]);
+
   async function getWalletBalance() {
     const walletBalance = await underlyingContract?.balanceOf(walletAddress);
 
@@ -113,6 +123,22 @@ function BorrowModal({ data, editable, closeModal }: Props) {
 
     if (formattedBalance) {
       setWalletBalance(formattedBalance);
+    }
+  }
+
+  async function getHealthFactor() {
+    try {
+      const accountLiquidity = await previewerContract?.accountLiquidity(
+        auditorData.address,
+        walletAddress
+      );
+
+      const collateral = parseFloat(ethers.utils.formatEther(accountLiquidity[0]));
+      const debt = parseFloat(ethers.utils.formatEther(accountLiquidity[1]));
+
+      setHealthFactor({ debt, collateral });
+    } catch (e) {
+      console.log(e);
     }
   }
 
@@ -173,7 +199,7 @@ function BorrowModal({ data, editable, closeModal }: Props) {
   }
 
   async function getFeeAtMaturity() {
-    if (!qty) return;
+    if (!qty || qty === '0') return;
 
     const feeAtMaturity = await previewerContract?.previewBorrowAtMaturity(
       fixedLenderWithSigner!.address,
@@ -242,8 +268,18 @@ function BorrowModal({ data, editable, closeModal }: Props) {
                 }}
                 line
               />
-              <ModalRow text={translations[lang].maturityDebt} value={'X %'} line />
-              <ModalRow text={translations[lang].healthFactor} values={['1,1', '1,8']} />
+              {healthFactor && (
+                <ModalRow
+                  text={translations[lang].healthFactor}
+                  values={[
+                    parseHealthFactor(healthFactor.debt, healthFactor.collateral),
+                    parseHealthFactor(
+                      healthFactor.debt + parseFloat(qty || '0'),
+                      healthFactor.collateral
+                    )
+                  ]}
+                />
+              )}
               <div className={styles.buttonContainer}>
                 <Button
                   text={translations[lang].borrow}

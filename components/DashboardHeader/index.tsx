@@ -18,6 +18,7 @@ import styles from './style.module.scss';
 import keys from './translations.json';
 
 import { getContractData } from 'utils/contracts';
+import parseHealthFactor from 'utils/parseHealthFactor';
 
 function DashboardHeader() {
   const { walletAddress } = useWeb3Context();
@@ -239,7 +240,7 @@ function DashboardHeader() {
             data={walletAddress && healthFactorData ? healthFactorData : notConnected}
             insideValue={
               walletAddress && healthFactor
-                ? `${((1 - healthFactor.debt / healthFactor.collateral) * 100).toFixed(2)} %`
+                ? parseHealthFactor(healthFactor.debt, healthFactor.collateral)
                 : ''
             }
           />
