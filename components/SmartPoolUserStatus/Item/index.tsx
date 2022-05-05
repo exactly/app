@@ -7,17 +7,21 @@ import Loading from 'components/common/Loading';
 import AuditorContext from 'contexts/AuditorContext';
 import FixedLenderContext from 'contexts/FixedLenderContext';
 import LangContext from 'contexts/LangContext';
+import { useWeb3Context } from 'contexts/Web3Context';
 
 import { LangKeys } from 'types/Lang';
 import { Deposit } from 'types/Deposit';
+import { Decimals } from 'types/Decimals';
 
 import styles from './style.module.scss';
 
 import keys from './translations.json';
 
+import decimals from 'config/decimals.json';
+
 import { getUnderlyingData } from 'utils/utils';
 import { getContractData } from 'utils/contracts';
-import { useWeb3Context } from 'contexts/Web3Context';
+import formatNumber from 'utils/formatNumber';
 
 type Props = {
   symbol: string;
@@ -97,11 +101,20 @@ function Item({ symbol, amount, walletAddress, showModal, deposit }: Props) {
   return (
     <div className={styles.container}>
       <div className={styles.symbol}>
-        <img src={`/img/assets/${symbol.toLowerCase()}.png`} className={styles.assetImage} />
+        <img
+          src={`/img/assets/${symbol.toLowerCase()}.png`}
+          alt={symbol}
+          className={styles.assetImage}
+        />
         <span className={styles.primary}>{symbol}</span>
       </div>
-      <span className={styles.value}>{walletBalance}</span>
-      <span className={styles.value}>{ethers.utils.formatUnits(amount, 18)}</span>
+      <span className={styles.value}>{formatNumber(walletBalance!, symbol)}</span>
+      <span className={styles.value}>
+        {formatNumber(
+          ethers.utils.formatUnits(amount, decimals[symbol! as keyof Decimals]),
+          symbol
+        )}
+      </span>
       <span className={styles.value}>{0}</span>
 
       <span className={styles.value}>

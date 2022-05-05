@@ -18,7 +18,7 @@ import useModal from 'hooks/useModal';
 
 import { AuditorProvider } from 'contexts/AuditorContext';
 import { FixedLenderProvider } from 'contexts/FixedLenderContext';
-import { InterestRateModelProvider } from 'contexts/InterestRateModelContext';
+import { PreviewerProvider } from 'contexts/PreviewerContext';
 
 import { Market } from 'types/Market';
 import { UnformattedMarket } from 'types/UnformattedMarket';
@@ -28,10 +28,10 @@ import dictionary from 'dictionary/en.json';
 import { getContractData } from 'utils/contracts';
 
 //Contracts
-import InterestRateModel from 'protocol/deployments/kovan/InterestRateModel.json';
 import Auditor from 'protocol/deployments/kovan/Auditor.json';
 import FixedLenderDAI from 'protocol/deployments/kovan/FixedLenderDAI.json';
 import FixedLenderWETH from 'protocol/deployments/kovan/FixedLenderWETH.json';
+import Previewer from 'protocol/deployments/kovan/Previewer.json';
 
 interface Props {}
 
@@ -102,9 +102,9 @@ const Pools: NextPage<Props> = () => {
   }
 
   return (
-    <AuditorProvider value={Auditor}>
-      <FixedLenderProvider value={[FixedLenderDAI, FixedLenderWETH]}>
-        <InterestRateModelProvider value={InterestRateModel}>
+    <PreviewerProvider value={Previewer}>
+      <AuditorProvider value={Auditor}>
+        <FixedLenderProvider value={[FixedLenderDAI, FixedLenderWETH]}>
           {modal && modalContent?.type == 'deposit' && (
             <DepositModalMP data={modalContent} closeModal={handleModal} />
           )}
@@ -129,9 +129,9 @@ const Pools: NextPage<Props> = () => {
 
           <MarketsList markets={markets} showModal={showModal} />
           <Footer />
-        </InterestRateModelProvider>
-      </FixedLenderProvider>
-    </AuditorProvider>
+        </FixedLenderProvider>
+      </AuditorProvider>
+    </PreviewerProvider>
   );
 };
 

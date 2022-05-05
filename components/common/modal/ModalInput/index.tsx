@@ -25,9 +25,9 @@ function ModalInput({ value, onChange, name, disabled, onMax }: Props) {
         className={styles.input}
         onKeyDown={(e) => blockedCharacters.includes(e.key) && e.preventDefault()}
         step="any"
+        autoFocus
       />
-      <p className={styles.translatedValue}>$ {value ?? 0}</p>
-
+      <p className={styles.translatedValue}>$ {value == '' ? 0 : value}</p>
       {onMax && (
         <p className={styles.max} onClick={onMax}>
           MAX

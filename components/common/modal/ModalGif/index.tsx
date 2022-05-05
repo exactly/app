@@ -46,7 +46,7 @@ function ModalGif({ tx }: Props) {
   return (
     <div className={styles.container}>
       <div className={styles.mediaContainer}>
-        <img src="/img/icons/circles.svg" className={styles.img} />
+        <img src="/img/icons/circles.svg" alt="circles" className={styles.img} />
         <video
           ref={videoRef}
           autoPlay

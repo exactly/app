@@ -1,17 +1,20 @@
-import styles from './style.module.scss'
+import styles from './style.module.scss';
 
 interface Props {
-  title: string,
-  value: string
+  title: string;
+  value: number | string;
+  symbol?: string;
 }
 
-function AssetInfo({ title, value }: Props) {
+function AssetInfo({ title, value, symbol }: Props) {
   return (
     <div className={styles.assetInfoContainer}>
       <div className={styles.titleContainer}>{title}</div>
-      <span className={styles.value}>{value}</span>
+      <span className={styles.value}>
+        {value} {symbol}
+      </span>
     </div>
-  )
+  );
 }
 
 export default AssetInfo;

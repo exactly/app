@@ -1,6 +1,7 @@
 import { useContext } from 'react';
 
 import LangContext from 'contexts/LangContext';
+import { useWeb3Context } from 'contexts/Web3Context';
 
 import { LangKeys } from 'types/Lang';
 
@@ -11,13 +12,24 @@ import keys from './translations.json';
 import Button from 'components/common/Button';
 import Tooltip from 'components/Tooltip';
 
+import parseSymbol from 'utils/parseSymbol';
+
 interface Props {
-  showModal: (type: string) => void;
+  showModal: (type: string, maturity: string | undefined) => void;
+  symbol: string;
 }
 
-function SmartPoolInfo({ showModal }: Props) {
+function SmartPoolInfo({ showModal, symbol }: Props) {
+  const { walletAddress, connect } = useWeb3Context();
+
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
+
+  function handleClick() {
+    if (!walletAddress && connect) return connect();
+
+    showModal('smartDeposit', undefined);
+  }
 
   return (
     <div className={styles.maturityContainer}>
@@ -28,14 +40,18 @@ function SmartPoolInfo({ showModal }: Props) {
       <ul className={styles.table}>
         <li className={styles.header}>
           <div className={styles.assetInfo}>
-            <img className={styles.assetImage} src="/img/assets/dai.png" alt="dai" />
-            <p className={styles.asset}>DAI</p>
+            <img
+              className={styles.assetImage}
+              src={`/img/assets/${symbol.toLowerCase()}.png`}
+              alt={symbol}
+            />
+            <p className={styles.asset}>{parseSymbol(symbol)}</p>
           </div>
           <div className={styles.buttonContainer}>
             <Button
               text={translations[lang].deposit}
               className="tertiary"
-              onClick={() => showModal('smartDeposit')}
+              onClick={() => handleClick()}
             />
           </div>
         </li>

@@ -2,7 +2,7 @@
   "en": {
     "withdraw": "Withdraw",
     "maturityPool": "Maturity Pool",
-    "exactlyBalance": "Exactly Balance",
+    "exactlyBalance": "Deposited Amount",
     "interestRate": "Interest Rate",
     "interestRateSlippage": "Interest Rate Slippage"
   },

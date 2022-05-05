@@ -11,7 +11,7 @@ function Circle({ title, description, icon, type }: Props) {
   return (
     <div className={styles.circleContainer}>
       <div className={`${styles.circle} ${type ? styles[type] : styles.primary}`}>
-        <img src={icon} />
+        <img src={icon} alt={title} />
       </div>
       <h4 className={styles.title}>{title}</h4>
       <p className={styles.description}>{description}</p>

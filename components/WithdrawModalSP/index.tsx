@@ -9,6 +9,7 @@ import ModalRow from 'components/common/modal/ModalRow';
 import ModalTitle from 'components/common/modal/ModalTitle';
 import ModalTxCost from 'components/common/modal/ModalTxCost';
 import ModalMinimized from 'components/common/modal/ModalMinimized';
+import ModalWrapper from 'components/common/modal/ModalWrapper';
 import ModalGif from 'components/common/modal/ModalGif';
 import Overlay from 'components/Overlay';
 
@@ -17,6 +18,7 @@ import { Deposit } from 'types/Deposit';
 import { LangKeys } from 'types/Lang';
 import { Gas } from 'types/Gas';
 import { Transaction } from 'types/Transaction';
+import { Decimals } from 'types/Decimals';
 
 import styles from './style.module.scss';
 
@@ -25,6 +27,8 @@ import FixedLenderContext from 'contexts/FixedLenderContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 
 import { getContractData } from 'utils/contracts';
+
+import decimals from 'config/decimals.json';
 
 import keys from './translations.json';
 
@@ -43,16 +47,17 @@ function WithdrawModalSP({ data, closeModal }: Props) {
 
   const fixedLenderData = useContext(FixedLenderContext);
 
-  const [qty, setQty] = useState<string>('0');
+  const [qty, setQty] = useState<string>('');
   const [gas, setGas] = useState<Gas | undefined>();
   const [tx, setTx] = useState<Transaction | undefined>(undefined);
   const [minimized, setMinimized] = useState<Boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
     undefined
   );
 
-  const parsedAmount = ethers.utils.formatUnits(assets, 18);
+  const parsedAmount = ethers.utils.formatUnits(assets, decimals[symbol! as keyof Decimals]);
 
   useEffect(() => {
     getFixedLenderContract();
@@ -73,23 +78,30 @@ function WithdrawModalSP({ data, closeModal }: Props) {
   }
 
   async function withdraw() {
-    const withdraw = await fixedLenderWithSigner?.withdraw(
-      ethers.utils.parseUnits(qty!),
-      walletAddress,
-      walletAddress
-    );
-    setTx({ status: 'processing', hash: withdraw?.hash });
+    setLoading(true);
+    try {
+      const withdraw = await fixedLenderWithSigner?.withdraw(
+        ethers.utils.parseUnits(qty!),
+        walletAddress,
+        walletAddress
+      );
+      setTx({ status: 'processing', hash: withdraw?.hash });
 
-    const status = await withdraw.wait();
+      const status = await withdraw.wait();
+      setLoading(false);
 
-    setTx({ status: 'success', hash: status?.transactionHash });
+      setTx({ status: 'success', hash: status?.transactionHash });
+    } catch (e) {
+      setLoading(false);
+      console.log(e);
+    }
   }
 
   async function estimateGas() {
     const gasPriceInGwei = await fixedLenderWithSigner?.provider.getGasPrice();
 
     const estimatedGasCost = await fixedLenderWithSigner?.estimateGas.withdraw(
-      ethers.utils.parseUnits(qty!),
+      ethers.utils.parseUnits('1'),
       walletAddress,
       walletAddress
     );
@@ -123,7 +135,7 @@ function WithdrawModalSP({ data, closeModal }: Props) {
   return (
     <>
       {!minimized && (
-        <section className={styles.formContainer}>
+        <ModalWrapper>
           {!tx && (
             <>
               <ModalTitle title={translations[lang].withdraw} />
@@ -138,13 +150,16 @@ function WithdrawModalSP({ data, closeModal }: Props) {
                 <Button
                   text={translations[lang].withdraw}
                   className={qty <= '0' || !qty ? 'secondaryDisabled' : 'tertiary'}
+                  disabled={qty <= '0' || !qty || loading}
                   onClick={withdraw}
+                  loading={loading}
+                  color="primary"
                 />
               </div>
             </>
           )}
           {tx && <ModalGif tx={tx} />}
-        </section>
+        </ModalWrapper>
       )}
 
       {tx && minimized && (

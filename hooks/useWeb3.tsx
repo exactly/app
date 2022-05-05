@@ -5,21 +5,25 @@ import WalletConnectProvider from '@walletconnect/web3-provider';
 
 import { Web3ProviderState, Web3Action, web3InitialState, web3Reducer } from 'reducers/web3';
 
-const providerOptions = {
-  walletconnect: {
-    package: WalletConnectProvider,
-    options: {
-      infuraId: `${process.env.NEXT_INFURA_ID}`
-    }
-  }
-};
-
 let web3Modal: Web3Modal | null;
+
 if (typeof window !== 'undefined') {
   web3Modal = new Web3Modal({
     network: `${process.env.NEXT_PUBLIC_NETWORK}`,
     cacheProvider: true,
-    providerOptions
+    providerOptions: {
+      walletconnect: {
+        package: WalletConnectProvider,
+        options: {
+          infuraId: `${process.env.NEXT_INFURA_ID}`,
+          rpc: {
+            1: `https://mainnet.infura.io/v3/77a2479dc2bd4436aa3edb374f3019d2`,
+            42: `https://kovan.infura.io/v3/77a2479dc2bd4436aa3edb374f3019d2`
+          },
+          chainId: 42
+        }
+      }
+    }
   });
 }
 

@@ -16,11 +16,12 @@ import DepositModalSP from 'components/DepositModalSP';
 import BorrowModal from 'components/BorrowModal';
 import DashboardHeader from 'components/DashboardHeader';
 import Tabs from 'components/Tabs';
+import EmptyState from 'components/EmptyState';
 
 import { AuditorProvider } from 'contexts/AuditorContext';
 import { FixedLenderProvider } from 'contexts/FixedLenderContext';
-import { InterestRateModelProvider } from 'contexts/InterestRateModelContext';
 import { useWeb3Context } from 'contexts/Web3Context';
+import { PreviewerProvider } from 'contexts/PreviewerContext';
 
 import { Contract } from 'types/Contract';
 import { Dictionary } from 'types/Dictionary';
@@ -42,21 +43,20 @@ import {
 } from 'queries';
 
 //Contracts
-import InterestRateModel from 'protocol/deployments/kovan/InterestRateModel.json';
 import Auditor from 'protocol/deployments/kovan/Auditor.json';
 import FixedLenderDAI from 'protocol/deployments/kovan/FixedLenderDAI.json';
 import FixedLenderWETH from 'protocol/deployments/kovan/FixedLenderWETH.json';
+import Previewer from 'protocol/deployments/kovan/Previewer.json';
 
 import translations from 'dictionary/en.json';
 
 import { getSymbol } from 'utils/utils';
-import EmptyState from 'components/EmptyState';
+import getSubgraph from 'utils/getSubgraph';
 
 interface Props {
   auditor: Contract;
   assetsAddresses: Dictionary<string>;
   fixedLender: Contract;
-  interestRateModel: Contract;
 }
 
 const DashBoard: NextPage<Props> = () => {
@@ -90,49 +90,53 @@ const DashBoard: NextPage<Props> = () => {
 
   async function getData() {
     if (!walletAddress) return;
+    try {
+      const subgraphUrl = getSubgraph();
 
-    //MP
+      //MP
+      const getMaturityPoolDeposits = await request(
+        subgraphUrl,
+        getMaturityPoolDepositsQuery(walletAddress)
+      );
 
-    const getMaturityPoolDeposits = await request(
-      'https://api.thegraph.com/subgraphs/name/exactly-finance/exactly',
-      getMaturityPoolDepositsQuery(walletAddress)
-    );
+      // const getMaturityPoolWithdraws = await request(
+      //   subgraphUrl,
+      //   getMaturityPoolWithdrawsQuery(walletAddress)
+      // );
 
-    // const getMaturityPoolWithdraws = await request(
-    //   'https://api.thegraph.com/subgraphs/name/exactly-finance/exactly',
-    //   getMaturityPoolWithdrawsQuery(walletAddress)
-    // );
+      const getMaturityPoolBorrows = await request(
+        subgraphUrl,
+        getMaturityPoolBorrowsQuery(walletAddress)
+      );
 
-    const getMaturityPoolBorrows = await request(
-      'https://api.thegraph.com/subgraphs/name/exactly-finance/exactly',
-      getMaturityPoolBorrowsQuery(walletAddress)
-    );
+      // const getMaturityPoolRepays = await request(
+      //  subgraphUrl,
+      //   getMaturityPoolRepaysQuery(walletAddress)
+      // );
 
-    // const getMaturityPoolRepays = await request(
-    //   'https://api.thegraph.com/subgraphs/name/exactly-finance/exactly',
-    //   getMaturityPoolRepaysQuery(walletAddress)
-    // );
+      //SP
+      const getSmartPoolDeposits = await request(
+        subgraphUrl,
+        getSmartPoolDepositsQuery(walletAddress)
+      );
 
-    //SP
-    const getSmartPoolDeposits = await request(
-      'https://api.thegraph.com/subgraphs/name/exactly-finance/exactly',
-      getSmartPoolDepositsQuery(walletAddress)
-    );
+      const getSmartPoolWithdraws = await request(
+        subgraphUrl,
+        getSmartPoolWithdrawsQuery(walletAddress)
+      );
 
-    const getSmartPoolWithdraws = await request(
-      'https://api.thegraph.com/subgraphs/name/exactly-finance/exactly',
-      getSmartPoolWithdrawsQuery(walletAddress)
-    );
+      const smartPoolDeposits = formatSmartPoolDeposits(
+        getSmartPoolDeposits.deposits,
+        getSmartPoolWithdraws.withdraws
+      );
 
-    const smartPoolDeposits = formatSmartPoolDeposits(
-      getSmartPoolDeposits.deposits,
-      getSmartPoolWithdraws.withdraws
-    );
+      setSmartPoolDeposits(smartPoolDeposits);
 
-    setSmartPoolDeposits(smartPoolDeposits);
-
-    setMaturityPoolDeposits(getMaturityPoolDeposits.depositAtMaturities);
-    setMaturityPoolBorrows(getMaturityPoolBorrows.borrowAtMaturities);
+      setMaturityPoolDeposits(getMaturityPoolDeposits.depositAtMaturities);
+      setMaturityPoolBorrows(getMaturityPoolBorrows.borrowAtMaturities);
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   function showModal(data: Deposit | Borrow, type: String) {
@@ -167,11 +171,11 @@ const DashBoard: NextPage<Props> = () => {
   }
 
   return (
-    <AuditorProvider value={Auditor}>
-      <FixedLenderProvider value={fixedLenders}>
-        <InterestRateModelProvider value={InterestRateModel}>
+    <PreviewerProvider value={Previewer}>
+      <AuditorProvider value={Auditor}>
+        <FixedLenderProvider value={fixedLenders}>
           {modal && modalContent?.type == 'borrow' && (
-            <BorrowModal data={modalContent} closeModal={handleModal} />
+            <BorrowModal data={modalContent} closeModal={handleModal} editable />
           )}
 
           {modal && modalContent?.type == 'repay' && (
@@ -179,7 +183,7 @@ const DashBoard: NextPage<Props> = () => {
           )}
 
           {modal && modalContent?.type == 'deposit' && (
-            <DepositModalMP data={modalContent} closeModal={handleModal} />
+            <DepositModalMP data={modalContent} closeModal={handleModal} editable />
           )}
 
           {modal && modalContent?.type == 'withdraw' && (
@@ -221,9 +225,9 @@ const DashBoard: NextPage<Props> = () => {
             <EmptyState />
           )}
           <Footer />
-        </InterestRateModelProvider>
-      </FixedLenderProvider>
-    </AuditorProvider>
+        </FixedLenderProvider>
+      </AuditorProvider>
+    </PreviewerProvider>
   );
 };
 

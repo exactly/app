@@ -74,9 +74,19 @@ function MobileNavbar() {
             )
           )}
           {!open ? (
-            <img src="./img/icons/hamburger.svg" onClick={handleMenu} className={styles.icon} />
+            <img
+              src="./img/icons/hamburger.svg"
+              alt="hamburger"
+              onClick={handleMenu}
+              className={styles.icon}
+            />
           ) : (
-            <img src="./img/icons/close.svg" onClick={handleMenu} className={styles.icon} />
+            <img
+              src="./img/icons/close.svg"
+              alt="close"
+              onClick={handleMenu}
+              className={styles.icon}
+            />
           )}
         </div>
       </nav>

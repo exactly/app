@@ -57,7 +57,7 @@ function HowItWorks() {
       <div className={styles.buttonContainer}>
         <Button text={translations[lang].openApp} />
         <a href="" target="_blank" rel="noopener noreferrer" className={styles.faq}>
-          <img src="./img/icons/question.svg" />
+          <img src="./img/icons/question.svg" alt="question" />
           <p>{translations[lang].faq}</p>
         </a>
       </div>

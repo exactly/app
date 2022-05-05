@@ -8,6 +8,7 @@ import LangContext from 'contexts/LangContext';
 import { LangKeys } from 'types/Lang';
 import { Deposit } from 'types/Deposit';
 import { Borrow } from 'types/Borrow';
+import { Decimals } from 'types/Decimals';
 import { Option } from 'react-dropdown';
 
 import styles from './style.module.scss';
@@ -16,6 +17,10 @@ import keys from './translations.json';
 
 import parseTimestamp from 'utils/parseTimestamp';
 import { getSymbol } from 'utils/utils';
+import formatNumber from 'utils/formatNumber';
+import parseSymbol from 'utils/parseSymbol';
+
+import decimals from 'config/decimals.json';
 
 type Props = {
   type?: Option;
@@ -38,16 +43,25 @@ function Item({ type, amount, fee, maturityDate, showModal, market, data }: Prop
   const startDate = parseInt(maturityDate) - maturityLife;
   const current = nowInSeconds - startDate;
   const progress = (current * 100) / maturityLife;
-  const fixedRate = (parseInt(fee) * 100) / parseInt(amount);
+  const fixedRate = (parseFloat(fee) * 100) / parseFloat(amount);
   const symbol = getSymbol(market);
 
   return (
     <div className={styles.container}>
       <div className={styles.symbol}>
-        <img src={`/img/assets/${symbol?.toLowerCase()}.png`} className={styles.assetImage} />
-        <span className={styles.primary}>{symbol}</span>
+        <img
+          src={`/img/assets/${symbol?.toLowerCase()}.png`}
+          alt={symbol}
+          className={styles.assetImage}
+        />
+        <span className={styles.primary}>{parseSymbol(symbol)}</span>
       </div>
-      <span className={styles.value}>{ethers.utils.formatUnits(amount, 18)}</span>
+      <span className={styles.value}>
+        {formatNumber(
+          ethers.utils.formatUnits(amount, decimals[symbol! as keyof Decimals]),
+          symbol
+        )}
+      </span>
       <span className={styles.value}>{fixedRate.toFixed(2)}%</span>
       <span className={styles.value}>{parseTimestamp(maturityDate)}</span>
 

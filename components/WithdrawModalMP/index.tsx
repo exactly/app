@@ -9,6 +9,7 @@ import ModalRow from 'components/common/modal/ModalRow';
 import ModalTitle from 'components/common/modal/ModalTitle';
 import ModalTxCost from 'components/common/modal/ModalTxCost';
 import ModalMinimized from 'components/common/modal/ModalMinimized';
+import ModalWrapper from 'components/common/modal/ModalWrapper';
 import ModalGif from 'components/common/modal/ModalGif';
 import Overlay from 'components/Overlay';
 import ModalRowEditable from 'components/common/modal/ModalRowEditable';
@@ -18,6 +19,7 @@ import { Deposit } from 'types/Deposit';
 import { LangKeys } from 'types/Lang';
 import { Gas } from 'types/Gas';
 import { Transaction } from 'types/Transaction';
+import { Decimals } from 'types/Decimals';
 
 import parseTimestamp from 'utils/parseTimestamp';
 import { getContractData } from 'utils/contracts';
@@ -28,6 +30,8 @@ import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 import FixedLenderContext from 'contexts/FixedLenderContext';
 
+import decimals from 'config/decimals.json';
+
 import keys from './translations.json';
 
 type Props = {
@@ -36,7 +40,7 @@ type Props = {
 };
 
 function WithdrawModalMP({ data, closeModal }: Props) {
-  const { symbol, maturity, assets } = data;
+  const { symbol, maturity, assets, fee } = data;
 
   const { web3Provider, walletAddress } = useWeb3Context();
 
@@ -45,18 +49,21 @@ function WithdrawModalMP({ data, closeModal }: Props) {
 
   const fixedLenderData = useContext(FixedLenderContext);
 
-  const [qty, setQty] = useState<string>('0');
+  const [qty, setQty] = useState<string>('');
   const [gas, setGas] = useState<Gas | undefined>();
   const [tx, setTx] = useState<Transaction | undefined>(undefined);
   const [minimized, setMinimized] = useState<Boolean>(false);
-  const [slippage, setSlippage] = useState<number>(0.5);
+  const [slippage, setSlippage] = useState<string>('0.5');
   const [editSlippage, setEditSlippage] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
     undefined
   );
 
-  const parsedAmount = ethers.utils.formatUnits(assets, 18);
+  const parsedFee = ethers.utils.formatUnits(fee, decimals[symbol! as keyof Decimals]);
+  const parsedAmount = ethers.utils.formatUnits(assets, decimals[symbol! as keyof Decimals]);
+  const finalAmount = (parseFloat(parsedAmount) + parseFloat(parsedFee)).toString();
 
   useEffect(() => {
     getFixedLenderContract();
@@ -69,7 +76,7 @@ function WithdrawModalMP({ data, closeModal }: Props) {
   }, [fixedLenderWithSigner]);
 
   function onMax() {
-    setQty(parsedAmount);
+    setQty(finalAmount);
   }
 
   function handleInputChange(e: ChangeEvent<HTMLInputElement>) {
@@ -77,21 +84,28 @@ function WithdrawModalMP({ data, closeModal }: Props) {
   }
 
   async function withdraw() {
-    const minAmount = parseFloat(qty!) * (1 - slippage / 100);
+    setLoading(true);
+    try {
+      const minAmount = parseFloat(qty!) * (1 - parseFloat(slippage) / 100);
 
-    const withdraw = await fixedLenderWithSigner?.withdrawAtMaturity(
-      maturity,
-      ethers.utils.parseUnits(qty!),
-      ethers.utils.parseUnits(`${minAmount}`),
-      walletAddress,
-      walletAddress
-    );
+      const withdraw = await fixedLenderWithSigner?.withdrawAtMaturity(
+        maturity,
+        ethers.utils.parseUnits(qty!),
+        ethers.utils.parseUnits(`${minAmount}`),
+        walletAddress,
+        walletAddress
+      );
 
-    setTx({ status: 'processing', hash: withdraw?.hash });
+      setTx({ status: 'processing', hash: withdraw?.hash });
 
-    const status = await withdraw.wait();
+      const status = await withdraw.wait();
+      setLoading(false);
 
-    setTx({ status: 'success', hash: status?.transactionHash });
+      setTx({ status: 'success', hash: status?.transactionHash });
+    } catch (e) {
+      setLoading(false);
+      console.log(e);
+    }
   }
 
   async function estimateGas() {
@@ -134,16 +148,16 @@ function WithdrawModalMP({ data, closeModal }: Props) {
   return (
     <>
       {!minimized && (
-        <section className={styles.formContainer}>
+        <ModalWrapper>
           {!tx && (
             <>
               <ModalTitle title={translations[lang].withdraw} />
-              <ModalAsset asset={symbol!} amount={parsedAmount} />
+              <ModalAsset asset={symbol!} amount={finalAmount} />
               <ModalClose closeModal={closeModal} />
               <ModalRow text={translations[lang].maturityPool} value={parseTimestamp(maturity)} />
               <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} />
               {gas && <ModalTxCost gas={gas} />}
-              <ModalRow text={translations[lang].exactlyBalance} value={parsedAmount} line />
+              <ModalRow text={translations[lang].exactlyBalance} value={finalAmount} line />
               <ModalRow text={translations[lang].interestRate} value="X %" line />
               <ModalRowEditable
                 text={translations[lang].interestRateSlippage}
@@ -151,22 +165,28 @@ function WithdrawModalMP({ data, closeModal }: Props) {
                 editable={editSlippage}
                 symbol="%"
                 onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                  setSlippage(e.target.valueAsNumber);
+                  setSlippage(e.target.value);
                 }}
-                onClick={() => setEditSlippage((prev) => !prev)}
+                onClick={() => {
+                  if (slippage == '') setSlippage('0.5');
+                  setEditSlippage((prev) => !prev);
+                }}
                 line
               />
               <div className={styles.buttonContainer}>
                 <Button
                   text={translations[lang].withdraw}
                   className={qty <= '0' || !qty ? 'secondaryDisabled' : 'tertiary'}
+                  disabled={qty <= '0' || !qty || loading}
                   onClick={withdraw}
+                  loading={loading}
+                  color="primary"
                 />
               </div>
             </>
           )}
           {tx && <ModalGif tx={tx} />}
-        </section>
+        </ModalWrapper>
       )}
 
       {tx && minimized && (

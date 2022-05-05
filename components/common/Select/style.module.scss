@@ -5,6 +5,7 @@
 
   .placeholder {
     width: 70%;
+    text-align: center;
   }
 
   .select {
@@ -54,6 +55,36 @@
   }
 }
 
+.containerEditable {
+  @extend .container;
+  min-width: 125px;
+
+  .selectEditable {
+    @extend .select;
+    border: none;
+    padding: 0;
+    font-weight: 600;
+    justify-content: center;
+
+    .arrowEditable {
+      @extend .arrow;
+      border-color: var(--primary) transparent;
+      margin: 0;
+    }
+  }
+  .menuEditable {
+    @extend .menu;
+    border: 1px solid var(--primary);
+    border-top-left-radius: var(--smallUnit);
+    border-top-right-radius: var(--smallUnit);
+    max-width: 99px;
+    position: absolute;
+    right: var(--u);
+  }
+}
+.selectEditable:hover {
+  box-shadow: none !important;
+}
 .arrowClosed {
   border-style: solid;
   border-width: 5 px 5 px 0;

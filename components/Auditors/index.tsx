@@ -23,7 +23,7 @@ function Auditors() {
         {auditors.map((auditor, key) => {
           return (
             <a href={auditor.web} target="_blank" rel="noopener noreferrer" key={key}>
-              <img src={`/img/auditors/${auditor.name}.svg`} />
+              <img src={`/img/auditors/${auditor.name}.svg`} alt={auditor.name} />
             </a>
           );
         })}

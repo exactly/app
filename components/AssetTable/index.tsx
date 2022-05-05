@@ -3,19 +3,26 @@ import Loading from 'components/common/Loading';
 import { Maturity } from 'types/Maturity';
 import styles from './style.module.scss';
 
-import keys from "./translations.json";
+import keys from './translations.json';
 import { LangKeys } from 'types/Lang';
 import { useContext } from 'react';
 import LangContext from 'contexts/LangContext';
+import { useWeb3Context } from 'contexts/Web3Context';
 
 interface Props {
   maturities: Array<Maturity> | undefined;
-  showModal: (type: string) => void;
+  showModal: (type: string, maturity: string | undefined) => void;
 }
 
 function AssetTable({ maturities, showModal }: Props) {
+  const { walletAddress, connect } = useWeb3Context();
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
+
+  function handleClick(type: string, maturity: string) {
+    if (!walletAddress && connect) return connect();
+    showModal(type, maturity);
+  }
 
   return (
     <div className={styles.table}>
@@ -23,7 +30,6 @@ function AssetTable({ maturities, showModal }: Props) {
         <div className={styles.maturity}>{translations[lang].maturity}</div>
         <div className={styles.lastFixedRate}>{translations[lang].lastFixedRate}</div>
         <div className={styles.actions}></div>
-
       </div>
       {maturities ? (
         <>
@@ -40,13 +46,20 @@ function AssetTable({ maturities, showModal }: Props) {
                 </div>
                 <div className={styles.actions}>
                   <div className={styles.buttonContainer}>
-                    <Button text={translations[lang].deposit} className="primary" onClick={() => showModal('deposit')} />
+                    <Button
+                      text={translations[lang].deposit}
+                      className="primary"
+                      onClick={() => handleClick('deposit', maturity.value)}
+                    />
                   </div>
                   <div className={styles.buttonContainer}>
-                    <Button text={translations[lang].borrow} className="secondary" onClick={() => showModal('borrow')} />
+                    <Button
+                      text={translations[lang].borrow}
+                      className="secondary"
+                      onClick={() => handleClick('borrow', maturity.value)}
+                    />
                   </div>
                 </div>
-
               </div>
             );
           })}

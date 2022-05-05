@@ -16,10 +16,8 @@ function Tooltip({ value, image }: Props) {
       onMouseEnter={() => setShow(true)}
       onMouseLeave={() => setShow(false)}
     >
-      <img src={image ?? '/img/icons/tooltip.svg'} />
-      <div
-        className={`${styles.tooltip} ${show ? styles.show : styles.hidden}`}
-      >
+      <img src={image ?? '/img/icons/tooltip.svg'} alt="tooltip" />
+      <div className={`${styles.tooltip} ${show ? styles.show : styles.hidden}`}>
         <div className={styles.arrowUp}></div>
         <p className={styles.text}>{value}</p>
       </div>
