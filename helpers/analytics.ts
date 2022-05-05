@@ -1,5 +1,5 @@
 export const GA_TRACKING_ID = process.env.NEXT_PUBLIC_GA_TRACKING_ID ?? '';
-const isProd = process.env.NODE_ENV === 'production';
+export const isProd = process.env.NODE_ENV === 'production';
 
 export const pageview = (url: URL) => {
   if (isProd) {

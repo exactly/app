@@ -10,7 +10,6 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@types/gtag.js": "^0.0.10",
     "@walletconnect/web3-provider": "^1.7.5",
     "dayjs": "^1.10.7",
     "ethers": "^5.6.5",
@@ -26,6 +25,7 @@
     "web3modal": "^1.9.7"
   },
   "devDependencies": {
+    "@types/gtag.js": "^0.0.10",
     "@types/react": "17.0.19",
     "eslint": "7.32.0",
     "eslint-config-next": "11.1.2",

@@ -1,9 +1,7 @@
 import { Html, Head, Main, NextScript } from 'next/document';
-import { GA_TRACKING_ID } from 'helpers/analytics';
+import { GA_TRACKING_ID, isProd } from 'helpers/analytics';
 
 export default function Document() {
-  const isProd = process.env.NODE_ENV === 'production';
-
   return (
     <Html lang="en">
       <Head>
