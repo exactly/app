@@ -188,7 +188,7 @@ function RepayModal({ data, closeModal }: Props) {
                   setSlippage(e.target.value);
                 }}
                 onClick={() => {
-                  if (slippage == '') setSlippage('0.5');
+                  if (slippage == '') setSlippage(parsedAmount);
                   setEditSlippage((prev) => !prev);
                 }}
                 line

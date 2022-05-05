@@ -78,7 +78,9 @@ function WithdrawModalMP({ data, closeModal }: Props) {
   useEffect(() => {
     const earlyWithdraw = Date.now() / 1000 < parseInt(maturity);
 
-    setIsEarlyWithdraw(earlyWithdraw);
+    if (earlyWithdraw) {
+      setIsEarlyWithdraw(earlyWithdraw);
+    }
 
     if (!earlyWithdraw) {
       //if the maturity is closed the user should be able to withdraw everything.
@@ -208,7 +210,7 @@ function WithdrawModalMP({ data, closeModal }: Props) {
                     setSlippage(e.target.value);
                   }}
                   onClick={() => {
-                    if (slippage == '') setSlippage('0.05');
+                    if (slippage == '') setSlippage(parsedAmount);
                     setEditSlippage((prev) => !prev);
                   }}
                   line

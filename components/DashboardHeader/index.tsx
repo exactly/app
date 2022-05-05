@@ -10,6 +10,8 @@ import PreviewerContext from 'contexts/PreviewerContext';
 import AuditorContext from 'contexts/AuditorContext';
 
 import { LangKeys } from 'types/Lang';
+import { Dictionary } from 'types/Dictionary';
+import { DonutData } from 'types/DonutData';
 
 import styles from './style.module.scss';
 
@@ -28,8 +30,8 @@ function DashboardHeader() {
 
   const previewerContract = getContractData(previewerData.address!, previewerData.abi!);
 
-  const [healthFactor, setHealthFactor] = useState<any | undefined>(undefined);
-  const [healthFactorData, setHealthFactorData] = useState<any>([]);
+  const [healthFactor, setHealthFactor] = useState<Dictionary<number>>();
+  const [healthFactorData, setHealthFactorData] = useState<Array<DonutData>>();
 
   const notConnected = [
     {
@@ -207,10 +209,11 @@ function DashboardHeader() {
                   {translations[lang].collateral}
                 </p>
                 <p className={styles.informationValue}>
-                  {(
-                    (healthFactor.collateral / (healthFactor.collateral + healthFactor.debt)) *
-                    100
-                  ).toFixed(2)}
+                  {healthFactor &&
+                    (
+                      (healthFactor.collateral / (healthFactor.collateral + healthFactor.debt)) *
+                      100
+                    ).toFixed(2)}
                   %
                 </p>
               </div>
@@ -220,10 +223,11 @@ function DashboardHeader() {
                   {translations[lang].debt}
                 </p>
                 <p className={styles.informationValue}>
-                  {(
-                    (healthFactor.debt / (healthFactor.collateral + healthFactor.debt)) *
-                    100
-                  ).toFixed(2)}
+                  {healthFactor &&
+                    (
+                      (healthFactor.debt / (healthFactor.collateral + healthFactor.debt)) *
+                      100
+                    ).toFixed(2)}
                   %
                 </p>
               </div>
