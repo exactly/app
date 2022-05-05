@@ -12,3 +12,12 @@
   z-index: 6;
   border-radius: var(--smallUnit);
 }
+
+@media (max-width: 769px) {
+  .formContainer {
+    width: 90%;
+    max-height: 90%;
+    left: 5%;
+    top: 5%;
+  }
+}

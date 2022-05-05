@@ -1,8 +1,6 @@
 {
   "en": {
-    "approval": "Please approve before depositing",
-    "deposit": "Verify your data before depositing. Making this deposit, the asset will automatically remain as",
-    "collateral": "collateral."
+    "approval": "Please approve before depositing"
   },
   "es": {}
 }

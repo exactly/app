@@ -51,7 +51,7 @@ function MobileNavbar() {
   return (
     <>
       {open && <Overlay closeModal={handleMenu} />}
-      <nav className={styles.navBar}>
+      <nav className={styles.navBar} style={open ? { zIndex: 7 } : {}}>
         <div className={styles.wrapper}>
           <Link href="/">
             <img src="/img/logo.svg" alt="Exactly Logo" className={styles.logo} />
@@ -75,14 +75,14 @@ function MobileNavbar() {
           )}
           {!open ? (
             <img
-              src="./img/icons/hamburger.svg"
+              src="/img/icons/hamburger.svg"
               alt="hamburger"
               onClick={handleMenu}
               className={styles.icon}
             />
           ) : (
             <img
-              src="./img/icons/close.svg"
+              src="/img/icons/close.svg"
               alt="close"
               onClick={handleMenu}
               className={styles.icon}
@@ -104,6 +104,12 @@ function MobileNavbar() {
               </li>
             );
           })}
+          {walletAddress && (
+            <li className={styles.disconnect} onClick={() => disconnect && disconnect()}>
+              <img src="/img/icons/power.svg" />
+              {translations[lang].disconnect}
+            </li>
+          )}
         </ul>
       )}
     </>
