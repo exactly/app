@@ -2,6 +2,7 @@
   max-width: var(--maxWidth);
   margin: 0 auto;
   margin-top: var(--u6);
+  border-bottom: 1px solid var(--gray-100);
 
   .tabs {
     display: flex;
@@ -15,10 +16,11 @@
       color: var(--gray-500);
       width: 50%;
       margin: 0;
+      font-size: var(--font-24);
     }
 
     .selected {
-      border-bottom: 2px solid;
+      border-bottom: 4px solid;
       border-image: linear-gradient(90deg, #7bf5e1 0.29%, #4d4de8 100.29%);
       border-image-slice: 1;
       color: var(--gray-900);

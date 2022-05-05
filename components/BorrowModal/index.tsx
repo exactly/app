@@ -175,7 +175,7 @@ function BorrowModal({ data, editable, closeModal }: Props) {
   async function getFeeAtMaturity() {
     if (!qty) return;
 
-    const feeAtMaturity = await previewerContract?.previewFeeAtMaturity(
+    const feeAtMaturity = await previewerContract?.previewBorrowAtMaturity(
       fixedLenderWithSigner!.address,
       parseInt(date?.value ?? maturity),
       ethers.utils.parseUnits(qty)

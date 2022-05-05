@@ -3,8 +3,9 @@
     "lateRepay": "Late Repay",
     "earlyRepay": "Early Repay",
     "maturityPool": "Maturity Pool",
-    "remainingDebt": "Remaining Debt",
-    "debtSlippage": "Debt Slippage",
+    "amountAtFinish": "Amount At Finish",
+    "amountToPay": "Amount To Repay",
+    "maximumAmountToPay": "Maximum Amount To Repay",
     "healthFactor": "Health Factor",
     "repay": "Repay"
   },

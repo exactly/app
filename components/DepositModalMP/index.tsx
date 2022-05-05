@@ -176,7 +176,7 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
 
   async function deposit() {
     try {
-      const minAmount = parseFloat(qty!) * (1 - parseFloat(slippage) / 100);
+      const minAmount = parseFloat(qty!) * (1 + parseFloat(slippage) / 100);
 
       const deposit = await fixedLenderWithSigner?.depositAtMaturity(
         parseInt(date?.value ?? maturity),
@@ -230,7 +230,7 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
   async function getYieldAtMaturity() {
     if (!qty) return;
 
-    const yieldAtMaturity = await previewerContract?.previewYieldAtMaturity(
+    const yieldAtMaturity = await previewerContract?.previewDepositAtMaturity(
       marketAddress,
       parseInt(date?.value ?? maturity),
       ethers.utils.parseUnits(qty)

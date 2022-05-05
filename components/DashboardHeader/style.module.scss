@@ -87,6 +87,16 @@
               @extend .fixed;
               background: var(--secondary);
             }
+
+            .debt {
+              @extend .fixed;
+              background: var(--error);
+            }
+
+            .collateral {
+              @extend .fixed;
+              background: var(--success);
+            }
           }
           .informationValue {
             font-size: var(--font-14);
