@@ -1,9 +1,12 @@
 export const GA_TRACKING_ID = process.env.NEXT_PUBLIC_GA_TRACKING_ID ?? '';
+const isProd = process.env.NODE_ENV === 'production';
 
 export const pageview = (url: URL) => {
-  window.gtag('config', GA_TRACKING_ID, {
-    page_path: url
-  });
+  if (isProd) {
+    window.gtag('config', GA_TRACKING_ID, {
+      page_path: url
+    });
+  }
 };
 
 type GTagEvent = {
