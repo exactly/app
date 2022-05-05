@@ -23,12 +23,14 @@ import { Decimals } from 'types/Decimals';
 
 import parseTimestamp from 'utils/parseTimestamp';
 import { getContractData } from 'utils/contracts';
+import formatNumber from 'utils/formatNumber';
 
 import styles from './style.module.scss';
 
 import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 import FixedLenderContext from 'contexts/FixedLenderContext';
+import PreviewerContext from 'contexts/PreviewerContext';
 
 import decimals from 'config/decimals.json';
 
@@ -48,26 +50,45 @@ function WithdrawModalMP({ data, closeModal }: Props) {
   const translations: { [key: string]: LangKeys } = keys;
 
   const fixedLenderData = useContext(FixedLenderContext);
-
-  const [qty, setQty] = useState<string>('');
-  const [gas, setGas] = useState<Gas | undefined>();
-  const [tx, setTx] = useState<Transaction | undefined>(undefined);
-  const [minimized, setMinimized] = useState<Boolean>(false);
-  const [slippage, setSlippage] = useState<string>('0.5');
-  const [editSlippage, setEditSlippage] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(false);
-
-  const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
-    undefined
-  );
+  const previewerData = useContext(PreviewerContext);
 
   const parsedFee = ethers.utils.formatUnits(fee, decimals[symbol! as keyof Decimals]);
   const parsedAmount = ethers.utils.formatUnits(assets, decimals[symbol! as keyof Decimals]);
   const finalAmount = (parseFloat(parsedAmount) + parseFloat(parsedFee)).toString();
 
+  const [qty, setQty] = useState<string>('');
+  const [gas, setGas] = useState<Gas | undefined>();
+  const [tx, setTx] = useState<Transaction | undefined>(undefined);
+  const [minimized, setMinimized] = useState<Boolean>(false);
+  const [slippage, setSlippage] = useState<string>(parsedAmount);
+  const [editSlippage, setEditSlippage] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [isEarlyWithdraw, setIsEarlyWithdraw] = useState<boolean>(false);
+
+  const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
+    undefined
+  );
+
+  const previewerContract = getContractData(previewerData.address!, previewerData.abi!);
+
   useEffect(() => {
     getFixedLenderContract();
   }, []);
+
+  useEffect(() => {
+    const earlyWithdraw = Date.now() / 1000 < parseInt(maturity);
+
+    if (earlyWithdraw) {
+      setIsEarlyWithdraw(earlyWithdraw);
+    }
+
+    if (!earlyWithdraw) {
+      //if the maturity is closed the user should be able to withdraw everything.
+      // so slippage = finalAmount
+
+      setSlippage(finalAmount);
+    }
+  }, [maturity]);
 
   useEffect(() => {
     if (fixedLenderWithSigner && !gas) {
@@ -76,7 +97,9 @@ function WithdrawModalMP({ data, closeModal }: Props) {
   }, [fixedLenderWithSigner]);
 
   function onMax() {
-    setQty(finalAmount);
+    const formattedAmount = formatNumber(finalAmount, symbol!);
+
+    setQty(formattedAmount);
   }
 
   function handleInputChange(e: ChangeEvent<HTMLInputElement>) {
@@ -85,8 +108,11 @@ function WithdrawModalMP({ data, closeModal }: Props) {
 
   async function withdraw() {
     setLoading(true);
+
     try {
-      const minAmount = parseFloat(qty!) * (1 - parseFloat(slippage) / 100);
+      //we should change this 0 in case of earlyWithdraw with the amount - penaltyFee from the previewWithdraw
+
+      const minAmount = isEarlyWithdraw ? 0 : finalAmount;
 
       const withdraw = await fixedLenderWithSigner?.withdrawAtMaturity(
         maturity,
@@ -151,28 +177,45 @@ function WithdrawModalMP({ data, closeModal }: Props) {
         <ModalWrapper>
           {!tx && (
             <>
-              <ModalTitle title={translations[lang].withdraw} />
+              <ModalTitle
+                title={
+                  isEarlyWithdraw ? translations[lang].earlyWithdraw : translations[lang].withdraw
+                }
+              />
               <ModalAsset asset={symbol!} amount={finalAmount} />
               <ModalClose closeModal={closeModal} />
               <ModalRow text={translations[lang].maturityPool} value={parseTimestamp(maturity)} />
               <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} />
               {gas && <ModalTxCost gas={gas} />}
-              <ModalRow text={translations[lang].exactlyBalance} value={finalAmount} line />
-              <ModalRow text={translations[lang].interestRate} value="X %" line />
-              <ModalRowEditable
-                text={translations[lang].interestRateSlippage}
-                value={slippage}
-                editable={editSlippage}
-                symbol="%"
-                onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                  setSlippage(e.target.value);
-                }}
-                onClick={() => {
-                  if (slippage == '') setSlippage('0.5');
-                  setEditSlippage((prev) => !prev);
-                }}
+              <ModalRow
+                text={translations[lang].amountAtFinish}
+                value={formatNumber(finalAmount, symbol!)}
                 line
               />
+              <ModalRow
+                text={translations[lang].amountToReceive}
+                value={
+                  isEarlyWithdraw
+                    ? formatNumber(qty || 0, symbol!)
+                    : formatNumber(finalAmount, symbol!)
+                }
+                line
+              />
+              {isEarlyWithdraw && (
+                <ModalRowEditable
+                  text={translations[lang].amountSlippage}
+                  value={slippage}
+                  editable={editSlippage}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                    setSlippage(e.target.value);
+                  }}
+                  onClick={() => {
+                    if (slippage == '') setSlippage(parsedAmount);
+                    setEditSlippage((prev) => !prev);
+                  }}
+                  line
+                />
+              )}
               <div className={styles.buttonContainer}>
                 <Button
                   text={translations[lang].withdraw}

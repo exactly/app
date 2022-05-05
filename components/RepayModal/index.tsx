@@ -23,6 +23,7 @@ import { Decimals } from 'types/Decimals';
 
 import parseTimestamp from 'utils/parseTimestamp';
 import { getContractData } from 'utils/contracts';
+import formatNumber from 'utils/formatNumber';
 
 import styles from './style.module.scss';
 
@@ -48,12 +49,14 @@ function RepayModal({ data, closeModal }: Props) {
 
   const fixedLenderData = useContext(FixedLenderContext);
 
-  const [qty, setQty] = useState<string>('');
-  const [slippage, setSlippage] = useState<string>('0.5');
-  const [isLateRepay, setIsLateRepay] = useState<boolean>(false);
   const parsedFee = ethers.utils.formatUnits(fee, decimals[symbol! as keyof Decimals]);
   const parsedAmount = ethers.utils.formatUnits(assets, decimals[symbol! as keyof Decimals]);
   const finalAmount = (parseFloat(parsedAmount) + parseFloat(parsedFee)).toString();
+
+  const [qty, setQty] = useState<string>('');
+  const [slippage, setSlippage] = useState<string>(formatNumber(finalAmount, symbol!));
+  const [isLateRepay, setIsLateRepay] = useState<boolean>(false);
+
   const [gas, setGas] = useState<Gas | undefined>();
   const [tx, setTx] = useState<Transaction | undefined>(undefined);
   const [minimized, setMinimized] = useState<boolean>(false);
@@ -102,7 +105,8 @@ function RepayModal({ data, closeModal }: Props) {
   }
 
   function onMax() {
-    setQty(finalAmount);
+    const formattedAmount = formatNumber(finalAmount, symbol!);
+    setQty(formattedAmount);
   }
 
   function handleInputChange(e: ChangeEvent<HTMLInputElement>) {
@@ -111,6 +115,7 @@ function RepayModal({ data, closeModal }: Props) {
 
   async function repay() {
     setLoading(true);
+
     try {
       const repay = await fixedLenderWithSigner?.repayAtMaturity(
         maturity,
@@ -165,17 +170,25 @@ function RepayModal({ data, closeModal }: Props) {
               <ModalRow text={translations[lang].maturityPool} value={parseTimestamp(maturity)} />
               <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} />
               {gas && <ModalTxCost gas={gas} />}
-              <ModalRow text={translations[lang].remainingDebt} value={finalAmount} line />
+              <ModalRow
+                text={translations[lang].amountAtFinish}
+                value={formatNumber(finalAmount, symbol!)}
+                line
+              />
+              <ModalRow
+                text={translations[lang].amountToPay}
+                value={formatNumber(finalAmount, symbol!)}
+                line
+              />
               <ModalRowEditable
-                text={translations[lang].debtSlippage}
+                text={translations[lang].maximumAmountToPay}
                 value={slippage}
                 editable={editSlippage}
-                symbol="%"
                 onChange={(e: ChangeEvent<HTMLInputElement>) => {
                   setSlippage(e.target.value);
                 }}
                 onClick={() => {
-                  if (slippage == '') setSlippage('0.5');
+                  if (slippage == '') setSlippage(parsedAmount);
                   setEditSlippage((prev) => !prev);
                 }}
                 line

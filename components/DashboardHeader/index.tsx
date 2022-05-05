@@ -1,21 +1,37 @@
-import { useContext } from 'react';
+import { useContext, useEffect, useState } from 'react';
+import { ethers } from 'ethers';
 
 import DonutChart from 'components/DonutChart';
+import Tooltip from 'components/Tooltip';
 
 import LangContext from 'contexts/LangContext';
+import { useWeb3Context } from 'contexts/Web3Context';
+import PreviewerContext from 'contexts/PreviewerContext';
+import AuditorContext from 'contexts/AuditorContext';
 
 import { LangKeys } from 'types/Lang';
+import { Dictionary } from 'types/Dictionary';
+import { DonutData } from 'types/DonutData';
 
 import styles from './style.module.scss';
 
 import keys from './translations.json';
-import Tooltip from 'components/Tooltip';
-import { useWeb3Context } from 'contexts/Web3Context';
+
+import { getContractData } from 'utils/contracts';
 
 function DashboardHeader() {
-  const lang: string = useContext(LangContext);
   const { walletAddress } = useWeb3Context();
+
+  const previewerData = useContext(PreviewerContext);
+  const auditorData = useContext(AuditorContext);
+
+  const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
+
+  const previewerContract = getContractData(previewerData.address!, previewerData.abi!);
+
+  const [healthFactor, setHealthFactor] = useState<Dictionary<number>>();
+  const [healthFactorData, setHealthFactorData] = useState<Array<DonutData>>();
 
   const notConnected = [
     {
@@ -66,18 +82,40 @@ function DashboardHeader() {
     }
   ];
 
-  const defaultHealthFactorData = [
-    {
-      label: '',
-      value: 50,
-      color: '#63CA10'
-    },
-    {
-      label: '',
-      value: 50,
-      color: '#AF0606'
+  useEffect(() => {
+    if (!walletAddress) return;
+    getHealthFactor();
+  }, [walletAddress]);
+
+  async function getHealthFactor() {
+    try {
+      const accountLiquidity = await previewerContract?.accountLiquidity(
+        auditorData.address,
+        walletAddress
+      );
+
+      const parsedCollateral = parseFloat(ethers.utils.formatEther(accountLiquidity[0]));
+      const parsedDebt = parseFloat(ethers.utils.formatEther(accountLiquidity[1]));
+
+      const healthFactorData = [
+        {
+          label: '',
+          value: parsedCollateral,
+          color: '#63CA10'
+        },
+        {
+          label: '',
+          value: parsedDebt,
+          color: '#AF0606'
+        }
+      ];
+
+      setHealthFactorData(healthFactorData);
+      setHealthFactor({ collateral: parsedCollateral, debt: parsedDebt });
+    } catch (e) {
+      console.log(e);
     }
-  ];
+  }
 
   return (
     <section className={styles.section}>
@@ -167,25 +205,43 @@ function DashboardHeader() {
             <div className={styles.informationContainer}>
               <div className={styles.information}>
                 <p className={styles.informationTitle}>
-                  <span className={styles.fixed} />
-                  {translations[lang].deposited}
+                  <span className={styles.collateral} />
+                  {translations[lang].collateral}
                 </p>
-                <p className={styles.informationValue}>50%</p>
+                <p className={styles.informationValue}>
+                  {healthFactor &&
+                    (
+                      (healthFactor.collateral / (healthFactor.collateral + healthFactor.debt)) *
+                      100
+                    ).toFixed(2)}
+                  %
+                </p>
               </div>
               <div className={styles.information}>
                 <p className={styles.informationTitle}>
-                  <span className={styles.variable} />
-                  {translations[lang].borrowed}
+                  <span className={styles.debt} />
+                  {translations[lang].debt}
                 </p>
-                <p className={styles.informationValue}>50%</p>
+                <p className={styles.informationValue}>
+                  {healthFactor &&
+                    (
+                      (healthFactor.debt / (healthFactor.collateral + healthFactor.debt)) *
+                      100
+                    ).toFixed(2)}
+                  %
+                </p>
               </div>
             </div>
           )}
         </div>
         <div className={styles.chartContainer}>
           <DonutChart
-            data={walletAddress ? defaultHealthFactorData : notConnected}
-            insideValue={walletAddress ? '6,6%' : ''}
+            data={walletAddress && healthFactorData ? healthFactorData : notConnected}
+            insideValue={
+              walletAddress && healthFactor
+                ? `${((1 - healthFactor.debt / healthFactor.collateral) * 100).toFixed(2)} %`
+                : ''
+            }
           />
         </div>
       </div>
