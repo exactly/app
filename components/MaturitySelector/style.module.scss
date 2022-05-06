@@ -28,7 +28,13 @@
 }
 
 @media (max-width: 769px) {
-  .container {
-    width: 90%;
+  .sectionContainer {
+    max-width: 100%;
+    padding: 20px;
+  }
+
+  .sectionContainerEditable {
+    max-width: 100%;
+    padding: 20px;
   }
 }

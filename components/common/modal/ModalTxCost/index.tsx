@@ -1,4 +1,8 @@
+import { useEffect, useState } from 'react';
+
 import { Gas } from 'types/Gas';
+
+import getExchangeRate from 'utils/getExchangeRate';
 
 import styles from './style.module.scss';
 
@@ -7,13 +11,24 @@ type Props = {
 };
 
 function ModalTxCost({ gas }: Props) {
-  const { usd, gwei, eth } = gas;
+  const { gwei, eth } = gas;
+
+  const [exchangeRate, setExchangeRate] = useState(1);
+
+  useEffect(() => {
+    getRate();
+  }, []);
+
+  async function getRate() {
+    const rate = await getExchangeRate('ETH');
+    setExchangeRate(rate);
+  }
 
   return (
     <section className={styles.container}>
       <p>Approximate tx cost</p>
       <p>
-        {usd && `$ ${usd} /`} {eth && `${eth} ETH / `}
+        {eth && `$ ${(parseFloat(eth) * exchangeRate).toFixed(2)} /`} {eth && `${eth} ETH / `}
         {gwei && `${gwei} GWEI`}
       </p>
     </section>

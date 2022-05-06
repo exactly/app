@@ -16,7 +16,7 @@
     "graphql": "^16.3.0",
     "graphql-request": "^4.0.0",
     "next": "^12.1.5",
-    "protocol": "git+https://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:x-oauth-basic@github.com/exactly-finance/protocol.git#feature/periphery",
+    "protocol": "git+https://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:x-oauth-basic@github.com/exactly-finance/protocol.git#deploy",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "react-dropdown": "^1.9.2",
@@ -25,6 +25,7 @@
     "web3modal": "^1.9.7"
   },
   "devDependencies": {
+    "@types/gtag.js": "^0.0.10",
     "@types/react": "17.0.19",
     "eslint": "7.32.0",
     "eslint-config-next": "11.1.2",

@@ -1,10 +1,11 @@
 {
   "en": {
     "withdraw": "Withdraw",
+    "earlyWithdraw": "Early Withdraw",
     "maturityPool": "Maturity Pool",
-    "exactlyBalance": "Deposited Amount",
-    "interestRate": "Interest Rate",
-    "interestRateSlippage": "Interest Rate Slippage"
+    "amountAtFinish": "Amount At Finish",
+    "amountToReceive": "Amount To Receive",
+    "amountSlippage": "Minimum Amount To Receive"
   },
   "es": {}
 }

@@ -1,7 +1,9 @@
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 
 import formatNumber from 'utils/formatNumber';
 import parseSymbol from 'utils/parseSymbol';
+import getExchangeRate from 'utils/getExchangeRate';
 
 import AssetSelector from 'components/AssetSelector';
 
@@ -15,7 +17,25 @@ type Props = {
 };
 
 function ModalAsset({ asset, amount, editable, defaultAddress }: Props) {
+  const [exchangeRate, setExchangeRate] = useState(1);
+
   const parsedSymbol = parseSymbol(asset);
+
+  useEffect(() => {
+    if (
+      !parsedSymbol ||
+      parsedSymbol.toLocaleLowerCase() === 'dai' ||
+      parsedSymbol.toLocaleLowerCase() === 'usdc'
+    )
+      return;
+
+    getRate();
+  }, [parsedSymbol]);
+
+  async function getRate() {
+    const rate = await getExchangeRate(parsedSymbol!);
+    setExchangeRate(rate);
+  }
 
   return (
     <div className={styles.assetContainer}>
@@ -38,7 +58,9 @@ function ModalAsset({ asset, amount, editable, defaultAddress }: Props) {
           <p className={styles.price}>
             {formatNumber(amount, asset)} {parsedSymbol}
           </p>
-          <p className={styles.secondaryPrice}>$ 1M</p>
+          <p className={styles.secondaryPrice}>
+            $ {(parseFloat(amount) * exchangeRate).toFixed(2)}
+          </p>
         </div>
       )}
     </div>

@@ -4,6 +4,7 @@ function formatNumber(number: string | number, symbol: string) {
   const parsedNumber = typeof number == 'string' ? parseFloat(number) : number;
 
   const dictionary: Dictionary<number> = {
+    USD: 2,
     DAI: 2,
     USDC: 2,
     WETH: 8,
