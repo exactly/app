@@ -251,7 +251,7 @@ function BorrowModal({ data, editable, closeModal }: Props) {
                 value={date?.label ?? parseTimestamp(maturity)}
                 editable={editable}
               />
-              <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} />
+              <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} symbol={symbol!} />
               {gas && <ModalTxCost gas={gas} />}
               <ModalRow text={translations[lang].interestRate} value={`${fixedRate}%`} line />
               <ModalRowEditable

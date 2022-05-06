@@ -1,16 +1,34 @@
-import { ChangeEventHandler, MouseEventHandler } from 'react';
+import { useState, ChangeEventHandler, MouseEventHandler, useEffect } from 'react';
+
+import getExchangeRate from 'utils/getExchangeRate';
+
 import styles from './style.module.scss';
 
 type Props = {
   value?: string;
-  onChange?: ChangeEventHandler;
   name?: string;
   disabled?: boolean;
+  symbol?: string;
+  onChange?: ChangeEventHandler;
   onMax?: MouseEventHandler;
 };
 
-function ModalInput({ value, onChange, name, disabled, onMax }: Props) {
+function ModalInput({ value, name, disabled, symbol, onChange, onMax }: Props) {
+  const [exchangeRate, setExchangeRate] = useState(1);
+
   const blockedCharacters = ['e', 'E', '+', '-'];
+
+  useEffect(() => {
+    if (!symbol || symbol.toLocaleLowerCase() === 'dai' || symbol.toLocaleLowerCase() === 'usdc')
+      return;
+
+    getRate();
+  }, [symbol]);
+
+  async function getRate() {
+    const rate = await getExchangeRate(symbol!);
+    setExchangeRate(rate);
+  }
 
   return (
     <section className={styles.inputSection}>
@@ -27,7 +45,9 @@ function ModalInput({ value, onChange, name, disabled, onMax }: Props) {
         step="any"
         autoFocus
       />
-      <p className={styles.translatedValue}>$ {value == '' ? 0 : value}</p>
+      <p className={styles.translatedValue}>
+        $ {value == '' || !value ? 0 : (parseFloat(value) * exchangeRate).toFixed(2)}
+      </p>
       {onMax && (
         <p className={styles.max} onClick={onMax}>
           MAX

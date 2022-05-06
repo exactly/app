@@ -198,7 +198,7 @@ function RepayModal({ data, closeModal }: Props) {
               <ModalAsset asset={symbol!} amount={finalAmount} />
               <ModalClose closeModal={closeModal} />
               <ModalRow text={translations[lang].maturityPool} value={parseTimestamp(maturity)} />
-              <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} />
+              <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} symbol={symbol!} />
               {gas && <ModalTxCost gas={gas} />}
               <ModalRow
                 text={translations[lang].amountAtFinish}
