@@ -20,9 +20,11 @@ import { LangKeys } from 'types/Lang';
 import { UnderlyingData } from 'types/Underlying';
 import { Gas } from 'types/Gas';
 import { Transaction } from 'types/Transaction';
+import { Dictionary } from 'types/Dictionary';
 
 import { getContractData } from 'utils/contracts';
 import { getUnderlyingData } from 'utils/utils';
+import parseHealthFactor from 'utils/parseHealthFactor';
 
 import numbers from 'config/numbers.json';
 
@@ -31,6 +33,8 @@ import styles from './style.module.scss';
 import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 import FixedLenderContext from 'contexts/FixedLenderContext';
+import PreviewerContext from 'contexts/PreviewerContext';
+import AuditorContext from 'contexts/AuditorContext';
 
 import keys from './translations.json';
 
@@ -48,6 +52,8 @@ function DepositModalSP({ data, closeModal }: Props) {
   const translations: { [key: string]: LangKeys } = keys;
 
   const fixedLenderData = useContext(FixedLenderContext);
+  const previewerData = useContext(PreviewerContext);
+  const auditorData = useContext(AuditorContext);
 
   const [qty, setQty] = useState<string>('');
   const [walletBalance, setWalletBalance] = useState<string | undefined>(undefined);
@@ -57,6 +63,7 @@ function DepositModalSP({ data, closeModal }: Props) {
   const [step, setStep] = useState<number>(1);
   const [pending, setPending] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
+  const [healthFactor, setHealthFactor] = useState<Dictionary<number>>();
 
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
     undefined
@@ -74,10 +81,17 @@ function DepositModalSP({ data, closeModal }: Props) {
     web3Provider?.getSigner()
   );
 
+  const previewerContract = getContractData(previewerData.address!, previewerData.abi!);
+
   useEffect(() => {
     getFixedLenderContract();
     getWalletBalance();
   }, []);
+
+  useEffect(() => {
+    if (!walletAddress) return;
+    getHealthFactor();
+  }, [walletAddress]);
 
   useEffect(() => {
     if (fixedLenderWithSigner && !gas) {
@@ -132,6 +146,22 @@ function DepositModalSP({ data, closeModal }: Props) {
 
     if (formattedBalance) {
       setWalletBalance(formattedBalance);
+    }
+  }
+
+  async function getHealthFactor() {
+    try {
+      const accountLiquidity = await previewerContract?.accountLiquidity(
+        auditorData.address,
+        walletAddress
+      );
+
+      const collateral = parseFloat(ethers.utils.formatEther(accountLiquidity[0]));
+      const debt = parseFloat(ethers.utils.formatEther(accountLiquidity[1]));
+
+      setHealthFactor({ debt, collateral });
+    } catch (e) {
+      console.log(e);
     }
   }
 
@@ -217,7 +247,18 @@ function DepositModalSP({ data, closeModal }: Props) {
               {gas && <ModalTxCost gas={gas} />}
               <ModalRow text={translations[lang].exactlyBalance} value="$ XXXX" line />
               <ModalRow text={translations[lang].interestRate} value="X %" line />
-              <ModalRow text={translations[lang].healthFactor} values={['1.1', '1.8']} line />
+              {healthFactor && (
+                <ModalRow
+                  text={translations[lang].healthFactor}
+                  values={[
+                    parseHealthFactor(healthFactor.debt, healthFactor.collateral),
+                    parseHealthFactor(
+                      healthFactor.debt,
+                      healthFactor.collateral + parseFloat(qty || '0')
+                    )
+                  ]}
+                />
+              )}
               <ModalRow text={translations[lang].borrowLimit} values={['100K', '150K']} />
               <ModalStepper currentStep={step} totalSteps={3} />
               <div className={styles.buttonContainer}>

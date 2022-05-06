@@ -20,16 +20,20 @@ import { LangKeys } from 'types/Lang';
 import { Gas } from 'types/Gas';
 import { Transaction } from 'types/Transaction';
 import { Decimals } from 'types/Decimals';
+import { Dictionary } from 'types/Dictionary';
 
 import parseTimestamp from 'utils/parseTimestamp';
 import { getContractData } from 'utils/contracts';
 import formatNumber from 'utils/formatNumber';
+import parseHealthFactor from 'utils/parseHealthFactor';
 
 import styles from './style.module.scss';
 
 import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 import FixedLenderContext from 'contexts/FixedLenderContext';
+import PreviewerContext from 'contexts/PreviewerContext';
+import AuditorContext from 'contexts/AuditorContext';
 
 import decimals from 'config/decimals.json';
 
@@ -48,6 +52,8 @@ function RepayModal({ data, closeModal }: Props) {
   const translations: { [key: string]: LangKeys } = keys;
 
   const fixedLenderData = useContext(FixedLenderContext);
+  const previewerData = useContext(PreviewerContext);
+  const auditorData = useContext(AuditorContext);
 
   const parsedFee = ethers.utils.formatUnits(fee, decimals[symbol! as keyof Decimals]);
   const parsedAmount = ethers.utils.formatUnits(assets, decimals[symbol! as keyof Decimals]);
@@ -62,14 +68,22 @@ function RepayModal({ data, closeModal }: Props) {
   const [minimized, setMinimized] = useState<boolean>(false);
   const [editSlippage, setEditSlippage] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
+  const [healthFactor, setHealthFactor] = useState<Dictionary<number>>();
 
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
     undefined
   );
 
+  const previewerContract = getContractData(previewerData.address!, previewerData.abi!);
+
   useEffect(() => {
     getFixedLenderContract();
   }, []);
+
+  useEffect(() => {
+    if (!walletAddress) return;
+    getHealthFactor();
+  }, [walletAddress]);
 
   useEffect(() => {
     if (fixedLenderWithSigner && !gas) {
@@ -102,6 +116,22 @@ function RepayModal({ data, closeModal }: Props) {
     );
 
     setFixedLenderWithSigner(fixedLender);
+  }
+
+  async function getHealthFactor() {
+    try {
+      const accountLiquidity = await previewerContract?.accountLiquidity(
+        auditorData.address,
+        walletAddress
+      );
+
+      const collateral = parseFloat(ethers.utils.formatEther(accountLiquidity[0]));
+      const debt = parseFloat(ethers.utils.formatEther(accountLiquidity[1]));
+
+      setHealthFactor({ debt, collateral });
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   function onMax() {
@@ -193,7 +223,18 @@ function RepayModal({ data, closeModal }: Props) {
                 }}
                 line
               />
-              <ModalRow text={translations[lang].healthFactor} values={['1.1', '1.8']} />
+              {healthFactor && (
+                <ModalRow
+                  text={translations[lang].healthFactor}
+                  values={[
+                    parseHealthFactor(healthFactor.debt, healthFactor.collateral),
+                    parseHealthFactor(
+                      healthFactor.debt - parseFloat(qty || '0'),
+                      healthFactor.collateral
+                    )
+                  ]}
+                />
+              )}
               <div className={styles.buttonContainer}>
                 <Button
                   text={translations[lang].repay}
