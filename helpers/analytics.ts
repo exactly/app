@@ -3,9 +3,11 @@ export const isProd = process.env.NODE_ENV === 'production';
 
 export const pageview = (url: URL) => {
   if (isProd) {
-    window.gtag('config', GA_TRACKING_ID, {
-      page_path: url
-    });
+    if (typeof window !== 'undefined') {
+      window.gtag('config', GA_TRACKING_ID, {
+        page_path: url
+      });
+    }
   }
 };
 

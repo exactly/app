@@ -11,6 +11,8 @@ import { Web3ContextProvider } from 'contexts/Web3Context';
 
 import { LangProvider } from 'contexts/LangContext';
 
+import { pageview } from 'helpers/analytics';
+
 function MyApp({ Component, pageProps }: AppProps) {
   const props = { ...pageProps };
 
@@ -18,8 +20,7 @@ function MyApp({ Component, pageProps }: AppProps) {
 
   useEffect(() => {
     const handleRouteChange = (url: URL) => {
-      // @ts-ignore
-      gtag.pageview(url);
+      pageview(url);
     };
 
     router.events.on('routeChangeComplete', handleRouteChange);
