@@ -278,7 +278,7 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
                 editable={editable}
               />
               <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} symbol={symbol!} />
-              {gas && <ModalTxCost gas={gas} />}
+              <ModalTxCost gas={gas!} />
               <ModalRow text={translations[lang].interestRate} value={`${fixedRate}%`} line />
               <ModalRowEditable
                 text={translations[lang].minimumDepositRate}

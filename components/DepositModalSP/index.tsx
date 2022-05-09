@@ -6,6 +6,7 @@ import ModalAsset from 'components/common/modal/ModalAsset';
 import ModalClose from 'components/common/modal/ModalClose';
 import ModalInput from 'components/common/modal/ModalInput';
 import ModalRow from 'components/common/modal/ModalRow';
+import ModalRowHealthFactor from 'components/common/modal/ModalRowHealthFactor';
 import ModalTitle from 'components/common/modal/ModalTitle';
 import ModalTxCost from 'components/common/modal/ModalTxCost';
 import ModalMinimized from 'components/common/modal/ModalMinimized';
@@ -13,6 +14,7 @@ import ModalWrapper from 'components/common/modal/ModalWrapper';
 import ModalGif from 'components/common/modal/ModalGif';
 import ModalStepper from 'components/common/modal/ModalStepper';
 import Overlay from 'components/Overlay';
+import SkeletonModalRowBeforeAfter from 'components/common/skeletons/SkeletonModalRowBeforeAfter';
 
 import { Borrow } from 'types/Borrow';
 import { Deposit } from 'types/Deposit';
@@ -20,11 +22,10 @@ import { LangKeys } from 'types/Lang';
 import { UnderlyingData } from 'types/Underlying';
 import { Gas } from 'types/Gas';
 import { Transaction } from 'types/Transaction';
-import { Dictionary } from 'types/Dictionary';
+import { HealthFactor } from 'types/HealthFactor';
 
 import { getContractData } from 'utils/contracts';
 import { getUnderlyingData } from 'utils/utils';
-import parseHealthFactor from 'utils/parseHealthFactor';
 
 import numbers from 'config/numbers.json';
 
@@ -63,7 +64,7 @@ function DepositModalSP({ data, closeModal }: Props) {
   const [step, setStep] = useState<number>(1);
   const [pending, setPending] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
-  const [healthFactor, setHealthFactor] = useState<Dictionary<number>>();
+  const [healthFactor, setHealthFactor] = useState<HealthFactor>();
 
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
     undefined
@@ -244,33 +245,29 @@ function DepositModalSP({ data, closeModal }: Props) {
               <ModalAsset asset={symbol!} amount={walletBalance} />
               <ModalClose closeModal={closeModal} />
               <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} symbol={symbol!} />
-              {gas && <ModalTxCost gas={gas} />}
+              <ModalTxCost gas={gas!} />
               <ModalRow text={translations[lang].exactlyBalance} value="$ XXXX" line />
               <ModalRow text={translations[lang].interestRate} value="X %" line />
-              {healthFactor && (
-                <ModalRow
+              {healthFactor ? (
+                <ModalRowHealthFactor
                   text={translations[lang].healthFactor}
-                  values={[
-                    parseHealthFactor(healthFactor.debt, healthFactor.collateral),
-                    parseHealthFactor(
-                      healthFactor.debt,
-                      healthFactor.collateral + parseFloat(qty || '0')
-                    )
-                  ]}
+                  healthFactor={healthFactor}
+                  qty={qty}
+                  operation="deposit"
                 />
+              ) : (
+                <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
               )}
-              <ModalRow text={translations[lang].borrowLimit} values={['100K', '150K']} />
+              {/* <ModalRow text={translations[lang].borrowLimit} values={['100K', '150K']} /> */}
               <ModalStepper currentStep={step} totalSteps={3} />
               <div className={styles.buttonContainer}>
-                {
-                  <Button
-                    text={step == 1 ? translations[lang].approve : translations[lang].deposit}
-                    loading={loading}
-                    className={qty && qty > '0' ? 'primary' : 'disabled'}
-                    disabled={((!qty || qty <= '0') && !pending) || loading}
-                    onClick={handleClickAction}
-                  />
-                }
+                <Button
+                  text={step == 1 ? translations[lang].approve : translations[lang].deposit}
+                  loading={loading}
+                  className={qty && qty > '0' ? 'primary' : 'disabled'}
+                  disabled={((!qty || qty <= '0') && !pending) || loading}
+                  onClick={handleClickAction}
+                />
               </div>
             </>
           )}

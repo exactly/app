@@ -7,12 +7,14 @@ import ModalClose from 'components/common/modal/ModalClose';
 import ModalInput from 'components/common/modal/ModalInput';
 import ModalRow from 'components/common/modal/ModalRow';
 import ModalRowEditable from 'components/common/modal/ModalRowEditable';
+import ModalRowHealthFactor from 'components/common/modal/ModalRowHealthFactor';
 import ModalTitle from 'components/common/modal/ModalTitle';
 import ModalTxCost from 'components/common/modal/ModalTxCost';
 import ModalMinimized from 'components/common/modal/ModalMinimized';
 import ModalWrapper from 'components/common/modal/ModalWrapper';
 import ModalGif from 'components/common/modal/ModalGif';
 import Overlay from 'components/Overlay';
+import SkeletonModalRowBeforeAfter from 'components/common/skeletons/SkeletonModalRowBeforeAfter';
 
 import { Borrow } from 'types/Borrow';
 import { Deposit } from 'types/Deposit';
@@ -20,12 +22,11 @@ import { LangKeys } from 'types/Lang';
 import { Gas } from 'types/Gas';
 import { Transaction } from 'types/Transaction';
 import { Decimals } from 'types/Decimals';
-import { Dictionary } from 'types/Dictionary';
+import { HealthFactor } from 'types/HealthFactor';
 
 import parseTimestamp from 'utils/parseTimestamp';
 import { getContractData } from 'utils/contracts';
 import formatNumber from 'utils/formatNumber';
-import parseHealthFactor from 'utils/parseHealthFactor';
 
 import styles from './style.module.scss';
 
@@ -68,7 +69,7 @@ function RepayModal({ data, closeModal }: Props) {
   const [minimized, setMinimized] = useState<boolean>(false);
   const [editSlippage, setEditSlippage] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
-  const [healthFactor, setHealthFactor] = useState<Dictionary<number>>();
+  const [healthFactor, setHealthFactor] = useState<HealthFactor>();
 
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
     undefined
@@ -199,7 +200,7 @@ function RepayModal({ data, closeModal }: Props) {
               <ModalClose closeModal={closeModal} />
               <ModalRow text={translations[lang].maturityPool} value={parseTimestamp(maturity)} />
               <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} symbol={symbol!} />
-              {gas && <ModalTxCost gas={gas} />}
+              <ModalTxCost gas={gas!} />
               <ModalRow
                 text={translations[lang].amountAtFinish}
                 value={formatNumber(finalAmount, symbol!)}
@@ -223,17 +224,15 @@ function RepayModal({ data, closeModal }: Props) {
                 }}
                 line
               />
-              {healthFactor && (
-                <ModalRow
+              {healthFactor ? (
+                <ModalRowHealthFactor
                   text={translations[lang].healthFactor}
-                  values={[
-                    parseHealthFactor(healthFactor.debt, healthFactor.collateral),
-                    parseHealthFactor(
-                      healthFactor.debt - parseFloat(qty || '0'),
-                      healthFactor.collateral
-                    )
-                  ]}
+                  healthFactor={healthFactor}
+                  qty={qty}
+                  operation="repay"
                 />
+              ) : (
+                <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
               )}
               <div className={styles.buttonContainer}>
                 <Button
