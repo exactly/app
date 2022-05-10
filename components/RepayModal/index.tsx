@@ -200,7 +200,7 @@ function RepayModal({ data, closeModal }: Props) {
               <ModalClose closeModal={closeModal} />
               <ModalRow text={translations[lang].maturityPool} value={parseTimestamp(maturity)} />
               <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} symbol={symbol!} />
-              <ModalTxCost gas={gas!} />
+              <ModalTxCost gas={gas} />
               <ModalRow
                 text={translations[lang].amountAtFinish}
                 value={formatNumber(finalAmount, symbol!)}
@@ -225,12 +225,7 @@ function RepayModal({ data, closeModal }: Props) {
                 line
               />
               {healthFactor ? (
-                <ModalRowHealthFactor
-                  text={translations[lang].healthFactor}
-                  healthFactor={healthFactor}
-                  qty={qty}
-                  operation="repay"
-                />
+                <ModalRowHealthFactor healthFactor={healthFactor} qty={qty} operation="repay" />
               ) : (
                 <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
               )}

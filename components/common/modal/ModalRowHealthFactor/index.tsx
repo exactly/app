@@ -1,18 +1,27 @@
+import { useContext } from 'react';
 import Image from 'next/image';
+
 import { HealthFactor } from 'types/HealthFactor';
+import { LangKeys } from 'types/Lang';
 
 import parseHealthFactor from 'utils/parseHealthFactor';
 
+import LangContext from 'contexts/LangContext';
+
 import styles from './style.module.scss';
 
+import keys from './translations.json';
+
 type Props = {
-  text: string;
   healthFactor?: HealthFactor;
   qty: string;
   operation: string;
 };
 
-function ModalRowHealthFactor({ text, healthFactor, qty, operation }: Props) {
+function ModalRowHealthFactor({ healthFactor, qty, operation }: Props) {
+  const lang: string = useContext(LangContext);
+  const translations: { [key: string]: LangKeys } = keys;
+
   const beforeHealthFactor =
     healthFactor && parseHealthFactor(healthFactor.debt, healthFactor.collateral);
   let afterHealthfactor = beforeHealthFactor;
@@ -42,7 +51,7 @@ function ModalRowHealthFactor({ text, healthFactor, qty, operation }: Props) {
 
   return (
     <section className={`${styles.row} ${styles.line}`}>
-      <p className={styles.text}>{text}</p>
+      <p className={styles.text}>{translations[lang].healthFactor}</p>
       <section className={styles.values}>
         <span className={styles.value}>{beforeHealthFactor}</span>
         <div className={styles.imageContainer}>

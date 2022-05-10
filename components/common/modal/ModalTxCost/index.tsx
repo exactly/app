@@ -13,7 +13,7 @@ import keys from './translations.json';
 import LangContext from 'contexts/LangContext';
 
 type Props = {
-  gas: Gas;
+  gas: Gas | undefined;
 };
 
 function ModalTxCost({ gas }: Props) {

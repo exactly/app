@@ -253,7 +253,7 @@ function BorrowModal({ data, editable, closeModal }: Props) {
                 editable={editable}
               />
               <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} symbol={symbol!} />
-              <ModalTxCost gas={gas!} />
+              <ModalTxCost gas={gas} />
               <ModalRow text={translations[lang].interestRate} value={`${fixedRate}%`} line />
               <ModalRowEditable
                 text={translations[lang].maximumBorrowRate}
@@ -270,12 +270,7 @@ function BorrowModal({ data, editable, closeModal }: Props) {
                 line
               />
               {healthFactor ? (
-                <ModalRowHealthFactor
-                  text={translations[lang].healthFactor}
-                  healthFactor={healthFactor}
-                  qty={qty}
-                  operation="borrow"
-                />
+                <ModalRowHealthFactor healthFactor={healthFactor} qty={qty} operation="borrow" />
               ) : (
                 <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
               )}
