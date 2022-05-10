@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
+import Skeleton from 'react-loading-skeleton';
 
 import formatNumber from 'utils/formatNumber';
 import parseSymbol from 'utils/parseSymbol';
@@ -53,7 +54,7 @@ function ModalAsset({ asset, amount, editable, defaultAddress }: Props) {
         )}
         {editable && <AssetSelector defaultAddress={defaultAddress} />}
       </div>
-      {amount && (
+      {amount ? (
         <div className={styles.assetPriceContainer}>
           <p className={styles.price}>
             {formatNumber(amount, asset)} {parsedSymbol}
@@ -61,6 +62,10 @@ function ModalAsset({ asset, amount, editable, defaultAddress }: Props) {
           <p className={styles.secondaryPrice}>
             $ {(parseFloat(amount) * exchangeRate).toFixed(2)}
           </p>
+        </div>
+      ) : (
+        <div className={styles.skeleton}>
+          <Skeleton count={2} width={50} />
         </div>
       )}
     </div>

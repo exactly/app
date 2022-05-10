@@ -6,6 +6,8 @@ import ModalAsset from 'components/common/modal/ModalAsset';
 import ModalClose from 'components/common/modal/ModalClose';
 import ModalInput from 'components/common/modal/ModalInput';
 import ModalRow from 'components/common/modal/ModalRow';
+import ModalRowHealthFactor from 'components/common/modal/ModalRowHealthFactor';
+import SkeletonModalRowBeforeAfter from 'components/common/skeletons/SkeletonModalRowBeforeAfter';
 import ModalTitle from 'components/common/modal/ModalTitle';
 import ModalTxCost from 'components/common/modal/ModalTxCost';
 import ModalMinimized from 'components/common/modal/ModalMinimized';
@@ -22,12 +24,11 @@ import { UnderlyingData } from 'types/Underlying';
 import { Gas } from 'types/Gas';
 import { Transaction } from 'types/Transaction';
 import { Decimals } from 'types/Decimals';
-import { Dictionary } from 'types/Dictionary';
+import { HealthFactor } from 'types/HealthFactor';
 
 import { getContractData } from 'utils/contracts';
 import { getUnderlyingData, getSymbol } from 'utils/utils';
 import parseTimestamp from 'utils/parseTimestamp';
-import parseHealthFactor from 'utils/parseHealthFactor';
 
 import styles from './style.module.scss';
 
@@ -71,7 +72,7 @@ function BorrowModal({ data, editable, closeModal }: Props) {
   const [slippage, setSlippage] = useState<string>('0.5');
   const [editSlippage, setEditSlippage] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
-  const [healthFactor, setHealthFactor] = useState<Dictionary<number>>();
+  const [healthFactor, setHealthFactor] = useState<HealthFactor>();
 
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
     undefined
@@ -252,7 +253,7 @@ function BorrowModal({ data, editable, closeModal }: Props) {
                 editable={editable}
               />
               <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} symbol={symbol!} />
-              {gas && <ModalTxCost gas={gas} />}
+              <ModalTxCost gas={gas} />
               <ModalRow text={translations[lang].interestRate} value={`${fixedRate}%`} line />
               <ModalRowEditable
                 text={translations[lang].maximumBorrowRate}
@@ -268,17 +269,10 @@ function BorrowModal({ data, editable, closeModal }: Props) {
                 }}
                 line
               />
-              {healthFactor && (
-                <ModalRow
-                  text={translations[lang].healthFactor}
-                  values={[
-                    parseHealthFactor(healthFactor.debt, healthFactor.collateral),
-                    parseHealthFactor(
-                      healthFactor.debt + parseFloat(qty || '0'),
-                      healthFactor.collateral
-                    )
-                  ]}
-                />
+              {healthFactor ? (
+                <ModalRowHealthFactor healthFactor={healthFactor} qty={qty} operation="borrow" />
+              ) : (
+                <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
               )}
               <div className={styles.buttonContainer}>
                 <Button
