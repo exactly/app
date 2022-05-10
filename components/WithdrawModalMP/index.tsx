@@ -175,7 +175,7 @@ function WithdrawModalMP({ data, closeModal }: Props) {
   return (
     <>
       {!minimized && (
-        <ModalWrapper>
+        <ModalWrapper closeModal={closeModal}>
           {!tx && (
             <>
               <ModalTitle
