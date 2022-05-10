@@ -14,9 +14,9 @@ function ModalWrapper({ children, closeModal }: Props) {
       }
     };
 
-    window.addEventListener('keydown', close);
+    window.addEventListener('keyup', close);
 
-    return () => window.removeEventListener('keydown', close);
+    return () => window.removeEventListener('keyup', close);
   }, []);
 
   return <section className={styles.formContainer}>{children}</section>;
