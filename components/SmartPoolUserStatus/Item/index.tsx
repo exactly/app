@@ -61,7 +61,7 @@ function Item({ symbol, amount, walletAddress, showModal, deposit, auditorContra
      * "assets" is a bitMap
      * "marketIndex" is the index of the market we want to check if has collateral
      * with "<<" (leftshift) we check if the bit in the marketIndex is 0 or not
-     * if its 0 dosen't enter the market y is different to 0 has enter the market
+     * if its 0 dosen't enter the market is different to 0 has enter the market
      */
 
     !assets.and(1 << marketIndex).eq(0) ? setToggle(true) : setToggle(false);
