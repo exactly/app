@@ -31,8 +31,8 @@ function DashboardHeader() {
 
   const previewerContract = getContractData(previewerData.address!, previewerData.abi!);
 
-  const [healthFactor, setHealthFactor] = useState<Dictionary<number>>();
-  const [healthFactorData, setHealthFactorData] = useState<Array<DonutData>>();
+  const [healthFactor, setHealthFactor] = useState<Dictionary<number> | undefined>(undefined);
+  const [healthFactorData, setHealthFactorData] = useState<Array<DonutData> | undefined>(undefined);
 
   const notConnected = [
     {
@@ -97,22 +97,22 @@ function DashboardHeader() {
 
       const parsedCollateral = parseFloat(ethers.utils.formatEther(accountLiquidity[0]));
       const parsedDebt = parseFloat(ethers.utils.formatEther(accountLiquidity[1]));
-
-      const healthFactorData = [
-        {
-          label: '',
-          value: parsedCollateral,
-          color: '#63CA10'
-        },
-        {
-          label: '',
-          value: parsedDebt,
-          color: '#AF0606'
-        }
-      ];
-
-      setHealthFactorData(healthFactorData);
-      setHealthFactor({ collateral: parsedCollateral, debt: parsedDebt });
+      if (parsedCollateral > 0 || parsedDebt > 0) {
+        const healthFactorData = [
+          {
+            label: '',
+            value: parsedCollateral,
+            color: '#63CA10'
+          },
+          {
+            label: '',
+            value: parsedDebt,
+            color: '#AF0606'
+          }
+        ];
+        setHealthFactorData(healthFactorData);
+        setHealthFactor({ collateral: parsedCollateral, debt: parsedDebt });
+      }
     } catch (e) {
       console.log(e);
     }
@@ -209,28 +209,30 @@ function DashboardHeader() {
                   <span className={styles.collateral} />
                   {translations[lang].collateral}
                 </p>
-                <p className={styles.informationValue}>
-                  {healthFactor &&
-                    (
+                {healthFactor && (
+                  <p className={styles.informationValue}>
+                    {(
                       (healthFactor.collateral / (healthFactor.collateral + healthFactor.debt)) *
                       100
                     ).toFixed(2)}
-                  %
-                </p>
+                    %
+                  </p>
+                )}
               </div>
               <div className={styles.information}>
                 <p className={styles.informationTitle}>
                   <span className={styles.debt} />
                   {translations[lang].debt}
                 </p>
-                <p className={styles.informationValue}>
-                  {healthFactor &&
-                    (
+                {healthFactor && (
+                  <p className={styles.informationValue}>
+                    {(
                       (healthFactor.debt / (healthFactor.collateral + healthFactor.debt)) *
                       100
                     ).toFixed(2)}
-                  %
-                </p>
+                    %
+                  </p>
+                )}
               </div>
             </div>
           )}

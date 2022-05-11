@@ -1,13 +1,11 @@
 import { useContext, useEffect, useState } from 'react';
-import { ethers } from 'ethers';
+import { ethers, Contract } from 'ethers';
 import Button from 'components/common/Button';
 import Switch from 'components/common/Switch';
 import Loading from 'components/common/Loading';
 
-import AuditorContext from 'contexts/AuditorContext';
 import FixedLenderContext from 'contexts/FixedLenderContext';
 import LangContext from 'contexts/LangContext';
-import { useWeb3Context } from 'contexts/Web3Context';
 
 import { LangKeys } from 'types/Lang';
 import { Deposit } from 'types/Deposit';
@@ -29,11 +27,10 @@ type Props = {
   walletAddress: string | null | undefined;
   showModal: (data: Deposit, type: String) => void;
   deposit: Deposit;
+  auditorContract: Contract | undefined;
 };
 
-function Item({ symbol, amount, walletAddress, showModal, deposit }: Props) {
-  const { web3Provider } = useWeb3Context();
-  const auditor = useContext(AuditorContext);
+function Item({ symbol, amount, walletAddress, showModal, deposit, auditorContract }: Props) {
   const fixedLender = useContext(FixedLenderContext);
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
@@ -42,17 +39,33 @@ function Item({ symbol, amount, walletAddress, showModal, deposit }: Props) {
   const [loading, setLoading] = useState<boolean>(false);
   const [walletBalance, setWalletBalance] = useState<string | undefined>(undefined);
 
-  const auditorContract = getContractData(
-    auditor.address!,
-    auditor.abi!,
-    web3Provider?.getSigner()
-  );
-
   const underlyingData = getUnderlyingData(process.env.NEXT_PUBLIC_NETWORK!, symbol);
 
   useEffect(() => {
     getCurrentBalance();
   }, []);
+
+  useEffect(() => {
+    if (auditorContract) {
+      checkCollaterals();
+    }
+  }, [walletAddress]);
+
+  async function checkCollaterals() {
+    const fixedLenderAddress = getFixedLenderAddress();
+    const allMarkets = await auditorContract?.getAllMarkets();
+    const marketIndex = allMarkets.indexOf(fixedLenderAddress);
+    const assets = await auditorContract?.accountAssets(walletAddress);
+
+    /**
+     * "assets" is a bitMap
+     * "marketIndex" is the index of the market we want to check if has collateral
+     * with "<<" (leftshift) we check if the bit in the marketIndex is 0 or not
+     * if its 0 dosen't enter the market is different to 0 has enter the market
+     */
+
+    !assets.and(1 << marketIndex).eq(0) ? setToggle(true) : setToggle(false);
+  }
 
   async function getCurrentBalance() {
     const contractData = await getContractData(underlyingData!.address, underlyingData!.abi);
@@ -63,20 +76,26 @@ function Item({ symbol, amount, walletAddress, showModal, deposit }: Props) {
     }
   }
 
+  function getFixedLenderAddress() {
+    const filteredFixedLender = fixedLender.find((contract) => {
+      const args: Array<string> | undefined = contract?.args;
+      const contractSymbol: string | undefined = args && args[1];
+
+      return contractSymbol === symbol;
+    });
+
+    const fixedLenderAddress = filteredFixedLender?.address;
+
+    return fixedLenderAddress;
+  }
+
   async function handleMarket() {
     try {
       let tx;
 
       setLoading(true);
 
-      const filteredFixedLender = fixedLender.find((contract) => {
-        const args: Array<string> | undefined = contract?.args;
-        const contractSymbol: string | undefined = args && args[1];
-
-        return contractSymbol === symbol;
-      });
-
-      const fixedLenderAddress = filteredFixedLender?.address;
+      const fixedLenderAddress = getFixedLenderAddress();
 
       if (!toggle && fixedLenderAddress) {
         //if it's not toggled we need to ENTER
@@ -130,7 +149,7 @@ function Item({ symbol, amount, walletAddress, showModal, deposit }: Props) {
           />
         ) : (
           <div className={styles.loadingContainer}>
-            <Loading size="small" />
+            <Loading size="small" color="primary" />
           </div>
         )}
       </span>

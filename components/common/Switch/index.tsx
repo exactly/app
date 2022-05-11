@@ -20,7 +20,10 @@ const Switch = ({ isOn, handleToggle, id, disabled }: Props) => {
         type="checkbox"
         disabled={disabled}
       />
-      <label className={disabled ? styles.disabled : styles.label} htmlFor={id}>
+      <label
+        className={disabled ? styles.disabled : isOn ? styles.label : styles.labelOff}
+        htmlFor={id}
+      >
         <span className={styles.button} />
       </label>
     </>

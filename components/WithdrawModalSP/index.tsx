@@ -6,12 +6,14 @@ import ModalAsset from 'components/common/modal/ModalAsset';
 import ModalClose from 'components/common/modal/ModalClose';
 import ModalInput from 'components/common/modal/ModalInput';
 import ModalRow from 'components/common/modal/ModalRow';
+import ModalRowHealthFactor from 'components/common/modal/ModalRowHealthFactor';
 import ModalTitle from 'components/common/modal/ModalTitle';
 import ModalTxCost from 'components/common/modal/ModalTxCost';
 import ModalMinimized from 'components/common/modal/ModalMinimized';
 import ModalWrapper from 'components/common/modal/ModalWrapper';
 import ModalGif from 'components/common/modal/ModalGif';
 import Overlay from 'components/Overlay';
+import SkeletonModalRowBeforeAfter from 'components/common/skeletons/SkeletonModalRowBeforeAfter';
 
 import { Borrow } from 'types/Borrow';
 import { Deposit } from 'types/Deposit';
@@ -19,7 +21,7 @@ import { LangKeys } from 'types/Lang';
 import { Gas } from 'types/Gas';
 import { Transaction } from 'types/Transaction';
 import { Decimals } from 'types/Decimals';
-import { Dictionary } from 'types/Dictionary';
+import { HealthFactor } from 'types/HealthFactor';
 
 import styles from './style.module.scss';
 
@@ -30,7 +32,6 @@ import PreviewerContext from 'contexts/PreviewerContext';
 import AuditorContext from 'contexts/AuditorContext';
 
 import { getContractData } from 'utils/contracts';
-import parseHealthFactor from 'utils/parseHealthFactor';
 
 import decimals from 'config/decimals.json';
 
@@ -58,7 +59,7 @@ function WithdrawModalSP({ data, closeModal }: Props) {
   const [tx, setTx] = useState<Transaction | undefined>(undefined);
   const [minimized, setMinimized] = useState<Boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
-  const [healthFactor, setHealthFactor] = useState<Dictionary<number>>();
+  const [healthFactor, setHealthFactor] = useState<HealthFactor>();
 
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
     undefined
@@ -169,24 +170,16 @@ function WithdrawModalSP({ data, closeModal }: Props) {
           {!tx && (
             <>
               <ModalTitle title={translations[lang].withdraw} />
-              <ModalAsset asset={symbol!} />
+              <ModalAsset asset={symbol!} amount={parsedAmount} />
               <ModalClose closeModal={closeModal} />
               <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} symbol={symbol!} />
-              {gas && <ModalTxCost gas={gas} />}
+              <ModalTxCost gas={gas} />
               <ModalRow text={translations[lang].exactlyBalance} value={parsedAmount} line />
-              {healthFactor && (
-                <ModalRow
-                  text={translations[lang].healthFactor}
-                  values={[
-                    parseHealthFactor(healthFactor.debt, healthFactor.collateral),
-                    parseHealthFactor(
-                      healthFactor.debt,
-                      healthFactor.collateral - parseFloat(qty || '0')
-                    )
-                  ]}
-                />
+              {healthFactor ? (
+                <ModalRowHealthFactor healthFactor={healthFactor} qty={qty} operation="withdraw" />
+              ) : (
+                <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
               )}
-              <ModalRow text={translations[lang].borrowLimit} values={['1000', '2000']} />
               <div className={styles.buttonContainer}>
                 <Button
                   text={translations[lang].withdraw}

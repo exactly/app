@@ -3,6 +3,8 @@ import { useContext } from 'react';
 import Item from './Item';
 
 import LangContext from 'contexts/LangContext';
+import { useWeb3Context } from 'contexts/Web3Context';
+import AuditorContext from 'contexts/AuditorContext';
 
 import { LangKeys } from 'types/Lang';
 import { Deposit } from 'types/Deposit';
@@ -11,6 +13,8 @@ import { Dictionary } from 'types/Dictionary';
 import styles from './style.module.scss';
 
 import keys from './translations.json';
+
+import { getContractData } from 'utils/contracts';
 
 type Props = {
   walletAddress: string | null | undefined;
@@ -21,6 +25,14 @@ type Props = {
 function SmartPoolUserStatus({ deposits, walletAddress, showModal }: Props) {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
+  const auditor = useContext(AuditorContext);
+  const { web3Provider } = useWeb3Context();
+
+  const auditorContract = getContractData(
+    auditor.address!,
+    auditor.abi!,
+    web3Provider?.getSigner()
+  );
 
   return (
     <div className={styles.container}>
@@ -39,7 +51,6 @@ function SmartPoolUserStatus({ deposits, walletAddress, showModal }: Props) {
           {deposits &&
             Object.keys(deposits).map((symbol: string, key: number) => {
               const amount: string = JSON.stringify(deposits[symbol].assets);
-
               return (
                 <Item
                   key={key}
@@ -48,6 +59,7 @@ function SmartPoolUserStatus({ deposits, walletAddress, showModal }: Props) {
                   walletAddress={walletAddress}
                   deposit={deposits[symbol]}
                   showModal={showModal}
+                  auditorContract={auditorContract}
                 />
               );
             })}
