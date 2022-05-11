@@ -1,4 +1,5 @@
-import { ReactNode, useEffect } from 'react';
+import { ReactNode } from 'react';
+import ModalClose from '../ModalClose';
 import styles from './style.module.scss';
 
 interface Props {
@@ -7,19 +8,12 @@ interface Props {
 }
 
 function ModalWrapper({ children, closeModal }: Props) {
-  useEffect(() => {
-    const close = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        closeModal(e);
-      }
-    };
-
-    window.addEventListener('keyup', close);
-
-    return () => window.removeEventListener('keyup', close);
-  }, []);
-
-  return <section className={styles.formContainer}>{children}</section>;
+  return (
+    <section className={styles.formContainer}>
+      <ModalClose closeModal={closeModal} />
+      {children}
+    </section>
+  );
 }
 
 export default ModalWrapper;

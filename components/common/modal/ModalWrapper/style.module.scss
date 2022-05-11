@@ -11,6 +11,13 @@
   flex-direction: column;
   z-index: 6;
   border-radius: var(--smallUnit);
+
+  .close {
+    position: absolute;
+    width: var(--u3);
+    height: var(--u3);
+    right: var(--u3);
+  }
 }
 
 @media (max-width: 769px) {

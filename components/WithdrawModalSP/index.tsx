@@ -196,7 +196,6 @@ function WithdrawModalSP({ data, closeModal }: Props) {
             <>
               <ModalTitle title={translations[lang].withdraw} />
               <ModalAsset asset={symbol!} amount={parsedAmount} />
-              <ModalClose closeModal={closeModal} />
               <ModalInput
                 onMax={onMax}
                 value={qty}

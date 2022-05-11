@@ -262,7 +262,6 @@ function BorrowModal({ data, editable, closeModal }: Props) {
                 editable={editable}
                 defaultAddress={marketAddress}
               />
-              <ModalClose closeModal={closeModal} />
               <ModalMaturityEditable
                 text={translations[lang].maturityPool}
                 value={date?.label ?? parseTimestamp(maturity)}

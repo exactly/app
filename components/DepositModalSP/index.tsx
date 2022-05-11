@@ -304,7 +304,6 @@ function DepositModalSP({ data, closeModal }: Props) {
             <>
               <ModalTitle title={translations[lang].deposit} />
               <ModalAsset asset={symbol!} amount={walletBalance} />
-              <ModalClose closeModal={closeModal} />
               <ModalInput
                 onMax={onMax}
                 value={qty}
