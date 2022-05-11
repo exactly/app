@@ -2,6 +2,7 @@
   height: 0;
   width: 0;
   visibility: hidden;
+  position: absolute;
 }
 
 .label {
@@ -32,7 +33,17 @@
 .disabled {
   @extend .label;
   background: var(--gray-50);
-  border: 1px solid var(--gray-100);
+  border: none;
+
+  .button {
+    background: var(--gray-200);
+  }
+}
+
+.labelOff {
+  @extend .label;
+  background: var(--white);
+  border: 1px solid var(--gray-200);
 
   .button {
     background: var(--gray-200);
