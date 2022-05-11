@@ -196,7 +196,7 @@ function DepositModalSP({ data, closeModal }: Props) {
     const gasPriceInGwei = await fixedLenderWithSigner?.provider.getGasPrice();
 
     const estimatedGasCost = await fixedLenderWithSigner?.estimateGas.deposit(
-      ethers.utils.parseUnits(1!.toString()),
+      ethers.utils.parseUnits(`${numbers.estimateGasAmount}`),
       walletAddress
     );
 
