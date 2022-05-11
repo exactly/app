@@ -199,12 +199,10 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
   async function estimateGas() {
     const gasPriceInGwei = await fixedLenderWithSigner?.provider.getGasPrice();
 
-    const minAmount = 1 * (1 - parseFloat(slippage) / 100);
-
     const estimatedGasCost = await fixedLenderWithSigner?.estimateGas.depositAtMaturity(
       parseInt(date?.value ?? maturity),
-      ethers.utils.parseUnits('1'),
-      ethers.utils.parseUnits(`${minAmount}`),
+      ethers.utils.parseUnits(`${numbers.estimateGasAmount}`),
+      ethers.utils.parseUnits('0'),
       walletAddress
     );
 

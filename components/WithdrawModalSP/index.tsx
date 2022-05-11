@@ -34,6 +34,7 @@ import AuditorContext from 'contexts/AuditorContext';
 import { getContractData } from 'utils/contracts';
 
 import decimals from 'config/decimals.json';
+import numbers from 'config/numbers.json';
 
 import keys from './translations.json';
 
@@ -132,7 +133,7 @@ function WithdrawModalSP({ data, closeModal }: Props) {
     const gasPriceInGwei = await fixedLenderWithSigner?.provider.getGasPrice();
 
     const estimatedGasCost = await fixedLenderWithSigner?.estimateGas.withdraw(
-      ethers.utils.parseUnits('1'),
+      ethers.utils.parseUnits(`${numbers.estimateGasAmount}`),
       walletAddress,
       walletAddress
     );
