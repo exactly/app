@@ -33,6 +33,7 @@ import FixedLenderContext from 'contexts/FixedLenderContext';
 import PreviewerContext from 'contexts/PreviewerContext';
 
 import decimals from 'config/decimals.json';
+import numbers from 'config/numbers.json';
 
 import keys from './translations.json';
 
@@ -139,7 +140,7 @@ function WithdrawModalMP({ data, closeModal }: Props) {
 
     const estimatedGasCost = await fixedLenderWithSigner?.estimateGas.withdrawAtMaturity(
       maturity,
-      ethers.utils.parseUnits('1'),
+      ethers.utils.parseUnits(`${numbers.estimateGasAmount}`),
       ethers.utils.parseUnits('0'),
       walletAddress,
       walletAddress

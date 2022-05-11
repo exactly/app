@@ -37,6 +37,7 @@ import PreviewerContext from 'contexts/PreviewerContext';
 import AuditorContext from 'contexts/AuditorContext';
 
 import decimals from 'config/decimals.json';
+import numbers from 'config/numbers.json';
 
 import keys from './translations.json';
 
@@ -173,8 +174,8 @@ function RepayModal({ data, closeModal }: Props) {
 
     const estimatedGasCost = await fixedLenderWithSigner?.estimateGas.repayAtMaturity(
       maturity,
-      ethers.utils.parseUnits('1'),
-      ethers.utils.parseUnits('2'),
+      ethers.utils.parseUnits(`${numbers.estimateGasAmount}`),
+      ethers.utils.parseUnits(`${numbers.estimateGasAmount * 2}`),
       walletAddress
     );
 

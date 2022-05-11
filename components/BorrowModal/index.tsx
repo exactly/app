@@ -40,6 +40,7 @@ import PreviewerContext from 'contexts/PreviewerContext';
 import AuditorContext from 'contexts/AuditorContext';
 
 import decimals from 'config/decimals.json';
+import numbers from 'config/numbers.json';
 
 import keys from './translations.json';
 
@@ -180,12 +181,10 @@ function BorrowModal({ data, editable, closeModal }: Props) {
   async function estimateGas() {
     const gasPriceInGwei = await fixedLenderWithSigner?.provider.getGasPrice();
 
-    const maxAmount = 1 * (1 + parseFloat(slippage) / 100);
-
     const estimatedGasCost = await fixedLenderWithSigner?.estimateGas.borrowAtMaturity(
       parseInt(date?.value ?? maturity),
-      ethers.utils.parseUnits('1'),
-      ethers.utils.parseUnits(`${maxAmount}`),
+      ethers.utils.parseUnits(`${numbers.estimateGasAmount}`),
+      ethers.utils.parseUnits(`${numbers.estimateGasAmount * 1.1}`),
       walletAddress,
       walletAddress
     );
