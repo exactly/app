@@ -29,17 +29,6 @@ function MaturityPoolDashboard({ deposits, borrows, showModal, tab }: Props) {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
-  const filterByAsset = {
-    label: translations[lang].filterAsset,
-    value: 'asset'
-  };
-
-  const filterByMaturity = {
-    label: translations[lang].filterMaturity,
-    value: 'maturity'
-  };
-
-  const [filter, setFilter] = useState<Option>(filterByAsset);
   const [defaultMaturity, setDefaultMaturity] = useState<string>();
 
   useEffect(() => {
@@ -58,21 +47,11 @@ function MaturityPoolDashboard({ deposits, borrows, showModal, tab }: Props) {
 
   return (
     <section className={styles.container}>
-      <div className={styles.titleContainer}>
-        <p className={styles.title}>{translations[lang].maturityPools}</p>
-        <Tooltip value={translations[lang].maturityPools} />
-      </div>
       <section className={styles.sectionContainer}>
-        <div className={styles.selectContainer}>
-          <Select
-            onChange={(option: Option) => {
-              setFilter(option);
-            }}
-            options={[filterByAsset, filterByMaturity]}
-            value={filter}
-          />
+        <div className={styles.titleContainer}>
+          <p className={styles.title}>{translations[lang].maturityPools}</p>
+          <Tooltip value={translations[lang].maturityPools} />
         </div>
-
         <div className={styles.buttonContainer}>
           <Button
             text={
@@ -90,22 +69,12 @@ function MaturityPoolDashboard({ deposits, borrows, showModal, tab }: Props) {
           />
         </div>
       </section>
-
-      {filter?.value == 'asset' ? (
-        <MaturityPoolUserStatusByAsset
-          type={tab}
-          deposits={deposits}
-          borrows={borrows}
-          showModal={showModal}
-        />
-      ) : (
-        <MaturityPoolUserStatusByMaturity
-          type={tab}
-          deposits={deposits}
-          borrows={borrows}
-          showModal={showModal}
-        />
-      )}
+      <MaturityPoolUserStatusByAsset
+        type={tab}
+        deposits={deposits}
+        borrows={borrows}
+        showModal={showModal}
+      />
     </section>
   );
 }

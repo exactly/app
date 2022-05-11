@@ -114,36 +114,10 @@ const DashBoard: NextPage<Props> = () => {
         getMaturityPoolDepositsQuery(walletAddress)
       );
 
-      // const getMaturityPoolWithdraws = await request(
-      //   subgraphUrl,
-      //   getMaturityPoolWithdrawsQuery(walletAddress)
-      // );
-
       const getMaturityPoolBorrows = await request(
         subgraphUrl,
         getMaturityPoolBorrowsQuery(walletAddress)
       );
-
-      // const getMaturityPoolRepays = await request(
-      //  subgraphUrl,
-      //   getMaturityPoolRepaysQuery(walletAddress)
-      // );
-
-      //SP
-      const getSmartPoolDeposits = await request(
-        subgraphUrl,
-        getSmartPoolDepositsQuery(walletAddress)
-      );
-
-      const getSmartPoolWithdraws = await request(
-        subgraphUrl,
-        getSmartPoolWithdrawsQuery(walletAddress)
-      );
-
-      // const smartPoolDeposits = formatSmartPoolDeposits(
-      //   getSmartPoolDeposits.deposits,
-      //   getSmartPoolWithdraws.withdraws
-      // );
 
       setMaturityPoolDeposits(getMaturityPoolDeposits.depositAtMaturities);
       setMaturityPoolBorrows(getMaturityPoolBorrows.borrowAtMaturities);
