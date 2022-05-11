@@ -4,6 +4,7 @@ import { Withdraw } from 'types/Withdraw';
 import { getSymbol } from './utils';
 
 function formatSmartPoolDeposits(rawDeposits: Deposit[], rawWithdraws: Withdraw[]) {
+  // this method should be expanded to do the subgraph query directly from here
   const depositsDict: Dictionary<any> = {};
 
   rawDeposits.forEach((deposit) => {

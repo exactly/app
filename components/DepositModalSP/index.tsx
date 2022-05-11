@@ -1,5 +1,6 @@
 import { ChangeEvent, useContext, useEffect, useState } from 'react';
 import { Contract, ethers } from 'ethers';
+import request from 'graphql-request';
 
 import Button from 'components/common/Button';
 import ModalAsset from 'components/common/modal/ModalAsset';
@@ -40,10 +41,9 @@ import AuditorContext from 'contexts/AuditorContext';
 import keys from './translations.json';
 
 import getSubgraph from 'utils/getSubgraph';
-import request from 'graphql-request';
-import { getSmartPoolDepositsQuery } from 'queries/getSmartPoolDeposits';
-import { getSmartPoolWithdrawsQuery } from 'queries/getSmartPoolWithdraws';
 import formatSmartPoolDeposits from 'utils/formatSmartPoolDeposits';
+
+import { getSmartPoolDepositsQuery, getSmartPoolWithdrawsQuery } from 'queries';
 
 type Props = {
   data: Borrow | Deposit;
