@@ -1,5 +1,6 @@
 import { ChangeEvent, useContext, useEffect, useState } from 'react';
 import { Contract, ethers } from 'ethers';
+import request from 'graphql-request';
 
 import Button from 'components/common/Button';
 import ModalAsset from 'components/common/modal/ModalAsset';
@@ -39,6 +40,11 @@ import AuditorContext from 'contexts/AuditorContext';
 
 import keys from './translations.json';
 
+import getSubgraph from 'utils/getSubgraph';
+import formatSmartPoolDeposits from 'utils/formatSmartPoolDeposits';
+
+import { getSmartPoolDepositsQuery, getSmartPoolWithdrawsQuery } from 'queries';
+
 type Props = {
   data: Borrow | Deposit;
   closeModal: (props: any) => void;
@@ -65,6 +71,7 @@ function DepositModalSP({ data, closeModal }: Props) {
   const [pending, setPending] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [healthFactor, setHealthFactor] = useState<HealthFactor>();
+  const [depositedAmount, setDepositedAmount] = useState<string>();
 
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
     undefined
@@ -87,6 +94,7 @@ function DepositModalSP({ data, closeModal }: Props) {
   useEffect(() => {
     getFixedLenderContract();
     getWalletBalance();
+    getUserDeposits();
   }, []);
 
   useEffect(() => {
@@ -164,6 +172,34 @@ function DepositModalSP({ data, closeModal }: Props) {
     } catch (e) {
       console.log(e);
     }
+  }
+
+  async function getUserDeposits() {
+    if (!walletAddress || !symbol) return;
+
+    const subgraphUrl = getSubgraph();
+
+    const getSmartPoolDeposits = await request(
+      subgraphUrl,
+      getSmartPoolDepositsQuery(walletAddress)
+    );
+
+    const getSmartPoolWithdraws = await request(
+      subgraphUrl,
+      getSmartPoolWithdrawsQuery(walletAddress)
+    );
+
+    const deposits = formatSmartPoolDeposits(
+      getSmartPoolDeposits.deposits,
+      getSmartPoolWithdraws.withdraws
+    );
+
+    const amount = deposits[symbol?.toUpperCase()].assets;
+    const formattedAmount = amount && ethers.utils.formatEther(`${amount}`);
+
+    if (!formattedAmount) return;
+
+    setDepositedAmount(formattedAmount);
   }
 
   async function onMax() {
@@ -246,7 +282,7 @@ function DepositModalSP({ data, closeModal }: Props) {
               <ModalClose closeModal={closeModal} />
               <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} symbol={symbol!} />
               <ModalTxCost gas={gas} />
-              <ModalRow text={translations[lang].exactlyBalance} value="$ XXXX" line />
+              <ModalRow text={translations[lang].exactlyBalance} value={depositedAmount} line />
               <ModalRow text={translations[lang].interestRate} value="X %" line />
               {healthFactor ? (
                 <ModalRowHealthFactor healthFactor={healthFactor} qty={qty} operation="deposit" />
