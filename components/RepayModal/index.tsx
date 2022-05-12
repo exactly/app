@@ -225,8 +225,13 @@ function RepayModal({ data, closeModal }: Props) {
                 }}
                 line
               />
-              {healthFactor ? (
-                <ModalRowHealthFactor healthFactor={healthFactor} qty={qty} operation="repay" />
+              {healthFactor && symbol ? (
+                <ModalRowHealthFactor
+                  healthFactor={healthFactor}
+                  qty={qty}
+                  symbol={symbol}
+                  operation="repay"
+                />
               ) : (
                 <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
               )}

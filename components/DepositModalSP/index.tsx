@@ -284,8 +284,13 @@ function DepositModalSP({ data, closeModal }: Props) {
               <ModalTxCost gas={gas} />
               <ModalRow text={translations[lang].exactlyBalance} value={depositedAmount} line />
               <ModalRow text={translations[lang].interestRate} value="X %" line />
-              {healthFactor ? (
-                <ModalRowHealthFactor healthFactor={healthFactor} qty={qty} operation="deposit" />
+              {healthFactor && symbol ? (
+                <ModalRowHealthFactor
+                  healthFactor={healthFactor}
+                  qty={qty}
+                  symbol={symbol}
+                  operation="deposit"
+                />
               ) : (
                 <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
               )}

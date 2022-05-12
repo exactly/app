@@ -1,10 +1,12 @@
-import { useContext } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import Image from 'next/image';
 
 import { HealthFactor } from 'types/HealthFactor';
 import { LangKeys } from 'types/Lang';
 
 import parseHealthFactor from 'utils/parseHealthFactor';
+import parseSymbol from 'utils/parseSymbol';
+import getExchangeRate from 'utils/getExchangeRate';
 
 import LangContext from 'contexts/LangContext';
 
@@ -13,39 +15,64 @@ import styles from './style.module.scss';
 import keys from './translations.json';
 
 type Props = {
-  healthFactor?: HealthFactor;
+  healthFactor: HealthFactor;
   qty: string;
+  symbol: string;
   operation: string;
 };
 
-function ModalRowHealthFactor({ healthFactor, qty, operation }: Props) {
+function ModalRowHealthFactor({ healthFactor, qty, symbol, operation }: Props) {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
+  const parsedSymbol = parseSymbol(symbol);
+
+  const [newQty, setNewQty] = useState<number | undefined>(undefined);
 
   const beforeHealthFactor =
     healthFactor && parseHealthFactor(healthFactor.debt, healthFactor.collateral);
-  let afterHealthfactor = beforeHealthFactor;
+
+  let afterHealthFactor = beforeHealthFactor;
+
+  useEffect(() => {
+    getAmount();
+  }, [symbol, qty]);
+
+  async function getAmount() {
+    let exchangeRate = 1;
+
+    if (
+      parsedSymbol &&
+      parsedSymbol.toLowerCase() !== 'dai' &&
+      parsedSymbol.toLowerCase() !== 'usdc'
+    ) {
+      exchangeRate = await getExchangeRate(parsedSymbol);
+    }
+
+    const newQty = exchangeRate * parseFloat(qty);
+
+    setNewQty(newQty);
+  }
 
   switch (operation) {
     case 'deposit':
-      afterHealthfactor =
+      afterHealthFactor =
         healthFactor &&
-        parseHealthFactor(healthFactor.debt, healthFactor.collateral + parseFloat(qty || '0'));
+        parseHealthFactor(healthFactor.debt, healthFactor.collateral + (newQty || 0));
       break;
     case 'withdraw':
-      afterHealthfactor =
+      afterHealthFactor =
         healthFactor &&
-        parseHealthFactor(healthFactor.debt, healthFactor.collateral - parseFloat(qty || '0'));
+        parseHealthFactor(healthFactor.debt, healthFactor.collateral - (newQty || 0));
       break;
     case 'borrow':
-      afterHealthfactor =
+      afterHealthFactor =
         healthFactor &&
-        parseHealthFactor(healthFactor.debt + parseFloat(qty || '0'), healthFactor.collateral);
+        parseHealthFactor(healthFactor.debt + (newQty || 0), healthFactor.collateral);
       break;
     case 'repay':
-      afterHealthfactor =
+      afterHealthFactor =
         healthFactor &&
-        parseHealthFactor(healthFactor.debt - parseFloat(qty || '0'), healthFactor.collateral);
+        parseHealthFactor(healthFactor.debt - (newQty || 0), healthFactor.collateral);
       break;
   }
 
@@ -57,7 +84,7 @@ function ModalRowHealthFactor({ healthFactor, qty, operation }: Props) {
         <div className={styles.imageContainer}>
           <Image src="/img/icons/arrowRight.svg" alt="arrowRight" layout="fill" />
         </div>
-        <span className={styles.value}>{afterHealthfactor}</span>
+        <span className={styles.value}>{afterHealthFactor}</span>
       </section>
     </section>
   );
