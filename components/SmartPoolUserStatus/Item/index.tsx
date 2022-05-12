@@ -49,7 +49,7 @@ function Item({ symbol, amount, walletAddress, showModal, deposit, auditorContra
     if (auditorContract) {
       checkCollaterals();
     }
-  }, [walletAddress]);
+  });
 
   async function checkCollaterals() {
     const fixedLenderAddress = getFixedLenderAddress();

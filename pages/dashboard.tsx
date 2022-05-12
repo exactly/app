@@ -27,17 +27,12 @@ import { Contract } from 'types/Contract';
 import { Dictionary } from 'types/Dictionary';
 import { Borrow } from 'types/Borrow';
 import { Deposit } from 'types/Deposit';
-import { Withdraw } from 'types/Withdraw';
-// import { Repay } from 'types/Repay';
-// import { WithdrawMP } from 'types/WithdrawMP';
 
 import useModal from 'hooks/useModal';
 
 import {
   getMaturityPoolBorrowsQuery,
   getMaturityPoolDepositsQuery,
-  // getMaturityPoolRepaysQuery,
-  // getMaturityPoolWithdrawsQuery,
   getSmartPoolDepositsQuery,
   getSmartPoolWithdrawsQuery
 } from 'queries';
@@ -50,8 +45,8 @@ import Previewer from 'protocol/deployments/kovan/Previewer.json';
 
 import translations from 'dictionary/en.json';
 
-import { getSymbol } from 'utils/utils';
 import getSubgraph from 'utils/getSubgraph';
+import formatSmartPoolDeposits from 'utils/formatSmartPoolDeposits';
 
 interface Props {
   auditor: Contract;
@@ -146,28 +141,6 @@ const DashBoard: NextPage<Props> = () => {
     }
 
     handleModal({ content: { ...data, type } });
-  }
-
-  function formatSmartPoolDeposits(rawDeposits: Deposit[], rawWithdraws: Withdraw[]) {
-    let depositsDict: Dictionary<any> = {};
-
-    rawDeposits.forEach((deposit) => {
-      const symbol = getSymbol(deposit.market);
-
-      const oldAmount = depositsDict[symbol]?.assets ?? 0;
-      const newAmount = oldAmount + parseInt(deposit.assets);
-      depositsDict[symbol] = { ...deposit, assets: newAmount };
-    });
-
-    rawWithdraws.forEach((withdraw) => {
-      const symbol = getSymbol(withdraw.market);
-
-      const oldAmount = depositsDict[symbol]?.assets;
-      const newAmount = oldAmount - parseInt(withdraw.assets);
-      depositsDict[symbol] = { ...withdraw, assets: newAmount };
-    });
-
-    return depositsDict;
   }
 
   return (
