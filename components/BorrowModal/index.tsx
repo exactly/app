@@ -268,8 +268,13 @@ function BorrowModal({ data, editable, closeModal }: Props) {
                 }}
                 line
               />
-              {healthFactor ? (
-                <ModalRowHealthFactor healthFactor={healthFactor} qty={qty} operation="borrow" />
+              {healthFactor && symbol ? (
+                <ModalRowHealthFactor
+                  healthFactor={healthFactor}
+                  qty={qty}
+                  symbol={symbol}
+                  operation="borrow"
+                />
               ) : (
                 <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
               )}

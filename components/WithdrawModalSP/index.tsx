@@ -176,8 +176,13 @@ function WithdrawModalSP({ data, closeModal }: Props) {
               <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} symbol={symbol!} />
               <ModalTxCost gas={gas} />
               <ModalRow text={translations[lang].exactlyBalance} value={parsedAmount} line />
-              {healthFactor ? (
-                <ModalRowHealthFactor healthFactor={healthFactor} qty={qty} operation="withdraw" />
+              {healthFactor && symbol ? (
+                <ModalRowHealthFactor
+                  healthFactor={healthFactor}
+                  qty={qty}
+                  symbol={symbol}
+                  operation="withdraw"
+                />
               ) : (
                 <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
               )}
