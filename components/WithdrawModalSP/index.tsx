@@ -167,7 +167,7 @@ function WithdrawModalSP({ data, closeModal }: Props) {
   return (
     <>
       {!minimized && (
-        <ModalWrapper>
+        <ModalWrapper closeModal={closeModal}>
           {!tx && (
             <>
               <ModalTitle title={translations[lang].withdraw} />

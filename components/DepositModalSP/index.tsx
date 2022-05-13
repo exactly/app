@@ -274,7 +274,7 @@ function DepositModalSP({ data, closeModal }: Props) {
   return (
     <>
       {!minimized && (
-        <ModalWrapper>
+        <ModalWrapper closeModal={closeModal}>
           {!tx && (
             <>
               <ModalTitle title={translations[lang].deposit} />
