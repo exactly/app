@@ -20,6 +20,7 @@ import decimals from 'config/decimals.json';
 import { getUnderlyingData } from 'utils/utils';
 import { getContractData } from 'utils/contracts';
 import formatNumber from 'utils/formatNumber';
+import parseSymbol from 'utils/parseSymbol';
 
 type Props = {
   symbol: string;
@@ -125,7 +126,7 @@ function Item({ symbol, amount, walletAddress, showModal, deposit, auditorContra
           alt={symbol}
           className={styles.assetImage}
         />
-        <span className={styles.primary}>{symbol}</span>
+        <span className={styles.primary}>{parseSymbol(symbol)}</span>
       </div>
       <span className={styles.value}>{formatNumber(walletBalance!, symbol)}</span>
       <span className={styles.value}>

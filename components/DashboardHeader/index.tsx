@@ -112,6 +112,9 @@ function DashboardHeader() {
         ];
         setHealthFactorData(healthFactorData);
         setHealthFactor({ collateral: parsedCollateral, debt: parsedDebt });
+      } else {
+        setHealthFactorData(notConnected);
+        setHealthFactor(undefined);
       }
     } catch (e) {
       console.log(e);
