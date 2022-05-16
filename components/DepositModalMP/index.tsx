@@ -15,6 +15,7 @@ import ModalStepper from 'components/common/modal/ModalStepper';
 import Overlay from 'components/Overlay';
 import ModalRowEditable from 'components/common/modal/ModalRowEditable';
 import ModalMaturityEditable from 'components/common/modal/ModalMaturityEditable';
+import ModalError from 'components/common/modal/ModalError';
 
 import { Borrow } from 'types/Borrow';
 import { Deposit } from 'types/Deposit';
@@ -23,6 +24,7 @@ import { UnderlyingData } from 'types/Underlying';
 import { Gas } from 'types/Gas';
 import { Transaction } from 'types/Transaction';
 import { Decimals } from 'types/Decimals';
+import { Error } from 'types/Error';
 
 import { getContractData } from 'utils/contracts';
 import { getSymbol, getUnderlyingData } from 'utils/utils';
@@ -70,6 +72,7 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
   const [slippage, setSlippage] = useState<string>('0.5');
   const [editSlippage, setEditSlippage] = useState<boolean>(false);
   const [fixedRate, setFixedRate] = useState<string>('0.00');
+  const [error, setError] = useState<Error | undefined>(undefined);
 
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
     undefined
@@ -152,7 +155,10 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
       setStep((step) => step + 1);
     } catch (e) {
       setLoading(false);
-      console.log(e);
+
+      setError({
+        status: true
+      });
     }
   }
 
@@ -171,6 +177,16 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
   }
 
   function handleInputChange(e: ChangeEvent<HTMLInputElement>) {
+    if (step != 1 && walletBalance && e.target.valueAsNumber > parseFloat(walletBalance)) {
+      setError({
+        status: true,
+        message: translations[lang].insufficientBalance,
+        component: 'input'
+      });
+    } else {
+      setError(undefined);
+    }
+
     setQty(e.target.value);
   }
 
@@ -192,7 +208,10 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
       setTx({ status: 'success', hash: status?.transactionHash });
     } catch (e) {
       setLoading(false);
-      console.log(e);
+      setError({
+        status: true,
+        message: translations[lang].notEnoughSlippage
+      });
     }
   }
 
@@ -275,7 +294,13 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
                 value={date?.label ?? parseTimestamp(maturity)}
                 editable={editable}
               />
-              <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} symbol={symbol!} />
+              <ModalInput
+                onMax={onMax}
+                value={qty}
+                onChange={handleInputChange}
+                symbol={symbol!}
+                error={error?.component == 'input'}
+              />
               <ModalTxCost gas={gas} />
               <ModalRow text={translations[lang].interestRate} value={`${fixedRate}%`} line />
               <ModalRowEditable
@@ -293,11 +318,12 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
                 line
               />
               <ModalStepper currentStep={step} totalSteps={3} />
+              {error && <ModalError message={error.message} />}
               <div className={styles.buttonContainer}>
                 <Button
                   text={step == 1 ? translations[lang].approve : translations[lang].deposit}
-                  className={qty && qty > '0' ? 'primary' : 'disabled'}
-                  disabled={((!qty || qty <= '0') && !pending) || loading}
+                  className={qty && qty > '0' && !error?.status ? 'primary' : 'disabled'}
+                  disabled={((!qty || qty <= '0') && !pending) || loading || error?.status}
                   onClick={handleClickAction}
                   loading={loading}
                 />

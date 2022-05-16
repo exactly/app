@@ -9,11 +9,12 @@ type Props = {
   name?: string;
   disabled?: boolean;
   symbol?: string;
+  error?: boolean;
   onChange?: ChangeEventHandler;
   onMax?: MouseEventHandler;
 };
 
-function ModalInput({ value, name, disabled, symbol, onChange, onMax }: Props) {
+function ModalInput({ value, name, disabled, symbol, error, onChange, onMax }: Props) {
   const [exchangeRate, setExchangeRate] = useState(1);
 
   const blockedCharacters = ['e', 'E', '+', '-'];
@@ -31,7 +32,7 @@ function ModalInput({ value, name, disabled, symbol, onChange, onMax }: Props) {
   }
 
   return (
-    <section className={styles.inputSection}>
+    <section className={error ? styles.error : styles.inputSection}>
       <input
         min={0.0}
         type="number"

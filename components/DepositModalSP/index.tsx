@@ -16,6 +16,7 @@ import ModalGif from 'components/common/modal/ModalGif';
 import ModalStepper from 'components/common/modal/ModalStepper';
 import Overlay from 'components/Overlay';
 import SkeletonModalRowBeforeAfter from 'components/common/skeletons/SkeletonModalRowBeforeAfter';
+import ModalError from 'components/common/modal/ModalError';
 
 import { Borrow } from 'types/Borrow';
 import { Deposit } from 'types/Deposit';
@@ -24,6 +25,7 @@ import { UnderlyingData } from 'types/Underlying';
 import { Gas } from 'types/Gas';
 import { Transaction } from 'types/Transaction';
 import { HealthFactor } from 'types/HealthFactor';
+import { Error } from 'types/Error';
 
 import { getContractData } from 'utils/contracts';
 import { getUnderlyingData } from 'utils/utils';
@@ -72,6 +74,7 @@ function DepositModalSP({ data, closeModal }: Props) {
   const [loading, setLoading] = useState<boolean>(false);
   const [healthFactor, setHealthFactor] = useState<HealthFactor>();
   const [depositedAmount, setDepositedAmount] = useState<string>();
+  const [error, setError] = useState<Error | undefined>(undefined);
 
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
     undefined
@@ -144,7 +147,10 @@ function DepositModalSP({ data, closeModal }: Props) {
       setStep((step) => step + 1);
     } catch (e) {
       setLoading(false);
-      console.log(e);
+
+      setError({
+        status: true
+      });
     }
   }
 
@@ -205,6 +211,16 @@ function DepositModalSP({ data, closeModal }: Props) {
   }
 
   function handleInputChange(e: ChangeEvent<HTMLInputElement>) {
+    if (step != 1 && walletBalance && e.target.valueAsNumber > parseFloat(walletBalance)) {
+      setError({
+        status: true,
+        message: translations[lang].insufficientBalance,
+        component: 'input'
+      });
+    } else {
+      setError(undefined);
+    }
+
     setQty(e.target.value);
   }
 
@@ -222,7 +238,10 @@ function DepositModalSP({ data, closeModal }: Props) {
       setTx({ status: 'success', hash: status?.transactionHash });
     } catch (e) {
       setLoading(false);
-      console.log(e);
+
+      setError({
+        status: true
+      });
     }
   }
 
@@ -278,7 +297,13 @@ function DepositModalSP({ data, closeModal }: Props) {
               <ModalTitle title={translations[lang].deposit} />
               <ModalAsset asset={symbol!} amount={walletBalance} />
               <ModalClose closeModal={closeModal} />
-              <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} symbol={symbol!} />
+              <ModalInput
+                onMax={onMax}
+                value={qty}
+                onChange={handleInputChange}
+                symbol={symbol!}
+                error={error?.component == 'input'}
+              />
               <ModalTxCost gas={gas} />
               <ModalRow text={translations[lang].exactlyBalance} value={depositedAmount} line />
               <ModalRow text={translations[lang].interestRate} value="X %" line />
@@ -294,12 +319,13 @@ function DepositModalSP({ data, closeModal }: Props) {
               )}
               {/* <ModalRow text={translations[lang].borrowLimit} values={['100K', '150K']} /> */}
               <ModalStepper currentStep={step} totalSteps={3} />
+              {error && <ModalError message={error.message} />}
               <div className={styles.buttonContainer}>
                 <Button
                   text={step == 1 ? translations[lang].approve : translations[lang].deposit}
                   loading={loading}
-                  className={qty && qty > '0' ? 'primary' : 'disabled'}
-                  disabled={((!qty || qty <= '0') && !pending) || loading}
+                  className={qty && qty > '0' && !error?.status ? 'primary' : 'disabled'}
+                  disabled={((!qty || qty <= '0') && !pending) || loading || error?.status}
                   onClick={handleClickAction}
                 />
               </div>
