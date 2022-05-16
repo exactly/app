@@ -7,7 +7,8 @@
     "amountToPay": "Amount To Repay",
     "maximumAmountToPay": "Maximum Amount To Repay",
     "healthFactor": "Health Factor",
-    "repay": "Repay"
+    "repay": "Repay",
+    "notEnoughBalance": "You don't have enough balance to perform the transaction"
   },
   "es": {}
 }
