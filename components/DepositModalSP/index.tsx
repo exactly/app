@@ -194,12 +194,10 @@ function DepositModalSP({ data, closeModal }: Props) {
       getSmartPoolWithdraws.withdraws
     );
 
-    const amount = deposits[symbol?.toUpperCase()].assets;
+    const amount = deposits[symbol?.toUpperCase()]?.assets;
     const formattedAmount = amount && ethers.utils.formatEther(`${amount}`);
 
-    if (!formattedAmount) return;
-
-    setDepositedAmount(formattedAmount);
+    !formattedAmount ? setDepositedAmount('0') : setDepositedAmount(formattedAmount);
   }
 
   async function onMax() {
