@@ -1,4 +1,5 @@
 export type Error = {
-  status: Boolean;
-  msg: string;
+  status: boolean;
+  message?: string;
+  component?: string;
 };

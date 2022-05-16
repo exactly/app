@@ -5,7 +5,8 @@
     "exactlyBalance": "Deposited Amount",
     "interestRate": "Interest Rate",
     "healthFactor": "Health Factor",
-    "borrowLimit": "Borrow Limit"
+    "borrowLimit": "Borrow Limit",
+    "insufficientBalance": "You can't deposit more than you have in your wallet"
   },
   "es": {}
 }

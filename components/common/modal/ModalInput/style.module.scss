@@ -38,3 +38,8 @@
     font-size: var(--font-12);
   }
 }
+
+.error {
+  @extend .inputSection;
+  border: 1px solid var(--error);
+}
