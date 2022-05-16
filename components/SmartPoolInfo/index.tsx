@@ -56,7 +56,7 @@ function SmartPoolInfo({ showModal, symbol }: Props) {
           </div>
         </li>
         <li className={styles.row}>
-          <span className={styles.title}>{translations[lang].totalBorrowed}</span>{' '}
+          <span className={styles.title}>{translations[lang].totalDeposited}</span>{' '}
           <p className={styles.value}>1.553.612.280,17</p>
         </li>
         <li className={styles.row}>
@@ -70,10 +70,6 @@ function SmartPoolInfo({ showModal, symbol }: Props) {
         <li className={styles.row}>
           <span className={styles.title}>{translations[lang].suppliers}</span>{' '}
           <p className={styles.value}>68693</p>
-        </li>
-        <li className={styles.row}>
-          <span className={styles.title}>{translations[lang].borrowers}</span>{' '}
-          <p className={styles.value}>1292</p>
         </li>
       </ul>
     </div>
