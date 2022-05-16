@@ -185,40 +185,51 @@ function BorrowModal({ data, editable, closeModal }: Props) {
   }
 
   async function estimateGas() {
-    const gasPriceInGwei = await fixedLenderWithSigner?.provider.getGasPrice();
+    try {
+      const gasPriceInGwei = await fixedLenderWithSigner?.provider.getGasPrice();
 
-    const estimatedGasCost = await fixedLenderWithSigner?.estimateGas.borrowAtMaturity(
-      parseInt(date?.value ?? maturity),
-      ethers.utils.parseUnits(`${numbers.estimateGasAmount}`),
-      ethers.utils.parseUnits(`${numbers.estimateGasAmount * 1.1}`),
-      walletAddress,
-      walletAddress
-    );
+      const estimatedGasCost = await fixedLenderWithSigner?.estimateGas.borrowAtMaturity(
+        parseInt(date?.value ?? maturity),
+        ethers.utils.parseUnits(`${numbers.estimateGasAmount}`),
+        ethers.utils.parseUnits(`${numbers.estimateGasAmount * 1.1}`),
+        walletAddress,
+        walletAddress
+      );
 
-    if (gasPriceInGwei && estimatedGasCost) {
-      const gwei = await ethers.utils.formatUnits(gasPriceInGwei, 'gwei');
-      const gasCost = await ethers.utils.formatUnits(estimatedGasCost, 'gwei');
-      const eth = parseFloat(gwei) * parseFloat(gasCost);
+      if (gasPriceInGwei && estimatedGasCost) {
+        const gwei = await ethers.utils.formatUnits(gasPriceInGwei, 'gwei');
+        const gasCost = await ethers.utils.formatUnits(estimatedGasCost, 'gwei');
+        const eth = parseFloat(gwei) * parseFloat(gasCost);
 
-      setGas({ eth: eth.toFixed(8), gwei: parseFloat(gwei).toFixed(1) });
+        setGas({ eth: eth.toFixed(8), gwei: parseFloat(gwei).toFixed(1) });
+      }
+    } catch (e) {
+      setError({
+        status: true,
+        message: translations[lang].notEnoughBalance,
+        component: 'gas'
+      });
     }
   }
 
   async function getFeeAtMaturity() {
     if (!qty || qty === '0') return;
+    try {
+      const feeAtMaturity = await previewerContract?.previewBorrowAtMaturity(
+        fixedLenderWithSigner!.address,
+        parseInt(date?.value ?? maturity),
+        ethers.utils.parseUnits(qty)
+      );
 
-    const feeAtMaturity = await previewerContract?.previewBorrowAtMaturity(
-      fixedLenderWithSigner!.address,
-      parseInt(date?.value ?? maturity),
-      ethers.utils.parseUnits(qty)
-    );
+      const fixedRate =
+        (parseFloat(ethers.utils.formatUnits(feeAtMaturity, decimals[symbol! as keyof Decimals])) *
+          100) /
+        parseFloat(qty);
 
-    const fixedRate =
-      (parseFloat(ethers.utils.formatUnits(feeAtMaturity, decimals[symbol! as keyof Decimals])) *
-        100) /
-      parseFloat(qty);
-
-    setFixedRate(fixedRate.toFixed(2));
+      setFixedRate(fixedRate.toFixed(2));
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   async function getFixedLenderContract() {
@@ -258,7 +269,7 @@ function BorrowModal({ data, editable, closeModal }: Props) {
                 editable={editable}
               />
               <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} symbol={symbol!} />
-              <ModalTxCost gas={gas} />
+              {error?.component !== 'gas' && <ModalTxCost gas={gas} />}
               <ModalRow text={translations[lang].interestRate} value={`${fixedRate}%`} line />
               <ModalRowEditable
                 text={translations[lang].maximumBorrowRate}
@@ -289,9 +300,9 @@ function BorrowModal({ data, editable, closeModal }: Props) {
               <div className={styles.buttonContainer}>
                 <Button
                   text={translations[lang].borrow}
-                  className={qty <= '0' || !qty ? 'disabled' : 'secondary'}
+                  className={qty <= '0' || !qty || error?.status ? 'disabled' : 'secondary'}
                   onClick={borrow}
-                  disabled={qty <= '0' || !qty || loading}
+                  disabled={qty <= '0' || !qty || loading || error?.status}
                   loading={loading}
                 />
               </div>

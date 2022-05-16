@@ -109,11 +109,22 @@ function WithdrawModalSP({ data, closeModal }: Props) {
   }
 
   function handleInputChange(e: ChangeEvent<HTMLInputElement>) {
+    if (e.target.valueAsNumber > parseFloat(qty)) {
+      setError({
+        status: true,
+        message: translations[lang].insufficientBalance,
+        component: 'input'
+      });
+    } else {
+      setError(undefined);
+    }
+
     setQty(e.target.value);
   }
 
   async function withdraw() {
     setLoading(true);
+
     try {
       const withdraw = await fixedLenderWithSigner?.withdraw(
         ethers.utils.parseUnits(qty!),
@@ -135,20 +146,28 @@ function WithdrawModalSP({ data, closeModal }: Props) {
   }
 
   async function estimateGas() {
-    const gasPriceInGwei = await fixedLenderWithSigner?.provider.getGasPrice();
+    try {
+      const gasPriceInGwei = await fixedLenderWithSigner?.provider.getGasPrice();
 
-    const estimatedGasCost = await fixedLenderWithSigner?.estimateGas.withdraw(
-      ethers.utils.parseUnits(`${numbers.estimateGasAmount}`),
-      walletAddress,
-      walletAddress
-    );
+      const estimatedGasCost = await fixedLenderWithSigner?.estimateGas.withdraw(
+        ethers.utils.parseUnits(`${numbers.estimateGasAmount}`),
+        walletAddress,
+        walletAddress
+      );
 
-    if (gasPriceInGwei && estimatedGasCost) {
-      const gwei = await ethers.utils.formatUnits(gasPriceInGwei, 'gwei');
-      const gasCost = await ethers.utils.formatUnits(estimatedGasCost, 'gwei');
-      const eth = parseFloat(gwei) * parseFloat(gasCost);
+      if (gasPriceInGwei && estimatedGasCost) {
+        const gwei = await ethers.utils.formatUnits(gasPriceInGwei, 'gwei');
+        const gasCost = await ethers.utils.formatUnits(estimatedGasCost, 'gwei');
+        const eth = parseFloat(gwei) * parseFloat(gasCost);
 
-      setGas({ eth: eth.toFixed(8), gwei: parseFloat(gwei).toFixed(1) });
+        setGas({ eth: eth.toFixed(8), gwei: parseFloat(gwei).toFixed(1) });
+      }
+    } catch (e) {
+      setError({
+        status: true,
+        message: translations[lang].notEnoughBalance,
+        component: 'gas'
+      });
     }
   }
 
@@ -178,8 +197,14 @@ function WithdrawModalSP({ data, closeModal }: Props) {
               <ModalTitle title={translations[lang].withdraw} />
               <ModalAsset asset={symbol!} amount={parsedAmount} />
               <ModalClose closeModal={closeModal} />
-              <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} symbol={symbol!} />
-              <ModalTxCost gas={gas} />
+              <ModalInput
+                onMax={onMax}
+                value={qty}
+                onChange={handleInputChange}
+                symbol={symbol!}
+                error={error?.component == 'input'}
+              />
+              {error?.component !== 'gas' && <ModalTxCost gas={gas} />}
               <ModalRow text={translations[lang].exactlyBalance} value={parsedAmount} line />
               {healthFactor && symbol ? (
                 <ModalRowHealthFactor
@@ -195,8 +220,8 @@ function WithdrawModalSP({ data, closeModal }: Props) {
               <div className={styles.buttonContainer}>
                 <Button
                   text={translations[lang].withdraw}
-                  className={qty <= '0' || !qty ? 'secondaryDisabled' : 'tertiary'}
-                  disabled={qty <= '0' || !qty || loading}
+                  className={qty <= '0' || !qty || error?.status ? 'secondaryDisabled' : 'tertiary'}
+                  disabled={qty <= '0' || !qty || loading || error?.status}
                   onClick={withdraw}
                   loading={loading}
                   color="primary"

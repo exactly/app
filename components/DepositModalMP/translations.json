@@ -6,7 +6,8 @@
     "interestRate": "Interest Rate",
     "minimumDepositRate": "Minimum Deposit Rate",
     "insufficientBalance": "You can't deposit more than you have in your wallet",
-    "notEnoughSlippage": "The transaction failed, please check your Minimum Deposit Rate"
+    "notEnoughSlippage": "The transaction failed, please check your Minimum Deposit Rate",
+    "notEnoughBalance": "You don't have enough balance to perform the transaction"
   },
   "es": {}
 }

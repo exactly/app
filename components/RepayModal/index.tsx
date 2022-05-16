@@ -175,21 +175,29 @@ function RepayModal({ data, closeModal }: Props) {
   }
 
   async function estimateGas() {
-    const gasPriceInGwei = await fixedLenderWithSigner?.provider.getGasPrice();
+    try {
+      const gasPriceInGwei = await fixedLenderWithSigner?.provider.getGasPrice();
 
-    const estimatedGasCost = await fixedLenderWithSigner?.estimateGas.repayAtMaturity(
-      maturity,
-      ethers.utils.parseUnits(`${numbers.estimateGasAmount}`),
-      ethers.utils.parseUnits(`${numbers.estimateGasAmount * 2}`),
-      walletAddress
-    );
+      const estimatedGasCost = await fixedLenderWithSigner?.estimateGas.repayAtMaturity(
+        maturity,
+        ethers.utils.parseUnits(`${numbers.estimateGasAmount}`),
+        ethers.utils.parseUnits(`${numbers.estimateGasAmount * 2}`),
+        walletAddress
+      );
 
-    if (gasPriceInGwei && estimatedGasCost) {
-      const gwei = await ethers.utils.formatUnits(gasPriceInGwei, 'gwei');
-      const gasCost = await ethers.utils.formatUnits(estimatedGasCost, 'gwei');
-      const eth = parseFloat(gwei) * parseFloat(gasCost);
+      if (gasPriceInGwei && estimatedGasCost) {
+        const gwei = await ethers.utils.formatUnits(gasPriceInGwei, 'gwei');
+        const gasCost = await ethers.utils.formatUnits(estimatedGasCost, 'gwei');
+        const eth = parseFloat(gwei) * parseFloat(gasCost);
 
-      setGas({ eth: eth.toFixed(8), gwei: parseFloat(gwei).toFixed(1) });
+        setGas({ eth: eth.toFixed(8), gwei: parseFloat(gwei).toFixed(1) });
+      }
+    } catch (e) {
+      setError({
+        status: true,
+        message: translations[lang].notEnoughBalance,
+        component: 'gas'
+      });
     }
   }
 
@@ -206,7 +214,7 @@ function RepayModal({ data, closeModal }: Props) {
               <ModalClose closeModal={closeModal} />
               <ModalRow text={translations[lang].maturityPool} value={parseTimestamp(maturity)} />
               <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} symbol={symbol!} />
-              <ModalTxCost gas={gas} />
+              {error?.component !== 'gas' && <ModalTxCost gas={gas} />}
               <ModalRow
                 text={translations[lang].amountAtFinish}
                 value={formatNumber(finalAmount, symbol!)}
@@ -214,7 +222,7 @@ function RepayModal({ data, closeModal }: Props) {
               />
               <ModalRow
                 text={translations[lang].amountToPay}
-                value={formatNumber(finalAmount, symbol!)}
+                value={qty && parseFloat(qty) > 0 ? formatNumber(qty, symbol!) : '0'}
                 line
               />
               <ModalRowEditable
