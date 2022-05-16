@@ -10,7 +10,6 @@ import MaturityInfo from 'components/MaturityInfo';
 import AssetInfo from 'components/AssetInfo';
 import AssetTable from 'components/AssetTable';
 import SmartPoolInfo from 'components/SmartPoolInfo';
-import SmartPoolChart from 'components/SmartPoolChart';
 import MobileNavbar from 'components/MobileNavbar';
 import Paginator from 'components/Paginator';
 import DepositModalMP from 'components/DepositModalMP';
@@ -34,6 +33,7 @@ import keys from './translations.json';
 
 import parseTimestamp from 'utils/parseTimestamp';
 import { getContractData } from 'utils/contracts';
+import getExchangeRate from 'utils/getExchangeRate';
 
 //Contracts
 import Auditor from 'protocol/deployments/kovan/Auditor.json';
@@ -43,29 +43,31 @@ import Previewer from 'protocol/deployments/kovan/Previewer.json';
 
 interface Props {
   symbol: string;
+  price: number;
 }
 
-const Asset: NextPage<Props> = ({ symbol }) => {
-  const [page, setPage] = useState<number>(1);
-  const lang: string = useContext(LangContext);
+const Asset: NextPage<Props> = ({ symbol, price }) => {
   const { modal, handleModal, modalContent } = useModal();
 
-  const itemsPerPage = 5;
-
+  const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
+  const [page, setPage] = useState<number>(1);
+  const [maturities, setMaturities] = useState<Array<Maturity> | undefined>(undefined);
+  const [marketData, setMarketData] = useState<UnformattedMarket | undefined>(undefined);
+
+  const itemsPerPage = 3;
+
   const auditorContract = getContractData(Auditor.address, Auditor.abi);
+
   const fixedLenders = [FixedLenderDAI, FixedLenderWETH];
 
   const filteredFixedLender = fixedLenders.find((fl) => fl.args[1] === symbol);
+
   const fixedLenderContract = getContractData(
     filteredFixedLender?.address!,
     filteredFixedLender?.abi!
   );
-
-  const [maturities, setMaturities] = useState<Array<Maturity> | undefined>(undefined);
-
-  const [marketData, setMarketData] = useState<UnformattedMarket | undefined>(undefined);
 
   useEffect(() => {
     if (!maturities) {
@@ -148,7 +150,6 @@ const Asset: NextPage<Props> = ({ symbol }) => {
           <section className={style.container}>
             <div className={style.smartPoolContainer}>
               <SmartPoolInfo showModal={showModal} symbol={symbol} />
-              <SmartPoolChart />
             </div>
             <section className={style.assetData}>
               <div className={style.assetContainer}>
@@ -160,11 +161,12 @@ const Asset: NextPage<Props> = ({ symbol }) => {
               <div className={style.leftColumn}>
                 <AssetTable
                   maturities={maturities?.slice(itemsPerPage * (page - 1), itemsPerPage * page)}
+                  market={filteredFixedLender?.address!}
                   showModal={showModal}
                 />
                 <Paginator
                   total={maturities?.length ?? 0}
-                  itemsPerPage={5}
+                  itemsPerPage={itemsPerPage}
                   handleChange={(page) => setPage(page)}
                   currentPage={page}
                 />
@@ -175,7 +177,7 @@ const Asset: NextPage<Props> = ({ symbol }) => {
             </section>
             <h2 className={style.assetTitle}>{translations[lang].assetDetails}</h2>
             <div className={style.assetInfoContainer}>
-              <AssetInfo title={translations[lang].price} value="$4,213.62" />
+              <AssetInfo title={translations[lang].price} value={`$${Math.ceil(price)}`} />
               <AssetInfo title={translations[lang].reserveFactor} value="20%" />
               {marketData && (
                 <AssetInfo
@@ -199,10 +201,14 @@ const Asset: NextPage<Props> = ({ symbol }) => {
 
 export async function getServerSideProps(req: NextApiRequest) {
   const tokenSymbol: string = req?.query?.id as string;
+  const symbol = tokenSymbol.toUpperCase() === 'ETH' ? 'WETH' : tokenSymbol.toUpperCase();
+
+  const price = await getExchangeRate(tokenSymbol);
 
   return {
     props: {
-      symbol: tokenSymbol.toUpperCase()
+      symbol: symbol,
+      price
     }
   };
 }

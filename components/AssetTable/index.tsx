@@ -1,28 +1,26 @@
-import Button from 'components/common/Button';
+import { useContext } from 'react';
+
 import Loading from 'components/common/Loading';
+
+import LangContext from 'contexts/LangContext';
+
 import { Maturity } from 'types/Maturity';
+import { LangKeys } from 'types/Lang';
+
 import styles from './style.module.scss';
 
 import keys from './translations.json';
-import { LangKeys } from 'types/Lang';
-import { useContext } from 'react';
-import LangContext from 'contexts/LangContext';
-import { useWeb3Context } from 'contexts/Web3Context';
+import Item from './Item';
 
 interface Props {
   maturities: Array<Maturity> | undefined;
+  market: string;
   showModal: (type: string, maturity: string | undefined) => void;
 }
 
-function AssetTable({ maturities, showModal }: Props) {
-  const { walletAddress, connect } = useWeb3Context();
+function AssetTable({ maturities, market, showModal }: Props) {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
-
-  function handleClick(type: string, maturity: string) {
-    if (!walletAddress && connect) return connect();
-    showModal(type, maturity);
-  }
 
   return (
     <div className={styles.table}>
@@ -34,34 +32,7 @@ function AssetTable({ maturities, showModal }: Props) {
       {maturities ? (
         <>
           {maturities.map((maturity: Maturity, key: number) => {
-            return (
-              <div className={styles.row} key={key}>
-                <div className={styles.maturity}>
-                  <span>{maturity.label}</span>
-                  <span className={styles.liquidity}>{translations[lang].liquidity}: $1.3B</span>
-                </div>
-                <div className={styles.lastFixedRate}>
-                  <div className={styles.deposit}>4,41%</div>
-                  <div className={styles.borrow}>3,16%</div>
-                </div>
-                <div className={styles.actions}>
-                  <div className={styles.buttonContainer}>
-                    <Button
-                      text={translations[lang].deposit}
-                      className="primary"
-                      onClick={() => handleClick('deposit', maturity.value)}
-                    />
-                  </div>
-                  <div className={styles.buttonContainer}>
-                    <Button
-                      text={translations[lang].borrow}
-                      className="secondary"
-                      onClick={() => handleClick('borrow', maturity.value)}
-                    />
-                  </div>
-                </div>
-              </div>
-            );
+            return <Item key={key} maturity={maturity} market={market} showModal={showModal} />;
           })}
         </>
       ) : (

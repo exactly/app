@@ -5,15 +5,32 @@
   margin-top: var(--u2);
   padding: 0;
   justify-content: center;
+
   .item {
     margin: 0 var(--u);
     color: var(--primary);
+    height: var(--u3);
+    width: var(--u3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-14);
+    color: var(--primary-200);
+
     &.active {
-      font-weight: bold;
+      background-color: var(--primary);
+      color: var(--white);
+      border-radius: 50%;
     }
+
     &:hover {
-      font-weight: bold;
       cursor: pointer;
     }
+  }
+
+  .arrow {
+    @extend .item;
+    color: var(--primary);
+    font-weight: bolder;
   }
 }
