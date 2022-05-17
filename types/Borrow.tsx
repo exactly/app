@@ -6,6 +6,6 @@ export type Borrow = {
   receiver?: string;
   borrower?: string;
   assets: string;
-  fee?: string;
+  fee: string;
   symbol?: string;
 };
