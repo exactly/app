@@ -85,9 +85,10 @@ function SmartPoolUserStatus({ walletAddress, showModal }: Props) {
           </div>
 
           {itemData &&
-            itemData.map((item: SPItem) => {
+            itemData.map((item: SPItem, key: number) => {
               return (
                 <Item
+                  key={key}
                   tokenAmount={item.tokens}
                   symbol={item.symbol}
                   walletAddress={walletAddress}
