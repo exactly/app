@@ -18,11 +18,6 @@ type Props = {
 function ModalGif({ tx }: Props) {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
-  const videoRef = useRef(null);
-
-  // useEffect(() => {
-  //   videoRef.current?.load();
-  // }, [tx.status]);
 
   const options: Dictionary<ModalCases> = {
     processing: {
@@ -48,7 +43,6 @@ function ModalGif({ tx }: Props) {
       <div className={styles.mediaContainer}>
         <img src="/img/icons/circles.svg" alt="circles" className={styles.img} />
         <video
-          ref={videoRef}
           autoPlay
           loop
           poster={options[tx.status].img}

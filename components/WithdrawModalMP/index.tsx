@@ -207,7 +207,6 @@ function WithdrawModalMP({ data, closeModal }: Props) {
                 }
               />
               <ModalAsset asset={symbol!} amount={finalAmount} />
-              <ModalClose closeModal={closeModal} />
               <ModalRow text={translations[lang].maturityPool} value={parseTimestamp(maturity)} />
               <ModalInput
                 onMax={onMax}
