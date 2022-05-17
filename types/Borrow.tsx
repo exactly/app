@@ -1,7 +1,7 @@
 export type Borrow = {
   id?: string;
   market: string;
-  maturity?: string;
+  maturity: string;
   caller?: string;
   receiver?: string;
   borrower?: string;

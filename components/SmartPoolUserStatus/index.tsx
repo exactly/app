@@ -1,5 +1,4 @@
 import { useContext, useEffect, useState } from 'react';
-import { ethers } from 'ethers';
 
 import Item from './Item';
 
@@ -87,7 +86,6 @@ function SmartPoolUserStatus({ walletAddress, showModal }: Props) {
 
           {itemData &&
             itemData.map((item: SPItem) => {
-              // const amount: string = JSON.stringify(deposits[symbol].assets);
               return (
                 <Item
                   tokenAmount={item.tokens}
@@ -103,39 +101,6 @@ function SmartPoolUserStatus({ walletAddress, showModal }: Props) {
       </div>
     </div>
   );
-  // return (
-  //   <div className={styles.container}>
-  //     <div className={styles.market}>
-  //       <div className={styles.column}>
-  //         <div className={styles.tableRow}>
-  //           <span className={styles.symbol}>{translations[lang].asset}</span>
-  //           <span className={styles.title}>{translations[lang].walletBalance}</span>
-  //           <span className={styles.title}>{translations[lang].currentBalance}</span>
-  //           <span className={styles.title}>{translations[lang].eToken}</span>
-  //           <span className={styles.title}>{translations[lang].collateral}</span>
-
-  //           <span className={styles.title} />
-  //         </div>
-
-  //         {deposits &&
-  //           Object.keys(deposits).map((symbol: string, key: number) => {
-  //             const amount: string = JSON.stringify(deposits[symbol].assets);
-  //             return (
-  //               <Item
-  //                 key={key}
-  //                 amount={amount}
-  //                 symbol={symbol}
-  //                 walletAddress={walletAddress}
-  //                 deposit={deposits[symbol]}
-  //                 showModal={showModal}
-  //                 auditorContract={auditorContract}
-  //               />
-  //             );
-  //           })}
-  //       </div>
-  //     </div>
-  //   </div>
-  // );
 }
 
 export default SmartPoolUserStatus;
