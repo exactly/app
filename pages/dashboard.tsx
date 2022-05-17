@@ -62,7 +62,7 @@ const DashBoard: NextPage<Props> = () => {
   // const [getMaturityPoolWithdraws, setMaturityPoolWithdraws] = useState<Array<WithdrawMP>>([]);
   const [maturityPoolBorrows, setMaturityPoolBorrows] = useState<Array<Borrow>>([]);
   // const [maturityPoolRepays, setMaturityPoolRepays] = useState<Array<Repay>>([]);
-  const [smartPoolDeposits, setSmartPoolDeposits] = useState<Dictionary<Deposit>>();
+  // const [smartPoolDeposits, setSmartPoolDeposits] = useState<Dictionary<Deposit>>();
   // const [smartPoolWithdraws, setSmartPoolWithdraws] = useState<Dictionary<Withdraw>>();
 
   const fixedLenders = [FixedLenderDAI, FixedLenderWETH];
@@ -120,12 +120,12 @@ const DashBoard: NextPage<Props> = () => {
         getSmartPoolWithdrawsQuery(walletAddress)
       );
 
-      const smartPoolDeposits = formatSmartPoolDeposits(
-        getSmartPoolDeposits.deposits,
-        getSmartPoolWithdraws.withdraws
-      );
+      // const smartPoolDeposits = formatSmartPoolDeposits(
+      //   getSmartPoolDeposits.deposits,
+      //   getSmartPoolWithdraws.withdraws
+      // );
 
-      setSmartPoolDeposits(smartPoolDeposits);
+      // setSmartPoolDeposits(smartPoolDeposits);
 
       setMaturityPoolDeposits(getMaturityPoolDeposits.depositAtMaturities);
       setMaturityPoolBorrows(getMaturityPoolBorrows.borrowAtMaturities);
@@ -184,9 +184,7 @@ const DashBoard: NextPage<Props> = () => {
 
           {walletAddress ? (
             <>
-              {tab.value == 'deposit' && (
-                <SmartPoolDashboard deposits={smartPoolDeposits} showModal={showModal} />
-              )}
+              {tab.value == 'deposit' && <SmartPoolDashboard showModal={showModal} />}
               <MaturityPoolDashboard
                 deposits={maturityPoolDeposits}
                 borrows={maturityPoolBorrows}

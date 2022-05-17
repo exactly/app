@@ -34,6 +34,7 @@ import PreviewerContext from 'contexts/PreviewerContext';
 import AuditorContext from 'contexts/AuditorContext';
 
 import { getContractData } from 'utils/contracts';
+import formatNumber from 'utils/formatNumber';
 
 import decimals from 'config/decimals.json';
 import numbers from 'config/numbers.json';
@@ -71,7 +72,10 @@ function WithdrawModalSP({ data, closeModal }: Props) {
 
   const previewerContract = getContractData(previewerData.address!, previewerData.abi!);
 
-  const parsedAmount = ethers.utils.formatUnits(assets, decimals[symbol! as keyof Decimals]);
+  const parsedAmount = formatNumber(
+    ethers.utils.formatUnits(assets, decimals[symbol! as keyof Decimals]),
+    symbol!
+  );
 
   useEffect(() => {
     getFixedLenderContract();

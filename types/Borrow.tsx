@@ -1,11 +1,11 @@
 export type Borrow = {
-  id: string;
+  id?: string;
   market: string;
-  maturity: string;
-  caller: string;
-  receiver: string;
-  borrower: string;
+  maturity?: string;
+  caller?: string;
+  receiver?: string;
+  borrower?: string;
   assets: string;
-  fee: string;
+  fee?: string;
   symbol?: string;
 };
