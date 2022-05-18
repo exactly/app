@@ -10,7 +10,7 @@ import FixedLenderContext from 'contexts/FixedLenderContext';
 import { LangKeys } from 'types/Lang';
 import { Deposit } from 'types/Deposit';
 import { Dictionary } from 'types/Dictionary';
-import { SPItem } from 'types/SPItem';
+import { SmartPoolItemData } from 'types/SmartPoolItemData';
 
 import styles from './style.module.scss';
 
@@ -21,7 +21,7 @@ import { getSymbol } from 'utils/utils';
 
 type Props = {
   walletAddress: string | null | undefined;
-  showModal: (data: Deposit, type: String) => void;
+  showModal: (data: Deposit | any, type: String) => void;
 };
 
 function SmartPoolUserStatus({ walletAddress, showModal }: Props) {
@@ -30,7 +30,7 @@ function SmartPoolUserStatus({ walletAddress, showModal }: Props) {
   const translations: { [key: string]: LangKeys } = keys;
   const auditor = useContext(AuditorContext);
   const { web3Provider } = useWeb3Context();
-  const [itemData, setItemData] = useState<Array<SPItem>>([]);
+  const [itemData, setItemData] = useState<Array<SmartPoolItemData>>([]);
 
   const auditorContract = getContractData(
     auditor.address!,
@@ -85,7 +85,7 @@ function SmartPoolUserStatus({ walletAddress, showModal }: Props) {
           </div>
 
           {itemData &&
-            itemData.map((item: SPItem, key: number) => {
+            itemData.map((item: SmartPoolItemData, key: number) => {
               return (
                 <Item
                   key={key}

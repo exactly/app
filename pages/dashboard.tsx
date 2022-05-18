@@ -62,8 +62,6 @@ const DashBoard: NextPage<Props> = () => {
   // const [getMaturityPoolWithdraws, setMaturityPoolWithdraws] = useState<Array<WithdrawMP>>([]);
   const [maturityPoolBorrows, setMaturityPoolBorrows] = useState<Array<Borrow>>([]);
   // const [maturityPoolRepays, setMaturityPoolRepays] = useState<Array<Repay>>([]);
-  // const [smartPoolDeposits, setSmartPoolDeposits] = useState<Dictionary<Deposit>>();
-  // const [smartPoolWithdraws, setSmartPoolWithdraws] = useState<Dictionary<Withdraw>>();
 
   const fixedLenders = [FixedLenderDAI, FixedLenderWETH];
 
@@ -124,8 +122,6 @@ const DashBoard: NextPage<Props> = () => {
       //   getSmartPoolDeposits.deposits,
       //   getSmartPoolWithdraws.withdraws
       // );
-
-      // setSmartPoolDeposits(smartPoolDeposits);
 
       setMaturityPoolDeposits(getMaturityPoolDeposits.depositAtMaturities);
       setMaturityPoolBorrows(getMaturityPoolBorrows.borrowAtMaturities);

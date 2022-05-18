@@ -1,6 +1,6 @@
 import { BigNumber } from 'ethers';
 
-export type SPItem = {
+export type SmartPoolItemData = {
   symbol: string;
   eTokens: BigNumber;
   tokens: BigNumber;
