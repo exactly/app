@@ -41,8 +41,8 @@ export function getUnderlyingData(network: string | undefined, symbol: string | 
 
 export function getSymbol(address: string) {
   const dictionary: Dictionary<string> = {
-    '0x188e20546ac8fbdce64f7e166896ff082fc5e055': 'DAI',
-    '0xe44fb639bccfb119725d846a3148907f205f5fb2': 'WETH'
+    '0xcac4d1ca0e395cfeca89fbb196d60cae8f0193da': 'DAI',
+    '0xb160ac4da4f5425f876d741b61898d7e52f0ebe2': 'WETH'
   };
 
   return dictionary[address.toLowerCase()];
