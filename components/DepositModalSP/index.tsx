@@ -207,7 +207,10 @@ function DepositModalSP({ data, closeModal }: Props) {
   }
 
   async function onMax() {
-    walletBalance && setQty(walletBalance);
+    if (walletBalance) {
+      setQty(walletBalance);
+      setError(undefined);
+    }
   }
 
   function handleInputChange(e: ChangeEvent<HTMLInputElement>) {
