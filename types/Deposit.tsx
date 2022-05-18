@@ -1,10 +1,10 @@
 export type Deposit = {
   assets: string;
-  caller: string;
+  caller?: string;
   fee: string;
-  id: string;
+  id?: string;
   market: string;
   maturity: string;
-  owner: string;
+  owner?: string;
   symbol?: string;
 };

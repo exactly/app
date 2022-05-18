@@ -1,38 +1,74 @@
-import { useContext } from 'react';
+import { useContext, useEffect, useState } from 'react';
 
 import Item from './Item';
 
 import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 import AuditorContext from 'contexts/AuditorContext';
+import FixedLenderContext from 'contexts/FixedLenderContext';
 
 import { LangKeys } from 'types/Lang';
 import { Deposit } from 'types/Deposit';
 import { Dictionary } from 'types/Dictionary';
+import { SmartPoolItemData } from 'types/SmartPoolItemData';
 
 import styles from './style.module.scss';
 
 import keys from './translations.json';
 
 import { getContractData } from 'utils/contracts';
+import { getSymbol } from 'utils/utils';
 
 type Props = {
   walletAddress: string | null | undefined;
-  deposits: Dictionary<Deposit> | undefined;
-  showModal: (data: Deposit, type: String) => void;
+  showModal: (data: Deposit | any, type: String) => void;
 };
 
-function SmartPoolUserStatus({ deposits, walletAddress, showModal }: Props) {
+function SmartPoolUserStatus({ walletAddress, showModal }: Props) {
+  const fixedLenders = useContext(FixedLenderContext);
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
   const auditor = useContext(AuditorContext);
   const { web3Provider } = useWeb3Context();
+  const [itemData, setItemData] = useState<Array<SmartPoolItemData>>([]);
 
   const auditorContract = getContractData(
     auditor.address!,
     auditor.abi!,
     web3Provider?.getSigner()
   );
+
+  useEffect(() => {
+    getCurrentBalance();
+  }, []);
+
+  async function getCurrentBalance() {
+    const data = [];
+
+    for (let i = 0; i < fixedLenders.length; i++) {
+      const fixedLender = fixedLenders[i];
+
+      const fixedLenderAddress = fixedLender.address;
+      const fixedLenderAbi = fixedLender.abi;
+      const fixedLenderSymbol = getSymbol(fixedLenderAddress!);
+
+      const contractData = await getContractData(fixedLenderAddress!, fixedLenderAbi!);
+      const balance = await contractData?.balanceOf(walletAddress);
+
+      if (balance) {
+        const etokens = balance;
+        const tokens = await contractData?.convertToAssets(balance);
+
+        const obj = {
+          symbol: fixedLenderSymbol,
+          eTokens: etokens,
+          tokens: tokens
+        };
+        data.push(obj);
+      }
+    }
+    setItemData(data);
+  }
 
   return (
     <div className={styles.container}>
@@ -42,22 +78,21 @@ function SmartPoolUserStatus({ deposits, walletAddress, showModal }: Props) {
             <span className={styles.symbol}>{translations[lang].asset}</span>
             <span className={styles.title}>{translations[lang].walletBalance}</span>
             <span className={styles.title}>{translations[lang].currentBalance}</span>
-            <span className={styles.title}>{translations[lang].liquidity}</span>
+            <span className={styles.title}>{translations[lang].eToken}</span>
             <span className={styles.title}>{translations[lang].collateral}</span>
 
             <span className={styles.title} />
           </div>
 
-          {deposits &&
-            Object.keys(deposits).map((symbol: string, key: number) => {
-              const amount: string = JSON.stringify(deposits[symbol].assets);
+          {itemData &&
+            itemData.map((item: SmartPoolItemData, key: number) => {
               return (
                 <Item
                   key={key}
-                  amount={amount}
-                  symbol={symbol}
+                  tokenAmount={item.tokens}
+                  symbol={item.symbol}
                   walletAddress={walletAddress}
-                  deposit={deposits[symbol]}
+                  eTokenAmount={item.eTokens}
                   showModal={showModal}
                   auditorContract={auditorContract}
                 />

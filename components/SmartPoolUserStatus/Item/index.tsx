@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { ethers, Contract } from 'ethers';
+import { ethers, Contract, BigNumber } from 'ethers';
 import Button from 'components/common/Button';
 import Switch from 'components/common/Switch';
 import Loading from 'components/common/Loading';
@@ -24,14 +24,21 @@ import parseSymbol from 'utils/parseSymbol';
 
 type Props = {
   symbol: string;
-  amount: string;
+  tokenAmount: BigNumber;
   walletAddress: string | null | undefined;
-  showModal: (data: Deposit, type: String) => void;
-  deposit: Deposit;
+  showModal: (data: Deposit | any, type: String) => void;
+  eTokenAmount: BigNumber;
   auditorContract: Contract | undefined;
 };
 
-function Item({ symbol, amount, walletAddress, showModal, deposit, auditorContract }: Props) {
+function Item({
+  symbol,
+  tokenAmount,
+  walletAddress,
+  showModal,
+  eTokenAmount,
+  auditorContract
+}: Props) {
   const fixedLender = useContext(FixedLenderContext);
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
@@ -53,7 +60,7 @@ function Item({ symbol, amount, walletAddress, showModal, deposit, auditorContra
   });
 
   async function checkCollaterals() {
-    const fixedLenderAddress = getFixedLenderAddress();
+    const fixedLenderAddress = getFixedLenderData().address;
     const allMarkets = await auditorContract?.getAllMarkets();
     const marketIndex = allMarkets.indexOf(fixedLenderAddress);
     const assets = await auditorContract?.accountAssets(walletAddress);
@@ -77,7 +84,7 @@ function Item({ symbol, amount, walletAddress, showModal, deposit, auditorContra
     }
   }
 
-  function getFixedLenderAddress() {
+  function getFixedLenderData() {
     const filteredFixedLender = fixedLender.find((contract) => {
       const args: Array<string> | undefined = contract?.args;
       const contractSymbol: string | undefined = args && args[1];
@@ -85,9 +92,12 @@ function Item({ symbol, amount, walletAddress, showModal, deposit, auditorContra
       return contractSymbol === symbol;
     });
 
-    const fixedLenderAddress = filteredFixedLender?.address;
+    const fixedLenderData = {
+      address: filteredFixedLender?.address,
+      abi: filteredFixedLender?.abi
+    };
 
-    return fixedLenderAddress;
+    return fixedLenderData;
   }
 
   async function handleMarket() {
@@ -96,7 +106,7 @@ function Item({ symbol, amount, walletAddress, showModal, deposit, auditorContra
 
       setLoading(true);
 
-      const fixedLenderAddress = getFixedLenderAddress();
+      const fixedLenderAddress = getFixedLenderData().address;
 
       if (!toggle && fixedLenderAddress) {
         //if it's not toggled we need to ENTER
@@ -131,11 +141,16 @@ function Item({ symbol, amount, walletAddress, showModal, deposit, auditorContra
       <span className={styles.value}>{formatNumber(walletBalance!, symbol)}</span>
       <span className={styles.value}>
         {formatNumber(
-          ethers.utils.formatUnits(amount, decimals[symbol! as keyof Decimals]),
+          ethers.utils.formatUnits(tokenAmount, decimals[symbol! as keyof Decimals]),
           symbol
         )}
       </span>
-      <span className={styles.value}>{0}</span>
+      <span className={styles.value}>
+        {formatNumber(
+          ethers.utils.formatUnits(eTokenAmount, decimals[symbol! as keyof Decimals]),
+          symbol
+        )}
+      </span>
 
       <span className={styles.value}>
         {!loading ? (
@@ -161,7 +176,10 @@ function Item({ symbol, amount, walletAddress, showModal, deposit, auditorContra
             className="primary"
             onClick={() =>
               showModal(
-                { ...deposit, assets: JSON.stringify(deposit.assets), symbol },
+                {
+                  market: getFixedLenderData().address,
+                  symbol
+                },
                 'smartDeposit'
               )
             }
@@ -174,7 +192,10 @@ function Item({ symbol, amount, walletAddress, showModal, deposit, auditorContra
             className="tertiary"
             onClick={() =>
               showModal(
-                { ...deposit, assets: JSON.stringify(deposit.assets), symbol },
+                {
+                  assets: tokenAmount,
+                  symbol
+                },
                 'withdrawSP'
               )
             }

@@ -4,7 +4,7 @@
     "currentBalance": "Deposited Amount",
     "utilizationRate": "Utilization Rate",
     "lastRate": "Last Rate",
-    "liquidity": "Liquidity",
+    "eToken": "eToken",
     "apr": "APR (Variable)",
     "collateral": "Collateral",
     "walletBalance": "Wallet Balance"
