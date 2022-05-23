@@ -19,6 +19,8 @@ import DepositModalSP from 'components/DepositModalSP';
 import { Maturity } from 'types/Maturity';
 import { LangKeys } from 'types/Lang';
 import { UnformattedMarket } from 'types/UnformattedMarket';
+import { FixedLenderAccountData } from 'types/FixedLenderAccountData';
+import { AccountData } from 'types/AccountData';
 
 import { AuditorProvider } from 'contexts/AuditorContext';
 import LangContext from 'contexts/LangContext';
@@ -95,7 +97,13 @@ const Asset: NextPage<Props> = ({ symbol, price }) => {
   async function getAccountData() {
     try {
       const data = await previewerContract?.extendedAccountData(walletAddress);
-      setAccountData(data);
+      const newAccountData: AccountData = {};
+
+      data.forEach((fixedLender: FixedLenderAccountData) => {
+        newAccountData[fixedLender.assetSymbol] = fixedLender;
+      });
+
+      setAccountData(newAccountData);
     } catch (e) {
       console.log(e);
     }

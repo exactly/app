@@ -28,6 +28,8 @@ import { Contract } from 'types/Contract';
 import { Dictionary } from 'types/Dictionary';
 import { Borrow } from 'types/Borrow';
 import { Deposit } from 'types/Deposit';
+import { FixedLenderAccountData } from 'types/FixedLenderAccountData';
+import { AccountData } from 'types/AccountData';
 
 import useModal from 'hooks/useModal';
 
@@ -89,7 +91,13 @@ const DashBoard: NextPage<Props> = () => {
   async function getAccountData() {
     try {
       const data = await previewerContract?.extendedAccountData(walletAddress);
-      setAccountData(data);
+      const newAccountData: AccountData = {};
+
+      data.forEach((fixedLender: FixedLenderAccountData) => {
+        newAccountData[fixedLender.assetSymbol] = fixedLender;
+      });
+
+      setAccountData(newAccountData);
     } catch (e) {
       console.log(e);
     }

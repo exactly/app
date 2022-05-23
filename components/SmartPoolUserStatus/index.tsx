@@ -40,7 +40,7 @@ function SmartPoolUserStatus({ walletAddress, showModal }: Props) {
 
   useEffect(() => {
     getCurrentBalance();
-  }, []);
+  }, [walletAddress]);
 
   async function getCurrentBalance() {
     const data = [];

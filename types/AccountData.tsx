@@ -1,15 +1,5 @@
-import { BigNumber } from '@ethersproject/bignumber';
+import { FixedLenderAccountData } from './FixedLenderAccountData';
 
 export type AccountData = {
-  fixedLenderAddress: string;
-  symbol: string;
-  maturitySupplyPositions: Array<BigNumber>;
-  maturityBorrowPositions: Array<BigNumber>;
-  smartPoolAsstets: BigNumber;
-  smartPoolShares: BigNumber;
-  oraclePrice: BigNumber;
-  penaltyRate: BigNumber;
-  collateralFactor: BigNumber;
-  decimals: number;
-  isCollateral: boolean;
+  [Key: string]: FixedLenderAccountData;
 };

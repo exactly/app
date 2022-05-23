@@ -24,6 +24,8 @@ import PreviewerContext from 'contexts/PreviewerContext';
 
 import { Market } from 'types/Market';
 import { UnformattedMarket } from 'types/UnformattedMarket';
+import { FixedLenderAccountData } from 'types/FixedLenderAccountData';
+import { AccountData } from 'types/AccountData';
 
 import dictionary from 'dictionary/en.json';
 
@@ -75,7 +77,13 @@ const Pools: NextPage<Props> = () => {
   async function getAccountData() {
     try {
       const data = await previewerContract?.extendedAccountData(walletAddress);
-      setAccountData(data);
+      const newAccountData: AccountData = {};
+
+      data.forEach((fixedLender: FixedLenderAccountData) => {
+        newAccountData[fixedLender.assetSymbol] = fixedLender;
+      });
+
+      setAccountData(newAccountData);
     } catch (e) {
       console.log(e);
     }
