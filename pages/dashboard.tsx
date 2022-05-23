@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import type { NextPage } from 'next';
 import { request } from 'graphql-request';
 import { Option } from 'react-dropdown';
@@ -21,7 +21,8 @@ import EmptyState from 'components/EmptyState';
 import { AuditorProvider } from 'contexts/AuditorContext';
 import { FixedLenderProvider } from 'contexts/FixedLenderContext';
 import { useWeb3Context } from 'contexts/Web3Context';
-import { PreviewerProvider } from 'contexts/PreviewerContext';
+import PreviewerContext from 'contexts/PreviewerContext';
+import { AccountDataContext } from 'contexts/AccountDataContext';
 
 import { Contract } from 'types/Contract';
 import { Dictionary } from 'types/Dictionary';
@@ -41,12 +42,11 @@ import {
 import Auditor from 'protocol/deployments/kovan/Auditor.json';
 import FixedLenderDAI from 'protocol/deployments/kovan/FixedLenderDAI.json';
 import FixedLenderWETH from 'protocol/deployments/kovan/FixedLenderWETH.json';
-import Previewer from 'protocol/deployments/kovan/Previewer.json';
 
 import translations from 'dictionary/en.json';
 
 import getSubgraph from 'utils/getSubgraph';
-import formatSmartPoolDeposits from 'utils/formatSmartPoolDeposits';
+import { getContractData } from 'utils/contracts';
 
 interface Props {
   auditor: Contract;
@@ -56,6 +56,8 @@ interface Props {
 
 const DashBoard: NextPage<Props> = () => {
   const { walletAddress } = useWeb3Context();
+  const previewerData = useContext(PreviewerContext);
+  const { accountData, setAccountData } = useContext(AccountDataContext);
   const { modal, handleModal, modalContent } = useModal();
 
   const [maturityPoolDeposits, setMaturityPoolDeposits] = useState<Array<Deposit>>([]);
@@ -64,6 +66,7 @@ const DashBoard: NextPage<Props> = () => {
   // const [maturityPoolRepays, setMaturityPoolRepays] = useState<Array<Repay>>([]);
 
   const fixedLenders = [FixedLenderDAI, FixedLenderWETH];
+  const previewerContract = getContractData(previewerData.address!, previewerData.abi!);
 
   const tabDeposit = {
     label: translations.deposit,
@@ -78,8 +81,19 @@ const DashBoard: NextPage<Props> = () => {
   const [tab, setTab] = useState<Option>(tabDeposit);
 
   useEffect(() => {
+    if (!walletAddress) return;
     getData();
+    getAccountData();
   }, [walletAddress]);
+
+  async function getAccountData() {
+    try {
+      const data = await previewerContract?.extendedAccountData(walletAddress);
+      setAccountData(data);
+    } catch (e) {
+      console.log(e);
+    }
+  }
 
   async function getData() {
     if (!walletAddress) return;
@@ -140,61 +154,58 @@ const DashBoard: NextPage<Props> = () => {
   }
 
   return (
-    <PreviewerProvider value={Previewer}>
-      <AuditorProvider value={Auditor}>
-        <FixedLenderProvider value={fixedLenders}>
-          {modal && modalContent?.type == 'borrow' && (
-            <BorrowModal data={modalContent} closeModal={handleModal} editable />
-          )}
+    <AuditorProvider value={Auditor}>
+      <FixedLenderProvider value={fixedLenders}>
+        {modal && modalContent?.type == 'borrow' && (
+          <BorrowModal data={modalContent} closeModal={handleModal} editable />
+        )}
 
-          {modal && modalContent?.type == 'repay' && (
-            <RepayModal data={modalContent} closeModal={handleModal} />
-          )}
+        {modal && modalContent?.type == 'repay' && (
+          <RepayModal data={modalContent} closeModal={handleModal} />
+        )}
 
-          {modal && modalContent?.type == 'deposit' && (
-            <DepositModalMP data={modalContent} closeModal={handleModal} editable />
-          )}
+        {modal && modalContent?.type == 'deposit' && (
+          <DepositModalMP data={modalContent} closeModal={handleModal} editable />
+        )}
 
-          {modal && modalContent?.type == 'withdraw' && (
-            <WithdrawModalMP data={modalContent} closeModal={handleModal} />
-          )}
+        {modal && modalContent?.type == 'withdraw' && (
+          <WithdrawModalMP data={modalContent} closeModal={handleModal} />
+        )}
 
-          {modal && modalContent?.type == 'smartDeposit' && (
-            <DepositModalSP data={modalContent} closeModal={handleModal} />
-          )}
+        {modal && modalContent?.type == 'smartDeposit' && (
+          <DepositModalSP data={modalContent} closeModal={handleModal} />
+        )}
 
-          {modal && modalContent?.type == 'withdrawSP' && (
-            <WithdrawModalSP data={modalContent} closeModal={handleModal} />
-          )}
+        {modal && modalContent?.type == 'withdrawSP' && (
+          <WithdrawModalSP data={modalContent} closeModal={handleModal} />
+        )}
 
-          <MobileNavbar />
-          <Navbar />
-          <DashboardHeader />
-          <Tabs
-            values={[tabDeposit, tabBorrow]}
-            selected={tab}
-            handleTab={(value: Option) => {
-              setTab(value);
-            }}
-          />
-
-          {walletAddress ? (
-            <>
-              {tab.value == 'deposit' && <SmartPoolDashboard showModal={showModal} />}
-              <MaturityPoolDashboard
-                deposits={maturityPoolDeposits}
-                borrows={maturityPoolBorrows}
-                showModal={showModal}
-                tab={tab}
-              />
-            </>
-          ) : (
-            <EmptyState />
-          )}
-          <Footer />
-        </FixedLenderProvider>
-      </AuditorProvider>
-    </PreviewerProvider>
+        <MobileNavbar />
+        <Navbar />
+        <DashboardHeader />
+        <Tabs
+          values={[tabDeposit, tabBorrow]}
+          selected={tab}
+          handleTab={(value: Option) => {
+            setTab(value);
+          }}
+        />
+        {walletAddress ? (
+          <>
+            {tab.value == 'deposit' && <SmartPoolDashboard showModal={showModal} />}
+            <MaturityPoolDashboard
+              deposits={maturityPoolDeposits}
+              borrows={maturityPoolBorrows}
+              showModal={showModal}
+              tab={tab}
+            />
+          </>
+        ) : (
+          <EmptyState />
+        )}
+        <Footer />
+      </FixedLenderProvider>
+    </AuditorProvider>
   );
 };
 
