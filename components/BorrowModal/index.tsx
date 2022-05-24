@@ -55,7 +55,7 @@ type Props = {
 function BorrowModal({ data, editable, closeModal }: Props) {
   const { maturity, market } = data;
 
-  const { web3Provider, walletAddress } = useWeb3Context();
+  const { web3Provider, walletAddress, network } = useWeb3Context();
 
   const { date, address } = useContext(AddressContext);
 
@@ -83,20 +83,28 @@ function BorrowModal({ data, editable, closeModal }: Props) {
   );
 
   const marketAddress = editable ? address?.value ?? market : market;
-  const symbol = getSymbol(marketAddress);
+  const symbol = getSymbol(marketAddress, network?.name);
 
   const underlyingData: UnderlyingData | undefined = getUnderlyingData(
-    process.env.NEXT_PUBLIC_NETWORK!,
+    network?.name,
     symbol.toLowerCase()
   );
 
-  const underlyingContract = getContractData(underlyingData!.address, underlyingData!.abi);
+  const underlyingContract = getContractData(
+    network?.name,
+    underlyingData!.address,
+    underlyingData!.abi
+  );
 
-  const previewerContract = getContractData(previewerData.address!, previewerData.abi!);
+  const previewerContract = getContractData(
+    network?.name,
+    previewerData.address!,
+    previewerData.abi!
+  );
 
   useEffect(() => {
     getFixedLenderContract();
-  }, [address, market]);
+  }, [address, market, fixedLenderData]);
 
   useEffect(() => {
     if (underlyingContract && fixedLenderWithSigner) {
@@ -241,6 +249,7 @@ function BorrowModal({ data, editable, closeModal }: Props) {
     });
 
     const fixedLender = await getContractData(
+      network?.name,
       filteredFixedLender?.address!,
       filteredFixedLender?.abi!,
       web3Provider?.getSigner()

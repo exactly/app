@@ -8,10 +8,6 @@ import { useEffect } from 'react';
 
 import { AddressProvider } from 'contexts/AddressContext';
 import { Web3ContextProvider } from 'contexts/Web3Context';
-import { PreviewerProvider } from 'contexts/PreviewerContext';
-import { AccountDataProvider } from 'contexts/AccountDataContext';
-
-import Previewer from 'protocol/deployments/kovan/Previewer.json';
 
 import { LangProvider } from 'contexts/LangContext';
 
@@ -47,11 +43,7 @@ function MyApp({ Component, pageProps }: AppProps) {
       <LangProvider value={'en'}>
         <Web3ContextProvider>
           <AddressProvider>
-            <PreviewerProvider value={Previewer}>
-              <AccountDataProvider>
-                <Component {...props} />
-              </AccountDataProvider>
-            </PreviewerProvider>
+            <Component {...props} />
           </AddressProvider>
         </Web3ContextProvider>
       </LangProvider>

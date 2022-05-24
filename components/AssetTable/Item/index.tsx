@@ -25,7 +25,7 @@ type Props = {
 };
 
 function Item({ maturity, market, showModal }: Props) {
-  const { walletAddress, connect } = useWeb3Context();
+  const { walletAddress, connect, network } = useWeb3Context();
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
@@ -38,7 +38,7 @@ function Item({ maturity, market, showModal }: Props) {
 
   async function getLastFixedRate() {
     try {
-      const subgraphUrl = getSubgraph();
+      const subgraphUrl = getSubgraph(network?.name);
 
       const getLastBorrowRate = await request(
         subgraphUrl,
