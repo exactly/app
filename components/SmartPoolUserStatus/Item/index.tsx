@@ -6,6 +6,7 @@ import Loading from 'components/common/Loading';
 
 import FixedLenderContext from 'contexts/FixedLenderContext';
 import LangContext from 'contexts/LangContext';
+import { useWeb3Context } from 'contexts/Web3Context';
 
 import { LangKeys } from 'types/Lang';
 import { Deposit } from 'types/Deposit';
@@ -39,15 +40,17 @@ function Item({
   eTokenAmount,
   auditorContract
 }: Props) {
+  const { network } = useWeb3Context();
   const fixedLender = useContext(FixedLenderContext);
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
+
   const [toggle, setToggle] = useState<boolean>(false);
   const [disabled, setDisabled] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [walletBalance, setWalletBalance] = useState<string | undefined>(undefined);
 
-  const underlyingData = getUnderlyingData(process.env.NEXT_PUBLIC_NETWORK!, symbol);
+  const underlyingData = getUnderlyingData(network?.name, symbol);
 
   useEffect(() => {
     getCurrentBalance();
@@ -76,7 +79,12 @@ function Item({
   }
 
   async function getCurrentBalance() {
-    const contractData = await getContractData(underlyingData!.address, underlyingData!.abi);
+    const contractData = await getContractData(
+      network?.name,
+      underlyingData!.address,
+      underlyingData!.abi
+    );
+
     const balance = await contractData?.balanceOf(walletAddress);
 
     if (balance) {

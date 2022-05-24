@@ -50,7 +50,7 @@ type Props = {
 
 function RepayModal({ data, closeModal }: Props) {
   const { symbol, maturity, assets, fee } = data;
-  const { walletAddress, web3Provider } = useWeb3Context();
+  const { walletAddress, web3Provider, network } = useWeb3Context();
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
@@ -79,11 +79,15 @@ function RepayModal({ data, closeModal }: Props) {
     undefined
   );
 
-  const previewerContract = getContractData(previewerData.address!, previewerData.abi!);
+  const previewerContract = getContractData(
+    network?.name,
+    previewerData.address!,
+    previewerData.abi!
+  );
 
   useEffect(() => {
     getFixedLenderContract();
-  }, []);
+  }, [fixedLenderData]);
 
   useEffect(() => {
     if (!walletAddress) return;
@@ -102,10 +106,6 @@ function RepayModal({ data, closeModal }: Props) {
     setIsLateRepay(repay);
   }, [maturity]);
 
-  useEffect(() => {
-    getFixedLenderContract();
-  }, []);
-
   async function getFixedLenderContract() {
     const filteredFixedLender = fixedLenderData.find((contract) => {
       const args: Array<string> | undefined = contract?.args;
@@ -115,6 +115,7 @@ function RepayModal({ data, closeModal }: Props) {
     });
 
     const fixedLender = await getContractData(
+      network?.name,
       filteredFixedLender?.address!,
       filteredFixedLender?.abi!,
       web3Provider?.getSigner()

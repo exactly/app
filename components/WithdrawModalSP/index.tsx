@@ -49,7 +49,7 @@ type Props = {
 function WithdrawModalSP({ data, closeModal }: Props) {
   const { symbol, assets } = data;
 
-  const { walletAddress, web3Provider } = useWeb3Context();
+  const { walletAddress, web3Provider, network } = useWeb3Context();
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
@@ -70,7 +70,11 @@ function WithdrawModalSP({ data, closeModal }: Props) {
     undefined
   );
 
-  const previewerContract = getContractData(previewerData.address!, previewerData.abi!);
+  const previewerContract = getContractData(
+    network?.name,
+    previewerData.address!,
+    previewerData.abi!
+  );
 
   const parsedAmount = formatNumber(
     ethers.utils.formatUnits(assets, decimals[symbol! as keyof Decimals]),
@@ -79,7 +83,7 @@ function WithdrawModalSP({ data, closeModal }: Props) {
 
   useEffect(() => {
     getFixedLenderContract();
-  }, []);
+  }, [fixedLenderData]);
 
   useEffect(() => {
     if (!walletAddress) return;
@@ -184,6 +188,7 @@ function WithdrawModalSP({ data, closeModal }: Props) {
     });
 
     const fixedLender = await getContractData(
+      network?.name,
       filteredFixedLender?.address!,
       filteredFixedLender?.abi!,
       web3Provider?.getSigner()

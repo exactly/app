@@ -29,10 +29,11 @@ function SmartPoolUserStatus({ walletAddress, showModal }: Props) {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
   const auditor = useContext(AuditorContext);
-  const { web3Provider } = useWeb3Context();
+  const { web3Provider, network } = useWeb3Context();
   const [itemData, setItemData] = useState<Array<SmartPoolItemData>>([]);
 
   const auditorContract = getContractData(
+    network?.name,
     auditor.address!,
     auditor.abi!,
     web3Provider?.getSigner()
@@ -50,9 +51,13 @@ function SmartPoolUserStatus({ walletAddress, showModal }: Props) {
 
       const fixedLenderAddress = fixedLender.address;
       const fixedLenderAbi = fixedLender.abi;
-      const fixedLenderSymbol = getSymbol(fixedLenderAddress!);
+      const fixedLenderSymbol = getSymbol(fixedLenderAddress!, network?.name);
 
-      const contractData = await getContractData(fixedLenderAddress!, fixedLenderAbi!);
+      const contractData = await getContractData(
+        network?.name,
+        fixedLenderAddress!,
+        fixedLenderAbi!
+      );
       const balance = await contractData?.balanceOf(walletAddress);
 
       if (balance) {

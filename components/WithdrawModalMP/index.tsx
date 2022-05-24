@@ -47,7 +47,7 @@ type Props = {
 function WithdrawModalMP({ data, closeModal }: Props) {
   const { symbol, maturity, assets, fee } = data;
 
-  const { web3Provider, walletAddress } = useWeb3Context();
+  const { web3Provider, walletAddress, network } = useWeb3Context();
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
@@ -73,11 +73,15 @@ function WithdrawModalMP({ data, closeModal }: Props) {
     undefined
   );
 
-  const previewerContract = getContractData(previewerData.address!, previewerData.abi!);
+  const previewerContract = getContractData(
+    network?.name,
+    previewerData.address!,
+    previewerData.abi!
+  );
 
   useEffect(() => {
     getFixedLenderContract();
-  }, []);
+  }, [fixedLenderData]);
 
   useEffect(() => {
     const earlyWithdraw = Date.now() / 1000 < parseInt(maturity);
@@ -187,6 +191,7 @@ function WithdrawModalMP({ data, closeModal }: Props) {
     });
 
     const fixedLender = await getContractData(
+      network?.name,
       filteredFixedLender?.address!,
       filteredFixedLender?.abi!,
       web3Provider?.getSigner()
