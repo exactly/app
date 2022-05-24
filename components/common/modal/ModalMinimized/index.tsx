@@ -10,6 +10,7 @@ import { ModalCases } from 'types/ModalCases';
 import keys from './translations.json';
 
 import LangContext from 'contexts/LangContext';
+import { useWeb3Context } from 'contexts/Web3Context';
 
 type Props = {
   tx: Transaction;
@@ -17,6 +18,8 @@ type Props = {
 };
 
 function ModalMinimized({ tx, handleMinimize }: Props) {
+  const { network } = useWeb3Context();
+
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
@@ -59,7 +62,9 @@ function ModalMinimized({ tx, handleMinimize }: Props) {
         {translations[lang].etherscanText}{' '}
         <a
           className={styles.etherscan}
-          href={`https://kovan.etherscan.io/tx/${tx.hash}`}
+          href={`https://${network?.name ?? process.env.NEXT_PUBLIC_NETWORK}.etherscan.io/tx/${
+            tx.hash
+          }`}
           target="_blank"
           rel="noopener noreferrer"
         >

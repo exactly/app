@@ -28,7 +28,7 @@ type Props = {
 
 function Item({ market, showModal, src }: Props) {
   const { date } = useContext(AddressContext);
-  const { walletAddress, connect } = useWeb3Context();
+  const { web3Provider, walletAddress, connect, network } = useWeb3Context();
 
   const fixedLenderData = useContext(FixedLenderContext);
 
@@ -41,16 +41,20 @@ function Item({ market, showModal, src }: Props) {
 
   async function getFixedLenderContract() {
     const filteredFixedLender = fixedLenderData.find((fl) => fl.address == market.market);
+
     const fixedLender = await getContractData(
+      network?.name,
       filteredFixedLender?.address!,
-      filteredFixedLender?.abi!
+      filteredFixedLender?.abi!,
+      web3Provider?.getSigner()
     );
+
     setFixedLender(fixedLender);
   }
 
   useEffect(() => {
     getFixedLenderContract();
-  }, []);
+  }, [fixedLenderData]);
 
   useEffect(() => {
     if (date?.value && fixedLender) {
@@ -66,7 +70,7 @@ function Item({ market, showModal, src }: Props) {
 
   async function getMarketData() {
     const borrowed = await fixedLender?.smartPoolBorrowed();
-    const supplied = await fixedLender?.smartPoolBalance();
+    const supplied = await fixedLender?.smartPoolAssets();
 
     const newPoolData = {
       borrowed: Math.round(parseInt(await ethers.utils.formatEther(borrowed))),

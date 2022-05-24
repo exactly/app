@@ -4,6 +4,7 @@ import { ethers } from 'ethers';
 import Button from 'components/common/Button';
 
 import LangContext from 'contexts/LangContext';
+import { useWeb3Context } from 'contexts/Web3Context';
 
 import { LangKeys } from 'types/Lang';
 import { Deposit } from 'types/Deposit';
@@ -33,6 +34,8 @@ type Props = {
 };
 
 function Item({ type, amount, fee, maturityDate, showModal, market, data }: Props) {
+  const { network } = useWeb3Context();
+
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
@@ -44,7 +47,7 @@ function Item({ type, amount, fee, maturityDate, showModal, market, data }: Prop
   const current = nowInSeconds - startDate;
   const progress = (current * 100) / maturityLife;
   const fixedRate = (parseFloat(fee) * 100) / parseFloat(amount);
-  const symbol = getSymbol(market);
+  const symbol = getSymbol(market, network?.name);
 
   useEffect(() => {
     getMaturityData();

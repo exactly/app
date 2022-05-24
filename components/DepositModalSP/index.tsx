@@ -55,7 +55,7 @@ type Props = {
 function DepositModalSP({ data, closeModal }: Props) {
   const { market, symbol } = data;
 
-  const { web3Provider, walletAddress } = useWeb3Context();
+  const { web3Provider, walletAddress, network } = useWeb3Context();
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
@@ -83,22 +83,27 @@ function DepositModalSP({ data, closeModal }: Props) {
   let underlyingData: UnderlyingData | undefined = undefined;
 
   if (symbol) {
-    underlyingData = getUnderlyingData(process.env.NEXT_PUBLIC_NETWORK!, symbol.toLowerCase());
+    underlyingData = getUnderlyingData(network?.name, symbol.toLowerCase());
   }
 
   const underlyingContract = getContractData(
+    network?.name,
     underlyingData!.address,
     underlyingData!.abi,
     web3Provider?.getSigner()
   );
 
-  const previewerContract = getContractData(previewerData.address!, previewerData.abi!);
+  const previewerContract = getContractData(
+    network?.name,
+    previewerData.address!,
+    previewerData.abi!
+  );
 
   useEffect(() => {
     getFixedLenderContract();
     getWalletBalance();
     getUserDeposits();
-  }, []);
+  }, [fixedLenderData]);
 
   useEffect(() => {
     if (!walletAddress) return;
@@ -183,7 +188,7 @@ function DepositModalSP({ data, closeModal }: Props) {
   async function getUserDeposits() {
     if (!walletAddress || !symbol) return;
 
-    const subgraphUrl = getSubgraph();
+    const subgraphUrl = getSubgraph(network?.name);
 
     const getSmartPoolDeposits = await request(
       subgraphUrl,
@@ -197,7 +202,8 @@ function DepositModalSP({ data, closeModal }: Props) {
 
     const deposits = formatSmartPoolDeposits(
       getSmartPoolDeposits.deposits,
-      getSmartPoolWithdraws.withdraws
+      getSmartPoolWithdraws.withdraws,
+      network?.name!
     );
 
     const amount = deposits[symbol?.toUpperCase()]?.assets;
@@ -291,6 +297,7 @@ function DepositModalSP({ data, closeModal }: Props) {
     });
 
     const fixedLender = await getContractData(
+      network?.name,
       filteredFixedLender?.address!,
       filteredFixedLender?.abi!,
       web3Provider?.getSigner()

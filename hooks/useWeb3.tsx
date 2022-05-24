@@ -9,7 +9,6 @@ let web3Modal: Web3Modal | null;
 
 if (typeof window !== 'undefined') {
   web3Modal = new Web3Modal({
-    network: `${process.env.NEXT_PUBLIC_NETWORK}`,
     cacheProvider: true,
     providerOptions: {
       walletconnect: {
@@ -18,6 +17,7 @@ if (typeof window !== 'undefined') {
           infuraId: `${process.env.NEXT_INFURA_ID}`,
           rpc: {
             1: `https://mainnet.infura.io/v3/77a2479dc2bd4436aa3edb374f3019d2`,
+            4: 'https://rinkeby.infura.io/v3/77a2479dc2bd4436aa3edb374f3019d2',
             42: `https://kovan.infura.io/v3/77a2479dc2bd4436aa3edb374f3019d2`
           },
           chainId: 42
