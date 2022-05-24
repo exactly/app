@@ -21,11 +21,10 @@ export function formatWallet(walletAddress: String) {
   return `${walletAddress.substring(0, 6)}...${walletAddress.substring(38)}`;
 }
 
-export function getUnderlyingData(
-  network: string | undefined = 'kovan',
-  symbol: string | undefined
-) {
-  if (!network || !symbol) return;
+export function getUnderlyingData(network: string | undefined, symbol: string | undefined) {
+  if (!symbol) return;
+
+  const currentNetwork = network ?? process.env.NEXT_PUBLIC_NETWORK;
 
   const baseData: UnderlyingNetwork = {
     kovan: {
@@ -51,10 +50,12 @@ export function getUnderlyingData(
     mainnet: {}
   };
 
-  return baseData[network.toLowerCase()][symbol.toLowerCase()];
+  return baseData[currentNetwork!.toLowerCase()][symbol.toLowerCase()];
 }
 
-export function getSymbol(address: string, network: string = 'kovan') {
+export function getSymbol(address: string, network: string | undefined) {
+  const currentNetwork = network ?? process.env.NEXT_PUBLIC_NETWORK;
+
   const dictionary: Dictionary<Dictionary<string>> = {
     kovan: {
       '0xcac4d1ca0e395cfeca89fbb196d60cae8f0193da': 'DAI',
@@ -66,5 +67,5 @@ export function getSymbol(address: string, network: string = 'kovan') {
     }
   };
 
-  return dictionary[network.toLowerCase()][address.toLowerCase()];
+  return dictionary[currentNetwork!.toLowerCase()][address.toLowerCase()];
 }
