@@ -1,3 +1,5 @@
+import { getAllMaturityPoolDepositsQuery } from 'queries/getAllMaturityPoolDeposits';
+import { getAllMaturityPoolBorrowsQuery } from 'queries/getAllMaturityPoolBorrows';
 import { getMaturityPoolDepositsQuery } from 'queries/getMaturityPoolDeposits';
 import { getMaturityPoolBorrowsQuery } from 'queries/getMaturityPoolBorrows';
 import { getMaturityPoolRepaysQuery } from 'queries/getMaturityPoolRepay';
@@ -8,8 +10,10 @@ import { getSmartPoolDepositsQuery } from './getSmartPoolDeposits';
 import { getSmartPoolWithdrawsQuery } from './getSmartPoolWithdraws';
 
 export {
-  getMaturityPoolBorrowsQuery,
+  getAllMaturityPoolDepositsQuery,
+  getAllMaturityPoolBorrowsQuery,
   getMaturityPoolDepositsQuery,
+  getMaturityPoolBorrowsQuery,
   getMaturityPoolRepaysQuery,
   getMaturityPoolWithdrawsQuery,
   getLastMaturityPoolBorrowRate,

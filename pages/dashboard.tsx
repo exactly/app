@@ -28,7 +28,7 @@ import { Deposit } from 'types/Deposit';
 
 import useModal from 'hooks/useModal';
 
-import { getMaturityPoolBorrowsQuery, getMaturityPoolDepositsQuery } from 'queries';
+import { getAllMaturityPoolBorrowsQuery, getAllMaturityPoolDepositsQuery } from 'queries';
 
 import translations from 'dictionary/en.json';
 
@@ -76,12 +76,12 @@ const DashBoard: NextPage<Props> = () => {
       //MP
       const getMaturityPoolDeposits = await request(
         subgraphUrl,
-        getMaturityPoolDepositsQuery(walletAddress)
+        getAllMaturityPoolDepositsQuery(walletAddress)
       );
 
       const getMaturityPoolBorrows = await request(
         subgraphUrl,
-        getMaturityPoolBorrowsQuery(walletAddress)
+        getAllMaturityPoolBorrowsQuery(walletAddress)
       );
 
       setMaturityPoolDeposits(getMaturityPoolDeposits.depositAtMaturities);

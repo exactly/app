@@ -1,5 +1,6 @@
-import { useContext, useEffect } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { ethers } from 'ethers';
+import request from 'graphql-request';
 
 import Button from 'components/common/Button';
 
@@ -20,8 +21,18 @@ import parseTimestamp from 'utils/parseTimestamp';
 import { getSymbol } from 'utils/utils';
 import formatNumber from 'utils/formatNumber';
 import parseSymbol from 'utils/parseSymbol';
+import getSubgraph from 'utils/getSubgraph';
+
+import {
+  getMaturityPoolBorrowsQuery,
+  getMaturityPoolDepositsQuery,
+  getMaturityPoolWithdrawsQuery,
+  getMaturityPoolRepaysQuery
+} from 'queries';
 
 import decimals from 'config/decimals.json';
+import { WithdrawMP } from 'types/WithdrawMP';
+import { Repay } from 'types/Repay';
 
 type Props = {
   type?: Option;
@@ -34,10 +45,14 @@ type Props = {
 };
 
 function Item({ type, amount, fee, maturityDate, showModal, market, data }: Props) {
-  const { network } = useWeb3Context();
+  const { network, walletAddress } = useWeb3Context();
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
+
+  const [transactions, setTransactions] = useState<Array<WithdrawMP | Repay | Deposit | Borrow>>(
+    []
+  );
 
   const oneHour = 3600;
   const oneDay = oneHour * 24;
@@ -51,9 +66,43 @@ function Item({ type, amount, fee, maturityDate, showModal, market, data }: Prop
 
   useEffect(() => {
     getMaturityData();
-  }, [maturityDate]);
+  }, [maturityDate, walletAddress]);
 
-  async function getMaturityData() {}
+  async function getMaturityData() {
+    const subgraphUrl = getSubgraph(network?.name);
+    const transactions = [];
+
+    if (type?.value === 'borrow') {
+      const getMaturityPoolBorrows = await request(
+        subgraphUrl,
+        getMaturityPoolBorrowsQuery(walletAddress!, maturityDate)
+      );
+
+      transactions.push(...getMaturityPoolBorrows.borrowAtMaturities);
+
+      const getMaturityPoolRepays = await request(
+        subgraphUrl,
+        getMaturityPoolRepaysQuery(walletAddress!, maturityDate)
+      );
+
+      transactions.push(...getMaturityPoolRepays.repayAtMaturities);
+    } else {
+      const getMaturityPoolDeposits = await request(
+        subgraphUrl,
+        getMaturityPoolDepositsQuery(walletAddress!, maturityDate)
+      );
+
+      transactions.push(...getMaturityPoolDeposits.depositAtMaturities);
+
+      const getMaturityPoolWithdraws = await request(
+        subgraphUrl,
+        getMaturityPoolWithdrawsQuery(walletAddress!, maturityDate)
+      );
+
+      transactions.push(...getMaturityPoolWithdraws.withdrawAtMaturities);
+    }
+    setTransactions(transactions);
+  }
 
   return (
     <details className={styles.container}>
@@ -105,21 +154,15 @@ function Item({ type, amount, fee, maturityDate, showModal, market, data }: Prop
               <th scope="col">Amount</th>
             </tr>
           </thead>
-          <tbody>
-            <td>01/01/2022</td>
-            <td>withdraw</td>
-            <td>$100</td>
-          </tbody>
-          <tbody>
-            <td>01/01/2022</td>
-            <td>withdraw</td>
-            <td>$100</td>
-          </tbody>
-          <tbody>
-            <td>01/01/2022</td>
-            <td>withdraw</td>
-            <td>$100</td>
-          </tbody>
+          {transactions.map((transaction) => {
+            return (
+              <tbody>
+                <td>01/01/2022</td>
+                <td>withdraw</td>
+                <td>$100</td>
+              </tbody>
+            );
+          })}
         </table>
       </div>
     </details>

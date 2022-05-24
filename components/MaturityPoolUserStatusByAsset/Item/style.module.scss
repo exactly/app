@@ -26,6 +26,7 @@
       color: var(--primary);
     }
   }
+
   .tableContainer {
     padding-left: calc(100% / 6);
     padding-right: 5%;
@@ -116,5 +117,49 @@
 .secondaryContainer {
   &:hover {
     border-left: var(--smallestUnit) solid var(--secondary);
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .container {
+    .tableContainer {
+      .table {
+        border: 0;
+
+        thead {
+          border: none;
+          clip: rect(0 0 0 0);
+          height: 1px;
+          margin: -1px;
+          overflow: hidden;
+          padding: 0;
+          position: absolute;
+          width: 1px;
+        }
+
+        tr {
+          border-bottom: 3px solid #ddd;
+          display: block;
+          margin-bottom: 0.625em;
+        }
+        td {
+          border-bottom: 1px solid #ddd;
+          display: block;
+          font-size: 0.8em;
+          text-align: right;
+
+          &::before {
+            content: attr(data-label);
+            float: left;
+            font-weight: bold;
+            text-transform: uppercase;
+          }
+        }
+
+        &:last-child {
+          border-bottom: 0;
+        }
+      }
+    }
   }
 }
