@@ -58,8 +58,8 @@ export function getSymbol(address: string, network: string | undefined) {
 
   const dictionary: Dictionary<Dictionary<string>> = {
     kovan: {
-      '0xcac4d1ca0e395cfeca89fbb196d60cae8f0193da': 'DAI',
-      '0xb160ac4da4f5425f876d741b61898d7e52f0ebe2': 'WETH'
+      '0x19eeebe4c4b3eb6ca36da09809d387efda807e25': 'DAI',
+      '0xe64021ba8661d5902a2838adc77dd43ab4a2fd82': 'WETH'
     },
     rinkeby: {
       '0xc1fe172c03e63c6e35aee32e33a3326064ef7590': 'DAI',
