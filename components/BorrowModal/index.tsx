@@ -230,9 +230,10 @@ function BorrowModal({ data, editable, closeModal }: Props) {
       );
 
       const fixedRate =
-        (parseFloat(ethers.utils.formatUnits(feeAtMaturity, decimals[symbol! as keyof Decimals])) *
-          100) /
-        parseFloat(qty);
+        ((parseFloat(ethers.utils.formatUnits(feeAtMaturity, decimals[symbol! as keyof Decimals])) -
+          parseFloat(qty)) /
+          parseFloat(qty)) *
+        100;
 
       setFixedRate(fixedRate.toFixed(2));
     } catch (e) {
