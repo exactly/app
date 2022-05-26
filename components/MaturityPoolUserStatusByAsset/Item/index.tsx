@@ -163,7 +163,7 @@ function Item({ type, amount, fee, maturityDate, showModal, market, data }: Prop
               <th scope="col">Amount</th>
             </tr>
           </thead>
-          {transactions.map((transaction: any) => {
+          {transactions.map((transaction: any, key) => {
             const value = formatNumber(
               ethers.utils.formatUnits(transaction.assets, decimals[symbol! as keyof Decimals]),
               symbol
@@ -179,7 +179,7 @@ function Item({ type, amount, fee, maturityDate, showModal, market, data }: Prop
             const isEnter = text.toLowerCase() == 'borrow' || text.toLowerCase() == 'deposit';
 
             return (
-              <tbody>
+              <tbody key={key}>
                 <tr>
                   <td>{parseTimestamp(transaction?.timestamp || '0')}</td>
                   <td>
