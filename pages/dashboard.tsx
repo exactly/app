@@ -101,62 +101,66 @@ const DashBoard: NextPage<Props> = () => {
   }
 
   return (
-    <PreviewerProvider value={Previewer}>
-      <AccountDataProvider>
-        <AuditorProvider value={Auditor}>
-          <FixedLenderProvider value={fixedLenders}>
-            {modal && modalContent?.type == 'borrow' && (
-              <BorrowModal data={modalContent} closeModal={handleModal} editable />
-            )}
+    <>
+      {Auditor && (
+        <PreviewerProvider value={Previewer}>
+          <AccountDataProvider>
+            <AuditorProvider value={Auditor}>
+              <FixedLenderProvider value={fixedLenders}>
+                {modal && modalContent?.type == 'borrow' && (
+                  <BorrowModal data={modalContent} closeModal={handleModal} editable />
+                )}
 
-            {modal && modalContent?.type == 'repay' && (
-              <RepayModal data={modalContent} closeModal={handleModal} />
-            )}
+                {modal && modalContent?.type == 'repay' && (
+                  <RepayModal data={modalContent} closeModal={handleModal} />
+                )}
 
-            {modal && modalContent?.type == 'deposit' && (
-              <DepositModalMP data={modalContent} closeModal={handleModal} editable />
-            )}
+                {modal && modalContent?.type == 'deposit' && (
+                  <DepositModalMP data={modalContent} closeModal={handleModal} editable />
+                )}
 
-            {modal && modalContent?.type == 'withdraw' && (
-              <WithdrawModalMP data={modalContent} closeModal={handleModal} />
-            )}
+                {modal && modalContent?.type == 'withdraw' && (
+                  <WithdrawModalMP data={modalContent} closeModal={handleModal} />
+                )}
 
-            {modal && modalContent?.type == 'smartDeposit' && (
-              <DepositModalSP data={modalContent} closeModal={handleModal} />
-            )}
+                {modal && modalContent?.type == 'smartDeposit' && (
+                  <DepositModalSP data={modalContent} closeModal={handleModal} />
+                )}
 
-            {modal && modalContent?.type == 'withdrawSP' && (
-              <WithdrawModalSP data={modalContent} closeModal={handleModal} />
-            )}
+                {modal && modalContent?.type == 'withdrawSP' && (
+                  <WithdrawModalSP data={modalContent} closeModal={handleModal} />
+                )}
 
-            <MobileNavbar />
-            <Navbar />
-            <DashboardHeader />
-            <Tabs
-              values={[tabDeposit, tabBorrow]}
-              selected={tab}
-              handleTab={(value: Option) => {
-                setTab(value);
-              }}
-            />
-            {walletAddress ? (
-              <>
-                {tab.value == 'deposit' && <SmartPoolDashboard showModal={showModal} />}
-                <MaturityPoolDashboard
-                  deposits={maturityPoolDeposits}
-                  borrows={maturityPoolBorrows}
-                  showModal={showModal}
-                  tab={tab}
+                <MobileNavbar />
+                <Navbar />
+                <DashboardHeader />
+                <Tabs
+                  values={[tabDeposit, tabBorrow]}
+                  selected={tab}
+                  handleTab={(value: Option) => {
+                    setTab(value);
+                  }}
                 />
-              </>
-            ) : (
-              <EmptyState />
-            )}
-            <Footer />
-          </FixedLenderProvider>
-        </AuditorProvider>
-      </AccountDataProvider>
-    </PreviewerProvider>
+                {walletAddress ? (
+                  <>
+                    {tab.value == 'deposit' && <SmartPoolDashboard showModal={showModal} />}
+                    <MaturityPoolDashboard
+                      deposits={maturityPoolDeposits}
+                      borrows={maturityPoolBorrows}
+                      showModal={showModal}
+                      tab={tab}
+                    />
+                  </>
+                ) : (
+                  <EmptyState />
+                )}
+                <Footer />
+              </FixedLenderProvider>
+            </AuditorProvider>
+          </AccountDataProvider>
+        </PreviewerProvider>
+      )}
+    </>
   );
 };
 
