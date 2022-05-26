@@ -32,13 +32,11 @@ type Props = {
 
 function Item({ market, showModal, type, src }: Props) {
   const { date } = useContext(AddressContext);
-  const { walletAddress, connect } = useWeb3Context();
+  const { web3Provider, walletAddress, connect, network } = useWeb3Context();
   const fixedLenderData = useContext(FixedLenderContext);
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
-
-  const { web3Provider } = useWeb3Context();
 
   const [poolData, setPoolData] = useState<Pool | undefined>(undefined);
   const [fixedLender, setFixedLender] = useState<ethers.Contract | undefined>(undefined);
@@ -46,7 +44,7 @@ function Item({ market, showModal, type, src }: Props) {
 
   useEffect(() => {
     getFixedLenderContract();
-  }, []);
+  }, [fixedLenderData]);
 
   useEffect(() => {
     if (date?.value && fixedLender) {
@@ -58,6 +56,7 @@ function Item({ market, showModal, type, src }: Props) {
     const filteredFixedLender = fixedLenderData.find((fl) => fl.address == market.market);
 
     const fixedLender = await getContractData(
+      network?.name,
       filteredFixedLender?.address!,
       filteredFixedLender?.abi!,
       web3Provider?.getSigner()
@@ -84,7 +83,7 @@ function Item({ market, showModal, type, src }: Props) {
       let fee;
       let amount;
 
-      const subgraphUrl = getSubgraph();
+      const subgraphUrl = getSubgraph(network?.name);
 
       if (type == 'borrow') {
         const getLastBorrowRate = await request(

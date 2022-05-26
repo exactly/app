@@ -5,6 +5,7 @@ import Tooltip from 'components/Tooltip';
 
 import { AddressContext } from 'contexts/AddressContext';
 import AuditorContext from 'contexts/AuditorContext';
+import { useWeb3Context } from 'contexts/Web3Context';
 
 import assets from 'dictionary/assets.json';
 
@@ -26,9 +27,11 @@ type Props = {
 
 function AssetSelector({ title, defaultAddress, onChange }: Props) {
   const { address, setAddress } = useContext(AddressContext);
+  const { network } = useWeb3Context();
+
   const auditorData = useContext(AuditorContext);
 
-  const auditorContract = getContractData(auditorData.address!, auditorData.abi!);
+  const auditorContract = getContractData(network?.name, auditorData.address!, auditorData.abi!);
   const [selectOptions, setSelectOptions] = useState<Array<Option>>([]);
   const [allMarketsData, setAllMarketsData] = useState<Array<Market>>([]);
 

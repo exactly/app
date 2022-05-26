@@ -1,0 +1,60 @@
+.row {
+  padding: var(--u2);
+  height: 110px;
+  width: 100%;
+  border-bottom: 1px solid var(--gray-100);
+  display: flex;
+  justify-content: space-between;
+
+  .maturity {
+    width: 40%;
+
+    span {
+      display: block;
+      margin: var(--u) 0;
+      font-weight: bold;
+
+      &.liquidity {
+        color: var(--gray-900);
+        font-weight: normal;
+      }
+    }
+  }
+
+  .lastFixedRate {
+    width: 40%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+
+    .deposit {
+      color: var(--primary);
+      font-weight: bold;
+    }
+
+    .borrow {
+      color: var(--secondary);
+      font-weight: bold;
+    }
+  }
+
+  .actions {
+    width: 20%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+
+    .buttonContainer {
+      height: var(--u4);
+      color: var(--white);
+
+      &.deposit {
+        background-color: var(--primary);
+      }
+
+      &.borrow {
+        background-color: var(--secondary);
+      }
+    }
+  }
+}

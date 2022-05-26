@@ -15,6 +15,7 @@ import ModalWrapper from 'components/common/modal/ModalWrapper';
 import ModalGif from 'components/common/modal/ModalGif';
 import Overlay from 'components/Overlay';
 import SkeletonModalRowBeforeAfter from 'components/common/skeletons/SkeletonModalRowBeforeAfter';
+import ModalError from 'components/common/modal/ModalError';
 
 import { Borrow } from 'types/Borrow';
 import { Deposit } from 'types/Deposit';
@@ -23,6 +24,7 @@ import { Gas } from 'types/Gas';
 import { Transaction } from 'types/Transaction';
 import { Decimals } from 'types/Decimals';
 import { HealthFactor } from 'types/HealthFactor';
+import { Error } from 'types/Error';
 
 import parseTimestamp from 'utils/parseTimestamp';
 import { getContractData } from 'utils/contracts';
@@ -48,7 +50,7 @@ type Props = {
 
 function RepayModal({ data, closeModal }: Props) {
   const { symbol, maturity, assets, fee } = data;
-  const { walletAddress, web3Provider } = useWeb3Context();
+  const { walletAddress, web3Provider, network } = useWeb3Context();
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
@@ -71,16 +73,21 @@ function RepayModal({ data, closeModal }: Props) {
   const [editSlippage, setEditSlippage] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [healthFactor, setHealthFactor] = useState<HealthFactor>();
+  const [error, setError] = useState<Error | undefined>(undefined);
 
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
     undefined
   );
 
-  const previewerContract = getContractData(previewerData.address!, previewerData.abi!);
+  const previewerContract = getContractData(
+    network?.name,
+    previewerData.address!,
+    previewerData.abi!
+  );
 
   useEffect(() => {
     getFixedLenderContract();
-  }, []);
+  }, [fixedLenderData]);
 
   useEffect(() => {
     if (!walletAddress) return;
@@ -99,10 +106,6 @@ function RepayModal({ data, closeModal }: Props) {
     setIsLateRepay(repay);
   }, [maturity]);
 
-  useEffect(() => {
-    getFixedLenderContract();
-  }, []);
-
   async function getFixedLenderContract() {
     const filteredFixedLender = fixedLenderData.find((contract) => {
       const args: Array<string> | undefined = contract?.args;
@@ -112,6 +115,7 @@ function RepayModal({ data, closeModal }: Props) {
     });
 
     const fixedLender = await getContractData(
+      network?.name,
       filteredFixedLender?.address!,
       filteredFixedLender?.abi!,
       web3Provider?.getSigner()
@@ -165,43 +169,52 @@ function RepayModal({ data, closeModal }: Props) {
       setTx({ status: 'success', hash: status?.transactionHash });
     } catch (e) {
       setLoading(false);
-      console.log(e);
+      setError({
+        status: true
+      });
     }
   }
 
   async function estimateGas() {
-    const gasPriceInGwei = await fixedLenderWithSigner?.provider.getGasPrice();
+    try {
+      const gasPriceInGwei = await fixedLenderWithSigner?.provider.getGasPrice();
 
-    const estimatedGasCost = await fixedLenderWithSigner?.estimateGas.repayAtMaturity(
-      maturity,
-      ethers.utils.parseUnits(`${numbers.estimateGasAmount}`),
-      ethers.utils.parseUnits(`${numbers.estimateGasAmount * 2}`),
-      walletAddress
-    );
+      const estimatedGasCost = await fixedLenderWithSigner?.estimateGas.repayAtMaturity(
+        maturity,
+        ethers.utils.parseUnits(`${numbers.estimateGasAmount}`),
+        ethers.utils.parseUnits(`${numbers.estimateGasAmount * 2}`),
+        walletAddress
+      );
 
-    if (gasPriceInGwei && estimatedGasCost) {
-      const gwei = await ethers.utils.formatUnits(gasPriceInGwei, 'gwei');
-      const gasCost = await ethers.utils.formatUnits(estimatedGasCost, 'gwei');
-      const eth = parseFloat(gwei) * parseFloat(gasCost);
+      if (gasPriceInGwei && estimatedGasCost) {
+        const gwei = await ethers.utils.formatUnits(gasPriceInGwei, 'gwei');
+        const gasCost = await ethers.utils.formatUnits(estimatedGasCost, 'gwei');
+        const eth = parseFloat(gwei) * parseFloat(gasCost);
 
-      setGas({ eth: eth.toFixed(8), gwei: parseFloat(gwei).toFixed(1) });
+        setGas({ eth: eth.toFixed(8), gwei: parseFloat(gwei).toFixed(1) });
+      }
+    } catch (e) {
+      setError({
+        status: true,
+        message: translations[lang].notEnoughBalance,
+        component: 'gas'
+      });
     }
   }
 
   return (
     <>
       {!minimized && (
-        <ModalWrapper>
+        <ModalWrapper closeModal={closeModal}>
           {!tx && (
             <>
               <ModalTitle
                 title={isLateRepay ? translations[lang].lateRepay : translations[lang].earlyRepay}
               />
               <ModalAsset asset={symbol!} amount={finalAmount} />
-              <ModalClose closeModal={closeModal} />
               <ModalRow text={translations[lang].maturityPool} value={parseTimestamp(maturity)} />
               <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} symbol={symbol!} />
-              <ModalTxCost gas={gas} />
+              {error?.component !== 'gas' && <ModalTxCost gas={gas} />}
               <ModalRow
                 text={translations[lang].amountAtFinish}
                 value={formatNumber(finalAmount, symbol!)}
@@ -209,7 +222,7 @@ function RepayModal({ data, closeModal }: Props) {
               />
               <ModalRow
                 text={translations[lang].amountToPay}
-                value={formatNumber(finalAmount, symbol!)}
+                value={qty && parseFloat(qty) > 0 ? formatNumber(qty, symbol!) : '0'}
                 line
               />
               <ModalRowEditable
@@ -235,6 +248,7 @@ function RepayModal({ data, closeModal }: Props) {
               ) : (
                 <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
               )}
+              {error && <ModalError message={error.message} />}
               <div className={styles.buttonContainer}>
                 <Button
                   text={translations[lang].repay}

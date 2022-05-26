@@ -9,6 +9,7 @@ import style from './style.module.scss';
 
 import { AddressContext } from 'contexts/AddressContext';
 import FixedLenderContext from 'contexts/FixedLenderContext';
+import { useWeb3Context } from 'contexts/Web3Context';
 
 import { Date } from 'types/Date';
 
@@ -22,7 +23,10 @@ type Props = {
 };
 
 function MaturitySelector({ title, address, editable }: Props) {
+  const { network } = useWeb3Context();
+
   const { date, setDate } = useContext(AddressContext);
+
   const fixedLender = useContext(FixedLenderContext);
 
   const [dates, setDates] = useState<Array<Option>>([]);
@@ -36,7 +40,7 @@ function MaturitySelector({ title, address, editable }: Props) {
 
   const fixedLenderABI = filteredFixedLender ? filteredFixedLender.abi! : fixedLender[0].abi!;
 
-  const fixedLenderContract = getContractData(fixedLenderAddress, fixedLenderABI);
+  const fixedLenderContract = getContractData(network?.name, fixedLenderAddress, fixedLenderABI);
 
   useEffect(() => {
     if (dates.length == 0) {
@@ -50,16 +54,13 @@ function MaturitySelector({ title, address, editable }: Props) {
     let timestamp = currentTimestamp - (currentTimestamp % interval);
     const maxPools = await fixedLenderContract?.maxFuturePools();
     const pools = [];
-
     for (let i = 0; i < maxPools; i++) {
       timestamp += interval;
       pools.push(timestamp);
     }
-
     const dates = pools?.map((pool: any) => {
       return pool.toString();
     });
-
     const formattedDates = dates?.map((date: any) => {
       return {
         value: date,

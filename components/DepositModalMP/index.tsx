@@ -15,6 +15,7 @@ import ModalStepper from 'components/common/modal/ModalStepper';
 import Overlay from 'components/Overlay';
 import ModalRowEditable from 'components/common/modal/ModalRowEditable';
 import ModalMaturityEditable from 'components/common/modal/ModalMaturityEditable';
+import ModalError from 'components/common/modal/ModalError';
 
 import { Borrow } from 'types/Borrow';
 import { Deposit } from 'types/Deposit';
@@ -23,6 +24,7 @@ import { UnderlyingData } from 'types/Underlying';
 import { Gas } from 'types/Gas';
 import { Transaction } from 'types/Transaction';
 import { Decimals } from 'types/Decimals';
+import { Error } from 'types/Error';
 
 import { getContractData } from 'utils/contracts';
 import { getSymbol, getUnderlyingData } from 'utils/utils';
@@ -49,8 +51,7 @@ type Props = {
 
 function DepositModalMP({ data, editable, closeModal }: Props) {
   const { maturity, market } = data;
-  const { web3Provider, walletAddress } = useWeb3Context();
-
+  const { web3Provider, walletAddress, network } = useWeb3Context();
   const { date, address } = useContext(AddressContext);
 
   const lang: string = useContext(LangContext);
@@ -70,6 +71,7 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
   const [slippage, setSlippage] = useState<string>('0.5');
   const [editSlippage, setEditSlippage] = useState<boolean>(false);
   const [fixedRate, setFixedRate] = useState<string>('0.00');
+  const [error, setError] = useState<Error | undefined>(undefined);
 
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
     undefined
@@ -77,24 +79,29 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
 
   const marketAddress = editable ? address?.value ?? market ?? fixedLenderData[0].address : market;
 
-  const symbol = getSymbol(marketAddress);
+  const symbol = getSymbol(marketAddress, network?.name);
 
   const underlyingData: UnderlyingData | undefined = getUnderlyingData(
-    process.env.NEXT_PUBLIC_NETWORK!,
+    network?.name,
     symbol.toLowerCase()
   );
 
   const underlyingContract = getContractData(
+    network?.name,
     underlyingData!.address,
     underlyingData!.abi,
     web3Provider?.getSigner()
   );
 
-  const previewerContract = getContractData(previewerData.address!, previewerData.abi!);
+  const previewerContract = getContractData(
+    network?.name,
+    previewerData.address!,
+    previewerData.abi!
+  );
 
   useEffect(() => {
     getFixedLenderContract();
-  }, [address, market]);
+  }, [address, market, fixedLenderData]);
 
   useEffect(() => {
     if (underlyingContract && fixedLenderWithSigner) {
@@ -152,7 +159,10 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
       setStep((step) => step + 1);
     } catch (e) {
       setLoading(false);
-      console.log(e);
+
+      setError({
+        status: true
+      });
     }
   }
 
@@ -167,10 +177,23 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
   }
 
   async function onMax() {
-    walletBalance && setQty(walletBalance);
+    if (walletBalance) {
+      setQty(walletBalance);
+      setError(undefined);
+    }
   }
 
   function handleInputChange(e: ChangeEvent<HTMLInputElement>) {
+    if (step != 1 && walletBalance && e.target.valueAsNumber > parseFloat(walletBalance)) {
+      setError({
+        status: true,
+        message: translations[lang].insufficientBalance,
+        component: 'input'
+      });
+    } else {
+      setError(undefined);
+    }
+
     setQty(e.target.value);
   }
 
@@ -192,26 +215,37 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
       setTx({ status: 'success', hash: status?.transactionHash });
     } catch (e) {
       setLoading(false);
-      console.log(e);
+      setError({
+        status: true,
+        message: translations[lang].notEnoughSlippage
+      });
     }
   }
 
   async function estimateGas() {
-    const gasPriceInGwei = await fixedLenderWithSigner?.provider.getGasPrice();
+    try {
+      const gasPriceInGwei = await fixedLenderWithSigner?.provider.getGasPrice();
 
-    const estimatedGasCost = await fixedLenderWithSigner?.estimateGas.depositAtMaturity(
-      parseInt(date?.value ?? maturity),
-      ethers.utils.parseUnits(`${numbers.estimateGasAmount}`),
-      ethers.utils.parseUnits('0'),
-      walletAddress
-    );
+      const estimatedGasCost = await fixedLenderWithSigner?.estimateGas.depositAtMaturity(
+        parseInt(date?.value ?? maturity),
+        ethers.utils.parseUnits(`${numbers.estimateGasAmount}`),
+        ethers.utils.parseUnits('0'),
+        walletAddress
+      );
 
-    if (gasPriceInGwei && estimatedGasCost) {
-      const gwei = await ethers.utils.formatUnits(gasPriceInGwei, 'gwei');
-      const gasCost = await ethers.utils.formatUnits(estimatedGasCost, 'gwei');
-      const eth = parseFloat(gwei) * parseFloat(gasCost);
+      if (gasPriceInGwei && estimatedGasCost) {
+        const gwei = await ethers.utils.formatUnits(gasPriceInGwei, 'gwei');
+        const gasCost = await ethers.utils.formatUnits(estimatedGasCost, 'gwei');
+        const eth = parseFloat(gwei) * parseFloat(gasCost);
 
-      setGas({ eth: eth.toFixed(8), gwei: parseFloat(gwei).toFixed(1) });
+        setGas({ eth: eth.toFixed(8), gwei: parseFloat(gwei).toFixed(1) });
+      }
+    } catch (e) {
+      setError({
+        status: true,
+        message: translations[lang].notEnoughBalance,
+        component: 'gas'
+      });
     }
   }
 
@@ -227,19 +261,25 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
 
   async function getYieldAtMaturity() {
     if (!qty) return;
+    try {
+      const yieldAtMaturity = await previewerContract?.previewDepositAtMaturity(
+        marketAddress,
+        parseInt(date?.value ?? maturity),
+        ethers.utils.parseUnits(qty)
+      );
 
-    const yieldAtMaturity = await previewerContract?.previewDepositAtMaturity(
-      marketAddress,
-      parseInt(date?.value ?? maturity),
-      ethers.utils.parseUnits(qty)
-    );
+      const fixedRate =
+        ((parseFloat(
+          ethers.utils.formatUnits(yieldAtMaturity, decimals[symbol! as keyof Decimals])
+        ) -
+          parseFloat(qty)) /
+          parseFloat(qty)) *
+        100;
 
-    const fixedRate =
-      (parseFloat(ethers.utils.formatUnits(yieldAtMaturity, decimals[symbol! as keyof Decimals])) *
-        100) /
-      parseFloat(qty);
-
-    setFixedRate(fixedRate.toFixed(2));
+      setFixedRate(fixedRate.toFixed(2));
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   async function getFixedLenderContract() {
@@ -248,6 +288,7 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
     });
 
     const fixedLender = await getContractData(
+      network?.name,
       filteredFixedLender?.address!,
       filteredFixedLender?.abi!,
       web3Provider?.getSigner()
@@ -259,7 +300,7 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
   return (
     <>
       {!minimized && (
-        <ModalWrapper>
+        <ModalWrapper closeModal={closeModal}>
           {!tx && (
             <>
               <ModalTitle title={translations[lang].deposit} />
@@ -269,14 +310,19 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
                 editable={editable}
                 defaultAddress={marketAddress}
               />
-              <ModalClose closeModal={closeModal} />
               <ModalMaturityEditable
                 text={translations[lang].maturityPool}
                 value={date?.label ?? parseTimestamp(maturity)}
                 editable={editable}
               />
-              <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} symbol={symbol!} />
-              <ModalTxCost gas={gas} />
+              <ModalInput
+                onMax={onMax}
+                value={qty}
+                onChange={handleInputChange}
+                symbol={symbol!}
+                error={error?.component == 'input'}
+              />
+              {error?.component !== 'gas' && <ModalTxCost gas={gas} />}
               <ModalRow text={translations[lang].interestRate} value={`${fixedRate}%`} line />
               <ModalRowEditable
                 text={translations[lang].minimumDepositRate}
@@ -293,11 +339,12 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
                 line
               />
               <ModalStepper currentStep={step} totalSteps={3} />
+              {error && <ModalError message={error.message} />}
               <div className={styles.buttonContainer}>
                 <Button
                   text={step == 1 ? translations[lang].approve : translations[lang].deposit}
-                  className={qty && qty > '0' ? 'primary' : 'disabled'}
-                  disabled={((!qty || qty <= '0') && !pending) || loading}
+                  className={qty && qty > '0' && !error?.status ? 'primary' : 'disabled'}
+                  disabled={((!qty || qty <= '0') && !pending) || loading || error?.status}
                   onClick={handleClickAction}
                   loading={loading}
                 />

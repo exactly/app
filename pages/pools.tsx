@@ -18,6 +18,8 @@ import useModal from 'hooks/useModal';
 
 import { AuditorProvider } from 'contexts/AuditorContext';
 import { FixedLenderProvider } from 'contexts/FixedLenderContext';
+import { AccountDataProvider } from 'contexts/AccountDataContext';
+import { useWeb3Context } from 'contexts/Web3Context';
 import { PreviewerProvider } from 'contexts/PreviewerContext';
 
 import { Market } from 'types/Market';
@@ -27,30 +29,28 @@ import dictionary from 'dictionary/en.json';
 
 import { getContractData } from 'utils/contracts';
 
-//Contracts
-import Auditor from 'protocol/deployments/kovan/Auditor.json';
-import FixedLenderDAI from 'protocol/deployments/kovan/FixedLenderDAI.json';
-import FixedLenderWETH from 'protocol/deployments/kovan/FixedLenderWETH.json';
-import Previewer from 'protocol/deployments/kovan/Previewer.json';
+import getABI from 'config/abiImporter';
 
 interface Props {}
 
 const Pools: NextPage<Props> = () => {
   const { modal, handleModal, modalContent } = useModal();
+  const { network } = useWeb3Context();
 
   const [markets, setMarkets] = useState<Array<Market>>([]);
 
-  const auditorContract = getContractData(Auditor.address!, Auditor.abi!);
+  const { Previewer, Auditor, FixedLenderDAI, FixedLenderWETH } = getABI(network?.name);
+
+  const auditorContract = getContractData(network?.name!, Auditor.address!, Auditor.abi!);
 
   useEffect(() => {
     if (auditorContract) {
       getMarkets();
     }
-  }, []);
+  }, [Auditor.address]);
 
   async function getMarkets() {
     const marketsAddresses = await auditorContract?.getAllMarkets();
-
     const marketsData: Array<UnformattedMarket> = [];
 
     marketsAddresses.map((address: string) => {
@@ -103,34 +103,36 @@ const Pools: NextPage<Props> = () => {
 
   return (
     <PreviewerProvider value={Previewer}>
-      <AuditorProvider value={Auditor}>
-        <FixedLenderProvider value={[FixedLenderDAI, FixedLenderWETH]}>
-          {modal && modalContent?.type == 'deposit' && (
-            <DepositModalMP data={modalContent} closeModal={handleModal} />
-          )}
+      <AccountDataProvider>
+        <AuditorProvider value={Auditor}>
+          <FixedLenderProvider value={[FixedLenderDAI, FixedLenderWETH]}>
+            {modal && modalContent?.type == 'deposit' && (
+              <DepositModalMP data={modalContent} closeModal={handleModal} />
+            )}
 
-          {modal && modalContent?.type == 'smartDeposit' && (
-            <DepositModalSP data={modalContent} closeModal={handleModal} />
-          )}
+            {modal && modalContent?.type == 'smartDeposit' && (
+              <DepositModalSP data={modalContent} closeModal={handleModal} />
+            )}
 
-          {modal && modalContent?.type == 'borrow' && (
-            <BorrowModal data={modalContent} closeModal={handleModal} />
-          )}
+            {modal && modalContent?.type == 'borrow' && (
+              <BorrowModal data={modalContent} closeModal={handleModal} />
+            )}
 
-          <MobileNavbar />
-          <Navbar />
-          <CurrentNetwork />
+            <MobileNavbar />
+            <Navbar />
+            <CurrentNetwork />
 
-          <div style={{ marginTop: '180px' }}>
-            <SmartPoolList markets={markets} showModal={showModal} />
-          </div>
+            <div style={{ marginTop: '180px' }}>
+              <SmartPoolList markets={markets} showModal={showModal} />
+            </div>
 
-          <MaturitySelector title={dictionary.maturityPools} />
+            <MaturitySelector title={dictionary.maturityPools} />
 
-          <MarketsList markets={markets} showModal={showModal} />
-          <Footer />
-        </FixedLenderProvider>
-      </AuditorProvider>
+            <MarketsList markets={markets} showModal={showModal} />
+            <Footer />
+          </FixedLenderProvider>
+        </AuditorProvider>
+      </AccountDataProvider>
     </PreviewerProvider>
   );
 };

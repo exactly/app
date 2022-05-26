@@ -10,7 +10,6 @@ import MaturityInfo from 'components/MaturityInfo';
 import AssetInfo from 'components/AssetInfo';
 import AssetTable from 'components/AssetTable';
 import SmartPoolInfo from 'components/SmartPoolInfo';
-import SmartPoolChart from 'components/SmartPoolChart';
 import MobileNavbar from 'components/MobileNavbar';
 import Paginator from 'components/Paginator';
 import DepositModalMP from 'components/DepositModalMP';
@@ -24,6 +23,7 @@ import { UnformattedMarket } from 'types/UnformattedMarket';
 import { AuditorProvider } from 'contexts/AuditorContext';
 import LangContext from 'contexts/LangContext';
 import { FixedLenderProvider } from 'contexts/FixedLenderContext';
+import { useWeb3Context } from 'contexts/Web3Context';
 import { PreviewerProvider } from 'contexts/PreviewerContext';
 
 import style from './style.module.scss';
@@ -34,38 +34,43 @@ import keys from './translations.json';
 
 import parseTimestamp from 'utils/parseTimestamp';
 import { getContractData } from 'utils/contracts';
+import getExchangeRate from 'utils/getExchangeRate';
 
-//Contracts
-import Auditor from 'protocol/deployments/kovan/Auditor.json';
-import FixedLenderDAI from 'protocol/deployments/kovan/FixedLenderDAI.json';
-import FixedLenderWETH from 'protocol/deployments/kovan/FixedLenderWETH.json';
-import Previewer from 'protocol/deployments/kovan/Previewer.json';
+import getABI from 'config/abiImporter';
+import { AccountDataProvider } from 'contexts/AccountDataContext';
 
 interface Props {
   symbol: string;
+  price: number;
 }
 
-const Asset: NextPage<Props> = ({ symbol }) => {
-  const [page, setPage] = useState<number>(1);
-  const lang: string = useContext(LangContext);
+const Asset: NextPage<Props> = ({ symbol, price }) => {
   const { modal, handleModal, modalContent } = useModal();
 
-  const itemsPerPage = 5;
+  const { network } = useWeb3Context();
+  const lang: string = useContext(LangContext);
 
   const translations: { [key: string]: LangKeys } = keys;
 
-  const auditorContract = getContractData(Auditor.address, Auditor.abi);
+  const [page, setPage] = useState<number>(1);
+  const [maturities, setMaturities] = useState<Array<Maturity> | undefined>(undefined);
+  const [marketData, setMarketData] = useState<UnformattedMarket | undefined>(undefined);
+
+  const { Previewer, Auditor, FixedLenderDAI, FixedLenderWETH } = getABI(network?.name);
+
+  const itemsPerPage = 3;
+
+  const auditorContract = getContractData(network?.name, Auditor.address, Auditor.abi);
+
   const fixedLenders = [FixedLenderDAI, FixedLenderWETH];
 
   const filteredFixedLender = fixedLenders.find((fl) => fl.args[1] === symbol);
+
   const fixedLenderContract = getContractData(
+    network?.name,
     filteredFixedLender?.address!,
     filteredFixedLender?.abi!
   );
-
-  const [maturities, setMaturities] = useState<Array<Maturity> | undefined>(undefined);
-
-  const [marketData, setMarketData] = useState<UnformattedMarket | undefined>(undefined);
 
   useEffect(() => {
     if (!maturities) {
@@ -128,81 +133,87 @@ const Asset: NextPage<Props> = ({ symbol }) => {
 
   return (
     <PreviewerProvider value={Previewer}>
-      <AuditorProvider value={Auditor}>
-        <FixedLenderProvider value={fixedLenders}>
-          <MobileNavbar />
-          <Navbar />
+      <AccountDataProvider>
+        <AuditorProvider value={Auditor}>
+          <FixedLenderProvider value={fixedLenders}>
+            <MobileNavbar />
+            <Navbar />
 
-          {modal && modalContent?.type == 'deposit' && (
-            <DepositModalMP data={modalContent} closeModal={handleModal} />
-          )}
+            {modal && modalContent?.type == 'deposit' && (
+              <DepositModalMP data={modalContent} closeModal={handleModal} />
+            )}
 
-          {modal && modalContent?.type == 'smartDeposit' && (
-            <DepositModalSP data={modalContent} closeModal={handleModal} />
-          )}
+            {modal && modalContent?.type == 'smartDeposit' && (
+              <DepositModalSP data={modalContent} closeModal={handleModal} />
+            )}
 
-          {modal && modalContent?.type == 'borrow' && (
-            <BorrowModal data={modalContent} closeModal={handleModal} />
-          )}
+            {modal && modalContent?.type == 'borrow' && (
+              <BorrowModal data={modalContent} closeModal={handleModal} />
+            )}
 
-          <section className={style.container}>
-            <div className={style.smartPoolContainer}>
-              <SmartPoolInfo showModal={showModal} symbol={symbol} />
-              <SmartPoolChart />
-            </div>
-            <section className={style.assetData}>
-              <div className={style.assetContainer}>
-                {marketData && <AssetSelector title={true} defaultAddress={marketData[5]} />}
+            <section className={style.container}>
+              <div className={style.smartPoolContainer}>
+                <SmartPoolInfo showModal={showModal} symbol={symbol} />
               </div>
-              <div className={style.assetMetricsContainer}></div>
+              <section className={style.assetData}>
+                <div className={style.assetContainer}>
+                  {marketData && <AssetSelector title={true} defaultAddress={marketData[5]} />}
+                </div>
+                <div className={style.assetMetricsContainer}></div>
+              </section>
+              <section className={style.graphContainer}>
+                <div className={style.leftColumn}>
+                  <AssetTable
+                    maturities={maturities?.slice(itemsPerPage * (page - 1), itemsPerPage * page)}
+                    market={filteredFixedLender?.address!}
+                    showModal={showModal}
+                  />
+                  <Paginator
+                    total={maturities?.length ?? 0}
+                    itemsPerPage={itemsPerPage}
+                    handleChange={(page) => setPage(page)}
+                    currentPage={page}
+                  />
+                </div>
+                <div className={style.assetGraph}>
+                  <PoolsChart />
+                </div>
+              </section>
+              <h2 className={style.assetTitle}>{translations[lang].assetDetails}</h2>
+              <div className={style.assetInfoContainer}>
+                <AssetInfo title={translations[lang].price} value={`$${Math.ceil(price)}`} />
+                <AssetInfo title={translations[lang].reserveFactor} value="20%" />
+                {marketData && (
+                  <AssetInfo
+                    title={translations[lang].collateralFactor}
+                    value={parseFloat(ethers.utils.formatEther(marketData[3])) * 100}
+                    symbol="%"
+                  />
+                )}
+              </div>
+              <div className={style.maturitiesContainer}>
+                {maturities?.slice(0, 3)?.map((maturity) => {
+                  return <MaturityInfo maturity={maturity} key={maturity.value} symbol={symbol} />;
+                })}
+              </div>
             </section>
-            <section className={style.graphContainer}>
-              <div className={style.leftColumn}>
-                <AssetTable
-                  maturities={maturities?.slice(itemsPerPage * (page - 1), itemsPerPage * page)}
-                  showModal={showModal}
-                />
-                <Paginator
-                  total={maturities?.length ?? 0}
-                  itemsPerPage={5}
-                  handleChange={(page) => setPage(page)}
-                  currentPage={page}
-                />
-              </div>
-              <div className={style.assetGraph}>
-                <PoolsChart />
-              </div>
-            </section>
-            <h2 className={style.assetTitle}>{translations[lang].assetDetails}</h2>
-            <div className={style.assetInfoContainer}>
-              <AssetInfo title={translations[lang].price} value="$4,213.62" />
-              <AssetInfo title={translations[lang].reserveFactor} value="20%" />
-              {marketData && (
-                <AssetInfo
-                  title={translations[lang].collateralFactor}
-                  value={parseFloat(ethers.utils.formatEther(marketData[3])) * 100}
-                  symbol="%"
-                />
-              )}
-            </div>
-            <div className={style.maturitiesContainer}>
-              {maturities?.slice(0, 3)?.map((maturity) => {
-                return <MaturityInfo maturity={maturity} key={maturity.value} symbol={symbol} />;
-              })}
-            </div>
-          </section>
-        </FixedLenderProvider>
-      </AuditorProvider>
+          </FixedLenderProvider>
+        </AuditorProvider>
+      </AccountDataProvider>
     </PreviewerProvider>
   );
 };
 
 export async function getServerSideProps(req: NextApiRequest) {
   const tokenSymbol: string = req?.query?.id as string;
+  const symbol = tokenSymbol.toUpperCase() === 'ETH' ? 'WETH' : tokenSymbol.toUpperCase();
+
+  const price = await getExchangeRate(tokenSymbol);
 
   return {
     props: {
-      symbol: tokenSymbol.toUpperCase()
+      symbol: symbol,
+      price
     }
   };
 }

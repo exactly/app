@@ -15,11 +15,10 @@ import styles from './style.module.scss';
 import keys from './translations.json';
 
 type Props = {
-  deposits: Dictionary<Deposit> | undefined;
   showModal: (data: Deposit, type: String) => void;
 };
 
-function SmartPoolDashboard({ deposits, showModal }: Props) {
+function SmartPoolDashboard({ showModal }: Props) {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
   const { walletAddress } = useWeb3Context();
@@ -30,11 +29,7 @@ function SmartPoolDashboard({ deposits, showModal }: Props) {
         <p className={styles.title}>{translations[lang].smartPool}</p>
         <Tooltip value={translations[lang].smartPool} />
       </div>
-      <SmartPoolUserStatus
-        deposits={deposits}
-        walletAddress={walletAddress}
-        showModal={showModal}
-      />
+      <SmartPoolUserStatus walletAddress={walletAddress} showModal={showModal} />
     </section>
   );
 }

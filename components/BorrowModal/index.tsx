@@ -16,6 +16,7 @@ import ModalGif from 'components/common/modal/ModalGif';
 import Overlay from 'components/Overlay';
 import ModalRowEditable from 'components/common/modal/ModalRowEditable';
 import ModalMaturityEditable from 'components/common/modal/ModalMaturityEditable';
+import ModalError from 'components/common/modal/ModalError';
 
 import { Borrow } from 'types/Borrow';
 import { Deposit } from 'types/Deposit';
@@ -25,6 +26,7 @@ import { Gas } from 'types/Gas';
 import { Transaction } from 'types/Transaction';
 import { Decimals } from 'types/Decimals';
 import { HealthFactor } from 'types/HealthFactor';
+import { Error } from 'types/Error';
 
 import { getContractData } from 'utils/contracts';
 import { getUnderlyingData, getSymbol } from 'utils/utils';
@@ -53,7 +55,7 @@ type Props = {
 function BorrowModal({ data, editable, closeModal }: Props) {
   const { maturity, market } = data;
 
-  const { web3Provider, walletAddress } = useWeb3Context();
+  const { web3Provider, walletAddress, network } = useWeb3Context();
 
   const { date, address } = useContext(AddressContext);
 
@@ -74,26 +76,35 @@ function BorrowModal({ data, editable, closeModal }: Props) {
   const [editSlippage, setEditSlippage] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [healthFactor, setHealthFactor] = useState<HealthFactor>();
+  const [error, setError] = useState<Error | undefined>(undefined);
 
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
     undefined
   );
 
   const marketAddress = editable ? address?.value ?? market : market;
-  const symbol = getSymbol(marketAddress);
+  const symbol = getSymbol(marketAddress, network?.name);
 
   const underlyingData: UnderlyingData | undefined = getUnderlyingData(
-    process.env.NEXT_PUBLIC_NETWORK!,
+    network?.name,
     symbol.toLowerCase()
   );
 
-  const underlyingContract = getContractData(underlyingData!.address, underlyingData!.abi);
+  const underlyingContract = getContractData(
+    network?.name,
+    underlyingData!.address,
+    underlyingData!.abi
+  );
 
-  const previewerContract = getContractData(previewerData.address!, previewerData.abi!);
+  const previewerContract = getContractData(
+    network?.name,
+    previewerData.address!,
+    previewerData.abi!
+  );
 
   useEffect(() => {
     getFixedLenderContract();
-  }, [address, market]);
+  }, [address, market, fixedLenderData]);
 
   useEffect(() => {
     if (underlyingContract && fixedLenderWithSigner) {
@@ -174,45 +185,60 @@ function BorrowModal({ data, editable, closeModal }: Props) {
       setTx({ status: 'success', hash: status?.transactionHash });
     } catch (e) {
       setLoading(false);
-      console.log(e);
+
+      setError({
+        status: true
+      });
     }
   }
 
   async function estimateGas() {
-    const gasPriceInGwei = await fixedLenderWithSigner?.provider.getGasPrice();
+    try {
+      const gasPriceInGwei = await fixedLenderWithSigner?.provider.getGasPrice();
 
-    const estimatedGasCost = await fixedLenderWithSigner?.estimateGas.borrowAtMaturity(
-      parseInt(date?.value ?? maturity),
-      ethers.utils.parseUnits(`${numbers.estimateGasAmount}`),
-      ethers.utils.parseUnits(`${numbers.estimateGasAmount * 1.1}`),
-      walletAddress,
-      walletAddress
-    );
+      const estimatedGasCost = await fixedLenderWithSigner?.estimateGas.borrowAtMaturity(
+        parseInt(date?.value ?? maturity),
+        ethers.utils.parseUnits(`${numbers.estimateGasAmount}`),
+        ethers.utils.parseUnits(`${numbers.estimateGasAmount * 1.1}`),
+        walletAddress,
+        walletAddress
+      );
 
-    if (gasPriceInGwei && estimatedGasCost) {
-      const gwei = await ethers.utils.formatUnits(gasPriceInGwei, 'gwei');
-      const gasCost = await ethers.utils.formatUnits(estimatedGasCost, 'gwei');
-      const eth = parseFloat(gwei) * parseFloat(gasCost);
+      if (gasPriceInGwei && estimatedGasCost) {
+        const gwei = await ethers.utils.formatUnits(gasPriceInGwei, 'gwei');
+        const gasCost = await ethers.utils.formatUnits(estimatedGasCost, 'gwei');
+        const eth = parseFloat(gwei) * parseFloat(gasCost);
 
-      setGas({ eth: eth.toFixed(8), gwei: parseFloat(gwei).toFixed(1) });
+        setGas({ eth: eth.toFixed(8), gwei: parseFloat(gwei).toFixed(1) });
+      }
+    } catch (e) {
+      setError({
+        status: true,
+        message: translations[lang].notEnoughBalance,
+        component: 'gas'
+      });
     }
   }
 
   async function getFeeAtMaturity() {
     if (!qty || qty === '0') return;
+    try {
+      const feeAtMaturity = await previewerContract?.previewBorrowAtMaturity(
+        fixedLenderWithSigner!.address,
+        parseInt(date?.value ?? maturity),
+        ethers.utils.parseUnits(qty)
+      );
 
-    const feeAtMaturity = await previewerContract?.previewBorrowAtMaturity(
-      fixedLenderWithSigner!.address,
-      parseInt(date?.value ?? maturity),
-      ethers.utils.parseUnits(qty)
-    );
+      const fixedRate =
+        ((parseFloat(ethers.utils.formatUnits(feeAtMaturity, decimals[symbol! as keyof Decimals])) -
+          parseFloat(qty)) /
+          parseFloat(qty)) *
+        100;
 
-    const fixedRate =
-      (parseFloat(ethers.utils.formatUnits(feeAtMaturity, decimals[symbol! as keyof Decimals])) *
-        100) /
-      parseFloat(qty);
-
-    setFixedRate(fixedRate.toFixed(2));
+      setFixedRate(fixedRate.toFixed(2));
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   async function getFixedLenderContract() {
@@ -224,6 +250,7 @@ function BorrowModal({ data, editable, closeModal }: Props) {
     });
 
     const fixedLender = await getContractData(
+      network?.name,
       filteredFixedLender?.address!,
       filteredFixedLender?.abi!,
       web3Provider?.getSigner()
@@ -235,7 +262,7 @@ function BorrowModal({ data, editable, closeModal }: Props) {
   return (
     <>
       {!minimized && (
-        <ModalWrapper>
+        <ModalWrapper closeModal={closeModal}>
           {!tx && (
             <>
               <ModalTitle title={translations[lang].borrow} />
@@ -245,14 +272,13 @@ function BorrowModal({ data, editable, closeModal }: Props) {
                 editable={editable}
                 defaultAddress={marketAddress}
               />
-              <ModalClose closeModal={closeModal} />
               <ModalMaturityEditable
                 text={translations[lang].maturityPool}
                 value={date?.label ?? parseTimestamp(maturity)}
                 editable={editable}
               />
               <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} symbol={symbol!} />
-              <ModalTxCost gas={gas} />
+              {error?.component !== 'gas' && <ModalTxCost gas={gas} />}
               <ModalRow text={translations[lang].interestRate} value={`${fixedRate}%`} line />
               <ModalRowEditable
                 text={translations[lang].maximumBorrowRate}
@@ -278,12 +304,14 @@ function BorrowModal({ data, editable, closeModal }: Props) {
               ) : (
                 <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
               )}
+
+              {error && <ModalError message={error.message} />}
               <div className={styles.buttonContainer}>
                 <Button
                   text={translations[lang].borrow}
-                  className={qty <= '0' || !qty ? 'disabled' : 'secondary'}
+                  className={qty <= '0' || !qty || error?.status ? 'disabled' : 'secondary'}
                   onClick={borrow}
-                  disabled={qty <= '0' || !qty || loading}
+                  disabled={qty <= '0' || !qty || loading || error?.status}
                   loading={loading}
                 />
               </div>

@@ -21,7 +21,7 @@ import { getContractData } from 'utils/contracts';
 import parseHealthFactor from 'utils/parseHealthFactor';
 
 function DashboardHeader() {
-  const { walletAddress } = useWeb3Context();
+  const { walletAddress, network } = useWeb3Context();
 
   const previewerData = useContext(PreviewerContext);
   const auditorData = useContext(AuditorContext);
@@ -29,7 +29,11 @@ function DashboardHeader() {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
-  const previewerContract = getContractData(previewerData.address!, previewerData.abi!);
+  const previewerContract = getContractData(
+    network?.name,
+    previewerData.address!,
+    previewerData.abi!
+  );
 
   const [healthFactor, setHealthFactor] = useState<Dictionary<number> | undefined>(undefined);
   const [healthFactorData, setHealthFactorData] = useState<Array<DonutData> | undefined>(undefined);
@@ -112,6 +116,9 @@ function DashboardHeader() {
         ];
         setHealthFactorData(healthFactorData);
         setHealthFactor({ collateral: parsedCollateral, debt: parsedDebt });
+      } else {
+        setHealthFactorData(notConnected);
+        setHealthFactor(undefined);
       }
     } catch (e) {
       console.log(e);

@@ -1,11 +1,12 @@
 import { useContext, useEffect, useState } from 'react';
-import { ethers, Contract } from 'ethers';
+import { ethers, Contract, BigNumber } from 'ethers';
 import Button from 'components/common/Button';
 import Switch from 'components/common/Switch';
 import Loading from 'components/common/Loading';
 
 import FixedLenderContext from 'contexts/FixedLenderContext';
 import LangContext from 'contexts/LangContext';
+import { useWeb3Context } from 'contexts/Web3Context';
 
 import { LangKeys } from 'types/Lang';
 import { Deposit } from 'types/Deposit';
@@ -20,26 +21,36 @@ import decimals from 'config/decimals.json';
 import { getUnderlyingData } from 'utils/utils';
 import { getContractData } from 'utils/contracts';
 import formatNumber from 'utils/formatNumber';
+import parseSymbol from 'utils/parseSymbol';
 
 type Props = {
   symbol: string;
-  amount: string;
+  tokenAmount: BigNumber;
   walletAddress: string | null | undefined;
-  showModal: (data: Deposit, type: String) => void;
-  deposit: Deposit;
+  showModal: (data: Deposit | any, type: String) => void;
+  eTokenAmount: BigNumber;
   auditorContract: Contract | undefined;
 };
 
-function Item({ symbol, amount, walletAddress, showModal, deposit, auditorContract }: Props) {
+function Item({
+  symbol,
+  tokenAmount,
+  walletAddress,
+  showModal,
+  eTokenAmount,
+  auditorContract
+}: Props) {
+  const { network } = useWeb3Context();
   const fixedLender = useContext(FixedLenderContext);
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
+
   const [toggle, setToggle] = useState<boolean>(false);
   const [disabled, setDisabled] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [walletBalance, setWalletBalance] = useState<string | undefined>(undefined);
 
-  const underlyingData = getUnderlyingData(process.env.NEXT_PUBLIC_NETWORK!, symbol);
+  const underlyingData = getUnderlyingData(network?.name, symbol);
 
   useEffect(() => {
     getCurrentBalance();
@@ -52,7 +63,7 @@ function Item({ symbol, amount, walletAddress, showModal, deposit, auditorContra
   });
 
   async function checkCollaterals() {
-    const fixedLenderAddress = getFixedLenderAddress();
+    const fixedLenderAddress = getFixedLenderData().address;
     const allMarkets = await auditorContract?.getAllMarkets();
     const marketIndex = allMarkets.indexOf(fixedLenderAddress);
     const assets = await auditorContract?.accountAssets(walletAddress);
@@ -68,7 +79,12 @@ function Item({ symbol, amount, walletAddress, showModal, deposit, auditorContra
   }
 
   async function getCurrentBalance() {
-    const contractData = await getContractData(underlyingData!.address, underlyingData!.abi);
+    const contractData = await getContractData(
+      network?.name,
+      underlyingData!.address,
+      underlyingData!.abi
+    );
+
     const balance = await contractData?.balanceOf(walletAddress);
 
     if (balance) {
@@ -76,7 +92,7 @@ function Item({ symbol, amount, walletAddress, showModal, deposit, auditorContra
     }
   }
 
-  function getFixedLenderAddress() {
+  function getFixedLenderData() {
     const filteredFixedLender = fixedLender.find((contract) => {
       const args: Array<string> | undefined = contract?.args;
       const contractSymbol: string | undefined = args && args[1];
@@ -84,9 +100,12 @@ function Item({ symbol, amount, walletAddress, showModal, deposit, auditorContra
       return contractSymbol === symbol;
     });
 
-    const fixedLenderAddress = filteredFixedLender?.address;
+    const fixedLenderData = {
+      address: filteredFixedLender?.address,
+      abi: filteredFixedLender?.abi
+    };
 
-    return fixedLenderAddress;
+    return fixedLenderData;
   }
 
   async function handleMarket() {
@@ -95,7 +114,7 @@ function Item({ symbol, amount, walletAddress, showModal, deposit, auditorContra
 
       setLoading(true);
 
-      const fixedLenderAddress = getFixedLenderAddress();
+      const fixedLenderAddress = getFixedLenderData().address;
 
       if (!toggle && fixedLenderAddress) {
         //if it's not toggled we need to ENTER
@@ -125,16 +144,21 @@ function Item({ symbol, amount, walletAddress, showModal, deposit, auditorContra
           alt={symbol}
           className={styles.assetImage}
         />
-        <span className={styles.primary}>{symbol}</span>
+        <span className={styles.primary}>{parseSymbol(symbol)}</span>
       </div>
       <span className={styles.value}>{formatNumber(walletBalance!, symbol)}</span>
       <span className={styles.value}>
         {formatNumber(
-          ethers.utils.formatUnits(amount, decimals[symbol! as keyof Decimals]),
+          ethers.utils.formatUnits(tokenAmount, decimals[symbol! as keyof Decimals]),
           symbol
         )}
       </span>
-      <span className={styles.value}>{0}</span>
+      <span className={styles.value}>
+        {formatNumber(
+          ethers.utils.formatUnits(eTokenAmount, decimals[symbol! as keyof Decimals]),
+          symbol
+        )}
+      </span>
 
       <span className={styles.value}>
         {!loading ? (
@@ -160,7 +184,10 @@ function Item({ symbol, amount, walletAddress, showModal, deposit, auditorContra
             className="primary"
             onClick={() =>
               showModal(
-                { ...deposit, assets: JSON.stringify(deposit.assets), symbol },
+                {
+                  market: getFixedLenderData().address,
+                  symbol
+                },
                 'smartDeposit'
               )
             }
@@ -173,7 +200,10 @@ function Item({ symbol, amount, walletAddress, showModal, deposit, auditorContra
             className="tertiary"
             onClick={() =>
               showModal(
-                { ...deposit, assets: JSON.stringify(deposit.assets), symbol },
+                {
+                  assets: tokenAmount,
+                  symbol
+                },
                 'withdrawSP'
               )
             }

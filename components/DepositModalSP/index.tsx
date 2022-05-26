@@ -16,6 +16,7 @@ import ModalGif from 'components/common/modal/ModalGif';
 import ModalStepper from 'components/common/modal/ModalStepper';
 import Overlay from 'components/Overlay';
 import SkeletonModalRowBeforeAfter from 'components/common/skeletons/SkeletonModalRowBeforeAfter';
+import ModalError from 'components/common/modal/ModalError';
 
 import { Borrow } from 'types/Borrow';
 import { Deposit } from 'types/Deposit';
@@ -24,6 +25,7 @@ import { UnderlyingData } from 'types/Underlying';
 import { Gas } from 'types/Gas';
 import { Transaction } from 'types/Transaction';
 import { HealthFactor } from 'types/HealthFactor';
+import { Error } from 'types/Error';
 
 import { getContractData } from 'utils/contracts';
 import { getUnderlyingData } from 'utils/utils';
@@ -53,7 +55,7 @@ type Props = {
 function DepositModalSP({ data, closeModal }: Props) {
   const { market, symbol } = data;
 
-  const { web3Provider, walletAddress } = useWeb3Context();
+  const { web3Provider, walletAddress, network } = useWeb3Context();
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
@@ -72,6 +74,7 @@ function DepositModalSP({ data, closeModal }: Props) {
   const [loading, setLoading] = useState<boolean>(false);
   const [healthFactor, setHealthFactor] = useState<HealthFactor>();
   const [depositedAmount, setDepositedAmount] = useState<string>();
+  const [error, setError] = useState<Error | undefined>(undefined);
 
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
     undefined
@@ -80,22 +83,27 @@ function DepositModalSP({ data, closeModal }: Props) {
   let underlyingData: UnderlyingData | undefined = undefined;
 
   if (symbol) {
-    underlyingData = getUnderlyingData(process.env.NEXT_PUBLIC_NETWORK!, symbol.toLowerCase());
+    underlyingData = getUnderlyingData(network?.name, symbol.toLowerCase());
   }
 
   const underlyingContract = getContractData(
+    network?.name,
     underlyingData!.address,
     underlyingData!.abi,
     web3Provider?.getSigner()
   );
 
-  const previewerContract = getContractData(previewerData.address!, previewerData.abi!);
+  const previewerContract = getContractData(
+    network?.name,
+    previewerData.address!,
+    previewerData.abi!
+  );
 
   useEffect(() => {
     getFixedLenderContract();
     getWalletBalance();
     getUserDeposits();
-  }, []);
+  }, [fixedLenderData]);
 
   useEffect(() => {
     if (!walletAddress) return;
@@ -144,7 +152,10 @@ function DepositModalSP({ data, closeModal }: Props) {
       setStep((step) => step + 1);
     } catch (e) {
       setLoading(false);
-      console.log(e);
+
+      setError({
+        status: true
+      });
     }
   }
 
@@ -177,7 +188,7 @@ function DepositModalSP({ data, closeModal }: Props) {
   async function getUserDeposits() {
     if (!walletAddress || !symbol) return;
 
-    const subgraphUrl = getSubgraph();
+    const subgraphUrl = getSubgraph(network?.name);
 
     const getSmartPoolDeposits = await request(
       subgraphUrl,
@@ -191,22 +202,34 @@ function DepositModalSP({ data, closeModal }: Props) {
 
     const deposits = formatSmartPoolDeposits(
       getSmartPoolDeposits.deposits,
-      getSmartPoolWithdraws.withdraws
+      getSmartPoolWithdraws.withdraws,
+      network?.name!
     );
 
-    const amount = deposits[symbol?.toUpperCase()].assets;
+    const amount = deposits[symbol?.toUpperCase()]?.assets;
     const formattedAmount = amount && ethers.utils.formatEther(`${amount}`);
 
-    if (!formattedAmount) return;
-
-    setDepositedAmount(formattedAmount);
+    !formattedAmount ? setDepositedAmount('0') : setDepositedAmount(formattedAmount);
   }
 
   async function onMax() {
-    walletBalance && setQty(walletBalance);
+    if (walletBalance) {
+      setQty(walletBalance);
+      setError(undefined);
+    }
   }
 
   function handleInputChange(e: ChangeEvent<HTMLInputElement>) {
+    if (step != 1 && walletBalance && e.target.valueAsNumber > parseFloat(walletBalance)) {
+      setError({
+        status: true,
+        message: translations[lang].insufficientBalance,
+        component: 'input'
+      });
+    } else {
+      setError(undefined);
+    }
+
     setQty(e.target.value);
   }
 
@@ -224,24 +247,35 @@ function DepositModalSP({ data, closeModal }: Props) {
       setTx({ status: 'success', hash: status?.transactionHash });
     } catch (e) {
       setLoading(false);
-      console.log(e);
+
+      setError({
+        status: true
+      });
     }
   }
 
   async function estimateGas() {
-    const gasPriceInGwei = await fixedLenderWithSigner?.provider.getGasPrice();
+    try {
+      const gasPriceInGwei = await fixedLenderWithSigner?.provider.getGasPrice();
 
-    const estimatedGasCost = await fixedLenderWithSigner?.estimateGas.deposit(
-      ethers.utils.parseUnits(`${numbers.estimateGasAmount}`),
-      walletAddress
-    );
+      const estimatedGasCost = await fixedLenderWithSigner?.estimateGas.deposit(
+        ethers.utils.parseUnits(`${numbers.estimateGasAmount}`),
+        walletAddress
+      );
 
-    if (gasPriceInGwei && estimatedGasCost) {
-      const gwei = await ethers.utils.formatUnits(gasPriceInGwei, 'gwei');
-      const gasCost = await ethers.utils.formatUnits(estimatedGasCost, 'gwei');
-      const eth = parseFloat(gwei) * parseFloat(gasCost);
+      if (gasPriceInGwei && estimatedGasCost) {
+        const gwei = await ethers.utils.formatUnits(gasPriceInGwei, 'gwei');
+        const gasCost = await ethers.utils.formatUnits(estimatedGasCost, 'gwei');
+        const eth = parseFloat(gwei) * parseFloat(gasCost);
 
-      setGas({ eth: eth.toFixed(8), gwei: parseFloat(gwei).toFixed(1) });
+        setGas({ eth: eth.toFixed(8), gwei: parseFloat(gwei).toFixed(1) });
+      }
+    } catch (e) {
+      setError({
+        status: true,
+        message: translations[lang].notEnoughBalance,
+        component: 'gas'
+      });
     }
   }
 
@@ -263,6 +297,7 @@ function DepositModalSP({ data, closeModal }: Props) {
     });
 
     const fixedLender = await getContractData(
+      network?.name,
       filteredFixedLender?.address!,
       filteredFixedLender?.abi!,
       web3Provider?.getSigner()
@@ -274,14 +309,19 @@ function DepositModalSP({ data, closeModal }: Props) {
   return (
     <>
       {!minimized && (
-        <ModalWrapper>
+        <ModalWrapper closeModal={closeModal}>
           {!tx && (
             <>
               <ModalTitle title={translations[lang].deposit} />
               <ModalAsset asset={symbol!} amount={walletBalance} />
-              <ModalClose closeModal={closeModal} />
-              <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} symbol={symbol!} />
-              <ModalTxCost gas={gas} />
+              <ModalInput
+                onMax={onMax}
+                value={qty}
+                onChange={handleInputChange}
+                symbol={symbol!}
+                error={error?.component == 'input'}
+              />
+              {error?.component !== 'gas' && <ModalTxCost gas={gas} />}
               <ModalRow text={translations[lang].exactlyBalance} value={depositedAmount} line />
               <ModalRow text={translations[lang].interestRate} value="X %" line />
               {healthFactor && symbol ? (
@@ -296,12 +336,13 @@ function DepositModalSP({ data, closeModal }: Props) {
               )}
               {/* <ModalRow text={translations[lang].borrowLimit} values={['100K', '150K']} /> */}
               <ModalStepper currentStep={step} totalSteps={3} />
+              {error && <ModalError message={error.message} />}
               <div className={styles.buttonContainer}>
                 <Button
                   text={step == 1 ? translations[lang].approve : translations[lang].deposit}
                   loading={loading}
-                  className={qty && qty > '0' ? 'primary' : 'disabled'}
-                  disabled={((!qty || qty <= '0') && !pending) || loading}
+                  className={qty && qty > '0' && !error?.status ? 'primary' : 'disabled'}
+                  disabled={((!qty || qty <= '0') && !pending) || loading || error?.status}
                   onClick={handleClickAction}
                 />
               </div>

@@ -1,8 +1,10 @@
 import { Dictionary } from 'types/Dictionary';
 import { UnderlyingNetwork } from 'types/Underlying';
 
-import DAI from 'protocol/deployments/kovan/DAI.json';
-import WETH from 'protocol/deployments/kovan/WETH.json';
+import kovanDAI from 'protocol/deployments/kovan/DAI.json';
+import kovanWETH from 'protocol/deployments/kovan/WETH.json';
+import rinkebyDAI from 'protocol/deployments/rinkeby/DAI.json';
+import rinkebyWETH from 'protocol/deployments/rinkeby/WETH.json';
 
 export function transformClasses(style: any, classes: string) {
   if (!style) return 'style object is mandatory';
@@ -20,30 +22,50 @@ export function formatWallet(walletAddress: String) {
 }
 
 export function getUnderlyingData(network: string | undefined, symbol: string | undefined) {
-  if (!network || !symbol) return;
+  if (!symbol) return;
+
+  const currentNetwork = network ?? process.env.NEXT_PUBLIC_NETWORK;
 
   const baseData: UnderlyingNetwork = {
     kovan: {
       dai: {
-        address: DAI.address,
-        abi: DAI.abi
+        address: kovanDAI.address,
+        abi: kovanDAI.abi
       },
       weth: {
-        address: WETH.address,
-        abi: WETH.abi
+        address: kovanWETH.address,
+        abi: kovanWETH.abi
+      }
+    },
+    rinkeby: {
+      dai: {
+        address: rinkebyDAI.address,
+        abi: rinkebyDAI.abi
+      },
+      weth: {
+        address: rinkebyWETH.address,
+        abi: rinkebyWETH.abi
       }
     },
     mainnet: {}
   };
 
-  return baseData[network.toLowerCase()][symbol.toLowerCase()];
+  return baseData[currentNetwork!.toLowerCase()][symbol.toLowerCase()];
 }
 
-export function getSymbol(address: string) {
-  const dictionary: Dictionary<string> = {
-    '0x188e20546ac8fbdce64f7e166896ff082fc5e055': 'DAI',
-    '0xe44fb639bccfb119725d846a3148907f205f5fb2': 'WETH'
+export function getSymbol(address: string, network: string | undefined) {
+  const currentNetwork = network ?? process.env.NEXT_PUBLIC_NETWORK;
+
+  const dictionary: Dictionary<Dictionary<string>> = {
+    kovan: {
+      '0x19eeebe4c4b3eb6ca36da09809d387efda807e25': 'DAI',
+      '0xe64021ba8661d5902a2838adc77dd43ab4a2fd82': 'WETH'
+    },
+    rinkeby: {
+      '0xc1fe172c03e63c6e35aee32e33a3326064ef7590': 'DAI',
+      '0xc1034988cc35c964d1d6c71e06f7c6f1cc315670': 'WETH'
+    }
   };
 
-  return dictionary[address.toLowerCase()];
+  return dictionary[currentNetwork!.toLowerCase()][address.toLowerCase()];
 }
