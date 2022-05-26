@@ -269,11 +269,12 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
       );
 
       const fixedRate =
-        (parseFloat(
+        ((parseFloat(
           ethers.utils.formatUnits(yieldAtMaturity, decimals[symbol! as keyof Decimals])
         ) -
           parseFloat(qty)) /
-        parseFloat(qty);
+          parseFloat(qty)) *
+        100;
 
       setFixedRate(fixedRate.toFixed(2));
     } catch (e) {
