@@ -1,7 +1,7 @@
-export function getMaturityPoolDepositsQuery(address: string) {
+export function getMaturityPoolDepositsQuery(address: string, maturity: string) {
   return `
   {
-    depositAtMaturities(where:{caller: "${address}"}){
+    depositAtMaturities(where:{caller: "${address}", maturity: "${maturity}"}){
       id
       market
       maturity
@@ -9,6 +9,7 @@ export function getMaturityPoolDepositsQuery(address: string) {
       owner
       assets
       fee
+      timestamp
     }
   }
   `;

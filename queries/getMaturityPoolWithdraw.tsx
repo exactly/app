@@ -1,7 +1,7 @@
-export function getMaturityPoolWithdrawsQuery(address: string) {
+export function getMaturityPoolWithdrawsQuery(address: string, maturity: string) {
   return `
   {
-    withdrawAtMaturities(where:{caller: "${address}"}){
+    withdrawAtMaturities(where:{caller: "${address}", maturity: "${maturity}"}){
       id
       market
       maturity
@@ -10,6 +10,7 @@ export function getMaturityPoolWithdrawsQuery(address: string) {
       owner
       assets
       assetsDiscounted
+      timestamp
     }
   }
   `;

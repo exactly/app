@@ -5,6 +5,7 @@ export function getLastMaturityPoolDepositRate(market: string, maturity: string)
         fee
         assets
         id
+        timestamp
       }
     }
     `;

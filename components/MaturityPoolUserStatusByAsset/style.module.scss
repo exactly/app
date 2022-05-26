@@ -7,8 +7,7 @@
   }
 
   .market {
-    background-color: var(--white);
-    box-shadow: var(--shadow-tables);
+    background: var(--gray-50);
     border-radius: var(--u);
     display: flex;
     flex-wrap: wrap;
@@ -24,7 +23,7 @@
 
       .tableRow {
         display: flex;
-        padding: var(--u) var(--u3);
+        padding: var(--u2) var(--u3);
         font-weight: bold;
         color: var(--gray-500);
         font-size: var(--font-12);
