@@ -9,6 +9,7 @@ export function getSmartPoolWithdrawsQuery(address: string) {
       owner
       assets
       shares
+      timestamp
     }
   }
   `;

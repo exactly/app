@@ -8,4 +8,5 @@ export type Borrow = {
   assets: string;
   fee: string;
   symbol?: string;
+  timestamp?: string;
 };

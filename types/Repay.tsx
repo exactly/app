@@ -6,4 +6,5 @@ export type Repay = {
   borrower: string;
   assets: string;
   debtCovered: string;
+  timestamp: string;
 };

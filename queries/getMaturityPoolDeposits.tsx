@@ -9,6 +9,7 @@ export function getMaturityPoolDepositsQuery(address: string, maturity: string) 
       owner
       assets
       fee
+      timestamp
     }
   }
   `;

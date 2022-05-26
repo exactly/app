@@ -10,6 +10,7 @@ export function getMaturityPoolWithdrawsQuery(address: string, maturity: string)
       owner
       assets
       assetsDiscounted
+      timestamp
     }
   }
   `;

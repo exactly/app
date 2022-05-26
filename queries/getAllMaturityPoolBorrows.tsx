@@ -10,6 +10,7 @@ export function getAllMaturityPoolBorrowsQuery(address: string) {
       borrower
       assets
       fee
+      timestamp
     }
   }
   `;

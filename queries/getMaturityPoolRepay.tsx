@@ -9,6 +9,7 @@ export function getMaturityPoolRepaysQuery(address: string, maturity: string) {
       borrower
       assets
       debtCovered
+      timestamp
     }
   }
   `;

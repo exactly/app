@@ -22,6 +22,7 @@ import { getSymbol } from 'utils/utils';
 import formatNumber from 'utils/formatNumber';
 import parseSymbol from 'utils/parseSymbol';
 import getSubgraph from 'utils/getSubgraph';
+import getExchangeRate from 'utils/getExchangeRate';
 
 import {
   getMaturityPoolBorrowsQuery,
@@ -53,6 +54,7 @@ function Item({ type, amount, fee, maturityDate, showModal, market, data }: Prop
   const [transactions, setTransactions] = useState<Array<WithdrawMP | Repay | Deposit | Borrow>>(
     []
   );
+  const [exchangeRate, setExchangeRate] = useState<number | undefined>(undefined);
 
   const oneHour = 3600;
   const oneDay = oneHour * 24;
@@ -66,6 +68,7 @@ function Item({ type, amount, fee, maturityDate, showModal, market, data }: Prop
 
   useEffect(() => {
     getMaturityData();
+    getRate();
   }, [maturityDate, walletAddress]);
 
   async function getMaturityData() {
@@ -101,7 +104,13 @@ function Item({ type, amount, fee, maturityDate, showModal, market, data }: Prop
 
       transactions.push(...getMaturityPoolWithdraws.withdrawAtMaturities);
     }
-    setTransactions(transactions);
+    setTransactions(transactions.sort((a, b) => b.timestamp - a.timestamp));
+  }
+
+  async function getRate() {
+    const rate = await getExchangeRate(symbol);
+
+    setExchangeRate(rate);
   }
 
   return (
@@ -154,12 +163,43 @@ function Item({ type, amount, fee, maturityDate, showModal, market, data }: Prop
               <th scope="col">Amount</th>
             </tr>
           </thead>
-          {transactions.map((transaction) => {
+          {transactions.map((transaction: any) => {
+            const value = formatNumber(
+              ethers.utils.formatUnits(transaction.assets, decimals[symbol! as keyof Decimals]),
+              symbol
+            );
+            const text = transaction?.fee
+              ? type?.value == 'borrow'
+                ? translations[lang].borrow
+                : translations[lang].deposit
+              : type?.value == 'borrow'
+              ? translations[lang].repay
+              : translations[lang].withdraw;
+
+            const isEnter = text.toLowerCase() == 'borrow' || text.toLowerCase() == 'deposit';
+
             return (
               <tbody>
-                <td>01/01/2022</td>
-                <td>withdraw</td>
-                <td>$100</td>
+                <tr>
+                  <td>{parseTimestamp(transaction?.timestamp || '0')}</td>
+                  <td>
+                    <span
+                      className={styles.arrow}
+                      style={isEnter ? { color: `var(--success)` } : { color: `var(--error)` }}
+                    >
+                      {isEnter ? '↓' : '↑'}
+                    </span>{' '}
+                    {text}
+                  </td>
+                  <td>
+                    {value}{' '}
+                    {exchangeRate && (
+                      <span className={styles.usd}>
+                        (${(parseFloat(value) * exchangeRate).toFixed(2)})
+                      </span>
+                    )}
+                  </td>
+                </tr>
               </tbody>
             );
           })}
