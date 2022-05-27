@@ -24,6 +24,8 @@ import { PreviewerProvider } from 'contexts/PreviewerContext';
 
 import { Market } from 'types/Market';
 import { UnformattedMarket } from 'types/UnformattedMarket';
+import { AccountData } from 'types/AccountData';
+import { FixedLenderAccountData } from 'types/FixedLenderAccountData';
 
 import dictionary from 'dictionary/en.json';
 
@@ -35,9 +37,11 @@ interface Props {}
 
 const Pools: NextPage<Props> = () => {
   const { modal, handleModal, modalContent } = useModal();
-  const { network } = useWeb3Context();
+  const { network, walletAddress } = useWeb3Context();
 
   const [markets, setMarkets] = useState<Array<Market>>([]);
+
+  const [accountData, setAccountData] = useState<AccountData>();
 
   const { Previewer, Auditor, FixedLenderDAI, FixedLenderWETH } = getABI(network?.name);
 
@@ -46,6 +50,11 @@ const Pools: NextPage<Props> = () => {
       getMarkets();
     }
   }, [Auditor]);
+
+  useEffect(() => {
+    if (!walletAddress) return;
+    getAccountData();
+  }, [walletAddress]);
 
   async function getMarkets() {
     const auditorContract = getContractData(network?.name!, Auditor.address!, Auditor.abi!);
@@ -60,6 +69,22 @@ const Pools: NextPage<Props> = () => {
     Promise.all(marketsData).then((data: Array<UnformattedMarket>) => {
       setMarkets(formatMarkets(data));
     });
+  }
+
+  async function getAccountData() {
+    try {
+      const previewerContract = getContractData(network?.name, Previewer.address!, Previewer.abi!);
+      const data = await previewerContract?.accounts(walletAddress);
+      const newAccountData: AccountData = {};
+
+      data.forEach((fixedLender: FixedLenderAccountData) => {
+        newAccountData[fixedLender.assetSymbol] = fixedLender;
+      });
+
+      setAccountData(newAccountData);
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   function formatMarkets(markets: Array<UnformattedMarket>) {
@@ -105,7 +130,7 @@ const Pools: NextPage<Props> = () => {
     <>
       {Auditor && (
         <PreviewerProvider value={Previewer}>
-          <AccountDataProvider>
+          <AccountDataProvider value={{ accountData, setAccountData }}>
             <AuditorProvider value={Auditor}>
               <FixedLenderProvider value={[FixedLenderDAI, FixedLenderWETH]}>
                 {modal && modalContent?.type == 'deposit' && (

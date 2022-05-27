@@ -4,7 +4,6 @@ import request from 'graphql-request';
 
 import Button from 'components/common/Button';
 import ModalAsset from 'components/common/modal/ModalAsset';
-import ModalClose from 'components/common/modal/ModalClose';
 import ModalInput from 'components/common/modal/ModalInput';
 import ModalRow from 'components/common/modal/ModalRow';
 import ModalRowHealthFactor from 'components/common/modal/ModalRowHealthFactor';
@@ -24,7 +23,6 @@ import { LangKeys } from 'types/Lang';
 import { UnderlyingData } from 'types/Underlying';
 import { Gas } from 'types/Gas';
 import { Transaction } from 'types/Transaction';
-import { HealthFactor } from 'types/HealthFactor';
 import { Error } from 'types/Error';
 
 import { getContractData } from 'utils/contracts';
@@ -37,8 +35,6 @@ import styles from './style.module.scss';
 import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 import FixedLenderContext from 'contexts/FixedLenderContext';
-import PreviewerContext from 'contexts/PreviewerContext';
-import AuditorContext from 'contexts/AuditorContext';
 
 import keys from './translations.json';
 
@@ -61,8 +57,6 @@ function DepositModalSP({ data, closeModal }: Props) {
   const translations: { [key: string]: LangKeys } = keys;
 
   const fixedLenderData = useContext(FixedLenderContext);
-  const previewerData = useContext(PreviewerContext);
-  const auditorData = useContext(AuditorContext);
 
   const [qty, setQty] = useState<string>('');
   const [walletBalance, setWalletBalance] = useState<string | undefined>(undefined);
@@ -72,7 +66,6 @@ function DepositModalSP({ data, closeModal }: Props) {
   const [step, setStep] = useState<number>(1);
   const [pending, setPending] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
-  const [healthFactor, setHealthFactor] = useState<HealthFactor>();
   const [depositedAmount, setDepositedAmount] = useState<string>();
   const [error, setError] = useState<Error | undefined>(undefined);
 
@@ -93,22 +86,11 @@ function DepositModalSP({ data, closeModal }: Props) {
     web3Provider?.getSigner()
   );
 
-  const previewerContract = getContractData(
-    network?.name,
-    previewerData.address!,
-    previewerData.abi!
-  );
-
   useEffect(() => {
     getFixedLenderContract();
     getWalletBalance();
     getUserDeposits();
   }, [fixedLenderData]);
-
-  useEffect(() => {
-    if (!walletAddress) return;
-    getHealthFactor();
-  }, [walletAddress]);
 
   useEffect(() => {
     if (fixedLenderWithSigner && !gas) {
@@ -166,22 +148,6 @@ function DepositModalSP({ data, closeModal }: Props) {
 
     if (formattedBalance) {
       setWalletBalance(formattedBalance);
-    }
-  }
-
-  async function getHealthFactor() {
-    try {
-      const accountLiquidity = await previewerContract?.accountLiquidity(
-        auditorData.address,
-        walletAddress
-      );
-
-      const collateral = parseFloat(ethers.utils.formatEther(accountLiquidity[0]));
-      const debt = parseFloat(ethers.utils.formatEther(accountLiquidity[1]));
-
-      setHealthFactor({ debt, collateral });
-    } catch (e) {
-      console.log(e);
     }
   }
 
@@ -324,13 +290,8 @@ function DepositModalSP({ data, closeModal }: Props) {
               {error?.component !== 'gas' && <ModalTxCost gas={gas} />}
               <ModalRow text={translations[lang].exactlyBalance} value={depositedAmount} line />
               <ModalRow text={translations[lang].interestRate} value="X %" line />
-              {healthFactor && symbol ? (
-                <ModalRowHealthFactor
-                  healthFactor={healthFactor}
-                  qty={qty}
-                  symbol={symbol}
-                  operation="deposit"
-                />
+              {symbol ? (
+                <ModalRowHealthFactor qty={qty} symbol={symbol} operation="deposit" />
               ) : (
                 <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
               )}

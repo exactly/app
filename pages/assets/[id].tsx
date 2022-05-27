@@ -19,6 +19,8 @@ import DepositModalSP from 'components/DepositModalSP';
 import { Maturity } from 'types/Maturity';
 import { LangKeys } from 'types/Lang';
 import { UnformattedMarket } from 'types/UnformattedMarket';
+import { AccountData } from 'types/AccountData';
+import { FixedLenderAccountData } from 'types/FixedLenderAccountData';
 
 import { AuditorProvider } from 'contexts/AuditorContext';
 import LangContext from 'contexts/LangContext';
@@ -47,7 +49,7 @@ interface Props {
 const Asset: NextPage<Props> = ({ symbol, price }) => {
   const { modal, handleModal, modalContent } = useModal();
 
-  const { network } = useWeb3Context();
+  const { network, walletAddress } = useWeb3Context();
   const lang: string = useContext(LangContext);
 
   const translations: { [key: string]: LangKeys } = keys;
@@ -55,6 +57,7 @@ const Asset: NextPage<Props> = ({ symbol, price }) => {
   const [page, setPage] = useState<number>(1);
   const [maturities, setMaturities] = useState<Array<Maturity> | undefined>(undefined);
   const [marketData, setMarketData] = useState<UnformattedMarket | undefined>(undefined);
+  const [accountData, setAccountData] = useState<AccountData>();
 
   const { Previewer, Auditor, FixedLenderDAI, FixedLenderWETH } = getABI(network?.name);
 
@@ -70,6 +73,11 @@ const Asset: NextPage<Props> = ({ symbol, price }) => {
       getPools();
     }
   }, [Auditor, symbol]);
+
+  useEffect(() => {
+    if (!walletAddress) return;
+    getAccountData();
+  }, [walletAddress]);
 
   async function getMarketData() {
     const auditorContract = getContractData(network?.name, Auditor.address, Auditor.abi);
@@ -112,6 +120,22 @@ const Asset: NextPage<Props> = ({ symbol, price }) => {
     setMaturities(formattedDates);
   }
 
+  async function getAccountData() {
+    try {
+      const previewerContract = getContractData(network?.name, Previewer.address!, Previewer.abi!);
+      const data = await previewerContract?.accounts(walletAddress);
+      const newAccountData: AccountData = {};
+
+      data.forEach((fixedLender: FixedLenderAccountData) => {
+        newAccountData[fixedLender.assetSymbol] = fixedLender;
+      });
+
+      setAccountData(newAccountData);
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
   function showModal(type: string, maturity: string | undefined) {
     if (modalContent?.type) {
       //in the future we should handle the minimized modal status through a context here
@@ -136,7 +160,7 @@ const Asset: NextPage<Props> = ({ symbol, price }) => {
     <>
       {Auditor && (
         <PreviewerProvider value={Previewer}>
-          <AccountDataProvider>
+          <AccountDataProvider value={{ accountData, setAccountData }}>
             <AuditorProvider value={Auditor}>
               <FixedLenderProvider value={fixedLenders}>
                 <MobileNavbar />

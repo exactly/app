@@ -6,8 +6,7 @@ import Tooltip from 'components/Tooltip';
 
 import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
-import PreviewerContext from 'contexts/PreviewerContext';
-import AuditorContext from 'contexts/AuditorContext';
+import AccountDataContext from 'contexts/AccountDataContext';
 
 import { LangKeys } from 'types/Lang';
 import { Dictionary } from 'types/Dictionary';
@@ -17,23 +16,15 @@ import styles from './style.module.scss';
 
 import keys from './translations.json';
 
-import { getContractData } from 'utils/contracts';
 import parseHealthFactor from 'utils/parseHealthFactor';
+import { FixedLenderAccountData } from 'types/FixedLenderAccountData';
 
 function DashboardHeader() {
-  const { walletAddress, network } = useWeb3Context();
-
-  const previewerData = useContext(PreviewerContext);
-  const auditorData = useContext(AuditorContext);
+  const { walletAddress } = useWeb3Context();
+  const { accountData } = useContext(AccountDataContext);
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
-
-  const previewerContract = getContractData(
-    network?.name,
-    previewerData.address!,
-    previewerData.abi!
-  );
 
   const [healthFactor, setHealthFactor] = useState<Dictionary<number> | undefined>(undefined);
   const [healthFactorData, setHealthFactorData] = useState<Array<DonutData> | undefined>(undefined);
@@ -90,38 +81,64 @@ function DashboardHeader() {
   useEffect(() => {
     if (!walletAddress) return;
     getHealthFactor();
-  }, [walletAddress]);
+  }, [walletAddress, accountData]);
 
-  async function getHealthFactor() {
-    try {
-      const accountLiquidity = await previewerContract?.accountLiquidity(
-        auditorData.address,
-        walletAddress
-      );
+  function getHealthFactor() {
+    if (!accountData) return;
 
-      const parsedCollateral = parseFloat(ethers.utils.formatEther(accountLiquidity[0]));
-      const parsedDebt = parseFloat(ethers.utils.formatEther(accountLiquidity[1]));
-      if (parsedCollateral > 0 || parsedDebt > 0) {
-        const healthFactorData = [
-          {
-            label: '',
-            value: parsedCollateral,
-            color: '#63CA10'
-          },
-          {
-            label: '',
-            value: parsedDebt,
-            color: '#AF0606'
-          }
-        ];
-        setHealthFactorData(healthFactorData);
-        setHealthFactor({ collateral: parsedCollateral, debt: parsedDebt });
-      } else {
-        setHealthFactorData(notConnected);
-        setHealthFactor(undefined);
+    let collateral = 0;
+    let debt = 0;
+
+    const data = Object.values(accountData);
+
+    data.forEach((fixedLender: FixedLenderAccountData) => {
+      const decimals = fixedLender.decimals;
+
+      if (fixedLender.isCollateral) {
+        const assets = parseFloat(ethers.utils.formatUnits(fixedLender.smartPoolAssets, decimals));
+        const oracle = parseFloat(ethers.utils.formatUnits(fixedLender.oraclePrice, 18));
+        const collateralFactor = parseFloat(
+          ethers.utils.formatUnits(fixedLender.collateralFactor, decimals)
+        );
+
+        collateral += assets * oracle * collateralFactor;
       }
-    } catch (e) {
-      console.log(e);
+
+      fixedLender.maturityBorrowPositions.forEach((borrowPosition) => {
+        const penaltyRate = parseFloat(ethers.utils.formatUnits(fixedLender.penaltyRate, 18));
+        const principal = parseFloat(
+          ethers.utils.formatUnits(borrowPosition.position.principal, decimals)
+        );
+        const fee = parseFloat(ethers.utils.formatUnits(borrowPosition.position.fee, decimals));
+        const maturityTimestamp = borrowPosition.maturity.toNumber();
+        const currentTimestamp = new Date().getTime() / 1000;
+
+        debt += principal + fee;
+        if (maturityTimestamp > currentTimestamp) {
+          debt += (currentTimestamp - maturityTimestamp) * penaltyRate;
+        }
+      });
+    });
+
+    if (collateral > 0 || debt > 0) {
+      const healthFactorData = [
+        {
+          label: '',
+          value: collateral,
+          color: '#63CA10'
+        },
+        {
+          label: '',
+          value: debt,
+          color: '#AF0606'
+        }
+      ];
+      setHealthFactorData(healthFactorData);
+
+      setHealthFactor({ collateral, debt });
+    } else {
+      setHealthFactorData(notConnected);
+      setHealthFactor(undefined);
     }
   }
 
