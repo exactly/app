@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect } from 'react';
 import type { NextPage } from 'next';
 import { request } from 'graphql-request';
 import { Option } from 'react-dropdown';
@@ -22,9 +22,12 @@ import { AuditorProvider } from 'contexts/AuditorContext';
 import { FixedLenderProvider } from 'contexts/FixedLenderContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 import { PreviewerProvider } from 'contexts/PreviewerContext';
+import { AccountDataProvider } from 'contexts/AccountDataContext';
 
 import { Borrow } from 'types/Borrow';
 import { Deposit } from 'types/Deposit';
+import { AccountData } from 'types/AccountData';
+import { FixedLenderAccountData } from 'types/FixedLenderAccountData';
 
 import useModal from 'hooks/useModal';
 
@@ -33,9 +36,9 @@ import { getMaturityPoolBorrowsQuery, getMaturityPoolDepositsQuery } from 'queri
 import translations from 'dictionary/en.json';
 
 import getSubgraph from 'utils/getSubgraph';
+import { getContractData } from 'utils/contracts';
 
 import getABI from 'config/abiImporter';
-import { AccountDataProvider } from 'contexts/AccountDataContext';
 
 interface Props {}
 
@@ -44,12 +47,15 @@ const DashBoard: NextPage<Props> = () => {
 
   const { modal, handleModal, modalContent } = useModal();
 
+  const [accountData, setAccountData] = useState<AccountData>();
+
   const [maturityPoolDeposits, setMaturityPoolDeposits] = useState<Array<Deposit>>([]);
   const [maturityPoolBorrows, setMaturityPoolBorrows] = useState<Array<Borrow>>([]);
 
   const { Previewer, Auditor, FixedLenderDAI, FixedLenderWETH } = getABI(network?.name);
 
   const fixedLenders = [FixedLenderDAI, FixedLenderWETH];
+  const previewerContract = getContractData(network?.name, Previewer.address!, Previewer.abi!);
 
   const tabDeposit = {
     label: translations.deposit,
@@ -66,6 +72,7 @@ const DashBoard: NextPage<Props> = () => {
   useEffect(() => {
     if (!walletAddress) return;
     getData();
+    getAccountData();
   }, [walletAddress]);
 
   async function getData() {
@@ -91,6 +98,21 @@ const DashBoard: NextPage<Props> = () => {
     }
   }
 
+  async function getAccountData() {
+    try {
+      const data = await previewerContract?.accounts(walletAddress);
+      const newAccountData: AccountData = {};
+
+      data.forEach((fixedLender: FixedLenderAccountData) => {
+        newAccountData[fixedLender.assetSymbol] = fixedLender;
+      });
+
+      setAccountData(newAccountData);
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
   function showModal(data: Deposit | Borrow, type: String) {
     if (modalContent?.type) {
       //in the future we should handle the minimized modal status through a context here
@@ -104,7 +126,7 @@ const DashBoard: NextPage<Props> = () => {
     <>
       {Auditor && (
         <PreviewerProvider value={Previewer}>
-          <AccountDataProvider>
+          <AccountDataProvider value={{ accountData, setAccountData }}>
             <AuditorProvider value={Auditor}>
               <FixedLenderProvider value={fixedLenders}>
                 {modal && modalContent?.type == 'borrow' && (

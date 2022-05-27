@@ -3,7 +3,6 @@ import { Contract, ethers } from 'ethers';
 
 import Button from 'components/common/Button';
 import ModalAsset from 'components/common/modal/ModalAsset';
-import ModalClose from 'components/common/modal/ModalClose';
 import ModalInput from 'components/common/modal/ModalInput';
 import ModalRow from 'components/common/modal/ModalRow';
 import ModalTitle from 'components/common/modal/ModalTitle';
@@ -32,7 +31,6 @@ import styles from './style.module.scss';
 import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 import FixedLenderContext from 'contexts/FixedLenderContext';
-import PreviewerContext from 'contexts/PreviewerContext';
 
 import decimals from 'config/decimals.json';
 import numbers from 'config/numbers.json';
@@ -53,7 +51,6 @@ function WithdrawModalMP({ data, closeModal }: Props) {
   const translations: { [key: string]: LangKeys } = keys;
 
   const fixedLenderData = useContext(FixedLenderContext);
-  const previewerData = useContext(PreviewerContext);
 
   const parsedFee = ethers.utils.formatUnits(fee, decimals[symbol! as keyof Decimals]);
   const parsedAmount = ethers.utils.formatUnits(assets, decimals[symbol! as keyof Decimals]);
@@ -71,12 +68,6 @@ function WithdrawModalMP({ data, closeModal }: Props) {
 
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
     undefined
-  );
-
-  const previewerContract = getContractData(
-    network?.name,
-    previewerData.address!,
-    previewerData.abi!
   );
 
   useEffect(() => {

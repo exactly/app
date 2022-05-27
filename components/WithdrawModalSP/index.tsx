@@ -3,7 +3,6 @@ import { ethers, Contract } from 'ethers';
 
 import Button from 'components/common/Button';
 import ModalAsset from 'components/common/modal/ModalAsset';
-import ModalClose from 'components/common/modal/ModalClose';
 import ModalInput from 'components/common/modal/ModalInput';
 import ModalRow from 'components/common/modal/ModalRow';
 import ModalRowHealthFactor from 'components/common/modal/ModalRowHealthFactor';
@@ -22,7 +21,6 @@ import { LangKeys } from 'types/Lang';
 import { Gas } from 'types/Gas';
 import { Transaction } from 'types/Transaction';
 import { Decimals } from 'types/Decimals';
-import { HealthFactor } from 'types/HealthFactor';
 import { Error } from 'types/Error';
 
 import styles from './style.module.scss';
@@ -30,8 +28,6 @@ import styles from './style.module.scss';
 import LangContext from 'contexts/LangContext';
 import FixedLenderContext from 'contexts/FixedLenderContext';
 import { useWeb3Context } from 'contexts/Web3Context';
-import PreviewerContext from 'contexts/PreviewerContext';
-import AuditorContext from 'contexts/AuditorContext';
 
 import { getContractData } from 'utils/contracts';
 import formatNumber from 'utils/formatNumber';
@@ -55,25 +51,16 @@ function WithdrawModalSP({ data, closeModal }: Props) {
   const translations: { [key: string]: LangKeys } = keys;
 
   const fixedLenderData = useContext(FixedLenderContext);
-  const previewerData = useContext(PreviewerContext);
-  const auditorData = useContext(AuditorContext);
 
   const [qty, setQty] = useState<string>('');
   const [gas, setGas] = useState<Gas | undefined>();
   const [tx, setTx] = useState<Transaction | undefined>(undefined);
   const [minimized, setMinimized] = useState<Boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
-  const [healthFactor, setHealthFactor] = useState<HealthFactor>();
   const [error, setError] = useState<Error | undefined>(undefined);
 
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
     undefined
-  );
-
-  const previewerContract = getContractData(
-    network?.name,
-    previewerData.address!,
-    previewerData.abi!
   );
 
   const parsedAmount = formatNumber(
@@ -86,31 +73,10 @@ function WithdrawModalSP({ data, closeModal }: Props) {
   }, [fixedLenderData]);
 
   useEffect(() => {
-    if (!walletAddress) return;
-    getHealthFactor();
-  }, [walletAddress]);
-
-  useEffect(() => {
     if (fixedLenderWithSigner && !gas) {
       estimateGas();
     }
   }, [fixedLenderWithSigner]);
-
-  async function getHealthFactor() {
-    try {
-      const accountLiquidity = await previewerContract?.accountLiquidity(
-        auditorData.address,
-        walletAddress
-      );
-
-      const collateral = parseFloat(ethers.utils.formatEther(accountLiquidity[0]));
-      const debt = parseFloat(ethers.utils.formatEther(accountLiquidity[1]));
-
-      setHealthFactor({ debt, collateral });
-    } catch (e) {
-      console.log(e);
-    }
-  }
 
   function onMax() {
     setQty(parsedAmount);
@@ -214,13 +180,8 @@ function WithdrawModalSP({ data, closeModal }: Props) {
               />
               {error?.component !== 'gas' && <ModalTxCost gas={gas} />}
               <ModalRow text={translations[lang].exactlyBalance} value={parsedAmount} line />
-              {healthFactor && symbol ? (
-                <ModalRowHealthFactor
-                  healthFactor={healthFactor}
-                  qty={qty}
-                  symbol={symbol}
-                  operation="withdraw"
-                />
+              {symbol ? (
+                <ModalRowHealthFactor qty={qty} symbol={symbol} operation="withdraw" />
               ) : (
                 <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
               )}
