@@ -33,12 +33,10 @@ function ModalRowHealthFactor({ qty, symbol, operation }: Props) {
 
   const [newQty, setNewQty] = useState<number | undefined>(undefined);
 
-  const [healthFactor, setHealthFactor] = useState<HealthFactor>({ collateral: 0, debt: 0 });
-
-  const [loading, setLoading] = useState<boolean>(true);
+  const [healthFactor, setHealthFactor] = useState<HealthFactor | undefined>(undefined);
 
   const beforeHealthFactor =
-    accountData && parseHealthFactor(healthFactor.debt, healthFactor.collateral);
+    accountData && parseHealthFactor(healthFactor!.debt, healthFactor!.collateral);
 
   let afterHealthFactor = beforeHealthFactor;
 
@@ -87,7 +85,6 @@ function ModalRowHealthFactor({ qty, symbol, operation }: Props) {
     const healthFactor = { collateral, debt };
 
     setHealthFactor(healthFactor);
-    setLoading(false);
   }
 
   async function getAmount() {
@@ -109,26 +106,26 @@ function ModalRowHealthFactor({ qty, symbol, operation }: Props) {
   switch (operation) {
     case 'deposit':
       afterHealthFactor = parseHealthFactor(
-        healthFactor.debt,
-        healthFactor.collateral + (newQty || 0)
+        healthFactor!.debt,
+        healthFactor!.collateral + (newQty || 0)
       );
       break;
     case 'withdraw':
       afterHealthFactor = parseHealthFactor(
-        healthFactor.debt,
-        healthFactor.collateral - (newQty || 0)
+        healthFactor!.debt,
+        healthFactor!.collateral - (newQty || 0)
       );
       break;
     case 'borrow':
       afterHealthFactor = parseHealthFactor(
-        healthFactor.debt + (newQty || 0),
-        healthFactor.collateral
+        healthFactor!.debt + (newQty || 0),
+        healthFactor!.collateral
       );
       break;
     case 'repay':
       afterHealthFactor = parseHealthFactor(
-        healthFactor.debt - (newQty || 0),
-        healthFactor.collateral
+        healthFactor!.debt - (newQty || 0),
+        healthFactor!.collateral
       );
       break;
   }
@@ -137,7 +134,7 @@ function ModalRowHealthFactor({ qty, symbol, operation }: Props) {
     <section className={`${styles.row} ${styles.line}`}>
       <p className={styles.text}>{translations[lang].healthFactor}</p>
       <section className={styles.values}>
-        {loading ? (
+        {healthFactor ? (
           <Skeleton width={40} />
         ) : (
           <span className={styles.value}>{beforeHealthFactor}</span>
@@ -145,7 +142,7 @@ function ModalRowHealthFactor({ qty, symbol, operation }: Props) {
         <div className={styles.imageContainer}>
           <Image src="/img/icons/arrowRight.svg" alt="arrowRight" layout="fill" />
         </div>
-        {loading ? (
+        {healthFactor ? (
           <Skeleton width={40} />
         ) : (
           <span className={styles.value}>{afterHealthFactor}</span>
