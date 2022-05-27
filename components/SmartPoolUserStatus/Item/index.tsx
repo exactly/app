@@ -19,7 +19,7 @@ import keys from './translations.json';
 
 import decimals from 'config/decimals.json';
 
-import { getSymbol, getUnderlyingData } from 'utils/utils';
+import { getUnderlyingData } from 'utils/utils';
 import { getContractData } from 'utils/contracts';
 import formatNumber from 'utils/formatNumber';
 import parseSymbol from 'utils/parseSymbol';
@@ -63,7 +63,7 @@ function Item({
     if (auditorContract) {
       checkCollaterals();
     }
-  });
+  }, [auditorContract]);
 
   async function checkCollaterals() {
     if (!accountData) return;
@@ -123,6 +123,7 @@ function Item({
 
       //when it ends we stop loading
       setLoading(false);
+      setToggle(!toggle);
     } catch (e) {
       //if user rejects tx we change toggle status to previous, and stop loading
       setToggle((prev) => !prev);
