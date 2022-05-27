@@ -44,7 +44,7 @@ function Item({
   const { network } = useWeb3Context();
   const fixedLender = useContext(FixedLenderContext);
   const lang: string = useContext(LangContext);
-  const accountData = useContext(AccountDataContext);
+  const { accountData } = useContext(AccountDataContext);
 
   const translations: { [key: string]: LangKeys } = keys;
 
@@ -66,8 +66,8 @@ function Item({
   });
 
   async function checkCollaterals() {
-    if (!accountData.accountData) return;
-    const data = accountData.accountData;
+    if (!accountData) return;
+    const data = accountData;
 
     data![symbol].isCollateral ? setToggle(true) : setToggle(false);
   }
