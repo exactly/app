@@ -55,7 +55,6 @@ const DashBoard: NextPage<Props> = () => {
   const { Previewer, Auditor, FixedLenderDAI, FixedLenderWETH } = getABI(network?.name);
 
   const fixedLenders = [FixedLenderDAI, FixedLenderWETH];
-  const previewerContract = getContractData(network?.name, Previewer.address!, Previewer.abi!);
 
   const tabDeposit = {
     label: translations.deposit,
@@ -100,6 +99,7 @@ const DashBoard: NextPage<Props> = () => {
 
   async function getAccountData() {
     try {
+      const previewerContract = getContractData(network?.name, Previewer.address!, Previewer.abi!);
       const data = await previewerContract?.accounts(walletAddress);
       const newAccountData: AccountData = {};
 

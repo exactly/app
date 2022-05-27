@@ -1,9 +1,11 @@
 import { useContext, useEffect, useState } from 'react';
+import { ethers } from 'ethers';
 import Image from 'next/image';
 import Skeleton from 'react-loading-skeleton';
 
 import { LangKeys } from 'types/Lang';
 import { HealthFactor } from 'types/HealthFactor';
+import { FixedLenderAccountData } from 'types/FixedLenderAccountData';
 
 import parseHealthFactor from 'utils/parseHealthFactor';
 import parseSymbol from 'utils/parseSymbol';
@@ -15,7 +17,6 @@ import AccountDataContext from 'contexts/AccountDataContext';
 import styles from './style.module.scss';
 
 import keys from './translations.json';
-import { ethers } from 'ethers';
 
 type Props = {
   qty: string;
@@ -24,8 +25,9 @@ type Props = {
 };
 
 function ModalRowHealthFactor({ qty, symbol, operation }: Props) {
-  const lang: string = useContext(LangContext);
   const { accountData } = useContext(AccountDataContext);
+  const lang: string = useContext(LangContext);
+
   const translations: { [key: string]: LangKeys } = keys;
   const parsedSymbol = parseSymbol(symbol);
 
@@ -46,13 +48,14 @@ function ModalRowHealthFactor({ qty, symbol, operation }: Props) {
   }, [symbol, qty]);
 
   function getHealthFactor() {
-    const data = Object.values(accountData!);
+    if (!accountData) return;
 
     let collateral = 0;
     let debt = 0;
 
-    for (let i = 0; i < data.length; i++) {
-      const fixedLender = data[i];
+    const data = Object.values(accountData!);
+
+    data.forEach((fixedLender: FixedLenderAccountData) => {
       const decimals = fixedLender.decimals;
 
       if (fixedLender.isCollateral) {
@@ -65,21 +68,21 @@ function ModalRowHealthFactor({ qty, symbol, operation }: Props) {
         collateral += assets * oracle * collateralFactor;
       }
 
-      for (let j = 0; j < fixedLender.maturityBorrowPositions.length; j++) {
-        parseFloat(ethers.utils.formatUnits(fixedLender.penaltyRate, decimals));
-        const borrow = fixedLender.maturityBorrowPositions[j];
+      fixedLender.maturityBorrowPositions.forEach((borrowPosition) => {
         const penaltyRate = parseFloat(ethers.utils.formatUnits(fixedLender.penaltyRate, 18));
-        const principal = parseFloat(ethers.utils.formatUnits(borrow.position.principal, decimals));
-        const fee = parseFloat(ethers.utils.formatUnits(borrow.position.fee, decimals));
-        const maturityTimestamp = borrow.maturity.toNumber();
+        const principal = parseFloat(
+          ethers.utils.formatUnits(borrowPosition.position.principal, decimals)
+        );
+        const fee = parseFloat(ethers.utils.formatUnits(borrowPosition.position.fee, decimals));
+        const maturityTimestamp = borrowPosition.maturity.toNumber();
         const currentTimestamp = new Date().getTime() / 1000;
 
         debt += principal + fee;
         if (maturityTimestamp > currentTimestamp) {
           debt += (currentTimestamp - maturityTimestamp) * penaltyRate;
         }
-      }
-    }
+      });
+    });
 
     const healthFactor = { collateral, debt };
 

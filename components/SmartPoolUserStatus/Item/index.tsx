@@ -66,6 +66,7 @@ function Item({
   });
 
   async function checkCollaterals() {
+    if (!accountData.accountData) return;
     const data = accountData.accountData;
 
     data![symbol].isCollateral ? setToggle(true) : setToggle(false);

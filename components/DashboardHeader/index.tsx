@@ -21,7 +21,7 @@ import { FixedLenderAccountData } from 'types/FixedLenderAccountData';
 
 function DashboardHeader() {
   const { walletAddress } = useWeb3Context();
-  const accountData = useContext(AccountDataContext);
+  const { accountData } = useContext(AccountDataContext);
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
@@ -84,12 +84,12 @@ function DashboardHeader() {
   }, [walletAddress, accountData]);
 
   function getHealthFactor() {
-    if (!accountData.accountData) return;
+    if (!accountData) return;
 
     let collateral = 0;
     let debt = 0;
 
-    const data = Object.values(accountData.accountData);
+    const data = Object.values(accountData);
 
     data.forEach((fixedLender: FixedLenderAccountData) => {
       const decimals = fixedLender.decimals;
@@ -104,20 +104,20 @@ function DashboardHeader() {
         collateral += assets * oracle * collateralFactor;
       }
 
-      for (let j = 0; j < fixedLender.maturityBorrowPositions.length; j++) {
-        parseFloat(ethers.utils.formatUnits(fixedLender.penaltyRate, decimals));
-        const borrow = fixedLender.maturityBorrowPositions[j];
+      fixedLender.maturityBorrowPositions.forEach((borrowPosition) => {
         const penaltyRate = parseFloat(ethers.utils.formatUnits(fixedLender.penaltyRate, 18));
-        const principal = parseFloat(ethers.utils.formatUnits(borrow.position.principal, decimals));
-        const fee = parseFloat(ethers.utils.formatUnits(borrow.position.fee, decimals));
-        const maturityTimestamp = borrow.maturity.toNumber();
+        const principal = parseFloat(
+          ethers.utils.formatUnits(borrowPosition.position.principal, decimals)
+        );
+        const fee = parseFloat(ethers.utils.formatUnits(borrowPosition.position.fee, decimals));
+        const maturityTimestamp = borrowPosition.maturity.toNumber();
         const currentTimestamp = new Date().getTime() / 1000;
 
         debt += principal + fee;
         if (maturityTimestamp > currentTimestamp) {
           debt += (currentTimestamp - maturityTimestamp) * penaltyRate;
         }
-      }
+      });
     });
 
     if (collateral > 0 || debt > 0) {

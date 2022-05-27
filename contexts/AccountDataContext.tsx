@@ -3,7 +3,7 @@ import { AccountData } from 'types/AccountData';
 
 type ContextValues = {
   accountData: AccountData | undefined;
-  setAccountData: (accountData: AccountData | undefined) => void;
+  setAccountData: (accountData: AccountData) => void;
 };
 
 const defaultValues: ContextValues = {
