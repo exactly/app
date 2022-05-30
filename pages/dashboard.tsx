@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import type { NextPage } from 'next';
-import { request } from 'graphql-request';
 import { Option } from 'react-dropdown';
 
 import Navbar from 'components/Navbar';
@@ -31,11 +30,8 @@ import { FixedLenderAccountData } from 'types/FixedLenderAccountData';
 
 import useModal from 'hooks/useModal';
 
-import { getAllMaturityPoolBorrowsQuery, getAllMaturityPoolDepositsQuery } from 'queries';
-
 import translations from 'dictionary/en.json';
 
-import getSubgraph from 'utils/getSubgraph';
 import { getContractData } from 'utils/contracts';
 
 import getABI from 'config/abiImporter';
@@ -48,9 +44,6 @@ const DashBoard: NextPage<Props> = () => {
   const { modal, handleModal, modalContent } = useModal();
 
   const [accountData, setAccountData] = useState<AccountData>();
-
-  const [maturityPoolDeposits, setMaturityPoolDeposits] = useState<Array<Deposit>>([]);
-  const [maturityPoolBorrows, setMaturityPoolBorrows] = useState<Array<Borrow>>([]);
 
   const { Previewer, Auditor, FixedLenderDAI, FixedLenderWETH } = getABI(network?.name);
 
@@ -70,32 +63,8 @@ const DashBoard: NextPage<Props> = () => {
 
   useEffect(() => {
     if (!walletAddress) return;
-    getData();
     getAccountData();
   }, [walletAddress]);
-
-  async function getData() {
-    if (!walletAddress) return;
-    try {
-      const subgraphUrl = getSubgraph(network?.name);
-
-      //MP
-      const getMaturityPoolDeposits = await request(
-        subgraphUrl,
-        getAllMaturityPoolDepositsQuery(walletAddress)
-      );
-
-      const getMaturityPoolBorrows = await request(
-        subgraphUrl,
-        getAllMaturityPoolBorrowsQuery(walletAddress)
-      );
-
-      setMaturityPoolDeposits(getMaturityPoolDeposits.depositAtMaturities);
-      setMaturityPoolBorrows(getMaturityPoolBorrows.borrowAtMaturities);
-    } catch (e) {
-      console.log(e);
-    }
-  }
 
   async function getAccountData() {
     try {
@@ -166,12 +135,7 @@ const DashBoard: NextPage<Props> = () => {
                 {walletAddress ? (
                   <>
                     {tab.value == 'deposit' && <SmartPoolDashboard showModal={showModal} />}
-                    <MaturityPoolDashboard
-                      deposits={maturityPoolDeposits}
-                      borrows={maturityPoolBorrows}
-                      showModal={showModal}
-                      tab={tab}
-                    />
+                    <MaturityPoolDashboard showModal={showModal} tab={tab} />
                   </>
                 ) : (
                   <EmptyState />

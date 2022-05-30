@@ -1,7 +1,7 @@
-export function getMaturityPoolDepositsQuery(address: string, maturity: string) {
+export function getMaturityPoolDepositsQuery(address: string, maturity: string, market: string) {
   return `
   {
-    depositAtMaturities(where:{caller: "${address}", maturity: "${maturity}"}){
+    depositAtMaturities(where:{caller: "${address}", maturity: "${maturity}", market: "${market}"}){
       id
       market
       maturity

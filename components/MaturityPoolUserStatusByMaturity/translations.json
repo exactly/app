@@ -4,7 +4,8 @@
     "marketSize": "Market Size",
     "fixedRate": "Fixed Rate",
     "maturityDate": "Maturity Date",
-    "progress": "Progress"
+    "progress": "Progress",
+    "timeElapsed": "Time Elapsed"
   },
   "es": {}
 }

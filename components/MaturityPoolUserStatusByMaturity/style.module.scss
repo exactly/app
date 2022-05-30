@@ -1,9 +1,136 @@
+@function calcRgbaColor($index, $leftSide, $full) {
+  $from-r: 123; // start red rgb value
+  $from-g: 245; // start green rgb value
+  $from-b: 225; // start blue rgb value
+  $to-r: 99; // end red rgb value
+  $to-g: 202; // end green rgb value
+  $to-b: 16; // end blue rgb value
+  $from: rgba($from-r, $from-g, $from-b, 1); //values in rgba
+  $to: rgba($to-r, $to-g, $to-b, 1); // values in rgba
+
+  $add: $index + 1;
+
+  @if $leftSide == true {
+    $add: $index - 1;
+  }
+
+  @if $full == false {
+    $to-r: 77; // end red rgb value
+    $to-g: 77; // end green rgb value
+    $to-b: 232; // end blue rgb value
+    $from: rgba($from-r, $from-g, $from-b, 1); //values in rgba
+    $to: rgba($to-r, $to-g, $to-b, 1); // values in rgba
+  }
+
+  @return rgba(
+    $from-r + $add * ($to-r - $from-r) / 26,
+    $from-g + $add * ($to-g - $from-g) / 26,
+    $from-b + $add * ($to-b - $from-b) / 26,
+    1
+  );
+}
+
+@for $i from 1 through 26 {
+  .track > .fullBar:nth-child(#{$i}) {
+    background: linear-gradient(
+      to bottom right,
+      calcRgbaColor($i, true, true),
+      calcRgbaColor($i, false, true)
+    );
+
+    background: linear-gradient(
+      to bottom right,
+      calcRgbaColor($i, true, true),
+      calcRgbaColor($i, false, true)
+    );
+  }
+
+  .track > .incompleteBar:nth-child(#{$i}) {
+    background: linear-gradient(
+      to bottom right,
+      calcRgbaColor($i, true, false),
+      calcRgbaColor($i, false, false)
+    );
+    background: linear-gradient(
+      to bottom right,
+      calcRgbaColor($i, true, false),
+      calcRgbaColor($i, false, false)
+    );
+  }
+}
+
 .container {
   width: var(--max-width);
+  border-top: 1px solid var(--gray-100);
+  margin-bottom: var(--u5);
+  padding-top: var(--u4);
 
-  .date {
-    color: var(--gray-500);
-    font-weight: bold;
+  .infoContainer {
+    display: flex;
+    gap: var(--u10);
+
+    .dateContainer {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      gap: var(--u2);
+      margin-bottom: var(--u4);
+
+      .title {
+        margin: 0;
+        color: var(--gray-500);
+        font-weight: 600;
+      }
+
+      .date {
+        margin: 0;
+        color: var(--gray-900);
+        font-weight: bold;
+        font-size: var(--font-20);
+      }
+
+      .progress {
+        width: 250px;
+
+        .track {
+          width: 100%;
+          height: var(--u3);
+          animation: prgBar 5s linear 0s infinite alternate;
+          display: flex;
+
+          .fullBar {
+            height: var(--u3);
+            width: var(--smallUnit);
+            border-radius: var(--smallestUnit);
+            margin-right: var(--smallestUnit);
+
+            &:not(:first-child) {
+              margin-left: var(--smallestUnit);
+            }
+          }
+
+          .incompleteBar {
+            height: var(--u3);
+            width: var(--smallUnit);
+            border-radius: var(--smallestUnit);
+            margin-right: var(--smallestUnit);
+
+            &:not(:first-child) {
+              margin-left: var(--smallestUnit);
+            }
+          }
+
+          .emptyBar {
+            height: var(--u3);
+            width: var(--smallUnit);
+            border-radius: var(--smallestUnit);
+            margin-left: var(--smallestUnit);
+            margin-right: var(--smallestUnit);
+            background: var(--gray-200);
+          }
+        }
+      }
+    }
   }
 
   .market {
@@ -31,7 +158,7 @@
         align-items: center;
 
         .symbol {
-          width: 20%;
+          width: calc(100% / 4);
         }
 
         .address {
@@ -39,7 +166,7 @@
         }
 
         .title {
-          width: 20%;
+          width: calc(100% / 4);
         }
       }
     }

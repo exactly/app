@@ -18,7 +18,6 @@ import styles from './style.module.scss';
 import keys from './translations.json';
 
 import parseTimestamp from 'utils/parseTimestamp';
-import { getSymbol } from 'utils/utils';
 import formatNumber from 'utils/formatNumber';
 import parseSymbol from 'utils/parseSymbol';
 import getSubgraph from 'utils/getSubgraph';
@@ -31,7 +30,6 @@ import {
   getMaturityPoolRepaysQuery
 } from 'queries';
 
-import decimals from 'config/decimals.json';
 import { WithdrawMP } from 'types/WithdrawMP';
 import { Repay } from 'types/Repay';
 
@@ -41,11 +39,12 @@ type Props = {
   fee: string;
   maturityDate: string;
   showModal: (data: Deposit | Borrow, type: String) => void;
-  market: string;
-  data: Deposit | Borrow;
+  symbol: string;
+  decimals: number;
+  data: Borrow | Deposit;
 };
 
-function Item({ type, amount, fee, maturityDate, showModal, market, data }: Props) {
+function Item({ type, amount, fee, maturityDate, showModal, symbol, data, decimals }: Props) {
   const { network, walletAddress } = useWeb3Context();
 
   const lang: string = useContext(LangContext);
@@ -64,48 +63,47 @@ function Item({ type, amount, fee, maturityDate, showModal, market, data }: Prop
   const current = nowInSeconds - startDate;
   const progress = (current * 100) / maturityLife;
   const fixedRate = (parseFloat(fee) * 100) / parseFloat(amount);
-  const symbol = getSymbol(market, network?.name);
 
   useEffect(() => {
-    getMaturityData();
+    // getMaturityData();
     getRate();
   }, [maturityDate, walletAddress]);
 
-  async function getMaturityData() {
-    const subgraphUrl = getSubgraph(network?.name);
-    const transactions = [];
+  // async function getMaturityData() {
+  //   const subgraphUrl = getSubgraph(network?.name);
+  //   const transactions = [];
 
-    if (type?.value === 'borrow') {
-      const getMaturityPoolBorrows = await request(
-        subgraphUrl,
-        getMaturityPoolBorrowsQuery(walletAddress!, maturityDate)
-      );
+  //   if (type?.value === 'borrow') {
+  //     const getMaturityPoolBorrows = await request(
+  //       subgraphUrl,
+  //       getMaturityPoolBorrowsQuery(walletAddress!, maturityDate)
+  //     );
 
-      transactions.push(...getMaturityPoolBorrows.borrowAtMaturities);
+  //     transactions.push(...getMaturityPoolBorrows.borrowAtMaturities);
 
-      const getMaturityPoolRepays = await request(
-        subgraphUrl,
-        getMaturityPoolRepaysQuery(walletAddress!, maturityDate)
-      );
+  //     const getMaturityPoolRepays = await request(
+  //       subgraphUrl,
+  //       getMaturityPoolRepaysQuery(walletAddress!, maturityDate)
+  //     );
 
-      transactions.push(...getMaturityPoolRepays.repayAtMaturities);
-    } else {
-      const getMaturityPoolDeposits = await request(
-        subgraphUrl,
-        getMaturityPoolDepositsQuery(walletAddress!, maturityDate)
-      );
+  //     transactions.push(...getMaturityPoolRepays.repayAtMaturities);
+  //   } else {
+  //     const getMaturityPoolDeposits = await request(
+  //       subgraphUrl,
+  //       getMaturityPoolDepositsQuery(walletAddress!, maturityDate)
+  //     );
 
-      transactions.push(...getMaturityPoolDeposits.depositAtMaturities);
+  //     transactions.push(...getMaturityPoolDeposits.depositAtMaturities);
 
-      const getMaturityPoolWithdraws = await request(
-        subgraphUrl,
-        getMaturityPoolWithdrawsQuery(walletAddress!, maturityDate)
-      );
+  //     const getMaturityPoolWithdraws = await request(
+  //       subgraphUrl,
+  //       getMaturityPoolWithdrawsQuery(walletAddress!, maturityDate)
+  //     );
 
-      transactions.push(...getMaturityPoolWithdraws.withdrawAtMaturities);
-    }
-    setTransactions(transactions.sort((a, b) => b.timestamp - a.timestamp));
-  }
+  //     transactions.push(...getMaturityPoolWithdraws.withdrawAtMaturities);
+  //   }
+  //   setTransactions(transactions.sort((a, b) => b.timestamp - a.timestamp));
+  // }
 
   async function getRate() {
     const rate = await getExchangeRate(symbol);
@@ -125,10 +123,7 @@ function Item({ type, amount, fee, maturityDate, showModal, market, data }: Prop
           <span className={styles.primary}>{parseSymbol(symbol)}</span>
         </div>
         <span className={styles.value}>
-          {formatNumber(
-            ethers.utils.formatUnits(amount, decimals[symbol! as keyof Decimals]),
-            symbol
-          )}
+          {formatNumber(ethers.utils.formatUnits(amount, decimals), symbol)}
         </span>
         <span className={styles.value}>{fixedRate.toFixed(2)}%</span>
         <span className={styles.value}>{parseTimestamp(maturityDate)}</span>
@@ -148,7 +143,7 @@ function Item({ type, amount, fee, maturityDate, showModal, market, data }: Prop
               text={type.value == 'borrow' ? translations[lang].repay : translations[lang].withdraw}
               className={type.value == 'borrow' ? 'quaternary' : 'tertiary'}
               onClick={() => {
-                showModal({ ...data, symbol }, type.value == 'borrow' ? 'repay' : 'withdraw');
+                showModal(data, type.value == 'borrow' ? 'repay' : 'withdraw');
               }}
             />
           </div>
@@ -163,24 +158,24 @@ function Item({ type, amount, fee, maturityDate, showModal, market, data }: Prop
               <th scope="col">Amount</th>
             </tr>
           </thead>
-          {transactions.map((transaction: any, key) => {
-            const value = formatNumber(
-              ethers.utils.formatUnits(transaction.assets, decimals[symbol! as keyof Decimals]),
-              symbol
-            );
-            const text = transaction?.fee
-              ? type?.value == 'borrow'
-                ? translations[lang].borrow
-                : translations[lang].deposit
-              : type?.value == 'borrow'
-              ? translations[lang].repay
-              : translations[lang].withdraw;
+          <tbody>
+            {transactions.map((transaction: any, key) => {
+              const value = formatNumber(
+                ethers.utils.formatUnits(transaction.assets, decimals),
+                symbol
+              );
+              const text = transaction?.fee
+                ? type?.value == 'borrow'
+                  ? translations[lang].borrow
+                  : translations[lang].deposit
+                : type?.value == 'borrow'
+                ? translations[lang].repay
+                : translations[lang].withdraw;
 
-            const isEnter = text.toLowerCase() == 'borrow' || text.toLowerCase() == 'deposit';
+              const isEnter = text.toLowerCase() == 'borrow' || text.toLowerCase() == 'deposit';
 
-            return (
-              <tbody key={key}>
-                <tr>
+              return (
+                <tr key={key}>
                   <td>{parseTimestamp(transaction?.timestamp || '0')}</td>
                   <td>
                     <span
@@ -200,9 +195,9 @@ function Item({ type, amount, fee, maturityDate, showModal, market, data }: Prop
                     )}
                   </td>
                 </tr>
-              </tbody>
-            );
-          })}
+              );
+            })}
+          </tbody>
         </table>
       </div>
     </details>
