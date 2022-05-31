@@ -1,55 +1,198 @@
-import { useContext } from 'react';
+import { useContext, useEffect, useState } from 'react';
+import { ethers } from 'ethers';
+import request from 'graphql-request';
 
 import Button from 'components/common/Button';
 
 import LangContext from 'contexts/LangContext';
+import { useWeb3Context } from 'contexts/Web3Context';
 
-import { Option } from 'react-dropdown';
 import { LangKeys } from 'types/Lang';
-import { Market } from 'types/Market';
+import { Deposit } from 'types/Deposit';
+import { Borrow } from 'types/Borrow';
+import { Option } from 'react-dropdown';
+import { WithdrawMP } from 'types/WithdrawMP';
+import { Repay } from 'types/Repay';
 
 import styles from './style.module.scss';
 
 import keys from './translations.json';
 
+import parseTimestamp from 'utils/parseTimestamp';
+import formatNumber from 'utils/formatNumber';
+import parseSymbol from 'utils/parseSymbol';
+import getSubgraph from 'utils/getSubgraph';
+import getExchangeRate from 'utils/getExchangeRate';
+
+import {
+  getMaturityPoolBorrowsQuery,
+  getMaturityPoolDepositsQuery,
+  getMaturityPoolWithdrawsQuery,
+  getMaturityPoolRepaysQuery
+} from 'queries';
+
 type Props = {
-  market?: Market;
-  showModal?: (address: Market['address'], type: 'borrow' | 'deposit') => void;
   type?: Option;
-  src?: string;
+  amount: string;
+  fee: string;
+  maturityDate: string;
+  showModal: (data: Deposit | Borrow, type: String) => void;
   symbol: string;
+  market: string;
+  decimals: number;
+  data: Borrow | Deposit;
 };
 
-function Item({ market, showModal, type, src, symbol }: Props) {
+function Item({
+  type,
+  amount,
+  fee,
+  maturityDate,
+  showModal,
+  symbol,
+  market,
+  decimals,
+  data
+}: Props) {
+  const { network, walletAddress } = useWeb3Context();
+
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
+  const [transactions, setTransactions] = useState<Array<WithdrawMP | Repay | Deposit | Borrow>>(
+    []
+  );
+  const [exchangeRate, setExchangeRate] = useState<number | undefined>(undefined);
+
+  const fixedRate = (parseFloat(fee) * 100) / parseFloat(amount);
+
+  useEffect(() => {
+    getMaturityData();
+    getRate();
+  }, [maturityDate, walletAddress]);
+
+  async function getMaturityData() {
+    const subgraphUrl = getSubgraph(network?.name);
+    const transactions = [];
+
+    if (type?.value === 'borrow') {
+      const getMaturityPoolBorrows = await request(
+        subgraphUrl,
+        getMaturityPoolBorrowsQuery(walletAddress!, maturityDate, market.toLowerCase())
+      );
+
+      transactions.push(...getMaturityPoolBorrows.borrowAtMaturities);
+
+      const getMaturityPoolRepays = await request(
+        subgraphUrl,
+        getMaturityPoolRepaysQuery(walletAddress!, maturityDate, market.toLowerCase())
+      );
+
+      transactions.push(...getMaturityPoolRepays.repayAtMaturities);
+    } else {
+      const getMaturityPoolDeposits = await request(
+        subgraphUrl,
+        getMaturityPoolDepositsQuery(walletAddress!, maturityDate, market.toLowerCase())
+      );
+
+      transactions.push(...getMaturityPoolDeposits.depositAtMaturities);
+
+      const getMaturityPoolWithdraws = await request(
+        subgraphUrl,
+        getMaturityPoolWithdrawsQuery(walletAddress!, maturityDate, market.toLowerCase())
+      );
+
+      transactions.push(...getMaturityPoolWithdraws.withdrawAtMaturities);
+    }
+    setTransactions(transactions.sort((a, b) => b.timestamp - a.timestamp));
+  }
+
+  async function getRate() {
+    const rate = await getExchangeRate(symbol);
+
+    setExchangeRate(rate);
+  }
+
   return (
-    <div className={styles.container}>
-      <div className={styles.symbol}>
-        <img
-          src={`/img/assets/${symbol.toLowerCase()}.png`}
-          alt="symbol"
-          className={styles.assetImage}
-        />
-        <span className={styles.primary}>DAI</span>
-      </div>
-      <span className={styles.value}>17,18</span>
-      <span className={styles.value}>4.41%</span>
-
-      <span className={styles.value}>
-        <div className={styles.line}>
-          <div className={styles.progress} style={{ width: `50%` }} />
+    <details className={styles.container}>
+      <summary className={styles.summary}>
+        <div className={styles.symbol}>
+          <img
+            src={`/img/assets/${symbol?.toLowerCase()}.png`}
+            alt={symbol}
+            className={styles.assetImage}
+          />
+          <span className={styles.primary}>{parseSymbol(symbol)}</span>
         </div>
-      </span>
+        <span className={styles.value}>
+          {formatNumber(ethers.utils.formatUnits(amount, decimals), symbol)}
+        </span>
+        <span className={styles.value}>{fixedRate.toFixed(2)}%</span>
 
-      <div className={styles.buttonContainer}>
-        <Button
-          text={type?.value == 'borrow' ? translations[lang].borrow : translations[lang].deposit}
-          className={type?.value == 'borrow' ? 'secondary' : 'primary'}
-        />
+        {type && (
+          <div className={styles.buttonContainer}>
+            <Button
+              text={type.value == 'borrow' ? translations[lang].repay : translations[lang].withdraw}
+              className={type.value == 'borrow' ? 'quaternary' : 'tertiary'}
+              onClick={() => {
+                showModal(data, type.value == 'borrow' ? 'repay' : 'withdraw');
+              }}
+            />
+          </div>
+        )}
+      </summary>
+      <div className={styles.tableContainer}>
+        <table className={styles.table}>
+          <thead>
+            <tr>
+              <th scope="col">Date</th>
+              <th scope="col">Operation</th>
+              <th scope="col">Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            {transactions.map((transaction: any, key) => {
+              const value = formatNumber(
+                ethers.utils.formatUnits(transaction.assets, decimals),
+                symbol
+              );
+              const text = transaction?.fee
+                ? type?.value == 'borrow'
+                  ? translations[lang].borrow
+                  : translations[lang].deposit
+                : type?.value == 'borrow'
+                ? translations[lang].repay
+                : translations[lang].withdraw;
+
+              const isEnter = text.toLowerCase() == 'borrow' || text.toLowerCase() == 'deposit';
+
+              return (
+                <tr key={key}>
+                  <td>{parseTimestamp(transaction?.timestamp || '0')}</td>
+                  <td>
+                    <span
+                      className={styles.arrow}
+                      style={isEnter ? { color: `var(--success)` } : { color: `var(--error)` }}
+                    >
+                      {isEnter ? '↓' : '↑'}
+                    </span>{' '}
+                    {text}
+                  </td>
+                  <td>
+                    {value}{' '}
+                    {exchangeRate && (
+                      <span className={styles.usd}>
+                        (${(parseFloat(value) * exchangeRate).toFixed(2)})
+                      </span>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
       </div>
-    </div>
+    </details>
   );
 }
 

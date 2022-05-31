@@ -6,4 +6,5 @@ export type Withdraw = {
   market: string;
   owner: string;
   shares: string;
+  timestamp: string;
 };

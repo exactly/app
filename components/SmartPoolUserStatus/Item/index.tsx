@@ -7,6 +7,7 @@ import Loading from 'components/common/Loading';
 import FixedLenderContext from 'contexts/FixedLenderContext';
 import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
+import AccountDataContext from 'contexts/AccountDataContext';
 
 import { LangKeys } from 'types/Lang';
 import { Deposit } from 'types/Deposit';
@@ -43,6 +44,8 @@ function Item({
   const { network } = useWeb3Context();
   const fixedLender = useContext(FixedLenderContext);
   const lang: string = useContext(LangContext);
+  const { accountData } = useContext(AccountDataContext);
+
   const translations: { [key: string]: LangKeys } = keys;
 
   const [toggle, setToggle] = useState<boolean>(false);
@@ -60,22 +63,13 @@ function Item({
     if (auditorContract) {
       checkCollaterals();
     }
-  });
+  }, []);
 
   async function checkCollaterals() {
-    const fixedLenderAddress = getFixedLenderData().address;
-    const allMarkets = await auditorContract?.getAllMarkets();
-    const marketIndex = allMarkets.indexOf(fixedLenderAddress);
-    const assets = await auditorContract?.accountAssets(walletAddress);
+    if (!accountData) return;
+    const data = accountData;
 
-    /**
-     * "assets" is a bitMap
-     * "marketIndex" is the index of the market we want to check if has collateral
-     * with "<<" (leftshift) we check if the bit in the marketIndex is 0 or not
-     * if its 0 dosen't enter the market is different to 0 has enter the market
-     */
-
-    !assets.and(1 << marketIndex).eq(0) ? setToggle(true) : setToggle(false);
+    data![symbol].isCollateral ? setToggle(true) : setToggle(false);
   }
 
   async function getCurrentBalance() {
@@ -126,7 +120,7 @@ function Item({
 
       //waiting for tx to end
       await tx.wait();
-
+      setToggle(!toggle);
       //when it ends we stop loading
       setLoading(false);
     } catch (e) {

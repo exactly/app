@@ -7,4 +7,5 @@ export type Deposit = {
   maturity: string;
   owner?: string;
   symbol?: string;
+  timestamp?: string;
 };

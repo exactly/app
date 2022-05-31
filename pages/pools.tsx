@@ -24,6 +24,8 @@ import { PreviewerProvider } from 'contexts/PreviewerContext';
 
 import { Market } from 'types/Market';
 import { UnformattedMarket } from 'types/UnformattedMarket';
+import { AccountData } from 'types/AccountData';
+import { FixedLenderAccountData } from 'types/FixedLenderAccountData';
 
 import dictionary from 'dictionary/en.json';
 
@@ -35,21 +37,28 @@ interface Props {}
 
 const Pools: NextPage<Props> = () => {
   const { modal, handleModal, modalContent } = useModal();
-  const { network } = useWeb3Context();
+  const { network, walletAddress } = useWeb3Context();
 
   const [markets, setMarkets] = useState<Array<Market>>([]);
 
+  const [accountData, setAccountData] = useState<AccountData>();
+
   const { Previewer, Auditor, FixedLenderDAI, FixedLenderWETH } = getABI(network?.name);
 
-  const auditorContract = getContractData(network?.name!, Auditor.address!, Auditor.abi!);
-
   useEffect(() => {
-    if (auditorContract) {
+    if (Auditor) {
       getMarkets();
     }
-  }, [Auditor.address]);
+  }, [Auditor]);
+
+  useEffect(() => {
+    if (!walletAddress) return;
+    getAccountData();
+  }, [walletAddress]);
 
   async function getMarkets() {
+    const auditorContract = getContractData(network?.name!, Auditor.address!, Auditor.abi!);
+
     const marketsAddresses = await auditorContract?.getAllMarkets();
     const marketsData: Array<UnformattedMarket> = [];
 
@@ -60,6 +69,22 @@ const Pools: NextPage<Props> = () => {
     Promise.all(marketsData).then((data: Array<UnformattedMarket>) => {
       setMarkets(formatMarkets(data));
     });
+  }
+
+  async function getAccountData() {
+    try {
+      const previewerContract = getContractData(network?.name, Previewer.address!, Previewer.abi!);
+      const data = await previewerContract?.accounts(walletAddress);
+      const newAccountData: AccountData = {};
+
+      data.forEach((fixedLender: FixedLenderAccountData) => {
+        newAccountData[fixedLender.assetSymbol] = fixedLender;
+      });
+
+      setAccountData(newAccountData);
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   function formatMarkets(markets: Array<UnformattedMarket>) {
@@ -102,38 +127,42 @@ const Pools: NextPage<Props> = () => {
   }
 
   return (
-    <PreviewerProvider value={Previewer}>
-      <AccountDataProvider>
-        <AuditorProvider value={Auditor}>
-          <FixedLenderProvider value={[FixedLenderDAI, FixedLenderWETH]}>
-            {modal && modalContent?.type == 'deposit' && (
-              <DepositModalMP data={modalContent} closeModal={handleModal} />
-            )}
+    <>
+      {Auditor && (
+        <PreviewerProvider value={Previewer}>
+          <AccountDataProvider value={{ accountData, setAccountData }}>
+            <AuditorProvider value={Auditor}>
+              <FixedLenderProvider value={[FixedLenderDAI, FixedLenderWETH]}>
+                {modal && modalContent?.type == 'deposit' && (
+                  <DepositModalMP data={modalContent} closeModal={handleModal} />
+                )}
 
-            {modal && modalContent?.type == 'smartDeposit' && (
-              <DepositModalSP data={modalContent} closeModal={handleModal} />
-            )}
+                {modal && modalContent?.type == 'smartDeposit' && (
+                  <DepositModalSP data={modalContent} closeModal={handleModal} />
+                )}
 
-            {modal && modalContent?.type == 'borrow' && (
-              <BorrowModal data={modalContent} closeModal={handleModal} />
-            )}
+                {modal && modalContent?.type == 'borrow' && (
+                  <BorrowModal data={modalContent} closeModal={handleModal} />
+                )}
 
-            <MobileNavbar />
-            <Navbar />
-            <CurrentNetwork />
+                <MobileNavbar />
+                <Navbar />
+                <CurrentNetwork />
 
-            <div style={{ marginTop: '180px' }}>
-              <SmartPoolList markets={markets} showModal={showModal} />
-            </div>
+                <div style={{ marginTop: '180px' }}>
+                  <SmartPoolList markets={markets} showModal={showModal} />
+                </div>
 
-            <MaturitySelector title={dictionary.maturityPools} />
+                <MaturitySelector title={dictionary.maturityPools} />
 
-            <MarketsList markets={markets} showModal={showModal} />
-            <Footer />
-          </FixedLenderProvider>
-        </AuditorProvider>
-      </AccountDataProvider>
-    </PreviewerProvider>
+                <MarketsList markets={markets} showModal={showModal} />
+                <Footer />
+              </FixedLenderProvider>
+            </AuditorProvider>
+          </AccountDataProvider>
+        </PreviewerProvider>
+      )}
+    </>
   );
 };
 

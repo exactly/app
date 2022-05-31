@@ -1,4 +1,4 @@
-import React, { createContext, FC, useState } from 'react';
+import { createContext } from 'react';
 import { AccountData } from 'types/AccountData';
 
 type ContextValues = {
@@ -13,13 +13,6 @@ const defaultValues: ContextValues = {
 
 const AccountDataContext = createContext(defaultValues);
 
-const AccountDataProvider: FC = ({ children }) => {
-  const [accountData, setAccountData] = useState<AccountData>();
-  return (
-    <AccountDataContext.Provider value={{ accountData, setAccountData }}>
-      {children}
-    </AccountDataContext.Provider>
-  );
-};
+export const AccountDataProvider = AccountDataContext.Provider;
 
-export { AccountDataContext, AccountDataProvider };
+export default AccountDataContext;

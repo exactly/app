@@ -1,11 +1,21 @@
 import { BigNumber } from '@ethersproject/bignumber';
 
+export interface MaturityPosition {
+  maturity: BigNumber;
+  position: Position;
+}
+
+export interface Position {
+  fee: BigNumber;
+  principal: BigNumber;
+}
+
 export type FixedLenderAccountData = {
-  fixedLenderAddress: string;
+  fixedLender: string;
   assetSymbol: string;
-  maturitySupplyPositions: Array<BigNumber>;
-  maturityBorrowPositions: Array<BigNumber>;
-  smartPoolAsstets: BigNumber;
+  maturitySupplyPositions: Array<MaturityPosition>;
+  maturityBorrowPositions: Array<MaturityPosition>;
+  smartPoolAssets: BigNumber;
   smartPoolShares: BigNumber;
   oraclePrice: BigNumber;
   penaltyRate: BigNumber;

@@ -1,6 +1,5 @@
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect } from 'react';
 import type { NextPage } from 'next';
-import { request } from 'graphql-request';
 import { Option } from 'react-dropdown';
 
 import Navbar from 'components/Navbar';
@@ -22,20 +21,20 @@ import { AuditorProvider } from 'contexts/AuditorContext';
 import { FixedLenderProvider } from 'contexts/FixedLenderContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 import { PreviewerProvider } from 'contexts/PreviewerContext';
+import { AccountDataProvider } from 'contexts/AccountDataContext';
 
 import { Borrow } from 'types/Borrow';
 import { Deposit } from 'types/Deposit';
+import { AccountData } from 'types/AccountData';
+import { FixedLenderAccountData } from 'types/FixedLenderAccountData';
 
 import useModal from 'hooks/useModal';
 
-import { getMaturityPoolBorrowsQuery, getMaturityPoolDepositsQuery } from 'queries';
-
 import translations from 'dictionary/en.json';
 
-import getSubgraph from 'utils/getSubgraph';
+import { getContractData } from 'utils/contracts';
 
 import getABI from 'config/abiImporter';
-import { AccountDataProvider } from 'contexts/AccountDataContext';
 
 interface Props {}
 
@@ -44,8 +43,7 @@ const DashBoard: NextPage<Props> = () => {
 
   const { modal, handleModal, modalContent } = useModal();
 
-  const [maturityPoolDeposits, setMaturityPoolDeposits] = useState<Array<Deposit>>([]);
-  const [maturityPoolBorrows, setMaturityPoolBorrows] = useState<Array<Borrow>>([]);
+  const [accountData, setAccountData] = useState<AccountData>();
 
   const { Previewer, Auditor, FixedLenderDAI, FixedLenderWETH } = getABI(network?.name);
 
@@ -65,27 +63,20 @@ const DashBoard: NextPage<Props> = () => {
 
   useEffect(() => {
     if (!walletAddress) return;
-    getData();
+    getAccountData();
   }, [walletAddress]);
 
-  async function getData() {
-    if (!walletAddress) return;
+  async function getAccountData() {
     try {
-      const subgraphUrl = getSubgraph(network?.name);
+      const previewerContract = getContractData(network?.name, Previewer.address!, Previewer.abi!);
+      const data = await previewerContract?.accounts(walletAddress);
+      const newAccountData: AccountData = {};
 
-      //MP
-      const getMaturityPoolDeposits = await request(
-        subgraphUrl,
-        getMaturityPoolDepositsQuery(walletAddress)
-      );
+      data.forEach((fixedLender: FixedLenderAccountData) => {
+        newAccountData[fixedLender.assetSymbol] = fixedLender;
+      });
 
-      const getMaturityPoolBorrows = await request(
-        subgraphUrl,
-        getMaturityPoolBorrowsQuery(walletAddress)
-      );
-
-      setMaturityPoolDeposits(getMaturityPoolDeposits.depositAtMaturities);
-      setMaturityPoolBorrows(getMaturityPoolBorrows.borrowAtMaturities);
+      setAccountData(newAccountData);
     } catch (e) {
       console.log(e);
     }
@@ -101,62 +92,61 @@ const DashBoard: NextPage<Props> = () => {
   }
 
   return (
-    <PreviewerProvider value={Previewer}>
-      <AccountDataProvider>
-        <AuditorProvider value={Auditor}>
-          <FixedLenderProvider value={fixedLenders}>
-            {modal && modalContent?.type == 'borrow' && (
-              <BorrowModal data={modalContent} closeModal={handleModal} editable />
-            )}
+    <>
+      {Auditor && (
+        <PreviewerProvider value={Previewer}>
+          <AccountDataProvider value={{ accountData, setAccountData }}>
+            <AuditorProvider value={Auditor}>
+              <FixedLenderProvider value={fixedLenders}>
+                {modal && modalContent?.type == 'borrow' && (
+                  <BorrowModal data={modalContent} closeModal={handleModal} editable />
+                )}
 
-            {modal && modalContent?.type == 'repay' && (
-              <RepayModal data={modalContent} closeModal={handleModal} />
-            )}
+                {modal && modalContent?.type == 'repay' && (
+                  <RepayModal data={modalContent} closeModal={handleModal} />
+                )}
 
-            {modal && modalContent?.type == 'deposit' && (
-              <DepositModalMP data={modalContent} closeModal={handleModal} editable />
-            )}
+                {modal && modalContent?.type == 'deposit' && (
+                  <DepositModalMP data={modalContent} closeModal={handleModal} editable />
+                )}
 
-            {modal && modalContent?.type == 'withdraw' && (
-              <WithdrawModalMP data={modalContent} closeModal={handleModal} />
-            )}
+                {modal && modalContent?.type == 'withdraw' && (
+                  <WithdrawModalMP data={modalContent} closeModal={handleModal} />
+                )}
 
-            {modal && modalContent?.type == 'smartDeposit' && (
-              <DepositModalSP data={modalContent} closeModal={handleModal} />
-            )}
+                {modal && modalContent?.type == 'smartDeposit' && (
+                  <DepositModalSP data={modalContent} closeModal={handleModal} />
+                )}
 
-            {modal && modalContent?.type == 'withdrawSP' && (
-              <WithdrawModalSP data={modalContent} closeModal={handleModal} />
-            )}
+                {modal && modalContent?.type == 'withdrawSP' && (
+                  <WithdrawModalSP data={modalContent} closeModal={handleModal} />
+                )}
 
-            <MobileNavbar />
-            <Navbar />
-            <DashboardHeader />
-            <Tabs
-              values={[tabDeposit, tabBorrow]}
-              selected={tab}
-              handleTab={(value: Option) => {
-                setTab(value);
-              }}
-            />
-            {walletAddress ? (
-              <>
-                {tab.value == 'deposit' && <SmartPoolDashboard showModal={showModal} />}
-                <MaturityPoolDashboard
-                  deposits={maturityPoolDeposits}
-                  borrows={maturityPoolBorrows}
-                  showModal={showModal}
-                  tab={tab}
+                <MobileNavbar />
+                <Navbar />
+                <DashboardHeader />
+                <Tabs
+                  values={[tabDeposit, tabBorrow]}
+                  selected={tab}
+                  handleTab={(value: Option) => {
+                    setTab(value);
+                  }}
                 />
-              </>
-            ) : (
-              <EmptyState />
-            )}
-            <Footer />
-          </FixedLenderProvider>
-        </AuditorProvider>
-      </AccountDataProvider>
-    </PreviewerProvider>
+                {walletAddress ? (
+                  <>
+                    {tab.value == 'deposit' && <SmartPoolDashboard showModal={showModal} />}
+                    <MaturityPoolDashboard showModal={showModal} tab={tab} />
+                  </>
+                ) : (
+                  <EmptyState />
+                )}
+                <Footer />
+              </FixedLenderProvider>
+            </AuditorProvider>
+          </AccountDataProvider>
+        </PreviewerProvider>
+      )}
+    </>
   );
 };
 
