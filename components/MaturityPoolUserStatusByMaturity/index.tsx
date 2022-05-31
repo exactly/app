@@ -59,7 +59,7 @@ function MaturityPoolUserStatusByMaturity({ type, maturities, showModal }: Props
                         {Array(26)
                           .fill('a')
                           .map((_, key) => {
-                            return <div className={styles.fullBar} key={key} />;
+                            return <span className={styles.fullBar} key={key} />;
                           })}
                         <Image
                           className={styles.image}
@@ -74,12 +74,12 @@ function MaturityPoolUserStatusByMaturity({ type, maturities, showModal }: Props
                         {Array(Math.floor((progress * 26) / 100))
                           .fill('a')
                           .map((_, key) => {
-                            return <div className={styles.incompleteBar} key={key} />;
+                            return <span className={styles.incompleteBar} key={key} />;
                           })}
                         {Array(Math.ceil(26 - (progress * 26) / 100))
                           .fill('a')
                           .map((_, key) => {
-                            return <div className={styles.emptyBar} key={key} />;
+                            return <span className={styles.emptyBar} key={key} />;
                           })}
                       </>
                     )}
