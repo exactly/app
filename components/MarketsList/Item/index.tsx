@@ -44,13 +44,13 @@ function Item({ market, showModal, type }: Props) {
 
   useEffect(() => {
     getFixedLenderContract();
-  }, [fixedLenderData]);
+  }, [fixedLenderData, market]);
 
   useEffect(() => {
     if (date?.value && fixedLender) {
       getMarketData();
     }
-  }, [date, fixedLender]);
+  }, [date, fixedLender, market]);
 
   async function getFixedLenderContract() {
     if (!market) return;
@@ -68,6 +68,7 @@ function Item({ market, showModal, type }: Props) {
 
   function handleClick() {
     if (!market || !showModal || !type) return;
+
     if (!walletAddress && connect) return connect();
 
     showModal(market, type);
@@ -75,6 +76,7 @@ function Item({ market, showModal, type }: Props) {
 
   async function getMarketData() {
     if (!market) return;
+
     const { borrowed, supplied } = await fixedLender?.maturityPools(date?.value);
 
     const newPoolData = {

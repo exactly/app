@@ -41,6 +41,7 @@ function Item({ market, showModal }: Props) {
 
   async function getFixedLenderContract() {
     if (!market) return;
+
     const filteredFixedLender = fixedLenderData.find((fl) => fl.address == market.market);
 
     const fixedLender = await getContractData(
@@ -65,6 +66,7 @@ function Item({ market, showModal }: Props) {
 
   function handleClick() {
     if (!market || !showModal) return;
+
     if (!walletAddress && connect) return connect();
 
     showModal(market, 'smartDeposit');
