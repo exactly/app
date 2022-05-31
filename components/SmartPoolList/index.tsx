@@ -1,15 +1,12 @@
 import { useContext } from 'react';
 
 import Item from './Item';
-import Loading from 'components/common/Loading';
-
-import assets from 'dictionary/assets.json';
 
 import { Market } from 'types/Market';
-import { Assets } from 'types/Assets';
 import { LangKeys } from 'types/Lang';
 
 import LangContext from 'contexts/LangContext';
+import FixedLenderContext from 'contexts/FixedLenderContext';
 
 import styles from './style.module.scss';
 
@@ -22,6 +19,7 @@ type Props = {
 };
 
 function SmartPoolList({ markets, showModal }: Props) {
+  const fixedLenderData = useContext(FixedLenderContext);
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
@@ -39,13 +37,12 @@ function SmartPoolList({ markets, showModal }: Props) {
             <span className={styles.title} />
           </div>
           {markets?.map((market, key) => {
-            const symbol: keyof Market = market.symbol;
-            const assetsData: Assets<symbol> = assets;
-            const src: string = assetsData[symbol];
-
-            return <Item market={market} key={key} showModal={showModal} src={src} />;
+            return <Item market={market} key={key} showModal={showModal} />;
           })}
-          {markets.length === 0 && <Loading />}
+          {markets.length === 0 &&
+            fixedLenderData.map((_, key) => {
+              return <Item key={key} />;
+            })}
         </div>
       </div>
     </section>
