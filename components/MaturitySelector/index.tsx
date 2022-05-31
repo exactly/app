@@ -1,6 +1,7 @@
 import { useEffect, useState, useContext } from 'react';
 import { Option } from 'react-dropdown';
 import dayjs from 'dayjs';
+import Skeleton from 'react-loading-skeleton';
 
 import Select from 'components/common/Select';
 import Tooltip from 'components/Tooltip';
@@ -85,13 +86,17 @@ function MaturitySelector({ title, address, editable }: Props) {
           <Tooltip value={title} />
         </div>
       )}
-      <Select
-        options={dates}
-        onChange={handleChange}
-        placeholder={date?.value ?? dates[0]?.label}
-        value={date?.label ?? dates[0]?.value}
-        editable={editable}
-      />
+      {dates.length !== 0 ? (
+        <Select
+          options={dates}
+          onChange={handleChange}
+          placeholder={date?.value ?? dates[0]?.label}
+          value={date?.label ?? dates[0]?.value}
+          editable={editable}
+        />
+      ) : (
+        <Skeleton width={170} height={48} />
+      )}
     </section>
   );
 }

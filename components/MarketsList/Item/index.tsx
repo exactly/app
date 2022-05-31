@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
 import { ethers } from 'ethers';
 import { request } from 'graphql-request';
+import Skeleton from 'react-loading-skeleton';
 
 import Button from 'components/common/Button';
 
@@ -24,13 +25,12 @@ import getSubgraph from 'utils/getSubgraph';
 import { getLastMaturityPoolBorrowRate, getLastMaturityPoolDepositRate } from 'queries';
 
 type Props = {
-  market: Market;
-  showModal: (marketData: Market, type: 'borrow' | 'deposit') => void;
-  type: 'borrow' | 'deposit';
-  src: string;
+  market?: Market;
+  showModal?: (marketData: Market, type: 'borrow' | 'deposit') => void;
+  type?: 'borrow' | 'deposit';
 };
 
-function Item({ market, showModal, type, src }: Props) {
+function Item({ market, showModal, type }: Props) {
   const { date } = useContext(AddressContext);
   const { web3Provider, walletAddress, connect, network } = useWeb3Context();
   const fixedLenderData = useContext(FixedLenderContext);
@@ -40,19 +40,20 @@ function Item({ market, showModal, type, src }: Props) {
 
   const [poolData, setPoolData] = useState<Pool | undefined>(undefined);
   const [fixedLender, setFixedLender] = useState<ethers.Contract | undefined>(undefined);
-  const [rate, setRate] = useState<string>('0');
+  const [rate, setRate] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     getFixedLenderContract();
-  }, [fixedLenderData]);
+  }, [fixedLenderData, market]);
 
   useEffect(() => {
     if (date?.value && fixedLender) {
       getMarketData();
     }
-  }, [date, fixedLender]);
+  }, [date, fixedLender, market]);
 
   async function getFixedLenderContract() {
+    if (!market) return;
     const filteredFixedLender = fixedLenderData.find((fl) => fl.address == market.market);
 
     const fixedLender = await getContractData(
@@ -66,12 +67,16 @@ function Item({ market, showModal, type, src }: Props) {
   }
 
   function handleClick() {
+    if (!market || !showModal || !type) return;
+
     if (!walletAddress && connect) return connect();
 
     showModal(market, type);
   }
 
   async function getMarketData() {
+    if (!market) return;
+
     const { borrowed, supplied } = await fixedLender?.maturityPools(date?.value);
 
     const newPoolData = {
@@ -121,20 +126,36 @@ function Item({ market, showModal, type, src }: Props) {
       onClick={handleClick}
     >
       <div className={style.symbol}>
-        <img src={src} alt={market?.symbol} className={style.assetImage} />
-        <span className={style.primary}>{parseSymbol(market?.symbol)}</span>
+        {(market && (
+          <img
+            src={`/img/assets/${market?.symbol.toLowerCase()}.png`}
+            alt={market?.symbol}
+            className={style.assetImage}
+          />
+        )) || <Skeleton circle width={40} height={40} />}
+        <span className={style.primary}>
+          {(market && parseSymbol(market?.symbol)) || <Skeleton width={30} />}
+        </span>
       </div>
       <span className={style.value}>
-        {type == 'borrow'
-          ? formatNumber(poolData?.borrowed!, market?.symbol)
-          : formatNumber(poolData?.supplied!, market?.symbol)}
+        {poolData && market ? (
+          type == 'borrow' ? (
+            formatNumber(poolData?.borrowed!, market?.symbol)
+          ) : (
+            formatNumber(poolData?.supplied!, market?.symbol)
+          )
+        ) : (
+          <Skeleton />
+        )}
       </span>
-      <span className={style.value}>{rate}%</span>
+      <span className={style.value}>{(rate && `${rate}%`) || <Skeleton />}</span>
       <div className={style.buttonContainer}>
-        <Button
-          text={type == 'borrow' ? translations[lang].borrow : translations[lang].deposit}
-          className={type == 'borrow' ? 'secondary' : 'primary'}
-        />
+        {(market && (
+          <Button
+            text={type == 'borrow' ? translations[lang].borrow : translations[lang].deposit}
+            className={type == 'borrow' ? 'secondary' : 'primary'}
+          />
+        )) || <Skeleton height={40} />}
       </div>
     </div>
   );
