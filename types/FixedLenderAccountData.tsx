@@ -1,6 +1,6 @@
 import { BigNumber } from '@ethersproject/bignumber';
 
-export interface MaturityPostion {
+export interface MaturityPosition {
   maturity: BigNumber;
   position: Position;
 }
@@ -11,10 +11,10 @@ export interface Position {
 }
 
 export type FixedLenderAccountData = {
-  fixedLenderAddress: string;
+  fixedLender: string;
   assetSymbol: string;
-  maturitySupplyPositions: Array<MaturityPostion>;
-  maturityBorrowPositions: Array<MaturityPostion>;
+  maturitySupplyPositions: Array<MaturityPosition>;
+  maturityBorrowPositions: Array<MaturityPosition>;
   smartPoolAssets: BigNumber;
   smartPoolShares: BigNumber;
   oraclePrice: BigNumber;

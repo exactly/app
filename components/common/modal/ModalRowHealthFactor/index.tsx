@@ -88,15 +88,7 @@ function ModalRowHealthFactor({ qty, symbol, operation }: Props) {
   }
 
   async function getAmount() {
-    let exchangeRate = 1;
-
-    if (
-      parsedSymbol &&
-      parsedSymbol.toLowerCase() !== 'dai' &&
-      parsedSymbol.toLowerCase() !== 'usdc'
-    ) {
-      exchangeRate = await getExchangeRate(parsedSymbol);
-    }
+    const exchangeRate = await getExchangeRate(parsedSymbol);
 
     const newQty = exchangeRate * parseFloat(qty);
 

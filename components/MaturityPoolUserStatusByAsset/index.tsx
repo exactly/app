@@ -15,12 +15,11 @@ import { Borrow } from 'types/Borrow';
 
 type Props = {
   type: Option;
-  deposits: Deposit[];
-  borrows: Borrow[];
+  maturities: any;
   showModal: (data: Deposit | Borrow, type: String) => void;
 };
 
-function MaturityPoolUserStatusByAsset({ type, deposits, borrows, showModal }: Props) {
+function MaturityPoolUserStatusByAsset({ type, maturities, showModal }: Props) {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
@@ -37,37 +36,47 @@ function MaturityPoolUserStatusByAsset({ type, deposits, borrows, showModal }: P
             <span className={styles.title} />
           </div>
 
-          {type.value == 'borrow' &&
-            borrows.map((borrow: Borrow, key: number) => {
-              return (
-                <Item
-                  type={type}
-                  key={key}
-                  amount={borrow.assets}
-                  fee={borrow.fee}
-                  maturityDate={borrow.maturity}
-                  showModal={showModal}
-                  market={borrow.market}
-                  data={borrow}
-                />
-              );
-            })}
+          {/* {type.value == 'borrow' &&
+            maturities.borrows &&
+            Object.keys(maturities.borrows)?.map((maturity: string, key: number) => {
+              const { principal, fee, symbol, fixedLender, decimals } =
+                maturities.borrows[maturity];
 
-          {type.value == 'deposit' &&
-            deposits.map((deposit: Deposit, key: number) => {
               return (
                 <Item
                   type={type}
                   key={key}
-                  amount={deposit.assets}
-                  fee={deposit.fee}
-                  maturityDate={deposit.maturity}
+                  amount={principal}
+                  fee={fee}
+                  maturityDate={maturity}
                   showModal={showModal}
-                  market={deposit.market}
-                  data={deposit}
+                  symbol={symbol}
+                  decimals={decimals}
+                  data={{ assets: principal, fee: fee, market: fixedLender, maturity, symbol }}
                 />
               );
-            })}
+            })} */}
+          {/* 
+          {type.value == 'deposit' &&
+            maturities.deposits &&
+            Object.keys(maturities.deposits)?.map((maturity: string, key: number) => {
+              const { principal, fee, symbol, fixedLender, decimals } =
+                maturities.deposits[maturity];
+
+              return (
+                <Item
+                  type={type}
+                  key={key}
+                  amount={principal}
+                  fee={fee}
+                  maturityDate={maturity}
+                  showModal={showModal}
+                  symbol={symbol}
+                  decimals={decimals}
+                  data={{ assets: principal, fee: fee, market: fixedLender, maturity, symbol }}
+                />
+              );
+            })} */}
         </div>
       </div>
     </div>
