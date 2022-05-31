@@ -85,6 +85,7 @@ function MaturityPoolDashboard({ showModal, tab }: Props) {
 
       asset.maturityBorrowPositions.forEach((pool) => {
         const date = pool.maturity.toNumber().toString();
+        data.borrows = data.borrows ?? {};
 
         data.borrows[date] = data.borrows[date]
           ? [
