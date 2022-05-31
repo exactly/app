@@ -7,10 +7,7 @@ import { AddressContext } from 'contexts/AddressContext';
 import AuditorContext from 'contexts/AuditorContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 
-import assets from 'dictionary/assets.json';
-
 import { Market } from 'types/Market';
-import { Assets } from 'types/Assets';
 import { UnformattedMarket } from 'types/UnformattedMarket';
 import { Address } from 'types/Address';
 import { Option } from 'react-dropdown';
@@ -76,16 +73,16 @@ function AssetSelector({ title, defaultAddress, onChange }: Props) {
       collateralFactor: market[4]
     };
 
-    const symbol: keyof Market = marketData.symbol;
-    const assetsData: Assets<symbol> = assets;
-    const src: string = assetsData[symbol];
-
     onChange && onChange(marketData);
 
     return {
       label: (
         <div className={style.labelContainer}>
-          <img src={src} alt={marketData.name} className={style.marketImage} />{' '}
+          <img
+            src={`/img/assets/${marketData?.symbol.toLowerCase()}.png`}
+            alt={marketData.name}
+            className={style.marketImage}
+          />{' '}
           <span className={style.marketName}>{parseSymbol(marketData.name)}</span>
         </div>
       ),
@@ -103,16 +100,16 @@ function AssetSelector({ title, defaultAddress, onChange }: Props) {
         collateralFactor: market[4]
       };
 
-      const symbol: keyof Market = marketData.symbol;
-      const assetsData: Assets<symbol> = assets;
-      const src: string = assetsData[symbol];
-
       setAllMarketsData((prevState) => [...prevState, marketData]);
 
       return {
         label: (
           <div className={style.labelContainer}>
-            <img src={src} alt={parseSymbol(marketData.name)} className={style.marketImage} />{' '}
+            <img
+              src={`/img/assets/${marketData?.symbol.toLowerCase()}.png`}
+              alt={parseSymbol(marketData.name)}
+              className={style.marketImage}
+            />{' '}
             <span className={style.marketName}>{parseSymbol(marketData.name)}</span>
           </div>
         ),
