@@ -31,7 +31,7 @@ function MaturityPoolUserStatusByMaturity({ type, maturities, showModal }: Props
       {Object.keys(
         type.value == 'deposit' && maturities.deposits
           ? maturities?.deposits
-          : maturities.borrows
+          : type.value == 'borrow' && maturities.borrows
           ? maturities?.borrows
           : {}
       ).map((maturity: any, key) => {
