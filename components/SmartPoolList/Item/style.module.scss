@@ -6,6 +6,7 @@
   cursor: pointer;
   background: var(--white);
   gap: var(--u2);
+  margin: var(--smallUnit);
 
   .symbol {
     width: calc(100% / 4);
