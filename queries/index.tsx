@@ -8,6 +8,7 @@ import { getLastMaturityPoolBorrowRate } from './getLastMaturityPoolBorrowRate';
 import { getLastMaturityPoolDepositRate } from './getLastMaturityPoolDepositRate';
 import { getSmartPoolDepositsQuery } from './getSmartPoolDeposits';
 import { getSmartPoolWithdrawsQuery } from './getSmartPoolWithdraws';
+import { getSmartPoolAccruedEarnings } from './getSmartPoolAccruedEarnings';
 
 export {
   getAllMaturityPoolDepositsQuery,
@@ -19,5 +20,6 @@ export {
   getLastMaturityPoolBorrowRate,
   getLastMaturityPoolDepositRate,
   getSmartPoolDepositsQuery,
-  getSmartPoolWithdrawsQuery
+  getSmartPoolWithdrawsQuery,
+  getSmartPoolAccruedEarnings
 };

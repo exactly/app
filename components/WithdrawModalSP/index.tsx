@@ -14,6 +14,7 @@ import ModalGif from 'components/common/modal/ModalGif';
 import Overlay from 'components/Overlay';
 import SkeletonModalRowBeforeAfter from 'components/common/skeletons/SkeletonModalRowBeforeAfter';
 import ModalError from 'components/common/modal/ModalError';
+import ModalRowBorrowLimit from 'components/common/modal/ModalRowBorrowLimit';
 
 import { Borrow } from 'types/Borrow';
 import { Deposit } from 'types/Deposit';
@@ -22,6 +23,7 @@ import { Gas } from 'types/Gas';
 import { Transaction } from 'types/Transaction';
 import { Decimals } from 'types/Decimals';
 import { Error } from 'types/Error';
+import { HealthFactor } from 'types/HealthFactor';
 
 import styles from './style.module.scss';
 
@@ -57,6 +59,7 @@ function WithdrawModalSP({ data, closeModal }: Props) {
   const [tx, setTx] = useState<Transaction | undefined>(undefined);
   const [minimized, setMinimized] = useState<Boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
+  const [healthFactor, setHealthFactor] = useState<HealthFactor | undefined>(undefined);
   const [error, setError] = useState<Error | undefined>(undefined);
 
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
@@ -145,6 +148,10 @@ function WithdrawModalSP({ data, closeModal }: Props) {
     }
   }
 
+  function getHealthFactor(healthFactor: HealthFactor) {
+    setHealthFactor(healthFactor);
+  }
+
   async function getFixedLenderContract() {
     const filteredFixedLender = fixedLenderData.find((contract) => {
       const args: Array<string> | undefined = contract?.args;
@@ -181,10 +188,21 @@ function WithdrawModalSP({ data, closeModal }: Props) {
               {error?.component !== 'gas' && <ModalTxCost gas={gas} />}
               <ModalRow text={translations[lang].exactlyBalance} value={parsedAmount} line />
               {symbol ? (
-                <ModalRowHealthFactor qty={qty} symbol={symbol} operation="withdraw" />
+                <ModalRowHealthFactor
+                  qty={qty}
+                  symbol={symbol}
+                  operation="withdraw"
+                  healthFactorCallback={getHealthFactor}
+                />
               ) : (
                 <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
               )}
+              <ModalRowBorrowLimit
+                healthFactor={healthFactor}
+                qty={qty}
+                symbol={symbol!}
+                operation="withdraw"
+              />
               {error && <ModalError message={error.message} />}
               <div className={styles.buttonContainer}>
                 <Button
