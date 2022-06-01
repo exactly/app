@@ -5,7 +5,7 @@ import { getSmartPoolAccruedEarnings } from 'queries';
 
 import getSubgraph from './getSubgraph';
 
-async function getSmartPoolInterestRate(network: string) {
+async function getSmartPoolInterestRate(network: string, fixedLenderAddress: string) {
   const oneDay = 86400;
 
   const currentTimestamp = Math.floor(Date.now() / 1000);
@@ -14,7 +14,7 @@ async function getSmartPoolInterestRate(network: string) {
 
   const smartPoolAccruedEarnings = await request(
     subgraphUrl,
-    getSmartPoolAccruedEarnings(currentTimestamp - oneDay * 3, currentTimestamp)
+    getSmartPoolAccruedEarnings(currentTimestamp - oneDay * 3, currentTimestamp, fixedLenderAddress)
   );
 
   let periodAccrued = 0;
@@ -34,7 +34,7 @@ async function getSmartPoolInterestRate(network: string) {
     ((oneDay * 365) / (newOperation.timestamp - oldOperation.timestamp)) *
     100;
 
-  if (interestRate === Infinity) return undefined;
+  if (interestRate === Infinity || isNaN(interestRate)) return '0';
 
   return interestRate.toFixed(2);
 }

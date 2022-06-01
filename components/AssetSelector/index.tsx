@@ -135,7 +135,7 @@ function AssetSelector({ title, defaultAddress, onChange }: Props) {
     <section className={style.container}>
       {title && (
         <div className={style.titleContainer}>
-          <p className={style.title}>Maturity pool</p>
+          <p className={style.title}>Maturity Pool</p>
           <Tooltip value="Maturity Pool" />
         </div>
       )}

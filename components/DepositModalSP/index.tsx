@@ -267,7 +267,10 @@ function DepositModalSP({ data, closeModal }: Props) {
 
   async function getInterestRate() {
     try {
-      const interestRate = await getSmartPoolInterestRate(network?.name!);
+      const interestRate = await getSmartPoolInterestRate(
+        network?.name!,
+        fixedLenderWithSigner?.address!
+      );
 
       setRate(interestRate);
     } catch (e) {

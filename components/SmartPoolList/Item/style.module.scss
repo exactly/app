@@ -1,15 +1,14 @@
 .container {
   display: flex;
-  justify-content: space-between;
   padding: var(--u2) var(--u3);
   align-items: center;
   border-left: 2px solid var(--white);
   cursor: pointer;
   background: var(--white);
-  margin: var(--smallUnit);
+  gap: var(--u2);
 
   .symbol {
-    width: 20%;
+    width: calc(100% / 4);
     font-weight: bold;
     display: flex;
     gap: var(--u2);
@@ -38,11 +37,11 @@
   }
 
   .address {
-    width: 50%;
+    width: calc(100% / 4);
   }
 
   .value {
-    width: 20%;
+    width: calc(100% / 4);
     color: var(--gray-900);
   }
 }

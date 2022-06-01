@@ -1,15 +1,15 @@
 .container {
   display: flex;
-  justify-content: space-between;
   border-top: 1px solid var(--gray-100);
   border-bottom: 1px solid var(--gray-100);
   padding: var(--u2) var(--u3);
   align-items: center;
   border-left: 2px solid var(--white);
+  gap: var(--u2);
   cursor: pointer;
 
   .symbol {
-    width: 15%;
+    width: calc(100% / 4);
     font-weight: bold;
     display: flex;
     gap: var(--u2);
@@ -21,9 +21,9 @@
     }
 
     .primary {
-      width: 100%;
       font-size: var(--font-16);
     }
+
     .secondary {
       font-size: var(--font-12);
       color: var(--gray-100);
@@ -38,11 +38,11 @@
   }
 
   .address {
-    width: 50%;
+    width: calc(100% / 4);
   }
 
   .value {
-    width: 15%;
+    width: calc(100% / 4);
     color: var(--gray-900);
   }
 }

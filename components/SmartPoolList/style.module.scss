@@ -4,7 +4,7 @@
   margin: var(--u4) auto;
   display: flex;
   flex-direction: column;
-  text-align: center;
+  text-align: left;
 
   .sectionTitleContainer {
     display: flex;
@@ -35,23 +35,24 @@
 
       .tableRow {
         display: flex;
-        padding: var(--u) var(--u3);
-        justify-content: space-between;
+        padding: var(--u2) var(--u3);
         font-weight: bold;
         color: var(--gray-500);
         font-size: var(--font-12);
         align-items: center;
+        text-align: left;
+        gap: var(--u4);
 
         .symbol {
-          width: 20%;
+          width: calc(100% / 4);
         }
 
         .address {
-          width: 50%;
+          width: calc(100% / 4);
         }
 
         .title {
-          width: 20%;
+          width: calc(100% / 4);
         }
       }
     }
