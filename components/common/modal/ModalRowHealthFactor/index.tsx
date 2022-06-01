@@ -22,9 +22,10 @@ type Props = {
   qty: string;
   symbol: string;
   operation: string;
+  healthFactorCallback?: (healthFactor: HealthFactor) => void;
 };
 
-function ModalRowHealthFactor({ qty, symbol, operation }: Props) {
+function ModalRowHealthFactor({ qty, symbol, operation, healthFactorCallback }: Props) {
   const { accountData } = useContext(AccountDataContext);
   const lang: string = useContext(LangContext);
 
@@ -85,6 +86,8 @@ function ModalRowHealthFactor({ qty, symbol, operation }: Props) {
     const healthFactor = { collateral, debt };
 
     setHealthFactor(healthFactor);
+
+    if (healthFactorCallback) healthFactorCallback(healthFactor);
   }
 
   async function getAmount() {
@@ -122,11 +125,11 @@ function ModalRowHealthFactor({ qty, symbol, operation }: Props) {
     <section className={`${styles.row} ${styles.line}`}>
       <p className={styles.text}>{translations[lang].healthFactor}</p>
       <section className={styles.values}>
-        <span className={styles.value}>{beforeHealthFactor || <Skeleton />}</span>
+        <span className={styles.value}>{(symbol && beforeHealthFactor) || <Skeleton />}</span>
         <div className={styles.imageContainer}>
           <Image src="/img/icons/arrowRight.svg" alt="arrowRight" layout="fill" />
         </div>
-        <span className={styles.value}>{afterHealthFactor || <Skeleton />}</span>
+        <span className={styles.value}>{(symbol && afterHealthFactor) || <Skeleton />}</span>
       </section>
     </section>
   );

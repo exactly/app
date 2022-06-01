@@ -4,8 +4,8 @@
   margin: var(--u2) auto;
   display: flex;
   flex-wrap: wrap;
-  gap: var(--u3);
-  text-align: center;
+  gap: var(--u4);
+  text-align: left;
 
   .market {
     background-color: var(--white);
@@ -26,23 +26,23 @@
 
       .tableRow {
         display: flex;
-        padding: var(--u) var(--u3);
-        justify-content: space-between;
+        padding: var(--u2) var(--u3);
         font-weight: bold;
         color: var(--gray-500);
         font-size: var(--font-12);
         align-items: center;
+        gap: var(--u2);
 
         .symbol {
-          width: 15%;
+          width: calc(100% / 4);
         }
 
         .address {
-          width: 50%;
+          width: calc(100% / 4);
         }
 
         .title {
-          width: 15%;
+          width: calc(100% / 4);
         }
       }
     }
@@ -53,7 +53,8 @@
   .container {
     max-width: 100%;
     padding: 20px;
-    text-align: center;
+    text-align: left;
+
     .market {
       width: 100%;
     }
