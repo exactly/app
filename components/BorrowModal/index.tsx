@@ -16,6 +16,7 @@ import Overlay from 'components/Overlay';
 import ModalRowEditable from 'components/common/modal/ModalRowEditable';
 import ModalMaturityEditable from 'components/common/modal/ModalMaturityEditable';
 import ModalError from 'components/common/modal/ModalError';
+import ModalRowBorrowLimit from 'components/common/modal/ModalRowBorrowLimit';
 
 import { Borrow } from 'types/Borrow';
 import { Deposit } from 'types/Deposit';
@@ -25,6 +26,7 @@ import { Gas } from 'types/Gas';
 import { Transaction } from 'types/Transaction';
 import { Decimals } from 'types/Decimals';
 import { Error } from 'types/Error';
+import { HealthFactor } from 'types/HealthFactor';
 
 import { getContractData } from 'utils/contracts';
 import { getUnderlyingData, getSymbol } from 'utils/utils';
@@ -37,6 +39,7 @@ import { useWeb3Context } from 'contexts/Web3Context';
 import FixedLenderContext from 'contexts/FixedLenderContext';
 import { AddressContext } from 'contexts/AddressContext';
 import PreviewerContext from 'contexts/PreviewerContext';
+import AccountDataContext from 'contexts/AccountDataContext';
 
 import decimals from 'config/decimals.json';
 import numbers from 'config/numbers.json';
@@ -53,6 +56,7 @@ function BorrowModal({ data, editable, closeModal }: Props) {
   const { maturity, market } = data;
 
   const { web3Provider, walletAddress, network } = useWeb3Context();
+  const { accountData } = useContext(AccountDataContext);
 
   const { date, address } = useContext(AddressContext);
 
@@ -71,6 +75,9 @@ function BorrowModal({ data, editable, closeModal }: Props) {
   const [slippage, setSlippage] = useState<string>('0.5');
   const [editSlippage, setEditSlippage] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
+  const [healthFactor, setHealthFactor] = useState<HealthFactor | undefined>(undefined);
+  const [collateralFactor, setCollateralFactor] = useState<number | undefined>(undefined);
+
   const [error, setError] = useState<Error | undefined>(undefined);
 
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
@@ -216,6 +223,17 @@ function BorrowModal({ data, editable, closeModal }: Props) {
     }
   }
 
+  function getHealthFactor(healthFactor: HealthFactor) {
+    setHealthFactor(healthFactor);
+
+    if (accountData && symbol) {
+      const collateralFactor = ethers.utils.formatEther(
+        accountData[symbol.toUpperCase()]?.collateralFactor
+      );
+      setCollateralFactor(parseFloat(collateralFactor));
+    }
+  }
+
   async function getFixedLenderContract() {
     const filteredFixedLender = fixedLenderData.find((contract) => {
       const args: Array<string> | undefined = contract?.args;
@@ -270,11 +288,22 @@ function BorrowModal({ data, editable, closeModal }: Props) {
                 line
               />
               {symbol ? (
-                <ModalRowHealthFactor qty={qty} symbol={symbol} operation="borrow" />
+                <ModalRowHealthFactor
+                  qty={qty}
+                  symbol={symbol}
+                  operation="borrow"
+                  healthFactorCallback={getHealthFactor}
+                />
               ) : (
                 <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
               )}
-
+              <ModalRowBorrowLimit
+                healthFactor={healthFactor}
+                collateralFactor={collateralFactor}
+                qty={qty}
+                symbol={symbol!}
+                operation="borrow"
+              />
               {error && <ModalError message={error.message} />}
               <div className={styles.buttonContainer}>
                 <Button

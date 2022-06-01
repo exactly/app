@@ -19,10 +19,17 @@ type Props = {
   qty: string;
   symbol: string;
   healthFactor: HealthFactor | undefined;
+  collateralFactor: number | undefined;
   operation: string;
 };
 
-function ModalRowBorrowLimit({ qty, symbol, healthFactor, operation }: Props) {
+function ModalRowBorrowLimit({
+  qty,
+  symbol,
+  healthFactor,
+  collateralFactor = 0.8,
+  operation
+}: Props) {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
@@ -48,7 +55,7 @@ function ModalRowBorrowLimit({ qty, symbol, healthFactor, operation }: Props) {
 
   switch (operation) {
     case 'deposit':
-      afterBorrowLimit = beforeBorrowLimit + (newQty || 0);
+      afterBorrowLimit = beforeBorrowLimit + (newQty || 0) * collateralFactor;
       break;
     case 'withdraw':
       afterBorrowLimit = beforeBorrowLimit - (newQty || 0);
@@ -57,7 +64,7 @@ function ModalRowBorrowLimit({ qty, symbol, healthFactor, operation }: Props) {
       afterBorrowLimit = beforeBorrowLimit - (newQty || 0);
       break;
     case 'repay':
-      afterBorrowLimit = beforeBorrowLimit + (newQty || 0);
+      afterBorrowLimit = beforeBorrowLimit + (newQty || 0) * collateralFactor;
       break;
   }
 

@@ -15,6 +15,7 @@ import ModalGif from 'components/common/modal/ModalGif';
 import Overlay from 'components/Overlay';
 import SkeletonModalRowBeforeAfter from 'components/common/skeletons/SkeletonModalRowBeforeAfter';
 import ModalError from 'components/common/modal/ModalError';
+import ModalRowBorrowLimit from 'components/common/modal/ModalRowBorrowLimit';
 
 import { Borrow } from 'types/Borrow';
 import { Deposit } from 'types/Deposit';
@@ -23,6 +24,7 @@ import { Gas } from 'types/Gas';
 import { Transaction } from 'types/Transaction';
 import { Decimals } from 'types/Decimals';
 import { Error } from 'types/Error';
+import { HealthFactor } from 'types/HealthFactor';
 
 import parseTimestamp from 'utils/parseTimestamp';
 import { getContractData } from 'utils/contracts';
@@ -33,6 +35,7 @@ import styles from './style.module.scss';
 import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 import FixedLenderContext from 'contexts/FixedLenderContext';
+import AccountDataContext from 'contexts/AccountDataContext';
 
 import decimals from 'config/decimals.json';
 import numbers from 'config/numbers.json';
@@ -46,7 +49,9 @@ type Props = {
 
 function RepayModal({ data, closeModal }: Props) {
   const { symbol, maturity, assets, fee } = data;
+
   const { walletAddress, web3Provider, network } = useWeb3Context();
+  const { accountData } = useContext(AccountDataContext);
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
@@ -66,6 +71,9 @@ function RepayModal({ data, closeModal }: Props) {
   const [minimized, setMinimized] = useState<boolean>(false);
   const [editSlippage, setEditSlippage] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
+  const [healthFactor, setHealthFactor] = useState<HealthFactor | undefined>(undefined);
+  const [collateralFactor, setCollateralFactor] = useState<number | undefined>(undefined);
+
   const [error, setError] = useState<Error | undefined>(undefined);
 
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
@@ -168,6 +176,17 @@ function RepayModal({ data, closeModal }: Props) {
     }
   }
 
+  function getHealthFactor(healthFactor: HealthFactor) {
+    setHealthFactor(healthFactor);
+
+    if (accountData && symbol) {
+      const collateralFactor = ethers.utils.formatEther(
+        accountData[symbol.toUpperCase()]?.collateralFactor
+      );
+      setCollateralFactor(parseFloat(collateralFactor));
+    }
+  }
+
   return (
     <>
       {!minimized && (
@@ -205,10 +224,22 @@ function RepayModal({ data, closeModal }: Props) {
                 line
               />
               {symbol ? (
-                <ModalRowHealthFactor qty={qty} symbol={symbol} operation="repay" />
+                <ModalRowHealthFactor
+                  qty={qty}
+                  symbol={symbol}
+                  operation="repay"
+                  healthFactorCallback={getHealthFactor}
+                />
               ) : (
                 <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
               )}
+              <ModalRowBorrowLimit
+                healthFactor={healthFactor}
+                collateralFactor={collateralFactor}
+                qty={qty}
+                symbol={symbol!}
+                operation="repay"
+              />
               {error && <ModalError message={error.message} />}
               <div className={styles.buttonContainer}>
                 <Button

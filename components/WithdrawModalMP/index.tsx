@@ -102,7 +102,7 @@ function WithdrawModalMP({ data, closeModal }: Props) {
   }
 
   function handleInputChange(e: ChangeEvent<HTMLInputElement>) {
-    if (e.target.valueAsNumber > parseFloat(qty)) {
+    if (e.target.valueAsNumber > parseFloat(parsedAmount)) {
       setError({
         status: true,
         message: translations[lang].insufficientBalance,
