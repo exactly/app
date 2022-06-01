@@ -16,6 +16,7 @@ import ModalStepper from 'components/common/modal/ModalStepper';
 import Overlay from 'components/Overlay';
 import SkeletonModalRowBeforeAfter from 'components/common/skeletons/SkeletonModalRowBeforeAfter';
 import ModalError from 'components/common/modal/ModalError';
+import ModalRowBorrowLimit from 'components/common/modal/ModalRowBorrowLimit';
 
 import { Borrow } from 'types/Borrow';
 import { Deposit } from 'types/Deposit';
@@ -24,9 +25,11 @@ import { UnderlyingData } from 'types/Underlying';
 import { Gas } from 'types/Gas';
 import { Transaction } from 'types/Transaction';
 import { Error } from 'types/Error';
+import { HealthFactor } from 'types/HealthFactor';
 
 import { getContractData } from 'utils/contracts';
 import { getUnderlyingData } from 'utils/utils';
+import getSmartPoolInterestRate from 'utils/getSmartPoolInterestRate';
 
 import numbers from 'config/numbers.json';
 
@@ -35,6 +38,7 @@ import styles from './style.module.scss';
 import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 import FixedLenderContext from 'contexts/FixedLenderContext';
+import AccountDataContext from 'contexts/AccountDataContext';
 
 import keys from './translations.json';
 
@@ -52,6 +56,7 @@ function DepositModalSP({ data, closeModal }: Props) {
   const { market, symbol } = data;
 
   const { web3Provider, walletAddress, network } = useWeb3Context();
+  const { accountData } = useContext(AccountDataContext);
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
@@ -67,6 +72,10 @@ function DepositModalSP({ data, closeModal }: Props) {
   const [pending, setPending] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [depositedAmount, setDepositedAmount] = useState<string>();
+  const [rate, setRate] = useState<string | undefined>(undefined);
+  const [healthFactor, setHealthFactor] = useState<HealthFactor | undefined>(undefined);
+  const [collateralFactor, setCollateralFactor] = useState<number | undefined>(undefined);
+
   const [error, setError] = useState<Error | undefined>(undefined);
 
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
@@ -97,6 +106,12 @@ function DepositModalSP({ data, closeModal }: Props) {
       estimateGas();
     }
   }, [fixedLenderWithSigner]);
+
+  useEffect(() => {
+    if (!fixedLenderWithSigner || !network) return;
+
+    getInterestRate();
+  }, [fixedLenderWithSigner, network]);
 
   useEffect(() => {
     checkAllowance();
@@ -254,6 +269,30 @@ function DepositModalSP({ data, closeModal }: Props) {
     }
   }
 
+  async function getInterestRate() {
+    try {
+      const interestRate = await getSmartPoolInterestRate(
+        network?.name!,
+        fixedLenderWithSigner?.address!
+      );
+
+      setRate(interestRate);
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+  function getHealthFactor(healthFactor: HealthFactor) {
+    setHealthFactor(healthFactor);
+
+    if (accountData && symbol) {
+      const collateralFactor = ethers.utils.formatEther(
+        accountData[symbol.toUpperCase()]?.collateralFactor
+      );
+      setCollateralFactor(parseFloat(collateralFactor));
+    }
+  }
+
   async function getFixedLenderContract() {
     const filteredFixedLender = fixedLenderData.find((contract) => {
       const args: Array<string> | undefined = contract?.args;
@@ -289,13 +328,28 @@ function DepositModalSP({ data, closeModal }: Props) {
               />
               {error?.component !== 'gas' && <ModalTxCost gas={gas} />}
               <ModalRow text={translations[lang].exactlyBalance} value={depositedAmount} line />
-              <ModalRow text={translations[lang].interestRate} value="X %" line />
+              <ModalRow
+                text={translations[lang].interestRate}
+                value={rate ? `${rate}%` : '0%'}
+                line
+              />
               {symbol ? (
-                <ModalRowHealthFactor qty={qty} symbol={symbol} operation="deposit" />
+                <ModalRowHealthFactor
+                  qty={qty}
+                  symbol={symbol}
+                  operation="deposit"
+                  healthFactorCallback={getHealthFactor}
+                />
               ) : (
                 <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
               )}
-              {/* <ModalRow text={translations[lang].borrowLimit} values={['100K', '150K']} /> */}
+              <ModalRowBorrowLimit
+                healthFactor={healthFactor}
+                collateralFactor={collateralFactor}
+                qty={qty}
+                symbol={symbol!}
+                operation="deposit"
+              />
               <ModalStepper currentStep={step} totalSteps={3} />
               {error && <ModalError message={error.message} />}
               <div className={styles.buttonContainer}>

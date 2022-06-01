@@ -34,6 +34,7 @@ function SmartPoolList({ markets, showModal }: Props) {
           <div className={styles.tableRow}>
             <span className={styles.symbol}>{translations[lang].asset}</span>
             <span className={styles.title}>{translations[lang].marketSize}</span>
+            <span className={styles.title}>{translations[lang].annualRate}</span>
             <span className={styles.title} />
           </div>
           {markets?.map((market, key) => {

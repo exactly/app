@@ -2,7 +2,8 @@
   "en": {
     "asset": "Asset",
     "marketSize": "Market size",
-    "smartPool": "Smart Pool"
+    "smartPool": "Smart Pools",
+    "annualRate": "Annual Rate"
   },
   "es": {}
 }

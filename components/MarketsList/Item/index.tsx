@@ -140,9 +140,9 @@ function Item({ market, showModal, type }: Props) {
       <span className={style.value}>
         {poolData && market ? (
           type == 'borrow' ? (
-            formatNumber(poolData?.borrowed!, market?.symbol)
+            `$${formatNumber(poolData?.borrowed!, market?.symbol)}`
           ) : (
-            formatNumber(poolData?.supplied!, market?.symbol)
+            `$${formatNumber(poolData?.supplied!, market?.symbol)}`
           )
         ) : (
           <Skeleton />

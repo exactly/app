@@ -6,7 +6,7 @@
     "utilizationRate": "Utilization Rate",
     "suppliers": "# of suppliers",
     "deposit": "Deposit",
-    "smartPool": "Smart Pool"
+    "smartPool": "Smart Pools"
   },
   "es": {
     "days": "días",
@@ -15,6 +15,6 @@
     "utilizationRate": "Tasa de Utilización",
     "suppliers": "# de proveedores",
     "deposit": "Depositar",
-    "smartPool": "Smart Pool"
+    "smartPool": "Smart Pools"
   }
 }

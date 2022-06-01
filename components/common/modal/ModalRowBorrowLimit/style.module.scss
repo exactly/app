@@ -1,0 +1,30 @@
+.row {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--u2) 0;
+
+  .text {
+    margin: 0;
+    color: var(--gray-500);
+  }
+  .values {
+    margin: 0;
+    display: flex;
+    gap: var(--u2);
+    position: relative;
+    font-weight: 600;
+
+    .imageContainer {
+      width: var(--u2);
+      height: var(--u2);
+    }
+
+    .value {
+      width: 30px;
+    }
+  }
+}
+
+.line {
+  border-bottom: 1px solid var(--gray-100);
+}

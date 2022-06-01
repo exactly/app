@@ -20,6 +20,7 @@ import keys from './translations.json';
 import { getContractData } from 'utils/contracts';
 import formatNumber from 'utils/formatNumber';
 import parseSymbol from 'utils/parseSymbol';
+import getSmartPoolInterestRate from 'utils/getSmartPoolInterestRate';
 
 type Props = {
   market?: Market;
@@ -36,6 +37,7 @@ function Item({ market, showModal }: Props) {
   const translations: { [key: string]: LangKeys } = keys;
 
   const [poolData, setPoolData] = useState<Pool | undefined>(undefined);
+  const [rate, setRate] = useState<string | undefined>(undefined);
 
   const [fixedLender, setFixedLender] = useState<Contract | undefined>(undefined);
 
@@ -81,6 +83,9 @@ function Item({ market, showModal }: Props) {
       supplied: Math.round(parseInt(await ethers.utils.formatEther(supplied)))
     };
 
+    const interestRate = await getSmartPoolInterestRate(network?.name!, fixedLender?.address!);
+
+    setRate(interestRate);
     setPoolData(newPoolData);
   }
 
@@ -99,8 +104,11 @@ function Item({ market, showModal }: Props) {
         </span>
       </div>
       <span className={style.value}>
-        {(market && poolData && formatNumber(poolData?.supplied!, market?.symbol)) || <Skeleton />}
+        {(market && poolData && `$${formatNumber(poolData?.supplied!, market?.symbol)}`) || (
+          <Skeleton />
+        )}
       </span>
+      <span className={style.value}>{(rate && `${rate}%`) || <Skeleton />}</span>
       <div className={style.buttonContainer}>
         {(market && <Button text={translations[lang].deposit} className={'tertiary'} />) || (
           <Skeleton height={40} />
