@@ -38,6 +38,7 @@ import styles from './style.module.scss';
 import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 import FixedLenderContext from 'contexts/FixedLenderContext';
+import AccountDataContext from 'contexts/AccountDataContext';
 
 import keys from './translations.json';
 
@@ -55,6 +56,7 @@ function DepositModalSP({ data, closeModal }: Props) {
   const { market, symbol } = data;
 
   const { web3Provider, walletAddress, network } = useWeb3Context();
+  const { accountData } = useContext(AccountDataContext);
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
@@ -72,6 +74,8 @@ function DepositModalSP({ data, closeModal }: Props) {
   const [depositedAmount, setDepositedAmount] = useState<string>();
   const [rate, setRate] = useState<string | undefined>(undefined);
   const [healthFactor, setHealthFactor] = useState<HealthFactor | undefined>(undefined);
+  const [collateralFactor, setCollateralFactor] = useState<number | undefined>(undefined);
+
   const [error, setError] = useState<Error | undefined>(undefined);
 
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
@@ -280,6 +284,13 @@ function DepositModalSP({ data, closeModal }: Props) {
 
   function getHealthFactor(healthFactor: HealthFactor) {
     setHealthFactor(healthFactor);
+
+    if (accountData && symbol) {
+      const collateralFactor = ethers.utils.formatEther(
+        accountData[symbol.toUpperCase()]?.collateralFactor
+      );
+      setCollateralFactor(parseFloat(collateralFactor));
+    }
   }
 
   async function getFixedLenderContract() {
@@ -334,6 +345,7 @@ function DepositModalSP({ data, closeModal }: Props) {
               )}
               <ModalRowBorrowLimit
                 healthFactor={healthFactor}
+                collateralFactor={collateralFactor}
                 qty={qty}
                 symbol={symbol!}
                 operation="deposit"

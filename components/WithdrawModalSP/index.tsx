@@ -30,6 +30,7 @@ import styles from './style.module.scss';
 import LangContext from 'contexts/LangContext';
 import FixedLenderContext from 'contexts/FixedLenderContext';
 import { useWeb3Context } from 'contexts/Web3Context';
+import AccountDataContext from 'contexts/AccountDataContext';
 
 import { getContractData } from 'utils/contracts';
 import formatNumber from 'utils/formatNumber';
@@ -48,6 +49,7 @@ function WithdrawModalSP({ data, closeModal }: Props) {
   const { symbol, assets } = data;
 
   const { walletAddress, web3Provider, network } = useWeb3Context();
+  const { accountData } = useContext(AccountDataContext);
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
@@ -60,6 +62,7 @@ function WithdrawModalSP({ data, closeModal }: Props) {
   const [minimized, setMinimized] = useState<Boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [healthFactor, setHealthFactor] = useState<HealthFactor | undefined>(undefined);
+  const [collateralFactor, setCollateralFactor] = useState<number | undefined>(undefined);
   const [error, setError] = useState<Error | undefined>(undefined);
 
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
@@ -86,7 +89,7 @@ function WithdrawModalSP({ data, closeModal }: Props) {
   }
 
   function handleInputChange(e: ChangeEvent<HTMLInputElement>) {
-    if (e.target.valueAsNumber > parseFloat(qty)) {
+    if (e.target.valueAsNumber > parseFloat(parsedAmount)) {
       setError({
         status: true,
         message: translations[lang].insufficientBalance,
@@ -150,6 +153,13 @@ function WithdrawModalSP({ data, closeModal }: Props) {
 
   function getHealthFactor(healthFactor: HealthFactor) {
     setHealthFactor(healthFactor);
+
+    if (accountData && symbol) {
+      const collateralFactor = ethers.utils.formatEther(
+        accountData[symbol.toUpperCase()]?.collateralFactor
+      );
+      setCollateralFactor(parseFloat(collateralFactor));
+    }
   }
 
   async function getFixedLenderContract() {
@@ -199,6 +209,7 @@ function WithdrawModalSP({ data, closeModal }: Props) {
               )}
               <ModalRowBorrowLimit
                 healthFactor={healthFactor}
+                collateralFactor={collateralFactor}
                 qty={qty}
                 symbol={symbol!}
                 operation="withdraw"
