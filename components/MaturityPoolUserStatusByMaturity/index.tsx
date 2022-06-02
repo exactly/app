@@ -64,7 +64,9 @@ function MaturityPoolUserStatusByMaturity({ type, maturities, showModal }: Props
                 <div className={styles.progress}>
                   <Tooltip
                     value={`${
-                      daysRemaining <= 0 ? 'Completed' : `${rtf.format(daysRemaining, 'day')}`
+                      daysRemaining <= 0
+                        ? translations[lang].finished
+                        : `${rtf.format(daysRemaining, 'day')}`
                     }`}
                     disableImage
                   >
