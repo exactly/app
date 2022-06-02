@@ -5,7 +5,8 @@
     "fixedRate": "Fixed Rate",
     "maturityDate": "Maturity Date",
     "progress": "Progress",
-    "timeElapsed": "Time Elapsed"
+    "timeElapsed": "Time Elapsed",
+    "finished": "Finished"
   },
   "es": {}
 }
