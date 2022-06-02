@@ -15,6 +15,7 @@ import Paginator from 'components/Paginator';
 import DepositModalMP from 'components/DepositModalMP';
 import BorrowModal from 'components/BorrowModal';
 import DepositModalSP from 'components/DepositModalSP';
+import Tooltip from 'components/Tooltip';
 
 import { Maturity } from 'types/Maturity';
 import { LangKeys } from 'types/Lang';
@@ -67,6 +68,12 @@ const Asset: NextPage<Props> = ({ symbol, price }) => {
 
   const filteredFixedLender = fixedLenders.find((fl) => fl?.args[1] === symbol);
 
+  const fixedLenderContract = getContractData(
+    network?.name,
+    filteredFixedLender?.address!,
+    filteredFixedLender?.abi!
+  );
+
   useEffect(() => {
     if (!maturities && Auditor) {
       getMarketData();
@@ -91,12 +98,6 @@ const Asset: NextPage<Props> = ({ symbol, price }) => {
     const currentTimestamp = dayjs().unix();
     const interval = 2419200;
     let timestamp = currentTimestamp - (currentTimestamp % interval);
-
-    const fixedLenderContract = getContractData(
-      network?.name,
-      filteredFixedLender?.address!,
-      filteredFixedLender?.abi!
-    );
 
     const maxPools = await fixedLenderContract?.maxFuturePools();
     const pools = [];
@@ -180,11 +181,16 @@ const Asset: NextPage<Props> = ({ symbol, price }) => {
 
                 <section className={style.container}>
                   <div className={style.smartPoolContainer}>
-                    <SmartPoolInfo showModal={showModal} symbol={symbol} />
+                    <SmartPoolInfo
+                      showModal={showModal}
+                      symbol={symbol}
+                      fixedLender={fixedLenderContract}
+                    />
                   </div>
                   <section className={style.assetData}>
                     <div className={style.assetContainer}>
-                      {marketData && <AssetSelector title={true} defaultAddress={marketData[5]} />}
+                      <p className={style.title}>{translations[lang].maturityPools}</p>
+                      <Tooltip value={translations[lang].maturityPools} />
                     </div>
                     <div className={style.assetMetricsContainer}></div>
                   </section>
@@ -222,11 +228,26 @@ const Asset: NextPage<Props> = ({ symbol, price }) => {
                     )}
                   </div>
                   <div className={style.maturitiesContainer}>
-                    {maturities?.slice(0, 3)?.map((maturity) => {
-                      return (
-                        <MaturityInfo maturity={maturity} key={maturity.value} symbol={symbol} />
-                      );
-                    })}
+                    {maturities
+                      ?.slice(itemsPerPage * (page - 1), itemsPerPage * page)
+                      ?.map((maturity) => {
+                        return (
+                          <MaturityInfo
+                            maturity={maturity}
+                            key={maturity.value}
+                            symbol={symbol}
+                            fixedLender={fixedLenderContract}
+                          />
+                        );
+                      })}
+                    <div className={style.paginator}>
+                      <Paginator
+                        total={maturities?.length ?? 0}
+                        itemsPerPage={itemsPerPage}
+                        handleChange={(page) => setPage(page)}
+                        currentPage={page}
+                      />
+                    </div>
                   </div>
                 </section>
               </FixedLenderProvider>

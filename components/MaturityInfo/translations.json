@@ -3,7 +3,7 @@
     "days": "days",
     "day": "day",
     "totalBorrowed": "Total Borrowed",
-    "liquidity": "Liquidity",
+    "totalDeposited": "Total Deposited",
     "utilizationRate": "Utilization Rate",
     "suppliers": "# of suppliers",
     "borrowers": "# of borrowers"
@@ -12,7 +12,6 @@
     "days": "días",
     "day": "día",
     "totalBorrowed": "Total Prestado",
-    "liquidity": "Liquidez",
     "utilizationRate": "Tasa de Utilización",
     "suppliers": "# de proveedores",
     "borrowers": "# de prestamistas"

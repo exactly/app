@@ -29,7 +29,7 @@ function SmartPoolUserStatus({ walletAddress, showModal }: Props) {
   const translations: { [key: string]: LangKeys } = keys;
   const auditor = useContext(AuditorContext);
   const { web3Provider, network } = useWeb3Context();
-  const [itemData, setItemData] = useState<Array<SmartPoolItemData>>([]);
+  const [itemData, setItemData] = useState<Array<SmartPoolItemData> | undefined>(undefined);
 
   const auditorContract = getContractData(
     network?.name,
@@ -89,20 +89,33 @@ function SmartPoolUserStatus({ walletAddress, showModal }: Props) {
             <span className={styles.title} />
           </div>
 
-          {itemData &&
-            itemData.map((item: SmartPoolItemData, key: number) => {
-              return (
-                <Item
-                  key={key}
-                  tokenAmount={item.tokens}
-                  symbol={item.symbol}
-                  walletAddress={walletAddress}
-                  eTokenAmount={item.eTokens}
-                  showModal={showModal}
-                  auditorContract={auditorContract}
-                />
-              );
-            })}
+          {itemData
+            ? itemData.map((item: SmartPoolItemData, key: number) => {
+                return (
+                  <Item
+                    key={key}
+                    tokenAmount={item.tokens}
+                    symbol={item.symbol}
+                    walletAddress={walletAddress}
+                    eTokenAmount={item.eTokens}
+                    showModal={showModal}
+                    auditorContract={auditorContract}
+                  />
+                );
+              })
+            : fixedLenders.map((_, key: number) => {
+                return (
+                  <Item
+                    key={key}
+                    tokenAmount={undefined}
+                    symbol={undefined}
+                    walletAddress={undefined}
+                    eTokenAmount={undefined}
+                    showModal={() => undefined}
+                    auditorContract={undefined}
+                  />
+                );
+              })}
         </div>
       </div>
     </div>

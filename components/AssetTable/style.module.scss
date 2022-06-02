@@ -11,8 +11,9 @@
     display: flex;
     justify-content: space-between;
     height: var(--u6);
-    color: var(--gray-900);
+    color: var(--gray-500);
     font-size: var(--font-14);
+    font-weight: 600;
 
     .maturity {
       width: 40%;

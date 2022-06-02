@@ -4,17 +4,15 @@
     "totalDeposited": "Total Deposited",
     "liquidity": "Liquidity",
     "utilizationRate": "Utilization Rate",
-    "suppliers": "# of suppliers",
     "deposit": "Deposit",
-    "smartPool": "Smart Pools"
+    "smartPool": "Smart Pool"
   },
   "es": {
     "days": "días",
     "totalDeposited": "Total Depositado",
     "liquidity": "Liquidez",
     "utilizationRate": "Tasa de Utilización",
-    "suppliers": "# de proveedores",
     "deposit": "Depositar",
-    "smartPool": "Smart Pools"
+    "smartPool": "Smart Pool"
   }
 }

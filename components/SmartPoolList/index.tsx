@@ -42,7 +42,7 @@ function SmartPoolList({ markets, showModal }: Props) {
           })}
           {markets.length === 0 &&
             fixedLenderData.map((_, key) => {
-              return <Item key={key} />;
+              return <Item key={key} market={undefined} />;
             })}
         </div>
       </div>
