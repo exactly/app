@@ -15,6 +15,8 @@ import styles from './style.module.scss';
 import keys from './translations.json';
 
 import parseTimestamp from 'utils/parseTimestamp';
+import Tooltip from 'components/Tooltip';
+import dayjs from 'dayjs';
 
 type Props = {
   type: Option;
@@ -42,6 +44,13 @@ function MaturityPoolUserStatusByMaturity({ type, maturities, showModal }: Props
         const startDate = parseInt(maturity) - maturityLife;
         const current = nowInSeconds - startDate;
         const progress = (current * 100) / maturityLife;
+        const daysRemaining = dayjs.unix(maturity).diff(dayjs(), 'days');
+
+        const rtf = new Intl.RelativeTimeFormat('en', {
+          localeMatcher: 'best fit',
+          numeric: 'always',
+          style: 'long'
+        });
 
         return (
           <div className={styles.container} key={key}>
@@ -53,37 +62,44 @@ function MaturityPoolUserStatusByMaturity({ type, maturities, showModal }: Props
               <div className={styles.dateContainer}>
                 <p className={styles.title}>{translations[lang].timeElapsed}</p>
                 <div className={styles.progress}>
-                  <div className={styles.track}>
-                    {progress >= 100 && (
-                      <>
-                        {Array(26)
-                          .fill('a')
-                          .map((_, key) => {
-                            return <span className={styles.fullBar} key={key} />;
-                          })}
-                        <Image
-                          className={styles.image}
-                          src="/img/icons/okTick.svg"
-                          width={21}
-                          height={21}
-                        />
-                      </>
-                    )}
-                    {progress < 100 && (
-                      <>
-                        {Array(Math.floor((progress * 26) / 100))
-                          .fill('a')
-                          .map((_, key) => {
-                            return <span className={styles.incompleteBar} key={key} />;
-                          })}
-                        {Array(Math.ceil(26 - (progress * 26) / 100))
-                          .fill('a')
-                          .map((_, key) => {
-                            return <span className={styles.emptyBar} key={key} />;
-                          })}
-                      </>
-                    )}
-                  </div>
+                  <Tooltip
+                    value={`${
+                      daysRemaining <= 0 ? 'Completed' : `${rtf.format(daysRemaining, 'day')}`
+                    }`}
+                    disableImage
+                  >
+                    <div className={styles.track}>
+                      {progress >= 100 && (
+                        <>
+                          {Array(26)
+                            .fill('a')
+                            .map((_, key) => {
+                              return <span className={styles.fullBar} key={key} />;
+                            })}
+                          <Image
+                            className={styles.image}
+                            src="/img/icons/okTick.svg"
+                            width={21}
+                            height={21}
+                          />
+                        </>
+                      )}
+                      {progress < 100 && (
+                        <>
+                          {Array(Math.floor((progress * 26) / 100))
+                            .fill('a')
+                            .map((_, key) => {
+                              return <span className={styles.incompleteBar} key={key} />;
+                            })}
+                          {Array(Math.ceil(26 - (progress * 26) / 100))
+                            .fill('a')
+                            .map((_, key) => {
+                              return <span className={styles.emptyBar} key={key} />;
+                            })}
+                        </>
+                      )}
+                    </div>
+                  </Tooltip>
                 </div>
               </div>
             </div>
