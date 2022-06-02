@@ -1,5 +1,6 @@
 import { useContext } from 'react';
 import Image from 'next/image';
+import dayjs from 'dayjs';
 
 import Item from './Item';
 
@@ -16,7 +17,6 @@ import keys from './translations.json';
 
 import parseTimestamp from 'utils/parseTimestamp';
 import Tooltip from 'components/Tooltip';
-import dayjs from 'dayjs';
 
 type Props = {
   type: Option;
