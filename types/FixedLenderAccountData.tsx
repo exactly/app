@@ -19,7 +19,7 @@ export type FixedLenderAccountData = {
   smartPoolShares: BigNumber;
   oraclePrice: BigNumber;
   penaltyRate: BigNumber;
-  collateralFactor: BigNumber;
+  adjustFactor: BigNumber;
   decimals: number;
   isCollateral: boolean;
 };

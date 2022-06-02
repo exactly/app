@@ -28,7 +28,7 @@ import { Error } from 'types/Error';
 import { HealthFactor } from 'types/HealthFactor';
 
 import { getContractData } from 'utils/contracts';
-import { getUnderlyingData } from 'utils/utils';
+import { getSymbol, getUnderlyingData } from 'utils/utils';
 import getSmartPoolInterestRate from 'utils/getSmartPoolInterestRate';
 
 import numbers from 'config/numbers.json';
@@ -62,7 +62,7 @@ function DepositModalSP({ data, closeModal }: Props) {
   const translations: { [key: string]: LangKeys } = keys;
 
   const fixedLenderData = useContext(FixedLenderContext);
-
+  console.log(fixedLenderData, 'FLDATA');
   const [qty, setQty] = useState<string>('');
   const [walletBalance, setWalletBalance] = useState<string | undefined>(undefined);
   const [gas, setGas] = useState<Gas | undefined>();
@@ -87,7 +87,6 @@ function DepositModalSP({ data, closeModal }: Props) {
   if (symbol) {
     underlyingData = getUnderlyingData(network?.name, symbol.toLowerCase());
   }
-
   const underlyingContract = getContractData(
     network?.name,
     underlyingData!.address,
@@ -163,6 +162,7 @@ function DepositModalSP({ data, closeModal }: Props) {
   }
 
   async function getWalletBalance() {
+    console.log('contract', underlyingContract);
     const walletBalance = await underlyingContract?.balanceOf(walletAddress);
 
     const formattedBalance = walletBalance && ethers.utils.formatEther(walletBalance);
@@ -249,7 +249,7 @@ function DepositModalSP({ data, closeModal }: Props) {
         ethers.utils.parseUnits(`${numbers.estimateGasAmount}`),
         walletAddress
       );
-
+      console.log(fixedLenderWithSigner, 'fl');
       if (gasPriceInGwei && estimatedGasCost) {
         const gwei = await ethers.utils.formatUnits(gasPriceInGwei, 'gwei');
         const gasCost = await ethers.utils.formatUnits(estimatedGasCost, 'gwei');
@@ -318,7 +318,7 @@ function DepositModalSP({ data, closeModal }: Props) {
 
     if (accountData && symbol) {
       const collateralFactor = ethers.utils.formatEther(
-        accountData[symbol.toUpperCase()]?.collateralFactor
+        accountData[symbol.toUpperCase()]?.adjustFactor
       );
       setCollateralFactor(parseFloat(collateralFactor));
     }
@@ -326,8 +326,7 @@ function DepositModalSP({ data, closeModal }: Props) {
 
   async function getFixedLenderContract() {
     const filteredFixedLender = fixedLenderData.find((contract) => {
-      const args: Array<string> | undefined = contract?.args;
-      const contractSymbol: string | undefined = args && args[1];
+      const contractSymbol = getSymbol(contract.address!, network!.name);
 
       return contractSymbol == symbol;
     });

@@ -43,32 +43,27 @@ const Pools: NextPage<Props> = () => {
 
   const [accountData, setAccountData] = useState<AccountData>();
 
-  const { Previewer, Auditor, FixedLenderDAI, FixedLenderWETH } = getABI(network?.name);
+  const { Previewer, Auditor, FixedLenderDAI, FixedLenderWETH, FixedLenderWBTC, FixedLenderUSDC } =
+    getABI(network?.name);
 
   useEffect(() => {
-    if (Auditor) {
+    if (Previewer) {
       getMarkets();
     }
-  }, [Auditor]);
+  }, [Previewer]);
 
   useEffect(() => {
-    if (!walletAddress) return;
     getAccountData();
   }, [walletAddress]);
 
   async function getMarkets() {
-    const auditorContract = getContractData(network?.name!, Auditor.address!, Auditor.abi!);
+    const previewerContract = getContractData(network?.name!, Previewer.address!, Previewer.abi!);
 
-    const marketsAddresses = await auditorContract?.getAllMarkets();
-    const marketsData: Array<UnformattedMarket> = [];
+    const marketsData = await previewerContract?.accounts(
+      '0x000000000000000000000000000000000000dEaD'
+    );
 
-    marketsAddresses.map((address: string) => {
-      marketsData.push(auditorContract?.getMarketData(address));
-    });
-
-    Promise.all(marketsData).then((data: Array<UnformattedMarket>) => {
-      setMarkets(formatMarkets(data));
-    });
+    setMarkets(formatMarkets(marketsData));
   }
 
   async function getAccountData() {
@@ -87,7 +82,7 @@ const Pools: NextPage<Props> = () => {
     }
   }
 
-  function formatMarkets(markets: Array<UnformattedMarket>) {
+  function formatMarkets(markets: Array<any>) {
     const length = markets.length;
 
     let formattedMarkets: Array<Market> = [];
@@ -101,11 +96,11 @@ const Pools: NextPage<Props> = () => {
         collateralFactor: 0
       };
 
-      market['market'] = markets[i][5];
-      market['symbol'] = markets[i][0];
-      market['name'] = markets[i][1];
-      market['isListed'] = markets[i][2];
-      market['collateralFactor'] = parseFloat(ethers.utils.formatEther(markets[i][3]));
+      market['market'] = markets[i].market;
+      market['symbol'] = markets[i].assetSymbol;
+      market['name'] = markets[i].assetSymbol;
+      market['isListed'] = true;
+      market['collateralFactor'] = parseFloat(ethers.utils.formatEther(markets[i].adjustFactor));
 
       formattedMarkets = [...formattedMarkets, market];
     }
@@ -132,7 +127,9 @@ const Pools: NextPage<Props> = () => {
         <PreviewerProvider value={Previewer}>
           <AccountDataProvider value={{ accountData, setAccountData }}>
             <AuditorProvider value={Auditor}>
-              <FixedLenderProvider value={[FixedLenderDAI, FixedLenderWETH]}>
+              <FixedLenderProvider
+                value={[FixedLenderDAI, FixedLenderWETH, FixedLenderWBTC, FixedLenderUSDC]}
+              >
                 {modal && modalContent?.type == 'deposit' && (
                   <DepositModalMP data={modalContent} closeModal={handleModal} />
                 )}

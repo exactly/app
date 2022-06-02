@@ -39,6 +39,7 @@ import decimals from 'config/decimals.json';
 import numbers from 'config/numbers.json';
 
 import keys from './translations.json';
+import { getSymbol } from 'utils/utils';
 
 type Props = {
   data: Borrow | Deposit;
@@ -155,7 +156,7 @@ function WithdrawModalSP({ data, closeModal }: Props) {
 
     if (accountData && symbol) {
       const collateralFactor = ethers.utils.formatEther(
-        accountData[symbol.toUpperCase()]?.collateralFactor
+        accountData[symbol.toUpperCase()]?.adjustFactor
       );
       setCollateralFactor(parseFloat(collateralFactor));
     }
@@ -163,8 +164,7 @@ function WithdrawModalSP({ data, closeModal }: Props) {
 
   async function getFixedLenderContract() {
     const filteredFixedLender = fixedLenderData.find((contract) => {
-      const args: Array<string> | undefined = contract?.args;
-      const contractSymbol: string | undefined = args && args[1];
+      const contractSymbol = getSymbol(contract.address!, network!.name);
 
       return contractSymbol == symbol;
     });

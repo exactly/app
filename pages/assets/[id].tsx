@@ -89,7 +89,7 @@ const Asset: NextPage<Props> = ({ symbol, price }) => {
 
   async function getPools() {
     const currentTimestamp = dayjs().unix();
-    const interval = 604800;
+    const interval = 2419200;
     let timestamp = currentTimestamp - (currentTimestamp % interval);
 
     const fixedLenderContract = getContractData(

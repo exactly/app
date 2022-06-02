@@ -19,7 +19,7 @@ import keys from './translations.json';
 
 import decimals from 'config/decimals.json';
 
-import { getUnderlyingData } from 'utils/utils';
+import { getSymbol, getUnderlyingData } from 'utils/utils';
 import { getContractData } from 'utils/contracts';
 import formatNumber from 'utils/formatNumber';
 import parseSymbol from 'utils/parseSymbol';
@@ -88,8 +88,7 @@ function Item({
 
   function getFixedLenderData() {
     const filteredFixedLender = fixedLender.find((contract) => {
-      const args: Array<string> | undefined = contract?.args;
-      const contractSymbol: string | undefined = args && args[1];
+      const contractSymbol = getSymbol(contract.address!, network!.name);
 
       return contractSymbol === symbol;
     });

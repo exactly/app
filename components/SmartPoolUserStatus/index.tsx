@@ -9,7 +9,6 @@ import FixedLenderContext from 'contexts/FixedLenderContext';
 
 import { LangKeys } from 'types/Lang';
 import { Deposit } from 'types/Deposit';
-import { Dictionary } from 'types/Dictionary';
 import { SmartPoolItemData } from 'types/SmartPoolItemData';
 
 import styles from './style.module.scss';
@@ -58,6 +57,7 @@ function SmartPoolUserStatus({ walletAddress, showModal }: Props) {
         fixedLenderAddress!,
         fixedLenderAbi!
       );
+
       const balance = await contractData?.balanceOf(walletAddress);
 
       if (balance) {
