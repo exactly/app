@@ -68,7 +68,7 @@ function DepositModalSP({ data, closeModal }: Props) {
   const [gas, setGas] = useState<Gas | undefined>();
   const [tx, setTx] = useState<Transaction | undefined>(undefined);
   const [minimized, setMinimized] = useState<boolean>(false);
-  const [step, setStep] = useState<number>(1);
+  const [step, setStep] = useState<number | undefined>(undefined);
   const [pending, setPending] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [depositedAmount, setDepositedAmount] = useState<string>();
@@ -126,6 +126,8 @@ function DepositModalSP({ data, closeModal }: Props) {
 
     if (formattedAllowance > amount && !isNaN(amount) && !isNaN(formattedAllowance)) {
       setStep(2);
+    } else {
+      setStep(1);
     }
   }
 
@@ -146,7 +148,7 @@ function DepositModalSP({ data, closeModal }: Props) {
       setLoading(false);
 
       //once the tx is done we update the step
-      setStep((step) => step + 1);
+      setStep(2);
     } catch (e) {
       setLoading(false);
 

@@ -1,4 +1,4 @@
-@function calcRgbaColor($index, $leftSide, $full) {
+@function calcRgbaColor($index, $leftSide, $type) {
   $from-r: 123; // start red rgb value
   $from-g: 245; // start green rgb value
   $from-b: 225; // start blue rgb value
@@ -14,10 +14,21 @@
     $add: $index - 1;
   }
 
-  @if $full == false {
+  @if $type == 'incomplete' {
     $to-r: 77; // end red rgb value
     $to-g: 77; // end green rgb value
     $to-b: 232; // end blue rgb value
+    $from: rgba($from-r, $from-g, $from-b, 1); //values in rgba
+    $to: rgba($to-r, $to-g, $to-b, 1); // values in rgba
+  }
+
+  @if $type == 'elapsed' {
+    $from-r: 241; // start red rgb value
+    $from-g: 157; // start green rgb value
+    $from-b: 43; // start blue rgb value
+    $to-r: 175; // end red rgb value
+    $to-g: 6; // end green rgb value
+    $to-b: 6; // end blue rgb value
     $from: rgba($from-r, $from-g, $from-b, 1); //values in rgba
     $to: rgba($to-r, $to-g, $to-b, 1); // values in rgba
   }
@@ -34,27 +45,40 @@
   .track > .fullBar:nth-child(#{$i}) {
     background: linear-gradient(
       to bottom right,
-      calcRgbaColor($i, true, true),
-      calcRgbaColor($i, false, true)
+      calcRgbaColor($i, true, 'full'),
+      calcRgbaColor($i, false, 'full')
     );
 
     background: linear-gradient(
       to bottom right,
-      calcRgbaColor($i, true, true),
-      calcRgbaColor($i, false, true)
+      calcRgbaColor($i, true, 'full'),
+      calcRgbaColor($i, false, 'full')
     );
   }
 
   .track > .incompleteBar:nth-child(#{$i}) {
     background: linear-gradient(
       to bottom right,
-      calcRgbaColor($i, true, false),
-      calcRgbaColor($i, false, false)
+      calcRgbaColor($i, true, 'incomplete'),
+      calcRgbaColor($i, false, 'incomplete')
     );
     background: linear-gradient(
       to bottom right,
-      calcRgbaColor($i, true, false),
-      calcRgbaColor($i, false, false)
+      calcRgbaColor($i, true, 'incomplete'),
+      calcRgbaColor($i, false, 'incomplete')
+    );
+  }
+
+  .track > .elapsedBar:nth-child(#{$i}) {
+    background: linear-gradient(
+      to bottom right,
+      calcRgbaColor($i, true, 'elapsed'),
+      calcRgbaColor($i, false, 'elapsed')
+    );
+    background: linear-gradient(
+      to bottom right,
+      calcRgbaColor($i, true, 'elapsed'),
+      calcRgbaColor($i, false, 'elapsed')
     );
   }
 }
@@ -109,6 +133,17 @@
           }
 
           .incompleteBar {
+            height: var(--u3);
+            width: var(--smallUnit);
+            border-radius: var(--smallestUnit);
+            margin-right: var(--smallestUnit);
+
+            &:not(:first-child) {
+              margin-left: var(--smallestUnit);
+            }
+          }
+
+          .elapsedBar {
             height: var(--u3);
             width: var(--smallUnit);
             border-radius: var(--smallestUnit);

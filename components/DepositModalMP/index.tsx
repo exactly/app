@@ -65,7 +65,7 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
   const [gas, setGas] = useState<Gas | undefined>();
   const [tx, setTx] = useState<Transaction | undefined>(undefined);
   const [minimized, setMinimized] = useState<boolean>(false);
-  const [step, setStep] = useState<number>(1);
+  const [step, setStep] = useState<number | undefined>(undefined);
   const [pending, setPending] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [slippage, setSlippage] = useState<string>('0.5');
@@ -156,7 +156,7 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
       setLoading(false);
 
       //once the tx is done we update the step
-      setStep((step) => step + 1);
+      setStep(2);
     } catch (e) {
       setLoading(false);
 

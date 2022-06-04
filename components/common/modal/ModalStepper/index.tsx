@@ -1,4 +1,5 @@
 import { useContext } from 'react';
+import Skeleton from 'react-loading-skeleton';
 
 import LangContext from 'contexts/LangContext';
 
@@ -9,8 +10,8 @@ import styles from './style.module.scss';
 import keys from './translations.json';
 
 type Props = {
-  currentStep: Number;
-  totalSteps: Number;
+  currentStep: number | undefined;
+  totalSteps: number;
 };
 
 function ModalStepper({ currentStep, totalSteps }: Props) {
@@ -20,16 +21,17 @@ function ModalStepper({ currentStep, totalSteps }: Props) {
   return (
     <>
       <div className={styles.steps}>
-        {Array.from(Array(totalSteps).keys()).map((step) => {
-          return (
-            <div
-              className={currentStep >= step + 1 ? styles.selectedStep : styles.step}
-              key={step}
-            ></div>
-          );
-        })}
+        {(currentStep &&
+          Array.from(Array(totalSteps).keys()).map((step) => {
+            return (
+              <div
+                className={currentStep >= step + 1 ? styles.selectedStep : styles.step}
+                key={step}
+              ></div>
+            );
+          })) || <Skeleton containerClassName={styles.skeleton} />}
+        {currentStep == 1 && <p className={styles.text}>{translations[lang].approval}</p>}
       </div>
-      {currentStep == 1 && <p className={styles.text}>{translations[lang].approval}</p>}
     </>
   );
 }
