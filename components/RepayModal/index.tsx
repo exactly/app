@@ -170,7 +170,6 @@ function RepayModal({ data, closeModal }: Props) {
     } catch (e) {
       setError({
         status: true,
-        message: translations[lang].notEnoughBalance,
         component: 'gas'
       });
     }
@@ -240,12 +239,12 @@ function RepayModal({ data, closeModal }: Props) {
                 symbol={symbol!}
                 operation="repay"
               />
-              {error && <ModalError message={error.message} />}
+              {error && error.component != 'gas' && <ModalError message={error.message} />}
               <div className={styles.buttonContainer}>
                 <Button
                   text={translations[lang].repay}
-                  className={qty <= '0' || !qty ? 'secondaryDisabled' : 'quaternary'}
-                  disabled={qty <= '0' || !qty || loading}
+                  className={parseFloat(qty) <= 0 || !qty ? 'secondaryDisabled' : 'quaternary'}
+                  disabled={parseFloat(qty) <= 0 || !qty || loading}
                   onClick={repay}
                   loading={loading}
                   color="secondary"

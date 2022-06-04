@@ -110,10 +110,14 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
   }, [underlyingContract, fixedLenderWithSigner]);
 
   useEffect(() => {
-    if (fixedLenderWithSigner && !gas) {
-      estimateGas();
+    if (fixedLenderWithSigner) {
+      if (step == 1) {
+        estimateApprovalGasCost();
+      } else if (step == 2) {
+        estimateGas();
+      }
     }
-  }, [fixedLenderWithSigner]);
+  }, [fixedLenderWithSigner, step]);
 
   useEffect(() => {
     checkAllowance();
@@ -238,12 +242,37 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
         const gasCost = await ethers.utils.formatUnits(estimatedGasCost, 'gwei');
         const eth = parseFloat(gwei) * parseFloat(gasCost);
 
-        setGas({ eth: eth.toFixed(8), gwei: parseFloat(gwei).toFixed(1) });
+        setGas({ eth: eth.toFixed(6), gwei: parseFloat(gwei).toFixed(1) });
       }
     } catch (e) {
       setError({
         status: true,
-        message: translations[lang].notEnoughBalance,
+        component: 'gas'
+      });
+    }
+  }
+
+  async function estimateApprovalGasCost() {
+    try {
+      const gasPriceInGwei = await underlyingContract?.provider.getGasPrice();
+
+      const estimatedGasCost = await underlyingContract?.estimateGas.approve(
+        market,
+        ethers.utils.parseUnits(numbers.approvalAmount!.toString())
+      );
+
+      if (gasPriceInGwei && estimatedGasCost) {
+        const gwei = await ethers.utils.formatUnits(gasPriceInGwei, 'gwei');
+        const gasCost = await ethers.utils.formatUnits(estimatedGasCost, 'gwei');
+        const eth = parseFloat(gwei) * parseFloat(gasCost);
+
+        setGas({ eth: eth.toFixed(6), gwei: parseFloat(gwei).toFixed(1) });
+      }
+    } catch (e) {
+      console.log(e);
+      setError({
+        status: true,
+        message: translations[lang].error,
         component: 'gas'
       });
     }
@@ -260,7 +289,8 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
   }
 
   async function getYieldAtMaturity() {
-    if (!qty) return;
+    if (!qty || parseFloat(qty) <= 0) return;
+
     try {
       const yieldAtMaturity = await previewerContract?.previewDepositAtMaturity(
         marketAddress,
@@ -322,7 +352,7 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
                 symbol={symbol!}
                 error={error?.component == 'input'}
               />
-              {error?.component !== 'gas' && <ModalTxCost gas={gas} />}
+              {error && error.component != 'gas' && <ModalError message={error.message} />}
               <ModalRow text={translations[lang].interestRate} value={`${fixedRate}%`} line />
               <ModalRowEditable
                 text={translations[lang].minimumDepositRate}
@@ -339,12 +369,14 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
                 line
               />
               <ModalStepper currentStep={step} totalSteps={3} />
-              {error && <ModalError message={error.message} />}
+              {error && error.component != 'gas' && <ModalError message={error.message} />}
               <div className={styles.buttonContainer}>
                 <Button
                   text={step == 1 ? translations[lang].approve : translations[lang].deposit}
-                  className={qty && qty > '0' && !error?.status ? 'primary' : 'disabled'}
-                  disabled={((!qty || qty <= '0') && !pending) || loading || error?.status}
+                  className={qty && parseFloat(qty) > 0 && !error?.status ? 'primary' : 'disabled'}
+                  disabled={
+                    ((!qty || parseFloat(qty) <= 0) && !pending) || loading || error?.status
+                  }
                   onClick={handleClickAction}
                   loading={loading}
                 />

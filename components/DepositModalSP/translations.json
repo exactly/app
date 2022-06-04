@@ -7,7 +7,7 @@
     "healthFactor": "Health Factor",
     "borrowLimit": "Borrow Limit",
     "insufficientBalance": "You can't deposit more than you have in your wallet",
-    "notEnoughBalance": "You don't have enough balance to perform the transaction"
+    "error": "There was an error with your transaction, please try again"
   },
   "es": {}
 }
