@@ -74,7 +74,7 @@ function DashboardHeader() {
         label: symbol.toUpperCase(),
         value: 0,
         color: getAssetColor(symbol),
-        image: `/img/assets/${symbol.toLowerCase().toLowerCase()}.png`
+        image: `/img/assets/${symbol.toLowerCase()}.png`
       };
 
       const smartPoolDepositValue = parseFloat(
