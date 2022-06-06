@@ -1,4 +1,5 @@
 import { useContext } from 'react';
+import { useSpring, animated } from 'react-spring';
 
 import styles from './style.module.scss';
 
@@ -23,6 +24,8 @@ function ModalMinimized({ tx, handleMinimize }: Props) {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
+  const style = useSpring({ from: { opacity: 0 }, to: { opacity: 1 }, duration: 5000 });
+
   const options: Dictionary<ModalCases> = {
     processing: {
       img: '/img/modals/img/waiting.png',
@@ -43,7 +46,7 @@ function ModalMinimized({ tx, handleMinimize }: Props) {
   };
 
   return (
-    <div className={styles.container}>
+    <animated.section style={style} className={styles.container}>
       <img
         src="./img/icons/open.svg"
         alt="open"
@@ -71,7 +74,7 @@ function ModalMinimized({ tx, handleMinimize }: Props) {
           Etherscan
         </a>
       </p>
-    </div>
+    </animated.section>
   );
 }
 
