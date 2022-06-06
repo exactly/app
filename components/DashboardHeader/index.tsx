@@ -74,7 +74,7 @@ function DashboardHeader() {
         label: symbol.toUpperCase(),
         value: 0,
         color: getAssetColor(symbol),
-        image: `/img/assets/${symbol}.png`
+        image: `/img/assets/${symbol.toLowerCase()}.png`
       };
 
       const smartPoolDepositValue = parseFloat(
@@ -145,7 +145,7 @@ function DashboardHeader() {
         label: symbol.toUpperCase(),
         value: 0,
         color: getAssetColor(symbol),
-        image: `/img/assets/${symbol}.png`
+        image: `/img/assets/${symbol.toLowerCase()}.png`
       };
 
       fixedLender.maturityBorrowPositions.forEach((borrowPosition) => {
