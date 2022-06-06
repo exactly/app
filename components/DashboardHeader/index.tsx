@@ -1,5 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
 import { ethers } from 'ethers';
+import Skeleton from 'react-loading-skeleton';
 
 import DonutChart from 'components/DonutChart';
 import Tooltip from 'components/Tooltip';
@@ -12,12 +13,14 @@ import { LangKeys } from 'types/Lang';
 import { Dictionary } from 'types/Dictionary';
 import { DonutData } from 'types/DonutData';
 
+import { FixedLenderAccountData } from 'types/FixedLenderAccountData';
+
 import styles from './style.module.scss';
 
 import keys from './translations.json';
 
 import parseHealthFactor from 'utils/parseHealthFactor';
-import { FixedLenderAccountData } from 'types/FixedLenderAccountData';
+import getAssetColor from 'utils/getAssetColor';
 
 function DashboardHeader() {
   const { walletAddress } = useWeb3Context();
@@ -26,8 +29,16 @@ function DashboardHeader() {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
-  const [healthFactor, setHealthFactor] = useState<Dictionary<number> | undefined>(undefined);
   const [healthFactorData, setHealthFactorData] = useState<Array<DonutData> | undefined>(undefined);
+  const [depositData, setDepositData] = useState<Array<DonutData> | undefined>(undefined);
+  const [rateData, setRateData] = useState<Array<DonutData> | undefined>(undefined);
+  const [borrowData, setBorrowData] = useState<Array<DonutData> | undefined>(undefined);
+
+  const [totalDeposit, setTotalDeposit] = useState<number | undefined>(undefined);
+  const [totalBorrow, setTotalBorrow] = useState<number | undefined>(undefined);
+
+  const [rateComposition, setRateComposition] = useState<Dictionary<number> | undefined>(undefined);
+  const [healthFactor, setHealthFactor] = useState<Dictionary<number> | undefined>(undefined);
 
   const notConnected = [
     {
@@ -38,50 +49,120 @@ function DashboardHeader() {
     }
   ];
 
-  const defaultDepositData = [
-    {
-      label: 'DAI',
-      value: 100,
-      color: '#F19D2B',
-      image: '/img/assets/dai.png'
-    },
-    {
-      label: 'ETH',
-      value: 100,
-      color: '#627EEA',
-      image: '/img/assets/ether.png'
-    },
-    {
-      label: 'USDC',
-      value: 100,
-      color: '#2775CA',
-      image: '/img/assets/usdc.png'
-    },
-    {
-      label: 'WBTC',
-      value: 100,
-      color: '#282138',
-      image: '/img/assets/wbtc.png'
-    }
-  ];
-
-  const defaultRateData = [
-    {
-      label: 'Deposited',
-      value: 75,
-      color: '#4D4DE8'
-    },
-    {
-      label: 'Borrowed',
-      value: 25,
-      color: '#7BF5E1'
-    }
-  ];
-
   useEffect(() => {
     if (!walletAddress) return;
+    getDeposits();
     getHealthFactor();
+    getBorrows();
   }, [walletAddress, accountData]);
+
+  function getDeposits() {
+    if (!accountData) return;
+
+    const data = Object.values(accountData);
+    const depositData: DonutData[] = [];
+    let allDepositsUSD = 0;
+    let variableComposition = 0;
+    let fixedComposition = 0;
+
+    data.forEach((fixedLender) => {
+      const symbol = fixedLender.assetSymbol;
+      const decimals = fixedLender.decimals;
+      const oracle = parseFloat(ethers.utils.formatUnits(fixedLender.oraclePrice, decimals));
+
+      const objectDepositData: DonutData = {
+        label: symbol.toUpperCase(),
+        value: 0,
+        color: getAssetColor(symbol),
+        image: `/img/assets/${symbol}.png`
+      };
+
+      const smartPoolDepositValue = parseFloat(
+        ethers.utils.formatUnits(fixedLender.smartPoolAssets, decimals)
+      );
+      const smartPoolDepositValueUSD = smartPoolDepositValue * oracle;
+
+      objectDepositData.value += smartPoolDepositValueUSD; //add the value in USD to the asset deposit data
+      allDepositsUSD += smartPoolDepositValueUSD; //add the value in USD to the total deposit
+      variableComposition += smartPoolDepositValueUSD; //add the value in USD to the variable composition %
+
+      fixedLender.maturitySupplyPositions.forEach((supplyPosition) => {
+        const maturityDepositValue = parseFloat(
+          ethers.utils.formatUnits(supplyPosition.position.principal, decimals)
+        );
+        const maturityDepositValueUSD = maturityDepositValue * oracle;
+        objectDepositData.value += maturityDepositValueUSD; //add the value in USD to the asset deposit data
+        allDepositsUSD += maturityDepositValueUSD; //add the value in USD to the total deposit
+        fixedComposition += maturityDepositValueUSD; //add the value in USD to the fixed composition %
+      });
+
+      if (objectDepositData.value !== 0) depositData.push(objectDepositData);
+    });
+
+    allDepositsUSD > 0 ? setDepositData(depositData) : setDepositData(notConnected);
+    allDepositsUSD > 0 ? setTotalDeposit(allDepositsUSD) : setTotalDeposit(0);
+
+    //RATE DATA
+    if (allDepositsUSD !== 0) {
+      const variable = (variableComposition * 100) / allDepositsUSD;
+      const fixed = (fixedComposition * 100) / allDepositsUSD;
+
+      variableComposition = parseFloat(variable.toFixed(2));
+      fixedComposition = parseFloat(fixed.toFixed(2));
+
+      setRateComposition({ variableComposition, fixedComposition });
+      setRateData([
+        {
+          label: 'Variable',
+          value: variable,
+          color: '#7BF5E1'
+        },
+        {
+          label: 'Fixed',
+          value: fixed,
+          color: '#4D4DE8'
+        }
+      ]);
+    } else {
+      setRateData(notConnected);
+      setRateComposition(undefined);
+    }
+  }
+
+  function getBorrows() {
+    if (!accountData) return;
+
+    const data = Object.values(accountData);
+    const borrowData: DonutData[] = [];
+    let allBorrowsUSD = 0;
+
+    data.forEach((fixedLender) => {
+      const symbol = fixedLender.assetSymbol;
+      const decimals = fixedLender.decimals;
+      const oracle = parseFloat(ethers.utils.formatUnits(fixedLender.oraclePrice, decimals));
+
+      const objectBorrowData: DonutData = {
+        label: symbol.toUpperCase(),
+        value: 0,
+        color: getAssetColor(symbol),
+        image: `/img/assets/${symbol}.png`
+      };
+
+      fixedLender.maturityBorrowPositions.forEach((borrowPosition) => {
+        const borrowValue = parseFloat(
+          ethers.utils.formatUnits(borrowPosition.position.principal, decimals)
+        );
+        const borrowValueUSD = borrowValue * oracle;
+        objectBorrowData.value += borrowValueUSD;
+        allBorrowsUSD += borrowValueUSD;
+      });
+
+      if (objectBorrowData.value !== 0) borrowData.push(objectBorrowData);
+    });
+
+    allBorrowsUSD > 0 ? setBorrowData(borrowData) : setBorrowData(notConnected);
+    allBorrowsUSD > 0 ? setTotalBorrow(allBorrowsUSD) : setTotalBorrow(0);
+  }
 
   function getHealthFactor() {
     if (!accountData) return;
@@ -149,21 +230,27 @@ function DashboardHeader() {
           <h3 className={styles.title}>
             {translations[lang].deposits} <Tooltip value={translations[lang].deposits} />
           </h3>
-          {walletAddress ? (
+          {walletAddress && (
             <>
-              <p className={styles.value}>$6,724</p>
-              <p className={styles.subvalue}>2.14% {translations[lang].apr}</p>
+              {
+                <p className={styles.value}>
+                  {depositData ? `$${totalDeposit?.toFixed(2)}` : <Skeleton />}
+                </p>
+              }
+              {/* {<p className={styles.subvalue}>2.14% {translations[lang].apr}</p>} */}
             </>
-          ) : (
-            <p className={styles.disabledValue}>$0</p>
           )}
+          {!walletAddress && <p className={styles.disabledValue}>$0</p>}
         </div>
         <div className={styles.chartContainer}>
-          <DonutChart data={walletAddress ? defaultDepositData : notConnected} small />
-          {walletAddress && (
+          <DonutChart data={walletAddress && depositData ? depositData : notConnected} small />
+          {walletAddress && depositData && (
             <div className={styles.detail}>
-              {defaultDepositData.map((asset, key) => {
-                return <Tooltip key={key} value={'$1234'} image={asset.image} />;
+              {depositData.map((asset, key) => {
+                if (totalDeposit === 0) return;
+                return (
+                  <Tooltip key={key} value={`$${asset.value.toFixed(2)}`} image={asset.image} />
+                );
               })}
             </div>
           )}
@@ -181,20 +268,22 @@ function DashboardHeader() {
                   <span className={styles.variable} />
                   {translations[lang].variable}
                 </p>
-                <p className={styles.informationValue}>50%</p>
+                <p className={styles.informationValue}>
+                  {rateComposition && `${rateComposition.variableComposition}%`}
+                </p>
               </div>
               <div className={styles.information}>
                 <p className={styles.informationTitle}>
                   <span className={styles.fixed} />
                   {translations[lang].fixed}
                 </p>
-                <p className={styles.informationValue}>50%</p>
+                {rateComposition && `${rateComposition.fixedComposition}%`}
               </div>
             </div>
           )}
         </div>
         <div className={styles.chartContainer}>
-          <DonutChart data={walletAddress ? defaultRateData : notConnected} />
+          <DonutChart data={walletAddress && rateData ? rateData : notConnected} />
         </div>
       </div>
       <div className={styles.container}>
@@ -204,19 +293,24 @@ function DashboardHeader() {
           </h3>
           {walletAddress ? (
             <>
-              <p className={styles.value}>$6,724</p>
-              <p className={styles.subvalue}>2.14% {translations[lang].apr}</p>
+              <p className={styles.value}>
+                {totalBorrow ? `$${totalBorrow?.toFixed(2)}` : <Skeleton />}
+              </p>
+              {/* <p className={styles.subvalue}>2.14% {translations[lang].apr}</p> */}
             </>
           ) : (
             <p className={styles.disabledValue}>$0</p>
           )}
         </div>
         <div className={styles.chartContainer}>
-          <DonutChart data={walletAddress ? defaultDepositData : notConnected} small />
-          {walletAddress && (
+          <DonutChart data={walletAddress && borrowData ? borrowData : notConnected} small />
+          {walletAddress && borrowData && (
             <div className={styles.detail}>
-              {defaultDepositData.map((asset, key) => {
-                return <Tooltip key={key} value={'$1234'} image={asset.image} />;
+              {borrowData.map((asset, key) => {
+                if (totalBorrow === 0) return;
+                return (
+                  <Tooltip key={key} value={`$${asset.value.toFixed(2)}`} image={asset.image} />
+                );
               })}
             </div>
           )}
