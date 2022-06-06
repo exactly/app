@@ -50,8 +50,8 @@
   .assetInfoContainer {
     display: flex;
     max-width: 45%;
-    justify-content: space-between;
     margin-bottom: var(--u5);
+    gap: var(--u3);
   }
 
   .maturitiesContainer {

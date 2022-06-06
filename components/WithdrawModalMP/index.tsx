@@ -167,7 +167,6 @@ function WithdrawModalMP({ data, closeModal }: Props) {
     } catch (e) {
       setError({
         status: true,
-        message: translations[lang].notEnoughBalance,
         component: 'gas'
       });
     }
@@ -241,12 +240,14 @@ function WithdrawModalMP({ data, closeModal }: Props) {
                   line
                 />
               )}
-              {error && <ModalError message={error.message} />}
+              {error && error.component != 'gas' && <ModalError message={error.message} />}
               <div className={styles.buttonContainer}>
                 <Button
                   text={translations[lang].withdraw}
-                  className={qty <= '0' || !qty || error?.status ? 'secondaryDisabled' : 'tertiary'}
-                  disabled={qty <= '0' || !qty || loading || error?.status}
+                  className={
+                    parseFloat(qty) <= 0 || !qty || error?.status ? 'secondaryDisabled' : 'tertiary'
+                  }
+                  disabled={parseFloat(qty) <= 0 || !qty || loading || error?.status}
                   onClick={withdraw}
                   loading={loading}
                   color="primary"

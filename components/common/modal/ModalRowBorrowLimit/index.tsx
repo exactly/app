@@ -21,6 +21,7 @@ type Props = {
   healthFactor: HealthFactor | undefined;
   collateralFactor: number | undefined;
   operation: string;
+  line?: boolean;
 };
 
 function ModalRowBorrowLimit({
@@ -28,7 +29,8 @@ function ModalRowBorrowLimit({
   symbol,
   healthFactor,
   collateralFactor = 0.8,
-  operation
+  operation,
+  line
 }: Props) {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
@@ -68,8 +70,10 @@ function ModalRowBorrowLimit({
       break;
   }
 
+  const rowStyles = line ? `${styles.row} ${styles.line}` : styles.row;
+
   return (
-    <section className={`${styles.row} ${styles.line}`}>
+    <section className={rowStyles}>
       <p className={styles.text}>{translations[lang].borrowLimit}</p>
       <section className={styles.values}>
         <span className={styles.value}>

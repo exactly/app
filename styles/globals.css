@@ -20,3 +20,17 @@ a {
 .web3modal-modal-lightbox {
   z-index: 10 !important;
 }
+
+html::-webkit-scrollbar-track {
+  background-color: var(--gray-100);
+}
+
+html::-webkit-scrollbar {
+  width: var(--u);
+  background-color: transparent;
+}
+
+html::-webkit-scrollbar-thumb {
+  background-color: var(--gray-500);
+  border-radius: 100px;
+}

@@ -68,7 +68,7 @@ function DepositModalSP({ data, closeModal }: Props) {
   const [gas, setGas] = useState<Gas | undefined>();
   const [tx, setTx] = useState<Transaction | undefined>(undefined);
   const [minimized, setMinimized] = useState<boolean>(false);
-  const [step, setStep] = useState<number>(1);
+  const [step, setStep] = useState<number | undefined>(undefined);
   const [pending, setPending] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [depositedAmount, setDepositedAmount] = useState<string>();
@@ -102,10 +102,14 @@ function DepositModalSP({ data, closeModal }: Props) {
   }, [fixedLenderData]);
 
   useEffect(() => {
-    if (fixedLenderWithSigner && !gas) {
-      estimateGas();
+    if (fixedLenderWithSigner) {
+      if (step == 1) {
+        estimateApprovalGasCost();
+      } else if (step == 2) {
+        estimateGas();
+      }
     }
-  }, [fixedLenderWithSigner]);
+  }, [fixedLenderWithSigner, step]);
 
   useEffect(() => {
     if (!fixedLenderWithSigner || !network) return;
@@ -126,6 +130,8 @@ function DepositModalSP({ data, closeModal }: Props) {
 
     if (formattedAllowance > amount && !isNaN(amount) && !isNaN(formattedAllowance)) {
       setStep(2);
+    } else {
+      setStep(1);
     }
   }
 
@@ -146,7 +152,7 @@ function DepositModalSP({ data, closeModal }: Props) {
       setLoading(false);
 
       //once the tx is done we update the step
-      setStep((step) => step + 1);
+      setStep(2);
     } catch (e) {
       setLoading(false);
 
@@ -249,12 +255,37 @@ function DepositModalSP({ data, closeModal }: Props) {
         const gasCost = await ethers.utils.formatUnits(estimatedGasCost, 'gwei');
         const eth = parseFloat(gwei) * parseFloat(gasCost);
 
-        setGas({ eth: eth.toFixed(8), gwei: parseFloat(gwei).toFixed(1) });
+        setGas({ eth: eth.toFixed(6), gwei: parseFloat(gwei).toFixed(1) });
       }
     } catch (e) {
       setError({
         status: true,
-        message: translations[lang].notEnoughBalance,
+        component: 'gas'
+      });
+    }
+  }
+
+  async function estimateApprovalGasCost() {
+    try {
+      const gasPriceInGwei = await underlyingContract?.provider.getGasPrice();
+
+      const estimatedGasCost = await underlyingContract?.estimateGas.approve(
+        market,
+        ethers.utils.parseUnits(numbers.approvalAmount!.toString())
+      );
+
+      if (gasPriceInGwei && estimatedGasCost) {
+        const gwei = await ethers.utils.formatUnits(gasPriceInGwei, 'gwei');
+        const gasCost = await ethers.utils.formatUnits(estimatedGasCost, 'gwei');
+        const eth = parseFloat(gwei) * parseFloat(gasCost);
+
+        setGas({ eth: eth.toFixed(6), gwei: parseFloat(gwei).toFixed(1) });
+      }
+    } catch (e) {
+      console.log(e);
+      setError({
+        status: true,
+        message: translations[lang].error,
         component: 'gas'
       });
     }
@@ -351,13 +382,15 @@ function DepositModalSP({ data, closeModal }: Props) {
                 operation="deposit"
               />
               <ModalStepper currentStep={step} totalSteps={3} />
-              {error && <ModalError message={error.message} />}
+              {error && error.component != 'gas' && <ModalError message={error.message} />}
               <div className={styles.buttonContainer}>
                 <Button
                   text={step == 1 ? translations[lang].approve : translations[lang].deposit}
                   loading={loading}
-                  className={qty && qty > '0' && !error?.status ? 'primary' : 'disabled'}
-                  disabled={((!qty || qty <= '0') && !pending) || loading || error?.status}
+                  className={qty && parseFloat(qty) > 0 && !error?.status ? 'primary' : 'disabled'}
+                  disabled={
+                    ((!qty || parseFloat(qty) <= 0) && !pending) || loading || error?.status
+                  }
                   onClick={handleClickAction}
                 />
               </div>

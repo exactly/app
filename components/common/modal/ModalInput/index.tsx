@@ -1,4 +1,5 @@
 import { useState, ChangeEventHandler, MouseEventHandler, useEffect } from 'react';
+import formatNumber from 'utils/formatNumber';
 
 import getExchangeRate from 'utils/getExchangeRate';
 
@@ -47,7 +48,10 @@ function ModalInput({ value, name, disabled, symbol, error, onChange, onMax }: P
         autoFocus
       />
       <p className={styles.translatedValue}>
-        $ {value == '' || !value ? 0 : (parseFloat(value) * exchangeRate).toFixed(2)}
+        ${' '}
+        {value == '' || !value || !symbol
+          ? 0
+          : formatNumber(parseFloat(value) * exchangeRate, symbol)}
       </p>
       {onMax && (
         <p className={styles.max} onClick={onMax}>

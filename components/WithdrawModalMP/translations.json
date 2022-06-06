@@ -6,8 +6,7 @@
     "amountAtFinish": "Amount At Finish",
     "amountToReceive": "Amount To Receive",
     "amountSlippage": "Minimum Amount To Receive",
-    "insufficientBalance": "You can't withdraw more than the deposited amount",
-    "notEnoughBalance": "You don't have enough balance to perform the transaction"
+    "insufficientBalance": "You can't withdraw more than the deposited amount"
   },
   "es": {}
 }

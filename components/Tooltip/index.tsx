@@ -1,13 +1,15 @@
-import { useState } from 'react';
+import { ReactChildren, useState } from 'react';
 
 import styles from './style.module.scss';
 
 type Props = {
   value: String;
   image?: string;
+  children?: any;
+  disableImage?: boolean;
 };
 
-function Tooltip({ value, image }: Props) {
+function Tooltip({ value, image, children, disableImage }: Props) {
   const [show, setShow] = useState<Boolean>(false);
 
   return (
@@ -16,7 +18,8 @@ function Tooltip({ value, image }: Props) {
       onMouseEnter={() => setShow(true)}
       onMouseLeave={() => setShow(false)}
     >
-      <img src={image ?? '/img/icons/tooltip.svg'} alt="tooltip" />
+      {children}
+      {!disableImage && <img src={image ?? '/img/icons/tooltip.svg'} alt="tooltip" />}
       <div className={`${styles.tooltip} ${show ? styles.show : styles.hidden}`}>
         <div className={styles.arrowUp}></div>
         <p className={styles.text}>{value}</p>

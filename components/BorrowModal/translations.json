@@ -6,8 +6,7 @@
     "interestRate": "Interest Rate",
     "maximumBorrowRate": "Maximum Borrow Rate",
     "maturityDebt": "Maturity Debt",
-    "healthFactor": "Health Factor",
-    "notEnoughBalance": "You don't have enough balance to perform the transaction"
+    "healthFactor": "Health Factor"
   },
   "es": {}
 }
