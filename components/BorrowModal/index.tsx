@@ -196,14 +196,14 @@ function BorrowModal({ data, editable, closeModal }: Props) {
     } catch (e) {
       setError({
         status: true,
-        message: translations[lang].notEnoughBalance,
         component: 'gas'
       });
     }
   }
 
   async function getFeeAtMaturity() {
-    if (!qty || qty === '0') return;
+    if (!qty || parseFloat(qty) <= 0) return;
+
     try {
       const feeAtMaturity = await previewerContract?.previewBorrowAtMaturity(
         fixedLenderWithSigner!.address,
@@ -304,13 +304,15 @@ function BorrowModal({ data, editable, closeModal }: Props) {
                 symbol={symbol!}
                 operation="borrow"
               />
-              {error && <ModalError message={error.message} />}
+              {error && error.component != 'gas' && <ModalError message={error.message} />}
               <div className={styles.buttonContainer}>
                 <Button
                   text={translations[lang].borrow}
-                  className={qty <= '0' || !qty || error?.status ? 'disabled' : 'secondary'}
+                  className={
+                    parseFloat(qty) <= 0 || !qty || error?.status ? 'disabled' : 'secondary'
+                  }
                   onClick={borrow}
-                  disabled={qty <= '0' || !qty || loading || error?.status}
+                  disabled={parseFloat(qty) <= 0 || !qty || loading || error?.status}
                   loading={loading}
                 />
               </div>

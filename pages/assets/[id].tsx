@@ -211,8 +211,8 @@ const Asset: NextPage<Props> = ({ symbol, price }) => {
                   </section>
                   <h2 className={style.assetTitle}>{translations[lang].assetDetails}</h2>
                   <div className={style.assetInfoContainer}>
-                    <AssetInfo title={translations[lang].price} value={`$${Math.ceil(price)}`} />
-                    <AssetInfo title={translations[lang].reserveFactor} value="20%" />
+                    <AssetInfo title={translations[lang].price} value={`$${price}`} />
+                    {/* <AssetInfo title={translations[lang].reserveFactor} value="20%" /> */}
                     {marketData && (
                       <AssetInfo
                         title={translations[lang].collateralFactor}

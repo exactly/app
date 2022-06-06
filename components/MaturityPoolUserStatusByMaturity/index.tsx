@@ -76,11 +76,22 @@ function MaturityPoolUserStatusByMaturity({ type, maturities, showModal }: Props
                           {Array(26)
                             .fill('a')
                             .map((_, key) => {
-                              return <span className={styles.fullBar} key={key} />;
+                              return (
+                                <span
+                                  className={
+                                    type.value == 'deposit' ? styles.fullBar : styles.elapsedBar
+                                  }
+                                  key={key}
+                                />
+                              );
                             })}
                           <Image
                             className={styles.image}
-                            src="/img/icons/okTick.svg"
+                            src={
+                              type.value == 'deposit'
+                                ? '/img/icons/okTick.svg'
+                                : '/img/icons/xTick.svg'
+                            }
                             width={21}
                             height={21}
                           />
