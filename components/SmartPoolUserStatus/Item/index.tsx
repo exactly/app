@@ -63,7 +63,7 @@ function Item({
     if (auditorContract) {
       checkCollaterals();
     }
-  }, []);
+  }, [auditorContract, walletAddress]);
 
   async function checkCollaterals() {
     if (!accountData) return;
