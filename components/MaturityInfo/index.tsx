@@ -13,7 +13,9 @@ import styles from './style.module.scss';
 import keys from './translations.json';
 
 import numbers from 'config/numbers.json';
+
 import parseSymbol from 'utils/parseSymbol';
+import getExchangeRate from 'utils/getExchangeRate';
 
 interface Props {
   maturity: Maturity;
@@ -48,15 +50,21 @@ function MaturityInfo({ maturity, symbol, fixedLender }: Props) {
   }, [fixedLender]);
 
   async function getMaturityPoolData() {
-    const { borrowed, supplied } = await fixedLender?.maturityPools(maturity.value);
+    try {
+      const { borrowed, supplied } = await fixedLender?.maturityPools(maturity.value);
+      const decimals = await fixedLender?.decimals();
+      const exchangeRate = await getExchangeRate(symbol);
 
-    const newPoolData = {
-      borrowed: parseFloat(await ethers.utils.formatEther(borrowed)),
-      supplied: parseFloat(await ethers.utils.formatEther(supplied))
-    };
+      const newPoolData = {
+        borrowed: parseFloat(await ethers.utils.formatUnits(borrowed, decimals)),
+        supplied: parseFloat(await ethers.utils.formatUnits(supplied, decimals))
+      };
 
-    setSupply(newPoolData.supplied);
-    setDemand(newPoolData.borrowed);
+      setSupply(newPoolData.supplied * exchangeRate);
+      setDemand(newPoolData.borrowed * exchangeRate);
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   return (

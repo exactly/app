@@ -228,16 +228,26 @@ const Asset: NextPage<Props> = ({ symbol, price }) => {
                     )}
                   </div>
                   <div className={style.maturitiesContainer}>
-                    {maturities?.slice(0, 3)?.map((maturity) => {
-                      return (
-                        <MaturityInfo
-                          maturity={maturity}
-                          key={maturity.value}
-                          symbol={symbol}
-                          fixedLender={fixedLenderContract}
-                        />
-                      );
-                    })}
+                    {maturities
+                      ?.slice(itemsPerPage * (page - 1), itemsPerPage * page)
+                      ?.map((maturity) => {
+                        return (
+                          <MaturityInfo
+                            maturity={maturity}
+                            key={maturity.value}
+                            symbol={symbol}
+                            fixedLender={fixedLenderContract}
+                          />
+                        );
+                      })}
+                    <div className={style.paginator}>
+                      <Paginator
+                        total={maturities?.length ?? 0}
+                        itemsPerPage={itemsPerPage}
+                        handleChange={(page) => setPage(page)}
+                        currentPage={page}
+                      />
+                    </div>
                   </div>
                 </section>
               </FixedLenderProvider>
