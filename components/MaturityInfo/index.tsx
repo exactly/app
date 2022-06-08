@@ -1,4 +1,7 @@
-import { useContext } from 'react';
+import { useContext, useMemo, useState } from 'react';
+import { Contract, ethers } from 'ethers';
+import dayjs from 'dayjs';
+import Skeleton from 'react-loading-skeleton';
 
 import LangContext from 'contexts/LangContext';
 
@@ -15,20 +18,46 @@ import parseSymbol from 'utils/parseSymbol';
 interface Props {
   maturity: Maturity;
   symbol: string;
+  fixedLender: Contract | undefined;
 }
 
-function MaturityInfo({ maturity, symbol }: Props) {
+function MaturityInfo({ maturity, symbol, fixedLender }: Props) {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
-  const days = (new Date(maturity.label).getTime() - new Date().getTime()) / (1000 * 3600 * 24);
+  const [supply, setSupply] = useState<number | undefined>(undefined);
+  const [demand, setDemand] = useState<number | undefined>(undefined);
+
+  const daysRemaining = dayjs.unix(parseInt(maturity.value)).diff(dayjs(), 'days');
 
   const color =
-    days < numbers.daysToError
+    daysRemaining < numbers.daysToError
       ? styles.error
-      : days < numbers.daysToWarning
+      : daysRemaining < numbers.daysToWarning
       ? styles.warning
       : styles.status;
+
+  const rtf = new Intl.RelativeTimeFormat('en', {
+    localeMatcher: 'best fit',
+    numeric: 'always',
+    style: 'long'
+  });
+
+  useMemo(() => {
+    getMaturityPoolData();
+  }, [fixedLender]);
+
+  async function getMaturityPoolData() {
+    const { borrowed, supplied } = await fixedLender?.maturityPools(maturity.value);
+
+    const newPoolData = {
+      borrowed: parseFloat(await ethers.utils.formatEther(borrowed)),
+      supplied: parseFloat(await ethers.utils.formatEther(supplied))
+    };
+
+    setSupply(newPoolData.supplied);
+    setDemand(newPoolData.borrowed);
+  }
 
   return (
     <div className={styles.maturityContainer}>
@@ -45,29 +74,32 @@ function MaturityInfo({ maturity, symbol }: Props) {
           </div>
           <p className={color}>
             <img src="/img/icons/clock.svg" alt="clock" />
-            {Math.floor(days)}{' '}
-            {Math.floor(days) != 1 ? translations[lang].days : translations[lang].day}
+            {rtf.format(daysRemaining, 'day')}
           </p>
         </li>
         <li className={styles.row}>
           <span className={styles.title}>{translations[lang].totalBorrowed}</span>{' '}
-          <p className={styles.value}>1.553.612.280,17</p>
+          <p className={styles.value}>
+            {demand && demand > 0 ? `$${demand.toFixed(2)}` : demand == 0 ? '0.00' : <Skeleton />}
+          </p>
         </li>
         <li className={styles.row}>
-          <span className={styles.title}> {translations[lang].liquidity}</span>{' '}
-          <p className={styles.value}>384.186.120,43</p>
+          <span className={styles.title}>{translations[lang].totalDeposited}</span>{' '}
+          <p className={styles.value}>
+            {supply && supply > 0 ? `$${supply.toFixed(2)}` : supply == 0 ? '0.00' : <Skeleton />}
+          </p>
         </li>
         <li className={styles.row}>
           <span className={styles.title}>{translations[lang].utilizationRate}</span>{' '}
-          <p className={styles.value}>80%</p>
-        </li>
-        <li className={styles.row}>
-          <span className={styles.title}>{translations[lang].suppliers}</span>{' '}
-          <p className={styles.value}>68693</p>
-        </li>
-        <li className={styles.row}>
-          <span className={styles.title}>{translations[lang].borrowers}</span>{' '}
-          <p className={styles.value}>1292</p>
+          <p className={styles.value}>
+            {demand && supply && demand > 0 && supply > 0 ? (
+              `${((demand / supply) * 100).toFixed(2)}%`
+            ) : demand == 0 || supply == 0 ? (
+              '0.00%'
+            ) : (
+              <Skeleton />
+            )}
+          </p>
         </li>
       </ul>
     </div>

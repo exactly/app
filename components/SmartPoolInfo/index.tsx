@@ -1,4 +1,5 @@
-import { useContext } from 'react';
+import { useContext, useMemo, useState } from 'react';
+import { Contract, ethers } from 'ethers';
 
 import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
@@ -13,17 +14,39 @@ import Button from 'components/common/Button';
 import Tooltip from 'components/Tooltip';
 
 import parseSymbol from 'utils/parseSymbol';
+import Skeleton from 'react-loading-skeleton';
 
 interface Props {
   showModal: (type: string, maturity: string | undefined) => void;
   symbol: string;
+  fixedLender: Contract | undefined;
 }
 
-function SmartPoolInfo({ showModal, symbol }: Props) {
+function SmartPoolInfo({ showModal, symbol, fixedLender }: Props) {
   const { walletAddress, connect } = useWeb3Context();
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
+
+  const [supply, setSupply] = useState<number | undefined>(undefined);
+  const [demand, setDemand] = useState<number | undefined>(undefined);
+
+  useMemo(() => {
+    getSmartPoolData();
+  }, [fixedLender]);
+
+  async function getSmartPoolData() {
+    const borrowed = await fixedLender?.smartPoolBorrowed();
+    const supplied = await fixedLender?.smartPoolAssets();
+
+    const newPoolData = {
+      borrowed: Math.round(parseInt(await ethers.utils.formatEther(borrowed))),
+      supplied: Math.round(parseInt(await ethers.utils.formatEther(supplied)))
+    };
+
+    setSupply(newPoolData.supplied);
+    setDemand(newPoolData.borrowed);
+  }
 
   function handleClick() {
     if (!walletAddress && connect) return connect();
@@ -57,19 +80,17 @@ function SmartPoolInfo({ showModal, symbol }: Props) {
         </li>
         <li className={styles.row}>
           <span className={styles.title}>{translations[lang].totalDeposited}</span>{' '}
-          <p className={styles.value}>1.553.612.280,17</p>
+          <p className={styles.value}> {(supply && `$${supply}`) || <Skeleton />}</p>
         </li>
         <li className={styles.row}>
           <span className={styles.title}> {translations[lang].liquidity}</span>{' '}
-          <p className={styles.value}>384.186.120,43</p>
+          <p className={styles.value}> {supply && demand ? `$${supply - demand}` : <Skeleton />}</p>
         </li>
         <li className={styles.row}>
           <span className={styles.title}>{translations[lang].utilizationRate}</span>{' '}
-          <p className={styles.value}>80%</p>
-        </li>
-        <li className={styles.row}>
-          <span className={styles.title}>{translations[lang].suppliers}</span>{' '}
-          <p className={styles.value}>68693</p>
+          <p className={styles.value}>
+            {supply && demand ? `${((demand / supply) * 100).toFixed(2)}%` : <Skeleton />}{' '}
+          </p>
         </li>
       </ul>
     </div>

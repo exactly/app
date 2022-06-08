@@ -80,6 +80,8 @@
       .value {
         color: var(--gray-900);
         font-weight: 600;
+        min-width: var(--u6);
+        text-align: right;
       }
     }
   }

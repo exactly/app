@@ -5,20 +5,35 @@
   .assetData {
     display: flex;
     align-items: flex-end;
+
     .assetContainer {
       width: 200px;
+      display: flex;
+      align-items: center;
+      gap: var(--u);
+      margin-bottom: var(--u3);
+
+      .title {
+        font-size: var(--font-20);
+        font-weight: bold;
+        margin: 0;
+      }
     }
+
     .assetMetricsContainer {
       margin: var(--u3) 0px;
       display: flex;
+
       .assetMetrics {
         margin: 0 var(--u3);
+
         .title {
           color: var(--gray-500);
           display: block;
           font-size: var(--font-12);
           font-weight: 600;
         }
+
         .value {
           color: var(--gray-900);
           margin-top: var(--u);
