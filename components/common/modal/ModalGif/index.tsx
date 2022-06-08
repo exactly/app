@@ -2,6 +2,7 @@ import { useContext } from 'react';
 
 import styles from './style.module.scss';
 
+import { Contract } from 'ethers';
 import { Dictionary } from 'types/Dictionary';
 import { Transaction } from 'types/Transaction';
 import { LangKeys } from 'types/Lang';
@@ -14,10 +15,12 @@ import { useWeb3Context } from 'contexts/Web3Context';
 
 type Props = {
   tx: Transaction;
+  symbol?: string;
+  contract?: Contract;
 };
 
-function ModalGif({ tx }: Props) {
-  const { network } = useWeb3Context();
+function ModalGif({ tx, symbol, contract }: Props) {
+  const { web3Provider, network } = useWeb3Context();
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
@@ -40,6 +43,34 @@ function ModalGif({ tx }: Props) {
       text: translations[lang].errorText
     }
   };
+
+  async function handleAddToken() {
+    if (!web3Provider?.provider.request || !contract || !symbol) return;
+
+    try {
+      const decimals = await contract.decimals();
+      const address = await contract.address;
+
+      //we can detect if the user added the token or not
+      //we need to change the token url, it can't be local hosted, needs to be public
+
+      await web3Provider.provider.request({
+        method: 'wallet_watchAsset',
+        params: {
+          // @ts-ignore
+          type: 'ERC20',
+          options: {
+            address,
+            symbol: `e${symbol}`,
+            decimals,
+            image: ''
+          }
+        }
+      });
+    } catch (e) {
+      console.log(e);
+    }
+  }
 
   return (
     <div className={styles.container}>
@@ -77,6 +108,12 @@ function ModalGif({ tx }: Props) {
           >
             Etherscan
           </a>
+        </p>
+      )}
+
+      {tx.status == 'success' && contract && (
+        <p className={styles.link} onClick={handleAddToken}>
+          <span className={styles.addToken}> {translations[lang].addToken}</span>
         </p>
       )}
 

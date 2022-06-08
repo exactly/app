@@ -396,7 +396,9 @@ function DepositModalSP({ data, closeModal }: Props) {
               </div>
             </>
           )}
-          {tx && <ModalGif tx={tx} />}
+          {tx && symbol && fixedLenderWithSigner && (
+            <ModalGif tx={tx} symbol={symbol} contract={fixedLenderWithSigner} />
+          )}
         </ModalWrapper>
       )}
 

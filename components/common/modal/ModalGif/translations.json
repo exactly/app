@@ -5,7 +5,8 @@
     "successTitle": "Done!",
     "errorTitle": "There was an error",
     "etherscanText": "View at",
-    "errorButton": "Try again"
+    "errorButton": "Try again",
+    "addToken": "Add Token"
   },
   "es": {}
 }

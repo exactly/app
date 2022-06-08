@@ -45,8 +45,17 @@
 
     .etherscan {
       color: var(--primary);
-      font-weight: 500;
+      font-weight: 600;
       cursor: pointer;
+      text-decoration: underline;
+    }
+
+    .addToken {
+      color: var(--primary);
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: underline;
+      font-size: var(--font-14);
     }
   }
 }
