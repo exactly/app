@@ -9,6 +9,12 @@
   .maturity {
     width: 40%;
 
+    .value {
+      width: 40%;
+      margin: 0;
+      height: var(--u2);
+    }
+
     span {
       display: block;
       margin: var(--u) 0;
@@ -30,11 +36,13 @@
     .deposit {
       color: var(--primary);
       font-weight: bold;
+      width: 30%;
     }
 
     .borrow {
       color: var(--secondary);
       font-weight: bold;
+      width: 30%;
     }
   }
 
@@ -47,6 +55,7 @@
     .buttonContainer {
       height: var(--u4);
       color: var(--white);
+      width: 100%;
 
       &.deposit {
         background-color: var(--primary);
