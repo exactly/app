@@ -6,7 +6,7 @@
   .titleContainer {
     width: 100%;
     font-size: var(--font-16);
-    color: var(--gray-500);
+    color: var(--gray-900);
     font-weight: 700;
   }
 
@@ -49,6 +49,7 @@
         color: var(--gray-500);
         margin: 0 var(--u3);
         font-size: var(--font-12);
+        font-weight: 600;
       }
 
       .warning {
