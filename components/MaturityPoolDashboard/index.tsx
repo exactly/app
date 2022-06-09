@@ -1,6 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
 import dayjs from 'dayjs';
-import { Option } from 'react-dropdown';
 
 import { FixedLenderAccountData } from 'types/FixedLenderAccountData';
 
@@ -18,6 +17,7 @@ import keys from './translations.json';
 import { Deposit } from 'types/Deposit';
 import { Borrow } from 'types/Borrow';
 import { LangKeys } from 'types/Lang';
+import { Option } from 'react-dropdown';
 
 interface Props {
   showModal: (data: Deposit | Borrow, type: String) => void;
@@ -152,7 +152,7 @@ function MaturityPoolDashboard({ showModal, tab }: Props) {
         <MaturityPoolUserStatusByMaturity
           type={undefined}
           maturities={undefined}
-          showModal={showModal}
+          showModal={() => undefined}
         />
       )}
       {tab.value == 'deposit' && maturities && !maturities.hasOwnProperty('deposits') && (

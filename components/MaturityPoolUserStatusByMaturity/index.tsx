@@ -1,7 +1,6 @@
 import { useContext } from 'react';
 import Image from 'next/image';
 import dayjs from 'dayjs';
-import { Option } from 'react-dropdown';
 import Skeleton from 'react-loading-skeleton';
 
 import Item from './Item';
@@ -12,6 +11,7 @@ import LangContext from 'contexts/LangContext';
 import { LangKeys } from 'types/Lang';
 import { Deposit } from 'types/Deposit';
 import { Borrow } from 'types/Borrow';
+import { Option } from 'react-dropdown';
 
 import styles from './style.module.scss';
 
@@ -148,7 +148,7 @@ function MaturityPoolUserStatusByMaturity({ type, maturities, showModal }: Props
                     })}
 
                   {type.value == 'borrow' &&
-                    maturities.borrows &&
+                    maturities.hasOwnProperty('borrows') &&
                     maturities?.borrows[maturity]?.map((pool: any, key: number) => {
                       const { principal, fee, symbol, market, decimals } = pool;
 
@@ -207,7 +207,7 @@ function MaturityPoolUserStatusByMaturity({ type, maturities, showModal }: Props
                 amount={undefined}
                 fee={undefined}
                 maturityDate={undefined}
-                showModal={showModal}
+                showModal={() => undefined}
                 symbol={undefined}
                 market={undefined}
                 decimals={undefined}

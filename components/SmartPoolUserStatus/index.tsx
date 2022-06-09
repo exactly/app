@@ -110,7 +110,7 @@ function SmartPoolUserStatus({ walletAddress, showModal }: Props) {
                     symbol={undefined}
                     walletAddress={undefined}
                     eTokenAmount={undefined}
-                    showModal={showModal}
+                    showModal={() => undefined}
                     auditorContract={undefined}
                   />
                 );

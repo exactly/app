@@ -30,7 +30,7 @@ type Props = {
   symbol: string | undefined;
   tokenAmount: BigNumber | undefined;
   walletAddress: string | null | undefined;
-  showModal: (data: Deposit | any, type: String) => void;
+  showModal: (data: Deposit | any, type: String) => void | undefined;
   eTokenAmount: BigNumber | undefined;
   auditorContract: Contract | undefined;
 };
@@ -69,6 +69,7 @@ function Item({
 
   async function checkCollaterals() {
     if (!accountData || !symbol) return;
+
     const data = accountData;
 
     data![symbol].isCollateral ? setToggle(true) : setToggle(false);

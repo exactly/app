@@ -2,8 +2,8 @@
   "en": {
     "emptyState": "Empty State",
     "position": "No position found, please connect your wallet",
-    "deposit": "There are no deposits yet",
-    "borrow": "There are no borrows yet"
+    "deposit": "No deposits found",
+    "borrow": "No borrows found"
   },
   "es": {}
 }

@@ -1,10 +1,9 @@
 import { useContext, useEffect, useState } from 'react';
 import { ethers } from 'ethers';
 import request from 'graphql-request';
-import Skeleton from 'react-loading-skeleton';
-import { Option } from 'react-dropdown';
 
 import Button from 'components/common/Button';
+import Skeleton from 'react-loading-skeleton';
 
 import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
@@ -14,6 +13,7 @@ import { Deposit } from 'types/Deposit';
 import { Borrow } from 'types/Borrow';
 import { WithdrawMP } from 'types/WithdrawMP';
 import { Repay } from 'types/Repay';
+import { Option } from 'react-dropdown';
 
 import styles from './style.module.scss';
 
@@ -65,7 +65,7 @@ function Item({
   );
   const [exchangeRate, setExchangeRate] = useState<number | undefined>(undefined);
 
-  const fixedRate = (parseFloat(fee!) * 100) / parseFloat(amount!);
+  const fixedRate = fee && amount && (parseFloat(fee) * 100) / parseFloat(amount);
 
   useEffect(() => {
     getMaturityData();
@@ -74,6 +74,7 @@ function Item({
 
   async function getMaturityData() {
     if (!walletAddress || !maturityDate || !market || !type) return;
+
     const subgraphUrl = getSubgraph(network?.name);
     const transactions = [];
 
@@ -111,6 +112,7 @@ function Item({
 
   async function getRate() {
     if (!symbol) return;
+
     const rate = await getExchangeRate(symbol);
 
     setExchangeRate(rate);
@@ -165,10 +167,9 @@ function Item({
           </thead>
           <tbody>
             {transactions.map((transaction: any, key) => {
-              const value = formatNumber(
-                ethers.utils.formatUnits(transaction.assets, decimals),
-                symbol!
-              );
+              const value =
+                symbol &&
+                formatNumber(ethers.utils.formatUnits(transaction.assets, decimals), symbol);
               const text = transaction?.fee
                 ? type?.value == 'borrow'
                   ? translations[lang].borrow
@@ -195,7 +196,7 @@ function Item({
                     {value}{' '}
                     {exchangeRate && (
                       <span className={styles.usd}>
-                        (${(parseFloat(value) * exchangeRate).toFixed(2)})
+                        (${value && (parseFloat(value) * exchangeRate).toFixed(2)})
                       </span>
                     )}
                   </td>
