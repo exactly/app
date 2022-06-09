@@ -23,7 +23,7 @@ import parseSymbol from 'utils/parseSymbol';
 import getSmartPoolInterestRate from 'utils/getSmartPoolInterestRate';
 
 type Props = {
-  market?: Market;
+  market: Market | undefined;
   showModal?: (marketData: Market, type: String) => void;
 };
 

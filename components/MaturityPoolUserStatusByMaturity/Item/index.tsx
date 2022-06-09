@@ -1,6 +1,8 @@
 import { useContext, useEffect, useState } from 'react';
 import { ethers } from 'ethers';
 import request from 'graphql-request';
+import Skeleton from 'react-loading-skeleton';
+import { Option } from 'react-dropdown';
 
 import Button from 'components/common/Button';
 
@@ -10,7 +12,6 @@ import { useWeb3Context } from 'contexts/Web3Context';
 import { LangKeys } from 'types/Lang';
 import { Deposit } from 'types/Deposit';
 import { Borrow } from 'types/Borrow';
-import { Option } from 'react-dropdown';
 import { WithdrawMP } from 'types/WithdrawMP';
 import { Repay } from 'types/Repay';
 
@@ -32,15 +33,15 @@ import {
 } from 'queries';
 
 type Props = {
-  type?: Option;
-  amount: string;
-  fee: string;
-  maturityDate: string;
+  type?: Option | undefined;
+  amount: string | undefined;
+  fee: string | undefined;
+  maturityDate: string | undefined;
   showModal: (data: Deposit | Borrow, type: String) => void;
-  symbol: string;
-  market: string;
-  decimals: number;
-  data: Borrow | Deposit;
+  symbol: string | undefined;
+  market: string | undefined;
+  decimals: number | undefined;
+  data: Borrow | Deposit | undefined;
 };
 
 function Item({
@@ -64,7 +65,7 @@ function Item({
   );
   const [exchangeRate, setExchangeRate] = useState<number | undefined>(undefined);
 
-  const fixedRate = (parseFloat(fee) * 100) / parseFloat(amount);
+  const fixedRate = (parseFloat(fee!) * 100) / parseFloat(amount!);
 
   useEffect(() => {
     getMaturityData();
@@ -72,6 +73,7 @@ function Item({
   }, [maturityDate, walletAddress]);
 
   async function getMaturityData() {
+    if (!walletAddress || !maturityDate || !market || !type) return;
     const subgraphUrl = getSubgraph(network?.name);
     const transactions = [];
 
@@ -108,6 +110,7 @@ function Item({
   }
 
   async function getRate() {
+    if (!symbol) return;
     const rate = await getExchangeRate(symbol);
 
     setExchangeRate(rate);
@@ -117,19 +120,27 @@ function Item({
     <details className={styles.container}>
       <summary className={styles.summary}>
         <div className={styles.symbol}>
-          <img
-            src={`/img/assets/${symbol?.toLowerCase()}.png`}
-            alt={symbol}
-            className={styles.assetImage}
-          />
-          <span className={styles.primary}>{parseSymbol(symbol)}</span>
+          {(symbol && (
+            <img
+              src={`/img/assets/${symbol?.toLowerCase()}.png`}
+              alt={symbol}
+              className={styles.assetImage}
+            />
+          )) || <Skeleton circle height={40} width={40} />}
+          <span className={styles.primary}>{symbol ? parseSymbol(symbol) : <Skeleton />}</span>
         </div>
         <span className={styles.value}>
-          {formatNumber(ethers.utils.formatUnits(amount, decimals), symbol)}
+          {symbol && amount ? (
+            formatNumber(ethers.utils.formatUnits(amount, decimals), symbol)
+          ) : (
+            <Skeleton width={40} />
+          )}
         </span>
-        <span className={styles.value}>{fixedRate.toFixed(2)}%</span>
+        <span className={styles.value}>
+          {fixedRate ? `${fixedRate.toFixed(2)} %` : <Skeleton width={40} />}
+        </span>
 
-        {type && (
+        {type && data ? (
           <div className={styles.buttonContainer}>
             <Button
               text={type.value == 'borrow' ? translations[lang].repay : translations[lang].withdraw}
@@ -139,6 +150,8 @@ function Item({
               }}
             />
           </div>
+        ) : (
+          <Skeleton className={styles.buttonContainer} />
         )}
       </summary>
       <div className={styles.tableContainer}>
@@ -154,7 +167,7 @@ function Item({
             {transactions.map((transaction: any, key) => {
               const value = formatNumber(
                 ethers.utils.formatUnits(transaction.assets, decimals),
-                symbol
+                symbol!
               );
               const text = transaction?.fee
                 ? type?.value == 'borrow'

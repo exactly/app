@@ -1,23 +1,23 @@
 import { useContext, useEffect, useState } from 'react';
 import dayjs from 'dayjs';
-
 import { Option } from 'react-dropdown';
-import { LangKeys } from 'types/Lang';
+
 import { FixedLenderAccountData } from 'types/FixedLenderAccountData';
 
 import AccountDataContext from 'contexts/AccountDataContext';
+import LangContext from 'contexts/LangContext';
 
 import Tooltip from 'components/Tooltip';
 import MaturityPoolUserStatusByMaturity from 'components/MaturityPoolUserStatusByMaturity';
 import Button from 'components/common/Button';
-
-import LangContext from 'contexts/LangContext';
+import EmptyState from 'components/EmptyState';
 
 import styles from './style.module.scss';
 
 import keys from './translations.json';
 import { Deposit } from 'types/Deposit';
 import { Borrow } from 'types/Borrow';
+import { LangKeys } from 'types/Lang';
 
 interface Props {
   showModal: (data: Deposit | Borrow, type: String) => void;
@@ -142,12 +142,24 @@ function MaturityPoolDashboard({ showModal, tab }: Props) {
           )}
         </div>
       </section>
-      {maturities && (
+      {maturities ? (
         <MaturityPoolUserStatusByMaturity
           type={tab}
           maturities={maturities}
           showModal={showModal}
         />
+      ) : (
+        <MaturityPoolUserStatusByMaturity
+          type={undefined}
+          maturities={undefined}
+          showModal={showModal}
+        />
+      )}
+      {tab.value == 'deposit' && maturities && !maturities.hasOwnProperty('deposits') && (
+        <EmptyState connected tab={tab.value} />
+      )}
+      {tab.value == 'borrow' && maturities && !maturities.hasOwnProperty('borrows') && (
+        <EmptyState connected tab={tab.value} />
       )}
     </section>
   );
