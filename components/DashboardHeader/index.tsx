@@ -206,12 +206,12 @@ function DashboardHeader() {
         {
           label: '',
           value: collateral,
-          color: '#63CA10'
+          color: '#53D3BE'
         },
         {
           label: '',
           value: debt,
-          color: '#AF0606'
+          color: '#4D4DE8'
         }
       ];
       setHealthFactorData(healthFactorData);
@@ -277,7 +277,9 @@ function DashboardHeader() {
                   <span className={styles.fixed} />
                   {translations[lang].fixed}
                 </p>
-                {rateComposition && `${rateComposition.fixedComposition}%`}
+                <p className={styles.informationValue}>
+                  {rateComposition && `${rateComposition.fixedComposition}%`}
+                </p>
               </div>
             </div>
           )}

@@ -90,12 +90,12 @@
 
             .debt {
               @extend .fixed;
-              background: var(--error);
+              background: var(--primary);
             }
 
             .collateral {
               @extend .fixed;
-              background: var(--success);
+              background: var(--secondary);
             }
           }
           .informationValue {

@@ -1,5 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
 import request from 'graphql-request';
+import Skeleton from 'react-loading-skeleton';
 
 import Button from 'components/common/Button';
 
@@ -19,9 +20,9 @@ import getSubgraph from 'utils/getSubgraph';
 import { getLastMaturityPoolBorrowRate, getLastMaturityPoolDepositRate } from 'queries';
 
 type Props = {
-  maturity: Maturity;
-  market: string;
-  showModal: (type: string, maturity: string | undefined) => void;
+  maturity: Maturity | undefined;
+  market: string | undefined;
+  showModal: (type: string, maturity: string | undefined) => void | undefined;
 };
 
 function Item({ maturity, market, showModal }: Props) {
@@ -31,12 +32,18 @@ function Item({ maturity, market, showModal }: Props) {
   const translations: { [key: string]: LangKeys } = keys;
 
   const [lastFixedRate, setLastFixedRate] = useState<Dictionary<string> | undefined>(undefined);
+  const [currentMaturity, setCurrentMaturity] = useState<Maturity | undefined>(undefined);
 
   useEffect(() => {
     getLastFixedRate();
-  }, [maturity.value, market]);
+  }, [maturity, market]);
 
   async function getLastFixedRate() {
+    setLastFixedRate(undefined);
+    setCurrentMaturity(undefined);
+
+    if (!market || !maturity) return;
+
     try {
       const subgraphUrl = getSubgraph(network?.name);
 
@@ -66,6 +73,8 @@ function Item({ maturity, market, showModal }: Props) {
     } catch (e) {
       console.log(e);
     }
+
+    setCurrentMaturity(maturity);
   }
 
   function handleClick(type: string, maturity: string) {
@@ -76,27 +85,39 @@ function Item({ maturity, market, showModal }: Props) {
   return (
     <div className={styles.row}>
       <div className={styles.maturity}>
-        <span>{maturity.label}</span>
-        <span className={styles.liquidity}>{translations[lang].liquidity}: $1.3B</span>
+        <span className={styles.value}>{currentMaturity?.label || <Skeleton />}</span>
+        {/* <span className={styles.liquidity}>{translations[lang].liquidity}: $1.3B</span> */}
       </div>
       <div className={styles.lastFixedRate}>
-        <div className={styles.deposit}>{lastFixedRate?.deposit}%</div>
-        <div className={styles.borrow}>{lastFixedRate?.borrow}%</div>
+        <div className={styles.deposit}>
+          {lastFixedRate ? `${lastFixedRate?.deposit}%` : <Skeleton />}
+        </div>
+        <div className={styles.borrow}>
+          {lastFixedRate ? `${lastFixedRate?.borrow}%` : <Skeleton />}
+        </div>
       </div>
       <div className={styles.actions}>
         <div className={styles.buttonContainer}>
-          <Button
-            text={translations[lang].deposit}
-            className="primary"
-            onClick={() => handleClick('deposit', maturity.value)}
-          />
+          {currentMaturity && maturity ? (
+            <Button
+              text={translations[lang].deposit}
+              className="primary"
+              onClick={() => handleClick('deposit', maturity.value)}
+            />
+          ) : (
+            <Skeleton className={styles.buttonContainer} />
+          )}
         </div>
         <div className={styles.buttonContainer}>
-          <Button
-            text={translations[lang].borrow}
-            className="secondary"
-            onClick={() => handleClick('borrow', maturity.value)}
-          />
+          {currentMaturity && maturity ? (
+            <Button
+              text={translations[lang].borrow}
+              className="secondary"
+              onClick={() => handleClick('borrow', maturity.value)}
+            />
+          ) : (
+            <Skeleton className={styles.buttonContainer} />
+          )}
         </div>
       </div>
     </div>

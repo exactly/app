@@ -2,7 +2,7 @@ import styles from './style.module.scss';
 
 interface Props {
   title: string;
-  value: number | string;
+  value: number | string | undefined;
   symbol?: string;
 }
 

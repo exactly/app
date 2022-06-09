@@ -7,7 +7,8 @@
     "netRate": "Net Rate",
     "supplyAPY": "Supply APY",
     "distributionAPY": "Distribution APY",
-    "totalSupply": "Total Supply"
+    "totalSupply": "Total Supply",
+    "maturityPools": "Maturity Pools"
   },
   "es": {
     "price": "Precio",
