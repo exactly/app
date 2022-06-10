@@ -194,9 +194,9 @@ function Item({
                   </td>
                   <td>
                     {value}{' '}
-                    {exchangeRate && (
+                    {exchangeRate && value && (
                       <span className={styles.usd}>
-                        (${value && (parseFloat(value) * exchangeRate).toFixed(2)})
+                        (${(parseFloat(value) * exchangeRate).toFixed(2)})
                       </span>
                     )}
                   </td>
