@@ -296,7 +296,7 @@ function DashboardHeader() {
           {walletAddress ? (
             <>
               <p className={styles.value}>
-                {totalBorrow ? `$${totalBorrow?.toFixed(2)}` : <Skeleton />}
+                {borrowData ? `$${totalBorrow?.toFixed(2)}` : <Skeleton />}
               </p>
               {/* <p className={styles.subvalue}>2.14% {translations[lang].apr}</p> */}
             </>

@@ -1,5 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
 import { ethers, Contract, BigNumber } from 'ethers';
+import Skeleton from 'react-loading-skeleton';
+
 import Button from 'components/common/Button';
 import Switch from 'components/common/Switch';
 import Loading from 'components/common/Loading';
@@ -25,11 +27,11 @@ import formatNumber from 'utils/formatNumber';
 import parseSymbol from 'utils/parseSymbol';
 
 type Props = {
-  symbol: string;
-  tokenAmount: BigNumber;
+  symbol: string | undefined;
+  tokenAmount: BigNumber | undefined;
   walletAddress: string | null | undefined;
-  showModal: (data: Deposit | any, type: String) => void;
-  eTokenAmount: BigNumber;
+  showModal: (data: Deposit | any, type: String) => void | undefined;
+  eTokenAmount: BigNumber | undefined;
   auditorContract: Contract | undefined;
 };
 
@@ -57,7 +59,7 @@ function Item({
 
   useEffect(() => {
     getCurrentBalance();
-  }, []);
+  }, [walletAddress]);
 
   useEffect(() => {
     if (auditorContract) {
@@ -66,13 +68,16 @@ function Item({
   }, [auditorContract, walletAddress]);
 
   async function checkCollaterals() {
-    if (!accountData) return;
+    if (!accountData || !symbol) return;
+
     const data = accountData;
 
     data![symbol].isCollateral ? setToggle(true) : setToggle(false);
   }
 
   async function getCurrentBalance() {
+    if (!walletAddress || !symbol) return;
+
     const contractData = await getContractData(
       network?.name,
       underlyingData!.address,
@@ -133,75 +138,95 @@ function Item({
   return (
     <div className={styles.container}>
       <div className={styles.symbol}>
-        <img
-          src={`/img/assets/${symbol.toLowerCase()}.png`}
-          alt={symbol}
-          className={styles.assetImage}
-        />
-        <span className={styles.primary}>{parseSymbol(symbol)}</span>
+        {(symbol && (
+          <img
+            src={`/img/assets/${symbol.toLowerCase()}.png`}
+            alt={symbol}
+            className={styles.assetImage}
+          />
+        )) || <Skeleton circle height={40} width={40} />}
+        <span className={styles.primary}>{(symbol && parseSymbol(symbol)) || <Skeleton />}</span>
       </div>
-      <span className={styles.value}>{formatNumber(walletBalance!, symbol)}</span>
       <span className={styles.value}>
-        {formatNumber(
-          ethers.utils.formatUnits(tokenAmount, decimals[symbol! as keyof Decimals]),
-          symbol
+        {(symbol && walletBalance && formatNumber(walletBalance!, symbol)) || (
+          <Skeleton width={40} />
         )}
       </span>
       <span className={styles.value}>
-        {formatNumber(
-          ethers.utils.formatUnits(eTokenAmount, decimals[symbol! as keyof Decimals]),
-          symbol
-        )}
+        {(tokenAmount &&
+          symbol &&
+          formatNumber(
+            ethers.utils.formatUnits(tokenAmount, decimals[symbol! as keyof Decimals]),
+            symbol
+          )) || <Skeleton width={40} />}
+      </span>
+      <span className={styles.value}>
+        {(eTokenAmount &&
+          symbol &&
+          formatNumber(
+            ethers.utils.formatUnits(eTokenAmount, decimals[symbol! as keyof Decimals]),
+            symbol
+          )) || <Skeleton width={40} />}
       </span>
 
-      <span className={styles.value}>
-        {!loading ? (
-          <Switch
-            isOn={toggle}
-            handleToggle={() => {
-              setToggle((prev) => !prev);
-              handleMarket();
-            }}
-            id={underlyingData?.address || Math.random().toString()}
-            disabled={disabled}
-          />
-        ) : (
-          <div className={styles.loadingContainer}>
-            <Loading size="small" color="primary" />
-          </div>
-        )}
-      </span>
+      {symbol ? (
+        <span className={styles.value}>
+          {!loading ? (
+            <Switch
+              isOn={toggle}
+              handleToggle={() => {
+                setToggle((prev) => !prev);
+                handleMarket();
+              }}
+              id={underlyingData?.address || Math.random().toString()}
+              disabled={disabled}
+            />
+          ) : (
+            <div className={styles.loadingContainer}>
+              <Loading size="small" color="primary" />
+            </div>
+          )}
+        </span>
+      ) : (
+        <span className={styles.value}>
+          <Skeleton width={40} />
+        </span>
+      )}
       <div className={styles.actions}>
         <div className={styles.buttonContainer}>
-          <Button
-            text={translations[lang].deposit}
-            className="primary"
-            onClick={() =>
-              showModal(
-                {
-                  market: getFixedLenderData().address,
-                  symbol
-                },
-                'smartDeposit'
-              )
-            }
-          />
+          {(symbol && (
+            <Button
+              text={translations[lang].deposit}
+              className="primary"
+              onClick={() =>
+                showModal(
+                  {
+                    market: getFixedLenderData().address,
+                    symbol
+                  },
+                  'smartDeposit'
+                )
+              }
+            />
+          )) || <Skeleton height={40} />}
         </div>
 
         <div className={styles.buttonContainer}>
-          <Button
-            text={translations[lang].withdraw}
-            className="tertiary"
-            onClick={() =>
-              showModal(
-                {
-                  assets: tokenAmount,
-                  symbol
-                },
-                'withdrawSP'
-              )
-            }
-          />
+          {(symbol && (
+            <Button
+              text={translations[lang].withdraw}
+              className="tertiary"
+              onClick={() =>
+                showModal(
+                  {
+                    assets: tokenAmount,
+                    symbol
+                  },
+                  'withdrawSP'
+                )
+              }
+            />
+          )) || <Skeleton height={40} />}
         </div>
       </div>
     </div>
