@@ -15,16 +15,17 @@ import { Dictionary } from 'types/Dictionary';
 function getABI(network: string | undefined = 'rinkeby') {
   const dictionary: Dictionary<Dictionary<any>> = {
     kovan: {
-      FixedLenderDAI: kovanFixedLenderDAI,
-      FixedLenderWETH: kovanFixedLenderWETH,
+      FixedLenders: [kovanFixedLenderDAI, kovanFixedLenderWETH],
       Auditor: kovanAuditor,
       Previewer: kovanPreviewer
     },
     rinkeby: {
-      FixedLenderDAI: rinkebyFixedLenderDAI,
-      FixedLenderWETH: rinkebyFixedLenderWETH,
-      FixedLenderWBTC: rinkebyFixedLenderWBTC,
-      FixedLenderUSDC: rinkebyFixedLenderUSDC,
+      FixedLenders: [
+        rinkebyFixedLenderDAI,
+        rinkebyFixedLenderWETH,
+        rinkebyFixedLenderWBTC,
+        rinkebyFixedLenderUSDC
+      ],
       Auditor: rinkebyAuditor,
       Previewer: rinkebyPreviewer
     },

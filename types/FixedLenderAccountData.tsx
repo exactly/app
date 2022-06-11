@@ -11,7 +11,7 @@ export interface Position {
 }
 
 export type FixedLenderAccountData = {
-  fixedLender: string;
+  market: string;
   assetSymbol: string;
   maturitySupplyPositions: Array<MaturityPosition>;
   maturityBorrowPositions: Array<MaturityPosition>;

@@ -12,7 +12,7 @@ import Item from './Item';
 
 interface Props {
   maturities: Array<Maturity> | undefined;
-  market: string;
+  market: string | undefined;
   showModal: (type: string, maturity: string | undefined) => void;
 }
 
@@ -27,14 +27,14 @@ function AssetTable({ maturities, market, showModal }: Props) {
         <div className={styles.lastFixedRate}>{translations[lang].lastFixedRate}</div>
         <div className={styles.actions}></div>
       </div>
-      {maturities && (
+      {maturities && market && (
         <>
           {maturities.map((maturity: Maturity, key: number) => {
             return <Item key={key} maturity={maturity} market={market} showModal={showModal} />;
           })}
         </>
       )}
-      {!maturities &&
+      {(!maturities || !market) &&
         Array(3)
           .fill('a')
           .map((_, key: number) => {

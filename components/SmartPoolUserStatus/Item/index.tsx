@@ -59,13 +59,13 @@ function Item({
 
   useEffect(() => {
     getCurrentBalance();
-  }, [walletAddress]);
+  }, [underlyingData, walletAddress]);
 
   useEffect(() => {
-    if (auditorContract) {
+    if (accountData) {
       checkCollaterals();
     }
-  }, [auditorContract, walletAddress]);
+  }, [accountData, walletAddress]);
 
   async function checkCollaterals() {
     if (!accountData || !symbol) return;
@@ -116,7 +116,7 @@ function Item({
 
       if (!toggle && fixedLenderAddress) {
         //if it's not toggled we need to ENTER
-        tx = await auditorContract?.enterMarkets([fixedLenderAddress]);
+        tx = await auditorContract?.enterMarket(fixedLenderAddress);
       } else if (fixedLenderAddress) {
         //if it's toggled we need to EXIT
         tx = await auditorContract?.exitMarket(fixedLenderAddress);
@@ -128,6 +128,7 @@ function Item({
       //when it ends we stop loading
       setLoading(false);
     } catch (e) {
+      console.log(e);
       //if user rejects tx we change toggle status to previous, and stop loading
       setToggle((prev) => !prev);
       setLoading(false);

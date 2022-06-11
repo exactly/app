@@ -62,7 +62,7 @@ function DepositModalSP({ data, closeModal }: Props) {
   const translations: { [key: string]: LangKeys } = keys;
 
   const fixedLenderData = useContext(FixedLenderContext);
-  console.log(fixedLenderData, 'FLDATA');
+
   const [qty, setQty] = useState<string>('');
   const [walletBalance, setWalletBalance] = useState<string | undefined>(undefined);
   const [gas, setGas] = useState<Gas | undefined>();
@@ -162,7 +162,6 @@ function DepositModalSP({ data, closeModal }: Props) {
   }
 
   async function getWalletBalance() {
-    console.log('contract', underlyingContract);
     const walletBalance = await underlyingContract?.balanceOf(walletAddress);
 
     const formattedBalance = walletBalance && ethers.utils.formatEther(walletBalance);
@@ -249,7 +248,7 @@ function DepositModalSP({ data, closeModal }: Props) {
         ethers.utils.parseUnits(`${numbers.estimateGasAmount}`),
         walletAddress
       );
-      console.log(fixedLenderWithSigner, 'fl');
+
       if (gasPriceInGwei && estimatedGasCost) {
         const gwei = await ethers.utils.formatUnits(gasPriceInGwei, 'gwei');
         const gasCost = await ethers.utils.formatUnits(estimatedGasCost, 'gwei');

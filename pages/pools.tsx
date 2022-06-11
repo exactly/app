@@ -16,7 +16,6 @@ import DepositModalSP from 'components/DepositModalSP';
 
 import useModal from 'hooks/useModal';
 
-import { AuditorProvider } from 'contexts/AuditorContext';
 import { FixedLenderProvider } from 'contexts/FixedLenderContext';
 import { AccountDataProvider } from 'contexts/AccountDataContext';
 import { useWeb3Context } from 'contexts/Web3Context';
@@ -43,8 +42,7 @@ const Pools: NextPage<Props> = () => {
 
   const [accountData, setAccountData] = useState<AccountData>();
 
-  const { Previewer, Auditor, FixedLenderDAI, FixedLenderWETH, FixedLenderWBTC, FixedLenderUSDC } =
-    getABI(network?.name);
+  const { Previewer, FixedLenders } = getABI(network?.name);
 
   useEffect(() => {
     if (Previewer) {
@@ -82,7 +80,7 @@ const Pools: NextPage<Props> = () => {
     }
   }
 
-  function formatMarkets(markets: Array<any>) {
+  function formatMarkets(markets: Array<FixedLenderAccountData>) {
     const length = markets.length;
 
     let formattedMarkets: Array<Market> = [];
@@ -123,39 +121,35 @@ const Pools: NextPage<Props> = () => {
 
   return (
     <>
-      {Auditor && (
+      {Previewer && (
         <PreviewerProvider value={Previewer}>
           <AccountDataProvider value={{ accountData, setAccountData }}>
-            <AuditorProvider value={Auditor}>
-              <FixedLenderProvider
-                value={[FixedLenderDAI, FixedLenderWETH, FixedLenderWBTC, FixedLenderUSDC]}
-              >
-                {modal && modalContent?.type == 'deposit' && (
-                  <DepositModalMP data={modalContent} closeModal={handleModal} />
-                )}
+            <FixedLenderProvider value={FixedLenders}>
+              {modal && modalContent?.type == 'deposit' && (
+                <DepositModalMP data={modalContent} closeModal={handleModal} />
+              )}
 
-                {modal && modalContent?.type == 'smartDeposit' && (
-                  <DepositModalSP data={modalContent} closeModal={handleModal} />
-                )}
+              {modal && modalContent?.type == 'smartDeposit' && (
+                <DepositModalSP data={modalContent} closeModal={handleModal} />
+              )}
 
-                {modal && modalContent?.type == 'borrow' && (
-                  <BorrowModal data={modalContent} closeModal={handleModal} />
-                )}
+              {modal && modalContent?.type == 'borrow' && (
+                <BorrowModal data={modalContent} closeModal={handleModal} />
+              )}
 
-                <MobileNavbar />
-                <Navbar />
-                <CurrentNetwork />
+              <MobileNavbar />
+              <Navbar />
+              <CurrentNetwork />
 
-                <div style={{ marginTop: '180px' }}>
-                  <SmartPoolList markets={markets} showModal={showModal} />
-                </div>
+              <div style={{ marginTop: '180px' }}>
+                <SmartPoolList markets={markets} showModal={showModal} />
+              </div>
 
-                <MaturitySelector title={dictionary.maturityPools} />
+              <MaturitySelector title={dictionary.maturityPools} />
 
-                <MarketsList markets={markets} showModal={showModal} />
-                <Footer />
-              </FixedLenderProvider>
-            </AuditorProvider>
+              <MarketsList markets={markets} showModal={showModal} />
+              <Footer />
+            </FixedLenderProvider>
           </AccountDataProvider>
         </PreviewerProvider>
       )}
