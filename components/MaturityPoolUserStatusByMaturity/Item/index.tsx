@@ -132,14 +132,10 @@ function Item({
           <span className={styles.primary}>{symbol ? parseSymbol(symbol) : <Skeleton />}</span>
         </div>
         <span className={styles.value}>
-          {symbol && amount ? (
-            formatNumber(ethers.utils.formatUnits(amount, decimals), symbol)
-          ) : (
-            <Skeleton width={40} />
-          )}
+          {symbol && amount ? ethers.utils.formatUnits(amount, decimals) : <Skeleton width={40} />}
         </span>
         <span className={styles.value}>
-          {fixedRate ? `${fixedRate.toFixed(2)} %` : <Skeleton width={40} />}
+          {fixedRate != undefined ? `${(fixedRate || 0).toFixed(2)} %` : <Skeleton width={40} />}
         </span>
 
         {type && data ? (
@@ -167,9 +163,8 @@ function Item({
           </thead>
           <tbody>
             {transactions.map((transaction: any, key) => {
-              const value =
-                symbol &&
-                formatNumber(ethers.utils.formatUnits(transaction.assets, decimals), symbol);
+              const value = symbol && ethers.utils.formatUnits(transaction.assets, decimals);
+
               const text = transaction?.fee
                 ? type?.value == 'borrow'
                   ? translations[lang].borrow

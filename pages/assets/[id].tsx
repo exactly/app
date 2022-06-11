@@ -199,7 +199,7 @@ const Asset: NextPage<Props> = ({ symbol, price }) => {
       handleModal({ content: { ...market, type } });
     }
   }
-  console.log(fixedLenderContract, 1234);
+
   return (
     <>
       {Previewer && (
