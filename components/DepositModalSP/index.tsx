@@ -30,6 +30,7 @@ import { HealthFactor } from 'types/HealthFactor';
 import { getContractData } from 'utils/contracts';
 import { getSymbol, getUnderlyingData } from 'utils/utils';
 import getSmartPoolInterestRate from 'utils/getSmartPoolInterestRate';
+import formatNumber from 'utils/formatNumber';
 
 import numbers from 'config/numbers.json';
 
@@ -172,28 +173,11 @@ function DepositModalSP({ data, closeModal }: Props) {
   }
 
   async function getUserDeposits() {
-    if (!walletAddress || !symbol) return;
+    if (!walletAddress || !symbol || !accountData) return;
 
-    const subgraphUrl = getSubgraph(network?.name);
+    const amount = accountData[symbol.toUpperCase()]?.smartPoolAssets;
 
-    const getSmartPoolDeposits = await request(
-      subgraphUrl,
-      getSmartPoolDepositsQuery(walletAddress)
-    );
-
-    const getSmartPoolWithdraws = await request(
-      subgraphUrl,
-      getSmartPoolWithdrawsQuery(walletAddress)
-    );
-
-    const deposits = formatSmartPoolDeposits(
-      getSmartPoolDeposits.deposits,
-      getSmartPoolWithdraws.withdraws,
-      network?.name!
-    );
-
-    const amount = deposits[symbol?.toUpperCase()]?.assets;
-    const formattedAmount = amount && ethers.utils.formatEther(`${amount}`);
+    const formattedAmount = amount && formatNumber(ethers.utils.formatEther(amount), symbol);
 
     !formattedAmount ? setDepositedAmount('0') : setDepositedAmount(formattedAmount);
   }
@@ -305,7 +289,6 @@ function DepositModalSP({ data, closeModal }: Props) {
         network?.name!,
         fixedLenderWithSigner?.address!
       );
-
       setRate(interestRate);
     } catch (e) {
       console.log(e);

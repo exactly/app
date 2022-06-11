@@ -112,7 +112,7 @@ function MaturityPoolDashboard({ showModal, tab }: Props) {
 
     setMaturities(data);
   }
-  console.log(accountData);
+
   return (
     <section className={styles.container}>
       <section className={styles.sectionContainer}>

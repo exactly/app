@@ -53,7 +53,6 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
   const { maturity, market } = data;
   const { web3Provider, walletAddress, network } = useWeb3Context();
   const { date, address } = useContext(AddressContext);
-
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 

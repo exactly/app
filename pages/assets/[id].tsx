@@ -184,7 +184,6 @@ const Asset: NextPage<Props> = ({ symbol, price }) => {
       //in the future we should handle the minimized modal status through a context here
       return;
     }
-
     if (marketData) {
       const market = {
         market: marketData.market,
@@ -192,7 +191,7 @@ const Asset: NextPage<Props> = ({ symbol, price }) => {
         name: marketData.assetSymbol,
         isListed: true,
         collateralFactor: parseFloat(ethers.utils.formatEther(marketData.adjustFactor)),
-        maturity: maturity ?? undefined
+        maturity: maturity
       };
 
       handleModal({ content: { ...market, type } });
