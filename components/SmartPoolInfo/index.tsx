@@ -89,7 +89,9 @@ function SmartPoolInfo({ showModal, symbol, fixedLender }: Props) {
         </li>
         <li className={styles.row}>
           <span className={styles.title}>{translations[lang].totalDeposited}</span>{' '}
-          <p className={styles.value}> {(supply && `$${supply.toFixed(2)}`) || <Skeleton />}</p>
+          <p className={styles.value}>
+            {(supply != undefined && `$${supply.toFixed(2)}`) || <Skeleton />}
+          </p>
         </li>
         <li className={styles.row}>
           <span className={styles.title}> {translations[lang].liquidity}</span>{' '}
@@ -105,7 +107,7 @@ function SmartPoolInfo({ showModal, symbol, fixedLender }: Props) {
           <span className={styles.title}>{translations[lang].utilizationRate}</span>{' '}
           <p className={styles.value}>
             {supply != undefined && demand != undefined ? (
-              `${((demand / supply) * 100).toFixed(2)}%`
+              `${((demand / supply) * 100 || 0).toFixed(2)}%`
             ) : (
               <Skeleton />
             )}{' '}

@@ -1,5 +1,5 @@
-import { useContext, useMemo, useState } from 'react';
-import type { GetStaticProps, NextPage } from 'next';
+import { useContext, useEffect, useMemo, useState } from 'react';
+import type { GetStaticProps, NextApiRequest, NextPage } from 'next';
 import { Contract, ethers } from 'ethers';
 import dayjs from 'dayjs';
 
@@ -64,25 +64,25 @@ const Asset: NextPage<Props> = ({ symbol, price }) => {
   const previewerContract = getContractData(network?.name!, Previewer.address!, Previewer.abi!);
   const itemsPerPage = 3;
 
-  useMemo(() => {
-    if (!FixedLenders || !network) return;
+  useEffect(() => {
+    if (!FixedLenders) return;
 
     getFixedLenderContract();
   }, [network]);
 
-  useMemo(() => {
+  useEffect(() => {
     if (!fixedLenderContract) return;
 
     getPools();
   }, [fixedLenderContract]);
 
-  useMemo(() => {
+  useEffect(() => {
     if (!maturities && Previewer) {
       getMarketData();
     }
   }, [Previewer, symbol]);
 
-  useMemo(() => {
+  useEffect(() => {
     if (!walletAddress) return;
     getAccountData();
   }, [walletAddress]);
@@ -166,7 +166,10 @@ const Asset: NextPage<Props> = ({ symbol, price }) => {
 
   async function getFixedLenderContract() {
     const filteredFixedLender = FixedLenders.find((contract: Contract) => {
-      const contractSymbol = getSymbol(contract.address!, network!.name);
+      const contractSymbol = getSymbol(
+        contract.address!,
+        network?.name ?? process.env.NEXT_PUBLIC_NETWORK
+      );
       return contractSymbol == symbol;
     });
 
@@ -175,7 +178,6 @@ const Asset: NextPage<Props> = ({ symbol, price }) => {
       filteredFixedLender?.address!,
       filteredFixedLender?.abi!
     );
-
     setFixedLenderContract(fixedLender);
   }
 
@@ -197,7 +199,7 @@ const Asset: NextPage<Props> = ({ symbol, price }) => {
       handleModal({ content: { ...market, type } });
     }
   }
-
+  console.log(fixedLenderContract, 1234);
   return (
     <>
       {Previewer && (
@@ -313,6 +315,6 @@ export const getStaticProps: GetStaticProps = async (context) => {
 export async function getStaticPaths() {
   return {
     paths: ['/assets/dai', '/assets/eth', '/assets/usdc', '/assets/weth', '/assets/wbtc'],
-    fallback: true
+    fallback: false
   };
 }
