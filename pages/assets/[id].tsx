@@ -92,7 +92,9 @@ const Asset: NextPage<Props> = ({ symbol, price }) => {
       '0x000000000000000000000000000000000000dEaD'
     );
 
-    const filteredMarket = marketsData.find((market: any) => market.assetSymbol === symbol);
+    const filteredMarket = marketsData.find(
+      (market: FixedLenderAccountData) => market.assetSymbol === symbol
+    );
     const {
       market,
       assetSymbol,
