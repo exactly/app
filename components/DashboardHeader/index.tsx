@@ -246,7 +246,7 @@ function DashboardHeader() {
           {walletAddress && depositData && (
             <div className={styles.detail}>
               {depositData.map((asset, key) => {
-                if (!totalDeposit) return;
+                if (!totalDeposit || parseFloat(totalDeposit) === 0) return;
                 return (
                   <Tooltip key={key} value={`$${asset.value.toFixed(2)}`} image={asset.image} />
                 );

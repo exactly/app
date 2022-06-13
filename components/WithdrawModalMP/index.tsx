@@ -25,6 +25,7 @@ import { Error } from 'types/Error';
 import parseTimestamp from 'utils/parseTimestamp';
 import { getContractData } from 'utils/contracts';
 import formatNumber from 'utils/formatNumber';
+import { getSymbol } from 'utils/utils';
 
 import styles from './style.module.scss';
 
@@ -36,7 +37,6 @@ import decimals from 'config/decimals.json';
 import numbers from 'config/numbers.json';
 
 import keys from './translations.json';
-import { getSymbol } from 'utils/utils';
 
 type Props = {
   data: Borrow | Deposit;

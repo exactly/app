@@ -34,12 +34,12 @@ import AccountDataContext from 'contexts/AccountDataContext';
 
 import { getContractData } from 'utils/contracts';
 import formatNumber from 'utils/formatNumber';
+import { getSymbol } from 'utils/utils';
 
 import decimals from 'config/decimals.json';
 import numbers from 'config/numbers.json';
 
 import keys from './translations.json';
-import { getSymbol } from 'utils/utils';
 
 type Props = {
   data: Borrow | Deposit;
