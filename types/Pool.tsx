@@ -3,4 +3,5 @@ export type Pool = {
   borrowed?: number | undefined;
   debt?: number | undefined;
   supplied?: number | undefined;
+  rate?: number | undefined;
 };

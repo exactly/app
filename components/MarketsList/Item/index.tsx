@@ -23,6 +23,7 @@ import parseSymbol from 'utils/parseSymbol';
 import getSubgraph from 'utils/getSubgraph';
 
 import { getLastMaturityPoolBorrowRate, getLastMaturityPoolDepositRate } from 'queries';
+import getExchangeRate from 'utils/getExchangeRate';
 
 type Props = {
   market?: Market;
@@ -79,9 +80,12 @@ function Item({ market, showModal, type }: Props) {
 
     const { borrowed, supplied } = await fixedLender?.maturityPools(date?.value);
 
+    const exchangeRate = await getExchangeRate(market.symbol);
+
     const newPoolData = {
       borrowed: parseFloat(await ethers.utils.formatEther(borrowed)),
-      supplied: parseFloat(await ethers.utils.formatEther(supplied))
+      supplied: parseFloat(await ethers.utils.formatEther(supplied)),
+      rate: exchangeRate
     };
 
     try {
@@ -137,18 +141,28 @@ function Item({ market, showModal, type }: Props) {
           {(market && parseSymbol(market?.symbol)) || <Skeleton width={30} />}
         </span>
       </div>
-      <span className={style.value}>
+      <p className={style.value}>
         {poolData && market ? (
           type == 'borrow' ? (
-            `$${formatNumber(poolData?.borrowed!, market?.symbol)}`
+            `${formatNumber(poolData?.borrowed!, market?.symbol)}`
           ) : (
-            `$${formatNumber(poolData?.supplied!, market?.symbol)}`
+            `${formatNumber(poolData?.supplied!, market?.symbol)}`
           )
         ) : (
           <Skeleton />
+        )}{' '}
+        {poolData && type == 'borrow' && (
+          <span className={style.exchange}>
+            ({`$${formatNumber(poolData?.borrowed! * poolData?.rate!, 'usd')}`})
+          </span>
         )}
-      </span>
-      <span className={style.value}>{(rate && `${rate}%`) || <Skeleton />}</span>
+        {poolData && type == 'deposit' && (
+          <span className={style.exchange}>
+            ({`$${formatNumber(poolData?.supplied! * poolData?.rate!, 'usd')}`})
+          </span>
+        )}
+      </p>
+      <p className={style.value}>{(rate && `${rate}%`) || <Skeleton />}</p>
       <div className={style.buttonContainer}>
         {(market && (
           <Button

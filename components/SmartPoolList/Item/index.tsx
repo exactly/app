@@ -21,9 +21,10 @@ import { getContractData } from 'utils/contracts';
 import formatNumber from 'utils/formatNumber';
 import parseSymbol from 'utils/parseSymbol';
 import getSmartPoolInterestRate from 'utils/getSmartPoolInterestRate';
+import getExchangeRate from 'utils/getExchangeRate';
 
 type Props = {
-  market?: Market;
+  market: Market | undefined;
   showModal?: (marketData: Market, type: String) => void;
 };
 
@@ -75,12 +76,17 @@ function Item({ market, showModal }: Props) {
   }
 
   async function getMarketData() {
+    if (!market) return;
+
     const borrowed = await fixedLender?.smartPoolBorrowed();
     const supplied = await fixedLender?.smartPoolAssets();
 
+    const exchangeRate = await getExchangeRate(market.symbol);
+
     const newPoolData = {
       borrowed: Math.round(parseInt(await ethers.utils.formatEther(borrowed))),
-      supplied: Math.round(parseInt(await ethers.utils.formatEther(supplied)))
+      supplied: Math.round(parseInt(await ethers.utils.formatEther(supplied))),
+      rate: exchangeRate
     };
 
     const interestRate = await getSmartPoolInterestRate(network?.name!, fixedLender?.address!);
@@ -103,12 +109,17 @@ function Item({ market, showModal }: Props) {
           {(market && parseSymbol(market?.symbol)) || <Skeleton />}
         </span>
       </div>
-      <span className={style.value}>
-        {(market && poolData && `$${formatNumber(poolData?.supplied!, market?.symbol)}`) || (
+      <p className={style.value}>
+        {(market &&
+          poolData &&
+          `$${formatNumber(poolData?.supplied! * poolData?.rate!, market?.symbol)}`) || (
           <Skeleton />
+        )}{' '}
+        {poolData && (
+          <span className={style.exchange}>({`$${formatNumber(poolData?.supplied!, 'usd')}`})</span>
         )}
-      </span>
-      <span className={style.value}>{(rate && `${rate}%`) || <Skeleton />}</span>
+      </p>
+      <p className={style.value}>{(rate && `${rate}%`) || <Skeleton />}</p>
       <div className={style.buttonContainer}>
         {(market && <Button text={translations[lang].deposit} className={'tertiary'} />) || (
           <Skeleton height={40} />

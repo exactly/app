@@ -34,6 +34,7 @@ import AccountDataContext from 'contexts/AccountDataContext';
 
 import { getContractData } from 'utils/contracts';
 import formatNumber from 'utils/formatNumber';
+import { getSymbol } from 'utils/utils';
 
 import decimals from 'config/decimals.json';
 import numbers from 'config/numbers.json';
@@ -155,7 +156,7 @@ function WithdrawModalSP({ data, closeModal }: Props) {
 
     if (accountData && symbol) {
       const collateralFactor = ethers.utils.formatEther(
-        accountData[symbol.toUpperCase()]?.collateralFactor
+        accountData[symbol.toUpperCase()]?.adjustFactor
       );
       setCollateralFactor(parseFloat(collateralFactor));
     }
@@ -163,8 +164,7 @@ function WithdrawModalSP({ data, closeModal }: Props) {
 
   async function getFixedLenderContract() {
     const filteredFixedLender = fixedLenderData.find((contract) => {
-      const args: Array<string> | undefined = contract?.args;
-      const contractSymbol: string | undefined = args && args[1];
+      const contractSymbol = getSymbol(contract.address!, network!.name);
 
       return contractSymbol == symbol;
     });

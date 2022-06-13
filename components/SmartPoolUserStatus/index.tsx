@@ -9,7 +9,6 @@ import FixedLenderContext from 'contexts/FixedLenderContext';
 
 import { LangKeys } from 'types/Lang';
 import { Deposit } from 'types/Deposit';
-import { Dictionary } from 'types/Dictionary';
 import { SmartPoolItemData } from 'types/SmartPoolItemData';
 
 import styles from './style.module.scss';
@@ -30,7 +29,7 @@ function SmartPoolUserStatus({ walletAddress, showModal }: Props) {
   const translations: { [key: string]: LangKeys } = keys;
   const auditor = useContext(AuditorContext);
   const { web3Provider, network } = useWeb3Context();
-  const [itemData, setItemData] = useState<Array<SmartPoolItemData>>([]);
+  const [itemData, setItemData] = useState<Array<SmartPoolItemData> | undefined>(undefined);
 
   const auditorContract = getContractData(
     network?.name,
@@ -44,35 +43,41 @@ function SmartPoolUserStatus({ walletAddress, showModal }: Props) {
   }, [walletAddress]);
 
   async function getCurrentBalance() {
-    const data = [];
+    try {
+      const data = [];
 
-    for (let i = 0; i < fixedLenders.length; i++) {
-      const fixedLender = fixedLenders[i];
+      for (let i = 0; i < fixedLenders.length; i++) {
+        const fixedLender = fixedLenders[i];
 
-      const fixedLenderAddress = fixedLender.address;
-      const fixedLenderAbi = fixedLender.abi;
-      const fixedLenderSymbol = getSymbol(fixedLenderAddress!, network?.name);
+        const fixedLenderAddress = fixedLender.address;
+        const fixedLenderAbi = fixedLender.abi;
+        const fixedLenderSymbol = getSymbol(fixedLenderAddress!, network?.name);
 
-      const contractData = await getContractData(
-        network?.name,
-        fixedLenderAddress!,
-        fixedLenderAbi!
-      );
-      const balance = await contractData?.balanceOf(walletAddress);
+        const contractData = await getContractData(
+          network?.name,
+          fixedLenderAddress!,
+          fixedLenderAbi!
+        );
 
-      if (balance) {
-        const etokens = balance;
-        const tokens = await contractData?.convertToAssets(balance);
+        const balance = await contractData?.balanceOf(walletAddress);
 
-        const obj = {
-          symbol: fixedLenderSymbol,
-          eTokens: etokens,
-          tokens: tokens
-        };
-        data.push(obj);
+        if (balance) {
+          const etokens = balance;
+          const tokens = await contractData?.convertToAssets(balance);
+
+          const obj = {
+            symbol: fixedLenderSymbol,
+            eTokens: etokens,
+            tokens: tokens
+          };
+          data.push(obj);
+        }
       }
+
+      setItemData(data);
+    } catch (e) {
+      console.log(e);
     }
-    setItemData(data);
   }
 
   return (
@@ -89,20 +94,33 @@ function SmartPoolUserStatus({ walletAddress, showModal }: Props) {
             <span className={styles.title} />
           </div>
 
-          {itemData &&
-            itemData.map((item: SmartPoolItemData, key: number) => {
-              return (
-                <Item
-                  key={key}
-                  tokenAmount={item.tokens}
-                  symbol={item.symbol}
-                  walletAddress={walletAddress}
-                  eTokenAmount={item.eTokens}
-                  showModal={showModal}
-                  auditorContract={auditorContract}
-                />
-              );
-            })}
+          {itemData
+            ? itemData.map((item: SmartPoolItemData, key: number) => {
+                return (
+                  <Item
+                    key={key}
+                    tokenAmount={item.tokens}
+                    symbol={item.symbol}
+                    walletAddress={walletAddress}
+                    eTokenAmount={item.eTokens}
+                    showModal={showModal}
+                    auditorContract={auditorContract}
+                  />
+                );
+              })
+            : fixedLenders.map((_, key: number) => {
+                return (
+                  <Item
+                    key={key}
+                    tokenAmount={undefined}
+                    symbol={undefined}
+                    walletAddress={undefined}
+                    eTokenAmount={undefined}
+                    showModal={() => undefined}
+                    auditorContract={undefined}
+                  />
+                );
+              })}
         </div>
       </div>
     </div>

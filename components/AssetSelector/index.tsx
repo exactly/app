@@ -1,16 +1,17 @@
 import { useEffect, useState, useContext } from 'react';
+import { ethers } from 'ethers';
 
 import Select from 'components/common/Select';
 import Tooltip from 'components/Tooltip';
 
 import { AddressContext } from 'contexts/AddressContext';
-import AuditorContext from 'contexts/AuditorContext';
 import { useWeb3Context } from 'contexts/Web3Context';
+import PreviewerContext from 'contexts/PreviewerContext';
 
 import { Market } from 'types/Market';
-import { UnformattedMarket } from 'types/UnformattedMarket';
 import { Address } from 'types/Address';
 import { Option } from 'react-dropdown';
+import { FixedLenderAccountData } from 'types/FixedLenderAccountData';
 
 import style from './style.module.scss';
 import { getContractData } from 'utils/contracts';
@@ -23,81 +24,55 @@ type Props = {
 };
 
 function AssetSelector({ title, defaultAddress, onChange }: Props) {
+  const previewerData = useContext(PreviewerContext);
+
   const { address, setAddress } = useContext(AddressContext);
   const { network } = useWeb3Context();
 
-  const auditorData = useContext(AuditorContext);
-
-  const auditorContract = getContractData(network?.name, auditorData.address!, auditorData.abi!);
   const [selectOptions, setSelectOptions] = useState<Array<Option>>([]);
   const [allMarketsData, setAllMarketsData] = useState<Array<Market>>([]);
 
   useEffect(() => {
-    if (auditorContract) {
+    if (previewerData) {
       getMarkets();
     }
-  }, []);
+  }, [previewerData]);
 
   async function getMarkets() {
-    const marketsAddresses = await auditorContract?.getAllMarkets();
-    const marketsData: Array<UnformattedMarket> = [];
+    const previewerContract = getContractData(
+      network?.name!,
+      previewerData.address!,
+      previewerData.abi!
+    );
 
-    if (!marketsAddresses) {
+    const marketsData = await previewerContract?.accounts(
+      '0x000000000000000000000000000000000000dEaD'
+    );
+
+    if (!marketsData) {
       //in case the contract doesn't return any market data
       return;
     }
 
-    marketsAddresses.map((address: string) => {
-      return marketsData.push(auditorContract?.getMarketData(address));
+    const formattedMarkets = formatMarkets(marketsData);
+
+    setSelectOptions(formattedMarkets);
+
+    const defaultOption = formattedMarkets?.find((market: Option) => {
+      return market.value == defaultAddress;
     });
 
-    Promise.all(marketsData).then((data: Array<UnformattedMarket>) => {
-      const formattedMarkets = formatMarkets(data);
-      setSelectOptions(formattedMarkets);
-
-      const defaultOption = data?.find((market) => {
-        return market[5] == defaultAddress;
-      });
-
-      const formatDefault = defaultOption && formatDefaultOption(defaultOption);
-      setAddress(formatDefault ?? formattedMarkets[0]);
-    });
+    setAddress(defaultOption ?? formattedMarkets[0]);
   }
 
-  function formatDefaultOption(market: UnformattedMarket) {
-    const marketData: Market = {
-      symbol: market[0],
-      name: market[1],
-      market: market[5],
-      isListed: market[2],
-      collateralFactor: market[4]
-    };
-
-    onChange && onChange(marketData);
-
-    return {
-      label: (
-        <div className={style.labelContainer}>
-          <img
-            src={`/img/assets/${marketData?.symbol.toLowerCase()}.png`}
-            alt={marketData.name}
-            className={style.marketImage}
-          />{' '}
-          <span className={style.marketName}>{parseSymbol(marketData.name)}</span>
-        </div>
-      ),
-      value: marketData.market
-    };
-  }
-
-  function formatMarkets(markets: Array<UnformattedMarket>) {
-    const formattedMarkets = markets.map((market: UnformattedMarket) => {
+  function formatMarkets(markets: Array<FixedLenderAccountData>) {
+    const formattedMarkets = markets.map((market: FixedLenderAccountData) => {
       const marketData: Market = {
-        symbol: market[0],
-        name: market[1],
-        market: market[5],
-        isListed: market[2],
-        collateralFactor: market[4]
+        symbol: market.assetSymbol,
+        name: market.assetSymbol,
+        market: market.market,
+        isListed: true,
+        collateralFactor: parseFloat(ethers.utils.formatEther(market.adjustFactor))
       };
 
       setAllMarketsData((prevState) => [...prevState, marketData]);
@@ -121,8 +96,7 @@ function AssetSelector({ title, defaultAddress, onChange }: Props) {
   }
 
   function getDataByAddress(address: string) {
-    const marketData = allMarketsData.find((market) => market.address == address);
-
+    const marketData = allMarketsData.find((market) => market.market == address);
     onChange && marketData && onChange(marketData);
   }
 

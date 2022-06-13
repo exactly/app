@@ -1,7 +1,5 @@
 import { useContext } from 'react';
 
-import Loading from 'components/common/Loading';
-
 import LangContext from 'contexts/LangContext';
 
 import { Maturity } from 'types/Maturity';
@@ -14,7 +12,7 @@ import Item from './Item';
 
 interface Props {
   maturities: Array<Maturity> | undefined;
-  market: string;
+  market: string | undefined;
   showModal: (type: string, maturity: string | undefined) => void;
 }
 
@@ -29,17 +27,19 @@ function AssetTable({ maturities, market, showModal }: Props) {
         <div className={styles.lastFixedRate}>{translations[lang].lastFixedRate}</div>
         <div className={styles.actions}></div>
       </div>
-      {maturities ? (
+      {maturities && market && (
         <>
           {maturities.map((maturity: Maturity, key: number) => {
             return <Item key={key} maturity={maturity} market={market} showModal={showModal} />;
           })}
         </>
-      ) : (
-        <div className={styles.center}>
-          <Loading />
-        </div>
       )}
+      {(!maturities || !market) &&
+        Array(3)
+          .fill('a')
+          .map((_, key: number) => {
+            return <Item key={key} maturity={undefined} market={undefined} showModal={showModal} />;
+          })}
     </div>
   );
 }

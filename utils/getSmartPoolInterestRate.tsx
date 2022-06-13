@@ -17,6 +17,8 @@ async function getSmartPoolInterestRate(network: string, fixedLenderAddress: str
     getSmartPoolAccruedEarnings(currentTimestamp - oneDay * 3, currentTimestamp, fixedLenderAddress)
   );
 
+  if (smartPoolAccruedEarnings.smartPoolEarningsAccrueds.length == 0) return '0.00';
+
   let periodAccrued = 0;
   const newOperation = smartPoolAccruedEarnings.smartPoolEarningsAccrueds[0];
 
@@ -34,7 +36,7 @@ async function getSmartPoolInterestRate(network: string, fixedLenderAddress: str
     ((oneDay * 365) / (newOperation.timestamp - oldOperation.timestamp)) *
     100;
 
-  if (interestRate === Infinity || isNaN(interestRate)) return '0';
+  if (interestRate === Infinity || isNaN(interestRate)) return '0.00';
 
   return interestRate.toFixed(2);
 }

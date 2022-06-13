@@ -28,8 +28,9 @@ import { Error } from 'types/Error';
 import { HealthFactor } from 'types/HealthFactor';
 
 import { getContractData } from 'utils/contracts';
-import { getUnderlyingData } from 'utils/utils';
+import { getSymbol, getUnderlyingData } from 'utils/utils';
 import getSmartPoolInterestRate from 'utils/getSmartPoolInterestRate';
+import formatNumber from 'utils/formatNumber';
 
 import numbers from 'config/numbers.json';
 
@@ -87,7 +88,6 @@ function DepositModalSP({ data, closeModal }: Props) {
   if (symbol) {
     underlyingData = getUnderlyingData(network?.name, symbol.toLowerCase());
   }
-
   const underlyingContract = getContractData(
     network?.name,
     underlyingData!.address,
@@ -173,28 +173,11 @@ function DepositModalSP({ data, closeModal }: Props) {
   }
 
   async function getUserDeposits() {
-    if (!walletAddress || !symbol) return;
+    if (!walletAddress || !symbol || !accountData) return;
 
-    const subgraphUrl = getSubgraph(network?.name);
+    const amount = accountData[symbol.toUpperCase()]?.smartPoolAssets;
 
-    const getSmartPoolDeposits = await request(
-      subgraphUrl,
-      getSmartPoolDepositsQuery(walletAddress)
-    );
-
-    const getSmartPoolWithdraws = await request(
-      subgraphUrl,
-      getSmartPoolWithdrawsQuery(walletAddress)
-    );
-
-    const deposits = formatSmartPoolDeposits(
-      getSmartPoolDeposits.deposits,
-      getSmartPoolWithdraws.withdraws,
-      network?.name!
-    );
-
-    const amount = deposits[symbol?.toUpperCase()]?.assets;
-    const formattedAmount = amount && ethers.utils.formatEther(`${amount}`);
+    const formattedAmount = amount && formatNumber(ethers.utils.formatEther(amount), symbol);
 
     !formattedAmount ? setDepositedAmount('0') : setDepositedAmount(formattedAmount);
   }
@@ -306,7 +289,6 @@ function DepositModalSP({ data, closeModal }: Props) {
         network?.name!,
         fixedLenderWithSigner?.address!
       );
-
       setRate(interestRate);
     } catch (e) {
       console.log(e);
@@ -318,7 +300,7 @@ function DepositModalSP({ data, closeModal }: Props) {
 
     if (accountData && symbol) {
       const collateralFactor = ethers.utils.formatEther(
-        accountData[symbol.toUpperCase()]?.collateralFactor
+        accountData[symbol.toUpperCase()]?.adjustFactor
       );
       setCollateralFactor(parseFloat(collateralFactor));
     }
@@ -326,8 +308,7 @@ function DepositModalSP({ data, closeModal }: Props) {
 
   async function getFixedLenderContract() {
     const filteredFixedLender = fixedLenderData.find((contract) => {
-      const args: Array<string> | undefined = contract?.args;
-      const contractSymbol: string | undefined = args && args[1];
+      const contractSymbol = getSymbol(contract.address!, network!.name);
 
       return contractSymbol == symbol;
     });

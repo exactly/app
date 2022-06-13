@@ -1,7 +1,8 @@
 {
   "en": {
     "asset": "Asset",
-    "marketSize": "Market Size",
+    "depositedAmount": "Deposited Amount",
+    "borrowedAmount": "Debt Amount",
     "fixedRate": "Fixed Rate",
     "maturityDate": "Maturity Date",
     "progress": "Progress",

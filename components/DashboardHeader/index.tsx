@@ -21,6 +21,7 @@ import keys from './translations.json';
 
 import parseHealthFactor from 'utils/parseHealthFactor';
 import getAssetColor from 'utils/getAssetColor';
+import formatNumber from 'utils/formatNumber';
 
 function DashboardHeader() {
   const { walletAddress } = useWeb3Context();
@@ -34,8 +35,8 @@ function DashboardHeader() {
   const [rateData, setRateData] = useState<Array<DonutData> | undefined>(undefined);
   const [borrowData, setBorrowData] = useState<Array<DonutData> | undefined>(undefined);
 
-  const [totalDeposit, setTotalDeposit] = useState<number | undefined>(undefined);
-  const [totalBorrow, setTotalBorrow] = useState<number | undefined>(undefined);
+  const [totalDeposit, setTotalDeposit] = useState<string | undefined>(undefined);
+  const [totalBorrow, setTotalBorrow] = useState<string | undefined>(undefined);
 
   const [rateComposition, setRateComposition] = useState<Dictionary<number> | undefined>(undefined);
   const [healthFactor, setHealthFactor] = useState<Dictionary<number> | undefined>(undefined);
@@ -100,7 +101,9 @@ function DashboardHeader() {
     });
 
     allDepositsUSD > 0 ? setDepositData(depositData) : setDepositData(notConnected);
-    allDepositsUSD > 0 ? setTotalDeposit(allDepositsUSD) : setTotalDeposit(0);
+    allDepositsUSD > 0
+      ? setTotalDeposit(formatNumber(allDepositsUSD, 'USD'))
+      : setTotalDeposit('0.00');
 
     //RATE DATA
     if (allDepositsUSD !== 0) {
@@ -161,7 +164,7 @@ function DashboardHeader() {
     });
 
     allBorrowsUSD > 0 ? setBorrowData(borrowData) : setBorrowData(notConnected);
-    allBorrowsUSD > 0 ? setTotalBorrow(allBorrowsUSD) : setTotalBorrow(0);
+    allBorrowsUSD > 0 ? setTotalBorrow(formatNumber(allBorrowsUSD, 'USD')) : setTotalBorrow('0.00');
   }
 
   function getHealthFactor() {
@@ -179,7 +182,7 @@ function DashboardHeader() {
         const assets = parseFloat(ethers.utils.formatUnits(fixedLender.smartPoolAssets, decimals));
         const oracle = parseFloat(ethers.utils.formatUnits(fixedLender.oraclePrice, 18));
         const collateralFactor = parseFloat(
-          ethers.utils.formatUnits(fixedLender.collateralFactor, decimals)
+          ethers.utils.formatUnits(fixedLender.adjustFactor, decimals)
         );
 
         collateral += assets * oracle * collateralFactor;
@@ -206,12 +209,12 @@ function DashboardHeader() {
         {
           label: '',
           value: collateral,
-          color: '#63CA10'
+          color: '#53D3BE'
         },
         {
           label: '',
           value: debt,
-          color: '#AF0606'
+          color: '#4D4DE8'
         }
       ];
       setHealthFactorData(healthFactorData);
@@ -232,11 +235,7 @@ function DashboardHeader() {
           </h3>
           {walletAddress && (
             <>
-              {
-                <p className={styles.value}>
-                  {depositData ? `$${totalDeposit?.toFixed(2)}` : <Skeleton />}
-                </p>
-              }
+              {<p className={styles.value}>{depositData ? `$${totalDeposit}` : <Skeleton />}</p>}
               {/* {<p className={styles.subvalue}>2.14% {translations[lang].apr}</p>} */}
             </>
           )}
@@ -247,7 +246,7 @@ function DashboardHeader() {
           {walletAddress && depositData && (
             <div className={styles.detail}>
               {depositData.map((asset, key) => {
-                if (totalDeposit === 0) return;
+                if (!totalDeposit || parseFloat(totalDeposit) === 0) return;
                 return (
                   <Tooltip key={key} value={`$${asset.value.toFixed(2)}`} image={asset.image} />
                 );
@@ -277,7 +276,9 @@ function DashboardHeader() {
                   <span className={styles.fixed} />
                   {translations[lang].fixed}
                 </p>
-                {rateComposition && `${rateComposition.fixedComposition}%`}
+                <p className={styles.informationValue}>
+                  {rateComposition && `${rateComposition.fixedComposition}%`}
+                </p>
               </div>
             </div>
           )}
@@ -293,9 +294,7 @@ function DashboardHeader() {
           </h3>
           {walletAddress ? (
             <>
-              <p className={styles.value}>
-                {totalBorrow ? `$${totalBorrow?.toFixed(2)}` : <Skeleton />}
-              </p>
+              <p className={styles.value}>{borrowData ? `$${totalBorrow}` : <Skeleton />}</p>
               {/* <p className={styles.subvalue}>2.14% {translations[lang].apr}</p> */}
             </>
           ) : (
@@ -307,7 +306,8 @@ function DashboardHeader() {
           {walletAddress && borrowData && (
             <div className={styles.detail}>
               {borrowData.map((asset, key) => {
-                if (totalBorrow === 0) return;
+                if (totalBorrow == 'undefined' || parseFloat(totalBorrow!) == 0) return;
+
                 return (
                   <Tooltip key={key} value={`$${asset.value.toFixed(2)}`} image={asset.image} />
                 );

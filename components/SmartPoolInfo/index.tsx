@@ -1,4 +1,6 @@
-import { useContext } from 'react';
+import { useContext, useMemo, useState } from 'react';
+import { Contract, ethers } from 'ethers';
+import Skeleton from 'react-loading-skeleton';
 
 import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
@@ -13,17 +15,47 @@ import Button from 'components/common/Button';
 import Tooltip from 'components/Tooltip';
 
 import parseSymbol from 'utils/parseSymbol';
+import getExchangeRate from 'utils/getExchangeRate';
 
 interface Props {
   showModal: (type: string, maturity: string | undefined) => void;
   symbol: string;
+  fixedLender: Contract | undefined;
 }
 
-function SmartPoolInfo({ showModal, symbol }: Props) {
+function SmartPoolInfo({ showModal, symbol, fixedLender }: Props) {
   const { walletAddress, connect } = useWeb3Context();
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
+
+  const [supply, setSupply] = useState<number | undefined>(undefined);
+  const [demand, setDemand] = useState<number | undefined>(undefined);
+
+  useMemo(() => {
+    if (fixedLender) {
+      getSmartPoolData();
+    }
+  }, [fixedLender]);
+
+  async function getSmartPoolData() {
+    try {
+      const borrowed = await fixedLender?.smartPoolBorrowed();
+      const supplied = await fixedLender?.smartPoolAssets();
+      const decimals = await fixedLender?.decimals();
+      const exchangeRate = await getExchangeRate(symbol);
+
+      const newPoolData = {
+        borrowed: parseFloat(await ethers.utils.formatUnits(borrowed, decimals)),
+        supplied: parseFloat(await ethers.utils.formatUnits(supplied, decimals))
+      };
+
+      setSupply(newPoolData.supplied * exchangeRate);
+      setDemand(newPoolData.borrowed * exchangeRate);
+    } catch (e) {
+      console.log(e);
+    }
+  }
 
   function handleClick() {
     if (!walletAddress && connect) return connect();
@@ -57,19 +89,29 @@ function SmartPoolInfo({ showModal, symbol }: Props) {
         </li>
         <li className={styles.row}>
           <span className={styles.title}>{translations[lang].totalDeposited}</span>{' '}
-          <p className={styles.value}>1.553.612.280,17</p>
+          <p className={styles.value}>
+            {(supply != undefined && `$${supply.toFixed(2)}`) || <Skeleton />}
+          </p>
         </li>
         <li className={styles.row}>
           <span className={styles.title}> {translations[lang].liquidity}</span>{' '}
-          <p className={styles.value}>384.186.120,43</p>
+          <p className={styles.value}>
+            {supply != undefined && demand != undefined ? (
+              `$${(supply - demand).toFixed(2)}`
+            ) : (
+              <Skeleton />
+            )}
+          </p>
         </li>
         <li className={styles.row}>
           <span className={styles.title}>{translations[lang].utilizationRate}</span>{' '}
-          <p className={styles.value}>80%</p>
-        </li>
-        <li className={styles.row}>
-          <span className={styles.title}>{translations[lang].suppliers}</span>{' '}
-          <p className={styles.value}>68693</p>
+          <p className={styles.value}>
+            {supply != undefined && demand != undefined ? (
+              `${((demand / supply) * 100 || 0).toFixed(2)}%`
+            ) : (
+              <Skeleton />
+            )}{' '}
+          </p>
         </li>
       </ul>
     </div>

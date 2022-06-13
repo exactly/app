@@ -1,23 +1,23 @@
 import { useContext, useEffect, useState } from 'react';
 import dayjs from 'dayjs';
 
-import { Option } from 'react-dropdown';
-import { LangKeys } from 'types/Lang';
 import { FixedLenderAccountData } from 'types/FixedLenderAccountData';
 
 import AccountDataContext from 'contexts/AccountDataContext';
+import LangContext from 'contexts/LangContext';
 
 import Tooltip from 'components/Tooltip';
 import MaturityPoolUserStatusByMaturity from 'components/MaturityPoolUserStatusByMaturity';
 import Button from 'components/common/Button';
-
-import LangContext from 'contexts/LangContext';
+import EmptyState from 'components/EmptyState';
 
 import styles from './style.module.scss';
 
 import keys from './translations.json';
 import { Deposit } from 'types/Deposit';
 import { Borrow } from 'types/Borrow';
+import { LangKeys } from 'types/Lang';
+import { Option } from 'react-dropdown';
 
 interface Props {
   showModal: (data: Deposit | Borrow, type: String) => void;
@@ -47,7 +47,7 @@ function MaturityPoolDashboard({ showModal, tab }: Props) {
 
   async function getDefaultMaturity() {
     const currentTimestamp = dayjs().unix();
-    const interval = 604800;
+    const interval = 2419200;
     const timestamp = currentTimestamp - (currentTimestamp % interval) + interval;
 
     setDefaultMaturity(timestamp.toString());
@@ -66,7 +66,7 @@ function MaturityPoolDashboard({ showModal, tab }: Props) {
               ...data.deposits[date],
               {
                 symbol: asset.assetSymbol,
-                market: asset.fixedLender,
+                market: asset.market,
                 fee: pool.position.fee,
                 principal: pool.position.principal,
                 decimals: asset.decimals
@@ -75,7 +75,7 @@ function MaturityPoolDashboard({ showModal, tab }: Props) {
           : [
               {
                 symbol: asset.assetSymbol,
-                market: asset.fixedLender,
+                market: asset.market,
                 fee: pool.position.fee,
                 principal: pool.position.principal,
                 decimals: asset.decimals
@@ -92,7 +92,7 @@ function MaturityPoolDashboard({ showModal, tab }: Props) {
               ...data.borrows[date],
               {
                 symbol: asset.assetSymbol,
-                market: asset.fixedLender,
+                market: asset.market,
                 fee: pool.position.fee,
                 principal: pool.position.principal,
                 decimals: asset.decimals
@@ -101,7 +101,7 @@ function MaturityPoolDashboard({ showModal, tab }: Props) {
           : [
               {
                 symbol: asset.assetSymbol,
-                market: asset.fixedLender,
+                market: asset.market,
                 fee: pool.position.fee,
                 principal: pool.position.principal,
                 decimals: asset.decimals
@@ -132,7 +132,7 @@ function MaturityPoolDashboard({ showModal, tab }: Props) {
                   {
                     assets: '0',
                     fee: '0',
-                    market: accountData.DAI.fixedLender!,
+                    market: accountData.DAI.market!,
                     maturity: defaultMaturity!
                   },
                   tab.value
@@ -142,12 +142,24 @@ function MaturityPoolDashboard({ showModal, tab }: Props) {
           )}
         </div>
       </section>
-      {maturities && (
+      {maturities ? (
         <MaturityPoolUserStatusByMaturity
           type={tab}
           maturities={maturities}
           showModal={showModal}
         />
+      ) : (
+        <MaturityPoolUserStatusByMaturity
+          type={undefined}
+          maturities={undefined}
+          showModal={() => undefined}
+        />
+      )}
+      {tab.value == 'deposit' && maturities && !maturities.hasOwnProperty('deposits') && (
+        <EmptyState connected tab={tab.value} />
+      )}
+      {tab.value == 'borrow' && maturities && !maturities.hasOwnProperty('borrows') && (
+        <EmptyState connected tab={tab.value} />
       )}
     </section>
   );

@@ -85,9 +85,9 @@
 
 .container {
   width: var(--max-width);
-  border-top: 1px solid var(--gray-100);
-  margin-bottom: var(--u5);
-  padding-top: var(--u4);
+  border-bottom: 1px solid var(--gray-100);
+  padding-top: var(--u2);
+  padding-bottom: var(--u4);
 
   .infoContainer {
     display: flex;
