@@ -87,7 +87,7 @@ function Item({ market, showModal, type }: Props) {
       supplied: parseFloat(await ethers.utils.formatEther(supplied)),
       rate: exchangeRate
     };
-    console.log(newPoolData, 1234);
+
     try {
       let fee;
       let amount;
