@@ -43,35 +43,41 @@ function SmartPoolUserStatus({ walletAddress, showModal }: Props) {
   }, [walletAddress]);
 
   async function getCurrentBalance() {
-    const data = [];
+    try {
+      const data = [];
 
-    for (let i = 0; i < fixedLenders.length; i++) {
-      const fixedLender = fixedLenders[i];
+      for (let i = 0; i < fixedLenders.length; i++) {
+        const fixedLender = fixedLenders[i];
 
-      const fixedLenderAddress = fixedLender.address;
-      const fixedLenderAbi = fixedLender.abi;
-      const fixedLenderSymbol = getSymbol(fixedLenderAddress!, network?.name);
+        const fixedLenderAddress = fixedLender.address;
+        const fixedLenderAbi = fixedLender.abi;
+        const fixedLenderSymbol = getSymbol(fixedLenderAddress!, network?.name);
 
-      const contractData = await getContractData(
-        network?.name,
-        fixedLenderAddress!,
-        fixedLenderAbi!
-      );
-      const balance = await contractData?.balanceOf(walletAddress);
+        const contractData = await getContractData(
+          network?.name,
+          fixedLenderAddress!,
+          fixedLenderAbi!
+        );
 
-      if (balance) {
-        const etokens = balance;
-        const tokens = await contractData?.convertToAssets(balance);
+        const balance = await contractData?.balanceOf(walletAddress);
 
-        const obj = {
-          symbol: fixedLenderSymbol,
-          eTokens: etokens,
-          tokens: tokens
-        };
-        data.push(obj);
+        if (balance) {
+          const etokens = balance;
+          const tokens = await contractData?.convertToAssets(balance);
+
+          const obj = {
+            symbol: fixedLenderSymbol,
+            eTokens: etokens,
+            tokens: tokens
+          };
+          data.push(obj);
+        }
       }
+
+      setItemData(data);
+    } catch (e) {
+      console.log(e);
     }
-    setItemData(data);
   }
 
   return (

@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Dictionary } from 'types/Dictionary';
 
 type Props = {
   content?: any;

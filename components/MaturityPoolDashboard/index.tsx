@@ -47,7 +47,7 @@ function MaturityPoolDashboard({ showModal, tab }: Props) {
 
   async function getDefaultMaturity() {
     const currentTimestamp = dayjs().unix();
-    const interval = 604800;
+    const interval = 2419200;
     const timestamp = currentTimestamp - (currentTimestamp % interval) + interval;
 
     setDefaultMaturity(timestamp.toString());
@@ -66,7 +66,7 @@ function MaturityPoolDashboard({ showModal, tab }: Props) {
               ...data.deposits[date],
               {
                 symbol: asset.assetSymbol,
-                market: asset.fixedLender,
+                market: asset.market,
                 fee: pool.position.fee,
                 principal: pool.position.principal,
                 decimals: asset.decimals
@@ -75,7 +75,7 @@ function MaturityPoolDashboard({ showModal, tab }: Props) {
           : [
               {
                 symbol: asset.assetSymbol,
-                market: asset.fixedLender,
+                market: asset.market,
                 fee: pool.position.fee,
                 principal: pool.position.principal,
                 decimals: asset.decimals
@@ -92,7 +92,7 @@ function MaturityPoolDashboard({ showModal, tab }: Props) {
               ...data.borrows[date],
               {
                 symbol: asset.assetSymbol,
-                market: asset.fixedLender,
+                market: asset.market,
                 fee: pool.position.fee,
                 principal: pool.position.principal,
                 decimals: asset.decimals
@@ -101,7 +101,7 @@ function MaturityPoolDashboard({ showModal, tab }: Props) {
           : [
               {
                 symbol: asset.assetSymbol,
-                market: asset.fixedLender,
+                market: asset.market,
                 fee: pool.position.fee,
                 principal: pool.position.principal,
                 decimals: asset.decimals
@@ -132,7 +132,7 @@ function MaturityPoolDashboard({ showModal, tab }: Props) {
                   {
                     assets: '0',
                     fee: '0',
-                    market: accountData.DAI.fixedLender!,
+                    market: accountData.DAI.market!,
                     maturity: defaultMaturity!
                   },
                   tab.value

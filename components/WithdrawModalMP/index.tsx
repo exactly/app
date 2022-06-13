@@ -25,6 +25,7 @@ import { Error } from 'types/Error';
 import parseTimestamp from 'utils/parseTimestamp';
 import { getContractData } from 'utils/contracts';
 import formatNumber from 'utils/formatNumber';
+import { getSymbol } from 'utils/utils';
 
 import styles from './style.module.scss';
 
@@ -174,8 +175,7 @@ function WithdrawModalMP({ data, closeModal }: Props) {
 
   async function getFixedLenderContract() {
     const filteredFixedLender = fixedLenderData.find((contract) => {
-      const args: Array<string> | undefined = contract?.args;
-      const contractSymbol: string | undefined = args && args[1];
+      const contractSymbol = getSymbol(contract.address!, network!.name);
 
       return contractSymbol == symbol;
     });

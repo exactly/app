@@ -11,7 +11,7 @@ export interface Position {
 }
 
 export type FixedLenderAccountData = {
-  fixedLender: string;
+  market: string;
   assetSymbol: string;
   maturitySupplyPositions: Array<MaturityPosition>;
   maturityBorrowPositions: Array<MaturityPosition>;
@@ -19,7 +19,7 @@ export type FixedLenderAccountData = {
   smartPoolShares: BigNumber;
   oraclePrice: BigNumber;
   penaltyRate: BigNumber;
-  collateralFactor: BigNumber;
+  adjustFactor: BigNumber;
   decimals: number;
   isCollateral: boolean;
 };

@@ -21,7 +21,7 @@ import keys from './translations.json';
 
 import decimals from 'config/decimals.json';
 
-import { getUnderlyingData } from 'utils/utils';
+import { getSymbol, getUnderlyingData } from 'utils/utils';
 import { getContractData } from 'utils/contracts';
 import formatNumber from 'utils/formatNumber';
 import parseSymbol from 'utils/parseSymbol';
@@ -59,13 +59,13 @@ function Item({
 
   useEffect(() => {
     getCurrentBalance();
-  }, [walletAddress]);
+  }, [underlyingData, walletAddress]);
 
   useEffect(() => {
-    if (auditorContract) {
+    if (accountData) {
       checkCollaterals();
     }
-  }, [auditorContract, walletAddress]);
+  }, [accountData, walletAddress]);
 
   async function checkCollaterals() {
     if (!accountData || !symbol) return;
@@ -93,8 +93,7 @@ function Item({
 
   function getFixedLenderData() {
     const filteredFixedLender = fixedLender.find((contract) => {
-      const args: Array<string> | undefined = contract?.args;
-      const contractSymbol: string | undefined = args && args[1];
+      const contractSymbol = getSymbol(contract.address!, network!.name);
 
       return contractSymbol === symbol;
     });
@@ -117,7 +116,7 @@ function Item({
 
       if (!toggle && fixedLenderAddress) {
         //if it's not toggled we need to ENTER
-        tx = await auditorContract?.enterMarkets([fixedLenderAddress]);
+        tx = await auditorContract?.enterMarket(fixedLenderAddress);
       } else if (fixedLenderAddress) {
         //if it's toggled we need to EXIT
         tx = await auditorContract?.exitMarket(fixedLenderAddress);
@@ -129,6 +128,7 @@ function Item({
       //when it ends we stop loading
       setLoading(false);
     } catch (e) {
+      console.log(e);
       //if user rejects tx we change toggle status to previous, and stop loading
       setToggle((prev) => !prev);
       setLoading(false);

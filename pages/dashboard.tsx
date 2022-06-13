@@ -45,9 +45,7 @@ const DashBoard: NextPage<Props> = () => {
 
   const [accountData, setAccountData] = useState<AccountData>();
 
-  const { Previewer, Auditor, FixedLenderDAI, FixedLenderWETH } = getABI(network?.name);
-
-  const fixedLenders = [FixedLenderDAI, FixedLenderWETH];
+  const { Previewer, Auditor, FixedLenders } = getABI(network?.name);
 
   const tabDeposit = {
     label: translations.deposit,
@@ -97,7 +95,7 @@ const DashBoard: NextPage<Props> = () => {
         <PreviewerProvider value={Previewer}>
           <AccountDataProvider value={{ accountData, setAccountData }}>
             <AuditorProvider value={Auditor}>
-              <FixedLenderProvider value={fixedLenders}>
+              <FixedLenderProvider value={FixedLenders}>
                 {modal && modalContent?.type == 'borrow' && (
                   <BorrowModal data={modalContent} closeModal={handleModal} editable />
                 )}

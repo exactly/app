@@ -33,7 +33,9 @@ function SmartPoolInfo({ showModal, symbol, fixedLender }: Props) {
   const [demand, setDemand] = useState<number | undefined>(undefined);
 
   useMemo(() => {
-    getSmartPoolData();
+    if (fixedLender) {
+      getSmartPoolData();
+    }
   }, [fixedLender]);
 
   async function getSmartPoolData() {
@@ -87,18 +89,28 @@ function SmartPoolInfo({ showModal, symbol, fixedLender }: Props) {
         </li>
         <li className={styles.row}>
           <span className={styles.title}>{translations[lang].totalDeposited}</span>{' '}
-          <p className={styles.value}> {(supply && `$${supply.toFixed(2)}`) || <Skeleton />}</p>
+          <p className={styles.value}>
+            {(supply != undefined && `$${supply.toFixed(2)}`) || <Skeleton />}
+          </p>
         </li>
         <li className={styles.row}>
           <span className={styles.title}> {translations[lang].liquidity}</span>{' '}
           <p className={styles.value}>
-            {supply && demand ? `$${(supply - demand).toFixed(2)}` : <Skeleton />}
+            {supply != undefined && demand != undefined ? (
+              `$${(supply - demand).toFixed(2)}`
+            ) : (
+              <Skeleton />
+            )}
           </p>
         </li>
         <li className={styles.row}>
           <span className={styles.title}>{translations[lang].utilizationRate}</span>{' '}
           <p className={styles.value}>
-            {supply && demand ? `${((demand / supply) * 100).toFixed(2)}%` : <Skeleton />}{' '}
+            {supply != undefined && demand != undefined ? (
+              `${((demand / supply) * 100 || 0).toFixed(2)}%`
+            ) : (
+              <Skeleton />
+            )}{' '}
           </p>
         </li>
       </ul>
