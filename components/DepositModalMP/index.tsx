@@ -67,7 +67,7 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
   const [step, setStep] = useState<number | undefined>(undefined);
   const [pending, setPending] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
-  const [slippage, setSlippage] = useState<string>('0.5');
+  const [slippage, setSlippage] = useState<string>('0.00');
   const [editSlippage, setEditSlippage] = useState<boolean>(false);
   const [fixedRate, setFixedRate] = useState<string>('0.00');
   const [error, setError] = useState<Error | undefined>(undefined);
@@ -362,7 +362,7 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
                   setSlippage(e.target.value);
                 }}
                 onClick={() => {
-                  if (slippage == '') setSlippage('0.5');
+                  if (slippage == '') setSlippage('0.00');
                   setEditSlippage((prev) => !prev);
                 }}
                 line

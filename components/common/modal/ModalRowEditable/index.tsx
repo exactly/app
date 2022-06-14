@@ -31,7 +31,7 @@ function ModalRowEditable({
       <p className={styles.text}>{text}</p>
       <section className={styles.editable}>
         {!editable && (
-          <p className={styles.value}>{`${value == '' ? placeholder ?? '0.05' : value} ${
+          <p className={styles.value}>{`${value == '' ? placeholder ?? '0.00' : value}${
             symbol ? symbol : ''
           }`}</p>
         )}
@@ -40,7 +40,7 @@ function ModalRowEditable({
             <input
               min={0.0}
               type="number"
-              placeholder={placeholder ?? '0.05'}
+              placeholder={placeholder ?? '0.00'}
               value={value !== '' ? parseFloat(value!) : ''}
               onChange={onChange}
               name={text}
