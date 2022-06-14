@@ -24,9 +24,9 @@ function Navbar() {
 
   const routes = [
     {
-      pathname: '/pools',
-      href: '/pools',
-      name: translations[lang].pools
+      pathname: '/markets',
+      href: '/markets',
+      name: translations[lang].markets
     },
     {
       pathname: '/assets/[id]',
