@@ -1,6 +1,7 @@
-import AccountDataContext from 'contexts/AccountDataContext';
 import { ethers } from 'ethers';
 import { useState, ChangeEventHandler, MouseEventHandler, useEffect, useContext } from 'react';
+
+import AccountDataContext from 'contexts/AccountDataContext';
 
 import formatNumber from 'utils/formatNumber';
 
