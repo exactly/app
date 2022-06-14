@@ -109,8 +109,8 @@ function AssetSelector({ title, defaultAddress, onChange }: Props) {
     <section className={style.container}>
       {title && (
         <div className={style.titleContainer}>
-          <p className={style.title}>Maturity Pools</p>
-          <Tooltip value="Maturity Pool" />
+          <p className={style.title}>Fixed Rate Pools</p>
+          <Tooltip value="Fixed Rate Pools" />
         </div>
       )}
       <div className={style.selectContainer}>

@@ -24,7 +24,7 @@ const Hero = () => {
           </h1>
           <p className={style.subtitle}>{translations[lang].description}</p>
           <div className={style.buttonContainer}>
-            <Link href="/pools">
+            <Link href="/markets">
               <Button text={translations[lang].open} />
             </Link>
           </div>
