@@ -4,6 +4,7 @@ import dayjs from 'dayjs';
 import Skeleton from 'react-loading-skeleton';
 
 import LangContext from 'contexts/LangContext';
+import AccountDataContext from 'contexts/AccountDataContext';
 
 import { LangKeys } from 'types/Lang';
 import { Maturity } from 'types/Maturity';
@@ -15,7 +16,6 @@ import keys from './translations.json';
 import numbers from 'config/numbers.json';
 
 import parseSymbol from 'utils/parseSymbol';
-import getExchangeRate from 'utils/getExchangeRate';
 
 interface Props {
   maturity: Maturity;
@@ -24,6 +24,8 @@ interface Props {
 }
 
 function MaturityInfo({ maturity, symbol, fixedLender }: Props) {
+  const { accountData } = useContext(AccountDataContext);
+
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
@@ -50,10 +52,13 @@ function MaturityInfo({ maturity, symbol, fixedLender }: Props) {
   }, [fixedLender]);
 
   async function getMaturityPoolData() {
+    if (!accountData) return;
+
     try {
       const { borrowed, supplied } = await fixedLender?.maturityPools(maturity.value);
       const decimals = await fixedLender?.decimals();
-      const exchangeRate = await getExchangeRate(symbol);
+
+      const exchangeRate = parseFloat(ethers.utils.formatEther(accountData[symbol].oraclePrice));
 
       const newPoolData = {
         borrowed: parseFloat(await ethers.utils.formatUnits(borrowed, decimals)),

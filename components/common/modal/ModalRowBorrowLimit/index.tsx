@@ -1,14 +1,15 @@
 import { useContext, useEffect, useState } from 'react';
 import Image from 'next/image';
 import Skeleton from 'react-loading-skeleton';
+import { ethers } from 'ethers';
 
 import { LangKeys } from 'types/Lang';
 import { HealthFactor } from 'types/HealthFactor';
 
 import parseSymbol from 'utils/parseSymbol';
-import getExchangeRate from 'utils/getExchangeRate';
 
 import LangContext from 'contexts/LangContext';
+import AccountDataContext from 'contexts/AccountDataContext';
 
 import styles from './style.module.scss';
 
@@ -32,6 +33,8 @@ function ModalRowBorrowLimit({
   operation,
   line
 }: Props) {
+  const { accountData } = useContext(AccountDataContext);
+
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
@@ -44,7 +47,9 @@ function ModalRowBorrowLimit({
   let afterBorrowLimit = 0;
 
   async function getAmount() {
-    const exchangeRate = await getExchangeRate(parsedSymbol);
+    if (!accountData || !symbol) return;
+
+    const exchangeRate = parseFloat(ethers.utils.formatEther(accountData[symbol].oraclePrice));
 
     const newQty = exchangeRate * parseFloat(qty);
 

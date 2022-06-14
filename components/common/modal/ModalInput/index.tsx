@@ -1,7 +1,8 @@
-import { useState, ChangeEventHandler, MouseEventHandler, useEffect } from 'react';
-import formatNumber from 'utils/formatNumber';
+import AccountDataContext from 'contexts/AccountDataContext';
+import { ethers } from 'ethers';
+import { useState, ChangeEventHandler, MouseEventHandler, useEffect, useContext } from 'react';
 
-import getExchangeRate from 'utils/getExchangeRate';
+import formatNumber from 'utils/formatNumber';
 
 import styles from './style.module.scss';
 
@@ -16,19 +17,20 @@ type Props = {
 };
 
 function ModalInput({ value, name, disabled, symbol, error, onChange, onMax }: Props) {
+  const { accountData } = useContext(AccountDataContext);
+
   const [exchangeRate, setExchangeRate] = useState(1);
 
   const blockedCharacters = ['e', 'E', '+', '-'];
 
   useEffect(() => {
-    if (!symbol || symbol.toLocaleLowerCase() === 'dai' || symbol.toLocaleLowerCase() === 'usdc')
-      return;
-
     getRate();
   }, [symbol]);
 
   async function getRate() {
-    const rate = await getExchangeRate(symbol!);
+    if (!accountData || !symbol) return;
+
+    const rate = parseFloat(ethers.utils.formatEther(accountData[symbol].oraclePrice));
     setExchangeRate(rate);
   }
 

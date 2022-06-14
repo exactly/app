@@ -6,6 +6,7 @@ import Button from 'components/common/Button';
 
 import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
+import AccountDataContext from 'contexts/AccountDataContext';
 
 import { LangKeys } from 'types/Lang';
 import { Deposit } from 'types/Deposit';
@@ -21,7 +22,6 @@ import parseTimestamp from 'utils/parseTimestamp';
 import formatNumber from 'utils/formatNumber';
 import parseSymbol from 'utils/parseSymbol';
 import getSubgraph from 'utils/getSubgraph';
-import getExchangeRate from 'utils/getExchangeRate';
 
 import {
   getMaturityPoolBorrowsQuery,
@@ -46,6 +46,8 @@ type Props = {
 
 function Item({ type, amount, fee, maturityDate, showModal, symbol, data, decimals }: Props) {
   const { network, walletAddress } = useWeb3Context();
+
+  const { accountData } = useContext(AccountDataContext);
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
@@ -106,7 +108,9 @@ function Item({ type, amount, fee, maturityDate, showModal, symbol, data, decima
   // }
 
   async function getRate() {
-    const rate = await getExchangeRate(symbol);
+    if (!accountData || !symbol) return;
+
+    const rate = parseFloat(ethers.utils.formatEther(accountData[symbol].oraclePrice));
 
     setExchangeRate(rate);
   }

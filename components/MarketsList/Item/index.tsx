@@ -13,6 +13,7 @@ import FixedLenderContext from 'contexts/FixedLenderContext';
 import { AddressContext } from 'contexts/AddressContext';
 import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
+import AccountDataContext from 'contexts/AccountDataContext';
 
 import style from './style.module.scss';
 
@@ -23,7 +24,6 @@ import parseSymbol from 'utils/parseSymbol';
 import getSubgraph from 'utils/getSubgraph';
 
 import { getLastMaturityPoolBorrowRate, getLastMaturityPoolDepositRate } from 'queries';
-import getExchangeRate from 'utils/getExchangeRate';
 
 type Props = {
   market?: Market;
@@ -34,7 +34,9 @@ type Props = {
 function Item({ market, showModal, type }: Props) {
   const { date } = useContext(AddressContext);
   const { web3Provider, walletAddress, connect, network } = useWeb3Context();
+
   const fixedLenderData = useContext(FixedLenderContext);
+  const { accountData } = useContext(AccountDataContext);
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
@@ -51,7 +53,7 @@ function Item({ market, showModal, type }: Props) {
     if (date?.value && fixedLender) {
       getMarketData();
     }
-  }, [date, fixedLender, market]);
+  }, [date, fixedLender, market, accountData]);
 
   async function getFixedLenderContract() {
     if (!market) return;
@@ -76,11 +78,13 @@ function Item({ market, showModal, type }: Props) {
   }
 
   async function getMarketData() {
-    if (!market) return;
+    if (!market || !accountData) return;
 
     const { borrowed, supplied } = await fixedLender?.maturityPools(date?.value);
 
-    const exchangeRate = await getExchangeRate(market.symbol);
+    const exchangeRate = parseFloat(
+      ethers.utils.formatEther(accountData[market?.symbol.toUpperCase()].oraclePrice)
+    );
 
     const newPoolData = {
       borrowed: parseFloat(await ethers.utils.formatEther(borrowed)),
@@ -144,22 +148,12 @@ function Item({ market, showModal, type }: Props) {
       <p className={style.value}>
         {poolData && market ? (
           type == 'borrow' ? (
-            `${formatNumber(poolData?.borrowed!, market?.symbol)}`
+            `$${formatNumber(poolData?.borrowed! * poolData?.rate!, 'USD')}`
           ) : (
-            `${formatNumber(poolData?.supplied!, market?.symbol)}`
+            `$${formatNumber(poolData?.supplied! * poolData?.rate!, 'USD')}`
           )
         ) : (
           <Skeleton />
-        )}{' '}
-        {poolData && type == 'borrow' && (
-          <span className={style.exchange}>
-            ({`$${formatNumber(poolData?.borrowed! * poolData?.rate!, 'usd')}`})
-          </span>
-        )}
-        {poolData && type == 'deposit' && (
-          <span className={style.exchange}>
-            ({`$${formatNumber(poolData?.supplied! * poolData?.rate!, 'usd')}`})
-          </span>
         )}
       </p>
       <p className={style.value}>{(rate && `${rate}%`) || <Skeleton />}</p>

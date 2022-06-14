@@ -12,6 +12,7 @@ import FixedLenderContext from 'contexts/FixedLenderContext';
 import { AddressContext } from 'contexts/AddressContext';
 import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
+import AccountDataContext from 'contexts/AccountDataContext';
 
 import style from './style.module.scss';
 
@@ -21,7 +22,6 @@ import { getContractData } from 'utils/contracts';
 import formatNumber from 'utils/formatNumber';
 import parseSymbol from 'utils/parseSymbol';
 import getSmartPoolInterestRate from 'utils/getSmartPoolInterestRate';
-import getExchangeRate from 'utils/getExchangeRate';
 
 type Props = {
   market: Market | undefined;
@@ -33,6 +33,7 @@ function Item({ market, showModal }: Props) {
   const { web3Provider, walletAddress, connect, network } = useWeb3Context();
 
   const fixedLenderData = useContext(FixedLenderContext);
+  const { accountData } = useContext(AccountDataContext);
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
@@ -65,7 +66,7 @@ function Item({ market, showModal }: Props) {
     if (date?.value && fixedLender) {
       getMarketData();
     }
-  }, [date, fixedLender]);
+  }, [date, fixedLender, accountData]);
 
   function handleClick() {
     if (!market || !showModal) return;
@@ -76,12 +77,14 @@ function Item({ market, showModal }: Props) {
   }
 
   async function getMarketData() {
-    if (!market) return;
+    if (!market || !accountData) return;
 
     const borrowed = await fixedLender?.smartPoolBorrowed();
     const supplied = await fixedLender?.smartPoolAssets();
 
-    const exchangeRate = await getExchangeRate(market.symbol);
+    const exchangeRate = parseFloat(
+      ethers.utils.formatEther(accountData[market?.symbol.toUpperCase()].oraclePrice)
+    );
 
     const newPoolData = {
       borrowed: Math.round(parseInt(await ethers.utils.formatEther(borrowed))),
@@ -112,12 +115,7 @@ function Item({ market, showModal }: Props) {
       <p className={style.value}>
         {(market &&
           poolData &&
-          `$${formatNumber(poolData?.supplied! * poolData?.rate!, market?.symbol)}`) || (
-          <Skeleton />
-        )}{' '}
-        {poolData && (
-          <span className={style.exchange}>({`$${formatNumber(poolData?.supplied!, 'usd')}`})</span>
-        )}
+          `$${formatNumber(poolData?.supplied! * poolData?.rate!, 'USD')}`) || <Skeleton />}
       </p>
       <p className={style.value}>{(rate && `${rate}%`) || <Skeleton />}</p>
       <div className={style.buttonContainer}>

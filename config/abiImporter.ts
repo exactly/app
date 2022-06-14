@@ -12,7 +12,7 @@ import rinkebyPreviewer from 'protocol/deployments/rinkeby/Previewer.json';
 
 import { Dictionary } from 'types/Dictionary';
 
-function getABI(network: string | undefined = 'rinkeby') {
+function getABI(network: string | undefined) {
   const dictionary: Dictionary<Dictionary<any>> = {
     kovan: {
       FixedLenders: [kovanFixedLenderDAI, kovanFixedLenderWETH],
@@ -32,7 +32,7 @@ function getABI(network: string | undefined = 'rinkeby') {
     mainnet: {}
   };
 
-  return dictionary[network];
+  return dictionary[network || process.env.NEXT_PUBLIC_NETWORK!];
 }
 
 export default getABI;
