@@ -6,7 +6,9 @@
     "interestRate": "Interest Rate",
     "maximumBorrowRate": "Maximum Borrow Rate",
     "maturityDebt": "Maturity Debt",
-    "healthFactor": "Health Factor"
+    "healthFactor": "Health Factor",
+    "notEnoughSlippage": "The transaction failed, please check your Maximum Deposit Rate",
+    "deniedTransaction": "Transaction rejected"
   },
   "es": {}
 }

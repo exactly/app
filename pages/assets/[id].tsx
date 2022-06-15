@@ -235,7 +235,6 @@ const Asset: NextPage<Props> = ({ symbol }) => {
                 <section className={style.assetData}>
                   <div className={style.assetContainer}>
                     <p className={style.title}>{translations[lang].maturityPools}</p>
-                    <Tooltip value={translations[lang].maturityPools} />
                   </div>
                   <div className={style.assetMetricsContainer}></div>
                 </section>
@@ -246,12 +245,14 @@ const Asset: NextPage<Props> = ({ symbol }) => {
                       market={fixedLenderContract?.address}
                       showModal={showModal}
                     />
-                    <Paginator
-                      total={maturities?.length ?? 0}
-                      itemsPerPage={itemsPerPage}
-                      handleChange={(page) => setPage(page)}
-                      currentPage={page}
-                    />
+                    {maturities && maturities.length > 0 && (
+                      <Paginator
+                        total={maturities.length}
+                        itemsPerPage={itemsPerPage}
+                        handleChange={(page) => setPage(page)}
+                        currentPage={page}
+                      />
+                    )}
                   </div>
                   <div className={style.assetGraph}>
                     <PoolsChart />
