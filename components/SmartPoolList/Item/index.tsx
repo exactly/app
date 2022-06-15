@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
 import { Contract, ethers } from 'ethers';
 import Skeleton from 'react-loading-skeleton';
+import Link from 'next/link';
 
 import Button from 'components/common/Button';
 
@@ -99,31 +100,40 @@ function Item({ market, showModal }: Props) {
   }
 
   return (
-    <div className={`${style.container} ${style.primaryContainer}`} onClick={handleClick}>
-      <div className={style.symbol}>
-        {(market && (
-          <img
-            src={`/img/assets/${market?.symbol.toLowerCase()}.png`}
-            className={style.assetImage}
-            alt={market?.symbol}
-          />
-        )) || <Skeleton circle height={40} width={40} />}
-        <span className={style.primary}>
-          {(market && parseSymbol(market?.symbol)) || <Skeleton />}
-        </span>
+    <Link href={`/assets/${market?.symbol.toLowerCase()}`}>
+      <div className={`${style.container} ${style.primaryContainer}`}>
+        <div className={style.symbol}>
+          {(market && (
+            <img
+              src={`/img/assets/${market?.symbol.toLowerCase()}.png`}
+              className={style.assetImage}
+              alt={market?.symbol}
+            />
+          )) || <Skeleton circle height={40} width={40} />}
+          <span className={style.primary}>
+            {(market && parseSymbol(market?.symbol)) || <Skeleton />}
+          </span>
+        </div>
+        <p className={style.value}>
+          {(market &&
+            poolData &&
+            `$${formatNumber(poolData?.supplied! * poolData?.rate!, 'USD')}`) || <Skeleton />}
+        </p>
+        <p className={style.value}>{(rate && `${rate}%`) || <Skeleton />}</p>
+        <div className={style.buttonContainer}>
+          {(market && (
+            <Button
+              text={translations[lang].deposit}
+              className={'tertiary'}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleClick();
+              }}
+            />
+          )) || <Skeleton height={40} />}
+        </div>
       </div>
-      <p className={style.value}>
-        {(market &&
-          poolData &&
-          `$${formatNumber(poolData?.supplied! * poolData?.rate!, 'USD')}`) || <Skeleton />}
-      </p>
-      <p className={style.value}>{(rate && `${rate}%`) || <Skeleton />}</p>
-      <div className={style.buttonContainer}>
-        {(market && <Button text={translations[lang].deposit} className={'tertiary'} />) || (
-          <Skeleton height={40} />
-        )}
-      </div>
-    </div>
+    </Link>
   );
 }
 
