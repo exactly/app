@@ -1,6 +1,7 @@
 .footer {
   width: 100%;
   margin-top: 50px;
+  display: flex;
 
   .container {
     width: var(--maxWidth);
@@ -15,6 +16,7 @@
       flex-wrap: wrap;
       justify-content: center;
       gap: 50px;
+      align-self: center;
 
       .images {
         display: flex;

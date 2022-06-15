@@ -2,6 +2,7 @@ import { useContext, useEffect, useState } from 'react';
 import { ethers } from 'ethers';
 import { request } from 'graphql-request';
 import Skeleton from 'react-loading-skeleton';
+import Link from 'next/link';
 
 import Button from 'components/common/Button';
 
@@ -127,45 +128,50 @@ function Item({ market, showModal, type }: Props) {
   }
 
   return (
-    <div
-      className={`${style.container} ${
-        type == 'borrow' ? style.secondaryContainer : style.primaryContainer
-      }`}
-      onClick={handleClick}
-    >
-      <div className={style.symbol}>
-        {(market && (
-          <img
-            src={`/img/assets/${market?.symbol.toLowerCase()}.png`}
-            alt={market?.symbol}
-            className={style.assetImage}
-          />
-        )) || <Skeleton circle width={40} height={40} />}
-        <span className={style.primary}>
-          {(market && parseSymbol(market?.symbol)) || <Skeleton width={30} />}
-        </span>
-      </div>
-      <p className={style.value}>
-        {poolData && market ? (
-          type == 'borrow' ? (
-            `$${formatNumber(poolData?.borrowed! * poolData?.rate!, 'USD')}`
+    <Link href={`/assets/${market?.symbol.toLowerCase()}`}>
+      <div
+        className={`${style.container} ${
+          type == 'borrow' ? style.secondaryContainer : style.primaryContainer
+        }`}
+      >
+        <div className={style.symbol}>
+          {(market && (
+            <img
+              src={`/img/assets/${market?.symbol.toLowerCase()}.png`}
+              alt={market?.symbol}
+              className={style.assetImage}
+            />
+          )) || <Skeleton circle width={40} height={40} />}
+          <span className={style.primary}>
+            {(market && parseSymbol(market?.symbol)) || <Skeleton width={30} />}
+          </span>
+        </div>
+        <p className={style.value}>
+          {poolData && market ? (
+            type == 'borrow' ? (
+              `$${formatNumber(poolData?.borrowed! * poolData?.rate!, 'USD')}`
+            ) : (
+              `$${formatNumber(poolData?.supplied! * poolData?.rate!, 'USD')}`
+            )
           ) : (
-            `$${formatNumber(poolData?.supplied! * poolData?.rate!, 'USD')}`
-          )
-        ) : (
-          <Skeleton />
-        )}
-      </p>
-      <p className={style.value}>{(rate && `${rate}%`) || <Skeleton />}</p>
-      <div className={style.buttonContainer}>
-        {(market && (
-          <Button
-            text={type == 'borrow' ? translations[lang].borrow : translations[lang].deposit}
-            className={type == 'borrow' ? 'secondary' : 'primary'}
-          />
-        )) || <Skeleton height={40} />}
+            <Skeleton />
+          )}
+        </p>
+        <p className={style.value}>{(rate && `${rate}%`) || <Skeleton />}</p>
+        <div className={style.buttonContainer}>
+          {(market && (
+            <Button
+              text={type == 'borrow' ? translations[lang].borrow : translations[lang].deposit}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleClick();
+              }}
+              className={type == 'borrow' ? 'secondary' : 'primary'}
+            />
+          )) || <Skeleton height={40} />}
+        </div>
       </div>
-    </div>
+    </Link>
   );
 }
 

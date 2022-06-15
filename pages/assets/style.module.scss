@@ -91,3 +91,36 @@
     margin-bottom: var(--u6);
   }
 }
+
+@media (max-width: 769px) {
+  .container {
+    max-width: 100%;
+    padding-left: var(--u2);
+    padding-right: var(--u2);
+
+    .smartPoolContainer {
+      flex-direction: column;
+      width: 100%;
+    }
+
+    .graphContainer {
+      flex-direction: column;
+      .leftColumn {
+        max-width: 100%;
+      }
+      .assetGraph {
+        max-width: 100%;
+      }
+    }
+
+    .assetInfoContainer {
+      max-width: 100%;
+      justify-content: space-around;
+    }
+
+    .maturitiesContainer {
+      flex-direction: column;
+      width: 100%;
+    }
+  }
+}

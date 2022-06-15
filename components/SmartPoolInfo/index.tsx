@@ -16,6 +16,7 @@ import Button from 'components/common/Button';
 import Tooltip from 'components/Tooltip';
 
 import parseSymbol from 'utils/parseSymbol';
+import formatNumber from 'utils/formatNumber';
 
 interface Props {
   showModal: (type: string, maturity: string | undefined) => void;
@@ -94,14 +95,14 @@ function SmartPoolInfo({ showModal, symbol, fixedLender }: Props) {
         <li className={styles.row}>
           <span className={styles.title}>{translations[lang].totalDeposited}</span>{' '}
           <p className={styles.value}>
-            {(supply != undefined && `$${supply.toFixed(2)}`) || <Skeleton />}
+            {(supply != undefined && `$${formatNumber(supply, symbol, true)}`) || <Skeleton />}
           </p>
         </li>
         <li className={styles.row}>
           <span className={styles.title}> {translations[lang].liquidity}</span>{' '}
           <p className={styles.value}>
             {supply != undefined && demand != undefined ? (
-              `$${(supply - demand).toFixed(2)}`
+              `$${formatNumber(supply - demand, symbol, true)}`
             ) : (
               <Skeleton />
             )}

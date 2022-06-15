@@ -20,21 +20,20 @@ const Footer = () => {
         <div className={style.left}>
           <div className={style.images}>
             <a href="https://twitter.com/exactly_finance" target="_blank" rel="noreferrer noopener">
-              <img alt="twitter" src="./img/social/twitter.png" />
+              <img alt="twitter" src="/img/social/twitter.png" />
             </a>
             <a href="https://discord.gg/6HppqAxQut" target="_blank" rel="noreferrer noopener">
-              <img alt="discord" src="./img/social/discord.png" />
+              <img alt="discord" src="/img/social/discord.png" />
             </a>
             <a href="https://t.me/exactlyFinance" target="_blank" rel="noreferrer noopener">
-              <img alt="telegram" src="./img/social/telegram.png" />
+              <img alt="telegram" src="/img/social/telegram.png" />
             </a>
             <a href="https://github.com/exactly-finance" target="_blank" rel="noreferrer noopener">
-              <img alt="github" src="./img/social/github.png" />
+              <img alt="github" src="/img/social/github.png" />
             </a>
             <a href="https://docs.exactly.finance/" target="_blank" rel="noreferrer noopener">
-              <img alt="gitbook" src="./img/social/gitbook.png" />
+              <img alt="gitbook" src="/img/social/gitbook.png" />
             </a>
-
           </div>
           <div>
             <a

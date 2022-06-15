@@ -16,6 +16,7 @@ import keys from './translations.json';
 import numbers from 'config/numbers.json';
 
 import parseSymbol from 'utils/parseSymbol';
+import formatNumber from 'utils/formatNumber';
 
 interface Props {
   maturity: Maturity;
@@ -93,13 +94,25 @@ function MaturityInfo({ maturity, symbol, fixedLender }: Props) {
         <li className={styles.row}>
           <span className={styles.title}>{translations[lang].totalBorrowed}</span>{' '}
           <p className={styles.value}>
-            {demand && demand > 0 ? `$${demand.toFixed(2)}` : demand == 0 ? '0.00' : <Skeleton />}
+            {demand && demand > 0 ? (
+              `$${formatNumber(demand, symbol, true)}`
+            ) : demand == 0 ? (
+              '0.00'
+            ) : (
+              <Skeleton />
+            )}
           </p>
         </li>
         <li className={styles.row}>
           <span className={styles.title}>{translations[lang].totalDeposited}</span>{' '}
           <p className={styles.value}>
-            {supply && supply > 0 ? `$${supply.toFixed(2)}` : supply == 0 ? '0.00' : <Skeleton />}
+            {supply && supply > 0 ? (
+              `$${formatNumber(supply, symbol, true)}`
+            ) : supply == 0 ? (
+              '0.00'
+            ) : (
+              <Skeleton />
+            )}
           </p>
         </li>
         <li className={styles.row}>

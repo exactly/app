@@ -54,6 +54,7 @@ function Item({
   const [disabled, setDisabled] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [walletBalance, setWalletBalance] = useState<string | undefined>(undefined);
+  const [rate, setRate] = useState<number | undefined>(undefined);
 
   const underlyingData = getUnderlyingData(network?.name, symbol);
 
@@ -64,6 +65,7 @@ function Item({
   useEffect(() => {
     if (accountData) {
       checkCollaterals();
+      getExchangeRate();
     }
   }, [accountData, walletAddress]);
 
@@ -73,6 +75,15 @@ function Item({
     const data = accountData;
 
     data![symbol].isCollateral ? setToggle(true) : setToggle(false);
+  }
+
+  function getExchangeRate() {
+    if (!accountData || !symbol) return;
+    const data = accountData;
+    const exchangeRate = parseFloat(
+      ethers.utils.formatEther(data[symbol.toUpperCase()].oraclePrice)
+    );
+    setRate(exchangeRate);
   }
 
   async function getCurrentBalance() {
@@ -148,25 +159,29 @@ function Item({
         <span className={styles.primary}>{(symbol && parseSymbol(symbol)) || <Skeleton />}</span>
       </div>
       <span className={styles.value}>
-        {(symbol && walletBalance && formatNumber(walletBalance!, symbol)) || (
-          <Skeleton width={40} />
-        )}
+        {(symbol &&
+          rate &&
+          walletBalance &&
+          `$${formatNumber(parseFloat(walletBalance!) * rate, symbol)}`) || <Skeleton width={40} />}
       </span>
       <span className={styles.value}>
         {(tokenAmount &&
           symbol &&
-          formatNumber(
-            ethers.utils.formatUnits(tokenAmount, decimals[symbol! as keyof Decimals]),
-            symbol
-          )) || <Skeleton width={40} />}
+          rate &&
+          `$${formatNumber(
+            parseFloat(ethers.utils.formatUnits(tokenAmount, decimals[symbol! as keyof Decimals])) *
+              rate,
+            'USD',
+            true
+          )}`) || <Skeleton width={40} />}
       </span>
       <span className={styles.value}>
         {(eTokenAmount &&
           symbol &&
-          formatNumber(
+          `${formatNumber(
             ethers.utils.formatUnits(eTokenAmount, decimals[symbol! as keyof Decimals]),
             symbol
-          )) || <Skeleton width={40} />}
+          )}`) || <Skeleton width={40} />}{' '}
       </span>
 
       {symbol ? (
