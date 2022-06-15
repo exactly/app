@@ -182,8 +182,8 @@ function BorrowModal({ data, editable, closeModal }: Props) {
 
       const estimatedGasCost = await fixedLenderWithSigner?.estimateGas.borrowAtMaturity(
         parseInt(date?.value ?? maturity),
-        ethers.utils.parseUnits(`0.0000000000000001`, decimals),
-        ethers.utils.parseUnits(`0.0000000000002`, decimals),
+        ethers.utils.parseUnits(`1`, decimals),
+        ethers.utils.parseUnits(`2`, decimals),
         walletAddress,
         walletAddress
       );
@@ -196,6 +196,7 @@ function BorrowModal({ data, editable, closeModal }: Props) {
         setGas({ eth: eth.toFixed(8), gwei: parseFloat(gwei).toFixed(1) });
       }
     } catch (e) {
+      console.log(e);
       setError({
         status: true,
         component: 'gas'

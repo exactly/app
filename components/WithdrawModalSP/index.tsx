@@ -132,7 +132,6 @@ function WithdrawModalSP({ data, closeModal }: Props) {
     try {
       const gasPriceInGwei = await fixedLenderWithSigner?.provider.getGasPrice();
       const decimals = await fixedLenderWithSigner?.decimals();
-
       const estimatedGasCost = await fixedLenderWithSigner?.estimateGas.withdraw(
         ethers.utils.parseUnits(`${numbers.estimateGasAmount}`, decimals),
         walletAddress,

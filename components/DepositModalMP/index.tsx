@@ -233,7 +233,7 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
 
       const estimatedGasCost = await fixedLenderWithSigner?.estimateGas.depositAtMaturity(
         parseInt(date?.value ?? maturity),
-        ethers.utils.parseUnits(`${numbers.estimateGasAmount}`, decimals),
+        ethers.utils.parseUnits(`1`, decimals),
         ethers.utils.parseUnits('0', decimals),
         walletAddress
       );
@@ -352,7 +352,7 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
                 symbol={symbol!}
                 error={error?.component == 'input'}
               />
-              {error && error.component != 'gas' && <ModalError message={error.message} />}
+              {error?.component !== 'gas' && <ModalTxCost gas={gas} />}
               <ModalRow text={translations[lang].interestRate} value={`${fixedRate}%`} line />
               <ModalRowEditable
                 text={translations[lang].minimumDepositRate}
