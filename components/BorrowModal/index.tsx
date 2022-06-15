@@ -129,8 +129,8 @@ function BorrowModal({ data, editable, closeModal }: Props) {
 
   async function getWalletBalance() {
     const walletBalance = await underlyingContract?.balanceOf(walletAddress);
-
-    const formattedBalance = walletBalance && ethers.utils.formatEther(walletBalance);
+    const decimals = await underlyingContract?.decimals();
+    const formattedBalance = walletBalance && ethers.utils.formatUnits(walletBalance, decimals);
 
     if (formattedBalance) {
       setWalletBalance(formattedBalance);
@@ -161,11 +161,12 @@ function BorrowModal({ data, editable, closeModal }: Props) {
 
     try {
       const maxAmount = parseFloat(qty!) * (1 + parseFloat(slippage) / 100);
+      const decimals = await fixedLenderWithSigner?.decimals();
 
       const borrow = await fixedLenderWithSigner?.borrowAtMaturity(
         parseInt(date?.value ?? maturity),
-        ethers.utils.parseUnits(qty!),
-        ethers.utils.parseUnits(`${maxAmount}`),
+        ethers.utils.parseUnits(qty!, decimals),
+        ethers.utils.parseUnits(`${maxAmount}`, decimals),
         walletAddress,
         walletAddress
       );
@@ -193,11 +194,12 @@ function BorrowModal({ data, editable, closeModal }: Props) {
   async function estimateGas() {
     try {
       const gasPriceInGwei = await fixedLenderWithSigner?.provider.getGasPrice();
+      const decimals = await fixedLenderWithSigner?.decimals();
 
       const estimatedGasCost = await fixedLenderWithSigner?.estimateGas.borrowAtMaturity(
         parseInt(date?.value ?? maturity),
-        ethers.utils.parseUnits(`${numbers.estimateGasAmount}`),
-        ethers.utils.parseUnits(`${numbers.estimateGasAmount * 1.1}`),
+        ethers.utils.parseUnits(`1`, decimals),
+        ethers.utils.parseUnits(`2`, decimals),
         walletAddress,
         walletAddress
       );
@@ -210,6 +212,7 @@ function BorrowModal({ data, editable, closeModal }: Props) {
         setGas({ eth: eth.toFixed(8), gwei: parseFloat(gwei).toFixed(1) });
       }
     } catch (e) {
+      console.log(e);
       setError({
         status: true,
         component: 'gas'
@@ -221,15 +224,16 @@ function BorrowModal({ data, editable, closeModal }: Props) {
     if (!qty || parseFloat(qty) <= 0) return;
 
     try {
+      const decimals = await fixedLenderWithSigner?.decimals();
+
       const feeAtMaturity = await previewerContract?.previewBorrowAtMaturity(
         fixedLenderWithSigner!.address,
         parseInt(date?.value ?? maturity),
-        ethers.utils.parseUnits(qty)
+        ethers.utils.parseUnits(qty, decimals)
       );
 
       const fixedRate =
-        ((parseFloat(ethers.utils.formatUnits(feeAtMaturity, decimals[symbol! as keyof Decimals])) -
-          parseFloat(qty)) /
+        ((parseFloat(ethers.utils.formatUnits(feeAtMaturity, decimals)) - parseFloat(qty)) /
           parseFloat(qty)) *
         100;
 

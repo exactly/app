@@ -1,7 +1,7 @@
 {
   "decimals": 2,
   "approvalAmount": 90000000000,
-  "estimateGasAmount": 0.000001,
+  "estimateGasAmount": 0.00001,
   "daysToWarning": 2,
   "daysToError": 0
 }
