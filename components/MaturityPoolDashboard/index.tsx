@@ -118,7 +118,6 @@ function MaturityPoolDashboard({ showModal, tab }: Props) {
       <section className={styles.sectionContainer}>
         <div className={styles.titleContainer}>
           <p className={styles.title}>{translations[lang].maturityPools}</p>
-          <Tooltip value={translations[lang].maturityPools} />
         </div>
         <div className={styles.buttonContainer}>
           {accountData && (

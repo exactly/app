@@ -27,7 +27,6 @@ function SmartPoolList({ markets, showModal }: Props) {
     <section className={styles.container}>
       <div className={styles.sectionTitleContainer}>
         <p className={styles.sectionTitle}>{translations[lang].smartPool}</p>
-        <Tooltip value={translations[lang].smartPool} />
       </div>
       <div className={styles.market}>
         <div className={styles.column}>
