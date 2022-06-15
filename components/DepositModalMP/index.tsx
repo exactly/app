@@ -203,11 +203,12 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
   async function deposit() {
     try {
       const minAmount = parseFloat(qty!) * (1 + parseFloat(slippage) / 100);
+      const decimals = await fixedLenderWithSigner?.decimals();
 
       const deposit = await fixedLenderWithSigner?.depositAtMaturity(
         parseInt(date?.value ?? maturity),
-        ethers.utils.parseUnits(qty!),
-        ethers.utils.parseUnits(`${minAmount}`),
+        ethers.utils.parseUnits(qty!, decimals),
+        ethers.utils.parseUnits(`${minAmount}`, decimals),
         walletAddress
       );
 
@@ -228,11 +229,12 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
   async function estimateGas() {
     try {
       const gasPriceInGwei = await fixedLenderWithSigner?.provider.getGasPrice();
+      const decimals = await fixedLenderWithSigner?.decimals();
 
       const estimatedGasCost = await fixedLenderWithSigner?.estimateGas.depositAtMaturity(
         parseInt(date?.value ?? maturity),
-        ethers.utils.parseUnits(`${numbers.estimateGasAmount}`),
-        ethers.utils.parseUnits('0'),
+        ethers.utils.parseUnits(`${numbers.estimateGasAmount}`, decimals),
+        ethers.utils.parseUnits('0', decimals),
         walletAddress
       );
 
@@ -291,17 +293,16 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
     if (!qty || parseFloat(qty) <= 0) return;
 
     try {
+      const decimals = await fixedLenderWithSigner?.decimals();
+
       const yieldAtMaturity = await previewerContract?.previewDepositAtMaturity(
         marketAddress,
         parseInt(date?.value ?? maturity),
-        ethers.utils.parseUnits(qty)
+        ethers.utils.parseUnits(qty, decimals)
       );
 
       const fixedRate =
-        ((parseFloat(
-          ethers.utils.formatUnits(yieldAtMaturity, decimals[symbol! as keyof Decimals])
-        ) -
-          parseFloat(qty)) /
+        ((parseFloat(ethers.utils.formatUnits(yieldAtMaturity, decimals)) - parseFloat(qty)) /
           parseFloat(qty)) *
         100;
 

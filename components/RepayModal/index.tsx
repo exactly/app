@@ -127,10 +127,12 @@ function RepayModal({ data, closeModal }: Props) {
     setLoading(true);
 
     try {
+      const decimals = await fixedLenderWithSigner?.decimals();
+
       const repay = await fixedLenderWithSigner?.repayAtMaturity(
         maturity,
-        ethers.utils.parseUnits(qty!),
-        ethers.utils.parseUnits(qty!),
+        ethers.utils.parseUnits(qty!, decimals),
+        ethers.utils.parseUnits(qty!, decimals),
         walletAddress
       );
 
@@ -153,10 +155,12 @@ function RepayModal({ data, closeModal }: Props) {
     try {
       const gasPriceInGwei = await fixedLenderWithSigner?.provider.getGasPrice();
 
+      const decimals = await fixedLenderWithSigner?.decimals();
+
       const estimatedGasCost = await fixedLenderWithSigner?.estimateGas.repayAtMaturity(
         maturity,
-        ethers.utils.parseUnits(`${numbers.estimateGasAmount}`),
-        ethers.utils.parseUnits(`${numbers.estimateGasAmount * 2}`),
+        ethers.utils.parseUnits(`${numbers.estimateGasAmount}`, decimals),
+        ethers.utils.parseUnits(`${numbers.estimateGasAmount * 2}`, decimals),
         walletAddress
       );
 
