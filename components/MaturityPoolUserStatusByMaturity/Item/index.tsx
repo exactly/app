@@ -23,6 +23,7 @@ import keys from './translations.json';
 import parseTimestamp from 'utils/parseTimestamp';
 import parseSymbol from 'utils/parseSymbol';
 import getSubgraph from 'utils/getSubgraph';
+import formatNumber from 'utils/formatNumber';
 
 import {
   getMaturityPoolBorrowsQuery,
@@ -30,7 +31,6 @@ import {
   getMaturityPoolWithdrawsQuery,
   getMaturityPoolRepaysQuery
 } from 'queries';
-import formatNumber from 'utils/formatNumber';
 
 type Props = {
   type?: Option | undefined;
