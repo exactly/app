@@ -21,7 +21,6 @@ type Props = {
   collateralFactor: number | undefined;
   operation: string;
   line?: boolean;
-  callback?: (borrowLimit: number) => void;
 };
 
 function ModalRowBorrowLimit({
