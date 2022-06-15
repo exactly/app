@@ -27,7 +27,6 @@ function SmartPoolDashboard({ showModal }: Props) {
     <section className={styles.container}>
       <div className={styles.titleContainer}>
         <p className={styles.title}>{translations[lang].smartPool}</p>
-        <Tooltip value={translations[lang].smartPool} />
       </div>
       <SmartPoolUserStatus walletAddress={walletAddress} showModal={showModal} />
     </section>

@@ -83,7 +83,6 @@ function MaturitySelector({ title, address, editable }: Props) {
       {title && (
         <div className={style.titleContainer}>
           <p className={style.title}>{title}</p>
-          <Tooltip value={title} />
         </div>
       )}
       {dates.length !== 0 ? (
