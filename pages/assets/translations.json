@@ -8,7 +8,7 @@
     "supplyAPY": "Supply APY",
     "distributionAPY": "Distribution APY",
     "totalSupply": "Total Supply",
-    "maturityPools": "Maturity Pools"
+    "maturityPools": "Fixed Rate Pools"
   },
   "es": {
     "price": "Precio",

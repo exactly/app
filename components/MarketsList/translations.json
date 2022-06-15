@@ -2,7 +2,7 @@
   "en": {
     "asset": "Asset",
     "marketSize": "Market size",
-    "lastFixedRate": "Last Fixed Rate"
+    "lastAPY": "Last APY"
   },
   "es": {}
 }

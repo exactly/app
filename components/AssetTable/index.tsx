@@ -24,7 +24,7 @@ function AssetTable({ maturities, market, showModal }: Props) {
     <div className={styles.table}>
       <div className={styles.row}>
         <div className={styles.maturity}>{translations[lang].maturity}</div>
-        <div className={styles.lastFixedRate}>{translations[lang].lastFixedRate}</div>
+        <div className={styles.lastFixedRate}>{translations[lang].lastAPY}</div>
         <div className={styles.actions}></div>
       </div>
       {maturities && market && (

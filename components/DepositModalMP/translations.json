@@ -2,7 +2,7 @@
   "en": {
     "deposit": "Deposit",
     "approve": "Approve",
-    "maturityPool": "Maturity Pool",
+    "maturityPool": "Fixed Rate Pool",
     "interestRate": "Interest Rate",
     "minimumDepositRate": "Minimum Deposit Rate",
     "insufficientBalance": "You can't deposit more than you have in your wallet",

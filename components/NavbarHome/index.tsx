@@ -21,9 +21,9 @@ function NavbarHome() {
 
   const routes = [
     {
-      pathname: '/pools',
-      href: '/pools',
-      name: translations[lang].pools
+      pathname: '/markets',
+      href: '/markets',
+      name: translations[lang].markets
     },
     {
       pathname: '/assets/[id]',
@@ -43,20 +43,14 @@ function NavbarHome() {
       <div className={styles.wrapper}>
         <div className={styles.left}>
           <Link href="/">
-            <img
-              src="/img/logo.svg"
-              alt="Exactly Logo"
-              className={styles.logo}
-            />
+            <img src="/img/logo.svg" alt="Exactly Logo" className={styles.logo} />
           </Link>
           <ul className={styles.linksContainer}>
             {routes.map((route) => {
               return (
                 <li
                   className={
-                    route.pathname === pathname
-                      ? `${styles.link} ${styles.active}`
-                      : styles.link
+                    route.pathname === pathname ? `${styles.link} ${styles.active}` : styles.link
                   }
                   key={route.pathname}
                 >
@@ -68,7 +62,7 @@ function NavbarHome() {
         </div>
         <div className={styles.right}>
           <div className={styles.buttonContainer}>
-            <Link href="/pools">
+            <Link href="/markets">
               <Button text={translations[lang].open} />
             </Link>
           </div>

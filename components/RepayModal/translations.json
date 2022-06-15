@@ -2,7 +2,7 @@
   "en": {
     "lateRepay": "Late Repay",
     "earlyRepay": "Early Repay",
-    "maturityPool": "Maturity Pool",
+    "maturityPool": "Fixed Rate Pool",
     "amountAtFinish": "Amount At Finish",
     "amountToPay": "Amount To Repay",
     "maximumAmountToPay": "Maximum Amount To Repay",
