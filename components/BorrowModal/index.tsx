@@ -72,7 +72,7 @@ function BorrowModal({ data, editable, closeModal }: Props) {
   const [tx, setTx] = useState<Transaction | undefined>(undefined);
   const [minimized, setMinimized] = useState<Boolean>(false);
   const [fixedRate, setFixedRate] = useState<string | undefined>('0.00');
-  const [slippage, setSlippage] = useState<string>('0.5');
+  const [slippage, setSlippage] = useState<string>('0.00');
   const [editSlippage, setEditSlippage] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [healthFactor, setHealthFactor] = useState<HealthFactor | undefined>(undefined);

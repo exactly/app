@@ -9,7 +9,6 @@ import { FixedLenderAccountData } from 'types/FixedLenderAccountData';
 
 import parseHealthFactor from 'utils/parseHealthFactor';
 import parseSymbol from 'utils/parseSymbol';
-import getExchangeRate from 'utils/getExchangeRate';
 
 import LangContext from 'contexts/LangContext';
 import AccountDataContext from 'contexts/AccountDataContext';
@@ -91,7 +90,9 @@ function ModalRowHealthFactor({ qty, symbol, operation, healthFactorCallback }: 
   }
 
   async function getAmount() {
-    const exchangeRate = await getExchangeRate(parsedSymbol);
+    if (!accountData || !symbol) return;
+
+    const exchangeRate = parseFloat(ethers.utils.formatEther(accountData[symbol].oraclePrice));
 
     const newQty = exchangeRate * parseFloat(qty);
 

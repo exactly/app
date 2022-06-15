@@ -31,7 +31,7 @@
   }
 
   .buttonContainer {
-    width: 100px;
+    width: calc(100% / 4);
     height: var(--u5);
     font-weight: 600;
     font-size: var(--font-14);
