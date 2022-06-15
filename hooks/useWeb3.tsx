@@ -20,7 +20,7 @@ if (typeof window !== 'undefined') {
             4: 'https://rinkeby.infura.io/v3/77a2479dc2bd4436aa3edb374f3019d2',
             42: `https://kovan.infura.io/v3/77a2479dc2bd4436aa3edb374f3019d2`
           },
-          chainId: 2
+          chainId: 4
         }
       }
     }
