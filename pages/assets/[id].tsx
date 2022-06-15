@@ -35,17 +35,15 @@ import keys from './translations.json';
 
 import parseTimestamp from 'utils/parseTimestamp';
 import { getContractData } from 'utils/contracts';
-import getExchangeRate from 'utils/getExchangeRate';
 import { getSymbol } from 'utils/utils';
 
 import getABI from 'config/abiImporter';
 
 interface Props {
   symbol: string;
-  price: number;
 }
 
-const Asset: NextPage<Props> = ({ symbol, price }) => {
+const Asset: NextPage<Props> = ({ symbol }) => {
   const { modal, handleModal, modalContent } = useModal();
 
   const { network, walletAddress } = useWeb3Context();
@@ -58,6 +56,7 @@ const Asset: NextPage<Props> = ({ symbol, price }) => {
   const [marketData, setMarketData] = useState<FixedLenderAccountData | undefined>(undefined);
   const [accountData, setAccountData] = useState<AccountData>();
   const [fixedLenderContract, setFixedLenderContract] = useState<Contract | undefined>(undefined);
+  const [price, setPrice] = useState<number | undefined>(undefined);
 
   const { Previewer, FixedLenders } = getABI(network?.name);
 
@@ -95,6 +94,7 @@ const Asset: NextPage<Props> = ({ symbol, price }) => {
     const filteredMarket = marketsData.find(
       (market: FixedLenderAccountData) => market.assetSymbol === symbol
     );
+
     const {
       market,
       assetSymbol,
@@ -258,7 +258,12 @@ const Asset: NextPage<Props> = ({ symbol, price }) => {
                 </section>
                 <h2 className={style.assetTitle}>{translations[lang].assetDetails}</h2>
                 <div className={style.assetInfoContainer}>
-                  <AssetInfo title={translations[lang].price} value={`$${price}`} />
+                  {marketData && (
+                    <AssetInfo
+                      title={translations[lang].price}
+                      value={`$${parseFloat(ethers.utils.formatEther(marketData.oraclePrice))}`}
+                    />
+                  )}
                   {marketData && (
                     <AssetInfo
                       title={translations[lang].collateralFactor}
@@ -304,12 +309,9 @@ export const getStaticProps: GetStaticProps = async (context) => {
   const tokenSymbol: string = context.params?.id as string;
   const symbol = tokenSymbol.toUpperCase() === 'ETH' ? 'WETH' : tokenSymbol.toUpperCase();
 
-  const price = await getExchangeRate(tokenSymbol);
-
   return {
     props: {
-      symbol: symbol,
-      price
+      symbol: symbol
     }
   };
 };

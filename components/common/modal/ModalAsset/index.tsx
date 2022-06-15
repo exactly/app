@@ -1,14 +1,16 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import Image from 'next/image';
 import Skeleton from 'react-loading-skeleton';
 
 import formatNumber from 'utils/formatNumber';
 import parseSymbol from 'utils/parseSymbol';
-import getExchangeRate from 'utils/getExchangeRate';
 
 import AssetSelector from 'components/AssetSelector';
 
+import AccountDataContext from 'contexts/AccountDataContext';
+
 import styles from './style.module.scss';
+import { ethers } from 'ethers';
 
 type Props = {
   asset: string;
@@ -18,23 +20,20 @@ type Props = {
 };
 
 function ModalAsset({ asset, amount, editable, defaultAddress }: Props) {
+  const { accountData } = useContext(AccountDataContext);
+
   const [exchangeRate, setExchangeRate] = useState(1);
 
   const parsedSymbol = parseSymbol(asset);
 
   useEffect(() => {
-    if (
-      !parsedSymbol ||
-      parsedSymbol.toLocaleLowerCase() === 'dai' ||
-      parsedSymbol.toLocaleLowerCase() === 'usdc'
-    )
-      return;
-
     getRate();
-  }, [parsedSymbol]);
+  }, [parsedSymbol, accountData]);
 
   async function getRate() {
-    const rate = await getExchangeRate(parsedSymbol!);
+    if (!accountData || !asset) return;
+
+    const rate = parseFloat(ethers.utils.formatEther(accountData[asset].oraclePrice));
     setExchangeRate(rate);
   }
 

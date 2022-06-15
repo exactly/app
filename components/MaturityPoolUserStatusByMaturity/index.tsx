@@ -51,7 +51,7 @@ function MaturityPoolUserStatusByMaturity({ type, maturities, showModal }: Props
           const rtf = new Intl.RelativeTimeFormat('en', {
             localeMatcher: 'best fit',
             numeric: 'always',
-            style: 'long'
+            style: 'short'
           });
 
           return (
@@ -68,7 +68,7 @@ function MaturityPoolUserStatusByMaturity({ type, maturities, showModal }: Props
                       value={`${
                         daysRemaining <= 0
                           ? translations[lang].finished
-                          : `${rtf.format(daysRemaining, 'day')}`
+                          : `Maturity ${rtf.format(daysRemaining, 'day')}`
                       }`}
                       disableImage
                     >

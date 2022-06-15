@@ -4,6 +4,7 @@ import Skeleton from 'react-loading-skeleton';
 
 import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
+import AccountDataContext from 'contexts/AccountDataContext';
 
 import { LangKeys } from 'types/Lang';
 
@@ -15,7 +16,6 @@ import Button from 'components/common/Button';
 import Tooltip from 'components/Tooltip';
 
 import parseSymbol from 'utils/parseSymbol';
-import getExchangeRate from 'utils/getExchangeRate';
 
 interface Props {
   showModal: (type: string, maturity: string | undefined) => void;
@@ -25,6 +25,8 @@ interface Props {
 
 function SmartPoolInfo({ showModal, symbol, fixedLender }: Props) {
   const { walletAddress, connect } = useWeb3Context();
+
+  const { accountData } = useContext(AccountDataContext);
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
@@ -36,14 +38,16 @@ function SmartPoolInfo({ showModal, symbol, fixedLender }: Props) {
     if (fixedLender) {
       getSmartPoolData();
     }
-  }, [fixedLender]);
+  }, [fixedLender, accountData]);
 
   async function getSmartPoolData() {
+    if (!accountData || !symbol) return;
+
     try {
       const borrowed = await fixedLender?.smartPoolBorrowed();
       const supplied = await fixedLender?.smartPoolAssets();
       const decimals = await fixedLender?.decimals();
-      const exchangeRate = await getExchangeRate(symbol);
+      const exchangeRate = parseFloat(ethers.utils.formatEther(accountData[symbol].oraclePrice));
 
       const newPoolData = {
         borrowed: parseFloat(await ethers.utils.formatUnits(borrowed, decimals)),

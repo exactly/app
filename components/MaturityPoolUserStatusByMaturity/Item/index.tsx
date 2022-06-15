@@ -7,6 +7,7 @@ import Skeleton from 'react-loading-skeleton';
 
 import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
+import AccountDataContext from 'contexts/AccountDataContext';
 
 import { LangKeys } from 'types/Lang';
 import { Deposit } from 'types/Deposit';
@@ -20,10 +21,8 @@ import styles from './style.module.scss';
 import keys from './translations.json';
 
 import parseTimestamp from 'utils/parseTimestamp';
-import formatNumber from 'utils/formatNumber';
 import parseSymbol from 'utils/parseSymbol';
 import getSubgraph from 'utils/getSubgraph';
-import getExchangeRate from 'utils/getExchangeRate';
 
 import {
   getMaturityPoolBorrowsQuery,
@@ -56,6 +55,8 @@ function Item({
   data
 }: Props) {
   const { network, walletAddress } = useWeb3Context();
+
+  const { accountData } = useContext(AccountDataContext);
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
@@ -111,9 +112,9 @@ function Item({
   }
 
   async function getRate() {
-    if (!symbol) return;
+    if (!symbol || !accountData) return;
 
-    const rate = await getExchangeRate(symbol);
+    const rate = parseFloat(ethers.utils.formatEther(accountData[symbol].oraclePrice));
 
     setExchangeRate(rate);
   }
