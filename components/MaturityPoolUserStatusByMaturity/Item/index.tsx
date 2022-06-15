@@ -30,6 +30,7 @@ import {
   getMaturityPoolWithdrawsQuery,
   getMaturityPoolRepaysQuery
 } from 'queries';
+import formatNumber from 'utils/formatNumber';
 
 type Props = {
   type?: Option | undefined;
@@ -133,7 +134,15 @@ function Item({
           <span className={styles.primary}>{symbol ? parseSymbol(symbol) : <Skeleton />}</span>
         </div>
         <span className={styles.value}>
-          {symbol && amount ? ethers.utils.formatUnits(amount, decimals) : <Skeleton width={40} />}
+          {symbol && exchangeRate && amount ? (
+            `$${formatNumber(
+              parseFloat(ethers.utils.formatUnits(amount, decimals)) * exchangeRate,
+              'USD',
+              true
+            )}`
+          ) : (
+            <Skeleton width={40} />
+          )}
         </span>
         <span className={styles.value}>
           {fixedRate != undefined ? `${(fixedRate || 0).toFixed(2)} %` : <Skeleton width={40} />}

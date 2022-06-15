@@ -15,6 +15,7 @@ import DepositModalMP from 'components/DepositModalMP';
 import BorrowModal from 'components/BorrowModal';
 import DepositModalSP from 'components/DepositModalSP';
 import Tooltip from 'components/Tooltip';
+import Footer from 'components/Footer';
 
 import { Maturity } from 'types/Maturity';
 import { LangKeys } from 'types/Lang';
@@ -295,6 +296,7 @@ const Asset: NextPage<Props> = ({ symbol }) => {
                   </div>
                 </div>
               </section>
+              <Footer />
             </FixedLenderProvider>
           </AccountDataProvider>
         </PreviewerProvider>

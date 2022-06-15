@@ -94,9 +94,15 @@
       .value {
         color: var(--gray-900);
         font-weight: 600;
-        width: 15%;
+        min-width: 15%;
         text-align: right;
       }
     }
+  }
+}
+
+@media (max-width: 769px) {
+  .maturityContainer {
+    width: 100%;
   }
 }
