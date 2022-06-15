@@ -129,8 +129,8 @@ function BorrowModal({ data, editable, closeModal }: Props) {
 
   async function getWalletBalance() {
     const walletBalance = await underlyingContract?.balanceOf(walletAddress);
-
-    const formattedBalance = walletBalance && ethers.utils.formatEther(walletBalance);
+    const decimals = await underlyingContract?.decimals();
+    const formattedBalance = walletBalance && ethers.utils.formatUnits(walletBalance, decimals);
 
     if (formattedBalance) {
       setWalletBalance(formattedBalance);

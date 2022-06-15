@@ -164,8 +164,9 @@ function DepositModalSP({ data, closeModal }: Props) {
 
   async function getWalletBalance() {
     const walletBalance = await underlyingContract?.balanceOf(walletAddress);
+    const decimals = await underlyingContract?.decimals();
 
-    const formattedBalance = walletBalance && ethers.utils.formatEther(walletBalance);
+    const formattedBalance = walletBalance && ethers.utils.formatUnits(walletBalance, decimals);
 
     if (formattedBalance) {
       setWalletBalance(formattedBalance);
@@ -176,8 +177,10 @@ function DepositModalSP({ data, closeModal }: Props) {
     if (!walletAddress || !symbol || !accountData) return;
 
     const amount = accountData[symbol.toUpperCase()]?.smartPoolAssets;
+    const decimals = await underlyingContract?.decimals();
 
-    const formattedAmount = amount && formatNumber(ethers.utils.formatEther(amount), symbol);
+    const formattedAmount =
+      amount && formatNumber(ethers.utils.formatUnits(amount, decimals), symbol);
 
     !formattedAmount ? setDepositedAmount('0') : setDepositedAmount(formattedAmount);
   }

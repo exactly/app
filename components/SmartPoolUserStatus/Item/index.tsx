@@ -98,7 +98,9 @@ function Item({
     const balance = await contractData?.balanceOf(walletAddress);
 
     if (balance) {
-      setWalletBalance(ethers.utils.formatEther(balance));
+      const decimals = await contractData?.decimals();
+
+      setWalletBalance(ethers.utils.formatUnits(balance, decimals));
     }
   }
 
