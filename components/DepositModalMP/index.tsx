@@ -217,11 +217,16 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
       const status = await deposit.wait();
 
       setTx({ status: 'success', hash: status?.transactionHash });
-    } catch (e) {
+    } catch (e: any) {
       setLoading(false);
+
+      const isDenied = e?.message?.includes('User denied');
+
       setError({
         status: true,
-        message: translations[lang].notEnoughSlippage
+        message: isDenied
+          ? translations[lang].deniedTransaction
+          : translations[lang].notEnoughSlippage
       });
     }
   }

@@ -31,6 +31,7 @@ function Paginator({ total, itemsPerPage, handleChange, currentPage }: Props) {
           </li>
         );
       })}
+
       <li
         className={styles.arrow}
         onClick={() => handleChange(currentPage + 1 <= pages ? currentPage + 1 : pages)}

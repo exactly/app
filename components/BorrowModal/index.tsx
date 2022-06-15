@@ -72,7 +72,7 @@ function BorrowModal({ data, editable, closeModal }: Props) {
   const [tx, setTx] = useState<Transaction | undefined>(undefined);
   const [minimized, setMinimized] = useState<Boolean>(false);
   const [fixedRate, setFixedRate] = useState<string | undefined>('0.00');
-  const [slippage, setSlippage] = useState<string>('0.00');
+  const [slippage, setSlippage] = useState<string>('10.00');
   const [editSlippage, setEditSlippage] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [healthFactor, setHealthFactor] = useState<HealthFactor | undefined>(undefined);
@@ -138,11 +138,22 @@ function BorrowModal({ data, editable, closeModal }: Props) {
   }
 
   async function onMax() {
-    walletBalance && setQty(walletBalance);
+    if (!accountData || !healthFactor || !collateralFactor || qty) return;
+
+    const rate = ethers.utils.formatEther(accountData[symbol.toUpperCase()]?.oraclePrice);
+
+    const beforeBorrowLimit = healthFactor ? healthFactor!.collateral - healthFactor!.debt : 0;
+
+    const afterBorrowLimit = beforeBorrowLimit - (parseFloat(qty) * parseFloat(rate) || 0);
+
+    if (parseFloat(qty) * parseFloat(rate) > afterBorrowLimit) return;
+
+    setQty((afterBorrowLimit / parseFloat(rate)).toString());
   }
 
   function handleInputChange(e: ChangeEvent<HTMLInputElement>) {
     setQty(e.target.value);
+    setError(undefined);
   }
 
   async function borrow() {
@@ -166,11 +177,16 @@ function BorrowModal({ data, editable, closeModal }: Props) {
       setLoading(false);
 
       setTx({ status: 'success', hash: status?.transactionHash });
-    } catch (e) {
+    } catch (e: any) {
       setLoading(false);
 
+      const isDenied = e?.message?.includes('User denied');
+
       setError({
-        status: true
+        status: true,
+        message: isDenied
+          ? translations[lang].deniedTransaction
+          : translations[lang].notEnoughSlippage
       });
     }
   }
@@ -285,7 +301,7 @@ function BorrowModal({ data, editable, closeModal }: Props) {
                   setSlippage(e.target.value);
                 }}
                 onClick={() => {
-                  if (slippage == '') setSlippage('0.5');
+                  if (slippage == '') setSlippage('10.00');
                   setEditSlippage((prev) => !prev);
                 }}
                 line

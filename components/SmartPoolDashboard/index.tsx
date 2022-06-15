@@ -1,10 +1,8 @@
 import { useContext } from 'react';
 
 import { LangKeys } from 'types/Lang';
-import { Dictionary } from 'types/Dictionary';
 import { Deposit } from 'types/Deposit';
 
-import Tooltip from 'components/Tooltip';
 import SmartPoolUserStatus from 'components/SmartPoolUserStatus';
 
 import LangContext from 'contexts/LangContext';
