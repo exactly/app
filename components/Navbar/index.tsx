@@ -46,7 +46,7 @@ function Navbar() {
       <div className={styles.wrapper}>
         <div className={styles.left}>
           <Link href="/">
-            <img src="/img/logo.svg" alt="Exactly Logo" className={styles.logo} />
+            <img src="/img/logo.png" alt="Exactly Logo" className={styles.logo} />
           </Link>
           <ul className={styles.linksContainer}>
             {routes.map((route) => {

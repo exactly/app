@@ -54,7 +54,7 @@ function MobileNavbar() {
       <nav className={styles.navBar} style={open ? { zIndex: 7 } : {}}>
         <div className={styles.wrapper}>
           <Link href="/">
-            <img src="/img/logo.svg" alt="Exactly Logo" className={styles.logo} />
+            <img src="/img/logo.png" alt="Exactly Logo" className={styles.logo} />
           </Link>
           {connect && !walletAddress ? (
             <div className={styles.buttonContainer}>
