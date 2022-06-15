@@ -6,8 +6,6 @@ import { ethers } from 'ethers';
 import { LangKeys } from 'types/Lang';
 import { HealthFactor } from 'types/HealthFactor';
 
-import parseSymbol from 'utils/parseSymbol';
-
 import LangContext from 'contexts/LangContext';
 import AccountDataContext from 'contexts/AccountDataContext';
 
@@ -37,8 +35,6 @@ function ModalRowBorrowLimit({
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
-
-  const parsedSymbol = parseSymbol(symbol);
 
   const [newQty, setNewQty] = useState<number | undefined>(undefined);
 
