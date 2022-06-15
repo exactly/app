@@ -72,7 +72,6 @@ function SmartPoolInfo({ showModal, symbol, fixedLender }: Props) {
     <div className={styles.maturityContainer}>
       <div className={styles.titleContainer}>
         <p className={styles.title}>{translations[lang].smartPool}</p>
-        <Tooltip value={translations[lang].smartPool} />
       </div>
       <ul className={styles.table}>
         <li className={styles.header}>
