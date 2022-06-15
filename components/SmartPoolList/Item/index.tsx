@@ -82,14 +82,15 @@ function Item({ market, showModal }: Props) {
 
     const borrowed = await fixedLender?.smartPoolBorrowed();
     const supplied = await fixedLender?.smartPoolAssets();
+    const decimals = await fixedLender?.decimals();
 
     const exchangeRate = parseFloat(
       ethers.utils.formatEther(accountData[market?.symbol.toUpperCase()].oraclePrice)
     );
 
     const newPoolData = {
-      borrowed: Math.round(parseInt(await ethers.utils.formatEther(borrowed))),
-      supplied: Math.round(parseInt(await ethers.utils.formatEther(supplied))),
+      borrowed: Math.round(parseInt(await ethers.utils.formatUnits(borrowed, decimals))),
+      supplied: Math.round(parseInt(await ethers.utils.formatUnits(supplied, decimals))),
       rate: exchangeRate
     };
 

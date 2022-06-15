@@ -69,7 +69,7 @@ function DashboardHeader() {
     data.forEach((fixedLender) => {
       const symbol = fixedLender.assetSymbol;
       const decimals = fixedLender.decimals;
-      const oracle = parseFloat(ethers.utils.formatUnits(fixedLender.oraclePrice, decimals));
+      const oracle = parseFloat(ethers.utils.formatUnits(fixedLender.oraclePrice, 18));
 
       const objectDepositData: DonutData = {
         label: symbol.toUpperCase(),
@@ -142,7 +142,7 @@ function DashboardHeader() {
     data.forEach((fixedLender) => {
       const symbol = fixedLender.assetSymbol;
       const decimals = fixedLender.decimals;
-      const oracle = parseFloat(ethers.utils.formatUnits(fixedLender.oraclePrice, decimals));
+      const oracle = parseFloat(ethers.utils.formatUnits(fixedLender.oraclePrice, 18));
 
       const objectBorrowData: DonutData = {
         label: symbol.toUpperCase(),

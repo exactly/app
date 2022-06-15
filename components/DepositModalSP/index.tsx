@@ -208,8 +208,10 @@ function DepositModalSP({ data, closeModal }: Props) {
 
   async function deposit() {
     try {
+      const decimals = await fixedLenderWithSigner?.decimals();
+
       const deposit = await fixedLenderWithSigner?.deposit(
-        ethers.utils.parseUnits(qty!.toString()),
+        ethers.utils.parseUnits(qty!.toString(), decimals),
         walletAddress
       );
 
@@ -230,9 +232,10 @@ function DepositModalSP({ data, closeModal }: Props) {
   async function estimateGas() {
     try {
       const gasPriceInGwei = await fixedLenderWithSigner?.provider.getGasPrice();
+      const decimals = await fixedLenderWithSigner?.decimals();
 
       const estimatedGasCost = await fixedLenderWithSigner?.estimateGas.deposit(
-        ethers.utils.parseUnits(`${numbers.estimateGasAmount}`),
+        ethers.utils.parseUnits(`${numbers.estimateGasAmount}`, decimals),
         walletAddress
       );
 
