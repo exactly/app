@@ -315,9 +315,9 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
           parseFloat(qty)) *
         100;
 
-      const fixedRate = rate * time;
+      const fixedAPY = (Math.pow(1 + rate, time) - 1) * 100;
 
-      setFixedRate(fixedRate.toFixed(2));
+      setFixedRate(fixedAPY.toFixed(2));
     } catch (e) {
       console.log(e);
     }

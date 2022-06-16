@@ -233,13 +233,12 @@ function BorrowModal({ data, editable, closeModal }: Props) {
       const time = 31536000 / (parseInt(date?.value ?? maturity) - currentTimestamp);
 
       const rate =
-        ((parseFloat(ethers.utils.formatUnits(feeAtMaturity, decimals)) - parseFloat(qty)) /
-          parseFloat(qty)) *
-        100;
+        (parseFloat(ethers.utils.formatUnits(feeAtMaturity, decimals)) - parseFloat(qty)) /
+        parseFloat(qty);
 
-      const fixedRate = rate * time;
+      const fixedAPY = (Math.pow(1 + rate, time) - 1) * 100;
 
-      setFixedRate(fixedRate.toFixed(2));
+      setFixedRate(fixedAPY.toFixed(2));
     } catch (e) {
       console.log(e);
     }
