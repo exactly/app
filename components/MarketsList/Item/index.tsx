@@ -95,11 +95,14 @@ function Item({ market, showModal, type }: Props) {
       rate: exchangeRate
     };
 
+    setPoolData(newPoolData);
+
     try {
       let fee;
       let amount;
 
       const subgraphUrl = getSubgraph(network?.name);
+      const decimals = await fixedLender?.decimals();
 
       if (type == 'borrow') {
         const getLastBorrowRate = await request(
@@ -119,14 +122,23 @@ function Item({ market, showModal, type }: Props) {
         amount = getLastDepositRate?.depositAtMaturities[0]?.assets;
       }
 
-      const fixedRate = (parseFloat(fee) * 100) / parseFloat(amount);
+      if (!fee || !amount) return setRate('0.00');
 
-      setRate(isNaN(fixedRate) ? '0.00' : fixedRate.toFixed(2));
+      const currentTimestamp = new Date().getTime() / 1000;
+
+      const time = 31536000 / (parseInt(date?.value!) - currentTimestamp);
+
+      const rate =
+        (parseFloat(ethers.utils.formatUnits(fee, decimals)) /
+          parseFloat(ethers.utils.formatUnits(amount, decimals))) *
+        100;
+
+      const fixedRate = rate * time;
+
+      setRate(fixedRate.toFixed(2));
     } catch (e) {
       console.log(e);
     }
-
-    setPoolData(newPoolData);
   }
 
   return (
