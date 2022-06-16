@@ -129,9 +129,8 @@ function Item({ market, showModal, type }: Props) {
       const time = 31536000 / (parseInt(date?.value!) - currentTimestamp);
 
       const rate =
-        (parseFloat(ethers.utils.formatUnits(fee, decimals)) /
-          parseFloat(ethers.utils.formatUnits(amount, decimals))) *
-        100;
+        parseFloat(ethers.utils.formatUnits(fee, decimals)) /
+        parseFloat(ethers.utils.formatUnits(amount, decimals));
 
       const fixedAPY = (Math.pow(1 + rate, time) - 1) * 100;
 

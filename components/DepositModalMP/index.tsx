@@ -311,9 +311,8 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
       const time = 31536000 / (parseInt(date?.value ?? maturity) - currentTimestamp);
 
       const rate =
-        ((parseFloat(ethers.utils.formatUnits(yieldAtMaturity, decimals)) - parseFloat(qty)) /
-          parseFloat(qty)) *
-        100;
+        (parseFloat(ethers.utils.formatUnits(yieldAtMaturity, decimals)) - parseFloat(qty)) /
+        parseFloat(qty);
 
       const fixedAPY = (Math.pow(1 + rate, time) - 1) * 100;
 
