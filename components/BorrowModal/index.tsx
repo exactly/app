@@ -24,7 +24,6 @@ import { LangKeys } from 'types/Lang';
 import { UnderlyingData } from 'types/Underlying';
 import { Gas } from 'types/Gas';
 import { Transaction } from 'types/Transaction';
-import { Decimals } from 'types/Decimals';
 import { Error } from 'types/Error';
 import { HealthFactor } from 'types/HealthFactor';
 
@@ -40,9 +39,6 @@ import FixedLenderContext from 'contexts/FixedLenderContext';
 import { AddressContext } from 'contexts/AddressContext';
 import PreviewerContext from 'contexts/PreviewerContext';
 import AccountDataContext from 'contexts/AccountDataContext';
-
-import decimals from 'config/decimals.json';
-import numbers from 'config/numbers.json';
 
 import keys from './translations.json';
 
@@ -232,10 +228,16 @@ function BorrowModal({ data, editable, closeModal }: Props) {
         ethers.utils.parseUnits(qty, decimals)
       );
 
-      const fixedRate =
+      const currentTimestamp = new Date().getTime() / 1000;
+
+      const time = 31536000 / (parseInt(date?.value ?? maturity) - currentTimestamp);
+
+      const rate =
         ((parseFloat(ethers.utils.formatUnits(feeAtMaturity, decimals)) - parseFloat(qty)) /
           parseFloat(qty)) *
         100;
+
+      const fixedRate = rate * time;
 
       setFixedRate(fixedRate.toFixed(2));
     } catch (e) {
