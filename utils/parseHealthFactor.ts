@@ -6,7 +6,7 @@ function parseHealthFactor(debt: number, collateral: number) {
   } else {
     const healthFactor = collateral / debt;
 
-    if (healthFactor > 10) return '10.00';
+    if (healthFactor > 100) return '+100.00';
 
     return (collateral / debt).toFixed(2);
   }

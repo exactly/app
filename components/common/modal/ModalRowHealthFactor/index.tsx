@@ -29,7 +29,6 @@ function ModalRowHealthFactor({ qty, symbol, operation, healthFactorCallback }: 
   const lang: string = useContext(LangContext);
 
   const translations: { [key: string]: LangKeys } = keys;
-  const parsedSymbol = parseSymbol(symbol);
 
   const [newQty, setNewQty] = useState<number | undefined>(undefined);
 
