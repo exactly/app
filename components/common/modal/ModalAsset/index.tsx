@@ -59,7 +59,7 @@ function ModalAsset({ asset, amount, editable, defaultAddress }: Props) {
             {formatNumber(amount, asset)} {parsedSymbol}
           </p>
           <p className={styles.secondaryPrice}>
-            $ {(parseFloat(amount) * exchangeRate).toFixed(2)}
+            $ {formatNumber(parseFloat(amount) * exchangeRate, 'usd')}
           </p>
         </div>
       ) : (
