@@ -133,9 +133,9 @@ function Item({ market, showModal, type }: Props) {
           parseFloat(ethers.utils.formatUnits(amount, decimals))) *
         100;
 
-      const fixedRate = rate * time;
+      const fixedAPY = (Math.pow(1 + rate, time) - 1) * 100;
 
-      setRate(fixedRate.toFixed(2));
+      setRate(fixedAPY.toFixed(2));
     } catch (e) {
       console.log(e);
     }
