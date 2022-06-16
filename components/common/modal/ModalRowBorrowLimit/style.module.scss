@@ -10,9 +10,14 @@
   .values {
     margin: 0;
     display: flex;
-    gap: var(--u2);
+    gap: var(--u);
     position: relative;
     font-weight: 600;
+
+    .value {
+      min-width: var(--u6);
+      text-align: right;
+    }
 
     .imageContainer {
       width: var(--u2);

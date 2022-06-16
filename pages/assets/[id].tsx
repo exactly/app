@@ -1,5 +1,5 @@
-import { useContext, useEffect, useMemo, useState } from 'react';
-import type { GetStaticProps, NextApiRequest, NextPage } from 'next';
+import { useContext, useEffect, useState } from 'react';
+import type { GetStaticProps, NextPage } from 'next';
 import { Contract, ethers } from 'ethers';
 import dayjs from 'dayjs';
 
@@ -14,7 +14,6 @@ import Paginator from 'components/Paginator';
 import DepositModalMP from 'components/DepositModalMP';
 import BorrowModal from 'components/BorrowModal';
 import DepositModalSP from 'components/DepositModalSP';
-import Tooltip from 'components/Tooltip';
 import Footer from 'components/Footer';
 
 import { Maturity } from 'types/Maturity';

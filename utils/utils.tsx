@@ -73,10 +73,10 @@ export function getSymbol(address: string, network: string | undefined) {
       '0xe233629098f8a09bf8f07140bf57accdcb5caa3f': 'WETH'
     },
     rinkeby: {
-      '0xdbefd898fd00e6e06a4c6da8f430f26f7ed9beae': 'DAI',
-      '0xe4476d8803a01fe1bf1e51df545300b7bf7f30f2': 'WETH',
-      '0x640117781c6ed9e80fc12146cac1df7b9a0e939b': 'WBTC',
-      '0x3281ae2c8580d54fc609e008fefae97d76272777': 'USDC'
+      '0x114af308cee2d6b55c3464fdfb13c0607df3c9c5': 'DAI',
+      '0x9f275f6d25232fff082082a53c62c6426c1cc94c': 'WETH',
+      '0xf710a8d4a88c42d6d341c6e465005f1dcf50726e': 'WBTC',
+      '0x69295eac101184f825ef551e0d500b2ad414adbd': 'USDC'
     }
   };
 

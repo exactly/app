@@ -306,12 +306,18 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
         ethers.utils.parseUnits(qty, decimals)
       );
 
-      const fixedRate =
+      const currentTimestamp = new Date().getTime() / 1000;
+
+      const time = 31536000 / (parseInt(date?.value ?? maturity) - currentTimestamp);
+
+      const rate =
         ((parseFloat(ethers.utils.formatUnits(yieldAtMaturity, decimals)) - parseFloat(qty)) /
           parseFloat(qty)) *
         100;
 
-      setFixedRate(fixedRate.toFixed(2));
+      const fixedAPY = (Math.pow(1 + rate, time) - 1) * 100;
+
+      setFixedRate(fixedAPY.toFixed(2));
     } catch (e) {
       console.log(e);
     }
