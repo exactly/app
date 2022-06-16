@@ -78,15 +78,17 @@ function ModalRowBorrowLimit({
       <p className={styles.text}>{translations[lang].borrowLimit}</p>
       <section className={styles.values}>
         <span className={styles.value}>
-          {(healthFactor && formatNumber(beforeBorrowLimit, 'usd')) || <Skeleton />}
+          {`$${(healthFactor && formatNumber(beforeBorrowLimit, 'usd')) || <Skeleton />}`}
         </span>
         <div className={styles.imageContainer}>
           <Image src="/img/icons/arrowRight.svg" alt="arrowRight" layout="fill" />
         </div>
         <span className={styles.value}>
-          {(healthFactor && formatNumber(afterBorrowLimit > 0 ? afterBorrowLimit : 0, 'usd')) || (
-            <Skeleton />
-          )}
+          {`$${
+            (healthFactor && afterBorrowLimit > 0
+              ? formatNumber(afterBorrowLimit, 'usd')
+              : '0.00') || <Skeleton />
+          }`}
         </span>
       </section>
     </section>
