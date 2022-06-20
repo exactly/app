@@ -1,6 +1,7 @@
 {
   "en": {
     "withdraw": "Withdraw",
+    "approve": "Approve",
     "exactlyBalance": "Deposited Amount",
     "healthFactor": "Health Factor",
     "borrowLimit": "Borrow Limit",

@@ -113,7 +113,7 @@ function BorrowModal({ data, editable, closeModal }: Props) {
 
   useEffect(() => {
     checkAllowance();
-  }, [address, market, symbol, qty]);
+  }, [walletAddress, fixedLenderWithSigner, symbol, qty]);
 
   useEffect(() => {
     if (underlyingContract && fixedLenderWithSigner) {
@@ -140,7 +140,7 @@ function BorrowModal({ data, editable, closeModal }: Props) {
 
     if (
       (allowance && parseFloat(allowance) < parseFloat(qty)) ||
-      (allowance && parseFloat(allowance) == 0)
+      (allowance && parseFloat(allowance) == 0 && !qty)
     ) {
       setNeedsApproval(true);
     }
@@ -395,7 +395,7 @@ function BorrowModal({ data, editable, closeModal }: Props) {
                     parseFloat(qty) <= 0 || !qty || error?.status ? 'disabled' : 'secondary'
                   }
                   onClick={needsApproval ? approve : borrow}
-                  disabled={parseFloat(qty) <= 0 || !qty || loading || error?.status}
+                  disabled={parseFloat(qty) <= 0 || !qty || loading || error?.status || pending}
                   loading={loading || pending}
                 />
               </div>
