@@ -60,8 +60,6 @@ function ModalRowHealthFactor({ qty, symbol, operation, healthFactorCallback }: 
         const oracle = parseFloat(ethers.utils.formatUnits(fixedLender.oraclePrice, 18));
         const collateralFactor = parseFloat(ethers.utils.formatUnits(fixedLender.adjustFactor, 18));
 
-        console.log(assets, oracle, collateralFactor);
-
         collateral += assets * oracle * collateralFactor;
       }
 

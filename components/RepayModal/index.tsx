@@ -154,6 +154,7 @@ function RepayModal({ data, closeModal }: Props) {
 
       setTx({ status: 'success', hash: status?.transactionHash });
     } catch (e: any) {
+      console.log(e);
       setLoading(false);
 
       const isDenied = e?.message?.includes('User denied');
