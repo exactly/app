@@ -330,7 +330,7 @@ export const getStaticProps: GetStaticProps = async (context) => {
 
 export async function getStaticPaths() {
   return {
-    paths: ['/assets/dai', '/assets/eth', '/assets/usdc', '/assets/weth', '/assets/wbtc'],
+    paths: ['/assets/dai', '/assets/eth', '/assets/usdc', '/assets/wbtc'],
     fallback: false
   };
 }

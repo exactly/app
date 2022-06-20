@@ -105,7 +105,7 @@ function Item({ market, showModal }: Props) {
 
   return (
     <div className={`${style.container} ${style.primaryContainer}`}>
-      <Link href={`/assets/${market?.symbol.toLowerCase()}`}>
+      <Link href={`/assets/${market?.symbol == 'WETH' ? 'eth' : market?.symbol.toLowerCase()}`}>
         <div className={style.symbol}>
           {(market && (
             <img
