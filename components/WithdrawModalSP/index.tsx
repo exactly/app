@@ -168,6 +168,8 @@ function WithdrawModalSP({ data, closeModal }: Props) {
   }
 
   async function estimateGas() {
+    if (symbol == 'WETH') return;
+
     try {
       const gasPriceInGwei = await fixedLenderWithSigner?.provider.getGasPrice();
       const decimals = await fixedLenderWithSigner?.decimals();
