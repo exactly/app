@@ -66,12 +66,12 @@ function Item({
     []
   );
   const [exchangeRate, setExchangeRate] = useState<number | undefined>(undefined);
-
-  const fixedRate = fee && amount && (parseFloat(fee) * 100) / parseFloat(amount);
+  const [APY, setAPY] = useState<number | undefined>(undefined);
 
   useEffect(() => {
     getMaturityData();
     getRate();
+    getAPY();
   }, [maturityDate, walletAddress]);
 
   async function getMaturityData() {
@@ -120,6 +120,21 @@ function Item({
     setExchangeRate(rate);
   }
 
+  async function getAPY() {
+    if (!maturityDate || !fee || !amount) return;
+
+    const currentTimestamp = new Date().getTime() / 1000;
+
+    const time = 31536000 / (parseInt(maturityDate) - currentTimestamp);
+    const rate =
+      parseFloat(ethers.utils.formatUnits(fee, decimals)) /
+      parseFloat(ethers.utils.formatUnits(amount, decimals));
+
+    const fixedAPY = (Math.pow(1 + rate, time) - 1) * 100;
+
+    setAPY(fixedAPY);
+  }
+
   return (
     <details className={styles.container}>
       <summary className={styles.summary}>
@@ -145,7 +160,7 @@ function Item({
           )}
         </span>
         <span className={styles.value}>
-          {fixedRate != undefined ? `${(fixedRate || 0).toFixed(2)} %` : <Skeleton width={40} />}
+          {APY != undefined ? `${(APY || 0).toFixed(2)} %` : <Skeleton width={40} />}
         </span>
 
         {type && data ? (
