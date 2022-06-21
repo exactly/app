@@ -45,7 +45,7 @@ function Navbar() {
     <nav className={styles.navBar}>
       <div className={styles.wrapper}>
         <div className={styles.left}>
-          <Link href="/">
+          <Link href="/markets">
             <img src="/img/logo.png" alt="Exactly Logo" className={styles.logo} />
           </Link>
           <ul className={styles.linksContainer}>
