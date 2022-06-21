@@ -11,6 +11,43 @@
     margin: 0;
   }
 
+  .walletInfo {
+    cursor: default;
+    right: 50px;
+    position: fixed;
+    width: 192px;
+    top: 9%;
+    background: var(--white);
+    box-shadow: var(--shadow-tables);
+    display: flex;
+    flex-direction: column;
+    z-index: 6;
+    border-radius: var(--smallUnit);
+    padding-left: var(--u2);
+
+    .disconnect {
+      margin-top: var(--u2);
+      display: flex;
+      align-items: center;
+      gap: var(--smallUnit);
+      cursor: pointer;
+    }
+  }
+
+  .walletInfo:after {
+    bottom: 100%;
+    left: 89.2%;
+    border: solid transparent;
+    content: '';
+    height: 0;
+    width: 0;
+    position: absolute;
+    pointer-events: none;
+    border-bottom-color: #fff;
+    border-width: 10px;
+    margin-left: -10px;
+  }
+
   .networkContainer {
     display: flex;
     gap: var(--smallUnit);

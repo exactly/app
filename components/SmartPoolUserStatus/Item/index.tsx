@@ -164,7 +164,7 @@ function Item({
         {(symbol &&
           rate &&
           walletBalance &&
-          `$${formatNumber(parseFloat(walletBalance!) * rate, symbol)}`) || <Skeleton width={40} />}
+          `$${formatNumber(parseFloat(walletBalance!) * rate, 'usd')}`) || <Skeleton width={40} />}
       </span>
       <span className={styles.value}>
         {(tokenAmount &&
