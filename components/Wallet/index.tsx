@@ -37,15 +37,19 @@ function Wallet({ walletAddress, cogwheel = true, network, disconnect }: Props) 
   }, [walletAddress]);
 
   async function getENS(walletAddress: string) {
-    const ens = await providers.getDefaultProvider().lookupAddress(walletAddress);
+    try {
+      const ens = await providers.getDefaultProvider().lookupAddress(walletAddress);
 
-    setEns(ens);
+      setEns(ens);
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   return (
     <div className={styles.container}>
       <p className={styles.wallet} onClick={handleWallet}>
-        {ens ? ens : formattedWallet}
+        {ens ?? formattedWallet}
       </p>
       {cogwheel && (
         <img
