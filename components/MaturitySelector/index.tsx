@@ -94,7 +94,7 @@ function MaturitySelector({ title, address, editable }: Props) {
           editable={editable}
         />
       ) : (
-        <Skeleton width={170} height={48} />
+        <Skeleton width={140} height={48} />
       )}
     </section>
   );

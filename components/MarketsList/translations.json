@@ -1,8 +1,9 @@
 {
   "en": {
     "asset": "Asset",
-    "marketSize": "Market size",
-    "lastAPY": "Last APY"
+    "totalDeposits": "Total Deposits",
+    "totalBorrows": "Total Borrows",
+    "lastAPY": "Last APY (fixed)"
   },
   "es": {}
 }

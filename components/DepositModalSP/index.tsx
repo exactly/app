@@ -335,7 +335,7 @@ function DepositModalSP({ data, closeModal }: Props) {
         <ModalWrapper closeModal={closeModal}>
           {!tx && (
             <>
-              <ModalTitle title={translations[lang].deposit} />
+              <ModalTitle title={translations[lang].variableRateDeposit} />
               <ModalAsset asset={symbol!} amount={walletBalance} />
               <ModalInput
                 onMax={onMax}
@@ -346,11 +346,6 @@ function DepositModalSP({ data, closeModal }: Props) {
               />
               {error?.component !== 'gas' && <ModalTxCost gas={gas} />}
               <ModalRow text={translations[lang].exactlyBalance} value={depositedAmount} line />
-              <ModalRow
-                text={translations[lang].interestRate}
-                value={rate ? `${rate}%` : '0%'}
-                line
-              />
               {symbol ? (
                 <ModalRowHealthFactor
                   qty={qty}

@@ -278,7 +278,7 @@ function BorrowModal({ data, editable, closeModal }: Props) {
         <ModalWrapper closeModal={closeModal}>
           {!tx && (
             <>
-              <ModalTitle title={translations[lang].borrow} />
+              <ModalTitle title={translations[lang].fixedRateBorrow} />
               <ModalAsset
                 asset={symbol!}
                 amount={walletBalance}
@@ -292,9 +292,9 @@ function BorrowModal({ data, editable, closeModal }: Props) {
               />
               <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} symbol={symbol!} />
               {error?.component !== 'gas' && <ModalTxCost gas={gas} />}
-              <ModalRow text={translations[lang].interestRate} value={`${fixedRate}%`} line />
+              <ModalRow text={translations[lang].apy} value={`${fixedRate}%`} line />
               <ModalRowEditable
-                text={translations[lang].maximumBorrowRate}
+                text={translations[lang].maximumBorrowApy}
                 value={slippage}
                 editable={editSlippage}
                 symbol="%"

@@ -1,9 +1,9 @@
 {
   "en": {
     "asset": "Asset",
-    "marketSize": "Market size",
+    "totalDeposits": "Total Deposits",
     "smartPool": "Variable Rate Pools",
-    "lastAPY": "Last APY"
+    "lastAPY": "Last APY (variable)"
   },
   "es": {}
 }
