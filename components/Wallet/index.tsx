@@ -1,4 +1,5 @@
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
+import { providers } from 'ethers';
 
 import styles from './style.module.scss';
 
@@ -24,15 +25,27 @@ function Wallet({ walletAddress, cogwheel = true, network, disconnect }: Props) 
   const translations: { [key: string]: LangKeys } = keys;
   const formattedWallet = walletAddress && formatWallet(walletAddress);
   const [walletContainer, setWalletContainer] = useState<Boolean>(false);
+  const [ens, setEns] = useState<string | null>(null);
 
   function handleWallet() {
     setWalletContainer((prev) => !prev);
   }
 
+  useEffect(() => {
+    if (!walletAddress) return;
+    getENS(walletAddress);
+  }, [walletAddress]);
+
+  async function getENS(walletAddress: string) {
+    const ens = await providers.getDefaultProvider().lookupAddress(walletAddress);
+
+    setEns(ens);
+  }
+
   return (
     <div className={styles.container}>
       <p className={styles.wallet} onClick={handleWallet}>
-        {formattedWallet}
+        {ens ? ens : formattedWallet}
       </p>
       {cogwheel && (
         <img
@@ -49,7 +62,7 @@ function Wallet({ walletAddress, cogwheel = true, network, disconnect }: Props) 
       )}
 
       {walletContainer && (
-        <div className={styles.walletInfo}>
+        <div className={styles.walletContainer}>
           {walletAddress && (
             <p className={styles.disconnect} onClick={() => disconnect && disconnect()}>
               <img src="/img/icons/power.svg" />

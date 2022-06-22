@@ -1,5 +1,6 @@
 .container {
   color: var(--black);
+  position: absolute;
   font-size: var(--font-14);
   display: flex;
   flex-wrap: wrap;
@@ -11,12 +12,12 @@
     margin: 0;
   }
 
-  .walletInfo {
+  .walletContainer {
     cursor: default;
-    right: 50px;
-    position: fixed;
+    position: absolute;
     width: 192px;
-    top: 9%;
+    top: 40px;
+    right: -15px;
     background: var(--white);
     box-shadow: var(--shadow-tables);
     display: flex;
@@ -34,7 +35,7 @@
     }
   }
 
-  .walletInfo:after {
+  .walletContainer:after {
     bottom: 100%;
     left: 89.2%;
     border: solid transparent;

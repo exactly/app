@@ -343,7 +343,7 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
         <ModalWrapper closeModal={closeModal}>
           {!tx && (
             <>
-              <ModalTitle title={translations[lang].deposit} />
+              <ModalTitle title={translations[lang].fixedRateDeposit} />
               <ModalAsset
                 asset={symbol}
                 amount={walletBalance}
@@ -363,9 +363,9 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
                 error={error?.component == 'input'}
               />
               {error?.component !== 'gas' && <ModalTxCost gas={gas} />}
-              <ModalRow text={translations[lang].interestRate} value={`${fixedRate}%`} line />
+              <ModalRow text={translations[lang].apy} value={`${fixedRate}%`} line />
               <ModalRowEditable
-                text={translations[lang].minimumDepositRate}
+                text={translations[lang].minimumApy}
                 value={slippage}
                 editable={editSlippage}
                 symbol="%"

@@ -1,10 +1,11 @@
 {
   "en": {
     "borrow": "Borrow",
+    "fixedRateBorrow": "Fixed Rate Borrow",
     "maturityPool": "Fixed Rate Pool",
     "exactlyBalance": "Exactly Balance",
-    "interestRate": "Interest Rate",
-    "maximumBorrowRate": "Maximum Borrow Rate",
+    "apy": "APY",
+    "maximumBorrowApy": "Maximum Borrow APY",
     "maturityDebt": "Maturity Debt",
     "healthFactor": "Health Factor",
     "notEnoughSlippage": "The transaction failed, please check your Maximum Deposit Rate",
