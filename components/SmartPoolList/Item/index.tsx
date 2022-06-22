@@ -79,25 +79,28 @@ function Item({ market, showModal }: Props) {
 
   async function getMarketData() {
     if (!market || !accountData) return;
+    try {
+      const borrowed = await fixedLender?.smartPoolBorrowed();
+      const supplied = await fixedLender?.smartPoolAssets();
+      const decimals = await fixedLender?.decimals();
 
-    const borrowed = await fixedLender?.smartPoolBorrowed();
-    const supplied = await fixedLender?.smartPoolAssets();
-    const decimals = await fixedLender?.decimals();
+      const exchangeRate = parseFloat(
+        ethers.utils.formatEther(accountData[market?.symbol.toUpperCase()].oraclePrice)
+      );
 
-    const exchangeRate = parseFloat(
-      ethers.utils.formatEther(accountData[market?.symbol.toUpperCase()].oraclePrice)
-    );
+      const newPoolData = {
+        borrowed: Math.round(parseInt(await ethers.utils.formatUnits(borrowed, decimals))),
+        supplied: Math.round(parseInt(await ethers.utils.formatUnits(supplied, decimals))),
+        rate: exchangeRate
+      };
 
-    const newPoolData = {
-      borrowed: Math.round(parseInt(await ethers.utils.formatUnits(borrowed, decimals))),
-      supplied: Math.round(parseInt(await ethers.utils.formatUnits(supplied, decimals))),
-      rate: exchangeRate
-    };
+      const interestRate = await getSmartPoolInterestRate(network?.name!, fixedLender?.address!);
 
-    const interestRate = await getSmartPoolInterestRate(network?.name!, fixedLender?.address!);
-
-    setRate(interestRate);
-    setPoolData(newPoolData);
+      setRate(interestRate);
+      setPoolData(newPoolData);
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   return (

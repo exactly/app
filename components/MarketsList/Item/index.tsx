@@ -81,21 +81,25 @@ function Item({ market, showModal, type }: Props) {
   async function getMarketData() {
     if (!market || !accountData) return;
 
-    const { borrowed, supplied } = await fixedLender?.maturityPools(date?.value);
+    try {
+      const { borrowed, supplied } = await fixedLender?.maturityPools(date?.value);
 
-    const decimals = await fixedLender?.decimals();
+      const decimals = await fixedLender?.decimals();
 
-    const exchangeRate = parseFloat(
-      ethers.utils.formatEther(accountData[market?.symbol.toUpperCase()].oraclePrice)
-    );
+      const exchangeRate = parseFloat(
+        ethers.utils.formatEther(accountData[market?.symbol.toUpperCase()].oraclePrice)
+      );
 
-    const newPoolData = {
-      borrowed: parseFloat(await ethers.utils.formatUnits(borrowed, decimals)),
-      supplied: parseFloat(await ethers.utils.formatUnits(supplied, decimals)),
-      rate: exchangeRate
-    };
+      const newPoolData = {
+        borrowed: parseFloat(await ethers.utils.formatUnits(borrowed, decimals)),
+        supplied: parseFloat(await ethers.utils.formatUnits(supplied, decimals)),
+        rate: exchangeRate
+      };
 
-    setPoolData(newPoolData);
+      setPoolData(newPoolData);
+    } catch (e) {
+      console.log(e);
+    }
 
     try {
       let fee;

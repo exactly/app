@@ -87,68 +87,76 @@ const Asset: NextPage<Props> = ({ symbol }) => {
   }, [walletAddress]);
 
   async function getMarketData() {
-    const marketsData = await previewerContract?.accounts(
-      '0x000000000000000000000000000000000000dEaD'
-    );
+    try {
+      const marketsData = await previewerContract?.accounts(
+        '0x000000000000000000000000000000000000dEaD'
+      );
 
-    const filteredMarket = marketsData.find(
-      (market: FixedLenderAccountData) => market.assetSymbol === symbol
-    );
+      const filteredMarket = marketsData.find(
+        (market: FixedLenderAccountData) => market.assetSymbol === symbol
+      );
 
-    const {
-      market,
-      assetSymbol,
-      maturitySupplyPositions,
-      maturityBorrowPositions,
-      smartPoolAssets,
-      smartPoolShares,
-      oraclePrice,
-      penaltyRate,
-      adjustFactor,
-      decimals,
-      isCollateral
-    } = filteredMarket;
+      const {
+        market,
+        assetSymbol,
+        maturitySupplyPositions,
+        maturityBorrowPositions,
+        smartPoolAssets,
+        smartPoolShares,
+        oraclePrice,
+        penaltyRate,
+        adjustFactor,
+        decimals,
+        isCollateral
+      } = filteredMarket;
 
-    setMarketData({
-      market,
-      assetSymbol,
-      maturitySupplyPositions,
-      maturityBorrowPositions,
-      smartPoolAssets,
-      smartPoolShares,
-      oraclePrice,
-      penaltyRate,
-      adjustFactor,
-      decimals,
-      isCollateral
-    });
+      setMarketData({
+        market,
+        assetSymbol,
+        maturitySupplyPositions,
+        maturityBorrowPositions,
+        smartPoolAssets,
+        smartPoolShares,
+        oraclePrice,
+        penaltyRate,
+        adjustFactor,
+        decimals,
+        isCollateral
+      });
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   async function getPools() {
-    const currentTimestamp = dayjs().unix();
-    const interval = 2419200;
-    let timestamp = currentTimestamp - (currentTimestamp % interval);
+    try {
+      const currentTimestamp = dayjs().unix();
+      const interval = 2419200;
+      let timestamp = currentTimestamp - (currentTimestamp % interval);
 
-    const maxPools = await fixedLenderContract?.maxFuturePools();
-    const pools = [];
+      const maxPools = await fixedLenderContract?.maxFuturePools();
+      const pools = [];
 
-    for (let i = 0; i < maxPools; i++) {
-      timestamp += interval;
-      pools.push(timestamp);
+      for (let i = 0; i < maxPools; i++) {
+        timestamp += interval;
+        pools.push(timestamp);
+      }
+
+      const dates = pools?.map((pool: any) => {
+        return pool.toString();
+      });
+
+      const formattedDates = dates?.map((date: any) => {
+        return {
+          value: date,
+          label: parseTimestamp(date)
+        };
+      });
+
+      setMaturities(formattedDates);
+    } catch (e) {
+      console.log(e);
     }
-
-    const dates = pools?.map((pool: any) => {
-      return pool.toString();
-    });
-
-    const formattedDates = dates?.map((date: any) => {
-      return {
-        value: date,
-        label: parseTimestamp(date)
-      };
-    });
-
-    setMaturities(formattedDates);
   }
 
   async function getAccountData() {
