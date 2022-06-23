@@ -37,8 +37,8 @@ function Navbar() {
       pathname: '/dashboard',
       href: '/dashboard',
       name: translations[lang].dashboard
-    },
-    { pathname: '/nerd-mode', href: '/', name: translations[lang].nerdMode }
+    }
+    // { pathname: '/nerd-mode', href: '/', name: translations[lang].nerdMode }
   ];
 
   return (
