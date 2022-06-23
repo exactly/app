@@ -32,7 +32,6 @@ function ModalRowBorrowLimit({
   line
 }: Props) {
   const { accountData } = useContext(AccountDataContext);
-
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
@@ -43,7 +42,7 @@ function ModalRowBorrowLimit({
   let afterBorrowLimit = 0;
 
   async function getAmount() {
-    if (!accountData || !symbol) return;
+    if (!accountData || !symbol || !qty) return;
 
     const exchangeRate = parseFloat(ethers.utils.formatEther(accountData[symbol].oraclePrice));
 
