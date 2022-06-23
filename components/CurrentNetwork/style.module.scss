@@ -3,6 +3,24 @@
   position: fixed;
   top: var(--navbarHeight);
   z-index: 3;
+
+  .alertContainer {
+    width: 100%;
+    height: var(--u6);
+    background: var(--primary);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--white);
+  }
+
+  .error {
+    background: var(--error);
+  }
+
+  .success {
+    background: var(--success);
+  }
 }
 
 @media (max-width: 769px) {

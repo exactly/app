@@ -79,30 +79,33 @@ function Item({ market, showModal }: Props) {
 
   async function getMarketData() {
     if (!market || !accountData) return;
+    try {
+      const borrowed = await fixedLender?.smartPoolBorrowed();
+      const supplied = await fixedLender?.smartPoolAssets();
+      const decimals = await fixedLender?.decimals();
 
-    const borrowed = await fixedLender?.smartPoolBorrowed();
-    const supplied = await fixedLender?.smartPoolAssets();
-    const decimals = await fixedLender?.decimals();
+      const exchangeRate = parseFloat(
+        ethers.utils.formatEther(accountData[market?.symbol.toUpperCase()].oraclePrice)
+      );
 
-    const exchangeRate = parseFloat(
-      ethers.utils.formatEther(accountData[market?.symbol.toUpperCase()].oraclePrice)
-    );
+      const newPoolData = {
+        borrowed: Math.round(parseInt(await ethers.utils.formatUnits(borrowed, decimals))),
+        supplied: Math.round(parseInt(await ethers.utils.formatUnits(supplied, decimals))),
+        rate: exchangeRate
+      };
 
-    const newPoolData = {
-      borrowed: Math.round(parseInt(await ethers.utils.formatUnits(borrowed, decimals))),
-      supplied: Math.round(parseInt(await ethers.utils.formatUnits(supplied, decimals))),
-      rate: exchangeRate
-    };
+      const interestRate = await getSmartPoolInterestRate(network?.name!, fixedLender?.address!);
 
-    const interestRate = await getSmartPoolInterestRate(network?.name!, fixedLender?.address!);
-
-    setRate(interestRate);
-    setPoolData(newPoolData);
+      setRate(interestRate);
+      setPoolData(newPoolData);
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   return (
-    <Link href={`/assets/${market?.symbol.toLowerCase()}`}>
-      <div className={`${style.container} ${style.primaryContainer}`}>
+    <div className={`${style.container} ${style.primaryContainer}`}>
+      <Link href={`/assets/${market?.symbol.toLowerCase()}`}>
         <div className={style.symbol}>
           {(market && (
             <img
@@ -115,26 +118,26 @@ function Item({ market, showModal }: Props) {
             {(market && parseSymbol(market?.symbol)) || <Skeleton />}
           </span>
         </div>
-        <p className={style.value}>
-          {(market &&
-            poolData &&
-            `$${formatNumber(poolData?.supplied! * poolData?.rate!, 'USD')}`) || <Skeleton />}
-        </p>
-        <p className={style.value}>{(rate && `${rate}%`) || <Skeleton />}</p>
-        <div className={style.buttonContainer}>
-          {(market && (
-            <Button
-              text={translations[lang].deposit}
-              className={'tertiary'}
-              onClick={(e) => {
-                e.stopPropagation();
-                handleClick();
-              }}
-            />
-          )) || <Skeleton height={40} />}
-        </div>
+      </Link>
+      <p className={style.value}>
+        {(market &&
+          poolData &&
+          `$${formatNumber(poolData?.supplied! * poolData?.rate!, 'USD')}`) || <Skeleton />}
+      </p>
+      <p className={style.value}>{(rate && `${rate}%`) || <Skeleton />}</p>
+      <div className={style.buttonContainer}>
+        {(market && (
+          <Button
+            text={translations[lang].deposit}
+            className={'tertiary'}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleClick();
+            }}
+          />
+        )) || <Skeleton height={40} />}
       </div>
-    </Link>
+    </div>
   );
 }
 

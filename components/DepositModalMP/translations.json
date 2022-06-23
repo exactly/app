@@ -1,10 +1,11 @@
 {
   "en": {
+    "fixedRateDeposit": "Fixed Rate Deposit",
     "deposit": "Deposit",
     "approve": "Approve",
     "maturityPool": "Fixed Rate Pool",
-    "interestRate": "Interest Rate",
-    "minimumDepositRate": "Minimum Deposit Rate",
+    "apy": "APY",
+    "minimumApy": "Minimum Deposit APY",
     "insufficientBalance": "You can't deposit more than you have in your wallet",
     "notEnoughSlippage": "The transaction failed, please check your Minimum Deposit Rate",
     "error": "There was an error with your transaction, please try again",

@@ -1,7 +1,8 @@
 {
   "en": {
     "connectedTo": "You are connected to",
-    "network": "network"
+    "network": "network",
+    "disconnected": "Please connect your wallet"
   },
   "es": {}
 }

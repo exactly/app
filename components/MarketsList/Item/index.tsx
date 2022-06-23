@@ -81,21 +81,25 @@ function Item({ market, showModal, type }: Props) {
   async function getMarketData() {
     if (!market || !accountData) return;
 
-    const { borrowed, supplied } = await fixedLender?.maturityPools(date?.value);
+    try {
+      const { borrowed, supplied } = await fixedLender?.maturityPools(date?.value);
 
-    const decimals = await fixedLender?.decimals();
+      const decimals = await fixedLender?.decimals();
 
-    const exchangeRate = parseFloat(
-      ethers.utils.formatEther(accountData[market?.symbol.toUpperCase()].oraclePrice)
-    );
+      const exchangeRate = parseFloat(
+        ethers.utils.formatEther(accountData[market?.symbol.toUpperCase()].oraclePrice)
+      );
 
-    const newPoolData = {
-      borrowed: parseFloat(await ethers.utils.formatUnits(borrowed, decimals)),
-      supplied: parseFloat(await ethers.utils.formatUnits(supplied, decimals)),
-      rate: exchangeRate
-    };
+      const newPoolData = {
+        borrowed: parseFloat(await ethers.utils.formatUnits(borrowed, decimals)),
+        supplied: parseFloat(await ethers.utils.formatUnits(supplied, decimals)),
+        rate: exchangeRate
+      };
 
-    setPoolData(newPoolData);
+      setPoolData(newPoolData);
+    } catch (e) {
+      console.log(e);
+    }
 
     try {
       let fee;
@@ -141,12 +145,12 @@ function Item({ market, showModal, type }: Props) {
   }
 
   return (
-    <Link href={`/assets/${market?.symbol.toLowerCase()}`}>
-      <div
-        className={`${style.container} ${
-          type == 'borrow' ? style.secondaryContainer : style.primaryContainer
-        }`}
-      >
+    <div
+      className={`${style.container} ${
+        type == 'borrow' ? style.secondaryContainer : style.primaryContainer
+      }`}
+    >
+      <Link href={`/assets/${market?.symbol.toLowerCase()}`}>
         <div className={style.symbol}>
           {(market && (
             <img
@@ -159,32 +163,32 @@ function Item({ market, showModal, type }: Props) {
             {(market && parseSymbol(market?.symbol)) || <Skeleton width={30} />}
           </span>
         </div>
-        <p className={style.value}>
-          {poolData && market ? (
-            type == 'borrow' ? (
-              `$${formatNumber(poolData?.borrowed! * poolData?.rate!, 'USD')}`
-            ) : (
-              `$${formatNumber(poolData?.supplied! * poolData?.rate!, 'USD')}`
-            )
+      </Link>
+      <p className={style.value}>
+        {poolData && market ? (
+          type == 'borrow' ? (
+            `$${formatNumber(poolData?.borrowed! * poolData?.rate!, 'USD')}`
           ) : (
-            <Skeleton />
-          )}
-        </p>
-        <p className={style.value}>{(rate && `${rate}%`) || <Skeleton />}</p>
-        <div className={style.buttonContainer}>
-          {(market && (
-            <Button
-              text={type == 'borrow' ? translations[lang].borrow : translations[lang].deposit}
-              onClick={(e) => {
-                e.stopPropagation();
-                handleClick();
-              }}
-              className={type == 'borrow' ? 'secondary' : 'primary'}
-            />
-          )) || <Skeleton height={40} />}
-        </div>
+            `$${formatNumber(poolData?.supplied! * poolData?.rate!, 'USD')}`
+          )
+        ) : (
+          <Skeleton />
+        )}
+      </p>
+      <p className={style.value}>{(rate && `${rate}%`) || <Skeleton />}</p>
+      <div className={style.buttonContainer}>
+        {(market && (
+          <Button
+            text={type == 'borrow' ? translations[lang].borrow : translations[lang].deposit}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleClick();
+            }}
+            className={type == 'borrow' ? 'secondary' : 'primary'}
+          />
+        )) || <Skeleton height={40} />}
       </div>
-    </Link>
+    </div>
   );
 }
 

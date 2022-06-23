@@ -220,11 +220,14 @@ function DepositModalSP({ data, closeModal }: Props) {
       const status = await deposit.wait();
 
       setTx({ status: 'success', hash: status?.transactionHash });
-    } catch (e) {
+    } catch (e: any) {
       setLoading(false);
 
+      const isDenied = e?.message?.includes('User denied');
+
       setError({
-        status: true
+        status: true,
+        message: isDenied && translations[lang].deniedTransaction
       });
     }
   }
@@ -335,7 +338,7 @@ function DepositModalSP({ data, closeModal }: Props) {
         <ModalWrapper closeModal={closeModal}>
           {!tx && (
             <>
-              <ModalTitle title={translations[lang].deposit} />
+              <ModalTitle title={translations[lang].variableRateDeposit} />
               <ModalAsset asset={symbol!} amount={walletBalance} />
               <ModalInput
                 onMax={onMax}
@@ -346,11 +349,6 @@ function DepositModalSP({ data, closeModal }: Props) {
               />
               {error?.component !== 'gas' && <ModalTxCost gas={gas} />}
               <ModalRow text={translations[lang].exactlyBalance} value={depositedAmount} line />
-              <ModalRow
-                text={translations[lang].interestRate}
-                value={rate ? `${rate}%` : '0%'}
-                line
-              />
               {symbol ? (
                 <ModalRowHealthFactor
                   qty={qty}

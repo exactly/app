@@ -32,7 +32,7 @@ function getABI(network: string | undefined) {
     mainnet: {}
   };
 
-  return dictionary[network || process.env.NEXT_PUBLIC_NETWORK!];
+  return dictionary[network || process.env.NEXT_PUBLIC_NETWORK!] ?? dictionary.rinkeby;
 }
 
 export default getABI;

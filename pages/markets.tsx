@@ -39,7 +39,6 @@ const Pools: NextPage<Props> = () => {
   const { network, walletAddress } = useWeb3Context();
 
   const [markets, setMarkets] = useState<Array<Market>>([]);
-
   const [accountData, setAccountData] = useState<AccountData>();
 
   const { Previewer, FixedLenders } = getABI(network?.name);
@@ -55,13 +54,17 @@ const Pools: NextPage<Props> = () => {
   }, [walletAddress]);
 
   async function getMarkets() {
-    const previewerContract = getContractData(network?.name!, Previewer.address!, Previewer.abi!);
+    try {
+      const previewerContract = getContractData(network?.name!, Previewer.address!, Previewer.abi!);
 
-    const marketsData = await previewerContract?.accounts(
-      '0x000000000000000000000000000000000000dEaD'
-    );
+      const marketsData = await previewerContract?.accounts(
+        '0x000000000000000000000000000000000000dEaD'
+      );
 
-    setMarkets(formatMarkets(marketsData));
+      setMarkets(formatMarkets(marketsData));
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   async function getAccountData() {

@@ -139,10 +139,14 @@ function WithdrawModalMP({ data, closeModal }: Props) {
       setLoading(false);
 
       setTx({ status: 'success', hash: status?.transactionHash });
-    } catch (e) {
+    } catch (e: any) {
       setLoading(false);
+
+      const isDenied = e?.message?.includes('User denied');
+
       setError({
-        status: true
+        status: true,
+        message: isDenied && translations[lang].deniedTransaction
       });
     }
   }
