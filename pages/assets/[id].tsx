@@ -56,7 +56,6 @@ const Asset: NextPage<Props> = ({ symbol }) => {
   const [marketData, setMarketData] = useState<FixedLenderAccountData | undefined>(undefined);
   const [accountData, setAccountData] = useState<AccountData>();
   const [fixedLenderContract, setFixedLenderContract] = useState<Contract | undefined>(undefined);
-  const [price, setPrice] = useState<number | undefined>(undefined);
 
   const { Previewer, FixedLenders } = getABI(network?.name);
 
@@ -161,7 +160,10 @@ const Asset: NextPage<Props> = ({ symbol }) => {
 
   async function getAccountData() {
     try {
-      const data = await previewerContract?.accounts(walletAddress);
+      const data = await previewerContract?.accounts(
+        walletAddress ?? '0x000000000000000000000000000000000000dEaD'
+      );
+
       const newAccountData: AccountData = {};
 
       data.forEach((fixedLender: FixedLenderAccountData) => {
