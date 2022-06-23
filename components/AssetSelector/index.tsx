@@ -39,30 +39,34 @@ function AssetSelector({ title, defaultAddress, onChange }: Props) {
   }, [previewerData]);
 
   async function getMarkets() {
-    const previewerContract = getContractData(
-      network?.name!,
-      previewerData.address!,
-      previewerData.abi!
-    );
+    try {
+      const previewerContract = getContractData(
+        network?.name!,
+        previewerData.address!,
+        previewerData.abi!
+      );
 
-    const marketsData = await previewerContract?.accounts(
-      '0x000000000000000000000000000000000000dEaD'
-    );
+      const marketsData = await previewerContract?.accounts(
+        '0x000000000000000000000000000000000000dEaD'
+      );
 
-    if (!marketsData) {
-      //in case the contract doesn't return any market data
-      return;
+      if (!marketsData) {
+        //in case the contract doesn't return any market data
+        return;
+      }
+
+      const formattedMarkets = formatMarkets(marketsData);
+
+      setSelectOptions(formattedMarkets);
+
+      const defaultOption = formattedMarkets?.find((market: Option) => {
+        return market.value == defaultAddress;
+      });
+
+      setAddress(defaultOption ?? formattedMarkets[0]);
+    } catch (e) {
+      console.log(e);
     }
-
-    const formattedMarkets = formatMarkets(marketsData);
-
-    setSelectOptions(formattedMarkets);
-
-    const defaultOption = formattedMarkets?.find((market: Option) => {
-      return market.value == defaultAddress;
-    });
-
-    setAddress(defaultOption ?? formattedMarkets[0]);
   }
 
   function formatMarkets(markets: Array<FixedLenderAccountData>) {

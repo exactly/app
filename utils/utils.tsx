@@ -80,5 +80,7 @@ export function getSymbol(address: string, network: string | undefined) {
     }
   };
 
-  return dictionary[currentNetwork!.toLowerCase()][address.toLowerCase()];
+  return dictionary[currentNetwork!.toLowerCase()]
+    ? dictionary[currentNetwork!.toLowerCase()][address.toLowerCase()]
+    : 'DAI';
 }
