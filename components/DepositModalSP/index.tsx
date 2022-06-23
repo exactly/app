@@ -220,11 +220,14 @@ function DepositModalSP({ data, closeModal }: Props) {
       const status = await deposit.wait();
 
       setTx({ status: 'success', hash: status?.transactionHash });
-    } catch (e) {
+    } catch (e: any) {
       setLoading(false);
 
+      const isDenied = e?.message?.includes('User denied');
+
       setError({
-        status: true
+        status: true,
+        message: isDenied && translations[lang].deniedTransaction
       });
     }
   }

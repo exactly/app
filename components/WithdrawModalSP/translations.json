@@ -4,7 +4,8 @@
     "exactlyBalance": "Deposited Amount",
     "healthFactor": "Health Factor",
     "borrowLimit": "Borrow Limit",
-    "insufficientBalance": "You can't withdraw more than the deposited amount"
+    "insufficientBalance": "You can't withdraw more than the deposited amount",
+    "deniedTransaction": "Transaction rejected"
   },
   "es": {}
 }
