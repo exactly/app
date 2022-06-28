@@ -68,7 +68,6 @@ function WithdrawModalMP({ data, closeModal }: Props) {
   const [isEarlyWithdraw, setIsEarlyWithdraw] = useState<boolean>(false);
   const [error, setError] = useState<Error | undefined>(undefined);
   const [needsApproval, setNeedsApproval] = useState<boolean>(false);
-  const [pending, setPending] = useState<boolean>(false);
 
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
     undefined
@@ -120,9 +119,7 @@ function WithdrawModalMP({ data, closeModal }: Props) {
   }
 
   function onMax() {
-    const formattedAmount = formatNumber(finalAmount, symbol!);
-
-    setQty(formattedAmount);
+    setQty(finalAmount);
   }
 
   function handleInputChange(e: ChangeEvent<HTMLInputElement>) {
@@ -220,13 +217,13 @@ function WithdrawModalMP({ data, closeModal }: Props) {
       if (!web3Provider || !ETHrouter || !fixedLenderWithSigner) return;
 
       try {
-        setPending(true);
+        setLoading(true);
 
         const approve = await ETHrouter.approve(fixedLenderWithSigner);
 
         await approve.wait();
 
-        setPending(false);
+        setLoading(false);
         setNeedsApproval(false);
       } catch (e: any) {
         setLoading(false);
@@ -317,9 +314,9 @@ function WithdrawModalMP({ data, closeModal }: Props) {
                   className={
                     parseFloat(qty) <= 0 || !qty || error?.status ? 'secondaryDisabled' : 'tertiary'
                   }
-                  disabled={parseFloat(qty) <= 0 || !qty || loading || error?.status || pending}
+                  disabled={parseFloat(qty) <= 0 || !qty || loading || error?.status}
                   onClick={needsApproval ? approve : withdraw}
-                  loading={loading || pending}
+                  loading={loading}
                   color="primary"
                 />
               </div>
