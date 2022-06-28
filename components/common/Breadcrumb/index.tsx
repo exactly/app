@@ -19,7 +19,7 @@ function Breadcrumb({ steps }: Props) {
 
   return (
     <ul className={style.container}>
-      <Link href="/">
+      <Link href="/markets">
         <li>translations[lang].markets</li>
       </Link>
 
