@@ -73,10 +73,9 @@ function WithdrawModalSP({ data, closeModal }: Props) {
     undefined
   );
 
-  const parsedAmount = formatNumber(
-    ethers.utils.formatUnits(assets, decimals[symbol! as keyof Decimals]),
-    symbol!
-  );
+  const parsedAmount = ethers.utils.formatUnits(assets, decimals[symbol! as keyof Decimals]);
+
+  const formattedAmount = formatNumber(parsedAmount, symbol!);
 
   const ETHrouter =
     web3Provider && symbol == 'WETH' && handleEth(network?.name, web3Provider?.getSigner());
@@ -256,7 +255,7 @@ function WithdrawModalSP({ data, closeModal }: Props) {
                 error={error?.component == 'input'}
               />
               {error?.component !== 'gas' && <ModalTxCost gas={gas} />}
-              <ModalRow text={translations[lang].exactlyBalance} value={parsedAmount} line />
+              <ModalRow text={translations[lang].exactlyBalance} value={formattedAmount} line />
               {symbol ? (
                 <ModalRowHealthFactor
                   qty={qty}
