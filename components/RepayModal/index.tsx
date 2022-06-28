@@ -116,8 +116,7 @@ function RepayModal({ data, closeModal }: Props) {
   }
 
   function onMax() {
-    const formattedAmount = formatNumber(finalAmount, symbol!);
-    setQty(formattedAmount);
+    setQty(finalAmount);
   }
 
   function handleInputChange(e: ChangeEvent<HTMLInputElement>) {
