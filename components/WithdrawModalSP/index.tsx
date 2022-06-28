@@ -263,8 +263,8 @@ function WithdrawModalSP({ data, closeModal }: Props) {
                 symbol={symbol!}
                 error={error?.component == 'input'}
               />
-              <ModalRow text={translations[lang].exactlyBalance} value={formattedAmount} line />
               {error?.component !== 'gas' && symbol != 'WETH' && <ModalTxCost gas={gas} />}
+              <ModalRow text={translations[lang].exactlyBalance} value={formattedAmount} line />
               {symbol ? (
                 <ModalRowHealthFactor
                   qty={qty}
