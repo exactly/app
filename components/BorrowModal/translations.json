@@ -1,6 +1,7 @@
 {
   "en": {
     "borrow": "Borrow",
+    "approve": "Approve",
     "fixedRateBorrow": "Fixed Rate Borrow",
     "maturityPool": "Fixed Rate Pool",
     "exactlyBalance": "Exactly Balance",

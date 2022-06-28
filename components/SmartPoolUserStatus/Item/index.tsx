@@ -43,7 +43,7 @@ function Item({
   eTokenAmount,
   auditorContract
 }: Props) {
-  const { network } = useWeb3Context();
+  const { network, web3Provider } = useWeb3Context();
   const fixedLender = useContext(FixedLenderContext);
   const lang: string = useContext(LangContext);
   const { accountData } = useContext(AccountDataContext);
@@ -89,17 +89,25 @@ function Item({
   async function getCurrentBalance() {
     if (!walletAddress || !symbol) return;
 
-    const contractData = await getContractData(
-      network?.name,
-      underlyingData!.address,
-      underlyingData!.abi
-    );
+    let balance;
+    let decimals;
 
-    const balance = await contractData?.balanceOf(walletAddress);
+    if (symbol == 'WETH') {
+      balance = await web3Provider?.getBalance(walletAddress!);
+      decimals = 18;
+    } else {
+      const contractData = await getContractData(
+        network?.name,
+        underlyingData!.address,
+        underlyingData!.abi
+      );
+
+      decimals = await contractData?.decimals();
+
+      balance = await contractData?.balanceOf(walletAddress);
+    }
 
     if (balance) {
-      const decimals = await contractData?.decimals();
-
       setWalletBalance(ethers.utils.formatUnits(balance, decimals));
     }
   }

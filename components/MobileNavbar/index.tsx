@@ -53,7 +53,7 @@ function MobileNavbar() {
       {open && <Overlay closeModal={handleMenu} />}
       <nav className={styles.navBar} style={open ? { zIndex: 7 } : {}}>
         <div className={styles.wrapper}>
-          <Link href="/">
+          <Link href="/markets">
             <img src="/img/logo.png" alt="Exactly Logo" className={styles.logo} />
           </Link>
           {connect && !walletAddress ? (

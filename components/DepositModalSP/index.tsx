@@ -1,6 +1,5 @@
 import { ChangeEvent, useContext, useEffect, useState } from 'react';
 import { Contract, ethers } from 'ethers';
-import request from 'graphql-request';
 
 import Button from 'components/common/Button';
 import ModalAsset from 'components/common/modal/ModalAsset';
@@ -29,8 +28,8 @@ import { HealthFactor } from 'types/HealthFactor';
 
 import { getContractData } from 'utils/contracts';
 import { getSymbol, getUnderlyingData } from 'utils/utils';
-import getSmartPoolInterestRate from 'utils/getSmartPoolInterestRate';
 import formatNumber from 'utils/formatNumber';
+import handleEth from 'utils/handleEth';
 
 import numbers from 'config/numbers.json';
 
@@ -42,11 +41,6 @@ import FixedLenderContext from 'contexts/FixedLenderContext';
 import AccountDataContext from 'contexts/AccountDataContext';
 
 import keys from './translations.json';
-
-import getSubgraph from 'utils/getSubgraph';
-import formatSmartPoolDeposits from 'utils/formatSmartPoolDeposits';
-
-import { getSmartPoolDepositsQuery, getSmartPoolWithdrawsQuery } from 'queries';
 
 type Props = {
   data: Borrow | Deposit;
@@ -73,7 +67,6 @@ function DepositModalSP({ data, closeModal }: Props) {
   const [pending, setPending] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [depositedAmount, setDepositedAmount] = useState<string>();
-  const [rate, setRate] = useState<string | undefined>(undefined);
   const [healthFactor, setHealthFactor] = useState<HealthFactor | undefined>(undefined);
   const [collateralFactor, setCollateralFactor] = useState<number | undefined>(undefined);
 
@@ -88,6 +81,7 @@ function DepositModalSP({ data, closeModal }: Props) {
   if (symbol) {
     underlyingData = getUnderlyingData(network?.name, symbol.toLowerCase());
   }
+
   const underlyingContract = getContractData(
     network?.name,
     underlyingData!.address,
@@ -112,16 +106,14 @@ function DepositModalSP({ data, closeModal }: Props) {
   }, [fixedLenderWithSigner, step]);
 
   useEffect(() => {
-    if (!fixedLenderWithSigner || !network) return;
-
-    getInterestRate();
-  }, [fixedLenderWithSigner, network]);
-
-  useEffect(() => {
     checkAllowance();
   }, [market, walletAddress, underlyingContract]);
 
   async function checkAllowance() {
+    if (symbol == 'WETH') {
+      return setStep(2);
+    }
+
     const allowance = await underlyingContract?.allowance(walletAddress, market);
 
     const formattedAllowance = allowance && parseFloat(ethers.utils.formatEther(allowance));
@@ -136,11 +128,10 @@ function DepositModalSP({ data, closeModal }: Props) {
   }
 
   async function approve() {
+    if (symbol == 'WETH') return;
+
     try {
-      const approval = await underlyingContract?.approve(
-        market,
-        ethers.utils.parseUnits(numbers.approvalAmount!.toString())
-      );
+      const approval = await underlyingContract?.approve(market, ethers.constants.MaxUint256);
 
       //we set the transaction as pending
       setPending((pending) => !pending);
@@ -163,8 +154,16 @@ function DepositModalSP({ data, closeModal }: Props) {
   }
 
   async function getWalletBalance() {
-    const walletBalance = await underlyingContract?.balanceOf(walletAddress);
-    const decimals = await underlyingContract?.decimals();
+    let walletBalance;
+    let decimals;
+
+    if (symbol == 'WETH') {
+      walletBalance = await web3Provider?.getBalance(walletAddress!);
+      decimals = 18;
+    } else {
+      walletBalance = await underlyingContract?.balanceOf(walletAddress);
+      decimals = await underlyingContract?.decimals();
+    }
 
     const formattedBalance = walletBalance && ethers.utils.formatUnits(walletBalance, decimals);
 
@@ -210,10 +209,20 @@ function DepositModalSP({ data, closeModal }: Props) {
     try {
       const decimals = await fixedLenderWithSigner?.decimals();
 
-      const deposit = await fixedLenderWithSigner?.deposit(
-        ethers.utils.parseUnits(qty!.toString(), decimals),
-        walletAddress
-      );
+      let deposit;
+
+      if (symbol == 'WETH') {
+        if (!web3Provider) return;
+
+        const ETHrouter = handleEth(network?.name, web3Provider?.getSigner());
+
+        deposit = await ETHrouter?.depositETH(qty!);
+      } else {
+        deposit = await fixedLenderWithSigner?.deposit(
+          ethers.utils.parseUnits(qty!.toString(), decimals),
+          walletAddress
+        );
+      }
 
       setTx({ status: 'processing', hash: deposit?.hash });
 
@@ -233,6 +242,8 @@ function DepositModalSP({ data, closeModal }: Props) {
   }
 
   async function estimateGas() {
+    if (symbol == 'WETH') return;
+
     try {
       const gasPriceInGwei = await fixedLenderWithSigner?.provider.getGasPrice();
       const decimals = await fixedLenderWithSigner?.decimals();
@@ -258,6 +269,8 @@ function DepositModalSP({ data, closeModal }: Props) {
   }
 
   async function estimateApprovalGasCost() {
+    if (symbol == 'WETH') return;
+
     try {
       const gasPriceInGwei = await underlyingContract?.provider.getGasPrice();
 
@@ -285,22 +298,10 @@ function DepositModalSP({ data, closeModal }: Props) {
 
   function handleClickAction() {
     setLoading(true);
-    if (step === 1 && !pending) {
+    if (step === 1 && !pending && symbol != 'WETH') {
       return approve();
     } else if (!pending) {
       return deposit();
-    }
-  }
-
-  async function getInterestRate() {
-    try {
-      const interestRate = await getSmartPoolInterestRate(
-        network?.name!,
-        fixedLenderWithSigner?.address!
-      );
-      setRate(interestRate);
-    } catch (e) {
-      console.log(e);
     }
   }
 

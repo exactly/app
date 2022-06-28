@@ -3,7 +3,6 @@ import { Contract, ethers } from 'ethers';
 
 import Button from 'components/common/Button';
 import ModalAsset from 'components/common/modal/ModalAsset';
-import ModalClose from 'components/common/modal/ModalClose';
 import ModalInput from 'components/common/modal/ModalInput';
 import ModalRow from 'components/common/modal/ModalRow';
 import ModalTitle from 'components/common/modal/ModalTitle';
@@ -23,15 +22,14 @@ import { LangKeys } from 'types/Lang';
 import { UnderlyingData } from 'types/Underlying';
 import { Gas } from 'types/Gas';
 import { Transaction } from 'types/Transaction';
-import { Decimals } from 'types/Decimals';
 import { Error } from 'types/Error';
 
 import { getContractData } from 'utils/contracts';
 import { getSymbol, getUnderlyingData } from 'utils/utils';
 import parseTimestamp from 'utils/parseTimestamp';
+import handleEth from 'utils/handleEth';
 
 import numbers from 'config/numbers.json';
-import decimals from 'config/decimals.json';
 
 import styles from './style.module.scss';
 
@@ -129,6 +127,10 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
   }, [underlyingContract, qty, maturity, date, market]);
 
   async function checkAllowance() {
+    if (symbol == 'WETH') {
+      return setStep(2);
+    }
+
     const allowance = await underlyingContract?.allowance(walletAddress, marketAddress);
 
     const formattedAllowance = allowance && parseFloat(ethers.utils.formatEther(allowance));
@@ -143,10 +145,12 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
   }
 
   async function approve() {
+    if (symbol == 'WETH') return;
+
     try {
       const approval = await underlyingContract?.approve(
         marketAddress,
-        ethers.utils.parseUnits(numbers.approvalAmount!.toString())
+        ethers.constants.MaxUint256
       );
 
       //we set the transaction as pending
@@ -170,8 +174,17 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
   }
 
   async function getWalletBalance() {
-    const walletBalance = await underlyingContract?.balanceOf(walletAddress);
-    const decimals = await underlyingContract?.decimals();
+    let walletBalance;
+    let decimals;
+
+    if (symbol == 'WETH') {
+      walletBalance = await web3Provider?.getBalance(walletAddress!);
+      decimals = 18;
+    } else {
+      walletBalance = await underlyingContract?.balanceOf(walletAddress);
+      decimals = await underlyingContract?.decimals();
+    }
+
     const formattedBalance = walletBalance && ethers.utils.formatUnits(walletBalance, decimals);
 
     if (formattedBalance) {
@@ -202,15 +215,27 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
 
   async function deposit() {
     try {
-      const minAmount = parseFloat(qty!) * (1 + parseFloat(slippage) / 100);
       const decimals = await fixedLenderWithSigner?.decimals();
+      const minAmount = parseFloat(qty!) * (1 + parseFloat(slippage) / 100);
 
-      const deposit = await fixedLenderWithSigner?.depositAtMaturity(
-        parseInt(date?.value ?? maturity),
-        ethers.utils.parseUnits(qty!, decimals),
-        ethers.utils.parseUnits(`${minAmount}`, decimals),
-        walletAddress
-      );
+      let deposit;
+
+      if (symbol == 'WETH') {
+        const ETHrouter = web3Provider && handleEth(network?.name, web3Provider?.getSigner());
+
+        deposit = await ETHrouter?.depositAtMaturityETH(
+          date?.value ?? maturity,
+          minAmount.toString(),
+          qty!
+        );
+      } else {
+        deposit = await fixedLenderWithSigner?.depositAtMaturity(
+          parseInt(date?.value ?? maturity),
+          ethers.utils.parseUnits(qty!, decimals),
+          ethers.utils.parseUnits(`${minAmount}`, decimals),
+          walletAddress
+        );
+      }
 
       setTx({ status: 'processing', hash: deposit?.hash });
 
@@ -232,13 +257,15 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
   }
 
   async function estimateGas() {
+    if (symbol == 'WETH') return;
+
     try {
       const gasPriceInGwei = await fixedLenderWithSigner?.provider.getGasPrice();
       const decimals = await fixedLenderWithSigner?.decimals();
 
       const estimatedGasCost = await fixedLenderWithSigner?.estimateGas.depositAtMaturity(
         parseInt(date?.value ?? maturity),
-        ethers.utils.parseUnits(`1`, decimals),
+        ethers.utils.parseUnits(`0.1`, decimals),
         ethers.utils.parseUnits('0', decimals),
         walletAddress
       );
@@ -259,6 +286,8 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
   }
 
   async function estimateApprovalGasCost() {
+    if (symbol == 'WETH') return;
+
     try {
       const gasPriceInGwei = await underlyingContract?.provider.getGasPrice();
 
@@ -287,7 +316,7 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
   function handleClickAction() {
     setLoading(true);
 
-    if (step === 1 && !pending) {
+    if (step === 1 && !pending && symbol != 'WETH') {
       return approve();
     } else if (!pending) {
       return deposit();
