@@ -150,7 +150,7 @@ function Item({ market, showModal, type }: Props) {
         type == 'borrow' ? style.secondaryContainer : style.primaryContainer
       }`}
     >
-      <Link href={`/assets/${market?.symbol.toLowerCase()}`}>
+      <Link href={`/assets/${market?.symbol == 'WETH' ? 'eth' : market?.symbol.toLowerCase()}`}>
         <div className={style.symbol}>
           {(market && (
             <img
