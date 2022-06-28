@@ -212,13 +212,23 @@ function WithdrawModalSP({ data, closeModal }: Props) {
       try {
         setPending(true);
 
-        const approve = ETHrouter.approve(fixedLenderWithSigner);
+        const approve = await ETHrouter.approve(fixedLenderWithSigner);
 
         await approve.wait();
 
         setPending(false);
-      } catch (e) {
-        setPending(false);
+        setNeedsApproval(false);
+      } catch (e: any) {
+        setLoading(false);
+
+        const isDenied = e?.message?.includes('User denied');
+
+        setError({
+          status: true,
+          message: isDenied
+            ? translations[lang].deniedTransaction
+            : translations[lang].notEnoughSlippage
+        });
       }
     }
   }
@@ -255,7 +265,7 @@ function WithdrawModalSP({ data, closeModal }: Props) {
                 symbol={symbol!}
                 error={error?.component == 'input'}
               />
-              {error?.component !== 'gas' && <ModalTxCost gas={gas} />}
+              {error?.component !== 'gas' && symbol != 'WETH' && <ModalTxCost gas={gas} />}
               <ModalRow text={translations[lang].exactlyBalance} value={parsedAmount} line />
               {symbol ? (
                 <ModalRowHealthFactor

@@ -222,13 +222,23 @@ function WithdrawModalMP({ data, closeModal }: Props) {
       try {
         setPending(true);
 
-        const approve = ETHrouter.approve(fixedLenderWithSigner);
+        const approve = await ETHrouter.approve(fixedLenderWithSigner);
 
         await approve.wait();
 
         setPending(false);
-      } catch (e) {
-        setPending(false);
+        setNeedsApproval(false);
+      } catch (e: any) {
+        setLoading(false);
+
+        const isDenied = e?.message?.includes('User denied');
+
+        setError({
+          status: true,
+          message: isDenied
+            ? translations[lang].deniedTransaction
+            : translations[lang].notEnoughSlippage
+        });
       }
     }
   }
