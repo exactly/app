@@ -30,6 +30,7 @@ import { HealthFactor } from 'types/HealthFactor';
 import { getContractData } from 'utils/contracts';
 import { getUnderlyingData, getSymbol } from 'utils/utils';
 import parseTimestamp from 'utils/parseTimestamp';
+import handleEth from 'utils/handleEth';
 
 import styles from './style.module.scss';
 
@@ -73,6 +74,8 @@ function BorrowModal({ data, editable, closeModal }: Props) {
   const [loading, setLoading] = useState<boolean>(false);
   const [healthFactor, setHealthFactor] = useState<HealthFactor | undefined>(undefined);
   const [collateralFactor, setCollateralFactor] = useState<number | undefined>(undefined);
+  const [needsApproval, setNeedsApproval] = useState<boolean>(false);
+  const [pending, setPending] = useState<boolean>(false);
 
   const [error, setError] = useState<Error | undefined>(undefined);
 
@@ -83,6 +86,9 @@ function BorrowModal({ data, editable, closeModal }: Props) {
   const marketAddress = editable ? address?.value ?? market : market;
 
   const symbol = getSymbol(marketAddress, network?.name);
+
+  const ETHrouter =
+    web3Provider && symbol == 'WETH' && handleEth(network?.name, web3Provider?.getSigner());
 
   const underlyingData: UnderlyingData | undefined = getUnderlyingData(
     network?.name,
@@ -106,6 +112,10 @@ function BorrowModal({ data, editable, closeModal }: Props) {
   }, [address, market, fixedLenderData]);
 
   useEffect(() => {
+    checkAllowance();
+  }, [walletAddress, fixedLenderWithSigner, symbol, qty]);
+
+  useEffect(() => {
     if (underlyingContract && fixedLenderWithSigner) {
       getWalletBalance();
     }
@@ -123,9 +133,31 @@ function BorrowModal({ data, editable, closeModal }: Props) {
     }
   }, [qty, date, maturity]);
 
+  async function checkAllowance() {
+    if (symbol != 'WETH' || !ETHrouter || !walletAddress || !fixedLenderWithSigner) return;
+
+    const allowance = await ETHrouter.checkAllowance(walletAddress, fixedLenderWithSigner);
+
+    if (
+      (allowance && parseFloat(allowance) < parseFloat(qty)) ||
+      (allowance && parseFloat(allowance) == 0 && !qty)
+    ) {
+      setNeedsApproval(true);
+    }
+  }
+
   async function getWalletBalance() {
-    const walletBalance = await underlyingContract?.balanceOf(walletAddress);
-    const decimals = await underlyingContract?.decimals();
+    let walletBalance;
+    let decimals;
+
+    if (symbol == 'WETH') {
+      walletBalance = await web3Provider?.getBalance(walletAddress!);
+      decimals = 18;
+    } else {
+      walletBalance = await underlyingContract?.balanceOf(walletAddress);
+      decimals = await underlyingContract?.decimals();
+    }
+
     const formattedBalance = walletBalance && ethers.utils.formatUnits(walletBalance, decimals);
 
     if (formattedBalance) {
@@ -159,13 +191,25 @@ function BorrowModal({ data, editable, closeModal }: Props) {
       const maxAmount = parseFloat(qty!) * (1 + parseFloat(slippage) / 100);
       const decimals = await fixedLenderWithSigner?.decimals();
 
-      const borrow = await fixedLenderWithSigner?.borrowAtMaturity(
-        parseInt(date?.value ?? maturity),
-        ethers.utils.parseUnits(qty!, decimals),
-        ethers.utils.parseUnits(`${maxAmount}`, decimals),
-        walletAddress,
-        walletAddress
-      );
+      let borrow;
+
+      if (symbol == 'WETH') {
+        if (!web3Provider || !ETHrouter) return;
+
+        borrow = await ETHrouter?.borrowAtMaturityETH(
+          date?.value ?? maturity,
+          qty!,
+          maxAmount.toString()
+        );
+      } else {
+        borrow = await fixedLenderWithSigner?.borrowAtMaturity(
+          parseInt(date?.value ?? maturity),
+          ethers.utils.parseUnits(qty!, decimals),
+          ethers.utils.parseUnits(`${maxAmount}`, decimals),
+          walletAddress,
+          walletAddress
+        );
+      }
 
       setTx({ status: 'processing', hash: borrow?.hash });
 
@@ -175,7 +219,6 @@ function BorrowModal({ data, editable, closeModal }: Props) {
       setTx({ status: 'success', hash: status?.transactionHash });
     } catch (e: any) {
       setLoading(false);
-
       const isDenied = e?.message?.includes('User denied');
 
       setError({
@@ -188,6 +231,8 @@ function BorrowModal({ data, editable, closeModal }: Props) {
   }
 
   async function estimateGas() {
+    if (symbol == 'WETH') return;
+
     try {
       const gasPriceInGwei = await fixedLenderWithSigner?.provider.getGasPrice();
       const decimals = await fixedLenderWithSigner?.decimals();
@@ -272,6 +317,24 @@ function BorrowModal({ data, editable, closeModal }: Props) {
     setFixedLenderWithSigner(fixedLender);
   }
 
+  async function approve() {
+    if (symbol == 'WETH') {
+      if (!web3Provider || !ETHrouter || !fixedLenderWithSigner) return;
+
+      try {
+        setPending(true);
+
+        const approve = ETHrouter.approve(fixedLenderWithSigner);
+
+        await approve.wait();
+
+        setPending(false);
+      } catch (e) {
+        setPending(false);
+      }
+    }
+  }
+
   return (
     <>
       {!minimized && (
@@ -327,13 +390,13 @@ function BorrowModal({ data, editable, closeModal }: Props) {
               {error && error.component != 'gas' && <ModalError message={error.message} />}
               <div className={styles.buttonContainer}>
                 <Button
-                  text={translations[lang].borrow}
+                  text={needsApproval ? translations[lang].approve : translations[lang].borrow}
                   className={
                     parseFloat(qty) <= 0 || !qty || error?.status ? 'disabled' : 'secondary'
                   }
-                  onClick={borrow}
-                  disabled={parseFloat(qty) <= 0 || !qty || loading || error?.status}
-                  loading={loading}
+                  onClick={needsApproval ? approve : borrow}
+                  disabled={parseFloat(qty) <= 0 || !qty || loading || error?.status || pending}
+                  loading={loading || pending}
                 />
               </div>
             </>

@@ -1,6 +1,7 @@
 {
   "en": {
     "withdraw": "Withdraw",
+    "approve": "Approve",
     "earlyWithdraw": "Early Withdraw",
     "maturityPool": "Fixed Rate Pool",
     "amountAtFinish": "Amount At Finish",

@@ -35,6 +35,7 @@ import AccountDataContext from 'contexts/AccountDataContext';
 import { getContractData } from 'utils/contracts';
 import formatNumber from 'utils/formatNumber';
 import { getSymbol } from 'utils/utils';
+import handleEth from 'utils/handleEth';
 
 import decimals from 'config/decimals.json';
 import numbers from 'config/numbers.json';
@@ -65,6 +66,8 @@ function WithdrawModalSP({ data, closeModal }: Props) {
   const [healthFactor, setHealthFactor] = useState<HealthFactor | undefined>(undefined);
   const [collateralFactor, setCollateralFactor] = useState<number | undefined>(undefined);
   const [error, setError] = useState<Error | undefined>(undefined);
+  const [needsApproval, setNeedsApproval] = useState<boolean>(false);
+  const [pending, setPending] = useState<boolean>(false);
 
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
     undefined
@@ -75,15 +78,35 @@ function WithdrawModalSP({ data, closeModal }: Props) {
     symbol!
   );
 
+  const ETHrouter =
+    web3Provider && symbol == 'WETH' && handleEth(network?.name, web3Provider?.getSigner());
+
   useEffect(() => {
     getFixedLenderContract();
   }, [fixedLenderData]);
+
+  useEffect(() => {
+    checkAllowance();
+  }, [walletAddress, fixedLenderWithSigner, symbol, qty]);
 
   useEffect(() => {
     if (fixedLenderWithSigner && !gas) {
       estimateGas();
     }
   }, [fixedLenderWithSigner]);
+
+  async function checkAllowance() {
+    if (symbol != 'WETH' || !ETHrouter || !walletAddress || !fixedLenderWithSigner) return;
+
+    const allowance = await ETHrouter.checkAllowance(walletAddress, fixedLenderWithSigner);
+
+    if (
+      (allowance && parseFloat(allowance) < parseFloat(qty)) ||
+      (allowance && parseFloat(allowance) == 0 && !qty)
+    ) {
+      setNeedsApproval(true);
+    }
+  }
 
   function onMax() {
     setQty(parsedAmount);
@@ -107,13 +130,25 @@ function WithdrawModalSP({ data, closeModal }: Props) {
     setLoading(true);
 
     try {
-      const decimals = await fixedLenderWithSigner?.decimals();
+      let decimals;
+      let withdraw;
 
-      const withdraw = await fixedLenderWithSigner?.withdraw(
-        ethers.utils.parseUnits(qty!, decimals),
-        walletAddress,
-        walletAddress
-      );
+      if (symbol == 'WETH') {
+        if (!ETHrouter) return;
+
+        decimals = 18;
+
+        withdraw = await ETHrouter.withdrawETH(qty);
+      } else {
+        decimals = await fixedLenderWithSigner?.decimals();
+
+        withdraw = await fixedLenderWithSigner?.withdraw(
+          ethers.utils.parseUnits(qty!, decimals),
+          walletAddress,
+          walletAddress
+        );
+      }
+
       setTx({ status: 'processing', hash: withdraw?.hash });
 
       const status = await withdraw.wait();
@@ -133,6 +168,8 @@ function WithdrawModalSP({ data, closeModal }: Props) {
   }
 
   async function estimateGas() {
+    if (symbol == 'WETH') return;
+
     try {
       const gasPriceInGwei = await fixedLenderWithSigner?.provider.getGasPrice();
       const decimals = await fixedLenderWithSigner?.decimals();
@@ -165,6 +202,24 @@ function WithdrawModalSP({ data, closeModal }: Props) {
         accountData[symbol.toUpperCase()]?.adjustFactor
       );
       setCollateralFactor(parseFloat(collateralFactor));
+    }
+  }
+
+  async function approve() {
+    if (symbol == 'WETH') {
+      if (!web3Provider || !ETHrouter || !fixedLenderWithSigner) return;
+
+      try {
+        setPending(true);
+
+        const approve = ETHrouter.approve(fixedLenderWithSigner);
+
+        await approve.wait();
+
+        setPending(false);
+      } catch (e) {
+        setPending(false);
+      }
     }
   }
 
@@ -222,12 +277,12 @@ function WithdrawModalSP({ data, closeModal }: Props) {
               {error && error.component != 'gas' && <ModalError message={error.message} />}
               <div className={styles.buttonContainer}>
                 <Button
-                  text={translations[lang].withdraw}
+                  text={needsApproval ? translations[lang].approve : translations[lang].withdraw}
                   className={
                     parseFloat(qty) <= 0 || !qty || error?.status ? 'secondaryDisabled' : 'tertiary'
                   }
-                  disabled={parseFloat(qty) <= 0 || !qty || loading || error?.status}
-                  onClick={withdraw}
+                  disabled={parseFloat(qty) <= 0 || !qty || loading || error?.status || pending}
+                  onClick={needsApproval ? approve : withdraw}
                   loading={loading}
                   color="primary"
                 />

@@ -26,6 +26,7 @@ import parseTimestamp from 'utils/parseTimestamp';
 import { getContractData } from 'utils/contracts';
 import formatNumber from 'utils/formatNumber';
 import { getSymbol } from 'utils/utils';
+import handleEth from 'utils/handleEth';
 
 import styles from './style.module.scss';
 
@@ -66,14 +67,23 @@ function WithdrawModalMP({ data, closeModal }: Props) {
   const [loading, setLoading] = useState<boolean>(false);
   const [isEarlyWithdraw, setIsEarlyWithdraw] = useState<boolean>(false);
   const [error, setError] = useState<Error | undefined>(undefined);
+  const [needsApproval, setNeedsApproval] = useState<boolean>(false);
+  const [pending, setPending] = useState<boolean>(false);
 
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
     undefined
   );
 
+  const ETHrouter =
+    web3Provider && symbol == 'WETH' && handleEth(network?.name, web3Provider?.getSigner());
+
   useEffect(() => {
     getFixedLenderContract();
   }, [fixedLenderData]);
+
+  useEffect(() => {
+    checkAllowance();
+  }, [walletAddress, fixedLenderWithSigner, symbol, qty]);
 
   useEffect(() => {
     const earlyWithdraw = Date.now() / 1000 < parseInt(maturity);
@@ -95,6 +105,19 @@ function WithdrawModalMP({ data, closeModal }: Props) {
       estimateGas();
     }
   }, [fixedLenderWithSigner]);
+
+  async function checkAllowance() {
+    if (symbol != 'WETH' || !ETHrouter || !walletAddress || !fixedLenderWithSigner) return;
+
+    const allowance = await ETHrouter.checkAllowance(walletAddress, fixedLenderWithSigner);
+
+    if (
+      (allowance && parseFloat(allowance) < parseFloat(qty)) ||
+      (allowance && parseFloat(allowance) == 0 && !qty)
+    ) {
+      setNeedsApproval(true);
+    }
+  }
 
   function onMax() {
     const formattedAmount = formatNumber(finalAmount, symbol!);
@@ -122,20 +145,31 @@ function WithdrawModalMP({ data, closeModal }: Props) {
     try {
       //we should change this 0 in case of earlyWithdraw with the amount - penaltyFee from the previewWithdraw
       const minAmount = isEarlyWithdraw ? 0 : finalAmount;
+      let withdraw;
+      let decimals;
 
-      const decimals = await fixedLenderWithSigner?.decimals();
+      if (symbol == 'WETH') {
+        if (!ETHrouter) return;
 
-      const withdraw = await fixedLenderWithSigner?.withdrawAtMaturity(
-        maturity,
-        ethers.utils.parseUnits(qty!, decimals),
-        ethers.utils.parseUnits(`${minAmount}`, decimals),
-        walletAddress,
-        walletAddress
-      );
+        decimals = 18;
+
+        withdraw = await ETHrouter?.withdrawAtMaturityETH(maturity, qty, minAmount.toString());
+      } else {
+        decimals = await fixedLenderWithSigner?.decimals();
+
+        withdraw = await fixedLenderWithSigner?.withdrawAtMaturity(
+          maturity,
+          ethers.utils.parseUnits(qty!, decimals),
+          ethers.utils.parseUnits(`${minAmount}`, decimals),
+          walletAddress,
+          walletAddress
+        );
+      }
 
       setTx({ status: 'processing', hash: withdraw?.hash });
 
       const status = await withdraw.wait();
+
       setLoading(false);
 
       setTx({ status: 'success', hash: status?.transactionHash });
@@ -152,6 +186,8 @@ function WithdrawModalMP({ data, closeModal }: Props) {
   }
 
   async function estimateGas() {
+    if (symbol == 'WETH') return;
+
     try {
       const gasPriceInGwei = await fixedLenderWithSigner?.provider.getGasPrice();
       const decimals = await fixedLenderWithSigner?.decimals();
@@ -176,6 +212,24 @@ function WithdrawModalMP({ data, closeModal }: Props) {
         status: true,
         component: 'gas'
       });
+    }
+  }
+
+  async function approve() {
+    if (symbol == 'WETH') {
+      if (!web3Provider || !ETHrouter || !fixedLenderWithSigner) return;
+
+      try {
+        setPending(true);
+
+        const approve = ETHrouter.approve(fixedLenderWithSigner);
+
+        await approve.wait();
+
+        setPending(false);
+      } catch (e) {
+        setPending(false);
+      }
     }
   }
 
@@ -249,13 +303,13 @@ function WithdrawModalMP({ data, closeModal }: Props) {
               {error && error.component != 'gas' && <ModalError message={error.message} />}
               <div className={styles.buttonContainer}>
                 <Button
-                  text={translations[lang].withdraw}
+                  text={needsApproval ? translations[lang].approve : translations[lang].withdraw}
                   className={
                     parseFloat(qty) <= 0 || !qty || error?.status ? 'secondaryDisabled' : 'tertiary'
                   }
-                  disabled={parseFloat(qty) <= 0 || !qty || loading || error?.status}
-                  onClick={withdraw}
-                  loading={loading}
+                  disabled={parseFloat(qty) <= 0 || !qty || loading || error?.status || pending}
+                  onClick={needsApproval ? approve : withdraw}
+                  loading={loading || pending}
                   color="primary"
                 />
               </div>

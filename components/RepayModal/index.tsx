@@ -29,6 +29,8 @@ import { HealthFactor } from 'types/HealthFactor';
 import parseTimestamp from 'utils/parseTimestamp';
 import { getContractData } from 'utils/contracts';
 import formatNumber from 'utils/formatNumber';
+import { getSymbol } from 'utils/utils';
+import handleEth from 'utils/handleEth';
 
 import styles from './style.module.scss';
 
@@ -41,7 +43,6 @@ import decimals from 'config/decimals.json';
 import numbers from 'config/numbers.json';
 
 import keys from './translations.json';
-import { getSymbol } from 'utils/utils';
 
 type Props = {
   data: Borrow | Deposit;
@@ -128,13 +129,22 @@ function RepayModal({ data, closeModal }: Props) {
 
     try {
       const decimals = await fixedLenderWithSigner?.decimals();
+      let repay;
 
-      const repay = await fixedLenderWithSigner?.repayAtMaturity(
-        maturity,
-        ethers.utils.parseUnits(qty!, decimals),
-        ethers.utils.parseUnits(qty!, decimals),
-        walletAddress
-      );
+      if (symbol == 'WETH') {
+        if (!web3Provider) return;
+
+        const ETHrouter = handleEth(network?.name, web3Provider?.getSigner());
+
+        repay = await ETHrouter?.repayAtMaturityETH(maturity, qty!);
+      } else {
+        repay = await fixedLenderWithSigner?.repayAtMaturity(
+          maturity,
+          ethers.utils.parseUnits(qty!, decimals),
+          ethers.utils.parseUnits(qty!, decimals),
+          walletAddress
+        );
+      }
 
       setTx({ status: 'processing', hash: repay?.hash });
 
@@ -144,6 +154,7 @@ function RepayModal({ data, closeModal }: Props) {
 
       setTx({ status: 'success', hash: status?.transactionHash });
     } catch (e: any) {
+      console.log(e);
       setLoading(false);
 
       const isDenied = e?.message?.includes('User denied');
@@ -156,6 +167,8 @@ function RepayModal({ data, closeModal }: Props) {
   }
 
   async function estimateGas() {
+    if (symbol == 'WETH') return;
+
     try {
       const gasPriceInGwei = await fixedLenderWithSigner?.provider.getGasPrice();
 

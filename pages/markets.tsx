@@ -22,7 +22,6 @@ import { useWeb3Context } from 'contexts/Web3Context';
 import { PreviewerProvider } from 'contexts/PreviewerContext';
 
 import { Market } from 'types/Market';
-import { UnformattedMarket } from 'types/UnformattedMarket';
 import { AccountData } from 'types/AccountData';
 import { FixedLenderAccountData } from 'types/FixedLenderAccountData';
 
@@ -36,7 +35,7 @@ interface Props {}
 
 const Pools: NextPage<Props> = () => {
   const { modal, handleModal, modalContent } = useModal();
-  const { network, walletAddress } = useWeb3Context();
+  const { network, walletAddress, web3Provider } = useWeb3Context();
 
   const [markets, setMarkets] = useState<Array<Market>>([]);
   const [accountData, setAccountData] = useState<AccountData>();

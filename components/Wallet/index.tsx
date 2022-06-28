@@ -1,5 +1,4 @@
 import { useContext, useEffect, useState } from 'react';
-import { providers } from 'ethers';
 
 import styles from './style.module.scss';
 
@@ -11,6 +10,7 @@ import LangContext from 'contexts/LangContext';
 
 import { LangKeys } from 'types/Lang';
 import { Network } from 'types/Network';
+import { useWeb3 } from 'hooks/useWeb3';
 
 type Props = {
   walletAddress: string;
@@ -22,6 +22,8 @@ type Props = {
 function Wallet({ walletAddress, cogwheel = true, network, disconnect }: Props) {
   const lang: string = useContext(LangContext);
 
+  const { web3Provider } = useWeb3();
+
   const translations: { [key: string]: LangKeys } = keys;
   const formattedWallet = walletAddress && formatWallet(walletAddress);
   const [walletContainer, setWalletContainer] = useState<Boolean>(false);
@@ -32,13 +34,15 @@ function Wallet({ walletAddress, cogwheel = true, network, disconnect }: Props) 
   }
 
   useEffect(() => {
-    if (!walletAddress) return;
+    if (!walletAddress || !web3Provider) return;
     getENS(walletAddress);
-  }, [walletAddress]);
+  }, [walletAddress, web3Provider]);
 
   async function getENS(walletAddress: string) {
+    if (!web3Provider) return;
+
     try {
-      const ens = await providers.getDefaultProvider().lookupAddress(walletAddress);
+      const ens = await web3Provider.lookupAddress(walletAddress);
 
       setEns(ens);
     } catch (e) {
