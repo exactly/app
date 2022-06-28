@@ -348,7 +348,7 @@ function DepositModalSP({ data, closeModal }: Props) {
                 symbol={symbol!}
                 error={error?.component == 'input'}
               />
-              {error?.component !== 'gas' && <ModalTxCost gas={gas} />}
+              {error?.component !== 'gas' && symbol != 'WETH' && <ModalTxCost gas={gas} />}
               <ModalRow text={translations[lang].exactlyBalance} value={depositedAmount} line />
               {symbol ? (
                 <ModalRowHealthFactor

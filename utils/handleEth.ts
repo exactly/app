@@ -78,9 +78,7 @@ function handleEth(network: string = 'rinkeby', signer: ethers.providers.JsonRpc
   function approve(FixedLenderWETH: Contract) {
     if (!router) return;
 
-    const approve = FixedLenderWETH.approve(rinkebyRouter.address, ethers.constants.MaxUint256);
-
-    return approve;
+    return FixedLenderWETH.approve(rinkebyRouter.address, ethers.constants.MaxUint256);
   }
 
   return {

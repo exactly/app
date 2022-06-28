@@ -218,7 +218,7 @@ function RepayModal({ data, closeModal }: Props) {
               <ModalAsset asset={symbol!} amount={finalAmount} />
               <ModalRow text={translations[lang].maturityPool} value={parseTimestamp(maturity)} />
               <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} symbol={symbol!} />
-              {error?.component !== 'gas' && <ModalTxCost gas={gas} />}
+              {error?.component !== 'gas' && symbol != 'WETH' && <ModalTxCost gas={gas} />}
               <ModalRow
                 text={translations[lang].amountAtFinish}
                 value={formatNumber(finalAmount, symbol!)}

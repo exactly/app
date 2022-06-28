@@ -257,8 +257,12 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
   }
 
   async function estimateGas() {
-    if (symbol == 'WETH') return;
-
+    if (symbol == 'WETH') {
+      return setError({
+        status: true,
+        component: 'gas'
+      });
+    }
     try {
       const gasPriceInGwei = await fixedLenderWithSigner?.provider.getGasPrice();
       const decimals = await fixedLenderWithSigner?.decimals();
@@ -391,7 +395,7 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
                 symbol={symbol!}
                 error={error?.component == 'input'}
               />
-              {error?.component !== 'gas' && <ModalTxCost gas={gas} />}
+              {error?.component !== 'gas' && symbol != 'WETH' && <ModalTxCost gas={gas} />}
               <ModalRow text={translations[lang].apy} value={`${fixedRate}%`} line />
               <ModalRowEditable
                 text={translations[lang].minimumApy}

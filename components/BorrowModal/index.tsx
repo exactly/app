@@ -75,7 +75,6 @@ function BorrowModal({ data, editable, closeModal }: Props) {
   const [healthFactor, setHealthFactor] = useState<HealthFactor | undefined>(undefined);
   const [collateralFactor, setCollateralFactor] = useState<number | undefined>(undefined);
   const [needsApproval, setNeedsApproval] = useState<boolean>(false);
-  const [pending, setPending] = useState<boolean>(false);
 
   const [error, setError] = useState<Error | undefined>(undefined);
 
@@ -320,17 +319,26 @@ function BorrowModal({ data, editable, closeModal }: Props) {
   async function approve() {
     if (symbol == 'WETH') {
       if (!web3Provider || !ETHrouter || !fixedLenderWithSigner) return;
-
       try {
-        setPending(true);
+        setLoading(true);
 
-        const approve = ETHrouter.approve(fixedLenderWithSigner);
+        const approve = await ETHrouter.approve(fixedLenderWithSigner);
 
         await approve.wait();
 
-        setPending(false);
-      } catch (e) {
-        setPending(false);
+        setLoading(false);
+        setNeedsApproval(false);
+      } catch (e: any) {
+        setLoading(false);
+
+        const isDenied = e?.message?.includes('User denied');
+
+        setError({
+          status: true,
+          message: isDenied
+            ? translations[lang].deniedTransaction
+            : translations[lang].notEnoughSlippage
+        });
       }
     }
   }
@@ -354,7 +362,7 @@ function BorrowModal({ data, editable, closeModal }: Props) {
                 editable={editable}
               />
               <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} symbol={symbol!} />
-              {error?.component !== 'gas' && <ModalTxCost gas={gas} />}
+              {error?.component !== 'gas' && symbol != 'WETH' && <ModalTxCost gas={gas} />}
               <ModalRow text={translations[lang].apy} value={`${fixedRate}%`} line />
               <ModalRowEditable
                 text={translations[lang].maximumBorrowApy}
@@ -395,8 +403,8 @@ function BorrowModal({ data, editable, closeModal }: Props) {
                     parseFloat(qty) <= 0 || !qty || error?.status ? 'disabled' : 'secondary'
                   }
                   onClick={needsApproval ? approve : borrow}
-                  disabled={parseFloat(qty) <= 0 || !qty || loading || error?.status || pending}
-                  loading={loading || pending}
+                  disabled={parseFloat(qty) <= 0 || !qty || loading || error?.status}
+                  loading={loading}
                 />
               </div>
             </>

@@ -68,7 +68,6 @@ function WithdrawModalMP({ data, closeModal }: Props) {
   const [isEarlyWithdraw, setIsEarlyWithdraw] = useState<boolean>(false);
   const [error, setError] = useState<Error | undefined>(undefined);
   const [needsApproval, setNeedsApproval] = useState<boolean>(false);
-  const [pending, setPending] = useState<boolean>(false);
 
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
     undefined
@@ -218,15 +217,25 @@ function WithdrawModalMP({ data, closeModal }: Props) {
       if (!web3Provider || !ETHrouter || !fixedLenderWithSigner) return;
 
       try {
-        setPending(true);
+        setLoading(true);
 
-        const approve = ETHrouter.approve(fixedLenderWithSigner);
+        const approve = await ETHrouter.approve(fixedLenderWithSigner);
 
         await approve.wait();
 
-        setPending(false);
-      } catch (e) {
-        setPending(false);
+        setLoading(false);
+        setNeedsApproval(false);
+      } catch (e: any) {
+        setLoading(false);
+
+        const isDenied = e?.message?.includes('User denied');
+
+        setError({
+          status: true,
+          message: isDenied
+            ? translations[lang].deniedTransaction
+            : translations[lang].notEnoughSlippage
+        });
       }
     }
   }
@@ -268,7 +277,7 @@ function WithdrawModalMP({ data, closeModal }: Props) {
                 symbol={symbol!}
                 error={error?.component == 'input'}
               />
-              <ModalTxCost gas={gas} />
+              {error?.component !== 'gas' && symbol != 'WETH' && <ModalTxCost gas={gas} />}
               <ModalRow
                 text={translations[lang].amountAtFinish}
                 value={formatNumber(finalAmount, symbol!)}
@@ -305,9 +314,9 @@ function WithdrawModalMP({ data, closeModal }: Props) {
                   className={
                     parseFloat(qty) <= 0 || !qty || error?.status ? 'secondaryDisabled' : 'tertiary'
                   }
-                  disabled={parseFloat(qty) <= 0 || !qty || loading || error?.status || pending}
+                  disabled={parseFloat(qty) <= 0 || !qty || loading || error?.status}
                   onClick={needsApproval ? approve : withdraw}
-                  loading={loading || pending}
+                  loading={loading}
                   color="primary"
                 />
               </div>
