@@ -8,7 +8,6 @@ import { HealthFactor } from 'types/HealthFactor';
 import { FixedLenderAccountData } from 'types/FixedLenderAccountData';
 
 import parseHealthFactor from 'utils/parseHealthFactor';
-import parseSymbol from 'utils/parseSymbol';
 
 import LangContext from 'contexts/LangContext';
 import AccountDataContext from 'contexts/AccountDataContext';
@@ -59,8 +58,6 @@ function ModalRowHealthFactor({ qty, symbol, operation, healthFactorCallback }: 
         const assets = parseFloat(ethers.utils.formatUnits(fixedLender.smartPoolAssets, decimals));
         const oracle = parseFloat(ethers.utils.formatUnits(fixedLender.oraclePrice, 18));
         const collateralFactor = parseFloat(ethers.utils.formatUnits(fixedLender.adjustFactor, 18));
-
-        console.log(assets, oracle, collateralFactor);
 
         collateral += assets * oracle * collateralFactor;
       }

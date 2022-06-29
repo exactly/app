@@ -36,6 +36,7 @@ import keys from './translations.json';
 import parseTimestamp from 'utils/parseTimestamp';
 import { getContractData } from 'utils/contracts';
 import { getSymbol } from 'utils/utils';
+import getLastAPY from 'utils/getLastAPY';
 
 import getABI from 'config/abiImporter';
 
@@ -56,6 +57,8 @@ const Asset: NextPage<Props> = ({ symbol }) => {
   const [marketData, setMarketData] = useState<FixedLenderAccountData | undefined>(undefined);
   const [accountData, setAccountData] = useState<AccountData>();
   const [fixedLenderContract, setFixedLenderContract] = useState<Contract | undefined>(undefined);
+  const [depositsData, setDepositsData] = useState<Array<Maturity> | undefined>(undefined);
+  const [borrowsData, setBorrowsData] = useState<Array<Maturity> | undefined>(undefined);
 
   const { Previewer, FixedLenders } = getABI(network?.name);
 
@@ -84,6 +87,30 @@ const Asset: NextPage<Props> = ({ symbol }) => {
     if (!walletAddress) return;
     getAccountData();
   }, [walletAddress]);
+
+  useEffect(() => {
+    handleAPY();
+  }, [maturities, fixedLenderContract, network, accountData]);
+
+  async function handleAPY() {
+    if (!maturities || !fixedLenderContract || !network || !accountData) return;
+    try {
+      const apy: any = await getLastAPY(
+        maturities,
+        fixedLenderContract?.address,
+        network,
+        accountData
+      );
+
+      const deposit = apy?.sortedDeposit;
+      const borrow = apy?.sortedBorrow;
+
+      setDepositsData(deposit);
+      setBorrowsData(borrow);
+    } catch (e) {
+      console.log(e);
+    }
+  }
 
   async function getMarketData() {
     try {
@@ -130,7 +157,7 @@ const Asset: NextPage<Props> = ({ symbol }) => {
   async function getPools() {
     try {
       const currentTimestamp = dayjs().unix();
-      const interval = 2419200;
+      const interval = 2419200; //28 days;
       let timestamp = currentTimestamp - (currentTimestamp % interval);
 
       const maxPools = await fixedLenderContract?.maxFuturePools();
@@ -253,6 +280,8 @@ const Asset: NextPage<Props> = ({ symbol }) => {
                       maturities={maturities?.slice(itemsPerPage * (page - 1), itemsPerPage * page)}
                       market={fixedLenderContract?.address}
                       showModal={showModal}
+                      deposits={depositsData}
+                      borrows={borrowsData}
                     />
                     {maturities && maturities.length > 0 && (
                       <Paginator
@@ -264,7 +293,7 @@ const Asset: NextPage<Props> = ({ symbol }) => {
                     )}
                   </div>
                   <div className={style.assetGraph}>
-                    <PoolsChart />
+                    <PoolsChart deposits={depositsData} borrows={borrowsData} />
                   </div>
                 </section>
                 <h2 className={style.assetTitle}>{translations[lang].assetDetails}</h2>
