@@ -33,11 +33,8 @@ function MyApp({ Component, pageProps }: AppProps) {
   return (
     <>
       <Head>
-        <title>Exactly App - Fixed interest rates lending & borrowing protocol</title>
-        <meta
-          name="description"
-          content="Exactly App - Fixed interest rates lending & borrowing protocol"
-        />
+        <title>Exactly App - Decentralizing the time value of money</title>
+        <meta name="description" content="Exactly App - Decentralizing the time value of money" />
         <link rel="icon" href="/icon.ico" />
       </Head>
       <LangProvider value={'en'}>
