@@ -8,7 +8,6 @@ import { HealthFactor } from 'types/HealthFactor';
 import { FixedLenderAccountData } from 'types/FixedLenderAccountData';
 
 import parseHealthFactor from 'utils/parseHealthFactor';
-import parseSymbol from 'utils/parseSymbol';
 
 import LangContext from 'contexts/LangContext';
 import AccountDataContext from 'contexts/AccountDataContext';

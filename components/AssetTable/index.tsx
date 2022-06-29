@@ -14,9 +14,11 @@ interface Props {
   maturities: Array<Maturity> | undefined;
   market: string | undefined;
   showModal: (type: string, maturity: string | undefined) => void;
+  deposits: Array<Maturity> | undefined;
+  borrows: Array<Maturity> | undefined;
 }
 
-function AssetTable({ maturities, market, showModal }: Props) {
+function AssetTable({ maturities, market, showModal, deposits, borrows }: Props) {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
@@ -30,7 +32,16 @@ function AssetTable({ maturities, market, showModal }: Props) {
       {maturities && market && (
         <>
           {maturities.map((maturity: Maturity, key: number) => {
-            return <Item key={key} maturity={maturity} market={market} showModal={showModal} />;
+            return (
+              <Item
+                key={key}
+                maturity={maturity}
+                market={market}
+                showModal={showModal}
+                deposits={deposits}
+                borrows={borrows}
+              />
+            );
           })}
         </>
       )}
@@ -38,7 +49,16 @@ function AssetTable({ maturities, market, showModal }: Props) {
         Array(3)
           .fill('a')
           .map((_, key: number) => {
-            return <Item key={key} maturity={undefined} market={undefined} showModal={showModal} />;
+            return (
+              <Item
+                key={key}
+                maturity={undefined}
+                market={undefined}
+                showModal={showModal}
+                deposits={undefined}
+                borrows={undefined}
+              />
+            );
           })}
     </div>
   );

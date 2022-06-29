@@ -4,8 +4,29 @@
 
   .title {
     width: 100%;
-    font-size: var(--font-20);
-    color: var(--gray-900);
-    font-weight: 700;
+    font-size: var(--font-);
+    color: var(--gray-500);
+    font-weight: 300;
+    margin-left: var(--u8);
   }
+}
+
+.customTooltip {
+  color: #fff;
+  border-radius: var(--smallUnit);
+  padding: var(--u);
+
+  .label {
+    margin: 0;
+  }
+}
+
+.customTooltipDeposit {
+  @extend .customTooltip;
+  background-color: var(--primary);
+}
+
+.customTooltipBorrow {
+  @extend .customTooltip;
+  background-color: var(--secondary);
 }
