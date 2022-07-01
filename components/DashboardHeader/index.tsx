@@ -65,7 +65,7 @@ function DashboardHeader() {
     let allDepositsUSD = 0;
     let variableComposition = 0;
     let fixedComposition = 0;
-
+    console.log(data);
     data.forEach((fixedLender) => {
       const symbol = fixedLender.assetSymbol;
       const decimals = fixedLender.decimals;
@@ -178,9 +178,10 @@ function DashboardHeader() {
     data.forEach((fixedLender: FixedLenderAccountData) => {
       const decimals = fixedLender.decimals;
 
+      const oracle = parseFloat(ethers.utils.formatUnits(fixedLender.oraclePrice, 18));
+
       if (fixedLender.isCollateral) {
         const assets = parseFloat(ethers.utils.formatUnits(fixedLender.smartPoolAssets, decimals));
-        const oracle = parseFloat(ethers.utils.formatUnits(fixedLender.oraclePrice, 18));
         const collateralFactor = parseFloat(ethers.utils.formatUnits(fixedLender.adjustFactor, 18));
 
         collateral += assets * oracle * collateralFactor;
@@ -195,13 +196,15 @@ function DashboardHeader() {
         const maturityTimestamp = borrowPosition.maturity.toNumber();
         const currentTimestamp = new Date().getTime() / 1000;
 
-        debt += principal + fee;
+        debt += (principal + fee) * oracle;
+
         if (maturityTimestamp > currentTimestamp) {
           debt += (currentTimestamp - maturityTimestamp) * penaltyRate;
         }
       });
     });
 
+    console.log(debt, 'debt');
     if (collateral > 0 || debt > 0) {
       const healthFactorData = [
         {

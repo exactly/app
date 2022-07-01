@@ -54,9 +54,10 @@ function ModalRowHealthFactor({ qty, symbol, operation, healthFactorCallback }: 
     data.forEach((fixedLender: FixedLenderAccountData) => {
       const decimals = fixedLender.decimals;
 
+      const oracle = parseFloat(ethers.utils.formatUnits(fixedLender.oraclePrice, 18));
+
       if (fixedLender.isCollateral) {
         const assets = parseFloat(ethers.utils.formatUnits(fixedLender.smartPoolAssets, decimals));
-        const oracle = parseFloat(ethers.utils.formatUnits(fixedLender.oraclePrice, 18));
         const collateralFactor = parseFloat(ethers.utils.formatUnits(fixedLender.adjustFactor, 18));
 
         collateral += assets * oracle * collateralFactor;
@@ -71,7 +72,7 @@ function ModalRowHealthFactor({ qty, symbol, operation, healthFactorCallback }: 
         const maturityTimestamp = borrowPosition.maturity.toNumber();
         const currentTimestamp = new Date().getTime() / 1000;
 
-        debt += principal + fee;
+        debt += (principal + fee) * oracle;
         if (maturityTimestamp > currentTimestamp) {
           debt += (currentTimestamp - maturityTimestamp) * penaltyRate;
         }
