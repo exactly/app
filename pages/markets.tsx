@@ -35,7 +35,7 @@ interface Props {}
 
 const Pools: NextPage<Props> = () => {
   const { modal, handleModal, modalContent } = useModal();
-  const { network, walletAddress, web3Provider } = useWeb3Context();
+  const { network, walletAddress } = useWeb3Context();
 
   const [markets, setMarkets] = useState<Array<Market>>([]);
   const [accountData, setAccountData] = useState<AccountData>();
@@ -56,9 +56,7 @@ const Pools: NextPage<Props> = () => {
     try {
       const previewerContract = getContractData(network?.name!, Previewer.address!, Previewer.abi!);
 
-      const marketsData = await previewerContract?.accounts(
-        '0x000000000000000000000000000000000000dEaD'
-      );
+      const marketsData = await previewerContract?.accounts(ethers.constants.AddressZero);
 
       setMarkets(formatMarkets(marketsData));
     } catch (e) {
@@ -72,12 +70,11 @@ const Pools: NextPage<Props> = () => {
       const data = await previewerContract?.accounts(
         walletAddress || '0x000000000000000000000000000000000000dEaD'
       );
-      const newAccountData: AccountData = {};
 
+      const newAccountData: AccountData = {};
       data.forEach((fixedLender: FixedLenderAccountData) => {
         newAccountData[fixedLender.assetSymbol] = fixedLender;
       });
-
       setAccountData(newAccountData);
     } catch (e) {
       console.log(e);
