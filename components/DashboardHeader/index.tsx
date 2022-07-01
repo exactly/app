@@ -65,7 +65,7 @@ function DashboardHeader() {
     let allDepositsUSD = 0;
     let variableComposition = 0;
     let fixedComposition = 0;
-    console.log(data);
+
     data.forEach((fixedLender) => {
       const symbol = fixedLender.assetSymbol;
       const decimals = fixedLender.decimals;
@@ -204,7 +204,6 @@ function DashboardHeader() {
       });
     });
 
-    console.log(debt, 'debt');
     if (collateral > 0 || debt > 0) {
       const healthFactorData = [
         {
