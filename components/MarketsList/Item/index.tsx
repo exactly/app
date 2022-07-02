@@ -52,6 +52,8 @@ function Item({ market, showModal, type }: Props) {
 
   useEffect(() => {
     if (date?.value && fixedLender) {
+      setPoolData(undefined);
+      setRate(undefined);
       getMarketData();
     }
   }, [date, fixedLender, market, accountData]);
@@ -126,7 +128,7 @@ function Item({ market, showModal, type }: Props) {
         amount = getLastDepositRate?.depositAtMaturities[0]?.assets;
       }
 
-      if (!fee || !amount) return setRate('0.00');
+      if (!fee || !amount) return setRate('N/A');
 
       const currentTimestamp = new Date().getTime() / 1000;
 
@@ -138,7 +140,11 @@ function Item({ market, showModal, type }: Props) {
 
       const fixedAPY = (Math.pow(1 + rate, time) - 1) * 100;
 
-      setRate(fixedAPY.toFixed(2));
+      if (fixedAPY <= 0.01) {
+        return setRate('N/A');
+      }
+
+      setRate(`${fixedAPY.toFixed(2)}%`);
     } catch (e) {
       console.log(e);
     }
@@ -175,7 +181,7 @@ function Item({ market, showModal, type }: Props) {
           <Skeleton />
         )}
       </p>
-      <p className={style.value}>{(rate && `${rate}%`) || <Skeleton />}</p>
+      <p className={style.value}>{rate || <Skeleton />}</p>
       <div className={style.buttonContainer}>
         {(market && (
           <Button

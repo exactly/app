@@ -12,9 +12,9 @@ function getABI(network: string | undefined) {
     rinkeby: {
       FixedLenders: [
         rinkebyFixedLenderDAI,
+        rinkebyFixedLenderUSDC,
         rinkebyFixedLenderWETH,
-        rinkebyFixedLenderWBTC,
-        rinkebyFixedLenderUSDC
+        rinkebyFixedLenderWBTC
       ],
       Auditor: rinkebyAuditor,
       Previewer: rinkebyPreviewer

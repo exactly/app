@@ -8,7 +8,7 @@ function parseHealthFactor(debt: number, collateral: number) {
 
     if (healthFactor > 100) return '100x';
 
-    return (collateral / debt).toFixed(2);
+    return `${(collateral / debt).toFixed(0)}x`;
   }
 }
 export default parseHealthFactor;
