@@ -67,9 +67,8 @@ const Asset: NextPage<Props> = ({ symbol }) => {
 
   useEffect(() => {
     if (!FixedLenders) return;
-
     getFixedLenderContract();
-  }, [network]);
+  }, [network, symbol]);
 
   useEffect(() => {
     if (!fixedLenderContract) return;

@@ -13,14 +13,28 @@ import styles from './style.module.scss';
 
 import keys from './translations.json';
 import { useWeb3Context } from 'contexts/Web3Context';
+import FixedLenderContext from 'contexts/FixedLenderContext';
+import { getSymbol } from 'utils/utils';
 
 function Navbar() {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
-  const { connect, disconnect, walletAddress } = useWeb3Context();
+  const { connect, disconnect, walletAddress, network } = useWeb3Context();
+  const fixedLenderData = useContext(FixedLenderContext);
 
   const router = useRouter();
   const { pathname } = router;
+
+  const assetsRoutes: { href: string; name: string }[] = fixedLenderData.map((asset) => {
+    const address = asset.address;
+    const assetSymbol =
+      getSymbol(address!, network?.name) == 'WETH' ? 'ETH' : getSymbol(address!, network?.name);
+
+    return {
+      href: `/assets/${assetSymbol}`.toLowerCase(),
+      name: assetSymbol
+    };
+  });
 
   const routes = [
     {
@@ -50,16 +64,52 @@ function Navbar() {
           </Link>
           <ul className={styles.linksContainer}>
             {routes.map((route) => {
-              return (
-                <li
-                  className={
-                    route.pathname === pathname ? `${styles.link} ${styles.active}` : styles.link
-                  }
-                  key={route.pathname}
-                >
-                  <Link href={route.href}>{route.name}</Link>
-                </li>
-              );
+              if (route.pathname === '/assets/[id]') {
+                return (
+                  <li
+                    className={`${styles.assetLink} 
+                     ${
+                       route.pathname === pathname ? `${styles.link} ${styles.active}` : styles.link
+                     }
+                    `}
+                    key={route.pathname}
+                  >
+                    {assetsRoutes.length > 0 ? (
+                      <div className={styles.dropdown}>
+                        <p className={styles.assetsTitle}>{translations[lang].assets}</p>
+                        <img src={`/img/icons/arrowDown.svg`} alt="assets" />
+                        <div className={styles.dropdownContent}>
+                          {assetsRoutes.map((asset: any) => {
+                            return (
+                              <Link href={asset.href} key={asset.name}>
+                                {asset.name}
+                              </Link>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <div className={styles.dropdown}>
+                          <Link href="assets/dai">{translations[lang].assets}</Link>
+                          <img src={`/img/icons/arrowDown.svg`} alt="assets" />
+                        </div>
+                      </>
+                    )}
+                  </li>
+                );
+              } else {
+                return (
+                  <li
+                    className={
+                      route.pathname === pathname ? `${styles.link} ${styles.active}` : styles.link
+                    }
+                    key={route.pathname}
+                  >
+                    <Link href={route.href}>{route.name}</Link>
+                  </li>
+                );
+              }
             })}
           </ul>
         </div>
