@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { ethers } from 'ethers';
 import { request } from 'graphql-request';
 import Skeleton from 'react-loading-skeleton';
@@ -46,17 +46,24 @@ function Item({ market, showModal, type }: Props) {
   const [fixedLender, setFixedLender] = useState<ethers.Contract | undefined>(undefined);
   const [rate, setRate] = useState<string | undefined>(undefined);
 
+  const [time, setTime] = useState(Date.now());
+
+  useEffect(() => {
+    const interval = setInterval(() => setTime(Date.now()), 15000);
+    return () => {
+      clearInterval(interval);
+    };
+  }, []);
+
   useEffect(() => {
     getFixedLenderContract();
   }, [fixedLenderData, market]);
 
   useEffect(() => {
     if (date?.value && fixedLender) {
-      setPoolData(undefined);
-      setRate(undefined);
       getMarketData();
     }
-  }, [date, fixedLender, market, accountData]);
+  }, [date, network, market, accountData, time]);
 
   async function getFixedLenderContract() {
     if (!market) return;
@@ -82,6 +89,9 @@ function Item({ market, showModal, type }: Props) {
 
   async function getMarketData() {
     if (!market || !accountData) return;
+
+    setPoolData(undefined);
+    setRate(undefined);
 
     try {
       const { borrowed, supplied } = await fixedLender?.maturityPools(date?.value);
