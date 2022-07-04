@@ -39,6 +39,7 @@ import { getSymbol } from 'utils/utils';
 import getLastAPY from 'utils/getLastAPY';
 
 import getABI from 'config/abiImporter';
+import allowedNetworks from 'config/allowedNetworks.json';
 
 interface Props {
   symbol: string;
@@ -67,9 +68,8 @@ const Asset: NextPage<Props> = ({ symbol }) => {
 
   useEffect(() => {
     if (!FixedLenders) return;
-
     getFixedLenderContract();
-  }, [network]);
+  }, [network, symbol]);
 
   useEffect(() => {
     if (!fixedLenderContract) return;
@@ -221,6 +221,8 @@ const Asset: NextPage<Props> = ({ symbol }) => {
   }
 
   function showModal(type: string, maturity: string | undefined) {
+    if (network && !allowedNetworks.includes(network?.name)) return;
+
     if (modalContent?.type) {
       //in the future we should handle the minimized modal status through a context here
       return;

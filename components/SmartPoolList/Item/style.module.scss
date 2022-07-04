@@ -3,7 +3,7 @@
   padding: var(--u2) var(--u3);
   align-items: center;
   border-left: 2px solid var(--white);
-  cursor: pointer;
+  cursor: default;
   background: var(--white);
   gap: var(--u2);
   margin: var(--smallUnit);
@@ -14,6 +14,7 @@
     display: flex;
     gap: var(--u2);
     align-items: center;
+    cursor: pointer;
 
     .assetImage {
       width: var(--u5);

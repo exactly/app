@@ -24,12 +24,14 @@ import { PreviewerProvider } from 'contexts/PreviewerContext';
 import { Market } from 'types/Market';
 import { AccountData } from 'types/AccountData';
 import { FixedLenderAccountData } from 'types/FixedLenderAccountData';
+import { Dictionary } from 'types/Dictionary';
 
 import dictionary from 'dictionary/en.json';
 
 import { getContractData } from 'utils/contracts';
 
 import getABI from 'config/abiImporter';
+import allowedNetworks from 'config/allowedNetworks.json';
 
 interface Props {}
 
@@ -72,9 +74,11 @@ const Pools: NextPage<Props> = () => {
       );
 
       const newAccountData: AccountData = {};
+
       data.forEach((fixedLender: FixedLenderAccountData) => {
         newAccountData[fixedLender.assetSymbol] = fixedLender;
       });
+
       setAccountData(newAccountData);
     } catch (e) {
       console.log(e);
@@ -83,6 +87,13 @@ const Pools: NextPage<Props> = () => {
 
   function formatMarkets(markets: Array<FixedLenderAccountData>) {
     const length = markets.length;
+
+    const dictionary: Dictionary<number> = {
+      DAI: 1,
+      USDC: 2,
+      WETH: 3,
+      WBTC: 4
+    };
 
     let formattedMarkets: Array<Market> = [];
 
@@ -100,14 +111,19 @@ const Pools: NextPage<Props> = () => {
       market['name'] = markets[i].assetSymbol;
       market['isListed'] = true;
       market['collateralFactor'] = parseFloat(ethers.utils.formatEther(markets[i].adjustFactor));
+      market['order'] = dictionary[markets[i].assetSymbol] ?? 99;
 
       formattedMarkets = [...formattedMarkets, market];
     }
 
-    return formattedMarkets;
+    return formattedMarkets.sort((a: Market, b: Market) => {
+      return a.order > b.order ? 1 : -1;
+    });
   }
 
   function showModal(marketData: Market, type: String) {
+    if (network && !allowedNetworks.includes(network?.name)) return;
+
     if (modalContent?.type) {
       //in the future we should handle the minimized modal status through a context here
       return;

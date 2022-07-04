@@ -46,6 +46,15 @@ function Item({ market, showModal, type }: Props) {
   const [fixedLender, setFixedLender] = useState<ethers.Contract | undefined>(undefined);
   const [rate, setRate] = useState<string | undefined>(undefined);
 
+  const [time, setTime] = useState(Date.now());
+
+  useEffect(() => {
+    const interval = setInterval(() => setTime(Date.now()), 15000);
+    return () => {
+      clearInterval(interval);
+    };
+  }, []);
+
   useEffect(() => {
     getFixedLenderContract();
   }, [fixedLenderData, market]);
@@ -54,7 +63,7 @@ function Item({ market, showModal, type }: Props) {
     if (date?.value && fixedLender) {
       getMarketData();
     }
-  }, [date, fixedLender, market, accountData]);
+  }, [date, network, market, accountData, time]);
 
   async function getFixedLenderContract() {
     if (!market) return;
@@ -80,6 +89,9 @@ function Item({ market, showModal, type }: Props) {
 
   async function getMarketData() {
     if (!market || !accountData) return;
+
+    setPoolData(undefined);
+    setRate(undefined);
 
     try {
       const { borrowed, supplied } = await fixedLender?.maturityPools(date?.value);
@@ -126,7 +138,7 @@ function Item({ market, showModal, type }: Props) {
         amount = getLastDepositRate?.depositAtMaturities[0]?.assets;
       }
 
-      if (!fee || !amount) return setRate('0.00');
+      if (!fee || !amount) return setRate('N/A');
 
       const currentTimestamp = new Date().getTime() / 1000;
 
@@ -138,7 +150,11 @@ function Item({ market, showModal, type }: Props) {
 
       const fixedAPY = (Math.pow(1 + rate, time) - 1) * 100;
 
-      setRate(fixedAPY.toFixed(2));
+      if (fixedAPY <= 0.01) {
+        return setRate('N/A');
+      }
+
+      setRate(`${fixedAPY.toFixed(2)}%`);
     } catch (e) {
       console.log(e);
     }
@@ -175,7 +191,7 @@ function Item({ market, showModal, type }: Props) {
           <Skeleton />
         )}
       </p>
-      <p className={style.value}>{(rate && `${rate}%`) || <Skeleton />}</p>
+      <p className={style.value}>{rate || <Skeleton />}</p>
       <div className={style.buttonContainer}>
         {(market && (
           <Button

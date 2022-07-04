@@ -22,7 +22,7 @@ function ModalInput({ value, name, disabled, symbol, error, onChange, onMax }: P
 
   const [exchangeRate, setExchangeRate] = useState(1);
 
-  const blockedCharacters = ['e', 'E', '+', '-'];
+  const blockedCharacters = ['e', 'E', '+', '-', ','];
 
   useEffect(() => {
     getRate();
@@ -47,6 +47,7 @@ function ModalInput({ value, name, disabled, symbol, error, onChange, onMax }: P
         disabled={disabled}
         className={styles.input}
         onKeyDown={(e) => blockedCharacters.includes(e.key) && e.preventDefault()}
+        onPaste={(e) => e.preventDefault()}
         step="any"
         autoFocus
       />

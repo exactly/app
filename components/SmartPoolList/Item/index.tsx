@@ -44,6 +44,15 @@ function Item({ market, showModal }: Props) {
 
   const [fixedLender, setFixedLender] = useState<Contract | undefined>(undefined);
 
+  const [time, setTime] = useState(Date.now());
+
+  useEffect(() => {
+    const interval = setInterval(() => setTime(Date.now()), 15000);
+    return () => {
+      clearInterval(interval);
+    };
+  }, []);
+
   async function getFixedLenderContract() {
     if (!market) return;
 
@@ -67,7 +76,7 @@ function Item({ market, showModal }: Props) {
     if (date?.value && fixedLender) {
       getMarketData();
     }
-  }, [date, fixedLender, accountData]);
+  }, [date, time, accountData]);
 
   function handleClick() {
     if (!market || !showModal) return;
@@ -79,6 +88,10 @@ function Item({ market, showModal }: Props) {
 
   async function getMarketData() {
     if (!market || !accountData) return;
+
+    setPoolData(undefined);
+    setRate(undefined);
+
     try {
       const borrowed = await fixedLender?.smartPoolBorrowed();
       const supplied = await fixedLender?.smartPoolAssets();
@@ -129,7 +142,6 @@ function Item({ market, showModal }: Props) {
         {(market && (
           <Button
             text={translations[lang].deposit}
-            className={'tertiary'}
             onClick={(e) => {
               e.stopPropagation();
               handleClick();

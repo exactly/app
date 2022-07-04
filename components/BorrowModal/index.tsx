@@ -31,6 +31,7 @@ import { getContractData } from 'utils/contracts';
 import { getUnderlyingData, getSymbol } from 'utils/utils';
 import parseTimestamp from 'utils/parseTimestamp';
 import handleEth from 'utils/handleEth';
+import getOneDollar from 'utils/getOneDollar';
 
 import styles from './style.module.scss';
 
@@ -68,7 +69,7 @@ function BorrowModal({ data, editable, closeModal }: Props) {
   const [gas, setGas] = useState<Gas | undefined>(undefined);
   const [tx, setTx] = useState<Transaction | undefined>(undefined);
   const [minimized, setMinimized] = useState<Boolean>(false);
-  const [fixedRate, setFixedRate] = useState<string | undefined>('0.00');
+  const [fixedRate, setFixedRate] = useState<string | undefined>(undefined);
   const [slippage, setSlippage] = useState<string>('10.00');
   const [editSlippage, setEditSlippage] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
@@ -127,10 +128,10 @@ function BorrowModal({ data, editable, closeModal }: Props) {
   }, [fixedLenderWithSigner]);
 
   useEffect(() => {
-    if (qty) {
+    if (fixedLenderWithSigner) {
       getFeeAtMaturity();
     }
-  }, [qty, date, maturity]);
+  }, [qty, date, maturity, fixedLenderWithSigner]);
 
   async function checkAllowance() {
     if (symbol != 'WETH' || !ETHrouter || !walletAddress || !fixedLenderWithSigner) return;
@@ -261,28 +262,29 @@ function BorrowModal({ data, editable, closeModal }: Props) {
   }
 
   async function getFeeAtMaturity() {
-    if (!qty || parseFloat(qty) <= 0) return;
-
+    if (!accountData) return;
     try {
       const decimals = await fixedLenderWithSigner?.decimals();
+      const currentTimestamp = new Date().getTime() / 1000;
+      const time = 31536000 / (parseInt(date?.value ?? maturity) - currentTimestamp);
+      const oracle = ethers.utils.formatEther(accountData[symbol.toUpperCase()]?.oraclePrice);
+
+      const qtyValue = qty == '' ? getOneDollar(oracle, decimals) : qty;
+      const parsedQtyValue = ethers.utils.parseUnits(qtyValue, decimals);
 
       const feeAtMaturity = await previewerContract?.previewBorrowAtMaturity(
         fixedLenderWithSigner!.address,
         parseInt(date?.value ?? maturity),
-        ethers.utils.parseUnits(qty, decimals)
+        parsedQtyValue
       );
 
-      const currentTimestamp = new Date().getTime() / 1000;
-
-      const time = 31536000 / (parseInt(date?.value ?? maturity) - currentTimestamp);
-
       const rate =
-        (parseFloat(ethers.utils.formatUnits(feeAtMaturity, decimals)) - parseFloat(qty)) /
-        parseFloat(qty);
+        (parseFloat(ethers.utils.formatUnits(feeAtMaturity, decimals)) - parseFloat(qtyValue)) /
+        parseFloat(qtyValue);
 
       const fixedAPY = (Math.pow(1 + rate, time) - 1) * 100;
 
-      setFixedRate(fixedAPY.toFixed(2));
+      setFixedRate(`${fixedAPY.toFixed(2)}%`);
     } catch (e) {
       console.log(e);
     }
@@ -363,7 +365,7 @@ function BorrowModal({ data, editable, closeModal }: Props) {
               />
               <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} symbol={symbol!} />
               {error?.component !== 'gas' && symbol != 'WETH' && <ModalTxCost gas={gas} />}
-              <ModalRow text={translations[lang].apy} value={`${fixedRate}%`} line />
+              <ModalRow text={translations[lang].apy} value={fixedRate} line />
               <ModalRowEditable
                 text={translations[lang].maximumBorrowApy}
                 value={slippage}

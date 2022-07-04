@@ -230,9 +230,7 @@ function DashboardHeader() {
     <section className={styles.section}>
       <div className={styles.container}>
         <div className={styles.box}>
-          <h3 className={styles.title}>
-            {translations[lang].deposits} <Tooltip value={translations[lang].deposits} />
-          </h3>
+          <h3 className={styles.title}>{translations[lang].deposits}</h3>
           {walletAddress && (
             <>
               {<p className={styles.value}>{depositData ? `$${totalDeposit}` : <Skeleton />}</p>}
@@ -289,9 +287,7 @@ function DashboardHeader() {
       </div>
       <div className={styles.container}>
         <div className={styles.box}>
-          <h3 className={styles.title}>
-            {translations[lang].borrows} <Tooltip value={translations[lang].borrows} />
-          </h3>
+          <h3 className={styles.title}>{translations[lang].borrows}</h3>
           {walletAddress ? (
             <>
               <p className={styles.value}>{borrowData ? `$${totalBorrow}` : <Skeleton />}</p>
