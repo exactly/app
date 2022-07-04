@@ -4,7 +4,7 @@
     "deposit": "Deposit",
     "approve": "Approve",
     "maturityPool": "Fixed Rate Pool",
-    "apy": "APY",
+    "apy": "APY (fixed)",
     "minimumApy": "Minimum Deposit APY",
     "insufficientBalance": "You can't deposit more than you have in your wallet",
     "notEnoughSlippage": "The transaction failed, please check your Minimum Deposit Rate",

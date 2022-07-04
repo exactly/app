@@ -5,7 +5,7 @@
     "fixedRateBorrow": "Fixed Rate Borrow",
     "maturityPool": "Fixed Rate Pool",
     "exactlyBalance": "Exactly Balance",
-    "apy": "APY",
+    "apy": "APY (fixed)",
     "maximumBorrowApy": "Maximum Borrow APY",
     "maturityDebt": "Maturity Debt",
     "healthFactor": "Health Factor",

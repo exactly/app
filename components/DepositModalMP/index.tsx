@@ -28,6 +28,7 @@ import { getContractData } from 'utils/contracts';
 import { getSymbol, getUnderlyingData } from 'utils/utils';
 import parseTimestamp from 'utils/parseTimestamp';
 import handleEth from 'utils/handleEth';
+import getOneDollar from 'utils/getOneDollar';
 
 import numbers from 'config/numbers.json';
 
@@ -38,6 +39,7 @@ import { useWeb3Context } from 'contexts/Web3Context';
 import FixedLenderContext from 'contexts/FixedLenderContext';
 import { AddressContext } from 'contexts/AddressContext';
 import PreviewerContext from 'contexts/PreviewerContext';
+import AccountDataContext from 'contexts/AccountDataContext';
 
 import keys from './translations.json';
 
@@ -51,6 +53,7 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
   const { maturity, market } = data;
   const { web3Provider, walletAddress, network } = useWeb3Context();
   const { date, address } = useContext(AddressContext);
+  const { accountData } = useContext(AccountDataContext);
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
@@ -67,7 +70,7 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
   const [loading, setLoading] = useState<boolean>(false);
   const [slippage, setSlippage] = useState<string>('0.00');
   const [editSlippage, setEditSlippage] = useState<boolean>(false);
-  const [fixedRate, setFixedRate] = useState<string>('0.00');
+  const [fixedRate, setFixedRate] = useState<string | undefined>(undefined);
   const [error, setError] = useState<Error | undefined>(undefined);
 
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
@@ -121,10 +124,10 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
   }, [address, market, walletAddress, underlyingContract]);
 
   useEffect(() => {
-    if (underlyingContract) {
+    if (fixedLenderWithSigner) {
       getYieldAtMaturity();
     }
-  }, [underlyingContract, qty, maturity, date, market]);
+  }, [qty, maturity, date, market, fixedLenderWithSigner]);
 
   async function checkAllowance() {
     if (symbol == 'WETH') {
@@ -328,28 +331,30 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
   }
 
   async function getYieldAtMaturity() {
-    if (!qty || parseFloat(qty) <= 0) return;
+    if (!accountData) return;
 
     try {
       const decimals = await fixedLenderWithSigner?.decimals();
+      const currentTimestamp = new Date().getTime() / 1000;
+      const time = 31536000 / (parseInt(date?.value ?? maturity) - currentTimestamp);
+      const oracle = ethers.utils.formatEther(accountData[symbol.toUpperCase()]?.oraclePrice);
 
-      const yieldAtMaturity = await previewerContract?.previewDepositAtMaturity(
+      const qtyValue = qty == '' ? getOneDollar(oracle, decimals) : qty;
+      const parsedQtyValue = ethers.utils.parseUnits(qtyValue, decimals);
+
+      const feeAtMaturity = await previewerContract?.previewDepositAtMaturity(
         marketAddress,
         parseInt(date?.value ?? maturity),
-        ethers.utils.parseUnits(qty, decimals)
+        parsedQtyValue
       );
 
-      const currentTimestamp = new Date().getTime() / 1000;
-
-      const time = 31536000 / (parseInt(date?.value ?? maturity) - currentTimestamp);
-
       const rate =
-        (parseFloat(ethers.utils.formatUnits(yieldAtMaturity, decimals)) - parseFloat(qty)) /
-        parseFloat(qty);
+        (parseFloat(ethers.utils.formatUnits(feeAtMaturity, decimals)) - parseFloat(qtyValue)) /
+        parseFloat(qtyValue);
 
       const fixedAPY = (Math.pow(1 + rate, time) - 1) * 100;
 
-      setFixedRate(fixedAPY.toFixed(2));
+      setFixedRate(`${fixedAPY.toFixed(2)}%`);
     } catch (e) {
       console.log(e);
     }
@@ -396,7 +401,7 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
                 error={error?.component == 'input'}
               />
               {error?.component !== 'gas' && symbol != 'WETH' && <ModalTxCost gas={gas} />}
-              <ModalRow text={translations[lang].apy} value={`${fixedRate}%`} line />
+              <ModalRow text={translations[lang].apy} value={fixedRate} line />
               <ModalRowEditable
                 text={translations[lang].minimumApy}
                 value={slippage}
