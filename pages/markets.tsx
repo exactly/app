@@ -31,6 +31,7 @@ import dictionary from 'dictionary/en.json';
 import { getContractData } from 'utils/contracts';
 
 import getABI from 'config/abiImporter';
+import allowedNetworks from 'config/allowedNetworks.json';
 
 interface Props {}
 
@@ -121,6 +122,8 @@ const Pools: NextPage<Props> = () => {
   }
 
   function showModal(marketData: Market, type: String) {
+    if (network && !allowedNetworks.includes(network?.name)) return;
+
     if (modalContent?.type) {
       //in the future we should handle the minimized modal status through a context here
       return;
