@@ -6,7 +6,7 @@
   align-items: center;
   border-left: 2px solid var(--white);
   gap: var(--u2);
-  cursor: pointer;
+  cursor: default;
 
   .symbol {
     width: calc(100% / 4);
@@ -14,6 +14,7 @@
     display: flex;
     gap: var(--u2);
     align-items: center;
+    cursor: pointer;
 
     .assetImage {
       width: var(--u5);

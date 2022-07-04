@@ -129,7 +129,6 @@ function Item({ market, showModal }: Props) {
         {(market && (
           <Button
             text={translations[lang].deposit}
-            className={'tertiary'}
             onClick={(e) => {
               e.stopPropagation();
               handleClick();

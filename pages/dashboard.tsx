@@ -27,6 +27,7 @@ import { Borrow } from 'types/Borrow';
 import { Deposit } from 'types/Deposit';
 import { AccountData } from 'types/AccountData';
 import { FixedLenderAccountData } from 'types/FixedLenderAccountData';
+import { Dictionary } from 'types/Dictionary';
 
 import useModal from 'hooks/useModal';
 
