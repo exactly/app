@@ -183,9 +183,7 @@ function BorrowModal({ data, editable, closeModal }: Props) {
   function handleInputChange(e: ChangeEvent<HTMLInputElement>) {
     setQty(e.target.value);
 
-    const usdRequested = e.target.valueAsNumber;
-
-    if (poolLiquidity && poolLiquidity < usdRequested) {
+    if (poolLiquidity && poolLiquidity < e.target.valueAsNumber) {
       return setError({
         status: true,
         message: translations[lang].availableLiquidityError
