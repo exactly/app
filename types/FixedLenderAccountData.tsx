@@ -27,5 +27,5 @@ export type FixedLenderAccountData = {
   adjustFactor: BigNumber;
   decimals: number;
   isCollateral: boolean;
-  availableLiquidity: MaturityLiquidity[];
+  availableLiquidity?: MaturityLiquidity[];
 };
