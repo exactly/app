@@ -244,7 +244,7 @@ function BorrowModal({ data, editable, closeModal }: Props) {
 
     const maturityDate = date?.value ?? maturity;
 
-    const maturityData = accountData[symbol].availableLiquidity.find((data) => {
+    const maturityData = accountData[symbol].availableLiquidity?.find((data) => {
       return data.maturity.toString() == maturityDate;
     });
 
