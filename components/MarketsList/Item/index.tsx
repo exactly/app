@@ -49,7 +49,7 @@ function Item({ market, showModal, type }: Props) {
   const [time, setTime] = useState(Date.now());
 
   useEffect(() => {
-    const interval = setInterval(() => setTime(Date.now()), 1500000);
+    const interval = setInterval(() => setTime(Date.now()), 15000);
     return () => {
       clearInterval(interval);
     };
@@ -114,8 +114,6 @@ function Item({ market, showModal, type }: Props) {
     }
 
     try {
-      const currentTimestamp = new Date().getTime() / 1000;
-      const time = 31536000 / (parseInt(date?.value!) - currentTimestamp);
       const subgraphUrl = getSubgraph(network?.name);
       const decimals = await fixedLender?.decimals();
 
@@ -133,6 +131,9 @@ function Item({ market, showModal, type }: Props) {
           const borrowFee = parseFloat(ethers.utils.formatUnits(borrow.fee, decimals));
           const borrowAmount = parseFloat(ethers.utils.formatUnits(borrow.assets, decimals));
           const borrowRate = borrowFee / borrowAmount;
+          const borrowTimestamp = borrow.timestamp;
+          const time = 31536000 / (parseInt(date?.value!) - borrowTimestamp);
+
           const borrowFixedAPY = (Math.pow(1 + borrowRate, time) - 1) * 100;
 
           allAPYxPr += borrowFixedAPY * borrowAmount;
@@ -150,6 +151,8 @@ function Item({ market, showModal, type }: Props) {
           const depositFee = parseFloat(ethers.utils.formatUnits(deposit.fee, decimals));
           const depositAmount = parseFloat(ethers.utils.formatUnits(deposit.assets, decimals));
           const depositRate = depositFee / depositAmount;
+          const depositTimestamp = deposit.timestamp;
+          const time = 31536000 / (parseInt(date?.value!) - depositTimestamp);
           const depositFixedAPY = (Math.pow(1 + depositRate, time) - 1) * 100;
 
           allAPYxPr += depositFixedAPY * depositAmount;
