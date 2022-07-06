@@ -10,7 +10,8 @@
     "maturityDebt": "Maturity Debt",
     "healthFactor": "Health Factor",
     "notEnoughSlippage": "The transaction failed, please check your Maximum Deposit Rate",
-    "deniedTransaction": "Transaction rejected"
+    "deniedTransaction": "Transaction rejected",
+    "availableLiquidityError": "There is not enough liquidity in this pool"
   },
   "es": {}
 }

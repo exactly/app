@@ -76,6 +76,7 @@ function BorrowModal({ data, editable, closeModal }: Props) {
   const [healthFactor, setHealthFactor] = useState<HealthFactor | undefined>(undefined);
   const [collateralFactor, setCollateralFactor] = useState<number | undefined>(undefined);
   const [needsApproval, setNeedsApproval] = useState<boolean>(false);
+  const [poolLiquidity, setPoolLiquidity] = useState<number | undefined>(undefined);
 
   const [error, setError] = useState<Error | undefined>(undefined);
 
@@ -113,6 +114,7 @@ function BorrowModal({ data, editable, closeModal }: Props) {
 
   useEffect(() => {
     checkAllowance();
+    checkPoolLiquidity();
   }, [walletAddress, fixedLenderWithSigner, symbol, qty]);
 
   useEffect(() => {
@@ -181,6 +183,14 @@ function BorrowModal({ data, editable, closeModal }: Props) {
 
   function handleInputChange(e: ChangeEvent<HTMLInputElement>) {
     setQty(e.target.value);
+
+    if (poolLiquidity && poolLiquidity < e.target.valueAsNumber) {
+      return setError({
+        status: true,
+        message: translations[lang].availableLiquidityError
+      });
+    }
+
     setError(undefined);
   }
 
@@ -228,6 +238,22 @@ function BorrowModal({ data, editable, closeModal }: Props) {
           : translations[lang].notEnoughSlippage
       });
     }
+  }
+
+  async function checkPoolLiquidity() {
+    if (!accountData) return;
+
+    const maturityDate = date?.value ?? maturity;
+
+    const maturityData = accountData[symbol].availableLiquidity?.find((data) => {
+      return data.maturity.toString() == maturityDate;
+    });
+
+    const decimals = await fixedLenderWithSigner?.decimals();
+
+    const limit = maturityData && ethers.utils.formatUnits(maturityData?.assets!, decimals);
+
+    limit && setPoolLiquidity(parseFloat(limit));
   }
 
   async function estimateGas() {
