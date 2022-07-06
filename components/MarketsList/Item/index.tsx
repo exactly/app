@@ -49,7 +49,7 @@ function Item({ market, showModal, type }: Props) {
   const [time, setTime] = useState(Date.now());
 
   useEffect(() => {
-    const interval = setInterval(() => setTime(Date.now()), 15000);
+    const interval = setInterval(() => setTime(Date.now()), 1500000);
     return () => {
       clearInterval(interval);
     };
@@ -114,47 +114,57 @@ function Item({ market, showModal, type }: Props) {
     }
 
     try {
-      let fee;
-      let amount;
-
+      const currentTimestamp = new Date().getTime() / 1000;
+      const time = 31536000 / (parseInt(date?.value!) - currentTimestamp);
       const subgraphUrl = getSubgraph(network?.name);
       const decimals = await fixedLender?.decimals();
+
+      let allAPYxPr = 0;
+      let allPr = 0;
 
       if (type == 'borrow') {
         const getLastBorrowRate = await request(
           subgraphUrl,
           getLastMaturityPoolBorrowRate(market.market, date?.value!)
         );
+        for (let i = 0; i < getLastBorrowRate?.borrowAtMaturities.length; i++) {
+          const borrow = getLastBorrowRate?.borrowAtMaturities[i];
 
-        fee = getLastBorrowRate?.borrowAtMaturities[0]?.fee;
-        amount = getLastBorrowRate?.borrowAtMaturities[0]?.assets;
+          const borrowFee = parseFloat(ethers.utils.formatUnits(borrow.fee, decimals));
+          const borrowAmount = parseFloat(ethers.utils.formatUnits(borrow.assets, decimals));
+          const borrowRate = borrowFee / borrowAmount;
+          const borrowFixedAPY = (Math.pow(1 + borrowRate, time) - 1) * 100;
+
+          allAPYxPr += borrowFixedAPY * borrowAmount;
+          allPr += borrowAmount;
+        }
       } else if (type == 'deposit') {
         const getLastDepositRate = await request(
           subgraphUrl,
           getLastMaturityPoolDepositRate(market.market, date?.value!)
         );
 
-        fee = getLastDepositRate?.depositAtMaturities[0]?.fee;
-        amount = getLastDepositRate?.depositAtMaturities[0]?.assets;
+        for (let i = 0; i < getLastDepositRate?.depositAtMaturities.length; i++) {
+          const deposit = getLastDepositRate?.depositAtMaturities[i];
+
+          const depositFee = parseFloat(ethers.utils.formatUnits(deposit.fee, decimals));
+          const depositAmount = parseFloat(ethers.utils.formatUnits(deposit.assets, decimals));
+          const depositRate = depositFee / depositAmount;
+          const depositFixedAPY = (Math.pow(1 + depositRate, time) - 1) * 100;
+
+          allAPYxPr += depositFixedAPY * depositAmount;
+          allPr += depositAmount;
+        }
       }
+      const avarageFixedAPY = allAPYxPr / allPr;
 
-      if (!fee || !amount) return setRate('N/A');
+      if (!avarageFixedAPY) return setRate('N/A');
 
-      const currentTimestamp = new Date().getTime() / 1000;
-
-      const time = 31536000 / (parseInt(date?.value!) - currentTimestamp);
-
-      const rate =
-        parseFloat(ethers.utils.formatUnits(fee, decimals)) /
-        parseFloat(ethers.utils.formatUnits(amount, decimals));
-
-      const fixedAPY = (Math.pow(1 + rate, time) - 1) * 100;
-
-      if (fixedAPY <= 0.01) {
+      if (avarageFixedAPY <= 0.01) {
         return setRate('N/A');
       }
 
-      setRate(`${fixedAPY.toFixed(2)}%`);
+      setRate(`${avarageFixedAPY.toFixed(2)}%`);
     } catch (e) {
       console.log(e);
     }
