@@ -116,6 +116,7 @@ function Item({ market, showModal, type }: Props) {
     try {
       let fee;
       let amount;
+      let timestamp;
 
       const subgraphUrl = getSubgraph(network?.name);
       const decimals = await fixedLender?.decimals();
@@ -128,6 +129,7 @@ function Item({ market, showModal, type }: Props) {
 
         fee = getLastBorrowRate?.borrowAtMaturities[0]?.fee;
         amount = getLastBorrowRate?.borrowAtMaturities[0]?.assets;
+        timestamp = getLastBorrowRate.borrowAtMaturities[0].timestamp;
       } else if (type == 'deposit') {
         const getLastDepositRate = await request(
           subgraphUrl,
@@ -136,13 +138,14 @@ function Item({ market, showModal, type }: Props) {
 
         fee = getLastDepositRate?.depositAtMaturities[0]?.fee;
         amount = getLastDepositRate?.depositAtMaturities[0]?.assets;
+        timestamp = getLastDepositRate.depositAtMaturities[0]?.timestamp;
       }
 
       if (!fee || !amount) return setRate('N/A');
 
       const currentTimestamp = new Date().getTime() / 1000;
 
-      const time = 31536000 / (parseInt(date?.value!) - currentTimestamp);
+      const time = 31536000 / (parseInt(date?.value!) - timestamp);
 
       const rate =
         parseFloat(ethers.utils.formatUnits(fee, decimals)) /
