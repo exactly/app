@@ -117,17 +117,16 @@ function Item({ market, showModal, type }: Props) {
       const subgraphUrl = getSubgraph(network?.name);
       const decimals = await fixedLender?.decimals();
 
-      let allAPYxPr = 0;
-      let allPr = 0;
+      let allAPYbyAmount = 0;
+      let allAmounts = 0;
 
       if (type == 'borrow') {
         const getLastBorrowRate = await request(
           subgraphUrl,
           getLastMaturityPoolBorrowRate(market.market, date?.value!)
         );
-        for (let i = 0; i < getLastBorrowRate?.borrowAtMaturities.length; i++) {
-          const borrow = getLastBorrowRate?.borrowAtMaturities[i];
 
+        getLastBorrowRate?.borrowAtMaturities.forEach((borrow: any) => {
           const borrowFee = parseFloat(ethers.utils.formatUnits(borrow.fee, decimals));
           const borrowAmount = parseFloat(ethers.utils.formatUnits(borrow.assets, decimals));
           const borrowRate = borrowFee / borrowAmount;
@@ -136,18 +135,16 @@ function Item({ market, showModal, type }: Props) {
 
           const borrowFixedAPY = (Math.pow(1 + borrowRate, time) - 1) * 100;
 
-          allAPYxPr += borrowFixedAPY * borrowAmount;
-          allPr += borrowAmount;
-        }
+          allAPYbyAmount += borrowFixedAPY * borrowAmount;
+          allAmounts += borrowAmount;
+        });
       } else if (type == 'deposit') {
         const getLastDepositRate = await request(
           subgraphUrl,
           getLastMaturityPoolDepositRate(market.market, date?.value!)
         );
 
-        for (let i = 0; i < getLastDepositRate?.depositAtMaturities.length; i++) {
-          const deposit = getLastDepositRate?.depositAtMaturities[i];
-
+        getLastDepositRate?.depositAtMaturities.forEach((deposit: any) => {
           const depositFee = parseFloat(ethers.utils.formatUnits(deposit.fee, decimals));
           const depositAmount = parseFloat(ethers.utils.formatUnits(deposit.assets, decimals));
           const depositRate = depositFee / depositAmount;
@@ -155,11 +152,11 @@ function Item({ market, showModal, type }: Props) {
           const time = 31536000 / (parseInt(date?.value!) - depositTimestamp);
           const depositFixedAPY = (Math.pow(1 + depositRate, time) - 1) * 100;
 
-          allAPYxPr += depositFixedAPY * depositAmount;
-          allPr += depositAmount;
-        }
+          allAPYbyAmount += depositFixedAPY * depositAmount;
+          allAmounts += depositAmount;
+        });
       }
-      const avarageFixedAPY = allAPYxPr / allPr;
+      const avarageFixedAPY = allAPYbyAmount / allAmounts;
 
       if (!avarageFixedAPY) return setRate('N/A');
 
