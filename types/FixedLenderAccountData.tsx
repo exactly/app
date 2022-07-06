@@ -10,6 +10,11 @@ export interface Position {
   principal: BigNumber;
 }
 
+export interface MaturityLiquidity {
+  maturity: BigNumber;
+  assets: BigNumber;
+}
+
 export type FixedLenderAccountData = {
   market: string;
   assetSymbol: string;
@@ -22,4 +27,5 @@ export type FixedLenderAccountData = {
   adjustFactor: BigNumber;
   decimals: number;
   isCollateral: boolean;
+  availableLiquidity?: MaturityLiquidity[];
 };
