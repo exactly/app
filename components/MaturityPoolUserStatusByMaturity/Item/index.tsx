@@ -71,8 +71,11 @@ function Item({
   useEffect(() => {
     getMaturityData();
     getRate();
-    getAPY();
   }, [maturityDate, walletAddress]);
+
+  useEffect(() => {
+    getAPY();
+  }, [walletAddress]);
 
   async function getMaturityData() {
     if (!walletAddress || !maturityDate || !market || !type) return;
@@ -121,18 +124,46 @@ function Item({
   }
 
   async function getAPY() {
-    if (!maturityDate || !fee || !amount) return;
+    if (!walletAddress || !maturityDate || !market || !type) return;
 
-    const currentTimestamp = new Date().getTime() / 1000;
+    const subgraphUrl = getSubgraph(network?.name);
+    const allTransactions: any = [];
+    let allAPYbyAmount = 0;
+    let allAmounts = 0;
 
-    const time = 31536000 / (parseInt(maturityDate) - currentTimestamp);
-    const rate =
-      parseFloat(ethers.utils.formatUnits(fee, decimals)) /
-      parseFloat(ethers.utils.formatUnits(amount, decimals));
+    if (type?.value === 'borrow') {
+      const getMaturityPoolBorrows = await request(
+        subgraphUrl,
+        getMaturityPoolBorrowsQuery(walletAddress!, maturityDate, market.toLowerCase())
+      );
 
-    const fixedAPY = (Math.pow(1 + rate, time) - 1) * 100;
+      allTransactions.push(...getMaturityPoolBorrows.borrowAtMaturities);
+    } else {
+      const getMaturityPoolDeposits = await request(
+        subgraphUrl,
+        getMaturityPoolDepositsQuery(walletAddress!, maturityDate, market.toLowerCase())
+      );
 
-    setAPY(fixedAPY);
+      allTransactions.push(...getMaturityPoolDeposits.depositAtMaturities);
+    }
+
+    allTransactions.forEach((transaction: any) => {
+      const transactionFee = parseFloat(ethers.utils.formatUnits(transaction.fee, decimals));
+      const transactionAmount = parseFloat(ethers.utils.formatUnits(transaction.assets, decimals));
+      const transactionRate = transactionFee / transactionAmount;
+      const transactionTimestamp = parseFloat(transaction.timestamp);
+      const transactionMaturity = parseFloat(transaction.maturity);
+      const time = 31536000 / (transactionMaturity - transactionTimestamp);
+
+      const transactionAPY = (Math.pow(1 + transactionRate, time) - 1) * 100;
+
+      allAPYbyAmount += transactionAPY * transactionAmount;
+      allAmounts += transactionAmount;
+    });
+
+    const averageAPY = allAPYbyAmount / allAmounts;
+
+    setAPY(averageAPY);
   }
 
   return (
