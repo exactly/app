@@ -168,7 +168,7 @@ function BorrowModal({ data, editable, closeModal }: Props) {
   }
 
   async function onMax() {
-    if (!accountData || !healthFactor || !collateralFactor || qty) return;
+    if (!accountData || !healthFactor || !collateralFactor) return;
 
     const rate = ethers.utils.formatEther(accountData[symbol.toUpperCase()]?.oraclePrice);
 
