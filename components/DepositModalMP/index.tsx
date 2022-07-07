@@ -409,6 +409,7 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
                 symbol="%"
                 onChange={(e: ChangeEvent<HTMLInputElement>) => {
                   setSlippage(e.target.value);
+                  error?.message == translations[lang].notEnoughSlippage && setError(undefined);
                 }}
                 onClick={() => {
                   if (slippage == '') setSlippage('0.00');
