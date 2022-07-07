@@ -124,30 +124,30 @@ function Item({
   }
 
   async function getAPY() {
-    if (!walletAddress || !maturityDate || !market || !type) return;
+    if (!walletAddress || !maturityDate || !market || !type || !network) return;
 
-    const subgraphUrl = getSubgraph(network?.name);
-    const allTransactions: any = [];
+    const subgraphUrl = getSubgraph(network.name);
+    const allTransactions = [];
     let allAPYbyAmount = 0;
     let allAmounts = 0;
 
     if (type?.value === 'borrow') {
       const getMaturityPoolBorrows = await request(
         subgraphUrl,
-        getMaturityPoolBorrowsQuery(walletAddress!, maturityDate, market.toLowerCase())
+        getMaturityPoolBorrowsQuery(walletAddress, maturityDate, market.toLowerCase())
       );
 
       allTransactions.push(...getMaturityPoolBorrows.borrowAtMaturities);
     } else {
       const getMaturityPoolDeposits = await request(
         subgraphUrl,
-        getMaturityPoolDepositsQuery(walletAddress!, maturityDate, market.toLowerCase())
+        getMaturityPoolDepositsQuery(walletAddress, maturityDate, market.toLowerCase())
       );
 
       allTransactions.push(...getMaturityPoolDeposits.depositAtMaturities);
     }
 
-    allTransactions.forEach((transaction: any) => {
+    allTransactions.forEach((transaction) => {
       const transactionFee = parseFloat(ethers.utils.formatUnits(transaction.fee, decimals));
       const transactionAmount = parseFloat(ethers.utils.formatUnits(transaction.assets, decimals));
       const transactionRate = transactionFee / transactionAmount;
