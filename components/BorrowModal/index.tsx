@@ -199,6 +199,8 @@ function BorrowModal({ data, editable, closeModal }: Props) {
 
     try {
       if (fixedRate && parseFloat(slippage) < parseFloat(fixedRate)) {
+        setLoading(false);
+
         return setError({
           status: true,
           message: translations[lang].notEnoughSlippage
