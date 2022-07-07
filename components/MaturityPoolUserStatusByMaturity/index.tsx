@@ -127,7 +127,7 @@ function MaturityPoolUserStatusByMaturity({ type, maturities, showModal }: Props
                         ? translations[lang].depositedAmount
                         : translations[lang].borrowedAmount}
                     </span>
-                    <span className={styles.title}>{translations[lang].fixedRate}</span>
+                    <span className={styles.title}>{translations[lang].averageFixedRate}</span>
                     <span className={styles.title} />
                   </div>
 
@@ -201,7 +201,7 @@ function MaturityPoolUserStatusByMaturity({ type, maturities, showModal }: Props
               <div className={styles.tableRow}>
                 <span className={styles.symbol}>{translations[lang].asset}</span>
                 <span className={styles.title}>{translations[lang].marketSize}</span>
-                <span className={styles.title}>{translations[lang].fixedRate}</span>
+                <span className={styles.title}>{translations[lang].averageFixedRate}</span>
                 <span className={styles.title} />
               </div>
 
