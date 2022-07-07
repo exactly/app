@@ -198,7 +198,14 @@ function BorrowModal({ data, editable, closeModal }: Props) {
     setLoading(true);
 
     try {
-      const maxAmount = parseFloat(qty!) * (1 + parseFloat(slippage) / 100);
+      if (fixedRate && parseFloat(slippage) < parseFloat(fixedRate)) {
+        return setError({
+          status: true,
+          message: translations[lang].notEnoughSlippage
+        });
+      }
+      //save the demo
+      const maxAmount = parseFloat(qty!) * 1.5;
       const decimals = await fixedLenderWithSigner?.decimals();
 
       let borrow;
