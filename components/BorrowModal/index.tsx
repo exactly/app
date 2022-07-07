@@ -205,7 +205,7 @@ function BorrowModal({ data, editable, closeModal }: Props) {
         });
       }
       //save the demo
-      const maxAmount = parseFloat(qty!) * 2;
+      const maxAmount = parseFloat(qty!) * 1.5;
       const decimals = await fixedLenderWithSigner?.decimals();
 
       let borrow;
