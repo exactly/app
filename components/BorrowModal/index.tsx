@@ -168,7 +168,7 @@ function BorrowModal({ data, editable, closeModal }: Props) {
   }
 
   async function onMax() {
-    if (!accountData || !healthFactor || !collateralFactor || qty) return;
+    if (!accountData || !healthFactor || !collateralFactor) return;
 
     const rate = ethers.utils.formatEther(accountData[symbol.toUpperCase()]?.oraclePrice);
 
@@ -408,6 +408,7 @@ function BorrowModal({ data, editable, closeModal }: Props) {
                 symbol="%"
                 onChange={(e: ChangeEvent<HTMLInputElement>) => {
                   setSlippage(e.target.value);
+                  error?.message == translations[lang].notEnoughSlippage && setError(undefined);
                 }}
                 onClick={() => {
                   if (slippage == '') setSlippage('10.00');

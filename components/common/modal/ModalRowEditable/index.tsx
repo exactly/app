@@ -24,7 +24,7 @@ function ModalRowEditable({
   onClick
 }: Props) {
   const rowStyles = line ? `${styles.row} ${styles.line}` : styles.row;
-  const blockedCharacters = ['e', 'E', '+', '-'];
+  const blockedCharacters = ['e', 'E', '+', '-', ','];
 
   return (
     <section className={rowStyles}>
