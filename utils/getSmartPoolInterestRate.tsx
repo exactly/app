@@ -7,7 +7,7 @@ import getSubgraph from './getSubgraph';
 
 async function getSmartPoolInterestRate(network: string, fixedLenderAddress: string) {
   const oneDay = 86400;
-  const days = fixedLenderAddress == '0x9f275F6D25232FFf082082a53C62C6426c1cc94C' ? 10 : 3;
+  const days = 10;
   const currentTimestamp = Math.floor(Date.now() / 1000);
 
   const subgraphUrl = getSubgraph(network);
@@ -26,9 +26,11 @@ async function getSmartPoolInterestRate(network: string, fixedLenderAddress: str
   let periodAccrued = 0;
   let totalAssetsByTime = 0;
 
-  const reorder = smartPoolAccruedEarnings.smartPoolEarningsAccrueds.sort((a: any, b: any) => {
-    return parseFloat(a.timestamp) - parseFloat(b.timestamp);
-  });
+  const reorder = smartPoolAccruedEarnings.smartPoolEarningsAccrueds.sort(
+    (a: { timestamp: string }, b: { timestamp: string }) => {
+      return parseFloat(a.timestamp) - parseFloat(b.timestamp);
+    }
+  );
 
   const allIr = []; //for the demo
 
@@ -67,12 +69,6 @@ async function getSmartPoolInterestRate(network: string, fixedLenderAddress: str
   if (averageInterestrate === Infinity || isNaN(averageInterestrate)) return '0.00';
 
   return averageInterestrate.toFixed(2); //for the demo
-
-  // const totalAssets = totalAssetsByTime / (oneDay * days);
-  // const interestRate = (periodAccrued / totalAssets) * ((oneDay * 365) / (oneDay * days)) * 100;
-
-  // if (interestRate === Infinity || isNaN(interestRate)) return '0.00';
-  // return interestRate.toFixed(2);
 }
 
 export default getSmartPoolInterestRate;
