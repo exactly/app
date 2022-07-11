@@ -1,7 +1,5 @@
 import { useContext } from 'react';
 
-import AlertMessage from 'components/AlertMessage';
-
 import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 
