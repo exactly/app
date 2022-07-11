@@ -50,7 +50,7 @@ function MaturityInfo({ maturity, symbol, fixedLender }: Props) {
 
   useMemo(() => {
     getMaturityPoolData();
-  }, [fixedLender]);
+  }, [fixedLender, maturity, symbol]);
 
   async function getMaturityPoolData() {
     if (!accountData) return;
