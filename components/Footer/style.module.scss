@@ -22,12 +22,12 @@
         display: flex;
         flex-wrap: wrap;
         justify-content: center;
-        gap: 40px;
+        gap: var(--u5);
       }
 
       .link {
         border-right: 1px solid #e1e1e1;
-        padding: 5px;
+        padding: 0 var(--u2);
         text-decoration: none;
         font-weight: 600;
         font-size: var(--font-14);
@@ -55,6 +55,10 @@
       justify-content: center;
       align-items: center;
       gap: var(--u3);
+
+      .left {
+        gap: var(--u2);
+      }
     }
   }
 }
