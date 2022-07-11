@@ -47,7 +47,6 @@ const Pools: NextPage<Props> = () => {
   useEffect(() => {
     if ((!modal || modalContent == {}) && Previewer) {
       setTimeout(() => {
-        console.log('markets');
         getMarkets();
       }, 5000);
     }
