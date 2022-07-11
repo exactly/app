@@ -5,6 +5,7 @@ import { Option } from 'react-dropdown';
 import Navbar from 'components/Navbar';
 import Footer from 'components/Footer';
 import MobileNavbar from 'components/MobileNavbar';
+import CurrentNetwork from 'components/CurrentNetwork';
 import MaturityPoolDashboard from 'components/MaturityPoolDashboard';
 import SmartPoolDashboard from 'components/SmartPoolDashboard';
 import RepayModal from 'components/RepayModal';
@@ -27,7 +28,6 @@ import { Borrow } from 'types/Borrow';
 import { Deposit } from 'types/Deposit';
 import { AccountData } from 'types/AccountData';
 import { FixedLenderAccountData } from 'types/FixedLenderAccountData';
-import { Dictionary } from 'types/Dictionary';
 
 import useModal from 'hooks/useModal';
 
@@ -123,6 +123,7 @@ const DashBoard: NextPage<Props> = () => {
 
                 <MobileNavbar />
                 <Navbar />
+                <CurrentNetwork />
                 <DashboardHeader />
                 <Tabs
                   values={[tabDeposit, tabBorrow]}

@@ -4,6 +4,7 @@ import { Contract, ethers } from 'ethers';
 import dayjs from 'dayjs';
 
 import Navbar from 'components/Navbar';
+import CurrentNetwork from 'components/CurrentNetwork';
 import PoolsChart from 'components/PoolsChart';
 import MaturityInfo from 'components/MaturityInfo';
 import AssetInfo from 'components/AssetInfo';
@@ -249,6 +250,7 @@ const Asset: NextPage<Props> = ({ symbol }) => {
             <FixedLenderProvider value={FixedLenders}>
               <MobileNavbar />
               <Navbar />
+              <CurrentNetwork />
 
               {modal && modalContent?.type == 'deposit' && (
                 <DepositModalMP data={modalContent} closeModal={handleModal} />
@@ -315,18 +317,19 @@ const Asset: NextPage<Props> = ({ symbol }) => {
                   )}
                 </div>
                 <div className={style.maturitiesContainer}>
-                  {maturities
-                    ?.slice(itemsPerPage * (page - 1), itemsPerPage * page)
-                    ?.map((maturity) => {
-                      return (
-                        <MaturityInfo
-                          maturity={maturity}
-                          key={maturity.value}
-                          symbol={symbol}
-                          fixedLender={fixedLenderContract}
-                        />
-                      );
-                    })}
+                  {maturities &&
+                    maturities
+                      ?.slice(itemsPerPage * (page - 1), itemsPerPage * page)
+                      ?.map((maturity) => {
+                        return (
+                          <MaturityInfo
+                            maturity={maturity}
+                            key={maturity.value}
+                            symbol={symbol}
+                            fixedLender={fixedLenderContract}
+                          />
+                        );
+                      })}
                   <div className={style.paginator}>
                     <Paginator
                       total={maturities?.length ?? 0}

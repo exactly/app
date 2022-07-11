@@ -1,6 +1,7 @@
 .container {
   max-width: var(--maxWidth);
-  margin: var(--navbarHeight) auto;
+  margin: 0 auto;
+  margin-top: calc(var(--navbarHeight) * 1.5 + var(--currentNetwork));
 
   .assetData {
     display: flex;

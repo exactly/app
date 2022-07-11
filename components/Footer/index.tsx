@@ -45,14 +45,6 @@ const Footer = () => {
               {translations[lang].blog}
             </a>
             <a
-              href="mailto: info@exactly.finance"
-              target="_blank"
-              rel="noreferrer noopener"
-              className={style.link}
-            >
-              {translations[lang].blog}
-            </a>
-            <a
               href="https://github.com/exactly-finance/about/tree/main/jobs"
               target="_blank"
               rel="noreferrer noopener"
@@ -60,10 +52,17 @@ const Footer = () => {
             >
               {translations[lang].careers}
             </a>
+            <a
+              href="https://docs.exact.ly/brand-assets"
+              target="_blank"
+              rel="noreferrer noopener"
+              className={style.link}
+            >
+              {translations[lang].mediaKit}
+            </a>
           </div>
         </div>
         <div className={style.right}>
-          <p>This software is v1.0.01</p>
           <p>© {date.getFullYear()} Exactly</p>
         </div>
       </div>

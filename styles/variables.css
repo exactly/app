@@ -58,6 +58,9 @@
   /* NAVBAR */
   --navbarHeight: 88px;
 
+  /* Current Network or Wallet Disconected */
+  --currentNetwork: 48px;
+
   /* OPACITY */
   --defaultOpacity: 50%;
 }
