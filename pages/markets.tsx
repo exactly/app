@@ -45,8 +45,9 @@ const Pools: NextPage<Props> = () => {
   const { Previewer, FixedLenders } = getABI(network?.name);
 
   useEffect(() => {
-    if (!modal && Previewer) {
+    if ((!modal || modalContent == {}) && Previewer) {
       setTimeout(() => {
+        console.log('markets');
         getMarkets();
       }, 5000);
     }

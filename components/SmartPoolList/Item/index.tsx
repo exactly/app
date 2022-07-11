@@ -47,7 +47,10 @@ function Item({ market, showModal }: Props) {
   const [time, setTime] = useState(Date.now());
 
   useEffect(() => {
-    const interval = setInterval(() => setTime(Date.now()), 30000);
+    const interval = setInterval(() => {
+      setTime(Date.now());
+    }, 30000);
+
     return () => {
       clearInterval(interval);
     };
@@ -76,7 +79,7 @@ function Item({ market, showModal }: Props) {
     if (date?.value && fixedLender) {
       getMarketData();
     }
-  }, [date, time, accountData]);
+  }, [date, time, accountData, market]);
 
   function handleClick() {
     if (!market || !showModal) return;
