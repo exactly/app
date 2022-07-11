@@ -50,7 +50,7 @@ const Pools: NextPage<Props> = () => {
         getMarkets();
       }, 5000);
     }
-  }, [modal]);
+  }, [modal, modalContent]);
 
   useEffect(() => {
     if (Previewer) {
