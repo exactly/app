@@ -4,6 +4,7 @@ import { Contract, ethers } from 'ethers';
 import dayjs from 'dayjs';
 
 import Navbar from 'components/Navbar';
+import CurrentNetwork from 'components/CurrentNetwork';
 import PoolsChart from 'components/PoolsChart';
 import MaturityInfo from 'components/MaturityInfo';
 import AssetInfo from 'components/AssetInfo';
@@ -249,6 +250,7 @@ const Asset: NextPage<Props> = ({ symbol }) => {
             <FixedLenderProvider value={FixedLenders}>
               <MobileNavbar />
               <Navbar />
+              <CurrentNetwork />
 
               {modal && modalContent?.type == 'deposit' && (
                 <DepositModalMP data={modalContent} closeModal={handleModal} />

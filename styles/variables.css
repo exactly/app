@@ -58,6 +58,9 @@
   /* NAVBAR */
   --navbarHeight: 88px;
 
+  /* NAVBAR */
+  --currentNetwork: 48px;
+
   /* OPACITY */
   --defaultOpacity: 50%;
 }
