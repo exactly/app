@@ -56,7 +56,7 @@ function MaturityInfo({ maturity, symbol, fixedLender }: Props) {
     if (!accountData) return;
 
     try {
-      const { borrowed, supplied } = await fixedLender?.maturityPools(maturity.value);
+      const { borrowed, supplied } = await fixedLender?.fixedPools(maturity.value);
       const decimals = await fixedLender?.decimals();
 
       const exchangeRate = parseFloat(ethers.utils.formatEther(accountData[symbol].oraclePrice));
