@@ -50,7 +50,6 @@ function ModalRowHealthFactor({ qty, symbol, operation, healthFactorCallback }: 
     let debt = 0;
 
     const data = Object.values(accountData!);
-
     data.forEach((fixedLender: FixedLenderAccountData) => {
       const decimals = fixedLender.decimals;
 
@@ -63,7 +62,7 @@ function ModalRowHealthFactor({ qty, symbol, operation, healthFactorCallback }: 
         collateral += assets * oracle * collateralFactor;
       }
 
-      fixedLender.maturityBorrowPositions.forEach((borrowPosition) => {
+      fixedLender.fixedBorrowPositions.forEach((borrowPosition) => {
         const penaltyRate = parseFloat(ethers.utils.formatUnits(fixedLender.penaltyRate, 18));
         const principal = parseFloat(
           ethers.utils.formatUnits(borrowPosition.position.principal, decimals)
