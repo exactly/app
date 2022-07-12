@@ -1,5 +1,12 @@
 import { ethers } from 'ethers';
-import { useState, ChangeEventHandler, MouseEventHandler, useEffect, useContext } from 'react';
+import {
+  useState,
+  ChangeEventHandler,
+  MouseEventHandler,
+  useEffect,
+  useContext,
+  ClipboardEvent
+} from 'react';
 
 import AccountDataContext from 'contexts/AccountDataContext';
 
@@ -35,6 +42,13 @@ function ModalInput({ value, name, disabled, symbol, error, onChange, onMax }: P
     setExchangeRate(rate);
   }
 
+  function filterPasteValue(e: ClipboardEvent<HTMLInputElement>) {
+    if (e.type == 'paste') {
+      const data = e.clipboardData.getData('Text');
+      if (/[^\d|\.]+/gi.test(data)) e.preventDefault();
+    }
+  }
+
   return (
     <section className={error ? styles.error : styles.inputSection}>
       <input
@@ -47,7 +61,7 @@ function ModalInput({ value, name, disabled, symbol, error, onChange, onMax }: P
         disabled={disabled}
         className={styles.input}
         onKeyDown={(e) => blockedCharacters.includes(e.key) && e.preventDefault()}
-        onPaste={(e) => e.preventDefault()}
+        onPaste={(e) => filterPasteValue(e)}
         step="any"
         autoFocus
       />

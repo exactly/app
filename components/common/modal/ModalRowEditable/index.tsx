@@ -13,6 +13,13 @@ type Props = {
   onClick: () => void;
 };
 
+function filterPasteValue(e: any) {
+  if (e.type == 'paste') {
+    const data = e.clipboardData.getData('Text');
+    if (/[^\d|\.]+/gi.test(data)) e.preventDefault();
+  }
+}
+
 function ModalRowEditable({
   text,
   value,
@@ -46,6 +53,7 @@ function ModalRowEditable({
               name={text}
               className={styles.input}
               onKeyDown={(e) => blockedCharacters.includes(e.key) && e.preventDefault()}
+              onPaste={(e) => filterPasteValue(e)}
               step="any"
               autoFocus
             />
