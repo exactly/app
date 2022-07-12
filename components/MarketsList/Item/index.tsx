@@ -97,7 +97,7 @@ function Item({ market, showModal, type }: Props) {
     setRate(undefined);
 
     try {
-      const { borrowed, supplied } = await fixedLender?.maturityPools(date?.value);
+      const { borrowed, supplied } = await fixedLender?.fixedPools(date?.value);
 
       const decimals = await fixedLender?.decimals();
 

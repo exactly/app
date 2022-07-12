@@ -19,7 +19,7 @@ export type FixedLenderAccountData = {
   market: string;
   assetSymbol: string;
   maturitySupplyPositions: Array<MaturityPosition>;
-  maturityBorrowPositions: Array<MaturityPosition>;
+  fixedBorrowPositions: Array<MaturityPosition>;
   smartPoolAssets: BigNumber;
   smartPoolShares: BigNumber;
   oraclePrice: BigNumber;
