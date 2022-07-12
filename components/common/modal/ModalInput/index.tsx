@@ -5,8 +5,7 @@ import {
   MouseEventHandler,
   useEffect,
   useContext,
-  KeyboardEvent,
-  ChangeEvent
+  ClipboardEvent
 } from 'react';
 
 import AccountDataContext from 'contexts/AccountDataContext';
@@ -43,7 +42,7 @@ function ModalInput({ value, name, disabled, symbol, error, onChange, onMax }: P
     setExchangeRate(rate);
   }
 
-  function filterPasteValue(e: any) {
+  function filterPasteValue(e: ClipboardEvent<HTMLInputElement>) {
     if (e.type == 'paste') {
       const data = e.clipboardData.getData('Text');
       if (/[^\d|\.]+/gi.test(data)) e.preventDefault();
