@@ -83,7 +83,7 @@ function MaturityPoolDashboard({ showModal, tab }: Props) {
             ];
       });
 
-      asset.maturityBorrowPositions.forEach((pool) => {
+      asset.fixedBorrowPositions.forEach((pool) => {
         const date = pool.maturity.toNumber().toString();
         data.borrows = data.borrows ?? {};
 

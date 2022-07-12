@@ -151,7 +151,7 @@ function DashboardHeader() {
         image: `/img/assets/${symbol.toLowerCase()}.png`
       };
 
-      fixedLender.maturityBorrowPositions.forEach((borrowPosition) => {
+      fixedLender.fixedBorrowPositions.forEach((borrowPosition) => {
         const borrowValue = parseFloat(
           ethers.utils.formatUnits(borrowPosition.position.principal, decimals)
         );
@@ -187,7 +187,7 @@ function DashboardHeader() {
         collateral += assets * oracle * collateralFactor;
       }
 
-      fixedLender.maturityBorrowPositions.forEach((borrowPosition) => {
+      fixedLender.fixedBorrowPositions.forEach((borrowPosition) => {
         const penaltyRate = parseFloat(ethers.utils.formatUnits(fixedLender.penaltyRate, 18));
         const principal = parseFloat(
           ethers.utils.formatUnits(borrowPosition.position.principal, decimals)
