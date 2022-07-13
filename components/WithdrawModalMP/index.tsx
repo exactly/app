@@ -307,7 +307,6 @@ function WithdrawModalMP({ data, closeModal }: Props) {
                       if (slippage == '') setSlippage(parsedAmount);
                       setEditSlippage((prev) => !prev);
                     }}
-                    line
                   />
                 )}
               </ModalExpansionPanelWrapper>
