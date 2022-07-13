@@ -16,6 +16,7 @@ import Overlay from 'components/Overlay';
 import SkeletonModalRowBeforeAfter from 'components/common/skeletons/SkeletonModalRowBeforeAfter';
 import ModalError from 'components/common/modal/ModalError';
 import ModalRowBorrowLimit from 'components/common/modal/ModalRowBorrowLimit';
+import ModalExpansionPanelWrapper from 'components/common/modal/ModalExpansionPanelWrapper';
 
 import { Borrow } from 'types/Borrow';
 import { Deposit } from 'types/Deposit';
@@ -349,24 +350,26 @@ function DepositModalSP({ data, closeModal }: Props) {
                 error={error?.component == 'input'}
               />
               {error?.component !== 'gas' && symbol != 'WETH' && <ModalTxCost gas={gas} />}
-              <ModalRow text={translations[lang].exactlyBalance} value={depositedAmount} line />
-              {symbol ? (
-                <ModalRowHealthFactor
+              <ModalRow text={translations[lang].exactlyBalance} value={depositedAmount} />
+              <ModalExpansionPanelWrapper>
+                {symbol ? (
+                  <ModalRowHealthFactor
+                    qty={qty}
+                    symbol={symbol}
+                    operation="deposit"
+                    healthFactorCallback={getHealthFactor}
+                  />
+                ) : (
+                  <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
+                )}
+                <ModalRowBorrowLimit
+                  healthFactor={healthFactor}
+                  collateralFactor={collateralFactor}
                   qty={qty}
-                  symbol={symbol}
+                  symbol={symbol!}
                   operation="deposit"
-                  healthFactorCallback={getHealthFactor}
                 />
-              ) : (
-                <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
-              )}
-              <ModalRowBorrowLimit
-                healthFactor={healthFactor}
-                collateralFactor={collateralFactor}
-                qty={qty}
-                symbol={symbol!}
-                operation="deposit"
-              />
+              </ModalExpansionPanelWrapper>
               <ModalStepper currentStep={step} totalSteps={3} />
               {error && error.component != 'gas' && <ModalError message={error.message} />}
               <div className={styles.buttonContainer}>

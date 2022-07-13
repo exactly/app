@@ -1,0 +1,79 @@
+.circlePlus {
+  background: none;
+  color: var(--gray-200);
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  position: relative;
+}
+
+.circlePlus:before {
+  content: '';
+  display: block;
+  width: 110px;
+  height: 1px;
+  background: var(--gray-200);
+  top: 50%;
+  position: absolute;
+}
+.circlePlus:after {
+  content: '';
+  display: block;
+  width: 110px;
+  height: 1px;
+  background: var(--gray-200);
+  top: 50%;
+  right: 0;
+  position: absolute;
+}
+
+.circlePlus .circle {
+  margin: auto;
+  position: relative;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid var(--gray-200);
+  background: var(--white);
+}
+.circlePlus .circle .horizontal {
+  position: absolute;
+  background-color: var(--gray-200);
+  width: 13px;
+  height: 1px;
+  left: 15%;
+  top: 46%;
+}
+.circlePlus .circle .vertical {
+  position: absolute;
+  background-color: var(--gray-200);
+  width: 1px;
+  height: 13px;
+  left: 48%;
+  top: 15%;
+}
+
+.closed {
+  .vertical {
+    transition: all 0.5s ease-in-out;
+    transform: rotate(-90deg);
+  }
+  .horizontal {
+    transition: all 0.5s ease-in-out;
+    transform: rotate(-90deg);
+    opacity: 1;
+  }
+}
+
+.opened {
+  opacity: 1;
+  .vertical {
+    transition: all 0.5s ease-in-out;
+    transform: rotate(90deg);
+  }
+  .horizontal {
+    transition: all 0.5s ease-in-out;
+    transform: rotate(90deg);
+    opacity: 0;
+  }
+}

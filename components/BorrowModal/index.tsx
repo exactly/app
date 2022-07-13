@@ -17,6 +17,7 @@ import ModalRowEditable from 'components/common/modal/ModalRowEditable';
 import ModalMaturityEditable from 'components/common/modal/ModalMaturityEditable';
 import ModalError from 'components/common/modal/ModalError';
 import ModalRowBorrowLimit from 'components/common/modal/ModalRowBorrowLimit';
+import ModalExpansionPanelWrapper from 'components/common/modal/ModalExpansionPanelWrapper';
 
 import { Borrow } from 'types/Borrow';
 import { Deposit } from 'types/Deposit';
@@ -414,25 +415,27 @@ function BorrowModal({ data, editable, closeModal }: Props) {
                   if (slippage == '') setSlippage('10.00');
                   setEditSlippage((prev) => !prev);
                 }}
-                line
               />
-              {symbol ? (
-                <ModalRowHealthFactor
+              <ModalExpansionPanelWrapper>
+                {symbol ? (
+                  <ModalRowHealthFactor
+                    qty={qty}
+                    symbol={symbol}
+                    operation="borrow"
+                    healthFactorCallback={getHealthFactor}
+                  />
+                ) : (
+                  <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
+                )}
+                <ModalRowBorrowLimit
+                  healthFactor={healthFactor}
+                  collateralFactor={collateralFactor}
                   qty={qty}
-                  symbol={symbol}
+                  symbol={symbol!}
                   operation="borrow"
-                  healthFactorCallback={getHealthFactor}
                 />
-              ) : (
-                <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
-              )}
-              <ModalRowBorrowLimit
-                healthFactor={healthFactor}
-                collateralFactor={collateralFactor}
-                qty={qty}
-                symbol={symbol!}
-                operation="borrow"
-              />
+              </ModalExpansionPanelWrapper>
+
               {error && error.component != 'gas' && <ModalError message={error.message} />}
               <div className={styles.buttonContainer}>
                 <Button
