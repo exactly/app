@@ -1,7 +1,9 @@
 export function getMaturityPoolWithdrawsQuery(address: string, maturity: string, market: string) {
   return `
   {
-    withdrawAtMaturities(where:{receiver: "${address}", maturity: "${maturity}", market: "${market}"}){
+    withdrawAtMaturities(where:{receiver: "${address}", maturity: ${parseInt(
+    maturity
+  )}, market: "${market}"}){
       id
       market
       maturity
