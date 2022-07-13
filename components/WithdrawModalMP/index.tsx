@@ -13,6 +13,7 @@ import ModalGif from 'components/common/modal/ModalGif';
 import Overlay from 'components/Overlay';
 import ModalRowEditable from 'components/common/modal/ModalRowEditable';
 import ModalError from 'components/common/modal/ModalError';
+import ModalExpansionPanelWrapper from 'components/common/modal/ModalExpansionPanelWrapper';
 
 import { Borrow } from 'types/Borrow';
 import { Deposit } from 'types/Deposit';
@@ -281,33 +282,35 @@ function WithdrawModalMP({ data, closeModal }: Props) {
               <ModalRow
                 text={translations[lang].amountAtFinish}
                 value={formatNumber(finalAmount, symbol!)}
-                line
               />
-              <ModalRow
-                text={translations[lang].amountToReceive}
-                value={
-                  isEarlyWithdraw
-                    ? formatNumber(qty || 0, symbol!)
-                    : formatNumber(finalAmount, symbol!)
-                }
-                line
-              />
-              {isEarlyWithdraw && (
-                <ModalRowEditable
-                  text={translations[lang].amountSlippage}
-                  value={slippage}
-                  editable={editSlippage}
-                  onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                    setSlippage(e.target.value);
-                    error?.message == translations[lang].notEnoughSlippage && setError(undefined);
-                  }}
-                  onClick={() => {
-                    if (slippage == '') setSlippage(parsedAmount);
-                    setEditSlippage((prev) => !prev);
-                  }}
+              <ModalExpansionPanelWrapper>
+                <ModalRow
+                  text={translations[lang].amountToReceive}
+                  value={
+                    isEarlyWithdraw
+                      ? formatNumber(qty || 0, symbol!)
+                      : formatNumber(finalAmount, symbol!)
+                  }
                   line
                 />
-              )}
+
+                {isEarlyWithdraw && (
+                  <ModalRowEditable
+                    text={translations[lang].amountSlippage}
+                    value={slippage}
+                    editable={editSlippage}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                      setSlippage(e.target.value);
+                      error?.message == translations[lang].notEnoughSlippage && setError(undefined);
+                    }}
+                    onClick={() => {
+                      if (slippage == '') setSlippage(parsedAmount);
+                      setEditSlippage((prev) => !prev);
+                    }}
+                    line
+                  />
+                )}
+              </ModalExpansionPanelWrapper>
               {error && error.component != 'gas' && <ModalError message={error.message} />}
               <div className={styles.buttonContainer}>
                 <Button

@@ -16,6 +16,7 @@ import Overlay from 'components/Overlay';
 import SkeletonModalRowBeforeAfter from 'components/common/skeletons/SkeletonModalRowBeforeAfter';
 import ModalError from 'components/common/modal/ModalError';
 import ModalRowBorrowLimit from 'components/common/modal/ModalRowBorrowLimit';
+import ModalExpansionPanelWrapper from 'components/common/modal/ModalExpansionPanelWrapper';
 
 import { Borrow } from 'types/Borrow';
 import { Deposit } from 'types/Deposit';
@@ -222,44 +223,48 @@ function RepayModal({ data, closeModal }: Props) {
               <ModalRow
                 text={translations[lang].amountAtFinish}
                 value={formatNumber(finalAmount, symbol!)}
-                line
               />
-              <ModalRow
-                text={translations[lang].amountToPay}
-                value={qty && parseFloat(qty) > 0 ? formatNumber(qty, symbol!) : '0'}
-                line
-              />
-              <ModalRowEditable
-                text={translations[lang].maximumAmountToPay}
-                value={slippage}
-                editable={editSlippage}
-                onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                  setSlippage(e.target.value);
-                  error?.message == translations[lang].notEnoughSlippage && setError(undefined);
-                }}
-                onClick={() => {
-                  if (slippage == '') setSlippage(parsedAmount);
-                  setEditSlippage((prev) => !prev);
-                }}
-                line
-              />
-              {symbol ? (
-                <ModalRowHealthFactor
-                  qty={qty}
-                  symbol={symbol}
-                  operation="repay"
-                  healthFactorCallback={getHealthFactor}
+              <ModalExpansionPanelWrapper>
+                <ModalRow
+                  text={translations[lang].amountToPay}
+                  value={qty && parseFloat(qty) > 0 ? formatNumber(qty, symbol!) : '0'}
+                  line
                 />
-              ) : (
-                <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
-              )}
-              <ModalRowBorrowLimit
-                healthFactor={healthFactor}
-                collateralFactor={collateralFactor}
-                qty={qty}
-                symbol={symbol!}
-                operation="repay"
-              />
+
+                <ModalRowEditable
+                  text={translations[lang].maximumAmountToPay}
+                  value={slippage}
+                  editable={editSlippage}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                    setSlippage(e.target.value);
+                    error?.message == translations[lang].notEnoughSlippage && setError(undefined);
+                  }}
+                  onClick={() => {
+                    if (slippage == '') setSlippage(parsedAmount);
+                    setEditSlippage((prev) => !prev);
+                  }}
+                  line
+                />
+
+                {symbol ? (
+                  <ModalRowHealthFactor
+                    qty={qty}
+                    symbol={symbol}
+                    operation="repay"
+                    healthFactorCallback={getHealthFactor}
+                  />
+                ) : (
+                  <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
+                )}
+                <ModalRowBorrowLimit
+                  healthFactor={healthFactor}
+                  collateralFactor={collateralFactor}
+                  qty={qty}
+                  symbol={symbol!}
+                  operation="repay"
+                />
+              </ModalExpansionPanelWrapper>
+
               {error && error.component != 'gas' && <ModalError message={error.message} />}
               <div className={styles.buttonContainer}>
                 <Button
