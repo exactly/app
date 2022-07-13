@@ -1,7 +1,7 @@
 export function getSmartPoolDepositsQuery(address: string) {
   return `
   {
-    deposits(where:{caller: "${address}"}){
+    deposits(where:{owner: "${address}"}){
       id
       market   
       caller
