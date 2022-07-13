@@ -1,7 +1,7 @@
 export function getSmartPoolWithdrawsQuery(address: string) {
   return `
   {
-    withdraws(where:{caller: "${address}"}){
+    withdraws(where:{owner: "${address}"}){
       id
       market
       caller
