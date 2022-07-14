@@ -417,7 +417,6 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
                     if (slippage == '') setSlippage('0.00');
                     setEditSlippage((prev) => !prev);
                   }}
-                  line
                 />
               </ModalExpansionPanelWrapper>
               <ModalStepper currentStep={step} totalSteps={3} />
