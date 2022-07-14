@@ -21,13 +21,11 @@ function EmptyState({ connected, tab }: Props) {
     <section className={styles.container}>
       {connected && tab ? (
         <>
-          <h3 className={styles.title}>{translations[lang].emptyState}</h3>
-          <h4 className={styles.description}>{translations[lang][tab]}</h4>
+          <h3 className={styles.title}>{translations[lang][tab]}</h3>
         </>
       ) : (
         <>
-          <h3 className={styles.title}>{translations[lang].emptyState}</h3>
-          <h4 className={styles.description}>{translations[lang].position}</h4>
+          <h3 className={styles.title}>{translations[lang].position}</h3>
         </>
       )}
     </section>
