@@ -15,6 +15,7 @@ import Overlay from 'components/Overlay';
 import ModalRowEditable from 'components/common/modal/ModalRowEditable';
 import ModalMaturityEditable from 'components/common/modal/ModalMaturityEditable';
 import ModalError from 'components/common/modal/ModalError';
+import ModalExpansionPanelWrapper from 'components/common/modal/ModalExpansionPanelWrapper';
 
 import { Borrow } from 'types/Borrow';
 import { Deposit } from 'types/Deposit';
@@ -401,22 +402,23 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
                 error={error?.component == 'input'}
               />
               {error?.component !== 'gas' && symbol != 'WETH' && <ModalTxCost gas={gas} />}
-              <ModalRow text={translations[lang].apy} value={fixedRate} line />
-              <ModalRowEditable
-                text={translations[lang].minimumApy}
-                value={slippage}
-                editable={editSlippage}
-                symbol="%"
-                onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                  setSlippage(e.target.value);
-                  error?.message == translations[lang].notEnoughSlippage && setError(undefined);
-                }}
-                onClick={() => {
-                  if (slippage == '') setSlippage('0.00');
-                  setEditSlippage((prev) => !prev);
-                }}
-                line
-              />
+              <ModalRow text={translations[lang].apy} value={fixedRate} />
+              <ModalExpansionPanelWrapper>
+                <ModalRowEditable
+                  text={translations[lang].minimumApy}
+                  value={slippage}
+                  editable={editSlippage}
+                  symbol="%"
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                    setSlippage(e.target.value);
+                    error?.message == translations[lang].notEnoughSlippage && setError(undefined);
+                  }}
+                  onClick={() => {
+                    if (slippage == '') setSlippage('0.00');
+                    setEditSlippage((prev) => !prev);
+                  }}
+                />
+              </ModalExpansionPanelWrapper>
               <ModalStepper currentStep={step} totalSteps={3} />
               {error && error.component != 'gas' && <ModalError message={error.message} />}
               <div className={styles.buttonContainer}>
