@@ -193,8 +193,6 @@ async function getVariableAPY(market: string, subgraphUrl: string, decimals: num
 
         const APY = (Math.pow(parseFloat(parsedResult), time) - 1) * 100;
 
-        console.log({ parsedResult, final: final.timestamp, initial: initial.timestamp });
-
         return APY.toFixed(2);
       }
     );
