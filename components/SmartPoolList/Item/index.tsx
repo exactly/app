@@ -23,6 +23,8 @@ import { getContractData } from 'utils/contracts';
 import formatNumber from 'utils/formatNumber';
 import parseSymbol from 'utils/parseSymbol';
 import getSmartPoolInterestRate from 'utils/getSmartPoolInterestRate';
+import getVariableAPY from 'utils/getVariableAPY';
+import getSubgraph from 'utils/getSubgraph';
 
 type Props = {
   market: Market | undefined;
@@ -110,9 +112,12 @@ function Item({ market, showModal }: Props) {
         rate: exchangeRate
       };
 
-      const interestRate = await getSmartPoolInterestRate(network?.name!, fixedLender?.address!);
+      const subgraphUrl = getSubgraph(network?.name!);
 
-      setRate(interestRate);
+      const interestRate = await getVariableAPY(fixedLender?.address!, subgraphUrl, decimals);
+
+      interestRate && setRate(interestRate);
+
       setPoolData(newPoolData);
     } catch (e) {
       console.log(e);

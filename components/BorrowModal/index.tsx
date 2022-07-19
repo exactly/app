@@ -175,9 +175,12 @@ function BorrowModal({ data, editable, closeModal }: Props) {
 
     const beforeBorrowLimit = healthFactor ? healthFactor!.collateral - healthFactor!.debt : 0;
 
-    const afterBorrowLimit = beforeBorrowLimit - (parseFloat(qty) * parseFloat(rate) || 0);
+    const afterBorrowLimit =
+      beforeBorrowLimit - ((parseFloat(qty) * parseFloat(rate)) / collateralFactor || 0);
 
-    if (parseFloat(qty) * parseFloat(rate) > afterBorrowLimit) return;
+    if ((parseFloat(qty) * parseFloat(rate)) / collateralFactor > afterBorrowLimit) return;
+
+    //add pool liquidity validation we should display the minimum between the poolliquidity and borrowLimit
 
     setQty((afterBorrowLimit / parseFloat(rate)).toString());
   }
