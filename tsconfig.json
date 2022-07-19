@@ -1,11 +1,7 @@
 {
   "compilerOptions": {
-    "target": "es5",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "target": "es2020",
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -19,39 +15,17 @@
     "jsx": "preserve",
     "baseUrl": "./",
     "paths": {
-      "components/*": [
-        "./components/*"
-      ],
-      "pages/*": [
-        "./pages/*"
-      ],
-      "hooks/*": [
-        "./hooks/*"
-      ],
-      "contracts/*": [
-        "./contracts/*"
-      ],
-      "types/*": [
-        "./types/*"
-      ],
-      "utils/*": [
-        "./utils/*"
-      ],
-      "contexts/*": [
-        "./contexts/*"
-      ],
-      "dictionary/*": [
-        "./dictionary/*"
-      ],
-      "data/*": [
-        "./data/*"
-      ],
-      "config/*": [
-        "./config/*"
-      ],
-      "queries/*": [
-        "./queries/*"
-      ]
+      "components/*": ["./components/*"],
+      "pages/*": ["./pages/*"],
+      "hooks/*": ["./hooks/*"],
+      "contracts/*": ["./contracts/*"],
+      "types/*": ["./types/*"],
+      "utils/*": ["./utils/*"],
+      "contexts/*": ["./contexts/*"],
+      "dictionary/*": ["./dictionary/*"],
+      "data/*": ["./data/*"],
+      "config/*": ["./config/*"],
+      "queries/*": ["./queries/*"]
     },
     "incremental": true
   },
@@ -59,9 +33,8 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    "contexts/AddressContext.js"
+    "contexts/AddressContext.js",
+    "utils/getVariableAPY.js"
   ],
-  "exclude": [
-    "node_modules"
-  ]
+  "exclude": ["node_modules"]
 }
