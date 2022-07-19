@@ -114,7 +114,7 @@ function Item({ market, showModal }: Props) {
 
       const subgraphUrl = getSubgraph(network?.name!);
 
-      const interestRate = await getVariableAPY(fixedLender?.address!, subgraphUrl);
+      const interestRate = await getVariableAPY(fixedLender?.address!, subgraphUrl, decimals);
 
       interestRate && setRate(interestRate);
 

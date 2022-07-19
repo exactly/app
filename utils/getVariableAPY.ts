@@ -2,7 +2,7 @@ import fetch from 'cross-fetch';
 import { ApolloClient, HttpLink, InMemoryCache, gql as gqld } from '@apollo/client/core';
 import { ethers } from 'ethers';
 
-async function getVariableAPY(market: string, subgraphUrl: string) {
+async function getVariableAPY(market: string, subgraphUrl: string, decimals: number) {
   const WAD = 1000000000000000000n;
   const INTERVAL = 86400 * 7 * 4;
   const MAX_FUTURE_POOLS = 3;
@@ -12,7 +12,12 @@ async function getVariableAPY(market: string, subgraphUrl: string) {
   const futurePools = (start = now(), n = MAX_FUTURE_POOLS, interval = INTERVAL) =>
     [...new Array(n)].map((_, i) => start - (start % interval) + interval * (i + 1));
 
-  const start = now() - 86400 * 10;
+  // const start = now() - 86400 * 4;
+
+  const timeWindow = {
+    start: now() - 86400 * 7,
+    end: now()
+  };
 
   return new ApolloClient({
     link: new HttpLink({ uri: subgraphUrl, fetch }),
@@ -20,7 +25,7 @@ async function getVariableAPY(market: string, subgraphUrl: string) {
     defaultOptions: { query: { fetchPolicy: 'no-cache' } }
   })
     .query({
-      variables: { market: market, start },
+      variables: { market: market, start: timeWindow.start },
       query: gqld`
       query GetAPY(
         $market: Bytes
@@ -72,7 +77,7 @@ async function getVariableAPY(market: string, subgraphUrl: string) {
         ) {
           accumulatedEarningsSmoothFactor
         }
-        ${futurePools(start)
+        ${futurePools(timeWindow.start)
           .map(
             (maturity) => `
           initial${maturity}: marketUpdateds(
@@ -88,7 +93,7 @@ async function getVariableAPY(market: string, subgraphUrl: string) {
         `
           )
           .join('')}
-        ${futurePools()
+        ${futurePools(timeWindow.end)
           .map(
             (maturity) => `
           final${maturity}: marketUpdateds(
@@ -117,14 +122,7 @@ async function getVariableAPY(market: string, subgraphUrl: string) {
               smartPoolEarningsAccumulator: '0'
             }
           ],
-          final: [
-            final = {
-              timestamp: initial.timestamp,
-              smartPoolShares: initial.smartPoolShares,
-              smartPoolAssets: initial.smartPoolAssets,
-              smartPoolEarningsAccumulator: initial.smartPoolEarningsAccumulator
-            }
-          ],
+          final: [final = initial],
           initialAccumulatedEarningsAccrual: [initialAccumulatedEarningsAccrual = { timestamp: 0 }],
           finalAccumulatedEarningsAccrual: [finalAccumulatedEarningsAccrual = { timestamp: 0 }],
           accumulatedEarningsSmoothFactor: [accumulatedEarningsSmoothFactor],
@@ -138,24 +136,24 @@ async function getVariableAPY(market: string, subgraphUrl: string) {
             //@ts-expect-error
             .map(([, [fixedPool]]: [string, [any]]) => fixedPool);
         const totalAssets = (
+          timestamp: number,
           marketState: {
-            timestamp: number;
             smartPoolAssets: string;
             smartPoolEarningsAccumulator: string;
           },
           accumulatedEarningsAccrual: { timestamp: number },
           maturities: { timestamp: number; maturity: number; maturityUnassignedEarnings: string }[]
         ) => {
-          const elapsed = BigInt(marketState.timestamp - accumulatedEarningsAccrual.timestamp);
+          const elapsed = BigInt(timestamp - accumulatedEarningsAccrual.timestamp);
           return (
             BigInt(marketState.smartPoolAssets) +
             maturities.reduce((smartPoolEarnings, fixedPool) => {
               const { timestamp: lastAccrual, maturity, maturityUnassignedEarnings } = fixedPool;
+              return smartPoolEarnings + BigInt(maturityUnassignedEarnings);
               return (
                 smartPoolEarnings +
                 (maturity > lastAccrual
-                  ? (BigInt(maturityUnassignedEarnings) *
-                      BigInt(marketState.timestamp - lastAccrual)) /
+                  ? (BigInt(maturityUnassignedEarnings) * BigInt(timestamp - lastAccrual)) /
                     BigInt(maturity - lastAccrual)
                   : 0n)
               );
@@ -171,6 +169,7 @@ async function getVariableAPY(market: string, subgraphUrl: string) {
 
         const initialShares = BigInt(initial.smartPoolShares);
         const initialAssets = totalAssets(
+          timeWindow.start,
           initial,
           initialAccumulatedEarningsAccrual,
           fixedPools('initial')
@@ -178,6 +177,7 @@ async function getVariableAPY(market: string, subgraphUrl: string) {
 
         const finalShares = BigInt(final.smartPoolShares);
         const finalAssets = totalAssets(
+          timeWindow.end,
           final,
           finalAccumulatedEarningsAccrual,
           fixedPools('final')
@@ -189,7 +189,13 @@ async function getVariableAPY(market: string, subgraphUrl: string) {
 
         const parsedResult = ethers.utils.formatUnits(result, 18);
 
-        return ((parseFloat(parsedResult) - 1) * 100).toFixed(2);
+        const time = 31536000 / (timeWindow.end - timeWindow.start);
+
+        const APY = (Math.pow(parseFloat(parsedResult), time) - 1) * 100;
+
+        console.log({ parsedResult, final: final.timestamp, initial: initial.timestamp });
+
+        return APY.toFixed(2);
       }
     );
 }
