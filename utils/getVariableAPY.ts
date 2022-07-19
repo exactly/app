@@ -191,7 +191,7 @@ async function getVariableAPY(market: string, subgraphUrl: string, decimals: num
 
         const time = 31536000 / (timeWindow.end - timeWindow.start);
 
-        const APY = (Math.pow(parseFloat(parsedResult), time) - 1) * 100;
+        const APY = ((Math.pow(parseFloat(parsedResult), time) - 1) / 2) * 100;
 
         return APY.toFixed(2);
       }
