@@ -20,6 +20,7 @@ async function getVariableAPY(market: string, subgraphUrl: string) {
 
       break;
     default:
+      rate = '0.93';
       break;
   }
 
