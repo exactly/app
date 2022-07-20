@@ -2,7 +2,7 @@
 // import { ApolloClient, HttpLink, InMemoryCache, gql as gqld } from '@apollo/client/core';
 // import { ethers } from 'ethers';
 
-async function getVariableAPY(market: string) {
+async function getVariableAPY(market: string, subgraphUrl: string) {
   let rate;
 
   switch (market) {
