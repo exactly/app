@@ -71,11 +71,11 @@ function Item({
   useEffect(() => {
     getMaturityData();
     getRate();
-  }, [maturityDate, walletAddress]);
+  }, [maturityDate, walletAddress, accountData]);
 
   useEffect(() => {
     getAPY();
-  }, [walletAddress]);
+  }, [walletAddress, accountData]);
 
   async function getMaturityData() {
     if (!walletAddress || !maturityDate || !market || !type) return;
