@@ -10,22 +10,32 @@ export interface Position {
   principal: BigNumber;
 }
 
-export interface MaturityLiquidity {
+export interface FixedPool {
   maturity: BigNumber;
-  assets: BigNumber;
+  borrowed: BigNumber;
+  supplied: BigNumber;
+  available: BigNumber;
+  utilization: BigNumber;
 }
 
 export type FixedLenderAccountData = {
   market: string;
+  decimals: number;
   assetSymbol: string;
-  maturitySupplyPositions: Array<MaturityPosition>;
-  fixedBorrowPositions: Array<MaturityPosition>;
-  smartPoolAssets: BigNumber;
-  smartPoolShares: BigNumber;
   oraclePrice: BigNumber;
   penaltyRate: BigNumber;
   adjustFactor: BigNumber;
-  decimals: number;
+  maxFuturePools: number;
+  fixedPools: Array<FixedPool>;
+  floatingBackupBorrowed: BigNumber;
+  floatingAvailableAssets: BigNumber;
+  totalFloatingBorrowAssets: BigNumber;
+  totalFloatingDepositAssets: BigNumber;
   isCollateral: boolean;
-  availableLiquidity?: MaturityLiquidity[];
+  floatingBorrowShares: BigNumber;
+  floatingBorrowAssets: BigNumber;
+  floatingDepositShares: BigNumber;
+  floatingDepositAssets: BigNumber;
+  fixedDepositPositions: Array<MaturityPosition>;
+  fixedBorrowPositions: Array<MaturityPosition>;
 };

@@ -127,10 +127,10 @@ function BorrowModal({ data, editable, closeModal }: Props) {
   }, [underlyingContract, fixedLenderWithSigner]);
 
   useEffect(() => {
-    if (fixedLenderWithSigner && !gas) {
+    if (fixedLenderWithSigner && !gas && accountData) {
       estimateGas();
     }
-  }, [fixedLenderWithSigner]);
+  }, [fixedLenderWithSigner, accountData]);
 
   useEffect(() => {
     if (fixedLenderWithSigner) {
@@ -264,23 +264,23 @@ function BorrowModal({ data, editable, closeModal }: Props) {
 
     const maturityDate = date?.value ?? maturity;
 
-    const maturityData = accountData[symbol].availableLiquidity?.find((data) => {
+    const maturityData = accountData[symbol].fixedPools?.find((data) => {
       return data.maturity.toString() == maturityDate;
     });
 
-    const decimals = await fixedLenderWithSigner?.decimals();
+    const decimals = accountData[symbol].decimals;
 
-    const limit = maturityData && ethers.utils.formatUnits(maturityData?.assets!, decimals);
+    const limit = maturityData && ethers.utils.formatUnits(maturityData?.available!, decimals);
 
     limit && setPoolLiquidity(parseFloat(limit));
   }
 
   async function estimateGas() {
-    if (symbol == 'WETH') return;
+    if (symbol == 'WETH' || !accountData) return;
 
     try {
       const gasPriceInGwei = await fixedLenderWithSigner?.provider.getGasPrice();
-      const decimals = await fixedLenderWithSigner?.decimals();
+      const decimals = accountData[symbol].decimals;
 
       const estimatedGasCost = await fixedLenderWithSigner?.estimateGas.borrowAtMaturity(
         parseInt(date?.value ?? maturity),
@@ -308,8 +308,9 @@ function BorrowModal({ data, editable, closeModal }: Props) {
 
   async function getFeeAtMaturity() {
     if (!accountData) return;
+
     try {
-      const decimals = await fixedLenderWithSigner?.decimals();
+      const decimals = accountData[symbol.toUpperCase()].decimals;
       const currentTimestamp = new Date().getTime() / 1000;
       const time = 31536000 / (parseInt(date?.value ?? maturity) - currentTimestamp);
       const oracle = ethers.utils.formatEther(accountData[symbol.toUpperCase()]?.oraclePrice);
@@ -324,7 +325,8 @@ function BorrowModal({ data, editable, closeModal }: Props) {
       );
 
       const rate =
-        (parseFloat(ethers.utils.formatUnits(feeAtMaturity, decimals)) - parseFloat(qtyValue)) /
+        (parseFloat(ethers.utils.formatUnits(feeAtMaturity.assets, decimals)) -
+          parseFloat(qtyValue)) /
         parseFloat(qtyValue);
 
       const fixedAPY = (Math.pow(1 + rate, time) - 1) * 100;

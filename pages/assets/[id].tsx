@@ -116,7 +116,7 @@ const Asset: NextPage<Props> = ({ symbol }) => {
 
   async function getMarketData() {
     try {
-      const marketsData = await previewerContract?.accounts(
+      const marketsData = await previewerContract?.exactly(
         '0x000000000000000000000000000000000000dEaD'
       );
 
@@ -126,30 +126,46 @@ const Asset: NextPage<Props> = ({ symbol }) => {
 
       const {
         market,
+        decimals,
         assetSymbol,
-        maturitySupplyPositions,
-        fixedBorrowPositions,
-        smartPoolAssets,
-        smartPoolShares,
         oraclePrice,
         penaltyRate,
         adjustFactor,
-        decimals,
-        isCollateral
+        maxFuturePools,
+        fixedPools,
+        floatingBackupBorrowed,
+        floatingAvailableAssets,
+        totalFloatingBorrowAssets,
+        totalFloatingDepositAssets,
+        isCollateral,
+        floatingBorrowShares,
+        floatingBorrowAssets,
+        floatingDepositShares,
+        floatingDepositAssets,
+        fixedDepositPositions,
+        fixedBorrowPositions
       } = filteredMarket;
 
       setMarketData({
         market,
+        decimals,
         assetSymbol,
-        maturitySupplyPositions,
-        fixedBorrowPositions,
-        smartPoolAssets,
-        smartPoolShares,
         oraclePrice,
         penaltyRate,
         adjustFactor,
-        decimals,
-        isCollateral
+        maxFuturePools,
+        fixedPools,
+        floatingBackupBorrowed,
+        floatingAvailableAssets,
+        totalFloatingBorrowAssets,
+        totalFloatingDepositAssets,
+        isCollateral,
+        floatingBorrowShares,
+        floatingBorrowAssets,
+        floatingDepositShares,
+        floatingDepositAssets,
+        fixedDepositPositions,
+        fixedBorrowPositions
       });
     } catch (e) {
       console.log(e);
@@ -189,7 +205,7 @@ const Asset: NextPage<Props> = ({ symbol }) => {
 
   async function getAccountData() {
     try {
-      const data = await previewerContract?.accounts(
+      const data = await previewerContract?.exactly(
         walletAddress ?? '0x000000000000000000000000000000000000dEaD'
       );
 

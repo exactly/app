@@ -163,7 +163,7 @@ function WithdrawModalMP({ data, closeModal }: Props) {
       parsedQtyValue
     );
 
-    const formatWithdrawAmount = ethers.utils.formatUnits(earlyWithdrawAmount, decimals);
+    const formatWithdrawAmount = ethers.utils.formatUnits(earlyWithdrawAmount.assets, decimals);
     const minimumWithdrawAmount = parseFloat(formatWithdrawAmount) * (1 - numbers.slippage);
 
     setWithdrawAmount(formatWithdrawAmount);

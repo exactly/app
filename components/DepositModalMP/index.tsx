@@ -339,7 +339,7 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
     if (!accountData) return;
 
     try {
-      const decimals = await fixedLenderWithSigner?.decimals();
+      const decimals = accountData[symbol.toUpperCase()]?.decimals;
       const currentTimestamp = new Date().getTime() / 1000;
       const time = 31536000 / (parseInt(date?.value ?? maturity) - currentTimestamp);
       const oracle = ethers.utils.formatEther(accountData[symbol.toUpperCase()]?.oraclePrice);
@@ -354,12 +354,14 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
       );
 
       const rate =
-        (parseFloat(ethers.utils.formatUnits(feeAtMaturity, decimals)) - parseFloat(qtyValue)) /
+        (parseFloat(ethers.utils.formatUnits(feeAtMaturity.assets, decimals)) -
+          parseFloat(qtyValue)) /
         parseFloat(qtyValue);
 
       const fixedAPY = (Math.pow(1 + rate, time) - 1) * 100;
 
       const slippageAPY = (fixedAPY * (1 - numbers.slippage)).toFixed(2);
+
       setSlippage(slippageAPY);
 
       setFixedRate(`${fixedAPY.toFixed(2)}%`);
