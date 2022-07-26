@@ -6,6 +6,7 @@ import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 import AuditorContext from 'contexts/AuditorContext';
 import FixedLenderContext from 'contexts/FixedLenderContext';
+import AccountDataContext from 'contexts/AccountDataContext';
 
 import { LangKeys } from 'types/Lang';
 import { Deposit } from 'types/Deposit';
@@ -29,6 +30,8 @@ function SmartPoolUserStatus({ walletAddress, showModal }: Props) {
   const translations: { [key: string]: LangKeys } = keys;
   const auditor = useContext(AuditorContext);
   const { web3Provider, network } = useWeb3Context();
+  const { accountData } = useContext(AccountDataContext);
+
   const [itemData, setItemData] = useState<Array<SmartPoolItemData> | undefined>(undefined);
 
   const auditorContract = getContractData(
@@ -40,7 +43,7 @@ function SmartPoolUserStatus({ walletAddress, showModal }: Props) {
 
   useEffect(() => {
     getCurrentBalance();
-  }, [walletAddress]);
+  }, [walletAddress, accountData]);
 
   async function getCurrentBalance() {
     try {

@@ -61,6 +61,15 @@ const DashBoard: NextPage<Props> = () => {
   const [tab, setTab] = useState<Option>(tabDeposit);
 
   useEffect(() => {
+    if ((!modal || modalContent == {}) && Previewer) {
+      setTimeout(() => {
+        if (!walletAddress) return;
+        getAccountData();
+      }, 5000);
+    }
+  }, [modal, modalContent]);
+
+  useEffect(() => {
     if (!walletAddress) return;
     getAccountData();
   }, [walletAddress]);

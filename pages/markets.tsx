@@ -60,7 +60,7 @@ const Pools: NextPage<Props> = () => {
 
   useEffect(() => {
     getAccountData();
-  }, [walletAddress]);
+  }, [walletAddress, Previewer]);
 
   async function getMarkets() {
     try {
