@@ -24,7 +24,7 @@
     "react-dropdown": "^1.9.2",
     "react-loading-skeleton": "^3.1.0",
     "react-spring": "^9.4.5",
-    "recharts": "^2.1.8",
+    "recharts": "2.1.8",
     "sass": "^1.39.0",
     "web3modal": "^1.9.7"
   },
