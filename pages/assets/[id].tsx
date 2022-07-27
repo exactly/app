@@ -16,6 +16,7 @@ import DepositModalMP from 'components/DepositModalMP';
 import BorrowModal from 'components/BorrowModal';
 import DepositModalSP from 'components/DepositModalSP';
 import Footer from 'components/Footer';
+import FaucetModal from 'components/FaucetModal';
 
 import { Maturity } from 'types/Maturity';
 import { LangKeys } from 'types/Lang';
@@ -221,13 +222,14 @@ const Asset: NextPage<Props> = ({ symbol }) => {
     setFixedLenderContract(fixedLender);
   }
 
-  function showModal(type: string, maturity: string | undefined) {
+  function showModal(maturity: string | undefined, type: string) {
     if (network && !allowedNetworks.includes(network?.name)) return;
 
     if (modalContent?.type) {
       //in the future we should handle the minimized modal status through a context here
       return;
     }
+
     if (marketData) {
       const market = {
         market: marketData.market,
@@ -250,7 +252,9 @@ const Asset: NextPage<Props> = ({ symbol }) => {
             <FixedLenderProvider value={FixedLenders}>
               <MobileNavbar />
               <Navbar />
-              <CurrentNetwork />
+              <CurrentNetwork showModal={showModal} />
+
+              {modal && modalContent?.type == 'faucet' && <FaucetModal closeModal={handleModal} />}
 
               {modal && modalContent?.type == 'deposit' && (
                 <DepositModalMP data={modalContent} closeModal={handleModal} />

@@ -13,6 +13,7 @@ import SmartPoolList from 'components/SmartPoolList';
 import DepositModalMP from 'components/DepositModalMP';
 import BorrowModal from 'components/BorrowModal';
 import DepositModalSP from 'components/DepositModalSP';
+import FaucetModal from 'components/FaucetModal';
 
 import useModal from 'hooks/useModal';
 
@@ -150,6 +151,7 @@ const Pools: NextPage<Props> = () => {
         <PreviewerProvider value={Previewer}>
           <AccountDataProvider value={{ accountData, setAccountData }}>
             <FixedLenderProvider value={FixedLenders}>
+              {modal && modalContent?.type == 'faucet' && <FaucetModal closeModal={handleModal} />}
               {modal && modalContent?.type == 'deposit' && (
                 <DepositModalMP data={modalContent} closeModal={handleModal} />
               )}
@@ -164,7 +166,7 @@ const Pools: NextPage<Props> = () => {
 
               <MobileNavbar />
               <Navbar />
-              <CurrentNetwork />
+              <CurrentNetwork showModal={showModal} />
 
               <div style={{ marginTop: '180px' }}>
                 <SmartPoolList markets={markets} showModal={showModal} />

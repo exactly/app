@@ -13,13 +13,12 @@ import styles from './style.module.scss';
 import keys from './translations.json';
 
 import Button from 'components/common/Button';
-import Tooltip from 'components/Tooltip';
 
 import parseSymbol from 'utils/parseSymbol';
 import formatNumber from 'utils/formatNumber';
 
 interface Props {
-  showModal: (type: string, maturity: string | undefined) => void;
+  showModal: (maturity: string | undefined, type: string) => void;
   symbol: string;
   fixedLender: Contract | undefined;
 }
@@ -65,7 +64,7 @@ function SmartPoolInfo({ showModal, symbol, fixedLender }: Props) {
   function handleClick() {
     if (!walletAddress && connect) return connect();
 
-    showModal('smartDeposit', undefined);
+    showModal(undefined, 'smartDeposit');
   }
 
   return (

@@ -9,9 +9,15 @@ import styles from './style.module.scss';
 
 import keys from './translations.json';
 
+import Button from 'components/common/Button';
+
 import allowedNetworks from 'config/allowedNetworks.json';
 
-function CurrentNetwork() {
+type Props = {
+  showModal?: (marketData: any, type: any) => void;
+};
+
+function CurrentNetwork({ showModal }: Props) {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
@@ -31,6 +37,8 @@ function CurrentNetwork() {
           }
         ]
       });
+    } else if (isAllowed && network?.name == 'rinkeby' && showModal) {
+      showModal({}, 'faucet');
     }
   }
 
@@ -42,10 +50,13 @@ function CurrentNetwork() {
     >
       <div className={`${styles.alertContainer} ${status ? styles[status] : ''}`}>
         {isAllowed && network && (
-          <p>
-            <span>{translations[lang].connectedTo}</span>{' '}
-            <strong>{network?.name ?? 'unknown'}</strong> <span>{translations[lang].network}</span>
-          </p>
+          <>
+            <p>
+              <span>{translations[lang].connectedTo}</span>{' '}
+              <strong>{network?.name ?? 'unknown'}</strong>{' '}
+              {network?.name == 'rinkeby' && <span>{translations[lang].faucet}</span>}
+            </p>
+          </>
         )}
         {!network && <p>{translations[lang].disconnected}</p>}
         {!isAllowed && network && (
