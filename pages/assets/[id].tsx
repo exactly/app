@@ -80,7 +80,7 @@ const Asset: NextPage<Props> = ({ symbol }) => {
   }, [fixedLenderContract]);
 
   useEffect(() => {
-    if (!maturities && Previewer) {
+    if (Previewer) {
       getMarketData();
     }
   }, [Previewer, symbol]);
