@@ -99,6 +99,7 @@ function FloatingBorrowModal({ data, editable, closeModal }: Props) {
   useEffect(() => {
     checkAllowance();
     checkLiquidity();
+    checkCollateral();
   }, [walletAddress, fixedLenderWithSigner, symbol, qty]);
 
   useEffect(() => {
@@ -241,13 +242,19 @@ function FloatingBorrowModal({ data, editable, closeModal }: Props) {
 
   async function checkCollateral() {
     if (!accountData) return;
-
     const decimals = accountData[symbol].decimals;
 
-    const limit =
-      data && ethers.utils.formatUnits(accountData[symbol].floatingAvailableAssets, decimals);
+    const isCollateral = accountData[symbol].isCollateral;
 
-    limit && setLiquidity(parseFloat(limit));
+    const hasDepositedToFloatingPool =
+      parseFloat(ethers.utils.formatUnits(accountData[symbol].floatingBorrowAssets, decimals)) > 0;
+
+    if (!isCollateral || !hasDepositedToFloatingPool) {
+      return setError({
+        status: true,
+        message: translations[lang].noCollateral
+      });
+    }
   }
 
   async function estimateGas() {
