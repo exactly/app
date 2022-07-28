@@ -220,7 +220,11 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
   async function deposit() {
     try {
       const decimals = await fixedLenderWithSigner?.decimals();
-      const minAmount = parseFloat(qty!) * (1 + parseFloat(slippage) / 100);
+      const currentTimestamp = new Date().getTime() / 1000;
+      const time = (parseInt(date?.value ?? maturity) - currentTimestamp) / 31536000;
+      const apy = parseFloat(slippage) / 100;
+
+      const minAmount = parseFloat(qty!) * Math.pow(1 + apy, time);
 
       let deposit;
 
@@ -354,6 +358,9 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
         parseFloat(qtyValue);
 
       const fixedAPY = (Math.pow(1 + rate, time) - 1) * 100;
+
+      const slippageAPY = (fixedAPY * 0.95).toFixed(2);
+      setSlippage(slippageAPY);
 
       setFixedRate(`${fixedAPY.toFixed(2)}%`);
     } catch (e) {

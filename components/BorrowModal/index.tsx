@@ -71,7 +71,7 @@ function BorrowModal({ data, editable, closeModal }: Props) {
   const [tx, setTx] = useState<Transaction | undefined>(undefined);
   const [minimized, setMinimized] = useState<Boolean>(false);
   const [fixedRate, setFixedRate] = useState<string | undefined>(undefined);
-  const [slippage, setSlippage] = useState<string>('10.00');
+  const [slippage, setSlippage] = useState<string>('0.00');
   const [editSlippage, setEditSlippage] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [healthFactor, setHealthFactor] = useState<HealthFactor | undefined>(undefined);
@@ -210,9 +210,13 @@ function BorrowModal({ data, editable, closeModal }: Props) {
           message: translations[lang].notEnoughSlippage
         });
       }
-      //save the demo
-      const maxAmount = parseFloat(qty!) * 1.5;
+
+      const currentTimestamp = new Date().getTime() / 1000;
+      const time = (parseInt(date?.value ?? maturity) - currentTimestamp) / 31536000;
+      const apy = parseFloat(slippage) / 100;
       const decimals = await fixedLenderWithSigner?.decimals();
+
+      const maxAmount = parseFloat(qty!) * Math.pow(1 + apy, time);
 
       let borrow;
 
@@ -323,6 +327,9 @@ function BorrowModal({ data, editable, closeModal }: Props) {
 
       const fixedAPY = (Math.pow(1 + rate, time) - 1) * 100;
 
+      const slippageAPY = (fixedAPY * 1.05).toFixed(2);
+      setSlippage(slippageAPY);
+
       setFixedRate(`${fixedAPY.toFixed(2)}%`);
     } catch (e) {
       console.log(e);
@@ -415,7 +422,7 @@ function BorrowModal({ data, editable, closeModal }: Props) {
                   error?.message == translations[lang].notEnoughSlippage && setError(undefined);
                 }}
                 onClick={() => {
-                  if (slippage == '') setSlippage('10.00');
+                  if (slippage == '') setSlippage('0.00');
                   setEditSlippage((prev) => !prev);
                 }}
               />
