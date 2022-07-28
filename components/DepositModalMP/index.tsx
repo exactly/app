@@ -359,7 +359,7 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
 
       const fixedAPY = (Math.pow(1 + rate, time) - 1) * 100;
 
-      const slippageAPY = (fixedAPY * 0.95).toFixed(2);
+      const slippageAPY = (fixedAPY * (1 - numbers.slippage)).toFixed(2);
       setSlippage(slippageAPY);
 
       setFixedRate(`${fixedAPY.toFixed(2)}%`);
