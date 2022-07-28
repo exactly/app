@@ -18,6 +18,8 @@ import DashboardHeader from 'components/DashboardHeader';
 import Tabs from 'components/Tabs';
 import EmptyState from 'components/EmptyState';
 import FaucetModal from 'components/FaucetModal';
+import FloatingBorrowModal from 'components/FloatingBorrowModal';
+import FloatingRepayModal from 'components/FloatingRepayModal';
 
 import { AuditorProvider } from 'contexts/AuditorContext';
 import { FixedLenderProvider } from 'contexts/FixedLenderContext';
@@ -109,6 +111,14 @@ const DashBoard: NextPage<Props> = () => {
               <FixedLenderProvider value={FixedLenders}>
                 {modal && modalContent?.type == 'faucet' && (
                   <FaucetModal closeModal={handleModal} />
+                )}
+
+                {modal && modalContent?.type == 'floatingBorrow' && (
+                  <FloatingBorrowModal data={modalContent} closeModal={handleModal} />
+                )}
+
+                {modal && modalContent?.type == 'floatingRepay' && (
+                  <FloatingRepayModal data={modalContent} closeModal={handleModal} />
                 )}
 
                 {modal && modalContent?.type == 'borrow' && (

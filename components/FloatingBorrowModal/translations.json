@@ -1,0 +1,13 @@
+{
+  "en": {
+    "borrow": "Borrow",
+    "approve": "Approve",
+    "floatingPoolBorrow": "Variable Rate Borrow",
+    "healthFactor": "Health Factor",
+    "notEnoughSlippage": "The transaction failed, please check your Maximum Deposit Rate",
+    "deniedTransaction": "Transaction rejected",
+    "availableLiquidityError": "There is not enough liquidity",
+    "generalError": "There was an error, please try again"
+  },
+  "es": {}
+}
