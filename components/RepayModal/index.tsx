@@ -153,7 +153,7 @@ function RepayModal({ data, closeModal }: Props) {
 
     const formatRepayAmount = ethers.utils.formatUnits(earlyRepayAmount, decimals);
 
-    const maximumRepayAmount = parseFloat(formatRepayAmount) * 1.05;
+    const maximumRepayAmount = parseFloat(formatRepayAmount) * (1 + numbers.slippage);
 
     setRepayAmount(formatRepayAmount);
     setSlippage(formatNumber(maximumRepayAmount, symbol!, true));

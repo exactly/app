@@ -164,7 +164,7 @@ function WithdrawModalMP({ data, closeModal }: Props) {
     );
 
     const formatWithdrawAmount = ethers.utils.formatUnits(earlyWithdrawAmount, decimals);
-    const minimumWithdrawAmount = parseFloat(formatWithdrawAmount) * 0.95;
+    const minimumWithdrawAmount = parseFloat(formatWithdrawAmount) * (1 - numbers.slippage);
 
     setWithdrawAmount(formatWithdrawAmount);
     setSlippage(formatNumber(minimumWithdrawAmount, symbol!, true));
