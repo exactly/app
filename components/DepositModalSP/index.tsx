@@ -227,18 +227,25 @@ function DepositModalSP({ data, closeModal }: Props) {
 
       setTx({ status: 'processing', hash: deposit?.hash });
 
-      const status = await deposit.wait();
+      const txReceipt = await deposit.wait();
 
-      setTx({ status: 'success', hash: status?.transactionHash });
+      if (txReceipt.status == 1) {
+        setTx({ status: 'success', hash: txReceipt?.transactionHash });
+      } else {
+        setTx({ status: 'error', hash: txReceipt?.transactionHash });
+      }
     } catch (e: any) {
       setLoading(false);
 
       const isDenied = e?.message?.includes('User denied');
-
-      setError({
-        status: true,
-        message: isDenied && translations[lang].deniedTransaction
-      });
+      if (isDenied) {
+        setError({
+          status: true,
+          message: isDenied && translations[lang].deniedTransaction
+        });
+      } else {
+        setTx({ status: 'error', hash: e?.transactionHash });
+      }
     }
   }
 
@@ -385,7 +392,7 @@ function DepositModalSP({ data, closeModal }: Props) {
               </div>
             </>
           )}
-          {tx && <ModalGif tx={tx} />}
+          {tx && <ModalGif tx={tx} tryAgain={deposit} />}
         </ModalWrapper>
       )}
 
