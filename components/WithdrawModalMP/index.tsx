@@ -199,20 +199,28 @@ function WithdrawModalMP({ data, closeModal }: Props) {
 
       setTx({ status: 'processing', hash: withdraw?.hash });
 
-      const status = await withdraw.wait();
+      const txReceipt = await withdraw.wait();
 
       setLoading(false);
 
-      setTx({ status: 'success', hash: status?.transactionHash });
+      if (txReceipt.status == 1) {
+        setTx({ status: 'success', hash: txReceipt?.transactionHash });
+      } else {
+        setTx({ status: 'error', hash: txReceipt?.transactionHash });
+      }
     } catch (e: any) {
+      console.log(e);
       setLoading(false);
 
       const isDenied = e?.message?.includes('User denied');
-
-      setError({
-        status: true,
-        message: isDenied && translations[lang].deniedTransaction
-      });
+      if (isDenied) {
+        setError({
+          status: true,
+          message: isDenied && translations[lang].deniedTransaction
+        });
+      } else {
+        setTx({ status: 'error', hash: e?.transactionHash });
+      }
     }
   }
 
@@ -358,7 +366,7 @@ function WithdrawModalMP({ data, closeModal }: Props) {
               </div>
             </>
           )}
-          {tx && <ModalGif tx={tx} />}
+          {tx && <ModalGif tx={tx} tryAgain={withdraw} />}
         </ModalWrapper>
       )}
 

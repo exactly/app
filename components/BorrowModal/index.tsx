@@ -242,20 +242,29 @@ function BorrowModal({ data, editable, closeModal }: Props) {
 
       setTx({ status: 'processing', hash: borrow?.hash });
 
-      const status = await borrow.wait();
+      const txReceipt = await borrow.wait();
       setLoading(false);
 
-      setTx({ status: 'success', hash: status?.transactionHash });
+      if (txReceipt.status == 1) {
+        setTx({ status: 'success', hash: txReceipt?.transactionHash });
+      } else {
+        setTx({ status: 'error', hash: txReceipt?.transactionHash });
+      }
     } catch (e: any) {
+      console.log(e);
       setLoading(false);
-      const isDenied = e?.message?.includes('User denied');
 
-      setError({
-        status: true,
-        message: isDenied
-          ? translations[lang].deniedTransaction
-          : translations[lang].notEnoughSlippage
-      });
+      const isDenied = e?.message?.includes('User denied');
+      if (isDenied) {
+        setError({
+          status: true,
+          message: isDenied
+            ? translations[lang].deniedTransaction
+            : translations[lang].notEnoughSlippage
+        });
+      } else {
+        setTx({ status: 'error', hash: e?.transactionHash });
+      }
     }
   }
 
@@ -463,7 +472,7 @@ function BorrowModal({ data, editable, closeModal }: Props) {
               </div>
             </>
           )}
-          {tx && <ModalGif tx={tx} />}
+          {tx && <ModalGif tx={tx} tryAgain={borrow} />}
         </ModalWrapper>
       )}
 
