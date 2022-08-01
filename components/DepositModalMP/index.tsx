@@ -268,7 +268,10 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
             : translations[lang].notEnoughSlippage
         });
       } else {
-        setTx({ status: 'error', hash: e?.transactionHash });
+        setError({
+          status: true,
+          message: translations[lang].generalError
+        });
       }
     }
   }

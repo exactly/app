@@ -8,7 +8,8 @@
     "borrowLimit": "Borrow Limit",
     "insufficientBalance": "You can't deposit more than you have in your wallet",
     "error": "There was an error with your transaction, please try again",
-    "deniedTransaction": "Transaction rejected"
+    "deniedTransaction": "Transaction rejected",
+    "generalError": "There was an error, please try again"
   },
   "es": {}
 }

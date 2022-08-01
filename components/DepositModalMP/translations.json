@@ -9,7 +9,8 @@
     "insufficientBalance": "You can't deposit more than you have in your wallet",
     "notEnoughSlippage": "The transaction failed, please check your Minimum Deposit Rate",
     "error": "There was an error with your transaction, please try again",
-    "deniedTransaction": "Transaction rejected"
+    "deniedTransaction": "Transaction rejected",
+    "generalError": "There was an error, please try again"
   },
   "es": {}
 }

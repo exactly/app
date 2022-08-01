@@ -169,7 +169,10 @@ function WithdrawModalSP({ data, closeModal }: Props) {
           message: isDenied && translations[lang].deniedTransaction
         });
       } else {
-        setTx({ status: 'error', hash: e?.transactionHash });
+        setError({
+          status: true,
+          message: isDenied && translations[lang].generalError
+        });
       }
     }
   }

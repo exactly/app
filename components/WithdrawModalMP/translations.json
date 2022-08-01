@@ -8,7 +8,8 @@
     "amountToReceive": "Amount To Receive",
     "amountSlippage": "Minimum Amount To Receive",
     "insufficientBalance": "You can't withdraw more than the deposited amount",
-    "deniedTransaction": "Transaction rejected"
+    "deniedTransaction": "Transaction rejected",
+    "generalError": "There was an error, please try again"
   },
   "es": {}
 }

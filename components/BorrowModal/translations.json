@@ -11,7 +11,8 @@
     "healthFactor": "Health Factor",
     "notEnoughSlippage": "The transaction failed, please check your Maximum Deposit Rate",
     "deniedTransaction": "Transaction rejected",
-    "availableLiquidityError": "There is not enough liquidity in this pool"
+    "availableLiquidityError": "There is not enough liquidity in this pool",
+    "generalError": "There was an error, please try again"
   },
   "es": {}
 }

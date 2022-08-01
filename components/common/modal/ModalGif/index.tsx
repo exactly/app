@@ -20,8 +20,6 @@ type Props = {
 };
 
 function ModalGif({ tx, tryAgain }: Props) {
-  console.log(tx);
-
   const { network } = useWeb3Context();
 
   const lang: string = useContext(LangContext);
