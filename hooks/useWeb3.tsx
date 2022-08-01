@@ -16,8 +16,8 @@ if (typeof window !== 'undefined') {
         options: {
           infuraId: `${process.env.NEXT_INFURA_ID}`,
           rpc: {
-            1: `https://mainnet.infura.io/v3/77a2479dc2bd4436aa3edb374f3019d2`,
-            4: 'https://rinkeby.infura.io/v3/77a2479dc2bd4436aa3edb374f3019d2'
+            1: `https://mainnet.infura.io/v3/a6e9caa47aa94595bfb2b0503edf880c`,
+            4: 'https://rinkeby.infura.io/v3/a6e9caa47aa94595bfb2b0503edf880c'
           },
           chainId: 4
         }
