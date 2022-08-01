@@ -4,6 +4,12 @@
   align-items: center;
   position: relative;
 
+  .buttonContainer {
+    height: var(--u5);
+    width: 100%;
+    margin-top: var(--u2);
+  }
+
   .mediaContainer {
     display: flex;
     align-items: center;
