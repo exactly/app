@@ -117,7 +117,7 @@ function WithdrawModalMP({ data, closeModal }: Props) {
 
   useEffect(() => {
     if (qty == '') return;
-    previewDepositAtMaturity();
+    previewWithdrawAtMaturity();
   }, [qty]);
 
   async function checkAllowance() {
@@ -151,13 +151,13 @@ function WithdrawModalMP({ data, closeModal }: Props) {
     setQty(e.target.value);
   }
 
-  async function previewDepositAtMaturity() {
+  async function previewWithdrawAtMaturity() {
     const decimals = await fixedLenderWithSigner?.decimals();
     const market = fixedLenderWithSigner?.address;
     const parsedMaturity = parseInt(maturity);
     const parsedQtyValue = ethers.utils.parseUnits(qty, decimals);
 
-    const earlyWithdrawAmount = await previewerContract?.previewDepositAtMaturity(
+    const earlyWithdrawAmount = await previewerContract?.previewWithdrawAtMaturity(
       market,
       parsedMaturity,
       parsedQtyValue

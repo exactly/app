@@ -63,14 +63,18 @@ async function getLastAPY(
       //BORROW
       const borrowFee = maturityData?.getLastBorrowRate?.borrowAtMaturities[0]?.fee;
       const borrowAmount = maturityData?.getLastBorrowRate?.borrowAtMaturities[0]?.assets;
+      const borrowTime =
+        31536000 /
+        (parseInt(maturityData?.maturity!) -
+          maturityData?.getLastBorrowRate?.borrowAtMaturities[0]?.timestamp);
 
       //DEPOSIT
       const depositFee = maturityData?.getLastDepositRate?.depositAtMaturities[0]?.fee;
       const depositAmount = maturityData?.getLastDepositRate?.depositAtMaturities[0]?.assets;
-
-      //TIME
-      const currentTimestamp = new Date().getTime() / 1000;
-      const time = 31536000 / (parseInt(maturityData?.maturity!) - currentTimestamp);
+      const depositTime =
+        31536000 /
+        (parseInt(maturityData?.maturity!) -
+          maturityData?.getLastDepositRate?.depositAtMaturities[0]?.timestamp);
 
       let fixedBorrowAPY = 0;
       let fixedDepositAPY = 0;
@@ -79,14 +83,14 @@ async function getLastAPY(
         const borrowFixedRate =
           parseFloat(ethers.utils.formatUnits(borrowFee, decimals)) /
           parseFloat(ethers.utils.formatUnits(borrowAmount, decimals));
-        fixedBorrowAPY = (Math.pow(1 + borrowFixedRate, time) - 1) * 100;
+        fixedBorrowAPY = (Math.pow(1 + borrowFixedRate, borrowTime) - 1) * 100;
       }
 
       if (depositFee && decimals && depositAmount) {
         const depositFixedRate =
           parseFloat(ethers.utils.formatUnits(depositFee, decimals)) /
           parseFloat(ethers.utils.formatUnits(depositAmount, decimals));
-        fixedDepositAPY = (Math.pow(1 + depositFixedRate, time) - 1) * 100;
+        fixedDepositAPY = (Math.pow(1 + depositFixedRate, depositTime) - 1) * 100;
       }
 
       depositData.apy = Number(fixedDepositAPY.toFixed(2));

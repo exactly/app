@@ -57,7 +57,7 @@ function MaturityPoolDashboard({ showModal, tab }: Props) {
     const data: any = {};
 
     Object.values(accountData!).forEach((asset: FixedLenderAccountData) => {
-      asset.maturitySupplyPositions.forEach((pool) => {
+      asset.fixedDepositPositions.forEach((pool) => {
         const date = pool.maturity.toNumber().toString();
         data.deposits = data.deposits ?? {};
 

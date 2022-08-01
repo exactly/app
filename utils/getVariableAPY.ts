@@ -35,9 +35,9 @@ async function getVariableAPY(market: string, subgraphUrl: string) {
           orderDirection: desc
           where: { market: $market, timestamp_lte: $start }
         ) {
-          smartPoolShares
-          smartPoolAssets
-          smartPoolEarningsAccumulator
+          floatingDepositShares
+          floatingAssets
+          earningsAccumulator
         }
         final: marketUpdateds(
           first: 1
@@ -45,15 +45,15 @@ async function getVariableAPY(market: string, subgraphUrl: string) {
           orderDirection: desc
           where: { market: $market }
         ) {
-          smartPoolShares
-          smartPoolAssets
-          smartPoolEarningsAccumulator
+          floatingDepositShares
+          floatingAssets
+          earningsAccumulator
         }
         initialAccumulatedEarningsAccrual: marketUpdateds(
           first: 1
           orderBy: timestamp
           orderDirection: desc
-          where: { market: $market, maturity: 0, timestamp_lte: $start }
+          where: { market: $market, timestamp_lte: $start }
         ) {
           timestamp
         }
@@ -61,22 +61,22 @@ async function getVariableAPY(market: string, subgraphUrl: string) {
           first: 1
           orderBy: timestamp
           orderDirection: desc
-          where: { market: $market, maturity: 0 }
+          where: { market: $market }
         ) {
           timestamp
         }
-        accumulatedEarningsSmoothFactor: accumulatedEarningsSmoothFactorSets(
+        accumulatedEarningsSmoothFactor: earningsAccumulatorSmoothFactorSets(
           first: 1
           orderBy: timestamp
           orderDirection: desc
           where: { market: $market }
         ) {
-          accumulatedEarningsSmoothFactor
+          earningsAccumulatorSmoothFactor
         }
         ${futurePools(timeWindow.start)
           .map(
             (maturity) => `
-          initial${maturity}: marketUpdateds(
+          initial${maturity}: marketUpdatedAtMaturities(
             first: 1
             orderBy: timestamp
             orderDirection: desc
@@ -92,7 +92,7 @@ async function getVariableAPY(market: string, subgraphUrl: string) {
         ${futurePools(timeWindow.end)
           .map(
             (maturity) => `
-          final${maturity}: marketUpdateds(
+          final${maturity}: marketUpdatedAtMaturities(
             first: 1
             orderBy: timestamp
             orderDirection: desc
@@ -113,9 +113,9 @@ async function getVariableAPY(market: string, subgraphUrl: string) {
           initial: [
             initial = {
               timestamp: 0,
-              smartPoolShares: '0',
-              smartPoolAssets: '0',
-              smartPoolEarningsAccumulator: '0'
+              floatingDepositShares: '0',
+              floatingAssets: '0',
+              earningsAccumulator: '0'
             }
           ],
           final: [final = initial],
@@ -131,18 +131,19 @@ async function getVariableAPY(market: string, subgraphUrl: string) {
             .filter(([key, res]: [string, [any]]) => res.length && key.startsWith(prefix))
             //@ts-expect-error
             .map(([, [fixedPool]]: [string, [any]]) => fixedPool);
+
         const totalAssets = (
           timestamp: number,
           marketState: {
-            smartPoolAssets: string;
-            smartPoolEarningsAccumulator: string;
+            floatingAssets: string;
+            earningsAccumulator: string;
           },
           accumulatedEarningsAccrual: { timestamp: number },
           maturities: { timestamp: number; maturity: number; maturityUnassignedEarnings: string }[]
         ) => {
           const elapsed = BigInt(timestamp - accumulatedEarningsAccrual.timestamp);
           return (
-            BigInt(marketState.smartPoolAssets) +
+            BigInt(marketState.floatingAssets) +
             maturities.reduce((smartPoolEarnings, fixedPool) => {
               const { timestamp: lastAccrual, maturity, maturityUnassignedEarnings } = fixedPool;
               return (
@@ -154,15 +155,16 @@ async function getVariableAPY(market: string, subgraphUrl: string) {
               );
             }, 0n) +
             (elapsed &&
-              (BigInt(marketState.smartPoolEarningsAccumulator) * elapsed) /
+              (BigInt(marketState.earningsAccumulator) * elapsed) /
                 (elapsed +
-                  (BigInt(accumulatedEarningsSmoothFactor.accumulatedEarningsSmoothFactor) *
+                  (BigInt(accumulatedEarningsSmoothFactor.earningsAccumulatorSmoothFactor) *
                     BigInt(MAX_FUTURE_POOLS * INTERVAL)) /
                     WAD))
           );
         };
 
-        const initialShares = BigInt(initial.smartPoolShares);
+        const initialShares = BigInt(initial.floatingDepositShares);
+
         const initialAssets = totalAssets(
           timeWindow.start,
           initial,
@@ -170,24 +172,28 @@ async function getVariableAPY(market: string, subgraphUrl: string) {
           fixedPools('initial')
         );
 
-        const finalShares = BigInt(final.smartPoolShares);
+        const finalShares = BigInt(final.floatingDepositShares);
         const finalAssets = totalAssets(
           timeWindow.end,
           final,
           finalAccumulatedEarningsAccrual,
           fixedPools('final')
         );
-        const denominatorFallback = initialShares ? (initialAssets * WAD) / initialShares : WAD;
 
-        const result = (((finalAssets * WAD) / finalShares) * WAD) / denominatorFallback;
+        try {
+          const denominatorFallback = initialShares ? (initialAssets * WAD) / initialShares : WAD;
 
-        const parsedResult = ethers.utils.formatUnits(result, 18);
+          const result = (((finalAssets * WAD) / finalShares) * WAD) / denominatorFallback;
+          const parsedResult = ethers.utils.formatUnits(result, 18);
 
-        const time = 31536000 / (timeWindow.end - timeWindow.start);
+          const time = 31536000 / (timeWindow.end - timeWindow.start);
 
-        const APY = (Math.pow(parseFloat(parsedResult), time) - 1) * 100;
+          const APY = (Math.pow(parseFloat(parsedResult), time) - 1) * 100;
 
-        return APY.toFixed(2);
+          return APY.toFixed(2);
+        } catch (e) {
+          return '0.00';
+        }
       }
     );
 }

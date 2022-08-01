@@ -54,6 +54,16 @@ const Pools: NextPage<Props> = () => {
   }, [modal, modalContent]);
 
   useEffect(() => {
+    const interval = setInterval(() => {
+      getAccountData();
+    }, 30000);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [walletAddress, Previewer]);
+
+  useEffect(() => {
     if (Previewer) {
       getMarkets();
     }
@@ -67,7 +77,7 @@ const Pools: NextPage<Props> = () => {
     try {
       const previewerContract = getContractData(network?.name!, Previewer.address!, Previewer.abi!);
 
-      const marketsData = await previewerContract?.accounts(ethers.constants.AddressZero);
+      const marketsData = await previewerContract?.exactly(ethers.constants.AddressZero);
 
       setMarkets(formatMarkets(marketsData));
     } catch (e) {
@@ -78,7 +88,7 @@ const Pools: NextPage<Props> = () => {
   async function getAccountData() {
     try {
       const previewerContract = getContractData(network?.name, Previewer.address!, Previewer.abi!);
-      const data = await previewerContract?.accounts(
+      const data = await previewerContract?.exactly(
         walletAddress || '0x000000000000000000000000000000000000dEaD'
       );
 

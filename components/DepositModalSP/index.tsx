@@ -176,7 +176,7 @@ function DepositModalSP({ data, closeModal }: Props) {
   async function getUserDeposits() {
     if (!walletAddress || !symbol || !accountData) return;
 
-    const amount = accountData[symbol.toUpperCase()]?.smartPoolAssets;
+    const amount = accountData[symbol.toUpperCase()]?.floatingDepositAssets;
     const decimals = await underlyingContract?.decimals();
 
     const formattedAmount =

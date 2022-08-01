@@ -1,8 +1,8 @@
 import rinkebyAuditor from 'protocol/deployments/rinkeby/Auditor.json';
-import rinkebyFixedLenderDAI from 'protocol/deployments/rinkeby/FixedLenderDAI.json';
-import rinkebyFixedLenderWETH from 'protocol/deployments/rinkeby/FixedLenderWETH.json';
-import rinkebyFixedLenderWBTC from 'protocol/deployments/rinkeby/FixedLenderWBTC.json';
-import rinkebyFixedLenderUSDC from 'protocol/deployments/rinkeby/FixedLenderUSDC.json';
+import rinkebyFixedLenderDAI from 'protocol/deployments/rinkeby/MarketDAI.json';
+import rinkebyFixedLenderWETH from 'protocol/deployments/rinkeby/MarketWETH.json';
+import rinkebyFixedLenderWBTC from 'protocol/deployments/rinkeby/MarketWBTC.json';
+import rinkebyFixedLenderUSDC from 'protocol/deployments/rinkeby/MarketUSDC.json';
 import rinkebyPreviewer from 'protocol/deployments/rinkeby/Previewer.json';
 
 import { Dictionary } from 'types/Dictionary';

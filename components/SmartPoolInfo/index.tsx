@@ -42,11 +42,11 @@ function SmartPoolInfo({ showModal, symbol, fixedLender }: Props) {
 
   async function getSmartPoolData() {
     if (!accountData || !symbol) return;
-
     try {
-      const borrowed = await fixedLender?.smartPoolBorrowed();
-      const supplied = await fixedLender?.smartPoolAssets();
-      const decimals = await fixedLender?.decimals();
+      const borrowed = accountData[symbol.toUpperCase()].totalFloatingBorrowAssets;
+      const supplied = accountData[symbol.toUpperCase()].totalFloatingDepositAssets;
+      const decimals = accountData[symbol.toUpperCase()].decimals;
+
       const exchangeRate = parseFloat(ethers.utils.formatEther(accountData[symbol].oraclePrice));
 
       const newPoolData = {

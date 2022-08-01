@@ -97,17 +97,22 @@ function Item({ market, showModal, type }: Props) {
     setRate(undefined);
 
     try {
-      const { borrowed, supplied } = await fixedLender?.fixedPools(date?.value);
+      const pool = accountData[market?.symbol.toUpperCase()].fixedPools.find((pool) => {
+        return pool.maturity.toString() == date?.value;
+      });
+      const decimals = accountData[market?.symbol.toUpperCase()].decimals;
 
-      const decimals = await fixedLender?.decimals();
+      if (!pool) {
+        return;
+      }
 
       const exchangeRate = parseFloat(
         ethers.utils.formatEther(accountData[market?.symbol.toUpperCase()].oraclePrice)
       );
 
       const newPoolData = {
-        borrowed: parseFloat(await ethers.utils.formatUnits(borrowed, decimals)),
-        supplied: parseFloat(await ethers.utils.formatUnits(supplied, decimals)),
+        borrowed: parseFloat(await ethers.utils.formatUnits(pool.borrowed, decimals)),
+        supplied: parseFloat(await ethers.utils.formatUnits(pool.supplied, decimals)),
         rate: exchangeRate
       };
 
@@ -118,7 +123,7 @@ function Item({ market, showModal, type }: Props) {
 
     try {
       const subgraphUrl = getSubgraph(network?.name);
-      const decimals = await fixedLender?.decimals();
+      const decimals = accountData[market?.symbol.toUpperCase()].decimals;
 
       let allAPYbyAmount = 0;
       let allAmounts = 0;
@@ -159,15 +164,16 @@ function Item({ market, showModal, type }: Props) {
           allAmounts += depositAmount;
         });
       }
-      const avarageFixedAPY = allAPYbyAmount / allAmounts;
 
-      if (!avarageFixedAPY) return setRate('N/A');
+      const averageFixedAPY = allAPYbyAmount / allAmounts;
 
-      if (avarageFixedAPY <= 0.01) {
+      if (!averageFixedAPY) return setRate('N/A');
+
+      if (averageFixedAPY <= 0.01) {
         return setRate('N/A');
       }
 
-      setRate(`${avarageFixedAPY.toFixed(2)}%`);
+      setRate(`${averageFixedAPY.toFixed(2)}%`);
     } catch (e) {
       console.log(e);
     }
