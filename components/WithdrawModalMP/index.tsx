@@ -34,6 +34,7 @@ import styles from './style.module.scss';
 import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 import FixedLenderContext from 'contexts/FixedLenderContext';
+import PreviewerContext from 'contexts/PreviewerContext';
 
 import decimals from 'config/decimals.json';
 import numbers from 'config/numbers.json';
@@ -54,6 +55,7 @@ function WithdrawModalMP({ data, closeModal }: Props) {
   const translations: { [key: string]: LangKeys } = keys;
 
   const fixedLenderData = useContext(FixedLenderContext);
+  const previewerData = useContext(PreviewerContext);
 
   const parsedFee = ethers.utils.formatUnits(fee, decimals[symbol! as keyof Decimals]);
   const parsedAmount = ethers.utils.formatUnits(assets, decimals[symbol! as keyof Decimals]);
@@ -69,6 +71,7 @@ function WithdrawModalMP({ data, closeModal }: Props) {
   const [isEarlyWithdraw, setIsEarlyWithdraw] = useState<boolean>(false);
   const [error, setError] = useState<Error | undefined>(undefined);
   const [needsApproval, setNeedsApproval] = useState<boolean>(false);
+  const [withdrawAmount, setWithdrawAmount] = useState<string>('0');
 
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
     undefined
@@ -76,6 +79,12 @@ function WithdrawModalMP({ data, closeModal }: Props) {
 
   const ETHrouter =
     web3Provider && symbol == 'WETH' && handleEth(network?.name, web3Provider?.getSigner());
+
+  const previewerContract = getContractData(
+    network?.name,
+    previewerData.address!,
+    previewerData.abi!
+  );
 
   useEffect(() => {
     getFixedLenderContract();
@@ -105,6 +114,11 @@ function WithdrawModalMP({ data, closeModal }: Props) {
       estimateGas();
     }
   }, [fixedLenderWithSigner]);
+
+  useEffect(() => {
+    if (qty == '') return;
+    previewWithdrawAtMaturity();
+  }, [qty]);
 
   async function checkAllowance() {
     if (symbol != 'WETH' || !ETHrouter || !walletAddress || !fixedLenderWithSigner) return;
@@ -137,6 +151,25 @@ function WithdrawModalMP({ data, closeModal }: Props) {
     setQty(e.target.value);
   }
 
+  async function previewWithdrawAtMaturity() {
+    const decimals = await fixedLenderWithSigner?.decimals();
+    const market = fixedLenderWithSigner?.address;
+    const parsedMaturity = parseInt(maturity);
+    const parsedQtyValue = ethers.utils.parseUnits(qty, decimals);
+
+    const earlyWithdrawAmount = await previewerContract?.previewWithdrawAtMaturity(
+      market,
+      parsedMaturity,
+      parsedQtyValue
+    );
+
+    const formatWithdrawAmount = ethers.utils.formatUnits(earlyWithdrawAmount, decimals);
+    const minimumWithdrawAmount = parseFloat(formatWithdrawAmount) * (1 - numbers.slippage);
+
+    setWithdrawAmount(formatWithdrawAmount);
+    setSlippage(formatNumber(minimumWithdrawAmount, symbol!, true));
+  }
+
   async function withdraw() {
     setLoading(true);
 
@@ -166,20 +199,31 @@ function WithdrawModalMP({ data, closeModal }: Props) {
 
       setTx({ status: 'processing', hash: withdraw?.hash });
 
-      const status = await withdraw.wait();
+      const txReceipt = await withdraw.wait();
 
       setLoading(false);
 
-      setTx({ status: 'success', hash: status?.transactionHash });
+      if (txReceipt.status == 1) {
+        setTx({ status: 'success', hash: txReceipt?.transactionHash });
+      } else {
+        setTx({ status: 'error', hash: txReceipt?.transactionHash });
+      }
     } catch (e: any) {
+      console.log(e);
       setLoading(false);
 
       const isDenied = e?.message?.includes('User denied');
-
-      setError({
-        status: true,
-        message: isDenied && translations[lang].deniedTransaction
-      });
+      if (isDenied) {
+        setError({
+          status: true,
+          message: isDenied && translations[lang].deniedTransaction
+        });
+      } else {
+        setError({
+          status: true,
+          message: translations[lang].generalError
+        });
+      }
     }
   }
 
@@ -288,8 +332,8 @@ function WithdrawModalMP({ data, closeModal }: Props) {
                   text={translations[lang].amountToReceive}
                   value={
                     isEarlyWithdraw
-                      ? formatNumber(qty || 0, symbol!)
-                      : formatNumber(finalAmount, symbol!)
+                      ? formatNumber(withdrawAmount, symbol!, true)
+                      : formatNumber(finalAmount, symbol!, true)
                   }
                   line
                 />
@@ -325,7 +369,7 @@ function WithdrawModalMP({ data, closeModal }: Props) {
               </div>
             </>
           )}
-          {tx && <ModalGif tx={tx} />}
+          {tx && <ModalGif tx={tx} tryAgain={withdraw} />}
         </ModalWrapper>
       )}
 

@@ -79,7 +79,7 @@ function DashboardHeader() {
       };
 
       const smartPoolDepositValue = parseFloat(
-        ethers.utils.formatUnits(fixedLender.smartPoolAssets, decimals)
+        ethers.utils.formatUnits(fixedLender.floatingDepositAssets, decimals)
       );
       const smartPoolDepositValueUSD = smartPoolDepositValue * oracle;
 
@@ -87,7 +87,7 @@ function DashboardHeader() {
       allDepositsUSD += smartPoolDepositValueUSD; //add the value in USD to the total deposit
       variableComposition += smartPoolDepositValueUSD; //add the value in USD to the variable composition %
 
-      fixedLender.maturitySupplyPositions.forEach((supplyPosition) => {
+      fixedLender.fixedDepositPositions.forEach((supplyPosition) => {
         const maturityDepositValue = parseFloat(
           ethers.utils.formatUnits(supplyPosition.position.principal, decimals)
         );
@@ -182,7 +182,9 @@ function DashboardHeader() {
       const collateralFactor = parseFloat(ethers.utils.formatUnits(fixedLender.adjustFactor, 18));
 
       if (fixedLender.isCollateral) {
-        const assets = parseFloat(ethers.utils.formatUnits(fixedLender.smartPoolAssets, decimals));
+        const assets = parseFloat(
+          ethers.utils.formatUnits(fixedLender.floatingDepositAssets, decimals)
+        );
 
         collateral += assets * oracle * collateralFactor;
       }

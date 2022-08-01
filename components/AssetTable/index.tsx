@@ -13,7 +13,7 @@ import Item from './Item';
 interface Props {
   maturities: Array<Maturity> | undefined;
   market: string | undefined;
-  showModal: (type: string, maturity: string | undefined) => void;
+  showModal: (maturity: string | undefined, type: string) => void;
   deposits: Array<Maturity> | undefined;
   borrows: Array<Maturity> | undefined;
 }

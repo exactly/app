@@ -16,6 +16,7 @@ import DepositModalMP from 'components/DepositModalMP';
 import BorrowModal from 'components/BorrowModal';
 import DepositModalSP from 'components/DepositModalSP';
 import Footer from 'components/Footer';
+import FaucetModal from 'components/FaucetModal';
 
 import { Maturity } from 'types/Maturity';
 import { LangKeys } from 'types/Lang';
@@ -79,7 +80,7 @@ const Asset: NextPage<Props> = ({ symbol }) => {
   }, [fixedLenderContract]);
 
   useEffect(() => {
-    if (!maturities && Previewer) {
+    if (Previewer) {
       getMarketData();
     }
   }, [Previewer, symbol]);
@@ -115,7 +116,7 @@ const Asset: NextPage<Props> = ({ symbol }) => {
 
   async function getMarketData() {
     try {
-      const marketsData = await previewerContract?.accounts(
+      const marketsData = await previewerContract?.exactly(
         '0x000000000000000000000000000000000000dEaD'
       );
 
@@ -125,30 +126,46 @@ const Asset: NextPage<Props> = ({ symbol }) => {
 
       const {
         market,
+        decimals,
         assetSymbol,
-        maturitySupplyPositions,
-        fixedBorrowPositions,
-        smartPoolAssets,
-        smartPoolShares,
         oraclePrice,
         penaltyRate,
         adjustFactor,
-        decimals,
-        isCollateral
+        maxFuturePools,
+        fixedPools,
+        floatingBackupBorrowed,
+        floatingAvailableAssets,
+        totalFloatingBorrowAssets,
+        totalFloatingDepositAssets,
+        isCollateral,
+        floatingBorrowShares,
+        floatingBorrowAssets,
+        floatingDepositShares,
+        floatingDepositAssets,
+        fixedDepositPositions,
+        fixedBorrowPositions
       } = filteredMarket;
 
       setMarketData({
         market,
+        decimals,
         assetSymbol,
-        maturitySupplyPositions,
-        fixedBorrowPositions,
-        smartPoolAssets,
-        smartPoolShares,
         oraclePrice,
         penaltyRate,
         adjustFactor,
-        decimals,
-        isCollateral
+        maxFuturePools,
+        fixedPools,
+        floatingBackupBorrowed,
+        floatingAvailableAssets,
+        totalFloatingBorrowAssets,
+        totalFloatingDepositAssets,
+        isCollateral,
+        floatingBorrowShares,
+        floatingBorrowAssets,
+        floatingDepositShares,
+        floatingDepositAssets,
+        fixedDepositPositions,
+        fixedBorrowPositions
       });
     } catch (e) {
       console.log(e);
@@ -188,7 +205,7 @@ const Asset: NextPage<Props> = ({ symbol }) => {
 
   async function getAccountData() {
     try {
-      const data = await previewerContract?.accounts(
+      const data = await previewerContract?.exactly(
         walletAddress ?? '0x000000000000000000000000000000000000dEaD'
       );
 
@@ -221,13 +238,14 @@ const Asset: NextPage<Props> = ({ symbol }) => {
     setFixedLenderContract(fixedLender);
   }
 
-  function showModal(type: string, maturity: string | undefined) {
+  function showModal(maturity: string | undefined, type: string) {
     if (network && !allowedNetworks.includes(network?.name)) return;
 
     if (modalContent?.type) {
       //in the future we should handle the minimized modal status through a context here
       return;
     }
+
     if (marketData) {
       const market = {
         market: marketData.market,
@@ -250,7 +268,9 @@ const Asset: NextPage<Props> = ({ symbol }) => {
             <FixedLenderProvider value={FixedLenders}>
               <MobileNavbar />
               <Navbar />
-              <CurrentNetwork />
+              <CurrentNetwork showModal={showModal} />
+
+              {modal && modalContent?.type == 'faucet' && <FaucetModal closeModal={handleModal} />}
 
               {modal && modalContent?.type == 'deposit' && (
                 <DepositModalMP data={modalContent} closeModal={handleModal} />

@@ -6,7 +6,8 @@
     "healthFactor": "Health Factor",
     "borrowLimit": "Borrow Limit",
     "insufficientBalance": "You can't withdraw more than the deposited amount",
-    "deniedTransaction": "Transaction rejected"
+    "deniedTransaction": "Transaction rejected",
+    "generalError": "There was an error, please try again"
   },
   "es": {}
 }

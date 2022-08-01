@@ -16,12 +16,12 @@ import keys from './translations.json';
 type Props = {
   maturity: Maturity | undefined;
   market: string | undefined;
-  showModal: (type: string, maturity: string | undefined) => void | undefined;
+  showModal: (maturity: string | undefined, type: string) => void | undefined;
   deposits: Array<Maturity> | undefined;
   borrows: Array<Maturity> | undefined;
 };
 
-function Item({ maturity, market, showModal, deposits, borrows }: Props) {
+function Item({ maturity, showModal, deposits, borrows }: Props) {
   const { walletAddress, connect } = useWeb3Context();
 
   const lang: string = useContext(LangContext);
@@ -46,7 +46,7 @@ function Item({ maturity, market, showModal, deposits, borrows }: Props) {
 
   function handleClick(type: string, maturity: string) {
     if (!walletAddress && connect) return connect();
-    showModal(type, maturity);
+    showModal(maturity, type);
   }
 
   return (

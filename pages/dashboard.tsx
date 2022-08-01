@@ -17,6 +17,7 @@ import BorrowModal from 'components/BorrowModal';
 import DashboardHeader from 'components/DashboardHeader';
 import Tabs from 'components/Tabs';
 import EmptyState from 'components/EmptyState';
+import FaucetModal from 'components/FaucetModal';
 
 import { AuditorProvider } from 'contexts/AuditorContext';
 import { FixedLenderProvider } from 'contexts/FixedLenderContext';
@@ -61,6 +62,15 @@ const DashBoard: NextPage<Props> = () => {
   const [tab, setTab] = useState<Option>(tabDeposit);
 
   useEffect(() => {
+    if ((!modal || modalContent == {}) && Previewer) {
+      setTimeout(() => {
+        if (!walletAddress) return;
+        getAccountData();
+      }, 5000);
+    }
+  }, [modal, modalContent]);
+
+  useEffect(() => {
     if (!walletAddress) return;
     getAccountData();
   }, [walletAddress]);
@@ -68,7 +78,7 @@ const DashBoard: NextPage<Props> = () => {
   async function getAccountData() {
     try {
       const previewerContract = getContractData(network?.name, Previewer.address!, Previewer.abi!);
-      const data = await previewerContract?.accounts(walletAddress);
+      const data = await previewerContract?.exactly(walletAddress);
       const newAccountData: AccountData = {};
 
       data.forEach((fixedLender: FixedLenderAccountData) => {
@@ -97,6 +107,10 @@ const DashBoard: NextPage<Props> = () => {
           <AccountDataProvider value={{ accountData, setAccountData }}>
             <AuditorProvider value={Auditor}>
               <FixedLenderProvider value={FixedLenders}>
+                {modal && modalContent?.type == 'faucet' && (
+                  <FaucetModal closeModal={handleModal} />
+                )}
+
                 {modal && modalContent?.type == 'borrow' && (
                   <BorrowModal data={modalContent} closeModal={handleModal} editable />
                 )}
@@ -123,7 +137,7 @@ const DashBoard: NextPage<Props> = () => {
 
                 <MobileNavbar />
                 <Navbar />
-                <CurrentNetwork />
+                <CurrentNetwork showModal={showModal} />
                 <DashboardHeader />
                 <Tabs
                   values={[tabDeposit, tabBorrow]}

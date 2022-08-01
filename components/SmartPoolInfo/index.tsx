@@ -13,13 +13,12 @@ import styles from './style.module.scss';
 import keys from './translations.json';
 
 import Button from 'components/common/Button';
-import Tooltip from 'components/Tooltip';
 
 import parseSymbol from 'utils/parseSymbol';
 import formatNumber from 'utils/formatNumber';
 
 interface Props {
-  showModal: (type: string, maturity: string | undefined) => void;
+  showModal: (maturity: string | undefined, type: string) => void;
   symbol: string;
   fixedLender: Contract | undefined;
 }
@@ -43,11 +42,11 @@ function SmartPoolInfo({ showModal, symbol, fixedLender }: Props) {
 
   async function getSmartPoolData() {
     if (!accountData || !symbol) return;
-
     try {
-      const borrowed = await fixedLender?.smartPoolBorrowed();
-      const supplied = await fixedLender?.smartPoolAssets();
-      const decimals = await fixedLender?.decimals();
+      const borrowed = accountData[symbol.toUpperCase()].totalFloatingBorrowAssets;
+      const supplied = accountData[symbol.toUpperCase()].totalFloatingDepositAssets;
+      const decimals = accountData[symbol.toUpperCase()].decimals;
+
       const exchangeRate = parseFloat(ethers.utils.formatEther(accountData[symbol].oraclePrice));
 
       const newPoolData = {
@@ -65,7 +64,7 @@ function SmartPoolInfo({ showModal, symbol, fixedLender }: Props) {
   function handleClick() {
     if (!walletAddress && connect) return connect();
 
-    showModal('smartDeposit', undefined);
+    showModal(undefined, 'smartDeposit');
   }
 
   return (

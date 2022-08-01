@@ -39,6 +39,7 @@ import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 import FixedLenderContext from 'contexts/FixedLenderContext';
 import AccountDataContext from 'contexts/AccountDataContext';
+import PreviewerContext from 'contexts/PreviewerContext';
 
 import decimals from 'config/decimals.json';
 import numbers from 'config/numbers.json';
@@ -55,6 +56,7 @@ function RepayModal({ data, closeModal }: Props) {
 
   const { walletAddress, web3Provider, network } = useWeb3Context();
   const { accountData } = useContext(AccountDataContext);
+  const previewerData = useContext(PreviewerContext);
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
@@ -76,11 +78,18 @@ function RepayModal({ data, closeModal }: Props) {
   const [loading, setLoading] = useState<boolean>(false);
   const [healthFactor, setHealthFactor] = useState<HealthFactor | undefined>(undefined);
   const [collateralFactor, setCollateralFactor] = useState<number | undefined>(undefined);
+  const [repayAmount, setRepayAmount] = useState<string>('0');
 
   const [error, setError] = useState<Error | undefined>(undefined);
 
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
     undefined
+  );
+
+  const previewerContract = getContractData(
+    network?.name,
+    previewerData.address!,
+    previewerData.abi!
   );
 
   useEffect(() => {
@@ -98,6 +107,11 @@ function RepayModal({ data, closeModal }: Props) {
 
     setIsLateRepay(repay);
   }, [maturity]);
+
+  useEffect(() => {
+    if (qty == '') return;
+    previewRepayAtMaturity();
+  }, [qty]);
 
   async function getFixedLenderContract() {
     const filteredFixedLender = fixedLenderData.find((contract) => {
@@ -124,6 +138,27 @@ function RepayModal({ data, closeModal }: Props) {
     setQty(e.target.value);
   }
 
+  async function previewRepayAtMaturity() {
+    const decimals = await fixedLenderWithSigner?.decimals();
+    const market = fixedLenderWithSigner?.address;
+    const parsedMaturity = parseInt(maturity);
+    const parsedQtyValue = ethers.utils.parseUnits(qty, decimals);
+
+    const earlyRepayAmount = await previewerContract?.previewRepayAtMaturity(
+      market,
+      parsedMaturity,
+      parsedQtyValue,
+      walletAddress
+    );
+
+    const formatRepayAmount = ethers.utils.formatUnits(earlyRepayAmount, decimals);
+
+    const maximumRepayAmount = parseFloat(formatRepayAmount) * (1 + numbers.slippage);
+
+    setRepayAmount(formatRepayAmount);
+    setSlippage(formatNumber(maximumRepayAmount, symbol!, true));
+  }
+
   async function repay() {
     setLoading(true);
 
@@ -148,21 +183,31 @@ function RepayModal({ data, closeModal }: Props) {
 
       setTx({ status: 'processing', hash: repay?.hash });
 
-      const status = await repay.wait();
+      const txReceipt = await repay.wait();
 
       setLoading(false);
 
-      setTx({ status: 'success', hash: status?.transactionHash });
+      if (txReceipt.status == 1) {
+        setTx({ status: 'success', hash: txReceipt?.transactionHash });
+      } else {
+        setTx({ status: 'error', hash: txReceipt?.transactionHash });
+      }
     } catch (e: any) {
       console.log(e);
       setLoading(false);
 
       const isDenied = e?.message?.includes('User denied');
-
-      setError({
-        status: true,
-        message: isDenied && translations[lang].deniedTransaction
-      });
+      if (isDenied) {
+        setError({
+          status: true,
+          message: isDenied && translations[lang].deniedTransaction
+        });
+      } else {
+        setError({
+          status: true,
+          message: translations[lang].generalError
+        });
+      }
     }
   }
 
@@ -225,11 +270,7 @@ function RepayModal({ data, closeModal }: Props) {
                 value={formatNumber(finalAmount, symbol!)}
               />
               <ModalExpansionPanelWrapper>
-                <ModalRow
-                  text={translations[lang].amountToPay}
-                  value={qty && parseFloat(qty) > 0 ? formatNumber(qty, symbol!) : '0'}
-                  line
-                />
+                <ModalRow text={translations[lang].amountToPay} value={repayAmount} line />
 
                 <ModalRowEditable
                   text={translations[lang].maximumAmountToPay}
@@ -278,7 +319,7 @@ function RepayModal({ data, closeModal }: Props) {
               </div>
             </>
           )}
-          {tx && <ModalGif tx={tx} />}
+          {tx && <ModalGif tx={tx} tryAgain={repay} />}
         </ModalWrapper>
       )}
 

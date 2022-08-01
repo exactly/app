@@ -3,6 +3,7 @@
   position: fixed;
   top: var(--navbarHeight);
   z-index: 3;
+  cursor: pointer;
 
   .alertContainer {
     width: 100%;
@@ -12,6 +13,11 @@
     justify-content: center;
     align-items: center;
     color: var(--white);
+    gap: var(--u2);
+
+    .buttonContainer {
+      width: 80px;
+    }
   }
 
   .error {

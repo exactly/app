@@ -3,7 +3,7 @@ export function getLastMaturityPoolBorrowRate(market: string, maturity: string) 
     {
       borrowAtMaturities(where:{market: "${market}", maturity: ${parseInt(
     maturity
-  )}}, orderBy: id, orderDirection: desc){          
+  )}}, orderBy: timestamp, orderDirection: desc){          
         fee
         assets
         id

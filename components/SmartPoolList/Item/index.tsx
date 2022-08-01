@@ -46,18 +46,6 @@ function Item({ market, showModal }: Props) {
 
   const [fixedLender, setFixedLender] = useState<Contract | undefined>(undefined);
 
-  const [time, setTime] = useState(Date.now());
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTime(Date.now());
-    }, 30000);
-
-    return () => {
-      clearInterval(interval);
-    };
-  }, []);
-
   async function getFixedLenderContract() {
     if (!market) return;
 
@@ -81,7 +69,7 @@ function Item({ market, showModal }: Props) {
     if (date?.value && fixedLender) {
       getMarketData();
     }
-  }, [date, time, accountData, market]);
+  }, [date, accountData, market]);
 
   function handleClick() {
     if (!market || !showModal) return;
@@ -96,11 +84,10 @@ function Item({ market, showModal }: Props) {
 
     setPoolData(undefined);
     setRate(undefined);
-
     try {
-      const borrowed = await fixedLender?.smartPoolBorrowed();
-      const supplied = await fixedLender?.smartPoolAssets();
-      const decimals = await fixedLender?.decimals();
+      const borrowed = accountData[market?.symbol.toUpperCase()].totalFloatingBorrowAssets;
+      const supplied = accountData[market?.symbol.toUpperCase()].totalFloatingDepositAssets;
+      const decimals = accountData[market?.symbol.toUpperCase()].decimals;
 
       const exchangeRate = parseFloat(
         ethers.utils.formatEther(accountData[market?.symbol.toUpperCase()].oraclePrice)

@@ -1,7 +1,6 @@
 import { Contract, ethers } from 'ethers';
 
-import rinkebyRouter from 'protocol/deployments/rinkeby/FixedLenderETHRouter.json';
-import rinkebyFixedLenderWETH from 'protocol/deployments/rinkeby/FixedLenderWETH.json';
+import rinkebyRouter from 'protocol/deployments/rinkeby/MarketETHRouter.json';
 
 import { getContractData } from './contracts';
 

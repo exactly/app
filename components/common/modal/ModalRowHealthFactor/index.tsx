@@ -57,7 +57,9 @@ function ModalRowHealthFactor({ qty, symbol, operation, healthFactorCallback }: 
       const collateralFactor = parseFloat(ethers.utils.formatUnits(fixedLender.adjustFactor, 18));
 
       if (fixedLender.isCollateral) {
-        const assets = parseFloat(ethers.utils.formatUnits(fixedLender.smartPoolAssets, decimals));
+        const assets = parseFloat(
+          ethers.utils.formatUnits(fixedLender.floatingDepositAssets, decimals)
+        );
 
         collateral += assets * oracle * collateralFactor;
       }

@@ -13,6 +13,7 @@ import SmartPoolList from 'components/SmartPoolList';
 import DepositModalMP from 'components/DepositModalMP';
 import BorrowModal from 'components/BorrowModal';
 import DepositModalSP from 'components/DepositModalSP';
+import FaucetModal from 'components/FaucetModal';
 
 import useModal from 'hooks/useModal';
 
@@ -53,6 +54,16 @@ const Pools: NextPage<Props> = () => {
   }, [modal, modalContent]);
 
   useEffect(() => {
+    const interval = setInterval(() => {
+      getAccountData();
+    }, 30000);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [walletAddress, Previewer]);
+
+  useEffect(() => {
     if (Previewer) {
       getMarkets();
     }
@@ -60,13 +71,13 @@ const Pools: NextPage<Props> = () => {
 
   useEffect(() => {
     getAccountData();
-  }, [walletAddress]);
+  }, [walletAddress, Previewer]);
 
   async function getMarkets() {
     try {
       const previewerContract = getContractData(network?.name!, Previewer.address!, Previewer.abi!);
 
-      const marketsData = await previewerContract?.accounts(ethers.constants.AddressZero);
+      const marketsData = await previewerContract?.exactly(ethers.constants.AddressZero);
 
       setMarkets(formatMarkets(marketsData));
     } catch (e) {
@@ -77,7 +88,7 @@ const Pools: NextPage<Props> = () => {
   async function getAccountData() {
     try {
       const previewerContract = getContractData(network?.name, Previewer.address!, Previewer.abi!);
-      const data = await previewerContract?.accounts(
+      const data = await previewerContract?.exactly(
         walletAddress || '0x000000000000000000000000000000000000dEaD'
       );
 
@@ -150,6 +161,7 @@ const Pools: NextPage<Props> = () => {
         <PreviewerProvider value={Previewer}>
           <AccountDataProvider value={{ accountData, setAccountData }}>
             <FixedLenderProvider value={FixedLenders}>
+              {modal && modalContent?.type == 'faucet' && <FaucetModal closeModal={handleModal} />}
               {modal && modalContent?.type == 'deposit' && (
                 <DepositModalMP data={modalContent} closeModal={handleModal} />
               )}
@@ -164,7 +176,7 @@ const Pools: NextPage<Props> = () => {
 
               <MobileNavbar />
               <Navbar />
-              <CurrentNetwork />
+              <CurrentNetwork showModal={showModal} />
 
               <div style={{ marginTop: '180px' }}>
                 <SmartPoolList markets={markets} showModal={showModal} />

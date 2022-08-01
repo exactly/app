@@ -60,7 +60,7 @@ function Item({
 
   useEffect(() => {
     getCurrentBalance();
-  }, [underlyingData, walletAddress]);
+  }, [underlyingData, walletAddress, accountData]);
 
   useEffect(() => {
     if (accountData) {

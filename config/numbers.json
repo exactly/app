@@ -3,5 +3,6 @@
   "approvalAmount": 90000000000,
   "estimateGasAmount": 0.00001,
   "daysToWarning": 2,
-  "daysToError": 0
+  "daysToError": 0,
+  "slippage": 0.05
 }

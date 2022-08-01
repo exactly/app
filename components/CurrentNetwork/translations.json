@@ -2,7 +2,8 @@
   "en": {
     "connectedTo": "You are connected to",
     "network": "network",
-    "disconnected": "Please connect your wallet"
+    "disconnected": "Please connect your wallet",
+    "faucet": "- Click here to faucet"
   },
   "es": {}
 }

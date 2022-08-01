@@ -45,6 +45,8 @@ import AccountDataContext from 'contexts/AccountDataContext';
 
 import keys from './translations.json';
 
+import numbers from 'config/numbers.json';
+
 type Props = {
   data: Borrow | Deposit;
   editable?: boolean;
@@ -71,7 +73,7 @@ function BorrowModal({ data, editable, closeModal }: Props) {
   const [tx, setTx] = useState<Transaction | undefined>(undefined);
   const [minimized, setMinimized] = useState<Boolean>(false);
   const [fixedRate, setFixedRate] = useState<string | undefined>(undefined);
-  const [slippage, setSlippage] = useState<string>('10.00');
+  const [slippage, setSlippage] = useState<string>('0.00');
   const [editSlippage, setEditSlippage] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [healthFactor, setHealthFactor] = useState<HealthFactor | undefined>(undefined);
@@ -125,10 +127,10 @@ function BorrowModal({ data, editable, closeModal }: Props) {
   }, [underlyingContract, fixedLenderWithSigner]);
 
   useEffect(() => {
-    if (fixedLenderWithSigner && !gas) {
+    if (fixedLenderWithSigner && !gas && accountData) {
       estimateGas();
     }
-  }, [fixedLenderWithSigner]);
+  }, [fixedLenderWithSigner, accountData]);
 
   useEffect(() => {
     if (fixedLenderWithSigner) {
@@ -210,9 +212,13 @@ function BorrowModal({ data, editable, closeModal }: Props) {
           message: translations[lang].notEnoughSlippage
         });
       }
-      //save the demo
-      const maxAmount = parseFloat(qty!) * 1.5;
+
+      const currentTimestamp = new Date().getTime() / 1000;
+      const time = (parseInt(date?.value ?? maturity) - currentTimestamp) / 31536000;
+      const apy = parseFloat(slippage) / 100;
       const decimals = await fixedLenderWithSigner?.decimals();
+
+      const maxAmount = parseFloat(qty!) * Math.pow(1 + apy, time);
 
       let borrow;
 
@@ -236,20 +242,32 @@ function BorrowModal({ data, editable, closeModal }: Props) {
 
       setTx({ status: 'processing', hash: borrow?.hash });
 
-      const status = await borrow.wait();
+      const txReceipt = await borrow.wait();
       setLoading(false);
 
-      setTx({ status: 'success', hash: status?.transactionHash });
+      if (txReceipt.status == 1) {
+        setTx({ status: 'success', hash: txReceipt?.transactionHash });
+      } else {
+        setTx({ status: 'error', hash: txReceipt?.transactionHash });
+      }
     } catch (e: any) {
+      console.log(e);
       setLoading(false);
-      const isDenied = e?.message?.includes('User denied');
 
-      setError({
-        status: true,
-        message: isDenied
-          ? translations[lang].deniedTransaction
-          : translations[lang].notEnoughSlippage
-      });
+      const isDenied = e?.message?.includes('User denied');
+      if (isDenied) {
+        setError({
+          status: true,
+          message: isDenied
+            ? translations[lang].deniedTransaction
+            : translations[lang].notEnoughSlippage
+        });
+      } else {
+        setError({
+          status: true,
+          message: translations[lang].generalError
+        });
+      }
     }
   }
 
@@ -258,23 +276,23 @@ function BorrowModal({ data, editable, closeModal }: Props) {
 
     const maturityDate = date?.value ?? maturity;
 
-    const maturityData = accountData[symbol].availableLiquidity?.find((data) => {
+    const maturityData = accountData[symbol].fixedPools?.find((data) => {
       return data.maturity.toString() == maturityDate;
     });
 
-    const decimals = await fixedLenderWithSigner?.decimals();
+    const decimals = accountData[symbol].decimals;
 
-    const limit = maturityData && ethers.utils.formatUnits(maturityData?.assets!, decimals);
+    const limit = maturityData && ethers.utils.formatUnits(maturityData?.available!, decimals);
 
     limit && setPoolLiquidity(parseFloat(limit));
   }
 
   async function estimateGas() {
-    if (symbol == 'WETH') return;
+    if (symbol == 'WETH' || !accountData) return;
 
     try {
       const gasPriceInGwei = await fixedLenderWithSigner?.provider.getGasPrice();
-      const decimals = await fixedLenderWithSigner?.decimals();
+      const decimals = accountData[symbol].decimals;
 
       const estimatedGasCost = await fixedLenderWithSigner?.estimateGas.borrowAtMaturity(
         parseInt(date?.value ?? maturity),
@@ -302,8 +320,9 @@ function BorrowModal({ data, editable, closeModal }: Props) {
 
   async function getFeeAtMaturity() {
     if (!accountData) return;
+
     try {
-      const decimals = await fixedLenderWithSigner?.decimals();
+      const decimals = accountData[symbol.toUpperCase()].decimals;
       const currentTimestamp = new Date().getTime() / 1000;
       const time = 31536000 / (parseInt(date?.value ?? maturity) - currentTimestamp);
       const oracle = ethers.utils.formatEther(accountData[symbol.toUpperCase()]?.oraclePrice);
@@ -318,10 +337,15 @@ function BorrowModal({ data, editable, closeModal }: Props) {
       );
 
       const rate =
-        (parseFloat(ethers.utils.formatUnits(feeAtMaturity, decimals)) - parseFloat(qtyValue)) /
+        (parseFloat(ethers.utils.formatUnits(feeAtMaturity.assets, decimals)) -
+          parseFloat(qtyValue)) /
         parseFloat(qtyValue);
 
       const fixedAPY = (Math.pow(1 + rate, time) - 1) * 100;
+
+      const slippageAPY = (fixedAPY * (1 + numbers.slippage)).toFixed(2);
+
+      setSlippage(slippageAPY);
 
       setFixedRate(`${fixedAPY.toFixed(2)}%`);
     } catch (e) {
@@ -415,7 +439,7 @@ function BorrowModal({ data, editable, closeModal }: Props) {
                   error?.message == translations[lang].notEnoughSlippage && setError(undefined);
                 }}
                 onClick={() => {
-                  if (slippage == '') setSlippage('10.00');
+                  if (slippage == '') setSlippage('0.00');
                   setEditSlippage((prev) => !prev);
                 }}
               />
@@ -453,7 +477,7 @@ function BorrowModal({ data, editable, closeModal }: Props) {
               </div>
             </>
           )}
-          {tx && <ModalGif tx={tx} />}
+          {tx && <ModalGif tx={tx} tryAgain={borrow} />}
         </ModalWrapper>
       )}
 

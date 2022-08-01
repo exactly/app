@@ -46,7 +46,7 @@ function AssetSelector({ title, defaultAddress, onChange }: Props) {
         previewerData.abi!
       );
 
-      const marketsData = await previewerContract?.accounts(
+      const marketsData = await previewerContract?.exactly(
         '0x000000000000000000000000000000000000dEaD'
       );
 

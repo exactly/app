@@ -12,11 +12,14 @@ import keys from './translations.json';
 import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 
+import Button from 'components/common/Button';
+
 type Props = {
   tx: Transaction;
+  tryAgain: (props: any) => void;
 };
 
-function ModalGif({ tx }: Props) {
+function ModalGif({ tx, tryAgain }: Props) {
   const { network } = useWeb3Context();
 
   const lang: string = useContext(LangContext);
@@ -55,14 +58,12 @@ function ModalGif({ tx }: Props) {
       </div>
       <h3 className={styles.title}>{options[tx.status].title}</h3>
 
-      {tx.status == 'error' ? (
-        <p className={styles.text}>{options[tx.status].text}</p>
-      ) : (
-        <p className={styles.hash}>
-          <span className={styles.hashTitle}>{translations[lang].transactionHash} </span>
-          {tx.hash}
-        </p>
-      )}
+      {tx.status == 'error' ?? <p className={styles.text}>{options[tx.status].text}</p>}
+
+      <p className={styles.hash}>
+        <span className={styles.hashTitle}>{translations[lang].transactionHash} </span>
+        {tx.hash}
+      </p>
 
       {tx.status != 'loading' && (
         <p className={styles.link}>
@@ -80,7 +81,11 @@ function ModalGif({ tx }: Props) {
         </p>
       )}
 
-      {tx.status == 'error' && <button> {translations[lang].errorButton}</button>}
+      {tx.status == 'error' && (
+        <div className={styles.buttonContainer}>
+          <Button text={translations[lang].errorButton} onClick={tryAgain} />
+        </div>
+      )}
     </div>
   );
 }

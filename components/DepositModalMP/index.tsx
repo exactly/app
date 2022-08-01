@@ -220,7 +220,11 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
   async function deposit() {
     try {
       const decimals = await fixedLenderWithSigner?.decimals();
-      const minAmount = parseFloat(qty!) * (1 + parseFloat(slippage) / 100);
+      const currentTimestamp = new Date().getTime() / 1000;
+      const time = (parseInt(date?.value ?? maturity) - currentTimestamp) / 31536000;
+      const apy = parseFloat(slippage) / 100;
+
+      const minAmount = parseFloat(qty!) * Math.pow(1 + apy, time);
 
       let deposit;
 
@@ -243,20 +247,32 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
 
       setTx({ status: 'processing', hash: deposit?.hash });
 
-      const status = await deposit.wait();
+      const txReceipt = await deposit.wait();
 
-      setTx({ status: 'success', hash: status?.transactionHash });
+      if (txReceipt.status == 1) {
+        setTx({ status: 'success', hash: txReceipt?.transactionHash });
+      } else {
+        setTx({ status: 'error', hash: txReceipt?.transactionHash });
+      }
     } catch (e: any) {
+      console.log(e);
+
       setLoading(false);
 
       const isDenied = e?.message?.includes('User denied');
-
-      setError({
-        status: true,
-        message: isDenied
-          ? translations[lang].deniedTransaction
-          : translations[lang].notEnoughSlippage
-      });
+      if (isDenied) {
+        setError({
+          status: true,
+          message: isDenied
+            ? translations[lang].deniedTransaction
+            : translations[lang].notEnoughSlippage
+        });
+      } else {
+        setError({
+          status: true,
+          message: translations[lang].generalError
+        });
+      }
     }
   }
 
@@ -335,7 +351,7 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
     if (!accountData) return;
 
     try {
-      const decimals = await fixedLenderWithSigner?.decimals();
+      const decimals = accountData[symbol.toUpperCase()]?.decimals;
       const currentTimestamp = new Date().getTime() / 1000;
       const time = 31536000 / (parseInt(date?.value ?? maturity) - currentTimestamp);
       const oracle = ethers.utils.formatEther(accountData[symbol.toUpperCase()]?.oraclePrice);
@@ -350,10 +366,15 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
       );
 
       const rate =
-        (parseFloat(ethers.utils.formatUnits(feeAtMaturity, decimals)) - parseFloat(qtyValue)) /
+        (parseFloat(ethers.utils.formatUnits(feeAtMaturity.assets, decimals)) -
+          parseFloat(qtyValue)) /
         parseFloat(qtyValue);
 
       const fixedAPY = (Math.pow(1 + rate, time) - 1) * 100;
+
+      const slippageAPY = (fixedAPY * (1 - numbers.slippage)).toFixed(2);
+
+      setSlippage(slippageAPY);
 
       setFixedRate(`${fixedAPY.toFixed(2)}%`);
     } catch (e) {
@@ -434,7 +455,7 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
               </div>
             </>
           )}
-          {tx && <ModalGif tx={tx} />}
+          {tx && <ModalGif tx={tx} tryAgain={deposit} />}
         </ModalWrapper>
       )}
 
