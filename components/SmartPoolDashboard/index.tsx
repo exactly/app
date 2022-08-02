@@ -1,4 +1,5 @@
 import { useContext } from 'react';
+import { Option } from 'react-dropdown';
 
 import { LangKeys } from 'types/Lang';
 import { Deposit } from 'types/Deposit';
@@ -14,9 +15,10 @@ import keys from './translations.json';
 
 type Props = {
   showModal: (data: Deposit, type: String) => void;
+  tab: Option;
 };
 
-function SmartPoolDashboard({ showModal }: Props) {
+function SmartPoolDashboard({ showModal, tab }: Props) {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
   const { walletAddress } = useWeb3Context();
@@ -26,7 +28,7 @@ function SmartPoolDashboard({ showModal }: Props) {
       <div className={styles.titleContainer}>
         <p className={styles.title}>{translations[lang].smartPool}</p>
       </div>
-      <SmartPoolUserStatus walletAddress={walletAddress} showModal={showModal} />
+      <SmartPoolUserStatus walletAddress={walletAddress} showModal={showModal} type={tab} />
     </section>
   );
 }

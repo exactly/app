@@ -2,6 +2,7 @@
   "en": {
     "asset": "Asset",
     "currentBalance": "Deposited Amount",
+    "borrowBalance": "Borrowed Amount",
     "utilizationRate": "Utilization Rate",
     "lastRate": "Last Rate",
     "eToken": "eToken",
