@@ -21,19 +21,31 @@ function handleEth(network: string = 'rinkeby', signer: ethers.providers.JsonRpc
   function depositETH(qty: string) {
     if (!qty || !router) return;
 
-    return router.depositETH({ value: ethers.utils.parseEther(qty) });
+    return router.deposit({ value: ethers.utils.parseEther(qty) });
   }
 
   function withdrawETH(qty: string) {
     if (!qty || !router) return;
 
-    return router.withdrawETH(ethers.utils.parseEther(qty));
+    return router.withdraw(ethers.utils.parseEther(qty));
+  }
+
+  function borrowETH(qty: string) {
+    if (!qty || !router) return;
+
+    return router.borrow(ethers.utils.parseEther(qty));
+  }
+
+  function repayETH(qty: string) {
+    if (!qty || !router) return;
+
+    return router.repay(ethers.utils.parseEther(qty));
   }
 
   function depositAtMaturityETH(maturity: string, minAssets: string, qty: string) {
     if (!qty || !router) return;
 
-    return router.depositAtMaturityETH(maturity, ethers.utils.parseEther(minAssets), {
+    return router.depositAtMaturity(maturity, ethers.utils.parseEther(minAssets), {
       value: ethers.utils.parseEther(qty)
     });
   }
@@ -41,7 +53,7 @@ function handleEth(network: string = 'rinkeby', signer: ethers.providers.JsonRpc
   function withdrawAtMaturityETH(maturity: string, qty: string, minAssets: string) {
     if (!qty || !router) return;
 
-    return router.withdrawAtMaturityETH(
+    return router.withdrawAtMaturity(
       maturity,
       ethers.utils.parseEther(qty),
       ethers.utils.parseEther(minAssets)
@@ -51,7 +63,7 @@ function handleEth(network: string = 'rinkeby', signer: ethers.providers.JsonRpc
   function borrowAtMaturityETH(maturity: string, qty: string, maxAssets: string) {
     if (!qty || !router) return;
 
-    return router.borrowAtMaturityETH(
+    return router.borrowAtMaturity(
       maturity,
       ethers.utils.parseEther(qty),
       ethers.utils.parseEther(maxAssets)
@@ -61,7 +73,7 @@ function handleEth(network: string = 'rinkeby', signer: ethers.providers.JsonRpc
   function repayAtMaturityETH(maturity: string, qty: string) {
     if (!qty || !router) return;
 
-    return router.repayAtMaturityETH(maturity, ethers.utils.parseEther(qty), {
+    return router.repayAtMaturity(maturity, ethers.utils.parseEther(qty), {
       value: ethers.utils.parseEther(qty)
     });
   }
@@ -83,6 +95,8 @@ function handleEth(network: string = 'rinkeby', signer: ethers.providers.JsonRpc
   return {
     depositETH,
     withdrawETH,
+    borrowETH,
+    repayETH,
     depositAtMaturityETH,
     withdrawAtMaturityETH,
     borrowAtMaturityETH,
