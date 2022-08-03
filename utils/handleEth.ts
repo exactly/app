@@ -17,7 +17,7 @@ function handleEth(network: string = 'rinkeby', signer: ethers.providers.JsonRpc
     dictionary[network].abi,
     signer
   );
-  console.log(router);
+
   function depositETH(qty: string) {
     if (!qty || !router) return;
 
