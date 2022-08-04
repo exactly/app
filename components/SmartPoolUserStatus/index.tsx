@@ -1,5 +1,4 @@
 import { useContext, useEffect, useState } from 'react';
-import { Option } from 'react-dropdown';
 
 import Item from './Item';
 
@@ -11,6 +10,7 @@ import AccountDataContext from 'contexts/AccountDataContext';
 import { LangKeys } from 'types/Lang';
 import { Deposit } from 'types/Deposit';
 import { SmartPoolItemData } from 'types/SmartPoolItemData';
+import { Option } from 'react-dropdown';
 
 import styles from './style.module.scss';
 

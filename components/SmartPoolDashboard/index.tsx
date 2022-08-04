@@ -1,8 +1,8 @@
 import { useContext } from 'react';
-import { Option } from 'react-dropdown';
 
 import { LangKeys } from 'types/Lang';
 import { Deposit } from 'types/Deposit';
+import { Option } from 'react-dropdown';
 
 import SmartPoolUserStatus from 'components/SmartPoolUserStatus';
 

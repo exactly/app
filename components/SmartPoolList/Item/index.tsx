@@ -72,7 +72,7 @@ function Item({ market, showModal, type }: Props) {
     }
   }, [date, accountData, market]);
 
-  function handleClick(modal: 'floatingBorrow' | 'smartDeposit') {
+  function handleClick(modal: string) {
     if (!market || !showModal) return;
 
     if (!walletAddress && connect) return connect();
