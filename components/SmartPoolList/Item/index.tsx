@@ -72,12 +72,12 @@ function Item({ market, showModal, type }: Props) {
     }
   }, [date, accountData, market]);
 
-  function handleClick() {
+  function handleClick(modal: 'floatingBorrow' | 'smartDeposit') {
     if (!market || !showModal) return;
 
     if (!walletAddress && connect) return connect();
 
-    showModal(market, 'smartDeposit');
+    showModal(market, modal);
   }
 
   async function getMarketData() {
@@ -147,7 +147,7 @@ function Item({ market, showModal, type }: Props) {
             text={type == 'borrow' ? translations[lang].borrow : translations[lang].deposit}
             onClick={(e) => {
               e.stopPropagation();
-              handleClick();
+              handleClick(type == 'borrow' ? 'floatingBorrow' : 'smartDeposit');
             }}
             className={type == 'borrow' ? 'secondary' : 'primary'}
           />
