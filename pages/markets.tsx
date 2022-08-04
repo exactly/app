@@ -14,6 +14,7 @@ import DepositModalMP from 'components/DepositModalMP';
 import BorrowModal from 'components/BorrowModal';
 import DepositModalSP from 'components/DepositModalSP';
 import FaucetModal from 'components/FaucetModal';
+import FloatingBorrowModal from 'components/FloatingBorrowModal';
 
 import useModal from 'hooks/useModal';
 
@@ -168,6 +169,10 @@ const Pools: NextPage<Props> = () => {
 
               {modal && modalContent?.type == 'smartDeposit' && (
                 <DepositModalSP data={modalContent} closeModal={handleModal} />
+              )}
+
+              {modal && modalContent?.type == 'floatingBorrow' && (
+                <FloatingBorrowModal data={modalContent} closeModal={handleModal} />
               )}
 
               {modal && modalContent?.type == 'borrow' && (

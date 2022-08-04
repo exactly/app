@@ -94,7 +94,7 @@ function DepositModalSP({ data, closeModal }: Props) {
     getFixedLenderContract();
     getWalletBalance();
     getUserDeposits();
-  }, [fixedLenderData]);
+  }, [fixedLenderData, walletAddress]);
 
   useEffect(() => {
     if (fixedLenderWithSigner) {

@@ -2,16 +2,11 @@
   "en": {
     "borrow": "Borrow",
     "approve": "Approve",
-    "fixedRateBorrow": "Fixed Rate Borrow",
-    "maturityPool": "Fixed Rate Pool",
-    "exactlyBalance": "Exactly Balance",
-    "apy": "APY (fixed)",
-    "maximumBorrowApy": "Maximum Borrow APY",
-    "maturityDebt": "Maturity Debt",
+    "floatingPoolBorrow": "Variable Rate Borrow",
     "healthFactor": "Health Factor",
     "notEnoughSlippage": "The transaction failed, please check your Maximum Deposit Rate",
     "deniedTransaction": "Transaction rejected",
-    "availableLiquidityError": "There is not enough liquidity in this pool",
+    "availableLiquidityError": "There is not enough liquidity",
     "generalError": "There was an error, please try again",
     "noCollateral": "You don't have collateral. Please deposit in a Variable Rate Pool first"
   },
