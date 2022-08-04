@@ -5,27 +5,26 @@ import Item from './Item';
 import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 import AuditorContext from 'contexts/AuditorContext';
-import FixedLenderContext from 'contexts/FixedLenderContext';
 import AccountDataContext from 'contexts/AccountDataContext';
 
 import { LangKeys } from 'types/Lang';
 import { Deposit } from 'types/Deposit';
 import { SmartPoolItemData } from 'types/SmartPoolItemData';
+import { Option } from 'react-dropdown';
 
 import styles from './style.module.scss';
 
 import keys from './translations.json';
 
 import { getContractData } from 'utils/contracts';
-import { getSymbol } from 'utils/utils';
 
 type Props = {
   walletAddress: string | null | undefined;
   showModal: (data: Deposit | any, type: String) => void;
+  type: Option;
 };
 
-function SmartPoolUserStatus({ walletAddress, showModal }: Props) {
-  const fixedLenders = useContext(FixedLenderContext);
+function SmartPoolUserStatus({ walletAddress, showModal, type }: Props) {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
   const auditor = useContext(AuditorContext);
@@ -45,42 +44,28 @@ function SmartPoolUserStatus({ walletAddress, showModal }: Props) {
     getCurrentBalance();
   }, [walletAddress, accountData]);
 
-  async function getCurrentBalance() {
-    try {
-      const data = [];
+  function getCurrentBalance() {
+    if (!accountData) return;
+    const allMarkets = Object.values(accountData);
 
-      for (let i = 0; i < fixedLenders.length; i++) {
-        const fixedLender = fixedLenders[i];
+    const data: SmartPoolItemData[] = [];
 
-        const fixedLenderAddress = fixedLender.address;
-        const fixedLenderAbi = fixedLender.abi;
-        const fixedLenderSymbol = getSymbol(fixedLenderAddress!, network?.name);
+    allMarkets.forEach((market) => {
+      const symbol = market.assetSymbol;
+      const depositBalance = market.floatingDepositAssets;
+      const eTokens = market.floatingDepositShares;
+      const borrowBalance = market.floatingBorrowAssets;
 
-        const contractData = await getContractData(
-          network?.name,
-          fixedLenderAddress!,
-          fixedLenderAbi!
-        );
+      const obj = {
+        symbol: symbol,
+        eTokens: eTokens,
+        depositedAmount: depositBalance,
+        borrowedAmount: borrowBalance
+      };
+      data.push(obj);
+    });
 
-        const balance = await contractData?.balanceOf(walletAddress);
-
-        if (balance) {
-          const etokens = balance;
-          const tokens = await contractData?.convertToAssets(balance);
-
-          const obj = {
-            symbol: fixedLenderSymbol,
-            eTokens: etokens,
-            tokens: tokens
-          };
-          data.push(obj);
-        }
-      }
-
-      setItemData(data);
-    } catch (e) {
-      console.log(e);
-    }
+    setItemData(data);
   }
 
   return (
@@ -90,9 +75,17 @@ function SmartPoolUserStatus({ walletAddress, showModal }: Props) {
           <div className={styles.tableRow}>
             <span className={styles.symbol}>{translations[lang].asset}</span>
             <span className={styles.title}>{translations[lang].walletBalance}</span>
-            <span className={styles.title}>{translations[lang].currentBalance}</span>
-            <span className={styles.title}>{translations[lang].eToken}</span>
-            <span className={styles.title}>{translations[lang].collateral}</span>
+            <span className={styles.title}>
+              {type.value == 'deposit'
+                ? translations[lang].currentBalance
+                : translations[lang].borrowBalance}
+            </span>
+            {type.value == 'deposit' && (
+              <>
+                <span className={styles.title}>{translations[lang].eToken}</span>
+                <span className={styles.title}>{translations[lang].collateral}</span>
+              </>
+            )}
 
             <span className={styles.title} />
           </div>
@@ -102,25 +95,30 @@ function SmartPoolUserStatus({ walletAddress, showModal }: Props) {
                 return (
                   <Item
                     key={key}
-                    tokenAmount={item.tokens}
+                    depositAmount={item.depositedAmount}
+                    borrowedAmount={item.borrowedAmount}
                     symbol={item.symbol}
                     walletAddress={walletAddress}
                     eTokenAmount={item.eTokens}
                     showModal={showModal}
                     auditorContract={auditorContract}
+                    type={type}
                   />
                 );
               })
-            : fixedLenders.map((_, key: number) => {
+            : accountData &&
+              Object.keys(accountData).map((_, key: number) => {
                 return (
                   <Item
                     key={key}
-                    tokenAmount={undefined}
+                    depositAmount={undefined}
+                    borrowedAmount={undefined}
                     symbol={undefined}
                     walletAddress={undefined}
                     eTokenAmount={undefined}
                     showModal={() => undefined}
                     auditorContract={undefined}
+                    type={undefined}
                   />
                 );
               })}

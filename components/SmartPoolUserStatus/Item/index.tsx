@@ -14,6 +14,7 @@ import AccountDataContext from 'contexts/AccountDataContext';
 import { LangKeys } from 'types/Lang';
 import { Deposit } from 'types/Deposit';
 import { Decimals } from 'types/Decimals';
+import { Option } from 'react-dropdown';
 
 import styles from './style.module.scss';
 
@@ -28,20 +29,24 @@ import parseSymbol from 'utils/parseSymbol';
 
 type Props = {
   symbol: string | undefined;
-  tokenAmount: BigNumber | undefined;
+  depositAmount: BigNumber | undefined;
+  borrowedAmount: BigNumber | undefined;
   walletAddress: string | null | undefined;
   showModal: (data: Deposit | any, type: String) => void | undefined;
   eTokenAmount: BigNumber | undefined;
   auditorContract: Contract | undefined;
+  type: Option | undefined;
 };
 
 function Item({
   symbol,
-  tokenAmount,
+  depositAmount,
+  borrowedAmount,
   walletAddress,
   showModal,
   eTokenAmount,
-  auditorContract
+  auditorContract,
+  type
 }: Props) {
   const { network, web3Provider } = useWeb3Context();
   const fixedLender = useContext(FixedLenderContext);
@@ -175,61 +180,73 @@ function Item({
           `$${formatNumber(parseFloat(walletBalance!) * rate, 'usd')}`) || <Skeleton width={40} />}
       </span>
       <span className={styles.value}>
-        {(tokenAmount &&
+        {(depositAmount &&
+          borrowedAmount &&
           symbol &&
           rate &&
           `$${formatNumber(
-            parseFloat(ethers.utils.formatUnits(tokenAmount, decimals[symbol! as keyof Decimals])) *
-              rate,
+            parseFloat(
+              ethers.utils.formatUnits(
+                type?.value == 'deposit' ? depositAmount : borrowedAmount,
+                decimals[symbol! as keyof Decimals]
+              )
+            ) * rate,
             'USD',
             true
           )}`) || <Skeleton width={40} />}
       </span>
-      <span className={styles.value}>
-        {(eTokenAmount &&
-          symbol &&
-          `${formatNumber(
-            ethers.utils.formatUnits(eTokenAmount, decimals[symbol! as keyof Decimals]),
-            symbol
-          )}`) || <Skeleton width={40} />}{' '}
-      </span>
+      {type?.value == 'deposit' && (
+        <>
+          <span className={styles.value}>
+            {(eTokenAmount &&
+              symbol &&
+              `${formatNumber(
+                ethers.utils.formatUnits(eTokenAmount, decimals[symbol! as keyof Decimals]),
+                symbol
+              )}`) || <Skeleton width={40} />}{' '}
+          </span>
 
-      {symbol ? (
-        <span className={styles.value}>
-          {!loading ? (
-            <Switch
-              isOn={toggle}
-              handleToggle={() => {
-                setToggle((prev) => !prev);
-                handleMarket();
-              }}
-              id={underlyingData?.address || Math.random().toString()}
-              disabled={disabled}
-            />
+          {symbol ? (
+            <span className={styles.value}>
+              {!loading ? (
+                <Switch
+                  isOn={toggle}
+                  handleToggle={() => {
+                    setToggle((prev) => !prev);
+                    handleMarket();
+                  }}
+                  id={underlyingData?.address || Math.random().toString()}
+                  disabled={disabled}
+                />
+              ) : (
+                <div className={styles.loadingContainer}>
+                  <Loading size="small" color="primary" />
+                </div>
+              )}
+            </span>
           ) : (
-            <div className={styles.loadingContainer}>
-              <Loading size="small" color="primary" />
-            </div>
+            <span className={styles.value}>
+              <Skeleton width={40} />
+            </span>
           )}
-        </span>
-      ) : (
-        <span className={styles.value}>
-          <Skeleton width={40} />
-        </span>
+        </>
       )}
+
       <div className={styles.actions}>
         <div className={styles.buttonContainer}>
-          {(symbol && (
+          {(symbol && type && (
             <Button
-              text={translations[lang].deposit}
-              className="primary"
+              text={
+                type.value == 'deposit' ? translations[lang].deposit : translations[lang].borrow
+              }
+              className={type.value == 'deposit' ? 'primary' : 'secondary'}
               onClick={() =>
                 showModal(
                   {
                     market: getFixedLenderData().address,
                     symbol
                   },
-                  'smartDeposit'
+                  type.value == 'deposit' ? 'smartDeposit' : 'floatingBorrow'
                 )
               }
             />
@@ -237,17 +254,19 @@ function Item({
         </div>
 
         <div className={styles.buttonContainer}>
-          {(symbol && (
+          {(symbol && type && (
             <Button
-              text={translations[lang].withdraw}
-              className="tertiary"
+              text={
+                type.value == 'deposit' ? translations[lang].withdraw : translations[lang].repay
+              }
+              className={type.value == 'deposit' ? 'tertiary' : 'quaternary'}
               onClick={() =>
                 showModal(
                   {
-                    assets: tokenAmount,
+                    assets: depositAmount,
                     symbol
                   },
-                  'withdrawSP'
+                  type.value == 'deposit' ? 'withdrawSP' : 'floatingRepay'
                 )
               }
             />

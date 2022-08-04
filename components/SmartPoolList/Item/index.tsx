@@ -29,9 +29,10 @@ import getSubgraph from 'utils/getSubgraph';
 type Props = {
   market: Market | undefined;
   showModal?: (marketData: Market, type: String) => void;
+  type: 'borrow' | 'deposit';
 };
 
-function Item({ market, showModal }: Props) {
+function Item({ market, showModal, type }: Props) {
   const { date } = useContext(AddressContext);
   const { web3Provider, walletAddress, connect, network } = useWeb3Context();
 
@@ -71,12 +72,12 @@ function Item({ market, showModal }: Props) {
     }
   }, [date, accountData, market]);
 
-  function handleClick() {
+  function handleClick(modal: string) {
     if (!market || !showModal) return;
 
     if (!walletAddress && connect) return connect();
 
-    showModal(market, 'smartDeposit');
+    showModal(market, modal);
   }
 
   async function getMarketData() {
@@ -94,8 +95,8 @@ function Item({ market, showModal }: Props) {
       );
 
       const newPoolData = {
-        borrowed: Math.round(parseInt(await ethers.utils.formatUnits(borrowed, decimals))),
-        supplied: Math.round(parseInt(await ethers.utils.formatUnits(supplied, decimals))),
+        borrowed: Math.round(parseInt(ethers.utils.formatUnits(borrowed, decimals))),
+        supplied: Math.round(parseInt(ethers.utils.formatUnits(supplied, decimals))),
         rate: exchangeRate
       };
 
@@ -112,7 +113,11 @@ function Item({ market, showModal }: Props) {
   }
 
   return (
-    <div className={`${style.container} ${style.primaryContainer}`}>
+    <div
+      className={`${style.container} ${
+        type == 'borrow' ? style.secondaryContainer : style.primaryContainer
+      }`}
+    >
       <Link href={`/assets/${market?.symbol == 'WETH' ? 'eth' : market?.symbol.toLowerCase()}`}>
         <div className={style.symbol}>
           {(market && (
@@ -130,17 +135,21 @@ function Item({ market, showModal }: Props) {
       <p className={style.value}>
         {(market &&
           poolData &&
-          `$${formatNumber(poolData?.supplied! * poolData?.rate!, 'USD')}`) || <Skeleton />}
+          `$${formatNumber(
+            (type == 'borrow' ? poolData?.borrowed! : poolData?.supplied!) * poolData?.rate!,
+            'USD'
+          )}`) || <Skeleton />}
       </p>
       <p className={style.value}>{(rate && `${rate}%`) || <Skeleton />}</p>
       <div className={style.buttonContainer}>
         {(market && (
           <Button
-            text={translations[lang].deposit}
+            text={type == 'borrow' ? translations[lang].borrow : translations[lang].deposit}
             onClick={(e) => {
               e.stopPropagation();
-              handleClick();
+              handleClick(type == 'borrow' ? 'floatingBorrow' : 'smartDeposit');
             }}
+            className={type == 'borrow' ? 'secondary' : 'primary'}
           />
         )) || <Skeleton height={40} />}
       </div>

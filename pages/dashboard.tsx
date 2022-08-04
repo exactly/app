@@ -158,7 +158,7 @@ const DashBoard: NextPage<Props> = () => {
                 />
                 {walletAddress ? (
                   <>
-                    {tab.value == 'deposit' && <SmartPoolDashboard showModal={showModal} />}
+                    <SmartPoolDashboard showModal={showModal} tab={tab} />
                     <MaturityPoolDashboard showModal={showModal} tab={tab} />
                   </>
                 ) : (
