@@ -246,7 +246,7 @@ function Item({
                     market: getFixedLenderData().address,
                     symbol
                   },
-                  'smartDeposit'
+                  type.value == 'deposit' ? 'smartDeposit' : 'floatingBorrow'
                 )
               }
             />
@@ -266,7 +266,7 @@ function Item({
                     assets: depositAmount,
                     symbol
                   },
-                  'withdrawSP'
+                  type.value == 'deposit' ? 'withdrawSP' : 'floatingRepay'
                 )
               }
             />

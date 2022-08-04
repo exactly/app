@@ -17,6 +17,12 @@
     text-align: left;
   }
 
+  .marketsContainer {
+    display: flex;
+    flex-direction: row;
+    gap: var(--u4);
+  }
+
   .market {
     border-radius: var(--u);
     display: flex;
