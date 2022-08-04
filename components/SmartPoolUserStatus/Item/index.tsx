@@ -1,7 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
 import { ethers, Contract, BigNumber } from 'ethers';
 import Skeleton from 'react-loading-skeleton';
-import { Option } from 'react-dropdown';
 
 import Button from 'components/common/Button';
 import Switch from 'components/common/Switch';
@@ -15,6 +14,7 @@ import AccountDataContext from 'contexts/AccountDataContext';
 import { LangKeys } from 'types/Lang';
 import { Deposit } from 'types/Deposit';
 import { Decimals } from 'types/Decimals';
+import { Option } from 'react-dropdown';
 
 import styles from './style.module.scss';
 
