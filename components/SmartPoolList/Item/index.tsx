@@ -95,8 +95,8 @@ function Item({ market, showModal, type }: Props) {
       );
 
       const newPoolData = {
-        borrowed: Math.round(parseInt(await ethers.utils.formatUnits(borrowed, decimals))),
-        supplied: Math.round(parseInt(await ethers.utils.formatUnits(supplied, decimals))),
+        borrowed: Math.round(parseInt(ethers.utils.formatUnits(borrowed, decimals))),
+        supplied: Math.round(parseInt(ethers.utils.formatUnits(supplied, decimals))),
         rate: exchangeRate
       };
 
