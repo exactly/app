@@ -56,10 +56,10 @@ export function getSymbol(address: string, network: string | undefined) {
 
   const dictionary: Dictionary<Dictionary<string>> = {
     rinkeby: {
-      '0xaa82c12e87373dd9ea622fea84100c2f28c7a4d4': 'DAI',
-      '0x1fb3d1836c8a7e66e5da6459392b5d6ee09f743b': 'WETH',
-      '0xd135e2d232f5b14bc21b8ddba45190e3f5fcf9b0': 'WBTC',
-      '0x80f755f7d6de6a67691858a433a128d71e3e65bc': 'USDC'
+      '0x46a32241f2753118016c8fb804a12d6094f6bf81': 'DAI',
+      '0x594ba496a24b8e6683de356afcbfb7400e3ecae7': 'WETH',
+      '0x2d6b5da466fc1523d6377ebc5bb0b52ae440c4ee': 'WBTC',
+      '0xd795bb0abc85c32bb7a9f8701729fe39847084fa': 'USDC'
     }
   };
 

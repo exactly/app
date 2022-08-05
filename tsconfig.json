@@ -34,7 +34,7 @@
     "**/*.ts",
     "**/*.tsx",
     "contexts/AddressContext.js",
-    "utils/getVariableAPY.js"
+    "utils/getFloatingAPY.js"
   ],
   "exclude": ["node_modules"]
 }
