@@ -22,8 +22,7 @@ import keys from './translations.json';
 import { getContractData } from 'utils/contracts';
 import formatNumber from 'utils/formatNumber';
 import parseSymbol from 'utils/parseSymbol';
-import getSmartPoolInterestRate from 'utils/getSmartPoolInterestRate';
-import getVariableAPY from 'utils/getVariableAPY';
+import getVariableAPY from 'utils/getFloatingAPY';
 import getSubgraph from 'utils/getSubgraph';
 
 type Props = {
@@ -102,7 +101,11 @@ function Item({ market, showModal, type }: Props) {
 
       const subgraphUrl = getSubgraph(network?.name!);
 
-      const interestRate = await getVariableAPY(fixedLender?.address!, subgraphUrl);
+      const interestRate = await getVariableAPY(
+        fixedLender?.address!,
+        subgraphUrl,
+        accountData[market?.symbol.toUpperCase()].maxFuturePools
+      );
 
       interestRate && setRate(interestRate);
 
