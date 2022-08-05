@@ -2,6 +2,7 @@
   "en": {
     "days": "days",
     "totalDeposited": "Total Deposited",
+    "totalBorrowed": "Total Borrowed",
     "liquidity": "Liquidity",
     "utilizationRate": "Utilization Rate",
     "deposit": "Deposit",

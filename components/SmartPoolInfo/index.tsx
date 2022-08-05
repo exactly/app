@@ -97,6 +97,12 @@ function SmartPoolInfo({ showModal, symbol, fixedLender }: Props) {
           </p>
         </li>
         <li className={styles.row}>
+          <span className={styles.title}>{translations[lang].totalBorrowed}</span>{' '}
+          <p className={styles.value}>
+            {(demand != undefined && `$${formatNumber(demand, symbol, true)}`) || <Skeleton />}
+          </p>
+        </li>
+        <li className={styles.row}>
           <span className={styles.title}> {translations[lang].liquidity}</span>{' '}
           <p className={styles.value}>
             {supply != undefined && demand != undefined ? (
