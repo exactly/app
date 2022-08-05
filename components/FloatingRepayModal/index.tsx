@@ -59,7 +59,6 @@ function FloatingRepayModal({ data, closeModal }: Props) {
   const fixedLenderData = useContext(FixedLenderContext);
 
   const finalAmount = ethers.utils.formatUnits(assets, decimals[symbol! as keyof Decimals]);
-
   const [qty, setQty] = useState<string>('');
 
   const [gas, setGas] = useState<Gas | undefined>();
