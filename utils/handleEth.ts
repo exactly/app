@@ -39,7 +39,9 @@ function handleEth(network: string = 'rinkeby', signer: ethers.providers.JsonRpc
   function repayETH(qty: string) {
     if (!qty || !router) return;
 
-    return router.repay({ value: ethers.utils.parseEther(qty) });
+    return router.repay(ethers.utils.parseEther(qty), {
+      value: ethers.utils.parseEther(qty)
+    });
   }
 
   function depositAtMaturityETH(maturity: string, minAssets: string, qty: string) {

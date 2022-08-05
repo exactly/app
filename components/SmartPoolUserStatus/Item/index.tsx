@@ -263,7 +263,7 @@ function Item({
               onClick={() =>
                 showModal(
                   {
-                    assets: depositAmount,
+                    assets: type.value == 'deposit' ? depositAmount : borrowedAmount,
                     symbol
                   },
                   type.value == 'deposit' ? 'withdrawSP' : 'floatingRepay'

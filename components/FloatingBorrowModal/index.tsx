@@ -249,7 +249,9 @@ function FloatingBorrowModal({ data, editable, closeModal }: Props) {
     const hasDepositedToFloatingPool =
       parseFloat(ethers.utils.formatUnits(accountData[symbol].floatingBorrowAssets, decimals)) > 0;
 
-    if (!isCollateral || !hasDepositedToFloatingPool) {
+    if (isCollateral || hasDepositedToFloatingPool) {
+      return;
+    } else {
       return setError({
         status: true,
         message: translations[lang].noCollateral

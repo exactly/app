@@ -59,7 +59,6 @@ function FloatingRepayModal({ data, closeModal }: Props) {
   const fixedLenderData = useContext(FixedLenderContext);
 
   const finalAmount = ethers.utils.formatUnits(assets, decimals[symbol! as keyof Decimals]);
-
   const [qty, setQty] = useState<string>('');
 
   const [gas, setGas] = useState<Gas | undefined>();
@@ -123,7 +122,7 @@ function FloatingRepayModal({ data, closeModal }: Props) {
       if (symbol == 'WETH') {
         if (!web3Provider) return;
 
-        const ETHrouter = handleEth(network?.name, web3Provider?.getSigner());
+        const ETHrouter = web3Provider && handleEth(network?.name, web3Provider?.getSigner());
 
         repay = await ETHrouter?.repayETH(qty!);
       } else {
