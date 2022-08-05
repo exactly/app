@@ -5,9 +5,9 @@ import Skeleton from 'react-loading-skeleton';
 
 import { LangKeys } from 'types/Lang';
 import { HealthFactor } from 'types/HealthFactor';
-import { FixedLenderAccountData } from 'types/FixedLenderAccountData';
 
 import parseHealthFactor from 'utils/parseHealthFactor';
+import getHealthFactorData from 'utils/getHealthFactorData';
 
 import LangContext from 'contexts/LangContext';
 import AccountDataContext from 'contexts/AccountDataContext';
@@ -15,7 +15,6 @@ import AccountDataContext from 'contexts/AccountDataContext';
 import styles from './style.module.scss';
 
 import keys from './translations.json';
-import getHealthFactorData from 'utils/getHealthFactorData';
 
 type Props = {
   qty: string;
