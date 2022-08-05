@@ -29,7 +29,6 @@
     flex-wrap: wrap;
     width: calc(50% - var(--u2));
     background: var(--gray-50);
-
     h2 {
       margin: var(--u) 0 var(--u3) 0;
       padding: var(--u3) var(--u3) 0;
@@ -38,6 +37,7 @@
 
     .column {
       width: 100%;
+      overflow-x: auto;
 
       .tableRow {
         display: flex;
@@ -49,6 +49,7 @@
         text-align: left;
         gap: var(--u2);
         margin: 0 var(--smallUnit);
+        min-width: 400px;
 
         .symbol {
           width: calc(100% / 4);
@@ -71,8 +72,11 @@
     max-width: 100%;
     padding: 20px;
     text-align: center;
-    .market {
-      width: 100%;
+    .marketsContainer {
+      flex-direction: column;
+      .market {
+        width: 100%;
+      }
     }
   }
 }

@@ -23,6 +23,7 @@
       gap: var(--smallUnit);
       display: flex;
       flex-direction: column;
+      overflow-x: auto;
 
       .tableRow {
         display: flex;
@@ -31,6 +32,7 @@
         color: var(--gray-500);
         font-size: var(--font-12);
         align-items: center;
+        min-width: 800px;
 
         .symbol {
           width: 15.66%;

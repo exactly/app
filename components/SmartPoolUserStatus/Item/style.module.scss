@@ -6,6 +6,8 @@
   align-items: center;
   cursor: pointer;
   background: var(--white);
+  min-width: 800px;
+
   &:last-child {
     margin-bottom: var(--smallUnit);
   }
