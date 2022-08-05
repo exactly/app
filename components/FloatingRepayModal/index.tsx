@@ -122,7 +122,7 @@ function FloatingRepayModal({ data, closeModal }: Props) {
       if (symbol == 'WETH') {
         if (!web3Provider) return;
 
-        const ETHrouter = web3Provider && handleEth(network?.name, web3Provider?.getSigner());
+        const ETHrouter = handleEth(network?.name, web3Provider?.getSigner());
 
         repay = await ETHrouter?.repayETH(qty!);
       } else {
