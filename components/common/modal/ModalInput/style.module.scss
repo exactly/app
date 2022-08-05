@@ -3,6 +3,7 @@
   border: 1px solid var(--gray-200);
   padding: var(--u);
   border-radius: var(--smallUnit);
+  overflow: hidden;
 
   .input {
     font-family: 'Source Sans Pro', sans-serif;
@@ -26,7 +27,7 @@
     text-align: center;
     font-size: var(--font-14);
     color: var(--gray-500);
-    overflow-x: scroll;
+    max-width: 100%;
   }
 
   .max {
