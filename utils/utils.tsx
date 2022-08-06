@@ -58,14 +58,6 @@ export function getUnderlyingData(network: string | undefined, symbol: string | 
 
 export function getSymbol(address: string, network: string | undefined) {
   const currentNetwork = network ?? process.env.NEXT_PUBLIC_NETWORK;
-  // const dictionary: Dictionary<Dictionary<string>> = {
-  //   rinkeby: {
-  //     '0x08e31947ed0bcd30006acd8795ede6d18968935a': 'DAI',
-  //     '0xde80d6f51f558189feb2187028a6e481cfc3d8f3': 'WETH',
-  //     '0x7f693e8329668101118e2fdf95e7ee49b99a6f3e': 'WBTC',
-  //     '0x8b56d07321702305088cc56abb9531495a5ed7f2': 'USDC'
-  //   }
-  // };
 
   const dictionary: Dictionary<Dictionary<string>> = {
     rinkeby: {
