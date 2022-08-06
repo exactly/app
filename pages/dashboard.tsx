@@ -18,6 +18,8 @@ import DashboardHeader from 'components/DashboardHeader';
 import Tabs from 'components/Tabs';
 import EmptyState from 'components/EmptyState';
 import FaucetModal from 'components/FaucetModal';
+import FloatingBorrowModal from 'components/FloatingBorrowModal';
+import FloatingRepayModal from 'components/FloatingRepayModal';
 
 import { AuditorProvider } from 'contexts/AuditorContext';
 import { FixedLenderProvider } from 'contexts/FixedLenderContext';
@@ -111,6 +113,14 @@ const DashBoard: NextPage<Props> = () => {
                   <FaucetModal closeModal={handleModal} />
                 )}
 
+                {modal && modalContent?.type == 'floatingBorrow' && (
+                  <FloatingBorrowModal data={modalContent} closeModal={handleModal} />
+                )}
+
+                {modal && modalContent?.type == 'floatingRepay' && (
+                  <FloatingRepayModal data={modalContent} closeModal={handleModal} />
+                )}
+
                 {modal && modalContent?.type == 'borrow' && (
                   <BorrowModal data={modalContent} closeModal={handleModal} editable />
                 )}
@@ -148,7 +158,7 @@ const DashBoard: NextPage<Props> = () => {
                 />
                 {walletAddress ? (
                   <>
-                    {tab.value == 'deposit' && <SmartPoolDashboard showModal={showModal} />}
+                    <SmartPoolDashboard showModal={showModal} tab={tab} />
                     <MaturityPoolDashboard showModal={showModal} tab={tab} />
                   </>
                 ) : (

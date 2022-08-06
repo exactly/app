@@ -108,7 +108,7 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
     if (underlyingContract && fixedLenderWithSigner) {
       getWalletBalance();
     }
-  }, [underlyingContract, fixedLenderWithSigner]);
+  }, [underlyingContract, fixedLenderWithSigner, walletAddress]);
 
   useEffect(() => {
     if (fixedLenderWithSigner) {

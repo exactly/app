@@ -6,6 +6,11 @@ import rinkebyWETH from 'protocol/deployments/rinkeby/WETH.json';
 import rinkebyWBTC from 'protocol/deployments/rinkeby/WBTC.json';
 import rinkebyUSDC from 'protocol/deployments/rinkeby/USDC.json';
 
+import rinkebyFixedLenderDAI from 'protocol/deployments/rinkeby/MarketDAI.json';
+import rinkebyFixedLenderWETH from 'protocol/deployments/rinkeby/MarketWETH.json';
+import rinkebyFixedLenderWBTC from 'protocol/deployments/rinkeby/MarketWBTC.json';
+import rinkebyFixedLenderUSDC from 'protocol/deployments/rinkeby/MarketUSDC.json';
+
 export function transformClasses(style: any, classes: string) {
   if (!style) return 'style object is mandatory';
 
@@ -56,10 +61,10 @@ export function getSymbol(address: string, network: string | undefined) {
 
   const dictionary: Dictionary<Dictionary<string>> = {
     rinkeby: {
-      '0xaa82c12e87373dd9ea622fea84100c2f28c7a4d4': 'DAI',
-      '0x1fb3d1836c8a7e66e5da6459392b5d6ee09f743b': 'WETH',
-      '0xd135e2d232f5b14bc21b8ddba45190e3f5fcf9b0': 'WBTC',
-      '0x80f755f7d6de6a67691858a433a128d71e3e65bc': 'USDC'
+      [rinkebyFixedLenderDAI.address.toLowerCase()]: 'DAI',
+      [rinkebyFixedLenderWETH.address.toLowerCase()]: 'WETH',
+      [rinkebyFixedLenderWBTC.address.toLowerCase()]: 'WBTC',
+      [rinkebyFixedLenderUSDC.address.toLowerCase()]: 'USDC'
     }
   };
 

@@ -23,6 +23,7 @@
 
     .column {
       width: 100%;
+      overflow-x: auto;
 
       .tableRow {
         display: flex;
@@ -32,6 +33,7 @@
         font-size: var(--font-12);
         align-items: center;
         gap: var(--u2);
+        min-width: 400px;
 
         .symbol {
           width: calc(100% / 4);
@@ -53,8 +55,7 @@
   .container {
     max-width: 100%;
     padding: 20px;
-    text-align: left;
-
+    text-align: center;
     .market {
       width: 100%;
     }

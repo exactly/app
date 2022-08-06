@@ -32,6 +32,7 @@ function MaturityInfo({ maturity, symbol, fixedLender }: Props) {
 
   const [supply, setSupply] = useState<number | undefined>(undefined);
   const [demand, setDemand] = useState<number | undefined>(undefined);
+  const [utilization, setUtilization] = useState<number | undefined>(undefined);
 
   const daysRemaining = dayjs.unix(parseInt(maturity.value)).diff(dayjs(), 'days');
 
@@ -52,22 +53,32 @@ function MaturityInfo({ maturity, symbol, fixedLender }: Props) {
     getMaturityPoolData();
   }, [fixedLender, maturity, symbol]);
 
-  async function getMaturityPoolData() {
+  function getMaturityPoolData() {
     if (!accountData) return;
 
     try {
-      const { borrowed, supplied } = await fixedLender?.fixedPools(maturity.value);
-      const decimals = await fixedLender?.decimals();
+      const pool = accountData[symbol.toUpperCase()].fixedPools.find((pool) => {
+        return pool.maturity.toString() == maturity.value;
+      });
 
-      const exchangeRate = parseFloat(ethers.utils.formatEther(accountData[symbol].oraclePrice));
+      const decimals = accountData[symbol.toUpperCase()].decimals;
+
+      const poolUtilization = ethers.utils.formatUnits(pool?.utilization!, decimals);
+      const borrowed = ethers.utils.formatUnits(pool?.borrowed!, decimals);
+      const supplied = ethers.utils.formatUnits(pool?.supplied!, decimals);
+
+      const exchangeRate = parseFloat(
+        ethers.utils.formatEther(accountData[symbol.toUpperCase()].oraclePrice)
+      );
 
       const newPoolData = {
-        borrowed: parseFloat(await ethers.utils.formatUnits(borrowed, decimals)),
-        supplied: parseFloat(await ethers.utils.formatUnits(supplied, decimals))
+        borrowed: parseFloat(borrowed),
+        supplied: parseFloat(supplied)
       };
 
       setSupply(newPoolData.supplied * exchangeRate);
       setDemand(newPoolData.borrowed * exchangeRate);
+      setUtilization(parseFloat(poolUtilization));
     } catch (e) {
       console.log(e);
     }
@@ -118,13 +129,7 @@ function MaturityInfo({ maturity, symbol, fixedLender }: Props) {
         <li className={styles.row}>
           <span className={styles.title}>{translations[lang].utilizationRate}</span>{' '}
           <p className={styles.value}>
-            {demand && supply && demand > 0 && supply > 0 ? (
-              `${((demand / supply) * 100).toFixed(2)}%`
-            ) : demand == 0 || supply == 0 ? (
-              '0.00%'
-            ) : (
-              <Skeleton />
-            )}
+            {utilization != undefined ? `${utilization.toFixed(2)}%` : <Skeleton />}
           </p>
         </li>
       </ul>

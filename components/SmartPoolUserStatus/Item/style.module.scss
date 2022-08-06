@@ -6,6 +6,8 @@
   align-items: center;
   cursor: pointer;
   background: var(--white);
+  min-width: 800px;
+
   &:last-child {
     margin-bottom: var(--smallUnit);
   }
@@ -35,6 +37,7 @@
 
   .actions {
     display: flex;
+    margin-left: auto;
     .buttonContainer {
       width: 100px;
       height: var(--u5);

@@ -13,8 +13,6 @@ import { LangKeys } from 'types/Lang';
 import { Dictionary } from 'types/Dictionary';
 import { DonutData } from 'types/DonutData';
 
-import { FixedLenderAccountData } from 'types/FixedLenderAccountData';
-
 import styles from './style.module.scss';
 
 import keys from './translations.json';
@@ -22,6 +20,7 @@ import keys from './translations.json';
 import parseHealthFactor from 'utils/parseHealthFactor';
 import getAssetColor from 'utils/getAssetColor';
 import formatNumber from 'utils/formatNumber';
+import getHealthFactorData from 'utils/getHealthFactorData';
 
 function DashboardHeader() {
   const { walletAddress } = useWeb3Context();
@@ -151,6 +150,16 @@ function DashboardHeader() {
         image: `/img/assets/${symbol.toLowerCase()}.png`
       };
 
+      //floatinBorrow
+      if (fixedLender.floatingBorrowAssets) {
+        const borrowAssets = parseFloat(
+          ethers.utils.formatUnits(fixedLender.floatingBorrowAssets, decimals)
+        );
+
+        allBorrowsUSD += borrowAssets * oracle;
+      }
+
+      //fixed borrow
       fixedLender.fixedBorrowPositions.forEach((borrowPosition) => {
         const borrowValue = parseFloat(
           ethers.utils.formatUnits(borrowPosition.position.principal, decimals)
@@ -170,43 +179,7 @@ function DashboardHeader() {
   function getHealthFactor() {
     if (!accountData) return;
 
-    let collateral = 0;
-    let debt = 0;
-
-    const data = Object.values(accountData);
-
-    data.forEach((fixedLender: FixedLenderAccountData) => {
-      const decimals = fixedLender.decimals;
-
-      const oracle = parseFloat(ethers.utils.formatUnits(fixedLender.oraclePrice, 18));
-      const collateralFactor = parseFloat(ethers.utils.formatUnits(fixedLender.adjustFactor, 18));
-
-      if (fixedLender.isCollateral) {
-        const assets = parseFloat(
-          ethers.utils.formatUnits(fixedLender.floatingDepositAssets, decimals)
-        );
-
-        collateral += assets * oracle * collateralFactor;
-      }
-
-      fixedLender.fixedBorrowPositions.forEach((borrowPosition) => {
-        const penaltyRate = parseFloat(ethers.utils.formatUnits(fixedLender.penaltyRate, 18));
-        const principal = parseFloat(
-          ethers.utils.formatUnits(borrowPosition.position.principal, decimals)
-        );
-        const fee = parseFloat(ethers.utils.formatUnits(borrowPosition.position.fee, decimals));
-        const maturityTimestamp = borrowPosition.maturity.toNumber();
-        const currentTimestamp = new Date().getTime() / 1000;
-
-        debt += (principal + fee) * oracle;
-
-        if (maturityTimestamp > currentTimestamp) {
-          debt += (currentTimestamp - maturityTimestamp) * penaltyRate;
-        }
-
-        debt = debt / collateralFactor;
-      });
-    });
+    const { collateral, debt } = getHealthFactorData(accountData);
 
     if (collateral > 0 || debt > 0) {
       const healthFactorData = [
