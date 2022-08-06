@@ -24,6 +24,7 @@ import formatNumber from 'utils/formatNumber';
 import parseSymbol from 'utils/parseSymbol';
 import getFloatingAPY from 'utils/getFloatingAPY';
 import getSubgraph from 'utils/getSubgraph';
+import getFloatingBorrowAPY from 'utils/getFloatingBorrowAPY';
 
 type Props = {
   market: Market | undefined;
@@ -101,11 +102,17 @@ function Item({ market, showModal, type }: Props) {
 
       const subgraphUrl = getSubgraph(network?.name!);
 
-      const interestRate = await getFloatingAPY(
-        fixedLender?.address!,
-        subgraphUrl,
-        accountData[market?.symbol.toUpperCase()].maxFuturePools
-      );
+      let interestRate;
+
+      if (type == 'deposit') {
+        interestRate = await getFloatingAPY(
+          fixedLender?.address!,
+          subgraphUrl,
+          accountData[market?.symbol.toUpperCase()].maxFuturePools
+        );
+      } else if (type == 'borrow') {
+        interestRate = await getFloatingBorrowAPY(fixedLender?.address!, subgraphUrl);
+      }
 
       interestRate && setRate(interestRate);
 
