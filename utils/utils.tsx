@@ -6,6 +6,11 @@ import rinkebyWETH from 'protocol/deployments/rinkeby/WETH.json';
 import rinkebyWBTC from 'protocol/deployments/rinkeby/WBTC.json';
 import rinkebyUSDC from 'protocol/deployments/rinkeby/USDC.json';
 
+import rinkebyFixedLenderDAI from 'protocol/deployments/rinkeby/MarketDAI.json';
+import rinkebyFixedLenderWETH from 'protocol/deployments/rinkeby/MarketWETH.json';
+import rinkebyFixedLenderWBTC from 'protocol/deployments/rinkeby/MarketWBTC.json';
+import rinkebyFixedLenderUSDC from 'protocol/deployments/rinkeby/MarketUSDC.json';
+
 export function transformClasses(style: any, classes: string) {
   if (!style) return 'style object is mandatory';
 
@@ -53,13 +58,21 @@ export function getUnderlyingData(network: string | undefined, symbol: string | 
 
 export function getSymbol(address: string, network: string | undefined) {
   const currentNetwork = network ?? process.env.NEXT_PUBLIC_NETWORK;
+  // const dictionary: Dictionary<Dictionary<string>> = {
+  //   rinkeby: {
+  //     '0x08e31947ed0bcd30006acd8795ede6d18968935a': 'DAI',
+  //     '0xde80d6f51f558189feb2187028a6e481cfc3d8f3': 'WETH',
+  //     '0x7f693e8329668101118e2fdf95e7ee49b99a6f3e': 'WBTC',
+  //     '0x8b56d07321702305088cc56abb9531495a5ed7f2': 'USDC'
+  //   }
+  // };
 
   const dictionary: Dictionary<Dictionary<string>> = {
     rinkeby: {
-      '0x46a32241f2753118016c8fb804a12d6094f6bf81': 'DAI',
-      '0x594ba496a24b8e6683de356afcbfb7400e3ecae7': 'WETH',
-      '0x2d6b5da466fc1523d6377ebc5bb0b52ae440c4ee': 'WBTC',
-      '0xd795bb0abc85c32bb7a9f8701729fe39847084fa': 'USDC'
+      [rinkebyFixedLenderDAI.address.toLowerCase()]: 'DAI',
+      [rinkebyFixedLenderWETH.address.toLowerCase()]: 'WETH',
+      [rinkebyFixedLenderWBTC.address.toLowerCase()]: 'WBTC',
+      [rinkebyFixedLenderUSDC.address.toLowerCase()]: 'USDC'
     }
   };
 

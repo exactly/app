@@ -31,90 +31,90 @@ export default async (market: string, subgraphURL: string, maxFuturePools: numbe
   } = (await request(
     subgraphURL,
     `
-    query(
-      $market: Bytes
-      $start: Int
-    ) {
-      initial: marketUpdateds(
-        first: 1
-        orderBy: timestamp
-        orderDirection: desc
-        where: { market: $market, timestamp_lte: $start }
+      query(
+        $market: Bytes
+        $start: Int
       ) {
-        timestamp
-        floatingDepositShares
-        floatingAssets
-        earningsAccumulator
-      }
-      final: marketUpdateds(
-        first: 1
-        orderBy: timestamp
-        orderDirection: desc
-        where: { market: $market }
-      ) {
-        timestamp
-        floatingDepositShares
-        floatingAssets
-        earningsAccumulator
-      }
-      initialAccumulatorAccrual: marketUpdateds(
-        first: 1
-        orderBy: timestamp
-        orderDirection: desc
-        where: { market: $market, maturity: 0, timestamp_lte: $start }
-      ) {
-        timestamp
-      }
-      finalAccumulatorAccrual: marketUpdateds(
-        first: 1
-        orderBy: timestamp
-        orderDirection: desc
-        where: { market: $market, maturity: 0 }
-      ) {
-        timestamp
-      }
-      earningsAccumulatorSmoothFactor: earningsAccumulatorSmoothFactorSets(
-        first: 1
-        orderBy: timestamp
-        orderDirection: desc
-        where: { market: $market }
-      ) {
-        earningsAccumulatorSmoothFactor
-      }
-      ${futurePools(timeWindow.start)
-        .map(
-          (maturity) => `
-        initial${maturity}: marketUpdateds(
+        initial: marketUpdateds(
           first: 1
           orderBy: timestamp
           orderDirection: desc
-          where: { market: $market, maturity: ${maturity}, timestamp_lte: $start }
+          where: { market: $market, timestamp_lte: $start }
         ) {
           timestamp
-          maturity
-          maturityUnassignedEarnings
+          floatingDepositShares
+          floatingAssets
+          earningsAccumulator
         }
-      `
-        )
-        .join('')}
-      ${futurePools(timeWindow.end)
-        .map(
-          (maturity) => `
-        final${maturity}: marketUpdateds(
+        final: marketUpdateds(
           first: 1
           orderBy: timestamp
           orderDirection: desc
-          where: { market: $market, maturity: ${maturity} }
+          where: { market: $market }
         ) {
           timestamp
-          maturity
-          maturityUnassignedEarnings
+          floatingDepositShares
+          floatingAssets
+          earningsAccumulator
         }
-      `
-        )
-        .join('')}
-    }
-  `,
+        initialAccumulatorAccrual: accumulatorAccrueds(
+          first: 1
+          orderBy: timestamp
+          orderDirection: desc
+          where: { market: $market, timestamp_lte: $start }
+        ) {
+          timestamp
+        }
+        finalAccumulatorAccrual: accumulatorAccrueds(
+          first: 1
+          orderBy: timestamp
+          orderDirection: desc
+          where: { market: $market }
+        ) {
+          timestamp
+        }
+        earningsAccumulatorSmoothFactor: earningsAccumulatorSmoothFactorSets(
+          first: 1
+          orderBy: timestamp
+          orderDirection: desc
+          where: { market: $market }
+        ) {
+          earningsAccumulatorSmoothFactor
+        }
+        ${futurePools(timeWindow.start)
+          .map(
+            (maturity) => `
+          initial${maturity}: fixedEarningsUpdateds(
+            first: 1
+            orderBy: timestamp
+            orderDirection: desc
+            where: { market: $market, maturity: ${maturity}, timestamp_lte: $start }
+          ) {
+            timestamp
+            maturity
+            unassignedEarnings
+          }
+        `
+          )
+          .join('')}
+        ${futurePools(timeWindow.end)
+          .map(
+            (maturity) => `
+          final${maturity}: fixedEarningsUpdateds(
+            first: 1
+            orderBy: timestamp
+            orderDirection: desc
+            where: { market: $market, maturity: ${maturity} }
+          ) {
+            timestamp
+            maturity
+            unassignedEarnings
+          }
+        `
+          )
+          .join('')}
+      }
+    `,
     { market, ...timeWindow }
   )) as {
     initial: MarketState[];
@@ -139,10 +139,10 @@ export default async (market: string, subgraphURL: string, maxFuturePools: numbe
     return (
       BigInt(floatingAssets) +
       maturities.reduce(
-        (smartPoolEarnings, { timestamp: lastAccrual, maturity, maturityUnassignedEarnings }) =>
+        (smartPoolEarnings, { timestamp: lastAccrual, maturity, unassignedEarnings }) =>
           smartPoolEarnings +
           (maturity > lastAccrual
-            ? (BigInt(maturityUnassignedEarnings) * BigInt(timestamp - lastAccrual)) /
+            ? (BigInt(unassignedEarnings) * BigInt(timestamp - lastAccrual)) /
               BigInt(maturity - lastAccrual)
             : 0n),
         0n
@@ -153,26 +153,24 @@ export default async (market: string, subgraphURL: string, maxFuturePools: numbe
             (BigInt(earningsAccumulatorSmoothFactor) * BigInt(maxFuturePools * interval)) / WAD))
     );
   };
-
-  const initialShares = BigInt(initial.floatingDepositShares);
-  const initialAssets = totalAssets(
-    timeWindow.start,
-    initial,
-    initialAccumulatorAccrual,
-    fixedPool('initial')
-  );
-
-  const finalShares = BigInt(final.floatingDepositShares);
-  const finalAssets = totalAssets(
-    timeWindow.end,
-    final,
-    finalAccumulatorAccrual,
-    fixedPool('final')
-  );
-
   try {
-    const denominator = initialShares ? (initialAssets * WAD) / initialShares : WAD;
+    const initialShares = BigInt(initial.floatingDepositShares);
+    const initialAssets = totalAssets(
+      timeWindow.start,
+      initial,
+      initialAccumulatorAccrual,
+      fixedPool('initial')
+    );
 
+    const finalShares = BigInt(final.floatingDepositShares);
+    const finalAssets = totalAssets(
+      timeWindow.end,
+      final,
+      finalAccumulatorAccrual,
+      fixedPool('final')
+    );
+
+    const denominator = initialShares ? (initialAssets * WAD) / initialShares : WAD;
     const result = (((finalAssets * WAD) / finalShares) * WAD) / denominator;
 
     const time = 31_536_000 / (timeWindow.end - timeWindow.start);
@@ -193,8 +191,7 @@ interface MarketState extends State {
   earningsAccumulator: string;
 }
 
-interface FixedPool {
-  timestamp: number;
+interface FixedPool extends State {
   maturity: number;
-  maturityUnassignedEarnings: string;
+  unassignedEarnings: string;
 }
