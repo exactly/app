@@ -240,7 +240,7 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
         deposit = await fixedLenderWithSigner?.depositAtMaturity(
           parseInt(date?.value ?? maturity),
           ethers.utils.parseUnits(qty!, decimals),
-          ethers.utils.parseUnits(`${minAmount}`, decimals),
+          ethers.utils.parseUnits(`${minAmount.toFixed(decimals)}`, decimals),
           walletAddress
         );
       }
