@@ -244,7 +244,9 @@ function FloatingBorrowModal({ data, editable, closeModal }: Props) {
     if (!accountData) return;
     const decimals = accountData[symbol].decimals;
 
-    const isCollateral = accountData[symbol].isCollateral;
+    const isCollateral = Object.keys(accountData).some((market) => {
+      return accountData[market].isCollateral;
+    });
 
     const hasDepositedToFloatingPool =
       parseFloat(ethers.utils.formatUnits(accountData[symbol].floatingBorrowAssets, decimals)) > 0;
