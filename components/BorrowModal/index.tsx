@@ -82,6 +82,7 @@ function BorrowModal({ data, editable, closeModal }: Props) {
   const [poolLiquidity, setPoolLiquidity] = useState<number | undefined>(undefined);
 
   const [error, setError] = useState<Error | undefined>(undefined);
+  const [gasError, setGasError] = useState<Error | undefined>(undefined);
 
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
     undefined
@@ -256,6 +257,11 @@ function BorrowModal({ data, editable, closeModal }: Props) {
       setLoading(false);
 
       const isDenied = e?.message?.includes('User denied');
+      const txError = e?.includes(`"status":0`);
+
+      const regex = new RegExp(/\"hash":"(.*?)\"/g); //regex to get all between ("hash":") and (")
+      const preTxHash = e?.match(regex); //get the hash from plain text by the regex
+      const txErrorHash = preTxHash![0].substring(8, preTxHash![0].length - 1); //parse the string to get the txHash only
       if (isDenied) {
         setError({
           status: true,
@@ -263,6 +269,8 @@ function BorrowModal({ data, editable, closeModal }: Props) {
             ? translations[lang].deniedTransaction
             : translations[lang].notEnoughSlippage
         });
+      } else if (txError) {
+        setTx({ status: 'error', hash: txErrorHash });
       } else {
         setError({
           status: true,
@@ -312,7 +320,7 @@ function BorrowModal({ data, editable, closeModal }: Props) {
       }
     } catch (e) {
       console.log(e);
-      setError({
+      setGasError({
         status: true,
         component: 'gas'
       });
@@ -449,7 +457,7 @@ function BorrowModal({ data, editable, closeModal }: Props) {
                 editable={editable}
               />
               <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} symbol={symbol!} />
-              {error?.component !== 'gas' && symbol != 'WETH' && <ModalTxCost gas={gas} />}
+              {gasError?.component !== 'gas' && symbol != 'WETH' && <ModalTxCost gas={gas} />}
               <ModalRow text={translations[lang].apy} value={fixedRate} line />
               <ModalRowEditable
                 text={translations[lang].maximumBorrowApy}
