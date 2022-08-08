@@ -13,7 +13,7 @@
     "deniedTransaction": "Transaction rejected",
     "availableLiquidityError": "There is not enough liquidity in this pool",
     "generalError": "There was an error, please try again",
-    "noCollateral": "You don't have enough collateralized assets or deposits in the Variable Rate Pool."
+    "noCollateral": "You don't have enough collateralized assets or deposits in the Variable Rate Pool"
   },
   "es": {}
 }
