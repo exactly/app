@@ -55,25 +55,30 @@ function ModalMinimized({ tx, handleMinimize }: Props) {
       />
       <h3 className={styles.title}>{options[tx.status].title}</h3>
       <div className={styles.loading}>
-        {tx.status != 'success' ? (
-          <div className={styles.loadingLine}></div>
-        ) : (
+        {tx.status == 'success' ? (
           <div className={styles.doneLine}></div>
+        ) : tx.status == 'error' ? (
+          <div className={styles.errorLine}></div>
+        ) : (
+          <div className={styles.loadingLine}></div>
         )}
       </div>
-      <p className={styles.link}>
-        {translations[lang].etherscanText}{' '}
-        <a
-          className={styles.etherscan}
-          href={`https://${network?.name ?? process.env.NEXT_PUBLIC_NETWORK}.etherscan.io/tx/${
-            tx.hash
-          }`}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Etherscan
-        </a>
-      </p>
+
+      {tx.hash && (
+        <p className={styles.link}>
+          {translations[lang].etherscanText}{' '}
+          <a
+            className={styles.etherscan}
+            href={`https://${network?.name ?? process.env.NEXT_PUBLIC_NETWORK}.etherscan.io/tx/${
+              tx.hash
+            }`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Etherscan
+          </a>
+        </p>
+      )}
     </animated.section>
   );
 }
