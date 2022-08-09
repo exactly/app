@@ -58,6 +58,10 @@
       overflow: hidden;
       position: relative;
     }
+    .errorLine {
+      @extend .doneLine;
+      background: var(--error);
+    }
   }
 
   .link {
