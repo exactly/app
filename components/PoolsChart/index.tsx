@@ -143,8 +143,8 @@ function PoolsChart({ deposits, borrows }: Props) {
             iconSize={30}
             wrapperStyle={legendStyle}
           />
-          <Scatter name="Deposit" data={deposit} fill="#4d4de8" line id="deposit" />
-          <Scatter name="Borrow" data={borrow} fill="#53d3be" line id="borrow" />
+          <Scatter name="Deposit" data={deposit} fill="#008cf4" line id="deposit" />
+          <Scatter name="Borrow" data={borrow} fill="#34c53a" line id="borrow" />
         </ScatterChart>
       </ResponsiveContainer>
     </div>
