@@ -68,7 +68,7 @@
         }
 
         .dropdownContent a:hover {
-          background-color: rgba(#4d4de8, 0.1);
+          background-color: rgba(#008cf4, 0.1);
         }
 
         .link:hover .dropdownContent {
@@ -96,7 +96,7 @@
         .active {
           @extend .link;
           border-bottom: 2px solid;
-          border-image: linear-gradient(90deg, #7bf5e1 0.29%, #4d4de8 100.29%);
+          border-image: linear-gradient(90deg, #008cf4 0.29%, #34c53a 100.29%);
           border-image-slice: 1;
 
           a {

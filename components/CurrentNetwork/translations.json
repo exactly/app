@@ -1,6 +1,6 @@
 {
   "en": {
-    "connectedTo": "You are connected to",
+    "connectedTo": "You are connected to EXACTLY TESTNET on ",
     "network": "network",
     "disconnected": "Please connect your wallet",
     "faucet": "- Click here to faucet"
