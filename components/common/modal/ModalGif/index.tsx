@@ -60,10 +60,12 @@ function ModalGif({ tx, tryAgain }: Props) {
 
       {tx.status == 'error' ?? <p className={styles.text}>{options[tx.status].text}</p>}
 
-      <p className={styles.hash}>
-        <span className={styles.hashTitle}>{translations[lang].transactionHash} </span>
-        {tx.hash}
-      </p>
+      {tx.hash && (
+        <p className={styles.hash}>
+          <span className={styles.hashTitle}>{translations[lang].transactionHash} </span>
+          {tx.hash}
+        </p>
+      )}
 
       {tx.status != 'loading' && (
         <p className={styles.link}>

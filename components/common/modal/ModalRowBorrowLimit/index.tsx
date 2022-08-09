@@ -37,7 +37,13 @@ function ModalRowBorrowLimit({
 
   const [newQty, setNewQty] = useState<number | undefined>(undefined);
 
-  const beforeBorrowLimit = healthFactor ? healthFactor!.collateral - healthFactor!.debt : 0;
+  let beforeBorrowLimit = healthFactor ? healthFactor!.collateral - healthFactor!.debt : 0;
+
+  if (operation == 'borrow') {
+    beforeBorrowLimit = healthFactor
+      ? healthFactor!.collateral * collateralFactor - healthFactor!.debt
+      : 0;
+  }
 
   let afterBorrowLimit = 0;
 
