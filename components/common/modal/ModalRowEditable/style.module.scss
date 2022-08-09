@@ -13,6 +13,7 @@
     gap: var(--smallUnit);
     display: flex;
     align-items: center;
+    width: 30%;
 
     .value {
       margin: 0;
@@ -27,7 +28,7 @@
       border: 1px solid var(--gray-200);
       padding: var(--u);
       border-radius: var(--smallUnit);
-      height: 100%;
+      height: var(--u4);
       width: 100%;
       display: flex;
       align-items: center;
@@ -42,7 +43,7 @@
         color: var(--gray-900);
         font-weight: 600;
         text-align: right;
-        font-family: 'Source Sans Pro', sans-serif;
+        font-family: inherit;
 
         &::-webkit-outer-spin-button,
         &::-webkit-inner-spin-button {

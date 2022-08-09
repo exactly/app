@@ -1,10 +1,10 @@
 @function calcRgbaColor($index, $leftSide, $type) {
-  $from-r: 123; // start red rgb value
-  $from-g: 245; // start green rgb value
-  $from-b: 225; // start blue rgb value
-  $to-r: 99; // end red rgb value
-  $to-g: 202; // end green rgb value
-  $to-b: 16; // end blue rgb value
+  $from-r: 0; // end red rgb value
+  $from-g: 140; // end green rgb value
+  $from-b: 244; // end blue rgb value
+  $to-r: 52; // start red rgb value
+  $to-g: 197; // start green rgb value
+  $to-b: 58; // start blue rgb value
   $from: rgba($from-r, $from-g, $from-b, 1); //values in rgba
   $to: rgba($to-r, $to-g, $to-b, 1); // values in rgba
 
@@ -15,11 +15,11 @@
   }
 
   @if $type == 'incomplete' {
-    $to-r: 77; // end red rgb value
-    $to-g: 77; // end green rgb value
-    $to-b: 232; // end blue rgb value
-    $from: rgba($from-r, $from-g, $from-b, 1); //values in rgba
-    $to: rgba($to-r, $to-g, $to-b, 1); // values in rgba
+    $to-r: 52; // end red rgb value
+    $to-g: 197; // end green rgb value
+    $to-b: 58; // end blue rgb value
+    $from: rgba($from-r, $from-g, $from-b, 1); // values in rgba
+    $to: rgba($to-r, $to-g, $to-b, 1); //values in rgba
   }
 
   @if $type == 'elapsed' {

@@ -39,15 +39,15 @@
   --gray-900: #1f1939;
   --black: #000;
 
-  --primary: #4d4de8;
-  --primary-hover: #3b3abd;
+  --primary: #008cf4;
+  --primary-hover: #016bbd;
   --primary-50: #f6f6fe;
   --primary-100: #d4d4fa;
   --primary-200: #a6a6f4;
 
-  --secondary-brand: #7bf5e1;
-  --secondary: #53d3be;
-  --secondary-hover: #1dac95;
+  --secondary-brand: #34c53a;
+  --secondary: #34c53a;
+  --secondary-hover: #26952a;
 
   --shadow-tables: 0px 0px 10px rgba(0, 0, 0, 0.15);
   --shadow-header-mob: 0px 2px 4px rgba(0, 0, 0, 0.15);

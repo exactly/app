@@ -117,12 +117,12 @@ function DashboardHeader() {
         {
           label: 'Variable',
           value: variable,
-          color: '#7BF5E1'
+          color: '#34c53a'
         },
         {
           label: 'Fixed',
           value: fixed,
-          color: '#4D4DE8'
+          color: '#008cf4'
         }
       ]);
     } else {
@@ -186,12 +186,12 @@ function DashboardHeader() {
         {
           label: '',
           value: collateral,
-          color: '#53D3BE'
+          color: '#008cf4'
         },
         {
           label: '',
           value: debt,
-          color: '#4D4DE8'
+          color: '#34c53a'
         }
       ];
       setHealthFactorData(healthFactorData);

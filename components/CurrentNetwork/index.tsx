@@ -9,8 +9,6 @@ import styles from './style.module.scss';
 
 import keys from './translations.json';
 
-import Button from 'components/common/Button';
-
 import allowedNetworks from 'config/allowedNetworks.json';
 
 type Props = {
@@ -52,17 +50,23 @@ function CurrentNetwork({ showModal }: Props) {
         {isAllowed && network && (
           <>
             <p>
-              <span>{translations[lang].connectedTo}</span>{' '}
-              <strong>{network?.name ?? 'unknown'}</strong>{' '}
+              <span>
+                You are connected to <strong> EXACTLY TESTNET</strong> on
+              </span>{' '}
+              <strong>{network?.name?.toUpperCase() ?? 'UNKNOWN'}</strong>{' '}
               {network?.name == 'rinkeby' && <span>{translations[lang].faucet}</span>}
             </p>
           </>
         )}
-        {!network && <p>{translations[lang].disconnected}</p>}
+        {!network && (
+          <p>
+            {translations[lang].disconnected} to use <strong>EXACTLY TESTNET</strong>
+          </p>
+        )}
         {!isAllowed && network && (
           <p>
             Click here to connect to <strong>{process.env.NEXT_PUBLIC_NETWORK}</strong> and start
-            using <strong>Exactly</strong> Protocol{' '}
+            using <strong>EXACTLY TESTNET </strong>{' '}
           </p>
         )}
       </div>
