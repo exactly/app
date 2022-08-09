@@ -2,7 +2,7 @@ function parseHealthFactor(debt: number, collateral: number) {
   //TODO => check case when the user doesn't have any collateral or debt
 
   if (collateral <= 0 || debt <= 0) {
-    return '1x';
+    return '∞+';
   } else {
     const healthFactor = collateral / debt;
 
