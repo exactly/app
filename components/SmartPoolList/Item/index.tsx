@@ -85,6 +85,7 @@ function Item({ market, showModal, type }: Props) {
 
     setPoolData(undefined);
     setRate(undefined);
+
     try {
       const borrowed = accountData[market?.symbol.toUpperCase()].totalFloatingBorrowAssets;
       const supplied = accountData[market?.symbol.toUpperCase()].totalFloatingDepositAssets;
@@ -114,9 +115,13 @@ function Item({ market, showModal, type }: Props) {
         interestRate = await getFloatingBorrowAPY(fixedLender?.address!, subgraphUrl);
       }
 
-      interestRate && setRate(interestRate);
-
       setPoolData(newPoolData);
+
+      if (interestRate != 'N/A') {
+        return interestRate && setRate(`${interestRate}%`);
+      } else {
+        return setRate('N/A');
+      }
     } catch (e) {
       console.log(e);
     }
@@ -150,7 +155,7 @@ function Item({ market, showModal, type }: Props) {
             'USD'
           )}`) || <Skeleton />}
       </p>
-      <p className={style.value}>{(rate && `${rate}%`) || <Skeleton />}</p>
+      <p className={style.value}>{(rate && rate) || <Skeleton />}</p>
       <div className={style.buttonContainer}>
         {(market && (
           <Button
