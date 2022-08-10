@@ -39,22 +39,28 @@ function FaucetModal({ closeModal }: Props) {
     web3Provider?.getSigner()
   );
 
+  const decimals: Dictionary<number> = {
+    USDC: 6,
+    WBTC: 8,
+    DAI: 18,
+    WETH: 18,
+    ETH: 18
+  };
+
   async function mint(asset: string) {
-    const decimals: Dictionary<number> = {
-      USDC: 6,
-      WBTC: 8,
-      DAI: 18,
-      WETH: 18,
-      ETH: 18
-    };
     try {
       const contract = getUnderlyingData(network!.name.toLowerCase(), asset.toLowerCase());
 
       setLoading(asset);
+      const amounts: Dictionary<string> = {
+        DAI: '50000',
+        USDC: '50000',
+        WBTC: '2'
+      };
 
       const mint = await faucetContract?.mint(
         contract?.address,
-        ethers.utils.parseUnits('10000', decimals[asset.toUpperCase()])
+        ethers.utils.parseUnits(amounts[asset.toUpperCase()], decimals[asset.toUpperCase()])
       );
 
       await mint.wait();
@@ -67,11 +73,52 @@ function FaucetModal({ closeModal }: Props) {
 
   const assets = ['DAI', 'USDC', 'ETH', 'WBTC'];
 
+  async function addTokens() {
+    const filter = assets.filter((asset) => asset != 'ETH');
+
+    const images: Dictionary<string> = {
+      DAI: 'https://gateway.ipfs.io/ipfs/QmXyHPX8GS99dUiChsq7iRfZ4y3aofQqPjMjFJyCpkWs8e',
+      WBTC: 'https://gateway.ipfs.io/ipfs/QmZHbqjFzzbf5sR2LJtVPi5UeEqS7fmzLBiWFRAM1dsJRm',
+      USDC: 'https://gateway.ipfs.io/ipfs/QmSi4utTywi5EANuedkPT2gi5qj6g3aeXzPjMWkeYdk7Ag'
+    };
+
+    try {
+      filter.forEach(async (asset) => {
+        if (!web3Provider?.provider.request) return;
+
+        const contract = getUnderlyingData(network!.name.toLowerCase(), asset.toLowerCase());
+
+        const upperCaseAsset = asset.toUpperCase();
+
+        return await web3Provider?.provider?.request({
+          method: 'wallet_watchAsset',
+          params: {
+            // @ts-ignore
+            type: 'ERC20',
+            options: {
+              address: contract?.address,
+              symbol: upperCaseAsset,
+              decimals: decimals[upperCaseAsset],
+              image: images[upperCaseAsset]
+            }
+          }
+        });
+      });
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
   return (
     <>
       <ModalWrapper closeModal={closeModal}>
         <div className={styles.faucetContainer}>
-          <h3 className={styles.title}>{translations[lang].faucet}</h3>
+          <div className={styles.titlesContainer}>
+            <h3 className={styles.title}>{translations[lang].faucet}</h3>
+            <h4 className={styles.addTokens} onClick={addTokens}>
+              {translations[lang].addTokens}
+            </h4>
+          </div>
           <div className={styles.header}>
             <p>{translations[lang].asset}</p>
             <p></p>
@@ -79,7 +126,7 @@ function FaucetModal({ closeModal }: Props) {
           {assets.map((asset) => {
             if (asset == 'ETH') {
               return (
-                <div className={styles.assetContainer}>
+                <div className={styles.assetContainer} key={asset}>
                   <p className={styles.asset}>
                     <img src={`/img/assets/weth.png`} alt={asset} className={styles.assetImage} />
                     {asset}

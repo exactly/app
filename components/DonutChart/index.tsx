@@ -35,8 +35,8 @@ function DonutChart({ data, small, insideValue }: Props) {
           cy={cy}
           innerRadius={innerRadius - 1}
           outerRadius={outerRadius + 1}
-          startAngle={startAngle + 0.5}
-          endAngle={endAngle - 0.5}
+          startAngle={startAngle}
+          endAngle={endAngle}
           fill={fill}
         />
       </g>

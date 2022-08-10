@@ -67,7 +67,7 @@ function FloatingRepayModal({ data, closeModal }: Props) {
   const [loading, setLoading] = useState<boolean>(false);
   const [healthFactor, setHealthFactor] = useState<HealthFactor | undefined>(undefined);
   const [collateralFactor, setCollateralFactor] = useState<number | undefined>(undefined);
-  const [repayAmount, setRepayAmount] = useState<string>('0');
+  // const [repayAmount, setRepayAmount] = useState<string>('0');
 
   const [error, setError] = useState<Error | undefined>(undefined);
 
@@ -220,27 +220,27 @@ function FloatingRepayModal({ data, closeModal }: Props) {
               <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} symbol={symbol!} />
               {error?.component !== 'gas' && symbol != 'WETH' && <ModalTxCost gas={gas} />}
 
-              <ModalExpansionPanelWrapper>
-                <ModalRow text={translations[lang].amountToPay} value={repayAmount} line />
+              {/* <ModalExpansionPanelWrapper> */}
+              {/* <ModalRow text={translations[lang].amountToPay} value={repayAmount} line /> */}
 
-                {symbol ? (
-                  <ModalRowHealthFactor
-                    qty={qty}
-                    symbol={symbol}
-                    operation="repay"
-                    healthFactorCallback={getHealthFactor}
-                  />
-                ) : (
-                  <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
-                )}
-                <ModalRowBorrowLimit
-                  healthFactor={healthFactor}
-                  collateralFactor={collateralFactor}
+              {symbol ? (
+                <ModalRowHealthFactor
                   qty={qty}
-                  symbol={symbol!}
+                  symbol={symbol}
                   operation="repay"
+                  healthFactorCallback={getHealthFactor}
                 />
-              </ModalExpansionPanelWrapper>
+              ) : (
+                <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
+              )}
+              <ModalRowBorrowLimit
+                healthFactor={healthFactor}
+                collateralFactor={collateralFactor}
+                qty={qty}
+                symbol={symbol!}
+                operation="repay"
+              />
+              {/* </ModalExpansionPanelWrapper> */}
 
               {error && error.component != 'gas' && <ModalError message={error.message} />}
               <div className={styles.buttonContainer}>

@@ -3,8 +3,25 @@
   flex-direction: column;
   gap: var(--u);
 
-  .title {
-    margin: var(--u) 0;
+  .titlesContainer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    .title {
+      margin: var(--u) 0;
+    }
+
+    .addTokens {
+      margin: 0;
+      font-size: var(--font-14);
+      color: var(--primary);
+      cursor: pointer;
+
+      &:hover {
+        color: var(--primary-hover);
+      }
+    }
   }
 
   .header {

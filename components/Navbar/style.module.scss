@@ -123,6 +123,18 @@
   }
 }
 
+//Only for Testnet Demo
+.discordFeedbackLink {
+  margin-right: 100px;
+  color: #008cf4;
+  font-size: var(--font-18);
+  text-decoration: underline;
+  text-underline-offset: var(--smallUnit);
+}
+.discordFeedbackLink:hover {
+  color: #34c53a;
+}
+
 @media (max-width: 769px) {
   .navBar {
     display: none;
