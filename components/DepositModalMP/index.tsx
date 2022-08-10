@@ -260,7 +260,7 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
       setLoading(false);
 
       const isDenied = e?.message?.includes('User denied');
-      const txError = e?.includes(`"status":0`);
+      const txError = e?.message?.includes(`"status":0`);
 
       const regex = new RegExp(/\"hash":"(.*?)\"/g); //regex to get all between ("hash":") and (")
       const preTxHash = e?.message?.match(regex); //get the hash from plain text by the regex
