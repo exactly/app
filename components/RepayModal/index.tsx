@@ -26,11 +26,12 @@ import { Transaction } from 'types/Transaction';
 import { Decimals } from 'types/Decimals';
 import { Error } from 'types/Error';
 import { HealthFactor } from 'types/HealthFactor';
+import { UnderlyingData } from 'types/Underlying';
 
 import parseTimestamp from 'utils/parseTimestamp';
 import { getContractData } from 'utils/contracts';
 import formatNumber from 'utils/formatNumber';
-import { getSymbol } from 'utils/utils';
+import { getSymbol, getUnderlyingData } from 'utils/utils';
 import handleEth from 'utils/handleEth';
 
 import styles from './style.module.scss';
@@ -79,6 +80,7 @@ function RepayModal({ data, closeModal }: Props) {
   const [healthFactor, setHealthFactor] = useState<HealthFactor | undefined>(undefined);
   const [collateralFactor, setCollateralFactor] = useState<number | undefined>(undefined);
   const [repayAmount, setRepayAmount] = useState<string>('0');
+  const [needsApproval, setNeedsApproval] = useState<boolean>(false);
 
   const [error, setError] = useState<Error | undefined>(undefined);
 
@@ -90,6 +92,18 @@ function RepayModal({ data, closeModal }: Props) {
     network?.name,
     previewerData.address!,
     previewerData.abi!
+  );
+
+  const underlyingData: UnderlyingData | undefined = getUnderlyingData(
+    network?.name,
+    symbol?.toLowerCase()
+  );
+
+  const underlyingContract = getContractData(
+    network?.name,
+    underlyingData!.address,
+    underlyingData!.abi,
+    web3Provider?.getSigner()
   );
 
   useEffect(() => {
@@ -112,6 +126,56 @@ function RepayModal({ data, closeModal }: Props) {
     if (qty == '') return;
     previewRepayAtMaturity();
   }, [qty]);
+
+  useEffect(() => {
+    checkAllowance();
+  }, [symbol, walletAddress, underlyingContract]);
+
+  async function checkAllowance() {
+    if (symbol == 'WETH' || !fixedLenderWithSigner) {
+      return;
+    }
+
+    const allowance = await underlyingContract?.allowance(
+      walletAddress,
+      fixedLenderWithSigner?.address
+    );
+
+    const formattedAllowance = allowance && parseFloat(ethers.utils.formatEther(allowance));
+
+    const amount = qty == '' ? 0 : parseFloat(qty);
+
+    if (formattedAllowance > amount && !isNaN(amount) && !isNaN(formattedAllowance)) {
+      setNeedsApproval(false);
+    } else {
+      setNeedsApproval(true);
+    }
+  }
+
+  async function approve() {
+    if (symbol == 'WETH' || !fixedLenderWithSigner) return;
+
+    try {
+      setLoading(true);
+
+      const approval = await underlyingContract?.approve(
+        fixedLenderWithSigner?.address,
+        ethers.constants.MaxUint256
+      );
+
+      await approval.wait();
+
+      setLoading(false);
+
+      setNeedsApproval(false);
+    } catch (e) {
+      setLoading(false);
+      setNeedsApproval(true);
+      setError({
+        status: true
+      });
+    }
+  }
 
   async function getFixedLenderContract() {
     const filteredFixedLender = fixedLenderData.find((contract) => {
@@ -197,11 +261,15 @@ function RepayModal({ data, closeModal }: Props) {
       setLoading(false);
 
       const isDenied = e?.message?.includes('User denied');
-      const txError = e?.includes(`"status":0`);
 
-      const regex = new RegExp(/\"hash":"(.*?)\"/g); //regex to get all between ("hash":") and (")
-      const preTxHash = e?.message?.match(regex); //get the hash from plain text by the regex
-      const txErrorHash = preTxHash![0].substring(8, preTxHash![0].length - 1); //parse the string to get the txHash only
+      const txError = e?.message?.includes(`"status":0`);
+      let txErrorHash = undefined;
+
+      if (txError) {
+        const regex = new RegExp(/\"hash":"(.*?)\"/g); //regex to get all between ("hash":") and (")
+        const preTxHash = e?.message?.match(regex); //get the hash from plain text by the regex
+        txErrorHash = preTxHash[0].substring(8, preTxHash[0].length - 1); //parse the string to get the txHash only
+      }
 
       if (isDenied) {
         setError({
@@ -317,10 +385,10 @@ function RepayModal({ data, closeModal }: Props) {
               {error && error.component != 'gas' && <ModalError message={error.message} />}
               <div className={styles.buttonContainer}>
                 <Button
-                  text={translations[lang].repay}
+                  text={needsApproval ? translations[lang].approval : translations[lang].repay}
                   className={parseFloat(qty) <= 0 || !qty ? 'secondaryDisabled' : 'quaternary'}
                   disabled={parseFloat(qty) <= 0 || !qty || loading}
-                  onClick={repay}
+                  onClick={needsApproval ? approve : repay}
                   loading={loading}
                   color="secondary"
                 />
