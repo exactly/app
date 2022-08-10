@@ -126,6 +126,7 @@ function Navbar() {
                 <a
                   className={styles.discordFeedbackLink}
                   target="_blank"
+                  rel="noreferrer noopener"
                   href="https://discordapp.com/channels/846682395553824808/985912903880302632"
                 >
                   <strong>Give us feedback here!</strong>
