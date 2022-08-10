@@ -10,7 +10,7 @@ export default async (market: string, subgraphURL: string, maxFuturePools: numbe
     [...new Array(n)].map((_, i) => start - (start % interval) + interval * (i + 1));
 
   const timeWindow = {
-    start: Math.floor(Date.now() / 1_000) - 86_400 * 7,
+    start: Math.max(Math.floor(Date.now() / 1_000) - 86_400 * 7, 1_660_170_000),
     end: Math.floor(Date.now() / 1_000)
   };
 
