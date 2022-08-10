@@ -213,16 +213,22 @@ function WithdrawModalMP({ data, closeModal }: Props) {
       setLoading(false);
 
       const isDenied = e?.message?.includes('User denied');
-      const txError = e?.message?.includes(`"status":0`);
 
-      const regex = new RegExp(/\"hash":"(.*?)\"/g); //regex to get all between ("hash":") and (")
-      const preTxHash = e?.message?.match(regex); //get the hash from plain text by the regex
-      const txErrorHash = preTxHash![0].substring(8, preTxHash![0].length - 1); //parse the string to get the txHash only
+      const txError = e?.message?.includes(`"status":0`);
+      let txErrorHash = undefined;
+
+      if (txError) {
+        const regex = new RegExp(/\"hash":"(.*?)\"/g); //regex to get all between ("hash":") and (")
+        const preTxHash = e?.message?.match(regex); //get the hash from plain text by the regex
+        txErrorHash = preTxHash[0].substring(8, preTxHash[0].length - 1); //parse the string to get the txHash only
+      }
 
       if (isDenied) {
         setError({
           status: true,
-          message: isDenied && translations[lang].deniedTransaction
+          message: isDenied
+            ? translations[lang].deniedTransaction
+            : translations[lang].notEnoughSlippage
         });
       } else if (txError) {
         setTx({ status: 'error', hash: txErrorHash });
