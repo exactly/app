@@ -11,6 +11,7 @@ import { LangKeys } from 'types/Lang';
 import { Deposit } from 'types/Deposit';
 import { SmartPoolItemData } from 'types/SmartPoolItemData';
 import { Option } from 'react-dropdown';
+import { FixedLenderAccountData } from 'types/FixedLenderAccountData';
 
 import styles from './style.module.scss';
 
@@ -46,7 +47,13 @@ function SmartPoolUserStatus({ walletAddress, showModal, type }: Props) {
 
   function getCurrentBalance() {
     if (!accountData) return;
-    const allMarkets = Object.values(accountData);
+    const orderAssets = ['DAI', 'USDC', 'WETH', 'WBTC'];
+
+    const allMarkets = Object.values(accountData).sort(
+      (a: FixedLenderAccountData, b: FixedLenderAccountData) => {
+        return orderAssets.indexOf(a.assetSymbol) - orderAssets.indexOf(b.assetSymbol);
+      }
+    );
 
     const data: SmartPoolItemData[] = [];
 
