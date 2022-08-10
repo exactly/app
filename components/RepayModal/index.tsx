@@ -274,9 +274,7 @@ function RepayModal({ data, closeModal }: Props) {
       if (isDenied) {
         setError({
           status: true,
-          message: isDenied
-            ? translations[lang].deniedTransaction
-            : translations[lang].notEnoughSlippage
+          message: isDenied && translations[lang].deniedTransaction
         });
       } else if (txError) {
         setTx({ status: 'error', hash: txErrorHash });

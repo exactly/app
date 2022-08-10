@@ -256,7 +256,6 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
       }
     } catch (e: any) {
       console.log(e);
-      console.log(e);
       setLoading(false);
 
       const isDenied = e?.message?.includes('User denied');
@@ -273,9 +272,7 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
       if (isDenied) {
         setError({
           status: true,
-          message: isDenied
-            ? translations[lang].deniedTransaction
-            : translations[lang].notEnoughSlippage
+          message: isDenied && translations[lang].deniedTransaction
         });
       } else if (txError) {
         setTx({ status: 'error', hash: txErrorHash });
