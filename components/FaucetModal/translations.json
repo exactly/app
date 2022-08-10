@@ -2,7 +2,8 @@
   "en": {
     "faucet": "Faucet",
     "asset": "Asset",
-    "mint": "Mint"
+    "mint": "Mint",
+    "addTokens": "Add tokens to wallet"
   },
   "es": {}
 }
