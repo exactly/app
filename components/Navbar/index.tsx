@@ -117,14 +117,23 @@ function Navbar() {
         <div className={styles.right}>
           {connect && !walletAddress ? (
             <div className={styles.buttonContainer}>
-              <Button text="Conectar" onClick={() => connect()} />
+              <Button text="Connect Wallet" onClick={() => connect()} />
             </div>
           ) : (
             disconnect &&
             walletAddress && (
-              <div className={styles.buttonContainer}>
-                <Wallet walletAddress={walletAddress} disconnect={() => disconnect()} />
-              </div>
+              <>
+                <a
+                  className={styles.discordFeedback}
+                  target="_blank"
+                  href="https://discordapp.com/channels/846682395553824808/985912903880302632"
+                >
+                  <strong>Give us feedback here!</strong>
+                </a>
+                <div className={styles.buttonContainer}>
+                  <Wallet walletAddress={walletAddress} disconnect={() => disconnect()} />
+                </div>
+              </>
             )
           )}
         </div>

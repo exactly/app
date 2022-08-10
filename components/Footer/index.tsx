@@ -28,16 +28,16 @@ const Footer = () => {
             <a href="https://t.me/exactlyFinance" target="_blank" rel="noreferrer noopener">
               <img alt="telegram" src="/img/social/telegram.png" />
             </a>
-            <a href="https://github.com/exactly-finance" target="_blank" rel="noreferrer noopener">
+            <a href="https://github.com/exactly-protocol" target="_blank" rel="noreferrer noopener">
               <img alt="github" src="/img/social/github.png" />
             </a>
-            <a href="https://docs.exactly.finance/" target="_blank" rel="noreferrer noopener">
+            <a href="https://docs.exact.ly/" target="_blank" rel="noreferrer noopener">
               <img alt="gitbook" src="/img/social/gitbook.png" />
             </a>
           </div>
           <div>
             <a
-              href="https://medium.com/@exactly_finance"
+              href="https://medium.com/@exactly_protocol"
               target="_blank"
               rel="noreferrer noopener"
               className={style.link}
@@ -45,7 +45,7 @@ const Footer = () => {
               {translations[lang].blog}
             </a>
             <a
-              href="https://github.com/exactly-finance/about/tree/main/jobs"
+              href="https://github.com/exactly-protocol/about/tree/main/jobs"
               target="_blank"
               rel="noreferrer noopener"
               className={style.link}
@@ -53,7 +53,7 @@ const Footer = () => {
               {translations[lang].careers}
             </a>
             <a
-              href="https://docs.exact.ly/brand-assets"
+              href="https://docs.exact.ly/resources/brand-assets"
               target="_blank"
               rel="noreferrer noopener"
               className={style.link}
