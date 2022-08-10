@@ -30,7 +30,7 @@ export default async (market: string, subgraphUrl: string) => {
       $market: Bytes
       $start: Int
     ) {
-      initial: marketUpdateds(
+      initial: marketUpdates(
         first: 1
         orderBy: timestamp
         orderDirection: desc
@@ -41,7 +41,7 @@ export default async (market: string, subgraphUrl: string) => {
         floatingBorrowShares
         floatingDebt
       }
-      final: marketUpdateds(
+      final: marketUpdates(
         first: 1
         orderBy: timestamp
         orderDirection: desc
@@ -52,7 +52,7 @@ export default async (market: string, subgraphUrl: string) => {
         floatingBorrowShares
         floatingDebt
       }
-      initialDebtUpdate: floatingDebtUpdateds(
+      initialDebtUpdate: floatingDebtUpdates(
         first: 1
         orderBy: timestamp
         orderDirection: desc
@@ -61,7 +61,7 @@ export default async (market: string, subgraphUrl: string) => {
         timestamp
         utilization
       }
-      finalDebtUpdate: floatingDebtUpdateds(
+      finalDebtUpdate: floatingDebtUpdates(
         first: 1
         orderBy: timestamp
         orderDirection: desc
@@ -134,7 +134,7 @@ export default async (market: string, subgraphUrl: string) => {
 
     return ((Number(formatFixed(result, 18)) ** time - 1) * 100).toFixed(2);
   } catch (e) {
-    return '0.00';
+    return 'N/A';
   }
 };
 

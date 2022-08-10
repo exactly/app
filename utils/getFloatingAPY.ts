@@ -35,7 +35,7 @@ export default async (market: string, subgraphURL: string, maxFuturePools: numbe
         $market: Bytes
         $start: Int
       ) {
-        initial: marketUpdateds(
+        initial: marketUpdates(
           first: 1
           orderBy: timestamp
           orderDirection: desc
@@ -46,7 +46,7 @@ export default async (market: string, subgraphURL: string, maxFuturePools: numbe
           floatingAssets
           earningsAccumulator
         }
-        final: marketUpdateds(
+        final: marketUpdates(
           first: 1
           orderBy: timestamp
           orderDirection: desc
@@ -57,7 +57,7 @@ export default async (market: string, subgraphURL: string, maxFuturePools: numbe
           floatingAssets
           earningsAccumulator
         }
-        initialAccumulatorAccrual: accumulatorAccrueds(
+        initialAccumulatorAccrual: accumulatorAccruals(
           first: 1
           orderBy: timestamp
           orderDirection: desc
@@ -65,7 +65,7 @@ export default async (market: string, subgraphURL: string, maxFuturePools: numbe
         ) {
           timestamp
         }
-        finalAccumulatorAccrual: accumulatorAccrueds(
+        finalAccumulatorAccrual: accumulatorAccruals(
           first: 1
           orderBy: timestamp
           orderDirection: desc
@@ -84,7 +84,7 @@ export default async (market: string, subgraphURL: string, maxFuturePools: numbe
         ${futurePools(timeWindow.start)
           .map(
             (maturity) => `
-          initial${maturity}: fixedEarningsUpdateds(
+          initial${maturity}: fixedEarningsUpdates(
             first: 1
             orderBy: timestamp
             orderDirection: desc
@@ -100,7 +100,7 @@ export default async (market: string, subgraphURL: string, maxFuturePools: numbe
         ${futurePools(timeWindow.end)
           .map(
             (maturity) => `
-          final${maturity}: fixedEarningsUpdateds(
+          final${maturity}: fixedEarningsUpdates(
             first: 1
             orderBy: timestamp
             orderDirection: desc
@@ -177,7 +177,7 @@ export default async (market: string, subgraphURL: string, maxFuturePools: numbe
 
     return ((Number(formatFixed(result, 18)) ** time - 1) * 100).toFixed(2);
   } catch (e) {
-    return '0.00';
+    return 'N/A';
   }
 };
 
