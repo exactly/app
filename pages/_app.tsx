@@ -4,6 +4,7 @@ import '../styles/variables.css';
 import { useRouter } from 'next/router';
 import type { AppProps } from 'next/app';
 import Head from 'next/head';
+import Script from 'next/script';
 import { useEffect } from 'react';
 
 import { AddressProvider } from 'contexts/AddressContext';
@@ -32,6 +33,18 @@ function MyApp({ Component, pageProps }: AppProps) {
 
   return (
     <>
+      <Script
+        strategy="lazyOnload"
+        src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS}`}
+      />
+      <Script strategy="lazyOnload">
+        {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', '${process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS}');
+            `}
+      </Script>
       <Head>
         <title>Exactly App - Decentralizing the time value of money</title>
         <meta name="description" content="Exactly App - Decentralizing the time value of money" />
