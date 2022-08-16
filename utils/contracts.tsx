@@ -15,10 +15,7 @@ export function getContractData(
   if (providerData) {
     provider = providerData;
   } else {
-    provider = new ethers.providers.InfuraProvider(publicNetwork, {
-      projectId: '77a2479dc2bd4436aa3edb374f3019d2',
-      projectSecret: process.env.NEXT_INFURA_ID
-    });
+    provider = new ethers.providers.InfuraProvider(publicNetwork);
   }
 
   return new ethers.Contract(address, abi, provider).connect(provider);

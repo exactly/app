@@ -51,7 +51,7 @@ function Item({ market, showModal, type }: Props) {
   useEffect(() => {
     const interval = setInterval(() => {
       setTime(Date.now());
-    }, 30000);
+    }, 600000);
 
     return () => {
       clearInterval(interval);
