@@ -57,7 +57,7 @@ const Pools: NextPage<Props> = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       getAccountData();
-    }, 30000);
+    }, 600000);
 
     return () => {
       clearInterval(interval);
