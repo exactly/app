@@ -115,6 +115,14 @@ function Navbar() {
         </div>
 
         <div className={styles.right}>
+          <a
+            className={styles.discordFeedbackLink}
+            target="_blank"
+            rel="noreferrer noopener"
+            href="https://discordapp.com/channels/846682395553824808/985912903880302632"
+          >
+            <strong>Give us feedback here!</strong>
+          </a>
           {connect && !walletAddress ? (
             <div className={styles.buttonContainer}>
               <Button text="Connect Wallet" onClick={() => connect()} />
@@ -122,19 +130,9 @@ function Navbar() {
           ) : (
             disconnect &&
             walletAddress && (
-              <>
-                <a
-                  className={styles.discordFeedbackLink}
-                  target="_blank"
-                  rel="noreferrer noopener"
-                  href="https://discordapp.com/channels/846682395553824808/985912903880302632"
-                >
-                  <strong>Give us feedback here!</strong>
-                </a>
-                <div className={styles.buttonContainer}>
-                  <Wallet walletAddress={walletAddress} disconnect={() => disconnect()} />
-                </div>
-              </>
+              <div className={styles.buttonContainer}>
+                <Wallet walletAddress={walletAddress} disconnect={() => disconnect()} />
+              </div>
             )
           )}
         </div>
