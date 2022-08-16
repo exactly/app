@@ -58,7 +58,7 @@ function MobileNavbar() {
           </Link>
           {connect && !walletAddress ? (
             <div className={styles.buttonContainer}>
-              <Button text="Conectar" onClick={connect} />
+              <Button text="Connect Wallet" onClick={connect} />
             </div>
           ) : (
             disconnect &&
