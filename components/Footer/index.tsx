@@ -19,10 +19,10 @@ const Footer = () => {
       <div className={style.container}>
         <div className={style.left}>
           <div className={style.images}>
-            <a href="https://twitter.com/exactly_finance" target="_blank" rel="noreferrer noopener">
+            <a href="https://twitter.com/exactlyprotocol" target="_blank" rel="noreferrer noopener">
               <img alt="twitter" src="/img/social/twitter.png" />
             </a>
-            <a href="https://discord.gg/6HppqAxQut" target="_blank" rel="noreferrer noopener">
+            <a href="https://exact.ly/discord" target="_blank" rel="noreferrer noopener">
               <img alt="discord" src="/img/social/discord.png" />
             </a>
             <a href="https://t.me/exactlyFinance" target="_blank" rel="noreferrer noopener">
