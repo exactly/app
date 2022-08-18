@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import type { NextPage } from 'next';
 
 import { ethers } from 'ethers';
+import { parseFixed } from '@ethersproject/bignumber';
 
 import MarketsList from 'components/MarketsList';
 import MaturitySelector from 'components/MaturitySelector';
@@ -26,9 +27,12 @@ import { PreviewerProvider } from 'contexts/PreviewerContext';
 import { Market } from 'types/Market';
 import { AccountData } from 'types/AccountData';
 import { FixedLenderAccountData } from 'types/FixedLenderAccountData';
+import { FixedMarketData } from 'types/FixedMarketData';
 import { Dictionary } from 'types/Dictionary';
 
 import dictionary from 'dictionary/en.json';
+
+import numbers from 'config/numbers.json';
 
 import { getContractData } from 'utils/contracts';
 
@@ -43,8 +47,11 @@ const Pools: NextPage<Props> = () => {
 
   const [markets, setMarkets] = useState<Array<Market>>([]);
   const [accountData, setAccountData] = useState<AccountData>();
+  const [fixedMarketData, setFixedMarketData] = useState<FixedMarketData[] | undefined>(undefined);
 
   const { Previewer, FixedLenders } = getABI(network?.name);
+
+  const previewerContract = getContractData(network?.name!, Previewer.address!, Previewer.abi!);
 
   useEffect(() => {
     if ((!modal || modalContent == {}) && Previewer) {
@@ -67,6 +74,7 @@ const Pools: NextPage<Props> = () => {
   useEffect(() => {
     if (Previewer) {
       getMarkets();
+      getPreviewFixed();
     }
   }, [Previewer]);
 
@@ -76,8 +84,6 @@ const Pools: NextPage<Props> = () => {
 
   async function getMarkets() {
     try {
-      const previewerContract = getContractData(network?.name!, Previewer.address!, Previewer.abi!);
-
       const marketsData = await previewerContract?.exactly(ethers.constants.AddressZero);
 
       setMarkets(formatMarkets(marketsData));
@@ -86,9 +92,20 @@ const Pools: NextPage<Props> = () => {
     }
   }
 
+  async function getPreviewFixed() {
+    try {
+      const data = await previewerContract?.previewFixed(
+        parseFixed(numbers.usdAmount.toString(), 18)
+      );
+
+      setFixedMarketData(data);
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
   async function getAccountData() {
     try {
-      const previewerContract = getContractData(network?.name, Previewer.address!, Previewer.abi!);
       const data = await previewerContract?.exactly(
         walletAddress || '0x000000000000000000000000000000000000dEaD'
       );
@@ -189,7 +206,11 @@ const Pools: NextPage<Props> = () => {
 
               <MaturitySelector title={dictionary.maturityPools} />
 
-              <MarketsList markets={markets} showModal={showModal} />
+              <MarketsList
+                markets={markets}
+                showModal={showModal}
+                fixedMarketData={fixedMarketData}
+              />
               <Footer />
             </FixedLenderProvider>
           </AccountDataProvider>

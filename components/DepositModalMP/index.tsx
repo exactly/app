@@ -1,5 +1,6 @@
 import { ChangeEvent, useContext, useEffect, useState } from 'react';
 import { Contract, ethers } from 'ethers';
+import { formatFixed, parseFixed } from '@ethersproject/bignumber';
 
 import Button from 'components/common/Button';
 import ModalAsset from 'components/common/modal/ModalAsset';
@@ -360,31 +361,29 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
     if (!accountData) return;
 
     try {
-      const decimals = accountData[symbol.toUpperCase()]?.decimals;
+      const decimals = accountData[symbol.toUpperCase()].decimals;
       const currentTimestamp = new Date().getTime() / 1000;
-      const time = 31536000 / (parseInt(date?.value ?? maturity) - currentTimestamp);
-      const oracle = ethers.utils.formatEther(accountData[symbol.toUpperCase()]?.oraclePrice);
+      const time = 31_536_000 / (parseInt(date?.value ?? maturity) - currentTimestamp);
+      const oracle = accountData[symbol.toUpperCase()]?.oraclePrice;
 
-      const qtyValue = qty == '' ? getOneDollar(oracle, decimals) : qty;
-      const parsedQtyValue = ethers.utils.parseUnits(qtyValue, decimals);
+      const qtyValue = qty == '' ? getOneDollar(oracle, decimals) : parseFixed(qty, decimals);
 
       const feeAtMaturity = await previewerContract?.previewDepositAtMaturity(
         marketAddress,
         parseInt(date?.value ?? maturity),
-        parsedQtyValue
+        qtyValue
       );
 
-      const rate =
-        (parseFloat(ethers.utils.formatUnits(feeAtMaturity.assets, decimals)) -
-          parseFloat(qtyValue)) /
-        parseFloat(qtyValue);
+      const initialAssets = qtyValue;
+      const finalAssets = feeAtMaturity.assets;
 
-      const fixedAPY = (Math.pow(1 + rate, time) - 1) * 100;
+      const rate = finalAssets.mul(parseFixed('1', 18)).div(initialAssets);
+
+      const fixedAPY = (Number(formatFixed(rate, 18)) ** time - 1) * 100;
 
       const slippageAPY = (fixedAPY * (1 - numbers.slippage)).toFixed(2);
 
       setSlippage(slippageAPY);
-
       setFixedRate(`${fixedAPY.toFixed(2)}%`);
     } catch (e) {
       console.log(e);

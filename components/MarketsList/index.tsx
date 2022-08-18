@@ -4,6 +4,7 @@ import Item from 'components/MarketsList/Item';
 
 import { Market } from 'types/Market';
 import { LangKeys } from 'types/Lang';
+import { FixedMarketData } from 'types/FixedMarketData';
 
 import LangContext from 'contexts/LangContext';
 import FixedLenderContext from 'contexts/FixedLenderContext';
@@ -14,10 +15,11 @@ import keys from './translations.json';
 
 type Props = {
   markets: Array<Market>;
+  fixedMarketData: FixedMarketData[] | undefined;
   showModal: (marketData: Market, type: 'borrow' | 'deposit') => void;
 };
 
-function MarketsList({ markets, showModal }: Props) {
+function MarketsList({ markets, showModal, fixedMarketData }: Props) {
   const fixedLenderData = useContext(FixedLenderContext);
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
@@ -33,7 +35,15 @@ function MarketsList({ markets, showModal }: Props) {
             <span className={style.title} />
           </div>
           {markets?.map((market, key) => {
-            return <Item market={market} key={key} showModal={showModal} type="deposit" />;
+            return (
+              <Item
+                market={market}
+                key={key}
+                showModal={showModal}
+                type="deposit"
+                fixedMarketData={fixedMarketData}
+              />
+            );
           })}
           {markets.length === 0 &&
             fixedLenderData.map((_, key) => {
@@ -50,7 +60,15 @@ function MarketsList({ markets, showModal }: Props) {
             <span className={style.title} />
           </div>
           {markets?.map((market, key) => {
-            return <Item market={market} key={key} showModal={showModal} type="borrow" />;
+            return (
+              <Item
+                market={market}
+                key={key}
+                showModal={showModal}
+                type="borrow"
+                fixedMarketData={fixedMarketData}
+              />
+            );
           })}
           {markets.length === 0 &&
             fixedLenderData.map((_, key) => {
