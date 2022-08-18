@@ -3,7 +3,7 @@
     "asset": "Asset",
     "totalDeposits": "Total Deposits",
     "totalBorrows": "Total Borrows",
-    "averageAPY": "APY (average)"
+    "averageAPY": "APY ($1k)"
   },
   "es": {}
 }
