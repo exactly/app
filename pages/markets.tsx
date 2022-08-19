@@ -57,6 +57,7 @@ const Pools: NextPage<Props> = () => {
     if ((!modal || modalContent == {}) && Previewer) {
       setTimeout(() => {
         getMarkets();
+        getPreviewFixed();
       }, 5000);
     }
   }, [modal, modalContent]);

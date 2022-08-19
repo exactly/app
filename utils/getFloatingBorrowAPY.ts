@@ -7,8 +7,8 @@ const max = (a: bigint, b: bigint) => (a > b ? a : b);
 
 export default async (market: string, subgraphUrl: string) => {
   const timeWindow = {
-    // start: Math.floor(Date.now() / 1_000) - 86_400 * 7,
-    start: Math.max(Math.floor(Date.now() / 1_000) - 86_400 * 7, 1_660_170_000),
+    start: Math.floor(Date.now() / 1_000) - 3_600 * 24,
+    // start: Math.max(Math.floor(Date.now() / 1_000) - 86_400 * 7, 1_660_170_000),
     end: Math.floor(Date.now() / 1_000)
   };
 
