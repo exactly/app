@@ -78,7 +78,7 @@ function MaturityInfo({ maturity, symbol, fixedLender }: Props) {
 
       setSupply(newPoolData.supplied * exchangeRate);
       setDemand(newPoolData.borrowed * exchangeRate);
-      setUtilization(parseFloat(poolUtilization));
+      setUtilization(parseFloat(poolUtilization) * 100);
     } catch (e) {
       console.log(e);
     }
