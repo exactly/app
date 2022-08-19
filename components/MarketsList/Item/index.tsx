@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
+import { formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { ethers } from 'ethers';
-import { request } from 'graphql-request';
 import Skeleton from 'react-loading-skeleton';
 import Link from 'next/link';
 
@@ -9,6 +9,7 @@ import Button from 'components/common/Button';
 import { Market } from 'types/Market';
 import { Pool } from 'types/Pool';
 import { LangKeys } from 'types/Lang';
+import { FixedMarketData } from 'types/FixedMarketData';
 
 import FixedLenderContext from 'contexts/FixedLenderContext';
 import { AddressContext } from 'contexts/AddressContext';
@@ -22,17 +23,15 @@ import keys from './translations.json';
 import { getContractData } from 'utils/contracts';
 import formatNumber from 'utils/formatNumber';
 import parseSymbol from 'utils/parseSymbol';
-import getSubgraph from 'utils/getSubgraph';
-
-import { getLastMaturityPoolBorrowRate, getLastMaturityPoolDepositRate } from 'queries';
 
 type Props = {
   market?: Market;
+  fixedMarketData?: FixedMarketData[];
   showModal?: (marketData: Market, type: 'borrow' | 'deposit') => void;
   type?: 'borrow' | 'deposit';
 };
 
-function Item({ market, showModal, type }: Props) {
+function Item({ market, showModal, type, fixedMarketData }: Props) {
   const { date } = useContext(AddressContext);
   const { web3Provider, walletAddress, connect, network } = useWeb3Context();
 
@@ -122,58 +121,47 @@ function Item({ market, showModal, type }: Props) {
     }
 
     try {
-      const subgraphUrl = getSubgraph(network?.name);
-      const decimals = accountData[market?.symbol.toUpperCase()].decimals;
-
-      let allAPYbyAmount = 0;
-      let allAmounts = 0;
+      const fixedMarket = fixedMarketData?.find((element) => element.market == market.market);
 
       if (type == 'borrow') {
-        const getLastBorrowRate = await request(
-          subgraphUrl,
-          getLastMaturityPoolBorrowRate(market.market, date?.value!)
-        );
+        const pool = fixedMarket?.borrows.find((pool) => pool.maturity.toString() == date?.value);
+        if (!fixedMarket || !pool) return;
 
-        getLastBorrowRate?.borrowAtMaturities.forEach((borrow: any) => {
-          const borrowFee = parseFloat(ethers.utils.formatUnits(borrow.fee, decimals));
-          const borrowAmount = parseFloat(ethers.utils.formatUnits(borrow.assets, decimals));
-          const borrowRate = borrowFee / borrowAmount;
-          const borrowTimestamp = borrow.timestamp;
-          const time = 31536000 / (parseInt(date?.value!) - borrowTimestamp);
+        const initialAssets = fixedMarket.assets;
+        const finalAssets = pool.assets;
 
-          const borrowFixedAPY = (Math.pow(1 + borrowRate, time) - 1) * 100;
+        const borrowRate = finalAssets.mul(parseFixed('1', 18)).div(initialAssets);
+        const borrowTimestamp = new Date().getTime() / 1_000;
 
-          allAPYbyAmount += borrowFixedAPY * borrowAmount;
-          allAmounts += borrowAmount;
-        });
+        const time = 31_536_000 / (parseInt(date?.value!) - borrowTimestamp);
+
+        const borrowFixedAPY = (Number(formatFixed(borrowRate, 18)) ** time - 1) * 100;
+
+        if (borrowFixedAPY <= 0.01) {
+          setRate('N/A');
+        } else {
+          setRate(`${borrowFixedAPY.toFixed(2)}%`);
+        }
       } else if (type == 'deposit') {
-        const getLastDepositRate = await request(
-          subgraphUrl,
-          getLastMaturityPoolDepositRate(market.market, date?.value!)
-        );
+        const pool = fixedMarket?.deposits.find((pool) => pool.maturity.toString() == date?.value);
+        if (!fixedMarket || !pool) return;
 
-        getLastDepositRate?.depositAtMaturities.forEach((deposit: any) => {
-          const depositFee = parseFloat(ethers.utils.formatUnits(deposit.fee, decimals));
-          const depositAmount = parseFloat(ethers.utils.formatUnits(deposit.assets, decimals));
-          const depositRate = depositFee / depositAmount;
-          const depositTimestamp = deposit.timestamp;
-          const time = 31536000 / (parseInt(date?.value!) - depositTimestamp);
-          const depositFixedAPY = (Math.pow(1 + depositRate, time) - 1) * 100;
+        const initialAssets = fixedMarket.assets;
+        const finalAssets = pool.assets;
 
-          allAPYbyAmount += depositFixedAPY * depositAmount;
-          allAmounts += depositAmount;
-        });
+        const depositRate = finalAssets.mul(parseFixed('1', 18)).div(initialAssets);
+        const depositTimestamp = new Date().getTime() / 1_000;
+
+        const time = 31_536_000 / (parseInt(date?.value!) - depositTimestamp);
+
+        const depositFixedAPY = (Number(formatFixed(depositRate, 18)) ** time - 1) * 100;
+
+        if (depositFixedAPY <= 0.01) {
+          setRate('N/A');
+        } else {
+          setRate(`${depositFixedAPY.toFixed(2)}%`);
+        }
       }
-
-      const averageFixedAPY = allAPYbyAmount / allAmounts;
-
-      if (!averageFixedAPY) return setRate('N/A');
-
-      if (averageFixedAPY <= 0.01) {
-        return setRate('N/A');
-      }
-
-      setRate(`${averageFixedAPY.toFixed(2)}%`);
     } catch (e) {
       console.log(e);
     }

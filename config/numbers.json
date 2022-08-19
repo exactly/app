@@ -4,5 +4,6 @@
   "estimateGasAmount": 0.00001,
   "daysToWarning": 2,
   "daysToError": 0,
-  "slippage": 0.05
+  "slippage": 0.05,
+  "usdAmount": 1000
 }

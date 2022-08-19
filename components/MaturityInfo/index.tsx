@@ -63,7 +63,7 @@ function MaturityInfo({ maturity, symbol, fixedLender }: Props) {
 
       const decimals = accountData[symbol.toUpperCase()].decimals;
 
-      const poolUtilization = ethers.utils.formatUnits(pool?.utilization!, decimals);
+      const poolUtilization = ethers.utils.formatUnits(pool?.utilization!, 18);
       const borrowed = ethers.utils.formatUnits(pool?.borrowed!, decimals);
       const supplied = ethers.utils.formatUnits(pool?.supplied!, decimals);
 
@@ -78,7 +78,7 @@ function MaturityInfo({ maturity, symbol, fixedLender }: Props) {
 
       setSupply(newPoolData.supplied * exchangeRate);
       setDemand(newPoolData.borrowed * exchangeRate);
-      setUtilization(parseFloat(poolUtilization));
+      setUtilization(parseFloat(poolUtilization) * 100);
     } catch (e) {
       console.log(e);
     }
