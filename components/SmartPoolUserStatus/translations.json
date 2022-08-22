@@ -8,7 +8,9 @@
     "eToken": "eToken",
     "apr": "APR (Variable)",
     "collateral": "Collateral",
-    "walletBalance": "Wallet Balance"
+    "walletBalance": "Wallet Balance",
+    "noDepositsFound": "No deposits found",
+    "noBorrowsFound": "No borrows found"
   },
   "es": {}
 }

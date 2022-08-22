@@ -174,12 +174,6 @@ function Item({
         <span className={styles.primary}>{(symbol && parseSymbol(symbol)) || <Skeleton />}</span>
       </div>
       <span className={styles.value}>
-        {(symbol &&
-          rate &&
-          walletBalance &&
-          `$${formatNumber(parseFloat(walletBalance!) * rate, 'usd')}`) || <Skeleton width={40} />}
-      </span>
-      <span className={styles.value}>
         {(depositAmount &&
           borrowedAmount &&
           symbol &&
