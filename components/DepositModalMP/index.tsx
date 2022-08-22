@@ -383,6 +383,15 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
 
       const slippageAPY = (fixedAPY * (1 - numbers.slippage)).toFixed(2);
 
+      //Let's check against 0.01 for now, because this is a percentage and it could be 0.0001 or lower, but not 0
+      if (fixedAPY < 0.01) {
+        setError({
+          status: true,
+          message: translations[lang].zeroRate,
+          component: 'input'
+        });
+      }
+
       setSlippage(slippageAPY);
       setFixedRate(`${fixedAPY.toFixed(2)}%`);
     } catch (e) {
