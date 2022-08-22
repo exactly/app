@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
 
 import Item from './Item';
+import EmptyState from 'components/EmptyState';
 
 import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
@@ -34,6 +35,8 @@ function SmartPoolUserStatus({ walletAddress, showModal, type }: Props) {
 
   const [itemData, setItemData] = useState<Array<SmartPoolItemData> | undefined>(undefined);
 
+  const orderAssets = ['DAI', 'USDC', 'WETH', 'WBTC'];
+
   const auditorContract = getContractData(
     network?.name,
     auditor.address!,
@@ -43,11 +46,10 @@ function SmartPoolUserStatus({ walletAddress, showModal, type }: Props) {
 
   useEffect(() => {
     getCurrentBalance();
-  }, [walletAddress, accountData]);
+  }, [walletAddress, accountData, type]);
 
   function getCurrentBalance() {
     if (!accountData) return;
-    const orderAssets = ['DAI', 'USDC', 'WETH', 'WBTC'];
 
     const allMarkets = Object.values(accountData).sort(
       (a: FixedLenderAccountData, b: FixedLenderAccountData) => {
@@ -69,52 +71,97 @@ function SmartPoolUserStatus({ walletAddress, showModal, type }: Props) {
         depositedAmount: depositBalance,
         borrowedAmount: borrowBalance
       };
-      data.push(obj);
+
+      const lookAfter = type.value == 'borrow' ? 'borrowedAmount' : 'depositedAmount';
+
+      if (obj[lookAfter] && !obj[lookAfter].isZero()) {
+        data.push(obj);
+      }
     });
 
     setItemData(data);
   }
-
+  console.log(itemData);
   return (
     <div className={styles.container}>
-      <div className={styles.market}>
-        <div className={styles.column}>
-          <div className={styles.tableRow}>
-            <span className={styles.symbol}>{translations[lang].asset}</span>
-            <span className={styles.title}>{translations[lang].walletBalance}</span>
-            <span className={styles.title}>
-              {type.value == 'deposit'
-                ? translations[lang].currentBalance
-                : translations[lang].borrowBalance}
-            </span>
-            {type.value == 'deposit' && (
-              <>
-                <span className={styles.title}>{translations[lang].eToken}</span>
-                <span className={styles.title}>{translations[lang].collateral}</span>
-              </>
-            )}
+      {itemData && itemData.length > 0 ? (
+        <div className={styles.market}>
+          <div className={styles.column}>
+            <div className={styles.tableRow}>
+              <span className={styles.symbol}>{translations[lang].asset}</span>
+              <span className={styles.title}>
+                {type.value == 'deposit'
+                  ? translations[lang].currentBalance
+                  : translations[lang].borrowBalance}
+              </span>
+              {type.value == 'deposit' && (
+                <>
+                  <span className={styles.title}>{translations[lang].eToken}</span>
+                  <span className={styles.title}>{translations[lang].collateral}</span>
+                </>
+              )}
 
-            <span className={styles.title} />
+              <span className={styles.title} />
+            </div>
+
+            {itemData
+              ? itemData.map((item: SmartPoolItemData, key: number) => {
+                  return (
+                    <Item
+                      key={key}
+                      depositAmount={item.depositedAmount}
+                      borrowedAmount={item.borrowedAmount}
+                      symbol={item.symbol}
+                      walletAddress={walletAddress}
+                      eTokenAmount={item.eTokens}
+                      showModal={showModal}
+                      auditorContract={auditorContract}
+                      type={type}
+                    />
+                  );
+                })
+              : accountData &&
+                Object.keys(accountData).map((_, key: number) => {
+                  return (
+                    <Item
+                      key={key}
+                      depositAmount={undefined}
+                      borrowedAmount={undefined}
+                      symbol={undefined}
+                      walletAddress={undefined}
+                      eTokenAmount={undefined}
+                      showModal={() => undefined}
+                      auditorContract={undefined}
+                      type={undefined}
+                    />
+                  );
+                })}
           </div>
+        </div>
+      ) : itemData && itemData?.length == 0 ? (
+        <EmptyState connected tab={type.value} />
+      ) : (
+        !itemData && (
+          <div className={styles.market}>
+            <div className={styles.column}>
+              <div className={styles.tableRow}>
+                <span className={styles.symbol}>{translations[lang].asset}</span>
+                <span className={styles.title}>
+                  {type.value == 'deposit'
+                    ? translations[lang].currentBalance
+                    : translations[lang].borrowBalance}
+                </span>
+                {type.value == 'deposit' && (
+                  <>
+                    <span className={styles.title}>{translations[lang].eToken}</span>
+                    <span className={styles.title}>{translations[lang].collateral}</span>
+                  </>
+                )}
 
-          {itemData
-            ? itemData.map((item: SmartPoolItemData, key: number) => {
-                return (
-                  <Item
-                    key={key}
-                    depositAmount={item.depositedAmount}
-                    borrowedAmount={item.borrowedAmount}
-                    symbol={item.symbol}
-                    walletAddress={walletAddress}
-                    eTokenAmount={item.eTokens}
-                    showModal={showModal}
-                    auditorContract={auditorContract}
-                    type={type}
-                  />
-                );
-              })
-            : accountData &&
-              Object.keys(accountData).map((_, key: number) => {
+                <span className={styles.title} />
+              </div>
+
+              {orderAssets.map((_, key: number) => {
                 return (
                   <Item
                     key={key}
@@ -129,8 +176,10 @@ function SmartPoolUserStatus({ walletAddress, showModal, type }: Props) {
                   />
                 );
               })}
-        </div>
-      </div>
+            </div>
+          </div>
+        )
+      )}
     </div>
   );
 }

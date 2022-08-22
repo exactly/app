@@ -13,7 +13,7 @@
   }
 
   .symbol {
-    width: calc(100% / 6);
+    width: calc(100% / 5);
     font-weight: bold;
     display: flex;
     gap: var(--u2);
@@ -25,7 +25,7 @@
     }
 
     .primary {
-      width: 30%;
+      width: calc(100% / 5);
       margin-bottom: var(--smallUnit);
       font-size: var(--font-16);
     }
@@ -38,6 +38,7 @@
   .actions {
     display: flex;
     margin-left: auto;
+    width: calc(100% / 5);
     .buttonContainer {
       width: 100px;
       height: var(--u5);
@@ -48,7 +49,7 @@
   }
 
   .value {
-    width: calc(100% / 6);
+    width: calc(100% / 5);
     color: var(--gray-900);
 
     .line {
