@@ -1,0 +1,31 @@
+.row {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--u2) 0;
+
+  .text {
+    margin: 0;
+    color: var(--gray-500);
+  }
+  .values {
+    margin: 0;
+    display: flex;
+    gap: var(--u);
+    position: relative;
+    font-weight: 600;
+
+    .value {
+      min-width: var(--u6);
+      text-align: right;
+    }
+
+    .imageContainer {
+      width: var(--u2);
+      height: var(--u2);
+    }
+  }
+}
+
+.line {
+  border-bottom: 1px solid var(--gray-100);
+}
