@@ -81,7 +81,7 @@ function SmartPoolUserStatus({ walletAddress, showModal, type }: Props) {
 
     setItemData(data);
   }
-  console.log(itemData);
+
   return (
     <div className={styles.container}>
       {itemData && itemData.length > 0 ? (
@@ -94,6 +94,7 @@ function SmartPoolUserStatus({ walletAddress, showModal, type }: Props) {
                   ? translations[lang].currentBalance
                   : translations[lang].borrowBalance}
               </span>
+
               {type.value == 'deposit' && (
                 <>
                   <span className={styles.title}>{translations[lang].eToken}</span>
