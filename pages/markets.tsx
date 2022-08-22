@@ -23,6 +23,7 @@ import { FixedLenderProvider } from 'contexts/FixedLenderContext';
 import { AccountDataProvider } from 'contexts/AccountDataContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 import { PreviewerProvider } from 'contexts/PreviewerContext';
+import { ModalStatusProvider } from 'contexts/ModalStatusContext';
 
 import { Market } from 'types/Market';
 import { AccountData } from 'types/AccountData';
@@ -52,6 +53,8 @@ const Pools: NextPage<Props> = () => {
   const { Previewer, FixedLenders } = getABI(network?.name);
 
   const previewerContract = getContractData(network?.name!, Previewer.address!, Previewer.abi!);
+
+  const [minimized, setMinimized] = useState<boolean>(false);
 
   useEffect(() => {
     if ((!modal || modalContent == {}) && Previewer) {
@@ -163,8 +166,7 @@ const Pools: NextPage<Props> = () => {
     if (network && !allowedNetworks.includes(network?.name)) return;
 
     if (modalContent?.type) {
-      //in the future we should handle the minimized modal status through a context here
-      return;
+      return setMinimized((minimized) => !minimized);
     }
 
     const data = markets.find((market) => {
@@ -180,39 +182,44 @@ const Pools: NextPage<Props> = () => {
         <PreviewerProvider value={Previewer}>
           <AccountDataProvider value={{ accountData, setAccountData }}>
             <FixedLenderProvider value={FixedLenders}>
-              {modal && modalContent?.type == 'faucet' && <FaucetModal closeModal={handleModal} />}
-              {modal && modalContent?.type == 'deposit' && (
-                <DepositModalMP data={modalContent} closeModal={handleModal} />
-              )}
+              <ModalStatusProvider value={{ minimized, setMinimized }}>
+                {modal && modalContent?.type == 'faucet' && (
+                  <FaucetModal closeModal={handleModal} />
+                )}
 
-              {modal && modalContent?.type == 'smartDeposit' && (
-                <DepositModalSP data={modalContent} closeModal={handleModal} />
-              )}
+                {modal && modalContent?.type == 'deposit' && (
+                  <DepositModalMP data={modalContent} closeModal={handleModal} />
+                )}
 
-              {modal && modalContent?.type == 'floatingBorrow' && (
-                <FloatingBorrowModal data={modalContent} closeModal={handleModal} />
-              )}
+                {modal && modalContent?.type == 'smartDeposit' && (
+                  <DepositModalSP data={modalContent} closeModal={handleModal} />
+                )}
 
-              {modal && modalContent?.type == 'borrow' && (
-                <BorrowModal data={modalContent} closeModal={handleModal} />
-              )}
+                {modal && modalContent?.type == 'floatingBorrow' && (
+                  <FloatingBorrowModal data={modalContent} closeModal={handleModal} />
+                )}
 
-              <MobileNavbar />
-              <Navbar />
-              <CurrentNetwork showModal={showModal} />
+                {modal && modalContent?.type == 'borrow' && (
+                  <BorrowModal data={modalContent} closeModal={handleModal} />
+                )}
 
-              <div style={{ marginTop: '180px' }}>
-                <SmartPoolList markets={markets} showModal={showModal} />
-              </div>
+                <MobileNavbar />
+                <Navbar />
+                <CurrentNetwork showModal={showModal} />
 
-              <MaturitySelector title={dictionary.maturityPools} />
+                <div style={{ marginTop: '180px' }}>
+                  <SmartPoolList markets={markets} showModal={showModal} />
+                </div>
 
-              <MarketsList
-                markets={markets}
-                showModal={showModal}
-                fixedMarketData={fixedMarketData}
-              />
-              <Footer />
+                <MaturitySelector title={dictionary.maturityPools} />
+
+                <MarketsList
+                  markets={markets}
+                  showModal={showModal}
+                  fixedMarketData={fixedMarketData}
+                />
+                <Footer />
+              </ModalStatusProvider>
             </FixedLenderProvider>
           </AccountDataProvider>
         </PreviewerProvider>

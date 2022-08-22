@@ -40,6 +40,7 @@ import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 import FixedLenderContext from 'contexts/FixedLenderContext';
 import AccountDataContext from 'contexts/AccountDataContext';
+import ModalStatusContext from 'contexts/ModalStatusContext';
 
 import keys from './translations.json';
 
@@ -57,13 +58,14 @@ function DepositModalSP({ data, closeModal }: Props) {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
+  const { minimized, setMinimized } = useContext(ModalStatusContext);
+
   const fixedLenderData = useContext(FixedLenderContext);
 
   const [qty, setQty] = useState<string>('');
   const [walletBalance, setWalletBalance] = useState<string | undefined>(undefined);
   const [gas, setGas] = useState<Gas | undefined>();
   const [tx, setTx] = useState<Transaction | undefined>(undefined);
-  const [minimized, setMinimized] = useState<boolean>(false);
   const [step, setStep] = useState<number | undefined>(undefined);
   const [pending, setPending] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
@@ -418,7 +420,7 @@ function DepositModalSP({ data, closeModal }: Props) {
         <ModalMinimized
           tx={tx}
           handleMinimize={() => {
-            setMinimized((prev) => !prev);
+            setMinimized((prev: boolean) => !prev);
           }}
         />
       )}
@@ -429,7 +431,7 @@ function DepositModalSP({ data, closeModal }: Props) {
             !tx || tx.status == 'success'
               ? closeModal
               : () => {
-                  setMinimized((prev) => !prev);
+                  setMinimized((prev: boolean) => !prev);
                 }
           }
         />

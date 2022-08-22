@@ -37,6 +37,7 @@ import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 import FixedLenderContext from 'contexts/FixedLenderContext';
 import AccountDataContext from 'contexts/AccountDataContext';
+import ModalStatusContext from 'contexts/ModalStatusContext';
 
 import decimals from 'config/decimals.json';
 import numbers from 'config/numbers.json';
@@ -53,6 +54,7 @@ function FloatingRepayModal({ data, closeModal }: Props) {
 
   const { walletAddress, web3Provider, network } = useWeb3Context();
   const { accountData } = useContext(AccountDataContext);
+  const { minimized, setMinimized } = useContext(ModalStatusContext);
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
@@ -64,7 +66,6 @@ function FloatingRepayModal({ data, closeModal }: Props) {
 
   const [gas, setGas] = useState<Gas | undefined>();
   const [tx, setTx] = useState<Transaction | undefined>(undefined);
-  const [minimized, setMinimized] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [healthFactor, setHealthFactor] = useState<HealthFactor | undefined>(undefined);
   const [collateralFactor, setCollateralFactor] = useState<number | undefined>(undefined);
@@ -331,7 +332,7 @@ function FloatingRepayModal({ data, closeModal }: Props) {
         <ModalMinimized
           tx={tx}
           handleMinimize={() => {
-            setMinimized((prev) => !prev);
+            setMinimized((prev: boolean) => !prev);
           }}
         />
       )}
@@ -342,7 +343,7 @@ function FloatingRepayModal({ data, closeModal }: Props) {
             !tx || tx.status == 'success'
               ? closeModal
               : () => {
-                  setMinimized((prev) => !prev);
+                  setMinimized((prev: boolean) => !prev);
                 }
           }
         />
