@@ -57,10 +57,22 @@ function Item({ maturity, showModal, deposits, borrows }: Props) {
       </div>
       <div className={styles.lastFixedRate}>
         <div className={styles.deposit}>
-          {currentDeposit ? `${currentDeposit.apy}%` : <Skeleton />}
+          {currentDeposit && currentDeposit.apy != 0 ? (
+            `${currentDeposit.apy}%`
+          ) : currentDeposit ? (
+            `N/A`
+          ) : (
+            <Skeleton />
+          )}
         </div>
         <div className={styles.borrow}>
-          {currentBorrow ? `${currentBorrow?.apy}%` : <Skeleton />}
+          {currentBorrow && currentBorrow.apy != 0 ? (
+            `${currentBorrow?.apy}%`
+          ) : currentBorrow ? (
+            'N/A'
+          ) : (
+            <Skeleton />
+          )}
         </div>
       </div>
       <div className={styles.actions}>
