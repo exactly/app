@@ -12,24 +12,8 @@ import { Web3ContextProvider } from 'contexts/Web3Context';
 
 import { LangProvider } from 'contexts/LangContext';
 
-import { pageview } from 'helpers/analytics';
-
 function MyApp({ Component, pageProps }: AppProps) {
   const props = { ...pageProps };
-
-  const router = useRouter();
-
-  useEffect(() => {
-    const handleRouteChange = (url: URL) => {
-      pageview(url);
-    };
-
-    router.events.on('routeChangeComplete', handleRouteChange);
-
-    return () => {
-      router.events.off('routeChangeComplete', handleRouteChange);
-    };
-  }, [router.events]);
 
   return (
     <>
