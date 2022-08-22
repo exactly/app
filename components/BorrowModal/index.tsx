@@ -43,6 +43,7 @@ import FixedLenderContext from 'contexts/FixedLenderContext';
 import { AddressContext } from 'contexts/AddressContext';
 import PreviewerContext from 'contexts/PreviewerContext';
 import AccountDataContext from 'contexts/AccountDataContext';
+import ModalStatusContext from 'contexts/ModalStatusContext';
 
 import keys from './translations.json';
 
@@ -65,6 +66,8 @@ function BorrowModal({ data, editable, closeModal }: Props) {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
+  const { minimized, setMinimized } = useContext(ModalStatusContext);
+
   const fixedLenderData = useContext(FixedLenderContext);
   const previewerData = useContext(PreviewerContext);
 
@@ -72,7 +75,6 @@ function BorrowModal({ data, editable, closeModal }: Props) {
   const [walletBalance, setWalletBalance] = useState<string | undefined>(undefined);
   const [gas, setGas] = useState<Gas | undefined>(undefined);
   const [tx, setTx] = useState<Transaction | undefined>(undefined);
-  const [minimized, setMinimized] = useState<Boolean>(false);
   const [fixedRate, setFixedRate] = useState<string | undefined>(undefined);
   const [slippage, setSlippage] = useState<string>('0.00');
   const [editSlippage, setEditSlippage] = useState<boolean>(false);
@@ -523,7 +525,7 @@ function BorrowModal({ data, editable, closeModal }: Props) {
         <ModalMinimized
           tx={tx}
           handleMinimize={() => {
-            setMinimized((prev) => !prev);
+            setMinimized((prev: boolean) => !prev);
           }}
         />
       )}
@@ -534,7 +536,7 @@ function BorrowModal({ data, editable, closeModal }: Props) {
             !tx || tx.status == 'success'
               ? closeModal
               : () => {
-                  setMinimized((prev) => !prev);
+                  setMinimized((prev: boolean) => !prev);
                 }
           }
         />

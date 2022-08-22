@@ -48,6 +48,7 @@ const DashBoard: NextPage<Props> = () => {
   const { modal, handleModal, modalContent } = useModal();
 
   const [accountData, setAccountData] = useState<AccountData>();
+  const [minimized, setMinimized] = useState<boolean>(false);
 
   const { Previewer, Auditor, FixedLenders } = getABI(network?.name);
 
@@ -95,8 +96,7 @@ const DashBoard: NextPage<Props> = () => {
 
   function showModal(data: Deposit | Borrow, type: String) {
     if (modalContent?.type) {
-      //in the future we should handle the minimized modal status through a context here
-      return;
+      return setMinimized((minimized) => !minimized);
     }
 
     handleModal({ content: { ...data, type } });
