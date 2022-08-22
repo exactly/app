@@ -26,11 +26,11 @@ function ModalRowUtilizationRate({ urBefore, urAfter, line }: Props) {
     <section className={rowStyles}>
       <p className={styles.text}>{translations[lang].utilizationRate}</p>
       <section className={styles.values}>
-        <span className={styles.value}>{`${urBefore}%` || <Skeleton />}</span>
+        <span className={styles.value}>{(urBefore && `${urBefore}%`) || <Skeleton />}</span>
         <div className={styles.imageContainer}>
           <Image src="/img/icons/arrowRight.svg" alt="arrowRight" layout="fill" />
         </div>
-        <span className={styles.value}>{`${urAfter}%` || <Skeleton />}</span>
+        <span className={styles.value}>{(urAfter && `${urAfter}%`) || <Skeleton />}</span>
       </section>
     </section>
   );

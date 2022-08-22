@@ -363,8 +363,8 @@ function BorrowModal({ data, editable, closeModal }: Props) {
       const initialAssets = qtyValue;
       const finalAssets = feeAtMaturity.assets;
 
-      if (qty == '' && utilizationRate?.before) {
-        setUtilizationRate({ ...utilizationRate, after: utilizationRate.before });
+      if (qty == '') {
+        setUtilizationRate({ ...utilizationRate, after: utilizationRate?.before! });
       } else {
         setUtilizationRate({
           ...utilizationRate,
