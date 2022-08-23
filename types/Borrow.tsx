@@ -9,4 +9,5 @@ export type Borrow = {
   fee: string;
   symbol?: string;
   timestamp?: string;
+  editable?: boolean;
 };

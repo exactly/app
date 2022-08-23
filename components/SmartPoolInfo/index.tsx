@@ -1,10 +1,11 @@
-import { useContext, useMemo, useState } from 'react';
-import { Contract, ethers } from 'ethers';
+import { useContext, useEffect, useState } from 'react';
+import { ethers } from 'ethers';
 import Skeleton from 'react-loading-skeleton';
 
 import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 import AccountDataContext from 'contexts/AccountDataContext';
+import ModalStatusContext from 'contexts/ModalStatusContext';
 
 import { LangKeys } from 'types/Lang';
 
@@ -18,15 +19,14 @@ import parseSymbol from 'utils/parseSymbol';
 import formatNumber from 'utils/formatNumber';
 
 interface Props {
-  showModal: (maturity: string | undefined, type: string) => void;
   symbol: string;
-  fixedLender: Contract | undefined;
 }
 
-function SmartPoolInfo({ showModal, symbol, fixedLender }: Props) {
+function SmartPoolInfo({ symbol }: Props) {
   const { walletAddress, connect } = useWeb3Context();
 
   const { accountData } = useContext(AccountDataContext);
+  const { setOpen, setModalContent } = useContext(ModalStatusContext);
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
@@ -34,14 +34,13 @@ function SmartPoolInfo({ showModal, symbol, fixedLender }: Props) {
   const [supply, setSupply] = useState<number | undefined>(undefined);
   const [demand, setDemand] = useState<number | undefined>(undefined);
 
-  useMemo(() => {
-    if (fixedLender) {
-      getSmartPoolData();
-    }
-  }, [fixedLender, accountData]);
+  useEffect(() => {
+    getSmartPoolData();
+  }, [accountData, symbol]);
 
   async function getSmartPoolData() {
     if (!accountData || !symbol) return;
+
     try {
       const borrowed = accountData[symbol.toUpperCase()].totalFloatingBorrowAssets;
       const supplied = accountData[symbol.toUpperCase()].totalFloatingDepositAssets;
@@ -64,7 +63,21 @@ function SmartPoolInfo({ showModal, symbol, fixedLender }: Props) {
   function handleClick() {
     if (!walletAddress && connect) return connect();
 
-    showModal(undefined, 'smartDeposit');
+    if (!accountData) return;
+
+    const marketData = accountData[symbol];
+
+    const market = {
+      market: marketData.market,
+      symbol: marketData.assetSymbol,
+      name: marketData.assetSymbol,
+      isListed: true,
+      collateralFactor: parseFloat(ethers.utils.formatEther(marketData.adjustFactor)),
+      type: 'smartDeposit'
+    };
+
+    setOpen(true);
+    setModalContent(market);
   }
 
   return (

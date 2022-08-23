@@ -10,16 +10,15 @@ import { Pool } from 'types/Pool';
 import { LangKeys } from 'types/Lang';
 
 import FixedLenderContext from 'contexts/FixedLenderContext';
-import { AddressContext } from 'contexts/AddressContext';
 import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 import AccountDataContext from 'contexts/AccountDataContext';
+import ModalStatusContext from 'contexts/ModalStatusContext';
 
 import style from './style.module.scss';
 
 import keys from './translations.json';
 
-import { getContractData } from 'utils/contracts';
 import formatNumber from 'utils/formatNumber';
 import parseSymbol from 'utils/parseSymbol';
 import getFloatingAPY from 'utils/getFloatingAPY';
@@ -28,16 +27,15 @@ import getFloatingBorrowAPY from 'utils/getFloatingBorrowAPY';
 
 type Props = {
   market: Market | undefined;
-  showModal?: (marketData: Market, type: String) => void;
   type: 'borrow' | 'deposit';
 };
 
-function Item({ market, showModal, type }: Props) {
-  const { date } = useContext(AddressContext);
-  const { web3Provider, walletAddress, connect, network } = useWeb3Context();
+function Item({ market, type }: Props) {
+  const { walletAddress, connect, network } = useWeb3Context();
 
   const fixedLenderData = useContext(FixedLenderContext);
   const { accountData } = useContext(AccountDataContext);
+  const { setOpen, setModalContent } = useContext(ModalStatusContext);
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
@@ -45,39 +43,31 @@ function Item({ market, showModal, type }: Props) {
   const [poolData, setPoolData] = useState<Pool | undefined>(undefined);
   const [rate, setRate] = useState<string | undefined>(undefined);
 
-  const [fixedLender, setFixedLender] = useState<Contract | undefined>(undefined);
+  const [fixedLenderAddress, setFixedLenderAddress] = useState<string | undefined>(undefined);
 
   async function getFixedLenderContract() {
     if (!market) return;
 
     const filteredFixedLender = fixedLenderData.find((fl) => fl.address == market.market);
 
-    const fixedLender = await getContractData(
-      network?.name,
-      filteredFixedLender?.address!,
-      filteredFixedLender?.abi!,
-      web3Provider?.getSigner()
-    );
-
-    setFixedLender(fixedLender);
+    setFixedLenderAddress(filteredFixedLender?.address);
   }
 
   useEffect(() => {
     getFixedLenderContract();
-  }, [fixedLenderData]);
+  }, [fixedLenderData, market]);
 
   useEffect(() => {
-    if (date?.value && fixedLender) {
-      getMarketData();
-    }
-  }, [date, accountData, market]);
+    getMarketData();
+  }, [accountData, market, network, fixedLenderAddress]);
 
   function handleClick(modal: string) {
-    if (!market || !showModal) return;
+    if (!market) return;
 
     if (!walletAddress && connect) return connect();
 
-    showModal(market, modal);
+    setOpen(true);
+    setModalContent({ ...market, type: modal });
   }
 
   async function getMarketData() {
@@ -105,16 +95,17 @@ function Item({ market, showModal, type }: Props) {
 
       let interestRate;
 
+      if (!fixedLenderAddress) return;
+
       if (type == 'deposit') {
         interestRate = await getFloatingAPY(
-          fixedLender?.address!,
+          fixedLenderAddress,
           subgraphUrl,
           accountData[market?.symbol.toUpperCase()].maxFuturePools
         );
       } else if (type == 'borrow') {
-        interestRate = await getFloatingBorrowAPY(fixedLender?.address!, subgraphUrl);
+        interestRate = await getFloatingBorrowAPY(fixedLenderAddress, subgraphUrl);
       }
-
       setPoolData(newPoolData);
 
       if (interestRate != 'N/A') {

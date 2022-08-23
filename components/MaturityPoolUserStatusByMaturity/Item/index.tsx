@@ -8,6 +8,7 @@ import Skeleton from 'react-loading-skeleton';
 import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 import AccountDataContext from 'contexts/AccountDataContext';
+import ModalStatusContext from 'contexts/ModalStatusContext';
 
 import { LangKeys } from 'types/Lang';
 import { Deposit } from 'types/Deposit';
@@ -37,27 +38,17 @@ type Props = {
   amount: string | undefined;
   fee: string | undefined;
   maturityDate: string | undefined;
-  showModal: (data: Deposit | Borrow, type: String) => void;
   symbol: string | undefined;
   market: string | undefined;
   decimals: number | undefined;
   data: Borrow | Deposit | undefined;
 };
 
-function Item({
-  type,
-  amount,
-  fee,
-  maturityDate,
-  showModal,
-  symbol,
-  market,
-  decimals,
-  data
-}: Props) {
+function Item({ type, amount, fee, maturityDate, symbol, market, decimals, data }: Props) {
   const { network, walletAddress } = useWeb3Context();
 
   const { accountData } = useContext(AccountDataContext);
+  const { setOpen, setModalContent } = useContext(ModalStatusContext);
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
@@ -200,7 +191,8 @@ function Item({
               text={type.value == 'borrow' ? translations[lang].repay : translations[lang].withdraw}
               className={type.value == 'borrow' ? 'quaternary' : 'tertiary'}
               onClick={() => {
-                showModal(data, type.value == 'borrow' ? 'repay' : 'withdraw');
+                setOpen(true);
+                setModalContent({ ...data, type: type.value == 'borrow' ? 'repay' : 'withdraw' });
               }}
             />
           </div>

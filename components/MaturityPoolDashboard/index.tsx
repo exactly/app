@@ -2,11 +2,13 @@ import { useContext, useEffect, useState } from 'react';
 import dayjs from 'dayjs';
 
 import { FixedLenderAccountData } from 'types/FixedLenderAccountData';
+import { LangKeys } from 'types/Lang';
+import { Option } from 'react-dropdown';
 
 import AccountDataContext from 'contexts/AccountDataContext';
 import LangContext from 'contexts/LangContext';
+import ModalStatusContext from 'contexts/ModalStatusContext';
 
-import Tooltip from 'components/Tooltip';
 import MaturityPoolUserStatusByMaturity from 'components/MaturityPoolUserStatusByMaturity';
 import Button from 'components/common/Button';
 import EmptyState from 'components/EmptyState';
@@ -14,21 +16,17 @@ import EmptyState from 'components/EmptyState';
 import styles from './style.module.scss';
 
 import keys from './translations.json';
-import { Deposit } from 'types/Deposit';
-import { Borrow } from 'types/Borrow';
-import { LangKeys } from 'types/Lang';
-import { Option } from 'react-dropdown';
 
 interface Props {
-  showModal: (data: Deposit | Borrow, type: String) => void;
   tab: Option;
 }
 
-function MaturityPoolDashboard({ showModal, tab }: Props) {
+function MaturityPoolDashboard({ tab }: Props) {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
   const { accountData } = useContext(AccountDataContext);
+  const { setModalContent, setOpen } = useContext(ModalStatusContext);
 
   const [defaultMaturity, setDefaultMaturity] = useState<string>();
   const [maturities, setMaturities] = useState<any>(undefined);
@@ -126,33 +124,25 @@ function MaturityPoolDashboard({ showModal, tab }: Props) {
                 tab.value == 'borrow' ? translations[lang].newBorrow : translations[lang].newDeposit
               }
               className={tab.value == 'borrow' ? 'secondary' : 'primary'}
-              onClick={() =>
-                showModal(
-                  {
-                    assets: '0',
-                    fee: '0',
-                    market: accountData.DAI.market!,
-                    maturity: defaultMaturity!
-                  },
-                  tab.value
-                )
-              }
+              onClick={() => {
+                setOpen(true);
+                setModalContent({
+                  assets: '0',
+                  fee: '0',
+                  market: accountData.DAI.market!,
+                  maturity: defaultMaturity!,
+                  type: tab.value,
+                  editable: true
+                });
+              }}
             />
           )}
         </div>
       </section>
       {maturities ? (
-        <MaturityPoolUserStatusByMaturity
-          type={tab}
-          maturities={maturities}
-          showModal={showModal}
-        />
+        <MaturityPoolUserStatusByMaturity type={tab} maturities={maturities} />
       ) : (
-        <MaturityPoolUserStatusByMaturity
-          type={undefined}
-          maturities={undefined}
-          showModal={() => undefined}
-        />
+        <MaturityPoolUserStatusByMaturity type={undefined} maturities={undefined} />
       )}
       {tab.value == 'deposit' && maturities && !maturities.hasOwnProperty('deposits') && (
         <EmptyState connected tab={tab.value} />

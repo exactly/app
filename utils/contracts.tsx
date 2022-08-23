@@ -10,13 +10,17 @@ export function getContractData(
 
   const publicNetwork = network ?? process.env.NEXT_PUBLIC_NETWORK;
 
-  let provider;
+  try {
+    let provider;
 
-  if (providerData) {
-    provider = providerData;
-  } else {
-    provider = new ethers.providers.InfuraProvider(publicNetwork);
+    if (providerData) {
+      provider = providerData;
+    } else {
+      provider = new ethers.providers.InfuraProvider(publicNetwork);
+    }
+
+    return new ethers.Contract(address, abi, provider).connect(provider);
+  } catch (e) {
+    console.log(e);
   }
-
-  return new ethers.Contract(address, abi, provider).connect(provider);
 }

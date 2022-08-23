@@ -9,7 +9,6 @@ import AuditorContext from 'contexts/AuditorContext';
 import AccountDataContext from 'contexts/AccountDataContext';
 
 import { LangKeys } from 'types/Lang';
-import { Deposit } from 'types/Deposit';
 import { SmartPoolItemData } from 'types/SmartPoolItemData';
 import { Option } from 'react-dropdown';
 import { FixedLenderAccountData } from 'types/FixedLenderAccountData';
@@ -22,11 +21,10 @@ import { getContractData } from 'utils/contracts';
 
 type Props = {
   walletAddress: string | null | undefined;
-  showModal: (data: Deposit | any, type: String) => void;
   type: Option;
 };
 
-function SmartPoolUserStatus({ walletAddress, showModal, type }: Props) {
+function SmartPoolUserStatus({ walletAddress, type }: Props) {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
   const auditor = useContext(AuditorContext);
@@ -115,7 +113,6 @@ function SmartPoolUserStatus({ walletAddress, showModal, type }: Props) {
                       symbol={item.symbol}
                       walletAddress={walletAddress}
                       eTokenAmount={item.eTokens}
-                      showModal={showModal}
                       auditorContract={auditorContract}
                       type={type}
                     />
@@ -131,7 +128,6 @@ function SmartPoolUserStatus({ walletAddress, showModal, type }: Props) {
                       symbol={undefined}
                       walletAddress={undefined}
                       eTokenAmount={undefined}
-                      showModal={() => undefined}
                       auditorContract={undefined}
                       type={undefined}
                     />
@@ -171,7 +167,6 @@ function SmartPoolUserStatus({ walletAddress, showModal, type }: Props) {
                     symbol={undefined}
                     walletAddress={undefined}
                     eTokenAmount={undefined}
-                    showModal={() => undefined}
                     auditorContract={undefined}
                     type={undefined}
                   />

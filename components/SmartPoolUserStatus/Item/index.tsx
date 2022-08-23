@@ -10,9 +10,9 @@ import FixedLenderContext from 'contexts/FixedLenderContext';
 import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 import AccountDataContext from 'contexts/AccountDataContext';
+import ModalStatusContext from 'contexts/ModalStatusContext';
 
 import { LangKeys } from 'types/Lang';
-import { Deposit } from 'types/Deposit';
 import { Decimals } from 'types/Decimals';
 import { Option } from 'react-dropdown';
 
@@ -32,7 +32,6 @@ type Props = {
   depositAmount: BigNumber | undefined;
   borrowedAmount: BigNumber | undefined;
   walletAddress: string | null | undefined;
-  showModal: (data: Deposit | any, type: String) => void | undefined;
   eTokenAmount: BigNumber | undefined;
   auditorContract: Contract | undefined;
   type: Option | undefined;
@@ -43,7 +42,6 @@ function Item({
   depositAmount,
   borrowedAmount,
   walletAddress,
-  showModal,
   eTokenAmount,
   auditorContract,
   type
@@ -52,6 +50,7 @@ function Item({
   const fixedLender = useContext(FixedLenderContext);
   const lang: string = useContext(LangContext);
   const { accountData } = useContext(AccountDataContext);
+  const { setModalContent, setOpen } = useContext(ModalStatusContext);
 
   const translations: { [key: string]: LangKeys } = keys;
 
@@ -234,15 +233,14 @@ function Item({
                 type.value == 'deposit' ? translations[lang].deposit : translations[lang].borrow
               }
               className={type.value == 'deposit' ? 'primary' : 'secondary'}
-              onClick={() =>
-                showModal(
-                  {
-                    market: getFixedLenderData().address,
-                    symbol
-                  },
-                  type.value == 'deposit' ? 'smartDeposit' : 'floatingBorrow'
-                )
-              }
+              onClick={() => {
+                setOpen(true);
+                setModalContent({
+                  market: getFixedLenderData().address,
+                  symbol,
+                  type: type.value == 'deposit' ? 'smartDeposit' : 'floatingBorrow'
+                });
+              }}
             />
           )) || <Skeleton height={40} />}
         </div>
@@ -254,15 +252,14 @@ function Item({
                 type.value == 'deposit' ? translations[lang].withdraw : translations[lang].repay
               }
               className={type.value == 'deposit' ? 'tertiary' : 'quaternary'}
-              onClick={() =>
-                showModal(
-                  {
-                    assets: type.value == 'deposit' ? depositAmount : borrowedAmount,
-                    symbol
-                  },
-                  type.value == 'deposit' ? 'withdrawSP' : 'floatingRepay'
-                )
-              }
+              onClick={() => {
+                setOpen(true);
+                setModalContent({
+                  assets: type.value == 'deposit' ? depositAmount : borrowedAmount,
+                  symbol,
+                  type: type.value == 'deposit' ? 'withdrawSP' : 'floatingRepay'
+                });
+              }}
             />
           )) || <Skeleton height={40} />}
         </div>

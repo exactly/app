@@ -5,6 +5,9 @@ import Button from 'components/common/Button';
 
 import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
+import ModalStatusContext from 'contexts/ModalStatusContext';
+import AccountDataContext from 'contexts/AccountDataContext';
+import { AddressContext } from 'contexts/AddressContext';
 
 import { LangKeys } from 'types/Lang';
 import { Maturity } from 'types/Maturity';
@@ -14,15 +17,17 @@ import styles from './style.module.scss';
 import keys from './translations.json';
 
 type Props = {
+  symbol: string;
   maturity: Maturity | undefined;
-  market: string | undefined;
-  showModal: (maturity: string | undefined, type: string) => void | undefined;
   deposits: Array<Maturity> | undefined;
   borrows: Array<Maturity> | undefined;
 };
 
-function Item({ maturity, showModal, deposits, borrows }: Props) {
+function Item({ symbol, maturity, deposits, borrows }: Props) {
   const { walletAddress, connect } = useWeb3Context();
+  const { setOpen, setModalContent } = useContext(ModalStatusContext);
+  const { setDate } = useContext(AddressContext);
+  const { accountData } = useContext(AccountDataContext);
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
@@ -44,16 +49,32 @@ function Item({ maturity, showModal, deposits, borrows }: Props) {
     setCurrentBorrow(borrow);
   }, [deposits, borrows, maturity]);
 
-  function handleClick(type: string, maturity: string) {
+  function handleClick(type: string, maturity: Maturity) {
     if (!walletAddress && connect) return connect();
-    showModal(maturity, type);
+
+    if (!accountData) return;
+
+    setOpen(true);
+
+    const marketData = accountData[symbol];
+
+    const market = {
+      market: marketData.market,
+      symbol: marketData.assetSymbol,
+      name: marketData.assetSymbol,
+      isListed: true,
+      collateralFactor: 0,
+      type
+    };
+
+    setDate(maturity);
+    setModalContent(market);
   }
 
   return (
     <div className={styles.row}>
       <div className={styles.maturity}>
         <span className={styles.value}>{currentMaturity?.label || <Skeleton />}</span>
-        {/* <span className={styles.liquidity}>{translations[lang].liquidity}: $1.3B</span> */}
       </div>
       <div className={styles.lastFixedRate}>
         <div className={styles.deposit}>
@@ -81,7 +102,7 @@ function Item({ maturity, showModal, deposits, borrows }: Props) {
             <Button
               text={translations[lang].deposit}
               className="primary"
-              onClick={() => handleClick('deposit', maturity.value)}
+              onClick={() => handleClick('deposit', maturity)}
             />
           ) : (
             <Skeleton className={styles.buttonContainer} />
@@ -92,7 +113,7 @@ function Item({ maturity, showModal, deposits, borrows }: Props) {
             <Button
               text={translations[lang].borrow}
               className="secondary"
-              onClick={() => handleClick('borrow', maturity.value)}
+              onClick={() => handleClick('borrow', maturity)}
             />
           ) : (
             <Skeleton className={styles.buttonContainer} />
