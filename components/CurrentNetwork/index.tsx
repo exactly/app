@@ -2,6 +2,7 @@ import { useContext } from 'react';
 
 import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
+import ModalStatusContext from 'contexts/ModalStatusContext';
 
 import { LangKeys } from 'types/Lang';
 
@@ -11,15 +12,13 @@ import keys from './translations.json';
 
 import allowedNetworks from 'config/allowedNetworks.json';
 
-type Props = {
-  showModal?: (marketData: any, type: any) => void;
-};
-
-function CurrentNetwork({ showModal }: Props) {
+function CurrentNetwork() {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
   const { network, web3Provider } = useWeb3Context();
+  const { setOpen, setModalContent } = useContext(ModalStatusContext);
+
   const isAllowed = network && allowedNetworks.includes(network?.name);
   const status = network?.name && isAllowed ? 'success' : 'error';
 
@@ -35,8 +34,9 @@ function CurrentNetwork({ showModal }: Props) {
           }
         ]
       });
-    } else if (isAllowed && network?.name == 'rinkeby' && showModal) {
-      showModal({}, 'faucet');
+    } else if (isAllowed && network?.name == 'rinkeby') {
+      setOpen(true);
+      setModalContent({ type: 'faucet' });
     }
   }
 

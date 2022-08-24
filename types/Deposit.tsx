@@ -8,4 +8,5 @@ export type Deposit = {
   owner?: string;
   symbol?: string;
   timestamp?: string;
+  editable?: boolean;
 };

@@ -19,6 +19,7 @@ import ModalMaturityEditable from 'components/common/modal/ModalMaturityEditable
 import ModalError from 'components/common/modal/ModalError';
 import ModalRowBorrowLimit from 'components/common/modal/ModalRowBorrowLimit';
 import ModalExpansionPanelWrapper from 'components/common/modal/ModalExpansionPanelWrapper';
+import ModalRowUtilizationRate from 'components/common/modal/ModalRowUtilizationRate';
 
 import { Borrow } from 'types/Borrow';
 import { Deposit } from 'types/Deposit';
@@ -28,6 +29,7 @@ import { Gas } from 'types/Gas';
 import { Transaction } from 'types/Transaction';
 import { Error } from 'types/Error';
 import { HealthFactor } from 'types/HealthFactor';
+import { Dictionary } from 'types/Dictionary';
 
 import { getContractData } from 'utils/contracts';
 import { getUnderlyingData, getSymbol } from 'utils/utils';
@@ -43,6 +45,7 @@ import FixedLenderContext from 'contexts/FixedLenderContext';
 import { AddressContext } from 'contexts/AddressContext';
 import PreviewerContext from 'contexts/PreviewerContext';
 import AccountDataContext from 'contexts/AccountDataContext';
+import ModalStatusContext from 'contexts/ModalStatusContext';
 
 import keys from './translations.json';
 
@@ -65,6 +68,8 @@ function BorrowModal({ data, editable, closeModal }: Props) {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
+  const { minimized, setMinimized } = useContext(ModalStatusContext);
+
   const fixedLenderData = useContext(FixedLenderContext);
   const previewerData = useContext(PreviewerContext);
 
@@ -72,7 +77,6 @@ function BorrowModal({ data, editable, closeModal }: Props) {
   const [walletBalance, setWalletBalance] = useState<string | undefined>(undefined);
   const [gas, setGas] = useState<Gas | undefined>(undefined);
   const [tx, setTx] = useState<Transaction | undefined>(undefined);
-  const [minimized, setMinimized] = useState<Boolean>(false);
   const [fixedRate, setFixedRate] = useState<string | undefined>(undefined);
   const [slippage, setSlippage] = useState<string>('0.00');
   const [editSlippage, setEditSlippage] = useState<boolean>(false);
@@ -81,6 +85,7 @@ function BorrowModal({ data, editable, closeModal }: Props) {
   const [collateralFactor, setCollateralFactor] = useState<number | undefined>(undefined);
   const [needsApproval, setNeedsApproval] = useState<boolean>(false);
   const [poolLiquidity, setPoolLiquidity] = useState<number | undefined>(undefined);
+  const [utilizationRate, setUtilizationRate] = useState<Dictionary<string>>();
 
   const [error, setError] = useState<Error | undefined>(undefined);
   const [gasError, setGasError] = useState<Error | undefined>(undefined);
@@ -121,6 +126,7 @@ function BorrowModal({ data, editable, closeModal }: Props) {
     checkAllowance();
     checkPoolLiquidity();
     checkCollateral();
+    getUtilizationRate();
   }, [walletAddress, fixedLenderWithSigner, symbol, qty]);
 
   useEffect(() => {
@@ -357,6 +363,15 @@ function BorrowModal({ data, editable, closeModal }: Props) {
       const initialAssets = qtyValue;
       const finalAssets = feeAtMaturity.assets;
 
+      if (qty == '') {
+        setUtilizationRate({ ...utilizationRate, after: utilizationRate?.before! });
+      } else {
+        setUtilizationRate({
+          ...utilizationRate,
+          after: (Number(formatFixed(feeAtMaturity.utilization, 18)) * 100).toFixed(2)
+        });
+      }
+
       const rate = finalAssets.mul(parseFixed('1', 18)).div(initialAssets);
 
       const fixedAPY = (Number(formatFixed(rate, 18)) ** time - 1) * 100;
@@ -368,6 +383,21 @@ function BorrowModal({ data, editable, closeModal }: Props) {
     } catch (e) {
       console.log(e);
     }
+  }
+
+  function getUtilizationRate() {
+    if (!accountData) return;
+    const maturityTimestamp = date?.value ?? maturity;
+
+    const pool = accountData[symbol].fixedPools.find((pool) => {
+      return pool.maturity.toString() == maturityTimestamp;
+    });
+
+    if (!pool) return;
+
+    const before = (Number(formatFixed(pool.utilization, 18)) * 100).toFixed(2);
+
+    setUtilizationRate({ ...utilizationRate, before });
   }
 
   function getHealthFactor(healthFactor: HealthFactor) {
@@ -498,6 +528,11 @@ function BorrowModal({ data, editable, closeModal }: Props) {
                   qty={qty}
                   symbol={symbol!}
                   operation="borrow"
+                  line
+                />
+                <ModalRowUtilizationRate
+                  urBefore={utilizationRate?.before}
+                  urAfter={utilizationRate?.after}
                 />
               </ModalExpansionPanelWrapper>
 
@@ -523,7 +558,7 @@ function BorrowModal({ data, editable, closeModal }: Props) {
         <ModalMinimized
           tx={tx}
           handleMinimize={() => {
-            setMinimized((prev) => !prev);
+            setMinimized((prev: boolean) => !prev);
           }}
         />
       )}
@@ -534,7 +569,7 @@ function BorrowModal({ data, editable, closeModal }: Props) {
             !tx || tx.status == 'success'
               ? closeModal
               : () => {
-                  setMinimized((prev) => !prev);
+                  setMinimized((prev: boolean) => !prev);
                 }
           }
         />

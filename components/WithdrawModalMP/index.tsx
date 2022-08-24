@@ -35,6 +35,7 @@ import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 import FixedLenderContext from 'contexts/FixedLenderContext';
 import PreviewerContext from 'contexts/PreviewerContext';
+import ModalStatusContext from 'contexts/ModalStatusContext';
 
 import decimals from 'config/decimals.json';
 import numbers from 'config/numbers.json';
@@ -56,6 +57,7 @@ function WithdrawModalMP({ data, closeModal }: Props) {
 
   const fixedLenderData = useContext(FixedLenderContext);
   const previewerData = useContext(PreviewerContext);
+  const { minimized, setMinimized } = useContext(ModalStatusContext);
 
   const parsedFee = ethers.utils.formatUnits(fee, decimals[symbol! as keyof Decimals]);
   const parsedAmount = ethers.utils.formatUnits(assets, decimals[symbol! as keyof Decimals]);
@@ -64,7 +66,6 @@ function WithdrawModalMP({ data, closeModal }: Props) {
   const [qty, setQty] = useState<string>('');
   const [gas, setGas] = useState<Gas | undefined>();
   const [tx, setTx] = useState<Transaction | undefined>(undefined);
-  const [minimized, setMinimized] = useState<Boolean>(false);
   const [slippage, setSlippage] = useState<string>(parsedAmount);
   const [editSlippage, setEditSlippage] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
@@ -389,7 +390,7 @@ function WithdrawModalMP({ data, closeModal }: Props) {
         <ModalMinimized
           tx={tx}
           handleMinimize={() => {
-            setMinimized((prev) => !prev);
+            setMinimized((prev: boolean) => !prev);
           }}
         />
       )}
@@ -400,7 +401,7 @@ function WithdrawModalMP({ data, closeModal }: Props) {
             !tx || tx.status == 'success'
               ? closeModal
               : () => {
-                  setMinimized((prev) => !prev);
+                  setMinimized((prev: boolean) => !prev);
                 }
           }
         />

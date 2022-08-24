@@ -10,7 +10,8 @@
     "notEnoughSlippage": "The transaction failed, please check your Minimum Deposit Rate",
     "error": "There was an error with your transaction, please try again",
     "deniedTransaction": "Transaction rejected",
-    "generalError": "There was an error, please try again"
+    "generalError": "There was an error, please try again",
+    "zeroRate": "You can't deposit at 0% rate, try depositing to another pool"
   },
   "es": {}
 }

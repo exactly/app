@@ -35,11 +35,11 @@
         min-width: 800px;
 
         .symbol {
-          width: 15.66%;
+          width: calc(100% / 5);
         }
 
         .title {
-          width: 15.66%;
+          width: calc(100% / 5);
         }
       }
     }

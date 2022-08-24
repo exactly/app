@@ -1,4 +1,4 @@
-import { useContext, useMemo, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Contract, ethers } from 'ethers';
 import dayjs from 'dayjs';
 import Skeleton from 'react-loading-skeleton';
@@ -49,7 +49,7 @@ function MaturityInfo({ maturity, symbol, fixedLender }: Props) {
     style: 'long'
   });
 
-  useMemo(() => {
+  useEffect(() => {
     getMaturityPoolData();
   }, [fixedLender, maturity, symbol]);
 

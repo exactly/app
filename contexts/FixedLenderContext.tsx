@@ -1,5 +1,9 @@
+import { createContext, FC } from 'react';
 import { ethers } from 'ethers';
-import { createContext } from 'react';
+
+import { useWeb3Context } from './Web3Context';
+
+import getABI from 'config/abiImporter';
 
 type ContextValues = {
   address: string | undefined;
@@ -11,6 +15,12 @@ const defaultValues: ContextValues[] = [];
 
 const FixedLenderContext = createContext(defaultValues);
 
-export const FixedLenderProvider = FixedLenderContext.Provider;
+export const FixedLenderProvider: FC = ({ children }) => {
+  const { network } = useWeb3Context();
+
+  const { FixedLenders } = getABI(network?.name);
+
+  return <FixedLenderContext.Provider value={FixedLenders}>{children}</FixedLenderContext.Provider>;
+};
 
 export default FixedLenderContext;

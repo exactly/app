@@ -42,20 +42,22 @@ import FixedLenderContext from 'contexts/FixedLenderContext';
 import { AddressContext } from 'contexts/AddressContext';
 import PreviewerContext from 'contexts/PreviewerContext';
 import AccountDataContext from 'contexts/AccountDataContext';
+import ModalStatusContext from 'contexts/ModalStatusContext';
 
 import keys from './translations.json';
 
 type Props = {
   data: Borrow | Deposit;
-  editable?: boolean;
   closeModal: (props: any) => void;
 };
 
-function DepositModalMP({ data, editable, closeModal }: Props) {
-  const { maturity, market } = data;
+function DepositModalMP({ data, closeModal }: Props) {
+  const { maturity, market, editable } = data;
   const { web3Provider, walletAddress, network } = useWeb3Context();
   const { date, address } = useContext(AddressContext);
   const { accountData } = useContext(AccountDataContext);
+  const { minimized, setMinimized } = useContext(ModalStatusContext);
+
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
@@ -66,7 +68,6 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
   const [walletBalance, setWalletBalance] = useState<string | undefined>(undefined);
   const [gas, setGas] = useState<Gas | undefined>();
   const [tx, setTx] = useState<Transaction | undefined>(undefined);
-  const [minimized, setMinimized] = useState<boolean>(false);
   const [step, setStep] = useState<number | undefined>(undefined);
   const [pending, setPending] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
@@ -383,6 +384,15 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
 
       const slippageAPY = (fixedAPY * (1 - numbers.slippage)).toFixed(2);
 
+      //Let's check against 0.01 for now, because this is a percentage and it could be 0.0001 or lower, but not 0
+      if (fixedAPY < 0.01) {
+        setError({
+          status: true,
+          message: translations[lang].zeroRate,
+          component: 'input'
+        });
+      }
+
       setSlippage(slippageAPY);
       setFixedRate(`${fixedAPY.toFixed(2)}%`);
     } catch (e) {
@@ -471,7 +481,7 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
         <ModalMinimized
           tx={tx}
           handleMinimize={() => {
-            setMinimized((prev) => !prev);
+            setMinimized((prev: boolean) => !prev);
           }}
         />
       )}
@@ -482,7 +492,7 @@ function DepositModalMP({ data, editable, closeModal }: Props) {
             !tx || tx.status == 'success'
               ? closeModal
               : () => {
-                  setMinimized((prev) => !prev);
+                  setMinimized((prev: boolean) => !prev);
                 }
           }
         />
