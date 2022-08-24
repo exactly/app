@@ -59,7 +59,6 @@ function DepositModalSP({ data, closeModal }: Props) {
   const translations: { [key: string]: LangKeys } = keys;
 
   const { minimized, setMinimized } = useContext(ModalStatusContext);
-
   const fixedLenderData = useContext(FixedLenderContext);
 
   const [qty, setQty] = useState<string>('');

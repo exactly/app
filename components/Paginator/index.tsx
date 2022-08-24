@@ -1,14 +1,19 @@
+import { useContext } from 'react';
+
+import { AddressContext } from 'contexts/AddressContext';
+
 import styles from './style.module.scss';
 
 interface Props {
-  total: number;
   itemsPerPage: number;
   handleChange: (page: number) => void;
   currentPage: number;
 }
 
-function Paginator({ total, itemsPerPage, handleChange, currentPage }: Props) {
-  const pages = Math.ceil(total / itemsPerPage);
+function Paginator({ itemsPerPage, handleChange, currentPage }: Props) {
+  const { dates } = useContext(AddressContext);
+
+  const pages = Math.ceil(dates.length / itemsPerPage);
 
   return (
     <ul className={styles.container}>

@@ -48,12 +48,11 @@ import keys from './translations.json';
 
 type Props = {
   data: Borrow | Deposit;
-  editable?: boolean;
   closeModal: (props: any) => void;
 };
 
-function DepositModalMP({ data, editable, closeModal }: Props) {
-  const { maturity, market } = data;
+function DepositModalMP({ data, closeModal }: Props) {
+  const { maturity, market, editable } = data;
   const { web3Provider, walletAddress, network } = useWeb3Context();
   const { date, address } = useContext(AddressContext);
   const { accountData } = useContext(AccountDataContext);

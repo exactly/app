@@ -1,16 +1,17 @@
 import '../styles/globals.css';
 import '../styles/variables.css';
 
-import { useRouter } from 'next/router';
 import type { AppProps } from 'next/app';
 import Head from 'next/head';
 import Script from 'next/script';
-import { useEffect } from 'react';
 
-import { AddressProvider } from 'contexts/AddressContext';
 import { Web3ContextProvider } from 'contexts/Web3Context';
-
 import { LangProvider } from 'contexts/LangContext';
+import { ModalStatusProvider } from 'contexts/ModalStatusContext';
+import { AddressProvider } from 'contexts/AddressContext';
+import { PreviewerProvider } from 'contexts/PreviewerContext';
+import { AccountDataProvider } from 'contexts/AccountDataContext';
+import { FixedLenderProvider } from 'contexts/FixedLenderContext';
 
 function MyApp({ Component, pageProps }: AppProps) {
   const props = { ...pageProps };
@@ -37,9 +38,17 @@ function MyApp({ Component, pageProps }: AppProps) {
       </Head>
       <LangProvider value={'en'}>
         <Web3ContextProvider>
-          <AddressProvider>
-            <Component {...props} />
-          </AddressProvider>
+          <PreviewerProvider>
+            <AccountDataProvider>
+              <FixedLenderProvider>
+                <AddressProvider>
+                  <ModalStatusProvider>
+                    <Component {...props} />
+                  </ModalStatusProvider>
+                </AddressProvider>
+              </FixedLenderProvider>
+            </AccountDataProvider>
+          </PreviewerProvider>
         </Web3ContextProvider>
       </LangProvider>
     </>

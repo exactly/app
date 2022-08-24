@@ -11,82 +11,48 @@ import { Pool } from 'types/Pool';
 import { LangKeys } from 'types/Lang';
 import { FixedMarketData } from 'types/FixedMarketData';
 
-import FixedLenderContext from 'contexts/FixedLenderContext';
 import { AddressContext } from 'contexts/AddressContext';
 import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 import AccountDataContext from 'contexts/AccountDataContext';
+import ModalStatusContext from 'contexts/ModalStatusContext';
 
 import style from './style.module.scss';
 
 import keys from './translations.json';
-import { getContractData } from 'utils/contracts';
 import formatNumber from 'utils/formatNumber';
 import parseSymbol from 'utils/parseSymbol';
 
 type Props = {
   market?: Market;
   fixedMarketData?: FixedMarketData[];
-  showModal?: (marketData: Market, type: 'borrow' | 'deposit') => void;
   type?: 'borrow' | 'deposit';
 };
 
-function Item({ market, showModal, type, fixedMarketData }: Props) {
+function Item({ market, type, fixedMarketData }: Props) {
   const { date } = useContext(AddressContext);
-  const { web3Provider, walletAddress, connect, network } = useWeb3Context();
+  const { walletAddress, connect, network } = useWeb3Context();
 
-  const fixedLenderData = useContext(FixedLenderContext);
+  const { setOpen, setModalContent } = useContext(ModalStatusContext);
   const { accountData } = useContext(AccountDataContext);
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
   const [poolData, setPoolData] = useState<Pool | undefined>(undefined);
-  const [fixedLender, setFixedLender] = useState<ethers.Contract | undefined>(undefined);
   const [rate, setRate] = useState<string | undefined>(undefined);
 
-  const [time, setTime] = useState(Date.now());
-
   useEffect(() => {
-    const interval = setInterval(() => {
-      setTime(Date.now());
-    }, 600000);
-
-    return () => {
-      clearInterval(interval);
-    };
-  }, []);
-
-  useEffect(() => {
-    getFixedLenderContract();
-  }, [fixedLenderData, market]);
-
-  useEffect(() => {
-    if (date?.value && fixedLender) {
-      getMarketData();
-    }
-  }, [date, network, market, accountData, time]);
-
-  async function getFixedLenderContract() {
-    if (!market) return;
-    const filteredFixedLender = fixedLenderData.find((fl) => fl.address == market.market);
-
-    const fixedLender = await getContractData(
-      network?.name,
-      filteredFixedLender?.address!,
-      filteredFixedLender?.abi!,
-      web3Provider?.getSigner()
-    );
-
-    setFixedLender(fixedLender);
-  }
+    getMarketData();
+  }, [date, network, market, accountData, fixedMarketData]);
 
   function handleClick() {
-    if (!market || !showModal || !type) return;
+    if (!market || !type) return;
 
     if (!walletAddress && connect) return connect();
 
-    showModal(market, type);
+    setOpen(true);
+    setModalContent({ ...market, type });
   }
 
   async function getMarketData() {
@@ -99,6 +65,7 @@ function Item({ market, showModal, type, fixedMarketData }: Props) {
       const pool = accountData[market?.symbol.toUpperCase()].fixedPools.find((pool) => {
         return pool.maturity.toString() == date?.value;
       });
+
       const decimals = accountData[market?.symbol.toUpperCase()].decimals;
 
       if (!pool) {

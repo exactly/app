@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { useContext, useEffect, useState } from 'react';
 
 import Item from './Item';
 
@@ -7,21 +7,38 @@ import { LangKeys } from 'types/Lang';
 
 import LangContext from 'contexts/LangContext';
 import FixedLenderContext from 'contexts/FixedLenderContext';
+import AccountDataContext from 'contexts/AccountDataContext';
 
 import styles from './style.module.scss';
 
 import keys from './translations.json';
-import Tooltip from 'components/Tooltip';
 
-type Props = {
-  markets: Array<Market>;
-  showModal: (marketData: Market, type: String) => void;
-};
+import formatMarkets from 'utils/formatMarkets';
 
-function SmartPoolList({ markets, showModal }: Props) {
+function SmartPoolList() {
+  //this is only used to render the skeletons, the data is not read in any moment
   const fixedLenderData = useContext(FixedLenderContext);
+
+  const { accountData } = useContext(AccountDataContext);
+
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
+
+  const [markets, setMarkets] = useState<Market[]>([]);
+
+  useEffect(() => {
+    getMarkets();
+  }, [accountData]);
+
+  async function getMarkets() {
+    if (!accountData) return;
+
+    try {
+      setMarkets(formatMarkets(accountData));
+    } catch (e) {
+      console.log(e);
+    }
+  }
 
   return (
     <section className={styles.container}>
@@ -38,7 +55,7 @@ function SmartPoolList({ markets, showModal }: Props) {
               <span className={styles.title} />
             </div>
             {markets?.map((market, key) => {
-              return <Item market={market} key={key} showModal={showModal} type={'deposit'} />;
+              return <Item market={market} key={key} type={'deposit'} />;
             })}
             {markets.length === 0 &&
               fixedLenderData.map((_, key) => {
@@ -55,7 +72,7 @@ function SmartPoolList({ markets, showModal }: Props) {
               <span className={styles.title} />
             </div>
             {markets?.map((market, key) => {
-              return <Item market={market} key={key} showModal={showModal} type={'borrow'} />;
+              return <Item market={market} key={key} type={'borrow'} />;
             })}
             {markets.length === 0 &&
               fixedLenderData.map((_, key) => {

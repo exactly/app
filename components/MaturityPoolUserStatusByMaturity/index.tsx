@@ -9,8 +9,6 @@ import Tooltip from 'components/Tooltip';
 import LangContext from 'contexts/LangContext';
 
 import { LangKeys } from 'types/Lang';
-import { Deposit } from 'types/Deposit';
-import { Borrow } from 'types/Borrow';
 import { Option } from 'react-dropdown';
 
 import styles from './style.module.scss';
@@ -22,10 +20,9 @@ import parseTimestamp from 'utils/parseTimestamp';
 type Props = {
   type: Option | undefined;
   maturities: any | undefined;
-  showModal: (data: Deposit | Borrow, type: String) => void;
 };
 
-function MaturityPoolUserStatusByMaturity({ type, maturities, showModal }: Props) {
+function MaturityPoolUserStatusByMaturity({ type, maturities }: Props) {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
@@ -142,7 +139,6 @@ function MaturityPoolUserStatusByMaturity({ type, maturities, showModal }: Props
                           amount={principal}
                           fee={fee}
                           maturityDate={maturity}
-                          showModal={showModal}
                           symbol={symbol}
                           market={market}
                           decimals={decimals}
@@ -163,7 +159,6 @@ function MaturityPoolUserStatusByMaturity({ type, maturities, showModal }: Props
                           amount={principal}
                           fee={fee}
                           maturityDate={maturity}
-                          showModal={showModal}
                           symbol={symbol}
                           market={market}
                           decimals={decimals}
@@ -211,7 +206,6 @@ function MaturityPoolUserStatusByMaturity({ type, maturities, showModal }: Props
                 amount={undefined}
                 fee={undefined}
                 maturityDate={undefined}
-                showModal={() => undefined}
                 symbol={undefined}
                 market={undefined}
                 decimals={undefined}
