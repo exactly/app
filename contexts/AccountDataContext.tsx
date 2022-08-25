@@ -41,7 +41,6 @@ export const AccountDataProvider: FC = ({ children }) => {
   }, [walletAddress, Previewer, network]);
 
   async function getAccountData() {
-    console.log(1);
     try {
       const data = await previewerContract?.exactly(
         walletAddress || '0x000000000000000000000000000000000000dEaD'
