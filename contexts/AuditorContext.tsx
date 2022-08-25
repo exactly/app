@@ -1,5 +1,9 @@
-import { ethers } from "ethers";
-import { createContext } from "react";
+import { createContext, FC } from 'react';
+import { ethers } from 'ethers';
+
+import getABI from 'config/abiImporter';
+
+import { useWeb3Context } from './Web3Context';
 
 type ContextValues = {
   address: string | undefined;
@@ -13,6 +17,12 @@ const defaultValues: ContextValues = {
 
 const AuditorContext = createContext(defaultValues);
 
-export const AuditorProvider = AuditorContext.Provider;
+export const AuditorProvider: FC = ({ children }) => {
+  const { network } = useWeb3Context();
+
+  const { Auditor } = getABI(network?.name);
+
+  return <AuditorContext.Provider value={Auditor}>{children}</AuditorContext.Provider>;
+};
 
 export default AuditorContext;
