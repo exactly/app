@@ -12,6 +12,7 @@ import { AddressProvider } from 'contexts/AddressContext';
 import { PreviewerProvider } from 'contexts/PreviewerContext';
 import { AccountDataProvider } from 'contexts/AccountDataContext';
 import { FixedLenderProvider } from 'contexts/FixedLenderContext';
+import { AuditorProvider } from 'contexts/AuditorContext';
 
 function MyApp({ Component, pageProps }: AppProps) {
   const props = { ...pageProps };
@@ -40,13 +41,15 @@ function MyApp({ Component, pageProps }: AppProps) {
         <Web3ContextProvider>
           <PreviewerProvider>
             <AccountDataProvider>
-              <FixedLenderProvider>
-                <AddressProvider>
-                  <ModalStatusProvider>
-                    <Component {...props} />
-                  </ModalStatusProvider>
-                </AddressProvider>
-              </FixedLenderProvider>
+              <AuditorProvider>
+                <FixedLenderProvider>
+                  <AddressProvider>
+                    <ModalStatusProvider>
+                      <Component {...props} />
+                    </ModalStatusProvider>
+                  </AddressProvider>
+                </FixedLenderProvider>
+              </AuditorProvider>
             </AccountDataProvider>
           </PreviewerProvider>
         </Web3ContextProvider>
