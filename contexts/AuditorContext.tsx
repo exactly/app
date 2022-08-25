@@ -1,6 +1,8 @@
-import getABI from 'config/abiImporter';
-import { ethers } from 'ethers';
 import { createContext, FC } from 'react';
+import { ethers } from 'ethers';
+
+import getABI from 'config/abiImporter';
+
 import { useWeb3Context } from './Web3Context';
 
 type ContextValues = {
