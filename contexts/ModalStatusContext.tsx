@@ -44,7 +44,7 @@ export const ModalStatusProvider: FC = ({ children }) => {
   };
 
   useEffect(() => {
-    if (!open) {
+    if (!open && modalContent) {
       setTimeout(() => {
         getAccountData();
       }, 5000);
