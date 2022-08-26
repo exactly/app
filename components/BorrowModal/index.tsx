@@ -244,12 +244,17 @@ function BorrowModal({ data, editable, closeModal }: Props) {
           maxAmount.toString()
         );
       } else {
+        const gas = await estimateGas(qty!, maxAmount.toString());
+
         borrow = await fixedLenderWithSigner?.borrowAtMaturity(
           parseInt(date?.value ?? maturity),
-          ethers.utils.parseUnits(qty!, decimals),
-          ethers.utils.parseUnits(`${maxAmount.toFixed(decimals)}`, decimals),
+          parseFixed(qty!, decimals),
+          parseFixed(`${maxAmount.toFixed(decimals)}`, decimals),
           walletAddress,
-          walletAddress
+          walletAddress,
+          {
+            gasLimit: Number(gas?.gasCost) * 1.1
+          }
         );
       }
 
@@ -312,7 +317,7 @@ function BorrowModal({ data, editable, closeModal }: Props) {
     limit && setPoolLiquidity(parseFloat(limit));
   }
 
-  async function estimateGas() {
+  async function estimateGas(min: string = '1', max: string = '2') {
     if (symbol == 'WETH' || !accountData) return;
 
     try {
@@ -321,8 +326,8 @@ function BorrowModal({ data, editable, closeModal }: Props) {
 
       const estimatedGasCost = await fixedLenderWithSigner?.estimateGas.borrowAtMaturity(
         parseInt(date?.value ?? maturity),
-        ethers.utils.parseUnits(`1`, decimals),
-        ethers.utils.parseUnits(`2`, decimals),
+        parseFixed(min, decimals),
+        parseFixed(max, decimals),
         walletAddress,
         walletAddress
       );
@@ -333,6 +338,8 @@ function BorrowModal({ data, editable, closeModal }: Props) {
         const eth = parseFloat(gwei) * parseFloat(gasCost);
 
         setGas({ eth: eth.toFixed(8), gwei: parseFloat(gwei).toFixed(1) });
+
+        return { gasCost: gwei };
       }
     } catch (e) {
       console.log(e);
@@ -340,6 +347,8 @@ function BorrowModal({ data, editable, closeModal }: Props) {
         status: true,
         component: 'gas'
       });
+
+      return { gasCost: undefined };
     }
   }
 

@@ -4,7 +4,7 @@ import LangContext from 'contexts/LangContext';
 
 import { LangKeys } from 'types/Lang';
 
-import style from './style.module.scss';
+import styles from './style.module.scss';
 
 import keys from './translations.json';
 
@@ -15,57 +15,64 @@ const Footer = () => {
   const date = new Date();
 
   return (
-    <footer className={style.footer}>
-      <div className={style.container}>
-        <div className={style.left}>
-          <div className={style.images}>
-            <a href="https://twitter.com/exactlyprotocol" target="_blank" rel="noreferrer noopener">
-              <img alt="twitter" src="/img/social/twitter.png" />
-            </a>
-            <a href="https://exact.ly/discord" target="_blank" rel="noreferrer noopener">
-              <img alt="discord" src="/img/social/discord.png" />
-            </a>
-            <a href="https://t.me/exactlyFinance" target="_blank" rel="noreferrer noopener">
-              <img alt="telegram" src="/img/social/telegram.png" />
-            </a>
-            <a href="https://github.com/exactly-protocol" target="_blank" rel="noreferrer noopener">
-              <img alt="github" src="/img/social/github.png" />
-            </a>
-            <a href="https://docs.exact.ly/" target="_blank" rel="noreferrer noopener">
-              <img alt="gitbook" src="/img/social/gitbook.png" />
-            </a>
-          </div>
-          <div>
+    <footer className={styles.footer}>
+      <img src="./img/isologo.svg" className={styles.logo} alt="exactly logo" />
+      <div>
+        <ul className={styles.links}>
+          <li>
             <a
-              href="https://medium.com/@exactly_protocol"
+              rel="noopener noreferrer"
               target="_blank"
-              rel="noreferrer noopener"
-              className={style.link}
+              href="https://docs.exact.ly/resources/brand-assets"
+            >
+              {translations[lang].brand}
+            </a>
+          </li>
+          <li>
+            <a
+              rel="noopener noreferrer"
+              target="_blank"
+              href="https://github.com/exactly-protocol/about/tree/main/jobs"
+            >
+              {translations[lang].jobs}
+            </a>
+          </li>
+          <li>
+            <a rel="noopener noreferrer" target="_blank" href="https://exact.ly/discord">
+              {translations[lang].contact}
+            </a>
+          </li>
+          <li>
+            <a rel="noopener noreferrer" target="_blank" href="https://docs.exact.ly/">
+              {translations[lang].docs}
+            </a>
+          </li>
+          <li>
+            <a
+              rel="noopener noreferrer"
+              target="_blank"
+              href="https://docs.exact.ly/getting-started/white-paper"
+            >
+              {translations[lang].whitePaper}
+            </a>
+          </li>
+          <li>
+            <a
+              rel="noopener noreferrer"
+              target="_blank"
+              href="https://medium.com/@exactly_protocol"
             >
               {translations[lang].blog}
             </a>
-            <a
-              href="https://github.com/exactly-protocol/about/tree/main/jobs"
-              target="_blank"
-              rel="noreferrer noopener"
-              className={style.link}
-            >
-              {translations[lang].careers}
+          </li>
+          <li>
+            <a rel="noopener noreferrer" target="_blank" href="https://exact.ly/tos">
+              {translations[lang].tos}
             </a>
-            <a
-              href="https://docs.exact.ly/resources/brand-assets"
-              target="_blank"
-              rel="noreferrer noopener"
-              className={style.link}
-            >
-              {translations[lang].mediaKit}
-            </a>
-          </div>
-        </div>
-        <div className={style.right}>
-          <p>© {date.getFullYear()} Exactly</p>
-        </div>
+          </li>
+        </ul>
       </div>
+      <p className={styles.logo}>c.{date.getFullYear()}</p>
     </footer>
   );
 };
