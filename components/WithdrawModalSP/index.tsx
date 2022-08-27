@@ -1,5 +1,6 @@
 import { ChangeEvent, useContext, useEffect, useState } from 'react';
 import { ethers, Contract } from 'ethers';
+import { formatFixed, parseFixed } from '@ethersproject/bignumber';
 
 import Button from 'components/common/Button';
 import ModalAsset from 'components/common/modal/ModalAsset';
@@ -140,12 +141,19 @@ function WithdrawModalSP({ data, closeModal }: Props) {
 
         withdraw = await ETHrouter.withdrawETH(qty);
       } else {
-        decimals = await fixedLenderWithSigner?.decimals();
+        if (!accountData || !symbol) return;
+
+        const gasLimit = await getGasLimit(qty);
+
+        decimals = accountData[symbol].decimals;
 
         withdraw = await fixedLenderWithSigner?.withdraw(
-          ethers.utils.parseUnits(qty!, decimals),
+          parseFixed(qty, decimals),
           walletAddress,
-          walletAddress
+          walletAddress,
+          {
+            gasLimit: gasLimit ? Math.ceil(Number(formatFixed(gasLimit)) * 1.1) : undefined
+          }
         );
       }
 
@@ -194,20 +202,14 @@ function WithdrawModalSP({ data, closeModal }: Props) {
     if (symbol == 'WETH') return;
 
     try {
-      const gasPriceInGwei = await fixedLenderWithSigner?.provider.getGasPrice();
-      const decimals = await fixedLenderWithSigner?.decimals();
-      const estimatedGasCost = await fixedLenderWithSigner?.estimateGas.withdraw(
-        ethers.utils.parseUnits(`${numbers.estimateGasAmount}`, decimals),
-        walletAddress,
-        walletAddress
-      );
+      const gasPrice = (await fixedLenderWithSigner?.provider.getFeeData())?.maxFeePerGas;
 
-      if (gasPriceInGwei && estimatedGasCost) {
-        const gwei = await ethers.utils.formatUnits(gasPriceInGwei, 'gwei');
-        const gasCost = await ethers.utils.formatUnits(estimatedGasCost, 'gwei');
-        const eth = parseFloat(gwei) * parseFloat(gasCost);
+      const gasLimit = await getGasLimit('1');
 
-        setGas({ eth: eth.toFixed(8), gwei: parseFloat(gwei).toFixed(1) });
+      if (gasPrice && gasLimit) {
+        const total = formatFixed(gasPrice.mul(gasLimit), 18);
+
+        setGas({ eth: Number(total).toFixed(6) });
       }
     } catch (e) {
       setError({
@@ -215,6 +217,20 @@ function WithdrawModalSP({ data, closeModal }: Props) {
         component: 'gas'
       });
     }
+  }
+
+  async function getGasLimit(qty: string) {
+    if (!accountData || !symbol) return;
+
+    const decimals = accountData[symbol].decimals;
+
+    const gasLimit = await fixedLenderWithSigner?.estimateGas.withdraw(
+      parseFixed(qty, decimals),
+      walletAddress,
+      walletAddress
+    );
+
+    return gasLimit;
   }
 
   function getHealthFactor(healthFactor: HealthFactor) {

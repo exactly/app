@@ -1,5 +1,6 @@
 import { ChangeEvent, useContext, useEffect, useState } from 'react';
 import { Contract, ethers } from 'ethers';
+import { formatFixed, parseFixed } from '@ethersproject/bignumber';
 
 import Button from 'components/common/Button';
 import ModalAsset from 'components/common/modal/ModalAsset';
@@ -31,8 +32,6 @@ import { getContractData } from 'utils/contracts';
 import { getSymbol, getUnderlyingData } from 'utils/utils';
 import formatNumber from 'utils/formatNumber';
 import handleEth from 'utils/handleEth';
-
-import numbers from 'config/numbers.json';
 
 import styles from './style.module.scss';
 
@@ -105,7 +104,7 @@ function DepositModalSP({ data, closeModal }: Props) {
         estimateGas();
       }
     }
-  }, [fixedLenderWithSigner, step]);
+  }, [fixedLenderWithSigner, step, qty]);
 
   useEffect(() => {
     checkAllowance();
@@ -133,7 +132,11 @@ function DepositModalSP({ data, closeModal }: Props) {
     if (symbol == 'WETH') return;
 
     try {
-      const approval = await underlyingContract?.approve(market, ethers.constants.MaxUint256);
+      const gasLimit = await getApprovalGasLimit();
+
+      const approval = await underlyingContract?.approve(market, ethers.constants.MaxUint256, {
+        gasLimit: gasLimit ? Math.ceil(Number(formatFixed(gasLimit)) * 1.1) : undefined
+      });
 
       //we set the transaction as pending
       setPending((pending) => !pending);
@@ -209,7 +212,9 @@ function DepositModalSP({ data, closeModal }: Props) {
 
   async function deposit() {
     try {
-      const decimals = await fixedLenderWithSigner?.decimals();
+      if (!accountData || !symbol) return;
+
+      const decimals = accountData[symbol].decimals;
 
       let deposit;
 
@@ -220,9 +225,14 @@ function DepositModalSP({ data, closeModal }: Props) {
 
         deposit = await ETHrouter?.depositETH(qty!);
       } else {
+        const gasLimit = await getGasLimit(qty);
+
         deposit = await fixedLenderWithSigner?.deposit(
-          ethers.utils.parseUnits(qty!.toString(), decimals),
-          walletAddress
+          ethers.utils.parseUnits(qty, decimals),
+          walletAddress,
+          {
+            gasLimit: gasLimit ? Math.ceil(Number(formatFixed(gasLimit)) * 1.1) : undefined
+          }
         );
       }
 
@@ -272,20 +282,14 @@ function DepositModalSP({ data, closeModal }: Props) {
     if (symbol == 'WETH') return;
 
     try {
-      const gasPriceInGwei = await fixedLenderWithSigner?.provider.getGasPrice();
-      const decimals = await fixedLenderWithSigner?.decimals();
+      const gasPrice = (await fixedLenderWithSigner?.provider.getFeeData())?.maxFeePerGas;
 
-      const estimatedGasCost = await fixedLenderWithSigner?.estimateGas.deposit(
-        ethers.utils.parseUnits(`${numbers.estimateGasAmount}`, decimals),
-        walletAddress
-      );
+      const gasLimit = await getGasLimit(qty);
 
-      if (gasPriceInGwei && estimatedGasCost) {
-        const gwei = await ethers.utils.formatUnits(gasPriceInGwei, 'gwei');
-        const gasCost = await ethers.utils.formatUnits(estimatedGasCost, 'gwei');
-        const eth = parseFloat(gwei) * parseFloat(gasCost);
+      if (gasPrice && gasLimit) {
+        const total = formatFixed(gasPrice.mul(gasLimit), 18);
 
-        setGas({ eth: eth.toFixed(6), gwei: parseFloat(gwei).toFixed(1) });
+        setGas({ eth: Number(total).toFixed(6) });
       }
     } catch (e) {
       setError({
@@ -295,23 +299,40 @@ function DepositModalSP({ data, closeModal }: Props) {
     }
   }
 
+  async function getGasLimit(qty: string) {
+    if (!accountData || !symbol) return;
+
+    const decimals = accountData[symbol].decimals;
+
+    const gasLimit = await fixedLenderWithSigner?.estimateGas.deposit(
+      parseFixed(qty, decimals),
+      walletAddress
+    );
+
+    return gasLimit;
+  }
+
+  async function getApprovalGasLimit() {
+    const gasLimit = await underlyingContract?.estimateGas.approve(
+      market,
+      ethers.constants.MaxUint256
+    );
+
+    return gasLimit;
+  }
+
   async function estimateApprovalGasCost() {
     if (symbol == 'WETH') return;
 
     try {
-      const gasPriceInGwei = await underlyingContract?.provider.getGasPrice();
+      const gasPrice = (await fixedLenderWithSigner?.provider.getFeeData())?.maxFeePerGas;
 
-      const estimatedGasCost = await underlyingContract?.estimateGas.approve(
-        market,
-        ethers.utils.parseUnits(numbers.approvalAmount!.toString())
-      );
+      const gasLimit = await getApprovalGasLimit();
 
-      if (gasPriceInGwei && estimatedGasCost) {
-        const gwei = await ethers.utils.formatUnits(gasPriceInGwei, 'gwei');
-        const gasCost = await ethers.utils.formatUnits(estimatedGasCost, 'gwei');
-        const eth = parseFloat(gwei) * parseFloat(gasCost);
+      if (gasPrice && gasLimit) {
+        const total = formatFixed(gasPrice.mul(gasLimit), 18);
 
-        setGas({ eth: eth.toFixed(6), gwei: parseFloat(gwei).toFixed(1) });
+        setGas({ eth: Number(total).toFixed(6) });
       }
     } catch (e) {
       console.log(e);

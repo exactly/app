@@ -226,10 +226,13 @@ function BorrowModal({ data, editable, closeModal }: Props) {
         });
       }
 
+      if (!accountData) return;
+
       const currentTimestamp = new Date().getTime() / 1000;
       const time = (parseInt(date?.value ?? maturity) - currentTimestamp) / 31536000;
       const apy = parseFloat(slippage) / 100;
-      const decimals = await fixedLenderWithSigner?.decimals();
+
+      const decimals = accountData[symbol].decimals;
 
       const maxAmount = parseFloat(qty!) * Math.pow(1 + apy, time);
 
@@ -244,12 +247,17 @@ function BorrowModal({ data, editable, closeModal }: Props) {
           maxAmount.toString()
         );
       } else {
+        const gasLimit = await getGasLimit(qty, maxAmount.toString());
+
         borrow = await fixedLenderWithSigner?.borrowAtMaturity(
           parseInt(date?.value ?? maturity),
           ethers.utils.parseUnits(qty!, decimals),
           ethers.utils.parseUnits(`${maxAmount.toFixed(decimals)}`, decimals),
           walletAddress,
-          walletAddress
+          walletAddress,
+          {
+            gasLimit: gasLimit ? Math.ceil(Number(formatFixed(gasLimit)) * 1.1) : undefined
+          }
         );
       }
 
@@ -316,23 +324,14 @@ function BorrowModal({ data, editable, closeModal }: Props) {
     if (symbol == 'WETH' || !accountData) return;
 
     try {
-      const gasPriceInGwei = await fixedLenderWithSigner?.provider.getGasPrice();
-      const decimals = accountData[symbol].decimals;
+      const gasPrice = (await fixedLenderWithSigner?.provider.getFeeData())?.maxFeePerGas;
 
-      const estimatedGasCost = await fixedLenderWithSigner?.estimateGas.borrowAtMaturity(
-        parseInt(date?.value ?? maturity),
-        ethers.utils.parseUnits(`1`, decimals),
-        ethers.utils.parseUnits(`2`, decimals),
-        walletAddress,
-        walletAddress
-      );
+      const gasLimit = await getGasLimit('1', '2');
 
-      if (gasPriceInGwei && estimatedGasCost) {
-        const gwei = await ethers.utils.formatUnits(gasPriceInGwei, 'gwei');
-        const gasCost = await ethers.utils.formatUnits(estimatedGasCost, 'gwei');
-        const eth = parseFloat(gwei) * parseFloat(gasCost);
+      if (gasPrice && gasLimit) {
+        const total = formatFixed(gasPrice.mul(gasLimit), 18);
 
-        setGas({ eth: eth.toFixed(8), gwei: parseFloat(gwei).toFixed(1) });
+        setGas({ eth: Number(total).toFixed(6) });
       }
     } catch (e) {
       console.log(e);
@@ -341,6 +340,22 @@ function BorrowModal({ data, editable, closeModal }: Props) {
         component: 'gas'
       });
     }
+  }
+
+  async function getGasLimit(qty: string, maxQty: string) {
+    if (!accountData) return;
+
+    const decimals = accountData[symbol].decimals;
+
+    const gasLimit = await fixedLenderWithSigner?.estimateGas.borrowAtMaturity(
+      parseInt(date?.value ?? maturity),
+      parseFixed(qty, decimals),
+      parseFixed(maxQty, decimals),
+      walletAddress,
+      walletAddress
+    );
+
+    return gasLimit;
   }
 
   async function getFeeAtMaturity() {

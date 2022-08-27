@@ -1,5 +1,6 @@
 import { ChangeEvent, useContext, useEffect, useState } from 'react';
 import { Contract, ethers } from 'ethers';
+import { formatFixed, parseFixed } from '@ethersproject/bignumber';
 
 import Button from 'components/common/Button';
 import ModalAsset from 'components/common/modal/ModalAsset';
@@ -204,7 +205,10 @@ function RepayModal({ data, closeModal }: Props) {
   }
 
   async function previewRepayAtMaturity() {
-    const decimals = await fixedLenderWithSigner?.decimals();
+    if (!accountData || !symbol) return;
+
+    const decimals = accountData[symbol].decimals;
+
     const market = fixedLenderWithSigner?.address;
     const parsedMaturity = parseInt(maturity);
     const parsedQtyValue = ethers.utils.parseUnits(qty, decimals);
@@ -228,7 +232,10 @@ function RepayModal({ data, closeModal }: Props) {
     setLoading(true);
 
     try {
-      const decimals = await fixedLenderWithSigner?.decimals();
+      if (!accountData || !symbol) return;
+
+      const decimals = accountData[symbol].decimals;
+
       let repay;
 
       if (symbol == 'WETH') {
@@ -238,11 +245,16 @@ function RepayModal({ data, closeModal }: Props) {
 
         repay = await ETHrouter?.repayAtMaturityETH(maturity, qty!);
       } else {
+        const gasLimit = await getGasLimit(qty, qty);
+
         repay = await fixedLenderWithSigner?.repayAtMaturity(
           maturity,
-          ethers.utils.parseUnits(qty!, decimals),
-          ethers.utils.parseUnits(qty!, decimals),
-          walletAddress
+          parseFixed(qty, decimals),
+          parseFixed(qty, decimals),
+          walletAddress,
+          {
+            gasLimit: gasLimit ? Math.ceil(Number(formatFixed(gasLimit)) * 1.1) : undefined
+          }
         );
       }
 
@@ -292,23 +304,14 @@ function RepayModal({ data, closeModal }: Props) {
     if (symbol == 'WETH') return;
 
     try {
-      const gasPriceInGwei = await fixedLenderWithSigner?.provider.getGasPrice();
+      const gasPrice = (await fixedLenderWithSigner?.provider.getFeeData())?.maxFeePerGas;
 
-      const decimals = await fixedLenderWithSigner?.decimals();
+      const gasLimit = await getGasLimit('1', '2');
 
-      const estimatedGasCost = await fixedLenderWithSigner?.estimateGas.repayAtMaturity(
-        maturity,
-        ethers.utils.parseUnits(`${numbers.estimateGasAmount}`, decimals),
-        ethers.utils.parseUnits(`${numbers.estimateGasAmount * 2}`, decimals),
-        walletAddress
-      );
+      if (gasPrice && gasLimit) {
+        const total = formatFixed(gasPrice.mul(gasLimit), 18);
 
-      if (gasPriceInGwei && estimatedGasCost) {
-        const gwei = await ethers.utils.formatUnits(gasPriceInGwei, 'gwei');
-        const gasCost = await ethers.utils.formatUnits(estimatedGasCost, 'gwei');
-        const eth = parseFloat(gwei) * parseFloat(gasCost);
-
-        setGas({ eth: eth.toFixed(8), gwei: parseFloat(gwei).toFixed(1) });
+        setGas({ eth: Number(total).toFixed(6) });
       }
     } catch (e) {
       setError({
@@ -316,6 +319,21 @@ function RepayModal({ data, closeModal }: Props) {
         component: 'gas'
       });
     }
+  }
+
+  async function getGasLimit(qty: string, maxQty: string) {
+    if (!accountData || !symbol) return;
+
+    const decimals = accountData[symbol].decimals;
+
+    const gasLimit = await fixedLenderWithSigner?.estimateGas.repayAtMaturity(
+      maturity,
+      parseFixed(qty, decimals),
+      parseFixed(maxQty, decimals),
+      walletAddress
+    );
+
+    return gasLimit;
   }
 
   function getHealthFactor(healthFactor: HealthFactor) {
