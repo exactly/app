@@ -43,6 +43,8 @@ import ModalStatusContext from 'contexts/ModalStatusContext';
 
 import keys from './translations.json';
 
+import numbers from 'config/numbers.json';
+
 type Props = {
   data: Borrow | Deposit;
   closeModal: (props: any) => void;
@@ -135,7 +137,9 @@ function DepositModalSP({ data, closeModal }: Props) {
       const gasLimit = await getApprovalGasLimit();
 
       const approval = await underlyingContract?.approve(market, ethers.constants.MaxUint256, {
-        gasLimit: gasLimit ? Math.ceil(Number(formatFixed(gasLimit)) * 1.1) : undefined
+        gasLimit: gasLimit
+          ? Math.ceil(Number(formatFixed(gasLimit)) * numbers.gasLimitMultiplier)
+          : undefined
       });
 
       //we set the transaction as pending
@@ -231,7 +235,9 @@ function DepositModalSP({ data, closeModal }: Props) {
           ethers.utils.parseUnits(qty, decimals),
           walletAddress,
           {
-            gasLimit: gasLimit ? Math.ceil(Number(formatFixed(gasLimit)) * 1.1) : undefined
+            gasLimit: gasLimit
+              ? Math.ceil(Number(formatFixed(gasLimit)) * numbers.gasLimitMultiplier)
+              : undefined
           }
         );
       }
