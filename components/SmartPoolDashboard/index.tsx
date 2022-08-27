@@ -4,6 +4,7 @@ import { LangKeys } from 'types/Lang';
 import { Option } from 'react-dropdown';
 
 import SmartPoolUserStatus from 'components/SmartPoolUserStatus';
+import AddETokensButton from 'components/AddETokensButton';
 
 import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
@@ -25,6 +26,7 @@ function SmartPoolDashboard({ tab }: Props) {
     <section className={styles.container}>
       <div className={styles.titleContainer}>
         <p className={styles.title}>{translations[lang].smartPool}</p>
+        <AddETokensButton />
       </div>
       <SmartPoolUserStatus walletAddress={walletAddress} type={tab} />
     </section>
