@@ -129,9 +129,7 @@ function FaucetModal({ closeModal }: Props) {
               return (
                 <div className={styles.assetContainer} key={asset}>
                   <p className={styles.asset}>
-                    <div className={styles.assetImage}>
-                      <Image src={`/img/assets/weth.png`} alt={asset} layout="fill" />
-                    </div>
+                    <Image src={`/img/assets/weth.png`} alt={asset} width={40} height={40} />
                     {asset}
                   </p>
                   <div className={styles.buttonContainer}>
@@ -145,13 +143,12 @@ function FaucetModal({ closeModal }: Props) {
             return (
               <div className={styles.assetContainer} key={asset}>
                 <p className={styles.asset}>
-                  <div className={styles.assetImage}>
-                    <Image
-                      src={`/img/assets/${asset.toLowerCase()}.png`}
-                      alt={asset}
-                      layout="fill"
-                    />
-                  </div>
+                  <Image
+                    src={`/img/assets/${asset.toLowerCase()}.png`}
+                    alt={asset}
+                    width={40}
+                    height={40}
+                  />
                   {asset}
                 </p>
                 <div className={styles.buttonContainer}>
