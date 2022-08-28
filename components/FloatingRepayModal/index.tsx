@@ -273,7 +273,7 @@ function FloatingRepayModal({ data, closeModal }: Props) {
     const decimals = accountData[symbol].decimals;
 
     const gasLimit = await fixedLenderWithSigner?.estimateGas.repay(
-      parseFixed(qty, decimals),
+      ethers.utils.parseUnits(qty, decimals),
       walletAddress
     );
 

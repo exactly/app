@@ -252,8 +252,8 @@ function RepayModal({ data, closeModal }: Props) {
 
         repay = await fixedLenderWithSigner?.repayAtMaturity(
           maturity,
-          parseFixed(qty, decimals),
-          parseFixed(qty, decimals),
+          ethers.utils.parseUnits(qty, decimals),
+          ethers.utils.parseUnits(qty, decimals),
           walletAddress,
           {
             gasLimit: gasLimit ? Math.ceil(Number(formatFixed(gasLimit)) * 1.1) : undefined
@@ -331,8 +331,8 @@ function RepayModal({ data, closeModal }: Props) {
 
     const gasLimit = await fixedLenderWithSigner?.estimateGas.repayAtMaturity(
       maturity,
-      parseFixed(qty, decimals),
-      parseFixed(maxQty, decimals),
+      ethers.utils.parseUnits(qty, decimals),
+      ethers.utils.parseUnits(maxQty, decimals),
       walletAddress
     );
 

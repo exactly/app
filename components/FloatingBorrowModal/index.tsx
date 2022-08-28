@@ -314,7 +314,7 @@ function FloatingBorrowModal({ data, editable, closeModal }: Props) {
     const decimals = accountData[symbol].decimals;
 
     const gasLimit = await fixedLenderWithSigner?.estimateGas.borrow(
-      parseFixed(qty, decimals),
+      ethers.utils.parseUnits(qty, decimals),
       walletAddress,
       walletAddress
     );

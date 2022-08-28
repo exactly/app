@@ -349,8 +349,8 @@ function BorrowModal({ data, editable, closeModal }: Props) {
 
     const gasLimit = await fixedLenderWithSigner?.estimateGas.borrowAtMaturity(
       parseInt(date?.value ?? maturity),
-      parseFixed(qty, decimals),
-      parseFixed(maxQty, decimals),
+      ethers.utils.parseUnits(qty, decimals),
+      ethers.utils.parseUnits(maxQty, decimals),
       walletAddress,
       walletAddress
     );

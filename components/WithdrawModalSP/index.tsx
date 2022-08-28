@@ -148,7 +148,7 @@ function WithdrawModalSP({ data, closeModal }: Props) {
         decimals = accountData[symbol].decimals;
 
         withdraw = await fixedLenderWithSigner?.withdraw(
-          parseFixed(qty, decimals),
+          ethers.utils.parseUnits(qty, decimals),
           walletAddress,
           walletAddress,
           {
@@ -225,7 +225,7 @@ function WithdrawModalSP({ data, closeModal }: Props) {
     const decimals = accountData[symbol].decimals;
 
     const gasLimit = await fixedLenderWithSigner?.estimateGas.withdraw(
-      parseFixed(qty, decimals),
+      ethers.utils.parseUnits(qty, decimals),
       walletAddress,
       walletAddress
     );

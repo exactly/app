@@ -329,8 +329,8 @@ function DepositModalMP({ data, closeModal }: Props) {
 
     const gasLimit = await fixedLenderWithSigner?.estimateGas.depositAtMaturity(
       parseInt(date?.value ?? maturity),
-      parseFixed(qty, decimals),
-      parseFixed(minQty, decimals),
+      ethers.utils.parseUnits(qty, decimals),
+      ethers.utils.parseUnits(minQty, decimals),
       walletAddress
     );
 
@@ -405,7 +405,7 @@ function DepositModalMP({ data, closeModal }: Props) {
 
       const slippageAPY = (fixedAPY * (1 - numbers.slippage)).toFixed(2);
 
-      //Let's check against 0.01 for now, because this is a percentage and it could be 0.0001 or lower, but not 0
+      // Let's check against 0.01 for now, because this is a percentage and it could be 0.0001 or lower, but not 0
       if (fixedAPY < 0.01) {
         setError({
           status: true,

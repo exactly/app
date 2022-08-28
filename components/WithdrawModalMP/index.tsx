@@ -201,8 +201,8 @@ function WithdrawModalMP({ data, closeModal }: Props) {
 
         withdraw = await fixedLenderWithSigner?.withdrawAtMaturity(
           maturity,
-          parseFixed(qty, decimals),
-          parseFixed(qty, decimals),
+          ethers.utils.parseUnits(qty, decimals),
+          ethers.utils.parseUnits(qty, decimals),
           walletAddress,
           walletAddress,
           {
@@ -281,8 +281,8 @@ function WithdrawModalMP({ data, closeModal }: Props) {
 
     const gasLimit = await fixedLenderWithSigner?.estimateGas.withdrawAtMaturity(
       maturity,
-      parseFixed(qty, decimals),
-      parseFixed(minQty, decimals),
+      ethers.utils.parseUnits(qty, decimals),
+      ethers.utils.parseUnits(minQty, decimals),
       walletAddress,
       walletAddress
     );
