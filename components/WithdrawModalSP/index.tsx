@@ -1,6 +1,6 @@
 import { ChangeEvent, useContext, useEffect, useState } from 'react';
 import { ethers, Contract } from 'ethers';
-import { formatFixed, parseFixed } from '@ethersproject/bignumber';
+import { formatFixed } from '@ethersproject/bignumber';
 
 import Button from 'components/common/Button';
 import ModalAsset from 'components/common/modal/ModalAsset';
