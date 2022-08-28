@@ -247,7 +247,7 @@ function BorrowModal({ data, editable, closeModal }: Props) {
           maxAmount.toString()
         );
       } else {
-        const gasLimit = await getGasLimit(qty, maxAmount.toString());
+        const gasLimit = await getGasLimit(qty, maxAmount.toFixed(decimals));
 
         borrow = await fixedLenderWithSigner?.borrowAtMaturity(
           parseInt(date?.value ?? maturity),

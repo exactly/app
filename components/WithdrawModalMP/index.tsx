@@ -182,7 +182,7 @@ function WithdrawModalMP({ data, closeModal }: Props) {
 
     try {
       //we should change this 0 in case of earlyWithdraw with the amount - penaltyFee from the previewWithdraw
-      const minAmount = isEarlyWithdraw ? 0 : finalAmount;
+      const minAmount = isEarlyWithdraw ? 0 : Number(finalAmount);
       let withdraw;
       let decimals;
 
@@ -195,14 +195,14 @@ function WithdrawModalMP({ data, closeModal }: Props) {
       } else {
         if (!accountData || !symbol) return;
 
-        const gasLimit = await getGasLimit(qty, minAmount.toString());
+        const gasLimit = await getGasLimit(qty, minAmount.toFixed(decimals));
 
         decimals = accountData[symbol].decimals;
 
         withdraw = await fixedLenderWithSigner?.withdrawAtMaturity(
           maturity,
           ethers.utils.parseUnits(qty, decimals),
-          ethers.utils.parseUnits(qty, decimals),
+          ethers.utils.parseUnits(minAmount.toFixed(decimals), decimals),
           walletAddress,
           walletAddress,
           {
