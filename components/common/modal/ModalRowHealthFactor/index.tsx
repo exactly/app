@@ -137,9 +137,7 @@ function ModalRowHealthFactor({ qty, symbol, operation, healthFactorCallback }: 
       <p className={styles.text}>{translations[lang].healthFactor}</p>
       <section className={styles.values}>
         <span className={styles.value}>{(symbol && beforeHealthFactor) || <Skeleton />}</span>
-        <div className={styles.imageContainer}>
-          <Image src="/img/icons/arrowRight.svg" alt="arrowRight" layout="fill" />
-        </div>
+        <Image src="/img/icons/arrowRight.svg" alt="arrowRight" width={20} height={20} />
         <span className={styles.value}>{(symbol && afterHealthFactor) || <Skeleton />}</span>
       </section>
     </section>

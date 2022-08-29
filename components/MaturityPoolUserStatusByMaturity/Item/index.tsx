@@ -164,7 +164,7 @@ function Item({ type, amount, fee, maturityDate, symbol, market, decimals, data 
         <div className={styles.symbol}>
           {(symbol && (
             <Image
-              src={`/img/assets/${symbol?.toLowerCase()}.png`}
+              src={`/img/assets/${symbol?.toLowerCase()}.svg`}
               alt={symbol}
               width={40}
               height={40}

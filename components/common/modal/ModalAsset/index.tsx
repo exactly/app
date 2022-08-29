@@ -43,7 +43,7 @@ function ModalAsset({ asset, amount, editable, defaultAddress }: Props) {
         {!editable && (
           <>
             <Image
-              src={`/img/assets/${asset.toLowerCase()}.png`}
+              src={`/img/assets/${asset.toLowerCase()}.svg`}
               alt={asset}
               width="24"
               height="24"

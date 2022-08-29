@@ -1,7 +1,7 @@
 {
   "en": {
-    "deposits": "Deposit",
-    "borrows": "Borrow",
+    "deposits": "Deposits",
+    "borrows": "Borrows",
     "rateComposition": "Rate Composition",
     "healthFactor": "Health Factor",
     "apr": "APR",
