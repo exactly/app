@@ -20,10 +20,12 @@ function MyApp({ Component, pageProps }: AppProps) {
   const props = { ...pageProps };
 
   useEffect(() => {
-    const theme = JSON.parse(window?.localStorage?.getItem('theme') ?? 'light');
+    if (window?.localStorage?.getItem('theme')) {
+      const theme = JSON.parse(window.localStorage.getItem('theme')!);
 
-    if (theme && theme != '') {
-      document.body.dataset.theme = theme;
+      if (theme && theme != '') {
+        document.body.dataset.theme = theme;
+      }
     }
   }, []);
 
