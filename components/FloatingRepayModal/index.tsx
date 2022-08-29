@@ -1,10 +1,10 @@
 import { ChangeEvent, useContext, useEffect, useState } from 'react';
 import { Contract, ethers } from 'ethers';
+import { formatFixed } from '@ethersproject/bignumber';
 
 import Button from 'components/common/Button';
 import ModalAsset from 'components/common/modal/ModalAsset';
 import ModalInput from 'components/common/modal/ModalInput';
-import ModalRow from 'components/common/modal/ModalRow';
 import ModalRowHealthFactor from 'components/common/modal/ModalRowHealthFactor';
 import ModalTitle from 'components/common/modal/ModalTitle';
 import ModalTxCost from 'components/common/modal/ModalTxCost';
@@ -15,7 +15,6 @@ import Overlay from 'components/Overlay';
 import SkeletonModalRowBeforeAfter from 'components/common/skeletons/SkeletonModalRowBeforeAfter';
 import ModalError from 'components/common/modal/ModalError';
 import ModalRowBorrowLimit from 'components/common/modal/ModalRowBorrowLimit';
-import ModalExpansionPanelWrapper from 'components/common/modal/ModalExpansionPanelWrapper';
 
 import { Borrow } from 'types/Borrow';
 import { Deposit } from 'types/Deposit';
@@ -131,9 +130,16 @@ function FloatingRepayModal({ data, closeModal }: Props) {
     try {
       setLoading(true);
 
+      const gasLimit = await getApprovalGasLimit();
+
       const approval = await underlyingContract?.approve(
         fixedLenderWithSigner?.address,
-        ethers.constants.MaxUint256
+        ethers.constants.MaxUint256,
+        {
+          gasLimit: gasLimit
+            ? Math.ceil(Number(formatFixed(gasLimit)) * numbers.gasLimitMultiplier)
+            : undefined
+        }
       );
 
       await approval.wait();
@@ -191,9 +197,16 @@ function FloatingRepayModal({ data, closeModal }: Props) {
 
         repay = await ETHrouter?.repayETH(qty!);
       } else {
+        const gasLimit = await getGasLimit(qty);
+
         repay = await fixedLenderWithSigner?.repay(
           ethers.utils.parseUnits(qty!, decimals),
-          walletAddress
+          walletAddress,
+          {
+            gasLimit: gasLimit
+              ? Math.ceil(Number(formatFixed(gasLimit)) * numbers.gasLimitMultiplier)
+              : undefined
+          }
         );
       }
 
@@ -243,21 +256,14 @@ function FloatingRepayModal({ data, closeModal }: Props) {
     if (symbol == 'WETH' || !accountData) return;
 
     try {
-      const gasPriceInGwei = await fixedLenderWithSigner?.provider.getGasPrice();
+      const gasPrice = (await fixedLenderWithSigner?.provider.getFeeData())?.maxFeePerGas;
 
-      const decimals = accountData[symbol!].decimals;
+      const gasLimit = await getGasLimit('1');
 
-      const estimatedGasCost = await fixedLenderWithSigner?.estimateGas.repay(
-        ethers.utils.parseUnits(`${numbers.estimateGasAmount}`, decimals),
-        walletAddress
-      );
+      if (gasPrice && gasLimit) {
+        const total = formatFixed(gasPrice.mul(gasLimit), 18);
 
-      if (gasPriceInGwei && estimatedGasCost) {
-        const gwei = await ethers.utils.formatUnits(gasPriceInGwei, 'gwei');
-        const gasCost = await ethers.utils.formatUnits(estimatedGasCost, 'gwei');
-        const eth = parseFloat(gwei) * parseFloat(gasCost);
-
-        setGas({ eth: eth.toFixed(8), gwei: parseFloat(gwei).toFixed(1) });
+        setGas({ eth: Number(total).toFixed(6) });
       }
     } catch (e) {
       setError({
@@ -265,6 +271,28 @@ function FloatingRepayModal({ data, closeModal }: Props) {
         component: 'gas'
       });
     }
+  }
+
+  async function getGasLimit(qty: string) {
+    if (!accountData || !symbol) return;
+
+    const decimals = accountData[symbol].decimals;
+
+    const gasLimit = await fixedLenderWithSigner?.estimateGas.repay(
+      ethers.utils.parseUnits(qty, decimals),
+      walletAddress
+    );
+
+    return gasLimit;
+  }
+
+  async function getApprovalGasLimit() {
+    const gasLimit = await underlyingContract?.estimateGas.approve(
+      fixedLenderWithSigner?.address,
+      ethers.constants.MaxUint256
+    );
+
+    return gasLimit;
   }
 
   function getHealthFactor(healthFactor: HealthFactor) {

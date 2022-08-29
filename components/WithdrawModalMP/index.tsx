@@ -1,5 +1,6 @@
 import { ChangeEvent, useContext, useEffect, useState } from 'react';
 import { Contract, ethers } from 'ethers';
+import { formatFixed } from '@ethersproject/bignumber';
 
 import Button from 'components/common/Button';
 import ModalAsset from 'components/common/modal/ModalAsset';
@@ -36,6 +37,7 @@ import { useWeb3Context } from 'contexts/Web3Context';
 import FixedLenderContext from 'contexts/FixedLenderContext';
 import PreviewerContext from 'contexts/PreviewerContext';
 import ModalStatusContext from 'contexts/ModalStatusContext';
+import AccountDataContext from 'contexts/AccountDataContext';
 
 import decimals from 'config/decimals.json';
 import numbers from 'config/numbers.json';
@@ -58,6 +60,7 @@ function WithdrawModalMP({ data, closeModal }: Props) {
   const fixedLenderData = useContext(FixedLenderContext);
   const previewerData = useContext(PreviewerContext);
   const { minimized, setMinimized } = useContext(ModalStatusContext);
+  const { accountData } = useContext(AccountDataContext);
 
   const parsedFee = ethers.utils.formatUnits(fee, decimals[symbol! as keyof Decimals]);
   const parsedAmount = ethers.utils.formatUnits(assets, decimals[symbol! as keyof Decimals]);
@@ -153,7 +156,10 @@ function WithdrawModalMP({ data, closeModal }: Props) {
   }
 
   async function previewWithdrawAtMaturity() {
-    const decimals = await fixedLenderWithSigner?.decimals();
+    if (!accountData || !symbol) return;
+
+    const decimals = accountData[symbol].decimals;
+
     const market = fixedLenderWithSigner?.address;
     const parsedMaturity = parseInt(maturity);
     const parsedQtyValue = ethers.utils.parseUnits(qty, decimals);
@@ -176,7 +182,7 @@ function WithdrawModalMP({ data, closeModal }: Props) {
 
     try {
       //we should change this 0 in case of earlyWithdraw with the amount - penaltyFee from the previewWithdraw
-      const minAmount = isEarlyWithdraw ? 0 : finalAmount;
+      const minAmount = isEarlyWithdraw ? 0 : Number(finalAmount);
       let withdraw;
       let decimals;
 
@@ -187,14 +193,23 @@ function WithdrawModalMP({ data, closeModal }: Props) {
 
         withdraw = await ETHrouter?.withdrawAtMaturityETH(maturity, qty, minAmount.toString());
       } else {
-        decimals = await fixedLenderWithSigner?.decimals();
+        if (!accountData || !symbol) return;
+
+        const gasLimit = await getGasLimit(qty, minAmount.toFixed(decimals));
+
+        decimals = accountData[symbol].decimals;
 
         withdraw = await fixedLenderWithSigner?.withdrawAtMaturity(
           maturity,
-          ethers.utils.parseUnits(qty!, decimals),
-          ethers.utils.parseUnits(`${minAmount}`, decimals),
+          ethers.utils.parseUnits(qty, decimals),
+          ethers.utils.parseUnits(minAmount.toFixed(decimals), decimals),
           walletAddress,
-          walletAddress
+          walletAddress,
+          {
+            gasLimit: gasLimit
+              ? Math.ceil(Number(formatFixed(gasLimit)) * numbers.gasLimitMultiplier)
+              : undefined
+          }
         );
       }
 
@@ -244,23 +259,14 @@ function WithdrawModalMP({ data, closeModal }: Props) {
     if (symbol == 'WETH') return;
 
     try {
-      const gasPriceInGwei = await fixedLenderWithSigner?.provider.getGasPrice();
-      const decimals = await fixedLenderWithSigner?.decimals();
+      const gasPrice = (await fixedLenderWithSigner?.provider.getFeeData())?.maxFeePerGas;
 
-      const estimatedGasCost = await fixedLenderWithSigner?.estimateGas.withdrawAtMaturity(
-        maturity,
-        ethers.utils.parseUnits(`${numbers.estimateGasAmount}`, decimals),
-        ethers.utils.parseUnits('0', decimals),
-        walletAddress,
-        walletAddress
-      );
+      const gasLimit = await getGasLimit('1', '0');
 
-      if (gasPriceInGwei && estimatedGasCost) {
-        const gwei = await ethers.utils.formatUnits(gasPriceInGwei, 'gwei');
-        const gasCost = await ethers.utils.formatUnits(estimatedGasCost, 'gwei');
-        const eth = parseFloat(gwei) * parseFloat(gasCost);
+      if (gasPrice && gasLimit) {
+        const total = formatFixed(gasPrice.mul(gasLimit), 18);
 
-        setGas({ eth: eth.toFixed(8), gwei: parseFloat(gwei).toFixed(1) });
+        setGas({ eth: Number(total).toFixed(6) });
       }
     } catch (e) {
       setError({
@@ -268,6 +274,22 @@ function WithdrawModalMP({ data, closeModal }: Props) {
         component: 'gas'
       });
     }
+  }
+
+  async function getGasLimit(qty: string, minQty: string) {
+    if (!accountData || !symbol) return;
+
+    const decimals = accountData[symbol].decimals;
+
+    const gasLimit = await fixedLenderWithSigner?.estimateGas.withdrawAtMaturity(
+      maturity,
+      ethers.utils.parseUnits(qty, decimals),
+      ethers.utils.parseUnits(minQty, decimals),
+      walletAddress,
+      walletAddress
+    );
+
+    return gasLimit;
   }
 
   async function approve() {
