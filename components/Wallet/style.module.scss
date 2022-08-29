@@ -1,5 +1,5 @@
 .container {
-  color: var(--black);
+  color: var(--text-color);
   position: absolute;
   font-size: var(--font-14);
   display: flex;
@@ -18,7 +18,7 @@
     width: 192px;
     top: var(--u5);
     right: calc(var(--u2) * -1);
-    background: var(--white);
+    background: var(--background);
     box-shadow: var(--shadow-tables);
     display: flex;
     flex-direction: column;
@@ -44,7 +44,7 @@
     width: 0;
     position: absolute;
     pointer-events: none;
-    border-bottom-color: #fff;
+    border-bottom-color: var(--background);
     border-width: 10px;
     margin-left: -10px;
   }
@@ -57,7 +57,7 @@
     .network {
       margin: 0;
       opacity: var(--defaultOpacity);
-      color: var(--black);
+      color: var(--text-color);
     }
 
     .dot {
