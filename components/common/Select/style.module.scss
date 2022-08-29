@@ -4,7 +4,7 @@
   height: var(--u6);
 
   .placeholder {
-    width: 70%;
+    width: 100%;
     text-align: center;
   }
 
@@ -62,6 +62,7 @@
 
     div {
       color: var(--text-color);
+      text-align: center;
     }
   }
 }
@@ -80,7 +81,7 @@
     .arrowEditable {
       @extend .arrow;
       border-color: var(--primary) transparent;
-      margin: 0;
+      margin: 0 -10px;
     }
   }
   .menuEditable {
@@ -88,7 +89,6 @@
     border: 1px solid var(--primary);
     border-top-left-radius: var(--smallUnit);
     border-top-right-radius: var(--smallUnit);
-    max-width: 99px;
     position: absolute;
     right: var(--u);
   }
