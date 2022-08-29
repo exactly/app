@@ -206,7 +206,9 @@ function WithdrawModalMP({ data, closeModal }: Props) {
           walletAddress,
           walletAddress,
           {
-            gasLimit: gasLimit ? Math.ceil(Number(formatFixed(gasLimit)) * 1.1) : undefined
+            gasLimit: gasLimit
+              ? Math.ceil(Number(formatFixed(gasLimit)) * numbers.gasLimitMultiplier)
+              : undefined
           }
         );
       }

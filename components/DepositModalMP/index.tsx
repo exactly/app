@@ -160,7 +160,9 @@ function DepositModalMP({ data, closeModal }: Props) {
         marketAddress,
         ethers.constants.MaxUint256,
         {
-          gasLimit: gasLimit ? Math.ceil(Number(formatFixed(gasLimit)) * 1.1) : undefined
+          gasLimit: gasLimit
+            ? Math.ceil(Number(formatFixed(gasLimit)) * numbers.gasLimitMultiplier)
+            : undefined
         }
       );
 
@@ -253,7 +255,11 @@ function DepositModalMP({ data, closeModal }: Props) {
           ethers.utils.parseUnits(qty!, decimals),
           ethers.utils.parseUnits(`${minAmount.toFixed(decimals)}`, decimals),
           walletAddress,
-          { gasLimit: gasLimit ? Math.ceil(Number(formatFixed(gasLimit)) * 1.1) : undefined }
+          {
+            gasLimit: gasLimit
+              ? Math.ceil(Number(formatFixed(gasLimit)) * numbers.gasLimitMultiplier)
+              : undefined
+          }
         );
       }
 

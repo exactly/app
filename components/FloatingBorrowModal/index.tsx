@@ -40,6 +40,8 @@ import ModalStatusContext from 'contexts/ModalStatusContext';
 
 import keys from './translations.json';
 
+import numbers from 'config/numbers.json';
+
 type Props = {
   data: Borrow | Deposit;
   editable?: boolean;
@@ -206,7 +208,9 @@ function FloatingBorrowModal({ data, editable, closeModal }: Props) {
           walletAddress,
           walletAddress,
           {
-            gasLimit: gasLimit ? Math.ceil(Number(formatFixed(gasLimit)) * 1.1) : undefined
+            gasLimit: gasLimit
+              ? Math.ceil(Number(formatFixed(gasLimit)) * numbers.gasLimitMultiplier)
+              : undefined
           }
         );
       }

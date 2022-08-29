@@ -135,7 +135,11 @@ function FloatingRepayModal({ data, closeModal }: Props) {
       const approval = await underlyingContract?.approve(
         fixedLenderWithSigner?.address,
         ethers.constants.MaxUint256,
-        { gasLimit: gasLimit ? Math.ceil(Number(formatFixed(gasLimit)) * 1.1) : undefined }
+        {
+          gasLimit: gasLimit
+            ? Math.ceil(Number(formatFixed(gasLimit)) * numbers.gasLimitMultiplier)
+            : undefined
+        }
       );
 
       await approval.wait();
@@ -199,7 +203,9 @@ function FloatingRepayModal({ data, closeModal }: Props) {
           ethers.utils.parseUnits(qty!, decimals),
           walletAddress,
           {
-            gasLimit: gasLimit ? Math.ceil(Number(formatFixed(gasLimit)) * 1.1) : undefined
+            gasLimit: gasLimit
+              ? Math.ceil(Number(formatFixed(gasLimit)) * numbers.gasLimitMultiplier)
+              : undefined
           }
         );
       }
