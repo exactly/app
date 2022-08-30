@@ -325,7 +325,7 @@ function BorrowModal({ data, editable, closeModal }: Props) {
         setTx({ status: 'error', hash: txReceipt?.transactionHash });
       }
     } catch (e: any) {
-      console.log(e, 1234);
+      console.log(e);
       setLoading(false);
 
       const isDenied = e?.message?.includes('User denied');
