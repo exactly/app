@@ -1,6 +1,8 @@
 import { useContext, useEffect, useState } from 'react';
 import { ethers, Contract, BigNumber } from 'ethers';
 import Skeleton from 'react-loading-skeleton';
+import request from 'graphql-request';
+import { formatFixed, parseFixed } from '@ethersproject/bignumber';
 
 import Button from 'components/common/Button';
 import Switch from 'components/common/Switch';
@@ -23,9 +25,11 @@ import keys from './translations.json';
 import decimals from 'config/decimals.json';
 
 import { getSymbol, getUnderlyingData } from 'utils/utils';
-import { getContractData } from 'utils/contracts';
 import formatNumber from 'utils/formatNumber';
 import parseSymbol from 'utils/parseSymbol';
+import getSubgraph from 'utils/getSubgraph';
+
+import { getSmartPoolDepositsAndWithdraws, getSmartPoolBorrowsAndRepays } from 'queries';
 
 type Props = {
   symbol: string | undefined;
@@ -35,6 +39,7 @@ type Props = {
   eTokenAmount: BigNumber | undefined;
   auditorContract: Contract | undefined;
   type: Option | undefined;
+  market: string | undefined;
 };
 
 function Item({
@@ -44,9 +49,10 @@ function Item({
   walletAddress,
   eTokenAmount,
   auditorContract,
-  type
+  type,
+  market
 }: Props) {
-  const { network, web3Provider } = useWeb3Context();
+  const { network } = useWeb3Context();
   const fixedLender = useContext(FixedLenderContext);
   const lang: string = useContext(LangContext);
   const { accountData } = useContext(AccountDataContext);
@@ -57,14 +63,15 @@ function Item({
   const [toggle, setToggle] = useState<boolean>(false);
   const [disabled, setDisabled] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
-  const [walletBalance, setWalletBalance] = useState<string | undefined>(undefined);
   const [rate, setRate] = useState<number | undefined>(undefined);
+  const [originalAmount, setOriginalAmount] = useState<string | undefined>(undefined);
+  const [difference, setDifference] = useState<string | undefined>(undefined);
 
   const underlyingData = getUnderlyingData(network?.name, symbol);
 
   useEffect(() => {
-    getCurrentBalance();
-  }, [underlyingData, walletAddress, accountData]);
+    getOriginalAmount();
+  }, [accountData, walletAddress, type, symbol]);
 
   useEffect(() => {
     if (accountData) {
@@ -90,32 +97,6 @@ function Item({
     setRate(exchangeRate);
   }
 
-  async function getCurrentBalance() {
-    if (!walletAddress || !symbol) return;
-
-    let balance;
-    let decimals;
-
-    if (symbol == 'WETH') {
-      balance = await web3Provider?.getBalance(walletAddress!);
-      decimals = 18;
-    } else {
-      const contractData = await getContractData(
-        network?.name,
-        underlyingData!.address,
-        underlyingData!.abi
-      );
-
-      decimals = await contractData?.decimals();
-
-      balance = await contractData?.balanceOf(walletAddress);
-    }
-
-    if (balance) {
-      setWalletBalance(ethers.utils.formatUnits(balance, decimals));
-    }
-  }
-
   function getFixedLenderData() {
     const filteredFixedLender = fixedLender.find((contract) => {
       const contractSymbol = getSymbol(contract.address!, network!.name);
@@ -129,6 +110,74 @@ function Item({
     };
 
     return fixedLenderData;
+  }
+
+  async function getOriginalAmount() {
+    if (!network || !walletAddress || !accountData || !symbol || !market || !type) return;
+    setOriginalAmount(undefined);
+    setDifference(undefined);
+
+    const subgraphUrl = getSubgraph(network.name);
+
+    const decimals = accountData[symbol].decimals;
+
+    let amount;
+
+    let totalIncremental = parseFixed('0', decimals);
+
+    let totalDecremental = parseFixed('0', decimals);
+
+    try {
+      if (type.value == 'deposit') {
+        const smartPoolDepositsAndWithdraws = await request(
+          subgraphUrl,
+          getSmartPoolDepositsAndWithdraws(walletAddress, market)
+        );
+
+        smartPoolDepositsAndWithdraws.deposits.forEach((deposit: any) => {
+          totalIncremental = totalIncremental.add(parseFixed(deposit.assets));
+        });
+
+        smartPoolDepositsAndWithdraws.withdraws.forEach((withdraw: any) => {
+          totalDecremental = totalDecremental.add(parseFixed(withdraw.assets));
+        });
+      }
+
+      if (type.value == 'borrow') {
+        const smartPoolBorrowsAndRepays = await request(
+          subgraphUrl,
+          getSmartPoolBorrowsAndRepays(walletAddress, market)
+        );
+
+        smartPoolBorrowsAndRepays.borrows.forEach((borrow: any) => {
+          totalIncremental = totalIncremental.add(parseFixed(borrow.assets));
+        });
+
+        smartPoolBorrowsAndRepays.repays.forEach((repay: any) => {
+          totalDecremental = totalDecremental.add(parseFixed(repay.assets));
+        });
+      }
+
+      amount = formatFixed(totalIncremental.sub(totalDecremental), decimals);
+
+      amount && setOriginalAmount(amount);
+    } catch (e) {
+      console.log(e);
+    }
+
+    try {
+      if (!depositAmount || !borrowedAmount) return;
+
+      const amountToSubtract = type.value == 'deposit' ? depositAmount : borrowedAmount;
+
+      const difference =
+        (Number(formatFixed(amountToSubtract, decimals)) - Number(amount)) / Number(amount);
+
+      setDifference(`${(difference * 100).toFixed(2)}%`);
+    } catch (e) {
+      console.log(e);
+      setDifference('N/A');
+    }
   }
 
   async function handleMarket() {
@@ -173,6 +222,24 @@ function Item({
         <span className={styles.primary}>{(symbol && parseSymbol(symbol)) || <Skeleton />}</span>
       </div>
       <span className={styles.value}>
+        {(originalAmount &&
+          rate &&
+          `$${formatNumber(parseFloat(originalAmount) * rate, 'USD', true)}`) || (
+          <Skeleton width={40} />
+        )}
+      </span>
+      {type?.value == 'deposit' && (
+        <span className={styles.value}>
+          {(eTokenAmount &&
+            symbol &&
+            `${formatNumber(
+              ethers.utils.formatUnits(eTokenAmount, decimals[symbol! as keyof Decimals]),
+              symbol
+            )}`) || <Skeleton width={40} />}{' '}
+        </span>
+      )}
+
+      <span className={styles.value}>
         {(depositAmount &&
           borrowedAmount &&
           symbol &&
@@ -188,17 +255,11 @@ function Item({
             true
           )}`) || <Skeleton width={40} />}
       </span>
+
+      <span className={styles.value}>{(difference && difference) || <Skeleton width={40} />}</span>
+
       {type?.value == 'deposit' && (
         <>
-          <span className={styles.value}>
-            {(eTokenAmount &&
-              symbol &&
-              `${formatNumber(
-                ethers.utils.formatUnits(eTokenAmount, decimals[symbol! as keyof Decimals]),
-                symbol
-              )}`) || <Skeleton width={40} />}{' '}
-          </span>
-
           {symbol ? (
             <span className={styles.value}>
               {!loading ? (

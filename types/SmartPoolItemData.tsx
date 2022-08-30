@@ -5,4 +5,5 @@ export type SmartPoolItemData = {
   eTokens: BigNumber;
   depositedAmount: BigNumber;
   borrowedAmount: BigNumber;
+  market: string;
 };

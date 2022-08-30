@@ -62,12 +62,14 @@ function SmartPoolUserStatus({ walletAddress, type }: Props) {
       const depositBalance = market.floatingDepositAssets;
       const eTokens = market.floatingDepositShares;
       const borrowBalance = market.floatingBorrowAssets;
+      const address = market.market;
 
       const obj = {
         symbol: symbol,
         eTokens: eTokens,
         depositedAmount: depositBalance,
-        borrowedAmount: borrowBalance
+        borrowedAmount: borrowBalance,
+        market: address
       };
 
       const lookAfter = type.value == 'borrow' ? 'borrowedAmount' : 'depositedAmount';
@@ -94,10 +96,15 @@ function SmartPoolUserStatus({ walletAddress, type }: Props) {
               </span>
 
               {type.value == 'deposit' && (
-                <>
-                  <span className={styles.title}>{translations[lang].eToken}</span>
-                  <span className={styles.title}>{translations[lang].collateral}</span>
-                </>
+                <span className={styles.title}>{translations[lang].eToken}</span>
+              )}
+
+              <span className={styles.title}>{translations[lang].netAssetValue}</span>
+
+              <span className={styles.title}>{translations[lang].difference}</span>
+
+              {type.value == 'deposit' && (
+                <span className={styles.title}>{translations[lang].collateral}</span>
               )}
 
               <span className={styles.title} />
@@ -115,6 +122,7 @@ function SmartPoolUserStatus({ walletAddress, type }: Props) {
                       eTokenAmount={item.eTokens}
                       auditorContract={auditorContract}
                       type={type}
+                      market={item.market}
                     />
                   );
                 })
@@ -130,6 +138,7 @@ function SmartPoolUserStatus({ walletAddress, type }: Props) {
                       eTokenAmount={undefined}
                       auditorContract={undefined}
                       type={undefined}
+                      market={undefined}
                     />
                   );
                 })}
@@ -169,6 +178,7 @@ function SmartPoolUserStatus({ walletAddress, type }: Props) {
                     eTokenAmount={undefined}
                     auditorContract={undefined}
                     type={undefined}
+                    market={undefined}
                   />
                 );
               })}
