@@ -1,5 +1,5 @@
 import { formatFixed } from '@ethersproject/bignumber';
-import { BigNumber, ethers } from 'ethers';
+import { BigNumber } from 'ethers';
 import { WAD } from './fixedPointMathLib';
 
 function parseHealthFactor(debt: BigNumber, collateral: BigNumber) {
@@ -10,19 +10,19 @@ function parseHealthFactor(debt: BigNumber, collateral: BigNumber) {
   } else {
     const healthFactor = collateral.mul(WAD).div(debt);
 
-    const formatHealthFactor = Number(ethers.utils.formatUnits(healthFactor, 18));
+    const formatedHealthFactor = Number(formatFixed(healthFactor, 18));
 
     let decimals = 0;
 
-    if (formatHealthFactor < 10) {
+    if (formatedHealthFactor < 10) {
       decimals = 2;
     }
 
-    if (formatHealthFactor > 100) {
+    if (formatedHealthFactor > 100) {
       return '∞';
     }
 
-    return `${formatHealthFactor.toFixed(decimals)}x`;
+    return `${formatedHealthFactor.toFixed(decimals)}x`;
   }
 }
 export default parseHealthFactor;

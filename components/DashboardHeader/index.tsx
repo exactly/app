@@ -12,6 +12,7 @@ import AccountDataContext from 'contexts/AccountDataContext';
 import { LangKeys } from 'types/Lang';
 import { Dictionary } from 'types/Dictionary';
 import { DonutData } from 'types/DonutData';
+import { HealthFactor } from 'types/HealthFactor';
 
 import styles from './style.module.scss';
 
@@ -21,6 +22,7 @@ import parseHealthFactor from 'utils/parseHealthFactor';
 import getAssetColor from 'utils/getAssetColor';
 import formatNumber from 'utils/formatNumber';
 import getHealthFactorData from 'utils/getHealthFactorData';
+import { formatFixed, parseFixed } from '@ethersproject/bignumber';
 
 function DashboardHeader() {
   const { walletAddress } = useWeb3Context();
@@ -38,7 +40,7 @@ function DashboardHeader() {
   const [totalBorrow, setTotalBorrow] = useState<string | undefined>(undefined);
 
   const [rateComposition, setRateComposition] = useState<Dictionary<number> | undefined>(undefined);
-  const [healthFactor, setHealthFactor] = useState<Dictionary<number> | undefined>(undefined);
+  const [healthFactor, setHealthFactor] = useState<HealthFactor | undefined>(undefined);
 
   const notConnected = [
     {
@@ -181,16 +183,16 @@ function DashboardHeader() {
 
     const { collateral, debt } = getHealthFactorData(accountData);
 
-    if (collateral > 0 || debt > 0) {
+    if (collateral.isZero() || debt.isZero) {
       const healthFactorData = [
         {
           label: '',
-          value: collateral,
+          value: Number(formatFixed(collateral, 18)),
           color: '#008cf4'
         },
         {
           label: '',
-          value: debt,
+          value: Number(formatFixed(debt, 18)),
           color: '#34c53a'
         }
       ];
@@ -303,8 +305,14 @@ function DashboardHeader() {
                 {healthFactor && (
                   <p className={styles.informationValue}>
                     {(
-                      (healthFactor.collateral / (healthFactor.collateral + healthFactor.debt)) *
-                      100
+                      Number(
+                        formatFixed(
+                          healthFactor.collateral
+                            .mul(parseFixed('1', 18))
+                            .div(healthFactor.collateral.add(healthFactor.debt)),
+                          18
+                        )
+                      ) * 100
                     ).toFixed(2)}
                     %
                   </p>
@@ -318,8 +326,14 @@ function DashboardHeader() {
                 {healthFactor && (
                   <p className={styles.informationValue}>
                     {(
-                      (healthFactor.debt / (healthFactor.collateral + healthFactor.debt)) *
-                      100
+                      Number(
+                        formatFixed(
+                          healthFactor.debt
+                            .mul(parseFixed('1', 18))
+                            .div(healthFactor.collateral.add(healthFactor.debt)),
+                          18
+                        )
+                      ) * 100
                     ).toFixed(2)}
                     %
                   </p>

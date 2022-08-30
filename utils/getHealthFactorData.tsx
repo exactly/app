@@ -1,4 +1,5 @@
 import { BigNumber, ethers } from 'ethers';
+import { parseFixed } from '@ethersproject/bignumber';
 
 import { AccountData } from 'types/AccountData';
 import { FixedLenderAccountData } from 'types/FixedLenderAccountData';
@@ -15,28 +16,25 @@ function getHealthFactorData(accountData: AccountData) {
       let fixedLenderCollateral = ethers.constants.Zero;
       let fixedLenderDebt = ethers.constants.Zero;
       const decimals = fixedLender.decimals;
+      const decimalWAD = parseFixed('1', decimals); //WAD based on the decimals of the fixedLender
 
       const oracle = fixedLender.oraclePrice;
-      const collateralFactor = fixedLender.adjustFactor;
+      const adjustFactor = fixedLender.adjustFactor;
 
       //Collateral
       if (fixedLender.isCollateral) {
         const assets = fixedLender.floatingDepositAssets;
 
-        fixedLenderCollateral = fixedLenderCollateral.add(
-          assets.mul(oracle).div(ethers.utils.parseUnits('1', decimals))
-        );
+        fixedLenderCollateral = fixedLenderCollateral.add(assets.mul(oracle).div(decimalWAD));
       }
 
-      collateral = collateral.add(fixedLenderCollateral.mul(collateralFactor).div(WAD));
+      collateral = collateral.add(fixedLenderCollateral.mul(adjustFactor).div(WAD));
 
       //Floating Debt
       if (fixedLender.floatingBorrowAssets) {
         const borrowAssets = fixedLender.floatingBorrowAssets;
 
-        fixedLenderDebt = fixedLenderDebt
-          .add(borrowAssets.mul(oracle))
-          .div(ethers.utils.parseUnits('1', decimals));
+        fixedLenderDebt = fixedLenderDebt.add(borrowAssets.mul(oracle)).div(decimalWAD);
       }
 
       //Fixed Debt
@@ -50,9 +48,7 @@ function getHealthFactorData(accountData: AccountData) {
 
         const position = principal.add(fee);
 
-        fixedLenderDebt = fixedLenderDebt.add(
-          position.mul(oracle).div(ethers.utils.parseUnits('1', decimals))
-        );
+        fixedLenderDebt = fixedLenderDebt.add(position.mul(oracle).div(decimalWAD));
 
         if (maturityTimestamp.gt(currentTimestamp)) {
           const time = currentTimestamp.sub(maturityTimestamp);
@@ -61,7 +57,7 @@ function getHealthFactorData(accountData: AccountData) {
         }
       });
 
-      debt = debt.add(fixedLenderDebt.mul(WAD).div(collateralFactor));
+      debt = debt.add(fixedLenderDebt.mul(WAD).div(adjustFactor));
     });
 
     return { collateral, debt };

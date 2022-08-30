@@ -194,6 +194,14 @@ function DepositModalSP({ data, closeModal }: Props) {
   }
 
   function handleInputChange(e: ChangeEvent<HTMLInputElement>) {
+    if (!accountData || !symbol) return;
+    const decimals = accountData[symbol.toUpperCase()].decimals;
+
+    if (e.target.value.includes('.')) {
+      const regex = /[^,.]*$/g;
+      const inputDecimals = regex.exec(e.target.value)![0];
+      if (inputDecimals.length > decimals) return;
+    }
     if (step != 1 && walletBalance && e.target.valueAsNumber > parseFloat(walletBalance)) {
       setError({
         status: true,
@@ -388,13 +396,7 @@ function DepositModalSP({ data, closeModal }: Props) {
                 ) : (
                   <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
                 )}
-                <ModalRowBorrowLimit
-                  healthFactor={healthFactor}
-                  collateralFactor={collateralFactor}
-                  qty={qty}
-                  symbol={symbol!}
-                  operation="deposit"
-                />
+                <ModalRowBorrowLimit qty={qty} symbol={symbol!} operation="deposit" />
               </ModalExpansionPanelWrapper>
               <ModalStepper currentStep={step} totalSteps={3} />
               {error && error.component != 'gas' && <ModalError message={error.message} />}

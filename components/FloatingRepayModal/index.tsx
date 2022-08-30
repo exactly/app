@@ -302,13 +302,7 @@ function FloatingRepayModal({ data, closeModal }: Props) {
               ) : (
                 <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
               )}
-              <ModalRowBorrowLimit
-                healthFactor={healthFactor}
-                collateralFactor={collateralFactor}
-                qty={qty}
-                symbol={symbol!}
-                operation="repay"
-              />
+              <ModalRowBorrowLimit qty={qty} symbol={symbol!} operation="repay" />
               {/* </ModalExpansionPanelWrapper> */}
 
               {error && error.component != 'gas' && <ModalError message={error.message} />}

@@ -25,6 +25,7 @@ export type FixedLenderAccountData = {
   oraclePrice: BigNumber;
   penaltyRate: BigNumber;
   adjustFactor: BigNumber;
+  maxBorrowAssets: BigNumber;
   maxFuturePools: number;
   fixedPools: Array<FixedPool>;
   floatingBackupBorrowed: BigNumber;

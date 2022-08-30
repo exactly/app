@@ -36,6 +36,7 @@ import { useWeb3Context } from 'contexts/Web3Context';
 import FixedLenderContext from 'contexts/FixedLenderContext';
 import PreviewerContext from 'contexts/PreviewerContext';
 import ModalStatusContext from 'contexts/ModalStatusContext';
+import AccountDataContext from 'contexts/AccountDataContext';
 
 import decimals from 'config/decimals.json';
 import numbers from 'config/numbers.json';
@@ -58,6 +59,7 @@ function WithdrawModalMP({ data, closeModal }: Props) {
   const fixedLenderData = useContext(FixedLenderContext);
   const previewerData = useContext(PreviewerContext);
   const { minimized, setMinimized } = useContext(ModalStatusContext);
+  const { accountData } = useContext(AccountDataContext);
 
   const parsedFee = ethers.utils.formatUnits(fee, decimals[symbol! as keyof Decimals]);
   const parsedAmount = ethers.utils.formatUnits(assets, decimals[symbol! as keyof Decimals]);
@@ -139,6 +141,15 @@ function WithdrawModalMP({ data, closeModal }: Props) {
   }
 
   function handleInputChange(e: ChangeEvent<HTMLInputElement>) {
+    if (!accountData || !symbol) return;
+    const decimals = accountData[symbol.toUpperCase()].decimals;
+
+    if (e.target.value.includes('.')) {
+      const regex = /[^,.]*$/g;
+      const inputDecimals = regex.exec(e.target.value)![0];
+      if (inputDecimals.length > decimals) return;
+    }
+
     if (e.target.valueAsNumber > parseFloat(parsedAmount)) {
       setError({
         status: true,
