@@ -148,7 +148,6 @@ function Item({
           subgraphUrl,
           getSmartPoolBorrowsAndRepays(walletAddress, market)
         );
-        console.log();
 
         smartPoolBorrowsAndRepays.borrows.forEach((borrow: any) => {
           totalIncremental = totalIncremental.add(parseFixed(borrow.assets));
