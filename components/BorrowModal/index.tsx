@@ -295,7 +295,7 @@ function BorrowModal({ data, editable, closeModal }: Props) {
         borrow = await ETHrouter?.borrowAtMaturityETH(
           date?.value ?? maturity,
           qty!,
-          maxAmount.toString()
+          maxAmount.toFixed(18)
         );
       } else {
         const gasLimit = await getGasLimit(qty, maxAmount.toFixed(decimals));
@@ -325,7 +325,7 @@ function BorrowModal({ data, editable, closeModal }: Props) {
         setTx({ status: 'error', hash: txReceipt?.transactionHash });
       }
     } catch (e: any) {
-      console.log(e);
+      console.log(e, 1234);
       setLoading(false);
 
       const isDenied = e?.message?.includes('User denied');
