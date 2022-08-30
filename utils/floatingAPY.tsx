@@ -8,32 +8,29 @@ const min = (a: bigint, b: bigint) => (a < b ? a : b);
 const max = (a: bigint, b: bigint) => (a > b ? a : b);
 
 const floatingRate = (
-  { curveA, curveB, maxUtilization }: IRMParameters,
+  { floatingCurveA, floatingCurveB, floatingMaxUtilization }: InterestRateModel,
   utilizationBefore: bigint,
   utilizationAfter: bigint
 ) =>
-  (BigInt(utilizationAfter) - BigInt(utilizationBefore) < 2_500_000_000n
-    ? (BigInt(curveA) * WAD) / (BigInt(maxUtilization) - BigInt(utilizationBefore))
-    : (BigInt(curveA) *
+  (utilizationAfter - utilizationBefore < 2_500_000_000n
+    ? (BigInt(floatingCurveA) * WAD) / (BigInt(floatingMaxUtilization) - utilizationBefore)
+    : (BigInt(floatingCurveA) *
         lnWad(
-          ((BigInt(maxUtilization) - BigInt(utilizationBefore)) * WAD) /
-            (BigInt(maxUtilization) - BigInt(utilizationAfter))
+          ((BigInt(floatingMaxUtilization) - utilizationBefore) * WAD) /
+            (BigInt(floatingMaxUtilization) - utilizationAfter)
         )) /
-      (BigInt(utilizationAfter) - BigInt(utilizationBefore))) + BigInt(curveB);
+      (utilizationAfter - utilizationBefore)) + BigInt(floatingCurveB);
 
 export const totalFloatingBorrowAssets = (
   timestamp: number,
   { floatingAssets, floatingDebt }: MarketState,
   { timestamp: debtUpdate, utilization }: FloatingDebtState,
-  floatingParameters: IRMParameters
+  interestRateModel: InterestRateModel
 ) => {
-  const { fullUtilization } = floatingParameters;
   const newUtilization =
-    BigInt(floatingAssets) > 0n
-      ? (BigInt(floatingDebt) * WAD) / ((BigInt(floatingAssets) * WAD) / BigInt(fullUtilization))
-      : 0n;
+    BigInt(floatingAssets) > 0n ? (BigInt(floatingDebt) * WAD) / BigInt(floatingAssets) : 0n;
   const borrowRate = floatingRate(
-    floatingParameters,
+    interestRateModel,
     min(BigInt(utilization), newUtilization),
     max(BigInt(utilization), newUtilization)
   );
@@ -50,7 +47,7 @@ export const totalAssets = (
   maturities: FixedPool[],
   earningsAccumulatorSmoothFactor: string,
   floatingDebtState: FloatingDebtState,
-  floatingParameters: IRMParameters,
+  interestRateModel: InterestRateModel,
   treasuryFeeRate: string
 ) => {
   const { floatingAssets, floatingDebt, earningsAccumulator } = marketState;
@@ -70,7 +67,7 @@ export const totalAssets = (
       (BigInt(earningsAccumulator) * elapsed) /
         (elapsed +
           (BigInt(earningsAccumulatorSmoothFactor) * BigInt(maturities.length * INTERVAL)) / WAD)) +
-    ((totalFloatingBorrowAssets(timestamp, marketState, floatingDebtState, floatingParameters) -
+    ((totalFloatingBorrowAssets(timestamp, marketState, floatingDebtState, interestRateModel) -
       BigInt(floatingDebt)) *
       (WAD - BigInt(treasuryFeeRate))) /
       WAD
@@ -114,9 +111,8 @@ export interface FixedPool extends State {
   unassignedEarnings: string;
 }
 
-export interface IRMParameters {
-  curveA: string;
-  curveB: string;
-  maxUtilization: string;
-  fullUtilization: string;
+export interface InterestRateModel {
+  floatingCurveA: string;
+  floatingCurveB: string;
+  floatingMaxUtilization: string;
 }

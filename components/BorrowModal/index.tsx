@@ -82,7 +82,6 @@ function BorrowModal({ data, editable, closeModal }: Props) {
   const [editSlippage, setEditSlippage] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [healthFactor, setHealthFactor] = useState<HealthFactor | undefined>(undefined);
-  const [collateralFactor, setCollateralFactor] = useState<number | undefined>(undefined);
   const [needsApproval, setNeedsApproval] = useState<boolean>(false);
   const [poolLiquidity, setPoolLiquidity] = useState<number | undefined>(undefined);
   const [utilizationRate, setUtilizationRate] = useState<Dictionary<string>>();
@@ -180,7 +179,7 @@ function BorrowModal({ data, editable, closeModal }: Props) {
   }
 
   async function onMax() {
-    if (!accountData || !healthFactor || !collateralFactor) return;
+    if (!accountData || !healthFactor) return;
 
     const decimals = accountData[symbol.toUpperCase()].decimals;
     const adjustFactor = accountData[symbol.toUpperCase()].adjustFactor;
@@ -220,14 +219,14 @@ function BorrowModal({ data, editable, closeModal }: Props) {
       if (inputDecimals.length > decimals) return;
     }
 
+    setQty(e.target.value);
+
     if (maxBorrowAssets.lt(parseFixed(e.target.value || '0', decimals))) {
       return setError({
         status: true,
         message: translations[lang].borrowLimit
       });
     }
-
-    setQty(e.target.value);
 
     if (poolLiquidity && poolLiquidity < e.target.valueAsNumber) {
       return setError({
@@ -444,13 +443,6 @@ function BorrowModal({ data, editable, closeModal }: Props) {
 
   function getHealthFactor(healthFactor: HealthFactor) {
     setHealthFactor(healthFactor);
-
-    if (accountData && symbol) {
-      const collateralFactor = ethers.utils.formatEther(
-        accountData[symbol.toUpperCase()]?.adjustFactor
-      );
-      setCollateralFactor(parseFloat(collateralFactor));
-    }
   }
 
   async function getFixedLenderContract() {

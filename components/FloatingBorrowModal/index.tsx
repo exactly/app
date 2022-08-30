@@ -69,7 +69,6 @@ function FloatingBorrowModal({ data, editable, closeModal }: Props) {
   const [tx, setTx] = useState<Transaction | undefined>(undefined);
   const [loading, setLoading] = useState<boolean>(false);
   const [healthFactor, setHealthFactor] = useState<HealthFactor | undefined>(undefined);
-  const [collateralFactor, setCollateralFactor] = useState<number | undefined>(undefined);
   const [needsApproval, setNeedsApproval] = useState<boolean>(false);
   const [liquidity, setLiquidity] = useState<BigNumber | undefined>(undefined);
 
@@ -153,7 +152,7 @@ function FloatingBorrowModal({ data, editable, closeModal }: Props) {
   }
 
   async function onMax() {
-    if (!accountData || !healthFactor || !collateralFactor) return;
+    if (!accountData || !healthFactor) return;
 
     const decimals = accountData[symbol.toUpperCase()].decimals;
     const adjustFactor = accountData[symbol.toUpperCase()].adjustFactor;
@@ -231,7 +230,7 @@ function FloatingBorrowModal({ data, editable, closeModal }: Props) {
         const gasLimit = await getGasLimit(qty);
 
         borrow = await fixedLenderWithSigner?.borrow(
-          ethers.utils.parseUnits(qty!, decimals).sub(10),
+          ethers.utils.parseUnits(qty!, decimals),
           walletAddress,
           walletAddress,
           {
@@ -352,13 +351,6 @@ function FloatingBorrowModal({ data, editable, closeModal }: Props) {
 
   function getHealthFactor(healthFactor: HealthFactor) {
     setHealthFactor(healthFactor);
-
-    if (accountData && symbol) {
-      const collateralFactor = ethers.utils.formatEther(
-        accountData[symbol.toUpperCase()]?.adjustFactor
-      );
-      setCollateralFactor(parseFloat(collateralFactor));
-    }
   }
 
   async function getFixedLenderContract() {

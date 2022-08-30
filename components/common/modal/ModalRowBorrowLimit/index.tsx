@@ -30,8 +30,6 @@ function ModalRowBorrowLimit({ qty, symbol, operation, line }: Props) {
   const [beforeBorrowLimit, setBeforeBorrowLimit] = useState<string | undefined>(undefined);
   const [afterBorrowLimit, setAfterBorrowLimit] = useState<string | undefined>(undefined);
 
-  const WAD = parseFixed('1', 18);
-
   useEffect(() => {
     getBorrowLimits();
   }, [symbol, newQty]);
@@ -54,6 +52,7 @@ function ModalRowBorrowLimit({ qty, symbol, operation, line }: Props) {
     const maxBorrowAssets = accountData[symbol.toUpperCase()].maxBorrowAssets;
     const adjustFactor = accountData[symbol.toUpperCase()].adjustFactor;
     const isCollateral = accountData[symbol.toUpperCase()].isCollateral;
+    const WAD = parseFixed('1', 18);
 
     const beforeBorrowLimitUSD = maxBorrowAssets.mul(oraclePrice).div(parseFixed('1', decimals));
     const newQtyUsd = newQty.mul(oraclePrice).div(parseFixed('1', decimals));

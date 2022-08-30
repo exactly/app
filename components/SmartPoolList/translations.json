@@ -3,7 +3,7 @@
     "asset": "Asset",
     "totalDeposits": "Total Deposits",
     "smartPool": "Variable Rate Pools",
-    "lastAPY": "APY (last 24hs)",
+    "lastAPY": "APY (last hour)",
     "totalBorrows": "Total Borrows"
   },
   "es": {}

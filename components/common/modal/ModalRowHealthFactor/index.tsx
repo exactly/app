@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 import { parseFixed } from '@ethersproject/bignumber';
 import Image from 'next/image';
 import Skeleton from 'react-loading-skeleton';
@@ -42,10 +42,10 @@ function ModalRowHealthFactor({ qty, symbol, operation, healthFactorCallback }: 
     getAmount();
   }, [symbol, qty]);
 
-  useEffect(() => {
+  useMemo(() => {
     getHealthFactor();
     calculateAfterHealthFactor();
-  }, [symbol, newQty]);
+  }, [symbol, newQty, accountData, healthFactorCallback]);
 
   function getAmount() {
     if (!accountData || !symbol || !qty) return;
@@ -61,12 +61,14 @@ function ModalRowHealthFactor({ qty, symbol, operation, healthFactorCallback }: 
 
     const healthFactor = getHealthFactorData(accountData);
 
-    setHealthFactor(healthFactor);
+    if (healthFactor) {
+      setHealthFactor(healthFactor);
 
-    setBeforeHealthFactor(parseHealthFactor(healthFactor!.debt, healthFactor!.collateral));
-    setAfterHealthFactor(parseHealthFactor(healthFactor!.debt, healthFactor!.collateral));
+      setBeforeHealthFactor(parseHealthFactor(healthFactor.debt, healthFactor.collateral));
+      setAfterHealthFactor(parseHealthFactor(healthFactor.debt, healthFactor.collateral));
+    }
 
-    if (healthFactorCallback) healthFactorCallback(healthFactor);
+    if (healthFactorCallback && healthFactor) healthFactorCallback(healthFactor);
   }
 
   function calculateAfterHealthFactor() {
