@@ -24,9 +24,8 @@ function ModalTxCost({ gas }: Props) {
 
   const [exchangeRate, setExchangeRate] = useState(1);
 
-  const eth = gas?.eth && `${gas.eth} ETH /`;
+  const eth = gas?.eth && `${gas.eth} ETH`;
   const usd = gas && `$ ${(parseFloat(eth!) * exchangeRate).toFixed(2)} /`;
-  const gwei = gas?.gwei && `${gas.gwei} GWEI`;
 
   useEffect(() => {
     getRate();
@@ -42,7 +41,7 @@ function ModalTxCost({ gas }: Props) {
   return (
     <section className={styles.container}>
       <p>{translations[lang].aproxTxCost}</p>
-      <p className={styles.gasCost}>{gas ? `${usd} ${eth} ${gwei}` : <Skeleton />}</p>
+      <p className={styles.gasCost}>{gas ? `${usd} ${eth}` : <Skeleton />}</p>
     </section>
   );
 }

@@ -40,6 +40,8 @@ import ModalStatusContext from 'contexts/ModalStatusContext';
 
 import keys from './translations.json';
 
+import numbers from 'config/numbers.json';
+
 type Props = {
   data: Borrow | Deposit;
   editable?: boolean;
@@ -226,10 +228,17 @@ function FloatingBorrowModal({ data, editable, closeModal }: Props) {
 
         borrow = await ETHrouter?.borrowETH(qty.toString());
       } else {
+        const gasLimit = await getGasLimit(qty);
+
         borrow = await fixedLenderWithSigner?.borrow(
           ethers.utils.parseUnits(qty!, decimals).sub(10),
           walletAddress,
-          walletAddress
+          walletAddress,
+          {
+            gasLimit: gasLimit
+              ? Math.ceil(Number(formatFixed(gasLimit)) * numbers.gasLimitMultiplier)
+              : undefined
+          }
         );
       }
 
@@ -309,21 +318,14 @@ function FloatingBorrowModal({ data, editable, closeModal }: Props) {
     if (symbol == 'WETH' || !accountData) return;
 
     try {
-      const gasPriceInGwei = await fixedLenderWithSigner?.provider.getGasPrice();
-      const decimals = accountData[symbol].decimals;
+      const gasPrice = (await fixedLenderWithSigner?.provider.getFeeData())?.maxFeePerGas;
 
-      const estimatedGasCost = await fixedLenderWithSigner?.estimateGas.borrow(
-        ethers.utils.parseUnits('1', decimals),
-        walletAddress,
-        walletAddress
-      );
+      const gasLimit = await getGasLimit('1');
 
-      if (gasPriceInGwei && estimatedGasCost) {
-        const gwei = await ethers.utils.formatUnits(gasPriceInGwei, 'gwei');
-        const gasCost = await ethers.utils.formatUnits(estimatedGasCost, 'gwei');
-        const eth = parseFloat(gwei) * parseFloat(gasCost);
+      if (gasPrice && gasLimit) {
+        const total = formatFixed(gasPrice.mul(gasLimit), 18);
 
-        setGas({ eth: eth.toFixed(8), gwei: parseFloat(gwei).toFixed(1) });
+        setGas({ eth: Number(total).toFixed(6) });
       }
     } catch (e) {
       console.log(e);
@@ -332,6 +334,20 @@ function FloatingBorrowModal({ data, editable, closeModal }: Props) {
         component: 'gas'
       });
     }
+  }
+
+  async function getGasLimit(qty: string) {
+    if (!accountData) return;
+
+    const decimals = accountData[symbol].decimals;
+
+    const gasLimit = await fixedLenderWithSigner?.estimateGas.borrow(
+      ethers.utils.parseUnits(qty, decimals),
+      walletAddress,
+      walletAddress
+    );
+
+    return gasLimit;
   }
 
   function getHealthFactor(healthFactor: HealthFactor) {

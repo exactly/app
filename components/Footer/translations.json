@@ -1,9 +1,12 @@
 {
   "en": {
-    "blog": "Blog",
+    "brand": "Brand Assets",
+    "jobs": "Jobs",
     "contact": "Contact",
-    "careers": "Careers",
-    "mediaKit": "Media Kit"
+    "docs": "Docs",
+    "whitePaper": "White Paper",
+    "blog": "Blog",
+    "tos": "Terms of Service"
   },
   "es": {}
 }
