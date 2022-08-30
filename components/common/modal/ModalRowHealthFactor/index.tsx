@@ -42,10 +42,10 @@ function ModalRowHealthFactor({ qty, symbol, operation, healthFactorCallback }: 
     getAmount();
   }, [symbol, qty]);
 
-  useMemo(() => {
+  useEffect(() => {
     getHealthFactor();
     calculateAfterHealthFactor();
-  }, [symbol, newQty, accountData, healthFactorCallback]);
+  }, [symbol, newQty, accountData]);
 
   function getAmount() {
     if (!accountData || !symbol || !qty) return;
