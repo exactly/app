@@ -1,4 +1,5 @@
 import { useContext } from 'react';
+import Image from 'next/image';
 
 import styles from './style.module.scss';
 
@@ -47,7 +48,9 @@ function ModalGif({ tx, tryAgain }: Props) {
   return (
     <div className={styles.container}>
       <div className={styles.mediaContainer}>
-        <img src="/img/icons/circles.svg" alt="circles" className={styles.img} />
+        <div className={styles.imageContainer}>
+          <Image src="/img/icons/circles.svg" alt="circles" width={140} height={134} />
+        </div>
         <video
           autoPlay
           loop

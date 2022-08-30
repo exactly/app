@@ -1,5 +1,6 @@
 import { useContext, useState } from 'react';
 import { ethers } from 'ethers';
+import Image from 'next/image';
 
 import ModalWrapper from 'components/common/modal/ModalWrapper';
 import Overlay from 'components/Overlay';
@@ -128,7 +129,9 @@ function FaucetModal({ closeModal }: Props) {
               return (
                 <div className={styles.assetContainer} key={asset}>
                   <p className={styles.asset}>
-                    <img src={`/img/assets/weth.png`} alt={asset} className={styles.assetImage} />
+                    <div className={styles.assetImage}>
+                      <Image src={`/img/assets/weth.png`} alt={asset} layout="fill" />
+                    </div>
                     {asset}
                   </p>
                   <div className={styles.buttonContainer}>
@@ -142,11 +145,13 @@ function FaucetModal({ closeModal }: Props) {
             return (
               <div className={styles.assetContainer} key={asset}>
                 <p className={styles.asset}>
-                  <img
-                    src={`/img/assets/${asset.toLowerCase()}.png`}
-                    alt={asset}
-                    className={styles.assetImage}
-                  />
+                  <div className={styles.assetImage}>
+                    <Image
+                      src={`/img/assets/${asset.toLowerCase()}.png`}
+                      alt={asset}
+                      layout="fill"
+                    />
+                  </div>
                   {asset}
                 </p>
                 <div className={styles.buttonContainer}>

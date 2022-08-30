@@ -58,16 +58,7 @@
       gap: var(--u);
       font-size: var(--font-18);
       font-weight: 600;
-      width: 30%;
       margin: 0;
-
-      .assetImage {
-        width: 25px;
-      }
-    }
-
-    .balance {
-      width: 30%;
     }
 
     .buttonContainer {
@@ -75,4 +66,9 @@
       height: 30px;
     }
   }
+}
+.assetImage {
+  width: 40px;
+  height: 40px;
+  position: relative;
 }

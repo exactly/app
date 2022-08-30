@@ -1,4 +1,6 @@
 import { ChangeEventHandler } from 'react';
+import Image from 'next/image';
+
 import styles from './style.module.scss';
 
 type Props = {
@@ -60,12 +62,15 @@ function ModalRowEditable({
             {symbol && <p className={styles.symbol}>{symbol}</p>}
           </div>
         )}
-        <img
-          className={styles.arrow}
-          src={`/img/icons/${editable ? 'arrowUp' : 'arrowDown'}.svg`}
-          alt="arrow"
-          onClick={onClick}
-        />
+        <div className={styles.arrow}>
+          <Image
+            src={`/img/icons/${editable ? 'arrowUp' : 'arrowDown'}.svg`}
+            alt="arrow"
+            onClick={onClick}
+            width={12}
+            height={7}
+          />
+        </div>
       </section>
     </section>
   );
