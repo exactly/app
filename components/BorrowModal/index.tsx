@@ -36,6 +36,7 @@ import { getUnderlyingData, getSymbol } from 'utils/utils';
 import parseTimestamp from 'utils/parseTimestamp';
 import handleEth from 'utils/handleEth';
 import getOneDollar from 'utils/getOneDollar';
+import getBeforeBorrowLimit from 'utils/getBeforeBorrowLimit';
 
 import styles from './style.module.scss';
 
@@ -185,21 +186,31 @@ function BorrowModal({ data, editable, closeModal }: Props) {
     const adjustFactor = accountData[symbol.toUpperCase()].adjustFactor;
     const oraclePrice = accountData[symbol.toUpperCase()].oraclePrice;
 
-    const col = healthFactor.collateral;
+    let col = healthFactor.collateral;
     const hf = parseFixed('1.05', 18);
-    const wad = parseFixed('1', 18);
+    const WAD = parseFixed('1', 18);
+
+    const hasDepositedToFloatingPool =
+      Number(formatFixed(accountData![symbol].floatingDepositAssets, decimals)) > 0;
+
+    if (!accountData![symbol.toUpperCase()].isCollateral && hasDepositedToFloatingPool) {
+      col = col.add(
+        accountData![symbol].floatingDepositAssets.mul(accountData![symbol].adjustFactor).div(WAD)
+      );
+    }
 
     const debt = healthFactor.debt;
+
     const safeMaximumBorrow = Number(
       formatFixed(
         col
-          .sub(hf.mul(debt).div(wad))
-          .mul(wad)
+          .sub(hf.mul(debt).div(WAD))
+          .mul(WAD)
           .div(hf)
-          .mul(wad)
+          .mul(WAD)
           .div(oraclePrice)
           .mul(adjustFactor)
-          .div(wad),
+          .div(WAD),
         18
       )
     ).toFixed(decimals);
@@ -211,7 +222,15 @@ function BorrowModal({ data, editable, closeModal }: Props) {
   function handleInputChange(e: ChangeEvent<HTMLInputElement>) {
     if (!accountData) return;
     const decimals = accountData[symbol.toUpperCase()].decimals;
-    const maxBorrowAssets = accountData[symbol.toUpperCase()].maxBorrowAssets;
+    const oraclePrice = accountData[symbol.toUpperCase()].oraclePrice;
+
+    const maxBorrowAssets = getBeforeBorrowLimit(
+      accountData,
+      symbol,
+      oraclePrice,
+      decimals,
+      'borrow'
+    );
 
     if (e.target.value.includes('.')) {
       const regex = /[^,.]*$/g;
@@ -221,7 +240,15 @@ function BorrowModal({ data, editable, closeModal }: Props) {
 
     setQty(e.target.value);
 
-    if (maxBorrowAssets.lt(parseFixed(e.target.value || '0', decimals))) {
+    const WAD = parseFixed('1', 18);
+
+    if (
+      maxBorrowAssets.lt(
+        parseFixed(e.target.value || '0', decimals)
+          .mul(accountData[symbol].oraclePrice)
+          .div(WAD)
+      )
+    ) {
       return setError({
         status: true,
         message: translations[lang].borrowLimit
@@ -471,7 +498,7 @@ function BorrowModal({ data, editable, closeModal }: Props) {
     });
 
     const hasDepositedToFloatingPool =
-      parseFloat(ethers.utils.formatUnits(accountData[symbol].floatingBorrowAssets, decimals)) > 0;
+      Number(formatFixed(accountData[symbol].floatingDepositAssets, decimals)) > 0;
 
     if (isCollateral || hasDepositedToFloatingPool) {
       return;
