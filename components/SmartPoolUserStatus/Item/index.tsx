@@ -72,7 +72,7 @@ function Item({
 
   useEffect(() => {
     getOriginalAmount();
-  }, [accountData, walletAddress, type, symbol]);
+  }, [accountData, walletAddress, type, symbol, borrowedAmount, depositAmount]);
 
   useEffect(() => {
     if (accountData) {
@@ -115,6 +115,7 @@ function Item({
 
   async function getOriginalAmount() {
     if (!network || !walletAddress || !accountData || !symbol || !market || !type) return;
+
     setOriginalAmount(undefined);
     setDifference(undefined);
 
