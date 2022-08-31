@@ -36,7 +36,7 @@ function Item({ market, type, fixedMarketData }: Props) {
   const { date } = useContext(AddressContext);
   const { walletAddress, connect, network } = useWeb3Context();
 
-  const { setOpen, setModalContent } = useContext(ModalStatusContext);
+  const { setOpen } = useContext(ModalStatusContext);
   const { accountData } = useContext(AccountDataContext);
 
   const lang: string = useContext(LangContext);
@@ -55,7 +55,6 @@ function Item({ market, type, fixedMarketData }: Props) {
     if (!walletAddress && connect) return connect();
 
     setOpen(true);
-    setModalContent({ ...market, type });
   }
 
   async function getMarketData() {

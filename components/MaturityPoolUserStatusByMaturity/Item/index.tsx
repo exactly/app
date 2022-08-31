@@ -49,7 +49,7 @@ function Item({ type, amount, fee, maturityDate, symbol, market, decimals, data 
   const { network, walletAddress } = useWeb3Context();
 
   const { accountData } = useContext(AccountDataContext);
-  const { setOpen, setModalContent } = useContext(ModalStatusContext);
+  const { setOpen } = useContext(ModalStatusContext);
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
@@ -194,7 +194,6 @@ function Item({ type, amount, fee, maturityDate, symbol, market, decimals, data 
               className={type.value == 'borrow' ? 'quaternary' : 'tertiary'}
               onClick={() => {
                 setOpen(true);
-                setModalContent({ ...data, type: type.value == 'borrow' ? 'repay' : 'withdraw' });
               }}
             />
           </div>

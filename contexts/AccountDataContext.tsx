@@ -1,8 +1,10 @@
-import { createContext, FC, useEffect, useState } from 'react';
+import { createContext, FC, useContext, useEffect, useState } from 'react';
 
 import { AccountData } from 'types/AccountData';
 import { FixedLenderAccountData } from 'types/FixedLenderAccountData';
+
 import { useWeb3Context } from './Web3Context';
+import ContractsContext from './ContractsContext';
 
 import { getContractData } from 'utils/contracts';
 
@@ -23,10 +25,12 @@ const AccountDataContext = createContext(defaultValues);
 export const AccountDataProvider: FC = ({ children }) => {
   const [accountData, setAccountData] = useState<AccountData | undefined>(undefined);
   const { network, walletAddress } = useWeb3Context();
+  const { createInstance } = useContext(ContractsContext);
 
   const { Previewer } = getABI(network?.name);
 
-  const previewerContract = getContractData(network?.name!, Previewer.address!, Previewer.abi!);
+  // const previewerContract = getContractData(network?.name!, Previewer.address!, Previewer.abi!);
+  const previewerContract = createInstance(Previewer.address!, Previewer.abi!, 'previewer');
 
   useEffect(() => {
     getAccountData();

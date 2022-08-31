@@ -15,6 +15,7 @@ import { FixedLenderProvider } from 'contexts/FixedLenderContext';
 import { AuditorProvider } from 'contexts/AuditorContext';
 import { SkeletonTheme } from 'react-loading-skeleton';
 import { ThemeProvider } from 'contexts/ThemeContext';
+import { ContractsProvider } from 'contexts/ContractsContext';
 
 function MyApp({ Component, pageProps }: AppProps) {
   const props = { ...pageProps };
@@ -43,22 +44,24 @@ function MyApp({ Component, pageProps }: AppProps) {
         <LangProvider value={'en'}>
           <Web3ContextProvider>
             <PreviewerProvider>
-              <AccountDataProvider>
-                <AuditorProvider>
-                  <FixedLenderProvider>
-                    <AddressProvider>
-                      <ModalStatusProvider>
-                        <SkeletonTheme
-                          baseColor="var(--skeleton-base)"
-                          highlightColor="var(--skeleton-highlight)"
-                        >
-                          <Component {...props} />
-                        </SkeletonTheme>
-                      </ModalStatusProvider>
-                    </AddressProvider>
-                  </FixedLenderProvider>
-                </AuditorProvider>
-              </AccountDataProvider>
+              <ContractsProvider>
+                <AccountDataProvider>
+                  <AuditorProvider>
+                    <FixedLenderProvider>
+                      <AddressProvider>
+                        <ModalStatusProvider>
+                          <SkeletonTheme
+                            baseColor="var(--skeleton-base)"
+                            highlightColor="var(--skeleton-highlight)"
+                          >
+                            <Component {...props} />
+                          </SkeletonTheme>
+                        </ModalStatusProvider>
+                      </AddressProvider>
+                    </FixedLenderProvider>
+                  </AuditorProvider>
+                </AccountDataProvider>
+              </ContractsProvider>
             </PreviewerProvider>
           </Web3ContextProvider>
         </LangProvider>

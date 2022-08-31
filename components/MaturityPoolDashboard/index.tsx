@@ -29,7 +29,7 @@ function MaturityPoolDashboard({ tab }: Props) {
   const translations: { [key: string]: LangKeys } = keys;
 
   const { accountData } = useContext(AccountDataContext);
-  const { setModalContent, setOpen } = useContext(ModalStatusContext);
+  const { setOpen } = useContext(ModalStatusContext);
 
   const [defaultMaturity, setDefaultMaturity] = useState<string>();
   const [maturities, setMaturities] = useState<any>(undefined);
@@ -129,14 +129,6 @@ function MaturityPoolDashboard({ tab }: Props) {
               className={tab.value == 'borrow' ? 'secondary' : 'primary'}
               onClick={() => {
                 setOpen(true);
-                setModalContent({
-                  assets: '0',
-                  fee: '0',
-                  market: accountData.DAI.market!,
-                  maturity: defaultMaturity!,
-                  type: tab.value,
-                  editable: true
-                });
               }}
             />
           )}

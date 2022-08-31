@@ -9,7 +9,7 @@ import SmartPoolInfo from 'components/SmartPoolInfo';
 import MobileNavbar from 'components/MobileNavbar';
 import Paginator from 'components/Paginator';
 import Footer from 'components/Footer';
-import ModalsContainer from 'components/ModalsContainer';
+import OperationsModals from 'components/OperationsModal';
 
 import { LangKeys } from 'types/Lang';
 import { Maturity } from 'types/Maturity';
@@ -75,11 +75,10 @@ const Asset: NextPage<Props> = ({ symbol = 'DAI' }) => {
 
   return (
     <>
+      <OperationsModals />
       <MobileNavbar />
       <Navbar />
       <CurrentNetwork />
-
-      <ModalsContainer />
 
       <section className={style.container}>
         <div className={style.smartPoolContainer}>

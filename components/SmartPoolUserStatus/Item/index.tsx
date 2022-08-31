@@ -60,7 +60,7 @@ function Item({
   const fixedLender = useContext(FixedLenderContext);
   const lang: string = useContext(LangContext);
   const { accountData } = useContext(AccountDataContext);
-  const { setModalContent, setOpen } = useContext(ModalStatusContext);
+  const { setOpen } = useContext(ModalStatusContext);
 
   const translations: { [key: string]: LangKeys } = keys;
 
@@ -336,11 +336,6 @@ function Item({
               className={type.value == 'deposit' ? 'primary' : 'secondary'}
               onClick={() => {
                 setOpen(true);
-                setModalContent({
-                  market: getFixedLenderData().address,
-                  symbol,
-                  type: type.value == 'deposit' ? 'smartDeposit' : 'floatingBorrow'
-                });
               }}
             />
           )) || <Skeleton height={40} />}
@@ -355,11 +350,6 @@ function Item({
               className={type.value == 'deposit' ? 'tertiary' : 'quaternary'}
               onClick={() => {
                 setOpen(true);
-                setModalContent({
-                  assets: type.value == 'deposit' ? depositAmount : borrowedAmount,
-                  symbol,
-                  type: type.value == 'deposit' ? 'withdrawSP' : 'floatingRepay'
-                });
               }}
             />
           )) || <Skeleton height={40} />}

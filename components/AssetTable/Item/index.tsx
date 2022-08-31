@@ -32,7 +32,7 @@ type Props = {
 
 function Item({ symbol, maturity, fixedMarketData }: Props) {
   const { walletAddress, connect, network } = useWeb3Context();
-  const { setOpen, setModalContent } = useContext(ModalStatusContext);
+  const { setOpen } = useContext(ModalStatusContext);
   const { setDate } = useContext(AddressContext);
   const { accountData } = useContext(AccountDataContext);
 
@@ -124,7 +124,6 @@ function Item({ symbol, maturity, fixedMarketData }: Props) {
     };
 
     setDate(maturity);
-    setModalContent(market);
   }
 
   return (

@@ -37,7 +37,7 @@ function Item({ market, type }: Props) {
 
   const fixedLenderData = useContext(FixedLenderContext);
   const { accountData } = useContext(AccountDataContext);
-  const { setOpen, setModalContent } = useContext(ModalStatusContext);
+  const { setOpen } = useContext(ModalStatusContext);
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
@@ -70,7 +70,6 @@ function Item({ market, type }: Props) {
     if (!walletAddress && connect) return connect();
 
     setOpen(true);
-    setModalContent({ ...market, type: modal });
   }
 
   async function getRates() {

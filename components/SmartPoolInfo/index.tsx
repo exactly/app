@@ -27,7 +27,7 @@ function SmartPoolInfo({ symbol }: Props) {
   const { walletAddress, connect } = useWeb3Context();
 
   const { accountData } = useContext(AccountDataContext);
-  const { setOpen, setModalContent } = useContext(ModalStatusContext);
+  const { setOpen } = useContext(ModalStatusContext);
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
@@ -78,7 +78,6 @@ function SmartPoolInfo({ symbol }: Props) {
     };
 
     setOpen(true);
-    setModalContent(market);
   }
 
   return (

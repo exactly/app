@@ -1,0 +1,11 @@
+.modal {
+  position: fixed;
+  width: 50%;
+  height: fit-content;
+  left: 25%;
+  top: 20%;
+  background: var(--background);
+  box-shadow: var(--shadow-tables);
+  z-index: var(--layer-6);
+  display: flex;
+}
