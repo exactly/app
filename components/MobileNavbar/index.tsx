@@ -1,6 +1,7 @@
 import { useState, useContext } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import Image from 'next/image';
 
 import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
@@ -54,7 +55,15 @@ function MobileNavbar() {
       <nav className={styles.navBar} style={open ? { zIndex: 7 } : {}}>
         <div className={styles.wrapper}>
           <Link href="/markets">
-            <img src="/img/logo.png" alt="Exactly Logo" className={styles.logo} />
+            <div className={styles.logo}>
+              <Image
+                src="/img/logo.png"
+                alt="Exactly Logo"
+                layout="responsive"
+                width={5986}
+                height={1657}
+              />
+            </div>
           </Link>
           {connect && !walletAddress ? (
             <div className={styles.buttonContainer}>
@@ -74,18 +83,22 @@ function MobileNavbar() {
             )
           )}
           {!open ? (
-            <img
+            <Image
               src="/img/icons/hamburger.svg"
               alt="hamburger"
               onClick={handleMenu}
               className={styles.icon}
+              width={32}
+              height={24}
             />
           ) : (
-            <img
+            <Image
               src="/img/icons/close.svg"
               alt="close"
               onClick={handleMenu}
               className={styles.icon}
+              width={24}
+              height={24}
             />
           )}
         </div>
@@ -114,7 +127,7 @@ function MobileNavbar() {
           })}
           {walletAddress && (
             <li className={styles.disconnect} onClick={() => disconnect && disconnect()}>
-              <img src="/img/icons/power.svg" />
+              <Image src="/img/icons/power.svg" width={24} height={24} />
               {translations[lang].disconnect}
             </li>
           )}

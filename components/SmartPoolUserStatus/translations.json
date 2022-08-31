@@ -10,7 +10,9 @@
     "collateral": "Collateral",
     "walletBalance": "Wallet Balance",
     "noDepositsFound": "No deposits found",
-    "noBorrowsFound": "No borrows found"
+    "noBorrowsFound": "No borrows found",
+    "netAssetValue": "Net Asset Value",
+    "difference": "%"
   },
   "es": {}
 }

@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
 import { ethers } from 'ethers';
 import Skeleton from 'react-loading-skeleton';
+import Image from 'next/image';
 
 import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
@@ -88,10 +89,11 @@ function SmartPoolInfo({ symbol }: Props) {
       <ul className={styles.table}>
         <li className={styles.header}>
           <div className={styles.assetInfo}>
-            <img
-              className={styles.assetImage}
+            <Image
               src={`/img/assets/${symbol.toLowerCase()}.png`}
               alt={symbol}
+              width={40}
+              height={40}
             />
             <p className={styles.asset}>{parseSymbol(symbol)}</p>
           </div>

@@ -142,6 +142,15 @@ function WithdrawModalMP({ data, closeModal }: Props) {
   }
 
   function handleInputChange(e: ChangeEvent<HTMLInputElement>) {
+    if (!accountData || !symbol) return;
+    const decimals = accountData[symbol.toUpperCase()].decimals;
+
+    if (e.target.value.includes('.')) {
+      const regex = /[^,.]*$/g;
+      const inputDecimals = regex.exec(e.target.value)![0];
+      if (inputDecimals.length > decimals) return;
+    }
+
     if (e.target.valueAsNumber > parseFloat(parsedAmount)) {
       setError({
         status: true,

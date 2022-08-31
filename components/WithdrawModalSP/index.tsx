@@ -25,7 +25,6 @@ import { Gas } from 'types/Gas';
 import { Transaction } from 'types/Transaction';
 import { Decimals } from 'types/Decimals';
 import { Error } from 'types/Error';
-import { HealthFactor } from 'types/HealthFactor';
 
 import styles from './style.module.scss';
 
@@ -66,8 +65,6 @@ function WithdrawModalSP({ data, closeModal }: Props) {
   const [gas, setGas] = useState<Gas | undefined>();
   const [tx, setTx] = useState<Transaction | undefined>(undefined);
   const [loading, setLoading] = useState<boolean>(false);
-  const [healthFactor, setHealthFactor] = useState<HealthFactor | undefined>(undefined);
-  const [collateralFactor, setCollateralFactor] = useState<number | undefined>(undefined);
   const [error, setError] = useState<Error | undefined>(undefined);
   const [needsApproval, setNeedsApproval] = useState<boolean>(false);
 
@@ -114,6 +111,15 @@ function WithdrawModalSP({ data, closeModal }: Props) {
   }
 
   function handleInputChange(e: ChangeEvent<HTMLInputElement>) {
+    if (!accountData || !symbol) return;
+    const decimals = accountData[symbol.toUpperCase()].decimals;
+
+    if (e.target.value.includes('.')) {
+      const regex = /[^,.]*$/g;
+      const inputDecimals = regex.exec(e.target.value)![0];
+      if (inputDecimals.length > decimals) return;
+    }
+
     if (e.target.valueAsNumber > parseFloat(parsedAmount)) {
       setError({
         status: true,
@@ -235,17 +241,6 @@ function WithdrawModalSP({ data, closeModal }: Props) {
     return gasLimit;
   }
 
-  function getHealthFactor(healthFactor: HealthFactor) {
-    setHealthFactor(healthFactor);
-
-    if (accountData && symbol) {
-      const collateralFactor = ethers.utils.formatEther(
-        accountData[symbol.toUpperCase()]?.adjustFactor
-      );
-      setCollateralFactor(parseFloat(collateralFactor));
-    }
-  }
-
   async function approve() {
     if (symbol == 'WETH') {
       if (!web3Provider || !ETHrouter || !fixedLenderWithSigner) return;
@@ -310,22 +305,11 @@ function WithdrawModalSP({ data, closeModal }: Props) {
               <ModalRow text={translations[lang].exactlyBalance} value={formattedAmount} />
               <ModalExpansionPanelWrapper>
                 {symbol ? (
-                  <ModalRowHealthFactor
-                    qty={qty}
-                    symbol={symbol}
-                    operation="withdraw"
-                    healthFactorCallback={getHealthFactor}
-                  />
+                  <ModalRowHealthFactor qty={qty} symbol={symbol} operation="withdraw" />
                 ) : (
                   <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
                 )}
-                <ModalRowBorrowLimit
-                  healthFactor={healthFactor}
-                  collateralFactor={collateralFactor}
-                  qty={qty}
-                  symbol={symbol!}
-                  operation="withdraw"
-                />
+                <ModalRowBorrowLimit qty={qty} symbol={symbol!} operation="withdraw" />
               </ModalExpansionPanelWrapper>
 
               {error && error.component != 'gas' && <ModalError message={error.message} />}

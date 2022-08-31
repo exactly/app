@@ -1,5 +1,6 @@
 import { useContext } from 'react';
 import { useSpring, animated } from 'react-spring';
+import Image from 'next/image';
 
 import styles from './style.module.scss';
 
@@ -47,12 +48,15 @@ function ModalMinimized({ tx, handleMinimize }: Props) {
 
   return (
     <animated.section style={style} className={styles.container}>
-      <img
-        src="./img/icons/open.svg"
-        alt="open"
-        className={styles.open}
-        onClick={() => handleMinimize()}
-      />
+      <div className={styles.open}>
+        <Image
+          src="/img/icons/open.svg"
+          alt="open"
+          onClick={() => handleMinimize()}
+          width={16}
+          height={16}
+        />
+      </div>
       <h3 className={styles.title}>{options[tx.status].title}</h3>
       <div className={styles.loading}>
         {tx.status == 'success' ? (

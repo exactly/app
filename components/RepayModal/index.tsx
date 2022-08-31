@@ -26,7 +26,6 @@ import { Gas } from 'types/Gas';
 import { Transaction } from 'types/Transaction';
 import { Decimals } from 'types/Decimals';
 import { Error } from 'types/Error';
-import { HealthFactor } from 'types/HealthFactor';
 import { UnderlyingData } from 'types/Underlying';
 
 import parseTimestamp from 'utils/parseTimestamp';
@@ -79,8 +78,6 @@ function RepayModal({ data, closeModal }: Props) {
   const [tx, setTx] = useState<Transaction | undefined>(undefined);
   const [editSlippage, setEditSlippage] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
-  const [healthFactor, setHealthFactor] = useState<HealthFactor | undefined>(undefined);
-  const [collateralFactor, setCollateralFactor] = useState<number | undefined>(undefined);
   const [repayAmount, setRepayAmount] = useState<string>('0');
   const [needsApproval, setNeedsApproval] = useState<boolean>(false);
 
@@ -208,6 +205,14 @@ function RepayModal({ data, closeModal }: Props) {
   }
 
   function handleInputChange(e: ChangeEvent<HTMLInputElement>) {
+    if (!accountData || !symbol) return;
+    const decimals = accountData[symbol.toUpperCase()].decimals;
+
+    if (e.target.value.includes('.')) {
+      const regex = /[^,.]*$/g;
+      const inputDecimals = regex.exec(e.target.value)![0];
+      if (inputDecimals.length > decimals) return;
+    }
     setQty(e.target.value);
   }
 
@@ -354,17 +359,6 @@ function RepayModal({ data, closeModal }: Props) {
     return gasLimit;
   }
 
-  function getHealthFactor(healthFactor: HealthFactor) {
-    setHealthFactor(healthFactor);
-
-    if (accountData && symbol) {
-      const collateralFactor = ethers.utils.formatEther(
-        accountData[symbol.toUpperCase()]?.adjustFactor
-      );
-      setCollateralFactor(parseFloat(collateralFactor));
-    }
-  }
-
   return (
     <>
       {!minimized && (
@@ -401,22 +395,11 @@ function RepayModal({ data, closeModal }: Props) {
                 />
 
                 {symbol ? (
-                  <ModalRowHealthFactor
-                    qty={qty}
-                    symbol={symbol}
-                    operation="repay"
-                    healthFactorCallback={getHealthFactor}
-                  />
+                  <ModalRowHealthFactor qty={qty} symbol={symbol} operation="repay" />
                 ) : (
                   <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
                 )}
-                <ModalRowBorrowLimit
-                  healthFactor={healthFactor}
-                  collateralFactor={collateralFactor}
-                  qty={qty}
-                  symbol={symbol!}
-                  operation="repay"
-                />
+                <ModalRowBorrowLimit qty={qty} symbol={symbol!} operation="repay" />
               </ModalExpansionPanelWrapper>
 
               {error && error.component != 'gas' && <ModalError message={error.message} />}

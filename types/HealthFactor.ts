@@ -1,4 +1,6 @@
+import { BigNumber } from 'ethers';
+
 export type HealthFactor = {
-  collateral: number;
-  debt: number;
+  collateral: BigNumber;
+  debt: BigNumber;
 };

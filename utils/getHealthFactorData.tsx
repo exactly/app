@@ -1,61 +1,63 @@
-import { ethers } from 'ethers';
+import { BigNumber, ethers } from 'ethers';
+import { parseFixed } from '@ethersproject/bignumber';
 
 import { AccountData } from 'types/AccountData';
 import { FixedLenderAccountData } from 'types/FixedLenderAccountData';
+import { WAD } from './fixedPointMathLib';
 
 function getHealthFactorData(accountData: AccountData) {
-  let collateral = 0;
-  let debt = 0;
+  let collateral = ethers.constants.Zero;
+  let debt = ethers.constants.Zero;
 
   const data = Object.values(accountData);
 
   try {
     data.forEach((fixedLender: FixedLenderAccountData) => {
-      let fixedLenderCollateral = 0;
-      let fixedLenderDebt = 0;
+      let fixedLenderCollateral = ethers.constants.Zero;
+      let fixedLenderDebt = ethers.constants.Zero;
       const decimals = fixedLender.decimals;
+      const decimalWAD = parseFixed('1', decimals); //WAD based on the decimals of the fixedLender
 
-      const oracle = parseFloat(ethers.utils.formatUnits(fixedLender.oraclePrice, 18));
-      const collateralFactor = parseFloat(ethers.utils.formatUnits(fixedLender.adjustFactor, 18));
+      const oracle = fixedLender.oraclePrice;
+      const adjustFactor = fixedLender.adjustFactor;
 
       //Collateral
       if (fixedLender.isCollateral) {
-        const assets = parseFloat(
-          ethers.utils.formatUnits(fixedLender.floatingDepositAssets, decimals)
-        );
+        const assets = fixedLender.floatingDepositAssets;
 
-        fixedLenderCollateral += assets * oracle;
+        fixedLenderCollateral = fixedLenderCollateral.add(assets.mul(oracle).div(decimalWAD));
       }
 
-      collateral += fixedLenderCollateral * collateralFactor;
+      collateral = collateral.add(fixedLenderCollateral.mul(adjustFactor).div(WAD));
 
       //Floating Debt
       if (fixedLender.floatingBorrowAssets) {
-        const borrowAssets = parseFloat(
-          ethers.utils.formatUnits(fixedLender.floatingBorrowAssets, decimals)
-        );
+        const borrowAssets = fixedLender.floatingBorrowAssets;
 
-        fixedLenderDebt += borrowAssets * oracle;
+        fixedLenderDebt = fixedLenderDebt.add(borrowAssets.mul(oracle)).div(decimalWAD);
       }
 
       //Fixed Debt
       fixedLender.fixedBorrowPositions.forEach((borrowPosition) => {
-        const penaltyRate = parseFloat(ethers.utils.formatUnits(fixedLender.penaltyRate, 18));
-        const principal = parseFloat(
-          ethers.utils.formatUnits(borrowPosition.position.principal, decimals)
-        );
-        const fee = parseFloat(ethers.utils.formatUnits(borrowPosition.position.fee, decimals));
-        const maturityTimestamp = borrowPosition.maturity.toNumber();
-        const currentTimestamp = new Date().getTime() / 1000;
+        const penaltyRate = fixedLender.penaltyRate;
+        const principal = borrowPosition.position.principal;
+        const fee = borrowPosition.position.fee;
 
-        fixedLenderDebt += (principal + fee) * oracle;
+        const maturityTimestamp = borrowPosition.maturity;
+        const currentTimestamp = BigNumber.from(Math.floor(Date.now() / 1000));
 
-        if (maturityTimestamp > currentTimestamp) {
-          fixedLenderDebt += (currentTimestamp - maturityTimestamp) * penaltyRate;
+        const position = principal.add(fee);
+
+        fixedLenderDebt = fixedLenderDebt.add(position.mul(oracle).div(decimalWAD));
+
+        if (maturityTimestamp.gt(currentTimestamp)) {
+          const time = currentTimestamp.sub(maturityTimestamp);
+
+          fixedLenderDebt = fixedLenderDebt.add(time.mul(penaltyRate));
         }
       });
 
-      debt += fixedLenderDebt / collateralFactor;
+      debt = debt.add(fixedLenderDebt.mul(WAD).div(adjustFactor));
     });
 
     return { collateral, debt };

@@ -82,7 +82,6 @@ function BorrowModal({ data, editable, closeModal }: Props) {
   const [editSlippage, setEditSlippage] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [healthFactor, setHealthFactor] = useState<HealthFactor | undefined>(undefined);
-  const [collateralFactor, setCollateralFactor] = useState<number | undefined>(undefined);
   const [needsApproval, setNeedsApproval] = useState<boolean>(false);
   const [poolLiquidity, setPoolLiquidity] = useState<number | undefined>(undefined);
   const [utilizationRate, setUtilizationRate] = useState<Dictionary<string>>();
@@ -180,28 +179,54 @@ function BorrowModal({ data, editable, closeModal }: Props) {
   }
 
   async function onMax() {
-    if (!accountData || !healthFactor || !collateralFactor) return;
+    if (!accountData || !healthFactor) return;
 
-    const rate = ethers.utils.formatEther(accountData[symbol.toUpperCase()]?.oraclePrice);
+    const decimals = accountData[symbol.toUpperCase()].decimals;
+    const adjustFactor = accountData[symbol.toUpperCase()].adjustFactor;
+    const oraclePrice = accountData[symbol.toUpperCase()].oraclePrice;
 
-    const adjustFactor = ethers.utils.formatEther(accountData[symbol.toUpperCase()]?.adjustFactor);
+    const col = healthFactor.collateral;
+    const hf = parseFixed('1.05', 18);
+    const wad = parseFixed('1', 18);
 
-    const beforeBorrowLimit = healthFactor
-      ? healthFactor!.collateral * parseFloat(adjustFactor) - healthFactor!.debt
-      : 0;
+    const debt = healthFactor.debt;
+    const safeMaximumBorrow = Number(
+      formatFixed(
+        col
+          .sub(hf.mul(debt).div(wad))
+          .mul(wad)
+          .div(hf)
+          .mul(wad)
+          .div(oraclePrice)
+          .mul(adjustFactor)
+          .div(wad),
+        18
+      )
+    ).toFixed(decimals);
 
-    const afterBorrowLimit =
-      beforeBorrowLimit - ((parseFloat(qty) * parseFloat(rate)) / collateralFactor || 0);
-
-    if ((parseFloat(qty) * parseFloat(rate)) / collateralFactor > afterBorrowLimit) return;
-
-    //add pool liquidity validation we should display the minimum between the poolliquidity and borrowLimit
-
-    setQty((afterBorrowLimit / parseFloat(rate)).toString());
+    setQty(safeMaximumBorrow);
+    setError(undefined);
   }
 
   function handleInputChange(e: ChangeEvent<HTMLInputElement>) {
+    if (!accountData) return;
+    const decimals = accountData[symbol.toUpperCase()].decimals;
+    const maxBorrowAssets = accountData[symbol.toUpperCase()].maxBorrowAssets;
+
+    if (e.target.value.includes('.')) {
+      const regex = /[^,.]*$/g;
+      const inputDecimals = regex.exec(e.target.value)![0];
+      if (inputDecimals.length > decimals) return;
+    }
+
     setQty(e.target.value);
+
+    if (maxBorrowAssets.lt(parseFixed(e.target.value || '0', decimals))) {
+      return setError({
+        status: true,
+        message: translations[lang].borrowLimit
+      });
+    }
 
     if (poolLiquidity && poolLiquidity < e.target.valueAsNumber) {
       return setError({
@@ -231,8 +256,7 @@ function BorrowModal({ data, editable, closeModal }: Props) {
       const currentTimestamp = new Date().getTime() / 1000;
       const time = (parseInt(date?.value ?? maturity) - currentTimestamp) / 31536000;
       const apy = parseFloat(slippage) / 100;
-
-      const decimals = accountData[symbol].decimals;
+      const decimals = accountData![symbol.toUpperCase()].decimals;
 
       const maxAmount = parseFloat(qty!) * Math.pow(1 + apy, time);
 
@@ -419,13 +443,6 @@ function BorrowModal({ data, editable, closeModal }: Props) {
 
   function getHealthFactor(healthFactor: HealthFactor) {
     setHealthFactor(healthFactor);
-
-    if (accountData && symbol) {
-      const collateralFactor = ethers.utils.formatEther(
-        accountData[symbol.toUpperCase()]?.adjustFactor
-      );
-      setCollateralFactor(parseFloat(collateralFactor));
-    }
   }
 
   async function getFixedLenderContract() {
@@ -539,14 +556,7 @@ function BorrowModal({ data, editable, closeModal }: Props) {
                 ) : (
                   <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
                 )}
-                <ModalRowBorrowLimit
-                  healthFactor={healthFactor}
-                  collateralFactor={collateralFactor}
-                  qty={qty}
-                  symbol={symbol!}
-                  operation="borrow"
-                  line
-                />
+                <ModalRowBorrowLimit qty={qty} symbol={symbol!} operation="borrow" line />
                 <ModalRowUtilizationRate
                   urBefore={utilizationRate?.before}
                   urAfter={utilizationRate?.after}

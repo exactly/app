@@ -2,6 +2,7 @@ import { useContext, useEffect, useState } from 'react';
 import { Contract, ethers } from 'ethers';
 import dayjs from 'dayjs';
 import Skeleton from 'react-loading-skeleton';
+import Image from 'next/image';
 
 import LangContext from 'contexts/LangContext';
 import AccountDataContext from 'contexts/AccountDataContext';
@@ -90,15 +91,17 @@ function MaturityInfo({ maturity, symbol, fixedLender }: Props) {
       <ul className={styles.table}>
         <li className={styles.header}>
           <div className={styles.assetInfo}>
-            <img
+            <Image
               className={styles.assetImage}
               src={`/img/assets/${symbol.toLowerCase()}.png`}
               alt={symbol}
+              width={40}
+              height={40}
             />
             <p className={styles.asset}>{parseSymbol(symbol)}</p>
           </div>
           <p className={color}>
-            <img src="/img/icons/clock.svg" alt="clock" />
+            <Image src="/img/icons/clock.svg" alt="clock" width={10} height={10} />
             {rtf.format(daysRemaining, 'day')}
           </p>
         </li>

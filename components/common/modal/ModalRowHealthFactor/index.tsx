@@ -1,10 +1,11 @@
-import { useContext, useEffect, useState } from 'react';
-import { ethers } from 'ethers';
+import { useContext, useEffect, useMemo, useState } from 'react';
+import { parseFixed } from '@ethersproject/bignumber';
 import Image from 'next/image';
 import Skeleton from 'react-loading-skeleton';
 
 import { LangKeys } from 'types/Lang';
 import { HealthFactor } from 'types/HealthFactor';
+import { BigNumber } from 'ethers';
 
 import parseHealthFactor from 'utils/parseHealthFactor';
 import getHealthFactorData from 'utils/getHealthFactorData';
@@ -26,64 +27,105 @@ type Props = {
 function ModalRowHealthFactor({ qty, symbol, operation, healthFactorCallback }: Props) {
   const { accountData } = useContext(AccountDataContext);
   const lang: string = useContext(LangContext);
+  const WAD = parseFixed('1', 18);
 
   const translations: { [key: string]: LangKeys } = keys;
 
-  const [newQty, setNewQty] = useState<number | undefined>(undefined);
+  const [newQty, setNewQty] = useState<BigNumber | undefined>(undefined);
 
   const [healthFactor, setHealthFactor] = useState<HealthFactor | undefined>(undefined);
 
-  const beforeHealthFactor =
-    healthFactor && parseHealthFactor(healthFactor!.debt, healthFactor!.collateral);
+  const [beforeHealthFactor, setBeforeHealthFactor] = useState<string | undefined>(undefined);
+  const [afterHealthFactor, setAfterHealthFactor] = useState<string | undefined>(undefined);
 
-  let afterHealthFactor = beforeHealthFactor;
+  useEffect(() => {
+    getAmount();
+  }, [symbol, qty]);
 
   useEffect(() => {
     getHealthFactor();
-    getAmount();
-  }, [symbol, qty]);
+    calculateAfterHealthFactor();
+  }, [symbol, newQty, accountData]);
+
+  function getAmount() {
+    if (!accountData || !symbol || !qty) return;
+
+    const decimals = accountData[symbol].decimals;
+    const newQty = parseFixed(qty, decimals);
+
+    setNewQty(newQty);
+  }
 
   function getHealthFactor() {
     if (!accountData) return;
 
     const healthFactor = getHealthFactorData(accountData);
 
-    setHealthFactor(healthFactor);
+    if (healthFactor) {
+      setHealthFactor(healthFactor);
 
-    if (healthFactorCallback) healthFactorCallback(healthFactor);
+      setBeforeHealthFactor(parseHealthFactor(healthFactor.debt, healthFactor.collateral));
+      setAfterHealthFactor(parseHealthFactor(healthFactor.debt, healthFactor.collateral));
+    }
+
+    if (healthFactorCallback && healthFactor) healthFactorCallback(healthFactor);
   }
 
-  async function getAmount() {
-    if (!accountData || !symbol) return;
+  function calculateAfterHealthFactor() {
+    if (!accountData || !newQty) return;
 
-    const exchangeRate = parseFloat(ethers.utils.formatEther(accountData[symbol].oraclePrice));
+    const adjustFactor = accountData[symbol].adjustFactor;
+    const oraclePrice = accountData[symbol].oraclePrice;
+    const isCollateral = accountData[symbol].isCollateral;
+    const decimals = accountData[symbol].decimals;
 
-    const newQty = exchangeRate * parseFloat(qty);
+    const newQtyUsd = newQty.mul(oraclePrice).div(parseFixed('1', decimals));
 
-    setNewQty(newQty);
-  }
+    switch (operation) {
+      case 'deposit': {
+        if (isCollateral) {
+          const adjustedNewQtyUsd = newQtyUsd.mul(adjustFactor).div(WAD);
 
-  switch (operation) {
-    case 'deposit':
-      afterHealthFactor =
-        healthFactor &&
-        parseHealthFactor(healthFactor!.debt, healthFactor!.collateral + (newQty || 0));
-      break;
-    case 'withdraw':
-      afterHealthFactor =
-        healthFactor &&
-        parseHealthFactor(healthFactor!.debt, healthFactor!.collateral - (newQty || 0));
-      break;
-    case 'borrow':
-      afterHealthFactor =
-        healthFactor &&
-        parseHealthFactor(healthFactor!.debt + (newQty || 0), healthFactor!.collateral);
-      break;
-    case 'repay':
-      afterHealthFactor =
-        healthFactor &&
-        parseHealthFactor(healthFactor!.debt - (newQty || 0), healthFactor!.collateral);
-      break;
+          setAfterHealthFactor(
+            parseHealthFactor(healthFactor!.debt, healthFactor!.collateral.add(adjustedNewQtyUsd))
+          );
+        } else {
+          setAfterHealthFactor(parseHealthFactor(healthFactor!.debt, healthFactor!.collateral));
+        }
+
+        break;
+      }
+      case 'withdraw': {
+        if (isCollateral) {
+          const adjustedNewQtyUsd = newQtyUsd.mul(WAD).div(adjustFactor);
+
+          setAfterHealthFactor(
+            parseHealthFactor(healthFactor!.debt, healthFactor!.collateral.sub(adjustedNewQtyUsd))
+          );
+        } else {
+          setAfterHealthFactor(parseHealthFactor(healthFactor!.debt, healthFactor!.collateral));
+        }
+
+        break;
+      }
+      case 'borrow': {
+        const adjustedNewQtyUsd = newQtyUsd.mul(WAD).div(adjustFactor);
+
+        setAfterHealthFactor(
+          parseHealthFactor(healthFactor!.debt.add(adjustedNewQtyUsd), healthFactor!.collateral)
+        );
+
+        break;
+      }
+      case 'repay': {
+        const adjustedNewQtyUsd = newQtyUsd.mul(adjustFactor).div(WAD);
+
+        setAfterHealthFactor(
+          parseHealthFactor(healthFactor!.debt, healthFactor!.collateral.add(adjustedNewQtyUsd))
+        );
+        break;
+      }
+    }
   }
 
   return (

@@ -1,4 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
+import Image from 'next/image';
 
 import styles from './style.module.scss';
 
@@ -56,10 +57,12 @@ function Wallet({ walletAddress, cogwheel = true, network, disconnect }: Props) 
         {ens ?? formattedWallet}
       </p>
       {cogwheel && (
-        <img
+        <Image
           src={`/img/icons/${walletContainer ? 'arrowUp' : 'arrowDown'}.svg`}
           alt="settings"
           onClick={handleWallet}
+          width={12}
+          height={7}
         />
       )}
       {network && (
@@ -73,7 +76,7 @@ function Wallet({ walletAddress, cogwheel = true, network, disconnect }: Props) 
         <div className={styles.walletContainer}>
           {walletAddress && (
             <p className={styles.disconnect} onClick={() => disconnect && disconnect()}>
-              <img src="/img/icons/power.svg" />
+              <Image src="/img/icons/power.svg" width={24} height={24} />
               {translations[lang].disconnect}
             </p>
           )}

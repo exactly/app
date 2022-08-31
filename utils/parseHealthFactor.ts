@@ -1,22 +1,28 @@
-function parseHealthFactor(debt: number, collateral: number) {
+import { formatFixed } from '@ethersproject/bignumber';
+import { BigNumber } from 'ethers';
+import { WAD } from './fixedPointMathLib';
+
+function parseHealthFactor(debt: BigNumber, collateral: BigNumber) {
   //TODO => check case when the user doesn't have any collateral or debt
 
-  if (collateral <= 0 || debt <= 0) {
+  if (collateral.isZero() || debt.isZero()) {
     return '∞';
   } else {
-    const healthFactor = collateral / debt;
+    const healthFactor = collateral.mul(WAD).div(debt);
+
+    const formatedHealthFactor = Number(formatFixed(healthFactor, 18));
 
     let decimals = 0;
 
-    if (healthFactor < 10) {
+    if (formatedHealthFactor < 10) {
       decimals = 2;
     }
 
-    if (healthFactor > 100) {
+    if (formatedHealthFactor > 100) {
       return '∞';
     }
 
-    return `${healthFactor.toFixed(decimals)}x`;
+    return `${formatedHealthFactor.toFixed(decimals)}x`;
   }
 }
 export default parseHealthFactor;

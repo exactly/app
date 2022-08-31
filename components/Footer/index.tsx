@@ -1,4 +1,5 @@
 import { useContext } from 'react';
+import Image from 'next/image';
 
 import LangContext from 'contexts/LangContext';
 
@@ -16,7 +17,7 @@ const Footer = () => {
 
   return (
     <footer className={styles.footer}>
-      <img src="./img/isologo.svg" className={styles.logo} alt="exactly logo" />
+      <Image src="/img/isologo.svg" alt="exactly logo" width={24} height={24} />
       <div>
         <ul className={styles.links}>
           <li>

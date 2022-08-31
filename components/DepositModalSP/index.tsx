@@ -26,7 +26,6 @@ import { UnderlyingData } from 'types/Underlying';
 import { Gas } from 'types/Gas';
 import { Transaction } from 'types/Transaction';
 import { Error } from 'types/Error';
-import { HealthFactor } from 'types/HealthFactor';
 
 import { getContractData } from 'utils/contracts';
 import { getSymbol, getUnderlyingData } from 'utils/utils';
@@ -70,8 +69,6 @@ function DepositModalSP({ data, closeModal }: Props) {
   const [pending, setPending] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [depositedAmount, setDepositedAmount] = useState<string>();
-  const [healthFactor, setHealthFactor] = useState<HealthFactor | undefined>(undefined);
-  const [collateralFactor, setCollateralFactor] = useState<number | undefined>(undefined);
 
   const [error, setError] = useState<Error | undefined>(undefined);
 
@@ -201,6 +198,14 @@ function DepositModalSP({ data, closeModal }: Props) {
   }
 
   function handleInputChange(e: ChangeEvent<HTMLInputElement>) {
+    if (!accountData || !symbol) return;
+    const decimals = accountData[symbol.toUpperCase()].decimals;
+
+    if (e.target.value.includes('.')) {
+      const regex = /[^,.]*$/g;
+      const inputDecimals = regex.exec(e.target.value)![0];
+      if (inputDecimals.length > decimals) return;
+    }
     if (step != 1 && walletBalance && e.target.valueAsNumber > parseFloat(walletBalance)) {
       setError({
         status: true,
@@ -290,7 +295,7 @@ function DepositModalSP({ data, closeModal }: Props) {
     try {
       const gasPrice = (await fixedLenderWithSigner?.provider.getFeeData())?.maxFeePerGas;
 
-      const gasLimit = await getGasLimit(qty);
+      const gasLimit = await getGasLimit('1');
 
       if (gasPrice && gasLimit) {
         const total = formatFixed(gasPrice.mul(gasLimit), 18);
@@ -359,17 +364,6 @@ function DepositModalSP({ data, closeModal }: Props) {
     }
   }
 
-  function getHealthFactor(healthFactor: HealthFactor) {
-    setHealthFactor(healthFactor);
-
-    if (accountData && symbol) {
-      const collateralFactor = ethers.utils.formatEther(
-        accountData[symbol.toUpperCase()]?.adjustFactor
-      );
-      setCollateralFactor(parseFloat(collateralFactor));
-    }
-  }
-
   async function getFixedLenderContract() {
     const filteredFixedLender = fixedLenderData.find((contract) => {
       const contractSymbol = getSymbol(contract.address!, network!.name);
@@ -406,22 +400,11 @@ function DepositModalSP({ data, closeModal }: Props) {
               <ModalRow text={translations[lang].exactlyBalance} value={depositedAmount} />
               <ModalExpansionPanelWrapper>
                 {symbol ? (
-                  <ModalRowHealthFactor
-                    qty={qty}
-                    symbol={symbol}
-                    operation="deposit"
-                    healthFactorCallback={getHealthFactor}
-                  />
+                  <ModalRowHealthFactor qty={qty} symbol={symbol} operation="deposit" />
                 ) : (
                   <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
                 )}
-                <ModalRowBorrowLimit
-                  healthFactor={healthFactor}
-                  collateralFactor={collateralFactor}
-                  qty={qty}
-                  symbol={symbol!}
-                  operation="deposit"
-                />
+                <ModalRowBorrowLimit qty={qty} symbol={symbol!} operation="deposit" />
               </ModalExpansionPanelWrapper>
               <ModalStepper currentStep={step} totalSteps={3} />
               {error && error.component != 'gas' && <ModalError message={error.message} />}

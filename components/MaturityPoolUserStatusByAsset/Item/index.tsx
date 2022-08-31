@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
 import { ethers } from 'ethers';
-import request from 'graphql-request';
+import Image from 'next/image';
 
 import Button from 'components/common/Button';
 
@@ -21,14 +21,6 @@ import keys from './translations.json';
 import parseTimestamp from 'utils/parseTimestamp';
 import formatNumber from 'utils/formatNumber';
 import parseSymbol from 'utils/parseSymbol';
-import getSubgraph from 'utils/getSubgraph';
-
-import {
-  getMaturityPoolBorrowsQuery,
-  getMaturityPoolDepositsQuery,
-  getMaturityPoolWithdrawsQuery,
-  getMaturityPoolRepaysQuery
-} from 'queries';
 
 import { WithdrawMP } from 'types/WithdrawMP';
 import { Repay } from 'types/Repay';
@@ -119,10 +111,11 @@ function Item({ type, amount, fee, maturityDate, showModal, symbol, data, decima
     <details className={styles.container}>
       <summary className={styles.summary}>
         <div className={styles.symbol}>
-          <img
+          <Image
             src={`/img/assets/${symbol?.toLowerCase()}.png`}
             alt={symbol}
-            className={styles.assetImage}
+            width={40}
+            height={40}
           />
           <span className={styles.primary}>{parseSymbol(symbol)}</span>
         </div>

@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
 import { ethers } from 'ethers';
 import request from 'graphql-request';
+import Image from 'next/image';
 
 import Button from 'components/common/Button';
 import Skeleton from 'react-loading-skeleton';
@@ -162,10 +163,11 @@ function Item({ type, amount, fee, maturityDate, symbol, market, decimals, data 
       <summary className={styles.summary}>
         <div className={styles.symbol}>
           {(symbol && (
-            <img
+            <Image
               src={`/img/assets/${symbol?.toLowerCase()}.png`}
               alt={symbol}
-              className={styles.assetImage}
+              width={40}
+              height={40}
             />
           )) || <Skeleton circle height={40} width={40} />}
           <span className={styles.primary}>{symbol ? parseSymbol(symbol) : <Skeleton />}</span>

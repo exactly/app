@@ -1,5 +1,6 @@
 import { useEffect, useState, useContext } from 'react';
 import { ethers } from 'ethers';
+import Image from 'next/image';
 
 import Select from 'components/common/Select';
 import Tooltip from 'components/Tooltip';
@@ -84,10 +85,12 @@ function AssetSelector({ title, defaultAddress, onChange }: Props) {
       return {
         label: (
           <div className={style.labelContainer}>
-            <img
+            <Image
               src={`/img/assets/${marketData?.symbol.toLowerCase()}.png`}
               alt={parseSymbol(marketData.name)}
               className={style.marketImage}
+              width={24}
+              height={24}
             />{' '}
             <span className={style.marketName}>{parseSymbol(marketData.name)}</span>
           </div>
