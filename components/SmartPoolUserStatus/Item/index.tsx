@@ -8,6 +8,7 @@ import Image from 'next/image';
 import Button from 'components/common/Button';
 import Switch from 'components/common/Switch';
 import Loading from 'components/common/Loading';
+import Tooltip from 'components/Tooltip';
 
 import FixedLenderContext from 'contexts/FixedLenderContext';
 import LangContext from 'contexts/LangContext';
@@ -29,6 +30,8 @@ import { getSymbol, getUnderlyingData } from 'utils/utils';
 import formatNumber from 'utils/formatNumber';
 import parseSymbol from 'utils/parseSymbol';
 import getSubgraph from 'utils/getSubgraph';
+import getHealthFactorData from 'utils/getHealthFactorData';
+import parseHealthFactor from 'utils/parseHealthFactor';
 
 import { getSmartPoolDepositsAndWithdraws, getSmartPoolBorrowsAndRepays } from 'queries';
 
@@ -67,6 +70,7 @@ function Item({
   const [rate, setRate] = useState<number | undefined>(undefined);
   const [originalAmount, setOriginalAmount] = useState<string | undefined>(undefined);
   const [difference, setDifference] = useState<string | undefined>(undefined);
+  const [disabledText, setDisabledText] = useState<string | undefined>(undefined);
 
   const underlyingData = getUnderlyingData(network?.name, symbol);
 
@@ -84,9 +88,28 @@ function Item({
   async function checkCollaterals() {
     if (!accountData || !symbol) return;
 
-    const data = accountData;
+    const floatingPositions = accountData[symbol].floatingBorrowAssets;
+    const fixedPositions = accountData[symbol].fixedBorrowPositions;
 
-    data![symbol].isCollateral ? setToggle(true) : setToggle(false);
+    if (!floatingPositions.isZero() || fixedPositions.length > 0) {
+      setDisabledText('activeBorrow');
+      setDisabled(true);
+    }
+
+    if (accountData[symbol].isCollateral) {
+      setToggle(true);
+
+      const healthFactor = await getHealthFactorData(accountData);
+      const collateralAssets = accountData[symbol].floatingAvailableAssets;
+
+      const newHF = parseFloat(
+        parseHealthFactor(healthFactor.debt, healthFactor.collateral.sub(collateralAssets))
+      );
+
+      if (newHF < 1) {
+        setDisabledText('underCollateral');
+      }
+    }
   }
 
   function getExchangeRate() {
@@ -266,15 +289,24 @@ function Item({
           {symbol ? (
             <span className={styles.value}>
               {!loading ? (
-                <Switch
-                  isOn={toggle}
-                  handleToggle={() => {
-                    setToggle((prev) => !prev);
-                    handleMarket();
-                  }}
-                  id={underlyingData?.address || Math.random().toString()}
-                  disabled={disabled}
-                />
+                <Tooltip
+                  value={
+                    disabledText && disabled
+                      ? translations[lang][`${disabledText}`]
+                      : translations[lang].exitMarket
+                  }
+                  disableImage
+                >
+                  <Switch
+                    isOn={toggle}
+                    handleToggle={() => {
+                      setToggle((prev) => !prev);
+                      handleMarket();
+                    }}
+                    id={underlyingData?.address || Math.random().toString()}
+                    disabled={disabled}
+                  />
+                </Tooltip>
               ) : (
                 <div className={styles.loadingContainer}>
                   <Loading size="small" color="primary" />
