@@ -51,13 +51,13 @@ function SmartPoolList() {
         <div className={styles.market}>
           <div className={styles.column}>
             <div className={styles.tableRow}>
-              <span className={styles.symbol}>{translations[lang].asset}</span>
-              <span className={styles.title}>{translations[lang].totalDeposits}</span>
-              <span className={styles.title}>
+              <div className={styles.symbol}>{translations[lang].asset}</div>
+              <div className={styles.title}>{translations[lang].totalDeposits}</div>
+              <div className={styles.title}>
                 {translations[lang].lastAPY}{' '}
                 <Tooltip value={translations[lang].lastApyTooltip} orientation="down" />
-              </span>
-              <span className={styles.title} />
+              </div>
+              <div className={styles.title} />
             </div>
             {markets?.map((market, key) => {
               return <Item market={market} key={key} type={'deposit'} />;
@@ -71,13 +71,13 @@ function SmartPoolList() {
         <div className={styles.market}>
           <div className={styles.column}>
             <div className={styles.tableRow}>
-              <span className={styles.symbol}>{translations[lang].asset}</span>
-              <span className={styles.title}>{translations[lang].totalBorrows}</span>
-              <span className={styles.title}>
+              <div className={styles.symbol}>{translations[lang].asset}</div>
+              <div className={styles.title}>{translations[lang].totalBorrows}</div>
+              <div className={styles.title}>
                 {translations[lang].lastAPY}{' '}
                 <Tooltip value={translations[lang].lastApyTooltip} orientation="down" />
-              </span>
-              <span className={styles.title} />
+              </div>
+              <div className={styles.title} />
             </div>
             {markets?.map((market, key) => {
               return <Item market={market} key={key} type={'borrow'} />;

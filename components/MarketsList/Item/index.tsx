@@ -158,7 +158,7 @@ function Item({ market, type, fixedMarketData }: Props) {
           </span>
         </div>
       </Link>
-      <p className={style.value}>
+      <div className={style.value}>
         {poolData && market ? (
           type == 'borrow' ? (
             `$${formatNumber(poolData?.borrowed! * poolData?.rate!, 'USD')}`
@@ -168,10 +168,10 @@ function Item({ market, type, fixedMarketData }: Props) {
         ) : (
           <Skeleton />
         )}
-      </p>
-      <p className={style.value}>
+      </div>
+      <div className={style.value}>
         {rate || <Skeleton />} {rate == 'N/A' && <Tooltip value={translations[lang].noRate} />}
-      </p>
+      </div>
       <div className={style.buttonContainer}>
         {(market && (
           <Button
