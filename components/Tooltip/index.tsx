@@ -1,4 +1,5 @@
-import { ReactChildren, useState } from 'react';
+import { useState } from 'react';
+import Image from 'next/image';
 
 import styles from './style.module.scss';
 
@@ -19,7 +20,9 @@ function Tooltip({ value, image, children, disableImage }: Props) {
       onMouseLeave={() => setShow(false)}
     >
       {children}
-      {!disableImage && <img src={image ?? '/img/icons/tooltip.svg'} alt="tooltip" />}
+      {!disableImage && (
+        <Image src={image ?? '/img/icons/tooltip.svg'} alt="tooltip" width={18} height={18} />
+      )}
       <div className={`${styles.tooltip} ${show ? styles.show : styles.hidden}`}>
         <div className={styles.arrowUp}></div>
         <p className={styles.text}>{value}</p>

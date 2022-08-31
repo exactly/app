@@ -3,6 +3,7 @@ import { ethers, Contract, BigNumber } from 'ethers';
 import Skeleton from 'react-loading-skeleton';
 import request from 'graphql-request';
 import { formatFixed, parseFixed } from '@ethersproject/bignumber';
+import Image from 'next/image';
 
 import Button from 'components/common/Button';
 import Switch from 'components/common/Switch';
@@ -213,10 +214,11 @@ function Item({
     <div className={styles.container}>
       <div className={styles.symbol}>
         {(symbol && (
-          <img
+          <Image
             src={`/img/assets/${symbol.toLowerCase()}.png`}
             alt={symbol}
-            className={styles.assetImage}
+            width={40}
+            height={40}
           />
         )) || <Skeleton circle height={40} width={40} />}
         <span className={styles.primary}>{(symbol && parseSymbol(symbol)) || <Skeleton />}</span>

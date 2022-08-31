@@ -3,6 +3,7 @@ import { formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { ethers } from 'ethers';
 import Skeleton from 'react-loading-skeleton';
 import Link from 'next/link';
+import Image from 'next/image';
 
 import Button from 'components/common/Button';
 
@@ -143,10 +144,11 @@ function Item({ market, type, fixedMarketData }: Props) {
       <Link href={`/assets/${market?.symbol == 'WETH' ? 'eth' : market?.symbol.toLowerCase()}`}>
         <div className={style.symbol}>
           {(market && (
-            <img
+            <Image
               src={`/img/assets/${market?.symbol.toLowerCase()}.png`}
               alt={market?.symbol}
-              className={style.assetImage}
+              width={40}
+              height={40}
             />
           )) || <Skeleton circle width={40} height={40} />}
           <span className={style.primary}>

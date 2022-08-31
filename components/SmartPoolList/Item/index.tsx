@@ -1,7 +1,8 @@
 import { useContext, useEffect, useState } from 'react';
-import { Contract, ethers } from 'ethers';
+import { ethers } from 'ethers';
 import Skeleton from 'react-loading-skeleton';
 import Link from 'next/link';
+import Image from 'next/image';
 
 import Button from 'components/common/Button';
 
@@ -127,10 +128,11 @@ function Item({ market, type }: Props) {
       <Link href={`/assets/${market?.symbol == 'WETH' ? 'eth' : market?.symbol.toLowerCase()}`}>
         <div className={style.symbol}>
           {(market && (
-            <img
+            <Image
               src={`/img/assets/${market?.symbol.toLowerCase()}.png`}
-              className={style.assetImage}
               alt={market?.symbol}
+              width={40}
+              height={40}
             />
           )) || <Skeleton circle height={40} width={40} />}
           <span className={style.primary}>

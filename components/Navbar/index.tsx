@@ -1,6 +1,7 @@
 import { useContext } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import Image from 'next/image';
 
 import Button from 'components/common/Button';
 import Wallet from 'components/Wallet';
@@ -60,7 +61,15 @@ function Navbar() {
       <div className={styles.wrapper}>
         <div className={styles.left}>
           <Link href="/markets">
-            <img src="/img/logo.png" alt="Exactly Logo" className={styles.logo} />
+            <div className={styles.logo}>
+              <Image
+                src="/img/logo.png"
+                alt="Exactly Logo"
+                layout="responsive"
+                width={5986}
+                height={1657}
+              />
+            </div>
           </Link>
           <ul className={styles.linksContainer}>
             {routes.map((route) => {
@@ -77,7 +86,12 @@ function Navbar() {
                     {assetsRoutes.length > 0 ? (
                       <div className={styles.dropdown}>
                         <p className={styles.assetsTitle}>{translations[lang].assets}</p>
-                        <img src={`/img/icons/arrowDown.svg`} alt="assets" />
+                        <Image
+                          src={`/img/icons/arrowDown.svg`}
+                          alt="assets"
+                          width={12}
+                          height={7}
+                        />
                         <div className={styles.dropdownContent}>
                           {assetsRoutes.map((asset: any) => {
                             return (
@@ -92,7 +106,12 @@ function Navbar() {
                       <>
                         <div className={styles.dropdown}>
                           <Link href="assets/dai">{translations[lang].assets}</Link>
-                          <img src={`/img/icons/arrowDown.svg`} alt="assets" />
+                          <Image
+                            src={`/img/icons/arrowDown.svg`}
+                            alt="assets"
+                            width={12}
+                            height={7}
+                          />
                         </div>
                       </>
                     )}
