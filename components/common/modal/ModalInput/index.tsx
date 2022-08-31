@@ -1,4 +1,4 @@
-import { ethers } from 'ethers';
+import { formatFixed, parseFixed } from '@ethersproject/bignumber';
 import {
   useState,
   ChangeEventHandler,
@@ -27,19 +27,25 @@ type Props = {
 function ModalInput({ value, name, disabled, symbol, error, onChange, onMax }: Props) {
   const { accountData } = useContext(AccountDataContext);
 
-  const [exchangeRate, setExchangeRate] = useState(1);
+  const [newValue, setNewValue] = useState<string>('0');
 
   const blockedCharacters = ['e', 'E', '+', '-', ','];
 
   useEffect(() => {
-    getRate();
-  }, [symbol]);
+    formatValue();
+  }, [symbol, value]);
 
-  async function getRate() {
-    if (!accountData || !symbol) return;
+  function formatValue() {
+    if (!accountData || !value || !symbol) return;
 
-    const rate = parseFloat(ethers.utils.formatEther(accountData[symbol].oraclePrice));
-    setExchangeRate(rate);
+    const decimals = accountData[symbol].decimals;
+    const oraclePrice = accountData[symbol].oraclePrice;
+    const parsedValue = parseFixed(value, decimals);
+    const WAD = parseFixed('1', 18);
+
+    const valueUsd = parsedValue.mul(oraclePrice).div(WAD);
+
+    setNewValue(formatFixed(valueUsd, decimals));
   }
 
   function filterPasteValue(e: ClipboardEvent<HTMLInputElement>) {
@@ -66,9 +72,7 @@ function ModalInput({ value, name, disabled, symbol, error, onChange, onMax }: P
         autoFocus
       />
       <p className={styles.translatedValue}>
-        {value == '' || !value || !symbol
-          ? '$ 0'
-          : `$${formatNumber(parseFloat(value) * exchangeRate, symbol)}`}
+        {value == '' || !value || !symbol ? '$ 0' : `$${formatNumber(newValue, symbol)}`}
       </p>
       {onMax && (
         <p className={styles.max} onClick={onMax}>

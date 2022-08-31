@@ -1,6 +1,6 @@
 import { ChangeEvent, useContext, useEffect, useState } from 'react';
-import { Contract, ethers } from 'ethers';
-import { formatFixed } from '@ethersproject/bignumber';
+import { BigNumber, Contract, ethers } from 'ethers';
+import { formatFixed, parseFixed } from '@ethersproject/bignumber';
 
 import Button from 'components/common/Button';
 import ModalAsset from 'components/common/modal/ModalAsset';
@@ -69,9 +69,8 @@ function FloatingBorrowModal({ data, editable, closeModal }: Props) {
   const [tx, setTx] = useState<Transaction | undefined>(undefined);
   const [loading, setLoading] = useState<boolean>(false);
   const [healthFactor, setHealthFactor] = useState<HealthFactor | undefined>(undefined);
-  const [collateralFactor, setCollateralFactor] = useState<number | undefined>(undefined);
   const [needsApproval, setNeedsApproval] = useState<boolean>(false);
-  const [liquidity, setLiquidity] = useState<number | undefined>(undefined);
+  const [liquidity, setLiquidity] = useState<BigNumber | undefined>(undefined);
 
   const [error, setError] = useState<Error | undefined>(undefined);
   const [gasError, setGasError] = useState<Error | undefined>(undefined);
@@ -153,33 +152,60 @@ function FloatingBorrowModal({ data, editable, closeModal }: Props) {
   }
 
   async function onMax() {
-    if (!accountData || !healthFactor || !collateralFactor) return;
+    if (!accountData || !healthFactor) return;
 
-    const rate = ethers.utils.formatEther(accountData[symbol.toUpperCase()]?.oraclePrice);
+    const decimals = accountData[symbol.toUpperCase()].decimals;
+    const adjustFactor = accountData[symbol.toUpperCase()].adjustFactor;
+    const oraclePrice = accountData[symbol.toUpperCase()].oraclePrice;
 
-    const adjustFactor = ethers.utils.formatEther(accountData[symbol.toUpperCase()]?.adjustFactor);
+    const col = healthFactor.collateral;
+    const hf = parseFixed('1.05', 18);
+    const wad = parseFixed('1', 18);
 
-    const beforeBorrowLimit = healthFactor
-      ? healthFactor!.collateral * parseFloat(adjustFactor) - healthFactor!.debt
-      : 0;
+    const debt = healthFactor.debt;
+    const safeMaximumBorrow = Number(
+      formatFixed(
+        col
+          .sub(hf.mul(debt).div(wad))
+          .mul(wad)
+          .div(hf)
+          .mul(wad)
+          .div(oraclePrice)
+          .mul(adjustFactor)
+          .div(wad),
+        18
+      )
+    ).toFixed(decimals);
 
-    const afterBorrowLimit =
-      beforeBorrowLimit - ((parseFloat(qty) * parseFloat(rate)) / collateralFactor || 0);
-
-    if ((parseFloat(qty) * parseFloat(rate)) / collateralFactor > afterBorrowLimit) return;
-
-    //we should display the minimum between the liquidity and borrowLimit
-
-    setQty((afterBorrowLimit / parseFloat(rate)).toString());
+    setQty(safeMaximumBorrow);
+    setError(undefined);
   }
 
   function handleInputChange(e: ChangeEvent<HTMLInputElement>) {
+    if (!liquidity || !accountData) return;
+
+    const decimals = accountData[symbol.toUpperCase()].decimals;
+    const maxBorrowAssets = accountData[symbol.toUpperCase()].maxBorrowAssets;
+
+    if (e.target.value.includes('.')) {
+      const regex = /[^,.]*$/g;
+      const inputDecimals = regex.exec(e.target.value)![0];
+      if (inputDecimals.length > decimals) return;
+    }
+
     setQty(e.target.value);
 
-    if (liquidity && liquidity < e.target.valueAsNumber) {
+    if (liquidity.lt(parseFixed(e.target.value || '0', decimals))) {
       return setError({
         status: true,
         message: translations[lang].availableLiquidityError
+      });
+    }
+
+    if (maxBorrowAssets.lt(parseFixed(e.target.value || '0', decimals))) {
+      return setError({
+        status: true,
+        message: translations[lang].borrowLimit
       });
     }
 
@@ -261,12 +287,9 @@ function FloatingBorrowModal({ data, editable, closeModal }: Props) {
   async function checkLiquidity() {
     if (!accountData) return;
 
-    const decimals = accountData[symbol].decimals;
+    const limit = accountData[symbol].floatingAvailableAssets;
 
-    const limit =
-      data && ethers.utils.formatUnits(accountData[symbol].floatingAvailableAssets, decimals);
-
-    limit && setLiquidity(parseFloat(limit));
+    limit && setLiquidity(limit);
   }
 
   async function checkCollateral() {
@@ -328,13 +351,6 @@ function FloatingBorrowModal({ data, editable, closeModal }: Props) {
 
   function getHealthFactor(healthFactor: HealthFactor) {
     setHealthFactor(healthFactor);
-
-    if (accountData && symbol) {
-      const collateralFactor = ethers.utils.formatEther(
-        accountData[symbol.toUpperCase()]?.adjustFactor
-      );
-      setCollateralFactor(parseFloat(collateralFactor));
-    }
   }
 
   async function getFixedLenderContract() {
@@ -407,13 +423,7 @@ function FloatingBorrowModal({ data, editable, closeModal }: Props) {
               ) : (
                 <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
               )}
-              <ModalRowBorrowLimit
-                healthFactor={healthFactor}
-                collateralFactor={collateralFactor}
-                qty={qty}
-                symbol={symbol!}
-                operation="borrow"
-              />
+              <ModalRowBorrowLimit qty={qty} symbol={symbol!} operation="borrow" />
               {error && error.component != 'gas' && <ModalError message={error.message} />}
               <div className={styles.buttonContainer}>
                 <Button

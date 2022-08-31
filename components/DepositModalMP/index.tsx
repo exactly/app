@@ -213,6 +213,15 @@ function DepositModalMP({ data, closeModal }: Props) {
   }
 
   function handleInputChange(e: ChangeEvent<HTMLInputElement>) {
+    if (!accountData) return;
+    const decimals = accountData[symbol.toUpperCase()].decimals;
+
+    if (e.target.value.includes('.')) {
+      const regex = /[^,.]*$/g;
+      const inputDecimals = regex.exec(e.target.value)![0];
+      if (inputDecimals.length > decimals) return;
+    }
+
     if (step != 1 && walletBalance && e.target.valueAsNumber > parseFloat(walletBalance)) {
       setError({
         status: true,
