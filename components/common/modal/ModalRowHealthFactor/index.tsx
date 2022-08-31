@@ -1,4 +1,4 @@
-import { useContext, useEffect, useMemo, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { parseFixed } from '@ethersproject/bignumber';
 import Image from 'next/image';
 import Skeleton from 'react-loading-skeleton';
