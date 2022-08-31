@@ -295,7 +295,7 @@ function DepositModalSP({ data, closeModal }: Props) {
     try {
       const gasPrice = (await fixedLenderWithSigner?.provider.getFeeData())?.maxFeePerGas;
 
-      const gasLimit = await getGasLimit(qty);
+      const gasLimit = await getGasLimit('1');
 
       if (gasPrice && gasLimit) {
         const total = formatFixed(gasPrice.mul(gasLimit), 18);
