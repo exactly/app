@@ -183,7 +183,7 @@ function DashboardHeader() {
 
     const { collateral, debt } = getHealthFactorData(accountData);
 
-    if (collateral.isZero() || debt.isZero()) {
+    if (!collateral.isZero() || !debt.isZero()) {
       const healthFactorData = [
         {
           label: '',
