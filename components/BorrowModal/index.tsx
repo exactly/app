@@ -36,6 +36,7 @@ import { getUnderlyingData, getSymbol } from 'utils/utils';
 import parseTimestamp from 'utils/parseTimestamp';
 import handleEth from 'utils/handleEth';
 import getOneDollar from 'utils/getOneDollar';
+import getBeforeBorrowLimit from 'utils/getBeforeBorrowLimit';
 
 import styles from './style.module.scss';
 
@@ -50,7 +51,6 @@ import ModalStatusContext from 'contexts/ModalStatusContext';
 import keys from './translations.json';
 
 import numbers from 'config/numbers.json';
-import getBeforeBorrowLimit from 'utils/getBeforeBorrowLimit';
 
 type Props = {
   data: Borrow | Deposit;

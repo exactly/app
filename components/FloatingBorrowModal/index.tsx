@@ -28,6 +28,7 @@ import { HealthFactor } from 'types/HealthFactor';
 import { getContractData } from 'utils/contracts';
 import { getUnderlyingData, getSymbol } from 'utils/utils';
 import handleEth from 'utils/handleEth';
+import getBeforeBorrowLimit from 'utils/getBeforeBorrowLimit';
 
 import styles from './style.module.scss';
 
@@ -41,7 +42,6 @@ import ModalStatusContext from 'contexts/ModalStatusContext';
 import keys from './translations.json';
 
 import numbers from 'config/numbers.json';
-import getBeforeBorrowLimit from 'utils/getBeforeBorrowLimit';
 
 type Props = {
   data: Borrow | Deposit;
