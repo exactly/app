@@ -44,7 +44,7 @@ import keys from './translations.json';
 function DepositAtMaturity() {
   const { web3Provider, walletAddress, network } = useWeb3Context();
   const { date, market } = useContext(MarketContext);
-  const { accountData } = useContext(AccountDataContext);
+  const { accountData, getAccountData } = useContext(AccountDataContext);
   const { getInstance } = useContext(ContractsContext);
 
   const lang: string = useContext(LangContext);
@@ -258,6 +258,8 @@ function DepositAtMaturity() {
       } else {
         setTx({ status: 'error', hash: txReceipt?.transactionHash });
       }
+
+      getAccountData();
     } catch (e: any) {
       console.log(e);
       setLoading(false);

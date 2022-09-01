@@ -59,7 +59,7 @@ function Item({
 }: Props) {
   const { network } = useWeb3Context();
   const fixedLender = useContext(FixedLenderContext);
-  const { accountData } = useContext(AccountDataContext);
+  const { accountData, getAccountData } = useContext(AccountDataContext);
   const { setOpen, setOperation } = useContext(ModalStatusContext);
   const { setMarket } = useContext(MarketContext);
 
@@ -233,6 +233,8 @@ function Item({
       setToggle(!toggle);
       //when it ends we stop loading
       setLoading(false);
+
+      getAccountData();
     } catch (e) {
       console.log(e);
       //if user rejects tx we change toggle status to previous, and stop loading

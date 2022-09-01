@@ -46,7 +46,7 @@ import keys from './translations.json';
 function RepayAtMaturity() {
   const { web3Provider, walletAddress, network } = useWeb3Context();
   const { date, market } = useContext(MarketContext);
-  const { accountData } = useContext(AccountDataContext);
+  const { accountData, getAccountData } = useContext(AccountDataContext);
   const { getInstance } = useContext(ContractsContext);
 
   const previewerData = useContext(PreviewerContext);
@@ -275,33 +275,41 @@ function RepayAtMaturity() {
   async function previewRepayAtMaturity() {
     if (!accountData || !symbol || !date) return;
 
-    if (qty == '') {
-      setRepayAmount('0');
-      return;
+    try {
+      if (qty == '') {
+        setRepayAmount('0');
+        return;
+      }
+
+      const decimals = accountData[symbol].decimals;
+
+      const market = fixedLenderWithSigner?.address;
+      const parsedMaturity = parseInt(date.value);
+      const parsedQtyValue = ethers.utils.parseUnits(qty, decimals);
+      const WAD = parseFixed('1', 18);
+
+      const previewerContract = getInstance(
+        previewerData.address!,
+        previewerData.abi!,
+        'previewer'
+      );
+
+      const repayAmount = await previewerContract?.previewRepayAtMaturity(
+        market,
+        parsedMaturity,
+        parsedQtyValue,
+        walletAddress
+      );
+
+      const parseSlippage = parseFixed((1 + numbers.slippage).toString(), 18);
+
+      const maximumRepayAmount = repayAmount.mul(parseSlippage).div(WAD);
+
+      setRepayAmount(Number(formatFixed(repayAmount, decimals)).toFixed(decimals));
+      setSlippage(formatFixed(maximumRepayAmount, decimals)); // = principal + fee + penalties if is late repay + slippage
+    } catch (e) {
+      console.log(e);
     }
-
-    const decimals = accountData[symbol].decimals;
-
-    const market = fixedLenderWithSigner?.address;
-    const parsedMaturity = parseInt(date.value);
-    const parsedQtyValue = ethers.utils.parseUnits(qty, decimals);
-    const WAD = parseFixed('1', 18);
-
-    const previewerContract = getInstance(previewerData.address!, previewerData.abi!, 'previewer');
-
-    const repayAmount = await previewerContract?.previewRepayAtMaturity(
-      market,
-      parsedMaturity,
-      parsedQtyValue,
-      walletAddress
-    );
-
-    const parseSlippage = parseFixed((1 + numbers.slippage).toString(), 18);
-
-    const maximumRepayAmount = repayAmount.mul(parseSlippage).div(WAD);
-
-    setRepayAmount(Number(formatFixed(repayAmount, decimals)).toFixed(decimals));
-    setSlippage(formatFixed(maximumRepayAmount, decimals)); // = principal + fee + penalties if is late repay + slippage
   }
 
   async function repay() {
@@ -347,6 +355,8 @@ function RepayAtMaturity() {
       } else {
         setTx({ status: 'error', hash: txReceipt?.transactionHash });
       }
+
+      getAccountData();
     } catch (e: any) {
       console.log(e);
       setLoading(false);

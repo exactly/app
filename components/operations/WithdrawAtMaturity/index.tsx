@@ -42,7 +42,7 @@ import keys from './translations.json';
 function WithdrawAtMaturity() {
   const { web3Provider, walletAddress, network } = useWeb3Context();
   const { date, market } = useContext(MarketContext);
-  const { accountData } = useContext(AccountDataContext);
+  const { accountData, getAccountData } = useContext(AccountDataContext);
   const { getInstance } = useContext(ContractsContext);
 
   const lang: string = useContext(LangContext);
@@ -182,17 +182,21 @@ function WithdrawAtMaturity() {
 
     const previewerContract = getInstance(previewerData.address!, previewerData.abi!, 'previewer');
 
-    const withdrawAmount = await previewerContract?.previewWithdrawAtMaturity(
-      market,
-      parsedMaturity,
-      parsedQtyValue
-    );
+    try {
+      const withdrawAmount = await previewerContract?.previewWithdrawAtMaturity(
+        market,
+        parsedMaturity,
+        parsedQtyValue
+      );
 
-    const parseSlippage = parseFixed((1 - numbers.slippage).toString(), 18);
-    const minimumWithdrawAmount = withdrawAmount.mul(parseSlippage).div(WAD);
+      const parseSlippage = parseFixed((1 - numbers.slippage).toString(), 18);
+      const minimumWithdrawAmount = withdrawAmount.mul(parseSlippage).div(WAD);
 
-    setWithdrawAmount(Number(formatFixed(withdrawAmount, decimals)).toFixed(decimals));
-    setSlippage(formatFixed(minimumWithdrawAmount, decimals));
+      setWithdrawAmount(Number(formatFixed(withdrawAmount, decimals)).toFixed(decimals));
+      setSlippage(formatFixed(minimumWithdrawAmount, decimals));
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   async function withdraw() {
@@ -235,6 +239,8 @@ function WithdrawAtMaturity() {
       } else {
         setTx({ status: 'error', hash: txReceipt?.transactionHash });
       }
+
+      getAccountData();
     } catch (e: any) {
       console.log(e);
       setLoading(false);
