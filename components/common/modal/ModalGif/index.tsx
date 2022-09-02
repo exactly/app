@@ -76,7 +76,7 @@ function ModalGif({ tx, tryAgain }: Props) {
         </a>
       )}
 
-      {tx.status == 'success' && (
+      {tx.status == 'error' && (
         <div className={styles.buttonContainer}>
           <Button text={translations[lang].errorButton} onClick={tryAgain} />
         </div>
