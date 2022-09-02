@@ -28,7 +28,7 @@ function ModalGif({ tx, tryAgain }: Props) {
   const translations: { [key: string]: LangKeys } = keys;
 
   const options: Dictionary<ModalCases> = {
-    loading: {
+    processing: {
       img: '',
       title: translations[lang].loadingTitle,
       text: translations[lang].loadingText
@@ -39,7 +39,7 @@ function ModalGif({ tx, tryAgain }: Props) {
       text: translations[lang].successText
     },
     error: {
-      img: '',
+      img: '/img/icons/errorTick.svg',
       title: translations[lang].errorTitle,
       text: translations[lang].errorText
     }
@@ -48,8 +48,8 @@ function ModalGif({ tx, tryAgain }: Props) {
   return (
     <section className={styles.container}>
       <section className={styles.header}>
-        {tx.status == 'success' && <Image src={options[tx.status].img} width={74} height={74} />}
-        {tx.status == 'loading' && <Loading color="primary" />}
+        {tx.status != 'processing' && <Image src={options[tx.status].img} width={74} height={74} />}
+        {tx.status == 'processing' && <Loading color="primary" />}
         <section className={styles.titleContainer}>
           <h3 className={styles.title}>{options[tx.status].title}</h3>
           <p className={styles.description}>{options[tx.status].text}</p>

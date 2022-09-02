@@ -49,19 +49,17 @@ function ModalRowHealthFactor({ qty, symbol, operation, healthFactorCallback }: 
   }, [healthFactor, newQty, accountData]);
 
   function getAmount() {
-    const zero = ethers.constants.Zero;
-
-    if (!accountData || !symbol) return zero;
+    if (!accountData || !symbol) return;
 
     if (qty == '') {
-      return zero;
+      return ethers.constants.Zero;
     }
     const decimals = accountData[symbol].decimals;
 
     const regex = /[^,.]*$/g;
     const inputDecimals = regex.exec(qty)![0];
 
-    if (inputDecimals.length > decimals) return zero;
+    if (inputDecimals.length > decimals) return;
 
     const newQty = parseFixed(qty, decimals);
 

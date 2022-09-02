@@ -37,19 +37,17 @@ function ModalRowBorrowLimit({ qty, symbol, operation, line }: Props) {
   }, [accountData, symbol, newQty, operation]);
 
   function getAmount() {
-    const zero = ethers.constants.Zero;
-
-    if (!accountData || !symbol) return zero;
+    if (!accountData || !symbol) return;
 
     if (qty == '') {
-      return zero;
+      return ethers.constants.Zero;
     }
 
     const decimals = accountData[symbol].decimals;
     const regex = /[^,.]*$/g;
     const inputDecimals = regex.exec(qty)![0];
 
-    if (inputDecimals.length > decimals) return zero;
+    if (inputDecimals.length > decimals) return;
 
     const newQty = parseFixed(qty, decimals);
 
@@ -57,7 +55,7 @@ function ModalRowBorrowLimit({ qty, symbol, operation, line }: Props) {
   }
 
   function getBorrowLimits() {
-    if (!accountData) return [undefined, undefined];
+    if (!accountData || !newQty) return [undefined, undefined];
 
     const oraclePrice = accountData[symbol.toUpperCase()].oraclePrice;
     const decimals = accountData[symbol.toUpperCase()].decimals;
