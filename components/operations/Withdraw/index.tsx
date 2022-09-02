@@ -334,7 +334,6 @@ function Withdraw() {
               disabled={parseFloat(qty) <= 0 || !qty || loading || error?.status}
               onClick={needsApproval ? approve : withdraw}
               loading={loading}
-              color="primary"
             />
           </div>
         </>
