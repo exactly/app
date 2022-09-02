@@ -366,7 +366,6 @@ function Repay() {
               disabled={parseFloat(qty) <= 0 || !qty || loading}
               onClick={needsApproval ? approve : repay}
               loading={loading}
-              color="secondary"
             />
           </div>
         </>
