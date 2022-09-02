@@ -129,7 +129,7 @@ function FaucetModal({ closeModal }: Props) {
               return (
                 <div className={styles.assetContainer} key={asset}>
                   <p className={styles.asset}>
-                    <Image src={`/img/assets/weth.png`} alt={asset} width={40} height={40} />
+                    <Image src={`/img/assets/weth.svg`} alt={asset} width={40} height={40} />
                     {asset}
                   </p>
                   <div className={styles.buttonContainer}>
@@ -144,7 +144,7 @@ function FaucetModal({ closeModal }: Props) {
               <div className={styles.assetContainer} key={asset}>
                 <p className={styles.asset}>
                   <Image
-                    src={`/img/assets/${asset.toLowerCase()}.png`}
+                    src={`/img/assets/${asset.toLowerCase()}.svg`}
                     alt={asset}
                     width={40}
                     height={40}

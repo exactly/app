@@ -26,7 +26,7 @@ const Pools: NextPage<Props> = () => {
         <SmartPoolList />
       </div>
 
-      <MaturitySelector title={dictionary.maturityPools} />
+      <MaturitySelector title={dictionary.maturityPools} subtitle={dictionary.maturities} />
 
       <MarketsList />
       <Footer />

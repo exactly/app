@@ -36,7 +36,11 @@ function Navbar() {
 
     return {
       href: `/assets/${assetSymbol}`.toLowerCase(),
-      name: assetSymbol
+      name: assetSymbol,
+      image:
+        assetSymbol == 'ETH'
+          ? `/img/assets/weth.svg`
+          : `/img/assets/${assetSymbol.toLowerCase()}.svg`
     };
   });
 
@@ -120,7 +124,10 @@ function Navbar() {
                           {assetsRoutes.map((asset: any) => {
                             return (
                               <Link href={asset.href} key={asset.name}>
-                                {asset.name}
+                                <div className={styles.asset}>
+                                  <Image src={asset.image} width={20} height={20} />{' '}
+                                  <p className={styles.assetName}>{asset.name}</p>
+                                </div>
                               </Link>
                             );
                           })}

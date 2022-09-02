@@ -86,7 +86,7 @@ function AssetSelector({ title, defaultAddress, onChange }: Props) {
         label: (
           <div className={style.labelContainer}>
             <Image
-              src={`/img/assets/${marketData?.symbol.toLowerCase()}.png`}
+              src={`/img/assets/${marketData?.symbol.toLowerCase()}.svg`}
               alt={parseSymbol(marketData.name)}
               className={style.marketImage}
               width={24}

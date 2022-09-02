@@ -19,6 +19,18 @@
       font-weight: bold;
     }
   }
+
+  .maturityContainer {
+    display: flex;
+    gap: var(--u);
+    align-items: center;
+
+    .title {
+      font-size: var(--font-14);
+      margin: 0;
+      font-weight: 500;
+    }
+  }
 }
 
 .sectionContainerEditable {

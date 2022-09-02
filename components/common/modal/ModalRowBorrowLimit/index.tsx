@@ -123,9 +123,7 @@ function ModalRowBorrowLimit({ qty, symbol, operation, line }: Props) {
         <span className={styles.value}>
           {beforeBorrowLimit && `$${formatNumber(beforeBorrowLimit, 'usd') || <Skeleton />}`}
         </span>
-        <div className={styles.imageContainer}>
-          <Image src="/img/icons/arrowRight.svg" alt="arrowRight" layout="fill" />
-        </div>
+        <Image src="/img/icons/arrowRight.svg" alt="arrowRight" width={20} height={20} />
         <span className={styles.value}>
           {afterBorrowLimit && `$${formatNumber(afterBorrowLimit, 'usd') || <Skeleton />}`}
         </span>

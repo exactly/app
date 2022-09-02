@@ -90,7 +90,7 @@ function SmartPoolInfo({ symbol }: Props) {
         <li className={styles.header}>
           <div className={styles.assetInfo}>
             <Image
-              src={`/img/assets/${symbol.toLowerCase()}.png`}
+              src={`/img/assets/${symbol.toLowerCase()}.svg`}
               alt={symbol}
               width={40}
               height={40}
