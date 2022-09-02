@@ -11,10 +11,11 @@ import { Date } from 'types/Date';
 
 type Props = {
   title?: string;
+  subtitle?: string;
   editable?: boolean;
 };
 
-function MaturitySelector({ title, editable }: Props) {
+function MaturitySelector({ title, subtitle, editable }: Props) {
   const { date, setDate, dates } = useContext(AddressContext);
 
   function handleChange(option: Date) {
@@ -30,17 +31,20 @@ function MaturitySelector({ title, editable }: Props) {
           <p className={style.title}>{title}</p>
         </div>
       )}
-      {dates.length !== 0 ? (
-        <Select
-          options={dates}
-          onChange={handleChange}
-          placeholder={date?.value ?? dates[0]?.label}
-          value={date?.label ?? dates[0]?.value}
-          editable={editable}
-        />
-      ) : (
-        <Skeleton width={140} height={48} />
-      )}
+      <div className={style.maturityContainer}>
+        {subtitle && <p className={style.title}>{subtitle}</p>}
+        {dates.length !== 0 ? (
+          <Select
+            options={dates}
+            onChange={handleChange}
+            placeholder={date?.value ?? dates[0]?.label}
+            value={date?.label ?? dates[0]?.value}
+            editable={editable}
+          />
+        ) : (
+          <Skeleton width={140} height={48} />
+        )}
+      </div>
     </section>
   );
 }

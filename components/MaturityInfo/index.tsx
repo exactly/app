@@ -93,7 +93,7 @@ function MaturityInfo({ maturity, symbol, fixedLender }: Props) {
           <div className={styles.assetInfo}>
             <Image
               className={styles.assetImage}
-              src={`/img/assets/${symbol.toLowerCase()}.png`}
+              src={`/img/assets/${symbol.toLowerCase()}.svg`}
               alt={symbol}
               width={40}
               height={40}

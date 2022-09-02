@@ -14,7 +14,7 @@ function formatNumber(number: string | number, symbol: string, standard?: boolea
   return new Intl.NumberFormat('en-GB', {
     notation: standard ? 'standard' : 'compact',
     compactDisplay: 'short',
-    minimumFractionDigits: 0,
+    minimumFractionDigits: 2,
     maximumFractionDigits: dictionary[symbol.toUpperCase()] ?? 2
   }).format(parsedNumber);
 }

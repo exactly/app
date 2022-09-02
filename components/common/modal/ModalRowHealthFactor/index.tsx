@@ -1,11 +1,11 @@
-import { useContext, useEffect, useMemo, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { parseFixed } from '@ethersproject/bignumber';
 import Image from 'next/image';
 import Skeleton from 'react-loading-skeleton';
+import { BigNumber, ethers } from 'ethers';
 
 import { LangKeys } from 'types/Lang';
 import { HealthFactor } from 'types/HealthFactor';
-import { BigNumber } from 'ethers';
 
 import parseHealthFactor from 'utils/parseHealthFactor';
 import getHealthFactorData from 'utils/getHealthFactorData';
@@ -48,7 +48,11 @@ function ModalRowHealthFactor({ qty, symbol, operation, healthFactorCallback }: 
   }, [symbol, newQty, accountData]);
 
   function getAmount() {
-    if (!accountData || !symbol || !qty) return;
+    if (!accountData || !symbol) return;
+
+    if (qty == '') {
+      return setNewQty(ethers.constants.Zero);
+    }
 
     const decimals = accountData[symbol].decimals;
     const newQty = parseFixed(qty, decimals);
@@ -133,9 +137,7 @@ function ModalRowHealthFactor({ qty, symbol, operation, healthFactorCallback }: 
       <p className={styles.text}>{translations[lang].healthFactor}</p>
       <section className={styles.values}>
         <span className={styles.value}>{(symbol && beforeHealthFactor) || <Skeleton />}</span>
-        <div className={styles.imageContainer}>
-          <Image src="/img/icons/arrowRight.svg" alt="arrowRight" layout="fill" />
-        </div>
+        <Image src="/img/icons/arrowRight.svg" alt="arrowRight" width={20} height={20} />
         <span className={styles.value}>{(symbol && afterHealthFactor) || <Skeleton />}</span>
       </section>
     </section>

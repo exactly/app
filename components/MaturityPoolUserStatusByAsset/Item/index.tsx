@@ -112,7 +112,7 @@ function Item({ type, amount, fee, maturityDate, showModal, symbol, data, decima
       <summary className={styles.summary}>
         <div className={styles.symbol}>
           <Image
-            src={`/img/assets/${symbol?.toLowerCase()}.png`}
+            src={`/img/assets/${symbol?.toLowerCase()}.svg`}
             alt={symbol}
             width={40}
             height={40}

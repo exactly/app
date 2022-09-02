@@ -37,7 +37,7 @@ function MarketsList() {
 
   useEffect(() => {
     getPreviewFixed();
-  }, [network, previewerData]);
+  }, [network, previewerData, accountData]);
 
   useEffect(() => {
     getMarkets();

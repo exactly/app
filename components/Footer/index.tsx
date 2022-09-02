@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import Image from 'next/image';
 
 import LangContext from 'contexts/LangContext';
@@ -15,9 +15,17 @@ const Footer = () => {
 
   const date = new Date();
 
+  const [image, setImage] = useState<string>('/img/isologo.svg');
+
+  useEffect(() => {
+    if (document?.body?.dataset?.theme == 'dark') {
+      setImage('/img/isologo-white.svg');
+    }
+  }, []);
+
   return (
     <footer className={styles.footer}>
-      <Image src="/img/isologo.svg" alt="exactly logo" width={24} height={24} />
+      <Image src={image} alt="exactly logo" width={24} height={24} />
       <div>
         <ul className={styles.links}>
           <li>

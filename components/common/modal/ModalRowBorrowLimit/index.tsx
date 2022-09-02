@@ -12,7 +12,9 @@ import AccountDataContext from 'contexts/AccountDataContext';
 import styles from './style.module.scss';
 
 import keys from './translations.json';
+
 import formatNumber from 'utils/formatNumber';
+import getBeforeBorrowLimit from 'utils/getBeforeBorrowLimit';
 
 type Props = {
   qty: string;
@@ -35,7 +37,11 @@ function ModalRowBorrowLimit({ qty, symbol, operation, line }: Props) {
   }, [symbol, newQty]);
 
   function getAmount() {
-    if (!accountData || !symbol || !qty) return;
+    if (!accountData || !symbol) return;
+
+    if (qty == '') {
+      return setNewQty(ethers.constants.Zero);
+    }
 
     const decimals = accountData[symbol].decimals;
 
@@ -49,12 +55,19 @@ function ModalRowBorrowLimit({ qty, symbol, operation, line }: Props) {
 
     const oraclePrice = accountData[symbol.toUpperCase()].oraclePrice;
     const decimals = accountData[symbol.toUpperCase()].decimals;
-    const maxBorrowAssets = accountData[symbol.toUpperCase()].maxBorrowAssets;
     const adjustFactor = accountData[symbol.toUpperCase()].adjustFactor;
     const isCollateral = accountData[symbol.toUpperCase()].isCollateral;
+
     const WAD = parseFixed('1', 18);
 
-    const beforeBorrowLimitUSD = maxBorrowAssets.mul(oraclePrice).div(parseFixed('1', decimals));
+    const beforeBorrowLimitUSD = getBeforeBorrowLimit(
+      accountData,
+      symbol,
+      oraclePrice,
+      decimals,
+      operation
+    );
+
     const newQtyUsd = newQty.mul(oraclePrice).div(parseFixed('1', decimals));
 
     setBeforeBorrowLimit(Number(formatFixed(beforeBorrowLimitUSD, 18)).toFixed(2));
@@ -110,9 +123,7 @@ function ModalRowBorrowLimit({ qty, symbol, operation, line }: Props) {
         <span className={styles.value}>
           {beforeBorrowLimit && `$${formatNumber(beforeBorrowLimit, 'usd') || <Skeleton />}`}
         </span>
-        <div className={styles.imageContainer}>
-          <Image src="/img/icons/arrowRight.svg" alt="arrowRight" layout="fill" />
-        </div>
+        <Image src="/img/icons/arrowRight.svg" alt="arrowRight" width={20} height={20} />
         <span className={styles.value}>
           {afterBorrowLimit && `$${formatNumber(afterBorrowLimit, 'usd') || <Skeleton />}`}
         </span>

@@ -13,9 +13,21 @@ import { PreviewerProvider } from 'contexts/PreviewerContext';
 import { AccountDataProvider } from 'contexts/AccountDataContext';
 import { FixedLenderProvider } from 'contexts/FixedLenderContext';
 import { AuditorProvider } from 'contexts/AuditorContext';
+import { SkeletonTheme } from 'react-loading-skeleton';
+import { useEffect } from 'react';
 
 function MyApp({ Component, pageProps }: AppProps) {
   const props = { ...pageProps };
+
+  useEffect(() => {
+    if (window?.localStorage?.getItem('theme')) {
+      const theme = JSON.parse(window.localStorage.getItem('theme')!);
+
+      if (theme && theme != '') {
+        document.body.dataset.theme = theme;
+      }
+    }
+  }, []);
 
   return (
     <>
@@ -45,7 +57,12 @@ function MyApp({ Component, pageProps }: AppProps) {
                 <FixedLenderProvider>
                   <AddressProvider>
                     <ModalStatusProvider>
-                      <Component {...props} />
+                      <SkeletonTheme
+                        baseColor="var(--skeleton-base)"
+                        highlightColor="var(--skeleton-highlight)"
+                      >
+                        <Component {...props} />
+                      </SkeletonTheme>
                     </ModalStatusProvider>
                   </AddressProvider>
                 </FixedLenderProvider>

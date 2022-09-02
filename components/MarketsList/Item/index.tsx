@@ -145,7 +145,7 @@ function Item({ market, type, fixedMarketData }: Props) {
         <div className={style.symbol}>
           {(market && (
             <Image
-              src={`/img/assets/${market?.symbol.toLowerCase()}.png`}
+              src={`/img/assets/${market?.symbol.toLowerCase()}.svg`}
               alt={market?.symbol}
               width={40}
               height={40}

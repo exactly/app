@@ -13,15 +13,12 @@
     gap: var(--u);
     position: relative;
     font-weight: 600;
+    min-width: fit-content;
+    align-items: center;
 
     .value {
       min-width: var(--u6);
       text-align: right;
-    }
-
-    .imageContainer {
-      width: var(--u2);
-      height: var(--u2);
     }
   }
 }

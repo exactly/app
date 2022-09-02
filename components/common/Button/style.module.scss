@@ -26,7 +26,7 @@
 }
 
 .tertiary {
-  background: var(--white);
+  background: var(--background);
   color: var(--primary);
   border: 1px solid var(--primary);
 
@@ -39,7 +39,7 @@
 }
 
 .quaternary {
-  background: var(--white);
+  background: var(--background);
   color: var(--secondary);
   border: 1px solid var(--secondary);
 
@@ -60,12 +60,12 @@
 
 .secondaryDisabled {
   color: var(--gray-200);
-  background: var(--white);
+  background: var(--background);
   border: 1px solid var(--gray-200);
 
   &:hover {
     color: var(--gray-200);
-    background: var(--white);
+    background: var(--background);
     border: 1px solid var(--gray-200);
   }
 }

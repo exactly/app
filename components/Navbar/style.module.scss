@@ -5,7 +5,7 @@
   padding: var(--u2);
   box-sizing: border-box;
   box-shadow: var(--shadow-header-mob);
-  background: var(--white);
+  background-color: var(--background);
   top: 0;
   z-index: 4;
 
@@ -22,7 +22,7 @@
 
       .logo {
         cursor: pointer;
-        width: 170px;
+        width: 110px;
       }
 
       .linksContainer {
@@ -53,16 +53,27 @@
           position: absolute;
           top: var(--u3);
           left: calc(var(--u4) * -1);
-          background-color: #fff;
+          background-color: var(--background);
           width: 100px;
           z-index: 10;
           border: 1px solid var(--primary);
           border-radius: var(--smallUnit);
+          gap: var(--u);
+
+          .asset {
+            display: flex;
+            gap: var(--u);
+            align-items: center;
+            padding: var(--u);
+            .assetName {
+              margin: 0;
+            }
+          }
         }
 
         .dropdownContent a {
           display: flex;
-          flex-direction: column;
+          flex-direction: row;
           text-align: left;
           padding: 10px 4px 10px 14px;
           font-weight: 400;
@@ -120,6 +131,11 @@
         display: flex;
         align-items: center;
       }
+    }
+
+    .theme {
+      cursor: pointer;
+      margin-left: var(--u2);
     }
   }
 }

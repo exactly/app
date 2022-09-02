@@ -1,5 +1,6 @@
 {
   "maturityPools": "Fixed Rate Pools",
+  "maturities": "Maturities:",
   "deposit": "Deposit",
   "borrow": "Borrow"
 }

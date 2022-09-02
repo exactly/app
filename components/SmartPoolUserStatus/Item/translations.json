@@ -3,7 +3,10 @@
     "deposit": "Deposit",
     "withdraw": "Withdraw",
     "borrow": "Borrow",
-    "repay": "Repay"
+    "repay": "Repay",
+    "activeBorrow": "You can't disable collateral on this asset because you have an active borrow",
+    "underCollateral": "Disabling this collateral will make your health factor less than 1",
+    "exitMarket": "Disabling this asset as collateral affects your borrowing power and Health Factor"
   },
   "es": {}
 }

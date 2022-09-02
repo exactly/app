@@ -13,9 +13,7 @@ function SkeletonModalRowBeforeAfter({ text }: Props) {
       <p className={styles.text}>{text}</p>
       <section className={styles.values}>
         <Skeleton width={40} />
-        <div className={styles.imageContainer}>
-          <Image src="/img/icons/arrowRight.svg" alt="arrowRight" layout="fill" />
-        </div>
+        <Image src="/img/icons/arrowRight.svg" alt="arrowRight" width={20} height={20} />
         <Skeleton width={40} />
       </section>
     </section>

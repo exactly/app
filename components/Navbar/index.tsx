@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
@@ -23,6 +23,9 @@ function Navbar() {
   const { connect, disconnect, walletAddress, network } = useWeb3Context();
   const fixedLenderData = useContext(FixedLenderContext);
 
+  const [image, setImage] = useState<string>('/img/logo.png');
+  const [icon, setIcon] = useState<string>('/img/icons/moon.svg');
+
   const router = useRouter();
   const { pathname } = router;
 
@@ -33,7 +36,11 @@ function Navbar() {
 
     return {
       href: `/assets/${assetSymbol}`.toLowerCase(),
-      name: assetSymbol
+      name: assetSymbol,
+      image:
+        assetSymbol == 'ETH'
+          ? `/img/assets/weth.svg`
+          : `/img/assets/${assetSymbol.toLowerCase()}.svg`
     };
   });
 
@@ -56,6 +63,27 @@ function Navbar() {
     // { pathname: '/nerd-mode', href: '/', name: translations[lang].nerdMode }
   ];
 
+  useEffect(() => {
+    if (document?.body?.dataset?.theme == 'dark') {
+      setImage('/img/logo-white.png');
+      setIcon('/img/icons/sun.svg');
+    }
+  }, []);
+
+  function changeTheme() {
+    if (document.body.dataset.theme == 'light') {
+      document.body.dataset.theme = 'dark';
+      setImage('/img/logo-white.png');
+      setIcon('/img/icons/sun.svg');
+      localStorage.setItem('theme', JSON.stringify('dark'));
+    } else {
+      document.body.dataset.theme = 'light';
+      setImage('/img/logo.png');
+      setIcon('/img/icons/moon.svg');
+      localStorage.setItem('theme', JSON.stringify('light'));
+    }
+  }
+
   return (
     <nav className={styles.navBar}>
       <div className={styles.wrapper}>
@@ -63,7 +91,7 @@ function Navbar() {
           <Link href="/markets">
             <div className={styles.logo}>
               <Image
-                src="/img/logo.png"
+                src={image}
                 alt="Exactly Logo"
                 layout="responsive"
                 width={5986}
@@ -96,7 +124,10 @@ function Navbar() {
                           {assetsRoutes.map((asset: any) => {
                             return (
                               <Link href={asset.href} key={asset.name}>
-                                {asset.name}
+                                <div className={styles.asset}>
+                                  <Image src={asset.image} width={20} height={20} />{' '}
+                                  <p className={styles.assetName}>{asset.name}</p>
+                                </div>
                               </Link>
                             );
                           })}
@@ -142,6 +173,7 @@ function Navbar() {
           >
             <strong>Give us feedback here!</strong>
           </a>
+
           {connect && !walletAddress ? (
             <div className={styles.buttonContainer}>
               <Button text="Connect Wallet" onClick={() => connect()} />
@@ -154,6 +186,9 @@ function Navbar() {
               </div>
             )
           )}
+          <div className={styles.theme}>
+            <Image src={icon} width={16} height={16} onClick={changeTheme} />
+          </div>
         </div>
       </div>
     </nav>
