@@ -5,7 +5,7 @@
   padding: var(--u2);
   box-sizing: border-box;
   box-shadow: var(--shadow-header-mob);
-  background: var(--white);
+  background-color: var(--background);
   top: 0;
   z-index: 4;
 
@@ -53,7 +53,7 @@
           position: absolute;
           top: var(--u3);
           left: calc(var(--u4) * -1);
-          background-color: #fff;
+          background-color: var(--background);
           width: 100px;
           z-index: 10;
           border: 1px solid var(--primary);
@@ -120,6 +120,11 @@
         display: flex;
         align-items: center;
       }
+    }
+
+    .theme {
+      cursor: pointer;
+      margin-left: var(--u2);
     }
   }
 }

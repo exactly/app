@@ -5,7 +5,7 @@
   padding: var(--u2);
   box-sizing: border-box;
   box-shadow: var(--shadow);
-  background: var(--white);
+  background: var(--background);
   z-index: 3;
   top: 0;
   display: none;
@@ -48,7 +48,7 @@
   gap: var(--u3);
   list-style: none;
   font-weight: 600;
-  background: var(--white);
+  background: var(--background);
   margin: 0;
   padding: 0;
   text-align: center;
@@ -76,6 +76,11 @@
     align-items: center;
     justify-content: center;
     gap: var(--smallUnit);
+  }
+
+  .theme {
+    @extend .disconnect;
+    background: none;
   }
 
   .active {

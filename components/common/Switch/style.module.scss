@@ -12,7 +12,7 @@
   cursor: pointer;
   width: var(--u6);
   height: var(--u3);
-  background: var(--white);
+  background: var(--background);
   border-radius: var(--u6);
   position: relative;
   border: 1px solid var(--primary);
@@ -42,7 +42,7 @@
 
 .labelOff {
   @extend .label;
-  background: var(--white);
+  background: var(--background);
   border: 1px solid var(--gray-200);
 
   .button {

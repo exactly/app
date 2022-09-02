@@ -1,4 +1,4 @@
-import { useState, useContext } from 'react';
+import { useState, useContext, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
@@ -22,6 +22,8 @@ function MobileNavbar() {
   const { network, walletAddress, connect, disconnect } = useWeb3Context();
 
   const [open, setOpen] = useState<Boolean>(false);
+  const [image, setImage] = useState<string>('/img/logo.png');
+  const [icon, setIcon] = useState<string>('/img/icons/moon.svg');
 
   const router = useRouter();
   const { pathname } = router;
@@ -49,6 +51,27 @@ function MobileNavbar() {
     // { pathname: '/nerd-mode', href: '/', name: translations[lang].nerdMode }
   ];
 
+  useEffect(() => {
+    if (document?.body?.dataset?.theme == 'dark') {
+      setImage('/img/logo-white.png');
+      setIcon('/img/icons/sun.svg');
+    }
+  }, []);
+
+  function changeTheme() {
+    if (document.body.dataset.theme == 'light') {
+      document.body.dataset.theme = 'dark';
+      setImage('/img/logo-white.png');
+      setIcon('/img/icons/sun.svg');
+      localStorage.setItem('theme', JSON.stringify('dark'));
+    } else {
+      document.body.dataset.theme = 'light';
+      setImage('/img/logo.png');
+      setIcon('/img/icons/moon.svg');
+      localStorage.setItem('theme', JSON.stringify('light'));
+    }
+  }
+
   return (
     <>
       {open && <Overlay closeModal={handleMenu} />}
@@ -57,7 +80,7 @@ function MobileNavbar() {
           <Link href="/markets">
             <div className={styles.logo}>
               <Image
-                src="/img/logo.png"
+                src={image}
                 alt="Exactly Logo"
                 layout="responsive"
                 width={5986}
@@ -125,6 +148,9 @@ function MobileNavbar() {
               </li>
             );
           })}
+          <li className={styles.theme} onClick={changeTheme}>
+            <Image src={icon} width={16} height={16} />
+          </li>
           {walletAddress && (
             <li className={styles.disconnect} onClick={() => disconnect && disconnect()}>
               <Image src="/img/icons/power.svg" width={24} height={24} />
