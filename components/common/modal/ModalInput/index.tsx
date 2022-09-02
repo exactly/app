@@ -23,7 +23,7 @@ function ModalInput({ value, name, disabled, symbol, error, onChange, onMax }: P
   const blockedCharacters = ['e', 'E', '+', '-', ','];
 
   const newValue = useMemo(() => {
-    if (!accountData || !value || !symbol) return '0';
+    if (!accountData || !value || !symbol) return;
 
     const decimals = accountData[symbol].decimals;
     const oraclePrice = accountData[symbol].oraclePrice;
@@ -31,7 +31,7 @@ function ModalInput({ value, name, disabled, symbol, error, onChange, onMax }: P
     const regex = /[^,.]*$/g;
     const inputDecimals = regex.exec(value)![0];
 
-    if (inputDecimals.length > decimals) return '0';
+    if (inputDecimals.length > decimals) return;
 
     const parsedValue = parseFixed(value, decimals);
     const WAD = parseFixed('1', 18);
@@ -65,7 +65,9 @@ function ModalInput({ value, name, disabled, symbol, error, onChange, onMax }: P
         autoFocus
       />
       <p className={styles.translatedValue}>
-        {value == '' || !value || !symbol ? '$0' : `$${formatNumber(newValue, symbol)}`}
+        {value == '' || !value || !symbol || !newValue
+          ? '$0'
+          : `$${formatNumber(newValue, symbol)}`}
       </p>
       {onMax && (
         <p className={styles.max} onClick={onMax}>
