@@ -76,7 +76,7 @@ function Wallet({ walletAddress, cogwheel = true, network, disconnect }: Props) 
         <div className={styles.walletContainer}>
           {walletAddress && (
             <p className={styles.disconnect} onClick={() => disconnect && disconnect()}>
-              <Image src="/img/icons/power.svg" width={24} height={24} />
+              <Image src="/img/icons/power.svg" alt="power" width={24} height={24} />
               {translations[lang].disconnect}
             </p>
           )}

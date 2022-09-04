@@ -107,7 +107,12 @@ function Navbar() {
                             return (
                               <Link href={asset.href} key={asset.name}>
                                 <div className={styles.asset}>
-                                  <Image src={asset.image} width={20} height={20} />{' '}
+                                  <Image
+                                    src={asset.image}
+                                    alt={asset.name}
+                                    width={20}
+                                    height={20}
+                                  />{' '}
                                   <p className={styles.assetName}>{asset.name}</p>
                                 </div>
                               </Link>
@@ -171,6 +176,7 @@ function Navbar() {
           <div className={styles.theme}>
             <Image
               src={theme == 'light' ? '/img/icons/moon.svg' : '/img/icons/sun.svg'}
+              alt="theme toggler"
               width={16}
               height={16}
               onClick={changeTheme}

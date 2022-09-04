@@ -131,13 +131,14 @@ function MobileNavbar() {
           <li className={styles.theme} onClick={changeTheme}>
             <Image
               src={theme == 'light' ? '/img/icons/moon.svg' : '/img/icons/sun.svg'}
+              alt="theme toggler"
               width={16}
               height={16}
             />
           </li>
           {walletAddress && (
             <li className={styles.disconnect} onClick={() => disconnect && disconnect()}>
-              <Image src="/img/icons/power.svg" width={24} height={24} />
+              <Image src="/img/icons/power.svg" alt="power" width={24} height={24} />
               {translations[lang].disconnect}
             </li>
           )}
