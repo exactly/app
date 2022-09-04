@@ -75,8 +75,8 @@ function Navbar() {
                 src={theme == 'light' ? '/img/logo.png' : '/img/logo-white.png'}
                 alt="Exactly Logo"
                 layout="responsive"
-                width={5986}
-                height={1657}
+                width={187}
+                height={52}
               />
             </div>
           </Link>
