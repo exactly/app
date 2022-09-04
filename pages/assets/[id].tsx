@@ -31,7 +31,7 @@ interface Props {
   symbol: string;
 }
 
-const Asset: NextPage<Props> = ({ symbol }) => {
+const Asset: NextPage<Props> = ({ symbol = 'DAI' }) => {
   const { network } = useWeb3Context();
   const { dates } = useContext(AddressContext);
   const fixedLenderData = useContext(FixedLenderContext);
