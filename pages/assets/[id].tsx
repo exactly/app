@@ -146,6 +146,6 @@ export const getStaticProps: GetStaticProps = async (context) => {
 export async function getStaticPaths() {
   return {
     paths: ['/assets/dai', '/assets/eth', '/assets/usdc', '/assets/wbtc'],
-    fallback: true
+    fallback: false
   };
 }
