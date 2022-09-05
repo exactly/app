@@ -9,7 +9,7 @@
   padding: var(--u3) var(--u9);
   display: flex;
   flex-direction: column;
-  z-index: 6;
+  z-index: var(--layer-6);
   border-radius: var(--smallUnit);
 }
 

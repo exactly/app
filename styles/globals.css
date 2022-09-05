@@ -20,7 +20,7 @@ a {
 }
 
 .web3modal-modal-lightbox {
-  z-index: 10 !important;
+  z-index: var(--layer-10) !important;
 }
 
 html::-webkit-scrollbar-track {

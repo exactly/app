@@ -44,6 +44,17 @@
   --secondary: #34c53a;
   --secondary-hover: #26952a;
 
+  /* z-index */
+  --layer-0: -1;
+  --layer-1: 1;
+  --layer-2: 2;
+  --layer-3: 3;
+  --layer-4: 4;
+  --layer-5: 5;
+  --layer-6: 6;
+  --layer-7: 7;
+  --layer-10: 10;
+
   /* NAVBAR */
   --navbarHeight: 88px;
 
