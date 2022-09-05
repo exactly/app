@@ -1,7 +1,8 @@
 import { useContext, useEffect, useState } from 'react';
 import { parseFixed } from '@ethersproject/bignumber';
+import dynamic from 'next/dynamic';
 
-import Item from 'components/MarketsList/Item';
+const Item = dynamic(() => import('components/MarketsList/Item'));
 
 import { Market } from 'types/Market';
 import { LangKeys } from 'types/Lang';

@@ -3,8 +3,9 @@ import { ethers } from 'ethers';
 import Skeleton from 'react-loading-skeleton';
 import Link from 'next/link';
 import Image from 'next/image';
+import dynamic from 'next/dynamic';
 
-import Button from 'components/common/Button';
+const Button = dynamic(() => import('components/common/Button'));
 
 import { Market } from 'types/Market';
 import { Pool } from 'types/Pool';
