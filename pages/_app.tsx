@@ -14,20 +14,10 @@ import { AccountDataProvider } from 'contexts/AccountDataContext';
 import { FixedLenderProvider } from 'contexts/FixedLenderContext';
 import { AuditorProvider } from 'contexts/AuditorContext';
 import { SkeletonTheme } from 'react-loading-skeleton';
-import { useEffect } from 'react';
+import { ThemeProvider } from 'contexts/ThemeContext';
 
 function MyApp({ Component, pageProps }: AppProps) {
   const props = { ...pageProps };
-
-  useEffect(() => {
-    if (window?.localStorage?.getItem('theme')) {
-      const theme = JSON.parse(window.localStorage.getItem('theme')!);
-
-      if (theme && theme != '') {
-        document.body.dataset.theme = theme;
-      }
-    }
-  }, []);
 
   return (
     <>
@@ -49,28 +39,30 @@ function MyApp({ Component, pageProps }: AppProps) {
         <meta name="description" content="Exactly App - Decentralizing the time value of money" />
         <link rel="icon" href="/icon.ico" />
       </Head>
-      <LangProvider value={'en'}>
-        <Web3ContextProvider>
-          <PreviewerProvider>
-            <AccountDataProvider>
-              <AuditorProvider>
-                <FixedLenderProvider>
-                  <AddressProvider>
-                    <ModalStatusProvider>
-                      <SkeletonTheme
-                        baseColor="var(--skeleton-base)"
-                        highlightColor="var(--skeleton-highlight)"
-                      >
-                        <Component {...props} />
-                      </SkeletonTheme>
-                    </ModalStatusProvider>
-                  </AddressProvider>
-                </FixedLenderProvider>
-              </AuditorProvider>
-            </AccountDataProvider>
-          </PreviewerProvider>
-        </Web3ContextProvider>
-      </LangProvider>
+      <ThemeProvider>
+        <LangProvider value={'en'}>
+          <Web3ContextProvider>
+            <PreviewerProvider>
+              <AccountDataProvider>
+                <AuditorProvider>
+                  <FixedLenderProvider>
+                    <AddressProvider>
+                      <ModalStatusProvider>
+                        <SkeletonTheme
+                          baseColor="var(--skeleton-base)"
+                          highlightColor="var(--skeleton-highlight)"
+                        >
+                          <Component {...props} />
+                        </SkeletonTheme>
+                      </ModalStatusProvider>
+                    </AddressProvider>
+                  </FixedLenderProvider>
+                </AuditorProvider>
+              </AccountDataProvider>
+            </PreviewerProvider>
+          </Web3ContextProvider>
+        </LangProvider>
+      </ThemeProvider>
     </>
   );
 }
