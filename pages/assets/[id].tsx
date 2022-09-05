@@ -50,7 +50,7 @@ const Asset: NextPage<Props> = ({ symbol = 'DAI' }) => {
   }, [network, accountData, symbol]);
 
   async function handleAPY() {
-    if (!network || !accountData) return;
+    if (!accountData) return;
 
     const filteredFixedLender = fixedLenderData.find((contract: any) => {
       const contractSymbol = getSymbol(
