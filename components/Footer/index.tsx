@@ -1,7 +1,8 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext } from 'react';
 import Image from 'next/image';
 
 import LangContext from 'contexts/LangContext';
+import ThemeContext from 'contexts/ThemeContext';
 
 import { LangKeys } from 'types/Lang';
 
@@ -13,19 +14,18 @@ const Footer = () => {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
+  const { theme, changeTheme } = useContext(ThemeContext);
+
   const date = new Date();
-
-  const [image, setImage] = useState<string>('/img/isologo.svg');
-
-  useEffect(() => {
-    if (document?.body?.dataset?.theme == 'dark') {
-      setImage('/img/isologo-white.svg');
-    }
-  }, []);
 
   return (
     <footer className={styles.footer}>
-      <Image src={image} alt="exactly logo" width={24} height={24} />
+      <Image
+        src={theme == 'light' ? '/img/isologo.svg' : '/img/isologo-white.svg'}
+        alt="exactly logo"
+        width={24}
+        height={24}
+      />
       <div>
         <ul className={styles.links}>
           <li>

@@ -31,7 +31,7 @@ interface Props {
   symbol: string;
 }
 
-const Asset: NextPage<Props> = ({ symbol }) => {
+const Asset: NextPage<Props> = ({ symbol = 'DAI' }) => {
   const { network } = useWeb3Context();
   const { dates } = useContext(AddressContext);
   const fixedLenderData = useContext(FixedLenderContext);
@@ -50,7 +50,7 @@ const Asset: NextPage<Props> = ({ symbol }) => {
   }, [network, accountData, symbol]);
 
   async function handleAPY() {
-    if (!network || !accountData) return;
+    if (!accountData) return;
 
     const filteredFixedLender = fixedLenderData.find((contract: any) => {
       const contractSymbol = getSymbol(
@@ -146,6 +146,6 @@ export const getStaticProps: GetStaticProps = async (context) => {
 export async function getStaticPaths() {
   return {
     paths: ['/assets/dai', '/assets/eth', '/assets/usdc', '/assets/wbtc'],
-    fallback: false
+    fallback: true
   };
 }

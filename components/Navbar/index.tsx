@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
@@ -9,6 +9,7 @@ import Wallet from 'components/Wallet';
 import { LangKeys } from 'types/Lang';
 
 import LangContext from 'contexts/LangContext';
+import ThemeContext from 'contexts/ThemeContext';
 
 import styles from './style.module.scss';
 
@@ -20,13 +21,14 @@ import { getSymbol } from 'utils/utils';
 function Navbar() {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
+
   const { connect, disconnect, walletAddress, network } = useWeb3Context();
   const fixedLenderData = useContext(FixedLenderContext);
 
-  const [image, setImage] = useState<string>('/img/logo.png');
-  const [icon, setIcon] = useState<string>('/img/icons/moon.svg');
+  const { theme, changeTheme } = useContext(ThemeContext);
 
   const router = useRouter();
+
   const { pathname } = router;
 
   const assetsRoutes: { href: string; name: string }[] = fixedLenderData.map((asset) => {
@@ -63,27 +65,6 @@ function Navbar() {
     // { pathname: '/nerd-mode', href: '/', name: translations[lang].nerdMode }
   ];
 
-  useEffect(() => {
-    if (document?.body?.dataset?.theme == 'dark') {
-      setImage('/img/logo-white.png');
-      setIcon('/img/icons/sun.svg');
-    }
-  }, []);
-
-  function changeTheme() {
-    if (document.body.dataset.theme == 'light') {
-      document.body.dataset.theme = 'dark';
-      setImage('/img/logo-white.png');
-      setIcon('/img/icons/sun.svg');
-      localStorage.setItem('theme', JSON.stringify('dark'));
-    } else {
-      document.body.dataset.theme = 'light';
-      setImage('/img/logo.png');
-      setIcon('/img/icons/moon.svg');
-      localStorage.setItem('theme', JSON.stringify('light'));
-    }
-  }
-
   return (
     <nav className={styles.navBar}>
       <div className={styles.wrapper}>
@@ -91,11 +72,11 @@ function Navbar() {
           <Link href="/markets">
             <div className={styles.logo}>
               <Image
-                src={image}
+                src={theme == 'light' ? '/img/logo.png' : '/img/logo-white.png'}
                 alt="Exactly Logo"
                 layout="responsive"
-                width={5986}
-                height={1657}
+                width={187}
+                height={52}
               />
             </div>
           </Link>
@@ -119,13 +100,19 @@ function Navbar() {
                           alt="assets"
                           width={12}
                           height={7}
+                          priority
                         />
                         <div className={styles.dropdownContent}>
                           {assetsRoutes.map((asset: any) => {
                             return (
                               <Link href={asset.href} key={asset.name}>
                                 <div className={styles.asset}>
-                                  <Image src={asset.image} width={20} height={20} />{' '}
+                                  <Image
+                                    src={asset.image}
+                                    alt={asset.name}
+                                    width={20}
+                                    height={20}
+                                  />{' '}
                                   <p className={styles.assetName}>{asset.name}</p>
                                 </div>
                               </Link>
@@ -187,7 +174,13 @@ function Navbar() {
             )
           )}
           <div className={styles.theme}>
-            <Image src={icon} width={16} height={16} onClick={changeTheme} />
+            <Image
+              src={theme == 'light' ? '/img/icons/moon.svg' : '/img/icons/sun.svg'}
+              alt="theme toggler"
+              width={16}
+              height={16}
+              onClick={changeTheme}
+            />
           </div>
         </div>
       </div>

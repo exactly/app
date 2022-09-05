@@ -91,6 +91,7 @@ function MaturityPoolUserStatusByMaturity({ type, maturities }: Props) {
                                   ? '/img/icons/okTick.svg'
                                   : '/img/icons/xTick.svg'
                               }
+                              alt="tick"
                               width={21}
                               height={21}
                             />

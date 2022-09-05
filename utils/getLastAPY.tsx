@@ -12,7 +12,7 @@ import getSubgraph from './getSubgraph';
 async function getLastAPY(
   maturity: Maturity[],
   market: string,
-  network: ethers.providers.Network,
+  network: ethers.providers.Network | undefined,
   accountData: AccountData
 ) {
   const subgraphUrl = getSubgraph(network?.name);
