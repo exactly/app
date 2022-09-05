@@ -20,7 +20,7 @@
       top: 50%;
       width: 800%;
       border-bottom: solid 2px var(--gray-200);
-      z-index: -1;
+      z-index: var(--layer-0);
     }
   }
 
@@ -34,7 +34,7 @@
       top: 50%;
       width: 800%;
       border-bottom: solid 2px var(--primary);
-      z-index: -1;
+      z-index: var(--layer-0);
     }
   }
 }

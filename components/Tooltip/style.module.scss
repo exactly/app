@@ -12,7 +12,7 @@
     color: var(--white);
     padding: var(--u) var(--u2);
     font-size: var(--font-14);
-    z-index: 4;
+    z-index: var(--layer-4);
     bottom: 125%;
     border-radius: var(--smallUnit);
     position: absolute;

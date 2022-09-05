@@ -6,7 +6,7 @@
   box-sizing: border-box;
   box-shadow: var(--shadow);
   background: var(--background);
-  z-index: 3;
+  z-index: var(--layer-3);
   top: 0;
   display: none;
 
@@ -54,7 +54,7 @@
   text-align: center;
   padding: var(--u3) 0px;
   position: fixed;
-  z-index: 7;
+  z-index: var(--layer-7);
   top: var(--navbarHeight);
   display: none;
 

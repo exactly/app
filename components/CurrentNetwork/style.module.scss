@@ -2,7 +2,7 @@
   width: 100%;
   position: fixed;
   top: var(--navbarHeight);
-  z-index: 3;
+  z-index: var(--layer-3);
   cursor: pointer;
 
   .alertContainer {

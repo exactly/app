@@ -7,7 +7,7 @@
   box-shadow: var(--shadow-header-mob);
   background-color: var(--background);
   top: 0;
-  z-index: 4;
+  z-index: var(--layer-4);
 
   .wrapper {
     display: flex;
@@ -55,7 +55,7 @@
           left: calc(var(--u4) * -1);
           background-color: var(--background);
           width: 100px;
-          z-index: 10;
+          z-index: var(--layer-10);
           border: 1px solid var(--primary);
           border-radius: var(--smallUnit);
           gap: var(--u);

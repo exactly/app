@@ -22,7 +22,7 @@
     box-shadow: var(--shadow-tables);
     display: flex;
     flex-direction: column;
-    z-index: 6;
+    z-index: var(--layer-6);
     border-radius: var(--smallUnit);
     padding-left: var(--u2);
 
