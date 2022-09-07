@@ -1,7 +1,8 @@
 import { useContext, useEffect, useState } from 'react';
+import dynamic from 'next/dynamic';
 
-import Item from './Item';
-import EmptyState from 'components/EmptyState';
+const Item = dynamic(() => import('./Item'));
+const EmptyState = dynamic(() => import('components/EmptyState'));
 
 import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';

@@ -1,6 +1,8 @@
+import dynamic from 'next/dynamic';
+
 import styles from './style.module.scss';
 
-import MaturitySelector from 'components/MaturitySelector';
+const MaturitySelector = dynamic(() => import('components/MaturitySelector'));
 
 type Props = {
   textTooltip?: string;

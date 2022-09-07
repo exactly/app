@@ -2,9 +2,10 @@ import { useContext } from 'react';
 import Image from 'next/image';
 import dayjs from 'dayjs';
 import Skeleton from 'react-loading-skeleton';
+import dynamic from 'next/dynamic';
 
-import Item from './Item';
-import Tooltip from 'components/Tooltip';
+const Item = dynamic(() => import('./Item'));
+const Tooltip = dynamic(() => import('components/Tooltip'));
 
 import LangContext from 'contexts/LangContext';
 

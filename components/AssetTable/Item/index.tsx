@@ -1,7 +1,8 @@
 import { useContext, useEffect, useState } from 'react';
 import Skeleton from 'react-loading-skeleton';
+import dynamic from 'next/dynamic';
 
-import Button from 'components/common/Button';
+const Button = dynamic(() => import('components/common/Button'));
 
 import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';

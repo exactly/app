@@ -1,14 +1,15 @@
 import { useContext } from 'react';
+import dynamic from 'next/dynamic';
 
-import BorrowModal from 'components/BorrowModal';
-import DepositModalMP from 'components/DepositModalMP';
-import DepositModalSP from 'components/DepositModalSP';
-import FaucetModal from 'components/FaucetModal';
-import FloatingBorrowModal from 'components/FloatingBorrowModal';
-import FloatingRepayModal from 'components/FloatingRepayModal';
-import RepayModal from 'components/RepayModal';
-import WithdrawModalMP from 'components/WithdrawModalMP';
-import WithdrawModalSP from 'components/WithdrawModalSP';
+const BorrowModal = dynamic(() => import('components/BorrowModal'));
+const DepositModalMP = dynamic(() => import('components/DepositModalMP'));
+const DepositModalSP = dynamic(() => import('components/DepositModalSP'));
+const FaucetModal = dynamic(() => import('components/FaucetModal'));
+const FloatingBorrowModal = dynamic(() => import('components/FloatingBorrowModal'));
+const FloatingRepayModal = dynamic(() => import('components/FloatingRepayModal'));
+const RepayModal = dynamic(() => import('components/RepayModal'));
+const WithdrawModalMP = dynamic(() => import('components/WithdrawModalMP'));
+const WithdrawModalSP = dynamic(() => import('components/WithdrawModalSP'));
 
 import ModalStatusContext from 'contexts/ModalStatusContext';
 

@@ -1,7 +1,8 @@
 import { useContext } from 'react';
 import Skeleton from 'react-loading-skeleton';
+import dynamic from 'next/dynamic';
 
-import Select from 'components/common/Select';
+const Select = dynamic(() => import('components/common/Select'));
 
 import style from './style.module.scss';
 

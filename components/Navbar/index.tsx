@@ -2,9 +2,10 @@ import { useContext } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
+import dynamic from 'next/dynamic';
 
-import Button from 'components/common/Button';
-import Wallet from 'components/Wallet';
+const Button = dynamic(() => import('components/common/Button'));
+const Wallet = dynamic(() => import('components/Wallet'));
 
 import { LangKeys } from 'types/Lang';
 

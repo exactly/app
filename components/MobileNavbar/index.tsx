@@ -1,15 +1,16 @@
-import { useState, useContext, useEffect } from 'react';
+import { useState, useContext } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
+import dynamic from 'next/dynamic';
 
 import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 import ThemeContext from 'contexts/ThemeContext';
 
-import Button from 'components/common/Button';
-import Wallet from 'components/Wallet';
-import Overlay from 'components/Overlay';
+const Button = dynamic(() => import('components/common/Button'));
+const Wallet = dynamic(() => import('components/Wallet'));
+const Overlay = dynamic(() => import('components/Overlay'));
 
 import { LangKeys } from 'types/Lang';
 
