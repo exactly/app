@@ -1,5 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
 import dayjs from 'dayjs';
+import dynamic from 'next/dynamic';
 
 import { FixedLenderAccountData } from 'types/FixedLenderAccountData';
 import { LangKeys } from 'types/Lang';
@@ -9,9 +10,11 @@ import AccountDataContext from 'contexts/AccountDataContext';
 import LangContext from 'contexts/LangContext';
 import ModalStatusContext from 'contexts/ModalStatusContext';
 
-import MaturityPoolUserStatusByMaturity from 'components/MaturityPoolUserStatusByMaturity';
-import Button from 'components/common/Button';
-import EmptyState from 'components/EmptyState';
+const MaturityPoolUserStatusByMaturity = dynamic(
+  () => import('components/MaturityPoolUserStatusByMaturity')
+);
+const Button = dynamic(() => import('components/common/Button'));
+const EmptyState = dynamic(() => import('components/EmptyState'));
 
 import styles from './style.module.scss';
 

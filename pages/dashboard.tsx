@@ -1,16 +1,18 @@
 import { useState } from 'react';
 import type { NextPage } from 'next';
+import dynamic from 'next/dynamic';
 
 import Navbar from 'components/Navbar';
 import Footer from 'components/Footer';
 import MobileNavbar from 'components/MobileNavbar';
 import CurrentNetwork from 'components/CurrentNetwork';
-import MaturityPoolDashboard from 'components/MaturityPoolDashboard';
-import SmartPoolDashboard from 'components/SmartPoolDashboard';
 import DashboardHeader from 'components/DashboardHeader';
 import Tabs from 'components/Tabs';
-import EmptyState from 'components/EmptyState';
 import ModalsContainer from 'components/ModalsContainer';
+
+const SmartPoolDashboard = dynamic(() => import('components/SmartPoolDashboard'));
+const MaturityPoolDashboard = dynamic(() => import('components/MaturityPoolDashboard'));
+const EmptyState = dynamic(() => import('components/EmptyState'));
 
 import { useWeb3Context } from 'contexts/Web3Context';
 

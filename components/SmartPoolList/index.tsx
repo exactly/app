@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
+import dynamic from 'next/dynamic';
 
-import Item from './Item';
+const Item = dynamic(() => import('./Item'));
 
 import { Market } from 'types/Market';
 import { LangKeys } from 'types/Lang';
