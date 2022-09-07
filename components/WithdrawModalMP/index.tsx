@@ -200,7 +200,7 @@ function WithdrawModalMP({ data, closeModal }: Props) {
 
         decimals = 18;
 
-        withdraw = await ETHrouter?.withdrawAtMaturityETH(maturity, qty, minAmount.toString());
+        withdraw = await ETHrouter?.withdrawAtMaturityETH(maturity, qty, minAmount.toFixed(18));
       } else {
         if (!accountData || !symbol) return;
 

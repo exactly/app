@@ -295,7 +295,7 @@ function BorrowModal({ data, editable, closeModal }: Props) {
         borrow = await ETHrouter?.borrowAtMaturityETH(
           date?.value ?? maturity,
           qty!,
-          maxAmount.toString()
+          maxAmount.toFixed(18)
         );
       } else {
         const gasLimit = await getGasLimit(qty, maxAmount.toFixed(decimals));
