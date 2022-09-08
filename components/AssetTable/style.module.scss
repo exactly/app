@@ -24,6 +24,13 @@
       display: flex;
       flex-direction: column;
       justify-content: space-around;
+
+      .apy {
+        width: 100%;
+        display: flex;
+        gap: var(--u);
+        align-items: center;
+      }
     }
 
     .actions {

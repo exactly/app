@@ -16,6 +16,8 @@
     position: absolute;
     left: 50%;
     transform: translate(-50%, 0);
+    width: fit-content;
+    height: fit-content;
 
     .arrow {
       width: 0;
@@ -40,7 +42,8 @@
 
   .tooltipDown {
     @extend .tooltipUp;
-    bottom: -40px;
+    top: 120%;
+    bottom: 0;
 
     .arrow {
       @extend .arrow;
