@@ -7,6 +7,8 @@ import { useWeb3Context } from 'contexts/Web3Context';
 import PreviewerContext from 'contexts/PreviewerContext';
 import AccountDataContext from 'contexts/AccountDataContext';
 
+import Tooltip from 'components/Tooltip';
+
 import { Maturity } from 'types/Maturity';
 import { LangKeys } from 'types/Lang';
 import { FixedMarketData } from 'types/FixedMarketData';
@@ -66,7 +68,12 @@ function AssetTable({ page, itemsPerPage, symbol, deposits, borrows }: Props) {
     <div className={styles.table}>
       <div className={styles.row}>
         <div className={styles.maturity}>{translations[lang].maturity}</div>
-        <div className={styles.lastFixedRate}>{translations[lang].apy}</div>
+        <div className={styles.lastFixedRate}>
+          <div className={styles.apy}>
+            {translations[lang].apy}{' '}
+            <Tooltip value={translations[lang].apyTooltip} orientation="down" />
+          </div>
+        </div>
         <div className={styles.actions}></div>
       </div>
       {dates && (

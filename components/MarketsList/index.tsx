@@ -3,6 +3,7 @@ import { parseFixed } from '@ethersproject/bignumber';
 import dynamic from 'next/dynamic';
 
 const Item = dynamic(() => import('components/MarketsList/Item'));
+import Tooltip from 'components/Tooltip';
 
 import { Market } from 'types/Market';
 import { LangKeys } from 'types/Lang';
@@ -79,7 +80,10 @@ function MarketsList() {
           <div className={style.tableRow}>
             <span className={style.symbol}>{translations[lang].asset}</span>
             <span className={style.title}>{translations[lang].totalDeposits}</span>
-            <span className={style.title}>{translations[lang].averageAPY}</span>
+            <span className={style.title}>
+              {translations[lang].averageAPY}{' '}
+              <Tooltip value={translations[lang].depositApyTooltip} orientation="down" />
+            </span>
             <span className={style.title} />
           </div>
           {markets?.map((market, key) => {
@@ -98,7 +102,10 @@ function MarketsList() {
           <div className={style.tableRow}>
             <span className={style.symbol}>{translations[lang].asset}</span>
             <span className={style.title}>{translations[lang].totalBorrows}</span>
-            <span className={style.title}>{translations[lang].averageAPY}</span>
+            <div className={style.title}>
+              {translations[lang].averageAPY}{' '}
+              <Tooltip value={translations[lang].borrowApyTooltip} orientation="down" />
+            </div>
             <span className={style.title} />
           </div>
           {markets?.map((market, key) => {

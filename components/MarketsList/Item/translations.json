@@ -1,7 +1,8 @@
 {
   "en": {
     "borrow": "Borrow",
-    "deposit": "Deposit"
+    "deposit": "Deposit",
+    "noRate": "There is no interest rate available for this pool at the moment. We recommend you to check other maturities"
   },
   "es": {}
 }

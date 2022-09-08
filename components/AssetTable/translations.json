@@ -4,6 +4,7 @@
     "liquidity": "Liquidity",
     "maturity": "Maturity",
     "deposit": "Deposit",
-    "borrow": "Borrow"
+    "borrow": "Borrow",
+    "apyTooltip": "Marginal interest rate for a $1k operation"
   }
 }
