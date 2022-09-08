@@ -7,8 +7,8 @@ function formatNumber(number: string | number, symbol: string, standard?: boolea
     USD: 2,
     DAI: 2,
     USDC: 2,
-    WETH: 8,
-    WBTC: 8
+    WETH: 6,
+    WBTC: 6
   };
 
   return new Intl.NumberFormat('en-GB', {
