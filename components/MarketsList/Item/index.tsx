@@ -170,12 +170,7 @@ function Item({ market, type, fixedMarketData }: Props) {
         )}
       </p>
       <p className={style.value}>
-        {rate || <Skeleton />}{' '}
-        {rate == 'N/A' && (
-          <div>
-            <Tooltip value={translations[lang].noRate} />
-          </div>
-        )}
+        {rate || <Skeleton />} {rate == 'N/A' && <Tooltip value={translations[lang].noRate} />}
       </p>
       <div className={style.buttonContainer}>
         {(market && (
