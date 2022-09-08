@@ -1,4 +1,5 @@
 import Skeleton from 'react-loading-skeleton';
+import Image from 'next/image';
 
 import styles from './style.module.scss';
 
@@ -8,16 +9,28 @@ type Props = {
   value?: string;
   valueTooltip?: string;
   line?: boolean;
+  asset?: string;
 };
 
-function ModalRow({ text, value, line }: Props) {
+function ModalRow({ text, value, line, asset }: Props) {
   const rowStyles = line ? `${styles.row} ${styles.line}` : styles.row;
 
   return (
     <section className={rowStyles}>
       <p className={styles.text}>{text}</p>
 
-      <p className={styles.value}>{value || <Skeleton />}</p>
+      <>
+        {asset && (
+          <Image
+            src={`/img/assets/${asset.toLowerCase()}.svg`}
+            alt={asset}
+            width="24"
+            height="24"
+          />
+        )}
+
+        <p className={styles.value}>{value || <Skeleton />}</p>
+      </>
     </section>
   );
 }

@@ -192,7 +192,7 @@ function FloatingRepayModal({ data, closeModal }: Props) {
 
         const ETHrouter = handleEth(network?.name, web3Provider?.getSigner());
 
-        repay = await ETHrouter?.repayETH(qty!);
+        repay = await ETHrouter?.repayETH(qty!, qty!);
       } else {
         const gasLimit = await getGasLimit(qty);
 

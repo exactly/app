@@ -1,12 +1,14 @@
+import { BigNumber } from 'ethers';
+
 export type Deposit = {
-  assets: string;
-  caller?: string;
-  fee: string;
   id?: string;
   market: string;
-  maturity: string;
-  owner?: string;
   symbol?: string;
+  maturity: string;
+  assets: BigNumber;
+  fee: BigNumber;
+  owner?: string;
+  caller?: string;
   timestamp?: string;
   editable?: boolean;
 };

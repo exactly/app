@@ -36,11 +36,11 @@ function handleEth(network: string = 'rinkeby', signer: ethers.providers.JsonRpc
     return router.borrow(ethers.utils.parseEther(qty));
   }
 
-  function repayETH(qty: string) {
+  function repayETH(qty: string, maxValue: string) {
     if (!qty || !router) return;
 
     return router.repay(ethers.utils.parseEther(qty), {
-      value: ethers.utils.parseEther(qty)
+      value: ethers.utils.parseEther(maxValue)
     });
   }
 
@@ -72,11 +72,11 @@ function handleEth(network: string = 'rinkeby', signer: ethers.providers.JsonRpc
     );
   }
 
-  function repayAtMaturityETH(maturity: string, qty: string) {
+  function repayAtMaturityETH(maturity: string, qty: string, maxValue: string) {
     if (!qty || !router) return;
 
     return router.repayAtMaturity(maturity, ethers.utils.parseEther(qty), {
-      value: ethers.utils.parseEther(qty)
+      value: ethers.utils.parseEther(maxValue)
     });
   }
 
