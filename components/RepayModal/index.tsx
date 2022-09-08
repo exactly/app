@@ -417,7 +417,7 @@ function RepayModal({ data, closeModal }: Props) {
               <ModalTitle
                 title={isLateRepay ? translations[lang].lateRepay : translations[lang].earlyRepay}
               />
-              <ModalAsset asset={symbol!} amount={'2'} />
+              <ModalAsset asset={symbol!} amount={amountAtFinish} />
               <ModalRow text={translations[lang].maturityPool} value={parseTimestamp(maturity)} />
               <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} symbol={symbol!} />
               {error?.component !== 'gas' && symbol != 'WETH' && <ModalTxCost gas={gas} />}
