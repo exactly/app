@@ -5,13 +5,11 @@
   align-items: center;
   width: fit-content;
 
-  .tooltip {
+  .tooltipUp {
     display: block;
     position: absolute;
     background: var(--tooltip-background);
-    color: var(--white);
     padding: var(--u) var(--u2);
-    font-size: var(--font-14);
     z-index: var(--layer-4);
     bottom: 125%;
     border-radius: var(--smallUnit);
@@ -19,7 +17,7 @@
     left: 50%;
     transform: translate(-50%, 0);
 
-    .arrowUp {
+    .arrow {
       width: 0;
       height: 0;
       border-left: 5px solid transparent;
@@ -32,8 +30,30 @@
 
     .text {
       width: max-content;
-      max-width: 200px;
+      max-width: 300px;
       margin: 0;
+      font-size: var(--font-14);
+      color: var(--white);
+      font-weight: normal;
+    }
+  }
+
+  .tooltipDown {
+    @extend .tooltipUp;
+    bottom: -40px;
+
+    .arrow {
+      @extend .arrow;
+      border-top: none;
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-bottom: 5px solid var(--tooltip-background);
+      bottom: 0;
+      top: -5px;
+    }
+
+    .text {
+      @extend .text;
     }
   }
 
