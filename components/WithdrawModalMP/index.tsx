@@ -1,6 +1,6 @@
 import { ChangeEvent, useContext, useEffect, useState } from 'react';
 import { Contract, ethers } from 'ethers';
-import { formatFixed } from '@ethersproject/bignumber';
+import { formatFixed, parseFixed } from '@ethersproject/bignumber';
 
 import Button from 'components/common/Button';
 import ModalAsset from 'components/common/modal/ModalAsset';
@@ -62,20 +62,20 @@ function WithdrawModalMP({ data, closeModal }: Props) {
   const { minimized, setMinimized } = useContext(ModalStatusContext);
   const { accountData } = useContext(AccountDataContext);
 
-  const parsedFee = ethers.utils.formatUnits(fee, decimals[symbol! as keyof Decimals]);
-  const parsedAmount = ethers.utils.formatUnits(assets, decimals[symbol! as keyof Decimals]);
-  const finalAmount = (parseFloat(parsedAmount) + parseFloat(parsedFee)).toString();
-
   const [qty, setQty] = useState<string>('');
   const [gas, setGas] = useState<Gas | undefined>();
   const [tx, setTx] = useState<Transaction | undefined>(undefined);
-  const [slippage, setSlippage] = useState<string>(parsedAmount);
+  const [slippage, setSlippage] = useState<string>('0');
   const [editSlippage, setEditSlippage] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
-  const [isEarlyWithdraw, setIsEarlyWithdraw] = useState<boolean>(false);
+  const [isEarlyWithdraw, setIsEarlyWithdraw] = useState<boolean>(
+    Date.now() / 1000 > parseInt(maturity)
+  );
   const [error, setError] = useState<Error | undefined>(undefined);
   const [needsApproval, setNeedsApproval] = useState<boolean>(false);
   const [withdrawAmount, setWithdrawAmount] = useState<string>('0');
+  const [amountAtFinish, setAmountAtFinish] = useState<string | undefined>(undefined);
+  const positionAssets = assets.add(fee);
 
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
     undefined
@@ -99,18 +99,9 @@ function WithdrawModalMP({ data, closeModal }: Props) {
   }, [walletAddress, fixedLenderWithSigner, symbol, qty]);
 
   useEffect(() => {
-    const earlyWithdraw = Date.now() / 1000 < parseInt(maturity);
+    const isEarly = Date.now() / 1000 < parseInt(maturity);
 
-    if (earlyWithdraw) {
-      setIsEarlyWithdraw(earlyWithdraw);
-    }
-
-    if (!earlyWithdraw) {
-      //if the maturity is closed the user should be able to withdraw everything.
-      // so slippage = finalAmount
-
-      setSlippage(finalAmount);
-    }
+    setIsEarlyWithdraw(isEarly);
   }, [maturity]);
 
   useEffect(() => {
@@ -120,7 +111,6 @@ function WithdrawModalMP({ data, closeModal }: Props) {
   }, [fixedLenderWithSigner]);
 
   useEffect(() => {
-    if (qty == '') return;
     previewWithdrawAtMaturity();
   }, [qty]);
 
@@ -138,7 +128,8 @@ function WithdrawModalMP({ data, closeModal }: Props) {
   }
 
   function onMax() {
-    setQty(finalAmount);
+    const decimals = accountData![symbol!.toUpperCase()].decimals;
+    setQty(formatFixed(positionAssets, decimals));
   }
 
   function handleInputChange(e: ChangeEvent<HTMLInputElement>) {
@@ -151,7 +142,9 @@ function WithdrawModalMP({ data, closeModal }: Props) {
       if (inputDecimals.length > decimals) return;
     }
 
-    if (e.target.valueAsNumber > parseFloat(parsedAmount)) {
+    const parsedValue = parseFixed(e.target.value || '0', decimals);
+
+    if (parsedValue.gt(positionAssets)) {
       setError({
         status: true,
         message: translations[lang].insufficientBalance,
@@ -164,54 +157,65 @@ function WithdrawModalMP({ data, closeModal }: Props) {
     setQty(e.target.value);
   }
 
+  useEffect(() => {
+    calculateAmount();
+  }, [accountData, data]);
+
+  function calculateAmount() {
+    if (!accountData || !symbol) return;
+
+    const decimals = accountData[symbol.toUpperCase()].decimals;
+
+    setAmountAtFinish(formatFixed(positionAssets, decimals));
+  }
+
   async function previewWithdrawAtMaturity() {
     if (!accountData || !symbol) return;
+
+    if (qty == '') {
+      setWithdrawAmount('0');
+      return;
+    }
 
     const decimals = accountData[symbol].decimals;
 
     const market = fixedLenderWithSigner?.address;
     const parsedMaturity = parseInt(maturity);
     const parsedQtyValue = ethers.utils.parseUnits(qty, decimals);
+    const WAD = parseFixed('1', 18);
 
-    const earlyWithdrawAmount = await previewerContract?.previewWithdrawAtMaturity(
+    const withdrawAmount = await previewerContract?.previewWithdrawAtMaturity(
       market,
       parsedMaturity,
       parsedQtyValue
     );
 
-    const formatWithdrawAmount = ethers.utils.formatUnits(earlyWithdrawAmount, decimals);
-    const minimumWithdrawAmount = parseFloat(formatWithdrawAmount) * (1 - numbers.slippage);
+    const parseSlippage = parseFixed((1 - numbers.slippage).toString(), 18);
+    const minimumWithdrawAmount = withdrawAmount.mul(parseSlippage).div(WAD);
 
-    setWithdrawAmount(formatWithdrawAmount);
-    setSlippage(formatNumber(minimumWithdrawAmount, symbol!, true));
+    setWithdrawAmount(Number(formatFixed(withdrawAmount, decimals)).toFixed(decimals));
+    setSlippage(formatFixed(minimumWithdrawAmount, decimals));
   }
 
   async function withdraw() {
     setLoading(true);
 
     try {
-      //we should change this 0 in case of earlyWithdraw with the amount - penaltyFee from the previewWithdraw
-      const minAmount = isEarlyWithdraw ? 0 : Number(finalAmount);
+      if (!accountData || !symbol) return;
+      const decimals = accountData[symbol].decimals;
       let withdraw;
-      let decimals;
 
       if (symbol == 'WETH') {
         if (!ETHrouter) return;
 
-        decimals = 18;
-
-        withdraw = await ETHrouter?.withdrawAtMaturityETH(maturity, qty, minAmount.toFixed(18));
+        withdraw = await ETHrouter?.withdrawAtMaturityETH(maturity, qty, slippage);
       } else {
-        if (!accountData || !symbol) return;
-
-        const gasLimit = await getGasLimit(qty, minAmount.toFixed(decimals));
-
-        decimals = accountData[symbol].decimals;
+        const gasLimit = await getGasLimit(qty, slippage);
 
         withdraw = await fixedLenderWithSigner?.withdrawAtMaturity(
           maturity,
           ethers.utils.parseUnits(qty, decimals),
-          ethers.utils.parseUnits(minAmount.toFixed(decimals), decimals),
+          ethers.utils.parseUnits(slippage, decimals),
           walletAddress,
           walletAddress,
           {
@@ -357,7 +361,7 @@ function WithdrawModalMP({ data, closeModal }: Props) {
                   isEarlyWithdraw ? translations[lang].earlyWithdraw : translations[lang].withdraw
                 }
               />
-              <ModalAsset asset={symbol!} amount={finalAmount} />
+              <ModalAsset asset={symbol!} amount={amountAtFinish} />
               <ModalRow text={translations[lang].maturityPool} value={parseTimestamp(maturity)} />
               <ModalInput
                 onMax={onMax}
@@ -369,19 +373,15 @@ function WithdrawModalMP({ data, closeModal }: Props) {
               {error?.component !== 'gas' && symbol != 'WETH' && <ModalTxCost gas={gas} />}
               <ModalRow
                 text={translations[lang].amountAtFinish}
-                value={formatNumber(finalAmount, symbol!)}
+                value={amountAtFinish && `${formatNumber(amountAtFinish, symbol!, true)}`}
+                asset={symbol}
+              />
+              <ModalRow
+                text={translations[lang].amountToReceive}
+                value={formatNumber(withdrawAmount, symbol!, true)}
+                asset={symbol}
               />
               <ModalExpansionPanelWrapper>
-                <ModalRow
-                  text={translations[lang].amountToReceive}
-                  value={
-                    isEarlyWithdraw
-                      ? formatNumber(withdrawAmount, symbol!, true)
-                      : formatNumber(finalAmount, symbol!, true)
-                  }
-                  line
-                />
-
                 {isEarlyWithdraw && (
                   <ModalRowEditable
                     text={translations[lang].amountSlippage}
@@ -392,7 +392,7 @@ function WithdrawModalMP({ data, closeModal }: Props) {
                       error?.message == translations[lang].notEnoughSlippage && setError(undefined);
                     }}
                     onClick={() => {
-                      if (slippage == '') setSlippage(parsedAmount);
+                      if (slippage == '') setSlippage('0');
                       setEditSlippage((prev) => !prev);
                     }}
                   />

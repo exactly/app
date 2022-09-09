@@ -423,7 +423,7 @@ function RepayModal({ data, closeModal }: Props) {
               {error?.component !== 'gas' && symbol != 'WETH' && <ModalTxCost gas={gas} />}
               <ModalRow
                 text={translations[lang].amountAtFinish}
-                value={amountAtFinish && `${formatNumber(amountAtFinish, symbol!)}`}
+                value={amountAtFinish && `${formatNumber(amountAtFinish, symbol!, true)}`}
                 asset={symbol}
               />
               {isLateRepay ? (
