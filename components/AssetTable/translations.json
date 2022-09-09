@@ -1,16 +1,10 @@
 {
   "en": {
-    "lastAPY": "Last APY",
+    "apy": "APY ($1k)",
     "liquidity": "Liquidity",
     "maturity": "Maturity",
     "deposit": "Deposit",
-    "borrow": "Borrow"
-  },
-  "es": {
-    "lastFixedRate": "Última tasa fija",
-    "liquidity": "Liquidez",
-    "maturity": "Madurez",
-    "deposit": "Depositar",
-    "borrow": "Pedir prestado"
+    "borrow": "Borrow",
+    "apyTooltip": "Marginal interest rate for a $1k operation"
   }
 }

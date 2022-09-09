@@ -7,6 +7,7 @@ import Image from 'next/image';
 import dynamic from 'next/dynamic';
 
 const Button = dynamic(() => import('components/common/Button'));
+import Tooltip from 'components/Tooltip';
 
 import { Market } from 'types/Market';
 import { Pool } from 'types/Pool';
@@ -168,7 +169,9 @@ function Item({ market, type, fixedMarketData }: Props) {
           <Skeleton />
         )}
       </p>
-      <p className={style.value}>{rate || <Skeleton />}</p>
+      <p className={style.value}>
+        {rate || <Skeleton />} {rate == 'N/A' && <Tooltip value={translations[lang].noRate} />}
+      </p>
       <div className={style.buttonContainer}>
         {(market && (
           <Button

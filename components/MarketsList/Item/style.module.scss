@@ -42,6 +42,9 @@
     width: calc(100% / 4);
     color: var(--gray-900);
     margin: 0;
+    display: flex;
+    gap: var(--u);
+    align-items: center;
 
     .exchange {
       font-size: var(--font-12);

@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { ethers } from 'ethers';
+import { BigNumber, ethers } from 'ethers';
 import request from 'graphql-request';
 import Image from 'next/image';
 
@@ -36,8 +36,8 @@ import {
 
 type Props = {
   type?: Option | undefined;
-  amount: string | undefined;
-  fee: string | undefined;
+  amount: BigNumber | undefined;
+  fee: BigNumber | undefined;
   maturityDate: string | undefined;
   symbol: string | undefined;
   market: string | undefined;

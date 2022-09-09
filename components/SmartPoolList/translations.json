@@ -4,7 +4,8 @@
     "totalDeposits": "Total Deposits",
     "smartPool": "Variable Rate Pools",
     "lastAPY": "APY (last hour)",
-    "totalBorrows": "Total Borrows"
+    "totalBorrows": "Total Borrows",
+    "lastApyTooltip": "Change in value of the underlying share in the last hour, annualized"
   },
   "es": {}
 }

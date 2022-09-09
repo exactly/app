@@ -2,6 +2,7 @@ import { useContext, useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 
 const Item = dynamic(() => import('./Item'));
+import Tooltip from 'components/Tooltip';
 
 import { Market } from 'types/Market';
 import { LangKeys } from 'types/Lang';
@@ -52,7 +53,10 @@ function SmartPoolList() {
             <div className={styles.tableRow}>
               <span className={styles.symbol}>{translations[lang].asset}</span>
               <span className={styles.title}>{translations[lang].totalDeposits}</span>
-              <span className={styles.title}>{translations[lang].lastAPY}</span>
+              <span className={styles.title}>
+                {translations[lang].lastAPY}{' '}
+                <Tooltip value={translations[lang].lastApyTooltip} orientation="down" />
+              </span>
               <span className={styles.title} />
             </div>
             {markets?.map((market, key) => {
@@ -69,7 +73,10 @@ function SmartPoolList() {
             <div className={styles.tableRow}>
               <span className={styles.symbol}>{translations[lang].asset}</span>
               <span className={styles.title}>{translations[lang].totalBorrows}</span>
-              <span className={styles.title}>{translations[lang].lastAPY}</span>
+              <span className={styles.title}>
+                {translations[lang].lastAPY}{' '}
+                <Tooltip value={translations[lang].lastApyTooltip} orientation="down" />
+              </span>
               <span className={styles.title} />
             </div>
             {markets?.map((market, key) => {

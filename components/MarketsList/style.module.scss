@@ -45,6 +45,9 @@
 
         .title {
           width: calc(100% / 4);
+          display: flex;
+          gap: var(--u);
+          align-items: center;
         }
       }
     }
