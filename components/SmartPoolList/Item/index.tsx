@@ -61,6 +61,7 @@ function Item({ market, type }: Props) {
 
   useEffect(() => {
     getMarketData();
+    getRates();
   }, [accountData, market, network, fixedLenderAddress]);
 
   function handleClick(modal: string) {
@@ -72,11 +73,41 @@ function Item({ market, type }: Props) {
     setModalContent({ ...market, type: modal });
   }
 
+  async function getRates() {
+    if (!market || !accountData) return;
+    try {
+      const subgraphUrl = getSubgraph(network?.name!);
+
+      let interestRate;
+
+      if (!fixedLenderAddress) return;
+
+      if (type == 'deposit') {
+        interestRate = await getFloatingAPY(
+          fixedLenderAddress,
+          subgraphUrl,
+          accountData[market?.symbol.toUpperCase()].maxFuturePools
+        );
+      } else if (type == 'borrow') {
+        interestRate = await getFloatingBorrowAPY(fixedLenderAddress, subgraphUrl);
+      }
+
+      if (interestRate && rate && `${interestRate}%` == rate) {
+        return;
+      }
+
+      if (interestRate != 'N/A') {
+        return interestRate && setRate(`${interestRate}%`);
+      } else {
+        return setRate('N/A');
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
   async function getMarketData() {
     if (!market || !accountData) return;
-
-    setPoolData(undefined);
-    setRate(undefined);
 
     try {
       const borrowed = accountData[market?.symbol.toUpperCase()].totalFloatingBorrowAssets;
@@ -93,27 +124,12 @@ function Item({ market, type }: Props) {
         rate: exchangeRate
       };
 
-      const subgraphUrl = getSubgraph(network?.name!);
-
-      let interestRate;
-
-      if (!fixedLenderAddress) return;
-
-      if (type == 'deposit') {
-        interestRate = await getFloatingAPY(
-          fixedLenderAddress,
-          subgraphUrl,
-          accountData[market?.symbol.toUpperCase()].maxFuturePools
-        );
-      } else if (type == 'borrow') {
-        interestRate = await getFloatingBorrowAPY(fixedLenderAddress, subgraphUrl);
-      }
-      setPoolData(newPoolData);
-
-      if (interestRate != 'N/A') {
-        return interestRate && setRate(`${interestRate}%`);
-      } else {
-        return setRate('N/A');
+      if (
+        newPoolData.borrowed !== poolData?.borrowed ||
+        newPoolData.supplied !== poolData?.supplied ||
+        newPoolData.rate !== poolData.rate
+      ) {
+        setPoolData(newPoolData);
       }
     } catch (e) {
       console.log(e);

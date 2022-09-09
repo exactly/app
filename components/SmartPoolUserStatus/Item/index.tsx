@@ -188,6 +188,8 @@ function Item({
 
       amount = formatFixed(totalIncremental.sub(totalDecremental), decimals);
 
+      if (amount && originalAmount && Number(amount) === Number(originalAmount)) return;
+
       amount && setOriginalAmount(amount);
     } catch (e) {
       console.log(e);
