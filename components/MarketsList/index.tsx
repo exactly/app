@@ -78,13 +78,13 @@ function MarketsList() {
       <div className={style.market}>
         <div className={style.column}>
           <div className={style.tableRow}>
-            <span className={style.symbol}>{translations[lang].asset}</span>
-            <span className={style.title}>{translations[lang].totalDeposits}</span>
-            <span className={style.title}>
+            <div className={style.symbol}>{translations[lang].asset}</div>
+            <div className={style.title}>{translations[lang].totalDeposits}</div>
+            <div className={style.title}>
               {translations[lang].averageAPY}{' '}
               <Tooltip value={translations[lang].depositApyTooltip} orientation="down" />
-            </span>
-            <span className={style.title} />
+            </div>
+            <div className={style.title} />
           </div>
           {markets?.map((market, key) => {
             return (

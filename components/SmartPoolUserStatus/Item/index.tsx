@@ -188,6 +188,8 @@ function Item({
 
       amount = formatFixed(totalIncremental.sub(totalDecremental), decimals);
 
+      if (amount && originalAmount && Number(amount) === Number(originalAmount)) return;
+
       amount && setOriginalAmount(amount);
     } catch (e) {
       console.log(e);
@@ -248,27 +250,27 @@ function Item({
             height={40}
           />
         )) || <Skeleton circle height={40} width={40} />}
-        <span className={styles.primary}>{(symbol && parseSymbol(symbol)) || <Skeleton />}</span>
+        <div className={styles.primary}>{(symbol && parseSymbol(symbol)) || <Skeleton />}</div>
       </div>
-      <span className={styles.value}>
+      <div className={styles.value}>
         {(originalAmount &&
           rate &&
           `$${formatNumber(parseFloat(originalAmount) * rate, 'USD', true)}`) || (
           <Skeleton width={40} />
         )}
-      </span>
+      </div>
       {type?.value == 'deposit' && (
-        <span className={styles.value}>
+        <div className={styles.value}>
           {(eTokenAmount &&
             symbol &&
             `${formatNumber(
               ethers.utils.formatUnits(eTokenAmount, decimals[symbol! as keyof Decimals]),
               symbol
             )}`) || <Skeleton width={40} />}{' '}
-        </span>
+        </div>
       )}
 
-      <span className={styles.value}>
+      <div className={styles.value}>
         {(depositAmount &&
           borrowedAmount &&
           symbol &&
@@ -283,14 +285,14 @@ function Item({
             'USD',
             true
           )}`) || <Skeleton width={40} />}
-      </span>
+      </div>
 
-      <span className={styles.value}>{(difference && difference) || <Skeleton width={40} />}</span>
+      <div className={styles.value}>{(difference && difference) || <Skeleton width={40} />}</div>
 
       {type?.value == 'deposit' && (
         <>
           {symbol ? (
-            <span className={styles.value}>
+            <div className={styles.value}>
               {!loading ? (
                 <Tooltip
                   value={
@@ -315,11 +317,11 @@ function Item({
                   <Loading size="small" color="primary" />
                 </div>
               )}
-            </span>
+            </div>
           ) : (
-            <span className={styles.value}>
+            <div className={styles.value}>
               <Skeleton width={40} />
-            </span>
+            </div>
           )}
         </>
       )}
