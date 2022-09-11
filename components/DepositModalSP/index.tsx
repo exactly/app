@@ -34,6 +34,8 @@ import handleEth from 'utils/handleEth';
 
 import styles from './style.module.scss';
 
+import useDebounce from 'hooks/useDebounce';
+
 import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 import FixedLenderContext from 'contexts/FixedLenderContext';
@@ -72,6 +74,8 @@ function DepositModalSP({ data, closeModal }: Props) {
 
   const [error, setError] = useState<Error | undefined>(undefined);
 
+  const debounceQty = useDebounce(qty, numbers.debounceTime);
+
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
     undefined
   );
@@ -103,7 +107,7 @@ function DepositModalSP({ data, closeModal }: Props) {
         estimateGas();
       }
     }
-  }, [fixedLenderWithSigner, step, qty]);
+  }, [fixedLenderWithSigner, step, debounceQty]);
 
   useEffect(() => {
     checkAllowance();

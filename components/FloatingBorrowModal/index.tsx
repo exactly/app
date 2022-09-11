@@ -32,6 +32,8 @@ import getBeforeBorrowLimit from 'utils/getBeforeBorrowLimit';
 
 import styles from './style.module.scss';
 
+import useDebounce from 'hooks/useDebounce';
+
 import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 import FixedLenderContext from 'contexts/FixedLenderContext';
@@ -76,6 +78,8 @@ function FloatingBorrowModal({ data, editable, closeModal }: Props) {
   const [error, setError] = useState<Error | undefined>(undefined);
   const [gasError, setGasError] = useState<Error | undefined>(undefined);
 
+  const debounceQty = useDebounce(qty, numbers.debounceTime);
+
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
     undefined
   );
@@ -106,7 +110,7 @@ function FloatingBorrowModal({ data, editable, closeModal }: Props) {
     checkAllowance();
     checkLiquidity();
     checkCollateral();
-  }, [walletAddress, fixedLenderWithSigner, symbol, qty]);
+  }, [walletAddress, fixedLenderWithSigner, symbol, debounceQty]);
 
   useEffect(() => {
     if (underlyingContract && fixedLenderWithSigner) {
