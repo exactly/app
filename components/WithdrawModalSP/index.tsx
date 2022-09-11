@@ -70,7 +70,7 @@ function WithdrawModalSP({ data, closeModal }: Props) {
   const [error, setError] = useState<Error | undefined>(undefined);
   const [needsApproval, setNeedsApproval] = useState<boolean>(false);
 
-  const debounceQty = useDebounce(qty, numbers.debounceTime);
+  const debounceQty = useDebounce(qty);
 
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
     undefined

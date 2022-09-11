@@ -78,7 +78,7 @@ function DepositModalMP({ data, closeModal }: Props) {
   const [fixedRate, setFixedRate] = useState<string | undefined>(undefined);
   const [error, setError] = useState<Error | undefined>(undefined);
 
-  const debounceQty = useDebounce(qty, numbers.debounceTime);
+  const debounceQty = useDebounce(qty);
 
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
     undefined

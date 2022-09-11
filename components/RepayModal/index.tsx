@@ -84,7 +84,7 @@ function RepayModal({ data, closeModal }: Props) {
     undefined
   );
 
-  const debounceQty = useDebounce(qty, numbers.debounceTime);
+  const debounceQty = useDebounce(qty);
 
   const positionAssets = assets.add(fee);
 

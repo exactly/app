@@ -77,7 +77,7 @@ function WithdrawModalMP({ data, closeModal }: Props) {
   const [amountAtFinish, setAmountAtFinish] = useState<string | undefined>(undefined);
   const positionAssets = assets.add(fee);
 
-  const debounceQty = useDebounce(qty, numbers.debounceTime);
+  const debounceQty = useDebounce(qty);
 
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
     undefined
