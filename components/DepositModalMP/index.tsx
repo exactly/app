@@ -36,6 +36,8 @@ import numbers from 'config/numbers.json';
 
 import styles from './style.module.scss';
 
+import useDebounce from 'hooks/useDebounce';
+
 import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 import FixedLenderContext from 'contexts/FixedLenderContext';
@@ -75,6 +77,8 @@ function DepositModalMP({ data, closeModal }: Props) {
   const [editSlippage, setEditSlippage] = useState<boolean>(false);
   const [fixedRate, setFixedRate] = useState<string | undefined>(undefined);
   const [error, setError] = useState<Error | undefined>(undefined);
+
+  const debounceQty = useDebounce(qty);
 
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
     undefined
@@ -120,7 +124,7 @@ function DepositModalMP({ data, closeModal }: Props) {
         estimateGas();
       }
     }
-  }, [fixedLenderWithSigner, step, qty]);
+  }, [fixedLenderWithSigner, step, debounceQty]);
 
   useEffect(() => {
     checkAllowance();
@@ -130,7 +134,7 @@ function DepositModalMP({ data, closeModal }: Props) {
     if (fixedLenderWithSigner) {
       getYieldAtMaturity();
     }
-  }, [qty, maturity, date, market, fixedLenderWithSigner]);
+  }, [debounceQty, maturity, date, market, fixedLenderWithSigner]);
 
   async function checkAllowance() {
     if (symbol == 'WETH') {

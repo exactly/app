@@ -40,6 +40,8 @@ import getBeforeBorrowLimit from 'utils/getBeforeBorrowLimit';
 
 import styles from './style.module.scss';
 
+import useDebounce from 'hooks/useDebounce';
+
 import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 import FixedLenderContext from 'contexts/FixedLenderContext';
@@ -90,6 +92,8 @@ function BorrowModal({ data, editable, closeModal }: Props) {
   const [error, setError] = useState<Error | undefined>(undefined);
   const [gasError, setGasError] = useState<Error | undefined>(undefined);
 
+  const debounceQty = useDebounce(qty);
+
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
     undefined
   );
@@ -127,7 +131,7 @@ function BorrowModal({ data, editable, closeModal }: Props) {
     checkPoolLiquidity();
     checkCollateral();
     getUtilizationRate();
-  }, [walletAddress, fixedLenderWithSigner, symbol, qty]);
+  }, [walletAddress, fixedLenderWithSigner, symbol, debounceQty]);
 
   useEffect(() => {
     if (underlyingContract && fixedLenderWithSigner) {
@@ -145,7 +149,7 @@ function BorrowModal({ data, editable, closeModal }: Props) {
     if (fixedLenderWithSigner) {
       getFeeAtMaturity();
     }
-  }, [qty, date, maturity, fixedLenderWithSigner]);
+  }, [debounceQty, date, maturity, fixedLenderWithSigner]);
 
   async function checkAllowance() {
     if (symbol != 'WETH' || !ETHrouter || !walletAddress || !fixedLenderWithSigner) return;

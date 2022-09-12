@@ -6,5 +6,6 @@
   "daysToError": 0,
   "slippage": 0.05,
   "usdAmount": 1000,
-  "gasLimitMultiplier": 1.25
+  "gasLimitMultiplier": 1.25,
+  "debounceTime": 500
 }

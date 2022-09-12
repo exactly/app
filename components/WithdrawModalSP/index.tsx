@@ -28,6 +28,8 @@ import { Error } from 'types/Error';
 
 import styles from './style.module.scss';
 
+import useDebounce from 'hooks/useDebounce';
+
 import LangContext from 'contexts/LangContext';
 import FixedLenderContext from 'contexts/FixedLenderContext';
 import { useWeb3Context } from 'contexts/Web3Context';
@@ -68,6 +70,8 @@ function WithdrawModalSP({ data, closeModal }: Props) {
   const [error, setError] = useState<Error | undefined>(undefined);
   const [needsApproval, setNeedsApproval] = useState<boolean>(false);
 
+  const debounceQty = useDebounce(qty);
+
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
     undefined
   );
@@ -85,7 +89,7 @@ function WithdrawModalSP({ data, closeModal }: Props) {
 
   useEffect(() => {
     checkAllowance();
-  }, [walletAddress, fixedLenderWithSigner, symbol, qty]);
+  }, [walletAddress, fixedLenderWithSigner, symbol, debounceQty]);
 
   useEffect(() => {
     if (fixedLenderWithSigner && !gas) {

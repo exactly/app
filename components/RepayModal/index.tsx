@@ -35,6 +35,8 @@ import handleEth from 'utils/handleEth';
 
 import styles from './style.module.scss';
 
+import useDebounce from 'hooks/useDebounce';
+
 import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 import FixedLenderContext from 'contexts/FixedLenderContext';
@@ -82,6 +84,8 @@ function RepayModal({ data, closeModal }: Props) {
     undefined
   );
 
+  const debounceQty = useDebounce(qty);
+
   const positionAssets = assets.add(fee);
 
   const previewerContract = getContractData(
@@ -121,7 +125,7 @@ function RepayModal({ data, closeModal }: Props) {
   useEffect(() => {
     previewRepayAtMaturity();
     if (isLateRepay) calculatePenalties();
-  }, [qty]);
+  }, [debounceQty]);
 
   useEffect(() => {
     checkAllowance();

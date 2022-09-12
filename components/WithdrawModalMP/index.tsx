@@ -21,7 +21,6 @@ import { Deposit } from 'types/Deposit';
 import { LangKeys } from 'types/Lang';
 import { Gas } from 'types/Gas';
 import { Transaction } from 'types/Transaction';
-import { Decimals } from 'types/Decimals';
 import { Error } from 'types/Error';
 
 import parseTimestamp from 'utils/parseTimestamp';
@@ -32,6 +31,8 @@ import handleEth from 'utils/handleEth';
 
 import styles from './style.module.scss';
 
+import useDebounce from 'hooks/useDebounce';
+
 import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 import FixedLenderContext from 'contexts/FixedLenderContext';
@@ -39,7 +40,6 @@ import PreviewerContext from 'contexts/PreviewerContext';
 import ModalStatusContext from 'contexts/ModalStatusContext';
 import AccountDataContext from 'contexts/AccountDataContext';
 
-import decimals from 'config/decimals.json';
 import numbers from 'config/numbers.json';
 
 import keys from './translations.json';
@@ -77,6 +77,8 @@ function WithdrawModalMP({ data, closeModal }: Props) {
   const [amountAtFinish, setAmountAtFinish] = useState<string | undefined>(undefined);
   const positionAssets = assets.add(fee);
 
+  const debounceQty = useDebounce(qty);
+
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
     undefined
   );
@@ -96,7 +98,7 @@ function WithdrawModalMP({ data, closeModal }: Props) {
 
   useEffect(() => {
     checkAllowance();
-  }, [walletAddress, fixedLenderWithSigner, symbol, qty]);
+  }, [walletAddress, fixedLenderWithSigner, symbol, debounceQty]);
 
   useEffect(() => {
     const isEarly = Date.now() / 1000 < parseInt(maturity);
@@ -112,7 +114,7 @@ function WithdrawModalMP({ data, closeModal }: Props) {
 
   useEffect(() => {
     previewWithdrawAtMaturity();
-  }, [qty]);
+  }, [debounceQty]);
 
   async function checkAllowance() {
     if (symbol != 'WETH' || !ETHrouter || !walletAddress || !fixedLenderWithSigner) return;
