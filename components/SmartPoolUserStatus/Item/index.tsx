@@ -296,7 +296,9 @@ function Item({
               {!loading ? (
                 <Tooltip
                   value={
-                    disabledText && disabled
+                    !toggle
+                      ? translations[lang].enterMarket
+                      : disabledText && disabled
                       ? translations[lang][`${disabledText}`]
                       : translations[lang].exitMarket
                   }
