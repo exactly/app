@@ -72,7 +72,7 @@ function RepayAtMaturity() {
   const [totalAmount, setTotalAmount] = useState<string>('0');
   const [slippage, setSlippage] = useState<string>('0');
   const [error, setError] = useState<Error | undefined>(undefined);
-  const [positionAssets, setPositionAssets] = useState<BigNumber | bigint>(0n);
+  const [positionAssets, setPositionAssets] = useState<BigNumber>(ethers.constants.Zero);
 
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
     undefined
@@ -96,13 +96,15 @@ function RepayAtMaturity() {
   }, [market, network, symbol]);
 
   useEffect(() => {
-    setPositionAssets(0n);
+    setPositionAssets(ethers.constants.Zero);
 
     const pool = accountData![symbol].fixedBorrowPositions.find((position) => {
       return position.maturity.toNumber().toString() === date!.value;
     });
 
-    const positionAssets = pool ? pool.position.principal.add(pool.position.fee) : 0n;
+    const positionAssets = pool
+      ? pool.position.principal.add(pool.position.fee)
+      : ethers.constants.Zero;
 
     setPositionAssets(positionAssets);
   }, [date, accountData, symbol]);
