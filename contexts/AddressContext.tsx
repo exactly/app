@@ -66,15 +66,8 @@ const MarketProvider: FC = ({ children }) => {
     }
   }
 
-  function getMarket() {
-    if (!market && accountData) {
-      setMarket({ value: accountData.DAI.market });
-    }
-  }
-
   useEffect(() => {
     getPools();
-    getMarket();
   }, [accountData]);
 
   return (

@@ -19,12 +19,12 @@ import parseSymbol from 'utils/parseSymbol';
 
 type Props = {
   title?: Boolean;
+  defaultAddress: string | undefined;
   onChange?: (marketData: Market) => void;
 };
 
-function AssetSelector({ title, onChange }: Props) {
+function AssetSelector({ title, defaultAddress, onChange }: Props) {
   const previewerData = useContext(PreviewerContext);
-
   const { market, setMarket } = useContext(MarketContext);
   const { getInstance } = useContext(ContractsContext);
 
@@ -35,7 +35,7 @@ function AssetSelector({ title, onChange }: Props) {
     if (previewerData) {
       getMarkets();
     }
-  }, [previewerData, market]);
+  }, [previewerData]);
 
   async function getMarkets() {
     try {
@@ -58,6 +58,12 @@ function AssetSelector({ title, onChange }: Props) {
       const formattedMarkets = formatMarkets(marketsData);
 
       setSelectOptions(formattedMarkets);
+
+      const defaultOption = formattedMarkets?.find((market: Option) => {
+        return market.value == defaultAddress;
+      });
+
+      setMarket(defaultOption ?? formattedMarkets[0]);
     } catch (e) {
       console.log(e);
     }

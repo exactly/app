@@ -8,6 +8,7 @@ import parseSymbol from 'utils/parseSymbol';
 import AssetSelector from 'components/AssetSelector';
 
 import AccountDataContext from 'contexts/AccountDataContext';
+import { MarketContext } from 'contexts/AddressContext';
 
 import styles from './style.module.scss';
 import { ethers } from 'ethers';
@@ -19,6 +20,7 @@ type Props = {
 
 function ModalAsset({ asset, amount }: Props) {
   const { accountData } = useContext(AccountDataContext);
+  const { market } = useContext(MarketContext);
 
   const [exchangeRate, setExchangeRate] = useState(1);
 
@@ -38,7 +40,7 @@ function ModalAsset({ asset, amount }: Props) {
   return (
     <div className={styles.assetContainer}>
       <div className={styles.informationContainer}>
-        <AssetSelector />
+        <AssetSelector defaultAddress={market?.value} />
       </div>
       {amount ? (
         <div className={styles.assetPriceContainer}>
