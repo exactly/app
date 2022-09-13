@@ -15,6 +15,7 @@ import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 import AccountDataContext from 'contexts/AccountDataContext';
 import ModalStatusContext from 'contexts/ModalStatusContext';
+import { MarketContext } from 'contexts/AddressContext';
 
 import { LangKeys } from 'types/Lang';
 import { Decimals } from 'types/Decimals';
@@ -58,10 +59,11 @@ function Item({
 }: Props) {
   const { network } = useWeb3Context();
   const fixedLender = useContext(FixedLenderContext);
-  const lang: string = useContext(LangContext);
   const { accountData } = useContext(AccountDataContext);
-  const { setOpen } = useContext(ModalStatusContext);
+  const { setOpen, setOperation } = useContext(ModalStatusContext);
+  const { setMarket } = useContext(MarketContext);
 
+  const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
   const [toggle, setToggle] = useState<boolean>(false);
@@ -335,6 +337,8 @@ function Item({
               }
               className={type.value == 'deposit' ? 'primary' : 'secondary'}
               onClick={() => {
+                setMarket({ value: market! });
+                setOperation(type.value);
                 setOpen(true);
               }}
             />
@@ -349,6 +353,8 @@ function Item({
               }
               className={type.value == 'deposit' ? 'tertiary' : 'quaternary'}
               onClick={() => {
+                setMarket({ value: market! });
+                setOperation(type.value == 'deposit' ? 'withdraw' : 'repay');
                 setOpen(true);
               }}
             />

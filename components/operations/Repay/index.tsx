@@ -8,16 +8,11 @@ import ModalInput from 'components/common/modal/ModalInput';
 import ModalRowHealthFactor from 'components/common/modal/ModalRowHealthFactor';
 import ModalTitle from 'components/common/modal/ModalTitle';
 import ModalTxCost from 'components/common/modal/ModalTxCost';
-import ModalMinimized from 'components/common/modal/ModalMinimized';
-import ModalWrapper from 'components/common/modal/ModalWrapper';
 import ModalGif from 'components/common/modal/ModalGif';
-import Overlay from 'components/Overlay';
 import SkeletonModalRowBeforeAfter from 'components/common/skeletons/SkeletonModalRowBeforeAfter';
 import ModalError from 'components/common/modal/ModalError';
 import ModalRowBorrowLimit from 'components/common/modal/ModalRowBorrowLimit';
 
-import { Borrow } from 'types/Borrow';
-import { Deposit } from 'types/Deposit';
 import { LangKeys } from 'types/Lang';
 import { Gas } from 'types/Gas';
 import { Transaction } from 'types/Transaction';
@@ -25,7 +20,6 @@ import { Decimals } from 'types/Decimals';
 import { Error } from 'types/Error';
 import { UnderlyingData } from 'types/Underlying';
 
-import { getContractData } from 'utils/contracts';
 import { getSymbol, getUnderlyingData } from 'utils/utils';
 import handleEth from 'utils/handleEth';
 
@@ -35,37 +29,35 @@ import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 import FixedLenderContext from 'contexts/FixedLenderContext';
 import AccountDataContext from 'contexts/AccountDataContext';
-import ModalStatusContext from 'contexts/ModalStatusContext';
+import { MarketContext } from 'contexts/AddressContext';
+import ContractsContext from 'contexts/ContractsContext';
 
 import decimals from 'config/decimals.json';
 import numbers from 'config/numbers.json';
 
 import keys from './translations.json';
 
-type Props = {
-  data: Borrow | Deposit;
-  closeModal: (props: any) => void;
-};
-
-function FloatingRepayModal({ data, closeModal }: Props) {
-  const { symbol, assets } = data;
-
+function Repay() {
   const { walletAddress, web3Provider, network } = useWeb3Context();
   const { accountData } = useContext(AccountDataContext);
-  const { minimized, setMinimized } = useContext(ModalStatusContext);
+  const { market } = useContext(MarketContext);
+  const { getInstance } = useContext(ContractsContext);
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
   const fixedLenderData = useContext(FixedLenderContext);
 
+  const symbol = getSymbol(market!.value, network?.name);
+  const assets = accountData![symbol].floatingBorrowAssets;
+
   const finalAmount = ethers.utils.formatUnits(assets, decimals[symbol! as keyof Decimals]);
+
   const [qty, setQty] = useState<string>('');
 
   const [gas, setGas] = useState<Gas | undefined>();
   const [tx, setTx] = useState<Transaction | undefined>(undefined);
   const [loading, setLoading] = useState<boolean>(false);
-  // const [repayAmount, setRepayAmount] = useState<string>('0');
   const [needsApproval, setNeedsApproval] = useState<boolean>(false);
 
   const [error, setError] = useState<Error | undefined>(undefined);
@@ -73,28 +65,21 @@ function FloatingRepayModal({ data, closeModal }: Props) {
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
     undefined
   );
+  const [underlyingContract, setUnderlyingContract] = useState<Contract | undefined>(undefined);
 
   useEffect(() => {
     getFixedLenderContract();
-  }, [fixedLenderData]);
+  }, [market, fixedLenderData]);
+
+  useEffect(() => {
+    getUnderlyingContract();
+  }, [market, network, symbol]);
 
   useEffect(() => {
     if (fixedLenderWithSigner && !gas) {
       estimateGas();
     }
   }, [fixedLenderWithSigner]);
-
-  const underlyingData: UnderlyingData | undefined = getUnderlyingData(
-    network?.name,
-    symbol?.toLowerCase()
-  );
-
-  const underlyingContract = getContractData(
-    network?.name,
-    underlyingData!.address,
-    underlyingData!.abi,
-    web3Provider?.getSigner()
-  );
 
   useEffect(() => {
     checkAllowance();
@@ -153,21 +138,35 @@ function FloatingRepayModal({ data, closeModal }: Props) {
     }
   }
 
-  async function getFixedLenderContract() {
+  function getFixedLenderContract() {
     const filteredFixedLender = fixedLenderData.find((contract) => {
       const contractSymbol = getSymbol(contract.address!, network!.name);
 
       return contractSymbol == symbol;
     });
 
-    const fixedLender = await getContractData(
-      network?.name,
+    const fixedLender = getInstance(
       filteredFixedLender?.address!,
       filteredFixedLender?.abi!,
-      web3Provider?.getSigner()
+      `market${symbol}`
     );
 
     setFixedLenderWithSigner(fixedLender);
+  }
+
+  function getUnderlyingContract() {
+    const underlyingData: UnderlyingData | undefined = getUnderlyingData(
+      network?.name,
+      symbol.toLowerCase()
+    );
+
+    const underlyingContract = getInstance(
+      underlyingData!.address,
+      underlyingData!.abi,
+      `underlying${symbol}`
+    );
+
+    setUnderlyingContract(underlyingContract);
   }
 
   function onMax() {
@@ -294,65 +293,35 @@ function FloatingRepayModal({ data, closeModal }: Props) {
 
   return (
     <>
-      {!minimized && (
-        <ModalWrapper closeModal={closeModal}>
-          {!tx && (
-            <>
-              <ModalTitle title={translations[lang].lateRepay} />
-              <ModalAsset asset={symbol!} amount={finalAmount} />
-              <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} symbol={symbol!} />
-              {error?.component !== 'gas' && symbol != 'WETH' && <ModalTxCost gas={gas} />}
-
-              {/* <ModalExpansionPanelWrapper> */}
-              {/* <ModalRow text={translations[lang].amountToPay} value={repayAmount} line /> */}
-
-              {symbol ? (
-                <ModalRowHealthFactor qty={qty} symbol={symbol} operation="repay" />
-              ) : (
-                <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
-              )}
-              <ModalRowBorrowLimit qty={qty} symbol={symbol!} operation="repay" />
-              {/* </ModalExpansionPanelWrapper> */}
-
-              {error && error.component != 'gas' && <ModalError message={error.message} />}
-              <div className={styles.buttonContainer}>
-                <Button
-                  text={needsApproval ? translations[lang].approval : translations[lang].repay}
-                  className={parseFloat(qty) <= 0 || !qty ? 'secondaryDisabled' : 'quaternary'}
-                  disabled={parseFloat(qty) <= 0 || !qty || loading}
-                  onClick={needsApproval ? approve : repay}
-                  loading={loading}
-                  color="secondary"
-                />
-              </div>
-            </>
+      {!tx && (
+        <>
+          <ModalTitle title={translations[lang].lateRepay} />
+          <ModalAsset asset={symbol!} amount={finalAmount} />
+          <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} symbol={symbol!} />
+          {error?.component !== 'gas' && symbol != 'WETH' && <ModalTxCost gas={gas} />}
+          {symbol ? (
+            <ModalRowHealthFactor qty={qty} symbol={symbol} operation="repay" />
+          ) : (
+            <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
           )}
-          {tx && <ModalGif tx={tx} tryAgain={repay} />}
-        </ModalWrapper>
-      )}
+          <ModalRowBorrowLimit qty={qty} symbol={symbol!} operation="repay" />
 
-      {tx && minimized && (
-        <ModalMinimized
-          tx={tx}
-          handleMinimize={() => {
-            setMinimized((prev: boolean) => !prev);
-          }}
-        />
+          {error && error.component != 'gas' && <ModalError message={error.message} />}
+          <div className={styles.buttonContainer}>
+            <Button
+              text={needsApproval ? translations[lang].approval : translations[lang].repay}
+              className={parseFloat(qty) <= 0 || !qty ? 'secondaryDisabled' : 'quaternary'}
+              disabled={parseFloat(qty) <= 0 || !qty || loading}
+              onClick={needsApproval ? approve : repay}
+              loading={loading}
+              color="secondary"
+            />
+          </div>
+        </>
       )}
-
-      {!minimized && (
-        <Overlay
-          closeModal={
-            !tx || tx.status == 'success'
-              ? closeModal
-              : () => {
-                  setMinimized((prev: boolean) => !prev);
-                }
-          }
-        />
-      )}
+      {tx && <ModalGif tx={tx} tryAgain={repay} />}
     </>
   );
 }
 
-export default FloatingRepayModal;
+export default Repay;

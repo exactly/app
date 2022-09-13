@@ -6,27 +6,24 @@ const Select = dynamic(() => import('components/common/Select'));
 
 import style from './style.module.scss';
 
-import { AddressContext } from 'contexts/AddressContext';
+import { MarketContext } from 'contexts/AddressContext';
 
 import { Date } from 'types/Date';
 
 type Props = {
   title?: string;
   subtitle?: string;
-  editable?: boolean;
 };
 
-function MaturitySelector({ title, subtitle, editable }: Props) {
-  const { date, setDate, dates } = useContext(AddressContext);
+function MaturitySelector({ title, subtitle }: Props) {
+  const { date, setDate, dates } = useContext(MarketContext);
 
   function handleChange(option: Date) {
     setDate(option);
   }
 
-  const sectionContainerClass = editable ? 'sectionContainerEditable' : 'sectionContainer';
-
   return (
-    <section className={style[sectionContainerClass]}>
+    <section className={style.sectionContainerEditable}>
       {title && (
         <div className={style.titleContainer}>
           <p className={style.title}>{title}</p>
@@ -38,9 +35,9 @@ function MaturitySelector({ title, subtitle, editable }: Props) {
           <Select
             options={dates}
             onChange={handleChange}
-            placeholder={date?.value ?? dates[0]?.label}
-            value={date?.label ?? dates[0]?.value}
-            editable={editable}
+            placeholder={date?.value}
+            value={date?.label}
+            editable
           />
         ) : (
           <Skeleton width={140} height={48} />

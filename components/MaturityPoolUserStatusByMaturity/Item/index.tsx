@@ -10,6 +10,7 @@ import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 import AccountDataContext from 'contexts/AccountDataContext';
 import ModalStatusContext from 'contexts/ModalStatusContext';
+import { MarketContext } from 'contexts/AddressContext';
 
 import { LangKeys } from 'types/Lang';
 import { Deposit } from 'types/Deposit';
@@ -45,11 +46,12 @@ type Props = {
   data: Borrow | Deposit | undefined;
 };
 
-function Item({ type, amount, fee, maturityDate, symbol, market, decimals, data }: Props) {
+function Item({ type, amount, maturityDate, symbol, market, decimals, data }: Props) {
   const { network, walletAddress } = useWeb3Context();
 
   const { accountData } = useContext(AccountDataContext);
-  const { setOpen } = useContext(ModalStatusContext);
+  const { setOpen, setOperation } = useContext(ModalStatusContext);
+  const { setMarket, setDate } = useContext(MarketContext);
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
@@ -193,6 +195,9 @@ function Item({ type, amount, fee, maturityDate, symbol, market, decimals, data 
               text={type.value == 'borrow' ? translations[lang].repay : translations[lang].withdraw}
               className={type.value == 'borrow' ? 'quaternary' : 'tertiary'}
               onClick={() => {
+                setDate({ value: maturityDate!, label: parseTimestamp(maturityDate!) });
+                setMarket({ value: market! });
+                setOperation(type.value == 'borrow' ? 'repayAtMaturity' : 'withdrawAtMaturity');
                 setOpen(true);
               }}
             />

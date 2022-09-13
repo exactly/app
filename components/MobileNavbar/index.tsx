@@ -54,7 +54,7 @@ function MobileNavbar() {
 
   return (
     <>
-      {open && <Overlay closeModal={handleMenu} />}
+      {open && <Overlay close={handleMenu} />}
       <nav className={styles.navBar} style={open ? { zIndex: 7 } : {}}>
         <div className={styles.wrapper}>
           <Link href="/markets">

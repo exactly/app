@@ -9,12 +9,11 @@ import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 import ModalStatusContext from 'contexts/ModalStatusContext';
 import AccountDataContext from 'contexts/AccountDataContext';
-import { AddressContext } from 'contexts/AddressContext';
+import { MarketContext } from 'contexts/AddressContext';
 
 import { LangKeys } from 'types/Lang';
 import { Maturity } from 'types/Maturity';
 import { FixedMarketData } from 'types/FixedMarketData';
-import { Pool } from 'types/Pool';
 
 import styles from './style.module.scss';
 
@@ -32,8 +31,8 @@ type Props = {
 
 function Item({ symbol, maturity, fixedMarketData }: Props) {
   const { walletAddress, connect, network } = useWeb3Context();
-  const { setOpen } = useContext(ModalStatusContext);
-  const { setDate } = useContext(AddressContext);
+  const { setOpen, setOperation } = useContext(ModalStatusContext);
+  const { setDate, setMarket } = useContext(MarketContext);
   const { accountData } = useContext(AccountDataContext);
 
   const lang: string = useContext(LangContext);
@@ -110,20 +109,12 @@ function Item({ symbol, maturity, fixedMarketData }: Props) {
 
     if (!accountData) return;
 
-    setOpen(true);
-
     const marketData = accountData[symbol];
 
-    const market = {
-      market: marketData.market,
-      symbol: marketData.assetSymbol,
-      name: marketData.assetSymbol,
-      isListed: true,
-      collateralFactor: 0,
-      type
-    };
-
+    setOperation(type);
+    setMarket({ value: marketData.market });
     setDate(maturity);
+    setOpen(true);
   }
 
   return (
@@ -141,7 +132,7 @@ function Item({ symbol, maturity, fixedMarketData }: Props) {
             <Button
               text={translations[lang].deposit}
               className="primary"
-              onClick={() => handleClick('deposit', maturity)}
+              onClick={() => handleClick('depositAtMaturity', maturity)}
             />
           ) : (
             <Skeleton className={styles.buttonContainer} />
@@ -152,7 +143,7 @@ function Item({ symbol, maturity, fixedMarketData }: Props) {
             <Button
               text={translations[lang].borrow}
               className="secondary"
-              onClick={() => handleClick('borrow', maturity)}
+              onClick={() => handleClick('borrowAtMaturity', maturity)}
             />
           ) : (
             <Skeleton className={styles.buttonContainer} />

@@ -1,7 +1,7 @@
 import { useContext } from 'react';
 
 import OperationsSelector from './OperationsSelector';
-import Operation from './Operation';
+import OperationContainer from './OperationContainer';
 
 import ModalStatusContext from 'contexts/ModalStatusContext';
 
@@ -17,7 +17,7 @@ function OperationsModals() {
         <>
           <section className={styles.modal}>
             <OperationsSelector />
-            <Operation />
+            <OperationContainer />
           </section>
           <Overlay
             close={() => {

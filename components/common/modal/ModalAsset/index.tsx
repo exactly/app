@@ -15,11 +15,9 @@ import { ethers } from 'ethers';
 type Props = {
   asset: string;
   amount?: string;
-  editable?: boolean;
-  defaultAddress?: string;
 };
 
-function ModalAsset({ asset, amount, editable, defaultAddress }: Props) {
+function ModalAsset({ asset, amount }: Props) {
   const { accountData } = useContext(AccountDataContext);
 
   const [exchangeRate, setExchangeRate] = useState(1);
@@ -40,18 +38,7 @@ function ModalAsset({ asset, amount, editable, defaultAddress }: Props) {
   return (
     <div className={styles.assetContainer}>
       <div className={styles.informationContainer}>
-        {!editable && (
-          <>
-            <Image
-              src={`/img/assets/${asset.toLowerCase()}.svg`}
-              alt={asset}
-              width="24"
-              height="24"
-            />
-            <p className={styles.assetName}>{parsedSymbol}</p>
-          </>
-        )}
-        {editable && <AssetSelector defaultAddress={defaultAddress} />}
+        <AssetSelector />
       </div>
       {amount ? (
         <div className={styles.assetPriceContainer}>

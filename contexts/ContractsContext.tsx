@@ -1,40 +1,31 @@
-import { createContext, FC } from 'react';
+import { createContext, FC, useState } from 'react';
 import { Contract, ContractInterface, ethers } from 'ethers';
 
 import { Dictionary } from 'types/Dictionary';
+import { contractName } from 'types/ContractNames';
 
 import { useWeb3Context } from './Web3Context';
 
-type contractName =
-  | 'marketDAI'
-  | 'marketUSDC'
-  | 'marketETH'
-  | 'marketWBTC'
-  | 'underlyingDAI'
-  | 'underlyingUSDC'
-  | 'underlyingETH'
-  | 'underlyingWBTC'
-  | 'auditor'
-  | 'previewer';
-
 type ContextValues = {
-  createInstance: (address: string, abi: string, contractName: contractName) => void;
+  getInstance: (address: string, abi: ContractInterface, contractName: contractName) => any;
 };
 
 const defaultValues: ContextValues = {
-  createInstance: () => {}
+  getInstance: () => {
+    return undefined;
+  }
 };
 
 const ContractsContext = createContext(defaultValues);
 
 export const ContractsProvider: FC = ({ children }) => {
   const { network, web3Provider } = useWeb3Context();
+  const [instances, setInstances] = useState<Dictionary<Contract> | null>(null);
 
-  const instances: Dictionary<Dictionary<Contract>> = {};
-
-  function createInstance(address: string, abi: ContractInterface, contractName: contractName) {
-    if (network && instances[network.name] && instances[network.name][contractName]) {
-      return instances[network.name][contractName];
+  function getInstance(address: string, abi: ContractInterface, contractName: contractName) {
+    if (network && instances && instances[network.name + contractName]) {
+      console.log('using old instance of ' + contractName);
+      return instances[network.name + contractName];
     }
 
     try {
@@ -56,9 +47,10 @@ export const ContractsProvider: FC = ({ children }) => {
 
       if ((network && network.name) || process.env.NEXT_PUBLIC_NETWORK) {
         const key = network?.name ?? process.env.NEXT_PUBLIC_NETWORK;
-        instances[key!] = {};
 
-        instances[key!][contractName] = instance;
+        setInstances({ ...instances, [key + contractName]: instance });
+
+        console.log('using new instance of ' + contractName);
       }
 
       return instance;
@@ -67,9 +59,7 @@ export const ContractsProvider: FC = ({ children }) => {
     }
   }
 
-  return (
-    <ContractsContext.Provider value={{ createInstance }}>{children}</ContractsContext.Provider>
-  );
+  return <ContractsContext.Provider value={{ getInstance }}>{children}</ContractsContext.Provider>;
 };
 
 export default ContractsContext;

@@ -5,9 +5,9 @@ import Image from 'next/image';
 import Select from 'components/common/Select';
 import Tooltip from 'components/Tooltip';
 
-import { AddressContext } from 'contexts/AddressContext';
-import { useWeb3Context } from 'contexts/Web3Context';
+import { MarketContext } from 'contexts/AddressContext';
 import PreviewerContext from 'contexts/PreviewerContext';
+import ContractsContext from 'contexts/ContractsContext';
 
 import { Market } from 'types/Market';
 import { Address } from 'types/Address';
@@ -15,20 +15,18 @@ import { Option } from 'react-dropdown';
 import { FixedLenderAccountData } from 'types/FixedLenderAccountData';
 
 import style from './style.module.scss';
-import { getContractData } from 'utils/contracts';
 import parseSymbol from 'utils/parseSymbol';
 
 type Props = {
   title?: Boolean;
-  defaultAddress?: String;
   onChange?: (marketData: Market) => void;
 };
 
-function AssetSelector({ title, defaultAddress, onChange }: Props) {
+function AssetSelector({ title, onChange }: Props) {
   const previewerData = useContext(PreviewerContext);
 
-  const { address, setAddress } = useContext(AddressContext);
-  const { network } = useWeb3Context();
+  const { market, setMarket } = useContext(MarketContext);
+  const { getInstance } = useContext(ContractsContext);
 
   const [selectOptions, setSelectOptions] = useState<Array<Option>>([]);
   const [allMarketsData, setAllMarketsData] = useState<Array<Market>>([]);
@@ -37,14 +35,15 @@ function AssetSelector({ title, defaultAddress, onChange }: Props) {
     if (previewerData) {
       getMarkets();
     }
-  }, [previewerData]);
+  }, [previewerData, market]);
 
   async function getMarkets() {
     try {
-      const previewerContract = getContractData(
-        network?.name!,
+      //this call is not needed we can remove it and consume directly accountData from the context
+      const previewerContract = getInstance(
         previewerData.address!,
-        previewerData.abi!
+        previewerData.abi!,
+        'previewer'
       );
 
       const marketsData = await previewerContract?.exactly(
@@ -59,12 +58,6 @@ function AssetSelector({ title, defaultAddress, onChange }: Props) {
       const formattedMarkets = formatMarkets(marketsData);
 
       setSelectOptions(formattedMarkets);
-
-      const defaultOption = formattedMarkets?.find((market: Option) => {
-        return market.value == defaultAddress;
-      });
-
-      setAddress(defaultOption ?? formattedMarkets[0]);
     } catch (e) {
       console.log(e);
     }
@@ -109,7 +102,7 @@ function AssetSelector({ title, defaultAddress, onChange }: Props) {
 
   function handleChange(option: Address) {
     getDataByAddress(option.value);
-    setAddress(option);
+    setMarket(option);
   }
 
   return (
@@ -124,8 +117,8 @@ function AssetSelector({ title, defaultAddress, onChange }: Props) {
         <Select
           options={selectOptions}
           onChange={handleChange}
-          placeholder={address ?? selectOptions[0]}
-          value={address ?? selectOptions[0]}
+          placeholder={market ?? selectOptions[0]}
+          value={market ?? selectOptions[0]}
         />
       </div>
     </section>

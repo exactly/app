@@ -8,7 +8,7 @@ import Script from 'next/script';
 import { Web3ContextProvider } from 'contexts/Web3Context';
 import { LangProvider } from 'contexts/LangContext';
 import { ModalStatusProvider } from 'contexts/ModalStatusContext';
-import { AddressProvider } from 'contexts/AddressContext';
+import { MarketProvider } from 'contexts/AddressContext';
 import { PreviewerProvider } from 'contexts/PreviewerContext';
 import { AccountDataProvider } from 'contexts/AccountDataContext';
 import { FixedLenderProvider } from 'contexts/FixedLenderContext';
@@ -48,7 +48,7 @@ function MyApp({ Component, pageProps }: AppProps) {
                 <AccountDataProvider>
                   <AuditorProvider>
                     <FixedLenderProvider>
-                      <AddressProvider>
+                      <MarketProvider>
                         <ModalStatusProvider>
                           <SkeletonTheme
                             baseColor="var(--skeleton-base)"
@@ -57,7 +57,7 @@ function MyApp({ Component, pageProps }: AppProps) {
                             <Component {...props} />
                           </SkeletonTheme>
                         </ModalStatusProvider>
-                      </AddressProvider>
+                      </MarketProvider>
                     </FixedLenderProvider>
                   </AuditorProvider>
                 </AccountDataProvider>

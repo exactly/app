@@ -9,19 +9,20 @@ type Operation =
   | 'borrowAtMaturity'
   | 'depositAtMaturity'
   | 'withdrawAtMaturity'
-  | 'repayAtMaturity';
+  | 'repayAtMaturity'
+  | any;
 
 type ContextValues = {
-  open: boolean;
+  open: boolean | null;
   setOpen: (open: any) => void;
-  operation: Operation;
+  operation: Operation | null;
   setOperation: (operation: Operation) => void;
 };
 
 const defaultValues: ContextValues = {
   open: false,
   setOpen: () => {},
-  operation: 'deposit',
+  operation: null,
   setOperation: () => {}
 };
 
@@ -30,10 +31,10 @@ const ModalStatusContext = createContext(defaultValues);
 export const ModalStatusProvider: FC = ({ children }) => {
   const { getAccountData } = useContext(AccountDataContext);
   const [open, setOpen] = useState<boolean>(false);
-  const [operation, setOperation] = useState<Operation>('deposit');
+  const [operation, setOperation] = useState<Operation | null>(null);
 
   useEffect(() => {
-    if (!open) {
+    if (!open && operation) {
       setTimeout(() => {
         getAccountData();
       }, 5000);

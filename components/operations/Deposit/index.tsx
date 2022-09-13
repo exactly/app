@@ -9,25 +9,19 @@ import ModalRow from 'components/common/modal/ModalRow';
 import ModalRowHealthFactor from 'components/common/modal/ModalRowHealthFactor';
 import ModalTitle from 'components/common/modal/ModalTitle';
 import ModalTxCost from 'components/common/modal/ModalTxCost';
-import ModalMinimized from 'components/common/modal/ModalMinimized';
-import ModalWrapper from 'components/common/modal/ModalWrapper';
 import ModalGif from 'components/common/modal/ModalGif';
 import ModalStepper from 'components/common/modal/ModalStepper';
-import Overlay from 'components/Overlay';
 import SkeletonModalRowBeforeAfter from 'components/common/skeletons/SkeletonModalRowBeforeAfter';
 import ModalError from 'components/common/modal/ModalError';
 import ModalRowBorrowLimit from 'components/common/modal/ModalRowBorrowLimit';
 import ModalExpansionPanelWrapper from 'components/common/modal/ModalExpansionPanelWrapper';
 
-import { Borrow } from 'types/Borrow';
-import { Deposit } from 'types/Deposit';
 import { LangKeys } from 'types/Lang';
 import { UnderlyingData } from 'types/Underlying';
 import { Gas } from 'types/Gas';
 import { Transaction } from 'types/Transaction';
 import { Error } from 'types/Error';
 
-import { getContractData } from 'utils/contracts';
 import { getSymbol, getUnderlyingData } from 'utils/utils';
 import formatNumber from 'utils/formatNumber';
 import handleEth from 'utils/handleEth';
@@ -40,27 +34,22 @@ import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 import FixedLenderContext from 'contexts/FixedLenderContext';
 import AccountDataContext from 'contexts/AccountDataContext';
-import ModalStatusContext from 'contexts/ModalStatusContext';
+import { MarketContext } from 'contexts/AddressContext';
+import ContractsContext from 'contexts/ContractsContext';
 
 import keys from './translations.json';
 
 import numbers from 'config/numbers.json';
 
-type Props = {
-  data: Borrow | Deposit;
-  closeModal: (props: any) => void;
-};
-
-function DepositModalSP({ data, closeModal }: Props) {
-  const { market, symbol } = data;
-
+function Deposit() {
   const { web3Provider, walletAddress, network } = useWeb3Context();
   const { accountData } = useContext(AccountDataContext);
+  const { market } = useContext(MarketContext);
+  const { getInstance } = useContext(ContractsContext);
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
-  const { minimized, setMinimized } = useContext(ModalStatusContext);
   const fixedLenderData = useContext(FixedLenderContext);
 
   const [qty, setQty] = useState<string>('');
@@ -79,33 +68,35 @@ function DepositModalSP({ data, closeModal }: Props) {
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
     undefined
   );
+  const [underlyingContract, setUnderlyingContract] = useState<Contract | undefined>(undefined);
 
-  let underlyingData: UnderlyingData | undefined = undefined;
-
-  if (symbol) {
-    underlyingData = getUnderlyingData(network?.name, symbol.toLowerCase());
-  }
-
-  const underlyingContract = getContractData(
-    network?.name,
-    underlyingData!.address,
-    underlyingData!.abi,
-    web3Provider?.getSigner()
-  );
+  const symbol = market?.value ? getSymbol(market.value, network?.name) : 'DAI';
 
   useEffect(() => {
     getFixedLenderContract();
-    getWalletBalance();
-    getUserDeposits();
-  }, [fixedLenderData, walletAddress]);
+  }, [market, fixedLenderData]);
 
   useEffect(() => {
-    if (fixedLenderWithSigner) {
-      if (step == 1) {
-        estimateApprovalGasCost();
-      } else if (step == 2) {
-        estimateGas();
-      }
+    getUnderlyingContract();
+  }, [market, network, symbol]);
+
+  useEffect(() => {
+    getWalletBalance();
+  }, [walletAddress, underlyingContract]);
+
+  useEffect(() => {
+    getUserDeposits();
+  }, [symbol, walletAddress, accountData]);
+
+  useEffect(() => {
+    if (step == 1) {
+      estimateApprovalGasCost();
+    }
+  }, [step, underlyingContract]);
+
+  useEffect(() => {
+    if (step == 2) {
+      estimateGas();
     }
   }, [fixedLenderWithSigner, step, debounceQty]);
 
@@ -118,12 +109,13 @@ function DepositModalSP({ data, closeModal }: Props) {
       return setStep(2);
     }
 
-    const allowance = await underlyingContract?.allowance(walletAddress, market);
+    if (!underlyingContract || !market) return;
+
+    const allowance = await underlyingContract?.allowance(walletAddress, market?.value);
 
     const formattedAllowance = allowance && parseFloat(ethers.utils.formatEther(allowance));
 
     const amount = qty == '' ? 0 : parseFloat(qty);
-
     if (formattedAllowance > amount && !isNaN(amount) && !isNaN(formattedAllowance)) {
       setStep(2);
     } else {
@@ -137,11 +129,15 @@ function DepositModalSP({ data, closeModal }: Props) {
     try {
       const gasLimit = await getApprovalGasLimit();
 
-      const approval = await underlyingContract?.approve(market, ethers.constants.MaxUint256, {
-        gasLimit: gasLimit
-          ? Math.ceil(Number(formatFixed(gasLimit)) * numbers.gasLimitMultiplier)
-          : undefined
-      });
+      const approval = await underlyingContract?.approve(
+        market?.value,
+        ethers.constants.MaxUint256,
+        {
+          gasLimit: gasLimit
+            ? Math.ceil(Number(formatFixed(gasLimit)) * numbers.gasLimitMultiplier)
+            : undefined
+        }
+      );
 
       //we set the transaction as pending
       setPending((pending) => !pending);
@@ -171,6 +167,8 @@ function DepositModalSP({ data, closeModal }: Props) {
       walletBalance = await web3Provider?.getBalance(walletAddress!);
       decimals = 18;
     } else {
+      if (!underlyingContract) return;
+
       walletBalance = await underlyingContract?.balanceOf(walletAddress);
       decimals = await underlyingContract?.decimals();
     }
@@ -295,7 +293,6 @@ function DepositModalSP({ data, closeModal }: Props) {
 
   async function estimateGas() {
     if (symbol == 'WETH') return;
-
     try {
       const gasPrice = (await fixedLenderWithSigner?.provider.getFeeData())?.maxFeePerGas;
 
@@ -307,6 +304,7 @@ function DepositModalSP({ data, closeModal }: Props) {
         setGas({ eth: Number(total).toFixed(6) });
       }
     } catch (e) {
+      console.log(e);
       setError({
         status: true,
         component: 'gas'
@@ -329,7 +327,7 @@ function DepositModalSP({ data, closeModal }: Props) {
 
   async function getApprovalGasLimit() {
     const gasLimit = await underlyingContract?.estimateGas.approve(
-      market,
+      market?.value,
       ethers.constants.MaxUint256
     );
 
@@ -340,7 +338,7 @@ function DepositModalSP({ data, closeModal }: Props) {
     if (symbol == 'WETH') return;
 
     try {
-      const gasPrice = (await fixedLenderWithSigner?.provider.getFeeData())?.maxFeePerGas;
+      const gasPrice = (await underlyingContract?.provider.getFeeData())?.maxFeePerGas;
 
       const gasLimit = await getApprovalGasLimit();
 
@@ -368,89 +366,76 @@ function DepositModalSP({ data, closeModal }: Props) {
     }
   }
 
-  async function getFixedLenderContract() {
+  function getFixedLenderContract() {
     const filteredFixedLender = fixedLenderData.find((contract) => {
       const contractSymbol = getSymbol(contract.address!, network!.name);
 
       return contractSymbol == symbol;
     });
 
-    const fixedLender = await getContractData(
-      network?.name,
+    const fixedLender = getInstance(
       filteredFixedLender?.address!,
       filteredFixedLender?.abi!,
-      web3Provider?.getSigner()
+      `market${symbol}`
     );
 
     setFixedLenderWithSigner(fixedLender);
   }
 
+  function getUnderlyingContract() {
+    const underlyingData: UnderlyingData | undefined = getUnderlyingData(
+      network?.name,
+      symbol.toLowerCase()
+    );
+
+    const underlyingContract = getInstance(
+      underlyingData!.address,
+      underlyingData!.abi,
+      `underlying${symbol}`
+    );
+
+    setUnderlyingContract(underlyingContract);
+  }
+
   return (
     <>
-      {!minimized && (
-        <ModalWrapper closeModal={closeModal}>
-          {!tx && (
-            <>
-              <ModalTitle title={translations[lang].variableRateDeposit} />
-              <ModalAsset asset={symbol!} amount={walletBalance} />
-              <ModalInput
-                onMax={onMax}
-                value={qty}
-                onChange={handleInputChange}
-                symbol={symbol!}
-                error={error?.component == 'input'}
-              />
-              {error?.component !== 'gas' && symbol != 'WETH' && <ModalTxCost gas={gas} />}
-              <ModalRow text={translations[lang].exactlyBalance} value={depositedAmount} />
-              <ModalExpansionPanelWrapper>
-                {symbol ? (
-                  <ModalRowHealthFactor qty={qty} symbol={symbol} operation="deposit" />
-                ) : (
-                  <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
-                )}
-                <ModalRowBorrowLimit qty={qty} symbol={symbol!} operation="deposit" />
-              </ModalExpansionPanelWrapper>
-              <ModalStepper currentStep={step} totalSteps={3} />
-              {error && error.component != 'gas' && <ModalError message={error.message} />}
-              <div className={styles.buttonContainer}>
-                <Button
-                  text={step == 1 ? translations[lang].approve : translations[lang].deposit}
-                  loading={loading}
-                  className={qty && parseFloat(qty) > 0 && !error?.status ? 'primary' : 'disabled'}
-                  disabled={
-                    ((!qty || parseFloat(qty) <= 0) && !pending) || loading || error?.status
-                  }
-                  onClick={handleClickAction}
-                />
-              </div>
-            </>
-          )}
-          {tx && <ModalGif tx={tx} tryAgain={deposit} />}
-        </ModalWrapper>
+      {!tx && (
+        <>
+          <ModalTitle title={translations[lang].variableRateDeposit} />
+          <ModalAsset asset={symbol!} amount={walletBalance} />
+          <ModalInput
+            onMax={onMax}
+            value={qty}
+            onChange={handleInputChange}
+            symbol={symbol!}
+            error={error?.component == 'input'}
+          />
+          {error?.component !== 'gas' && symbol != 'WETH' && <ModalTxCost gas={gas} />}
+          <ModalRow text={translations[lang].exactlyBalance} value={depositedAmount} />
+          <ModalExpansionPanelWrapper>
+            {symbol ? (
+              <ModalRowHealthFactor qty={qty} symbol={symbol} operation="deposit" />
+            ) : (
+              <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
+            )}
+            <ModalRowBorrowLimit qty={qty} symbol={symbol!} operation="deposit" />
+          </ModalExpansionPanelWrapper>
+          <ModalStepper currentStep={step} totalSteps={3} />
+          {error && error.component != 'gas' && <ModalError message={error.message} />}
+          <div className={styles.buttonContainer}>
+            <Button
+              text={step == 1 ? translations[lang].approve : translations[lang].deposit}
+              loading={loading}
+              className={qty && parseFloat(qty) > 0 && !error?.status ? 'primary' : 'disabled'}
+              disabled={((!qty || parseFloat(qty) <= 0) && !pending) || loading || error?.status}
+              onClick={handleClickAction}
+            />
+          </div>
+        </>
       )}
-
-      {tx && minimized && (
-        <ModalMinimized
-          tx={tx}
-          handleMinimize={() => {
-            setMinimized((prev: boolean) => !prev);
-          }}
-        />
-      )}
-
-      {!minimized && (
-        <Overlay
-          closeModal={
-            !tx || tx.status == 'success'
-              ? closeModal
-              : () => {
-                  setMinimized((prev: boolean) => !prev);
-                }
-          }
-        />
-      )}
+      {tx && <ModalGif tx={tx} tryAgain={deposit} />}
     </>
   );
 }
 
-export default DepositModalSP;
+export default Deposit;

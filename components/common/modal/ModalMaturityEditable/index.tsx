@@ -10,19 +10,16 @@ type Props = {
   valueTooltip?: string;
   line?: boolean;
   values?: Array<string>;
-  value?: string;
   fixedLenderContract?: any;
-  editable?: boolean;
 };
 
-function ModalMaturityEditable({ text, value, line, editable }: Props) {
+function ModalMaturityEditable({ text, line }: Props) {
   const rowStyles = line ? `${styles.row} ${styles.line}` : styles.row;
 
   return (
     <section className={rowStyles}>
       <p className={styles.text}>{text}</p>
-      {!editable && <p className={styles.value}>{value}</p>}
-      {editable && <MaturitySelector editable={editable} />}
+      <MaturitySelector />
     </section>
   );
 }

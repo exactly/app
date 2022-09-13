@@ -1,5 +1,4 @@
 import { useContext, useEffect, useState } from 'react';
-import dayjs from 'dayjs';
 import dynamic from 'next/dynamic';
 
 import { FixedLenderAccountData } from 'types/FixedLenderAccountData';
@@ -29,30 +28,15 @@ function MaturityPoolDashboard({ tab }: Props) {
   const translations: { [key: string]: LangKeys } = keys;
 
   const { accountData } = useContext(AccountDataContext);
-  const { setOpen } = useContext(ModalStatusContext);
+  const { setOpen, setOperation } = useContext(ModalStatusContext);
 
-  const [defaultMaturity, setDefaultMaturity] = useState<string>();
   const [maturities, setMaturities] = useState<any>(undefined);
-
-  useEffect(() => {
-    if (!defaultMaturity) {
-      getDefaultMaturity();
-    }
-  }, [defaultMaturity]);
 
   useEffect(() => {
     if (accountData) {
       getMaturityPools();
     }
   }, [accountData]);
-
-  async function getDefaultMaturity() {
-    const currentTimestamp = dayjs().unix();
-    const interval = 2419200;
-    const timestamp = currentTimestamp - (currentTimestamp % interval) + interval;
-
-    setDefaultMaturity(timestamp.toString());
-  }
 
   async function getMaturityPools() {
     const data: any = {};
@@ -128,6 +112,7 @@ function MaturityPoolDashboard({ tab }: Props) {
               }
               className={tab.value == 'borrow' ? 'secondary' : 'primary'}
               onClick={() => {
+                setOperation(tab.value == 'borrow' ? 'borrowAtMaturity' : 'depositAtMaturity');
                 setOpen(true);
               }}
             />

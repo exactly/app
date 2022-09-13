@@ -7,6 +7,7 @@ import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 import AccountDataContext from 'contexts/AccountDataContext';
 import ModalStatusContext from 'contexts/ModalStatusContext';
+import { MarketContext } from 'contexts/AddressContext';
 
 import { LangKeys } from 'types/Lang';
 
@@ -27,7 +28,8 @@ function SmartPoolInfo({ symbol }: Props) {
   const { walletAddress, connect } = useWeb3Context();
 
   const { accountData } = useContext(AccountDataContext);
-  const { setOpen } = useContext(ModalStatusContext);
+  const { setOpen, setOperation } = useContext(ModalStatusContext);
+  const { setMarket } = useContext(MarketContext);
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
@@ -68,15 +70,8 @@ function SmartPoolInfo({ symbol }: Props) {
 
     const marketData = accountData[symbol];
 
-    const market = {
-      market: marketData.market,
-      symbol: marketData.assetSymbol,
-      name: marketData.assetSymbol,
-      isListed: true,
-      collateralFactor: parseFloat(ethers.utils.formatEther(marketData.adjustFactor)),
-      type: 'smartDeposit'
-    };
-
+    setOperation('deposit');
+    setMarket({ value: marketData.market });
     setOpen(true);
   }
 

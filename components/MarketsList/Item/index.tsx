@@ -14,7 +14,7 @@ import { Pool } from 'types/Pool';
 import { LangKeys } from 'types/Lang';
 import { FixedMarketData } from 'types/FixedMarketData';
 
-import { AddressContext } from 'contexts/AddressContext';
+import { MarketContext } from 'contexts/AddressContext';
 import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 import AccountDataContext from 'contexts/AccountDataContext';
@@ -33,10 +33,11 @@ type Props = {
 };
 
 function Item({ market, type, fixedMarketData }: Props) {
-  const { date } = useContext(AddressContext);
+  const { date } = useContext(MarketContext);
   const { walletAddress, connect, network } = useWeb3Context();
 
-  const { setOpen } = useContext(ModalStatusContext);
+  const { setOpen, setOperation } = useContext(ModalStatusContext);
+  const { setMarket } = useContext(MarketContext);
   const { accountData } = useContext(AccountDataContext);
 
   const lang: string = useContext(LangContext);
@@ -54,6 +55,8 @@ function Item({ market, type, fixedMarketData }: Props) {
 
     if (!walletAddress && connect) return connect();
 
+    setOperation(type);
+    setMarket({ value: market.market });
     setOpen(true);
   }
 

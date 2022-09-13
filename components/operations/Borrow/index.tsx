@@ -9,15 +9,10 @@ import ModalRowHealthFactor from 'components/common/modal/ModalRowHealthFactor';
 import SkeletonModalRowBeforeAfter from 'components/common/skeletons/SkeletonModalRowBeforeAfter';
 import ModalTitle from 'components/common/modal/ModalTitle';
 import ModalTxCost from 'components/common/modal/ModalTxCost';
-import ModalMinimized from 'components/common/modal/ModalMinimized';
-import ModalWrapper from 'components/common/modal/ModalWrapper';
 import ModalGif from 'components/common/modal/ModalGif';
-import Overlay from 'components/Overlay';
 import ModalError from 'components/common/modal/ModalError';
 import ModalRowBorrowLimit from 'components/common/modal/ModalRowBorrowLimit';
 
-import { Borrow } from 'types/Borrow';
-import { Deposit } from 'types/Deposit';
 import { LangKeys } from 'types/Lang';
 import { UnderlyingData } from 'types/Underlying';
 import { Gas } from 'types/Gas';
@@ -25,7 +20,6 @@ import { Transaction } from 'types/Transaction';
 import { Error } from 'types/Error';
 import { HealthFactor } from 'types/HealthFactor';
 
-import { getContractData } from 'utils/contracts';
 import { getUnderlyingData, getSymbol } from 'utils/utils';
 import handleEth from 'utils/handleEth';
 import getBeforeBorrowLimit from 'utils/getBeforeBorrowLimit';
@@ -37,32 +31,24 @@ import useDebounce from 'hooks/useDebounce';
 import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 import FixedLenderContext from 'contexts/FixedLenderContext';
-import { AddressContext } from 'contexts/AddressContext';
+import { MarketContext } from 'contexts/AddressContext';
 import AccountDataContext from 'contexts/AccountDataContext';
-import ModalStatusContext from 'contexts/ModalStatusContext';
+import ContractsContext from 'contexts/ContractsContext';
 
 import keys from './translations.json';
 
 import numbers from 'config/numbers.json';
 
-type Props = {
-  data: Borrow | Deposit;
-  editable?: boolean;
-  closeModal: (props: any) => void;
-};
-
-function FloatingBorrowModal({ data, editable, closeModal }: Props) {
-  const { market } = data;
-
+function Borrow() {
   const { web3Provider, walletAddress, network } = useWeb3Context();
   const { accountData } = useContext(AccountDataContext);
 
-  const { address } = useContext(AddressContext);
+  const { market } = useContext(MarketContext);
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
-  const { minimized, setMinimized } = useContext(ModalStatusContext);
+  const { getInstance } = useContext(ContractsContext);
 
   const fixedLenderData = useContext(FixedLenderContext);
 
@@ -83,28 +69,20 @@ function FloatingBorrowModal({ data, editable, closeModal }: Props) {
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
     undefined
   );
+  const [underlyingContract, setUnderlyingContract] = useState<Contract | undefined>(undefined);
 
-  const marketAddress = editable ? address?.value ?? market : market;
-
-  const symbol = getSymbol(marketAddress, network?.name);
+  const symbol = market?.value ? getSymbol(market.value, network?.name) : 'DAI';
 
   const ETHrouter =
     web3Provider && symbol == 'WETH' && handleEth(network?.name, web3Provider?.getSigner());
 
-  const underlyingData: UnderlyingData | undefined = getUnderlyingData(
-    network?.name,
-    symbol.toLowerCase()
-  );
-
-  const underlyingContract = getContractData(
-    network?.name,
-    underlyingData!.address,
-    underlyingData!.abi
-  );
-
   useEffect(() => {
     getFixedLenderContract();
-  }, [address, market, fixedLenderData]);
+  }, [market, fixedLenderData]);
+
+  useEffect(() => {
+    getUnderlyingContract();
+  }, [market, network, symbol]);
 
   useEffect(() => {
     checkAllowance();
@@ -384,21 +362,35 @@ function FloatingBorrowModal({ data, editable, closeModal }: Props) {
     setHealthFactor(healthFactor);
   }
 
-  async function getFixedLenderContract() {
+  function getFixedLenderContract() {
     const filteredFixedLender = fixedLenderData.find((contract) => {
       const contractSymbol = getSymbol(contract.address!, network!.name);
 
       return contractSymbol == symbol;
     });
 
-    const fixedLender = await getContractData(
-      network?.name,
+    const fixedLender = getInstance(
       filteredFixedLender?.address!,
       filteredFixedLender?.abi!,
-      web3Provider?.getSigner()
+      `market${symbol}`
     );
 
     setFixedLenderWithSigner(fixedLender);
+  }
+
+  function getUnderlyingContract() {
+    const underlyingData: UnderlyingData | undefined = getUnderlyingData(
+      network?.name,
+      symbol.toLowerCase()
+    );
+
+    const underlyingContract = getInstance(
+      underlyingData!.address,
+      underlyingData!.abi,
+      `underlying${symbol}`
+    );
+
+    setUnderlyingContract(underlyingContract);
   }
 
   async function approve() {
@@ -430,71 +422,44 @@ function FloatingBorrowModal({ data, editable, closeModal }: Props) {
 
   return (
     <>
-      {!minimized && (
-        <ModalWrapper closeModal={closeModal}>
-          {!tx && (
-            <>
-              <ModalTitle title={translations[lang].floatingPoolBorrow} />
-              <ModalAsset asset={symbol!} amount={walletBalance} />
-              <ModalInput
-                onMax={onMax}
-                value={qty}
-                onChange={handleInputChange}
-                symbol={symbol!}
-                error={error?.component == 'input'}
-              />
-              {gasError?.component !== 'gas' && symbol != 'WETH' && <ModalTxCost gas={gas} />}
-              {symbol ? (
-                <ModalRowHealthFactor
-                  qty={qty}
-                  symbol={symbol}
-                  operation="borrow"
-                  healthFactorCallback={getHealthFactor}
-                />
-              ) : (
-                <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
-              )}
-              <ModalRowBorrowLimit qty={qty} symbol={symbol!} operation="borrow" />
-              {error && error.component != 'gas' && <ModalError message={error.message} />}
-              <div className={styles.buttonContainer}>
-                <Button
-                  text={needsApproval ? translations[lang].approve : translations[lang].borrow}
-                  className={
-                    parseFloat(qty) <= 0 || !qty || error?.status ? 'disabled' : 'secondary'
-                  }
-                  onClick={needsApproval ? approve : borrow}
-                  disabled={parseFloat(qty) <= 0 || !qty || loading || error?.status}
-                  loading={loading}
-                />
-              </div>
-            </>
+      {!tx && (
+        <>
+          <ModalTitle title={translations[lang].floatingPoolBorrow} />
+          <ModalAsset asset={symbol!} amount={walletBalance} />
+          <ModalInput
+            onMax={onMax}
+            value={qty}
+            onChange={handleInputChange}
+            symbol={symbol!}
+            error={error?.component == 'input'}
+          />
+          {gasError?.component !== 'gas' && symbol != 'WETH' && <ModalTxCost gas={gas} />}
+          {symbol ? (
+            <ModalRowHealthFactor
+              qty={qty}
+              symbol={symbol}
+              operation="borrow"
+              healthFactorCallback={getHealthFactor}
+            />
+          ) : (
+            <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
           )}
-          {tx && <ModalGif tx={tx} tryAgain={borrow} />}
-        </ModalWrapper>
+          <ModalRowBorrowLimit qty={qty} symbol={symbol!} operation="borrow" />
+          {error && error.component != 'gas' && <ModalError message={error.message} />}
+          <div className={styles.buttonContainer}>
+            <Button
+              text={needsApproval ? translations[lang].approve : translations[lang].borrow}
+              className={parseFloat(qty) <= 0 || !qty || error?.status ? 'disabled' : 'secondary'}
+              onClick={needsApproval ? approve : borrow}
+              disabled={parseFloat(qty) <= 0 || !qty || loading || error?.status}
+              loading={loading}
+            />
+          </div>
+        </>
       )}
-
-      {tx && minimized && (
-        <ModalMinimized
-          tx={tx}
-          handleMinimize={() => {
-            setMinimized((prev: boolean) => !prev);
-          }}
-        />
-      )}
-
-      {!minimized && (
-        <Overlay
-          closeModal={
-            !tx || tx.status == 'success'
-              ? closeModal
-              : () => {
-                  setMinimized((prev: boolean) => !prev);
-                }
-          }
-        />
-      )}
+      {tx && <ModalGif tx={tx} tryAgain={borrow} />}
     </>
   );
 }
 
-export default FloatingBorrowModal;
+export default Borrow;
