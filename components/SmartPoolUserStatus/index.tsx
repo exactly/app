@@ -5,9 +5,9 @@ const Item = dynamic(() => import('./Item'));
 const EmptyState = dynamic(() => import('components/EmptyState'));
 
 import LangContext from 'contexts/LangContext';
-import { useWeb3Context } from 'contexts/Web3Context';
 import AuditorContext from 'contexts/AuditorContext';
 import AccountDataContext from 'contexts/AccountDataContext';
+import ContractsContext from 'contexts/ContractsContext';
 
 import { LangKeys } from 'types/Lang';
 import { SmartPoolItemData } from 'types/SmartPoolItemData';
@@ -18,8 +18,6 @@ import styles from './style.module.scss';
 
 import keys from './translations.json';
 
-import { getContractData } from 'utils/contracts';
-
 type Props = {
   walletAddress: string | null | undefined;
   type: Option;
@@ -29,19 +27,14 @@ function SmartPoolUserStatus({ walletAddress, type }: Props) {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
   const auditor = useContext(AuditorContext);
-  const { web3Provider, network } = useWeb3Context();
   const { accountData } = useContext(AccountDataContext);
+  const { getInstance } = useContext(ContractsContext);
 
   const [itemData, setItemData] = useState<Array<SmartPoolItemData> | undefined>(undefined);
 
   const orderAssets = ['DAI', 'USDC', 'WETH', 'WBTC'];
 
-  const auditorContract = getContractData(
-    network?.name,
-    auditor.address!,
-    auditor.abi!,
-    web3Provider?.getSigner()
-  );
+  const auditorContract = getInstance(auditor.address!, auditor.abi!, 'auditor');
 
   useEffect(() => {
     getCurrentBalance();

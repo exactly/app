@@ -53,8 +53,13 @@ function ModalRowHealthFactor({ qty, symbol, operation, healthFactorCallback }: 
     if (qty == '') {
       return setNewQty(ethers.constants.Zero);
     }
-
     const decimals = accountData[symbol].decimals;
+
+    const regex = /[^,.]*$/g;
+    const inputDecimals = regex.exec(qty)![0];
+
+    if (inputDecimals.length > decimals) return;
+
     const newQty = parseFixed(qty, decimals);
 
     setNewQty(newQty);

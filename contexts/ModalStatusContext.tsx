@@ -1,50 +1,40 @@
 import { createContext, FC, useContext, useEffect, useState } from 'react';
 import AccountDataContext from './AccountDataContext';
 
+type Operation =
+  | 'borrow'
+  | 'deposit'
+  | 'withdraw'
+  | 'repay'
+  | 'borrowAtMaturity'
+  | 'depositAtMaturity'
+  | 'withdrawAtMaturity'
+  | 'repayAtMaturity'
+  | any;
+
 type ContextValues = {
-  minimized: boolean;
-  setMinimized: (minimized: any) => void;
-  open: boolean;
-  setOpen: (minimized: any) => void;
-  modalContent: any;
-  setModalContent: (minimized: any) => void;
+  open: boolean | null;
+  setOpen: (open: any) => void;
+  operation: Operation | null;
+  setOperation: (operation: Operation) => void;
 };
 
 const defaultValues: ContextValues = {
-  minimized: false,
-  setMinimized: () => {},
   open: false,
   setOpen: () => {},
-  modalContent: undefined,
-  setModalContent: () => {}
+  operation: null,
+  setOperation: () => {}
 };
 
 const ModalStatusContext = createContext(defaultValues);
 
 export const ModalStatusProvider: FC = ({ children }) => {
   const { getAccountData } = useContext(AccountDataContext);
-  const [minimized, setMinimized] = useState<boolean>(false);
-  const [open, setIsOpened] = useState<boolean>(false);
-  const [modalContent, setContent] = useState<any>();
-
-  const setOpen = (value: boolean) => {
-    if (!minimized) {
-      setIsOpened(value);
-    } else {
-      setMinimized(false);
-    }
-  };
-
-  const setModalContent = (data: any) => {
-    if (!minimized) {
-      setContent(data);
-    } else {
-      setMinimized(false);
-    }
-  };
+  const [open, setOpen] = useState<boolean>(false);
+  const [operation, setOperation] = useState<Operation | null>(null);
 
   useEffect(() => {
-    if (!open && modalContent) {
+    if (!open && operation) {
       setTimeout(() => {
         getAccountData();
       }, 5000);
@@ -52,9 +42,7 @@ export const ModalStatusProvider: FC = ({ children }) => {
   }, [open]);
 
   return (
-    <ModalStatusContext.Provider
-      value={{ open, minimized, modalContent, setMinimized, setOpen, setModalContent }}
-    >
+    <ModalStatusContext.Provider value={{ open, setOpen, operation, setOperation }}>
       {children}
     </ModalStatusContext.Provider>
   );

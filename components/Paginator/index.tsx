@@ -1,6 +1,6 @@
 import { useContext } from 'react';
 
-import { AddressContext } from 'contexts/AddressContext';
+import { MarketContext } from 'contexts/AddressContext';
 
 import styles from './style.module.scss';
 
@@ -11,7 +11,7 @@ interface Props {
 }
 
 function Paginator({ itemsPerPage, handleChange, currentPage }: Props) {
-  const { dates } = useContext(AddressContext);
+  const { dates } = useContext(MarketContext);
 
   const pages = Math.ceil(dates.length / itemsPerPage);
 

@@ -40,6 +40,12 @@ function ModalInput({ value, name, disabled, symbol, error, onChange, onMax }: P
 
     const decimals = accountData[symbol].decimals;
     const oraclePrice = accountData[symbol].oraclePrice;
+
+    const regex = /[^,.]*$/g;
+    const inputDecimals = regex.exec(value)![0];
+
+    if (inputDecimals.length > decimals) return;
+
     const parsedValue = parseFixed(value, decimals);
     const WAD = parseFixed('1', 18);
 

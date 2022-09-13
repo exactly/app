@@ -9,17 +9,12 @@ import ModalRow from 'components/common/modal/ModalRow';
 import ModalRowHealthFactor from 'components/common/modal/ModalRowHealthFactor';
 import ModalTitle from 'components/common/modal/ModalTitle';
 import ModalTxCost from 'components/common/modal/ModalTxCost';
-import ModalMinimized from 'components/common/modal/ModalMinimized';
-import ModalWrapper from 'components/common/modal/ModalWrapper';
 import ModalGif from 'components/common/modal/ModalGif';
-import Overlay from 'components/Overlay';
 import SkeletonModalRowBeforeAfter from 'components/common/skeletons/SkeletonModalRowBeforeAfter';
 import ModalError from 'components/common/modal/ModalError';
 import ModalRowBorrowLimit from 'components/common/modal/ModalRowBorrowLimit';
 import ModalExpansionPanelWrapper from 'components/common/modal/ModalExpansionPanelWrapper';
 
-import { Borrow } from 'types/Borrow';
-import { Deposit } from 'types/Deposit';
 import { LangKeys } from 'types/Lang';
 import { Gas } from 'types/Gas';
 import { Transaction } from 'types/Transaction';
@@ -34,9 +29,9 @@ import LangContext from 'contexts/LangContext';
 import FixedLenderContext from 'contexts/FixedLenderContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 import AccountDataContext from 'contexts/AccountDataContext';
-import ModalStatusContext from 'contexts/ModalStatusContext';
+import { MarketContext } from 'contexts/AddressContext';
+import ContractsContext from 'contexts/ContractsContext';
 
-import { getContractData } from 'utils/contracts';
 import formatNumber from 'utils/formatNumber';
 import { getSymbol } from 'utils/utils';
 import handleEth from 'utils/handleEth';
@@ -46,17 +41,11 @@ import numbers from 'config/numbers.json';
 
 import keys from './translations.json';
 
-type Props = {
-  data: Borrow | Deposit;
-  closeModal: (props: any) => void;
-};
-
-function WithdrawModalSP({ data, closeModal }: Props) {
-  const { symbol, assets } = data;
-
+function Withdraw() {
   const { walletAddress, web3Provider, network } = useWeb3Context();
   const { accountData } = useContext(AccountDataContext);
-  const { minimized, setMinimized } = useContext(ModalStatusContext);
+  const { market } = useContext(MarketContext);
+  const { getInstance } = useContext(ContractsContext);
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
@@ -76,12 +65,19 @@ function WithdrawModalSP({ data, closeModal }: Props) {
     undefined
   );
 
+  const symbol = market?.value ? getSymbol(market.value, network?.name) : 'DAI';
+  const assets = accountData![symbol].floatingDepositAssets;
+
   const parsedAmount = ethers.utils.formatUnits(assets, decimals[symbol! as keyof Decimals]);
 
   const formattedAmount = formatNumber(parsedAmount, symbol!);
 
   const ETHrouter =
     web3Provider && symbol == 'WETH' && handleEth(network?.name, web3Provider?.getSigner());
+
+  useEffect(() => {
+    setQty('');
+  }, [symbol]);
 
   useEffect(() => {
     getFixedLenderContract();
@@ -273,18 +269,17 @@ function WithdrawModalSP({ data, closeModal }: Props) {
     }
   }
 
-  async function getFixedLenderContract() {
+  function getFixedLenderContract() {
     const filteredFixedLender = fixedLenderData.find((contract) => {
       const contractSymbol = getSymbol(contract.address!, network!.name);
 
       return contractSymbol == symbol;
     });
 
-    const fixedLender = await getContractData(
-      network?.name,
+    const fixedLender = getInstance(
       filteredFixedLender?.address!,
       filteredFixedLender?.abi!,
-      web3Provider?.getSigner()
+      `market${symbol}`
     );
 
     setFixedLenderWithSigner(fixedLender);
@@ -292,71 +287,46 @@ function WithdrawModalSP({ data, closeModal }: Props) {
 
   return (
     <>
-      {!minimized && (
-        <ModalWrapper closeModal={closeModal}>
-          {!tx && (
-            <>
-              <ModalTitle title={translations[lang].withdraw} />
-              <ModalAsset asset={symbol!} amount={parsedAmount} />
-              <ModalInput
-                onMax={onMax}
-                value={qty}
-                onChange={handleInputChange}
-                symbol={symbol!}
-                error={error?.component == 'input'}
-              />
-              {error?.component !== 'gas' && symbol != 'WETH' && <ModalTxCost gas={gas} />}
-              <ModalRow text={translations[lang].exactlyBalance} value={formattedAmount} />
-              <ModalExpansionPanelWrapper>
-                {symbol ? (
-                  <ModalRowHealthFactor qty={qty} symbol={symbol} operation="withdraw" />
-                ) : (
-                  <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
-                )}
-                <ModalRowBorrowLimit qty={qty} symbol={symbol!} operation="withdraw" />
-              </ModalExpansionPanelWrapper>
+      {!tx && (
+        <>
+          <ModalTitle title={translations[lang].withdraw} />
+          <ModalAsset asset={symbol!} amount={parsedAmount} />
+          <ModalInput
+            onMax={onMax}
+            value={qty}
+            onChange={handleInputChange}
+            symbol={symbol!}
+            error={error?.component == 'input'}
+          />
+          {error?.component !== 'gas' && symbol != 'WETH' && <ModalTxCost gas={gas} />}
+          <ModalRow text={translations[lang].exactlyBalance} value={formattedAmount} />
+          <ModalExpansionPanelWrapper>
+            {symbol ? (
+              <ModalRowHealthFactor qty={qty} symbol={symbol} operation="withdraw" />
+            ) : (
+              <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
+            )}
+            <ModalRowBorrowLimit qty={qty} symbol={symbol!} operation="withdraw" />
+          </ModalExpansionPanelWrapper>
 
-              {error && error.component != 'gas' && <ModalError message={error.message} />}
-              <div className={styles.buttonContainer}>
-                <Button
-                  text={needsApproval ? translations[lang].approve : translations[lang].withdraw}
-                  className={
-                    parseFloat(qty) <= 0 || !qty || error?.status ? 'secondaryDisabled' : 'tertiary'
-                  }
-                  disabled={parseFloat(qty) <= 0 || !qty || loading || error?.status}
-                  onClick={needsApproval ? approve : withdraw}
-                  loading={loading}
-                  color="primary"
-                />
-              </div>
-            </>
-          )}
-          {tx && <ModalGif tx={tx} tryAgain={withdraw} />}
-        </ModalWrapper>
+          {error && error.component != 'gas' && <ModalError message={error.message} />}
+          <div className={styles.buttonContainer}>
+            <Button
+              text={needsApproval ? translations[lang].approve : translations[lang].withdraw}
+              className={
+                parseFloat(qty) <= 0 || !qty || error?.status ? 'secondaryDisabled' : 'tertiary'
+              }
+              disabled={parseFloat(qty) <= 0 || !qty || loading || error?.status}
+              onClick={needsApproval ? approve : withdraw}
+              loading={loading}
+              color="primary"
+            />
+          </div>
+        </>
       )}
-
-      {tx && minimized && (
-        <ModalMinimized
-          tx={tx}
-          handleMinimize={() => {
-            setMinimized((prev: boolean) => !prev);
-          }}
-        />
-      )}
-
-      {!minimized && (
-        <Overlay
-          closeModal={
-            !tx || tx.status == 'success'
-              ? closeModal
-              : () => {
-                  setMinimized((prev: boolean) => !prev);
-                }
-          }
-        />
-      )}
+      {tx && <ModalGif tx={tx} tryAgain={withdraw} />}
     </>
   );
 }
 
-export default WithdrawModalSP;
+export default Withdraw;

@@ -9,14 +9,14 @@ import SmartPoolInfo from 'components/SmartPoolInfo';
 import MobileNavbar from 'components/MobileNavbar';
 import Paginator from 'components/Paginator';
 import Footer from 'components/Footer';
-import ModalsContainer from 'components/ModalsContainer';
+import OperationsModals from 'components/OperationsModal';
 
 import { LangKeys } from 'types/Lang';
 import { Maturity } from 'types/Maturity';
 
 import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
-import { AddressContext } from 'contexts/AddressContext';
+import { MarketContext } from 'contexts/AddressContext';
 import FixedLenderContext from 'contexts/FixedLenderContext';
 import AccountDataContext from 'contexts/AccountDataContext';
 
@@ -33,7 +33,7 @@ interface Props {
 
 const Asset: NextPage<Props> = ({ symbol = 'DAI' }) => {
   const { network } = useWeb3Context();
-  const { dates } = useContext(AddressContext);
+  const { dates } = useContext(MarketContext);
   const fixedLenderData = useContext(FixedLenderContext);
   const { accountData } = useContext(AccountDataContext);
 
@@ -75,11 +75,10 @@ const Asset: NextPage<Props> = ({ symbol = 'DAI' }) => {
 
   return (
     <>
+      <OperationsModals />
       <MobileNavbar />
       <Navbar />
       <CurrentNetwork />
-
-      <ModalsContainer />
 
       <section className={style.container}>
         <div className={style.smartPoolContainer}>

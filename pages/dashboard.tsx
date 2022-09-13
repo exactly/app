@@ -8,7 +8,7 @@ import MobileNavbar from 'components/MobileNavbar';
 import CurrentNetwork from 'components/CurrentNetwork';
 import DashboardHeader from 'components/DashboardHeader';
 import Tabs from 'components/Tabs';
-import ModalsContainer from 'components/ModalsContainer';
+import OperationsModals from 'components/OperationsModal';
 
 const SmartPoolDashboard = dynamic(() => import('components/SmartPoolDashboard'));
 const MaturityPoolDashboard = dynamic(() => import('components/MaturityPoolDashboard'));
@@ -39,7 +39,7 @@ const DashBoard: NextPage<Props> = () => {
 
   return (
     <>
-      <ModalsContainer />
+      <OperationsModals />
       <MobileNavbar />
       <Navbar />
       <CurrentNetwork />

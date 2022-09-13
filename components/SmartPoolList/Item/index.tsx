@@ -16,6 +16,7 @@ import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 import AccountDataContext from 'contexts/AccountDataContext';
 import ModalStatusContext from 'contexts/ModalStatusContext';
+import { MarketContext } from 'contexts/AddressContext';
 
 import style from './style.module.scss';
 
@@ -37,7 +38,8 @@ function Item({ market, type }: Props) {
 
   const fixedLenderData = useContext(FixedLenderContext);
   const { accountData } = useContext(AccountDataContext);
-  const { setOpen, setModalContent } = useContext(ModalStatusContext);
+  const { setOpen, setOperation } = useContext(ModalStatusContext);
+  const { setMarket } = useContext(MarketContext);
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
@@ -64,13 +66,14 @@ function Item({ market, type }: Props) {
     getRates();
   }, [accountData, market, network, fixedLenderAddress]);
 
-  function handleClick(modal: string) {
+  function handleClick(type: string) {
     if (!market) return;
 
     if (!walletAddress && connect) return connect();
 
+    setMarket({ value: market.market });
+    setOperation(type);
     setOpen(true);
-    setModalContent({ ...market, type: modal });
   }
 
   async function getRates() {
@@ -172,7 +175,7 @@ function Item({ market, type }: Props) {
             text={type == 'borrow' ? translations[lang].borrow : translations[lang].deposit}
             onClick={(e) => {
               e.stopPropagation();
-              handleClick(type == 'borrow' ? 'floatingBorrow' : 'smartDeposit');
+              handleClick(type == 'borrow' ? 'borrow' : 'deposit');
             }}
             className={type == 'borrow' ? 'secondary' : 'primary'}
           />
