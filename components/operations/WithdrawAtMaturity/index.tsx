@@ -65,7 +65,7 @@ function WithdrawAtMaturity() {
   const [needsApproval, setNeedsApproval] = useState<boolean>(false);
   const [withdrawAmount, setWithdrawAmount] = useState<string>('0');
   const [amountAtFinish, setAmountAtFinish] = useState<string | undefined>(undefined);
-  const [positionAssets, setPositionAssets] = useState<BigNumber | bigint>(0n);
+  const [positionAssets, setPositionAssets] = useState<BigNumber>(ethers.constants.Zero);
 
   const symbol = market?.value ? getSymbol(market.value, network?.name) : 'DAI';
 
@@ -97,12 +97,14 @@ function WithdrawAtMaturity() {
   }, [date]);
 
   useEffect(() => {
-    setPositionAssets(0n);
+    setPositionAssets(ethers.constants.Zero);
 
     const pool = accountData![symbol].fixedDepositPositions.find((position) => {
       return position.maturity.toNumber().toString() === date!.value;
     });
-    const positionAssets = pool ? pool.position.principal.add(pool.position.fee) : 0n;
+    const positionAssets = pool
+      ? pool.position.principal.add(pool.position.fee)
+      : ethers.constants.Zero;
 
     setPositionAssets(positionAssets);
   }, [date, accountData, symbol]);
