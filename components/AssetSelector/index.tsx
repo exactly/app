@@ -16,6 +16,7 @@ import { FixedLenderAccountData } from 'types/FixedLenderAccountData';
 
 import style from './style.module.scss';
 import parseSymbol from 'utils/parseSymbol';
+import Skeleton from 'react-loading-skeleton';
 
 type Props = {
   title?: Boolean;
@@ -35,7 +36,7 @@ function AssetSelector({ title, defaultAddress, onChange }: Props) {
     if (previewerData) {
       getMarkets();
     }
-  }, [previewerData]);
+  }, [previewerData, defaultAddress]);
 
   async function getMarkets() {
     try {
@@ -120,12 +121,14 @@ function AssetSelector({ title, defaultAddress, onChange }: Props) {
         </div>
       )}
       <div className={style.selectContainer}>
-        <Select
-          options={selectOptions}
-          onChange={handleChange}
-          placeholder={market ?? selectOptions[0]}
-          value={market ?? selectOptions[0]}
-        />
+        {(market && market.label && market.value && (
+          <Select
+            options={selectOptions}
+            onChange={handleChange}
+            placeholder={market ?? selectOptions[0]}
+            value={market ?? selectOptions[0]}
+          />
+        )) || <Skeleton width={200} height={48} />}
       </div>
     </section>
   );

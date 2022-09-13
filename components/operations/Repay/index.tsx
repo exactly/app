@@ -48,7 +48,7 @@ function Repay() {
 
   const fixedLenderData = useContext(FixedLenderContext);
 
-  const symbol = getSymbol(market!.value, network?.name);
+  const symbol = market?.value ? getSymbol(market.value, network?.name) : 'DAI';
   const assets = accountData![symbol].floatingBorrowAssets;
 
   const finalAmount = ethers.utils.formatUnits(assets, decimals[symbol! as keyof Decimals]);
@@ -66,6 +66,10 @@ function Repay() {
     undefined
   );
   const [underlyingContract, setUnderlyingContract] = useState<Contract | undefined>(undefined);
+
+  useEffect(() => {
+    setQty('');
+  }, [symbol]);
 
   useEffect(() => {
     getFixedLenderContract();
@@ -89,6 +93,8 @@ function Repay() {
     if (symbol == 'WETH' || !fixedLenderWithSigner) {
       return;
     }
+
+    if (!underlyingContract || !walletAddress || !market) return;
 
     const allowance = await underlyingContract?.allowance(
       walletAddress,

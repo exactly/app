@@ -72,7 +72,11 @@ function DepositAtMaturity() {
   );
   const [underlyingContract, setUnderlyingContract] = useState<Contract | undefined>(undefined);
 
-  const symbol = getSymbol(market!.value, network?.name);
+  const symbol = market?.value ? getSymbol(market.value, network?.name) : 'DAI';
+
+  useEffect(() => {
+    setQty('');
+  }, [symbol, date]);
 
   useEffect(() => {
     getFixedLenderContract();
@@ -112,6 +116,8 @@ function DepositAtMaturity() {
     if (symbol == 'WETH') {
       return setStep(2);
     }
+
+    if (!underlyingContract || !walletAddress || !market) return;
 
     const allowance = await underlyingContract?.allowance(walletAddress, market?.value);
 
@@ -477,7 +483,7 @@ function DepositAtMaturity() {
               }}
             />
           </ModalExpansionPanelWrapper>
-          <ModalStepper currentStep={step} totalSteps={3} />
+          {/* <ModalStepper currentStep={step} totalSteps={3} /> */}
           {error && error.component != 'gas' && <ModalError message={error.message} />}
           <div className={styles.buttonContainer}>
             <Button

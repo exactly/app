@@ -1,0 +1,10 @@
+{
+  "en": {
+    "deposit": "Deposit",
+    "borrow": "Borrow",
+    "withdraw": "Withdraw",
+    "repay": "Repay",
+    "fixedRate": "Fixed Rate",
+    "variableRate": "Variable Rate"
+  }
+}

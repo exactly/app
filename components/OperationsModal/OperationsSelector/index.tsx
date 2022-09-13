@@ -1,47 +1,55 @@
 import { useContext } from 'react';
 
 import ModalStatusContext from 'contexts/ModalStatusContext';
+import LangContext from 'contexts/LangContext';
 
 import styles from './styles.module.scss';
 
+import { LangKeys } from 'types/Lang';
+
+import keys from './translations.json';
+
 function OperationsSelector() {
   const { operation, setOperation } = useContext(ModalStatusContext);
+
+  const lang: string = useContext(LangContext);
+  const translations: { [key: string]: LangKeys } = keys;
 
   const actions = {
     variable: [
       {
         value: 'deposit',
-        label: 'Deposit'
+        label: translations[lang].deposit
       },
       {
         value: 'borrow',
-        label: 'Borrow'
+        label: translations[lang].borrow
       },
       {
         value: 'withdraw',
-        label: 'Withdraw'
+        label: translations[lang].withdraw
       },
       {
         value: 'repay',
-        label: 'Repay'
+        label: translations[lang].repay
       }
     ],
     fixed: [
       {
         value: 'depositAtMaturity',
-        label: 'Deposit'
+        label: translations[lang].deposit
       },
       {
         value: 'borrowAtMaturity',
-        label: 'Borrow'
+        label: translations[lang].borrow
       },
       {
         value: 'withdrawAtMaturity',
-        label: 'Withdraw'
+        label: translations[lang].withdraw
       },
       {
         value: 'repayAtMaturity',
-        label: 'Repay'
+        label: translations[lang].repay
       }
     ]
   };
@@ -55,7 +63,7 @@ function OperationsSelector() {
   return (
     <section className={styles.operationsSelector}>
       <section className={styles.section}>
-        <h3 className={styles.title}>Fixed</h3>
+        <h3 className={styles.title}>{translations[lang].fixedRate}</h3>
         <ul className={styles.list}>
           {actions.fixed.map((action) => {
             return (
@@ -71,7 +79,7 @@ function OperationsSelector() {
         </ul>
       </section>
       <section className={styles.section}>
-        <h3 className={styles.title}>Variable</h3>
+        <h3 className={styles.title}>{translations[lang].variableRate}</h3>
         <ul className={styles.list}>
           {actions.variable.map((action) => {
             return (

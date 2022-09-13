@@ -65,7 +65,7 @@ function Withdraw() {
     undefined
   );
 
-  const symbol = getSymbol(market!.value, network?.name);
+  const symbol = market?.value ? getSymbol(market.value, network?.name) : 'DAI';
   const assets = accountData![symbol].floatingDepositAssets;
 
   const parsedAmount = ethers.utils.formatUnits(assets, decimals[symbol! as keyof Decimals]);
@@ -74,6 +74,10 @@ function Withdraw() {
 
   const ETHrouter =
     web3Provider && symbol == 'WETH' && handleEth(network?.name, web3Provider?.getSigner());
+
+  useEffect(() => {
+    setQty('');
+  }, [symbol]);
 
   useEffect(() => {
     getFixedLenderContract();

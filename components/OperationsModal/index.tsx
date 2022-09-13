@@ -1,4 +1,5 @@
 import { useContext } from 'react';
+import Image from 'next/image';
 
 import OperationsSelector from './OperationsSelector';
 import OperationContainer from './OperationContainer';
@@ -16,6 +17,9 @@ function OperationsModals() {
       {open && (
         <>
           <section className={styles.modal}>
+            <div className={styles.closeButton} onClick={() => setOpen(false)}>
+              <Image src="/img/icons/close.svg" width={20} height={20} />
+            </div>
             <OperationsSelector />
             <OperationContainer />
           </section>

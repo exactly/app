@@ -82,10 +82,14 @@ function BorrowAtMaturity() {
   );
   const [underlyingContract, setUnderlyingContract] = useState<Contract | undefined>(undefined);
 
-  const symbol = getSymbol(market!.value, network?.name);
+  const symbol = market?.value ? getSymbol(market.value, network?.name) : 'DAI';
 
   const ETHrouter =
     web3Provider && symbol == 'WETH' && handleEth(network?.name, web3Provider?.getSigner());
+
+  useEffect(() => {
+    setQty('');
+  }, [symbol, date]);
 
   useEffect(() => {
     getFixedLenderContract();

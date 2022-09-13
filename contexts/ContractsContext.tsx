@@ -24,7 +24,6 @@ export const ContractsProvider: FC = ({ children }) => {
 
   function getInstance(address: string, abi: ContractInterface, contractName: contractName) {
     if (network && instances && instances[network.name + contractName]) {
-      console.log('using old instance of ' + contractName);
       return instances[network.name + contractName];
     }
 
@@ -49,8 +48,6 @@ export const ContractsProvider: FC = ({ children }) => {
         const key = network?.name ?? process.env.NEXT_PUBLIC_NETWORK;
 
         setInstances({ ...instances, [key + contractName]: instance });
-
-        console.log('using new instance of ' + contractName);
       }
 
       return instance;

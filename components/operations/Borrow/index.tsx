@@ -77,6 +77,10 @@ function Borrow() {
     web3Provider && symbol == 'WETH' && handleEth(network?.name, web3Provider?.getSigner());
 
   useEffect(() => {
+    setQty('');
+  }, [symbol]);
+
+  useEffect(() => {
     getFixedLenderContract();
   }, [market, fixedLenderData]);
 

@@ -79,9 +79,13 @@ function RepayAtMaturity() {
   );
   const [underlyingContract, setUnderlyingContract] = useState<Contract | undefined>(undefined);
 
-  const symbol = getSymbol(market!.value, network?.name);
+  const symbol = market?.value ? getSymbol(market.value, network?.name) : 'DAI';
 
   const debounceQty = useDebounce(qty);
+
+  useEffect(() => {
+    setQty('');
+  }, [symbol, date]);
 
   useEffect(() => {
     getFixedLenderContract();
@@ -94,9 +98,10 @@ function RepayAtMaturity() {
   useEffect(() => {
     setPositionAssets(0n);
 
-    const pool = accountData![symbol].fixedDepositPositions.find((position) => {
+    const pool = accountData![symbol].fixedBorrowPositions.find((position) => {
       return position.maturity.toNumber().toString() === date!.value;
     });
+
     const positionAssets = pool ? pool.position.principal.add(pool.position.fee) : 0n;
 
     setPositionAssets(positionAssets);
@@ -165,6 +170,8 @@ function RepayAtMaturity() {
     if (symbol == 'WETH' || !fixedLenderWithSigner) {
       return;
     }
+
+    if (!underlyingContract || !walletAddress || !market) return;
 
     const allowance = await underlyingContract?.allowance(
       walletAddress,

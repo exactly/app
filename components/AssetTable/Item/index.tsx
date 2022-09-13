@@ -18,7 +18,6 @@ import { FixedMarketData } from 'types/FixedMarketData';
 import styles from './style.module.scss';
 
 import keys from './translations.json';
-import { ethers } from 'ethers';
 import { Dictionary } from 'types/Dictionary';
 
 type Props = {

@@ -1,39 +1,39 @@
-import { ChangeEvent, useContext, useEffect, useState } from 'react';
-import { Contract, ethers, BigNumber } from 'ethers';
 import { formatFixed, parseFixed } from '@ethersproject/bignumber';
+import { BigNumber, Contract, ethers } from 'ethers';
+import { ChangeEvent, useContext, useEffect, useState } from 'react';
 
 import Button from 'components/common/Button';
 import ModalAsset from 'components/common/modal/ModalAsset';
-import ModalInput from 'components/common/modal/ModalInput';
-import ModalRow from 'components/common/modal/ModalRow';
-import ModalTitle from 'components/common/modal/ModalTitle';
-import ModalTxCost from 'components/common/modal/ModalTxCost';
-import ModalGif from 'components/common/modal/ModalGif';
-import ModalRowEditable from 'components/common/modal/ModalRowEditable';
 import ModalError from 'components/common/modal/ModalError';
 import ModalExpansionPanelWrapper from 'components/common/modal/ModalExpansionPanelWrapper';
+import ModalGif from 'components/common/modal/ModalGif';
+import ModalInput from 'components/common/modal/ModalInput';
 import ModalMaturityEditable from 'components/common/modal/ModalMaturityEditable';
+import ModalRow from 'components/common/modal/ModalRow';
+import ModalRowEditable from 'components/common/modal/ModalRowEditable';
+import ModalTitle from 'components/common/modal/ModalTitle';
+import ModalTxCost from 'components/common/modal/ModalTxCost';
 
-import { LangKeys } from 'types/Lang';
-import { Gas } from 'types/Gas';
-import { Transaction } from 'types/Transaction';
 import { Error } from 'types/Error';
+import { Gas } from 'types/Gas';
+import { LangKeys } from 'types/Lang';
+import { Transaction } from 'types/Transaction';
 
 import formatNumber from 'utils/formatNumber';
-import { getSymbol } from 'utils/utils';
 import handleEth from 'utils/handleEth';
+import { getSymbol } from 'utils/utils';
 
 import styles from './style.module.scss';
 
 import useDebounce from 'hooks/useDebounce';
 
-import LangContext from 'contexts/LangContext';
-import { useWeb3Context } from 'contexts/Web3Context';
-import FixedLenderContext from 'contexts/FixedLenderContext';
-import PreviewerContext from 'contexts/PreviewerContext';
 import AccountDataContext from 'contexts/AccountDataContext';
 import { MarketContext } from 'contexts/AddressContext';
 import ContractsContext from 'contexts/ContractsContext';
+import FixedLenderContext from 'contexts/FixedLenderContext';
+import LangContext from 'contexts/LangContext';
+import PreviewerContext from 'contexts/PreviewerContext';
+import { useWeb3Context } from 'contexts/Web3Context';
 
 import numbers from 'config/numbers.json';
 
@@ -67,7 +67,7 @@ function WithdrawAtMaturity() {
   const [amountAtFinish, setAmountAtFinish] = useState<string | undefined>(undefined);
   const [positionAssets, setPositionAssets] = useState<BigNumber | bigint>(0n);
 
-  const symbol = getSymbol(market!.value, network?.name);
+  const symbol = market?.value ? getSymbol(market.value, network?.name) : 'DAI';
 
   const debounceQty = useDebounce(qty);
 
@@ -77,6 +77,10 @@ function WithdrawAtMaturity() {
 
   const ETHrouter =
     web3Provider && symbol == 'WETH' && handleEth(network?.name, web3Provider?.getSigner());
+
+  useEffect(() => {
+    setQty('');
+  }, [symbol, date]);
 
   useEffect(() => {
     getFixedLenderContract();

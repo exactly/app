@@ -55,7 +55,7 @@ function Item({ market, type, fixedMarketData }: Props) {
 
     if (!walletAddress && connect) return connect();
 
-    setOperation(type);
+    setOperation(type == 'borrow' ? 'borrowAtMaturity' : 'depositAtMaturity');
     setMarket({ value: market.market });
     setOpen(true);
   }
