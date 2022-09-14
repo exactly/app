@@ -1,22 +1,21 @@
-import { useEffect, useState, useContext } from 'react';
+import { useState, useContext, useMemo, useEffect } from 'react';
 import { ethers } from 'ethers';
 import Image from 'next/image';
+import Skeleton from 'react-loading-skeleton';
 
 import Select from 'components/common/Select';
 import Tooltip from 'components/Tooltip';
 
 import { MarketContext } from 'contexts/AddressContext';
-import PreviewerContext from 'contexts/PreviewerContext';
-import ContractsContext from 'contexts/ContractsContext';
+import AccountDataContext from 'contexts/AccountDataContext';
 
 import { Market } from 'types/Market';
 import { Address } from 'types/Address';
 import { Option } from 'react-dropdown';
-import { FixedLenderAccountData } from 'types/FixedLenderAccountData';
+import { AccountData } from 'types/AccountData';
 
 import style from './style.module.scss';
 import parseSymbol from 'utils/parseSymbol';
-import Skeleton from 'react-loading-skeleton';
 
 type Props = {
   title?: Boolean;
@@ -25,53 +24,37 @@ type Props = {
 };
 
 function AssetSelector({ title, defaultAddress, onChange }: Props) {
-  const previewerData = useContext(PreviewerContext);
   const { market, setMarket } = useContext(MarketContext);
-  const { getInstance } = useContext(ContractsContext);
+  const { accountData } = useContext(AccountDataContext);
 
-  const [selectOptions, setSelectOptions] = useState<Array<Option>>([]);
   const [allMarketsData, setAllMarketsData] = useState<Array<Market>>([]);
 
+  const selectOptions = useMemo(() => {
+    return getMarkets();
+  }, [accountData, defaultAddress]);
+
   useEffect(() => {
-    if (previewerData) {
-      getMarkets();
+    const defaultOption = selectOptions?.find((market: Option) => {
+      return market.value == defaultAddress;
+    });
+
+    setMarket(defaultOption ?? selectOptions[0]);
+  }, [selectOptions]);
+
+  function getMarkets() {
+    if (!accountData) {
+      return [];
     }
-  }, [previewerData, defaultAddress]);
 
-  async function getMarkets() {
-    try {
-      //this call is not needed we can remove it and consume directly accountData from the context
-      const previewerContract = getInstance(
-        previewerData.address!,
-        previewerData.abi!,
-        'previewer'
-      );
+    const formattedMarkets = formatMarkets(accountData);
 
-      const marketsData = await previewerContract?.exactly(
-        '0x000000000000000000000000000000000000dEaD'
-      );
-
-      if (!marketsData) {
-        //in case the contract doesn't return any market data
-        return;
-      }
-
-      const formattedMarkets = formatMarkets(marketsData);
-
-      setSelectOptions(formattedMarkets);
-
-      const defaultOption = formattedMarkets?.find((market: Option) => {
-        return market.value == defaultAddress;
-      });
-
-      setMarket(defaultOption ?? formattedMarkets[0]);
-    } catch (e) {
-      console.log(e);
-    }
+    return formattedMarkets;
   }
 
-  function formatMarkets(markets: Array<FixedLenderAccountData>) {
-    const formattedMarkets = markets.map((market: FixedLenderAccountData) => {
+  function formatMarkets(markets: AccountData) {
+    const formattedMarkets = Object.keys(markets).map((marketName: string) => {
+      const market = markets[marketName];
+
       const marketData: Market = {
         symbol: market.assetSymbol,
         name: market.assetSymbol,

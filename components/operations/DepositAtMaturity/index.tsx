@@ -76,9 +76,9 @@ function DepositAtMaturity() {
     return market?.value ? getSymbol(market.value, network?.name) : 'DAI';
   }, [market?.value, network?.name]);
 
-  useEffect(() => {
-    setQty('');
-  }, [symbol, date]);
+  // useEffect(() => {
+  //   setQty('');
+  // }, [symbol, date]);
 
   useEffect(() => {
     getFixedLenderContract();
@@ -122,11 +122,9 @@ function DepositAtMaturity() {
     if (!underlyingContract || !walletAddress || !market) return;
 
     const allowance = await underlyingContract?.allowance(walletAddress, market?.value);
-
     const formattedAllowance = allowance && parseFloat(ethers.utils.formatEther(allowance));
 
     const amount = qty == '' ? 0 : parseFloat(qty);
-
     if (formattedAllowance > amount && !isNaN(amount) && !isNaN(formattedAllowance)) {
       setStep(2);
     } else {
@@ -135,11 +133,10 @@ function DepositAtMaturity() {
   }
 
   async function approve() {
-    if (symbol == 'WETH') return;
+    if (symbol == 'WETH' || !underlyingContract) return;
 
     try {
       const gasLimit = await getApprovalGasLimit();
-
       const approval = await underlyingContract?.approve(
         market?.value,
         ethers.constants.MaxUint256,
@@ -162,8 +159,8 @@ function DepositAtMaturity() {
       //once the tx is done we update the step
       setStep(2);
     } catch (e) {
+      console.log(e);
       setLoading(false);
-
       setError({
         status: true
       });
@@ -334,7 +331,7 @@ function DepositAtMaturity() {
 
   async function getApprovalGasLimit() {
     const gasLimit = await underlyingContract?.estimateGas.approve(
-      market,
+      market?.value,
       ethers.constants.MaxUint256
     );
 
