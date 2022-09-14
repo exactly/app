@@ -1,4 +1,4 @@
-import { ChangeEvent, useContext, useEffect, useState } from 'react';
+import { ChangeEvent, useContext, useEffect, useMemo, useState } from 'react';
 import { Contract, ethers } from 'ethers';
 import { formatFixed } from '@ethersproject/bignumber';
 
@@ -59,7 +59,6 @@ function Deposit() {
   const [step, setStep] = useState<number | undefined>(undefined);
   const [pending, setPending] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
-  const [depositedAmount, setDepositedAmount] = useState<string>();
 
   const [error, setError] = useState<Error | undefined>(undefined);
 
@@ -70,7 +69,13 @@ function Deposit() {
   );
   const [underlyingContract, setUnderlyingContract] = useState<Contract | undefined>(undefined);
 
-  const symbol = market?.value ? getSymbol(market.value, network?.name) : 'DAI';
+  const symbol = useMemo(() => {
+    return market?.value ? getSymbol(market.value, network?.name) : 'DAI';
+  }, [market?.value, network?.name]);
+
+  const depositedAmount = useMemo(() => {
+    return getUserDeposits();
+  }, [accountData, symbol]);
 
   useEffect(() => {
     setQty('');
@@ -87,10 +92,6 @@ function Deposit() {
   useEffect(() => {
     getWalletBalance();
   }, [walletAddress, underlyingContract]);
-
-  useEffect(() => {
-    getUserDeposits();
-  }, [symbol, walletAddress, accountData]);
 
   useEffect(() => {
     if (step == 1) {
@@ -184,19 +185,19 @@ function Deposit() {
     }
   }
 
-  async function getUserDeposits() {
-    if (!walletAddress || !symbol || !accountData) return;
+  function getUserDeposits() {
+    if (!symbol || !accountData) return '0';
 
     const amount = accountData[symbol.toUpperCase()]?.floatingDepositAssets;
-    const decimals = await underlyingContract?.decimals();
+    const decimals = accountData[symbol.toUpperCase()]?.decimals;
 
     const formattedAmount =
       amount && formatNumber(ethers.utils.formatUnits(amount, decimals), symbol);
 
-    !formattedAmount ? setDepositedAmount('0') : setDepositedAmount(formattedAmount);
+    return formattedAmount ?? '0';
   }
 
-  async function onMax() {
+  function onMax() {
     if (walletBalance) {
       setQty(walletBalance);
       setError(undefined);

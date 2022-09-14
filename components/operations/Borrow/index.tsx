@@ -1,5 +1,5 @@
-import { ChangeEvent, useContext, useEffect, useState } from 'react';
-import { BigNumber, Contract, ethers } from 'ethers';
+import { ChangeEvent, useContext, useEffect, useMemo, useState } from 'react';
+import { Contract, ethers } from 'ethers';
 import { formatFixed, parseFixed } from '@ethersproject/bignumber';
 
 import Button from 'components/common/Button';
@@ -59,7 +59,6 @@ function Borrow() {
   const [loading, setLoading] = useState<boolean>(false);
   const [healthFactor, setHealthFactor] = useState<HealthFactor | undefined>(undefined);
   const [needsApproval, setNeedsApproval] = useState<boolean>(false);
-  const [liquidity, setLiquidity] = useState<BigNumber | undefined>(undefined);
 
   const [error, setError] = useState<Error | undefined>(undefined);
   const [gasError, setGasError] = useState<Error | undefined>(undefined);
@@ -71,7 +70,16 @@ function Borrow() {
   );
   const [underlyingContract, setUnderlyingContract] = useState<Contract | undefined>(undefined);
 
-  const symbol = market?.value ? getSymbol(market.value, network?.name) : 'DAI';
+  const symbol = useMemo(() => {
+    return market?.value ? getSymbol(market.value, network?.name) : 'DAI';
+  }, [market?.value, network?.name]);
+
+  const liquidity = useMemo(() => {
+    if (!accountData) return undefined;
+
+    const limit = accountData[symbol].floatingAvailableAssets;
+    return limit ?? undefined;
+  }, [accountData, symbol]);
 
   const ETHrouter =
     web3Provider && symbol == 'WETH' && handleEth(network?.name, web3Provider?.getSigner());
@@ -88,10 +96,12 @@ function Borrow() {
     getUnderlyingContract();
   }, [market, network, symbol]);
 
+  useMemo(() => {
+    checkCollateral();
+  }, [accountData, symbol, debounceQty]);
+
   useEffect(() => {
     checkAllowance();
-    checkLiquidity();
-    checkCollateral();
   }, [walletAddress, fixedLenderWithSigner, symbol, debounceQty]);
 
   useEffect(() => {
@@ -138,7 +148,7 @@ function Borrow() {
     }
   }
 
-  async function onMax() {
+  function onMax() {
     if (!accountData || !healthFactor) return;
 
     const decimals = accountData[symbol.toUpperCase()].decimals;
@@ -297,15 +307,7 @@ function Borrow() {
     }
   }
 
-  async function checkLiquidity() {
-    if (!accountData) return;
-
-    const limit = accountData[symbol].floatingAvailableAssets;
-
-    limit && setLiquidity(limit);
-  }
-
-  async function checkCollateral() {
+  function checkCollateral() {
     if (!accountData) return;
     const decimals = accountData[symbol].decimals;
 
