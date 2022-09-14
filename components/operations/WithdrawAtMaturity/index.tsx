@@ -1,6 +1,6 @@
 import { formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { BigNumber, Contract, ethers } from 'ethers';
-import { ChangeEvent, useContext, useEffect, useState } from 'react';
+import { ChangeEvent, useContext, useEffect, useMemo, useState } from 'react';
 
 import Button from 'components/common/Button';
 import ModalAsset from 'components/common/modal/ModalAsset';
@@ -58,25 +58,47 @@ function WithdrawAtMaturity() {
   const [editSlippage, setEditSlippage] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
 
-  const [isEarlyWithdraw, setIsEarlyWithdraw] = useState<boolean>(
-    Date.now() / 1000 > parseInt(date!.value)
-  );
   const [error, setError] = useState<Error | undefined>(undefined);
   const [needsApproval, setNeedsApproval] = useState<boolean>(false);
   const [withdrawAmount, setWithdrawAmount] = useState<string>('0');
-  const [amountAtFinish, setAmountAtFinish] = useState<string | undefined>(undefined);
-  const [positionAssets, setPositionAssets] = useState<BigNumber>(ethers.constants.Zero);
-
-  const symbol = market?.value ? getSymbol(market.value, network?.name) : 'DAI';
-
-  const debounceQty = useDebounce(qty);
 
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
     undefined
   );
 
+  const symbol = useMemo(() => {
+    return market?.value ? getSymbol(market.value, network?.name) : 'DAI';
+  }, [market?.value, network?.name]);
+
+  const debounceQty = useDebounce(qty);
+
   const ETHrouter =
     web3Provider && symbol == 'WETH' && handleEth(network?.name, web3Provider?.getSigner());
+
+  const isEarlyWithdraw = useMemo(() => {
+    return Date.now() / 1000 < parseInt(date!.value);
+  }, [date]);
+
+  const positionAssets = useMemo(() => {
+    if (!accountData) return '0';
+
+    const pool = accountData[symbol].fixedDepositPositions.find((position) => {
+      return position.maturity.toNumber().toString() === date!.value;
+    });
+    const positionAssets = pool
+      ? pool.position.principal.add(pool.position.fee)
+      : ethers.constants.Zero;
+
+    return positionAssets;
+  }, [date, accountData, symbol]);
+
+  const amountAtFinish = useMemo(() => {
+    if (!accountData || !symbol) return undefined;
+
+    const decimals = accountData[symbol.toUpperCase()].decimals;
+
+    return formatFixed(positionAssets, decimals);
+  }, [accountData, symbol]);
 
   useEffect(() => {
     setQty('');
@@ -91,25 +113,6 @@ function WithdrawAtMaturity() {
   }, [walletAddress, fixedLenderWithSigner, symbol, debounceQty]);
 
   useEffect(() => {
-    const isEarly = Date.now() / 1000 < parseInt(date!.value);
-
-    setIsEarlyWithdraw(isEarly);
-  }, [date]);
-
-  useEffect(() => {
-    setPositionAssets(ethers.constants.Zero);
-
-    const pool = accountData![symbol].fixedDepositPositions.find((position) => {
-      return position.maturity.toNumber().toString() === date!.value;
-    });
-    const positionAssets = pool
-      ? pool.position.principal.add(pool.position.fee)
-      : ethers.constants.Zero;
-
-    setPositionAssets(positionAssets);
-  }, [date, accountData, symbol]);
-
-  useEffect(() => {
     if (fixedLenderWithSigner && !gas) {
       estimateGas();
     }
@@ -118,10 +121,6 @@ function WithdrawAtMaturity() {
   useEffect(() => {
     previewWithdrawAtMaturity();
   }, [debounceQty]);
-
-  useEffect(() => {
-    calculateAmount();
-  }, [accountData, symbol, positionAssets]);
 
   async function checkAllowance() {
     if (symbol != 'WETH' || !ETHrouter || !walletAddress || !fixedLenderWithSigner) return;
@@ -164,14 +163,6 @@ function WithdrawAtMaturity() {
     }
 
     setQty(e.target.value);
-  }
-
-  function calculateAmount() {
-    if (!accountData || !symbol) return;
-
-    const decimals = accountData[symbol.toUpperCase()].decimals;
-
-    setAmountAtFinish(formatFixed(positionAssets, decimals));
   }
 
   async function previewWithdrawAtMaturity() {

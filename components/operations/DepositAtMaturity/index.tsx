@@ -1,4 +1,4 @@
-import { ChangeEvent, useContext, useEffect, useState } from 'react';
+import { ChangeEvent, useContext, useEffect, useMemo, useState } from 'react';
 import { Contract, ethers } from 'ethers';
 import { formatFixed, parseFixed } from '@ethersproject/bignumber';
 
@@ -72,7 +72,9 @@ function DepositAtMaturity() {
   );
   const [underlyingContract, setUnderlyingContract] = useState<Contract | undefined>(undefined);
 
-  const symbol = market?.value ? getSymbol(market.value, network?.name) : 'DAI';
+  const symbol = useMemo(() => {
+    return market?.value ? getSymbol(market.value, network?.name) : 'DAI';
+  }, [market?.value, network?.name]);
 
   useEffect(() => {
     setQty('');

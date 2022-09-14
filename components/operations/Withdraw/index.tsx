@@ -1,4 +1,4 @@
-import { ChangeEvent, useContext, useEffect, useState } from 'react';
+import { ChangeEvent, useContext, useEffect, useMemo, useState } from 'react';
 import { ethers, Contract } from 'ethers';
 import { formatFixed } from '@ethersproject/bignumber';
 
@@ -65,12 +65,22 @@ function Withdraw() {
     undefined
   );
 
-  const symbol = market?.value ? getSymbol(market.value, network?.name) : 'DAI';
-  const assets = accountData![symbol].floatingDepositAssets;
+  const symbol = useMemo(() => {
+    return market?.value ? getSymbol(market.value, network?.name) : 'DAI';
+  }, [market?.value, network?.name]);
 
-  const parsedAmount = ethers.utils.formatUnits(assets, decimals[symbol! as keyof Decimals]);
+  const assets = useMemo(() => {
+    if (!accountData) return undefined;
 
-  const formattedAmount = formatNumber(parsedAmount, symbol!);
+    return accountData[symbol].floatingDepositAssets;
+  }, [symbol, accountData]);
+
+  const [parsedAmount, formattedAmount] = useMemo(() => {
+    if (!assets || !symbol) return ['0', '0'];
+
+    const parsedAmount = ethers.utils.formatUnits(assets, decimals[symbol! as keyof Decimals]);
+    return [parsedAmount, formatNumber(parsedAmount, symbol!)];
+  }, [assets, symbol]);
 
   const ETHrouter =
     web3Provider && symbol == 'WETH' && handleEth(network?.name, web3Provider?.getSigner());

@@ -1,5 +1,5 @@
-import { ChangeEvent, useContext, useEffect, useState } from 'react';
-import { Contract, ethers, BigNumber } from 'ethers';
+import { ChangeEvent, useContext, useEffect, useMemo, useState } from 'react';
+import { Contract, ethers } from 'ethers';
 import { formatFixed, parseFixed } from '@ethersproject/bignumber';
 
 import Button from 'components/common/Button';
@@ -57,9 +57,6 @@ function RepayAtMaturity() {
   const fixedLenderData = useContext(FixedLenderContext);
 
   const [qty, setQty] = useState<string>('');
-  const [isLateRepay, setIsLateRepay] = useState<boolean>(
-    Date.now() / 1000 > parseInt(date!.value)
-  );
 
   const [gas, setGas] = useState<Gas | undefined>();
   const [tx, setTx] = useState<Transaction | undefined>(undefined);
@@ -72,14 +69,31 @@ function RepayAtMaturity() {
   const [totalAmount, setTotalAmount] = useState<string>('0');
   const [slippage, setSlippage] = useState<string>('0');
   const [error, setError] = useState<Error | undefined>(undefined);
-  const [positionAssets, setPositionAssets] = useState<BigNumber>(ethers.constants.Zero);
 
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
     undefined
   );
   const [underlyingContract, setUnderlyingContract] = useState<Contract | undefined>(undefined);
 
-  const symbol = market?.value ? getSymbol(market.value, network?.name) : 'DAI';
+  const symbol = useMemo(() => {
+    return market?.value ? getSymbol(market.value, network?.name) : 'DAI';
+  }, [market?.value, network?.name]);
+
+  const isLateRepay = useMemo(() => {
+    return Date.now() / 1000 > parseInt(date!.value);
+  }, [date]);
+
+  const positionAssets = useMemo(() => {
+    const pool = accountData![symbol].fixedBorrowPositions.find((position) => {
+      return position.maturity.toNumber().toString() === date!.value;
+    });
+
+    const positionAssets = pool
+      ? pool.position.principal.add(pool.position.fee)
+      : ethers.constants.Zero;
+
+    return positionAssets;
+  }, [date, accountData, symbol]);
 
   const debounceQty = useDebounce(qty);
 
@@ -96,30 +110,10 @@ function RepayAtMaturity() {
   }, [market, network, symbol]);
 
   useEffect(() => {
-    setPositionAssets(ethers.constants.Zero);
-
-    const pool = accountData![symbol].fixedBorrowPositions.find((position) => {
-      return position.maturity.toNumber().toString() === date!.value;
-    });
-
-    const positionAssets = pool
-      ? pool.position.principal.add(pool.position.fee)
-      : ethers.constants.Zero;
-
-    setPositionAssets(positionAssets);
-  }, [date, accountData, symbol]);
-
-  useEffect(() => {
     if (fixedLenderWithSigner && !gas) {
       estimateGas();
     }
   }, [fixedLenderWithSigner]);
-
-  useEffect(() => {
-    const repay = Date.now() / 1000 > parseInt(date!.value);
-
-    setIsLateRepay(repay);
-  }, [date]);
 
   useEffect(() => {
     previewRepayAtMaturity();

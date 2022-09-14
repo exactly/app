@@ -1,4 +1,4 @@
-import { ChangeEvent, useContext, useEffect, useState } from 'react';
+import { ChangeEvent, useContext, useEffect, useMemo, useState } from 'react';
 import { Contract, ethers } from 'ethers';
 import { formatFixed, parseFixed } from '@ethersproject/bignumber';
 
@@ -69,7 +69,6 @@ function BorrowAtMaturity() {
   const [loading, setLoading] = useState<boolean>(false);
   const [healthFactor, setHealthFactor] = useState<HealthFactor | undefined>(undefined);
   const [needsApproval, setNeedsApproval] = useState<boolean>(false);
-  const [poolLiquidity, setPoolLiquidity] = useState<number | undefined>(undefined);
   const [utilizationRate, setUtilizationRate] = useState<Dictionary<string>>();
 
   const [error, setError] = useState<Error | undefined>(undefined);
@@ -82,10 +81,32 @@ function BorrowAtMaturity() {
   );
   const [underlyingContract, setUnderlyingContract] = useState<Contract | undefined>(undefined);
 
-  const symbol = market?.value ? getSymbol(market.value, network?.name) : 'DAI';
+  const symbol = useMemo(() => {
+    return market?.value ? getSymbol(market.value, network?.name) : 'DAI';
+  }, [market?.value, network?.name]);
 
   const ETHrouter =
     web3Provider && symbol == 'WETH' && handleEth(network?.name, web3Provider?.getSigner());
+
+  const poolLiquidity = useMemo(() => {
+    if (!accountData || !date) return;
+
+    const maturityDate = date.value;
+
+    const maturityData = accountData[symbol].fixedPools?.find((data) => {
+      return data.maturity.toString() == maturityDate;
+    });
+
+    const decimals = accountData[symbol].decimals;
+
+    const limit = maturityData && ethers.utils.formatUnits(maturityData?.available!, decimals);
+
+    return limit ? parseFloat(limit) : undefined;
+  }, [accountData, date?.value]);
+
+  useMemo(() => {
+    checkCollateral();
+  }, [accountData, symbol]);
 
   useEffect(() => {
     setQty('');
@@ -101,8 +122,6 @@ function BorrowAtMaturity() {
 
   useEffect(() => {
     checkAllowance();
-    checkPoolLiquidity();
-    checkCollateral();
     getUtilizationRate();
   }, [walletAddress, fixedLenderWithSigner, symbol, debounceQty]);
 
@@ -156,7 +175,7 @@ function BorrowAtMaturity() {
     }
   }
 
-  async function onMax() {
+  function onMax() {
     if (!accountData || !healthFactor) return;
 
     const decimals = accountData[symbol.toUpperCase()].decimals;
@@ -330,22 +349,6 @@ function BorrowAtMaturity() {
     }
   }
 
-  async function checkPoolLiquidity() {
-    if (!accountData || !date) return;
-
-    const maturityDate = date.value;
-
-    const maturityData = accountData[symbol].fixedPools?.find((data) => {
-      return data.maturity.toString() == maturityDate;
-    });
-
-    const decimals = accountData[symbol].decimals;
-
-    const limit = maturityData && ethers.utils.formatUnits(maturityData?.available!, decimals);
-
-    limit && setPoolLiquidity(parseFloat(limit));
-  }
-
   async function estimateGas() {
     if (symbol == 'WETH' || !accountData) return;
 
@@ -482,7 +485,7 @@ function BorrowAtMaturity() {
     setUnderlyingContract(underlyingContract);
   }
 
-  async function checkCollateral() {
+  function checkCollateral() {
     if (!accountData) return;
     const decimals = accountData[symbol].decimals;
 

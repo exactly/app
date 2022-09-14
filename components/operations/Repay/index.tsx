@@ -1,4 +1,4 @@
-import { ChangeEvent, useContext, useEffect, useState } from 'react';
+import { ChangeEvent, useContext, useEffect, useMemo, useState } from 'react';
 import { Contract, ethers } from 'ethers';
 import { formatFixed } from '@ethersproject/bignumber';
 
@@ -48,11 +48,6 @@ function Repay() {
 
   const fixedLenderData = useContext(FixedLenderContext);
 
-  const symbol = market?.value ? getSymbol(market.value, network?.name) : 'DAI';
-  const assets = accountData![symbol].floatingBorrowAssets;
-
-  const finalAmount = ethers.utils.formatUnits(assets, decimals[symbol! as keyof Decimals]);
-
   const [qty, setQty] = useState<string>('');
 
   const [gas, setGas] = useState<Gas | undefined>();
@@ -66,6 +61,22 @@ function Repay() {
     undefined
   );
   const [underlyingContract, setUnderlyingContract] = useState<Contract | undefined>(undefined);
+
+  const symbol = useMemo(() => {
+    return market?.value ? getSymbol(market.value, network?.name) : 'DAI';
+  }, [market?.value, network?.name]);
+
+  const assets = useMemo(() => {
+    if (!accountData) return undefined;
+
+    return accountData[symbol].floatingBorrowAssets;
+  }, [symbol, accountData]);
+
+  const finalAmount = useMemo(() => {
+    if (!assets || !symbol) return '0';
+
+    return ethers.utils.formatUnits(assets, decimals[symbol! as keyof Decimals]);
+  }, [assets, symbol]);
 
   useEffect(() => {
     setQty('');
