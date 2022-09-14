@@ -76,9 +76,9 @@ function DepositAtMaturity() {
     return market?.value ? getSymbol(market.value, network?.name) : 'DAI';
   }, [market?.value, network?.name]);
 
-  // useEffect(() => {
-  //   setQty('');
-  // }, [symbol, date]);
+  useEffect(() => {
+    setQty('');
+  }, [symbol, date]);
 
   useEffect(() => {
     getFixedLenderContract();
