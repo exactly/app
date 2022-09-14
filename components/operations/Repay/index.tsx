@@ -301,7 +301,7 @@ function Repay() {
 
   async function getApprovalGasLimit() {
     const gasLimit = await underlyingContract?.estimateGas.approve(
-      fixedLenderWithSigner?.address,
+      market?.value,
       ethers.constants.MaxUint256
     );
 
