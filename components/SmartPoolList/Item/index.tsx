@@ -24,9 +24,8 @@ import keys from './translations.json';
 
 import formatNumber from 'utils/formatNumber';
 import parseSymbol from 'utils/parseSymbol';
-import getFloatingAPY from 'utils/getFloatingAPY';
 import getSubgraph from 'utils/getSubgraph';
-import getFloatingBorrowAPY from 'utils/getFloatingBorrowAPY';
+import queryRate from 'utils/queryRates';
 
 type Props = {
   market: Market | undefined;
@@ -46,15 +45,14 @@ function Item({ market, type }: Props) {
 
   const [poolData, setPoolData] = useState<Pool | undefined>(undefined);
   const [rate, setRate] = useState<string | undefined>(undefined);
-
-  const [fixedLenderAddress, setFixedLenderAddress] = useState<string | undefined>(undefined);
+  const [marketAddress, setMarketAddress] = useState<string | undefined>(undefined);
 
   async function getFixedLenderContract() {
     if (!market) return;
 
     const filteredFixedLender = fixedLenderData.find((fl) => fl.address == market.market);
 
-    setFixedLenderAddress(filteredFixedLender?.address);
+    setMarketAddress(filteredFixedLender?.address);
   }
 
   useEffect(() => {
@@ -64,7 +62,7 @@ function Item({ market, type }: Props) {
   useEffect(() => {
     getMarketData();
     getRates();
-  }, [accountData, market, network, fixedLenderAddress]);
+  }, [accountData, market, network, marketAddress]);
 
   function handleClick(type: string) {
     if (!market) return;
@@ -83,16 +81,17 @@ function Item({ market, type }: Props) {
 
       let interestRate;
 
-      if (!fixedLenderAddress) return;
+      if (!marketAddress) return;
 
       if (type == 'deposit') {
-        interestRate = await getFloatingAPY(
-          fixedLenderAddress,
-          subgraphUrl,
-          accountData[market?.symbol.toUpperCase()].maxFuturePools
-        );
+        const maxFuturePools = accountData[market?.symbol.toUpperCase()].maxFuturePools;
+        const data = await queryRate(subgraphUrl, marketAddress, 'deposit', { maxFuturePools });
+
+        interestRate = data[0].rate.toFixed(2);
       } else if (type == 'borrow') {
-        interestRate = await getFloatingBorrowAPY(fixedLenderAddress, subgraphUrl);
+        const data = await queryRate(subgraphUrl, marketAddress, 'borrow');
+
+        interestRate = data[0].rate.toFixed(2);
       }
 
       if (interestRate && rate && `${interestRate}%` == rate) {
