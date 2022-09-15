@@ -43,7 +43,7 @@ import keys from './translations.json';
 
 function Withdraw() {
   const { walletAddress, web3Provider, network } = useWeb3Context();
-  const { accountData } = useContext(AccountDataContext);
+  const { accountData, getAccountData } = useContext(AccountDataContext);
   const { market } = useContext(MarketContext);
   const { getInstance } = useContext(ContractsContext);
 
@@ -185,6 +185,8 @@ function Withdraw() {
       } else {
         setTx({ status: 'error', hash: txReceipt?.transactionHash });
       }
+
+      getAccountData();
     } catch (e: any) {
       console.log(e);
       setLoading(false);

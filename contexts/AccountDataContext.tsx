@@ -1,4 +1,5 @@
-import { createContext, FC, useContext, useEffect, useState } from 'react';
+import { createContext, FC, useContext, useEffect, useMemo, useState } from 'react';
+import { ethers } from 'ethers';
 
 import { AccountData } from 'types/AccountData';
 import { FixedLenderAccountData } from 'types/FixedLenderAccountData';
@@ -7,6 +8,7 @@ import { useWeb3Context } from './Web3Context';
 import ContractsContext from './ContractsContext';
 
 import getABI from 'config/abiImporter';
+import useDebounce from 'hooks/useDebounce';
 
 type ContextValues = {
   accountData: AccountData | undefined;
@@ -23,28 +25,30 @@ const AccountDataContext = createContext(defaultValues);
 export const AccountDataProvider: FC = ({ children }) => {
   const [accountData, setAccountData] = useState<AccountData | undefined>(undefined);
   const { network, walletAddress } = useWeb3Context();
-  const { getInstance } = useContext(ContractsContext);
 
+  const walletAddressDebounced = useDebounce(walletAddress);
+
+  const { getInstance } = useContext(ContractsContext);
   const { Previewer } = getABI(network?.name);
 
   useEffect(() => {
     getAccountData();
-  }, [walletAddress, Previewer]);
+  }, [walletAddressDebounced, Previewer]);
 
   useEffect(() => {
     const interval = setInterval(() => {
       getAccountData();
     }, 600000);
     return () => clearInterval(interval);
-  }, [walletAddress, Previewer]);
+  }, [walletAddressDebounced, Previewer]);
 
   async function getAccountData() {
     try {
       const previewerContract = getInstance(Previewer.address!, Previewer.abi!, 'previewer');
 
-      const data = await previewerContract?.exactly(
-        walletAddress || '0x000000000000000000000000000000000000dEaD'
-      );
+      const wallet = walletAddressDebounced ? walletAddressDebounced : ethers.constants.AddressZero;
+
+      const data = await previewerContract?.exactly(wallet);
 
       const newAccountData: AccountData = {};
 

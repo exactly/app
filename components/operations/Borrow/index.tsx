@@ -41,7 +41,7 @@ import numbers from 'config/numbers.json';
 
 function Borrow() {
   const { web3Provider, walletAddress, network } = useWeb3Context();
-  const { accountData } = useContext(AccountDataContext);
+  const { accountData, getAccountData } = useContext(AccountDataContext);
 
   const { market } = useContext(MarketContext);
 
@@ -274,6 +274,8 @@ function Borrow() {
       } else {
         setTx({ status: 'error', hash: txReceipt?.transactionHash });
       }
+
+      getAccountData();
     } catch (e: any) {
       console.log(e);
       setLoading(false);
