@@ -233,10 +233,7 @@ function DashboardHeader() {
         </div>
         <div className={styles.line}></div>
         <div className={styles.box}>
-          <h3 className={styles.title}>
-            {translations[lang].rateComposition}{' '}
-            <Tooltip value={translations[lang].rateComposition} />
-          </h3>
+          <h3 className={styles.title}>{translations[lang].rateComposition}</h3>
           {walletAddress && (
             <div className={styles.informationContainer}>
               <div className={styles.information}>
@@ -293,7 +290,8 @@ function DashboardHeader() {
         <div className={styles.line}></div>
         <div className={styles.box}>
           <h3 className={styles.title}>
-            {translations[lang].healthFactor} <Tooltip value={translations[lang].healthFactor} />
+            {translations[lang].healthFactor}{' '}
+            <Tooltip value={translations[lang].healthFactorTooltip} />
           </h3>
           {walletAddress && (
             <div className={styles.informationContainer}>
