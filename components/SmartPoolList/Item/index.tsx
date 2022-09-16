@@ -45,14 +45,14 @@ function Item({ market, type }: Props) {
 
   const [poolData, setPoolData] = useState<Pool | undefined>(undefined);
   const [rate, setRate] = useState<string | undefined>(undefined);
-  const [marketAddress, setMarketAddress] = useState<string | undefined>(undefined);
+  const [eMarketAddress, setEMarketAddress] = useState<string | undefined>(undefined);
 
   async function getFixedLenderContract() {
     if (!market) return;
 
     const filteredFixedLender = fixedLenderData.find((fl) => fl.address == market.market);
 
-    setMarketAddress(filteredFixedLender?.address);
+    setEMarketAddress(filteredFixedLender?.address);
   }
 
   useEffect(() => {
@@ -62,7 +62,7 @@ function Item({ market, type }: Props) {
   useEffect(() => {
     getMarketData();
     getRates();
-  }, [accountData, market, network, marketAddress]);
+  }, [accountData, market, network, eMarketAddress]);
 
   function handleClick(type: string) {
     if (!market) return;
@@ -81,15 +81,15 @@ function Item({ market, type }: Props) {
 
       let interestRate;
 
-      if (!marketAddress) return;
+      if (!eMarketAddress) return;
 
       if (type == 'deposit') {
         const maxFuturePools = accountData[market?.symbol.toUpperCase()].maxFuturePools;
-        const data = await queryRate(subgraphUrl, marketAddress, 'deposit', { maxFuturePools });
+        const data = await queryRate(subgraphUrl, eMarketAddress, 'deposit', { maxFuturePools });
 
         interestRate = data[0].rate.toFixed(2);
       } else if (type == 'borrow') {
-        const data = await queryRate(subgraphUrl, marketAddress, 'borrow');
+        const data = await queryRate(subgraphUrl, eMarketAddress, 'borrow');
 
         interestRate = data[0].rate.toFixed(2);
       }
