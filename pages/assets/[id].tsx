@@ -26,6 +26,7 @@ import keys from './translations.json';
 
 import getLastAPY from 'utils/getLastAPY';
 import { getSymbol } from 'utils/utils';
+import FloatingAPYChart from 'components/FloatingAPYChart';
 
 interface Props {
   symbol: string;
@@ -44,6 +45,7 @@ const Asset: NextPage<Props> = ({ symbol = 'DAI' }) => {
   const [page, setPage] = useState<number>(1);
   const [depositsData, setDepositsData] = useState<Array<Maturity> | undefined>(undefined);
   const [borrowsData, setBorrowsData] = useState<Array<Maturity> | undefined>(undefined);
+  const [eMarketAddress, setEMarketAddress] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     handleAPY();
@@ -59,6 +61,8 @@ const Asset: NextPage<Props> = ({ symbol = 'DAI' }) => {
       );
       return contractSymbol == symbol;
     });
+
+    setEMarketAddress(filteredFixedLender?.address);
 
     try {
       const apy: any = await getLastAPY(dates, filteredFixedLender?.address!, network, accountData);
@@ -83,6 +87,7 @@ const Asset: NextPage<Props> = ({ symbol = 'DAI' }) => {
       <section className={style.container}>
         <div className={style.smartPoolContainer}>
           <SmartPoolInfo symbol={symbol} />
+          <FloatingAPYChart market={eMarketAddress} network={network} />
         </div>
         <section className={style.assetData}>
           <div className={style.assetContainer}>
