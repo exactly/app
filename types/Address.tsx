@@ -1,4 +1,4 @@
 export type Address = {
-  label: JSX.Element;
+  label?: JSX.Element;
   value: string;
 };

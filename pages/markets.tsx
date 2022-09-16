@@ -6,8 +6,8 @@ import Navbar from 'components/Navbar';
 import CurrentNetwork from 'components/CurrentNetwork';
 import Footer from 'components/Footer';
 import MobileNavbar from 'components/MobileNavbar';
-import ModalsContainer from 'components/ModalsContainer';
 import SmartPoolList from 'components/SmartPoolList';
+import OperationsModals from 'components/OperationsModal';
 
 import dictionary from 'dictionary/en.json';
 
@@ -16,8 +16,7 @@ interface Props {}
 const Pools: NextPage<Props> = () => {
   return (
     <>
-      <ModalsContainer />
-
+      <OperationsModals />
       <MobileNavbar />
       <Navbar />
       <CurrentNetwork />

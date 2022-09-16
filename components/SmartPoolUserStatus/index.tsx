@@ -1,13 +1,14 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
+import { Contract } from 'ethers';
 
 const Item = dynamic(() => import('./Item'));
 const EmptyState = dynamic(() => import('components/EmptyState'));
 
 import LangContext from 'contexts/LangContext';
-import { useWeb3Context } from 'contexts/Web3Context';
 import AuditorContext from 'contexts/AuditorContext';
 import AccountDataContext from 'contexts/AccountDataContext';
+import ContractsContext from 'contexts/ContractsContext';
 
 import { LangKeys } from 'types/Lang';
 import { SmartPoolItemData } from 'types/SmartPoolItemData';
@@ -18,8 +19,6 @@ import styles from './style.module.scss';
 
 import keys from './translations.json';
 
-import { getContractData } from 'utils/contracts';
-
 type Props = {
   walletAddress: string | null | undefined;
   type: Option;
@@ -29,23 +28,26 @@ function SmartPoolUserStatus({ walletAddress, type }: Props) {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
   const auditor = useContext(AuditorContext);
-  const { web3Provider, network } = useWeb3Context();
   const { accountData } = useContext(AccountDataContext);
+  const { getInstance } = useContext(ContractsContext);
 
   const [itemData, setItemData] = useState<Array<SmartPoolItemData> | undefined>(undefined);
+  const [auditorContract, setAuditorContract] = useState<Contract | undefined>(undefined);
 
   const orderAssets = ['DAI', 'USDC', 'WETH', 'WBTC'];
-
-  const auditorContract = getContractData(
-    network?.name,
-    auditor.address!,
-    auditor.abi!,
-    web3Provider?.getSigner()
-  );
 
   useEffect(() => {
     getCurrentBalance();
   }, [walletAddress, accountData, type]);
+
+  useEffect(() => {
+    getAuditorContract();
+  }, [auditor]);
+
+  function getAuditorContract() {
+    const auditorContract = getInstance(auditor.address!, auditor.abi!, 'auditor');
+    setAuditorContract(auditorContract);
+  }
 
   function getCurrentBalance() {
     if (!accountData) return;

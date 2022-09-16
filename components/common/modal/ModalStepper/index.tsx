@@ -27,7 +27,7 @@ function ModalStepper({ currentStep, totalSteps }: Props) {
               <div
                 className={currentStep >= step + 1 ? styles.selectedStep : styles.step}
                 key={step}
-              ></div>
+              />
             );
           })) || <Skeleton containerClassName={styles.skeleton} />}
         {currentStep == 1 && <p className={styles.text}>{translations[lang].approval}</p>}

@@ -3,13 +3,13 @@ import { useSpring, animated } from 'react-spring';
 import styles from './style.module.scss';
 
 type Props = {
-  closeModal?: any;
+  close: () => void;
 };
 
-function Overlay({ closeModal }: Props) {
+function Overlay({ close }: Props) {
   const style = useSpring({ from: { opacity: 0 }, to: { opacity: 0.5 }, duration: 10000 });
 
-  return <animated.div style={style} className={styles.overlay} onClick={closeModal} />;
+  return <animated.div style={style} className={styles.overlay} onClick={close} />;
 }
 
 export default Overlay;

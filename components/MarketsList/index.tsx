@@ -11,25 +11,23 @@ import { FixedMarketData } from 'types/FixedMarketData';
 
 import LangContext from 'contexts/LangContext';
 import FixedLenderContext from 'contexts/FixedLenderContext';
-import { useWeb3Context } from 'contexts/Web3Context';
 import PreviewerContext from 'contexts/PreviewerContext';
 import AccountDataContext from 'contexts/AccountDataContext';
+import ContractsContext from 'contexts/ContractsContext';
 
 import style from './style.module.scss';
 
 import keys from './translations.json';
 
-import { getContractData } from 'utils/contracts';
 import formatMarkets from 'utils/formatMarkets';
 
 import numbers from 'config/numbers.json';
 
 function MarketsList() {
-  const { network } = useWeb3Context();
-
   const previewerData = useContext(PreviewerContext);
   const fixedLenderData = useContext(FixedLenderContext);
   const { accountData } = useContext(AccountDataContext);
+  const { getInstance } = useContext(ContractsContext);
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
@@ -39,7 +37,7 @@ function MarketsList() {
 
   useEffect(() => {
     getPreviewFixed();
-  }, [network, previewerData, accountData]);
+  }, [previewerData, accountData]);
 
   useEffect(() => {
     getMarkets();
@@ -57,10 +55,10 @@ function MarketsList() {
 
   async function getPreviewFixed() {
     try {
-      const previewerContract = getContractData(
-        network?.name!,
+      const previewerContract = getInstance(
         previewerData.address!,
-        previewerData.abi!
+        previewerData.abi!,
+        'previewer'
       );
 
       const data = await previewerContract?.previewFixed(

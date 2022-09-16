@@ -10,7 +10,8 @@
     "deposited": "Deposited",
     "borrowed": "Borrowed",
     "collateral": "Collateral",
-    "debt": "Debt"
+    "debt": "Debt",
+    "healthFactorTooltip": "Proportion of collateral deposited versus the amount borrowed. A health factor above 1.25 is recommended to avoid liquidation"
   },
   "es": {}
 }

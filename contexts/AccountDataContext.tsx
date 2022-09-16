@@ -1,12 +1,14 @@
-import { createContext, FC, useEffect, useState } from 'react';
+import { createContext, FC, useContext, useEffect, useMemo, useState } from 'react';
+import { ethers } from 'ethers';
 
 import { AccountData } from 'types/AccountData';
 import { FixedLenderAccountData } from 'types/FixedLenderAccountData';
-import { useWeb3Context } from './Web3Context';
 
-import { getContractData } from 'utils/contracts';
+import { useWeb3Context } from './Web3Context';
+import ContractsContext from './ContractsContext';
 
 import getABI from 'config/abiImporter';
+import useDebounce from 'hooks/useDebounce';
 
 type ContextValues = {
   accountData: AccountData | undefined;
@@ -24,27 +26,29 @@ export const AccountDataProvider: FC = ({ children }) => {
   const [accountData, setAccountData] = useState<AccountData | undefined>(undefined);
   const { network, walletAddress } = useWeb3Context();
 
-  const { Previewer } = getABI(network?.name);
+  const walletAddressDebounced = useDebounce(walletAddress);
 
-  const previewerContract = getContractData(network?.name!, Previewer.address!, Previewer.abi!);
+  const { getInstance } = useContext(ContractsContext);
+  const { Previewer } = getABI(network?.name);
 
   useEffect(() => {
     getAccountData();
-  }, [walletAddress, Previewer, network]);
+  }, [walletAddressDebounced, Previewer]);
 
   useEffect(() => {
     const interval = setInterval(() => {
       getAccountData();
     }, 600000);
-
     return () => clearInterval(interval);
-  }, [walletAddress, Previewer, network]);
+  }, [walletAddressDebounced, Previewer]);
 
   async function getAccountData() {
     try {
-      const data = await previewerContract?.exactly(
-        walletAddress || '0x000000000000000000000000000000000000dEaD'
-      );
+      const previewerContract = getInstance(Previewer.address!, Previewer.abi!, 'previewer');
+
+      const wallet = walletAddressDebounced ? walletAddressDebounced : ethers.constants.AddressZero;
+
+      const data = await previewerContract?.exactly(wallet);
 
       const newAccountData: AccountData = {};
 

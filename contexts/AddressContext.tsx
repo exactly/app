@@ -9,25 +9,25 @@ import parseTimestamp from 'utils/parseTimestamp';
 import AccountDataContext from './AccountDataContext';
 
 type ContextValues = {
-  address: Address | undefined;
-  setAddress: (address: Address) => void;
+  market: Address | undefined;
+  setMarket: (address: Address) => void;
   date: Date | undefined;
   setDate: (date: Date) => void;
   dates: Date[];
 };
 
 const defaultValues: ContextValues = {
-  address: undefined,
-  setAddress: () => {},
+  market: undefined,
+  setMarket: () => {},
   date: undefined,
   setDate: () => {},
   dates: []
 };
 
-const AddressContext = createContext(defaultValues);
+const MarketContext = createContext(defaultValues);
 
-const AddressProvider: FC = ({ children }) => {
-  const [address, setAddress] = useState<Address>();
+const MarketProvider: FC = ({ children }) => {
+  const [market, setMarket] = useState<Address>();
   const [date, setDate] = useState<Date>();
   const [dates, setDates] = useState<Date[]>([]);
 
@@ -71,10 +71,10 @@ const AddressProvider: FC = ({ children }) => {
   }, [accountData]);
 
   return (
-    <AddressContext.Provider value={{ address, setAddress, date, setDate, dates }}>
+    <MarketContext.Provider value={{ market, setMarket, date, setDate, dates }}>
       {children}
-    </AddressContext.Provider>
+    </MarketContext.Provider>
   );
 };
 
-export { AddressContext, AddressProvider };
+export { MarketContext, MarketProvider };

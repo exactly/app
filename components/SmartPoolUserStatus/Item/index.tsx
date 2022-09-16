@@ -15,6 +15,7 @@ import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 import AccountDataContext from 'contexts/AccountDataContext';
 import ModalStatusContext from 'contexts/ModalStatusContext';
+import { MarketContext } from 'contexts/AddressContext';
 
 import { LangKeys } from 'types/Lang';
 import { Decimals } from 'types/Decimals';
@@ -58,10 +59,11 @@ function Item({
 }: Props) {
   const { network } = useWeb3Context();
   const fixedLender = useContext(FixedLenderContext);
-  const lang: string = useContext(LangContext);
-  const { accountData } = useContext(AccountDataContext);
-  const { setModalContent, setOpen } = useContext(ModalStatusContext);
+  const { accountData, getAccountData } = useContext(AccountDataContext);
+  const { setOpen, setOperation } = useContext(ModalStatusContext);
+  const { setMarket } = useContext(MarketContext);
 
+  const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
   const [toggle, setToggle] = useState<boolean>(false);
@@ -231,6 +233,8 @@ function Item({
       setToggle(!toggle);
       //when it ends we stop loading
       setLoading(false);
+
+      getAccountData();
     } catch (e) {
       console.log(e);
       //if user rejects tx we change toggle status to previous, and stop loading
@@ -296,7 +300,9 @@ function Item({
               {!loading ? (
                 <Tooltip
                   value={
-                    disabledText && disabled
+                    !toggle
+                      ? translations[lang].enterMarket
+                      : disabledText && disabled
                       ? translations[lang][`${disabledText}`]
                       : translations[lang].exitMarket
                   }
@@ -335,12 +341,9 @@ function Item({
               }
               className={type.value == 'deposit' ? 'primary' : 'secondary'}
               onClick={() => {
+                setMarket({ value: market! });
+                setOperation(type.value);
                 setOpen(true);
-                setModalContent({
-                  market: getFixedLenderData().address,
-                  symbol,
-                  type: type.value == 'deposit' ? 'smartDeposit' : 'floatingBorrow'
-                });
               }}
             />
           )) || <Skeleton height={40} />}
@@ -354,12 +357,9 @@ function Item({
               }
               className={type.value == 'deposit' ? 'tertiary' : 'quaternary'}
               onClick={() => {
+                setMarket({ value: market! });
+                setOperation(type.value == 'deposit' ? 'withdraw' : 'repay');
                 setOpen(true);
-                setModalContent({
-                  assets: type.value == 'deposit' ? depositAmount : borrowedAmount,
-                  symbol,
-                  type: type.value == 'deposit' ? 'withdrawSP' : 'floatingRepay'
-                });
               }}
             />
           )) || <Skeleton height={40} />}

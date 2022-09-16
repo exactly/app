@@ -2,17 +2,15 @@ import { useContext, useState } from 'react';
 import { ethers } from 'ethers';
 import Image from 'next/image';
 
-import ModalWrapper from 'components/common/modal/ModalWrapper';
-import Overlay from 'components/Overlay';
 import Button from 'components/common/Button';
 
 import faucetAbi from './faucetAbi.json';
 
-import { getContractData } from 'utils/contracts';
 import { getUnderlyingData } from 'utils/utils';
 
 import { useWeb3Context } from 'contexts/Web3Context';
 import LangContext from 'contexts/LangContext';
+import ContractsContext from 'contexts/ContractsContext';
 
 import { Dictionary } from 'types/Dictionary';
 import { LangKeys } from 'types/Lang';
@@ -21,24 +19,14 @@ import styles from './style.module.scss';
 
 import keys from './translations.json';
 
-type Props = {
-  closeModal: (props: any) => void;
-};
-
-function FaucetModal({ closeModal }: Props) {
+function Faucet() {
   const { network, web3Provider } = useWeb3Context();
+  const { getInstance } = useContext(ContractsContext);
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
   const [loading, setLoading] = useState<string | undefined>(undefined);
-
-  const faucetContract = getContractData(
-    network?.name!,
-    '0x88138ca1e9e485a1e688b030f85bb79d63f156ba',
-    faucetAbi,
-    web3Provider?.getSigner()
-  );
 
   const decimals: Dictionary<number> = {
     USDC: 6,
@@ -58,6 +46,12 @@ function FaucetModal({ closeModal }: Props) {
         USDC: '50000',
         WBTC: '2'
       };
+
+      const faucetContract = getInstance(
+        '0x88138ca1e9e485a1e688b030f85bb79d63f156ba',
+        faucetAbi,
+        'faucet'
+      );
 
       const mint = await faucetContract?.mint(
         contract?.address,
@@ -112,60 +106,57 @@ function FaucetModal({ closeModal }: Props) {
 
   return (
     <>
-      <ModalWrapper closeModal={closeModal}>
-        <div className={styles.faucetContainer}>
-          <div className={styles.titlesContainer}>
-            <h3 className={styles.title}>{translations[lang].faucet}</h3>
-            <h4 className={styles.addTokens} onClick={addTokens}>
-              {translations[lang].addTokens}
-            </h4>
-          </div>
-          <div className={styles.header}>
-            <p>{translations[lang].asset}</p>
-            <p></p>
-          </div>
-          {assets.map((asset) => {
-            if (asset == 'ETH') {
-              return (
-                <div className={styles.assetContainer} key={asset}>
-                  <p className={styles.asset}>
-                    <Image src={`/img/assets/weth.svg`} alt={asset} width={40} height={40} />
-                    {asset}
-                  </p>
-                  <div className={styles.buttonContainer}>
-                    <a href="https://rinkebyfaucet.com/" target="_blank" rel="noopener noreferrer">
-                      <Button text={translations[lang].mint} />
-                    </a>
-                  </div>
-                </div>
-              );
-            }
+      <div className={styles.faucetContainer}>
+        <div className={styles.titlesContainer}>
+          <h3 className={styles.title}>{translations[lang].faucet}</h3>
+          <h4 className={styles.addTokens} onClick={addTokens}>
+            {translations[lang].addTokens}
+          </h4>
+        </div>
+        <div className={styles.header}>
+          <p>{translations[lang].asset}</p>
+          <p></p>
+        </div>
+        {assets.map((asset) => {
+          if (asset == 'ETH') {
             return (
               <div className={styles.assetContainer} key={asset}>
                 <p className={styles.asset}>
-                  <Image
-                    src={`/img/assets/${asset.toLowerCase()}.svg`}
-                    alt={asset}
-                    width={40}
-                    height={40}
-                  />
+                  <Image src={`/img/assets/weth.svg`} alt={asset} width={40} height={40} />
                   {asset}
                 </p>
                 <div className={styles.buttonContainer}>
-                  <Button
-                    text={translations[lang].mint}
-                    onClick={() => mint(asset)}
-                    loading={asset == loading}
-                  />
+                  <a href="https://rinkebyfaucet.com/" target="_blank" rel="noopener noreferrer">
+                    <Button text={translations[lang].mint} />
+                  </a>
                 </div>
               </div>
             );
-          })}
-        </div>
-      </ModalWrapper>
-      <Overlay closeModal={closeModal} />
+          }
+          return (
+            <div className={styles.assetContainer} key={asset}>
+              <p className={styles.asset}>
+                <Image
+                  src={`/img/assets/${asset.toLowerCase()}.svg`}
+                  alt={asset}
+                  width={40}
+                  height={40}
+                />
+                {asset}
+              </p>
+              <div className={styles.buttonContainer}>
+                <Button
+                  text={translations[lang].mint}
+                  onClick={() => mint(asset)}
+                  loading={asset == loading}
+                />
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </>
   );
 }
 
-export default FaucetModal;
+export default Faucet;

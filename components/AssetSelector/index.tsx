@@ -1,77 +1,60 @@
-import { useEffect, useState, useContext } from 'react';
+import { useState, useContext, useMemo, useEffect } from 'react';
 import { ethers } from 'ethers';
 import Image from 'next/image';
+import Skeleton from 'react-loading-skeleton';
 
 import Select from 'components/common/Select';
 import Tooltip from 'components/Tooltip';
 
-import { AddressContext } from 'contexts/AddressContext';
-import { useWeb3Context } from 'contexts/Web3Context';
-import PreviewerContext from 'contexts/PreviewerContext';
+import { MarketContext } from 'contexts/AddressContext';
+import AccountDataContext from 'contexts/AccountDataContext';
 
 import { Market } from 'types/Market';
 import { Address } from 'types/Address';
 import { Option } from 'react-dropdown';
-import { FixedLenderAccountData } from 'types/FixedLenderAccountData';
+import { AccountData } from 'types/AccountData';
 
 import style from './style.module.scss';
-import { getContractData } from 'utils/contracts';
 import parseSymbol from 'utils/parseSymbol';
 
 type Props = {
   title?: Boolean;
-  defaultAddress?: String;
+  defaultAddress: string | undefined;
   onChange?: (marketData: Market) => void;
 };
 
 function AssetSelector({ title, defaultAddress, onChange }: Props) {
-  const previewerData = useContext(PreviewerContext);
+  const { market, setMarket } = useContext(MarketContext);
+  const { accountData } = useContext(AccountDataContext);
 
-  const { address, setAddress } = useContext(AddressContext);
-  const { network } = useWeb3Context();
-
-  const [selectOptions, setSelectOptions] = useState<Array<Option>>([]);
   const [allMarketsData, setAllMarketsData] = useState<Array<Market>>([]);
 
+  const selectOptions = useMemo(() => {
+    return getMarkets();
+  }, [accountData, defaultAddress]);
+
   useEffect(() => {
-    if (previewerData) {
-      getMarkets();
+    const defaultOption = selectOptions?.find((market: Option) => {
+      return market.value == defaultAddress;
+    });
+
+    setMarket(defaultOption ?? selectOptions[0]);
+  }, [selectOptions]);
+
+  function getMarkets() {
+    if (!accountData) {
+      return [];
     }
-  }, [previewerData]);
 
-  async function getMarkets() {
-    try {
-      const previewerContract = getContractData(
-        network?.name!,
-        previewerData.address!,
-        previewerData.abi!
-      );
+    const formattedMarkets = formatMarkets(accountData);
 
-      const marketsData = await previewerContract?.exactly(
-        '0x000000000000000000000000000000000000dEaD'
-      );
-
-      if (!marketsData) {
-        //in case the contract doesn't return any market data
-        return;
-      }
-
-      const formattedMarkets = formatMarkets(marketsData);
-
-      setSelectOptions(formattedMarkets);
-
-      const defaultOption = formattedMarkets?.find((market: Option) => {
-        return market.value == defaultAddress;
-      });
-
-      setAddress(defaultOption ?? formattedMarkets[0]);
-    } catch (e) {
-      console.log(e);
-    }
+    return formattedMarkets;
   }
 
-  function formatMarkets(markets: Array<FixedLenderAccountData>) {
-    const formattedMarkets = markets.map((market: FixedLenderAccountData) => {
+  function formatMarkets(markets: AccountData) {
+    const formattedMarkets = Object.keys(markets).map((marketName: string) => {
+      const market = markets[marketName];
+
       const marketData: Market = {
         symbol: market.assetSymbol,
         name: market.assetSymbol,
@@ -109,7 +92,7 @@ function AssetSelector({ title, defaultAddress, onChange }: Props) {
 
   function handleChange(option: Address) {
     getDataByAddress(option.value);
-    setAddress(option);
+    setMarket(option);
   }
 
   return (
@@ -121,12 +104,14 @@ function AssetSelector({ title, defaultAddress, onChange }: Props) {
         </div>
       )}
       <div className={style.selectContainer}>
-        <Select
-          options={selectOptions}
-          onChange={handleChange}
-          placeholder={address ?? selectOptions[0]}
-          value={address ?? selectOptions[0]}
-        />
+        {(market && market.label && market.value && (
+          <Select
+            options={selectOptions}
+            onChange={handleChange}
+            placeholder={market ?? selectOptions[0]}
+            value={market ?? selectOptions[0]}
+          />
+        )) || <Skeleton width={200} height={48} />}
       </div>
     </section>
   );

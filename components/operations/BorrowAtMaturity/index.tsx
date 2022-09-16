@@ -1,4 +1,4 @@
-import { ChangeEvent, useContext, useEffect, useState } from 'react';
+import { ChangeEvent, useContext, useEffect, useMemo, useState } from 'react';
 import { Contract, ethers } from 'ethers';
 import { formatFixed, parseFixed } from '@ethersproject/bignumber';
 
@@ -10,10 +10,7 @@ import ModalRowHealthFactor from 'components/common/modal/ModalRowHealthFactor';
 import SkeletonModalRowBeforeAfter from 'components/common/skeletons/SkeletonModalRowBeforeAfter';
 import ModalTitle from 'components/common/modal/ModalTitle';
 import ModalTxCost from 'components/common/modal/ModalTxCost';
-import ModalMinimized from 'components/common/modal/ModalMinimized';
-import ModalWrapper from 'components/common/modal/ModalWrapper';
 import ModalGif from 'components/common/modal/ModalGif';
-import Overlay from 'components/Overlay';
 import ModalRowEditable from 'components/common/modal/ModalRowEditable';
 import ModalMaturityEditable from 'components/common/modal/ModalMaturityEditable';
 import ModalError from 'components/common/modal/ModalError';
@@ -21,8 +18,6 @@ import ModalRowBorrowLimit from 'components/common/modal/ModalRowBorrowLimit';
 import ModalExpansionPanelWrapper from 'components/common/modal/ModalExpansionPanelWrapper';
 import ModalRowUtilizationRate from 'components/common/modal/ModalRowUtilizationRate';
 
-import { Borrow } from 'types/Borrow';
-import { Deposit } from 'types/Deposit';
 import { LangKeys } from 'types/Lang';
 import { UnderlyingData } from 'types/Underlying';
 import { Gas } from 'types/Gas';
@@ -31,45 +26,35 @@ import { Error } from 'types/Error';
 import { HealthFactor } from 'types/HealthFactor';
 import { Dictionary } from 'types/Dictionary';
 
-import { getContractData } from 'utils/contracts';
 import { getUnderlyingData, getSymbol } from 'utils/utils';
-import parseTimestamp from 'utils/parseTimestamp';
 import handleEth from 'utils/handleEth';
 import getOneDollar from 'utils/getOneDollar';
 import getBeforeBorrowLimit from 'utils/getBeforeBorrowLimit';
 
 import styles from './style.module.scss';
 
+import useDebounce from 'hooks/useDebounce';
+
 import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 import FixedLenderContext from 'contexts/FixedLenderContext';
-import { AddressContext } from 'contexts/AddressContext';
+import { MarketContext } from 'contexts/AddressContext';
 import PreviewerContext from 'contexts/PreviewerContext';
 import AccountDataContext from 'contexts/AccountDataContext';
-import ModalStatusContext from 'contexts/ModalStatusContext';
+import ContractsContext from 'contexts/ContractsContext';
 
 import keys from './translations.json';
 
 import numbers from 'config/numbers.json';
 
-type Props = {
-  data: Borrow | Deposit;
-  editable?: boolean;
-  closeModal: (props: any) => void;
-};
-
-function BorrowModal({ data, editable, closeModal }: Props) {
-  const { maturity, market } = data;
-
+function BorrowAtMaturity() {
   const { web3Provider, walletAddress, network } = useWeb3Context();
-  const { accountData } = useContext(AccountDataContext);
-
-  const { date, address } = useContext(AddressContext);
+  const { accountData, getAccountData } = useContext(AccountDataContext);
+  const { date, market } = useContext(MarketContext);
+  const { getInstance } = useContext(ContractsContext);
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
-
-  const { minimized, setMinimized } = useContext(ModalStatusContext);
 
   const fixedLenderData = useContext(FixedLenderContext);
   const previewerData = useContext(PreviewerContext);
@@ -84,50 +69,61 @@ function BorrowModal({ data, editable, closeModal }: Props) {
   const [loading, setLoading] = useState<boolean>(false);
   const [healthFactor, setHealthFactor] = useState<HealthFactor | undefined>(undefined);
   const [needsApproval, setNeedsApproval] = useState<boolean>(false);
-  const [poolLiquidity, setPoolLiquidity] = useState<number | undefined>(undefined);
   const [utilizationRate, setUtilizationRate] = useState<Dictionary<string>>();
 
   const [error, setError] = useState<Error | undefined>(undefined);
   const [gasError, setGasError] = useState<Error | undefined>(undefined);
 
+  const debounceQty = useDebounce(qty);
+
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
     undefined
   );
+  const [underlyingContract, setUnderlyingContract] = useState<Contract | undefined>(undefined);
 
-  const marketAddress = editable ? address?.value ?? market : market;
-
-  const symbol = getSymbol(marketAddress, network?.name);
+  const symbol = useMemo(() => {
+    return market?.value ? getSymbol(market.value, network?.name) : 'DAI';
+  }, [market?.value, network?.name]);
 
   const ETHrouter =
     web3Provider && symbol == 'WETH' && handleEth(network?.name, web3Provider?.getSigner());
 
-  const underlyingData: UnderlyingData | undefined = getUnderlyingData(
-    network?.name,
-    symbol.toLowerCase()
-  );
+  const poolLiquidity = useMemo(() => {
+    if (!accountData || !date) return;
 
-  const underlyingContract = getContractData(
-    network?.name,
-    underlyingData!.address,
-    underlyingData!.abi
-  );
+    const maturityDate = date.value;
 
-  const previewerContract = getContractData(
-    network?.name,
-    previewerData.address!,
-    previewerData.abi!
-  );
+    const maturityData = accountData[symbol].fixedPools?.find((data) => {
+      return data.maturity.toString() == maturityDate;
+    });
+
+    const decimals = accountData[symbol].decimals;
+
+    const limit = maturityData && ethers.utils.formatUnits(maturityData?.available!, decimals);
+
+    return limit ? parseFloat(limit) : undefined;
+  }, [accountData, date?.value]);
+
+  useMemo(() => {
+    checkCollateral();
+  }, [accountData, symbol]);
+
+  useEffect(() => {
+    setQty('');
+  }, [symbol, date]);
 
   useEffect(() => {
     getFixedLenderContract();
-  }, [address, market, fixedLenderData]);
+  }, [market, fixedLenderData]);
+
+  useEffect(() => {
+    getUnderlyingContract();
+  }, [market, network, symbol]);
 
   useEffect(() => {
     checkAllowance();
-    checkPoolLiquidity();
-    checkCollateral();
     getUtilizationRate();
-  }, [walletAddress, fixedLenderWithSigner, symbol, qty]);
+  }, [walletAddress, fixedLenderWithSigner, symbol, debounceQty]);
 
   useEffect(() => {
     if (underlyingContract && fixedLenderWithSigner) {
@@ -145,7 +141,7 @@ function BorrowModal({ data, editable, closeModal }: Props) {
     if (fixedLenderWithSigner) {
       getFeeAtMaturity();
     }
-  }, [qty, date, maturity, fixedLenderWithSigner]);
+  }, [debounceQty, date, fixedLenderWithSigner]);
 
   async function checkAllowance() {
     if (symbol != 'WETH' || !ETHrouter || !walletAddress || !fixedLenderWithSigner) return;
@@ -179,7 +175,7 @@ function BorrowModal({ data, editable, closeModal }: Props) {
     }
   }
 
-  async function onMax() {
+  function onMax() {
     if (!accountData || !healthFactor) return;
 
     const decimals = accountData[symbol.toUpperCase()].decimals;
@@ -278,10 +274,10 @@ function BorrowModal({ data, editable, closeModal }: Props) {
         });
       }
 
-      if (!accountData) return;
+      if (!accountData || !date) return;
 
       const currentTimestamp = new Date().getTime() / 1000;
-      const time = (parseInt(date?.value ?? maturity) - currentTimestamp) / 31536000;
+      const time = (parseInt(date.value) - currentTimestamp) / 31536000;
       const apy = parseFloat(slippage) / 100;
       const decimals = accountData![symbol.toUpperCase()].decimals;
 
@@ -292,16 +288,12 @@ function BorrowModal({ data, editable, closeModal }: Props) {
       if (symbol == 'WETH') {
         if (!web3Provider || !ETHrouter) return;
 
-        borrow = await ETHrouter?.borrowAtMaturityETH(
-          date?.value ?? maturity,
-          qty!,
-          maxAmount.toFixed(18)
-        );
+        borrow = await ETHrouter?.borrowAtMaturityETH(date.value, qty!, maxAmount.toFixed(18));
       } else {
         const gasLimit = await getGasLimit(qty, maxAmount.toFixed(decimals));
 
         borrow = await fixedLenderWithSigner?.borrowAtMaturity(
-          parseInt(date?.value ?? maturity),
+          parseInt(date.value),
           ethers.utils.parseUnits(qty!, decimals),
           ethers.utils.parseUnits(`${maxAmount.toFixed(decimals)}`, decimals),
           walletAddress,
@@ -324,6 +316,8 @@ function BorrowModal({ data, editable, closeModal }: Props) {
       } else {
         setTx({ status: 'error', hash: txReceipt?.transactionHash });
       }
+
+      getAccountData();
     } catch (e: any) {
       console.log(e);
       setLoading(false);
@@ -357,22 +351,6 @@ function BorrowModal({ data, editable, closeModal }: Props) {
     }
   }
 
-  async function checkPoolLiquidity() {
-    if (!accountData) return;
-
-    const maturityDate = date?.value ?? maturity;
-
-    const maturityData = accountData[symbol].fixedPools?.find((data) => {
-      return data.maturity.toString() == maturityDate;
-    });
-
-    const decimals = accountData[symbol].decimals;
-
-    const limit = maturityData && ethers.utils.formatUnits(maturityData?.available!, decimals);
-
-    limit && setPoolLiquidity(parseFloat(limit));
-  }
-
   async function estimateGas() {
     if (symbol == 'WETH' || !accountData) return;
 
@@ -396,12 +374,12 @@ function BorrowModal({ data, editable, closeModal }: Props) {
   }
 
   async function getGasLimit(qty: string, maxQty: string) {
-    if (!accountData) return;
+    if (!accountData || !date) return;
 
     const decimals = accountData[symbol].decimals;
 
     const gasLimit = await fixedLenderWithSigner?.estimateGas.borrowAtMaturity(
-      parseInt(date?.value ?? maturity),
+      parseInt(date.value),
       ethers.utils.parseUnits(qty, decimals),
       ethers.utils.parseUnits(maxQty, decimals),
       walletAddress,
@@ -412,19 +390,25 @@ function BorrowModal({ data, editable, closeModal }: Props) {
   }
 
   async function getFeeAtMaturity() {
-    if (!accountData) return;
+    if (!accountData || !date) return;
 
     try {
       const decimals = accountData[symbol.toUpperCase()].decimals;
       const currentTimestamp = new Date().getTime() / 1000;
-      const time = 31_536_000 / (parseInt(date?.value ?? maturity) - currentTimestamp);
+      const time = 31_536_000 / (parseInt(date.value) - currentTimestamp);
       const oracle = accountData[symbol.toUpperCase()]?.oraclePrice;
 
       const qtyValue = qty == '' ? getOneDollar(oracle, decimals) : parseFixed(qty, decimals);
 
+      const previewerContract = getInstance(
+        previewerData.address!,
+        previewerData.abi!,
+        'previewer'
+      );
+
       const feeAtMaturity = await previewerContract?.previewBorrowAtMaturity(
         fixedLenderWithSigner!.address,
-        parseInt(date?.value ?? maturity),
+        parseInt(date.value),
         qtyValue
       );
 
@@ -454,8 +438,8 @@ function BorrowModal({ data, editable, closeModal }: Props) {
   }
 
   function getUtilizationRate() {
-    if (!accountData) return;
-    const maturityTimestamp = date?.value ?? maturity;
+    if (!accountData || !date) return;
+    const maturityTimestamp = date?.value;
 
     const pool = accountData[symbol].fixedPools.find((pool) => {
       return pool.maturity.toString() == maturityTimestamp;
@@ -472,24 +456,38 @@ function BorrowModal({ data, editable, closeModal }: Props) {
     setHealthFactor(healthFactor);
   }
 
-  async function getFixedLenderContract() {
+  function getFixedLenderContract() {
     const filteredFixedLender = fixedLenderData.find((contract) => {
       const contractSymbol = getSymbol(contract.address!, network!.name);
 
       return contractSymbol == symbol;
     });
 
-    const fixedLender = await getContractData(
-      network?.name,
+    const fixedLender = getInstance(
       filteredFixedLender?.address!,
       filteredFixedLender?.abi!,
-      web3Provider?.getSigner()
+      `market${symbol}`
     );
 
     setFixedLenderWithSigner(fixedLender);
   }
 
-  async function checkCollateral() {
+  function getUnderlyingContract() {
+    const underlyingData: UnderlyingData | undefined = getUnderlyingData(
+      network?.name,
+      symbol.toLowerCase()
+    );
+
+    const underlyingContract = getInstance(
+      underlyingData!.address,
+      underlyingData!.abi,
+      `underlying${symbol}`
+    );
+
+    setUnderlyingContract(underlyingContract);
+  }
+
+  function checkCollateral() {
     if (!accountData) return;
     const decimals = accountData[symbol].decimals;
 
@@ -539,97 +537,61 @@ function BorrowModal({ data, editable, closeModal }: Props) {
 
   return (
     <>
-      {!minimized && (
-        <ModalWrapper closeModal={closeModal}>
-          {!tx && (
-            <>
-              <ModalTitle title={translations[lang].fixedRateBorrow} />
-              <ModalAsset
-                asset={symbol!}
-                amount={walletBalance}
-                editable={editable}
-                defaultAddress={marketAddress}
+      {!tx && (
+        <>
+          <ModalTitle title={translations[lang].fixedRateBorrow} />
+          <ModalAsset asset={symbol!} amount={walletBalance} />
+          <ModalMaturityEditable text={translations[lang].maturityPool} />
+          <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} symbol={symbol!} />
+          {gasError?.component !== 'gas' && symbol != 'WETH' && <ModalTxCost gas={gas} />}
+          <ModalRow text={translations[lang].apy} value={fixedRate} line />
+          <ModalRowEditable
+            text={translations[lang].maximumBorrowApy}
+            value={slippage}
+            editable={editSlippage}
+            symbol="%"
+            onChange={(e: ChangeEvent<HTMLInputElement>) => {
+              setSlippage(e.target.value);
+              error?.message == translations[lang].notEnoughSlippage && setError(undefined);
+            }}
+            onClick={() => {
+              if (slippage == '') setSlippage('0.00');
+              setEditSlippage((prev) => !prev);
+            }}
+          />
+          <ModalExpansionPanelWrapper>
+            {symbol ? (
+              <ModalRowHealthFactor
+                qty={qty}
+                symbol={symbol}
+                operation="borrow"
+                healthFactorCallback={getHealthFactor}
               />
-              <ModalMaturityEditable
-                text={translations[lang].maturityPool}
-                value={date?.label ?? parseTimestamp(maturity)}
-                editable={editable}
-              />
-              <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} symbol={symbol!} />
-              {gasError?.component !== 'gas' && symbol != 'WETH' && <ModalTxCost gas={gas} />}
-              <ModalRow text={translations[lang].apy} value={fixedRate} line />
-              <ModalRowEditable
-                text={translations[lang].maximumBorrowApy}
-                value={slippage}
-                editable={editSlippage}
-                symbol="%"
-                onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                  setSlippage(e.target.value);
-                  error?.message == translations[lang].notEnoughSlippage && setError(undefined);
-                }}
-                onClick={() => {
-                  if (slippage == '') setSlippage('0.00');
-                  setEditSlippage((prev) => !prev);
-                }}
-              />
-              <ModalExpansionPanelWrapper>
-                {symbol ? (
-                  <ModalRowHealthFactor
-                    qty={qty}
-                    symbol={symbol}
-                    operation="borrow"
-                    healthFactorCallback={getHealthFactor}
-                  />
-                ) : (
-                  <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
-                )}
-                <ModalRowBorrowLimit qty={qty} symbol={symbol!} operation="borrow" line />
-                <ModalRowUtilizationRate
-                  urBefore={utilizationRate?.before}
-                  urAfter={utilizationRate?.after}
-                />
-              </ModalExpansionPanelWrapper>
+            ) : (
+              <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
+            )}
+            <ModalRowBorrowLimit qty={qty} symbol={symbol!} operation="borrow" line />
+            <ModalRowUtilizationRate
+              urBefore={utilizationRate?.before}
+              urAfter={utilizationRate?.after}
+            />
+          </ModalExpansionPanelWrapper>
 
-              {error && error.component != 'gas' && <ModalError message={error.message} />}
-              <div className={styles.buttonContainer}>
-                <Button
-                  text={needsApproval ? translations[lang].approve : translations[lang].borrow}
-                  className={
-                    parseFloat(qty) <= 0 || !qty || error?.status ? 'disabled' : 'secondary'
-                  }
-                  onClick={needsApproval ? approve : borrow}
-                  disabled={parseFloat(qty) <= 0 || !qty || loading || error?.status}
-                  loading={loading}
-                />
-              </div>
-            </>
-          )}
-          {tx && <ModalGif tx={tx} tryAgain={borrow} />}
-        </ModalWrapper>
+          {error && error.component != 'gas' && <ModalError message={error.message} />}
+          <div className={styles.buttonContainer}>
+            <Button
+              text={needsApproval ? translations[lang].approve : translations[lang].borrow}
+              className={parseFloat(qty) <= 0 || !qty || error?.status ? 'disabled' : 'secondary'}
+              onClick={needsApproval ? approve : borrow}
+              disabled={parseFloat(qty) <= 0 || !qty || loading || error?.status}
+              loading={loading}
+            />
+          </div>
+        </>
       )}
-
-      {tx && minimized && (
-        <ModalMinimized
-          tx={tx}
-          handleMinimize={() => {
-            setMinimized((prev: boolean) => !prev);
-          }}
-        />
-      )}
-
-      {!minimized && (
-        <Overlay
-          closeModal={
-            !tx || tx.status == 'success'
-              ? closeModal
-              : () => {
-                  setMinimized((prev: boolean) => !prev);
-                }
-          }
-        />
-      )}
+      {tx && <ModalGif tx={tx} tryAgain={borrow} />}
     </>
   );
 }
 
-export default BorrowModal;
+export default BorrowAtMaturity;

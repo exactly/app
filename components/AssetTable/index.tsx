@@ -2,10 +2,11 @@ import { useContext, useEffect, useState } from 'react';
 import { parseFixed } from '@ethersproject/bignumber';
 
 import LangContext from 'contexts/LangContext';
-import { AddressContext } from 'contexts/AddressContext';
+import { MarketContext } from 'contexts/AddressContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 import PreviewerContext from 'contexts/PreviewerContext';
 import AccountDataContext from 'contexts/AccountDataContext';
+import ContractsContext from 'contexts/ContractsContext';
 
 import Tooltip from 'components/Tooltip';
 
@@ -18,8 +19,6 @@ import styles from './style.module.scss';
 import keys from './translations.json';
 
 import Item from './Item';
-
-import { getContractData } from 'utils/contracts';
 
 import numbers from 'config/numbers.json';
 
@@ -37,8 +36,9 @@ function AssetTable({ page, itemsPerPage, symbol, deposits, borrows }: Props) {
 
   const { network } = useWeb3Context();
   const { accountData } = useContext(AccountDataContext);
-  const { dates } = useContext(AddressContext);
+  const { dates } = useContext(MarketContext);
   const previewerData = useContext(PreviewerContext);
+  const { getInstance } = useContext(ContractsContext);
 
   const [fixedMarketData, setFixedMarketData] = useState<FixedMarketData[] | undefined>(undefined);
 
@@ -48,10 +48,10 @@ function AssetTable({ page, itemsPerPage, symbol, deposits, borrows }: Props) {
 
   async function getPreviewFixed() {
     try {
-      const previewerContract = getContractData(
-        network?.name!,
+      const previewerContract = getInstance(
         previewerData.address!,
-        previewerData.abi!
+        previewerData.abi!,
+        'previewer'
       );
 
       const data = await previewerContract?.previewFixed(

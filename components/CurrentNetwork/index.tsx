@@ -17,7 +17,7 @@ function CurrentNetwork() {
   const translations: { [key: string]: LangKeys } = keys;
 
   const { network, web3Provider } = useWeb3Context();
-  const { setOpen, setModalContent } = useContext(ModalStatusContext);
+  const { setOpen, setOperation } = useContext(ModalStatusContext);
 
   const isAllowed = network && allowedNetworks.includes(network?.name);
   const status = network?.name && isAllowed ? 'success' : 'error';
@@ -35,8 +35,8 @@ function CurrentNetwork() {
         ]
       });
     } else if (isAllowed && network?.name == 'rinkeby') {
+      setOperation('faucet');
       setOpen(true);
-      setModalContent({ type: 'faucet' });
     }
   }
 

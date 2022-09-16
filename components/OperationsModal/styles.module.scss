@@ -1,0 +1,18 @@
+.modal {
+  position: fixed;
+  width: 600px;
+  height: fit-content;
+  left: calc(50% - 300px);
+  top: 10%;
+  background: var(--background);
+  box-shadow: var(--shadow-tables);
+  z-index: var(--layer-6);
+  display: flex;
+
+  .closeButton {
+    position: absolute;
+    top: var(--u2);
+    right: var(--u2);
+    cursor: pointer;
+  }
+}
