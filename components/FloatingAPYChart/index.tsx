@@ -95,7 +95,7 @@ function FloatingAPYChart({ market, network }: Props) {
         </div>
       </div>
 
-      <ResponsiveContainer width="100%" height="100%">
+      <ResponsiveContainer className={styles.graphCard} width="100%" height="100%">
         <>
           <ComposedChart
             width={600}

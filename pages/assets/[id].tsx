@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 import type { GetStaticProps, NextPage } from 'next';
 
 import Navbar from 'components/Navbar';
@@ -37,7 +37,6 @@ const Asset: NextPage<Props> = ({ symbol = 'DAI' }) => {
   const { dates } = useContext(MarketContext);
   const fixedLenderData = useContext(FixedLenderContext);
   const { accountData } = useContext(AccountDataContext);
-
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
@@ -45,15 +44,8 @@ const Asset: NextPage<Props> = ({ symbol = 'DAI' }) => {
   const [page, setPage] = useState<number>(1);
   const [depositsData, setDepositsData] = useState<Array<Maturity> | undefined>(undefined);
   const [borrowsData, setBorrowsData] = useState<Array<Maturity> | undefined>(undefined);
-  const [eMarketAddress, setEMarketAddress] = useState<string | undefined>(undefined);
 
-  useEffect(() => {
-    handleAPY();
-  }, [network, accountData, symbol]);
-
-  async function handleAPY() {
-    if (!accountData) return;
-
+  const eMarketAddress = useMemo(() => {
     const filteredFixedLender = fixedLenderData.find((contract: any) => {
       const contractSymbol = getSymbol(
         contract.address!,
@@ -62,10 +54,18 @@ const Asset: NextPage<Props> = ({ symbol = 'DAI' }) => {
       return contractSymbol == symbol;
     });
 
-    setEMarketAddress(filteredFixedLender?.address);
+    return filteredFixedLender?.address;
+  }, [fixedLenderData, network]);
+
+  useEffect(() => {
+    handleAPY();
+  }, [network, accountData, symbol, eMarketAddress]);
+
+  async function handleAPY() {
+    if (!accountData || !eMarketAddress) return;
 
     try {
-      const apy: any = await getLastAPY(dates, filteredFixedLender?.address!, network, accountData);
+      const apy: any = await getLastAPY(dates, eMarketAddress, network, accountData);
 
       const deposit = apy?.sortedDeposit;
       const borrow = apy?.sortedBorrow;

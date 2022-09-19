@@ -1,14 +1,11 @@
 .graphContainer {
   display: flex;
   flex-direction: column;
-  background: var(--gray-50);
-  box-shadow: var(--shadow-tables);
-  border-radius: var(--u);
 
   .titleContainer {
     display: flex;
     align-items: center;
-    padding: var(--u);
+    padding: 0 var(--u);
 
     .title {
       width: 100%;
@@ -24,5 +21,11 @@
       height: var(--u5);
       gap: var(--u);
     }
+  }
+  .graphCard {
+    background: var(--gray-50);
+    box-shadow: var(--shadow-tables);
+    border-radius: var(--u);
+    padding: var(--u2);
   }
 }
