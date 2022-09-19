@@ -1,0 +1,31 @@
+.graphContainer {
+  display: flex;
+  flex-direction: column;
+
+  .titleContainer {
+    display: flex;
+    align-items: center;
+    padding: 0 var(--u);
+
+    .title {
+      width: 100%;
+      font-size: var(--font-20);
+      color: var(--gray-900);
+      font-weight: 700;
+    }
+
+    .buttonContainer {
+      display: flex;
+      margin-right: var(--u2);
+      width: 300px;
+      height: var(--u5);
+      gap: var(--u);
+    }
+  }
+  .graphCard {
+    background: var(--gray-50);
+    box-shadow: var(--shadow-tables);
+    border-radius: var(--u);
+    padding: var(--u2);
+  }
+}
