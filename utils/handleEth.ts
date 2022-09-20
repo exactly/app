@@ -1,4 +1,4 @@
-import { Contract, ethers } from 'ethers';
+import { BigNumber, Contract, ethers } from 'ethers';
 
 import rinkebyRouter from 'protocol/deployments/rinkeby/MarketETHRouter.json';
 
@@ -30,6 +30,12 @@ function handleEth(network: string = 'rinkeby', signer: ethers.providers.JsonRpc
     return router.withdraw(ethers.utils.parseEther(qty));
   }
 
+  function redeemETH(shares: BigNumber) {
+    if (!shares || !router) return;
+
+    return router.redeem(shares);
+  }
+
   function borrowETH(qty: string) {
     if (!qty || !router) return;
 
@@ -41,6 +47,14 @@ function handleEth(network: string = 'rinkeby', signer: ethers.providers.JsonRpc
 
     return router.repay(ethers.utils.parseEther(qty), {
       value: ethers.utils.parseEther(maxValue)
+    });
+  }
+
+  function refundETH(shares: BigNumber, maxValue: BigNumber) {
+    if (!shares || !router) return;
+
+    return router.refund(shares, {
+      value: maxValue
     });
   }
 
@@ -97,8 +111,10 @@ function handleEth(network: string = 'rinkeby', signer: ethers.providers.JsonRpc
   return {
     depositETH,
     withdrawETH,
+    redeemETH,
     borrowETH,
     repayETH,
+    refundETH,
     depositAtMaturityETH,
     withdrawAtMaturityETH,
     borrowAtMaturityETH,
