@@ -58,6 +58,7 @@ function Withdraw() {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | undefined>(undefined);
   const [needsApproval, setNeedsApproval] = useState<boolean>(false);
+  const [isMax, setIsMax] = useState<boolean>(false);
 
   const debounceQty = useDebounce(qty);
 
@@ -118,6 +119,9 @@ function Withdraw() {
 
   function onMax() {
     setQty(parsedAmount);
+
+    //we enable max flag if user clicks max
+    setIsMax(true);
   }
 
   function handleInputChange(e: ChangeEvent<HTMLInputElement>) {
@@ -141,9 +145,14 @@ function Withdraw() {
     }
 
     setQty(e.target.value);
+
+    //we disable max flag if user changes input
+    isMax && setIsMax(false);
   }
 
   async function withdraw() {
+    if (!accountData) return;
+
     setLoading(true);
 
     try {
@@ -155,24 +164,40 @@ function Withdraw() {
 
         decimals = 18;
 
-        withdraw = await ETHrouter.withdrawETH(qty);
+        if (isMax) {
+          withdraw = await ETHrouter.redeemETH(accountData[symbol].floatingDepositShares);
+        } else {
+          withdraw = await ETHrouter.withdrawETH(qty);
+        }
       } else {
         if (!accountData || !symbol) return;
 
         const gasLimit = await getGasLimit(qty);
-
         decimals = accountData[symbol].decimals;
 
-        withdraw = await fixedLenderWithSigner?.withdraw(
-          ethers.utils.parseUnits(qty, decimals),
-          walletAddress,
-          walletAddress,
-          {
-            gasLimit: gasLimit
-              ? Math.ceil(Number(formatFixed(gasLimit)) * numbers.gasLimitMultiplier)
-              : undefined
-          }
-        );
+        if (isMax) {
+          withdraw = await fixedLenderWithSigner?.redeem(
+            accountData[symbol].floatingDepositShares,
+            walletAddress,
+            walletAddress,
+            {
+              gasLimit: gasLimit
+                ? Math.ceil(Number(formatFixed(gasLimit)) * numbers.gasLimitMultiplier)
+                : undefined
+            }
+          );
+        } else {
+          withdraw = await fixedLenderWithSigner?.withdraw(
+            ethers.utils.parseUnits(qty, decimals),
+            walletAddress,
+            walletAddress,
+            {
+              gasLimit: gasLimit
+                ? Math.ceil(Number(formatFixed(gasLimit)) * numbers.gasLimitMultiplier)
+                : undefined
+            }
+          );
+        }
       }
 
       setTx({ status: 'processing', hash: withdraw?.hash });

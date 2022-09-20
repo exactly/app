@@ -54,7 +54,7 @@ function Repay() {
   const [tx, setTx] = useState<Transaction | undefined>(undefined);
   const [loading, setLoading] = useState<boolean>(false);
   const [needsApproval, setNeedsApproval] = useState<boolean>(false);
-
+  const [isMax, setIsMax] = useState<boolean>(false);
   const [error, setError] = useState<Error | undefined>(undefined);
 
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
@@ -188,10 +188,16 @@ function Repay() {
 
   function onMax() {
     setQty(finalAmount);
+
+    //we enable max flag if user clicks max
+    setIsMax(true);
   }
 
   function handleInputChange(e: ChangeEvent<HTMLInputElement>) {
     setQty(e.target.value);
+
+    //we disable max flag if user changes input
+    isMax && setIsMax(false);
   }
 
   async function repay() {
@@ -208,19 +214,38 @@ function Repay() {
 
         const ETHrouter = handleEth(network?.name, web3Provider?.getSigner());
 
-        repay = await ETHrouter?.repayETH(qty!, qty!);
+        if (isMax) {
+          repay = await ETHrouter?.refundETH(
+            accountData[symbol].floatingBorrowShares,
+            accountData[symbol].floatingBorrowShares
+          );
+        } else {
+          repay = await ETHrouter?.repayETH(qty!, qty!);
+        }
       } else {
         const gasLimit = await getGasLimit(qty);
 
-        repay = await fixedLenderWithSigner?.repay(
-          ethers.utils.parseUnits(qty!, decimals),
-          walletAddress,
-          {
-            gasLimit: gasLimit
-              ? Math.ceil(Number(formatFixed(gasLimit)) * numbers.gasLimitMultiplier)
-              : undefined
-          }
-        );
+        if (isMax) {
+          repay = await fixedLenderWithSigner?.refund(
+            accountData[symbol].floatingBorrowShares,
+            walletAddress,
+            {
+              gasLimit: gasLimit
+                ? Math.ceil(Number(formatFixed(gasLimit)) * numbers.gasLimitMultiplier)
+                : undefined
+            }
+          );
+        } else {
+          repay = await fixedLenderWithSigner?.repay(
+            ethers.utils.parseUnits(qty!, decimals),
+            walletAddress,
+            {
+              gasLimit: gasLimit
+                ? Math.ceil(Number(formatFixed(gasLimit)) * numbers.gasLimitMultiplier)
+                : undefined
+            }
+          );
+        }
       }
 
       setTx({ status: 'processing', hash: repay?.hash });

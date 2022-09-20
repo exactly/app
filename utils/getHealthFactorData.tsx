@@ -50,7 +50,7 @@ function getHealthFactorData(accountData: AccountData) {
 
         fixedLenderDebt = fixedLenderDebt.add(position.mul(oracle).div(decimalWAD));
 
-        if (maturityTimestamp.gt(currentTimestamp)) {
+        if (currentTimestamp.gt(maturityTimestamp)) {
           const time = currentTimestamp.sub(maturityTimestamp);
 
           fixedLenderDebt = fixedLenderDebt.add(time.mul(penaltyRate));
