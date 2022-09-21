@@ -465,7 +465,7 @@ function Borrow() {
           <div className={styles.buttonContainer}>
             <Button
               text={needsApproval ? translations[lang].approve : translations[lang].borrow}
-              className={parseFloat(qty) <= 0 || !qty || error?.status ? 'disabled' : 'secondary'}
+              className={parseFloat(qty) <= 0 || !qty || error?.status ? 'disabled' : 'primary'}
               onClick={needsApproval ? approve : borrow}
               disabled={parseFloat(qty) <= 0 || !qty || loading || error?.status}
               loading={loading}

@@ -504,7 +504,7 @@ function RepayAtMaturity() {
           <div className={styles.buttonContainer}>
             <Button
               text={needsApproval ? translations[lang].approval : translations[lang].repay}
-              className={parseFloat(qty) <= 0 || !qty ? 'secondaryDisabled' : 'quaternary'}
+              className={parseFloat(qty) <= 0 || !qty ? 'disabled' : 'primary'}
               disabled={parseFloat(qty) <= 0 || !qty || loading}
               onClick={needsApproval ? approve : repay}
               loading={loading}
