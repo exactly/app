@@ -63,13 +63,7 @@ function ModalRowEditable({
           </div>
         )}
         <div className={styles.arrow}>
-          <Image
-            src={`/img/icons/${editable ? 'arrowUp' : 'arrowDown'}.svg`}
-            alt="arrow"
-            onClick={onClick}
-            width={12}
-            height={7}
-          />
+          <Image src={`/img/icons/edit.svg`} alt="arrow" onClick={onClick} width={10} height={10} />
         </div>
       </section>
     </section>

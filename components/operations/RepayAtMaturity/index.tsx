@@ -14,7 +14,6 @@ import ModalGif from 'components/common/modal/ModalGif';
 import SkeletonModalRowBeforeAfter from 'components/common/skeletons/SkeletonModalRowBeforeAfter';
 import ModalError from 'components/common/modal/ModalError';
 import ModalRowBorrowLimit from 'components/common/modal/ModalRowBorrowLimit';
-import ModalExpansionPanelWrapper from 'components/common/modal/ModalExpansionPanelWrapper';
 import ModalMaturityEditable from 'components/common/modal/ModalMaturityEditable';
 
 import { LangKeys } from 'types/Lang';
@@ -439,8 +438,14 @@ function RepayAtMaturity() {
         <>
           <ModalTitle
             title={isLateRepay ? translations[lang].lateRepay : translations[lang].earlyRepay}
+            description={translations[lang].repayExplanation}
           />
-          <ModalAsset asset={symbol!} amount={amountAtFinish} />
+          <ModalAsset
+            asset={symbol!}
+            assetTitle={translations[lang].action.toUpperCase()}
+            amount={amountAtFinish}
+            amountTitle={translations[lang].debtAmount.toUpperCase()}
+          />
           <ModalMaturityEditable text={translations[lang].maturityPool} />
           <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} symbol={symbol!} />
           {error?.component !== 'gas' && symbol != 'WETH' && <ModalTxCost gas={gas} />}
@@ -448,6 +453,7 @@ function RepayAtMaturity() {
             text={translations[lang].amountAtFinish}
             value={amountAtFinish && `${formatNumber(amountAtFinish, symbol!, true)}`}
             asset={symbol}
+            line
           />
           {isLateRepay ? (
             <>
@@ -455,11 +461,13 @@ function RepayAtMaturity() {
                 text={translations[lang].penalties}
                 value={formatNumber(penaltyAssets, symbol!, true)}
                 asset={symbol}
+                line
               />
               <ModalRow
                 text={translations[lang].totalAssets}
                 value={formatNumber(totalAmount, symbol!, true)}
                 asset={symbol}
+                line
               />
             </>
           ) : (
@@ -467,29 +475,30 @@ function RepayAtMaturity() {
               text={translations[lang].amountToPay}
               value={formatNumber(repayAmount, symbol!)}
               asset={symbol}
+              line
             />
           )}
-          <ModalExpansionPanelWrapper>
-            <ModalRowEditable
-              text={translations[lang].maximumAmountToPay}
-              value={formatNumber(slippage, symbol!)}
-              editable={editSlippage}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                setSlippage(e.target.value);
-                error?.message == translations[lang].notEnoughSlippage && setError(undefined);
-              }}
-              onClick={() => {
-                if (slippage == '') setSlippage('0');
-                setEditSlippage((prev) => !prev);
-              }}
-            />
-            {symbol ? (
-              <ModalRowHealthFactor qty={qty} symbol={symbol} operation="repay" />
-            ) : (
-              <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
-            )}
-            <ModalRowBorrowLimit qty={qty} symbol={symbol!} operation="repay" />
-          </ModalExpansionPanelWrapper>
+          <ModalRowEditable
+            text={translations[lang].maximumAmountToPay}
+            value={formatNumber(slippage, symbol!)}
+            editable={editSlippage}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => {
+              setSlippage(e.target.value);
+              error?.message == translations[lang].notEnoughSlippage && setError(undefined);
+            }}
+            onClick={() => {
+              if (slippage == '') setSlippage('0');
+              setEditSlippage((prev) => !prev);
+            }}
+            line
+          />
+          {symbol ? (
+            <ModalRowHealthFactor qty={qty} symbol={symbol} operation="repay" />
+          ) : (
+            <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
+          )}
+
+          <ModalRowBorrowLimit qty={qty} symbol={symbol!} operation="repay" line />
 
           {error && error.component != 'gas' && <ModalError message={error.message} />}
           <div className={styles.buttonContainer}>

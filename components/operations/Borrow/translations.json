@@ -9,7 +9,10 @@
     "availableLiquidityError": "There is not enough liquidity",
     "generalError": "There was an error, please try again",
     "noCollateral": "You don't have enough collateralized assets or deposits in the Variable Rate Pool",
-    "borrowLimit": "You can't borrow more than your borrow limit"
+    "borrowLimit": "You can't borrow more than your borrow limit",
+    "floatingPoolBorrowExplanation": "Variable rate borrow takes tokens from Exactly and  deposits into your wallet resulting in debt.",
+    "walletBalance": "Your Wallet Balance",
+    "action": "Asset to borrow"
   },
   "es": {}
 }

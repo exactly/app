@@ -1,8 +1,8 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useMemo } from 'react';
 import { parseFixed } from '@ethersproject/bignumber';
 import Image from 'next/image';
 import Skeleton from 'react-loading-skeleton';
-import { BigNumber, ethers } from 'ethers';
+import { ethers } from 'ethers';
 
 import { LangKeys } from 'types/Lang';
 import { HealthFactor } from 'types/HealthFactor';
@@ -31,57 +31,62 @@ function ModalRowHealthFactor({ qty, symbol, operation, healthFactorCallback }: 
 
   const translations: { [key: string]: LangKeys } = keys;
 
-  const [newQty, setNewQty] = useState<BigNumber | undefined>(undefined);
-
-  const [healthFactor, setHealthFactor] = useState<HealthFactor | undefined>(undefined);
-
-  const [beforeHealthFactor, setBeforeHealthFactor] = useState<string | undefined>(undefined);
-  const [afterHealthFactor, setAfterHealthFactor] = useState<string | undefined>(undefined);
-
-  useEffect(() => {
-    getAmount();
+  const newQty = useMemo(() => {
+    return getAmount();
   }, [symbol, qty]);
 
-  useEffect(() => {
-    getHealthFactor();
-    calculateAfterHealthFactor();
-  }, [symbol, newQty, accountData]);
+  const {
+    beforeHealthFactor,
+    healthFactor
+  }:
+    | { beforeHealthFactor: undefined; healthFactor: undefined }
+    | { beforeHealthFactor: string; healthFactor: HealthFactor } = useMemo(() => {
+    return getBeforeHealthFactor();
+  }, [accountData]);
+
+  const afterHealthFactor = useMemo(() => {
+    return calculateAfterHealthFactor();
+  }, [healthFactor, newQty, accountData]);
 
   function getAmount() {
-    if (!accountData || !symbol) return;
+    const zero = ethers.constants.Zero;
+
+    if (!accountData || !symbol) return zero;
 
     if (qty == '') {
-      return setNewQty(ethers.constants.Zero);
+      return zero;
     }
     const decimals = accountData[symbol].decimals;
 
     const regex = /[^,.]*$/g;
     const inputDecimals = regex.exec(qty)![0];
 
-    if (inputDecimals.length > decimals) return;
+    if (inputDecimals.length > decimals) return zero;
 
     const newQty = parseFixed(qty, decimals);
 
-    setNewQty(newQty);
+    return newQty;
   }
 
-  function getHealthFactor() {
-    if (!accountData) return;
+  function getBeforeHealthFactor() {
+    if (!accountData) return { beforeHealthFactor: undefined, healthFactor: undefined };
 
-    const healthFactor = getHealthFactorData(accountData);
+    const healthFactor: HealthFactor = getHealthFactorData(accountData);
 
     if (healthFactor) {
-      setHealthFactor(healthFactor);
+      if (healthFactorCallback) healthFactorCallback(healthFactor);
 
-      setBeforeHealthFactor(parseHealthFactor(healthFactor.debt, healthFactor.collateral));
-      setAfterHealthFactor(parseHealthFactor(healthFactor.debt, healthFactor.collateral));
+      return {
+        beforeHealthFactor: parseHealthFactor(healthFactor.debt, healthFactor.collateral),
+        healthFactor: healthFactor
+      };
     }
 
-    if (healthFactorCallback && healthFactor) healthFactorCallback(healthFactor);
+    return { beforeHealthFactor: undefined, healthFactor: undefined };
   }
 
   function calculateAfterHealthFactor() {
-    if (!accountData || !newQty) return;
+    if (!accountData || !newQty || !healthFactor) return;
 
     const adjustFactor = accountData[symbol].adjustFactor;
     const oraclePrice = accountData[symbol].oraclePrice;
@@ -95,44 +100,41 @@ function ModalRowHealthFactor({ qty, symbol, operation, healthFactorCallback }: 
         if (isCollateral) {
           const adjustedNewQtyUsd = newQtyUsd.mul(adjustFactor).div(WAD);
 
-          setAfterHealthFactor(
-            parseHealthFactor(healthFactor!.debt, healthFactor!.collateral.add(adjustedNewQtyUsd))
+          return parseHealthFactor(
+            healthFactor!.debt,
+            healthFactor!.collateral.add(adjustedNewQtyUsd)
           );
         } else {
-          setAfterHealthFactor(parseHealthFactor(healthFactor!.debt, healthFactor!.collateral));
+          return parseHealthFactor(healthFactor!.debt, healthFactor!.collateral);
         }
-
-        break;
       }
       case 'withdraw': {
         if (isCollateral) {
           const adjustedNewQtyUsd = newQtyUsd.mul(WAD).div(adjustFactor);
 
-          setAfterHealthFactor(
-            parseHealthFactor(healthFactor!.debt, healthFactor!.collateral.sub(adjustedNewQtyUsd))
+          return parseHealthFactor(
+            healthFactor!.debt,
+            healthFactor!.collateral.sub(adjustedNewQtyUsd)
           );
         } else {
-          setAfterHealthFactor(parseHealthFactor(healthFactor!.debt, healthFactor!.collateral));
+          return parseHealthFactor(healthFactor!.debt, healthFactor!.collateral);
         }
-
-        break;
       }
       case 'borrow': {
         const adjustedNewQtyUsd = newQtyUsd.mul(WAD).div(adjustFactor);
 
-        setAfterHealthFactor(
-          parseHealthFactor(healthFactor!.debt.add(adjustedNewQtyUsd), healthFactor!.collateral)
+        return parseHealthFactor(
+          healthFactor!.debt.add(adjustedNewQtyUsd),
+          healthFactor!.collateral
         );
-
-        break;
       }
       case 'repay': {
         const adjustedNewQtyUsd = newQtyUsd.mul(adjustFactor).div(WAD);
 
-        setAfterHealthFactor(
-          parseHealthFactor(healthFactor!.debt, healthFactor!.collateral.add(adjustedNewQtyUsd))
+        return parseHealthFactor(
+          healthFactor!.debt,
+          healthFactor!.collateral.add(adjustedNewQtyUsd)
         );
-        break;
       }
     }
   }
@@ -142,8 +144,10 @@ function ModalRowHealthFactor({ qty, symbol, operation, healthFactorCallback }: 
       <p className={styles.text}>{translations[lang].healthFactor}</p>
       <section className={styles.values}>
         <span className={styles.value}>{(symbol && beforeHealthFactor) || <Skeleton />}</span>
-        <Image src="/img/icons/arrowRight.svg" alt="arrowRight" width={20} height={20} />
-        <span className={styles.value}>{(symbol && afterHealthFactor) || <Skeleton />}</span>
+        <Image src="/img/icons/arrowRight.svg" alt="arrowRight" width={15} height={15} />
+        <span className={styles.value}>
+          {(symbol && afterHealthFactor ? afterHealthFactor : beforeHealthFactor) || <Skeleton />}
+        </span>
       </section>
     </section>
   );

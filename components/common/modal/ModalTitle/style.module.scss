@@ -1,6 +1,20 @@
-.title {
-  color: var(--gray-900);
-  font-size: var(--font-20);
-  text-align: center;
-  margin: 0;
+.titleSection {
+  display: flex;
+  flex-direction: column;
+  color: var(--text-color);
+
+  .title {
+    font-size: var(--font-24);
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .description {
+    font-size: var(--font-16);
+    line-height: 22px;
+
+    .link {
+      color: var(--primary);
+    }
+  }
 }

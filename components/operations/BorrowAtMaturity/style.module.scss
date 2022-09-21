@@ -2,3 +2,9 @@
   height: var(--u5);
   margin-top: var(--u2);
 }
+
+.maturityRowModal {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: var(--dashed-line);
+}

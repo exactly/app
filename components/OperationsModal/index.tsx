@@ -18,7 +18,7 @@ function OperationsModals() {
         <>
           <section className={styles.modal}>
             <div className={styles.closeButton} onClick={() => setOpen(false)}>
-              <Image src="/img/icons/close.svg" width={20} height={20} />
+              <Image src="/img/icons/close.svg" width={21} height={22} />
             </div>
             <OperationsSelector />
             <OperationContainer />

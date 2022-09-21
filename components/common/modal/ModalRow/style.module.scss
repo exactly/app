@@ -1,23 +1,35 @@
 .row {
   display: flex;
-  padding: var(--u) 0;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: var(--u2) 0;
+  font-size: var(--font-16);
+  color: var(--text-color);
+  text-align: left;
+  gap: var(--u2);
 
   .text {
-    width: 60%;
     margin: 0;
-    margin-right: auto;
-    color: var(--gray-500);
+    color: var(--text-color);
+    font-size: var(--font-16);
+    font-weight: 500;
   }
-  .value {
-    width: auto;
-    text-align: right;
-    margin: 0;
-    margin-left: var(--smallUnit);
-    color: var(--gray-900);
-    font-weight: 600;
+
+  .valueContainer {
+    display: flex;
+    gap: var(--u);
+    align-items: center;
+
+    .value {
+      width: auto;
+      text-align: right;
+      margin: 0;
+      margin-left: var(--smallUnit);
+      font-weight: 600;
+    }
   }
 }
 
 .line {
-  border-bottom: 1px solid var(--gray-100);
+  border-bottom: var(--dashed-line);
 }

@@ -1,7 +1,6 @@
 .container {
   max-width: var(--maxWidth);
   width: 100%;
-  margin: var(--u2) auto;
   display: flex;
   flex-direction: column;
   gap: var(--u3);
@@ -18,8 +17,9 @@
       margin: 0;
     }
   }
+
   .selectContainer {
-    max-width: 200px;
+    max-width: 100px;
     .labelContainer {
       display: flex;
       align-items: center;

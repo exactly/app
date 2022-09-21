@@ -5,7 +5,6 @@ import { formatFixed, parseFixed } from '@ethersproject/bignumber';
 import Button from 'components/common/Button';
 import ModalAsset from 'components/common/modal/ModalAsset';
 import ModalInput from 'components/common/modal/ModalInput';
-import ModalRow from 'components/common/modal/ModalRow';
 import ModalTitle from 'components/common/modal/ModalTitle';
 import ModalTxCost from 'components/common/modal/ModalTxCost';
 import ModalGif from 'components/common/modal/ModalGif';
@@ -13,7 +12,7 @@ import ModalStepper from 'components/common/modal/ModalStepper';
 import ModalRowEditable from 'components/common/modal/ModalRowEditable';
 import ModalMaturityEditable from 'components/common/modal/ModalMaturityEditable';
 import ModalError from 'components/common/modal/ModalError';
-import ModalExpansionPanelWrapper from 'components/common/modal/ModalExpansionPanelWrapper';
+import ModalCell from 'components/common/modal/ModalCell';
 
 import { LangKeys } from 'types/Lang';
 import { UnderlyingData } from 'types/Underlying';
@@ -456,9 +455,20 @@ function DepositAtMaturity() {
     <>
       {!tx && (
         <>
-          <ModalTitle title={translations[lang].fixedRateDeposit} />
-          <ModalAsset asset={symbol} amount={walletBalance} />
-          <ModalMaturityEditable text={translations[lang].maturityPool} />
+          <ModalTitle
+            title={translations[lang].fixedRateDeposit}
+            description={translations[lang].fixedRateDepositExplanation}
+          />
+          <ModalAsset
+            asset={symbol}
+            assetTitle={translations[lang].action.toUpperCase()}
+            amount={walletBalance}
+            amountTitle={translations[lang].walletBalance.toUpperCase()}
+          />
+          <section className={styles.maturityRowModal}>
+            <ModalMaturityEditable text={translations[lang].maturityPool.toUpperCase()} />
+            <ModalCell text={translations[lang].apy.toUpperCase()} value={fixedRate} column />
+          </section>
           <ModalInput
             onMax={onMax}
             value={qty}
@@ -467,23 +477,21 @@ function DepositAtMaturity() {
             error={error?.component == 'input'}
           />
           {error?.component !== 'gas' && symbol != 'WETH' && <ModalTxCost gas={gas} />}
-          <ModalRow text={translations[lang].apy} value={fixedRate} />
-          <ModalExpansionPanelWrapper>
-            <ModalRowEditable
-              text={translations[lang].minimumApy}
-              value={slippage}
-              editable={editSlippage}
-              symbol="%"
-              onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                setSlippage(e.target.value);
-                error?.message == translations[lang].notEnoughSlippage && setError(undefined);
-              }}
-              onClick={() => {
-                if (slippage == '') setSlippage('0.00');
-                setEditSlippage((prev) => !prev);
-              }}
-            />
-          </ModalExpansionPanelWrapper>
+          <ModalRowEditable
+            text={translations[lang].minimumApy}
+            value={slippage}
+            editable={editSlippage}
+            symbol="%"
+            onChange={(e: ChangeEvent<HTMLInputElement>) => {
+              setSlippage(e.target.value);
+              error?.message == translations[lang].notEnoughSlippage && setError(undefined);
+            }}
+            onClick={() => {
+              if (slippage == '') setSlippage('0.00');
+              setEditSlippage((prev) => !prev);
+            }}
+            line
+          />
           {/* <ModalStepper currentStep={step} totalSteps={3} /> */}
           {error && error.component != 'gas' && <ModalError message={error.message} />}
           <div className={styles.buttonContainer}>

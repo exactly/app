@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext } from 'react';
+import { useContext, useMemo } from 'react';
 import Skeleton from 'react-loading-skeleton';
 import { ethers } from 'ethers';
 
@@ -22,25 +22,18 @@ function ModalTxCost({ gas }: Props) {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
-  const [exchangeRate, setExchangeRate] = useState(1);
+  const exchangeRate = useMemo(() => {
+    if (!accountData) return 1;
+
+    return parseFloat(ethers.utils.formatEther(accountData.WETH.oraclePrice));
+  }, [accountData]);
 
   const eth = gas?.eth && `${gas.eth} ETH`;
   const usd = gas && `$ ${(parseFloat(eth!) * exchangeRate).toFixed(2)} /`;
 
-  useEffect(() => {
-    getRate();
-  }, [accountData]);
-
-  async function getRate() {
-    if (!accountData) return;
-
-    const rate = parseFloat(ethers.utils.formatEther(accountData.WETH.oraclePrice));
-    setExchangeRate(rate);
-  }
-
   return (
     <section className={styles.container}>
-      <p>{translations[lang].aproxTxCost}</p>
+      <p>{translations[lang].approxTxCost}</p>
       <p className={styles.gasCost}>{gas ? `${usd} ${eth}` : <Skeleton />}</p>
     </section>
   );

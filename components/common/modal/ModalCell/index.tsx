@@ -10,14 +10,15 @@ type Props = {
   valueTooltip?: string;
   line?: boolean;
   asset?: string;
+  column?: boolean;
 };
 
-function ModalRow({ text, value, line, asset }: Props) {
+function ModalCell({ text, value, line, asset }: Props) {
   return (
     <section className={line ? `${styles.row} ${styles.line}` : styles.row}>
       <p className={styles.text}>{text}</p>
 
-      <section className={styles.valueContainer}>
+      <>
         {asset && (
           <Image
             src={`/img/assets/${asset.toLowerCase()}.svg`}
@@ -28,9 +29,9 @@ function ModalRow({ text, value, line, asset }: Props) {
         )}
 
         <p className={styles.value}>{value || <Skeleton />}</p>
-      </section>
+      </>
     </section>
   );
 }
 
-export default ModalRow;
+export default ModalCell;

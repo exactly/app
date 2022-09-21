@@ -432,8 +432,16 @@ function Borrow() {
     <>
       {!tx && (
         <>
-          <ModalTitle title={translations[lang].floatingPoolBorrow} />
-          <ModalAsset asset={symbol!} amount={walletBalance} />
+          <ModalTitle
+            title={translations[lang].floatingPoolBorrow}
+            description={translations[lang].floatingPoolBorrowExplanation}
+          />
+          <ModalAsset
+            asset={symbol!}
+            assetTitle={translations[lang].action.toUpperCase()}
+            amount={walletBalance}
+            amountTitle={translations[lang].walletBalance.toUpperCase()}
+          />
           <ModalInput
             onMax={onMax}
             value={qty}
@@ -452,7 +460,7 @@ function Borrow() {
           ) : (
             <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
           )}
-          <ModalRowBorrowLimit qty={qty} symbol={symbol!} operation="borrow" />
+          <ModalRowBorrowLimit qty={qty} symbol={symbol!} operation="borrow" line />
           {error && error.component != 'gas' && <ModalError message={error.message} />}
           <div className={styles.buttonContainer}>
             <Button

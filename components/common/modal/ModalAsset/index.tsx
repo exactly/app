@@ -1,5 +1,5 @@
-import { useContext, useEffect, useState } from 'react';
-import Image from 'next/image';
+import { useContext, useMemo } from 'react';
+import { ethers } from 'ethers';
 import Skeleton from 'react-loading-skeleton';
 
 import formatNumber from 'utils/formatNumber';
@@ -11,44 +11,42 @@ import AccountDataContext from 'contexts/AccountDataContext';
 import { MarketContext } from 'contexts/AddressContext';
 
 import styles from './style.module.scss';
-import { ethers } from 'ethers';
 
 type Props = {
   asset: string;
+  assetTitle?: string;
   amount?: string;
+  amountTitle?: string;
 };
 
-function ModalAsset({ asset, amount }: Props) {
+function ModalAsset({ asset, assetTitle, amount, amountTitle }: Props) {
   const { accountData } = useContext(AccountDataContext);
   const { market } = useContext(MarketContext);
 
-  const [exchangeRate, setExchangeRate] = useState(1);
+  const parsedSymbol = useMemo(() => {
+    return parseSymbol(asset);
+  }, [asset]);
 
-  const parsedSymbol = parseSymbol(asset);
+  const exchangeRate = useMemo(() => {
+    if (!accountData || !asset) return 1;
 
-  useEffect(() => {
-    getRate();
+    return parseFloat(ethers.utils.formatEther(accountData[asset].oraclePrice));
   }, [parsedSymbol, accountData]);
-
-  async function getRate() {
-    if (!accountData || !asset) return;
-
-    const rate = parseFloat(ethers.utils.formatEther(accountData[asset].oraclePrice));
-    setExchangeRate(rate);
-  }
 
   return (
     <div className={styles.assetContainer}>
       <div className={styles.informationContainer}>
+        {assetTitle && <p className={styles.title}>{assetTitle}</p>}
         <AssetSelector defaultAddress={market?.value} />
       </div>
       {amount ? (
         <div className={styles.assetPriceContainer}>
+          {amountTitle && <p className={styles.title}>{amountTitle}</p>}
           <p className={styles.price}>
             {formatNumber(amount, asset)} {parsedSymbol}
           </p>
           <p className={styles.secondaryPrice}>
-            $ {formatNumber(parseFloat(amount) * exchangeRate, 'usd')}
+            ${formatNumber(parseFloat(amount) * exchangeRate, 'usd')}
           </p>
         </div>
       ) : (

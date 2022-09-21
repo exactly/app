@@ -1,18 +1,15 @@
 .inputSection {
   position: relative;
-  border: 1px solid var(--gray-200);
-  padding: var(--u);
-  border-radius: var(--smallUnit);
+  border-bottom: var(--full-line);
+  padding: var(--u) 0;
 
   .input {
     font-family: inherit;
-    width: 100%;
-    height: 70%;
+    width: 95%;
     border: none;
     outline: none;
-    font-size: var(--font-32);
-    text-align: center;
-    color: var(--gray-900);
+    font-size: var(--font-64);
+    color: var(--text-color);
     background: none;
 
     &::-webkit-outer-spin-button,
@@ -24,24 +21,25 @@
 
   .translatedValue {
     margin: 0;
-    text-align: center;
     font-size: var(--font-14);
-    color: var(--gray-500);
+    color: var(--secondary-text-color);
     max-width: 100%;
+    font-family: var(--secondary-font);
   }
 
   .max {
     position: absolute;
     margin: 0;
-    top: 40%;
-    right: -40px;
+    top: 35%;
+    right: 0;
     cursor: pointer;
     color: var(--primary);
     font-size: var(--font-12);
+    font-weight: 700;
   }
 }
 
 .error {
   @extend .inputSection;
-  border: 1px solid var(--error);
+  border-bottom: 1px solid var(--error);
 }
