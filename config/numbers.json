@@ -7,5 +7,7 @@
   "slippage": 0.05,
   "usdAmount": 1000,
   "gasLimitMultiplier": 1.25,
-  "debounceTime": 500
+  "debounceTime": 500,
+  "minAPYValue": 0,
+  "maxAPYValue": 100
 }
