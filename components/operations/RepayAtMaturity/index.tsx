@@ -446,7 +446,7 @@ function RepayAtMaturity() {
             amount={amountAtFinish}
             amountTitle={translations[lang].debtAmount.toUpperCase()}
           />
-          <ModalMaturityEditable text={translations[lang].maturityPool} />
+          <ModalMaturityEditable text={translations[lang].maturityPool} line />
           <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} symbol={symbol!} />
           {error?.component !== 'gas' && symbol != 'WETH' && <ModalTxCost gas={gas} />}
           <ModalRow

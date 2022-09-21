@@ -3,14 +3,13 @@
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  margin: var(--u2) 0;
+  margin: var(--u) 0;
   flex-wrap: wrap;
 
   .step {
-    width: var(--u2);
-    height: var(--u2);
-    border-radius: 50%;
-    background: var(--gray-200);
+    width: 11px;
+    height: 11px;
+    background: var(--secondary-text-color);
     position: relative;
 
     &:not(:first-child):after {
@@ -18,8 +17,9 @@
       position: absolute;
       right: 0;
       top: 50%;
-      width: 800%;
-      border-bottom: solid 2px var(--gray-200);
+      width: 1700%;
+      border-bottom: var(--solid-line);
+      border-width: 2px;
       z-index: var(--layer-0);
     }
   }
@@ -27,13 +27,15 @@
   .selectedStep {
     @extend .step;
     background: var(--primary);
+
     &:not(:first-child):after {
       content: '';
       position: absolute;
       right: 0;
       top: 50%;
-      width: 800%;
-      border-bottom: solid 2px var(--primary);
+      border-bottom: var(--solid-line);
+      border-color: var(--primary);
+      border-width: 2px;
       z-index: var(--layer-0);
     }
   }
@@ -41,22 +43,14 @@
 
 .text {
   font-size: var(--font-12);
-  color: var(--gray-900);
+  color: var(--text-color);
   width: 100%;
   margin: 0;
-  margin-top: var(--u);
+  margin-top: var(--u2);
+  font-family: var(--secondary-font);
 }
 
 .skeleton {
   @extend .steps;
   margin: var(--u) 0;
-}
-
-@media (max-width: 769px) {
-  .formContainer {
-    width: 90%;
-    height: 90%;
-    left: 5%;
-    top: 5%;
-  }
 }

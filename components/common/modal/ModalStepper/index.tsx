@@ -30,7 +30,9 @@ function ModalStepper({ currentStep, totalSteps }: Props) {
               />
             );
           })) || <Skeleton containerClassName={styles.skeleton} />}
-        {currentStep == 1 && <p className={styles.text}>{translations[lang].approval}</p>}
+        {currentStep == 1 && (
+          <p className={styles.text}>{translations[lang].approval.toUpperCase()}</p>
+        )}
       </div>
     </>
   );
