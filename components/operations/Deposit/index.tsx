@@ -432,7 +432,7 @@ function Deposit() {
             <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
           )}
           <ModalRowBorrowLimit qty={qty} symbol={symbol!} operation="deposit" line />
-          {/* <ModalStepper currentStep={step} totalSteps={3} /> */}
+          <ModalStepper currentStep={step} totalSteps={3} />
           {error && error.component != 'gas' && <ModalError message={error.message} />}
           <div className={styles.buttonContainer}>
             <Button

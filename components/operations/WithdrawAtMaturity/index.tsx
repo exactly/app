@@ -366,7 +366,7 @@ function WithdrawAtMaturity() {
             amount={amountAtFinish}
             amountTitle={translations[lang].depositedAmount.toUpperCase()}
           />
-          <ModalMaturityEditable text={translations[lang].maturityPool} />
+          <ModalMaturityEditable text={translations[lang].maturityPool} line />
           <ModalInput
             onMax={onMax}
             value={qty}
