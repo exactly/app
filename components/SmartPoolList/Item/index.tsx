@@ -4,6 +4,7 @@ import Skeleton from 'react-loading-skeleton';
 import Link from 'next/link';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
+import { captureException } from '@sentry/browser';
 
 const Button = dynamic(() => import('components/common/Button'));
 
@@ -21,6 +22,8 @@ import { MarketContext } from 'contexts/AddressContext';
 import style from './style.module.scss';
 
 import keys from './translations.json';
+
+import numbers from 'config/numbers.json';
 
 import formatNumber from 'utils/formatNumber';
 import parseSymbol from 'utils/parseSymbol';
@@ -64,6 +67,10 @@ function Item({ market, type }: Props) {
     getRates();
   }, [accountData, market, network, eMarketAddress]);
 
+  useEffect(() => {
+    checkWeirdAPY();
+  }, [rate]);
+
   function handleClick(type: string) {
     if (!market) return;
 
@@ -88,7 +95,9 @@ function Item({ market, type }: Props) {
         const data = await queryRate(subgraphUrl, eMarketAddress, 'deposit', { maxFuturePools });
 
         interestRate = data[0].rate.toFixed(2);
-      } else if (type == 'borrow') {
+      }
+
+      if (type == 'borrow') {
         const data = await queryRate(subgraphUrl, eMarketAddress, 'borrow');
 
         interestRate = data[0].rate.toFixed(2);
@@ -105,6 +114,19 @@ function Item({ market, type }: Props) {
       }
     } catch (e) {
       console.log(e);
+    }
+  }
+
+  function checkWeirdAPY() {
+    if (!market || !rate) return;
+    const apy = Number(rate.substring(0, rate.length - 1)); // remove % symbol from rate
+
+    try {
+      if (apy < numbers.minAPYValue || apy < numbers.maxAPYValue) {
+        throw new Error(`weirdAPYs | ${rate} in ${type} ${market.symbol}`);
+      }
+    } catch (e) {
+      captureException(e);
     }
   }
 
