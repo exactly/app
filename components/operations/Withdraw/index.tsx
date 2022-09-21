@@ -355,9 +355,7 @@ function Withdraw() {
           <div className={styles.buttonContainer}>
             <Button
               text={needsApproval ? translations[lang].approve : translations[lang].withdraw}
-              className={
-                parseFloat(qty) <= 0 || !qty || error?.status ? 'secondaryDisabled' : 'tertiary'
-              }
+              className={parseFloat(qty) <= 0 || !qty || error?.status ? 'disabled' : 'primary'}
               disabled={parseFloat(qty) <= 0 || !qty || loading || error?.status}
               onClick={needsApproval ? approve : withdraw}
               loading={loading}
