@@ -13,7 +13,6 @@ import ModalGif from 'components/common/modal/ModalGif';
 import SkeletonModalRowBeforeAfter from 'components/common/skeletons/SkeletonModalRowBeforeAfter';
 import ModalError from 'components/common/modal/ModalError';
 import ModalRowBorrowLimit from 'components/common/modal/ModalRowBorrowLimit';
-import ModalExpansionPanelWrapper from 'components/common/modal/ModalExpansionPanelWrapper';
 
 import { LangKeys } from 'types/Lang';
 import { Gas } from 'types/Gas';
@@ -326,8 +325,16 @@ function Withdraw() {
     <>
       {!tx && (
         <>
-          <ModalTitle title={translations[lang].withdraw} />
-          <ModalAsset asset={symbol!} amount={parsedAmount} />
+          <ModalTitle
+            title={translations[lang].withdraw}
+            description={translations[lang].withdrawExplanation}
+          />
+          <ModalAsset
+            asset={symbol!}
+            assetTitle={translations[lang].action.toUpperCase()}
+            amount={parsedAmount}
+            amountTitle={translations[lang].depositedAmount.toUpperCase()}
+          />
           <ModalInput
             onMax={onMax}
             value={qty}
@@ -336,15 +343,13 @@ function Withdraw() {
             error={error?.component == 'input'}
           />
           {error?.component !== 'gas' && symbol != 'WETH' && <ModalTxCost gas={gas} />}
-          <ModalRow text={translations[lang].exactlyBalance} value={formattedAmount} />
-          <ModalExpansionPanelWrapper>
-            {symbol ? (
-              <ModalRowHealthFactor qty={qty} symbol={symbol} operation="withdraw" />
-            ) : (
-              <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
-            )}
-            <ModalRowBorrowLimit qty={qty} symbol={symbol!} operation="withdraw" />
-          </ModalExpansionPanelWrapper>
+          <ModalRow text={translations[lang].exactlyBalance} value={formattedAmount} line />
+          {symbol ? (
+            <ModalRowHealthFactor qty={qty} symbol={symbol} operation="withdraw" />
+          ) : (
+            <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
+          )}
+          <ModalRowBorrowLimit qty={qty} symbol={symbol!} operation="withdraw" line />
 
           {error && error.component != 'gas' && <ModalError message={error.message} />}
           <div className={styles.buttonContainer}>

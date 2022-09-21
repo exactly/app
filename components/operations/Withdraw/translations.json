@@ -7,7 +7,10 @@
     "borrowLimit": "Borrow Limit",
     "insufficientBalance": "You can't withdraw more than the deposited amount",
     "deniedTransaction": "Transaction rejected",
-    "generalError": "There was an error, please try again"
+    "generalError": "There was an error, please try again",
+    "withdrawExplanation": "Variable rate borrow takes tokens from Exactly and  deposits into your wallet resulting in debt.",
+    "action": "Asset to Withdraw",
+    "depositedAmount": "Deposited Amount"
   },
   "es": {}
 }

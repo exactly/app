@@ -5,7 +5,6 @@ import { formatFixed, parseFixed } from '@ethersproject/bignumber';
 import Button from 'components/common/Button';
 import ModalAsset from 'components/common/modal/ModalAsset';
 import ModalInput from 'components/common/modal/ModalInput';
-import ModalRow from 'components/common/modal/ModalRow';
 import ModalRowHealthFactor from 'components/common/modal/ModalRowHealthFactor';
 import SkeletonModalRowBeforeAfter from 'components/common/skeletons/SkeletonModalRowBeforeAfter';
 import ModalTitle from 'components/common/modal/ModalTitle';
@@ -15,8 +14,8 @@ import ModalRowEditable from 'components/common/modal/ModalRowEditable';
 import ModalMaturityEditable from 'components/common/modal/ModalMaturityEditable';
 import ModalError from 'components/common/modal/ModalError';
 import ModalRowBorrowLimit from 'components/common/modal/ModalRowBorrowLimit';
-import ModalExpansionPanelWrapper from 'components/common/modal/ModalExpansionPanelWrapper';
 import ModalRowUtilizationRate from 'components/common/modal/ModalRowUtilizationRate';
+import ModalCell from 'components/common/modal/ModalCell';
 
 import { LangKeys } from 'types/Lang';
 import { UnderlyingData } from 'types/Underlying';
@@ -539,12 +538,22 @@ function BorrowAtMaturity() {
     <>
       {!tx && (
         <>
-          <ModalTitle title={translations[lang].fixedRateBorrow} />
-          <ModalAsset asset={symbol!} amount={walletBalance} />
-          <ModalMaturityEditable text={translations[lang].maturityPool} />
+          <ModalTitle
+            title={translations[lang].fixedRateBorrow}
+            description={translations[lang].fixedRateBorrowExplanation}
+          />
+          <ModalAsset
+            asset={symbol!}
+            assetTitle={translations[lang].action.toUpperCase()}
+            amount={walletBalance}
+            amountTitle={translations[lang].walletBalance.toUpperCase()}
+          />
+          <section className={styles.maturityRowModal}>
+            <ModalMaturityEditable text={translations[lang].maturityPool} />
+            <ModalCell text={translations[lang].apy} value={fixedRate} line />
+          </section>
           <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} symbol={symbol!} />
           {gasError?.component !== 'gas' && symbol != 'WETH' && <ModalTxCost gas={gas} />}
-          <ModalRow text={translations[lang].apy} value={fixedRate} line />
           <ModalRowEditable
             text={translations[lang].maximumBorrowApy}
             value={slippage}
@@ -558,24 +567,24 @@ function BorrowAtMaturity() {
               if (slippage == '') setSlippage('0.00');
               setEditSlippage((prev) => !prev);
             }}
+            line
           />
-          <ModalExpansionPanelWrapper>
-            {symbol ? (
-              <ModalRowHealthFactor
-                qty={qty}
-                symbol={symbol}
-                operation="borrow"
-                healthFactorCallback={getHealthFactor}
-              />
-            ) : (
-              <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
-            )}
-            <ModalRowBorrowLimit qty={qty} symbol={symbol!} operation="borrow" line />
-            <ModalRowUtilizationRate
-              urBefore={utilizationRate?.before}
-              urAfter={utilizationRate?.after}
+          {symbol ? (
+            <ModalRowHealthFactor
+              qty={qty}
+              symbol={symbol}
+              operation="borrow"
+              healthFactorCallback={getHealthFactor}
             />
-          </ModalExpansionPanelWrapper>
+          ) : (
+            <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
+          )}
+          <ModalRowBorrowLimit qty={qty} symbol={symbol!} operation="borrow" line />
+          <ModalRowUtilizationRate
+            urBefore={utilizationRate?.before}
+            urAfter={utilizationRate?.after}
+            line
+          />
 
           {error && error.component != 'gas' && <ModalError message={error.message} />}
           <div className={styles.buttonContainer}>

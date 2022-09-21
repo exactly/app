@@ -9,7 +9,10 @@
     "insufficientBalance": "You can't deposit more than you have in your wallet",
     "error": "There was an error with your transaction, please try again",
     "deniedTransaction": "Transaction rejected",
-    "generalError": "There was an error, please try again"
+    "generalError": "There was an error, please try again",
+    "walletBalance": "Your wallet balance",
+    "variableRateDepositExplanation": "Variable rate deposit takes token from your wallet and deposits into Exactly expecting returns with a variable rate.",
+    "action": "Asset to deposit"
   },
   "es": {}
 }

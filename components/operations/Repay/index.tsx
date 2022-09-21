@@ -339,8 +339,16 @@ function Repay() {
     <>
       {!tx && (
         <>
-          <ModalTitle title={translations[lang].lateRepay} />
-          <ModalAsset asset={symbol!} amount={finalAmount} />
+          <ModalTitle
+            title={translations[lang].lateRepay}
+            description={translations[lang].repayExplanation}
+          />
+          <ModalAsset
+            asset={symbol!}
+            assetTitle={translations[lang].action.toUpperCase()}
+            amount={finalAmount}
+            amountTitle={translations[lang].debtAmount.toUpperCase()}
+          />
           <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} symbol={symbol!} />
           {error?.component !== 'gas' && symbol != 'WETH' && <ModalTxCost gas={gas} />}
           {symbol ? (
@@ -348,7 +356,7 @@ function Repay() {
           ) : (
             <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
           )}
-          <ModalRowBorrowLimit qty={qty} symbol={symbol!} operation="repay" />
+          <ModalRowBorrowLimit qty={qty} symbol={symbol!} operation="repay" line />
 
           {error && error.component != 'gas' && <ModalError message={error.message} />}
           <div className={styles.buttonContainer}>

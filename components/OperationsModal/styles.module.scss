@@ -3,11 +3,12 @@
   width: 600px;
   height: fit-content;
   left: calc(50% - 300px);
-  top: 10%;
+  top: 5%;
   background: var(--background);
   box-shadow: var(--shadow-tables);
   z-index: var(--layer-6);
   display: flex;
+  padding: var(--u4) var(--u4);
 
   .closeButton {
     position: absolute;

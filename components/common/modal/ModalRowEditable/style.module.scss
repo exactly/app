@@ -1,24 +1,27 @@
 .row {
   display: flex;
   justify-content: space-between;
-  padding: var(--u2) 0;
   align-items: center;
+  padding: var(--u2) 0;
 
   .text {
     width: 100%;
     margin: 0;
-    color: var(--gray-500);
+    color: var(--text-color);
+    font-weight: 500;
   }
 
   .editable {
     gap: var(--smallUnit);
     display: flex;
     align-items: center;
-    width: 30%;
+    justify-content: flex-end;
+    width: 50%;
+    max-height: var(--u2);
 
     .value {
       margin: 0;
-      color: var(--gray-900);
+      color: var(--text-color);
       font-weight: 600;
       max-width: 90%;
       overflow-x: hidden;
@@ -26,14 +29,13 @@
 
     .inputContainer {
       position: relative;
-      border: 1px solid var(--gray-200);
-      padding: var(--u);
-      border-radius: var(--smallUnit);
+      border: none;
+      padding: 0;
       height: var(--u4);
       width: 100%;
       display: flex;
       align-items: center;
-      gap: var(--smallUnit);
+      border-bottom: var(--full-line);
 
       .input {
         width: 100%;
@@ -41,11 +43,12 @@
         outline: none;
         text-align: center;
         padding: 0;
-        color: var(--gray-900);
+        color: var(--text-color);
         font-weight: 600;
         text-align: right;
         font-family: inherit;
         background: none;
+        font-size: var(--font-16);
 
         &::-webkit-outer-spin-button,
         &::-webkit-inner-spin-button {
@@ -55,7 +58,7 @@
       }
       .symbol {
         margin: 0;
-        color: var(--gray-900);
+        color: var(--text-color);
         font-weight: 600;
       }
     }
@@ -66,5 +69,5 @@
 }
 
 .line {
-  border-bottom: 1px solid var(--gray-100);
+  border-bottom: var(--dashed-line);
 }

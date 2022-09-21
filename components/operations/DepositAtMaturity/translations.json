@@ -11,7 +11,10 @@
     "error": "There was an error with your transaction, please try again",
     "deniedTransaction": "Transaction rejected",
     "generalError": "There was an error, please try again",
-    "zeroRate": "You can't deposit at 0% rate, try depositing to another pool"
+    "zeroRate": "You can't deposit at 0% rate, try depositing to another pool",
+    "walletBalance": "Your wallet balance",
+    "fixedRateDepositExplanation": "Fixed rate deposit takes token from your wallet and deposits into Exactly expecting returns with a fixed rate.",
+    "action": "Asset to Deposit"
   },
   "es": {}
 }

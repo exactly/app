@@ -5,13 +5,16 @@
     "maturityPool": "Fixed Rate Pool",
     "amountAtFinish": "Amount At Finish",
     "amountToPay": "Amount To Repay",
-    "maximumAmountToPay": "Max Amount To Repay",
+    "maximumAmountToPay": "Maximum Amount To Repay",
     "totalAssets": "Total Repay",
     "healthFactor": "Health Factor",
     "repay": "Repay",
     "deniedTransaction": "Transaction rejected",
     "generalError": "There was an error, please try again",
-    "penalties": "Penalties Amount"
+    "penalties": "Penalties Amount",
+    "repayExplanation": "Repay cancels debt on Exactly by taking assets from your wallet.",
+    "action": "Asset to Repay",
+    "debtAmount": "Debt Amount"
   },
   "es": {}
 }
