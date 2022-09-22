@@ -6,10 +6,13 @@
     "maturityPool": "Fixed Rate Pool",
     "amountAtFinish": "Amount At Finish",
     "amountToReceive": "Amount To Receive",
-    "amountSlippage": "Min Amount To Receive",
+    "amountSlippage": "Minimum Amount To Receive",
     "insufficientBalance": "You can't withdraw more than the deposited amount",
     "deniedTransaction": "Transaction rejected",
-    "generalError": "There was an error, please try again"
+    "generalError": "There was an error, please try again",
+    "withdrawExplanation": "Withdraw removes assets from your accounts and deposits them into your wallet.",
+    "action": "Asset to Withdraw",
+    "depositedAmount": "Deposited Amount"
   },
   "es": {}
 }

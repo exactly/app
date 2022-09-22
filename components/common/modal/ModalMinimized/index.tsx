@@ -30,17 +30,16 @@ function ModalMinimized({ tx, handleMinimize }: Props) {
   const options: Dictionary<ModalCases> = {
     processing: {
       img: '/img/modals/img/waiting.png',
-      video: '/img/modals/video/waiting.mp4',
-      title: translations[lang].loadingTitle
+      title: translations[lang].loadingTitle,
+      text: translations[lang].loadingText
     },
     success: {
       img: '/img/modals/img/success.png',
-      video: '/img/modals/video/success.mp4',
-      title: translations[lang].successTitle
+      title: translations[lang].successTitle,
+      text: translations[lang].successText
     },
     error: {
       img: '/img/modals/img/error.png',
-      video: '/img/modals/video/error.mp4',
       title: translations[lang].errorTitle,
       text: translations[lang].errorText
     }

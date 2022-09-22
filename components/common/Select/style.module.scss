@@ -1,19 +1,18 @@
 .container {
   width: 100%;
-  min-width: 170px;
+  min-width: 120px;
   height: var(--u6);
 
   .placeholder {
     width: 100%;
-    text-align: center;
+    text-align: left;
   }
 
   .select {
-    border: 1px solid var(--primary);
-    border-radius: var(--smallUnit);
+    border: none;
     color: var(--text-color);
     font-weight: bold;
-    padding: 12px var(--u);
+    padding: 0;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -21,7 +20,7 @@
     background: var(--background);
 
     .arrow {
-      border-color: var(--primary) transparent transparent;
+      border-color: var(--secondary-text-color) transparent transparent;
       top: 22px;
       margin-right: var(--u);
     }
@@ -30,16 +29,10 @@
   .menu {
     text-align: left;
     margin-top: -5px;
-    border: 1px solid var(--primary);
-    border-top: none;
-    border-bottom-left-radius: var(--smallUnit);
-    border-bottom-right-radius: var(--smallUnit);
+    border: none;
+    box-shadow: var(--dropdown-shadow);
     background: var(--background);
     color: var(--text-color);
-
-    div:hover {
-      background-color: rgba(0, 140, 244, 0.1);
-    }
 
     div[aria-selected='true'] {
       background-color: rgba(0, 140, 244, 0.1);
@@ -62,7 +55,8 @@
 
     div {
       color: var(--text-color);
-      text-align: center;
+      text-align: left;
+      padding: var(--smallUnit) 1px;
     }
   }
 }
@@ -80,15 +74,11 @@
 
     .arrowEditable {
       @extend .arrow;
-      border-color: var(--primary) transparent;
       margin: 0 -10px;
     }
   }
   .menuEditable {
     @extend .menu;
-    border: 1px solid var(--primary);
-    border-top-left-radius: var(--smallUnit);
-    border-top-right-radius: var(--smallUnit);
     position: absolute;
     right: var(--u);
   }

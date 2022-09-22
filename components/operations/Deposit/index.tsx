@@ -14,7 +14,6 @@ import ModalStepper from 'components/common/modal/ModalStepper';
 import SkeletonModalRowBeforeAfter from 'components/common/skeletons/SkeletonModalRowBeforeAfter';
 import ModalError from 'components/common/modal/ModalError';
 import ModalRowBorrowLimit from 'components/common/modal/ModalRowBorrowLimit';
-import ModalExpansionPanelWrapper from 'components/common/modal/ModalExpansionPanelWrapper';
 
 import { LangKeys } from 'types/Lang';
 import { UnderlyingData } from 'types/Underlying';
@@ -408,8 +407,16 @@ function Deposit() {
     <>
       {!tx && (
         <>
-          <ModalTitle title={translations[lang].variableRateDeposit} />
-          <ModalAsset asset={symbol!} amount={walletBalance} />
+          <ModalTitle
+            title={translations[lang].variableRateDeposit}
+            description={translations[lang].variableRateDepositExplanation}
+          />
+          <ModalAsset
+            asset={symbol!}
+            assetTitle={translations[lang].action.toUpperCase()}
+            amount={walletBalance}
+            amountTitle={translations[lang].walletBalance.toUpperCase()}
+          />
           <ModalInput
             onMax={onMax}
             value={qty}
@@ -418,16 +425,14 @@ function Deposit() {
             error={error?.component == 'input'}
           />
           {error?.component !== 'gas' && symbol != 'WETH' && <ModalTxCost gas={gas} />}
-          <ModalRow text={translations[lang].exactlyBalance} value={depositedAmount} />
-          <ModalExpansionPanelWrapper>
-            {symbol ? (
-              <ModalRowHealthFactor qty={qty} symbol={symbol} operation="deposit" />
-            ) : (
-              <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
-            )}
-            <ModalRowBorrowLimit qty={qty} symbol={symbol!} operation="deposit" />
-          </ModalExpansionPanelWrapper>
-          {/* <ModalStepper currentStep={step} totalSteps={3} /> */}
+          <ModalRow text={translations[lang].exactlyBalance} value={depositedAmount} line />
+          {symbol ? (
+            <ModalRowHealthFactor qty={qty} symbol={symbol} operation="deposit" />
+          ) : (
+            <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
+          )}
+          <ModalRowBorrowLimit qty={qty} symbol={symbol!} operation="deposit" line />
+          <ModalStepper currentStep={step} totalSteps={3} />
           {error && error.component != 'gas' && <ModalError message={error.message} />}
           <div className={styles.buttonContainer}>
             <Button

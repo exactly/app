@@ -3,21 +3,24 @@
   display: flex;
   justify-content: space-between;
   width: 100%;
-  margin-top: var(--u3);
-  padding-bottom: var(--u2);
-  text-align: right;
-  min-height: var(--u7);
+  border-bottom: var(--dashed-line);
+  color: var(--text-color);
+
+  .title {
+    font-family: var(--secondary-font);
+    font-weight: 500;
+    font-size: var(--font-10);
+  }
 
   .informationContainer {
     width: 50%;
-    align-self: center;
     display: flex;
     gap: var(--u);
-    align-items: center;
+    flex-direction: column;
+    gap: var(--smallestUnit);
 
     .assetName {
       margin: 0;
-      color: var(--gray-900);
       font-weight: 600;
       font-size: var(--font-20);
     }
@@ -26,20 +29,21 @@
   .assetPriceContainer {
     display: flex;
     gap: var(--u);
-    justify-content: center;
     flex-direction: column;
     gap: var(--smallestUnit);
+    text-align: right;
 
     .price {
       margin: 0;
-      color: var(--gray-900);
-      font-weight: 600;
+      font-weight: 700;
+      font-size: var(--font-16);
     }
 
     .secondaryPrice {
       margin: 0;
       font-size: var(--font-12);
-      color: var(--gray-500);
+      color: var(--secondary-text-color);
+      font-family: var(--secondary-font);
     }
   }
 }

@@ -1,12 +1,5 @@
 import { formatFixed, parseFixed } from '@ethersproject/bignumber';
-import {
-  useState,
-  ChangeEventHandler,
-  MouseEventHandler,
-  useEffect,
-  useContext,
-  ClipboardEvent
-} from 'react';
+import { ChangeEventHandler, MouseEventHandler, useContext, ClipboardEvent, useMemo } from 'react';
 
 import AccountDataContext from 'contexts/AccountDataContext';
 
@@ -27,15 +20,9 @@ type Props = {
 function ModalInput({ value, name, disabled, symbol, error, onChange, onMax }: Props) {
   const { accountData } = useContext(AccountDataContext);
 
-  const [newValue, setNewValue] = useState<string>('0');
-
   const blockedCharacters = ['e', 'E', '+', '-', ','];
 
-  useEffect(() => {
-    formatValue();
-  }, [symbol, value]);
-
-  function formatValue() {
+  const newValue = useMemo(() => {
     if (!accountData || !value || !symbol) return;
 
     const decimals = accountData[symbol].decimals;
@@ -51,8 +38,8 @@ function ModalInput({ value, name, disabled, symbol, error, onChange, onMax }: P
 
     const valueUsd = parsedValue.mul(oraclePrice).div(WAD);
 
-    setNewValue(formatFixed(valueUsd, decimals));
-  }
+    return formatFixed(valueUsd, decimals);
+  }, [symbol, value, accountData]);
 
   function filterPasteValue(e: ClipboardEvent<HTMLInputElement>) {
     if (e.type == 'paste') {
@@ -78,7 +65,9 @@ function ModalInput({ value, name, disabled, symbol, error, onChange, onMax }: P
         autoFocus
       />
       <p className={styles.translatedValue}>
-        {value == '' || !value || !symbol ? '$ 0' : `$${formatNumber(newValue, symbol)}`}
+        {value == '' || !value || !symbol || !newValue
+          ? '$0'
+          : `$${formatNumber(newValue, symbol)}`}
       </p>
       {onMax && (
         <p className={styles.max} onClick={onMax}>

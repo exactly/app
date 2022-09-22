@@ -1,7 +1,7 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useMemo } from 'react';
 import Image from 'next/image';
 import Skeleton from 'react-loading-skeleton';
-import { BigNumber, ethers } from 'ethers';
+import { ethers } from 'ethers';
 import { parseFixed, formatFixed } from '@ethersproject/bignumber';
 
 import { LangKeys } from 'types/Lang';
@@ -28,19 +28,19 @@ function ModalRowBorrowLimit({ qty, symbol, operation, line }: Props) {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
-  const [newQty, setNewQty] = useState<BigNumber>(ethers.constants.Zero);
-  const [beforeBorrowLimit, setBeforeBorrowLimit] = useState<string | undefined>(undefined);
-  const [afterBorrowLimit, setAfterBorrowLimit] = useState<string | undefined>(undefined);
+  const newQty = useMemo(() => {
+    return getAmount();
+  }, [accountData, symbol, qty]);
 
-  useEffect(() => {
-    getBorrowLimits();
-  }, [symbol, newQty]);
+  const [beforeBorrowLimit, afterBorrowLimit] = useMemo(() => {
+    return getBorrowLimits();
+  }, [accountData, symbol, newQty, operation]);
 
   function getAmount() {
     if (!accountData || !symbol) return;
 
     if (qty == '') {
-      return setNewQty(ethers.constants.Zero);
+      return ethers.constants.Zero;
     }
 
     const decimals = accountData[symbol].decimals;
@@ -51,11 +51,11 @@ function ModalRowBorrowLimit({ qty, symbol, operation, line }: Props) {
 
     const newQty = parseFixed(qty, decimals);
 
-    setNewQty(newQty);
+    return newQty;
   }
 
   function getBorrowLimits() {
-    if (!accountData) return;
+    if (!accountData || !newQty) return [undefined, undefined];
 
     const oraclePrice = accountData[symbol.toUpperCase()].oraclePrice;
     const decimals = accountData[symbol.toUpperCase()].decimals;
@@ -74,60 +74,54 @@ function ModalRowBorrowLimit({ qty, symbol, operation, line }: Props) {
 
     const newQtyUsd = newQty.mul(oraclePrice).div(parseFixed('1', decimals));
 
-    setBeforeBorrowLimit(Number(formatFixed(beforeBorrowLimitUSD, 18)).toFixed(2));
+    const beforeBorrowLimit = Number(formatFixed(beforeBorrowLimitUSD, 18)).toFixed(2);
+    let afterBorrowLimit = beforeBorrowLimit;
 
     switch (operation) {
       case 'deposit':
         if (isCollateral) {
           const adjustedDepositBorrowLimit = newQtyUsd.mul(adjustFactor).div(WAD);
-          setAfterBorrowLimit(
-            Number(formatFixed(beforeBorrowLimitUSD.add(adjustedDepositBorrowLimit), 18)).toFixed(2)
-          );
+
+          afterBorrowLimit = Number(
+            formatFixed(beforeBorrowLimitUSD.add(adjustedDepositBorrowLimit), 18)
+          ).toFixed(2);
         } else {
-          setAfterBorrowLimit(Number(formatFixed(beforeBorrowLimitUSD, 18)).toFixed(2));
+          afterBorrowLimit = Number(formatFixed(beforeBorrowLimitUSD, 18)).toFixed(2);
         }
         break;
 
       case 'withdraw':
-        setAfterBorrowLimit(
-          Number(formatFixed(beforeBorrowLimitUSD.sub(newQtyUsd), 18)).toFixed(2)
-        );
+        afterBorrowLimit = Number(formatFixed(beforeBorrowLimitUSD.sub(newQtyUsd), 18)).toFixed(2);
         break;
 
       case 'borrow':
-        setAfterBorrowLimit(
-          Number(formatFixed(beforeBorrowLimitUSD.sub(newQtyUsd), 18)).toFixed(2)
-        );
+        afterBorrowLimit = Number(formatFixed(beforeBorrowLimitUSD.sub(newQtyUsd), 18)).toFixed(2);
         break;
 
       case 'repay':
         if (isCollateral) {
           const adjustedRepayBorrowLimit = newQtyUsd.mul(adjustFactor).div(WAD);
-          setAfterBorrowLimit(
-            Number(formatFixed(beforeBorrowLimitUSD.add(adjustedRepayBorrowLimit), 18)).toFixed(2)
-          );
-        } else {
-          setAfterBorrowLimit(Number(formatFixed(beforeBorrowLimitUSD, 18)).toFixed(2));
-        }
 
+          afterBorrowLimit = Number(
+            formatFixed(beforeBorrowLimitUSD.add(adjustedRepayBorrowLimit), 18)
+          ).toFixed(2);
+        } else {
+          afterBorrowLimit = Number(formatFixed(beforeBorrowLimitUSD, 18)).toFixed(2);
+        }
         break;
     }
+
+    return [beforeBorrowLimit, afterBorrowLimit];
   }
 
-  useEffect(() => {
-    getAmount();
-  }, [symbol, qty]);
-
-  const rowStyles = line ? `${styles.row} ${styles.line}` : styles.row;
-
   return (
-    <section className={rowStyles}>
+    <section className={line ? `${styles.row} ${styles.line}` : styles.row}>
       <p className={styles.text}>{translations[lang].borrowLimit}</p>
       <section className={styles.values}>
         <span className={styles.value}>
           {beforeBorrowLimit && `$${formatNumber(beforeBorrowLimit, 'usd') || <Skeleton />}`}
         </span>
-        <Image src="/img/icons/arrowRight.svg" alt="arrowRight" width={20} height={20} />
+        <Image src="/img/icons/arrowRight.svg" alt="arrowRight" width={15} height={15} />
         <span className={styles.value}>
           {afterBorrowLimit && `$${formatNumber(afterBorrowLimit, 'usd') || <Skeleton />}`}
         </span>

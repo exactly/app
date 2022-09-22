@@ -32,7 +32,6 @@
 
   /* COLORS */
   --white: #fff;
-  --black: #000;
 
   --primary: #008cf4;
   --primary-50: #d3ecff;
@@ -66,6 +65,9 @@
 
   /* TOOLTIP*/
   --tooltip-background: #1f1939;
+
+  /* FONT */
+  --secondary-font: 'IBM Plex Mono', monospace;
 }
 
 body[data-theme='light'] {
@@ -73,18 +75,24 @@ body[data-theme='light'] {
   --gray-50: #fafafa;
   --gray-100: #e1e1e1;
   --gray-200: #cccccc;
-  --gray-500: #8f8c9c;
+  --gray-500: #9a9a9a;
   --gray-900: #1f1939;
 
   /* SHADOWS */
   --shadow-tables: 0px 0px 10px rgba(0, 0, 0, 0.15);
   --shadow-header-mob: 0px 2px 4px rgba(0, 0, 0, 0.15);
+  --dropdown-shadow: 0px 2px 2px rgba(0, 0, 0, 0.1);
 
   /* BACKGROUND */
   --background: #fff;
 
+  /* LINES */
+  --solid-line: 1px solid#e0e0e0;
+  --dashed-line: 1px dashed #d9d9d9;
+
   /* TEXT */
-  --text-color: black;
+  --text-color: #0e0e0e;
+  --secondary-text-color: #9a9a9a;
 
   /* OVERLAY */
   --overlay-background: black;
@@ -102,19 +110,25 @@ body[data-theme='dark'] {
   /* GRAYS */
   --gray-50: #1d1c1c;
   --gray-100: #8f8c9c;
-  --gray-200: #cccccc;
+  --gray-200: #1d1c1c;
   --gray-500: #e1e1e1;
   --gray-900: #fafafa;
 
   /* SHADOWS */
-  --shadow-tables: 0px 0px 10px rgba(143, 140, 156, 0.1);
+  --shadow-tables: 0px 0px 5px rgba(143, 140, 156, 0.1);
   --shadow-header-mob: 0px 2px 4px rgba(143, 140, 156, 0.1);
+  --dropdown-shadow: 0px 2px 2px rgba(143, 140, 156, 0.1);
 
   /* BACKGROUND */
   --background: #121212;
 
+  /* LINES */
+  --solid-line: 1px solid#e0e0e0;
+  --dashed-line: 1px dashed #d9d9d9;
+
   /* TEXT */
   --text-color: #fafafad4;
+  --secondary-text-color: #e1e1e1;
 
   /* OVERLAY */
   --overlay-background: #121212;

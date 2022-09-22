@@ -5,7 +5,6 @@ import { ChangeEvent, useContext, useEffect, useMemo, useState } from 'react';
 import Button from 'components/common/Button';
 import ModalAsset from 'components/common/modal/ModalAsset';
 import ModalError from 'components/common/modal/ModalError';
-import ModalExpansionPanelWrapper from 'components/common/modal/ModalExpansionPanelWrapper';
 import ModalGif from 'components/common/modal/ModalGif';
 import ModalInput from 'components/common/modal/ModalInput';
 import ModalMaturityEditable from 'components/common/modal/ModalMaturityEditable';
@@ -359,9 +358,15 @@ function WithdrawAtMaturity() {
         <>
           <ModalTitle
             title={isEarlyWithdraw ? translations[lang].earlyWithdraw : translations[lang].withdraw}
+            description={translations[lang].withdrawExplanation}
           />
-          <ModalAsset asset={symbol!} amount={amountAtFinish} />
-          <ModalMaturityEditable text={translations[lang].maturityPool} />
+          <ModalAsset
+            asset={symbol!}
+            assetTitle={translations[lang].action.toUpperCase()}
+            amount={amountAtFinish}
+            amountTitle={translations[lang].depositedAmount.toUpperCase()}
+          />
+          <ModalMaturityEditable text={translations[lang].maturityPool} line />
           <ModalInput
             onMax={onMax}
             value={qty}
@@ -374,40 +379,38 @@ function WithdrawAtMaturity() {
             text={translations[lang].amountAtFinish}
             value={amountAtFinish && `${formatNumber(amountAtFinish, symbol!, true)}`}
             asset={symbol}
+            line
           />
           <ModalRow
             text={translations[lang].amountToReceive}
             value={formatNumber(withdrawAmount, symbol!, true)}
             asset={symbol}
+            line
           />
-          <ModalExpansionPanelWrapper>
-            {isEarlyWithdraw && (
-              <ModalRowEditable
-                text={translations[lang].amountSlippage}
-                value={slippage}
-                editable={editSlippage}
-                onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                  setSlippage(e.target.value);
-                  error?.message == translations[lang].notEnoughSlippage && setError(undefined);
-                }}
-                onClick={() => {
-                  if (slippage == '') setSlippage('0');
-                  setEditSlippage((prev) => !prev);
-                }}
-              />
-            )}
-          </ModalExpansionPanelWrapper>
+          {isEarlyWithdraw && (
+            <ModalRowEditable
+              text={translations[lang].amountSlippage}
+              value={slippage}
+              editable={editSlippage}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                setSlippage(e.target.value);
+                error?.message == translations[lang].notEnoughSlippage && setError(undefined);
+              }}
+              onClick={() => {
+                if (slippage == '') setSlippage('0');
+                setEditSlippage((prev) => !prev);
+              }}
+              line
+            />
+          )}
           {error && error.component != 'gas' && <ModalError message={error.message} />}
           <div className={styles.buttonContainer}>
             <Button
               text={needsApproval ? translations[lang].approve : translations[lang].withdraw}
-              className={
-                parseFloat(qty) <= 0 || !qty || error?.status ? 'secondaryDisabled' : 'tertiary'
-              }
+              className={parseFloat(qty) <= 0 || !qty || error?.status ? 'disabled' : 'primary'}
               disabled={parseFloat(qty) <= 0 || !qty || loading || error?.status}
               onClick={needsApproval ? approve : withdraw}
               loading={loading}
-              color="primary"
             />
           </div>
         </>

@@ -14,10 +14,8 @@ type Props = {
 };
 
 function ModalMaturityEditable({ text, line }: Props) {
-  const rowStyles = line ? `${styles.row} ${styles.line}` : styles.row;
-
   return (
-    <section className={rowStyles}>
+    <section className={line ? `${styles.row} ${styles.line}` : styles.row}>
       <p className={styles.text}>{text}</p>
       <MaturitySelector />
     </section>
