@@ -87,7 +87,7 @@ const Asset: NextPage<Props> = ({ symbol = 'DAI' }) => {
       <section className={style.container}>
         <div className={style.smartPoolContainer}>
           <SmartPoolInfo symbol={symbol} />
-          <FloatingAPYChart market={eMarketAddress} network={network} />
+          {/* <FloatingAPYChart market={eMarketAddress} network={network} /> */}
         </div>
         <section className={style.assetData}>
           <div className={style.assetContainer}>
