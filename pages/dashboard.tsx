@@ -5,7 +5,6 @@ import dynamic from 'next/dynamic';
 import Navbar from 'components/Navbar';
 import Footer from 'components/Footer';
 import MobileNavbar from 'components/MobileNavbar';
-import CurrentNetwork from 'components/CurrentNetwork';
 import DashboardHeader from 'components/DashboardHeader';
 import Tabs from 'components/Tabs';
 import OperationsModals from 'components/OperationsModal';
@@ -42,7 +41,6 @@ const DashBoard: NextPage<Props> = () => {
       <OperationsModals />
       <MobileNavbar />
       <Navbar />
-      <CurrentNetwork />
       <DashboardHeader />
       <Tabs
         values={[tabDeposit, tabBorrow]}

@@ -7,6 +7,9 @@
   gap: var(--u);
   user-select: none;
   cursor: pointer;
+  border: var(--solid-line);
+  padding: var(--u);
+  border-radius: 25px;
 
   .wallet {
     margin: 0;
@@ -47,24 +50,5 @@
     border-bottom-color: var(--background);
     border-width: 10px;
     margin-left: -10px;
-  }
-
-  .networkContainer {
-    display: flex;
-    gap: var(--smallUnit);
-    align-items: center;
-
-    .network {
-      margin: 0;
-      opacity: var(--defaultOpacity);
-      color: var(--text-color);
-    }
-
-    .dot {
-      background: var(--success);
-      border-radius: 50%;
-      width: var(--u);
-      height: var(--u);
-    }
   }
 }

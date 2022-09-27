@@ -2,7 +2,6 @@ import { useContext, useEffect, useMemo, useState } from 'react';
 import type { GetStaticProps, NextPage } from 'next';
 
 import Navbar from 'components/Navbar';
-import CurrentNetwork from 'components/CurrentNetwork';
 import PoolsChart from 'components/PoolsChart';
 import AssetTable from 'components/AssetTable';
 import SmartPoolInfo from 'components/SmartPoolInfo';
@@ -82,7 +81,6 @@ const Asset: NextPage<Props> = ({ symbol = 'DAI' }) => {
       <OperationsModals />
       <MobileNavbar />
       <Navbar />
-      <CurrentNetwork />
 
       <section className={style.container}>
         <div className={style.smartPoolContainer}>

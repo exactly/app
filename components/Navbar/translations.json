@@ -3,7 +3,10 @@
     "markets": "Markets",
     "assets": "Assets",
     "dashboard": "Dashboard",
-    "nerdMode": "Nerd Mode"
+    "nerdMode": "Nerd Mode",
+    "connectedTo": "Connected to",
+    "clickHere": "Connect to rinkeby",
+    "disconnected": "Please connect your wallet"
   },
   "es": {}
 }

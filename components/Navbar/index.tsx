@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { useContext, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
@@ -11,60 +11,64 @@ import { LangKeys } from 'types/Lang';
 
 import LangContext from 'contexts/LangContext';
 import ThemeContext from 'contexts/ThemeContext';
+import { useWeb3Context } from 'contexts/Web3Context';
+import ModalStatusContext from 'contexts/ModalStatusContext';
 
 import styles from './style.module.scss';
 
 import keys from './translations.json';
-import { useWeb3Context } from 'contexts/Web3Context';
-import FixedLenderContext from 'contexts/FixedLenderContext';
-import { getSymbol } from 'utils/utils';
+
+import allowedNetworks from 'config/allowedNetworks.json';
 
 function Navbar() {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
-  const { connect, disconnect, walletAddress, network } = useWeb3Context();
-  const fixedLenderData = useContext(FixedLenderContext);
+  const { web3Provider, connect, disconnect, walletAddress, network } = useWeb3Context();
 
   const { theme, changeTheme } = useContext(ThemeContext);
+  const { setOpen, setOperation } = useContext(ModalStatusContext);
 
   const router = useRouter();
 
   const { pathname } = router;
 
-  const assetsRoutes: { href: string; name: string }[] = fixedLenderData.map((asset) => {
-    const address = asset.address;
-    const assetSymbol =
-      getSymbol(address!, network?.name) == 'WETH' ? 'ETH' : getSymbol(address!, network?.name);
+  const routes = useMemo(() => {
+    return [
+      {
+        pathname: '/markets',
+        href: '/markets',
+        name: translations[lang].markets
+      },
+      {
+        pathname: '/dashboard',
+        href: '/dashboard',
+        name: translations[lang].dashboard
+      }
+    ];
+  }, []);
 
-    return {
-      href: `/assets/${assetSymbol}`.toLowerCase(),
-      name: assetSymbol,
-      image:
-        assetSymbol == 'ETH'
-          ? `/img/assets/weth.svg`
-          : `/img/assets/${assetSymbol.toLowerCase()}.svg`
-    };
-  });
+  const isAllowed = useMemo(() => {
+    return network && allowedNetworks.includes(network?.name);
+  }, [network, allowedNetworks]);
 
-  const routes = [
-    {
-      pathname: '/markets',
-      href: '/markets',
-      name: translations[lang].markets
-    },
-    {
-      pathname: '/assets/[id]',
-      href: '/assets/dai',
-      name: translations[lang].assets
-    },
-    {
-      pathname: '/dashboard',
-      href: '/dashboard',
-      name: translations[lang].dashboard
+  async function handleClick() {
+    if (!isAllowed) {
+      if (!web3Provider?.provider.request) return;
+
+      await web3Provider.provider.request({
+        method: 'wallet_switchEthereumChain',
+        params: [
+          {
+            chainId: '0x4'
+          }
+        ]
+      });
+    } else if (isAllowed && network?.name == 'rinkeby') {
+      setOperation('faucet');
+      setOpen(true);
     }
-    // { pathname: '/nerd-mode', href: '/', name: translations[lang].nerdMode }
-  ];
+  }
 
   return (
     <nav className={styles.navBar}>
@@ -81,86 +85,47 @@ function Navbar() {
               />
             </div>
           </Link>
+        </div>
+
+        <div className={styles.center}>
           <ul className={styles.linksContainer}>
             {routes.map((route) => {
-              if (route.pathname === '/assets/[id]') {
-                return (
-                  <li
-                    className={`${styles.assetLink} 
-                     ${
-                       route.pathname === pathname ? `${styles.link} ${styles.active}` : styles.link
-                     }
-                    `}
-                    key={route.pathname}
-                  >
-                    {assetsRoutes.length > 0 ? (
-                      <div className={styles.dropdown}>
-                        <p className={styles.assetsTitle}>{translations[lang].assets}</p>
-                        <Image
-                          src={`/img/icons/arrowDown.svg`}
-                          alt="assets"
-                          width={12}
-                          height={7}
-                          priority
-                        />
-                        <div className={styles.dropdownContent}>
-                          {assetsRoutes.map((asset: any) => {
-                            return (
-                              <Link href={asset.href} key={asset.name}>
-                                <div className={styles.asset}>
-                                  <Image
-                                    src={asset.image}
-                                    alt={asset.name}
-                                    width={20}
-                                    height={20}
-                                  />{' '}
-                                  <p className={styles.assetName}>{asset.name}</p>
-                                </div>
-                              </Link>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    ) : (
-                      <>
-                        <div className={styles.dropdown}>
-                          <Link href="assets/dai">{translations[lang].assets}</Link>
-                          <Image
-                            src={`/img/icons/arrowDown.svg`}
-                            alt="assets"
-                            width={12}
-                            height={7}
-                          />
-                        </div>
-                      </>
-                    )}
-                  </li>
-                );
-              } else {
-                return (
-                  <li
-                    className={
-                      route.pathname === pathname ? `${styles.link} ${styles.active}` : styles.link
-                    }
-                    key={route.pathname}
-                  >
-                    <Link href={route.href}>{route.name}</Link>
-                  </li>
-                );
-              }
+              return (
+                <li
+                  className={
+                    route.pathname === pathname ? `${styles.link} ${styles.active}` : styles.link
+                  }
+                  key={route.pathname}
+                >
+                  <Link href={route.href}>{route.name}</Link>
+                </li>
+              );
             })}
           </ul>
         </div>
-
         <div className={styles.right}>
-          <a
-            className={styles.discordFeedbackLink}
-            target="_blank"
-            rel="noreferrer noopener"
-            href="https://discordapp.com/channels/846682395553824808/985912903880302632"
-          >
-            <strong>Give us feedback here!</strong>
-          </a>
+          {network && isAllowed && (
+            <div className={styles.networkContainer} onClick={handleClick}>
+              <div className={styles.dot} />
+              <p className={styles.network}>
+                {translations[lang].connectedTo} {network?.name}
+              </p>
+            </div>
+          )}
+
+          {network && !isAllowed && (
+            <div className={styles.networkContainer} onClick={handleClick}>
+              <div className={styles.dotError} />
+              <p className={styles.network}>{translations[lang].clickHere}</p>
+            </div>
+          )}
+
+          {!network && (
+            <div className={styles.networkContainer} onClick={handleClick}>
+              <div className={styles.dotError} />
+              <p className={styles.network}>{translations[lang].disconnected}</p>
+            </div>
+          )}
 
           {connect && !walletAddress ? (
             <div className={styles.buttonContainer}>
