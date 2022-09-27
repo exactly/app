@@ -3,7 +3,6 @@ import type { NextPage } from 'next';
 import MarketsList from 'components/MarketsList';
 import MaturitySelector from 'components/MaturitySelector';
 import Navbar from 'components/Navbar';
-import CurrentNetwork from 'components/CurrentNetwork';
 import Footer from 'components/Footer';
 import MobileNavbar from 'components/MobileNavbar';
 import SmartPoolList from 'components/SmartPoolList';
@@ -19,7 +18,6 @@ const Pools: NextPage<Props> = () => {
       <OperationsModals />
       <MobileNavbar />
       <Navbar />
-      <CurrentNetwork />
 
       <div style={{ marginTop: '180px' }}>
         <SmartPoolList />
