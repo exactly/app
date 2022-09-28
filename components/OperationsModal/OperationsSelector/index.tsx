@@ -1,6 +1,6 @@
 import { useContext } from 'react';
 
-import ModalStatusContext from 'contexts/ModalStatusContext';
+import ModalStatusContext, { Operation } from 'contexts/ModalStatusContext';
 import LangContext from 'contexts/LangContext';
 
 import styles from './styles.module.scss';
@@ -54,7 +54,7 @@ function OperationsSelector() {
     ]
   };
 
-  function handleOperation(action: any) {
+  function handleOperation(action: Operation) {
     if (operation != action) {
       setOperation(action);
     }
@@ -69,7 +69,7 @@ function OperationsSelector() {
             return (
               <li
                 key={action.value}
-                onClick={() => handleOperation(action.value)}
+                onClick={() => handleOperation(action.value as Operation)}
                 className={operation == action.value ? styles.activeAction : styles.action}
               >
                 {action.label}
@@ -85,7 +85,7 @@ function OperationsSelector() {
             return (
               <li
                 key={action.value}
-                onClick={() => handleOperation(action.value)}
+                onClick={() => handleOperation(action.value as Operation)}
                 className={operation == action.value ? styles.activeAction : styles.action}
               >
                 {action.label}

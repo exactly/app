@@ -14,7 +14,7 @@ import FixedLenderContext from 'contexts/FixedLenderContext';
 import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 import AccountDataContext from 'contexts/AccountDataContext';
-import ModalStatusContext from 'contexts/ModalStatusContext';
+import ModalStatusContext, { Operation } from 'contexts/ModalStatusContext';
 import { MarketContext } from 'contexts/AddressContext';
 
 import { LangKeys } from 'types/Lang';
@@ -342,7 +342,7 @@ function Item({
               className={type.value == 'deposit' ? 'primary' : 'secondary'}
               onClick={() => {
                 setMarket({ value: market! });
-                setOperation(type.value);
+                setOperation(type.value as Operation);
                 setOpen(true);
               }}
             />

@@ -7,7 +7,7 @@ const Button = dynamic(() => import('components/common/Button'));
 
 import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
-import ModalStatusContext from 'contexts/ModalStatusContext';
+import ModalStatusContext, { Operation } from 'contexts/ModalStatusContext';
 import AccountDataContext from 'contexts/AccountDataContext';
 import { MarketContext } from 'contexts/AddressContext';
 
@@ -110,7 +110,7 @@ function Item({ symbol, maturity, fixedMarketData }: Props) {
 
     const marketData = accountData[symbol];
 
-    setOperation(type);
+    setOperation(type as Operation);
     setMarket({ value: marketData.market });
     setDate(maturity);
     setOpen(true);
