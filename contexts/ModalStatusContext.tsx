@@ -1,7 +1,7 @@
 import { createContext, FC, useContext, useEffect, useState } from 'react';
 import AccountDataContext from './AccountDataContext';
 
-type Operation =
+export type Operation =
   | 'borrow'
   | 'deposit'
   | 'withdraw'
@@ -10,7 +10,7 @@ type Operation =
   | 'depositAtMaturity'
   | 'withdrawAtMaturity'
   | 'repayAtMaturity'
-  | any;
+  | 'faucet';
 
 type ContextValues = {
   open: boolean | null;

@@ -16,7 +16,7 @@ import FixedLenderContext from 'contexts/FixedLenderContext';
 import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 import AccountDataContext from 'contexts/AccountDataContext';
-import ModalStatusContext from 'contexts/ModalStatusContext';
+import ModalStatusContext, { Operation } from 'contexts/ModalStatusContext';
 import { MarketContext } from 'contexts/AddressContext';
 
 import style from './style.module.scss';
@@ -71,7 +71,7 @@ function Item({ market, type }: Props) {
     checkWeirdAPY();
   }, [rate]);
 
-  function handleClick(type: string) {
+  function handleClick(type: Operation) {
     if (!market) return;
 
     if (!walletAddress && connect) return connect();
