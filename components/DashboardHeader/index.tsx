@@ -23,7 +23,6 @@ import getAssetColor from 'utils/getAssetColor';
 import formatNumber from 'utils/formatNumber';
 import getHealthFactorData from 'utils/getHealthFactorData';
 import { formatFixed, parseFixed } from '@ethersproject/bignumber';
-import OrderAction from 'components/OrderAction';
 
 function DashboardHeader() {
   const { walletAddress } = useWeb3Context();
@@ -208,11 +207,6 @@ function DashboardHeader() {
 
   return (
     <section className={styles.section}>
-      <div
-        style={{ display: 'flex', width: '100%', alignItems: 'flex-end', flexDirection: 'column' }}
-      >
-        <OrderAction />
-      </div>
       <div className={styles.container}>
         <div className={styles.box}>
           <h3 className={styles.title}>{translations[lang].deposits}</h3>
