@@ -39,9 +39,7 @@ function ModalExpansionPanelWrapper({ children }: Props) {
           ...style
         }}
       >
-        <div ref={ref} className={styles.test}>
-          {children}
-        </div>
+        <div ref={ref}>{children}</div>
       </animated.div>
     </>
   );
