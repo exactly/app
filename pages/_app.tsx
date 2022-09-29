@@ -16,6 +16,8 @@ import { AuditorProvider } from 'contexts/AuditorContext';
 import { SkeletonTheme } from 'react-loading-skeleton';
 import { ThemeProvider } from 'contexts/ThemeContext';
 import { ContractsProvider } from 'contexts/ContractsContext';
+import { ThemeProvider as MUIThemeProvider } from '@mui/material/styles';
+import theme from 'styles/theme';
 
 function MyApp({ Component, pageProps }: AppProps) {
   const props = { ...pageProps };
@@ -41,30 +43,32 @@ function MyApp({ Component, pageProps }: AppProps) {
         <link rel="icon" href="/icon.ico" />
       </Head>
       <ThemeProvider>
-        <LangProvider value={'en'}>
-          <Web3ContextProvider>
-            <PreviewerProvider>
-              <ContractsProvider>
-                <AccountDataProvider>
-                  <AuditorProvider>
-                    <FixedLenderProvider>
-                      <MarketProvider>
-                        <ModalStatusProvider>
-                          <SkeletonTheme
-                            baseColor="var(--skeleton-base)"
-                            highlightColor="var(--skeleton-highlight)"
-                          >
-                            <Component {...props} />
-                          </SkeletonTheme>
-                        </ModalStatusProvider>
-                      </MarketProvider>
-                    </FixedLenderProvider>
-                  </AuditorProvider>
-                </AccountDataProvider>
-              </ContractsProvider>
-            </PreviewerProvider>
-          </Web3ContextProvider>
-        </LangProvider>
+        <MUIThemeProvider theme={theme}>
+          <LangProvider value={'en'}>
+            <Web3ContextProvider>
+              <PreviewerProvider>
+                <ContractsProvider>
+                  <AccountDataProvider>
+                    <AuditorProvider>
+                      <FixedLenderProvider>
+                        <MarketProvider>
+                          <ModalStatusProvider>
+                            <SkeletonTheme
+                              baseColor="var(--skeleton-base)"
+                              highlightColor="var(--skeleton-highlight)"
+                            >
+                              <Component {...props} />
+                            </SkeletonTheme>
+                          </ModalStatusProvider>
+                        </MarketProvider>
+                      </FixedLenderProvider>
+                    </AuditorProvider>
+                  </AccountDataProvider>
+                </ContractsProvider>
+              </PreviewerProvider>
+            </Web3ContextProvider>
+          </LangProvider>
+        </MUIThemeProvider>
       </ThemeProvider>
     </>
   );
