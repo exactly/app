@@ -1,0 +1,81 @@
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  text-align: left;
+  display: table;
+  overflow-x: scroll;
+
+  thead {
+    background: none;
+    color: var(--text-color);
+    font-size: var(--font-12);
+    border-radius: var(--u);
+    margin-bottom: var(--u2);
+
+    tr {
+      display: flex;
+      width: 100%;
+      justify-content: space-between;
+
+      th {
+        padding: var(--u2) 0;
+        display: block;
+        width: calc(100% / 6);
+        margin-left: var(--u2);
+        font-weight: 600;
+        font-family: var(--secondary-font);
+      }
+    }
+  }
+
+  tbody {
+    color: var(--text-color);
+    display: block;
+    width: 100%;
+    background: var(--table-background);
+
+    &::-webkit-scrollbar-track {
+      box-shadow: none;
+      background-color: transparent;
+    }
+
+    &::-webkit-scrollbar {
+      width: var(--u);
+      background-color: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background-color: var(--gray-100);
+      border-radius: 100px;
+    }
+
+    tr {
+      border-bottom: var(--table-line);
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      text-align: left;
+
+      td {
+        padding: var(--u2) 0;
+        font-size: var(--font-14);
+        width: calc(100% / 6);
+        margin-left: var(--u2);
+        display: flex;
+        gap: var(--u);
+        align-items: center;
+        font-weight: 400;
+        font-size: var(--font-16);
+
+        &:last-child {
+          padding-right: var(--u2);
+        }
+
+        .marketName {
+          font-weight: 600;
+        }
+      }
+    }
+  }
+}

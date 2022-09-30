@@ -1,0 +1,16 @@
+.tablesContainer {
+  display: flex;
+  max-width: var(--maxWidth);
+  width: 90%;
+  margin: 0 auto;
+  gap: var(--u5);
+
+  .tableContainer {
+    min-width: 50%;
+
+    .title {
+      font-weight: 600;
+      font-size: var(--font-24);
+    }
+  }
+}

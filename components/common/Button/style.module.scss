@@ -68,3 +68,15 @@
     border: 1px solid var(--gray-200);
   }
 }
+
+.white {
+  background: var(--background);
+  color: var(--primary);
+  font-weight: 600;
+
+  &:hover {
+    color: var(--primary);
+    background: var(--background);
+    border: none;
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "en": {
+    "asset": "Asset",
+    "totalDeposited": "Total Deposited",
+    "totalBorrowed": "Total Borrowed",
+    "depositAPY": "Deposit APY",
+    "borrowAPY": "Borrow APY"
+  },
+  "es": {}
+}

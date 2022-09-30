@@ -85,10 +85,12 @@ body[data-theme='light'] {
 
   /* BACKGROUND */
   --background: #fff;
+  --table-background: #f9f9f9;
 
   /* LINES */
   --solid-line: 1px solid#e0e0e0;
   --dashed-line: 1px dashed #d9d9d9;
+  --table-line: 1px solid #e7e7e7;
 
   /* TEXT */
   --text-color: #0e0e0e;

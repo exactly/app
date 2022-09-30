@@ -1,3 +1,5 @@
+import { formatFixed, parseFixed } from '@ethersproject/bignumber';
+
 import { AccountData } from 'types/AccountData';
 import { Dictionary } from 'types/Dictionary';
 import { Market } from 'types/Market';
@@ -12,6 +14,8 @@ export default function formatMarkets(accountData: AccountData) {
 
   const formattedMarkets: Array<Market> = [];
 
+  const WAD = parseFixed('1', 18);
+
   Object.keys(accountData).forEach((assetName) => {
     const market = accountData[assetName];
 
@@ -21,7 +25,17 @@ export default function formatMarkets(accountData: AccountData) {
       name: assetName,
       isListed: false,
       collateralFactor: 0,
-      order: dictionary[assetName]
+      order: dictionary[assetName],
+      borrowed: formatFixed(
+        market.totalFloatingBorrowAssets.mul(market.oraclePrice).div(WAD),
+        market.decimals
+      ),
+      supplied: formatFixed(
+        market.totalFloatingDepositAssets.mul(market.oraclePrice).div(WAD),
+        market.decimals
+      ),
+      decimals: market.decimals,
+      exchangeRate: market.oraclePrice
     };
 
     formattedMarkets.push(newMarket);

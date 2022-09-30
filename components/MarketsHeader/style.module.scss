@@ -1,0 +1,38 @@
+.headerSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--u4);
+  margin: calc(var(--navbarHeight) + var(--u10)) auto 0 auto;
+  max-width: var(--maxWidth);
+  width: 90%;
+
+  .title {
+    font-weight: 600;
+    font-size: var(--font-36);
+    margin: 0;
+  }
+
+  .stats {
+    display: flex;
+    gap: var(--u5);
+
+    .stat {
+      font-weight: 600;
+      display: flex;
+      flex-direction: column;
+      gap: var(--u);
+
+      .statTitle {
+        font-family: var(--secondary-font);
+        color: var(--secondary-text-color);
+        margin: 0;
+        font-size: var(--font-12);
+      }
+
+      .statValue {
+        font-size: var(--font-24);
+        margin: 0;
+      }
+    }
+  }
+}
