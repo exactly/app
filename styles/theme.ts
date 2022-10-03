@@ -16,6 +16,16 @@ const theme = createTheme({
             "900": "#1f1939",
         },
     },
+    typography: {
+        fontFamily: 'articulat-cf',
+        h1: {
+            fontSize: 36,
+            fontWeight: 600,
+        },
+        h6: {
+            fontWeight: 700
+        }
+    },
     components: {
         MuiButton: {
             styleOverrides: {
