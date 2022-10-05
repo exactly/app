@@ -1,0 +1,14 @@
+{
+  "usdc": {
+    "description": "USD Coin"
+  },
+  "dai": {
+    "description": ""
+  },
+  "weth": {
+    "description": ""
+  },
+  "wbtc": {
+    "description": ""
+  }
+}
