@@ -1,28 +1,29 @@
-import rinkebyAuditor from 'protocol/deployments/rinkeby/Auditor.json';
-import rinkebyFixedLenderDAI from 'protocol/deployments/rinkeby/MarketDAI.json';
-import rinkebyFixedLenderWETH from 'protocol/deployments/rinkeby/MarketWETH.json';
-import rinkebyFixedLenderWBTC from 'protocol/deployments/rinkeby/MarketWBTC.json';
-import rinkebyFixedLenderUSDC from 'protocol/deployments/rinkeby/MarketUSDC.json';
-import rinkebyPreviewer from 'protocol/deployments/rinkeby/Previewer.json';
+import goerliAuditor from 'protocol/deployments/goerli/Auditor.json';
+import goerliFixedLenderDAI from 'protocol/deployments/goerli/MarketDAI.json';
+import goerliFixedLenderWETH from 'protocol/deployments/goerli/MarketWETH.json';
+import goerliFixedLenderWBTC from 'protocol/deployments/goerli/MarketWBTC.json';
+import goerliFixedLenderUSDC from 'protocol/deployments/goerli/MarketUSDC.json';
+import goerliPreviewer from 'protocol/deployments/goerli/Previewer.json';
+// FIXME: need new files
 
 import { Dictionary } from 'types/Dictionary';
 
 function getABI(network: string | undefined) {
   const dictionary: Dictionary<Dictionary<any>> = {
-    rinkeby: {
+    goerli: {
       FixedLenders: [
-        rinkebyFixedLenderDAI,
-        rinkebyFixedLenderUSDC,
-        rinkebyFixedLenderWETH,
-        rinkebyFixedLenderWBTC
+        goerliFixedLenderDAI,
+        goerliFixedLenderUSDC,
+        goerliFixedLenderWETH,
+        goerliFixedLenderWBTC
       ],
-      Auditor: rinkebyAuditor,
-      Previewer: rinkebyPreviewer
+      Auditor: goerliAuditor,
+      Previewer: goerliPreviewer
     },
     mainnet: {}
   };
 
-  return dictionary[network || process.env.NEXT_PUBLIC_NETWORK!] ?? dictionary.rinkeby;
+  return dictionary[network || process.env.NEXT_PUBLIC_NETWORK!] ?? dictionary.goerli;
 }
 
 export default getABI;

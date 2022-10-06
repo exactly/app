@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "NODE_ENV=development NET=local next dev",
     "build": "next build",
-    "rinkeby": "NODE_ENV=production NET=rinkeby next start",
+    "goerli": "NODE_ENV=production NET=goerli next start",
     "start": "NODE_ENV=production NET=mainnet next start",
     "lint": "next lint"
   },

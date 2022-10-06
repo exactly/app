@@ -17,7 +17,9 @@ if (typeof window !== 'undefined') {
           infuraId: `${process.env.NEXT_INFURA_ID}`,
           rpc: {
             1: `https://mainnet.infura.io/v3/a6e9caa47aa94595bfb2b0503edf880c`,
-            4: 'https://rinkeby.infura.io/v3/a6e9caa47aa94595bfb2b0503edf880c'
+            // FIXME: remove rinkeby (id 4)
+            4: 'https://rinkeby.infura.io/v3/a6e9caa47aa94595bfb2b0503edf880c',
+            5: 'https://goerli.infura.io/v3/a6e9caa47aa94595bfb2b0503edf880c',
           },
           chainId: 4
         }

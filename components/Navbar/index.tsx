@@ -64,7 +64,7 @@ function Navbar() {
           }
         ]
       });
-    } else if (isAllowed && network?.name == 'rinkeby') {
+    } else if (isAllowed && network?.name === 'goerli') {
       setOperation('faucet');
       setOpen(true);
     }

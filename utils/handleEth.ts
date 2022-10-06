@@ -1,14 +1,15 @@
 import { BigNumber, Contract, ethers } from 'ethers';
 
-import rinkebyRouter from 'protocol/deployments/rinkeby/MarketETHRouter.json';
+import goerliRouter from 'protocol/deployments/goerli/MarketETHRouter.json';
+// FIXME: need new file
 
 import { getContractData } from './contracts';
 
 import { Dictionary } from 'types/Dictionary';
 
-function handleEth(network: string = 'rinkeby', signer: ethers.providers.JsonRpcSigner) {
+function handleEth(network: string = 'goerli', signer: ethers.providers.JsonRpcSigner) {
   const dictionary: Dictionary<any> = {
-    rinkeby: rinkebyRouter
+    goerli: goerliRouter
   };
 
   const router = getContractData(
@@ -97,7 +98,7 @@ function handleEth(network: string = 'rinkeby', signer: ethers.providers.JsonRpc
   async function checkAllowance(wallet: string, FixedLenderWETH: Contract) {
     if (!wallet || !router) return;
 
-    const allowance = await FixedLenderWETH.allowance(wallet, rinkebyRouter.address);
+    const allowance = await FixedLenderWETH.allowance(wallet, goerliRouter.address);
 
     return ethers.utils.formatEther(allowance);
   }
@@ -105,7 +106,7 @@ function handleEth(network: string = 'rinkeby', signer: ethers.providers.JsonRpc
   function approve(FixedLenderWETH: Contract) {
     if (!router) return;
 
-    return FixedLenderWETH.approve(rinkebyRouter.address, ethers.constants.MaxUint256);
+    return FixedLenderWETH.approve(goerliRouter.address, ethers.constants.MaxUint256);
   }
 
   return {
