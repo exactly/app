@@ -7,12 +7,10 @@ import { Option } from 'react-dropdown';
 
 import AccountDataContext from 'contexts/AccountDataContext';
 import LangContext from 'contexts/LangContext';
-import ModalStatusContext from 'contexts/ModalStatusContext';
 
 const MaturityPoolUserStatusByMaturity = dynamic(
   () => import('components/MaturityPoolUserStatusByMaturity')
 );
-const Button = dynamic(() => import('components/common/Button'));
 const EmptyState = dynamic(() => import('components/EmptyState'));
 
 import styles from './style.module.scss';
@@ -28,7 +26,6 @@ function MaturityPoolDashboard({ tab }: Props) {
   const translations: { [key: string]: LangKeys } = keys;
 
   const { accountData } = useContext(AccountDataContext);
-  const { setOpen, setOperation } = useContext(ModalStatusContext);
 
   const [maturities, setMaturities] = useState<any>(undefined);
 
@@ -103,20 +100,6 @@ function MaturityPoolDashboard({ tab }: Props) {
       <section className={styles.sectionContainer}>
         <div className={styles.titleContainer}>
           <p className={styles.title}>{translations[lang].maturityPools}</p>
-        </div>
-        <div className={styles.buttonContainer}>
-          {accountData && (
-            <Button
-              text={
-                tab.value == 'borrow' ? translations[lang].newBorrow : translations[lang].newDeposit
-              }
-              className={tab.value == 'borrow' ? 'secondary' : 'primary'}
-              onClick={() => {
-                setOperation(tab.value == 'borrow' ? 'borrowAtMaturity' : 'depositAtMaturity');
-                setOpen(true);
-              }}
-            />
-          )}
         </div>
       </section>
       {maturities ? (

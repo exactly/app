@@ -1,5 +1,11 @@
+import { useContext } from 'react';
 import { Option } from 'react-dropdown';
 import styles from './style.module.scss';
+import keys from './translations.json';
+
+import { LangKeys } from 'types/Lang';
+
+import LangContext from 'contexts/LangContext';
 
 type Props = {
   values: Array<Option>;
@@ -8,6 +14,9 @@ type Props = {
 };
 
 function Tabs({ values, selected, handleTab }: Props) {
+  const lang: string = useContext(LangContext);
+  const translations: { [key: string]: LangKeys } = keys;
+
   return (
     <section className={styles.tabsSection}>
       <div className={styles.tabs}>
@@ -20,7 +29,7 @@ function Tabs({ values, selected, handleTab }: Props) {
               onClick={() => handleTab(value)}
               key={value.value}
             >
-              {value.label}
+              {translations[lang][`${value.label}`]}
             </p>
           );
         })}

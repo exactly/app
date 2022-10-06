@@ -1,16 +1,9 @@
 {
   "en": {
-    "deposits": "Deposits",
-    "borrows": "Borrows",
-    "rateComposition": "Rate Composition",
+    "title": "Dashboard",
+    "deposit": "MY DEPOSIT",
+    "borrow": "MY BORROW",
     "healthFactor": "Health Factor",
-    "apr": "APR",
-    "variable": "Variable",
-    "fixed": "Fixed",
-    "deposited": "Deposited",
-    "borrowed": "Borrowed",
-    "collateral": "Collateral",
-    "debt": "Debt",
     "healthFactorTooltip": "Proportion of collateral deposited versus the amount borrowed. A health factor above 1.25 is recommended to avoid liquidation"
   },
   "es": {}

@@ -6,12 +6,12 @@ export function getMaturityPoolWithdrawsQuery(address: string, maturity: string,
   )}, market: "${market}"}){
       id
       market
+      timestamp
       maturity
       receiver
       owner
-      assets
+      positionAssets
       assetsDiscounted
-      timestamp
     }
   }
   `;
