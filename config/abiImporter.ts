@@ -4,7 +4,6 @@ import goerliFixedLenderWETH from 'protocol/deployments/goerli/MarketWETH.json';
 import goerliFixedLenderWBTC from 'protocol/deployments/goerli/MarketWBTC.json';
 import goerliFixedLenderUSDC from 'protocol/deployments/goerli/MarketUSDC.json';
 import goerliPreviewer from 'protocol/deployments/goerli/Previewer.json';
-// FIXME: need new files
 
 import { Dictionary } from 'types/Dictionary';
 

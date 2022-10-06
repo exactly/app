@@ -1,7 +1,6 @@
 import { BigNumber, Contract, ethers } from 'ethers';
 
 import goerliRouter from 'protocol/deployments/goerli/MarketETHRouter.json';
-// FIXME: need new file
 
 import { getContractData } from './contracts';
 

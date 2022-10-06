@@ -10,7 +10,6 @@ import goerliFixedLenderDAI from 'protocol/deployments/goerli/MarketDAI.json';
 import goerliFixedLenderWETH from 'protocol/deployments/goerli/MarketWETH.json';
 import goerliFixedLenderWBTC from 'protocol/deployments/goerli/MarketWBTC.json';
 import goerliFixedLenderUSDC from 'protocol/deployments/goerli/MarketUSDC.json';
-// FIXME: need the new files
 
 export function transformClasses(style: any, classes: string) {
   if (!style) return 'style object is mandatory';
