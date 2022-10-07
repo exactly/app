@@ -1,15 +1,15 @@
 import { Dictionary } from 'types/Dictionary';
 import { UnderlyingNetwork } from 'types/Underlying';
 
-import rinkebyDAI from 'protocol/deployments/rinkeby/DAI.json';
-import rinkebyWETH from 'protocol/deployments/rinkeby/WETH.json';
-import rinkebyWBTC from 'protocol/deployments/rinkeby/WBTC.json';
-import rinkebyUSDC from 'protocol/deployments/rinkeby/USDC.json';
+import goerliDAI from 'protocol/deployments/goerli/DAI.json';
+import goerliWETH from 'protocol/deployments/goerli/WETH.json';
+import goerliWBTC from 'protocol/deployments/goerli/WBTC.json';
+import goerliUSDC from 'protocol/deployments/goerli/USDC.json';
 
-import rinkebyFixedLenderDAI from 'protocol/deployments/rinkeby/MarketDAI.json';
-import rinkebyFixedLenderWETH from 'protocol/deployments/rinkeby/MarketWETH.json';
-import rinkebyFixedLenderWBTC from 'protocol/deployments/rinkeby/MarketWBTC.json';
-import rinkebyFixedLenderUSDC from 'protocol/deployments/rinkeby/MarketUSDC.json';
+import goerliFixedLenderDAI from 'protocol/deployments/goerli/MarketDAI.json';
+import goerliFixedLenderWETH from 'protocol/deployments/goerli/MarketWETH.json';
+import goerliFixedLenderWBTC from 'protocol/deployments/goerli/MarketWBTC.json';
+import goerliFixedLenderUSDC from 'protocol/deployments/goerli/MarketUSDC.json';
 
 export function transformClasses(style: any, classes: string) {
   if (!style) return 'style object is mandatory';
@@ -32,22 +32,22 @@ export function getUnderlyingData(network: string | undefined, symbol: string | 
   const currentNetwork = network ?? process.env.NEXT_PUBLIC_NETWORK;
 
   const baseData: UnderlyingNetwork = {
-    rinkeby: {
+    goerli: {
       dai: {
-        address: rinkebyDAI.address,
-        abi: rinkebyDAI.abi
+        address: goerliDAI.address,
+        abi: goerliDAI.abi
       },
       weth: {
-        address: rinkebyWETH.address,
-        abi: rinkebyWETH.abi
+        address: goerliWETH.address,
+        abi: goerliWETH.abi
       },
       wbtc: {
-        address: rinkebyWBTC.address,
-        abi: rinkebyWBTC.abi
+        address: goerliWBTC.address,
+        abi: goerliWBTC.abi
       },
       usdc: {
-        address: rinkebyUSDC.address,
-        abi: rinkebyUSDC.abi
+        address: goerliUSDC.address,
+        abi: goerliUSDC.abi
       }
     },
     mainnet: {}
@@ -60,11 +60,11 @@ export function getSymbol(address: string, network: string | undefined) {
   const currentNetwork = network ?? process.env.NEXT_PUBLIC_NETWORK;
 
   const dictionary: Dictionary<Dictionary<string>> = {
-    rinkeby: {
-      [rinkebyFixedLenderDAI.address.toLowerCase()]: 'DAI',
-      [rinkebyFixedLenderWETH.address.toLowerCase()]: 'WETH',
-      [rinkebyFixedLenderWBTC.address.toLowerCase()]: 'WBTC',
-      [rinkebyFixedLenderUSDC.address.toLowerCase()]: 'USDC'
+    goerli: {
+      [goerliFixedLenderDAI.address.toLowerCase()]: 'DAI',
+      [goerliFixedLenderWETH.address.toLowerCase()]: 'WETH',
+      [goerliFixedLenderWBTC.address.toLowerCase()]: 'WBTC',
+      [goerliFixedLenderUSDC.address.toLowerCase()]: 'USDC'
     }
   };
 

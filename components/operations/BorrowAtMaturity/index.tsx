@@ -538,10 +538,7 @@ function BorrowAtMaturity() {
     <>
       {!tx && (
         <>
-          <ModalTitle
-            title={translations[lang].fixedRateBorrow}
-            description={translations[lang].fixedRateBorrowExplanation}
-          />
+          <ModalTitle title={translations[lang].fixedRateBorrow} />
           <ModalAsset
             asset={symbol!}
             assetTitle={translations[lang].action.toUpperCase()}

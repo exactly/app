@@ -126,7 +126,7 @@ function Faucet() {
                   {asset}
                 </p>
                 <div className={styles.buttonContainer}>
-                  <a href="https://rinkebyfaucet.com/" target="_blank" rel="noopener noreferrer">
+                  <a href="https://goerlifaucet.com/" target="_blank" rel="noopener noreferrer">
                     <Button text={translations[lang].mint} />
                   </a>
                 </div>

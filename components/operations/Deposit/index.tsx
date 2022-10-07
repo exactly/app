@@ -407,10 +407,7 @@ function Deposit() {
     <>
       {!tx && (
         <>
-          <ModalTitle
-            title={translations[lang].variableRateDeposit}
-            description={translations[lang].variableRateDepositExplanation}
-          />
+          <ModalTitle title={translations[lang].variableRateDeposit} />
           <ModalAsset
             asset={symbol!}
             assetTitle={translations[lang].action.toUpperCase()}

@@ -5,7 +5,7 @@
     "dashboard": "Dashboard",
     "nerdMode": "Nerd Mode",
     "connectedTo": "Connected to",
-    "clickHere": "Connect to rinkeby",
+    "clickHere": "Connect to goerli",
     "disconnected": "Please connect your wallet"
   },
   "es": {}

@@ -455,10 +455,7 @@ function DepositAtMaturity() {
     <>
       {!tx && (
         <>
-          <ModalTitle
-            title={translations[lang].fixedRateDeposit}
-            description={translations[lang].fixedRateDepositExplanation}
-          />
+          <ModalTitle title={translations[lang].fixedRateDeposit} />
           <ModalAsset
             asset={symbol}
             assetTitle={translations[lang].action.toUpperCase()}
