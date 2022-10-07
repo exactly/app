@@ -325,10 +325,7 @@ function Withdraw() {
     <>
       {!tx && (
         <>
-          <ModalTitle
-            title={translations[lang].withdraw}
-            description={translations[lang].withdrawExplanation}
-          />
+          <ModalTitle title={translations[lang].withdraw} />
           <ModalAsset
             asset={symbol!}
             assetTitle={translations[lang].action.toUpperCase()}

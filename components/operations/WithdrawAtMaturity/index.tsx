@@ -358,7 +358,6 @@ function WithdrawAtMaturity() {
         <>
           <ModalTitle
             title={isEarlyWithdraw ? translations[lang].earlyWithdraw : translations[lang].withdraw}
-            description={translations[lang].withdrawExplanation}
           />
           <ModalAsset
             asset={symbol!}
