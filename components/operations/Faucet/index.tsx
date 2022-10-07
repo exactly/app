@@ -48,7 +48,7 @@ function Faucet() {
       };
 
       const faucetContract = getInstance(
-        '0x88138ca1e9e485a1e688b030f85bb79d63f156ba',
+        '0x1ca525Cd5Cb77DB5Fa9cBbA02A0824e283469DBe', // TODO: move to config file
         faucetAbi,
         'faucet'
       );
