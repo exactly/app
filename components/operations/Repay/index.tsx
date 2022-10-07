@@ -339,10 +339,7 @@ function Repay() {
     <>
       {!tx && (
         <>
-          <ModalTitle
-            title={translations[lang].lateRepay}
-            description={translations[lang].repayExplanation}
-          />
+          <ModalTitle title={translations[lang].lateRepay} />
           <ModalAsset
             asset={symbol!}
             assetTitle={translations[lang].action.toUpperCase()}

@@ -438,7 +438,6 @@ function RepayAtMaturity() {
         <>
           <ModalTitle
             title={isLateRepay ? translations[lang].lateRepay : translations[lang].earlyRepay}
-            description={translations[lang].repayExplanation}
           />
           <ModalAsset
             asset={symbol!}

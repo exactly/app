@@ -432,10 +432,7 @@ function Borrow() {
     <>
       {!tx && (
         <>
-          <ModalTitle
-            title={translations[lang].floatingPoolBorrow}
-            description={translations[lang].floatingPoolBorrowExplanation}
-          />
+          <ModalTitle title={translations[lang].floatingPoolBorrow} />
           <ModalAsset
             asset={symbol!}
             assetTitle={translations[lang].action.toUpperCase()}
