@@ -1,9 +1,9 @@
 import { BigNumber } from '@ethersproject/bignumber';
 
 export interface PreviewFixedAtAllMaturities {
-  maturity: BigNumber;
-  assets: BigNumber;
-  utilization: BigNumber;
+  maturity: BigNumber;    // timestamp - id of the maturity
+  assets: BigNumber;      // amount of assets to be paid when maturity finishes
+  utilization: BigNumber; // how much there is to borrow based on the actual lends/deposits
 }
 
 export type FixedMarketData = {

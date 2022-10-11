@@ -405,16 +405,29 @@ function BorrowAtMaturity() {
         'previewer'
       );
 
-      const feeAtMaturity = await previewerContract?.previewBorrowAtMaturity(
-        fixedLenderWithSigner!.address,
-        parseInt(date.value),
-        qtyValue
-      );
+      let feeAtMaturity;
+      try {
+        feeAtMaturity = await previewerContract?.previewBorrowAtMaturity(
+          fixedLenderWithSigner!.address,
+          parseInt(date.value),
+          qtyValue
+        );
+      } catch (error) {
+        // FIXME: should show some message like "There is not enough liquidity in the pool"
+        setFixedRate('N/A');
+        setSlippage('N/A');
+        setUtilizationRate({
+          ...utilizationRate,
+          after: 'N/A'
+        });
+        console.log(error);
+        return;
+      }
 
       const initialAssets = qtyValue;
       const finalAssets = feeAtMaturity.assets;
 
-      if (qty == '') {
+      if (qty === '') {
         setUtilizationRate({ ...utilizationRate, after: utilizationRate?.before! });
       } else {
         setUtilizationRate({

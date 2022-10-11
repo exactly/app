@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from 'react';
 import Skeleton from 'react-loading-skeleton';
 import dynamic from 'next/dynamic';
 import { formatFixed, parseFixed } from '@ethersproject/bignumber';
-
+import { MaxUint256 } from '@ethersproject/constants';
 const Button = dynamic(() => import('components/common/Button'));
 
 import LangContext from 'contexts/LangContext';
@@ -93,7 +93,8 @@ function Item({ symbol, maturity, fixedMarketData }: Props) {
         rates.depositAPY = `${depositFixedAPY.toFixed(2)}%`;
       }
 
-      if (borrowFixedAPY >= 0.01) {
+      // when borrowing is not possible, the previewer returns MaxUint256
+      if (borrowFixedAPY >= 0.01 && !finalBorrowAssets.eq(MaxUint256)) {
         rates.borrowAPY = `${borrowFixedAPY.toFixed(2)}%`;
       }
 
