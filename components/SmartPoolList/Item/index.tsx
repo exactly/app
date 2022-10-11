@@ -53,7 +53,7 @@ function Item({ market, type }: Props) {
   async function getFixedLenderContract() {
     if (!market) return;
 
-    const filteredFixedLender = fixedLenderData.find((fl) => fl.address == market.market);
+    const filteredFixedLender = fixedLenderData.find((fl) => fl.address === market.market);
 
     setEMarketAddress(filteredFixedLender?.address);
   }
@@ -90,20 +90,24 @@ function Item({ market, type }: Props) {
 
       if (!eMarketAddress) return;
 
-      if (type == 'deposit') {
+      if (type === 'deposit') {
         const maxFuturePools = accountData[market?.symbol.toUpperCase()].maxFuturePools;
         const data = await queryRate(subgraphUrl, eMarketAddress, 'deposit', { maxFuturePools });
 
         interestRate = data[0].rate.toFixed(2);
       }
 
+<<<<<<< HEAD
       if (type == 'borrow') {
+=======
+      if (type === 'borrow') {
+>>>>>>> develop
         const data = await queryRate(subgraphUrl, eMarketAddress, 'borrow');
 
         interestRate = data[0].rate.toFixed(2);
       }
 
-      if (interestRate && rate && `${interestRate}%` == rate) {
+      if (interestRate && rate && `${interestRate}%` === rate) {
         return;
       }
 
@@ -163,10 +167,10 @@ function Item({ market, type }: Props) {
   return (
     <div
       className={`${style.container} ${
-        type == 'borrow' ? style.secondaryContainer : style.primaryContainer
+        type === 'borrow' ? style.secondaryContainer : style.primaryContainer
       }`}
     >
-      <Link href={`/assets/${market?.symbol == 'WETH' ? 'eth' : market?.symbol.toLowerCase()}`}>
+      <Link href={`/assets/${market?.symbol === 'WETH' ? 'eth' : market?.symbol.toLowerCase()}`}>
         <div className={style.symbol}>
           {(market && (
             <Image
@@ -185,7 +189,7 @@ function Item({ market, type }: Props) {
         {(market &&
           poolData &&
           `$${formatNumber(
-            (type == 'borrow' ? poolData?.borrowed! : poolData?.supplied!) * poolData?.rate!,
+            (type === 'borrow' ? poolData?.borrowed! : poolData?.supplied!) * poolData?.rate!,
             'USD'
           )}`) || <Skeleton />}
       </p>
@@ -193,12 +197,12 @@ function Item({ market, type }: Props) {
       <div className={style.buttonContainer}>
         {(market && (
           <Button
-            text={type == 'borrow' ? translations[lang].borrow : translations[lang].deposit}
+            text={type === 'borrow' ? translations[lang].borrow : translations[lang].deposit}
             onClick={(e) => {
               e.stopPropagation();
-              handleClick(type == 'borrow' ? 'borrow' : 'deposit');
+              handleClick(type === 'borrow' ? 'borrow' : 'deposit');
             }}
-            className={type == 'borrow' ? 'secondary' : 'primary'}
+            className={type === 'borrow' ? 'secondary' : 'primary'}
           />
         )) || <Skeleton height={40} />}
       </div>

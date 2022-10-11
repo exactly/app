@@ -244,7 +244,11 @@ export default async (
     const proportion = (shareValue * WAD) / prevShareValue;
     return {
       date: new Date(timestamp * 1_000),
+<<<<<<< HEAD
       rate: Number(formatFixed(proportion, 18)) ** (31_536_000 / interval) - 1,
+=======
+      rate: (Number(formatFixed(proportion, 18)) ** (31_536_000 / interval) - 1) * 100,
+>>>>>>> develop
       utilization: Number(formatFixed(utilization, 18))
     };
   });

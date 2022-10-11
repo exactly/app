@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
-import { parseFixed } from '@ethersproject/bignumber';
+import { formatFixed, parseFixed } from '@ethersproject/bignumber';
 import dynamic from 'next/dynamic';
+import { captureMessage } from '@sentry/nextjs';
 
 const Item = dynamic(() => import('components/MarketsList/Item'));
 import Tooltip from 'components/Tooltip';
@@ -22,6 +23,7 @@ import keys from './translations.json';
 import formatMarkets from 'utils/formatMarkets';
 
 import numbers from 'config/numbers.json';
+const { usdAmount, maxAPYValue, minAPYValue } = numbers;
 
 function MarketsList() {
   const previewerData = useContext(PreviewerContext);
@@ -53,6 +55,57 @@ function MarketsList() {
     }
   }
 
+  const checkWeirdAPY = (marketsData: any) => {
+    if (!markets.length) return; // not ready to do the check yet
+
+    const findings = [];
+    // iterate through every market asset
+    for (let index = 0; index < marketsData.length; index++) {
+      const marketData = marketsData[index];
+      const {
+        borrows: borrowPools,
+        deposits: depositPools,
+        assets: initialAssets,
+        market: marketAddress
+      } = marketData;
+      const { name: marketName } = markets.find(
+        ({ market }) => market.toLowerCase() === marketAddress.toLowerCase()
+      )!;
+      // iterate through every borrow & deposit pools - parallel arrays
+      for (let j = 0; j < borrowPools.length; j++) {
+        const { assets: borrowFinalAssets, maturity: timestampEnd } = borrowPools[j];
+        const { assets: depositFinalAssets } = depositPools[j];
+
+        const timestampNow = new Date().getTime() / 1_000;
+
+        // 31_536_000 = seconds in 1 year
+        const timePerYear = 31_536_000 / (timestampEnd - timestampNow);
+
+        const borrowRate = borrowFinalAssets.mul(parseFixed('1', 18)).div(initialAssets);
+        const borrowFixedAPY = (Number(formatFixed(borrowRate, 18)) ** timePerYear - 1) * 100;
+
+        const depositRate = depositFinalAssets.mul(parseFixed('1', 18)).div(initialAssets);
+        const depositFixedAPY = (Number(formatFixed(depositRate, 18)) ** timePerYear - 1) * 100;
+
+        if (depositFixedAPY > borrowFixedAPY) {
+          findings.push(`Market: ${marketName} -> deposit APY > borrow APY.`);
+        }
+
+        if (depositFixedAPY > maxAPYValue || borrowFixedAPY > maxAPYValue) {
+          findings.push(`Market: ${marketName} -> APY > ${maxAPYValue}%`);
+        }
+
+        if (depositFixedAPY < minAPYValue || borrowFixedAPY < minAPYValue) {
+          findings.push(`Market: ${marketName} -> APY < ${minAPYValue}%`);
+        }
+      }
+    }
+
+    if (findings.length) {
+      captureMessage(`Weird Fixed APYs | ${findings.join(' | ')}`);
+    }
+  };
+
   async function getPreviewFixed() {
     try {
       const previewerContract = getInstance(
@@ -61,11 +114,12 @@ function MarketsList() {
         'previewer'
       );
 
-      const data = await previewerContract?.previewFixed(
-        parseFixed(numbers.usdAmount.toString(), 18)
+      const marketData = await previewerContract?.previewFixed(
+        parseFixed(usdAmount.toString(), 18)
       );
 
-      setFixedMarketData(data);
+      checkWeirdAPY(marketData);
+      setFixedMarketData(marketData);
     } catch (e) {
       console.log(e);
     }
