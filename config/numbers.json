@@ -9,5 +9,5 @@
   "gasLimitMultiplier": 1.25,
   "debounceTime": 500,
   "minAPYValue": 0,
-  "maxAPYValue": 100
+  "maxAPYValue": 30
 }

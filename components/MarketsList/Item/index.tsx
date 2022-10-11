@@ -93,10 +93,10 @@ function Item({ market, type, fixedMarketData }: Props) {
     }
 
     try {
-      const fixedMarket = fixedMarketData?.find((element) => element.market == market.market);
+      const fixedMarket = fixedMarketData?.find((element) => element.market === market.market);
 
-      if (type == 'borrow') {
-        const pool = fixedMarket?.borrows.find((pool) => pool.maturity.toString() == date?.value);
+      if (type === 'borrow') {
+        const pool = fixedMarket?.borrows.find((pool) => pool.maturity.toString() === date?.value);
         if (!fixedMarket || !pool) return;
 
         const initialAssets = fixedMarket.assets;
@@ -114,8 +114,8 @@ function Item({ market, type, fixedMarketData }: Props) {
         } else {
           setRate(`${borrowFixedAPY.toFixed(2)}%`);
         }
-      } else if (type == 'deposit') {
-        const pool = fixedMarket?.deposits.find((pool) => pool.maturity.toString() == date?.value);
+      } else if (type === 'deposit') {
+        const pool = fixedMarket?.deposits.find((pool) => pool.maturity.toString() === date?.value);
         if (!fixedMarket || !pool) return;
 
         const initialAssets = fixedMarket.assets;
