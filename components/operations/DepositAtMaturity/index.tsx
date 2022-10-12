@@ -291,7 +291,7 @@ function DepositAtMaturity() {
   }
 
   async function estimateGas() {
-    if (symbol == 'WETH') return;
+    if (symbol === 'WETH') return;
 
     try {
       const gasPrice = (await fixedLenderWithSigner?.provider.getFeeData())?.maxFeePerGas;
