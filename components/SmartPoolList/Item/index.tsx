@@ -97,11 +97,7 @@ function Item({ market, type }: Props) {
         interestRate = data[0].rate.toFixed(2);
       }
 
-<<<<<<< HEAD
-      if (type == 'borrow') {
-=======
       if (type === 'borrow') {
->>>>>>> develop
         const data = await queryRate(subgraphUrl, eMarketAddress, 'borrow');
 
         interestRate = data[0].rate.toFixed(2);
