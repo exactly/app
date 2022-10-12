@@ -94,13 +94,13 @@ function Item({ market, type }: Props) {
         const maxFuturePools = accountData[market?.symbol.toUpperCase()].maxFuturePools;
         const data = await queryRate(subgraphUrl, eMarketAddress, 'deposit', { maxFuturePools });
 
-        interestRate = data[0].rate.toFixed(2);
+        interestRate = (data[0].rate * 100).toFixed(2);
       }
 
       if (type === 'borrow') {
         const data = await queryRate(subgraphUrl, eMarketAddress, 'borrow');
 
-        interestRate = data[0].rate.toFixed(2);
+        interestRate = (data[0].rate * 100).toFixed(2);
       }
 
       if (interestRate && rate && `${interestRate}%` === rate) {
