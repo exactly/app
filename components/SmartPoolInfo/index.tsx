@@ -1,5 +1,5 @@
-import { useContext, useEffect, useState } from 'react';
-import { utils } from 'ethers';
+import { FC, useContext, useEffect, useState } from 'react';
+import { formatEther, formatUnits } from '@ethersproject/units';
 import Skeleton from 'react-loading-skeleton';
 import Image from 'next/image';
 
@@ -24,7 +24,7 @@ interface Props {
   symbol: string;
 }
 
-function SmartPoolInfo({ symbol }: Props) {
+const SmartPoolInfo: FC<Props> = ({ symbol }) => {
   const { walletAddress, connect } = useWeb3Context();
 
   const { accountData } = useContext(AccountDataContext);
@@ -45,19 +45,16 @@ function SmartPoolInfo({ symbol }: Props) {
     if (!accountData || !symbol) return;
 
     try {
-      const borrowed = accountData[symbol.toUpperCase()].totalFloatingBorrowAssets;
-      const supplied = accountData[symbol.toUpperCase()].totalFloatingDepositAssets;
-      const decimals = accountData[symbol.toUpperCase()].decimals;
+      const {
+        totalFloatingBorrowAssets: borrowed,
+        totalFloatingDepositAssets: supplied,
+        decimals,
+        oraclePrice
+      } = accountData[parseSymbol(symbol)];
+      const exchangeRate = parseFloat(formatEther(oraclePrice));
 
-      const exchangeRate = parseFloat(utils.formatEther(accountData[symbol].oraclePrice));
-
-      const newPoolData = {
-        borrowed: parseFloat(await utils.formatUnits(borrowed, decimals)),
-        supplied: parseFloat(await utils.formatUnits(supplied, decimals))
-      };
-
-      setSupply(newPoolData.supplied * exchangeRate);
-      setDemand(newPoolData.borrowed * exchangeRate);
+      setSupply(parseFloat(formatUnits(supplied, decimals)) * exchangeRate);
+      setDemand(parseFloat(formatUnits(borrowed, decimals)) * exchangeRate);
     } catch (e) {
       console.log(e);
     }
@@ -134,6 +131,6 @@ function SmartPoolInfo({ symbol }: Props) {
       </ul>
     </div>
   );
-}
+};
 
 export default SmartPoolInfo;
