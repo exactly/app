@@ -24,8 +24,10 @@ import style from './style.module.scss';
 import keys from './translations.json';
 
 import getLastAPR from 'utils/getLastAPR';
-import { getSymbol } from 'utils/utils';
 import FloatingAPRChart from 'components/FloatingAPRChart';
+import { getSymbol, getUnderlyingData } from 'utils/utils';
+import AssetInfoHeader from 'components/AssetInfo/Header';
+import { AssetSymbol } from 'utils/assets';
 
 interface Props {
   symbol: string;
@@ -33,11 +35,14 @@ interface Props {
 
 const Asset: NextPage<Props> = ({ symbol = 'DAI' }) => {
   const { network } = useWeb3Context();
-  const { dates } = useContext(MarketContext);
+  const { dates, market } = useContext(MarketContext);
   const fixedLenderData = useContext(FixedLenderContext);
   const { accountData } = useContext(AccountDataContext);
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
+
+  const networkName = (network?.name || process.env.NEXT_PUBLIC_NETWORK) as string;
+  const assetAddress = getUnderlyingData(networkName, symbol.toLowerCase())?.address as string;
 
   const itemsPerPage = 3;
   const [page, setPage] = useState<number>(1);
@@ -50,7 +55,7 @@ const Asset: NextPage<Props> = ({ symbol = 'DAI' }) => {
         contract.address!,
         network?.name ?? process.env.NEXT_PUBLIC_NETWORK
       );
-      return contractSymbol == symbol;
+      return contractSymbol === symbol;
     });
 
     return filteredFixedLender?.address;
@@ -83,6 +88,11 @@ const Asset: NextPage<Props> = ({ symbol = 'DAI' }) => {
       <Navbar />
 
       <section className={style.container}>
+        <AssetInfoHeader
+          symbol={symbol.toLowerCase() as AssetSymbol}
+          assetAddress={assetAddress}
+          networkName={networkName}
+        />
         <div className={style.smartPoolContainer}>
           <SmartPoolInfo symbol={symbol} />
           {/* <FloatingAPYChart market={eMarketAddress} network={network} /> */}
