@@ -25,7 +25,7 @@ import keys from './translations.json';
 
 import getLastAPY from 'utils/getLastAPY';
 import { getSymbol } from 'utils/utils';
-import FloatingAPYChart from 'components/FloatingAPYChart';
+import FloatingAPRChart from 'components/FloatingAPRChart';
 
 interface Props {
   symbol: string;

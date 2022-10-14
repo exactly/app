@@ -30,7 +30,7 @@ interface Props {
   network: Network | undefined;
 }
 
-function FloatingAPYChart({ market, network }: Props) {
+function FloatingAPRChart({ market, network }: Props) {
   const [data, setData] = useState<any>([]);
   const defaultOptions = {
     maxFuturePools: 3,
@@ -46,10 +46,10 @@ function FloatingAPYChart({ market, network }: Props) {
   const translations: { [key: string]: LangKeys } = keys;
 
   useEffect(() => {
-    getHistoricalAPY();
+    getHistoricalAPR();
   }, [market, network, queryoptions]);
 
-  async function getHistoricalAPY() {
+  async function getHistoricalAPR() {
     if (!market || !network) return;
 
     const subgraphUrl = getSubgraph(network.name);
@@ -113,7 +113,7 @@ function FloatingAPYChart({ market, network }: Props) {
             <YAxis
               stroke="#008cf4"
               unit="%"
-              label={{ value: 'APY', angle: -90, position: 'insideLeft' }}
+              label={{ value: 'APR', angle: -90, position: 'insideLeft' }}
             />
             <YAxis
               yAxisId="right"
@@ -158,7 +158,7 @@ function FloatingAPYChart({ market, network }: Props) {
   );
 }
 
-export default FloatingAPYChart;
+export default FloatingAPRChart;
 
 interface Options {
   maxFuturePools?: number | undefined;
