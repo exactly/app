@@ -68,7 +68,7 @@ function Item({ market, type }: Props) {
   }, [accountData, market, network, eMarketAddress]);
 
   useEffect(() => {
-    checkWeirdAPY();
+    checkWeirdAPR();
   }, [rate]);
 
   function handleClick(type: Operation) {
@@ -94,13 +94,13 @@ function Item({ market, type }: Props) {
         const maxFuturePools = accountData[market?.symbol.toUpperCase()].maxFuturePools;
         const data = await queryRate(subgraphUrl, eMarketAddress, 'deposit', { maxFuturePools });
 
-        interestRate = (data[0].rate * 100).toFixed(2);
+        interestRate = (data[0].apr * 100).toFixed(2);
       }
 
       if (type === 'borrow') {
         const data = await queryRate(subgraphUrl, eMarketAddress, 'borrow');
 
-        interestRate = (data[0].rate * 100).toFixed(2);
+        interestRate = (data[0].apr * 100).toFixed(2);
       }
 
       if (interestRate && rate && `${interestRate}%` === rate) {
@@ -117,13 +117,13 @@ function Item({ market, type }: Props) {
     }
   }
 
-  function checkWeirdAPY() {
+  function checkWeirdAPR() {
     if (!market || !rate) return;
-    const apy = Number(rate.substring(0, rate.length - 1)); // remove % symbol from rate
+    const apr = Number(rate.substring(0, rate.length - 1)); // remove % symbol from rate
 
     try {
-      if (apy < numbers.minAPYValue || apy > numbers.maxAPYValue) {
-        throw new Error(`weirdAPYs | ${rate} in ${type} ${market.symbol}`);
+      if (apr < numbers.minAPYValue || apr > numbers.maxAPYValue) {
+        throw new Error(`weirdAPRs | ${rate} in ${type} ${market.symbol}`);
       }
     } catch (e) {
       captureException(e);
