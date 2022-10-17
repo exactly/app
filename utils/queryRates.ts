@@ -124,7 +124,6 @@ export default async (
         floatingDebt
         earningsAccumulator
       }
-
       ${key}_floatingDebtState: floatingDebtUpdates(
         first: 1
         orderBy: timestamp
@@ -134,7 +133,6 @@ export default async (
         timestamp
         utilization
       }
-
       ${key}_interestRateModel: interestRateModelSets(
         first: 1
         orderBy: timestamp
@@ -145,7 +143,6 @@ export default async (
         floatingCurveB
         floatingMaxUtilization
       }
-
       ${type === 'deposit' ? `
         ${key}_accumulatorAccrual: accumulatorAccruals(
           first: 1
@@ -155,7 +152,6 @@ export default async (
         ) {
           accumulatorAccrual: timestamp
         }
-
         ${key}_smoothFactor: earningsAccumulatorSmoothFactorSets(
           first: 1
           orderBy: timestamp
@@ -164,7 +160,6 @@ export default async (
         ) {
           smoothFactor: earningsAccumulatorSmoothFactor
         }
-
         ${key}_treasuryFeeRate: treasurySets(
           first: 1
           orderBy: timestamp
@@ -173,10 +168,9 @@ export default async (
         ) {
           treasuryFeeRate
         }
-
         ${[...new Array(maxFuturePools! + 1)]
-          .map((__, j) => timestamp - (timestamp % FIXED_INTERVAL) + j * FIXED_INTERVAL)
-          .map((maturity) => `
+    .map((__, j) => timestamp - (timestamp % FIXED_INTERVAL) + j * FIXED_INTERVAL)
+    .map((maturity) => `
           ${key}_pool_${maturity}: fixedEarningsUpdates(
             first: 1
             orderBy: timestamp
@@ -240,6 +234,7 @@ export default async (
     return {
       date: new Date(timestamp * 1_000),
       apr: (Number(formatFixed(proportion, 18)) - 1) * (31_536_000 / interval),
+      apy: Number(formatFixed(proportion, 18)) ** (31_536_000 / interval) - 1,
       utilization: Number(formatFixed(utilization, 18)),
     };
   });
