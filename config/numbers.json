@@ -5,9 +5,9 @@
   "daysToWarning": 2,
   "daysToError": 0,
   "slippage": 0.05,
-  "usdAmount": 1000,
+  "usdAmount": 1,
   "gasLimitMultiplier": 1.25,
   "debounceTime": 500,
-  "minAPYValue": 0,
-  "maxAPYValue": 30
+  "minAPRValue": 0,
+  "maxAPRValue": 30
 }

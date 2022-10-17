@@ -1,10 +1,10 @@
 {
   "en": {
-    "apy": "APY ($1k)",
+    "apr": "APR ($1)",
     "liquidity": "Liquidity",
     "maturity": "Maturity",
     "deposit": "Deposit",
     "borrow": "Borrow",
-    "apyTooltip": "Marginal interest rate for a $1k operation"
+    "aprTooltip": "Marginal interest rate for a $1 operation"
   }
 }

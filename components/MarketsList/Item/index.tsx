@@ -107,12 +107,12 @@ function Item({ market, type, fixedMarketData }: Props) {
 
         const time = 31_536_000 / (parseInt(date?.value!) - borrowTimestamp);
 
-        const borrowFixedAPY = (Number(formatFixed(borrowRate, 18)) ** time - 1) * 100;
+        const borrowFixedAPR = (Number(formatFixed(borrowRate, 18)) - 1) * time * 100;
 
-        if (borrowFixedAPY <= 0.01) {
+        if (borrowFixedAPR <= 0.01) {
           setRate('N/A');
         } else {
-          setRate(`${borrowFixedAPY.toFixed(2)}%`);
+          setRate(`${borrowFixedAPR.toFixed(2)}%`);
         }
       } else if (type === 'deposit') {
         const pool = fixedMarket?.deposits.find((pool) => pool.maturity.toString() === date?.value);
@@ -126,12 +126,12 @@ function Item({ market, type, fixedMarketData }: Props) {
 
         const time = 31_536_000 / (parseInt(date?.value!) - depositTimestamp);
 
-        const depositFixedAPY = (Number(formatFixed(depositRate, 18)) ** time - 1) * 100;
+        const depositFixedAPR = (Number(formatFixed(depositRate, 18)) - 1) * time * 100;
 
-        if (depositFixedAPY <= 0.01) {
+        if (depositFixedAPR <= 0.01) {
           setRate('N/A');
         } else {
-          setRate(`${depositFixedAPY.toFixed(2)}%`);
+          setRate(`${depositFixedAPR.toFixed(2)}%`);
         }
       }
     } catch (e) {

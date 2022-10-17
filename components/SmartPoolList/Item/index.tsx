@@ -122,7 +122,7 @@ function Item({ market, type }: Props) {
     const apr = Number(rate.substring(0, rate.length - 1)); // remove % symbol from rate
 
     try {
-      if (apr < numbers.minAPYValue || apr > numbers.maxAPYValue) {
+      if (apr < numbers.minAPRValue || apr > numbers.maxAPRValue) {
         throw new Error(`weirdAPRs | ${rate} in ${type} ${market.symbol}`);
       }
     } catch (e) {
