@@ -277,10 +277,10 @@ function BorrowAtMaturity() {
 
       const currentTimestamp = new Date().getTime() / 1000;
       const time = (parseInt(date.value) - currentTimestamp) / 31536000;
-      const apy = parseFloat(slippage) / 100;
+      const apr = parseFloat(slippage) / 100;
       const decimals = accountData![symbol.toUpperCase()].decimals;
 
-      const maxAmount = parseFloat(qty!) * Math.pow(1 + apy, time);
+      const maxAmount = parseFloat(qty!) * ((1 + apr) * time);
 
       let borrow;
 
@@ -438,12 +438,12 @@ function BorrowAtMaturity() {
 
       const rate = finalAssets.mul(parseFixed('1', 18)).div(initialAssets);
 
-      const fixedAPY = (Number(formatFixed(rate, 18)) ** time - 1) * 100;
+      const fixedAPR = (Number(formatFixed(rate, 18)) * time - 1) * 100;
 
-      const slippageAPY = (fixedAPY * (1 + numbers.slippage)).toFixed(2);
+      const slippageAPR = (fixedAPR * (1 + numbers.slippage)).toFixed(2);
 
-      setSlippage(slippageAPY);
-      setFixedRate(`${fixedAPY.toFixed(2)}%`);
+      setSlippage(slippageAPR);
+      setFixedRate(`${fixedAPR.toFixed(2)}%`);
     } catch (e) {
       console.log(e);
     }
@@ -560,12 +560,12 @@ function BorrowAtMaturity() {
           />
           <section className={styles.maturityRowModal}>
             <ModalMaturityEditable text={translations[lang].maturityPool} />
-            <ModalCell text={translations[lang].apy} value={fixedRate} line />
+            <ModalCell text={translations[lang].apr} value={fixedRate} line />
           </section>
           <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} symbol={symbol!} />
           {gasError?.component !== 'gas' && symbol != 'WETH' && <ModalTxCost gas={gas} />}
           <ModalRowEditable
-            text={translations[lang].maximumBorrowApy}
+            text={translations[lang].maximumBorrowApr}
             value={slippage}
             editable={editSlippage}
             symbol="%"

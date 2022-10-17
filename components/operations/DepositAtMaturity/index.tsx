@@ -222,13 +222,13 @@ function DepositAtMaturity() {
       const decimals = accountData[symbol].decimals;
       const currentTimestamp = new Date().getTime() / 1000;
       const time = (parseInt(date.value) - currentTimestamp) / 31536000;
-      const apy = parseFloat(slippage) / 100;
+      const apr = parseFloat(slippage) / 100;
 
-      const minAmount = parseFloat(qty!) * Math.pow(1 + apy, time);
+      const minAmount = parseFloat(qty!) * ((1 + apr) * time);
 
       let deposit;
 
-      if (symbol == 'WETH') {
+      if (symbol === 'WETH') {
         const ETHrouter = web3Provider && handleEth(network?.name, web3Provider?.getSigner());
 
         deposit = await ETHrouter?.depositAtMaturityETH(date.value, minAmount.toString(), qty!);
@@ -396,12 +396,12 @@ function DepositAtMaturity() {
 
       const rate = finalAssets.mul(parseFixed('1', 18)).div(initialAssets);
 
-      const fixedAPY = (Number(formatFixed(rate, 18)) ** time - 1) * 100;
+      const fixedAPR = (Number(formatFixed(rate, 18)) * time - 1) * 100;
 
-      const slippageAPY = (fixedAPY * (1 - numbers.slippage)).toFixed(2);
+      const slippageAPR = (fixedAPR * (1 - numbers.slippage)).toFixed(2);
 
       // Let's check against 0.01 for now, because this is a percentage and it could be 0.0001 or lower, but not 0
-      if (fixedAPY < 0.01) {
+      if (fixedAPR < 0.01) {
         setError({
           status: true,
           message: translations[lang].zeroRate,
@@ -409,8 +409,8 @@ function DepositAtMaturity() {
         });
       }
 
-      setSlippage(slippageAPY);
-      setFixedRate(`${fixedAPY.toFixed(2)}%`);
+      setSlippage(slippageAPR);
+      setFixedRate(`${fixedAPR.toFixed(2)}%`);
     } catch (e) {
       console.log(e);
     }
@@ -460,7 +460,7 @@ function DepositAtMaturity() {
           />
           <section className={styles.maturityRowModal}>
             <ModalMaturityEditable text={translations[lang].maturityPool.toUpperCase()} />
-            <ModalCell text={translations[lang].apy.toUpperCase()} value={fixedRate} column />
+            <ModalCell text={translations[lang].apr.toUpperCase()} value={fixedRate} column />
           </section>
           <ModalInput
             onMax={onMax}
@@ -471,7 +471,7 @@ function DepositAtMaturity() {
           />
           {error?.component !== 'gas' && symbol != 'WETH' && <ModalTxCost gas={gas} />}
           <ModalRowEditable
-            text={translations[lang].minimumApy}
+            text={translations[lang].minimumApr}
             value={slippage}
             editable={editSlippage}
             symbol="%"

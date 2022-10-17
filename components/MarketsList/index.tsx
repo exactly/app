@@ -23,7 +23,7 @@ import keys from './translations.json';
 import formatMarkets from 'utils/formatMarkets';
 
 import numbers from 'config/numbers.json';
-const { usdAmount, maxAPYValue, minAPYValue } = numbers;
+const { usdAmount, maxAPRValue, minAPRValue } = numbers;
 
 function MarketsList() {
   const previewerData = useContext(PreviewerContext);
@@ -55,7 +55,7 @@ function MarketsList() {
     }
   }
 
-  const checkWeirdAPY = (marketsData: any) => {
+  const checkWeirdAPR = (marketsData: any) => {
     if (!markets.length) return; // not ready to do the check yet
 
     const findings = [];
@@ -82,27 +82,27 @@ function MarketsList() {
         const timePerYear = 31_536_000 / (timestampEnd - timestampNow);
 
         const borrowRate = borrowFinalAssets.mul(parseFixed('1', 18)).div(initialAssets);
-        const borrowFixedAPY = (Number(formatFixed(borrowRate, 18)) ** timePerYear - 1) * 100;
+        const borrowFixedAPR = (Number(formatFixed(borrowRate, 18)) * timePerYear - 1) * 100;
 
         const depositRate = depositFinalAssets.mul(parseFixed('1', 18)).div(initialAssets);
-        const depositFixedAPY = (Number(formatFixed(depositRate, 18)) ** timePerYear - 1) * 100;
+        const depositFixedAPR = (Number(formatFixed(depositRate, 18)) * timePerYear - 1) * 100;
 
-        if (depositFixedAPY > borrowFixedAPY) {
-          findings.push(`Market: ${marketName} -> deposit APY > borrow APY.`);
+        if (depositFixedAPR > borrowFixedAPR) {
+          findings.push(`Market: ${marketName} -> deposit APR > borrow APR.`);
         }
 
-        if (depositFixedAPY > maxAPYValue || borrowFixedAPY > maxAPYValue) {
-          findings.push(`Market: ${marketName} -> APY > ${maxAPYValue}%`);
+        if (depositFixedAPR > maxAPRValue || borrowFixedAPR > maxAPRValue) {
+          findings.push(`Market: ${marketName} -> APR > ${maxAPRValue}%`);
         }
 
-        if (depositFixedAPY < minAPYValue || borrowFixedAPY < minAPYValue) {
-          findings.push(`Market: ${marketName} -> APY < ${minAPYValue}%`);
+        if (depositFixedAPR < minAPRValue || borrowFixedAPR < minAPRValue) {
+          findings.push(`Market: ${marketName} -> APR < ${minAPRValue}%`);
         }
       }
     }
 
     if (findings.length) {
-      captureMessage(`Weird Fixed APYs | ${findings.join(' | ')}`);
+      captureMessage(`Weird Fixed APRs | ${findings.join(' | ')}`);
     }
   };
 
@@ -118,7 +118,7 @@ function MarketsList() {
         parseFixed(usdAmount.toString(), 18)
       );
 
-      checkWeirdAPY(marketData);
+      checkWeirdAPR(marketData);
       setFixedMarketData(marketData);
     } catch (e) {
       console.log(e);
@@ -133,8 +133,8 @@ function MarketsList() {
             <div className={style.symbol}>{translations[lang].asset}</div>
             <div className={style.title}>{translations[lang].totalDeposits}</div>
             <div className={style.title}>
-              {translations[lang].averageAPY}{' '}
-              <Tooltip value={translations[lang].depositApyTooltip} orientation="down" />
+              {translations[lang].averageAPR}{' '}
+              <Tooltip value={translations[lang].depositAprTooltip} orientation="down" />
             </div>
             <div className={style.title} />
           </div>
@@ -155,8 +155,8 @@ function MarketsList() {
             <span className={style.symbol}>{translations[lang].asset}</span>
             <span className={style.title}>{translations[lang].totalBorrows}</span>
             <div className={style.title}>
-              {translations[lang].averageAPY}{' '}
-              <Tooltip value={translations[lang].borrowApyTooltip} orientation="down" />
+              {translations[lang].averageAPR}{' '}
+              <Tooltip value={translations[lang].borrowAprTooltip} orientation="down" />
             </div>
             <span className={style.title} />
           </div>

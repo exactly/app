@@ -1,4 +1,4 @@
-import { useContext, useEffect, useMemo, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import type { GetStaticProps, NextPage } from 'next';
 
 import Navbar from 'components/Navbar';
@@ -23,7 +23,7 @@ import style from './style.module.scss';
 
 import keys from './translations.json';
 
-import getLastAPY from 'utils/getLastAPY';
+import getLastAPR from 'utils/getLastAPR';
 import { getSymbol } from 'utils/utils';
 import FloatingAPRChart from 'components/FloatingAPRChart';
 
@@ -54,27 +54,27 @@ const Asset: NextPage<Props> = ({ symbol = 'DAI' }) => {
     });
 
     return filteredFixedLender?.address;
-  }, [fixedLenderData, network]);
+  }, [fixedLenderData, network?.name, symbol]);
 
-  useEffect(() => {
-    handleAPY();
-  }, [network, accountData, symbol, eMarketAddress]);
-
-  async function handleAPY() {
+  const handleAPR = useCallback(async () => {
     if (!accountData || !eMarketAddress) return;
 
     try {
-      const apy: any = await getLastAPY(dates, eMarketAddress, network, accountData);
+      const apr: any = await getLastAPR(dates, eMarketAddress, network, accountData);
 
-      const deposit = apy?.sortedDeposit;
-      const borrow = apy?.sortedBorrow;
+      const deposit = apr?.sortedDeposit;
+      const borrow = apr?.sortedBorrow;
 
       setDepositsData(deposit);
       setBorrowsData(borrow);
     } catch (e) {
       console.log(e);
     }
-  }
+  }, [network, accountData, eMarketAddress, dates]);
+
+  useEffect(() => {
+    handleAPR();
+  }, [handleAPR]);
 
   return (
     <>
