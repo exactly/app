@@ -3,9 +3,9 @@
     "asset": "Asset",
     "totalDeposits": "Total Deposits",
     "totalBorrows": "Total Borrows",
-    "averageAPY": "APY ($1k)",
-    "depositApyTooltip": "Marginal interest rate for a $1k deposit",
-    "borrowApyTooltip": "Marginal interest rate for a $1k loan"
+    "averageAPR": "APR ($1)",
+    "depositAprTooltip": "Marginal interest rate for a $1 deposit",
+    "borrowAprTooltip": "Marginal interest rate for a $1 loan"
   },
   "es": {}
 }

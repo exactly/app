@@ -9,7 +9,7 @@ import { Maturity } from 'types/Maturity';
 import { getSymbol } from './utils';
 import getSubgraph from './getSubgraph';
 
-async function getLastAPY(
+async function getLastAPR(
   maturity: Maturity[],
   market: string,
   network: ethers.providers.Network | undefined,
@@ -76,25 +76,25 @@ async function getLastAPY(
         (parseInt(maturityData?.maturity!) -
           maturityData?.getLastDepositRate?.depositAtMaturities[0]?.timestamp);
 
-      let fixedBorrowAPY = 0;
-      let fixedDepositAPY = 0;
+      let fixedBorrowAPR = 0;
+      let fixedDepositAPR = 0;
 
       if (borrowFee && decimals && borrowAmount) {
         const borrowFixedRate =
           parseFloat(ethers.utils.formatUnits(borrowFee, decimals)) /
           parseFloat(ethers.utils.formatUnits(borrowAmount, decimals));
-        fixedBorrowAPY = (Math.pow(1 + borrowFixedRate, borrowTime) - 1) * 100;
+        fixedBorrowAPR = (borrowFixedRate - 1) * borrowTime * 100;
       }
 
       if (depositFee && decimals && depositAmount) {
         const depositFixedRate =
           parseFloat(ethers.utils.formatUnits(depositFee, decimals)) /
           parseFloat(ethers.utils.formatUnits(depositAmount, decimals));
-        fixedDepositAPY = (Math.pow(1 + depositFixedRate, depositTime) - 1) * 100;
+        fixedDepositAPR = (depositFixedRate - 1) * depositTime * 100;
       }
 
-      depositData.apy = Number(fixedDepositAPY.toFixed(2));
-      borrowData.apy = Number(fixedBorrowAPY.toFixed(2));
+      depositData.apr = Number(fixedDepositAPR.toFixed(2));
+      borrowData.apr = Number(fixedBorrowAPR.toFixed(2));
 
       deposit.push(depositData);
       borrow.push(borrowData);
@@ -111,4 +111,4 @@ async function getLastAPY(
   });
 }
 
-export default getLastAPY;
+export default getLastAPR;

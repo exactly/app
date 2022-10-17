@@ -65,8 +65,8 @@ function Item({ type, amount, maturityDate, symbol, market, progress, decimals, 
     []
   );
   const [exchangeRate, setExchangeRate] = useState<number | undefined>(undefined);
-  const [APY, setAPY] = useState<number | undefined>(undefined);
   const [daysRemaining, setDaysRemaining] = useState<string | undefined>(undefined);
+  const [APR, setAPR] = useState<number | undefined>(undefined);
 
   useEffect(() => {
     getMaturityData();
@@ -75,7 +75,7 @@ function Item({ type, amount, maturityDate, symbol, market, progress, decimals, 
   }, [maturityDate, walletAddress, accountData]);
 
   useEffect(() => {
-    getAPY();
+    getAPR();
   }, [walletAddress, accountData]);
 
   async function getMaturityData() {
@@ -124,12 +124,12 @@ function Item({ type, amount, maturityDate, symbol, market, progress, decimals, 
     setExchangeRate(rate);
   }
 
-  async function getAPY() {
+  async function getAPR() {
     if (!walletAddress || !maturityDate || !market || !type || !network) return;
 
     const subgraphUrl = getSubgraph(network.name);
     const allTransactions = [];
-    let allAPYbyAmount = 0;
+    let allAPRbyAmount = 0;
     let allAmounts = 0;
 
     if (type?.value === 'borrow') {
@@ -156,15 +156,15 @@ function Item({ type, amount, maturityDate, symbol, market, progress, decimals, 
       const transactionMaturity = parseFloat(transaction.maturity);
       const time = 31536000 / (transactionMaturity - transactionTimestamp);
 
-      const transactionAPY = (Math.pow(1 + transactionRate, time) - 1) * 100;
+      const transactionAPR = (transactionRate - 1) * time * 100;
 
-      allAPYbyAmount += transactionAPY * transactionAmount;
+      allAPRbyAmount += transactionAPR * transactionAmount;
       allAmounts += transactionAmount;
     });
 
-    const averageAPY = allAPYbyAmount / allAmounts;
+    const averageAPR = allAPRbyAmount / allAmounts;
 
-    setAPY(averageAPY);
+    setAPR(averageAPR);
   }
 
   function getDays() {
@@ -200,7 +200,7 @@ function Item({ type, amount, maturityDate, symbol, market, progress, decimals, 
           )}
         </span>
         <span className={styles.value}>
-          {APY != undefined ? `${(APY || 0).toFixed(2)} %` : <Skeleton width={40} />}
+          {APR != undefined ? `${(APR || 0).toFixed(2)} %` : <Skeleton width={40} />}
         </span>
 
         <span className={styles.value}>{maturityDate && parseTimestamp(maturityDate)}</span>

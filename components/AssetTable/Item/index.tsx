@@ -49,14 +49,14 @@ function Item({ symbol, maturity, fixedMarketData }: Props) {
     setRates(undefined);
 
     try {
-      const marketAddress = accountData[symbol].market;
-      const fixedMarket = fixedMarketData?.find((element) => element.market == marketAddress);
+      const { market: marketAddress } = accountData[symbol];
+      const fixedMarket = fixedMarketData?.find(({ market }) => market === marketAddress);
 
       const poolBorrowData = fixedMarket?.borrows.find(
-        (pool) => pool.maturity.toString() == maturity?.value
+        (pool) => pool.maturity.toString() === maturity?.value
       );
       const poolDepositData = fixedMarket?.deposits.find(
-        (pool) => pool.maturity.toString() == maturity?.value
+        (pool) => pool.maturity.toString() === maturity?.value
       );
 
       if (!fixedMarket || !poolBorrowData || !poolDepositData) return;
@@ -80,22 +80,22 @@ function Item({ symbol, maturity, fixedMarketData }: Props) {
       const borrowTime = 31_536_000 / (parseInt(maturity?.value!) - borrowTimestamp);
       const depositTime = 31_536_000 / (parseInt(maturity?.value!) - depositTimestamp);
 
-      //APYs
-      const borrowFixedAPY = (Number(formatFixed(borrowRate, 18)) ** borrowTime - 1) * 100;
-      const depositFixedAPY = (Number(formatFixed(depositRate, 18)) ** depositTime - 1) * 100;
+      //APRs
+      const borrowFixedAPR = (Number(formatFixed(borrowRate, 18)) - 1) * borrowTime * 100;
+      const depositFixedAPR = (Number(formatFixed(depositRate, 18)) - 1) * depositTime * 100;
 
       const rates = {
-        depositAPY: 'N/A',
-        borrowAPY: 'N/A'
+        depositAPR: 'N/A',
+        borrowAPR: 'N/A'
       };
 
-      if (depositFixedAPY >= 0.01) {
-        rates.depositAPY = `${depositFixedAPY.toFixed(2)}%`;
+      if (depositFixedAPR >= 0.01) {
+        rates.depositAPR = `${depositFixedAPR.toFixed(2)}%`;
       }
 
       // when borrowing is not possible, the previewer returns MaxUint256
-      if (borrowFixedAPY >= 0.01 && !finalBorrowAssets.eq(MaxUint256)) {
-        rates.borrowAPY = `${borrowFixedAPY.toFixed(2)}%`;
+      if (borrowFixedAPR >= 0.01 && !finalBorrowAssets.eq(MaxUint256)) {
+        rates.borrowAPR = `${borrowFixedAPR.toFixed(2)}%`;
       }
 
       setRates(rates);
@@ -123,8 +123,8 @@ function Item({ symbol, maturity, fixedMarketData }: Props) {
         <span className={styles.value}>{maturity?.label || <Skeleton />}</span>
       </div>
       <div className={styles.lastFixedRate}>
-        <div className={styles.deposit}>{rates?.depositAPY ? rates.depositAPY : <Skeleton />}</div>
-        <div className={styles.borrow}>{rates?.borrowAPY ? rates.borrowAPY : <Skeleton />}</div>
+        <div className={styles.deposit}>{rates?.depositAPR || <Skeleton />}</div>
+        <div className={styles.borrow}>{rates?.borrowAPR || <Skeleton />}</div>
       </div>
       <div className={styles.actions}>
         <div className={styles.buttonContainer}>

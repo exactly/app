@@ -69,9 +69,9 @@ function AssetTable({ page, itemsPerPage, symbol, deposits, borrows }: Props) {
       <div className={styles.row}>
         <div className={styles.maturity}>{translations[lang].maturity}</div>
         <div className={styles.lastFixedRate}>
-          <div className={styles.apy}>
-            {translations[lang].apy}{' '}
-            <Tooltip value={translations[lang].apyTooltip} orientation="down" />
+          <div className={styles.apr}>
+            {translations[lang].apr}{' '}
+            <Tooltip value={translations[lang].aprTooltip} orientation="down" />
           </div>
         </div>
         <div className={styles.actions}></div>

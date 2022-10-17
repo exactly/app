@@ -124,8 +124,8 @@ function PoolsChart({ deposits, borrows }: Props) {
             scale="time"
           />
           <YAxis
-            dataKey="apy"
-            name="Last APY"
+            dataKey="apr"
+            name="Last APR"
             unit="%"
             stroke="#8f8c9c"
             tickMargin={16}
