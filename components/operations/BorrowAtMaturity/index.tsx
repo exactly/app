@@ -438,7 +438,7 @@ function BorrowAtMaturity() {
 
       const rate = finalAssets.mul(parseFixed('1', 18)).div(initialAssets);
 
-      const fixedAPR = (Number(formatFixed(rate, 18)) * time - 1) * 100;
+      const fixedAPR = (Number(formatFixed(rate, 18)) - 1) * time * 100;
 
       const slippageAPR = (fixedAPR * (1 + numbers.slippage)).toFixed(2);
 
