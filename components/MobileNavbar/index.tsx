@@ -129,14 +129,14 @@ function MobileNavbar() {
               </li>
             );
           })}
-          <li className={styles.theme} onClick={changeTheme}>
+          {/* <li className={styles.theme} onClick={changeTheme}>
             <Image
               src={theme == 'light' ? '/img/icons/moon.svg' : '/img/icons/sun.svg'}
               alt="theme toggler"
               width={16}
               height={16}
             />
-          </li>
+          </li> */}
           {walletAddress && (
             <li className={styles.disconnect} onClick={() => disconnect && disconnect()}>
               <Image src="/img/icons/power.svg" alt="power" width={24} height={24} />
