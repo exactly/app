@@ -1,5 +1,6 @@
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import type { GetStaticProps, NextPage } from 'next';
+import Grid from '@mui/material/Grid';
 
 import Navbar from 'components/Navbar';
 import PoolsChart from 'components/PoolsChart';
@@ -24,9 +25,8 @@ import style from './style.module.scss';
 import keys from './translations.json';
 
 import getLastAPR from 'utils/getLastAPR';
-import FloatingAPRChart from 'components/FloatingAPRChart';
 import { getSymbol, getUnderlyingData } from 'utils/utils';
-import AssetInfoHeader from 'components/AssetInfo/Header';
+import AssetHeaderInfo from 'components/AssetInfo/Header';
 import { AssetSymbol } from 'utils/assets';
 
 interface Props {
@@ -88,15 +88,26 @@ const Asset: NextPage<Props> = ({ symbol = 'DAI' }) => {
       <Navbar />
 
       <section className={style.container}>
-        <AssetInfoHeader
+        <AssetHeaderInfo
           symbol={symbol.toLowerCase() as AssetSymbol}
           assetAddress={assetAddress}
           networkName={networkName}
         />
-        <div className={style.smartPoolContainer}>
-          <SmartPoolInfo symbol={symbol} />
-          {/* <FloatingAPYChart market={eMarketAddress} network={network} /> */}
-        </div>
+        <Grid container spacing={4} mt={5} ml={0}>
+          <Grid item container>
+            <SmartPoolInfo
+              symbol={symbol}
+              eMarketAddress={eMarketAddress}
+              networkName={networkName}
+            />
+            {/* Add Smart Pool Data component here */}
+          </Grid>
+          {/* TODO: put FRP info here */}
+          <Grid item container>
+            {/* FRP Info here */}
+            {/* FRP Data here */}
+          </Grid>
+        </Grid>
         <section className={style.assetData}>
           <div className={style.assetContainer}>
             <p className={style.title}>{translations[lang].maturityPools}</p>

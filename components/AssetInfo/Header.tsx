@@ -15,7 +15,7 @@ type Props = {
   assetAddress: string;
 };
 
-const AssetInfoHeader: FC<Props> = ({ symbol, networkName, assetAddress }) => {
+const AssetHeaderInfo: FC<Props> = ({ symbol, networkName, assetAddress }) => {
   const { description: assetDescription } = getAssetData(symbol as AssetSymbol);
   const etherscanUrl = getTokenEtherscanUrl(networkName as Network, assetAddress);
 
@@ -63,4 +63,4 @@ const AssetInfoHeader: FC<Props> = ({ symbol, networkName, assetAddress }) => {
   );
 };
 
-export default AssetInfoHeader;
+export default AssetHeaderInfo;
