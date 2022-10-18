@@ -26,7 +26,8 @@ export const ThemeProvider: FC = ({ children }) => {
         (storageTheme == 'light' || storageTheme == 'dark')
       ) {
         document.body.dataset.theme = storageTheme;
-        setTheme(storageTheme);
+        // setTheme(storageTheme);
+        setTheme('light'); //HACK disabling the darkmode option, force the light theme if the user change the localStorage
       }
     } else {
       if (window?.localStorage) {

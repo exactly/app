@@ -60,7 +60,7 @@ function Navbar() {
         method: 'wallet_switchEthereumChain',
         params: [
           {
-            chainId: '0x4'
+            chainId: '0x5'
           }
         ]
       });
@@ -139,7 +139,7 @@ function Navbar() {
               </div>
             )
           )}
-          <div className={styles.theme}>
+          {/* <div className={styles.theme}>
             <Image
               src={theme == 'light' ? '/img/icons/moon.svg' : '/img/icons/sun.svg'}
               alt="theme toggler"
@@ -147,7 +147,7 @@ function Navbar() {
               height={16}
               onClick={changeTheme}
             />
-          </div>
+          </div> */}
         </div>
       </div>
     </nav>
