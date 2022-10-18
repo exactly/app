@@ -2,7 +2,7 @@ import { useContext, useMemo } from 'react';
 import { parseFixed } from '@ethersproject/bignumber';
 import Image from 'next/image';
 import Skeleton from 'react-loading-skeleton';
-import { ethers } from 'ethers';
+import { constants } from 'ethers';
 
 import { LangKeys } from 'types/Lang';
 import { HealthFactor } from 'types/HealthFactor';
@@ -52,7 +52,7 @@ function ModalRowHealthFactor({ qty, symbol, operation, healthFactorCallback }: 
     if (!accountData || !symbol) return;
 
     if (qty == '') {
-      return ethers.constants.Zero;
+      return constants.Zero;
     }
     const decimals = accountData[symbol].decimals;
 

@@ -1,16 +1,10 @@
 .container {
   display: flex;
-  padding: var(--u2) var(--u3);
-  margin: 0 var(--smallUnit);
-  border-radius: var(--u);
+  padding: var(--u) var(--u2);
   align-items: center;
   cursor: pointer;
-  background: var(--background);
-  min-width: 800px;
-
-  &:last-child {
-    margin-bottom: var(--smallUnit);
-  }
+  background: #f9f9f9;
+  border-bottom: 1px solid #e7e7e7;
 
   .symbol {
     width: calc(100% / 7);
@@ -21,8 +15,7 @@
 
     .primary {
       width: calc(100% / 7);
-      margin-bottom: var(--smallUnit);
-      font-size: var(--font-16);
+      font-size: var(--font-14);
     }
     .secondary {
       font-size: var(--font-12);
@@ -33,20 +26,20 @@
   .actions {
     display: flex;
     margin-left: auto;
-    width: calc(100% / 7);
 
     .buttonContainer {
-      width: 150px;
-      height: var(--u5);
+      min-width: 97px;
+      height: 27px;
       font-weight: 600;
       font-size: var(--font-14);
-      margin: 0 var(--u2);
+      margin: var(--smallUnit);
     }
   }
 
   .value {
     width: calc(100% / 7);
     color: var(--gray-900);
+    font-size: 14px;
 
     .line {
       height: var(--smallUnit);

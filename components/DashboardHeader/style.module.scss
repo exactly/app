@@ -1,165 +1,46 @@
-.section {
-  width: 100%;
+.headerSection {
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--u5);
+  flex-direction: column;
+  gap: var(--u4);
+  margin: calc(var(--navbarHeight) + var(--u10)) auto 0 auto;
   max-width: var(--maxWidth);
-  margin: 0 auto;
-  margin-top: calc(var(--navbarHeight) * 1.5 + var(--currentNetwork));
+  width: 90%;
 
-  .container {
+  .titleSection {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    background-color: var(--background);
-    box-shadow: var(--shadow-tables);
-    padding: var(--u3);
-    border-radius: var(--u);
-    position: relative;
-    margin: 0 auto;
 
-    .box {
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-
-      .title {
-        color: var(--gray-500);
-        font-weight: 500;
-        font-size: var(--font-16);
-        display: flex;
-        align-items: center;
-        gap: var(--smallUnit);
-        margin: 0;
-        margin-bottom: var(--u2);
-      }
-
-      .value {
-        color: var(--gray-900);
-        font-size: var(--font-32);
-        font-weight: 600;
-        margin: 0;
-      }
-
-      .disabledValue {
-        @extend .value;
-        color: var(--gray-100);
-      }
-
-      .subvalue {
-        color: var(--gray-900);
-        display: flex;
-        align-items: center;
-        gap: var(--smallUnit);
-        margin: 0;
-
-        .asset {
-          height: var(--u2);
-          width: var(--u2);
-        }
-      }
-      .informationContainer {
-        display: flex;
-        gap: var(--u2);
-        .information {
-          display: flex;
-          flex-direction: column;
-          gap: var(--u);
-
-          .informationTitle {
-            font-size: var(--font-12);
-            font-weight: 600;
-            color: var(--gray-500);
-            display: flex;
-            align-items: center;
-            margin: 0;
-
-            .fixed {
-              display: inline-block;
-              width: var(--u);
-              height: var(--u);
-              border-radius: 50%;
-              background: var(--primary);
-              margin-right: var(--smallUnit);
-            }
-
-            .variable {
-              @extend .fixed;
-              background: var(--secondary);
-            }
-
-            .debt {
-              @extend .fixed;
-              background: var(--secondary);
-            }
-
-            .collateral {
-              @extend .fixed;
-              background: var(--primary);
-            }
-          }
-          .informationValue {
-            font-size: var(--font-14);
-            color: var(--gray-900);
-            font-weight: 400;
-            margin: 0;
-          }
-        }
-      }
-    }
-
-    .chartContainer {
-      margin-left: var(--u);
-      display: flex;
-      flex-direction: column;
-
-      .detail {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: var(--u);
-
-        img {
-          height: var(--u2);
-          width: var(--u2);
-        }
-      }
+    .title {
+      font-weight: 600;
+      font-size: var(--font-36);
+      margin: 0;
     }
   }
 
-  .line {
-    height: 100%;
-    background: var(--gray-100);
-    width: 1px;
-    margin: var(--u2);
-  }
-}
+  .stats {
+    display: flex;
+    gap: var(--u5);
 
-@media (max-width: 769px) {
-  .section {
-    .container {
-      width: 90%;
-      margin: 0 auto;
+    .stat {
+      font-weight: 600;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      gap: var(--u3);
+      gap: var(--u);
 
-      .box {
-        align-items: center;
-        justify-content: center;
+      .statTitle {
+        font-family: var(--secondary-font);
+        color: var(--secondary-text-color);
+        margin: 0;
+        font-size: var(--font-12);
       }
 
-      .chartContainer {
+      .statValue {
+        display: flex;
         align-items: center;
-        justify-content: center;
+        gap: var(--smallUnit);
+        font-size: var(--font-24);
+        margin: 0;
       }
-    }
-
-    .line {
-      display: none;
     }
   }
 }

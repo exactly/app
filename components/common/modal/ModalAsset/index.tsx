@@ -1,5 +1,5 @@
 import { useContext, useMemo } from 'react';
-import { ethers } from 'ethers';
+import { utils } from 'ethers';
 import Skeleton from 'react-loading-skeleton';
 
 import formatNumber from 'utils/formatNumber';
@@ -30,7 +30,7 @@ function ModalAsset({ asset, assetTitle, amount, amountTitle }: Props) {
   const exchangeRate = useMemo(() => {
     if (!accountData || !asset) return 1;
 
-    return parseFloat(ethers.utils.formatEther(accountData[asset].oraclePrice));
+    return parseFloat(utils.formatEther(accountData[asset].oraclePrice));
   }, [parsedSymbol, accountData]);
 
   return (

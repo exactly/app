@@ -1,5 +1,5 @@
 import { useContext, useState } from 'react';
-import { ethers } from 'ethers';
+import { utils } from 'ethers';
 import Image from 'next/image';
 
 import Button from 'components/common/Button';
@@ -55,7 +55,7 @@ function Faucet() {
 
       const mint = await faucetContract?.mint(
         contract?.address,
-        ethers.utils.parseUnits(amounts[asset.toUpperCase()], decimals[asset.toUpperCase()])
+        utils.parseUnits(amounts[asset.toUpperCase()], decimals[asset.toUpperCase()])
       );
 
       await mint.wait();

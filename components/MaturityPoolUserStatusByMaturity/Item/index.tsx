@@ -4,6 +4,8 @@ import request from 'graphql-request';
 import Image from 'next/image';
 
 import Button from 'components/common/Button';
+const Tooltip = dynamic(() => import('components/Tooltip'));
+
 import Skeleton from 'react-loading-skeleton';
 
 import LangContext from 'contexts/LangContext';
@@ -27,6 +29,7 @@ import parseTimestamp from 'utils/parseTimestamp';
 import parseSymbol from 'utils/parseSymbol';
 import getSubgraph from 'utils/getSubgraph';
 import formatNumber from 'utils/formatNumber';
+import getDaysRemaining from 'utils/getDaysRemaining';
 
 import {
   getMaturityPoolBorrowsQuery,
@@ -34,6 +37,7 @@ import {
   getMaturityPoolWithdrawsQuery,
   getMaturityPoolRepaysQuery
 } from 'queries';
+import dynamic from 'next/dynamic';
 
 type Props = {
   type?: Option | undefined;
@@ -44,9 +48,10 @@ type Props = {
   market: string | undefined;
   decimals: number | undefined;
   data: Borrow | Deposit | undefined;
+  progress: number | undefined;
 };
 
-function Item({ type, amount, maturityDate, symbol, market, decimals, data }: Props) {
+function Item({ type, amount, maturityDate, symbol, market, progress, decimals, data }: Props) {
   const { network, walletAddress } = useWeb3Context();
 
   const { accountData } = useContext(AccountDataContext);
@@ -61,10 +66,12 @@ function Item({ type, amount, maturityDate, symbol, market, decimals, data }: Pr
   );
   const [exchangeRate, setExchangeRate] = useState<number | undefined>(undefined);
   const [APY, setAPY] = useState<number | undefined>(undefined);
+  const [daysRemaining, setDaysRemaining] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     getMaturityData();
     getRate();
+    getDays();
   }, [maturityDate, walletAddress, accountData]);
 
   useEffect(() => {
@@ -160,6 +167,13 @@ function Item({ type, amount, maturityDate, symbol, market, decimals, data }: Pr
     setAPY(averageAPY);
   }
 
+  function getDays() {
+    if (!maturityDate) return;
+
+    const days = getDaysRemaining(Number(maturityDate));
+    setDaysRemaining(days);
+  }
+
   return (
     <details className={styles.container}>
       <summary className={styles.summary}>
@@ -168,10 +182,10 @@ function Item({ type, amount, maturityDate, symbol, market, decimals, data }: Pr
             <Image
               src={`/img/assets/${symbol?.toLowerCase()}.svg`}
               alt={symbol}
-              width={40}
-              height={40}
+              width={20}
+              height={20}
             />
-          )) || <Skeleton circle height={40} width={40} />}
+          )) || <Skeleton circle height={20} width={20} />}
           <span className={styles.primary}>{symbol ? parseSymbol(symbol) : <Skeleton />}</span>
         </div>
         <span className={styles.value}>
@@ -189,11 +203,22 @@ function Item({ type, amount, maturityDate, symbol, market, decimals, data }: Pr
           {APY != undefined ? `${(APY || 0).toFixed(2)} %` : <Skeleton width={40} />}
         </span>
 
+        <span className={styles.value}>{maturityDate && parseTimestamp(maturityDate)}</span>
+
+        <span className={styles.value}>
+          <div className={styles.line}>
+            {progress && progress >= 100 ? (
+              <div className={styles.fullProgress} style={{ width: `100%` }} />
+            ) : (
+              <div className={styles.progress} style={{ width: `${progress?.toString()}%` }} />
+            )}
+          </div>
+        </span>
         {type && data ? (
           <div className={styles.buttonContainer}>
             <Button
               text={type.value == 'borrow' ? translations[lang].repay : translations[lang].withdraw}
-              className={type.value == 'borrow' ? 'quaternary' : 'tertiary'}
+              className={'tertiary'}
               onClick={() => {
                 setDate({ value: maturityDate!, label: parseTimestamp(maturityDate!) });
                 setMarket({ value: market! });

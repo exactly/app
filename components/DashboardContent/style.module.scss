@@ -1,0 +1,27 @@
+.container {
+  width: 100%;
+  display: flex;
+  max-width: var(--maxWidth);
+  flex-direction: row-reverse;
+  margin: 0 auto;
+  gap: var(--u4);
+
+  .chartContainer {
+    min-width: 307px;
+  }
+
+  .poolsContainer {
+    width: 100%;
+  }
+}
+
+@media (max-width: 769px) {
+  .container {
+    flex-direction: column;
+    width: 100%;
+
+    .poolsContainer {
+      width: fit-content;
+    }
+  }
+}

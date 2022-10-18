@@ -250,10 +250,10 @@ function Item({
           <Image
             src={`/img/assets/${symbol.toLowerCase()}.svg`}
             alt={symbol}
-            width={40}
-            height={40}
+            width={20}
+            height={20}
           />
-        )) || <Skeleton circle height={40} width={40} />}
+        )) || <Skeleton circle height={20} width={20} />}
         <div className={styles.primary}>{(symbol && parseSymbol(symbol)) || <Skeleton />}</div>
       </div>
       <div className={styles.value}>
@@ -296,7 +296,7 @@ function Item({
       {type?.value == 'deposit' && (
         <>
           {symbol ? (
-            <div className={styles.value}>
+            <div>
               {!loading ? (
                 <Tooltip
                   value={
@@ -339,7 +339,7 @@ function Item({
               text={
                 type.value == 'deposit' ? translations[lang].deposit : translations[lang].borrow
               }
-              className={type.value == 'deposit' ? 'primary' : 'secondary'}
+              className={'primary'}
               onClick={() => {
                 setMarket({ value: market! });
                 setOperation(type.value as Operation);
@@ -355,7 +355,7 @@ function Item({
               text={
                 type.value == 'deposit' ? translations[lang].withdraw : translations[lang].repay
               }
-              className={type.value == 'deposit' ? 'tertiary' : 'quaternary'}
+              className={'tertiary'}
               onClick={() => {
                 setMarket({ value: market! });
                 setOperation(type.value == 'deposit' ? 'withdraw' : 'repay');

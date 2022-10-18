@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { ethers } from 'ethers';
+import { utils } from 'ethers';
 import Skeleton from 'react-loading-skeleton';
 import Image from 'next/image';
 
@@ -49,11 +49,11 @@ function SmartPoolInfo({ symbol }: Props) {
       const supplied = accountData[symbol.toUpperCase()].totalFloatingDepositAssets;
       const decimals = accountData[symbol.toUpperCase()].decimals;
 
-      const exchangeRate = parseFloat(ethers.utils.formatEther(accountData[symbol].oraclePrice));
+      const exchangeRate = parseFloat(utils.formatEther(accountData[symbol].oraclePrice));
 
       const newPoolData = {
-        borrowed: parseFloat(await ethers.utils.formatUnits(borrowed, decimals)),
-        supplied: parseFloat(await ethers.utils.formatUnits(supplied, decimals))
+        borrowed: parseFloat(await utils.formatUnits(borrowed, decimals)),
+        supplied: parseFloat(await utils.formatUnits(supplied, decimals))
       };
 
       setSupply(newPoolData.supplied * exchangeRate);
