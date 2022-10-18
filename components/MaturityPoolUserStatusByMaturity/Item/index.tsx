@@ -1,5 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
-import { BigNumber, ethers } from 'ethers';
+import { formatEther, formatUnits } from '@ethersproject/units';
+import { BigNumber } from '@ethersproject/bignumber';
 import request from 'graphql-request';
 import Image from 'next/image';
 
@@ -119,7 +120,7 @@ function Item({ type, amount, maturityDate, symbol, market, progress, decimals, 
   async function getRate() {
     if (!symbol || !accountData) return;
 
-    const rate = parseFloat(ethers.utils.formatEther(accountData[symbol].oraclePrice));
+    const rate = parseFloat(formatEther(accountData[symbol].oraclePrice));
 
     setExchangeRate(rate);
   }
@@ -149,14 +150,14 @@ function Item({ type, amount, maturityDate, symbol, market, progress, decimals, 
     }
 
     allTransactions.forEach((transaction) => {
-      const transactionFee = parseFloat(ethers.utils.formatUnits(transaction.fee, decimals));
-      const transactionAmount = parseFloat(ethers.utils.formatUnits(transaction.assets, decimals));
+      const transactionFee = parseFloat(formatUnits(transaction.fee, decimals));
+      const transactionAmount = parseFloat(formatUnits(transaction.assets, decimals));
       const transactionRate = transactionFee / transactionAmount;
       const transactionTimestamp = parseFloat(transaction.timestamp);
       const transactionMaturity = parseFloat(transaction.maturity);
       const time = 31536000 / (transactionMaturity - transactionTimestamp);
 
-      const transactionAPR = (transactionRate - 1) * time * 100;
+      const transactionAPR = transactionRate * time * 100;
 
       allAPRbyAmount += transactionAPR * transactionAmount;
       allAmounts += transactionAmount;
@@ -191,7 +192,7 @@ function Item({ type, amount, maturityDate, symbol, market, progress, decimals, 
         <span className={styles.value}>
           {symbol && exchangeRate && amount ? (
             `$${formatNumber(
-              parseFloat(ethers.utils.formatUnits(amount, decimals)) * exchangeRate,
+              parseFloat(formatUnits(amount, decimals)) * exchangeRate,
               'USD',
               true
             )}`
@@ -242,7 +243,7 @@ function Item({ type, amount, maturityDate, symbol, market, progress, decimals, 
           </thead>
           <tbody>
             {transactions.map((transaction: any, key) => {
-              const value = symbol && ethers.utils.formatUnits(transaction.assets, decimals);
+              const value = symbol && formatUnits(transaction.assets, decimals);
 
               const text = transaction?.fee
                 ? type?.value == 'borrow'
