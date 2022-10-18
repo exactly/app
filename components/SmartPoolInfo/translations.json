@@ -6,7 +6,10 @@
     "liquidity": "Liquidity",
     "utilizationRate": "Utilization Rate",
     "deposit": "Deposit",
-    "smartPool": "Variable Rate Pool"
+    "smartPool": "Variable Rate Pool",
+    "TVL": "Total Value Locked",
+    "depositAPR": "Deposit APR",
+    "borrowAPR": "Borrow APR"
   },
   "es": {
     "days": "días",
@@ -14,6 +17,9 @@
     "liquidity": "Liquidez",
     "utilizationRate": "Tasa de Utilización",
     "deposit": "Depositar",
-    "smartPool": "Smart Pool"
+    "smartPool": "Smart Pool",
+    "TVL": "Valor Total Bloqueado",
+    "depositAPR": "Depositar APR",
+    "borrowAPR": "Prestar APR"
   }
 }

@@ -1,47 +1,57 @@
-import { FC, useContext, useEffect, useState } from 'react';
+import { FC, useCallback, useContext, useEffect, useState } from 'react';
 import { formatEther, formatUnits } from '@ethersproject/units';
 import Skeleton from 'react-loading-skeleton';
-import Image from 'next/image';
+import Grid from '@mui/material/Grid';
+import Typography from '@mui/material/Typography';
 
 import LangContext from 'contexts/LangContext';
-import { useWeb3Context } from 'contexts/Web3Context';
 import AccountDataContext from 'contexts/AccountDataContext';
-import ModalStatusContext from 'contexts/ModalStatusContext';
-import { MarketContext } from 'contexts/AddressContext';
 
 import { LangKeys } from 'types/Lang';
 
-import styles from './style.module.scss';
-
 import keys from './translations.json';
-
-import Button from 'components/common/Button';
 
 import parseSymbol from 'utils/parseSymbol';
 import formatNumber from 'utils/formatNumber';
+import queryRates from 'utils/queryRates';
+import getSubgraph from 'utils/getSubgraph';
 
-interface Props {
+type ItemInfoProps = {
+  label: string;
+  value?: string;
+};
+
+const ItemInfo: FC<ItemInfoProps> = ({ label, value }) => {
+  return (
+    <Grid item sx={{ display: 'flex', flexDirection: 'column' }}>
+      <Typography textTransform="uppercase" variant="caption">
+        {label}
+      </Typography>
+      <Typography variant="h5" component="p">
+        {(!!value && value) || <Skeleton />}
+      </Typography>
+    </Grid>
+  );
+};
+
+type SmartPoolInfoProps = {
   symbol: string;
-}
+  eMarketAddress?: string;
+  networkName: string;
+};
 
-const SmartPoolInfo: FC<Props> = ({ symbol }) => {
-  const { walletAddress, connect } = useWeb3Context();
-
+const SmartPoolInfo: FC<SmartPoolInfoProps> = ({ symbol, eMarketAddress, networkName }) => {
   const { accountData } = useContext(AccountDataContext);
-  const { setOpen, setOperation } = useContext(ModalStatusContext);
-  const { setMarket } = useContext(MarketContext);
-
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
   const [supply, setSupply] = useState<number | undefined>(undefined);
   const [demand, setDemand] = useState<number | undefined>(undefined);
+  const [depositAPR, setDepositAPR] = useState<string | undefined>(undefined);
+  const [borrowAPR, setBorrowAPR] = useState<string | undefined>(undefined);
+  const subgraphUrl = getSubgraph(networkName);
 
-  useEffect(() => {
-    getSmartPoolData();
-  }, [accountData, symbol]);
-
-  async function getSmartPoolData() {
+  const fetchPoolData = useCallback(async () => {
     if (!accountData || !symbol) return;
 
     try {
@@ -58,78 +68,57 @@ const SmartPoolInfo: FC<Props> = ({ symbol }) => {
     } catch (e) {
       console.log(e);
     }
-  }
+  }, [accountData, symbol]);
 
-  function handleClick() {
-    if (!walletAddress && connect) return connect();
+  useEffect(() => {
+    fetchPoolData();
+  }, [fetchPoolData]);
 
-    if (!accountData) return;
+  const fetchAPRs = useCallback(async () => {
+    if (!accountData || !eMarketAddress) return;
+    const maxFuturePools = accountData[symbol.toUpperCase()].maxFuturePools;
 
-    const marketData = accountData[symbol];
+    // TODO: consider storing these results in a new context so it's only fetched once - already added in tech debt docs
+    const [{ apr: depositAPRRate }] = await queryRates(subgraphUrl, eMarketAddress, 'deposit', {
+      maxFuturePools
+    });
+    const [{ apr: borrowAPRRate }] = await queryRates(subgraphUrl, eMarketAddress, 'borrow');
+    setDepositAPR(`${(depositAPRRate * 100).toFixed(2)}%`);
 
-    setOperation('deposit');
-    setMarket({ value: marketData.market });
-    setOpen(true);
-  }
+    setBorrowAPR(`${(borrowAPRRate * 100).toFixed(2)}%`);
+  }, [accountData, eMarketAddress, symbol, subgraphUrl]);
+
+  useEffect(() => {
+    fetchAPRs();
+  }, [fetchAPRs]);
 
   return (
-    <div className={styles.maturityContainer}>
-      <div className={styles.titleContainer}>
-        <p className={styles.title}>{translations[lang].smartPool}</p>
-      </div>
-      <ul className={styles.table}>
-        <li className={styles.header}>
-          <div className={styles.assetInfo}>
-            <Image
-              src={`/img/assets/${symbol.toLowerCase()}.svg`}
-              alt={symbol}
-              width={40}
-              height={40}
-            />
-            <p className={styles.asset}>{parseSymbol(symbol)}</p>
-          </div>
-          <div className={styles.buttonContainer}>
-            <Button
-              text={translations[lang].deposit}
-              className="tertiary"
-              onClick={() => handleClick()}
-            />
-          </div>
-        </li>
-        <li className={styles.row}>
-          <span className={styles.title}>{translations[lang].totalDeposited}</span>{' '}
-          <p className={styles.value}>
-            {(supply != undefined && `$${formatNumber(supply, symbol, true)}`) || <Skeleton />}
-          </p>
-        </li>
-        <li className={styles.row}>
-          <span className={styles.title}>{translations[lang].totalBorrowed}</span>{' '}
-          <p className={styles.value}>
-            {(demand != undefined && `$${formatNumber(demand, symbol, true)}`) || <Skeleton />}
-          </p>
-        </li>
-        <li className={styles.row}>
-          <span className={styles.title}> {translations[lang].liquidity}</span>{' '}
-          <p className={styles.value}>
-            {supply != undefined && demand != undefined ? (
-              `$${formatNumber(supply - demand, symbol, true)}`
-            ) : (
-              <Skeleton />
-            )}
-          </p>
-        </li>
-        <li className={styles.row}>
-          <span className={styles.title}>{translations[lang].utilizationRate}</span>{' '}
-          <p className={styles.value}>
-            {supply != undefined && demand != undefined ? (
-              `${((demand / supply) * 100 || 0).toFixed(2)}%`
-            ) : (
-              <Skeleton />
-            )}{' '}
-          </p>
-        </li>
-      </ul>
-    </div>
+    <Grid container>
+      <Typography variant="h6" gutterBottom>
+        {translations[lang].smartPool}
+      </Typography>
+      <Grid item container spacing={3}>
+        <ItemInfo
+          label={translations[lang].totalDeposited}
+          value={supply ? formatNumber(supply, symbol) : undefined}
+        />
+        <ItemInfo
+          label={translations[lang].totalBorrowed}
+          value={demand ? formatNumber(demand, symbol) : undefined}
+        />
+        <ItemInfo
+          label={translations[lang].TVL}
+          value={supply && demand ? formatNumber(supply - demand, symbol) : undefined}
+        />
+        {/* TODO: put real values */}
+        <ItemInfo label={translations[lang].depositAPR} value={depositAPR} />
+        <ItemInfo label={translations[lang].borrowAPR} value={borrowAPR} />
+        <ItemInfo
+          label={translations[lang].utilizationRate}
+          value={supply && demand ? `${((demand / supply) * 100).toFixed(2)}%` : undefined}
+        />
+      </Grid>
+    </Grid>
   );
 };
 

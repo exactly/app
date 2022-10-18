@@ -22,8 +22,16 @@ const theme = createTheme({
             fontSize: 36,
             fontWeight: 600,
         },
+        h5: {
+            fontWeight: 600,
+            fontSize: 24,
+        },
         h6: {
             fontWeight: 700
+        },
+        caption: {
+            color: '#9a9a9a',
+            fontFamily: 'IBM Plex Mono',
         }
     },
     components: {

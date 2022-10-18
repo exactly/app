@@ -1,7 +1,7 @@
 import { Dictionary } from 'types/Dictionary';
 
 function formatNumber(number: string | number, symbol: string, standard?: boolean) {
-  const parsedNumber = typeof number == 'string' ? parseFloat(number) : number;
+  const parsedNumber = typeof number === 'string' ? parseFloat(number) : number;
 
   const dictionary: Dictionary<number> = {
     USD: 2,
