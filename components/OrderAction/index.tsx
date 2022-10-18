@@ -35,7 +35,7 @@ const OrderOrDeposit: FC<OrderOrDepositProps> = ({ showActions }) => {
 
 function OrderAction() {
   const { setOpen, setOperation } = useContext(ModalStatusContext);
-  const [showActions, setShowActions] = useState(true);
+  const [showActions, setShowActions] = useState(false);
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 

@@ -11,7 +11,7 @@
     "walletBalance": "Wallet Balance",
     "noDepositsFound": "No deposits found",
     "noBorrowsFound": "No borrows found",
-    "netAssetValue": "Net Asset Value",
+    "netAssetValue": "Value",
     "difference": "%"
   },
   "es": {}

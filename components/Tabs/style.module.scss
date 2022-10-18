@@ -2,13 +2,13 @@
   max-width: var(--maxWidth);
   margin: 0 auto;
   margin-top: var(--u6);
-  border-bottom: 1px solid var(--gray-100);
+  border-bottom: var(--smallUnit) solid var(--gray-100);
 
   .tabs {
     display: flex;
     text-align: center;
     align-items: center;
-    width: 300px;
+    width: 360px;
 
     .tab {
       padding: var(--smallUnit) var(--u2);
@@ -20,11 +20,11 @@
     }
 
     .selected {
-      border-bottom: 4px solid;
-      border-image: linear-gradient(90deg, #008cf4 0.29%, #34c53a 100.29%);
-      border-image-slice: 1;
+      border-bottom: 4px solid #34c53a;
       color: var(--gray-900);
-      font-weight: 600;
+      background-color: black;
+      color: white;
+      margin-bottom: calc(var(--smallUnit) * -1);
     }
   }
 }

@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { ethers } from 'ethers';
+import { utils } from 'ethers';
 import Image from 'next/image';
 
 import Button from 'components/common/Button';
@@ -11,7 +11,6 @@ import AccountDataContext from 'contexts/AccountDataContext';
 import { LangKeys } from 'types/Lang';
 import { Deposit } from 'types/Deposit';
 import { Borrow } from 'types/Borrow';
-import { Decimals } from 'types/Decimals';
 import { Option } from 'react-dropdown';
 
 import styles from './style.module.scss';
@@ -102,7 +101,7 @@ function Item({ type, amount, fee, maturityDate, showModal, symbol, data, decima
   async function getRate() {
     if (!accountData || !symbol) return;
 
-    const rate = parseFloat(ethers.utils.formatEther(accountData[symbol].oraclePrice));
+    const rate = parseFloat(utils.formatEther(accountData[symbol].oraclePrice));
 
     setExchangeRate(rate);
   }
@@ -120,7 +119,7 @@ function Item({ type, amount, fee, maturityDate, showModal, symbol, data, decima
           <span className={styles.primary}>{parseSymbol(symbol)}</span>
         </div>
         <span className={styles.value}>
-          {formatNumber(ethers.utils.formatUnits(amount, decimals), symbol)}
+          {formatNumber(utils.formatUnits(amount, decimals), symbol)}
         </span>
         <span className={styles.value}>{fixedRate.toFixed(2)}%</span>
         <span className={styles.value}>{parseTimestamp(maturityDate)}</span>
@@ -157,10 +156,7 @@ function Item({ type, amount, fee, maturityDate, showModal, symbol, data, decima
           </thead>
           <tbody>
             {transactions.map((transaction: any, key) => {
-              const value = formatNumber(
-                ethers.utils.formatUnits(transaction.assets, decimals),
-                symbol
-              );
+              const value = formatNumber(utils.formatUnits(transaction.assets, decimals), symbol);
               const text = transaction?.fee
                 ? type?.value == 'borrow'
                   ? translations[lang].borrow

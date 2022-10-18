@@ -1,7 +1,7 @@
 import { useContext, useMemo } from 'react';
 import Image from 'next/image';
 import Skeleton from 'react-loading-skeleton';
-import { ethers } from 'ethers';
+import { constants } from 'ethers';
 import { parseFixed, formatFixed } from '@ethersproject/bignumber';
 
 import { LangKeys } from 'types/Lang';
@@ -40,7 +40,7 @@ function ModalRowBorrowLimit({ qty, symbol, operation, line }: Props) {
     if (!accountData || !symbol) return;
 
     if (qty == '') {
-      return ethers.constants.Zero;
+      return constants.Zero;
     }
 
     const decimals = accountData[symbol].decimals;

@@ -1,5 +1,5 @@
 .container {
-  width: var(--max-width);
+  // width: var(--max-width);
 
   .date {
     color: var(--gray-500);
@@ -7,7 +7,7 @@
   }
 
   .market {
-    background-color: var(--gray-50);
+    background-color: var(--background);
     border-radius: var(--u);
     display: flex;
     flex-wrap: wrap;
@@ -20,7 +20,6 @@
 
     .column {
       width: 100%;
-      gap: var(--smallUnit);
       display: flex;
       flex-direction: column;
       overflow-x: auto;
@@ -30,8 +29,8 @@
         display: flex;
         padding: var(--u) var(--u3);
         font-weight: bold;
-        color: var(--gray-500);
         font-size: var(--font-12);
+        font-family: var(--secondary-font);
         align-items: center;
         min-width: 800px;
 

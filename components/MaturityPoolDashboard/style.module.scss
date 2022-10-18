@@ -4,8 +4,6 @@
   margin: 0 auto;
   margin-top: var(--u4);
   padding-top: var(--u2);
-  border-top: 1px solid var(--gray-100);
-  gap: var(--u2);
   max-width: var(--maxWidth);
 
   .sectionContainer {
@@ -31,11 +29,6 @@
       font-size: var(--font-14);
       margin-right: 4%;
     }
-  }
-
-  .line {
-    border-bottom: 1px solid var(--gray-100);
-    width: 100%;
   }
 }
 

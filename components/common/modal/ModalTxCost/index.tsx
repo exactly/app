@@ -1,6 +1,6 @@
 import { useContext, useMemo } from 'react';
 import Skeleton from 'react-loading-skeleton';
-import { ethers } from 'ethers';
+import { utils } from 'ethers';
 
 import { Gas } from 'types/Gas';
 import { LangKeys } from 'types/Lang';
@@ -25,7 +25,7 @@ function ModalTxCost({ gas }: Props) {
   const exchangeRate = useMemo(() => {
     if (!accountData) return 1;
 
-    return parseFloat(ethers.utils.formatEther(accountData.WETH.oraclePrice));
+    return parseFloat(utils.formatEther(accountData.WETH.oraclePrice));
   }, [accountData]);
 
   const eth = gas?.eth && `${gas.eth} ETH`;

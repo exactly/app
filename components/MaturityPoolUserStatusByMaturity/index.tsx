@@ -1,11 +1,8 @@
 import { useContext } from 'react';
-import Image from 'next/image';
-import dayjs from 'dayjs';
 import Skeleton from 'react-loading-skeleton';
 import dynamic from 'next/dynamic';
 
 const Item = dynamic(() => import('./Item'));
-const Tooltip = dynamic(() => import('components/Tooltip'));
 
 import LangContext from 'contexts/LangContext';
 
@@ -15,8 +12,6 @@ import { Option } from 'react-dropdown';
 import styles from './style.module.scss';
 
 import keys from './translations.json';
-
-import parseTimestamp from 'utils/parseTimestamp';
 
 type Props = {
   type: Option | undefined;
@@ -44,91 +39,25 @@ function MaturityPoolUserStatusByMaturity({ type, maturities }: Props) {
           const startDate = parseInt(maturity) - maturityLife;
           const current = nowInSeconds - startDate;
           const progress = (current * 100) / maturityLife;
-          const daysRemaining = dayjs.unix(maturity).diff(dayjs(), 'days');
-
-          const rtf = new Intl.RelativeTimeFormat('en', {
-            localeMatcher: 'best fit',
-            numeric: 'always',
-            style: 'short'
-          });
 
           return (
             <div className={styles.container} key={key}>
-              <div className={styles.infoContainer}>
-                <div className={styles.dateContainer}>
-                  <p className={styles.title}>{translations[lang].maturityDate}</p>
-                  <p className={styles.date}>{parseTimestamp(maturity)}</p>
-                </div>
-                <div className={styles.dateContainer}>
-                  <p className={styles.title}>{translations[lang].timeElapsed}</p>
-                  <div className={styles.progress}>
-                    <Tooltip
-                      value={`${
-                        daysRemaining <= 0
-                          ? translations[lang].finished
-                          : `Maturity ${rtf.format(daysRemaining, 'day')}`
-                      }`}
-                      disableImage
-                    >
-                      <div className={styles.track}>
-                        {progress >= 100 && (
-                          <>
-                            {Array(26)
-                              .fill('a')
-                              .map((_, key) => {
-                                return (
-                                  <span
-                                    className={
-                                      type.value == 'deposit' ? styles.fullBar : styles.elapsedBar
-                                    }
-                                    key={key}
-                                  />
-                                );
-                              })}
-                            <Image
-                              className={styles.image}
-                              src={
-                                type.value == 'deposit'
-                                  ? '/img/icons/okTick.svg'
-                                  : '/img/icons/xTick.svg'
-                              }
-                              alt="tick"
-                              width={21}
-                              height={21}
-                            />
-                          </>
-                        )}
-                        {progress < 100 && (
-                          <>
-                            {Array(Math.floor((progress * 26) / 100))
-                              .fill('a')
-                              .map((_, key) => {
-                                return <span className={styles.incompleteBar} key={key} />;
-                              })}
-                            {Array(Math.ceil(26 - (progress * 26) / 100))
-                              .fill('a')
-                              .map((_, key) => {
-                                return <span className={styles.emptyBar} key={key} />;
-                              })}
-                          </>
-                        )}
-                      </div>
-                    </Tooltip>
-                  </div>
-                </div>
-              </div>
               <div className={styles.market}>
                 <div className={styles.column}>
-                  <div className={styles.tableRow}>
-                    <span className={styles.symbol}>{translations[lang].asset}</span>
-                    <span className={styles.title}>
-                      {type.value == 'deposit'
-                        ? translations[lang].depositedAmount
-                        : translations[lang].borrowedAmount}
-                    </span>
-                    <span className={styles.title}>{translations[lang].averageFixedRate}</span>
-                    <span className={styles.title} />
-                  </div>
+                  {key == 0 && ( //HACK until we add MUI grid
+                    <div className={styles.tableRow}>
+                      <span className={styles.symbol}>{translations[lang].asset}</span>
+                      <span className={styles.title}>
+                        {type.value == 'deposit'
+                          ? translations[lang].depositedAmount
+                          : translations[lang].borrowedAmount}
+                      </span>
+                      <span className={styles.title}>{translations[lang].averageFixedRate}</span>
+                      <span className={styles.title}>{translations[lang].maturityDate}</span>
+                      <span className={styles.title}>{translations[lang].timeElapsed}</span>
+                      <span className={styles.title} />
+                    </div>
+                  )}
 
                   {type.value == 'deposit' &&
                     maturities.hasOwnProperty('deposits') &&
@@ -143,6 +72,7 @@ function MaturityPoolUserStatusByMaturity({ type, maturities }: Props) {
                           maturityDate={maturity}
                           symbol={symbol}
                           market={market}
+                          progress={progress}
                           decimals={decimals}
                           data={{ assets: principal, fee: fee, market: market, maturity, symbol }}
                         />
@@ -163,6 +93,7 @@ function MaturityPoolUserStatusByMaturity({ type, maturities }: Props) {
                           maturityDate={maturity}
                           symbol={symbol}
                           market={market}
+                          progress={progress}
                           decimals={decimals}
                           data={{ assets: principal, fee: fee, market: market, maturity, symbol }}
                         />
@@ -210,6 +141,7 @@ function MaturityPoolUserStatusByMaturity({ type, maturities }: Props) {
                 maturityDate={undefined}
                 symbol={undefined}
                 market={undefined}
+                progress={undefined}
                 decimals={undefined}
                 data={undefined}
               />

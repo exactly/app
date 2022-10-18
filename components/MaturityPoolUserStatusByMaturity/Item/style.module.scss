@@ -1,16 +1,13 @@
 .container {
-  border-left: 2px solid var(--background);
   cursor: pointer;
-  background: var(--background);
-  box-shadow: var(--shadow-tables);
-  border-radius: var(--u);
   min-width: 500px;
 
   .summary {
     display: flex;
     align-items: center;
-    padding: var(--u2) var(--u3);
-    margin: var(--smallUnit) 0;
+    padding: var(--u) var(--u2);
+    background-color: #f9f9f9;
+    border-bottom: 1px solid #e7e7e7;
 
     &::-webkit-details-marker {
       display: none;
@@ -30,7 +27,7 @@
   }
 
   .tableContainer {
-    padding-left: calc(100% / 6);
+    // padding-left: calc(100% / 6);
     padding-right: 5%;
     padding-bottom: var(--u2);
     width: 100%;
@@ -114,15 +111,13 @@
   }
 
   .symbol {
-    width: calc(100% / 4);
+    width: calc(100% / 6);
     font-weight: bold;
     display: flex;
     gap: var(--u2);
-    align-items: center;
 
     .primary {
-      margin-bottom: var(--smallUnit);
-      font-size: var(--font-16);
+      font-size: var(--font-14);
     }
     .secondary {
       font-size: var(--font-12);
@@ -131,16 +126,17 @@
   }
 
   .buttonContainer {
-    width: 100px;
-    height: var(--u5);
-    font-weight: 600;
+    width: 97px;
+    height: 27px;
     font-size: var(--font-14);
-    margin: 0 auto;
+    margin-right: 10px;
+    margin-left: auto;
   }
 
   .value {
-    width: calc(100% / 4);
+    width: calc(100% / 6);
     color: var(--gray-900);
+    font-size: 14px;
 
     .line {
       height: var(--smallUnit);
@@ -150,6 +146,11 @@
       height: var(--u);
     }
     .progress {
+      @extend .line;
+      background: var(--secondary);
+      border-radius: var(--u2);
+    }
+    .fullProgress {
       @extend .line;
       background: var(--primary);
       border-radius: var(--u2);
