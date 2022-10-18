@@ -2,9 +2,9 @@ import { useContext, useEffect, useState } from 'react';
 import { BigNumber, ethers } from 'ethers';
 import request from 'graphql-request';
 import Image from 'next/image';
-import dayjs from 'dayjs';
 
 import Button from 'components/common/Button';
+const Tooltip = dynamic(() => import('components/Tooltip'));
 
 import Skeleton from 'react-loading-skeleton';
 
@@ -29,6 +29,7 @@ import parseTimestamp from 'utils/parseTimestamp';
 import parseSymbol from 'utils/parseSymbol';
 import getSubgraph from 'utils/getSubgraph';
 import formatNumber from 'utils/formatNumber';
+import getDaysRemaining from 'utils/getDaysRemaining';
 
 import {
   getMaturityPoolBorrowsQuery,
@@ -37,8 +38,6 @@ import {
   getMaturityPoolRepaysQuery
 } from 'queries';
 import dynamic from 'next/dynamic';
-
-const Tooltip = dynamic(() => import('components/Tooltip'));
 
 type Props = {
   type?: Option | undefined;
@@ -67,22 +66,17 @@ function Item({ type, amount, maturityDate, symbol, market, progress, decimals, 
   );
   const [exchangeRate, setExchangeRate] = useState<number | undefined>(undefined);
   const [APY, setAPY] = useState<number | undefined>(undefined);
+  const [daysRemaining, setDaysRemaining] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     getMaturityData();
     getRate();
+    getDays();
   }, [maturityDate, walletAddress, accountData]);
 
   useEffect(() => {
     getAPY();
   }, [walletAddress, accountData]);
-
-  const daysRemaining = dayjs.unix(Number(maturityDate)).diff(dayjs(), 'days');
-  const rtf = new Intl.RelativeTimeFormat('en', {
-    localeMatcher: 'best fit',
-    numeric: 'always',
-    style: 'short'
-  });
 
   async function getMaturityData() {
     if (!walletAddress || !maturityDate || !market || !type) return;
@@ -171,6 +165,13 @@ function Item({ type, amount, maturityDate, symbol, market, progress, decimals, 
     const averageAPY = allAPYbyAmount / allAmounts;
 
     setAPY(averageAPY);
+  }
+
+  function getDays() {
+    if (!maturityDate) return;
+
+    const days = getDaysRemaining(Number(maturityDate));
+    setDaysRemaining(days);
   }
 
   return (

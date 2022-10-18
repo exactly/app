@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
 import { formatFixed, parseFixed } from '@ethersproject/bignumber';
-import { ethers } from 'ethers';
+import { utils } from 'ethers';
 import Skeleton from 'react-loading-skeleton';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -78,12 +78,12 @@ function Item({ market, type, fixedMarketData }: Props) {
       }
 
       const exchangeRate = parseFloat(
-        ethers.utils.formatEther(accountData[market?.symbol.toUpperCase()].oraclePrice)
+        utils.formatEther(accountData[market?.symbol.toUpperCase()].oraclePrice)
       );
 
       const newPoolData = {
-        borrowed: parseFloat(await ethers.utils.formatUnits(pool.borrowed, decimals)),
-        supplied: parseFloat(await ethers.utils.formatUnits(pool.supplied, decimals)),
+        borrowed: parseFloat(await utils.formatUnits(pool.borrowed, decimals)),
+        supplied: parseFloat(await utils.formatUnits(pool.supplied, decimals)),
         rate: exchangeRate
       };
 

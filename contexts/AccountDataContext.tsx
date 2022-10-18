@@ -1,5 +1,5 @@
 import { createContext, FC, useContext, useEffect, useMemo, useState } from 'react';
-import { ethers } from 'ethers';
+import { constants } from 'ethers';
 
 import { AccountData } from 'types/AccountData';
 import { FixedLenderAccountData } from 'types/FixedLenderAccountData';
@@ -46,7 +46,7 @@ export const AccountDataProvider: FC = ({ children }) => {
     try {
       const previewerContract = getInstance(Previewer.address!, Previewer.abi!, 'previewer');
 
-      const wallet = walletAddressDebounced ? walletAddressDebounced : ethers.constants.AddressZero;
+      const wallet = walletAddressDebounced ? walletAddressDebounced : constants.AddressZero;
 
       const data = await previewerContract?.exactly(wallet);
 
