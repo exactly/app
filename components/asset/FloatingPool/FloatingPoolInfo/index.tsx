@@ -1,10 +1,10 @@
 import { FC, useCallback, useContext, useEffect, useState } from 'react';
 import { formatEther, formatUnits } from '@ethersproject/units';
-import Grid from '@mui/material/Grid';
-import Typography from '@mui/material/Typography';
 
 import LangContext from 'contexts/LangContext';
 import AccountDataContext from 'contexts/AccountDataContext';
+import { PoolItemInfoProps } from 'components/asset/PoolItemInfo';
+import PoolHeaderInfo from 'components/asset/PoolHeaderInfo';
 
 import { LangKeys } from 'types/Lang';
 
@@ -14,15 +14,14 @@ import parseSymbol from 'utils/parseSymbol';
 import formatNumber from 'utils/formatNumber';
 import queryRates from 'utils/queryRates';
 import getSubgraph from 'utils/getSubgraph';
-import PoolItemInfo from 'components/asset/PoolItemInfo';
 
-type SmartPoolInfoProps = {
+type FloatingPoolInfoProps = {
   symbol: string;
   eMarketAddress?: string;
   networkName: string;
 };
 
-const SmartPoolInfo: FC<SmartPoolInfoProps> = ({ symbol, eMarketAddress, networkName }) => {
+const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol, eMarketAddress, networkName }) => {
   const { accountData } = useContext(AccountDataContext);
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
@@ -74,33 +73,34 @@ const SmartPoolInfo: FC<SmartPoolInfoProps> = ({ symbol, eMarketAddress, network
     fetchAPRs();
   }, [fetchAPRs]);
 
-  return (
-    <Grid container>
-      <Typography variant="h6" gutterBottom>
-        {translations[lang].smartPool}
-      </Typography>
-      <Grid item container spacing={3}>
-        <PoolItemInfo
-          label={translations[lang].totalDeposited}
-          value={supply ? formatNumber(supply, symbol) : undefined}
-        />
-        <PoolItemInfo
-          label={translations[lang].totalBorrowed}
-          value={demand ? formatNumber(demand, symbol) : undefined}
-        />
-        <PoolItemInfo
-          label={translations[lang].TVL}
-          value={supply && demand ? formatNumber(supply - demand, symbol) : undefined}
-        />
-        <PoolItemInfo label={translations[lang].depositAPR} value={depositAPR} />
-        <PoolItemInfo label={translations[lang].borrowAPR} value={borrowAPR} />
-        <PoolItemInfo
-          label={translations[lang].utilizationRate}
-          value={supply && demand ? `${((demand / supply) * 100).toFixed(2)}%` : undefined}
-        />
-      </Grid>
-    </Grid>
-  );
+  const itemsInfo: PoolItemInfoProps[] = [
+    {
+      label: translations[lang].totalDeposited,
+      value: supply ? formatNumber(supply, symbol) : undefined
+    },
+    {
+      label: translations[lang].totalBorrowed,
+      value: demand ? formatNumber(demand, symbol) : undefined
+    },
+    {
+      label: translations[lang].TVL,
+      value: supply && demand ? formatNumber(supply - demand, symbol) : undefined
+    },
+    {
+      label: translations[lang].depositAPR,
+      value: depositAPR
+    },
+    {
+      label: translations[lang].borrowAPR,
+      value: borrowAPR
+    },
+    {
+      label: translations[lang].utilizationRate,
+      value: supply && demand ? `${((demand / supply) * 100).toFixed(2)}%` : undefined
+    }
+  ];
+
+  return <PoolHeaderInfo title={translations[lang].smartPool} itemsInfo={itemsInfo} />;
 };
 
-export default SmartPoolInfo;
+export default FloatingPoolInfo;

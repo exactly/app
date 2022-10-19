@@ -4,8 +4,8 @@ import Grid from '@mui/material/Grid';
 
 import Navbar from 'components/Navbar';
 import PoolsChart from 'components/PoolsChart';
-import AssetTable from 'components/AssetTable';
-import SmartPoolInfo from 'components/asset/FloatingPool/SmartPoolInfo';
+import AssetTable from 'components/asset/MaturityPool/AssetTable';
+import FloatingPoolInfo from 'components/asset/FloatingPool/FloatingPoolInfo';
 import MobileNavbar from 'components/MobileNavbar';
 import Paginator from 'components/Paginator';
 import Footer from 'components/Footer';
@@ -29,8 +29,8 @@ import FloatingAPRChart from 'components/asset/FloatingPool/FloatingAPRChart';
 import { getSymbol, getUnderlyingData } from 'utils/utils';
 import AssetHeaderInfo from 'components/asset/Header';
 import { AssetSymbol } from 'utils/assets';
-import MaturityInfo from 'components/asset/MaturityInfo';
-import MaturityPoolInfo from 'components/asset/MaturityInfo/MaturityPoolInfo';
+// import AssetMaturityPools from 'components/asset/MaturityPool';
+import MaturityPoolInfo from 'components/asset/MaturityPool/MaturityPoolInfo';
 
 interface Props {
   symbol: string;
@@ -98,7 +98,7 @@ const Asset: NextPage<Props> = ({ symbol = 'DAI' }) => {
         />
         <Grid container spacing={4} mt={5} ml={0}>
           <Grid item container>
-            <SmartPoolInfo
+            <FloatingPoolInfo
               symbol={symbol}
               eMarketAddress={eMarketAddress}
               networkName={networkName}
