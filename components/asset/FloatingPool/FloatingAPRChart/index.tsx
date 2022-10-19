@@ -149,7 +149,6 @@ function FloatingAPRChart({ market, networkName }: Props) {
               }}
             />
             <Line type="monotone" dataKey="apr" stroke="#008cf4" activeDot={{ r: 6 }} />
-            <Line type="monotone" dataKey="apy" stroke="#000000" activeDot={{ r: 6 }} />
             <Line type="monotone" dataKey="utilization" stroke="#34c53a" activeDot={{ r: 6 }} />
           </ComposedChart>
         </>

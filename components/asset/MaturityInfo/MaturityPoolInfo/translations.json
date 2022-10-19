@@ -1,0 +1,13 @@
+{
+  "en": {
+    "maturityPools": "Fixed rate pools",
+    "totalDeposited": "Total Deposited",
+    "totalBorrowed": "Total Borrowed",
+    "utilizationRate": "Utilization Rate",
+    "deposit": "Deposit",
+    "TVL": "Total Value Locked",
+    "bestDepositAPR": "Best Deposit APR",
+    "bestBorrowAPR": "Best Borrow APR"
+  },
+  "es": {}
+}

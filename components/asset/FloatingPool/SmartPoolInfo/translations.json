@@ -3,7 +3,6 @@
     "days": "days",
     "totalDeposited": "Total Deposited",
     "totalBorrowed": "Total Borrowed",
-    "liquidity": "Liquidity",
     "utilizationRate": "Utilization Rate",
     "deposit": "Deposit",
     "smartPool": "Variable Rate Pool",
@@ -14,7 +13,6 @@
   "es": {
     "days": "días",
     "totalDeposited": "Total Depositado",
-    "liquidity": "Liquidez",
     "utilizationRate": "Tasa de Utilización",
     "deposit": "Depositar",
     "smartPool": "Smart Pool",
