@@ -6,14 +6,15 @@ import Typography from '@mui/material/Typography';
 import LangContext from 'contexts/LangContext';
 import AccountDataContext from 'contexts/AccountDataContext';
 
+import PoolItemInfo, { PoolItemInfoProps } from 'components/asset/PoolItemInfo';
+
 import { LangKeys } from 'types/Lang';
 
 import keys from './translations.json';
 
-import parseSymbol from 'utils/parseSymbol';
 import formatNumber from 'utils/formatNumber';
-import getSubgraph from 'utils/getSubgraph';
-import PoolItemInfo from 'components/asset/PoolItemInfo';
+import parseTimestamp from 'utils/parseTimestamp';
+import PoolHeaderInfo from 'components/asset/PoolHeaderInfo';
 
 type MaturityPoolInfoProps = {
   symbol: string;
@@ -30,6 +31,8 @@ const MaturityPoolInfo: FC<MaturityPoolInfoProps> = ({ symbol, eMarketAddress, n
   const [demand, setDemand] = useState<number | undefined>(undefined);
   const [depositAPR, setDepositAPR] = useState<string | undefined>(undefined);
   const [borrowAPR, setBorrowAPR] = useState<string | undefined>(undefined);
+  const [bestDepositAPRDate, setBestDepositAPRDate] = useState<string | undefined>(undefined);
+  const [bestBorrowAPRDate, setBestBorrowAPRDate] = useState<string | undefined>(undefined);
 
   const fetchPoolData = useCallback(async () => {
     if (!accountData || !symbol) return;
@@ -49,40 +52,51 @@ const MaturityPoolInfo: FC<MaturityPoolInfoProps> = ({ symbol, eMarketAddress, n
     // FIXME: put real data
     const depositAPRRate = 0.01;
     const borrowAPRRate = 0.01;
+    const mockDate = parseTimestamp(Date.now() / 1000);
 
     setDepositAPR(`${(depositAPRRate * 100).toFixed(2)}%`);
     setBorrowAPR(`${(borrowAPRRate * 100).toFixed(2)}%`);
+
+    setBestDepositAPRDate(mockDate);
+    setBestBorrowAPRDate(mockDate);
   }, [accountData, eMarketAddress]);
 
   useEffect(() => {
     fetchAPRs();
   }, [fetchAPRs]);
 
+  const itemsInfo: PoolItemInfoProps[] = [
+    {
+      label: translations[lang].totalDeposited,
+      value: supply ? formatNumber(supply, symbol) : undefined
+    },
+    {
+      label: translations[lang].totalBorrowed,
+      value: demand ? formatNumber(demand, symbol) : undefined
+    },
+    {
+      label: translations[lang].TVL,
+      value: supply && demand ? formatNumber(supply - demand, symbol) : undefined
+    },
+    {
+      label: translations[lang].bestDepositAPR,
+      value: depositAPR,
+      underLabel: bestDepositAPRDate
+    },
+    {
+      label: translations[lang].bestBorrowAPR,
+      value: borrowAPR,
+      underLabel: bestBorrowAPRDate
+    },
+    {
+      label: translations[lang].utilizationRate,
+      value: supply && demand ? `${((demand / supply) * 100).toFixed(2)}%` : undefined
+    }
+  ];
+
   return (
     <Grid container>
-      <Typography variant="h6" gutterBottom>
-        {translations[lang].maturityPools}
-      </Typography>
-      <Grid item container spacing={3}>
-        <PoolItemInfo
-          label={translations[lang].totalDeposited}
-          value={supply ? formatNumber(supply, symbol) : undefined}
-        />
-        <PoolItemInfo
-          label={translations[lang].totalBorrowed}
-          value={demand ? formatNumber(demand, symbol) : undefined}
-        />
-        <PoolItemInfo
-          label={translations[lang].TVL}
-          value={supply && demand ? formatNumber(supply - demand, symbol) : undefined}
-        />
-        <PoolItemInfo label={translations[lang].bestDepositAPR} value={depositAPR} />
-        <PoolItemInfo label={translations[lang].bestBorrowAPR} value={borrowAPR} />
-        <PoolItemInfo
-          label={translations[lang].utilizationRate}
-          value={supply && demand ? `${((demand / supply) * 100).toFixed(2)}%` : undefined}
-        />
-      </Grid>
+      <PoolHeaderInfo title={translations[lang].maturityPools} itemsInfo={itemsInfo} />
     </Grid>
   );
 };

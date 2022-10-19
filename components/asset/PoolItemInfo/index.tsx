@@ -3,7 +3,7 @@ import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import Skeleton from 'react-loading-skeleton';
 
-type PoolItemInfoProps = {
+export type PoolItemInfoProps = {
   label: string;
   value?: string;
   underLabel?: string;
