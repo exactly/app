@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from 'react';
 import { parseFixed } from '@ethersproject/bignumber';
 
 import LangContext from 'contexts/LangContext';
-import { MarketContext } from 'contexts/AddressContext';
+import { MarketContext } from 'contexts/MarketContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 import PreviewerContext from 'contexts/PreviewerContext';
 import AccountDataContext from 'contexts/AccountDataContext';

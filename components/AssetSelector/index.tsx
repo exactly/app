@@ -6,7 +6,7 @@ import Skeleton from 'react-loading-skeleton';
 import Select from 'components/common/Select';
 import Tooltip from 'components/Tooltip';
 
-import { MarketContext } from 'contexts/AddressContext';
+import { MarketContext } from 'contexts/MarketContext';
 import AccountDataContext from 'contexts/AccountDataContext';
 
 import { Market } from 'types/Market';
