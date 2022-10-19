@@ -1,6 +1,6 @@
 import { useContext } from 'react';
 
-import { MarketContext } from 'contexts/AddressContext';
+import { MarketContext } from 'contexts/MarketContext';
 
 import styles from './style.module.scss';
 

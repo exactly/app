@@ -8,7 +8,7 @@ import parseSymbol from 'utils/parseSymbol';
 import AssetSelector from 'components/AssetSelector';
 
 import AccountDataContext from 'contexts/AccountDataContext';
-import { MarketContext } from 'contexts/AddressContext';
+import { MarketContext } from 'contexts/MarketContext';
 
 import styles from './style.module.scss';
 

@@ -33,7 +33,7 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    "contexts/AddressContext.js",
+    "contexts/MarketContext.js",
     "utils/queryRates.ts"
   ],
   "exclude": ["node_modules"]

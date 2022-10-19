@@ -16,7 +16,7 @@ import { Maturity } from 'types/Maturity';
 
 import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
-import { MarketContext } from 'contexts/AddressContext';
+import { MarketContext } from 'contexts/MarketContext';
 import FixedLenderContext from 'contexts/FixedLenderContext';
 import AccountDataContext from 'contexts/AccountDataContext';
 

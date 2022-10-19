@@ -9,7 +9,7 @@ import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 import ModalStatusContext, { Operation } from 'contexts/ModalStatusContext';
 import AccountDataContext from 'contexts/AccountDataContext';
-import { MarketContext } from 'contexts/AddressContext';
+import { MarketContext } from 'contexts/MarketContext';
 
 import { LangKeys } from 'types/Lang';
 import { Maturity } from 'types/Maturity';

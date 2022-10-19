@@ -8,7 +8,7 @@ import Script from 'next/script';
 import { Web3ContextProvider } from 'contexts/Web3Context';
 import { LangProvider } from 'contexts/LangContext';
 import { ModalStatusProvider } from 'contexts/ModalStatusContext';
-import { MarketProvider } from 'contexts/AddressContext';
+import { MarketProvider } from 'contexts/MarketContext';
 import { PreviewerProvider } from 'contexts/PreviewerContext';
 import { AccountDataProvider } from 'contexts/AccountDataContext';
 import { FixedLenderProvider } from 'contexts/FixedLenderContext';
