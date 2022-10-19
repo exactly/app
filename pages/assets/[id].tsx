@@ -5,7 +5,7 @@ import Grid from '@mui/material/Grid';
 import Navbar from 'components/Navbar';
 import PoolsChart from 'components/PoolsChart';
 import AssetTable from 'components/AssetTable';
-import SmartPoolInfo from 'components/SmartPoolInfo';
+import SmartPoolInfo from 'components/asset/FloatingPool/SmartPoolInfo';
 import MobileNavbar from 'components/MobileNavbar';
 import Paginator from 'components/Paginator';
 import Footer from 'components/Footer';
@@ -25,10 +25,12 @@ import style from './style.module.scss';
 import keys from './translations.json';
 
 import getLastAPR from 'utils/getLastAPR';
-import FloatingAPRChart from 'components/FloatingAPRChart';
+import FloatingAPRChart from 'components/asset/FloatingPool/FloatingAPRChart';
 import { getSymbol, getUnderlyingData } from 'utils/utils';
-import AssetHeaderInfo from 'components/AssetInfo/Header';
+import AssetHeaderInfo from 'components/asset/Header';
 import { AssetSymbol } from 'utils/assets';
+import MaturityInfo from 'components/asset/MaturityInfo';
+import MaturityPoolInfo from 'components/asset/MaturityInfo/MaturityPoolInfo';
 
 interface Props {
   symbol: string;
@@ -103,18 +105,14 @@ const Asset: NextPage<Props> = ({ symbol = 'DAI' }) => {
             />
             <FloatingAPRChart networkName={networkName} market={eMarketAddress} />
           </Grid>
-          {/* TODO: put FRP info here */}
-          <Grid item container>
-            {/* FRP Info here */}
-            {/* FRP Data here */}
+          <Grid item container mt={5}>
+            <MaturityPoolInfo
+              symbol={symbol}
+              eMarketAddress={eMarketAddress}
+              networkName={networkName}
+            />
           </Grid>
         </Grid>
-        <section className={style.assetData}>
-          <div className={style.assetContainer}>
-            <p className={style.title}>{translations[lang].maturityPools}</p>
-          </div>
-          <div className={style.assetMetricsContainer}></div>
-        </section>
         <section className={style.graphContainer}>
           <div className={style.leftColumn}>
             <AssetTable
