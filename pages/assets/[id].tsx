@@ -25,6 +25,7 @@ import style from './style.module.scss';
 import keys from './translations.json';
 
 import getLastAPR from 'utils/getLastAPR';
+import FloatingAPRChart from 'components/FloatingAPRChart';
 import { getSymbol, getUnderlyingData } from 'utils/utils';
 import AssetHeaderInfo from 'components/AssetInfo/Header';
 import { AssetSymbol } from 'utils/assets';
@@ -100,7 +101,7 @@ const Asset: NextPage<Props> = ({ symbol = 'DAI' }) => {
               eMarketAddress={eMarketAddress}
               networkName={networkName}
             />
-            {/* Add Smart Pool Data component here */}
+            <FloatingAPRChart networkName={networkName} market={eMarketAddress} />
           </Grid>
           {/* TODO: put FRP info here */}
           <Grid item container>
