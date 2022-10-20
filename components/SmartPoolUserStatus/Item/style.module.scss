@@ -7,14 +7,14 @@
   border-bottom: 1px solid #e7e7e7;
 
   .symbol {
-    width: calc(100% / 7);
+    width: calc(100% / 5);
     font-weight: bold;
     display: flex;
     gap: var(--u2);
     align-items: center;
 
     .primary {
-      width: calc(100% / 7);
+      width: calc(100% / 5);
       font-size: var(--font-14);
     }
     .secondary {
@@ -37,7 +37,7 @@
   }
 
   .value {
-    width: calc(100% / 7);
+    width: calc(100% / 5);
     color: var(--gray-900);
     font-size: 14px;
 

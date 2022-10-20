@@ -86,6 +86,9 @@ function Navbar() {
             </div>
           </Link>
         </div>
+        <div className={styles.faucet} onClick={handleClick}>
+          <p>Goerli Faucet</p>
+        </div>
 
         <div className={styles.center}>
           <ul className={styles.linksContainer}>
@@ -103,6 +106,15 @@ function Navbar() {
             })}
           </ul>
         </div>
+        <a
+          className={styles.discordFeedbackLink}
+          target="_blank"
+          rel="noreferrer noopener"
+          href="https://discordapp.com/channels/846682395553824808/985912903880302632"
+        >
+          <strong>Give us feedback here!</strong>
+        </a>
+
         <div className={styles.right}>
           {network && isAllowed && (
             <div className={styles.networkContainer} onClick={handleClick}>
