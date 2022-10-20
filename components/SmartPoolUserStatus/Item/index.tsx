@@ -256,23 +256,13 @@ function Item({
         )) || <Skeleton circle height={20} width={20} />}
         <div className={styles.primary}>{(symbol && parseSymbol(symbol)) || <Skeleton />}</div>
       </div>
-      <div className={styles.value}>
+      {/* <div className={styles.value}>
         {(originalAmount &&
           rate &&
           `$${formatNumber(parseFloat(originalAmount) * rate, 'USD', true)}`) || (
           <Skeleton width={40} />
         )}
-      </div>
-      {type?.value == 'deposit' && (
-        <div className={styles.value}>
-          {(eTokenAmount &&
-            symbol &&
-            `${formatNumber(
-              ethers.utils.formatUnits(eTokenAmount, decimals[symbol! as keyof Decimals]),
-              symbol
-            )}`) || <Skeleton width={40} />}{' '}
-        </div>
-      )}
+      </div> */}
 
       <div className={styles.value}>
         {(depositAmount &&
@@ -291,7 +281,18 @@ function Item({
           )}`) || <Skeleton width={40} />}
       </div>
 
-      <div className={styles.value}>{(difference && difference) || <Skeleton width={40} />}</div>
+      {type?.value == 'deposit' && (
+        <div className={styles.value}>
+          {(eTokenAmount &&
+            symbol &&
+            `${formatNumber(
+              ethers.utils.formatUnits(eTokenAmount, decimals[symbol! as keyof Decimals]),
+              symbol
+            )}`) || <Skeleton width={40} />}{' '}
+        </div>
+      )}
+
+      {/* <div className={styles.value}>{(difference && difference) || <Skeleton width={40} />}</div> */}
 
       {type?.value == 'deposit' && (
         <>
