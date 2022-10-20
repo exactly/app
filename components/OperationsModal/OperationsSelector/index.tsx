@@ -63,9 +63,9 @@ function OperationsSelector() {
   return (
     <section className={styles.operationsSelector}>
       <section className={styles.section}>
-        <h3 className={styles.title}>{translations[lang].fixedRate}</h3>
+        <h3 className={styles.title}>{translations[lang].variableRate}</h3>
         <ul className={styles.list}>
-          {actions.fixed.map((action) => {
+          {actions.variable.map((action) => {
             return (
               <li
                 key={action.value}
@@ -79,9 +79,9 @@ function OperationsSelector() {
         </ul>
       </section>
       <section className={styles.section}>
-        <h3 className={styles.title}>{translations[lang].variableRate}</h3>
+        <h3 className={styles.title}>{translations[lang].fixedRate}</h3>
         <ul className={styles.list}>
-          {actions.variable.map((action) => {
+          {actions.fixed.map((action) => {
             return (
               <li
                 key={action.value}

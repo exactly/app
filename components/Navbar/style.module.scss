@@ -26,6 +26,14 @@
       }
     }
 
+    .faucet {
+      cursor: pointer;
+      color: var(--primary);
+    }
+    .faucet:hover {
+      color: #34c53a;
+    }
+
     .center {
       .linksContainer {
         display: flex;
@@ -99,7 +107,17 @@
         align-items: center;
       }
     }
-
+    //Only for Testnet Demo
+    .discordFeedbackLink {
+      display: flex;
+      justify-content: center;
+      color: var(--primary);
+      text-decoration: underline;
+      text-underline-offset: var(--smallUnit);
+    }
+    .discordFeedbackLink:hover {
+      color: #34c53a;
+    }
     .theme {
       cursor: pointer;
       margin-left: var(--u2);
