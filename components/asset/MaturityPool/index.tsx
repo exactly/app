@@ -13,6 +13,8 @@ import PreviewerContext from 'contexts/PreviewerContext';
 import ContractsContext from 'contexts/ContractsContext';
 import { FixedMarketData } from 'types/FixedMarketData';
 import parseTimestamp from 'utils/parseTimestamp';
+import MaturityPoolsTable from './MaturityPoolsTable';
+import getAPRsPerMaturity, { APRsPerMaturityType } from './utils';
 
 type AssetMaturityPoolsProps = {
   symbol: string;
@@ -35,6 +37,7 @@ const AssetMaturityPools: FC<AssetMaturityPoolsProps> = ({ symbol: rawSymbol }) 
   const [totalBorrowed, setTotalBorrowed] = useState<number | undefined>(undefined);
   const [bestDepositAPR, setBestDepositAPR] = useState<BestAPR | undefined>(undefined);
   const [bestBorrowAPR, setBestBorrowAPR] = useState<BestAPR | undefined>(undefined);
+  const [APRsPerMaturity, setAPRsPerMaturity] = useState<APRsPerMaturityType>({});
 
   const getMaturitiesData = useCallback(async () => {
     if (!accountData) return;
@@ -50,52 +53,16 @@ const AssetMaturityPools: FC<AssetMaturityPoolsProps> = ({ symbol: rawSymbol }) 
       ({ market }) => market === marketAddress,
     ) as FixedMarketData;
 
-    const timestampNow = Date.now() / 1000;
-
     const { deposits, borrows, decimals, assets: initialAssets } = marketMaturities;
 
-    const APRsPerMaturity: Record<string, { borrow: number | string; deposit: number | string }> =
-      {};
+    const { APRsPerMaturity, maturityMaxAPRDeposit, maturityMinAPRBorrow } = getAPRsPerMaturity(
+      deposits,
+      borrows,
+      decimals,
+      initialAssets
+    );
 
-    let maturityMaxAPRDeposit = 0;
-    deposits.forEach(({ maturity: maturityBN, assets: finalDepositAssets }) => {
-      const maturity = maturityBN.toNumber();
-      const timePerYear = 31_536_000 / (maturity - timestampNow);
-      const rate = finalDepositAssets.mul(parseFixed('1', 18)).div(initialAssets);
-      const depositAPR = (Number(formatFixed(rate, 18)) - 1) * timePerYear * 100;
-
-      const actualMax = APRsPerMaturity[maturityMaxAPRDeposit]?.deposit;
-      if (
-        depositAPR > minAPRValue &&
-        (!actualMax || depositAPR > APRsPerMaturity[maturityMaxAPRDeposit]?.deposit)
-      ) {
-        maturityMaxAPRDeposit = maturity;
-      }
-
-      APRsPerMaturity[maturity] = {
-        ...APRsPerMaturity[maturity],
-        deposit: depositAPR < minAPRValue ? 'N/A' : depositAPR.toFixed(2),
-      };
-    });
-
-    let maturityMinAPRBorrow = 0;
-    borrows.forEach(({ maturity: maturityBN, assets: finalBorrowAssets }) => {
-      const maturity = maturityBN.toNumber();
-      const timePerYear = 31_536_000 / (maturity - timestampNow);
-      const rate = finalBorrowAssets.mul(parseFixed('1', 18)).div(initialAssets);
-      const borrowAPR = (Number(formatFixed(rate, 18)) - 1) * timePerYear * 100;
-
-      const actualMin = APRsPerMaturity[maturityMinAPRBorrow]?.borrow;
-
-      if (borrowAPR > minAPRValue && (!actualMin || borrowAPR < actualMin)) {
-        maturityMinAPRBorrow = maturity;
-      }
-
-      APRsPerMaturity[maturity] = {
-        ...APRsPerMaturity[maturity],
-        borrow: borrowAPR < minAPRValue ? 'N/A' : borrowAPR.toFixed(2),
-      };
-    });
+    setAPRsPerMaturity(APRsPerMaturity);
 
     const { fixedPools, usdPrice: exchangeRate } = accountData[symbol];
     let tempTotalDeposited = Zero;
@@ -145,7 +112,7 @@ const AssetMaturityPools: FC<AssetMaturityPoolsProps> = ({ symbol: rawSymbol }) 
         bestBorrowAPR={bestBorrowAPR?.apr}
         bestBorrowAPRDate={bestBorrowAPR?.timestamp}
       />
-      {/* TODO: here goes the table - should pass APRsPerMaturity, where all the data is */}
+      <MaturityPoolsTable APRsPerMaturity={APRsPerMaturity} />
     </Grid>
   );
 };

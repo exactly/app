@@ -22,6 +22,7 @@ import Item from './Item';
 
 import numbers from 'config/numbers.json';
 
+// FIXME: remove this component once it's replaced by MaturityPoolTable
 interface Props {
   page: number;
   itemsPerPage: number;
