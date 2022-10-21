@@ -1,5 +1,6 @@
 import { FC, useCallback, useContext, useEffect, useState } from 'react';
-import { formatEther, formatUnits } from '@ethersproject/units';
+import { formatUnits } from '@ethersproject/units';
+import { WeiPerEther } from '@ethersproject/constants';
 
 import LangContext from 'contexts/LangContext';
 import AccountDataContext from 'contexts/AccountDataContext';
@@ -26,8 +27,8 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol, eMarketAddress, n
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
-  const [supply, setSupply] = useState<number | undefined>(undefined);
-  const [demand, setDemand] = useState<number | undefined>(undefined);
+  const [deposited, setDeposited] = useState<number | undefined>(undefined);
+  const [borrowed, setBorrowed] = useState<number | undefined>(undefined);
   const [depositAPR, setDepositAPR] = useState<string | undefined>(undefined);
   const [borrowAPR, setBorrowAPR] = useState<string | undefined>(undefined);
   const subgraphUrl = getSubgraph(networkName);
@@ -37,15 +38,24 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol, eMarketAddress, n
 
     try {
       const {
-        totalFloatingBorrowAssets: borrowed,
-        totalFloatingDepositAssets: supplied,
+        totalFloatingDepositAssets: totalDeposited,
+        totalFloatingBorrowAssets: totalBorrowed,
         decimals,
-        oraclePrice
+        oraclePrice: exchangeRate
       } = accountData[symbol];
-      const exchangeRate = parseFloat(formatEther(oraclePrice));
 
-      setSupply(parseFloat(formatUnits(supplied, decimals)) * exchangeRate);
-      setDemand(parseFloat(formatUnits(borrowed, decimals)) * exchangeRate);
+      const totalDepositUSD = formatUnits(
+        totalDeposited.mul(exchangeRate).div(WeiPerEther),
+        decimals
+      );
+
+      const totalBorrowUSD = formatUnits(
+        totalBorrowed.mul(exchangeRate).div(WeiPerEther),
+        decimals
+      );
+
+      setDeposited(parseFloat(totalDepositUSD));
+      setBorrowed(parseFloat(totalBorrowUSD));
     } catch (e) {
       console.log(e);
     }
@@ -76,15 +86,15 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol, eMarketAddress, n
   const itemsInfo: PoolItemInfoProps[] = [
     {
       label: translations[lang].totalDeposited,
-      value: supply ? `$${formatNumber(supply)}` : undefined
+      value: deposited ? `$${formatNumber(deposited)}` : undefined
     },
     {
       label: translations[lang].totalBorrowed,
-      value: demand ? `$${formatNumber(demand)}` : undefined
+      value: borrowed ? `$${formatNumber(borrowed)}` : undefined
     },
     {
       label: translations[lang].TVL,
-      value: supply && demand ? `$${formatNumber(supply - demand)}` : undefined
+      value: deposited && borrowed ? `$${formatNumber(deposited - borrowed)}` : undefined
     },
     {
       label: translations[lang].depositAPR,
@@ -96,7 +106,7 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol, eMarketAddress, n
     },
     {
       label: translations[lang].utilizationRate,
-      value: supply && demand ? `${((demand / supply) * 100).toFixed(2)}%` : undefined
+      value: deposited && borrowed ? `${((borrowed / deposited) * 100).toFixed(2)}%` : undefined
     }
   ];
 

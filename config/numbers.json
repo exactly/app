@@ -9,5 +9,6 @@
   "gasLimitMultiplier": 1.25,
   "debounceTime": 500,
   "minAPRValue": 0,
-  "maxAPRValue": 30
+  "maxAPRValue": 30,
+  "minValidAPRforFRPs": 0.01
 }
