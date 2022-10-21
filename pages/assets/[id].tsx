@@ -29,7 +29,7 @@ import FloatingAPRChart from 'components/asset/FloatingPool/FloatingAPRChart';
 import { getSymbol, getUnderlyingData } from 'utils/utils';
 import AssetHeaderInfo from 'components/asset/Header';
 import { AssetSymbol } from 'utils/assets';
-// import AssetMaturityPools from 'components/asset/MaturityPool';
+import AssetMaturityPools from 'components/asset/MaturityPool';
 import MaturityPoolInfo from 'components/asset/MaturityPool/MaturityPoolInfo';
 
 interface Props {
@@ -106,11 +106,7 @@ const Asset: NextPage<Props> = ({ symbol = 'DAI' }) => {
             <FloatingAPRChart networkName={networkName} market={eMarketAddress} />
           </Grid>
           <Grid item container mt={5}>
-            <MaturityPoolInfo
-              symbol={symbol}
-              eMarketAddress={eMarketAddress}
-              networkName={networkName}
-            />
+            <AssetMaturityPools symbol={symbol} />
           </Grid>
         </Grid>
         <section className={style.graphContainer}>

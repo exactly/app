@@ -41,7 +41,7 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol, eMarketAddress, n
         totalFloatingDepositAssets: supplied,
         decimals,
         oraclePrice
-      } = accountData[parseSymbol(symbol)];
+      } = accountData[symbol];
       const exchangeRate = parseFloat(formatEther(oraclePrice));
 
       setSupply(parseFloat(formatUnits(supplied, decimals)) * exchangeRate);
@@ -76,15 +76,15 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol, eMarketAddress, n
   const itemsInfo: PoolItemInfoProps[] = [
     {
       label: translations[lang].totalDeposited,
-      value: supply ? formatNumber(supply, symbol) : undefined
+      value: supply ? `$${formatNumber(supply)}` : undefined
     },
     {
       label: translations[lang].totalBorrowed,
-      value: demand ? formatNumber(demand, symbol) : undefined
+      value: demand ? `$${formatNumber(demand)}` : undefined
     },
     {
       label: translations[lang].TVL,
-      value: supply && demand ? formatNumber(supply - demand, symbol) : undefined
+      value: supply && demand ? `$${formatNumber(supply - demand)}` : undefined
     },
     {
       label: translations[lang].depositAPR,
