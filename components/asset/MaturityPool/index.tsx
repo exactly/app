@@ -77,8 +77,6 @@ const AssetMaturityPools: FC<AssetMaturityPoolsProps> = ({ symbol: rawSymbol }) 
       const rate = finalDepositAssets.mul(parseFixed('1', 18)).div(initialAssets);
       const depositAPR = (Number(formatFixed(rate, 18)) - 1) * timePerYear * 100;
 
-      debugger;
-
       const actualMax = APRsPerMaturity[maturityMaxAPRDeposit]?.deposit;
       if (
         depositAPR > MIN_VALID_APR &&
