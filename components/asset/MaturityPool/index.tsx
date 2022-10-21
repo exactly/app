@@ -1,19 +1,13 @@
 import { FC, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { formatEther, formatUnits } from '@ethersproject/units';
+import { formatUnits } from '@ethersproject/units';
 import { formatFixed, parseFixed } from '@ethersproject/bignumber';
+import { Zero, WeiPerEther } from '@ethersproject/constants';
+import Grid from '@mui/material/Grid';
 
-import LangContext from 'contexts/LangContext';
 import AccountDataContext from 'contexts/AccountDataContext';
-
-import { LangKeys } from 'types/Lang';
-
-import keys from './translations.json';
 
 import numbers from 'config/numbers.json';
 
-import parseSymbol from 'utils/parseSymbol';
-import formatNumber from 'utils/formatNumber';
-import { Grid } from '@mui/material';
 import MaturityPoolInfo from './MaturityPoolInfo';
 import PreviewerContext from 'contexts/PreviewerContext';
 import ContractsContext from 'contexts/ContractsContext';
@@ -38,9 +32,6 @@ const AssetMaturityPools: FC<AssetMaturityPoolsProps> = ({ symbol: rawSymbol }) 
   const previewerData = useContext(PreviewerContext);
   const { getInstance } = useContext(ContractsContext);
 
-  const lang: string = useContext(LangContext);
-  const translations: { [key: string]: LangKeys } = keys;
-
   const [totalDeposited, setTotalDeposited] = useState<number | undefined>(undefined);
   const [totalBorrowed, setTotalBorrowed] = useState<number | undefined>(undefined);
   const [bestDepositAPR, setBestDepositAPR] = useState<BestAPR | undefined>(undefined);
@@ -59,9 +50,6 @@ const AssetMaturityPools: FC<AssetMaturityPoolsProps> = ({ symbol: rawSymbol }) 
     const marketMaturities = previewFixedData.find(
       ({ market }) => market === marketAddress
     ) as FixedMarketData;
-    console.log('***********************************');
-    console.log({ marketMaturities });
-    console.log('***********************************');
 
     const timestampNow = Date.now() / 1000;
 
@@ -114,18 +102,25 @@ const AssetMaturityPools: FC<AssetMaturityPoolsProps> = ({ symbol: rawSymbol }) 
     console.log({ APRsPerMaturity });
     console.log('***********************************');
 
-    const { fixedPools } = accountData[symbol];
-    let tempTotalSupplied = 0;
-    let tempTotalBorrowed = 0;
-    fixedPools.map(({ borrowed, supplied }) => {
-      tempTotalSupplied += parseFloat(formatUnits(supplied, decimals));
-      tempTotalBorrowed += parseFloat(formatUnits(borrowed, decimals));
+    const { fixedPools, oraclePrice: exchangeRate } = accountData[symbol];
+    let tempTotalDeposited = Zero;
+    let tempTotalBorrowed = Zero;
+    fixedPools.map(({ borrowed, supplied: deposited }) => {
+      tempTotalDeposited = tempTotalDeposited.add(deposited);
+      tempTotalBorrowed = tempTotalBorrowed.add(borrowed);
     });
 
-    const exchangeRate = parseFloat(formatEther(accountData[symbol].oraclePrice));
+    const totalDepositedUSD = formatUnits(
+      tempTotalDeposited.mul(exchangeRate).div(WeiPerEther),
+      decimals
+    );
+    const totalBorrowedUSD = formatUnits(
+      tempTotalBorrowed.mul(exchangeRate).div(WeiPerEther),
+      decimals
+    );
 
-    setTotalDeposited(tempTotalSupplied * exchangeRate);
-    setTotalBorrowed(tempTotalBorrowed * exchangeRate);
+    setTotalDeposited(Number(totalDepositedUSD));
+    setTotalBorrowed(Number(totalBorrowedUSD));
 
     setBestDepositAPR({
       timestamp: Boolean(maturityMaxAPRDeposit) ? parseTimestamp(maturityMaxAPRDeposit) : undefined,
