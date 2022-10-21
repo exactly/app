@@ -23,8 +23,7 @@ type BestAPR = {
   apr: string;
 };
 
-const { usdAmount: usdAmountPreviewer } = numbers;
-const MIN_VALID_APR = 0.01;
+const { usdAmount: usdAmountPreviewer, minValidAPRforFRPs: MIN_VALID_APR } = numbers;
 
 const AssetMaturityPools: FC<AssetMaturityPoolsProps> = ({ symbol: rawSymbol }) => {
   const symbol = rawSymbol.toUpperCase();
@@ -97,10 +96,6 @@ const AssetMaturityPools: FC<AssetMaturityPoolsProps> = ({ symbol: rawSymbol }) 
         borrow: borrowAPR < MIN_VALID_APR ? 'N/A' : borrowAPR.toFixed(2)
       };
     });
-
-    console.log('***********************************');
-    console.log({ APRsPerMaturity });
-    console.log('***********************************');
 
     const { fixedPools, oraclePrice: exchangeRate } = accountData[symbol];
     let tempTotalDeposited = Zero;
