@@ -82,10 +82,10 @@ function MarketsList() {
         const timePerYear = 31_536_000 / (timestampEnd - timestampNow);
 
         const borrowRate = borrowFinalAssets.mul(parseFixed('1', 18)).div(initialAssets);
-        const borrowFixedAPR = (Number(formatFixed(borrowRate, 18)) * timePerYear - 1) * 100;
+        const borrowFixedAPR = Number(formatFixed(borrowRate, 18)) * timePerYear * 100;
 
         const depositRate = depositFinalAssets.mul(parseFixed('1', 18)).div(initialAssets);
-        const depositFixedAPR = (Number(formatFixed(depositRate, 18)) * timePerYear - 1) * 100;
+        const depositFixedAPR = Number(formatFixed(depositRate, 18)) * timePerYear * 100;
 
         if (depositFixedAPR > borrowFixedAPR) {
           findings.push(`Market: ${marketName} -> deposit APR > borrow APR.`);

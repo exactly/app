@@ -1,6 +1,6 @@
 import { Dictionary } from 'types/Dictionary';
 
-function formatNumber(number: string | number, symbol: string, standard?: boolean) {
+function formatNumber(number: string | number, symbol?: string, standard?: boolean) {
   const parsedNumber = typeof number === 'string' ? parseFloat(number) : number;
 
   const dictionary: Dictionary<number> = {
@@ -15,7 +15,7 @@ function formatNumber(number: string | number, symbol: string, standard?: boolea
     notation: standard ? 'standard' : 'compact',
     compactDisplay: 'short',
     minimumFractionDigits: 2,
-    maximumFractionDigits: dictionary[symbol.toUpperCase()] ?? 2
+    maximumFractionDigits: symbol ? dictionary[symbol.toUpperCase()] : 2
   }).format(parsedNumber);
 }
 
