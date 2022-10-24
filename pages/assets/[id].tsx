@@ -3,8 +3,6 @@ import type { GetStaticProps, NextPage } from 'next';
 import Grid from '@mui/material/Grid';
 
 import Navbar from 'components/Navbar';
-import PoolsChart from 'components/PoolsChart';
-import AssetTable from 'components/asset/MaturityPool/AssetTable';
 import FloatingPoolInfo from 'components/asset/FloatingPool/FloatingPoolInfo';
 import MobileNavbar from 'components/MobileNavbar';
 import Paginator from 'components/Paginator';
@@ -109,39 +107,6 @@ const Asset: NextPage<Props> = ({ symbol = 'DAI' }) => {
             <AssetMaturityPools symbol={symbol} />
           </Grid>
         </Grid>
-        <section className={style.graphContainer}>
-          <div className={style.leftColumn}>
-            <AssetTable
-              page={page}
-              itemsPerPage={itemsPerPage}
-              symbol={symbol}
-              deposits={depositsData}
-              borrows={borrowsData}
-            />
-            <Paginator
-              itemsPerPage={itemsPerPage}
-              handleChange={(page) => setPage(page)}
-              currentPage={page}
-            />
-          </div>
-          <div className={style.assetGraph}>
-            <PoolsChart deposits={depositsData} borrows={borrowsData} />
-          </div>
-        </section>
-        {/* <h2 className={style.assetTitle}>{translations[lang].assetDetails}</h2>
-        <div className={style.assetInfoContainer}>
-          <AssetInfo
-            title={translations[lang].price}
-            value={`$${parseFloat(ethers.utils.formatEther(marketData.usdPrice))}`}
-          />
-
-          <AssetInfo
-            title={translations[lang].collateralFactor}
-            value={parseFloat(ethers.utils.formatEther(marketData.adjustFactor)) * 100}
-            symbol="%"
-          />
-        </div>
-        <div className={style.maturitiesContainer}></div> */}
       </section>
       <Footer />
     </>

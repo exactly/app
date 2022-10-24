@@ -1,6 +1,6 @@
 import { FC, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { formatUnits } from '@ethersproject/units';
-import { formatFixed, parseFixed } from '@ethersproject/bignumber';
+import { parseFixed } from '@ethersproject/bignumber';
 import { Zero, WeiPerEther } from '@ethersproject/constants';
 import Grid from '@mui/material/Grid';
 
@@ -103,16 +103,20 @@ const AssetMaturityPools: FC<AssetMaturityPoolsProps> = ({ symbol: rawSymbol }) 
   }, [getMaturitiesData]);
 
   return (
-    <Grid>
-      <MaturityPoolInfo
-        totalDeposited={totalDeposited}
-        totalBorrowed={totalBorrowed}
-        bestDepositAPR={bestDepositAPR?.apr}
-        bestDepositAPRDate={bestDepositAPR?.timestamp}
-        bestBorrowAPR={bestBorrowAPR?.apr}
-        bestBorrowAPRDate={bestBorrowAPR?.timestamp}
-      />
-      <MaturityPoolsTable APRsPerMaturity={APRsPerMaturity} />
+    <Grid container spacing={2}>
+      <Grid item xs={12}>
+        <MaturityPoolInfo
+          totalDeposited={totalDeposited}
+          totalBorrowed={totalBorrowed}
+          bestDepositAPR={bestDepositAPR?.apr}
+          bestDepositAPRDate={bestDepositAPR?.timestamp}
+          bestBorrowAPR={bestBorrowAPR?.apr}
+          bestBorrowAPRDate={bestBorrowAPR?.timestamp}
+        />
+      </Grid>
+      <Grid item xs={12}>
+        <MaturityPoolsTable APRsPerMaturity={APRsPerMaturity} symbol={symbol} />
+      </Grid>
     </Grid>
   );
 };

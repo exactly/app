@@ -14,7 +14,7 @@ const PoolHeaderInfo: FC<PoolHeaderInfoProps> = ({ title, itemsInfo }) => {
       <Typography variant="h6" gutterBottom>
         {title}
       </Typography>
-      <Grid item container spacing={3}>
+      <Grid item container spacing={4}>
         {itemsInfo.map(({ label, value, underLabel }) => (
           <PoolItemInfo key={label} label={label} value={value} underLabel={underLabel} />
         ))}

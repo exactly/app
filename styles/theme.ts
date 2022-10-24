@@ -42,6 +42,13 @@ const theme = createTheme({
                     borderRadius: 0
                 },
             }
+        },
+        MuiTableBody: {
+            styleOverrides: {
+                root: {
+                    backgroundColor: '#f9f9f9'
+                }
+            }
         }
     },
     shadows: Array(25).fill("none") as Shadows,
