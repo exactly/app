@@ -52,7 +52,7 @@ const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ APRsPerMaturity, symb
   const defineRows = useCallback(() => {
     if (!accountData) return;
 
-    const { fixedPools, oraclePrice: exchangeRate } = accountData[symbol];
+    const { fixedPools, usdPrice: exchangeRate } = accountData[symbol];
     const tempRows: TableRow[] = [];
 
     fixedPools.forEach(({ maturity, borrowed, supplied }, index) => {

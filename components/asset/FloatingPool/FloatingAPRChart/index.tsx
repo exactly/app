@@ -75,29 +75,6 @@ function FloatingAPRChart({ market, networkName }: Props) {
           {translations[lang].title}
           {queryWindow}
         </p>
-        <div className={styles.buttonContainer}>
-          <Button
-            text="1 Day"
-            className="tertiary"
-            onClick={() => {
-              setQueryOptions({ maxFuturePools: 3, interval: 3_600, count: 24, roundTicks: true });
-              setQueryWindow('for 1 Day');
-            }}
-          />
-          <Button
-            text="1 Month"
-            className="tertiary"
-            onClick={() => {
-              setQueryOptions({
-                maxFuturePools: 3,
-                interval: 3_600 * 24,
-                count: 30,
-                roundTicks: true,
-              });
-              setQueryWindow('for 1 Month');
-            }}
-          />
-        </div>
       </div>
 
       <ResponsiveContainer className={styles.graphCard} width="100%" height="100%">
