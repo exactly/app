@@ -436,8 +436,20 @@ function BorrowAtMaturity() {
 
       const slippageAPR = fixedAPR * (1 + numbers.slippage);
 
-      setSlippage(slippageAPR.toLocaleString(undefined, { style: 'percent' }));
-      setFixedRate(fixedAPR.toLocaleString(undefined, { style: 'percent' }));
+      setSlippage(
+        slippageAPR.toLocaleString(undefined, {
+          style: 'percent',
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        }),
+      );
+      setFixedRate(
+        fixedAPR.toLocaleString(undefined, {
+          style: 'percent',
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        }),
+      );
     } catch (e) {
       console.log(e);
     }

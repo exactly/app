@@ -113,7 +113,13 @@ function Item({ market, type, fixedMarketData }: Props) {
         if (borrowFixedAPR <= 0.01 || finalAssets.eq(MaxUint256)) {
           setRate('N/A');
         } else {
-          setRate(borrowFixedAPR.toLocaleString(undefined, { style: 'percent' }));
+          setRate(
+            borrowFixedAPR.toLocaleString(undefined, {
+              style: 'percent',
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            }),
+          );
         }
       } else if (type === 'deposit') {
         const pool = fixedMarket?.deposits.find((pool) => pool.maturity.toString() === date?.value);
@@ -132,7 +138,13 @@ function Item({ market, type, fixedMarketData }: Props) {
         if (depositFixedAPR <= 0.01) {
           setRate('N/A');
         } else {
-          setRate(depositFixedAPR.toLocaleString(undefined, { style: 'percent' }));
+          setRate(
+            depositFixedAPR.toLocaleString(undefined, {
+              style: 'percent',
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            }),
+          );
         }
       }
     } catch (e) {
