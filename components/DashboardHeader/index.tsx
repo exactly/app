@@ -48,7 +48,7 @@ function DashboardHeader() {
 
     data.forEach((fixedLender) => {
       const decimals = fixedLender.decimals;
-      const oracle = parseFloat(utils.formatUnits(fixedLender.oraclePrice, 18));
+      const oracle = parseFloat(utils.formatUnits(fixedLender.usdPrice, 18));
 
       const smartPoolDepositValue = parseFloat(
         utils.formatUnits(fixedLender.floatingDepositAssets, decimals)
@@ -79,7 +79,7 @@ function DashboardHeader() {
 
     data.forEach((fixedLender) => {
       const decimals = fixedLender.decimals;
-      const oracle = parseFloat(utils.formatUnits(fixedLender.oraclePrice, 18));
+      const oracle = parseFloat(utils.formatUnits(fixedLender.usdPrice, 18));
 
       //floatinBorrow
       if (fixedLender.floatingBorrowAssets) {

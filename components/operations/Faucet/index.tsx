@@ -33,7 +33,7 @@ function Faucet() {
     WBTC: 8,
     DAI: 18,
     WETH: 18,
-    ETH: 18
+    ETH: 18,
   };
 
   async function mint(asset: string) {
@@ -44,18 +44,18 @@ function Faucet() {
       const amounts: Dictionary<string> = {
         DAI: '50000',
         USDC: '50000',
-        WBTC: '2'
+        WBTC: '2',
       };
 
       const faucetContract = getInstance(
         '0x1ca525Cd5Cb77DB5Fa9cBbA02A0824e283469DBe', // TODO: move to config file
         faucetAbi,
-        'faucet'
+        'faucet',
       );
 
       const mint = await faucetContract?.mint(
         contract?.address,
-        utils.parseUnits(amounts[asset.toUpperCase()], decimals[asset.toUpperCase()])
+        utils.parseUnits(amounts[asset.toUpperCase()], decimals[asset.toUpperCase()]),
       );
 
       await mint.wait();
@@ -66,7 +66,7 @@ function Faucet() {
     }
   }
 
-  const assets = ['DAI', 'USDC', 'ETH', 'WBTC'];
+  const assets = ['DAI', 'USDC', 'ETH', 'WBTC', 'WSTETH'];
 
   async function addTokens() {
     const filter = assets.filter((asset) => asset != 'ETH');
@@ -74,7 +74,7 @@ function Faucet() {
     const images: Dictionary<string> = {
       DAI: 'https://gateway.ipfs.io/ipfs/QmXyHPX8GS99dUiChsq7iRfZ4y3aofQqPjMjFJyCpkWs8e',
       WBTC: 'https://gateway.ipfs.io/ipfs/QmZHbqjFzzbf5sR2LJtVPi5UeEqS7fmzLBiWFRAM1dsJRm',
-      USDC: 'https://gateway.ipfs.io/ipfs/QmSi4utTywi5EANuedkPT2gi5qj6g3aeXzPjMWkeYdk7Ag'
+      USDC: 'https://gateway.ipfs.io/ipfs/QmSi4utTywi5EANuedkPT2gi5qj6g3aeXzPjMWkeYdk7Ag',
     };
 
     try {
@@ -94,9 +94,9 @@ function Faucet() {
               address: contract?.address,
               symbol: upperCaseAsset,
               decimals: decimals[upperCaseAsset],
-              image: images[upperCaseAsset]
-            }
-          }
+              image: images[upperCaseAsset],
+            },
+          },
         });
       });
     } catch (e) {
@@ -127,6 +127,21 @@ function Faucet() {
                 </p>
                 <div className={styles.buttonContainer}>
                   <a href="https://goerlifaucet.com/" target="_blank" rel="noopener noreferrer">
+                    <Button text={translations[lang].mint} />
+                  </a>
+                </div>
+              </div>
+            );
+          }
+          if (asset == 'WSTETH') {
+            return (
+              <div className={styles.assetContainer} key={asset}>
+                <p className={styles.asset}>
+                  <Image src={`/img/assets/wsteth.svg`} alt={asset} width={40} height={40} />
+                  {asset}
+                </p>
+                <div className={styles.buttonContainer}>
+                  <a href="https://stake.testnet.fi/" target="_blank" rel="noopener noreferrer">
                     <Button text={translations[lang].mint} />
                   </a>
                 </div>

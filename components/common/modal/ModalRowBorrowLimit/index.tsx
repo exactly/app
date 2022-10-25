@@ -57,7 +57,7 @@ function ModalRowBorrowLimit({ qty, symbol, operation, line }: Props) {
   function getBorrowLimits() {
     if (!accountData || !newQty) return [undefined, undefined];
 
-    const oraclePrice = accountData[symbol.toUpperCase()].oraclePrice;
+    const usdPrice = accountData[symbol.toUpperCase()].usdPrice;
     const decimals = accountData[symbol.toUpperCase()].decimals;
     const adjustFactor = accountData[symbol.toUpperCase()].adjustFactor;
     const isCollateral = accountData[symbol.toUpperCase()].isCollateral;
@@ -67,12 +67,12 @@ function ModalRowBorrowLimit({ qty, symbol, operation, line }: Props) {
     const beforeBorrowLimitUSD = getBeforeBorrowLimit(
       accountData,
       symbol,
-      oraclePrice,
+      usdPrice,
       decimals,
       operation
     );
 
-    const newQtyUsd = newQty.mul(oraclePrice).div(parseFixed('1', decimals));
+    const newQtyUsd = newQty.mul(usdPrice).div(parseFixed('1', decimals));
 
     const beforeBorrowLimit = Number(formatFixed(beforeBorrowLimitUSD, 18)).toFixed(2);
     let afterBorrowLimit = beforeBorrowLimit;

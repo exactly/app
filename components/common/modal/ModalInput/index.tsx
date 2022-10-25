@@ -26,7 +26,7 @@ function ModalInput({ value, name, disabled, symbol, error, onChange, onMax }: P
     if (!accountData || !value || !symbol) return;
 
     const decimals = accountData[symbol].decimals;
-    const oraclePrice = accountData[symbol].oraclePrice;
+    const usdPrice = accountData[symbol].usdPrice;
 
     const regex = /[^,.]*$/g;
     const inputDecimals = regex.exec(value)![0];
@@ -36,7 +36,7 @@ function ModalInput({ value, name, disabled, symbol, error, onChange, onMax }: P
     const parsedValue = parseFixed(value, decimals);
     const WAD = parseFixed('1', 18);
 
-    const valueUsd = parsedValue.mul(oraclePrice).div(WAD);
+    const valueUsd = parsedValue.mul(usdPrice).div(WAD);
 
     return formatFixed(valueUsd, decimals);
   }, [symbol, value, accountData]);

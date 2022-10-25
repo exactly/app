@@ -92,6 +92,7 @@ function Item({ market, type }: Props) {
 
       if (type === 'deposit') {
         const maxFuturePools = accountData[market?.symbol.toUpperCase()].maxFuturePools;
+
         const data = await queryRate(subgraphUrl, eMarketAddress, 'deposit', { maxFuturePools });
 
         interestRate = (data[0].apr * 100).toFixed(2);
@@ -139,13 +140,13 @@ function Item({ market, type }: Props) {
       const decimals = accountData[market?.symbol.toUpperCase()].decimals;
 
       const exchangeRate = parseFloat(
-        utils.formatEther(accountData[market?.symbol.toUpperCase()].oraclePrice)
+        utils.formatEther(accountData[market?.symbol.toUpperCase()].usdPrice),
       );
 
       const newPoolData = {
         borrowed: parseFloat(utils.formatUnits(borrowed, decimals)),
         supplied: parseFloat(utils.formatUnits(supplied, decimals)),
-        rate: exchangeRate
+        rate: exchangeRate,
       };
 
       if (
@@ -186,7 +187,7 @@ function Item({ market, type }: Props) {
           poolData &&
           `$${formatNumber(
             (type === 'borrow' ? poolData?.borrowed! : poolData?.supplied!) * poolData?.rate!,
-            'USD'
+            'USD',
           )}`) || <Skeleton />}
       </p>
       <p className={style.value}>{(rate && rate) || <Skeleton />}</p>

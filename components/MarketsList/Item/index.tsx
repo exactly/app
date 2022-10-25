@@ -1,5 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
 import { formatFixed, parseFixed } from '@ethersproject/bignumber';
+import { MaxUint256 } from '@ethersproject/constants';
 import { utils } from 'ethers';
 import Skeleton from 'react-loading-skeleton';
 import Link from 'next/link';
@@ -78,13 +79,13 @@ function Item({ market, type, fixedMarketData }: Props) {
       }
 
       const exchangeRate = parseFloat(
-        utils.formatEther(accountData[market?.symbol.toUpperCase()].oraclePrice)
+        utils.formatEther(accountData[market?.symbol.toUpperCase()].usdPrice),
       );
 
       const newPoolData = {
         borrowed: parseFloat(await utils.formatUnits(pool.borrowed, decimals)),
         supplied: parseFloat(await utils.formatUnits(pool.supplied, decimals)),
-        rate: exchangeRate
+        rate: exchangeRate,
       };
 
       setPoolData(newPoolData);
@@ -107,12 +108,12 @@ function Item({ market, type, fixedMarketData }: Props) {
 
         const time = 31_536_000 / (parseInt(date?.value!) - borrowTimestamp);
 
-        const borrowFixedAPR = (Number(formatFixed(borrowRate, 18)) - 1) * time * 100;
+        const borrowFixedAPR = (Number(formatFixed(borrowRate, 18)) - 1) * time;
 
-        if (borrowFixedAPR <= 0.01) {
+        if (borrowFixedAPR <= 0.01 || finalAssets.eq(MaxUint256)) {
           setRate('N/A');
         } else {
-          setRate(`${borrowFixedAPR.toFixed(2)}%`);
+          setRate(borrowFixedAPR.toLocaleString(undefined, { style: 'percent' }));
         }
       } else if (type === 'deposit') {
         const pool = fixedMarket?.deposits.find((pool) => pool.maturity.toString() === date?.value);
@@ -126,12 +127,12 @@ function Item({ market, type, fixedMarketData }: Props) {
 
         const time = 31_536_000 / (parseInt(date?.value!) - depositTimestamp);
 
-        const depositFixedAPR = (Number(formatFixed(depositRate, 18)) - 1) * time * 100;
+        const depositFixedAPR = (Number(formatFixed(depositRate, 18)) - 1) * time;
 
         if (depositFixedAPR <= 0.01) {
           setRate('N/A');
         } else {
-          setRate(`${depositFixedAPR.toFixed(2)}%`);
+          setRate(depositFixedAPR.toLocaleString(undefined, { style: 'percent' }));
         }
       }
     } catch (e) {

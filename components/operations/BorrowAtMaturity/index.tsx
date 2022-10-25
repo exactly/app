@@ -76,7 +76,7 @@ function BorrowAtMaturity() {
   const debounceQty = useDebounce(qty);
 
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
-    undefined
+    undefined,
   );
   const [underlyingContract, setUnderlyingContract] = useState<Contract | undefined>(undefined);
 
@@ -179,7 +179,7 @@ function BorrowAtMaturity() {
 
     const decimals = accountData[symbol.toUpperCase()].decimals;
     const adjustFactor = accountData[symbol.toUpperCase()].adjustFactor;
-    const oraclePrice = accountData[symbol.toUpperCase()].oraclePrice;
+    const usdPrice = accountData[symbol.toUpperCase()].usdPrice;
 
     let col = healthFactor.collateral;
     const hf = parseFixed('1.05', 18);
@@ -190,7 +190,7 @@ function BorrowAtMaturity() {
 
     if (!accountData![symbol.toUpperCase()].isCollateral && hasDepositedToFloatingPool) {
       col = col.add(
-        accountData![symbol].floatingDepositAssets.mul(accountData![symbol].adjustFactor).div(WAD)
+        accountData![symbol].floatingDepositAssets.mul(accountData![symbol].adjustFactor).div(WAD),
       );
     }
 
@@ -203,11 +203,11 @@ function BorrowAtMaturity() {
           .mul(WAD)
           .div(hf)
           .mul(WAD)
-          .div(oraclePrice)
+          .div(usdPrice)
           .mul(adjustFactor)
           .div(WAD),
-        18
-      )
+        18,
+      ),
     ).toFixed(decimals);
 
     setQty(safeMaximumBorrow);
@@ -217,15 +217,9 @@ function BorrowAtMaturity() {
   function handleInputChange(e: ChangeEvent<HTMLInputElement>) {
     if (!accountData) return;
     const decimals = accountData[symbol.toUpperCase()].decimals;
-    const oraclePrice = accountData[symbol.toUpperCase()].oraclePrice;
+    const usdPrice = accountData[symbol.toUpperCase()].usdPrice;
 
-    const maxBorrowAssets = getBeforeBorrowLimit(
-      accountData,
-      symbol,
-      oraclePrice,
-      decimals,
-      'borrow'
-    );
+    const maxBorrowAssets = getBeforeBorrowLimit(accountData, symbol, usdPrice, decimals, 'borrow');
 
     if (e.target.value.includes('.')) {
       const regex = /[^,.]*$/g;
@@ -240,20 +234,20 @@ function BorrowAtMaturity() {
     if (
       maxBorrowAssets.lt(
         parseFixed(e.target.value || '0', decimals)
-          .mul(accountData[symbol].oraclePrice)
-          .div(WAD)
+          .mul(accountData[symbol].usdPrice)
+          .div(WAD),
       )
     ) {
       return setError({
         status: true,
-        message: translations[lang].borrowLimit
+        message: translations[lang].borrowLimit,
       });
     }
 
     if (poolLiquidity && poolLiquidity < e.target.valueAsNumber) {
       return setError({
         status: true,
-        message: translations[lang].availableLiquidityError
+        message: translations[lang].availableLiquidityError,
       });
     }
 
@@ -269,7 +263,7 @@ function BorrowAtMaturity() {
 
         return setError({
           status: true,
-          message: translations[lang].notEnoughSlippage
+          message: translations[lang].notEnoughSlippage,
         });
       }
 
@@ -300,8 +294,8 @@ function BorrowAtMaturity() {
           {
             gasLimit: gasLimit
               ? Math.ceil(Number(formatFixed(gasLimit)) * numbers.gasLimitMultiplier)
-              : undefined
-          }
+              : undefined,
+          },
         );
       }
 
@@ -337,14 +331,14 @@ function BorrowAtMaturity() {
           status: true,
           message: isDenied
             ? translations[lang].deniedTransaction
-            : translations[lang].notEnoughSlippage
+            : translations[lang].notEnoughSlippage,
         });
       } else if (txError) {
         setTx({ status: 'error', hash: txErrorHash });
       } else {
         setError({
           status: true,
-          message: translations[lang].generalError
+          message: translations[lang].generalError,
         });
       }
     }
@@ -367,7 +361,7 @@ function BorrowAtMaturity() {
       console.log(e);
       setGasError({
         status: true,
-        component: 'gas'
+        component: 'gas',
       });
     }
   }
@@ -382,7 +376,7 @@ function BorrowAtMaturity() {
       ethers.utils.parseUnits(qty, decimals),
       ethers.utils.parseUnits(maxQty, decimals),
       walletAddress,
-      walletAddress
+      walletAddress,
     );
 
     return gasLimit;
@@ -395,14 +389,14 @@ function BorrowAtMaturity() {
       const decimals = accountData[symbol.toUpperCase()].decimals;
       const currentTimestamp = new Date().getTime() / 1000;
       const time = 31_536_000 / (parseInt(date.value) - currentTimestamp);
-      const oracle = accountData[symbol.toUpperCase()]?.oraclePrice;
+      const oracle = accountData[symbol.toUpperCase()]?.usdPrice;
 
       const qtyValue = qty == '' ? getOneDollar(oracle, decimals) : parseFixed(qty, decimals);
 
       const previewerContract = getInstance(
         previewerData.address!,
         previewerData.abi!,
-        'previewer'
+        'previewer',
       );
 
       let feeAtMaturity;
@@ -410,7 +404,7 @@ function BorrowAtMaturity() {
         feeAtMaturity = await previewerContract?.previewBorrowAtMaturity(
           fixedLenderWithSigner!.address,
           parseInt(date.value),
-          qtyValue
+          qtyValue,
         );
       } catch (error) {
         // FIXME: should show some message like "There is not enough liquidity in the pool"
@@ -418,7 +412,7 @@ function BorrowAtMaturity() {
         setSlippage('N/A');
         setUtilizationRate({
           ...utilizationRate,
-          after: 'N/A'
+          after: 'N/A',
         });
         console.log(error);
         return;
@@ -432,18 +426,18 @@ function BorrowAtMaturity() {
       } else {
         setUtilizationRate({
           ...utilizationRate,
-          after: (Number(formatFixed(feeAtMaturity.utilization, 18)) * 100).toFixed(2)
+          after: (Number(formatFixed(feeAtMaturity.utilization, 18)) * 100).toFixed(2),
         });
       }
 
       const rate = finalAssets.mul(parseFixed('1', 18)).div(initialAssets);
 
-      const fixedAPR = (Number(formatFixed(rate, 18)) - 1) * time * 100;
+      const fixedAPR = (Number(formatFixed(rate, 18)) - 1) * time;
 
-      const slippageAPR = (fixedAPR * (1 + numbers.slippage)).toFixed(2);
+      const slippageAPR = fixedAPR * (1 + numbers.slippage);
 
-      setSlippage(slippageAPR);
-      setFixedRate(`${fixedAPR.toFixed(2)}%`);
+      setSlippage(slippageAPR.toLocaleString(undefined, { style: 'percent' }));
+      setFixedRate(fixedAPR.toLocaleString(undefined, { style: 'percent' }));
     } catch (e) {
       console.log(e);
     }
@@ -478,7 +472,7 @@ function BorrowAtMaturity() {
     const fixedLender = getInstance(
       filteredFixedLender?.address!,
       filteredFixedLender?.abi!,
-      `market${symbol}`
+      `market${symbol}`,
     );
 
     setFixedLenderWithSigner(fixedLender);
@@ -487,13 +481,13 @@ function BorrowAtMaturity() {
   function getUnderlyingContract() {
     const underlyingData: UnderlyingData | undefined = getUnderlyingData(
       network?.name,
-      symbol.toLowerCase()
+      symbol.toLowerCase(),
     );
 
     const underlyingContract = getInstance(
       underlyingData!.address,
       underlyingData!.abi,
-      `underlying${symbol}`
+      `underlying${symbol}`,
     );
 
     setUnderlyingContract(underlyingContract);
@@ -515,7 +509,7 @@ function BorrowAtMaturity() {
     } else {
       return setError({
         status: true,
-        message: translations[lang].noCollateral
+        message: translations[lang].noCollateral,
       });
     }
   }
@@ -541,7 +535,7 @@ function BorrowAtMaturity() {
           status: true,
           message: isDenied
             ? translations[lang].deniedTransaction
-            : translations[lang].notEnoughSlippage
+            : translations[lang].notEnoughSlippage,
         });
       }
     }

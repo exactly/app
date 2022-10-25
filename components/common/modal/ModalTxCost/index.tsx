@@ -25,7 +25,7 @@ function ModalTxCost({ gas }: Props) {
   const exchangeRate = useMemo(() => {
     if (!accountData) return 1;
 
-    return parseFloat(utils.formatEther(accountData.WETH.oraclePrice));
+    return parseFloat(utils.formatEther(accountData.WETH.usdPrice));
   }, [accountData]);
 
   const eth = gas?.eth && `${gas.eth} ETH`;

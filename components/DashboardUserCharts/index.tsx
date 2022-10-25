@@ -46,8 +46,8 @@ function DashboardUserCharts() {
       label: '',
       value: 100,
       color: '#E1E1E1',
-      image: ''
-    }
+      image: '',
+    },
   ];
 
   useEffect(() => {
@@ -68,17 +68,17 @@ function DashboardUserCharts() {
     data.forEach((fixedLender) => {
       const symbol = fixedLender.assetSymbol;
       const decimals = fixedLender.decimals;
-      const oracle = parseFloat(utils.formatUnits(fixedLender.oraclePrice, 18));
+      const oracle = parseFloat(utils.formatUnits(fixedLender.usdPrice, 18));
 
       const objectDepositData: DonutData = {
         label: symbol.toUpperCase(),
         value: 0,
         color: getAssetColor(symbol),
-        image: `/img/assets/${symbol.toLowerCase()}.svg`
+        image: `/img/assets/${symbol.toLowerCase()}.svg`,
       };
 
       const variablePoolDepositValue = parseFloat(
-        utils.formatUnits(fixedLender.floatingDepositAssets, decimals)
+        utils.formatUnits(fixedLender.floatingDepositAssets, decimals),
       );
       const variablePoolDepositValueUSD = variablePoolDepositValue * oracle;
 
@@ -88,7 +88,7 @@ function DashboardUserCharts() {
 
       fixedLender.fixedDepositPositions.forEach((supplyPosition) => {
         const maturityDepositValue = parseFloat(
-          utils.formatUnits(supplyPosition.position.principal, decimals)
+          utils.formatUnits(supplyPosition.position.principal, decimals),
         );
         const maturityDepositValueUSD = maturityDepositValue * oracle;
         objectDepositData.value += maturityDepositValueUSD; //add the value in USD to the asset deposit data
@@ -128,19 +128,19 @@ function DashboardUserCharts() {
     data.forEach((fixedLender) => {
       const symbol = fixedLender.assetSymbol;
       const decimals = fixedLender.decimals;
-      const oracle = parseFloat(utils.formatUnits(fixedLender.oraclePrice, 18));
+      const oracle = parseFloat(utils.formatUnits(fixedLender.usdPrice, 18));
 
       const objectBorrowData: DonutData = {
         label: symbol.toUpperCase(),
         value: 0,
         color: getAssetColor(symbol),
-        image: `/img/assets/${symbol.toLowerCase()}.svg`
+        image: `/img/assets/${symbol.toLowerCase()}.svg`,
       };
 
       //floatinBorrow
       if (fixedLender.floatingBorrowAssets) {
         const variablePoolBorrowValue = parseFloat(
-          utils.formatUnits(fixedLender.floatingBorrowAssets, decimals)
+          utils.formatUnits(fixedLender.floatingBorrowAssets, decimals),
         );
         const variablePoolBorrowValueUSD = variablePoolBorrowValue * oracle;
 
@@ -152,7 +152,7 @@ function DashboardUserCharts() {
       //fixed borrow
       fixedLender.fixedBorrowPositions.forEach((borrowPosition) => {
         const maturityBorrowValue = parseFloat(
-          utils.formatUnits(borrowPosition.position.principal, decimals)
+          utils.formatUnits(borrowPosition.position.principal, decimals),
         );
         const maturityBorrowValueUSD = maturityBorrowValue * oracle;
         objectBorrowData.value += maturityBorrowValueUSD;
@@ -208,7 +208,7 @@ function DashboardUserCharts() {
                           sx={{
                             color: `${getAssetColor(asset.label || 'WBTC')}`,
                             fontSize: '8px',
-                            alignSelf: 'center'
+                            alignSelf: 'center',
                           }}
                         />
                         <code>
@@ -240,7 +240,7 @@ function DashboardUserCharts() {
                 sx={{
                   color: `#008cf4`,
                   fontSize: '8px',
-                  alignSelf: 'center'
+                  alignSelf: 'center',
                 }}
               />
               <code>
@@ -258,7 +258,7 @@ function DashboardUserCharts() {
                 sx={{
                   color: `#331A53`,
                   fontSize: '8px',
-                  alignSelf: 'center'
+                  alignSelf: 'center',
                 }}
               />
               <code>
@@ -296,7 +296,7 @@ function DashboardUserCharts() {
                           sx={{
                             color: `${getAssetColor(asset.label || 'WBTC')}`,
                             fontSize: '8px',
-                            alignSelf: 'center'
+                            alignSelf: 'center',
                           }}
                         />
                         <code>
@@ -316,7 +316,7 @@ function DashboardUserCharts() {
             {borrowRateComposition ? (
               <div
                 className={styles.fullProgress}
-                style={{ width: `${borrowRateComposition.variableComposition}0%` }}
+                style={{ width: `${borrowRateComposition.variableComposition}%` }}
               />
             ) : (
               <div className={styles.fullProgress} style={{ width: `100%` }} />
@@ -328,7 +328,7 @@ function DashboardUserCharts() {
                 sx={{
                   color: `#008cf4`,
                   fontSize: '8px',
-                  alignSelf: 'center'
+                  alignSelf: 'center',
                 }}
               />
               <code>
@@ -346,7 +346,7 @@ function DashboardUserCharts() {
                 sx={{
                   color: `#331A53`,
                   fontSize: '8px',
-                  alignSelf: 'center'
+                  alignSelf: 'center',
                 }}
               />
               <code>
