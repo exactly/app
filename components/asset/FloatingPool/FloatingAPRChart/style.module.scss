@@ -1,6 +1,7 @@
 .graphContainer {
   display: flex;
   flex-direction: column;
+  width: 100%;
 
   .titleContainer {
     display: flex;
@@ -23,9 +24,7 @@
     }
   }
   .graphCard {
-    background: var(--gray-50);
-    box-shadow: var(--shadow-tables);
-    border-radius: var(--u);
     padding: var(--u2);
+    width: 100%;
   }
 }

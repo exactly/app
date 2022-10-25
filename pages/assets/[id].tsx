@@ -29,6 +29,7 @@ import AssetHeaderInfo from 'components/asset/Header';
 import { AssetSymbol } from 'utils/assets';
 import AssetMaturityPools from 'components/asset/MaturityPool';
 import MaturityPoolInfo from 'components/asset/MaturityPool/MaturityPoolInfo';
+import AssetFloatingPool from 'components/asset/FloatingPool';
 
 interface Props {
   symbol: string;
@@ -95,13 +96,12 @@ const Asset: NextPage<Props> = ({ symbol = 'DAI' }) => {
           networkName={networkName}
         />
         <Grid container spacing={4} mt={5} ml={0}>
-          <Grid item container>
-            <FloatingPoolInfo
+          <Grid item container spacing={4}>
+            <AssetFloatingPool
               symbol={symbol}
               eMarketAddress={eMarketAddress}
               networkName={networkName}
             />
-            <FloatingAPRChart networkName={networkName} market={eMarketAddress} />
           </Grid>
           <Grid item container mt={5}>
             <AssetMaturityPools symbol={symbol} />
