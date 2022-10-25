@@ -6,14 +6,14 @@ import { AccountData } from 'types/AccountData';
 function getBeforeBorrowLimit(
   accountData: AccountData,
   symbol: string,
-  oraclePrice: BigNumber,
+  usdPrice: BigNumber,
   decimals: number,
   type: string
 ) {
   const maxBorrowAssets = accountData![symbol.toUpperCase()].maxBorrowAssets;
   const WAD = parseFixed('1', 18);
 
-  let before = maxBorrowAssets.mul(oraclePrice).div(parseFixed('1', decimals));
+  let before = maxBorrowAssets.mul(usdPrice).div(parseFixed('1', decimals));
 
   const hasDepositedToFloatingPool =
     Number(formatFixed(accountData![symbol].floatingDepositAssets, decimals)) > 0;

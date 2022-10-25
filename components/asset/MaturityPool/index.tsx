@@ -42,12 +42,12 @@ const AssetMaturityPools: FC<AssetMaturityPoolsProps> = ({ symbol: rawSymbol }) 
     const previewerContract = getInstance(previewerData.address!, previewerData.abi!, 'previewer');
 
     const previewFixedData: FixedMarketData[] = await previewerContract?.previewFixed(
-      parseFixed(usdAmountPreviewer.toString(), 18)
+      parseFixed(usdAmountPreviewer.toString(), 18),
     );
 
     const { market: marketAddress } = accountData[symbol];
     const marketMaturities = previewFixedData.find(
-      ({ market }) => market === marketAddress
+      ({ market }) => market === marketAddress,
     ) as FixedMarketData;
 
     const timestampNow = Date.now() / 1000;
@@ -74,7 +74,7 @@ const AssetMaturityPools: FC<AssetMaturityPoolsProps> = ({ symbol: rawSymbol }) 
 
       APRsPerMaturity[maturity] = {
         ...APRsPerMaturity[maturity],
-        deposit: depositAPR < MIN_VALID_APR ? 'N/A' : depositAPR.toFixed(2)
+        deposit: depositAPR < MIN_VALID_APR ? 'N/A' : depositAPR.toFixed(2),
       };
     });
 
@@ -93,11 +93,11 @@ const AssetMaturityPools: FC<AssetMaturityPoolsProps> = ({ symbol: rawSymbol }) 
 
       APRsPerMaturity[maturity] = {
         ...APRsPerMaturity[maturity],
-        borrow: borrowAPR < MIN_VALID_APR ? 'N/A' : borrowAPR.toFixed(2)
+        borrow: borrowAPR < MIN_VALID_APR ? 'N/A' : borrowAPR.toFixed(2),
       };
     });
 
-    const { fixedPools, oraclePrice: exchangeRate } = accountData[symbol];
+    const { fixedPools, usdPrice: exchangeRate } = accountData[symbol];
     let tempTotalDeposited = Zero;
     let tempTotalBorrowed = Zero;
     fixedPools.map(({ borrowed, supplied: deposited }) => {
@@ -107,11 +107,11 @@ const AssetMaturityPools: FC<AssetMaturityPoolsProps> = ({ symbol: rawSymbol }) 
 
     const totalDepositedUSD = formatUnits(
       tempTotalDeposited.mul(exchangeRate).div(WeiPerEther),
-      decimals
+      decimals,
     );
     const totalBorrowedUSD = formatUnits(
       tempTotalBorrowed.mul(exchangeRate).div(WeiPerEther),
-      decimals
+      decimals,
     );
 
     setTotalDeposited(Number(totalDepositedUSD));
@@ -121,13 +121,13 @@ const AssetMaturityPools: FC<AssetMaturityPoolsProps> = ({ symbol: rawSymbol }) 
       timestamp: Boolean(maturityMaxAPRDeposit) ? parseTimestamp(maturityMaxAPRDeposit) : undefined,
       apr: APRsPerMaturity[maturityMaxAPRDeposit]?.deposit
         ? `${Number(APRsPerMaturity[maturityMaxAPRDeposit].deposit).toFixed(2)}%`
-        : 'N/A'
+        : 'N/A',
     });
     setBestBorrowAPR({
       timestamp: Boolean(maturityMinAPRBorrow) ? parseTimestamp(maturityMinAPRBorrow) : undefined,
       apr: APRsPerMaturity[maturityMinAPRBorrow]?.borrow
         ? `${Number(APRsPerMaturity[maturityMinAPRBorrow].borrow).toFixed(2)}%`
-        : 'N/A'
+        : 'N/A',
     });
   }, [accountData, symbol, getInstance, previewerData]);
 

@@ -87,11 +87,11 @@ function ModalRowHealthFactor({ qty, symbol, operation, healthFactorCallback }: 
     if (!accountData || !newQty || !healthFactor) return;
 
     const adjustFactor = accountData[symbol].adjustFactor;
-    const oraclePrice = accountData[symbol].oraclePrice;
+    const usdPrice = accountData[symbol].usdPrice;
     const isCollateral = accountData[symbol].isCollateral;
     const decimals = accountData[symbol].decimals;
 
-    const newQtyUsd = newQty.mul(oraclePrice).div(parseFixed('1', decimals));
+    const newQtyUsd = newQty.mul(usdPrice).div(parseFixed('1', decimals));
 
     switch (operation) {
       case 'deposit': {

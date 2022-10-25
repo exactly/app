@@ -66,10 +66,10 @@ function MarketsList() {
         borrows: borrowPools,
         deposits: depositPools,
         assets: initialAssets,
-        market: marketAddress
+        market: marketAddress,
       } = marketData;
       const { name: marketName } = markets.find(
-        ({ market }) => market.toLowerCase() === marketAddress.toLowerCase()
+        ({ market }) => market.toLowerCase() === marketAddress.toLowerCase(),
       )!;
       // iterate through every borrow & deposit pools - parallel arrays
       for (let j = 0; j < borrowPools.length; j++) {
@@ -111,11 +111,11 @@ function MarketsList() {
       const previewerContract = getInstance(
         previewerData.address!,
         previewerData.abi!,
-        'previewer'
+        'previewer',
       );
 
       const marketData = await previewerContract?.previewFixed(
-        parseFixed(usdAmount.toString(), 18)
+        parseFixed(usdAmount.toString(), 18),
       );
 
       checkWeirdAPR(marketData);

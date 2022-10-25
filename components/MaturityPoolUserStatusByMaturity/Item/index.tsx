@@ -36,7 +36,7 @@ import {
   getMaturityPoolBorrowsQuery,
   getMaturityPoolDepositsQuery,
   getMaturityPoolWithdrawsQuery,
-  getMaturityPoolRepaysQuery
+  getMaturityPoolRepaysQuery,
 } from 'queries';
 import dynamic from 'next/dynamic';
 
@@ -63,7 +63,7 @@ function Item({ type, amount, maturityDate, symbol, market, progress, decimals, 
   const translations: { [key: string]: LangKeys } = keys;
 
   const [transactions, setTransactions] = useState<Array<WithdrawMP | Repay | Deposit | Borrow>>(
-    []
+    [],
   );
   const [exchangeRate, setExchangeRate] = useState<number | undefined>(undefined);
   const [daysRemaining, setDaysRemaining] = useState<string | undefined>(undefined);
@@ -88,28 +88,28 @@ function Item({ type, amount, maturityDate, symbol, market, progress, decimals, 
     if (type?.value === 'borrow') {
       const getMaturityPoolBorrows = await request(
         subgraphUrl,
-        getMaturityPoolBorrowsQuery(walletAddress!, maturityDate, market.toLowerCase())
+        getMaturityPoolBorrowsQuery(walletAddress!, maturityDate, market.toLowerCase()),
       );
 
       transactions.push(...getMaturityPoolBorrows.borrowAtMaturities);
 
       const getMaturityPoolRepays = await request(
         subgraphUrl,
-        getMaturityPoolRepaysQuery(walletAddress!, maturityDate, market.toLowerCase())
+        getMaturityPoolRepaysQuery(walletAddress!, maturityDate, market.toLowerCase()),
       );
 
       transactions.push(...getMaturityPoolRepays.repayAtMaturities);
     } else {
       const getMaturityPoolDeposits = await request(
         subgraphUrl,
-        getMaturityPoolDepositsQuery(walletAddress!, maturityDate, market.toLowerCase())
+        getMaturityPoolDepositsQuery(walletAddress!, maturityDate, market.toLowerCase()),
       );
 
       transactions.push(...getMaturityPoolDeposits.depositAtMaturities);
 
       const getMaturityPoolWithdraws = await request(
         subgraphUrl,
-        getMaturityPoolWithdrawsQuery(walletAddress!, maturityDate, market.toLowerCase())
+        getMaturityPoolWithdrawsQuery(walletAddress!, maturityDate, market.toLowerCase()),
       );
 
       transactions.push(...getMaturityPoolWithdraws.withdrawAtMaturities);
@@ -120,7 +120,7 @@ function Item({ type, amount, maturityDate, symbol, market, progress, decimals, 
   async function getRate() {
     if (!symbol || !accountData) return;
 
-    const rate = parseFloat(formatEther(accountData[symbol].oraclePrice));
+    const rate = parseFloat(formatEther(accountData[symbol].usdPrice));
 
     setExchangeRate(rate);
   }
@@ -136,14 +136,14 @@ function Item({ type, amount, maturityDate, symbol, market, progress, decimals, 
     if (type?.value === 'borrow') {
       const getMaturityPoolBorrows = await request(
         subgraphUrl,
-        getMaturityPoolBorrowsQuery(walletAddress, maturityDate, market.toLowerCase())
+        getMaturityPoolBorrowsQuery(walletAddress, maturityDate, market.toLowerCase()),
       );
 
       allTransactions.push(...getMaturityPoolBorrows.borrowAtMaturities);
     } else {
       const getMaturityPoolDeposits = await request(
         subgraphUrl,
-        getMaturityPoolDepositsQuery(walletAddress, maturityDate, market.toLowerCase())
+        getMaturityPoolDepositsQuery(walletAddress, maturityDate, market.toLowerCase()),
       );
 
       allTransactions.push(...getMaturityPoolDeposits.depositAtMaturities);
@@ -194,7 +194,7 @@ function Item({ type, amount, maturityDate, symbol, market, progress, decimals, 
             `$${formatNumber(
               parseFloat(formatUnits(amount, decimals)) * exchangeRate,
               'USD',
-              true
+              true,
             )}`
           ) : (
             <Skeleton width={40} />

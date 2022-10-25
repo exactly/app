@@ -56,7 +56,7 @@ const Asset: NextPage<Props> = ({ symbol = 'DAI' }) => {
     const filteredFixedLender = fixedLenderData.find((contract: any) => {
       const contractSymbol = getSymbol(
         contract.address!,
-        network?.name ?? process.env.NEXT_PUBLIC_NETWORK
+        network?.name ?? process.env.NEXT_PUBLIC_NETWORK,
       );
       return contractSymbol === symbol;
     });
@@ -132,7 +132,7 @@ const Asset: NextPage<Props> = ({ symbol = 'DAI' }) => {
         <div className={style.assetInfoContainer}>
           <AssetInfo
             title={translations[lang].price}
-            value={`$${parseFloat(ethers.utils.formatEther(marketData.oraclePrice))}`}
+            value={`$${parseFloat(ethers.utils.formatEther(marketData.usdPrice))}`}
           />
 
           <AssetInfo
@@ -156,14 +156,14 @@ export const getStaticProps: GetStaticProps = async (context) => {
 
   return {
     props: {
-      symbol: symbol
-    }
+      symbol: symbol,
+    },
   };
 };
 
 export async function getStaticPaths() {
   return {
     paths: ['/assets/dai', '/assets/eth', '/assets/usdc', '/assets/wbtc'],
-    fallback: true
+    fallback: true,
   };
 }

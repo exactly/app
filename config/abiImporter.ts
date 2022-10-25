@@ -3,6 +3,8 @@ import goerliFixedLenderDAI from 'protocol/deployments/goerli/MarketDAI.json';
 import goerliFixedLenderWETH from 'protocol/deployments/goerli/MarketWETH.json';
 import goerliFixedLenderWBTC from 'protocol/deployments/goerli/MarketWBTC.json';
 import goerliFixedLenderUSDC from 'protocol/deployments/goerli/MarketUSDC.json';
+import goerliFixedLenderWSTETH from 'protocol/deployments/goerli/MarketwstETH.json';
+// import {abi as marketABI} from 'protocol/deployments/goerli/MarketUSDC.json';
 import goerliPreviewer from 'protocol/deployments/goerli/Previewer.json';
 
 import { Dictionary } from 'types/Dictionary';
@@ -14,12 +16,13 @@ function getABI(network: string | undefined) {
         goerliFixedLenderDAI,
         goerliFixedLenderUSDC,
         goerliFixedLenderWETH,
-        goerliFixedLenderWBTC
+        goerliFixedLenderWBTC,
+        goerliFixedLenderWSTETH,
       ],
       Auditor: goerliAuditor,
-      Previewer: goerliPreviewer
+      Previewer: goerliPreviewer,
     },
-    mainnet: {}
+    mainnet: {},
   };
 
   return dictionary[network || process.env.NEXT_PUBLIC_NETWORK!] ?? dictionary.goerli;

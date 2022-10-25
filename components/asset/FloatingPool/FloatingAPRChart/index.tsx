@@ -9,7 +9,7 @@ import {
   ResponsiveContainer,
   Tooltip,
   Legend,
-  CartesianGrid
+  CartesianGrid,
 } from 'recharts';
 
 import LangContext from 'contexts/LangContext';
@@ -35,7 +35,7 @@ function FloatingAPRChart({ market, networkName }: Props) {
     maxFuturePools: 3,
     interval: 3_600 * 24,
     count: 30,
-    roundTicks: true
+    roundTicks: true,
   };
 
   const [queryOptions, setQueryOptions] = useState<Options>(defaultOptions);
@@ -53,8 +53,8 @@ function FloatingAPRChart({ market, networkName }: Props) {
       ({ apr, apy, ...rest }) => ({
         ...rest,
         apr: apr * 100,
-        apy: apy * 100
-      })
+        apy: apy * 100,
+      }),
     );
 
     setData(data);
@@ -92,7 +92,7 @@ function FloatingAPRChart({ market, networkName }: Props) {
                 maxFuturePools: 3,
                 interval: 3_600 * 24,
                 count: 30,
-                roundTicks: true
+                roundTicks: true,
               });
               setQueryWindow('for 1 Month');
             }}
@@ -110,7 +110,7 @@ function FloatingAPRChart({ market, networkName }: Props) {
               top: 5,
               right: 30,
               left: 20,
-              bottom: 5
+              bottom: 5,
             }}
           >
             <CartesianGrid horizontal vertical={false} />
@@ -131,7 +131,7 @@ function FloatingAPRChart({ market, networkName }: Props) {
                 angle: +90,
                 position: 'insideLeft',
                 dy: -35,
-                offset: 50
+                offset: 50,
               }}
             />
             <Tooltip
@@ -145,7 +145,7 @@ function FloatingAPRChart({ market, networkName }: Props) {
               iconSize={30}
               wrapperStyle={{
                 top: '270px',
-                right: '-100px'
+                right: '-100px',
               }}
             />
             <Line type="monotone" dataKey="apr" stroke="#008cf4" activeDot={{ r: 6 }} />

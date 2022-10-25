@@ -67,7 +67,7 @@ function DepositAtMaturity() {
   const debounceQty = useDebounce(qty);
 
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
-    undefined
+    undefined,
   );
   const [underlyingContract, setUnderlyingContract] = useState<Contract | undefined>(undefined);
 
@@ -142,8 +142,8 @@ function DepositAtMaturity() {
         {
           gasLimit: gasLimit
             ? Math.ceil(Number(formatFixed(gasLimit)) * numbers.gasLimitMultiplier)
-            : undefined
-        }
+            : undefined,
+        },
       );
 
       //we set the transaction as pending
@@ -161,7 +161,7 @@ function DepositAtMaturity() {
       console.log(e);
       setLoading(false);
       setError({
-        status: true
+        status: true,
       });
     }
   }
@@ -206,7 +206,7 @@ function DepositAtMaturity() {
       setError({
         status: true,
         message: translations[lang].insufficientBalance,
-        component: 'input'
+        component: 'input',
       });
     } else {
       setError(undefined);
@@ -243,8 +243,8 @@ function DepositAtMaturity() {
           {
             gasLimit: gasLimit
               ? Math.ceil(Number(formatFixed(gasLimit)) * numbers.gasLimitMultiplier)
-              : undefined
-          }
+              : undefined,
+          },
         );
       }
 
@@ -277,14 +277,14 @@ function DepositAtMaturity() {
       if (isDenied) {
         setError({
           status: true,
-          message: isDenied && translations[lang].deniedTransaction
+          message: isDenied && translations[lang].deniedTransaction,
         });
       } else if (txError) {
         setTx({ status: 'error', hash: txErrorHash });
       } else {
         setError({
           status: true,
-          message: translations[lang].generalError
+          message: translations[lang].generalError,
         });
       }
     }
@@ -306,7 +306,7 @@ function DepositAtMaturity() {
     } catch (e) {
       setError({
         status: true,
-        component: 'gas'
+        component: 'gas',
       });
     }
   }
@@ -320,7 +320,7 @@ function DepositAtMaturity() {
       parseInt(date.value),
       ethers.utils.parseUnits(qty, decimals),
       ethers.utils.parseUnits(minQty, decimals),
-      walletAddress
+      walletAddress,
     );
 
     return gasLimit;
@@ -329,7 +329,7 @@ function DepositAtMaturity() {
   async function getApprovalGasLimit() {
     const gasLimit = await underlyingContract?.estimateGas.approve(
       market?.value,
-      ethers.constants.MaxUint256
+      ethers.constants.MaxUint256,
     );
 
     return gasLimit;
@@ -353,7 +353,7 @@ function DepositAtMaturity() {
       setError({
         status: true,
         message: translations[lang].error,
-        component: 'gas'
+        component: 'gas',
       });
     }
   }
@@ -375,20 +375,20 @@ function DepositAtMaturity() {
       const decimals = accountData[symbol.toUpperCase()].decimals;
       const currentTimestamp = new Date().getTime() / 1000;
       const time = 31_536_000 / (parseInt(date?.value) - currentTimestamp);
-      const oracle = accountData[symbol.toUpperCase()]?.oraclePrice;
+      const oracle = accountData[symbol.toUpperCase()]?.usdPrice;
 
       const qtyValue = qty == '' ? getOneDollar(oracle, decimals) : parseFixed(qty, decimals);
 
       const previewerContract = getInstance(
         previewerData.address!,
         previewerData.abi!,
-        'previewer'
+        'previewer',
       );
 
       const feeAtMaturity = await previewerContract?.previewDepositAtMaturity(
         market?.value,
         parseInt(date.value),
-        qtyValue
+        qtyValue,
       );
 
       const initialAssets = qtyValue;
@@ -396,21 +396,33 @@ function DepositAtMaturity() {
 
       const rate = finalAssets.mul(parseFixed('1', 18)).div(initialAssets);
 
-      const fixedAPR = (Number(formatFixed(rate, 18)) - 1) * time * 100;
+      const fixedAPR = (Number(formatFixed(rate, 18)) - 1) * time;
 
-      const slippageAPR = (fixedAPR * (1 - numbers.slippage)).toFixed(2);
+      const slippageAPR = fixedAPR * (1 - numbers.slippage);
 
       // Let's check against 0.01 for now, because this is a percentage and it could be 0.0001 or lower, but not 0
       if (fixedAPR < 0.01) {
         setError({
           status: true,
           message: translations[lang].zeroRate,
-          component: 'input'
+          component: 'input',
         });
       }
 
-      setSlippage(slippageAPR);
-      setFixedRate(`${fixedAPR.toFixed(2)}%`);
+      setSlippage(
+        slippageAPR.toLocaleString(undefined, {
+          style: 'percent',
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        }),
+      );
+      setFixedRate(
+        fixedAPR.toLocaleString(undefined, {
+          style: 'percent',
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        }),
+      );
     } catch (e) {
       console.log(e);
     }
@@ -426,7 +438,7 @@ function DepositAtMaturity() {
     const fixedLender = getInstance(
       filteredFixedLender?.address!,
       filteredFixedLender?.abi!,
-      `market${symbol}`
+      `market${symbol}`,
     );
 
     setFixedLenderWithSigner(fixedLender);
@@ -435,13 +447,13 @@ function DepositAtMaturity() {
   function getUnderlyingContract() {
     const underlyingData: UnderlyingData | undefined = getUnderlyingData(
       network?.name,
-      symbol.toLowerCase()
+      symbol.toLowerCase(),
     );
 
     const underlyingContract = getInstance(
       underlyingData!.address,
       underlyingData!.abi,
-      `underlying${symbol}`
+      `underlying${symbol}`,
     );
 
     setUnderlyingContract(underlyingContract);

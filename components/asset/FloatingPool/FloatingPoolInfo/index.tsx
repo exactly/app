@@ -41,17 +41,17 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol, eMarketAddress, n
         totalFloatingDepositAssets: totalDeposited,
         totalFloatingBorrowAssets: totalBorrowed,
         decimals,
-        oraclePrice: exchangeRate
+        usdPrice: exchangeRate,
       } = accountData[symbol];
 
       const totalDepositUSD = formatUnits(
         totalDeposited.mul(exchangeRate).div(WeiPerEther),
-        decimals
+        decimals,
       );
 
       const totalBorrowUSD = formatUnits(
         totalBorrowed.mul(exchangeRate).div(WeiPerEther),
-        decimals
+        decimals,
       );
 
       setDeposited(parseFloat(totalDepositUSD));
@@ -71,7 +71,7 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol, eMarketAddress, n
 
     // TODO: consider storing these results in a new context so it's only fetched once - already added in tech debt docs
     const [{ apr: depositAPRRate }] = await queryRates(subgraphUrl, eMarketAddress, 'deposit', {
-      maxFuturePools
+      maxFuturePools,
     });
     const [{ apr: borrowAPRRate }] = await queryRates(subgraphUrl, eMarketAddress, 'borrow');
     setDepositAPR(`${(depositAPRRate * 100).toFixed(2)}%`);
@@ -86,28 +86,28 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol, eMarketAddress, n
   const itemsInfo: PoolItemInfoProps[] = [
     {
       label: translations[lang].totalDeposited,
-      value: deposited ? `$${formatNumber(deposited)}` : undefined
+      value: deposited ? `$${formatNumber(deposited)}` : undefined,
     },
     {
       label: translations[lang].totalBorrowed,
-      value: borrowed ? `$${formatNumber(borrowed)}` : undefined
+      value: borrowed ? `$${formatNumber(borrowed)}` : undefined,
     },
     {
       label: translations[lang].TVL,
-      value: deposited && borrowed ? `$${formatNumber(deposited - borrowed)}` : undefined
+      value: deposited && borrowed ? `$${formatNumber(deposited - borrowed)}` : undefined,
     },
     {
       label: translations[lang].depositAPR,
-      value: depositAPR
+      value: depositAPR,
     },
     {
       label: translations[lang].borrowAPR,
-      value: borrowAPR
+      value: borrowAPR,
     },
     {
       label: translations[lang].utilizationRate,
-      value: deposited && borrowed ? `${((borrowed / deposited) * 100).toFixed(2)}%` : undefined
-    }
+      value: deposited && borrowed ? `${((borrowed / deposited) * 100).toFixed(2)}%` : undefined,
+    },
   ];
 
   return <PoolHeaderInfo title={translations[lang].smartPool} itemsInfo={itemsInfo} />;

@@ -30,7 +30,7 @@ function ModalAsset({ asset, assetTitle, amount, amountTitle }: Props) {
   const exchangeRate = useMemo(() => {
     if (!accountData || !asset) return 1;
 
-    return parseFloat(utils.formatEther(accountData[asset].oraclePrice));
+    return parseFloat(utils.formatEther(accountData[asset].usdPrice));
   }, [parsedSymbol, accountData]);
 
   return (

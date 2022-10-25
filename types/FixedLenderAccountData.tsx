@@ -22,7 +22,7 @@ export type FixedLenderAccountData = {
   market: string;
   decimals: number;
   assetSymbol: string;
-  oraclePrice: BigNumber;
+  usdPrice: BigNumber;
   penaltyRate: BigNumber;
   adjustFactor: BigNumber;
   maxBorrowAssets: BigNumber;

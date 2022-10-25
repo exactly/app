@@ -102,10 +102,10 @@ function Item({
       setToggle(true);
 
       const healthFactor = await getHealthFactorData(accountData);
-      const oraclePrice = accountData[symbol].oraclePrice;
+      const usdPrice = accountData[symbol].usdPrice;
       const collateralAssets = accountData[symbol].floatingDepositAssets;
       const WAD = parseFixed('1', 18);
-      const collateralUsd = collateralAssets.mul(oraclePrice).div(WAD);
+      const collateralUsd = collateralAssets.mul(usdPrice).div(WAD);
 
       const newHF = parseFloat(
         parseHealthFactor(healthFactor.debt, healthFactor.collateral.sub(collateralUsd))
@@ -120,9 +120,7 @@ function Item({
   function getExchangeRate() {
     if (!accountData || !symbol) return;
     const data = accountData;
-    const exchangeRate = parseFloat(
-      ethers.utils.formatEther(data[symbol.toUpperCase()].oraclePrice)
-    );
+    const exchangeRate = parseFloat(ethers.utils.formatEther(data[symbol.toUpperCase()].usdPrice));
     setRate(exchangeRate);
   }
 
