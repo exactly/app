@@ -69,7 +69,7 @@ function MaturityInfo({ maturity, symbol, fixedLender }: Props) {
       const supplied = ethers.utils.formatUnits(pool?.supplied!, decimals);
 
       const exchangeRate = parseFloat(
-        ethers.utils.formatEther(accountData[symbol.toUpperCase()].oraclePrice)
+        ethers.utils.formatEther(accountData[symbol.toUpperCase()].usdPrice)
       );
 
       const newPoolData = {

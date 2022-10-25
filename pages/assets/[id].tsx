@@ -116,7 +116,7 @@ const Asset: NextPage<Props> = ({ symbol = 'DAI' }) => {
         <div className={style.assetInfoContainer}>
           <AssetInfo
             title={translations[lang].price}
-            value={`$${parseFloat(ethers.utils.formatEther(marketData.oraclePrice))}`}
+            value={`$${parseFloat(ethers.utils.formatEther(marketData.usdPrice))}`}
           />
 
           <AssetInfo

@@ -50,13 +50,11 @@ export const AccountDataProvider: FC = ({ children }) => {
 
       const data = await previewerContract?.exactly(wallet);
 
-      const newAccountData: AccountData = {};
-
-      data.forEach((fixedLender: FixedLenderAccountData) => {
-        newAccountData[fixedLender.assetSymbol] = fixedLender;
-      });
-
-      setAccountData(newAccountData);
+      setAccountData(
+        Object.fromEntries(
+          data.map((market: FixedLenderAccountData) => [market.assetSymbol.toUpperCase(), market]) // HACK remove .toUpperCase() function in all the app
+        )
+      );
     } catch (e) {
       console.log(e);
     }

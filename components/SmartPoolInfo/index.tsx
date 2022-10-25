@@ -49,7 +49,7 @@ function SmartPoolInfo({ symbol }: Props) {
       const supplied = accountData[symbol.toUpperCase()].totalFloatingDepositAssets;
       const decimals = accountData[symbol.toUpperCase()].decimals;
 
-      const exchangeRate = parseFloat(utils.formatEther(accountData[symbol].oraclePrice));
+      const exchangeRate = parseFloat(utils.formatEther(accountData[symbol].usdPrice));
 
       const newPoolData = {
         borrowed: parseFloat(await utils.formatUnits(borrowed, decimals)),

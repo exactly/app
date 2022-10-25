@@ -66,7 +66,7 @@ function Borrow() {
   const debounceQty = useDebounce(qty);
 
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
-    undefined
+    undefined,
   );
   const [underlyingContract, setUnderlyingContract] = useState<Contract | undefined>(undefined);
 
@@ -153,7 +153,7 @@ function Borrow() {
 
     const decimals = accountData[symbol.toUpperCase()].decimals;
     const adjustFactor = accountData[symbol.toUpperCase()].adjustFactor;
-    const oraclePrice = accountData[symbol.toUpperCase()].oraclePrice;
+    const usdPrice = accountData[symbol.toUpperCase()].usdPrice;
 
     let col = healthFactor.collateral;
     const hf = parseFixed('1.05', 18);
@@ -164,7 +164,7 @@ function Borrow() {
 
     if (!accountData![symbol.toUpperCase()].isCollateral && hasDepositedToFloatingPool) {
       col = col.add(
-        accountData![symbol].floatingDepositAssets.mul(accountData![symbol].adjustFactor).div(WAD)
+        accountData![symbol].floatingDepositAssets.mul(accountData![symbol].adjustFactor).div(WAD),
       );
     }
 
@@ -177,11 +177,11 @@ function Borrow() {
           .mul(WAD)
           .div(hf)
           .mul(WAD)
-          .div(oraclePrice)
+          .div(usdPrice)
           .mul(adjustFactor)
           .div(WAD),
-        18
-      )
+        18,
+      ),
     ).toFixed(decimals);
 
     setQty(safeMaximumBorrow);
@@ -192,15 +192,9 @@ function Borrow() {
     if (!liquidity || !accountData) return;
 
     const decimals = accountData[symbol.toUpperCase()].decimals;
-    const oraclePrice = accountData[symbol.toUpperCase()].oraclePrice;
+    const usdPrice = accountData[symbol.toUpperCase()].usdPrice;
 
-    const maxBorrowAssets = getBeforeBorrowLimit(
-      accountData,
-      symbol,
-      oraclePrice,
-      decimals,
-      'borrow'
-    );
+    const maxBorrowAssets = getBeforeBorrowLimit(accountData, symbol, usdPrice, decimals, 'borrow');
 
     if (e.target.value.includes('.')) {
       const regex = /[^,.]*$/g;
@@ -213,7 +207,7 @@ function Borrow() {
     if (liquidity.lt(parseFixed(e.target.value || '0', decimals))) {
       return setError({
         status: true,
-        message: translations[lang].availableLiquidityError
+        message: translations[lang].availableLiquidityError,
       });
     }
 
@@ -222,13 +216,13 @@ function Borrow() {
     if (
       maxBorrowAssets.lt(
         parseFixed(e.target.value || '0', decimals)
-          .mul(accountData[symbol].oraclePrice)
-          .div(WAD)
+          .mul(accountData[symbol].usdPrice)
+          .div(WAD),
       )
     ) {
       return setError({
         status: true,
-        message: translations[lang].borrowLimit
+        message: translations[lang].borrowLimit,
       });
     }
 
@@ -259,8 +253,8 @@ function Borrow() {
           {
             gasLimit: gasLimit
               ? Math.ceil(Number(formatFixed(gasLimit)) * numbers.gasLimitMultiplier)
-              : undefined
-          }
+              : undefined,
+          },
         );
       }
 
@@ -296,14 +290,14 @@ function Borrow() {
           status: true,
           message: isDenied
             ? translations[lang].deniedTransaction
-            : translations[lang].notEnoughSlippage
+            : translations[lang].notEnoughSlippage,
         });
       } else if (txError) {
         setTx({ status: 'error', hash: txErrorHash });
       } else {
         setError({
           status: true,
-          message: translations[lang].generalError
+          message: translations[lang].generalError,
         });
       }
     }
@@ -325,7 +319,7 @@ function Borrow() {
     } else {
       return setError({
         status: true,
-        message: translations[lang].noCollateral
+        message: translations[lang].noCollateral,
       });
     }
   }
@@ -347,7 +341,7 @@ function Borrow() {
       console.log(e);
       setGasError({
         status: true,
-        component: 'gas'
+        component: 'gas',
       });
     }
   }
@@ -360,7 +354,7 @@ function Borrow() {
     const gasLimit = await fixedLenderWithSigner?.estimateGas.borrow(
       ethers.utils.parseUnits(qty, decimals),
       walletAddress,
-      walletAddress
+      walletAddress,
     );
 
     return gasLimit;
@@ -380,7 +374,7 @@ function Borrow() {
     const fixedLender = getInstance(
       filteredFixedLender?.address!,
       filteredFixedLender?.abi!,
-      `market${symbol}`
+      `market${symbol}`,
     );
 
     setFixedLenderWithSigner(fixedLender);
@@ -389,13 +383,13 @@ function Borrow() {
   function getUnderlyingContract() {
     const underlyingData: UnderlyingData | undefined = getUnderlyingData(
       network?.name,
-      symbol.toLowerCase()
+      symbol.toLowerCase(),
     );
 
     const underlyingContract = getInstance(
       underlyingData!.address,
       underlyingData!.abi,
-      `underlying${symbol}`
+      `underlying${symbol}`,
     );
 
     setUnderlyingContract(underlyingContract);
@@ -422,7 +416,7 @@ function Borrow() {
           status: true,
           message: isDenied
             ? translations[lang].deniedTransaction
-            : translations[lang].notEnoughSlippage
+            : translations[lang].notEnoughSlippage,
         });
       }
     }

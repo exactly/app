@@ -18,7 +18,7 @@ function getHealthFactorData(accountData: AccountData) {
       const decimals = fixedLender.decimals;
       const decimalWAD = parseFixed('1', decimals); //WAD based on the decimals of the fixedLender
 
-      const oracle = fixedLender.oraclePrice;
+      const oracle = fixedLender.usdPrice;
       const adjustFactor = fixedLender.adjustFactor;
 
       //Collateral

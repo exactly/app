@@ -120,7 +120,7 @@ function Item({ type, amount, maturityDate, symbol, market, progress, decimals, 
   async function getRate() {
     if (!symbol || !accountData) return;
 
-    const rate = parseFloat(formatEther(accountData[symbol].oraclePrice));
+    const rate = parseFloat(formatEther(accountData[symbol].usdPrice));
 
     setExchangeRate(rate);
   }

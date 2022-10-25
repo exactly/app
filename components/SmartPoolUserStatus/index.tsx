@@ -34,7 +34,7 @@ function SmartPoolUserStatus({ walletAddress, type }: Props) {
   const [itemData, setItemData] = useState<Array<SmartPoolItemData> | undefined>(undefined);
   const [auditorContract, setAuditorContract] = useState<Contract | undefined>(undefined);
 
-  const orderAssets = ['DAI', 'USDC', 'WETH', 'WBTC'];
+  const orderAssets = ['DAI', 'USDC', 'WETH', 'WBTC', 'WSTETH'];
 
   useEffect(() => {
     getCurrentBalance();
@@ -55,7 +55,7 @@ function SmartPoolUserStatus({ walletAddress, type }: Props) {
     const allMarkets = Object.values(accountData).sort(
       (a: FixedLenderAccountData, b: FixedLenderAccountData) => {
         return orderAssets.indexOf(a.assetSymbol) - orderAssets.indexOf(b.assetSymbol);
-      }
+      },
     );
 
     const data: SmartPoolItemData[] = [];
@@ -72,7 +72,7 @@ function SmartPoolUserStatus({ walletAddress, type }: Props) {
         eTokens: eTokens,
         depositedAmount: depositBalance,
         borrowedAmount: borrowBalance,
-        market: address
+        market: address,
       };
 
       const lookAfter = type.value == 'borrow' ? 'borrowedAmount' : 'depositedAmount';
