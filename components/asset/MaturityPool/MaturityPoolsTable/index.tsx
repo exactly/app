@@ -15,6 +15,9 @@ import AccountDataContext from 'contexts/AccountDataContext';
 import { APRsPerMaturityType } from '../utils';
 import formatNumber from 'utils/formatNumber';
 import parseTimestamp from 'utils/parseTimestamp';
+import ModalStatusContext, { Operation } from 'contexts/ModalStatusContext';
+import { useWeb3Context } from 'contexts/Web3Context';
+import { MarketContext } from 'contexts/MarketContext';
 
 type MaturityPoolsTableProps = {
   APRsPerMaturity: APRsPerMaturityType;
@@ -40,7 +43,10 @@ const HeadCell: FC<{ title: string }> = ({ title }) => {
 };
 
 const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ APRsPerMaturity, symbol }) => {
+  const { walletAddress, connect, network } = useWeb3Context();
   const { accountData } = useContext(AccountDataContext);
+  const { setDate, setMarket } = useContext(MarketContext);
+  const { setOpen, setOperation } = useContext(ModalStatusContext);
   const [rows, setRows] = useState<TableRow[]>([]);
 
   const defineRows = useCallback(() => {
@@ -69,6 +75,28 @@ const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ APRsPerMaturity, symb
   useEffect(() => {
     defineRows();
   }, [defineRows]);
+
+  const handleActionClick = (
+    action: 'borrowAtMaturity' | 'depositAtMaturity',
+    maturity: string
+  ) => {
+    if (!walletAddress && connect) return connect();
+
+    if (!accountData) return;
+
+    const { market } = accountData[symbol];
+
+    setOperation(action as Operation);
+    setMarket({ value: market });
+    setDate({
+      value: maturity,
+      label: parseTimestamp(maturity)
+    });
+    setOpen(true);
+
+    setOperation(action);
+    setOpen(true);
+  };
 
   // TODO: add translations
   return (
@@ -110,7 +138,7 @@ const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ APRsPerMaturity, symb
                 <Button
                   disabled={depositAPR === 'N/A'}
                   variant="contained"
-                  //   onClick={() => handleClick('borrowAtMaturity', maturity)}
+                  onClick={() => handleActionClick('depositAtMaturity', maturity)}
                 >
                   Deposit
                 </Button>
@@ -120,7 +148,7 @@ const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ APRsPerMaturity, symb
                   disabled={borrowAPR === 'N/A'}
                   variant="outlined"
                   sx={{ backgroundColor: 'white' }}
-                  //   onClick={() => handleClick('borrowAtMaturity', maturity)}
+                  onClick={() => handleActionClick('borrowAtMaturity', maturity)}
                 >
                   Borrow
                 </Button>
