@@ -400,8 +400,7 @@ function DepositAtMaturity() {
 
       const slippageAPR = fixedAPR * (1 - numbers.slippage);
 
-      // Let's check against 0.01 for now, because this is a percentage and it could be 0.0001 or lower, but not 0
-      if (fixedAPR < 0.01) {
+      if (fixedAPR < numbers.minAPRValue) {
         setError({
           status: true,
           message: translations[lang].zeroRate,
