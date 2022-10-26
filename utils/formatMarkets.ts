@@ -7,7 +7,7 @@ export default function formatMarkets(accountData: AccountData) {
     DAI: 1,
     USDC: 2,
     WETH: 3,
-    WBTC: 4
+    WBTC: 4,
   };
 
   const formattedMarkets: Array<Market> = [];
@@ -21,7 +21,7 @@ export default function formatMarkets(accountData: AccountData) {
       name: assetName,
       isListed: false,
       collateralFactor: 0,
-      order: dictionary[assetName]
+      order: dictionary[assetName],
     };
 
     formattedMarkets.push(newMarket);

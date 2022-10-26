@@ -30,7 +30,7 @@ function MaturityPoolUserStatusByMaturity({ type, maturities }: Props) {
             ? maturities?.deposits
             : type.value == 'borrow' && maturities.borrows
             ? maturities?.borrows
-            : {}
+            : {},
         ).map((maturity: any, key) => {
           const oneHour = 3600;
           const oneDay = oneHour * 24;
@@ -60,7 +60,6 @@ function MaturityPoolUserStatusByMaturity({ type, maturities }: Props) {
                   )}
 
                   {type.value == 'deposit' &&
-                    maturities.hasOwnProperty('deposits') &&
                     maturities?.deposits[maturity]?.map((pool: any, key: number) => {
                       const { principal, fee, symbol, market, decimals } = pool;
                       return (
@@ -80,7 +79,6 @@ function MaturityPoolUserStatusByMaturity({ type, maturities }: Props) {
                     })}
 
                   {type.value == 'borrow' &&
-                    maturities.hasOwnProperty('borrows') &&
                     maturities?.borrows[maturity]?.map((pool: any, key: number) => {
                       const { principal, fee, symbol, market, decimals } = pool;
 

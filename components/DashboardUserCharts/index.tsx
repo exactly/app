@@ -34,12 +34,8 @@ function DashboardUserCharts() {
   const [totalDeposit, setTotalDeposit] = useState<number | undefined>(undefined);
   const [totalBorrow, setTotalBorrow] = useState<number | undefined>(undefined);
 
-  const [depositRateComposition, setDepositRateComposition] = useState<
-    Dictionary<number> | undefined
-  >(undefined);
-  const [borrowRateComposition, setBorrowRateComposition] = useState<
-    Dictionary<number> | undefined
-  >(undefined);
+  const [depositRateComposition, setDepositRateComposition] = useState<Dictionary<number> | undefined>(undefined);
+  const [borrowRateComposition, setBorrowRateComposition] = useState<Dictionary<number> | undefined>(undefined);
 
   const notConnected = [
     {
@@ -77,9 +73,7 @@ function DashboardUserCharts() {
         image: `/img/assets/${symbol.toLowerCase()}.svg`,
       };
 
-      const variablePoolDepositValue = parseFloat(
-        utils.formatUnits(fixedLender.floatingDepositAssets, decimals),
-      );
+      const variablePoolDepositValue = parseFloat(utils.formatUnits(fixedLender.floatingDepositAssets, decimals));
       const variablePoolDepositValueUSD = variablePoolDepositValue * oracle;
 
       objectDepositData.value += variablePoolDepositValueUSD; //add the value in USD to the asset deposit data
@@ -87,9 +81,7 @@ function DashboardUserCharts() {
       variableComposition += variablePoolDepositValueUSD; //add the value in USD to the variable composition %
 
       fixedLender.fixedDepositPositions.forEach((supplyPosition) => {
-        const maturityDepositValue = parseFloat(
-          utils.formatUnits(supplyPosition.position.principal, decimals),
-        );
+        const maturityDepositValue = parseFloat(utils.formatUnits(supplyPosition.position.principal, decimals));
         const maturityDepositValueUSD = maturityDepositValue * oracle;
         objectDepositData.value += maturityDepositValueUSD; //add the value in USD to the asset deposit data
         allDepositsUSD += maturityDepositValueUSD; //add the value in USD to the total deposit
@@ -139,9 +131,7 @@ function DashboardUserCharts() {
 
       //floatinBorrow
       if (fixedLender.floatingBorrowAssets) {
-        const variablePoolBorrowValue = parseFloat(
-          utils.formatUnits(fixedLender.floatingBorrowAssets, decimals),
-        );
+        const variablePoolBorrowValue = parseFloat(utils.formatUnits(fixedLender.floatingBorrowAssets, decimals));
         const variablePoolBorrowValueUSD = variablePoolBorrowValue * oracle;
 
         objectBorrowData.value += variablePoolBorrowValueUSD; //add the value in USD to the asset deposit data
@@ -151,9 +141,7 @@ function DashboardUserCharts() {
 
       //fixed borrow
       fixedLender.fixedBorrowPositions.forEach((borrowPosition) => {
-        const maturityBorrowValue = parseFloat(
-          utils.formatUnits(borrowPosition.position.principal, decimals),
-        );
+        const maturityBorrowValue = parseFloat(utils.formatUnits(borrowPosition.position.principal, decimals));
         const maturityBorrowValueUSD = maturityBorrowValue * oracle;
         objectBorrowData.value += maturityBorrowValueUSD;
         allBorrowsUSD += maturityBorrowValueUSD;
@@ -198,11 +186,7 @@ function DashboardUserCharts() {
                 {depositData.map((asset, key) => {
                   if (!totalDeposit || totalDeposit === 0) return;
                   return (
-                    <Tooltip
-                      key={key}
-                      value={`$${formatNumber(asset.value, 'USD', true)}`}
-                      disableImage
-                    >
+                    <Tooltip key={key} value={`$${formatNumber(asset.value, 'USD', true)}`} disableImage>
                       <div className={styles.detail}>
                         <CircleIcon
                           sx={{
@@ -246,11 +230,7 @@ function DashboardUserCharts() {
               <code>
                 {' '}
                 Variable{' '}
-                {depositRateComposition ? (
-                  depositRateComposition.variableComposition + '%'
-                ) : (
-                  <Skeleton width={15} />
-                )}
+                {depositRateComposition ? depositRateComposition.variableComposition + '%' : <Skeleton width={15} />}
               </code>
             </span>
             <span>
@@ -263,12 +243,7 @@ function DashboardUserCharts() {
               />
               <code>
                 {' '}
-                Fixed{' '}
-                {depositRateComposition ? (
-                  depositRateComposition.fixedComposition + '%'
-                ) : (
-                  <Skeleton width={15} />
-                )}
+                Fixed {depositRateComposition ? depositRateComposition.fixedComposition + '%' : <Skeleton width={15} />}
               </code>
             </span>
           </div>
@@ -286,11 +261,7 @@ function DashboardUserCharts() {
                 {borrowData.map((asset, key) => {
                   if (!totalBorrow || totalBorrow === 0) return;
                   return (
-                    <Tooltip
-                      key={key}
-                      value={`$${formatNumber(asset.value, 'USD', true)}`}
-                      disableImage
-                    >
+                    <Tooltip key={key} value={`$${formatNumber(asset.value, 'USD', true)}`} disableImage>
                       <div className={styles.detail}>
                         <CircleIcon
                           sx={{
@@ -314,10 +285,7 @@ function DashboardUserCharts() {
         <div>
           <div className={styles.line}>
             {borrowRateComposition ? (
-              <div
-                className={styles.fullProgress}
-                style={{ width: `${borrowRateComposition.variableComposition}%` }}
-              />
+              <div className={styles.fullProgress} style={{ width: `${borrowRateComposition.variableComposition}%` }} />
             ) : (
               <div className={styles.fullProgress} style={{ width: `100%` }} />
             )}
@@ -334,11 +302,7 @@ function DashboardUserCharts() {
               <code>
                 {' '}
                 Variable{' '}
-                {borrowRateComposition ? (
-                  borrowRateComposition.variableComposition + '%'
-                ) : (
-                  <Skeleton width={15} />
-                )}
+                {borrowRateComposition ? borrowRateComposition.variableComposition + '%' : <Skeleton width={15} />}
               </code>
             </span>
             <span>
@@ -351,12 +315,7 @@ function DashboardUserCharts() {
               />
               <code>
                 {' '}
-                Fixed{' '}
-                {borrowRateComposition ? (
-                  borrowRateComposition.fixedComposition + '%'
-                ) : (
-                  <Skeleton width={15} />
-                )}
+                Fixed {borrowRateComposition ? borrowRateComposition.fixedComposition + '%' : <Skeleton width={15} />}
               </code>
             </span>
           </div>

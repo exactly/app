@@ -5,7 +5,6 @@ import request from 'graphql-request';
 import Image from 'next/image';
 
 import Button from 'components/common/Button';
-const Tooltip = dynamic(() => import('components/Tooltip'));
 
 import Skeleton from 'react-loading-skeleton';
 
@@ -38,7 +37,6 @@ import {
   getMaturityPoolWithdrawsQuery,
   getMaturityPoolRepaysQuery,
 } from 'queries';
-import dynamic from 'next/dynamic';
 
 type Props = {
   type?: Option | undefined;
@@ -62,11 +60,9 @@ function Item({ type, amount, maturityDate, symbol, market, progress, decimals, 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
-  const [transactions, setTransactions] = useState<Array<WithdrawMP | Repay | Deposit | Borrow>>(
-    [],
-  );
+  const [transactions, setTransactions] = useState<Array<WithdrawMP | Repay | Deposit | Borrow>>([]);
   const [exchangeRate, setExchangeRate] = useState<number | undefined>(undefined);
-  const [daysRemaining, setDaysRemaining] = useState<string | undefined>(undefined);
+  const [, setDaysRemaining] = useState<string | undefined>(undefined);
   const [APR, setAPR] = useState<number | undefined>(undefined);
 
   useEffect(() => {
@@ -180,22 +176,13 @@ function Item({ type, amount, maturityDate, symbol, market, progress, decimals, 
       <summary className={styles.summary}>
         <div className={styles.symbol}>
           {(symbol && (
-            <Image
-              src={`/img/assets/${symbol?.toLowerCase()}.svg`}
-              alt={symbol}
-              width={20}
-              height={20}
-            />
+            <Image src={`/img/assets/${symbol?.toLowerCase()}.svg`} alt={symbol} width={20} height={20} />
           )) || <Skeleton circle height={20} width={20} />}
           <span className={styles.primary}>{symbol ? parseSymbol(symbol) : <Skeleton />}</span>
         </div>
         <span className={styles.value}>
           {symbol && exchangeRate && amount ? (
-            `$${formatNumber(
-              parseFloat(formatUnits(amount, decimals)) * exchangeRate,
-              'USD',
-              true,
-            )}`
+            `$${formatNumber(parseFloat(formatUnits(amount, decimals)) * exchangeRate, 'USD', true)}`
           ) : (
             <Skeleton width={40} />
           )}
@@ -270,9 +257,7 @@ function Item({ type, amount, maturityDate, symbol, market, progress, decimals, 
                   <td>
                     {value}{' '}
                     {exchangeRate && value && (
-                      <span className={styles.usd}>
-                        (${(parseFloat(value) * exchangeRate).toFixed(2)})
-                      </span>
+                      <span className={styles.usd}>(${(parseFloat(value) * exchangeRate).toFixed(2)})</span>
                     )}
                   </td>
                 </tr>

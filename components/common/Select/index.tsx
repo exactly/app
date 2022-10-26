@@ -1,4 +1,4 @@
-import { MouseEventHandler, CSSProperties } from 'react';
+import { CSSProperties, MouseEventHandler } from 'react';
 
 import styles from './style.module.scss';
 import Dropdown, { Option } from 'react-dropdown';
@@ -18,19 +18,7 @@ type Props = {
   editable?: boolean;
 };
 
-function Select({
-  className = '',
-  onChange,
-  onClick,
-  disabled,
-  options,
-  placeholder,
-  value,
-  editable
-}: Props) {
-  function handleChange(option: Option) {
-    onChange(option);
-  }
+function Select({ className = '', onChange, onClick, disabled, options, placeholder, value, editable }: Props) {
   const containerClass = editable ? 'containerEditable' : 'container';
   const selectClass = editable ? 'selectEditable' : 'select';
   const arrowClass = editable ? 'arrowEditable' : 'arrow';
@@ -40,7 +28,7 @@ function Select({
     <div onClick={onClick}>
       <Dropdown
         options={options}
-        onChange={(option) => handleChange(option)}
+        onChange={onChange}
         disabled={disabled}
         value={value}
         placeholder={placeholder}

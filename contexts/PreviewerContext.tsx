@@ -13,7 +13,7 @@ type ContextValues = {
 
 const defaultValues: ContextValues = {
   address: undefined,
-  abi: undefined
+  abi: undefined,
 };
 
 const PreviewerContext = createContext(defaultValues);

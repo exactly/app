@@ -25,5 +25,5 @@ export {
   getSmartPoolWithdrawsQuery,
   getSmartPoolAccruedEarnings,
   getSmartPoolDepositsAndWithdraws,
-  getSmartPoolBorrowsAndRepays
+  getSmartPoolBorrowsAndRepays,
 };

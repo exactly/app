@@ -1,5 +1,5 @@
 import type { FC, ReactNode } from 'react';
-import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import { constants } from 'ethers';
 
 import { AccountData } from 'types/AccountData';
@@ -18,7 +18,7 @@ type ContextValues = {
 
 const defaultValues: ContextValues = {
   accountData: undefined,
-  getAccountData: () => {}
+  getAccountData: () => undefined,
 };
 
 const AccountDataContext = createContext(defaultValues);
@@ -53,19 +53,15 @@ export const AccountDataProvider: FC<{ children?: ReactNode }> = ({ children }) 
 
       setAccountData(
         Object.fromEntries(
-          data.map((market: FixedLenderAccountData) => [market.assetSymbol.toUpperCase(), market]) // HACK remove .toUpperCase() function in all the app
-        )
+          data.map((market: FixedLenderAccountData) => [market.assetSymbol.toUpperCase(), market]), // HACK remove .toUpperCase() function in all the app
+        ),
       );
     } catch (e) {
       console.log(e);
     }
   }
 
-  return (
-    <AccountDataContext.Provider value={{ accountData, getAccountData }}>
-      {children}
-    </AccountDataContext.Provider>
-  );
+  return <AccountDataContext.Provider value={{ accountData, getAccountData }}>{children}</AccountDataContext.Provider>;
 };
 
 export default AccountDataContext;

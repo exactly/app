@@ -19,7 +19,7 @@ import { LangKeys } from 'types/Lang';
 import { Transaction } from 'types/Transaction';
 
 import formatNumber from 'utils/formatNumber';
-import handleEth from 'utils/handleEth';
+import handleETH from 'utils/handleETH';
 import { getSymbol } from 'utils/utils';
 
 import styles from './style.module.scss';
@@ -69,7 +69,7 @@ function WithdrawAtMaturity() {
 
   const debounceQty = useDebounce(qty);
 
-  const ETHrouter = web3Provider && symbol == 'WETH' && handleEth(network?.name, web3Provider?.getSigner());
+  const ETHrouter = web3Provider && symbol == 'WETH' && handleETH(network?.name, web3Provider?.getSigner());
 
   const isEarlyWithdraw = useMemo(() => {
     return Date.now() / 1000 < parseInt(date!.value);

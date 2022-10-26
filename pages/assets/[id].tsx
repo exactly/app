@@ -3,16 +3,12 @@ import type { GetStaticProps, NextPage } from 'next';
 import Grid from '@mui/material/Grid';
 
 import Navbar from 'components/Navbar';
-import FloatingPoolInfo from 'components/asset/FloatingPool/FloatingPoolInfo';
 import MobileNavbar from 'components/MobileNavbar';
-import Paginator from 'components/Paginator';
 import Footer from 'components/Footer';
 import OperationsModals from 'components/OperationsModal';
 
-import { LangKeys } from 'types/Lang';
 import { Maturity } from 'types/Maturity';
 
-import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 import { MarketContext } from 'contexts/MarketContext';
 import FixedLenderContext from 'contexts/FixedLenderContext';
@@ -20,15 +16,11 @@ import AccountDataContext from 'contexts/AccountDataContext';
 
 import style from './style.module.scss';
 
-import keys from './translations.json';
-
 import getLastAPR from 'utils/getLastAPR';
-import FloatingAPRChart from 'components/asset/FloatingPool/FloatingAPRChart';
 import { getSymbol, getUnderlyingData } from 'utils/utils';
 import AssetHeaderInfo from 'components/asset/Header';
 import { AssetSymbol } from 'utils/assets';
 import AssetMaturityPools from 'components/asset/MaturityPool';
-import MaturityPoolInfo from 'components/asset/MaturityPool/MaturityPoolInfo';
 import AssetFloatingPool from 'components/asset/FloatingPool';
 
 interface Props {
@@ -37,26 +29,19 @@ interface Props {
 
 const Asset: NextPage<Props> = ({ symbol = 'DAI' }) => {
   const { network } = useWeb3Context();
-  const { dates, market } = useContext(MarketContext);
+  const { dates } = useContext(MarketContext);
   const fixedLenderData = useContext(FixedLenderContext);
   const { accountData } = useContext(AccountDataContext);
-  const lang: string = useContext(LangContext);
-  const translations: { [key: string]: LangKeys } = keys;
 
   const networkName = (network?.name || process.env.NEXT_PUBLIC_NETWORK) as string;
   const assetAddress = getUnderlyingData(networkName, symbol.toLowerCase())?.address as string;
 
-  const itemsPerPage = 3;
-  const [page, setPage] = useState<number>(1);
-  const [depositsData, setDepositsData] = useState<Array<Maturity> | undefined>(undefined);
-  const [borrowsData, setBorrowsData] = useState<Array<Maturity> | undefined>(undefined);
+  const [, setDepositsData] = useState<Array<Maturity> | undefined>(undefined);
+  const [, setBorrowsData] = useState<Array<Maturity> | undefined>(undefined);
 
   const eMarketAddress = useMemo(() => {
     const filteredFixedLender = fixedLenderData.find((contract: any) => {
-      const contractSymbol = getSymbol(
-        contract.address!,
-        network?.name ?? process.env.NEXT_PUBLIC_NETWORK,
-      );
+      const contractSymbol = getSymbol(contract.address!, network?.name ?? process.env.NEXT_PUBLIC_NETWORK);
       return contractSymbol === symbol;
     });
 
@@ -97,11 +82,7 @@ const Asset: NextPage<Props> = ({ symbol = 'DAI' }) => {
         />
         <Grid container spacing={4} mt={5} ml={0}>
           <Grid item container spacing={4}>
-            <AssetFloatingPool
-              symbol={symbol}
-              eMarketAddress={eMarketAddress}
-              networkName={networkName}
-            />
+            <AssetFloatingPool symbol={symbol} eMarketAddress={eMarketAddress} networkName={networkName} />
           </Grid>
           <Grid item container mt={5}>
             <AssetMaturityPools symbol={symbol} />

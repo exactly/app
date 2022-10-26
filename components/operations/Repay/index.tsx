@@ -21,7 +21,7 @@ import { Error } from 'types/Error';
 import { UnderlyingData } from 'types/Underlying';
 
 import { getSymbol, getUnderlyingData } from 'utils/utils';
-import handleEth from 'utils/handleEth';
+import handleETH from 'utils/handleETH';
 
 import styles from './style.module.scss';
 
@@ -191,7 +191,7 @@ function Repay() {
       if (symbol == 'WETH') {
         if (!web3Provider) return;
 
-        const ETHrouter = handleEth(network?.name, web3Provider?.getSigner());
+        const ETHrouter = handleETH(network?.name, web3Provider?.getSigner());
 
         if (isMax) {
           repay = await ETHrouter?.refundETH(

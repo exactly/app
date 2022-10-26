@@ -1,9 +1,9 @@
-import assetsData from 'config/assetData.json'
+import assetsData from 'config/assetData.json';
 
-export type AssetSymbol = "usdc" | "dai" | "weth" | "wbtc" | "wsteth"
+export type AssetSymbol = 'usdc' | 'dai' | 'weth' | 'wbtc' | 'wsteth';
 
 export type AssetData = {
-    description: string
-}
+  description: string;
+};
 
-export const getAssetData = (symbol: AssetSymbol): AssetData | undefined => assetsData[symbol]
+export const getAssetData = (symbol: AssetSymbol): AssetData | undefined => assetsData[symbol];

@@ -31,30 +31,24 @@ function ModalMinimized({ tx, handleMinimize }: Props) {
     processing: {
       img: '/img/modals/img/waiting.png',
       title: translations[lang].loadingTitle,
-      text: translations[lang].loadingText
+      text: translations[lang].loadingText,
     },
     success: {
       img: '/img/modals/img/success.png',
       title: translations[lang].successTitle,
-      text: translations[lang].successText
+      text: translations[lang].successText,
     },
     error: {
       img: '/img/modals/img/error.png',
       title: translations[lang].errorTitle,
-      text: translations[lang].errorText
-    }
+      text: translations[lang].errorText,
+    },
   };
 
   return (
     <animated.section style={style} className={styles.container}>
       <div className={styles.open}>
-        <Image
-          src="/img/icons/open.svg"
-          alt="open"
-          onClick={() => handleMinimize()}
-          width={16}
-          height={16}
-        />
+        <Image src="/img/icons/open.svg" alt="open" onClick={() => handleMinimize()} width={16} height={16} />
       </div>
       <h3 className={styles.title}>{options[tx.status].title}</h3>
       <div className={styles.loading}>
@@ -72,9 +66,7 @@ function ModalMinimized({ tx, handleMinimize }: Props) {
           {translations[lang].etherscanText}{' '}
           <a
             className={styles.etherscan}
-            href={`https://${network?.name ?? process.env.NEXT_PUBLIC_NETWORK}.etherscan.io/tx/${
-              tx.hash
-            }`}
+            href={`https://${network?.name ?? process.env.NEXT_PUBLIC_NETWORK}.etherscan.io/tx/${tx.hash}`}
             target="_blank"
             rel="noopener noreferrer"
           >

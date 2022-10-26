@@ -19,39 +19,39 @@ function OperationsSelector() {
     variable: [
       {
         value: 'deposit',
-        label: translations[lang].deposit
+        label: translations[lang].deposit,
       },
       {
         value: 'borrow',
-        label: translations[lang].borrow
+        label: translations[lang].borrow,
       },
       {
         value: 'withdraw',
-        label: translations[lang].withdraw
+        label: translations[lang].withdraw,
       },
       {
         value: 'repay',
-        label: translations[lang].repay
-      }
+        label: translations[lang].repay,
+      },
     ],
     fixed: [
       {
         value: 'depositAtMaturity',
-        label: translations[lang].deposit
+        label: translations[lang].deposit,
       },
       {
         value: 'borrowAtMaturity',
-        label: translations[lang].borrow
+        label: translations[lang].borrow,
       },
       {
         value: 'withdrawAtMaturity',
-        label: translations[lang].withdraw
+        label: translations[lang].withdraw,
       },
       {
         value: 'repayAtMaturity',
-        label: translations[lang].repay
-      }
-    ]
+        label: translations[lang].repay,
+      },
+    ],
   };
 
   function handleOperation(action: Operation) {

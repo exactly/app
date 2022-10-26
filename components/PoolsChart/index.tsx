@@ -12,7 +12,7 @@ import {
   Tooltip,
   ZAxis,
   Legend,
-  CartesianGrid
+  CartesianGrid,
 } from 'recharts';
 
 import LangContext from 'contexts/LangContext';
@@ -45,11 +45,11 @@ function PoolsChart({ deposits, borrows }: Props) {
 
   const legendStyle = {
     top: '200px',
-    right: '-94px'
+    right: '-94px',
   };
 
   const tick = {
-    fontSize: '12px'
+    fontSize: '12px',
   };
 
   const ticks = getXAxisTicks();
@@ -74,8 +74,8 @@ function PoolsChart({ deposits, borrows }: Props) {
       relativeTime: {
         M: '1 month',
         MM: '%d months',
-        y: '%d months'
-      }
+        y: '%d months',
+      },
     });
 
     const parseTick = dayjs(tick * 1000).fromNow(true);
@@ -88,11 +88,7 @@ function PoolsChart({ deposits, borrows }: Props) {
       const type = payload[0].payload.type;
 
       return (
-        <div
-          className={`${
-            type == 'deposit' ? styles.customTooltipDeposit : styles.customTooltipBorrow
-          }`}
-        >
+        <div className={`${type == 'deposit' ? styles.customTooltipDeposit : styles.customTooltipBorrow}`}>
           <p className={styles.label}>{`${payload[2].name}: ${payload[0].payload.date}`}</p>
           <p className={styles.label}>{`${payload[1].name}: ${payload[1].value}%`}</p>
         </div>
@@ -117,10 +113,7 @@ function PoolsChart({ deposits, borrows }: Props) {
             tickFormatter={(tick) => formatXAxis(tick)}
             tick={tick}
             ticks={ticks}
-            domain={[
-              (dataMin: number) => Date.now() / 1000,
-              (dataMax: number) => Date.now() / 1000 + 7776000
-            ]}
+            domain={[() => Date.now() / 1_000, () => Date.now() / 1_000 + 7_776_000]}
             scale="time"
           />
           <YAxis
@@ -136,13 +129,7 @@ function PoolsChart({ deposits, borrows }: Props) {
           />
           <ZAxis dataKey="date" name="Maturity" />
           <Tooltip cursor={{ strokeDasharray: '4 4' }} content={<CustomTooltip />} />
-          <Legend
-            verticalAlign="bottom"
-            align="left"
-            iconType="plainline"
-            iconSize={30}
-            wrapperStyle={legendStyle}
-          />
+          <Legend verticalAlign="bottom" align="left" iconType="plainline" iconSize={30} wrapperStyle={legendStyle} />
           <Scatter name="Deposit" data={deposit} fill="#008cf4" line id="deposit" />
           <Scatter name="Borrow" data={borrow} fill="#34c53a" line id="borrow" />
         </ScatterChart>

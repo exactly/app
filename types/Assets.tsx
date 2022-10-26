@@ -1,3 +1,3 @@
-export interface Assets<T> {
+export interface Assets {
   [Key: string]: string;
 }

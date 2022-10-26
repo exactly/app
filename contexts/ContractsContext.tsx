@@ -14,7 +14,7 @@ type ContextValues = {
 const defaultValues: ContextValues = {
   getInstance: () => {
     return undefined;
-  }
+  },
 };
 
 const ContractsContext = createContext(defaultValues);

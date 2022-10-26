@@ -21,7 +21,7 @@ import { Error } from 'types/Error';
 import { HealthFactor } from 'types/HealthFactor';
 
 import { getUnderlyingData, getSymbol } from 'utils/utils';
-import handleEth from 'utils/handleEth';
+import handleETH from 'utils/handleETH';
 import getBeforeBorrowLimit from 'utils/getBeforeBorrowLimit';
 
 import styles from './style.module.scss';
@@ -79,7 +79,7 @@ function Borrow() {
     return limit ?? undefined;
   }, [accountData, symbol]);
 
-  const ETHrouter = web3Provider && symbol == 'WETH' && handleEth(network?.name, web3Provider?.getSigner());
+  const ETHrouter = web3Provider && symbol == 'WETH' && handleETH(network?.name, web3Provider?.getSigner());
 
   useEffect(() => {
     setQty('');

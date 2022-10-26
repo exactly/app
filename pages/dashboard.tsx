@@ -9,9 +9,7 @@ import OperationsModals from 'components/OperationsModal';
 
 const DashboardContent = dynamic(() => import('components/DashboardContent'));
 
-interface Props {}
-
-const DashBoard: NextPage<Props> = () => {
+const DashBoard: NextPage = () => {
   return (
     <>
       <OperationsModals />

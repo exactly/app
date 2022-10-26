@@ -23,9 +23,7 @@ function Tabs({ values, selected, handleTab }: Props) {
         {values.map((value) => {
           return (
             <p
-              className={
-                value.value === selected.value ? `${styles.tab} ${styles.selected}` : styles.tab
-              }
+              className={value.value === selected.value ? `${styles.tab} ${styles.selected}` : styles.tab}
               onClick={() => handleTab(value)}
               key={value.value}
             >

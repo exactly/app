@@ -21,12 +21,12 @@ function DashboardContent() {
 
   const tabDeposit = {
     label: translations.deposit,
-    value: 'deposit'
+    value: 'deposit',
   };
 
   const tabBorrow = {
     label: translations.borrow,
-    value: 'borrow'
+    value: 'borrow',
   };
 
   const [tab, setTab] = useState<Option>(tabDeposit);

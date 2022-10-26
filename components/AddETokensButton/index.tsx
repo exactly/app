@@ -24,7 +24,7 @@ function AddETokensButton() {
     WBTC: 8,
     DAI: 18,
     WETH: 18,
-    ETH: 18
+    ETH: 18,
   };
 
   async function addTokens() {
@@ -39,15 +39,15 @@ function AddETokensButton() {
         return await web3Provider?.provider?.request({
           method: 'wallet_watchAsset',
           params: {
-            // @ts-ignore
+            // @ts-expect-error bad typing
             type: 'ERC20',
             options: {
               address: contract?.address,
               symbol: `e${upperCaseAsset}`,
               decimals: decimals[upperCaseAsset],
-              image: ''
-            }
-          }
+              image: '',
+            },
+          },
         });
       });
     } catch (e) {

@@ -19,10 +19,10 @@ type ContextValues = {
 
 const defaultValues: ContextValues = {
   market: undefined,
-  setMarket: () => {},
+  setMarket: () => undefined,
   date: undefined,
-  setDate: () => {},
-  dates: []
+  setDate: () => undefined,
+  dates: [],
 };
 
 const MarketContext = createContext(defaultValues);
@@ -55,7 +55,7 @@ const MarketProvider: FC<{ children?: ReactNode }> = ({ children }) => {
       const formattedDates = dates?.map((date: any) => {
         return {
           value: date,
-          label: parseTimestamp(date)
+          label: parseTimestamp(date),
         };
       });
 
@@ -72,9 +72,7 @@ const MarketProvider: FC<{ children?: ReactNode }> = ({ children }) => {
   }, [accountData]);
 
   return (
-    <MarketContext.Provider value={{ market, setMarket, date, setDate, dates }}>
-      {children}
-    </MarketContext.Provider>
+    <MarketContext.Provider value={{ market, setMarket, date, setDate, dates }}>{children}</MarketContext.Provider>
   );
 };
 

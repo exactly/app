@@ -15,7 +15,7 @@ export const web3InitialState: Web3ProviderState = {
   walletAddress: undefined,
   network: undefined,
   connect: null,
-  disconnect: null
+  disconnect: null,
 };
 
 export type Web3Action =
@@ -46,17 +46,17 @@ export function web3Reducer(state: Web3ProviderState, action: Web3Action): Web3P
         provider: action.provider,
         web3Provider: action.web3Provider,
         walletAddress: action.walletAddress,
-        network: action.network
+        network: action.network,
       };
     case 'SET_ADDRESS':
       return {
         ...state,
-        walletAddress: action.walletAddress
+        walletAddress: action.walletAddress,
       };
     case 'SET_NETWORK':
       return {
         ...state,
-        network: action.network
+        network: action.network,
       };
     case 'RESET_WEB3_PROVIDER':
       return web3InitialState;

@@ -22,9 +22,9 @@ function MobileNavbar() {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
   const { network, walletAddress, connect, disconnect } = useWeb3Context();
-  const { theme, changeTheme } = useContext(ThemeContext);
+  const { theme } = useContext(ThemeContext);
 
-  const [open, setOpen] = useState<Boolean>(false);
+  const [open, setOpen] = useState<boolean>(false);
 
   const router = useRouter();
   const { pathname } = router;
@@ -37,18 +37,18 @@ function MobileNavbar() {
     {
       pathname: '/markets',
       href: '/markets',
-      name: translations[lang].markets
+      name: translations[lang].markets,
     },
     {
       pathname: '/assets/[id]',
       href: '/assets/dai',
-      name: translations[lang].assets
+      name: translations[lang].assets,
     },
     {
       pathname: '/dashboard',
       href: '/dashboard',
-      name: translations[lang].dashboard
-    }
+      name: translations[lang].dashboard,
+    },
     // { pathname: '/nerd-mode', href: '/', name: translations[lang].nerdMode }
   ];
 
@@ -77,12 +77,7 @@ function MobileNavbar() {
             disconnect &&
             walletAddress && (
               <div className={styles.buttonContainer}>
-                <Wallet
-                  walletAddress={walletAddress}
-                  cogwheel={false}
-                  network={network}
-                  disconnect={disconnect}
-                />
+                <Wallet walletAddress={walletAddress} cogwheel={false} network={network} disconnect={disconnect} />
               </div>
             )
           )}
@@ -120,9 +115,7 @@ function MobileNavbar() {
           {routes.map((route) => {
             return (
               <li
-                className={
-                  route.pathname === pathname ? `${styles.link} ${styles.active}` : styles.link
-                }
+                className={route.pathname === pathname ? `${styles.link} ${styles.active}` : styles.link}
                 key={route.pathname}
               >
                 <Link href={route.href}>{route.name}</Link>

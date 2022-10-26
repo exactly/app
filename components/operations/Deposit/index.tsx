@@ -23,7 +23,7 @@ import { Error } from 'types/Error';
 
 import { getSymbol, getUnderlyingData } from 'utils/utils';
 import formatNumber from 'utils/formatNumber';
-import handleEth from 'utils/handleEth';
+import handleETH from 'utils/handleETH';
 
 import styles from './style.module.scss';
 
@@ -227,7 +227,7 @@ function Deposit() {
       if (symbol == 'WETH') {
         if (!web3Provider) return;
 
-        const ETHrouter = handleEth(network?.name, web3Provider?.getSigner());
+        const ETHrouter = handleETH(network?.name, web3Provider?.getSigner());
 
         deposit = await ETHrouter?.depositETH(qty!);
       } else {

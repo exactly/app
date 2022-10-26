@@ -1,4 +1,4 @@
-import { FC, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { FC, useCallback, useContext, useEffect, useState } from 'react';
 import { formatUnits } from '@ethersproject/units';
 import { parseFixed } from '@ethersproject/bignumber';
 import { Zero, WeiPerEther } from '@ethersproject/constants';
@@ -25,7 +25,7 @@ type BestAPR = {
   apr: string;
 };
 
-const { usdAmount: usdAmountPreviewer, minAPRValue } = numbers;
+const { usdAmount: usdAmountPreviewer } = numbers;
 
 const AssetMaturityPools: FC<AssetMaturityPoolsProps> = ({ symbol: rawSymbol }) => {
   const symbol = rawSymbol.toUpperCase();
@@ -49,9 +49,7 @@ const AssetMaturityPools: FC<AssetMaturityPoolsProps> = ({ symbol: rawSymbol }) 
     );
 
     const { market: marketAddress } = accountData[symbol];
-    const marketMaturities = previewFixedData.find(
-      ({ market }) => market === marketAddress,
-    ) as FixedMarketData;
+    const marketMaturities = previewFixedData.find(({ market }) => market === marketAddress) as FixedMarketData;
 
     const { deposits, borrows, decimals, assets: initialAssets } = marketMaturities;
 
@@ -59,7 +57,7 @@ const AssetMaturityPools: FC<AssetMaturityPoolsProps> = ({ symbol: rawSymbol }) 
       deposits,
       borrows,
       decimals,
-      initialAssets
+      initialAssets,
     );
 
     setAPRsPerMaturity(APRsPerMaturity);
@@ -72,26 +70,20 @@ const AssetMaturityPools: FC<AssetMaturityPoolsProps> = ({ symbol: rawSymbol }) 
       tempTotalBorrowed = tempTotalBorrowed.add(borrowed);
     });
 
-    const totalDepositedUSD = formatUnits(
-      tempTotalDeposited.mul(exchangeRate).div(WeiPerEther),
-      decimals,
-    );
-    const totalBorrowedUSD = formatUnits(
-      tempTotalBorrowed.mul(exchangeRate).div(WeiPerEther),
-      decimals,
-    );
+    const totalDepositedUSD = formatUnits(tempTotalDeposited.mul(exchangeRate).div(WeiPerEther), decimals);
+    const totalBorrowedUSD = formatUnits(tempTotalBorrowed.mul(exchangeRate).div(WeiPerEther), decimals);
 
     setTotalDeposited(Number(totalDepositedUSD));
     setTotalBorrowed(Number(totalBorrowedUSD));
 
     setBestDepositAPR({
-      timestamp: Boolean(maturityMaxAPRDeposit) ? parseTimestamp(maturityMaxAPRDeposit) : undefined,
+      timestamp: maturityMaxAPRDeposit ? parseTimestamp(maturityMaxAPRDeposit) : undefined,
       apr: APRsPerMaturity[maturityMaxAPRDeposit]?.deposit
         ? `${Number(APRsPerMaturity[maturityMaxAPRDeposit].deposit).toFixed(2)}%`
         : 'N/A',
     });
     setBestBorrowAPR({
-      timestamp: Boolean(maturityMinAPRBorrow) ? parseTimestamp(maturityMinAPRBorrow) : undefined,
+      timestamp: maturityMinAPRBorrow ? parseTimestamp(maturityMinAPRBorrow) : undefined,
       apr: APRsPerMaturity[maturityMinAPRBorrow]?.borrow
         ? `${Number(APRsPerMaturity[maturityMinAPRBorrow].borrow).toFixed(2)}%`
         : 'N/A',

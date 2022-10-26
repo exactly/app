@@ -21,7 +21,7 @@ import { Transaction } from 'types/Transaction';
 import { Error } from 'types/Error';
 
 import { getSymbol, getUnderlyingData, toPercentage } from 'utils/utils';
-import handleEth from 'utils/handleEth';
+import handleETH from 'utils/handleETH';
 import getOneDollar from 'utils/getOneDollar';
 
 import numbers from 'config/numbers.json';
@@ -217,7 +217,7 @@ function DepositAtMaturity() {
       let deposit;
 
       if (symbol === 'WETH') {
-        const ETHrouter = web3Provider && handleEth(network?.name, web3Provider?.getSigner());
+        const ETHrouter = web3Provider && handleETH(network?.name, web3Provider?.getSigner());
 
         deposit = await ETHrouter?.depositAtMaturityETH(date.value, minAmount.toString(), qty!);
       } else {

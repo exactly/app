@@ -1,8 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
 import { ethers, Contract, BigNumber } from 'ethers';
 import Skeleton from 'react-loading-skeleton';
-import request from 'graphql-request';
-import { formatFixed, parseFixed } from '@ethersproject/bignumber';
+import { parseFixed } from '@ethersproject/bignumber';
 import Image from 'next/image';
 
 import Button from 'components/common/Button';
@@ -30,11 +29,8 @@ import decimals from 'config/decimals.json';
 import { getSymbol, getUnderlyingData } from 'utils/utils';
 import formatNumber from 'utils/formatNumber';
 import parseSymbol from 'utils/parseSymbol';
-import getSubgraph from 'utils/getSubgraph';
 import getHealthFactorData from 'utils/getHealthFactorData';
 import parseHealthFactor from 'utils/parseHealthFactor';
-
-import { getSmartPoolDepositsAndWithdraws, getSmartPoolBorrowsAndRepays } from 'queries';
 
 type Props = {
   symbol: string | undefined;
@@ -102,9 +98,7 @@ function Item({
       const WAD = parseFixed('1', 18);
       const collateralUsd = collateralAssets.mul(usdPrice).div(WAD);
 
-      const newHF = parseFloat(
-        parseHealthFactor(healthFactor.debt, healthFactor.collateral.sub(collateralUsd)),
-      );
+      const newHF = parseFloat(parseHealthFactor(healthFactor.debt, healthFactor.collateral.sub(collateralUsd)));
 
       if (newHF < 1) {
         setDisabledText('underCollateral');
@@ -168,14 +162,9 @@ function Item({
   return (
     <div className={styles.container}>
       <div className={styles.symbol}>
-        {(symbol && (
-          <Image
-            src={`/img/assets/${symbol.toLowerCase()}.svg`}
-            alt={symbol}
-            width={20}
-            height={20}
-          />
-        )) || <Skeleton circle height={20} width={20} />}
+        {(symbol && <Image src={`/img/assets/${symbol.toLowerCase()}.svg`} alt={symbol} width={20} height={20} />) || (
+          <Skeleton circle height={20} width={20} />
+        )}
         <div className={styles.primary}>{(symbol && parseSymbol(symbol)) || <Skeleton />}</div>
       </div>
       {/* <div className={styles.value}>
@@ -207,10 +196,9 @@ function Item({
         <div className={styles.value}>
           {(eTokenAmount &&
             symbol &&
-            `${formatNumber(
-              ethers.utils.formatUnits(eTokenAmount, decimals[symbol! as keyof Decimals]),
-              symbol,
-            )}`) || <Skeleton width={40} />}{' '}
+            `${formatNumber(ethers.utils.formatUnits(eTokenAmount, decimals[symbol! as keyof Decimals]), symbol)}`) || (
+            <Skeleton width={40} />
+          )}{' '}
         </div>
       )}
 
@@ -259,9 +247,7 @@ function Item({
         <div className={styles.buttonContainer}>
           {(symbol && type && (
             <Button
-              text={
-                type.value == 'deposit' ? translations[lang].deposit : translations[lang].borrow
-              }
+              text={type.value == 'deposit' ? translations[lang].deposit : translations[lang].borrow}
               className={'primary'}
               onClick={() => {
                 setMarket({ value: market! });
@@ -275,9 +261,7 @@ function Item({
         <div className={styles.buttonContainer}>
           {(symbol && type && (
             <Button
-              text={
-                type.value == 'deposit' ? translations[lang].withdraw : translations[lang].repay
-              }
+              text={type.value == 'deposit' ? translations[lang].withdraw : translations[lang].repay}
               className={'tertiary'}
               onClick={() => {
                 setMarket({ value: market! });

@@ -14,7 +14,7 @@ function ModalExpansionPanelWrapper({ children }: Props) {
 
   useEffect(() => {
     setStyle({
-      height: (toggle ? ref.current.offsetHeight : 0) + 'px'
+      height: (toggle ? ref.current.offsetHeight : 0) + 'px',
     });
   }, [setStyle, ref, toggle]);
 
@@ -24,10 +24,7 @@ function ModalExpansionPanelWrapper({ children }: Props) {
 
   return (
     <>
-      <button
-        onClick={handleToggle}
-        className={`${styles.circlePlus} ${toggle ? styles.opened : styles.closed}`}
-      >
+      <button onClick={handleToggle} className={`${styles.circlePlus} ${toggle ? styles.opened : styles.closed}`}>
         <div className={styles.circle}>
           <div className={styles.horizontal}></div>
           <div className={styles.vertical}></div>
@@ -36,7 +33,7 @@ function ModalExpansionPanelWrapper({ children }: Props) {
       <animated.div
         style={{
           overflow: 'hidden',
-          ...style
+          ...style,
         }}
       >
         <div ref={ref}>{children}</div>

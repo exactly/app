@@ -84,7 +84,7 @@ function Item({ market, type }: Props) {
   async function getRates() {
     if (!market || !accountData) return;
     if (!network?.name) throw new Error('network not found');
-    const subgraphUrl = getSubgraph(network.name);
+    const subgraphUrl = getSubgraph(network.name!);
 
     let interestRate;
 

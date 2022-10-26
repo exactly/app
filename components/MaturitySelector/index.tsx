@@ -1,4 +1,4 @@
-import { useCallback, useContext } from 'react';
+import { useContext } from 'react';
 import Skeleton from 'react-loading-skeleton';
 import dynamic from 'next/dynamic';
 
@@ -8,6 +8,8 @@ import style from './style.module.scss';
 
 import { MarketContext } from 'contexts/MarketContext';
 
+import { Date } from 'types/Date';
+
 type Props = {
   title?: string;
   subtitle?: string;
@@ -15,6 +17,10 @@ type Props = {
 
 function MaturitySelector({ title, subtitle }: Props) {
   const { date, setDate, dates } = useContext(MarketContext);
+
+  function handleChange(option: Date) {
+    setDate(option);
+  }
 
   return (
     <section className={style.sectionContainerEditable}>
@@ -25,19 +31,8 @@ function MaturitySelector({ title, subtitle }: Props) {
       )}
       <div className={style.maturityContainer}>
         {subtitle && <p className={style.title}>{subtitle}</p>}
-        {dates.length ? (
-          <Select
-            options={dates}
-            onChange={useCallback(
-              (option) => {
-                setDate(option);
-              },
-              [setDate],
-            )}
-            placeholder={date?.value}
-            value={date?.label}
-            editable
-          />
+        {dates.length !== 0 ? (
+          <Select options={dates} onChange={handleChange} placeholder={date?.value} value={date?.label} editable />
         ) : (
           <Skeleton width={140} height={48} />
         )}
