@@ -21,6 +21,7 @@ import { useWeb3Context } from 'contexts/Web3Context';
 import AccountDataContext from 'contexts/AccountDataContext';
 import ModalStatusContext from 'contexts/ModalStatusContext';
 
+import numbers from 'config/numbers.json';
 import style from './style.module.scss';
 
 import keys from './translations.json';
@@ -94,6 +95,7 @@ function Item({ market, type, fixedMarketData }: Props) {
     }
 
     try {
+      const { minAPRValue } = numbers;
       const fixedMarket = fixedMarketData?.find((element) => element.market === market.market);
 
       if (type === 'borrow') {
@@ -110,7 +112,7 @@ function Item({ market, type, fixedMarketData }: Props) {
 
         const borrowFixedAPR = (Number(formatFixed(borrowRate, 18)) - 1) * time;
 
-        if (borrowFixedAPR <= 0.01 || finalAssets.eq(MaxUint256)) {
+        if (borrowFixedAPR <= minAPRValue || finalAssets.eq(MaxUint256)) {
           setRate('N/A');
         } else {
           setRate(
@@ -135,7 +137,7 @@ function Item({ market, type, fixedMarketData }: Props) {
 
         const depositFixedAPR = (Number(formatFixed(depositRate, 18)) - 1) * time;
 
-        if (depositFixedAPR <= 0.01) {
+        if (depositFixedAPR <= minAPRValue) {
           setRate('N/A');
         } else {
           setRate(

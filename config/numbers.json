@@ -8,6 +8,6 @@
   "usdAmount": 1,
   "gasLimitMultiplier": 1.25,
   "debounceTime": 500,
-  "minAPRValue": 0,
-  "maxAPRValue": 30
+  "minAPRValue": 0.0001,
+  "maxAPRValue": 0.3
 }
