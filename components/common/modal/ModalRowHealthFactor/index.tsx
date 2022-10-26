@@ -37,7 +37,7 @@ function ModalRowHealthFactor({ qty, symbol, operation, healthFactorCallback }: 
 
   const {
     beforeHealthFactor,
-    healthFactor
+    healthFactor,
   }:
     | { beforeHealthFactor: undefined; healthFactor: undefined }
     | { beforeHealthFactor: string; healthFactor: HealthFactor } = useMemo(() => {
@@ -76,7 +76,7 @@ function ModalRowHealthFactor({ qty, symbol, operation, healthFactorCallback }: 
 
       return {
         beforeHealthFactor: parseHealthFactor(healthFactor.debt, healthFactor.collateral),
-        healthFactor: healthFactor
+        healthFactor: healthFactor,
       };
     }
 
@@ -98,10 +98,7 @@ function ModalRowHealthFactor({ qty, symbol, operation, healthFactorCallback }: 
         if (isCollateral) {
           const adjustedNewQtyUsd = newQtyUsd.mul(adjustFactor).div(WAD);
 
-          return parseHealthFactor(
-            healthFactor!.debt,
-            healthFactor!.collateral.add(adjustedNewQtyUsd)
-          );
+          return parseHealthFactor(healthFactor!.debt, healthFactor!.collateral.add(adjustedNewQtyUsd));
         } else {
           return parseHealthFactor(healthFactor!.debt, healthFactor!.collateral);
         }
@@ -110,10 +107,7 @@ function ModalRowHealthFactor({ qty, symbol, operation, healthFactorCallback }: 
         if (isCollateral) {
           const adjustedNewQtyUsd = newQtyUsd.mul(WAD).div(adjustFactor);
 
-          return parseHealthFactor(
-            healthFactor!.debt,
-            healthFactor!.collateral.sub(adjustedNewQtyUsd)
-          );
+          return parseHealthFactor(healthFactor!.debt, healthFactor!.collateral.sub(adjustedNewQtyUsd));
         } else {
           return parseHealthFactor(healthFactor!.debt, healthFactor!.collateral);
         }
@@ -121,18 +115,12 @@ function ModalRowHealthFactor({ qty, symbol, operation, healthFactorCallback }: 
       case 'borrow': {
         const adjustedNewQtyUsd = newQtyUsd.mul(WAD).div(adjustFactor);
 
-        return parseHealthFactor(
-          healthFactor!.debt.add(adjustedNewQtyUsd),
-          healthFactor!.collateral
-        );
+        return parseHealthFactor(healthFactor!.debt.add(adjustedNewQtyUsd), healthFactor!.collateral);
       }
       case 'repay': {
         const adjustedNewQtyUsd = newQtyUsd.mul(adjustFactor).div(WAD);
 
-        return parseHealthFactor(
-          healthFactor!.debt,
-          healthFactor!.collateral.add(adjustedNewQtyUsd)
-        );
+        return parseHealthFactor(healthFactor!.debt, healthFactor!.collateral.add(adjustedNewQtyUsd));
       }
     }
   }

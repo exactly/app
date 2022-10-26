@@ -31,18 +31,18 @@ function ModalGif({ tx, tryAgain }: Props) {
     processing: {
       img: '',
       title: translations[lang].loadingTitle,
-      text: translations[lang].loadingText
+      text: translations[lang].loadingText,
     },
     success: {
       img: '/img/icons/successTick.svg',
       title: translations[lang].successTitle,
-      text: translations[lang].successText
+      text: translations[lang].successText,
     },
     error: {
       img: '/img/icons/errorTick.svg',
       title: translations[lang].errorTitle,
-      text: translations[lang].errorText
-    }
+      text: translations[lang].errorText,
+    },
   };
 
   return (
@@ -66,9 +66,7 @@ function ModalGif({ tx, tryAgain }: Props) {
       {tx.status != 'loading' && (
         <a
           className={styles.link}
-          href={`https://${network?.name ?? process.env.NEXT_PUBLIC_NETWORK}.etherscan.io/tx/${
-            tx.hash
-          }`}
+          href={`https://${network?.name ?? process.env.NEXT_PUBLIC_NETWORK}.etherscan.io/tx/${tx.hash}`}
           target="_blank"
           rel="noopener noreferrer"
         >

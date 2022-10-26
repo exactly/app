@@ -13,7 +13,7 @@ type ContextValues = {
 
 const defaultValues: ContextValues = {
   address: undefined,
-  abi: undefined
+  abi: undefined,
 };
 
 const AuditorContext = createContext(defaultValues);

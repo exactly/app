@@ -40,28 +40,29 @@ async function getLastAPR(
 
     data.forEach((maturityData) => {
       const depositData: any = {
-        value: maturityData.maturity,
-        date: maturityData.date,
+        value: maturityData?.maturity,
+        date: maturityData?.date,
         type: 'deposit',
       };
       const borrowData: any = {
-        value: maturityData.maturity,
-        date: maturityData.date,
+        value: maturityData?.maturity,
+        date: maturityData?.date,
         type: 'borrow',
       };
 
       //BORROW
-      const borrowFee = maturityData.getLastBorrowRate?.borrowAtMaturities[0]?.fee;
-      const borrowAmount = maturityData.getLastBorrowRate?.borrowAtMaturities[0]?.assets;
+      const borrowFee = maturityData?.getLastBorrowRate?.borrowAtMaturities[0]?.fee;
+      const borrowAmount = maturityData?.getLastBorrowRate?.borrowAtMaturities[0]?.assets;
       const borrowTime =
-        31536000 / (parseInt(maturityData.maturity) - maturityData.getLastBorrowRate?.borrowAtMaturities[0]?.timestamp);
+        31536000 /
+        (parseInt(maturityData.maturity!) - maturityData?.getLastBorrowRate?.borrowAtMaturities[0]?.timestamp);
 
       //DEPOSIT
-      const depositFee = maturityData.getLastDepositRate?.depositAtMaturities[0]?.fee;
-      const depositAmount = maturityData.getLastDepositRate?.depositAtMaturities[0]?.assets;
+      const depositFee = maturityData?.getLastDepositRate?.depositAtMaturities[0]?.fee;
+      const depositAmount = maturityData?.getLastDepositRate?.depositAtMaturities[0]?.assets;
       const depositTime =
         31536000 /
-        (parseInt(maturityData.maturity) - maturityData.getLastDepositRate?.depositAtMaturities[0]?.timestamp);
+        (parseInt(maturityData.maturity!) - maturityData?.getLastDepositRate?.depositAtMaturities[0]?.timestamp);
 
       let fixedBorrowAPR = 0;
       let fixedDepositAPR = 0;

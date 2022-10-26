@@ -8,9 +8,7 @@ import { Option } from 'react-dropdown';
 import AccountDataContext from 'contexts/AccountDataContext';
 import LangContext from 'contexts/LangContext';
 
-const MaturityPoolUserStatusByMaturity = dynamic(
-  () => import('components/MaturityPoolUserStatusByMaturity')
-);
+const MaturityPoolUserStatusByMaturity = dynamic(() => import('components/MaturityPoolUserStatusByMaturity'));
 const EmptyState = dynamic(() => import('components/EmptyState'));
 
 import styles from './style.module.scss';
@@ -51,8 +49,8 @@ function MaturityPoolDashboard({ tab }: Props) {
                 market: asset.market,
                 fee: pool.position.fee,
                 principal: pool.position.principal,
-                decimals: asset.decimals
-              }
+                decimals: asset.decimals,
+              },
             ]
           : [
               {
@@ -60,8 +58,8 @@ function MaturityPoolDashboard({ tab }: Props) {
                 market: asset.market,
                 fee: pool.position.fee,
                 principal: pool.position.principal,
-                decimals: asset.decimals
-              }
+                decimals: asset.decimals,
+              },
             ];
       });
 
@@ -77,8 +75,8 @@ function MaturityPoolDashboard({ tab }: Props) {
                 market: asset.market,
                 fee: pool.position.fee,
                 principal: pool.position.principal,
-                decimals: asset.decimals
-              }
+                decimals: asset.decimals,
+              },
             ]
           : [
               {
@@ -86,8 +84,8 @@ function MaturityPoolDashboard({ tab }: Props) {
                 market: asset.market,
                 fee: pool.position.fee,
                 principal: pool.position.principal,
-                decimals: asset.decimals
-              }
+                decimals: asset.decimals,
+              },
             ];
       });
     });
@@ -107,12 +105,8 @@ function MaturityPoolDashboard({ tab }: Props) {
       ) : (
         <MaturityPoolUserStatusByMaturity type={undefined} maturities={undefined} />
       )}
-      {tab.value == 'deposit' && maturities && !maturities.hasOwnProperty('deposits') && (
-        <EmptyState connected tab={tab.value} />
-      )}
-      {tab.value == 'borrow' && maturities && !maturities.hasOwnProperty('borrows') && (
-        <EmptyState connected tab={tab.value} />
-      )}
+      {tab.value == 'deposit' && !maturities?.deposits && <EmptyState connected tab={tab.value} />}
+      {tab.value == 'borrow' && !maturities?.borrows && <EmptyState connected tab={tab.value} />}
     </section>
   );
 }

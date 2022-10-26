@@ -64,13 +64,7 @@ function ModalRowBorrowLimit({ qty, symbol, operation, line }: Props) {
 
     const WAD = parseFixed('1', 18);
 
-    const beforeBorrowLimitUSD = getBeforeBorrowLimit(
-      accountData,
-      symbol,
-      usdPrice,
-      decimals,
-      operation
-    );
+    const beforeBorrowLimitUSD = getBeforeBorrowLimit(accountData, symbol, usdPrice, decimals, operation);
 
     const newQtyUsd = newQty.mul(usdPrice).div(parseFixed('1', decimals));
 
@@ -82,9 +76,7 @@ function ModalRowBorrowLimit({ qty, symbol, operation, line }: Props) {
         if (isCollateral) {
           const adjustedDepositBorrowLimit = newQtyUsd.mul(adjustFactor).div(WAD);
 
-          afterBorrowLimit = Number(
-            formatFixed(beforeBorrowLimitUSD.add(adjustedDepositBorrowLimit), 18)
-          ).toFixed(2);
+          afterBorrowLimit = Number(formatFixed(beforeBorrowLimitUSD.add(adjustedDepositBorrowLimit), 18)).toFixed(2);
         } else {
           afterBorrowLimit = Number(formatFixed(beforeBorrowLimitUSD, 18)).toFixed(2);
         }
@@ -102,9 +94,7 @@ function ModalRowBorrowLimit({ qty, symbol, operation, line }: Props) {
         if (isCollateral) {
           const adjustedRepayBorrowLimit = newQtyUsd.mul(adjustFactor).div(WAD);
 
-          afterBorrowLimit = Number(
-            formatFixed(beforeBorrowLimitUSD.add(adjustedRepayBorrowLimit), 18)
-          ).toFixed(2);
+          afterBorrowLimit = Number(formatFixed(beforeBorrowLimitUSD.add(adjustedRepayBorrowLimit), 18)).toFixed(2);
         } else {
           afterBorrowLimit = Number(formatFixed(beforeBorrowLimitUSD, 18)).toFixed(2);
         }

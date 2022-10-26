@@ -88,7 +88,7 @@ function Faucet() {
         return await web3Provider?.provider?.request({
           method: 'wallet_watchAsset',
           params: {
-            // @ts-ignore
+            // @ts-expect-error bad typing
             type: 'ERC20',
             options: {
               address: contract?.address,
@@ -151,20 +151,11 @@ function Faucet() {
           return (
             <div className={styles.assetContainer} key={asset}>
               <p className={styles.asset}>
-                <Image
-                  src={`/img/assets/${asset.toLowerCase()}.svg`}
-                  alt={asset}
-                  width={40}
-                  height={40}
-                />
+                <Image src={`/img/assets/${asset.toLowerCase()}.svg`} alt={asset} width={40} height={40} />
                 {asset}
               </p>
               <div className={styles.buttonContainer}>
-                <Button
-                  text={translations[lang].mint}
-                  onClick={() => mint(asset)}
-                  loading={asset == loading}
-                />
+                <Button text={translations[lang].mint} onClick={() => mint(asset)} loading={asset == loading} />
               </div>
             </div>
           );

@@ -17,10 +17,7 @@ function Paginator({ itemsPerPage, handleChange, currentPage }: Props) {
 
   return (
     <ul className={styles.container}>
-      <li
-        className={styles.arrow}
-        onClick={() => handleChange(currentPage - 1 >= 1 ? currentPage - 1 : 1)}
-      >
+      <li className={styles.arrow} onClick={() => handleChange(currentPage - 1 >= 1 ? currentPage - 1 : 1)}>
         {'<'}
       </li>
 
@@ -37,10 +34,7 @@ function Paginator({ itemsPerPage, handleChange, currentPage }: Props) {
         );
       })}
 
-      <li
-        className={styles.arrow}
-        onClick={() => handleChange(currentPage + 1 <= pages ? currentPage + 1 : pages)}
-      >
+      <li className={styles.arrow} onClick={() => handleChange(currentPage + 1 <= pages ? currentPage + 1 : pages)}>
         {'>'}
       </li>
     </ul>

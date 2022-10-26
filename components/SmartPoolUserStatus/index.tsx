@@ -1,4 +1,4 @@
-import { useContext, useEffect, useMemo, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { Contract } from 'ethers';
 
@@ -52,11 +52,9 @@ function SmartPoolUserStatus({ walletAddress, type }: Props) {
   function getCurrentBalance() {
     if (!accountData) return;
 
-    const allMarkets = Object.values(accountData).sort(
-      (a: FixedLenderAccountData, b: FixedLenderAccountData) => {
-        return orderAssets.indexOf(a.assetSymbol) - orderAssets.indexOf(b.assetSymbol);
-      },
-    );
+    const allMarkets = Object.values(accountData).sort((a: FixedLenderAccountData, b: FixedLenderAccountData) => {
+      return orderAssets.indexOf(a.assetSymbol) - orderAssets.indexOf(b.assetSymbol);
+    });
 
     const data: SmartPoolItemData[] = [];
 
@@ -100,15 +98,11 @@ function SmartPoolUserStatus({ walletAddress, type }: Props) {
 
               <span className={styles.title}>{translations[lang].netAssetValue}</span>
 
-              {type.value == 'deposit' && (
-                <span className={styles.title}>{translations[lang].eToken}</span>
-              )}
+              {type.value == 'deposit' && <span className={styles.title}>{translations[lang].eToken}</span>}
 
               {/* <span className={styles.title}>{translations[lang].difference}</span> */}
 
-              {type.value == 'deposit' && (
-                <span className={styles.title}>{translations[lang].collateral}</span>
-              )}
+              {type.value == 'deposit' && <span className={styles.title}>{translations[lang].collateral}</span>}
 
               <span className={styles.title} />
             </div>
@@ -156,9 +150,7 @@ function SmartPoolUserStatus({ walletAddress, type }: Props) {
               <div className={styles.tableRow}>
                 <span className={styles.symbol}>{translations[lang].asset}</span>
                 <span className={styles.title}>
-                  {type.value == 'deposit'
-                    ? translations[lang].currentBalance
-                    : translations[lang].borrowBalance}
+                  {type.value == 'deposit' ? translations[lang].currentBalance : translations[lang].borrowBalance}
                 </span>
                 {type.value == 'deposit' && (
                   <>

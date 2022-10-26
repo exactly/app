@@ -10,14 +10,14 @@ const max = (a: bigint, b: bigint) => (a > b ? a : b);
 const floatingRate = (
   { floatingCurveA, floatingCurveB, floatingMaxUtilization }: InterestRateModel,
   utilizationBefore: bigint,
-  utilizationAfter: bigint
+  utilizationAfter: bigint,
 ) =>
   (utilizationAfter - utilizationBefore < 2_500_000_000n
     ? (BigInt(floatingCurveA) * WAD) / (BigInt(floatingMaxUtilization) - utilizationBefore)
     : (BigInt(floatingCurveA) *
         lnWad(
           ((BigInt(floatingMaxUtilization) - utilizationBefore) * WAD) /
-            (BigInt(floatingMaxUtilization) - utilizationAfter)
+            (BigInt(floatingMaxUtilization) - utilizationAfter),
         )) /
       (utilizationAfter - utilizationBefore)) + BigInt(floatingCurveB);
 
@@ -25,18 +25,16 @@ export const totalFloatingBorrowAssets = (
   timestamp: number,
   { floatingAssets, floatingDebt }: MarketState,
   { timestamp: debtUpdate, utilization }: FloatingDebtState,
-  interestRateModel: InterestRateModel
+  interestRateModel: InterestRateModel,
 ) => {
-  const newUtilization =
-    BigInt(floatingAssets) > 0n ? (BigInt(floatingDebt) * WAD) / BigInt(floatingAssets) : 0n;
+  const newUtilization = BigInt(floatingAssets) > 0n ? (BigInt(floatingDebt) * WAD) / BigInt(floatingAssets) : 0n;
   const borrowRate = floatingRate(
     interestRateModel,
     min(BigInt(utilization), newUtilization),
-    max(BigInt(utilization), newUtilization)
+    max(BigInt(utilization), newUtilization),
   );
   return (
-    BigInt(floatingDebt) +
-    (BigInt(floatingDebt) * ((borrowRate * BigInt(timestamp - debtUpdate)) / 31_536_000n)) / WAD
+    BigInt(floatingDebt) + (BigInt(floatingDebt) * ((borrowRate * BigInt(timestamp - debtUpdate)) / 31_536_000n)) / WAD
   );
 };
 
@@ -48,7 +46,7 @@ export const totalAssets = (
   earningsAccumulatorSmoothFactor: string,
   floatingDebtState: FloatingDebtState,
   interestRateModel: InterestRateModel,
-  treasuryFeeRate: string
+  treasuryFeeRate: string,
 ) => {
   const { floatingAssets, floatingDebt, earningsAccumulator } = marketState;
   const elapsed = BigInt(timestamp - accumulatorAccrual);
@@ -58,17 +56,14 @@ export const totalAssets = (
       (smartPoolEarnings, { timestamp: lastAccrual, maturity, unassignedEarnings }) =>
         smartPoolEarnings +
         (maturity > lastAccrual
-          ? (BigInt(unassignedEarnings) * BigInt(timestamp - lastAccrual)) /
-            BigInt(maturity - lastAccrual)
+          ? (BigInt(unassignedEarnings) * BigInt(timestamp - lastAccrual)) / BigInt(maturity - lastAccrual)
           : 0n),
-      0n
+      0n,
     ) +
     (elapsed &&
       (BigInt(earningsAccumulator) * elapsed) /
-        (elapsed +
-          (BigInt(earningsAccumulatorSmoothFactor) * BigInt(maturities.length * INTERVAL)) / WAD)) +
-    ((totalFloatingBorrowAssets(timestamp, marketState, floatingDebtState, interestRateModel) -
-      BigInt(floatingDebt)) *
+        (elapsed + (BigInt(earningsAccumulatorSmoothFactor) * BigInt(maturities.length * INTERVAL)) / WAD)) +
+    ((totalFloatingBorrowAssets(timestamp, marketState, floatingDebtState, interestRateModel) - BigInt(floatingDebt)) *
       (WAD - BigInt(treasuryFeeRate))) /
       WAD
   );
@@ -85,7 +80,7 @@ export const DEFAULT_MARKET_STATE = {
   floatingAssets: '0',
   floatingBorrowShares: '0',
   floatingDebt: '0',
-  earningsAccumulator: '0'
+  earningsAccumulator: '0',
 };
 
 export const DEFAULT_FLOATING_DEBT_STATE = { ...DEFAULT_STATE, utilization: '0' };

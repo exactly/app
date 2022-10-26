@@ -62,15 +62,8 @@ function MarketsList() {
     // iterate through every market asset
     for (let index = 0; index < marketsData.length; index++) {
       const marketData = marketsData[index];
-      const {
-        borrows: borrowPools,
-        deposits: depositPools,
-        assets: initialAssets,
-        market: marketAddress,
-      } = marketData;
-      const { name: marketName } = markets.find(
-        ({ market }) => market.toLowerCase() === marketAddress.toLowerCase(),
-      )!;
+      const { borrows: borrowPools, deposits: depositPools, assets: initialAssets, market: marketAddress } = marketData;
+      const { name: marketName } = markets.find(({ market }) => market.toLowerCase() === marketAddress.toLowerCase())!;
       // iterate through every borrow & deposit pools - parallel arrays
       for (let j = 0; j < borrowPools.length; j++) {
         const { assets: borrowFinalAssets, maturity: timestampEnd } = borrowPools[j];
@@ -108,15 +101,9 @@ function MarketsList() {
 
   async function getPreviewFixed() {
     try {
-      const previewerContract = getInstance(
-        previewerData.address!,
-        previewerData.abi!,
-        'previewer',
-      );
+      const previewerContract = getInstance(previewerData.address!, previewerData.abi!, 'previewer');
 
-      const marketData = await previewerContract?.previewFixed(
-        parseFixed(usdAmount.toString(), 18),
-      );
+      const marketData = await previewerContract?.previewFixed(parseFixed(usdAmount.toString(), 18));
 
       checkWeirdAPR(marketData);
       setFixedMarketData(marketData);
@@ -139,9 +126,7 @@ function MarketsList() {
             <div className={style.title} />
           </div>
           {markets?.map((market, key) => {
-            return (
-              <Item market={market} key={key} type="deposit" fixedMarketData={fixedMarketData} />
-            );
+            return <Item market={market} key={key} type="deposit" fixedMarketData={fixedMarketData} />;
           })}
           {markets.length === 0 &&
             fixedLenderData.map((_, key) => {
@@ -155,15 +140,12 @@ function MarketsList() {
             <span className={style.symbol}>{translations[lang].asset}</span>
             <span className={style.title}>{translations[lang].totalBorrows}</span>
             <div className={style.title}>
-              {translations[lang].averageAPR}{' '}
-              <Tooltip value={translations[lang].borrowAprTooltip} orientation="down" />
+              {translations[lang].averageAPR} <Tooltip value={translations[lang].borrowAprTooltip} orientation="down" />
             </div>
             <span className={style.title} />
           </div>
           {markets?.map((market, key) => {
-            return (
-              <Item market={market} key={key} type="borrow" fixedMarketData={fixedMarketData} />
-            );
+            return <Item market={market} key={key} type="borrow" fixedMarketData={fixedMarketData} />;
           })}
           {markets.length === 0 &&
             fixedLenderData.map((_, key) => {

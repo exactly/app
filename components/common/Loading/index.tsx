@@ -8,11 +8,7 @@ type Props = {
 function Loading({ size = 'normal', color = 'white' }: Props) {
   return (
     <div
-      className={
-        size == 'normal'
-          ? `${styles.loading} ${styles[color]}`
-          : `${styles.loadingSmall}  ${styles[color]}`
-      }
+      className={size == 'normal' ? `${styles.loading} ${styles[color]}` : `${styles.loadingSmall}  ${styles[color]}`}
     >
       <div></div>
       <div></div>

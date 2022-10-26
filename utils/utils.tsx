@@ -24,7 +24,7 @@ export function transformClasses(style: any, classes: string) {
     .join(' ');
 }
 
-export function formatWallet(walletAddress: String) {
+export function formatWallet(walletAddress: string) {
   return `${walletAddress.substring(0, 6)}...${walletAddress.substring(38)}`;
 }
 

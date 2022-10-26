@@ -1,5 +1,5 @@
-import { ethers } from "ethers";
-import { createContext } from "react";
+import { ethers } from 'ethers';
+import { createContext } from 'react';
 
 type ContextValues = {
   address: string | undefined;
@@ -8,7 +8,7 @@ type ContextValues = {
 
 const defaultValues: ContextValues = {
   address: undefined,
-  abi: undefined
+  abi: undefined,
 };
 
 const UtilsContext = createContext(defaultValues);

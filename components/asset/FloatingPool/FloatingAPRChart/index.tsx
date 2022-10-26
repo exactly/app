@@ -1,16 +1,6 @@
 import { useCallback, useContext, useEffect, useState } from 'react';
 
-import {
-  Line,
-  ComposedChart,
-  Area,
-  XAxis,
-  YAxis,
-  ResponsiveContainer,
-  Tooltip,
-  Legend,
-  CartesianGrid,
-} from 'recharts';
+import { Line, ComposedChart, XAxis, YAxis, ResponsiveContainer, Tooltip, Legend, CartesianGrid } from 'recharts';
 
 import LangContext from 'contexts/LangContext';
 
@@ -21,8 +11,6 @@ import getSubgraph from 'utils/getSubgraph';
 import queryRates from 'utils/queryRates';
 
 import { LangKeys } from 'types/Lang';
-
-import Button from 'components/common/Button';
 
 interface Props {
   market: string | undefined;
@@ -38,8 +26,8 @@ function FloatingAPRChart({ market, networkName }: Props) {
     roundTicks: true,
   };
 
-  const [queryOptions, setQueryOptions] = useState<Options>(defaultOptions);
-  const [queryWindow, setQueryWindow] = useState<string>('1 Month');
+  const [queryOptions] = useState<Options>(defaultOptions);
+  const [queryWindow] = useState<string>('1 Month');
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
@@ -49,13 +37,11 @@ function FloatingAPRChart({ market, networkName }: Props) {
 
     const subgraphUrl = getSubgraph(networkName);
 
-    const data = (await queryRates(subgraphUrl, market, 'deposit', queryOptions)).map(
-      ({ apr, apy, ...rest }) => ({
-        ...rest,
-        apr: apr * 100,
-        apy: apy * 100,
-      }),
-    );
+    const data = (await queryRates(subgraphUrl, market, 'deposit', queryOptions)).map(({ apr, apy, ...rest }) => ({
+      ...rest,
+      apr: apr * 100,
+      apy: apy * 100,
+    }));
 
     setData(data);
   }, [market, networkName, queryOptions]);
@@ -92,11 +78,7 @@ function FloatingAPRChart({ market, networkName }: Props) {
           >
             <CartesianGrid horizontal vertical={false} />
             <XAxis dataKey="date" hide />
-            <YAxis
-              stroke="#008cf4"
-              unit="%"
-              label={{ value: 'APR', angle: -90, position: 'insideLeft' }}
-            />
+            <YAxis stroke="#008cf4" unit="%" label={{ value: 'APR', angle: -90, position: 'insideLeft' }} />
             <YAxis
               yAxisId="right"
               orientation="right"

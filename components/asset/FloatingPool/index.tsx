@@ -14,11 +14,7 @@ const AssetFloatingPool: FC<AssetFloatingPoolProps> = ({ symbol, eMarketAddress,
   return (
     <Grid container spacing={2}>
       <Grid item xs={12}>
-        <FloatingPoolInfo
-          symbol={symbol}
-          eMarketAddress={eMarketAddress}
-          networkName={networkName}
-        />
+        <FloatingPoolInfo symbol={symbol} eMarketAddress={eMarketAddress} networkName={networkName} />
       </Grid>
       <Grid item xs={12}>
         <FloatingAPRChart networkName={networkName} market={eMarketAddress} />

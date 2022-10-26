@@ -79,9 +79,7 @@ function Item({ market, type, fixedMarketData }: Props) {
         return;
       }
 
-      const exchangeRate = parseFloat(
-        utils.formatEther(accountData[market?.symbol.toUpperCase()].usdPrice),
-      );
+      const exchangeRate = parseFloat(utils.formatEther(accountData[market?.symbol.toUpperCase()].usdPrice));
 
       const newPoolData = {
         borrowed: parseFloat(await utils.formatUnits(pool.borrowed, decimals)),
@@ -108,7 +106,7 @@ function Item({ market, type, fixedMarketData }: Props) {
         const borrowRate = finalAssets.mul(parseFixed('1', 18)).div(initialAssets);
         const borrowTimestamp = new Date().getTime() / 1_000;
 
-        const time = 31_536_000 / (parseInt(date?.value!) - borrowTimestamp);
+        const time = 31_536_000 / (parseInt(date.value!) - borrowTimestamp);
 
         const borrowFixedAPR = (Number(formatFixed(borrowRate, 18)) - 1) * time;
 
@@ -133,7 +131,7 @@ function Item({ market, type, fixedMarketData }: Props) {
         const depositRate = finalAssets.mul(parseFixed('1', 18)).div(initialAssets);
         const depositTimestamp = new Date().getTime() / 1_000;
 
-        const time = 31_536_000 / (parseInt(date?.value!) - depositTimestamp);
+        const time = 31_536_000 / (parseInt(date.value!) - depositTimestamp);
 
         const depositFixedAPR = (Number(formatFixed(depositRate, 18)) - 1) * time;
 
@@ -155,11 +153,7 @@ function Item({ market, type, fixedMarketData }: Props) {
   }
 
   return (
-    <div
-      className={`${style.container} ${
-        type == 'borrow' ? style.secondaryContainer : style.primaryContainer
-      }`}
-    >
+    <div className={`${style.container} ${type == 'borrow' ? style.secondaryContainer : style.primaryContainer}`}>
       <Link href={`/assets/${market?.symbol == 'WETH' ? 'eth' : market?.symbol.toLowerCase()}`}>
         <div className={style.symbol}>
           {(market && (
@@ -170,17 +164,15 @@ function Item({ market, type, fixedMarketData }: Props) {
               height={40}
             />
           )) || <Skeleton circle width={40} height={40} />}
-          <span className={style.primary}>
-            {(market && parseSymbol(market?.symbol)) || <Skeleton width={30} />}
-          </span>
+          <span className={style.primary}>{(market && parseSymbol(market?.symbol)) || <Skeleton width={30} />}</span>
         </div>
       </Link>
       <div className={style.value}>
         {poolData && market ? (
           type == 'borrow' ? (
-            `$${formatNumber(poolData?.borrowed! * poolData?.rate!, 'USD')}`
+            `$${formatNumber(poolData.borrowed! * poolData.rate!, 'USD')}`
           ) : (
-            `$${formatNumber(poolData?.supplied! * poolData?.rate!, 'USD')}`
+            `$${formatNumber(poolData.supplied! * poolData.rate!, 'USD')}`
           )
         ) : (
           <Skeleton />

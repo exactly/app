@@ -14,7 +14,7 @@ const Footer = () => {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
-  const { theme, changeTheme } = useContext(ThemeContext);
+  const { theme } = useContext(ThemeContext);
 
   const date = new Date();
 
@@ -29,11 +29,7 @@ const Footer = () => {
       <div>
         <ul className={styles.links}>
           <li>
-            <a
-              rel="noopener noreferrer"
-              target="_blank"
-              href="https://docs.exact.ly/resources/brand-assets"
-            >
+            <a rel="noopener noreferrer" target="_blank" href="https://docs.exact.ly/resources/brand-assets">
               {translations[lang].brand}
             </a>
           </li>
@@ -57,20 +53,12 @@ const Footer = () => {
             </a>
           </li>
           <li>
-            <a
-              rel="noopener noreferrer"
-              target="_blank"
-              href="https://docs.exact.ly/getting-started/white-paper"
-            >
+            <a rel="noopener noreferrer" target="_blank" href="https://docs.exact.ly/getting-started/white-paper">
               {translations[lang].whitePaper}
             </a>
           </li>
           <li>
-            <a
-              rel="noopener noreferrer"
-              target="_blank"
-              href="https://medium.com/@exactly_protocol"
-            >
+            <a rel="noopener noreferrer" target="_blank" href="https://medium.com/@exactly_protocol">
               {translations[lang].blog}
             </a>
           </li>

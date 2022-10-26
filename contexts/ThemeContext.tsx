@@ -8,7 +8,7 @@ type ContextValues = {
 
 const defaultValues: ContextValues = {
   theme: 'light',
-  changeTheme: () => {}
+  changeTheme: () => undefined,
 };
 
 const ThemeContext = createContext(defaultValues);
@@ -21,11 +21,7 @@ export const ThemeProvider: FC<{ children?: ReactNode }> = ({ children }) => {
       const storage = window?.localStorage?.getItem('theme');
       const storageTheme = storage && JSON.parse(storage);
 
-      if (
-        storageTheme &&
-        storageTheme != '' &&
-        (storageTheme == 'light' || storageTheme == 'dark')
-      ) {
+      if (storageTheme && storageTheme != '' && (storageTheme == 'light' || storageTheme == 'dark')) {
         document.body.dataset.theme = storageTheme;
         // setTheme(storageTheme);
         setTheme('light'); //HACK disabling the darkmode option, force the light theme if the user change the localStorage

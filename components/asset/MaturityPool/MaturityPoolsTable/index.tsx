@@ -43,7 +43,7 @@ const HeadCell: FC<{ title: string }> = ({ title }) => {
 };
 
 const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ APRsPerMaturity, symbol }) => {
-  const { walletAddress, connect, network } = useWeb3Context();
+  const { walletAddress, connect } = useWeb3Context();
   const { accountData } = useContext(AccountDataContext);
   const { setDate, setMarket } = useContext(MarketContext);
   const { setOpen, setOperation } = useContext(ModalStatusContext);
@@ -55,7 +55,7 @@ const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ APRsPerMaturity, symb
     const { fixedPools, usdPrice: exchangeRate } = accountData[symbol];
     const tempRows: TableRow[] = [];
 
-    fixedPools.forEach(({ maturity, borrowed, supplied }, index) => {
+    fixedPools.forEach(({ maturity, borrowed, supplied }) => {
       const maturityKey = maturity.toString();
 
       const totalDeposited = formatNumber(formatUnits(supplied.mul(exchangeRate).div(WeiPerEther)));
@@ -65,7 +65,7 @@ const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ APRsPerMaturity, symb
         totalDeposited,
         totalBorrowed,
         depositAPR: (APRsPerMaturity[maturityKey]?.deposit || 'N/A').toString(),
-        borrowAPR: (APRsPerMaturity[maturityKey]?.borrow || 'N/A').toString()
+        borrowAPR: (APRsPerMaturity[maturityKey]?.borrow || 'N/A').toString(),
       });
     });
 
@@ -76,10 +76,7 @@ const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ APRsPerMaturity, symb
     defineRows();
   }, [defineRows]);
 
-  const handleActionClick = (
-    action: 'borrowAtMaturity' | 'depositAtMaturity',
-    maturity: string
-  ) => {
+  const handleActionClick = (action: 'borrowAtMaturity' | 'depositAtMaturity', maturity: string) => {
     if (!walletAddress && connect) return connect();
 
     if (!accountData) return;
@@ -90,7 +87,7 @@ const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ APRsPerMaturity, symb
     setMarket({ value: market });
     setDate({
       value: maturity,
-      label: parseTimestamp(maturity)
+      label: parseTimestamp(maturity),
     });
     setOpen(true);
 
@@ -118,7 +115,7 @@ const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ APRsPerMaturity, symb
             <TableRow
               key={maturity}
               sx={{
-                '&:last-child td, &:last-child th': { border: 0 }
+                '&:last-child td, &:last-child th': { border: 0 },
               }}
             >
               <TableCell component="th" scope="row">
@@ -128,12 +125,8 @@ const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ APRsPerMaturity, symb
               </TableCell>
               <TableCell align="center">${totalDeposited}</TableCell>
               <TableCell align="center">${totalBorrowed}</TableCell>
-              <TableCell align="center">
-                {depositAPR !== 'N/A' ? `${depositAPR}%` : depositAPR}
-              </TableCell>
-              <TableCell align="center">
-                {borrowAPR !== 'N/A' ? `${borrowAPR}%` : borrowAPR}
-              </TableCell>
+              <TableCell align="center">{depositAPR !== 'N/A' ? `${depositAPR}%` : depositAPR}</TableCell>
+              <TableCell align="center">{borrowAPR !== 'N/A' ? `${borrowAPR}%` : borrowAPR}</TableCell>
               <TableCell align="center">
                 <Button
                   disabled={depositAPR === 'N/A'}

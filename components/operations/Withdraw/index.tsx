@@ -33,7 +33,7 @@ import ContractsContext from 'contexts/ContractsContext';
 
 import formatNumber from 'utils/formatNumber';
 import { getSymbol } from 'utils/utils';
-import handleEth from 'utils/handleEth';
+import handleETH from 'utils/handleETH';
 
 import decimals from 'config/decimals.json';
 import numbers from 'config/numbers.json';
@@ -80,7 +80,7 @@ function Withdraw() {
     return [parsedAmount, formatNumber(parsedAmount, symbol!)];
   }, [assets, symbol]);
 
-  const ETHrouter = web3Provider && symbol == 'WETH' && handleEth(network?.name, web3Provider?.getSigner());
+  const ETHrouter = web3Provider && symbol == 'WETH' && handleETH(network?.name, web3Provider?.getSigner());
 
   useEffect(() => {
     setQty('');

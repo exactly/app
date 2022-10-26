@@ -26,7 +26,7 @@ function Navbar() {
 
   const { web3Provider, connect, disconnect, walletAddress, network } = useWeb3Context();
 
-  const { theme, changeTheme } = useContext(ThemeContext);
+  const { theme } = useContext(ThemeContext);
   const { setOpen, setOperation } = useContext(ModalStatusContext);
 
   const router = useRouter();
@@ -38,13 +38,13 @@ function Navbar() {
       {
         pathname: '/markets',
         href: '/markets',
-        name: translations[lang].markets
+        name: translations[lang].markets,
       },
       {
         pathname: '/dashboard',
         href: '/dashboard',
-        name: translations[lang].dashboard
-      }
+        name: translations[lang].dashboard,
+      },
     ];
   }, []);
 
@@ -60,9 +60,9 @@ function Navbar() {
         method: 'wallet_switchEthereumChain',
         params: [
           {
-            chainId: '0x5'
-          }
-        ]
+            chainId: '0x5',
+          },
+        ],
       });
     } else if (isAllowed && network?.name === 'goerli') {
       setOperation('faucet');
@@ -95,9 +95,7 @@ function Navbar() {
             {routes.map((route) => {
               return (
                 <li
-                  className={
-                    route.pathname === pathname ? `${styles.link} ${styles.active}` : styles.link
-                  }
+                  className={route.pathname === pathname ? `${styles.link} ${styles.active}` : styles.link}
                   key={route.pathname}
                 >
                   <Link href={route.href}>{route.name}</Link>

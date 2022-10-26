@@ -11,7 +11,6 @@ import { LangKeys } from 'types/Lang';
 import keys from './translations.json';
 
 import formatNumber from 'utils/formatNumber';
-import parseTimestamp from 'utils/parseTimestamp';
 
 type MaturityPoolInfoProps = {
   totalDeposited?: number;
@@ -28,7 +27,7 @@ const MaturityPoolInfo: FC<MaturityPoolInfoProps> = ({
   bestDepositAPR,
   bestDepositAPRDate,
   bestBorrowAPR,
-  bestBorrowAPRDate
+  bestBorrowAPRDate,
 }) => {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
@@ -45,13 +44,13 @@ const MaturityPoolInfo: FC<MaturityPoolInfoProps> = ({
     {
       label: translations[lang].bestDepositAPR,
       value: bestDepositAPR ?? undefined,
-      underLabel: bestDepositAPRDate ?? undefined
+      underLabel: bestDepositAPRDate ?? undefined,
     },
     {
       label: translations[lang].bestBorrowAPR,
       value: bestBorrowAPR ?? undefined,
-      underLabel: bestBorrowAPRDate ?? undefined
-    }
+      underLabel: bestBorrowAPRDate ?? undefined,
+    },
   ];
 
   return (

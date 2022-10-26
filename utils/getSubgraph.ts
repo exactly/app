@@ -5,7 +5,7 @@ function getSubgraph(network: string | undefined) {
 
   const dictionary: Dictionary<string> = {
     goerli: 'https://api.thegraph.com/subgraphs/name/exactly-protocol/exactly-goerli',
-    mainnet: 'https://api.thegraph.com/subgraphs/name/exactly-protocol/exactly'
+    mainnet: 'https://api.thegraph.com/subgraphs/name/exactly-protocol/exactly',
   };
 
   return dictionary[currentNetwork!.toLowerCase()];

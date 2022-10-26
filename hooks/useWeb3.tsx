@@ -17,12 +17,12 @@ if (typeof window !== 'undefined') {
           infuraId: `${process.env.NEXT_INFURA_ID}`,
           rpc: {
             1: `https://mainnet.infura.io/v3/a6e9caa47aa94595bfb2b0503edf880c`,
-            5: 'https://goerli.infura.io/v3/a6e9caa47aa94595bfb2b0503edf880c'
+            5: 'https://goerli.infura.io/v3/a6e9caa47aa94595bfb2b0503edf880c',
           },
-          chainId: 4
-        }
-      }
-    }
+          chainId: 4,
+        },
+      },
+    },
   });
 }
 
@@ -44,7 +44,7 @@ export const useWeb3 = () => {
           provider,
           web3Provider,
           walletAddress,
-          network
+          network,
         } as Web3Action);
       } catch (err) {
         console.log('connect error', err);
@@ -62,7 +62,7 @@ export const useWeb3 = () => {
       }
 
       dispatch({
-        type: 'RESET_WEB3_PROVIDER'
+        type: 'RESET_WEB3_PROVIDER',
       } as Web3Action);
     } else {
       console.error('No Web3Modal');
@@ -82,17 +82,17 @@ export const useWeb3 = () => {
       const handleAccountsChanged = (accounts: string[]) => {
         dispatch({
           type: 'SET_ADDRESS',
-          walletAddress: accounts[0]
+          walletAddress: accounts[0],
         } as Web3Action);
       };
 
-      const handleChainChanged = (_hexChainId: string) => {
+      const handleChainChanged = () => {
         if (typeof window !== 'undefined') {
           window.location.reload();
         }
       };
 
-      const handleDisconnect = (error: { code: number; message: string }) => {
+      const handleDisconnect = () => {
         disconnect();
       };
 
@@ -122,6 +122,6 @@ export const useWeb3 = () => {
     walletAddress,
     network,
     connect,
-    disconnect
+    disconnect,
   } as Web3ProviderState;
 };

@@ -6,17 +6,12 @@ import { getContractData } from './contracts';
 
 import { Dictionary } from 'types/Dictionary';
 
-function handleEth(network: string = 'goerli', signer: ethers.providers.JsonRpcSigner) {
+function handleETH(network = 'goerli', signer: ethers.providers.JsonRpcSigner) {
   const dictionary: Dictionary<any> = {
-    goerli: goerliRouter
+    goerli: goerliRouter,
   };
 
-  const router = getContractData(
-    network,
-    dictionary[network].address,
-    dictionary[network].abi,
-    signer
-  );
+  const router = getContractData(network, dictionary[network].address, dictionary[network].abi, signer);
 
   function depositETH(qty: string) {
     if (!qty || !router) return;
@@ -46,7 +41,7 @@ function handleEth(network: string = 'goerli', signer: ethers.providers.JsonRpcS
     if (!qty || !router) return;
 
     return router.repay(ethers.utils.parseEther(qty), {
-      value: ethers.utils.parseEther(maxValue)
+      value: ethers.utils.parseEther(maxValue),
     });
   }
 
@@ -54,7 +49,7 @@ function handleEth(network: string = 'goerli', signer: ethers.providers.JsonRpcS
     if (!shares || !router) return;
 
     return router.refund(shares, {
-      value: maxValue
+      value: maxValue,
     });
   }
 
@@ -62,35 +57,27 @@ function handleEth(network: string = 'goerli', signer: ethers.providers.JsonRpcS
     if (!qty || !router) return;
 
     return router.depositAtMaturity(maturity, ethers.utils.parseEther(minAssets), {
-      value: ethers.utils.parseEther(qty)
+      value: ethers.utils.parseEther(qty),
     });
   }
 
   function withdrawAtMaturityETH(maturity: string, qty: string, minAssets: string) {
     if (!qty || !router) return;
 
-    return router.withdrawAtMaturity(
-      maturity,
-      ethers.utils.parseEther(qty),
-      ethers.utils.parseEther(minAssets)
-    );
+    return router.withdrawAtMaturity(maturity, ethers.utils.parseEther(qty), ethers.utils.parseEther(minAssets));
   }
 
   function borrowAtMaturityETH(maturity: string, qty: string, maxAssets: string) {
     if (!qty || !router) return;
 
-    return router.borrowAtMaturity(
-      maturity,
-      ethers.utils.parseEther(qty),
-      ethers.utils.parseEther(maxAssets)
-    );
+    return router.borrowAtMaturity(maturity, ethers.utils.parseEther(qty), ethers.utils.parseEther(maxAssets));
   }
 
   function repayAtMaturityETH(maturity: string, qty: string, maxValue: string) {
     if (!qty || !router) return;
 
     return router.repayAtMaturity(maturity, ethers.utils.parseEther(qty), {
-      value: ethers.utils.parseEther(maxValue)
+      value: ethers.utils.parseEther(maxValue),
     });
   }
 
@@ -120,8 +107,8 @@ function handleEth(network: string = 'goerli', signer: ethers.providers.JsonRpcS
     borrowAtMaturityETH,
     repayAtMaturityETH,
     checkAllowance,
-    approve
+    approve,
   };
 }
 
-export default handleEth;
+export default handleETH;

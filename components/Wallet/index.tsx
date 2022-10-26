@@ -15,7 +15,7 @@ import { useWeb3 } from 'hooks/useWeb3';
 
 type Props = {
   walletAddress: string;
-  cogwheel?: Boolean;
+  cogwheel?: boolean;
   network?: Network | null | undefined;
   disconnect: () => Promise<void>;
 };
@@ -27,7 +27,7 @@ function Wallet({ walletAddress, cogwheel = true, network, disconnect }: Props) 
 
   const translations: { [key: string]: LangKeys } = keys;
   const formattedWallet = walletAddress && formatWallet(walletAddress);
-  const [walletContainer, setWalletContainer] = useState<Boolean>(false);
+  const [walletContainer, setWalletContainer] = useState<boolean>(false);
   const [ens, setEns] = useState<string | null>(null);
 
   function handleWallet() {

@@ -10,9 +10,7 @@ import OperationsModals from 'components/OperationsModal';
 
 import dictionary from 'dictionary/en.json';
 
-interface Props {}
-
-const Pools: NextPage<Props> = () => {
+const Pools: NextPage = () => {
   return (
     <>
       <OperationsModals />

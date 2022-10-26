@@ -11,7 +11,6 @@ import { LangKeys } from 'types/Lang';
 
 import keys from './translations.json';
 
-import parseSymbol from 'utils/parseSymbol';
 import formatNumber from 'utils/formatNumber';
 import queryRates from 'utils/queryRates';
 import getSubgraph from 'utils/getSubgraph';
@@ -44,15 +43,9 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol, eMarketAddress, n
         usdPrice: exchangeRate,
       } = accountData[symbol];
 
-      const totalDepositUSD = formatUnits(
-        totalDeposited.mul(exchangeRate).div(WeiPerEther),
-        decimals,
-      );
+      const totalDepositUSD = formatUnits(totalDeposited.mul(exchangeRate).div(WeiPerEther), decimals);
 
-      const totalBorrowUSD = formatUnits(
-        totalBorrowed.mul(exchangeRate).div(WeiPerEther),
-        decimals,
-      );
+      const totalBorrowUSD = formatUnits(totalBorrowed.mul(exchangeRate).div(WeiPerEther), decimals);
 
       setDeposited(parseFloat(totalDepositUSD));
       setBorrowed(parseFloat(totalBorrowUSD));

@@ -34,13 +34,7 @@ const AssetHeaderInfo: FC<Props> = ({ symbol, networkName, assetAddress }) => {
           component="div"
         >
           {parseSymbol(symbol)}
-          <IconButton
-            sx={{ ml: 1 }}
-            size="small"
-            href={etherscanUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+          <IconButton sx={{ ml: 1 }} size="small" href={etherscanUrl} target="_blank" rel="noopener noreferrer">
             <OpenInNewIcon sx={{ height: '1rem', width: '1rem' }} />
           </IconButton>
         </Typography>

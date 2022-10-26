@@ -53,10 +53,7 @@ function MyApp({ Component, pageProps }: AppProps) {
                       <FixedLenderProvider>
                         <MarketProvider>
                           <ModalStatusProvider>
-                            <SkeletonTheme
-                              baseColor="var(--skeleton-base)"
-                              highlightColor="var(--skeleton-highlight)"
-                            >
+                            <SkeletonTheme baseColor="var(--skeleton-base)" highlightColor="var(--skeleton-highlight)">
                               <Component {...props} />
                             </SkeletonTheme>
                           </ModalStatusProvider>

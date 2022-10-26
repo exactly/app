@@ -22,9 +22,9 @@ type ContextValues = {
 
 const defaultValues: ContextValues = {
   open: false,
-  setOpen: () => {},
+  setOpen: () => undefined,
   operation: null,
-  setOperation: () => {}
+  setOperation: () => undefined,
 };
 
 const ModalStatusContext = createContext(defaultValues);

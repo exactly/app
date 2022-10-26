@@ -6,7 +6,7 @@ function getDaysRemaining(maturity: number) {
   const rtf = new Intl.RelativeTimeFormat('en', {
     localeMatcher: 'best fit',
     numeric: 'always',
-    style: 'long'
+    style: 'long',
   });
 
   return rtf.format(daysRemaining, 'day');

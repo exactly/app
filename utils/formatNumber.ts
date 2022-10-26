@@ -8,14 +8,14 @@ function formatNumber(number: string | number, symbol?: string, standard?: boole
     DAI: 2,
     USDC: 2,
     WETH: 6,
-    WBTC: 6
+    WBTC: 6,
   };
 
   return new Intl.NumberFormat('en-GB', {
     notation: standard ? 'standard' : 'compact',
     compactDisplay: 'short',
     minimumFractionDigits: 2,
-    maximumFractionDigits: symbol ? dictionary[symbol.toUpperCase()] : 2
+    maximumFractionDigits: symbol ? dictionary[symbol.toUpperCase()] : 2,
   }).format(parsedNumber);
 }
 

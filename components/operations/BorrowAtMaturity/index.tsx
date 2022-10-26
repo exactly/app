@@ -26,7 +26,7 @@ import { HealthFactor } from 'types/HealthFactor';
 import { Dictionary } from 'types/Dictionary';
 
 import { getUnderlyingData, getSymbol } from 'utils/utils';
-import handleEth from 'utils/handleEth';
+import handleETH from 'utils/handleETH';
 import getOneDollar from 'utils/getOneDollar';
 import getBeforeBorrowLimit from 'utils/getBeforeBorrowLimit';
 
@@ -82,7 +82,7 @@ function BorrowAtMaturity() {
     return market?.value ? getSymbol(market.value, network?.name) : 'DAI';
   }, [market?.value, network?.name]);
 
-  const ETHrouter = web3Provider && symbol == 'WETH' && handleEth(network?.name, web3Provider?.getSigner());
+  const ETHrouter = web3Provider && symbol == 'WETH' && handleETH(network?.name, web3Provider?.getSigner());
 
   const poolLiquidity = useMemo(() => {
     if (!accountData || !date) return;

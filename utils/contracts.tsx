@@ -4,7 +4,7 @@ export function getContractData(
   network: string | undefined,
   address: string,
   abi: ethers.ContractInterface,
-  providerData?: ethers.Signer
+  providerData?: ethers.Signer,
 ) {
   if (!address || !abi) return;
 
