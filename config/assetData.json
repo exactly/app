@@ -6,9 +6,12 @@
     "description": ""
   },
   "weth": {
-    "description": ""
+    "description": "Wrapped ETH"
   },
   "wbtc": {
-    "description": ""
+    "description": "Wrapped BTC"
+  },
+  "wsteth": {
+    "description": "Lido Wrapped Staked ETH"
   }
 }
