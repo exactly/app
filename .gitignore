@@ -16,35 +16,23 @@
 /build
 
 # misc
+.vscode/
 .DS_Store
+.*-version*
+.env.*
+*.env
+*.tsbuildinfo
 *.pem
+*.code-workspace
 
 # debug
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-
-# local env files
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+*.log
 
 # vercel
 .vercel
-
-# Sentry
-.sentryclirc
-
-# Sentry
-.sentryclirc
-
-# Sentry
-.sentryclirc
-
-# Sentry
-.sentryclirc
 
 # Sentry
 .sentryclirc
