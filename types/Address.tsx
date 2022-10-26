@@ -1,4 +1,6 @@
+import type { ReactNode } from 'react';
+
 export type Address = {
-  label?: JSX.Element;
+  label?: ReactNode;
   value: string;
 };

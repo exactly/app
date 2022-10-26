@@ -57,9 +57,7 @@ function Repay() {
   const [isMax, setIsMax] = useState<boolean>(false);
   const [error, setError] = useState<Error | undefined>(undefined);
 
-  const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
-    undefined
-  );
+  const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(undefined);
   const [underlyingContract, setUnderlyingContract] = useState<Contract | undefined>(undefined);
 
   const symbol = useMemo(() => {
@@ -107,10 +105,7 @@ function Repay() {
 
     if (!underlyingContract || !walletAddress || !market) return;
 
-    const allowance = await underlyingContract?.allowance(
-      walletAddress,
-      fixedLenderWithSigner?.address
-    );
+    const allowance = await underlyingContract?.allowance(walletAddress, fixedLenderWithSigner?.address);
 
     const formattedAllowance = allowance && parseFloat(ethers.utils.formatEther(allowance));
 
@@ -131,15 +126,9 @@ function Repay() {
 
       const gasLimit = await getApprovalGasLimit();
 
-      const approval = await underlyingContract?.approve(
-        fixedLenderWithSigner?.address,
-        ethers.constants.MaxUint256,
-        {
-          gasLimit: gasLimit
-            ? Math.ceil(Number(formatFixed(gasLimit)) * numbers.gasLimitMultiplier)
-            : undefined
-        }
-      );
+      const approval = await underlyingContract?.approve(fixedLenderWithSigner?.address, ethers.constants.MaxUint256, {
+        gasLimit: gasLimit ? Math.ceil(Number(formatFixed(gasLimit)) * numbers.gasLimitMultiplier) : undefined,
+      });
 
       await approval.wait();
 
@@ -150,7 +139,7 @@ function Repay() {
       setLoading(false);
       setNeedsApproval(true);
       setError({
-        status: true
+        status: true,
       });
     }
   }
@@ -162,26 +151,16 @@ function Repay() {
       return contractSymbol == symbol;
     });
 
-    const fixedLender = getInstance(
-      filteredFixedLender?.address!,
-      filteredFixedLender?.abi!,
-      `market${symbol}`
-    );
+    if (!filteredFixedLender) throw new Error('Market contract not found');
+    const fixedLender = getInstance(filteredFixedLender.address!, filteredFixedLender.abi!, `market${symbol}`);
 
     setFixedLenderWithSigner(fixedLender);
   }
 
   function getUnderlyingContract() {
-    const underlyingData: UnderlyingData | undefined = getUnderlyingData(
-      network?.name,
-      symbol.toLowerCase()
-    );
+    const underlyingData: UnderlyingData | undefined = getUnderlyingData(network?.name, symbol.toLowerCase());
 
-    const underlyingContract = getInstance(
-      underlyingData!.address,
-      underlyingData!.abi,
-      `underlying${symbol}`
-    );
+    const underlyingContract = getInstance(underlyingData!.address, underlyingData!.abi, `underlying${symbol}`);
 
     setUnderlyingContract(underlyingContract);
   }
@@ -217,7 +196,7 @@ function Repay() {
         if (isMax) {
           repay = await ETHrouter?.refundETH(
             accountData[symbol].floatingBorrowShares,
-            accountData[symbol].floatingBorrowShares
+            accountData[symbol].floatingBorrowShares,
           );
         } else {
           repay = await ETHrouter?.repayETH(qty!, qty!);
@@ -226,25 +205,13 @@ function Repay() {
         const gasLimit = await getGasLimit(qty);
 
         if (isMax) {
-          repay = await fixedLenderWithSigner?.refund(
-            accountData[symbol].floatingBorrowShares,
-            walletAddress,
-            {
-              gasLimit: gasLimit
-                ? Math.ceil(Number(formatFixed(gasLimit)) * numbers.gasLimitMultiplier)
-                : undefined
-            }
-          );
+          repay = await fixedLenderWithSigner?.refund(accountData[symbol].floatingBorrowShares, walletAddress, {
+            gasLimit: gasLimit ? Math.ceil(Number(formatFixed(gasLimit)) * numbers.gasLimitMultiplier) : undefined,
+          });
         } else {
-          repay = await fixedLenderWithSigner?.repay(
-            ethers.utils.parseUnits(qty!, decimals),
-            walletAddress,
-            {
-              gasLimit: gasLimit
-                ? Math.ceil(Number(formatFixed(gasLimit)) * numbers.gasLimitMultiplier)
-                : undefined
-            }
-          );
+          repay = await fixedLenderWithSigner?.repay(ethers.utils.parseUnits(qty!, decimals), walletAddress, {
+            gasLimit: gasLimit ? Math.ceil(Number(formatFixed(gasLimit)) * numbers.gasLimitMultiplier) : undefined,
+          });
         }
       }
 
@@ -271,7 +238,7 @@ function Repay() {
       let txErrorHash = undefined;
 
       if (txError) {
-        const regex = new RegExp(/\"hash":"(.*?)\"/g); //regex to get all between ("hash":") and (")
+        const regex = new RegExp(/"hash":"(.*?)"/g); //regex to get all between ("hash":") and (")
         const preTxHash = e?.message?.match(regex); //get the hash from plain text by the regex
         txErrorHash = preTxHash[0].substring(8, preTxHash[0].length - 1); //parse the string to get the txHash only
       }
@@ -279,14 +246,14 @@ function Repay() {
       if (isDenied) {
         setError({
           status: true,
-          message: isDenied && translations[lang].deniedTransaction
+          message: isDenied && translations[lang].deniedTransaction,
         });
       } else if (txError) {
         setTx({ status: 'error', hash: txErrorHash });
       } else {
         setError({
           status: true,
-          message: translations[lang].generalError
+          message: translations[lang].generalError,
         });
       }
     }
@@ -308,7 +275,7 @@ function Repay() {
     } catch (e) {
       setError({
         status: true,
-        component: 'gas'
+        component: 'gas',
       });
     }
   }
@@ -320,17 +287,14 @@ function Repay() {
 
     const gasLimit = await fixedLenderWithSigner?.estimateGas.repay(
       ethers.utils.parseUnits(qty, decimals),
-      walletAddress
+      walletAddress,
     );
 
     return gasLimit;
   }
 
   async function getApprovalGasLimit() {
-    const gasLimit = await underlyingContract?.estimateGas.approve(
-      market?.value,
-      ethers.constants.MaxUint256
-    );
+    const gasLimit = await underlyingContract?.estimateGas.approve(market?.value, ethers.constants.MaxUint256);
 
     return gasLimit;
   }

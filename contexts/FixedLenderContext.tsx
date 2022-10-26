@@ -1,4 +1,5 @@
-import { createContext, FC } from 'react';
+import type { FC, ReactNode } from 'react';
+import { createContext } from 'react';
 import { ethers } from 'ethers';
 
 import { useWeb3Context } from './Web3Context';
@@ -15,7 +16,7 @@ const defaultValues: ContextValues[] = [];
 
 const FixedLenderContext = createContext(defaultValues);
 
-export const FixedLenderProvider: FC = ({ children }) => {
+export const FixedLenderProvider: FC<{ children?: ReactNode }> = ({ children }) => {
   const { network } = useWeb3Context();
 
   const { FixedLenders } = getABI(network?.name);

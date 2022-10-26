@@ -66,9 +66,7 @@ function DepositAtMaturity() {
 
   const debounceQty = useDebounce(qty);
 
-  const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
-    undefined,
-  );
+  const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(undefined);
   const [underlyingContract, setUnderlyingContract] = useState<Contract | undefined>(undefined);
 
   const symbol = useMemo(() => {
@@ -136,15 +134,9 @@ function DepositAtMaturity() {
 
     try {
       const gasLimit = await getApprovalGasLimit();
-      const approval = await underlyingContract?.approve(
-        market?.value,
-        ethers.constants.MaxUint256,
-        {
-          gasLimit: gasLimit
-            ? Math.ceil(Number(formatFixed(gasLimit)) * numbers.gasLimitMultiplier)
-            : undefined,
-        },
-      );
+      const approval = await underlyingContract?.approve(market?.value, ethers.constants.MaxUint256, {
+        gasLimit: gasLimit ? Math.ceil(Number(formatFixed(gasLimit)) * numbers.gasLimitMultiplier) : undefined,
+      });
 
       //we set the transaction as pending
       setPending((pending) => !pending);
@@ -237,9 +229,7 @@ function DepositAtMaturity() {
           ethers.utils.parseUnits(`${minAmount.toFixed(decimals)}`, decimals),
           walletAddress,
           {
-            gasLimit: gasLimit
-              ? Math.ceil(Number(formatFixed(gasLimit)) * numbers.gasLimitMultiplier)
-              : undefined,
+            gasLimit: gasLimit ? Math.ceil(Number(formatFixed(gasLimit)) * numbers.gasLimitMultiplier) : undefined,
           },
         );
       }
@@ -265,7 +255,7 @@ function DepositAtMaturity() {
       let txErrorHash = undefined;
 
       if (txError) {
-        const regex = new RegExp(/\"hash":"(.*?)\"/g); //regex to get all between ("hash":") and (")
+        const regex = new RegExp(/"hash":"(.*?)"/g); //regex to get all between ("hash":") and (")
         const preTxHash = e?.message?.match(regex); //get the hash from plain text by the regex
         txErrorHash = preTxHash[0].substring(8, preTxHash[0].length - 1); //parse the string to get the txHash only
       }
@@ -323,10 +313,7 @@ function DepositAtMaturity() {
   }
 
   async function getApprovalGasLimit() {
-    const gasLimit = await underlyingContract?.estimateGas.approve(
-      market?.value,
-      ethers.constants.MaxUint256,
-    );
+    const gasLimit = await underlyingContract?.estimateGas.approve(market?.value, ethers.constants.MaxUint256);
 
     return gasLimit;
   }
@@ -375,11 +362,7 @@ function DepositAtMaturity() {
 
       const qtyValue = qty == '' ? getOneDollar(oracle, decimals) : parseFixed(qty, decimals);
 
-      const previewerContract = getInstance(
-        previewerData.address!,
-        previewerData.abi!,
-        'previewer',
-      );
+      const previewerContract = getInstance(previewerData.address!, previewerData.abi!, 'previewer');
 
       const feeAtMaturity = await previewerContract?.previewDepositAtMaturity(
         market?.value,
@@ -418,26 +401,16 @@ function DepositAtMaturity() {
       return contract.address == market.value;
     });
 
-    const fixedLender = getInstance(
-      filteredFixedLender?.address!,
-      filteredFixedLender?.abi!,
-      `market${symbol}`,
-    );
+    if (!filteredFixedLender) throw new Error('Market contract not found');
+    const fixedLender = getInstance(filteredFixedLender.address!, filteredFixedLender.abi!, `market${symbol}`);
 
     setFixedLenderWithSigner(fixedLender);
   }
 
   function getUnderlyingContract() {
-    const underlyingData: UnderlyingData | undefined = getUnderlyingData(
-      network?.name,
-      symbol.toLowerCase(),
-    );
+    const underlyingData: UnderlyingData | undefined = getUnderlyingData(network?.name, symbol.toLowerCase());
 
-    const underlyingContract = getInstance(
-      underlyingData!.address,
-      underlyingData!.abi,
-      `underlying${symbol}`,
-    );
+    const underlyingContract = getInstance(underlyingData!.address, underlyingData!.abi, `underlying${symbol}`);
 
     setUnderlyingContract(underlyingContract);
   }
@@ -455,11 +428,7 @@ function DepositAtMaturity() {
           />
           <section className={styles.maturityRowModal}>
             <ModalMaturityEditable text={translations[lang].maturityPool.toUpperCase()} />
-            <ModalCell
-              text={translations[lang].apr.toUpperCase()}
-              value={toPercentage(fixedRate)}
-              column
-            />
+            <ModalCell text={translations[lang].apr.toUpperCase()} value={toPercentage(fixedRate)} column />
           </section>
           <ModalInput
             onMax={onMax}

@@ -1,4 +1,5 @@
-import React, { createContext, FC, useContext, useEffect, useState } from 'react';
+import type { FC, ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import dayjs from 'dayjs';
 
 import { Address } from 'types/Address';
@@ -26,7 +27,7 @@ const defaultValues: ContextValues = {
 
 const MarketContext = createContext(defaultValues);
 
-const MarketProvider: FC = ({ children }) => {
+const MarketProvider: FC<{ children?: ReactNode }> = ({ children }) => {
   const [market, setMarket] = useState<Address>();
   const [date, setDate] = useState<Date>();
   const [dates, setDates] = useState<Date[]>([]);

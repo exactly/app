@@ -83,38 +83,35 @@ function Item({ market, type }: Props) {
 
   async function getRates() {
     if (!market || !accountData) return;
-    try {
-      const subgraphUrl = getSubgraph(network?.name!);
+    if (!network?.name) throw new Error('network not found');
+    const subgraphUrl = getSubgraph(network.name);
 
-      let interestRate;
+    let interestRate;
 
-      if (!eMarketAddress) return;
+    if (!eMarketAddress) return;
 
-      if (type === 'deposit') {
-        const maxFuturePools = accountData[market?.symbol.toUpperCase()].maxFuturePools;
+    if (type === 'deposit') {
+      const maxFuturePools = accountData[market?.symbol.toUpperCase()].maxFuturePools;
 
-        const data = await queryRate(subgraphUrl, eMarketAddress, 'deposit', { maxFuturePools });
+      const data = await queryRate(subgraphUrl, eMarketAddress, 'deposit', { maxFuturePools });
 
-        interestRate = (data[0].apr * 100).toFixed(2);
-      }
+      interestRate = (data[0].apr * 100).toFixed(2);
+    }
 
-      if (type === 'borrow') {
-        const data = await queryRate(subgraphUrl, eMarketAddress, 'borrow');
+    if (type === 'borrow') {
+      const data = await queryRate(subgraphUrl, eMarketAddress, 'borrow');
 
-        interestRate = (data[0].apr * 100).toFixed(2);
-      }
+      interestRate = (data[0].apr * 100).toFixed(2);
+    }
 
-      if (interestRate && rate && `${interestRate}%` === rate) {
-        return;
-      }
+    if (interestRate && rate && `${interestRate}%` === rate) {
+      return;
+    }
 
-      if (interestRate != 'N/A') {
-        return interestRate && setRate(`${interestRate}%`);
-      } else {
-        return setRate('N/A');
-      }
-    } catch (e) {
-      console.log(e);
+    if (interestRate != 'N/A') {
+      return interestRate && setRate(`${interestRate}%`);
+    } else {
+      return setRate('N/A');
     }
   }
 
@@ -139,9 +136,7 @@ function Item({ market, type }: Props) {
       const supplied = accountData[market?.symbol.toUpperCase()].totalFloatingDepositAssets;
       const decimals = accountData[market?.symbol.toUpperCase()].decimals;
 
-      const exchangeRate = parseFloat(
-        utils.formatEther(accountData[market?.symbol.toUpperCase()].usdPrice),
-      );
+      const exchangeRate = parseFloat(utils.formatEther(accountData[market?.symbol.toUpperCase()].usdPrice));
 
       const newPoolData = {
         borrowed: parseFloat(utils.formatUnits(borrowed, decimals)),
@@ -162,11 +157,7 @@ function Item({ market, type }: Props) {
   }
 
   return (
-    <div
-      className={`${style.container} ${
-        type === 'borrow' ? style.secondaryContainer : style.primaryContainer
-      }`}
-    >
+    <div className={`${style.container} ${type === 'borrow' ? style.secondaryContainer : style.primaryContainer}`}>
       <Link href={`/assets/${market?.symbol === 'WETH' ? 'eth' : market?.symbol.toLowerCase()}`}>
         <div className={style.symbol}>
           {(market && (
@@ -177,16 +168,14 @@ function Item({ market, type }: Props) {
               height={40}
             />
           )) || <Skeleton circle height={40} width={40} />}
-          <span className={style.primary}>
-            {(market && parseSymbol(market?.symbol)) || <Skeleton />}
-          </span>
+          <span className={style.primary}>{(market && parseSymbol(market?.symbol)) || <Skeleton />}</span>
         </div>
       </Link>
       <p className={style.value}>
         {(market &&
           poolData &&
           `$${formatNumber(
-            (type === 'borrow' ? poolData?.borrowed! : poolData?.supplied!) * poolData?.rate!,
+            (type === 'borrow' ? poolData.borrowed! : poolData.supplied!) * poolData.rate!,
             'USD',
           )}`) || <Skeleton />}
       </p>

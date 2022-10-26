@@ -100,7 +100,7 @@ function Item({ market, type, fixedMarketData }: Props) {
 
       if (type === 'borrow') {
         const pool = fixedMarket?.borrows.find((pool) => pool.maturity.toString() === date?.value);
-        if (!fixedMarket || !pool) return;
+        if (!fixedMarket || !pool || !date) return;
 
         const initialAssets = fixedMarket.assets;
         const finalAssets = pool.assets;
@@ -125,7 +125,7 @@ function Item({ market, type, fixedMarketData }: Props) {
         }
       } else if (type === 'deposit') {
         const pool = fixedMarket?.deposits.find((pool) => pool.maturity.toString() === date?.value);
-        if (!fixedMarket || !pool) return;
+        if (!fixedMarket || !pool || !date) return;
 
         const initialAssets = fixedMarket.assets;
         const finalAssets = pool.assets;
