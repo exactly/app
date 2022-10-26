@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
-    "target": "es2020",
+    "target": "esnext",
     "lib": ["dom", "dom.iterable", "esnext"],
-    "allowJs": true,
+    "allowJs": false,
     "skipLibCheck": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true,
@@ -29,12 +29,6 @@
     },
     "incremental": true
   },
-  "include": [
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    "contexts/MarketContext.js",
-    "utils/queryRates.ts"
-  ],
+  "include": ["**/*.ts", "**/*.tsx"],
   "exclude": ["node_modules"]
 }

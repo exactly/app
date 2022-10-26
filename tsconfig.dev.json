@@ -1,0 +1,3 @@
+{
+  "include": ["next.config.mjs", "**/.eslintrc.cjs", "**/*.config.ts"]
+}
