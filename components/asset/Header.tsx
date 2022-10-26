@@ -16,7 +16,7 @@ type Props = {
 };
 
 const AssetHeaderInfo: FC<Props> = ({ symbol, networkName, assetAddress }) => {
-  const { description: assetDescription } = getAssetData(symbol as AssetSymbol);
+  const assetDescription = getAssetData(symbol as AssetSymbol)?.description;
   const etherscanUrl = getTokenEtherscanUrl(networkName as Network, assetAddress);
 
   return (
@@ -29,7 +29,7 @@ const AssetHeaderInfo: FC<Props> = ({ symbol, networkName, assetAddress }) => {
           variant="h1"
           sx={{
             display: 'flex',
-            alignItems: 'center'
+            alignItems: 'center',
           }}
           component="div"
         >
@@ -54,7 +54,7 @@ const AssetHeaderInfo: FC<Props> = ({ symbol, networkName, assetAddress }) => {
           display: 'flex',
           flexDirection: 'row-reverse',
           flex: 'auto',
-          mr: 2
+          mr: 2,
         }}
       >
         <OrderAction />
