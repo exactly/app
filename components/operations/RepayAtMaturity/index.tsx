@@ -35,7 +35,7 @@ import { useWeb3Context } from 'contexts/Web3Context';
 import FixedLenderContext from 'contexts/FixedLenderContext';
 import AccountDataContext from 'contexts/AccountDataContext';
 import PreviewerContext from 'contexts/PreviewerContext';
-import { MarketContext } from 'contexts/AddressContext';
+import { MarketContext } from 'contexts/MarketContext';
 import ContractsContext from 'contexts/ContractsContext';
 
 import numbers from 'config/numbers.json';

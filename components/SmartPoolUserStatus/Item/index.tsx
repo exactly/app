@@ -15,7 +15,7 @@ import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 import AccountDataContext from 'contexts/AccountDataContext';
 import ModalStatusContext, { Operation } from 'contexts/ModalStatusContext';
-import { MarketContext } from 'contexts/AddressContext';
+import { MarketContext } from 'contexts/MarketContext';
 
 import { LangKeys } from 'types/Lang';
 import { Decimals } from 'types/Decimals';

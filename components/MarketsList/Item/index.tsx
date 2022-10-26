@@ -15,7 +15,7 @@ import { Pool } from 'types/Pool';
 import { LangKeys } from 'types/Lang';
 import { FixedMarketData } from 'types/FixedMarketData';
 
-import { MarketContext } from 'contexts/AddressContext';
+import { MarketContext } from 'contexts/MarketContext';
 import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 import AccountDataContext from 'contexts/AccountDataContext';

@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 
 import {
   Line,
@@ -9,7 +9,7 @@ import {
   ResponsiveContainer,
   Tooltip,
   Legend,
-  CartesianGrid
+  CartesianGrid,
 } from 'recharts';
 
 import LangContext from 'contexts/LangContext';
@@ -20,48 +20,53 @@ import keys from './translations.json';
 import getSubgraph from 'utils/getSubgraph';
 import queryRates from 'utils/queryRates';
 
-import { Network } from 'types/Network';
 import { LangKeys } from 'types/Lang';
 
 import Button from 'components/common/Button';
 
 interface Props {
   market: string | undefined;
-  network: Network | undefined;
+  networkName: string | undefined;
 }
 
-function FloatingAPRChart({ market, network }: Props) {
+function FloatingAPRChart({ market, networkName }: Props) {
   const [data, setData] = useState<any>([]);
   const defaultOptions = {
     maxFuturePools: 3,
     interval: 3_600 * 24,
     count: 30,
-    roundTicks: true
+    roundTicks: true,
   };
 
-  const [queryoptions, setQueryOptions] = useState<Options>(defaultOptions);
+  const [queryOptions, setQueryOptions] = useState<Options>(defaultOptions);
   const [queryWindow, setQueryWindow] = useState<string>('1 Month');
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
-  useEffect(() => {
-    getHistoricalAPR();
-  }, [market, network, queryoptions]);
+  const getHistoricalAPR = useCallback(async () => {
+    if (!market || !networkName) return;
 
-  async function getHistoricalAPR() {
-    if (!market || !network) return;
+    const subgraphUrl = getSubgraph(networkName);
 
-    const subgraphUrl = getSubgraph(network.name);
-
-    const data = await queryRates(subgraphUrl, market, 'deposit', queryoptions);
+    const data = (await queryRates(subgraphUrl, market, 'deposit', queryOptions)).map(
+      ({ apr, apy, ...rest }) => ({
+        ...rest,
+        apr: apr * 100,
+        apy: apy * 100,
+      }),
+    );
 
     setData(data);
-  }
+  }, [market, networkName, queryOptions]);
 
   function formatXAxis(tick: any) {
     return tick.toLocaleString();
   }
+
+  useEffect(() => {
+    getHistoricalAPR();
+  }, [getHistoricalAPR]);
 
   return (
     <section className={styles.graphContainer}>
@@ -87,7 +92,7 @@ function FloatingAPRChart({ market, network }: Props) {
                 maxFuturePools: 3,
                 interval: 3_600 * 24,
                 count: 30,
-                roundTicks: true
+                roundTicks: true,
               });
               setQueryWindow('for 1 Month');
             }}
@@ -105,7 +110,7 @@ function FloatingAPRChart({ market, network }: Props) {
               top: 5,
               right: 30,
               left: 20,
-              bottom: 5
+              bottom: 5,
             }}
           >
             <CartesianGrid horizontal vertical={false} />
@@ -126,7 +131,7 @@ function FloatingAPRChart({ market, network }: Props) {
                 angle: +90,
                 position: 'insideLeft',
                 dy: -35,
-                offset: 50
+                offset: 50,
               }}
             />
             <Tooltip
@@ -140,17 +145,11 @@ function FloatingAPRChart({ market, network }: Props) {
               iconSize={30}
               wrapperStyle={{
                 top: '270px',
-                right: '-100px'
+                right: '-100px',
               }}
             />
-            <Line type="monotone" dataKey="rate" stroke="#008cf4" activeDot={{ r: 6 }} />
-            <Area
-              yAxisId="right"
-              type="monotone"
-              dataKey="utilization"
-              stroke="#34c53a"
-              fill="#34c53a"
-            />
+            <Line type="monotone" dataKey="apr" stroke="#008cf4" activeDot={{ r: 6 }} />
+            <Line type="monotone" dataKey="utilization" stroke="#34c53a" activeDot={{ r: 6 }} />
           </ComposedChart>
         </>
       </ResponsiveContainer>

@@ -27,7 +27,7 @@ import styles from './style.module.scss';
 import useDebounce from 'hooks/useDebounce';
 
 import AccountDataContext from 'contexts/AccountDataContext';
-import { MarketContext } from 'contexts/AddressContext';
+import { MarketContext } from 'contexts/MarketContext';
 import ContractsContext from 'contexts/ContractsContext';
 import FixedLenderContext from 'contexts/FixedLenderContext';
 import LangContext from 'contexts/LangContext';

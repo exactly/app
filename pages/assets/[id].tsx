@@ -1,10 +1,11 @@
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import type { GetStaticProps, NextPage } from 'next';
+import Grid from '@mui/material/Grid';
 
 import Navbar from 'components/Navbar';
 import PoolsChart from 'components/PoolsChart';
-import AssetTable from 'components/AssetTable';
-import SmartPoolInfo from 'components/SmartPoolInfo';
+import AssetTable from 'components/asset/MaturityPool/AssetTable';
+import FloatingPoolInfo from 'components/asset/FloatingPool/FloatingPoolInfo';
 import MobileNavbar from 'components/MobileNavbar';
 import Paginator from 'components/Paginator';
 import Footer from 'components/Footer';
@@ -15,7 +16,7 @@ import { Maturity } from 'types/Maturity';
 
 import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
-import { MarketContext } from 'contexts/AddressContext';
+import { MarketContext } from 'contexts/MarketContext';
 import FixedLenderContext from 'contexts/FixedLenderContext';
 import AccountDataContext from 'contexts/AccountDataContext';
 
@@ -24,8 +25,12 @@ import style from './style.module.scss';
 import keys from './translations.json';
 
 import getLastAPR from 'utils/getLastAPR';
-import { getSymbol } from 'utils/utils';
-import FloatingAPRChart from 'components/FloatingAPRChart';
+import FloatingAPRChart from 'components/asset/FloatingPool/FloatingAPRChart';
+import { getSymbol, getUnderlyingData } from 'utils/utils';
+import AssetHeaderInfo from 'components/asset/Header';
+import { AssetSymbol } from 'utils/assets';
+import AssetMaturityPools from 'components/asset/MaturityPool';
+import MaturityPoolInfo from 'components/asset/MaturityPool/MaturityPoolInfo';
 
 interface Props {
   symbol: string;
@@ -33,11 +38,14 @@ interface Props {
 
 const Asset: NextPage<Props> = ({ symbol = 'DAI' }) => {
   const { network } = useWeb3Context();
-  const { dates } = useContext(MarketContext);
+  const { dates, market } = useContext(MarketContext);
   const fixedLenderData = useContext(FixedLenderContext);
   const { accountData } = useContext(AccountDataContext);
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
+
+  const networkName = (network?.name || process.env.NEXT_PUBLIC_NETWORK) as string;
+  const assetAddress = getUnderlyingData(networkName, symbol.toLowerCase())?.address as string;
 
   const itemsPerPage = 3;
   const [page, setPage] = useState<number>(1);
@@ -48,9 +56,9 @@ const Asset: NextPage<Props> = ({ symbol = 'DAI' }) => {
     const filteredFixedLender = fixedLenderData.find((contract: any) => {
       const contractSymbol = getSymbol(
         contract.address!,
-        network?.name ?? process.env.NEXT_PUBLIC_NETWORK
+        network?.name ?? process.env.NEXT_PUBLIC_NETWORK,
       );
-      return contractSymbol == symbol;
+      return contractSymbol === symbol;
     });
 
     return filteredFixedLender?.address;
@@ -83,16 +91,24 @@ const Asset: NextPage<Props> = ({ symbol = 'DAI' }) => {
       <Navbar />
 
       <section className={style.container}>
-        <div className={style.smartPoolContainer}>
-          <SmartPoolInfo symbol={symbol} />
-          {/* <FloatingAPYChart market={eMarketAddress} network={network} /> */}
-        </div>
-        <section className={style.assetData}>
-          <div className={style.assetContainer}>
-            <p className={style.title}>{translations[lang].maturityPools}</p>
-          </div>
-          <div className={style.assetMetricsContainer}></div>
-        </section>
+        <AssetHeaderInfo
+          symbol={symbol.toLowerCase() as AssetSymbol}
+          assetAddress={assetAddress}
+          networkName={networkName}
+        />
+        <Grid container spacing={4} mt={5} ml={0}>
+          <Grid item container>
+            <FloatingPoolInfo
+              symbol={symbol}
+              eMarketAddress={eMarketAddress}
+              networkName={networkName}
+            />
+            <FloatingAPRChart networkName={networkName} market={eMarketAddress} />
+          </Grid>
+          <Grid item container mt={5}>
+            <AssetMaturityPools symbol={symbol} />
+          </Grid>
+        </Grid>
         <section className={style.graphContainer}>
           <div className={style.leftColumn}>
             <AssetTable
@@ -140,14 +156,14 @@ export const getStaticProps: GetStaticProps = async (context) => {
 
   return {
     props: {
-      symbol: symbol
-    }
+      symbol: symbol,
+    },
   };
 };
 
 export async function getStaticPaths() {
   return {
     paths: ['/assets/dai', '/assets/eth', '/assets/usdc', '/assets/wbtc'],
-    fallback: true
+    fallback: true,
   };
 }
