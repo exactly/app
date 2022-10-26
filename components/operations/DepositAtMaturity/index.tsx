@@ -20,7 +20,7 @@ import { Gas } from 'types/Gas';
 import { Transaction } from 'types/Transaction';
 import { Error } from 'types/Error';
 
-import { getSymbol, getUnderlyingData } from 'utils/utils';
+import { getSymbol, getUnderlyingData, toPercentage } from 'utils/utils';
 import handleEth from 'utils/handleEth';
 import getOneDollar from 'utils/getOneDollar';
 
@@ -59,9 +59,9 @@ function DepositAtMaturity() {
   const [step, setStep] = useState<number | undefined>(undefined);
   const [pending, setPending] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
-  const [slippage, setSlippage] = useState<string>('0.00');
+  const [slippage, setSlippage] = useState<number>(0);
   const [editSlippage, setEditSlippage] = useState<boolean>(false);
-  const [fixedRate, setFixedRate] = useState<string | undefined>(undefined);
+  const [fixedRate, setFixedRate] = useState<number | undefined>(undefined);
   const [error, setError] = useState<Error | undefined>(undefined);
 
   const debounceQty = useDebounce(qty);
@@ -220,11 +220,7 @@ function DepositAtMaturity() {
       if (!accountData || !date) return;
 
       const decimals = accountData[symbol].decimals;
-      const currentTimestamp = new Date().getTime() / 1000;
-      const time = (parseInt(date.value) - currentTimestamp) / 31536000;
-      const apr = parseFloat(slippage) / 100;
-
-      const minAmount = parseFloat(qty!) * ((1 + apr) * time);
+      const minAmount = parseFloat(qty!) * (1 - slippage);
 
       let deposit;
 
@@ -400,8 +396,7 @@ function DepositAtMaturity() {
 
       const slippageAPR = fixedAPR * (1 - numbers.slippage);
 
-      // Let's check against 0.01 for now, because this is a percentage and it could be 0.0001 or lower, but not 0
-      if (fixedAPR < 0.01) {
+      if (fixedAPR < numbers.minAPRValue) {
         setError({
           status: true,
           message: translations[lang].zeroRate,
@@ -409,20 +404,8 @@ function DepositAtMaturity() {
         });
       }
 
-      setSlippage(
-        slippageAPR.toLocaleString(undefined, {
-          style: 'percent',
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        }),
-      );
-      setFixedRate(
-        fixedAPR.toLocaleString(undefined, {
-          style: 'percent',
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        }),
-      );
+      setSlippage(slippageAPR);
+      setFixedRate(fixedAPR);
     } catch (e) {
       console.log(e);
     }
@@ -472,7 +455,11 @@ function DepositAtMaturity() {
           />
           <section className={styles.maturityRowModal}>
             <ModalMaturityEditable text={translations[lang].maturityPool.toUpperCase()} />
-            <ModalCell text={translations[lang].apr.toUpperCase()} value={fixedRate} column />
+            <ModalCell
+              text={translations[lang].apr.toUpperCase()}
+              value={toPercentage(fixedRate)}
+              column
+            />
           </section>
           <ModalInput
             onMax={onMax}
@@ -484,15 +471,13 @@ function DepositAtMaturity() {
           {error?.component !== 'gas' && symbol != 'WETH' && <ModalTxCost gas={gas} />}
           <ModalRowEditable
             text={translations[lang].minimumApr}
-            value={slippage}
+            value={toPercentage(slippage)}
             editable={editSlippage}
-            symbol="%"
             onChange={(e: ChangeEvent<HTMLInputElement>) => {
-              setSlippage(e.target.value);
+              setSlippage(Number(e.target.value));
               error?.message == translations[lang].notEnoughSlippage && setError(undefined);
             }}
             onClick={() => {
-              if (slippage == '') setSlippage('0.00');
               setEditSlippage((prev) => !prev);
             }}
             line

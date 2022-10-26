@@ -23,7 +23,7 @@ type BestAPR = {
   apr: string;
 };
 
-const { usdAmount: usdAmountPreviewer, minValidAPRforFRPs: MIN_VALID_APR } = numbers;
+const { usdAmount: usdAmountPreviewer, minAPRValue } = numbers;
 
 const AssetMaturityPools: FC<AssetMaturityPoolsProps> = ({ symbol: rawSymbol }) => {
   const symbol = rawSymbol.toUpperCase();
@@ -66,7 +66,7 @@ const AssetMaturityPools: FC<AssetMaturityPoolsProps> = ({ symbol: rawSymbol }) 
 
       const actualMax = APRsPerMaturity[maturityMaxAPRDeposit]?.deposit;
       if (
-        depositAPR > MIN_VALID_APR &&
+        depositAPR > minAPRValue &&
         (!actualMax || depositAPR > APRsPerMaturity[maturityMaxAPRDeposit]?.deposit)
       ) {
         maturityMaxAPRDeposit = maturity;
@@ -74,7 +74,7 @@ const AssetMaturityPools: FC<AssetMaturityPoolsProps> = ({ symbol: rawSymbol }) 
 
       APRsPerMaturity[maturity] = {
         ...APRsPerMaturity[maturity],
-        deposit: depositAPR < MIN_VALID_APR ? 'N/A' : depositAPR.toFixed(2),
+        deposit: depositAPR < minAPRValue ? 'N/A' : depositAPR.toFixed(2),
       };
     });
 
@@ -87,13 +87,13 @@ const AssetMaturityPools: FC<AssetMaturityPoolsProps> = ({ symbol: rawSymbol }) 
 
       const actualMin = APRsPerMaturity[maturityMinAPRBorrow]?.borrow;
 
-      if (borrowAPR > MIN_VALID_APR && (!actualMin || borrowAPR < actualMin)) {
+      if (borrowAPR > minAPRValue && (!actualMin || borrowAPR < actualMin)) {
         maturityMinAPRBorrow = maturity;
       }
 
       APRsPerMaturity[maturity] = {
         ...APRsPerMaturity[maturity],
-        borrow: borrowAPR < MIN_VALID_APR ? 'N/A' : borrowAPR.toFixed(2),
+        borrow: borrowAPR < minAPRValue ? 'N/A' : borrowAPR.toFixed(2),
       };
     });
 

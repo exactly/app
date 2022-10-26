@@ -19,6 +19,8 @@ import styles from './style.module.scss';
 
 import keys from './translations.json';
 import { Dictionary } from 'types/Dictionary';
+import numbers from 'config/numbers.json';
+
 
 type Props = {
   symbol: string;
@@ -89,13 +91,21 @@ function Item({ symbol, maturity, fixedMarketData }: Props) {
         borrowAPR: 'N/A'
       };
 
-      if (depositFixedAPR >= 0.01) {
-        rates.depositAPR = `${depositFixedAPR.toFixed(2)}%`;
+      if (depositFixedAPR >= numbers.minAPRValue) {
+        rates.depositAPR = depositFixedAPR.toLocaleString(undefined, {
+          style: 'percent',
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        });
       }
 
       // when borrowing is not possible, the previewer returns MaxUint256
-      if (borrowFixedAPR >= 0.01 && !finalBorrowAssets.eq(MaxUint256)) {
-        rates.borrowAPR = `${borrowFixedAPR.toFixed(2)}%`;
+      if (borrowFixedAPR >= numbers.minAPRValue && !finalBorrowAssets.eq(MaxUint256)) {
+        rates.borrowAPR = borrowFixedAPR.toLocaleString(undefined, {
+          style: 'percent',
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        });
       }
 
       setRates(rates);

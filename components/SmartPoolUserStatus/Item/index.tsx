@@ -48,15 +48,16 @@ type Props = {
 };
 
 function Item({
-  symbol,
+  symbol: rawSymbol,
   depositAmount,
   borrowedAmount,
   walletAddress,
   eTokenAmount,
   auditorContract,
   type,
-  market
+  market,
 }: Props) {
+  const symbol = rawSymbol?.toUpperCase();
   const { network } = useWeb3Context();
   const fixedLender = useContext(FixedLenderContext);
   const { accountData, getAccountData } = useContext(AccountDataContext);
@@ -70,15 +71,9 @@ function Item({
   const [disabled, setDisabled] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [rate, setRate] = useState<number | undefined>(undefined);
-  const [originalAmount, setOriginalAmount] = useState<string | undefined>(undefined);
-  const [difference, setDifference] = useState<string | undefined>(undefined);
   const [disabledText, setDisabledText] = useState<string | undefined>(undefined);
 
   const underlyingData = getUnderlyingData(network?.name, symbol);
-
-  useEffect(() => {
-    getOriginalAmount();
-  }, [accountData, walletAddress, type, symbol, borrowedAmount, depositAmount]);
 
   useEffect(() => {
     if (accountData) {
@@ -108,7 +103,7 @@ function Item({
       const collateralUsd = collateralAssets.mul(usdPrice).div(WAD);
 
       const newHF = parseFloat(
-        parseHealthFactor(healthFactor.debt, healthFactor.collateral.sub(collateralUsd))
+        parseHealthFactor(healthFactor.debt, healthFactor.collateral.sub(collateralUsd)),
       );
 
       if (newHF < 1) {
@@ -133,81 +128,10 @@ function Item({
 
     const fixedLenderData = {
       address: filteredFixedLender?.address,
-      abi: filteredFixedLender?.abi
+      abi: filteredFixedLender?.abi,
     };
 
     return fixedLenderData;
-  }
-
-  async function getOriginalAmount() {
-    if (!network || !walletAddress || !accountData || !symbol || !market || !type) return;
-
-    setOriginalAmount(undefined);
-    setDifference(undefined);
-
-    const subgraphUrl = getSubgraph(network.name);
-
-    const decimals = accountData[symbol].decimals;
-
-    let amount;
-
-    let totalIncremental = parseFixed('0', decimals);
-
-    let totalDecremental = parseFixed('0', decimals);
-
-    try {
-      if (type.value == 'deposit') {
-        const smartPoolDepositsAndWithdraws = await request(
-          subgraphUrl,
-          getSmartPoolDepositsAndWithdraws(walletAddress, market)
-        );
-
-        smartPoolDepositsAndWithdraws.deposits.forEach((deposit: any) => {
-          totalIncremental = totalIncremental.add(parseFixed(deposit.assets));
-        });
-
-        smartPoolDepositsAndWithdraws.withdraws.forEach((withdraw: any) => {
-          totalDecremental = totalDecremental.add(parseFixed(withdraw.assets));
-        });
-      }
-
-      if (type.value == 'borrow') {
-        const smartPoolBorrowsAndRepays = await request(
-          subgraphUrl,
-          getSmartPoolBorrowsAndRepays(walletAddress, market)
-        );
-
-        smartPoolBorrowsAndRepays.borrows.forEach((borrow: any) => {
-          totalIncremental = totalIncremental.add(parseFixed(borrow.assets));
-        });
-
-        smartPoolBorrowsAndRepays.repays.forEach((repay: any) => {
-          totalDecremental = totalDecremental.add(parseFixed(repay.assets));
-        });
-      }
-
-      amount = formatFixed(totalIncremental.sub(totalDecremental), decimals);
-
-      if (amount && originalAmount && Number(amount) === Number(originalAmount)) return;
-
-      amount && setOriginalAmount(amount);
-    } catch (e) {
-      console.log(e);
-    }
-
-    try {
-      if (!depositAmount || !borrowedAmount) return;
-
-      const amountToSubtract = type.value == 'deposit' ? depositAmount : borrowedAmount;
-
-      const difference =
-        (Number(formatFixed(amountToSubtract, decimals)) - Number(amount)) / Number(amount);
-
-      setDifference(`${(difference * 100).toFixed(2)}%`);
-    } catch (e) {
-      console.log(e);
-      setDifference('N/A');
-    }
   }
 
   async function handleMarket() {
@@ -271,11 +195,11 @@ function Item({
             parseFloat(
               ethers.utils.formatUnits(
                 type?.value == 'deposit' ? depositAmount : borrowedAmount,
-                decimals[symbol! as keyof Decimals]
-              )
+                decimals[symbol! as keyof Decimals],
+              ),
             ) * rate,
             'USD',
-            true
+            true,
           )}`) || <Skeleton width={40} />}
       </div>
 
@@ -285,7 +209,7 @@ function Item({
             symbol &&
             `${formatNumber(
               ethers.utils.formatUnits(eTokenAmount, decimals[symbol! as keyof Decimals]),
-              symbol
+              symbol,
             )}`) || <Skeleton width={40} />}{' '}
         </div>
       )}

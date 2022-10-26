@@ -62,8 +62,8 @@ function BorrowAtMaturity() {
   const [walletBalance, setWalletBalance] = useState<string | undefined>(undefined);
   const [gas, setGas] = useState<Gas | undefined>(undefined);
   const [tx, setTx] = useState<Transaction | undefined>(undefined);
-  const [fixedRate, setFixedRate] = useState<string | undefined>(undefined);
-  const [slippage, setSlippage] = useState<string>('0.00');
+  const [fixedRate, setFixedRate] = useState<number | undefined>(undefined);
+  const [slippage, setSlippage] = useState<number>(0);
   const [editSlippage, setEditSlippage] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [healthFactor, setHealthFactor] = useState<HealthFactor | undefined>(undefined);
@@ -258,7 +258,7 @@ function BorrowAtMaturity() {
     setLoading(true);
 
     try {
-      if (fixedRate && parseFloat(slippage) < parseFloat(fixedRate)) {
+      if (fixedRate && slippage < fixedRate) {
         setLoading(false);
 
         return setError({
@@ -269,16 +269,12 @@ function BorrowAtMaturity() {
 
       if (!accountData || !date) return;
 
-      const currentTimestamp = new Date().getTime() / 1000;
-      const time = (parseInt(date.value) - currentTimestamp) / 31536000;
-      const apr = parseFloat(slippage) / 100;
       const decimals = accountData![symbol.toUpperCase()].decimals;
-
-      const maxAmount = parseFloat(qty!) * ((1 + apr) * time);
+      const maxAmount = parseFloat(qty!) * (1 + slippage);
 
       let borrow;
 
-      if (symbol == 'WETH') {
+      if (symbol === 'WETH') {
         if (!web3Provider || !ETHrouter) return;
 
         borrow = await ETHrouter?.borrowAtMaturityETH(date.value, qty!, maxAmount.toFixed(18));
@@ -408,8 +404,8 @@ function BorrowAtMaturity() {
         );
       } catch (error) {
         // FIXME: should show some message like "There is not enough liquidity in the pool"
-        setFixedRate('N/A');
-        setSlippage('N/A');
+        setFixedRate(undefined);
+        setSlippage(0);
         setUtilizationRate({
           ...utilizationRate,
           after: 'N/A',
@@ -436,20 +432,8 @@ function BorrowAtMaturity() {
 
       const slippageAPR = fixedAPR * (1 + numbers.slippage);
 
-      setSlippage(
-        slippageAPR.toLocaleString(undefined, {
-          style: 'percent',
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        }),
-      );
-      setFixedRate(
-        fixedAPR.toLocaleString(undefined, {
-          style: 'percent',
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        }),
-      );
+      setSlippage(slippageAPR);
+      setFixedRate(fixedAPR);
     } catch (e) {
       console.log(e);
     }
@@ -566,21 +550,31 @@ function BorrowAtMaturity() {
           />
           <section className={styles.maturityRowModal}>
             <ModalMaturityEditable text={translations[lang].maturityPool} />
-            <ModalCell text={translations[lang].apr} value={fixedRate} line />
+            <ModalCell
+              text={translations[lang].apr}
+              value={fixedRate?.toLocaleString(undefined, {
+                style: 'percent',
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
+              line
+            />
           </section>
           <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} symbol={symbol!} />
           {gasError?.component !== 'gas' && symbol != 'WETH' && <ModalTxCost gas={gas} />}
           <ModalRowEditable
             text={translations[lang].maximumBorrowApr}
-            value={slippage}
+            value={slippage.toLocaleString(undefined, {
+              style: 'percent',
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })}
             editable={editSlippage}
-            symbol="%"
             onChange={(e: ChangeEvent<HTMLInputElement>) => {
-              setSlippage(e.target.value);
+              setSlippage(Number(e.target.value) / 100);
               error?.message == translations[lang].notEnoughSlippage && setError(undefined);
             }}
             onClick={() => {
-              if (slippage == '') setSlippage('0.00');
               setEditSlippage((prev) => !prev);
             }}
             line

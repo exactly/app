@@ -79,3 +79,15 @@ export function getSymbol(address: string, network: string | undefined) {
     ? dictionary[currentNetwork!.toLowerCase()][address.toLowerCase()]
     : 'DAI';
 }
+
+export const toPercentage = (value?: number) => {
+  if (value != null) {
+    return value.toLocaleString(undefined, {
+      style: 'percent',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+  }
+
+  return 'N/A';
+};
