@@ -1,4 +1,6 @@
+import type { ReactNode } from 'react';
+
 export type Date = {
-  label: string;
+  label: ReactNode;
   value: string;
 };

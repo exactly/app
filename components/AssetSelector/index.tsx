@@ -1,4 +1,4 @@
-import { useState, useContext, useMemo, useEffect } from 'react';
+import { useState, useContext, useMemo, useEffect, useCallback } from 'react';
 import { utils } from 'ethers';
 import Image from 'next/image';
 import Skeleton from 'react-loading-skeleton';
@@ -10,7 +10,6 @@ import { MarketContext } from 'contexts/MarketContext';
 import AccountDataContext from 'contexts/AccountDataContext';
 
 import { Market } from 'types/Market';
-import { Address } from 'types/Address';
 import { Option } from 'react-dropdown';
 import { AccountData } from 'types/AccountData';
 
@@ -18,7 +17,7 @@ import style from './style.module.scss';
 import parseSymbol from 'utils/parseSymbol';
 
 type Props = {
-  title?: Boolean;
+  title?: boolean;
   defaultAddress: string | undefined;
   onChange?: (marketData: Market) => void;
 };
@@ -60,7 +59,7 @@ function AssetSelector({ title, defaultAddress, onChange }: Props) {
         name: market.assetSymbol,
         market: market.market,
         isListed: true,
-        collateralFactor: parseFloat(utils.formatEther(market.adjustFactor))
+        collateralFactor: parseFloat(utils.formatEther(market.adjustFactor)),
       };
 
       setAllMarketsData((prevState) => [...prevState, marketData]);
@@ -78,7 +77,7 @@ function AssetSelector({ title, defaultAddress, onChange }: Props) {
             <span className={style.marketName}>{parseSymbol(marketData.name)}</span>
           </div>
         ),
-        value: marketData.market
+        value: marketData.market,
       };
     });
 
@@ -90,10 +89,13 @@ function AssetSelector({ title, defaultAddress, onChange }: Props) {
     onChange && marketData && onChange(marketData);
   }
 
-  function handleChange(option: Address) {
-    getDataByAddress(option.value);
-    setMarket(option);
-  }
+  const handleChange = useCallback(
+    (option: Option) => {
+      getDataByAddress(option.value);
+      setMarket(option);
+    },
+    [getDataByAddress, setMarket],
+  );
 
   return (
     <section className={style.container}>

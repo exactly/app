@@ -1,5 +1,5 @@
 import { formatFixed, parseFixed } from '@ethersproject/bignumber';
-import { BigNumber, Contract, ethers } from 'ethers';
+import { Contract, ethers } from 'ethers';
 import { ChangeEvent, useContext, useEffect, useMemo, useState } from 'react';
 
 import Button from 'components/common/Button';
@@ -61,9 +61,7 @@ function WithdrawAtMaturity() {
   const [needsApproval, setNeedsApproval] = useState<boolean>(false);
   const [withdrawAmount, setWithdrawAmount] = useState<string>('0');
 
-  const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
-    undefined
-  );
+  const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(undefined);
 
   const symbol = useMemo(() => {
     return market?.value ? getSymbol(market.value, network?.name) : 'DAI';
@@ -71,8 +69,7 @@ function WithdrawAtMaturity() {
 
   const debounceQty = useDebounce(qty);
 
-  const ETHrouter =
-    web3Provider && symbol == 'WETH' && handleEth(network?.name, web3Provider?.getSigner());
+  const ETHrouter = web3Provider && symbol == 'WETH' && handleEth(network?.name, web3Provider?.getSigner());
 
   const isEarlyWithdraw = useMemo(() => {
     return Date.now() / 1000 < parseInt(date!.value);
@@ -84,9 +81,7 @@ function WithdrawAtMaturity() {
     const pool = accountData[symbol].fixedDepositPositions.find((position) => {
       return position.maturity.toNumber().toString() === date!.value;
     });
-    const positionAssets = pool
-      ? pool.position.principal.add(pool.position.fee)
-      : ethers.constants.Zero;
+    const positionAssets = pool ? pool.position.principal.add(pool.position.fee) : ethers.constants.Zero;
 
     return positionAssets;
   }, [date, accountData, symbol]);
@@ -126,10 +121,7 @@ function WithdrawAtMaturity() {
 
     const allowance = await ETHrouter.checkAllowance(walletAddress, fixedLenderWithSigner);
 
-    if (
-      (allowance && parseFloat(allowance) < parseFloat(qty)) ||
-      (allowance && parseFloat(allowance) == 0 && !qty)
-    ) {
+    if ((allowance && parseFloat(allowance) < parseFloat(qty)) || (allowance && parseFloat(allowance) == 0 && !qty)) {
       setNeedsApproval(true);
     }
   }
@@ -155,7 +147,7 @@ function WithdrawAtMaturity() {
       setError({
         status: true,
         message: translations[lang].insufficientBalance,
-        component: 'input'
+        component: 'input',
       });
     } else {
       setError(undefined);
@@ -182,11 +174,7 @@ function WithdrawAtMaturity() {
     const previewerContract = getInstance(previewerData.address!, previewerData.abi!, 'previewer');
 
     try {
-      const withdrawAmount = await previewerContract?.previewWithdrawAtMaturity(
-        market,
-        parsedMaturity,
-        parsedQtyValue
-      );
+      const withdrawAmount = await previewerContract?.previewWithdrawAtMaturity(market, parsedMaturity, parsedQtyValue);
 
       const parseSlippage = parseFixed((1 - numbers.slippage).toString(), 18);
       const minimumWithdrawAmount = withdrawAmount.mul(parseSlippage).div(WAD);
@@ -220,10 +208,8 @@ function WithdrawAtMaturity() {
           walletAddress,
           walletAddress,
           {
-            gasLimit: gasLimit
-              ? Math.ceil(Number(formatFixed(gasLimit)) * numbers.gasLimitMultiplier)
-              : undefined
-          }
+            gasLimit: gasLimit ? Math.ceil(Number(formatFixed(gasLimit)) * numbers.gasLimitMultiplier) : undefined,
+          },
         );
       }
 
@@ -250,7 +236,7 @@ function WithdrawAtMaturity() {
       let txErrorHash = undefined;
 
       if (txError) {
-        const regex = new RegExp(/\"hash":"(.*?)\"/g); //regex to get all between ("hash":") and (")
+        const regex = new RegExp(/"hash":"(.*?)"/g); //regex to get all between ("hash":") and (")
         const preTxHash = e?.message?.match(regex); //get the hash from plain text by the regex
         txErrorHash = preTxHash[0].substring(8, preTxHash[0].length - 1); //parse the string to get the txHash only
       }
@@ -258,14 +244,14 @@ function WithdrawAtMaturity() {
       if (isDenied) {
         setError({
           status: true,
-          message: isDenied && translations[lang].deniedTransaction
+          message: isDenied && translations[lang].deniedTransaction,
         });
       } else if (txError) {
         setTx({ status: 'error', hash: txErrorHash });
       } else {
         setError({
           status: true,
-          message: translations[lang].generalError
+          message: translations[lang].generalError,
         });
       }
     }
@@ -287,7 +273,7 @@ function WithdrawAtMaturity() {
     } catch (e) {
       setError({
         status: true,
-        component: 'gas'
+        component: 'gas',
       });
     }
   }
@@ -302,7 +288,7 @@ function WithdrawAtMaturity() {
       ethers.utils.parseUnits(qty, decimals),
       ethers.utils.parseUnits(minQty, decimals),
       walletAddress,
-      walletAddress
+      walletAddress,
     );
 
     return gasLimit;
@@ -328,9 +314,7 @@ function WithdrawAtMaturity() {
 
         setError({
           status: true,
-          message: isDenied
-            ? translations[lang].deniedTransaction
-            : translations[lang].notEnoughSlippage
+          message: isDenied ? translations[lang].deniedTransaction : translations[lang].notEnoughSlippage,
         });
       }
     }
@@ -343,11 +327,8 @@ function WithdrawAtMaturity() {
       return contractSymbol == symbol;
     });
 
-    const fixedLender = getInstance(
-      filteredFixedLender?.address!,
-      filteredFixedLender?.abi!,
-      `market${symbol}`
-    );
+    if (!filteredFixedLender) throw new Error('Market contract not found');
+    const fixedLender = getInstance(filteredFixedLender.address!, filteredFixedLender.abi!, `market${symbol}`);
 
     setFixedLenderWithSigner(fixedLender);
   }
@@ -356,9 +337,7 @@ function WithdrawAtMaturity() {
     <>
       {!tx && (
         <>
-          <ModalTitle
-            title={isEarlyWithdraw ? translations[lang].earlyWithdraw : translations[lang].withdraw}
-          />
+          <ModalTitle title={isEarlyWithdraw ? translations[lang].earlyWithdraw : translations[lang].withdraw} />
           <ModalAsset
             asset={symbol!}
             assetTitle={translations[lang].action.toUpperCase()}

@@ -1,4 +1,5 @@
-import { createContext, FC } from 'react';
+import type { FC, ReactNode } from 'react';
+import { createContext } from 'react';
 import { ethers } from 'ethers';
 
 import getABI from 'config/abiImporter';
@@ -17,7 +18,7 @@ const defaultValues: ContextValues = {
 
 const AuditorContext = createContext(defaultValues);
 
-export const AuditorProvider: FC = ({ children }) => {
+export const AuditorProvider: FC<{ children?: ReactNode }> = ({ children }) => {
   const { network } = useWeb3Context();
 
   const { Auditor } = getABI(network?.name);

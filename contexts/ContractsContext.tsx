@@ -1,4 +1,5 @@
-import { createContext, FC, useState } from 'react';
+import type { FC, ReactNode } from 'react';
+import { createContext, useState } from 'react';
 import { Contract, ContractInterface, ethers } from 'ethers';
 
 import { Dictionary } from 'types/Dictionary';
@@ -18,7 +19,7 @@ const defaultValues: ContextValues = {
 
 const ContractsContext = createContext(defaultValues);
 
-export const ContractsProvider: FC = ({ children }) => {
+export const ContractsProvider: FC<{ children?: ReactNode }> = ({ children }) => {
   const { network, web3Provider } = useWeb3Context();
   const [instances, setInstances] = useState<Dictionary<Contract> | null>(null);
 

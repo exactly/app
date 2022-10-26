@@ -69,9 +69,7 @@ function RepayAtMaturity() {
   const [slippage, setSlippage] = useState<string>('0');
   const [error, setError] = useState<Error | undefined>(undefined);
 
-  const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
-    undefined
-  );
+  const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(undefined);
   const [underlyingContract, setUnderlyingContract] = useState<Contract | undefined>(undefined);
 
   const symbol = useMemo(() => {
@@ -87,9 +85,7 @@ function RepayAtMaturity() {
       return position.maturity.toNumber().toString() === date!.value;
     });
 
-    const positionAssets = pool
-      ? pool.position.principal.add(pool.position.fee)
-      : ethers.constants.Zero;
+    const positionAssets = pool ? pool.position.principal.add(pool.position.fee) : ethers.constants.Zero;
 
     return positionAssets;
   }, [date, accountData, symbol]);
@@ -156,9 +152,7 @@ function RepayAtMaturity() {
     const penaltyAssets = penaltyRate.mul(penaltyTime).mul(positionAssets).div(WAD);
 
     setPenaltyAssets(Number(formatFixed(penaltyAssets, decimals)).toFixed(decimals));
-    setTotalAmount(
-      Number(formatFixed(positionAssets.add(penaltyAssets), decimals)).toFixed(decimals)
-    );
+    setTotalAmount(Number(formatFixed(positionAssets.add(penaltyAssets), decimals)).toFixed(decimals));
   }
 
   async function checkAllowance() {
@@ -168,10 +162,7 @@ function RepayAtMaturity() {
 
     if (!underlyingContract || !walletAddress || !market) return;
 
-    const allowance = await underlyingContract?.allowance(
-      walletAddress,
-      fixedLenderWithSigner?.address
-    );
+    const allowance = await underlyingContract?.allowance(walletAddress, fixedLenderWithSigner?.address);
 
     const formattedAllowance = allowance && parseFloat(ethers.utils.formatEther(allowance));
 
@@ -192,15 +183,9 @@ function RepayAtMaturity() {
 
       const gasLimit = await getApprovalGasLimit();
 
-      const approval = await underlyingContract?.approve(
-        fixedLenderWithSigner?.address,
-        ethers.constants.MaxUint256,
-        {
-          gasLimit: gasLimit
-            ? Math.ceil(Number(formatFixed(gasLimit)) * numbers.gasLimitMultiplier)
-            : undefined
-        }
-      );
+      const approval = await underlyingContract?.approve(fixedLenderWithSigner?.address, ethers.constants.MaxUint256, {
+        gasLimit: gasLimit ? Math.ceil(Number(formatFixed(gasLimit)) * numbers.gasLimitMultiplier) : undefined,
+      });
 
       await approval.wait();
 
@@ -211,7 +196,7 @@ function RepayAtMaturity() {
       setLoading(false);
       setNeedsApproval(true);
       setError({
-        status: true
+        status: true,
       });
     }
   }
@@ -223,26 +208,16 @@ function RepayAtMaturity() {
       return contractSymbol == symbol;
     });
 
-    const fixedLender = getInstance(
-      filteredFixedLender?.address!,
-      filteredFixedLender?.abi!,
-      `market${symbol}`
-    );
+    if (!filteredFixedLender) throw new Error('Market contract not found');
+    const fixedLender = getInstance(filteredFixedLender.address!, filteredFixedLender.abi!, `market${symbol}`);
 
     setFixedLenderWithSigner(fixedLender);
   }
 
   function getUnderlyingContract() {
-    const underlyingData: UnderlyingData | undefined = getUnderlyingData(
-      network?.name,
-      symbol.toLowerCase()
-    );
+    const underlyingData: UnderlyingData | undefined = getUnderlyingData(network?.name, symbol.toLowerCase());
 
-    const underlyingContract = getInstance(
-      underlyingData!.address,
-      underlyingData!.abi,
-      `underlying${symbol}`
-    );
+    const underlyingContract = getInstance(underlyingData!.address, underlyingData!.abi, `underlying${symbol}`);
 
     setUnderlyingContract(underlyingContract);
   }
@@ -287,17 +262,13 @@ function RepayAtMaturity() {
       const parsedQtyValue = ethers.utils.parseUnits(qty, decimals);
       const WAD = parseFixed('1', 18);
 
-      const previewerContract = getInstance(
-        previewerData.address!,
-        previewerData.abi!,
-        'previewer'
-      );
+      const previewerContract = getInstance(previewerData.address!, previewerData.abi!, 'previewer');
 
       const repayAmount = await previewerContract?.previewRepayAtMaturity(
         market,
         parsedMaturity,
         parsedQtyValue,
-        walletAddress
+        walletAddress,
       );
 
       const parseSlippage = parseFixed((1 + numbers.slippage).toString(), 18);
@@ -336,10 +307,8 @@ function RepayAtMaturity() {
           ethers.utils.parseUnits(slippage, decimals),
           walletAddress,
           {
-            gasLimit: gasLimit
-              ? Math.ceil(Number(formatFixed(gasLimit)) * numbers.gasLimitMultiplier)
-              : undefined
-          }
+            gasLimit: gasLimit ? Math.ceil(Number(formatFixed(gasLimit)) * numbers.gasLimitMultiplier) : undefined,
+          },
         );
       }
 
@@ -366,7 +335,7 @@ function RepayAtMaturity() {
       let txErrorHash = undefined;
 
       if (txError) {
-        const regex = new RegExp(/\"hash":"(.*?)\"/g); //regex to get all between ("hash":") and (")
+        const regex = new RegExp(/"hash":"(.*?)"/g); //regex to get all between ("hash":") and (")
         const preTxHash = e?.message?.match(regex); //get the hash from plain text by the regex
         txErrorHash = preTxHash[0].substring(8, preTxHash[0].length - 1); //parse the string to get the txHash only
       }
@@ -374,14 +343,14 @@ function RepayAtMaturity() {
       if (isDenied) {
         setError({
           status: true,
-          message: isDenied && translations[lang].deniedTransaction
+          message: isDenied && translations[lang].deniedTransaction,
         });
       } else if (txError) {
         setTx({ status: 'error', hash: txErrorHash });
       } else {
         setError({
           status: true,
-          message: translations[lang].generalError
+          message: translations[lang].generalError,
         });
       }
     }
@@ -403,7 +372,7 @@ function RepayAtMaturity() {
     } catch (e) {
       setError({
         status: true,
-        component: 'gas'
+        component: 'gas',
       });
     }
   }
@@ -417,17 +386,14 @@ function RepayAtMaturity() {
       date.value,
       ethers.utils.parseUnits(qty, decimals),
       ethers.utils.parseUnits(maxQty, decimals),
-      walletAddress
+      walletAddress,
     );
 
     return gasLimit;
   }
 
   async function getApprovalGasLimit() {
-    const gasLimit = await underlyingContract?.estimateGas.approve(
-      market?.value,
-      ethers.constants.MaxUint256
-    );
+    const gasLimit = await underlyingContract?.estimateGas.approve(market?.value, ethers.constants.MaxUint256);
 
     return gasLimit;
   }
@@ -436,9 +402,7 @@ function RepayAtMaturity() {
     <>
       {!tx && (
         <>
-          <ModalTitle
-            title={isLateRepay ? translations[lang].lateRepay : translations[lang].earlyRepay}
-          />
+          <ModalTitle title={isLateRepay ? translations[lang].lateRepay : translations[lang].earlyRepay} />
           <ModalAsset
             asset={symbol!}
             assetTitle={translations[lang].action.toUpperCase()}

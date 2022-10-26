@@ -1,4 +1,5 @@
-import { createContext, FC, useContext, useEffect, useMemo, useState } from 'react';
+import type { FC, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { constants } from 'ethers';
 
 import { AccountData } from 'types/AccountData';
@@ -22,7 +23,7 @@ const defaultValues: ContextValues = {
 
 const AccountDataContext = createContext(defaultValues);
 
-export const AccountDataProvider: FC = ({ children }) => {
+export const AccountDataProvider: FC<{ children?: ReactNode }> = ({ children }) => {
   const [accountData, setAccountData] = useState<AccountData | undefined>(undefined);
   const { network, walletAddress } = useWeb3Context();
 

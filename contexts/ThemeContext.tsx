@@ -1,4 +1,5 @@
-import { createContext, FC, useEffect, useState } from 'react';
+import type { FC, ReactNode } from 'react';
+import { createContext, useEffect, useState } from 'react';
 
 type ContextValues = {
   theme: 'light' | 'dark';
@@ -12,7 +13,7 @@ const defaultValues: ContextValues = {
 
 const ThemeContext = createContext(defaultValues);
 
-export const ThemeProvider: FC = ({ children }) => {
+export const ThemeProvider: FC<{ children?: ReactNode }> = ({ children }) => {
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
 
   useEffect(() => {

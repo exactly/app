@@ -65,9 +65,7 @@ function Borrow() {
 
   const debounceQty = useDebounce(qty);
 
-  const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
-    undefined,
-  );
+  const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(undefined);
   const [underlyingContract, setUnderlyingContract] = useState<Contract | undefined>(undefined);
 
   const symbol = useMemo(() => {
@@ -81,8 +79,7 @@ function Borrow() {
     return limit ?? undefined;
   }, [accountData, symbol]);
 
-  const ETHrouter =
-    web3Provider && symbol == 'WETH' && handleEth(network?.name, web3Provider?.getSigner());
+  const ETHrouter = web3Provider && symbol == 'WETH' && handleEth(network?.name, web3Provider?.getSigner());
 
   useEffect(() => {
     setQty('');
@@ -121,10 +118,7 @@ function Borrow() {
 
     const allowance = await ETHrouter.checkAllowance(walletAddress, fixedLenderWithSigner);
 
-    if (
-      (allowance && parseFloat(allowance) < parseFloat(qty)) ||
-      (allowance && parseFloat(allowance) == 0 && !qty)
-    ) {
+    if ((allowance && parseFloat(allowance) < parseFloat(qty)) || (allowance && parseFloat(allowance) == 0 && !qty)) {
       setNeedsApproval(true);
     }
   }
@@ -159,27 +153,17 @@ function Borrow() {
     const hf = parseFixed('1.05', 18);
     const WAD = parseFixed('1', 18);
 
-    const hasDepositedToFloatingPool =
-      Number(formatFixed(accountData![symbol].floatingDepositAssets, decimals)) > 0;
+    const hasDepositedToFloatingPool = Number(formatFixed(accountData![symbol].floatingDepositAssets, decimals)) > 0;
 
     if (!accountData![symbol.toUpperCase()].isCollateral && hasDepositedToFloatingPool) {
-      col = col.add(
-        accountData![symbol].floatingDepositAssets.mul(accountData![symbol].adjustFactor).div(WAD),
-      );
+      col = col.add(accountData![symbol].floatingDepositAssets.mul(accountData![symbol].adjustFactor).div(WAD));
     }
 
     const debt = healthFactor.debt;
 
     const safeMaximumBorrow = Number(
       formatFixed(
-        col
-          .sub(hf.mul(debt).div(WAD))
-          .mul(WAD)
-          .div(hf)
-          .mul(WAD)
-          .div(usdPrice)
-          .mul(adjustFactor)
-          .div(WAD),
+        col.sub(hf.mul(debt).div(WAD)).mul(WAD).div(hf).mul(WAD).div(usdPrice).mul(adjustFactor).div(WAD),
         18,
       ),
     ).toFixed(decimals);
@@ -251,9 +235,7 @@ function Borrow() {
           walletAddress,
           walletAddress,
           {
-            gasLimit: gasLimit
-              ? Math.ceil(Number(formatFixed(gasLimit)) * numbers.gasLimitMultiplier)
-              : undefined,
+            gasLimit: gasLimit ? Math.ceil(Number(formatFixed(gasLimit)) * numbers.gasLimitMultiplier) : undefined,
           },
         );
       }
@@ -280,7 +262,7 @@ function Borrow() {
       let txErrorHash = undefined;
 
       if (txError) {
-        const regex = new RegExp(/\"hash":"(.*?)\"/g); //regex to get all between ("hash":") and (")
+        const regex = new RegExp(/"hash":"(.*?)"/g); //regex to get all between ("hash":") and (")
         const preTxHash = e?.message?.match(regex); //get the hash from plain text by the regex
         txErrorHash = preTxHash[0].substring(8, preTxHash[0].length - 1); //parse the string to get the txHash only
       }
@@ -288,9 +270,7 @@ function Borrow() {
       if (isDenied) {
         setError({
           status: true,
-          message: isDenied
-            ? translations[lang].deniedTransaction
-            : translations[lang].notEnoughSlippage,
+          message: isDenied ? translations[lang].deniedTransaction : translations[lang].notEnoughSlippage,
         });
       } else if (txError) {
         setTx({ status: 'error', hash: txErrorHash });
@@ -311,8 +291,7 @@ function Borrow() {
       return accountData[market].isCollateral;
     });
 
-    const hasDepositedToFloatingPool =
-      Number(formatFixed(accountData[symbol].floatingDepositAssets, decimals)) > 0;
+    const hasDepositedToFloatingPool = Number(formatFixed(accountData[symbol].floatingDepositAssets, decimals)) > 0;
 
     if (isCollateral || hasDepositedToFloatingPool) {
       return;
@@ -371,26 +350,16 @@ function Borrow() {
       return contractSymbol == symbol;
     });
 
-    const fixedLender = getInstance(
-      filteredFixedLender?.address!,
-      filteredFixedLender?.abi!,
-      `market${symbol}`,
-    );
+    if (!filteredFixedLender) throw new Error('Market contract not found');
+    const fixedLender = getInstance(filteredFixedLender.address!, filteredFixedLender.abi!, `market${symbol}`);
 
     setFixedLenderWithSigner(fixedLender);
   }
 
   function getUnderlyingContract() {
-    const underlyingData: UnderlyingData | undefined = getUnderlyingData(
-      network?.name,
-      symbol.toLowerCase(),
-    );
+    const underlyingData: UnderlyingData | undefined = getUnderlyingData(network?.name, symbol.toLowerCase());
 
-    const underlyingContract = getInstance(
-      underlyingData!.address,
-      underlyingData!.abi,
-      `underlying${symbol}`,
-    );
+    const underlyingContract = getInstance(underlyingData!.address, underlyingData!.abi, `underlying${symbol}`);
 
     setUnderlyingContract(underlyingContract);
   }
@@ -414,9 +383,7 @@ function Borrow() {
 
         setError({
           status: true,
-          message: isDenied
-            ? translations[lang].deniedTransaction
-            : translations[lang].notEnoughSlippage,
+          message: isDenied ? translations[lang].deniedTransaction : translations[lang].notEnoughSlippage,
         });
       }
     }
@@ -442,12 +409,7 @@ function Borrow() {
           />
           {gasError?.component !== 'gas' && symbol != 'WETH' && <ModalTxCost gas={gas} />}
           {symbol ? (
-            <ModalRowHealthFactor
-              qty={qty}
-              symbol={symbol}
-              operation="borrow"
-              healthFactorCallback={getHealthFactor}
-            />
+            <ModalRowHealthFactor qty={qty} symbol={symbol} operation="borrow" healthFactorCallback={getHealthFactor} />
           ) : (
             <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
           )}

@@ -112,7 +112,7 @@ function FloatingAPRChart({ market, networkName }: Props) {
               }}
             />
             <Tooltip
-              formatter={(value: number) => `${value.toFixed(2)}%`}
+              formatter={(value: any) => `${value.toFixed(2)}%`}
               labelFormatter={(label: any) => formatXAxis(label)}
             />
             <Legend

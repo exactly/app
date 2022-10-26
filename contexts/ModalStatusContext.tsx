@@ -1,4 +1,5 @@
-import { createContext, FC, useContext, useEffect, useState } from 'react';
+import type { FC, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import AccountDataContext from './AccountDataContext';
 
 export type Operation =
@@ -28,7 +29,7 @@ const defaultValues: ContextValues = {
 
 const ModalStatusContext = createContext(defaultValues);
 
-export const ModalStatusProvider: FC = ({ children }) => {
+export const ModalStatusProvider: FC<{ children?: ReactNode }> = ({ children }) => {
   const { getAccountData } = useContext(AccountDataContext);
   const [open, setOpen] = useState<boolean>(false);
   const [operation, setOperation] = useState<Operation | null>(null);

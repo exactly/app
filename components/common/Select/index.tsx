@@ -7,7 +7,7 @@ import 'react-dropdown/style.css';
 
 type Props = {
   className?: string;
-  onChange: Function;
+  onChange: (arg: Option) => void;
   onClick?: MouseEventHandler;
   placeholder?: any;
   value?: any;

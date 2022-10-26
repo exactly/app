@@ -75,17 +75,14 @@ function BorrowAtMaturity() {
 
   const debounceQty = useDebounce(qty);
 
-  const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(
-    undefined,
-  );
+  const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(undefined);
   const [underlyingContract, setUnderlyingContract] = useState<Contract | undefined>(undefined);
 
   const symbol = useMemo(() => {
     return market?.value ? getSymbol(market.value, network?.name) : 'DAI';
   }, [market?.value, network?.name]);
 
-  const ETHrouter =
-    web3Provider && symbol == 'WETH' && handleEth(network?.name, web3Provider?.getSigner());
+  const ETHrouter = web3Provider && symbol == 'WETH' && handleEth(network?.name, web3Provider?.getSigner());
 
   const poolLiquidity = useMemo(() => {
     if (!accountData || !date) return;
@@ -98,7 +95,7 @@ function BorrowAtMaturity() {
 
     const decimals = accountData[symbol].decimals;
 
-    const limit = maturityData && ethers.utils.formatUnits(maturityData?.available!, decimals);
+    const limit = maturityData && ethers.utils.formatUnits(maturityData.available!, decimals);
 
     return limit ? parseFloat(limit) : undefined;
   }, [accountData, date?.value]);
@@ -147,10 +144,7 @@ function BorrowAtMaturity() {
 
     const allowance = await ETHrouter.checkAllowance(walletAddress, fixedLenderWithSigner);
 
-    if (
-      (allowance && parseFloat(allowance) < parseFloat(qty)) ||
-      (allowance && parseFloat(allowance) == 0 && !qty)
-    ) {
+    if ((allowance && parseFloat(allowance) < parseFloat(qty)) || (allowance && parseFloat(allowance) == 0 && !qty)) {
       setNeedsApproval(true);
     }
   }
@@ -185,27 +179,17 @@ function BorrowAtMaturity() {
     const hf = parseFixed('1.05', 18);
     const WAD = parseFixed('1', 18);
 
-    const hasDepositedToFloatingPool =
-      Number(formatFixed(accountData![symbol].floatingDepositAssets, decimals)) > 0;
+    const hasDepositedToFloatingPool = Number(formatFixed(accountData![symbol].floatingDepositAssets, decimals)) > 0;
 
     if (!accountData![symbol.toUpperCase()].isCollateral && hasDepositedToFloatingPool) {
-      col = col.add(
-        accountData![symbol].floatingDepositAssets.mul(accountData![symbol].adjustFactor).div(WAD),
-      );
+      col = col.add(accountData![symbol].floatingDepositAssets.mul(accountData![symbol].adjustFactor).div(WAD));
     }
 
     const debt = healthFactor.debt;
 
     const safeMaximumBorrow = Number(
       formatFixed(
-        col
-          .sub(hf.mul(debt).div(WAD))
-          .mul(WAD)
-          .div(hf)
-          .mul(WAD)
-          .div(usdPrice)
-          .mul(adjustFactor)
-          .div(WAD),
+        col.sub(hf.mul(debt).div(WAD)).mul(WAD).div(hf).mul(WAD).div(usdPrice).mul(adjustFactor).div(WAD),
         18,
       ),
     ).toFixed(decimals);
@@ -288,9 +272,7 @@ function BorrowAtMaturity() {
           walletAddress,
           walletAddress,
           {
-            gasLimit: gasLimit
-              ? Math.ceil(Number(formatFixed(gasLimit)) * numbers.gasLimitMultiplier)
-              : undefined,
+            gasLimit: gasLimit ? Math.ceil(Number(formatFixed(gasLimit)) * numbers.gasLimitMultiplier) : undefined,
           },
         );
       }
@@ -317,7 +299,7 @@ function BorrowAtMaturity() {
       let txErrorHash = undefined;
 
       if (txError) {
-        const regex = new RegExp(/\"hash":"(.*?)\"/g); //regex to get all between ("hash":") and (")
+        const regex = new RegExp(/"hash":"(.*?)"/g); //regex to get all between ("hash":") and (")
         const preTxHash = e?.message?.match(regex); //get the hash from plain text by the regex
         txErrorHash = preTxHash[0].substring(8, preTxHash[0].length - 1); //parse the string to get the txHash only
       }
@@ -325,9 +307,7 @@ function BorrowAtMaturity() {
       if (isDenied) {
         setError({
           status: true,
-          message: isDenied
-            ? translations[lang].deniedTransaction
-            : translations[lang].notEnoughSlippage,
+          message: isDenied ? translations[lang].deniedTransaction : translations[lang].notEnoughSlippage,
         });
       } else if (txError) {
         setTx({ status: 'error', hash: txErrorHash });
@@ -389,11 +369,7 @@ function BorrowAtMaturity() {
 
       const qtyValue = qty == '' ? getOneDollar(oracle, decimals) : parseFixed(qty, decimals);
 
-      const previewerContract = getInstance(
-        previewerData.address!,
-        previewerData.abi!,
-        'previewer',
-      );
+      const previewerContract = getInstance(previewerData.address!, previewerData.abi!, 'previewer');
 
       let feeAtMaturity;
       try {
@@ -418,7 +394,8 @@ function BorrowAtMaturity() {
       const finalAssets = feeAtMaturity.assets;
 
       if (qty === '') {
-        setUtilizationRate({ ...utilizationRate, after: utilizationRate?.before! });
+        if (!utilizationRate?.before) throw new Error('utilizationRate is undefined');
+        setUtilizationRate({ ...utilizationRate, after: utilizationRate.before });
       } else {
         setUtilizationRate({
           ...utilizationRate,
@@ -465,26 +442,16 @@ function BorrowAtMaturity() {
       return contractSymbol == symbol;
     });
 
-    const fixedLender = getInstance(
-      filteredFixedLender?.address!,
-      filteredFixedLender?.abi!,
-      `market${symbol}`,
-    );
+    if (!filteredFixedLender) throw new Error('Market contract not found');
+    const fixedLender = getInstance(filteredFixedLender.address!, filteredFixedLender.abi!, `market${symbol}`);
 
     setFixedLenderWithSigner(fixedLender);
   }
 
   function getUnderlyingContract() {
-    const underlyingData: UnderlyingData | undefined = getUnderlyingData(
-      network?.name,
-      symbol.toLowerCase(),
-    );
+    const underlyingData: UnderlyingData | undefined = getUnderlyingData(network?.name, symbol.toLowerCase());
 
-    const underlyingContract = getInstance(
-      underlyingData!.address,
-      underlyingData!.abi,
-      `underlying${symbol}`,
-    );
+    const underlyingContract = getInstance(underlyingData!.address, underlyingData!.abi, `underlying${symbol}`);
 
     setUnderlyingContract(underlyingContract);
   }
@@ -497,8 +464,7 @@ function BorrowAtMaturity() {
       return accountData[market].isCollateral;
     });
 
-    const hasDepositedToFloatingPool =
-      Number(formatFixed(accountData[symbol].floatingDepositAssets, decimals)) > 0;
+    const hasDepositedToFloatingPool = Number(formatFixed(accountData[symbol].floatingDepositAssets, decimals)) > 0;
 
     if (isCollateral || hasDepositedToFloatingPool) {
       return;
@@ -529,9 +495,7 @@ function BorrowAtMaturity() {
 
         setError({
           status: true,
-          message: isDenied
-            ? translations[lang].deniedTransaction
-            : translations[lang].notEnoughSlippage,
+          message: isDenied ? translations[lang].deniedTransaction : translations[lang].notEnoughSlippage,
         });
       }
     }
@@ -580,21 +544,12 @@ function BorrowAtMaturity() {
             line
           />
           {symbol ? (
-            <ModalRowHealthFactor
-              qty={qty}
-              symbol={symbol}
-              operation="borrow"
-              healthFactorCallback={getHealthFactor}
-            />
+            <ModalRowHealthFactor qty={qty} symbol={symbol} operation="borrow" healthFactorCallback={getHealthFactor} />
           ) : (
             <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
           )}
           <ModalRowBorrowLimit qty={qty} symbol={symbol!} operation="borrow" line />
-          <ModalRowUtilizationRate
-            urBefore={utilizationRate?.before}
-            urAfter={utilizationRate?.after}
-            line
-          />
+          <ModalRowUtilizationRate urBefore={utilizationRate?.before} urAfter={utilizationRate?.after} line />
 
           {error && error.component != 'gas' && <ModalError message={error.message} />}
           <div className={styles.buttonContainer}>
