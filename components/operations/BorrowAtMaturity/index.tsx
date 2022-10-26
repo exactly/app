@@ -269,16 +269,12 @@ function BorrowAtMaturity() {
 
       if (!accountData || !date) return;
 
-      const currentTimestamp = new Date().getTime() / 1_000;
-      const time = (parseInt(date.value) - currentTimestamp) / 31_536_000;
       const decimals = accountData![symbol.toUpperCase()].decimals;
-
-      const maxAmount = parseFloat(qty!) * ((1 + slippage) * time);
-      console.log('borrowAtMaturity', qty, slippage, maxAmount);
+      const maxAmount = parseFloat(qty!) * (1 + slippage);
 
       let borrow;
 
-      if (symbol == 'WETH') {
+      if (symbol === 'WETH') {
         if (!web3Provider || !ETHrouter) return;
 
         borrow = await ETHrouter?.borrowAtMaturityETH(date.value, qty!, maxAmount.toFixed(18));
@@ -554,11 +550,15 @@ function BorrowAtMaturity() {
           />
           <section className={styles.maturityRowModal}>
             <ModalMaturityEditable text={translations[lang].maturityPool} />
-            <ModalCell text={translations[lang].apr} value={fixedRate?.toLocaleString(undefined, {
-          style: 'percent',
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        })} line />
+            <ModalCell
+              text={translations[lang].apr}
+              value={fixedRate?.toLocaleString(undefined, {
+                style: 'percent',
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
+              line
+            />
           </section>
           <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} symbol={symbol!} />
           {gasError?.component !== 'gas' && symbol != 'WETH' && <ModalTxCost gas={gas} />}
@@ -570,9 +570,8 @@ function BorrowAtMaturity() {
               maximumFractionDigits: 2,
             })}
             editable={editSlippage}
-            symbol="%"
             onChange={(e: ChangeEvent<HTMLInputElement>) => {
-              setSlippage(Number(e.target.value));
+              setSlippage(Number(e.target.value) / 100);
               error?.message == translations[lang].notEnoughSlippage && setError(undefined);
             }}
             onClick={() => {
