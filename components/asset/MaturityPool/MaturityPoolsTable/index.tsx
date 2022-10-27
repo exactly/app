@@ -125,8 +125,8 @@ const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ APRsPerMaturity, symb
               </TableCell>
               <TableCell align="center">${totalDeposited}</TableCell>
               <TableCell align="center">${totalBorrowed}</TableCell>
-              <TableCell align="center">{depositAPR !== 'N/A' ? `${depositAPR}%` : depositAPR}</TableCell>
-              <TableCell align="center">{borrowAPR !== 'N/A' ? `${borrowAPR}%` : borrowAPR}</TableCell>
+              <TableCell align="center">{depositAPR}</TableCell>
+              <TableCell align="center">{borrowAPR}</TableCell>
               <TableCell align="center">
                 <Button
                   disabled={depositAPR === 'N/A'}
