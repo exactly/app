@@ -1,5 +1,9 @@
 import { createTheme, Shadows } from '@mui/material/styles';
 
+export const globals = {
+  maxWidth: 1250,
+};
+
 const theme = createTheme({
   palette: {
     primary: {
