@@ -57,10 +57,7 @@ function ModalRowBorrowLimit({ qty, symbol, operation, line }: Props) {
   function getBorrowLimits() {
     if (!accountData || !newQty) return [undefined, undefined];
 
-    const usdPrice = accountData[symbol.toUpperCase()].usdPrice;
-    const decimals = accountData[symbol.toUpperCase()].decimals;
-    const adjustFactor = accountData[symbol.toUpperCase()].adjustFactor;
-    const isCollateral = accountData[symbol.toUpperCase()].isCollateral;
+    const { usdPrice, decimals, adjustFactor, isCollateral } = accountData[symbol];
 
     const WAD = parseFixed('1', 18);
 

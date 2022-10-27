@@ -145,9 +145,9 @@ function Borrow() {
   function onMax() {
     if (!accountData || !healthFactor) return;
 
-    const decimals = accountData[symbol.toUpperCase()].decimals;
-    const adjustFactor = accountData[symbol.toUpperCase()].adjustFactor;
-    const usdPrice = accountData[symbol.toUpperCase()].usdPrice;
+    const decimals = accountData[symbol].decimals;
+    const adjustFactor = accountData[symbol].adjustFactor;
+    const usdPrice = accountData[symbol].usdPrice;
 
     let col = healthFactor.collateral;
     const hf = parseFixed('1.05', 18);
@@ -155,7 +155,7 @@ function Borrow() {
 
     const hasDepositedToFloatingPool = Number(formatFixed(accountData![symbol].floatingDepositAssets, decimals)) > 0;
 
-    if (!accountData![symbol.toUpperCase()].isCollateral && hasDepositedToFloatingPool) {
+    if (!accountData![symbol].isCollateral && hasDepositedToFloatingPool) {
       col = col.add(accountData![symbol].floatingDepositAssets.mul(accountData![symbol].adjustFactor).div(WAD));
     }
 
@@ -175,8 +175,8 @@ function Borrow() {
   function handleInputChange(e: ChangeEvent<HTMLInputElement>) {
     if (!liquidity || !accountData) return;
 
-    const decimals = accountData[symbol.toUpperCase()].decimals;
-    const usdPrice = accountData[symbol.toUpperCase()].usdPrice;
+    const decimals = accountData[symbol].decimals;
+    const usdPrice = accountData[symbol].usdPrice;
 
     const maxBorrowAssets = getBeforeBorrowLimit(accountData, symbol, usdPrice, decimals, 'borrow');
 
@@ -357,7 +357,7 @@ function Borrow() {
   }
 
   function getUnderlyingContract() {
-    const underlyingData: UnderlyingData | undefined = getUnderlyingData(network?.name, symbol.toLowerCase());
+    const underlyingData: UnderlyingData | undefined = getUnderlyingData(network?.name, symbol);
 
     const underlyingContract = getInstance(underlyingData!.address, underlyingData!.abi, `underlying${symbol}`);
 

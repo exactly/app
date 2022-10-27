@@ -179,8 +179,8 @@ function Deposit() {
   function getUserDeposits() {
     if (!symbol || !accountData) return '0';
 
-    const amount = accountData[symbol.toUpperCase()]?.floatingDepositAssets;
-    const decimals = accountData[symbol.toUpperCase()]?.decimals;
+    const amount = accountData[symbol]?.floatingDepositAssets;
+    const decimals = accountData[symbol]?.decimals;
 
     const formattedAmount = amount && formatNumber(ethers.utils.formatUnits(amount, decimals), symbol);
 
@@ -196,7 +196,7 @@ function Deposit() {
 
   function handleInputChange(e: ChangeEvent<HTMLInputElement>) {
     if (!accountData || !symbol) return;
-    const decimals = accountData[symbol.toUpperCase()].decimals;
+    const decimals = accountData[symbol].decimals;
 
     if (e.target.value.includes('.')) {
       const regex = /[^,.]*$/g;
@@ -366,7 +366,7 @@ function Deposit() {
   }
 
   function getUnderlyingContract() {
-    const underlyingData: UnderlyingData | undefined = getUnderlyingData(network?.name, symbol.toLowerCase());
+    const underlyingData: UnderlyingData | undefined = getUnderlyingData(network?.name, symbol);
 
     const underlyingContract = getInstance(underlyingData!.address, underlyingData!.abi, `underlying${symbol}`);
 

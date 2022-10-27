@@ -69,17 +69,17 @@ function Item({ market, type, fixedMarketData }: Props) {
     setRate(undefined);
 
     try {
-      const pool = accountData[market?.symbol.toUpperCase()].fixedPools.find((pool) => {
+      const pool = accountData[market?.symbol].fixedPools.find((pool) => {
         return pool.maturity.toString() == date?.value;
       });
 
-      const decimals = accountData[market?.symbol.toUpperCase()].decimals;
+      const decimals = accountData[market?.symbol].decimals;
 
       if (!pool) {
         return;
       }
 
-      const exchangeRate = parseFloat(utils.formatEther(accountData[market?.symbol.toUpperCase()].usdPrice));
+      const exchangeRate = parseFloat(utils.formatEther(accountData[market?.symbol].usdPrice));
 
       const newPoolData = {
         borrowed: parseFloat(await utils.formatUnits(pool.borrowed, decimals)),
@@ -154,15 +154,10 @@ function Item({ market, type, fixedMarketData }: Props) {
 
   return (
     <div className={`${style.container} ${type == 'borrow' ? style.secondaryContainer : style.primaryContainer}`}>
-      <Link href={`/assets/${market?.symbol == 'WETH' ? 'eth' : market?.symbol.toLowerCase()}`}>
+      <Link href={`/assets/${market?.symbol}`}>
         <div className={style.symbol}>
           {(market && (
-            <Image
-              src={`/img/assets/${market?.symbol.toLowerCase()}.svg`}
-              alt={market?.symbol}
-              width={40}
-              height={40}
-            />
+            <Image src={`/img/assets/${market?.symbol}.svg`} alt={market?.symbol} width={40} height={40} />
           )) || <Skeleton circle width={40} height={40} />}
           <span className={style.primary}>{(market && parseSymbol(market?.symbol)) || <Skeleton width={30} />}</span>
         </div>

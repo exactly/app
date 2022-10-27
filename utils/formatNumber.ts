@@ -15,7 +15,7 @@ function formatNumber(number: string | number, symbol?: string, standard?: boole
     notation: standard ? 'standard' : 'compact',
     compactDisplay: 'short',
     minimumFractionDigits: 2,
-    maximumFractionDigits: symbol ? dictionary[symbol.toUpperCase()] : 2,
+    maximumFractionDigits: symbol ? dictionary[symbol] : 2,
   }).format(parsedNumber);
 }
 

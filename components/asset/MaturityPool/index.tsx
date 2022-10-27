@@ -27,8 +27,7 @@ type BestAPR = {
 
 const { usdAmount: usdAmountPreviewer } = numbers;
 
-const AssetMaturityPools: FC<AssetMaturityPoolsProps> = ({ symbol: rawSymbol }) => {
-  const symbol = rawSymbol.toUpperCase();
+const AssetMaturityPools: FC<AssetMaturityPoolsProps> = ({ symbol }) => {
   const { accountData } = useContext(AccountDataContext);
   const previewerData = useContext(PreviewerContext);
   const { getInstance } = useContext(ContractsContext);

@@ -1,8 +1,6 @@
 import { Dictionary } from 'types/Dictionary';
 
 function getAssetColor(asset: string) {
-  const parsedAsset = asset.toUpperCase();
-
   const dictionary: Dictionary<string> = {
     DAI: '#F19D2B',
     USDC: '#2775CA',
@@ -10,7 +8,7 @@ function getAssetColor(asset: string) {
     WBTC: '#282138',
   };
 
-  return dictionary[parsedAsset];
+  return dictionary[asset];
 }
 
 export default getAssetColor;

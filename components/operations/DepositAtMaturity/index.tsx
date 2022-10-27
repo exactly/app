@@ -186,7 +186,7 @@ function DepositAtMaturity() {
 
   function handleInputChange(e: ChangeEvent<HTMLInputElement>) {
     if (!accountData) return;
-    const decimals = accountData[symbol.toUpperCase()].decimals;
+    const decimals = accountData[symbol].decimals;
 
     if (e.target.value.includes('.')) {
       const regex = /[^,.]*$/g;
@@ -355,10 +355,10 @@ function DepositAtMaturity() {
     if (!accountData || !date) return;
 
     try {
-      const decimals = accountData[symbol.toUpperCase()].decimals;
+      const decimals = accountData[symbol].decimals;
       const currentTimestamp = new Date().getTime() / 1000;
       const time = 31_536_000 / (parseInt(date?.value) - currentTimestamp);
-      const oracle = accountData[symbol.toUpperCase()]?.usdPrice;
+      const oracle = accountData[symbol]?.usdPrice;
 
       const qtyValue = qty == '' ? getOneDollar(oracle, decimals) : parseFixed(qty, decimals);
 
@@ -408,7 +408,7 @@ function DepositAtMaturity() {
   }
 
   function getUnderlyingContract() {
-    const underlyingData: UnderlyingData | undefined = getUnderlyingData(network?.name, symbol.toLowerCase());
+    const underlyingData: UnderlyingData | undefined = getUnderlyingData(network?.name, symbol);
 
     const underlyingContract = getInstance(underlyingData!.address, underlyingData!.abi, `underlying${symbol}`);
 

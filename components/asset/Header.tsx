@@ -5,18 +5,18 @@ import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import parseSymbol from 'utils/parseSymbol';
-import { AssetSymbol, getAssetData } from 'utils/assets';
+import { getAssetData } from 'utils/assets';
 import { getTokenEtherscanUrl, Network } from 'utils/network';
 import OrderAction from 'components/OrderAction';
 
 type Props = {
-  symbol: AssetSymbol;
+  symbol: string;
   networkName: string;
   assetAddress: string;
 };
 
 const AssetHeaderInfo: FC<Props> = ({ symbol, networkName, assetAddress }) => {
-  const assetDescription = getAssetData(symbol as AssetSymbol)?.description;
+  const assetDescription = getAssetData(symbol)?.description;
   const etherscanUrl = getTokenEtherscanUrl(networkName as Network, assetAddress);
 
   return (

@@ -34,7 +34,6 @@ function AddETokensButton() {
       fixedLenders?.forEach(async (contract) => {
         if (!web3Provider?.provider.request) return;
         const symbol = getSymbol(contract.address!, network.name);
-        const upperCaseAsset = symbol.toUpperCase();
 
         return await web3Provider?.provider?.request({
           method: 'wallet_watchAsset',
@@ -43,8 +42,8 @@ function AddETokensButton() {
             type: 'ERC20',
             options: {
               address: contract?.address,
-              symbol: `e${upperCaseAsset}`,
-              decimals: decimals[upperCaseAsset],
+              symbol: `e${symbol}`,
+              decimals: decimals[symbol],
               image: '',
             },
           },

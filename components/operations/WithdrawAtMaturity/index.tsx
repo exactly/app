@@ -89,7 +89,7 @@ function WithdrawAtMaturity() {
   const amountAtFinish = useMemo(() => {
     if (!accountData || !symbol) return undefined;
 
-    const decimals = accountData[symbol.toUpperCase()].decimals;
+    const decimals = accountData[symbol].decimals;
 
     return formatFixed(positionAssets, decimals);
   }, [accountData, symbol]);
@@ -127,13 +127,13 @@ function WithdrawAtMaturity() {
   }
 
   function onMax() {
-    const decimals = accountData![symbol!.toUpperCase()].decimals;
+    const { decimals } = accountData![symbol];
     setQty(formatFixed(positionAssets, decimals));
   }
 
   function handleInputChange(e: ChangeEvent<HTMLInputElement>) {
     if (!accountData || !symbol) return;
-    const decimals = accountData[symbol.toUpperCase()].decimals;
+    const decimals = accountData[symbol].decimals;
 
     if (e.target.value.includes('.')) {
       const regex = /[^,.]*$/g;

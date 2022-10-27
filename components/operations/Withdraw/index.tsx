@@ -119,7 +119,7 @@ function Withdraw() {
 
   function handleInputChange(e: ChangeEvent<HTMLInputElement>) {
     if (!accountData || !symbol) return;
-    const decimals = accountData[symbol.toUpperCase()].decimals;
+    const decimals = accountData[symbol].decimals;
 
     if (e.target.value.includes('.')) {
       const regex = /[^,.]*$/g;

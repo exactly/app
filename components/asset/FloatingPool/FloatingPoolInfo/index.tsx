@@ -60,7 +60,7 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol, eMarketAddress, n
 
   const fetchAPRs = useCallback(async () => {
     if (!accountData || !eMarketAddress) return;
-    const maxFuturePools = accountData[symbol.toUpperCase()].maxFuturePools;
+    const maxFuturePools = accountData[symbol].maxFuturePools;
 
     // TODO: consider storing these results in a new context so it's only fetched once - already added in tech debt docs
     const [{ apr: depositAPRRate }] = await queryRates(subgraphUrl, eMarketAddress, 'deposit', {

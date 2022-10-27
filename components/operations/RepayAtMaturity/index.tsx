@@ -126,7 +126,7 @@ function RepayAtMaturity() {
   function calculateAmount() {
     if (!accountData || !symbol) return;
 
-    const decimals = accountData[symbol.toUpperCase()].decimals;
+    const decimals = accountData[symbol].decimals;
 
     setAmountAtFinish(formatFixed(positionAssets, decimals));
   }
@@ -140,9 +140,9 @@ function RepayAtMaturity() {
       return;
     }
 
-    const decimals = accountData[symbol.toUpperCase()].decimals;
+    const decimals = accountData[symbol].decimals;
     const positionAssets = parseFixed(qty, decimals);
-    const penaltyRate = accountData[symbol.toUpperCase()].penaltyRate;
+    const penaltyRate = accountData[symbol].penaltyRate;
     const WAD = parseFixed('1', 18);
 
     const currentTimestamp = Math.floor(new Date().getTime() / 1000);
@@ -215,7 +215,7 @@ function RepayAtMaturity() {
   }
 
   function getUnderlyingContract() {
-    const underlyingData: UnderlyingData | undefined = getUnderlyingData(network?.name, symbol.toLowerCase());
+    const underlyingData: UnderlyingData | undefined = getUnderlyingData(network?.name, symbol);
 
     const underlyingContract = getInstance(underlyingData!.address, underlyingData!.abi, `underlying${symbol}`);
 
@@ -230,13 +230,13 @@ function RepayAtMaturity() {
     //   finalAssets = finalAssets.add(penaltyAssets || ethers.constants.Zero);
     // }
 
-    const decimals = accountData![symbol!.toUpperCase()].decimals;
+    const { decimals } = accountData![symbol];
     setQty(formatFixed(positionAssets, decimals));
   }
 
   function handleInputChange(e: ChangeEvent<HTMLInputElement>) {
     if (!accountData || !symbol) return;
-    const decimals = accountData[symbol.toUpperCase()].decimals;
+    const decimals = accountData[symbol].decimals;
 
     if (e.target.value.includes('.')) {
       const regex = /[^,.]*$/g;

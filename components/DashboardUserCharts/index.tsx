@@ -67,10 +67,10 @@ function DashboardUserCharts() {
       const oracle = parseFloat(utils.formatUnits(fixedLender.usdPrice, 18));
 
       const objectDepositData: DonutData = {
-        label: symbol.toUpperCase(),
+        label: symbol,
         value: 0,
         color: getAssetColor(symbol),
-        image: `/img/assets/${symbol.toLowerCase()}.svg`,
+        image: `/img/assets/${symbol}.svg`,
       };
 
       const variablePoolDepositValue = parseFloat(utils.formatUnits(fixedLender.floatingDepositAssets, decimals));
@@ -123,10 +123,10 @@ function DashboardUserCharts() {
       const oracle = parseFloat(utils.formatUnits(fixedLender.usdPrice, 18));
 
       const objectBorrowData: DonutData = {
-        label: symbol.toUpperCase(),
+        label: symbol,
         value: 0,
         color: getAssetColor(symbol),
-        image: `/img/assets/${symbol.toLowerCase()}.svg`,
+        image: `/img/assets/${symbol}.svg`,
       };
 
       //floatinBorrow
