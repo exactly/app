@@ -61,7 +61,7 @@ function SmartPoolList() {
             {markets?.map((market, key) => {
               return <Item market={market} key={key} type={'deposit'} />;
             })}
-            {markets.length === 0 &&
+            {!markets.length &&
               fixedLenderData.map((_, key) => {
                 return <Item key={key} market={undefined} type={'deposit'} />;
               })}
@@ -80,7 +80,7 @@ function SmartPoolList() {
             {markets?.map((market, key) => {
               return <Item market={market} key={key} type={'borrow'} />;
             })}
-            {markets.length === 0 &&
+            {!markets.length &&
               fixedLenderData.map((_, key) => {
                 return <Item key={key} market={undefined} type={'borrow'} />;
               })}

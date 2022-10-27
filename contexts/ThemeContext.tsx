@@ -21,7 +21,7 @@ export const ThemeProvider: FC<{ children?: ReactNode }> = ({ children }) => {
       const storage = window?.localStorage?.getItem('theme');
       const storageTheme = storage && JSON.parse(storage);
 
-      if (storageTheme && storageTheme != '' && (storageTheme == 'light' || storageTheme == 'dark')) {
+      if (storageTheme && (storageTheme === 'light' || storageTheme === 'dark')) {
         document.body.dataset.theme = storageTheme;
         // setTheme(storageTheme);
         setTheme('light'); //HACK disabling the darkmode option, force the light theme if the user change the localStorage
@@ -34,7 +34,7 @@ export const ThemeProvider: FC<{ children?: ReactNode }> = ({ children }) => {
   }, []);
 
   useEffect(() => {
-    if (document?.body?.dataset?.theme && document?.body?.dataset?.theme != theme) {
+    if (document?.body?.dataset?.theme && document?.body?.dataset?.theme !== theme) {
       document.body.dataset.theme = theme;
     }
   }, [theme, changeTheme]);

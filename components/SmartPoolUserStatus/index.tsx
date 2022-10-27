@@ -73,7 +73,7 @@ function SmartPoolUserStatus({ walletAddress, type }: Props) {
         market: address,
       };
 
-      const lookAfter = type.value == 'borrow' ? 'borrowedAmount' : 'depositedAmount';
+      const lookAfter = type.value === 'borrow' ? 'borrowedAmount' : 'depositedAmount';
 
       if (obj[lookAfter] && !obj[lookAfter].isZero()) {
         data.push(obj);
@@ -85,24 +85,24 @@ function SmartPoolUserStatus({ walletAddress, type }: Props) {
 
   return (
     <div className={styles.container}>
-      {itemData && itemData.length > 0 ? (
+      {itemData && itemData.length ? (
         <div className={styles.market}>
           <div className={styles.column}>
             <div className={styles.tableRow}>
               <span className={styles.symbol}>{translations[lang].asset}</span>
               {/* <span className={styles.title}>
-                {type.value == 'deposit'
+                {type.value === 'deposit'
                   ? translations[lang].currentBalance
                   : translations[lang].borrowBalance}
               </span> */}
 
               <span className={styles.title}>{translations[lang].netAssetValue}</span>
 
-              {type.value == 'deposit' && <span className={styles.title}>{translations[lang].eToken}</span>}
+              {type.value === 'deposit' && <span className={styles.title}>{translations[lang].eToken}</span>}
 
               {/* <span className={styles.title}>{translations[lang].difference}</span> */}
 
-              {type.value == 'deposit' && <span className={styles.title}>{translations[lang].collateral}</span>}
+              {type.value === 'deposit' && <span className={styles.title}>{translations[lang].collateral}</span>}
 
               <span className={styles.title} />
             </div>
@@ -141,7 +141,7 @@ function SmartPoolUserStatus({ walletAddress, type }: Props) {
                 })}
           </div>
         </div>
-      ) : itemData && itemData?.length == 0 ? (
+      ) : itemData && !itemData.length ? (
         <EmptyState connected tab={type.value} />
       ) : (
         !itemData && (
@@ -150,9 +150,9 @@ function SmartPoolUserStatus({ walletAddress, type }: Props) {
               <div className={styles.tableRow}>
                 <span className={styles.symbol}>{translations[lang].asset}</span>
                 <span className={styles.title}>
-                  {type.value == 'deposit' ? translations[lang].currentBalance : translations[lang].borrowBalance}
+                  {type.value === 'deposit' ? translations[lang].currentBalance : translations[lang].borrowBalance}
                 </span>
-                {type.value == 'deposit' && (
+                {type.value === 'deposit' && (
                   <>
                     <span className={styles.title}>{translations[lang].eToken}</span>
                     <span className={styles.title}>{translations[lang].collateral}</span>

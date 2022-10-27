@@ -35,7 +35,7 @@ export const ContractsProvider: FC<{ children?: ReactNode }> = ({ children }) =>
 
       let provider;
 
-      if (contractName == 'previewer') {
+      if (contractName === 'previewer') {
         provider = new InfuraProvider(publicNetwork);
       } else {
         provider = web3Provider?.getSigner();

@@ -107,7 +107,7 @@ function Item({ market, type }: Props) {
       return;
     }
 
-    if (interestRate != 'N/A') {
+    if (interestRate !== 'N/A') {
       return interestRate && setRate(`${interestRate}%`);
     } else {
       return setRate('N/A');

@@ -135,7 +135,7 @@ function RepayAtMaturity() {
   function calculatePenalties() {
     if (!accountData || !symbol || !date) return;
 
-    if (qty == '') {
+    if (!qty) {
       setPenaltyAssets('0');
       setTotalAmount('0');
       return;
@@ -157,7 +157,7 @@ function RepayAtMaturity() {
   }
 
   async function checkAllowance() {
-    if (symbol == 'WETH' || !fixedLenderWithSigner) {
+    if (symbol === 'WETH' || !fixedLenderWithSigner) {
       return;
     }
 
@@ -167,7 +167,7 @@ function RepayAtMaturity() {
 
     const formattedAllowance = allowance && parseFloat(formatFixed(allowance, 18));
 
-    const amount = qty == '' ? 0 : parseFloat(qty);
+    const amount = !qty ? 0 : parseFloat(qty);
 
     if (formattedAllowance > amount && !isNaN(amount) && !isNaN(formattedAllowance)) {
       setNeedsApproval(false);
@@ -177,7 +177,7 @@ function RepayAtMaturity() {
   }
 
   async function approve() {
-    if (symbol == 'WETH' || !fixedLenderWithSigner) return;
+    if (symbol === 'WETH' || !fixedLenderWithSigner) return;
 
     try {
       setLoading(true);
@@ -206,7 +206,7 @@ function RepayAtMaturity() {
     const filteredFixedLender = fixedLenderData.find((contract) => {
       const contractSymbol = getSymbol(contract.address!, network!.name);
 
-      return contractSymbol == symbol;
+      return contractSymbol === symbol;
     });
 
     if (!filteredFixedLender) throw new Error('Market contract not found');
@@ -251,7 +251,7 @@ function RepayAtMaturity() {
     if (!accountData || !symbol || !date) return;
 
     try {
-      if (qty == '') {
+      if (!qty) {
         setRepayAmount('0');
         return;
       }
@@ -293,7 +293,7 @@ function RepayAtMaturity() {
 
       let repay;
 
-      if (symbol == 'WETH') {
+      if (symbol === 'WETH') {
         if (!web3Provider) return;
 
         const ETHrouter = handleETH(network?.name, web3Provider?.getSigner());
@@ -319,7 +319,7 @@ function RepayAtMaturity() {
 
       setLoading(false);
 
-      if (txReceipt.status == 1) {
+      if (txReceipt.status === 1) {
         setTx({ status: 'success', hash: txReceipt?.transactionHash });
       } else {
         setTx({ status: 'error', hash: txReceipt?.transactionHash });
@@ -358,7 +358,7 @@ function RepayAtMaturity() {
   }
 
   async function estimateGas() {
-    if (symbol == 'WETH') return;
+    if (symbol === 'WETH') return;
 
     try {
       const gasPrice = (await fixedLenderWithSigner?.provider.getFeeData())?.maxFeePerGas;
@@ -412,7 +412,7 @@ function RepayAtMaturity() {
           />
           <ModalMaturityEditable text={translations[lang].maturityPool} line />
           <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} symbol={symbol!} />
-          {error?.component !== 'gas' && symbol != 'WETH' && <ModalTxCost gas={gas} />}
+          {error?.component !== 'gas' && symbol !== 'WETH' && <ModalTxCost gas={gas} />}
           <ModalRow
             text={translations[lang].amountAtFinish}
             value={amountAtFinish && `${formatNumber(amountAtFinish, symbol!, true)}`}
@@ -448,10 +448,10 @@ function RepayAtMaturity() {
             editable={editSlippage}
             onChange={(e: ChangeEvent<HTMLInputElement>) => {
               setSlippage(e.target.value);
-              error?.message == translations[lang].notEnoughSlippage && setError(undefined);
+              error?.message === translations[lang].notEnoughSlippage && setError(undefined);
             }}
             onClick={() => {
-              if (slippage == '') setSlippage('0');
+              if (!slippage) setSlippage('0');
               setEditSlippage((prev) => !prev);
             }}
             line
@@ -464,7 +464,7 @@ function RepayAtMaturity() {
 
           <ModalRowBorrowLimit qty={qty} symbol={symbol!} operation="repay" line />
 
-          {error && error.component != 'gas' && <ModalError message={error.message} />}
+          {error && error.component !== 'gas' && <ModalError message={error.message} />}
           <div className={styles.buttonContainer}>
             <Button
               text={needsApproval ? translations[lang].approval : translations[lang].repay}

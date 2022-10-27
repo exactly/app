@@ -98,7 +98,7 @@ function Repay() {
   }, [symbol, walletAddress, underlyingContract]);
 
   async function checkAllowance() {
-    if (symbol == 'WETH' || !fixedLenderWithSigner) {
+    if (symbol === 'WETH' || !fixedLenderWithSigner) {
       return;
     }
 
@@ -108,7 +108,7 @@ function Repay() {
 
     const formattedAllowance = allowance && parseFloat(formatFixed(allowance, 18));
 
-    const amount = qty == '' ? 0 : parseFloat(qty);
+    const amount = !qty ? 0 : parseFloat(qty);
 
     if (formattedAllowance > amount && !isNaN(amount) && !isNaN(formattedAllowance)) {
       setNeedsApproval(false);
@@ -118,7 +118,7 @@ function Repay() {
   }
 
   async function approve() {
-    if (symbol == 'WETH' || !fixedLenderWithSigner) return;
+    if (symbol === 'WETH' || !fixedLenderWithSigner) return;
 
     try {
       setLoading(true);
@@ -147,7 +147,7 @@ function Repay() {
     const filteredFixedLender = fixedLenderData.find((contract) => {
       const contractSymbol = getSymbol(contract.address!, network!.name);
 
-      return contractSymbol == symbol;
+      return contractSymbol === symbol;
     });
 
     if (!filteredFixedLender) throw new Error('Market contract not found');
@@ -187,7 +187,7 @@ function Repay() {
 
       let repay;
 
-      if (symbol == 'WETH') {
+      if (symbol === 'WETH') {
         if (!web3Provider) return;
 
         const ETHrouter = handleETH(network?.name, web3Provider?.getSigner());
@@ -220,7 +220,7 @@ function Repay() {
 
       setLoading(false);
 
-      if (txReceipt.status == 1) {
+      if (txReceipt.status === 1) {
         setTx({ status: 'success', hash: txReceipt?.transactionHash });
       } else {
         setTx({ status: 'error', hash: txReceipt?.transactionHash });
@@ -259,7 +259,7 @@ function Repay() {
   }
 
   async function estimateGas() {
-    if (symbol == 'WETH' || !accountData) return;
+    if (symbol === 'WETH' || !accountData) return;
 
     try {
       const gasPrice = (await fixedLenderWithSigner?.provider.getFeeData())?.maxFeePerGas;
@@ -307,7 +307,7 @@ function Repay() {
             amountTitle={translations[lang].debtAmount.toUpperCase()}
           />
           <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} symbol={symbol!} />
-          {error?.component !== 'gas' && symbol != 'WETH' && <ModalTxCost gas={gas} />}
+          {error?.component !== 'gas' && symbol !== 'WETH' && <ModalTxCost gas={gas} />}
           {symbol ? (
             <ModalRowHealthFactor qty={qty} symbol={symbol} operation="repay" />
           ) : (
@@ -315,7 +315,7 @@ function Repay() {
           )}
           <ModalRowBorrowLimit qty={qty} symbol={symbol!} operation="repay" line />
 
-          {error && error.component != 'gas' && <ModalError message={error.message} />}
+          {error && error.component !== 'gas' && <ModalError message={error.message} />}
           <div className={styles.buttonContainer}>
             <Button
               text={needsApproval ? translations[lang].approval : translations[lang].repay}

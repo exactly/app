@@ -42,7 +42,7 @@ function ModalInput({ value, name, disabled, symbol, error, onChange, onMax }: P
   }, [symbol, value, accountData]);
 
   function filterPasteValue(e: ClipboardEvent<HTMLInputElement>) {
-    if (e.type == 'paste') {
+    if (e.type === 'paste') {
       const data = e.clipboardData.getData('Text');
       if (/[^\d|.]+/gi.test(data)) e.preventDefault();
     }
@@ -65,7 +65,7 @@ function ModalInput({ value, name, disabled, symbol, error, onChange, onMax }: P
         autoFocus
       />
       <p className={styles.translatedValue}>
-        {value == '' || !value || !symbol || !newValue ? '$0' : `$${formatNumber(newValue, symbol)}`}
+        {value === '' || !value || !symbol || !newValue ? '$0' : `$${formatNumber(newValue, symbol)}`}
       </p>
       {onMax && (
         <p className={styles.max} onClick={onMax}>

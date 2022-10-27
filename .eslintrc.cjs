@@ -15,6 +15,7 @@ module.exports = {
     'plugin:@next/next/recommended',
   ],
   rules: {
+    eqeqeq: ['error', 'always', { null: 'ignore' }],
     'no-console': 'warn', // HACK set to error
     '@typescript-eslint/no-shadow': 'warn', // HACK set to error
     'eslint-comments/no-unused-disable': 'error',

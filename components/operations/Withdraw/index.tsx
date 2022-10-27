@@ -78,7 +78,7 @@ function Withdraw() {
     return [parsedAmount, formatNumber(parsedAmount, symbol!)];
   }, [assets, symbol]);
 
-  const ETHrouter = web3Provider && symbol == 'WETH' && handleETH(network?.name, web3Provider?.getSigner());
+  const ETHrouter = web3Provider && symbol === 'WETH' && handleETH(network?.name, web3Provider?.getSigner());
 
   useEffect(() => {
     setQty('');
@@ -99,11 +99,11 @@ function Withdraw() {
   }, [fixedLenderWithSigner]);
 
   async function checkAllowance() {
-    if (symbol != 'WETH' || !ETHrouter || !walletAddress || !fixedLenderWithSigner) return;
+    if (symbol !== 'WETH' || !ETHrouter || !walletAddress || !fixedLenderWithSigner) return;
 
     const allowance = await ETHrouter.checkAllowance(walletAddress, fixedLenderWithSigner);
 
-    if ((allowance && parseFloat(allowance) < parseFloat(qty)) || (allowance && parseFloat(allowance) == 0 && !qty)) {
+    if ((allowance && parseFloat(allowance) < parseFloat(qty)) || (allowance && parseFloat(allowance) === 0 && !qty)) {
       setNeedsApproval(true);
     }
   }
@@ -150,7 +150,7 @@ function Withdraw() {
       let decimals;
       let withdraw;
 
-      if (symbol == 'WETH') {
+      if (symbol === 'WETH') {
         if (!ETHrouter) return;
 
         decimals = 18;
@@ -187,7 +187,7 @@ function Withdraw() {
       const txReceipt = await withdraw.wait();
       setLoading(false);
 
-      if (txReceipt.status == 1) {
+      if (txReceipt.status === 1) {
         setTx({ status: 'success', hash: txReceipt?.transactionHash });
       } else {
         setTx({ status: 'error', hash: txReceipt?.transactionHash });
@@ -226,7 +226,7 @@ function Withdraw() {
   }
 
   async function estimateGas() {
-    if (symbol == 'WETH') return;
+    if (symbol === 'WETH') return;
 
     try {
       const gasPrice = (await fixedLenderWithSigner?.provider.getFeeData())?.maxFeePerGas;
@@ -261,7 +261,7 @@ function Withdraw() {
   }
 
   async function approve() {
-    if (symbol == 'WETH') {
+    if (symbol === 'WETH') {
       if (!web3Provider || !ETHrouter || !fixedLenderWithSigner) return;
 
       try {
@@ -290,7 +290,7 @@ function Withdraw() {
     const filteredFixedLender = fixedLenderData.find((contract) => {
       const contractSymbol = getSymbol(contract.address!, network!.name);
 
-      return contractSymbol == symbol;
+      return contractSymbol === symbol;
     });
 
     if (!filteredFixedLender) throw new Error('Market contract not found');
@@ -315,9 +315,9 @@ function Withdraw() {
             value={qty}
             onChange={handleInputChange}
             symbol={symbol!}
-            error={error?.component == 'input'}
+            error={error?.component === 'input'}
           />
-          {error?.component !== 'gas' && symbol != 'WETH' && <ModalTxCost gas={gas} />}
+          {error?.component !== 'gas' && symbol !== 'WETH' && <ModalTxCost gas={gas} />}
           <ModalRow text={translations[lang].exactlyBalance} value={formattedAmount} line />
           {symbol ? (
             <ModalRowHealthFactor qty={qty} symbol={symbol} operation="withdraw" />
@@ -326,7 +326,7 @@ function Withdraw() {
           )}
           <ModalRowBorrowLimit qty={qty} symbol={symbol!} operation="withdraw" line />
 
-          {error && error.component != 'gas' && <ModalError message={error.message} />}
+          {error && error.component !== 'gas' && <ModalError message={error.message} />}
           <div className={styles.buttonContainer}>
             <Button
               text={needsApproval ? translations[lang].approve : translations[lang].withdraw}

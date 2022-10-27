@@ -48,8 +48,8 @@ function ModalGif({ tx, tryAgain }: Props) {
   return (
     <section className={styles.container}>
       <section className={styles.header}>
-        {tx.status != 'processing' && <Image src={options[tx.status].img} width={74} height={74} />}
-        {tx.status == 'processing' && <Loading color="primary" />}
+        {tx.status !== 'processing' && <Image src={options[tx.status].img} width={74} height={74} />}
+        {tx.status === 'processing' && <Loading color="primary" />}
         <section className={styles.titleContainer}>
           <h3 className={styles.title}>{options[tx.status].title}</h3>
           <p className={styles.description}>{options[tx.status].text}</p>
@@ -63,7 +63,7 @@ function ModalGif({ tx, tryAgain }: Props) {
         </section>
       )}
 
-      {tx.status != 'loading' && (
+      {tx.status !== 'loading' && (
         <a
           className={styles.link}
           href={`https://${network?.name ?? process.env.NEXT_PUBLIC_NETWORK}.etherscan.io/tx/${tx.hash}`}
@@ -74,7 +74,7 @@ function ModalGif({ tx, tryAgain }: Props) {
         </a>
       )}
 
-      {tx.status == 'error' && (
+      {tx.status === 'error' && (
         <div className={styles.buttonContainer}>
           <Button text={translations[lang].errorButton} onClick={tryAgain} />
         </div>

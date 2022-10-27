@@ -52,9 +52,9 @@ function ModalMinimized({ tx, handleMinimize }: Props) {
       </div>
       <h3 className={styles.title}>{options[tx.status].title}</h3>
       <div className={styles.loading}>
-        {tx.status == 'success' ? (
+        {tx.status === 'success' ? (
           <div className={styles.doneLine}></div>
-        ) : tx.status == 'error' ? (
+        ) : tx.status === 'error' ? (
           <div className={styles.errorLine}></div>
         ) : (
           <div className={styles.loadingLine}></div>

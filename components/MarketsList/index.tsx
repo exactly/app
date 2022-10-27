@@ -128,7 +128,7 @@ function MarketsList() {
           {markets?.map((market, key) => {
             return <Item market={market} key={key} type="deposit" fixedMarketData={fixedMarketData} />;
           })}
-          {markets.length === 0 &&
+          {!markets.length &&
             fixedLenderData.map((_, key) => {
               return <Item key={key} />;
             })}
@@ -147,7 +147,7 @@ function MarketsList() {
           {markets?.map((market, key) => {
             return <Item market={market} key={key} type="borrow" fixedMarketData={fixedMarketData} />;
           })}
-          {markets.length === 0 &&
+          {!markets.length &&
             fixedLenderData.map((_, key) => {
               return <Item key={key} />;
             })}

@@ -25,7 +25,7 @@ function ModalStepper({ currentStep, totalSteps }: Props) {
           Array.from(Array(totalSteps).keys()).map((step) => {
             return <div className={currentStep >= step + 1 ? styles.selectedStep : styles.step} key={step} />;
           })) || <Skeleton containerClassName={styles.skeleton} />}
-        {currentStep == 1 && <p className={styles.text}>{translations[lang].approval.toUpperCase()}</p>}
+        {currentStep === 1 && <p className={styles.text}>{translations[lang].approval.toUpperCase()}</p>}
       </div>
     </>
   );

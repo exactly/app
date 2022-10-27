@@ -105,8 +105,8 @@ function MaturityPoolDashboard({ tab }: Props) {
       ) : (
         <MaturityPoolUserStatusByMaturity type={undefined} maturities={undefined} />
       )}
-      {tab.value == 'deposit' && !maturities?.deposits && <EmptyState connected tab={tab.value} />}
-      {tab.value == 'borrow' && !maturities?.borrows && <EmptyState connected tab={tab.value} />}
+      {tab.value === 'deposit' && !maturities?.deposits && <EmptyState connected tab={tab.value} />}
+      {tab.value === 'borrow' && !maturities?.borrows && <EmptyState connected tab={tab.value} />}
     </section>
   );
 }

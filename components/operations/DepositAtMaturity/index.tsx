@@ -94,9 +94,9 @@ function DepositAtMaturity() {
 
   useEffect(() => {
     if (fixedLenderWithSigner) {
-      if (step == 1) {
+      if (step === 1) {
         estimateApprovalGasCost();
-      } else if (step == 2) {
+      } else if (step === 2) {
         estimateGas();
       }
     }
@@ -113,7 +113,7 @@ function DepositAtMaturity() {
   }, [debounceQty, date, market, fixedLenderWithSigner]);
 
   async function checkAllowance() {
-    if (symbol == 'WETH') {
+    if (symbol === 'WETH') {
       return setStep(2);
     }
 
@@ -122,7 +122,7 @@ function DepositAtMaturity() {
     const allowance = await underlyingContract?.allowance(walletAddress, market?.value);
     const formattedAllowance = allowance && parseFloat(formatFixed(allowance, 18));
 
-    const amount = qty == '' ? 0 : parseFloat(qty);
+    const amount = !qty ? 0 : parseFloat(qty);
     if (formattedAllowance > amount && !isNaN(amount) && !isNaN(formattedAllowance)) {
       setStep(2);
     } else {
@@ -131,7 +131,7 @@ function DepositAtMaturity() {
   }
 
   async function approve() {
-    if (symbol == 'WETH' || !underlyingContract) return;
+    if (symbol === 'WETH' || !underlyingContract) return;
 
     try {
       const gasLimit = await getApprovalGasLimit();
@@ -163,7 +163,7 @@ function DepositAtMaturity() {
     let walletBalance;
     let decimals;
 
-    if (symbol == 'WETH') {
+    if (symbol === 'WETH') {
       walletBalance = await web3Provider?.getBalance(walletAddress!);
       decimals = 18;
     } else {
@@ -195,7 +195,7 @@ function DepositAtMaturity() {
       if (inputDecimals.length > decimals) return;
     }
 
-    if (step != 1 && walletBalance && e.target.valueAsNumber > parseFloat(walletBalance)) {
+    if (step !== 1 && walletBalance && e.target.valueAsNumber > parseFloat(walletBalance)) {
       setError({
         status: true,
         message: translations[lang].insufficientBalance,
@@ -239,7 +239,7 @@ function DepositAtMaturity() {
 
       const txReceipt = await deposit.wait();
 
-      if (txReceipt.status == 1) {
+      if (txReceipt.status === 1) {
         setTx({ status: 'success', hash: txReceipt?.transactionHash });
       } else {
         setTx({ status: 'error', hash: txReceipt?.transactionHash });
@@ -320,7 +320,7 @@ function DepositAtMaturity() {
   }
 
   async function estimateApprovalGasCost() {
-    if (symbol == 'WETH') return;
+    if (symbol === 'WETH') return;
 
     try {
       const gasPrice = (await fixedLenderWithSigner?.provider.getFeeData())?.maxFeePerGas;
@@ -345,7 +345,7 @@ function DepositAtMaturity() {
   function handleClickAction() {
     setLoading(true);
 
-    if (step === 1 && !pending && symbol != 'WETH') {
+    if (step === 1 && !pending && symbol !== 'WETH') {
       return approve();
     } else if (!pending) {
       return deposit();
@@ -361,7 +361,7 @@ function DepositAtMaturity() {
       const time = 31_536_000 / (parseInt(date?.value) - currentTimestamp);
       const oracle = accountData[symbol]?.usdPrice;
 
-      const qtyValue = qty == '' ? getOneDollar(oracle, decimals) : parseFixed(qty, decimals);
+      const qtyValue = !qty ? getOneDollar(oracle, decimals) : parseFixed(qty, decimals);
 
       const previewerContract = getInstance(previewerData.address!, previewerData.abi!, 'previewer');
 
@@ -399,7 +399,7 @@ function DepositAtMaturity() {
     if (!market) return;
 
     const filteredFixedLender = fixedLenderData.find((contract) => {
-      return contract.address == market.value;
+      return contract.address === market.value;
     });
 
     if (!filteredFixedLender) throw new Error('Market contract not found');
@@ -436,16 +436,16 @@ function DepositAtMaturity() {
             value={qty}
             onChange={handleInputChange}
             symbol={symbol!}
-            error={error?.component == 'input'}
+            error={error?.component === 'input'}
           />
-          {error?.component !== 'gas' && symbol != 'WETH' && <ModalTxCost gas={gas} />}
+          {error?.component !== 'gas' && symbol !== 'WETH' && <ModalTxCost gas={gas} />}
           <ModalRowEditable
             text={translations[lang].minimumApr}
             value={toPercentage(slippage)}
             editable={editSlippage}
             onChange={(e: ChangeEvent<HTMLInputElement>) => {
               setSlippage(Number(e.target.value));
-              error?.message == translations[lang].notEnoughSlippage && setError(undefined);
+              error?.message === translations[lang].notEnoughSlippage && setError(undefined);
             }}
             onClick={() => {
               setEditSlippage((prev) => !prev);
@@ -453,10 +453,10 @@ function DepositAtMaturity() {
             line
           />
           <ModalStepper currentStep={step} totalSteps={3} />
-          {error && error.component != 'gas' && <ModalError message={error.message} />}
+          {error && error.component !== 'gas' && <ModalError message={error.message} />}
           <div className={styles.buttonContainer}>
             <Button
-              text={step == 1 ? translations[lang].approve : translations[lang].deposit}
+              text={step === 1 ? translations[lang].approve : translations[lang].deposit}
               className={qty && parseFloat(qty) > 0 && !error?.status ? 'primary' : 'disabled'}
               disabled={((!qty || parseFloat(qty) <= 0) && !pending) || loading || error?.status}
               onClick={handleClickAction}

@@ -88,7 +88,7 @@ function PoolsChart({ deposits, borrows }: Props) {
       const type = payload[0].payload.type;
 
       return (
-        <div className={`${type == 'deposit' ? styles.customTooltipDeposit : styles.customTooltipBorrow}`}>
+        <div className={`${type === 'deposit' ? styles.customTooltipDeposit : styles.customTooltipBorrow}`}>
           <p className={styles.label}>{`${payload[2].name}: ${payload[0].payload.date}`}</p>
           <p className={styles.label}>{`${payload[1].name}: ${payload[1].value}%`}</p>
         </div>

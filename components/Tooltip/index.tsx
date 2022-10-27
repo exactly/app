@@ -19,7 +19,7 @@ function Tooltip({ value, image, children, disableImage, orientation = 'up' }: P
       {children}
       {!disableImage && <Image src={image ?? '/img/icons/tooltip.svg'} alt="tooltip" width={18} height={18} />}
 
-      {orientation == 'up' && (
+      {orientation === 'up' && (
         <div className={`${styles.tooltipUp} ${show ? styles.show : styles.hidden}`}>
           <div className={styles.arrow}></div>
           <p className={styles.text}>{value}</p>
@@ -27,7 +27,7 @@ function Tooltip({ value, image, children, disableImage, orientation = 'up' }: P
       )}
 
       {/* this should change if we use other tables and/or fix the overflow problem */}
-      {orientation == 'down' && (
+      {orientation === 'down' && (
         <div className={`${styles.tooltipDown} ${show ? styles.show : styles.hidden}`}>
           <div className={styles.arrow}></div>
           <p className={styles.text}>{value}</p>

@@ -31,7 +31,7 @@ function MaturitySelector({ title, subtitle }: Props) {
       )}
       <div className={style.maturityContainer}>
         {subtitle && <p className={style.title}>{subtitle}</p>}
-        {dates.length !== 0 ? (
+        {dates.length ? (
           <Select options={dates} onChange={handleChange} placeholder={date?.value} value={date?.label} editable />
         ) : (
           <Skeleton width={140} height={48} />

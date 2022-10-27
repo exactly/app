@@ -60,7 +60,7 @@ function MobileNavbar() {
           <Link href="/markets">
             <div className={styles.logo}>
               <Image
-                src={theme == 'light' ? '/img/logo.png' : '/img/logo-white.png'}
+                src={theme === 'light' ? '/img/logo.png' : '/img/logo-white.png'}
                 alt="Exactly Logo"
                 layout="responsive"
                 width={187}
@@ -124,7 +124,7 @@ function MobileNavbar() {
           })}
           {/* <li className={styles.theme} onClick={changeTheme}>
             <Image
-              src={theme == 'light' ? '/img/icons/moon.svg' : '/img/icons/sun.svg'}
+              src={theme === 'light' ? '/img/icons/moon.svg' : '/img/icons/sun.svg'}
               alt="theme toggler"
               width={16}
               height={16}

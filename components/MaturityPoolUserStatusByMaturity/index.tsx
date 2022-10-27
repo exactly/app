@@ -26,9 +26,9 @@ function MaturityPoolUserStatusByMaturity({ type, maturities }: Props) {
     <>
       {type && maturities ? (
         Object.keys(
-          type.value == 'deposit' && maturities.deposits
+          type.value === 'deposit' && maturities.deposits
             ? maturities?.deposits
-            : type.value == 'borrow' && maturities.borrows
+            : type.value === 'borrow' && maturities.borrows
             ? maturities?.borrows
             : {},
         ).map((maturity: any, key) => {
@@ -44,11 +44,11 @@ function MaturityPoolUserStatusByMaturity({ type, maturities }: Props) {
             <div className={styles.container} key={key}>
               <div className={styles.market}>
                 <div className={styles.column}>
-                  {key == 0 && ( //HACK until we add MUI grid
+                  {key === 0 && ( //HACK until we add MUI grid
                     <div className={styles.tableRow}>
                       <span className={styles.symbol}>{translations[lang].asset}</span>
                       <span className={styles.title}>
-                        {type.value == 'deposit'
+                        {type.value === 'deposit'
                           ? translations[lang].depositedAmount
                           : translations[lang].borrowedAmount}
                       </span>
@@ -59,7 +59,7 @@ function MaturityPoolUserStatusByMaturity({ type, maturities }: Props) {
                     </div>
                   )}
 
-                  {type.value == 'deposit' &&
+                  {type.value === 'deposit' &&
                     maturities?.deposits[maturity]?.map((pool: any, key: number) => {
                       const { principal, fee, symbol, market, decimals } = pool;
                       return (
@@ -78,7 +78,7 @@ function MaturityPoolUserStatusByMaturity({ type, maturities }: Props) {
                       );
                     })}
 
-                  {type.value == 'borrow' &&
+                  {type.value === 'borrow' &&
                     maturities?.borrows[maturity]?.map((pool: any, key: number) => {
                       const { principal, fee, symbol, market, decimals } = pool;
 

@@ -56,7 +56,7 @@ function Item({ market, type, fixedMarketData }: Props) {
 
     if (!walletAddress && connect) return connect();
 
-    setOperation(type == 'borrow' ? 'borrowAtMaturity' : 'depositAtMaturity');
+    setOperation(type === 'borrow' ? 'borrowAtMaturity' : 'depositAtMaturity');
     setMarket({ value: market.market });
     setOpen(true);
   }
@@ -69,7 +69,7 @@ function Item({ market, type, fixedMarketData }: Props) {
 
     try {
       const pool = accountData[market?.symbol].fixedPools.find((pool) => {
-        return pool.maturity.toString() == date?.value;
+        return pool.maturity.toString() === date?.value;
       });
 
       const decimals = accountData[market?.symbol].decimals;
@@ -152,7 +152,7 @@ function Item({ market, type, fixedMarketData }: Props) {
   }
 
   return (
-    <div className={`${style.container} ${type == 'borrow' ? style.secondaryContainer : style.primaryContainer}`}>
+    <div className={`${style.container} ${type === 'borrow' ? style.secondaryContainer : style.primaryContainer}`}>
       <Link href={`/assets/${market?.symbol}`}>
         <div className={style.symbol}>
           {(market && (
@@ -163,7 +163,7 @@ function Item({ market, type, fixedMarketData }: Props) {
       </Link>
       <div className={style.value}>
         {poolData && market ? (
-          type == 'borrow' ? (
+          type === 'borrow' ? (
             `$${formatNumber(poolData.borrowed! * poolData.rate!, 'USD')}`
           ) : (
             `$${formatNumber(poolData.supplied! * poolData.rate!, 'USD')}`
@@ -173,17 +173,17 @@ function Item({ market, type, fixedMarketData }: Props) {
         )}
       </div>
       <div className={style.value}>
-        {rate || <Skeleton />} {rate == 'N/A' && <Tooltip value={translations[lang].noRate} />}
+        {rate || <Skeleton />} {rate === 'N/A' && <Tooltip value={translations[lang].noRate} />}
       </div>
       <div className={style.buttonContainer}>
         {(market && (
           <Button
-            text={type == 'borrow' ? translations[lang].borrow : translations[lang].deposit}
+            text={type === 'borrow' ? translations[lang].borrow : translations[lang].deposit}
             onClick={(e) => {
               e.stopPropagation();
               handleClick();
             }}
-            className={type == 'borrow' ? 'secondary' : 'primary'}
+            className={type === 'borrow' ? 'secondary' : 'primary'}
           />
         )) || <Skeleton height={40} />}
       </div>

@@ -21,7 +21,7 @@ const Footer = () => {
   return (
     <footer className={styles.footer}>
       <Image
-        src={theme == 'light' ? '/img/isologo.svg' : '/img/isologo-white.svg'}
+        src={theme === 'light' ? '/img/isologo.svg' : '/img/isologo-white.svg'}
         alt="exactly logo"
         width={24}
         height={24}

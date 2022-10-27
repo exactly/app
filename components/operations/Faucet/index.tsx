@@ -66,7 +66,7 @@ function Faucet() {
   const assets = ['DAI', 'USDC', 'ETH', 'WBTC', 'wstETH'];
 
   async function addTokens() {
-    const filter = assets.filter((asset) => asset != 'ETH');
+    const filter = assets.filter((asset) => asset !== 'ETH');
 
     const images: Dictionary<string> = {
       DAI: 'https://gateway.ipfs.io/ipfs/QmXyHPX8GS99dUiChsq7iRfZ4y3aofQqPjMjFJyCpkWs8e',
@@ -113,7 +113,7 @@ function Faucet() {
           <p></p>
         </div>
         {assets.map((asset) => {
-          if (asset == 'ETH') {
+          if (asset === 'ETH') {
             return (
               <div className={styles.assetContainer} key={asset}>
                 <p className={styles.asset}>
@@ -150,7 +150,7 @@ function Faucet() {
                 {asset}
               </p>
               <div className={styles.buttonContainer}>
-                <Button text={translations[lang].mint} onClick={() => mint(asset)} loading={asset == loading} />
+                <Button text={translations[lang].mint} onClick={() => mint(asset)} loading={asset === loading} />
               </div>
             </div>
           );

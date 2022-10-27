@@ -17,7 +17,7 @@ function getBeforeBorrowLimit(
 
   const hasDepositedToFloatingPool = Number(formatFixed(accountData![symbol].floatingDepositAssets, decimals)) > 0;
 
-  if (!accountData![symbol].isCollateral && hasDepositedToFloatingPool && type == 'borrow') {
+  if (!accountData![symbol].isCollateral && hasDepositedToFloatingPool && type === 'borrow') {
     before = maxBorrowAssets.add(
       accountData![symbol].floatingDepositAssets.mul(accountData![symbol].adjustFactor).div(WAD),
     );

@@ -82,7 +82,7 @@ function BorrowAtMaturity() {
     return market?.value ? getSymbol(market.value, network?.name) : 'DAI';
   }, [market?.value, network?.name]);
 
-  const ETHrouter = web3Provider && symbol == 'WETH' && handleETH(network?.name, web3Provider?.getSigner());
+  const ETHrouter = web3Provider && symbol === 'WETH' && handleETH(network?.name, web3Provider?.getSigner());
 
   const poolLiquidity = useMemo(() => {
     if (!accountData || !date) return;
@@ -90,7 +90,7 @@ function BorrowAtMaturity() {
     const maturityDate = date.value;
 
     const maturityData = accountData[symbol].fixedPools?.find((data) => {
-      return data.maturity.toString() == maturityDate;
+      return data.maturity.toString() === maturityDate;
     });
 
     const decimals = accountData[symbol].decimals;
@@ -140,11 +140,11 @@ function BorrowAtMaturity() {
   }, [debounceQty, date, fixedLenderWithSigner]);
 
   async function checkAllowance() {
-    if (symbol != 'WETH' || !ETHrouter || !walletAddress || !fixedLenderWithSigner) return;
+    if (symbol !== 'WETH' || !ETHrouter || !walletAddress || !fixedLenderWithSigner) return;
 
     const allowance = await ETHrouter.checkAllowance(walletAddress, fixedLenderWithSigner);
 
-    if ((allowance && parseFloat(allowance) < parseFloat(qty)) || (allowance && parseFloat(allowance) == 0 && !qty)) {
+    if ((allowance && parseFloat(allowance) < parseFloat(qty)) || (allowance && parseFloat(allowance) === 0 && !qty)) {
       setNeedsApproval(true);
     }
   }
@@ -153,7 +153,7 @@ function BorrowAtMaturity() {
     let walletBalance;
     let decimals;
 
-    if (symbol == 'WETH') {
+    if (symbol === 'WETH') {
       walletBalance = await web3Provider?.getBalance(walletAddress!);
       decimals = 18;
     } else {
@@ -282,7 +282,7 @@ function BorrowAtMaturity() {
       const txReceipt = await borrow.wait();
       setLoading(false);
 
-      if (txReceipt.status == 1) {
+      if (txReceipt.status === 1) {
         setTx({ status: 'success', hash: txReceipt?.transactionHash });
       } else {
         setTx({ status: 'error', hash: txReceipt?.transactionHash });
@@ -321,7 +321,7 @@ function BorrowAtMaturity() {
   }
 
   async function estimateGas() {
-    if (symbol == 'WETH' || !accountData) return;
+    if (symbol === 'WETH' || !accountData) return;
 
     try {
       const gasPrice = (await fixedLenderWithSigner?.provider.getFeeData())?.maxFeePerGas;
@@ -367,7 +367,7 @@ function BorrowAtMaturity() {
       const time = 31_536_000 / (parseInt(date.value) - currentTimestamp);
       const oracle = accountData[symbol]?.usdPrice;
 
-      const qtyValue = qty == '' ? getOneDollar(oracle, decimals) : parseFixed(qty, decimals);
+      const qtyValue = !qty ? getOneDollar(oracle, decimals) : parseFixed(qty, decimals);
 
       const previewerContract = getInstance(previewerData.address!, previewerData.abi!, 'previewer');
 
@@ -393,7 +393,7 @@ function BorrowAtMaturity() {
       const initialAssets = qtyValue;
       const finalAssets = feeAtMaturity.assets;
 
-      if (qty === '') {
+      if (!qty) {
         if (!utilizationRate?.before) throw new Error('utilizationRate is undefined');
         setUtilizationRate({ ...utilizationRate, after: utilizationRate.before });
       } else {
@@ -421,7 +421,7 @@ function BorrowAtMaturity() {
     const maturityTimestamp = date?.value;
 
     const pool = accountData[symbol].fixedPools.find((pool) => {
-      return pool.maturity.toString() == maturityTimestamp;
+      return pool.maturity.toString() === maturityTimestamp;
     });
 
     if (!pool) return;
@@ -439,7 +439,7 @@ function BorrowAtMaturity() {
     const filteredFixedLender = fixedLenderData.find((contract) => {
       const contractSymbol = getSymbol(contract.address!, network!.name);
 
-      return contractSymbol == symbol;
+      return contractSymbol === symbol;
     });
 
     if (!filteredFixedLender) throw new Error('Market contract not found');
@@ -477,7 +477,7 @@ function BorrowAtMaturity() {
   }
 
   async function approve() {
-    if (symbol == 'WETH') {
+    if (symbol === 'WETH') {
       if (!web3Provider || !ETHrouter || !fixedLenderWithSigner) return;
       try {
         setLoading(true);
@@ -525,7 +525,7 @@ function BorrowAtMaturity() {
             />
           </section>
           <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} symbol={symbol!} />
-          {gasError?.component !== 'gas' && symbol != 'WETH' && <ModalTxCost gas={gas} />}
+          {gasError?.component !== 'gas' && symbol !== 'WETH' && <ModalTxCost gas={gas} />}
           <ModalRowEditable
             text={translations[lang].maximumBorrowApr}
             value={slippage.toLocaleString(undefined, {
@@ -536,7 +536,7 @@ function BorrowAtMaturity() {
             editable={editSlippage}
             onChange={(e: ChangeEvent<HTMLInputElement>) => {
               setSlippage(Number(e.target.value) / 100);
-              error?.message == translations[lang].notEnoughSlippage && setError(undefined);
+              error?.message === translations[lang].notEnoughSlippage && setError(undefined);
             }}
             onClick={() => {
               setEditSlippage((prev) => !prev);
@@ -551,7 +551,7 @@ function BorrowAtMaturity() {
           <ModalRowBorrowLimit qty={qty} symbol={symbol!} operation="borrow" line />
           <ModalRowUtilizationRate urBefore={utilizationRate?.before} urAfter={utilizationRate?.after} line />
 
-          {error && error.component != 'gas' && <ModalError message={error.message} />}
+          {error && error.component !== 'gas' && <ModalError message={error.message} />}
           <div className={styles.buttonContainer}>
             <Button
               text={needsApproval ? translations[lang].approve : translations[lang].borrow}

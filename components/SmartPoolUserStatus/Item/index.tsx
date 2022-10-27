@@ -179,14 +179,14 @@ function Item({
           rate &&
           `$${formatNumber(
             parseFloat(
-              formatFixed(type?.value == 'deposit' ? depositAmount : borrowedAmount, accountData?.[symbol].decimals),
+              formatFixed(type?.value === 'deposit' ? depositAmount : borrowedAmount, accountData?.[symbol].decimals),
             ) * rate,
             'USD',
             true,
           )}`) || <Skeleton width={40} />}
       </div>
 
-      {type?.value == 'deposit' && (
+      {type?.value === 'deposit' && (
         <div className={styles.value}>
           {(eTokenAmount &&
             symbol &&
@@ -198,7 +198,7 @@ function Item({
 
       {/* <div className={styles.value}>{(difference && difference) || <Skeleton width={40} />}</div> */}
 
-      {type?.value == 'deposit' && (
+      {type?.value === 'deposit' && (
         <>
           {symbol ? (
             <div>
@@ -241,7 +241,7 @@ function Item({
         <div className={styles.buttonContainer}>
           {(symbol && type && (
             <Button
-              text={type.value == 'deposit' ? translations[lang].deposit : translations[lang].borrow}
+              text={type.value === 'deposit' ? translations[lang].deposit : translations[lang].borrow}
               className={'primary'}
               onClick={() => {
                 setMarket({ value: market! });
@@ -255,11 +255,11 @@ function Item({
         <div className={styles.buttonContainer}>
           {(symbol && type && (
             <Button
-              text={type.value == 'deposit' ? translations[lang].withdraw : translations[lang].repay}
+              text={type.value === 'deposit' ? translations[lang].withdraw : translations[lang].repay}
               className={'tertiary'}
               onClick={() => {
                 setMarket({ value: market! });
-                setOperation(type.value == 'deposit' ? 'withdraw' : 'repay');
+                setOperation(type.value === 'deposit' ? 'withdraw' : 'repay');
                 setOpen(true);
               }}
             />

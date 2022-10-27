@@ -70,7 +70,7 @@ function WithdrawAtMaturity() {
 
   const debounceQty = useDebounce(qty);
 
-  const ETHrouter = web3Provider && symbol == 'WETH' && handleETH(network?.name, web3Provider?.getSigner());
+  const ETHrouter = web3Provider && symbol === 'WETH' && handleETH(network?.name, web3Provider?.getSigner());
 
   const isEarlyWithdraw = useMemo(() => {
     return Date.now() / 1000 < parseInt(date!.value);
@@ -118,11 +118,11 @@ function WithdrawAtMaturity() {
   }, [debounceQty]);
 
   async function checkAllowance() {
-    if (symbol != 'WETH' || !ETHrouter || !walletAddress || !fixedLenderWithSigner) return;
+    if (symbol !== 'WETH' || !ETHrouter || !walletAddress || !fixedLenderWithSigner) return;
 
     const allowance = await ETHrouter.checkAllowance(walletAddress, fixedLenderWithSigner);
 
-    if ((allowance && parseFloat(allowance) < parseFloat(qty)) || (allowance && parseFloat(allowance) == 0 && !qty)) {
+    if ((allowance && parseFloat(allowance) < parseFloat(qty)) || (allowance && parseFloat(allowance) === 0 && !qty)) {
       setNeedsApproval(true);
     }
   }
@@ -160,7 +160,7 @@ function WithdrawAtMaturity() {
   async function previewWithdrawAtMaturity() {
     if (!accountData || !symbol || !date) return;
 
-    if (qty == '') {
+    if (!qty) {
       setWithdrawAmount('0');
       return;
     }
@@ -195,7 +195,7 @@ function WithdrawAtMaturity() {
       const decimals = accountData[symbol].decimals;
       let withdraw;
 
-      if (symbol == 'WETH') {
+      if (symbol === 'WETH') {
         if (!ETHrouter) return;
 
         withdraw = await ETHrouter?.withdrawAtMaturityETH(date.value, qty, slippage);
@@ -220,7 +220,7 @@ function WithdrawAtMaturity() {
 
       setLoading(false);
 
-      if (txReceipt.status == 1) {
+      if (txReceipt.status === 1) {
         setTx({ status: 'success', hash: txReceipt?.transactionHash });
       } else {
         setTx({ status: 'error', hash: txReceipt?.transactionHash });
@@ -259,7 +259,7 @@ function WithdrawAtMaturity() {
   }
 
   async function estimateGas() {
-    if (symbol == 'WETH') return;
+    if (symbol === 'WETH') return;
 
     try {
       const gasPrice = (await fixedLenderWithSigner?.provider.getFeeData())?.maxFeePerGas;
@@ -296,7 +296,7 @@ function WithdrawAtMaturity() {
   }
 
   async function approve() {
-    if (symbol == 'WETH') {
+    if (symbol === 'WETH') {
       if (!web3Provider || !ETHrouter || !fixedLenderWithSigner) return;
 
       try {
@@ -325,7 +325,7 @@ function WithdrawAtMaturity() {
     const filteredFixedLender = fixedLenderData.find((contract) => {
       const contractSymbol = getSymbol(contract.address!, network!.name);
 
-      return contractSymbol == symbol;
+      return contractSymbol === symbol;
     });
 
     if (!filteredFixedLender) throw new Error('Market contract not found');
@@ -351,9 +351,9 @@ function WithdrawAtMaturity() {
             value={qty}
             onChange={handleInputChange}
             symbol={symbol!}
-            error={error?.component == 'input'}
+            error={error?.component === 'input'}
           />
-          {error?.component !== 'gas' && symbol != 'WETH' && <ModalTxCost gas={gas} />}
+          {error?.component !== 'gas' && symbol !== 'WETH' && <ModalTxCost gas={gas} />}
           <ModalRow
             text={translations[lang].amountAtFinish}
             value={amountAtFinish && `${formatNumber(amountAtFinish, symbol!, true)}`}
@@ -373,16 +373,16 @@ function WithdrawAtMaturity() {
               editable={editSlippage}
               onChange={(e: ChangeEvent<HTMLInputElement>) => {
                 setSlippage(e.target.value);
-                error?.message == translations[lang].notEnoughSlippage && setError(undefined);
+                error?.message === translations[lang].notEnoughSlippage && setError(undefined);
               }}
               onClick={() => {
-                if (slippage == '') setSlippage('0');
+                if (!slippage) setSlippage('0');
                 setEditSlippage((prev) => !prev);
               }}
               line
             />
           )}
-          {error && error.component != 'gas' && <ModalError message={error.message} />}
+          {error && error.component !== 'gas' && <ModalError message={error.message} />}
           <div className={styles.buttonContainer}>
             <Button
               text={needsApproval ? translations[lang].approve : translations[lang].withdraw}

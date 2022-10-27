@@ -25,7 +25,7 @@ function Paginator({ itemsPerPage, handleChange, currentPage }: Props) {
         const value = key + 1;
         return (
           <li
-            className={`${styles.item} ${currentPage == value ? styles.active : ''}`}
+            className={`${styles.item} ${currentPage === value ? styles.active : ''}`}
             key={key}
             onClick={() => handleChange(value)}
           >

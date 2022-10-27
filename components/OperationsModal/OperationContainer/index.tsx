@@ -20,15 +20,15 @@ function OperationContainer() {
 
   return (
     <section className={styles.operationContainer}>
-      {operation == 'deposit' && <Deposit />}
-      {operation == 'borrow' && <Borrow />}
-      {operation == 'withdraw' && <Withdraw />}
-      {operation == 'repay' && <Repay />}
-      {operation == 'depositAtMaturity' && <DepositAtMaturity />}
-      {operation == 'borrowAtMaturity' && <BorrowAtMaturity />}
-      {operation == 'withdrawAtMaturity' && <WithdrawAtMaturity />}
-      {operation == 'repayAtMaturity' && <RepayAtMaturity />}
-      {operation == 'faucet' && <Faucet />}
+      {operation === 'deposit' && <Deposit />}
+      {operation === 'borrow' && <Borrow />}
+      {operation === 'withdraw' && <Withdraw />}
+      {operation === 'repay' && <Repay />}
+      {operation === 'depositAtMaturity' && <DepositAtMaturity />}
+      {operation === 'borrowAtMaturity' && <BorrowAtMaturity />}
+      {operation === 'withdrawAtMaturity' && <WithdrawAtMaturity />}
+      {operation === 'repayAtMaturity' && <RepayAtMaturity />}
+      {operation === 'faucet' && <Faucet />}
     </section>
   );
 }

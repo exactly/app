@@ -16,7 +16,7 @@ type Props = {
 };
 
 function filterPasteValue(e: any) {
-  if (e.type == 'paste') {
+  if (e.type === 'paste') {
     const data = e.clipboardData.getData('Text');
     if (/[^\d|.]+/gi.test(data)) e.preventDefault();
   }
@@ -31,7 +31,7 @@ function ModalRowEditable({ text, value, line, editable, symbol, placeholder, on
       <p className={styles.text}>{text}</p>
       <section className={styles.editable}>
         {!editable && (
-          <p className={styles.value}>{`${value == '' ? placeholder ?? '0.00' : value}${symbol ? symbol : ''}`}</p>
+          <p className={styles.value}>{`${value ? placeholder ?? '0.00' : value}${symbol ? symbol : ''}`}</p>
         )}
         {editable && (
           <div className={styles.inputContainer}>
@@ -39,7 +39,7 @@ function ModalRowEditable({ text, value, line, editable, symbol, placeholder, on
               min={0.0}
               type="number"
               placeholder={placeholder ?? '0.00'}
-              value={value !== '' ? parseFloat(value!) : ''}
+              value={value && parseFloat(value!)}
               onChange={onChange}
               name={text}
               className={styles.input}

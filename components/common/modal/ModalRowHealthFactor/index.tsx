@@ -51,7 +51,7 @@ function ModalRowHealthFactor({ qty, symbol, operation, healthFactorCallback }: 
   function getAmount() {
     if (!accountData || !symbol) return;
 
-    if (qty == '') return Zero;
+    if (!qty) return Zero;
     const decimals = accountData[symbol].decimals;
 
     const regex = /[^,.]*$/g;

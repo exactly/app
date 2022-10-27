@@ -34,7 +34,7 @@ function AssetSelector({ title, defaultAddress, onChange }: Props) {
 
   useEffect(() => {
     const defaultOption = selectOptions?.find((market: Option) => {
-      return market.value == defaultAddress;
+      return market.value === defaultAddress;
     });
 
     setMarket(defaultOption ?? selectOptions[0]);
@@ -85,7 +85,7 @@ function AssetSelector({ title, defaultAddress, onChange }: Props) {
   }
 
   function getDataByAddress(address: string) {
-    const marketData = allMarketsData.find((market) => market.market == address);
+    const marketData = allMarketsData.find((market) => market.market === address);
     onChange && marketData && onChange(marketData);
   }
 

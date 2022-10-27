@@ -55,7 +55,7 @@ function OperationsSelector() {
   };
 
   function handleOperation(action: Operation) {
-    if (operation != action) {
+    if (operation !== action) {
       setOperation(action);
     }
   }
@@ -70,7 +70,7 @@ function OperationsSelector() {
               <li
                 key={action.value}
                 onClick={() => handleOperation(action.value as Operation)}
-                className={operation == action.value ? styles.activeAction : styles.action}
+                className={operation === action.value ? styles.activeAction : styles.action}
               >
                 {action.label}
               </li>
@@ -86,7 +86,7 @@ function OperationsSelector() {
               <li
                 key={action.value}
                 onClick={() => handleOperation(action.value as Operation)}
-                className={operation == action.value ? styles.activeAction : styles.action}
+                className={operation === action.value ? styles.activeAction : styles.action}
               >
                 {action.label}
               </li>

@@ -79,7 +79,7 @@ function Borrow() {
     return limit ?? undefined;
   }, [accountData, symbol]);
 
-  const ETHrouter = web3Provider && symbol == 'WETH' && handleETH(network?.name, web3Provider?.getSigner());
+  const ETHrouter = web3Provider && symbol === 'WETH' && handleETH(network?.name, web3Provider?.getSigner());
 
   useEffect(() => {
     setQty('');
@@ -114,11 +114,11 @@ function Borrow() {
   }, [fixedLenderWithSigner, accountData]);
 
   async function checkAllowance() {
-    if (symbol != 'WETH' || !ETHrouter || !walletAddress || !fixedLenderWithSigner) return;
+    if (symbol !== 'WETH' || !ETHrouter || !walletAddress || !fixedLenderWithSigner) return;
 
     const allowance = await ETHrouter.checkAllowance(walletAddress, fixedLenderWithSigner);
 
-    if ((allowance && parseFloat(allowance) < parseFloat(qty)) || (allowance && parseFloat(allowance) == 0 && !qty)) {
+    if ((allowance && parseFloat(allowance) < parseFloat(qty)) || (allowance && parseFloat(allowance) === 0 && !qty)) {
       setNeedsApproval(true);
     }
   }
@@ -127,7 +127,7 @@ function Borrow() {
     let walletBalance;
     let decimals;
 
-    if (symbol == 'WETH') {
+    if (symbol === 'WETH') {
       walletBalance = await web3Provider?.getBalance(walletAddress!);
       decimals = 18;
     } else {
@@ -223,7 +223,7 @@ function Borrow() {
     try {
       let borrow;
 
-      if (symbol == 'WETH') {
+      if (symbol === 'WETH') {
         if (!web3Provider || !ETHrouter) return;
 
         borrow = await ETHrouter?.borrowETH(qty.toString());
@@ -240,7 +240,7 @@ function Borrow() {
       const txReceipt = await borrow.wait();
       setLoading(false);
 
-      if (txReceipt.status == 1) {
+      if (txReceipt.status === 1) {
         setTx({ status: 'success', hash: txReceipt?.transactionHash });
       } else {
         setTx({ status: 'error', hash: txReceipt?.transactionHash });
@@ -299,7 +299,7 @@ function Borrow() {
   }
 
   async function estimateGas() {
-    if (symbol == 'WETH' || !accountData) return;
+    if (symbol === 'WETH' || !accountData) return;
 
     try {
       const gasPrice = (await fixedLenderWithSigner?.provider.getFeeData())?.maxFeePerGas;
@@ -342,7 +342,7 @@ function Borrow() {
     const filteredFixedLender = fixedLenderData.find((contract) => {
       const contractSymbol = getSymbol(contract.address!, network!.name);
 
-      return contractSymbol == symbol;
+      return contractSymbol === symbol;
     });
 
     if (!filteredFixedLender) throw new Error('Market contract not found');
@@ -360,7 +360,7 @@ function Borrow() {
   }
 
   async function approve() {
-    if (symbol == 'WETH') {
+    if (symbol === 'WETH') {
       if (!web3Provider || !ETHrouter || !fixedLenderWithSigner) return;
       try {
         setLoading(true);
@@ -400,16 +400,16 @@ function Borrow() {
             value={qty}
             onChange={handleInputChange}
             symbol={symbol!}
-            error={error?.component == 'input'}
+            error={error?.component === 'input'}
           />
-          {gasError?.component !== 'gas' && symbol != 'WETH' && <ModalTxCost gas={gas} />}
+          {gasError?.component !== 'gas' && symbol !== 'WETH' && <ModalTxCost gas={gas} />}
           {symbol ? (
             <ModalRowHealthFactor qty={qty} symbol={symbol} operation="borrow" healthFactorCallback={getHealthFactor} />
           ) : (
             <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
           )}
           <ModalRowBorrowLimit qty={qty} symbol={symbol!} operation="borrow" line />
-          {error && error.component != 'gas' && <ModalError message={error.message} />}
+          {error && error.component !== 'gas' && <ModalError message={error.message} />}
           <div className={styles.buttonContainer}>
             <Button
               text={needsApproval ? translations[lang].approve : translations[lang].borrow}

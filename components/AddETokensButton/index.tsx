@@ -28,7 +28,7 @@ function AddETokensButton() {
   };
 
   async function addTokens() {
-    if (!network || fixedLenders.length == 0) return;
+    if (!network || !fixedLenders.length) return;
 
     try {
       fixedLenders?.forEach(async (contract) => {

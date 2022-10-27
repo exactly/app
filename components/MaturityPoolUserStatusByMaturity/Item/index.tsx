@@ -187,9 +187,7 @@ function Item({ type, amount, maturityDate, symbol, market, progress, decimals, 
             <Skeleton width={40} />
           )}
         </span>
-        <span className={styles.value}>
-          {APR != undefined ? `${(APR || 0).toFixed(2)} %` : <Skeleton width={40} />}
-        </span>
+        <span className={styles.value}>{APR != null ? `${(APR || 0).toFixed(2)} %` : <Skeleton width={40} />}</span>
 
         <span className={styles.value}>{maturityDate && parseTimestamp(maturityDate)}</span>
 
@@ -205,12 +203,12 @@ function Item({ type, amount, maturityDate, symbol, market, progress, decimals, 
         {type && data ? (
           <div className={styles.buttonContainer}>
             <Button
-              text={type.value == 'borrow' ? translations[lang].repay : translations[lang].withdraw}
+              text={type.value === 'borrow' ? translations[lang].repay : translations[lang].withdraw}
               className={'tertiary'}
               onClick={() => {
                 setDate({ value: maturityDate!, label: parseTimestamp(maturityDate!) });
                 setMarket({ value: market! });
-                setOperation(type.value == 'borrow' ? 'repayAtMaturity' : 'withdrawAtMaturity');
+                setOperation(type.value === 'borrow' ? 'repayAtMaturity' : 'withdrawAtMaturity');
                 setOpen(true);
               }}
             />
@@ -233,14 +231,14 @@ function Item({ type, amount, maturityDate, symbol, market, progress, decimals, 
               const value = symbol && formatFixed(transaction.assets, decimals);
 
               const text = transaction?.fee
-                ? type?.value == 'borrow'
+                ? type?.value === 'borrow'
                   ? translations[lang].borrow
                   : translations[lang].deposit
-                : type?.value == 'borrow'
+                : type?.value === 'borrow'
                 ? translations[lang].repay
                 : translations[lang].withdraw;
 
-              const isEnter = text.toLowerCase() == 'borrow' || text.toLowerCase() == 'deposit';
+              const isEnter = text.toLowerCase() === 'borrow' || text.toLowerCase() === 'deposit';
 
               return (
                 <tr key={key}>
