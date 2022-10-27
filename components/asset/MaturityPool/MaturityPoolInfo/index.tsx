@@ -1,4 +1,4 @@
-import { FC, useContext } from 'react';
+import React, { FC, useContext } from 'react';
 import Grid from '@mui/material/Grid';
 
 import LangContext from 'contexts/LangContext';

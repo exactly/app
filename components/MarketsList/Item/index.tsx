@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { MaxUint256 } from '@ethersproject/constants';
 import Skeleton from 'react-loading-skeleton';

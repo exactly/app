@@ -1,6 +1,6 @@
 import type { FC, ReactNode } from 'react';
 import type { ContractInterface } from '@ethersproject/contracts';
-import { createContext } from 'react';
+import React, { createContext } from 'react';
 
 import { useWeb3Context } from './Web3Context';
 

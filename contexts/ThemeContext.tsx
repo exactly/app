@@ -1,5 +1,5 @@
 import type { FC, ReactNode } from 'react';
-import { createContext, useEffect, useState } from 'react';
+import React, { createContext, useEffect, useState } from 'react';
 
 type ContextValues = {
   theme: 'light' | 'dark';

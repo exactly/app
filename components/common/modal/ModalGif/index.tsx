@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import React, { useContext } from 'react';
 import Image from 'next/image';
 
 import styles from './style.module.scss';

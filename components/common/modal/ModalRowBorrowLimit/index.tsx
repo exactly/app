@@ -1,4 +1,4 @@
-import { useContext, useMemo } from 'react';
+import React, { useContext, useMemo } from 'react';
 import Image from 'next/image';
 import Skeleton from 'react-loading-skeleton';
 import { Zero } from '@ethersproject/constants';

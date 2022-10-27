@@ -1,6 +1,6 @@
 import type { Contract } from '@ethersproject/contracts';
 import type { BigNumber } from '@ethersproject/bignumber';
-import { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { formatFixed, parseFixed } from '@ethersproject/bignumber';
 import Skeleton from 'react-loading-skeleton';
 import Image from 'next/image';

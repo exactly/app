@@ -1,4 +1,4 @@
-import { useState, useContext, useMemo, useEffect, useCallback } from 'react';
+import React, { useState, useContext, useMemo, useEffect, useCallback } from 'react';
 import { formatFixed } from '@ethersproject/bignumber';
 import Image from 'next/image';
 import Skeleton from 'react-loading-skeleton';

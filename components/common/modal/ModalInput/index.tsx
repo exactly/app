@@ -1,5 +1,5 @@
 import { formatFixed, parseFixed } from '@ethersproject/bignumber';
-import { ChangeEventHandler, MouseEventHandler, useContext, ClipboardEvent, useMemo } from 'react';
+import React, { ChangeEventHandler, MouseEventHandler, useContext, ClipboardEvent, useMemo } from 'react';
 
 import AccountDataContext from 'contexts/AccountDataContext';
 

@@ -1,6 +1,6 @@
 import type { FC, ReactNode } from 'react';
 import type { ContractInterface } from '@ethersproject/contracts';
-import { createContext, useState } from 'react';
+import React, { createContext, useState } from 'react';
 import { InfuraProvider } from '@ethersproject/providers';
 import { Contract } from '@ethersproject/contracts';
 

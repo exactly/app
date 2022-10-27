@@ -1,3 +1,4 @@
+import React from 'react';
 import { Cell, Pie, PieChart, ResponsiveContainer, Sector } from 'recharts';
 
 import { DonutData } from 'types/DonutData';

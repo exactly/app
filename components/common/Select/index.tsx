@@ -1,4 +1,4 @@
-import { CSSProperties, MouseEventHandler } from 'react';
+import React, { CSSProperties, MouseEventHandler } from 'react';
 
 import styles from './style.module.scss';
 import Dropdown, { Option } from 'react-dropdown';

@@ -1,6 +1,6 @@
 import type { Contract } from '@ethersproject/contracts';
 import { formatFixed, parseFixed } from '@ethersproject/bignumber';
-import { ChangeEvent, useContext, useEffect, useMemo, useState } from 'react';
+import React, { ChangeEvent, useContext, useEffect, useMemo, useState } from 'react';
 import { Zero } from '@ethersproject/constants';
 
 import Button from 'components/common/Button';

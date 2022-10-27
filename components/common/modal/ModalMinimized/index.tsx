@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import React, { useContext } from 'react';
 import { useSpring, animated } from 'react-spring';
 import Image from 'next/image';
 

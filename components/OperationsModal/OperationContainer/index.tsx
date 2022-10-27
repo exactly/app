@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import React, { useContext } from 'react';
 import dynamic from 'next/dynamic';
 
 const Deposit = dynamic(() => import('components/operations/Deposit'));

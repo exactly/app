@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import type { GetStaticProps, NextPage } from 'next';
 import Grid from '@mui/material/Grid';
 

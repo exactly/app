@@ -1,6 +1,6 @@
 import type { BigNumber } from '@ethersproject/bignumber';
 import { formatFixed } from '@ethersproject/bignumber';
-import { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import request from 'graphql-request';
 import Image from 'next/image';
 

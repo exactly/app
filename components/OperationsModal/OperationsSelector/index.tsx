@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import React, { useContext } from 'react';
 
 import ModalStatusContext, { Operation } from 'contexts/ModalStatusContext';
 import LangContext from 'contexts/LangContext';

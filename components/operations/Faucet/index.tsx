@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { parseFixed } from '@ethersproject/bignumber';
 import Image from 'next/image';
 

@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { formatFixed, parseFixed } from '@ethersproject/bignumber';
 import dynamic from 'next/dynamic';
 import { captureMessage } from '@sentry/nextjs';

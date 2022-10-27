@@ -1,5 +1,5 @@
 import type { Contract } from '@ethersproject/contracts';
-import { ChangeEvent, useContext, useEffect, useMemo, useState } from 'react';
+import React, { ChangeEvent, useContext, useEffect, useMemo, useState } from 'react';
 import { formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { MaxUint256 } from '@ethersproject/constants';
 

@@ -4,6 +4,7 @@ import '../styles/variables.css';
 import type { AppProps } from 'next/app';
 import Head from 'next/head';
 import Script from 'next/script';
+import React from 'react';
 
 import { Web3ContextProvider } from 'contexts/Web3Context';
 import { LangProvider } from 'contexts/LangContext';

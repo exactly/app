@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import React, { FC } from 'react';
 import Grid from '@mui/material/Grid';
 import Image from 'next/image';
 import IconButton from '@mui/material/IconButton';

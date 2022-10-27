@@ -1,4 +1,4 @@
-import { ChangeEventHandler, CSSProperties } from 'react';
+import React, { ChangeEventHandler, CSSProperties } from 'react';
 import styles from './style.module.scss';
 
 type Props = {

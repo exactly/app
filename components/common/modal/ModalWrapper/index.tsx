@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import React, { ReactNode } from 'react';
 import { useSpring, animated } from 'react-spring';
 
 import ModalClose from '../ModalClose';

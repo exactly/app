@@ -1,4 +1,4 @@
-import { useContext, useMemo } from 'react';
+import React, { useContext, useMemo } from 'react';
 import { formatFixed } from '@ethersproject/bignumber';
 import Skeleton from 'react-loading-skeleton';
 

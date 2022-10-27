@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import React, { useContext } from 'react';
 import { Option } from 'react-dropdown';
 import styles from './style.module.scss';
 import keys from './translations.json';
