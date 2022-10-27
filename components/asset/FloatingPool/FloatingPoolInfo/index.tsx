@@ -14,6 +14,7 @@ import keys from './translations.json';
 import formatNumber from 'utils/formatNumber';
 import queryRates from 'utils/queryRates';
 import getSubgraph from 'utils/getSubgraph';
+import { toPercentage } from 'utils/utils';
 
 type FloatingPoolInfoProps = {
   symbol: string;
@@ -79,15 +80,15 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol, eMarketAddress, n
   const itemsInfo: PoolItemInfoProps[] = [
     {
       label: translations[lang].totalDeposited,
-      value: deposited ? `$${formatNumber(deposited)}` : undefined,
+      value: deposited != null ? `$${formatNumber(deposited)}` : undefined,
     },
     {
       label: translations[lang].totalBorrowed,
-      value: borrowed ? `$${formatNumber(borrowed)}` : undefined,
+      value: borrowed != null ? `$${formatNumber(borrowed)}` : undefined,
     },
     {
       label: translations[lang].TVL,
-      value: deposited && borrowed ? `$${formatNumber(deposited - borrowed)}` : undefined,
+      value: deposited != null && borrowed != null ? `$${formatNumber(deposited - borrowed)}` : undefined,
     },
     {
       label: translations[lang].depositAPR,
@@ -99,7 +100,7 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol, eMarketAddress, n
     },
     {
       label: translations[lang].utilizationRate,
-      value: deposited && borrowed ? `${((borrowed / deposited) * 100).toFixed(2)}%` : undefined,
+      value: toPercentage(deposited != null && borrowed != null && deposited > 0 ? borrowed / deposited : undefined),
     },
   ];
 
