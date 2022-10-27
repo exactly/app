@@ -4,12 +4,14 @@ const { include: devFiles } = require('./tsconfig.dev.json');
 module.exports = {
   parser: '@typescript-eslint/parser',
   parserOptions: { project: ['tsconfig.json', 'tsconfig.dev.json'] },
-  settings: { 'import/resolver': 'typescript' },
+  settings: { react: { version: 'detect' }, 'import/resolver': 'typescript' },
   extends: [
     'eslint:recommended',
     'plugin:import/errors',
     'plugin:import/warnings',
+    'plugin:react/recommended',
     'plugin:prettier/recommended',
+    'plugin:react-hooks/recommended',
     'plugin:eslint-comments/recommended',
     'plugin:@typescript-eslint/recommended',
     'plugin:@next/next/recommended',
