@@ -28,7 +28,7 @@ import decimals from 'config/decimals.json';
 
 import { getSymbol, getUnderlyingData } from 'utils/utils';
 import formatNumber from 'utils/formatNumber';
-import parseSymbol from 'utils/parseSymbol';
+import formatSymbol from 'utils/formatSymbol';
 import getHealthFactorData from 'utils/getHealthFactorData';
 import parseHealthFactor from 'utils/parseHealthFactor';
 
@@ -164,7 +164,7 @@ function Item({
         {(symbol && <Image src={`/img/assets/${symbol}.svg`} alt={symbol} width={20} height={20} />) || (
           <Skeleton circle height={20} width={20} />
         )}
-        <div className={styles.primary}>{(symbol && parseSymbol(symbol)) || <Skeleton />}</div>
+        <div className={styles.primary}>{(symbol && formatSymbol(symbol)) || <Skeleton />}</div>
       </div>
       {/* <div className={styles.value}>
         {(originalAmount &&

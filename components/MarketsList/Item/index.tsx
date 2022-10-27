@@ -26,7 +26,7 @@ import style from './style.module.scss';
 
 import keys from './translations.json';
 import formatNumber from 'utils/formatNumber';
-import parseSymbol from 'utils/parseSymbol';
+import formatSymbol from 'utils/formatSymbol';
 
 type Props = {
   market?: Market;
@@ -159,7 +159,7 @@ function Item({ market, type, fixedMarketData }: Props) {
           {(market && (
             <Image src={`/img/assets/${market?.symbol}.svg`} alt={market?.symbol} width={40} height={40} />
           )) || <Skeleton circle width={40} height={40} />}
-          <span className={style.primary}>{(market && parseSymbol(market?.symbol)) || <Skeleton width={30} />}</span>
+          <span className={style.primary}>{(market && formatSymbol(market?.symbol)) || <Skeleton width={30} />}</span>
         </div>
       </Link>
       <div className={style.value}>

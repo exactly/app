@@ -3,7 +3,7 @@ import { utils } from 'ethers';
 import Skeleton from 'react-loading-skeleton';
 
 import formatNumber from 'utils/formatNumber';
-import parseSymbol from 'utils/parseSymbol';
+import formatSymbol from 'utils/formatSymbol';
 
 import AssetSelector from 'components/AssetSelector';
 
@@ -24,7 +24,7 @@ function ModalAsset({ asset, assetTitle, amount, amountTitle }: Props) {
   const { market } = useContext(MarketContext);
 
   const parsedSymbol = useMemo(() => {
-    return parseSymbol(asset);
+    return formatSymbol(asset);
   }, [asset]);
 
   const exchangeRate = useMemo(() => {
