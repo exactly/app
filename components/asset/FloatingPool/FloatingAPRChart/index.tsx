@@ -11,6 +11,7 @@ import getSubgraph from 'utils/getSubgraph';
 import queryRates from 'utils/queryRates';
 
 import { LangKeys } from 'types/Lang';
+import parseTimestamp from 'utils/parseTimestamp';
 
 interface Props {
   market: string | undefined;
@@ -47,7 +48,11 @@ function FloatingAPRChart({ market, networkName }: Props) {
   }, [market, networkName, queryOptions]);
 
   function formatXAxis(tick: any) {
-    return tick.toLocaleString();
+    try {
+      return parseTimestamp(tick.getTime() / 1000); // directly checks if it's a date
+    } catch (error) {
+      return tick;
+    }
   }
 
   useEffect(() => {
