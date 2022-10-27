@@ -1,9 +1,9 @@
-import { ethers } from 'ethers';
+import type { ContractInterface } from '@ethersproject/contracts';
 import { createContext } from 'react';
 
 type ContextValues = {
   address: string | undefined;
-  abi: ethers.ContractInterface | undefined;
+  abi: ContractInterface | undefined;
 };
 
 const defaultValues: ContextValues = {

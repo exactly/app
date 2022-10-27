@@ -1,5 +1,5 @@
+import type { Contract } from '@ethersproject/contracts';
 import { ChangeEvent, useContext, useEffect, useMemo, useState } from 'react';
-import { Contract, ethers } from 'ethers';
 import { formatFixed, parseFixed } from '@ethersproject/bignumber';
 
 import Button from 'components/common/Button';
@@ -95,7 +95,7 @@ function BorrowAtMaturity() {
 
     const decimals = accountData[symbol].decimals;
 
-    const limit = maturityData && ethers.utils.formatUnits(maturityData.available!, decimals);
+    const limit = maturityData && formatFixed(maturityData.available!, decimals);
 
     return limit ? parseFloat(limit) : undefined;
   }, [accountData, date?.value]);
@@ -161,7 +161,7 @@ function BorrowAtMaturity() {
       decimals = await underlyingContract?.decimals();
     }
 
-    const formattedBalance = walletBalance && ethers.utils.formatUnits(walletBalance, decimals);
+    const formattedBalance = walletBalance && formatFixed(walletBalance, decimals);
 
     if (formattedBalance) {
       setWalletBalance(formattedBalance);
@@ -267,8 +267,8 @@ function BorrowAtMaturity() {
 
         borrow = await fixedLenderWithSigner?.borrowAtMaturity(
           parseInt(date.value),
-          ethers.utils.parseUnits(qty!, decimals),
-          ethers.utils.parseUnits(`${maxAmount.toFixed(decimals)}`, decimals),
+          parseFixed(qty!, decimals),
+          parseFixed(`${maxAmount.toFixed(decimals)}`, decimals),
           walletAddress,
           walletAddress,
           {
@@ -349,8 +349,8 @@ function BorrowAtMaturity() {
 
     const gasLimit = await fixedLenderWithSigner?.estimateGas.borrowAtMaturity(
       parseInt(date.value),
-      ethers.utils.parseUnits(qty, decimals),
-      ethers.utils.parseUnits(maxQty, decimals),
+      parseFixed(qty, decimals),
+      parseFixed(maxQty, decimals),
       walletAddress,
       walletAddress,
     );

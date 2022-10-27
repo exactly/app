@@ -1,5 +1,5 @@
 import { FC, useCallback, useContext, useEffect, useState } from 'react';
-import { formatUnits } from '@ethersproject/units';
+import { formatFixed } from '@ethersproject/bignumber';
 import { WeiPerEther } from '@ethersproject/constants';
 
 import LangContext from 'contexts/LangContext';
@@ -43,9 +43,9 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol, eMarketAddress, n
         usdPrice: exchangeRate,
       } = accountData[symbol];
 
-      const totalDepositUSD = formatUnits(totalDeposited.mul(exchangeRate).div(WeiPerEther), decimals);
+      const totalDepositUSD = formatFixed(totalDeposited.mul(exchangeRate).div(WeiPerEther), decimals);
 
-      const totalBorrowUSD = formatUnits(totalBorrowed.mul(exchangeRate).div(WeiPerEther), decimals);
+      const totalBorrowUSD = formatFixed(totalBorrowed.mul(exchangeRate).div(WeiPerEther), decimals);
 
       setDeposited(parseFloat(totalDepositUSD));
       setBorrowed(parseFloat(totalBorrowUSD));

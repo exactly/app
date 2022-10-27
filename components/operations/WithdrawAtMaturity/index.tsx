@@ -1,6 +1,7 @@
+import type { Contract } from '@ethersproject/contracts';
 import { formatFixed, parseFixed } from '@ethersproject/bignumber';
-import { Contract, ethers } from 'ethers';
 import { ChangeEvent, useContext, useEffect, useMemo, useState } from 'react';
+import { Zero } from '@ethersproject/constants';
 
 import Button from 'components/common/Button';
 import ModalAsset from 'components/common/modal/ModalAsset';
@@ -81,7 +82,7 @@ function WithdrawAtMaturity() {
     const pool = accountData[symbol].fixedDepositPositions.find((position) => {
       return position.maturity.toNumber().toString() === date!.value;
     });
-    const positionAssets = pool ? pool.position.principal.add(pool.position.fee) : ethers.constants.Zero;
+    const positionAssets = pool ? pool.position.principal.add(pool.position.fee) : Zero;
 
     return positionAssets;
   }, [date, accountData, symbol]);
@@ -168,7 +169,7 @@ function WithdrawAtMaturity() {
 
     const market = fixedLenderWithSigner?.address;
     const parsedMaturity = parseInt(date.value);
-    const parsedQtyValue = ethers.utils.parseUnits(qty, decimals);
+    const parsedQtyValue = parseFixed(qty, decimals);
     const WAD = parseFixed('1', 18);
 
     const previewerContract = getInstance(previewerData.address!, previewerData.abi!, 'previewer');
@@ -203,8 +204,8 @@ function WithdrawAtMaturity() {
 
         withdraw = await fixedLenderWithSigner?.withdrawAtMaturity(
           date.value,
-          ethers.utils.parseUnits(qty, decimals),
-          ethers.utils.parseUnits(slippage, decimals),
+          parseFixed(qty, decimals),
+          parseFixed(slippage, decimals),
           walletAddress,
           walletAddress,
           {
@@ -285,8 +286,8 @@ function WithdrawAtMaturity() {
 
     const gasLimit = await fixedLenderWithSigner?.estimateGas.withdrawAtMaturity(
       date.value,
-      ethers.utils.parseUnits(qty, decimals),
-      ethers.utils.parseUnits(minQty, decimals),
+      parseFixed(qty, decimals),
+      parseFixed(minQty, decimals),
       walletAddress,
       walletAddress,
     );

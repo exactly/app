@@ -1,6 +1,7 @@
+import type { Contract } from '@ethersproject/contracts';
 import { ChangeEvent, useContext, useEffect, useMemo, useState } from 'react';
-import { Contract, ethers } from 'ethers';
 import { formatFixed, parseFixed } from '@ethersproject/bignumber';
+import { MaxUint256, Zero } from '@ethersproject/constants';
 
 import Button from 'components/common/Button';
 import ModalAsset from 'components/common/modal/ModalAsset';
@@ -85,7 +86,7 @@ function RepayAtMaturity() {
       return position.maturity.toNumber().toString() === date!.value;
     });
 
-    const positionAssets = pool ? pool.position.principal.add(pool.position.fee) : ethers.constants.Zero;
+    const positionAssets = pool ? pool.position.principal.add(pool.position.fee) : Zero;
 
     return positionAssets;
   }, [date, accountData, symbol]);
@@ -164,7 +165,7 @@ function RepayAtMaturity() {
 
     const allowance = await underlyingContract?.allowance(walletAddress, fixedLenderWithSigner?.address);
 
-    const formattedAllowance = allowance && parseFloat(ethers.utils.formatEther(allowance));
+    const formattedAllowance = allowance && parseFloat(formatFixed(allowance, 18));
 
     const amount = qty == '' ? 0 : parseFloat(qty);
 
@@ -183,7 +184,7 @@ function RepayAtMaturity() {
 
       const gasLimit = await getApprovalGasLimit();
 
-      const approval = await underlyingContract?.approve(fixedLenderWithSigner?.address, ethers.constants.MaxUint256, {
+      const approval = await underlyingContract?.approve(fixedLenderWithSigner?.address, MaxUint256, {
         gasLimit: gasLimit ? Math.ceil(Number(formatFixed(gasLimit)) * numbers.gasLimitMultiplier) : undefined,
       });
 
@@ -227,7 +228,7 @@ function RepayAtMaturity() {
     // let finalAssets = positionAssets;
     // if (isLateRepay) {
     //   const penaltyAssets = calculatePenalties();
-    //   finalAssets = finalAssets.add(penaltyAssets || ethers.constants.Zero);
+    //   finalAssets = finalAssets.add(penaltyAssets || Zero);
     // }
 
     const { decimals } = accountData![symbol];
@@ -259,7 +260,7 @@ function RepayAtMaturity() {
 
       const market = fixedLenderWithSigner?.address;
       const parsedMaturity = parseInt(date.value);
-      const parsedQtyValue = ethers.utils.parseUnits(qty, decimals);
+      const parsedQtyValue = parseFixed(qty, decimals);
       const WAD = parseFixed('1', 18);
 
       const previewerContract = getInstance(previewerData.address!, previewerData.abi!, 'previewer');
@@ -303,8 +304,8 @@ function RepayAtMaturity() {
 
         repay = await fixedLenderWithSigner?.repayAtMaturity(
           date.value,
-          ethers.utils.parseUnits(qty, decimals),
-          ethers.utils.parseUnits(slippage, decimals),
+          parseFixed(qty, decimals),
+          parseFixed(slippage, decimals),
           walletAddress,
           {
             gasLimit: gasLimit ? Math.ceil(Number(formatFixed(gasLimit)) * numbers.gasLimitMultiplier) : undefined,
@@ -384,8 +385,8 @@ function RepayAtMaturity() {
 
     const gasLimit = await fixedLenderWithSigner?.estimateGas.repayAtMaturity(
       date.value,
-      ethers.utils.parseUnits(qty, decimals),
-      ethers.utils.parseUnits(maxQty, decimals),
+      parseFixed(qty, decimals),
+      parseFixed(maxQty, decimals),
       walletAddress,
     );
 
@@ -393,7 +394,7 @@ function RepayAtMaturity() {
   }
 
   async function getApprovalGasLimit() {
-    const gasLimit = await underlyingContract?.estimateGas.approve(market?.value, ethers.constants.MaxUint256);
+    const gasLimit = await underlyingContract?.estimateGas.approve(market?.value, MaxUint256);
 
     return gasLimit;
   }

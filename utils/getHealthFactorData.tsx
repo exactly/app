@@ -1,20 +1,20 @@
-import { BigNumber, ethers } from 'ethers';
-import { parseFixed } from '@ethersproject/bignumber';
+import { BigNumber, parseFixed } from '@ethersproject/bignumber';
+import { Zero } from '@ethersproject/constants';
 
 import { AccountData } from 'types/AccountData';
 import { FixedLenderAccountData } from 'types/FixedLenderAccountData';
 import { WAD } from './fixedPointMathLib';
 
 function getHealthFactorData(accountData: AccountData) {
-  let collateral = ethers.constants.Zero;
-  let debt = ethers.constants.Zero;
+  let collateral = Zero;
+  let debt = Zero;
 
   const data = Object.values(accountData);
 
   try {
     data.forEach((fixedLender: FixedLenderAccountData) => {
-      let fixedLenderCollateral = ethers.constants.Zero;
-      let fixedLenderDebt = ethers.constants.Zero;
+      let fixedLenderCollateral = Zero;
+      let fixedLenderDebt = Zero;
       const decimals = fixedLender.decimals;
       const decimalWAD = parseFixed('1', decimals); //WAD based on the decimals of the fixedLender
 

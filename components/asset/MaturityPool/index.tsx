@@ -1,6 +1,5 @@
 import { FC, useCallback, useContext, useEffect, useState } from 'react';
-import { formatUnits } from '@ethersproject/units';
-import { parseFixed } from '@ethersproject/bignumber';
+import { formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { Zero, WeiPerEther } from '@ethersproject/constants';
 import Grid from '@mui/material/Grid';
 
@@ -69,8 +68,8 @@ const AssetMaturityPools: FC<AssetMaturityPoolsProps> = ({ symbol }) => {
       tempTotalBorrowed = tempTotalBorrowed.add(borrowed);
     });
 
-    const totalDepositedUSD = formatUnits(tempTotalDeposited.mul(exchangeRate).div(WeiPerEther), decimals);
-    const totalBorrowedUSD = formatUnits(tempTotalBorrowed.mul(exchangeRate).div(WeiPerEther), decimals);
+    const totalDepositedUSD = formatFixed(tempTotalDeposited.mul(exchangeRate).div(WeiPerEther), decimals);
+    const totalBorrowedUSD = formatFixed(tempTotalBorrowed.mul(exchangeRate).div(WeiPerEther), decimals);
 
     setTotalDeposited(Number(totalDepositedUSD));
     setTotalBorrowed(Number(totalBorrowedUSD));

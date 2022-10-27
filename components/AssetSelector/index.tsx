@@ -1,5 +1,5 @@
 import { useState, useContext, useMemo, useEffect, useCallback } from 'react';
-import { utils } from 'ethers';
+import { formatFixed } from '@ethersproject/bignumber';
 import Image from 'next/image';
 import Skeleton from 'react-loading-skeleton';
 
@@ -59,7 +59,7 @@ function AssetSelector({ title, defaultAddress, onChange }: Props) {
         name: market.assetSymbol,
         market: market.market,
         isListed: true,
-        collateralFactor: parseFloat(utils.formatEther(market.adjustFactor)),
+        collateralFactor: parseFloat(formatFixed(market.adjustFactor, 18)),
       };
 
       setAllMarketsData((prevState) => [...prevState, marketData]);

@@ -1,6 +1,6 @@
 import type { FC, ReactNode } from 'react';
+import type { ContractInterface } from '@ethersproject/contracts';
 import { createContext } from 'react';
-import { ethers } from 'ethers';
 
 import getABI from 'config/abiImporter';
 
@@ -8,7 +8,7 @@ import { useWeb3Context } from './Web3Context';
 
 type ContextValues = {
   address: string | undefined;
-  abi: ethers.ContractInterface | undefined;
+  abi: ContractInterface | undefined;
 };
 
 const defaultValues: ContextValues = {

@@ -1,10 +1,13 @@
-import { ethers } from 'ethers';
+import type { ContractInterface } from '@ethersproject/contracts';
+import type { Signer } from '@ethersproject/abstract-signer';
+import { InfuraProvider } from '@ethersproject/providers';
+import { Contract } from '@ethersproject/contracts';
 
 export function getContractData(
   network: string | undefined,
   address: string,
-  abi: ethers.ContractInterface,
-  providerData?: ethers.Signer,
+  abi: ContractInterface,
+  providerData?: Signer,
 ) {
   if (!address || !abi) return;
 
@@ -16,10 +19,10 @@ export function getContractData(
     if (providerData) {
       provider = providerData;
     } else {
-      provider = new ethers.providers.InfuraProvider(publicNetwork);
+      provider = new InfuraProvider(publicNetwork);
     }
 
-    return new ethers.Contract(address, abi, provider).connect(provider);
+    return new Contract(address, abi, provider).connect(provider);
   } catch (e) {
     console.log(e);
   }

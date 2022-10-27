@@ -1,6 +1,6 @@
+import type { Contract } from '@ethersproject/contracts';
 import { useContext, useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
-import { Contract } from 'ethers';
 
 const Item = dynamic(() => import('./Item'));
 const EmptyState = dynamic(() => import('components/EmptyState'));
@@ -34,7 +34,7 @@ function SmartPoolUserStatus({ walletAddress, type }: Props) {
   const [itemData, setItemData] = useState<Array<SmartPoolItemData> | undefined>(undefined);
   const [auditorContract, setAuditorContract] = useState<Contract | undefined>(undefined);
 
-  const orderAssets = ['DAI', 'USDC', 'WETH', 'WBTC', 'WSTETH'];
+  const orderAssets = ['DAI', 'USDC', 'WETH', 'WBTC', 'wstETH'];
 
   useEffect(() => {
     getCurrentBalance();

@@ -1,8 +1,8 @@
 import { useContext, useMemo } from 'react';
 import { parseFixed } from '@ethersproject/bignumber';
+import { Zero } from '@ethersproject/constants';
 import Image from 'next/image';
 import Skeleton from 'react-loading-skeleton';
-import { constants } from 'ethers';
 
 import { LangKeys } from 'types/Lang';
 import { HealthFactor } from 'types/HealthFactor';
@@ -51,9 +51,7 @@ function ModalRowHealthFactor({ qty, symbol, operation, healthFactorCallback }: 
   function getAmount() {
     if (!accountData || !symbol) return;
 
-    if (qty == '') {
-      return constants.Zero;
-    }
+    if (qty == '') return Zero;
     const decimals = accountData[symbol].decimals;
 
     const regex = /[^,.]*$/g;

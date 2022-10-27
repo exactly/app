@@ -1,5 +1,5 @@
 import { FC, useCallback, useContext, useEffect, useState } from 'react';
-import { formatUnits } from '@ethersproject/units';
+import { formatFixed } from '@ethersproject/bignumber';
 import { WeiPerEther } from '@ethersproject/constants';
 import Button from '@mui/material/Button';
 import Paper from '@mui/material/Paper';
@@ -58,8 +58,8 @@ const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ APRsPerMaturity, symb
     fixedPools.forEach(({ maturity, borrowed, supplied }) => {
       const maturityKey = maturity.toString();
 
-      const totalDeposited = formatNumber(formatUnits(supplied.mul(exchangeRate).div(WeiPerEther)));
-      const totalBorrowed = formatNumber(formatUnits(borrowed.mul(exchangeRate).div(WeiPerEther)));
+      const totalDeposited = formatNumber(formatFixed(supplied.mul(exchangeRate).div(WeiPerEther), 18));
+      const totalBorrowed = formatNumber(formatFixed(borrowed.mul(exchangeRate).div(WeiPerEther), 18));
       tempRows.push({
         maturity: maturityKey,
         totalDeposited,

@@ -1,10 +1,10 @@
-import { ethers } from 'ethers';
+import type { Network, Web3Provider } from '@ethersproject/providers';
 
 export type Web3ProviderState = {
   provider: any;
-  web3Provider: ethers.providers.Web3Provider | undefined;
+  web3Provider: Web3Provider | undefined;
   walletAddress: string | undefined;
-  network: ethers.providers.Network | undefined;
+  network: Network | undefined;
   connect: (() => Promise<void>) | null;
   disconnect: (() => Promise<void>) | null;
 };

@@ -1,5 +1,5 @@
+import type { BigNumber } from '@ethersproject/bignumber';
 import { formatFixed } from '@ethersproject/bignumber';
-import { BigNumber } from 'ethers';
 import { WAD } from './fixedPointMathLib';
 
 function parseHealthFactor(debt: BigNumber, collateral: BigNumber) {

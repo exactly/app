@@ -1,4 +1,5 @@
-import { ethers } from 'ethers';
+import type { Network } from '@ethersproject/providers';
+import { formatFixed } from '@ethersproject/bignumber';
 import request from 'graphql-request';
 
 import { getLastMaturityPoolBorrowRate, getLastMaturityPoolDepositRate } from 'queries';
@@ -12,7 +13,7 @@ import getSubgraph from './getSubgraph';
 async function getLastAPR(
   maturity: Maturity[],
   market: string,
-  network: ethers.providers.Network | undefined,
+  network: Network | undefined,
   accountData: AccountData,
 ) {
   const subgraphUrl = getSubgraph(network?.name);
@@ -69,15 +70,13 @@ async function getLastAPR(
 
       if (borrowFee && decimals && borrowAmount) {
         const borrowFixedRate =
-          parseFloat(ethers.utils.formatUnits(borrowFee, decimals)) /
-          parseFloat(ethers.utils.formatUnits(borrowAmount, decimals));
+          parseFloat(formatFixed(borrowFee, decimals)) / parseFloat(formatFixed(borrowAmount, decimals));
         fixedBorrowAPR = (borrowFixedRate - 1) * borrowTime * 100;
       }
 
       if (depositFee && decimals && depositAmount) {
         const depositFixedRate =
-          parseFloat(ethers.utils.formatUnits(depositFee, decimals)) /
-          parseFloat(ethers.utils.formatUnits(depositAmount, decimals));
+          parseFloat(formatFixed(depositFee, decimals)) / parseFloat(formatFixed(depositAmount, decimals));
         fixedDepositAPR = (depositFixedRate - 1) * depositTime * 100;
       }
 

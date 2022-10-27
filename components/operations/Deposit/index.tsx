@@ -1,6 +1,7 @@
+import type { Contract } from '@ethersproject/contracts';
 import { ChangeEvent, useContext, useEffect, useMemo, useState } from 'react';
-import { Contract, ethers } from 'ethers';
-import { formatFixed } from '@ethersproject/bignumber';
+import { formatFixed, parseFixed } from '@ethersproject/bignumber';
+import { MaxUint256 } from '@ethersproject/constants';
 
 import Button from 'components/common/Button';
 import ModalAsset from 'components/common/modal/ModalAsset';
@@ -115,7 +116,7 @@ function Deposit() {
 
     const allowance = await underlyingContract?.allowance(walletAddress, market?.value);
 
-    const formattedAllowance = allowance && parseFloat(ethers.utils.formatEther(allowance));
+    const formattedAllowance = allowance && parseFloat(formatFixed(allowance, 18));
 
     const amount = qty == '' ? 0 : parseFloat(qty);
     if (formattedAllowance > amount && !isNaN(amount) && !isNaN(formattedAllowance)) {
@@ -131,7 +132,7 @@ function Deposit() {
     try {
       const gasLimit = await getApprovalGasLimit();
 
-      const approval = await underlyingContract?.approve(market?.value, ethers.constants.MaxUint256, {
+      const approval = await underlyingContract?.approve(market?.value, MaxUint256, {
         gasLimit: gasLimit ? Math.ceil(Number(formatFixed(gasLimit)) * numbers.gasLimitMultiplier) : undefined,
       });
 
@@ -169,7 +170,7 @@ function Deposit() {
       decimals = await underlyingContract?.decimals();
     }
 
-    const formattedBalance = walletBalance && ethers.utils.formatUnits(walletBalance, decimals);
+    const formattedBalance = walletBalance && formatFixed(walletBalance, decimals);
 
     if (formattedBalance) {
       setWalletBalance(formattedBalance);
@@ -182,7 +183,7 @@ function Deposit() {
     const amount = accountData[symbol]?.floatingDepositAssets;
     const decimals = accountData[symbol]?.decimals;
 
-    const formattedAmount = amount && formatNumber(ethers.utils.formatUnits(amount, decimals), symbol);
+    const formattedAmount = amount && formatNumber(formatFixed(amount, decimals), symbol);
 
     return formattedAmount ?? '0';
   }
@@ -233,7 +234,7 @@ function Deposit() {
       } else {
         const gasLimit = await getGasLimit(qty);
 
-        deposit = await fixedLenderWithSigner?.deposit(ethers.utils.parseUnits(qty, decimals), walletAddress, {
+        deposit = await fixedLenderWithSigner?.deposit(parseFixed(qty, decimals), walletAddress, {
           gasLimit: gasLimit ? Math.ceil(Number(formatFixed(gasLimit)) * numbers.gasLimitMultiplier) : undefined,
         });
       }
@@ -306,16 +307,13 @@ function Deposit() {
 
     const decimals = accountData[symbol].decimals;
 
-    const gasLimit = await fixedLenderWithSigner?.estimateGas.deposit(
-      ethers.utils.parseUnits(qty, decimals),
-      walletAddress,
-    );
+    const gasLimit = await fixedLenderWithSigner?.estimateGas.deposit(parseFixed(qty, decimals), walletAddress);
 
     return gasLimit;
   }
 
   async function getApprovalGasLimit() {
-    const gasLimit = await underlyingContract?.estimateGas.approve(market?.value, ethers.constants.MaxUint256);
+    const gasLimit = await underlyingContract?.estimateGas.approve(market?.value, MaxUint256);
 
     return gasLimit;
   }

@@ -1,6 +1,6 @@
+import type { Contract } from '@ethersproject/contracts';
 import { ChangeEvent, useContext, useEffect, useMemo, useState } from 'react';
-import { ethers, Contract } from 'ethers';
-import { formatFixed } from '@ethersproject/bignumber';
+import { formatFixed, parseFixed } from '@ethersproject/bignumber';
 
 import Button from 'components/common/Button';
 import ModalAsset from 'components/common/modal/ModalAsset';
@@ -17,7 +17,6 @@ import ModalRowBorrowLimit from 'components/common/modal/ModalRowBorrowLimit';
 import { LangKeys } from 'types/Lang';
 import { Gas } from 'types/Gas';
 import { Transaction } from 'types/Transaction';
-import { Decimals } from 'types/Decimals';
 import { ErrorData } from 'types/Error';
 
 import styles from './style.module.scss';
@@ -35,7 +34,6 @@ import formatNumber from 'utils/formatNumber';
 import { getSymbol } from 'utils/utils';
 import handleETH from 'utils/handleETH';
 
-import decimals from 'config/decimals.json';
 import numbers from 'config/numbers.json';
 
 import keys from './translations.json';
@@ -74,9 +72,9 @@ function Withdraw() {
   }, [symbol, accountData]);
 
   const [parsedAmount, formattedAmount] = useMemo(() => {
-    if (!assets || !symbol) return ['0', '0'];
+    if (!assets || !symbol || !accountData) return ['0', '0'];
 
-    const parsedAmount = ethers.utils.formatUnits(assets, decimals[symbol! as keyof Decimals]);
+    const parsedAmount = formatFixed(assets, accountData[symbol].decimals);
     return [parsedAmount, formatNumber(parsedAmount, symbol!)];
   }, [assets, symbol]);
 
@@ -178,14 +176,9 @@ function Withdraw() {
             },
           );
         } else {
-          withdraw = await fixedLenderWithSigner?.withdraw(
-            ethers.utils.parseUnits(qty, decimals),
-            walletAddress,
-            walletAddress,
-            {
-              gasLimit: gasLimit ? Math.ceil(Number(formatFixed(gasLimit)) * numbers.gasLimitMultiplier) : undefined,
-            },
-          );
+          withdraw = await fixedLenderWithSigner?.withdraw(parseFixed(qty, decimals), walletAddress, walletAddress, {
+            gasLimit: gasLimit ? Math.ceil(Number(formatFixed(gasLimit)) * numbers.gasLimitMultiplier) : undefined,
+          });
         }
       }
 
@@ -259,7 +252,7 @@ function Withdraw() {
     const decimals = accountData[symbol].decimals;
 
     const gasLimit = await fixedLenderWithSigner?.estimateGas.withdraw(
-      ethers.utils.parseUnits(qty, decimals),
+      parseFixed(qty, decimals),
       walletAddress,
       walletAddress,
     );

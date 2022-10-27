@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { utils } from 'ethers';
+import { formatFixed } from '@ethersproject/bignumber';
 import Skeleton from 'react-loading-skeleton';
 import CircleIcon from '@mui/icons-material/Circle';
 
@@ -47,15 +47,15 @@ function DashboardHeader() {
 
     data.forEach((fixedLender) => {
       const decimals = fixedLender.decimals;
-      const oracle = parseFloat(utils.formatUnits(fixedLender.usdPrice, 18));
+      const oracle = parseFloat(formatFixed(fixedLender.usdPrice, 18));
 
-      const smartPoolDepositValue = parseFloat(utils.formatUnits(fixedLender.floatingDepositAssets, decimals));
+      const smartPoolDepositValue = parseFloat(formatFixed(fixedLender.floatingDepositAssets, decimals));
       const smartPoolDepositValueUSD = smartPoolDepositValue * oracle;
 
       allDepositsUSD += smartPoolDepositValueUSD; //add the value in USD to the total deposit
 
       fixedLender.fixedDepositPositions.forEach((supplyPosition) => {
-        const maturityDepositValue = parseFloat(utils.formatUnits(supplyPosition.position.principal, decimals));
+        const maturityDepositValue = parseFloat(formatFixed(supplyPosition.position.principal, decimals));
         const maturityDepositValueUSD = maturityDepositValue * oracle;
         allDepositsUSD += maturityDepositValueUSD; //add the value in USD to the total deposit
       });
@@ -72,18 +72,18 @@ function DashboardHeader() {
 
     data.forEach((fixedLender) => {
       const decimals = fixedLender.decimals;
-      const oracle = parseFloat(utils.formatUnits(fixedLender.usdPrice, 18));
+      const oracle = parseFloat(formatFixed(fixedLender.usdPrice, 18));
 
       //floatinBorrow
       if (fixedLender.floatingBorrowAssets) {
-        const borrowAssets = parseFloat(utils.formatUnits(fixedLender.floatingBorrowAssets, decimals));
+        const borrowAssets = parseFloat(formatFixed(fixedLender.floatingBorrowAssets, decimals));
 
         allBorrowsUSD += borrowAssets * oracle;
       }
 
       //fixed borrow
       fixedLender.fixedBorrowPositions.forEach((borrowPosition) => {
-        const borrowValue = parseFloat(utils.formatUnits(borrowPosition.position.principal, decimals));
+        const borrowValue = parseFloat(formatFixed(borrowPosition.position.principal, decimals));
         const borrowValueUSD = borrowValue * oracle;
         allBorrowsUSD += borrowValueUSD;
       });

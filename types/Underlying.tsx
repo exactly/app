@@ -1,4 +1,4 @@
-import { ethers } from 'ethers';
+import type { ContractInterface } from '@ethersproject/contracts';
 
 export interface UnderlyingNetwork {
   [text: string]: Underlying;
@@ -10,5 +10,5 @@ export interface Underlying {
 
 export interface UnderlyingData {
   address: string;
-  abi: ethers.ContractInterface;
+  abi: ContractInterface;
 }

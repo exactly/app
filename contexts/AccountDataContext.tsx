@@ -1,6 +1,6 @@
 import type { FC, ReactNode } from 'react';
 import { createContext, useContext, useEffect, useState } from 'react';
-import { constants } from 'ethers';
+import { AddressZero } from '@ethersproject/constants';
 
 import { AccountData } from 'types/AccountData';
 import { FixedLenderAccountData } from 'types/FixedLenderAccountData';
@@ -47,7 +47,7 @@ export const AccountDataProvider: FC<{ children?: ReactNode }> = ({ children }) 
     try {
       const previewerContract = getInstance(Previewer.address!, Previewer.abi!, 'previewer');
 
-      const wallet = walletAddressDebounced ? walletAddressDebounced : constants.AddressZero;
+      const wallet = walletAddressDebounced ? walletAddressDebounced : AddressZero;
 
       const data = await previewerContract?.exactly(wallet);
 

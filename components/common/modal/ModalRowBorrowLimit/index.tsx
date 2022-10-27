@@ -1,7 +1,7 @@
 import { useContext, useMemo } from 'react';
 import Image from 'next/image';
 import Skeleton from 'react-loading-skeleton';
-import { constants } from 'ethers';
+import { Zero } from '@ethersproject/constants';
 import { parseFixed, formatFixed } from '@ethersproject/bignumber';
 
 import { LangKeys } from 'types/Lang';
@@ -39,9 +39,7 @@ function ModalRowBorrowLimit({ qty, symbol, operation, line }: Props) {
   function getAmount() {
     if (!accountData || !symbol) return;
 
-    if (qty == '') {
-      return constants.Zero;
-    }
+    if (qty == '') return Zero;
 
     const decimals = accountData[symbol].decimals;
     const regex = /[^,.]*$/g;

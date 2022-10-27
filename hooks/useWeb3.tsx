@@ -1,5 +1,5 @@
 import { useEffect, useReducer, useCallback } from 'react';
-import { providers } from 'ethers';
+import { Web3Provider } from '@ethersproject/providers';
 import Web3Modal from 'web3modal';
 import WalletConnectProvider from '@walletconnect/web3-provider';
 
@@ -34,7 +34,7 @@ export const useWeb3 = () => {
     if (web3Modal) {
       try {
         const provider = await web3Modal.connect();
-        const web3Provider = new providers.Web3Provider(provider);
+        const web3Provider = new Web3Provider(provider);
         const signer = web3Provider.getSigner();
         const walletAddress = await signer.getAddress();
         const network = await web3Provider.getNetwork();

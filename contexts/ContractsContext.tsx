@@ -1,6 +1,8 @@
 import type { FC, ReactNode } from 'react';
+import type { ContractInterface } from '@ethersproject/contracts';
 import { createContext, useState } from 'react';
-import { Contract, ContractInterface, ethers } from 'ethers';
+import { InfuraProvider } from '@ethersproject/providers';
+import { Contract } from '@ethersproject/contracts';
 
 import { Dictionary } from 'types/Dictionary';
 import { contractName } from 'types/ContractNames';
@@ -34,12 +36,12 @@ export const ContractsProvider: FC<{ children?: ReactNode }> = ({ children }) =>
       let provider;
 
       if (contractName == 'previewer') {
-        provider = new ethers.providers.InfuraProvider(publicNetwork);
+        provider = new InfuraProvider(publicNetwork);
       } else {
         provider = web3Provider?.getSigner();
       }
 
-      const instance = provider && new ethers.Contract(address, abi, provider).connect(provider);
+      const instance = provider && new Contract(address, abi, provider).connect(provider);
 
       if (!instance) {
         return new Error('Provider not found');

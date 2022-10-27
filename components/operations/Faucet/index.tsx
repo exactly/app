@@ -1,5 +1,5 @@
 import { useContext, useState } from 'react';
-import { utils } from 'ethers';
+import { parseFixed } from '@ethersproject/bignumber';
 import Image from 'next/image';
 
 import Button from 'components/common/Button';
@@ -53,7 +53,7 @@ function Faucet() {
         'faucet',
       );
 
-      const mint = await faucetContract?.mint(contract?.address, utils.parseUnits(amounts[asset], decimals[asset]));
+      const mint = await faucetContract?.mint(contract?.address, parseFixed(amounts[asset], decimals[asset]));
 
       await mint.wait();
 
@@ -128,11 +128,11 @@ function Faucet() {
               </div>
             );
           }
-          if (asset == 'WSTETH') {
+          if (asset === 'wstETH') {
             return (
               <div className={styles.assetContainer} key={asset}>
                 <p className={styles.asset}>
-                  <Image src={`/img/assets/wsteth.svg`} alt={asset} width={40} height={40} />
+                  <Image src={`/img/assets/${asset}.svg`} alt={asset} width={40} height={40} />
                   {asset}
                 </p>
                 <div className={styles.buttonContainer}>

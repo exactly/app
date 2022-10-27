@@ -1,7 +1,8 @@
+import type { Contract } from '@ethersproject/contracts';
+import type { BigNumber } from '@ethersproject/bignumber';
 import { useContext, useEffect, useState } from 'react';
-import { ethers, Contract, BigNumber } from 'ethers';
+import { formatFixed, parseFixed } from '@ethersproject/bignumber';
 import Skeleton from 'react-loading-skeleton';
-import { parseFixed } from '@ethersproject/bignumber';
 import Image from 'next/image';
 
 import Button from 'components/common/Button';
@@ -17,14 +18,11 @@ import ModalStatusContext, { Operation } from 'contexts/ModalStatusContext';
 import { MarketContext } from 'contexts/MarketContext';
 
 import { LangKeys } from 'types/Lang';
-import { Decimals } from 'types/Decimals';
 import { Option } from 'react-dropdown';
 
 import styles from './style.module.scss';
 
 import keys from './translations.json';
-
-import decimals from 'config/decimals.json';
 
 import { getSymbol, getUnderlyingData } from 'utils/utils';
 import formatNumber from 'utils/formatNumber';
@@ -108,7 +106,7 @@ function Item({
   function getExchangeRate() {
     if (!accountData || !symbol) return;
     const data = accountData;
-    const exchangeRate = parseFloat(ethers.utils.formatEther(data[symbol].usdPrice));
+    const exchangeRate = parseFloat(formatFixed(data[symbol].usdPrice, 18));
     setRate(exchangeRate);
   }
 
@@ -181,10 +179,7 @@ function Item({
           rate &&
           `$${formatNumber(
             parseFloat(
-              ethers.utils.formatUnits(
-                type?.value == 'deposit' ? depositAmount : borrowedAmount,
-                decimals[symbol! as keyof Decimals],
-              ),
+              formatFixed(type?.value == 'deposit' ? depositAmount : borrowedAmount, accountData?.[symbol].decimals),
             ) * rate,
             'USD',
             true,
@@ -195,7 +190,7 @@ function Item({
         <div className={styles.value}>
           {(eTokenAmount &&
             symbol &&
-            `${formatNumber(ethers.utils.formatUnits(eTokenAmount, decimals[symbol! as keyof Decimals]), symbol)}`) || (
+            `${formatNumber(formatFixed(eTokenAmount, accountData?.[symbol].decimals), symbol)}`) || (
             <Skeleton width={40} />
           )}{' '}
         </div>

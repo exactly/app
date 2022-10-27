@@ -1,4 +1,4 @@
-import { BigNumber } from 'ethers';
+import type { BigNumber } from '@ethersproject/bignumber';
 import { formatFixed, parseFixed } from '@ethersproject/bignumber';
 
 import { AccountData } from 'types/AccountData';

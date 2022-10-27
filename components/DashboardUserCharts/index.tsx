@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { utils } from 'ethers';
+import { formatFixed } from '@ethersproject/bignumber';
 import Skeleton from 'react-loading-skeleton';
 import CircleIcon from '@mui/icons-material/Circle';
 
@@ -64,7 +64,7 @@ function DashboardUserCharts() {
     data.forEach((fixedLender) => {
       const symbol = fixedLender.assetSymbol;
       const decimals = fixedLender.decimals;
-      const oracle = parseFloat(utils.formatUnits(fixedLender.usdPrice, 18));
+      const oracle = parseFloat(formatFixed(fixedLender.usdPrice, 18));
 
       const objectDepositData: DonutData = {
         label: symbol,
@@ -73,7 +73,7 @@ function DashboardUserCharts() {
         image: `/img/assets/${symbol}.svg`,
       };
 
-      const variablePoolDepositValue = parseFloat(utils.formatUnits(fixedLender.floatingDepositAssets, decimals));
+      const variablePoolDepositValue = parseFloat(formatFixed(fixedLender.floatingDepositAssets, decimals));
       const variablePoolDepositValueUSD = variablePoolDepositValue * oracle;
 
       objectDepositData.value += variablePoolDepositValueUSD; //add the value in USD to the asset deposit data
@@ -81,7 +81,7 @@ function DashboardUserCharts() {
       variableComposition += variablePoolDepositValueUSD; //add the value in USD to the variable composition %
 
       fixedLender.fixedDepositPositions.forEach((supplyPosition) => {
-        const maturityDepositValue = parseFloat(utils.formatUnits(supplyPosition.position.principal, decimals));
+        const maturityDepositValue = parseFloat(formatFixed(supplyPosition.position.principal, decimals));
         const maturityDepositValueUSD = maturityDepositValue * oracle;
         objectDepositData.value += maturityDepositValueUSD; //add the value in USD to the asset deposit data
         allDepositsUSD += maturityDepositValueUSD; //add the value in USD to the total deposit
@@ -120,7 +120,7 @@ function DashboardUserCharts() {
     data.forEach((fixedLender) => {
       const symbol = fixedLender.assetSymbol;
       const decimals = fixedLender.decimals;
-      const oracle = parseFloat(utils.formatUnits(fixedLender.usdPrice, 18));
+      const oracle = parseFloat(formatFixed(fixedLender.usdPrice, 18));
 
       const objectBorrowData: DonutData = {
         label: symbol,
@@ -131,7 +131,7 @@ function DashboardUserCharts() {
 
       //floatinBorrow
       if (fixedLender.floatingBorrowAssets) {
-        const variablePoolBorrowValue = parseFloat(utils.formatUnits(fixedLender.floatingBorrowAssets, decimals));
+        const variablePoolBorrowValue = parseFloat(formatFixed(fixedLender.floatingBorrowAssets, decimals));
         const variablePoolBorrowValueUSD = variablePoolBorrowValue * oracle;
 
         objectBorrowData.value += variablePoolBorrowValueUSD; //add the value in USD to the asset deposit data
@@ -141,7 +141,7 @@ function DashboardUserCharts() {
 
       //fixed borrow
       fixedLender.fixedBorrowPositions.forEach((borrowPosition) => {
-        const maturityBorrowValue = parseFloat(utils.formatUnits(borrowPosition.position.principal, decimals));
+        const maturityBorrowValue = parseFloat(formatFixed(borrowPosition.position.principal, decimals));
         const maturityBorrowValueUSD = maturityBorrowValue * oracle;
         objectBorrowData.value += maturityBorrowValueUSD;
         allBorrowsUSD += maturityBorrowValueUSD;

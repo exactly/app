@@ -1,6 +1,6 @@
+import type { BigNumber } from '@ethersproject/bignumber';
+import { formatFixed } from '@ethersproject/bignumber';
 import { useContext, useEffect, useState } from 'react';
-import { formatEther, formatUnits } from '@ethersproject/units';
-import { BigNumber } from '@ethersproject/bignumber';
 import request from 'graphql-request';
 import Image from 'next/image';
 
@@ -116,7 +116,7 @@ function Item({ type, amount, maturityDate, symbol, market, progress, decimals, 
   async function getRate() {
     if (!symbol || !accountData) return;
 
-    const rate = parseFloat(formatEther(accountData[symbol].usdPrice));
+    const rate = parseFloat(formatFixed(accountData[symbol].usdPrice, 18));
 
     setExchangeRate(rate);
   }
@@ -146,8 +146,8 @@ function Item({ type, amount, maturityDate, symbol, market, progress, decimals, 
     }
 
     allTransactions.forEach((transaction) => {
-      const transactionFee = parseFloat(formatUnits(transaction.fee, decimals));
-      const transactionAmount = parseFloat(formatUnits(transaction.assets, decimals));
+      const transactionFee = parseFloat(formatFixed(transaction.fee, decimals));
+      const transactionAmount = parseFloat(formatFixed(transaction.assets, decimals));
       const transactionRate = transactionFee / transactionAmount;
       const transactionTimestamp = parseFloat(transaction.timestamp);
       const transactionMaturity = parseFloat(transaction.maturity);
@@ -182,7 +182,7 @@ function Item({ type, amount, maturityDate, symbol, market, progress, decimals, 
         </div>
         <span className={styles.value}>
           {symbol && exchangeRate && amount ? (
-            `$${formatNumber(parseFloat(formatUnits(amount, decimals)) * exchangeRate, 'USD', true)}`
+            `$${formatNumber(parseFloat(formatFixed(amount, decimals)) * exchangeRate, 'USD', true)}`
           ) : (
             <Skeleton width={40} />
           )}
@@ -230,7 +230,7 @@ function Item({ type, amount, maturityDate, symbol, market, progress, decimals, 
           </thead>
           <tbody>
             {transactions.map((transaction: any, key) => {
-              const value = symbol && formatUnits(transaction.assets, decimals);
+              const value = symbol && formatFixed(transaction.assets, decimals);
 
               const text = transaction?.fee
                 ? type?.value == 'borrow'

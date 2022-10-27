@@ -1,5 +1,5 @@
+import type { BigNumber } from '@ethersproject/bignumber';
 import { parseFixed } from '@ethersproject/bignumber';
-import type { BigNumber } from 'ethers';
 import numbers from 'config/numbers.json';
 
 function getOneDollar(oracle: BigNumber, decimals: number) {

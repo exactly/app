@@ -1,5 +1,5 @@
+import type { Contract } from '@ethersproject/contracts';
 import { ChangeEvent, useContext, useEffect, useMemo, useState } from 'react';
-import { Contract, ethers } from 'ethers';
 import { formatFixed, parseFixed } from '@ethersproject/bignumber';
 
 import Button from 'components/common/Button';
@@ -135,7 +135,7 @@ function Borrow() {
       decimals = await underlyingContract?.decimals();
     }
 
-    const formattedBalance = walletBalance && ethers.utils.formatUnits(walletBalance, decimals);
+    const formattedBalance = walletBalance && formatFixed(walletBalance, decimals);
 
     if (formattedBalance) {
       setWalletBalance(formattedBalance);
@@ -230,14 +230,9 @@ function Borrow() {
       } else {
         const gasLimit = await getGasLimit(qty);
 
-        borrow = await fixedLenderWithSigner?.borrow(
-          ethers.utils.parseUnits(qty!, decimals),
-          walletAddress,
-          walletAddress,
-          {
-            gasLimit: gasLimit ? Math.ceil(Number(formatFixed(gasLimit)) * numbers.gasLimitMultiplier) : undefined,
-          },
-        );
+        borrow = await fixedLenderWithSigner?.borrow(parseFixed(qty!, decimals), walletAddress, walletAddress, {
+          gasLimit: gasLimit ? Math.ceil(Number(formatFixed(gasLimit)) * numbers.gasLimitMultiplier) : undefined,
+        });
       }
 
       setTx({ status: 'processing', hash: borrow?.hash });
@@ -331,7 +326,7 @@ function Borrow() {
     const decimals = accountData[symbol].decimals;
 
     const gasLimit = await fixedLenderWithSigner?.estimateGas.borrow(
-      ethers.utils.parseUnits(qty, decimals),
+      parseFixed(qty, decimals),
       walletAddress,
       walletAddress,
     );

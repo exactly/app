@@ -1,6 +1,7 @@
+import type { Contract } from '@ethersproject/contracts';
 import { ChangeEvent, useContext, useEffect, useMemo, useState } from 'react';
-import { Contract, ethers } from 'ethers';
 import { formatFixed, parseFixed } from '@ethersproject/bignumber';
+import { MaxUint256 } from '@ethersproject/constants';
 
 import Button from 'components/common/Button';
 import ModalAsset from 'components/common/modal/ModalAsset';
@@ -119,7 +120,7 @@ function DepositAtMaturity() {
     if (!underlyingContract || !walletAddress || !market) return;
 
     const allowance = await underlyingContract?.allowance(walletAddress, market?.value);
-    const formattedAllowance = allowance && parseFloat(ethers.utils.formatEther(allowance));
+    const formattedAllowance = allowance && parseFloat(formatFixed(allowance, 18));
 
     const amount = qty == '' ? 0 : parseFloat(qty);
     if (formattedAllowance > amount && !isNaN(amount) && !isNaN(formattedAllowance)) {
@@ -134,7 +135,7 @@ function DepositAtMaturity() {
 
     try {
       const gasLimit = await getApprovalGasLimit();
-      const approval = await underlyingContract?.approve(market?.value, ethers.constants.MaxUint256, {
+      const approval = await underlyingContract?.approve(market?.value, MaxUint256, {
         gasLimit: gasLimit ? Math.ceil(Number(formatFixed(gasLimit)) * numbers.gasLimitMultiplier) : undefined,
       });
 
@@ -170,7 +171,7 @@ function DepositAtMaturity() {
       decimals = await underlyingContract?.decimals();
     }
 
-    const formattedBalance = walletBalance && ethers.utils.formatUnits(walletBalance, decimals);
+    const formattedBalance = walletBalance && formatFixed(walletBalance, decimals);
 
     if (formattedBalance) {
       setWalletBalance(formattedBalance);
@@ -225,8 +226,8 @@ function DepositAtMaturity() {
 
         deposit = await fixedLenderWithSigner?.depositAtMaturity(
           parseInt(date.value),
-          ethers.utils.parseUnits(qty!, decimals),
-          ethers.utils.parseUnits(`${minAmount.toFixed(decimals)}`, decimals),
+          parseFixed(qty!, decimals),
+          parseFixed(`${minAmount.toFixed(decimals)}`, decimals),
           walletAddress,
           {
             gasLimit: gasLimit ? Math.ceil(Number(formatFixed(gasLimit)) * numbers.gasLimitMultiplier) : undefined,
@@ -304,8 +305,8 @@ function DepositAtMaturity() {
 
     const gasLimit = await fixedLenderWithSigner?.estimateGas.depositAtMaturity(
       parseInt(date.value),
-      ethers.utils.parseUnits(qty, decimals),
-      ethers.utils.parseUnits(minQty, decimals),
+      parseFixed(qty, decimals),
+      parseFixed(minQty, decimals),
       walletAddress,
     );
 
@@ -313,7 +314,7 @@ function DepositAtMaturity() {
   }
 
   async function getApprovalGasLimit() {
-    const gasLimit = await underlyingContract?.estimateGas.approve(market?.value, ethers.constants.MaxUint256);
+    const gasLimit = await underlyingContract?.estimateGas.approve(market?.value, MaxUint256);
 
     return gasLimit;
   }
