@@ -3,13 +3,13 @@ import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import Skeleton from 'react-loading-skeleton';
 
-export type PoolItemInfoProps = {
+export type ItemInfoProps = {
   label: string;
   value?: string;
   underLabel?: string;
 };
 
-const PoolItemInfo: FC<PoolItemInfoProps> = ({ label, value, underLabel }) => (
+const ItemInfo: FC<ItemInfoProps> = ({ label, value, underLabel }) => (
   <Grid item sx={{ display: 'flex', flexDirection: 'column' }}>
     <Typography textTransform="uppercase" variant="caption" fontWeight={600}>
       {label}
@@ -25,4 +25,4 @@ const PoolItemInfo: FC<PoolItemInfoProps> = ({ label, value, underLabel }) => (
   </Grid>
 );
 
-export default PoolItemInfo;
+export default ItemInfo;
