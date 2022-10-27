@@ -82,8 +82,7 @@ function Item({ market, type }: Props) {
   }
 
   async function getRates() {
-    if (!market || !accountData) return;
-    if (!network?.name) throw new Error('network not found');
+    if (!network || !market || !accountData) return;
     const subgraphUrl = getSubgraph(network.name!);
 
     let interestRate;
@@ -91,7 +90,7 @@ function Item({ market, type }: Props) {
     if (!eMarketAddress) return;
 
     if (type === 'deposit') {
-      const maxFuturePools = accountData[market?.symbol.toUpperCase()].maxFuturePools;
+      const maxFuturePools = accountData[market?.symbol].maxFuturePools;
 
       const data = await queryRate(subgraphUrl, eMarketAddress, 'deposit', { maxFuturePools });
 
@@ -132,11 +131,11 @@ function Item({ market, type }: Props) {
     if (!market || !accountData) return;
 
     try {
-      const borrowed = accountData[market?.symbol.toUpperCase()].totalFloatingBorrowAssets;
-      const supplied = accountData[market?.symbol.toUpperCase()].totalFloatingDepositAssets;
-      const decimals = accountData[market?.symbol.toUpperCase()].decimals;
+      const borrowed = accountData[market?.symbol].totalFloatingBorrowAssets;
+      const supplied = accountData[market?.symbol].totalFloatingDepositAssets;
+      const decimals = accountData[market?.symbol].decimals;
 
-      const exchangeRate = parseFloat(utils.formatEther(accountData[market?.symbol.toUpperCase()].usdPrice));
+      const exchangeRate = parseFloat(utils.formatEther(accountData[market?.symbol].usdPrice));
 
       const newPoolData = {
         borrowed: parseFloat(utils.formatUnits(borrowed, decimals)),
@@ -158,15 +157,10 @@ function Item({ market, type }: Props) {
 
   return (
     <div className={`${style.container} ${type === 'borrow' ? style.secondaryContainer : style.primaryContainer}`}>
-      <Link href={`/assets/${market?.symbol === 'WETH' ? 'eth' : market?.symbol.toLowerCase()}`}>
+      <Link href={`/assets/${market?.symbol}`}>
         <div className={style.symbol}>
           {(market && (
-            <Image
-              src={`/img/assets/${market?.symbol.toLowerCase()}.svg`}
-              alt={market?.symbol}
-              width={40}
-              height={40}
-            />
+            <Image src={`/img/assets/${market?.symbol}.svg`} alt={market?.symbol} width={40} height={40} />
           )) || <Skeleton circle height={40} width={40} />}
           <span className={style.primary}>{(market && parseSymbol(market?.symbol)) || <Skeleton />}</span>
         </div>

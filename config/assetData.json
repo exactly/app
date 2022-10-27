@@ -1,17 +1,17 @@
 {
-  "usdc": {
+  "USDC": {
     "description": "USD Coin"
   },
-  "dai": {
+  "DAI": {
     "description": ""
   },
-  "weth": {
+  "WETH": {
     "description": "Wrapped ETH"
   },
-  "wbtc": {
+  "WBTC": {
     "description": "Wrapped BTC"
   },
-  "wsteth": {
+  "wstETH": {
     "description": "Lido Wrapped Staked ETH"
   }
 }

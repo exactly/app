@@ -175,9 +175,9 @@ function Item({ type, amount, maturityDate, symbol, market, progress, decimals, 
     <details className={styles.container}>
       <summary className={styles.summary}>
         <div className={styles.symbol}>
-          {(symbol && (
-            <Image src={`/img/assets/${symbol?.toLowerCase()}.svg`} alt={symbol} width={20} height={20} />
-          )) || <Skeleton circle height={20} width={20} />}
+          {(symbol && <Image src={`/img/assets/${symbol}.svg`} alt={symbol} width={20} height={20} />) || (
+            <Skeleton circle height={20} width={20} />
+          )}
           <span className={styles.primary}>{symbol ? parseSymbol(symbol) : <Skeleton />}</span>
         </div>
         <span className={styles.value}>

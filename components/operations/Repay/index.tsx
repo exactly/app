@@ -158,7 +158,7 @@ function Repay() {
   }
 
   function getUnderlyingContract() {
-    const underlyingData: UnderlyingData | undefined = getUnderlyingData(network?.name, symbol.toLowerCase());
+    const underlyingData: UnderlyingData | undefined = getUnderlyingData(network?.name, symbol);
 
     const underlyingContract = getInstance(underlyingData!.address, underlyingData!.abi, `underlying${symbol}`);
 

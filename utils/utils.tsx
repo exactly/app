@@ -35,23 +35,23 @@ export function getUnderlyingData(network: string | undefined, symbol: string | 
 
   const baseData: UnderlyingNetwork = {
     goerli: {
-      dai: {
+      DAI: {
         address: goerliDAI.address,
         abi: goerliDAI.abi,
       },
-      weth: {
+      WETH: {
         address: goerliWETH.address,
         abi: goerliWETH.abi,
       },
-      wbtc: {
+      WBTC: {
         address: goerliWBTC.address,
         abi: goerliWBTC.abi,
       },
-      usdc: {
+      USDC: {
         address: goerliUSDC.address,
         abi: goerliUSDC.abi,
       },
-      wsteth: {
+      wstETH: {
         address: goerliWSTETH.address,
         abi: goerliWSTETH.abi,
       },
@@ -59,7 +59,7 @@ export function getUnderlyingData(network: string | undefined, symbol: string | 
     mainnet: {},
   };
 
-  return baseData[currentNetwork!.toLowerCase()][symbol.toLowerCase()];
+  return baseData[currentNetwork!.toLowerCase()][symbol];
 }
 
 export function getSymbol(address: string, network: string | undefined) {
@@ -71,7 +71,7 @@ export function getSymbol(address: string, network: string | undefined) {
       [goerliFixedLenderWETH.address.toLowerCase()]: 'WETH',
       [goerliFixedLenderWBTC.address.toLowerCase()]: 'WBTC',
       [goerliFixedLenderUSDC.address.toLowerCase()]: 'USDC',
-      [goerliFixedLenderWSTETH.address.toLowerCase()]: 'WSTETH',
+      [goerliFixedLenderWSTETH.address.toLowerCase()]: 'wstETH',
     },
   };
 

@@ -10,14 +10,14 @@ function getBeforeBorrowLimit(
   decimals: number,
   type: string,
 ) {
-  const maxBorrowAssets = accountData![symbol.toUpperCase()].maxBorrowAssets;
+  const maxBorrowAssets = accountData![symbol].maxBorrowAssets;
   const WAD = parseFixed('1', 18);
 
   let before = maxBorrowAssets.mul(usdPrice).div(parseFixed('1', decimals));
 
   const hasDepositedToFloatingPool = Number(formatFixed(accountData![symbol].floatingDepositAssets, decimals)) > 0;
 
-  if (!accountData![symbol.toUpperCase()].isCollateral && hasDepositedToFloatingPool && type == 'borrow') {
+  if (!accountData![symbol].isCollateral && hasDepositedToFloatingPool && type == 'borrow') {
     before = maxBorrowAssets.add(
       accountData![symbol].floatingDepositAssets.mul(accountData![symbol].adjustFactor).div(WAD),
     );

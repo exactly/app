@@ -44,7 +44,7 @@ type Props = {
 };
 
 function Item({
-  symbol: rawSymbol,
+  symbol,
   depositAmount,
   borrowedAmount,
   walletAddress,
@@ -53,7 +53,6 @@ function Item({
   type,
   market,
 }: Props) {
-  const symbol = rawSymbol?.toUpperCase();
   const { network } = useWeb3Context();
   const fixedLender = useContext(FixedLenderContext);
   const { accountData, getAccountData } = useContext(AccountDataContext);
@@ -109,7 +108,7 @@ function Item({
   function getExchangeRate() {
     if (!accountData || !symbol) return;
     const data = accountData;
-    const exchangeRate = parseFloat(ethers.utils.formatEther(data[symbol.toUpperCase()].usdPrice));
+    const exchangeRate = parseFloat(ethers.utils.formatEther(data[symbol].usdPrice));
     setRate(exchangeRate);
   }
 
@@ -162,7 +161,7 @@ function Item({
   return (
     <div className={styles.container}>
       <div className={styles.symbol}>
-        {(symbol && <Image src={`/img/assets/${symbol.toLowerCase()}.svg`} alt={symbol} width={20} height={20} />) || (
+        {(symbol && <Image src={`/img/assets/${symbol}.svg`} alt={symbol} width={20} height={20} />) || (
           <Skeleton circle height={20} width={20} />
         )}
         <div className={styles.primary}>{(symbol && parseSymbol(symbol)) || <Skeleton />}</div>

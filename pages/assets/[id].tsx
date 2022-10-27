@@ -19,7 +19,6 @@ import style from './style.module.scss';
 import getLastAPR from 'utils/getLastAPR';
 import { getSymbol, getUnderlyingData } from 'utils/utils';
 import AssetHeaderInfo from 'components/asset/Header';
-import { AssetSymbol } from 'utils/assets';
 import AssetMaturityPools from 'components/asset/MaturityPool';
 import AssetFloatingPool from 'components/asset/FloatingPool';
 
@@ -34,7 +33,7 @@ const Asset: NextPage<Props> = ({ symbol = 'DAI' }) => {
   const { accountData } = useContext(AccountDataContext);
 
   const networkName = (network?.name || process.env.NEXT_PUBLIC_NETWORK) as string;
-  const assetAddress = getUnderlyingData(networkName, symbol.toLowerCase())?.address as string;
+  const assetAddress = getUnderlyingData(networkName, symbol)?.address as string;
 
   const [, setDepositsData] = useState<Array<Maturity> | undefined>(undefined);
   const [, setBorrowsData] = useState<Array<Maturity> | undefined>(undefined);
@@ -75,11 +74,7 @@ const Asset: NextPage<Props> = ({ symbol = 'DAI' }) => {
       <Navbar />
 
       <section className={style.container}>
-        <AssetHeaderInfo
-          symbol={symbol.toLowerCase() as AssetSymbol}
-          assetAddress={assetAddress}
-          networkName={networkName}
-        />
+        <AssetHeaderInfo symbol={symbol} assetAddress={assetAddress} networkName={networkName} />
         <Grid container spacing={4} mt={5} ml={0}>
           <Grid item container spacing={4}>
             <AssetFloatingPool symbol={symbol} eMarketAddress={eMarketAddress} networkName={networkName} />
@@ -98,7 +93,7 @@ export default Asset;
 
 export const getStaticProps: GetStaticProps = async (context) => {
   const tokenSymbol: string = context.params?.id as string;
-  const symbol = tokenSymbol.toUpperCase() === 'ETH' ? 'WETH' : tokenSymbol.toUpperCase();
+  const symbol = tokenSymbol === 'ETH' ? 'WETH' : tokenSymbol;
 
   return {
     props: {
@@ -109,7 +104,7 @@ export const getStaticProps: GetStaticProps = async (context) => {
 
 export async function getStaticPaths() {
   return {
-    paths: ['/assets/dai', '/assets/eth', '/assets/usdc', '/assets/wbtc'],
+    paths: ['/assets/DAI', '/assets/WETH', '/assets/USDC', '/assets/WBTC', '/assets/wstETH'],
     fallback: true,
   };
 }

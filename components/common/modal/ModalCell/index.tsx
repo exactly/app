@@ -19,7 +19,7 @@ function ModalCell({ text, value, line, asset }: Props) {
       <p className={styles.text}>{text}</p>
 
       <>
-        {asset && <Image src={`/img/assets/${asset.toLowerCase()}.svg`} alt={asset} width="24" height="24" />}
+        {asset && <Image src={`/img/assets/${asset}.svg`} alt={asset} width="24" height="24" />}
 
         <p className={styles.value}>{value || <Skeleton />}</p>
       </>

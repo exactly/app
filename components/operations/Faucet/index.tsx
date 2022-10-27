@@ -38,7 +38,7 @@ function Faucet() {
 
   async function mint(asset: string) {
     try {
-      const contract = getUnderlyingData(network!.name.toLowerCase(), asset.toLowerCase());
+      const contract = getUnderlyingData(network!.name.toLowerCase(), asset);
 
       setLoading(asset);
       const amounts: Dictionary<string> = {
@@ -53,10 +53,7 @@ function Faucet() {
         'faucet',
       );
 
-      const mint = await faucetContract?.mint(
-        contract?.address,
-        utils.parseUnits(amounts[asset.toUpperCase()], decimals[asset.toUpperCase()]),
-      );
+      const mint = await faucetContract?.mint(contract?.address, utils.parseUnits(amounts[asset], decimals[asset]));
 
       await mint.wait();
 
@@ -66,7 +63,7 @@ function Faucet() {
     }
   }
 
-  const assets = ['DAI', 'USDC', 'ETH', 'WBTC', 'WSTETH'];
+  const assets = ['DAI', 'USDC', 'ETH', 'WBTC', 'wstETH'];
 
   async function addTokens() {
     const filter = assets.filter((asset) => asset != 'ETH');
@@ -81,9 +78,7 @@ function Faucet() {
       filter.forEach(async (asset) => {
         if (!web3Provider?.provider.request) return;
 
-        const contract = getUnderlyingData(network!.name.toLowerCase(), asset.toLowerCase());
-
-        const upperCaseAsset = asset.toUpperCase();
+        const contract = getUnderlyingData(network!.name.toLowerCase(), asset);
 
         return await web3Provider?.provider?.request({
           method: 'wallet_watchAsset',
@@ -92,9 +87,9 @@ function Faucet() {
             type: 'ERC20',
             options: {
               address: contract?.address,
-              symbol: upperCaseAsset,
-              decimals: decimals[upperCaseAsset],
-              image: images[upperCaseAsset],
+              symbol: asset,
+              decimals: decimals[asset],
+              image: images[asset],
             },
           },
         });
@@ -151,7 +146,7 @@ function Faucet() {
           return (
             <div className={styles.assetContainer} key={asset}>
               <p className={styles.asset}>
-                <Image src={`/img/assets/${asset.toLowerCase()}.svg`} alt={asset} width={40} height={40} />
+                <Image src={`/img/assets/${asset}.svg`} alt={asset} width={40} height={40} />
                 {asset}
               </p>
               <div className={styles.buttonContainer}>
