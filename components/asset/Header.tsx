@@ -4,7 +4,7 @@ import Image from 'next/image';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
-import parseSymbol from 'utils/parseSymbol';
+import formatSymbol from 'utils/formatSymbol';
 import { getAssetData } from 'utils/assets';
 import { getTokenEtherscanUrl, Network } from 'utils/network';
 import OrderAction from 'components/OrderAction';
@@ -33,7 +33,7 @@ const AssetHeaderInfo: FC<Props> = ({ symbol, networkName, assetAddress }) => {
           }}
           component="div"
         >
-          {parseSymbol(symbol)}
+          {formatSymbol(symbol)}
           <IconButton sx={{ ml: 1 }} size="small" href={etherscanUrl} target="_blank" rel="noopener noreferrer">
             <OpenInNewIcon sx={{ height: '1rem', width: '1rem' }} />
           </IconButton>

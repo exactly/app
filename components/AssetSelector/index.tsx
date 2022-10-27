@@ -14,7 +14,7 @@ import { Option } from 'react-dropdown';
 import { AccountData } from 'types/AccountData';
 
 import style from './style.module.scss';
-import parseSymbol from 'utils/parseSymbol';
+import formatSymbol from 'utils/formatSymbol';
 
 type Props = {
   title?: boolean;
@@ -69,12 +69,12 @@ function AssetSelector({ title, defaultAddress, onChange }: Props) {
           <div className={style.labelContainer}>
             <Image
               src={`/img/assets/${marketData?.symbol}.svg`}
-              alt={parseSymbol(marketData.name)}
+              alt={formatSymbol(marketData.symbol)}
               className={style.marketImage}
               width={24}
               height={24}
             />{' '}
-            <span className={style.marketName}>{parseSymbol(marketData.name)}</span>
+            <span className={style.marketName}>{formatSymbol(marketData.symbol)}</span>
           </div>
         ),
         value: marketData.market,

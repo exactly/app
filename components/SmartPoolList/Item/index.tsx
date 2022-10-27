@@ -26,7 +26,7 @@ import keys from './translations.json';
 import numbers from 'config/numbers.json';
 
 import formatNumber from 'utils/formatNumber';
-import parseSymbol from 'utils/parseSymbol';
+import formatSymbol from 'utils/formatSymbol';
 import getSubgraph from 'utils/getSubgraph';
 import queryRate from 'utils/queryRates';
 
@@ -162,7 +162,7 @@ function Item({ market, type }: Props) {
           {(market && (
             <Image src={`/img/assets/${market?.symbol}.svg`} alt={market?.symbol} width={40} height={40} />
           )) || <Skeleton circle height={40} width={40} />}
-          <span className={style.primary}>{(market && parseSymbol(market?.symbol)) || <Skeleton />}</span>
+          <span className={style.primary}>{(market && formatSymbol(market?.symbol)) || <Skeleton />}</span>
         </div>
       </Link>
       <p className={style.value}>

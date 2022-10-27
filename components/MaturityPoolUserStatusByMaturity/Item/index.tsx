@@ -26,7 +26,7 @@ import styles from './style.module.scss';
 import keys from './translations.json';
 
 import parseTimestamp from 'utils/parseTimestamp';
-import parseSymbol from 'utils/parseSymbol';
+import formatSymbol from 'utils/formatSymbol';
 import getSubgraph from 'utils/getSubgraph';
 import formatNumber from 'utils/formatNumber';
 import getDaysRemaining from 'utils/getDaysRemaining';
@@ -178,7 +178,7 @@ function Item({ type, amount, maturityDate, symbol, market, progress, decimals, 
           {(symbol && <Image src={`/img/assets/${symbol}.svg`} alt={symbol} width={20} height={20} />) || (
             <Skeleton circle height={20} width={20} />
           )}
-          <span className={styles.primary}>{symbol ? parseSymbol(symbol) : <Skeleton />}</span>
+          <span className={styles.primary}>{symbol ? formatSymbol(symbol) : <Skeleton />}</span>
         </div>
         <span className={styles.value}>
           {symbol && exchangeRate && amount ? (
