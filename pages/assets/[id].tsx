@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import type { GetStaticProps, NextPage } from 'next';
 import Grid from '@mui/material/Grid';
@@ -22,11 +23,7 @@ import AssetHeaderInfo from 'components/asset/Header';
 import AssetMaturityPools from 'components/asset/MaturityPool';
 import AssetFloatingPool from 'components/asset/FloatingPool';
 
-interface Props {
-  symbol: string;
-}
-
-const Asset: NextPage<Props> = ({ symbol = 'DAI' }) => {
+const Asset: NextPage<{ symbol: string }> = ({ symbol }) => {
   const { network } = useWeb3Context();
   const { dates } = useContext(MarketContext);
   const fixedLenderData = useContext(FixedLenderContext);
@@ -87,6 +84,10 @@ const Asset: NextPage<Props> = ({ symbol = 'DAI' }) => {
       <Footer />
     </>
   );
+};
+
+Asset.propTypes = {
+  symbol: PropTypes.string.isRequired,
 };
 
 export default Asset;

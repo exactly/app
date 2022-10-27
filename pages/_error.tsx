@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import type { NextPage } from 'next';
 import * as Sentry from '@sentry/nextjs';
 import NextErrorComponent from 'next/error';
@@ -14,6 +15,10 @@ CustomErrorComponent.getInitialProps = async (contextData) => {
 
   // This will contain the status code of the response
   return NextErrorComponent.getInitialProps(contextData);
+};
+
+CustomErrorComponent.propTypes = {
+  statusCode: PropTypes.number.isRequired,
 };
 
 export default CustomErrorComponent;

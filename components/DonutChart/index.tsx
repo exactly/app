@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useCallback } from 'react';
+import type { SectorProps } from 'recharts';
 import { Cell, Pie, PieChart, ResponsiveContainer, Sector } from 'recharts';
 
 import { DonutData } from 'types/DonutData';
@@ -11,38 +12,27 @@ type Props = {
   insideValue?: string;
 };
 
-type ActiveShape = {
-  cx: number;
-  cy: number;
-  innerRadius: number;
-  outerRadius: number;
-  startAngle: number;
-  endAngle: number;
-  fill: string;
-};
-
 function DonutChart({ data, small, insideValue }: Props) {
-  const renderActiveShape = (props: ActiveShape) => {
-    const { cx, cy, innerRadius, outerRadius, startAngle, endAngle, fill } = props;
-
-    return (
+  const renderActiveShape = useCallback(
+    ({ cx, cy, innerRadius, outerRadius, startAngle, endAngle, fill }: SectorProps) => (
       <g className={styles.innerValue}>
-        <text x={cx} y={cy - 4} dy={8} textAnchor="middle">
+        <text x={cx} y={cy! - 4} dy={8} textAnchor="middle">
           {insideValue}
         </text>
 
         <Sector
           cx={cx}
           cy={cy}
-          innerRadius={innerRadius - 1}
-          outerRadius={outerRadius + 1}
+          innerRadius={innerRadius! - 1}
+          outerRadius={outerRadius! + 1}
           startAngle={startAngle}
           endAngle={endAngle}
           fill={fill}
         />
       </g>
-    );
-  };
+    ),
+    [insideValue],
+  );
 
   return (
     <>
