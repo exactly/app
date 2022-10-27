@@ -4,8 +4,6 @@ import { WeiPerEther } from '@ethersproject/constants';
 
 import LangContext from 'contexts/LangContext';
 import AccountDataContext from 'contexts/AccountDataContext';
-import { PoolItemInfoProps } from 'components/asset/PoolItemInfo';
-import PoolHeaderInfo from 'components/asset/PoolHeaderInfo';
 
 import { LangKeys } from 'types/Lang';
 
@@ -15,6 +13,8 @@ import formatNumber from 'utils/formatNumber';
 import queryRates from 'utils/queryRates';
 import getSubgraph from 'utils/getSubgraph';
 import { toPercentage } from 'utils/utils';
+import { ItemInfoProps } from 'components/common/ItemInfo';
+import HeaderInfo from 'components/common/HeaderInfo';
 
 type FloatingPoolInfoProps = {
   symbol: string;
@@ -77,7 +77,7 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol, eMarketAddress, n
     fetchAPRs();
   }, [fetchAPRs]);
 
-  const itemsInfo: PoolItemInfoProps[] = [
+  const itemsInfo: ItemInfoProps[] = [
     {
       label: translations[lang].totalDeposited,
       value: deposited != null ? `$${formatNumber(deposited)}` : undefined,
@@ -104,7 +104,7 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol, eMarketAddress, n
     },
   ];
 
-  return <PoolHeaderInfo title={translations[lang].smartPool} itemsInfo={itemsInfo} />;
+  return <HeaderInfo title={translations[lang].smartPool} itemsInfo={itemsInfo} />;
 };
 
 export default FloatingPoolInfo;

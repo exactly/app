@@ -3,14 +3,13 @@ import Grid from '@mui/material/Grid';
 
 import LangContext from 'contexts/LangContext';
 
-import { PoolItemInfoProps } from 'components/asset/PoolItemInfo';
-import PoolHeaderInfo from 'components/asset/PoolHeaderInfo';
-
 import { LangKeys } from 'types/Lang';
 
 import keys from './translations.json';
 
 import formatNumber from 'utils/formatNumber';
+import HeaderInfo from 'components/common/HeaderInfo';
+import { ItemInfoProps } from 'components/common/ItemInfo';
 
 type MaturityPoolInfoProps = {
   totalDeposited?: number;
@@ -32,7 +31,7 @@ const MaturityPoolInfo: FC<MaturityPoolInfoProps> = ({
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
-  const itemsInfo: PoolItemInfoProps[] = [
+  const itemsInfo: ItemInfoProps[] = [
     {
       label: translations[lang].totalDeposited,
       value: totalDeposited != null ? `$${formatNumber(totalDeposited)}` : undefined,
@@ -55,7 +54,7 @@ const MaturityPoolInfo: FC<MaturityPoolInfoProps> = ({
 
   return (
     <Grid container>
-      <PoolHeaderInfo title={translations[lang].maturityPools} itemsInfo={itemsInfo} />
+      <HeaderInfo title={translations[lang].maturityPools} itemsInfo={itemsInfo} />
     </Grid>
   );
 };
