@@ -1,4 +1,4 @@
-export type Error = {
+export type ErrorData = {
   status: boolean;
   message?: string;
   component?: string;

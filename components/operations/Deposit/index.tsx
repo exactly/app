@@ -19,7 +19,7 @@ import { LangKeys } from 'types/Lang';
 import { UnderlyingData } from 'types/Underlying';
 import { Gas } from 'types/Gas';
 import { Transaction } from 'types/Transaction';
-import { Error } from 'types/Error';
+import { ErrorData } from 'types/Error';
 
 import { getSymbol, getUnderlyingData } from 'utils/utils';
 import formatNumber from 'utils/formatNumber';
@@ -59,7 +59,7 @@ function Deposit() {
   const [pending, setPending] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
 
-  const [error, setError] = useState<Error | undefined>(undefined);
+  const [error, setError] = useState<ErrorData | undefined>(undefined);
 
   const debounceQty = useDebounce(qty);
 

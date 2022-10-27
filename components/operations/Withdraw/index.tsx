@@ -18,7 +18,7 @@ import { LangKeys } from 'types/Lang';
 import { Gas } from 'types/Gas';
 import { Transaction } from 'types/Transaction';
 import { Decimals } from 'types/Decimals';
-import { Error } from 'types/Error';
+import { ErrorData } from 'types/Error';
 
 import styles from './style.module.scss';
 
@@ -55,7 +55,7 @@ function Withdraw() {
   const [gas, setGas] = useState<Gas | undefined>();
   const [tx, setTx] = useState<Transaction | undefined>(undefined);
   const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<Error | undefined>(undefined);
+  const [error, setError] = useState<ErrorData | undefined>(undefined);
   const [needsApproval, setNeedsApproval] = useState<boolean>(false);
   const [isMax, setIsMax] = useState<boolean>(false);
 

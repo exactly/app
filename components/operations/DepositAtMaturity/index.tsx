@@ -18,7 +18,7 @@ import { LangKeys } from 'types/Lang';
 import { UnderlyingData } from 'types/Underlying';
 import { Gas } from 'types/Gas';
 import { Transaction } from 'types/Transaction';
-import { Error } from 'types/Error';
+import { ErrorData } from 'types/Error';
 
 import { getSymbol, getUnderlyingData, toPercentage } from 'utils/utils';
 import handleETH from 'utils/handleETH';
@@ -62,7 +62,7 @@ function DepositAtMaturity() {
   const [slippage, setSlippage] = useState<number>(0);
   const [editSlippage, setEditSlippage] = useState<boolean>(false);
   const [fixedRate, setFixedRate] = useState<number | undefined>(undefined);
-  const [error, setError] = useState<Error | undefined>(undefined);
+  const [error, setError] = useState<ErrorData | undefined>(undefined);
 
   const debounceQty = useDebounce(qty);
 

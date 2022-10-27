@@ -13,7 +13,7 @@ import ModalRowEditable from 'components/common/modal/ModalRowEditable';
 import ModalTitle from 'components/common/modal/ModalTitle';
 import ModalTxCost from 'components/common/modal/ModalTxCost';
 
-import { Error } from 'types/Error';
+import { ErrorData } from 'types/Error';
 import { Gas } from 'types/Gas';
 import { LangKeys } from 'types/Lang';
 import { Transaction } from 'types/Transaction';
@@ -57,7 +57,7 @@ function WithdrawAtMaturity() {
   const [editSlippage, setEditSlippage] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
 
-  const [error, setError] = useState<Error | undefined>(undefined);
+  const [error, setError] = useState<ErrorData | undefined>(undefined);
   const [needsApproval, setNeedsApproval] = useState<boolean>(false);
   const [withdrawAmount, setWithdrawAmount] = useState<string>('0');
 

@@ -3,6 +3,7 @@ import { withSentryConfig } from '@sentry/nextjs';
 export default withSentryConfig({
   reactStrictMode: true,
   productionBrowserSourceMaps: true,
+  sentry: { hideSourceMaps: false },
 
   async redirects() {
     return [

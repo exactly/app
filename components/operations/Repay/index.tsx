@@ -17,7 +17,7 @@ import { LangKeys } from 'types/Lang';
 import { Gas } from 'types/Gas';
 import { Transaction } from 'types/Transaction';
 import { Decimals } from 'types/Decimals';
-import { Error } from 'types/Error';
+import { ErrorData } from 'types/Error';
 import { UnderlyingData } from 'types/Underlying';
 
 import { getSymbol, getUnderlyingData } from 'utils/utils';
@@ -55,7 +55,7 @@ function Repay() {
   const [loading, setLoading] = useState<boolean>(false);
   const [needsApproval, setNeedsApproval] = useState<boolean>(false);
   const [isMax, setIsMax] = useState<boolean>(false);
-  const [error, setError] = useState<Error | undefined>(undefined);
+  const [error, setError] = useState<ErrorData | undefined>(undefined);
 
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(undefined);
   const [underlyingContract, setUnderlyingContract] = useState<Contract | undefined>(undefined);

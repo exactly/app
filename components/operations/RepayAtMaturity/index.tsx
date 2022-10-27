@@ -19,7 +19,7 @@ import ModalMaturityEditable from 'components/common/modal/ModalMaturityEditable
 import { LangKeys } from 'types/Lang';
 import { Gas } from 'types/Gas';
 import { Transaction } from 'types/Transaction';
-import { Error } from 'types/Error';
+import { ErrorData } from 'types/Error';
 import { UnderlyingData } from 'types/Underlying';
 
 import formatNumber from 'utils/formatNumber';
@@ -67,7 +67,7 @@ function RepayAtMaturity() {
   const [penaltyAssets, setPenaltyAssets] = useState<string>('0');
   const [totalAmount, setTotalAmount] = useState<string>('0');
   const [slippage, setSlippage] = useState<string>('0');
-  const [error, setError] = useState<Error | undefined>(undefined);
+  const [error, setError] = useState<ErrorData | undefined>(undefined);
 
   const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(undefined);
   const [underlyingContract, setUnderlyingContract] = useState<Contract | undefined>(undefined);

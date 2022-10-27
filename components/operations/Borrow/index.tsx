@@ -17,7 +17,7 @@ import { LangKeys } from 'types/Lang';
 import { UnderlyingData } from 'types/Underlying';
 import { Gas } from 'types/Gas';
 import { Transaction } from 'types/Transaction';
-import { Error } from 'types/Error';
+import { ErrorData } from 'types/Error';
 import { HealthFactor } from 'types/HealthFactor';
 
 import { getUnderlyingData, getSymbol } from 'utils/utils';
@@ -60,8 +60,8 @@ function Borrow() {
   const [healthFactor, setHealthFactor] = useState<HealthFactor | undefined>(undefined);
   const [needsApproval, setNeedsApproval] = useState<boolean>(false);
 
-  const [error, setError] = useState<Error | undefined>(undefined);
-  const [gasError, setGasError] = useState<Error | undefined>(undefined);
+  const [error, setError] = useState<ErrorData | undefined>(undefined);
+  const [gasError, setGasError] = useState<ErrorData | undefined>(undefined);
 
   const debounceQty = useDebounce(qty);
 
