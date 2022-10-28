@@ -13,7 +13,7 @@ import ContractsContext from 'contexts/ContractsContext';
 import { FixedMarketData } from 'types/FixedMarketData';
 import parseTimestamp from 'utils/parseTimestamp';
 import MaturityPoolsTable from './MaturityPoolsTable';
-import getAPRsPerMaturity, { APRsPerMaturityType } from './utils';
+import getAPRsPerMaturity, { APRsPerMaturityType } from 'utils/getAPRsPerMaturity';
 
 type AssetMaturityPoolsProps = {
   symbol: string;
@@ -21,7 +21,7 @@ type AssetMaturityPoolsProps = {
 
 type BestAPR = {
   timestamp?: string;
-  apr: string;
+  apr: number;
 };
 
 const { usdAmount: usdAmountPreviewer } = numbers;
@@ -76,15 +76,11 @@ const AssetMaturityPools: FC<AssetMaturityPoolsProps> = ({ symbol }) => {
 
     setBestDepositAPR({
       timestamp: maturityMaxAPRDeposit ? parseTimestamp(maturityMaxAPRDeposit) : undefined,
-      apr: APRsPerMaturity[maturityMaxAPRDeposit]?.deposit
-        ? `${Number(APRsPerMaturity[maturityMaxAPRDeposit].deposit).toFixed(2)}%`
-        : 'N/A',
+      apr: APRsPerMaturity[maturityMaxAPRDeposit]?.deposit,
     });
     setBestBorrowAPR({
       timestamp: maturityMinAPRBorrow ? parseTimestamp(maturityMinAPRBorrow) : undefined,
-      apr: APRsPerMaturity[maturityMinAPRBorrow]?.borrow
-        ? `${Number(APRsPerMaturity[maturityMinAPRBorrow].borrow).toFixed(2)}%`
-        : 'N/A',
+      apr: APRsPerMaturity[maturityMinAPRBorrow]?.borrow,
     });
   }, [accountData, symbol, getInstance, previewerData]);
 

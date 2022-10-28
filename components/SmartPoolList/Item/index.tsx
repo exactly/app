@@ -83,6 +83,7 @@ function Item({ market, type }: Props) {
 
   async function getRates() {
     if (!network || !market || !accountData) return;
+
     const subgraphUrl = getSubgraph(network.name!);
 
     let interestRate;

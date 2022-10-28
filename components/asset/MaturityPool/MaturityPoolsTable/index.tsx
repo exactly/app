@@ -11,13 +11,17 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 
-import AccountDataContext from 'contexts/AccountDataContext';
-import { APRsPerMaturityType } from '../utils';
+import { APRsPerMaturityType } from 'utils/getAPRsPerMaturity';
 import formatNumber from 'utils/formatNumber';
 import parseTimestamp from 'utils/parseTimestamp';
+import { toPercentage } from 'utils/utils';
+
+import AccountDataContext from 'contexts/AccountDataContext';
 import ModalStatusContext, { Operation } from 'contexts/ModalStatusContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 import { MarketContext } from 'contexts/MarketContext';
+
+import numbers from 'config/numbers.json';
 
 type MaturityPoolsTableProps = {
   APRsPerMaturity: APRsPerMaturityType;
@@ -28,8 +32,8 @@ type TableRow = {
   maturity: string;
   totalDeposited: string;
   totalBorrowed: string;
-  depositAPR: string;
-  borrowAPR: string;
+  depositAPR: number;
+  borrowAPR: number;
 };
 
 const HeadCell: FC<{ title: string }> = ({ title }) => {
@@ -48,6 +52,7 @@ const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ APRsPerMaturity, symb
   const { setDate, setMarket } = useContext(MarketContext);
   const { setOpen, setOperation } = useContext(ModalStatusContext);
   const [rows, setRows] = useState<TableRow[]>([]);
+  const { minAPRValue } = numbers;
 
   const defineRows = useCallback(() => {
     if (!accountData) return;
@@ -64,8 +69,8 @@ const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ APRsPerMaturity, symb
         maturity: maturityKey,
         totalDeposited,
         totalBorrowed,
-        depositAPR: (APRsPerMaturity[maturityKey]?.deposit || 'N/A').toString(),
-        borrowAPR: (APRsPerMaturity[maturityKey]?.borrow || 'N/A').toString(),
+        depositAPR: APRsPerMaturity[maturityKey]?.deposit,
+        borrowAPR: APRsPerMaturity[maturityKey]?.borrow,
       });
     });
 
@@ -125,11 +130,11 @@ const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ APRsPerMaturity, symb
               </TableCell>
               <TableCell align="center">${totalDeposited}</TableCell>
               <TableCell align="center">${totalBorrowed}</TableCell>
-              <TableCell align="center">{depositAPR}</TableCell>
-              <TableCell align="center">{borrowAPR}</TableCell>
+              <TableCell align="center">{toPercentage(depositAPR > minAPRValue ? depositAPR : undefined)}</TableCell>
+              <TableCell align="center">{toPercentage(borrowAPR > minAPRValue ? borrowAPR : undefined)}</TableCell>
               <TableCell align="center">
                 <Button
-                  disabled={depositAPR === 'N/A'}
+                  disabled={depositAPR < minAPRValue}
                   variant="contained"
                   onClick={() => handleActionClick('depositAtMaturity', maturity)}
                 >
@@ -138,7 +143,7 @@ const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ APRsPerMaturity, symb
               </TableCell>
               <TableCell align="center">
                 <Button
-                  disabled={borrowAPR === 'N/A'}
+                  disabled={borrowAPR < minAPRValue}
                   variant="outlined"
                   sx={{ backgroundColor: 'white' }}
                   onClick={() => handleActionClick('borrowAtMaturity', maturity)}

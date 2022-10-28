@@ -10,13 +10,16 @@ import keys from './translations.json';
 import formatNumber from 'utils/formatNumber';
 import HeaderInfo from 'components/common/HeaderInfo';
 import { ItemInfoProps } from 'components/common/ItemInfo';
+import { toPercentage } from 'utils/utils';
+
+import numbers from 'config/numbers.json';
 
 type MaturityPoolInfoProps = {
   totalDeposited?: number;
   totalBorrowed?: number;
-  bestDepositAPR?: string;
+  bestDepositAPR?: number;
   bestDepositAPRDate?: string;
-  bestBorrowAPR?: string;
+  bestBorrowAPR?: number;
   bestBorrowAPRDate?: string;
 };
 
@@ -31,6 +34,8 @@ const MaturityPoolInfo: FC<MaturityPoolInfoProps> = ({
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
+  const { minAPRValue } = numbers;
+
   const itemsInfo: ItemInfoProps[] = [
     {
       label: translations[lang].totalDeposited,
@@ -42,12 +47,12 @@ const MaturityPoolInfo: FC<MaturityPoolInfoProps> = ({
     },
     {
       label: translations[lang].bestDepositAPR,
-      value: bestDepositAPR ?? undefined,
+      value: toPercentage(bestDepositAPR && bestDepositAPR > minAPRValue ? bestDepositAPR : undefined),
       underLabel: bestDepositAPRDate ?? undefined,
     },
     {
       label: translations[lang].bestBorrowAPR,
-      value: bestBorrowAPR ?? undefined,
+      value: toPercentage(bestBorrowAPR && bestBorrowAPR > minAPRValue ? bestBorrowAPR : undefined),
       underLabel: bestBorrowAPRDate ?? undefined,
     },
   ];
