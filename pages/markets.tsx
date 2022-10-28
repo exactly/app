@@ -15,6 +15,7 @@ import MarketsHeader from 'components/markets/Header';
 import { globals } from 'styles/theme';
 
 const { maxWidth } = globals;
+// import MarketTables from 'components/markets/MarketsTables';
 
 const Pools: NextPage = () => {
   return (
@@ -30,6 +31,7 @@ const Pools: NextPage = () => {
         <SmartPoolList />
       </div>
 
+      {/* <MarketTables /> */}
       <MaturitySelector title={dictionary.maturityPools} subtitle={dictionary.maturities} />
 
       <MarketsList />
