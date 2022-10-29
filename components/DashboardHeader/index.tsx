@@ -106,17 +106,16 @@ function DashboardHeader() {
 
   function getHealthFactorColor() {
     if (!healthFactor) return;
+    // HACK the colors should be manage by MUI theme and 'isNAN' when is infinite
 
-    const hf = parseHealthFactor(healthFactor.debt, healthFactor.collateral);
-    const value = Number(hf.substring(0, hf.length - 1));
-
-    if (value >= 1.25) {
+    const hf = parseFloat(parseHealthFactor(healthFactor.debt, healthFactor.collateral));
+    if (hf >= 1.25 || isNaN(hf)) {
       return '#63ca10';
     }
-    if (value < 1.25 && value >= 1) {
+    if (hf < 1.25 && hf >= 1) {
       return '#BCB03A';
     }
-    if (value < 1) {
+    if (hf < 1) {
       return '#FF0000';
     }
   }

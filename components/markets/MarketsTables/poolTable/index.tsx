@@ -22,6 +22,7 @@ import { Skeleton } from '@mui/material';
 const { minAPRValue } = numbers;
 
 export type PoolTableProps = {
+  isLoading: boolean;
   headers: TableHead[];
   rows: TableRow[];
 };
@@ -48,8 +49,16 @@ const HeadCell: FC<TableHead> = ({ title, width }) => {
     </TableCell>
   );
 };
+const defaultRows: TableRow[] = [
+  { symbol: 'DAI' },
+  { symbol: 'USDC' },
+  { symbol: 'WETH' },
+  { symbol: 'WBTC' },
+  { symbol: 'wstETH' },
+];
 
-const PoolTable: FC<PoolTableProps> = ({ headers, rows }) => {
+const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows }) => {
+  const tempRows = isLoading ? defaultRows : rows; // HACK this with the timeout in "marketsTables" is to avoid a screen flash when MUI  recive the new data of rows
   return (
     <TableContainer component={Paper}>
       <Table aria-label="simple table">
@@ -58,11 +67,11 @@ const PoolTable: FC<PoolTableProps> = ({ headers, rows }) => {
             {headers.map(({ title, width }) => (
               <HeadCell key={title.trim()} title={title} width={width} />
             ))}
-            <TableCell />
+            <TableCell width={100} />
           </TableRow>
         </TableHead>
         <TableBody>
-          {rows.map(({ symbol, totalDeposited, totalBorrowed, depositAPR, borrowAPR }) => (
+          {tempRows.map(({ symbol, totalDeposited, totalBorrowed, depositAPR, borrowAPR }) => (
             <TableRow
               key={symbol}
               sx={{
@@ -71,38 +80,50 @@ const PoolTable: FC<PoolTableProps> = ({ headers, rows }) => {
             >
               <TableCell component="th" scope="row" sx={{}}>
                 <Grid container sx={{ alignContent: 'center', width: '90px' }}>
-                  <Image src={`/img/assets/${symbol}.svg`} alt={symbol} width="24" height="24" />
+                  {isLoading ? (
+                    <Skeleton variant="circular" width={24} height={24} />
+                  ) : (
+                    <Image src={`/img/assets/${symbol}.svg`} alt={symbol} width="24" height="24" />
+                  )}
                   <Typography fontWeight="600" ml={1} display="inline" alignSelf="center">
-                    {formatSymbol(symbol)}
+                    {isLoading ? <Skeleton width={50} /> : formatSymbol(symbol)}
                   </Typography>
                 </Grid>
               </TableCell>
               <TableCell align="center">
-                <Typography>{totalDeposited}</Typography>
+                <Typography>{isLoading ? <Skeleton width={50} /> : `$${totalDeposited}`}</Typography>
               </TableCell>
               <TableCell align="center">
-                <Typography>{totalBorrowed}</Typography>
+                <Typography>{isLoading ? <Skeleton width={50} /> : `$${totalBorrowed}`}</Typography>
               </TableCell>
               <TableCell align="center" sx={{ width: '90px' }}>
-                {depositAPR ? (
-                  <Typography>{toPercentage(depositAPR > minAPRValue ? depositAPR : undefined)}</Typography>
-                ) : (
+                {isLoading ? (
                   <Skeleton />
+                ) : (
+                  <Typography>
+                    {toPercentage(depositAPR && depositAPR > minAPRValue ? depositAPR : undefined)}
+                  </Typography>
                 )}
               </TableCell>
               <TableCell align="center" sx={{ width: '90px' }}>
-                {borrowAPR ? (
-                  <Typography>{toPercentage(borrowAPR > minAPRValue ? borrowAPR : undefined)}</Typography>
-                ) : (
+                {isLoading ? (
                   <Skeleton />
+                ) : (
+                  <Typography>{toPercentage(borrowAPR && borrowAPR > minAPRValue ? borrowAPR : undefined)}</Typography>
                 )}
               </TableCell>
               <TableCell align="center">
-                <Link href={`/assets/${symbol}`} rel="noopener noreferrer">
-                  <Button variant="outlined" sx={{ backgroundColor: 'white' }}>
-                    <Typography fontWeight={600}>Details</Typography>
-                  </Button>
-                </Link>
+                {isLoading ? (
+                  <Skeleton variant="rectangular" width={80} height={36} />
+                ) : (
+                  <>
+                    <Link href={`/assets/${symbol}`} rel="noopener noreferrer">
+                      <Button variant="outlined" sx={{ backgroundColor: 'white' }}>
+                        <Typography fontWeight={600}>Details</Typography>
+                      </Button>
+                    </Link>
+                  </>
+                )}
               </TableCell>
             </TableRow>
           ))}
