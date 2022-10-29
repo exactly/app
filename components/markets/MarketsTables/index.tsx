@@ -21,11 +21,11 @@ import { Market } from 'types/Market';
 import { FixedMarketData } from 'types/FixedMarketData';
 
 import numbers from 'config/numbers.json';
-import { Skeleton, Typography } from '@mui/material';
+import { Typography } from '@mui/material';
 
 const { usdAmount: usdAmountPreviewer } = numbers;
 
-const defaultRows = [
+const defaultRows: TableRow[] = [
   { symbol: 'DAI' },
   { symbol: 'USDC' },
   { symbol: 'WETH' },
@@ -135,7 +135,10 @@ const MarketTables: FC = () => {
 
     setFloatingRows(tempFloatingRows);
     setFixedRows(tempFixedRows);
-    setIsLoading(false);
+    setTimeout(() => {
+      // HACK to prevent loading flashes on the table when change the data
+      setIsLoading(false);
+    }, 2000);
   }, [accountData, getInstance, markets, network, previewerData.abi, previewerData.address]);
 
   const floatingHeaders = [
@@ -182,18 +185,13 @@ const MarketTables: FC = () => {
         <Typography variant="h5" mb={1}>
           Variable Rate Pools
         </Typography>
-        {isLoading ? (
-          <Skeleton height={400} width={610} />
-        ) : (
-          <PoolTable headers={floatingHeaders} rows={floatingRows} />
-        )}
+        <PoolTable isLoading={isLoading} headers={floatingHeaders} rows={floatingRows} />
       </Grid>
       <Grid item sx={{ maxWidth: '620px' }}>
         <Typography variant="h5" mb={1}>
           Fixed Rate Pools
         </Typography>
-
-        {isLoading ? <Skeleton height={400} width={610} /> : <PoolTable headers={fixedHeaders} rows={fixedRows} />}
+        <PoolTable isLoading={isLoading} headers={fixedHeaders} rows={fixedRows} />
       </Grid>
     </Grid>
   );
