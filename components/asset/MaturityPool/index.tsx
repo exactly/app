@@ -82,7 +82,7 @@ const AssetMaturityPools: FC<AssetMaturityPoolsProps> = ({ symbol }) => {
       timestamp: maturityMinAPRBorrow ? parseTimestamp(maturityMinAPRBorrow) : undefined,
       apr: APRsPerMaturity[maturityMinAPRBorrow]?.borrow,
     });
-  }, [accountData, symbol, getInstance, previewerData]);
+  }, [accountData, symbol, previewerData]);
 
   useEffect(() => {
     getMaturitiesData();
