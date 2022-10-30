@@ -9,6 +9,7 @@ import AddIcon from '@mui/icons-material/Add';
 
 import ModalStatusContext from 'contexts/ModalStatusContext';
 import LangContext from 'contexts/LangContext';
+import { useWeb3Context } from 'contexts/Web3Context';
 
 import { LangKeys } from 'types/Lang';
 
@@ -34,12 +35,15 @@ const OrderOrDeposit: FC<OrderOrDepositProps> = ({ showActions }) => {
 };
 
 function OrderAction() {
+  const { walletAddress, connect } = useWeb3Context();
   const { setOpen, setOperation } = useContext(ModalStatusContext);
   const [showActions, setShowActions] = useState(false);
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
   const handleAction = (action: 'deposit' | 'borrow' | 'depositAtMaturity') => {
+    if (!walletAddress && connect) return connect();
+
     setOperation(action);
     setOpen(true);
   };

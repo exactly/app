@@ -51,7 +51,11 @@ const MarketTables: FC = () => {
   }, [accountData]);
 
   const defineRows = useCallback(async () => {
-    if (!accountData || !network || !markets) return;
+    if (!accountData || !markets || !previewerData.address || !previewerData.abi) return;
+
+    const networkName = network ? network.name : 'goerli'; // HACK if we dont have network we set a default to show data without a connected address
+
+    const previewerContract = getInstance(previewerData.address, previewerData.abi, 'previewer');
 
     const tempFloatingRows: TableRow[] = [];
     const tempFixedRows: TableRow[] = [];
@@ -74,8 +78,8 @@ const MarketTables: FC = () => {
           formatFixed(totalFloatingBorrowAssets.mul(usdPrice).div(WeiPerEther), decimals),
         );
 
-        const floatingDepositAPR = await getRates(network.name, 'deposit', maxFuturePools, marketAddress);
-        const floatingBorrowAPR = await getRates(network.name, 'borrow', maxFuturePools, marketAddress);
+        const floatingDepositAPR = await getRates(networkName, 'deposit', maxFuturePools, marketAddress);
+        const floatingBorrowAPR = await getRates(networkName, 'borrow', maxFuturePools, marketAddress);
 
         tempFloatingRows.push({
           symbol,
@@ -84,10 +88,6 @@ const MarketTables: FC = () => {
           depositAPR: floatingDepositAPR,
           borrowAPR: floatingBorrowAPR,
         });
-
-        if (!previewerData.address || !previewerData.abi) return;
-
-        const previewerContract = getInstance(previewerData.address, previewerData.abi, 'previewer');
 
         let totalDeposited = Zero;
         let totalBorrowed = Zero;
@@ -139,7 +139,7 @@ const MarketTables: FC = () => {
       // HACK to prevent loading flashes on the table when change the data
       setIsLoading(false);
     }, 2000);
-  }, [accountData, getInstance, markets, network, previewerData.abi, previewerData.address]);
+  }, [accountData, network, markets, previewerData.abi, previewerData.address]);
 
   const floatingHeaders = [
     { title: 'Asset' },
