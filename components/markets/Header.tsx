@@ -17,20 +17,14 @@ const MarketsHeader: FC = () => {
   useEffect(() => {
     if (!accountData) return;
 
-    const { totalDepositedUSD, totalBorrowedUSD, totalAvailableUSD } = Object.keys(accountData).reduce(
-      (acc: any, symbol) => {
-        const {
-          totalFloatingDepositAssets,
-          totalFloatingBorrowAssets,
-          usdPrice,
-          fixedPools,
-          floatingAvailableAssets,
-          decimals,
-        } = accountData[symbol];
+    const { totalDepositedUSD, totalBorrowedUSD } = Object.keys(accountData).reduce(
+      (acc, symbol) => {
+        const { totalFloatingDepositAssets, totalFloatingBorrowAssets, usdPrice, fixedPools, decimals } =
+          accountData[symbol];
 
         // iterate through fixed pools to get totals
-        const { fixedTotalDeposited, fixedTotalBorrowed, fixedTotalAvailable } = fixedPools.reduce(
-          (fixedPoolStats: any, pool: FixedPool) => {
+        const { fixedTotalDeposited, fixedTotalBorrowed } = fixedPools.reduce(
+          (fixedPoolStats, pool: FixedPool) => {
             const { supplied, borrowed, available } = pool;
 
             fixedPoolStats.fixedTotalDeposited = fixedPoolStats.fixedTotalDeposited.add(supplied);
@@ -48,17 +42,14 @@ const MarketsHeader: FC = () => {
         acc.totalBorrowedUSD = acc.totalBorrowedUSD.add(
           totalFloatingBorrowAssets.add(fixedTotalBorrowed).mul(usdPrice).div(WADDecimals),
         );
-        acc.totalAvailableUSD = acc.totalAvailableUSD.add(
-          floatingAvailableAssets.add(fixedTotalAvailable).mul(usdPrice).div(WADDecimals),
-        );
         return acc;
       },
-      { totalDepositedUSD: Zero, totalBorrowedUSD: Zero, totalAvailableUSD: Zero },
+      { totalDepositedUSD: Zero, totalBorrowedUSD: Zero },
     );
 
     setTotalDeposited(totalDepositedUSD);
     setTotalBorrowed(totalBorrowedUSD);
-    setTotalAvailable(totalAvailableUSD);
+    setTotalAvailable(totalDepositedUSD.sub(totalBorrowedUSD));
   }, [accountData]);
 
   const itemsInfo: ItemInfoProps[] = [
