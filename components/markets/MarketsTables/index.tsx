@@ -33,6 +33,14 @@ const defaultRows: TableRow[] = [
   { symbol: 'wstETH' },
 ];
 
+// sorts rows based on defaultRows symbol order
+const sortByDefault = (toSort: TableRow[]) =>
+  toSort.sort(({ symbol: aSymbol }, { symbol: bSymbol }) => {
+    const aIndex = defaultRows.findIndex(({ symbol }) => symbol === aSymbol);
+    const bIndex = defaultRows.findIndex(({ symbol }) => symbol === bSymbol);
+    return aIndex - bIndex;
+  });
+
 const MarketTables: FC = () => {
   const { network } = useWeb3Context();
   const { accountData } = useContext(AccountDataContext);
@@ -133,8 +141,9 @@ const MarketTables: FC = () => {
       }),
     );
 
-    setFloatingRows(tempFloatingRows);
-    setFixedRows(tempFixedRows);
+    setFloatingRows(sortByDefault(tempFloatingRows));
+    setFixedRows(sortByDefault(tempFixedRows));
+
     setTimeout(() => {
       // HACK to prevent loading flashes on the table when change the data
       setIsLoading(false);
