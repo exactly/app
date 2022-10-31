@@ -31,8 +31,7 @@ export const ContractsProvider: FC<{ children?: ReactNode }> = ({ children }) =>
     }
 
     try {
-      const publicNetwork = network ?? process.env.NEXT_PUBLIC_NETWORK;
-
+      const publicNetwork = network || process.env.NEXT_PUBLIC_NETWORK;
       let provider;
 
       if (contractName === 'previewer') {

@@ -60,7 +60,7 @@ function Navbar() {
         method: 'wallet_switchEthereumChain',
         params: [
           {
-            chainId: '0x5',
+            chainId: '0x1',
           },
         ],
       });
@@ -86,9 +86,12 @@ function Navbar() {
             </div>
           </Link>
         </div>
-        <div className={styles.faucet} onClick={handleClick}>
-          <p>Goerli Faucet</p>
-        </div>
+
+        {network?.chainId === 5 && ( // TODO: put chainId constants in a config file
+          <div className={styles.faucet} onClick={handleClick}>
+            <p>Goerli Faucet</p>
+          </div>
+        )}
 
         <div className={styles.center}>
           <ul className={styles.linksContainer}>
@@ -118,7 +121,8 @@ function Navbar() {
             <div className={styles.networkContainer} onClick={handleClick}>
               <div className={styles.dot} />
               <p className={styles.network}>
-                {translations[lang].connectedTo} {network?.name}
+                {translations[lang].connectedTo} {network?.name === 'homestead' ? 'mainnet' : network?.name}
+                {/* HACK - move to chainIds */}
               </p>
             </div>
           )}

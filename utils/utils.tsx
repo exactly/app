@@ -7,11 +7,23 @@ import goerliWBTC from 'protocol/deployments/goerli/WBTC.json';
 import goerliUSDC from 'protocol/deployments/goerli/USDC.json';
 import goerliWSTETH from 'protocol/deployments/goerli/wstETH.json';
 
+import mainnetDAI from 'protocol/deployments/mainnet/DAI.json';
+import mainnetWETH from 'protocol/deployments/mainnet/WETH.json';
+import mainnetWBTC from 'protocol/deployments/mainnet/WBTC.json';
+import mainnetUSDC from 'protocol/deployments/mainnet/USDC.json';
+import mainnetWSTETH from 'protocol/deployments/mainnet/wstETH.json';
+
 import goerliFixedLenderDAI from 'protocol/deployments/goerli/MarketDAI.json';
 import goerliFixedLenderWETH from 'protocol/deployments/goerli/MarketWETH.json';
 import goerliFixedLenderWBTC from 'protocol/deployments/goerli/MarketWBTC.json';
 import goerliFixedLenderUSDC from 'protocol/deployments/goerli/MarketUSDC.json';
 import goerliFixedLenderWSTETH from 'protocol/deployments/goerli/MarketwstETH.json';
+
+import mainnetFixedLenderDAI from 'protocol/deployments/mainnet/MarketDAI.json';
+import mainnetFixedLenderWETH from 'protocol/deployments/mainnet/MarketWETH.json';
+import mainnetFixedLenderWBTC from 'protocol/deployments/mainnet/MarketWBTC.json';
+import mainnetFixedLenderUSDC from 'protocol/deployments/mainnet/MarketUSDC.json';
+import mainnetFixedLenderWSTETH from 'protocol/deployments/mainnet/MarketwstETH.json';
 
 export function transformClasses(style: any, classes: string) {
   if (!style) return 'style object is mandatory';
@@ -56,7 +68,51 @@ export function getUnderlyingData(network: string | undefined, symbol: string | 
         abi: goerliWSTETH.abi,
       },
     },
-    mainnet: {},
+    mainnet: {
+      DAI: {
+        address: mainnetDAI.address,
+        abi: mainnetDAI.abi,
+      },
+      WETH: {
+        address: mainnetWETH.address,
+        abi: mainnetWETH.abi,
+      },
+      WBTC: {
+        address: mainnetWBTC.address,
+        abi: mainnetWBTC.abi,
+      },
+      USDC: {
+        address: mainnetUSDC.address,
+        abi: mainnetUSDC.abi,
+      },
+      wstETH: {
+        address: mainnetWSTETH.address,
+        abi: mainnetWSTETH.abi,
+      },
+    },
+    homestead: {
+      // HACK - remove this name and use chainId instead of network names
+      DAI: {
+        address: mainnetDAI.address,
+        abi: mainnetDAI.abi,
+      },
+      WETH: {
+        address: mainnetWETH.address,
+        abi: mainnetWETH.abi,
+      },
+      WBTC: {
+        address: mainnetWBTC.address,
+        abi: mainnetWBTC.abi,
+      },
+      USDC: {
+        address: mainnetUSDC.address,
+        abi: mainnetUSDC.abi,
+      },
+      wstETH: {
+        address: mainnetWSTETH.address,
+        abi: mainnetWSTETH.abi,
+      },
+    },
   };
 
   return baseData[currentNetwork!.toLowerCase()][symbol];
@@ -72,6 +128,21 @@ export function getSymbol(address: string, network: string | undefined) {
       [goerliFixedLenderWBTC.address.toLowerCase()]: 'WBTC',
       [goerliFixedLenderUSDC.address.toLowerCase()]: 'USDC',
       [goerliFixedLenderWSTETH.address.toLowerCase()]: 'wstETH',
+    },
+    mainnet: {
+      [mainnetFixedLenderDAI.address.toLowerCase()]: 'DAI',
+      [mainnetFixedLenderWETH.address.toLowerCase()]: 'WETH',
+      [mainnetFixedLenderWBTC.address.toLowerCase()]: 'WBTC',
+      [mainnetFixedLenderUSDC.address.toLowerCase()]: 'USDC',
+      [mainnetFixedLenderWSTETH.address.toLowerCase()]: 'wstETH',
+    },
+    homestead: {
+      // HACK - remove this name and use chainId instead of network names
+      [mainnetFixedLenderDAI.address.toLowerCase()]: 'DAI',
+      [mainnetFixedLenderWETH.address.toLowerCase()]: 'WETH',
+      [mainnetFixedLenderWBTC.address.toLowerCase()]: 'WBTC',
+      [mainnetFixedLenderUSDC.address.toLowerCase()]: 'USDC',
+      [mainnetFixedLenderWSTETH.address.toLowerCase()]: 'wstETH',
     },
   };
 
