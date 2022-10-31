@@ -83,7 +83,7 @@ function handleETH(network = 'goerli', signer: JsonRpcSigner) {
   async function checkAllowance(wallet: string, FixedLenderWETH: Contract) {
     if (!wallet || !router) return;
 
-    const allowance = await FixedLenderWETH.allowance(wallet, goerliRouter.address);
+    const allowance = await FixedLenderWETH.allowance(wallet, dictionary[network].address);
 
     return formatFixed(allowance, 18);
   }
@@ -91,7 +91,7 @@ function handleETH(network = 'goerli', signer: JsonRpcSigner) {
   function approve(FixedLenderWETH: Contract) {
     if (!router) return;
 
-    return FixedLenderWETH.approve(goerliRouter.address, MaxUint256);
+    return FixedLenderWETH.approve(dictionary[network].address, MaxUint256);
   }
 
   return {
