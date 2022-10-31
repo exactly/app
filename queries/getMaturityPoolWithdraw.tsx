@@ -9,7 +9,7 @@ export function getMaturityPoolWithdrawsQuery(address: string, maturity: string,
       receiver
       owner
       positionAssets
-      assetsDiscounted
+      assets: assetsDiscounted
     }
   }
   `;
