@@ -107,8 +107,8 @@ const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ APRsPerMaturity, symb
         <TableHead>
           <TableRow>
             <HeadCell title="Maturity" />
-            <HeadCell title="Total Deposited" />
-            <HeadCell title="Total Borrowed" />
+            <HeadCell title="Total Deposits" />
+            <HeadCell title="Total Borrows" />
             <HeadCell title="Deposit APR" />
             <HeadCell title="Borrow APR" />
             <TableCell></TableCell>

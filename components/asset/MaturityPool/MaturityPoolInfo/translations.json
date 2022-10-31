@@ -1,8 +1,8 @@
 {
   "en": {
     "maturityPools": "Fixed rate pools",
-    "totalDeposited": "Total Deposited",
-    "totalBorrowed": "Total Borrowed",
+    "totalDeposited": "Total Deposits",
+    "totalBorrowed": "Total Borrows",
     "utilizationRate": "Utilization Rate",
     "deposit": "Deposit",
     "TVL": "Total Value Locked",

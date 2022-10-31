@@ -40,9 +40,9 @@ export type TableRow = {
   borrowAPR?: number;
 };
 
-const HeadCell: FC<TableHead> = ({ title, width }) => {
+const HeadCell: FC<TableHead> = ({ title }) => {
   return (
-    <TableCell align="center" width={width}>
+    <TableCell align="center" padding="none">
       <Typography variant="caption" textTransform="uppercase" color="black" fontWeight={600}>
         {title}
       </Typography>
@@ -67,7 +67,7 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows }) => {
             {headers.map(({ title, width }) => (
               <HeadCell key={title.trim()} title={title} width={width} />
             ))}
-            <TableCell width={100} />
+            <TableCell />
           </TableRow>
         </TableHead>
         <TableBody>
@@ -78,7 +78,7 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows }) => {
                 '&:last-child td, &:last-child th': { border: 0 },
               }}
             >
-              <TableCell component="th" scope="row" sx={{}}>
+              <TableCell component="th" scope="row">
                 <Grid container sx={{ alignContent: 'center', width: '90px' }}>
                   {isLoading ? (
                     <Skeleton variant="circular" width={24} height={24} />
@@ -90,10 +90,10 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows }) => {
                   </Typography>
                 </Grid>
               </TableCell>
-              <TableCell align="center">
+              <TableCell align="center" sx={{ width: '90px' }}>
                 <Typography>{isLoading ? <Skeleton width={50} /> : `$${totalDeposited}`}</Typography>
               </TableCell>
-              <TableCell align="center">
+              <TableCell align="center" sx={{ width: '90px' }}>
                 <Typography>{isLoading ? <Skeleton width={50} /> : `$${totalBorrowed}`}</Typography>
               </TableCell>
               <TableCell align="center" sx={{ width: '90px' }}>

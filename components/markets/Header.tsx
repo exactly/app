@@ -54,11 +54,11 @@ const MarketsHeader: FC = () => {
 
   const itemsInfo: ItemInfoProps[] = [
     {
-      label: 'Total Deposited',
+      label: 'Total Deposits',
       value: totalDeposited != null ? formatNumber(formatFixed(totalDeposited, 18)) : undefined,
     },
     {
-      label: 'Total Borrowed',
+      label: 'Total Borrows',
       value: totalBorrowed != null ? formatNumber(formatFixed(totalBorrowed, 18)) : undefined,
     },
     {

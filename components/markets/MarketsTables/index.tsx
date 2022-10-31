@@ -152,17 +152,17 @@ const MarketTables: FC = () => {
 
   const floatingHeaders = [
     { title: 'Asset' },
-    { title: 'Total Deposited' },
-    { title: 'Total Borrowed' },
+    { title: 'Total Deposits' },
+    { title: 'Total Borrows' },
     { title: 'Deposit APR' },
     { title: 'Borrow APR' },
   ];
   const fixedHeaders = [
     { title: 'Asset' },
-    { title: 'Total Deposited' },
-    { title: 'Total Borrowed' },
-    { title: 'Deposit Best APR', width: 90 },
-    { title: 'Borrow Best APR', width: 90 },
+    { title: 'Total Deposits' },
+    { title: 'Total Borrows' },
+    { title: 'Best Deposit APR' },
+    { title: 'Best Borrow APR' },
   ];
 
   async function getRates(
