@@ -5,6 +5,7 @@ import { formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { MaxUint256 } from '@ethersproject/constants';
 
 import goerliRouter from 'protocol/deployments/goerli/MarketETHRouter.json';
+import mainnetRouter from 'protocol/deployments/mainnet/MarketETHRouter.json';
 
 import { getContractData } from './contracts';
 
@@ -13,6 +14,8 @@ import { Dictionary } from 'types/Dictionary';
 function handleETH(network = 'goerli', signer: JsonRpcSigner) {
   const dictionary: Dictionary<any> = {
     goerli: goerliRouter,
+    mainnet: mainnetRouter,
+    homestead: mainnetRouter, // HACK - move to chainIds
   };
 
   const router = getContractData(network, dictionary[network].address, dictionary[network].abi, signer);
