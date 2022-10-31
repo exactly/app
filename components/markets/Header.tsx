@@ -55,15 +55,15 @@ const MarketsHeader: FC = () => {
   const itemsInfo: ItemInfoProps[] = [
     {
       label: 'Total Deposits',
-      value: totalDeposited != null ? formatNumber(formatFixed(totalDeposited, 18)) : undefined,
+      value: totalDeposited != null ? `$${formatNumber(formatFixed(totalDeposited, 18))}` : undefined,
     },
     {
       label: 'Total Borrows',
-      value: totalBorrowed != null ? formatNumber(formatFixed(totalBorrowed, 18)) : undefined,
+      value: totalBorrowed != null ? `$${formatNumber(formatFixed(totalBorrowed, 18))}` : undefined,
     },
     {
       label: 'Total Available',
-      value: totalAvailable != null ? formatNumber(formatFixed(totalAvailable, 18)) : undefined,
+      value: totalAvailable != null ? `$${formatNumber(formatFixed(totalAvailable, 18))}` : undefined,
     },
   ];
   return <HeaderInfo itemsInfo={itemsInfo} title="Markets" rightAction={<OrderAction />} />;
