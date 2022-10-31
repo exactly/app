@@ -28,7 +28,7 @@
     "graphql": "^16.6.0",
     "graphql-request": "^5.0.0",
     "next": "^12.3.1",
-    "protocol": "git+https://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:x-oauth-basic@github.com/exactly-protocol/protocol#deploy",
+    "protocol": "git+https://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:x-oauth-basic@github.com/exactly-protocol/protocol#cb51439bb567068d5e68ce9848309195fd2484bc",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-dropdown": "^1.11.0",
