@@ -15,6 +15,7 @@ import { useWeb3Context } from 'contexts/Web3Context';
 
 import Button from 'components/common/Button';
 import Loading from 'components/common/Loading';
+import { getTxEtherscanUrl, Network } from 'utils/network';
 
 type Props = {
   tx: Transaction;
@@ -63,10 +64,10 @@ function ModalGif({ tx, tryAgain }: Props) {
         </section>
       )}
 
-      {tx.status !== 'loading' && (
+      {tx.status !== 'loading' && network !== undefined && (
         <a
           className={styles.link}
-          href={`https://${network?.name ?? process.env.NEXT_PUBLIC_NETWORK}.etherscan.io/tx/${tx.hash}`}
+          href={getTxEtherscanUrl(network?.name as Network, tx.hash as string)}
           target="_blank"
           rel="noopener noreferrer"
         >
