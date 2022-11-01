@@ -18,7 +18,6 @@ import ModalRowBorrowLimit from 'components/common/modal/ModalRowBorrowLimit';
 
 import { LangKeys } from 'types/Lang';
 import { UnderlyingData } from 'types/Underlying';
-import { Gas } from 'types/Gas';
 import { Transaction } from 'types/Transaction';
 import { ErrorData } from 'types/Error';
 
@@ -54,7 +53,7 @@ function Deposit() {
 
   const [qty, setQty] = useState<string>('');
   const [walletBalance, setWalletBalance] = useState<string | undefined>(undefined);
-  const [gas, setGas] = useState<Gas | undefined>();
+  const [gasCost, setGasCost] = useState<BigNumber | undefined>();
   const [tx, setTx] = useState<Transaction | undefined>(undefined);
   const [step, setStep] = useState<number | undefined>(undefined);
   const [pending, setPending] = useState<boolean>(false);
@@ -291,9 +290,7 @@ function Deposit() {
       const gasLimit = await getGasLimit(qty || '1');
 
       if (gasPrice && gasLimit) {
-        const total = formatFixed(gasPrice.mul(gasLimit), 18);
-
-        setGas({ eth: Number(total).toFixed(6) });
+        setGasCost(gasPrice.mul(gasLimit));
       }
     } catch (e) {
       console.log(e);
@@ -327,9 +324,7 @@ function Deposit() {
       const gasLimit = await estimateGasForApprove();
 
       if (gasPrice && gasLimit) {
-        const total = formatFixed(gasPrice.mul(gasLimit), 18);
-
-        setGas({ eth: Number(total).toFixed(6) });
+        setGasCost(gasPrice.mul(gasLimit));
       }
     } catch (e) {
       console.log(e);
@@ -389,7 +384,7 @@ function Deposit() {
             symbol={symbol!}
             error={error?.component === 'input'}
           />
-          {error?.component !== 'gas' && symbol !== 'WETH' && <ModalTxCost gas={gas} />}
+          {error?.component !== 'gas' && symbol !== 'WETH' && <ModalTxCost gasCost={gasCost} />}
           <ModalRow text={translations[lang].exactlyBalance} value={depositedAmount} line />
           {symbol ? (
             <ModalRowHealthFactor qty={qty} symbol={symbol} operation="deposit" />

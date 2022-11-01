@@ -1,6 +1,6 @@
 import type { Contract } from '@ethersproject/contracts';
 import React, { ChangeEvent, useContext, useEffect, useMemo, useState } from 'react';
-import { formatFixed, parseFixed } from '@ethersproject/bignumber';
+import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { MaxUint256 } from '@ethersproject/constants';
 
 import Button from 'components/common/Button';
@@ -17,7 +17,6 @@ import ModalCell from 'components/common/modal/ModalCell';
 
 import { LangKeys } from 'types/Lang';
 import { UnderlyingData } from 'types/Underlying';
-import { Gas } from 'types/Gas';
 import { Transaction } from 'types/Transaction';
 import { ErrorData } from 'types/Error';
 
@@ -55,7 +54,7 @@ function DepositAtMaturity() {
 
   const [qty, setQty] = useState<string>('');
   const [walletBalance, setWalletBalance] = useState<string | undefined>(undefined);
-  const [gas, setGas] = useState<Gas | undefined>();
+  const [gasCost, setGasCost] = useState<BigNumber | undefined>();
   const [tx, setTx] = useState<Transaction | undefined>(undefined);
   const [step, setStep] = useState<number | undefined>(undefined);
   const [pending, setPending] = useState<boolean>(false);
@@ -286,9 +285,7 @@ function DepositAtMaturity() {
       const gasLimit = await getGasLimit('0.0001', '0');
 
       if (gasPrice && gasLimit) {
-        const total = formatFixed(gasPrice.mul(gasLimit), 18);
-
-        setGas({ eth: Number(total).toFixed(6) });
+        setGasCost(gasPrice.mul(gasLimit));
       }
     } catch (e) {
       setError({
@@ -328,9 +325,7 @@ function DepositAtMaturity() {
       const gasLimit = await getApprovalGasLimit();
 
       if (gasPrice && gasLimit) {
-        const total = formatFixed(gasPrice.mul(gasLimit), 18);
-
-        setGas({ eth: Number(total).toFixed(6) });
+        setGasCost(gasPrice.mul(gasLimit));
       }
     } catch (e) {
       console.log(e);
@@ -438,7 +433,7 @@ function DepositAtMaturity() {
             symbol={symbol!}
             error={error?.component === 'input'}
           />
-          {error?.component !== 'gas' && symbol !== 'WETH' && <ModalTxCost gas={gas} />}
+          {error?.component !== 'gas' && symbol !== 'WETH' && <ModalTxCost gasCost={gasCost} />}
           <ModalRowEditable
             text={translations[lang].minimumApr}
             value={toPercentage(slippage)}

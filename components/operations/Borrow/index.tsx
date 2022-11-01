@@ -1,6 +1,6 @@
 import type { Contract } from '@ethersproject/contracts';
 import React, { ChangeEvent, useContext, useEffect, useMemo, useState } from 'react';
-import { formatFixed, parseFixed } from '@ethersproject/bignumber';
+import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 
 import Button from 'components/common/Button';
 import ModalAsset from 'components/common/modal/ModalAsset';
@@ -15,7 +15,6 @@ import ModalRowBorrowLimit from 'components/common/modal/ModalRowBorrowLimit';
 
 import { LangKeys } from 'types/Lang';
 import { UnderlyingData } from 'types/Underlying';
-import { Gas } from 'types/Gas';
 import { Transaction } from 'types/Transaction';
 import { ErrorData } from 'types/Error';
 import { HealthFactor } from 'types/HealthFactor';
@@ -54,7 +53,7 @@ function Borrow() {
 
   const [qty, setQty] = useState<string>('');
   const [walletBalance, setWalletBalance] = useState<string | undefined>(undefined);
-  const [gas, setGas] = useState<Gas | undefined>(undefined);
+  const [gasCost, setGasCost] = useState<BigNumber | undefined>(undefined);
   const [tx, setTx] = useState<Transaction | undefined>(undefined);
   const [loading, setLoading] = useState<boolean>(false);
   const [healthFactor, setHealthFactor] = useState<HealthFactor | undefined>(undefined);
@@ -108,7 +107,7 @@ function Borrow() {
   }, [underlyingContract, fixedLenderWithSigner, walletAddress]);
 
   useEffect(() => {
-    if (fixedLenderWithSigner && !gas && accountData) {
+    if (fixedLenderWithSigner && !gasCost && accountData) {
       estimateGas();
     }
   }, [fixedLenderWithSigner, accountData]);
@@ -307,9 +306,7 @@ function Borrow() {
       const gasLimit = await getGasLimit('0.0001');
 
       if (gasPrice && gasLimit) {
-        const total = formatFixed(gasPrice.mul(gasLimit), 18);
-
-        setGas({ eth: Number(total).toFixed(6) });
+        setGasCost(gasPrice.mul(gasLimit));
       }
     } catch (e) {
       console.log(e);
@@ -402,7 +399,7 @@ function Borrow() {
             symbol={symbol!}
             error={error?.component === 'input'}
           />
-          {gasError?.component !== 'gas' && symbol !== 'WETH' && <ModalTxCost gas={gas} />}
+          {gasError?.component !== 'gas' && symbol !== 'WETH' && <ModalTxCost gasCost={gasCost} />}
           {symbol ? (
             <ModalRowHealthFactor qty={qty} symbol={symbol} operation="borrow" healthFactorCallback={getHealthFactor} />
           ) : (

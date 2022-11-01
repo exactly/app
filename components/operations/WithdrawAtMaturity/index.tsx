@@ -1,5 +1,5 @@
 import type { Contract } from '@ethersproject/contracts';
-import { formatFixed, parseFixed } from '@ethersproject/bignumber';
+import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 import React, { ChangeEvent, useContext, useEffect, useMemo, useState } from 'react';
 import { Zero } from '@ethersproject/constants';
 
@@ -15,7 +15,6 @@ import ModalTitle from 'components/common/modal/ModalTitle';
 import ModalTxCost from 'components/common/modal/ModalTxCost';
 
 import { ErrorData } from 'types/Error';
-import { Gas } from 'types/Gas';
 import { LangKeys } from 'types/Lang';
 import { Transaction } from 'types/Transaction';
 
@@ -52,7 +51,7 @@ function WithdrawAtMaturity() {
   const previewerData = useContext(PreviewerContext);
 
   const [qty, setQty] = useState<string>('');
-  const [gas, setGas] = useState<Gas | undefined>();
+  const [gasCost, setGasCost] = useState<BigNumber | undefined>();
   const [tx, setTx] = useState<Transaction | undefined>(undefined);
   const [slippage, setSlippage] = useState<string>('0');
   const [editSlippage, setEditSlippage] = useState<boolean>(false);
@@ -108,7 +107,7 @@ function WithdrawAtMaturity() {
   }, [walletAddress, fixedLenderWithSigner, symbol, debounceQty]);
 
   useEffect(() => {
-    if (fixedLenderWithSigner && !gas) {
+    if (fixedLenderWithSigner && !gasCost) {
       estimateGas();
     }
   }, [fixedLenderWithSigner]);
@@ -267,9 +266,7 @@ function WithdrawAtMaturity() {
       const gasLimit = await getGasLimit('0.0001', '0');
 
       if (gasPrice && gasLimit) {
-        const total = formatFixed(gasPrice.mul(gasLimit), 18);
-
-        setGas({ eth: Number(total).toFixed(6) });
+        setGasCost(gasPrice.mul(gasLimit));
       }
     } catch (e) {
       setError({
@@ -353,7 +350,7 @@ function WithdrawAtMaturity() {
             symbol={symbol!}
             error={error?.component === 'input'}
           />
-          {error?.component !== 'gas' && symbol !== 'WETH' && <ModalTxCost gas={gas} />}
+          {error?.component !== 'gas' && symbol !== 'WETH' && <ModalTxCost gasCost={gasCost} />}
           <ModalRow
             text={translations[lang].amountAtFinish}
             value={amountAtFinish && `${formatNumber(amountAtFinish, symbol!, true)}`}
