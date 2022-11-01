@@ -1,6 +1,6 @@
 import type { Contract } from '@ethersproject/contracts';
 import React, { ChangeEvent, useContext, useEffect, useMemo, useState } from 'react';
-import { formatFixed, parseFixed } from '@ethersproject/bignumber';
+import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 
 import Button from 'components/common/Button';
 import ModalAsset from 'components/common/modal/ModalAsset';
@@ -15,7 +15,6 @@ import ModalError from 'components/common/modal/ModalError';
 import ModalRowBorrowLimit from 'components/common/modal/ModalRowBorrowLimit';
 
 import { LangKeys } from 'types/Lang';
-import { Gas } from 'types/Gas';
 import { Transaction } from 'types/Transaction';
 import { ErrorData } from 'types/Error';
 
@@ -50,7 +49,7 @@ function Withdraw() {
   const fixedLenderData = useContext(FixedLenderContext);
 
   const [qty, setQty] = useState<string>('');
-  const [gas, setGas] = useState<Gas | undefined>();
+  const [gasCost, setGasCost] = useState<BigNumber | undefined>();
   const [tx, setTx] = useState<Transaction | undefined>(undefined);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<ErrorData | undefined>(undefined);
@@ -93,7 +92,7 @@ function Withdraw() {
   }, [walletAddress, fixedLenderWithSigner, symbol, debounceQty]);
 
   useEffect(() => {
-    if (fixedLenderWithSigner && !gas) {
+    if (fixedLenderWithSigner && !gasCost) {
       estimateGas();
     }
   }, [fixedLenderWithSigner]);
@@ -234,9 +233,7 @@ function Withdraw() {
       const gasLimit = await getGasLimit('0.0001');
 
       if (gasPrice && gasLimit) {
-        const total = formatFixed(gasPrice.mul(gasLimit), 18);
-
-        setGas({ eth: Number(total).toFixed(6) });
+        setGasCost(gasPrice.mul(gasLimit));
       }
     } catch (e) {
       setError({
@@ -317,7 +314,7 @@ function Withdraw() {
             symbol={symbol!}
             error={error?.component === 'input'}
           />
-          {error?.component !== 'gas' && symbol !== 'WETH' && <ModalTxCost gas={gas} />}
+          {error?.component !== 'gas' && symbol !== 'WETH' && <ModalTxCost gasCost={gasCost} />}
           <ModalRow text={translations[lang].exactlyBalance} value={formattedAmount} line />
           {symbol ? (
             <ModalRowHealthFactor qty={qty} symbol={symbol} operation="withdraw" />
