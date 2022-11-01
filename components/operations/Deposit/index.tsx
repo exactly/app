@@ -1,6 +1,6 @@
 import type { Contract } from '@ethersproject/contracts';
 import React, { ChangeEvent, useContext, useEffect, useMemo, useState } from 'react';
-import { formatFixed, parseFixed } from '@ethersproject/bignumber';
+import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { MaxUint256 } from '@ethersproject/constants';
 
 import Button from 'components/common/Button';
@@ -99,7 +99,7 @@ function Deposit() {
 
   useEffect(() => {
     if (step === 2) {
-      estimateGas();
+      previewGasCost();
     }
   }, [fixedLenderWithSigner, step, debounceQty]);
 
@@ -130,29 +130,30 @@ function Deposit() {
     if (symbol === 'WETH') return;
 
     try {
-      const gasLimit = await getApprovalGasLimit();
+      const gasEstimation = await estimateGasForApprove();
 
       const approval = await underlyingContract?.approve(market?.value, MaxUint256, {
-        gasLimit: gasLimit ? Math.ceil(Number(formatFixed(gasLimit)) * numbers.gasLimitMultiplier) : undefined,
+        gasLimit: Math.ceil(Number(formatFixed(gasEstimation)) * numbers.gasLimitMultiplier),
       });
 
       //we set the transaction as pending
-      setPending((pending) => !pending);
+      setPending(true);
 
       await approval.wait();
 
       //we set the transaction as done
-      setPending((pending) => !pending);
-      setLoading(false);
+      setPending(false);
 
       //once the tx is done we update the step
       setStep(2);
     } catch (e) {
-      setLoading(false);
+      console.error(e);
 
       setError({
         status: true,
       });
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -230,12 +231,13 @@ function Deposit() {
 
         const ETHrouter = handleETH(network?.name, web3Provider?.getSigner());
 
+        // gas estimated directly on depositETH
         deposit = await ETHrouter?.depositETH(qty!);
       } else {
-        const gasLimit = await getGasLimit(qty);
+        const gasEstimation = (await getGasLimit(qty)) as BigNumber;
 
         deposit = await fixedLenderWithSigner?.deposit(parseFixed(qty, decimals), walletAddress, {
-          gasLimit: gasLimit ? Math.ceil(Number(formatFixed(gasLimit)) * numbers.gasLimitMultiplier) : undefined,
+          gasLimit: Math.ceil(Number(formatFixed(gasEstimation)) * numbers.gasLimitMultiplier),
         });
       }
 
@@ -281,12 +283,12 @@ function Deposit() {
     }
   }
 
-  async function estimateGas() {
+  async function previewGasCost() {
     if (symbol === 'WETH') return;
     try {
       const gasPrice = (await fixedLenderWithSigner?.provider.getFeeData())?.maxFeePerGas;
 
-      const gasLimit = await getGasLimit('0.0001');
+      const gasLimit = await getGasLimit(qty || '1');
 
       if (gasPrice && gasLimit) {
         const total = formatFixed(gasPrice.mul(gasLimit), 18);
@@ -307,15 +309,13 @@ function Deposit() {
 
     const decimals = accountData[symbol].decimals;
 
-    const gasLimit = await fixedLenderWithSigner?.estimateGas.deposit(parseFixed(qty, decimals), walletAddress);
-
-    return gasLimit;
+    return fixedLenderWithSigner?.estimateGas.deposit(parseFixed(qty, decimals), walletAddress);
   }
 
-  async function getApprovalGasLimit() {
-    const gasLimit = await underlyingContract?.estimateGas.approve(market?.value, MaxUint256);
+  async function estimateGasForApprove() {
+    if (!underlyingContract) throw new Error('underlyingContract is undefined');
 
-    return gasLimit;
+    return underlyingContract.estimateGas.approve(market?.value, MaxUint256);
   }
 
   async function estimateApprovalGasCost() {
@@ -324,7 +324,7 @@ function Deposit() {
     try {
       const gasPrice = (await underlyingContract?.provider.getFeeData())?.maxFeePerGas;
 
-      const gasLimit = await getApprovalGasLimit();
+      const gasLimit = await estimateGasForApprove();
 
       if (gasPrice && gasLimit) {
         const total = formatFixed(gasPrice.mul(gasLimit), 18);
