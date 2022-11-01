@@ -10,6 +10,7 @@ import mainnetRouter from 'protocol/deployments/mainnet/MarketETHRouter.json';
 import { getContractData } from './contracts';
 
 import { Dictionary } from 'types/Dictionary';
+import numbers from 'config/numbers.json';
 
 function handleETH(network = 'goerli', signer: JsonRpcSigner) {
   const dictionary: Dictionary<any> = {
@@ -20,10 +21,15 @@ function handleETH(network = 'goerli', signer: JsonRpcSigner) {
 
   const router = getContractData(network, dictionary[network].address, dictionary[network].abi, signer);
 
-  function depositETH(qty: string) {
+  async function depositETH(qty: string) {
     if (!qty || !router) return;
 
-    return router.deposit({ value: parseFixed(qty, 18) });
+    const gasEstimation = await router.estimateGas.deposit({ value: parseFixed(qty, 18) });
+
+    return router.deposit({
+      value: parseFixed(qty, 18),
+      gasLimit: Math.ceil(Number(formatFixed(gasEstimation)) * numbers.gasLimitMultiplier),
+    });
   }
 
   function withdrawETH(qty: string) {
