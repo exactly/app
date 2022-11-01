@@ -15,6 +15,10 @@
 # production
 /build
 
+# protocol
+/abi/
+/types/contracts/
+
 # misc
 .vscode/
 .DS_Store

@@ -7,6 +7,7 @@
     "build": "next build",
     "goerli": "NODE_ENV=production NET=goerli next start",
     "start": "NODE_ENV=production NET=mainnet next start",
+    "postinstall": "ts-node -P tsconfig.dev.json scripts/postinstall.ts",
     "lint": "eslint ."
   },
   "engines": {
@@ -42,6 +43,7 @@
   "devDependencies": {
     "@next/eslint-plugin-next": "^12.3.1",
     "@sentry/cli": "^2.8.0",
+    "@typechain/ethers-v5": "^10.1.0",
     "@types/eslint": "^8.4.8",
     "@types/node": "^18.11.7",
     "@types/react": "^18.0.23",
@@ -57,6 +59,8 @@
     "eslint-plugin-react": "^7.31.10",
     "eslint-plugin-react-hooks": "^4.6.0",
     "prettier": "^2.7.1",
+    "ts-node": "^10.9.1",
+    "typechain": "^8.1.0",
     "typescript": "^4.8.4"
   }
 }
