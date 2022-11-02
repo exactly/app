@@ -9,8 +9,6 @@ import { useWeb3Context } from 'contexts/Web3Context';
 
 import { LangKeys } from 'types/Lang';
 
-import styles from './style.module.scss';
-
 import keys from './translations.json';
 
 const OrderAction: FC = () => {
@@ -27,7 +25,7 @@ const OrderAction: FC = () => {
   };
 
   return (
-    <Box className={styles.container}>
+    <Box>
       <Grid container spacing={2}>
         <Grid item>
           <Button variant="contained" onClick={() => handleAction('deposit')}>
