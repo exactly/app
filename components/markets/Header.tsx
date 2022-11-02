@@ -66,7 +66,7 @@ const MarketsHeader: FC = () => {
       value: totalAvailable != null ? `$${formatNumber(formatFixed(totalAvailable, 18))}` : undefined,
     },
   ];
-  return <HeaderInfo itemsInfo={itemsInfo} title="Markets" rightAction={<OrderAction />} />;
+  return <HeaderInfo itemsInfo={itemsInfo} title="Markets" actions={<OrderAction />} />;
 };
 
 export default MarketsHeader;
