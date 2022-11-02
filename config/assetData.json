@@ -3,7 +3,7 @@
     "description": "USD Coin"
   },
   "DAI": {
-    "description": ""
+    "description": "DAI Coin"
   },
   "WETH": {
     "description": "Wrapped ETH"
