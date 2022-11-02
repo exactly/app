@@ -6,36 +6,26 @@ import ItemInfo, { ItemInfoProps } from './ItemInfo';
 type HeaderInfoProps = {
   title: string;
   itemsInfo: ItemInfoProps[];
-  rightAction?: JSX.Element;
+  actions?: JSX.Element;
 };
 
-const HeaderInfo: FC<HeaderInfoProps> = ({ title, itemsInfo, rightAction }) => {
+const HeaderInfo: FC<HeaderInfoProps> = ({ title, itemsInfo, actions }) => {
   return (
-    <Grid container>
-      <Grid item>
-        <Typography variant="h6" gutterBottom>
-          {title}
-        </Typography>
+    <>
+      <Grid item mb={1} sx={{ alignSelf: 'center', marginRight: '20px' }}>
+        <Typography variant="h2">{title}</Typography>
       </Grid>
-      {Boolean(rightAction) && (
-        <Grid
-          item
-          sx={{
-            display: 'flex',
-            flexDirection: 'row-reverse',
-            flex: 'auto',
-            mr: 2,
-          }}
-        >
-          {rightAction}
+      {Boolean(actions) && (
+        <Grid mb={4} container>
+          {actions}
         </Grid>
       )}
-      <Grid item container spacing={4}>
+      <Grid item container mb={2} spacing={4}>
         {itemsInfo.map(({ label, value, underLabel }) => (
           <ItemInfo key={label.trim()} label={label} value={value} underLabel={underLabel} />
         ))}
       </Grid>
-    </Grid>
+    </>
   );
 };
 
