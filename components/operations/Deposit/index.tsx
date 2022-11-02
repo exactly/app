@@ -1,7 +1,15 @@
-import type { Contract } from '@ethersproject/contracts';
-import React, { ChangeEvent, useContext, useEffect, useMemo, useState } from 'react';
+import React, { ChangeEvent, FC, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
-import { MaxUint256 } from '@ethersproject/constants';
+import { MaxUint256, Zero } from '@ethersproject/constants';
+import { Contract } from '@ethersproject/contracts';
+
+import { Market } from 'types/contracts/Market';
+import { ERC20 } from 'types/contracts/ERC20';
+import MarketABI from 'abi/Market.json';
+import ERC20ABI from 'abi/ERC20.json';
+
+import { MarketETHRouter } from 'types/contracts/MarketETHRouter';
+import MarketETHRouterABI from 'abi/MarketETHRouter.json';
 
 import Button from 'components/common/Button';
 import ModalAsset from 'components/common/modal/ModalAsset';
@@ -17,13 +25,11 @@ import ModalError from 'components/common/modal/ModalError';
 import ModalRowBorrowLimit from 'components/common/modal/ModalRowBorrowLimit';
 
 import { LangKeys } from 'types/Lang';
-import { UnderlyingData } from 'types/Underlying';
 import { Transaction } from 'types/Transaction';
 import { ErrorData } from 'types/Error';
 
-import { getSymbol, getUnderlyingData } from 'utils/utils';
+import { getSymbol } from 'utils/utils';
 import formatNumber from 'utils/formatNumber';
-import handleETH from 'utils/handleETH';
 
 import styles from './style.module.scss';
 
@@ -31,25 +37,22 @@ import useDebounce from 'hooks/useDebounce';
 
 import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
-import FixedLenderContext from 'contexts/FixedLenderContext';
 import AccountDataContext from 'contexts/AccountDataContext';
 import { MarketContext } from 'contexts/MarketContext';
-import ContractsContext from 'contexts/ContractsContext';
 
 import keys from './translations.json';
 
 import numbers from 'config/numbers.json';
+import getNetworkName from 'utils/getNetworkName';
 
-function Deposit() {
+const DEFAULT_QTY_ESTIMATION = '0.001';
+const Deposit: FC = () => {
   const { web3Provider, walletAddress, network } = useWeb3Context();
   const { accountData, getAccountData } = useContext(AccountDataContext);
   const { market } = useContext(MarketContext);
-  const { getInstance } = useContext(ContractsContext);
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
-
-  const fixedLenderData = useContext(FixedLenderContext);
 
   const [qty, setQty] = useState<string>('');
   const [walletBalance, setWalletBalance] = useState<string | undefined>(undefined);
@@ -57,94 +60,222 @@ function Deposit() {
   const [tx, setTx] = useState<Transaction | undefined>(undefined);
   const [step, setStep] = useState<number | undefined>(undefined);
   const [pending, setPending] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(false);
-
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<ErrorData | undefined>(undefined);
+  const [isLoadingAllowance, setIsLoadingAllowance] = useState(true); // utility to avoid estimating gas immediately when switching assets
+  const [needsAllowance, setNeedsAllowance] = useState(true);
+  const [assetContract, setAssetContract] = useState<ERC20 | null>(null);
+  const [marketETHRouterContract, setMarketETHRouterContract] = useState<MarketETHRouter | undefined>(undefined);
 
-  const debounceQty = useDebounce(qty);
+  const marketContract = useMemo(() => {
+    if (market?.value) {
+      // TODO: get market address from previewer response/context + remove MarketContext
+      return new Contract(market.value, MarketABI, web3Provider?.getSigner()) as Market;
+    }
+  }, [market, web3Provider]);
 
-  const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(undefined);
-  const [underlyingContract, setUnderlyingContract] = useState<Contract | undefined>(undefined);
+  const symbol = useMemo(
+    () => (market?.value ? getSymbol(market.value, network?.name) : 'DAI'),
+    [market?.value, network?.name],
+  );
 
-  const symbol = useMemo(() => {
-    return market?.value ? getSymbol(market.value, network?.name) : 'DAI';
-  }, [market?.value, network?.name]);
+  // load marketETHRouterContract
+  // TODO: consider moving this to a hook
+  useEffect(() => {
+    const loadMarketETHRouter = async () => {
+      if (!network) return;
+
+      try {
+        const { address } = await import(
+          `protocol/deployments/${getNetworkName(network.chainId)}/MarketETHRouter.json`,
+          {
+            assert: { type: 'json' },
+          }
+        );
+
+        setMarketETHRouterContract(
+          new Contract(address, MarketETHRouterABI, web3Provider?.getSigner()) as MarketETHRouter,
+        );
+      } catch (e) {
+        console.log('Failed to load market ETH router');
+        console.error(e);
+      }
+    };
+    void loadMarketETHRouter();
+  }, [network, web3Provider]);
+
+  // load asset contract
+  useEffect(() => {
+    const loadAssetContract = async () => {
+      if (!marketContract || symbol === 'WETH') return;
+
+      try {
+        const assetAddress = await marketContract.asset();
+
+        setAssetContract(new Contract(assetAddress, ERC20ABI, web3Provider?.getSigner()) as ERC20);
+      } catch (error) {
+        console.log('Error reading asset from market contract');
+        console.error(error);
+      }
+    };
+    void loadAssetContract();
+  }, [marketContract, symbol, web3Provider]);
+
+  const debounceQty = useDebounce(qty, 1000); // 1 seconds before estimating gas on qty change
 
   const depositedAmount = useMemo(() => {
-    return getUserDeposits();
+    if (!symbol || !accountData) return '0';
+
+    const { floatingDepositAssets, decimals } = accountData[symbol];
+    return formatNumber(formatFixed(floatingDepositAssets, decimals), symbol);
   }, [accountData, symbol]);
 
+  // set qty to '' when symbol changes
   useEffect(() => {
     setQty('');
   }, [symbol]);
 
+  // load wallet balance
   useEffect(() => {
-    getFixedLenderContract();
-  }, [market, fixedLenderData]);
+    const getWalletBalance = async () => {
+      if (!walletAddress) return;
+      let balance;
+      let decimals;
 
-  useEffect(() => {
-    getUnderlyingContract();
-  }, [market, network, symbol]);
+      if (symbol === 'WETH') {
+        balance = await web3Provider?.getBalance(walletAddress);
+        decimals = 18;
+      } else {
+        if (!assetContract || !marketContract) return;
 
-  useEffect(() => {
-    getWalletBalance();
-  }, [walletAddress, underlyingContract]);
+        balance = await assetContract.balanceOf(walletAddress);
+        decimals = await marketContract.decimals();
+      }
 
-  useEffect(() => {
-    if (step === 1) {
-      estimateApprovalGasCost();
+      setWalletBalance(balance && formatFixed(balance, decimals));
+    };
+
+    void getWalletBalance();
+  }, [walletAddress, symbol, web3Provider, marketContract, assetContract]);
+
+  const updateNeedsAllowance = useCallback(async () => {
+    setIsLoadingAllowance(true);
+    try {
+      if (symbol === 'WETH') {
+        setNeedsAllowance(false);
+        return;
+      }
+      if (!walletAddress || !assetContract || !marketContract || !accountData) return setNeedsAllowance(true);
+      const { decimals } = accountData[symbol];
+      const allowance = await assetContract.allowance(walletAddress, marketContract.address);
+
+      setNeedsAllowance(allowance.lte(parseFixed(qty || '0', decimals)));
+    } catch (e) {
+      console.error(e);
+      setNeedsAllowance(true);
+    } finally {
+      setIsLoadingAllowance(false);
     }
-  }, [step, underlyingContract]);
+  }, [accountData, assetContract, marketContract, qty, symbol, walletAddress]);
 
+  // execute updateNeedsAllowance on first render
   useEffect(() => {
-    if (step === 2) {
-      previewGasCost();
-    }
-  }, [fixedLenderWithSigner, step, debounceQty]);
+    void updateNeedsAllowance();
+  }, [updateNeedsAllowance]);
 
+  // set step to 2 only when already !needsAllowance and !isLoadingAllowance
   useEffect(() => {
-    checkAllowance();
-  }, [market, walletAddress, underlyingContract]);
+    if (needsAllowance || isLoadingAllowance) setStep(1);
+    else setStep(2);
+  }, [needsAllowance, isLoadingAllowance]);
 
-  async function checkAllowance() {
-    if (symbol === 'WETH') {
-      return setStep(2);
+  const previewGasCost = useCallback(async () => {
+    if (isLoadingAllowance || !symbol || !walletAddress) return;
+
+    let gasPrice = Zero,
+      gasLimit = Zero;
+
+    if (needsAllowance) {
+      try {
+        if (!marketContract || !assetContract) return;
+
+        gasPrice = (await assetContract.provider.getFeeData()).maxFeePerGas || Zero;
+        gasLimit = await assetContract.estimateGas.approve(
+          marketContract.address,
+          parseFixed(debounceQty || DEFAULT_QTY_ESTIMATION, 18),
+        );
+      } catch (e) {
+        console.log(e);
+        setError({
+          status: true,
+          message: translations[lang].error,
+          component: 'gas',
+        });
+      }
+
+      if (gasPrice.gt(Zero) && gasLimit.gt(Zero)) {
+        setGasCost(gasPrice.mul(gasLimit));
+      }
+      return;
     }
-
-    if (!underlyingContract || !walletAddress || !market) return;
-
-    const allowance = await underlyingContract?.allowance(walletAddress, market?.value);
-
-    const formattedAllowance = allowance && parseFloat(formatFixed(allowance, 18));
-
-    const amount = !qty ? 0 : parseFloat(qty);
-    if (formattedAllowance > amount && !isNaN(amount) && !isNaN(formattedAllowance)) {
-      setStep(2);
-    } else {
-      setStep(1);
-    }
-  }
-
-  async function approve() {
-    if (symbol === 'WETH') return;
 
     try {
-      const gasEstimation = await estimateGasForApprove();
+      if (symbol === 'WETH') {
+        if (!marketETHRouterContract) throw new Error('MarketETHRouterContract is undefined');
 
-      const approval = await underlyingContract?.approve(market?.value, MaxUint256, {
+        gasPrice = (await marketETHRouterContract.provider.getFeeData()).maxFeePerGas || Zero;
+        gasLimit = await marketETHRouterContract.estimateGas.deposit({
+          value: parseFixed(debounceQty || DEFAULT_QTY_ESTIMATION, 18),
+        });
+
+        if (gasPrice.gt(Zero) && gasLimit.gt(Zero)) {
+          setGasCost(gasPrice.mul(gasLimit));
+        }
+        return;
+      }
+
+      if (!marketContract) throw new Error('Market contract is undefined');
+
+      const decimals = await marketContract.decimals();
+      gasPrice = (await marketContract.provider.getFeeData()).maxFeePerGas || Zero;
+      gasLimit = await marketContract.estimateGas.deposit(
+        parseFixed(debounceQty || DEFAULT_QTY_ESTIMATION, decimals),
+        walletAddress,
+      );
+
+      if (gasPrice && gasLimit) {
+        setGasCost(gasPrice.mul(gasLimit));
+      }
+    } catch (e) {
+      console.log(e);
+      setError({
+        status: true,
+        message: translations[lang].error,
+        component: 'gas',
+      });
+    }
+  }, [needsAllowance, debounceQty]);
+
+  useEffect(() => {
+    void previewGasCost();
+  }, [previewGasCost]);
+
+  const approve = async () => {
+    if (symbol === 'WETH') return;
+    if (!marketContract) throw new Error('Market not found');
+    if (!assetContract) throw new Error('Asset not found');
+
+    try {
+      const gasEstimation = await assetContract.estimateGas.approve(marketContract.address, MaxUint256);
+      const approveTx = await assetContract.approve(marketContract.address, MaxUint256, {
         gasLimit: Math.ceil(Number(formatFixed(gasEstimation)) * numbers.gasLimitMultiplier),
       });
 
-      //we set the transaction as pending
       setPending(true);
-
-      await approval.wait();
-
-      //we set the transaction as done
+      await approveTx.wait();
       setPending(false);
 
-      //once the tx is done we update the step
-      setStep(2);
+      void updateNeedsAllowance();
     } catch (e) {
       console.error(e);
 
@@ -152,50 +283,18 @@ function Deposit() {
         status: true,
       });
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
-  }
+  };
 
-  async function getWalletBalance() {
-    let walletBalance;
-    let decimals;
-
-    if (symbol === 'WETH') {
-      walletBalance = await web3Provider?.getBalance(walletAddress!);
-      decimals = 18;
-    } else {
-      if (!underlyingContract) return;
-
-      walletBalance = await underlyingContract?.balanceOf(walletAddress);
-      decimals = await underlyingContract?.decimals();
-    }
-
-    const formattedBalance = walletBalance && formatFixed(walletBalance, decimals);
-
-    if (formattedBalance) {
-      setWalletBalance(formattedBalance);
-    }
-  }
-
-  function getUserDeposits() {
-    if (!symbol || !accountData) return '0';
-
-    const amount = accountData[symbol]?.floatingDepositAssets;
-    const decimals = accountData[symbol]?.decimals;
-
-    const formattedAmount = amount && formatNumber(formatFixed(amount, decimals), symbol);
-
-    return formattedAmount ?? '0';
-  }
-
-  function onMax() {
+  const onMax = () => {
     if (walletBalance) {
       setQty(walletBalance);
       setError(undefined);
     }
-  }
+  };
 
-  function handleInputChange(e: ChangeEvent<HTMLInputElement>) {
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (!accountData || !symbol) return;
     const decimals = accountData[symbol].decimals;
 
@@ -215,34 +314,37 @@ function Deposit() {
     }
 
     setQty(e.target.value);
-  }
+  };
 
-  async function deposit() {
+  const deposit = async () => {
     try {
-      if (!accountData || !symbol) return;
+      if (!symbol || !walletAddress) return;
 
-      const decimals = accountData[symbol].decimals;
-
-      let deposit;
+      let depositTx;
 
       if (symbol === 'WETH') {
-        if (!web3Provider) return;
+        if (!web3Provider || !marketETHRouterContract) return;
 
-        const ETHrouter = handleETH(network?.name, web3Provider?.getSigner());
+        const gasEstimation = await marketETHRouterContract.estimateGas.deposit({ value: parseFixed(qty, 18) });
 
-        // gas estimated directly on depositETH
-        deposit = await ETHrouter?.depositETH(qty!);
+        depositTx = await marketETHRouterContract.deposit({
+          value: parseFixed(qty, 18),
+          gasLimit: Math.ceil(Number(formatFixed(gasEstimation)) * numbers.gasLimitMultiplier),
+        });
       } else {
-        const gasEstimation = (await getGasLimit(qty)) as BigNumber;
+        if (!marketContract) throw new Error('Market contract is undefined');
+        const decimals = await marketContract.decimals();
+        const depositAmount = parseFixed(qty, decimals);
+        const gasEstimation = await marketContract.estimateGas.deposit(depositAmount, walletAddress);
 
-        deposit = await fixedLenderWithSigner?.deposit(parseFixed(qty, decimals), walletAddress, {
+        depositTx = await marketContract.deposit(depositAmount, walletAddress, {
           gasLimit: Math.ceil(Number(formatFixed(gasEstimation)) * numbers.gasLimitMultiplier),
         });
       }
 
-      setTx({ status: 'processing', hash: deposit?.hash });
+      setTx({ status: 'processing', hash: depositTx.hash });
 
-      const txReceipt = await deposit.wait();
+      const txReceipt = await depositTx.wait();
 
       if (txReceipt.status === 1) {
         setTx({ status: 'success', hash: txReceipt?.transactionHash });
@@ -253,7 +355,6 @@ function Deposit() {
       getAccountData();
     } catch (e: any) {
       console.log(e);
-      setLoading(false);
 
       const isDenied = e?.message?.includes('User denied');
 
@@ -279,92 +380,19 @@ function Deposit() {
           message: translations[lang].generalError,
         });
       }
+    } finally {
+      setIsLoading(false);
     }
-  }
+  };
 
-  async function previewGasCost() {
-    if (symbol === 'WETH') return;
-    try {
-      const gasPrice = (await fixedLenderWithSigner?.provider.getFeeData())?.maxFeePerGas;
-
-      const gasLimit = await getGasLimit(qty || '1');
-
-      if (gasPrice && gasLimit) {
-        setGasCost(gasPrice.mul(gasLimit));
-      }
-    } catch (e) {
-      console.log(e);
-      setError({
-        status: true,
-        component: 'gas',
-      });
-    }
-  }
-
-  async function getGasLimit(qty: string) {
-    if (!accountData || !symbol) return;
-
-    const decimals = accountData[symbol].decimals;
-
-    return fixedLenderWithSigner?.estimateGas.deposit(parseFixed(qty, decimals), walletAddress);
-  }
-
-  async function estimateGasForApprove() {
-    if (!underlyingContract) throw new Error('underlyingContract is undefined');
-
-    return underlyingContract.estimateGas.approve(market?.value, MaxUint256);
-  }
-
-  async function estimateApprovalGasCost() {
-    if (symbol === 'WETH') return;
-
-    try {
-      const gasPrice = (await underlyingContract?.provider.getFeeData())?.maxFeePerGas;
-
-      const gasLimit = await estimateGasForApprove();
-
-      if (gasPrice && gasLimit) {
-        setGasCost(gasPrice.mul(gasLimit));
-      }
-    } catch (e) {
-      console.log(e);
-      setError({
-        status: true,
-        message: translations[lang].error,
-        component: 'gas',
-      });
-    }
-  }
-
-  function handleClickAction() {
-    setLoading(true);
+  const handleSubmitAction = () => {
+    setIsLoading(true);
     if (step === 1 && !pending && symbol !== 'WETH') {
       return approve();
     } else if (!pending) {
       return deposit();
     }
-  }
-
-  function getFixedLenderContract() {
-    const filteredFixedLender = fixedLenderData.find((contract) => {
-      const contractSymbol = getSymbol(contract.address!, network!.name);
-
-      return contractSymbol === symbol;
-    });
-
-    if (!filteredFixedLender) throw new Error('Market contract not found');
-    const fixedLender = getInstance(filteredFixedLender.address!, filteredFixedLender.abi!, `market${symbol}`);
-
-    setFixedLenderWithSigner(fixedLender);
-  }
-
-  function getUnderlyingContract() {
-    const underlyingData: UnderlyingData | undefined = getUnderlyingData(network?.name, symbol);
-
-    const underlyingContract = getInstance(underlyingData!.address, underlyingData!.abi, `underlying${symbol}`);
-
-    setUnderlyingContract(underlyingContract);
-  }
+  };
 
   return (
     <>
@@ -384,7 +412,7 @@ function Deposit() {
             symbol={symbol!}
             error={error?.component === 'input'}
           />
-          {error?.component !== 'gas' && symbol !== 'WETH' && <ModalTxCost gasCost={gasCost} />}
+          {error?.component !== 'gas' && <ModalTxCost gasCost={gasCost} />}
           <ModalRow text={translations[lang].exactlyBalance} value={depositedAmount} line />
           {symbol ? (
             <ModalRowHealthFactor qty={qty} symbol={symbol} operation="deposit" />
@@ -397,10 +425,10 @@ function Deposit() {
           <div className={styles.buttonContainer}>
             <Button
               text={step === 1 ? translations[lang].approve : translations[lang].deposit}
-              loading={loading}
+              loading={isLoading}
               className={qty && parseFloat(qty) > 0 && !error?.status ? 'primary' : 'disabled'}
-              disabled={((!qty || parseFloat(qty) <= 0) && !pending) || loading || error?.status}
-              onClick={handleClickAction}
+              disabled={((!qty || parseFloat(qty) <= 0) && !pending) || isLoading || error?.status}
+              onClick={handleSubmitAction}
             />
           </div>
         </>
@@ -408,6 +436,6 @@ function Deposit() {
       {tx && <ModalGif tx={tx} tryAgain={deposit} />}
     </>
   );
-}
+};
 
 export default Deposit;
