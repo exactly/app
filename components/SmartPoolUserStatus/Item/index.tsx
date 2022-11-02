@@ -77,6 +77,8 @@ function Item({
 
   async function checkCollaterals() {
     if (!accountData || !symbol) return;
+    setToggle(false);
+    setDisabled(false);
 
     const floatingPositions = accountData[symbol].floatingBorrowAssets;
     const fixedPositions = accountData[symbol].fixedBorrowPositions;

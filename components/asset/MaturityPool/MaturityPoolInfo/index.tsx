@@ -13,23 +13,24 @@ import { ItemInfoProps } from 'components/common/ItemInfo';
 import { toPercentage } from 'utils/utils';
 
 import numbers from 'config/numbers.json';
+import parseTimestamp from 'utils/parseTimestamp';
 
 type MaturityPoolInfoProps = {
   totalDeposited?: number;
   totalBorrowed?: number;
   bestDepositAPR?: number;
-  bestDepositAPRDate?: string;
+  bestDepositAPRTimestamp?: number;
   bestBorrowAPR?: number;
-  bestBorrowAPRDate?: string;
+  bestBorrowAPRTimestamp?: number;
 };
 
 const MaturityPoolInfo: FC<MaturityPoolInfoProps> = ({
   totalDeposited,
   totalBorrowed,
   bestDepositAPR,
-  bestDepositAPRDate,
+  bestDepositAPRTimestamp,
   bestBorrowAPR,
-  bestBorrowAPRDate,
+  bestBorrowAPRTimestamp,
 }) => {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
@@ -48,18 +49,20 @@ const MaturityPoolInfo: FC<MaturityPoolInfoProps> = ({
     {
       label: translations[lang].bestDepositAPR,
       value: toPercentage(bestDepositAPR && bestDepositAPR > minAPRValue ? bestDepositAPR : undefined),
-      underLabel: bestDepositAPRDate ?? undefined,
+      underLabel: bestDepositAPRTimestamp ? parseTimestamp(bestDepositAPRTimestamp) : undefined,
+      tooltip: 'The highest fixed interest rate APR for a $1 deposit in all the available Fixed Rated Pools.',
     },
     {
       label: translations[lang].bestBorrowAPR,
       value: toPercentage(bestBorrowAPR && bestBorrowAPR > minAPRValue ? bestBorrowAPR : undefined),
-      underLabel: bestBorrowAPRDate ?? undefined,
+      underLabel: bestBorrowAPRTimestamp ? parseTimestamp(bestBorrowAPRTimestamp) : undefined,
+      tooltip: 'The lowest fixed interest rate APR for a $1 borrow in all the available Fixed Rated Pools.',
     },
   ];
 
   return (
     <Grid container>
-      <HeaderInfo title={translations[lang].maturityPools} itemsInfo={itemsInfo} />
+      <HeaderInfo title={translations[lang].maturityPools} itemsInfo={itemsInfo} variant="h5" />
     </Grid>
   );
 };

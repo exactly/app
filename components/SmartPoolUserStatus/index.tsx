@@ -73,11 +73,7 @@ function SmartPoolUserStatus({ walletAddress, type }: Props) {
         market: address,
       };
 
-      const lookAfter = type.value === 'borrow' ? 'borrowedAmount' : 'depositedAmount';
-
-      if (obj[lookAfter] && !obj[lookAfter].isZero()) {
-        data.push(obj);
-      }
+      data.push(obj);
     });
 
     setItemData(data);
@@ -90,17 +86,10 @@ function SmartPoolUserStatus({ walletAddress, type }: Props) {
           <div className={styles.column}>
             <div className={styles.tableRow}>
               <span className={styles.symbol}>{translations[lang].asset}</span>
-              {/* <span className={styles.title}>
-                {type.value === 'deposit'
-                  ? translations[lang].currentBalance
-                  : translations[lang].borrowBalance}
-              </span> */}
 
               <span className={styles.title}>{translations[lang].netAssetValue}</span>
 
               {type.value === 'deposit' && <span className={styles.title}>{translations[lang].eToken}</span>}
-
-              {/* <span className={styles.title}>{translations[lang].difference}</span> */}
 
               {type.value === 'deposit' && <span className={styles.title}>{translations[lang].collateral}</span>}
 

@@ -1,96 +1,85 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { formatFixed } from '@ethersproject/bignumber';
-import Skeleton from 'react-loading-skeleton';
-import CircleIcon from '@mui/icons-material/Circle';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
+import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
+import { Grid } from '@mui/material';
+import { Zero } from '@ethersproject/constants';
 
-import OrderAction from 'components/OrderAction';
-
-import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 import AccountDataContext from 'contexts/AccountDataContext';
 
-import { LangKeys } from 'types/Lang';
 import { HealthFactor } from 'types/HealthFactor';
-
-import styles from './style.module.scss';
-
-import keys from './translations.json';
+import { MaturityPosition } from 'types/FixedLenderAccountData';
 
 import parseHealthFactor from 'utils/parseHealthFactor';
 import formatNumber from 'utils/formatNumber';
 import getHealthFactorData from 'utils/getHealthFactorData';
+import HeaderInfo from 'components/common/HeaderInfo';
+import { ItemInfoProps } from 'components/common/ItemInfo';
 
 function DashboardHeader() {
   const { walletAddress } = useWeb3Context();
   const { accountData } = useContext(AccountDataContext);
 
-  const lang: string = useContext(LangContext);
-  const translations: { [key: string]: LangKeys } = keys;
-
-  const [totalDeposit, setTotalDeposit] = useState<string | undefined>(undefined);
-  const [totalBorrow, setTotalBorrow] = useState<string | undefined>(undefined);
-
   const [healthFactor, setHealthFactor] = useState<HealthFactor | undefined>(undefined);
+
+  const [totalDeposited, setTotalDeposited] = useState<BigNumber | undefined>(undefined);
+  const [totalBorrowed, setTotalBorrowed] = useState<BigNumber | undefined>(undefined);
 
   useEffect(() => {
     if (!walletAddress) return;
-    getDeposits();
     getHealthFactor();
-    getBorrows();
   }, [walletAddress, accountData]);
 
-  function getDeposits() {
+  useEffect(() => {
     if (!accountData) return;
 
-    const data = Object.values(accountData);
-    let allDepositsUSD = 0;
+    const { totalDepositedUSD, totalBorrowedUSD } = Object.keys(accountData).reduce(
+      (acc, symbol) => {
+        const {
+          floatingDepositAssets,
+          floatingBorrowAssets,
+          usdPrice,
+          fixedDepositPositions,
+          fixedBorrowPositions,
+          decimals,
+        } = accountData[symbol];
+        const WADDecimals = parseFixed('1', decimals);
 
-    data.forEach((fixedLender) => {
-      const decimals = fixedLender.decimals;
-      const oracle = parseFloat(formatFixed(fixedLender.usdPrice, 18));
+        // iterate through fixed deposited pools to get totals
+        const { fixedTotalDeposited } = fixedDepositPositions.reduce(
+          (fixedPoolStats, pool: MaturityPosition) => {
+            const { position } = pool;
 
-      const smartPoolDepositValue = parseFloat(formatFixed(fixedLender.floatingDepositAssets, decimals));
-      const smartPoolDepositValueUSD = smartPoolDepositValue * oracle;
+            fixedPoolStats.fixedTotalDeposited = fixedPoolStats.fixedTotalDeposited.add(position.principal);
+            return fixedPoolStats;
+          },
+          { fixedTotalDeposited: Zero },
+        );
 
-      allDepositsUSD += smartPoolDepositValueUSD; //add the value in USD to the total deposit
+        // iterate through fixed borrowed pools to get totals
+        const { fixedTotalBorrowed } = fixedBorrowPositions.reduce(
+          (fixedPoolStats, pool: MaturityPosition) => {
+            const { position } = pool;
 
-      fixedLender.fixedDepositPositions.forEach((supplyPosition) => {
-        const maturityDepositValue = parseFloat(formatFixed(supplyPosition.position.principal, decimals));
-        const maturityDepositValueUSD = maturityDepositValue * oracle;
-        allDepositsUSD += maturityDepositValueUSD; //add the value in USD to the total deposit
-      });
-    });
+            fixedPoolStats.fixedTotalBorrowed = fixedPoolStats.fixedTotalBorrowed.add(position.principal);
+            return fixedPoolStats;
+          },
+          { fixedTotalBorrowed: Zero },
+        );
 
-    allDepositsUSD > 0 ? setTotalDeposit(formatNumber(allDepositsUSD, 'USD')) : setTotalDeposit('0.00');
-  }
+        acc.totalDepositedUSD = acc.totalDepositedUSD.add(
+          floatingDepositAssets.add(fixedTotalDeposited).mul(usdPrice).div(WADDecimals),
+        );
+        acc.totalBorrowedUSD = acc.totalBorrowedUSD.add(
+          floatingBorrowAssets.add(fixedTotalBorrowed).mul(usdPrice).div(WADDecimals),
+        );
+        return acc;
+      },
+      { totalDepositedUSD: Zero, totalBorrowedUSD: Zero },
+    );
 
-  function getBorrows() {
-    if (!accountData) return;
-
-    const data = Object.values(accountData);
-    let allBorrowsUSD = 0;
-
-    data.forEach((fixedLender) => {
-      const decimals = fixedLender.decimals;
-      const oracle = parseFloat(formatFixed(fixedLender.usdPrice, 18));
-
-      //floatinBorrow
-      if (fixedLender.floatingBorrowAssets) {
-        const borrowAssets = parseFloat(formatFixed(fixedLender.floatingBorrowAssets, decimals));
-
-        allBorrowsUSD += borrowAssets * oracle;
-      }
-
-      //fixed borrow
-      fixedLender.fixedBorrowPositions.forEach((borrowPosition) => {
-        const borrowValue = parseFloat(formatFixed(borrowPosition.position.principal, decimals));
-        const borrowValueUSD = borrowValue * oracle;
-        allBorrowsUSD += borrowValueUSD;
-      });
-    });
-
-    allBorrowsUSD > 0 ? setTotalBorrow(formatNumber(allBorrowsUSD, 'USD')) : setTotalBorrow('0.00');
-  }
+    setTotalDeposited(totalDepositedUSD);
+    setTotalBorrowed(totalBorrowedUSD);
+  }, [accountData]);
 
   function getHealthFactor() {
     if (!accountData) return;
@@ -104,62 +93,49 @@ function DashboardHeader() {
     }
   }
 
-  function getHealthFactorColor() {
-    if (!healthFactor) return;
-    // HACK the colors should be manage by MUI theme and 'isNAN' when is infinite
+  // function getHealthFactorColor() {
+  //   if (!healthFactor) return;
+  //   // HACK the colors should be manage by MUI theme and 'isNAN' when is infinite
 
-    const hf = parseFloat(parseHealthFactor(healthFactor.debt, healthFactor.collateral));
-    if (hf >= 1.25 || isNaN(hf)) {
-      return '#63ca10';
-    }
-    if (hf < 1.25 && hf >= 1) {
-      return '#BCB03A';
-    }
-    if (hf < 1) {
-      return '#FF0000';
-    }
-  }
+  //   const hf = parseFloat(parseHealthFactor(healthFactor.debt, healthFactor.collateral));
+  //   if (hf >= 1.25 || isNaN(hf)) {
+  //     return '#63ca10';
+  //   }
+  //   if (hf < 1.25 && hf >= 1) {
+  //     return '#BCB03A';
+  //   }
+  //   if (hf < 1) {
+  //     return '#FF0000';
+  //   }
+  // }
+
+  const itemsInfo: ItemInfoProps[] = useMemo((): ItemInfoProps[] => {
+    return [
+      {
+        label: 'Your Deposits',
+        value: totalDeposited != null ? `$${formatNumber(formatFixed(totalDeposited, 18))}` : undefined,
+      },
+      {
+        label: 'Your Borrows',
+        value: totalBorrowed != null ? `$${formatNumber(formatFixed(totalBorrowed, 18))}` : undefined,
+      },
+      ...(healthFactor
+        ? [
+            {
+              label: 'Health Factor',
+              value: healthFactor != null ? parseHealthFactor(healthFactor.debt, healthFactor.collateral) : undefined,
+              tooltip:
+                'How “safe” is your leverage portfolio, defined as the risk adjusted proportion of collateral deposited versus the risk adjusted amount borrowed. A health factor above 1.25 is recommended to avoid liquidation.',
+            },
+          ]
+        : []),
+    ];
+  }, [healthFactor, totalBorrowed, totalDeposited]);
 
   return (
-    <section className={styles.headerSection}>
-      <div className={styles.titleSection}>
-        <h1>{translations[lang].title}</h1>
-        <OrderAction />
-      </div>
-
-      <section className={styles.stats}>
-        <section className={styles.stat}>
-          <h3 className={styles.statTitle}>{translations[lang]?.deposit?.toUpperCase()}</h3>
-          {walletAddress ? (
-            <p className={styles.statValue}>{totalDeposit ? `$${totalDeposit}` : <Skeleton />}</p>
-          ) : (
-            <p className={styles.statValue}>$0.00</p>
-          )}
-        </section>
-        <section className={styles.stat}>
-          <h3 className={styles.statTitle}>{translations[lang]?.borrow?.toUpperCase()}</h3>
-          {walletAddress ? (
-            <p className={styles.statValue}>{totalBorrow ? `$${totalBorrow}` : <Skeleton />}</p>
-          ) : (
-            <p className={styles.statValue}>$0.00</p>
-          )}
-        </section>
-        {walletAddress && healthFactor && (
-          <section className={styles.stat}>
-            <h3 className={styles.statTitle}>{translations[lang]?.healthFactor?.toUpperCase()}</h3>
-            <p className={styles.statValue}>
-              <CircleIcon
-                sx={{
-                  color: `${getHealthFactorColor()}`,
-                  fontSize: '8px',
-                }}
-              />
-              {parseHealthFactor(healthFactor.debt, healthFactor.collateral)}
-            </p>
-          </section>
-        )}
-      </section>
-    </section>
+    <Grid item sx={{ alignSelf: 'center', marginRight: '20px' }}>
+      <HeaderInfo itemsInfo={itemsInfo} title="Dashboard" />
+    </Grid>
   );
 }
 

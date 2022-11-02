@@ -5,7 +5,6 @@ import Grid from '@mui/material/Grid';
 
 import Navbar from 'components/Navbar';
 import MobileNavbar from 'components/MobileNavbar';
-import Footer from 'components/Footer';
 import OperationsModals from 'components/OperationsModal';
 
 import { Maturity } from 'types/Maturity';
@@ -70,18 +69,22 @@ const Asset: NextPage<{ symbol: string }> = ({ symbol }) => {
       <MobileNavbar />
       <Navbar />
 
-      <section className={style.container}>
-        <AssetHeaderInfo symbol={symbol} assetAddress={assetAddress} networkName={networkName} />
-        <Grid container spacing={4} mt={5} ml={0}>
-          <Grid item container spacing={4}>
+      <section className={style.container} style={{ marginTop: '130px' }}>
+        <AssetHeaderInfo
+          symbol={symbol}
+          assetAddress={assetAddress}
+          eMarketAddress={eMarketAddress}
+          networkName={networkName}
+        />
+        <Grid container mt={5}>
+          <Grid item container>
             <AssetFloatingPool symbol={symbol} eMarketAddress={eMarketAddress} networkName={networkName} />
           </Grid>
-          <Grid item container mt={5}>
+          <Grid item container>
             <AssetMaturityPools symbol={symbol} />
           </Grid>
         </Grid>
       </section>
-      <Footer />
     </>
   );
 };

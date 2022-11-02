@@ -94,7 +94,16 @@ function MaturityPoolDashboard({ tab }: Props) {
   }
 
   return (
-    <section className={styles.container}>
+    <section
+      className={styles.container}
+      style={{
+        boxShadow: '#A7A7A7 0px 0px 4px 0px',
+        borderRadius: '5px',
+        padding: '16px',
+        marginTop: '20px',
+        marginBottom: '90px',
+      }}
+    >
       <section className={styles.sectionContainer}>
         <div className={styles.titleContainer}>
           <p className={styles.title}>{translations[lang].maturityPools}</p>

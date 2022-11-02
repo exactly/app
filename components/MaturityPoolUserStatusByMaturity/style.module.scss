@@ -43,17 +43,9 @@
 
 @for $i from 1 through 26 {
   .track > .fullBar:nth-child(#{$i}) {
-    background: linear-gradient(
-      to bottom right,
-      calcRgbaColor($i, true, 'full'),
-      calcRgbaColor($i, false, 'full')
-    );
+    background: linear-gradient(to bottom right, calcRgbaColor($i, true, 'full'), calcRgbaColor($i, false, 'full'));
 
-    background: linear-gradient(
-      to bottom right,
-      calcRgbaColor($i, true, 'full'),
-      calcRgbaColor($i, false, 'full')
-    );
+    background: linear-gradient(to bottom right, calcRgbaColor($i, true, 'full'), calcRgbaColor($i, false, 'full'));
   }
 
   .track > .incompleteBar:nth-child(#{$i}) {

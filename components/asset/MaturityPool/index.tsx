@@ -11,7 +11,6 @@ import MaturityPoolInfo from './MaturityPoolInfo';
 import PreviewerContext from 'contexts/PreviewerContext';
 import ContractsContext from 'contexts/ContractsContext';
 import { FixedMarketData } from 'types/FixedMarketData';
-import parseTimestamp from 'utils/parseTimestamp';
 import MaturityPoolsTable from './MaturityPoolsTable';
 import getAPRsPerMaturity, { APRsPerMaturityType } from 'utils/getAPRsPerMaturity';
 
@@ -20,7 +19,7 @@ type AssetMaturityPoolsProps = {
 };
 
 type BestAPR = {
-  timestamp?: string;
+  timestamp?: number;
   apr: number;
 };
 
@@ -75,11 +74,11 @@ const AssetMaturityPools: FC<AssetMaturityPoolsProps> = ({ symbol }) => {
     setTotalBorrowed(Number(totalBorrowedUSD));
 
     setBestDepositAPR({
-      timestamp: maturityMaxAPRDeposit ? parseTimestamp(maturityMaxAPRDeposit) : undefined,
+      timestamp: maturityMaxAPRDeposit ? maturityMaxAPRDeposit : undefined,
       apr: APRsPerMaturity[maturityMaxAPRDeposit]?.deposit,
     });
     setBestBorrowAPR({
-      timestamp: maturityMinAPRBorrow ? parseTimestamp(maturityMinAPRBorrow) : undefined,
+      timestamp: maturityMinAPRBorrow ? maturityMinAPRBorrow : undefined,
       apr: APRsPerMaturity[maturityMinAPRBorrow]?.borrow,
     });
   }, [accountData, symbol, previewerData]);
@@ -89,18 +88,18 @@ const AssetMaturityPools: FC<AssetMaturityPoolsProps> = ({ symbol }) => {
   }, [getMaturitiesData]);
 
   return (
-    <Grid container spacing={2}>
+    <Grid container mt={4} mb={19} padding={2} sx={{ boxShadow: '#A7A7A7 0px 0px 4px 0px', borderRadius: '5px' }}>
       <Grid item xs={12}>
         <MaturityPoolInfo
           totalDeposited={totalDeposited}
           totalBorrowed={totalBorrowed}
           bestDepositAPR={bestDepositAPR?.apr}
-          bestDepositAPRDate={bestDepositAPR?.timestamp}
+          bestDepositAPRTimestamp={bestDepositAPR?.timestamp}
           bestBorrowAPR={bestBorrowAPR?.apr}
-          bestBorrowAPRDate={bestBorrowAPR?.timestamp}
+          bestBorrowAPRTimestamp={bestBorrowAPR?.timestamp}
         />
       </Grid>
-      <Grid item xs={12}>
+      <Grid item xs={12} mt={4}>
         <MaturityPoolsTable APRsPerMaturity={APRsPerMaturity} symbol={symbol} />
       </Grid>
     </Grid>
