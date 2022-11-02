@@ -1,11 +1,15 @@
 import React, { FC, useContext, useEffect, useState } from 'react';
-import HeaderInfo from 'components/common/HeaderInfo';
-import { ItemInfoProps } from 'components/common/ItemInfo';
-import OrderAction from 'components/OrderAction';
-import AccountDataContext from 'contexts/AccountDataContext';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber/lib';
 import { Zero } from '@ethersproject/constants/lib';
+
+import HeaderInfo from 'components/common/HeaderInfo';
+import { ItemInfoProps } from 'components/common/ItemInfo';
+import { Grid } from '@mui/material';
+
+import AccountDataContext from 'contexts/AccountDataContext';
+
 import { FixedPool } from 'types/FixedLenderAccountData';
+
 import formatNumber from 'utils/formatNumber';
 
 const MarketsHeader: FC = () => {
@@ -66,7 +70,11 @@ const MarketsHeader: FC = () => {
       value: totalAvailable != null ? `$${formatNumber(formatFixed(totalAvailable, 18))}` : undefined,
     },
   ];
-  return <HeaderInfo itemsInfo={itemsInfo} title="Markets" actions={<OrderAction />} />;
+  return (
+    <Grid container>
+      <HeaderInfo itemsInfo={itemsInfo} title="Markets" />
+    </Grid>
+  );
 };
 
 export default MarketsHeader;

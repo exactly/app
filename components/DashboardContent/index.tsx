@@ -3,7 +3,7 @@ import dynamic from 'next/dynamic';
 
 import Tabs from 'components/Tabs';
 
-const DashboardUserCharts = dynamic(() => import('components/DashboardUserCharts'));
+// const DashboardUserCharts = dynamic(() => import('components/DashboardUserCharts'));
 const SmartPoolDashboard = dynamic(() => import('components/SmartPoolDashboard'));
 const MaturityPoolDashboard = dynamic(() => import('components/MaturityPoolDashboard'));
 const EmptyState = dynamic(() => import('components/EmptyState'));
@@ -33,7 +33,7 @@ function DashboardContent() {
 
   return (
     <section className={styles.container}>
-      <div className={styles.chartContainer}>{<DashboardUserCharts />}</div>
+      {/* <div className={styles.chartContainer}>{<DashboardUserCharts />}</div> */}
       <div className={styles.poolsContainer}>
         <Tabs
           values={[tabDeposit, tabBorrow]}

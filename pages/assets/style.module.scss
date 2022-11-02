@@ -1,7 +1,7 @@
 .container {
   max-width: var(--maxWidth);
   margin: 0 auto;
-  margin-top: calc(var(--navbarHeight) * 1.5 + var(--currentNetwork));
+  // margin-top: calc(var(--navbarHeight) * 1.5 + var(--currentNetwork));
 
   .graphContainer {
     display: flex;

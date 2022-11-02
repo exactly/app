@@ -10,6 +10,7 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
+import Tooltip from '@mui/material/Tooltip';
 
 import { APRsPerMaturityType } from 'utils/getAPRsPerMaturity';
 import formatNumber from 'utils/formatNumber';
@@ -36,12 +37,14 @@ type TableRow = {
   borrowAPR: number;
 };
 
-const HeadCell: FC<{ title: string }> = ({ title }) => {
+const HeadCell: FC<{ title: string; tooltip?: string }> = ({ title, tooltip }) => {
   return (
-    <TableCell align="center">
-      <Typography variant="caption" textTransform="uppercase" color="black" fontWeight={600}>
-        {title}
-      </Typography>
+    <TableCell align={title === 'Maturity' ? 'left' : 'center'}>
+      <Tooltip title={tooltip} placement="top" arrow>
+        <Typography variant="subtitle2" sx={{ color: 'grey.500' }} fontWeight={600}>
+          {title}
+        </Typography>
+      </Tooltip>
     </TableCell>
   );
 };
@@ -109,10 +112,16 @@ const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ APRsPerMaturity, symb
             <HeadCell title="Maturity" />
             <HeadCell title="Total Deposits" />
             <HeadCell title="Total Borrows" />
-            <HeadCell title="Deposit APR" />
-            <HeadCell title="Borrow APR" />
-            <TableCell></TableCell>
-            <TableCell></TableCell>
+            <HeadCell
+              title="Deposit APR"
+              tooltip="The marginal fixed interest rate for a $1 deposit in the Fixed Rated Pool."
+            />
+            <HeadCell
+              title="Borrow APR"
+              tooltip="The marginal fixed interest rate for a $1 borrow in the Fixed Rated Pool."
+            />
+            <TableCell />
+            <TableCell />
           </TableRow>
         </TableHead>
         <TableBody>
@@ -122,6 +131,7 @@ const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ APRsPerMaturity, symb
               sx={{
                 '&:last-child td, &:last-child th': { border: 0 },
               }}
+              hover
             >
               <TableCell component="th" scope="row">
                 <Typography variant="body1" color="black" fontWeight={600}>
@@ -132,7 +142,13 @@ const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ APRsPerMaturity, symb
               <TableCell align="center">${totalBorrowed}</TableCell>
               <TableCell align="center">{toPercentage(depositAPR > minAPRValue ? depositAPR : undefined)}</TableCell>
               <TableCell align="center">{toPercentage(borrowAPR > minAPRValue ? borrowAPR : undefined)}</TableCell>
-              <TableCell align="center">
+              <TableCell
+                align="center"
+                size="small"
+                width={50}
+                onClick={(e) => e.preventDefault()}
+                sx={{ cursor: 'default' }}
+              >
                 <Button
                   disabled={depositAPR < minAPRValue}
                   variant="contained"
@@ -141,7 +157,14 @@ const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ APRsPerMaturity, symb
                   Deposit
                 </Button>
               </TableCell>
-              <TableCell align="center">
+
+              <TableCell
+                align="center"
+                size="small"
+                width={50}
+                onClick={(e) => e.preventDefault()}
+                sx={{ cursor: 'default' }}
+              >
                 <Button
                   disabled={borrowAPR < minAPRValue}
                   variant="outlined"

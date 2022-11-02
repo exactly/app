@@ -15,7 +15,6 @@ import formatNumber from 'utils/formatNumber';
 import getSubgraph from 'utils/getSubgraph';
 import queryRate from 'utils/queryRates';
 import getAPRsPerMaturity from 'utils/getAPRsPerMaturity';
-import parseTimestamp from 'utils/parseTimestamp';
 
 import { Market } from 'types/Market';
 import { FixedMarketData } from 'types/FixedMarketData';
@@ -24,6 +23,10 @@ import numbers from 'config/numbers.json';
 import { Typography } from '@mui/material';
 
 const { usdAmount: usdAmountPreviewer } = numbers;
+
+import { globals } from 'styles/theme';
+
+const { maxWidth } = globals;
 
 const defaultRows: TableRow[] = [
   { symbol: 'DAI' },
@@ -122,12 +125,12 @@ const MarketTables: FC = () => {
         );
 
         const depositAPR = {
-          timestamp: maturityMaxAPRDeposit ? parseTimestamp(maturityMaxAPRDeposit) : undefined,
+          timestamp: maturityMaxAPRDeposit ?? undefined,
           apr: APRsPerMaturity[maturityMaxAPRDeposit]?.deposit,
         };
 
         const borrowAPR = {
-          timestamp: maturityMinAPRBorrow ? parseTimestamp(maturityMinAPRBorrow) : undefined,
+          timestamp: maturityMinAPRBorrow ?? undefined,
           apr: APRsPerMaturity[maturityMinAPRBorrow]?.borrow,
         };
 
@@ -137,6 +140,8 @@ const MarketTables: FC = () => {
           totalBorrowed: formatNumber(formatFixed(totalBorrowed.mul(usdPrice).div(WeiPerEther), decimals)),
           depositAPR: depositAPR.apr,
           borrowAPR: borrowAPR.apr,
+          borrowTimestamp: borrowAPR.timestamp,
+          depositTimestamp: depositAPR.timestamp,
         });
       }),
     );
@@ -151,18 +156,36 @@ const MarketTables: FC = () => {
   }, [accountData, network, markets, previewerData.abi, previewerData.address]);
 
   const floatingHeaders = [
-    { title: 'Asset' },
-    { title: 'Total Deposits' },
-    { title: 'Total Borrows' },
-    { title: 'Deposit APR' },
-    { title: 'Borrow APR' },
+    {
+      title: 'Asset',
+    },
+    {
+      title: 'Total Deposits',
+    },
+    {
+      title: 'Total Borrows',
+    },
+    {
+      title: 'Deposit APR',
+      tooltip: 'Change in the underlying Variable Rate Pool shares value over the last hour, annualized.',
+    },
+    {
+      title: 'Borrow APR',
+      tooltip: 'Change in the underlying Variable Rate Pool shares value over the last hour, annualized.',
+    },
   ];
   const fixedHeaders = [
     { title: 'Asset' },
-    { title: 'Total Deposits' },
-    { title: 'Total Borrows' },
-    { title: 'Best Deposit APR' },
-    { title: 'Best Borrow APR' },
+    { title: 'Total Deposits', tooltip: 'Sum of all the deposits in all the Fixed Rate Pools.' },
+    { title: 'Total Borrows', tooltip: 'Sum of all the borrows in all the Fixed Rate Pools.' },
+    {
+      title: 'Best Deposit APR',
+      tooltip: 'The highest fixed interest rate APR for a $1 deposit in all the available Fixed Rated Pools.',
+    },
+    {
+      title: 'Best Borrow APR',
+      tooltip: 'The lowest fixed interest rate APR for a $1 borrow in all the available Fixed Rated Pools.',
+    },
   ];
 
   async function getRates(
@@ -189,18 +212,14 @@ const MarketTables: FC = () => {
   }, [accountData, getMarkets]);
 
   return (
-    <Grid container spacing={2} justifyContent="center" my={4}>
-      <Grid item sx={{ maxWidth: '620px' }}>
-        <Typography variant="h5" mb={1}>
-          Variable Rate Pools
-        </Typography>
-        <PoolTable isLoading={isLoading} headers={floatingHeaders} rows={floatingRows} />
+    <Grid container sx={{ maxWidth: maxWidth, margin: 'auto' }}>
+      <Grid width={'100%'} my={4} padding={2} sx={{ boxShadow: '#A7A7A7 0px 0px 4px 0px', borderRadius: '5px' }}>
+        <Typography variant="h5">Variable Rate Pools</Typography>
+        <PoolTable isLoading={isLoading} headers={floatingHeaders} rows={floatingRows} rateType={'floating'} />
       </Grid>
-      <Grid item sx={{ maxWidth: '620px' }}>
-        <Typography variant="h5" mb={1}>
-          Fixed Rate Pools
-        </Typography>
-        <PoolTable isLoading={isLoading} headers={fixedHeaders} rows={fixedRows} />
+      <Grid width={'100%'} mb={20} padding={2} sx={{ boxShadow: '#A7A7A7 0px 0px 4px 0px', borderRadius: '5px' }}>
+        <Typography variant="h5">Fixed Rate Pools</Typography>
+        <PoolTable isLoading={isLoading} headers={fixedHeaders} rows={fixedRows} rateType={'fixed'} />
       </Grid>
     </Grid>
   );

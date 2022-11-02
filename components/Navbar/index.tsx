@@ -107,16 +107,24 @@ function Navbar() {
             })}
           </ul>
         </div>
-        <a
-          className={styles.discordFeedbackLink}
-          target="_blank"
-          rel="noreferrer noopener"
-          href="https://discordapp.com/channels/846682395553824808/985912903880302632"
-        >
-          <strong>Give us feedback here!</strong>
-        </a>
 
         <div className={styles.right}>
+          <a
+            className={styles.discordFeedbackLink}
+            target="_blank"
+            rel="noreferrer noopener"
+            href="https://discord.com/channels/846682395553824808/908758791057719358"
+          >
+            <strong>Feedback here!</strong>
+          </a>
+          <a
+            className={styles.discordFeedbackLink}
+            target="_blank"
+            rel="noreferrer noopener"
+            href="https://docs.exact.ly/"
+          >
+            <strong>Docs</strong>
+          </a>
           {network && isAllowed && (
             <div className={styles.networkContainer} onClick={handleClick}>
               <div className={styles.dot} />

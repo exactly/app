@@ -6,23 +6,33 @@ import ItemInfo, { ItemInfoProps } from './ItemInfo';
 type HeaderInfoProps = {
   title: string;
   itemsInfo: ItemInfoProps[];
-  actions?: JSX.Element;
+  variant?:
+    | 'h2'
+    | 'button'
+    | 'caption'
+    | 'h1'
+    | 'h3'
+    | 'h4'
+    | 'h5'
+    | 'h6'
+    | 'inherit'
+    | 'subtitle1'
+    | 'subtitle2'
+    | 'body1'
+    | 'body2'
+    | 'overline'
+    | undefined;
 };
 
-const HeaderInfo: FC<HeaderInfoProps> = ({ title, itemsInfo, actions }) => {
+const HeaderInfo: FC<HeaderInfoProps> = ({ title, itemsInfo, variant = 'h2' }) => {
   return (
     <>
-      <Grid item mb={1} sx={{ alignSelf: 'center', marginRight: '20px' }}>
-        <Typography variant="h2">{title}</Typography>
+      <Grid item mb={1}>
+        <Typography variant={variant}>{title}</Typography>
       </Grid>
-      {Boolean(actions) && (
-        <Grid mb={4} container>
-          {actions}
-        </Grid>
-      )}
-      <Grid item container mb={2} spacing={4}>
-        {itemsInfo.map(({ label, value, underLabel }) => (
-          <ItemInfo key={label.trim()} label={label} value={value} underLabel={underLabel} />
+      <Grid item container spacing={4}>
+        {itemsInfo.map(({ label, value, underLabel, tooltip }) => (
+          <ItemInfo key={label.trim()} label={label} value={value} underLabel={underLabel} tooltip={tooltip} />
         ))}
       </Grid>
     </>

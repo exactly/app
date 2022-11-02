@@ -1,6 +1,6 @@
 {
   "en": {
-    "loadingTitle": "Waiting...",
+    "loadingTitle": "Please wait",
     "transactionHash": "Transaction Hash",
     "successTitle": "Done!",
     "errorTitle": "There was an error",

@@ -26,12 +26,26 @@ const theme = createTheme({
       fontSize: 36,
       fontWeight: 600,
     },
+    h2: {
+      fontSize: '2rem',
+      fontWeight: 700,
+    },
     h5: {
       fontWeight: 600,
       fontSize: 24,
     },
     h6: {
       fontWeight: 700,
+    },
+    subtitle1: {
+      fontWeight: 600,
+      fontSize: 14,
+      color: '#9a9a9a',
+      fontFamily: 'IBM Plex Mono',
+    },
+    subtitle2: {
+      fontSize: 12,
+      fontFamily: 'IBM Plex Mono',
     },
     caption: {
       color: '#9a9a9a',
@@ -44,13 +58,6 @@ const theme = createTheme({
         root: {
           textTransform: 'none',
           borderRadius: 0,
-        },
-      },
-    },
-    MuiTableBody: {
-      styleOverrides: {
-        root: {
-          backgroundColor: '#f9f9f9',
         },
       },
     },

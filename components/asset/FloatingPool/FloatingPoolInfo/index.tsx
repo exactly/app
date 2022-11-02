@@ -13,8 +13,11 @@ import formatNumber from 'utils/formatNumber';
 import queryRates from 'utils/queryRates';
 import getSubgraph from 'utils/getSubgraph';
 import { toPercentage } from 'utils/utils';
+
 import { ItemInfoProps } from 'components/common/ItemInfo';
 import HeaderInfo from 'components/common/HeaderInfo';
+import Grid from '@mui/material/Grid';
+import OrderAction from 'components/OrderAction';
 
 type FloatingPoolInfoProps = {
   symbol: string;
@@ -93,10 +96,12 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol, eMarketAddress, n
     {
       label: translations[lang].depositAPR,
       value: depositAPR,
+      tooltip: 'Change in the underlying Variable Rate Pool shares value over the last hour, annualized.',
     },
     {
       label: translations[lang].borrowAPR,
       value: borrowAPR,
+      tooltip: 'Change in the underlying Variable Rate Pool shares value over the last hour, annualized.',
     },
     {
       label: translations[lang].utilizationRate,
@@ -104,7 +109,16 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol, eMarketAddress, n
     },
   ];
 
-  return <HeaderInfo title={translations[lang].smartPool} itemsInfo={itemsInfo} />;
+  return (
+    <Grid container justifyContent="space-between">
+      <Grid>
+        <HeaderInfo title={translations[lang].smartPool} itemsInfo={itemsInfo} variant="h5" />
+      </Grid>
+      <Grid alignSelf="end">
+        <OrderAction />
+      </Grid>
+    </Grid>
+  );
 };
 
 export default FloatingPoolInfo;

@@ -23,7 +23,10 @@ function SmartPoolDashboard({ tab }: Props) {
   const { walletAddress } = useWeb3Context();
 
   return (
-    <section className={styles.container}>
+    <section
+      className={styles.container}
+      style={{ boxShadow: '#A7A7A7 0px 0px 4px 0px', borderRadius: '5px', padding: '16px', marginTop: '20px' }}
+    >
       <div className={styles.titleContainer}>
         <p className={styles.title}>{translations[lang].smartPool}</p>
         <AddETokensButton />

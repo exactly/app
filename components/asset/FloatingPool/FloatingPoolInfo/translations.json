@@ -2,11 +2,11 @@
   "en": {
     "days": "days",
     "totalDeposited": "Total Deposits",
-    "totalBorrowed": "Total Borrowed",
+    "totalBorrowed": "Total Borrows",
     "utilizationRate": "Utilization Rate",
     "deposit": "Deposit",
     "smartPool": "Variable Rate Pool",
-    "TVL": "Total Value Locked",
+    "TVL": "Total Available",
     "depositAPR": "Deposit APR",
     "borrowAPR": "Borrow APR"
   },
@@ -16,7 +16,7 @@
     "utilizationRate": "Tasa de Utilización",
     "deposit": "Depositar",
     "smartPool": "Smart Pool",
-    "TVL": "Valor Total Bloqueado",
+    "TVL": "Total Disponible",
     "depositAPR": "Depositar APR",
     "borrowAPR": "Prestar APR"
   }

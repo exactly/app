@@ -1,11 +1,11 @@
 {
   "en": {
     "transactionHash": "Transaction Hash",
-    "etherscanText": "View at Etherscan",
+    "etherscanText": "View on Etherscan",
     "errorButton": "Try again",
-    "successTitle": "Transaction Complete!",
+    "successTitle": "Transaction Completed!",
     "successText": "We are good to go!",
-    "loadingTitle": "Waiting...",
+    "loadingTitle": "Please wait",
     "loadingText": "Waiting for the network to finish the transaction...",
     "errorTitle": "There was an error!",
     "errorText": "The transaction failed, please try again"

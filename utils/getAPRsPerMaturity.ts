@@ -1,6 +1,6 @@
-import { formatFixed, parseFixed, BigNumber } from '@ethersproject/bignumber';
+import { formatFixed, BigNumber } from '@ethersproject/bignumber';
 import { PreviewFixedAtAllMaturities } from 'types/FixedMarketData';
-import { MaxUint256 } from '@ethersproject/constants';
+import { MaxUint256, WeiPerEther } from '@ethersproject/constants';
 
 import numbers from 'config/numbers.json';
 
@@ -22,14 +22,17 @@ const getAPRsPerMaturity = (
 ): CuratedMaturityAPRs => {
   const APRsPerMaturity: APRsPerMaturityType = {};
 
-  const timestampNow = Date.now() / 1000;
   let maturityMaxAPRDeposit = 0;
   deposits.forEach(({ maturity: maturityBN, assets: finalDepositAssets }) => {
     const maturity = maturityBN.toNumber();
-    const timePerYear = 31_536_000 / (maturity - timestampNow);
-    const rate = finalDepositAssets.mul(parseFixed('1', 18)).div(initialAssets);
-    const depositAPR = (Number(formatFixed(rate, 18)) - 1) * timePerYear;
     const actualMax = APRsPerMaturity[maturityMaxAPRDeposit]?.deposit;
+    const fees = finalDepositAssets.sub(initialAssets);
+
+    const assetsRate = fees
+      .mul(WeiPerEther.mul(31_536_000))
+      .div(initialAssets.mul(maturity - Math.floor(Date.now() / 1_000)));
+
+    const depositAPR = Number(formatFixed(assetsRate, 18));
 
     if (depositAPR > minAPRValue && (!actualMax || depositAPR > APRsPerMaturity[maturityMaxAPRDeposit]?.deposit)) {
       maturityMaxAPRDeposit = maturity;
@@ -42,11 +45,16 @@ const getAPRsPerMaturity = (
   });
 
   let maturityMinAPRBorrow = 0;
+
   borrows.forEach(({ maturity: maturityBN, assets: finalBorrowAssets }) => {
     const maturity = maturityBN.toNumber();
-    const timePerYear = 31_536_000 / (maturity - timestampNow);
-    const rate = finalBorrowAssets.eq(MaxUint256) ? 0 : finalBorrowAssets.mul(parseFixed('1', 18)).div(initialAssets);
-    const borrowAPR = rate && (Number(formatFixed(rate, 18)) - 1) * timePerYear;
+    const fees = finalBorrowAssets.sub(initialAssets);
+
+    const assetsRate = finalBorrowAssets.eq(MaxUint256)
+      ? 0
+      : fees.mul(WeiPerEther.mul(31_536_000)).div(initialAssets.mul(maturity - Math.floor(Date.now() / 1_000)));
+
+    const borrowAPR = Number(formatFixed(assetsRate, 18));
 
     if (borrowAPR) {
       const actualMin = APRsPerMaturity[maturityMinAPRBorrow]?.borrow;

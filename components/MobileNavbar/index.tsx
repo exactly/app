@@ -105,9 +105,9 @@ function MobileNavbar() {
           className={styles.discordFeedbackLink}
           target="_blank"
           rel="noreferrer noopener"
-          href="https://discordapp.com/channels/846682395553824808/985912903880302632"
+          href="https://discord.com/channels/846682395553824808/908758791057719358"
         >
-          <strong>Give us feedback here!</strong>
+          <strong>Feedback here!</strong>
         </a>
       </nav>
       {open && (
