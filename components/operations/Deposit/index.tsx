@@ -286,7 +286,7 @@ function Deposit() {
     try {
       const gasPrice = (await fixedLenderWithSigner?.provider.getFeeData())?.maxFeePerGas;
 
-      const gasLimit = await getGasLimit('1');
+      const gasLimit = await getGasLimit('0.0001');
 
       if (gasPrice && gasLimit) {
         const total = formatFixed(gasPrice.mul(gasLimit), 18);

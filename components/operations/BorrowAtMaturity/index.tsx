@@ -326,7 +326,7 @@ function BorrowAtMaturity() {
     try {
       const gasPrice = (await fixedLenderWithSigner?.provider.getFeeData())?.maxFeePerGas;
 
-      const gasLimit = await getGasLimit('1', '2');
+      const gasLimit = await getGasLimit('0.0001', '0.0002');
 
       if (gasPrice && gasLimit) {
         const total = formatFixed(gasPrice.mul(gasLimit), 18);
