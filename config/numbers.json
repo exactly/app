@@ -9,5 +9,6 @@
   "gasLimitMultiplier": 1.25,
   "debounceTime": 500,
   "minAPRValue": 0.0001,
-  "maxAPRValue": 0.3
+  "maxAPRValue": 0.3,
+  "defaultAmount": 69
 }
