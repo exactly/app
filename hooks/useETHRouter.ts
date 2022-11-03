@@ -4,6 +4,7 @@ import { MarketETHRouter } from 'types/contracts';
 import MarketETHRouterABI from 'abi/MarketETHRouter.json';
 import getNetworkName from 'utils/getNetworkName';
 import { useWeb3Context } from 'contexts/Web3Context';
+import { captureException } from '@sentry/nextjs';
 
 const useETHRouter = () => {
   const { web3Provider, network } = useWeb3Context();
@@ -14,23 +15,16 @@ const useETHRouter = () => {
     const loadMarketETHRouter = async () => {
       if (!network?.chainId) return;
 
-      try {
-        const { address } = await import(
-          `protocol/deployments/${getNetworkName(network?.chainId)}/MarketETHRouter.json`,
-          {
-            assert: { type: 'json' },
-          }
-        );
+      const { address } = await import(
+        `protocol/deployments/${getNetworkName(network?.chainId)}/MarketETHRouter.json`,
+        { assert: { type: 'json' } }
+      );
 
-        setMarketETHRouterContract(
-          new Contract(address, MarketETHRouterABI, web3Provider?.getSigner()) as MarketETHRouter,
-        );
-      } catch (error) {
-        console.log('Failed to load market ETH router');
-        console.error(error);
-      }
+      setMarketETHRouterContract(
+        new Contract(address, MarketETHRouterABI, web3Provider?.getSigner()) as MarketETHRouter,
+      );
     };
-    void loadMarketETHRouter();
+    loadMarketETHRouter().catch(captureException);
   }, [network?.chainId, web3Provider]);
 
   return marketETHRouterContract;
