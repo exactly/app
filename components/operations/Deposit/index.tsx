@@ -8,9 +8,6 @@ import { ERC20 } from 'types/contracts/ERC20';
 import MarketABI from 'abi/Market.json';
 import ERC20ABI from 'abi/ERC20.json';
 
-import { MarketETHRouter } from 'types/contracts/MarketETHRouter';
-import MarketETHRouterABI from 'abi/MarketETHRouter.json';
-
 import Button from 'components/common/Button';
 import ModalAsset from 'components/common/modal/ModalAsset';
 import ModalInput from 'components/common/modal/ModalInput';
@@ -43,7 +40,7 @@ import { MarketContext } from 'contexts/MarketContext';
 import keys from './translations.json';
 
 import numbers from 'config/numbers.json';
-import getNetworkName from 'utils/getNetworkName';
+import useETHRouter from 'hooks/useETHRouter';
 
 const DEFAULT_QTY_ESTIMATION = '0.001';
 const Deposit: FC = () => {
@@ -65,7 +62,8 @@ const Deposit: FC = () => {
   const [isLoadingAllowance, setIsLoadingAllowance] = useState(true); // utility to avoid estimating gas immediately when switching assets
   const [needsAllowance, setNeedsAllowance] = useState(true);
   const [assetContract, setAssetContract] = useState<ERC20 | null>(null);
-  const [marketETHRouterContract, setMarketETHRouterContract] = useState<MarketETHRouter | undefined>(undefined);
+
+  const ETHRouterContract = useETHRouter();
 
   const marketContract = useMemo(() => {
     if (market?.value) {
@@ -78,31 +76,6 @@ const Deposit: FC = () => {
     () => (market?.value ? getSymbol(market.value, network?.name) : 'DAI'),
     [market?.value, network?.name],
   );
-
-  // load marketETHRouterContract
-  // TODO: consider moving this to a hook
-  useEffect(() => {
-    const loadMarketETHRouter = async () => {
-      if (!network) return;
-
-      try {
-        const { address } = await import(
-          `protocol/deployments/${getNetworkName(network.chainId)}/MarketETHRouter.json`,
-          {
-            assert: { type: 'json' },
-          }
-        );
-
-        setMarketETHRouterContract(
-          new Contract(address, MarketETHRouterABI, web3Provider?.getSigner()) as MarketETHRouter,
-        );
-      } catch (e) {
-        console.log('Failed to load market ETH router');
-        console.error(e);
-      }
-    };
-    void loadMarketETHRouter();
-  }, [network, web3Provider]);
 
   // load asset contract
   useEffect(() => {
@@ -221,10 +194,10 @@ const Deposit: FC = () => {
 
     try {
       if (symbol === 'WETH') {
-        if (!marketETHRouterContract) throw new Error('MarketETHRouterContract is undefined');
+        if (!ETHRouterContract) return;
 
-        gasPrice = (await marketETHRouterContract.provider.getFeeData()).maxFeePerGas || Zero;
-        gasLimit = await marketETHRouterContract.estimateGas.deposit({
+        gasPrice = (await ETHRouterContract.provider.getFeeData()).maxFeePerGas || Zero;
+        gasLimit = await ETHRouterContract.estimateGas.deposit({
           value: parseFixed(debounceQty || DEFAULT_QTY_ESTIMATION, 18),
         });
 
@@ -254,7 +227,7 @@ const Deposit: FC = () => {
         component: 'gas',
       });
     }
-  }, [needsAllowance, debounceQty]);
+  }, [needsAllowance, debounceQty, ETHRouterContract]);
 
   useEffect(() => {
     void previewGasCost();
@@ -323,11 +296,11 @@ const Deposit: FC = () => {
       let depositTx;
 
       if (symbol === 'WETH') {
-        if (!web3Provider || !marketETHRouterContract) return;
+        if (!web3Provider || !ETHRouterContract) return;
 
-        const gasEstimation = await marketETHRouterContract.estimateGas.deposit({ value: parseFixed(qty, 18) });
+        const gasEstimation = await ETHRouterContract.estimateGas.deposit({ value: parseFixed(qty, 18) });
 
-        depositTx = await marketETHRouterContract.deposit({
+        depositTx = await ETHRouterContract.deposit({
           value: parseFixed(qty, 18),
           gasLimit: Math.ceil(Number(formatFixed(gasEstimation)) * numbers.gasLimitMultiplier),
         });
