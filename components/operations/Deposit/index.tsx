@@ -1,6 +1,6 @@
 import React, { ChangeEvent, FC, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
-import { MaxUint256, WeiPerEther, Zero } from '@ethersproject/constants';
+import { MaxUint256, WeiPerEther } from '@ethersproject/constants';
 import { Contract } from '@ethersproject/contracts';
 import { captureException } from '@sentry/nextjs';
 
@@ -53,16 +53,17 @@ const Deposit: FC = () => {
   const translations: { [key: string]: LangKeys } = keys;
 
   const [qty, setQty] = useState<string>('');
-  const [walletBalance, setWalletBalance] = useState<string | undefined>(undefined);
+  const [walletBalance, setWalletBalance] = useState<string | undefined>();
   const [gasCost, setGasCost] = useState<BigNumber | undefined>();
-  const [tx, setTx] = useState<Transaction | undefined>(undefined);
-  const [isPending, setIsPending] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [errorData, setErrorData] = useState<ErrorData | undefined>(undefined);
+  const [tx, setTx] = useState<Transaction | undefined>();
+  const [isPending, setIsPending] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorData, setErrorData] = useState<ErrorData | undefined>();
   const [isLoadingAllowance, setIsLoadingAllowance] = useState(true); // utility to avoid estimating gas immediately when switching assets
   const [needsAllowance, setNeedsAllowance] = useState(true);
-  const [assetContract, setAssetContract] = useState<ERC20 | null>(null);
+  const [assetContract, setAssetContract] = useState<ERC20 | undefined>();
 
+  const debounceQty = useDebounce(qty, 1000); // 1 seconds before estimating gas on qty change
   const ETHRouterContract = useETHRouter();
 
   const marketContract = useMemo(() => {
@@ -89,8 +90,6 @@ const Deposit: FC = () => {
     loadAssetContract().catch(captureException);
   }, [marketContract, symbol, web3Provider]);
 
-  const debounceQty = useDebounce(qty, 1000); // 1 seconds before estimating gas on qty change
-
   const depositedAmount = useMemo(() => {
     if (!symbol || !accountData) return '0';
 
@@ -106,25 +105,23 @@ const Deposit: FC = () => {
   // load wallet balance
   useEffect(() => {
     const getWalletBalance = async () => {
-      if (!walletAddress) return;
-      let balance;
-      let decimals;
+      if (!walletAddress || !web3Provider) return;
 
       if (symbol === 'WETH') {
-        balance = await web3Provider?.getBalance(walletAddress);
-        decimals = 18;
-      } else {
-        if (!assetContract || !marketContract) return;
-
-        balance = await assetContract.balanceOf(walletAddress);
-        decimals = await marketContract.decimals();
+        const balance = await web3Provider.getBalance(walletAddress);
+        return setWalletBalance(formatFixed(balance, 18));
       }
 
-      setWalletBalance(balance && formatFixed(balance, decimals));
+      if (!assetContract) return;
+
+      const balance = await assetContract.balanceOf(walletAddress);
+      const decimals = await assetContract.decimals();
+
+      setWalletBalance(formatFixed(balance, decimals));
     };
 
-    void getWalletBalance();
-  }, [walletAddress, symbol, web3Provider, marketContract, assetContract]);
+    getWalletBalance().catch(captureException);
+  }, [assetContract, symbol, walletAddress, web3Provider]);
 
   const updateNeedsAllowance = useCallback(async () => {
     setIsLoadingAllowance(true);
@@ -133,11 +130,12 @@ const Deposit: FC = () => {
         setNeedsAllowance(false);
         return;
       }
+
       if (!walletAddress || !assetContract || !marketContract || !accountData) return setNeedsAllowance(true);
-      const { decimals } = accountData[symbol];
+      const decimals = await assetContract.decimals();
       const allowance = await assetContract.allowance(walletAddress, marketContract.address);
 
-      setNeedsAllowance(allowance.lte(parseFixed(qty || '0', decimals)));
+      setNeedsAllowance(allowance.lt(parseFixed(qty || '0', decimals)));
     } catch (error) {
       captureException(error);
       setNeedsAllowance(true);
@@ -158,7 +156,8 @@ const Deposit: FC = () => {
   const previewGasCost = useCallback(async () => {
     if (isLoadingAllowance || !symbol || !walletAddress || !ETHRouterContract) return;
 
-    const gasPrice = (await ETHRouterContract.provider.getFeeData()).maxFeePerGas ?? Zero;
+    const gasPrice = (await ETHRouterContract.provider.getFeeData()).maxFeePerGas;
+    if (!gasPrice) return;
 
     if (needsAllowance) {
       if (!marketContract || !assetContract) return;
@@ -168,7 +167,7 @@ const Deposit: FC = () => {
         debounceQty ? parseFixed(debounceQty, 18) : DEFAULT_AMOUNT,
       );
 
-      setGasCost(gasPrice.gt(Zero) ? gasPrice.mul(gasLimit) : undefined);
+      setGasCost(gasPrice.mul(gasLimit));
       return;
     }
 
@@ -179,7 +178,7 @@ const Deposit: FC = () => {
         value: debounceQty ? parseFixed(debounceQty, 18) : DEFAULT_AMOUNT,
       });
 
-      setGasCost(gasPrice.gt(Zero) ? gasPrice.mul(gasLimit) : undefined);
+      setGasCost(gasPrice.mul(gasLimit));
       return;
     }
 
@@ -191,7 +190,7 @@ const Deposit: FC = () => {
       walletAddress,
     );
 
-    setGasCost(gasPrice.gt(Zero) ? gasPrice.mul(gasLimit) : undefined);
+    setGasCost(gasPrice.mul(gasLimit));
   }, [needsAllowance, debounceQty, ETHRouterContract]);
 
   useEffect(() => {
@@ -218,13 +217,13 @@ const Deposit: FC = () => {
 
       setIsPending(true);
       await approveTx.wait();
-      setIsPending(false);
 
       void updateNeedsAllowance();
     } catch (e) {
       captureException(e);
       setErrorData({ status: true });
     } finally {
+      setIsPending(false);
       setIsLoading(false);
     }
   }, [assetContract, marketContract, symbol, updateNeedsAllowance]);
@@ -286,9 +285,9 @@ const Deposit: FC = () => {
 
       setTx({ status: 'processing', hash: depositTx.hash });
 
-      const txReceipt = await depositTx.wait();
+      const { status, transactionHash } = await depositTx.wait();
 
-      setTx({ status: txReceipt.status ? 'success' : 'error', hash: txReceipt?.transactionHash });
+      setTx({ status: status ? 'success' : 'error', hash: transactionHash });
 
       getAccountData();
     } catch (error: any) {
