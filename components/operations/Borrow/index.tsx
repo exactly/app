@@ -1,6 +1,11 @@
-import type { Contract } from '@ethersproject/contracts';
-import React, { ChangeEvent, useContext, useEffect, useMemo, useState } from 'react';
+import React, { ChangeEvent, FC, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { Contract } from '@ethersproject/contracts';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
+
+import { Market } from 'types/contracts/Market';
+import { ERC20 } from 'types/contracts/ERC20';
+import MarketABI from 'abi/Market.json';
+import ERC20ABI from 'abi/ERC20.json';
 
 import Button from 'components/common/Button';
 import ModalAsset from 'components/common/modal/ModalAsset';
@@ -14,13 +19,11 @@ import ModalError from 'components/common/modal/ModalError';
 import ModalRowBorrowLimit from 'components/common/modal/ModalRowBorrowLimit';
 
 import { LangKeys } from 'types/Lang';
-import { UnderlyingData } from 'types/Underlying';
 import { Transaction } from 'types/Transaction';
 import { ErrorData } from 'types/Error';
 import { HealthFactor } from 'types/HealthFactor';
 
-import { getUnderlyingData, getSymbol } from 'utils/utils';
-import handleETH from 'utils/handleETH';
+import { getSymbol } from 'utils/utils';
 import getBeforeBorrowLimit from 'utils/getBeforeBorrowLimit';
 
 import styles from './style.module.scss';
@@ -29,47 +32,64 @@ import useDebounce from 'hooks/useDebounce';
 
 import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
-import FixedLenderContext from 'contexts/FixedLenderContext';
 import { MarketContext } from 'contexts/MarketContext';
 import AccountDataContext from 'contexts/AccountDataContext';
-import ContractsContext from 'contexts/ContractsContext';
 
 import keys from './translations.json';
 
 import numbers from 'config/numbers.json';
+import useETHRouter from 'hooks/useETHRouter';
+import { captureException } from '@sentry/nextjs';
+import { MaxUint256, WeiPerEther, Zero } from '@ethersproject/constants';
 
-function Borrow() {
+const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
+
+const Borrow: FC = () => {
   const { web3Provider, walletAddress, network } = useWeb3Context();
   const { accountData, getAccountData } = useContext(AccountDataContext);
-
   const { market } = useContext(MarketContext);
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
-  const { getInstance } = useContext(ContractsContext);
-
-  const fixedLenderData = useContext(FixedLenderContext);
-
   const [qty, setQty] = useState<string>('');
-  const [walletBalance, setWalletBalance] = useState<string | undefined>(undefined);
-  const [gasCost, setGasCost] = useState<BigNumber | undefined>(undefined);
-  const [tx, setTx] = useState<Transaction | undefined>(undefined);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [healthFactor, setHealthFactor] = useState<HealthFactor | undefined>(undefined);
-  const [needsApproval, setNeedsApproval] = useState<boolean>(false);
+  // TODO: walletBalance type should be BigNumber
+  const [walletBalance, setWalletBalance] = useState<string | undefined>();
+  const [gasCost, setGasCost] = useState<BigNumber | undefined>();
+  const [tx, setTx] = useState<Transaction | undefined>();
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorData, setErrorData] = useState<ErrorData | undefined>();
+  const [healthFactor, setHealthFactor] = useState<HealthFactor | undefined>();
+  const [needsAllowance, setNeedsAllowance] = useState(true);
+  const [isLoadingAllowance, setIsLoadingAllowance] = useState(true);
 
-  const [error, setError] = useState<ErrorData | undefined>(undefined);
-  const [gasError, setGasError] = useState<ErrorData | undefined>(undefined);
+  const [assetContract, setAssetContract] = useState<ERC20 | undefined>();
+  const ETHRouterContract = useETHRouter();
 
-  const debounceQty = useDebounce(qty);
+  const debounceQty = useDebounce(qty, 1000);
 
-  const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(undefined);
-  const [underlyingContract, setUnderlyingContract] = useState<Contract | undefined>(undefined);
+  const marketContract = useMemo(() => {
+    if (!market) return undefined;
+    return new Contract(market.value, MarketABI, web3Provider?.getSigner()) as Market;
+  }, [market, web3Provider]);
 
-  const symbol = useMemo(() => {
-    return market?.value ? getSymbol(market.value, network?.name) : 'DAI';
-  }, [market?.value, network?.name]);
+  const symbol = useMemo(
+    () => (market?.value ? getSymbol(market.value, network?.name) : 'DAI'),
+    [market?.value, network?.name],
+  );
+
+  // done
+  // load asset contract
+  useEffect(() => {
+    if (!marketContract) return;
+
+    const loadAssetContract = async () => {
+      const assetAddress = await marketContract.asset();
+      setAssetContract(new Contract(assetAddress, ERC20ABI, web3Provider) as ERC20);
+    };
+
+    loadAssetContract().catch(captureException);
+  }, [marketContract, web3Provider]);
 
   const liquidity = useMemo(() => {
     if (!accountData) return undefined;
@@ -78,70 +98,99 @@ function Borrow() {
     return limit ?? undefined;
   }, [accountData, symbol]);
 
-  const ETHrouter = web3Provider && symbol === 'WETH' && handleETH(network?.name, web3Provider?.getSigner());
-
+  // set qty to '' when symbol changes
   useEffect(() => {
     setQty('');
   }, [symbol]);
 
-  useEffect(() => {
-    getFixedLenderContract();
-  }, [market, fixedLenderData]);
+  // done
+  const hasCollateral = useMemo(() => {
+    if (!accountData || !marketContract) return;
 
-  useEffect(() => {
-    getUnderlyingContract();
-  }, [market, network, symbol]);
+    const isCollateral = Object.keys(accountData).some((aMarket) => accountData[aMarket].isCollateral);
+    if (isCollateral) return true;
 
-  useMemo(() => {
-    checkCollateral();
-  }, [accountData, symbol, debounceQty]);
+    const hasDepositedToFloatingPool = accountData[symbol].floatingDepositAssets.gt(Zero);
+    if (hasDepositedToFloatingPool) return true;
 
-  useEffect(() => {
-    checkAllowance();
-  }, [walletAddress, fixedLenderWithSigner, symbol, debounceQty]);
+    return false;
+  }, [accountData, marketContract, symbol]);
 
-  useEffect(() => {
-    if (underlyingContract && fixedLenderWithSigner) {
-      getWalletBalance();
+  const updateNeedsAllowance = useCallback(async () => {
+    setIsLoadingAllowance(true);
+    try {
+      if (symbol !== 'WETH') return setNeedsAllowance(false);
+      if (!walletAddress || !ETHRouterContract || !marketContract) return;
+
+      const allowance = await marketContract.allowance(walletAddress, ETHRouterContract.address);
+      setNeedsAllowance(allowance.lte(parseFixed(debounceQty || '0', 18)));
+    } catch (error) {
+      setNeedsAllowance(true);
+      captureException(error);
+    } finally {
+      setIsLoadingAllowance(false);
     }
-  }, [underlyingContract, fixedLenderWithSigner, walletAddress]);
+  }, [ETHRouterContract, debounceQty, marketContract, symbol, walletAddress]);
 
+  // execute updateNeedsAllowance on first render
   useEffect(() => {
-    if (fixedLenderWithSigner && !gasCost && accountData) {
-      estimateGas();
+    updateNeedsAllowance().catch(captureException);
+  }, [updateNeedsAllowance]);
+
+  const previewGasCost = useCallback(async () => {
+    if (isLoadingAllowance || !symbol || !walletAddress || !marketContract || !ETHRouterContract) return;
+
+    const gasPrice = (await ETHRouterContract.provider.getFeeData()).maxFeePerGas;
+    if (!gasPrice) return;
+
+    if (needsAllowance) {
+      // only WETH needs allowance -> estimates directly with the ETH router
+      const gasEstimation = await marketContract.estimateGas.approve(ETHRouterContract.address, MaxUint256);
+      return setGasCost(gasPrice.mul(gasEstimation));
     }
-  }, [fixedLenderWithSigner, accountData]);
-
-  async function checkAllowance() {
-    if (symbol !== 'WETH' || !ETHrouter || !walletAddress || !fixedLenderWithSigner) return;
-
-    const allowance = await ETHrouter.checkAllowance(walletAddress, fixedLenderWithSigner);
-
-    if ((allowance && parseFloat(allowance) < parseFloat(qty)) || (allowance && parseFloat(allowance) === 0 && !qty)) {
-      setNeedsApproval(true);
-    }
-  }
-
-  async function getWalletBalance() {
-    let walletBalance;
-    let decimals;
 
     if (symbol === 'WETH') {
-      walletBalance = await web3Provider?.getBalance(walletAddress!);
-      decimals = 18;
-    } else {
-      walletBalance = await underlyingContract?.balanceOf(walletAddress);
-      decimals = await underlyingContract?.decimals();
+      const gasEstimation = await ETHRouterContract.estimateGas.borrow(
+        debounceQty ? parseFixed(debounceQty, 18) : DEFAULT_AMOUNT,
+      );
+      return setGasCost(gasPrice.mul(gasEstimation));
     }
 
-    const formattedBalance = walletBalance && formatFixed(walletBalance, decimals);
+    const decimals = await marketContract.decimals();
+    const gasEstimation = await marketContract.estimateGas.borrow(
+      debounceQty ? parseFixed(debounceQty, decimals) : DEFAULT_AMOUNT,
+      walletAddress,
+      walletAddress,
+    );
+    setGasCost(gasPrice.mul(gasEstimation));
+  }, [isLoadingAllowance, needsAllowance]);
 
-    if (formattedBalance) {
-      setWalletBalance(formattedBalance);
-    }
-  }
+  useEffect(() => {
+    previewGasCost().catch((error) => {
+      captureException(error);
+      setErrorData({
+        status: true,
+        message: translations[lang].error,
+        component: 'gas',
+      });
+    });
+  }, [lang, previewGasCost, translations]);
 
-  function onMax() {
+  useEffect(() => {
+    const loadBalance = async () => {
+      if (!walletAddress || !web3Provider) return;
+
+      if (symbol === 'WETH') return setWalletBalance(formatFixed(await web3Provider.getBalance(walletAddress), 18));
+      if (!assetContract) return;
+
+      const decimals = await assetContract.decimals();
+      setWalletBalance(formatFixed(await assetContract.balanceOf(walletAddress), decimals));
+    };
+
+    loadBalance().catch(captureException);
+  }, [assetContract, symbol, walletAddress, web3Provider]);
+
+  const onMax = () => {
     if (!accountData || !healthFactor) return;
 
     const decimals = accountData[symbol].decimals;
@@ -168,10 +217,10 @@ function Borrow() {
     ).toFixed(decimals);
 
     setQty(safeMaximumBorrow);
-    setError(undefined);
-  }
+    setErrorData(undefined);
+  };
 
-  function handleInputChange(e: ChangeEvent<HTMLInputElement>) {
+  const handleInputChange = ({ target: { value } }: ChangeEvent<HTMLInputElement>) => {
     if (!liquidity || !accountData) return;
 
     const decimals = accountData[symbol].decimals;
@@ -179,16 +228,16 @@ function Borrow() {
 
     const maxBorrowAssets = getBeforeBorrowLimit(accountData, symbol, usdPrice, decimals, 'borrow');
 
-    if (e.target.value.includes('.')) {
+    if (value.includes('.')) {
       const regex = /[^,.]*$/g;
-      const inputDecimals = regex.exec(e.target.value)![0];
+      const inputDecimals = regex.exec(value)![0];
       if (inputDecimals.length > decimals) return;
     }
 
-    setQty(e.target.value);
+    setQty(value);
 
-    if (liquidity.lt(parseFixed(e.target.value || '0', decimals))) {
-      return setError({
+    if (liquidity.lt(parseFixed(value || '0', decimals))) {
+      return setErrorData({
         status: true,
         message: translations[lang].availableLiquidityError,
       });
@@ -198,188 +247,127 @@ function Borrow() {
 
     if (
       maxBorrowAssets.lt(
-        parseFixed(e.target.value || '0', decimals)
+        parseFixed(value || '0', decimals)
           .mul(accountData[symbol].usdPrice)
           .div(WAD),
       )
     ) {
-      return setError({
+      return setErrorData({
         status: true,
         message: translations[lang].borrowLimit,
       });
     }
 
-    setError(undefined);
-  }
+    setErrorData(undefined);
+  };
 
-  async function borrow() {
+  const borrow = useCallback(async () => {
     if (!accountData) return;
 
-    setLoading(true);
-
-    const decimals = accountData[symbol].decimals;
+    setIsLoading(true);
 
     try {
-      let borrow;
+      let borrowTx;
 
       if (symbol === 'WETH') {
-        if (!web3Provider || !ETHrouter) return;
+        if (!ETHRouterContract) return;
 
-        borrow = await ETHrouter?.borrowETH(qty.toString());
+        const amount = parseFixed(debounceQty, 18);
+        const gasEstimation = await ETHRouterContract.estimateGas.borrow(amount);
+        borrowTx = await ETHRouterContract.borrow(amount, {
+          gasLimit: gasEstimation.mul(parseFixed(String(numbers.gasLimitMultiplier), 18)).div(WeiPerEther),
+        });
       } else {
-        const gasLimit = await getGasLimit(qty);
+        if (!marketContract || !walletAddress) return;
 
-        borrow = await fixedLenderWithSigner?.borrow(parseFixed(qty!, decimals), walletAddress, walletAddress, {
-          gasLimit: gasLimit ? Math.ceil(Number(formatFixed(gasLimit)) * numbers.gasLimitMultiplier) : undefined,
+        const decimals = await marketContract.decimals();
+        const amount = parseFixed(debounceQty, decimals);
+        const gasEstimation = await marketContract.estimateGas.borrow(amount, walletAddress, walletAddress);
+        borrowTx = await marketContract.borrow(amount, walletAddress, walletAddress, {
+          gasLimit: gasEstimation.mul(parseFixed(String(numbers.gasLimitMultiplier), 18)).div(WeiPerEther),
         });
       }
 
-      setTx({ status: 'processing', hash: borrow?.hash });
+      setTx({ status: 'processing', hash: borrowTx.hash });
 
-      const txReceipt = await borrow.wait();
-      setLoading(false);
+      const { status, transactionHash } = await borrowTx.wait();
 
-      if (txReceipt.status === 1) {
-        setTx({ status: 'success', hash: txReceipt?.transactionHash });
-      } else {
-        setTx({ status: 'error', hash: txReceipt?.transactionHash });
-      }
+      setTx({ status: status ? 'success' : 'error', hash: transactionHash });
 
       getAccountData();
-    } catch (e: any) {
-      console.log(e);
-      setLoading(false);
+    } catch (error: any) {
+      setIsLoading(false);
 
-      const isDenied = e?.message?.includes('User denied');
+      if (error?.message?.includes('User denied')) {
+        return setErrorData({
+          status: true,
+          message: translations[lang].deniedTransaction,
+        });
+      }
 
-      const txError = e?.message?.includes(`"status":0`);
-      let txErrorHash = undefined;
+      const txError = error?.message?.includes(`"status":0`);
 
+      // TODO: check this logic
       if (txError) {
         const regex = new RegExp(/"hash":"(.*?)"/g); //regex to get all between ("hash":") and (")
-        const preTxHash = e?.message?.match(regex); //get the hash from plain text by the regex
-        txErrorHash = preTxHash[0].substring(8, preTxHash[0].length - 1); //parse the string to get the txHash only
+        const preTxHash = error?.message?.match(regex); //get the hash from plain text by the regex
+        const txErrorHash = preTxHash[0].substring(8, preTxHash[0].length - 1); //parse the string to get the txHash only
+        return setTx({ status: 'error', hash: txErrorHash });
       }
 
-      if (isDenied) {
-        setError({
-          status: true,
-          message: isDenied ? translations[lang].deniedTransaction : translations[lang].notEnoughSlippage,
-        });
-      } else if (txError) {
-        setTx({ status: 'error', hash: txErrorHash });
-      } else {
-        setError({
-          status: true,
-          message: translations[lang].generalError,
-        });
-      }
-    }
-  }
-
-  function checkCollateral() {
-    if (!accountData) return;
-    const decimals = accountData[symbol].decimals;
-
-    const isCollateral = Object.keys(accountData).some((market) => {
-      return accountData[market].isCollateral;
-    });
-
-    const hasDepositedToFloatingPool = Number(formatFixed(accountData[symbol].floatingDepositAssets, decimals)) > 0;
-
-    if (isCollateral || hasDepositedToFloatingPool) {
-      return;
-    } else {
-      return setError({
+      captureException(error);
+      setErrorData({
         status: true,
-        message: translations[lang].noCollateral,
+        message: translations[lang].generalError,
       });
+    } finally {
+      setIsLoading(false);
     }
-  }
+  }, [
+    ETHRouterContract,
+    accountData,
+    debounceQty,
+    getAccountData,
+    lang,
+    marketContract,
+    symbol,
+    translations,
+    walletAddress,
+  ]);
 
-  async function estimateGas() {
-    if (symbol === 'WETH' || !accountData) return;
+  const approve = useCallback(async () => {
+    // only enters here on ETH market
+    if (!marketContract || !ETHRouterContract) return;
 
     try {
-      const gasPrice = (await fixedLenderWithSigner?.provider.getFeeData())?.maxFeePerGas;
+      const gasEstimation = await marketContract.estimateGas.approve(ETHRouterContract.address, MaxUint256);
 
-      const gasLimit = await getGasLimit('0.0001');
-
-      if (gasPrice && gasLimit) {
-        setGasCost(gasPrice.mul(gasLimit));
-      }
-    } catch (e) {
-      console.log(e);
-      setGasError({
-        status: true,
-        component: 'gas',
+      const approveTx = await marketContract.approve(ETHRouterContract.address, MaxUint256, {
+        gasLimit: gasEstimation.mul(parseFixed(String(numbers.gasLimitMultiplier), 18)).div(WeiPerEther),
       });
+
+      await approveTx.wait();
+      void updateNeedsAllowance();
+    } catch (error: any) {
+      // TODO: check this logic
+      const isDenied = error?.message?.includes('User denied');
+
+      if (!isDenied) captureException(error);
+
+      setErrorData({
+        status: true,
+        message: isDenied ? translations[lang].deniedTransaction : translations[lang].generalError,
+      });
+    } finally {
+      setIsLoading(false);
     }
-  }
+  }, [ETHRouterContract, lang, marketContract, translations, updateNeedsAllowance]);
 
-  async function getGasLimit(qty: string) {
-    if (!accountData) return;
-
-    const decimals = accountData[symbol].decimals;
-
-    const gasLimit = await fixedLenderWithSigner?.estimateGas.borrow(
-      parseFixed(qty, decimals),
-      walletAddress,
-      walletAddress,
-    );
-
-    return gasLimit;
-  }
-
-  function getHealthFactor(healthFactor: HealthFactor) {
-    setHealthFactor(healthFactor);
-  }
-
-  function getFixedLenderContract() {
-    const filteredFixedLender = fixedLenderData.find((contract) => {
-      const contractSymbol = getSymbol(contract.address!, network!.name);
-
-      return contractSymbol === symbol;
-    });
-
-    if (!filteredFixedLender) throw new Error('Market contract not found');
-    const fixedLender = getInstance(filteredFixedLender.address!, filteredFixedLender.abi!, `market${symbol}`);
-
-    setFixedLenderWithSigner(fixedLender);
-  }
-
-  function getUnderlyingContract() {
-    const underlyingData: UnderlyingData | undefined = getUnderlyingData(network?.name, symbol);
-
-    const underlyingContract = getInstance(underlyingData!.address, underlyingData!.abi, `underlying${symbol}`);
-
-    setUnderlyingContract(underlyingContract);
-  }
-
-  async function approve() {
-    if (symbol === 'WETH') {
-      if (!web3Provider || !ETHrouter || !fixedLenderWithSigner) return;
-      try {
-        setLoading(true);
-
-        const approve = await ETHrouter.approve(fixedLenderWithSigner);
-
-        await approve.wait();
-
-        setLoading(false);
-        setNeedsApproval(false);
-      } catch (e: any) {
-        setLoading(false);
-
-        const isDenied = e?.message?.includes('User denied');
-
-        setError({
-          status: true,
-          message: isDenied ? translations[lang].deniedTransaction : translations[lang].notEnoughSlippage,
-        });
-      }
-    }
-  }
+  const handleSubmitAction = useCallback(() => {
+    if (isLoading) return;
+    setIsLoading(true);
+    return needsAllowance ? approve() : borrow();
+  }, [approve, borrow, isLoading, needsAllowance]);
 
   return (
     <>
@@ -397,23 +385,24 @@ function Borrow() {
             value={qty}
             onChange={handleInputChange}
             symbol={symbol!}
-            error={error?.component === 'input'}
+            error={errorData?.component === 'input'}
           />
-          {gasError?.component !== 'gas' && symbol !== 'WETH' && <ModalTxCost gasCost={gasCost} />}
+          {errorData?.component !== 'gas' && <ModalTxCost gasCost={gasCost} />}
           {symbol ? (
-            <ModalRowHealthFactor qty={qty} symbol={symbol} operation="borrow" healthFactorCallback={getHealthFactor} />
+            <ModalRowHealthFactor qty={qty} symbol={symbol} operation="borrow" healthFactorCallback={setHealthFactor} />
           ) : (
             <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
           )}
           <ModalRowBorrowLimit qty={qty} symbol={symbol!} operation="borrow" line />
-          {error && error.component !== 'gas' && <ModalError message={error.message} />}
+          {errorData && errorData.component !== 'gas' && <ModalError message={errorData.message} />}
+          {hasCollateral != null && !hasCollateral && <ModalError message={translations[lang].noCollateral} />}
           <div className={styles.buttonContainer}>
             <Button
-              text={needsApproval ? translations[lang].approve : translations[lang].borrow}
-              className={parseFloat(qty) <= 0 || !qty || error?.status ? 'disabled' : 'primary'}
-              onClick={needsApproval ? approve : borrow}
-              disabled={parseFloat(qty) <= 0 || !qty || loading || error?.status}
-              loading={loading}
+              text={needsAllowance ? translations[lang].approve : translations[lang].borrow}
+              className={parseFloat(qty) <= 0 || !qty || errorData?.status ? 'disabled' : 'primary'}
+              onClick={handleSubmitAction}
+              disabled={parseFloat(qty) <= 0 || !qty || isLoading || errorData?.status}
+              loading={isLoading}
             />
           </div>
         </>
@@ -421,6 +410,6 @@ function Borrow() {
       {tx && <ModalGif tx={tx} tryAgain={borrow} />}
     </>
   );
-}
+};
 
 export default Borrow;

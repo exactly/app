@@ -19,6 +19,8 @@ type Props = {
   amountTitle?: string;
 };
 
+// TODO: amount should be a BigNumber
+// refactor the operations using this component and add new prop "decimals" to do the parse here
 function ModalAsset({ asset, assetTitle, amount, amountTitle }: Props) {
   const { accountData } = useContext(AccountDataContext);
   const { market } = useContext(MarketContext);
