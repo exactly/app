@@ -41,9 +41,9 @@ import { MarketContext } from 'contexts/MarketContext';
 
 import keys from './translations.json';
 import numbers from 'config/numbers.json';
+import { ErrorCode } from '@ethersproject/logger';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
-const TX_REJECTED_CODE = 'ACTION_REJECTED';
 
 const Deposit: FC = () => {
   const { web3Provider, walletAddress, network } = useWeb3Context();
@@ -221,7 +221,7 @@ const Deposit: FC = () => {
 
       void updateNeedsAllowance();
     } catch (error: any) {
-      const isDenied = error?.code?.includes(TX_REJECTED_CODE);
+      const isDenied = error?.code === ErrorCode.ACTION_REJECTED;
 
       if (!isDenied) captureException(error);
 
@@ -295,7 +295,7 @@ const Deposit: FC = () => {
 
       getAccountData();
     } catch (error: any) {
-      if (error?.code?.includes(TX_REJECTED_CODE)) {
+      if (error?.code === ErrorCode.ACTION_REJECTED) {
         setErrorData({
           status: true,
           message: translations[lang].deniedTransaction,

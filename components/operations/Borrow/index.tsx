@@ -41,9 +41,9 @@ import numbers from 'config/numbers.json';
 import useETHRouter from 'hooks/useETHRouter';
 import { captureException } from '@sentry/nextjs';
 import { MaxUint256, WeiPerEther, Zero } from '@ethersproject/constants';
+import { ErrorCode } from '@ethersproject/logger';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
-const TX_REJECTED_CODE = 'ACTION_REJECTED';
 
 const Borrow: FC = () => {
   const { web3Provider, walletAddress, network } = useWeb3Context();
@@ -297,9 +297,7 @@ const Borrow: FC = () => {
 
       getAccountData();
     } catch (error: any) {
-      setIsLoading(false);
-
-      if (error?.code?.includes(TX_REJECTED_CODE)) {
+      if (error?.code === ErrorCode.ACTION_REJECTED) {
         return setErrorData({
           status: true,
           message: translations[lang].deniedTransaction,
@@ -349,7 +347,7 @@ const Borrow: FC = () => {
       await approveTx.wait();
       void updateNeedsAllowance();
     } catch (error: any) {
-      const isDenied = error?.code?.includes(TX_REJECTED_CODE);
+      const isDenied = error?.code === ErrorCode.ACTION_REJECTED;
 
       if (!isDenied) captureException(error);
 
