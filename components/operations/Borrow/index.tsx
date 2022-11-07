@@ -1,13 +1,16 @@
 import React, { ChangeEvent, FC, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { captureException } from '@sentry/nextjs';
 import { Contract } from '@ethersproject/contracts';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
+import { MaxUint256, WeiPerEther, Zero } from '@ethersproject/constants';
+import { ErrorCode } from '@ethersproject/logger';
+import LoadingButton from '@mui/lab/LoadingButton';
 
 import { Market } from 'types/contracts/Market';
 import { ERC20 } from 'types/contracts/ERC20';
 import MarketABI from 'abi/Market.json';
 import ERC20ABI from 'abi/ERC20.json';
 
-import Button from 'components/common/Button';
 import ModalAsset from 'components/common/modal/ModalAsset';
 import ModalInput from 'components/common/modal/ModalInput';
 import ModalRowHealthFactor from 'components/common/modal/ModalRowHealthFactor';
@@ -26,9 +29,8 @@ import { HealthFactor } from 'types/HealthFactor';
 import { getSymbol } from 'utils/utils';
 import getBeforeBorrowLimit from 'utils/getBeforeBorrowLimit';
 
-import styles from './style.module.scss';
-
 import useDebounce from 'hooks/useDebounce';
+import useETHRouter from 'hooks/useETHRouter';
 
 import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
@@ -36,12 +38,7 @@ import { MarketContext } from 'contexts/MarketContext';
 import AccountDataContext from 'contexts/AccountDataContext';
 
 import keys from './translations.json';
-
 import numbers from 'config/numbers.json';
-import useETHRouter from 'hooks/useETHRouter';
-import { captureException } from '@sentry/nextjs';
-import { MaxUint256, WeiPerEther, Zero } from '@ethersproject/constants';
-import { ErrorCode } from '@ethersproject/logger';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 
@@ -79,7 +76,6 @@ const Borrow: FC = () => {
     [market?.value, network?.name],
   );
 
-  // done
   // load asset contract
   useEffect(() => {
     if (!marketContract) return;
@@ -104,7 +100,6 @@ const Borrow: FC = () => {
     setQty('');
   }, [symbol]);
 
-  // done
   const hasCollateral = useMemo(() => {
     if (!accountData || !marketContract) return;
 
@@ -360,45 +355,44 @@ const Borrow: FC = () => {
     return needsAllowance ? approve() : borrow();
   }, [approve, borrow, isLoading, needsAllowance]);
 
+  if (tx) return <ModalGif tx={tx} tryAgain={borrow} />;
+
   return (
     <>
-      {!tx && (
-        <>
-          <ModalTitle title={translations[lang].floatingPoolBorrow} />
-          <ModalAsset
-            asset={symbol!}
-            assetTitle={translations[lang].action.toUpperCase()}
-            amount={walletBalance}
-            amountTitle={translations[lang].walletBalance.toUpperCase()}
-          />
-          <ModalInput
-            onMax={onMax}
-            value={qty}
-            onChange={handleInputChange}
-            symbol={symbol!}
-            error={errorData?.component === 'input'}
-          />
-          {errorData?.component !== 'gas' && <ModalTxCost gasCost={gasCost} />}
-          {symbol ? (
-            <ModalRowHealthFactor qty={qty} symbol={symbol} operation="borrow" healthFactorCallback={setHealthFactor} />
-          ) : (
-            <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
-          )}
-          <ModalRowBorrowLimit qty={qty} symbol={symbol!} operation="borrow" line />
-          {errorData && errorData.component !== 'gas' && <ModalError message={errorData.message} />}
-          {hasCollateral != null && !hasCollateral && <ModalError message={translations[lang].noCollateral} />}
-          <div className={styles.buttonContainer}>
-            <Button
-              text={needsAllowance ? translations[lang].approve : translations[lang].borrow}
-              className={parseFloat(qty) <= 0 || !qty || errorData?.status ? 'disabled' : 'primary'}
-              onClick={handleSubmitAction}
-              disabled={parseFloat(qty) <= 0 || !qty || isLoading || errorData?.status}
-              loading={isLoading}
-            />
-          </div>
-        </>
+      <ModalTitle title={translations[lang].floatingPoolBorrow} />
+      <ModalAsset
+        asset={symbol!}
+        assetTitle={translations[lang].action.toUpperCase()}
+        amount={walletBalance}
+        amountTitle={translations[lang].walletBalance.toUpperCase()}
+      />
+      <ModalInput
+        onMax={onMax}
+        value={qty}
+        onChange={handleInputChange}
+        symbol={symbol!}
+        error={errorData?.component === 'input'}
+      />
+      {errorData?.component !== 'gas' && <ModalTxCost gasCost={gasCost} />}
+      {symbol ? (
+        <ModalRowHealthFactor qty={qty} symbol={symbol} operation="borrow" healthFactorCallback={setHealthFactor} />
+      ) : (
+        <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
       )}
-      {tx && <ModalGif tx={tx} tryAgain={borrow} />}
+      <ModalRowBorrowLimit qty={qty} symbol={symbol!} operation="borrow" line />
+      {errorData && errorData.component !== 'gas' && <ModalError message={errorData.message} />}
+      {hasCollateral != null && !hasCollateral && <ModalError message={translations[lang].noCollateral} />}
+      <LoadingButton
+        fullWidth
+        sx={{ mt: 2 }}
+        loading={isLoading}
+        onClick={handleSubmitAction}
+        color="primary"
+        variant="contained"
+        disabled={!qty || parseFloat(qty) <= 0 || errorData?.status}
+      >
+        {needsAllowance ? translations[lang].approve : translations[lang].borrow}
+      </LoadingButton>
     </>
   );
 };
