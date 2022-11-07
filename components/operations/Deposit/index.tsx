@@ -2,14 +2,16 @@ import React, { ChangeEvent, FC, useCallback, useContext, useEffect, useMemo, us
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { MaxUint256, WeiPerEther } from '@ethersproject/constants';
 import { Contract } from '@ethersproject/contracts';
+import { ErrorCode } from '@ethersproject/logger';
 import { captureException } from '@sentry/nextjs';
+
+import LoadingButton from '@mui/lab/LoadingButton';
 
 import { Market } from 'types/contracts/Market';
 import { ERC20 } from 'types/contracts/ERC20';
 import MarketABI from 'abi/Market.json';
 import ERC20ABI from 'abi/ERC20.json';
 
-import Button from 'components/common/Button';
 import ModalAsset from 'components/common/modal/ModalAsset';
 import ModalInput from 'components/common/modal/ModalInput';
 import ModalRow from 'components/common/modal/ModalRow';
@@ -29,8 +31,6 @@ import { ErrorData } from 'types/Error';
 import { getSymbol } from 'utils/utils';
 import formatNumber from 'utils/formatNumber';
 
-import styles from './style.module.scss';
-
 import useDebounce from 'hooks/useDebounce';
 import useETHRouter from 'hooks/useETHRouter';
 
@@ -41,7 +41,6 @@ import { MarketContext } from 'contexts/MarketContext';
 
 import keys from './translations.json';
 import numbers from 'config/numbers.json';
-import { ErrorCode } from '@ethersproject/logger';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 
@@ -321,46 +320,45 @@ const Deposit: FC = () => {
     return needsAllowance ? approve() : deposit();
   }, [approve, deposit, isLoadingAllowance, isPending, needsAllowance]);
 
+  if (tx) return <ModalGif tx={tx} tryAgain={deposit} />;
+
   return (
     <>
-      {!tx && (
-        <>
-          <ModalTitle title={translations[lang].variableRateDeposit} />
-          <ModalAsset
-            asset={symbol!}
-            assetTitle={translations[lang].action.toUpperCase()}
-            amount={walletBalance}
-            amountTitle={translations[lang].walletBalance.toUpperCase()}
-          />
-          <ModalInput
-            onMax={onMax}
-            value={qty}
-            onChange={handleInputChange}
-            symbol={symbol!}
-            error={errorData?.component === 'input'}
-          />
-          {errorData?.component !== 'gas' && <ModalTxCost gasCost={gasCost} />}
-          <ModalRow text={translations[lang].exactlyBalance} value={depositedAmount} line />
-          {symbol ? (
-            <ModalRowHealthFactor qty={qty} symbol={symbol} operation="deposit" />
-          ) : (
-            <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
-          )}
-          <ModalRowBorrowLimit qty={qty} symbol={symbol!} operation="deposit" line />
-          <ModalStepper currentStep={step} totalSteps={3} />
-          {errorData && errorData.component !== 'gas' && <ModalError message={errorData.message} />}
-          <div className={styles.buttonContainer}>
-            <Button
-              text={step === 1 ? translations[lang].approve : translations[lang].deposit}
-              loading={isLoading}
-              className={qty && parseFloat(qty) > 0 && !errorData?.status ? 'primary' : 'disabled'}
-              disabled={((!qty || parseFloat(qty) <= 0) && !isPending) || isLoading || errorData?.status}
-              onClick={handleSubmitAction}
-            />
-          </div>
-        </>
+      <ModalTitle title={translations[lang].variableRateDeposit} />
+      <ModalAsset
+        asset={symbol!}
+        assetTitle={translations[lang].action.toUpperCase()}
+        amount={walletBalance}
+        amountTitle={translations[lang].walletBalance.toUpperCase()}
+      />
+      <ModalInput
+        onMax={onMax}
+        value={qty}
+        onChange={handleInputChange}
+        symbol={symbol!}
+        error={errorData?.component === 'input'}
+      />
+      {errorData?.component !== 'gas' && <ModalTxCost gasCost={gasCost} />}
+      <ModalRow text={translations[lang].exactlyBalance} value={depositedAmount} line />
+      {symbol ? (
+        <ModalRowHealthFactor qty={qty} symbol={symbol} operation="deposit" />
+      ) : (
+        <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
       )}
-      {tx && <ModalGif tx={tx} tryAgain={deposit} />}
+      <ModalRowBorrowLimit qty={qty} symbol={symbol!} operation="deposit" line />
+      <ModalStepper currentStep={step} totalSteps={3} />
+      {errorData && errorData.component !== 'gas' && <ModalError message={errorData.message} />}
+      <LoadingButton
+        fullWidth
+        sx={{ mt: 2 }}
+        loading={isLoading}
+        onClick={handleSubmitAction}
+        color="primary"
+        variant="contained"
+        disabled={!qty || parseFloat(qty) <= 0 || errorData?.status}
+      >
+        {needsAllowance ? translations[lang].approve : translations[lang].borrow}
+      </LoadingButton>
     </>
   );
 };
