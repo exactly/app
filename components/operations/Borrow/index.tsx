@@ -43,6 +43,7 @@ import { captureException } from '@sentry/nextjs';
 import { MaxUint256, WeiPerEther, Zero } from '@ethersproject/constants';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
+const TX_REJECTED_CODE = 'ACTION_REJECTED';
 
 const Borrow: FC = () => {
   const { web3Provider, walletAddress, network } = useWeb3Context();
@@ -298,7 +299,7 @@ const Borrow: FC = () => {
     } catch (error: any) {
       setIsLoading(false);
 
-      if (error?.message?.includes('User denied')) {
+      if (error?.code?.includes(TX_REJECTED_CODE)) {
         return setErrorData({
           status: true,
           message: translations[lang].deniedTransaction,
@@ -307,7 +308,6 @@ const Borrow: FC = () => {
 
       const txError = error?.message?.includes(`"status":0`);
 
-      // TODO: check this logic
       if (txError) {
         const regex = new RegExp(/"hash":"(.*?)"/g); //regex to get all between ("hash":") and (")
         const preTxHash = error?.message?.match(regex); //get the hash from plain text by the regex
@@ -349,8 +349,7 @@ const Borrow: FC = () => {
       await approveTx.wait();
       void updateNeedsAllowance();
     } catch (error: any) {
-      // TODO: check this logic
-      const isDenied = error?.message?.includes('User denied');
+      const isDenied = error?.code?.includes(TX_REJECTED_CODE);
 
       if (!isDenied) captureException(error);
 
