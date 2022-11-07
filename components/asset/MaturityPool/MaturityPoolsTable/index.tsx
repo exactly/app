@@ -37,10 +37,10 @@ type TableRow = {
   borrowAPR: number;
 };
 
-const HeadCell: FC<{ title: string; tooltip?: string }> = ({ title, tooltip }) => {
+const HeadCell: FC<{ title: string; tooltipTitle?: string }> = ({ title, tooltipTitle }) => {
   return (
     <TableCell align={title === 'Maturity' ? 'left' : 'center'}>
-      <Tooltip title={tooltip} placement="top" arrow>
+      <Tooltip title={tooltipTitle} placement="top" arrow>
         <Typography variant="subtitle2" sx={{ color: 'grey.500' }} fontWeight={600}>
           {title}
         </Typography>
@@ -114,11 +114,11 @@ const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ APRsPerMaturity, symb
             <HeadCell title="Total Borrows" />
             <HeadCell
               title="Deposit APR"
-              tooltip="The marginal fixed interest rate for a $1 deposit in the Fixed Rated Pool."
+              tooltipTitle="The marginal fixed interest rate for a $1 deposit in the Fixed Rated Pool."
             />
             <HeadCell
               title="Borrow APR"
-              tooltip="The marginal fixed interest rate for a $1 borrow in the Fixed Rated Pool."
+              tooltipTitle="The marginal fixed interest rate for a $1 borrow in the Fixed Rated Pool."
             />
             <TableCell />
             <TableCell />

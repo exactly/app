@@ -37,7 +37,7 @@ export type PoolTableProps = {
 
 export type TableHead = {
   title: string;
-  tooltip?: string;
+  tooltipTitle?: string;
 };
 
 export type TableRow = {
@@ -50,10 +50,10 @@ export type TableRow = {
   borrowTimestamp?: number;
 };
 
-const HeadCell: FC<TableHead> = ({ title, tooltip }) => {
+const HeadCell: FC<TableHead> = ({ title, tooltipTitle }) => {
   return (
     <TableCell align={title === 'Asset' ? 'left' : 'center'}>
-      <Tooltip title={tooltip} placement="top" arrow>
+      <Tooltip title={tooltipTitle} placement="top" arrow>
         <Typography variant="subtitle2" sx={{ color: 'grey.500' }} fontWeight={600}>
           {title}
         </Typography>
@@ -115,8 +115,8 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
       <Table aria-label="simple table">
         <TableHead>
           <TableRow>
-            {headers.map(({ title, tooltip }) => (
-              <HeadCell key={title.trim()} title={title} tooltip={tooltip} />
+            {headers.map(({ title, tooltipTitle }) => (
+              <HeadCell key={title.trim()} title={title} tooltipTitle={tooltipTitle} />
             ))}
             <TableCell />
             <TableCell />

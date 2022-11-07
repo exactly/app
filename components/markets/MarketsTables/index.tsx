@@ -167,24 +167,32 @@ const MarketTables: FC = () => {
     },
     {
       title: 'Deposit APR',
-      tooltip: 'Change in the underlying Variable Rate Pool shares value over the last hour, annualized.',
+      tooltipTitle: 'Change in the underlying Variable Rate Pool shares value over the last hour, annualized.',
     },
     {
       title: 'Borrow APR',
-      tooltip: 'Change in the underlying Variable Rate Pool shares value over the last hour, annualized.',
+      tooltipTitle: 'Change in the underlying Variable Rate Pool shares value over the last hour, annualized.',
     },
   ];
   const fixedHeaders = [
-    { title: 'Asset' },
-    { title: 'Total Deposits', tooltip: 'Sum of all the deposits in all the Fixed Rate Pools.' },
-    { title: 'Total Borrows', tooltip: 'Sum of all the borrows in all the Fixed Rate Pools.' },
+    {
+      title: 'Asset',
+    },
+    {
+      title: 'Total Deposits',
+      tooltipTitle: 'Sum of all the deposits in all the Fixed Rate Pools.',
+    },
+    {
+      title: 'Total Borrows',
+      tooltipTitle: 'Sum of all the borrows in all the Fixed Rate Pools.',
+    },
     {
       title: 'Best Deposit APR',
-      tooltip: 'The highest fixed interest rate APR for a $1 deposit in all the available Fixed Rated Pools.',
+      tooltipTitle: 'The highest fixed interest rate APR for a $1 deposit in all the available Fixed Rated Pools.',
     },
     {
       title: 'Best Borrow APR',
-      tooltip: 'The lowest fixed interest rate APR for a $1 borrow in all the available Fixed Rated Pools.',
+      tooltipTitle: 'The lowest fixed interest rate APR for a $1 borrow in all the available Fixed Rated Pools.',
     },
   ];
 
