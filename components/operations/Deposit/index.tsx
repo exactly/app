@@ -262,11 +262,9 @@ const Deposit: FC = () => {
   };
 
   const deposit = useCallback(async () => {
+    if (!symbol || !walletAddress) return;
+    let depositTx;
     try {
-      if (!symbol || !walletAddress) return;
-
-      let depositTx;
-
       if (symbol === 'WETH') {
         if (!web3Provider || !ETHRouterContract) return;
 
@@ -303,20 +301,15 @@ const Deposit: FC = () => {
         return;
       }
 
-      // txError
-      if (error?.message?.includes(`"status":0`)) {
-        const regex = new RegExp(/"hash":"(.*?)"/g); //regex to get all between ("hash":") and (")
-        const preTxHash = error?.message?.match(regex); //get the hash from plain text by the regex
-        const txErrorHash = preTxHash[0].substring(8, preTxHash[0].length - 1); //parse the string to get the txHash only
-        captureException(error);
-        setTx({ status: 'error', hash: txErrorHash });
-      } else {
-        captureException(error);
-        setErrorData({
-          status: true,
-          message: translations[lang].generalError,
-        });
+      if (depositTx?.hash) {
+        setTx({ status: 'error', hash: depositTx.hash });
       }
+
+      captureException(error);
+      setErrorData({
+        status: true,
+        message: translations[lang].generalError,
+      });
     } finally {
       setIsLoading(false);
     }
