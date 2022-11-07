@@ -43,6 +43,7 @@ import keys from './translations.json';
 import numbers from 'config/numbers.json';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
+const TX_REJECTED_CODE = 'ACTION_REJECTED';
 
 const Deposit: FC = () => {
   const { web3Provider, walletAddress, network } = useWeb3Context();
@@ -219,9 +220,12 @@ const Deposit: FC = () => {
       await approveTx.wait();
 
       void updateNeedsAllowance();
-    } catch (e) {
-      captureException(e);
-      setErrorData({ status: true });
+    } catch (error: any) {
+      const isDenied = error?.code?.includes(TX_REJECTED_CODE);
+
+      if (!isDenied) captureException(error);
+
+      setErrorData({ status: true, message: translations[lang].deniedTransaction });
     } finally {
       setIsPending(false);
       setIsLoading(false);
@@ -291,7 +295,7 @@ const Deposit: FC = () => {
 
       getAccountData();
     } catch (error: any) {
-      if (error?.message?.includes('User denied')) {
+      if (error?.code?.includes(TX_REJECTED_CODE)) {
         setErrorData({
           status: true,
           message: translations[lang].deniedTransaction,
