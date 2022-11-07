@@ -121,8 +121,14 @@ const AssetHeaderInfo: FC<Props> = ({ symbol, networkName, assetAddress, eMarket
         </Typography>
       </Grid>
       <Grid item container spacing={4}>
-        {itemsInfo.map(({ label, value, underLabel, tooltip }) => (
-          <ItemInfo key={label.trim()} label={label} value={value} underLabel={underLabel} tooltip={tooltip} />
+        {itemsInfo.map(({ label, value, underLabel, tooltipTitle }) => (
+          <ItemInfo
+            key={label.trim()}
+            label={label}
+            value={value}
+            underLabel={underLabel}
+            tooltipTitle={tooltipTitle}
+          />
         ))}
       </Grid>
     </Grid>

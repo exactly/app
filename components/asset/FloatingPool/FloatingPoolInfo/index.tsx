@@ -96,12 +96,12 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol, eMarketAddress, n
     {
       label: translations[lang].depositAPR,
       value: depositAPR,
-      tooltip: 'Change in the underlying Variable Rate Pool shares value over the last hour, annualized.',
+      tooltipTitle: 'Change in the underlying Variable Rate Pool shares value over the last hour, annualized.',
     },
     {
       label: translations[lang].borrowAPR,
       value: borrowAPR,
-      tooltip: 'Change in the underlying Variable Rate Pool shares value over the last hour, annualized.',
+      tooltipTitle: 'Change in the underlying Variable Rate Pool shares value over the last hour, annualized.',
     },
     {
       label: translations[lang].utilizationRate,

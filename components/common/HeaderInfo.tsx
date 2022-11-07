@@ -31,8 +31,14 @@ const HeaderInfo: FC<HeaderInfoProps> = ({ title, itemsInfo, variant = 'h2' }) =
         <Typography variant={variant}>{title}</Typography>
       </Grid>
       <Grid item container spacing={4}>
-        {itemsInfo.map(({ label, value, underLabel, tooltip }) => (
-          <ItemInfo key={label.trim()} label={label} value={value} underLabel={underLabel} tooltip={tooltip} />
+        {itemsInfo.map(({ label, value, underLabel, tooltipTitle }) => (
+          <ItemInfo
+            key={label.trim()}
+            label={label}
+            value={value}
+            underLabel={underLabel}
+            tooltipTitle={tooltipTitle}
+          />
         ))}
       </Grid>
     </>

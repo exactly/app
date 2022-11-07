@@ -93,22 +93,6 @@ function DashboardHeader() {
     }
   }
 
-  // function getHealthFactorColor() {
-  //   if (!healthFactor) return;
-  //   // HACK the colors should be manage by MUI theme and 'isNAN' when is infinite
-
-  //   const hf = parseFloat(parseHealthFactor(healthFactor.debt, healthFactor.collateral));
-  //   if (hf >= 1.25 || isNaN(hf)) {
-  //     return '#63ca10';
-  //   }
-  //   if (hf < 1.25 && hf >= 1) {
-  //     return '#BCB03A';
-  //   }
-  //   if (hf < 1) {
-  //     return '#FF0000';
-  //   }
-  // }
-
   const itemsInfo: ItemInfoProps[] = useMemo((): ItemInfoProps[] => {
     return [
       {
@@ -124,7 +108,7 @@ function DashboardHeader() {
             {
               label: 'Health Factor',
               value: healthFactor != null ? parseHealthFactor(healthFactor.debt, healthFactor.collateral) : undefined,
-              tooltip:
+              tooltipTitle:
                 'How “safe” is your leverage portfolio, defined as the risk adjusted proportion of collateral deposited versus the risk adjusted amount borrowed. A health factor above 1.25 is recommended to avoid liquidation.',
             },
           ]
