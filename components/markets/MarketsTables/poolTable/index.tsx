@@ -92,10 +92,11 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
     setOperation(action as Operation);
     setMarket({ value: market });
 
-    setDate({
-      value: maturity.toString(),
-      label: parseTimestamp(maturity),
-    });
+    if (maturity)
+      setDate({
+        value: maturity.toString(),
+        label: parseTimestamp(maturity),
+      });
 
     setOpen(true);
 
