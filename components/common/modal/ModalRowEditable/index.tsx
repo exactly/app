@@ -2,6 +2,7 @@ import React, { ChangeEventHandler } from 'react';
 import Image from 'next/image';
 
 import styles from './style.module.scss';
+import Tooltip from '@mui/material/Tooltip';
 
 type Props = {
   text: string;
@@ -28,7 +29,9 @@ function ModalRowEditable({ text, value, line, editable, symbol, placeholder, on
 
   return (
     <section className={rowStyles}>
-      <p className={styles.text}>{text}</p>
+      <Tooltip title={text} placement="top-start">
+        <p className={styles.text}>SLIPPAGE TOLERANCE ({text})</p>
+      </Tooltip>
       <section className={styles.editable}>
         {!editable && (
           <p className={styles.value}>{`${value ? placeholder ?? '0.00' : value}${symbol ? symbol : ''}`}</p>

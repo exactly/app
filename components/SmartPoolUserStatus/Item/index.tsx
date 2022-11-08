@@ -29,6 +29,7 @@ import formatNumber from 'utils/formatNumber';
 import formatSymbol from 'utils/formatSymbol';
 import getHealthFactorData from 'utils/getHealthFactorData';
 import parseHealthFactor from 'utils/parseHealthFactor';
+import Link from 'next/link';
 
 type Props = {
   symbol: string | undefined;
@@ -160,20 +161,14 @@ function Item({
 
   return (
     <div className={styles.container}>
-      <div className={styles.symbol}>
-        {(symbol && <Image src={`/img/assets/${symbol}.svg`} alt={symbol} width={20} height={20} />) || (
-          <Skeleton circle height={20} width={20} />
-        )}
-        <div className={styles.primary}>{(symbol && formatSymbol(symbol)) || <Skeleton />}</div>
-      </div>
-      {/* <div className={styles.value}>
-        {(originalAmount &&
-          rate &&
-          `$${formatNumber(parseFloat(originalAmount) * rate, 'USD', true)}`) || (
-          <Skeleton width={40} />
-        )}
-      </div> */}
-
+      <Link href={`/assets/${symbol}`}>
+        <div className={styles.symbol}>
+          {(symbol && <Image src={`/img/assets/${symbol}.svg`} alt={symbol} width={20} height={20} />) || (
+            <Skeleton circle height={20} width={20} />
+          )}
+          <div className={styles.primary}>{(symbol && formatSymbol(symbol)) || <Skeleton />}</div>
+        </div>
+      </Link>
       <div className={styles.value}>
         {(depositAmount &&
           borrowedAmount &&

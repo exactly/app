@@ -22,7 +22,9 @@ function ModalCell({ text, value, line, asset }: Props) {
       <>
         {asset && <Image src={`/img/assets/${asset}.svg`} alt={asset} width="24" height="24" />}
 
-        <p className={styles.value}>{value || <Skeleton />}</p>
+        <p className={styles.value}>
+          <strong>{value || <Skeleton />}</strong>
+        </p>
       </>
     </section>
   );

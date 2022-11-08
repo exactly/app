@@ -8,6 +8,8 @@
     width: 100%;
     margin: 0;
     color: var(--text-color);
+    font-size: var(--font-10);
+    font-family: var(--secondary-font);
     font-weight: 500;
   }
 
@@ -22,8 +24,9 @@
     .value {
       margin: 0;
       color: var(--text-color);
-      font-weight: 600;
-      max-width: 90%;
+      font-size: var(--font-10);
+      font-family: var(--secondary-font);
+      font-weight: 500;
       overflow-x: hidden;
     }
 

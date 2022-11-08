@@ -11,8 +11,10 @@
     gap: var(--smallUnit);
     .title {
       color: var(--gray-900);
-      font-size: var(--font-20);
-      font-weight: bold;
+      font-weight: 600;
+      font-size: 24px;
+      font-family: articulat-cf;
+      line-height: 1.334;
     }
   }
   .selectContainer {

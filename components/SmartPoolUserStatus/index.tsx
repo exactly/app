@@ -18,6 +18,7 @@ import { FixedLenderAccountData } from 'types/FixedLenderAccountData';
 import styles from './style.module.scss';
 
 import keys from './translations.json';
+import { Tooltip } from '@mui/material';
 
 type Props = {
   walletAddress: string | null | undefined;
@@ -89,7 +90,14 @@ function SmartPoolUserStatus({ walletAddress, type }: Props) {
 
               <span className={styles.title}>{translations[lang].netAssetValue}</span>
 
-              {type.value === 'deposit' && <span className={styles.title}>{translations[lang].eToken}</span>}
+              {type.value === 'deposit' && (
+                <Tooltip
+                  title="The Exactly voucher token (ERC-4626) for your deposit in the Variable Rate Pool."
+                  placement="top"
+                >
+                  <span className={styles.title}>{translations[lang].eToken}</span>
+                </Tooltip>
+              )}
 
               {type.value === 'deposit' && <span className={styles.title}>{translations[lang].collateral}</span>}
 

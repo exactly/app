@@ -64,7 +64,7 @@ const MarketTables: FC = () => {
   const defineRows = useCallback(async () => {
     if (!accountData || !markets || !previewerData.address || !previewerData.abi) return;
 
-    const networkName = network ? network.name : 'goerli'; // HACK if we dont have network we set a default to show data without a connected address
+    const networkName = network ? network.name : 'mainnet'; // HACK if we dont have network we set a default to show data without a connected address
 
     const previewerContract = getInstance(previewerData.address, previewerData.abi, 'previewer');
 
