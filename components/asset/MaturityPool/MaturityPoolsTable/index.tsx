@@ -60,14 +60,15 @@ const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ APRsPerMaturity, symb
   const defineRows = useCallback(() => {
     if (!accountData) return;
 
-    const { fixedPools, usdPrice: exchangeRate } = accountData[symbol];
+    const { fixedPools, usdPrice: exchangeRate, decimals } = accountData[symbol];
     const tempRows: TableRow[] = [];
 
     fixedPools.forEach(({ maturity, borrowed, supplied }) => {
       const maturityKey = maturity.toString();
 
-      const totalDeposited = formatNumber(formatFixed(supplied.mul(exchangeRate).div(WeiPerEther), 18));
-      const totalBorrowed = formatNumber(formatFixed(borrowed.mul(exchangeRate).div(WeiPerEther), 18));
+      const totalDeposited = formatNumber(formatFixed(supplied.mul(exchangeRate).div(WeiPerEther), decimals));
+      const totalBorrowed = formatNumber(formatFixed(borrowed.mul(exchangeRate).div(WeiPerEther), decimals));
+
       tempRows.push({
         maturity: maturityKey,
         totalDeposited,
