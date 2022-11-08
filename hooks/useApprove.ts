@@ -22,7 +22,7 @@ export default (contract?: ERC20 | Market, spender?: string) => {
         gasLimit: gasEstimation.mul(parseFixed(String(numbers.gasLimitMultiplier), 18)).div(WeiPerEther),
       });
 
-      await approveTx.wait();
+      return approveTx.wait();
     } catch (error: any) {
       const isDenied = error?.code === ErrorCode.ACTION_REJECTED;
 
