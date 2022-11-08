@@ -7,9 +7,7 @@ import { captureException } from '@sentry/nextjs';
 
 import LoadingButton from '@mui/lab/LoadingButton';
 
-import { Market } from 'types/contracts/Market';
 import { ERC20 } from 'types/contracts/ERC20';
-import MarketABI from 'abi/Market.json';
 import ERC20ABI from 'abi/ERC20.json';
 
 import ModalAsset from 'components/common/modal/ModalAsset';
@@ -42,6 +40,8 @@ import { MarketContext } from 'contexts/MarketContext';
 import keys from './translations.json';
 import numbers from 'config/numbers.json';
 import useApprove from 'hooks/useApprove';
+import useBalance from 'hooks/useBalance';
+import useMarket from 'hooks/useMarket';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 
@@ -54,7 +54,6 @@ const Deposit: FC = () => {
   const translations: { [key: string]: LangKeys } = keys;
 
   const [qty, setQty] = useState<string>('');
-  const [walletBalance, setWalletBalance] = useState<string | undefined>();
   const [gasCost, setGasCost] = useState<BigNumber | undefined>();
   const [tx, setTx] = useState<Transaction | undefined>();
   const [isLoadingOp, setIsLoadingOp] = useState(false);
@@ -63,15 +62,10 @@ const Deposit: FC = () => {
   const [needsAllowance, setNeedsAllowance] = useState(true);
   const [assetContract, setAssetContract] = useState<ERC20 | undefined>();
 
-  const debounceQty = useDebounce(qty, 1000); // 1 seconds before estimating gas on qty change
+  const debounceQty = useDebounce(qty); // 1 seconds before estimating gas on qty change
   const ETHRouterContract = useETHRouter();
 
-  const marketContract = useMemo(() => {
-    if (market?.value) {
-      // TODO: get market address from previewer response/context + remove MarketContext
-      return new Contract(market.value, MarketABI, web3Provider?.getSigner()) as Market;
-    }
-  }, [market, web3Provider]);
+  const marketContract = useMarket(market?.value);
 
   const symbol = useMemo(
     () => (market?.value ? getSymbol(market.value, network?.name) : 'DAI'),
@@ -102,26 +96,7 @@ const Deposit: FC = () => {
     setQty('');
   }, [symbol]);
 
-  // load wallet balance
-  useEffect(() => {
-    const getWalletBalance = async () => {
-      if (!walletAddress || !web3Provider) return;
-
-      if (symbol === 'WETH') {
-        const balance = await web3Provider.getBalance(walletAddress);
-        return setWalletBalance(formatFixed(balance, 18));
-      }
-
-      if (!assetContract) return;
-
-      const balance = await assetContract.balanceOf(walletAddress);
-      const decimals = await assetContract.decimals();
-
-      setWalletBalance(formatFixed(balance, decimals));
-    };
-
-    getWalletBalance().catch(captureException);
-  }, [assetContract, symbol, walletAddress, web3Provider]);
+  const walletBalance = useBalance(symbol, assetContract);
 
   const updateNeedsAllowance = useCallback(async () => {
     setIsLoadingAllowance(true);

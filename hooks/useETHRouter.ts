@@ -6,7 +6,7 @@ import getNetworkName from 'utils/getNetworkName';
 import { useWeb3Context } from 'contexts/Web3Context';
 import { captureException } from '@sentry/nextjs';
 
-const useETHRouter = () => {
+export default () => {
   const { web3Provider, network } = useWeb3Context();
 
   const [marketETHRouterContract, setMarketETHRouterContract] = useState<MarketETHRouter | undefined>(undefined);
@@ -29,5 +29,3 @@ const useETHRouter = () => {
 
   return marketETHRouterContract;
 };
-
-export default useETHRouter;
