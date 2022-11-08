@@ -37,6 +37,7 @@ import {
   getMaturityPoolWithdrawsQuery,
   getMaturityPoolRepaysQuery,
 } from 'queries';
+import Link from 'next/link';
 
 type Props = {
   type?: Option | undefined;
@@ -174,12 +175,14 @@ function Item({ type, amount, maturityDate, symbol, market, progress, decimals, 
   return (
     <details className={styles.container}>
       <summary className={styles.summary}>
-        <div className={styles.symbol}>
-          {(symbol && <Image src={`/img/assets/${symbol}.svg`} alt={symbol} width={20} height={20} />) || (
-            <Skeleton circle height={20} width={20} />
-          )}
-          <span className={styles.primary}>{symbol ? formatSymbol(symbol) : <Skeleton />}</span>
-        </div>
+        <Link href={`/assets/${symbol}`}>
+          <div className={styles.symbol}>
+            {(symbol && <Image src={`/img/assets/${symbol}.svg`} alt={symbol} width={20} height={20} />) || (
+              <Skeleton circle height={20} width={20} />
+            )}
+            <span className={styles.primary}>{symbol ? formatSymbol(symbol) : <Skeleton />}</span>
+          </div>
+        </Link>
         <span className={styles.value}>
           {symbol && exchangeRate && amount ? (
             `$${formatNumber(parseFloat(formatFixed(amount, decimals)) * exchangeRate, 'USD', true)}`

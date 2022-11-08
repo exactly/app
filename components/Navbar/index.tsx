@@ -85,27 +85,27 @@ function Navbar() {
               />
             </div>
           </Link>
-        </div>
 
-        {network?.chainId === 5 && ( // TODO: put chainId constants in a config file
-          <div className={styles.faucet} onClick={handleClick}>
-            <p>Goerli Faucet</p>
+          {network?.chainId === 5 && ( // TODO: put chainId constants in a config file
+            <div className={styles.faucet} onClick={handleClick}>
+              <p>Goerli Faucet</p>
+            </div>
+          )}
+
+          <div className={styles.center}>
+            <ul className={styles.linksContainer}>
+              {routes.map((route) => {
+                return (
+                  <li
+                    className={route.pathname === pathname ? `${styles.link} ${styles.active}` : styles.link}
+                    key={route.pathname}
+                  >
+                    <Link href={route.href}>{route.name}</Link>
+                  </li>
+                );
+              })}
+            </ul>
           </div>
-        )}
-
-        <div className={styles.center}>
-          <ul className={styles.linksContainer}>
-            {routes.map((route) => {
-              return (
-                <li
-                  className={route.pathname === pathname ? `${styles.link} ${styles.active}` : styles.link}
-                  key={route.pathname}
-                >
-                  <Link href={route.href}>{route.name}</Link>
-                </li>
-              );
-            })}
-          </ul>
         </div>
 
         <div className={styles.right}>

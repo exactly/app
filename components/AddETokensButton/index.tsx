@@ -12,6 +12,7 @@ import { getSymbol } from 'utils/utils';
 import styles from './style.module.scss';
 
 import keys from './translations.json';
+import { Tooltip } from '@mui/material';
 
 function AddETokensButton() {
   const { web3Provider, network } = useWeb3Context();
@@ -55,9 +56,11 @@ function AddETokensButton() {
   }
 
   return (
-    <p className={styles.addAssets} onClick={addTokens}>
-      {translations[lang].addTokens}
-    </p>
+    <Tooltip title="Add eTokens to Metamask" placement="top" arrow>
+      <p className={styles.addAssets} onClick={addTokens}>
+        {translations[lang].addTokens}
+      </p>
+    </Tooltip>
   );
 }
 

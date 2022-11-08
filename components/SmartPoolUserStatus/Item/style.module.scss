@@ -2,11 +2,11 @@
   display: flex;
   padding: var(--u) var(--u2);
   align-items: center;
-  cursor: pointer;
   background: #f9f9f9;
   border-bottom: 1px solid #e7e7e7;
 
   .symbol {
+    cursor: pointer;
     width: calc(100% / 5);
     font-weight: bold;
     display: flex;

@@ -156,7 +156,20 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
                     {isLoading ? (
                       <Skeleton />
                     ) : (
-                      <Tooltip title={depositTimestamp ? parseTimestamp(depositTimestamp) : ''} arrow placement="top">
+                      <Tooltip
+                        title={
+                          symbol === 'wstETH'
+                            ? depositTimestamp
+                              ? parseTimestamp(depositTimestamp) +
+                                " | The displayed APR doesn't include the Lido Staked ETH APR"
+                              : "The displayed APR doesn't include the Lido Staked ETH APR"
+                            : depositTimestamp
+                            ? parseTimestamp(depositTimestamp)
+                            : ''
+                        }
+                        arrow
+                        placement="top"
+                      >
                         <Typography>
                           {toPercentage(depositAPR && depositAPR > minAPRValue ? depositAPR : undefined)}
                         </Typography>
@@ -167,7 +180,20 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
                     {isLoading ? (
                       <Skeleton />
                     ) : (
-                      <Tooltip title={borrowTimestamp && parseTimestamp(borrowTimestamp)} arrow placement="top">
+                      <Tooltip
+                        title={
+                          symbol === 'wstETH'
+                            ? borrowTimestamp
+                              ? parseTimestamp(borrowTimestamp) +
+                                " | The displayed APR doesn't include the Lido Staked ETH APR"
+                              : "The displayed APR doesn't include the Lido Staked ETH APR"
+                            : borrowTimestamp
+                            ? parseTimestamp(borrowTimestamp)
+                            : ''
+                        }
+                        arrow
+                        placement="top"
+                      >
                         <Typography>
                           {toPercentage(borrowAPR && borrowAPR > minAPRValue ? borrowAPR : undefined)}
                         </Typography>
