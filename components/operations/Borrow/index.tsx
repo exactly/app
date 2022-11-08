@@ -39,6 +39,7 @@ import AccountDataContext from 'contexts/AccountDataContext';
 
 import keys from './translations.json';
 import numbers from 'config/numbers.json';
+import useApprove from 'hooks/useApprove';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 
@@ -55,7 +56,7 @@ const Borrow: FC = () => {
   const [walletBalance, setWalletBalance] = useState<string | undefined>();
   const [gasCost, setGasCost] = useState<BigNumber | undefined>();
   const [tx, setTx] = useState<Transaction | undefined>();
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingOp, setIsLoadingOp] = useState(false);
   const [errorData, setErrorData] = useState<ErrorData | undefined>();
   const [healthFactor, setHealthFactor] = useState<HealthFactor | undefined>();
   const [needsAllowance, setNeedsAllowance] = useState(true);
@@ -119,14 +120,14 @@ const Borrow: FC = () => {
       if (!walletAddress || !ETHRouterContract || !marketContract) return;
 
       const allowance = await marketContract.allowance(walletAddress, ETHRouterContract.address);
-      setNeedsAllowance(allowance.lte(parseFixed(debounceQty || '0', 18)));
+      setNeedsAllowance(allowance.lt(parseFixed(qty || '0', 18)));
     } catch (error) {
       setNeedsAllowance(true);
       captureException(error);
     } finally {
       setIsLoadingAllowance(false);
     }
-  }, [ETHRouterContract, debounceQty, marketContract, symbol, walletAddress]);
+  }, [ETHRouterContract, qty, marketContract, symbol, walletAddress]);
 
   // execute updateNeedsAllowance on first render
   useEffect(() => {
@@ -159,7 +160,7 @@ const Borrow: FC = () => {
       walletAddress,
     );
     setGasCost(gasPrice.mul(gasEstimation));
-  }, [isLoadingAllowance, needsAllowance]);
+  }, [isLoadingAllowance, symbol, walletAddress, marketContract, ETHRouterContract, needsAllowance, debounceQty]);
 
   useEffect(() => {
     previewGasCost().catch((error) => {
@@ -260,7 +261,7 @@ const Borrow: FC = () => {
   const borrow = useCallback(async () => {
     if (!accountData) return;
 
-    setIsLoading(true);
+    setIsLoadingOp(true);
     let borrowTx;
 
     try {
@@ -308,7 +309,7 @@ const Borrow: FC = () => {
         message: translations[lang].generalError,
       });
     } finally {
-      setIsLoading(false);
+      setIsLoadingOp(false);
     }
   }, [
     ETHRouterContract,
@@ -322,38 +323,23 @@ const Borrow: FC = () => {
     walletAddress,
   ]);
 
-  const approve = useCallback(async () => {
-    // only enters here on ETH market
-    if (!marketContract || !ETHRouterContract) return;
+  const {
+    approve,
+    isLoading: approveIsLoading,
+    errorData: approveErrorData,
+  } = useApprove(marketContract, ETHRouterContract?.address);
 
-    try {
-      const gasEstimation = await marketContract.estimateGas.approve(ETHRouterContract.address, MaxUint256);
+  const isLoading = useMemo(() => approveIsLoading || isLoadingOp, [approveIsLoading, isLoadingOp]);
 
-      const approveTx = await marketContract.approve(ETHRouterContract.address, MaxUint256, {
-        gasLimit: gasEstimation.mul(parseFixed(String(numbers.gasLimitMultiplier), 18)).div(WeiPerEther),
-      });
-
-      await approveTx.wait();
-      void updateNeedsAllowance();
-    } catch (error: any) {
-      const isDenied = error?.code === ErrorCode.ACTION_REJECTED;
-
-      if (!isDenied) captureException(error);
-
-      setErrorData({
-        status: true,
-        message: isDenied ? translations[lang].deniedTransaction : translations[lang].generalError,
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  }, [ETHRouterContract, lang, marketContract, translations, updateNeedsAllowance]);
-
-  const handleSubmitAction = useCallback(() => {
+  const handleSubmitAction = useCallback(async () => {
     if (isLoading) return;
-    setIsLoading(true);
+    if (needsAllowance) {
+      await approve();
+      setErrorData(approveErrorData);
+      void updateNeedsAllowance();
+    }
     return needsAllowance ? approve() : borrow();
-  }, [approve, borrow, isLoading, needsAllowance]);
+  }, [approve, approveErrorData, borrow, isLoading, needsAllowance, updateNeedsAllowance]);
 
   if (tx) return <ModalGif tx={tx} tryAgain={borrow} />;
 

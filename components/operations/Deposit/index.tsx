@@ -1,6 +1,6 @@
 import React, { ChangeEvent, FC, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
-import { MaxUint256, WeiPerEther } from '@ethersproject/constants';
+import { WeiPerEther } from '@ethersproject/constants';
 import { Contract } from '@ethersproject/contracts';
 import { ErrorCode } from '@ethersproject/logger';
 import { captureException } from '@sentry/nextjs';
@@ -41,6 +41,7 @@ import { MarketContext } from 'contexts/MarketContext';
 
 import keys from './translations.json';
 import numbers from 'config/numbers.json';
+import useApprove from 'hooks/useApprove';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 
@@ -56,8 +57,7 @@ const Deposit: FC = () => {
   const [walletBalance, setWalletBalance] = useState<string | undefined>();
   const [gasCost, setGasCost] = useState<BigNumber | undefined>();
   const [tx, setTx] = useState<Transaction | undefined>();
-  const [isPending, setIsPending] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingOp, setIsLoadingOp] = useState(false);
   const [errorData, setErrorData] = useState<ErrorData | undefined>();
   const [isLoadingAllowance, setIsLoadingAllowance] = useState(true); // utility to avoid estimating gas immediately when switching assets
   const [needsAllowance, setNeedsAllowance] = useState(true);
@@ -191,7 +191,16 @@ const Deposit: FC = () => {
     );
 
     setGasCost(gasPrice.mul(gasLimit));
-  }, [needsAllowance, debounceQty, ETHRouterContract]);
+  }, [
+    ETHRouterContract,
+    assetContract,
+    debounceQty,
+    isLoadingAllowance,
+    marketContract,
+    needsAllowance,
+    symbol,
+    walletAddress,
+  ]);
 
   useEffect(() => {
     previewGasCost().catch((error) => {
@@ -204,32 +213,11 @@ const Deposit: FC = () => {
     });
   }, [lang, previewGasCost, translations]);
 
-  const approve = useCallback(async () => {
-    if (symbol === 'WETH') return;
-    try {
-      if (!marketContract) throw new Error('Market not found');
-      if (!assetContract) throw new Error('Asset not found');
-
-      const gasEstimation = await assetContract.estimateGas.approve(marketContract.address, MaxUint256);
-      const approveTx = await assetContract.approve(marketContract.address, MaxUint256, {
-        gasLimit: gasEstimation.mul(parseFixed(String(numbers.gasLimitMultiplier), 18)).div(WeiPerEther),
-      });
-
-      setIsPending(true);
-      await approveTx.wait();
-
-      void updateNeedsAllowance();
-    } catch (error: any) {
-      const isDenied = error?.code === ErrorCode.ACTION_REJECTED;
-
-      if (!isDenied) captureException(error);
-
-      setErrorData({ status: true, message: translations[lang].deniedTransaction });
-    } finally {
-      setIsPending(false);
-      setIsLoading(false);
-    }
-  }, [assetContract, marketContract, symbol, updateNeedsAllowance]);
+  const {
+    approve,
+    isLoading: approveIsLoading,
+    errorData: approveErrorData,
+  } = useApprove(assetContract, marketContract?.address);
 
   const onMax = () => {
     if (walletBalance) {
@@ -264,6 +252,7 @@ const Deposit: FC = () => {
     if (!symbol || !walletAddress) return;
     let depositTx;
     try {
+      setIsLoadingOp(true);
       if (symbol === 'WETH') {
         if (!web3Provider || !ETHRouterContract) return;
 
@@ -310,15 +299,22 @@ const Deposit: FC = () => {
         message: translations[lang].generalError,
       });
     } finally {
-      setIsLoading(false);
+      setIsLoadingOp(false);
     }
   }, [ETHRouterContract, getAccountData, lang, marketContract, qty, symbol, translations, walletAddress, web3Provider]);
 
-  const handleSubmitAction = useCallback(() => {
-    if (isPending || isLoadingAllowance) return;
-    setIsLoading(true);
-    return needsAllowance ? approve() : deposit();
-  }, [approve, deposit, isLoadingAllowance, isPending, needsAllowance]);
+  const isLoading = approveIsLoading || isLoadingOp;
+
+  const handleSubmitAction = useCallback(async () => {
+    if (isLoading) return;
+    if (needsAllowance) {
+      await approve();
+      setErrorData(approveErrorData);
+      void updateNeedsAllowance();
+      return;
+    }
+    return deposit();
+  }, [approve, approveErrorData, deposit, isLoading, needsAllowance, updateNeedsAllowance]);
 
   if (tx) return <ModalGif tx={tx} tryAgain={deposit} />;
 
@@ -357,7 +353,7 @@ const Deposit: FC = () => {
         variant="contained"
         disabled={!qty || parseFloat(qty) <= 0 || errorData?.status}
       >
-        {needsAllowance ? translations[lang].approve : translations[lang].borrow}
+        {needsAllowance ? translations[lang].approve : translations[lang].deposit}
       </LoadingButton>
     </>
   );
