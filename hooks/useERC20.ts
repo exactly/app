@@ -7,19 +7,23 @@ import { ErrorData } from 'types/Error';
 
 export default (address?: Promise<string>) => {
   const { web3Provider } = useWeb3Context();
-  const [errorData, setErrorData] = useState<ErrorData | undefined>();
+
   const [assetContract, setAssetContract] = useState<ERC20 | undefined>();
+  const [errorData, setErrorData] = useState<ErrorData | undefined>();
 
   useEffect(() => {
-    const loadContract = async () => {
-      const contractAddress = await address;
-      if (!contractAddress) return;
-      setAssetContract(new Contract(contractAddress, ERC20ABI, web3Provider?.getSigner()) as ERC20);
+    const loadAssetContract = async () => {
+      if (!address || !(await address)) return;
+
+      setAssetContract(new Contract(await address, ERC20ABI, web3Provider?.getSigner()) as ERC20);
     };
 
-    loadContract().catch((error) => {
-      setErrorData({ error, status: true, message: 'Failed to load contract' });
-    });
+    loadAssetContract().catch((error) =>
+      setErrorData({
+        error,
+        status: true,
+      }),
+    );
   }, [address, web3Provider]);
 
   return { assetContract, errorData };

@@ -6,9 +6,7 @@ import { MaxUint256, WeiPerEther, Zero } from '@ethersproject/constants';
 import { ErrorCode } from '@ethersproject/logger';
 import LoadingButton from '@mui/lab/LoadingButton';
 
-import { Market } from 'types/contracts/Market';
 import { ERC20 } from 'types/contracts/ERC20';
-import MarketABI from 'abi/Market.json';
 import ERC20ABI from 'abi/ERC20.json';
 
 import ModalAsset from 'components/common/modal/ModalAsset';
@@ -40,6 +38,8 @@ import AccountDataContext from 'contexts/AccountDataContext';
 import keys from './translations.json';
 import numbers from 'config/numbers.json';
 import useApprove from 'hooks/useApprove';
+import useBalance from 'hooks/useBalance';
+import useMarket from 'hooks/useMarket';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 
@@ -52,8 +52,6 @@ const Borrow: FC = () => {
   const translations: { [key: string]: LangKeys } = keys;
 
   const [qty, setQty] = useState<string>('');
-  // TODO: walletBalance type should be BigNumber
-  const [walletBalance, setWalletBalance] = useState<string | undefined>();
   const [gasCost, setGasCost] = useState<BigNumber | undefined>();
   const [tx, setTx] = useState<Transaction | undefined>();
   const [isLoadingOp, setIsLoadingOp] = useState(false);
@@ -61,16 +59,13 @@ const Borrow: FC = () => {
   const [healthFactor, setHealthFactor] = useState<HealthFactor | undefined>();
   const [needsAllowance, setNeedsAllowance] = useState(true);
   const [isLoadingAllowance, setIsLoadingAllowance] = useState(true);
-
   const [assetContract, setAssetContract] = useState<ERC20 | undefined>();
+
   const ETHRouterContract = useETHRouter();
 
-  const debounceQty = useDebounce(qty, 1000);
+  const debounceQty = useDebounce(qty);
 
-  const marketContract = useMemo(() => {
-    if (!market) return undefined;
-    return new Contract(market.value, MarketABI, web3Provider?.getSigner()) as Market;
-  }, [market, web3Provider]);
+  const marketContract = useMarket(market?.value);
 
   const symbol = useMemo(
     () => (market?.value ? getSymbol(market.value, network?.name) : 'DAI'),
@@ -79,15 +74,17 @@ const Borrow: FC = () => {
 
   // load asset contract
   useEffect(() => {
-    if (!marketContract) return;
+    if (!marketContract || symbol === 'WETH') return;
 
     const loadAssetContract = async () => {
       const assetAddress = await marketContract.asset();
-      setAssetContract(new Contract(assetAddress, ERC20ABI, web3Provider) as ERC20);
+      setAssetContract(new Contract(assetAddress, ERC20ABI, web3Provider?.getSigner()) as ERC20);
     };
 
     loadAssetContract().catch(captureException);
-  }, [marketContract, web3Provider]);
+  }, [marketContract, symbol, web3Provider]);
+
+  const walletBalance = useBalance(symbol, assetContract);
 
   const liquidity = useMemo(() => {
     if (!accountData) return undefined;
@@ -102,16 +99,15 @@ const Borrow: FC = () => {
   }, [symbol]);
 
   const hasCollateral = useMemo(() => {
-    if (!accountData || !marketContract) return;
+    if (!accountData) return false;
 
-    const isCollateral = Object.keys(accountData).some((aMarket) => accountData[aMarket].isCollateral);
-    if (isCollateral) return true;
-
-    const hasDepositedToFloatingPool = accountData[symbol].floatingDepositAssets.gt(Zero);
-    if (hasDepositedToFloatingPool) return true;
-
-    return false;
-  }, [accountData, marketContract, symbol]);
+    return (
+      // isCollateral
+      accountData[symbol].floatingDepositAssets.gt(Zero) ||
+      // hasDepositedToFloatingPool
+      Object.keys(accountData).some((aMarket) => accountData[aMarket].isCollateral)
+    );
+  }, [accountData, symbol]);
 
   const updateNeedsAllowance = useCallback(async () => {
     setIsLoadingAllowance(true);
@@ -164,28 +160,14 @@ const Borrow: FC = () => {
 
   useEffect(() => {
     previewGasCost().catch((error) => {
-      captureException(error);
       setErrorData({
+        error,
         status: true,
         message: translations[lang].error,
         component: 'gas',
       });
     });
   }, [lang, previewGasCost, translations]);
-
-  useEffect(() => {
-    const loadBalance = async () => {
-      if (!walletAddress || !web3Provider) return;
-
-      if (symbol === 'WETH') return setWalletBalance(formatFixed(await web3Provider.getBalance(walletAddress), 18));
-      if (!assetContract) return;
-
-      const decimals = await assetContract.decimals();
-      setWalletBalance(formatFixed(await assetContract.balanceOf(walletAddress), decimals));
-    };
-
-    loadBalance().catch(captureException);
-  }, [assetContract, symbol, walletAddress, web3Provider]);
 
   const onMax = () => {
     if (!accountData || !healthFactor) return;
@@ -198,10 +180,10 @@ const Borrow: FC = () => {
     const hf = parseFixed('1.05', 18);
     const WAD = parseFixed('1', 18);
 
-    const hasDepositedToFloatingPool = Number(formatFixed(accountData![symbol].floatingDepositAssets, decimals)) > 0;
+    const hasDepositedToFloatingPool = Number(formatFixed(accountData[symbol].floatingDepositAssets, decimals)) > 0;
 
-    if (!accountData![symbol].isCollateral && hasDepositedToFloatingPool) {
-      col = col.add(accountData![symbol].floatingDepositAssets.mul(accountData![symbol].adjustFactor).div(WAD));
+    if (!accountData[symbol].isCollateral && hasDepositedToFloatingPool) {
+      col = col.add(accountData[symbol].floatingDepositAssets.mul(accountData[symbol].adjustFactor).div(WAD));
     }
 
     const debt = healthFactor.debt;
