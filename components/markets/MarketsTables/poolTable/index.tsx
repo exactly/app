@@ -80,7 +80,7 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
     action: 'borrow' | 'deposit' | 'depositAtMaturity' | 'borrowAtMaturity',
     symbol: string,
-    timestamp: any,
+    maturity: any,
   ) => {
     e.preventDefault();
     if (!walletAddress && connect) return connect();
@@ -93,8 +93,8 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
     setMarket({ value: market });
 
     setDate({
-      value: timestamp,
-      label: parseTimestamp(timestamp),
+      value: maturity.toString(),
+      label: parseTimestamp(maturity),
     });
 
     setOpen(true);
