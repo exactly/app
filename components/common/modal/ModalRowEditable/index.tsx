@@ -34,7 +34,7 @@ function ModalRowEditable({ text, value, line, editable, symbol, placeholder, on
       </Tooltip>
       <section className={styles.editable}>
         {!editable && (
-          <p className={styles.value}>{`${value ? placeholder ?? '0.00' : value}${symbol ? symbol : ''}`}</p>
+          <p className={styles.value}>{`${value ? value : placeholder ?? '0.00'}${symbol ? symbol : ''}`}</p>
         )}
         {editable && (
           <div className={styles.inputContainer}>
@@ -42,7 +42,7 @@ function ModalRowEditable({ text, value, line, editable, symbol, placeholder, on
               min={0.0}
               type="number"
               placeholder={placeholder ?? '0.00'}
-              value={value && parseFloat(value!)}
+              value={value && parseFloat(value)}
               onChange={onChange}
               name={text}
               className={styles.input}
