@@ -8,7 +8,7 @@
     "deniedTransaction": "Transaction rejected",
     "availableLiquidityError": "There is not enough liquidity",
     "generalError": "There was an error, please try again",
-    "noCollateral": "You don't have enough collateralized assets in the Variable Rate Pool",
+    "noCollateral": "In order to borrow you need to have a deposit in the Variable Rate Pool marked as collateral in your Dashboard",
     "borrowLimit": "You can't borrow more than your borrow limit",
     "floatingPoolBorrowExplanation": "Variable rate borrow takes tokens from Exactly and  deposits into your wallet resulting in debt.",
     "walletBalance": "Your Wallet Balance",

@@ -6,3 +6,11 @@
   padding-left: var(--u3);
   border-left: var(--solid-line);
 }
+
+@media (max-width: 769px) {
+  .operationContainer {
+    padding-left: 0;
+    border-left: 0;
+    width: 100%;
+  }
+}
