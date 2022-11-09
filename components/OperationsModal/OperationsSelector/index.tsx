@@ -8,6 +8,7 @@ import styles from './styles.module.scss';
 import { LangKeys } from 'types/Lang';
 
 import keys from './translations.json';
+import Tooltip from '@mui/material/Tooltip';
 
 function OperationsSelector() {
   const { operation, setOperation } = useContext(ModalStatusContext);
@@ -67,29 +68,49 @@ function OperationsSelector() {
         <ul className={styles.list}>
           {actions.variable.map((action) => {
             return (
-              <li
+              <Tooltip
                 key={action.value}
-                onClick={() => handleOperation(action.value as Operation)}
-                className={operation === action.value ? styles.activeAction : styles.action}
+                title={
+                  action.label === 'Borrow' &&
+                  'In order to borrow you need to have a deposit in the Variable Rate Pool marked as collateral in your Dashboard'
+                }
+                arrow
+                placement="top"
               >
-                {action.label}
-              </li>
+                <li
+                  key={action.value}
+                  onClick={() => handleOperation(action.value as Operation)}
+                  className={operation === action.value ? styles.activeAction : styles.action}
+                >
+                  {action.label}
+                </li>
+              </Tooltip>
             );
           })}
         </ul>
       </section>
-      <section className={styles.section}>
+      <section className={styles.section} style={{ marginTop: '40px' }}>
         <h3 className={styles.title}>{translations[lang].fixedRate}</h3>
         <ul className={styles.list}>
           {actions.fixed.map((action) => {
             return (
-              <li
+              <Tooltip
                 key={action.value}
-                onClick={() => handleOperation(action.value as Operation)}
-                className={operation === action.value ? styles.activeAction : styles.action}
+                title={
+                  action.label === 'Borrow' &&
+                  'In order to borrow you need to have a deposit in the Variable Rate Pool marked as collateral in your Dashboard'
+                }
+                arrow
+                placement="top"
               >
-                {action.label}
-              </li>
+                <li
+                  key={action.value}
+                  onClick={() => handleOperation(action.value as Operation)}
+                  className={operation === action.value ? styles.activeAction : styles.action}
+                >
+                  {action.label}
+                </li>
+              </Tooltip>
             );
           })}
         </ul>

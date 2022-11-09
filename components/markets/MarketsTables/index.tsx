@@ -158,6 +158,7 @@ const MarketTables: FC = () => {
   const floatingHeaders = [
     {
       title: 'Asset',
+      width: '130px',
     },
     {
       title: 'Total Deposits',
@@ -177,6 +178,7 @@ const MarketTables: FC = () => {
   const fixedHeaders = [
     {
       title: 'Asset',
+      width: '130px',
     },
     {
       title: 'Total Deposits',

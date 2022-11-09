@@ -38,6 +38,7 @@ export type PoolTableProps = {
 export type TableHead = {
   title: string;
   tooltipTitle?: string;
+  width?: string;
 };
 
 export type TableRow = {
@@ -50,9 +51,9 @@ export type TableRow = {
   borrowTimestamp?: number;
 };
 
-const HeadCell: FC<TableHead> = ({ title, tooltipTitle }) => {
+const HeadCell: FC<TableHead> = ({ title, tooltipTitle, width }) => {
   return (
-    <TableCell align={title === 'Asset' ? 'left' : 'center'}>
+    <TableCell align={title === 'Asset' ? 'left' : 'center'} sx={{ minWidth: width }}>
       <Tooltip title={tooltipTitle} placement="top" arrow>
         <Typography variant="subtitle2" sx={{ color: 'grey.500' }} fontWeight={600}>
           {title}
@@ -116,8 +117,8 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
       <Table aria-label="simple table">
         <TableHead>
           <TableRow>
-            {headers.map(({ title, tooltipTitle }) => (
-              <HeadCell key={title.trim()} title={title} tooltipTitle={tooltipTitle} />
+            {headers.map(({ title, tooltipTitle, width }) => (
+              <HeadCell key={title.trim()} title={title} tooltipTitle={tooltipTitle} width={width} />
             ))}
             <TableCell />
             <TableCell />
@@ -202,10 +203,11 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
                     )}
                   </TableCell>
                   <Tooltip
-                    title={isDisable(depositAPR) ? "You can't deposit at 0% rate, try depositing to another pool" : ''}
+                    title={
+                      'In order to deposit at a fixed rate, there must have been fixed rate loans at the same maturity previously to ensure the solvency condition'
+                    }
                     arrow
                     placement="top"
-                    followCursor
                   >
                     <TableCell
                       align="center"
@@ -245,20 +247,26 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
                     {isLoading ? (
                       <Skeleton variant="rectangular" width={78} height={40} />
                     ) : (
-                      <Button
-                        variant="outlined"
-                        sx={{ backgroundColor: 'white' }}
-                        onClick={(e) =>
-                          handleActionClick(
-                            e,
-                            rateType === 'floating' ? 'borrow' : 'borrowAtMaturity',
-                            symbol,
-                            borrowTimestamp,
-                          )
-                        }
+                      <Tooltip
+                        title="In order to borrow you need to have a deposit in the Variable Rate Pool marked as collateral in your Dashboard"
+                        arrow
+                        placement="top"
                       >
-                        Borrow
-                      </Button>
+                        <Button
+                          variant="outlined"
+                          sx={{ backgroundColor: 'white' }}
+                          onClick={(e) =>
+                            handleActionClick(
+                              e,
+                              rateType === 'floating' ? 'borrow' : 'borrowAtMaturity',
+                              symbol,
+                              borrowTimestamp,
+                            )
+                          }
+                        >
+                          Borrow
+                        </Button>
+                      </Tooltip>
                     )}
                   </TableCell>
                 </TableRow>

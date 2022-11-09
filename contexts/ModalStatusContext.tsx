@@ -14,7 +14,7 @@ export type Operation =
   | 'faucet';
 
 type ContextValues = {
-  open: boolean | null;
+  open: boolean;
   setOpen: (open: any) => void;
   operation: Operation | null;
   setOperation: (operation: Operation) => void;

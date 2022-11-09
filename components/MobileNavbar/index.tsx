@@ -21,7 +21,7 @@ import keys from './translations.json';
 function MobileNavbar() {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
-  const { network, walletAddress, connect, disconnect } = useWeb3Context();
+  const { walletAddress, connect, disconnect } = useWeb3Context();
   const { theme } = useContext(ThemeContext);
 
   const [open, setOpen] = useState<boolean>(false);
@@ -38,11 +38,6 @@ function MobileNavbar() {
       pathname: '/markets',
       href: '/markets',
       name: translations[lang].markets,
-    },
-    {
-      pathname: '/assets/[id]',
-      href: '/assets/dai',
-      name: translations[lang].assets,
     },
     {
       pathname: '/dashboard',
@@ -76,9 +71,19 @@ function MobileNavbar() {
           ) : (
             disconnect &&
             walletAddress && (
-              <div className={styles.buttonContainer}>
-                <Wallet walletAddress={walletAddress} cogwheel={false} network={network} disconnect={disconnect} />
-              </div>
+              <>
+                <a
+                  className={styles.discordFeedbackLink}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  href="https://discord.com/channels/846682395553824808/908758791057719358"
+                >
+                  <strong>Feedback here</strong>
+                </a>
+                <div className={styles.buttonContainer}>
+                  <Wallet walletAddress={walletAddress} cogwheel={false} disconnect={disconnect} />
+                </div>
+              </>
             )
           )}
           {!open ? (
@@ -101,14 +106,6 @@ function MobileNavbar() {
             />
           )}
         </div>
-        <a
-          className={styles.discordFeedbackLink}
-          target="_blank"
-          rel="noreferrer noopener"
-          href="https://discord.com/channels/846682395553824808/908758791057719358"
-        >
-          <strong>Feedback here!</strong>
-        </a>
       </nav>
       {open && (
         <ul className={styles.menu}>

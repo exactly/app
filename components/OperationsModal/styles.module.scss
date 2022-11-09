@@ -17,3 +17,10 @@
     cursor: pointer;
   }
 }
+
+@media (max-width: 769px) {
+  .modal {
+    width: 100%;
+    left: auto;
+  }
+}

@@ -13,7 +13,7 @@ export type ItemInfoProps = {
 };
 
 const ItemInfo: FC<ItemInfoProps> = ({ label, value, underLabel, tooltipTitle }) => (
-  <Grid item sx={{ display: 'flex', flexDirection: 'column' }}>
+  <Grid item>
     <Tooltip title={tooltipTitle} arrow placement="top">
       <Typography variant="subtitle1" sx={{ color: 'grey.500' }}>
         {label}
