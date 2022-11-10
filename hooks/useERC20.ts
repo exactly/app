@@ -2,29 +2,16 @@ import { Contract } from '@ethersproject/contracts';
 import { useWeb3Context } from 'contexts/Web3Context';
 import ERC20ABI from 'abi/ERC20.json';
 import { ERC20 } from 'types/contracts/ERC20';
-import { useEffect, useState } from 'react';
-import { ErrorData } from 'types/Error';
+import { useMemo } from 'react';
 
-export default (address?: Promise<string>) => {
+export default (address?: string) => {
   const { web3Provider } = useWeb3Context();
 
-  const [assetContract, setAssetContract] = useState<ERC20 | undefined>();
-  const [errorData, setErrorData] = useState<ErrorData | undefined>();
+  const assetContract = useMemo(() => {
+    if (!address) return;
 
-  useEffect(() => {
-    const loadAssetContract = async () => {
-      if (!address || !(await address)) return;
-
-      setAssetContract(new Contract(await address, ERC20ABI, web3Provider?.getSigner()) as ERC20);
-    };
-
-    loadAssetContract().catch((error) =>
-      setErrorData({
-        error,
-        status: true,
-      }),
-    );
+    return new Contract(address, ERC20ABI, web3Provider?.getSigner()) as ERC20;
   }, [address, web3Provider]);
 
-  return { assetContract, errorData };
+  return assetContract;
 };

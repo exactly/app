@@ -1,14 +1,10 @@
 import React, { ChangeEvent, FC, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { WeiPerEther } from '@ethersproject/constants';
-import { Contract } from '@ethersproject/contracts';
 import { ErrorCode } from '@ethersproject/logger';
 import { captureException } from '@sentry/nextjs';
 
 import LoadingButton from '@mui/lab/LoadingButton';
-
-import { ERC20 } from 'types/contracts/ERC20';
-import ERC20ABI from 'abi/ERC20.json';
 
 import ModalAsset from 'components/common/modal/ModalAsset';
 import ModalInput from 'components/common/modal/ModalInput';
@@ -42,11 +38,12 @@ import numbers from 'config/numbers.json';
 import useApprove from 'hooks/useApprove';
 import useBalance from 'hooks/useBalance';
 import useMarket from 'hooks/useMarket';
+import useERC20 from 'hooks/useERC20';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 
 const Deposit: FC = () => {
-  const { web3Provider, walletAddress, network } = useWeb3Context();
+  const { walletAddress, network } = useWeb3Context();
   const { accountData, getAccountData } = useContext(AccountDataContext);
   const { market } = useContext(MarketContext);
 
@@ -60,7 +57,7 @@ const Deposit: FC = () => {
   const [errorData, setErrorData] = useState<ErrorData | undefined>();
   const [isLoadingAllowance, setIsLoadingAllowance] = useState(true); // utility to avoid estimating gas immediately when switching assets
   const [needsAllowance, setNeedsAllowance] = useState(true);
-  const [assetContract, setAssetContract] = useState<ERC20 | undefined>();
+  const [assetAddress, setAssetAddress] = useState<string | undefined>();
 
   const debounceQty = useDebounce(qty); // 1 seconds before estimating gas on qty change
   const ETHRouterContract = useETHRouter();
@@ -72,17 +69,16 @@ const Deposit: FC = () => {
     [market?.value, network?.name],
   );
 
-  // load asset contract
   useEffect(() => {
     if (!marketContract || symbol === 'WETH') return;
 
-    const loadAssetContract = async () => {
-      const assetAddress = await marketContract.asset();
-      setAssetContract(new Contract(assetAddress, ERC20ABI, web3Provider?.getSigner()) as ERC20);
+    const loadAssetAddress = async () => {
+      setAssetAddress(await marketContract.asset());
     };
+    void loadAssetAddress();
+  }, [marketContract, symbol]);
 
-    loadAssetContract().catch(captureException);
-  }, [marketContract, symbol, web3Provider]);
+  const assetContract = useERC20(assetAddress);
 
   const depositedAmount = useMemo(() => {
     if (!symbol || !accountData) return '0';
@@ -98,6 +94,13 @@ const Deposit: FC = () => {
 
   const walletBalance = useBalance(symbol, assetContract);
 
+  const {
+    approve,
+    estimateGas: approveEstimateGas,
+    isLoading: approveIsLoading,
+    errorData: approveErrorData,
+  } = useApprove(assetContract, marketContract?.address);
+
   const updateNeedsAllowance = useCallback(async () => {
     setIsLoadingAllowance(true);
     try {
@@ -110,7 +113,7 @@ const Deposit: FC = () => {
       const decimals = await assetContract.decimals();
       const allowance = await assetContract.allowance(walletAddress, marketContract.address);
 
-      setNeedsAllowance(allowance.lt(parseFixed(qty || '0', decimals)));
+      setNeedsAllowance(allowance.lt(parseFixed(qty || String(numbers.defaultAmount), decimals)));
     } catch (error) {
       captureException(error);
       setNeedsAllowance(true);
@@ -129,32 +132,23 @@ const Deposit: FC = () => {
   }, [needsAllowance, isLoadingAllowance]);
 
   const previewGasCost = useCallback(async () => {
-    if (isLoadingAllowance || !symbol || !walletAddress || !ETHRouterContract) return;
+    if (isLoadingAllowance || !symbol || !walletAddress || !ETHRouterContract || !marketContract || !assetContract)
+      return;
 
     const gasPrice = (await ETHRouterContract.provider.getFeeData()).maxFeePerGas;
     if (!gasPrice) return;
 
     if (needsAllowance) {
-      if (!marketContract || !assetContract) return;
-
-      const gasLimit = await assetContract.estimateGas.approve(
-        marketContract.address,
-        debounceQty ? parseFixed(debounceQty, 18) : DEFAULT_AMOUNT,
-      );
-
-      setGasCost(gasPrice.mul(gasLimit));
-      return;
+      const gasEstimation = await approveEstimateGas();
+      return setGasCost(gasEstimation ? gasEstimation.mul(gasPrice) : undefined);
     }
 
     if (symbol === 'WETH') {
-      if (!ETHRouterContract) return;
-
       const gasLimit = await ETHRouterContract.estimateGas.deposit({
         value: debounceQty ? parseFixed(debounceQty, 18) : DEFAULT_AMOUNT,
       });
 
-      setGasCost(gasPrice.mul(gasLimit));
-      return;
+      return setGasCost(gasPrice.mul(gasLimit));
     }
 
     if (!marketContract) throw new Error('Market contract is undefined');
@@ -168,6 +162,7 @@ const Deposit: FC = () => {
     setGasCost(gasPrice.mul(gasLimit));
   }, [
     ETHRouterContract,
+    approveEstimateGas,
     assetContract,
     debounceQty,
     isLoadingAllowance,
@@ -188,12 +183,6 @@ const Deposit: FC = () => {
     });
   }, [lang, previewGasCost, translations]);
 
-  const {
-    approve,
-    isLoading: approveIsLoading,
-    errorData: approveErrorData,
-  } = useApprove(assetContract, marketContract?.address);
-
   const onMax = () => {
     if (walletBalance) {
       setQty(walletBalance);
@@ -203,33 +192,32 @@ const Deposit: FC = () => {
 
   const handleInputChange = ({ target: { value, valueAsNumber } }: ChangeEvent<HTMLInputElement>) => {
     if (!accountData || !symbol) return;
-    const decimals = accountData[symbol].decimals;
+    const { decimals } = accountData[symbol];
 
     if (value.includes('.')) {
       const regex = /[^,.]*$/g;
       const inputDecimals = regex.exec(value)![0];
       if (inputDecimals.length > decimals) return;
     }
-    if (step !== 1 && walletBalance && valueAsNumber > parseFloat(walletBalance)) {
-      setErrorData({
+
+    setQty(value);
+
+    if (walletBalance && valueAsNumber > parseFloat(walletBalance)) {
+      return setErrorData({
         status: true,
         message: translations[lang].insufficientBalance,
         component: 'input',
       });
-    } else {
-      setErrorData(undefined);
     }
-
-    setQty(value);
   };
 
   const deposit = useCallback(async () => {
-    if (!symbol || !walletAddress) return;
+    if (!walletAddress) return;
     let depositTx;
     try {
       setIsLoadingOp(true);
       if (symbol === 'WETH') {
-        if (!web3Provider || !ETHRouterContract) return;
+        if (!ETHRouterContract) return;
 
         const gasEstimation = await ETHRouterContract.estimateGas.deposit({ value: parseFixed(qty, 18) });
 
@@ -264,11 +252,9 @@ const Deposit: FC = () => {
         return;
       }
 
-      if (depositTx?.hash) {
-        setTx({ status: 'error', hash: depositTx.hash });
-      }
-
       captureException(error);
+      if (depositTx) return setTx({ status: 'error', hash: depositTx.hash });
+
       setErrorData({
         status: true,
         message: translations[lang].generalError,
@@ -276,9 +262,12 @@ const Deposit: FC = () => {
     } finally {
       setIsLoadingOp(false);
     }
-  }, [ETHRouterContract, getAccountData, lang, marketContract, qty, symbol, translations, walletAddress, web3Provider]);
+  }, [ETHRouterContract, getAccountData, lang, marketContract, qty, symbol, translations, walletAddress]);
 
-  const isLoading = approveIsLoading || isLoadingOp;
+  const isLoading = useMemo(
+    () => approveIsLoading || isLoadingOp || isLoadingAllowance,
+    [approveIsLoading, isLoadingAllowance, isLoadingOp],
+  );
 
   const handleSubmitAction = useCallback(async () => {
     if (isLoading) return;
