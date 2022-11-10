@@ -46,11 +46,11 @@ function OperationsSelector() {
       },
       {
         value: 'withdrawAtMaturity',
-        label: translations[lang].withdraw,
+        label: translations[lang].earlyWithdraw,
       },
       {
         value: 'repayAtMaturity',
-        label: translations[lang].repay,
+        label: translations[lang].earlyRepay,
       },
     ],
   };
@@ -76,6 +76,7 @@ function OperationsSelector() {
                 }
                 arrow
                 placement="top"
+                followCursor
               >
                 <li
                   key={action.value}
@@ -89,7 +90,7 @@ function OperationsSelector() {
           })}
         </ul>
       </section>
-      <section className={styles.section} style={{ marginTop: '40px' }}>
+      <section className={styles.section} style={{ marginTop: '50px' }}>
         <h3 className={styles.title}>{translations[lang].fixedRate}</h3>
         <ul className={styles.list}>
           {actions.fixed.map((action) => {
@@ -102,6 +103,7 @@ function OperationsSelector() {
                 }
                 arrow
                 placement="top"
+                followCursor
               >
                 <li
                   key={action.value}
