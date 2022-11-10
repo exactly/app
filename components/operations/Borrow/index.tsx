@@ -279,8 +279,9 @@ const Borrow: FC = () => {
       await approve();
       setErrorData(approveErrorData);
       setNeedsAllowance(await needsApproval());
+      return;
     }
-    return needsAllowance ? approve() : borrow();
+    return borrow();
   }, [approve, approveErrorData, borrow, isLoading, needsAllowance, needsApproval]);
 
   if (tx) return <ModalGif tx={tx} tryAgain={borrow} />;

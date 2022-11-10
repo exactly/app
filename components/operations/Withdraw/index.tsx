@@ -1,8 +1,6 @@
-import type { Contract } from '@ethersproject/contracts';
-import React, { ChangeEvent, useContext, useEffect, useMemo, useState } from 'react';
+import React, { ChangeEvent, FC, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 
-import Button from 'components/common/Button';
 import ModalAsset from 'components/common/modal/ModalAsset';
 import ModalInput from 'components/common/modal/ModalInput';
 import ModalRow from 'components/common/modal/ModalRow';
@@ -18,326 +16,277 @@ import { LangKeys } from 'types/Lang';
 import { Transaction } from 'types/Transaction';
 import { ErrorData } from 'types/Error';
 
-import styles from './style.module.scss';
-
-import useDebounce from 'hooks/useDebounce';
-
 import LangContext from 'contexts/LangContext';
-import FixedLenderContext from 'contexts/FixedLenderContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 import AccountDataContext from 'contexts/AccountDataContext';
 import { MarketContext } from 'contexts/MarketContext';
-import ContractsContext from 'contexts/ContractsContext';
 
 import formatNumber from 'utils/formatNumber';
 import { getSymbol } from 'utils/utils';
-import handleETH from 'utils/handleETH';
 
 import numbers from 'config/numbers.json';
 
 import keys from './translations.json';
+import useMarket from 'hooks/useMarket';
+import useETHRouter from 'hooks/useETHRouter';
+import { WeiPerEther } from '@ethersproject/constants';
+import handleOperationError from 'utils/handleOperationError';
+import useApprove from 'hooks/useApprove';
+import { LoadingButton } from '@mui/lab';
 
-function Withdraw() {
-  const { walletAddress, web3Provider, network } = useWeb3Context();
+const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
+
+const Withdraw: FC = () => {
+  const { walletAddress, network } = useWeb3Context();
   const { accountData, getAccountData } = useContext(AccountDataContext);
   const { market } = useContext(MarketContext);
-  const { getInstance } = useContext(ContractsContext);
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
-  const fixedLenderData = useContext(FixedLenderContext);
-
   const [qty, setQty] = useState<string>('');
   const [gasCost, setGasCost] = useState<BigNumber | undefined>();
-  const [tx, setTx] = useState<Transaction | undefined>(undefined);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<ErrorData | undefined>(undefined);
-  const [needsApproval, setNeedsApproval] = useState<boolean>(false);
-  const [isMax, setIsMax] = useState<boolean>(false);
+  const [tx, setTx] = useState<Transaction | undefined>();
+  const [isLoadingOp, setIsLoadingOp] = useState(false);
+  const [errorData, setErrorData] = useState<ErrorData | undefined>();
+  const [needsAllowance, setNeedsAllowance] = useState(false);
+  const [isMax, setIsMax] = useState(false);
 
-  const debounceQty = useDebounce(qty);
-
-  const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(undefined);
+  const marketContract = useMarket(market?.value);
 
   const symbol = useMemo(() => {
     return market?.value ? getSymbol(market.value, network?.name) : 'DAI';
   }, [market?.value, network?.name]);
 
   const assets = useMemo(() => {
-    if (!accountData) return undefined;
-
+    if (!accountData) return;
     return accountData[symbol].floatingDepositAssets;
   }, [symbol, accountData]);
 
   const [parsedAmount, formattedAmount] = useMemo(() => {
-    if (!assets || !symbol || !accountData) return ['0', '0'];
+    if (!assets || !accountData) return ['0', '0'];
+    const amount = formatFixed(assets, accountData[symbol].decimals);
+    return [amount, formatNumber(amount, symbol)];
+  }, [accountData, assets, symbol]);
 
-    const parsedAmount = formatFixed(assets, accountData[symbol].decimals);
-    return [parsedAmount, formatNumber(parsedAmount, symbol!)];
-  }, [assets, symbol]);
+  const ETHRouterContract = useETHRouter();
 
-  const ETHrouter = web3Provider && symbol === 'WETH' && handleETH(network?.name, web3Provider?.getSigner());
+  const {
+    approve,
+    estimateGas: approveEstimateGas,
+    isLoading: approveIsLoading,
+    errorData: approveErrorData,
+  } = useApprove(marketContract, ETHRouterContract?.address);
 
   useEffect(() => {
     setQty('');
   }, [symbol]);
 
-  useEffect(() => {
-    getFixedLenderContract();
-  }, [fixedLenderData]);
+  const isLoading = useMemo(() => isLoadingOp || approveIsLoading, [isLoadingOp, approveIsLoading]);
+
+  const needsApproval = useCallback(async () => {
+    if (symbol !== 'WETH') return false;
+    if (!walletAddress || !ETHRouterContract || !marketContract) return true;
+
+    const allowance = await marketContract.allowance(walletAddress, ETHRouterContract.address);
+    return allowance.lt(parseFixed(qty || '0', 18));
+  }, [ETHRouterContract, marketContract, qty, symbol, walletAddress]);
 
   useEffect(() => {
-    checkAllowance();
-  }, [walletAddress, fixedLenderWithSigner, symbol, debounceQty]);
+    needsApproval()
+      .then(setNeedsAllowance)
+      .catch((error) => setErrorData({ status: true, message: handleOperationError(error) }));
+  }, [needsApproval]);
 
-  useEffect(() => {
-    if (fixedLenderWithSigner && !gasCost) {
-      estimateGas();
+  const previewGasCost = useCallback(async () => {
+    if (!symbol || !walletAddress || !marketContract || !ETHRouterContract || !accountData) return;
+
+    const gasPrice = (await ETHRouterContract.provider.getFeeData()).maxFeePerGas;
+    if (!gasPrice) return;
+
+    if (await needsApproval()) {
+      // only WETH needs allowance -> estimates directly with the ETH router
+      const gasEstimation = await approveEstimateGas();
+      return setGasCost(gasEstimation ? gasPrice.mul(gasEstimation) : undefined);
     }
-  }, [fixedLenderWithSigner]);
 
-  async function checkAllowance() {
-    if (symbol !== 'WETH' || !ETHrouter || !walletAddress || !fixedLenderWithSigner) return;
-
-    const allowance = await ETHrouter.checkAllowance(walletAddress, fixedLenderWithSigner);
-
-    if ((allowance && parseFloat(allowance) < parseFloat(qty)) || (allowance && parseFloat(allowance) === 0 && !qty)) {
-      setNeedsApproval(true);
+    const { floatingDepositShares } = accountData[symbol];
+    if (symbol === 'WETH') {
+      const amount = isMax ? floatingDepositShares : qty ? parseFixed(qty, 18) : DEFAULT_AMOUNT;
+      const gasEstimation = await ETHRouterContract.estimateGas.redeem(amount);
+      return setGasCost(gasPrice.mul(gasEstimation));
     }
-  }
 
-  function onMax() {
+    const decimals = await marketContract.decimals();
+    const amount = isMax ? floatingDepositShares : qty ? parseFixed(qty, decimals) : DEFAULT_AMOUNT;
+    const gasEstimation = await marketContract.estimateGas.redeem(amount, walletAddress, walletAddress);
+    setGasCost(gasPrice.mul(gasEstimation));
+  }, [
+    ETHRouterContract,
+    accountData,
+    approveEstimateGas,
+    isMax,
+    marketContract,
+    needsApproval,
+    qty,
+    symbol,
+    walletAddress,
+  ]);
+
+  useEffect(() => {
+    previewGasCost().catch((error) => {
+      setErrorData({
+        status: true,
+        message: handleOperationError(error),
+        component: 'gas',
+      });
+    });
+  }, [lang, previewGasCost, translations]);
+
+  const onMax = () => {
     setQty(parsedAmount);
-
-    //we enable max flag if user clicks max
     setIsMax(true);
-  }
+  };
 
-  function handleInputChange(e: ChangeEvent<HTMLInputElement>) {
+  const handleInputChange = ({ target: { value, valueAsNumber } }: ChangeEvent<HTMLInputElement>) => {
     if (!accountData || !symbol) return;
-    const decimals = accountData[symbol].decimals;
+    const { decimals } = accountData[symbol];
 
-    if (e.target.value.includes('.')) {
+    if (value.includes('.')) {
       const regex = /[^,.]*$/g;
-      const inputDecimals = regex.exec(e.target.value)![0];
+      const inputDecimals = regex.exec(value)![0];
       if (inputDecimals.length > decimals) return;
     }
 
-    if (e.target.valueAsNumber > parseFloat(parsedAmount)) {
-      setError({
+    if (valueAsNumber > parseFloat(parsedAmount)) {
+      setErrorData({
         status: true,
         message: translations[lang].insufficientBalance,
         component: 'input',
       });
-    } else {
-      setError(undefined);
+      return;
     }
-
-    setQty(e.target.value);
-
+    setQty(value);
+    setErrorData(undefined);
     //we disable max flag if user changes input
     isMax && setIsMax(false);
-  }
+  };
 
-  async function withdraw() {
-    if (!accountData) return;
+  const withdraw = useCallback(async () => {
+    if (!accountData || !walletAddress || !marketContract || !symbol) return;
 
-    setLoading(true);
-
+    let withdrawTx;
     try {
-      let decimals;
-      let withdraw;
+      setIsLoadingOp(true);
+      const { decimals, floatingDepositShares } = accountData[symbol];
 
       if (symbol === 'WETH') {
-        if (!ETHrouter) return;
-
-        decimals = 18;
+        if (!ETHRouterContract) return;
 
         if (isMax) {
-          withdraw = await ETHrouter.redeemETH(accountData[symbol].floatingDepositShares);
+          const gasEstimation = await ETHRouterContract.estimateGas.redeem(floatingDepositShares);
+          withdrawTx = await ETHRouterContract.redeem(floatingDepositShares, {
+            gasLimit: gasEstimation.mul(parseFixed(String(numbers.gasLimitMultiplier), 18)).div(WeiPerEther),
+          });
         } else {
-          withdraw = await ETHrouter.withdrawETH(qty);
+          const gasEstimation = await ETHRouterContract.estimateGas.withdraw(parseFixed(qty, 18));
+          withdrawTx = await ETHRouterContract.withdraw(parseFixed(qty, 18), {
+            gasLimit: gasEstimation.mul(parseFixed(String(numbers.gasLimitMultiplier), 18)).div(WeiPerEther),
+          });
         }
       } else {
-        if (!accountData || !symbol) return;
-
-        const gasLimit = await getGasLimit(qty);
-        decimals = accountData[symbol].decimals;
-
         if (isMax) {
-          withdraw = await fixedLenderWithSigner?.redeem(
-            accountData[symbol].floatingDepositShares,
+          const gasEstimation = await marketContract.estimateGas.redeem(
+            floatingDepositShares,
             walletAddress,
             walletAddress,
-            {
-              gasLimit: gasLimit ? Math.ceil(Number(formatFixed(gasLimit)) * numbers.gasLimitMultiplier) : undefined,
-            },
           );
+
+          withdrawTx = await marketContract.redeem(floatingDepositShares, walletAddress, walletAddress, {
+            gasLimit: gasEstimation.mul(parseFixed(String(numbers.gasLimitMultiplier), 18)).div(WeiPerEther),
+          });
         } else {
-          withdraw = await fixedLenderWithSigner?.withdraw(parseFixed(qty, decimals), walletAddress, walletAddress, {
-            gasLimit: gasLimit ? Math.ceil(Number(formatFixed(gasLimit)) * numbers.gasLimitMultiplier) : undefined,
+          const gasEstimation = await marketContract.estimateGas.withdraw(
+            parseFixed(qty, decimals),
+            walletAddress,
+            walletAddress,
+          );
+
+          withdrawTx = await marketContract.withdraw(parseFixed(qty, decimals), walletAddress, walletAddress, {
+            gasLimit: gasEstimation.mul(parseFixed(String(numbers.gasLimitMultiplier), 18)).div(WeiPerEther),
           });
         }
       }
 
-      setTx({ status: 'processing', hash: withdraw?.hash });
+      setTx({ status: 'processing', hash: withdrawTx?.hash });
 
-      const txReceipt = await withdraw.wait();
-      setLoading(false);
+      const { status, transactionHash } = await withdrawTx.wait();
 
-      if (txReceipt.status === 1) {
-        setTx({ status: 'success', hash: txReceipt?.transactionHash });
-      } else {
-        setTx({ status: 'error', hash: txReceipt?.transactionHash });
-      }
+      setTx({ status: status ? 'success' : 'error', hash: transactionHash });
 
       getAccountData();
-    } catch (e: any) {
-      console.log(e);
-      setLoading(false);
-
-      const isDenied = e?.message?.includes('User denied');
-
-      const txError = e?.message?.includes(`"status":0`);
-      let txErrorHash = undefined;
-
-      if (txError) {
-        const regex = new RegExp(/"hash":"(.*?)"/g); //regex to get all between ("hash":") and (")
-        const preTxHash = e?.message?.match(regex); //get the hash from plain text by the regex
-        txErrorHash = preTxHash[0].substring(8, preTxHash[0].length - 1); //parse the string to get the txHash only
-      }
-
-      if (isDenied) {
-        setError({
-          status: true,
-          message: isDenied && translations[lang].deniedTransaction,
-        });
-      } else if (txError) {
-        setTx({ status: 'error', hash: txErrorHash });
-      } else {
-        setError({
-          status: true,
-          message: translations[lang].generalError,
-        });
-      }
+    } catch (error: any) {
+      if (withdrawTx) setTx({ status: 'error', hash: withdrawTx?.hash });
+      setErrorData({ status: true, message: handleOperationError(error) });
+    } finally {
+      setIsLoadingOp(false);
     }
-  }
+  }, [ETHRouterContract, accountData, getAccountData, isMax, marketContract, qty, symbol, walletAddress]);
 
-  async function estimateGas() {
-    if (symbol === 'WETH') return;
-
-    try {
-      const gasPrice = (await fixedLenderWithSigner?.provider.getFeeData())?.maxFeePerGas;
-
-      const gasLimit = await getGasLimit('0.0001');
-
-      if (gasPrice && gasLimit) {
-        setGasCost(gasPrice.mul(gasLimit));
-      }
-    } catch (e) {
-      setError({
-        status: true,
-        component: 'gas',
-      });
+  const handleSubmitAction = useCallback(async () => {
+    if (isLoading) return;
+    // check needs allowance
+    if (needsAllowance) {
+      await approve();
+      setErrorData(approveErrorData);
+      setNeedsAllowance(await needsApproval());
+      return;
     }
-  }
 
-  async function getGasLimit(qty: string) {
-    if (!accountData || !symbol) return;
+    return withdraw();
+  }, [approve, approveErrorData, isLoading, needsAllowance, needsApproval, withdraw]);
 
-    const decimals = accountData[symbol].decimals;
-
-    const gasLimit = await fixedLenderWithSigner?.estimateGas.withdraw(
-      parseFixed(qty, decimals),
-      walletAddress,
-      walletAddress,
-    );
-
-    return gasLimit;
-  }
-
-  async function approve() {
-    if (symbol === 'WETH') {
-      if (!web3Provider || !ETHrouter || !fixedLenderWithSigner) return;
-
-      try {
-        setLoading(true);
-
-        const approve = await ETHrouter.approve(fixedLenderWithSigner);
-
-        await approve.wait();
-
-        setLoading(false);
-        setNeedsApproval(false);
-      } catch (e: any) {
-        setLoading(false);
-
-        const isDenied = e?.message?.includes('User denied');
-
-        setError({
-          status: true,
-          message: isDenied ? translations[lang].deniedTransaction : translations[lang].notEnoughSlippage,
-        });
-      }
-    }
-  }
-
-  function getFixedLenderContract() {
-    const filteredFixedLender = fixedLenderData.find((contract) => {
-      const contractSymbol = getSymbol(contract.address!, network!.name);
-
-      return contractSymbol === symbol;
-    });
-
-    if (!filteredFixedLender) throw new Error('Market contract not found');
-    const fixedLender = getInstance(filteredFixedLender.address!, filteredFixedLender.abi!, `market${symbol}`);
-
-    setFixedLenderWithSigner(fixedLender);
-  }
+  if (tx) return <ModalGif tx={tx} tryAgain={withdraw} />;
 
   return (
     <>
-      {!tx && (
-        <>
-          <ModalTitle title={translations[lang].withdraw} />
-          <ModalAsset
-            asset={symbol!}
-            assetTitle={translations[lang].action.toUpperCase()}
-            amount={parsedAmount}
-            amountTitle={translations[lang].depositedAmount.toUpperCase()}
-          />
-          <ModalInput
-            onMax={onMax}
-            value={qty}
-            onChange={handleInputChange}
-            symbol={symbol!}
-            error={error?.component === 'input'}
-          />
-          {error?.component !== 'gas' && symbol !== 'WETH' && <ModalTxCost gasCost={gasCost} />}
-          <ModalRow text={translations[lang].exactlyBalance} value={formattedAmount} line />
-          {symbol ? (
-            <ModalRowHealthFactor qty={qty} symbol={symbol} operation="withdraw" />
-          ) : (
-            <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
-          )}
-          <ModalRowBorrowLimit qty={qty} symbol={symbol!} operation="withdraw" line />
-
-          {error && error.component !== 'gas' && <ModalError message={error.message} />}
-          <div className={styles.buttonContainer}>
-            <Button
-              text={needsApproval ? translations[lang].approve : translations[lang].withdraw}
-              className={parseFloat(qty) <= 0 || !qty || error?.status ? 'disabled' : 'primary'}
-              disabled={parseFloat(qty) <= 0 || !qty || loading || error?.status}
-              onClick={needsApproval ? approve : withdraw}
-              loading={loading}
-            />
-          </div>
-        </>
+      <ModalTitle title={translations[lang].withdraw} />
+      <ModalAsset
+        asset={symbol}
+        assetTitle={translations[lang].action.toUpperCase()}
+        amount={parsedAmount}
+        amountTitle={translations[lang].depositedAmount.toUpperCase()}
+      />
+      <ModalInput
+        onMax={onMax}
+        value={qty}
+        onChange={handleInputChange}
+        symbol={symbol}
+        error={errorData?.component === 'input'}
+      />
+      {errorData?.component !== 'gas' && <ModalTxCost gasCost={gasCost} />}
+      <ModalRow text={translations[lang].exactlyBalance} value={formattedAmount} line />
+      {symbol ? (
+        <ModalRowHealthFactor qty={qty} symbol={symbol} operation="withdraw" />
+      ) : (
+        <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
       )}
-      {tx && <ModalGif tx={tx} tryAgain={withdraw} />}
+      <ModalRowBorrowLimit qty={qty} symbol={symbol} operation="withdraw" line />
+
+      {errorData && <ModalError message={errorData.message} />}
+      <LoadingButton
+        fullWidth
+        sx={{ mt: 2 }}
+        loading={isLoading}
+        onClick={handleSubmitAction}
+        color="primary"
+        variant="contained"
+        disabled={parseFloat(qty) <= 0 || !qty || isLoading || errorData?.status}
+      >
+        {needsAllowance ? translations[lang].approve : translations[lang].withdraw}
+      </LoadingButton>
     </>
   );
-}
+};
 
 export default Withdraw;
