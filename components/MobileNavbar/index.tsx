@@ -11,6 +11,7 @@ import ThemeContext from 'contexts/ThemeContext';
 const Button = dynamic(() => import('components/common/Button'));
 const Wallet = dynamic(() => import('components/Wallet'));
 const Overlay = dynamic(() => import('components/Overlay'));
+const DisclamerModal = dynamic(() => import('components/DisclaimerModal'));
 
 import { LangKeys } from 'types/Lang';
 
@@ -49,6 +50,7 @@ function MobileNavbar() {
 
   return (
     <>
+      <DisclamerModal />
       {open && <Overlay close={handleMenu} />}
       <nav className={styles.navBar} style={open ? { zIndex: 7 } : {}}>
         <div className={styles.wrapper}>

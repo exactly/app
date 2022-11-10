@@ -19,6 +19,7 @@ import styles from './style.module.scss';
 import keys from './translations.json';
 
 import allowedNetworks from 'config/allowedNetworks.json';
+import DisclamerModal from 'components/DisclaimerModal';
 
 function Navbar() {
   const lang: string = useContext(LangContext);
@@ -73,6 +74,7 @@ function Navbar() {
   return (
     <nav className={styles.navBar}>
       <div className={styles.wrapper}>
+        <DisclamerModal />
         <div className={styles.left}>
           <Link href="/markets">
             <div className={styles.logo}>
