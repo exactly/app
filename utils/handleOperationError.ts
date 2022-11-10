@@ -38,6 +38,8 @@ export default (error: any) => {
               return 'Insufficient assets or lack of approval, please try again';
             case 'ZERO_SHARES':
               return 'Cannot deposit 0';
+            case 'ZERO_ASSETS':
+              return 'Cannot withdraw 0';
           }
       }
     }
