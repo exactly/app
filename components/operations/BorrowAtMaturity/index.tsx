@@ -1,14 +1,10 @@
 import React, { ChangeEvent, FC, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { MaxUint256, WeiPerEther, Zero } from '@ethersproject/constants';
+import { WeiPerEther, Zero } from '@ethersproject/constants';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
-import { Contract } from '@ethersproject/contracts';
 import { ErrorCode } from '@ethersproject/logger';
 import Box from '@mui/material/Box';
 import LoadingButton from '@mui/lab/LoadingButton';
 import { captureException } from '@sentry/nextjs';
-
-import { ERC20 } from 'types/contracts/ERC20';
-import ERC20ABI from 'abi/ERC20.json';
 
 import ModalAsset from 'components/common/modal/ModalAsset';
 import ModalInput from 'components/common/modal/ModalInput';
@@ -45,6 +41,7 @@ import useBalance from 'hooks/useBalance';
 import usePoolLiquidity from 'hooks/usePoolLiquidity';
 import useApprove from 'hooks/useApprove';
 import usePreviewer from 'hooks/usePreviewer';
+import useERC20 from 'hooks/useERC20';
 
 import keys from './translations.json';
 
@@ -73,7 +70,7 @@ const BorrowAtMaturity: FC = () => {
   const [needsAllowance, setNeedsAllowance] = useState(true);
   const [isLoadingAllowance, setIsLoadingAllowance] = useState(true);
   const [errorData, setErrorData] = useState<ErrorData | undefined>();
-  const [assetContract, setAssetContract] = useState<ERC20 | undefined>();
+  const [assetAddress, setAssetAddress] = useState<string | undefined>();
 
   const ETHRouterContract = useETHRouter();
   const marketContract = useMarket(market?.value);
@@ -82,6 +79,7 @@ const BorrowAtMaturity: FC = () => {
 
   const {
     approve,
+    estimateGas: approveEstimateGas,
     errorData: approveErrorData,
     isLoading: approveIsLoading,
   } = useApprove(marketContract, ETHRouterContract?.address);
@@ -92,17 +90,16 @@ const BorrowAtMaturity: FC = () => {
     return market?.value ? getSymbol(market.value, network?.name) : 'DAI';
   }, [market?.value, network?.name]);
 
-  // load asset contract
+  // load asset address
   useEffect(() => {
     if (!marketContract || symbol === 'WETH') return;
 
-    const loadAssetContract = async () => {
-      const assetAddress = await marketContract.asset();
-      setAssetContract(new Contract(assetAddress, ERC20ABI, web3Provider?.getSigner()) as ERC20);
-    };
+    const loadAssetAddress = async () => setAssetAddress(await marketContract.asset());
 
-    loadAssetContract().catch(captureException);
+    loadAssetAddress().catch(captureException);
   }, [marketContract, symbol, web3Provider]);
+
+  const assetContract = useERC20(assetAddress);
 
   const walletBalance = useBalance(symbol, assetContract);
   const poolLiquidity = usePoolLiquidity(symbol);
@@ -137,8 +134,8 @@ const BorrowAtMaturity: FC = () => {
 
     if (needsAllowance) {
       // only WETH needs allowance -> estimates directly with the ETH router
-      const gasEstimation = await marketContract.estimateGas.approve(ETHRouterContract.address, MaxUint256);
-      return setGasCost(gasPrice.mul(gasEstimation));
+      const gasEstimation = await approveEstimateGas();
+      return setGasCost(gasEstimation ? gasPrice.mul(gasEstimation) : undefined);
     }
 
     if (symbol === 'WETH') {
@@ -163,6 +160,7 @@ const BorrowAtMaturity: FC = () => {
     setGasCost(gasPrice.mul(gasEstimation));
   }, [
     ETHRouterContract,
+    approveEstimateGas,
     date,
     debounceQty,
     isLoadingAllowance,
@@ -203,7 +201,7 @@ const BorrowAtMaturity: FC = () => {
 
   // execute updateNeedsAllowance on first render
   useEffect(() => {
-    updateNeedsAllowance().catch(captureException);
+    void updateNeedsAllowance();
   }, [updateNeedsAllowance]);
 
   function onMax() {
@@ -237,18 +235,8 @@ const BorrowAtMaturity: FC = () => {
   }
 
   function handleInputChange({ target: { value, valueAsNumber } }: ChangeEvent<HTMLInputElement>) {
-    if (poolLiquidity && poolLiquidity < valueAsNumber) {
-      return setErrorData({
-        status: true,
-        message: translations[lang].availableLiquidityError,
-      });
-    }
-
     if (!accountData) return;
-    const decimals = accountData[symbol].decimals;
-    const usdPrice = accountData[symbol].usdPrice;
-
-    const maxBorrowAssets = getBeforeBorrowLimit(accountData, symbol, usdPrice, decimals, 'borrow');
+    const { decimals, usdPrice } = accountData[symbol];
 
     if (value.includes('.')) {
       const regex = /[^,.]*$/g;
@@ -258,13 +246,20 @@ const BorrowAtMaturity: FC = () => {
 
     setQty(value);
 
-    const WAD = parseFixed('1', 18);
+    if (poolLiquidity && poolLiquidity < valueAsNumber) {
+      return setErrorData({
+        status: true,
+        message: translations[lang].availableLiquidityError,
+      });
+    }
+
+    const maxBorrowAssets = getBeforeBorrowLimit(accountData, symbol, usdPrice, decimals, 'borrow');
 
     if (
       maxBorrowAssets.lt(
         parseFixed(value || '0', decimals)
-          .mul(accountData[symbol].usdPrice)
-          .div(WAD),
+          .mul(usdPrice)
+          .div(WeiPerEther),
       )
     ) {
       return setErrorData({
@@ -288,7 +283,7 @@ const BorrowAtMaturity: FC = () => {
       });
     }
 
-    if (!accountData || !date || !qty) return;
+    if (!accountData || !date || !qty || !walletAddress) return;
 
     const { decimals } = accountData[symbol];
     const amount = parseFixed(qty, decimals);
@@ -305,8 +300,7 @@ const BorrowAtMaturity: FC = () => {
           gasLimit: gasEstimation.mul(parseFixed(String(numbers.gasLimitMultiplier), 18)).div(WeiPerEther),
         });
       } else {
-        if (!marketContract) throw new Error('Market contract not found');
-        if (!walletAddress) throw new Error('Wallet address not found');
+        if (!marketContract) return;
 
         const gasEstimation = await marketContract.estimateGas.borrowAtMaturity(
           date.value,
@@ -340,6 +334,7 @@ const BorrowAtMaturity: FC = () => {
         status: true,
         message: translations[lang].generalError,
       });
+      captureException(error);
     } finally {
       setIsLoadingOp(false);
     }
@@ -362,19 +357,18 @@ const BorrowAtMaturity: FC = () => {
     if (!accountData || !date || !previewerContract || !marketContract) return;
 
     const { decimals, usdPrice } = accountData[symbol];
-    const currentTimestamp = new Date().getTime() / 1000;
 
     const initialAssets = debounceQty ? parseFixed(debounceQty, decimals) : getOneDollar(usdPrice, decimals);
 
     try {
-      const feeAtMaturity = await previewerContract.previewBorrowAtMaturity(
+      const { assets: finalAssets } = await previewerContract.previewBorrowAtMaturity(
         marketContract.address,
         date.value,
         initialAssets,
       );
 
+      const currentTimestamp = new Date().getTime() / 1000;
       const time = 31_536_000 / (Number(date.value) - currentTimestamp);
-      const { assets: finalAssets } = feeAtMaturity;
 
       const rate = finalAssets.mul(WeiPerEther).div(initialAssets);
 
@@ -383,7 +377,7 @@ const BorrowAtMaturity: FC = () => {
       setSlippage(slippageAPR);
       setFixedRate(fixedAPR);
     } catch (error) {
-      return setFixedRate(undefined);
+      setFixedRate(undefined);
     }
   }, [accountData, date, debounceQty, marketContract, previewerContract, symbol]);
 
@@ -427,7 +421,10 @@ const BorrowAtMaturity: FC = () => {
     updateURAfter().catch(captureException);
   }, [updateURAfter]);
 
-  const isLoading = isLoadingOp || approveIsLoading;
+  const isLoading = useMemo(
+    () => isLoadingOp || approveIsLoading || isLoadingAllowance,
+    [approveIsLoading, isLoadingAllowance, isLoadingOp],
+  );
 
   const handleSubmitAction = async () => {
     if (isLoading) return;

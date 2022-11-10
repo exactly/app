@@ -1,13 +1,9 @@
 import React, { ChangeEvent, FC, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { captureException } from '@sentry/nextjs';
-import { Contract } from '@ethersproject/contracts';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
-import { MaxUint256, WeiPerEther, Zero } from '@ethersproject/constants';
+import { WeiPerEther, Zero } from '@ethersproject/constants';
 import { ErrorCode } from '@ethersproject/logger';
 import LoadingButton from '@mui/lab/LoadingButton';
-
-import { ERC20 } from 'types/contracts/ERC20';
-import ERC20ABI from 'abi/ERC20.json';
 
 import ModalAsset from 'components/common/modal/ModalAsset';
 import ModalInput from 'components/common/modal/ModalInput';
@@ -40,11 +36,12 @@ import numbers from 'config/numbers.json';
 import useApprove from 'hooks/useApprove';
 import useBalance from 'hooks/useBalance';
 import useMarket from 'hooks/useMarket';
+import useERC20 from 'hooks/useERC20';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 
 const Borrow: FC = () => {
-  const { web3Provider, walletAddress, network } = useWeb3Context();
+  const { walletAddress, network } = useWeb3Context();
   const { accountData, getAccountData } = useContext(AccountDataContext);
   const { market } = useContext(MarketContext);
 
@@ -59,7 +56,7 @@ const Borrow: FC = () => {
   const [healthFactor, setHealthFactor] = useState<HealthFactor | undefined>();
   const [needsAllowance, setNeedsAllowance] = useState(true);
   const [isLoadingAllowance, setIsLoadingAllowance] = useState(true);
-  const [assetContract, setAssetContract] = useState<ERC20 | undefined>();
+  const [assetAddress, setAssetAddress] = useState<string | undefined>();
 
   const ETHRouterContract = useETHRouter();
 
@@ -72,17 +69,22 @@ const Borrow: FC = () => {
     [market?.value, network?.name],
   );
 
-  // load asset contract
   useEffect(() => {
     if (!marketContract || symbol === 'WETH') return;
 
-    const loadAssetContract = async () => {
-      const assetAddress = await marketContract.asset();
-      setAssetContract(new Contract(assetAddress, ERC20ABI, web3Provider?.getSigner()) as ERC20);
-    };
+    const loadAssetAddress = async () => setAssetAddress(await marketContract.asset());
 
-    loadAssetContract().catch(captureException);
-  }, [marketContract, symbol, web3Provider]);
+    loadAssetAddress().catch(captureException);
+  }, [marketContract, symbol]);
+
+  const assetContract = useERC20(assetAddress);
+
+  const {
+    approve,
+    estimateGas: approveEstimateGas,
+    isLoading: approveIsLoading,
+    errorData: approveErrorData,
+  } = useApprove(marketContract, ETHRouterContract?.address);
 
   const walletBalance = useBalance(symbol, assetContract);
 
@@ -138,8 +140,8 @@ const Borrow: FC = () => {
 
     if (needsAllowance) {
       // only WETH needs allowance -> estimates directly with the ETH router
-      const gasEstimation = await marketContract.estimateGas.approve(ETHRouterContract.address, MaxUint256);
-      return setGasCost(gasPrice.mul(gasEstimation));
+      const gasEstimation = await approveEstimateGas();
+      return setGasCost(gasEstimation ? gasPrice.mul(gasEstimation) : undefined);
     }
 
     if (symbol === 'WETH') {
@@ -156,7 +158,16 @@ const Borrow: FC = () => {
       walletAddress,
     );
     setGasCost(gasPrice.mul(gasEstimation));
-  }, [isLoadingAllowance, symbol, walletAddress, marketContract, ETHRouterContract, needsAllowance, debounceQty]);
+  }, [
+    isLoadingAllowance,
+    symbol,
+    walletAddress,
+    marketContract,
+    ETHRouterContract,
+    needsAllowance,
+    debounceQty,
+    approveEstimateGas,
+  ]);
 
   useEffect(() => {
     previewGasCost().catch((error) => {
@@ -304,12 +315,6 @@ const Borrow: FC = () => {
     translations,
     walletAddress,
   ]);
-
-  const {
-    approve,
-    isLoading: approveIsLoading,
-    errorData: approveErrorData,
-  } = useApprove(marketContract, ETHRouterContract?.address);
 
   const isLoading = useMemo(() => approveIsLoading || isLoadingOp, [approveIsLoading, isLoadingOp]);
 
