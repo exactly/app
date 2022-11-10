@@ -37,6 +37,7 @@ const theme = createTheme({
     h6: {
       fontWeight: 700,
     },
+
     subtitle1: {
       fontWeight: 600,
       fontSize: 14,
@@ -58,6 +59,14 @@ const theme = createTheme({
         root: {
           textTransform: 'none',
           borderRadius: 0,
+        },
+      },
+    },
+    MuiDialogTitle: {
+      styleOverrides: {
+        root: {
+          fontWeight: 600,
+          fontSize: 24,
         },
       },
     },
