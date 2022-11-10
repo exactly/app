@@ -32,6 +32,7 @@ import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 import AccountDataContext from 'contexts/AccountDataContext';
 import { MarketContext } from 'contexts/MarketContext';
+import ErrorInterface from 'utils/ErrorInterface';
 
 import keys from './translations.json';
 import numbers from 'config/numbers.json';
@@ -244,21 +245,29 @@ const Deposit: FC = () => {
 
       getAccountData();
     } catch (error: any) {
-      if (error?.code === ErrorCode.ACTION_REJECTED) {
-        setErrorData({
-          status: true,
-          message: translations[lang].deniedTransaction,
-        });
-        return;
+      switch (error?.code) {
+        case ErrorCode.ACTION_REJECTED:
+          setErrorData({ status: true, message: translations[lang].deniedTransaction });
+          return;
+        case ErrorCode.UNPREDICTABLE_GAS_LIMIT: {
+          const { name, args } = ErrorInterface.parseError(error.error.data.originalError.data);
+          switch (name) {
+            case 'InsufficientAccountLiquidity':
+              setErrorData({ status: true, message: translations[lang].generalError });
+              return;
+            case 'Error':
+              switch (args[0]) {
+                case 'TRANSFER_FROM_FAILED':
+                  setErrorData({ status: true, message: translations[lang].generalError });
+                  return;
+              }
+          }
+        }
       }
 
       captureException(error);
       if (depositTx) return setTx({ status: 'error', hash: depositTx.hash });
-
-      setErrorData({
-        status: true,
-        message: translations[lang].generalError,
-      });
+      setErrorData({ status: true, message: translations[lang].generalError });
     } finally {
       setIsLoadingOp(false);
     }
