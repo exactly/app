@@ -3,7 +3,9 @@
     "deposit": "Deposit",
     "borrow": "Borrow",
     "withdraw": "Withdraw",
+    "earlyWithdraw": "Early Withdraw",
     "repay": "Repay",
+    "earlyRepay": "Early Repay",
     "fixedRate": "Fixed Rate",
     "variableRate": "Variable Rate"
   }
