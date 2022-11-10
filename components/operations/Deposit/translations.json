@@ -12,7 +12,11 @@
     "generalError": "There was an error, please try again",
     "walletBalance": "Your wallet balance",
     "variableRateDepositExplanation": "Variable rate deposit takes tokens from your wallet and deposits into Exactly expecting returns with a variable rate.",
-    "action": "Asset to deposit"
+    "action": "Asset to deposit",
+    "zeroRepay": "Can't repay 0",
+    "zeroWithdraw": "Can't withdraw 0",
+    "insufficientProtocolLiquidity": "There is not enough liquidity",
+    "disagreement": "Wrong slippage value"
   },
   "es": {}
 }

@@ -255,6 +255,22 @@ const Deposit: FC = () => {
             case 'InsufficientAccountLiquidity':
               setErrorData({ status: true, message: translations[lang].generalError });
               return;
+            case 'InvalidPrice':
+              setErrorData({ status: true, message: translations[lang].generalError });
+              return;
+            case 'ZeroRepay':
+              setErrorData({ status: true, message: translations[lang].zeroRepay });
+              return;
+            case 'ZeroWithdraw':
+              setErrorData({ status: true, message: translations[lang].ZeroWithdraw });
+              return;
+            case 'InsufficientProtocolLiquidity':
+              setErrorData({ status: true, message: translations[lang].insufficientProtocolLiquidity });
+              return;
+            case 'Disagreement':
+              setErrorData({ status: true, message: translations[lang].disagreement });
+              return;
+
             case 'Error':
               switch (args[0]) {
                 case 'TRANSFER_FROM_FAILED':
