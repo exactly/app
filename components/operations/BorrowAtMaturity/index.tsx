@@ -46,6 +46,7 @@ import useERC20 from 'hooks/useERC20';
 import keys from './translations.json';
 
 import numbers from 'config/numbers.json';
+import handleOperationError from 'utils/handleOperationError';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 
@@ -68,7 +69,6 @@ const BorrowAtMaturity: FC = () => {
   const [urBefore, setUrBefore] = useState<string | undefined>();
   const [urAfter, setUrAfter] = useState<string | undefined>();
   const [needsAllowance, setNeedsAllowance] = useState(true);
-  const [isLoadingAllowance, setIsLoadingAllowance] = useState(true);
   const [errorData, setErrorData] = useState<ErrorData | undefined>();
   const [assetAddress, setAssetAddress] = useState<string | undefined>();
 
@@ -124,22 +124,37 @@ const BorrowAtMaturity: FC = () => {
 
   useEffect(() => {
     setQty('');
+    setErrorData(undefined);
   }, [symbol, date]);
 
+  const needsApproval = useCallback(async () => {
+    if (symbol !== 'WETH') return false;
+    if (!walletAddress || !ETHRouterContract || !marketContract) return true;
+
+    const allowance = await marketContract.allowance(walletAddress, ETHRouterContract.address);
+    return allowance.lt(parseFixed(qty || '0', 18));
+  }, [ETHRouterContract, marketContract, qty, symbol, walletAddress]);
+
+  useEffect(() => {
+    needsApproval()
+      .then(setNeedsAllowance)
+      .catch((error) => setErrorData({ status: true, message: handleOperationError(error) }));
+  }, [needsApproval]);
+
   const previewGasCost = useCallback(async () => {
-    if (isLoadingAllowance || !symbol || !walletAddress || !marketContract || !ETHRouterContract || !date) return;
+    if (!symbol || !walletAddress || !marketContract || !ETHRouterContract || !date) return;
 
     const gasPrice = (await ETHRouterContract.provider.getFeeData()).maxFeePerGas;
     if (!gasPrice) return;
 
-    if (needsAllowance) {
+    if (await needsApproval()) {
       // only WETH needs allowance -> estimates directly with the ETH router
       const gasEstimation = await approveEstimateGas();
       return setGasCost(gasEstimation ? gasPrice.mul(gasEstimation) : undefined);
     }
 
     if (symbol === 'WETH') {
-      const amount = debounceQty ? parseFixed(debounceQty, 18) : DEFAULT_AMOUNT;
+      const amount = qty ? parseFixed(qty, 18) : DEFAULT_AMOUNT;
       const maxAmount = amount.mul(parseFixed(String(1 + slippage), 18)).div(WeiPerEther);
 
       const gasEstimation = await ETHRouterContract.estimateGas.borrowAtMaturity(date.value, amount, maxAmount);
@@ -148,7 +163,7 @@ const BorrowAtMaturity: FC = () => {
     }
 
     const decimals = await marketContract.decimals();
-    const amount = debounceQty ? parseFixed(debounceQty, decimals) : DEFAULT_AMOUNT;
+    const amount = qty ? parseFixed(qty, decimals) : DEFAULT_AMOUNT;
     const maxAmount = amount.mul(parseFixed(String(1 + slippage), 18)).div(WeiPerEther);
     const gasEstimation = await marketContract.estimateGas.borrowAtMaturity(
       date.value,
@@ -162,10 +177,9 @@ const BorrowAtMaturity: FC = () => {
     ETHRouterContract,
     approveEstimateGas,
     date,
-    debounceQty,
-    isLoadingAllowance,
+    qty,
     marketContract,
-    needsAllowance,
+    needsApproval,
     slippage,
     symbol,
     walletAddress,
@@ -174,35 +188,12 @@ const BorrowAtMaturity: FC = () => {
   useEffect(() => {
     previewGasCost().catch((error) => {
       setErrorData({
-        error,
         status: true,
-        message: translations[lang].error,
+        message: handleOperationError(error),
         component: 'gas',
       });
     });
   }, [lang, previewGasCost, translations]);
-
-  // TODO: extract new hook useAllowance
-  const updateNeedsAllowance = useCallback(async () => {
-    setIsLoadingAllowance(true);
-    try {
-      if (symbol !== 'WETH') return setNeedsAllowance(false);
-      if (!walletAddress || !ETHRouterContract || !marketContract) return;
-
-      const allowance = await marketContract.allowance(walletAddress, ETHRouterContract.address);
-      setNeedsAllowance(allowance.lt(parseFixed(qty || '0', 18)));
-    } catch (error) {
-      setNeedsAllowance(true);
-      captureException(error);
-    } finally {
-      setIsLoadingAllowance(false);
-    }
-  }, [ETHRouterContract, marketContract, qty, symbol, walletAddress]);
-
-  // execute updateNeedsAllowance on first render
-  useEffect(() => {
-    void updateNeedsAllowance();
-  }, [updateNeedsAllowance]);
 
   function onMax() {
     if (!accountData || !healthFactor) return;
@@ -267,7 +258,6 @@ const BorrowAtMaturity: FC = () => {
         message: translations[lang].borrowLimit,
       });
     }
-
     setErrorData(undefined);
   }
 
@@ -421,10 +411,7 @@ const BorrowAtMaturity: FC = () => {
     updateURAfter().catch(captureException);
   }, [updateURAfter]);
 
-  const isLoading = useMemo(
-    () => isLoadingOp || approveIsLoading || isLoadingAllowance,
-    [approveIsLoading, isLoadingAllowance, isLoadingOp],
-  );
+  const isLoading = useMemo(() => isLoadingOp || approveIsLoading, [approveIsLoading, isLoadingOp]);
 
   const handleSubmitAction = async () => {
     if (isLoading) return;
@@ -432,7 +419,7 @@ const BorrowAtMaturity: FC = () => {
 
     await approve();
     setErrorData(approveErrorData);
-    void updateNeedsAllowance();
+    setNeedsAllowance(await needsApproval());
   };
 
   if (tx) return <ModalGif tx={tx} tryAgain={borrow} />;
@@ -473,7 +460,7 @@ const BorrowAtMaturity: FC = () => {
       <ModalRowBorrowLimit qty={qty} symbol={symbol} operation="borrow" line />
       <ModalRowUtilizationRate urBefore={urBefore} urAfter={urAfter} line />
 
-      {errorData && errorData.component !== 'gas' && <ModalError message={errorData.message} />}
+      {errorData && <ModalError message={errorData.message} />}
 
       <LoadingButton
         fullWidth

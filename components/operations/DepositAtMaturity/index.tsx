@@ -40,6 +40,7 @@ import useApprove from 'hooks/useApprove';
 import useETHRouter from 'hooks/useETHRouter';
 import usePreviewer from 'hooks/usePreviewer';
 import useERC20 from 'hooks/useERC20';
+import handleOperationError from 'utils/handleOperationError';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 
@@ -59,7 +60,6 @@ const DepositAtMaturity: FC = () => {
   const [editSlippage, setEditSlippage] = useState<boolean>(false);
   const [fixedRate, setFixedRate] = useState<number | undefined>(undefined);
   const [needsAllowance, setNeedsAllowance] = useState(true);
-  const [isLoadingAllowance, setIsLoadingAllowance] = useState(true);
   const [errorData, setErrorData] = useState<ErrorData | undefined>(undefined);
   const [assetAddress, setAssetAddress] = useState<string | undefined>();
 
@@ -87,27 +87,23 @@ const DepositAtMaturity: FC = () => {
 
   useEffect(() => {
     setQty('');
+    setErrorData(undefined);
   }, [symbol, date]);
 
-  const updateNeedsAllowance = useCallback(async () => {
-    try {
-      if (symbol === 'WETH') return setNeedsAllowance(false);
-      if (marketContract && assetContract && walletAddress) {
-        const allowance = await assetContract.allowance(walletAddress, marketContract.address);
-        const decimals = await assetContract.decimals();
-        setNeedsAllowance(allowance.lt(parseFixed(debounceQty || String(numbers.defaultAmount), decimals)));
-      }
-    } catch (error) {
-      setNeedsAllowance(true);
-      captureException(error);
-    } finally {
-      setIsLoadingAllowance(false);
-    }
+  const needsApproval = useCallback(async () => {
+    if (symbol === 'WETH') return false;
+    if (!marketContract || !assetContract || !walletAddress) return true;
+    const allowance = await assetContract.allowance(walletAddress, marketContract.address);
+    const decimals = await assetContract.decimals();
+    return allowance.lt(parseFixed(debounceQty || String(numbers.defaultAmount), decimals));
   }, [assetContract, debounceQty, marketContract, symbol, walletAddress]);
 
+  // load needs approval
   useEffect(() => {
-    void updateNeedsAllowance();
-  }, [updateNeedsAllowance]);
+    needsApproval()
+      .then(setNeedsAllowance)
+      .catch((error) => setErrorData({ status: true, message: handleOperationError(error) }));
+  }, [needsApproval]);
 
   const previewerContract = usePreviewer();
 
@@ -118,10 +114,7 @@ const DepositAtMaturity: FC = () => {
     errorData: approveErrorData,
   } = useApprove(assetContract, marketContract?.address);
 
-  const isLoading = useMemo(
-    () => isLoadingOp || approveIsLoading || isLoadingAllowance,
-    [approveIsLoading, isLoadingAllowance, isLoadingOp],
-  );
+  const isLoading = useMemo(() => isLoadingOp || approveIsLoading, [approveIsLoading, isLoadingOp]);
 
   const previewGasCost = useCallback(async () => {
     if (isLoading || !symbol || !walletAddress || !marketContract || !ETHRouterContract || !date) return;
@@ -129,7 +122,7 @@ const DepositAtMaturity: FC = () => {
     const gasPrice = (await ETHRouterContract.provider.getFeeData()).maxFeePerGas;
     if (!gasPrice) return;
 
-    if (needsAllowance) {
+    if (await needsApproval()) {
       const gasEstimation = await approveEstimateGas();
       return setGasCost(gasEstimation ? gasEstimation.mul(gasPrice) : undefined);
     }
@@ -162,7 +155,7 @@ const DepositAtMaturity: FC = () => {
     debounceQty,
     isLoading,
     marketContract,
-    needsAllowance,
+    needsApproval,
     slippage,
     symbol,
     walletAddress,
@@ -171,9 +164,8 @@ const DepositAtMaturity: FC = () => {
   useEffect(() => {
     previewGasCost().catch((error) => {
       setErrorData({
-        error,
         status: true,
-        message: translations[lang].error,
+        message: handleOperationError(error),
         component: 'gas',
       });
     });
@@ -198,7 +190,7 @@ const DepositAtMaturity: FC = () => {
 
     setQty(value);
 
-    if (!needsAllowance && walletBalance && valueAsNumber > parseFloat(walletBalance)) {
+    if (walletBalance && valueAsNumber > parseFloat(walletBalance)) {
       return setErrorData({
         status: true,
         message: translations[lang].insufficientBalance,
@@ -284,8 +276,8 @@ const DepositAtMaturity: FC = () => {
 
     await approve();
     setErrorData(approveErrorData);
-    void updateNeedsAllowance();
-  }, [approve, approveErrorData, deposit, isLoading, needsAllowance, updateNeedsAllowance]);
+    setNeedsAllowance(await needsApproval());
+  }, [approve, approveErrorData, deposit, isLoading, needsAllowance, needsApproval]);
 
   const updateAPR = useCallback(async () => {
     if (!accountData || !date || !previewerContract || !marketContract) return;
@@ -363,7 +355,7 @@ const DepositAtMaturity: FC = () => {
 
       <ModalStepper currentStep={needsAllowance ? 1 : 2} totalSteps={3} />
 
-      {errorData && errorData.component !== 'gas' && <ModalError message={errorData.message} />}
+      {errorData && <ModalError message={errorData.message} />}
 
       <LoadingButton
         fullWidth
