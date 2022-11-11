@@ -25,6 +25,8 @@ function OperationsSelector() {
       {
         value: 'borrow',
         label: translations[lang].borrow,
+        tooltipTitle:
+          'In order to borrow you need to have a deposit in the Variable Rate Pool marked as collateral in your Dashboard',
       },
       {
         value: 'withdraw',
@@ -43,14 +45,18 @@ function OperationsSelector() {
       {
         value: 'borrowAtMaturity',
         label: translations[lang].borrow,
+        tooltipTitle:
+          'In order to borrow you need to have a deposit in the Variable Rate Pool marked as collateral in your Dashboard',
       },
       {
         value: 'withdrawAtMaturity',
         label: translations[lang].earlyWithdraw,
+        tooltipTitle: 'Subject to market conditions of liquidity and interest rates at the transaction',
       },
       {
         value: 'repayAtMaturity',
         label: translations[lang].earlyRepay,
+        tooltipTitle: 'Subject to market conditions of liquidity and interest rates at the transaction',
       },
     ],
   };
@@ -68,16 +74,7 @@ function OperationsSelector() {
         <ul className={styles.list}>
           {actions.variable.map((action) => {
             return (
-              <Tooltip
-                key={action.value}
-                title={
-                  action.label === 'Borrow' &&
-                  'In order to borrow you need to have a deposit in the Variable Rate Pool marked as collateral in your Dashboard'
-                }
-                arrow
-                placement="top"
-                followCursor
-              >
+              <Tooltip key={action.value} title={action.tooltipTitle} arrow placement="top" followCursor>
                 <li
                   key={action.value}
                   onClick={() => handleOperation(action.value as Operation)}
@@ -95,16 +92,7 @@ function OperationsSelector() {
         <ul className={styles.list}>
           {actions.fixed.map((action) => {
             return (
-              <Tooltip
-                key={action.value}
-                title={
-                  action.label === 'Borrow' &&
-                  'In order to borrow you need to have a deposit in the Variable Rate Pool marked as collateral in your Dashboard'
-                }
-                arrow
-                placement="top"
-                followCursor
-              >
+              <Tooltip key={action.value} title={action.tooltipTitle} arrow placement="top" followCursor>
                 <li
                   key={action.value}
                   onClick={() => handleOperation(action.value as Operation)}

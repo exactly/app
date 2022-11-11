@@ -204,10 +204,12 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
                   </TableCell>
                   <Tooltip
                     title={
+                      rateType === 'fixed' &&
                       'In order to deposit at a fixed rate, there must have been fixed rate loans at the same maturity previously to ensure the solvency condition'
                     }
                     arrow
                     placement="top"
+                    followCursor
                   >
                     <TableCell
                       align="center"
@@ -251,6 +253,7 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
                         title="In order to borrow you need to have a deposit in the Variable Rate Pool marked as collateral in your Dashboard"
                         arrow
                         placement="top"
+                        followCursor
                       >
                         <Button
                           variant="outlined"
