@@ -14,26 +14,30 @@ export default (error: any) => {
       return 'Nonce expired';
     case ErrorCode.UNPREDICTABLE_GAS_LIMIT: {
       const { name, args } = ErrorInterface.parseError(error.error.data.originalError.data);
+
       switch (name) {
+        case 'InsufficientAccountLiquidity':
+          return 'There is not enough liquidity in your account';
+        case 'InsufficientProtocolLiquidity':
+          return 'There is not enough liquidity in the protocol';
+        case 'Disagreement':
+          return 'Not enough slippage';
+        case 'InvalidPrice':
+          captureException(error);
+          return 'Invalid price';
+        case 'ZeroRepay':
+          return "Can't repay 0";
+        case 'ZeroWithdraw':
+          return "Can't withdraw 0";
+        case 'UtilizationExceeded':
+          return 'Utilization rate exceeded';
+
         case 'Error':
           switch (args[0]) {
             case 'TRANSFER_FROM_FAILED':
               return 'Insufficient assets or lack of approval, please try again';
             case 'ZERO_SHARES':
               return 'Cannot deposit 0';
-            case 'InvalidPrice':
-              captureException(error);
-              return 'Invalid price';
-            case 'ZeroRepay':
-              return "Can't repay 0";
-            case 'ZeroWithdraw':
-              return "Can't withdraw 0";
-            case 'InsufficientProtocolLiquidity':
-              return 'There is not enough liquidity in the protocol';
-            case 'InsufficientAccountLiquidity':
-              return 'There is not enough liquidity in your account';
-            case 'Disagreement':
-              return 'Slippage is not enough';
           }
       }
     }
@@ -41,4 +45,5 @@ export default (error: any) => {
 
   // if none of the above, report to sentry
   captureException(error);
+  return 'There was an error, please try again';
 };
