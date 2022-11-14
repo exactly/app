@@ -65,7 +65,7 @@ function ModalInput({ value, name, disabled, symbol, error, onChange, onMax }: P
         autoFocus
       />
       <p className={styles.translatedValue}>
-        {value === '' || !value || !symbol || !newValue ? '$0' : `$${formatNumber(newValue, symbol)}`}
+        {value === '' || !value || !symbol || !newValue ? '$0' : `$${formatNumber(newValue)}`}
       </p>
       {onMax && (
         <p className={styles.max} onClick={onMax}>

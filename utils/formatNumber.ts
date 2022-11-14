@@ -1,9 +1,7 @@
-import { Dictionary } from 'types/Dictionary';
-
 function formatNumber(number: string | number, symbol?: string, standard?: boolean) {
   const parsedNumber = typeof number === 'string' ? parseFloat(number) : number;
 
-  const dictionary: Dictionary<number> = {
+  const dictionary: Record<string, number> = {
     USD: 2,
     DAI: 2,
     USDC: 2,

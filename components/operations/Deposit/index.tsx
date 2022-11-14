@@ -188,14 +188,6 @@ const Deposit: FC = () => {
     }
     setQty(value);
 
-    if (valueAsNumber <= 0) {
-      setErrorData({
-        status: true,
-        message: "Can't deposit 0",
-        component: 'input',
-      });
-    }
-
     if (walletBalance && valueAsNumber > parseFloat(walletBalance)) {
       return setErrorData({
         status: true,
