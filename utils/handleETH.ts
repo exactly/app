@@ -4,8 +4,8 @@ import type { JsonRpcSigner } from '@ethersproject/providers';
 import { formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { MaxUint256 } from '@ethersproject/constants';
 
-import goerliRouter from 'protocol/deployments/goerli/MarketETHRouter.json';
-import mainnetRouter from 'protocol/deployments/mainnet/MarketETHRouter.json';
+import goerliRouter from '@exactly-protocol/protocol/deployments/goerli/MarketETHRouter.json';
+import mainnetRouter from '@exactly-protocol/protocol/deployments/mainnet/MarketETHRouter.json';
 
 import { getContractData } from './contracts';
 
