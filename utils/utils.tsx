@@ -1,29 +1,29 @@
 import { Dictionary } from 'types/Dictionary';
 import { UnderlyingNetwork } from 'types/Underlying';
 
-import goerliDAI from 'protocol/deployments/goerli/DAI.json';
-import goerliWETH from 'protocol/deployments/goerli/WETH.json';
-import goerliWBTC from 'protocol/deployments/goerli/WBTC.json';
-import goerliUSDC from 'protocol/deployments/goerli/USDC.json';
-import goerliWSTETH from 'protocol/deployments/goerli/wstETH.json';
+import goerliDAI from '@exactly-protocol/protocol/deployments/goerli/DAI.json';
+import goerliWETH from '@exactly-protocol/protocol/deployments/goerli/WETH.json';
+import goerliWBTC from '@exactly-protocol/protocol/deployments/goerli/WBTC.json';
+import goerliUSDC from '@exactly-protocol/protocol/deployments/goerli/USDC.json';
+import goerliWSTETH from '@exactly-protocol/protocol/deployments/goerli/wstETH.json';
 
-import mainnetDAI from 'protocol/deployments/mainnet/DAI.json';
-import mainnetWETH from 'protocol/deployments/mainnet/WETH.json';
-import mainnetWBTC from 'protocol/deployments/mainnet/WBTC.json';
-import mainnetUSDC from 'protocol/deployments/mainnet/USDC.json';
-import mainnetWSTETH from 'protocol/deployments/mainnet/wstETH.json';
+import mainnetDAI from '@exactly-protocol/protocol/deployments/mainnet/DAI.json';
+import mainnetWETH from '@exactly-protocol/protocol/deployments/mainnet/WETH.json';
+import mainnetWBTC from '@exactly-protocol/protocol/deployments/mainnet/WBTC.json';
+import mainnetUSDC from '@exactly-protocol/protocol/deployments/mainnet/USDC.json';
+import mainnetWSTETH from '@exactly-protocol/protocol/deployments/mainnet/wstETH.json';
 
-import goerliFixedLenderDAI from 'protocol/deployments/goerli/MarketDAI.json';
-import goerliFixedLenderWETH from 'protocol/deployments/goerli/MarketWETH.json';
-import goerliFixedLenderWBTC from 'protocol/deployments/goerli/MarketWBTC.json';
-import goerliFixedLenderUSDC from 'protocol/deployments/goerli/MarketUSDC.json';
-import goerliFixedLenderWSTETH from 'protocol/deployments/goerli/MarketwstETH.json';
+import goerliFixedLenderDAI from '@exactly-protocol/protocol/deployments/goerli/MarketDAI.json';
+import goerliFixedLenderWETH from '@exactly-protocol/protocol/deployments/goerli/MarketWETH.json';
+import goerliFixedLenderWBTC from '@exactly-protocol/protocol/deployments/goerli/MarketWBTC.json';
+import goerliFixedLenderUSDC from '@exactly-protocol/protocol/deployments/goerli/MarketUSDC.json';
+import goerliFixedLenderWSTETH from '@exactly-protocol/protocol/deployments/goerli/MarketwstETH.json';
 
-import mainnetFixedLenderDAI from 'protocol/deployments/mainnet/MarketDAI.json';
-import mainnetFixedLenderWETH from 'protocol/deployments/mainnet/MarketWETH.json';
-import mainnetFixedLenderWBTC from 'protocol/deployments/mainnet/MarketWBTC.json';
-import mainnetFixedLenderUSDC from 'protocol/deployments/mainnet/MarketUSDC.json';
-import mainnetFixedLenderWSTETH from 'protocol/deployments/mainnet/MarketwstETH.json';
+import mainnetFixedLenderDAI from '@exactly-protocol/protocol/deployments/mainnet/MarketDAI.json';
+import mainnetFixedLenderWETH from '@exactly-protocol/protocol/deployments/mainnet/MarketWETH.json';
+import mainnetFixedLenderWBTC from '@exactly-protocol/protocol/deployments/mainnet/MarketWBTC.json';
+import mainnetFixedLenderUSDC from '@exactly-protocol/protocol/deployments/mainnet/MarketUSDC.json';
+import mainnetFixedLenderWSTETH from '@exactly-protocol/protocol/deployments/mainnet/MarketwstETH.json';
 
 export function transformClasses(style: any, classes: string) {
   if (!style) return 'style object is mandatory';

@@ -16,7 +16,7 @@ export default () => {
       if (!network?.chainId) return;
 
       const { address } = await import(
-        `protocol/deployments/${getNetworkName(network?.chainId)}/MarketETHRouter.json`,
+        `@exactly-protocol/protocol/deployments/${getNetworkName(network?.chainId)}/MarketETHRouter.json`,
         { assert: { type: 'json' } }
       );
 
