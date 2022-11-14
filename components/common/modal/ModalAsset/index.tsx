@@ -47,7 +47,7 @@ function ModalAsset({ asset, assetTitle, amount, amountTitle }: Props) {
           <p className={styles.price}>
             {formatNumber(amount, asset)} {parsedSymbol}
           </p>
-          <p className={styles.secondaryPrice}>${formatNumber(parseFloat(amount) * exchangeRate, 'usd')}</p>
+          <p className={styles.secondaryPrice}>${formatNumber(parseFloat(amount) * exchangeRate)}</p>
         </div>
       ) : (
         <div className={styles.skeleton}>
