@@ -3,6 +3,11 @@ import { captureException } from '@sentry/nextjs';
 import ErrorInterface from './ErrorInterface';
 
 export default (error: any) => {
+  if (!error?.code) {
+    captureException(error);
+    return 'There was an error, please try again';
+  }
+
   switch (error?.code) {
     case ErrorCode.ACTION_REJECTED:
       return 'Transaction rejected by user';
@@ -13,6 +18,11 @@ export default (error: any) => {
     case ErrorCode.NONCE_EXPIRED:
       return 'Nonce expired';
     case ErrorCode.UNPREDICTABLE_GAS_LIMIT: {
+      if (!error?.error?.data?.originalError?.data) {
+        captureException(error);
+        return 'There was an error, please try again';
+      }
+
       const { name, args } = ErrorInterface.parseError(error.error.data.originalError.data);
 
       switch (name) {
