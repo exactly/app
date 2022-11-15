@@ -111,7 +111,6 @@ function Repay() {
   const onMax = useCallback(() => {
     setQty(finalAmount);
 
-    //we enable max flag if user clicks max
     setIsMax(true);
   }, [setQty, finalAmount, setIsMax]);
 
@@ -119,7 +118,6 @@ function Repay() {
     (e: ChangeEvent<HTMLInputElement>) => {
       setQty(e.target.value);
 
-      //we disable max flag if user changes input
       isMax && setIsMax(false);
     },
     [setQty, isMax, setIsMax],
