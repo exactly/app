@@ -73,13 +73,10 @@ function Repay() {
     void loadAssetAddress();
   }, [marketContract, symbol]);
 
-  const assets = useMemo(() => accountData?.[symbol].floatingBorrowAssets, [symbol, accountData]);
-
   const finalAmount = useMemo(() => {
-    if (!assets || !symbol || !accountData) return '0';
-
-    return formatFixed(assets, accountData[symbol].decimals);
-  }, [assets, symbol]);
+    if (!accountData) return '0';
+    return formatFixed(accountData[symbol].floatingBorrowAssets, accountData[symbol].decimals);
+  }, [accountData, symbol]);
 
   useEffect(() => {
     setQty('');
@@ -118,12 +115,15 @@ function Repay() {
     setIsMax(true);
   }, [setQty, finalAmount, setIsMax]);
 
-  function handleInputChange(e: ChangeEvent<HTMLInputElement>) {
-    setQty(e.target.value);
+  const handleInputChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      setQty(e.target.value);
 
-    //we disable max flag if user changes input
-    isMax && setIsMax(false);
-  }
+      //we disable max flag if user changes input
+      isMax && setIsMax(false);
+    },
+    [setQty, isMax, setIsMax],
+  );
 
   async function repay() {
     if (!accountData || !qty || !marketContract || !walletAddress) return;
@@ -230,7 +230,6 @@ function Repay() {
 
   const handleSubmitAction = useCallback(async () => {
     if (isLoading) return;
-    // check needs allowance
     if (needsAllowance) {
       await approve();
       setErrorData(approveErrorData);
