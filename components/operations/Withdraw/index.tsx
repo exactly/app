@@ -134,6 +134,7 @@ const Withdraw: FC = () => {
   ]);
 
   useEffect(() => {
+    if (errorData?.status) return;
     previewGasCost().catch((error) => {
       setErrorData({
         status: true,
@@ -141,7 +142,7 @@ const Withdraw: FC = () => {
         component: 'gas',
       });
     });
-  }, [lang, previewGasCost, translations]);
+  }, [errorData?.status, lang, previewGasCost, translations]);
 
   const onMax = () => {
     setQty(parsedAmount);

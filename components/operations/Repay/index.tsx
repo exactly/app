@@ -9,7 +9,6 @@ import ModalRowHealthFactor from 'components/common/modal/ModalRowHealthFactor';
 import ModalTitle from 'components/common/modal/ModalTitle';
 import ModalTxCost from 'components/common/modal/ModalTxCost';
 import ModalGif from 'components/common/modal/ModalGif';
-import SkeletonModalRowBeforeAfter from 'components/common/skeletons/SkeletonModalRowBeforeAfter';
 import ModalError from 'components/common/modal/ModalError';
 import ModalRowBorrowLimit from 'components/common/modal/ModalRowBorrowLimit';
 
@@ -123,7 +122,7 @@ function Repay() {
     [setQty, isMax, setIsMax],
   );
 
-  async function repay() {
+  const repay = useCallback(async () => {
     if (!accountData || !qty || !marketContract || !walletAddress) return;
 
     let repayTx;
@@ -175,7 +174,7 @@ function Repay() {
     } finally {
       setIsLoadingOp(false);
     }
-  }
+  }, [ETHRouterContract, accountData, getAccountData, isMax, marketContract, qty, symbol, walletAddress]);
 
   const previewGasCost = useCallback(async () => {
     if (isLoading || !symbol || !walletAddress || !ETHRouterContract || !marketContract || !assetContract) return;
@@ -244,18 +243,14 @@ function Repay() {
     <>
       <ModalTitle title={translations[lang].lateRepay} />
       <ModalAsset
-        asset={symbol!}
+        asset={symbol}
         assetTitle={translations[lang].action.toUpperCase()}
         amount={finalAmount}
         amountTitle={translations[lang].debtAmount.toUpperCase()}
       />
-      <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} symbol={symbol!} />
+      <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} symbol={symbol} />
       {errorData?.component !== 'gas' && <ModalTxCost gasCost={gasCost} />}
-      {symbol ? (
-        <ModalRowHealthFactor qty={qty} symbol={symbol} operation="repay" />
-      ) : (
-        <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
-      )}
+      <ModalRowHealthFactor qty={qty} symbol={symbol} operation="repay" />
       <ModalRowBorrowLimit qty={qty} symbol={symbol} operation="repay" line />
 
       {errorData && <ModalError message={errorData.message} />}
