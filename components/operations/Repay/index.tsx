@@ -54,7 +54,7 @@ function Repay() {
   const [errorData, setErrorData] = useState<ErrorData | undefined>(undefined);
   const [assetAddress, setAssetAddress] = useState<string | undefined>();
 
-  const debounceQty = useDebounce(qty); // 1 seconds before estimating gas on qty change
+  const debounceQty = useDebounce(qty);
   const ETHRouterContract = useETHRouter();
 
   const marketContract = useMarket(market?.value);
