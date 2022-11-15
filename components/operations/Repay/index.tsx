@@ -128,7 +128,7 @@ function Repay() {
   async function repay() {
     if (!accountData || !qty || !marketContract || !walletAddress) return;
 
-    let repay;
+    let repayTx;
     try {
       setIsLoadingOp(true);
       const { decimals, floatingBorrowShares } = accountData[symbol];
@@ -139,13 +139,13 @@ function Repay() {
         if (isMax) {
           const gasEstimation = await ETHRouterContract.estimateGas.refund(floatingBorrowShares);
 
-          repay = await ETHRouterContract.refund(floatingBorrowShares, {
+          repayTx = await ETHRouterContract.refund(floatingBorrowShares, {
             gasLimit: gasEstimation.mul(parseFixed(String(numbers.gasLimitMultiplier), 18)).div(WeiPerEther),
           });
         } else {
           const gasEstimation = await ETHRouterContract.estimateGas.repay(floatingBorrowShares);
 
-          repay = await ETHRouterContract.repay(floatingBorrowShares, {
+          repayTx = await ETHRouterContract.repay(floatingBorrowShares, {
             gasLimit: gasEstimation.mul(parseFixed(String(numbers.gasLimitMultiplier), 18)).div(WeiPerEther),
           });
         }
@@ -153,26 +153,26 @@ function Repay() {
         if (isMax) {
           const gasEstimation = await marketContract.estimateGas.refund(floatingBorrowShares, walletAddress);
 
-          repay = await marketContract.refund(floatingBorrowShares, walletAddress, {
-            gasLimit: Math.ceil(Number(formatFixed(gasEstimation)) * numbers.gasLimitMultiplier),
+          repayTx = await marketContract.refund(floatingBorrowShares, walletAddress, {
+            gasLimit: gasEstimation.mul(parseFixed(String(numbers.gasLimitMultiplier), 18)).div(WeiPerEther),
           });
         } else {
           const gasEstimation = await marketContract.estimateGas.repay(parseFixed(qty, decimals), walletAddress);
-          repay = await marketContract.repay(parseFixed(qty!, decimals), walletAddress, {
-            gasLimit: Math.ceil(Number(formatFixed(gasEstimation)) * numbers.gasLimitMultiplier),
+          repayTx = await marketContract.repay(parseFixed(qty!, decimals), walletAddress, {
+            gasLimit: gasEstimation.mul(parseFixed(String(numbers.gasLimitMultiplier), 18)).div(WeiPerEther),
           });
         }
       }
 
-      setTx({ status: 'processing', hash: repay?.hash });
+      setTx({ status: 'processing', hash: repayTx?.hash });
 
-      const { status, transactionHash } = await repay.wait();
+      const { status, transactionHash } = await repayTx.wait();
 
-      setTx({ status: status === 1 ? 'success' : 'error', hash: transactionHash });
+      setTx({ status: status ? 'success' : 'error', hash: transactionHash });
 
       getAccountData();
     } catch (error: any) {
-      if (repay) setTx({ status: 'error', hash: repay?.hash });
+      if (repayTx) setTx({ status: 'error', hash: repayTx?.hash });
       setErrorData({ status: true, message: handleOperationError(error) });
     } finally {
       setIsLoadingOp(false);
@@ -197,8 +197,6 @@ function Repay() {
 
       return setGasCost(gasPrice.mul(gasLimit));
     }
-
-    if (!marketContract) throw new Error('Market contract is undefined');
 
     const decimals = await marketContract.decimals();
     const gasLimit = await marketContract.estimateGas.deposit(
@@ -263,7 +261,7 @@ function Repay() {
       )}
       <ModalRowBorrowLimit qty={qty} symbol={symbol} operation="repay" line />
 
-      {errorData && errorData.component !== 'gas' && <ModalError message={errorData.message} />}
+      {errorData && <ModalError message={errorData.message} />}
       <LoadingButton
         fullWidth
         sx={{ mt: 2 }}
