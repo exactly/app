@@ -1,9 +1,8 @@
-import type { Contract } from '@ethersproject/contracts';
-import React, { ChangeEvent, useContext, useEffect, useMemo, useState } from 'react';
+import React, { ChangeEvent, useContext, useEffect, useMemo, useState, useCallback } from 'react';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
-import { MaxUint256 } from '@ethersproject/constants';
+import { WeiPerEther } from '@ethersproject/constants';
+import { LoadingButton } from '@mui/lab';
 
-import Button from 'components/common/Button';
 import ModalAsset from 'components/common/modal/ModalAsset';
 import ModalInput from 'components/common/modal/ModalInput';
 import ModalRowHealthFactor from 'components/common/modal/ModalRowHealthFactor';
@@ -17,56 +16,64 @@ import ModalRowBorrowLimit from 'components/common/modal/ModalRowBorrowLimit';
 import { LangKeys } from 'types/Lang';
 import { Transaction } from 'types/Transaction';
 import { ErrorData } from 'types/Error';
-import { UnderlyingData } from 'types/Underlying';
 
-import { getSymbol, getUnderlyingData } from 'utils/utils';
-import handleETH from 'utils/handleETH';
-
-import styles from './style.module.scss';
+import { getSymbol } from 'utils/utils';
 
 import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
-import FixedLenderContext from 'contexts/FixedLenderContext';
 import AccountDataContext from 'contexts/AccountDataContext';
 import { MarketContext } from 'contexts/MarketContext';
-import ContractsContext from 'contexts/ContractsContext';
 
 import numbers from 'config/numbers.json';
 
 import keys from './translations.json';
+import useApprove from 'hooks/useApprove';
+import useMarket from 'hooks/useMarket';
+import useETHRouter from 'hooks/useETHRouter';
+import handleOperationError from 'utils/handleOperationError';
+import useERC20 from 'hooks/useERC20';
+import useDebounce from 'hooks/useDebounce';
+
+const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 
 function Repay() {
-  const { walletAddress, web3Provider, network } = useWeb3Context();
+  const { walletAddress, network } = useWeb3Context();
   const { accountData, getAccountData } = useContext(AccountDataContext);
   const { market } = useContext(MarketContext);
-  const { getInstance } = useContext(ContractsContext);
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
-
-  const fixedLenderData = useContext(FixedLenderContext);
 
   const [qty, setQty] = useState<string>('');
 
   const [gasCost, setGasCost] = useState<BigNumber | undefined>();
   const [tx, setTx] = useState<Transaction | undefined>(undefined);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [needsApproval, setNeedsApproval] = useState<boolean>(false);
+  const [isLoadingOp, setLoadingOp] = useState<boolean>(false);
+  const [needsAllowance, setNeedsAllowance] = useState(false);
   const [isMax, setIsMax] = useState<boolean>(false);
-  const [error, setError] = useState<ErrorData | undefined>(undefined);
+  const [errorData, setErrorData] = useState<ErrorData | undefined>(undefined);
+  const [assetAddress, setAssetAddress] = useState<string | undefined>();
 
-  const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(undefined);
-  const [underlyingContract, setUnderlyingContract] = useState<Contract | undefined>(undefined);
+  const debounceQty = useDebounce(qty); // 1 seconds before estimating gas on qty change
+  const ETHRouterContract = useETHRouter();
+
+  const marketContract = useMarket(market?.value);
+  const assetContract = useERC20(assetAddress);
 
   const symbol = useMemo(() => {
     return market?.value ? getSymbol(market.value, network?.name) : 'DAI';
   }, [market?.value, network?.name]);
 
-  const assets = useMemo(() => {
-    if (!accountData) return undefined;
+  useEffect(() => {
+    if (!marketContract || symbol === 'WETH') return;
 
-    return accountData[symbol].floatingBorrowAssets;
-  }, [symbol, accountData]);
+    const loadAssetAddress = async () => {
+      setAssetAddress(await marketContract.asset());
+    };
+    void loadAssetAddress();
+  }, [marketContract, symbol]);
+
+  const assets = useMemo(() => accountData?.[symbol].floatingBorrowAssets, [symbol, accountData]);
 
   const finalAmount = useMemo(() => {
     if (!assets || !symbol || !accountData) return '0';
@@ -76,99 +83,40 @@ function Repay() {
 
   useEffect(() => {
     setQty('');
+    setErrorData(undefined);
   }, [symbol]);
 
-  useEffect(() => {
-    getFixedLenderContract();
-  }, [market, fixedLenderData]);
+  const {
+    approve,
+    estimateGas: approveEstimateGas,
+    isLoading: approveIsLoading,
+    errorData: approveErrorData,
+  } = useApprove(assetContract, marketContract?.address);
+
+  const isLoading = useMemo(() => isLoadingOp || approveIsLoading, [isLoadingOp, approveIsLoading]);
+
+  const needsApproval = useCallback(async () => {
+    if (symbol === 'WETH') return false;
+
+    if (!walletAddress || !assetContract || !marketContract || !accountData) return true;
+
+    const decimals = await assetContract.decimals();
+    const allowance = await assetContract.allowance(walletAddress, marketContract.address);
+    return allowance.lt(parseFixed(qty || String(numbers.defaultAmount), decimals));
+  }, [accountData, assetContract, marketContract, qty, symbol, walletAddress]);
 
   useEffect(() => {
-    getUnderlyingContract();
-  }, [market, network, symbol]);
+    needsApproval()
+      .then(setNeedsAllowance)
+      .catch((error) => setErrorData({ status: true, message: handleOperationError(error) }));
+  }, [needsApproval]);
 
-  useEffect(() => {
-    if (fixedLenderWithSigner && !gasCost) {
-      estimateGas();
-    }
-  }, [fixedLenderWithSigner]);
-
-  useEffect(() => {
-    checkAllowance();
-  }, [symbol, walletAddress, underlyingContract]);
-
-  async function checkAllowance() {
-    if (symbol === 'WETH' || !fixedLenderWithSigner) {
-      return;
-    }
-
-    if (!underlyingContract || !walletAddress || !market) return;
-
-    const allowance = await underlyingContract?.allowance(walletAddress, fixedLenderWithSigner?.address);
-
-    const formattedAllowance = allowance && parseFloat(formatFixed(allowance, 18));
-
-    const amount = !qty ? 0 : parseFloat(qty);
-
-    if (formattedAllowance > amount && !isNaN(amount) && !isNaN(formattedAllowance)) {
-      setNeedsApproval(false);
-    } else {
-      setNeedsApproval(true);
-    }
-  }
-
-  async function approve() {
-    if (symbol === 'WETH' || !fixedLenderWithSigner) return;
-
-    try {
-      setLoading(true);
-
-      const gasLimit = await getApprovalGasLimit();
-
-      const approval = await underlyingContract?.approve(fixedLenderWithSigner?.address, MaxUint256, {
-        gasLimit: gasLimit ? Math.ceil(Number(formatFixed(gasLimit)) * numbers.gasLimitMultiplier) : undefined,
-      });
-
-      await approval.wait();
-
-      setLoading(false);
-
-      setNeedsApproval(false);
-    } catch (e) {
-      setLoading(false);
-      setNeedsApproval(true);
-      setError({
-        status: true,
-      });
-    }
-  }
-
-  function getFixedLenderContract() {
-    const filteredFixedLender = fixedLenderData.find((contract) => {
-      const contractSymbol = getSymbol(contract.address!, network!.name);
-
-      return contractSymbol === symbol;
-    });
-
-    if (!filteredFixedLender) throw new Error('Market contract not found');
-    const fixedLender = getInstance(filteredFixedLender.address!, filteredFixedLender.abi!, `market${symbol}`);
-
-    setFixedLenderWithSigner(fixedLender);
-  }
-
-  function getUnderlyingContract() {
-    const underlyingData: UnderlyingData | undefined = getUnderlyingData(network?.name, symbol);
-
-    const underlyingContract = getInstance(underlyingData!.address, underlyingData!.abi, `underlying${symbol}`);
-
-    setUnderlyingContract(underlyingContract);
-  }
-
-  function onMax() {
+  const onMax = useCallback(() => {
     setQty(finalAmount);
 
     //we enable max flag if user clicks max
     setIsMax(true);
-  }
+  }, [setQty, finalAmount, setIsMax]);
 
   function handleInputChange(e: ChangeEvent<HTMLInputElement>) {
     setQty(e.target.value);
@@ -178,153 +126,155 @@ function Repay() {
   }
 
   async function repay() {
-    if (!accountData) return;
-    setLoading(true);
+    if (!accountData || !qty || !marketContract || !walletAddress) return;
 
+    let repay;
     try {
-      const decimals = accountData[symbol!].decimals;
-
-      let repay;
+      setLoadingOp(true);
+      const { decimals, floatingBorrowShares } = accountData[symbol];
 
       if (symbol === 'WETH') {
-        if (!web3Provider) return;
-
-        const ETHrouter = handleETH(network?.name, web3Provider?.getSigner());
+        if (!ETHRouterContract) return;
 
         if (isMax) {
-          repay = await ETHrouter?.refundETH(
-            accountData[symbol].floatingBorrowShares,
-            accountData[symbol].floatingBorrowShares,
-          );
-        } else {
-          repay = await ETHrouter?.repayETH(qty!, qty!);
-        }
-      } else {
-        const gasLimit = await getGasLimit(qty);
+          const gasEstimation = await ETHRouterContract.estimateGas.refund(floatingBorrowShares);
 
-        if (isMax) {
-          repay = await fixedLenderWithSigner?.refund(accountData[symbol].floatingBorrowShares, walletAddress, {
-            gasLimit: gasLimit ? Math.ceil(Number(formatFixed(gasLimit)) * numbers.gasLimitMultiplier) : undefined,
+          repay = await ETHRouterContract.refund(floatingBorrowShares, {
+            gasLimit: gasEstimation.mul(parseFixed(String(numbers.gasLimitMultiplier), 18)).div(WeiPerEther),
           });
         } else {
-          repay = await fixedLenderWithSigner?.repay(parseFixed(qty!, decimals), walletAddress, {
-            gasLimit: gasLimit ? Math.ceil(Number(formatFixed(gasLimit)) * numbers.gasLimitMultiplier) : undefined,
+          const gasEstimation = await ETHRouterContract.estimateGas.repay(floatingBorrowShares);
+
+          repay = await ETHRouterContract.repay(floatingBorrowShares, {
+            gasLimit: gasEstimation.mul(parseFixed(String(numbers.gasLimitMultiplier), 18)).div(WeiPerEther),
+          });
+        }
+      } else {
+        if (isMax) {
+          const gasEstimation = await marketContract.estimateGas.refund(floatingBorrowShares, walletAddress);
+
+          repay = await marketContract.refund(floatingBorrowShares, walletAddress, {
+            gasLimit: Math.ceil(Number(formatFixed(gasEstimation)) * numbers.gasLimitMultiplier),
+          });
+        } else {
+          const gasEstimation = await marketContract.estimateGas.repay(parseFixed(qty, decimals), walletAddress);
+          repay = await marketContract.repay(parseFixed(qty!, decimals), walletAddress, {
+            gasLimit: Math.ceil(Number(formatFixed(gasEstimation)) * numbers.gasLimitMultiplier),
           });
         }
       }
 
       setTx({ status: 'processing', hash: repay?.hash });
 
-      const txReceipt = await repay.wait();
+      const { status, transactionHash } = await repay.wait();
 
-      setLoading(false);
-
-      if (txReceipt.status === 1) {
-        setTx({ status: 'success', hash: txReceipt?.transactionHash });
-      } else {
-        setTx({ status: 'error', hash: txReceipt?.transactionHash });
-      }
+      setTx({ status: status === 1 ? 'success' : 'error', hash: transactionHash });
 
       getAccountData();
-    } catch (e: any) {
-      console.log(e);
-      setLoading(false);
-
-      const isDenied = e?.message?.includes('User denied');
-
-      const txError = e?.message?.includes(`"status":0`);
-      let txErrorHash = undefined;
-
-      if (txError) {
-        const regex = new RegExp(/"hash":"(.*?)"/g); //regex to get all between ("hash":") and (")
-        const preTxHash = e?.message?.match(regex); //get the hash from plain text by the regex
-        txErrorHash = preTxHash[0].substring(8, preTxHash[0].length - 1); //parse the string to get the txHash only
-      }
-
-      if (isDenied) {
-        setError({
-          status: true,
-          message: isDenied && translations[lang].deniedTransaction,
-        });
-      } else if (txError) {
-        setTx({ status: 'error', hash: txErrorHash });
-      } else {
-        setError({
-          status: true,
-          message: translations[lang].generalError,
-        });
-      }
+    } catch (error: any) {
+      if (repay) setTx({ status: 'error', hash: repay?.hash });
+      setErrorData({ status: true, message: handleOperationError(error) });
+    } finally {
+      setLoadingOp(false);
     }
   }
 
-  async function estimateGas() {
-    if (symbol === 'WETH' || !accountData) return;
+  const previewGasCost = useCallback(async () => {
+    if (isLoading || !symbol || !walletAddress || !ETHRouterContract || !marketContract || !assetContract) return;
 
-    try {
-      const gasPrice = (await fixedLenderWithSigner?.provider.getFeeData())?.maxFeePerGas;
+    const gasPrice = (await ETHRouterContract.provider.getFeeData()).maxFeePerGas;
+    if (!gasPrice) return;
 
-      const gasLimit = await getGasLimit('0.0001');
+    if (await needsApproval()) {
+      const gasEstimation = await approveEstimateGas();
+      return setGasCost(gasEstimation ? gasEstimation.mul(gasPrice) : undefined);
+    }
 
-      if (gasPrice && gasLimit) {
-        setGasCost(gasPrice.mul(gasLimit));
-      }
-    } catch (e) {
-      setError({
+    if (symbol === 'WETH') {
+      const gasLimit = await ETHRouterContract.estimateGas.deposit({
+        value: debounceQty ? parseFixed(debounceQty, 18) : DEFAULT_AMOUNT,
+      });
+
+      return setGasCost(gasPrice.mul(gasLimit));
+    }
+
+    if (!marketContract) throw new Error('Market contract is undefined');
+
+    const decimals = await marketContract.decimals();
+    const gasLimit = await marketContract.estimateGas.deposit(
+      debounceQty ? parseFixed(debounceQty, decimals) : DEFAULT_AMOUNT,
+      walletAddress,
+    );
+
+    setGasCost(gasPrice.mul(gasLimit));
+  }, [
+    ETHRouterContract,
+    approveEstimateGas,
+    assetContract,
+    debounceQty,
+    isLoading,
+    marketContract,
+    needsApproval,
+    symbol,
+    walletAddress,
+  ]);
+
+  useEffect(() => {
+    if (errorData?.status) return;
+    previewGasCost().catch((error) => {
+      setErrorData({
         status: true,
+        message: handleOperationError(error),
         component: 'gas',
       });
+    });
+  }, [lang, previewGasCost, translations, errorData?.status]);
+
+  const handleSubmitAction = useCallback(async () => {
+    if (isLoading) return;
+    // check needs allowance
+    if (needsAllowance) {
+      await approve();
+      setErrorData(approveErrorData);
+      setNeedsAllowance(await needsApproval());
+      return;
     }
-  }
 
-  async function getGasLimit(qty: string) {
-    if (!accountData || !symbol) return;
+    return repay();
+  }, [approve, approveErrorData, isLoading, needsAllowance, needsApproval, repay]);
 
-    const decimals = accountData[symbol].decimals;
-
-    const gasLimit = await fixedLenderWithSigner?.estimateGas.repay(parseFixed(qty, decimals), walletAddress);
-
-    return gasLimit;
-  }
-
-  async function getApprovalGasLimit() {
-    const gasLimit = await underlyingContract?.estimateGas.approve(market?.value, MaxUint256);
-
-    return gasLimit;
-  }
+  if (tx) return <ModalGif tx={tx} tryAgain={repay} />;
 
   return (
     <>
-      {!tx && (
-        <>
-          <ModalTitle title={translations[lang].lateRepay} />
-          <ModalAsset
-            asset={symbol!}
-            assetTitle={translations[lang].action.toUpperCase()}
-            amount={finalAmount}
-            amountTitle={translations[lang].debtAmount.toUpperCase()}
-          />
-          <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} symbol={symbol!} />
-          {error?.component !== 'gas' && symbol !== 'WETH' && <ModalTxCost gasCost={gasCost} />}
-          {symbol ? (
-            <ModalRowHealthFactor qty={qty} symbol={symbol} operation="repay" />
-          ) : (
-            <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
-          )}
-          <ModalRowBorrowLimit qty={qty} symbol={symbol!} operation="repay" line />
-
-          {error && error.component !== 'gas' && <ModalError message={error.message} />}
-          <div className={styles.buttonContainer}>
-            <Button
-              text={needsApproval ? translations[lang].approval : translations[lang].repay}
-              className={parseFloat(qty) <= 0 || !qty ? 'disabled' : 'primary'}
-              disabled={parseFloat(qty) <= 0 || !qty || loading}
-              onClick={needsApproval ? approve : repay}
-              loading={loading}
-            />
-          </div>
-        </>
+      <ModalTitle title={translations[lang].lateRepay} />
+      <ModalAsset
+        asset={symbol!}
+        assetTitle={translations[lang].action.toUpperCase()}
+        amount={finalAmount}
+        amountTitle={translations[lang].debtAmount.toUpperCase()}
+      />
+      <ModalInput onMax={onMax} value={qty} onChange={handleInputChange} symbol={symbol!} />
+      {errorData?.component !== 'gas' && <ModalTxCost gasCost={gasCost} />}
+      {symbol ? (
+        <ModalRowHealthFactor qty={qty} symbol={symbol} operation="repay" />
+      ) : (
+        <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
       )}
-      {tx && <ModalGif tx={tx} tryAgain={repay} />}
+      <ModalRowBorrowLimit qty={qty} symbol={symbol} operation="repay" line />
+
+      {errorData && errorData.component !== 'gas' && <ModalError message={errorData.message} />}
+      <LoadingButton
+        fullWidth
+        sx={{ mt: 2 }}
+        variant="contained"
+        color="primary"
+        onClick={handleSubmitAction}
+        loading={isLoading}
+        disabled={!qty || parseFloat(qty) <= 0 || isLoading || errorData?.status}
+      >
+        {needsAllowance ? translations[lang].approval : translations[lang].repay}
+      </LoadingButton>
     </>
   );
 }
