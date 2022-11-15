@@ -48,7 +48,7 @@ function Repay() {
 
   const [gasCost, setGasCost] = useState<BigNumber | undefined>();
   const [tx, setTx] = useState<Transaction | undefined>(undefined);
-  const [isLoadingOp, setLoadingOp] = useState<boolean>(false);
+  const [isLoadingOp, setIsLoadingOp] = useState<boolean>(false);
   const [needsAllowance, setNeedsAllowance] = useState(false);
   const [isMax, setIsMax] = useState<boolean>(false);
   const [errorData, setErrorData] = useState<ErrorData | undefined>(undefined);
@@ -130,7 +130,7 @@ function Repay() {
 
     let repay;
     try {
-      setLoadingOp(true);
+      setIsLoadingOp(true);
       const { decimals, floatingBorrowShares } = accountData[symbol];
 
       if (symbol === 'WETH') {
@@ -175,7 +175,7 @@ function Repay() {
       if (repay) setTx({ status: 'error', hash: repay?.hash });
       setErrorData({ status: true, message: handleOperationError(error) });
     } finally {
-      setLoadingOp(false);
+      setIsLoadingOp(false);
     }
   }
 
