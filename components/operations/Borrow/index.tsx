@@ -6,7 +6,6 @@ import LoadingButton from '@mui/lab/LoadingButton';
 import ModalAsset from 'components/common/modal/ModalAsset';
 import ModalInput from 'components/common/modal/ModalInput';
 import ModalRowHealthFactor from 'components/common/modal/ModalRowHealthFactor';
-import SkeletonModalRowBeforeAfter from 'components/common/skeletons/SkeletonModalRowBeforeAfter';
 import ModalTitle from 'components/common/modal/ModalTitle';
 import ModalTxCost from 'components/common/modal/ModalTxCost';
 import ModalGif from 'components/common/modal/ModalGif';
@@ -151,6 +150,7 @@ const Borrow: FC = () => {
   }, [ETHRouterContract, approveEstimateGas, qty, marketContract, needsApproval, symbol, walletAddress]);
 
   useEffect(() => {
+    if (errorData?.status) return;
     previewGasCost().catch((error) => {
       setErrorData({
         status: true,
@@ -158,7 +158,7 @@ const Borrow: FC = () => {
         component: 'gas',
       });
     });
-  }, [lang, previewGasCost, translations]);
+  }, [errorData?.status, lang, previewGasCost, translations]);
 
   const onMax = () => {
     if (!accountData || !healthFactor) return;
@@ -290,7 +290,7 @@ const Borrow: FC = () => {
     <>
       <ModalTitle title={translations[lang].floatingPoolBorrow} />
       <ModalAsset
-        asset={symbol!}
+        asset={symbol}
         assetTitle={translations[lang].action.toUpperCase()}
         amount={walletBalance}
         amountTitle={translations[lang].walletBalance.toUpperCase()}
@@ -299,16 +299,12 @@ const Borrow: FC = () => {
         onMax={onMax}
         value={qty}
         onChange={handleInputChange}
-        symbol={symbol!}
+        symbol={symbol}
         error={errorData?.component === 'input'}
       />
       {errorData?.component !== 'gas' && <ModalTxCost gasCost={gasCost} />}
-      {symbol ? (
-        <ModalRowHealthFactor qty={qty} symbol={symbol} operation="borrow" healthFactorCallback={setHealthFactor} />
-      ) : (
-        <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
-      )}
-      <ModalRowBorrowLimit qty={qty} symbol={symbol!} operation="borrow" line />
+      <ModalRowHealthFactor qty={qty} symbol={symbol} operation="borrow" healthFactorCallback={setHealthFactor} />
+      <ModalRowBorrowLimit qty={qty} symbol={symbol} operation="borrow" line />
       {errorData && <ModalError message={errorData.message} />}
       {hasCollateral != null && !hasCollateral && <ModalError message={translations[lang].noCollateral} />}
       <LoadingButton

@@ -162,6 +162,7 @@ const DepositAtMaturity: FC = () => {
   ]);
 
   useEffect(() => {
+    if (errorData?.status) return;
     previewGasCost().catch((error) => {
       setErrorData({
         status: true,
@@ -169,7 +170,7 @@ const DepositAtMaturity: FC = () => {
         component: 'gas',
       });
     });
-  }, [lang, previewGasCost, translations]);
+  }, [errorData?.status, lang, previewGasCost, translations]);
 
   async function onMax() {
     if (walletBalance) {
