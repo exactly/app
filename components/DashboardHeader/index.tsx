@@ -103,7 +103,7 @@ function DashboardHeader() {
         label: 'Your Borrows',
         value: totalBorrowed != null ? `$${formatNumber(formatFixed(totalBorrowed, 18))}` : undefined,
       },
-      ...(healthFactor
+      ...(healthFactor && walletAddress
         ? [
             {
               label: 'Health Factor',
@@ -114,7 +114,7 @@ function DashboardHeader() {
           ]
         : []),
     ];
-  }, [healthFactor, totalBorrowed, totalDeposited]);
+  }, [healthFactor, totalBorrowed, totalDeposited, walletAddress]);
 
   return (
     <Grid item sx={{ alignSelf: 'center', marginRight: '20px' }}>
