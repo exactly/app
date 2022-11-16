@@ -32,6 +32,7 @@ import useETHRouter from 'hooks/useETHRouter';
 import handleOperationError from 'utils/handleOperationError';
 import useERC20 from 'hooks/useERC20';
 import useDebounce from 'hooks/useDebounce';
+import useBalance from 'hooks/useBalance';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 
@@ -62,6 +63,8 @@ function Repay() {
   const symbol = useMemo(() => {
     return market?.value ? getSymbol(market.value, network?.name) : 'DAI';
   }, [market?.value, network?.name]);
+
+  const walletBalance = useBalance(symbol, assetContract);
 
   useEffect(() => {
     if (!marketContract || symbol === 'WETH') return;
@@ -111,15 +114,42 @@ function Repay() {
     setQty(finalAmount);
 
     setIsMax(true);
-  }, [setQty, finalAmount, setIsMax]);
+
+    if (walletBalance && parseFloat(finalAmount) > parseFloat(walletBalance)) {
+      return setErrorData({
+        status: true,
+        message: translations[lang].insufficientBalance,
+        component: 'input',
+      });
+    }
+    setErrorData(undefined);
+  }, [finalAmount, walletBalance, translations, lang]);
 
   const handleInputChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      setQty(e.target.value);
+    ({ target: { value, valueAsNumber } }: ChangeEvent<HTMLInputElement>) => {
+      if (!accountData || !symbol) return;
+      const { decimals } = accountData[symbol];
+
+      if (value.includes('.')) {
+        const regex = /[^,.]*$/g;
+        const inputDecimals = regex.exec(value)![0];
+        if (inputDecimals.length > decimals) return; //limit the number of decimals on the input
+      }
+
+      setQty(value);
+
+      if (walletBalance && valueAsNumber > parseFloat(walletBalance)) {
+        return setErrorData({
+          status: true,
+          message: translations[lang].insufficientBalance,
+          component: 'input',
+        });
+      }
+      setErrorData(undefined);
 
       isMax && setIsMax(false);
     },
-    [setQty, isMax, setIsMax],
+    [accountData, symbol, walletBalance, isMax, translations, lang],
   );
 
   const repay = useCallback(async () => {
@@ -128,22 +158,32 @@ function Repay() {
     let repayTx;
     try {
       setIsLoadingOp(true);
-      const { decimals, floatingBorrowShares } = accountData[symbol];
+      const { decimals, floatingBorrowShares, floatingBorrowAssets } = accountData[symbol];
 
       if (symbol === 'WETH') {
         if (!ETHRouterContract) return;
 
         if (isMax) {
-          const gasEstimation = await ETHRouterContract.estimateGas.refund(floatingBorrowShares);
+          const gasEstimation = await ETHRouterContract.estimateGas.refund(floatingBorrowShares, {
+            value: floatingBorrowAssets.mul(parseFixed(String(1 + numbers.slippage), 18)).div(WeiPerEther),
+          });
 
           repayTx = await ETHRouterContract.refund(floatingBorrowShares, {
             gasLimit: gasEstimation.mul(parseFixed(String(numbers.gasLimitMultiplier), 18)).div(WeiPerEther),
+            value: floatingBorrowAssets.mul(parseFixed(String(1 + numbers.slippage), 18)).div(WeiPerEther),
           });
         } else {
-          const gasEstimation = await ETHRouterContract.estimateGas.repay(floatingBorrowShares);
+          const gasEstimation = await ETHRouterContract.estimateGas.repay(parseFixed(qty, 18), {
+            value: parseFixed(qty, 18)
+              .mul(parseFixed(String(1 + numbers.slippage), 18))
+              .div(WeiPerEther),
+          });
 
-          repayTx = await ETHRouterContract.repay(floatingBorrowShares, {
+          repayTx = await ETHRouterContract.repay(parseFixed(qty, 18), {
             gasLimit: gasEstimation.mul(parseFixed(String(numbers.gasLimitMultiplier), 18)).div(WeiPerEther),
+            value: parseFixed(qty, 18)
+              .mul(parseFixed(String(1 + numbers.slippage), 18))
+              .div(WeiPerEther),
           });
         }
       } else {
@@ -155,7 +195,7 @@ function Repay() {
           });
         } else {
           const gasEstimation = await marketContract.estimateGas.repay(parseFixed(qty, decimals), walletAddress);
-          repayTx = await marketContract.repay(parseFixed(qty!, decimals), walletAddress, {
+          repayTx = await marketContract.repay(parseFixed(qty, decimals), walletAddress, {
             gasLimit: gasEstimation.mul(parseFixed(String(numbers.gasLimitMultiplier), 18)).div(WeiPerEther),
           });
         }
@@ -177,7 +217,7 @@ function Repay() {
   }, [ETHRouterContract, accountData, getAccountData, isMax, marketContract, qty, symbol, walletAddress]);
 
   const previewGasCost = useCallback(async () => {
-    if (isLoading || !symbol || !walletAddress || !ETHRouterContract || !marketContract || !assetContract) return;
+    if (isLoading || !symbol || !walletAddress || !ETHRouterContract || !marketContract) return;
 
     const gasPrice = (await ETHRouterContract.provider.getFeeData()).maxFeePerGas;
     if (!gasPrice) return;
@@ -188,15 +228,21 @@ function Repay() {
     }
 
     if (symbol === 'WETH') {
-      const gasLimit = await ETHRouterContract.estimateGas.deposit({
-        value: debounceQty ? parseFixed(debounceQty, 18) : DEFAULT_AMOUNT,
+      const amount = debounceQty
+        ? parseFixed(debounceQty, 18)
+            .mul(parseFixed(String(1 + numbers.slippage), 18))
+            .div(WeiPerEther)
+        : DEFAULT_AMOUNT;
+
+      const gasLimit = await ETHRouterContract.estimateGas.repay(amount, {
+        value: amount,
       });
 
       return setGasCost(gasPrice.mul(gasLimit));
     }
 
     const decimals = await marketContract.decimals();
-    const gasLimit = await marketContract.estimateGas.deposit(
+    const gasLimit = await marketContract.estimateGas.repay(
       debounceQty ? parseFixed(debounceQty, decimals) : DEFAULT_AMOUNT,
       walletAddress,
     );
@@ -205,7 +251,6 @@ function Repay() {
   }, [
     ETHRouterContract,
     approveEstimateGas,
-    assetContract,
     debounceQty,
     isLoading,
     marketContract,

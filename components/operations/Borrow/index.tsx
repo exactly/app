@@ -92,7 +92,6 @@ const Borrow: FC = () => {
     return limit ?? undefined;
   }, [accountData, symbol]);
 
-  // set qty to '' when symbol changes
   useEffect(() => {
     setQty('');
     setErrorData(undefined);
@@ -102,9 +101,8 @@ const Borrow: FC = () => {
     if (!accountData) return false;
 
     return (
-      // isCollateral
-      accountData[symbol].floatingDepositAssets.gt(Zero) ||
       // hasDepositedToFloatingPool
+      accountData[symbol].floatingDepositAssets.gt(Zero) ||
       Object.keys(accountData).some((aMarket) => accountData[aMarket].isCollateral)
     );
   }, [accountData, symbol]);
@@ -130,7 +128,6 @@ const Borrow: FC = () => {
     if (!gasPrice) return;
 
     if (await needsApproval()) {
-      // only WETH needs allowance -> estimates directly with the ETH router
       const gasEstimation = await approveEstimateGas();
       return setGasCost(gasEstimation ? gasPrice.mul(gasEstimation) : undefined);
     }
@@ -203,6 +200,8 @@ const Borrow: FC = () => {
       if (inputDecimals.length > decimals) return;
     }
     setQty(value);
+
+    if (!hasCollateral) return setErrorData({ status: true, message: translations[lang].noCollateral });
 
     if (liquidity.lt(parseFixed(value || '0', decimals))) {
       return setErrorData({
@@ -306,7 +305,6 @@ const Borrow: FC = () => {
       <ModalRowHealthFactor qty={qty} symbol={symbol} operation="borrow" healthFactorCallback={setHealthFactor} />
       <ModalRowBorrowLimit qty={qty} symbol={symbol} operation="borrow" line />
       {errorData && <ModalError message={errorData.message} />}
-      {hasCollateral != null && !hasCollateral && <ModalError message={translations[lang].noCollateral} />}
       <LoadingButton
         fullWidth
         sx={{ mt: 2 }}

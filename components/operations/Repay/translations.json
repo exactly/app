@@ -9,7 +9,8 @@
     "approval": "Approve",
     "repayExplanation": "Variable rate borrow takes tokens from Exactly and deposits into your wallet resulting in debt.",
     "action": "Asset to Repay",
-    "debtAmount": "Debt Amount"
+    "debtAmount": "Debt Amount",
+    "insufficientBalance": "You can't repay more than you have in your wallet"
   },
   "es": {}
 }
