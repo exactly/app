@@ -96,8 +96,8 @@ function Item({
           {(eTokenAmount &&
             symbol &&
             `${formatNumber(formatFixed(eTokenAmount, accountData?.[symbol].decimals), symbol)}`) || (
-              <Skeleton width={40} />
-            )}{' '}
+            <Skeleton width={40} />
+          )}{' '}
         </div>
       )}
 
