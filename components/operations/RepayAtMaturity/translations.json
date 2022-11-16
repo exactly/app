@@ -14,7 +14,8 @@
     "penalties": "Penalties Amount",
     "repayExplanation": "Repay cancels debt on Exactly by taking assets from your wallet.",
     "action": "Asset to Repay",
-    "debtAmount": "Debt Amount"
+    "debtAmount": "Debt Amount",
+    "insufficientBalance": "You can't repay more than you have in your wallet"
   },
   "es": {}
 }
