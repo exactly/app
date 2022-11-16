@@ -1,9 +1,9 @@
 import type { Contract } from '@ethersproject/contracts';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
-import React, { ChangeEvent, useContext, useEffect, useMemo, useState } from 'react';
+import React, { ChangeEvent, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Zero } from '@ethersproject/constants';
+import LoadingButton from '@mui/lab/LoadingButton';
 
-import Button from 'components/common/Button';
 import ModalAsset from 'components/common/modal/ModalAsset';
 import ModalError from 'components/common/modal/ModalError';
 import ModalGif from 'components/common/modal/ModalGif';
@@ -22,8 +22,6 @@ import formatNumber from 'utils/formatNumber';
 import handleETH from 'utils/handleETH';
 import { getSymbol } from 'utils/utils';
 
-import styles from './style.module.scss';
-
 import useDebounce from 'hooks/useDebounce';
 
 import AccountDataContext from 'contexts/AccountDataContext';
@@ -37,6 +35,8 @@ import { useWeb3Context } from 'contexts/Web3Context';
 import numbers from 'config/numbers.json';
 
 import keys from './translations.json';
+import useMarket from 'hooks/useMarket';
+import useETHRouter from 'hooks/useETHRouter';
 
 function WithdrawAtMaturity() {
   const { web3Provider, walletAddress, network } = useWeb3Context();
@@ -52,16 +52,19 @@ function WithdrawAtMaturity() {
 
   const [qty, setQty] = useState<string>('');
   const [gasCost, setGasCost] = useState<BigNumber | undefined>();
-  const [tx, setTx] = useState<Transaction | undefined>(undefined);
+  const [tx, setTx] = useState<Transaction | undefined>();
   const [slippage, setSlippage] = useState<string>('0');
-  const [editSlippage, setEditSlippage] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [editSlippage, setEditSlippage] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const [error, setError] = useState<ErrorData | undefined>(undefined);
-  const [needsApproval, setNeedsApproval] = useState<boolean>(false);
+  const [errorData, setErrorData] = useState<ErrorData | undefined>();
+  const [needsAllowance, setNeedsAllowance] = useState(false);
   const [withdrawAmount, setWithdrawAmount] = useState<string>('0');
 
-  const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>(undefined);
+  const marketContract = useMarket(market?.value);
+  const ETHRouterContract = useETHRouter();
+
+  const [fixedLenderWithSigner, setFixedLenderWithSigner] = useState<Contract | undefined>();
 
   const symbol = useMemo(() => {
     return market?.value ? getSymbol(market.value, network?.name) : 'DAI';
@@ -122,7 +125,7 @@ function WithdrawAtMaturity() {
     const allowance = await ETHrouter.checkAllowance(walletAddress, fixedLenderWithSigner);
 
     if ((allowance && parseFloat(allowance) < parseFloat(qty)) || (allowance && parseFloat(allowance) === 0 && !qty)) {
-      setNeedsApproval(true);
+      setNeedsAllowance(true);
     }
   }
 
@@ -144,13 +147,13 @@ function WithdrawAtMaturity() {
     const parsedValue = parseFixed(e.target.value || '0', decimals);
 
     if (parsedValue.gt(positionAssets)) {
-      setError({
+      setErrorData({
         status: true,
         message: translations[lang].insufficientBalance,
         component: 'input',
       });
     } else {
-      setError(undefined);
+      setErrorData(undefined);
     }
 
     setQty(e.target.value);
@@ -187,7 +190,7 @@ function WithdrawAtMaturity() {
   }
 
   async function withdraw() {
-    setLoading(true);
+    setIsLoading(true);
 
     try {
       if (!accountData || !symbol || !date) return;
@@ -217,7 +220,7 @@ function WithdrawAtMaturity() {
 
       const txReceipt = await withdraw.wait();
 
-      setLoading(false);
+      setIsLoading(false);
 
       if (txReceipt.status === 1) {
         setTx({ status: 'success', hash: txReceipt?.transactionHash });
@@ -228,7 +231,7 @@ function WithdrawAtMaturity() {
       getAccountData();
     } catch (e: any) {
       console.log(e);
-      setLoading(false);
+      setIsLoading(false);
 
       const isDenied = e?.message?.includes('User denied');
 
@@ -242,14 +245,14 @@ function WithdrawAtMaturity() {
       }
 
       if (isDenied) {
-        setError({
+        setErrorData({
           status: true,
           message: isDenied && translations[lang].deniedTransaction,
         });
       } else if (txError) {
         setTx({ status: 'error', hash: txErrorHash });
       } else {
-        setError({
+        setErrorData({
           status: true,
           message: translations[lang].generalError,
         });
@@ -269,7 +272,7 @@ function WithdrawAtMaturity() {
         setGasCost(gasPrice.mul(gasLimit));
       }
     } catch (e) {
-      setError({
+      setErrorData({
         status: true,
         component: 'gas',
       });
@@ -297,20 +300,20 @@ function WithdrawAtMaturity() {
       if (!web3Provider || !ETHrouter || !fixedLenderWithSigner) return;
 
       try {
-        setLoading(true);
+        setIsLoading(true);
 
         const approve = await ETHrouter.approve(fixedLenderWithSigner);
 
         await approve.wait();
 
-        setLoading(false);
-        setNeedsApproval(false);
+        setIsLoading(false);
+        setNeedsAllowance(false);
       } catch (e: any) {
-        setLoading(false);
+        setIsLoading(false);
 
         const isDenied = e?.message?.includes('User denied');
 
-        setError({
+        setErrorData({
           status: true,
           message: isDenied ? translations[lang].deniedTransaction : translations[lang].notEnoughSlippage,
         });
@@ -331,67 +334,77 @@ function WithdrawAtMaturity() {
     setFixedLenderWithSigner(fixedLender);
   }
 
+  const handleSubmitAction = useCallback(async () => {
+    if (isLoading) return;
+    if (needsAllowance) {
+      await approve();
+      // setErrorData(approveErrorData);
+      // setNeedsAllowance(await needsApproval());
+      return;
+    }
+    return withdraw();
+  }, []);
+
+  if (tx) return <ModalGif tx={tx} tryAgain={withdraw} />;
+
   return (
     <>
-      {!tx && (
-        <>
-          <ModalTitle title={isEarlyWithdraw ? translations[lang].earlyWithdraw : translations[lang].withdraw} />
-          <ModalAsset
-            asset={symbol!}
-            assetTitle={translations[lang].action.toUpperCase()}
-            amount={amountAtFinish}
-            amountTitle={translations[lang].depositedAmount.toUpperCase()}
-          />
-          <ModalMaturityEditable text={translations[lang].maturityPool} line />
-          <ModalInput
-            onMax={onMax}
-            value={qty}
-            onChange={handleInputChange}
-            symbol={symbol!}
-            error={error?.component === 'input'}
-          />
-          {error?.component !== 'gas' && symbol !== 'WETH' && <ModalTxCost gasCost={gasCost} />}
-          <ModalRow
-            text={translations[lang].amountAtFinish}
-            value={amountAtFinish && `${formatNumber(amountAtFinish, symbol!, true)}`}
-            asset={symbol}
-            line
-          />
-          <ModalRow
-            text={translations[lang].amountToReceive}
-            value={formatNumber(withdrawAmount, symbol!, true)}
-            asset={symbol}
-            line
-          />
-          {isEarlyWithdraw && (
-            <ModalRowEditable
-              text={translations[lang].amountSlippage}
-              value={slippage}
-              editable={editSlippage}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                setSlippage(e.target.value);
-                error?.message === translations[lang].notEnoughSlippage && setError(undefined);
-              }}
-              onClick={() => {
-                if (!slippage) setSlippage('0');
-                setEditSlippage((prev) => !prev);
-              }}
-              line
-            />
-          )}
-          {error && error.component !== 'gas' && <ModalError message={error.message} />}
-          <div className={styles.buttonContainer}>
-            <Button
-              text={needsApproval ? translations[lang].approve : translations[lang].withdraw}
-              className={parseFloat(qty) <= 0 || !qty || error?.status ? 'disabled' : 'primary'}
-              disabled={parseFloat(qty) <= 0 || !qty || loading || error?.status}
-              onClick={needsApproval ? approve : withdraw}
-              loading={loading}
-            />
-          </div>
-        </>
+      <ModalTitle title={isEarlyWithdraw ? translations[lang].earlyWithdraw : translations[lang].withdraw} />
+      <ModalAsset
+        asset={symbol!}
+        assetTitle={translations[lang].action.toUpperCase()}
+        amount={amountAtFinish}
+        amountTitle={translations[lang].depositedAmount.toUpperCase()}
+      />
+      <ModalMaturityEditable text={translations[lang].maturityPool} line />
+      <ModalInput
+        onMax={onMax}
+        value={qty}
+        onChange={handleInputChange}
+        symbol={symbol!}
+        error={errorData?.component === 'input'}
+      />
+      {errorData?.component !== 'gas' && symbol !== 'WETH' && <ModalTxCost gasCost={gasCost} />}
+      <ModalRow
+        text={translations[lang].amountAtFinish}
+        value={amountAtFinish && `${formatNumber(amountAtFinish, symbol!, true)}`}
+        asset={symbol}
+        line
+      />
+      <ModalRow
+        text={translations[lang].amountToReceive}
+        value={formatNumber(withdrawAmount, symbol!, true)}
+        asset={symbol}
+        line
+      />
+      {isEarlyWithdraw && (
+        <ModalRowEditable
+          text={translations[lang].amountSlippage}
+          value={slippage}
+          editable={editSlippage}
+          onChange={(e: ChangeEvent<HTMLInputElement>) => {
+            setSlippage(e.target.value);
+            errorData?.message === translations[lang].notEnoughSlippage && setErrorData(undefined);
+          }}
+          onClick={() => {
+            if (!slippage) setSlippage('0');
+            setEditSlippage((prev) => !prev);
+          }}
+          line
+        />
       )}
-      {tx && <ModalGif tx={tx} tryAgain={withdraw} />}
+      {errorData && <ModalError message={errorData.message} />}
+      <LoadingButton
+        fullWidth
+        sx={{ mt: 2 }}
+        loading={isLoading}
+        onClick={handleSubmitAction}
+        color="primary"
+        variant="contained"
+        disabled={parseFloat(qty) <= 0 || !qty || isLoading || errorData?.status}
+      >
+        {needsAllowance ? translations[lang].approve : translations[lang].withdraw}
+      </LoadingButton>
     </>
   );
 }
