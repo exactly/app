@@ -47,11 +47,11 @@ function Repay() {
   const [qty, setQty] = useState<string>('');
 
   const [gasCost, setGasCost] = useState<BigNumber | undefined>();
-  const [tx, setTx] = useState<Transaction | undefined>(undefined);
-  const [isLoadingOp, setIsLoadingOp] = useState<boolean>(false);
+  const [tx, setTx] = useState<Transaction | undefined>();
+  const [isLoadingOp, setIsLoadingOp] = useState(false);
   const [needsAllowance, setNeedsAllowance] = useState(false);
-  const [isMax, setIsMax] = useState<boolean>(false);
-  const [errorData, setErrorData] = useState<ErrorData | undefined>(undefined);
+  const [isMax, setIsMax] = useState(false);
+  const [errorData, setErrorData] = useState<ErrorData | undefined>();
   const [assetAddress, setAssetAddress] = useState<string | undefined>();
 
   const debounceQty = useDebounce(qty);
@@ -217,7 +217,7 @@ function Repay() {
   }, [ETHRouterContract, accountData, getAccountData, isMax, marketContract, qty, symbol, walletAddress]);
 
   const previewGasCost = useCallback(async () => {
-    if (isLoading || !symbol || !walletAddress || !ETHRouterContract || !marketContract) return;
+    if (isLoading || !walletAddress || !ETHRouterContract || !marketContract) return;
 
     const gasPrice = (await ETHRouterContract.provider.getFeeData()).maxFeePerGas;
     if (!gasPrice) return;
