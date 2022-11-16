@@ -39,7 +39,7 @@ const MarketProvider: FC<{ children?: ReactNode }> = ({ children }) => {
       const currentTimestamp = dayjs().unix();
       const interval = 2419200;
       let timestamp = currentTimestamp - (currentTimestamp % interval);
-      const maxPools = (await accountData?.maxFuturePools) ?? 3;
+      const maxPools = accountData?.maxFuturePools ?? 3;
 
       const pools = [];
 
