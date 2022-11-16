@@ -5,7 +5,7 @@ export type WithdrawMP = {
   caller: string;
   receiver: string;
   owner: string;
+  positionAssets: string;
   assets: string;
-  assetsDiscounted: string;
   timestamp: string;
 };
