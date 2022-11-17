@@ -36,7 +36,7 @@ function DashboardContent({ healthFactor }: Props) {
       ...depositTab,
       content: walletAddress ? (
         <>
-          <FloatingPoolDashboard type={depositTab.value as 'deposit'} healthFactor={healthFactor} />
+          <FloatingPoolDashboard type={'deposit'} healthFactor={healthFactor} />
           <MaturityPoolDashboard tab={depositTab} />
         </>
       ) : (
@@ -47,7 +47,7 @@ function DashboardContent({ healthFactor }: Props) {
       ...borrowTab,
       content: walletAddress ? (
         <>
-          <FloatingPoolDashboard type={borrowTab.value as 'borrow'} healthFactor={healthFactor} />
+          <FloatingPoolDashboard type={'borrow'} healthFactor={healthFactor} />
           <MaturityPoolDashboard tab={borrowTab} />
         </>
       ) : (
