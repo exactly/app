@@ -16,10 +16,10 @@ import keys from '../../SmartPoolUserStatus/Item/translations.json';
 import { getSymbol } from 'utils/utils';
 import getHealthFactorData from 'utils/getHealthFactorData';
 import parseHealthFactor from 'utils/parseHealthFactor';
-import Switch from '@mui/material/Switch';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import Skeleton from '@mui/material/Skeleton';
+import StyledSwitch from 'components/Switch';
 
 type Props = {
   symbol: string | undefined;
@@ -146,7 +146,7 @@ function SwitchCollateral({ symbol, walletAddress, auditorContract }: Props) {
       arrow
     >
       <div>
-        <Switch
+        <StyledSwitch
           checked={toggle}
           onChange={() => {
             setToggle((prev) => !prev);
