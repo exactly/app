@@ -95,14 +95,18 @@ function SmartPoolDashboardTable({ type }: Props) {
       label: 'Value',
       key: 'value',
     },
-    {
-      label: 'eToken',
-      key: 'eToken',
-    },
-    {
-      label: 'Collateral',
-      key: 'collateral',
-    },
+    ...(type === 'deposit'
+      ? [
+          {
+            label: 'eToken',
+            key: 'eToken',
+          },
+          {
+            label: 'Collateral',
+            key: 'collateral',
+          },
+        ]
+      : []),
     {
       label: '',
       key: 'deposit',

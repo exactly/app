@@ -1,39 +1,26 @@
-import React, { useContext } from 'react';
+import React from 'react';
 
-import { LangKeys } from 'types/Lang';
-import { Option } from 'react-dropdown';
-
-import SmartPoolUserStatus from 'components/SmartPoolUserStatus';
 import AddETokensButton from 'components/AddETokensButton';
 
-import LangContext from 'contexts/LangContext';
-import { useWeb3Context } from 'contexts/Web3Context';
-
-import styles from './style.module.scss';
-
-import keys from './translations.json';
+import SmartPoolDashboardTable from 'components/SmartPoolDashboardTable';
+import Grid from '@mui/material/Grid';
+import Typography from '@mui/material/Typography';
+import Stack from '@mui/material/Stack';
 
 type Props = {
-  tab: Option;
+  type: 'deposit' | 'borrow';
 };
 
-function SmartPoolDashboard({ tab }: Props) {
-  const lang: string = useContext(LangContext);
-  const translations: { [key: string]: LangKeys } = keys;
-  const { walletAddress } = useWeb3Context();
-
+function SmartPoolDashboard2({ type }: Props) {
   return (
-    <section
-      className={styles.container}
-      style={{ boxShadow: '#A7A7A7 0px 0px 4px 0px', borderRadius: '5px', padding: '16px', marginTop: '20px' }}
-    >
-      <div className={styles.titleContainer}>
-        <p className={styles.title}>{translations[lang].smartPool}</p>
+    <Grid width={'100%'} my={4} padding={2} sx={{ boxShadow: '#A7A7A7 0px 0px 4px 0px', borderRadius: '5px' }}>
+      <Stack direction="row" spacing={2} alignItems="center">
+        <Typography variant="h5">Variable Rate Pools</Typography>
         <AddETokensButton />
-      </div>
-      <SmartPoolUserStatus walletAddress={walletAddress} type={tab} />
-    </section>
+      </Stack>
+      <SmartPoolDashboardTable type={type} />
+    </Grid>
   );
 }
 
-export default SmartPoolDashboard;
+export default SmartPoolDashboard2;

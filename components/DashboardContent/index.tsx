@@ -28,11 +28,10 @@ function DashboardContent() {
 
   const allTabs = [
     {
-      label: 'Your Deposits',
-      value: 'deposit',
+      ...depositTab,
       content: walletAddress ? (
         <>
-          <SmartPoolDashboard tab={depositTab} />
+          <SmartPoolDashboard type={depositTab.value as 'deposit'} />
           <MaturityPoolDashboard tab={depositTab} />
         </>
       ) : (
@@ -40,11 +39,10 @@ function DashboardContent() {
       ),
     },
     {
-      label: 'Your Borrows',
-      value: 'borrow',
+      ...borrowTab,
       content: walletAddress ? (
         <>
-          <SmartPoolDashboard tab={borrowTab} />
+          <SmartPoolDashboard type={borrowTab.value as 'borrow'} />
           <MaturityPoolDashboard tab={borrowTab} />
         </>
       ) : (
