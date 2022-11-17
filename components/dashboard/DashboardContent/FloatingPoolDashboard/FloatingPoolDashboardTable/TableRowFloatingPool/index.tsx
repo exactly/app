@@ -2,13 +2,9 @@ import type { Contract } from '@ethersproject/contracts';
 import type { BigNumber } from '@ethersproject/bignumber';
 import React, { useContext, useEffect, useState } from 'react';
 import { formatFixed } from '@ethersproject/bignumber';
-import Skeleton from 'react-loading-skeleton';
 import Image from 'next/image';
 
-import Button from '@mui/material/Button';
-import TableRow from '@mui/material/TableRow';
-import TableCell from '@mui/material/TableCell';
-import Stack from '@mui/material/Stack';
+import { Button, TableRow, TableCell, Stack, Typography, Skeleton } from '@mui/material';
 
 import AccountDataContext from 'contexts/AccountDataContext';
 import ModalStatusContext, { Operation } from 'contexts/ModalStatusContext';
@@ -20,7 +16,6 @@ import formatNumber from 'utils/formatNumber';
 import formatSymbol from 'utils/formatSymbol';
 import Link from 'next/link';
 import SwitchCollateral from 'components/dashboard/DashboardContent/FloatingPoolDashboard/FloatingPoolDashboardTable/SwitchCollateral';
-import { Typography } from '@mui/material';
 
 type Props = {
   symbol: string | undefined;
@@ -68,10 +63,10 @@ function TableRowFloatingPool({
         <TableCell component="th" align="left" sx={{ cursor: 'pointer' }}>
           <Stack direction="row" spacing={1}>
             {(symbol && <Image src={`/img/assets/${symbol}.svg`} alt={symbol} width={24} height={24} />) || (
-              <Skeleton circle height={24} width={24} />
+              <Skeleton sx={{ margin: 'auto' }} variant="circular" height={24} width={24} />
             )}
             <Typography fontWeight="600" ml={1} display="inline" alignSelf="center">
-              {(symbol && formatSymbol(symbol)) || <Skeleton />}
+              {(symbol && formatSymbol(symbol)) || <Skeleton sx={{ margin: 'auto' }} />}
             </Typography>
           </Stack>
         </TableCell>
@@ -88,7 +83,7 @@ function TableRowFloatingPool({
               ) * rate,
               'USD',
               true,
-            )}`) || <Skeleton width={40} />}
+            )}`) || <Skeleton sx={{ margin: 'auto' }} width={40} />}
         </Typography>
       </TableCell>
 
@@ -98,7 +93,7 @@ function TableRowFloatingPool({
             {(eTokenAmount &&
               symbol &&
               `${formatNumber(formatFixed(eTokenAmount, accountData?.[symbol].decimals), symbol)}`) || (
-              <Skeleton width={40} />
+              <Skeleton sx={{ margin: 'auto' }} width={40} />
             )}{' '}
           </Typography>
         </TableCell>
@@ -122,7 +117,7 @@ function TableRowFloatingPool({
           >
             Deposit
           </Button>
-        )) || <Skeleton height={40} />}
+        )) || <Skeleton sx={{ margin: 'auto' }} height={40} />}
       </TableCell>
 
       <TableCell align="center" width={50} size="small">
@@ -138,7 +133,7 @@ function TableRowFloatingPool({
           >
             Borrow
           </Button>
-        )) || <Skeleton height={40} />}
+        )) || <Skeleton sx={{ margin: 'auto' }} height={40} />}
       </TableCell>
     </TableRow>
   );

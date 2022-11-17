@@ -1,20 +1,18 @@
+import { parseFixed } from '@ethersproject/bignumber';
 import type { Contract } from '@ethersproject/contracts';
 import React, { useContext, useEffect, useState } from 'react';
-import { parseFixed } from '@ethersproject/bignumber';
 
 import Loading from 'components/common/Loading';
 
+import AccountDataContext from 'contexts/AccountDataContext';
 import FixedLenderContext from 'contexts/FixedLenderContext';
 import { useWeb3Context } from 'contexts/Web3Context';
-import AccountDataContext from 'contexts/AccountDataContext';
 
-import { getSymbol } from 'utils/utils';
+import { Skeleton, Tooltip, Typography } from '@mui/material';
+import StyledSwitch from 'components/Switch';
 import getHealthFactorData from 'utils/getHealthFactorData';
 import parseHealthFactor from 'utils/parseHealthFactor';
-import Tooltip from '@mui/material/Tooltip';
-import Typography from '@mui/material/Typography';
-import Skeleton from '@mui/material/Skeleton';
-import StyledSwitch from 'components/Switch';
+import { getSymbol } from 'utils/utils';
 
 type Props = {
   symbol: string | undefined;

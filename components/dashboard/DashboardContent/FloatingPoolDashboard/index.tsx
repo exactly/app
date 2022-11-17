@@ -3,8 +3,7 @@ import React from 'react';
 import AddETokensButton from 'components/AddETokensButton';
 
 import FloatingPoolDashboardTable from 'components/dashboard/DashboardContent/FloatingPoolDashboard/FloatingPoolDashboardTable';
-import Grid from '@mui/material/Grid';
-import Typography from '@mui/material/Typography';
+import { Grid, Typography } from '@mui/material';
 import Stack from '@mui/material/Stack';
 
 type Props = {

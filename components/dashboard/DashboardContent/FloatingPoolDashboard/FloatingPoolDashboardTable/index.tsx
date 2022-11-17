@@ -1,14 +1,16 @@
 import type { Contract } from '@ethersproject/contracts';
 import React, { useContext, useEffect, useState } from 'react';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
-import Tooltip from '@mui/material/Tooltip';
-import Typography from '@mui/material/Typography';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Tooltip,
+  Typography,
+} from '@mui/material';
 
 import AuditorContext from 'contexts/AuditorContext';
 import AccountDataContext from 'contexts/AccountDataContext';
@@ -117,6 +119,16 @@ function FloatingPoolDashboardTable({ type }: Props) {
     },
   ];
 
+  const defaultRows: FloatingPoolItemData[] = [
+    { symbol: 'DAI' },
+    { symbol: 'USDC' },
+    { symbol: 'WETH' },
+    { symbol: 'WBTC' },
+    { symbol: 'wstETH' },
+  ];
+
+  const rows = itemData || defaultRows;
+
   return (
     <TableContainer component={Paper}>
       <Table aria-label="simple table">
@@ -134,7 +146,7 @@ function FloatingPoolDashboardTable({ type }: Props) {
           </TableRow>
         </TableHead>
         <TableBody>
-          {itemData?.map((item: FloatingPoolItemData, key: number) => (
+          {rows?.map((item: FloatingPoolItemData, key: number) => (
             <TableRowFloatingPool
               key={`row_${key}`}
               depositAmount={item.depositedAmount}
