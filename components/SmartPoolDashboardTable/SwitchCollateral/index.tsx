@@ -1,11 +1,8 @@
 import type { Contract } from '@ethersproject/contracts';
 import React, { useContext, useEffect, useState } from 'react';
 import { parseFixed } from '@ethersproject/bignumber';
-import Skeleton from 'react-loading-skeleton';
 
-import Switch from 'components/common/Switch';
 import Loading from 'components/common/Loading';
-import Tooltip from 'components/Tooltip';
 
 import FixedLenderContext from 'contexts/FixedLenderContext';
 import LangContext from 'contexts/LangContext';
@@ -14,13 +11,15 @@ import AccountDataContext from 'contexts/AccountDataContext';
 
 import { LangKeys } from 'types/Lang';
 
-import styles from '../../SmartPoolUserStatus/Item/style.module.scss';
-
 import keys from '../../SmartPoolUserStatus/Item/translations.json';
 
-import { getSymbol, getUnderlyingData } from 'utils/utils';
+import { getSymbol } from 'utils/utils';
 import getHealthFactorData from 'utils/getHealthFactorData';
 import parseHealthFactor from 'utils/parseHealthFactor';
+import Switch from '@mui/material/Switch';
+import Tooltip from '@mui/material/Tooltip';
+import Typography from '@mui/material/Typography';
+import Skeleton from '@mui/material/Skeleton';
 
 type Props = {
   symbol: string | undefined;
@@ -41,14 +40,13 @@ function SwitchCollateral({ symbol, walletAddress, auditorContract }: Props) {
   const [loading, setLoading] = useState<boolean>(false);
   const [disabledText, setDisabledText] = useState<string | undefined>(undefined);
 
-  const underlyingData = getUnderlyingData(network?.name, symbol);
-
   useEffect(() => {
     if (accountData) {
       checkCollaterals();
     }
   }, [accountData, walletAddress]);
 
+  // TODO: extract
   async function checkCollaterals() {
     if (!accountData || !symbol) return;
     setToggle(false);
@@ -126,42 +124,40 @@ function SwitchCollateral({ symbol, walletAddress, auditorContract }: Props) {
   }
 
   if (!symbol) {
-    return (
-      <div className={styles.value}>
-        <Skeleton width={40} />
-      </div>
-    );
+    return <Skeleton animation="wave" width={60} height={30} sx={{ margin: 'auto' }} />;
+  }
+
+  if (loading) {
+    return <Loading size="small" color="primary" />;
   }
 
   return (
-    <div>
-      {!loading ? (
-        <Tooltip
-          value={
-            !toggle
-              ? translations[lang].enterMarket
-              : disabledText && disabled
-              ? translations[lang][`${disabledText}`]
-              : translations[lang].exitMarket
-          }
-          disableImage
-        >
-          <Switch
-            isOn={toggle}
-            handleToggle={() => {
-              setToggle((prev) => !prev);
-              handleMarket();
-            }}
-            id={underlyingData?.address || Math.random().toString()}
-            disabled={disabled}
-          />
-        </Tooltip>
-      ) : (
-        <div className={styles.loadingContainer}>
-          <Loading size="small" color="primary" />
-        </div>
-      )}
-    </div>
+    <Tooltip
+      title={
+        <Typography fontSize="1.2em" fontWeight={600}>
+          {!toggle
+            ? translations[lang].enterMarket
+            : disabledText && disabled
+            ? translations[lang][`${disabledText}`]
+            : translations[lang].exitMarket}
+        </Typography>
+      }
+      placement="top"
+      arrow
+    >
+      <div>
+        <Switch
+          checked={toggle}
+          onChange={() => {
+            setToggle((prev) => !prev);
+            handleMarket();
+          }}
+          inputProps={{ 'aria-label': 'controlled' }}
+          disabled={disabled}
+          defaultChecked
+        />
+      </div>
+    </Tooltip>
   );
 }
 
