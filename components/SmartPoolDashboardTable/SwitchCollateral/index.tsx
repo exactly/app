@@ -5,13 +5,8 @@ import { parseFixed } from '@ethersproject/bignumber';
 import Loading from 'components/common/Loading';
 
 import FixedLenderContext from 'contexts/FixedLenderContext';
-import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 import AccountDataContext from 'contexts/AccountDataContext';
-
-import { LangKeys } from 'types/Lang';
-
-import keys from '../../SmartPoolUserStatus/Item/translations.json';
 
 import { getSymbol } from 'utils/utils';
 import getHealthFactorData from 'utils/getHealthFactorData';
@@ -31,9 +26,6 @@ function SwitchCollateral({ symbol, walletAddress, auditorContract }: Props) {
   const { network } = useWeb3Context();
   const fixedLender = useContext(FixedLenderContext);
   const { accountData, getAccountData } = useContext(AccountDataContext);
-
-  const lang: string = useContext(LangContext);
-  const translations: { [key: string]: LangKeys } = keys;
 
   const [toggle, setToggle] = useState<boolean>(false);
   const [disabled, setDisabled] = useState<boolean>(false);
@@ -56,7 +48,7 @@ function SwitchCollateral({ symbol, walletAddress, auditorContract }: Props) {
     const fixedPositions = accountData[symbol].fixedBorrowPositions;
 
     if (!floatingPositions.isZero() || fixedPositions.length > 0) {
-      setDisabledText('activeBorrow');
+      setDisabledText(`You can't disable collateral on this asset because you have an active borrow`);
       setDisabled(true);
     }
 
@@ -72,7 +64,7 @@ function SwitchCollateral({ symbol, walletAddress, auditorContract }: Props) {
       const newHF = parseFloat(parseHealthFactor(healthFactor.debt, healthFactor.collateral.sub(collateralUsd)));
 
       if (newHF < 1) {
-        setDisabledText('underCollateral');
+        setDisabledText('Disabling this collateral will make your health factor less than 1');
       }
     }
   }
@@ -136,10 +128,10 @@ function SwitchCollateral({ symbol, walletAddress, auditorContract }: Props) {
       title={
         <Typography fontSize="1.2em" fontWeight={600}>
           {!toggle
-            ? translations[lang].enterMarket
+            ? 'Enable this asset as collateral'
             : disabledText && disabled
-            ? translations[lang][`${disabledText}`]
-            : translations[lang].exitMarket}
+            ? disabledText
+            : 'Disabling this asset as collateral affects your borrowing power and Health Factor'}
         </Typography>
       }
       placement="top"
