@@ -61,7 +61,7 @@ function TableRowFloatingPool({
   return (
     <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }} hover>
       <Link href={`/assets/${symbol}`}>
-        <TableCell component="th" align="left" sx={{ cursor: 'pointer' }}>
+        <TableCell component="th" align="left" sx={{ cursor: 'pointer' }} width={240}>
           <Stack direction="row" spacing={1}>
             {(symbol && <Image src={`/img/assets/${symbol}.svg`} alt={symbol} width={24} height={24} />) || (
               <Skeleton sx={{ margin: 'auto' }} variant="circular" height={24} width={24} />
@@ -72,7 +72,7 @@ function TableRowFloatingPool({
           </Stack>
         </TableCell>
       </Link>
-      <TableCell align="center" size="small">
+      <TableCell align={type === 'deposit' ? 'center' : 'left'} size="small">
         <Typography>
           {(depositAmount &&
             borrowedAmount &&
