@@ -16,6 +16,7 @@ import formatNumber from 'utils/formatNumber';
 import formatSymbol from 'utils/formatSymbol';
 import Link from 'next/link';
 import SwitchCollateral from 'components/dashboard/DashboardContent/FloatingPoolDashboard/FloatingPoolDashboardTable/SwitchCollateral';
+import { HealthFactor } from 'types/HealthFactor';
 
 type Props = {
   symbol: string | undefined;
@@ -26,6 +27,7 @@ type Props = {
   auditorContract: Contract | undefined;
   type: Option | undefined;
   market: string | undefined;
+  healthFactor: HealthFactor | undefined;
 };
 
 function TableRowFloatingPool({
@@ -37,6 +39,7 @@ function TableRowFloatingPool({
   auditorContract,
   type,
   market,
+  healthFactor,
 }: Props) {
   const { accountData } = useContext(AccountDataContext);
   const { setOpen, setOperation } = useContext(ModalStatusContext);
@@ -101,7 +104,12 @@ function TableRowFloatingPool({
 
       {type?.value === 'deposit' && (
         <TableCell align="center" size="small">
-          <SwitchCollateral symbol={symbol} walletAddress={walletAddress} auditorContract={auditorContract} />
+          <SwitchCollateral
+            symbol={symbol}
+            walletAddress={walletAddress}
+            auditorContract={auditorContract}
+            healthFactor={healthFactor}
+          />
         </TableCell>
       )}
 

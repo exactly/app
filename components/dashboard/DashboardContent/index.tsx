@@ -12,8 +12,13 @@ const EmptyState = dynamic(() => import('components/EmptyState'));
 
 import { useWeb3Context } from 'contexts/Web3Context';
 import DashboardTabs from 'components/dashboard/DashboardContent/DashboardTabs';
+import { HealthFactor } from 'types/HealthFactor';
 
-function DashboardContent() {
+type Props = {
+  healthFactor: HealthFactor | undefined;
+};
+
+function DashboardContent({ healthFactor }: Props) {
   const { walletAddress } = useWeb3Context();
 
   const depositTab = {
@@ -31,7 +36,7 @@ function DashboardContent() {
       ...depositTab,
       content: walletAddress ? (
         <>
-          <FloatingPoolDashboard type={depositTab.value as 'deposit'} />
+          <FloatingPoolDashboard type={depositTab.value as 'deposit'} healthFactor={healthFactor} />
           <MaturityPoolDashboard tab={depositTab} />
         </>
       ) : (
@@ -42,7 +47,7 @@ function DashboardContent() {
       ...borrowTab,
       content: walletAddress ? (
         <>
-          <FloatingPoolDashboard type={borrowTab.value as 'borrow'} />
+          <FloatingPoolDashboard type={borrowTab.value as 'borrow'} healthFactor={healthFactor} />
           <MaturityPoolDashboard tab={borrowTab} />
         </>
       ) : (
