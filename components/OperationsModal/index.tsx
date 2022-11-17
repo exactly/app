@@ -10,12 +10,8 @@ import { Dialog, DialogContent } from '@mui/material';
 function OperationsModals() {
   const { open, setOpen } = useContext(ModalStatusContext);
 
-  const handleClose = () => {
-    setOpen(false);
-  };
-
   return (
-    <Dialog open={open} onClose={handleClose}>
+    <Dialog open={open} onClose={() => setOpen(false)}>
       <DialogContent sx={{ display: 'flex' }}>
         <OperationsSelector />
         <OperationContainer />
