@@ -66,6 +66,7 @@ function SwitchCollateral({ symbol, walletAddress, auditorContract, healthFactor
     }
   }
 
+  // TODO: refactor, use new hook
   function getFixedLenderData() {
     const filteredFixedLender = fixedLender.find((contract) => {
       const contractSymbol = getSymbol(contract.address!, network!.name);

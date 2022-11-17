@@ -98,6 +98,7 @@ function FloatingPoolDashboardTable({ type, healthFactor }: Props) {
     {
       label: 'Value',
       key: 'value',
+      align: type === 'deposit' ? 'center' : 'left',
     },
     ...(type === 'deposit'
       ? [
@@ -121,6 +122,7 @@ function FloatingPoolDashboardTable({ type, healthFactor }: Props) {
     },
   ];
 
+  // TODO: remove hardcoded list
   const defaultRows: FloatingPoolItemData[] = [
     { symbol: 'DAI' },
     { symbol: 'USDC' },

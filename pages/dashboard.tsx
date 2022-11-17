@@ -1,6 +1,6 @@
 import type { NextPage } from 'next';
 import dynamic from 'next/dynamic';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 
 import Grid from '@mui/material/Grid';
 import DashboardHeader from 'components/dashboard/DashboardHeader';
@@ -20,14 +20,9 @@ const DashBoard: NextPage = () => {
   const { walletAddress } = useWeb3Context();
   const { accountData } = useContext(AccountDataContext);
 
-  const [healthFactor, setHealthFactor] = useState<HealthFactor | undefined>(undefined);
+  const [healthFactor, setHealthFactor] = useState<HealthFactor | undefined>();
 
-  useEffect(() => {
-    if (!walletAddress) return;
-    getHealthFactor();
-  }, [walletAddress, accountData]);
-
-  function getHealthFactor() {
+  const getHealthFactor = useCallback(() => {
     if (!accountData) return;
 
     const { collateral, debt } = getHealthFactorData(accountData);
@@ -37,14 +32,19 @@ const DashBoard: NextPage = () => {
     } else {
       setHealthFactor(undefined);
     }
-  }
+  }, [accountData]);
+
+  useEffect(() => {
+    if (!walletAddress) return;
+    getHealthFactor();
+  }, [walletAddress, accountData, getHealthFactor]);
 
   return (
     <>
       <OperationsModals />
       <MobileNavbar />
       <Navbar />
-      <Grid container sx={{ maxWidth: maxWidth, margin: 'auto', marginTop: '130px' }}>
+      <Grid container sx={{ maxWidth, margin: 'auto', marginTop: '130px' }}>
         <DashboardHeader healthFactor={healthFactor} />
       </Grid>
       <DashboardContent healthFactor={healthFactor} />
