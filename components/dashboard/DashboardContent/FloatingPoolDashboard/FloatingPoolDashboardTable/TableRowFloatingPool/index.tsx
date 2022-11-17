@@ -19,7 +19,7 @@ import { Option } from 'react-dropdown';
 import formatNumber from 'utils/formatNumber';
 import formatSymbol from 'utils/formatSymbol';
 import Link from 'next/link';
-import SwitchCollateral from 'components/SmartPoolDashboardTable/SwitchCollateral';
+import SwitchCollateral from 'components/dashboard/DashboardContent/FloatingPoolDashboard/FloatingPoolDashboardTable/SwitchCollateral';
 import { Typography } from '@mui/material';
 
 type Props = {
@@ -33,7 +33,7 @@ type Props = {
   market: string | undefined;
 };
 
-function TableRowSmartPool({
+function TableRowFloatingPool({
   symbol,
   depositAmount,
   borrowedAmount,
@@ -144,4 +144,4 @@ function TableRowSmartPool({
   );
 }
 
-export default TableRowSmartPool;
+export default TableRowFloatingPool;
