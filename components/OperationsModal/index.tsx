@@ -1,36 +1,26 @@
 import React, { useContext } from 'react';
-import Image from 'next/image';
 
 import OperationsSelector from './OperationsSelector';
 import OperationContainer from './OperationContainer';
 
 import ModalStatusContext from 'contexts/ModalStatusContext';
 
-import styles from './styles.module.scss';
-import Overlay from 'components/Overlay';
+import { Dialog, DialogContent } from '@mui/material';
 
 function OperationsModals() {
   const { open, setOpen } = useContext(ModalStatusContext);
 
+  const handleClose = () => {
+    setOpen(false);
+  };
+
   return (
-    <>
-      {open && (
-        <>
-          <section className={styles.modal}>
-            <div className={styles.closeButton} onClick={() => setOpen(false)}>
-              <Image src="/img/icons/close.svg" width={21} height={22} alt="close icon" />
-            </div>
-            <OperationsSelector />
-            <OperationContainer />
-          </section>
-          <Overlay
-            close={() => {
-              setOpen(false);
-            }}
-          />
-        </>
-      )}
-    </>
+    <Dialog open={open} onClose={handleClose}>
+      <DialogContent sx={{ display: 'flex' }}>
+        <OperationsSelector />
+        <OperationContainer />
+      </DialogContent>
+    </Dialog>
   );
 }
 
