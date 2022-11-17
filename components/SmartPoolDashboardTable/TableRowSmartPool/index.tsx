@@ -16,12 +16,11 @@ import { MarketContext } from 'contexts/MarketContext';
 
 import { Option } from 'react-dropdown';
 
-import styles from '../../SmartPoolUserStatus/Item/style.module.scss';
-
 import formatNumber from 'utils/formatNumber';
 import formatSymbol from 'utils/formatSymbol';
 import Link from 'next/link';
 import SwitchCollateral from 'components/SmartPoolDashboardTable/SwitchCollateral';
+import { Typography } from '@mui/material';
 
 type Props = {
   symbol: string | undefined;
@@ -66,41 +65,47 @@ function TableRowSmartPool({
   return (
     <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }} hover>
       <Link href={`/assets/${symbol}`}>
-        <TableCell align="left" sx={{ cursor: 'pointer' }}>
-          <Stack direction="row" spacing={2}>
-            {(symbol && <Image src={`/img/assets/${symbol}.svg`} alt={symbol} width={20} height={20} />) || (
-              <Skeleton circle height={20} width={20} />
+        <TableCell component="th" align="left" sx={{ cursor: 'pointer' }}>
+          <Stack direction="row" spacing={1}>
+            {(symbol && <Image src={`/img/assets/${symbol}.svg`} alt={symbol} width={24} height={24} />) || (
+              <Skeleton circle height={24} width={24} />
             )}
-            <div className={styles.primary}>{(symbol && formatSymbol(symbol)) || <Skeleton />}</div>
+            <Typography fontWeight="600" ml={1} display="inline" alignSelf="center">
+              {(symbol && formatSymbol(symbol)) || <Skeleton />}
+            </Typography>
           </Stack>
         </TableCell>
       </Link>
-      <TableCell align="center">
-        {(depositAmount &&
-          borrowedAmount &&
-          symbol &&
-          rate &&
-          `$${formatNumber(
-            parseFloat(
-              formatFixed(type?.value === 'deposit' ? depositAmount : borrowedAmount, accountData?.[symbol].decimals),
-            ) * rate,
-            'USD',
-            true,
-          )}`) || <Skeleton width={40} />}
+      <TableCell align="center" size="small">
+        <Typography>
+          {(depositAmount &&
+            borrowedAmount &&
+            symbol &&
+            rate &&
+            `$${formatNumber(
+              parseFloat(
+                formatFixed(type?.value === 'deposit' ? depositAmount : borrowedAmount, accountData?.[symbol].decimals),
+              ) * rate,
+              'USD',
+              true,
+            )}`) || <Skeleton width={40} />}
+        </Typography>
       </TableCell>
 
       {type?.value === 'deposit' && (
-        <TableCell align="center">
-          {(eTokenAmount &&
-            symbol &&
-            `${formatNumber(formatFixed(eTokenAmount, accountData?.[symbol].decimals), symbol)}`) || (
-            <Skeleton width={40} />
-          )}{' '}
+        <TableCell align="center" size="small">
+          <Typography>
+            {(eTokenAmount &&
+              symbol &&
+              `${formatNumber(formatFixed(eTokenAmount, accountData?.[symbol].decimals), symbol)}`) || (
+              <Skeleton width={40} />
+            )}{' '}
+          </Typography>
         </TableCell>
       )}
 
       {type?.value === 'deposit' && (
-        <TableCell align="center">
+        <TableCell align="center" size="small">
           <SwitchCollateral symbol={symbol} walletAddress={walletAddress} auditorContract={auditorContract} />
         </TableCell>
       )}
