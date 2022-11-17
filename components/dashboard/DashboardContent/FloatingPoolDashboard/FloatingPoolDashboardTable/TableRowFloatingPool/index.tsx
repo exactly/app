@@ -10,8 +10,6 @@ import AccountDataContext from 'contexts/AccountDataContext';
 import ModalStatusContext, { Operation } from 'contexts/ModalStatusContext';
 import { MarketContext } from 'contexts/MarketContext';
 
-import { Option } from 'react-dropdown';
-
 import formatNumber from 'utils/formatNumber';
 import formatSymbol from 'utils/formatSymbol';
 import Link from 'next/link';
@@ -25,7 +23,7 @@ type Props = {
   walletAddress: string | null | undefined;
   eTokenAmount: BigNumber | undefined;
   auditorContract: Contract | undefined;
-  type: Option | undefined;
+  type: 'deposit' | 'borrow';
   market: string | undefined;
   healthFactor: HealthFactor | undefined;
 };
@@ -82,7 +80,7 @@ function TableRowFloatingPool({
             rate &&
             `$${formatNumber(
               parseFloat(
-                formatFixed(type?.value === 'deposit' ? depositAmount : borrowedAmount, accountData?.[symbol].decimals),
+                formatFixed(type === 'deposit' ? depositAmount : borrowedAmount, accountData?.[symbol].decimals),
               ) * rate,
               'USD',
               true,
@@ -90,7 +88,7 @@ function TableRowFloatingPool({
         </Typography>
       </TableCell>
 
-      {type?.value === 'deposit' && (
+      {type === 'deposit' && (
         <TableCell align="center" size="small">
           <Typography>
             {(eTokenAmount &&
@@ -102,7 +100,7 @@ function TableRowFloatingPool({
         </TableCell>
       )}
 
-      {type?.value === 'deposit' && (
+      {type === 'deposit' && (
         <TableCell align="center" size="small">
           <SwitchCollateral
             symbol={symbol}
@@ -119,7 +117,7 @@ function TableRowFloatingPool({
             variant="contained"
             onClick={() => {
               setMarket({ value: market! });
-              setOperation(type.value as Operation);
+              setOperation(type as Operation);
               setOpen(true);
             }}
           >
@@ -135,7 +133,7 @@ function TableRowFloatingPool({
             sx={{ backgroundColor: 'white' }}
             onClick={() => {
               setMarket({ value: market! });
-              setOperation(type.value === 'deposit' ? 'withdraw' : 'repay');
+              setOperation(type === 'deposit' ? 'withdraw' : 'repay');
               setOpen(true);
             }}
           >

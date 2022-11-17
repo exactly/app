@@ -157,7 +157,7 @@ function FloatingPoolDashboardTable({ type, healthFactor }: Props) {
               walletAddress={walletAddress}
               eTokenAmount={item.eTokens}
               auditorContract={auditorContract}
-              type={{ label: type, value: type }}
+              type={type}
               market={item.market}
               healthFactor={healthFactor}
             />
