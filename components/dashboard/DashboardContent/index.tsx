@@ -5,13 +5,13 @@ import { globals } from 'styles/theme';
 
 const { maxWidth } = globals;
 
-// const DashboardUserCharts = dynamic(() => import('components/DashboardUserCharts'));
-const SmartPoolDashboard = dynamic(() => import('components/SmartPoolDashboard'));
+// const DashboardUserCharts = dynamic(() => import('components/DashboardContent/DashboardUserCharts'));
+const FloatingPoolDashboard = dynamic(() => import('components/dashboard/DashboardContent/FloatingPoolDashboard'));
 const MaturityPoolDashboard = dynamic(() => import('components/MaturityPoolDashboard'));
 const EmptyState = dynamic(() => import('components/EmptyState'));
 
 import { useWeb3Context } from 'contexts/Web3Context';
-import DashboardTabs from 'components/DashboardTabs';
+import DashboardTabs from 'components/dashboard/DashboardContent/DashboardTabs';
 
 function DashboardContent() {
   const { walletAddress } = useWeb3Context();
@@ -31,7 +31,7 @@ function DashboardContent() {
       ...depositTab,
       content: walletAddress ? (
         <>
-          <SmartPoolDashboard type={depositTab.value as 'deposit'} />
+          <FloatingPoolDashboard type={depositTab.value as 'deposit'} />
           <MaturityPoolDashboard tab={depositTab} />
         </>
       ) : (
@@ -42,7 +42,7 @@ function DashboardContent() {
       ...borrowTab,
       content: walletAddress ? (
         <>
-          <SmartPoolDashboard type={borrowTab.value as 'borrow'} />
+          <FloatingPoolDashboard type={borrowTab.value as 'borrow'} />
           <MaturityPoolDashboard tab={borrowTab} />
         </>
       ) : (

@@ -14,23 +14,23 @@ import AuditorContext from 'contexts/AuditorContext';
 import AccountDataContext from 'contexts/AccountDataContext';
 import ContractsContext from 'contexts/ContractsContext';
 
-import { SmartPoolItemData } from 'types/SmartPoolItemData';
+import { FloatingPoolItemData } from 'types/FloatingPoolItemData';
 import { FixedLenderAccountData } from 'types/FixedLenderAccountData';
 
 import { useWeb3Context } from 'contexts/Web3Context';
-import TableRowSmartPool from './TableRowSmartPool';
+import TableRowFloatingPool from './TableRowFloatingPool';
 
 type Props = {
   type: 'deposit' | 'borrow';
 };
 
-function SmartPoolDashboardTable({ type }: Props) {
+function FloatingPoolDashboardTable({ type }: Props) {
   const { walletAddress } = useWeb3Context();
   const auditor = useContext(AuditorContext);
   const { accountData } = useContext(AccountDataContext);
   const { getInstance } = useContext(ContractsContext);
 
-  const [itemData, setItemData] = useState<Array<SmartPoolItemData> | undefined>(undefined);
+  const [itemData, setItemData] = useState<Array<FloatingPoolItemData> | undefined>(undefined);
   const [auditorContract, setAuditorContract] = useState<Contract | undefined>(undefined);
 
   const orderAssets = ['DAI', 'USDC', 'WETH', 'WBTC', 'wstETH'];
@@ -55,7 +55,7 @@ function SmartPoolDashboardTable({ type }: Props) {
       return orderAssets.indexOf(a.assetSymbol) - orderAssets.indexOf(b.assetSymbol);
     });
 
-    const data: SmartPoolItemData[] = [];
+    const data: FloatingPoolItemData[] = [];
 
     allMarkets.forEach((market) => {
       const symbol = market.assetSymbol;
@@ -134,8 +134,8 @@ function SmartPoolDashboardTable({ type }: Props) {
           </TableRow>
         </TableHead>
         <TableBody>
-          {itemData?.map((item: SmartPoolItemData, key: number) => (
-            <TableRowSmartPool
+          {itemData?.map((item: FloatingPoolItemData, key: number) => (
+            <TableRowFloatingPool
               key={`row_${key}`}
               depositAmount={item.depositedAmount}
               borrowedAmount={item.borrowedAmount}
@@ -153,4 +153,4 @@ function SmartPoolDashboardTable({ type }: Props) {
   );
 }
 
-export default SmartPoolDashboardTable;
+export default FloatingPoolDashboardTable;

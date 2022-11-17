@@ -1,6 +1,6 @@
 import type { BigNumber } from '@ethersproject/bignumber';
 
-export type SmartPoolItemData = {
+export type FloatingPoolItemData = {
   symbol: string;
   eTokens: BigNumber;
   depositedAmount: BigNumber;
