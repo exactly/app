@@ -10,17 +10,18 @@ import { useWeb3Context } from 'contexts/Web3Context';
 
 import { Skeleton, Tooltip, Typography } from '@mui/material';
 import StyledSwitch from 'components/Switch';
-import getHealthFactorData from 'utils/getHealthFactorData';
 import parseHealthFactor from 'utils/parseHealthFactor';
 import { getSymbol } from 'utils/utils';
+import { HealthFactor } from 'types/HealthFactor';
 
 type Props = {
   symbol: string | undefined;
   walletAddress: string | null | undefined;
   auditorContract: Contract | undefined;
+  healthFactor: HealthFactor | undefined;
 };
 
-function SwitchCollateral({ symbol, walletAddress, auditorContract }: Props) {
+function SwitchCollateral({ symbol, walletAddress, auditorContract, healthFactor }: Props) {
   const { network } = useWeb3Context();
   const fixedLender = useContext(FixedLenderContext);
   const { accountData, getAccountData } = useContext(AccountDataContext);
@@ -34,11 +35,10 @@ function SwitchCollateral({ symbol, walletAddress, auditorContract }: Props) {
     if (accountData) {
       checkCollaterals();
     }
-  }, [accountData, walletAddress]);
+  }, [accountData, walletAddress, healthFactor]);
 
-  // TODO: extract
-  async function checkCollaterals() {
-    if (!accountData || !symbol) return;
+  function checkCollaterals() {
+    if (!accountData || !symbol || !healthFactor) return;
     setToggle(false);
     setDisabled(false);
 
@@ -53,7 +53,6 @@ function SwitchCollateral({ symbol, walletAddress, auditorContract }: Props) {
     if (accountData[symbol].isCollateral) {
       setToggle(true);
 
-      const healthFactor = await getHealthFactorData(accountData);
       const usdPrice = accountData[symbol].usdPrice;
       const collateralAssets = accountData[symbol].floatingDepositAssets;
       const WAD = parseFixed('1', 18);
@@ -113,7 +112,7 @@ function SwitchCollateral({ symbol, walletAddress, auditorContract }: Props) {
     }
   }
 
-  if (!symbol) {
+  if (!symbol || !healthFactor) {
     return <Skeleton animation="wave" width={60} height={30} sx={{ margin: 'auto' }} />;
   }
 

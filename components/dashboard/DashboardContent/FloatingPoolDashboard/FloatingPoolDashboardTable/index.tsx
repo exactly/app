@@ -21,12 +21,14 @@ import { FixedLenderAccountData } from 'types/FixedLenderAccountData';
 
 import { useWeb3Context } from 'contexts/Web3Context';
 import TableRowFloatingPool from './TableRowFloatingPool';
+import { HealthFactor } from 'types/HealthFactor';
 
 type Props = {
   type: 'deposit' | 'borrow';
+  healthFactor: HealthFactor | undefined;
 };
 
-function FloatingPoolDashboardTable({ type }: Props) {
+function FloatingPoolDashboardTable({ type, healthFactor }: Props) {
   const { walletAddress } = useWeb3Context();
   const auditor = useContext(AuditorContext);
   const { accountData } = useContext(AccountDataContext);
@@ -157,6 +159,7 @@ function FloatingPoolDashboardTable({ type }: Props) {
               auditorContract={auditorContract}
               type={{ label: type, value: type }}
               market={item.market}
+              healthFactor={healthFactor}
             />
           ))}
         </TableBody>

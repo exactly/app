@@ -11,23 +11,19 @@ import { MaturityPosition } from 'types/FixedLenderAccountData';
 
 import parseHealthFactor from 'utils/parseHealthFactor';
 import formatNumber from 'utils/formatNumber';
-import getHealthFactorData from 'utils/getHealthFactorData';
 import HeaderInfo from 'components/common/HeaderInfo';
 import { ItemInfoProps } from 'components/common/ItemInfo';
 
-function DashboardHeader() {
+type Props = {
+  healthFactor: HealthFactor | undefined;
+};
+
+function DashboardHeader({ healthFactor }: Props) {
   const { walletAddress } = useWeb3Context();
   const { accountData } = useContext(AccountDataContext);
 
-  const [healthFactor, setHealthFactor] = useState<HealthFactor | undefined>(undefined);
-
   const [totalDeposited, setTotalDeposited] = useState<BigNumber | undefined>(undefined);
   const [totalBorrowed, setTotalBorrowed] = useState<BigNumber | undefined>(undefined);
-
-  useEffect(() => {
-    if (!walletAddress) return;
-    getHealthFactor();
-  }, [walletAddress, accountData]);
 
   useEffect(() => {
     if (!accountData) return;
@@ -80,18 +76,6 @@ function DashboardHeader() {
     setTotalDeposited(totalDepositedUSD);
     setTotalBorrowed(totalBorrowedUSD);
   }, [accountData]);
-
-  function getHealthFactor() {
-    if (!accountData) return;
-
-    const { collateral, debt } = getHealthFactorData(accountData);
-
-    if (!collateral.isZero() || !debt.isZero()) {
-      setHealthFactor({ collateral, debt });
-    } else {
-      setHealthFactor(undefined);
-    }
-  }
 
   const itemsInfo: ItemInfoProps[] = useMemo((): ItemInfoProps[] => {
     return [
