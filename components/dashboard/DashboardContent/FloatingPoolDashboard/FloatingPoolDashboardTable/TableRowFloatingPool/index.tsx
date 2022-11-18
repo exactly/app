@@ -72,7 +72,7 @@ function TableRowFloatingPool({
           </Stack>
         </TableCell>
       </Link>
-      <TableCell align={type === 'deposit' ? 'center' : 'left'} size="small">
+      <TableCell align="center" size="small">
         <Typography>
           {(depositAmount &&
             borrowedAmount &&
@@ -88,7 +88,7 @@ function TableRowFloatingPool({
         </Typography>
       </TableCell>
 
-      {type === 'deposit' && (
+      {type === 'deposit' ? (
         <TableCell align="center" size="small">
           <Typography>
             {(eTokenAmount &&
@@ -98,9 +98,11 @@ function TableRowFloatingPool({
             )}{' '}
           </Typography>
         </TableCell>
+      ) : (
+        <TableCell align="center" size="small" />
       )}
 
-      {type === 'deposit' && (
+      {type === 'deposit' ? (
         <TableCell align="center" size="small">
           <SwitchCollateral
             symbol={symbol}
@@ -109,6 +111,8 @@ function TableRowFloatingPool({
             healthFactor={healthFactor}
           />
         </TableCell>
+      ) : (
+        <TableCell align="center" size="small" />
       )}
 
       <TableCell align="center" width={50} size="small">
