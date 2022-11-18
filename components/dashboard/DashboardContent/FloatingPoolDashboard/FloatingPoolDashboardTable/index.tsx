@@ -25,7 +25,7 @@ import { HealthFactor } from 'types/HealthFactor';
 
 type Props = {
   type: 'deposit' | 'borrow';
-  healthFactor: HealthFactor | undefined;
+  healthFactor?: HealthFactor;
 };
 
 function FloatingPoolDashboardTable({ type, healthFactor }: Props) {
@@ -34,8 +34,8 @@ function FloatingPoolDashboardTable({ type, healthFactor }: Props) {
   const { accountData } = useContext(AccountDataContext);
   const { getInstance } = useContext(ContractsContext);
 
-  const [itemData, setItemData] = useState<Array<FloatingPoolItemData> | undefined>(undefined);
-  const [auditorContract, setAuditorContract] = useState<Contract | undefined>(undefined);
+  const [itemData, setItemData] = useState<Array<FloatingPoolItemData> | undefined>();
+  const [auditorContract, setAuditorContract] = useState<Contract | undefined>();
 
   const orderAssets = ['DAI', 'USDC', 'WETH', 'WBTC', 'wstETH'];
 
@@ -139,7 +139,7 @@ function FloatingPoolDashboardTable({ type, healthFactor }: Props) {
         <TableHead>
           <TableRow>
             {headers.map((header) => (
-              <TableCell key={header.label} align={header.align || 'center'}>
+              <TableCell key={`header_${header.key}_${type}`} align={header.align || 'center'}>
                 <Tooltip
                   title={header.hidden ? '' : header.tooltipTitle}
                   placement={header.tooltipPlacement || 'top'}
@@ -158,9 +158,9 @@ function FloatingPoolDashboardTable({ type, healthFactor }: Props) {
           </TableRow>
         </TableHead>
         <TableBody>
-          {rows?.map((item: FloatingPoolItemData, key: number) => (
+          {rows?.map((item: FloatingPoolItemData) => (
             <TableRowFloatingPool
-              key={`row_${key}`}
+              key={`floating_row_${item.symbol}_${type}`}
               depositAmount={item.depositedAmount}
               borrowedAmount={item.borrowedAmount}
               symbol={item.symbol}

@@ -19,15 +19,11 @@ type Props = {
 function DashboardTabs({ initialTab, allTabs }: Props) {
   const [currentTab, setCurrentTab] = useState<Tab['value']>(initialTab);
 
-  const handleChange = (event: React.SyntheticEvent, newTab: string) => {
-    setCurrentTab(newTab);
-  };
-
   return (
     <TabContext value={currentTab}>
       <Box width="100%">
         <TabList
-          onChange={handleChange}
+          onChange={(_: React.SyntheticEvent, newTab: string) => setCurrentTab(newTab)}
           aria-label="lab API tabs example"
           TabIndicatorProps={{ sx: { height: '4px', background: '#34C53A' } }}
           textColor="inherit"
@@ -37,15 +33,15 @@ function DashboardTabs({ initialTab, allTabs }: Props) {
             '& button.Mui-selected': { backgroundColor: '#0E0E0E', color: 'white' },
           }}
         >
-          {allTabs.map((tab) => (
-            <Tab label={tab.label} value={tab.value} sx={{ paddingX: 5, fontSize: '1.1em' }} key={`tab_${tab.value}`} />
+          {allTabs.map(({ label, value }) => (
+            <Tab label={label} value={value} sx={{ paddingX: 5, fontSize: '1.1em' }} key={`tab_${value}`} />
           ))}
         </TabList>
         <Box sx={{ borderBottom: 4, borderColor: 'divider', marginTop: '-4px' }} width="100%" />
       </Box>
-      {allTabs.map((tab) => (
-        <TabPanel value={tab.value} sx={{ width: '100%', padding: 0 }} key={tab.value}>
-          {tab.content}
+      {allTabs.map(({ content, value }) => (
+        <TabPanel value={value} sx={{ width: '100%', padding: 0 }} key={value}>
+          {content}
         </TabPanel>
       ))}
     </TabContext>

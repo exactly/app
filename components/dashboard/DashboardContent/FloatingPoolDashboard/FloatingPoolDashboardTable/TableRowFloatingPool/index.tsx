@@ -17,15 +17,15 @@ import SwitchCollateral from 'components/dashboard/DashboardContent/FloatingPool
 import { HealthFactor } from 'types/HealthFactor';
 
 type Props = {
-  symbol: string | undefined;
-  depositAmount: BigNumber | undefined;
-  borrowedAmount: BigNumber | undefined;
-  walletAddress: string | null | undefined;
-  eTokenAmount: BigNumber | undefined;
-  auditorContract: Contract | undefined;
+  symbol?: string;
+  depositAmount?: BigNumber;
+  borrowedAmount?: BigNumber;
+  walletAddress?: string;
+  eTokenAmount?: BigNumber;
+  auditorContract?: Contract;
   type: 'deposit' | 'borrow';
-  market: string | undefined;
-  healthFactor: HealthFactor | undefined;
+  market?: string;
+  healthFactor?: HealthFactor;
 };
 
 function TableRowFloatingPool({
@@ -43,7 +43,7 @@ function TableRowFloatingPool({
   const { setOpen, setOperation } = useContext(ModalStatusContext);
   const { setMarket } = useContext(MarketContext);
 
-  const [rate, setRate] = useState<number | undefined>(undefined);
+  const [rate, setRate] = useState<number | undefined>();
 
   useEffect(() => {
     if (accountData) {

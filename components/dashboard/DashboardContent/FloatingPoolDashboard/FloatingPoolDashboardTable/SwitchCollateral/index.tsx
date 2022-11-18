@@ -1,6 +1,5 @@
-import { parseFixed } from '@ethersproject/bignumber';
 import type { Contract } from '@ethersproject/contracts';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 
 import Loading from 'components/common/Loading';
 
@@ -13,12 +12,13 @@ import StyledSwitch from 'components/Switch';
 import parseHealthFactor from 'utils/parseHealthFactor';
 import { getSymbol } from 'utils/utils';
 import { HealthFactor } from 'types/HealthFactor';
+import { WeiPerEther } from '@ethersproject/constants';
 
 type Props = {
-  symbol: string | undefined;
-  walletAddress: string | null | undefined;
-  auditorContract: Contract | undefined;
-  healthFactor: HealthFactor | undefined;
+  symbol?: string;
+  walletAddress?: string;
+  auditorContract?: Contract;
+  healthFactor?: HealthFactor;
 };
 
 function SwitchCollateral({ symbol, walletAddress, auditorContract, healthFactor }: Props) {
@@ -29,34 +29,28 @@ function SwitchCollateral({ symbol, walletAddress, auditorContract, healthFactor
   const [toggle, setToggle] = useState<boolean>(false);
   const [disabled, setDisabled] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
-  const [disabledText, setDisabledText] = useState<string | undefined>(undefined);
+  const [disabledText, setDisabledText] = useState<string | undefined>();
 
-  useEffect(() => {
-    if (accountData) {
-      checkCollaterals();
-    }
-  }, [accountData, walletAddress, healthFactor]);
-
-  function checkCollaterals() {
+  const checkCollaterals = useCallback(() => {
     if (!accountData || !symbol || !healthFactor) return;
     setToggle(false);
     setDisabled(false);
 
-    const floatingPositions = accountData[symbol].floatingBorrowAssets;
-    const fixedPositions = accountData[symbol].fixedBorrowPositions;
+    const { [symbol]: currentMarket } = accountData;
+    const floatingPositions = currentMarket.floatingBorrowAssets;
+    const fixedPositions = currentMarket.fixedBorrowPositions;
 
     if (!floatingPositions.isZero() || fixedPositions.length > 0) {
       setDisabledText(`You can't disable collateral on this asset because you have an active borrow`);
       setDisabled(true);
     }
 
-    if (accountData[symbol].isCollateral) {
+    if (currentMarket.isCollateral) {
       setToggle(true);
 
-      const usdPrice = accountData[symbol].usdPrice;
-      const collateralAssets = accountData[symbol].floatingDepositAssets;
-      const WAD = parseFixed('1', 18);
-      const collateralUsd = collateralAssets.mul(usdPrice).div(WAD);
+      const usdPrice = currentMarket.usdPrice;
+      const collateralAssets = currentMarket.floatingDepositAssets;
+      const collateralUsd = collateralAssets.mul(usdPrice).div(WeiPerEther);
 
       const newHF = parseFloat(parseHealthFactor(healthFactor.debt, healthFactor.collateral.sub(collateralUsd)));
 
@@ -64,7 +58,11 @@ function SwitchCollateral({ symbol, walletAddress, auditorContract, healthFactor
         setDisabledText('Disabling this collateral will make your health factor less than 1');
       }
     }
-  }
+  }, [accountData, healthFactor, symbol]);
+
+  useEffect(() => {
+    checkCollaterals();
+  }, [accountData, walletAddress, healthFactor, checkCollaterals]);
 
   // TODO: refactor, use new hook
   function getFixedLenderData() {
@@ -144,7 +142,6 @@ function SwitchCollateral({ symbol, walletAddress, auditorContract, healthFactor
           }}
           inputProps={{ 'aria-label': 'controlled' }}
           disabled={disabled}
-          defaultChecked
         />
       </div>
     </Tooltip>
