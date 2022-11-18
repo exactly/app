@@ -5,7 +5,7 @@ import styles from './style.module.scss';
 import Tooltip from '@mui/material/Tooltip';
 
 type Props = {
-  text: string;
+  text?: string;
   value?: string;
   valueTooltip?: string;
   line?: boolean;
@@ -30,7 +30,7 @@ function ModalRowEditable({ text, value, line, editable, symbol, placeholder, on
   return (
     <section className={rowStyles}>
       <Tooltip title={text} placement="top-start">
-        <p className={styles.text}>SLIPPAGE TOLERANCE ({text})</p>
+        <p className={styles.text}>SLIPPAGE TOLERANCE {text ? `(${text})` : ''}</p>
       </Tooltip>
       <section className={styles.editable}>
         {!editable && (
