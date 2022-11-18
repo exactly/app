@@ -15,15 +15,15 @@ import HeaderInfo from 'components/common/HeaderInfo';
 import { ItemInfoProps } from 'components/common/ItemInfo';
 
 type Props = {
-  healthFactor: HealthFactor | undefined;
+  healthFactor?: HealthFactor;
 };
 
 function DashboardHeader({ healthFactor }: Props) {
   const { walletAddress } = useWeb3Context();
   const { accountData } = useContext(AccountDataContext);
 
-  const [totalDeposited, setTotalDeposited] = useState<BigNumber | undefined>(undefined);
-  const [totalBorrowed, setTotalBorrowed] = useState<BigNumber | undefined>(undefined);
+  const [totalDeposited, setTotalDeposited] = useState<BigNumber | undefined>();
+  const [totalBorrowed, setTotalBorrowed] = useState<BigNumber | undefined>();
 
   useEffect(() => {
     if (!accountData) return;

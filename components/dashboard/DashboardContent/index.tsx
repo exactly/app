@@ -15,7 +15,7 @@ import DashboardTabs from 'components/dashboard/DashboardContent/DashboardTabs';
 import { HealthFactor } from 'types/HealthFactor';
 
 type Props = {
-  healthFactor: HealthFactor | undefined;
+  healthFactor?: HealthFactor;
 };
 
 function DashboardContent({ healthFactor }: Props) {

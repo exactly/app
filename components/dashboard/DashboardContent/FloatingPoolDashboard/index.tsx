@@ -9,7 +9,7 @@ import { HealthFactor } from 'types/HealthFactor';
 
 type Props = {
   type: 'deposit' | 'borrow';
-  healthFactor: HealthFactor | undefined;
+  healthFactor?: HealthFactor;
 };
 
 function FloatingPoolDashboard({ type, healthFactor }: Props) {
