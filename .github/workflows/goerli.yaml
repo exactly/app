@@ -1,0 +1,15 @@
+on:
+  push:
+    branches: [main]
+
+jobs:
+  goerli:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: goerli
+      - run: |
+          git fetch --unshallow
+          git reset --hard origin/main
+          git push --force
