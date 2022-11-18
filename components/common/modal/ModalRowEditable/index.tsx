@@ -30,7 +30,7 @@ function ModalRowEditable({ text, value, line, editable, symbol, placeholder, on
   return (
     <section className={rowStyles}>
       <Tooltip title={text} placement="top-start">
-        <p className={styles.text}>SLIPPAGE TOLERANCE {text ? `(${text})` : ''}</p>
+        <p className={styles.text}>SLIPPAGE TOLERANCE{text ? ` (${text})` : null}</p>
       </Tooltip>
       <section className={styles.editable}>
         {!editable && (
