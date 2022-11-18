@@ -88,6 +88,7 @@ function FloatingPoolDashboardTable({ type, healthFactor }: Props) {
     tooltipTitle?: string;
     tooltipPlacement?: 'top' | 'top-start' | 'top-end';
     align?: 'left' | 'inherit' | 'center' | 'right' | 'justify';
+    hidden?: boolean;
   }[] = [
     {
       label: 'Asset',
@@ -98,20 +99,18 @@ function FloatingPoolDashboardTable({ type, healthFactor }: Props) {
     {
       label: 'Value',
       key: 'value',
-      align: type === 'deposit' ? 'center' : 'left',
+      align: 'center',
     },
-    ...(type === 'deposit'
-      ? [
-          {
-            label: 'eToken',
-            key: 'eToken',
-          },
-          {
-            label: 'Collateral',
-            key: 'collateral',
-          },
-        ]
-      : []),
+    {
+      label: 'eToken',
+      key: 'eToken',
+      hidden: type !== 'deposit',
+    },
+    {
+      label: 'Collateral',
+      key: 'collateral',
+      hidden: type !== 'deposit',
+    },
     {
       label: '',
       key: 'deposit',
@@ -141,7 +140,7 @@ function FloatingPoolDashboardTable({ type, healthFactor }: Props) {
             {headers.map((header) => (
               <TableCell key={header.label} align={header.align || 'center'}>
                 <Tooltip title={header.tooltipTitle} placement={header.tooltipPlacement || 'top'} arrow>
-                  <Typography variant="subtitle2" sx={{ color: 'grey.500' }} fontWeight={600}>
+                  <Typography variant="subtitle2" sx={{ color: header.hidden ? 'white' : 'grey.500' }} fontWeight={600}>
                     {header.label}
                   </Typography>
                 </Tooltip>
