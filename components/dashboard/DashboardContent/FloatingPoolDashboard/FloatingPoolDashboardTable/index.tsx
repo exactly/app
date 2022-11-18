@@ -105,6 +105,7 @@ function FloatingPoolDashboardTable({ type, healthFactor }: Props) {
       label: 'eToken',
       key: 'eToken',
       hidden: type !== 'deposit',
+      tooltipTitle: 'The Exactly voucher token (ERC-4626) for your deposit in the Variable Rate Pool.',
     },
     {
       label: 'Collateral',
@@ -139,8 +140,16 @@ function FloatingPoolDashboardTable({ type, healthFactor }: Props) {
           <TableRow>
             {headers.map((header) => (
               <TableCell key={header.label} align={header.align || 'center'}>
-                <Tooltip title={header.tooltipTitle} placement={header.tooltipPlacement || 'top'} arrow>
-                  <Typography variant="subtitle2" sx={{ color: header.hidden ? 'white' : 'grey.500' }} fontWeight={600}>
+                <Tooltip
+                  title={header.hidden ? '' : header.tooltipTitle}
+                  placement={header.tooltipPlacement || 'top'}
+                  arrow
+                >
+                  <Typography
+                    variant="subtitle2"
+                    sx={{ color: 'grey.500', visibility: header.hidden ? 'hidden' : '' }}
+                    fontWeight={600}
+                  >
                     {header.label}
                   </Typography>
                 </Tooltip>
