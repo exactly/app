@@ -30,6 +30,7 @@ module.exports = {
       files: devFiles,
       extends: ['plugin:node/recommended'],
       rules: {
+        'node/no-missing-import': ['error', { tryExtensions: ['.ts', '.json'] }],
         'node/no-unpublished-import': 'off',
         '@typescript-eslint/no-var-requires': 'off',
         'node/no-unsupported-features/es-syntax': ['error', { ignores: ['modules', 'dynamicImport'] }],
