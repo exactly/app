@@ -14,10 +14,8 @@ import mainnetFixedLenderUSDC from '@exactly-protocol/protocol/deployments/mainn
 import mainnetFixedLenderWSTETH from '@exactly-protocol/protocol/deployments/mainnet/MarketwstETH.json';
 import mainnetPreviewer from '@exactly-protocol/protocol/deployments/mainnet/Previewer.json';
 
-import { Dictionary } from 'types/Dictionary';
-
 function getABI(network: string | undefined) {
-  const dictionary: Dictionary<Dictionary<any>> = {
+  const dictionary: Record<string, Record<string, any>> = {
     goerli: {
       FixedLenders: [
         goerliFixedLenderDAI,

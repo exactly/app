@@ -4,7 +4,6 @@ import FixedLenderContext from 'contexts/FixedLenderContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 import LangContext from 'contexts/LangContext';
 
-import { Dictionary } from 'types/Dictionary';
 import { LangKeys } from 'types/Lang';
 
 import { getSymbol } from 'utils/utils';
@@ -20,7 +19,7 @@ function AddETokensButton() {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
-  const decimals: Dictionary<number> = {
+  const decimals: Record<string, number> = {
     USDC: 6,
     WBTC: 8,
     DAI: 18,

@@ -11,7 +11,6 @@ import { useWeb3Context } from 'contexts/Web3Context';
 import AccountDataContext from 'contexts/AccountDataContext';
 
 import { LangKeys } from 'types/Lang';
-import { Dictionary } from 'types/Dictionary';
 import { DonutData } from 'types/DonutData';
 
 import styles from './style.module.scss';
@@ -28,14 +27,14 @@ function DashboardUserCharts() {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
-  const [depositData, setDepositData] = useState<Array<DonutData> | undefined>(undefined);
-  const [borrowData, setBorrowData] = useState<Array<DonutData> | undefined>(undefined);
+  const [depositData, setDepositData] = useState<Array<DonutData> | undefined>();
+  const [borrowData, setBorrowData] = useState<Array<DonutData> | undefined>();
 
-  const [totalDeposit, setTotalDeposit] = useState<number | undefined>(undefined);
-  const [totalBorrow, setTotalBorrow] = useState<number | undefined>(undefined);
+  const [totalDeposit, setTotalDeposit] = useState<number | undefined>();
+  const [totalBorrow, setTotalBorrow] = useState<number | undefined>();
 
-  const [depositRateComposition, setDepositRateComposition] = useState<Dictionary<number> | undefined>(undefined);
-  const [borrowRateComposition, setBorrowRateComposition] = useState<Dictionary<number> | undefined>(undefined);
+  const [depositRateComposition, setDepositRateComposition] = useState<Record<string, number> | undefined>();
+  const [borrowRateComposition, setBorrowRateComposition] = useState<Record<string, number> | undefined>();
 
   const notConnected = [
     {

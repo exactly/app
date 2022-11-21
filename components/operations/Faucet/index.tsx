@@ -12,7 +12,6 @@ import { useWeb3Context } from 'contexts/Web3Context';
 import LangContext from 'contexts/LangContext';
 import ContractsContext from 'contexts/ContractsContext';
 
-import { Dictionary } from 'types/Dictionary';
 import { LangKeys } from 'types/Lang';
 
 import styles from './style.module.scss';
@@ -28,7 +27,7 @@ function Faucet() {
 
   const [loading, setLoading] = useState<string | undefined>(undefined);
 
-  const decimals: Dictionary<number> = {
+  const decimals: Record<string, number> = {
     USDC: 6,
     WBTC: 8,
     DAI: 18,
@@ -41,7 +40,7 @@ function Faucet() {
       const contract = getUnderlyingData(network!.name.toLowerCase(), asset);
 
       setLoading(asset);
-      const amounts: Dictionary<string> = {
+      const amounts: Record<string, string> = {
         DAI: '50000',
         USDC: '50000',
         WBTC: '2',
@@ -68,7 +67,7 @@ function Faucet() {
   async function addTokens() {
     const filter = assets.filter((asset) => asset !== 'ETH');
 
-    const images: Dictionary<string> = {
+    const images: Record<string, string> = {
       DAI: 'https://gateway.ipfs.io/ipfs/QmXyHPX8GS99dUiChsq7iRfZ4y3aofQqPjMjFJyCpkWs8e',
       WBTC: 'https://gateway.ipfs.io/ipfs/QmZHbqjFzzbf5sR2LJtVPi5UeEqS7fmzLBiWFRAM1dsJRm',
       USDC: 'https://gateway.ipfs.io/ipfs/QmSi4utTywi5EANuedkPT2gi5qj6g3aeXzPjMWkeYdk7Ag',
