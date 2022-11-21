@@ -19,7 +19,7 @@ import styles from './style.module.scss';
 import keys from './translations.json';
 
 import allowedNetworks from 'config/allowedNetworks.json';
-import DisclamerModal from 'components/DisclaimerModal';
+import DisclaimerModal from 'components/DisclaimerModal';
 
 function Navbar() {
   const lang: string = useContext(LangContext);
@@ -34,8 +34,8 @@ function Navbar() {
 
   const { pathname } = router;
 
-  const routes = useMemo(() => {
-    return [
+  const routes = useMemo(
+    () => [
       {
         pathname: '/markets',
         href: '/markets',
@@ -46,17 +46,22 @@ function Navbar() {
         href: '/dashboard',
         name: translations[lang].dashboard,
       },
-    ];
-  }, []);
+    ],
+    [lang, translations],
+  );
 
-  const isAllowed = useMemo(() => {
-    return network && allowedNetworks.includes(network?.name);
-  }, [network, allowedNetworks]);
+  const isAllowed = useMemo(() => network && allowedNetworks.includes(network.name), [network]);
 
-  async function handleClick() {
+  async function handleFaucetClick() {
+    if (!web3Provider?.provider.request) return;
+
+    if (isAllowed && network?.name === 'goerli') {
+      setOperation('faucet');
+      setOpen(true);
+      return;
+    }
+
     if (!isAllowed) {
-      if (!web3Provider?.provider.request) return;
-
       await web3Provider.provider.request({
         method: 'wallet_switchEthereumChain',
         params: [
@@ -65,16 +70,13 @@ function Navbar() {
           },
         ],
       });
-    } else if (isAllowed && network?.name === 'goerli') {
-      setOperation('faucet');
-      setOpen(true);
     }
   }
 
   return (
     <nav className={styles.navBar}>
       <div className={styles.wrapper}>
-        <DisclamerModal />
+        <DisclaimerModal />
         <div className={styles.left}>
           <Link href="/markets">
             <div className={styles.logo}>
@@ -89,7 +91,7 @@ function Navbar() {
           </Link>
 
           {network?.chainId === 5 && ( // TODO: put chainId constants in a config file
-            <div className={styles.faucet} onClick={handleClick}>
+            <div className={styles.faucet} onClick={handleFaucetClick}>
               <p>Goerli Faucet</p>
             </div>
           )}
@@ -128,7 +130,7 @@ function Navbar() {
             <strong>Docs</strong>
           </a>
           {network && isAllowed && (
-            <div className={styles.networkContainer} onClick={handleClick}>
+            <div className={styles.networkContainer} onClick={handleFaucetClick}>
               <div className={styles.dot} />
               <p className={styles.network}>
                 {translations[lang].connectedTo} {network?.name === 'homestead' ? 'mainnet' : network?.name}
@@ -138,14 +140,14 @@ function Navbar() {
           )}
 
           {network && !isAllowed && (
-            <div className={styles.networkContainer} onClick={handleClick}>
+            <div className={styles.networkContainer} onClick={handleFaucetClick}>
               <div className={styles.dotError} />
               <p className={styles.network}>{translations[lang].clickHere}</p>
             </div>
           )}
 
           {!network && (
-            <div className={styles.networkContainer} onClick={handleClick}>
+            <div className={styles.networkContainer} onClick={handleFaucetClick}>
               <div className={styles.dotError} />
               <p className={styles.network}>{translations[lang].disconnected}</p>
             </div>
@@ -153,25 +155,16 @@ function Navbar() {
 
           {connect && !walletAddress ? (
             <div className={styles.buttonContainer}>
-              <Button text="Connect Wallet" onClick={() => connect()} />
+              <Button text="Connect Wallet" onClick={connect} />
             </div>
           ) : (
             disconnect &&
             walletAddress && (
               <div className={styles.buttonContainer}>
-                <Wallet walletAddress={walletAddress} disconnect={() => disconnect()} />
+                <Wallet walletAddress={walletAddress} disconnect={disconnect} />
               </div>
             )
           )}
-          {/* <div className={styles.theme}>
-            <Image
-              src={theme === 'light' ? '/img/icons/moon.svg' : '/img/icons/sun.svg'}
-              alt="theme toggler"
-              width={16}
-              height={16}
-              onClick={changeTheme}
-            />
-          </div> */}
         </div>
       </div>
     </nav>
