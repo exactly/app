@@ -17,8 +17,9 @@ async function getLastAPR(
   accountData: AccountData,
 ) {
   const subgraphUrl = getSubgraph(network?.name);
+  if (!subgraphUrl) return;
   const symbol = getSymbol(market, network?.name ?? process.env.NEXT_PUBLIC_NETWORK);
-  const decimals = accountData[symbol].decimals;
+  const { decimals } = accountData[symbol];
 
   const dataPromise = maturity.map(async (maturity) => {
     const getLastBorrowRate = await request(subgraphUrl, getLastMaturityPoolBorrowRate(market, maturity.value));

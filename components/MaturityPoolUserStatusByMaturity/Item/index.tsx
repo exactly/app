@@ -80,38 +80,39 @@ function Item({ type, amount, maturityDate, symbol, market, progress, decimals, 
     if (!walletAddress || !maturityDate || !market || !type) return;
 
     const subgraphUrl = getSubgraph(network?.name);
-    const transactions = [];
+    if (!subgraphUrl) return;
+    const tempTransactions = [];
 
     if (type?.value === 'borrow') {
       const getMaturityPoolBorrows = await request(
         subgraphUrl,
-        getMaturityPoolBorrowsQuery(walletAddress!, maturityDate, market.toLowerCase()),
+        getMaturityPoolBorrowsQuery(walletAddress, maturityDate, market.toLowerCase()),
       );
 
-      transactions.push(...getMaturityPoolBorrows.borrowAtMaturities);
+      tempTransactions.push(...getMaturityPoolBorrows.borrowAtMaturities);
 
       const getMaturityPoolRepays = await request(
         subgraphUrl,
-        getMaturityPoolRepaysQuery(walletAddress!, maturityDate, market.toLowerCase()),
+        getMaturityPoolRepaysQuery(walletAddress, maturityDate, market.toLowerCase()),
       );
 
-      transactions.push(...getMaturityPoolRepays.repayAtMaturities);
+      tempTransactions.push(...getMaturityPoolRepays.repayAtMaturities);
     } else {
       const getMaturityPoolDeposits = await request(
         subgraphUrl,
-        getMaturityPoolDepositsQuery(walletAddress!, maturityDate, market.toLowerCase()),
+        getMaturityPoolDepositsQuery(walletAddress, maturityDate, market.toLowerCase()),
       );
 
-      transactions.push(...getMaturityPoolDeposits.depositAtMaturities);
+      tempTransactions.push(...getMaturityPoolDeposits.depositAtMaturities);
 
       const getMaturityPoolWithdraws = await request(
         subgraphUrl,
-        getMaturityPoolWithdrawsQuery(walletAddress!, maturityDate, market.toLowerCase()),
+        getMaturityPoolWithdrawsQuery(walletAddress, maturityDate, market.toLowerCase()),
       );
 
-      transactions.push(...getMaturityPoolWithdraws.withdrawAtMaturities);
+      tempTransactions.push(...getMaturityPoolWithdraws.withdrawAtMaturities);
     }
-    setTransactions(transactions.sort((a, b) => b.timestamp - a.timestamp));
+    setTransactions(tempTransactions.sort((a, b) => b.timestamp - a.timestamp));
   }
 
   async function getRate() {
@@ -126,6 +127,7 @@ function Item({ type, amount, maturityDate, symbol, market, progress, decimals, 
     if (!walletAddress || !maturityDate || !market || !type || !network) return;
 
     const subgraphUrl = getSubgraph(network.name);
+    if (!subgraphUrl) return;
     const allTransactions = [];
     let allAPRbyAmount = 0;
     let allAmounts = 0;

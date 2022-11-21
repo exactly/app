@@ -18,6 +18,7 @@ import { ItemInfoProps } from 'components/common/ItemInfo';
 import HeaderInfo from 'components/common/HeaderInfo';
 import Grid from '@mui/material/Grid';
 import OrderAction from 'components/OrderAction';
+import { captureException } from '@sentry/nextjs';
 
 type FloatingPoolInfoProps = {
   symbol: string;
@@ -39,32 +40,28 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol, eMarketAddress, n
   const fetchPoolData = useCallback(async () => {
     if (!accountData || !symbol) return;
 
-    try {
-      const {
-        totalFloatingDepositAssets: totalDeposited,
-        totalFloatingBorrowAssets: totalBorrowed,
-        decimals,
-        usdPrice: exchangeRate,
-      } = accountData[symbol];
+    const {
+      totalFloatingDepositAssets: totalDeposited,
+      totalFloatingBorrowAssets: totalBorrowed,
+      decimals,
+      usdPrice: exchangeRate,
+    } = accountData[symbol];
 
-      const totalDepositUSD = formatFixed(totalDeposited.mul(exchangeRate).div(WeiPerEther), decimals);
+    const totalDepositUSD = formatFixed(totalDeposited.mul(exchangeRate).div(WeiPerEther), decimals);
 
-      const totalBorrowUSD = formatFixed(totalBorrowed.mul(exchangeRate).div(WeiPerEther), decimals);
+    const totalBorrowUSD = formatFixed(totalBorrowed.mul(exchangeRate).div(WeiPerEther), decimals);
 
-      setDeposited(parseFloat(totalDepositUSD));
-      setBorrowed(parseFloat(totalBorrowUSD));
-    } catch (e) {
-      console.log(e);
-    }
+    setDeposited(parseFloat(totalDepositUSD));
+    setBorrowed(parseFloat(totalBorrowUSD));
   }, [accountData, symbol]);
 
   useEffect(() => {
-    fetchPoolData();
+    fetchPoolData().catch(captureException);
   }, [fetchPoolData]);
 
   const fetchAPRs = useCallback(async () => {
-    if (!accountData || !eMarketAddress) return;
-    const maxFuturePools = accountData[symbol].maxFuturePools;
+    if (!accountData || !eMarketAddress || !subgraphUrl) return;
+    const { maxFuturePools } = accountData[symbol];
 
     // TODO: consider storing these results in a new context so it's only fetched once - already added in tech debt docs
     const [{ apr: depositAPRRate }] = await queryRates(subgraphUrl, eMarketAddress, 'deposit', {
@@ -77,7 +74,7 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol, eMarketAddress, n
   }, [accountData, eMarketAddress, symbol, subgraphUrl]);
 
   useEffect(() => {
-    fetchAPRs();
+    fetchAPRs().catch(captureException);
   }, [fetchAPRs]);
 
   const itemsInfo: ItemInfoProps[] = [

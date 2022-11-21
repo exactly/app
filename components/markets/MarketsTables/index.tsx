@@ -112,6 +112,7 @@ const MarketTables: FC = () => {
         const previewFixedData: FixedMarketData[] = await previewerContract?.previewFixed(
           parseFixed(usdAmountPreviewer.toString(), 18),
         );
+        if (!previewFixedData) return;
 
         const marketMaturities = previewFixedData.find(({ market }) => market === marketAddress) as FixedMarketData;
 
@@ -205,12 +206,10 @@ const MarketTables: FC = () => {
     eMarketAddress: string,
   ) {
     const subgraphUrl = getSubgraph(networkName);
+    if (!subgraphUrl) return;
 
-    const data = await queryRate(subgraphUrl, eMarketAddress, type, { maxFuturePools });
-
-    const interestRate = data[0].apr;
-
-    return interestRate;
+    const [{ apr }] = await queryRate(subgraphUrl, eMarketAddress, type, { maxFuturePools });
+    return apr;
   }
 
   useEffect(() => {
