@@ -18,7 +18,7 @@ import formatSymbol from 'utils/formatSymbol';
 
 type Props = {
   title?: boolean;
-  defaultAddress: string | undefined;
+  defaultAddress?: string;
   onChange?: (marketData: Market) => void;
 };
 
@@ -29,37 +29,27 @@ function AssetSelector({ title, defaultAddress, onChange }: Props) {
   const [allMarketsData, setAllMarketsData] = useState<Array<Market>>([]);
 
   const selectOptions = useMemo(() => {
-    return getMarkets();
-  }, [accountData, defaultAddress]);
+    if (!accountData) return [];
+
+    return formatMarkets(accountData);
+  }, [accountData]);
 
   useEffect(() => {
-    const defaultOption = selectOptions?.find((market: Option) => {
-      return market.value === defaultAddress;
-    });
+    const defaultOption = selectOptions.find(({ value }) => value === defaultAddress);
 
     setMarket(defaultOption ?? selectOptions[0]);
-  }, [selectOptions]);
-
-  function getMarkets() {
-    if (!accountData) {
-      return [];
-    }
-
-    const formattedMarkets = formatMarkets(accountData);
-
-    return formattedMarkets;
-  }
+  }, [defaultAddress, selectOptions, setMarket]);
 
   function formatMarkets(markets: AccountData) {
     const formattedMarkets = Object.keys(markets).map((marketName: string) => {
-      const market = markets[marketName];
+      const { assetSymbol, market: marketAddress, adjustFactor } = markets[marketName];
 
       const marketData: Market = {
-        symbol: market.assetSymbol,
-        name: market.assetSymbol,
-        market: market.market,
+        symbol: assetSymbol,
+        name: assetSymbol,
+        market: marketAddress,
         isListed: true,
-        collateralFactor: parseFloat(formatFixed(market.adjustFactor, 18)),
+        collateralFactor: parseFloat(formatFixed(adjustFactor, 18)),
       };
 
       setAllMarketsData((prevState) => [...prevState, marketData]);
@@ -84,17 +74,13 @@ function AssetSelector({ title, defaultAddress, onChange }: Props) {
     return formattedMarkets;
   }
 
-  function getDataByAddress(address: string) {
-    const marketData = allMarketsData.find((market) => market.market === address);
-    onChange && marketData && onChange(marketData);
-  }
-
   const handleChange = useCallback(
     (option: Option) => {
-      getDataByAddress(option.value);
+      const marketData = allMarketsData.find(({ market: marketAddress }) => marketAddress === option.value);
+      onChange && marketData && onChange(marketData);
       setMarket(option);
     },
-    [getDataByAddress, setMarket],
+    [allMarketsData, onChange, setMarket],
   );
 
   return (
