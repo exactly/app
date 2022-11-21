@@ -3,7 +3,6 @@ import Image from 'next/image';
 
 import styles from './style.module.scss';
 
-import { Dictionary } from 'types/Dictionary';
 import { Transaction } from 'types/Transaction';
 import { LangKeys } from 'types/Lang';
 import { ModalCases } from 'types/ModalCases';
@@ -28,7 +27,7 @@ function ModalGif({ tx, tryAgain }: Props) {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
-  const options: Dictionary<ModalCases> = {
+  const options: Record<string, ModalCases> = {
     processing: {
       img: '',
       title: translations[lang].loadingTitle,

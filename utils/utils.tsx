@@ -1,4 +1,3 @@
-import { Dictionary } from 'types/Dictionary';
 import { UnderlyingNetwork } from 'types/Underlying';
 
 import goerliDAI from '@exactly-protocol/protocol/deployments/goerli/DAI.json';
@@ -121,7 +120,7 @@ export function getUnderlyingData(network: string | undefined, symbol: string | 
 export function getSymbol(address: string, network: string | undefined) {
   const currentNetwork = network ?? process.env.NEXT_PUBLIC_NETWORK;
 
-  const dictionary: Dictionary<Dictionary<string>> = {
+  const dictionary: Record<string, Record<string, string>> = {
     goerli: {
       [goerliFixedLenderDAI.address.toLowerCase()]: 'DAI',
       [goerliFixedLenderWETH.address.toLowerCase()]: 'WETH',

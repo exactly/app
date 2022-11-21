@@ -4,7 +4,6 @@ import Image from 'next/image';
 
 import styles from './style.module.scss';
 
-import { Dictionary } from 'types/Dictionary';
 import { Transaction } from 'types/Transaction';
 import { LangKeys } from 'types/Lang';
 import { ModalCases } from 'types/ModalCases';
@@ -27,7 +26,7 @@ function ModalMinimized({ tx, handleMinimize }: Props) {
 
   const style = useSpring({ from: { opacity: 0 }, to: { opacity: 1 }, duration: 5000 });
 
-  const options: Dictionary<ModalCases> = {
+  const options: Record<string, ModalCases> = {
     processing: {
       img: '/img/modals/img/waiting.png',
       title: translations[lang].loadingTitle,

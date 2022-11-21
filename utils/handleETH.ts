@@ -9,11 +9,10 @@ import mainnetRouter from '@exactly-protocol/protocol/deployments/mainnet/Market
 
 import { getContractData } from './contracts';
 
-import { Dictionary } from 'types/Dictionary';
 import numbers from 'config/numbers.json';
 
 function handleETH(network = 'goerli', signer: JsonRpcSigner) {
-  const dictionary: Dictionary<any> = {
+  const dictionary: Record<string, any> = {
     goerli: goerliRouter,
     mainnet: mainnetRouter,
     homestead: mainnetRouter, // HACK - move to chainIds

@@ -4,7 +4,6 @@ import React, { createContext, useState } from 'react';
 import { InfuraProvider } from '@ethersproject/providers';
 import { Contract } from '@ethersproject/contracts';
 
-import { Dictionary } from 'types/Dictionary';
 import { contractName } from 'types/ContractNames';
 
 import { useWeb3Context } from './Web3Context';
@@ -23,7 +22,7 @@ const ContractsContext = createContext(defaultValues);
 
 export const ContractsProvider: FC<{ children?: ReactNode }> = ({ children }) => {
   const { network, web3Provider } = useWeb3Context();
-  const [instances, setInstances] = useState<Dictionary<Contract> | null>(null);
+  const [instances, setInstances] = useState<Record<string, Contract> | null>(null);
 
   function getInstance(address: string, abi: ContractInterface, contractName: contractName) {
     if (network && instances && instances[network.name + contractName]) {
