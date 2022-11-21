@@ -12,6 +12,7 @@ import queryRates from 'utils/queryRates';
 
 import { LangKeys } from 'types/Lang';
 import parseTimestamp from 'utils/parseTimestamp';
+import { captureException } from '@sentry/nextjs';
 
 interface Props {
   market: string | undefined;
@@ -37,6 +38,7 @@ function FloatingAPRChart({ market, networkName }: Props) {
     if (!market || !networkName) return;
 
     const subgraphUrl = getSubgraph(networkName);
+    if (!subgraphUrl) return;
 
     const data = (await queryRates(subgraphUrl, market, 'deposit', queryOptions)).map(({ apr, apy, ...rest }) => ({
       ...rest,
@@ -56,7 +58,7 @@ function FloatingAPRChart({ market, networkName }: Props) {
   }
 
   useEffect(() => {
-    getHistoricalAPR();
+    getHistoricalAPR().catch(captureException);
   }, [getHistoricalAPR]);
 
   return (
