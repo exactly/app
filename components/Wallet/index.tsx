@@ -1,17 +1,13 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 
 import styles from './style.module.scss';
 
-import keys from './translations.json';
-
 import { formatWallet } from 'utils/utils';
 
-import LangContext from 'contexts/LangContext';
-
-import { LangKeys } from 'types/Lang';
 import { Network } from 'types/Network';
 import { useWeb3 } from 'hooks/useWeb3';
+import { captureException } from '@sentry/nextjs';
 
 type Props = {
   walletAddress: string;
@@ -21,12 +17,9 @@ type Props = {
 };
 
 function Wallet({ walletAddress, cogwheel = true, network, disconnect }: Props) {
-  const lang: string = useContext(LangContext);
-
   const { web3Provider } = useWeb3();
 
-  const translations: { [key: string]: LangKeys } = keys;
-  const formattedWallet = walletAddress && formatWallet(walletAddress);
+  const formattedWallet = formatWallet(walletAddress);
   const [walletContainer, setWalletContainer] = useState<boolean>(false);
   const [ens, setEns] = useState<string | null>(null);
 
@@ -35,21 +28,12 @@ function Wallet({ walletAddress, cogwheel = true, network, disconnect }: Props) 
   }
 
   useEffect(() => {
-    if (!walletAddress || !web3Provider) return;
-    getENS(walletAddress);
-  }, [walletAddress, web3Provider]);
-
-  async function getENS(walletAddress: string) {
     if (!web3Provider) return;
 
-    try {
-      const ens = await web3Provider.lookupAddress(walletAddress);
+    const loadENS = async () => setEns(await web3Provider.lookupAddress(walletAddress));
 
-      setEns(ens);
-    } catch (e) {
-      console.log(e);
-    }
-  }
+    loadENS().catch(captureException);
+  }, [walletAddress, web3Provider]);
 
   return (
     <div className={styles.container}>
@@ -68,16 +52,16 @@ function Wallet({ walletAddress, cogwheel = true, network, disconnect }: Props) 
       {network && (
         <div className={styles.networkContainer}>
           <div className={styles.dot} />
-          <p className={styles.network}> {network?.name}</p>
+          <p className={styles.network}> {network.name}</p>
         </div>
       )}
 
       {walletContainer && (
         <div className={styles.walletContainer}>
           {walletAddress && (
-            <p className={styles.disconnect} onClick={() => disconnect && disconnect()}>
+            <p className={styles.disconnect} onClick={disconnect}>
               <Image src="/img/icons/power.svg" alt="power" width={24} height={24} />
-              {translations[lang].disconnect}
+              Disconnect wallet
             </p>
           )}
         </div>
