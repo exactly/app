@@ -19,7 +19,7 @@ function ModalRow({ text, value, line, asset }: Props) {
       <p className={styles.text}>{text}</p>
 
       <section className={styles.valueContainer}>
-        {asset && <Image src={`/img/assets/${asset}.svg`} alt={asset} width="24" height="24" />}
+        {asset && <Image src={`/img/assets/${asset}.svg`} alt={asset} width="24" height="24" layout="fixed" />}
 
         <p className={styles.value}>{value || <Skeleton />}</p>
       </section>
