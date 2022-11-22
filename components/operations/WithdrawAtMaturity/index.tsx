@@ -58,7 +58,8 @@ const WithdrawAtMaturity: FC = () => {
 
   const [errorData, setErrorData] = useState<ErrorData | undefined>();
   const [needsAllowance, setNeedsAllowance] = useState(false);
-  const [withdrawAmount, setWithdrawAmount] = useState('0');
+  const [minAmountToWithdraw, setMinAmountToWithdraw] = useState(Zero);
+  const [amountToWithdraw, setAmountToWithdraw] = useState(Zero);
 
   const marketContract = useMarket(market?.value);
   const ETHRouterContract = useETHRouter();
@@ -121,21 +122,20 @@ const WithdrawAtMaturity: FC = () => {
     if (!date || !marketContract || !previewerContract) return;
 
     if (!qty) {
-      setWithdrawAmount('0');
+      setMinAmountToWithdraw(Zero);
       return;
     }
 
     const parsedQtyValue = parseFixed(qty, decimals);
-    const amountToWithdraw = await previewerContract.previewWithdrawAtMaturity(
+    const amount = await previewerContract.previewWithdrawAtMaturity(
       marketContract.address,
       date.value,
       parsedQtyValue,
     );
 
-    const minimumWithdrawAmount = amountToWithdraw.mul(rawSlippage).div(WeiPerEther);
-
-    setWithdrawAmount(formatFixed(minimumWithdrawAmount, decimals));
-  }, [decimals, date, qty, marketContract, previewerContract, rawSlippage]);
+    setAmountToWithdraw(amount);
+    setMinAmountToWithdraw(isEarlyWithdraw ? amount.mul(rawSlippage).div(WeiPerEther) : amount);
+  }, [decimals, date, qty, marketContract, previewerContract, rawSlippage, isEarlyWithdraw]);
 
   useEffect(() => {
     previewWithdrawAtMaturity().catch((error) => setErrorData({ status: true, message: handleOperationError(error) }));
@@ -153,38 +153,36 @@ const WithdrawAtMaturity: FC = () => {
       return setGasCost(gasEstimation?.mul(gasPrice));
     }
 
+    const amount = amountToWithdraw.isZero() ? DEFAULT_AMOUNT : amountToWithdraw;
+
     if (symbol === 'WETH') {
-      const amount = qty ? parseFixed(qty, 18) : DEFAULT_AMOUNT;
-      const minAsset = amount.mul(rawSlippage).div(WeiPerEther);
       const gasEstimation = await ETHRouterContract.estimateGas.withdrawAtMaturity(
         date.value,
-        parseFixed(qty, 18),
-        minAsset,
+        amount,
+        minAmountToWithdraw,
       );
       return setGasCost(gasPrice.mul(gasEstimation));
     }
 
-    const assetDecimals = await marketContract.decimals();
-    const amount = qty ? parseFixed(qty, assetDecimals) : DEFAULT_AMOUNT;
-    const minAsset = amount.mul(rawSlippage).div(WeiPerEther);
     const gasEstimation = await marketContract.estimateGas.withdrawAtMaturity(
       date.value,
       amount,
-      minAsset,
+      minAmountToWithdraw,
       walletAddress,
       walletAddress,
     );
+
     setGasCost(gasPrice.mul(gasEstimation));
   }, [
-    rawSlippage,
+    amountToWithdraw,
     ETHRouterContract,
     approveEstimateGas,
     marketContract,
     needsApproval,
-    qty,
     symbol,
     walletAddress,
     date,
+    minAmountToWithdraw,
   ]);
 
   useEffect(() => {
@@ -234,33 +232,27 @@ const WithdrawAtMaturity: FC = () => {
       if (symbol === 'WETH') {
         if (!ETHRouterContract) return;
 
-        const amount = parseFixed(qty, 18);
-        const slippageAmount = amount.mul(rawSlippage).div(WeiPerEther);
-
         const gasEstimation = await ETHRouterContract.estimateGas.withdrawAtMaturity(
           date.value,
-          amount,
-          slippageAmount,
+          parseFixed(qty, 18),
+          minAmountToWithdraw,
         );
-        withdrawTx = await ETHRouterContract.withdrawAtMaturity(date.value, amount, slippageAmount, {
+        withdrawTx = await ETHRouterContract.withdrawAtMaturity(date.value, parseFixed(qty, 18), minAmountToWithdraw, {
           gasLimit: gasEstimation.mul(parseFixed(String(numbers.gasLimitMultiplier), 18)).div(WeiPerEther),
         });
       } else {
-        const amount = parseFixed(qty, decimals);
-        const slippageAmount = amount.mul(rawSlippage).div(WeiPerEther);
-
         const gasEstimation = await marketContract.estimateGas.withdrawAtMaturity(
           date.value,
-          amount,
-          slippageAmount,
+          parseFixed(qty, decimals),
+          minAmountToWithdraw,
           walletAddress,
           walletAddress,
         );
 
         withdrawTx = await marketContract.withdrawAtMaturity(
           date.value,
-          amount,
-          slippageAmount,
+          parseFixed(qty, decimals),
+          minAmountToWithdraw,
           walletAddress,
           walletAddress,
           {
@@ -282,7 +274,17 @@ const WithdrawAtMaturity: FC = () => {
     } finally {
       setIsLoadingOp(false);
     }
-  }, [decimals, date, symbol, qty, rawSlippage, ETHRouterContract, marketContract, walletAddress, getAccountData]);
+  }, [
+    date,
+    symbol,
+    qty,
+    ETHRouterContract,
+    marketContract,
+    walletAddress,
+    getAccountData,
+    minAmountToWithdraw,
+    decimals,
+  ]);
 
   const handleSubmitAction = useCallback(async () => {
     if (isLoading) return;
@@ -323,7 +325,7 @@ const WithdrawAtMaturity: FC = () => {
       />
       <ModalRow
         text={translations[lang].amountToReceive}
-        value={formatNumber(withdrawAmount, symbol, true)}
+        value={formatNumber(formatFixed(amountToWithdraw, decimals), symbol, true)}
         asset={symbol}
         line
       />
@@ -342,7 +344,12 @@ const WithdrawAtMaturity: FC = () => {
           line
         />
       )}
-      <ModalRow text="Min amount to withdraw" value={withdrawAmount} asset={symbol} line />
+      <ModalRow
+        text="Min amount to withdraw"
+        value={formatNumber(formatFixed(minAmountToWithdraw, decimals), symbol, true)}
+        asset={symbol}
+        line
+      />
       {errorData && <ModalError message={errorData.message} />}
       <LoadingButton
         fullWidth
