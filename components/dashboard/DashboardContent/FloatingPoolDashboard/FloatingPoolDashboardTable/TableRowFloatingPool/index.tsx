@@ -125,7 +125,7 @@ function TableRowFloatingPool({
               setOpen(true);
             }}
           >
-            Deposit
+            {type === 'deposit' ? 'Deposit' : 'Borrow'}
           </Button>
         )) || <Skeleton sx={{ margin: 'auto' }} height={40} />}
       </TableCell>
@@ -141,7 +141,7 @@ function TableRowFloatingPool({
               setOpen(true);
             }}
           >
-            Borrow
+            {type === 'deposit' ? 'Withdraw' : 'Repay'}
           </Button>
         )) || <Skeleton sx={{ margin: 'auto' }} height={40} />}
       </TableCell>
