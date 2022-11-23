@@ -111,7 +111,7 @@ function SwitchCollateral({ symbol, walletAddress, auditorContract, healthFactor
     }
   }
 
-  if (!symbol || !healthFactor) {
+  if (!symbol) {
     return <Skeleton animation="wave" width={60} height={30} sx={{ margin: 'auto' }} />;
   }
 
