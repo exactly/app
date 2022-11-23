@@ -85,10 +85,11 @@ function MaturityPoolDashboardTable({ type, maturities }: Props) {
           {maturities &&
             Object?.keys(maturities)
               ?.flatMap((maturity) => maturities[maturity])
-              ?.map(({ maturity, symbol, market, decimals }) => (
+              ?.map(({ principal, maturity, symbol, market, decimals }) => (
                 <TableRowMaturityPool
-                  type={type}
                   key={maturity}
+                  type={type}
+                  amount={principal}
                   maturityDate={maturity}
                   symbol={symbol}
                   market={market}
