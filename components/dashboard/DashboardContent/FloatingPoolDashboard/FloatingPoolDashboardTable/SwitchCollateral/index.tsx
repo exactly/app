@@ -32,7 +32,7 @@ function SwitchCollateral({ symbol, walletAddress, auditorContract, healthFactor
   const [disabledText, setDisabledText] = useState<string | undefined>();
 
   const checkCollaterals = useCallback(() => {
-    if (!accountData || !symbol || !healthFactor) return;
+    if (!accountData || !symbol) return;
     setToggle(false);
     setDisabled(false);
 
@@ -47,6 +47,7 @@ function SwitchCollateral({ symbol, walletAddress, auditorContract, healthFactor
 
     if (currentMarket.isCollateral) {
       setToggle(true);
+      if (!healthFactor) return;
 
       const usdPrice = currentMarket.usdPrice;
       const collateralAssets = currentMarket.floatingDepositAssets;
