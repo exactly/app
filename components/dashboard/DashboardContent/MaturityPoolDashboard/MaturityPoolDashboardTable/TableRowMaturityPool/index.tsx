@@ -2,6 +2,7 @@ import { BigNumber, formatFixed } from '@ethersproject/bignumber';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import { Button, IconButton, Skeleton, Stack, TableCell, TableRow, Typography } from '@mui/material';
+import StyledLinearProgress from 'components/common/LinearProgress';
 import AccountDataContext from 'contexts/AccountDataContext';
 import { MarketContext } from 'contexts/MarketContext';
 import ModalStatusContext from 'contexts/ModalStatusContext';
@@ -234,20 +235,24 @@ function TableRowMaturityPool({ symbol, amount, type, maturityDate, market, deci
           </TableCell>
         </Link>
         {/* TODO: add skeleton */}
-        <TableCell align="center">
+        <TableCell align="center" size="small">
           {symbol && exchangeRate && amount ? (
             `$${formatNumber(parseFloat(formatFixed(amount, decimals)) * exchangeRate, 'USD', true)}`
           ) : (
             <Skeleton width={40} />
           )}
         </TableCell>
-        <TableCell align="center">{`${(APR || 0).toFixed(2)} %`}</TableCell>
-        <TableCell align="center">{maturityDate && parseTimestamp(maturityDate)}</TableCell>
-        <TableCell align="center">{progress}</TableCell>
+        <TableCell align="center" size="small">{`${(APR || 0).toFixed(2)} %`}</TableCell>
+        <TableCell align="center" size="small">
+          {maturityDate && parseTimestamp(maturityDate)}
+        </TableCell>
+        <TableCell align="center" size="small">
+          <StyledLinearProgress variant="determinate" value={progress} />
+        </TableCell>
         <TableCell align="center" width={50} size="small">
           {(symbol && maturityDate && (
             <Button
-              variant="contained"
+              variant="outlined"
               onClick={() => {
                 setDate({ value: maturityDate!, label: parseTimestamp(maturityDate!) });
                 setMarket({ value: market! });
@@ -259,14 +264,14 @@ function TableRowMaturityPool({ symbol, amount, type, maturityDate, market, deci
             </Button>
           )) || <Skeleton sx={{ margin: 'auto' }} height={40} />}
         </TableCell>
-        <TableCell align="center">
+        <TableCell align="center" size="small">
           <IconButton aria-label="expand row" size="small" onClick={() => setOpen(!open)}>
             {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
           </IconButton>
         </TableCell>
       </TableRow>
       <TableRow>
-        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
+        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={7} size="small">
           <CollapseMaturityPool open={open} transactions={transactions} />
         </TableCell>
       </TableRow>
