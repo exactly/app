@@ -4,6 +4,7 @@ import Web3Modal from 'web3modal';
 import WalletConnectProvider from '@walletconnect/web3-provider';
 
 import { Web3ProviderState, Web3Action, web3InitialState, web3Reducer } from 'reducers/web3';
+import analytics from 'utils/analytics';
 
 let web3Modal: Web3Modal | null;
 
@@ -48,6 +49,8 @@ export const useWeb3 = () => {
         } as Web3Action);
       } catch (err) {
         console.log('connect error', err);
+      } finally {
+        analytics.identify(walletAddress ? walletAddress : 'anon');
       }
     } else {
       console.error('No Web3Modal');

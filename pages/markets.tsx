@@ -11,7 +11,6 @@ import MarketTables from 'components/markets/MarketsTables';
 import { globals } from 'styles/theme';
 
 const { maxWidth } = globals;
-
 const Pools: NextPage = () => {
   return (
     <>
