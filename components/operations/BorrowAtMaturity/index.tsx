@@ -150,7 +150,7 @@ const BorrowAtMaturity: FC = () => {
     if (await needsApproval()) {
       // only WETH needs allowance -> estimates directly with the ETH router
       const gasEstimation = await approveEstimateGas();
-      return setGasCost(gasEstimation ? gasPrice.mul(gasEstimation) : undefined);
+      return setGasCost(gasEstimation?.mul(gasPrice));
     }
 
     if (symbol === 'WETH') {
