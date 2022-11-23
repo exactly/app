@@ -36,6 +36,7 @@ import useBalance from 'hooks/useBalance';
 import useMarket from 'hooks/useMarket';
 import useERC20 from 'hooks/useERC20';
 import handleOperationError from 'utils/handleOperationError';
+import analytics from 'utils/analytics';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 
@@ -239,6 +240,12 @@ const Deposit: FC = () => {
       setNeedsAllowance(await needsApproval());
       return;
     }
+    console.log(qty);
+
+    void analytics.track('deposit', {
+      amount: qty,
+      asset: symbol,
+    });
     return deposit();
   }, [approve, approveErrorData, deposit, isLoading, needsAllowance, needsApproval]);
 
