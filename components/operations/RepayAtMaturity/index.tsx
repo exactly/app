@@ -146,7 +146,7 @@ const RepayAtMaturity: FC = () => {
   const isLoading = useMemo(() => isLoadingOp || approveIsLoading, [isLoadingOp, approveIsLoading]);
 
   const previewGasCost = useCallback(async () => {
-    if (isLoading || !walletAddress || !ETHRouterContract || !marketContract || !date) return;
+    if (isLoading || !walletAddress || !ETHRouterContract || !marketContract || !date || !qty) return;
 
     const gasPrice = (await ETHRouterContract.provider.getFeeData()).maxFeePerGas;
     if (!gasPrice) return;
@@ -173,6 +173,7 @@ const RepayAtMaturity: FC = () => {
 
     setGasCost(gasPrice.mul(gasLimit));
   }, [
+    qty,
     ETHRouterContract,
     approveEstimateGas,
     date,
@@ -219,9 +220,14 @@ const RepayAtMaturity: FC = () => {
       setQty(value);
 
       const input = parseFixed(value || '0', decimals);
-      const newPositionAssetsAmount = input
-        .mul(totalPositionAssets.mul(WeiPerEther).div(totalPositionAssets.add(totalPenalties)))
-        .div(WeiPerEther);
+
+      if (input.isZero()) {
+        return setErrorData({ status: true, message: "Can't repay 0" });
+      }
+
+      const newPositionAssetsAmount = totalPositionAssets.isZero()
+        ? Zero
+        : input.mul(totalPositionAssets.mul(WeiPerEther).div(totalPositionAssets.add(totalPenalties))).div(WeiPerEther);
       const newPenaltyAssets = input.sub(newPositionAssetsAmount);
       setPenaltyAssets(newPenaltyAssets);
       setPositionAssetsAmount(newPositionAssetsAmount);

@@ -138,11 +138,12 @@ const WithdrawAtMaturity: FC = () => {
   }, [decimals, date, qty, marketContract, previewerContract, rawSlippage, isEarlyWithdraw]);
 
   useEffect(() => {
+    if (errorData?.status) return;
     previewWithdrawAtMaturity().catch((error) => setErrorData({ status: true, message: handleOperationError(error) }));
-  }, [debounceQty, previewWithdrawAtMaturity]);
+  }, [debounceQty, previewWithdrawAtMaturity, errorData?.status]);
 
   const previewGasCost = useCallback(async () => {
-    if (!walletAddress || !marketContract || !ETHRouterContract || !date) return;
+    if (!walletAddress || !marketContract || !ETHRouterContract || !date || !qty) return;
 
     const gasPrice = (await ETHRouterContract.provider.getFeeData()).maxFeePerGas;
     if (!gasPrice) return;
@@ -174,6 +175,7 @@ const WithdrawAtMaturity: FC = () => {
 
     setGasCost(gasPrice.mul(gasEstimation));
   }, [
+    qty,
     amountToWithdraw,
     ETHRouterContract,
     approveEstimateGas,
@@ -206,18 +208,22 @@ const WithdrawAtMaturity: FC = () => {
         if (inputDecimals.length > decimals) return;
       }
 
+      setQty(value);
+
       const parsedValue = parseFixed(value || '0', decimals);
+
+      if (parsedValue.isZero()) {
+        return setErrorData({ status: true, message: 'Cannot withdraw 0' });
+      }
 
       if (parsedValue.gt(positionAssets)) {
         return setErrorData({
           status: true,
           message: translations[lang].insufficientBalance,
-          component: 'input',
         });
       }
 
       setErrorData(undefined);
-      setQty(value);
     },
     [decimals, positionAssets, translations, lang],
   );

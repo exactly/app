@@ -99,13 +99,12 @@ const Withdraw: FC = () => {
   }, [needsApproval]);
 
   const previewGasCost = useCallback(async () => {
-    if (!symbol || !walletAddress || !marketContract || !ETHRouterContract || !accountData) return;
+    if (!symbol || !walletAddress || !marketContract || !ETHRouterContract || !accountData || !qty) return;
 
     const gasPrice = (await ETHRouterContract.provider.getFeeData()).maxFeePerGas;
     if (!gasPrice) return;
 
     if (await needsApproval()) {
-      // only WETH needs allowance -> estimates directly with the ETH router
       const gasEstimation = await approveEstimateGas();
       return setGasCost(gasEstimation ? gasPrice.mul(gasEstimation) : undefined);
     }
@@ -122,13 +121,13 @@ const Withdraw: FC = () => {
     const gasEstimation = await marketContract.estimateGas.redeem(amount, walletAddress, walletAddress);
     setGasCost(gasPrice.mul(gasEstimation));
   }, [
+    qty,
     ETHRouterContract,
     accountData,
     approveEstimateGas,
     isMax,
     marketContract,
     needsApproval,
-    qty,
     symbol,
     walletAddress,
   ]);

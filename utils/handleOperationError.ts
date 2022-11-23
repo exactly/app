@@ -19,8 +19,7 @@ export default (error: any) => {
       return 'Nonce expired';
     case ErrorCode.UNPREDICTABLE_GAS_LIMIT: {
       if (!error?.error?.data?.originalError?.data) {
-        captureException(error);
-        return 'There was an error, please try again';
+        break;
       }
 
       const { name, args } = ErrorInterface.parseError(error.error.data.originalError.data);
