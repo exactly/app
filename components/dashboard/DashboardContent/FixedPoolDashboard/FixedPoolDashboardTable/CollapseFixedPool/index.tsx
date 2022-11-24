@@ -42,28 +42,32 @@ function CollapseFixedPool({ open, transactions }: Props) {
           {transactions?.map(({ id, date, type, amount, amountUSD, isBorrowOrDeposit }) => (
             <TableRow key={`collapsed_${id}`} sx={{ '&:last-child td, &:last-child th': { border: 0 } }} hover>
               <TableCell component="th" align="left" size="small">
-                <Typography variant="body2">{date || <Skeleton sx={{ margin: 'auto' }} width={40} />}</Typography>
+                <Typography variant="body2">{date || <Skeleton width={70} />}</Typography>
               </TableCell>
               <TableCell align="center" size="small">
                 <Typography variant="body2">
-                  {(
+                  {type ? (
                     <>
                       <span style={isBorrowOrDeposit ? { color: `var(--success)` } : { color: `var(--error)` }}>
                         {isBorrowOrDeposit ? '↓' : '↑'}
                       </span>
                       <span style={{ paddingLeft: '2px' }}>{type}</span>
                     </>
-                  ) || <Skeleton sx={{ margin: 'auto' }} width={40} />}
+                  ) : (
+                    <Skeleton sx={{ margin: 'auto' }} width={60} />
+                  )}
                 </Typography>
               </TableCell>
               <TableCell align="right" size="small">
                 <Typography variant="body2">
-                  {(
+                  {amount ? (
                     <>
                       {amount}
                       <span style={{ fontSize: '0.9em', color: 'grey', paddingLeft: '4px' }}>(${amountUSD})</span>
                     </>
-                  ) || <Skeleton sx={{ margin: 'auto' }} width={40} />}
+                  ) : (
+                    <Skeleton sx={{ marginLeft: 'auto' }} width={100} />
+                  )}
                 </Typography>
               </TableCell>
             </TableRow>
