@@ -98,14 +98,14 @@ const Withdraw: FC = () => {
   }, [needsApproval]);
 
   const previewGasCost = useCallback(async () => {
-    if (!walletAddress || !marketContract || !ETHRouterContract || !accountData || !qty) return;
+    if (isLoading || !walletAddress || !marketContract || !ETHRouterContract || !accountData || !qty) return;
 
     const gasPrice = (await ETHRouterContract.provider.getFeeData()).maxFeePerGas;
     if (!gasPrice) return;
 
     if (await needsApproval()) {
       const gasEstimation = await approveEstimateGas();
-      return setGasCost(gasEstimation ? gasPrice.mul(gasEstimation) : undefined);
+      return setGasCost(gasEstimation?.mul(gasPrice));
     }
 
     const { floatingDepositShares } = accountData[symbol];
@@ -120,6 +120,7 @@ const Withdraw: FC = () => {
     const gasEstimation = await marketContract.estimateGas.redeem(amount, walletAddress, walletAddress);
     setGasCost(gasPrice.mul(gasEstimation));
   }, [
+    isLoading,
     qty,
     ETHRouterContract,
     accountData,
@@ -140,7 +141,7 @@ const Withdraw: FC = () => {
         component: 'gas',
       });
     });
-  }, [errorData?.status, lang, previewGasCost, translations]);
+  }, [errorData?.status, previewGasCost]);
 
   const onMax = useCallback(() => {
     setQty(parsedAmount);

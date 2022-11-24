@@ -113,14 +113,14 @@ const DepositAtMaturity: FC = () => {
   const isLoading = useMemo(() => isLoadingOp || approveIsLoading, [approveIsLoading, isLoadingOp]);
 
   const previewGasCost = useCallback(async () => {
-    if (isLoading || !symbol || !walletAddress || !marketContract || !ETHRouterContract || !date) return;
+    if (isLoading || !walletAddress || !marketContract || !ETHRouterContract || !date) return;
 
     const gasPrice = (await ETHRouterContract.provider.getFeeData()).maxFeePerGas;
     if (!gasPrice) return;
 
     if (await needsApproval()) {
       const gasEstimation = await approveEstimateGas();
-      return setGasCost(gasEstimation ? gasEstimation.mul(gasPrice) : undefined);
+      return setGasCost(gasEstimation?.mul(gasPrice));
     }
 
     if (symbol === 'WETH') {
@@ -337,7 +337,7 @@ const DepositAtMaturity: FC = () => {
         symbol={symbol}
         error={errorData?.component === 'input'}
       />
-      {errorData?.component !== 'gas' && symbol !== 'WETH' && <ModalTxCost gasCost={gasCost} />}
+      {errorData?.component !== 'gas' && <ModalTxCost gasCost={gasCost} />}
       <ModalRowEditable
         text={translations[lang].minimumApr}
         value={toPercentage(slippage)}

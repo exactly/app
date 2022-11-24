@@ -12,7 +12,6 @@ import ModalTitle from 'components/common/modal/ModalTitle';
 import ModalTxCost from 'components/common/modal/ModalTxCost';
 import ModalGif from 'components/common/modal/ModalGif';
 import ModalStepper from 'components/common/modal/ModalStepper';
-import SkeletonModalRowBeforeAfter from 'components/common/skeletons/SkeletonModalRowBeforeAfter';
 import ModalError from 'components/common/modal/ModalError';
 import ModalRowBorrowLimit from 'components/common/modal/ModalRowBorrowLimit';
 
@@ -118,7 +117,7 @@ const Deposit: FC = () => {
   const isLoading = useMemo(() => approveIsLoading || isLoadingOp, [approveIsLoading, isLoadingOp]);
 
   const previewGasCost = useCallback(async () => {
-    if (isLoading || !walletAddress || !ETHRouterContract || !marketContract || !assetContract) return;
+    if (isLoading || !walletAddress || !ETHRouterContract || !marketContract) return;
 
     const gasPrice = (await ETHRouterContract.provider.getFeeData()).maxFeePerGas;
     if (!gasPrice) return;
@@ -146,7 +145,6 @@ const Deposit: FC = () => {
     decimals,
     ETHRouterContract,
     approveEstimateGas,
-    assetContract,
     qty,
     isLoading,
     marketContract,
@@ -264,11 +262,7 @@ const Deposit: FC = () => {
       />
       {errorData?.component !== 'gas' && <ModalTxCost gasCost={gasCost} />}
       <ModalRow text={translations[lang].exactlyBalance} value={depositedAmount} line />
-      {symbol ? (
-        <ModalRowHealthFactor qty={qty} symbol={symbol} operation="deposit" />
-      ) : (
-        <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
-      )}
+      <ModalRowHealthFactor qty={qty} symbol={symbol} operation="deposit" />
       <ModalRowBorrowLimit qty={qty} symbol={symbol} operation="deposit" line />
       <ModalStepper currentStep={needsAllowance ? 1 : 2} totalSteps={3} />
       {errorData && <ModalError message={errorData.message} />}

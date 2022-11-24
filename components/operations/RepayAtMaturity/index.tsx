@@ -196,7 +196,7 @@ const RepayAtMaturity: FC = () => {
         component: 'gas',
       });
     });
-  }, [lang, previewGasCost, translations, errorData?.status]);
+  }, [previewGasCost, errorData?.status]);
 
   const handleOnMax = useCallback(() => {
     setPenaltyAssets(totalPenalties);

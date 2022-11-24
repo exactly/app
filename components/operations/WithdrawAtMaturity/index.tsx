@@ -143,7 +143,7 @@ const WithdrawAtMaturity: FC = () => {
   }, [debounceQty, previewWithdrawAtMaturity, errorData?.status]);
 
   const previewGasCost = useCallback(async () => {
-    if (!walletAddress || !marketContract || !ETHRouterContract || !date || !qty) return;
+    if (isLoading || !walletAddress || !marketContract || !ETHRouterContract || !date || !qty) return;
 
     const gasPrice = (await ETHRouterContract.provider.getFeeData()).maxFeePerGas;
     if (!gasPrice) return;
@@ -175,6 +175,7 @@ const WithdrawAtMaturity: FC = () => {
 
     setGasCost(gasPrice.mul(gasEstimation));
   }, [
+    isLoading,
     qty,
     amountToWithdraw,
     ETHRouterContract,
