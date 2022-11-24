@@ -48,11 +48,10 @@ function TableRowMaturityPool({ symbol, amount, type, maturityDate, market, deci
 
   const getMaturityData = useCallback(async () => {
     const allTransactions = [...withdrawTxs, ...repayTxs, ...depositTxs, ...borrowTxs].sort(
-      (a, b) => parseInt(b.timestamp) - parseInt(b.timestamp),
+      (a, b) => parseInt(b.timestamp) - parseInt(a.timestamp),
     );
 
     if (!allTransactions || !exchangeRate) return;
-    // txs.sort((a, b) => b.timestamp - a.timestamp)
     const transformedTxs = allTransactions.map((transaction: any) => {
       const assets = symbol && formatFixed(transaction.assets, decimals);
 
@@ -161,8 +160,8 @@ function TableRowMaturityPool({ symbol, amount, type, maturityDate, market, deci
             <Button
               variant="outlined"
               onClick={() => {
-                setDate({ value: maturityDate!, label: parseTimestamp(maturityDate!) });
-                setMarket({ value: market! });
+                setDate({ value: maturityDate, label: parseTimestamp(maturityDate) });
+                setMarket({ value: market });
                 setOperation(type === 'borrow' ? 'repayAtMaturity' : 'withdrawAtMaturity');
                 openOperationModal(true);
               }}

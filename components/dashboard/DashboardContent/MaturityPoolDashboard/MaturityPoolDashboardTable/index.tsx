@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -9,54 +9,56 @@ import Typography from '@mui/material/Typography';
 import Paper from '@mui/material/Paper';
 import TableRowMaturityPool from './TableRowMaturityPool';
 import { Tooltip } from '@mui/material';
+import { TableHeader } from 'types/TableHeader';
+import { MaturityPool } from 'types/MaturityPool';
 
 type Props = {
   type: 'deposit' | 'borrow';
-  maturities: any;
+  maturities?: MaturityPool;
 };
 
-const headers: {
-  label: string;
-  key: string;
-  tooltipTitle?: string;
-  tooltipPlacement?: 'top' | 'top-start' | 'top-end';
-  align?: 'left' | 'inherit' | 'center' | 'right' | 'justify';
-  hidden?: boolean;
-}[] = [
-  {
-    label: 'Asset',
-    key: 'asset',
-    tooltipPlacement: 'top-start',
-    align: 'left',
-  },
-  {
-    label: 'Deposited Amount',
-    key: 'deposited amount',
-  },
-  {
-    label: 'Average Fixed Rate',
-    key: 'average fixed rate',
-  },
-  {
-    label: 'Maturity Date',
-    key: 'maturity date',
-  },
-  {
-    label: 'Time Elapsed',
-    key: 'time elapsed',
-  },
-  {
-    label: '',
-    key: 'action',
-  },
-  {
-    label: '',
-    key: 'expandable button',
-    hidden: true,
-  },
-];
-
 function MaturityPoolDashboardTable({ type, maturities }: Props) {
+  const headers: TableHeader[] = useMemo(() => {
+    return [
+      {
+        label: 'Asset',
+        key: 'asset',
+        tooltipPlacement: 'top-start',
+        align: 'left',
+      },
+      {
+        label: type === 'deposit' ? 'Deposited Amount' : 'Debt Amount',
+        key: 'deposited amount',
+      },
+      {
+        label: 'Average Fixed Rate',
+        key: 'average fixed rate',
+      },
+      {
+        label: 'Maturity Date',
+        key: 'maturity date',
+      },
+      {
+        label: 'Time Elapsed',
+        key: 'time elapsed',
+      },
+      {
+        label: '',
+        key: 'action',
+      },
+      {
+        label: '',
+        key: 'expandable button',
+        hidden: true,
+      },
+    ];
+  }, [type]);
+
+  const rows = useMemo(() => {
+    if (!maturities) return [];
+    return Object.keys(maturities)?.flatMap((maturity) => maturities[maturity]);
+  }, [maturities]);
+
   return (
     <TableContainer component={Paper}>
       <Table aria-label="collapsible table">
@@ -82,20 +84,17 @@ function MaturityPoolDashboardTable({ type, maturities }: Props) {
           </TableRow>
         </TableHead>
         <TableBody>
-          {maturities &&
-            Object?.keys(maturities)
-              ?.flatMap((maturity) => maturities[maturity])
-              ?.map(({ principal, maturity, symbol, market, decimals }) => (
-                <TableRowMaturityPool
-                  key={maturity}
-                  type={type}
-                  amount={principal}
-                  maturityDate={maturity}
-                  symbol={symbol}
-                  market={market}
-                  decimals={decimals}
-                />
-              ))}
+          {rows?.map(({ principal, maturity, symbol, market, decimals }) => (
+            <TableRowMaturityPool
+              key={maturity}
+              type={type}
+              amount={principal}
+              maturityDate={maturity}
+              symbol={symbol}
+              market={market}
+              decimals={decimals}
+            />
+          ))}
         </TableBody>
       </Table>
     </TableContainer>

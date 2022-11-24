@@ -1,5 +1,5 @@
 import type { Contract } from '@ethersproject/contracts';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import {
   Table,
   TableBody,
@@ -22,6 +22,7 @@ import { FixedLenderAccountData } from 'types/FixedLenderAccountData';
 import { useWeb3Context } from 'contexts/Web3Context';
 import TableRowFloatingPool from './TableRowFloatingPool';
 import { HealthFactor } from 'types/HealthFactor';
+import { TableHeader } from 'types/TableHeader';
 
 type Props = {
   type: 'deposit' | 'borrow';
@@ -82,45 +83,40 @@ function FloatingPoolDashboardTable({ type, healthFactor }: Props) {
     setItemData(data);
   }
 
-  const headers: {
-    label: string;
-    key: string;
-    tooltipTitle?: string;
-    tooltipPlacement?: 'top' | 'top-start' | 'top-end';
-    align?: 'left' | 'inherit' | 'center' | 'right' | 'justify';
-    hidden?: boolean;
-  }[] = [
-    {
-      label: 'Asset',
-      key: 'asset',
-      tooltipPlacement: 'top-start',
-      align: 'left',
-    },
-    {
-      label: 'Value',
-      key: 'value',
-      align: 'center',
-    },
-    {
-      label: 'eToken',
-      key: 'eToken',
-      hidden: type !== 'deposit',
-      tooltipTitle: 'The Exactly voucher token (ERC-4626) for your deposit in the Variable Rate Pool.',
-    },
-    {
-      label: 'Collateral',
-      key: 'collateral',
-      hidden: type !== 'deposit',
-    },
-    {
-      label: '',
-      key: 'deposit',
-    },
-    {
-      label: '',
-      key: 'borrow',
-    },
-  ];
+  const headers: TableHeader[] = useMemo(() => {
+    return [
+      {
+        label: 'Asset',
+        key: 'asset',
+        tooltipPlacement: 'top-start',
+        align: 'left',
+      },
+      {
+        label: 'Value',
+        key: 'value',
+        align: 'center',
+      },
+      {
+        label: 'eToken',
+        key: 'eToken',
+        hidden: type !== 'deposit',
+        tooltipTitle: 'The Exactly voucher token (ERC-4626) for your deposit in the Variable Rate Pool.',
+      },
+      {
+        label: 'Collateral',
+        key: 'collateral',
+        hidden: type !== 'deposit',
+      },
+      {
+        label: '',
+        key: 'deposit',
+      },
+      {
+        label: '',
+        key: 'borrow',
+      },
+    ];
+  }, [type]);
 
   // TODO: remove hardcoded list
   const defaultRows: FloatingPoolItemData[] = [
