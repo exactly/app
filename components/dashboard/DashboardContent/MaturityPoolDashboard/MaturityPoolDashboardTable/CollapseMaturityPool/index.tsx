@@ -1,16 +1,14 @@
 import React from 'react';
 import { Collapse, Skeleton, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material';
 import { MaturityPoolTransaction } from 'types/MaturityPoolTransaction';
+import { TableHeader } from 'types/TableHeader';
 
 type Props = {
   open: boolean;
   transactions: MaturityPoolTransaction[];
 };
 
-const headers: {
-  label: string;
-  align: 'left' | 'center' | 'right';
-}[] = [
+const headers: TableHeader[] = [
   {
     label: 'Date',
     align: 'left',
