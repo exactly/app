@@ -12,8 +12,10 @@ import { useWeb3Context } from 'contexts/Web3Context';
 import { globals } from 'styles/theme';
 import getHealthFactorData from 'utils/getHealthFactorData';
 import { HealthFactor } from 'types/HealthFactor';
+import analytics from 'utils/analytics';
 
 const { maxWidth } = globals;
+void analytics.page();
 
 const DashboardContent = dynamic(() => import('components/dashboard/DashboardContent'));
 const DashBoard: NextPage = () => {
