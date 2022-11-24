@@ -153,7 +153,7 @@ const RepayAtMaturity: FC = () => {
 
     if (await needsApproval()) {
       const gasEstimation = await approveEstimateGas();
-      return setGasCost(gasEstimation ? gasEstimation.mul(gasPrice) : undefined);
+      return setGasCost(gasEstimation?.mul(gasPrice));
     }
 
     const amount = positionAssetsAmount.isZero() ? DEFAULT_AMOUNT : positionAssetsAmount;
@@ -221,7 +221,7 @@ const RepayAtMaturity: FC = () => {
 
       const input = parseFixed(value || '0', decimals);
 
-      if (input.isZero()) {
+      if (input.isZero() || totalPositionAssets.isZero()) {
         return setErrorData({ status: true, message: "Can't repay 0" });
       }
 

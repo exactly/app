@@ -30,8 +30,7 @@ export default (contract?: ERC20 | Market, spender?: string) => {
       });
 
       // awaits the tx to be confirmed so isLoading stays true
-      const txReceipt = await approveTx.wait();
-      return txReceipt;
+      return await approveTx.wait();
     } catch (error: any) {
       const isDenied = error?.code === ErrorCode.ACTION_REJECTED;
 
@@ -44,7 +43,7 @@ export default (contract?: ERC20 | Market, spender?: string) => {
     } finally {
       setIsLoading(false);
     }
-  }, [spender, contract]);
+  }, [spender, contract, estimateGas]);
 
   return { approve, estimateGas, isLoading, errorData };
 };
