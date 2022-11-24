@@ -221,7 +221,7 @@ function TableRowMaturityPool({ symbol, amount, type, maturityDate, market, deci
 
   return (
     <React.Fragment>
-      <TableRow sx={{ '& > *': { borderBottom: 'unset' } }} hover>
+      <TableRow sx={{ '& > *': { borderBottom: 'unset' }, backgroundColor: open ? 'grey.50' : 'transparent' }} hover>
         <Link href={`/assets/${symbol}`}>
           <TableCell component="th" align="left" sx={{ cursor: 'pointer' }} width={240}>
             <Stack direction="row" spacing={1}>
@@ -271,7 +271,7 @@ function TableRowMaturityPool({ symbol, amount, type, maturityDate, market, deci
         </TableCell>
       </TableRow>
       <TableRow>
-        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={7} size="small">
+        <TableCell style={{ padding: 0 }} colSpan={7} size="small">
           <CollapseMaturityPool open={open} transactions={transactions} />
         </TableCell>
       </TableRow>
