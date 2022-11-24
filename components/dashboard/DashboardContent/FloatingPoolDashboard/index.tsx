@@ -16,7 +16,7 @@ function FloatingPoolDashboard({ type, healthFactor }: Props) {
   return (
     <Grid width={'100%'} my={4} padding={2} sx={{ boxShadow: '#A7A7A7 0px 0px 4px 0px', borderRadius: '5px' }}>
       <Stack direction="row" spacing={2} alignItems="center">
-        <Typography variant="h5">Variable Rate</Typography>
+        <Typography variant="h5">Variable Interest Rate</Typography>
         <AddETokensButton />
       </Stack>
       <FloatingPoolDashboardTable type={type} healthFactor={healthFactor} />
