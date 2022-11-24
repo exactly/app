@@ -5,11 +5,11 @@ export type Borrow = {
   market: string;
   symbol?: string;
   maturity: string;
-  assets?: BigNumber;
+  assets: BigNumber;
   fee: BigNumber;
   caller?: string;
   receiver?: string;
   borrower?: string;
-  timestamp?: string;
+  timestamp: string;
   editable?: boolean;
 };

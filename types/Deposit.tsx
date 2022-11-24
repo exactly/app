@@ -5,10 +5,10 @@ export type Deposit = {
   market: string;
   symbol?: string;
   maturity: string;
-  assets?: BigNumber;
+  assets: BigNumber;
   fee: BigNumber;
   owner?: string;
   caller?: string;
-  timestamp?: string;
+  timestamp: string;
   editable?: boolean;
 };
