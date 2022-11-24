@@ -1,16 +1,16 @@
 import AccountDataContext from 'contexts/AccountDataContext';
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { FixedLenderAccountData } from 'types/FixedLenderAccountData';
-import { MaturityPool } from 'types/MaturityPool';
+import { FixedPool } from 'types/FixedPool';
 
 export default () => {
   const { accountData } = useContext(AccountDataContext);
-  const [deposits, setDeposits] = useState<MaturityPool>();
-  const [borrows, setBorrows] = useState<MaturityPool>();
+  const [deposits, setDeposits] = useState<FixedPool>();
+  const [borrows, setBorrows] = useState<FixedPool>();
 
-  const getMaturityPools = useCallback(async () => {
+  const getFixedPools = useCallback(async () => {
     if (!accountData) return;
-    const data: Record<string, MaturityPool> = {};
+    const data: Record<string, FixedPool> = {};
 
     Object.values(accountData).forEach((asset: FixedLenderAccountData) => {
       asset.fixedDepositPositions.forEach((pool) => {
@@ -75,8 +75,8 @@ export default () => {
   }, [accountData]);
 
   useEffect(() => {
-    getMaturityPools();
-  }, [accountData, getMaturityPools]);
+    getFixedPools();
+  }, [accountData, getFixedPools]);
 
   return { deposits, borrows };
 };

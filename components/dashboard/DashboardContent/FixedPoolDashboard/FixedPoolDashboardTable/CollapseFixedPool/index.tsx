@@ -1,11 +1,11 @@
 import React from 'react';
 import { Collapse, Skeleton, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material';
-import { MaturityPoolTransaction } from 'types/MaturityPoolTransaction';
+import { FixedPoolTransaction } from 'types/FixedPoolTransaction';
 import { TableHeader } from 'types/TableHeader';
 
 type Props = {
   open: boolean;
-  transactions: MaturityPoolTransaction[];
+  transactions: FixedPoolTransaction[];
 };
 
 const headers: TableHeader[] = [
@@ -23,14 +23,14 @@ const headers: TableHeader[] = [
   },
 ];
 
-function CollapseMaturityPool({ open, transactions }: Props) {
+function CollapseFixedPool({ open, transactions }: Props) {
   return (
     <Collapse in={open} timeout="auto" unmountOnExit>
       <Table size="small" aria-label="purchases">
         <TableHead sx={{ backgroundColor: '#ebebeb' }}>
           <TableRow>
             {headers.map(({ label, align }) => (
-              <TableCell key={`collapse_maturity_header_${label}`} align={align}>
+              <TableCell key={`collapse_fixed_pool_header_${label}`} align={align}>
                 <Typography variant="subtitle2" sx={{ color: 'grey.600' }} fontWeight={600}>
                   {label}
                 </Typography>
@@ -74,4 +74,4 @@ function CollapseMaturityPool({ open, transactions }: Props) {
   );
 }
 
-export default CollapseMaturityPool;
+export default CollapseFixedPool;

@@ -1,4 +1,4 @@
-export type MaturityPoolTransaction = {
+export type FixedPoolTransaction = {
   id: string;
   type: string;
   date: string;

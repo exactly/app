@@ -18,7 +18,7 @@ export default (type: 'borrow' | 'deposit', maturity: string, market: string) =>
   const [depositTxs, setDepositTxs] = useState<Deposit[]>([]);
   const [borrowTxs, setBorrowTxs] = useState<Borrow[]>([]);
 
-  const getMaturityData = useCallback(async () => {
+  const getFixedPoolTransactions = useCallback(async () => {
     if (!walletAddress || !maturity || !market || !type) return;
 
     const subgraphUrl = getSubgraph(network?.name);
@@ -51,8 +51,8 @@ export default (type: 'borrow' | 'deposit', maturity: string, market: string) =>
   }, [market, maturity, network?.name, type, walletAddress]);
 
   useEffect(() => {
-    getMaturityData();
-  }, [maturity, walletAddress, getMaturityData]);
+    getFixedPoolTransactions();
+  }, [maturity, walletAddress, getFixedPoolTransactions]);
 
   return { withdrawTxs, repayTxs, depositTxs, borrowTxs };
 };
