@@ -19,6 +19,8 @@ import HeaderInfo from 'components/common/HeaderInfo';
 import Grid from '@mui/material/Grid';
 import OrderAction from 'components/OrderAction';
 import { captureException } from '@sentry/nextjs';
+import { useTheme } from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
 
 type FloatingPoolInfoProps = {
   symbol: string;
@@ -106,12 +108,18 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol, eMarketAddress, n
     },
   ];
 
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const tempStyle = isMobile
+    ? { display: 'flex', justifyContent: 'space-around', width: '100%' }
+    : { marginRight: '16px' };
+
   return (
-    <Grid container justifyContent="space-between">
+    <Grid container justifyContent="space-between" gap={2}>
       <Grid>
         <HeaderInfo title={translations[lang].smartPool} itemsInfo={itemsInfo} variant="h5" />
       </Grid>
-      <Grid alignSelf="end">
+      <Grid alignSelf="end" sx={tempStyle}>
         <OrderAction />
       </Grid>
     </Grid>
