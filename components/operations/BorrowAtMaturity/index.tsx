@@ -87,7 +87,8 @@ const BorrowAtMaturity: FC = () => {
     return market?.value ? getSymbol(market.value, network?.name) : 'DAI';
   }, [market?.value, network?.name]);
 
-  // load asset address
+  const isLoading = useMemo(() => isLoadingOp || approveIsLoading, [approveIsLoading, isLoadingOp]);
+
   useEffect(() => {
     if (!marketContract || symbol === 'WETH') return;
 
@@ -139,7 +140,7 @@ const BorrowAtMaturity: FC = () => {
   }, [needsApproval]);
 
   const previewGasCost = useCallback(async () => {
-    if (!symbol || !walletAddress || !marketContract || !ETHRouterContract || !date) return;
+    if (isLoading || !walletAddress || !marketContract || !ETHRouterContract || !date || !qty) return;
 
     const gasPrice = (await ETHRouterContract.provider.getFeeData()).maxFeePerGas;
     if (!gasPrice) return;
@@ -170,6 +171,7 @@ const BorrowAtMaturity: FC = () => {
     );
     setGasCost(gasPrice.mul(gasEstimation));
   }, [
+    isLoading,
     ETHRouterContract,
     approveEstimateGas,
     date,
@@ -195,18 +197,18 @@ const BorrowAtMaturity: FC = () => {
   const onMax = useCallback(() => {
     if (!accountData || !healthFactor) return;
 
-    const { decimals, usdPrice, adjustFactor } = accountData[symbol];
+    const { decimals, usdPrice, adjustFactor, floatingDepositAssets } = accountData[symbol];
 
     let col = healthFactor.collateral;
     const hf = parseFixed('1.05', 18);
 
-    const hasDepositedToFloatingPool = Number(formatFixed(accountData[symbol].floatingDepositAssets, decimals)) > 0;
+    const hasDepositedToFloatingPool = Number(formatFixed(floatingDepositAssets, decimals)) > 0;
 
     if (!accountData[symbol].isCollateral && hasDepositedToFloatingPool) {
-      col = col.add(accountData[symbol].floatingDepositAssets.mul(accountData[symbol].adjustFactor).div(WeiPerEther));
+      col = col.add(floatingDepositAssets.mul(adjustFactor).div(WeiPerEther));
     }
 
-    const debt = healthFactor.debt;
+    const { debt } = healthFactor;
 
     const safeMaximumBorrow = Number(
       formatFixed(
@@ -414,8 +416,6 @@ const BorrowAtMaturity: FC = () => {
   useEffect(() => {
     updateURAfter().catch(captureException);
   }, [updateURAfter]);
-
-  const isLoading = useMemo(() => isLoadingOp || approveIsLoading, [approveIsLoading, isLoadingOp]);
 
   const handleSubmitAction = useCallback(async () => {
     if (isLoading) return;

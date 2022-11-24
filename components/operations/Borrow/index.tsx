@@ -80,6 +80,8 @@ const Borrow: FC = () => {
     errorData: approveErrorData,
   } = useApprove(marketContract, ETHRouterContract?.address);
 
+  const isLoading = useMemo(() => approveIsLoading || isLoadingOp, [approveIsLoading, isLoadingOp]);
+
   const walletBalance = useBalance(symbol, assetContract);
 
   const liquidity = useMemo(() => {
@@ -119,14 +121,14 @@ const Borrow: FC = () => {
   }, [needsApproval]);
 
   const previewGasCost = useCallback(async () => {
-    if (!walletAddress || !marketContract || !ETHRouterContract) return;
+    if (isLoading || !walletAddress || !marketContract || !ETHRouterContract || !qty) return;
 
     const gasPrice = (await ETHRouterContract.provider.getFeeData()).maxFeePerGas;
     if (!gasPrice) return;
 
     if (await needsApproval()) {
       const gasEstimation = await approveEstimateGas();
-      return setGasCost(gasEstimation ? gasPrice.mul(gasEstimation) : undefined);
+      return setGasCost(gasEstimation?.mul(gasPrice));
     }
 
     if (symbol === 'WETH') {
@@ -141,7 +143,7 @@ const Borrow: FC = () => {
       walletAddress,
     );
     setGasCost(gasPrice.mul(gasEstimation));
-  }, [ETHRouterContract, approveEstimateGas, qty, marketContract, needsApproval, symbol, walletAddress]);
+  }, [isLoading, ETHRouterContract, approveEstimateGas, qty, marketContract, needsApproval, symbol, walletAddress]);
 
   useEffect(() => {
     if (errorData?.status) return;
@@ -269,8 +271,6 @@ const Borrow: FC = () => {
       setIsLoadingOp(false);
     }
   }, [ETHRouterContract, accountData, qty, getAccountData, marketContract, symbol, walletAddress]);
-
-  const isLoading = useMemo(() => approveIsLoading || isLoadingOp, [approveIsLoading, isLoadingOp]);
 
   const handleSubmitAction = useCallback(async () => {
     if (isLoading) return;
