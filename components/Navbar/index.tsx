@@ -1,4 +1,4 @@
-import React, { useContext, useMemo } from 'react';
+import React, { useContext, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
@@ -6,6 +6,7 @@ import dynamic from 'next/dynamic';
 
 const Button = dynamic(() => import('components/common/Button'));
 const Wallet = dynamic(() => import('components/Wallet'));
+import DisclaimerModal from 'components/DisclaimerModal';
 
 import { LangKeys } from 'types/Lang';
 
@@ -19,7 +20,7 @@ import styles from './style.module.scss';
 import keys from './translations.json';
 
 import allowedNetworks from 'config/allowedNetworks.json';
-import DisclaimerModal from 'components/DisclaimerModal';
+import analytics from 'utils/analytics';
 
 function Navbar() {
   const lang: string = useContext(LangContext);
@@ -33,6 +34,10 @@ function Navbar() {
   const router = useRouter();
 
   const { pathname } = router;
+
+  useEffect(() => {
+    void analytics.identify(walletAddress ? walletAddress : 'anon');
+  }, [walletAddress]);
 
   const routes = useMemo(
     () => [

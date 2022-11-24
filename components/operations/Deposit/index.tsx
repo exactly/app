@@ -223,6 +223,12 @@ const Deposit: FC = () => {
 
       setTx({ status: status ? 'success' : 'error', hash: transactionHash });
 
+      void analytics.track(status ? 'depositSuccess' : 'depositError', {
+        amount: qty,
+        asset: symbol,
+        hash: transactionHash,
+      });
+
       getAccountData();
     } catch (error: any) {
       if (depositTx) setTx({ status: 'error', hash: depositTx.hash });
@@ -240,7 +246,6 @@ const Deposit: FC = () => {
       setNeedsAllowance(await needsApproval());
       return;
     }
-    console.log(qty);
 
     void analytics.track('deposit', {
       amount: qty,
