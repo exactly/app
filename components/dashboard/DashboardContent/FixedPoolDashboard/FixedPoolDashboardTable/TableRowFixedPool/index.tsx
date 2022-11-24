@@ -7,16 +7,16 @@ import AccountDataContext from 'contexts/AccountDataContext';
 import { MarketContext } from 'contexts/MarketContext';
 import ModalStatusContext from 'contexts/ModalStatusContext';
 import { useWeb3Context } from 'contexts/Web3Context';
-import useMaturityPoolTransactions from 'hooks/useMaturityPoolTransactions';
+import useFixedOperation from 'hooks/useFixedPoolTransactions';
 import Image from 'next/image';
 import Link from 'next/link';
 
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { MaturityPoolTransaction } from 'types/MaturityPoolTransaction';
+import { FixedPoolTransaction } from 'types/FixedPoolTransaction';
 import formatNumber from 'utils/formatNumber';
 import formatSymbol from 'utils/formatSymbol';
 import parseTimestamp from 'utils/parseTimestamp';
-import CollapseMaturityPool from '../CollapseMaturityPool';
+import CollapseFixedPool from '../CollapseFixedPool';
 
 type Props = {
   symbol: string;
@@ -27,15 +27,15 @@ type Props = {
   decimals: number;
 };
 
-function TableRowMaturityPool({ symbol, amount, type, maturityDate, market, decimals }: Props) {
+function TableRowFixedPool({ symbol, amount, type, maturityDate, market, decimals }: Props) {
   const { walletAddress } = useWeb3Context();
   const { accountData } = useContext(AccountDataContext);
   const { setOpen: openOperationModal, setOperation } = useContext(ModalStatusContext);
   const { setMarket, setDate } = useContext(MarketContext);
-  const { withdrawTxs, repayTxs, depositTxs, borrowTxs } = useMaturityPoolTransactions(type, maturityDate, market);
+  const { withdrawTxs, repayTxs, depositTxs, borrowTxs } = useFixedOperation(type, maturityDate, market);
 
   const [open, setOpen] = useState(false);
-  const [transactions, setTransactions] = useState<MaturityPoolTransaction[]>([]);
+  const [transactions, setTransactions] = useState<FixedPoolTransaction[]>([]);
   const [exchangeRate, setExchangeRate] = useState<number | undefined>();
   const [APR, setAPR] = useState<number | undefined>();
 
@@ -46,7 +46,7 @@ function TableRowMaturityPool({ symbol, amount, type, maturityDate, market, deci
     setExchangeRate(rate);
   }, [accountData, symbol]);
 
-  const getMaturityData = useCallback(async () => {
+  const getFixedPoolTxs = useCallback(async () => {
     const allTransactions = [...withdrawTxs, ...repayTxs, ...depositTxs, ...borrowTxs].sort(
       (a, b) => parseInt(b.timestamp) - parseInt(a.timestamp),
     );
@@ -118,8 +118,8 @@ function TableRowMaturityPool({ symbol, amount, type, maturityDate, market, deci
 
   useEffect(() => {
     getRate();
-    getMaturityData();
-  }, [maturityDate, walletAddress, accountData, getMaturityData, getRate]);
+    getFixedPoolTxs();
+  }, [maturityDate, walletAddress, accountData, getFixedPoolTxs, getRate]);
 
   useEffect(() => {
     getAPR();
@@ -178,11 +178,11 @@ function TableRowMaturityPool({ symbol, amount, type, maturityDate, market, deci
       </TableRow>
       <TableRow>
         <TableCell style={{ padding: 0 }} colSpan={7} size="small">
-          <CollapseMaturityPool open={open} transactions={transactions} />
+          <CollapseFixedPool open={open} transactions={transactions} />
         </TableCell>
       </TableRow>
     </React.Fragment>
   );
 }
 
-export default TableRowMaturityPool;
+export default TableRowFixedPool;

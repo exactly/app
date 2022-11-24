@@ -9,4 +9,4 @@ type Pool = {
   decimals: number;
 };
 
-export type MaturityPool = Record<string, Pool[]>;
+export type FixedPool = Record<string, Pool[]>;

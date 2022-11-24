@@ -7,17 +7,17 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 import Paper from '@mui/material/Paper';
-import TableRowMaturityPool from './TableRowMaturityPool';
+import TableRowFixedPool from './TableRowFixedPool';
 import { Tooltip } from '@mui/material';
 import { TableHeader } from 'types/TableHeader';
-import { MaturityPool } from 'types/MaturityPool';
+import { FixedPool } from 'types/FixedPool';
 
 type Props = {
   type: 'deposit' | 'borrow';
-  maturities?: MaturityPool;
+  fixedPools?: FixedPool;
 };
 
-function MaturityPoolDashboardTable({ type, maturities }: Props) {
+function FixedPoolDashboardTable({ type, fixedPools }: Props) {
   const headers: TableHeader[] = useMemo(() => {
     return [
       {
@@ -55,9 +55,9 @@ function MaturityPoolDashboardTable({ type, maturities }: Props) {
   }, [type]);
 
   const rows = useMemo(() => {
-    if (!maturities) return [];
-    return Object.keys(maturities)?.flatMap((maturity) => maturities[maturity]);
-  }, [maturities]);
+    if (!fixedPools) return [];
+    return Object.keys(fixedPools)?.flatMap((maturity) => fixedPools[maturity]);
+  }, [fixedPools]);
 
   return (
     <TableContainer component={Paper}>
@@ -85,7 +85,7 @@ function MaturityPoolDashboardTable({ type, maturities }: Props) {
         </TableHead>
         <TableBody>
           {rows?.map(({ principal, maturity, symbol, market, decimals }) => (
-            <TableRowMaturityPool
+            <TableRowFixedPool
               key={maturity}
               type={type}
               amount={principal}
@@ -101,4 +101,4 @@ function MaturityPoolDashboardTable({ type, maturities }: Props) {
   );
 }
 
-export default MaturityPoolDashboardTable;
+export default FixedPoolDashboardTable;

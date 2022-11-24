@@ -7,7 +7,7 @@ const { maxWidth } = globals;
 
 // const DashboardUserCharts = dynamic(() => import('components/DashboardContent/DashboardUserCharts'));
 const FloatingPoolDashboard = dynamic(() => import('components/dashboard/DashboardContent/FloatingPoolDashboard'));
-const MaturityPoolDashboard = dynamic(() => import('components/dashboard/DashboardContent/MaturityPoolDashboard'));
+const FixedPoolDashboard = dynamic(() => import('components/dashboard/DashboardContent/FixedPoolDashboard'));
 const EmptyState = dynamic(() => import('components/EmptyState'));
 
 import { useWeb3Context } from 'contexts/Web3Context';
@@ -37,7 +37,7 @@ function DashboardContent({ healthFactor }: Props) {
       content: walletAddress ? (
         <>
           <FloatingPoolDashboard type="deposit" healthFactor={healthFactor} />
-          <MaturityPoolDashboard type="deposit" />
+          <FixedPoolDashboard type="deposit" />
         </>
       ) : (
         <EmptyState />
@@ -48,7 +48,7 @@ function DashboardContent({ healthFactor }: Props) {
       content: walletAddress ? (
         <>
           <FloatingPoolDashboard type="borrow" healthFactor={healthFactor} />
-          <MaturityPoolDashboard type="borrow" />
+          <FixedPoolDashboard type="borrow" />
         </>
       ) : (
         <EmptyState />
