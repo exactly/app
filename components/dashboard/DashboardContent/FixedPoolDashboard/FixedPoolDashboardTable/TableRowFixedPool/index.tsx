@@ -6,12 +6,11 @@ import StyledLinearProgress from 'components/common/LinearProgress';
 import AccountDataContext from 'contexts/AccountDataContext';
 import { MarketContext } from 'contexts/MarketContext';
 import ModalStatusContext from 'contexts/ModalStatusContext';
-import { useWeb3Context } from 'contexts/Web3Context';
 import useFixedOperation from 'hooks/useFixedPoolTransactions';
 import Image from 'next/image';
 import Link from 'next/link';
 
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { useContext, useMemo, useState } from 'react';
 import { FixedPoolTransaction } from 'types/FixedPoolTransaction';
 import formatNumber from 'utils/formatNumber';
 import formatSymbol from 'utils/formatSymbol';
@@ -28,30 +27,24 @@ type Props = {
 };
 
 function TableRowFixedPool({ symbol, amount, type, maturityDate, market, decimals }: Props) {
-  const { walletAddress } = useWeb3Context();
   const { accountData } = useContext(AccountDataContext);
   const { setOpen: openOperationModal, setOperation } = useContext(ModalStatusContext);
   const { setMarket, setDate } = useContext(MarketContext);
   const { withdrawTxs, repayTxs, depositTxs, borrowTxs } = useFixedOperation(type, maturityDate, market);
-
   const [open, setOpen] = useState(false);
-  const [transactions, setTransactions] = useState<FixedPoolTransaction[]>([]);
-  const [exchangeRate, setExchangeRate] = useState<number | undefined>();
-  const [APR, setAPR] = useState<number | undefined>();
 
-  const getRate = useCallback(() => {
+  const exchangeRate: number | undefined = useMemo(() => {
     if (!symbol || !accountData) return;
     const rate = parseFloat(formatFixed(accountData[symbol].usdPrice, 18));
-
-    setExchangeRate(rate);
+    return rate;
   }, [accountData, symbol]);
 
-  const getFixedPoolTxs = useCallback(async () => {
+  const transactions: FixedPoolTransaction[] = useMemo(() => {
     const allTransactions = [...withdrawTxs, ...repayTxs, ...depositTxs, ...borrowTxs].sort(
       (a, b) => parseInt(b.timestamp) - parseInt(a.timestamp),
     );
 
-    if (!allTransactions || !exchangeRate) return;
+    if (!allTransactions || !exchangeRate) return [];
     const transformedTxs = allTransactions.map((transaction: any) => {
       const assets = symbol && formatFixed(transaction.assets, decimals);
 
@@ -77,10 +70,10 @@ function TableRowFixedPool({ symbol, amount, type, maturityDate, market, decimal
       };
     });
 
-    setTransactions(transformedTxs);
+    return transformedTxs;
   }, [withdrawTxs, repayTxs, depositTxs, borrowTxs, type, exchangeRate, decimals, symbol]);
 
-  const getAPR = useCallback(async () => {
+  const APR: number | undefined = useMemo(() => {
     const allTransactions = [...depositTxs, ...borrowTxs];
     if (!allTransactions) return;
 
@@ -101,9 +94,7 @@ function TableRowFixedPool({ symbol, amount, type, maturityDate, market, decimal
       allAmounts += transactionAmount;
     });
 
-    const averageAPR = allAPRbyAmount / allAmounts;
-
-    setAPR(averageAPR);
+    return allAPRbyAmount / allAmounts;
   }, [depositTxs, borrowTxs, decimals]);
 
   const progress = useMemo(() => {
@@ -115,15 +106,6 @@ function TableRowFixedPool({ symbol, amount, type, maturityDate, market, decimal
     const current = nowInSeconds - startDate;
     return Math.min((current * 100) / maturityLife, 100);
   }, [maturityDate]);
-
-  useEffect(() => {
-    getRate();
-    getFixedPoolTxs();
-  }, [maturityDate, walletAddress, accountData, getFixedPoolTxs, getRate]);
-
-  useEffect(() => {
-    getAPR();
-  }, [walletAddress, accountData, getAPR]);
 
   return (
     <React.Fragment>
