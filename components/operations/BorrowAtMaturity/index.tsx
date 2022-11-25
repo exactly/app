@@ -46,6 +46,7 @@ import keys from './translations.json';
 
 import numbers from 'config/numbers.json';
 import handleOperationError from 'utils/handleOperationError';
+import analytics from 'utils/analytics';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 
@@ -316,6 +317,13 @@ const BorrowAtMaturity: FC = () => {
       const { status, transactionHash } = await borrowTx.wait();
       setTx({ status: status ? 'success' : 'error', hash: transactionHash });
 
+      void analytics.track(status ? 'borrowAtMaturitySuccess' : 'borrowAtMaturityError', {
+        amount: qty,
+        asset: symbol,
+        maturity: date.value,
+        hash: transactionHash,
+      });
+
       getAccountData();
     } catch (error: any) {
       if (error?.code === ErrorCode.ACTION_REJECTED) {
@@ -419,7 +427,15 @@ const BorrowAtMaturity: FC = () => {
 
   const handleSubmitAction = useCallback(async () => {
     if (isLoading) return;
-    if (!needsAllowance) return borrow();
+    if (!needsAllowance) {
+      void analytics.track('borrowAtMaturity', {
+        amount: qty,
+        maturity: date?.value,
+        asset: symbol,
+      });
+
+      return borrow();
+    }
 
     await approve();
     setErrorData(approveErrorData);

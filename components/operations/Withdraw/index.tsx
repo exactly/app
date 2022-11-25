@@ -32,6 +32,7 @@ import { WeiPerEther } from '@ethersproject/constants';
 import handleOperationError from 'utils/handleOperationError';
 import useApprove from 'hooks/useApprove';
 import { LoadingButton } from '@mui/lab';
+import analytics from 'utils/analytics';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 
@@ -226,6 +227,12 @@ const Withdraw: FC = () => {
 
       setTx({ status: status ? 'success' : 'error', hash: transactionHash });
 
+      void analytics.track(status ? 'withdrawSuccess' : 'withdrawError', {
+        amount: qty,
+        asset: symbol,
+        hash: transactionHash,
+      });
+
       getAccountData();
     } catch (error: any) {
       if (withdrawTx) setTx({ status: 'error', hash: withdrawTx?.hash });
@@ -245,8 +252,13 @@ const Withdraw: FC = () => {
       return;
     }
 
+    void analytics.track('withdraw', {
+      amount: qty,
+      asset: symbol,
+    });
+
     return withdraw();
-  }, [approve, approveErrorData, isLoading, needsAllowance, needsApproval, withdraw]);
+  }, [approve, approveErrorData, isLoading, needsAllowance, needsApproval, qty, symbol, withdraw]);
 
   if (tx) return <ModalGif tx={tx} tryAgain={withdraw} />;
 

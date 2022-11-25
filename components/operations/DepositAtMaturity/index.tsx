@@ -39,6 +39,7 @@ import useETHRouter from 'hooks/useETHRouter';
 import usePreviewer from 'hooks/usePreviewer';
 import useERC20 from 'hooks/useERC20';
 import handleOperationError from 'utils/handleOperationError';
+import analytics from 'utils/analytics';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 
@@ -237,6 +238,13 @@ const DepositAtMaturity: FC = () => {
       const { status, transactionHash } = await depositTx.wait();
       setTx({ status: status ? 'success' : 'error', hash: transactionHash });
 
+      void analytics.track(status ? 'depositAtMaturitySuccess' : 'depositAtMaturityError', {
+        amount: qty,
+        asset: symbol,
+        maturity: date.value,
+        hash: transactionHash,
+      });
+
       getAccountData();
     } catch (error: any) {
       if (error?.code === ErrorCode.ACTION_REJECTED) {
@@ -263,6 +271,7 @@ const DepositAtMaturity: FC = () => {
     getAccountData,
     lang,
     marketContract,
+    qty,
     slippage,
     symbol,
     translations,
@@ -271,12 +280,19 @@ const DepositAtMaturity: FC = () => {
 
   const handleSubmitAction = useCallback(async () => {
     if (isLoading) return;
-    if (!needsAllowance) return deposit();
+    if (!needsAllowance) {
+      void analytics.track('depositAtMaturity', {
+        amount: qty,
+        maturity: date?.value,
+        asset: symbol,
+      });
+      return deposit();
+    }
 
     await approve();
     setErrorData(approveErrorData);
     setNeedsAllowance(await needsApproval());
-  }, [approve, approveErrorData, deposit, isLoading, needsAllowance, needsApproval]);
+  }, [approve, approveErrorData, date?.value, deposit, isLoading, needsAllowance, needsApproval, qty, symbol]);
 
   const updateAPR = useCallback(async () => {
     if (!accountData || !date || !previewerContract || !marketContract) return;
