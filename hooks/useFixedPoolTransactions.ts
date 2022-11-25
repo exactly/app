@@ -52,7 +52,7 @@ export default (type: 'borrow' | 'deposit', maturity: string, market: string) =>
 
   useEffect(() => {
     getFixedPoolTransactions();
-  }, [maturity, walletAddress, getFixedPoolTransactions]);
+  }, [getFixedPoolTransactions]);
 
   return { withdrawTxs, repayTxs, depositTxs, borrowTxs };
 };
