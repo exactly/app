@@ -7,7 +7,7 @@ export default () => {
   const { accountData } = useContext(AccountDataContext);
 
   const fixedPools = useMemo(() => {
-    if (!accountData) return { deposits: [], borrows: [] };
+    if (!accountData) return { deposits: undefined, borrows: undefined };
     const data: Record<string, FixedPool> = {};
 
     Object.values(accountData).forEach((asset: FixedLenderAccountData) => {
