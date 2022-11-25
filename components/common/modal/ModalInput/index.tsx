@@ -1,32 +1,47 @@
 import { formatFixed, parseFixed } from '@ethersproject/bignumber';
-import React, { ChangeEventHandler, MouseEventHandler, useContext, ClipboardEvent, useMemo } from 'react';
+import React, {
+  ChangeEventHandler,
+  MouseEventHandler,
+  useContext,
+  ClipboardEvent,
+  KeyboardEvent,
+  useMemo,
+  useCallback,
+  useRef,
+} from 'react';
 
 import AccountDataContext from 'contexts/AccountDataContext';
 
 import formatNumber from 'utils/formatNumber';
 
 import styles from './style.module.scss';
+import { WeiPerEther } from '@ethersproject/constants';
 
 type Props = {
-  value?: string;
+  value: string;
   name?: string;
   disabled?: boolean;
-  symbol?: string;
+  symbol: string;
   error?: boolean;
-  onChange?: ChangeEventHandler;
+  onChange?: ChangeEventHandler<HTMLInputElement>;
   onMax?: MouseEventHandler;
 };
 
+const filterKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+  const blockedCharacters = ['e', 'E', '+', '-', ','];
+  if (blockedCharacters.includes(e.key)) {
+    e.preventDefault();
+  }
+};
+
 function ModalInput({ value, name, disabled, symbol, error, onChange, onMax }: Props) {
+  const ref = useRef<HTMLInputElement>(null);
   const { accountData } = useContext(AccountDataContext);
 
-  const blockedCharacters = ['e', 'E', '+', '-', ','];
-
   const newValue = useMemo(() => {
-    if (!accountData || !value || !symbol) return;
+    if (!accountData || !value) return;
 
-    const decimals = accountData[symbol].decimals;
-    const usdPrice = accountData[symbol].usdPrice;
+    const { decimals, usdPrice } = accountData[symbol];
 
     const regex = /[^,.]*$/g;
     const inputDecimals = regex.exec(value)![0];
@@ -34,39 +49,47 @@ function ModalInput({ value, name, disabled, symbol, error, onChange, onMax }: P
     if (inputDecimals.length > decimals) return;
 
     const parsedValue = parseFixed(value, decimals);
-    const WAD = parseFixed('1', 18);
 
-    const valueUsd = parsedValue.mul(usdPrice).div(WAD);
+    const valueUsd = parsedValue.mul(usdPrice).div(WeiPerEther);
 
     return formatFixed(valueUsd, decimals);
   }, [symbol, value, accountData]);
 
-  function filterPasteValue(e: ClipboardEvent<HTMLInputElement>) {
-    if (e.type === 'paste') {
-      const data = e.clipboardData.getData('Text');
-      if (/[^\d|.]+/gi.test(data)) e.preventDefault();
+  const filterPasteValue = useCallback((e: ClipboardEvent<HTMLInputElement>) => {
+    if (e.type !== 'paste') {
+      return;
     }
-  }
+
+    const data = e.clipboardData.getData('text');
+    if (!/^(\d*[.,])?\d+$/gi.test(data)) {
+      e.preventDefault();
+    }
+
+    if (data.includes(',') && ref.current) {
+      e.preventDefault();
+      ref.current.value = data.replaceAll(',', '.');
+      ref.current.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+  }, []);
 
   return (
     <section className={error ? styles.error : styles.inputSection}>
       <input
+        ref={ref}
         min={0.0}
         type="number"
-        placeholder={'0'}
+        placeholder="0"
         value={value}
         onChange={onChange}
         name={name}
         disabled={disabled}
         className={styles.input}
-        onKeyDown={(e) => blockedCharacters.includes(e.key) && e.preventDefault()}
-        onPaste={(e) => filterPasteValue(e)}
+        onKeyDown={filterKeyDown}
+        onPasteCapture={filterPasteValue}
         step="any"
         autoFocus
       />
-      <p className={styles.translatedValue}>
-        {value === '' || !value || !symbol || !newValue ? '$0' : `$${formatNumber(newValue)}`}
-      </p>
+      <p className={styles.translatedValue}>{`$${formatNumber(newValue || 0, 'USD')}`}</p>
       {onMax && (
         <p className={styles.max} onClick={onMax}>
           MAX
