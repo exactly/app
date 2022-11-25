@@ -34,6 +34,7 @@ import useBalance from 'hooks/useBalance';
 import useMarket from 'hooks/useMarket';
 import useERC20 from 'hooks/useERC20';
 import handleOperationError from 'utils/handleOperationError';
+import analytics from 'utils/analytics';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 
@@ -259,6 +260,12 @@ const Borrow: FC = () => {
 
       setTx({ status: status ? 'success' : 'error', hash: transactionHash });
 
+      void analytics.track(status ? 'borrowSuccess' : 'borrowError', {
+        amount: qty,
+        asset: symbol,
+        hash: transactionHash,
+      });
+
       getAccountData();
     } catch (error: any) {
       if (borrowTx?.hash) setTx({ status: 'error', hash: borrowTx.hash });
@@ -280,8 +287,14 @@ const Borrow: FC = () => {
       setNeedsAllowance(await needsApproval());
       return;
     }
+
+    void analytics.track('borrow', {
+      amount: qty,
+      asset: symbol,
+    });
+
     return borrow();
-  }, [approve, approveErrorData, borrow, isLoading, needsAllowance, needsApproval]);
+  }, [approve, approveErrorData, borrow, isLoading, needsAllowance, needsApproval, qty, symbol]);
 
   if (tx) return <ModalGif tx={tx} tryAgain={borrow} />;
 

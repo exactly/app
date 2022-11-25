@@ -36,6 +36,7 @@ import useERC20 from 'hooks/useERC20';
 import useApprove from 'hooks/useApprove';
 import handleOperationError from 'utils/handleOperationError';
 import useBalance from 'hooks/useBalance';
+import analytics from 'utils/analytics';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 const DEFAULT_SLIPPAGE = (numbers.slippage * 100).toFixed(2);
@@ -283,6 +284,13 @@ const RepayAtMaturity: FC = () => {
 
       setTx({ status: status ? 'success' : 'error', hash: transactionHash });
 
+      void analytics.track(status ? 'repayAtMaturitySuccess' : 'repayAtMaturityError', {
+        amount: qty,
+        asset: symbol,
+        maturity: date.value,
+        hash: transactionHash,
+      });
+
       getAccountData();
     } catch (error) {
       if (repayTx) setTx({ status: 'error', hash: repayTx?.hash });
@@ -311,6 +319,12 @@ const RepayAtMaturity: FC = () => {
       setNeedsAllowance(await needsApproval());
       return;
     }
+
+    void analytics.track('repayAtMaturity', {
+      amount: qty,
+      maturity: date?.value,
+      asset: symbol,
+    });
 
     return repay();
   }, [approve, approveErrorData, isLoading, needsAllowance, needsApproval, repay]);

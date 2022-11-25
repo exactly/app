@@ -35,6 +35,7 @@ import useETHRouter from 'hooks/useETHRouter';
 import useApprove from 'hooks/useApprove';
 import handleOperationError from 'utils/handleOperationError';
 import usePreviewer from 'hooks/usePreviewer';
+import analytics from 'utils/analytics';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 const DEFAULT_SLIPPAGE = (100 * numbers.slippage).toFixed(2);
@@ -274,6 +275,13 @@ const WithdrawAtMaturity: FC = () => {
 
       setTx({ status: status ? 'success' : 'error', hash: transactionHash });
 
+      void analytics.track(status ? 'withdrawAtMaturitySuccess' : 'withdrawAtMaturityError', {
+        amount: qty,
+        asset: symbol,
+        maturity: date.value,
+        hash: transactionHash,
+      });
+
       getAccountData();
     } catch (error) {
       if (withdrawTx) setTx({ status: 'error', hash: withdrawTx?.hash });
@@ -301,8 +309,15 @@ const WithdrawAtMaturity: FC = () => {
       setNeedsAllowance(await needsApproval());
       return;
     }
+
+    void analytics.track('withdrawAtMaturity', {
+      amount: qty,
+      maturity: date?.value,
+      asset: symbol,
+    });
+
     return withdraw();
-  }, [needsAllowance, approve, isLoading, approveErrorData, needsApproval, withdraw]);
+  }, [isLoading, needsAllowance, qty, date?.value, symbol, withdraw, approve, approveErrorData, needsApproval]);
 
   if (tx) return <ModalGif tx={tx} tryAgain={withdraw} />;
 

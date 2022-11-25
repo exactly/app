@@ -4,7 +4,7 @@ import googleAnalytics from '@analytics/google-analytics';
 const analytics = Analytics({
   plugins: [
     googleAnalytics({
-      measurementIds: 'G-2TWBJZP59Y',
+      measurementIds: process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS,
     }),
   ],
 });

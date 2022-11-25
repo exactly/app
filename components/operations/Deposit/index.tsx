@@ -251,6 +251,7 @@ const Deposit: FC = () => {
       amount: qty,
       asset: symbol,
     });
+
     return deposit();
   }, [approve, approveErrorData, deposit, isLoading, needsAllowance, needsApproval]);
 

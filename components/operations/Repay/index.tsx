@@ -32,6 +32,7 @@ import useETHRouter from 'hooks/useETHRouter';
 import handleOperationError from 'utils/handleOperationError';
 import useERC20 from 'hooks/useERC20';
 import useBalance from 'hooks/useBalance';
+import analytics from 'utils/analytics';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 
@@ -205,6 +206,12 @@ function Repay() {
 
       setTx({ status: status ? 'success' : 'error', hash: transactionHash });
 
+      void analytics.track(status ? 'repaySuccess' : 'repayError', {
+        amount: qty,
+        asset: symbol,
+        hash: transactionHash,
+      });
+
       getAccountData();
     } catch (error: any) {
       if (repayTx) setTx({ status: 'error', hash: repayTx?.hash });
@@ -268,8 +275,13 @@ function Repay() {
       return;
     }
 
+    void analytics.track('repay', {
+      amount: qty,
+      asset: symbol,
+    });
+
     return repay();
-  }, [approve, approveErrorData, isLoading, needsAllowance, needsApproval, repay]);
+  }, [approve, approveErrorData, isLoading, needsAllowance, needsApproval, qty, repay, symbol]);
 
   if (tx) return <ModalGif tx={tx} tryAgain={repay} />;
 
