@@ -28,7 +28,7 @@ export default (type: 'borrow' | 'deposit', maturity: string, market: string) =>
         subgraphUrl,
         getMaturityPoolBorrowsQuery(walletAddress, maturity, market.toLowerCase()),
       );
-      setDepositTxs([...getMaturityPoolBorrows.borrowAtMaturities]);
+      setBorrowTxs([...getMaturityPoolBorrows.borrowAtMaturities]);
 
       const getMaturityPoolRepays = await request(
         subgraphUrl,
@@ -40,7 +40,7 @@ export default (type: 'borrow' | 'deposit', maturity: string, market: string) =>
         subgraphUrl,
         getMaturityPoolDepositsQuery(walletAddress, maturity, market.toLowerCase()),
       );
-      setBorrowTxs([...getMaturityPoolDeposits.depositAtMaturities]);
+      setDepositTxs([...getMaturityPoolDeposits.depositAtMaturities]);
 
       const getMaturityPoolWithdraws = await request(
         subgraphUrl,
