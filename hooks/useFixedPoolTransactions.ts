@@ -19,9 +19,8 @@ export default (type: 'borrow' | 'deposit', maturity: string, market: string) =>
   const [borrowTxs, setBorrowTxs] = useState<Borrow[]>([]);
 
   const getFixedPoolTransactions = useCallback(async () => {
-    if (!walletAddress || !maturity || !market || !type) return;
-
     const subgraphUrl = getSubgraph(network?.name);
+    if (!walletAddress || !maturity || !market || !type || !subgraphUrl) return;
 
     if (type === 'borrow') {
       const getMaturityPoolBorrows = await request(
