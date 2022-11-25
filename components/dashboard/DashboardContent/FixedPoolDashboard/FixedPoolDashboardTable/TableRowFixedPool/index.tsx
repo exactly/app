@@ -155,7 +155,11 @@ function TableRowFixedPool({ symbol, amount, type, maturityDate, market, decimal
         </TableCell>
         <TableCell align="center" size="small">
           {progress ? (
-            <StyledLinearProgress variant="determinate" value={progress} />
+            <StyledLinearProgress
+              variant="determinate"
+              value={progress}
+              barColor={progress === 100 ? '#008cf4' : '#34c53a'}
+            />
           ) : (
             <Skeleton sx={{ margin: 'auto' }} width={130} />
           )}
