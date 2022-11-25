@@ -113,7 +113,7 @@ function TableRowFixedPool({ symbol, amount, type, maturityDate, market, decimal
     const nowInSeconds = Date.now() / 1000;
     const startDate = parseInt(maturityDate) - maturityLife;
     const current = nowInSeconds - startDate;
-    return (current * 100) / maturityLife;
+    return Math.min((current * 100) / maturityLife, 100);
   }, [maturityDate]);
 
   useEffect(() => {
