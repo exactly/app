@@ -31,7 +31,6 @@ import useMarket from 'hooks/useMarket';
 import useETHRouter from 'hooks/useETHRouter';
 import handleOperationError from 'utils/handleOperationError';
 import useERC20 from 'hooks/useERC20';
-import useDebounce from 'hooks/useDebounce';
 import useBalance from 'hooks/useBalance';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
@@ -54,7 +53,6 @@ function Repay() {
   const [errorData, setErrorData] = useState<ErrorData | undefined>();
   const [assetAddress, setAssetAddress] = useState<string | undefined>();
 
-  const debounceQty = useDebounce(qty);
   const ETHRouterContract = useETHRouter();
 
   const marketContract = useMarket(market?.value);
@@ -127,7 +125,7 @@ function Repay() {
 
   const handleInputChange = useCallback(
     ({ target: { value, valueAsNumber } }: ChangeEvent<HTMLInputElement>) => {
-      if (!accountData || !symbol) return;
+      if (!accountData) return;
       const { decimals } = accountData[symbol];
 
       if (value.includes('.')) {
@@ -228,8 +226,8 @@ function Repay() {
     }
 
     if (symbol === 'WETH') {
-      const amount = debounceQty
-        ? parseFixed(debounceQty, 18)
+      const amount = qty
+        ? parseFixed(qty, 18)
             .mul(parseFixed(String(1 + numbers.slippage), 18))
             .div(WeiPerEther)
         : DEFAULT_AMOUNT;
@@ -243,21 +241,12 @@ function Repay() {
 
     const decimals = await marketContract.decimals();
     const gasLimit = await marketContract.estimateGas.repay(
-      debounceQty ? parseFixed(debounceQty, decimals) : DEFAULT_AMOUNT,
+      qty ? parseFixed(qty, decimals) : DEFAULT_AMOUNT,
       walletAddress,
     );
 
     setGasCost(gasPrice.mul(gasLimit));
-  }, [
-    ETHRouterContract,
-    approveEstimateGas,
-    debounceQty,
-    isLoading,
-    marketContract,
-    needsApproval,
-    symbol,
-    walletAddress,
-  ]);
+  }, [ETHRouterContract, approveEstimateGas, qty, isLoading, marketContract, needsApproval, symbol, walletAddress]);
 
   useEffect(() => {
     if (errorData?.status) return;
@@ -268,7 +257,7 @@ function Repay() {
         component: 'gas',
       });
     });
-  }, [lang, previewGasCost, translations, errorData?.status]);
+  }, [previewGasCost, errorData?.status]);
 
   const handleSubmitAction = useCallback(async () => {
     if (isLoading) return;
@@ -297,7 +286,6 @@ function Repay() {
       {errorData?.component !== 'gas' && <ModalTxCost gasCost={gasCost} />}
       <ModalRowHealthFactor qty={qty} symbol={symbol} operation="repay" />
       <ModalRowBorrowLimit qty={qty} symbol={symbol} operation="repay" line />
-
       {errorData && <ModalError message={errorData.message} />}
       <LoadingButton
         fullWidth

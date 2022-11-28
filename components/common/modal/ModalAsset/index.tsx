@@ -33,7 +33,7 @@ function ModalAsset({ asset, assetTitle, amount, amountTitle }: Props) {
     if (!accountData || !asset) return 1;
 
     return parseFloat(formatFixed(accountData[asset].usdPrice, 18));
-  }, [parsedSymbol, accountData]);
+  }, [accountData, asset]);
 
   return (
     <div className={styles.assetContainer}>

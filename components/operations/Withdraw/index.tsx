@@ -8,7 +8,6 @@ import ModalRowHealthFactor from 'components/common/modal/ModalRowHealthFactor';
 import ModalTitle from 'components/common/modal/ModalTitle';
 import ModalTxCost from 'components/common/modal/ModalTxCost';
 import ModalGif from 'components/common/modal/ModalGif';
-import SkeletonModalRowBeforeAfter from 'components/common/skeletons/SkeletonModalRowBeforeAfter';
 import ModalError from 'components/common/modal/ModalError';
 import ModalRowBorrowLimit from 'components/common/modal/ModalRowBorrowLimit';
 
@@ -99,14 +98,14 @@ const Withdraw: FC = () => {
   }, [needsApproval]);
 
   const previewGasCost = useCallback(async () => {
-    if (!symbol || !walletAddress || !marketContract || !ETHRouterContract || !accountData || !qty) return;
+    if (isLoading || !walletAddress || !marketContract || !ETHRouterContract || !accountData || !qty) return;
 
     const gasPrice = (await ETHRouterContract.provider.getFeeData()).maxFeePerGas;
     if (!gasPrice) return;
 
     if (await needsApproval()) {
       const gasEstimation = await approveEstimateGas();
-      return setGasCost(gasEstimation ? gasPrice.mul(gasEstimation) : undefined);
+      return setGasCost(gasEstimation?.mul(gasPrice));
     }
 
     const { floatingDepositShares } = accountData[symbol];
@@ -121,6 +120,7 @@ const Withdraw: FC = () => {
     const gasEstimation = await marketContract.estimateGas.redeem(amount, walletAddress, walletAddress);
     setGasCost(gasPrice.mul(gasEstimation));
   }, [
+    isLoading,
     qty,
     ETHRouterContract,
     accountData,
@@ -141,39 +141,41 @@ const Withdraw: FC = () => {
         component: 'gas',
       });
     });
-  }, [errorData?.status, lang, previewGasCost, translations]);
+  }, [errorData?.status, previewGasCost]);
 
-  const onMax = () => {
+  const onMax = useCallback(() => {
     setQty(parsedAmount);
     setIsMax(true);
-  };
+  }, [parsedAmount]);
 
-  const handleInputChange = ({ target: { value, valueAsNumber } }: ChangeEvent<HTMLInputElement>) => {
-    if (!accountData || !symbol) return;
-    const { decimals } = accountData[symbol];
+  const handleInputChange = useCallback(
+    ({ target: { value, valueAsNumber } }: ChangeEvent<HTMLInputElement>) => {
+      if (!accountData) return;
+      const { decimals } = accountData[symbol];
 
-    if (value.includes('.')) {
-      const regex = /[^,.]*$/g;
-      const inputDecimals = regex.exec(value)![0];
-      if (inputDecimals.length > decimals) return;
-    }
+      if (value.includes('.')) {
+        const regex = /[^,.]*$/g;
+        const inputDecimals = regex.exec(value)![0];
+        if (inputDecimals.length > decimals) return;
+      }
 
-    if (valueAsNumber > parseFloat(parsedAmount)) {
-      setErrorData({
-        status: true,
-        message: translations[lang].insufficientBalance,
-        component: 'input',
-      });
-      return;
-    }
-    setQty(value);
-    setErrorData(undefined);
-    //we disable max flag if user changes input
-    isMax && setIsMax(false);
-  };
+      if (valueAsNumber > parseFloat(parsedAmount)) {
+        setErrorData({
+          status: true,
+          message: translations[lang].insufficientBalance,
+        });
+        return;
+      }
+      setQty(value);
+      setErrorData(undefined);
+      //we disable max flag if user changes input
+      isMax && setIsMax(false);
+    },
+    [accountData, symbol, isMax, lang, parsedAmount, translations],
+  );
 
   const withdraw = useCallback(async () => {
-    if (!accountData || !walletAddress || !marketContract || !symbol) return;
+    if (!accountData || !walletAddress || !marketContract) return;
 
     let withdrawTx;
     try {
@@ -266,13 +268,8 @@ const Withdraw: FC = () => {
       />
       {errorData?.component !== 'gas' && <ModalTxCost gasCost={gasCost} />}
       <ModalRow text={translations[lang].exactlyBalance} value={formattedAmount} line />
-      {symbol ? (
-        <ModalRowHealthFactor qty={qty} symbol={symbol} operation="withdraw" />
-      ) : (
-        <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
-      )}
+      <ModalRowHealthFactor qty={qty} symbol={symbol} operation="withdraw" />
       <ModalRowBorrowLimit qty={qty} symbol={symbol} operation="withdraw" line />
-
       {errorData && <ModalError message={errorData.message} />}
       <LoadingButton
         fullWidth

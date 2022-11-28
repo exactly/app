@@ -34,7 +34,6 @@ import { useWeb3Context } from 'contexts/Web3Context';
 import { MarketContext } from 'contexts/MarketContext';
 import AccountDataContext from 'contexts/AccountDataContext';
 
-import useDebounce from 'hooks/useDebounce';
 import useETHRouter from 'hooks/useETHRouter';
 import useMarket from 'hooks/useMarket';
 import useBalance from 'hooks/useBalance';
@@ -84,13 +83,12 @@ const BorrowAtMaturity: FC = () => {
     isLoading: approveIsLoading,
   } = useApprove(marketContract, ETHRouterContract?.address);
 
-  const debounceQty = useDebounce(qty);
-
   const symbol = useMemo(() => {
     return market?.value ? getSymbol(market.value, network?.name) : 'DAI';
   }, [market?.value, network?.name]);
 
-  // load asset address
+  const isLoading = useMemo(() => isLoadingOp || approveIsLoading, [approveIsLoading, isLoadingOp]);
+
   useEffect(() => {
     if (!marketContract || symbol === 'WETH') return;
 
@@ -142,13 +140,12 @@ const BorrowAtMaturity: FC = () => {
   }, [needsApproval]);
 
   const previewGasCost = useCallback(async () => {
-    if (!symbol || !walletAddress || !marketContract || !ETHRouterContract || !date) return;
+    if (isLoading || !walletAddress || !marketContract || !ETHRouterContract || !date || !qty) return;
 
     const gasPrice = (await ETHRouterContract.provider.getFeeData()).maxFeePerGas;
     if (!gasPrice) return;
 
     if (await needsApproval()) {
-      // only WETH needs allowance -> estimates directly with the ETH router
       const gasEstimation = await approveEstimateGas();
       return setGasCost(gasEstimation?.mul(gasPrice));
     }
@@ -174,6 +171,7 @@ const BorrowAtMaturity: FC = () => {
     );
     setGasCost(gasPrice.mul(gasEstimation));
   }, [
+    isLoading,
     ETHRouterContract,
     approveEstimateGas,
     date,
@@ -186,6 +184,7 @@ const BorrowAtMaturity: FC = () => {
   ]);
 
   useEffect(() => {
+    if (errorData?.status) return;
     previewGasCost().catch((error) => {
       setErrorData({
         status: true,
@@ -193,73 +192,80 @@ const BorrowAtMaturity: FC = () => {
         component: 'gas',
       });
     });
-  }, [lang, previewGasCost, translations]);
+  }, [previewGasCost, errorData?.status]);
 
-  function onMax() {
+  const onMax = useCallback(() => {
     if (!accountData || !healthFactor) return;
 
-    const decimals = accountData[symbol].decimals;
-    const adjustFactor = accountData[symbol].adjustFactor;
-    const usdPrice = accountData[symbol].usdPrice;
+    const { decimals, usdPrice, adjustFactor, floatingDepositAssets } = accountData[symbol];
 
     let col = healthFactor.collateral;
     const hf = parseFixed('1.05', 18);
-    const WAD = parseFixed('1', 18);
 
-    const hasDepositedToFloatingPool = Number(formatFixed(accountData[symbol].floatingDepositAssets, decimals)) > 0;
+    const hasDepositedToFloatingPool = Number(formatFixed(floatingDepositAssets, decimals)) > 0;
 
     if (!accountData[symbol].isCollateral && hasDepositedToFloatingPool) {
-      col = col.add(accountData[symbol].floatingDepositAssets.mul(accountData[symbol].adjustFactor).div(WAD));
+      col = col.add(floatingDepositAssets.mul(adjustFactor).div(WeiPerEther));
     }
 
-    const debt = healthFactor.debt;
+    const { debt } = healthFactor;
 
     const safeMaximumBorrow = Number(
       formatFixed(
-        col.sub(hf.mul(debt).div(WAD)).mul(WAD).div(hf).mul(WAD).div(usdPrice).mul(adjustFactor).div(WAD),
+        col
+          .sub(hf.mul(debt).div(WeiPerEther))
+          .mul(WeiPerEther)
+          .div(hf)
+          .mul(WeiPerEther)
+          .div(usdPrice)
+          .mul(adjustFactor)
+          .div(WeiPerEther),
         18,
       ),
     ).toFixed(decimals);
 
     setQty(safeMaximumBorrow);
     setErrorData(undefined);
-  }
+  }, [accountData, healthFactor, symbol]);
 
-  function handleInputChange({ target: { value, valueAsNumber } }: ChangeEvent<HTMLInputElement>) {
-    if (!accountData) return;
-    const { decimals, usdPrice } = accountData[symbol];
+  const handleInputChange = useCallback(
+    ({ target: { value, valueAsNumber } }: ChangeEvent<HTMLInputElement>) => {
+      if (!accountData) return;
+      const { decimals, usdPrice } = accountData[symbol];
 
-    if (value.includes('.')) {
-      const regex = /[^,.]*$/g;
-      const inputDecimals = regex.exec(value)![0];
-      if (inputDecimals.length > decimals) return;
-    }
+      if (value.includes('.')) {
+        const regex = /[^,.]*$/g;
+        const inputDecimals = regex.exec(value)![0];
+        if (inputDecimals.length > decimals) return;
+      }
 
-    setQty(value);
+      setQty(value);
 
-    if (poolLiquidity && poolLiquidity < valueAsNumber) {
-      return setErrorData({
-        status: true,
-        message: translations[lang].availableLiquidityError,
-      });
-    }
+      if (poolLiquidity && poolLiquidity < valueAsNumber) {
+        return setErrorData({
+          status: true,
+          message: translations[lang].availableLiquidityError,
+        });
+      }
 
-    const maxBorrowAssets = getBeforeBorrowLimit(accountData, symbol, usdPrice, decimals, 'borrow');
+      const maxBorrowAssets = getBeforeBorrowLimit(accountData, symbol, usdPrice, decimals, 'borrow');
 
-    if (
-      maxBorrowAssets.lt(
-        parseFixed(value || '0', decimals)
-          .mul(usdPrice)
-          .div(WeiPerEther),
-      )
-    ) {
-      return setErrorData({
-        status: true,
-        message: translations[lang].borrowLimit,
-      });
-    }
-    setErrorData(undefined);
-  }
+      if (
+        maxBorrowAssets.lt(
+          parseFixed(value || '0', decimals)
+            .mul(usdPrice)
+            .div(WeiPerEther),
+        )
+      ) {
+        return setErrorData({
+          status: true,
+          message: translations[lang].borrowLimit,
+        });
+      }
+      setErrorData(undefined);
+    },
+    [accountData, lang, translations, symbol, poolLiquidity],
+  );
 
   const borrow = useCallback(async () => {
     setIsLoadingOp(true);
@@ -348,7 +354,7 @@ const BorrowAtMaturity: FC = () => {
 
     const { decimals, usdPrice } = accountData[symbol];
 
-    const initialAssets = debounceQty ? parseFixed(debounceQty, decimals) : getOneDollar(usdPrice, decimals);
+    const initialAssets = qty ? parseFixed(qty, decimals) : getOneDollar(usdPrice, decimals);
 
     try {
       const { assets: finalAssets } = await previewerContract.previewBorrowAtMaturity(
@@ -369,7 +375,7 @@ const BorrowAtMaturity: FC = () => {
     } catch (error) {
       setFixedRate(undefined);
     }
-  }, [accountData, date, debounceQty, marketContract, previewerContract, symbol]);
+  }, [accountData, date, qty, marketContract, previewerContract, symbol]);
 
   // update APR
   useEffect(() => {
@@ -389,11 +395,11 @@ const BorrowAtMaturity: FC = () => {
 
   const updateURAfter = useCallback(async () => {
     if (!marketContract || !previewerContract || !date || !accountData) return;
-    if (!debounceQty) return setUrAfter(urBefore);
+    if (!qty) return setUrAfter(urBefore);
 
     try {
       const { decimals, usdPrice } = accountData[symbol];
-      const initialAssets = debounceQty ? parseFixed(debounceQty, decimals) : getOneDollar(usdPrice, decimals);
+      const initialAssets = qty ? parseFixed(qty, decimals) : getOneDollar(usdPrice, decimals);
 
       const { utilization } = await previewerContract.previewBorrowAtMaturity(
         marketContract.address,
@@ -405,22 +411,20 @@ const BorrowAtMaturity: FC = () => {
     } catch (error) {
       setUrAfter('N/A');
     }
-  }, [accountData, date, debounceQty, marketContract, previewerContract, symbol, urBefore]);
+  }, [accountData, date, qty, marketContract, previewerContract, symbol, urBefore]);
 
   useEffect(() => {
     updateURAfter().catch(captureException);
   }, [updateURAfter]);
 
-  const isLoading = useMemo(() => isLoadingOp || approveIsLoading, [approveIsLoading, isLoadingOp]);
-
-  const handleSubmitAction = async () => {
+  const handleSubmitAction = useCallback(async () => {
     if (isLoading) return;
     if (!needsAllowance) return borrow();
 
     await approve();
     setErrorData(approveErrorData);
     setNeedsAllowance(await needsApproval());
-  };
+  }, [isLoading, needsAllowance, approve, approveErrorData, needsApproval, borrow]);
 
   if (tx) return <ModalGif tx={tx} tryAgain={borrow} />;
 

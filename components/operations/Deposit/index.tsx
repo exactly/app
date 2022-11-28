@@ -12,7 +12,6 @@ import ModalTitle from 'components/common/modal/ModalTitle';
 import ModalTxCost from 'components/common/modal/ModalTxCost';
 import ModalGif from 'components/common/modal/ModalGif';
 import ModalStepper from 'components/common/modal/ModalStepper';
-import SkeletonModalRowBeforeAfter from 'components/common/skeletons/SkeletonModalRowBeforeAfter';
 import ModalError from 'components/common/modal/ModalError';
 import ModalRowBorrowLimit from 'components/common/modal/ModalRowBorrowLimit';
 
@@ -23,7 +22,6 @@ import { ErrorData } from 'types/Error';
 import { getSymbol } from 'utils/utils';
 import formatNumber from 'utils/formatNumber';
 
-import useDebounce from 'hooks/useDebounce';
 import useETHRouter from 'hooks/useETHRouter';
 
 import LangContext from 'contexts/LangContext';
@@ -57,7 +55,6 @@ const Deposit: FC = () => {
   const [needsAllowance, setNeedsAllowance] = useState(true);
   const [assetAddress, setAssetAddress] = useState<string | undefined>();
 
-  const debounceQty = useDebounce(qty); // 1 seconds before estimating gas on qty change
   const ETHRouterContract = useETHRouter();
 
   const marketContract = useMarket(market?.value);
@@ -66,6 +63,8 @@ const Deposit: FC = () => {
     () => (market?.value ? getSymbol(market.value, network?.name) : 'DAI'),
     [market?.value, network?.name],
   );
+
+  const decimals = useMemo(() => (accountData && accountData[symbol].decimals) || 18, [accountData, symbol]);
 
   useEffect(() => {
     if (!marketContract || symbol === 'WETH') return;
@@ -81,11 +80,10 @@ const Deposit: FC = () => {
   const depositedAmount = useMemo(() => {
     if (!symbol || !accountData) return '0';
 
-    const { floatingDepositAssets, decimals } = accountData[symbol];
+    const { floatingDepositAssets } = accountData[symbol];
     return formatNumber(formatFixed(floatingDepositAssets, decimals), symbol);
-  }, [accountData, symbol]);
+  }, [accountData, symbol, decimals]);
 
-  // set qty to '' when symbol changes
   useEffect(() => {
     setQty('');
     setErrorData(undefined);
@@ -105,10 +103,9 @@ const Deposit: FC = () => {
 
     if (!walletAddress || !assetContract || !marketContract || !accountData) return true;
 
-    const decimals = await assetContract.decimals();
     const allowance = await assetContract.allowance(walletAddress, marketContract.address);
     return allowance.lt(parseFixed(qty || String(numbers.defaultAmount), decimals));
-  }, [accountData, assetContract, marketContract, qty, symbol, walletAddress]);
+  }, [accountData, assetContract, marketContract, qty, symbol, walletAddress, decimals]);
 
   useEffect(() => {
     const loadNeedsApproval = async () => {
@@ -120,38 +117,35 @@ const Deposit: FC = () => {
   const isLoading = useMemo(() => approveIsLoading || isLoadingOp, [approveIsLoading, isLoadingOp]);
 
   const previewGasCost = useCallback(async () => {
-    if (isLoading || !symbol || !walletAddress || !ETHRouterContract || !marketContract || !assetContract) return;
+    if (isLoading || !walletAddress || !ETHRouterContract || !marketContract) return;
 
     const gasPrice = (await ETHRouterContract.provider.getFeeData()).maxFeePerGas;
     if (!gasPrice) return;
 
     if (await needsApproval()) {
       const gasEstimation = await approveEstimateGas();
-      return setGasCost(gasEstimation ? gasEstimation.mul(gasPrice) : undefined);
+      return setGasCost(gasEstimation?.mul(gasPrice));
     }
 
     if (symbol === 'WETH') {
       const gasLimit = await ETHRouterContract.estimateGas.deposit({
-        value: debounceQty ? parseFixed(debounceQty, 18) : DEFAULT_AMOUNT,
+        value: qty ? parseFixed(qty, 18) : DEFAULT_AMOUNT,
       });
 
       return setGasCost(gasPrice.mul(gasLimit));
     }
 
-    if (!marketContract) throw new Error('Market contract is undefined');
-
-    const decimals = await marketContract.decimals();
     const gasLimit = await marketContract.estimateGas.deposit(
-      debounceQty ? parseFixed(debounceQty, decimals) : DEFAULT_AMOUNT,
+      qty ? parseFixed(qty, decimals) : DEFAULT_AMOUNT,
       walletAddress,
     );
 
     setGasCost(gasPrice.mul(gasLimit));
   }, [
+    decimals,
     ETHRouterContract,
     approveEstimateGas,
-    assetContract,
-    debounceQty,
+    qty,
     isLoading,
     marketContract,
     needsApproval,
@@ -168,35 +162,35 @@ const Deposit: FC = () => {
         component: 'gas',
       });
     });
-  }, [lang, previewGasCost, translations, errorData?.status]);
+  }, [previewGasCost, errorData?.status]);
 
-  const onMax = () => {
+  const onMax = useCallback(() => {
     if (walletBalance) {
       setQty(walletBalance);
       setErrorData(undefined);
     }
-  };
+  }, [walletBalance]);
 
-  const handleInputChange = ({ target: { value, valueAsNumber } }: ChangeEvent<HTMLInputElement>) => {
-    if (!accountData || !symbol) return;
-    const { decimals } = accountData[symbol];
+  const handleInputChange = useCallback(
+    ({ target: { value, valueAsNumber } }: ChangeEvent<HTMLInputElement>) => {
+      if (value.includes('.')) {
+        const regex = /[^,.]*$/g;
+        const inputDecimals = regex.exec(value)![0];
+        if (inputDecimals.length > decimals) return;
+      }
+      setQty(value);
 
-    if (value.includes('.')) {
-      const regex = /[^,.]*$/g;
-      const inputDecimals = regex.exec(value)![0];
-      if (inputDecimals.length > decimals) return;
-    }
-    setQty(value);
-
-    if (walletBalance && valueAsNumber > parseFloat(walletBalance)) {
-      return setErrorData({
-        status: true,
-        message: translations[lang].insufficientBalance,
-        component: 'input',
-      });
-    }
-    setErrorData(undefined);
-  };
+      if (walletBalance && valueAsNumber > parseFloat(walletBalance)) {
+        return setErrorData({
+          status: true,
+          message: translations[lang].insufficientBalance,
+          component: 'input',
+        });
+      }
+      setErrorData(undefined);
+    },
+    [walletBalance, decimals, translations, lang],
+  );
 
   const deposit = useCallback(async () => {
     if (!walletAddress) return;
@@ -214,7 +208,6 @@ const Deposit: FC = () => {
         });
       } else {
         if (!marketContract) throw new Error('Market contract is undefined');
-        const decimals = await marketContract.decimals();
         const depositAmount = parseFixed(qty, decimals);
         const gasEstimation = await marketContract.estimateGas.deposit(depositAmount, walletAddress);
 
@@ -236,7 +229,7 @@ const Deposit: FC = () => {
     } finally {
       setIsLoadingOp(false);
     }
-  }, [ETHRouterContract, getAccountData, marketContract, qty, symbol, walletAddress]);
+  }, [ETHRouterContract, getAccountData, marketContract, qty, symbol, walletAddress, decimals]);
 
   const handleSubmitAction = useCallback(async () => {
     if (isLoading) return;
@@ -269,11 +262,7 @@ const Deposit: FC = () => {
       />
       {errorData?.component !== 'gas' && <ModalTxCost gasCost={gasCost} />}
       <ModalRow text={translations[lang].exactlyBalance} value={depositedAmount} line />
-      {symbol ? (
-        <ModalRowHealthFactor qty={qty} symbol={symbol} operation="deposit" />
-      ) : (
-        <SkeletonModalRowBeforeAfter text={translations[lang].healthFactor} />
-      )}
+      <ModalRowHealthFactor qty={qty} symbol={symbol} operation="deposit" />
       <ModalRowBorrowLimit qty={qty} symbol={symbol} operation="deposit" line />
       <ModalStepper currentStep={needsAllowance ? 1 : 2} totalSteps={3} />
       {errorData && <ModalError message={errorData.message} />}

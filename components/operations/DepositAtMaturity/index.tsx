@@ -26,8 +26,6 @@ import getOneDollar from 'utils/getOneDollar';
 
 import numbers from 'config/numbers.json';
 
-import useDebounce from 'hooks/useDebounce';
-
 import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 import { MarketContext } from 'contexts/MarketContext';
@@ -63,8 +61,6 @@ const DepositAtMaturity: FC = () => {
   const [errorData, setErrorData] = useState<ErrorData | undefined>(undefined);
   const [assetAddress, setAssetAddress] = useState<string | undefined>();
 
-  const debounceQty = useDebounce(qty);
-
   const ETHRouterContract = useETHRouter();
   const marketContract = useMarket(market?.value);
 
@@ -95,8 +91,8 @@ const DepositAtMaturity: FC = () => {
     if (!marketContract || !assetContract || !walletAddress) return true;
     const allowance = await assetContract.allowance(walletAddress, marketContract.address);
     const decimals = await assetContract.decimals();
-    return allowance.lt(parseFixed(debounceQty || String(numbers.defaultAmount), decimals));
-  }, [assetContract, debounceQty, marketContract, symbol, walletAddress]);
+    return allowance.lt(parseFixed(qty || String(numbers.defaultAmount), decimals));
+  }, [assetContract, qty, marketContract, symbol, walletAddress]);
 
   // load needs approval
   useEffect(() => {
@@ -117,18 +113,18 @@ const DepositAtMaturity: FC = () => {
   const isLoading = useMemo(() => isLoadingOp || approveIsLoading, [approveIsLoading, isLoadingOp]);
 
   const previewGasCost = useCallback(async () => {
-    if (isLoading || !symbol || !walletAddress || !marketContract || !ETHRouterContract || !date) return;
+    if (isLoading || !walletAddress || !marketContract || !ETHRouterContract || !date) return;
 
     const gasPrice = (await ETHRouterContract.provider.getFeeData()).maxFeePerGas;
     if (!gasPrice) return;
 
     if (await needsApproval()) {
       const gasEstimation = await approveEstimateGas();
-      return setGasCost(gasEstimation ? gasEstimation.mul(gasPrice) : undefined);
+      return setGasCost(gasEstimation?.mul(gasPrice));
     }
 
     if (symbol === 'WETH') {
-      const amount = debounceQty ? parseFixed(debounceQty, 18) : DEFAULT_AMOUNT;
+      const amount = qty ? parseFixed(qty, 18) : DEFAULT_AMOUNT;
       const minAmount = amount.mul(parseFixed(String(1 - slippage), 18)).div(WeiPerEther);
       const gasEstimation = await ETHRouterContract.estimateGas.depositAtMaturity(date.value, minAmount, {
         value: amount,
@@ -137,7 +133,7 @@ const DepositAtMaturity: FC = () => {
     }
 
     const decimals = await marketContract.decimals();
-    const amount = debounceQty ? parseFixed(debounceQty, decimals) : DEFAULT_AMOUNT;
+    const amount = qty ? parseFixed(qty, decimals) : DEFAULT_AMOUNT;
     const minAmount = amount.mul(parseFixed(String(1 - slippage), 18)).div(WeiPerEther);
 
     const gasEstimation = await marketContract.estimateGas.depositAtMaturity(
@@ -152,7 +148,7 @@ const DepositAtMaturity: FC = () => {
     ETHRouterContract,
     approveEstimateGas,
     date,
-    debounceQty,
+    qty,
     isLoading,
     marketContract,
     needsApproval,
@@ -170,46 +166,48 @@ const DepositAtMaturity: FC = () => {
         component: 'gas',
       });
     });
-  }, [errorData?.status, lang, previewGasCost, translations]);
+  }, [previewGasCost, errorData?.status]);
 
-  async function onMax() {
+  const onMax = useCallback(() => {
     if (walletBalance) {
       setQty(walletBalance);
       setErrorData(undefined);
     }
-  }
+  }, [walletBalance]);
 
-  function handleInputChange({ target: { value, valueAsNumber } }: ChangeEvent<HTMLInputElement>) {
-    if (!accountData) return;
-    const decimals = accountData[symbol].decimals;
+  const handleInputChange = useCallback(
+    ({ target: { value, valueAsNumber } }: ChangeEvent<HTMLInputElement>) => {
+      if (!accountData) return;
+      const { decimals } = accountData[symbol];
 
-    if (value.includes('.')) {
-      const regex = /[^,.]*$/g;
-      const inputDecimals = regex.exec(value)![0];
-      if (inputDecimals.length > decimals) return;
-    }
+      if (value.includes('.')) {
+        const regex = /[^,.]*$/g;
+        const inputDecimals = regex.exec(value)![0];
+        if (inputDecimals.length > decimals) return;
+      }
 
-    setQty(value);
+      setQty(value);
 
-    if (walletBalance && valueAsNumber > parseFloat(walletBalance)) {
-      return setErrorData({
-        status: true,
-        message: translations[lang].insufficientBalance,
-        component: 'input',
-      });
-    }
+      if (walletBalance && valueAsNumber > parseFloat(walletBalance)) {
+        return setErrorData({
+          status: true,
+          message: translations[lang].insufficientBalance,
+          component: 'input',
+        });
+      }
 
-    setErrorData(undefined);
-  }
+      setErrorData(undefined);
+    },
+    [accountData, walletBalance, translations, lang, symbol],
+  );
 
-  // done
   const deposit = useCallback(async () => {
-    if (!accountData || !date || !debounceQty || !ETHRouterContract || !marketContract || !walletAddress) return;
+    if (!accountData || !date || !qty || !ETHRouterContract || !marketContract || !walletAddress) return;
 
     let depositTx;
     try {
       const { decimals } = accountData[symbol];
-      const amount = parseFixed(debounceQty, decimals);
+      const amount = parseFixed(qty, decimals);
       const minAmount = amount.mul(parseFixed(String(1 - slippage), 18)).div(WeiPerEther);
 
       if (symbol === 'WETH') {
@@ -261,7 +259,7 @@ const DepositAtMaturity: FC = () => {
     ETHRouterContract,
     accountData,
     date,
-    debounceQty,
+    qty,
     getAccountData,
     lang,
     marketContract,
@@ -284,7 +282,7 @@ const DepositAtMaturity: FC = () => {
     if (!accountData || !date || !previewerContract || !marketContract) return;
 
     const { decimals, usdPrice } = accountData[symbol];
-    const initialAssets = debounceQty ? parseFixed(debounceQty, decimals) : getOneDollar(usdPrice, decimals);
+    const initialAssets = qty ? parseFixed(qty, decimals) : getOneDollar(usdPrice, decimals);
 
     try {
       const { assets: finalAssets } = await previewerContract.previewDepositAtMaturity(
@@ -305,7 +303,7 @@ const DepositAtMaturity: FC = () => {
     } catch (error) {
       setFixedRate(undefined);
     }
-  }, [accountData, date, debounceQty, marketContract, previewerContract, symbol]);
+  }, [accountData, date, qty, marketContract, previewerContract, symbol]);
 
   useEffect(() => {
     void updateAPR();
@@ -339,14 +337,13 @@ const DepositAtMaturity: FC = () => {
         symbol={symbol}
         error={errorData?.component === 'input'}
       />
-      {errorData?.component !== 'gas' && symbol !== 'WETH' && <ModalTxCost gasCost={gasCost} />}
+      {errorData?.component !== 'gas' && <ModalTxCost gasCost={gasCost} />}
       <ModalRowEditable
         text={translations[lang].minimumApr}
         value={toPercentage(slippage)}
         editable={editSlippage}
         onChange={(e: ChangeEvent<HTMLInputElement>) => {
-          setSlippage(Number(e.target.value));
-          errorData?.message === translations[lang].notEnoughSlippage && setErrorData(undefined);
+          setSlippage(e.target.valueAsNumber);
         }}
         onClick={() => {
           setEditSlippage((prev) => !prev);

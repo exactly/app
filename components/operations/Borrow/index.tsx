@@ -20,7 +20,6 @@ import { HealthFactor } from 'types/HealthFactor';
 import { getSymbol } from 'utils/utils';
 import getBeforeBorrowLimit from 'utils/getBeforeBorrowLimit';
 
-import useDebounce from 'hooks/useDebounce';
 import useETHRouter from 'hooks/useETHRouter';
 
 import LangContext from 'contexts/LangContext';
@@ -57,8 +56,6 @@ const Borrow: FC = () => {
 
   const ETHRouterContract = useETHRouter();
 
-  const debounceQty = useDebounce(qty);
-
   const marketContract = useMarket(market?.value);
 
   const symbol = useMemo(
@@ -82,6 +79,8 @@ const Borrow: FC = () => {
     isLoading: approveIsLoading,
     errorData: approveErrorData,
   } = useApprove(marketContract, ETHRouterContract?.address);
+
+  const isLoading = useMemo(() => approveIsLoading || isLoadingOp, [approveIsLoading, isLoadingOp]);
 
   const walletBalance = useBalance(symbol, assetContract);
 
@@ -122,14 +121,14 @@ const Borrow: FC = () => {
   }, [needsApproval]);
 
   const previewGasCost = useCallback(async () => {
-    if (!symbol || !walletAddress || !marketContract || !ETHRouterContract) return;
+    if (isLoading || !walletAddress || !marketContract || !ETHRouterContract || !qty) return;
 
     const gasPrice = (await ETHRouterContract.provider.getFeeData()).maxFeePerGas;
     if (!gasPrice) return;
 
     if (await needsApproval()) {
       const gasEstimation = await approveEstimateGas();
-      return setGasCost(gasEstimation ? gasPrice.mul(gasEstimation) : undefined);
+      return setGasCost(gasEstimation?.mul(gasPrice));
     }
 
     if (symbol === 'WETH') {
@@ -144,7 +143,7 @@ const Borrow: FC = () => {
       walletAddress,
     );
     setGasCost(gasPrice.mul(gasEstimation));
-  }, [ETHRouterContract, approveEstimateGas, qty, marketContract, needsApproval, symbol, walletAddress]);
+  }, [isLoading, ETHRouterContract, approveEstimateGas, qty, marketContract, needsApproval, symbol, walletAddress]);
 
   useEffect(() => {
     if (errorData?.status) return;
@@ -155,9 +154,9 @@ const Borrow: FC = () => {
         component: 'gas',
       });
     });
-  }, [errorData?.status, lang, previewGasCost, translations]);
+  }, [previewGasCost, errorData?.status]);
 
-  const onMax = () => {
+  const onMax = useCallback(() => {
     if (!accountData || !healthFactor) return;
 
     const decimals = accountData[symbol].decimals;
@@ -185,45 +184,48 @@ const Borrow: FC = () => {
 
     setQty(safeMaximumBorrow);
     setErrorData(undefined);
-  };
+  }, [symbol, accountData, healthFactor]);
 
-  const handleInputChange = ({ target: { value } }: ChangeEvent<HTMLInputElement>) => {
-    if (!liquidity || !accountData) return;
+  const handleInputChange = useCallback(
+    ({ target: { value } }: ChangeEvent<HTMLInputElement>) => {
+      if (!liquidity || !accountData) return;
 
-    const { decimals, usdPrice } = accountData[symbol];
+      const { decimals, usdPrice } = accountData[symbol];
 
-    const maxBorrowAssets = getBeforeBorrowLimit(accountData, symbol, usdPrice, decimals, 'borrow');
+      const maxBorrowAssets = getBeforeBorrowLimit(accountData, symbol, usdPrice, decimals, 'borrow');
 
-    if (value.includes('.')) {
-      const regex = /[^,.]*$/g;
-      const inputDecimals = regex.exec(value)![0];
-      if (inputDecimals.length > decimals) return;
-    }
-    setQty(value);
+      if (value.includes('.')) {
+        const regex = /[^,.]*$/g;
+        const inputDecimals = regex.exec(value)![0];
+        if (inputDecimals.length > decimals) return;
+      }
+      setQty(value);
 
-    if (!hasCollateral) return setErrorData({ status: true, message: translations[lang].noCollateral });
+      if (!hasCollateral) return setErrorData({ status: true, message: translations[lang].noCollateral });
 
-    if (liquidity.lt(parseFixed(value || '0', decimals))) {
-      return setErrorData({
-        status: true,
-        message: translations[lang].availableLiquidityError,
-      });
-    }
+      if (liquidity.lt(parseFixed(value || '0', decimals))) {
+        return setErrorData({
+          status: true,
+          message: translations[lang].availableLiquidityError,
+        });
+      }
 
-    if (
-      maxBorrowAssets.lt(
-        parseFixed(value || '0', decimals)
-          .mul(usdPrice)
-          .div(WeiPerEther),
-      )
-    ) {
-      return setErrorData({
-        status: true,
-        message: translations[lang].borrowLimit,
-      });
-    }
-    setErrorData(undefined);
-  };
+      if (
+        maxBorrowAssets.lt(
+          parseFixed(value || '0', decimals)
+            .mul(usdPrice)
+            .div(WeiPerEther),
+        )
+      ) {
+        return setErrorData({
+          status: true,
+          message: translations[lang].borrowLimit,
+        });
+      }
+      setErrorData(undefined);
+    },
+    [accountData, hasCollateral, lang, liquidity, translations, symbol],
+  );
 
   const borrow = useCallback(async () => {
     if (!accountData) return;
@@ -235,7 +237,7 @@ const Borrow: FC = () => {
       if (symbol === 'WETH') {
         if (!ETHRouterContract) return;
 
-        const amount = parseFixed(debounceQty, 18);
+        const amount = parseFixed(qty, 18);
         const gasEstimation = await ETHRouterContract.estimateGas.borrow(amount);
         borrowTx = await ETHRouterContract.borrow(amount, {
           gasLimit: gasEstimation.mul(parseFixed(String(numbers.gasLimitMultiplier), 18)).div(WeiPerEther),
@@ -244,7 +246,7 @@ const Borrow: FC = () => {
         if (!marketContract || !walletAddress) return;
 
         const decimals = await marketContract.decimals();
-        const amount = parseFixed(debounceQty, decimals);
+        const amount = parseFixed(qty, decimals);
         const gasEstimation = await marketContract.estimateGas.borrow(amount, walletAddress, walletAddress);
         borrowTx = await marketContract.borrow(amount, walletAddress, walletAddress, {
           gasLimit: gasEstimation.mul(parseFixed(String(numbers.gasLimitMultiplier), 18)).div(WeiPerEther),
@@ -268,9 +270,7 @@ const Borrow: FC = () => {
     } finally {
       setIsLoadingOp(false);
     }
-  }, [ETHRouterContract, accountData, debounceQty, getAccountData, marketContract, symbol, walletAddress]);
-
-  const isLoading = useMemo(() => approveIsLoading || isLoadingOp, [approveIsLoading, isLoadingOp]);
+  }, [ETHRouterContract, accountData, qty, getAccountData, marketContract, symbol, walletAddress]);
 
   const handleSubmitAction = useCallback(async () => {
     if (isLoading) return;
