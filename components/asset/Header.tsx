@@ -3,9 +3,8 @@ import Grid from '@mui/material/Grid';
 import Image from 'next/image';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
-import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import formatSymbol from 'utils/formatSymbol';
-import { getAddressEtherscanUrl, Network } from 'utils/network';
+import { Network } from 'utils/network';
 import ItemInfo, { ItemInfoProps } from 'components/common/ItemInfo';
 import AccountDataContext from 'contexts/AccountDataContext';
 import { BigNumber, formatFixed } from '@ethersproject/bignumber';
@@ -14,6 +13,7 @@ import formatNumber from 'utils/formatNumber';
 import { useRouter } from 'next/router';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { Tooltip } from '@mui/material';
+import ExplorerMenu from './ExplorerMenu';
 
 type Props = {
   symbol: string;
@@ -25,7 +25,6 @@ type Props = {
 const AssetHeaderInfo: FC<Props> = ({ symbol, networkName, assetAddress, eMarketAddress }) => {
   const { accountData } = useContext(AccountDataContext);
 
-  const etherscanUrl = getAddressEtherscanUrl(networkName as Network, eMarketAddress ?? assetAddress);
   const [floatingDeposits, setFloatingDeposits] = useState<BigNumber | undefined>(undefined);
   const [floatingBorrows, setFloatingBorrows] = useState<BigNumber | undefined>(undefined);
   const [fixedDeposits, setFixedDeposits] = useState<BigNumber | undefined>(undefined);
@@ -113,11 +112,13 @@ const AssetHeaderInfo: FC<Props> = ({ symbol, networkName, assetAddress, eMarket
         <Image src={`/img/assets/${symbol}.svg`} alt={symbol} width={29} height={29} />
         <Typography variant="h2" ml={1}>
           {formatSymbol(symbol)}
-          <Tooltip title="View Market Contract">
-            <IconButton size="small" href={etherscanUrl} target="_blank" rel="noopener noreferrer">
-              <OpenInNewIcon sx={{ alignSelf: 'center', height: '1rem', width: '1rem' }} />
-            </IconButton>
-          </Tooltip>
+          <ExplorerMenu
+            symbol={symbol}
+            networkName={networkName as Network}
+            assetAddress={assetAddress}
+            eMarketAddress={eMarketAddress}
+            rateModelAddress={assetAddress} //TODO: replace
+          />
         </Typography>
       </Grid>
       <Grid item container spacing={4}>
