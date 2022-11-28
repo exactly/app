@@ -238,7 +238,7 @@ const DepositAtMaturity: FC = () => {
       const { status, transactionHash } = await depositTx.wait();
       setTx({ status: status ? 'success' : 'error', hash: transactionHash });
 
-      void analytics.track(status ? 'depositAtMaturitySuccess' : 'depositAtMaturityError', {
+      void analytics.track(status ? 'depositAtMaturity' : 'depositAtMaturityRevert', {
         amount: qty,
         asset: symbol,
         maturity: date.value,
@@ -281,7 +281,7 @@ const DepositAtMaturity: FC = () => {
   const handleSubmitAction = useCallback(async () => {
     if (isLoading) return;
     if (!needsAllowance) {
-      void analytics.track('depositAtMaturity', {
+      void analytics.track('depositAtMaturityRequest', {
         amount: qty,
         maturity: date?.value,
         asset: symbol,

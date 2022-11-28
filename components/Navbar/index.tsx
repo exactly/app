@@ -36,7 +36,7 @@ function Navbar() {
   const { pathname } = router;
 
   useEffect(() => {
-    void analytics.identify(walletAddress ? walletAddress : 'anon');
+    walletAddress && void analytics.identify(walletAddress);
   }, [walletAddress]);
 
   const routes = useMemo(
