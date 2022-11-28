@@ -15,7 +15,6 @@ import { HealthFactor } from 'types/HealthFactor';
 import analytics from 'utils/analytics';
 
 const { maxWidth } = globals;
-void analytics.page();
 
 const DashboardContent = dynamic(() => import('components/dashboard/DashboardContent'));
 const DashBoard: NextPage = () => {
@@ -40,6 +39,10 @@ const DashBoard: NextPage = () => {
     if (!walletAddress) return;
     getHealthFactor();
   }, [walletAddress, accountData, getHealthFactor]);
+
+  useEffect(() => {
+    void analytics.page();
+  }, []);
 
   return (
     <>

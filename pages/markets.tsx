@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import type { NextPage } from 'next';
 import Grid from '@mui/material/Grid';
 
@@ -13,8 +13,10 @@ import analytics from 'utils/analytics';
 
 const { maxWidth } = globals;
 
-void analytics.page();
 const Pools: NextPage = () => {
+  useEffect(() => {
+    void analytics.page();
+  }, []);
   return (
     <>
       <OperationsModals />
