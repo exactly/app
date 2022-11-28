@@ -75,7 +75,7 @@ function TableRowFixedPool({ symbol, amount, type, maturityDate, market, decimal
 
   const APR: number | undefined = useMemo(() => {
     const allTransactions = [...depositTxs, ...borrowTxs];
-    if (!allTransactions) return;
+    if (!allTransactions) return undefined;
 
     let allAPRbyAmount = 0;
     let allAmounts = 0;
@@ -130,7 +130,7 @@ function TableRowFixedPool({ symbol, amount, type, maturityDate, market, decimal
           )}
         </TableCell>
         <TableCell align="center" size="small">
-          {APR ? `${(APR || 0).toFixed(2)} %` : <Skeleton sx={{ margin: 'auto' }} width={50} />}
+          {APR !== undefined ? `${(APR || 0).toFixed(2)} %` : <Skeleton sx={{ margin: 'auto' }} width={50} />}
         </TableCell>
         <TableCell align="center" size="small">
           {maturityDate ? parseTimestamp(maturityDate) : <Skeleton sx={{ margin: 'auto' }} width={80} />}
