@@ -227,7 +227,7 @@ const Withdraw: FC = () => {
 
       setTx({ status: status ? 'success' : 'error', hash: transactionHash });
 
-      void analytics.track(status ? 'withdrawSuccess' : 'withdrawError', {
+      void analytics.track(status ? 'withdraw' : 'withdrawRevert', {
         amount: qty,
         asset: symbol,
         hash: transactionHash,
@@ -252,7 +252,7 @@ const Withdraw: FC = () => {
       return;
     }
 
-    void analytics.track('withdraw', {
+    void analytics.track('withdrawRequest', {
       amount: qty,
       asset: symbol,
     });

@@ -223,7 +223,7 @@ const Deposit: FC = () => {
 
       setTx({ status: status ? 'success' : 'error', hash: transactionHash });
 
-      void analytics.track(status ? 'depositSuccess' : 'depositError', {
+      void analytics.track(status ? 'deposit' : 'depositRevert', {
         amount: qty,
         asset: symbol,
         hash: transactionHash,
@@ -247,7 +247,7 @@ const Deposit: FC = () => {
       return;
     }
 
-    void analytics.track('deposit', {
+    void analytics.track('depositRequest', {
       amount: qty,
       asset: symbol,
     });

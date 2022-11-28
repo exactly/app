@@ -206,7 +206,7 @@ function Repay() {
 
       setTx({ status: status ? 'success' : 'error', hash: transactionHash });
 
-      void analytics.track(status ? 'repaySuccess' : 'repayError', {
+      void analytics.track(status ? 'repay' : 'repayRevert', {
         amount: qty,
         asset: symbol,
         hash: transactionHash,
@@ -275,7 +275,7 @@ function Repay() {
       return;
     }
 
-    void analytics.track('repay', {
+    void analytics.track('repayRequest', {
       amount: qty,
       asset: symbol,
     });

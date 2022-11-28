@@ -260,7 +260,7 @@ const Borrow: FC = () => {
 
       setTx({ status: status ? 'success' : 'error', hash: transactionHash });
 
-      void analytics.track(status ? 'borrowSuccess' : 'borrowError', {
+      void analytics.track(status ? 'borrow' : 'borrowRevert', {
         amount: qty,
         asset: symbol,
         hash: transactionHash,
@@ -277,7 +277,7 @@ const Borrow: FC = () => {
     } finally {
       setIsLoadingOp(false);
     }
-  }, [ETHRouterContract, accountData, qty, getAccountData, marketContract, symbol, walletAddress]);
+  }, [ETHRouterContract, accountData, getAccountData, marketContract, qty, symbol, walletAddress]);
 
   const handleSubmitAction = useCallback(async () => {
     if (isLoading) return;
@@ -288,7 +288,7 @@ const Borrow: FC = () => {
       return;
     }
 
-    void analytics.track('borrow', {
+    void analytics.track('borrowRequest', {
       amount: qty,
       asset: symbol,
     });

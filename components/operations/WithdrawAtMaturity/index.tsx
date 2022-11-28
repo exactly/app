@@ -275,7 +275,7 @@ const WithdrawAtMaturity: FC = () => {
 
       setTx({ status: status ? 'success' : 'error', hash: transactionHash });
 
-      void analytics.track(status ? 'withdrawAtMaturitySuccess' : 'withdrawAtMaturityError', {
+      void analytics.track(status ? 'withdrawAtMaturity' : 'withdrawAtMaturityRevert', {
         amount: qty,
         asset: symbol,
         maturity: date.value,
@@ -310,7 +310,7 @@ const WithdrawAtMaturity: FC = () => {
       return;
     }
 
-    void analytics.track('withdrawAtMaturity', {
+    void analytics.track('withdrawAtMaturityRequest', {
       amount: qty,
       maturity: date?.value,
       asset: symbol,

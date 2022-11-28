@@ -317,7 +317,7 @@ const BorrowAtMaturity: FC = () => {
       const { status, transactionHash } = await borrowTx.wait();
       setTx({ status: status ? 'success' : 'error', hash: transactionHash });
 
-      void analytics.track(status ? 'borrowAtMaturitySuccess' : 'borrowAtMaturityError', {
+      void analytics.track(status ? 'borrowAtMaturity' : 'borrowAtMaturityRevert', {
         amount: qty,
         asset: symbol,
         maturity: date.value,
@@ -428,7 +428,7 @@ const BorrowAtMaturity: FC = () => {
   const handleSubmitAction = useCallback(async () => {
     if (isLoading) return;
     if (!needsAllowance) {
-      void analytics.track('borrowAtMaturity', {
+      void analytics.track('borrowAtMaturityRequest', {
         amount: qty,
         maturity: date?.value,
         asset: symbol,

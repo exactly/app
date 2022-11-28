@@ -284,7 +284,7 @@ const RepayAtMaturity: FC = () => {
 
       setTx({ status: status ? 'success' : 'error', hash: transactionHash });
 
-      void analytics.track(status ? 'repayAtMaturitySuccess' : 'repayAtMaturityError', {
+      void analytics.track(status ? 'repayAtMaturity' : 'repayAtMaturityRevert', {
         amount: qty,
         asset: symbol,
         maturity: date.value,
@@ -320,14 +320,14 @@ const RepayAtMaturity: FC = () => {
       return;
     }
 
-    void analytics.track('repayAtMaturity', {
+    void analytics.track('repayAtMaturityRequest', {
       amount: qty,
       maturity: date?.value,
       asset: symbol,
     });
 
     return repay();
-  }, [approve, approveErrorData, isLoading, needsAllowance, needsApproval, repay]);
+  }, [approve, approveErrorData, date?.value, isLoading, needsAllowance, needsApproval, qty, repay, symbol]);
 
   if (tx) return <ModalGif tx={tx} tryAgain={repay} />;
 
