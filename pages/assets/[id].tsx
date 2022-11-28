@@ -23,8 +23,6 @@ import AssetMaturityPools from 'components/asset/MaturityPool';
 import AssetFloatingPool from 'components/asset/FloatingPool';
 import analytics from 'utils/analytics';
 
-void analytics.page();
-
 const Asset: NextPage<{ symbol: string }> = ({ symbol }) => {
   const { network } = useWeb3Context();
   const { dates } = useContext(MarketContext);
@@ -65,6 +63,10 @@ const Asset: NextPage<{ symbol: string }> = ({ symbol }) => {
   useEffect(() => {
     handleAPR();
   }, [handleAPR]);
+
+  useEffect(() => {
+    void analytics.page();
+  }, []);
 
   return (
     <>
