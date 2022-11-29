@@ -5,4 +5,5 @@ export type FixedPoolTransaction = {
   amount: string;
   amountUSD: string;
   isBorrowOrDeposit: boolean;
+  APR?: number;
 };

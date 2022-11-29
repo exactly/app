@@ -12,6 +12,7 @@ import Link from 'next/link';
 
 import React, { useContext, useMemo, useState } from 'react';
 import { FixedPoolTransaction } from 'types/FixedPoolTransaction';
+import calculateAPR from 'utils/calculateAPR';
 import formatNumber from 'utils/formatNumber';
 import formatSymbol from 'utils/formatSymbol';
 import parseTimestamp from 'utils/parseTimestamp';
@@ -56,6 +57,10 @@ function TableRowFixedPool({ symbol, amount, type, maturityDate, market, decimal
         ? 'Repay'
         : 'Withdraw';
 
+      const { transactionAPR } = transaction?.fee
+        ? calculateAPR(transaction.fee, decimals, transaction.assets, transaction.timestamp, transaction.maturity)
+        : { transactionAPR: undefined };
+
       const isBorrowOrDeposit = txType.toLowerCase() === 'borrow' || txType.toLowerCase() === 'deposit';
       const date = parseTimestamp(transaction?.timestamp || '0');
       const amountUSD = (parseFloat(assets) * exchangeRate).toFixed(2);
@@ -67,6 +72,7 @@ function TableRowFixedPool({ symbol, amount, type, maturityDate, market, decimal
         amount: assets,
         amountUSD,
         isBorrowOrDeposit,
+        APR: transactionAPR,
       };
     });
 
@@ -80,16 +86,8 @@ function TableRowFixedPool({ symbol, amount, type, maturityDate, market, decimal
     let allAPRbyAmount = 0;
     let allAmounts = 0;
 
-    allTransactions.forEach((transaction) => {
-      const transactionFee = parseFloat(formatFixed(transaction.fee, decimals));
-      const transactionAmount = parseFloat(formatFixed(transaction.assets, decimals));
-      const transactionRate = transactionFee / transactionAmount;
-      const transactionTimestamp = parseFloat(transaction.timestamp);
-      const transactionMaturity = parseFloat(transaction.maturity);
-      const time = 31536000 / (transactionMaturity - transactionTimestamp);
-
-      const transactionAPR = transactionRate * time * 100;
-
+    allTransactions.forEach(({ fee, assets, timestamp, maturity }) => {
+      const { transactionAPR, transactionAmount } = calculateAPR(fee, decimals, assets, timestamp, maturity);
       allAPRbyAmount += transactionAPR * transactionAmount;
       allAmounts += transactionAmount;
     });

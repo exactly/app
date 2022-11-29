@@ -31,6 +31,10 @@ const headers: TableHeader[] = [
     label: 'Amount',
     align: 'right',
   },
+  {
+    label: 'APR',
+    align: 'right',
+  },
 ];
 
 function CollapseFixedPool({ open, transactions }: Props) {
@@ -49,7 +53,7 @@ function CollapseFixedPool({ open, transactions }: Props) {
           </TableRow>
         </TableHead>
         <TableBody>
-          {transactions?.map(({ id, date, type, amount, amountUSD, isBorrowOrDeposit }) => (
+          {transactions?.map(({ id, date, type, amount, amountUSD, isBorrowOrDeposit, APR }) => (
             <TableRow key={`collapsed_${id}`} sx={{ '&:last-child td, &:last-child th': { border: 0 } }} hover>
               <TableCell component="th" align="left" size="small">
                 <Typography variant="body2">{date || <Skeleton width={70} />}</Typography>
@@ -81,6 +85,9 @@ function CollapseFixedPool({ open, transactions }: Props) {
                     <Skeleton sx={{ marginLeft: 'auto' }} width={100} />
                   )}
                 </Typography>
+              </TableCell>
+              <TableCell align="right" size="small">
+                {APR !== undefined ? `${(APR || 0).toFixed(2)} %` : '-'}
               </TableCell>
             </TableRow>
           ))}
