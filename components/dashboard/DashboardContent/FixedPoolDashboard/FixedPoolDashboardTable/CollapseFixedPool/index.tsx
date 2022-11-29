@@ -1,5 +1,5 @@
 import React from 'react';
-import { Collapse, Skeleton, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material';
+import { Collapse, Skeleton, Table, TableBody, TableCell, TableHead, TableRow, Tooltip, Typography } from '@mui/material';
 import { FixedPoolTransaction } from 'types/FixedPoolTransaction';
 import { TableHeader } from 'types/TableHeader';
 
@@ -63,7 +63,9 @@ function CollapseFixedPool({ open, transactions }: Props) {
                   {amount ? (
                     <>
                       {amount}
-                      <span style={{ fontSize: '0.9em', color: 'grey', paddingLeft: '4px' }}>(${amountUSD})</span>
+                      <Tooltip title="Calculated with current asset price" placement="bottom-end">
+                        <span style={{ fontSize: '0.9em', color: 'grey', paddingLeft: '4px' }}>(${amountUSD})</span>
+                      </Tooltip>
                     </>
                   ) : (
                     <Skeleton sx={{ marginLeft: 'auto' }} width={100} />
