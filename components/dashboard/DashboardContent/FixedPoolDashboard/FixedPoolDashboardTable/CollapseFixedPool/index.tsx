@@ -1,5 +1,15 @@
 import React from 'react';
-import { Collapse, Skeleton, Table, TableBody, TableCell, TableHead, TableRow, Tooltip, Typography } from '@mui/material';
+import {
+  Collapse,
+  Skeleton,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Tooltip,
+  Typography,
+} from '@mui/material';
 import { FixedPoolTransaction } from 'types/FixedPoolTransaction';
 import { TableHeader } from 'types/TableHeader';
 
