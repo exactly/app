@@ -33,6 +33,8 @@ function FixedPoolDashboardTable({ type, fixedPools }: Props) {
       {
         label: 'Average Fixed Rate',
         key: 'average fixed rate',
+        tooltipTitle: 'Average rate for existing deposits',
+        tooltipPlacement: 'top-start',
       },
       {
         label: 'Maturity Date',
