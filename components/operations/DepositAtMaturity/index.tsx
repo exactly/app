@@ -178,15 +178,6 @@ const DepositAtMaturity: FC = () => {
 
   const handleInputChange = useCallback(
     ({ target: { value, valueAsNumber } }: ChangeEvent<HTMLInputElement>) => {
-      if (!accountData) return;
-      const { decimals } = accountData[symbol];
-
-      if (value.includes('.')) {
-        const regex = /[^,.]*$/g;
-        const inputDecimals = regex.exec(value)![0];
-        if (inputDecimals.length > decimals) return;
-      }
-
       setQty(value);
 
       if (walletBalance && valueAsNumber > parseFloat(walletBalance)) {
@@ -199,7 +190,7 @@ const DepositAtMaturity: FC = () => {
 
       setErrorData(undefined);
     },
-    [accountData, walletBalance, translations, lang, symbol],
+    [walletBalance, translations, lang],
   );
 
   const deposit = useCallback(async () => {
@@ -267,7 +258,6 @@ const DepositAtMaturity: FC = () => {
     ETHRouterContract,
     accountData,
     date,
-    qty,
     getAccountData,
     lang,
     marketContract,

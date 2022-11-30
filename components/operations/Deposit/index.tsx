@@ -174,11 +174,6 @@ const Deposit: FC = () => {
 
   const handleInputChange = useCallback(
     ({ target: { value, valueAsNumber } }: ChangeEvent<HTMLInputElement>) => {
-      if (value.includes('.')) {
-        const regex = /[^,.]*$/g;
-        const inputDecimals = regex.exec(value)![0];
-        if (inputDecimals.length > decimals) return;
-      }
       setQty(value);
 
       if (walletBalance && valueAsNumber > parseFloat(walletBalance)) {
@@ -190,7 +185,7 @@ const Deposit: FC = () => {
       }
       setErrorData(undefined);
     },
-    [walletBalance, decimals, translations, lang],
+    [walletBalance, translations, lang],
   );
 
   const deposit = useCallback(async () => {
@@ -253,7 +248,7 @@ const Deposit: FC = () => {
     });
 
     return deposit();
-  }, [approve, approveErrorData, deposit, isLoading, needsAllowance, needsApproval]);
+  }, [qty, symbol, approve, approveErrorData, deposit, isLoading, needsAllowance, needsApproval]);
 
   if (tx) return <ModalGif tx={tx} tryAgain={deposit} />;
 

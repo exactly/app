@@ -212,12 +212,6 @@ const RepayAtMaturity: FC = () => {
 
   const handleInputChange = useCallback(
     ({ target: { value } }: ChangeEvent<HTMLInputElement>) => {
-      if (value.includes('.')) {
-        const regex = /[^,.]*$/g;
-        const inputDecimals = regex.exec(value)![0];
-        if (inputDecimals.length > decimals) return;
-      }
-
       setQty(value);
 
       const input = parseFixed(value || '0', decimals);
