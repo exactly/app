@@ -151,15 +151,6 @@ const Withdraw: FC = () => {
 
   const handleInputChange = useCallback(
     ({ target: { value, valueAsNumber } }: ChangeEvent<HTMLInputElement>) => {
-      if (!accountData) return;
-      const { decimals } = accountData[symbol];
-
-      if (value.includes('.')) {
-        const regex = /[^,.]*$/g;
-        const inputDecimals = regex.exec(value)![0];
-        if (inputDecimals.length > decimals) return;
-      }
-
       if (valueAsNumber > parseFloat(parsedAmount)) {
         setErrorData({
           status: true,
@@ -172,7 +163,7 @@ const Withdraw: FC = () => {
       //we disable max flag if user changes input
       isMax && setIsMax(false);
     },
-    [accountData, symbol, isMax, lang, parsedAmount, translations],
+    [isMax, lang, parsedAmount, translations],
   );
 
   const withdraw = useCallback(async () => {

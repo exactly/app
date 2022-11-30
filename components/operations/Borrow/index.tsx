@@ -195,11 +195,6 @@ const Borrow: FC = () => {
 
       const maxBorrowAssets = getBeforeBorrowLimit(accountData, symbol, usdPrice, decimals, 'borrow');
 
-      if (value.includes('.')) {
-        const regex = /[^,.]*$/g;
-        const inputDecimals = regex.exec(value)![0];
-        if (inputDecimals.length > decimals) return;
-      }
       setQty(value);
 
       if (!hasCollateral) return setErrorData({ status: true, message: translations[lang].noCollateral });

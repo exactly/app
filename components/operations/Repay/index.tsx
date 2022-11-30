@@ -126,15 +126,6 @@ function Repay() {
 
   const handleInputChange = useCallback(
     ({ target: { value, valueAsNumber } }: ChangeEvent<HTMLInputElement>) => {
-      if (!accountData) return;
-      const { decimals } = accountData[symbol];
-
-      if (value.includes('.')) {
-        const regex = /[^,.]*$/g;
-        const inputDecimals = regex.exec(value)![0];
-        if (inputDecimals.length > decimals) return; //limit the number of decimals on the input
-      }
-
       setQty(value);
 
       if (walletBalance && valueAsNumber > parseFloat(walletBalance)) {
@@ -148,7 +139,7 @@ function Repay() {
 
       isMax && setIsMax(false);
     },
-    [accountData, symbol, walletBalance, isMax, translations, lang],
+    [walletBalance, isMax, translations, lang],
   );
 
   const repay = useCallback(async () => {

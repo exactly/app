@@ -234,12 +234,6 @@ const BorrowAtMaturity: FC = () => {
       if (!accountData) return;
       const { decimals, usdPrice } = accountData[symbol];
 
-      if (value.includes('.')) {
-        const regex = /[^,.]*$/g;
-        const inputDecimals = regex.exec(value)![0];
-        if (inputDecimals.length > decimals) return;
-      }
-
       setQty(value);
 
       if (poolLiquidity && poolLiquidity < valueAsNumber) {
@@ -440,7 +434,7 @@ const BorrowAtMaturity: FC = () => {
     await approve();
     setErrorData(approveErrorData);
     setNeedsAllowance(await needsApproval());
-  }, [isLoading, needsAllowance, approve, approveErrorData, needsApproval, borrow]);
+  }, [date?.value, qty, symbol, isLoading, needsAllowance, approve, approveErrorData, needsApproval, borrow]);
 
   if (tx) return <ModalGif tx={tx} tryAgain={borrow} />;
 
