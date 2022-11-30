@@ -103,20 +103,10 @@ export default Asset;
 export const getStaticProps: GetStaticProps = async (context) => {
   const tokenSymbol: string = context.params?.id as string;
   const symbol = tokenSymbol === 'ETH' ? 'WETH' : tokenSymbol;
-  const assets = ['DAI', 'USDC', 'ETH', 'WBTC', 'wstETH'];
-
-  if (!assets.includes(symbol)) {
-    return {
-      redirect: {
-        destination: '/',
-        permanent: false,
-      },
-    };
-  }
 
   return {
     props: {
-      symbol: symbol,
+      symbol,
     },
   };
 };
@@ -124,6 +114,6 @@ export const getStaticProps: GetStaticProps = async (context) => {
 export async function getStaticPaths() {
   return {
     paths: ['/assets/DAI', '/assets/WETH', '/assets/USDC', '/assets/WBTC', '/assets/wstETH'],
-    fallback: true,
+    fallback: false,
   };
 }

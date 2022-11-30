@@ -47,6 +47,7 @@ const AssetMaturityPools: FC<AssetMaturityPoolsProps> = ({ symbol }) => {
 
     const { market: marketAddress } = accountData[symbol];
     const marketMaturities = previewFixedData.find(({ market }) => market === marketAddress) as FixedMarketData;
+    if (!marketMaturities) return;
 
     const { deposits, borrows, decimals, assets: initialAssets } = marketMaturities;
 
