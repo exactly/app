@@ -1,7 +1,16 @@
+import React, {
+  ChangeEvent,
+  ChangeEventHandler,
+  KeyboardEvent,
+  MouseEventHandler,
+  useCallback,
+  useMemo,
+  ClipboardEvent,
+  useRef,
+} from 'react';
 import { formatFixed, parseFixed } from '@ethersproject/bignumber';
-import React, { ChangeEventHandler, MouseEventHandler, useContext, ClipboardEvent, useMemo } from 'react';
-
-import AccountDataContext from 'contexts/AccountDataContext';
+import useAccountData from 'hooks/useAccountData';
+import { WeiPerEther } from '@ethersproject/constants';
 
 import formatNumber from 'utils/formatNumber';
 
@@ -11,62 +20,86 @@ type Props = {
   value?: string;
   name?: string;
   disabled?: boolean;
-  symbol?: string;
+  symbol: string;
   error?: boolean;
-  onChange?: ChangeEventHandler;
+  onChange?: ChangeEventHandler<HTMLInputElement>;
   onMax?: MouseEventHandler;
 };
 
 function ModalInput({ value, name, disabled, symbol, error, onChange, onMax }: Props) {
-  const { accountData } = useContext(AccountDataContext);
+  const { decimals, usdPrice } = useAccountData(symbol);
+  const prev = useRef('');
 
-  const blockedCharacters = ['e', 'E', '+', '-', ','];
+  const isValid = useCallback(
+    (v: string): boolean => {
+      const regex = new RegExp(`^\\d*([.,]\\d{1,${decimals ?? 18}})?$`, 'g');
+      return regex.test(v);
+    },
+    [decimals],
+  );
 
-  const newValue = useMemo(() => {
-    if (!accountData || !value || !symbol) return;
+  const usdValue = useMemo(() => {
+    if (!value || !decimals || !usdPrice) return;
 
-    const decimals = accountData[symbol].decimals;
-    const usdPrice = accountData[symbol].usdPrice;
-
-    const regex = /[^,.]*$/g;
-    const inputDecimals = regex.exec(value)![0];
-
-    if (inputDecimals.length > decimals) return;
+    if (!isValid(value)) return;
 
     const parsedValue = parseFixed(value, decimals);
-    const WAD = parseFixed('1', 18);
+    const usd = parsedValue.mul(usdPrice).div(WeiPerEther);
 
-    const valueUsd = parsedValue.mul(usdPrice).div(WAD);
+    return formatFixed(usd, decimals);
+  }, [isValid, value, decimals, usdPrice]);
 
-    return formatFixed(valueUsd, decimals);
-  }, [symbol, value, accountData]);
+  const onChangeCallback = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      const { value: currentValue } = e.currentTarget;
+      if (!isValid(currentValue)) {
+        return e.preventDefault();
+      }
 
-  function filterPasteValue(e: ClipboardEvent<HTMLInputElement>) {
-    if (e.type === 'paste') {
-      const data = e.clipboardData.getData('Text');
-      if (/[^\d|.]+/gi.test(data)) e.preventDefault();
+      prev.current = currentValue;
+
+      onChange?.(e);
+    },
+    [isValid, onChange],
+  );
+
+  const onPaste = useCallback(
+    (e: ClipboardEvent<HTMLInputElement>) => {
+      const text = e.clipboardData.getData('text');
+      if (!isValid(text)) {
+        return e.preventDefault();
+      }
+
+      prev.current = text;
+    },
+    [isValid],
+  );
+
+  const onInput = useCallback((e: KeyboardEvent<HTMLInputElement>) => {
+    const { validity } = e.currentTarget;
+    if (validity.valid) {
+      return true;
     }
-  }
+    e.currentTarget.value = prev.current;
+  }, []);
 
   return (
     <section className={error ? styles.error : styles.inputSection}>
       <input
         min={0.0}
         type="number"
-        placeholder={'0'}
+        placeholder="0"
         value={value}
-        onChange={onChange}
+        onChange={onChangeCallback}
         name={name}
         disabled={disabled}
         className={styles.input}
-        onKeyDown={(e) => blockedCharacters.includes(e.key) && e.preventDefault()}
-        onPaste={(e) => filterPasteValue(e)}
+        onPaste={onPaste}
+        onInput={onInput}
         step="any"
         autoFocus
       />
-      <p className={styles.translatedValue}>
-        {value === '' || !value || !symbol || !newValue ? '$0' : `$${formatNumber(newValue)}`}
-      </p>
+      <p className={styles.translatedValue}>${formatNumber(usdValue || '0', 'USD')}</p>
       {onMax && (
         <p className={styles.max} onClick={onMax}>
           MAX
