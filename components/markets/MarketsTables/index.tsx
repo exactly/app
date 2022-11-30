@@ -115,6 +115,7 @@ const MarketTables: FC = () => {
         if (!previewFixedData) return;
 
         const marketMaturities = previewFixedData.find(({ market }) => market === marketAddress) as FixedMarketData;
+        if (!marketMaturities) return;
 
         const { deposits, borrows, assets: initialAssets } = marketMaturities;
 
