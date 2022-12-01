@@ -1,4 +1,4 @@
-export type contractName =
+export type ContractName =
   | 'marketDAI'
   | 'marketUSDC'
   | 'marketWETH'
