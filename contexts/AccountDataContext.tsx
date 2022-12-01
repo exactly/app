@@ -34,7 +34,7 @@ export const AccountDataProvider: FC<PropsWithChildren> = ({ children }) => {
 
     const wallet = walletAddressDebounced ? walletAddressDebounced : AddressZero;
 
-    const data = await Previewer?.exactly(wallet);
+    const data = await Previewer.exactly(wallet);
 
     setAccountData(Object.fromEntries(data.map((market: FixedLenderAccountData) => [market.assetSymbol, market])));
   }, [Previewer, walletAddressDebounced]);

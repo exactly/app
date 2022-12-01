@@ -4,12 +4,12 @@ import React, { createContext, useState } from 'react';
 import { InfuraProvider } from '@ethersproject/providers';
 import { Contract } from '@ethersproject/contracts';
 
-import { contractName } from 'types/ContractNames';
+import { ContractName } from 'types/ContractNames';
 
 import { useWeb3Context } from './Web3Context';
 
 type ContextValues = {
-  getInstance: (address: string, abi: ContractInterface, contractName: contractName) => any;
+  getInstance: (address: string, abi: ContractInterface, contractName: ContractName) => any;
 };
 
 const defaultValues: ContextValues = {
@@ -24,7 +24,7 @@ export const ContractsProvider: FC<{ children?: ReactNode }> = ({ children }) =>
   const { network, web3Provider } = useWeb3Context();
   const [instances, setInstances] = useState<Record<string, Contract> | null>(null);
 
-  function getInstance(address: string, abi: ContractInterface, contractName: contractName) {
+  function getInstance(address: string, abi: ContractInterface, contractName: ContractName) {
     if (network && instances && instances[network.name + contractName]) {
       return instances[network.name + contractName];
     }
