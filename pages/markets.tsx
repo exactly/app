@@ -14,9 +14,7 @@ import analytics from 'utils/analytics';
 const { maxWidth } = globals;
 
 const Pools: NextPage = () => {
-  useEffect(() => {
-    void analytics.page();
-  }, []);
+  useEffect(() => void analytics.page(), []);
   return (
     <>
       <OperationsModals />

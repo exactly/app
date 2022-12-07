@@ -64,9 +64,7 @@ const Asset: NextPage<{ symbol: string }> = ({ symbol }) => {
     handleAPR();
   }, [handleAPR]);
 
-  useEffect(() => {
-    void analytics.page();
-  }, []);
+  useEffect(() => void analytics.page(), []);
 
   return (
     <>

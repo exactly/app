@@ -40,9 +40,7 @@ const DashBoard: NextPage = () => {
     getHealthFactor();
   }, [walletAddress, accountData, getHealthFactor]);
 
-  useEffect(() => {
-    void analytics.page();
-  }, []);
+  useEffect(() => void analytics.page(), []);
 
   return (
     <>
