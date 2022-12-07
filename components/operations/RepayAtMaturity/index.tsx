@@ -1,4 +1,4 @@
-import React, { ChangeEvent, FC, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { ChangeEvent, FC, useCallback, useContext, useMemo, useState } from 'react';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { WeiPerEther, Zero } from '@ethersproject/constants';
 import LoadingButton from '@mui/lab/LoadingButton';
@@ -15,12 +15,9 @@ import ModalRowHealthFactor from 'components/common/modal/ModalRowHealthFactor';
 import ModalTitle from 'components/common/modal/ModalTitle';
 import ModalTxCost from 'components/common/modal/ModalTxCost';
 
-import { ErrorData } from 'types/Error';
 import { LangKeys } from 'types/Lang';
-import { Transaction } from 'types/Transaction';
 
 import formatNumber from 'utils/formatNumber';
-import { getSymbol } from 'utils/utils';
 
 import AccountDataContext from 'contexts/AccountDataContext';
 import LangContext from 'contexts/LangContext';
@@ -37,42 +34,47 @@ import useApprove from 'hooks/useApprove';
 import handleOperationError from 'utils/handleOperationError';
 import useBalance from 'hooks/useBalance';
 import analytics from 'utils/analytics';
+import { useOperationContext, usePreviewTx } from 'contexts/OperationContext';
+import useAccountData from 'hooks/useAccountData';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 const DEFAULT_SLIPPAGE = (numbers.slippage * 100).toFixed(2);
 
 const RepayAtMaturity: FC = () => {
-  const { walletAddress, network } = useWeb3Context();
+  const { walletAddress } = useWeb3Context();
   const { date, market } = useContext(MarketContext);
   const { accountData, getAccountData } = useContext(AccountDataContext);
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
-  const [qty, setQty] = useState('');
+  const {
+    symbol,
+    errorData,
+    setErrorData,
+    qty,
+    setQty,
+    gasCost,
+    tx,
+    setTx,
+    requiresApproval,
+    setRequiresApproval,
+    isLoading: isLoadingOp,
+    setIsLoading: setIsLoadingOp,
+  } = useOperationContext();
 
-  const [gasCost, setGasCost] = useState<BigNumber | undefined>();
-  const [tx, setTx] = useState<Transaction | undefined>();
   const [isSlippageEditable, setIsSlippageEditable] = useState(false);
-  const [isLoadingOp, setIsLoadingOp] = useState(false);
   const [penaltyAssets, setPenaltyAssets] = useState(Zero);
   const [positionAssetsAmount, setPositionAssetsAmount] = useState(Zero);
   const [slippage, setSlippage] = useState(DEFAULT_SLIPPAGE);
-  const [needsAllowance, setNeedsAllowance] = useState(false);
-  const [errorData, setErrorData] = useState<ErrorData | undefined>();
-  const [assetAddress, setAssetAddress] = useState<string | undefined>();
 
   const ETHRouterContract = useETHRouter();
+  const assetContract = useERC20();
 
   const marketContract = useMarket(market?.value);
-  const assetContract = useERC20(assetAddress);
 
-  const symbol = useMemo(
-    () => (market?.value ? getSymbol(market.value, network?.name) : 'DAI'),
-    [market?.value, network?.name],
-  );
   const rawSlippage = useMemo(() => 1 + Number(slippage) / 100, [slippage]);
-  const decimals = useMemo(() => (accountData && accountData[symbol].decimals) || 18, [accountData, symbol]);
+  const { decimals = 18 } = useAccountData(symbol);
 
   const maxAmountToRepay = useMemo(
     () =>
@@ -84,15 +86,6 @@ const RepayAtMaturity: FC = () => {
   );
 
   const walletBalance = useBalance(symbol, assetContract);
-
-  useEffect(() => {
-    if (!marketContract || symbol === 'WETH') return;
-
-    const loadAssetAddress = async () => {
-      setAssetAddress(await marketContract.asset());
-    };
-    void loadAssetAddress();
-  }, [marketContract, symbol]);
 
   const isLateRepay = useMemo(() => date && Date.now() / 1000 > parseInt(date.value), [date]);
 
@@ -117,87 +110,62 @@ const RepayAtMaturity: FC = () => {
     return penaltyRate.mul(penaltyTime).mul(totalPositionAssets).div(WeiPerEther);
   }, [accountData, date, isLateRepay, totalPositionAssets, symbol]);
 
-  useEffect(() => {
-    setQty('');
-    setErrorData(undefined);
-  }, [symbol, date]);
-
   const {
     approve,
     estimateGas: approveEstimateGas,
     isLoading: approveIsLoading,
-    errorData: approveErrorData,
-  } = useApprove(assetContract, marketContract?.address);
-
-  const needsApproval = useCallback(async () => {
-    if (symbol === 'WETH') return false;
-
-    if (!walletAddress || !assetContract || !marketContract || !accountData) return true;
-
-    const allowance = await assetContract.allowance(walletAddress, marketContract.address);
-    return allowance.lt(parseFixed(qty || String(numbers.defaultAmount), await assetContract.decimals()));
-  }, [accountData, assetContract, marketContract, qty, symbol, walletAddress]);
-
-  useEffect(() => {
-    needsApproval()
-      .then(setNeedsAllowance)
-      .catch((error) => setErrorData({ status: true, message: handleOperationError(error) }));
-  }, [needsApproval]);
-
-  const isLoading = useMemo(() => isLoadingOp || approveIsLoading, [isLoadingOp, approveIsLoading]);
-
-  const previewGasCost = useCallback(async () => {
-    if (isLoading || !walletAddress || !ETHRouterContract || !marketContract || !date || !qty) return;
-
-    const gasPrice = (await ETHRouterContract.provider.getFeeData()).maxFeePerGas;
-    if (!gasPrice) return;
-
-    if (await needsApproval()) {
-      const gasEstimation = await approveEstimateGas();
-      return setGasCost(gasEstimation?.mul(gasPrice));
-    }
-
-    const amount = positionAssetsAmount.isZero() ? DEFAULT_AMOUNT : positionAssetsAmount;
-    const maxAmount = maxAmountToRepay.isZero()
-      ? DEFAULT_AMOUNT.mul(parseFixed(String(rawSlippage * 10), 18)).div(WeiPerEther)
-      : maxAmountToRepay;
-
-    if (symbol === 'WETH') {
-      const gasLimit = await ETHRouterContract.estimateGas.repayAtMaturity(date.value, amount, {
-        value: maxAmount,
-      });
-
-      return setGasCost(gasPrice.mul(gasLimit));
-    }
-
-    const gasLimit = await marketContract.estimateGas.repayAtMaturity(date.value, amount, maxAmount, walletAddress);
-
-    setGasCost(gasPrice.mul(gasLimit));
-  }, [
-    qty,
-    ETHRouterContract,
-    approveEstimateGas,
-    date,
-    isLoading,
-    marketContract,
-    maxAmountToRepay,
     needsApproval,
-    positionAssetsAmount,
-    rawSlippage,
-    symbol,
-    walletAddress,
-  ]);
+  } = useApprove('repayAtMaturity', assetContract, marketContract?.address);
 
-  useEffect(() => {
-    if (errorData?.status) return;
-    previewGasCost().catch((error) => {
-      setErrorData({
-        status: true,
-        message: handleOperationError(error),
-        component: 'gas',
-      });
-    });
-  }, [previewGasCost, errorData?.status]);
+  const previewGasCost = useCallback(
+    async (quantity: string): Promise<BigNumber | undefined> => {
+      if (!walletAddress || !ETHRouterContract || !marketContract || !date || !quantity) return;
+
+      const gasPrice = (await ETHRouterContract.provider.getFeeData()).maxFeePerGas;
+      if (!gasPrice) return;
+
+      if (requiresApproval) {
+        const gasEstimation = await approveEstimateGas();
+        return gasEstimation?.mul(gasPrice);
+      }
+
+      const amount = positionAssetsAmount.isZero() ? DEFAULT_AMOUNT : positionAssetsAmount;
+      const maxAmount = maxAmountToRepay.isZero()
+        ? DEFAULT_AMOUNT.mul(parseFixed(String(rawSlippage * 10), 18)).div(WeiPerEther)
+        : maxAmountToRepay;
+
+      if (symbol === 'WETH') {
+        const gasLimit = await ETHRouterContract.estimateGas.repayAtMaturity(date.value, amount, {
+          value: maxAmount,
+        });
+
+        return gasPrice.mul(gasLimit);
+      }
+
+      const gasLimit = await marketContract.estimateGas.repayAtMaturity(date.value, amount, maxAmount, walletAddress);
+
+      return gasPrice.mul(gasLimit);
+    },
+    [
+      walletAddress,
+      ETHRouterContract,
+      marketContract,
+      date,
+      requiresApproval,
+      positionAssetsAmount,
+      maxAmountToRepay,
+      rawSlippage,
+      symbol,
+      approveEstimateGas,
+    ],
+  );
+
+  const { isLoading: previewIsLoading } = usePreviewTx({ qty, needsApproval, previewGasCost });
+
+  const isLoading = useMemo(
+    () => isLoadingOp || approveIsLoading || previewIsLoading,
+    [isLoadingOp, approveIsLoading, previewIsLoading],
+  );
 
   const handleOnMax = useCallback(() => {
     setPenaltyAssets(totalPenalties);
@@ -208,7 +176,7 @@ const RepayAtMaturity: FC = () => {
       return setErrorData({ status: true, message: 'Insufficient balance' });
 
     setErrorData(undefined);
-  }, [decimals, totalPositionAssets, totalPenalties, walletBalance]);
+  }, [totalPenalties, totalPositionAssets, setQty, decimals, walletBalance, setErrorData]);
 
   const handleInputChange = useCallback(
     ({ target: { value } }: ChangeEvent<HTMLInputElement>) => {
@@ -234,7 +202,7 @@ const RepayAtMaturity: FC = () => {
 
       setErrorData(undefined);
     },
-    [decimals, totalPositionAssets, totalPenalties, walletBalance],
+    [setQty, decimals, totalPositionAssets, totalPenalties, walletBalance, setErrorData],
   );
 
   const repay = useCallback(async () => {
@@ -285,7 +253,7 @@ const RepayAtMaturity: FC = () => {
         hash: transactionHash,
       });
 
-      getAccountData();
+      void getAccountData();
     } catch (error) {
       if (repayTx) setTx({ status: 'error', hash: repayTx?.hash });
       setErrorData({ status: true, message: handleOperationError(error) });
@@ -301,16 +269,18 @@ const RepayAtMaturity: FC = () => {
     maxAmountToRepay,
     positionAssetsAmount,
     qty,
+    setErrorData,
+    setIsLoadingOp,
+    setTx,
     symbol,
     walletAddress,
   ]);
 
   const handleSubmitAction = useCallback(async () => {
     if (isLoading) return;
-    if (needsAllowance) {
+    if (requiresApproval) {
       await approve();
-      setErrorData(approveErrorData);
-      setNeedsAllowance(await needsApproval());
+      setRequiresApproval(await needsApproval(qty));
       return;
     }
 
@@ -321,7 +291,7 @@ const RepayAtMaturity: FC = () => {
     });
 
     return repay();
-  }, [approve, approveErrorData, date?.value, isLoading, needsAllowance, needsApproval, qty, repay, symbol]);
+  }, [approve, date?.value, isLoading, needsApproval, qty, repay, requiresApproval, setRequiresApproval, symbol]);
 
   if (tx) return <ModalGif tx={tx} tryAgain={repay} />;
 
@@ -335,7 +305,13 @@ const RepayAtMaturity: FC = () => {
         amountTitle={translations[lang].debtAmount.toUpperCase()}
       />
       <ModalMaturityEditable text={translations[lang].maturityPool} line />
-      <ModalInput onMax={handleOnMax} value={qty} onChange={handleInputChange} symbol={symbol} />
+      <ModalInput
+        onMax={handleOnMax}
+        value={qty}
+        onChange={handleInputChange}
+        symbol={symbol}
+        error={errorData?.component === 'input'}
+      />
       {errorData?.component !== 'gas' && <ModalTxCost gasCost={gasCost} />}
       <ModalRow
         text={translations[lang].amountAtFinish}
@@ -388,10 +364,10 @@ const RepayAtMaturity: FC = () => {
         loading={isLoading}
         disabled={!qty || parseFloat(qty) <= 0 || isLoading || errorData?.status}
       >
-        {needsAllowance ? 'Approve' : translations[lang].repay}
+        {requiresApproval ? 'Approve' : translations[lang].repay}
       </LoadingButton>
     </>
   );
 };
 
-export default RepayAtMaturity;
+export default React.memo(RepayAtMaturity);

@@ -1,4 +1,4 @@
-import React, { ChangeEvent, FC, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { ChangeEvent, FC, useCallback, useContext, useMemo, useState } from 'react';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 
 import ModalAsset from 'components/common/modal/ModalAsset';
@@ -12,8 +12,6 @@ import ModalError from 'components/common/modal/ModalError';
 import ModalRowBorrowLimit from 'components/common/modal/ModalRowBorrowLimit';
 
 import { LangKeys } from 'types/Lang';
-import { Transaction } from 'types/Transaction';
-import { ErrorData } from 'types/Error';
 
 import LangContext from 'contexts/LangContext';
 import { useWeb3Context } from 'contexts/Web3Context';
@@ -21,7 +19,6 @@ import AccountDataContext from 'contexts/AccountDataContext';
 import { MarketContext } from 'contexts/MarketContext';
 
 import formatNumber from 'utils/formatNumber';
-import { getSymbol } from 'utils/utils';
 
 import numbers from 'config/numbers.json';
 
@@ -33,30 +30,34 @@ import handleOperationError from 'utils/handleOperationError';
 import useApprove from 'hooks/useApprove';
 import { LoadingButton } from '@mui/lab';
 import analytics from 'utils/analytics';
+import { useOperationContext, usePreviewTx } from 'contexts/OperationContext';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 
 const Withdraw: FC = () => {
-  const { walletAddress, network } = useWeb3Context();
+  const { walletAddress } = useWeb3Context();
   const { accountData, getAccountData } = useContext(AccountDataContext);
   const { market } = useContext(MarketContext);
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
-  const [qty, setQty] = useState<string>('');
-  const [gasCost, setGasCost] = useState<BigNumber | undefined>();
-  const [tx, setTx] = useState<Transaction | undefined>();
-  const [isLoadingOp, setIsLoadingOp] = useState(false);
-  const [errorData, setErrorData] = useState<ErrorData | undefined>();
-  const [needsAllowance, setNeedsAllowance] = useState(false);
+  const {
+    symbol,
+    errorData,
+    setErrorData,
+    qty,
+    setQty,
+    gasCost,
+    tx,
+    setTx,
+    requiresApproval,
+    setRequiresApproval,
+    isLoading: isLoadingOp,
+    setIsLoading: setIsLoadingOp,
+  } = useOperationContext();
+
   const [isMax, setIsMax] = useState(false);
-
-  const marketContract = useMarket(market?.value);
-
-  const symbol = useMemo(() => {
-    return market?.value ? getSymbol(market.value, network?.name) : 'DAI';
-  }, [market?.value, network?.name]);
 
   const assets = useMemo(() => {
     if (!accountData) return;
@@ -70,100 +71,78 @@ const Withdraw: FC = () => {
   }, [accountData, assets, symbol]);
 
   const ETHRouterContract = useETHRouter();
+  const marketContract = useMarket(market?.value);
 
   const {
     approve,
     estimateGas: approveEstimateGas,
     isLoading: approveIsLoading,
-    errorData: approveErrorData,
-  } = useApprove(marketContract, ETHRouterContract?.address);
-
-  useEffect(() => {
-    setQty('');
-  }, [symbol]);
-
-  const isLoading = useMemo(() => isLoadingOp || approveIsLoading, [isLoadingOp, approveIsLoading]);
-
-  const needsApproval = useCallback(async () => {
-    if (symbol !== 'WETH') return false;
-    if (!walletAddress || !ETHRouterContract || !marketContract) return true;
-
-    const allowance = await marketContract.allowance(walletAddress, ETHRouterContract.address);
-    return allowance.lt(parseFixed(qty || '0', 18));
-  }, [ETHRouterContract, marketContract, qty, symbol, walletAddress]);
-
-  useEffect(() => {
-    needsApproval()
-      .then(setNeedsAllowance)
-      .catch((error) => setErrorData({ status: true, message: handleOperationError(error) }));
-  }, [needsApproval]);
-
-  const previewGasCost = useCallback(async () => {
-    if (isLoading || !walletAddress || !marketContract || !ETHRouterContract || !accountData || !qty) return;
-
-    const gasPrice = (await ETHRouterContract.provider.getFeeData()).maxFeePerGas;
-    if (!gasPrice) return;
-
-    if (await needsApproval()) {
-      const gasEstimation = await approveEstimateGas();
-      return setGasCost(gasEstimation?.mul(gasPrice));
-    }
-
-    const { floatingDepositShares } = accountData[symbol];
-    if (symbol === 'WETH') {
-      const amount = isMax ? floatingDepositShares : qty ? parseFixed(qty, 18) : DEFAULT_AMOUNT;
-      const gasEstimation = await ETHRouterContract.estimateGas.redeem(amount);
-      return setGasCost(gasPrice.mul(gasEstimation));
-    }
-
-    const decimals = await marketContract.decimals();
-    const amount = isMax ? floatingDepositShares : qty ? parseFixed(qty, decimals) : DEFAULT_AMOUNT;
-    const gasEstimation = await marketContract.estimateGas.redeem(amount, walletAddress, walletAddress);
-    setGasCost(gasPrice.mul(gasEstimation));
-  }, [
-    isLoading,
-    qty,
-    ETHRouterContract,
-    accountData,
-    approveEstimateGas,
-    isMax,
-    marketContract,
     needsApproval,
-    symbol,
-    walletAddress,
-  ]);
+  } = useApprove('withdraw', marketContract, ETHRouterContract?.address);
 
-  useEffect(() => {
-    if (errorData?.status) return;
-    previewGasCost().catch((error) => {
-      setErrorData({
-        status: true,
-        message: handleOperationError(error),
-        component: 'gas',
-      });
-    });
-  }, [errorData?.status, previewGasCost]);
+  const previewGasCost = useCallback(
+    async (quantity: string): Promise<BigNumber | undefined> => {
+      if (!walletAddress || !marketContract || !ETHRouterContract || !accountData || !quantity) return;
+
+      const gasPrice = (await ETHRouterContract.provider.getFeeData()).maxFeePerGas;
+      if (!gasPrice) return;
+
+      if (requiresApproval) {
+        const gasEstimation = await approveEstimateGas();
+        return gasEstimation?.mul(gasPrice);
+      }
+
+      const { floatingDepositShares } = accountData[symbol];
+      if (symbol === 'WETH') {
+        const amount = isMax ? floatingDepositShares : quantity ? parseFixed(quantity, 18) : DEFAULT_AMOUNT;
+        const gasEstimation = await ETHRouterContract.estimateGas.redeem(amount);
+        return gasPrice.mul(gasEstimation);
+      }
+
+      const decimals = await marketContract.decimals();
+      const amount = isMax ? floatingDepositShares : quantity ? parseFixed(quantity, decimals) : DEFAULT_AMOUNT;
+      const gasEstimation = await marketContract.estimateGas.redeem(amount, walletAddress, walletAddress);
+      return gasPrice.mul(gasEstimation);
+    },
+    [
+      ETHRouterContract,
+      accountData,
+      approveEstimateGas,
+      isMax,
+      marketContract,
+      requiresApproval,
+      symbol,
+      walletAddress,
+    ],
+  );
+
+  const { isLoading: previewIsLoading } = usePreviewTx({ qty, needsApproval, previewGasCost });
+
+  const isLoading = useMemo(
+    () => isLoadingOp || approveIsLoading || previewIsLoading,
+    [isLoadingOp, approveIsLoading, previewIsLoading],
+  );
 
   const onMax = useCallback(() => {
     setQty(parsedAmount);
     setIsMax(true);
-  }, [parsedAmount]);
+  }, [parsedAmount, setQty]);
 
   const handleInputChange = useCallback(
     ({ target: { value, valueAsNumber } }: ChangeEvent<HTMLInputElement>) => {
+      setQty(value);
+
       if (valueAsNumber > parseFloat(parsedAmount)) {
-        setErrorData({
+        return setErrorData({
           status: true,
           message: translations[lang].insufficientBalance,
         });
-        return;
       }
-      setQty(value);
+
       setErrorData(undefined);
-      //we disable max flag if user changes input
-      isMax && setIsMax(false);
+      setIsMax(false);
     },
-    [isMax, lang, parsedAmount, translations],
+    [lang, parsedAmount, setErrorData, setQty, translations],
   );
 
   const withdraw = useCallback(async () => {
@@ -224,22 +203,32 @@ const Withdraw: FC = () => {
         hash: transactionHash,
       });
 
-      getAccountData();
+      void getAccountData();
     } catch (error: any) {
       if (withdrawTx) setTx({ status: 'error', hash: withdrawTx?.hash });
       setErrorData({ status: true, message: handleOperationError(error) });
     } finally {
       setIsLoadingOp(false);
     }
-  }, [ETHRouterContract, accountData, getAccountData, isMax, marketContract, qty, symbol, walletAddress]);
+  }, [
+    ETHRouterContract,
+    accountData,
+    getAccountData,
+    isMax,
+    marketContract,
+    qty,
+    setErrorData,
+    setIsLoadingOp,
+    setTx,
+    symbol,
+    walletAddress,
+  ]);
 
   const handleSubmitAction = useCallback(async () => {
     if (isLoading) return;
-    // check needs allowance
-    if (needsAllowance) {
+    if (requiresApproval) {
       await approve();
-      setErrorData(approveErrorData);
-      setNeedsAllowance(await needsApproval());
+      setRequiresApproval(await needsApproval(qty));
       return;
     }
 
@@ -249,7 +238,7 @@ const Withdraw: FC = () => {
     });
 
     return withdraw();
-  }, [approve, approveErrorData, isLoading, needsAllowance, needsApproval, qty, symbol, withdraw]);
+  }, [approve, isLoading, needsApproval, qty, requiresApproval, setRequiresApproval, symbol, withdraw]);
 
   if (tx) return <ModalGif tx={tx} tryAgain={withdraw} />;
 
@@ -281,12 +270,12 @@ const Withdraw: FC = () => {
         onClick={handleSubmitAction}
         color="primary"
         variant="contained"
-        disabled={parseFloat(qty) <= 0 || !qty || isLoading || errorData?.status}
+        disabled={!qty || parseFloat(qty) <= 0 || isLoading || errorData?.status}
       >
-        {needsAllowance ? translations[lang].approve : translations[lang].withdraw}
+        {requiresApproval ? translations[lang].approve : translations[lang].withdraw}
       </LoadingButton>
     </>
   );
 };
 
-export default Withdraw;
+export default React.memo(Withdraw);

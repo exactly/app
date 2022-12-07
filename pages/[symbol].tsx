@@ -12,7 +12,7 @@ import AccountDataContext from 'contexts/AccountDataContext';
 import FixedLenderContext from 'contexts/FixedLenderContext';
 import AssetMaturityPools from 'components/asset/MaturityPool';
 import AssetFloatingPool from 'components/asset/FloatingPool';
-import OperationsModals from 'components/OperationsModal';
+import OperationsModal from 'components/OperationsModal';
 import AssetHeaderInfo from 'components/asset/Header';
 import MobileNavbar from 'components/MobileNavbar';
 import Navbar from 'components/Navbar';
@@ -65,7 +65,7 @@ const Market: NextPage<{ symbol: string }> = ({ symbol }) => {
 
   return (
     <>
-      <OperationsModals />
+      <OperationsModal />
       <MobileNavbar />
       <Navbar />
 

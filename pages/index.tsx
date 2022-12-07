@@ -4,7 +4,7 @@ import Grid from '@mui/material/Grid';
 
 import Navbar from 'components/Navbar';
 import MobileNavbar from 'components/MobileNavbar';
-import OperationsModals from 'components/OperationsModal';
+import OperationsModal from 'components/OperationsModal';
 import MarketsHeader from 'components/markets/Header';
 import MarketTables from 'components/markets/MarketsTables';
 
@@ -15,9 +15,10 @@ const { maxWidth } = globals;
 
 const Markets: NextPage = () => {
   useEffect(() => void analytics.page(), []);
+
   return (
     <>
-      <OperationsModals />
+      <OperationsModal />
       <MobileNavbar />
       <Navbar />
       <Grid container sx={{ maxWidth: maxWidth, margin: 'auto', marginTop: '130px' }}>

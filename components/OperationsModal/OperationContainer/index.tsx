@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import dynamic from 'next/dynamic';
 
 const Deposit = dynamic(() => import('components/operations/Deposit'));
@@ -11,25 +11,28 @@ const WithdrawAtMaturity = dynamic(() => import('components/operations/WithdrawA
 const RepayAtMaturity = dynamic(() => import('components/operations/RepayAtMaturity'));
 const Faucet = dynamic(() => import('components/operations/Faucet'));
 
-import ModalStatusContext from 'contexts/ModalStatusContext';
-
 import styles from './style.module.scss';
 
+import { useModalStatus } from 'contexts/ModalStatusContext';
+import { OperationContextProvider } from 'contexts/OperationContext';
+
 function OperationContainer() {
-  const { operation } = useContext(ModalStatusContext);
+  const { operation } = useModalStatus();
 
   return (
-    <section className={styles.operationContainer}>
-      {operation === 'deposit' && <Deposit />}
-      {operation === 'borrow' && <Borrow />}
-      {operation === 'withdraw' && <Withdraw />}
-      {operation === 'repay' && <Repay />}
-      {operation === 'depositAtMaturity' && <DepositAtMaturity />}
-      {operation === 'borrowAtMaturity' && <BorrowAtMaturity />}
-      {operation === 'withdrawAtMaturity' && <WithdrawAtMaturity />}
-      {operation === 'repayAtMaturity' && <RepayAtMaturity />}
-      {operation === 'faucet' && <Faucet />}
-    </section>
+    <OperationContextProvider>
+      <section className={styles.operationContainer}>
+        {operation === 'deposit' && <Deposit />}
+        {operation === 'borrow' && <Borrow />}
+        {operation === 'withdraw' && <Withdraw />}
+        {operation === 'repay' && <Repay />}
+        {operation === 'depositAtMaturity' && <DepositAtMaturity />}
+        {operation === 'borrowAtMaturity' && <BorrowAtMaturity />}
+        {operation === 'withdrawAtMaturity' && <WithdrawAtMaturity />}
+        {operation === 'repayAtMaturity' && <RepayAtMaturity />}
+        {operation === 'faucet' && <Faucet />}
+      </section>
+    </OperationContextProvider>
   );
 }
 

@@ -7,7 +7,7 @@ import Image from 'next/image';
 import { Button, TableRow, TableCell, Stack, Typography, Skeleton } from '@mui/material';
 
 import AccountDataContext from 'contexts/AccountDataContext';
-import ModalStatusContext, { Operation } from 'contexts/ModalStatusContext';
+import { Operation, useModalStatus } from 'contexts/ModalStatusContext';
 import { MarketContext } from 'contexts/MarketContext';
 
 import formatNumber from 'utils/formatNumber';
@@ -23,7 +23,7 @@ type Props = {
   walletAddress?: string;
   eTokenAmount?: BigNumber;
   auditorContract?: Contract;
-  type: 'deposit' | 'borrow';
+  type: Extract<Operation, 'deposit' | 'borrow'>;
   market?: string;
   healthFactor?: HealthFactor;
 };
@@ -40,7 +40,7 @@ function TableRowFloatingPool({
   healthFactor,
 }: Props) {
   const { accountData } = useContext(AccountDataContext);
-  const { setOpen, setOperation } = useContext(ModalStatusContext);
+  const { openOperationModal } = useModalStatus();
   const { setMarket } = useContext(MarketContext);
 
   const [rate, setRate] = useState<number | undefined>();
@@ -121,8 +121,7 @@ function TableRowFloatingPool({
             variant="contained"
             onClick={() => {
               setMarket({ value: market! });
-              setOperation(type as Operation);
-              setOpen(true);
+              openOperationModal(type);
             }}
           >
             {type === 'deposit' ? 'Deposit' : 'Borrow'}
@@ -137,8 +136,7 @@ function TableRowFloatingPool({
             sx={{ backgroundColor: 'white' }}
             onClick={() => {
               setMarket({ value: market! });
-              setOperation(type === 'deposit' ? 'withdraw' : 'repay');
-              setOpen(true);
+              openOperationModal(type === 'deposit' ? 'withdraw' : 'repay');
             }}
           >
             {type === 'deposit' ? 'Withdraw' : 'Repay'}

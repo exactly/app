@@ -6,7 +6,7 @@ import Grid from '@mui/material/Grid';
 import DashboardHeader from 'components/dashboard/DashboardHeader';
 import MobileNavbar from 'components/MobileNavbar';
 import Navbar from 'components/Navbar';
-import OperationsModals from 'components/OperationsModal';
+import OperationsModal from 'components/OperationsModal';
 import AccountDataContext from 'contexts/AccountDataContext';
 import { useWeb3Context } from 'contexts/Web3Context';
 import { globals } from 'styles/theme';
@@ -17,6 +17,7 @@ import analytics from 'utils/analytics';
 const { maxWidth } = globals;
 
 const DashboardContent = dynamic(() => import('components/dashboard/DashboardContent'));
+
 const DashBoard: NextPage = () => {
   const { walletAddress } = useWeb3Context();
   const { accountData } = useContext(AccountDataContext);
@@ -44,7 +45,7 @@ const DashBoard: NextPage = () => {
 
   return (
     <>
-      <OperationsModals />
+      <OperationsModal />
       <MobileNavbar />
       <Navbar />
       <Grid container sx={{ maxWidth, margin: 'auto', marginTop: '130px' }}>

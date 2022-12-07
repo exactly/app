@@ -4,11 +4,14 @@ import { ErrorCode } from '@ethersproject/logger';
 import { captureException } from '@sentry/nextjs';
 import { useCallback, useState } from 'react';
 import { ERC20, Market } from 'types/contracts';
-import { ErrorData } from 'types/Error';
 import numbers from 'config/numbers.json';
+import { Operation } from 'contexts/ModalStatusContext';
+import { useWeb3Context } from 'contexts/Web3Context';
+import { useOperationContext } from 'contexts/OperationContext';
 
-export default (contract?: ERC20 | Market, spender?: string) => {
-  const [errorData, setErrorData] = useState<ErrorData | undefined>();
+export default (operation: Operation, contract?: ERC20 | Market, spender?: string) => {
+  const { walletAddress } = useWeb3Context();
+  const { symbol, setErrorData } = useOperationContext();
   const [isLoading, setIsLoading] = useState(false);
 
   const estimateGas = useCallback(async () => {
@@ -16,6 +19,31 @@ export default (contract?: ERC20 | Market, spender?: string) => {
 
     return contract.estimateGas.approve(spender, MaxUint256);
   }, [spender, contract]);
+
+  const needsApproval = useCallback(
+    async (qty: string): Promise<boolean> => {
+      switch (operation) {
+        case 'deposit':
+        case 'depositAtMaturity':
+        case 'repay':
+        case 'repayAtMaturity':
+          if (symbol === 'WETH') return false;
+          break;
+        case 'withdraw':
+        case 'withdrawAtMaturity':
+        case 'borrow':
+        case 'borrowAtMaturity':
+          if (symbol !== 'WETH') return false;
+          break;
+      }
+
+      if (!walletAddress || !contract || !spender) return true;
+
+      const allowance = await contract.allowance(walletAddress, spender);
+      return allowance.lt(parseFixed(qty || String(numbers.defaultAmount), await contract.decimals()));
+    },
+    [operation, symbol, contract, spender, walletAddress],
+  );
 
   const approve = useCallback(async () => {
     if (!contract || !spender) return;
@@ -43,7 +71,7 @@ export default (contract?: ERC20 | Market, spender?: string) => {
     } finally {
       setIsLoading(false);
     }
-  }, [spender, contract, estimateGas]);
+  }, [spender, contract, estimateGas, setErrorData]);
 
-  return { approve, estimateGas, isLoading, errorData };
+  return { approve, needsApproval, estimateGas, isLoading };
 };

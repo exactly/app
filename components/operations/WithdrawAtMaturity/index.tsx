@@ -13,14 +13,9 @@ import ModalRowEditable from 'components/common/modal/ModalRowEditable';
 import ModalTitle from 'components/common/modal/ModalTitle';
 import ModalTxCost from 'components/common/modal/ModalTxCost';
 
-import { ErrorData } from 'types/Error';
 import { LangKeys } from 'types/Lang';
-import { Transaction } from 'types/Transaction';
 
 import formatNumber from 'utils/formatNumber';
-import { getSymbol } from 'utils/utils';
-
-import useDebounce from 'hooks/useDebounce';
 
 import AccountDataContext from 'contexts/AccountDataContext';
 import { MarketContext } from 'contexts/MarketContext';
@@ -36,43 +31,48 @@ import useApprove from 'hooks/useApprove';
 import handleOperationError from 'utils/handleOperationError';
 import usePreviewer from 'hooks/usePreviewer';
 import analytics from 'utils/analytics';
+import { useOperationContext, usePreviewTx } from 'contexts/OperationContext';
+import useAccountData from 'hooks/useAccountData';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 const DEFAULT_SLIPPAGE = (100 * numbers.slippage).toFixed(2);
 
 const WithdrawAtMaturity: FC = () => {
-  const { walletAddress, network } = useWeb3Context();
+  const { walletAddress } = useWeb3Context();
   const { date, market } = useContext(MarketContext);
   const { accountData, getAccountData } = useContext(AccountDataContext);
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
-  const previewerContract = usePreviewer();
+  const {
+    symbol,
+    errorData,
+    setErrorData,
+    qty,
+    setQty,
+    gasCost,
+    tx,
+    setTx,
+    requiresApproval,
+    setRequiresApproval,
+    isLoading: isLoadingOp,
+    setIsLoading: setIsLoadingOp,
+  } = useOperationContext();
 
-  const [qty, setQty] = useState('');
-  const [gasCost, setGasCost] = useState<BigNumber | undefined>();
-  const [tx, setTx] = useState<Transaction | undefined>();
   const [slippage, setSlippage] = useState(DEFAULT_SLIPPAGE);
   const [editSlippage, setEditSlippage] = useState(false);
-  const [isLoadingOp, setIsLoadingOp] = useState(false);
 
-  const [errorData, setErrorData] = useState<ErrorData | undefined>();
-  const [needsAllowance, setNeedsAllowance] = useState(false);
   const [minAmountToWithdraw, setMinAmountToWithdraw] = useState(Zero);
   const [amountToWithdraw, setAmountToWithdraw] = useState(Zero);
 
   const marketContract = useMarket(market?.value);
   const ETHRouterContract = useETHRouter();
 
-  const symbol = useMemo(() => {
-    return market?.value ? getSymbol(market.value, network?.name) : 'DAI';
-  }, [market?.value, network?.name]);
+  const previewerContract = usePreviewer();
 
   const rawSlippage = useMemo(() => parseFixed(String(1 - Number(slippage) / 100), 18), [slippage]);
-
-  const debounceQty = useDebounce(qty);
-  const decimals = useMemo(() => (accountData && accountData[symbol].decimals) || 18, [accountData, symbol]);
+  const { decimals = 18 } = useAccountData(symbol);
 
   const isEarlyWithdraw = useMemo(() => {
     if (!date) return false;
@@ -90,34 +90,12 @@ const WithdrawAtMaturity: FC = () => {
 
   const amountAtFinish = useMemo(() => formatFixed(positionAssets, decimals), [decimals, positionAssets]);
 
-  useEffect(() => {
-    setQty('');
-    setErrorData(undefined);
-  }, [symbol, date]);
-
   const {
     approve,
     estimateGas: approveEstimateGas,
     isLoading: approveIsLoading,
-    errorData: approveErrorData,
-  } = useApprove(marketContract, ETHRouterContract?.address);
-
-  const isLoading = useMemo(() => isLoadingOp || approveIsLoading, [isLoadingOp, approveIsLoading]);
-
-  const needsApproval = useCallback(async () => {
-    if (symbol !== 'WETH') return false;
-
-    if (!walletAddress || !ETHRouterContract || !marketContract) return true;
-
-    const allowance = await marketContract.allowance(walletAddress, ETHRouterContract.address);
-    return allowance.lt(parseFixed(qty || '0', 18));
-  }, [ETHRouterContract, marketContract, qty, symbol, walletAddress]);
-
-  useEffect(() => {
-    needsApproval()
-      .then(setNeedsAllowance)
-      .catch((error) => setErrorData({ status: true, message: handleOperationError(error) }));
-  }, [needsApproval]);
+    needsApproval,
+  } = useApprove('withdrawAtMaturity', marketContract, ETHRouterContract?.address);
 
   const previewWithdrawAtMaturity = useCallback(async () => {
     if (!date || !marketContract || !previewerContract) return;
@@ -141,66 +119,63 @@ const WithdrawAtMaturity: FC = () => {
   useEffect(() => {
     if (errorData?.status) return;
     previewWithdrawAtMaturity().catch((error) => setErrorData({ status: true, message: handleOperationError(error) }));
-  }, [debounceQty, previewWithdrawAtMaturity, errorData?.status]);
+  }, [previewWithdrawAtMaturity, errorData?.status, setErrorData]);
 
-  const previewGasCost = useCallback(async () => {
-    if (isLoading || !walletAddress || !marketContract || !ETHRouterContract || !date || !qty) return;
+  const previewGasCost = useCallback(
+    async (quantity: string): Promise<BigNumber | undefined> => {
+      if (!walletAddress || !marketContract || !ETHRouterContract || !date || !quantity) return;
 
-    const gasPrice = (await ETHRouterContract.provider.getFeeData()).maxFeePerGas;
-    if (!gasPrice) return;
+      const gasPrice = (await ETHRouterContract.provider.getFeeData()).maxFeePerGas;
+      if (!gasPrice) return;
 
-    if (await needsApproval()) {
-      // only WETH needs allowance -> estimates directly with the ETH router
-      const gasEstimation = await approveEstimateGas();
-      return setGasCost(gasEstimation?.mul(gasPrice));
-    }
+      if (requiresApproval) {
+        // only WETH needs allowance -> estimates directly with the ETH router
+        const gasEstimation = await approveEstimateGas();
+        return gasEstimation?.mul(gasPrice);
+      }
 
-    const amount = amountToWithdraw.isZero() ? DEFAULT_AMOUNT : amountToWithdraw;
+      const amount = amountToWithdraw.isZero() ? DEFAULT_AMOUNT : amountToWithdraw;
 
-    if (symbol === 'WETH') {
-      const gasEstimation = await ETHRouterContract.estimateGas.withdrawAtMaturity(
+      if (symbol === 'WETH') {
+        const gasEstimation = await ETHRouterContract.estimateGas.withdrawAtMaturity(
+          date.value,
+          amount,
+          minAmountToWithdraw,
+        );
+        return gasPrice.mul(gasEstimation);
+      }
+
+      const gasEstimation = await marketContract.estimateGas.withdrawAtMaturity(
         date.value,
         amount,
         minAmountToWithdraw,
+        walletAddress,
+        walletAddress,
       );
-      return setGasCost(gasPrice.mul(gasEstimation));
-    }
 
-    const gasEstimation = await marketContract.estimateGas.withdrawAtMaturity(
-      date.value,
-      amount,
+      return gasPrice.mul(gasEstimation);
+    },
+    [
+      walletAddress,
+      marketContract,
+      ETHRouterContract,
+      date,
+      requiresApproval,
+      amountToWithdraw,
+      symbol,
       minAmountToWithdraw,
-      walletAddress,
-      walletAddress,
-    );
+      approveEstimateGas,
+    ],
+  );
 
-    setGasCost(gasPrice.mul(gasEstimation));
-  }, [
-    isLoading,
-    qty,
-    amountToWithdraw,
-    ETHRouterContract,
-    approveEstimateGas,
-    marketContract,
-    needsApproval,
-    symbol,
-    walletAddress,
-    date,
-    minAmountToWithdraw,
-  ]);
+  const { isLoading: previewIsLoading } = usePreviewTx({ qty, needsApproval, previewGasCost });
 
-  useEffect(() => {
-    if (errorData?.status) return;
-    previewGasCost().catch((error) => {
-      setErrorData({
-        status: true,
-        message: handleOperationError(error),
-        component: 'gas',
-      });
-    });
-  }, [lang, previewGasCost, translations, errorData?.status]);
+  const isLoading = useMemo(
+    () => isLoadingOp || approveIsLoading || previewIsLoading,
+    [isLoadingOp, approveIsLoading, previewIsLoading],
+  );
 
-  const onMax = useCallback(() => setQty(formatFixed(positionAssets, decimals)), [decimals, positionAssets]);
+  const onMax = useCallback(() => setQty(formatFixed(positionAssets, decimals)), [decimals, positionAssets, setQty]);
 
   const handleInputChange = useCallback(
     ({ target: { value } }: ChangeEvent<HTMLInputElement>) => {
@@ -221,7 +196,7 @@ const WithdrawAtMaturity: FC = () => {
 
       setErrorData(undefined);
     },
-    [decimals, positionAssets, translations, lang],
+    [setQty, decimals, positionAssets, setErrorData, translations, lang],
   );
 
   const withdraw = useCallback(async () => {
@@ -276,7 +251,7 @@ const WithdrawAtMaturity: FC = () => {
         hash: transactionHash,
       });
 
-      getAccountData();
+      void getAccountData();
     } catch (error) {
       if (withdrawTx) setTx({ status: 'error', hash: withdrawTx?.hash });
       setErrorData({ status: true, message: handleOperationError(error) });
@@ -285,22 +260,24 @@ const WithdrawAtMaturity: FC = () => {
     }
   }, [
     date,
-    symbol,
-    qty,
-    ETHRouterContract,
     marketContract,
     walletAddress,
+    qty,
+    setIsLoadingOp,
+    symbol,
+    setTx,
     getAccountData,
+    ETHRouterContract,
     minAmountToWithdraw,
     decimals,
+    setErrorData,
   ]);
 
   const handleSubmitAction = useCallback(async () => {
     if (isLoading) return;
-    if (needsAllowance) {
+    if (requiresApproval) {
       await approve();
-      setErrorData(approveErrorData);
-      setNeedsAllowance(await needsApproval());
+      setRequiresApproval(await needsApproval(qty));
       return;
     }
 
@@ -311,7 +288,7 @@ const WithdrawAtMaturity: FC = () => {
     });
 
     return withdraw();
-  }, [isLoading, needsAllowance, qty, date?.value, symbol, withdraw, approve, approveErrorData, needsApproval]);
+  }, [isLoading, requiresApproval, qty, date?.value, symbol, withdraw, approve, setRequiresApproval, needsApproval]);
 
   if (tx) return <ModalGif tx={tx} tryAgain={withdraw} />;
 
@@ -374,12 +351,12 @@ const WithdrawAtMaturity: FC = () => {
         onClick={handleSubmitAction}
         color="primary"
         variant="contained"
-        disabled={parseFloat(qty) <= 0 || !qty || isLoading || errorData?.status}
+        disabled={!qty || parseFloat(qty) <= 0 || isLoading || errorData?.status}
       >
-        {needsAllowance ? translations[lang].approve : translations[lang].withdraw}
+        {requiresApproval ? translations[lang].approve : translations[lang].withdraw}
       </LoadingButton>
     </>
   );
 };
 
-export default WithdrawAtMaturity;
+export default React.memo(WithdrawAtMaturity);
