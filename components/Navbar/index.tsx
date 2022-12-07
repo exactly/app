@@ -42,8 +42,8 @@ function Navbar() {
   const routes = useMemo(
     () => [
       {
-        pathname: '/markets',
-        href: '/markets',
+        pathname: '/',
+        href: '/',
         name: translations[lang].markets,
       },
       {
@@ -83,7 +83,7 @@ function Navbar() {
       <div className={styles.wrapper}>
         <DisclaimerModal />
         <div className={styles.left}>
-          <Link href="/markets">
+          <Link href="/">
             <div className={styles.logo}>
               <Image
                 src={theme === 'light' ? '/img/logo.png' : '/img/logo-white.png'}

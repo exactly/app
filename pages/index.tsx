@@ -13,7 +13,7 @@ import analytics from 'utils/analytics';
 
 const { maxWidth } = globals;
 
-const Pools: NextPage = () => {
+const Markets: NextPage = () => {
   useEffect(() => void analytics.page(), []);
   return (
     <>
@@ -28,4 +28,4 @@ const Pools: NextPage = () => {
   );
 };
 
-export default Pools;
+export default Markets;
