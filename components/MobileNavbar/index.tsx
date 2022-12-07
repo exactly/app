@@ -35,8 +35,8 @@ function MobileNavbar() {
 
   const routes = [
     {
-      pathname: '/markets',
-      href: '/markets',
+      pathname: '/',
+      href: '/',
       name: translations[lang].markets,
     },
     {
@@ -52,7 +52,7 @@ function MobileNavbar() {
       {open && <Overlay close={handleMenu} />}
       <nav className={styles.navBar} style={open ? { zIndex: 7 } : {}}>
         <div className={styles.wrapper}>
-          <Link href="/markets">
+          <Link href="/">
             <div className={styles.logo}>
               <Image
                 src={theme === 'light' ? '/img/logo.png' : '/img/logo-white.png'}

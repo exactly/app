@@ -1,29 +1,26 @@
-import PropTypes from 'prop-types';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import type { GetStaticProps, NextPage } from 'next';
-import Grid from '@mui/material/Grid';
-
-import Navbar from 'components/Navbar';
-import MobileNavbar from 'components/MobileNavbar';
-import OperationsModals from 'components/OperationsModal';
-
-import { Maturity } from 'types/Maturity';
-
+import PropTypes from 'prop-types';
+import { Grid } from '@mui/material';
+import { basename } from 'path';
+import { readdir, readFile } from 'fs/promises';
+import type { GetStaticPaths, GetStaticProps, NextPage } from 'next';
+import type { Maturity } from 'types/Maturity';
+import { getSymbol, getUnderlyingData } from 'utils/utils';
 import { useWeb3Context } from 'contexts/Web3Context';
 import { MarketContext } from 'contexts/MarketContext';
-import FixedLenderContext from 'contexts/FixedLenderContext';
 import AccountDataContext from 'contexts/AccountDataContext';
-
-import style from './style.module.scss';
-
-import getLastAPR from 'utils/getLastAPR';
-import { getSymbol, getUnderlyingData } from 'utils/utils';
-import AssetHeaderInfo from 'components/asset/Header';
+import FixedLenderContext from 'contexts/FixedLenderContext';
 import AssetMaturityPools from 'components/asset/MaturityPool';
 import AssetFloatingPool from 'components/asset/FloatingPool';
+import OperationsModals from 'components/OperationsModal';
+import AssetHeaderInfo from 'components/asset/Header';
+import MobileNavbar from 'components/MobileNavbar';
+import Navbar from 'components/Navbar';
+import getLastAPR from 'utils/getLastAPR';
 import analytics from 'utils/analytics';
+import style from './[symbol].module.scss';
 
-const Asset: NextPage<{ symbol: string }> = ({ symbol }) => {
+const Market: NextPage<{ symbol: string }> = ({ symbol }) => {
   const { network } = useWeb3Context();
   const { dates } = useContext(MarketContext);
   const fixedLenderData = useContext(FixedLenderContext);
@@ -92,26 +89,35 @@ const Asset: NextPage<{ symbol: string }> = ({ symbol }) => {
   );
 };
 
-Asset.propTypes = {
+Market.propTypes = {
   symbol: PropTypes.string.isRequired,
 };
 
-export default Asset;
+export default Market;
 
-export const getStaticProps: GetStaticProps = async (context) => {
-  const tokenSymbol: string = context.params?.id as string;
-  const symbol = tokenSymbol === 'ETH' ? 'WETH' : tokenSymbol;
-
+export const getStaticPaths: GetStaticPaths<{ symbol: string }> = async () => {
+  const deploymentsDir = 'node_modules/@exactly-protocol/protocol/deployments';
+  const networks = await readdir(deploymentsDir);
+  const markets = await Promise.all(
+    networks.map(async (network) => {
+      try {
+        await readFile(`${deploymentsDir}/${network}/.chainId`);
+        return (await readdir(`${deploymentsDir}/${network}`))
+          .map((filename) => basename(filename, '.json'))
+          .filter((name) => name.startsWith('Market') && !name.includes('_') && !name.includes('Router'))
+          .map((name) => name.replace(/^Market/, ''));
+      } catch {
+        return [];
+      }
+    }),
+  );
   return {
-    props: {
-      symbol,
-    },
+    paths: Array.from(new Set(markets.flat())).map((symbol) => ({ params: { symbol } })),
+    fallback: false,
   };
 };
 
-export async function getStaticPaths() {
-  return {
-    paths: ['/assets/DAI', '/assets/WETH', '/assets/USDC', '/assets/WBTC', '/assets/wstETH'],
-    fallback: false,
-  };
-}
+export const getStaticProps: GetStaticProps<{ symbol: string }, { symbol: string }> = ({ params }) => {
+  if (!params) throw new Error('missing params');
+  return { props: { symbol: params.symbol } };
+};

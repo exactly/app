@@ -16,7 +16,7 @@ function ErrorPageMessage({ code, description, message }: Props) {
       <h1 className={styles.code}>{code}</h1>
       <h2 className={styles.description}>{description}</h2>
       <p className={styles.message}>{message}</p>
-      <Link href="/markets">
+      <Link href="/">
         <a className={styles.buttonContainer}>
           <Button text="Go to Markets" />
         </a>
