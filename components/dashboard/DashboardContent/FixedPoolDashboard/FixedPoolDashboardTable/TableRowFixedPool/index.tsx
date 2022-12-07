@@ -1,3 +1,5 @@
+import Image from 'next/image';
+import Link from 'next/link';
 import { BigNumber, formatFixed } from '@ethersproject/bignumber';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
@@ -5,10 +7,7 @@ import { Button, IconButton, Skeleton, Stack, TableCell, TableRow, Typography } 
 import StyledLinearProgress from 'components/common/LinearProgress';
 import AccountDataContext from 'contexts/AccountDataContext';
 import { MarketContext } from 'contexts/MarketContext';
-import ModalStatusContext from 'contexts/ModalStatusContext';
 import useFixedOperation from 'hooks/useFixedPoolTransactions';
-import Image from 'next/image';
-import Link from 'next/link';
 
 import React, { useContext, useMemo, useState } from 'react';
 import { FixedPoolTransaction } from 'types/FixedPoolTransaction';
@@ -17,6 +16,7 @@ import formatNumber from 'utils/formatNumber';
 import formatSymbol from 'utils/formatSymbol';
 import parseTimestamp from 'utils/parseTimestamp';
 import CollapseFixedPool from '../CollapseFixedPool';
+import { useModalStatus } from 'contexts/ModalStatusContext';
 
 type Props = {
   symbol: string;
@@ -29,7 +29,7 @@ type Props = {
 
 function TableRowFixedPool({ symbol, amount, type, maturityDate, market, decimals }: Props) {
   const { accountData } = useContext(AccountDataContext);
-  const { setOpen: openOperationModal, setOperation } = useContext(ModalStatusContext);
+  const { openOperationModal } = useModalStatus();
   const { setMarket, setDate } = useContext(MarketContext);
   const { withdrawTxs, repayTxs, depositTxs, borrowTxs } = useFixedOperation(type, maturityDate, market);
   const [open, setOpen] = useState(false);
@@ -151,8 +151,7 @@ function TableRowFixedPool({ symbol, amount, type, maturityDate, market, decimal
               onClick={() => {
                 setDate({ value: maturityDate, label: parseTimestamp(maturityDate) });
                 setMarket({ value: market });
-                setOperation(type === 'borrow' ? 'repayAtMaturity' : 'withdrawAtMaturity');
-                openOperationModal(true);
+                openOperationModal(type === 'borrow' ? 'repayAtMaturity' : 'withdrawAtMaturity');
               }}
             >
               {type === 'borrow' ? 'Repay' : 'Withdraw'}

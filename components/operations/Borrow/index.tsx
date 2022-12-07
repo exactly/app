@@ -1,4 +1,4 @@
-import React, { ChangeEvent, FC, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { ChangeEvent, FC, useCallback, useContext, useMemo, useState } from 'react';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { WeiPerEther, Zero } from '@ethersproject/constants';
 import LoadingButton from '@mui/lab/LoadingButton';
@@ -13,11 +13,8 @@ import ModalError from 'components/common/modal/ModalError';
 import ModalRowBorrowLimit from 'components/common/modal/ModalRowBorrowLimit';
 
 import { LangKeys } from 'types/Lang';
-import { Transaction } from 'types/Transaction';
-import { ErrorData } from 'types/Error';
 import { HealthFactor } from 'types/HealthFactor';
 
-import { getSymbol } from 'utils/utils';
 import getBeforeBorrowLimit from 'utils/getBeforeBorrowLimit';
 
 import useETHRouter from 'hooks/useETHRouter';
@@ -35,53 +32,46 @@ import useMarket from 'hooks/useMarket';
 import useERC20 from 'hooks/useERC20';
 import handleOperationError from 'utils/handleOperationError';
 import analytics from 'utils/analytics';
+import { useOperationContext, usePreviewTx } from 'contexts/OperationContext';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 
 const Borrow: FC = () => {
-  const { walletAddress, network } = useWeb3Context();
+  const { walletAddress } = useWeb3Context();
   const { accountData, getAccountData } = useContext(AccountDataContext);
   const { market } = useContext(MarketContext);
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
-  const [qty, setQty] = useState<string>('');
-  const [gasCost, setGasCost] = useState<BigNumber | undefined>();
-  const [tx, setTx] = useState<Transaction | undefined>();
-  const [isLoadingOp, setIsLoadingOp] = useState(false);
-  const [errorData, setErrorData] = useState<ErrorData | undefined>();
+  const {
+    symbol,
+    errorData,
+    setErrorData,
+    qty,
+    setQty,
+    gasCost,
+    tx,
+    setTx,
+    requiresApproval,
+    setRequiresApproval,
+    isLoading: isLoadingOp,
+    setIsLoading: setIsLoadingOp,
+  } = useOperationContext();
+
   const [healthFactor, setHealthFactor] = useState<HealthFactor | undefined>();
-  const [needsAllowance, setNeedsAllowance] = useState(true);
-  const [assetAddress, setAssetAddress] = useState<string | undefined>();
 
   const ETHRouterContract = useETHRouter();
+  const assetContract = useERC20();
 
   const marketContract = useMarket(market?.value);
-
-  const symbol = useMemo(
-    () => (market?.value ? getSymbol(market.value, network?.name) : 'DAI'),
-    [market?.value, network?.name],
-  );
-
-  useEffect(() => {
-    if (!marketContract || symbol === 'WETH') return;
-
-    const loadAssetAddress = async () => setAssetAddress(await marketContract.asset());
-
-    loadAssetAddress().catch(handleOperationError);
-  }, [marketContract, symbol]);
-
-  const assetContract = useERC20(assetAddress);
 
   const {
     approve,
     estimateGas: approveEstimateGas,
     isLoading: approveIsLoading,
-    errorData: approveErrorData,
-  } = useApprove(marketContract, ETHRouterContract?.address);
-
-  const isLoading = useMemo(() => approveIsLoading || isLoadingOp, [approveIsLoading, isLoadingOp]);
+    needsApproval,
+  } = useApprove('borrow', marketContract, ETHRouterContract?.address);
 
   const walletBalance = useBalance(symbol, assetContract);
 
@@ -91,11 +81,6 @@ const Borrow: FC = () => {
     const limit = accountData[symbol].floatingAvailableAssets;
     return limit ?? undefined;
   }, [accountData, symbol]);
-
-  useEffect(() => {
-    setQty('');
-    setErrorData(undefined);
-  }, [symbol]);
 
   const hasCollateral = useMemo(() => {
     if (!accountData) return false;
@@ -107,71 +92,56 @@ const Borrow: FC = () => {
     );
   }, [accountData, symbol]);
 
-  const needsApproval = useCallback(async () => {
-    if (symbol !== 'WETH') return false;
-    if (!walletAddress || !ETHRouterContract || !marketContract) return true;
+  const previewGasCost = useCallback(
+    async (quantity: string): Promise<BigNumber | undefined> => {
+      if (!walletAddress || !marketContract || !ETHRouterContract || !quantity) return;
 
-    const allowance = await marketContract.allowance(walletAddress, ETHRouterContract.address);
-    return allowance.lt(parseFixed(qty || '0', 18));
-  }, [ETHRouterContract, marketContract, qty, symbol, walletAddress]);
+      const gasPrice = (await ETHRouterContract.provider.getFeeData()).maxFeePerGas;
+      if (!gasPrice) return;
 
-  useEffect(() => {
-    needsApproval()
-      .then(setNeedsAllowance)
-      .catch((error) => setErrorData({ status: true, message: handleOperationError(error) }));
-  }, [needsApproval]);
+      if (requiresApproval) {
+        const gasEstimation = await approveEstimateGas();
+        return gasEstimation?.mul(gasPrice);
+      }
 
-  const previewGasCost = useCallback(async () => {
-    if (isLoading || !walletAddress || !marketContract || !ETHRouterContract || !qty) return;
+      if (symbol === 'WETH') {
+        const gasEstimation = await ETHRouterContract.estimateGas.borrow(
+          quantity ? parseFixed(quantity, 18) : DEFAULT_AMOUNT,
+        );
+        return gasPrice.mul(gasEstimation);
+      }
 
-    const gasPrice = (await ETHRouterContract.provider.getFeeData()).maxFeePerGas;
-    if (!gasPrice) return;
+      const decimals = await marketContract.decimals();
+      const gasEstimation = await marketContract.estimateGas.borrow(
+        quantity ? parseFixed(quantity, decimals) : DEFAULT_AMOUNT,
+        walletAddress,
+        walletAddress,
+      );
+      return gasPrice.mul(gasEstimation);
+    },
+    [walletAddress, marketContract, ETHRouterContract, requiresApproval, symbol, approveEstimateGas],
+  );
 
-    if (await needsApproval()) {
-      const gasEstimation = await approveEstimateGas();
-      return setGasCost(gasEstimation?.mul(gasPrice));
-    }
+  const { isLoading: previewIsLoading } = usePreviewTx({ qty, needsApproval, previewGasCost });
 
-    if (symbol === 'WETH') {
-      const gasEstimation = await ETHRouterContract.estimateGas.borrow(qty ? parseFixed(qty, 18) : DEFAULT_AMOUNT);
-      return setGasCost(gasPrice.mul(gasEstimation));
-    }
-
-    const decimals = await marketContract.decimals();
-    const gasEstimation = await marketContract.estimateGas.borrow(
-      qty ? parseFixed(qty, decimals) : DEFAULT_AMOUNT,
-      walletAddress,
-      walletAddress,
-    );
-    setGasCost(gasPrice.mul(gasEstimation));
-  }, [isLoading, ETHRouterContract, approveEstimateGas, qty, marketContract, needsApproval, symbol, walletAddress]);
-
-  useEffect(() => {
-    if (errorData?.status) return;
-    previewGasCost().catch((error) => {
-      setErrorData({
-        status: true,
-        message: handleOperationError(error),
-        component: 'gas',
-      });
-    });
-  }, [previewGasCost, errorData?.status]);
+  const isLoading = useMemo(
+    () => isLoadingOp || approveIsLoading || previewIsLoading,
+    [isLoadingOp, approveIsLoading, previewIsLoading],
+  );
 
   const onMax = useCallback(() => {
     if (!accountData || !healthFactor) return;
 
-    const decimals = accountData[symbol].decimals;
-    const adjustFactor = accountData[symbol].adjustFactor;
-    const usdPrice = accountData[symbol].usdPrice;
+    const { decimals, adjustFactor, usdPrice, floatingDepositAssets, isCollateral } = accountData[symbol];
 
     let col = healthFactor.collateral;
     const hf = parseFixed('1.05', 18);
     const WAD = parseFixed('1', 18);
 
-    const hasDepositedToFloatingPool = Number(formatFixed(accountData[symbol].floatingDepositAssets, decimals)) > 0;
+    const hasDepositedToFloatingPool = Number(formatFixed(floatingDepositAssets, decimals)) > 0;
 
-    if (!accountData[symbol].isCollateral && hasDepositedToFloatingPool) {
-      col = col.add(accountData[symbol].floatingDepositAssets.mul(accountData[symbol].adjustFactor).div(WAD));
+    if (!isCollateral && hasDepositedToFloatingPool) {
+      col = col.add(floatingDepositAssets.mul(adjustFactor).div(WAD));
     }
 
     const debt = healthFactor.debt;
@@ -185,7 +155,7 @@ const Borrow: FC = () => {
 
     setQty(safeMaximumBorrow);
     setErrorData(undefined);
-  }, [symbol, accountData, healthFactor]);
+  }, [accountData, healthFactor, symbol, setQty, setErrorData]);
 
   const handleInputChange = useCallback(
     ({ target: { value } }: ChangeEvent<HTMLInputElement>) => {
@@ -220,7 +190,7 @@ const Borrow: FC = () => {
       }
       setErrorData(undefined);
     },
-    [accountData, hasCollateral, lang, liquidity, translations, symbol],
+    [liquidity, accountData, symbol, setQty, hasCollateral, setErrorData, translations, lang],
   );
 
   const borrow = useCallback(async () => {
@@ -261,7 +231,7 @@ const Borrow: FC = () => {
         hash: transactionHash,
       });
 
-      getAccountData();
+      void getAccountData();
     } catch (error: any) {
       if (borrowTx?.hash) setTx({ status: 'error', hash: borrowTx.hash });
 
@@ -272,14 +242,24 @@ const Borrow: FC = () => {
     } finally {
       setIsLoadingOp(false);
     }
-  }, [ETHRouterContract, accountData, getAccountData, marketContract, qty, symbol, walletAddress]);
+  }, [
+    ETHRouterContract,
+    accountData,
+    getAccountData,
+    marketContract,
+    qty,
+    setErrorData,
+    setIsLoadingOp,
+    setTx,
+    symbol,
+    walletAddress,
+  ]);
 
   const handleSubmitAction = useCallback(async () => {
     if (isLoading) return;
-    if (needsAllowance) {
+    if (requiresApproval) {
       await approve();
-      setErrorData(approveErrorData);
-      setNeedsAllowance(await needsApproval());
+      setRequiresApproval(await needsApproval(qty));
       return;
     }
 
@@ -289,7 +269,7 @@ const Borrow: FC = () => {
     });
 
     return borrow();
-  }, [approve, approveErrorData, borrow, isLoading, needsAllowance, needsApproval, qty, symbol]);
+  }, [approve, borrow, isLoading, needsApproval, qty, requiresApproval, setRequiresApproval, symbol]);
 
   if (tx) return <ModalGif tx={tx} tryAgain={borrow} />;
 
@@ -320,12 +300,12 @@ const Borrow: FC = () => {
         onClick={handleSubmitAction}
         color="primary"
         variant="contained"
-        disabled={!qty || parseFloat(qty) <= 0 || errorData?.status}
+        disabled={!qty || parseFloat(qty) <= 0 || isLoading || errorData?.status}
       >
-        {needsAllowance ? translations[lang].approve : translations[lang].borrow}
+        {requiresApproval ? translations[lang].approve : translations[lang].borrow}
       </LoadingButton>
     </>
   );
 };
 
-export default Borrow;
+export default React.memo(Borrow);

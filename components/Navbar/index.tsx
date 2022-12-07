@@ -13,7 +13,6 @@ import { LangKeys } from 'types/Lang';
 import LangContext from 'contexts/LangContext';
 import ThemeContext from 'contexts/ThemeContext';
 import { useWeb3Context } from 'contexts/Web3Context';
-import ModalStatusContext from 'contexts/ModalStatusContext';
 
 import styles from './style.module.scss';
 
@@ -21,6 +20,7 @@ import keys from './translations.json';
 
 import allowedNetworks from 'config/allowedNetworks.json';
 import analytics from 'utils/analytics';
+import { useModalStatus } from 'contexts/ModalStatusContext';
 
 function Navbar() {
   const lang: string = useContext(LangContext);
@@ -28,8 +28,9 @@ function Navbar() {
 
   const { web3Provider, connect, disconnect, walletAddress, network } = useWeb3Context();
 
+  const { openOperationModal } = useModalStatus();
+
   const { theme } = useContext(ThemeContext);
-  const { setOpen, setOperation } = useContext(ModalStatusContext);
 
   const router = useRouter();
 
@@ -61,9 +62,7 @@ function Navbar() {
     if (!web3Provider?.provider.request) return;
 
     if (isAllowed && network?.name === 'goerli') {
-      setOperation('faucet');
-      setOpen(true);
-      return;
+      return openOperationModal('faucet');
     }
 
     if (!isAllowed) {

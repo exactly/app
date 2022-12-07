@@ -1,22 +1,21 @@
-import React, { useContext } from 'react';
+import React from 'react';
 
 import OperationsSelector from './OperationsSelector';
 import OperationContainer from './OperationContainer';
 
-import ModalStatusContext from 'contexts/ModalStatusContext';
-
 import { Dialog, DialogContent, IconButton } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
+import { useModalStatus } from 'contexts/ModalStatusContext';
 
-function OperationsModals() {
-  const { open, setOpen } = useContext(ModalStatusContext);
+function OperationsModal() {
+  const { open, closeModal } = useModalStatus();
 
   return (
-    <Dialog open={open} onClose={() => setOpen(false)}>
+    <Dialog open={open} onClose={closeModal}>
       <DialogContent sx={{ display: 'flex' }}>
         <IconButton
           aria-label="close"
-          onClick={() => setOpen(false)}
+          onClick={closeModal}
           sx={{
             position: 'absolute',
             right: 10,
@@ -33,4 +32,4 @@ function OperationsModals() {
   );
 }
 
-export default OperationsModals;
+export default OperationsModal;

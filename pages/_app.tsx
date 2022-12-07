@@ -20,8 +20,6 @@ import { ThemeProvider as MUIThemeProvider } from '@mui/material/styles';
 import theme from 'styles/theme';
 
 function MyApp({ Component, pageProps }: AppProps) {
-  const props = { ...pageProps };
-
   return (
     <>
       <Head>
@@ -41,7 +39,7 @@ function MyApp({ Component, pageProps }: AppProps) {
                         <MarketProvider>
                           <ModalStatusProvider>
                             <SkeletonTheme baseColor="var(--skeleton-base)" highlightColor="var(--skeleton-highlight)">
-                              <Component {...props} />
+                              <Component {...pageProps} />
                             </SkeletonTheme>
                           </ModalStatusProvider>
                         </MarketProvider>

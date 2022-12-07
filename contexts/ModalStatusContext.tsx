@@ -1,5 +1,5 @@
-import type { FC, ReactNode } from 'react';
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useMemo, useCallback } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import AccountDataContext from './AccountDataContext';
 
 export type Operation =
@@ -15,38 +15,52 @@ export type Operation =
 
 type ContextValues = {
   open: boolean;
-  setOpen: (open: any) => void;
-  operation: Operation | null;
-  setOperation: (operation: Operation) => void;
+  operation?: Operation;
+  openOperationModal: (op: Operation) => void;
+  closeModal: () => void;
 };
 
-const defaultValues: ContextValues = {
-  open: false,
-  setOpen: () => undefined,
-  operation: null,
-  setOperation: () => undefined,
-};
+const ModalStatusContext = createContext<ContextValues | null>(null);
 
-const ModalStatusContext = createContext(defaultValues);
-
-export const ModalStatusProvider: FC<{ children?: ReactNode }> = ({ children }) => {
+export const ModalStatusProvider: FC<PropsWithChildren> = ({ children }) => {
   const { getAccountData } = useContext(AccountDataContext);
+
   const [open, setOpen] = useState<boolean>(false);
-  const [operation, setOperation] = useState<Operation | null>(null);
+
+  const [operation, setOperation] = useState<Operation | undefined>();
+
+  const openOperationModal = useCallback((op: Operation) => {
+    setOperation(op);
+    setOpen(true);
+  }, []);
+
+  const closeModal = useCallback(() => setOpen(false), []);
 
   useEffect(() => {
     if (!open && operation) {
-      setTimeout(() => {
-        getAccountData();
-      }, 5000);
+      setTimeout(() => void getAccountData(), 5000);
     }
-  }, [open]);
+  }, [open, operation, getAccountData]);
 
-  return (
-    <ModalStatusContext.Provider value={{ open, setOpen, operation, setOperation }}>
-      {children}
-    </ModalStatusContext.Provider>
+  const value: ContextValues = useMemo(
+    () => ({
+      open,
+      closeModal,
+      operation,
+      openOperationModal,
+    }),
+    [closeModal, open, openOperationModal, operation],
   );
+
+  return <ModalStatusContext.Provider value={value}>{children}</ModalStatusContext.Provider>;
 };
+
+export function useModalStatus() {
+  const ctx = useContext(ModalStatusContext);
+  if (!ctx) {
+    throw new Error('Using ModalStatusContext outside of provider');
+  }
+  return ctx;
+}
 
 export default ModalStatusContext;

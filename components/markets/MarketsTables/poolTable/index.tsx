@@ -22,9 +22,9 @@ import Link from 'next/link';
 import numbers from 'config/numbers.json';
 
 import { MarketContext } from 'contexts/MarketContext';
-import ModalStatusContext, { Operation } from 'contexts/ModalStatusContext';
 import AccountDataContext from 'contexts/AccountDataContext';
 import { useWeb3Context } from 'contexts/Web3Context';
+import { Operation, useModalStatus } from 'contexts/ModalStatusContext';
 
 const { minAPRValue } = numbers;
 
@@ -74,12 +74,12 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
   const { walletAddress, connect } = useWeb3Context();
   const { accountData } = useContext(AccountDataContext);
   const { setDate, setMarket } = useContext(MarketContext);
-  const { setOpen, setOperation } = useContext(ModalStatusContext);
+  const { openOperationModal } = useModalStatus();
   const tempRows = isLoading ? defaultRows : rows; // HACK this with the timeout in "marketsTables" is to avoid a screen flash when MUI  recive the new data of rows
 
   const handleActionClick = (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
-    action: 'borrow' | 'deposit' | 'depositAtMaturity' | 'borrowAtMaturity',
+    action: Extract<Operation, 'borrow' | 'deposit' | 'depositAtMaturity' | 'borrowAtMaturity'>,
     symbol: string,
     maturity: any,
   ) => {
@@ -90,19 +90,16 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
 
     const { market } = accountData[symbol];
 
-    setOperation(action as Operation);
     setMarket({ value: market });
 
-    if (maturity)
+    if (maturity) {
       setDate({
         value: maturity.toString(),
         label: parseTimestamp(maturity),
       });
+    }
 
-    setOpen(true);
-
-    setOperation(action);
-    setOpen(true);
+    openOperationModal(action);
   };
 
   const isDisable = (apr: number | undefined) => {
