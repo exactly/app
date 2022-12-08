@@ -1,0 +1,3 @@
+{
+  "entry": ["pages/**/*", "scripts/**/*", "sentry.*.config.ts"]
+}
