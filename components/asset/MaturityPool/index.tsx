@@ -1,66 +1,42 @@
 import React, { FC, useCallback, useContext, useEffect, useState } from 'react';
-import { formatFixed, parseFixed } from '@ethersproject/bignumber';
-import { Zero, WeiPerEther } from '@ethersproject/constants';
+import { Zero, WeiPerEther, MaxUint256 } from '@ethersproject/constants';
+import { formatFixed } from '@ethersproject/bignumber';
+import type { BigNumber } from '@ethersproject/bignumber';
 import Grid from '@mui/material/Grid';
 
 import AccountDataContext from 'contexts/AccountDataContext';
 
-import numbers from 'config/numbers.json';
-
+import MaturityPoolsTable, { APRsPerMaturityType } from './MaturityPoolsTable';
 import MaturityPoolInfo from './MaturityPoolInfo';
-import PreviewerContext from 'contexts/PreviewerContext';
-import ContractsContext from 'contexts/ContractsContext';
-import { FixedMarketData } from 'types/FixedMarketData';
-import MaturityPoolsTable from './MaturityPoolsTable';
-import getAPRsPerMaturity, { APRsPerMaturityType } from 'utils/getAPRsPerMaturity';
 
-type AssetMaturityPoolsProps = {
-  symbol: string;
+type Rate = {
+  maturity: BigNumber;
+  rate: BigNumber;
 };
 
-type BestAPR = {
-  timestamp?: number;
-  apr: number;
-};
-
-const { usdAmount: usdAmountPreviewer } = numbers;
-
-const AssetMaturityPools: FC<AssetMaturityPoolsProps> = ({ symbol }) => {
+const AssetMaturityPools: FC<{ symbol: string }> = ({ symbol }) => {
   const { accountData } = useContext(AccountDataContext);
-  const previewerData = useContext(PreviewerContext);
-  const { getInstance } = useContext(ContractsContext);
 
   const [totalDeposited, setTotalDeposited] = useState<number | undefined>(undefined);
   const [totalBorrowed, setTotalBorrowed] = useState<number | undefined>(undefined);
-  const [bestDepositAPR, setBestDepositAPR] = useState<BestAPR | undefined>(undefined);
-  const [bestBorrowAPR, setBestBorrowAPR] = useState<BestAPR | undefined>(undefined);
+  const [bestDeposit, setBestDeposit] = useState<Rate | undefined>(undefined);
+  const [bestBorrow, setBestBorrow] = useState<Rate | undefined>(undefined);
   const [APRsPerMaturity, setAPRsPerMaturity] = useState<APRsPerMaturityType>({});
 
   const getMaturitiesData = useCallback(async () => {
     if (!accountData) return;
 
-    const previewerContract = getInstance(previewerData.address!, previewerData.abi!, 'previewer');
+    const { fixedPools, usdPrice, decimals } = accountData[symbol];
 
-    const previewFixedData: FixedMarketData[] = await previewerContract?.previewFixed(
-      parseFixed(usdAmountPreviewer.toString(), 18),
+    setAPRsPerMaturity(
+      Object.fromEntries(
+        fixedPools.map(({ maturity, depositRate, minBorrowRate }) => [
+          maturity,
+          { borrow: Number(minBorrowRate.toBigInt()) / 1e18, deposit: Number(depositRate.toBigInt()) / 1e18 },
+        ]),
+      ),
     );
 
-    const { market: marketAddress } = accountData[symbol];
-    const marketMaturities = previewFixedData.find(({ market }) => market === marketAddress) as FixedMarketData;
-    if (!marketMaturities) return;
-
-    const { deposits, borrows, decimals, assets: initialAssets } = marketMaturities;
-
-    const { APRsPerMaturity, maturityMaxAPRDeposit, maturityMinAPRBorrow } = getAPRsPerMaturity(
-      deposits,
-      borrows,
-      decimals,
-      initialAssets,
-    );
-
-    setAPRsPerMaturity(APRsPerMaturity);
-
-    const { fixedPools, usdPrice: exchangeRate } = accountData[symbol];
     let tempTotalDeposited = Zero;
     let tempTotalBorrowed = Zero;
     fixedPools.map(({ borrowed, supplied: deposited }) => {
@@ -68,25 +44,24 @@ const AssetMaturityPools: FC<AssetMaturityPoolsProps> = ({ symbol }) => {
       tempTotalBorrowed = tempTotalBorrowed.add(borrowed);
     });
 
-    const totalDepositedUSD = formatFixed(tempTotalDeposited.mul(exchangeRate).div(WeiPerEther), decimals);
-    const totalBorrowedUSD = formatFixed(tempTotalBorrowed.mul(exchangeRate).div(WeiPerEther), decimals);
+    setTotalDeposited(Number(formatFixed(tempTotalDeposited.mul(usdPrice).div(WeiPerEther), decimals)));
+    setTotalBorrowed(Number(formatFixed(tempTotalBorrowed.mul(usdPrice).div(WeiPerEther), decimals)));
 
-    setTotalDeposited(Number(totalDepositedUSD));
-    setTotalBorrowed(Number(totalBorrowedUSD));
+    setBestDeposit(
+      fixedPools.reduce((best, { maturity, depositRate: rate }) => (rate.gt(best.rate) ? { maturity, rate } : best), {
+        maturity: Zero,
+        rate: Zero,
+      }),
+    );
+    setBestBorrow(
+      fixedPools.reduce((best, { maturity, minBorrowRate: rate }) => (rate.lt(best.rate) ? { maturity, rate } : best), {
+        maturity: Zero,
+        rate: MaxUint256,
+      }),
+    );
+  }, [accountData, symbol]);
 
-    setBestDepositAPR({
-      timestamp: maturityMaxAPRDeposit ? maturityMaxAPRDeposit : undefined,
-      apr: APRsPerMaturity[maturityMaxAPRDeposit]?.deposit,
-    });
-    setBestBorrowAPR({
-      timestamp: maturityMinAPRBorrow ? maturityMinAPRBorrow : undefined,
-      apr: APRsPerMaturity[maturityMinAPRBorrow]?.borrow,
-    });
-  }, [accountData, symbol, previewerData]);
-
-  useEffect(() => {
-    getMaturitiesData();
-  }, [getMaturitiesData]);
+  useEffect(() => void getMaturitiesData(), [getMaturitiesData]);
 
   return (
     <Grid container mt={4} mb={19} padding={2} sx={{ boxShadow: '#A7A7A7 0px 0px 4px 0px', borderRadius: '5px' }}>
@@ -94,10 +69,10 @@ const AssetMaturityPools: FC<AssetMaturityPoolsProps> = ({ symbol }) => {
         <MaturityPoolInfo
           totalDeposited={totalDeposited}
           totalBorrowed={totalBorrowed}
-          bestDepositAPR={bestDepositAPR?.apr}
-          bestDepositAPRTimestamp={bestDepositAPR?.timestamp}
-          bestBorrowAPR={bestBorrowAPR?.apr}
-          bestBorrowAPRTimestamp={bestBorrowAPR?.timestamp}
+          bestBorrowRate={bestBorrow && Number(bestBorrow.rate) / 1e18}
+          bestDepositRate={bestDeposit && Number(bestDeposit.rate) / 1e18}
+          bestBorrowMaturity={bestBorrow && Number(bestBorrow.maturity)}
+          bestDepositMaturity={bestDeposit && Number(bestDeposit.maturity)}
         />
       </Grid>
       <Grid item xs={12} mt={4}>

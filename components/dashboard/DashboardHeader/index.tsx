@@ -7,7 +7,6 @@ import { useWeb3Context } from 'contexts/Web3Context';
 import AccountDataContext from 'contexts/AccountDataContext';
 
 import { HealthFactor } from 'types/HealthFactor';
-import { MaturityPosition } from 'types/FixedLenderAccountData';
 
 import parseHealthFactor from 'utils/parseHealthFactor';
 import formatNumber from 'utils/formatNumber';
@@ -42,7 +41,7 @@ function DashboardHeader({ healthFactor }: Props) {
 
         // iterate through fixed deposited pools to get totals
         const { fixedTotalDeposited } = fixedDepositPositions.reduce(
-          (fixedPoolStats, pool: MaturityPosition) => {
+          (fixedPoolStats, pool) => {
             const { position } = pool;
 
             fixedPoolStats.fixedTotalDeposited = fixedPoolStats.fixedTotalDeposited.add(position.principal);
@@ -53,7 +52,7 @@ function DashboardHeader({ healthFactor }: Props) {
 
         // iterate through fixed borrowed pools to get totals
         const { fixedTotalBorrowed } = fixedBorrowPositions.reduce(
-          (fixedPoolStats, pool: MaturityPosition) => {
+          (fixedPoolStats, pool) => {
             const { position } = pool;
 
             fixedPoolStats.fixedTotalBorrowed = fixedPoolStats.fixedTotalBorrowed.add(position.principal);

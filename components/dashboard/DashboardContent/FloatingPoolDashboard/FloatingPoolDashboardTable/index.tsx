@@ -1,4 +1,3 @@
-import type { Contract } from '@ethersproject/contracts';
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 import {
   Table,
@@ -12,17 +11,15 @@ import {
   Typography,
 } from '@mui/material';
 
-import AuditorContext from 'contexts/AuditorContext';
 import AccountDataContext from 'contexts/AccountDataContext';
-import ContractsContext from 'contexts/ContractsContext';
 
 import { FloatingPoolItemData } from 'types/FloatingPoolItemData';
-import { FixedLenderAccountData } from 'types/FixedLenderAccountData';
 
 import { useWeb3Context } from 'contexts/Web3Context';
 import TableRowFloatingPool from './TableRowFloatingPool';
-import { HealthFactor } from 'types/HealthFactor';
-import { TableHeader } from 'types/TableHeader';
+import type { HealthFactor } from 'types/HealthFactor';
+import type { TableHeader } from 'types/TableHeader';
+import type { Previewer } from 'types/contracts/Previewer';
 
 type Props = {
   type: 'deposit' | 'borrow';
@@ -31,12 +28,9 @@ type Props = {
 
 function FloatingPoolDashboardTable({ type, healthFactor }: Props) {
   const { walletAddress } = useWeb3Context();
-  const auditor = useContext(AuditorContext);
   const { accountData } = useContext(AccountDataContext);
-  const { getInstance } = useContext(ContractsContext);
 
   const [itemData, setItemData] = useState<Array<FloatingPoolItemData> | undefined>();
-  const [auditorContract, setAuditorContract] = useState<Contract | undefined>();
 
   const orderAssets = ['DAI', 'USDC', 'WETH', 'WBTC', 'wstETH'];
 
@@ -44,21 +38,14 @@ function FloatingPoolDashboardTable({ type, healthFactor }: Props) {
     getCurrentBalance();
   }, [walletAddress, accountData, type]);
 
-  useEffect(() => {
-    getAuditorContract();
-  }, [auditor]);
-
-  function getAuditorContract() {
-    const auditorContract = getInstance(auditor.address!, auditor.abi!, 'auditor');
-    setAuditorContract(auditorContract);
-  }
-
   function getCurrentBalance() {
     if (!accountData) return;
 
-    const allMarkets = Object.values(accountData).sort((a: FixedLenderAccountData, b: FixedLenderAccountData) => {
-      return orderAssets.indexOf(a.assetSymbol) - orderAssets.indexOf(b.assetSymbol);
-    });
+    const allMarkets = Object.values(accountData).sort(
+      (a: Previewer.MarketAccountStructOutput, b: Previewer.MarketAccountStructOutput) => {
+        return orderAssets.indexOf(a.assetSymbol) - orderAssets.indexOf(b.assetSymbol);
+      },
+    );
 
     const data: FloatingPoolItemData[] = [];
 
@@ -162,7 +149,6 @@ function FloatingPoolDashboardTable({ type, healthFactor }: Props) {
               symbol={item.symbol}
               walletAddress={walletAddress}
               eTokenAmount={item.eTokens}
-              auditorContract={auditorContract}
               type={type}
               market={item.market}
               healthFactor={healthFactor}

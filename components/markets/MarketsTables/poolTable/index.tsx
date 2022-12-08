@@ -46,9 +46,9 @@ export type TableRow = {
   totalDeposited?: string;
   totalBorrowed?: string;
   depositAPR?: number;
-  depositTimestamp?: number;
+  depositMaturity?: number;
   borrowAPR?: number;
-  borrowTimestamp?: number;
+  borrowMaturity?: number;
 };
 
 const HeadCell: FC<TableHead> = ({ title, tooltipTitle, width }) => {
@@ -123,7 +123,7 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
         </TableHead>
         <TableBody>
           {tempRows.map(
-            ({ symbol, totalDeposited, totalBorrowed, depositAPR, borrowAPR, depositTimestamp, borrowTimestamp }) => (
+            ({ symbol, totalDeposited, totalBorrowed, depositAPR, borrowAPR, depositMaturity, borrowMaturity }) => (
               <Link href={`/assets/${symbol}`} key={symbol} rel="noopener noreferrer">
                 <TableRow
                   key={symbol}
@@ -158,12 +158,12 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
                       <Tooltip
                         title={
                           symbol === 'wstETH'
-                            ? depositTimestamp
-                              ? parseTimestamp(depositTimestamp) +
+                            ? depositMaturity
+                              ? parseTimestamp(depositMaturity) +
                                 " | The displayed APR doesn't include the Lido Staked ETH APR"
                               : "The displayed APR doesn't include the Lido Staked ETH APR"
-                            : depositTimestamp
-                            ? parseTimestamp(depositTimestamp)
+                            : depositMaturity
+                            ? parseTimestamp(depositMaturity)
                             : ''
                         }
                         arrow
@@ -182,12 +182,12 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
                       <Tooltip
                         title={
                           symbol === 'wstETH'
-                            ? borrowTimestamp
-                              ? parseTimestamp(borrowTimestamp) +
+                            ? borrowMaturity
+                              ? parseTimestamp(borrowMaturity) +
                                 " | The displayed APR doesn't include the Lido Staked ETH APR"
                               : "The displayed APR doesn't include the Lido Staked ETH APR"
-                            : borrowTimestamp
-                            ? parseTimestamp(borrowTimestamp)
+                            : borrowMaturity
+                            ? parseTimestamp(borrowMaturity)
                             : ''
                         }
                         arrow
@@ -225,7 +225,7 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
                               e,
                               rateType === 'floating' ? 'deposit' : 'depositAtMaturity',
                               symbol,
-                              depositTimestamp,
+                              depositMaturity,
                             )
                           }
                           disabled={isDisable(depositAPR)}
@@ -260,7 +260,7 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
                               e,
                               rateType === 'floating' ? 'borrow' : 'borrowAtMaturity',
                               symbol,
-                              borrowTimestamp,
+                              borrowMaturity,
                             )
                           }
                         >

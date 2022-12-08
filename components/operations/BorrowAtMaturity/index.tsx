@@ -21,7 +21,6 @@ import ModalCell from 'components/common/modal/ModalCell';
 
 import { LangKeys } from 'types/Lang';
 import { HealthFactor } from 'types/HealthFactor';
-import { FixedPool } from 'types/FixedLenderAccountData';
 
 import { toPercentage } from 'utils/utils';
 import getOneDollar from 'utils/getOneDollar';
@@ -352,11 +351,9 @@ const BorrowAtMaturity: FC = () => {
   useEffect(() => {
     if (!accountData || !date) return;
 
-    const { utilization: utBefore } = accountData[symbol].fixedPools.find(
-      ({ maturity }) => maturity.toString() === date.value,
-    ) as FixedPool;
-
-    setUrBefore((Number(formatFixed(utBefore, 18)) * 100).toFixed(2));
+    const fixedPool = accountData[symbol].fixedPools.find(({ maturity }) => maturity.toString() === date.value);
+    if (!fixedPool) return;
+    setUrBefore((Number(formatFixed(fixedPool.utilization, 18)) * 100).toFixed(2));
   }, [accountData, date, symbol]);
 
   const updateURAfter = useCallback(async () => {

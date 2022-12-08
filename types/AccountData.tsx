@@ -1,5 +1,5 @@
-import { FixedLenderAccountData } from './FixedLenderAccountData';
+import { Previewer } from './contracts/Previewer';
 
 export type AccountData = {
-  [Key: string]: FixedLenderAccountData;
+  [Key: string]: Previewer.MarketAccountStructOutput;
 };

@@ -2,7 +2,6 @@ import { BigNumber, parseFixed } from '@ethersproject/bignumber';
 import { Zero } from '@ethersproject/constants';
 
 import { AccountData } from 'types/AccountData';
-import { FixedLenderAccountData } from 'types/FixedLenderAccountData';
 import { WAD } from './fixedPointMathLib';
 
 function getHealthFactorData(accountData: AccountData) {
@@ -12,7 +11,7 @@ function getHealthFactorData(accountData: AccountData) {
   const data = Object.values(accountData);
 
   try {
-    data.forEach((fixedLender: FixedLenderAccountData) => {
+    data.forEach((fixedLender) => {
       let fixedLenderCollateral = Zero;
       let fixedLenderDebt = Zero;
       const decimals = fixedLender.decimals;

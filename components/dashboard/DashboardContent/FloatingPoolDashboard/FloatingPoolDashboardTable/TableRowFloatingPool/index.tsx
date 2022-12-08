@@ -1,4 +1,3 @@
-import type { Contract } from '@ethersproject/contracts';
 import type { BigNumber } from '@ethersproject/bignumber';
 import React, { useContext, useEffect, useState } from 'react';
 import { formatFixed } from '@ethersproject/bignumber';
@@ -22,7 +21,6 @@ type Props = {
   borrowedAmount?: BigNumber;
   walletAddress?: string;
   eTokenAmount?: BigNumber;
-  auditorContract?: Contract;
   type: Extract<Operation, 'deposit' | 'borrow'>;
   market?: string;
   healthFactor?: HealthFactor;
@@ -34,7 +32,6 @@ function TableRowFloatingPool({
   borrowedAmount,
   walletAddress,
   eTokenAmount,
-  auditorContract,
   type,
   market,
   healthFactor,
@@ -104,12 +101,7 @@ function TableRowFloatingPool({
 
       {type === 'deposit' ? (
         <TableCell align="center" size="small">
-          <SwitchCollateral
-            symbol={symbol}
-            walletAddress={walletAddress}
-            auditorContract={auditorContract}
-            healthFactor={healthFactor}
-          />
+          <SwitchCollateral symbol={symbol} walletAddress={walletAddress} healthFactor={healthFactor} />
         </TableCell>
       ) : (
         <TableCell align="center" size="small" />

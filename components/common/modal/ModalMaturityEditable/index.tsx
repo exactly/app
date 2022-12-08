@@ -11,7 +11,6 @@ type Props = {
   valueTooltip?: string;
   line?: boolean;
   values?: Array<string>;
-  fixedLenderContract?: any;
 };
 
 function ModalMaturityEditable({ text, line }: Props) {
