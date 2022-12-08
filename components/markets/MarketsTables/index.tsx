@@ -181,7 +181,7 @@ const MarketTables: FC = () => {
         <Typography variant="h5">Variable Interest Rate</Typography>
         <PoolTable isLoading={isLoading} headers={floatingHeaders} rows={floatingRows} rateType={'floating'} />
       </Grid>
-      <Grid width={'100%'} mb={20} padding={2} sx={{ boxShadow: '#A7A7A7 0px 0px 4px 0px', borderRadius: '5px' }}>
+      <Grid width={'100%'} mb={4} padding={2} sx={{ boxShadow: '#A7A7A7 0px 0px 4px 0px', borderRadius: '5px' }}>
         <Typography variant="h5">Fixed Interest Rate</Typography>
         <PoolTable isLoading={isLoading} headers={fixedHeaders} rows={fixedRows} rateType={'fixed'} />
       </Grid>
