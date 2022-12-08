@@ -9,7 +9,6 @@ import AssetFloatingPool from 'components/asset/FloatingPool';
 import OperationsModal from 'components/OperationsModal';
 import AssetHeaderInfo from 'components/asset/Header';
 import MobileNavbar from 'components/MobileNavbar';
-import Navbar from 'components/Navbar';
 import analytics from 'utils/analytics';
 import style from './[symbol].module.scss';
 import useAccountData from 'hooks/useAccountData';
@@ -23,8 +22,8 @@ const Market: NextPage<{ symbol: string }> = ({ symbol }) => {
     <>
       <OperationsModal />
       <MobileNavbar />
-      <Navbar />
-      <section className={style.container} style={{ marginTop: '130px' }}>
+
+      <section className={style.container}>
         <AssetHeaderInfo symbol={symbol} eMarketAddress={market} />
         <Grid container mt={5}>
           <Grid item container>

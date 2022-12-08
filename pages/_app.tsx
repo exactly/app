@@ -16,6 +16,7 @@ import { ThemeProvider } from 'contexts/ThemeContext';
 import { ThemeProvider as MUIThemeProvider } from '@mui/material/styles';
 import { wagmi, walletConnectId, web3modal } from 'utils/client';
 import theme from 'styles/theme';
+import Navbar from 'components/Navbar';
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
@@ -33,6 +34,7 @@ export default function App({ Component, pageProps }: AppProps) {
                 <MarketProvider>
                   <ModalStatusProvider>
                     <SkeletonTheme baseColor="var(--skeleton-base)" highlightColor="var(--skeleton-highlight)">
+                      <Navbar />
                       <Component {...pageProps} />
                     </SkeletonTheme>
                   </ModalStatusProvider>

@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 import type { NextPage } from 'next';
 import Grid from '@mui/material/Grid';
 
-import Navbar from 'components/Navbar';
 import MobileNavbar from 'components/MobileNavbar';
 import OperationsModal from 'components/OperationsModal';
 import MarketsHeader from 'components/markets/Header';
@@ -20,8 +19,7 @@ const Markets: NextPage = () => {
     <>
       <OperationsModal />
       <MobileNavbar />
-      <Navbar />
-      <Grid container sx={{ maxWidth: maxWidth, margin: 'auto', marginTop: '130px' }}>
+      <Grid container sx={{ maxWidth: maxWidth, margin: 'auto' }}>
         <MarketsHeader />
       </Grid>
       <MarketTables />

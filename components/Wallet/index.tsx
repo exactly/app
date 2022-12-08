@@ -1,62 +1,98 @@
-import React, { useState } from 'react';
-import { useDisconnect, useEnsName } from 'wagmi';
-import Image from 'next/image';
-
-import styles from './style.module.scss';
-
+import React, { useMemo } from 'react';
+import { useEnsName, useConnect, useDisconnect } from 'wagmi';
+import { useWeb3 } from 'hooks/useWeb3';
 import { formatWallet } from 'utils/utils';
 
-import { Network } from 'types/Network';
+import { Avatar, Box, Button, capitalize, Divider, Menu, MenuItem, Typography } from '@mui/material';
 
-type Props = {
-  walletAddress: string;
-  cogwheel?: boolean;
-  network?: Network | null | undefined;
-};
+import * as blockies from 'blockies-ts';
 
-function Wallet({ walletAddress, cogwheel = true, network }: Props) {
+function Wallet() {
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
+
+  const openMenu = (event: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget);
+  const closeMenu = () => setAnchorEl(null);
+
+  const { walletAddress } = useWeb3();
+  const { chain } = useWeb3();
   const { data: ens } = useEnsName({ address: walletAddress as `0x${string}` });
+  const { connect } = useConnect();
   const { disconnect } = useDisconnect();
 
   const formattedWallet = formatWallet(walletAddress);
-  const [walletContainer, setWalletContainer] = useState<boolean>(false);
 
-  function handleWallet() {
-    setWalletContainer((prev) => !prev);
+  const avatarImgSrc = useMemo(() => {
+    if (!walletAddress) return '';
+    return blockies.create({ seed: walletAddress.toLocaleLowerCase() }).toDataURL();
+  }, [walletAddress]);
+
+  if (!walletAddress) {
+    return (
+      <Button onClick={() => connect()} variant="contained">
+        Connect wallet
+      </Button>
+    );
   }
 
   return (
-    <div className={styles.container}>
-      <p className={styles.wallet} onClick={handleWallet}>
-        {ens ?? formattedWallet}
-      </p>
-      {cogwheel && (
-        <Image
-          src={`/img/icons/${walletContainer ? 'arrowUp' : 'arrowDown'}.svg`}
-          alt="settings"
-          onClick={handleWallet}
-          width={12}
-          height={7}
-        />
-      )}
-      {network && (
-        <div className={styles.networkContainer}>
-          <div className={styles.dot} />
-          <p className={styles.network}> {network.name}</p>
-        </div>
-      )}
-
-      {walletContainer && (
-        <div className={styles.walletContainer}>
-          {walletAddress && (
-            <p className={styles.disconnect} onClick={() => disconnect()}>
-              <Image src="/img/icons/power.svg" alt="power" width={24} height={24} />
-              Disconnect wallet
-            </p>
-          )}
-        </div>
-      )}
-    </div>
+    <>
+      <Button
+        variant="outlined"
+        onClick={openMenu}
+        id="basic-button"
+        aria-controls={open ? 'basic-menu' : undefined}
+        aria-haspopup="true"
+        aria-expanded={open ? 'true' : undefined}
+        sx={{ borderColor: '#E3E5E8', px: '10px' }}
+      >
+        <Avatar alt="Blocky Avatar" src={avatarImgSrc} sx={{ width: 20, height: 20, mr: '10px' }} />
+        <Typography variant="subtitle1" color="#0D0E0F">
+          {ens ?? formattedWallet}
+        </Typography>
+      </Button>
+      <Menu
+        id="basic-menu"
+        anchorEl={anchorEl}
+        open={open}
+        onClose={closeMenu}
+        MenuListProps={{
+          'aria-labelledby': 'basic-button',
+        }}
+        PaperProps={{
+          style: {
+            padding: '0 4px 4px 4px',
+            boxShadow: '#A7A7A7 0px 0px 2px 0px',
+            borderRadius: '2px',
+            minWidth: '150px',
+          },
+        }}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'center',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'center',
+        }}
+      >
+        <MenuItem>
+          <Box>
+            <Typography variant="subtitle1">Network</Typography>
+            <Box>{capitalize((chain?.network === 'homestead' ? 'mainnet' : chain?.network) || '')}</Box>
+          </Box>
+        </MenuItem>
+        <Divider />
+        <MenuItem
+          onClick={() => {
+            closeMenu();
+            disconnect();
+          }}
+        >
+          Disconnect wallet
+        </MenuItem>
+      </Menu>
+    </>
   );
 }
 

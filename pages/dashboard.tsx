@@ -5,7 +5,6 @@ import React, { useCallback, useContext, useEffect, useState } from 'react';
 import Grid from '@mui/material/Grid';
 import DashboardHeader from 'components/dashboard/DashboardHeader';
 import MobileNavbar from 'components/MobileNavbar';
-import Navbar from 'components/Navbar';
 import OperationsModal from 'components/OperationsModal';
 import AccountDataContext from 'contexts/AccountDataContext';
 import { globals } from 'styles/theme';
@@ -47,8 +46,7 @@ const DashBoard: NextPage = () => {
     <>
       <OperationsModal />
       <MobileNavbar />
-      <Navbar />
-      <Grid container sx={{ maxWidth, margin: 'auto', marginTop: '130px' }}>
+      <Grid container sx={{ maxWidth, margin: 'auto' }}>
         <DashboardHeader healthFactor={healthFactor} />
       </Grid>
       <DashboardContent healthFactor={healthFactor} />
