@@ -18,19 +18,19 @@ import parseTimestamp from 'utils/parseTimestamp';
 type MaturityPoolInfoProps = {
   totalDeposited?: number;
   totalBorrowed?: number;
-  bestDepositAPR?: number;
-  bestDepositAPRTimestamp?: number;
-  bestBorrowAPR?: number;
-  bestBorrowAPRTimestamp?: number;
+  bestDepositRate?: number;
+  bestDepositMaturity?: number;
+  bestBorrowRate?: number;
+  bestBorrowMaturity?: number;
 };
 
 const MaturityPoolInfo: FC<MaturityPoolInfoProps> = ({
   totalDeposited,
   totalBorrowed,
-  bestDepositAPR,
-  bestDepositAPRTimestamp,
-  bestBorrowAPR,
-  bestBorrowAPRTimestamp,
+  bestDepositRate,
+  bestDepositMaturity,
+  bestBorrowRate,
+  bestBorrowMaturity,
 }) => {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
@@ -47,15 +47,15 @@ const MaturityPoolInfo: FC<MaturityPoolInfoProps> = ({
       value: totalBorrowed != null ? `$${formatNumber(totalBorrowed)}` : undefined,
     },
     {
-      label: translations[lang].bestDepositAPR,
-      value: toPercentage(bestDepositAPR && bestDepositAPR > minAPRValue ? bestDepositAPR : undefined),
-      underLabel: bestDepositAPRTimestamp ? parseTimestamp(bestDepositAPRTimestamp) : undefined,
+      label: translations[lang].bestDepositRate,
+      value: toPercentage(bestDepositRate && bestDepositRate > minAPRValue ? bestDepositRate : undefined),
+      underLabel: bestDepositMaturity ? parseTimestamp(bestDepositMaturity) : undefined,
       tooltipTitle: 'The highest fixed interest rate APR for a $1 deposit in all the available Fixed Rated Pools.',
     },
     {
-      label: translations[lang].bestBorrowAPR,
-      value: toPercentage(bestBorrowAPR && bestBorrowAPR > minAPRValue ? bestBorrowAPR : undefined),
-      underLabel: bestBorrowAPRTimestamp ? parseTimestamp(bestBorrowAPRTimestamp) : undefined,
+      label: translations[lang].bestBorrowRate,
+      value: toPercentage(bestBorrowRate && bestBorrowRate > minAPRValue ? bestBorrowRate : undefined),
+      underLabel: bestBorrowMaturity ? parseTimestamp(bestBorrowMaturity) : undefined,
       tooltipTitle: 'The lowest fixed interest rate APR for a $1 borrow in all the available Fixed Rated Pools.',
     },
   ];

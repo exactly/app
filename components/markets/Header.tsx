@@ -8,8 +8,6 @@ import { Grid } from '@mui/material';
 
 import AccountDataContext from 'contexts/AccountDataContext';
 
-import { FixedPool } from 'types/FixedLenderAccountData';
-
 import formatNumber from 'utils/formatNumber';
 
 const MarketsHeader: FC = () => {
@@ -28,7 +26,7 @@ const MarketsHeader: FC = () => {
 
         // iterate through fixed pools to get totals
         const { fixedTotalDeposited, fixedTotalBorrowed } = fixedPools.reduce(
-          (fixedPoolStats, pool: FixedPool) => {
+          (fixedPoolStats, pool) => {
             const { supplied, borrowed, available } = pool;
 
             fixedPoolStats.fixedTotalDeposited = fixedPoolStats.fixedTotalDeposited.add(supplied);

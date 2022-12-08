@@ -5,11 +5,10 @@ import { basename } from 'path';
 import { readdir, readFile } from 'fs/promises';
 import type { GetStaticPaths, GetStaticProps, NextPage } from 'next';
 import type { Maturity } from 'types/Maturity';
-import { getSymbol, getUnderlyingData } from 'utils/utils';
+import { getUnderlyingData } from 'utils/utils';
 import { useWeb3Context } from 'contexts/Web3Context';
 import { MarketContext } from 'contexts/MarketContext';
 import AccountDataContext from 'contexts/AccountDataContext';
-import FixedLenderContext from 'contexts/FixedLenderContext';
 import AssetMaturityPools from 'components/asset/MaturityPool';
 import AssetFloatingPool from 'components/asset/FloatingPool';
 import OperationsModal from 'components/OperationsModal';
@@ -23,7 +22,6 @@ import style from './[symbol].module.scss';
 const Market: NextPage<{ symbol: string }> = ({ symbol }) => {
   const { network } = useWeb3Context();
   const { dates } = useContext(MarketContext);
-  const fixedLenderData = useContext(FixedLenderContext);
   const { accountData } = useContext(AccountDataContext);
 
   const networkName = (network?.name || process.env.NEXT_PUBLIC_NETWORK) as string;
@@ -32,20 +30,13 @@ const Market: NextPage<{ symbol: string }> = ({ symbol }) => {
   const [, setDepositsData] = useState<Array<Maturity> | undefined>(undefined);
   const [, setBorrowsData] = useState<Array<Maturity> | undefined>(undefined);
 
-  const eMarketAddress = useMemo(() => {
-    const filteredFixedLender = fixedLenderData.find((contract: any) => {
-      const contractSymbol = getSymbol(contract.address!, network?.name ?? process.env.NEXT_PUBLIC_NETWORK);
-      return contractSymbol === symbol;
-    });
-
-    return filteredFixedLender?.address;
-  }, [fixedLenderData, network?.name, symbol]);
+  const market = useMemo(() => accountData?.[symbol].market, [accountData, symbol]);
 
   const handleAPR = useCallback(async () => {
-    if (!accountData || !eMarketAddress) return;
+    if (!accountData || !market) return;
 
     try {
-      const apr: any = await getLastAPR(dates, eMarketAddress, network, accountData);
+      const apr: any = await getLastAPR(dates, market, network, accountData);
 
       const deposit = apr?.sortedDeposit;
       const borrow = apr?.sortedBorrow;
@@ -55,11 +46,9 @@ const Market: NextPage<{ symbol: string }> = ({ symbol }) => {
     } catch (e) {
       console.log(e);
     }
-  }, [network, accountData, eMarketAddress, dates]);
+  }, [network, accountData, market, dates]);
 
-  useEffect(() => {
-    handleAPR();
-  }, [handleAPR]);
+  useEffect(() => void handleAPR(), [handleAPR]);
 
   useEffect(() => void analytics.page(), []);
 
@@ -73,12 +62,12 @@ const Market: NextPage<{ symbol: string }> = ({ symbol }) => {
         <AssetHeaderInfo
           symbol={symbol}
           assetAddress={assetAddress}
-          eMarketAddress={eMarketAddress}
+          eMarketAddress={market}
           networkName={networkName}
         />
         <Grid container mt={5}>
           <Grid item container>
-            <AssetFloatingPool symbol={symbol} eMarketAddress={eMarketAddress} networkName={networkName} />
+            <AssetFloatingPool symbol={symbol} eMarketAddress={market} networkName={networkName} />
           </Grid>
           <Grid item container>
             <AssetMaturityPools symbol={symbol} />

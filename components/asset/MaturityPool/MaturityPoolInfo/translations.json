@@ -6,8 +6,8 @@
     "utilizationRate": "Utilization Rate",
     "deposit": "Deposit",
     "TVL": "Total Value Locked",
-    "bestDepositAPR": "Best Deposit APR",
-    "bestBorrowAPR": "Best Borrow APR"
+    "bestDepositRate": "Best Deposit APR",
+    "bestBorrowRate": "Best Borrow APR"
   },
   "es": {}
 }

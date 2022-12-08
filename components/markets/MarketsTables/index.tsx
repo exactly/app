@@ -2,27 +2,20 @@ import React, { FC, useCallback, useContext, useEffect, useState } from 'react';
 import Grid from '@mui/material/Grid';
 import PoolTable, { TableRow } from './poolTable';
 
-import { formatFixed, parseFixed } from '@ethersproject/bignumber';
-import { WeiPerEther, Zero } from '@ethersproject/constants';
+import { formatFixed } from '@ethersproject/bignumber';
+import { MaxUint256, WeiPerEther, Zero } from '@ethersproject/constants';
 
 import AccountDataContext from 'contexts/AccountDataContext';
 import { useWeb3Context } from 'contexts/Web3Context';
-import PreviewerContext from 'contexts/PreviewerContext';
-import ContractsContext from 'contexts/ContractsContext';
 
 import formatMarkets from 'utils/formatMarkets';
 import formatNumber from 'utils/formatNumber';
 import getSubgraph from 'utils/getSubgraph';
 import queryRate from 'utils/queryRates';
-import getAPRsPerMaturity from 'utils/getAPRsPerMaturity';
 
 import { Market } from 'types/Market';
-import { FixedMarketData } from 'types/FixedMarketData';
 
-import numbers from 'config/numbers.json';
 import { Typography } from '@mui/material';
-
-const { usdAmount: usdAmountPreviewer } = numbers;
 
 import { globals } from 'styles/theme';
 
@@ -47,8 +40,6 @@ const sortByDefault = (toSort: TableRow[]) =>
 const MarketTables: FC = () => {
   const { network } = useWeb3Context();
   const { accountData } = useContext(AccountDataContext);
-  const previewerData = useContext(PreviewerContext);
-  const { getInstance } = useContext(ContractsContext);
 
   const [floatingRows, setFloatingRows] = useState<TableRow[]>([...defaultRows]);
   const [fixedRows, setFixedRows] = useState<TableRow[]>([...defaultRows]);
@@ -62,11 +53,9 @@ const MarketTables: FC = () => {
   }, [accountData]);
 
   const defineRows = useCallback(async () => {
-    if (!accountData || !markets || !previewerData.address || !previewerData.abi) return;
+    if (!accountData || !markets) return;
 
     const networkName = network ? network.name : 'mainnet'; // HACK if we dont have network we set a default to show data without a connected address
-
-    const previewerContract = getInstance(previewerData.address, previewerData.abi, 'previewer');
 
     const tempFloatingRows: TableRow[] = [];
     const tempFixedRows: TableRow[] = [];
@@ -104,46 +93,29 @@ const MarketTables: FC = () => {
         let totalBorrowed = Zero;
 
         // Set deposits and borrows total of fixed pools
-        accountData[symbol].fixedPools.forEach((m) => {
-          totalDeposited = totalDeposited.add(m.supplied);
-          totalBorrowed = totalBorrowed.add(m.borrowed);
+        const { fixedPools } = accountData[symbol];
+        fixedPools.forEach(({ supplied, borrowed }) => {
+          totalDeposited = totalDeposited.add(supplied);
+          totalBorrowed = totalBorrowed.add(borrowed);
         });
 
-        const previewFixedData: FixedMarketData[] = await previewerContract?.previewFixed(
-          parseFixed(usdAmountPreviewer.toString(), 18),
+        const bestBorrow = fixedPools.reduce(
+          (best, { maturity, minBorrowRate: rate }) => (rate.lt(best.rate) ? { maturity, rate } : best),
+          { maturity: Zero, rate: MaxUint256 },
         );
-        if (!previewFixedData) return;
-
-        const marketMaturities = previewFixedData.find(({ market }) => market === marketAddress) as FixedMarketData;
-        if (!marketMaturities) return;
-
-        const { deposits, borrows, assets: initialAssets } = marketMaturities;
-
-        const { APRsPerMaturity, maturityMaxAPRDeposit, maturityMinAPRBorrow } = getAPRsPerMaturity(
-          deposits,
-          borrows,
-          decimals,
-          initialAssets,
+        const bestDeposit = fixedPools.reduce(
+          (best, { maturity, depositRate: rate }) => (rate.gt(best.rate) ? { maturity, rate } : best),
+          { maturity: Zero, rate: Zero },
         );
-
-        const depositAPR = {
-          timestamp: maturityMaxAPRDeposit ?? undefined,
-          apr: APRsPerMaturity[maturityMaxAPRDeposit]?.deposit,
-        };
-
-        const borrowAPR = {
-          timestamp: maturityMinAPRBorrow ?? undefined,
-          apr: APRsPerMaturity[maturityMinAPRBorrow]?.borrow,
-        };
 
         tempFixedRows.push({
           symbol,
           totalDeposited: formatNumber(formatFixed(totalDeposited.mul(usdPrice).div(WeiPerEther), decimals)),
           totalBorrowed: formatNumber(formatFixed(totalBorrowed.mul(usdPrice).div(WeiPerEther), decimals)),
-          depositAPR: depositAPR.apr,
-          borrowAPR: borrowAPR.apr,
-          borrowTimestamp: borrowAPR.timestamp,
-          depositTimestamp: depositAPR.timestamp,
+          borrowAPR: Number(bestBorrow.rate) / 1e18,
+          depositAPR: Number(bestDeposit.rate) / 1e18,
+          borrowMaturity: Number(bestBorrow.maturity),
+          depositMaturity: Number(bestDeposit.maturity),
         });
       }),
     );
@@ -155,7 +127,7 @@ const MarketTables: FC = () => {
       // HACK to prevent loading flashes on the table when change the data
       setIsLoading(false);
     }, 2000);
-  }, [accountData, network, markets, previewerData.abi, previewerData.address]);
+  }, [accountData, network, markets]);
 
   const floatingHeaders = [
     {

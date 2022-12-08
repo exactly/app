@@ -1,50 +1,48 @@
-import React, { FC, useCallback, createContext, useEffect, useState, PropsWithChildren } from 'react';
+import React, { createContext, useCallback, useEffect, useState } from 'react';
+import type { FC, PropsWithChildren, ReactNode } from 'react';
 import { AddressZero } from '@ethersproject/constants';
 import { captureException } from '@sentry/nextjs';
 
 import { AccountData } from 'types/AccountData';
-import { FixedLenderAccountData } from 'types/FixedLenderAccountData';
 
-import { useWeb3Context } from './Web3Context';
+import { useWeb3 } from 'hooks/useWeb3';
 
 import useDebounce from 'hooks/useDebounce';
 import usePreviewer from 'hooks/usePreviewer';
 
 type ContextValues = {
   accountData: AccountData | undefined;
-  getAccountData: () => Promise<void>;
+  getAccountData: () => Promise<AccountData | undefined>;
 };
 
-const defaultValues: ContextValues = {
+const AccountDataContext = createContext({
   accountData: undefined,
-  getAccountData: async () => undefined,
-};
-
-const AccountDataContext = createContext(defaultValues);
+  getAccountData: () => Promise.resolve({}),
+} as ContextValues);
 
 export const AccountDataProvider: FC<PropsWithChildren> = ({ children }) => {
-  const [accountData, setAccountData] = useState<AccountData | undefined>();
-  const { walletAddress } = useWeb3Context();
-  const Previewer = usePreviewer();
+  const [accountData, setAccountData] = useState<AccountData | undefined>(undefined);
+  const { walletAddress: rawAddress } = useWeb3();
 
-  const walletAddressDebounced = useDebounce(walletAddress);
+  const walletAddress = useDebounce(rawAddress);
+
+  const previewer = usePreviewer();
 
   const getAccountData = useCallback(async () => {
-    if (!Previewer) return;
+    if (!previewer) return undefined;
+    const account = walletAddress ?? AddressZero;
 
-    const wallet = walletAddressDebounced ? walletAddressDebounced : AddressZero;
+    const exactly = await previewer.exactly(account);
 
-    const data = await Previewer.exactly(wallet);
-
-    setAccountData(Object.fromEntries(data.map((market: FixedLenderAccountData) => [market.assetSymbol, market])));
-  }, [Previewer, walletAddressDebounced]);
-
-  useEffect(() => {
-    void getAccountData().catch(captureException);
-  }, [getAccountData]);
+    const data = Object.fromEntries(exactly.map((market) => [market.assetSymbol, market]));
+    setAccountData(data);
+    return data;
+  }, [walletAddress, previewer]);
 
   useEffect(() => {
-    const interval = setInterval(() => void getAccountData().catch(captureException), 600000);
+    void getAccountData();
+
+    const interval = setInterval(() => getAccountData().catch(captureException), 600_000);
     return () => clearInterval(interval);
   }, [getAccountData]);
 

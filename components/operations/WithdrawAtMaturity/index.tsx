@@ -1,6 +1,6 @@
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 import React, { ChangeEvent, FC, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { WeiPerEther, Zero } from '@ethersproject/constants';
+import { AddressZero, WeiPerEther, Zero } from '@ethersproject/constants';
 import LoadingButton from '@mui/lab/LoadingButton';
 
 import ModalAsset from 'components/common/modal/ModalAsset';
@@ -110,6 +110,7 @@ const WithdrawAtMaturity: FC = () => {
       marketContract.address,
       date.value,
       parsedQtyValue,
+      walletAddress ?? AddressZero,
     );
 
     setAmountToWithdraw(amount);

@@ -1,30 +1,25 @@
-import type { Contract } from '@ethersproject/contracts';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
+import { Skeleton, Tooltip, Typography } from '@mui/material';
+import { captureException } from '@sentry/nextjs';
+import { WeiPerEther } from '@ethersproject/constants';
+import { ErrorCode } from '@ethersproject/logger';
 
 import Loading from 'components/common/Loading';
-
-import AccountDataContext from 'contexts/AccountDataContext';
-import FixedLenderContext from 'contexts/FixedLenderContext';
-import { useWeb3Context } from 'contexts/Web3Context';
-
-import { Skeleton, Tooltip, Typography } from '@mui/material';
 import StyledSwitch from 'components/Switch';
+import AccountDataContext from 'contexts/AccountDataContext';
 import parseHealthFactor from 'utils/parseHealthFactor';
-import { getSymbol } from 'utils/utils';
 import { HealthFactor } from 'types/HealthFactor';
-import { WeiPerEther } from '@ethersproject/constants';
+import useAuditor from 'hooks/useAuditor';
 
 type Props = {
   symbol?: string;
   walletAddress?: string;
-  auditorContract?: Contract;
   healthFactor?: HealthFactor;
 };
 
-function SwitchCollateral({ symbol, walletAddress, auditorContract, healthFactor }: Props) {
-  const { network } = useWeb3Context();
-  const fixedLender = useContext(FixedLenderContext);
+function SwitchCollateral({ symbol, walletAddress, healthFactor }: Props) {
   const { accountData, getAccountData } = useContext(AccountDataContext);
+  const auditor = useAuditor();
 
   const [toggle, setToggle] = useState<boolean>(false);
   const [disabled, setDisabled] = useState<boolean>(false);
@@ -65,60 +60,28 @@ function SwitchCollateral({ symbol, walletAddress, auditorContract, healthFactor
     checkCollaterals();
   }, [accountData, walletAddress, healthFactor, checkCollaterals]);
 
-  // TODO: refactor, use new hook
-  function getFixedLenderData() {
-    const filteredFixedLender = fixedLender.find((contract) => {
-      const contractSymbol = getSymbol(contract.address!, network!.name);
+  const onToggle = useCallback(async () => {
+    setToggle((prev) => !prev);
+    if (!accountData || !symbol || !auditor) return;
+    const { market } = accountData[symbol];
 
-      return contractSymbol === symbol;
-    });
-
-    const fixedLenderData = {
-      address: filteredFixedLender?.address,
-      abi: filteredFixedLender?.abi,
-    };
-
-    return fixedLenderData;
-  }
-
-  async function handleMarket() {
     try {
-      let tx;
-
       setLoading(true);
-
-      const fixedLenderAddress = getFixedLenderData().address;
-
-      if (!toggle && fixedLenderAddress) {
-        //if it's not toggled we need to ENTER
-        tx = await auditorContract?.enterMarket(fixedLenderAddress);
-      } else if (fixedLenderAddress) {
-        //if it's toggled we need to EXIT
-        tx = await auditorContract?.exitMarket(fixedLenderAddress);
-      }
-
-      //waiting for tx to end
+      const tx = await (toggle ? auditor.exitMarket(market) : auditor.enterMarket(market));
       await tx.wait();
       setToggle(!toggle);
-      //when it ends we stop loading
       setLoading(false);
 
-      getAccountData();
-    } catch (e) {
-      console.log(e);
-      //if user rejects tx we change toggle status to previous, and stop loading
+      await getAccountData();
+    } catch (error: any) {
+      if (error.code !== ErrorCode.ACTION_REJECTED) captureException(error);
       setToggle((prev) => !prev);
       setLoading(false);
     }
-  }
+  }, [accountData, auditor, getAccountData, symbol, toggle]);
 
-  if (!symbol) {
-    return <Skeleton animation="wave" width={60} height={30} sx={{ margin: 'auto' }} />;
-  }
-
-  if (loading) {
-    return <Loading size="small" color="primary" />;
-  }
+  if (!symbol) return <Skeleton animation="wave" width={60} height={30} sx={{ margin: 'auto' }} />;
+  if (loading) return <Loading size="small" color="primary" />;
 
   return (
     <Tooltip
@@ -137,10 +100,7 @@ function SwitchCollateral({ symbol, walletAddress, auditorContract, healthFactor
       <div>
         <StyledSwitch
           checked={toggle}
-          onChange={() => {
-            setToggle((prev) => !prev);
-            handleMarket();
-          }}
+          onChange={onToggle}
           inputProps={{ 'aria-label': 'controlled' }}
           disabled={disabled}
         />

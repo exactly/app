@@ -12,7 +12,6 @@ import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 import Tooltip from '@mui/material/Tooltip';
 
-import { APRsPerMaturityType } from 'utils/getAPRsPerMaturity';
 import formatNumber from 'utils/formatNumber';
 import parseTimestamp from 'utils/parseTimestamp';
 import { toPercentage } from 'utils/utils';
@@ -23,6 +22,8 @@ import { useWeb3Context } from 'contexts/Web3Context';
 import { MarketContext } from 'contexts/MarketContext';
 
 import numbers from 'config/numbers.json';
+
+export type APRsPerMaturityType = Record<string, { borrow: number; deposit: number }>;
 
 type MaturityPoolsTableProps = {
   APRsPerMaturity: APRsPerMaturityType;

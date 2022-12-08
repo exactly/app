@@ -1,6 +1,5 @@
 import AccountDataContext from 'contexts/AccountDataContext';
 import { useContext, useMemo } from 'react';
-import { FixedLenderAccountData } from 'types/FixedLenderAccountData';
 import { FixedPool } from 'types/FixedPool';
 
 export default () => {
@@ -10,7 +9,7 @@ export default () => {
     if (!accountData) return { deposits: undefined, borrows: undefined };
     const data: Record<string, FixedPool> = {};
 
-    Object.values(accountData).forEach((asset: FixedLenderAccountData) => {
+    Object.values(accountData).forEach((asset) => {
       asset.fixedDepositPositions.forEach((pool) => {
         const date = pool.maturity.toNumber().toString();
         data.deposits = data.deposits ?? {};
