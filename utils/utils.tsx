@@ -9,7 +9,8 @@ export function transformClasses(style: any, classes: string) {
     .join(' ');
 }
 
-export function formatWallet(walletAddress: string) {
+export function formatWallet(walletAddress?: string) {
+  if (!walletAddress) return '';
   return `${walletAddress.substring(0, 6)}...${walletAddress.substring(38)}`;
 }
 

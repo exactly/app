@@ -7,7 +7,7 @@ export const globals = {
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#008cf4',
+      main: '#0E0E0E',
       '50': '#d3ecff',
       '100': '#d4d4fa',
       '200': '#a6a6f4',
@@ -39,7 +39,7 @@ const theme = createTheme({
     },
 
     subtitle1: {
-      fontWeight: 600,
+      fontWeight: 500,
       fontSize: 14,
       color: '#9a9a9a',
       fontFamily: 'IBM Plex Mono',
@@ -58,7 +58,9 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           textTransform: 'none',
-          borderRadius: 0,
+          borderRadius: '32px',
+          fontSize: '14px',
+          fontWeight: 600,
         },
       },
     },
