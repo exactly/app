@@ -64,7 +64,7 @@ const AssetMaturityPools: FC<{ symbol: string }> = ({ symbol }) => {
   useEffect(() => void getMaturitiesData(), [getMaturitiesData]);
 
   return (
-    <Grid container mt={4} mb={19} padding={2} sx={{ boxShadow: '#A7A7A7 0px 0px 4px 0px', borderRadius: '5px' }}>
+    <Grid container mt={4} mb={4} padding={2} sx={{ boxShadow: '#A7A7A7 0px 0px 4px 0px', borderRadius: '5px' }}>
       <Grid item xs={12}>
         <MaturityPoolInfo
           totalDeposited={totalDeposited}
