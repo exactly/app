@@ -116,7 +116,7 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
   );
 
   return (
-    <TableContainer component={Paper}>
+    <TableContainer>
       <Table aria-label="simple table">
         <TableHead>
           <TableRow>
