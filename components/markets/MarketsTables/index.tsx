@@ -177,12 +177,32 @@ const MarketTables: FC = () => {
 
   return (
     <Grid container sx={{ maxWidth: maxWidth, margin: 'auto' }}>
-      <Grid width={'100%'} my={4} padding={2} sx={{ boxShadow: '#A7A7A7 0px 0px 4px 0px', borderRadius: '5px' }}>
-        <Typography variant="h5">Variable Interest Rate</Typography>
+      <Grid
+        width={'100%'}
+        my={4}
+        p="24px"
+        boxShadow="0px 4px 12px rgba(175, 177, 182, 0.2)"
+        borderRadius="0px 0px 6px 6px"
+        bgcolor="white"
+        borderTop="4px solid #34C53A"
+      >
+        <Typography variant="h6" pb="16px">
+          Variable Interest Rate
+        </Typography>
         <PoolTable isLoading={isLoading} headers={floatingHeaders} rows={floatingRows} rateType={'floating'} />
       </Grid>
-      <Grid width={'100%'} mb={4} padding={2} sx={{ boxShadow: '#A7A7A7 0px 0px 4px 0px', borderRadius: '5px' }}>
-        <Typography variant="h5">Fixed Interest Rate</Typography>
+      <Grid
+        width={'100%'}
+        mb={4}
+        p="24px"
+        boxShadow="0px 4px 12px rgba(175, 177, 182, 0.2)"
+        borderRadius="0px 0px 6px 6px"
+        bgcolor="white"
+        borderTop="4px solid #008CF4"
+      >
+        <Typography variant="h6" pb="16px">
+          Fixed Interest Rate
+        </Typography>
         <PoolTable isLoading={isLoading} headers={fixedHeaders} rows={fixedRows} rateType={'fixed'} />
       </Grid>
     </Grid>

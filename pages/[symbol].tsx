@@ -10,8 +10,9 @@ import OperationsModal from 'components/OperationsModal';
 import AssetHeaderInfo from 'components/asset/Header';
 
 import analytics from 'utils/analytics';
-import style from './[symbol].module.scss';
 import useAccountData from 'hooks/useAccountData';
+import { globals } from 'styles/theme';
+const { maxWidth } = globals;
 
 const Market: NextPage<{ symbol: string }> = ({ symbol }) => {
   const { market } = useAccountData(symbol);
@@ -19,21 +20,19 @@ const Market: NextPage<{ symbol: string }> = ({ symbol }) => {
   useEffect(() => void analytics.page(), []);
 
   return (
-    <>
+    <Grid container sx={{ maxWidth: maxWidth }} mx="auto" mt={5}>
       <OperationsModal />
 
-      <section className={style.container}>
-        <AssetHeaderInfo symbol={symbol} eMarketAddress={market} />
-        <Grid container mt={5}>
-          <Grid item container>
-            <AssetFloatingPool symbol={symbol} eMarketAddress={market} />
-          </Grid>
-          <Grid item container>
-            <AssetMaturityPools symbol={symbol} />
-          </Grid>
+      <AssetHeaderInfo symbol={symbol} eMarketAddress={market} />
+      <Grid container mt={5}>
+        <Grid item container>
+          <AssetFloatingPool symbol={symbol} eMarketAddress={market} />
         </Grid>
-      </section>
-    </>
+        <Grid item container>
+          <AssetMaturityPools symbol={symbol} />
+        </Grid>
+      </Grid>
+    </Grid>
   );
 };
 

@@ -102,7 +102,7 @@ function FloatingPoolDashboardTable({ type, healthFactor }: Props) {
   const rows = itemData || defaultRows;
 
   return (
-    <TableContainer>
+    <TableContainer component={Paper}>
       <Table aria-label="simple table">
         <TableHead>
           <TableRow>

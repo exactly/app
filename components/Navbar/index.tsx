@@ -67,9 +67,9 @@ function Navbar() {
               key={pathname}
               variant={pathname === currentPathname ? 'contained' : 'text'}
               onClick={() => push(pathname, query)}
-              sx={{ display: { xs: 'none', md: 'block' } }}
+              sx={{ display: { xs: 'none', md: 'block' }, px: '24px' }}
             >
-              <Box px="6px">{name}</Box>
+              {name}
             </Button>
           ))}
           <Box sx={{ display: 'flex', gap: '10px', ml: 'auto' }}>
