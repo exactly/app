@@ -4,8 +4,7 @@ import React, { useCallback, useContext, useEffect, useState } from 'react';
 
 import Grid from '@mui/material/Grid';
 import DashboardHeader from 'components/dashboard/DashboardHeader';
-import MobileNavbar from 'components/MobileNavbar';
-import OperationsModal from 'components/OperationsModal';
+import OperationsModals from 'components/OperationsModal';
 import AccountDataContext from 'contexts/AccountDataContext';
 import { globals } from 'styles/theme';
 import getHealthFactorData from 'utils/getHealthFactorData';
@@ -44,8 +43,7 @@ const DashBoard: NextPage = () => {
 
   return (
     <>
-      <OperationsModal />
-      <MobileNavbar />
+      <OperationsModals />
       <Grid container sx={{ maxWidth, margin: 'auto' }}>
         <DashboardHeader healthFactor={healthFactor} />
       </Grid>
