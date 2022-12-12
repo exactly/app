@@ -107,8 +107,8 @@ const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ APRsPerMaturity, symb
 
   // TODO: add translations
   return (
-    <TableContainer component={Paper}>
-      <Table sx={{ minWidth: 650 }} aria-label="simple table">
+    <TableContainer>
+      <Table sx={{ minWidth: 650, bgcolor: 'transparent' }} aria-label="simple table">
         <TableHead>
           <TableRow>
             <HeadCell title="Maturity" />
