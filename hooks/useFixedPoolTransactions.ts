@@ -1,6 +1,5 @@
 import { parseFixed } from '@ethersproject/bignumber';
 import AccountDataContext from 'contexts/AccountDataContext';
-import { useWeb3Context } from 'contexts/Web3Context';
 import request from 'graphql-request';
 import { getMaturityPoolBorrowsQuery } from 'queries/getMaturityPoolBorrows';
 import { getMaturityPoolDepositsQuery } from 'queries/getMaturityPoolDeposits';
@@ -11,19 +10,21 @@ import { Borrow } from 'types/Borrow';
 import { Deposit } from 'types/Deposit';
 import { Repay } from 'types/Repay';
 import { WithdrawMP } from 'types/WithdrawMP';
-import getSubgraph from 'utils/getSubgraph';
+import { useWeb3 } from './useWeb3';
+import networkData from 'config/networkData.json' assert { type: 'json' };
 
 export default (type: 'borrow' | 'deposit', maturity: string, market: string) => {
   const { accountData } = useContext(AccountDataContext);
-  const { walletAddress, network } = useWeb3Context();
+  const { walletAddress, chain } = useWeb3();
   const [withdrawTxs, setWithdrawTxs] = useState<WithdrawMP[]>([]);
   const [repayTxs, setRepayTxs] = useState<Repay[]>([]);
   const [depositTxs, setDepositTxs] = useState<Deposit[]>([]);
   const [borrowTxs, setBorrowTxs] = useState<Borrow[]>([]);
 
   const getFixedPoolTransactions = useCallback(async () => {
-    const subgraphUrl = getSubgraph(network?.name);
-    if (!walletAddress || !maturity || !market || !type || !subgraphUrl || !accountData) return;
+    if (!walletAddress || !maturity || !market || !type || !chain || !accountData) return;
+    const subgraphUrl = networkData[String(chain.id) as keyof typeof networkData]?.subgraph;
+    if (!subgraphUrl) return;
 
     if (type === 'borrow') {
       const getMaturityPoolBorrows = await request(
@@ -128,7 +129,7 @@ export default (type: 'borrow' | 'deposit', maturity: string, market: string) =>
 
       setWithdrawTxs(withdraws);
     }
-  }, [market, maturity, network?.name, type, walletAddress, accountData]);
+  }, [walletAddress, maturity, market, type, chain, accountData]);
 
   useEffect(() => {
     getFixedPoolTransactions();

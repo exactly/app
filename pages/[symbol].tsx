@@ -6,8 +6,8 @@ import { readdir, readFile } from 'fs/promises';
 import type { GetStaticPaths, GetStaticProps, NextPage } from 'next';
 import type { Maturity } from 'types/Maturity';
 import { getUnderlyingData } from 'utils/utils';
-import { useWeb3Context } from 'contexts/Web3Context';
 import { MarketContext } from 'contexts/MarketContext';
+import { useWeb3 } from 'hooks/useWeb3';
 import AccountDataContext from 'contexts/AccountDataContext';
 import AssetMaturityPools from 'components/asset/MaturityPool';
 import AssetFloatingPool from 'components/asset/FloatingPool';
@@ -20,11 +20,11 @@ import analytics from 'utils/analytics';
 import style from './[symbol].module.scss';
 
 const Market: NextPage<{ symbol: string }> = ({ symbol }) => {
-  const { network } = useWeb3Context();
+  const { chain } = useWeb3();
   const { dates } = useContext(MarketContext);
   const { accountData } = useContext(AccountDataContext);
 
-  const networkName = (network?.name || process.env.NEXT_PUBLIC_NETWORK) as string;
+  const networkName = (chain?.network || process.env.NEXT_PUBLIC_NETWORK) as string;
   const assetAddress = getUnderlyingData(networkName, symbol)?.address as string;
 
   const [, setDepositsData] = useState<Array<Maturity> | undefined>(undefined);
@@ -33,10 +33,10 @@ const Market: NextPage<{ symbol: string }> = ({ symbol }) => {
   const market = useMemo(() => accountData?.[symbol].market, [accountData, symbol]);
 
   const handleAPR = useCallback(async () => {
-    if (!accountData || !market) return;
+    if (!accountData || !market || !chain) return;
 
     try {
-      const apr: any = await getLastAPR(dates, market, network, accountData);
+      const apr: any = await getLastAPR(dates, symbol, chain.id, accountData);
 
       const deposit = apr?.sortedDeposit;
       const borrow = apr?.sortedBorrow;
@@ -46,7 +46,7 @@ const Market: NextPage<{ symbol: string }> = ({ symbol }) => {
     } catch (e) {
       console.log(e);
     }
-  }, [network, accountData, market, dates]);
+  }, [chain, accountData, market, dates]);
 
   useEffect(() => void handleAPR(), [handleAPR]);
 
@@ -59,15 +59,10 @@ const Market: NextPage<{ symbol: string }> = ({ symbol }) => {
       <Navbar />
 
       <section className={style.container} style={{ marginTop: '130px' }}>
-        <AssetHeaderInfo
-          symbol={symbol}
-          assetAddress={assetAddress}
-          eMarketAddress={market}
-          networkName={networkName}
-        />
+        <AssetHeaderInfo symbol={symbol} assetAddress={assetAddress} eMarketAddress={market} />
         <Grid container mt={5}>
           <Grid item container>
-            <AssetFloatingPool symbol={symbol} eMarketAddress={market} networkName={networkName} />
+            <AssetFloatingPool symbol={symbol} eMarketAddress={market} />
           </Grid>
           <Grid item container>
             <AssetMaturityPools symbol={symbol} />

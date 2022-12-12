@@ -20,7 +20,7 @@ import formatNumber from 'utils/formatNumber';
 import AccountDataContext from 'contexts/AccountDataContext';
 import { MarketContext } from 'contexts/MarketContext';
 import LangContext from 'contexts/LangContext';
-import { useWeb3Context } from 'contexts/Web3Context';
+import { useWeb3 } from 'hooks/useWeb3';
 
 import numbers from 'config/numbers.json';
 
@@ -38,7 +38,7 @@ const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 const DEFAULT_SLIPPAGE = (100 * numbers.slippage).toFixed(2);
 
 const WithdrawAtMaturity: FC = () => {
-  const { walletAddress } = useWeb3Context();
+  const { walletAddress } = useWeb3();
   const { date, market } = useContext(MarketContext);
   const { accountData, getAccountData } = useContext(AccountDataContext);
 

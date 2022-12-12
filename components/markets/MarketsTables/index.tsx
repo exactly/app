@@ -6,11 +6,9 @@ import { formatFixed } from '@ethersproject/bignumber';
 import { MaxUint256, WeiPerEther, Zero } from '@ethersproject/constants';
 
 import AccountDataContext from 'contexts/AccountDataContext';
-import { useWeb3Context } from 'contexts/Web3Context';
 
 import formatMarkets from 'utils/formatMarkets';
 import formatNumber from 'utils/formatNumber';
-import getSubgraph from 'utils/getSubgraph';
 import queryRate from 'utils/queryRates';
 
 import { Market } from 'types/Market';
@@ -18,6 +16,8 @@ import { Market } from 'types/Market';
 import { Typography } from '@mui/material';
 
 import { globals } from 'styles/theme';
+import { useWeb3 } from 'hooks/useWeb3';
+import networkData from 'config/networkData.json' assert { type: 'json' };
 
 const { maxWidth } = globals;
 
@@ -38,7 +38,7 @@ const sortByDefault = (toSort: TableRow[]) =>
   });
 
 const MarketTables: FC = () => {
-  const { network } = useWeb3Context();
+  const { chain } = useWeb3();
   const { accountData } = useContext(AccountDataContext);
 
   const [floatingRows, setFloatingRows] = useState<TableRow[]>([...defaultRows]);
@@ -53,9 +53,7 @@ const MarketTables: FC = () => {
   }, [accountData]);
 
   const defineRows = useCallback(async () => {
-    if (!accountData || !markets) return;
-
-    const networkName = network ? network.name : 'mainnet'; // HACK if we dont have network we set a default to show data without a connected address
+    if (!accountData || !markets || !chain) return;
 
     const tempFloatingRows: TableRow[] = [];
     const tempFixedRows: TableRow[] = [];
@@ -78,8 +76,8 @@ const MarketTables: FC = () => {
           formatFixed(totalFloatingBorrowAssets.mul(usdPrice).div(WeiPerEther), decimals),
         );
 
-        const floatingDepositAPR = await getRates(networkName, 'deposit', maxFuturePools, marketAddress);
-        const floatingBorrowAPR = await getRates(networkName, 'borrow', maxFuturePools, marketAddress);
+        const floatingDepositAPR = await getRates(chain.id, 'deposit', maxFuturePools, marketAddress);
+        const floatingBorrowAPR = await getRates(chain.id, 'borrow', maxFuturePools, marketAddress);
 
         tempFloatingRows.push({
           symbol,
@@ -127,7 +125,7 @@ const MarketTables: FC = () => {
       // HACK to prevent loading flashes on the table when change the data
       setIsLoading(false);
     }, 2000);
-  }, [accountData, network, markets]);
+  }, [accountData, chain, markets]);
 
   const floatingHeaders = [
     {
@@ -172,13 +170,8 @@ const MarketTables: FC = () => {
     },
   ];
 
-  async function getRates(
-    networkName: string,
-    type: 'borrow' | 'deposit',
-    maxFuturePools: number,
-    eMarketAddress: string,
-  ) {
-    const subgraphUrl = getSubgraph(networkName);
+  async function getRates(chainId: number, type: 'borrow' | 'deposit', maxFuturePools: number, eMarketAddress: string) {
+    const subgraphUrl = networkData[String(chainId) as keyof typeof networkData]?.subgraph;
     if (!subgraphUrl) return;
 
     const [{ apr }] = await queryRate(subgraphUrl, eMarketAddress, type, { maxFuturePools });

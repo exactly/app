@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useMemo } from 'react';
+import { useSwitchNetwork } from 'wagmi';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
@@ -12,7 +13,7 @@ import { LangKeys } from 'types/Lang';
 
 import LangContext from 'contexts/LangContext';
 import ThemeContext from 'contexts/ThemeContext';
-import { useWeb3Context } from 'contexts/Web3Context';
+import ModalStatusContext from 'contexts/ModalStatusContext';
 
 import styles from './style.module.scss';
 
@@ -20,21 +21,19 @@ import keys from './translations.json';
 
 import allowedNetworks from 'config/allowedNetworks.json';
 import analytics from 'utils/analytics';
-import { useModalStatus } from 'contexts/ModalStatusContext';
+import { useWeb3 } from 'hooks/useWeb3';
 
 function Navbar() {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
+  const { switchNetworkAsync } = useSwitchNetwork();
+  const { chain } = useWeb3();
+  const { pathname, query } = useRouter();
 
-  const { web3Provider, connect, disconnect, walletAddress, network } = useWeb3Context();
-
-  const { openOperationModal } = useModalStatus();
+  const { connect, disconnect, walletAddress } = useWeb3();
 
   const { theme } = useContext(ThemeContext);
-
-  const router = useRouter();
-
-  const { pathname } = router;
+  const { setOpen, setOperation } = useContext(ModalStatusContext);
 
   useEffect(() => {
     walletAddress && void analytics.identify(walletAddress);
@@ -42,39 +41,22 @@ function Navbar() {
 
   const routes = useMemo(
     () => [
-      {
-        pathname: '/',
-        href: '/',
-        name: translations[lang].markets,
-      },
-      {
-        pathname: '/dashboard',
-        href: '/dashboard',
-        name: translations[lang].dashboard,
-      },
+      { pathname: '/', name: translations[lang].markets },
+      { pathname: '/dashboard', name: translations[lang].dashboard },
     ],
     [lang, translations],
   );
 
-  const isAllowed = useMemo(() => network && allowedNetworks.includes(network.name), [network]);
+  const isAllowed = useMemo(() => chain && allowedNetworks.includes(chain.network), [chain]);
 
   async function handleFaucetClick() {
-    if (!web3Provider?.provider.request) return;
-
-    if (isAllowed && network?.name === 'goerli') {
-      return openOperationModal('faucet');
+    if (isAllowed && chain?.network === 'goerli') {
+      setOperation('faucet');
+      setOpen(true);
+      return;
     }
 
-    if (!isAllowed) {
-      await web3Provider.provider.request({
-        method: 'wallet_switchEthereumChain',
-        params: [
-          {
-            chainId: '0x1',
-          },
-        ],
-      });
-    }
+    if (!isAllowed) await switchNetworkAsync?.(5);
   }
 
   return (
@@ -82,7 +64,7 @@ function Navbar() {
       <div className={styles.wrapper}>
         <DisclaimerModal />
         <div className={styles.left}>
-          <Link href="/">
+          <Link href={{ pathname: '/', query }}>
             <div className={styles.logo}>
               <Image
                 src={theme === 'light' ? '/img/logo.png' : '/img/logo-white.png'}
@@ -94,7 +76,7 @@ function Navbar() {
             </div>
           </Link>
 
-          {network?.chainId === 5 && ( // TODO: put chainId constants in a config file
+          {chain?.id === 5 && ( // TODO: put chainId constants in a config file
             <div className={styles.faucet} onClick={handleFaucetClick}>
               <p>Goerli Faucet</p>
             </div>
@@ -108,7 +90,7 @@ function Navbar() {
                     className={route.pathname === pathname ? `${styles.link} ${styles.active}` : styles.link}
                     key={route.pathname}
                   >
-                    <Link href={route.href}>{route.name}</Link>
+                    <Link href={{ pathname: route.pathname, query }}>{route.name}</Link>
                   </li>
                 );
               })}
@@ -133,24 +115,24 @@ function Navbar() {
           >
             <strong>Docs</strong>
           </a>
-          {network && isAllowed && (
+          {chain && isAllowed && (
             <div className={styles.networkContainer} onClick={handleFaucetClick}>
               <div className={styles.dot} />
               <p className={styles.network}>
-                {translations[lang].connectedTo} {network?.name === 'homestead' ? 'mainnet' : network?.name}
+                {translations[lang].connectedTo} {chain?.network === 'homestead' ? 'mainnet' : chain?.network}
                 {/* HACK - move to chainIds */}
               </p>
             </div>
           )}
 
-          {network && !isAllowed && (
+          {chain && !isAllowed && (
             <div className={styles.networkContainer} onClick={handleFaucetClick}>
               <div className={styles.dotError} />
               <p className={styles.network}>{translations[lang].clickHere}</p>
             </div>
           )}
 
-          {!network && (
+          {!chain && (
             <div className={styles.networkContainer} onClick={handleFaucetClick}>
               <div className={styles.dotError} />
               <p className={styles.network}>{translations[lang].disconnected}</p>

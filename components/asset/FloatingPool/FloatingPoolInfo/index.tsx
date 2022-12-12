@@ -11,7 +11,6 @@ import keys from './translations.json';
 
 import formatNumber from 'utils/formatNumber';
 import queryRates from 'utils/queryRates';
-import getSubgraph from 'utils/getSubgraph';
 import { toPercentage } from 'utils/utils';
 
 import { ItemInfoProps } from 'components/common/ItemInfo';
@@ -21,14 +20,16 @@ import OrderAction from 'components/OrderAction';
 import { captureException } from '@sentry/nextjs';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
+import { useWeb3 } from 'hooks/useWeb3';
+import networkData from 'config/networkData.json' assert { type: 'json' };
 
 type FloatingPoolInfoProps = {
   symbol: string;
   eMarketAddress?: string;
-  networkName: string;
 };
 
-const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol, eMarketAddress, networkName }) => {
+const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol, eMarketAddress }) => {
+  const { chain } = useWeb3();
   const { accountData } = useContext(AccountDataContext);
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
@@ -37,7 +38,6 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol, eMarketAddress, n
   const [borrowed, setBorrowed] = useState<number | undefined>(undefined);
   const [depositAPR, setDepositAPR] = useState<string | undefined>(undefined);
   const [borrowAPR, setBorrowAPR] = useState<string | undefined>(undefined);
-  const subgraphUrl = getSubgraph(networkName);
 
   const fetchPoolData = useCallback(async () => {
     if (!accountData || !symbol) return;
@@ -62,7 +62,9 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol, eMarketAddress, n
   }, [fetchPoolData]);
 
   const fetchAPRs = useCallback(async () => {
-    if (!accountData || !eMarketAddress || !subgraphUrl) return;
+    if (!accountData || !eMarketAddress || !chain) return;
+    const subgraphUrl = networkData[String(chain.id) as keyof typeof networkData]?.subgraph;
+    if (!subgraphUrl) return;
     const { maxFuturePools } = accountData[symbol];
 
     // TODO: consider storing these results in a new context so it's only fetched once - already added in tech debt docs
@@ -73,7 +75,7 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol, eMarketAddress, n
     setDepositAPR(`${(depositAPRRate * 100).toFixed(2)}%`);
 
     setBorrowAPR(`${(borrowAPRRate * 100).toFixed(2)}%`);
-  }, [accountData, eMarketAddress, symbol, subgraphUrl]);
+  }, [accountData, eMarketAddress, symbol, chain]);
 
   useEffect(() => {
     fetchAPRs().catch(captureException);

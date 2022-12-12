@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
+import { useEnsName } from 'wagmi';
 import Image from 'next/image';
 
 import styles from './style.module.scss';
@@ -6,8 +7,6 @@ import styles from './style.module.scss';
 import { formatWallet } from 'utils/utils';
 
 import { Network } from 'types/Network';
-import { useWeb3 } from 'hooks/useWeb3';
-import { captureException } from '@sentry/nextjs';
 
 type Props = {
   walletAddress: string;
@@ -17,23 +16,14 @@ type Props = {
 };
 
 function Wallet({ walletAddress, cogwheel = true, network, disconnect }: Props) {
-  const { web3Provider } = useWeb3();
+  const { data: ens } = useEnsName({ address: walletAddress as `0x${string}` });
 
   const formattedWallet = formatWallet(walletAddress);
   const [walletContainer, setWalletContainer] = useState<boolean>(false);
-  const [ens, setEns] = useState<string | null>(null);
 
   function handleWallet() {
     setWalletContainer((prev) => !prev);
   }
-
-  useEffect(() => {
-    if (!web3Provider) return;
-
-    const loadENS = async () => setEns(await web3Provider.lookupAddress(walletAddress));
-
-    loadENS().catch(captureException);
-  }, [walletAddress, web3Provider]);
 
   return (
     <div className={styles.container}>

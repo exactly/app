@@ -8,10 +8,10 @@ import MobileNavbar from 'components/MobileNavbar';
 import Navbar from 'components/Navbar';
 import OperationsModal from 'components/OperationsModal';
 import AccountDataContext from 'contexts/AccountDataContext';
-import { useWeb3Context } from 'contexts/Web3Context';
 import { globals } from 'styles/theme';
 import getHealthFactorData from 'utils/getHealthFactorData';
 import { HealthFactor } from 'types/HealthFactor';
+import { useWeb3 } from 'hooks/useWeb3';
 import analytics from 'utils/analytics';
 
 const { maxWidth } = globals;
@@ -19,7 +19,7 @@ const { maxWidth } = globals;
 const DashboardContent = dynamic(() => import('components/dashboard/DashboardContent'));
 
 const DashBoard: NextPage = () => {
-  const { walletAddress } = useWeb3Context();
+  const { walletAddress } = useWeb3();
   const { accountData } = useContext(AccountDataContext);
 
   const [healthFactor, setHealthFactor] = useState<HealthFactor | undefined>();

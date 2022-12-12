@@ -7,19 +7,16 @@ import LangContext from 'contexts/LangContext';
 import styles from './style.module.scss';
 import keys from './translations.json';
 
-import getSubgraph from 'utils/getSubgraph';
 import queryRates from 'utils/queryRates';
 
 import { LangKeys } from 'types/Lang';
 import parseTimestamp from 'utils/parseTimestamp';
 import { captureException } from '@sentry/nextjs';
+import { useWeb3 } from 'hooks/useWeb3';
+import networkData from 'config/networkData.json' assert { type: 'json' };
 
-interface Props {
-  market: string | undefined;
-  networkName: string | undefined;
-}
-
-function FloatingAPRChart({ market, networkName }: Props) {
+function FloatingAPRChart({ market }: { market?: string }) {
+  const { chain } = useWeb3();
   const [data, setData] = useState<any>([]);
   const defaultOptions = {
     maxFuturePools: 3,
@@ -35,9 +32,9 @@ function FloatingAPRChart({ market, networkName }: Props) {
   const translations: { [key: string]: LangKeys } = keys;
 
   const getHistoricalAPR = useCallback(async () => {
-    if (!market || !networkName) return;
+    if (!market || !chain) return;
 
-    const subgraphUrl = getSubgraph(networkName);
+    const subgraphUrl = networkData[String(chain.id) as keyof typeof networkData]?.subgraph;
     if (!subgraphUrl) return;
 
     const data = (await queryRates(subgraphUrl, market, 'deposit', queryOptions)).map(({ apr, apy, ...rest }) => ({
@@ -47,7 +44,7 @@ function FloatingAPRChart({ market, networkName }: Props) {
     }));
 
     setData(data);
-  }, [market, networkName, queryOptions]);
+  }, [market, chain, queryOptions]);
 
   function formatXAxis(tick: any) {
     try {

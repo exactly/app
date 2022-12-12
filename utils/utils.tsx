@@ -12,18 +12,6 @@ import mainnetWBTC from '@exactly-protocol/protocol/deployments/mainnet/WBTC.jso
 import mainnetUSDC from '@exactly-protocol/protocol/deployments/mainnet/USDC.json';
 import mainnetWSTETH from '@exactly-protocol/protocol/deployments/mainnet/wstETH.json';
 
-import goerliFixedLenderDAI from '@exactly-protocol/protocol/deployments/goerli/MarketDAI.json';
-import goerliFixedLenderWETH from '@exactly-protocol/protocol/deployments/goerli/MarketWETH.json';
-import goerliFixedLenderWBTC from '@exactly-protocol/protocol/deployments/goerli/MarketWBTC.json';
-import goerliFixedLenderUSDC from '@exactly-protocol/protocol/deployments/goerli/MarketUSDC.json';
-import goerliFixedLenderWSTETH from '@exactly-protocol/protocol/deployments/goerli/MarketwstETH.json';
-
-import mainnetFixedLenderDAI from '@exactly-protocol/protocol/deployments/mainnet/MarketDAI.json';
-import mainnetFixedLenderWETH from '@exactly-protocol/protocol/deployments/mainnet/MarketWETH.json';
-import mainnetFixedLenderWBTC from '@exactly-protocol/protocol/deployments/mainnet/MarketWBTC.json';
-import mainnetFixedLenderUSDC from '@exactly-protocol/protocol/deployments/mainnet/MarketUSDC.json';
-import mainnetFixedLenderWSTETH from '@exactly-protocol/protocol/deployments/mainnet/MarketwstETH.json';
-
 export function transformClasses(style: any, classes: string) {
   if (!style) return 'style object is mandatory';
 
@@ -115,39 +103,6 @@ export function getUnderlyingData(network: string | undefined, symbol: string | 
   };
 
   return baseData[currentNetwork!.toLowerCase()][symbol];
-}
-
-export function getSymbol(address: string, network: string | undefined) {
-  const currentNetwork = network ?? process.env.NEXT_PUBLIC_NETWORK;
-
-  const dictionary: Record<string, Record<string, string>> = {
-    goerli: {
-      [goerliFixedLenderDAI.address.toLowerCase()]: 'DAI',
-      [goerliFixedLenderWETH.address.toLowerCase()]: 'WETH',
-      [goerliFixedLenderWBTC.address.toLowerCase()]: 'WBTC',
-      [goerliFixedLenderUSDC.address.toLowerCase()]: 'USDC',
-      [goerliFixedLenderWSTETH.address.toLowerCase()]: 'wstETH',
-    },
-    mainnet: {
-      [mainnetFixedLenderDAI.address.toLowerCase()]: 'DAI',
-      [mainnetFixedLenderWETH.address.toLowerCase()]: 'WETH',
-      [mainnetFixedLenderWBTC.address.toLowerCase()]: 'WBTC',
-      [mainnetFixedLenderUSDC.address.toLowerCase()]: 'USDC',
-      [mainnetFixedLenderWSTETH.address.toLowerCase()]: 'wstETH',
-    },
-    homestead: {
-      // HACK - remove this name and use chainId instead of network names
-      [mainnetFixedLenderDAI.address.toLowerCase()]: 'DAI',
-      [mainnetFixedLenderWETH.address.toLowerCase()]: 'WETH',
-      [mainnetFixedLenderWBTC.address.toLowerCase()]: 'WBTC',
-      [mainnetFixedLenderUSDC.address.toLowerCase()]: 'USDC',
-      [mainnetFixedLenderWSTETH.address.toLowerCase()]: 'wstETH',
-    },
-  };
-
-  return dictionary[currentNetwork!.toLowerCase()]
-    ? dictionary[currentNetwork!.toLowerCase()][address.toLowerCase()]
-    : 'DAI';
 }
 
 export const toPercentage = (value?: number) => {

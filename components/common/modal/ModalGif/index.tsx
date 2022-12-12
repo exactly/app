@@ -10,11 +10,11 @@ import { ModalCases } from 'types/ModalCases';
 import keys from './translations.json';
 
 import LangContext from 'contexts/LangContext';
-import { useWeb3Context } from 'contexts/Web3Context';
 
 import Button from 'components/common/Button';
 import Loading from 'components/common/Loading';
-import { getTxEtherscanUrl, Network } from 'utils/network';
+import { useWeb3 } from 'hooks/useWeb3';
+import networkData from 'config/networkData.json' assert { type: 'json' };
 
 type Props = {
   tx: Transaction;
@@ -22,7 +22,7 @@ type Props = {
 };
 
 function ModalGif({ tx, tryAgain }: Props) {
-  const { network } = useWeb3Context();
+  const { chain } = useWeb3();
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
@@ -45,6 +45,7 @@ function ModalGif({ tx, tryAgain }: Props) {
     },
   };
 
+  const etherscan = networkData[String(chain?.id) as keyof typeof networkData]?.etherscan;
   return (
     <section className={styles.container}>
       <section className={styles.header}>
@@ -63,13 +64,8 @@ function ModalGif({ tx, tryAgain }: Props) {
         </section>
       )}
 
-      {tx.status !== 'loading' && network !== undefined && (
-        <a
-          className={styles.link}
-          href={getTxEtherscanUrl(network?.name as Network, tx.hash as string)}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
+      {tx.status !== 'loading' && chain && (
+        <a className={styles.link} href={`${etherscan}/tx/${tx.hash}`} target="_blank" rel="noopener noreferrer">
           {translations[lang].etherscanText}
         </a>
       )}

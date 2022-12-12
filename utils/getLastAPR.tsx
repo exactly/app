@@ -1,4 +1,3 @@
-import type { Network } from '@ethersproject/providers';
 import { formatFixed } from '@ethersproject/bignumber';
 import request from 'graphql-request';
 
@@ -7,19 +6,12 @@ import { getLastMaturityPoolBorrowRate, getLastMaturityPoolDepositRate } from 'q
 import { AccountData } from 'types/AccountData';
 import { Maturity } from 'types/Maturity';
 
-import { getSymbol } from './utils';
-import getSubgraph from './getSubgraph';
+import networkData from 'config/networkData.json' assert { type: 'json' };
 
-async function getLastAPR(
-  maturity: Maturity[],
-  market: string,
-  network: Network | undefined,
-  accountData: AccountData,
-) {
-  const subgraphUrl = getSubgraph(network?.name);
+async function getLastAPR(maturity: Maturity[], symbol: string, chainId: number, accountData: AccountData) {
+  const subgraphUrl = networkData[String(chainId) as keyof typeof networkData]?.subgraph;
   if (!subgraphUrl) return;
-  const symbol = getSymbol(market, network?.name ?? process.env.NEXT_PUBLIC_NETWORK);
-  const { decimals } = accountData[symbol];
+  const { decimals, market } = accountData[symbol];
 
   const dataPromise = maturity.map(async (maturity) => {
     const getLastBorrowRate = await request(subgraphUrl, getLastMaturityPoolBorrowRate(market, maturity.value));

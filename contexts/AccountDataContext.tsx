@@ -1,5 +1,5 @@
 import React, { createContext, useCallback, useEffect, useState } from 'react';
-import type { FC, PropsWithChildren, ReactNode } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { AddressZero } from '@ethersproject/constants';
 import { captureException } from '@sentry/nextjs';
 
@@ -7,7 +7,6 @@ import { AccountData } from 'types/AccountData';
 
 import { useWeb3 } from 'hooks/useWeb3';
 
-import useDebounce from 'hooks/useDebounce';
 import usePreviewer from 'hooks/usePreviewer';
 
 type ContextValues = {
@@ -22,9 +21,7 @@ const AccountDataContext = createContext({
 
 export const AccountDataProvider: FC<PropsWithChildren> = ({ children }) => {
   const [accountData, setAccountData] = useState<AccountData | undefined>(undefined);
-  const { walletAddress: rawAddress } = useWeb3();
-
-  const walletAddress = useDebounce(rawAddress);
+  const { walletAddress } = useWeb3();
 
   const previewer = usePreviewer();
 

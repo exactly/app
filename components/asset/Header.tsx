@@ -5,7 +5,6 @@ import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import formatSymbol from 'utils/formatSymbol';
-import { getAddressEtherscanUrl, Network } from 'utils/network';
 import ItemInfo, { ItemInfoProps } from 'components/common/ItemInfo';
 import AccountDataContext from 'contexts/AccountDataContext';
 import { BigNumber, formatFixed } from '@ethersproject/bignumber';
@@ -14,18 +13,19 @@ import formatNumber from 'utils/formatNumber';
 import { useRouter } from 'next/router';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { Tooltip } from '@mui/material';
+import { useWeb3 } from 'hooks/useWeb3';
+import networkData from 'config/networkData.json' assert { type: 'json' };
 
 type Props = {
   symbol: string;
-  networkName: string;
   assetAddress: string;
   eMarketAddress?: string;
 };
 
-const AssetHeaderInfo: FC<Props> = ({ symbol, networkName, assetAddress, eMarketAddress }) => {
+const AssetHeaderInfo: FC<Props> = ({ symbol, assetAddress, eMarketAddress }) => {
   const { accountData } = useContext(AccountDataContext);
+  const { chain } = useWeb3();
 
-  const etherscanUrl = getAddressEtherscanUrl(networkName as Network, eMarketAddress ?? assetAddress);
   const [floatingDeposits, setFloatingDeposits] = useState<BigNumber | undefined>(undefined);
   const [floatingBorrows, setFloatingBorrows] = useState<BigNumber | undefined>(undefined);
   const [fixedDeposits, setFixedDeposits] = useState<BigNumber | undefined>(undefined);
@@ -102,6 +102,7 @@ const AssetHeaderInfo: FC<Props> = ({ symbol, networkName, assetAddress, eMarket
     ];
   }, [fixedBorrows, fixedDeposits, floatingBorrows, floatingDeposits, accountData, symbol]);
 
+  const etherscan = networkData[String(chain?.id) as keyof typeof networkData]?.etherscan;
   return (
     <Grid>
       <Grid item container mb={1}>
@@ -113,11 +114,18 @@ const AssetHeaderInfo: FC<Props> = ({ symbol, networkName, assetAddress, eMarket
         <Image src={`/img/assets/${symbol}.svg`} alt={symbol} width={29} height={29} />
         <Typography variant="h2" ml={1}>
           {formatSymbol(symbol)}
-          <Tooltip title="View Market Contract">
-            <IconButton size="small" href={etherscanUrl} target="_blank" rel="noopener noreferrer">
-              <OpenInNewIcon sx={{ alignSelf: 'center', height: '1rem', width: '1rem' }} />
-            </IconButton>
-          </Tooltip>
+          {etherscan && (
+            <Tooltip title="View Market Contract">
+              <IconButton
+                size="small"
+                href={`${etherscan}/address/${eMarketAddress ?? assetAddress}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <OpenInNewIcon sx={{ alignSelf: 'center', height: '1rem', width: '1rem' }} />
+              </IconButton>
+            </Tooltip>
+          )}
         </Typography>
       </Grid>
       <Grid item container spacing={4}>

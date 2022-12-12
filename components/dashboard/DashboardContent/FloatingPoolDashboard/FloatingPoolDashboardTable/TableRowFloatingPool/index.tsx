@@ -1,6 +1,7 @@
 import type { BigNumber } from '@ethersproject/bignumber';
 import React, { useContext, useEffect, useState } from 'react';
 import { formatFixed } from '@ethersproject/bignumber';
+import { useRouter } from 'next/router';
 import Image from 'next/image';
 
 import { Button, TableRow, TableCell, Stack, Typography, Skeleton } from '@mui/material';
@@ -39,6 +40,7 @@ function TableRowFloatingPool({
   const { accountData } = useContext(AccountDataContext);
   const { openOperationModal } = useModalStatus();
   const { setMarket } = useContext(MarketContext);
+  const { query } = useRouter();
 
   const [rate, setRate] = useState<number | undefined>();
 
@@ -57,7 +59,7 @@ function TableRowFloatingPool({
 
   return (
     <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }} hover>
-      <Link href={`/assets/${symbol}`}>
+      <Link href={{ pathname: `/assets/${symbol}`, query }}>
         <TableCell component="th" align="left" sx={{ cursor: 'pointer' }} width={240}>
           <Stack direction="row" spacing={1}>
             {(symbol && <Image src={`/img/assets/${symbol}.svg`} alt={symbol} width={24} height={24} />) || (

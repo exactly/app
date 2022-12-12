@@ -1,31 +1,30 @@
 import { useEffect, useState } from 'react';
+import { useSigner } from 'wagmi';
 import { Contract } from '@ethersproject/contracts';
 import { MarketETHRouter } from 'types/contracts';
 import MarketETHRouterABI from 'abi/MarketETHRouter.json';
-import getNetworkName from 'utils/getNetworkName';
-import { useWeb3Context } from 'contexts/Web3Context';
 import { captureException } from '@sentry/nextjs';
+import { useWeb3 } from './useWeb3';
 
 export default () => {
-  const { web3Provider, network } = useWeb3Context();
+  const { data: signer } = useSigner();
+  const { chain } = useWeb3();
 
   const [marketETHRouterContract, setMarketETHRouterContract] = useState<MarketETHRouter | undefined>(undefined);
 
   useEffect(() => {
     const loadMarketETHRouter = async () => {
-      if (!network?.chainId) return;
+      if (!chain?.id || !signer) return;
 
       const { address } = await import(
-        `@exactly-protocol/protocol/deployments/${getNetworkName(network?.chainId)}/MarketETHRouter.json`,
+        `@exactly-protocol/protocol/deployments/${chain.name.toLowerCase()}/MarketETHRouter.json`,
         { assert: { type: 'json' } }
       );
 
-      setMarketETHRouterContract(
-        new Contract(address, MarketETHRouterABI, web3Provider?.getSigner()) as MarketETHRouter,
-      );
+      setMarketETHRouterContract(new Contract(address, MarketETHRouterABI, signer) as MarketETHRouter);
     };
     loadMarketETHRouter().catch(captureException);
-  }, [network?.chainId, web3Provider]);
+  }, []);
 
   return marketETHRouterContract;
 };

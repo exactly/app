@@ -7,11 +7,11 @@ import DonutChart from 'components/DonutChart';
 import Tooltip from 'components/Tooltip';
 
 import LangContext from 'contexts/LangContext';
-import { useWeb3Context } from 'contexts/Web3Context';
 import AccountDataContext from 'contexts/AccountDataContext';
 
 import { LangKeys } from 'types/Lang';
 import { DonutData } from 'types/DonutData';
+import { useWeb3 } from 'hooks/useWeb3';
 
 import styles from './style.module.scss';
 
@@ -21,7 +21,7 @@ import getAssetColor from 'utils/getAssetColor';
 import formatNumber from 'utils/formatNumber';
 
 function DashboardUserCharts() {
-  const { walletAddress } = useWeb3Context();
+  const { walletAddress } = useWeb3();
   const { accountData } = useContext(AccountDataContext);
 
   const lang: string = useContext(LangContext);
