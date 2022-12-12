@@ -1,41 +1,34 @@
 import React, { useCallback, useContext } from 'react';
+import { useAccount } from 'wagmi';
+import { Tooltip } from '@mui/material';
 
-import { useWeb3Context } from 'contexts/Web3Context';
-
+import AccountDataContext from 'contexts/AccountDataContext';
 import styles from './style.module.scss';
 
-import { Tooltip } from '@mui/material';
-import AccountDataContext from 'contexts/AccountDataContext';
-
-function AddETokensButton() {
-  const { web3Provider } = useWeb3Context();
+const AddETokensButton = () => {
   const { accountData } = useContext(AccountDataContext);
+  const { connector } = useAccount();
 
-  return (
+  const onClick = useCallback(async () => {
+    if (!accountData) return;
+    try {
+      await Promise.all(
+        Object.values(accountData).map(({ market, decimals, symbol }) =>
+          connector?.watchAsset?.({ address: market, decimals, symbol }),
+        ),
+      );
+    } catch (error: any) {
+      if (error.code !== 4001) throw error;
+    }
+  }, [accountData, connector]);
+
+  return connector?.watchAsset ? (
     <Tooltip title="Add eTokens to Metamask" placement="top" arrow>
-      <p
-        className={styles.addAssets}
-        onClick={useCallback(async () => {
-          if (!accountData) return;
-          try {
-            await Promise.all(
-              Object.values(accountData).map(({ market, decimals, assetSymbol }) =>
-                web3Provider?.provider.request?.({
-                  method: 'wallet_watchAsset',
-                  // @ts-expect-error bad typing
-                  params: { type: 'ERC20', options: { address: market, decimals, symbol: `e${assetSymbol}` } },
-                }),
-              ),
-            );
-          } catch (error: any) {
-            if (error.code !== 4001) throw error;
-          }
-        }, [accountData, web3Provider?.provider])}
-      >
+      <p className={styles.addAssets} onClick={onClick}>
         + eTokens
       </p>
     </Tooltip>
-  );
-}
+  ) : null;
+};
 
 export default AddETokensButton;

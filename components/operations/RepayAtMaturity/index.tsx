@@ -22,7 +22,7 @@ import formatNumber from 'utils/formatNumber';
 import AccountDataContext from 'contexts/AccountDataContext';
 import LangContext from 'contexts/LangContext';
 import { MarketContext } from 'contexts/MarketContext';
-import { useWeb3Context } from 'contexts/Web3Context';
+import { useWeb3 } from 'hooks/useWeb3';
 
 import numbers from 'config/numbers.json';
 
@@ -41,7 +41,7 @@ const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 const DEFAULT_SLIPPAGE = (numbers.slippage * 100).toFixed(2);
 
 const RepayAtMaturity: FC = () => {
-  const { walletAddress } = useWeb3Context();
+  const { walletAddress } = useWeb3();
   const { date, market } = useContext(MarketContext);
   const { accountData, getAccountData } = useContext(AccountDataContext);
 

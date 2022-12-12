@@ -1,14 +1,15 @@
 import { useMemo } from 'react';
 import { Contract } from '@ethersproject/contracts';
-import { useNetwork, useProvider } from 'wagmi';
+import { useProvider } from 'wagmi';
 import type { Previewer } from 'types/contracts/Previewer';
 import mainnetPreviewer from '@exactly-protocol/protocol/deployments/mainnet/Previewer.json' assert { type: 'json' };
 import goerliPreviewer from '@exactly-protocol/protocol/deployments/goerli/Previewer.json' assert { type: 'json' };
 import previewerABI from 'abi/Previewer.json' assert { type: 'json' };
+import { useWeb3 } from './useWeb3';
 
 export default () => {
-  const { chain } = useNetwork();
-  const provider = useProvider();
+  const { chain } = useWeb3();
+  const provider = useProvider({ chainId: chain?.id });
 
   return useMemo(() => {
     if (!provider || !chain) return null;

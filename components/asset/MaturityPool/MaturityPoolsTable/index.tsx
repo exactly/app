@@ -17,9 +17,9 @@ import parseTimestamp from 'utils/parseTimestamp';
 import { toPercentage } from 'utils/utils';
 
 import AccountDataContext from 'contexts/AccountDataContext';
-import { useModalStatus, type Operation } from 'contexts/ModalStatusContext';
-import { useWeb3Context } from 'contexts/Web3Context';
+import ModalStatusContext, { Operation } from 'contexts/ModalStatusContext';
 import { MarketContext } from 'contexts/MarketContext';
+import { useWeb3 } from 'hooks/useWeb3';
 
 import numbers from 'config/numbers.json';
 
@@ -51,10 +51,10 @@ const HeadCell: FC<{ title: string; tooltipTitle?: string }> = ({ title, tooltip
 };
 
 const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ APRsPerMaturity, symbol }) => {
-  const { walletAddress, connect } = useWeb3Context();
+  const { walletAddress, connect } = useWeb3();
   const { accountData } = useContext(AccountDataContext);
   const { setDate, setMarket } = useContext(MarketContext);
-  const { openOperationModal } = useModalStatus();
+  const { setOpen, setOperation } = useContext(ModalStatusContext);
   const [rows, setRows] = useState<TableRow[]>([]);
   const { minAPRValue } = numbers;
 
@@ -86,23 +86,23 @@ const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ APRsPerMaturity, symb
     defineRows();
   }, [defineRows]);
 
-  const handleActionClick = (
-    action: Extract<Operation, 'borrowAtMaturity' | 'depositAtMaturity'>,
-    maturity: string,
-  ) => {
+  const handleActionClick = (action: 'borrowAtMaturity' | 'depositAtMaturity', maturity: string) => {
     if (!walletAddress && connect) return connect();
 
     if (!accountData) return;
 
     const { market } = accountData[symbol];
 
+    setOperation(action as Operation);
     setMarket({ value: market });
     setDate({
       value: maturity,
       label: parseTimestamp(maturity),
     });
+    setOpen(true);
 
-    openOperationModal(action);
+    setOperation(action);
+    setOpen(true);
   };
 
   // TODO: add translations

@@ -13,10 +13,8 @@ import React, {
 import { ErrorData } from 'types/Error';
 import { Transaction } from 'types/Transaction';
 import handleOperationError from 'utils/handleOperationError';
-import { getSymbol } from 'utils/utils';
 import { MarketContext } from './MarketContext';
 import { useModalStatus } from './ModalStatusContext';
-import { useWeb3Context } from './Web3Context';
 
 type ContextValues = {
   symbol: string;
@@ -39,8 +37,7 @@ type ContextValues = {
 const OperationContext = createContext<ContextValues | null>(null);
 
 export const OperationContextProvider: FC<PropsWithChildren> = ({ children }) => {
-  const { network } = useWeb3Context();
-  const { market } = useContext(MarketContext);
+  const { account } = useContext(MarketContext);
   const { open, operation } = useModalStatus();
 
   const [errorData, setErrorData] = useState<ErrorData | undefined>();
@@ -51,11 +48,6 @@ export const OperationContextProvider: FC<PropsWithChildren> = ({ children }) =>
   const [isLoading, setIsLoading] = useState(false);
   const [requiresApproval, setRequiresApproval] = useState(true);
 
-  const symbol = useMemo(
-    () => (market?.value ? getSymbol(market.value, network?.name) : 'DAI'),
-    [market?.value, network?.name],
-  );
-
   useEffect(() => {
     setTx(undefined);
     setErrorData(undefined);
@@ -63,11 +55,11 @@ export const OperationContextProvider: FC<PropsWithChildren> = ({ children }) =>
     setIsLoading(false);
     setRequiresApproval(true);
     setGasCost(undefined);
-  }, [symbol, operation, open]);
+  }, [account?.assetSymbol, operation, open]);
 
   const value: ContextValues = useMemo(
     () => ({
-      symbol,
+      symbol: account?.assetSymbol ?? '',
       errorData,
       setErrorData,
       qty,
@@ -81,7 +73,7 @@ export const OperationContextProvider: FC<PropsWithChildren> = ({ children }) =>
       requiresApproval,
       setRequiresApproval,
     }),
-    [errorData, gasCost, isLoading, qty, requiresApproval, symbol, tx],
+    [errorData, gasCost, isLoading, qty, requiresApproval, account?.assetSymbol, tx],
   );
 
   return <OperationContext.Provider value={value}>{children}</OperationContext.Provider>;

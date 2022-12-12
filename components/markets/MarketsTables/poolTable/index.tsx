@@ -12,6 +12,7 @@ import Button from '@mui/material/Button';
 import { Skeleton, Tooltip } from '@mui/material';
 
 import Image from 'next/image';
+import { useRouter } from 'next/router';
 
 import { toPercentage } from 'utils/utils';
 import parseTimestamp from 'utils/parseTimestamp';
@@ -22,9 +23,9 @@ import Link from 'next/link';
 import numbers from 'config/numbers.json';
 
 import { MarketContext } from 'contexts/MarketContext';
+import ModalStatusContext, { Operation } from 'contexts/ModalStatusContext';
 import AccountDataContext from 'contexts/AccountDataContext';
-import { useWeb3Context } from 'contexts/Web3Context';
-import { Operation, useModalStatus } from 'contexts/ModalStatusContext';
+import { useWeb3 } from 'hooks/useWeb3';
 
 const { minAPRValue } = numbers;
 
@@ -71,15 +72,16 @@ const defaultRows: TableRow[] = [
 ];
 
 const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) => {
-  const { walletAddress, connect } = useWeb3Context();
+  const { walletAddress, connect } = useWeb3();
   const { accountData } = useContext(AccountDataContext);
   const { setDate, setMarket } = useContext(MarketContext);
-  const { openOperationModal } = useModalStatus();
+  const { setOpen, setOperation } = useContext(ModalStatusContext);
   const tempRows = isLoading ? defaultRows : rows; // HACK this with the timeout in "marketsTables" is to avoid a screen flash when MUI  recive the new data of rows
+  const { query } = useRouter();
 
   const handleActionClick = (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
-    action: Extract<Operation, 'borrow' | 'deposit' | 'depositAtMaturity' | 'borrowAtMaturity'>,
+    action: 'borrow' | 'deposit' | 'depositAtMaturity' | 'borrowAtMaturity',
     symbol: string,
     maturity: any,
   ) => {
@@ -90,16 +92,19 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
 
     const { market } = accountData[symbol];
 
+    setOperation(action as Operation);
     setMarket({ value: market });
 
-    if (maturity) {
+    if (maturity)
       setDate({
         value: maturity.toString(),
         label: parseTimestamp(maturity),
       });
-    }
 
-    openOperationModal(action);
+    setOpen(true);
+
+    setOperation(action);
+    setOpen(true);
   };
 
   const isDisable = (apr: number | undefined) => {
@@ -124,7 +129,7 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
         <TableBody>
           {tempRows.map(
             ({ symbol, totalDeposited, totalBorrowed, depositAPR, borrowAPR, depositMaturity, borrowMaturity }) => (
-              <Link href={`/assets/${symbol}`} key={symbol} rel="noopener noreferrer">
+              <Link href={{ pathname: `/assets/${symbol}`, query }} key={symbol} rel="noopener noreferrer">
                 <TableRow
                   key={symbol}
                   sx={{

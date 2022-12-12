@@ -3,24 +3,25 @@ import Button from '@mui/material/Button';
 import Box from '@mui/system/Box';
 import Grid from '@mui/material/Grid';
 
+import ModalStatusContext from 'contexts/ModalStatusContext';
 import LangContext from 'contexts/LangContext';
-import { useWeb3Context } from 'contexts/Web3Context';
 
 import { LangKeys } from 'types/Lang';
+import { useWeb3 } from 'hooks/useWeb3';
 
 import keys from './translations.json';
-import { Operation, useModalStatus } from 'contexts/ModalStatusContext';
 
 const OrderAction: FC = () => {
-  const { walletAddress, connect } = useWeb3Context();
-  const { openOperationModal } = useModalStatus();
+  const { walletAddress, connect } = useWeb3();
+  const { setOpen, setOperation } = useContext(ModalStatusContext);
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
-  const handleAction = (action: Extract<Operation, 'deposit' | 'borrow' | 'depositAtMaturity'>) => {
+  const handleAction = (action: 'deposit' | 'borrow' | 'depositAtMaturity') => {
     if (!walletAddress && connect) return connect();
 
-    openOperationModal(action);
+    setOperation(action);
+    setOpen(true);
   };
 
   return (

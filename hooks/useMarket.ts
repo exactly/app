@@ -1,17 +1,17 @@
-import { Contract } from '@ethersproject/contracts';
-import { useWeb3Context } from 'contexts/Web3Context';
-import MarketABI from 'abi/Market.json';
-import { Market } from 'types/contracts/Market';
 import { useMemo } from 'react';
+import { useSigner } from 'wagmi';
+import { Contract } from '@ethersproject/contracts';
+import type { Market } from 'types/contracts/Market';
+import marketABI from 'abi/Market.json';
 
 export default (address?: string) => {
-  const { web3Provider } = useWeb3Context();
+  const { data: signer } = useSigner();
 
   const marketContract = useMemo(() => {
-    if (!address) return;
+    if (!address || !signer) return;
 
-    return new Contract(address, MarketABI, web3Provider?.getSigner()) as Market;
-  }, [address, web3Provider]);
+    return new Contract(address, marketABI, signer) as Market;
+  }, [address, signer]);
 
   return marketContract;
 };

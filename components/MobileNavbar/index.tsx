@@ -5,7 +5,6 @@ import Image from 'next/image';
 import dynamic from 'next/dynamic';
 
 import LangContext from 'contexts/LangContext';
-import { useWeb3Context } from 'contexts/Web3Context';
 import ThemeContext from 'contexts/ThemeContext';
 
 const Button = dynamic(() => import('components/common/Button'));
@@ -17,34 +16,24 @@ import { LangKeys } from 'types/Lang';
 import styles from './style.module.scss';
 
 import keys from './translations.json';
+import { useWeb3 } from 'hooks/useWeb3';
 
 function MobileNavbar() {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
-  const { walletAddress, connect, disconnect } = useWeb3Context();
+  const { walletAddress, connect, disconnect } = useWeb3();
   const { theme } = useContext(ThemeContext);
+  const { pathname, query } = useRouter();
 
   const [open, setOpen] = useState<boolean>(false);
-
-  const router = useRouter();
-  const { pathname } = router;
 
   function handleMenu() {
     setOpen((prev) => !prev);
   }
 
   const routes = [
-    {
-      pathname: '/',
-      href: '/',
-      name: translations[lang].markets,
-    },
-    {
-      pathname: '/dashboard',
-      href: '/dashboard',
-      name: translations[lang].dashboard,
-    },
-    // { pathname: '/nerd-mode', href: '/', name: translations[lang].nerdMode }
+    { pathname: '/', name: translations[lang].markets },
+    { pathname: '/dashboard', name: translations[lang].dashboard },
   ];
 
   return (
@@ -52,7 +41,7 @@ function MobileNavbar() {
       {open && <Overlay close={handleMenu} />}
       <nav className={styles.navBar} style={open ? { zIndex: 7 } : {}}>
         <div className={styles.wrapper}>
-          <Link href="/">
+          <Link href={{ pathname: '/', query }}>
             <div className={styles.logo}>
               <Image
                 src={theme === 'light' ? '/img/logo.png' : '/img/logo-white.png'}
@@ -115,7 +104,7 @@ function MobileNavbar() {
                 className={route.pathname === pathname ? `${styles.link} ${styles.active}` : styles.link}
                 key={route.pathname}
               >
-                <Link href={route.href}>{route.name}</Link>
+                <Link href={{ pathname: route.pathname, query }}>{route.name}</Link>
               </li>
             );
           })}

@@ -1,4 +1,5 @@
 import React, { useContext, useState } from 'react';
+import { useAccount, useSigner } from 'wagmi';
 import { parseFixed } from '@ethersproject/bignumber';
 import { Contract } from '@ethersproject/contracts';
 import Image from 'next/image';
@@ -9,20 +10,22 @@ import faucetAbi from './abi.json';
 
 import { getUnderlyingData } from 'utils/utils';
 
-import { useWeb3Context } from 'contexts/Web3Context';
+import { useWeb3 } from 'hooks/useWeb3';
 import AccountDataContext from 'contexts/AccountDataContext';
 
 import styles from './style.module.scss';
 
 function Faucet() {
-  const { network, web3Provider } = useWeb3Context();
+  const { data: signer } = useSigner();
+  const { connector } = useAccount();
+  const { chain } = useWeb3();
   const { accountData } = useContext(AccountDataContext);
   const [loading, setLoading] = useState<string | undefined>(undefined);
 
   async function mint(symbol: string) {
-    if (!accountData) return;
+    if (!accountData || !chain) return;
     try {
-      const contract = getUnderlyingData(network!.name.toLowerCase(), symbol);
+      const contract = getUnderlyingData(chain.network, symbol);
 
       setLoading(symbol);
       const amounts: Record<string, string> = {
@@ -31,7 +34,7 @@ function Faucet() {
         WBTC: '2',
       };
 
-      const faucet = new Contract('0x1ca525Cd5Cb77DB5Fa9cBbA02A0824e283469DBe', faucetAbi, web3Provider?.getSigner()); // HACK de-hardcode
+      const faucet = new Contract('0x1ca525Cd5Cb77DB5Fa9cBbA02A0824e283469DBe', faucetAbi, signer ?? undefined); // HACK de-hardcode
       const tx = await faucet?.mint(contract?.address, parseFixed(amounts[symbol], accountData[symbol].decimals));
       await tx.wait();
       setLoading(undefined);
@@ -55,16 +58,9 @@ function Faucet() {
       await Promise.all(
         Object.values(accountData)
           .filter(({ assetSymbol }) => assetSymbol !== 'WETH')
-          .map(({ asset: address, decimals, assetSymbol: symbol }) => {
-            return web3Provider?.provider.request?.({
-              method: 'wallet_watchAsset',
-              params: {
-                // @ts-expect-error bad typing
-                type: 'ERC20',
-                options: { symbol, address, decimals, image: images[symbol] },
-              },
-            });
-          }),
+          .map(({ asset: address, decimals, assetSymbol: symbol }) =>
+            connector?.watchAsset?.({ symbol, address, decimals, image: images[symbol] }),
+          ),
       );
     } catch (error: any) {
       if (error.code !== 4001) throw error;

@@ -1,18 +1,10 @@
 {
-  "rinkeby": {
-    "etherscanBaseUrl": "https://rinkeby.etherscan.io",
-    "subgraphUrl": "https://api.thegraph.com/subgraphs/name/exactly-protocol/rinkeby"
+  "1": {
+    "etherscan": "https://etherscan.io",
+    "subgraph": "https://api.thegraph.com/subgraphs/name/exactly-protocol/exactly"
   },
-  "goerli": {
-    "etherscanBaseUrl": "https://goerli.etherscan.io",
-    "subgraphUrl": ""
-  },
-  "mainnet": {
-    "etherscanBaseUrl": "https://etherscan.io",
-    "subgraphUrl": "https://api.thegraph.com/subgraphs/name/exactly-protocol/exactly"
-  },
-  "homestead": {
-    "etherscanBaseUrl": "https://etherscan.io",
-    "subgraphUrl": "https://api.thegraph.com/subgraphs/name/exactly-protocol/exactly"
+  "5": {
+    "etherscan": "https://goerli.etherscan.io",
+    "subgraph": "https://api.thegraph.com/subgraphs/name/exactly-protocol/exactly-goerli"
   }
 }

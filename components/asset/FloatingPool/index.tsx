@@ -7,17 +7,16 @@ import FloatingPoolInfo from './FloatingPoolInfo';
 type AssetFloatingPoolProps = {
   symbol: string;
   eMarketAddress?: string;
-  networkName: string;
 };
 
-const AssetFloatingPool: FC<AssetFloatingPoolProps> = ({ symbol, eMarketAddress, networkName }) => {
+const AssetFloatingPool: FC<AssetFloatingPoolProps> = ({ symbol, eMarketAddress }) => {
   return (
     <Grid container padding={2} sx={{ boxShadow: '#A7A7A7 0px 0px 4px 0px', borderRadius: '5px' }}>
       <Grid item xs={12}>
-        <FloatingPoolInfo symbol={symbol} eMarketAddress={eMarketAddress} networkName={networkName} />
+        <FloatingPoolInfo symbol={symbol} eMarketAddress={eMarketAddress} />
       </Grid>
       <Grid item xs={12}>
-        {/* <FloatingAPRChart networkName={networkName} market={eMarketAddress} /> */}
+        {/* <FloatingAPRChart market={eMarketAddress} /> */}
       </Grid>
     </Grid>
   );

@@ -3,7 +3,6 @@ import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { Grid } from '@mui/material';
 import { Zero } from '@ethersproject/constants';
 
-import { useWeb3Context } from 'contexts/Web3Context';
 import AccountDataContext from 'contexts/AccountDataContext';
 
 import { HealthFactor } from 'types/HealthFactor';
@@ -12,13 +11,14 @@ import parseHealthFactor from 'utils/parseHealthFactor';
 import formatNumber from 'utils/formatNumber';
 import HeaderInfo from 'components/common/HeaderInfo';
 import { ItemInfoProps } from 'components/common/ItemInfo';
+import { useWeb3 } from 'hooks/useWeb3';
 
 type Props = {
   healthFactor?: HealthFactor;
 };
 
 function DashboardHeader({ healthFactor }: Props) {
-  const { walletAddress } = useWeb3Context();
+  const { walletAddress } = useWeb3();
   const { accountData } = useContext(AccountDataContext);
 
   const [totalDeposited, setTotalDeposited] = useState<BigNumber | undefined>();

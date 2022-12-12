@@ -10,16 +10,16 @@ const FloatingPoolDashboard = dynamic(() => import('components/dashboard/Dashboa
 const FixedPoolDashboard = dynamic(() => import('components/dashboard/DashboardContent/FixedPoolDashboard'));
 const EmptyState = dynamic(() => import('components/EmptyState'));
 
-import { useWeb3Context } from 'contexts/Web3Context';
 import DashboardTabs from 'components/dashboard/DashboardContent/DashboardTabs';
 import { HealthFactor } from 'types/HealthFactor';
+import { useWeb3 } from 'hooks/useWeb3';
 
 type Props = {
   healthFactor?: HealthFactor;
 };
 
 function DashboardContent({ healthFactor }: Props) {
-  const { walletAddress } = useWeb3Context();
+  const { walletAddress } = useWeb3();
 
   const depositTab = {
     label: 'Your Deposits',

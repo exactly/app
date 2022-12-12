@@ -6,11 +6,11 @@ import { useCallback, useState } from 'react';
 import { ERC20, Market } from 'types/contracts';
 import numbers from 'config/numbers.json';
 import { Operation } from 'contexts/ModalStatusContext';
-import { useWeb3Context } from 'contexts/Web3Context';
+import { useWeb3 } from './useWeb3';
 import { useOperationContext } from 'contexts/OperationContext';
 
 export default (operation: Operation, contract?: ERC20 | Market, spender?: string) => {
-  const { walletAddress } = useWeb3Context();
+  const { walletAddress } = useWeb3();
   const { symbol, setErrorData } = useOperationContext();
   const [isLoading, setIsLoading] = useState(false);
 

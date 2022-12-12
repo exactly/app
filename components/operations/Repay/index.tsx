@@ -15,7 +15,7 @@ import ModalRowBorrowLimit from 'components/common/modal/ModalRowBorrowLimit';
 import { LangKeys } from 'types/Lang';
 
 import LangContext from 'contexts/LangContext';
-import { useWeb3Context } from 'contexts/Web3Context';
+import { useWeb3 } from 'hooks/useWeb3';
 import AccountDataContext from 'contexts/AccountDataContext';
 import { MarketContext } from 'contexts/MarketContext';
 
@@ -34,7 +34,7 @@ import { useOperationContext, usePreviewTx } from 'contexts/OperationContext';
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 
 function Repay() {
-  const { walletAddress } = useWeb3Context();
+  const { walletAddress } = useWeb3();
   const { accountData, getAccountData } = useContext(AccountDataContext);
   const { market } = useContext(MarketContext);
 

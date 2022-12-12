@@ -1,5 +1,4 @@
-import type { FC, ReactNode } from 'react';
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { FC, ReactNode, useMemo, createContext, useContext, useEffect, useState, useCallback } from 'react';
 import dayjs from 'dayjs';
 
 import { Address } from 'types/Address';
@@ -8,9 +7,11 @@ import { Date } from 'types/Date';
 import parseTimestamp from 'utils/parseTimestamp';
 
 import AccountDataContext from './AccountDataContext';
+import type { Previewer } from 'types/contracts';
 
 type ContextValues = {
   market: Address | undefined;
+  account: Previewer.MarketAccountStructOutput | undefined;
   setMarket: (address: Address) => void;
   date: Date | undefined;
   setDate: (date: Date) => void;
@@ -19,6 +20,7 @@ type ContextValues = {
 
 const defaultValues: ContextValues = {
   market: undefined,
+  account: undefined,
   setMarket: () => undefined,
   date: undefined,
   setDate: () => undefined,
@@ -34,7 +36,7 @@ const MarketProvider: FC<{ children?: ReactNode }> = ({ children }) => {
 
   const { accountData } = useContext(AccountDataContext);
 
-  async function getPools() {
+  const getPools = useCallback(async () => {
     try {
       const currentTimestamp = dayjs().unix();
       const interval = 2419200;
@@ -65,14 +67,21 @@ const MarketProvider: FC<{ children?: ReactNode }> = ({ children }) => {
     } catch (e) {
       console.log(e);
     }
-  }
+  }, [accountData?.maxFuturePools, date]);
 
   useEffect(() => {
     getPools();
-  }, [accountData]);
+  }, [accountData, getPools]);
+
+  const account = useMemo(
+    () => accountData && Object.values(accountData).find((m) => m.market.toLowerCase() === market?.value.toLowerCase()),
+    [accountData, market],
+  );
 
   return (
-    <MarketContext.Provider value={{ market, setMarket, date, setDate, dates }}>{children}</MarketContext.Provider>
+    <MarketContext.Provider value={{ market, account, setMarket, date, setDate, dates }}>
+      {children}
+    </MarketContext.Provider>
   );
 };
 

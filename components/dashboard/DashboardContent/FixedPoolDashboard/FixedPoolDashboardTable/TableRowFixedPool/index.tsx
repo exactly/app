@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import { BigNumber, formatFixed } from '@ethersproject/bignumber';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
@@ -33,6 +34,7 @@ function TableRowFixedPool({ symbol, amount, type, maturityDate, market, decimal
   const { setMarket, setDate } = useContext(MarketContext);
   const { withdrawTxs, repayTxs, depositTxs, borrowTxs } = useFixedOperation(type, maturityDate, market);
   const [open, setOpen] = useState(false);
+  const { query } = useRouter();
 
   const exchangeRate: number | undefined = useMemo(() => {
     if (!symbol || !accountData) return;
@@ -108,7 +110,7 @@ function TableRowFixedPool({ symbol, amount, type, maturityDate, market, decimal
   return (
     <React.Fragment>
       <TableRow sx={{ '& > *': { borderBottom: 'unset' }, backgroundColor: open ? 'grey.50' : 'transparent' }} hover>
-        <Link href={`/assets/${symbol}`}>
+        <Link href={{ pathname: `/assets/${symbol}`, query }}>
           <TableCell component="th" align="left" sx={{ cursor: 'pointer' }} width={240}>
             <Stack direction="row" spacing={1}>
               {(symbol && <Image src={`/img/assets/${symbol}.svg`} alt={symbol} width={24} height={24} />) || (

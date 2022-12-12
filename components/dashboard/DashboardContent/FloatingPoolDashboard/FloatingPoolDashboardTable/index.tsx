@@ -14,8 +14,8 @@ import {
 import AccountDataContext from 'contexts/AccountDataContext';
 
 import { FloatingPoolItemData } from 'types/FloatingPoolItemData';
+import { useWeb3 } from 'hooks/useWeb3';
 
-import { useWeb3Context } from 'contexts/Web3Context';
 import TableRowFloatingPool from './TableRowFloatingPool';
 import type { HealthFactor } from 'types/HealthFactor';
 import type { TableHeader } from 'types/TableHeader';
@@ -27,7 +27,7 @@ type Props = {
 };
 
 function FloatingPoolDashboardTable({ type, healthFactor }: Props) {
-  const { walletAddress } = useWeb3Context();
+  const { walletAddress } = useWeb3();
   const { accountData } = useContext(AccountDataContext);
 
   const [itemData, setItemData] = useState<Array<FloatingPoolItemData> | undefined>();

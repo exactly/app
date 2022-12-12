@@ -1,11 +1,12 @@
 import '../styles/globals.css';
 import '../styles/variables.css';
 
-import type { AppProps } from 'next/app';
-import Head from 'next/head';
 import React from 'react';
+import Head from 'next/head';
+import { Web3Modal } from '@web3modal/react';
+import { WagmiConfig } from 'wagmi';
+import type { AppProps } from 'next/app';
 
-import { Web3ContextProvider } from 'contexts/Web3Context';
 import { LangProvider } from 'contexts/LangContext';
 import { ModalStatusProvider } from 'contexts/ModalStatusContext';
 import { MarketProvider } from 'contexts/MarketContext';
@@ -13,9 +14,10 @@ import { AccountDataProvider } from 'contexts/AccountDataContext';
 import { SkeletonTheme } from 'react-loading-skeleton';
 import { ThemeProvider } from 'contexts/ThemeContext';
 import { ThemeProvider as MUIThemeProvider } from '@mui/material/styles';
+import { wagmi, web3modal } from 'utils/client';
 import theme from 'styles/theme';
 
-function MyApp({ Component, pageProps }: AppProps) {
+export default function App({ Component, pageProps }: AppProps) {
   return (
     <>
       <Head>
@@ -26,7 +28,7 @@ function MyApp({ Component, pageProps }: AppProps) {
       <ThemeProvider>
         <MUIThemeProvider theme={theme}>
           <LangProvider value={'en'}>
-            <Web3ContextProvider>
+            <WagmiConfig client={wagmi}>
               <AccountDataProvider>
                 <MarketProvider>
                   <ModalStatusProvider>
@@ -36,12 +38,11 @@ function MyApp({ Component, pageProps }: AppProps) {
                   </ModalStatusProvider>
                 </MarketProvider>
               </AccountDataProvider>
-            </Web3ContextProvider>
+            </WagmiConfig>
+            <Web3Modal projectId={process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID} ethereumClient={web3modal} />
           </LangProvider>
         </MUIThemeProvider>
       </ThemeProvider>
     </>
   );
 }
-
-export default MyApp;
