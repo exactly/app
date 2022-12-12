@@ -10,7 +10,8 @@ const Wallet = dynamic(() => import('components/Wallet'));
 import ThemeContext from 'contexts/ThemeContext';
 import { useWeb3 } from 'hooks/useWeb3';
 
-import { AppBar, Box, Button, Chip, Toolbar } from '@mui/material';
+import { AppBar, Box, Button, Chip, IconButton, Toolbar } from '@mui/material';
+import MenuIcon from '@mui/icons-material/Menu';
 import allowedNetworks from 'config/allowedNetworks.json';
 import { globals } from 'styles/theme';
 import analytics from 'utils/analytics';
@@ -48,7 +49,7 @@ function Navbar() {
   }
 
   return (
-    <Box sx={{ display: 'flex', justifyContent: 'center' }} mb="20px">
+    <Box sx={{ display: 'flex', justifyContent: 'center' }} mb="20px" mx="8px">
       <DisclaimerModal />
       <AppBar position="static" color="transparent" sx={{ maxWidth }}>
         <Toolbar disableGutters sx={{ padding: '16px 0', gap: '8px' }}>
@@ -66,15 +67,25 @@ function Navbar() {
               key={pathname}
               variant={pathname === currentPathname ? 'contained' : 'text'}
               onClick={() => push(pathname, query)}
+              sx={{ display: { xs: 'none', md: 'block' } }}
             >
               <Box px="6px">{name}</Box>
             </Button>
           ))}
           <Box sx={{ display: 'flex', gap: '10px', ml: 'auto' }}>
             {/* TODO: put chainId constants in a config file */}
-            {chain?.id === 5 && <Chip label="Goerli Faucet" onClick={handleFaucetClick} sx={{ my: 'auto' }} />}
+            {chain?.id === 5 && (
+              <Chip
+                label="Goerli Faucet"
+                onClick={handleFaucetClick}
+                sx={{ my: 'auto', display: { xs: 'none', md: 'flex' } }}
+              />
+            )}
             <Wallet />
           </Box>
+          <IconButton size="large" edge="start" aria-label="menu" sx={{ display: { xs: 'block', md: 'none' } }}>
+            <MenuIcon sx={{ color: 'grey.300' }} />
+          </IconButton>
         </Toolbar>
       </AppBar>
     </Box>

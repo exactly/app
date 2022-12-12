@@ -8,7 +8,7 @@ const Footer = () => {
   const date = new Date();
 
   return (
-    <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+    <Box sx={{ display: 'flex', justifyContent: 'center' }} mx="8px">
       <Box sx={{ maxWidth, width: '100%' }}>
         <Box
           sx={{

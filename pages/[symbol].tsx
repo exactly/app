@@ -8,7 +8,7 @@ import AssetMaturityPools from 'components/asset/MaturityPool';
 import AssetFloatingPool from 'components/asset/FloatingPool';
 import OperationsModal from 'components/OperationsModal';
 import AssetHeaderInfo from 'components/asset/Header';
-import MobileNavbar from 'components/MobileNavbar';
+
 import analytics from 'utils/analytics';
 import style from './[symbol].module.scss';
 import useAccountData from 'hooks/useAccountData';
@@ -21,7 +21,6 @@ const Market: NextPage<{ symbol: string }> = ({ symbol }) => {
   return (
     <>
       <OperationsModal />
-      <MobileNavbar />
 
       <section className={style.container}>
         <AssetHeaderInfo symbol={symbol} eMarketAddress={market} />
