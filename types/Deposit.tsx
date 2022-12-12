@@ -4,7 +4,7 @@ export type Deposit = {
   id?: string;
   market: string;
   symbol?: string;
-  maturity: string;
+  maturity: number;
   assets: BigNumber;
   fee: BigNumber;
   owner?: string;

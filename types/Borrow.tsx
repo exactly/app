@@ -4,7 +4,7 @@ export type Borrow = {
   id?: string;
   market: string;
   symbol?: string;
-  maturity: string;
+  maturity: number;
   assets: BigNumber;
   fee: BigNumber;
   caller?: string;
