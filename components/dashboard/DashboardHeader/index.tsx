@@ -100,7 +100,7 @@ function DashboardHeader({ healthFactor }: Props) {
   }, [healthFactor, totalBorrowed, totalDeposited, walletAddress]);
 
   return (
-    <Grid item sx={{ alignSelf: 'center', marginRight: '20px' }}>
+    <Grid item sx={{ alignSelf: 'center' }} width="100%">
       <HeaderInfo itemsInfo={itemsInfo} title="Dashboard" />
     </Grid>
   );

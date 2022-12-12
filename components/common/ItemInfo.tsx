@@ -15,11 +15,11 @@ export type ItemInfoProps = {
 const ItemInfo: FC<ItemInfoProps> = ({ label, value, underLabel, tooltipTitle }) => (
   <Grid item>
     <Tooltip title={tooltipTitle} arrow placement="top">
-      <Typography variant="subtitle1" sx={{ color: 'grey.500' }}>
+      <Typography variant="subtitle2" sx={{ color: 'grey.500' }}>
         {label}
       </Typography>
     </Tooltip>
-    <Typography variant="h5" component="p">
+    <Typography variant="h2" component="p">
       {(!!value && value) || <Skeleton />}
     </Typography>
     {!!underLabel && (
