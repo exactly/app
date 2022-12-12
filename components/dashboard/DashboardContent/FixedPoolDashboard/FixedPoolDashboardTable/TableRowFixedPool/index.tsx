@@ -87,9 +87,9 @@ function TableRowFixedPool({ symbol, amount, type, maturityDate, market, decimal
     let allAmounts = 0;
 
     allTransactions.forEach(({ fee, assets, timestamp, maturity }) => {
-      const { transactionAPR, transactionAmount } = calculateAPR(fee, decimals, assets, timestamp, maturity);
-      allAPRbyAmount += transactionAPR * transactionAmount;
-      allAmounts += transactionAmount;
+      const { transactionAPR } = calculateAPR(fee, decimals, assets, timestamp, maturity);
+      allAPRbyAmount += transactionAPR * parseFloat(formatFixed(assets, decimals));
+      allAmounts += parseFloat(formatFixed(assets, decimals));
     });
 
     return allAPRbyAmount / allAmounts;
