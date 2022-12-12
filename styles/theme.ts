@@ -64,6 +64,7 @@ const theme = createTheme({
           borderRadius: '32px',
           fontSize: '14px',
           fontWeight: 600,
+          padding: '6px 16px',
         },
       },
     },

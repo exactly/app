@@ -62,7 +62,7 @@ function FixedPoolDashboardTable({ type, fixedPools }: Props) {
   }, [fixedPools]);
 
   return (
-    <TableContainer>
+    <TableContainer component={Paper}>
       <Table aria-label="collapsible table">
         <TableHead>
           <TableRow>
