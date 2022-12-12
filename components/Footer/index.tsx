@@ -1,7 +1,8 @@
-import { Box } from '@mui/system';
 import React from 'react';
+import { Box, Typography } from '@mui/material';
+import TwitterIcon from '@mui/icons-material/Twitter';
+import GitHubIcon from '@mui/icons-material/GitHub';
 import { globals } from 'styles/theme';
-import { Typography } from '@mui/material';
 const { maxWidth } = globals;
 
 const Footer = () => {
@@ -44,20 +45,24 @@ const Footer = () => {
           }}
         >
           <Typography fontSize="0.85em">© Exactly {date.getFullYear()}</Typography>
-          <Box sx={{ display: 'flex' }}>
+          <Box sx={{ display: 'flex', gap: 1.5 }}>
             <Typography fontSize="0.85em">
               <a target="_blank" rel="noreferrer noopener" href="https://docs.exact.ly/security/audits">
                 Audits
               </a>
             </Typography>
-            <Typography fontSize="0.85em" px="10px">
-              |
-            </Typography>
+            <Typography fontSize="0.85em">|</Typography>
             <Typography fontSize="0.85em">
               <a target="_blank" rel="noreferrer noopener" href="https://docs.exact.ly/">
                 Documentation
               </a>
             </Typography>
+            <a target="_blank" rel="noreferrer noopener" href="https://github.com/exactly-protocol">
+              <GitHubIcon fontSize="small" />
+            </a>
+            <a target="_blank" rel="noreferrer noopener" href="https://twitter.com/exactlyprotocol">
+              <TwitterIcon fontSize="small" />
+            </a>
           </Box>
         </Box>
       </Box>
