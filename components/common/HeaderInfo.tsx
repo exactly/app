@@ -25,13 +25,19 @@ type HeaderInfoProps = {
     | undefined;
 };
 
-const HeaderInfo: FC<HeaderInfoProps> = ({ title, itemsInfo, variant = 'h2' }) => {
+const HeaderInfo: FC<HeaderInfoProps> = ({ title, itemsInfo, variant = 'h6' }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   return (
-    <Grid mx={isMobile ? 2 : 0}>
-      <Grid item mb={1}>
+    <Grid
+      mx={isMobile ? 2 : 0}
+      sx={{ bgcolor: 'white' }}
+      width="100%"
+      p="24px"
+      boxShadow="0px 4px 12px rgba(175, 177, 182, 0.2);"
+    >
+      <Grid item mb="12px">
         <Typography variant={variant}>{title}</Typography>
       </Grid>
       <Grid item container spacing={4}>
