@@ -4,7 +4,7 @@ import { useRouter } from 'next/router';
 import { BigNumber, formatFixed } from '@ethersproject/bignumber';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
-import { Button, IconButton, Skeleton, Stack, TableCell, TableRow, Typography } from '@mui/material';
+import { Box, Button, IconButton, Skeleton, Stack, TableCell, TableRow, Typography } from '@mui/material';
 import StyledLinearProgress from 'components/common/LinearProgress';
 import AccountDataContext from 'contexts/AccountDataContext';
 import { MarketContext } from 'contexts/MarketContext';
@@ -122,31 +122,33 @@ function TableRowFixedPool({ symbol, amount, type, maturityDate, market, decimal
             </Stack>
           </TableCell>
         </Link>
-        <TableCell align="center" size="small">
+        <TableCell align="left" size="small">
           {symbol && exchangeRate && amount ? (
             `$${formatNumber(parseFloat(formatFixed(amount, decimals)) * exchangeRate, 'USD', true)}`
           ) : (
             <Skeleton sx={{ margin: 'auto' }} width={50} />
           )}
         </TableCell>
-        <TableCell align="center" size="small">
+        <TableCell align="left" size="small">
           {APR !== undefined ? `${(APR || 0).toFixed(2)} %` : <Skeleton sx={{ margin: 'auto' }} width={50} />}
         </TableCell>
-        <TableCell align="center" size="small">
+        <TableCell align="left" size="small">
           {maturityDate ? parseTimestamp(maturityDate) : <Skeleton sx={{ margin: 'auto' }} width={80} />}
         </TableCell>
-        <TableCell align="center" size="small">
-          {progress ? (
-            <StyledLinearProgress
-              variant="determinate"
-              value={progress}
-              barColor={progress === 100 ? '#008cf4' : '#34c53a'}
-            />
-          ) : (
-            <Skeleton sx={{ margin: 'auto' }} width={130} />
-          )}
+        <TableCell align="left" size="small" width={200}>
+          <Box width={150}>
+            {progress ? (
+              <StyledLinearProgress
+                variant="determinate"
+                value={progress}
+                barColor={progress === 100 ? '#008cf4' : '#34c53a'}
+              />
+            ) : (
+              <Skeleton sx={{ margin: 'auto' }} width={130} />
+            )}
+          </Box>
         </TableCell>
-        <TableCell align="center" width={50} size="small">
+        <TableCell align="left" width={50} size="small" sx={{ px: 1 }}>
           {(symbol && maturityDate && (
             <Button
               variant="outlined"
@@ -160,8 +162,13 @@ function TableRowFixedPool({ symbol, amount, type, maturityDate, market, decimal
             </Button>
           )) || <Skeleton sx={{ margin: 'auto' }} height={40} width={70} />}
         </TableCell>
-        <TableCell align="center" size="small">
-          <IconButton aria-label="expand row" size="small" onClick={() => setOpen(!open)}>
+        <TableCell align="left" size="small" width={50}>
+          <IconButton
+            aria-label="expand row"
+            size="small"
+            onClick={() => setOpen(!open)}
+            sx={{ border: '1px solid #E3E5E8', borderRadius: '24px' }}
+          >
             {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
           </IconButton>
         </TableCell>
