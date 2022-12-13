@@ -71,7 +71,7 @@ function TableRowFloatingPool({
           </Stack>
         </TableCell>
       </Link>
-      <TableCell align="center" size="small">
+      <TableCell align="left" size="small">
         <Typography>
           {(depositAmount &&
             borrowedAmount &&
@@ -88,7 +88,7 @@ function TableRowFloatingPool({
       </TableCell>
 
       {type === 'deposit' ? (
-        <TableCell align="center" size="small">
+        <TableCell align="left" size="small">
           <Typography>
             {(eTokenAmount &&
               symbol &&
@@ -98,18 +98,18 @@ function TableRowFloatingPool({
           </Typography>
         </TableCell>
       ) : (
-        <TableCell align="center" size="small" />
+        <TableCell align="left" size="small" />
       )}
 
       {type === 'deposit' ? (
-        <TableCell align="center" size="small">
+        <TableCell align="left" size="small">
           <SwitchCollateral symbol={symbol} walletAddress={walletAddress} healthFactor={healthFactor} />
         </TableCell>
       ) : (
-        <TableCell align="center" size="small" />
+        <TableCell align="left" size="small" />
       )}
 
-      <TableCell align="center" width={50} size="small">
+      <TableCell align="left" width={50} size="small" sx={{ px: 0.5 }}>
         {(symbol && type && (
           <Button
             variant="contained"
@@ -123,7 +123,7 @@ function TableRowFloatingPool({
         )) || <Skeleton sx={{ margin: 'auto' }} height={40} />}
       </TableCell>
 
-      <TableCell align="center" width={50} size="small">
+      <TableCell align="left" width={50} size="small" sx={{ px: 0.5 }}>
         {(symbol && type && (
           <Button
             variant="outlined"

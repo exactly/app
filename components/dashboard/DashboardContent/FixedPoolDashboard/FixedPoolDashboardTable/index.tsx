@@ -29,29 +29,35 @@ function FixedPoolDashboardTable({ type, fixedPools }: Props) {
       {
         label: type === 'deposit' ? 'Deposited Amount' : 'Debt Amount',
         key: 'deposited amount',
+        align: 'left',
       },
       {
         label: 'Average Fixed Rate',
         key: 'average fixed rate',
         tooltipTitle: 'Average rate for existing deposits',
         tooltipPlacement: 'top-start',
+        align: 'left',
       },
       {
         label: 'Maturity Date',
         key: 'maturity date',
+        align: 'left',
       },
       {
         label: 'Time Elapsed',
         key: 'time elapsed',
+        align: 'left',
       },
       {
         label: '',
         key: 'action',
+        align: 'left',
       },
       {
         label: '',
         key: 'expandable button',
         hidden: true,
+        align: 'left',
       },
     ];
   }, [type]);

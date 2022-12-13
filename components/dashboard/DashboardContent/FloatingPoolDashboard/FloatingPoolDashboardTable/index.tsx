@@ -75,26 +75,30 @@ function FloatingPoolDashboardTable({ type, healthFactor }: Props) {
       {
         label: 'Value',
         key: 'value',
-        align: 'center',
+        align: 'left',
       },
       {
         label: 'eToken',
         key: 'eToken',
         hidden: type !== 'deposit',
         tooltipTitle: 'The Exactly voucher token (ERC-4626) for your deposit in the Variable Rate Pool.',
+        align: 'left',
       },
       {
         label: 'Collateral',
         key: 'collateral',
         hidden: type !== 'deposit',
+        align: 'left',
       },
       {
         label: '',
         key: 'deposit',
+        align: 'left',
       },
       {
         label: '',
         key: 'borrow',
+        align: 'left',
       },
     ];
   }, [type]);

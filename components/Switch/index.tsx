@@ -16,6 +16,7 @@ const StyledSwitch = styled((props: SwitchProps) => (
       transform: 'translateX(16px)',
       color: '#fff',
       '& + .MuiSwitch-track': {
+        backgroundColor: '#33CC40',
         opacity: 1,
         border: 0,
       },
