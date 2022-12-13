@@ -25,15 +25,15 @@ const headers: TableHeader[] = [
   },
   {
     label: 'Operation',
-    align: 'center',
+    align: 'left',
   },
   {
     label: 'Amount',
-    align: 'right',
+    align: 'left',
   },
   {
     label: 'APR',
-    align: 'right',
+    align: 'left',
   },
 ];
 
@@ -44,7 +44,7 @@ function CollapseFixedPool({ open, transactions }: Props) {
         <TableHead sx={{ backgroundColor: '#ebebeb' }}>
           <TableRow>
             {headers.map(({ label, align }) => (
-              <TableCell key={`collapse_fixed_pool_header_${label}`} align={align}>
+              <TableCell key={`collapse_fixed_pool_header_${label}`} align={align} sx={{ px: 1 }}>
                 <Typography variant="subtitle2" sx={{ color: 'grey.600' }} fontWeight={600}>
                   {label}
                 </Typography>
@@ -55,10 +55,10 @@ function CollapseFixedPool({ open, transactions }: Props) {
         <TableBody>
           {transactions?.map(({ id, date, type, amount, amountUSD, isBorrowOrDeposit, APR }) => (
             <TableRow key={`collapsed_${id}`} sx={{ '&:last-child td, &:last-child th': { border: 0 } }} hover>
-              <TableCell component="th" align="left" size="small">
+              <TableCell component="th" align="left" size="small" sx={{ pl: 1 }}>
                 <Typography variant="body2">{date || <Skeleton width={70} />}</Typography>
               </TableCell>
-              <TableCell align="center" size="small">
+              <TableCell align="left" size="small">
                 <Typography variant="body2">
                   {type ? (
                     <>
@@ -72,7 +72,7 @@ function CollapseFixedPool({ open, transactions }: Props) {
                   )}
                 </Typography>
               </TableCell>
-              <TableCell align="right" size="small">
+              <TableCell align="left" size="small">
                 <Typography variant="body2">
                   {amount ? (
                     <>
@@ -86,7 +86,7 @@ function CollapseFixedPool({ open, transactions }: Props) {
                   )}
                 </Typography>
               </TableCell>
-              <TableCell align="right" size="small">
+              <TableCell align="left" size="small">
                 {APR !== undefined ? `${(APR || 0).toFixed(2)} %` : '-'}
               </TableCell>
             </TableRow>
