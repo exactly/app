@@ -4,6 +4,7 @@ import Tab from '@mui/material/Tab';
 import TabContext from '@mui/lab/TabContext';
 import TabList from '@mui/lab/TabList';
 import TabPanel from '@mui/lab/TabPanel';
+import { Typography } from '@mui/material';
 
 type Tab = {
   label: string;
@@ -25,7 +26,7 @@ function DashboardTabs({ initialTab, allTabs }: Props) {
         <TabList
           onChange={(_: React.SyntheticEvent, newTab: string) => setCurrentTab(newTab)}
           aria-label="lab API tabs example"
-          TabIndicatorProps={{ sx: { height: '4px', background: '#34C53A' } }}
+          TabIndicatorProps={{ sx: { height: 0 } }}
           textColor="inherit"
           sx={{
             '& button:hover': { backgroundColor: '#5c5a5a', color: 'white' },
@@ -34,7 +35,16 @@ function DashboardTabs({ initialTab, allTabs }: Props) {
           }}
         >
           {allTabs.map(({ label, value }) => (
-            <Tab label={label} value={value} sx={{ paddingX: 5, fontSize: '1.1em' }} key={`tab_${value}`} />
+            <Tab
+              key={`tab_${value}`}
+              value={value}
+              sx={{ paddingX: 2.5, textTransform: 'none' }}
+              label={
+                <Typography fontWeight={700} fontSize="14px">
+                  {label}
+                </Typography>
+              }
+            />
           ))}
         </TabList>
         <Box sx={{ borderBottom: 4, borderColor: 'divider', marginTop: '-4px' }} width="100%" />
