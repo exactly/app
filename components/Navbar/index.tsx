@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useMemo } from 'react';
-import { useSwitchNetwork } from 'wagmi';
+import { useConnect, useSwitchNetwork } from 'wagmi';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
@@ -26,9 +26,10 @@ import { useModalStatus } from 'contexts/ModalStatusContext';
 function Navbar() {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
-  const { connect, disconnect, walletAddress } = useWeb3();
+  const { walletAddress } = useWeb3();
   const { switchNetworkAsync } = useSwitchNetwork();
   const { pathname, query } = useRouter();
+  const { connect } = useConnect();
   const { chain } = useWeb3();
 
   const { openOperationModal } = useModalStatus();
@@ -139,17 +140,14 @@ function Navbar() {
             </div>
           )}
 
-          {connect && !walletAddress ? (
+          {!walletAddress ? (
             <div className={styles.buttonContainer}>
-              <Button text="Connect Wallet" onClick={connect} />
+              <Button text="Connect Wallet" onClick={() => connect()} />
             </div>
           ) : (
-            disconnect &&
-            walletAddress && (
-              <div className={styles.buttonContainer}>
-                <Wallet walletAddress={walletAddress} disconnect={disconnect} />
-              </div>
-            )
+            <div className={styles.buttonContainer}>
+              <Wallet walletAddress={walletAddress} />
+            </div>
           )}
         </div>
       </div>
