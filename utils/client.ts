@@ -3,13 +3,11 @@ import { createClient, configureChains } from 'wagmi';
 import { mainnet, goerli } from 'wagmi/chains';
 import { publicProvider } from 'wagmi/providers/public';
 
-const { NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID } = process.env;
-
-if (!NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID) throw new Error('missing wallet connect project id');
+export const walletConnectId = '11ddaa8aaede72cb5d6b0dae2fed7baa';
 
 const { chains, provider } = configureChains(
   [mainnet, goerli],
-  [publicProvider(), walletConnectProvider({ projectId: NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID })],
+  [publicProvider(), walletConnectProvider({ projectId: walletConnectId })],
 );
 
 export const wagmi = createClient({
