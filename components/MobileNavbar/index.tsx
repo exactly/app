@@ -1,4 +1,5 @@
 import React, { useState, useContext } from 'react';
+import { useConnect, useDisconnect } from 'wagmi';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
@@ -21,7 +22,9 @@ import { useWeb3 } from 'hooks/useWeb3';
 function MobileNavbar() {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
-  const { walletAddress, connect, disconnect } = useWeb3();
+  const { walletAddress } = useWeb3();
+  const { disconnect } = useDisconnect();
+  const { connect } = useConnect();
   const { theme } = useContext(ThemeContext);
   const { pathname, query } = useRouter();
 
@@ -53,27 +56,24 @@ function MobileNavbar() {
               />
             </div>
           </Link>
-          {connect && !walletAddress ? (
+          {!walletAddress ? (
             <div className={styles.buttonContainer}>
-              <Button text="Connect Wallet" onClick={connect} />
+              <Button text="Connect Wallet" onClick={() => connect()} />
             </div>
           ) : (
-            disconnect &&
-            walletAddress && (
-              <>
-                <a
-                  className={styles.discordFeedbackLink}
-                  target="_blank"
-                  rel="noreferrer noopener"
-                  href="https://discord.com/channels/846682395553824808/908758791057719358"
-                >
-                  <strong>Feedback here</strong>
-                </a>
-                <div className={styles.buttonContainer}>
-                  <Wallet walletAddress={walletAddress} cogwheel={false} disconnect={disconnect} />
-                </div>
-              </>
-            )
+            <>
+              <a
+                className={styles.discordFeedbackLink}
+                target="_blank"
+                rel="noreferrer noopener"
+                href="https://discord.com/channels/846682395553824808/908758791057719358"
+              >
+                <strong>Feedback here</strong>
+              </a>
+              <div className={styles.buttonContainer}>
+                <Wallet walletAddress={walletAddress} cogwheel={false} />
+              </div>
+            </>
           )}
           {!open ? (
             <Image
@@ -117,7 +117,7 @@ function MobileNavbar() {
             />
           </li> */}
           {walletAddress && (
-            <li className={styles.disconnect} onClick={() => disconnect && disconnect()}>
+            <li className={styles.disconnect} onClick={() => disconnect()}>
               <Image src="/img/icons/power.svg" alt="power" width={24} height={24} />
               {translations[lang].disconnect}
             </li>

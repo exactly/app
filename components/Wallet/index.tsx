@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useEnsName } from 'wagmi';
+import { useDisconnect, useEnsName } from 'wagmi';
 import Image from 'next/image';
 
 import styles from './style.module.scss';
@@ -12,11 +12,11 @@ type Props = {
   walletAddress: string;
   cogwheel?: boolean;
   network?: Network | null | undefined;
-  disconnect: () => Promise<void>;
 };
 
-function Wallet({ walletAddress, cogwheel = true, network, disconnect }: Props) {
+function Wallet({ walletAddress, cogwheel = true, network }: Props) {
   const { data: ens } = useEnsName({ address: walletAddress as `0x${string}` });
+  const { disconnect } = useDisconnect();
 
   const formattedWallet = formatWallet(walletAddress);
   const [walletContainer, setWalletContainer] = useState<boolean>(false);
@@ -49,7 +49,7 @@ function Wallet({ walletAddress, cogwheel = true, network, disconnect }: Props) 
       {walletContainer && (
         <div className={styles.walletContainer}>
           {walletAddress && (
-            <p className={styles.disconnect} onClick={disconnect}>
+            <p className={styles.disconnect} onClick={() => disconnect()}>
               <Image src="/img/icons/power.svg" alt="power" width={24} height={24} />
               Disconnect wallet
             </p>
