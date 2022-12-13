@@ -107,6 +107,10 @@ function TableRowFixedPool({ symbol, amount, type, maturityDate, market, decimal
     return Math.min((current * 100) / maturityLife, 100);
   }, [maturityDate]);
 
+  const daysLeft = useMemo(() => {
+    return Math.ceil((parseInt(maturityDate) - Date.now() / 1000) / (3600 * 24));
+  }, [maturityDate]);
+
   return (
     <React.Fragment>
       <TableRow sx={{ '& > *': { borderBottom: 'unset' }, backgroundColor: open ? 'grey.50' : 'transparent' }} hover>
@@ -138,11 +142,7 @@ function TableRowFixedPool({ symbol, amount, type, maturityDate, market, decimal
         <TableCell align="left" size="small" width={200}>
           <Box width={150}>
             {progress ? (
-              <StyledLinearProgress
-                variant="determinate"
-                value={progress}
-                barColor={progress === 100 ? '#008cf4' : '#34c53a'}
-              />
+              <StyledLinearProgress progress={progress} daysLeft={daysLeft} />
             ) : (
               <Skeleton sx={{ margin: 'auto' }} width={130} />
             )}
