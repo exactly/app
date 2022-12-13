@@ -13,7 +13,7 @@ import { LangKeys } from 'types/Lang';
 
 import LangContext from 'contexts/LangContext';
 import ThemeContext from 'contexts/ThemeContext';
-import ModalStatusContext from 'contexts/ModalStatusContext';
+import { useWeb3 } from 'hooks/useWeb3';
 
 import styles from './style.module.scss';
 
@@ -21,19 +21,19 @@ import keys from './translations.json';
 
 import allowedNetworks from 'config/allowedNetworks.json';
 import analytics from 'utils/analytics';
-import { useWeb3 } from 'hooks/useWeb3';
+import { useModalStatus } from 'contexts/ModalStatusContext';
 
 function Navbar() {
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
-  const { switchNetworkAsync } = useSwitchNetwork();
-  const { chain } = useWeb3();
-  const { pathname, query } = useRouter();
-
   const { connect, disconnect, walletAddress } = useWeb3();
+  const { switchNetworkAsync } = useSwitchNetwork();
+  const { pathname, query } = useRouter();
+  const { chain } = useWeb3();
+
+  const { openOperationModal } = useModalStatus();
 
   const { theme } = useContext(ThemeContext);
-  const { setOpen, setOperation } = useContext(ModalStatusContext);
 
   useEffect(() => {
     walletAddress && void analytics.identify(walletAddress);
@@ -50,13 +50,13 @@ function Navbar() {
   const isAllowed = useMemo(() => chain && allowedNetworks.includes(chain.network), [chain]);
 
   async function handleFaucetClick() {
-    if (isAllowed && chain?.network === 'goerli') {
-      setOperation('faucet');
-      setOpen(true);
-      return;
+    if (!switchNetworkAsync) return;
+
+    if (isAllowed && chain?.id === 5) {
+      return openOperationModal('faucet');
     }
 
-    if (!isAllowed) await switchNetworkAsync?.(5);
+    if (!isAllowed) await switchNetworkAsync(5);
   }
 
   return (
