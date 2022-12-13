@@ -55,7 +55,7 @@ export type TableRow = {
 
 const HeadCell: FC<TableHead> = ({ title, tooltipTitle, width }) => {
   return (
-    <TableCell align={title === 'Asset' ? 'left' : 'center'} sx={{ minWidth: width }}>
+    <TableCell align="left" sx={{ minWidth: width }}>
       <Tooltip title={tooltipTitle} placement="top" arrow>
         <Typography variant="subtitle2" sx={{ color: 'grey.500' }} fontWeight={600}>
           {title}
@@ -151,13 +151,13 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
                       </Typography>
                     </Grid>
                   </TableCell>
-                  <TableCell align="center" sx={{ width: '200px' }}>
+                  <TableCell align="left" sx={{ width: '200px' }}>
                     <Typography>{isLoading ? <Skeleton /> : `$${totalDeposited}`}</Typography>
                   </TableCell>
-                  <TableCell align="center" sx={{ width: '200px' }}>
+                  <TableCell align="left" sx={{ width: '200px' }}>
                     <Typography>{isLoading ? <Skeleton /> : `$${totalBorrowed}`}</Typography>
                   </TableCell>
-                  <TableCell align="center" sx={{ width: '200px' }}>
+                  <TableCell align="left" sx={{ width: '200px' }}>
                     {isLoading ? (
                       <Skeleton />
                     ) : (
@@ -181,7 +181,7 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
                       </Tooltip>
                     )}
                   </TableCell>
-                  <TableCell align="center" sx={{ width: '200px' }}>
+                  <TableCell align="left" sx={{ width: '200px' }}>
                     {isLoading ? (
                       <Skeleton />
                     ) : (
@@ -215,11 +215,11 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
                     followCursor
                   >
                     <TableCell
-                      align="center"
+                      align="left"
                       size="small"
                       width={50}
                       onClick={(e) => e.preventDefault()}
-                      sx={{ cursor: 'default' }}
+                      sx={{ cursor: 'default', px: 0.5 }}
                     >
                       {isLoading ? (
                         <Skeleton variant="rectangular" width={78} height={40} />
@@ -243,11 +243,11 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
                   </Tooltip>
 
                   <TableCell
-                    align="center"
+                    align="left"
                     size="small"
                     width={50}
                     onClick={(e) => e.preventDefault()}
-                    sx={{ cursor: 'default' }}
+                    sx={{ cursor: 'default', px: 0.5 }}
                   >
                     {isLoading ? (
                       <Skeleton variant="rectangular" width={78} height={40} />

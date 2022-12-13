@@ -66,6 +66,10 @@ const theme = createTheme({
           fontWeight: 600,
           padding: '6px 16px',
         },
+        outlined: {
+          color: '#62666A',
+          borderColor: '#E3E5E8',
+        },
       },
     },
     MuiDialogTitle: {
@@ -73,6 +77,14 @@ const theme = createTheme({
         root: {
           fontWeight: 600,
           fontSize: 24,
+        },
+      },
+    },
+    MuiTableCell: {
+      styleOverrides: {
+        root: {
+          paddingLeft: 0,
+          paddingRight: 0,
         },
       },
     },
