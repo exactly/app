@@ -18,6 +18,8 @@ export default function useDelayedEffect({ effect, skip = false, delay = 1000 }:
     const timeout = setTimeout(async () => {
       try {
         await effect(() => cancel);
+      } catch {
+        setIsLoading(false);
       } finally {
         setIsLoading(false);
       }

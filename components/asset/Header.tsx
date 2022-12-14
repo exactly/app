@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { type FC, useContext, useMemo } from 'react';
 import Grid from '@mui/material/Grid';
 import Image from 'next/image';
 import IconButton from '@mui/material/IconButton';
@@ -7,7 +7,7 @@ import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import formatSymbol from 'utils/formatSymbol';
 import ItemInfo, { ItemInfoProps } from 'components/common/ItemInfo';
 import AccountDataContext from 'contexts/AccountDataContext';
-import { BigNumber, formatFixed } from '@ethersproject/bignumber';
+import { formatFixed } from '@ethersproject/bignumber';
 import { WeiPerEther, Zero } from '@ethersproject/constants';
 import formatNumber from 'utils/formatNumber';
 import { useRouter } from 'next/router';
@@ -15,25 +15,23 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { Tooltip } from '@mui/material';
 import { useWeb3 } from 'hooks/useWeb3';
 import networkData from 'config/networkData.json' assert { type: 'json' };
+import useAccountData from 'hooks/useAccountData';
 
 type Props = {
   symbol: string;
-  assetAddress: string;
   eMarketAddress?: string;
 };
 
-const AssetHeaderInfo: FC<Props> = ({ symbol, assetAddress, eMarketAddress }) => {
+const AssetHeaderInfo: FC<Props> = ({ symbol, eMarketAddress }) => {
   const { accountData } = useContext(AccountDataContext);
-  const { chain } = useWeb3();
 
-  const [floatingDeposits, setFloatingDeposits] = useState<BigNumber | undefined>(undefined);
-  const [floatingBorrows, setFloatingBorrows] = useState<BigNumber | undefined>(undefined);
-  const [fixedDeposits, setFixedDeposits] = useState<BigNumber | undefined>(undefined);
-  const [fixedBorrows, setFixedBorrows] = useState<BigNumber | undefined>(undefined);
+  const { asset: assetAddress } = useAccountData(symbol);
+
+  const { chain } = useWeb3();
   const router = useRouter();
 
-  const fetchFloatingPoolData = useCallback(async () => {
-    if (!accountData || !symbol) return;
+  const { floatingDeposits, floatingBorrows } = useMemo(() => {
+    if (!accountData || !symbol) return {};
 
     const {
       totalFloatingDepositAssets: totalDeposited,
@@ -44,12 +42,11 @@ const AssetHeaderInfo: FC<Props> = ({ symbol, assetAddress, eMarketAddress }) =>
     const totalFloatingDepositUSD = totalDeposited.mul(exchangeRate).div(WeiPerEther);
     const totalFloatingBorrowUSD = totalBorrowed.mul(exchangeRate).div(WeiPerEther);
 
-    setFloatingDeposits(totalFloatingDepositUSD);
-    setFloatingBorrows(totalFloatingBorrowUSD);
+    return { floatingDeposits: totalFloatingDepositUSD, floatingBorrows: totalFloatingBorrowUSD };
   }, [accountData, symbol]);
 
-  const getMaturitiesData = useCallback(async () => {
-    if (!accountData) return;
+  const { fixedDeposits, fixedBorrows } = useMemo(() => {
+    if (!accountData) return {};
 
     const { fixedPools, usdPrice: exchangeRate } = accountData[symbol];
     let tempTotalFixedDeposited = Zero;
@@ -63,14 +60,8 @@ const AssetHeaderInfo: FC<Props> = ({ symbol, assetAddress, eMarketAddress }) =>
     const totalDepositedUSD = tempTotalFixedDeposited.mul(exchangeRate).div(WeiPerEther);
     const totalBorrowedUSD = tempTotalFixedBorrowed.mul(exchangeRate).div(WeiPerEther);
 
-    setFixedDeposits(totalDepositedUSD);
-    setFixedBorrows(totalBorrowedUSD);
+    return { fixedDeposits: totalDepositedUSD, fixedBorrows: totalBorrowedUSD };
   }, [accountData, symbol]);
-
-  useEffect(() => {
-    fetchFloatingPoolData();
-    getMaturitiesData();
-  }, [fetchFloatingPoolData, getMaturitiesData]);
 
   const itemsInfo: ItemInfoProps[] = useMemo((): ItemInfoProps[] => {
     if (!accountData) return [];

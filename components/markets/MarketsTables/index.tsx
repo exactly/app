@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useContext, useEffect, useState } from 'react';
+import React, { FC, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import Grid from '@mui/material/Grid';
 import PoolTable, { TableRow } from './poolTable';
 
@@ -11,26 +11,62 @@ import formatMarkets from 'utils/formatMarkets';
 import formatNumber from 'utils/formatNumber';
 import queryRate from 'utils/queryRates';
 
-import { Market } from 'types/Market';
+import type { Market } from 'types/Market';
 
 import { Typography } from '@mui/material';
 
 import { globals } from 'styles/theme';
 import { useWeb3 } from 'hooks/useWeb3';
 import networkData from 'config/networkData.json' assert { type: 'json' };
+import useAssets from 'hooks/useAssets';
 
 const { maxWidth } = globals;
 
-const defaultRows: TableRow[] = [
-  { symbol: 'DAI' },
-  { symbol: 'USDC' },
-  { symbol: 'WETH' },
-  { symbol: 'WBTC' },
-  { symbol: 'wstETH' },
+const floatingHeaders = [
+  {
+    title: 'Asset',
+    width: '130px',
+  },
+  {
+    title: 'Total Deposits',
+  },
+  {
+    title: 'Total Borrows',
+  },
+  {
+    title: 'Deposit APR',
+    tooltipTitle: 'Change in the underlying Variable Rate Pool shares value over the last hour, annualized.',
+  },
+  {
+    title: 'Borrow APR',
+    tooltipTitle: 'Change in the underlying Variable Rate Pool shares value over the last hour, annualized.',
+  },
+];
+const fixedHeaders = [
+  {
+    title: 'Asset',
+    width: '130px',
+  },
+  {
+    title: 'Total Deposits',
+    tooltipTitle: 'Sum of all the deposits in all the Fixed Rate Pools.',
+  },
+  {
+    title: 'Total Borrows',
+    tooltipTitle: 'Sum of all the borrows in all the Fixed Rate Pools.',
+  },
+  {
+    title: 'Best Deposit APR',
+    tooltipTitle: 'The highest fixed interest rate APR for a $1 deposit in all the available Fixed Rated Pools.',
+  },
+  {
+    title: 'Best Borrow APR',
+    tooltipTitle: 'The lowest fixed interest rate APR for a $1 borrow in all the available Fixed Rated Pools.',
+  },
 ];
 
 // sorts rows based on defaultRows symbol order
-const sortByDefault = (toSort: TableRow[]) =>
+const sortByDefault = (defaultRows: TableRow[], toSort: TableRow[]) =>
   toSort.sort(({ symbol: aSymbol }, { symbol: bSymbol }) => {
     const aIndex = defaultRows.findIndex(({ symbol }) => symbol === aSymbol);
     const bIndex = defaultRows.findIndex(({ symbol }) => symbol === bSymbol);
@@ -40,17 +76,25 @@ const sortByDefault = (toSort: TableRow[]) =>
 const MarketTables: FC = () => {
   const { chain } = useWeb3();
   const { accountData } = useContext(AccountDataContext);
+  const assets = useAssets();
+  const defaultRows = useMemo<TableRow[]>(() => assets.map((s) => ({ symbol: s })), [assets]);
 
   const [floatingRows, setFloatingRows] = useState<TableRow[]>([...defaultRows]);
   const [fixedRows, setFixedRows] = useState<TableRow[]>([...defaultRows]);
-  const [markets, setMarkets] = useState<Market[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  const getMarkets = useCallback(async () => {
-    if (!accountData) return;
+  const markets = useMemo<Market[]>(() => (accountData ? formatMarkets(accountData) : []), [accountData]);
 
-    setMarkets(formatMarkets(accountData));
-  }, [accountData]);
+  const getRates = useCallback(
+    async (chainId: number, type: 'borrow' | 'deposit', maxFuturePools: number, eMarketAddress: string) => {
+      const subgraphUrl = networkData[String(chainId) as keyof typeof networkData]?.subgraph;
+      if (!subgraphUrl) return;
+
+      const [{ apr }] = await queryRate(subgraphUrl, eMarketAddress, type, { maxFuturePools });
+      return apr;
+    },
+    [],
+  );
 
   const defineRows = useCallback(async () => {
     if (!accountData || !markets || !chain) return;
@@ -118,73 +162,18 @@ const MarketTables: FC = () => {
       }),
     );
 
-    setFloatingRows(sortByDefault(tempFloatingRows));
-    setFixedRows(sortByDefault(tempFixedRows));
+    setFloatingRows(sortByDefault(defaultRows, tempFloatingRows));
+    setFixedRows(sortByDefault(defaultRows, tempFixedRows));
 
     setTimeout(() => {
       // HACK to prevent loading flashes on the table when change the data
       setIsLoading(false);
     }, 2000);
-  }, [accountData, chain, markets]);
-
-  const floatingHeaders = [
-    {
-      title: 'Asset',
-      width: '130px',
-    },
-    {
-      title: 'Total Deposits',
-    },
-    {
-      title: 'Total Borrows',
-    },
-    {
-      title: 'Deposit APR',
-      tooltipTitle: 'Change in the underlying Variable Rate Pool shares value over the last hour, annualized.',
-    },
-    {
-      title: 'Borrow APR',
-      tooltipTitle: 'Change in the underlying Variable Rate Pool shares value over the last hour, annualized.',
-    },
-  ];
-  const fixedHeaders = [
-    {
-      title: 'Asset',
-      width: '130px',
-    },
-    {
-      title: 'Total Deposits',
-      tooltipTitle: 'Sum of all the deposits in all the Fixed Rate Pools.',
-    },
-    {
-      title: 'Total Borrows',
-      tooltipTitle: 'Sum of all the borrows in all the Fixed Rate Pools.',
-    },
-    {
-      title: 'Best Deposit APR',
-      tooltipTitle: 'The highest fixed interest rate APR for a $1 deposit in all the available Fixed Rated Pools.',
-    },
-    {
-      title: 'Best Borrow APR',
-      tooltipTitle: 'The lowest fixed interest rate APR for a $1 borrow in all the available Fixed Rated Pools.',
-    },
-  ];
-
-  async function getRates(chainId: number, type: 'borrow' | 'deposit', maxFuturePools: number, eMarketAddress: string) {
-    const subgraphUrl = networkData[String(chainId) as keyof typeof networkData]?.subgraph;
-    if (!subgraphUrl) return;
-
-    const [{ apr }] = await queryRate(subgraphUrl, eMarketAddress, type, { maxFuturePools });
-    return apr;
-  }
+  }, [accountData, chain, markets, defaultRows, getRates]);
 
   useEffect(() => {
     void defineRows();
   }, [defineRows]);
-
-  useEffect(() => {
-    void getMarkets();
-  }, [accountData, getMarkets]);
 
   return (
     <Grid container sx={{ maxWidth: maxWidth, margin: 'auto' }}>
