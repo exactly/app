@@ -44,6 +44,7 @@ import keys from './translations.json';
 import numbers from 'config/numbers.json';
 import analytics from 'utils/analytics';
 import { useOperationContext, usePreviewTx } from 'contexts/OperationContext';
+import getHealthFactorData from 'utils/getHealthFactorData';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 
@@ -73,9 +74,13 @@ const BorrowAtMaturity: FC = () => {
   const [fixedRate, setFixedRate] = useState<number | undefined>();
   const [slippage, setSlippage] = useState<number>(numbers.slippage);
   const [isSlippageEditable, setIsSlippageEditable] = useState(false);
-  const [healthFactor, setHealthFactor] = useState<HealthFactor | undefined>();
   const [urBefore, setUrBefore] = useState<string | undefined>();
   const [urAfter, setUrAfter] = useState<string | undefined>();
+
+  const healthFactor = useMemo<HealthFactor | undefined>(
+    () => (accountData ? getHealthFactorData(accountData) : undefined),
+    [accountData],
+  );
 
   const ETHRouterContract = useETHRouter();
   const assetContract = useERC20();
@@ -437,7 +442,7 @@ const BorrowAtMaturity: FC = () => {
         onClick={() => setIsSlippageEditable((prev) => !prev)}
         line
       />
-      <ModalRowHealthFactor qty={qty} symbol={symbol} operation="borrow" healthFactorCallback={setHealthFactor} />
+      <ModalRowHealthFactor qty={qty} symbol={symbol} operation="borrow" />
       <ModalRowBorrowLimit qty={qty} symbol={symbol} operation="borrow" line />
       <ModalRowUtilizationRate urBefore={urBefore} urAfter={urAfter} line />
 

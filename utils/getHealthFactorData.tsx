@@ -2,9 +2,10 @@ import { BigNumber, parseFixed } from '@ethersproject/bignumber';
 import { Zero } from '@ethersproject/constants';
 
 import { AccountData } from 'types/AccountData';
+import { HealthFactor } from 'types/HealthFactor';
 import { WAD } from './fixedPointMathLib';
 
-function getHealthFactorData(accountData: AccountData) {
+function getHealthFactorData(accountData: AccountData): HealthFactor {
   let collateral = Zero;
   let debt = Zero;
 
@@ -60,8 +61,7 @@ function getHealthFactorData(accountData: AccountData) {
     });
 
     return { collateral, debt };
-  } catch (e) {
-    console.log(e);
+  } catch {
     return { collateral, debt };
   }
 }

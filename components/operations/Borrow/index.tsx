@@ -1,4 +1,4 @@
-import React, { ChangeEvent, FC, useCallback, useContext, useMemo, useState } from 'react';
+import React, { type ChangeEvent, type FC, useCallback, useContext, useMemo } from 'react';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { WeiPerEther, Zero } from '@ethersproject/constants';
 import LoadingButton from '@mui/lab/LoadingButton';
@@ -33,6 +33,7 @@ import useERC20 from 'hooks/useERC20';
 import handleOperationError from 'utils/handleOperationError';
 import analytics from 'utils/analytics';
 import { useOperationContext, usePreviewTx } from 'contexts/OperationContext';
+import getHealthFactorData from 'utils/getHealthFactorData';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 
@@ -59,7 +60,10 @@ const Borrow: FC = () => {
     setIsLoading: setIsLoadingOp,
   } = useOperationContext();
 
-  const [healthFactor, setHealthFactor] = useState<HealthFactor | undefined>();
+  const healthFactor = useMemo<HealthFactor | undefined>(
+    () => (accountData ? getHealthFactorData(accountData) : undefined),
+    [accountData],
+  );
 
   const ETHRouterContract = useETHRouter();
   const assetContract = useERC20();
@@ -290,7 +294,7 @@ const Borrow: FC = () => {
         error={errorData?.component === 'input'}
       />
       {errorData?.component !== 'gas' && <ModalTxCost gasCost={gasCost} />}
-      <ModalRowHealthFactor qty={qty} symbol={symbol} operation="borrow" healthFactorCallback={setHealthFactor} />
+      <ModalRowHealthFactor qty={qty} symbol={symbol} operation="borrow" />
       <ModalRowBorrowLimit qty={qty} symbol={symbol} operation="borrow" line />
       {errorData && <ModalError message={errorData.message} />}
       <LoadingButton

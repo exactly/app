@@ -1,6 +1,6 @@
 import React, { useContext, useMemo } from 'react';
 import { parseFixed } from '@ethersproject/bignumber';
-import { Zero } from '@ethersproject/constants';
+import { WeiPerEther, Zero } from '@ethersproject/constants';
 import Image from 'next/image';
 import Skeleton from 'react-loading-skeleton';
 
@@ -16,24 +16,31 @@ import AccountDataContext from 'contexts/AccountDataContext';
 import styles from './style.module.scss';
 
 import keys from './translations.json';
+import { checkPrecision } from 'utils/utils';
 
 type Props = {
   qty: string;
   symbol: string;
   operation: string;
-  healthFactorCallback?: (healthFactor: HealthFactor) => void;
 };
 
-function ModalRowHealthFactor({ qty, symbol, operation, healthFactorCallback }: Props) {
+function ModalRowHealthFactor({ qty, symbol, operation }: Props) {
   const { accountData } = useContext(AccountDataContext);
   const lang: string = useContext(LangContext);
-  const WAD = parseFixed('1', 18);
 
   const translations: { [key: string]: LangKeys } = keys;
 
   const newQty = useMemo(() => {
-    return getAmount();
-  }, [symbol, qty]);
+    if (!accountData || !symbol) return;
+
+    if (!qty) return Zero;
+
+    const { decimals } = accountData[symbol];
+
+    if (!checkPrecision(qty, decimals)) return;
+
+    return parseFixed(qty, decimals);
+  }, [accountData, symbol, qty]);
 
   const {
     beforeHealthFactor,
@@ -41,87 +48,54 @@ function ModalRowHealthFactor({ qty, symbol, operation, healthFactorCallback }: 
   }:
     | { beforeHealthFactor: undefined; healthFactor: undefined }
     | { beforeHealthFactor: string; healthFactor: HealthFactor } = useMemo(() => {
-    return getBeforeHealthFactor();
+    if (!accountData) return {};
+
+    const hf: HealthFactor = getHealthFactorData(accountData);
+
+    return {
+      beforeHealthFactor: parseHealthFactor(hf.debt, hf.collateral),
+      healthFactor: hf,
+    };
   }, [accountData]);
 
   const afterHealthFactor = useMemo(() => {
-    return calculateAfterHealthFactor();
-  }, [healthFactor, newQty, accountData]);
-
-  function getAmount() {
-    if (!accountData || !symbol) return;
-
-    if (!qty) return Zero;
-    const decimals = accountData[symbol].decimals;
-
-    const regex = /[^,.]*$/g;
-    const inputDecimals = regex.exec(qty)![0];
-
-    if (inputDecimals.length > decimals) return;
-
-    const newQty = parseFixed(qty, decimals);
-
-    return newQty;
-  }
-
-  function getBeforeHealthFactor() {
-    if (!accountData) return { beforeHealthFactor: undefined, healthFactor: undefined };
-
-    const healthFactor: HealthFactor = getHealthFactorData(accountData);
-
-    if (healthFactor) {
-      if (healthFactorCallback) healthFactorCallback(healthFactor);
-
-      return {
-        beforeHealthFactor: parseHealthFactor(healthFactor.debt, healthFactor.collateral),
-        healthFactor: healthFactor,
-      };
-    }
-
-    return { beforeHealthFactor: undefined, healthFactor: undefined };
-  }
-
-  function calculateAfterHealthFactor() {
     if (!accountData || !newQty || !healthFactor) return;
 
-    const adjustFactor = accountData[symbol].adjustFactor;
-    const usdPrice = accountData[symbol].usdPrice;
-    const isCollateral = accountData[symbol].isCollateral;
-    const decimals = accountData[symbol].decimals;
+    const { adjustFactor, usdPrice, isCollateral, decimals } = accountData[symbol];
 
     const newQtyUsd = newQty.mul(usdPrice).div(parseFixed('1', decimals));
 
     switch (operation) {
       case 'deposit': {
         if (isCollateral) {
-          const adjustedNewQtyUsd = newQtyUsd.mul(adjustFactor).div(WAD);
+          const adjustedNewQtyUsd = newQtyUsd.mul(adjustFactor).div(WeiPerEther);
 
-          return parseHealthFactor(healthFactor!.debt, healthFactor!.collateral.add(adjustedNewQtyUsd));
+          return parseHealthFactor(healthFactor.debt, healthFactor.collateral.add(adjustedNewQtyUsd));
         } else {
-          return parseHealthFactor(healthFactor!.debt, healthFactor!.collateral);
+          return parseHealthFactor(healthFactor.debt, healthFactor.collateral);
         }
       }
       case 'withdraw': {
         if (isCollateral) {
-          const adjustedNewQtyUsd = newQtyUsd.mul(WAD).div(adjustFactor);
+          const adjustedNewQtyUsd = newQtyUsd.mul(WeiPerEther).div(adjustFactor);
 
-          return parseHealthFactor(healthFactor!.debt, healthFactor!.collateral.sub(adjustedNewQtyUsd));
+          return parseHealthFactor(healthFactor.debt, healthFactor.collateral.sub(adjustedNewQtyUsd));
         } else {
-          return parseHealthFactor(healthFactor!.debt, healthFactor!.collateral);
+          return parseHealthFactor(healthFactor.debt, healthFactor.collateral);
         }
       }
       case 'borrow': {
-        const adjustedNewQtyUsd = newQtyUsd.mul(WAD).div(adjustFactor);
+        const adjustedNewQtyUsd = newQtyUsd.mul(WeiPerEther).div(adjustFactor);
 
-        return parseHealthFactor(healthFactor!.debt.add(adjustedNewQtyUsd), healthFactor!.collateral);
+        return parseHealthFactor(healthFactor.debt.add(adjustedNewQtyUsd), healthFactor.collateral);
       }
       case 'repay': {
-        const adjustedNewQtyUsd = newQtyUsd.mul(adjustFactor).div(WAD);
+        const adjustedNewQtyUsd = newQtyUsd.mul(adjustFactor).div(WeiPerEther);
 
-        return parseHealthFactor(healthFactor!.debt, healthFactor!.collateral.add(adjustedNewQtyUsd));
+        return parseHealthFactor(healthFactor.debt, healthFactor.collateral.add(adjustedNewQtyUsd));
       }
     }
-  }
+  }, [healthFactor, newQty, accountData, operation, symbol]);
 
   return (
     <section className={`${styles.row} ${styles.line}`}>
