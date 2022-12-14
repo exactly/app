@@ -9,20 +9,32 @@ import AssetFloatingPool from 'components/asset/FloatingPool';
 import OperationsModal from 'components/OperationsModal';
 import AssetHeaderInfo from 'components/asset/Header';
 
+import { useRouter } from 'next/router';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { Box, IconButton, Tooltip, Typography } from '@mui/material';
 import analytics from 'utils/analytics';
 import useAccountData from 'hooks/useAccountData';
 import { globals } from 'styles/theme';
 const { maxWidth } = globals;
 
 const Market: NextPage<{ symbol: string }> = ({ symbol }) => {
+  const router = useRouter();
   const { market } = useAccountData(symbol);
 
   useEffect(() => void analytics.page(), []);
 
   return (
-    <Grid container sx={{ maxWidth: maxWidth }} mx="auto" mt={5}>
+    <Grid container sx={{ maxWidth: maxWidth }} mx="auto" mt={-1}>
       <OperationsModal />
 
+      <Box sx={{ display: 'flex', gap: 0.5 }} mb={1}>
+        <IconButton size="small" onClick={() => router.back()}>
+          <Tooltip title="Go Back" placement="top">
+            <ArrowBackIcon fontSize="small" />
+          </Tooltip>
+        </IconButton>
+        <Typography color="grey.500" sx={{ fontSize: '14px', fontWeight: 600, my: 'auto' }}>Back</Typography>
+      </Box>
       <AssetHeaderInfo symbol={symbol} eMarketAddress={market} />
       <Grid container mt={5}>
         <Grid item container>

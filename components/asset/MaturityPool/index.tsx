@@ -64,7 +64,15 @@ const AssetMaturityPools: FC<{ symbol: string }> = ({ symbol }) => {
   useEffect(() => void getMaturitiesData(), [getMaturitiesData]);
 
   return (
-    <Grid container mt={4} mb={4} padding={2} sx={{ boxShadow: '#A7A7A7 0px 0px 4px 0px', borderRadius: '5px' }}>
+    <Grid
+      container
+      width={'100%'}
+      my={4}
+      boxShadow="0px 4px 12px rgba(175, 177, 182, 0.2)"
+      borderRadius="0px 0px 6px 6px"
+      bgcolor="white"
+      borderTop="4px solid #008CF4"
+    >
       <Grid item xs={12}>
         <MaturityPoolInfo
           totalDeposited={totalDeposited}
@@ -75,7 +83,7 @@ const AssetMaturityPools: FC<{ symbol: string }> = ({ symbol }) => {
           bestDepositMaturity={bestDeposit && Number(bestDeposit.maturity)}
         />
       </Grid>
-      <Grid item xs={12} mt={4}>
+      <Grid item xs={12} px="24px" pb="24px" bgcolor="white">
         <MaturityPoolsTable APRsPerMaturity={APRsPerMaturity} symbol={symbol} />
       </Grid>
     </Grid>

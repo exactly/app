@@ -119,9 +119,9 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol, eMarketAddress })
   return (
     <Grid container justifyContent="space-between" gap={2}>
       <Grid>
-        <HeaderInfo title={translations[lang].smartPool} itemsInfo={itemsInfo} variant="h5" />
+        <HeaderInfo title={translations[lang].smartPool} itemsInfo={itemsInfo} variant="h5" shadow={false} />
       </Grid>
-      <Grid alignSelf="end" sx={tempStyle}>
+      <Grid alignSelf="end" sx={tempStyle} p="24px">
         <OrderAction />
       </Grid>
     </Grid>
