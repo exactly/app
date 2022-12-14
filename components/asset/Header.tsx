@@ -10,8 +10,6 @@ import AccountDataContext from 'contexts/AccountDataContext';
 import { formatFixed } from '@ethersproject/bignumber';
 import { WeiPerEther, Zero } from '@ethersproject/constants';
 import formatNumber from 'utils/formatNumber';
-import { useRouter } from 'next/router';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { Tooltip } from '@mui/material';
 import { useWeb3 } from 'hooks/useWeb3';
 import networkData from 'config/networkData.json' assert { type: 'json' };
@@ -28,7 +26,6 @@ const AssetHeaderInfo: FC<Props> = ({ symbol, eMarketAddress }) => {
   const { asset: assetAddress } = useAccountData(symbol);
 
   const { chain } = useWeb3();
-  const router = useRouter();
 
   const { floatingDeposits, floatingBorrows } = useMemo(() => {
     if (!accountData || !symbol) return {};
@@ -95,13 +92,8 @@ const AssetHeaderInfo: FC<Props> = ({ symbol, eMarketAddress }) => {
 
   const etherscan = networkData[String(chain?.id) as keyof typeof networkData]?.etherscan;
   return (
-    <Grid>
-      <Grid item container mb={1}>
-        <IconButton onClick={() => router.back()}>
-          <Tooltip title="Go Back" placement="top">
-            <ArrowBackIcon fontSize="small" />
-          </Tooltip>
-        </IconButton>
+    <Grid sx={{ bgcolor: 'white' }} width="100%" p="24px" boxShadow="0px 4px 12px rgba(175, 177, 182, 0.2)">
+      <Grid item container mb={2.5}>
         <Image src={`/img/assets/${symbol}.svg`} alt={symbol} width={29} height={29} />
         <Typography variant="h2" ml={1}>
           {formatSymbol(symbol)}

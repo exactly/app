@@ -23,9 +23,10 @@ type HeaderInfoProps = {
     | 'body2'
     | 'overline'
     | undefined;
+  shadow?: boolean;
 };
 
-const HeaderInfo: FC<HeaderInfoProps> = ({ title, itemsInfo, variant = 'h6' }) => {
+const HeaderInfo: FC<HeaderInfoProps> = ({ title, itemsInfo, variant = 'h6', shadow = true }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -35,7 +36,7 @@ const HeaderInfo: FC<HeaderInfoProps> = ({ title, itemsInfo, variant = 'h6' }) =
       sx={{ bgcolor: 'white' }}
       width="100%"
       p="24px"
-      boxShadow="0px 4px 12px rgba(175, 177, 182, 0.2);"
+      boxShadow={shadow ? '0px 4px 12px rgba(175, 177, 182, 0.2)' : ''}
     >
       <Grid item mb="12px">
         <Typography variant={variant}>{title}</Typography>
