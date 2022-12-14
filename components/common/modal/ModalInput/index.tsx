@@ -13,6 +13,7 @@ import useAccountData from 'hooks/useAccountData';
 import { WeiPerEther } from '@ethersproject/constants';
 
 import formatNumber from 'utils/formatNumber';
+import { checkPrecision } from 'utils/utils';
 
 import styles from './style.module.scss';
 
@@ -30,13 +31,7 @@ function ModalInput({ value, name, disabled, symbol, error, onChange, onMax }: P
   const { decimals, usdPrice } = useAccountData(symbol);
   const prev = useRef('');
 
-  const isValid = useCallback(
-    (v: string): boolean => {
-      const regex = new RegExp(`^\\d*([.,]\\d{1,${decimals ?? 18}})?$`, 'g');
-      return regex.test(v);
-    },
-    [decimals],
-  );
+  const isValid = useCallback((v: string): boolean => checkPrecision(v, decimals), [decimals]);
 
   const usdValue = useMemo(() => {
     if (!value || !decimals || !usdPrice) return;
