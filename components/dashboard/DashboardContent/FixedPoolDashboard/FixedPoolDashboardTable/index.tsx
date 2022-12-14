@@ -88,7 +88,7 @@ function FixedPoolDashboardTable({ type, fixedPools }: Props) {
         <TableBody>
           {rows?.map(({ principal, maturity, symbol, market, decimals }) => (
             <TableRowFixedPool
-              key={maturity}
+              key={`${symbol}_${maturity}_${principal}`}
               type={type}
               amount={principal}
               maturityDate={maturity}
