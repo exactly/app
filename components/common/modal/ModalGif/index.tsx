@@ -18,7 +18,7 @@ import networkData from 'config/networkData.json' assert { type: 'json' };
 
 type Props = {
   tx: Transaction;
-  tryAgain: (props: any) => void;
+  tryAgain: () => void;
 };
 
 function ModalGif({ tx, tryAgain }: Props) {
