@@ -40,7 +40,7 @@ type TableRow = {
 
 const HeadCell: FC<{ title: string; tooltipTitle?: string }> = ({ title, tooltipTitle }) => {
   return (
-    <TableCell align={title === 'Maturity' ? 'left' : 'center'}>
+    <TableCell align="left">
       <Tooltip title={tooltipTitle} placement="top" arrow>
         <Typography variant="subtitle2" sx={{ color: 'grey.500' }} fontWeight={600}>
           {title}
@@ -140,16 +140,16 @@ const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ APRsPerMaturity, symb
                   {parseTimestamp(maturity)}
                 </Typography>
               </TableCell>
-              <TableCell align="center">${totalDeposited}</TableCell>
-              <TableCell align="center">${totalBorrowed}</TableCell>
-              <TableCell align="center">{toPercentage(depositAPR > minAPRValue ? depositAPR : undefined)}</TableCell>
-              <TableCell align="center">{toPercentage(borrowAPR > minAPRValue ? borrowAPR : undefined)}</TableCell>
+              <TableCell align="left">${totalDeposited}</TableCell>
+              <TableCell align="left">${totalBorrowed}</TableCell>
+              <TableCell align="left">{toPercentage(depositAPR > minAPRValue ? depositAPR : undefined)}</TableCell>
+              <TableCell align="left">{toPercentage(borrowAPR > minAPRValue ? borrowAPR : undefined)}</TableCell>
               <TableCell
-                align="center"
+                align="left"
                 size="small"
                 width={50}
                 onClick={(e) => e.preventDefault()}
-                sx={{ cursor: 'default' }}
+                sx={{ cursor: 'default', px: 0.5 }}
               >
                 <Button
                   disabled={depositAPR < minAPRValue}
@@ -161,11 +161,11 @@ const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ APRsPerMaturity, symb
               </TableCell>
 
               <TableCell
-                align="center"
+                align="left"
                 size="small"
                 width={50}
                 onClick={(e) => e.preventDefault()}
-                sx={{ cursor: 'default' }}
+                sx={{ cursor: 'default', px: 0.5 }}
               >
                 <Button
                   disabled={borrowAPR < minAPRValue}

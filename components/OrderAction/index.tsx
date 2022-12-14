@@ -25,7 +25,7 @@ const OrderAction: FC = () => {
 
   return (
     <Box>
-      <Grid container spacing={4}>
+      <Grid container spacing={1}>
         <Grid item>
           <Button variant="contained" onClick={() => handleAction('deposit')}>
             {translations[lang].deposit}
