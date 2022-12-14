@@ -33,7 +33,9 @@ const Market: NextPage<{ symbol: string }> = ({ symbol }) => {
             <ArrowBackIcon fontSize="small" />
           </Tooltip>
         </IconButton>
-        <Typography color="grey.500" sx={{ fontSize: '14px', fontWeight: 600, my: 'auto' }}>Back</Typography>
+        <Typography color="grey.500" sx={{ fontSize: '14px', fontWeight: 600, my: 'auto' }}>
+          Back
+        </Typography>
       </Box>
       <AssetHeaderInfo symbol={symbol} eMarketAddress={market} />
       <Grid container mt={5}>
