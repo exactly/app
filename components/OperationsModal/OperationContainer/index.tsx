@@ -1,15 +1,14 @@
 import React from 'react';
-import dynamic from 'next/dynamic';
 
-const Deposit = dynamic(() => import('components/operations/Deposit'));
-const Borrow = dynamic(() => import('components/operations/Borrow'));
-const Withdraw = dynamic(() => import('components/operations/Withdraw'));
-const Repay = dynamic(() => import('components/operations/Repay'));
-const DepositAtMaturity = dynamic(() => import('components/operations/DepositAtMaturity'));
-const BorrowAtMaturity = dynamic(() => import('components/operations/BorrowAtMaturity'));
-const WithdrawAtMaturity = dynamic(() => import('components/operations/WithdrawAtMaturity'));
-const RepayAtMaturity = dynamic(() => import('components/operations/RepayAtMaturity'));
-const Faucet = dynamic(() => import('components/operations/Faucet'));
+import Deposit from 'components/operations/Deposit';
+import Borrow from 'components/operations/Borrow';
+import Withdraw from 'components/operations/Withdraw';
+import Repay from 'components/operations/Repay';
+import DepositAtMaturity from 'components/operations/DepositAtMaturity';
+import BorrowAtMaturity from 'components/operations/BorrowAtMaturity';
+import WithdrawAtMaturity from 'components/operations/WithdrawAtMaturity';
+import RepayAtMaturity from 'components/operations/RepayAtMaturity';
+import Faucet from 'components/operations/Faucet';
 
 import styles from './style.module.scss';
 
