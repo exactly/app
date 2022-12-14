@@ -20,13 +20,13 @@ const AccountDataContext = createContext({
 } as ContextValues);
 
 export const AccountDataProvider: FC<PropsWithChildren> = ({ children }) => {
-  const [accountData, setAccountData] = useState<AccountData | undefined>(undefined);
+  const [accountData, setAccountData] = useState<AccountData | undefined>();
   const { walletAddress } = useWeb3();
 
   const previewer = usePreviewer();
 
   const getAccountData = useCallback(async () => {
-    if (!previewer) return undefined;
+    if (!previewer) return;
     const account = walletAddress ?? AddressZero;
 
     const exactly = await previewer.exactly(account);

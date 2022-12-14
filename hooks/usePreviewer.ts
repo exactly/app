@@ -12,12 +12,13 @@ export default () => {
   const provider = useProvider({ chainId: chain?.id });
 
   return useMemo(() => {
-    if (!provider || !chain) return null;
+    if (!chain) return null;
 
     const address = {
       goerli: goerliPreviewer.address,
       mainnet: mainnetPreviewer.address,
     }[chain.network];
+
     if (!address) return null;
 
     return new Contract(address, previewerABI, provider) as Previewer;

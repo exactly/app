@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useCallback, useContext, useState } from 'react';
 import { useAccount, useSigner } from 'wagmi';
 import { parseFixed } from '@ethersproject/bignumber';
 import { Contract } from '@ethersproject/contracts';
@@ -8,51 +8,51 @@ import Button from 'components/common/Button';
 
 import faucetAbi from './abi.json';
 
-import { getUnderlyingData } from 'utils/utils';
-
-import { useWeb3 } from 'hooks/useWeb3';
 import AccountDataContext from 'contexts/AccountDataContext';
+import useAssets from 'hooks/useAssets';
 
 import styles from './style.module.scss';
+
+const images: Record<string, string> = {
+  DAI: 'https://gateway.ipfs.io/ipfs/QmXyHPX8GS99dUiChsq7iRfZ4y3aofQqPjMjFJyCpkWs8e',
+  WBTC: 'https://gateway.ipfs.io/ipfs/QmZHbqjFzzbf5sR2LJtVPi5UeEqS7fmzLBiWFRAM1dsJRm',
+  USDC: 'https://gateway.ipfs.io/ipfs/QmSi4utTywi5EANuedkPT2gi5qj6g3aeXzPjMWkeYdk7Ag',
+};
 
 function Faucet() {
   const { data: signer } = useSigner();
   const { connector } = useAccount();
-  const { chain } = useWeb3();
   const { accountData } = useContext(AccountDataContext);
   const [loading, setLoading] = useState<string | undefined>(undefined);
+  const assets = useAssets();
 
-  async function mint(symbol: string) {
-    if (!accountData || !chain) return;
-    try {
-      const contract = getUnderlyingData(chain.network, symbol);
+  const mint = useCallback(
+    async (symbol: string) => {
+      if (!accountData) return;
+      try {
+        const { asset, decimals } = accountData[symbol];
 
-      setLoading(symbol);
-      const amounts: Record<string, string> = {
-        DAI: '50000',
-        USDC: '50000',
-        WBTC: '2',
-      };
+        setLoading(symbol);
+        const amounts: Record<string, string> = {
+          DAI: '50000',
+          USDC: '50000',
+          WBTC: '2',
+        };
 
-      const faucet = new Contract('0x1ca525Cd5Cb77DB5Fa9cBbA02A0824e283469DBe', faucetAbi, signer ?? undefined); // HACK de-hardcode
-      const tx = await faucet?.mint(contract?.address, parseFixed(amounts[symbol], accountData[symbol].decimals));
-      await tx.wait();
-      setLoading(undefined);
-    } catch (e) {
-      setLoading(undefined);
-    }
-  }
+        const faucet = new Contract('0x1ca525Cd5Cb77DB5Fa9cBbA02A0824e283469DBe', faucetAbi, signer ?? undefined);
+        const tx = await faucet?.mint(asset, parseFixed(amounts[symbol], decimals));
+        await tx.wait();
+      } catch {
+        setLoading(undefined);
+      } finally {
+        setLoading(undefined);
+      }
+    },
+    [accountData, signer],
+  );
 
-  const assets = ['DAI', 'USDC', 'ETH', 'WBTC', 'wstETH'];
-
-  async function addTokens() {
+  const addTokens = useCallback(async () => {
     if (!accountData) return;
-
-    const images: Record<string, string> = {
-      DAI: 'https://gateway.ipfs.io/ipfs/QmXyHPX8GS99dUiChsq7iRfZ4y3aofQqPjMjFJyCpkWs8e',
-      WBTC: 'https://gateway.ipfs.io/ipfs/QmZHbqjFzzbf5sR2LJtVPi5UeEqS7fmzLBiWFRAM1dsJRm',
-      USDC: 'https://gateway.ipfs.io/ipfs/QmSi4utTywi5EANuedkPT2gi5qj6g3aeXzPjMWkeYdk7Ag',
-    };
 
     try {
       await Promise.all(
@@ -65,7 +65,7 @@ function Faucet() {
     } catch (error: any) {
       if (error.code !== 4001) throw error;
     }
-  }
+  }, [accountData, connector]);
 
   return (
     <>
@@ -81,12 +81,12 @@ function Faucet() {
           <p></p>
         </div>
         {assets.map((asset) => {
-          if (asset === 'ETH') {
+          if (asset === 'WETH') {
             return (
               <div className={styles.assetContainer} key={asset}>
                 <p className={styles.asset}>
                   <Image src={`/img/assets/weth.svg`} alt={asset} width={40} height={40} />
-                  {asset}
+                  ETH
                 </p>
                 <div className={styles.buttonContainer}>
                   <a href="https://goerlifaucet.com/" target="_blank" rel="noopener noreferrer">
