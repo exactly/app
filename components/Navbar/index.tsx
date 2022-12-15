@@ -10,13 +10,14 @@ const Wallet = dynamic(() => import('components/Wallet'));
 import ThemeContext from 'contexts/ThemeContext';
 import { useWeb3 } from 'hooks/useWeb3';
 
-import { AppBar, Box, Button, Chip, IconButton, Toolbar } from '@mui/material';
+import { AppBar, Box, Chip, IconButton, Toolbar } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import allowedNetworks from 'config/allowedNetworks.json';
 import { globals } from 'styles/theme';
 import analytics from 'utils/analytics';
 import { useModalStatus } from 'contexts/ModalStatusContext';
 import MobileMenu from 'components/MobileMenu';
+import Link from 'next/link';
 const { maxWidth, onlyMobile, onlyDesktop, onlyDesktopFlex } = globals;
 
 const routes = [
@@ -27,7 +28,7 @@ const routes = [
 function Navbar() {
   const { walletAddress } = useWeb3();
   const { switchNetworkAsync } = useSwitchNetwork();
-  const { pathname: currentPathname, query, push } = useRouter();
+  const { pathname: currentPathname, query } = useRouter();
   const { chain } = useWeb3();
 
   const { openOperationModal } = useModalStatus();
@@ -55,24 +56,35 @@ function Navbar() {
       <DisclaimerModal />
       <AppBar position="static" color="transparent" sx={{ maxWidth }}>
         <Toolbar disableGutters sx={{ padding: '0 0', gap: '8px' }}>
-          <Box mr="10px" onClick={() => push('/markets', query)} sx={{ cursor: 'pointer' }}>
-            <Image
-              src={theme === 'light' ? '/img/logo.svg' : '/img/logo-white.png'}
-              alt="Exactly Logo"
-              layout="fixed"
-              width={103}
-              height={30}
-            />
-          </Box>
+          <Link href={{ pathname: '/', query }}>
+            <Box mr="10px" sx={{ cursor: 'pointer' }}>
+              <Image
+                src={theme === 'light' ? '/img/logo.svg' : '/img/logo-white.png'}
+                alt="Exactly Logo"
+                layout="fixed"
+                width={103}
+                height={30}
+              />
+            </Box>
+          </Link>
           {routes.map(({ name, pathname }) => (
-            <Button
-              key={pathname}
-              variant={pathname === currentPathname ? 'contained' : 'text'}
-              onClick={() => push(pathname, query)}
-              sx={{ display: onlyDesktop, px: '24px' }}
-            >
-              {name}
-            </Button>
+            <Link key={pathname} href={{ pathname, query }}>
+              <Box
+                sx={{
+                  mx: '8px',
+                  py: '4px',
+                  display: onlyDesktop,
+                  cursor: 'pointer',
+                  color: currentPathname === pathname ? 'primary' : 'grey.600',
+                  borderBottom: currentPathname === pathname ? '2px solid' : '2px solid transparent',
+                  ':hover': { borderBottom: '2px solid' },
+                  fontSize: '14px',
+                  fontWeight: 700,
+                }}
+              >
+                {name}
+              </Box>
+            </Link>
           ))}
           <Box sx={{ display: 'flex', gap: '10px', ml: 'auto' }}>
             {/* TODO: put chainId constants in a config file */}
