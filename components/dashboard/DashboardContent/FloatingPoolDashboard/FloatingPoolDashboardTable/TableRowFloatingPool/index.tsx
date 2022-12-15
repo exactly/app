@@ -1,5 +1,5 @@
 import type { BigNumber } from '@ethersproject/bignumber';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useMemo } from 'react';
 import { formatFixed } from '@ethersproject/bignumber';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
@@ -31,20 +31,10 @@ function TableRowFloatingPool({ symbol, depositAmount, borrowedAmount, eTokenAmo
   const { setMarket } = useContext(MarketContext);
   const { query } = useRouter();
 
-  const [rate, setRate] = useState<number | undefined>();
-
-  useEffect(() => {
-    if (accountData) {
-      getExchangeRate();
-    }
-  }, [accountData]);
-
-  function getExchangeRate() {
+  const rate = useMemo<number | undefined>(() => {
     if (!accountData || !symbol) return;
-    const data = accountData;
-    const exchangeRate = parseFloat(formatFixed(data[symbol].usdPrice, 18));
-    setRate(exchangeRate);
-  }
+    return parseFloat(formatFixed(accountData[symbol].usdPrice, 18));
+  }, [accountData, symbol]);
 
   return (
     <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }} hover>

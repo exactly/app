@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { Grid } from '@mui/material';
 import { basename } from 'path';
 import { readdir, readFile } from 'fs/promises';
 import type { GetStaticPaths, GetStaticProps, NextPage } from 'next';
@@ -11,7 +10,7 @@ import AssetHeaderInfo from 'components/asset/Header';
 
 import { useRouter } from 'next/router';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import { Box, IconButton, Tooltip, Typography } from '@mui/material';
+import { Box, IconButton, Tooltip, Typography, Grid } from '@mui/material';
 import analytics from 'utils/analytics';
 import useAccountData from 'hooks/useAccountData';
 import { globals } from 'styles/theme';
