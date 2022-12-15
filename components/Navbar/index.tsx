@@ -3,7 +3,7 @@ import DisclaimerModal from 'components/DisclaimerModal';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
-import React, { useContext, useEffect, useMemo } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 
 const Wallet = dynamic(() => import('components/Wallet'));
 
@@ -16,6 +16,7 @@ import allowedNetworks from 'config/allowedNetworks.json';
 import { globals } from 'styles/theme';
 import analytics from 'utils/analytics';
 import { useModalStatus } from 'contexts/ModalStatusContext';
+import MobileMenu from 'components/MobileMenu';
 const { maxWidth, onlyMobile, onlyDesktop, onlyDesktopFlex } = globals;
 
 const routes = [
@@ -31,6 +32,7 @@ function Navbar() {
 
   const { openOperationModal } = useModalStatus();
   const { theme } = useContext(ThemeContext);
+  const [openMenu, setOpenMenu] = useState<boolean>(false);
 
   useEffect(() => {
     walletAddress && void analytics.identify(walletAddress);
@@ -79,9 +81,18 @@ function Navbar() {
             )}
             <Wallet />
           </Box>
-          <IconButton size="small" edge="start" aria-label="menu" sx={{ display: onlyMobile }}>
+          <IconButton
+            size="small"
+            edge="start"
+            aria-label="menu"
+            sx={{ display: onlyMobile }}
+            onClick={() => setOpenMenu(true)}
+          >
             <MenuIcon sx={{ color: 'grey.300' }} />
           </IconButton>
+          <Box display={onlyMobile}>
+            <MobileMenu open={openMenu} handleClose={() => setOpenMenu(false)} />
+          </Box>
         </Toolbar>
       </AppBar>
     </Box>
