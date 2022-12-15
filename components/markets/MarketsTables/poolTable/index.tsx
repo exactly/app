@@ -1,4 +1,4 @@
-import React, { FC, useContext } from 'react';
+import React, { FC, useCallback, useContext, useMemo } from 'react';
 import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -26,6 +26,7 @@ import { MarketContext } from 'contexts/MarketContext';
 import AccountDataContext from 'contexts/AccountDataContext';
 import { useWeb3 } from 'hooks/useWeb3';
 import { Operation, useModalStatus } from 'contexts/ModalStatusContext';
+import useAssets from 'hooks/useAssets';
 
 const { minAPRValue } = numbers;
 
@@ -63,53 +64,56 @@ const HeadCell: FC<TableHead> = ({ title, tooltipTitle, width }) => {
     </TableCell>
   );
 };
-const defaultRows: TableRow[] = [
-  { symbol: 'DAI' },
-  { symbol: 'USDC' },
-  { symbol: 'WETH' },
-  { symbol: 'WBTC' },
-  { symbol: 'wstETH' },
-];
 
 const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) => {
   const { walletAddress, connect } = useWeb3();
   const { accountData } = useContext(AccountDataContext);
   const { setDate, setMarket } = useContext(MarketContext);
   const { openOperationModal } = useModalStatus();
+  const assets = useAssets();
+  const defaultRows = useMemo<TableRow[]>(() => assets.map((s) => ({ symbol: s })), [assets]);
+
   const tempRows = isLoading ? defaultRows : rows; // HACK this with the timeout in "marketsTables" is to avoid a screen flash when MUI  recive the new data of rows
   const { query } = useRouter();
 
-  const handleActionClick = (
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
-    action: Extract<Operation, 'borrow' | 'deposit' | 'depositAtMaturity' | 'borrowAtMaturity'>,
-    symbol: string,
-    maturity: any,
-  ) => {
-    e.preventDefault();
-    if (!walletAddress && connect) return connect();
+  const handleActionClick = useCallback(
+    (
+      e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
+      action: Extract<Operation, 'borrow' | 'deposit' | 'depositAtMaturity' | 'borrowAtMaturity'>,
+      symbol: string,
+      maturity?: number,
+    ) => {
+      e.preventDefault();
 
-    if (!accountData) return;
+      if (!walletAddress && connect) return connect();
 
-    const { market } = accountData[symbol];
+      if (!accountData) return;
 
-    setMarket({ value: market });
+      const { market } = accountData[symbol];
 
-    if (maturity) {
-      setDate({
-        value: maturity.toString(),
-        label: parseTimestamp(maturity),
-      });
-    }
+      setMarket({ value: market });
 
-    openOperationModal(action);
-  };
+      if (maturity) {
+        setDate({
+          value: maturity.toString(),
+          label: parseTimestamp(maturity),
+        });
+      }
 
-  const isDisable = (apr: number | undefined) => {
-    if (rateType === 'floating') return false;
-    if (!apr) return true;
+      openOperationModal(action);
+    },
+    [accountData, connect, openOperationModal, setDate, setMarket, walletAddress],
+  );
 
-    return apr < minAPRValue;
-  };
+  const isDisable = useCallback(
+    (apr: number | undefined) => {
+      if (rateType === 'floating') return false;
+      if (!apr) return true;
+
+      return apr < minAPRValue;
+    },
+    [rateType],
+  );
 
   return (
     <TableContainer component={Paper}>
