@@ -32,16 +32,16 @@ const HeaderInfo: FC<HeaderInfoProps> = ({ title, itemsInfo, variant = 'h6', sha
 
   return (
     <Grid
-      mx={isMobile ? 2 : 0}
+      mx={isMobile ? 1 : 0}
       sx={{ bgcolor: 'white' }}
       width="100%"
-      p="24px"
+      p={isMobile ? '16px' : '24px'}
       boxShadow={shadow ? '0px 4px 12px rgba(175, 177, 182, 0.2)' : ''}
     >
       <Grid item mb="12px">
         <Typography variant={variant}>{title}</Typography>
       </Grid>
-      <Grid item container spacing={4}>
+      <Grid item container spacing={isMobile ? 2 : 4}>
         {itemsInfo.map(({ label, value, underLabel, tooltipTitle }) => (
           <ItemInfo
             key={label.trim()}

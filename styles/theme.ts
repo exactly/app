@@ -2,6 +2,9 @@ import { createTheme, Shadows } from '@mui/material/styles';
 
 export const globals = {
   maxWidth: 1250,
+  onlyMobile: { xs: 'block', sm: 'none' },
+  onlyDesktop: { xs: 'none', sm: 'block' },
+  onlyDesktopFlex: { xs: 'none', sm: 'flex' },
 };
 
 const theme = createTheme({
