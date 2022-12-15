@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import React, { FC, useMemo } from 'react';
 import { Box, Button, Divider, Grid, Tooltip, Typography } from '@mui/material';
 import numbers from 'config/numbers.json';
 import useMarketsPools from 'hooks/useMarketsPools';
@@ -9,20 +9,14 @@ import { toPercentage } from 'utils/utils';
 import { PoolTableProps, TableHead, TableRow } from '../poolTable';
 import Link from 'next/link';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import useAssets from 'hooks/useAssets';
 
 const { minAPRValue } = numbers;
 
-// TODO: replace this with de-hardcoded data
-const defaultRows: TableRow[] = [
-  { symbol: 'DAI' },
-  { symbol: 'USDC' },
-  { symbol: 'WETH' },
-  { symbol: 'WBTC' },
-  { symbol: 'wstETH' },
-];
-
 const PoolMobile: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) => {
   const { handleActionClick, isDisable } = useMarketsPools();
+  const assets = useAssets();
+  const defaultRows = useMemo<TableRow[]>(() => assets.map((s) => ({ symbol: s })), [assets]);
   const tempRows = isLoading ? defaultRows : rows;
   const { query } = useRouter();
   const isFloating = rateType === 'floating';
