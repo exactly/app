@@ -1,8 +1,6 @@
 import React, { ChangeEvent, FC, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { WeiPerEther } from '@ethersproject/constants';
-import { ErrorCode } from '@ethersproject/logger';
-import { captureException } from '@sentry/nextjs';
 import LoadingButton from '@mui/lab/LoadingButton';
 import Box from '@mui/material/Box';
 
