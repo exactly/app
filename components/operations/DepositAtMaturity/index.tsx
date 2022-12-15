@@ -37,6 +37,9 @@ import useERC20 from 'hooks/useERC20';
 import analytics from 'utils/analytics';
 import { useOperationContext, usePreviewTx } from 'contexts/OperationContext';
 import { toPercentage } from 'utils/utils';
+import ModalRow from 'components/common/modal/ModalRow';
+import formatNumber from 'utils/formatNumber';
+import handleOperationError from 'utils/handleOperationError';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 
@@ -196,19 +199,8 @@ const DepositAtMaturity: FC = () => {
 
       void getAccountData();
     } catch (error: any) {
-      if (error?.code === ErrorCode.ACTION_REJECTED) {
-        return setErrorData({
-          status: true,
-          message: translations[lang].deniedTransaction,
-        });
-      }
-      captureException(error);
-      if (depositTx) return setTx({ status: 'error', hash: depositTx.hash });
-
-      setErrorData({
-        status: true,
-        message: translations[lang].generalError,
-      });
+      if (depositTx) setTx({ status: 'error', hash: depositTx.hash });
+      setErrorData({ status: true, message: handleOperationError(error) });
     } finally {
       setIsLoadingOp(false);
     }
@@ -217,7 +209,6 @@ const DepositAtMaturity: FC = () => {
     accountData,
     date,
     getAccountData,
-    lang,
     marketContract,
     qty,
     setErrorData,
@@ -225,7 +216,6 @@ const DepositAtMaturity: FC = () => {
     setTx,
     slippage,
     symbol,
-    translations,
     walletAddress,
   ]);
 
@@ -276,6 +266,14 @@ const DepositAtMaturity: FC = () => {
     void updateAPR();
   }, [updateAPR]);
 
+  const optimalDepositAmount = useMemo<string | undefined>(() => {
+    if (!accountData) return;
+    const { fixedPools = [], decimals = 18 } = accountData[symbol];
+    const pool = fixedPools.find((p) => formatFixed(p.maturity) === date?.value);
+    if (!pool) return;
+    return formatNumber(formatFixed(pool.optimalDeposit, decimals), symbol);
+  }, [accountData, symbol, date?.value]);
+
   if (tx) return <ModalGif tx={tx} tryAgain={deposit} />;
 
   return (
@@ -317,6 +315,8 @@ const DepositAtMaturity: FC = () => {
         }}
         line
       />
+
+      <ModalRow text="Optimal deposit amount" value={optimalDepositAmount} asset={symbol} line />
 
       <ModalStepper currentStep={requiresApproval ? 1 : 2} totalSteps={3} />
 
