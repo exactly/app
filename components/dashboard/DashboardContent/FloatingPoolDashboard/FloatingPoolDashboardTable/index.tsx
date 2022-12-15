@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useMemo, useState } from 'react';
+import React, { useContext, useMemo } from 'react';
 import {
   Table,
   TableBody,
@@ -20,6 +20,7 @@ import TableRowFloatingPool from './TableRowFloatingPool';
 import type { HealthFactor } from 'types/HealthFactor';
 import type { TableHeader } from 'types/TableHeader';
 import type { Previewer } from 'types/contracts/Previewer';
+import useAssets from 'hooks/useAssets';
 
 type Props = {
   type: 'deposit' | 'borrow';
@@ -30,15 +31,14 @@ function FloatingPoolDashboardTable({ type, healthFactor }: Props) {
   const { walletAddress } = useWeb3();
   const { accountData } = useContext(AccountDataContext);
 
-  const [itemData, setItemData] = useState<Array<FloatingPoolItemData> | undefined>();
+  const orderAssets = useAssets();
 
-  const orderAssets = ['DAI', 'USDC', 'WETH', 'WBTC', 'wstETH'];
+  const defaultRows: FloatingPoolItemData[] = useMemo<FloatingPoolItemData[]>(
+    () => orderAssets.map((s) => ({ symbol: s })),
+    [orderAssets],
+  );
 
-  useEffect(() => {
-    getCurrentBalance();
-  }, [walletAddress, accountData, type]);
-
-  function getCurrentBalance() {
+  const itemData = useMemo<FloatingPoolItemData[] | undefined>(() => {
     if (!accountData) return;
 
     const allMarkets = Object.values(accountData).sort(
@@ -47,28 +47,22 @@ function FloatingPoolDashboardTable({ type, healthFactor }: Props) {
       },
     );
 
-    const data: FloatingPoolItemData[] = [];
-
-    allMarkets.forEach((market) => {
+    return allMarkets.map((market) => {
       const symbol = market.assetSymbol;
       const depositBalance = market.floatingDepositAssets;
       const eTokens = market.floatingDepositShares;
       const borrowBalance = market.floatingBorrowAssets;
       const address = market.market;
 
-      const obj = {
+      return {
         symbol: symbol,
         eTokens: eTokens,
         depositedAmount: depositBalance,
         borrowedAmount: borrowBalance,
         market: address,
       };
-
-      data.push(obj);
     });
-
-    setItemData(data);
-  }
+  }, [accountData, orderAssets]);
 
   const headers: TableHeader[] = useMemo(() => {
     return [
@@ -104,15 +98,6 @@ function FloatingPoolDashboardTable({ type, healthFactor }: Props) {
       },
     ];
   }, [type]);
-
-  // TODO: remove hardcoded list
-  const defaultRows: FloatingPoolItemData[] = [
-    { symbol: 'DAI' },
-    { symbol: 'USDC' },
-    { symbol: 'WETH' },
-    { symbol: 'WBTC' },
-    { symbol: 'wstETH' },
-  ];
 
   const rows = itemData || defaultRows;
 
