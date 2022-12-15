@@ -13,14 +13,15 @@ import queryRate from 'utils/queryRates';
 
 import type { Market } from 'types/Market';
 
-import { Typography } from '@mui/material';
+import { Box, Button, Typography } from '@mui/material';
 
 import { globals } from 'styles/theme';
 import { useWeb3 } from 'hooks/useWeb3';
 import networkData from 'config/networkData.json' assert { type: 'json' };
 import useAssets from 'hooks/useAssets';
+import PoolMobile from './poolMobile';
 
-const { maxWidth } = globals;
+const { maxWidth, onlyMobile, onlyDesktop } = globals;
 
 const floatingHeaders = [
   {
@@ -82,6 +83,7 @@ const MarketTables: FC = () => {
   const [floatingRows, setFloatingRows] = useState<TableRow[]>([...defaultRows]);
   const [fixedRows, setFixedRows] = useState<TableRow[]>([...defaultRows]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [selected, setSelected] = useState<'floating' | 'fixed'>('floating');
 
   const markets = useMemo<Market[]>(() => (accountData ? formatMarkets(accountData) : []), [accountData]);
 
@@ -185,6 +187,7 @@ const MarketTables: FC = () => {
         borderRadius="0px 0px 6px 6px"
         bgcolor="white"
         borderTop="4px solid #34C53A"
+        display={onlyDesktop}
       >
         <Typography variant="h6" pb="16px">
           Variable Interest Rate
@@ -199,12 +202,49 @@ const MarketTables: FC = () => {
         borderRadius="0px 0px 6px 6px"
         bgcolor="white"
         borderTop="4px solid #008CF4"
+        display={onlyDesktop}
       >
         <Typography variant="h6" pb="16px">
           Fixed Interest Rate
         </Typography>
         <PoolTable isLoading={isLoading} headers={fixedHeaders} rows={fixedRows} rateType={'fixed'} />
       </Grid>
+      <Box display={onlyMobile} width="100%" px={1} my={2}>
+        <Box display="flex" justifyContent="center" width="100%" mb={1}>
+          <Button
+            variant={selected === 'floating' ? 'contained' : 'outlined'}
+            fullWidth
+            sx={{
+              borderRadius: '6px 0px 0px 6px',
+              borderWidth: '1px',
+              color: selected === 'floating' ? 'white' : 'black',
+            }}
+            onClick={() => setSelected('floating')}
+          >
+            Variable Interest Rate
+          </Button>
+          <Button
+            variant={selected === 'fixed' ? 'contained' : 'outlined'}
+            fullWidth
+            sx={{
+              borderRadius: '0px 6px 6px 0px',
+              borderWidth: '1px',
+              color: selected === 'fixed' ? 'white' : 'black',
+            }}
+            onClick={() => setSelected('fixed')}
+          >
+            Fixed Interest Rate
+          </Button>
+        </Box>
+        <Box>
+          {selected === 'floating' && (
+            <PoolMobile isLoading={isLoading} headers={floatingHeaders} rows={floatingRows} rateType="floating" />
+          )}
+          {selected === 'fixed' && (
+            <PoolMobile isLoading={isLoading} headers={fixedHeaders} rows={fixedRows} rateType="fixed" />
+          )}
+        </Box>
+      </Box>
     </Grid>
   );
 };
