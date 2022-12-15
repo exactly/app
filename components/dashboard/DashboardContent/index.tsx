@@ -16,18 +16,18 @@ import { Box } from '@mui/material';
 import MobileTabs from 'components/MobileTabs';
 import DashboardMobile from './DashboardMobile';
 
+const depositTab = {
+  label: 'Your Deposits',
+  value: 'deposit',
+};
+
+const borrowTab = {
+  label: 'Your Borrows',
+  value: 'borrow',
+};
+
 function DashboardContent() {
   const { walletAddress } = useWeb3();
-
-  const depositTab = {
-    label: 'Your Deposits',
-    value: 'deposit',
-  };
-
-  const borrowTab = {
-    label: 'Your Borrows',
-    value: 'borrow',
-  };
 
   const allTabs = [
     {
