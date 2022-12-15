@@ -57,7 +57,7 @@ const Footer = () => {
                 Documentation
               </a>
             </Typography>
-            <a target="_blank" rel="noreferrer noopener" href="https://github.com/exactly-protocol">
+            <a target="_blank" rel="noreferrer noopener" href="https://github.com/exactly">
               <GitHubIcon fontSize="small" />
             </a>
             <a target="_blank" rel="noreferrer noopener" href="https://twitter.com/exactlyprotocol">
