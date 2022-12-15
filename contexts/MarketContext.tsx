@@ -1,4 +1,4 @@
-import React, { FC, ReactNode, useMemo, createContext, useContext, useEffect, useState, useCallback } from 'react';
+import React, { type FC, useMemo, createContext, useContext, useEffect, useState, type PropsWithChildren } from 'react';
 import dayjs from 'dayjs';
 
 import { Address } from 'types/Address';
@@ -27,51 +27,42 @@ const defaultValues: ContextValues = {
   dates: [],
 };
 
-const MarketContext = createContext(defaultValues);
+const MarketContext = createContext<ContextValues>(defaultValues);
 
-const MarketProvider: FC<{ children?: ReactNode }> = ({ children }) => {
+const MarketProvider: FC<PropsWithChildren> = ({ children }) => {
   const [market, setMarket] = useState<Address>();
   const [date, setDate] = useState<Date>();
-  const [dates, setDates] = useState<Date[]>([]);
 
   const { accountData } = useContext(AccountDataContext);
 
-  const getPools = useCallback(async () => {
-    try {
-      const currentTimestamp = dayjs().unix();
-      const interval = 2419200;
-      let timestamp = currentTimestamp - (currentTimestamp % interval);
-      const maxPools = accountData?.maxFuturePools ?? 3;
+  const dates = useMemo<Date[]>(() => {
+    const currentTimestamp = dayjs().unix();
+    const interval = 2419200;
+    let timestamp = currentTimestamp - (currentTimestamp % interval);
+    const maxPools = accountData?.maxFuturePools ?? 3;
 
-      const pools = [];
+    const pools: number[] = [];
 
-      for (let i = 0; i < maxPools; i++) {
-        timestamp += interval;
-        pools.push(timestamp);
-      }
-
-      const dates = pools?.map((pool: any) => {
-        return pool.toString();
-      });
-
-      const formattedDates = dates?.map((date: any) => {
-        return {
-          value: date,
-          label: parseTimestamp(date),
-        };
-      });
-
-      setDates(formattedDates);
-
-      !date && formattedDates && setDate(formattedDates[0]);
-    } catch (e) {
-      console.log(e);
+    for (let i = 0; i < maxPools; i++) {
+      timestamp += interval;
+      pools.push(timestamp);
     }
-  }, [accountData?.maxFuturePools, date]);
+
+    const formattedDates = pools.map((pool: number) => {
+      return {
+        value: pool.toString(),
+        label: parseTimestamp(pool),
+      };
+    });
+
+    return formattedDates;
+  }, [accountData?.maxFuturePools]);
 
   useEffect(() => {
-    getPools();
-  }, [accountData, getPools]);
+    if (dates.length && !date) {
+      setDate(dates[0]);
+    }
+  }, [accountData, date, dates]);
 
   const account = useMemo(
     () => accountData && Object.values(accountData).find((m) => m.market.toLowerCase() === market?.value.toLowerCase()),

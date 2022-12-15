@@ -18,16 +18,16 @@ function DashboardHeader() {
   const { walletAddress } = useWeb3();
   const { accountData } = useContext(AccountDataContext);
 
-  const [totalDeposited, setTotalDeposited] = useState<BigNumber | undefined>();
-  const [totalBorrowed, setTotalBorrowed] = useState<BigNumber | undefined>();
-
   const healthFactor = useMemo<HealthFactor | undefined>(() => {
     if (!accountData) return undefined;
     return getHealthFactorData(accountData);
   }, [accountData]);
 
-  useEffect(() => {
-    if (!accountData) return;
+  const { totalDeposited, totalBorrowed } = useMemo<{
+    totalDeposited?: BigNumber;
+    totalBorrowed?: BigNumber;
+  }>(() => {
+    if (!accountData) return {};
 
     const { totalDepositedUSD, totalBorrowedUSD } = Object.keys(accountData).reduce(
       (acc, symbol) => {
@@ -74,25 +74,24 @@ function DashboardHeader() {
       { totalDepositedUSD: Zero, totalBorrowedUSD: Zero },
     );
 
-    setTotalDeposited(totalDepositedUSD);
-    setTotalBorrowed(totalBorrowedUSD);
+    return { totalDeposited: totalDepositedUSD, totalBorrowed: totalBorrowedUSD };
   }, [accountData]);
 
   const itemsInfo: ItemInfoProps[] = useMemo((): ItemInfoProps[] => {
     return [
       {
         label: 'Your Deposits',
-        value: totalDeposited != null ? `$${formatNumber(formatFixed(totalDeposited, 18))}` : undefined,
+        value: totalDeposited ? `$${formatNumber(formatFixed(totalDeposited, 18))}` : undefined,
       },
       {
         label: 'Your Borrows',
-        value: totalBorrowed != null ? `$${formatNumber(formatFixed(totalBorrowed, 18))}` : undefined,
+        value: totalBorrowed ? `$${formatNumber(formatFixed(totalBorrowed, 18))}` : undefined,
       },
       ...(healthFactor && walletAddress
         ? [
             {
               label: 'Health Factor',
-              value: healthFactor != null ? parseHealthFactor(healthFactor.debt, healthFactor.collateral) : undefined,
+              value: healthFactor ? parseHealthFactor(healthFactor.debt, healthFactor.collateral) : undefined,
               tooltipTitle:
                 'How “safe” is your leverage portfolio, defined as the risk adjusted proportion of collateral deposited versus the risk adjusted amount borrowed. A health factor above 1.25 is recommended to avoid liquidation.',
             },
