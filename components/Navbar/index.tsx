@@ -16,7 +16,7 @@ import allowedNetworks from 'config/allowedNetworks.json';
 import { globals } from 'styles/theme';
 import analytics from 'utils/analytics';
 import { useModalStatus } from 'contexts/ModalStatusContext';
-const { maxWidth } = globals;
+const { maxWidth, onlyMobile, onlyDesktop, onlyDesktopFlex } = globals;
 
 const routes = [
   { pathname: '/', name: 'Markets' },
@@ -49,10 +49,10 @@ function Navbar() {
   }
 
   return (
-    <Box sx={{ display: 'flex', justifyContent: 'center' }} mb="20px" mx="8px">
+    <Box sx={{ display: 'flex', justifyContent: 'center' }} mx="8px">
       <DisclaimerModal />
       <AppBar position="static" color="transparent" sx={{ maxWidth }}>
-        <Toolbar disableGutters sx={{ padding: '16px 0', gap: '8px' }}>
+        <Toolbar disableGutters sx={{ padding: '0 0', gap: '8px' }}>
           <Box mr="10px" onClick={() => push('/markets', query)} sx={{ cursor: 'pointer' }}>
             <Image
               src={theme === 'light' ? '/img/logo.svg' : '/img/logo-white.png'}
@@ -67,7 +67,7 @@ function Navbar() {
               key={pathname}
               variant={pathname === currentPathname ? 'contained' : 'text'}
               onClick={() => push(pathname, query)}
-              sx={{ display: { xs: 'none', md: 'block' }, px: '24px' }}
+              sx={{ display: onlyDesktop, px: '24px' }}
             >
               {name}
             </Button>
@@ -75,15 +75,11 @@ function Navbar() {
           <Box sx={{ display: 'flex', gap: '10px', ml: 'auto' }}>
             {/* TODO: put chainId constants in a config file */}
             {chain?.id === 5 && (
-              <Chip
-                label="Goerli Faucet"
-                onClick={handleFaucetClick}
-                sx={{ my: 'auto', display: { xs: 'none', md: 'flex' } }}
-              />
+              <Chip label="Goerli Faucet" onClick={handleFaucetClick} sx={{ my: 'auto', display: onlyDesktopFlex }} />
             )}
             <Wallet />
           </Box>
-          <IconButton size="large" edge="start" aria-label="menu" sx={{ display: { xs: 'block', md: 'none' } }}>
+          <IconButton size="small" edge="start" aria-label="menu" sx={{ display: onlyMobile }}>
             <MenuIcon sx={{ color: 'grey.300' }} />
           </IconButton>
         </Toolbar>
