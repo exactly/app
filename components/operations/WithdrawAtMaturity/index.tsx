@@ -115,7 +115,7 @@ const WithdrawAtMaturity: FC = () => {
 
     setAmountToWithdraw(amount);
     setMinAmountToWithdraw(isEarlyWithdraw ? amount.mul(rawSlippage).div(WeiPerEther) : amount);
-  }, [decimals, date, qty, marketContract, previewerContract, rawSlippage, isEarlyWithdraw]);
+  }, [decimals, date, qty, marketContract, previewerContract, rawSlippage, isEarlyWithdraw, walletAddress]);
 
   useEffect(() => {
     if (errorData?.status) return;
