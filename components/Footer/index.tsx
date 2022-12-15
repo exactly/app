@@ -37,7 +37,7 @@ const Footer = () => {
             <a
               rel="noopener noreferrer"
               target="_blank"
-              href="https://github.com/exactly-protocol/about/tree/main/jobs"
+              href="https://github.com/exactly/about/tree/main/jobs"
             >
               {translations[lang].jobs}
             </a>
