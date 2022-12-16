@@ -38,6 +38,7 @@ import { toPercentage } from 'utils/utils';
 import ModalRow from 'components/common/modal/ModalRow';
 import formatNumber from 'utils/formatNumber';
 import handleOperationError from 'utils/handleOperationError';
+import useAccountData from 'hooks/useAccountData';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 
@@ -66,7 +67,8 @@ const DepositAtMaturity: FC = () => {
 
   const [slippage, setSlippage] = useState<number>(0);
   const [editSlippage, setEditSlippage] = useState<boolean>(false);
-  const [fixedRate, setFixedRate] = useState<number | undefined>(undefined);
+  const [fixedRate, setFixedRate] = useState<number | undefined>();
+  const [gtMaxYield, setGtMaxYield] = useState<boolean>(false);
 
   const ETHRouterContract = useETHRouter();
   const marketContract = useMarket(market?.value);
@@ -74,6 +76,7 @@ const DepositAtMaturity: FC = () => {
   const assetContract = useERC20();
 
   const walletBalance = useBalance(symbol, assetContract);
+  const { decimals = 18 } = useAccountData(symbol);
 
   const previewerContract = usePreviewer();
 
@@ -105,7 +108,6 @@ const DepositAtMaturity: FC = () => {
         return gasPrice.mul(gasEstimation);
       }
 
-      const decimals = await marketContract.decimals();
       const amount = quantity ? parseFixed(quantity, decimals) : DEFAULT_AMOUNT;
       const minAmount = amount.mul(parseFixed(String(1 - slippage), 18)).div(WeiPerEther);
 
@@ -118,7 +120,17 @@ const DepositAtMaturity: FC = () => {
 
       return gasPrice.mul(gasEstimation);
     },
-    [walletAddress, marketContract, ETHRouterContract, date, requiresApproval, symbol, slippage, approveEstimateGas],
+    [
+      walletAddress,
+      marketContract,
+      ETHRouterContract,
+      date,
+      requiresApproval,
+      symbol,
+      slippage,
+      approveEstimateGas,
+      decimals,
+    ],
   );
 
   const { isLoading: previewIsLoading } = usePreviewTx({ qty, needsApproval, previewGasCost });
@@ -135,6 +147,13 @@ const DepositAtMaturity: FC = () => {
     }
   }, [setErrorData, setQty, walletBalance]);
 
+  const optimalDepositAmount = useMemo<BigNumber | undefined>(() => {
+    if (!accountData) return;
+    const { fixedPools = [] } = accountData[symbol];
+    const pool = fixedPools.find((p) => formatFixed(p.maturity) === date?.value);
+    return pool?.optimalDeposit;
+  }, [accountData, symbol, date?.value]);
+
   const handleInputChange = useCallback(
     ({ target: { value, valueAsNumber } }: ChangeEvent<HTMLInputElement>) => {
       setQty(value);
@@ -146,10 +165,11 @@ const DepositAtMaturity: FC = () => {
           component: 'input',
         });
       }
-
       setErrorData(undefined);
+
+      setGtMaxYield(!!optimalDepositAmount && parseFixed(value, decimals).gt(optimalDepositAmount));
     },
-    [setQty, walletBalance, setErrorData, translations, lang],
+    [setQty, walletBalance, setErrorData, translations, lang, optimalDepositAmount, decimals],
   );
 
   const deposit = useCallback(async () => {
@@ -157,7 +177,6 @@ const DepositAtMaturity: FC = () => {
 
     let depositTx;
     try {
-      const { decimals } = accountData[symbol];
       const amount = parseFixed(qty, decimals);
       const minAmount = amount.mul(parseFixed(String(1 - slippage), 18)).div(WeiPerEther);
 
@@ -215,6 +234,7 @@ const DepositAtMaturity: FC = () => {
     slippage,
     symbol,
     walletAddress,
+    decimals,
   ]);
 
   const handleSubmitAction = useCallback(async () => {
@@ -236,7 +256,7 @@ const DepositAtMaturity: FC = () => {
   const updateAPR = useCallback(async () => {
     if (!accountData || !date || !previewerContract || !marketContract) return;
 
-    const { decimals, usdPrice } = accountData[symbol];
+    const { usdPrice } = accountData[symbol];
     const initialAssets = qty ? parseFixed(qty, decimals) : getOneDollar(usdPrice, decimals);
 
     try {
@@ -258,19 +278,11 @@ const DepositAtMaturity: FC = () => {
     } catch (error) {
       setFixedRate(undefined);
     }
-  }, [accountData, date, qty, marketContract, previewerContract, symbol]);
+  }, [accountData, date, qty, marketContract, previewerContract, symbol, decimals]);
 
   useEffect(() => {
     void updateAPR();
   }, [updateAPR]);
-
-  const optimalDepositAmount = useMemo<string | undefined>(() => {
-    if (!accountData) return;
-    const { fixedPools = [], decimals = 18 } = accountData[symbol];
-    const pool = fixedPools.find((p) => formatFixed(p.maturity) === date?.value);
-    if (!pool) return;
-    return formatNumber(formatFixed(pool.optimalDeposit, decimals), symbol);
-  }, [accountData, symbol, date?.value]);
 
   if (tx) return <ModalGif tx={tx} tryAgain={deposit} />;
 
@@ -314,10 +326,18 @@ const DepositAtMaturity: FC = () => {
         line
       />
 
-      <ModalRow text="Optimal deposit amount" value={optimalDepositAmount} asset={symbol} line />
+      {optimalDepositAmount && (
+        <ModalRow
+          text="Optimal deposit amount"
+          value={formatNumber(formatFixed(optimalDepositAmount, decimals), symbol)}
+          asset={symbol}
+          line
+        />
+      )}
 
       <ModalStepper currentStep={requiresApproval ? 1 : 2} totalSteps={3} />
 
+      {gtMaxYield && <ModalError message="You have reached the maximum yield possible" />}
       {errorData && <ModalError message={errorData.message} />}
 
       <LoadingButton
