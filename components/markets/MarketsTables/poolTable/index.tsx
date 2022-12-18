@@ -23,7 +23,7 @@ import Link from 'next/link';
 import numbers from 'config/numbers.json';
 
 import useAssets from 'hooks/useAssets';
-import useMarketsPools from 'hooks/useMarketsPools';
+import useActionButton from 'hooks/useActionButton';
 
 const { minAPRValue } = numbers;
 
@@ -63,7 +63,7 @@ const HeadCell: FC<TableHead> = ({ title, tooltipTitle, width }) => {
 };
 
 const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) => {
-  const { handleActionClick, isDisable } = useMarketsPools();
+  const { handleActionClick, isDisable } = useActionButton();
   const assets = useAssets();
   const defaultRows = useMemo<TableRow[]>(() => assets.map((s) => ({ symbol: s })), [assets]);
   const tempRows = isLoading ? defaultRows : rows; // HACK this with the timeout in "marketsTables" is to avoid a screen flash when MUI  recive the new data of rows

@@ -12,17 +12,19 @@ import formatNumber from 'utils/formatNumber';
 import HeaderInfo from 'components/common/HeaderInfo';
 import { ItemInfoProps } from 'components/common/ItemInfo';
 import { useWeb3 } from 'hooks/useWeb3';
+import getHealthFactorData from 'utils/getHealthFactorData';
 
-type Props = {
-  healthFactor?: HealthFactor;
-};
-
-function DashboardHeader({ healthFactor }: Props) {
+function DashboardHeader() {
   const { walletAddress } = useWeb3();
   const { accountData } = useContext(AccountDataContext);
 
   const [totalDeposited, setTotalDeposited] = useState<BigNumber | undefined>();
   const [totalBorrowed, setTotalBorrowed] = useState<BigNumber | undefined>();
+
+  const healthFactor = useMemo<HealthFactor | undefined>(() => {
+    if (!accountData) return undefined;
+    return getHealthFactorData(accountData);
+  }, [accountData]);
 
   useEffect(() => {
     if (!accountData) return;

@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Skeleton, Tooltip, Typography } from '@mui/material';
 import { captureException } from '@sentry/nextjs';
 import { WeiPerEther } from '@ethersproject/constants';
@@ -10,16 +10,22 @@ import AccountDataContext from 'contexts/AccountDataContext';
 import parseHealthFactor from 'utils/parseHealthFactor';
 import { HealthFactor } from 'types/HealthFactor';
 import useAuditor from 'hooks/useAuditor';
+import getHealthFactorData from 'utils/getHealthFactorData';
+import { useWeb3 } from 'hooks/useWeb3';
 
 type Props = {
   symbol?: string;
-  walletAddress?: string;
-  healthFactor?: HealthFactor;
 };
 
-function SwitchCollateral({ symbol, walletAddress, healthFactor }: Props) {
+function SwitchCollateral({ symbol }: Props) {
+  const { walletAddress } = useWeb3();
   const { accountData, getAccountData } = useContext(AccountDataContext);
   const auditor = useAuditor();
+
+  const healthFactor = useMemo<HealthFactor | undefined>(() => {
+    if (!accountData) return undefined;
+    return getHealthFactorData(accountData);
+  }, [accountData]);
 
   const [toggle, setToggle] = useState<boolean>(false);
   const [disabled, setDisabled] = useState<boolean>(false);

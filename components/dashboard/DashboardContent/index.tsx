@@ -3,7 +3,7 @@ import dynamic from 'next/dynamic';
 import Grid from '@mui/material/Grid';
 import { globals } from 'styles/theme';
 
-const { maxWidth } = globals;
+const { maxWidth, onlyMobile, onlyDesktop } = globals;
 
 // const DashboardUserCharts = dynamic(() => import('components/DashboardContent/DashboardUserCharts'));
 const FloatingPoolDashboard = dynamic(() => import('components/dashboard/DashboardContent/FloatingPoolDashboard'));
@@ -11,14 +11,12 @@ const FixedPoolDashboard = dynamic(() => import('components/dashboard/DashboardC
 const EmptyState = dynamic(() => import('components/EmptyState'));
 
 import DashboardTabs from 'components/dashboard/DashboardContent/DashboardTabs';
-import { HealthFactor } from 'types/HealthFactor';
 import { useWeb3 } from 'hooks/useWeb3';
+import { Box } from '@mui/material';
+import MobileTabs from 'components/MobileTabs';
+import DashboardMobile from './DashboardMobile';
 
-type Props = {
-  healthFactor?: HealthFactor;
-};
-
-function DashboardContent({ healthFactor }: Props) {
+function DashboardContent() {
   const { walletAddress } = useWeb3();
 
   const depositTab = {
@@ -36,7 +34,7 @@ function DashboardContent({ healthFactor }: Props) {
       ...depositTab,
       content: walletAddress ? (
         <>
-          <FloatingPoolDashboard type="deposit" healthFactor={healthFactor} />
+          <FloatingPoolDashboard type="deposit" />
           <FixedPoolDashboard type="deposit" />
         </>
       ) : (
@@ -47,7 +45,7 @@ function DashboardContent({ healthFactor }: Props) {
       ...borrowTab,
       content: walletAddress ? (
         <>
-          <FloatingPoolDashboard type="borrow" healthFactor={healthFactor} />
+          <FloatingPoolDashboard type="borrow" />
           <FixedPoolDashboard type="borrow" />
         </>
       ) : (
@@ -57,9 +55,25 @@ function DashboardContent({ healthFactor }: Props) {
   ];
 
   return (
-    <Grid container sx={{ maxWidth: maxWidth }} mx="auto" mt={5}>
-      <DashboardTabs initialTab={allTabs[0].value} allTabs={allTabs} />
-    </Grid>
+    <>
+      <Grid container sx={{ maxWidth: maxWidth }} mx="auto" mt={5} display={onlyDesktop}>
+        <DashboardTabs initialTab={allTabs[0].value} allTabs={allTabs} />
+      </Grid>
+      <Box display={onlyMobile} width="100%" px={1} my={2}>
+        <MobileTabs
+          tabs={[
+            {
+              title: 'Your Deposits',
+              content: <DashboardMobile type="deposit" />,
+            },
+            {
+              title: 'Your Borrows',
+              content: <DashboardMobile type="borrow" />,
+            },
+          ]}
+        />
+      </Box>
+    </>
   );
 }
 

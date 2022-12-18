@@ -14,21 +14,17 @@ import {
 import AccountDataContext from 'contexts/AccountDataContext';
 
 import { FloatingPoolItemData } from 'types/FloatingPoolItemData';
-import { useWeb3 } from 'hooks/useWeb3';
 
 import TableRowFloatingPool from './TableRowFloatingPool';
-import type { HealthFactor } from 'types/HealthFactor';
 import type { TableHeader } from 'types/TableHeader';
 import type { Previewer } from 'types/contracts/Previewer';
 import useAssets from 'hooks/useAssets';
 
 type Props = {
   type: 'deposit' | 'borrow';
-  healthFactor?: HealthFactor;
 };
 
-function FloatingPoolDashboardTable({ type, healthFactor }: Props) {
-  const { walletAddress } = useWeb3();
+function FloatingPoolDashboardTable({ type }: Props) {
   const { accountData } = useContext(AccountDataContext);
 
   const orderAssets = useAssets();
@@ -136,11 +132,9 @@ function FloatingPoolDashboardTable({ type, healthFactor }: Props) {
               depositAmount={item.depositedAmount}
               borrowedAmount={item.borrowedAmount}
               symbol={item.symbol}
-              walletAddress={walletAddress}
               eTokenAmount={item.eTokens}
               type={type}
               market={item.market}
-              healthFactor={healthFactor}
             />
           ))}
         </TableBody>

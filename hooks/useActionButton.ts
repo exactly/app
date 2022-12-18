@@ -8,19 +8,14 @@ import numbers from 'config/numbers.json';
 
 const { minAPRValue } = numbers;
 
-export default function useMarketsPools() {
+export default function useActionButton() {
   const { walletAddress, connect } = useWeb3();
   const { accountData } = useContext(AccountDataContext);
   const { setDate, setMarket } = useContext(MarketContext);
   const { openOperationModal } = useModalStatus();
 
   const handleActionClick = useCallback(
-    (
-      e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
-      action: Extract<Operation, 'borrow' | 'deposit' | 'depositAtMaturity' | 'borrowAtMaturity'>,
-      symbol: string,
-      maturity?: number,
-    ) => {
+    (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, action: Operation, symbol: string, maturity?: number) => {
       e.preventDefault();
 
       if (!walletAddress && connect) return connect();
