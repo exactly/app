@@ -5,14 +5,14 @@ const EmptyState = dynamic(() => import('components/EmptyState'));
 
 import { Grid, Typography } from '@mui/material';
 import FixedPoolDashboardTable from 'components/dashboard/DashboardContent/FixedPoolDashboard/FixedPoolDashboardTable';
-import useFixedPools from 'hooks/useFixedPools';
+import useDashboard from 'hooks/useDashboard';
 
 type Props = {
   type: 'deposit' | 'borrow';
 };
 
 function FixedPoolDashboard({ type }: Props) {
-  const { deposits, borrows } = useFixedPools();
+  const { fixedRows } = useDashboard(type);
 
   return (
     <Grid
@@ -25,9 +25,8 @@ function FixedPoolDashboard({ type }: Props) {
       borderTop="4px solid #008CF4"
     >
       <Typography variant="h6">Fixed Interest Rate</Typography>
-      {type && <FixedPoolDashboardTable fixedPools={type === 'deposit' ? deposits : borrows} type={type} />}
-      {type === 'deposit' && !deposits && <EmptyState connected tab={type} />}
-      {type === 'borrow' && !borrows && <EmptyState connected tab={type} />}
+      {type && <FixedPoolDashboardTable rows={fixedRows} type={type} />}
+      {!fixedRows && <EmptyState connected tab={type} />}
     </Grid>
   );
 }
