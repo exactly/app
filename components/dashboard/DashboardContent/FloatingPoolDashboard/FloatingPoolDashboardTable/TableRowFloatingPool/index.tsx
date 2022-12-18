@@ -14,7 +14,6 @@ import formatNumber from 'utils/formatNumber';
 import formatSymbol from 'utils/formatSymbol';
 import Link from 'next/link';
 import SwitchCollateral from 'components/dashboard/DashboardContent/FloatingPoolDashboard/FloatingPoolDashboardTable/SwitchCollateral';
-import { HealthFactor } from 'types/HealthFactor';
 
 type Props = {
   symbol?: string;
@@ -24,19 +23,9 @@ type Props = {
   eTokenAmount?: BigNumber;
   type: Extract<Operation, 'deposit' | 'borrow'>;
   market?: string;
-  healthFactor?: HealthFactor;
 };
 
-function TableRowFloatingPool({
-  symbol,
-  depositAmount,
-  borrowedAmount,
-  walletAddress,
-  eTokenAmount,
-  type,
-  market,
-  healthFactor,
-}: Props) {
+function TableRowFloatingPool({ symbol, depositAmount, borrowedAmount, eTokenAmount, type, market }: Props) {
   const { accountData } = useContext(AccountDataContext);
   const { openOperationModal } = useModalStatus();
   const { setMarket } = useContext(MarketContext);
@@ -48,7 +37,7 @@ function TableRowFloatingPool({
     if (accountData) {
       getExchangeRate();
     }
-  }, [accountData, walletAddress]);
+  }, [accountData]);
 
   function getExchangeRate() {
     if (!accountData || !symbol) return;
@@ -103,7 +92,7 @@ function TableRowFloatingPool({
 
       {type === 'deposit' ? (
         <TableCell align="left" size="small">
-          <SwitchCollateral symbol={symbol} walletAddress={walletAddress} healthFactor={healthFactor} />
+          <SwitchCollateral symbol={symbol} />
         </TableCell>
       ) : (
         <TableCell align="left" size="small" />

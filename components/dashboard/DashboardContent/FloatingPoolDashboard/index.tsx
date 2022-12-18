@@ -5,14 +5,12 @@ import AddETokensButton from 'components/AddETokensButton';
 import FloatingPoolDashboardTable from 'components/dashboard/DashboardContent/FloatingPoolDashboard/FloatingPoolDashboardTable';
 import { Grid, Typography } from '@mui/material';
 import Stack from '@mui/material/Stack';
-import { HealthFactor } from 'types/HealthFactor';
 
 type Props = {
   type: 'deposit' | 'borrow';
-  healthFactor?: HealthFactor;
 };
 
-function FloatingPoolDashboard({ type, healthFactor }: Props) {
+function FloatingPoolDashboard({ type }: Props) {
   return (
     <Grid
       width={'100%'}
@@ -27,7 +25,7 @@ function FloatingPoolDashboard({ type, healthFactor }: Props) {
         <Typography variant="h6">Variable Interest Rate</Typography>
         <AddETokensButton />
       </Stack>
-      <FloatingPoolDashboardTable type={type} healthFactor={healthFactor} />
+      <FloatingPoolDashboardTable type={type} />
     </Grid>
   );
 }

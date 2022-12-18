@@ -5,7 +5,7 @@ import { BigNumber, formatFixed } from '@ethersproject/bignumber';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import { Box, Button, IconButton, Skeleton, Stack, TableCell, TableRow, Typography } from '@mui/material';
-import StyledLinearProgress from 'components/common/LinearProgress';
+import MaturityLinearProgress from 'components/common/MaturityLinearProgress';
 import AccountDataContext from 'contexts/AccountDataContext';
 import { MarketContext } from 'contexts/MarketContext';
 import useFixedOperation from 'hooks/useFixedPoolTransactions';
@@ -97,20 +97,6 @@ function TableRowFixedPool({ symbol, amount, type, maturityDate, market, decimal
     return allAPRbyAmount / allAmounts;
   }, [depositTxs, borrowTxs, decimals]);
 
-  const progress = useMemo(() => {
-    const oneHour = 3600;
-    const oneDay = oneHour * 24;
-    const maturityLife = oneDay * 7 * 12;
-    const nowInSeconds = Date.now() / 1000;
-    const startDate = parseInt(maturityDate) - maturityLife;
-    const current = nowInSeconds - startDate;
-    return Math.min((current * 100) / maturityLife, 100);
-  }, [maturityDate]);
-
-  const daysLeft = useMemo(() => {
-    return Math.ceil((parseInt(maturityDate) - Date.now() / 1000) / (3600 * 24));
-  }, [maturityDate]);
-
   return (
     <React.Fragment>
       <TableRow sx={{ '& > *': { borderBottom: 'unset' }, backgroundColor: open ? 'grey.50' : 'transparent' }} hover>
@@ -141,8 +127,8 @@ function TableRowFixedPool({ symbol, amount, type, maturityDate, market, decimal
         </TableCell>
         <TableCell align="left" size="small" width={200}>
           <Box width={150}>
-            {progress ? (
-              <StyledLinearProgress progress={progress} daysLeft={daysLeft} />
+            {maturityDate ? (
+              <MaturityLinearProgress maturityDate={maturityDate} />
             ) : (
               <Skeleton sx={{ margin: 'auto' }} width={130} />
             )}
