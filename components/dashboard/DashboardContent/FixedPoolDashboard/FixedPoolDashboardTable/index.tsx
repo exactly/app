@@ -10,14 +10,14 @@ import Paper from '@mui/material/Paper';
 import TableRowFixedPool from './TableRowFixedPool';
 import { Tooltip } from '@mui/material';
 import { TableHeader } from 'types/TableHeader';
-import { FixedPool } from 'types/FixedPool';
+import { Pool } from 'types/FixedPool';
 
 type Props = {
   type: 'deposit' | 'borrow';
-  fixedPools?: FixedPool;
+  rows?: Pool[];
 };
 
-function FixedPoolDashboardTable({ type, fixedPools }: Props) {
+function FixedPoolDashboardTable({ type, rows }: Props) {
   const headers: TableHeader[] = useMemo(() => {
     return [
       {
@@ -61,11 +61,6 @@ function FixedPoolDashboardTable({ type, fixedPools }: Props) {
       },
     ];
   }, [type]);
-
-  const rows = useMemo(() => {
-    if (!fixedPools) return [];
-    return Object.keys(fixedPools)?.flatMap((maturity) => fixedPools[maturity]);
-  }, [fixedPools]);
 
   return (
     <TableContainer component={Paper}>
