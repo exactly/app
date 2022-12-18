@@ -1,4 +1,4 @@
-import React, { useContext, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import {
   Table,
   TableBody,
@@ -11,54 +11,18 @@ import {
   Typography,
 } from '@mui/material';
 
-import AccountDataContext from 'contexts/AccountDataContext';
-
 import { FloatingPoolItemData } from 'types/FloatingPoolItemData';
 
 import TableRowFloatingPool from './TableRowFloatingPool';
 import type { TableHeader } from 'types/TableHeader';
-import type { Previewer } from 'types/contracts/Previewer';
-import useAssets from 'hooks/useAssets';
+import useDashboard from 'hooks/useDashboard';
 
 type Props = {
   type: 'deposit' | 'borrow';
 };
 
 function FloatingPoolDashboardTable({ type }: Props) {
-  const { accountData } = useContext(AccountDataContext);
-
-  const orderAssets = useAssets();
-
-  const defaultRows: FloatingPoolItemData[] = useMemo<FloatingPoolItemData[]>(
-    () => orderAssets.map((s) => ({ symbol: s })),
-    [orderAssets],
-  );
-
-  const itemData = useMemo<FloatingPoolItemData[] | undefined>(() => {
-    if (!accountData) return;
-
-    const allMarkets = Object.values(accountData).sort(
-      (a: Previewer.MarketAccountStructOutput, b: Previewer.MarketAccountStructOutput) => {
-        return orderAssets.indexOf(a.assetSymbol) - orderAssets.indexOf(b.assetSymbol);
-      },
-    );
-
-    return allMarkets.map((market) => {
-      const symbol = market.assetSymbol;
-      const depositBalance = market.floatingDepositAssets;
-      const eTokens = market.floatingDepositShares;
-      const borrowBalance = market.floatingBorrowAssets;
-      const address = market.market;
-
-      return {
-        symbol: symbol,
-        eTokens: eTokens,
-        depositedAmount: depositBalance,
-        borrowedAmount: borrowBalance,
-        market: address,
-      };
-    });
-  }, [accountData, orderAssets]);
+  const { floatingRows } = useDashboard(type);
 
   const headers: TableHeader[] = useMemo(() => {
     return [
@@ -99,8 +63,6 @@ function FloatingPoolDashboardTable({ type }: Props) {
     ];
   }, [type]);
 
-  const rows = itemData || defaultRows;
-
   return (
     <TableContainer component={Paper}>
       <Table aria-label="simple table">
@@ -126,7 +88,7 @@ function FloatingPoolDashboardTable({ type }: Props) {
           </TableRow>
         </TableHead>
         <TableBody>
-          {rows?.map((item: FloatingPoolItemData) => (
+          {floatingRows?.map((item: FloatingPoolItemData) => (
             <TableRowFloatingPool
               key={`floating_row_${item.symbol}_${type}`}
               depositAmount={item.depositedAmount}

@@ -1,6 +1,6 @@
 import { BigNumber } from '@ethersproject/bignumber';
 
-type Pool = {
+export type Pool = {
   maturity: string;
   symbol: string;
   market: string;
