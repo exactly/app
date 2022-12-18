@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Box, Typography } from '@mui/material';
 import LinearProgress, { linearProgressClasses } from '@mui/material/LinearProgress';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { styled } from '@mui/material/styles';
 
-const CustomLinearProgress = styled(LinearProgress, {
+const StyledLinearProgress = styled(LinearProgress, {
   shouldForwardProp: (prop) => prop !== 'barColor',
 })<{ barColor: string }>(({ theme, barColor }) => ({
   height: 8,
@@ -19,11 +19,24 @@ const CustomLinearProgress = styled(LinearProgress, {
 }));
 
 type Props = {
-  progress: number;
-  daysLeft: number;
+  maturityDate: string;
 };
 
-function StyledLinearProgress({ progress, daysLeft }: Props) {
+function MaturityLinearProgress({ maturityDate }: Props) {
+  const progress = useMemo(() => {
+    const oneHour = 3600;
+    const oneDay = oneHour * 24;
+    const maturityLife = oneDay * 7 * 12;
+    const nowInSeconds = Date.now() / 1000;
+    const startDate = parseInt(maturityDate) - maturityLife;
+    const current = nowInSeconds - startDate;
+    return Math.min((current * 100) / maturityLife, 100);
+  }, [maturityDate]);
+
+  const daysLeft = useMemo(() => {
+    return Math.ceil((parseInt(maturityDate) - Date.now() / 1000) / (3600 * 24));
+  }, [maturityDate]);
+
   const isCompleted = progress === 100;
 
   return (
@@ -45,9 +58,9 @@ function StyledLinearProgress({ progress, daysLeft }: Props) {
           </>
         )}
       </Box>
-      <CustomLinearProgress variant="determinate" value={progress} barColor={isCompleted ? '#008CF4' : 'primary'} />
+      <StyledLinearProgress variant="determinate" value={progress} barColor={isCompleted ? '#008CF4' : 'primary'} />
     </Box>
   );
 }
 
-export default StyledLinearProgress;
+export default MaturityLinearProgress;
