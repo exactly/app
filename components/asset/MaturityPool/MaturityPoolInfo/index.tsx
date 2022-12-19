@@ -62,7 +62,7 @@ const MaturityPoolInfo: FC<MaturityPoolInfoProps> = ({
 
   return (
     <Grid container>
-      <HeaderInfo title={translations[lang].maturityPools} itemsInfo={itemsInfo} variant="h5" />
+      <HeaderInfo title="Fixed Interest Rate" itemsInfo={itemsInfo} shadow={false} />
     </Grid>
   );
 };
