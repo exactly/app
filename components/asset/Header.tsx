@@ -1,29 +1,26 @@
 import React, { type FC, useContext, useMemo } from 'react';
 import Grid from '@mui/material/Grid';
 import Image from 'next/image';
-import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
-import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import formatSymbol from 'utils/formatSymbol';
 import ItemInfo, { ItemInfoProps } from 'components/common/ItemInfo';
 import AccountDataContext from 'contexts/AccountDataContext';
 import { formatFixed } from '@ethersproject/bignumber';
 import { WeiPerEther, Zero } from '@ethersproject/constants';
 import formatNumber from 'utils/formatNumber';
-import { Tooltip } from '@mui/material';
 import { useWeb3 } from 'hooks/useWeb3';
 import networkData from 'config/networkData.json' assert { type: 'json' };
 import useAccountData from 'hooks/useAccountData';
+import ExplorerMenu from './ExplorerMenu';
 
 type Props = {
   symbol: string;
-  eMarketAddress?: string;
 };
 
-const AssetHeaderInfo: FC<Props> = ({ symbol, eMarketAddress }) => {
+const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
   const { accountData } = useContext(AccountDataContext);
 
-  const { asset: assetAddress } = useAccountData(symbol);
+  const { asset: assetAddress, market: eMarketAddress, interestRateModel: rateModelAddress } = useAccountData(symbol);
 
   const { chain } = useWeb3();
 
@@ -98,16 +95,12 @@ const AssetHeaderInfo: FC<Props> = ({ symbol, eMarketAddress }) => {
         <Typography variant="h2" ml={1}>
           {formatSymbol(symbol)}
           {etherscan && (
-            <Tooltip title="View Market Contract">
-              <IconButton
-                size="small"
-                href={`${etherscan}/address/${eMarketAddress ?? assetAddress}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <OpenInNewIcon sx={{ alignSelf: 'center', height: '1rem', width: '1rem' }} />
-              </IconButton>
-            </Tooltip>
+            <ExplorerMenu
+              symbol={symbol}
+              assetAddress={assetAddress}
+              eMarketAddress={eMarketAddress}
+              rateModelAddress={rateModelAddress?.id}
+            />
           )}
         </Typography>
       </Grid>

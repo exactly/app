@@ -36,7 +36,7 @@ const Market: NextPage<{ symbol: string }> = ({ symbol }) => {
           Back
         </Typography>
       </Box>
-      <AssetHeaderInfo symbol={symbol} eMarketAddress={market} />
+      <AssetHeaderInfo symbol={symbol} />
       <Grid container mt={3}>
         <Grid item container>
           <AssetFloatingPool symbol={symbol} eMarketAddress={market} />
