@@ -36,6 +36,7 @@ export default function useDashboard(type: string) {
         eTokens: eTokens,
         depositedAmount: depositBalance,
         borrowedAmount: borrowBalance,
+        market: market.market,
       };
     });
   }, [accountData, orderAssets]);

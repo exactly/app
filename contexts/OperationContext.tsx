@@ -59,7 +59,7 @@ export const OperationContextProvider: FC<PropsWithChildren> = ({ children }) =>
 
   const value: ContextValues = useMemo(
     () => ({
-      symbol: account?.assetSymbol ?? '',
+      symbol: account?.assetSymbol ?? 'DAI',
       errorData,
       setErrorData,
       qty,
