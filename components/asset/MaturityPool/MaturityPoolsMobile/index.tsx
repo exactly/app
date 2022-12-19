@@ -31,7 +31,7 @@ const MaturityPoolsMobile: FC<Props> = ({ APRsPerMaturity, symbol }) => {
             <Grid container>
               <GridItem title="Total Deposits" value={`$${totalDeposited}`} />
               <GridItem title="Total Borrows" value={`$${totalBorrowed}`} />
-              <Grid xs={12} my={0.5} />
+              <Grid item xs={12} my={0.5} />
               <GridItem
                 title="Deposit APR"
                 tooltip="The marginal fixed interest rate for a $1 deposit in the Fixed Rated Pool."
@@ -69,7 +69,7 @@ const MaturityPoolsMobile: FC<Props> = ({ APRsPerMaturity, symbol }) => {
 };
 
 const GridItem: FC<{ title: string; value: string; tooltip?: string }> = ({ title, value, tooltip }) => (
-  <Grid xs={6}>
+  <Grid item xs={6}>
     <Box display="flex">
       <Typography fontSize="16px" color="grey.300" lineHeight="20px">
         {title}
