@@ -29,7 +29,7 @@ const PoolMobile: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) 
                   header={headers[3]}
                   value={toPercentage(depositAPR && depositAPR > minAPRValue ? depositAPR : undefined)}
                 />
-                <Grid xs={12} my={1.8}>
+                <Grid item xs={12} my={1.8}>
                   <Divider />
                 </Grid>
                 <GridItem header={headers[2]} value={`$${totalBorrowed}`} />
@@ -70,7 +70,7 @@ const PoolMobile: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) 
 };
 
 const GridItem: FC<{ header: TableHead; value: string }> = ({ header, value }) => (
-  <Grid xs={6}>
+  <Grid item xs={6}>
     <Box display="flex">
       <Typography fontSize="16px" color="grey.300" lineHeight="20px">
         {header.title}
