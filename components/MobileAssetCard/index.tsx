@@ -26,7 +26,7 @@ const MobileAssetCard: FC<PropsWithChildren & Props> = ({ symbol, isFloating, ch
       gap={2}
     >
       <Box display="flex" justifyContent="space-between">
-        <Link href={{ pathname: `/assets/${symbol}`, query }} key={symbol} rel="noopener noreferrer">
+        <Link href={{ pathname: `/${symbol}`, query }} key={symbol} rel="noopener noreferrer">
           <Box display="flex" gap={1.3}>
             <Image src={`/img/assets/${symbol}.svg`} alt={symbol} width="40" height="40" />
             <Box display="flex" flexDirection="column" my="auto">

@@ -85,7 +85,7 @@ function TableRowFixedPool({ symbol, amount, type, maturityDate, market, decimal
   return (
     <React.Fragment>
       <TableRow sx={{ '& > *': { borderBottom: 'unset' }, backgroundColor: open ? 'grey.50' : 'transparent' }} hover>
-        <Link href={{ pathname: `/assets/${symbol}`, query }}>
+        <Link href={{ pathname: `/${symbol}`, query }}>
           <TableCell component="th" align="left" sx={{ cursor: 'pointer' }} width={240}>
             <Stack direction="row" spacing={1}>
               {(symbol && <Image src={`/img/assets/${symbol}.svg`} alt={symbol} width={24} height={24} />) || (
