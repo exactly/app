@@ -6,6 +6,7 @@ import { formatWallet } from 'utils/utils';
 import { Avatar, Box, Button, capitalize, Divider, Menu, MenuItem, Typography } from '@mui/material';
 
 import * as blockies from 'blockies-ts';
+import { InjectedConnector } from '@wagmi/core';
 
 function Wallet() {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -17,7 +18,9 @@ function Wallet() {
   const { walletAddress } = useWeb3();
   const { chain } = useWeb3();
   const { data: ens } = useEnsName({ address: walletAddress as `0x${string}` });
-  const { connect } = useConnect();
+  const { connect } = useConnect({
+    connector: new InjectedConnector(),
+  });
   const { disconnect } = useDisconnect();
 
   const formattedWallet = formatWallet(walletAddress);
