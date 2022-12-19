@@ -24,4 +24,6 @@ export default withSentryConfig({
       ],
     },
   ],
+
+  images: { unoptimized: true },
 });
