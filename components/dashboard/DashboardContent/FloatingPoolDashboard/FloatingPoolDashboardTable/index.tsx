@@ -88,12 +88,12 @@ function FloatingPoolDashboardTable({ type }: Props) {
           </TableRow>
         </TableHead>
         <TableBody>
-          {floatingRows?.map((item: FloatingPoolItemData) => (
+          {floatingRows.map((item: FloatingPoolItemData) => (
             <TableRowFloatingPool
               key={`floating_row_${item.symbol}_${type}`}
+              symbol={item.symbol}
               depositAmount={item.depositedAmount}
               borrowedAmount={item.borrowedAmount}
-              symbol={item.symbol}
               eTokenAmount={item.eTokens}
               type={type}
               market={item.market}

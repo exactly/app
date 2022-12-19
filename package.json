@@ -8,6 +8,7 @@
     "goerli": "NODE_ENV=production NET=goerli next start",
     "start": "NODE_ENV=production NET=mainnet next start",
     "export": "NODE_ENV=production next export",
+    "serve": "npx serve out",
     "postinstall": "ts-node -P tsconfig.dev.json scripts/postinstall.ts",
     "lint": "eslint ."
   },
