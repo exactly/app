@@ -68,7 +68,7 @@ const MaturityPoolsMobile: FC<Props> = ({ APRsPerMaturity, symbol }) => {
   );
 };
 
-const GridItem: FC<{ title: string; value: string, tooltip?: string }> = ({ title, value, tooltip }) => (
+const GridItem: FC<{ title: string; value: string; tooltip?: string }> = ({ title, value, tooltip }) => (
   <Grid xs={6}>
     <Box display="flex">
       <Typography fontSize="16px" color="grey.300" lineHeight="20px">
