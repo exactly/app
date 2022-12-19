@@ -65,7 +65,8 @@ const MarketProvider: FC<PropsWithChildren> = ({ children }) => {
   }, [accountData, date, dates]);
 
   const account = useMemo(
-    () => accountData && Object.values(accountData).find((m) => m.market.toLowerCase() === market?.value.toLowerCase()),
+    () =>
+      accountData && Object.values(accountData).find((m) => m.market.toLowerCase() === market?.value?.toLowerCase()),
     [accountData, market],
   );
 
