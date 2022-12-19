@@ -5,8 +5,8 @@ export type Pool = {
   symbol: string;
   market: string;
   fee: BigNumber;
-  principal: BigNumber;
   decimals: number;
+  previewValue: BigNumber;
 };
 
 export type FixedPool = Record<string, Pool[]>;

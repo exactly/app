@@ -27,7 +27,7 @@ function FixedPoolDashboardTable({ type, rows }: Props) {
         align: 'left',
       },
       {
-        label: type === 'deposit' ? 'Deposited Amount' : 'Debt Amount',
+        label: 'Market value',
         key: 'deposited amount',
         align: 'left',
       },
@@ -60,7 +60,7 @@ function FixedPoolDashboardTable({ type, rows }: Props) {
         align: 'left',
       },
     ];
-  }, [type]);
+  }, []);
 
   return (
     <TableContainer component={Paper}>
@@ -87,11 +87,11 @@ function FixedPoolDashboardTable({ type, rows }: Props) {
           </TableRow>
         </TableHead>
         <TableBody>
-          {rows?.map(({ principal, maturity, symbol, market, decimals }) => (
+          {rows?.map(({ previewValue, maturity, symbol, market, decimals }) => (
             <TableRowFixedPool
-              key={`${symbol}_${maturity}_${principal}`}
+              key={`${symbol}_${maturity}_${previewValue}`}
               type={type}
-              amount={principal}
+              amount={previewValue}
               maturityDate={maturity}
               symbol={symbol}
               market={market}

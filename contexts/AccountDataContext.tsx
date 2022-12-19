@@ -14,10 +14,10 @@ type ContextValues = {
   getAccountData: () => Promise<AccountData | undefined>;
 };
 
-const AccountDataContext = createContext({
+const AccountDataContext = createContext<ContextValues>({
   accountData: undefined,
   getAccountData: () => Promise.resolve({}),
-} as ContextValues);
+});
 
 export const AccountDataProvider: FC<PropsWithChildren> = ({ children }) => {
   const [accountData, setAccountData] = useState<AccountData | undefined>();
