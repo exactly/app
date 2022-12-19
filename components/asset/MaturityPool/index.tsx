@@ -6,8 +6,14 @@ import Grid from '@mui/material/Grid';
 
 import AccountDataContext from 'contexts/AccountDataContext';
 
-import MaturityPoolsTable, { APRsPerMaturityType } from './MaturityPoolsTable';
+import MaturityPoolsTable from './MaturityPoolsTable';
 import MaturityPoolInfo from './MaturityPoolInfo';
+import { Box } from '@mui/material';
+import { globals } from 'styles/theme';
+import { APRsPerMaturityType } from 'hooks/useMaturityPools';
+import MaturityPoolsMobile from './MaturityPoolsMobile';
+
+const { onlyMobile, onlyDesktop } = globals;
 
 type Rate = {
   maturity: BigNumber;
@@ -67,7 +73,7 @@ const AssetMaturityPools: FC<{ symbol: string }> = ({ symbol }) => {
     <Grid
       container
       width={'100%'}
-      my={4}
+      my={2}
       boxShadow="0px 4px 12px rgba(175, 177, 182, 0.2)"
       borderRadius="0px 0px 6px 6px"
       bgcolor="white"
@@ -83,9 +89,12 @@ const AssetMaturityPools: FC<{ symbol: string }> = ({ symbol }) => {
           bestDepositMaturity={bestDeposit && Number(bestDeposit.maturity)}
         />
       </Grid>
-      <Grid item xs={12} px="24px" pb="24px" bgcolor="white">
+      <Grid item xs={12} px="24px" pb="24px" bgcolor="white" display={onlyDesktop}>
         <MaturityPoolsTable APRsPerMaturity={APRsPerMaturity} symbol={symbol} />
       </Grid>
+      <Box display={onlyMobile} px="24px" pt={1} width="100%">
+        <MaturityPoolsMobile APRsPerMaturity={APRsPerMaturity} symbol={symbol} />
+      </Box>
     </Grid>
   );
 };

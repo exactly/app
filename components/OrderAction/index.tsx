@@ -1,7 +1,6 @@
 import React, { FC, useContext } from 'react';
 import Button from '@mui/material/Button';
 import Box from '@mui/system/Box';
-import Grid from '@mui/material/Grid';
 
 import LangContext from 'contexts/LangContext';
 import { useWeb3 } from 'hooks/useWeb3';
@@ -24,19 +23,13 @@ const OrderAction: FC = () => {
   };
 
   return (
-    <Box>
-      <Grid container spacing={1}>
-        <Grid item>
-          <Button variant="contained" onClick={() => handleAction('deposit')}>
-            {translations[lang].deposit}
-          </Button>
-        </Grid>
-        <Grid item display="flex">
-          <Button variant="outlined" onClick={() => handleAction('borrow')}>
-            {translations[lang].borrow}
-          </Button>
-        </Grid>
-      </Grid>
+    <Box display="flex" gap={1}>
+      <Button variant="contained" onClick={() => handleAction('deposit')} fullWidth>
+        {translations[lang].deposit}
+      </Button>
+      <Button variant="outlined" onClick={() => handleAction('borrow')} fullWidth>
+        {translations[lang].borrow}
+      </Button>
     </Box>
   );
 };
