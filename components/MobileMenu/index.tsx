@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import CloseIcon from '@mui/icons-material/Close';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import TwitterIcon from '@mui/icons-material/Twitter';
@@ -13,6 +13,17 @@ type Props = {
   open: boolean;
   handleClose: () => void;
 };
+
+const headers = [
+  {
+    title: 'Markets',
+    pathname: '/',
+  },
+  {
+    title: 'Dashboard',
+    pathname: '/dashboard',
+  },
+];
 
 function MobileMenu({ open, handleClose }: Props) {
   const { pathname: currentPathname, push, query } = useRouter();
@@ -41,55 +52,36 @@ function MobileMenu({ open, handleClose }: Props) {
               Menu
             </Typography>
             <Box display="flex" flexDirection="column" gap="16px">
-              <Typography
-                variant="h2"
-                onClick={() => {
-                  void push({ pathname: '/', query });
-                  handleClose();
-                }}
-                sx={{ textDecoration: currentPathname === '/' ? 'underline' : 'none' }}
-              >
-                Markets
-              </Typography>
-              <Typography
-                variant="h2"
-                onClick={() => {
-                  void push({ pathname: '/dashboard', query });
-                  handleClose();
-                }}
-                sx={{ textDecoration: currentPathname === '/dashboard' ? 'underline' : 'none' }}
-              >
-                Dashboard
-              </Typography>
+              {headers.map(({ title, pathname }) => (
+                <Typography
+                  key={`mobile_tabs_${title}`}
+                  variant="h2"
+                  onClick={() => {
+                    void push({ pathname, query });
+                    handleClose();
+                  }}
+                  sx={{ textDecoration: currentPathname === pathname ? 'underline' : 'none' }}
+                >
+                  {title}
+                </Typography>
+              ))}
             </Box>
             <Divider sx={{ my: '12px' }} />
             <Typography variant="subtitle2" color="grey.500" fontWeight={600}>
               Links
             </Typography>
-            <a target="_blank" rel="noreferrer noopener" href="https://docs.exact.ly/security/audits">
-              <Box display="flex" gap="10px">
-                <SecurityIcon fontSize="small" sx={{ color: 'grey.500', my: 'auto' }} />
-                <Typography variant="h6">Audits</Typography>
-              </Box>
-            </a>
-            <a target="_blank" rel="noreferrer noopener" href="https://docs.exact.ly/">
-              <Box display="flex" gap="10px">
-                <MenuBookIcon fontSize="small" sx={{ color: 'grey.500', my: 'auto' }} />
-                <Typography variant="h6">Documentation</Typography>
-              </Box>
-            </a>
-            <a target="_blank" rel="noreferrer noopener" href="https://github.com/exactly">
-              <Box display="flex" gap="10px">
-                <GitHubIcon fontSize="small" sx={{ color: 'grey.500', my: 'auto' }} />
-                <Typography variant="h6">Github</Typography>
-              </Box>
-            </a>
-            <a target="_blank" rel="noreferrer noopener" href="https://twitter.com/exactlyprotocol">
-              <Box display="flex" gap="10px">
-                <TwitterIcon fontSize="small" sx={{ color: 'grey.500', my: 'auto' }} />
-                <Typography variant="h6">Twitter</Typography>
-              </Box>
-            </a>
+            <LinkItem title="Audits" href="https://docs.exact.ly/security/audits">
+              <SecurityIcon fontSize="small" sx={{ color: 'grey.500', my: 'auto' }} />
+            </LinkItem>
+            <LinkItem title="Documentation" href="https://docs.exact.ly/">
+              <MenuBookIcon fontSize="small" sx={{ color: 'grey.500', my: 'auto' }} />
+            </LinkItem>
+            <LinkItem title="Github" href="https://github.com/exactly">
+              <GitHubIcon fontSize="small" sx={{ color: 'grey.500', my: 'auto' }} />
+            </LinkItem>
+            <LinkItem title="Twitter" href="https://twitter.com/exactlyprotocol">
+              <TwitterIcon fontSize="small" sx={{ color: 'grey.500', my: 'auto' }} />
+            </LinkItem>
           </Box>
           <Typography fontSize="16px" sx={{ color: 'grey.300' }}>
             © Exactly {date.getFullYear()}
@@ -99,5 +91,14 @@ function MobileMenu({ open, handleClose }: Props) {
     </Modal>
   );
 }
+
+const LinkItem: FC<PropsWithChildren & { title: string; href: string }> = ({ children, title, href }) => (
+  <a target="_blank" rel="noreferrer noopener" href={href}>
+    <Box display="flex" gap="10px">
+      {children}
+      <Typography variant="h6">{title}</Typography>
+    </Box>
+  </a>
+);
 
 export default MobileMenu;
