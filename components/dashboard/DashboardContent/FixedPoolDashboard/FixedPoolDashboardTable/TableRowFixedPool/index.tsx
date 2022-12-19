@@ -18,6 +18,7 @@ import formatSymbol from 'utils/formatSymbol';
 import parseTimestamp from 'utils/parseTimestamp';
 import CollapseFixedPool from '../CollapseFixedPool';
 import { useModalStatus } from 'contexts/ModalStatusContext';
+import APRItem from '../APRItem';
 
 type Props = {
   symbol: string;
@@ -81,22 +82,6 @@ function TableRowFixedPool({ symbol, amount, type, maturityDate, market, decimal
     return transformedTxs;
   }, [withdrawTxs, repayTxs, depositTxs, borrowTxs, type, exchangeRate, decimals, symbol]);
 
-  const APR: number | undefined = useMemo(() => {
-    const allTransactions = [...depositTxs, ...borrowTxs];
-    if (!allTransactions) return undefined;
-
-    let allAPRbyAmount = 0;
-    let allAmounts = 0;
-
-    allTransactions.forEach(({ fee, assets, timestamp, maturity }) => {
-      const { transactionAPR } = calculateAPR(fee, decimals, assets, timestamp, maturity);
-      allAPRbyAmount += transactionAPR * parseFloat(formatFixed(assets, decimals));
-      allAmounts += parseFloat(formatFixed(assets, decimals));
-    });
-
-    return allAPRbyAmount / allAmounts;
-  }, [depositTxs, borrowTxs, decimals]);
-
   return (
     <React.Fragment>
       <TableRow sx={{ '& > *': { borderBottom: 'unset' }, backgroundColor: open ? 'grey.50' : 'transparent' }} hover>
@@ -120,7 +105,7 @@ function TableRowFixedPool({ symbol, amount, type, maturityDate, market, decimal
           )}
         </TableCell>
         <TableCell align="left" size="small">
-          {APR !== undefined ? `${(APR || 0).toFixed(2)} %` : <Skeleton sx={{ margin: 'auto' }} width={50} />}
+          <APRItem type={type} maturityDate={maturityDate} market={market} decimals={decimals} />
         </TableCell>
         <TableCell align="left" size="small">
           {maturityDate ? parseTimestamp(maturityDate) : <Skeleton sx={{ margin: 'auto' }} width={80} />}

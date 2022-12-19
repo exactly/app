@@ -1,17 +1,16 @@
-import React, { FC, PropsWithChildren, useContext, useMemo } from 'react';
+import React, { FC, PropsWithChildren, useContext } from 'react';
+import { formatFixed } from '@ethersproject/bignumber';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import { Box, Button, Skeleton, Tooltip, Typography } from '@mui/material';
+import MaturityLinearProgress from 'components/common/MaturityLinearProgress';
 import MobileAssetCard from 'components/MobileAssetCard';
+import AccountDataContext from 'contexts/AccountDataContext';
 import useActionButton from 'hooks/useActionButton';
 import useDashboard from 'hooks/useDashboard';
-import AccountDataContext from 'contexts/AccountDataContext';
 import formatNumber from 'utils/formatNumber';
-import { formatFixed } from '@ethersproject/bignumber';
-import SwitchCollateral from '../FloatingPoolDashboard/FloatingPoolDashboardTable/SwitchCollateral';
-import MaturityLinearProgress from 'components/common/MaturityLinearProgress';
-import useFixedOperation from 'hooks/useFixedPoolTransactions';
-import calculateAPR from 'utils/calculateAPR';
 import parseTimestamp from 'utils/parseTimestamp';
+import SwitchCollateral from '../FloatingPoolDashboard/FloatingPoolDashboardTable/SwitchCollateral';
+import APRItem from '../FixedPoolDashboard/FixedPoolDashboardTable/APRItem';
 
 type Props = {
   type: 'deposit' | 'borrow';
@@ -97,7 +96,9 @@ const DashboardMobile: FC<Props> = ({ type }) => {
                   <Skeleton sx={{ margin: 'auto' }} width={50} />
                 )}
               </FlexItem>
-              <APRItem type={type} maturityDate={maturity} market={market} decimals={decimals} />
+              <FlexItem title="Avg Fixed Rate" tooltip="Average rate for existing deposits.">
+                <APRItem type={type} maturityDate={maturity} market={market} decimals={decimals} />
+              </FlexItem>
               <FlexItem title="MaturityDate">{maturity ? parseTimestamp(maturity) : <Skeleton width={80} />}</FlexItem>
             </Box>
             <MaturityLinearProgress maturityDate={maturity} />
@@ -106,7 +107,7 @@ const DashboardMobile: FC<Props> = ({ type }) => {
               fullWidth
               sx={{ height: '34px' }}
               onClick={(e) =>
-                handleActionClick(e, isDeposit ? 'withdrawAtMaturity' : 'repayAtMaturity', symbol, maturity)
+                handleActionClick(e, isDeposit ? 'withdrawAtMaturity' : 'repayAtMaturity', symbol, parseInt(maturity))
               }
             >
               {isDeposit ? 'Withdraw' : 'Repay'}
@@ -135,36 +136,5 @@ const FlexItem: FC<PropsWithChildren & { title: string; tooltip?: string }> = ({
     </Typography>
   </Box>
 );
-
-const APRItem: FC<{ type: 'deposit' | 'borrow'; maturityDate: string; market: string; decimals: number }> = ({
-  type,
-  maturityDate,
-  market,
-  decimals,
-}) => {
-  const { depositTxs, borrowTxs } = useFixedOperation(type, maturityDate, market);
-
-  const APR: number | undefined = useMemo(() => {
-    const allTransactions = [...depositTxs, ...borrowTxs];
-    if (!allTransactions) return undefined;
-
-    let allAPRbyAmount = 0;
-    let allAmounts = 0;
-
-    allTransactions.forEach(({ fee, assets, timestamp, maturity }) => {
-      const { transactionAPR } = calculateAPR(fee, decimals, assets, timestamp, maturity);
-      allAPRbyAmount += transactionAPR * parseFloat(formatFixed(assets, decimals));
-      allAmounts += parseFloat(formatFixed(assets, decimals));
-    });
-
-    return allAPRbyAmount / allAmounts;
-  }, [depositTxs, borrowTxs, decimals]);
-
-  return (
-    <FlexItem title="Avg Fixed Rate" tooltip="Average rate for existing deposits.">
-      {APR !== undefined ? `${(APR || 0).toFixed(2)} %` : <Skeleton sx={{ margin: 'auto' }} width={50} />}
-    </FlexItem>
-  );
-};
 
 export default DashboardMobile;
