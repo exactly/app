@@ -1,6 +1,4 @@
-import React, { FC, useCallback, useContext, useEffect, useState } from 'react';
-import { formatFixed } from '@ethersproject/bignumber';
-import { WeiPerEther } from '@ethersproject/constants';
+import React, { FC } from 'react';
 import Button from '@mui/material/Button';
 import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
@@ -12,30 +10,16 @@ import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 import Tooltip from '@mui/material/Tooltip';
 
-import formatNumber from 'utils/formatNumber';
 import parseTimestamp from 'utils/parseTimestamp';
 import { toPercentage } from 'utils/utils';
 
-import AccountDataContext from 'contexts/AccountDataContext';
-import { useModalStatus, type Operation } from 'contexts/ModalStatusContext';
-import { useWeb3 } from 'hooks/useWeb3';
-import { MarketContext } from 'contexts/MarketContext';
-
 import numbers from 'config/numbers.json';
-
-export type APRsPerMaturityType = Record<string, { borrow: number; deposit: number }>;
+import useActionButton from 'hooks/useActionButton';
+import useMaturityPools, { APRsPerMaturityType } from 'hooks/useMaturityPools';
 
 type MaturityPoolsTableProps = {
   APRsPerMaturity: APRsPerMaturityType;
   symbol: string;
-};
-
-type TableRow = {
-  maturity: string;
-  totalDeposited: string;
-  totalBorrowed: string;
-  depositAPR: number;
-  borrowAPR: number;
 };
 
 const HeadCell: FC<{ title: string; tooltipTitle?: string }> = ({ title, tooltipTitle }) => {
@@ -51,59 +35,9 @@ const HeadCell: FC<{ title: string; tooltipTitle?: string }> = ({ title, tooltip
 };
 
 const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ APRsPerMaturity, symbol }) => {
-  const { walletAddress, connect } = useWeb3();
-  const { accountData } = useContext(AccountDataContext);
-  const { setDate, setMarket } = useContext(MarketContext);
-  const { openOperationModal } = useModalStatus();
-  const [rows, setRows] = useState<TableRow[]>([]);
+  const { handleActionClick } = useActionButton();
   const { minAPRValue } = numbers;
-
-  const defineRows = useCallback(() => {
-    if (!accountData) return;
-
-    const { fixedPools, usdPrice: exchangeRate, decimals } = accountData[symbol];
-    const tempRows: TableRow[] = [];
-
-    fixedPools.forEach(({ maturity, borrowed, supplied }) => {
-      const maturityKey = maturity.toString();
-
-      const totalDeposited = formatNumber(formatFixed(supplied.mul(exchangeRate).div(WeiPerEther), decimals));
-      const totalBorrowed = formatNumber(formatFixed(borrowed.mul(exchangeRate).div(WeiPerEther), decimals));
-
-      tempRows.push({
-        maturity: maturityKey,
-        totalDeposited,
-        totalBorrowed,
-        depositAPR: APRsPerMaturity[maturityKey]?.deposit,
-        borrowAPR: APRsPerMaturity[maturityKey]?.borrow,
-      });
-    });
-
-    setRows(tempRows);
-  }, [accountData, symbol, APRsPerMaturity]);
-
-  useEffect(() => {
-    defineRows();
-  }, [defineRows]);
-
-  const handleActionClick = (
-    action: Extract<Operation, 'borrowAtMaturity' | 'depositAtMaturity'>,
-    maturity: string,
-  ) => {
-    if (!walletAddress && connect) return connect();
-
-    if (!accountData) return;
-
-    const { market } = accountData[symbol];
-
-    setMarket({ value: market });
-    setDate({
-      value: maturity,
-      label: parseTimestamp(maturity),
-    });
-
-    openOperationModal(action);
-  };
+  const rows = useMaturityPools(APRsPerMaturity, symbol);
 
   // TODO: add translations
   return (
@@ -154,7 +88,7 @@ const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ APRsPerMaturity, symb
                 <Button
                   disabled={depositAPR < minAPRValue}
                   variant="contained"
-                  onClick={() => handleActionClick('depositAtMaturity', maturity)}
+                  onClick={(e) => handleActionClick(e, 'depositAtMaturity', symbol, parseInt(maturity))}
                 >
                   Deposit
                 </Button>
@@ -171,7 +105,7 @@ const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ APRsPerMaturity, symb
                   disabled={borrowAPR < minAPRValue}
                   variant="outlined"
                   sx={{ backgroundColor: 'white' }}
-                  onClick={() => handleActionClick('borrowAtMaturity', maturity)}
+                  onClick={(e) => handleActionClick(e, 'borrowAtMaturity', symbol, parseInt(maturity))}
                 >
                   Borrow
                 </Button>

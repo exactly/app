@@ -15,13 +15,11 @@ import { toPercentage } from 'utils/utils';
 
 import { ItemInfoProps } from 'components/common/ItemInfo';
 import HeaderInfo from 'components/common/HeaderInfo';
-import Grid from '@mui/material/Grid';
 import OrderAction from 'components/OrderAction';
 import { captureException } from '@sentry/nextjs';
-import { useTheme } from '@mui/material/styles';
-import useMediaQuery from '@mui/material/useMediaQuery';
 import { useWeb3 } from 'hooks/useWeb3';
 import networkData from 'config/networkData.json' assert { type: 'json' };
+import { Box } from '@mui/material';
 
 type FloatingPoolInfoProps = {
   symbol: string;
@@ -110,21 +108,13 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol, eMarketAddress })
     },
   ];
 
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const tempStyle = isMobile
-    ? { display: 'flex', justifyContent: 'space-around', width: '100%' }
-    : { marginRight: '16px' };
-
   return (
-    <Grid container justifyContent="space-between" gap={2}>
-      <Grid>
-        <HeaderInfo title={translations[lang].smartPool} itemsInfo={itemsInfo} variant="h5" shadow={false} />
-      </Grid>
-      <Grid alignSelf="end" sx={tempStyle} p="24px">
+    <Box display="flex" justifyContent="space-between" flexDirection={{ xs: 'column', sm: 'row' }} gap={2}>
+      <HeaderInfo title="Variable Interest Rate" itemsInfo={itemsInfo} shadow={false} />
+      <Box p={3} mt={{ xs: -4, sm: 'auto' }}>
         <OrderAction />
-      </Grid>
-    </Grid>
+      </Box>
+    </Box>
   );
 };
 
