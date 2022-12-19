@@ -22,8 +22,8 @@ export default () => {
                 symbol: asset.assetSymbol,
                 market: asset.market,
                 fee: pool.position.fee,
-                principal: pool.position.principal,
                 decimals: asset.decimals,
+                previewValue: pool.previewValue,
               },
             ]
           : [
@@ -32,8 +32,8 @@ export default () => {
                 symbol: asset.assetSymbol,
                 market: asset.market,
                 fee: pool.position.fee,
-                principal: pool.position.principal,
                 decimals: asset.decimals,
+                previewValue: pool.previewValue,
               },
             ];
       });
@@ -50,8 +50,8 @@ export default () => {
                 symbol: asset.assetSymbol,
                 market: asset.market,
                 fee: pool.position.fee,
-                principal: pool.position.principal,
                 decimals: asset.decimals,
+                previewValue: pool.previewValue,
               },
             ]
           : [
@@ -60,8 +60,8 @@ export default () => {
                 symbol: asset.assetSymbol,
                 market: asset.market,
                 fee: pool.position.fee,
-                principal: pool.position.principal,
                 decimals: asset.decimals,
+                previewValue: pool.previewValue,
               },
             ];
       });

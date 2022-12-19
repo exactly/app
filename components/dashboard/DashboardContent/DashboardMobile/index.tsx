@@ -80,14 +80,14 @@ const DashboardMobile: FC<Props> = ({ type }) => {
           </>
         </MobileAssetCard>
       ))}
-      {fixedRows.map(({ symbol, principal, maturity, decimals, market }) => (
+      {fixedRows.map(({ symbol, previewValue, maturity, decimals, market }) => (
         <MobileAssetCard key={`dashboard_fixed_mobile_${symbol}_${type}_${maturity}`} symbol={symbol}>
           <>
             <Box display="flex" flexDirection="column" gap={1} width="100%">
-              <FlexItem title={isDeposit ? 'Deposited' : 'Debt'}>
-                {accountData && symbol && principal ? (
+              <FlexItem title="Market value">
+                {accountData && symbol && previewValue ? (
                   `$${formatNumber(
-                    parseFloat(formatFixed(principal, decimals)) *
+                    parseFloat(formatFixed(previewValue, decimals)) *
                       parseFloat(formatFixed(accountData[symbol].usdPrice, 18)),
                     'USD',
                     true,
