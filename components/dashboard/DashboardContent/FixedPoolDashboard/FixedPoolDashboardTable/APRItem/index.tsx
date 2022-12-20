@@ -28,7 +28,7 @@ const APRItem: FC<{ type: 'deposit' | 'borrow'; maturityDate: string; market: st
     return allAPRbyAmount / allAmounts;
   }, [depositTxs, borrowTxs, decimals]);
 
-  return <>{APR !== undefined ? `${(APR || 0).toFixed(2)} %` : <Skeleton sx={{ margin: 'auto' }} width={50} />}</>;
+  return <>{APR !== undefined ? `${(APR || 0).toFixed(2)} %` : <Skeleton width={50} />}</>;
 };
 
 export default APRItem;
