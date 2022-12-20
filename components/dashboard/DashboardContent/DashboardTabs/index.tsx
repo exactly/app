@@ -22,7 +22,7 @@ function DashboardTabs({ initialTab, allTabs }: Props) {
 
   return (
     <TabContext value={currentTab}>
-      <Box width="100%">
+      <Box>
         <TabList
           onChange={(_: React.SyntheticEvent, newTab: string) => setCurrentTab(newTab)}
           aria-label="lab API tabs example"
