@@ -1,10 +1,9 @@
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { Skeleton, Tooltip, Typography } from '@mui/material';
+import { CircularProgress, Skeleton, Tooltip, Typography } from '@mui/material';
 import { captureException } from '@sentry/nextjs';
 import { WeiPerEther } from '@ethersproject/constants';
 import { ErrorCode } from '@ethersproject/logger';
 
-import Loading from 'components/common/Loading';
 import StyledSwitch from 'components/Switch';
 import AccountDataContext from 'contexts/AccountDataContext';
 import parseHealthFactor from 'utils/parseHealthFactor';
@@ -86,8 +85,8 @@ function SwitchCollateral({ symbol }: Props) {
     }
   }, [accountData, auditor, getAccountData, symbol, toggle]);
 
-  if (!symbol) return <Skeleton animation="wave" width={60} height={30} sx={{ margin: 'auto' }} />;
-  if (loading) return <Loading size="small" color="primary" />;
+  if (!symbol) return <Skeleton animation="wave" width={40} height={36} sx={{ borderRadius: '12px' }} />;
+  if (loading) return <CircularProgress color="primary" size={24} thickness={8} />;
 
   return (
     <Tooltip
