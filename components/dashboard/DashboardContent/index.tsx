@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import dynamic from 'next/dynamic';
 import Grid from '@mui/material/Grid';
 import { globals } from 'styles/theme';
@@ -15,6 +15,7 @@ import { useWeb3 } from 'hooks/useWeb3';
 import { Box } from '@mui/material';
 import MobileTabs from 'components/MobileTabs';
 import DashboardMobile from './DashboardMobile';
+import ConnectYourWallet from './ConnectYourWallet';
 
 const depositTab = {
   label: 'Your Deposits',
@@ -27,36 +28,43 @@ const borrowTab = {
 };
 
 function DashboardContent() {
-  const { walletAddress } = useWeb3();
+  const { walletAddress, isConnected } = useWeb3();
 
-  const allTabs = [
-    {
-      ...depositTab,
-      content: walletAddress ? (
-        <>
-          <FloatingPoolDashboard type="deposit" />
-          <FixedPoolDashboard type="deposit" />
-        </>
-      ) : (
-        <EmptyState />
-      ),
-    },
-    {
-      ...borrowTab,
-      content: walletAddress ? (
-        <>
-          <FloatingPoolDashboard type="borrow" />
-          <FixedPoolDashboard type="borrow" />
-        </>
-      ) : (
-        <EmptyState />
-      ),
-    },
-  ];
+  const allTabs = useMemo(
+    () => [
+      {
+        ...depositTab,
+        content: walletAddress ? (
+          <>
+            <FloatingPoolDashboard type="deposit" />
+            <FixedPoolDashboard type="deposit" />
+          </>
+        ) : (
+          <EmptyState />
+        ),
+      },
+      {
+        ...borrowTab,
+        content: walletAddress ? (
+          <>
+            <FloatingPoolDashboard type="borrow" />
+            <FixedPoolDashboard type="borrow" />
+          </>
+        ) : (
+          <EmptyState />
+        ),
+      },
+    ],
+    [walletAddress],
+  );
+
+  if (!isConnected) {
+    return <ConnectYourWallet />;
+  }
 
   return (
     <>
-      <Grid container sx={{ maxWidth: maxWidth }} mx="auto" mt={5} display={onlyDesktop}>
+      <Grid container sx={{ maxWidth }} mx="auto" mt={5} display={onlyDesktop}>
         <DashboardTabs initialTab={allTabs[0].value} allTabs={allTabs} />
       </Grid>
       <Box display={onlyMobile} width="100%" px={1} my={2}>

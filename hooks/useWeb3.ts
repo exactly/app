@@ -7,12 +7,13 @@ import useDebounce from './useDebounce';
 export const useWeb3 = () => {
   const { connect } = useConnect({ connector: new InjectedConnector() });
   const { disconnect } = useDisconnect();
-  const { address } = useAccount();
+  const { address, isConnected } = useAccount();
   const { chain } = useNetwork();
   const { query } = useRouter();
 
   const walletAddress = useDebounce(address);
   return {
+    isConnected,
     walletAddress,
     chain: walletAddress
       ? chain
