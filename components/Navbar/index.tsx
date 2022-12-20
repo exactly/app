@@ -50,7 +50,7 @@ function Navbar() {
   }
 
   return (
-    <Box sx={{ display: 'flex', justifyContent: 'center' }} mx="8px">
+    <Box sx={{ display: 'flex', justifyContent: 'center' }}>
       <DisclaimerModal />
       <AppBar position="static" color="transparent" sx={{ maxWidth }}>
         <Toolbar disableGutters sx={{ padding: '0 0', gap: '8px' }}>
