@@ -1,5 +1,5 @@
 import React, { FC } from 'react';
-import { Box, Button, Divider, Grid, Tooltip, Typography } from '@mui/material';
+import { Box, Button, Divider, Grid, Skeleton, Tooltip, Typography } from '@mui/material';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import useMaturityPools, { APRsPerMaturityType } from 'hooks/useMaturityPools';
 import numbers from 'config/numbers.json';
@@ -29,18 +29,20 @@ const MaturityPoolsMobile: FC<Props> = ({ APRsPerMaturity, symbol }) => {
           <Box display="flex" flexDirection="column" gap={2} mt={2}>
             <Typography variant="h6">{parseTimestamp(maturity)}</Typography>
             <Grid container>
-              <GridItem title="Total Deposits" value={`$${totalDeposited}`} />
-              <GridItem title="Total Borrows" value={`$${totalBorrowed}`} />
+              <GridItem title="Total Deposits" value={`$${totalDeposited}`} isLoading={totalDeposited === undefined} />
+              <GridItem title="Total Borrows" value={`$${totalBorrowed}`} isLoading={totalBorrowed === undefined} />
               <Grid item xs={12} my={0.5} />
               <GridItem
                 title="Deposit APR"
                 tooltip="The marginal fixed interest rate for a $1 deposit in the Fixed Rated Pool."
                 value={`${toPercentage(depositAPR > minAPRValue ? depositAPR : undefined)}`}
+                isLoading={depositAPR === undefined}
               />
               <GridItem
                 title="Borrow APR"
                 tooltip="The marginal fixed interest rate for a $1 borrow in the Fixed Rated Pool."
                 value={`${toPercentage(borrowAPR > minAPRValue ? borrowAPR : undefined)}`}
+                isLoading={borrowAPR === undefined}
               />
             </Grid>
             <Box display="flex" gap={0.5} mb={2}>
@@ -68,7 +70,12 @@ const MaturityPoolsMobile: FC<Props> = ({ APRsPerMaturity, symbol }) => {
   );
 };
 
-const GridItem: FC<{ title: string; value: string; tooltip?: string }> = ({ title, value, tooltip }) => (
+const GridItem: FC<{ title: string; value: string; tooltip?: string; isLoading?: boolean }> = ({
+  title,
+  value,
+  tooltip,
+  isLoading,
+}) => (
   <Grid item xs={6}>
     <Box display="flex">
       <Typography fontSize="16px" color="grey.300" lineHeight="20px">
@@ -80,9 +87,13 @@ const GridItem: FC<{ title: string; value: string; tooltip?: string }> = ({ titl
         </Tooltip>
       )}
     </Box>
-    <Typography fontSize="16px" fontWeight={700} lineHeight="20px">
-      {value}
-    </Typography>
+    {isLoading ? (
+      <Skeleton width={60} />
+    ) : (
+      <Typography fontSize="16px" fontWeight={700} lineHeight="20px">
+        {value}
+      </Typography>
+    )}
   </Grid>
 );
 
