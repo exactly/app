@@ -80,41 +80,64 @@ const DashboardMobile: FC<Props> = ({ type }) => {
           </>
         </MobileAssetCard>
       ))}
-      {fixedRows.map(({ symbol, previewValue, maturity, decimals, market }) => (
-        <MobileAssetCard key={`dashboard_fixed_mobile_${symbol}_${type}_${maturity}`} symbol={symbol}>
-          <>
-            <Box display="flex" flexDirection="column" gap={1} width="100%">
-              <FlexItem title="Market value">
-                {accountData && symbol && previewValue ? (
-                  `$${formatNumber(
-                    parseFloat(formatFixed(previewValue, decimals)) *
-                      parseFloat(formatFixed(accountData[symbol].usdPrice, 18)),
-                    'USD',
-                    true,
-                  )}`
-                ) : (
-                  <Skeleton sx={{ margin: 'auto' }} width={50} />
-                )}
-              </FlexItem>
-              <FlexItem title="Avg Fixed Rate" tooltip="Average rate for existing deposits.">
-                <APRItem type={type} maturityDate={maturity} market={market} decimals={decimals} />
-              </FlexItem>
-              <FlexItem title="MaturityDate">{maturity ? parseTimestamp(maturity) : <Skeleton width={80} />}</FlexItem>
-            </Box>
-            <MaturityLinearProgress maturityDate={maturity} />
-            <Button
-              variant="outlined"
-              fullWidth
-              sx={{ height: '34px' }}
-              onClick={(e) =>
-                handleActionClick(e, isDeposit ? 'withdrawAtMaturity' : 'repayAtMaturity', symbol, parseInt(maturity))
-              }
-            >
-              {isDeposit ? 'Withdraw' : 'Repay'}
-            </Button>
-          </>
-        </MobileAssetCard>
-      ))}
+      {fixedRows.length === 0 ? (
+        <Box
+          bgcolor="#FFFFFF"
+          borderTop="4px solid #0095FF"
+          boxShadow="0px 4px 12px rgba(175, 177, 182, 0.2)"
+          borderRadius="6px"
+          padding="20px 0 24px 0"
+          display="flex"
+          flexDirection="column"
+          alignItems="center"
+          gap={1}
+        >
+          <Typography fontWeight={700} fontSize={16}>
+            Fixed Interest Rate
+          </Typography>
+          <Typography color="grey.500" fontSize={14}>
+            No {type}s found
+          </Typography>
+        </Box>
+      ) : (
+        fixedRows.map(({ symbol, previewValue, maturity, decimals, market }) => (
+          <MobileAssetCard key={`dashboard_fixed_mobile_${symbol}_${type}_${maturity}`} symbol={symbol}>
+            <>
+              <Box display="flex" flexDirection="column" gap={1} width="100%">
+                <FlexItem title="Market value">
+                  {accountData && symbol && previewValue ? (
+                    `$${formatNumber(
+                      parseFloat(formatFixed(previewValue, decimals)) *
+                        parseFloat(formatFixed(accountData[symbol].usdPrice, 18)),
+                      'USD',
+                      true,
+                    )}`
+                  ) : (
+                    <Skeleton sx={{ margin: 'auto' }} width={50} />
+                  )}
+                </FlexItem>
+                <FlexItem title="Avg Fixed Rate" tooltip="Average rate for existing deposits.">
+                  <APRItem type={type} maturityDate={maturity} market={market} decimals={decimals} />
+                </FlexItem>
+                <FlexItem title="MaturityDate">
+                  {maturity ? parseTimestamp(maturity) : <Skeleton width={80} />}
+                </FlexItem>
+              </Box>
+              <MaturityLinearProgress maturityDate={maturity} />
+              <Button
+                variant="outlined"
+                fullWidth
+                sx={{ height: '34px' }}
+                onClick={(e) =>
+                  handleActionClick(e, isDeposit ? 'withdrawAtMaturity' : 'repayAtMaturity', symbol, parseInt(maturity))
+                }
+              >
+                {isDeposit ? 'Withdraw' : 'Repay'}
+              </Button>
+            </>
+          </MobileAssetCard>
+        ))
+      )}
     </Box>
   );
 };

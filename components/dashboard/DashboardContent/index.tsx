@@ -3,12 +3,11 @@ import dynamic from 'next/dynamic';
 import Grid from '@mui/material/Grid';
 import { globals } from 'styles/theme';
 
-const { maxWidth, onlyMobile, onlyDesktop } = globals;
+const { onlyMobile, onlyDesktop } = globals;
 
 // const DashboardUserCharts = dynamic(() => import('components/DashboardContent/DashboardUserCharts'));
 const FloatingPoolDashboard = dynamic(() => import('components/dashboard/DashboardContent/FloatingPoolDashboard'));
 const FixedPoolDashboard = dynamic(() => import('components/dashboard/DashboardContent/FixedPoolDashboard'));
-const EmptyState = dynamic(() => import('components/EmptyState'));
 
 import DashboardTabs from 'components/dashboard/DashboardContent/DashboardTabs';
 import { useWeb3 } from 'hooks/useWeb3';
@@ -28,34 +27,30 @@ const borrowTab = {
 };
 
 function DashboardContent() {
-  const { walletAddress, isConnected } = useWeb3();
+  const { isConnected } = useWeb3();
 
   const allTabs = useMemo(
     () => [
       {
         ...depositTab,
-        content: walletAddress ? (
+        content: (
           <>
             <FloatingPoolDashboard type="deposit" />
             <FixedPoolDashboard type="deposit" />
           </>
-        ) : (
-          <EmptyState />
         ),
       },
       {
         ...borrowTab,
-        content: walletAddress ? (
+        content: (
           <>
             <FloatingPoolDashboard type="borrow" />
             <FixedPoolDashboard type="borrow" />
           </>
-        ) : (
-          <EmptyState />
         ),
       },
     ],
-    [walletAddress],
+    [],
   );
 
   if (!isConnected) {
@@ -64,10 +59,10 @@ function DashboardContent() {
 
   return (
     <>
-      <Grid container sx={{ maxWidth }} mx="auto" mt={5} display={onlyDesktop}>
+      <Grid mt={5} display={onlyDesktop}>
         <DashboardTabs initialTab={allTabs[0].value} allTabs={allTabs} />
       </Grid>
-      <Box display={onlyMobile} width="100%" px={1} my={2}>
+      <Box display={onlyMobile} my={2}>
         <MobileTabs
           tabs={[
             {

@@ -5,12 +5,15 @@ import AddETokensButton from 'components/AddETokensButton';
 import FloatingPoolDashboardTable from 'components/dashboard/DashboardContent/FloatingPoolDashboard/FloatingPoolDashboardTable';
 import { Grid, Typography } from '@mui/material';
 import Stack from '@mui/material/Stack';
+import useDashboard from 'hooks/useDashboard';
 
 type Props = {
   type: 'deposit' | 'borrow';
 };
 
 function FloatingPoolDashboard({ type }: Props) {
+  const { floatingRows } = useDashboard(type);
+
   return (
     <Grid
       width={'100%'}
@@ -25,7 +28,7 @@ function FloatingPoolDashboard({ type }: Props) {
         <Typography variant="h6">Variable Interest Rate</Typography>
         <AddETokensButton />
       </Stack>
-      <FloatingPoolDashboardTable type={type} />
+      <FloatingPoolDashboardTable rows={floatingRows} type={type} />
     </Grid>
   );
 }
