@@ -40,13 +40,11 @@ export default function App({ Component, pageProps }: AppProps) {
                   <ModalStatusProvider>
                     <SkeletonTheme baseColor="var(--skeleton-base)" highlightColor="var(--skeleton-highlight)">
                       <Grid
-                        sx={{
-                          maxWidth,
-                          display: 'flex',
-                          flexDirection: 'column',
-                          margin: isMobile ? '8px' : 'auto',
-                          height: '100%',
-                        }}
+                        maxWidth={maxWidth}
+                        display="flex"
+                        flexDirection="column"
+                        mx={isMobile ? 1 : 'auto'}
+                        height="100%"
                       >
                         <Navbar />
                         <main style={{ flexGrow: 1 }}>
