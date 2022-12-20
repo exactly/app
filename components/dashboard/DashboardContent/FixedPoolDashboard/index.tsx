@@ -1,9 +1,6 @@
 import React from 'react';
-import dynamic from 'next/dynamic';
-
-const EmptyState = dynamic(() => import('components/EmptyState'));
-
 import { Grid, Typography } from '@mui/material';
+
 import FixedPoolDashboardTable from 'components/dashboard/DashboardContent/FixedPoolDashboard/FixedPoolDashboardTable';
 import useDashboard from 'hooks/useDashboard';
 
@@ -25,8 +22,13 @@ function FixedPoolDashboard({ type }: Props) {
       borderTop="4px solid #008CF4"
     >
       <Typography variant="h6">Fixed Interest Rate</Typography>
-      {type && <FixedPoolDashboardTable rows={fixedRows} type={type} />}
-      {!fixedRows && <EmptyState connected tab={type} />}
+      {fixedRows.length === 0 ? (
+        <Typography color="grey.500" mt={1} fontSize="14px">
+          No {type}s found
+        </Typography>
+      ) : (
+        <FixedPoolDashboardTable rows={fixedRows} type={type} />
+      )}
     </Grid>
   );
 }
