@@ -56,7 +56,7 @@ function TableRowFloatingPool({ symbol, depositAmount, borrowedAmount, eTokenAmo
               parseFloat(formatFixed(type === 'deposit' ? depositAmount : borrowedAmount, decimals)) * rate,
               'USD',
               true,
-            )}`) || <Skeleton sx={{ margin: 'auto' }} width={40} />}
+            )}`) || <Skeleton width={70} />}
         </Typography>
       </TableCell>
 
@@ -64,7 +64,7 @@ function TableRowFloatingPool({ symbol, depositAmount, borrowedAmount, eTokenAmo
         <TableCell align="left" size="small">
           <Typography>
             {(eTokenAmount && `${formatNumber(formatFixed(eTokenAmount, decimals), symbol)}`) || (
-              <Skeleton sx={{ margin: 'auto' }} width={40} />
+              <Skeleton width={40} />
             )}{' '}
           </Typography>
         </TableCell>

@@ -92,7 +92,7 @@ function TableRowFixedPool({ symbol, amount, type, maturityDate, market, decimal
                 <Skeleton variant="circular" height={24} width={24} />
               )}
               <Typography fontWeight="600" ml={1} display="inline" alignSelf="center">
-                {(symbol && formatSymbol(symbol)) || <Skeleton sx={{ margin: 'auto' }} width={50} />}
+                {(symbol && formatSymbol(symbol)) || <Skeleton width={50} />}
               </Typography>
             </Stack>
           </TableCell>
@@ -131,7 +131,14 @@ function TableRowFixedPool({ symbol, amount, type, maturityDate, market, decimal
             >
               {type === 'borrow' ? 'Repay' : 'Withdraw'}
             </Button>
-          )) || <Skeleton sx={{ margin: 'auto', borderRadius: '32px' }} variant="rounded" height={34} width={96} />}
+          )) || (
+            <Skeleton
+              sx={{ margin: 'auto', borderRadius: '32px' }}
+              variant="rounded"
+              height={34}
+              width={type === 'borrow' ? 76 : 96}
+            />
+          )}
         </TableCell>
         <TableCell align="left" size="small" width={50}>
           <IconButton
