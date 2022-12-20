@@ -22,7 +22,7 @@ import useAssets from 'hooks/useAssets';
 import PoolMobile from './poolMobile';
 import MobileTabs from 'components/MobileTabs';
 
-const { maxWidth, onlyMobile, onlyDesktop } = globals;
+const { onlyMobile, onlyDesktop } = globals;
 
 const floatingHeaders = [
   {
@@ -178,9 +178,8 @@ const MarketTables: FC = () => {
   }, [defineRows]);
 
   return (
-    <Grid container sx={{ maxWidth: maxWidth, margin: 'auto' }}>
+    <>
       <Grid
-        width={'100%'}
         my={4}
         p="24px"
         boxShadow="0px 4px 12px rgba(175, 177, 182, 0.2)"
@@ -207,9 +206,9 @@ const MarketTables: FC = () => {
         <Typography variant="h6" pb="16px">
           Fixed Interest Rate
         </Typography>
-        <PoolTable isLoading={isLoading} headers={fixedHeaders} rows={fixedRows} rateType={'fixed'} />
+        <PoolTable isLoading={isLoading} headers={fixedHeaders} rows={fixedRows} rateType="fixed" />
       </Grid>
-      <Box display={onlyMobile} width="100%" px={1} my={2}>
+      <Box display={onlyMobile} my={2}>
         <MobileTabs
           tabs={[
             {
@@ -239,7 +238,7 @@ const MarketTables: FC = () => {
           ]}
         />
       </Box>
-    </Grid>
+    </>
   );
 };
 

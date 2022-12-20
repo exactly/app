@@ -1,10 +1,9 @@
-import React, { FC, useContext, useEffect, useState } from 'react';
+import React, { type FC, useContext, useMemo } from 'react';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber/lib';
 import { Zero } from '@ethersproject/constants/lib';
 
 import HeaderInfo from 'components/common/HeaderInfo';
 import { ItemInfoProps } from 'components/common/ItemInfo';
-import { Grid } from '@mui/material';
 
 import AccountDataContext from 'contexts/AccountDataContext';
 
@@ -12,13 +11,13 @@ import formatNumber from 'utils/formatNumber';
 
 const MarketsHeader: FC = () => {
   const { accountData } = useContext(AccountDataContext);
-  const [totalDeposited, setTotalDeposited] = useState<BigNumber | undefined>(undefined);
-  const [totalBorrowed, setTotalBorrowed] = useState<BigNumber | undefined>(undefined);
-  const [totalAvailable, setTotalAvailable] = useState<BigNumber | undefined>(undefined);
 
-  useEffect(() => {
-    if (!accountData) return;
-
+  const { totalDeposited, totalBorrowed, totalAvailable } = useMemo<{
+    totalDeposited?: BigNumber;
+    totalBorrowed?: BigNumber;
+    totalAvailable?: BigNumber;
+  }>(() => {
+    if (!accountData) return {};
     const { totalDepositedUSD, totalBorrowedUSD } = Object.keys(accountData).reduce(
       (acc, symbol) => {
         const { totalFloatingDepositAssets, totalFloatingBorrowAssets, usdPrice, fixedPools, decimals } =
@@ -49,30 +48,29 @@ const MarketsHeader: FC = () => {
       { totalDepositedUSD: Zero, totalBorrowedUSD: Zero },
     );
 
-    setTotalDeposited(totalDepositedUSD);
-    setTotalBorrowed(totalBorrowedUSD);
-    setTotalAvailable(totalDepositedUSD.sub(totalBorrowedUSD));
+    return {
+      totalDeposited: totalDepositedUSD,
+      totalBorrowed: totalBorrowedUSD,
+      totalAvailable: totalDepositedUSD.sub(totalBorrowedUSD),
+    };
   }, [accountData]);
 
   const itemsInfo: ItemInfoProps[] = [
     {
       label: 'Total Deposits',
-      value: totalDeposited != null ? `$${formatNumber(formatFixed(totalDeposited, 18))}` : undefined,
+      value: totalDeposited ? `$${formatNumber(formatFixed(totalDeposited, 18))}` : undefined,
     },
     {
       label: 'Total Borrows',
-      value: totalBorrowed != null ? `$${formatNumber(formatFixed(totalBorrowed, 18))}` : undefined,
+      value: totalBorrowed ? `$${formatNumber(formatFixed(totalBorrowed, 18))}` : undefined,
     },
     {
       label: 'Total Available',
-      value: totalAvailable != null ? `$${formatNumber(formatFixed(totalAvailable, 18))}` : undefined,
+      value: totalAvailable ? `$${formatNumber(formatFixed(totalAvailable, 18))}` : undefined,
     },
   ];
-  return (
-    <Grid container>
-      <HeaderInfo itemsInfo={itemsInfo} title="Markets" />
-    </Grid>
-  );
+
+  return <HeaderInfo itemsInfo={itemsInfo} title="Markets" />;
 };
 
 export default MarketsHeader;

@@ -8,6 +8,11 @@ body {
   font-family: 'articulat-cf';
   background-color: var(--background);
   color: var(--text-color);
+  height: 100%;
+}
+
+#__next {
+  height: 100%;
 }
 
 a {
