@@ -15,7 +15,7 @@ function MobileTabs({ tabs }: Props) {
 
   return (
     <>
-      <Box display="flex" justifyContent="center" width="100%" mb={1}>
+      <Box display="flex" justifyContent="center" mb={1}>
         {tabs.map(({ title }, i) => (
           <Button
             key={`mobile-tab-${title}`}

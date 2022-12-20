@@ -14,7 +14,7 @@ import { Pool } from 'types/FixedPool';
 
 type Props = {
   type: 'deposit' | 'borrow';
-  rows?: Pool[];
+  rows: Pool[];
 };
 
 function FixedPoolDashboardTable({ type, rows }: Props) {
@@ -64,7 +64,7 @@ function FixedPoolDashboardTable({ type, rows }: Props) {
 
   return (
     <TableContainer component={Paper}>
-      <Table aria-label="collapsible table">
+      <Table>
         <TableHead>
           <TableRow>
             {headers.map((header) => (
@@ -87,7 +87,7 @@ function FixedPoolDashboardTable({ type, rows }: Props) {
           </TableRow>
         </TableHead>
         <TableBody>
-          {rows?.map(({ previewValue, maturity, symbol, market, decimals }) => (
+          {rows.map(({ previewValue, maturity, symbol, market, decimals }) => (
             <TableRowFixedPool
               key={`${symbol}_${maturity}_${previewValue}`}
               type={type}
@@ -104,4 +104,4 @@ function FixedPoolDashboardTable({ type, rows }: Props) {
   );
 }
 
-export default FixedPoolDashboardTable;
+export default React.memo(FixedPoolDashboardTable);

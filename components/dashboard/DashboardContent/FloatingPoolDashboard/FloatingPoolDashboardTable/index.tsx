@@ -15,15 +15,13 @@ import { FloatingPoolItemData } from 'types/FloatingPoolItemData';
 
 import TableRowFloatingPool from './TableRowFloatingPool';
 import type { TableHeader } from 'types/TableHeader';
-import useDashboard from 'hooks/useDashboard';
 
 type Props = {
   type: 'deposit' | 'borrow';
+  rows: FloatingPoolItemData[];
 };
 
-function FloatingPoolDashboardTable({ type }: Props) {
-  const { floatingRows } = useDashboard(type);
-
+function FloatingPoolDashboardTable({ type, rows }: Props) {
   const headers: TableHeader[] = useMemo(() => {
     return [
       {
@@ -65,7 +63,7 @@ function FloatingPoolDashboardTable({ type }: Props) {
 
   return (
     <TableContainer component={Paper}>
-      <Table aria-label="simple table">
+      <Table>
         <TableHead>
           <TableRow>
             {headers.map((header) => (
@@ -88,7 +86,7 @@ function FloatingPoolDashboardTable({ type }: Props) {
           </TableRow>
         </TableHead>
         <TableBody>
-          {floatingRows.map((item: FloatingPoolItemData) => (
+          {rows.map((item: FloatingPoolItemData) => (
             <TableRowFloatingPool
               key={`floating_row_${item.symbol}_${type}`}
               symbol={item.symbol}
@@ -105,4 +103,4 @@ function FloatingPoolDashboardTable({ type }: Props) {
   );
 }
 
-export default FloatingPoolDashboardTable;
+export default React.memo(FloatingPoolDashboardTable);

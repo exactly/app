@@ -14,7 +14,7 @@ function ConnectYourWallet() {
         border: '1px solid #E0E0E0',
         borderRadius: '6px',
         padding: '32px',
-        gap: '8px',
+        gap: 1,
       }}
       mt={5}
     >
