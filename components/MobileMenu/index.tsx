@@ -8,6 +8,7 @@ import { Divider, IconButton, Modal, Slide, Typography } from '@mui/material';
 import { Box } from '@mui/system';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
 
 type Props = {
   open: boolean;
@@ -26,7 +27,7 @@ const headers = [
 ];
 
 function MobileMenu({ open, handleClose }: Props) {
-  const { pathname: currentPathname, push, query } = useRouter();
+  const { pathname: currentPathname, query } = useRouter();
   const date = new Date();
 
   return (
@@ -51,19 +52,21 @@ function MobileMenu({ open, handleClose }: Props) {
             <Typography variant="subtitle2" color="grey.500" fontWeight={600} mt="18px">
               Menu
             </Typography>
-            <Box display="flex" flexDirection="column" gap="16px">
+            <Box display="flex" flexDirection="column" gap={2}>
               {headers.map(({ title, pathname }) => (
-                <Typography
-                  key={`mobile_tabs_${title}`}
-                  variant="h2"
-                  onClick={() => {
-                    void push({ pathname, query });
-                    handleClose();
-                  }}
-                  sx={{ textDecoration: currentPathname === pathname ? 'underline' : 'none' }}
-                >
-                  {title}
-                </Typography>
+                <Link href={{ pathname, query }} key={`mobile_tabs_${title}`}>
+                  <a onClick={handleClose}>
+                    <Typography
+                      sx={{
+                        textDecoration: currentPathname === pathname ? 'underline' : 'none',
+                        fontWeight: 600,
+                        fontSize: 32,
+                      }}
+                    >
+                      {title}
+                    </Typography>
+                  </a>
+                </Link>
               ))}
             </Box>
             <Divider sx={{ my: '12px' }} />
