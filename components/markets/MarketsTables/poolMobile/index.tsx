@@ -1,5 +1,5 @@
 import React, { FC, useMemo } from 'react';
-import { Box, Button, Divider, Grid, Tooltip, Typography } from '@mui/material';
+import { Box, Button, Divider, Grid, Skeleton, Tooltip, Typography } from '@mui/material';
 import numbers from 'config/numbers.json';
 import useActionButton from 'hooks/useActionButton';
 import { toPercentage } from 'utils/utils';
@@ -24,18 +24,20 @@ const PoolMobile: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) 
           <MobileAssetCard key={`pool_mobile_${symbol}_${rateType}`} symbol={symbol} isFloating={isFloating}>
             <>
               <Grid container my={0.5}>
-                <GridItem header={headers[1]} value={`$${totalDeposited}`} />
+                <GridItem header={headers[1]} value={`$${totalDeposited}`} isLoading={totalDeposited === undefined} />
                 <GridItem
                   header={headers[3]}
                   value={toPercentage(depositAPR && depositAPR > minAPRValue ? depositAPR : undefined)}
+                  isLoading={depositAPR === undefined}
                 />
                 <Grid item xs={12} my={1.8}>
                   <Divider />
                 </Grid>
-                <GridItem header={headers[2]} value={`$${totalBorrowed}`} />
+                <GridItem header={headers[2]} value={`$${totalBorrowed}`} isLoading={totalBorrowed === undefined} />
                 <GridItem
                   header={headers[3]}
                   value={toPercentage(borrowAPR && borrowAPR > minAPRValue ? borrowAPR : undefined)}
+                  isLoading={borrowAPR === undefined}
                 />
               </Grid>
               <Box display="flex" gap={0.5}>
@@ -69,7 +71,7 @@ const PoolMobile: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) 
   );
 };
 
-const GridItem: FC<{ header: TableHead; value: string }> = ({ header, value }) => (
+const GridItem: FC<{ header: TableHead; value: string; isLoading?: boolean }> = ({ header, value, isLoading }) => (
   <Grid item xs={6}>
     <Box display="flex">
       <Typography fontSize="16px" color="grey.300" lineHeight="20px">
@@ -81,9 +83,13 @@ const GridItem: FC<{ header: TableHead; value: string }> = ({ header, value }) =
         </Tooltip>
       )}
     </Box>
-    <Typography fontSize="16px" fontWeight={700} lineHeight="20px">
-      {value}
-    </Typography>
+    {isLoading ? (
+      <Skeleton width={60} />
+    ) : (
+      <Typography fontSize="16px" fontWeight={700} lineHeight="20px">
+        {value}
+      </Typography>
+    )}
   </Grid>
 );
 
