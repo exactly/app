@@ -32,9 +32,7 @@ const HeaderInfo: FC<HeaderInfoProps> = ({ title, itemsInfo, variant = 'h6', sha
 
   return (
     <Grid
-      mx={isMobile ? 1 : 0}
       sx={{ bgcolor: 'white' }}
-      width="100%"
       p={isMobile ? '16px' : '24px'}
       boxShadow={shadow ? '0px 4px 12px rgba(175, 177, 182, 0.2)' : ''}
     >
