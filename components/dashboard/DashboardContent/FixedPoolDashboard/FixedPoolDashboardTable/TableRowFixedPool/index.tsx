@@ -89,10 +89,10 @@ function TableRowFixedPool({ symbol, amount, type, maturityDate, market, decimal
           <TableCell component="th" align="left" sx={{ cursor: 'pointer' }} width={240}>
             <Stack direction="row" spacing={1}>
               {(symbol && <Image src={`/img/assets/${symbol}.svg`} alt={symbol} width={24} height={24} />) || (
-                <Skeleton sx={{ margin: 'auto' }} variant="circular" height={24} width={24} />
+                <Skeleton variant="circular" height={24} width={24} />
               )}
               <Typography fontWeight="600" ml={1} display="inline" alignSelf="center">
-                {(symbol && formatSymbol(symbol)) || <Skeleton sx={{ margin: 'auto' }} />}
+                {(symbol && formatSymbol(symbol)) || <Skeleton sx={{ margin: 'auto' }} width={50} />}
               </Typography>
             </Stack>
           </TableCell>
@@ -101,21 +101,21 @@ function TableRowFixedPool({ symbol, amount, type, maturityDate, market, decimal
           {symbol && exchangeRate && amount ? (
             `$${formatNumber(parseFloat(formatFixed(amount, decimals)) * exchangeRate, 'USD', true)}`
           ) : (
-            <Skeleton sx={{ margin: 'auto' }} width={50} />
+            <Skeleton width={60} />
           )}
         </TableCell>
         <TableCell align="left" size="small">
           <APRItem type={type} maturityDate={maturityDate} market={market} decimals={decimals} />
         </TableCell>
         <TableCell align="left" size="small">
-          {maturityDate ? parseTimestamp(maturityDate) : <Skeleton sx={{ margin: 'auto' }} width={80} />}
+          {maturityDate ? parseTimestamp(maturityDate) : <Skeleton width={80} />}
         </TableCell>
         <TableCell align="left" size="small" width={200}>
           <Box width={150}>
             {maturityDate ? (
               <MaturityLinearProgress maturityDate={maturityDate} />
             ) : (
-              <Skeleton sx={{ margin: 'auto' }} width={130} />
+              <Skeleton sx={{ margin: 'auto' }} width={150} />
             )}
           </Box>
         </TableCell>
@@ -131,7 +131,7 @@ function TableRowFixedPool({ symbol, amount, type, maturityDate, market, decimal
             >
               {type === 'borrow' ? 'Repay' : 'Withdraw'}
             </Button>
-          )) || <Skeleton sx={{ margin: 'auto' }} height={40} width={70} />}
+          )) || <Skeleton sx={{ margin: 'auto', borderRadius: '32px' }} variant="rounded" height={34} width={96} />}
         </TableCell>
         <TableCell align="left" size="small" width={50}>
           <IconButton
