@@ -101,19 +101,19 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
                         <Image src={`/img/assets/${symbol}.svg`} alt={symbol} width="24" height="24" />
                       )}
                       <Typography fontWeight="600" ml={1} display="inline" alignSelf="center">
-                        {isLoading ? <Skeleton width={70} /> : formatSymbol(symbol)}
+                        {isLoading ? <Skeleton width={60} /> : formatSymbol(symbol)}
                       </Typography>
                     </Grid>
                   </TableCell>
                   <TableCell align="left" sx={{ width: '200px' }}>
-                    <Typography>{isLoading ? <Skeleton /> : `$${totalDeposited}`}</Typography>
+                    <Typography>{isLoading ? <Skeleton width={80} /> : `$${totalDeposited}`}</Typography>
                   </TableCell>
                   <TableCell align="left" sx={{ width: '200px' }}>
-                    <Typography>{isLoading ? <Skeleton /> : `$${totalBorrowed}`}</Typography>
+                    <Typography>{isLoading ? <Skeleton width={80} /> : `$${totalBorrowed}`}</Typography>
                   </TableCell>
                   <TableCell align="left" sx={{ width: '200px' }}>
                     {isLoading ? (
-                      <Skeleton />
+                      <Skeleton width={60} />
                     ) : (
                       <Tooltip
                         title={
@@ -137,7 +137,7 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
                   </TableCell>
                   <TableCell align="left" sx={{ width: '200px' }}>
                     {isLoading ? (
-                      <Skeleton />
+                      <Skeleton width={60} />
                     ) : (
                       <Tooltip
                         title={
@@ -176,7 +176,12 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
                       sx={{ cursor: 'default', px: 0.5 }}
                     >
                       {isLoading ? (
-                        <Skeleton variant="rectangular" width={78} height={40} />
+                        <Skeleton
+                          sx={{ margin: 'auto', borderRadius: '32px' }}
+                          variant="rounded"
+                          height={34}
+                          width={80}
+                        />
                       ) : (
                         <Button
                           variant="contained"
@@ -204,7 +209,12 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
                     sx={{ cursor: 'default', px: 0.5 }}
                   >
                     {isLoading ? (
-                      <Skeleton variant="rectangular" width={78} height={40} />
+                      <Skeleton
+                        sx={{ margin: 'auto', borderRadius: '32px' }}
+                        variant="rounded"
+                        height={34}
+                        width={80}
+                      />
                     ) : (
                       <Tooltip
                         title="In order to borrow you need to have a deposit in the Variable Rate Pool marked as collateral in your Dashboard"
