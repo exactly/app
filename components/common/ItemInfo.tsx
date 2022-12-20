@@ -1,8 +1,7 @@
 import React, { FC } from 'react';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
-import Skeleton from 'react-loading-skeleton';
-import { Tooltip } from '@mui/material';
+import { Skeleton, Tooltip } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 
@@ -26,7 +25,7 @@ const ItemInfo: FC<ItemInfoProps> = ({ label, value, underLabel, tooltipTitle })
         </Typography>
       </Tooltip>
       <Typography variant="h2" component="p">
-        {(!!value && value) || <Skeleton />}
+        {(!!value && value) || <Skeleton height={50} />}
       </Typography>
       {!!underLabel && (
         <Typography variant="subtitle2" sx={{ color: 'grey.500' }}>

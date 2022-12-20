@@ -68,7 +68,7 @@ function CollapseFixedPool({ open, transactions }: Props) {
                       <span style={{ paddingLeft: '2px' }}>{type}</span>
                     </>
                   ) : (
-                    <Skeleton sx={{ margin: 'auto' }} width={60} />
+                    <Skeleton width={80} />
                   )}
                 </Typography>
               </TableCell>
@@ -82,7 +82,7 @@ function CollapseFixedPool({ open, transactions }: Props) {
                       </Tooltip>
                     </>
                   ) : (
-                    <Skeleton sx={{ marginLeft: 'auto' }} width={100} />
+                    <Skeleton width={120} />
                   )}
                 </Typography>
               </TableCell>
