@@ -1,11 +1,8 @@
 import { useSwitchNetwork } from 'wagmi';
 import DisclaimerModal from 'components/DisclaimerModal';
-import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import React, { useContext, useEffect, useMemo, useState } from 'react';
-
-const Wallet = dynamic(() => import('components/Wallet'));
 
 import ThemeContext from 'contexts/ThemeContext';
 import { useWeb3 } from 'hooks/useWeb3';
@@ -18,6 +15,7 @@ import analytics from 'utils/analytics';
 import { useModalStatus } from 'contexts/ModalStatusContext';
 import MobileMenu from 'components/MobileMenu';
 import Link from 'next/link';
+import Wallet from 'components/Wallet';
 const { maxWidth, onlyMobile, onlyDesktop, onlyDesktopFlex } = globals;
 
 const routes = [
