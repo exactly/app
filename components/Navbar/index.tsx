@@ -16,6 +16,7 @@ import { useModalStatus } from 'contexts/ModalStatusContext';
 import MobileMenu from 'components/MobileMenu';
 import Link from 'next/link';
 import Wallet from 'components/Wallet';
+import SelectNetwork from 'components/SelectNetwork';
 const { maxWidth, onlyMobile, onlyDesktop, onlyDesktopFlex } = globals;
 
 const routes = [
@@ -89,6 +90,7 @@ function Navbar() {
             {chain?.id === 5 && (
               <Chip label="Goerli Faucet" onClick={handleFaucetClick} sx={{ my: 'auto', display: onlyDesktopFlex }} />
             )}
+            <SelectNetwork />
             <Wallet />
           </Box>
           <IconButton

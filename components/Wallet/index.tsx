@@ -3,10 +3,11 @@ import { useEnsName, useConnect, useDisconnect } from 'wagmi';
 import { useWeb3 } from 'hooks/useWeb3';
 import { formatWallet } from 'utils/utils';
 
-import { Avatar, Box, Button, capitalize, Divider, Menu, MenuItem, Typography } from '@mui/material';
+import { Avatar, Box, Button, Menu, Typography } from '@mui/material';
 
 import * as blockies from 'blockies-ts';
 import { InjectedConnector } from '@wagmi/core';
+import CopyToClipboardButton from 'components/common/CopyToClipboardButton';
 
 function Wallet() {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -16,7 +17,6 @@ function Wallet() {
   const closeMenu = () => setAnchorEl(null);
 
   const { walletAddress } = useWeb3();
-  const { chain } = useWeb3();
   const { data: ens } = useEnsName({ address: walletAddress as `0x${string}` });
   const { connect } = useConnect({
     connector: new InjectedConnector(),
@@ -64,36 +64,47 @@ function Wallet() {
         }}
         PaperProps={{
           style: {
-            padding: '0 4px 4px 4px',
-            boxShadow: '#A7A7A7 0px 0px 2px 0px',
-            borderRadius: '2px',
-            minWidth: '150px',
+            padding: '16px',
+            boxShadow: '0px 4px 12px rgba(97, 100, 107, 0.2)',
+            borderRadius: '6px',
+            minWidth: '280px',
           },
         }}
         anchorOrigin={{
           vertical: 'bottom',
-          horizontal: 'center',
+          horizontal: 'right',
         }}
         transformOrigin={{
           vertical: 'top',
-          horizontal: 'center',
+          horizontal: 'right',
         }}
       >
-        <MenuItem>
-          <Box>
-            <Typography variant="subtitle1">Network</Typography>
-            <Box>{capitalize((chain?.network === 'homestead' ? 'mainnet' : chain?.network) || '')}</Box>
+        <Box display="flex" flexDirection="column" gap={1}>
+          <Avatar alt="Blocky Avatar" src={avatarImgSrc} sx={{ mx: 'auto', width: 40, height: 40 }} />
+          <Box display="flex" flexDirection="column" my={1} mx="auto" textAlign="center">
+            {ens && (
+              <Typography variant="h6" lineHeight="16px">
+                {ens}
+              </Typography>
+            )}
+            <Box display="flex">
+              <Typography variant="subtitle1" fontSize="16px" color="grey.500">
+                {formattedWallet}
+              </Typography>
+              <CopyToClipboardButton text={walletAddress} />
+            </Box>
           </Box>
-        </MenuItem>
-        <Divider />
-        <MenuItem
-          onClick={() => {
-            closeMenu();
-            disconnect();
-          }}
-        >
-          Disconnect wallet
-        </MenuItem>
+          <Button variant="outlined">Switch wallet</Button>
+          <Button
+            variant="outlined"
+            onClick={() => {
+              closeMenu();
+              disconnect();
+            }}
+          >
+            Disconnect
+          </Button>
+        </Box>
       </Menu>
     </>
   );
