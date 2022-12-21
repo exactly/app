@@ -69,6 +69,7 @@ const theme = createTheme({
           fontSize: '14px',
           fontWeight: 600,
           padding: '6px 16px',
+          height: '34px',
         },
         outlined: {
           color: '#62666A',
