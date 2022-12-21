@@ -1,27 +1,24 @@
 import React, { useMemo } from 'react';
-import { useEnsName, useConnect, useDisconnect } from 'wagmi';
+import { useEnsName } from 'wagmi';
 import { useWeb3 } from 'hooks/useWeb3';
 import { formatWallet } from 'utils/utils';
 
 import { Avatar, Box, Button, Menu, Typography } from '@mui/material';
 
 import * as blockies from 'blockies-ts';
-import { InjectedConnector } from '@wagmi/core';
 import CopyToClipboardButton from 'components/common/CopyToClipboardButton';
+import { useWeb3Modal } from '@web3modal/react';
 
 function Wallet() {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-  const open = Boolean(anchorEl);
+  const isMenuOpen = Boolean(anchorEl);
 
   const openMenu = (event: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget);
   const closeMenu = () => setAnchorEl(null);
 
-  const { walletAddress } = useWeb3();
+  const { walletAddress, disconnect } = useWeb3();
   const { data: ens } = useEnsName({ address: walletAddress as `0x${string}` });
-  const { connect } = useConnect({
-    connector: new InjectedConnector(),
-  });
-  const { disconnect } = useDisconnect();
+  const { open } = useWeb3Modal();
 
   const formattedWallet = formatWallet(walletAddress);
 
@@ -32,7 +29,7 @@ function Wallet() {
 
   if (!walletAddress) {
     return (
-      <Button onClick={() => connect()} variant="contained">
+      <Button onClick={() => open()} variant="contained">
         Connect wallet
       </Button>
     );
@@ -44,9 +41,9 @@ function Wallet() {
         variant="outlined"
         onClick={openMenu}
         id="basic-button"
-        aria-controls={open ? 'basic-menu' : undefined}
+        aria-controls={isMenuOpen ? 'basic-menu' : undefined}
         aria-haspopup="true"
-        aria-expanded={open ? 'true' : undefined}
+        aria-expanded={isMenuOpen ? 'true' : undefined}
         sx={{ borderColor: '#E3E5E8', px: '10px' }}
       >
         <Avatar alt="Blocky Avatar" src={avatarImgSrc} sx={{ width: 20, height: 20, mr: '5px' }} />
@@ -57,7 +54,7 @@ function Wallet() {
       <Menu
         id="basic-menu"
         anchorEl={anchorEl}
-        open={open}
+        open={isMenuOpen}
         onClose={closeMenu}
         MenuListProps={{
           'aria-labelledby': 'basic-button',
