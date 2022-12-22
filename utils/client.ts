@@ -9,10 +9,8 @@ const { NEXT_PUBLIC_ENABLE_TESTNETS = 'false' } = process.env;
 
 export const mainnetChains: Chain[] = [mainnet, optimism];
 export const testnetChains: Chain[] = [goerli, optimismGoerli];
-export const allowedChains: Chain[] = [
-  ...mainnetChains,
-  ...(JSON.parse(NEXT_PUBLIC_ENABLE_TESTNETS) ? [...testnetChains] : []),
-];
+export const enableTestnets: boolean = JSON.parse(NEXT_PUBLIC_ENABLE_TESTNETS);
+export const allowedChains: Chain[] = [...mainnetChains, ...(enableTestnets ? [...testnetChains] : [])];
 
 const { chains, provider } = configureChains(allowedChains, [
   publicProvider(),
