@@ -9,7 +9,6 @@ import { useWeb3 } from 'hooks/useWeb3';
 
 import { AppBar, Box, Chip, IconButton, Toolbar } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
-import allowedNetworks from 'config/allowedNetworks.json';
 import { globals } from 'styles/theme';
 import analytics from 'utils/analytics';
 import { useModalStatus } from 'contexts/ModalStatusContext';
@@ -17,6 +16,7 @@ import MobileMenu from 'components/MobileMenu';
 import Link from 'next/link';
 import Wallet from 'components/Wallet';
 import SelectNetwork from 'components/SelectNetwork';
+import { allowedChains } from 'utils/client';
 const { maxWidth, onlyMobile, onlyDesktop, onlyDesktopFlex } = globals;
 
 const routes = [
@@ -38,16 +38,16 @@ function Navbar() {
     walletAddress && void analytics.identify(walletAddress);
   }, [walletAddress]);
 
-  const isAllowed = useMemo(() => chain && allowedNetworks.includes(chain.network), [chain]);
+  const isSupportedChain = useMemo(() => chain?.id && allowedChains.map((c) => c.id).includes(chain.id), [chain?.id]);
 
   async function handleFaucetClick() {
     if (!switchNetworkAsync) return;
 
-    if (isAllowed && chain?.id === goerli.id) {
+    if (isSupportedChain && chain?.id === goerli.id) {
       return openOperationModal('faucet');
     }
 
-    if (!isAllowed) await switchNetworkAsync(goerli.id);
+    if (!isSupportedChain) await switchNetworkAsync(goerli.id);
   }
 
   return (
