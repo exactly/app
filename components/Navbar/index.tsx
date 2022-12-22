@@ -1,4 +1,4 @@
-import { useSwitchNetwork } from 'wagmi';
+import { goerli, useSwitchNetwork } from 'wagmi';
 import DisclaimerModal from 'components/DisclaimerModal';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
@@ -28,7 +28,7 @@ function Navbar() {
   const { walletAddress } = useWeb3();
   const { switchNetworkAsync } = useSwitchNetwork();
   const { pathname: currentPathname, query } = useRouter();
-  const { chain } = useWeb3();
+  const { chain, isConnected } = useWeb3();
 
   const { openOperationModal } = useModalStatus();
   const { theme } = useContext(ThemeContext);
@@ -43,11 +43,11 @@ function Navbar() {
   async function handleFaucetClick() {
     if (!switchNetworkAsync) return;
 
-    if (isAllowed && chain?.id === 5) {
+    if (isAllowed && chain?.id === goerli.id) {
       return openOperationModal('faucet');
     }
 
-    if (!isAllowed) await switchNetworkAsync(5);
+    if (!isAllowed) await switchNetworkAsync(goerli.id);
   }
 
   return (
@@ -86,11 +86,10 @@ function Navbar() {
             </Link>
           ))}
           <Box display="flex" gap={0.5} ml="auto" flexDirection={{ xs: 'row-reverse', sm: 'row' }}>
-            {/* TODO: put chainId constants in a config file */}
-            {chain?.id === 5 && (
+            {isConnected && chain?.id === goerli.id && (
               <Chip label="Goerli Faucet" onClick={handleFaucetClick} sx={{ my: 'auto', display: onlyDesktopFlex }} />
             )}
-            <SelectNetwork />
+            {isConnected && <SelectNetwork />}
             <Wallet />
           </Box>
           <IconButton
