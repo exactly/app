@@ -9,6 +9,8 @@ import { Box, CircularProgress, Divider, Menu, MenuItem, Typography } from '@mui
 import { mainnetChains, testnetChains } from 'utils/client';
 import { useSwitchNetwork } from 'wagmi';
 import Image from 'next/image';
+import { globals } from 'styles/theme';
+const { onlyDesktop } = globals;
 
 const SelectNetwork: FC = () => {
   const { chain } = useWeb3();
@@ -39,7 +41,7 @@ const SelectNetwork: FC = () => {
         sx={{
           pr: '10px',
           pl: '6px',
-          minWidth: '120px',
+          minWidth: { xs: '60px', sm: '120px' },
           borderRadius: '32px',
           bgcolor: buttonBgColor,
           color: 'white',
@@ -49,17 +51,19 @@ const SelectNetwork: FC = () => {
           },
         }}
       >
-        <Box display="flex" justifyContent="space-between" width="100%" gap={1}>
-          <Box display="flex" gap={0.5}>
-            <Image src={`/img/networks/${chain?.id}.svg`} alt={`chain id ${chain?.id}`} width={24} height={24} />
-            {chain?.name}
+        {!isLoading && (
+          <Box display="flex" justifyContent="space-between" width="100%" gap={{ xs: 0, sm: 1 }}>
+            <Box display="flex" gap={0.5}>
+              <Image src={`/img/networks/${chain?.id}.svg`} alt={`chain id ${chain?.id}`} width={24} height={24} />
+              <Box display={onlyDesktop}>{chain?.name}</Box>
+            </Box>
+            {anchorEl ? (
+              <ExpandLessIcon sx={{ my: 'auto' }} fontSize="small" />
+            ) : (
+              <ExpandMoreIcon sx={{ my: 'auto' }} fontSize="small" />
+            )}
           </Box>
-          {anchorEl ? (
-            <ExpandLessIcon sx={{ my: 'auto' }} fontSize="small" />
-          ) : (
-            <ExpandMoreIcon sx={{ my: 'auto' }} fontSize="small" />
-          )}
-        </Box>
+        )}
       </LoadingButton>
       <Menu
         anchorEl={anchorEl}

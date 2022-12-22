@@ -85,7 +85,7 @@ function Navbar() {
               </Box>
             </Link>
           ))}
-          <Box sx={{ display: 'flex', gap: '10px', ml: 'auto' }}>
+          <Box display="flex" gap={0.5} ml="auto" flexDirection={{ xs: 'row-reverse', sm: 'row' }}>
             {/* TODO: put chainId constants in a config file */}
             {chain?.id === 5 && (
               <Chip label="Goerli Faucet" onClick={handleFaucetClick} sx={{ my: 'auto', display: onlyDesktopFlex }} />
