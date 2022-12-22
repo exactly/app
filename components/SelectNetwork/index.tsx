@@ -14,7 +14,6 @@ import { globals } from 'styles/theme';
 const { onlyDesktop } = globals;
 
 const SelectNetwork: FC = () => {
-  console.log('enableTestnet', enableTestnets);
   const { chain } = useWeb3();
   const { isLoading, switchNetworkAsync } = useSwitchNetwork();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
