@@ -124,7 +124,7 @@ const SelectNetwork: FC = () => {
           </MenuItem>
         ))}
         {enableTestnets && (
-          <>
+          <Box>
             <Divider />
             {testnetChains.map(({ id, name }) => (
               <MenuItem
@@ -155,7 +155,7 @@ const SelectNetwork: FC = () => {
                 </Box>
               </MenuItem>
             ))}
-          </>
+          </Box>
         )}
       </Menu>
     </>
