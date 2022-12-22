@@ -16,7 +16,7 @@ export type Operation =
 
 type ContextValues = {
   open: boolean;
-  operation?: Operation;
+  operation: Operation;
   openOperationModal: (op: Operation) => void;
   toggle: () => void;
   closeModal: () => void;
@@ -29,7 +29,7 @@ export const ModalStatusProvider: FC<PropsWithChildren> = ({ children }) => {
 
   const [open, setOpen] = useState<boolean>(false);
 
-  const [operation, setOperation] = useState<Operation | undefined>();
+  const [operation, setOperation] = useState<Operation>('deposit');
 
   const openOperationModal = useCallback((op: Operation) => {
     setOperation(op);
@@ -47,10 +47,10 @@ export const ModalStatusProvider: FC<PropsWithChildren> = ({ children }) => {
   }, [operation]);
 
   useEffect(() => {
-    if (!open && operation) {
+    if (!open) {
       setTimeout(() => void getAccountData(), 5000);
     }
-  }, [open, operation, getAccountData]);
+  }, [open, getAccountData]);
 
   const value: ContextValues = useMemo(
     () => ({
@@ -60,7 +60,7 @@ export const ModalStatusProvider: FC<PropsWithChildren> = ({ children }) => {
       openOperationModal,
       toggle,
     }),
-    [closeModal, open, openOperationModal, operation],
+    [closeModal, open, openOperationModal, operation, toggle],
   );
 
   return (
