@@ -4,6 +4,7 @@ import { useWeb3 } from 'hooks/useWeb3';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
+import ErrorIcon from '@mui/icons-material/Error';
 import { LoadingButton } from '@mui/lab';
 import { Box, CircularProgress, Divider, Menu, MenuItem, Typography } from '@mui/material';
 import { allowedChains, mainnetChains, testnetChains } from 'utils/client';
@@ -59,12 +60,16 @@ const SelectNetwork: FC = () => {
         {!isLoading && (
           <Box display="flex" justifyContent="space-between" width="100%" gap={{ xs: 0, sm: 1 }}>
             <Box display="flex" gap={0.5}>
-              <Image
-                src={`/img/networks/${isSupportedChain ? chain?.id : mainnet.id}.svg`}
-                alt={`chain id ${isSupportedChain ? chain?.id : mainnet.id}`}
-                width={24}
-                height={24}
-              />
+              {isSupportedChain ? (
+                <Image
+                  src={`/img/networks/${chain?.id}.svg`}
+                  alt={`chain id ${isSupportedChain ? chain?.id : mainnet.id}`}
+                  width={24}
+                  height={24}
+                />
+              ) : (
+                <ErrorIcon />
+              )}
               <Box display={onlyDesktop}>{isSupportedChain ? chain?.name : 'Unsupported network'}</Box>
             </Box>
             {anchorEl ? (
