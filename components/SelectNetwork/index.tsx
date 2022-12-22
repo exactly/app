@@ -109,7 +109,7 @@ const SelectNetwork: FC = () => {
             key={`mainnnet_chain_${id}`}
             value={id}
             onClick={() => onSelectNetwork(id)}
-            sx={{ bgcolor: chain?.id === id ? 'grey.100' : 'transparent', py: 1 }}
+            sx={{ bgcolor: chain?.id === id ? '#F9FAFB' : 'transparent', py: 1 }}
           >
             <Box display="flex" justifyContent="space-between" width="100%">
               <Box display="flex" gap={1}>
@@ -131,7 +131,7 @@ const SelectNetwork: FC = () => {
                 key={`testnet_chain_${id}`}
                 value={id}
                 onClick={() => onSelectNetwork(id)}
-                sx={{ bgcolor: chain?.id === id ? 'grey.100' : 'transparent' }}
+                sx={{ bgcolor: chain?.id === id ? '#F9FAFB' : 'transparent' }}
               >
                 <Box display="flex" justifyContent="space-between" width="100%">
                   <Box display="flex" gap={1}>
