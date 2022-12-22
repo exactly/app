@@ -6,7 +6,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 import { LoadingButton } from '@mui/lab';
 import { Box, CircularProgress, Divider, Menu, MenuItem, Typography } from '@mui/material';
-import { mainnetChains, testnetChains } from 'utils/client';
+import { allowedChains, mainnetChains, testnetChains } from 'utils/client';
 import { goerli, mainnet, useSwitchNetwork } from 'wagmi';
 import Image from 'next/image';
 import { globals } from 'styles/theme';
@@ -30,9 +30,15 @@ const SelectNetwork: FC = () => {
     [closeMenu, switchNetworkAsync],
   );
 
+  // Defaults to mainnet if chain is not in allowedChains
+  const currentChain = useMemo(() => {
+    if (!chain) return mainnet;
+    return allowedChains.includes(chain) ? chain : mainnet;
+  }, [chain]);
+
   const buttonBgColor = useMemo(
-    () => (chain?.id === mainnet.id || chain?.id === goerli.id ? '#627EEA' : '#EE2939'),
-    [chain?.id],
+    () => (currentChain.id === mainnet.id || currentChain.id === goerli.id ? '#627EEA' : '#EE2939'),
+    [currentChain],
   );
 
   return (
@@ -57,8 +63,13 @@ const SelectNetwork: FC = () => {
         {!isLoading && (
           <Box display="flex" justifyContent="space-between" width="100%" gap={{ xs: 0, sm: 1 }}>
             <Box display="flex" gap={0.5}>
-              <Image src={`/img/networks/${chain?.id}.svg`} alt={`chain id ${chain?.id}`} width={24} height={24} />
-              <Box display={onlyDesktop}>{chain?.name}</Box>
+              <Image
+                src={`/img/networks/${currentChain.id}.svg`}
+                alt={`chain id ${currentChain.id}`}
+                width={24}
+                height={24}
+              />
+              <Box display={onlyDesktop}>{currentChain.name}</Box>
             </Box>
             {anchorEl ? (
               <ExpandLessIcon sx={{ my: 'auto' }} fontSize="small" />
