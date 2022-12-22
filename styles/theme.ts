@@ -7,6 +7,28 @@ export const globals = {
   onlyDesktopFlex: { xs: 'none', sm: 'flex' },
 };
 
+declare module '@mui/material/styles' {
+  interface Palette {
+    operation: {
+      fixed: string;
+      variable: string;
+    };
+  }
+  interface PaletteOptions {
+    operation: {
+      fixed: string;
+      variable: string;
+    };
+  }
+
+  interface TypographyVariants {
+    fontFamilyMonospaced: string;
+  }
+  interface TypographyVariantsOptions {
+    fontFamilyMonospaced: string;
+  }
+}
+
 const theme = createTheme({
   palette: {
     primary: {
@@ -19,15 +41,20 @@ const theme = createTheme({
       '50': '#fafafa',
       '100': '#e1e1e1',
       '200': '#EDF0F2',
-      '300': '#94979E',
+      '300': '#E3E5E8',
       '500': '#9a9a9a',
       '600': '#62666A',
       '700': '#6F737B',
       '900': '#1f1939',
     },
+    operation: {
+      fixed: '#0095FF',
+      variable: '#33CC59',
+    },
   },
   typography: {
     fontFamily: 'articulat-cf',
+    fontFamilyMonospaced: 'IBM Plex Mono',
     h1: {
       fontSize: 36,
       fontWeight: 600,

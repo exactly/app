@@ -18,6 +18,7 @@ type ContextValues = {
   open: boolean;
   operation?: Operation;
   openOperationModal: (op: Operation) => void;
+  toggle: () => void;
   closeModal: () => void;
 };
 
@@ -37,6 +38,14 @@ export const ModalStatusProvider: FC<PropsWithChildren> = ({ children }) => {
 
   const closeModal = useCallback(() => setOpen(false), []);
 
+  const toggle = useCallback(() => {
+    if (!operation) return;
+    if (operation.endsWith('AtMaturity')) {
+      return setOperation(operation.replaceAll('AtMaturity', '') as Operation);
+    }
+    setOperation(`${operation}AtMaturity` as Operation);
+  }, [operation]);
+
   useEffect(() => {
     if (!open && operation) {
       setTimeout(() => void getAccountData(), 5000);
@@ -49,6 +58,7 @@ export const ModalStatusProvider: FC<PropsWithChildren> = ({ children }) => {
       closeModal,
       operation,
       openOperationModal,
+      toggle,
     }),
     [closeModal, open, openOperationModal, operation],
   );
