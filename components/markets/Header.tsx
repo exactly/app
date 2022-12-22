@@ -8,9 +8,15 @@ import { ItemInfoProps } from 'components/common/ItemInfo';
 import AccountDataContext from 'contexts/AccountDataContext';
 
 import formatNumber from 'utils/formatNumber';
+import { Box } from '@mui/material';
+import { allowedChains } from 'utils/client';
+import { useWeb3 } from 'hooks/useWeb3';
+import Image from 'next/image';
 
 const MarketsHeader: FC = () => {
   const { accountData } = useContext(AccountDataContext);
+  const { chain } = useWeb3();
+  const isSupportedChain = useMemo(() => chain?.id && allowedChains.map((c) => c.id).includes(chain.id), [chain?.id]);
 
   const { totalDeposited, totalBorrowed, totalAvailable } = useMemo<{
     totalDeposited?: BigNumber;
@@ -70,7 +76,19 @@ const MarketsHeader: FC = () => {
     },
   ];
 
-  return <HeaderInfo itemsInfo={itemsInfo} title="Markets" />;
+  return (
+    <HeaderInfo
+      itemsInfo={itemsInfo}
+      title={
+        <Box display="flex" gap={0.5}>
+          {isSupportedChain && (
+            <Image src={`/img/networks/${chain?.id}.svg`} alt={`chain id ${chain?.id}`} width={24} height={24} />
+          )}
+          <Box>{isSupportedChain ? `${chain?.name} Market` : 'Markets'}</Box>
+        </Box>
+      }
+    />
+  );
 };
 
 export default MarketsHeader;

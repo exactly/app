@@ -30,15 +30,11 @@ const SelectNetwork: FC = () => {
     [closeMenu, switchNetworkAsync],
   );
 
-  // Defaults to mainnet if chain is not in allowedChains
-  const currentChain = useMemo(() => {
-    if (!chain) return mainnet;
-    return allowedChains.includes(chain) ? chain : mainnet;
-  }, [chain]);
+  const isSupportedChain = useMemo(() => chain?.id && allowedChains.map((c) => c.id).includes(chain.id), [chain?.id]);
 
   const buttonBgColor = useMemo(
-    () => (currentChain.id === mainnet.id || currentChain.id === goerli.id ? '#627EEA' : '#EE2939'),
-    [currentChain],
+    () => (chain?.id === mainnet.id || chain?.id === goerli.id ? '#627EEA' : '#EE2939'),
+    [chain?.id],
   );
 
   return (
@@ -64,12 +60,12 @@ const SelectNetwork: FC = () => {
           <Box display="flex" justifyContent="space-between" width="100%" gap={{ xs: 0, sm: 1 }}>
             <Box display="flex" gap={0.5}>
               <Image
-                src={`/img/networks/${currentChain.id}.svg`}
-                alt={`chain id ${currentChain.id}`}
+                src={`/img/networks/${isSupportedChain ? chain?.id : mainnet.id}.svg`}
+                alt={`chain id ${isSupportedChain ? chain?.id : mainnet.id}`}
                 width={24}
                 height={24}
               />
-              <Box display={onlyDesktop}>{currentChain.name}</Box>
+              <Box display={onlyDesktop}>{isSupportedChain ? chain?.name : 'Unsupported network'}</Box>
             </Box>
             {anchorEl ? (
               <ExpandLessIcon sx={{ my: 'auto' }} fontSize="small" />

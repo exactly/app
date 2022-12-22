@@ -1,11 +1,11 @@
-import React, { FC } from 'react';
+import React, { FC, ReactNode } from 'react';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import ItemInfo, { ItemInfoProps } from './ItemInfo';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 type HeaderInfoProps = {
-  title: string;
+  title: ReactNode;
   itemsInfo: ItemInfoProps[];
   variant?:
     | 'h2'
