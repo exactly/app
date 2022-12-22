@@ -7,14 +7,14 @@ import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 import { LoadingButton } from '@mui/lab';
 import { Box, CircularProgress, Divider, Menu, MenuItem, Typography } from '@mui/material';
 import { mainnetChains, testnetChains } from 'utils/client';
-import { useSwitchNetwork } from 'wagmi';
+import { goerli, mainnet, useSwitchNetwork } from 'wagmi';
 import Image from 'next/image';
 import { globals } from 'styles/theme';
 const { onlyDesktop } = globals;
 
 const SelectNetwork: FC = () => {
   const { chain } = useWeb3();
-  const { isLoading, switchNetwork } = useSwitchNetwork();
+  const { isLoading, switchNetworkAsync } = useSwitchNetwork();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const openMenu = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget),
@@ -25,12 +25,15 @@ const SelectNetwork: FC = () => {
   const onSelectNetwork = useCallback(
     (chainId: number) => {
       closeMenu();
-      switchNetwork?.(chainId);
+      void switchNetworkAsync?.(chainId);
     },
-    [closeMenu, switchNetwork],
+    [closeMenu, switchNetworkAsync],
   );
 
-  const buttonBgColor = useMemo(() => (chain?.id === 1 || chain?.id === 5 ? '#627EEA' : '#EE2939'), [chain?.id]);
+  const buttonBgColor = useMemo(
+    () => (chain?.id === mainnet.id || chain?.id === goerli.id ? '#627EEA' : '#EE2939'),
+    [chain?.id],
+  );
 
   return (
     <>
