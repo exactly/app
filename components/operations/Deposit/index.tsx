@@ -8,7 +8,6 @@ import ModalAsset from 'components/common/modal/ModalAsset';
 import ModalInput from 'components/common/modal/ModalInput';
 import ModalRow from 'components/common/modal/ModalRow';
 import ModalRowHealthFactor from 'components/common/modal/ModalRowHealthFactor';
-import ModalTitle from 'components/common/modal/ModalTitle';
 import ModalTxCost from 'components/common/modal/ModalTxCost';
 import ModalGif from 'components/common/modal/ModalGif';
 import ModalStepper from 'components/common/modal/ModalStepper';
@@ -36,10 +35,15 @@ import handleOperationError from 'utils/handleOperationError';
 import analytics from 'utils/analytics';
 import useAccountData from 'hooks/useAccountData';
 import { useOperationContext, usePreviewTx } from 'contexts/OperationContext';
+import { ModalBox, ModalBoxRow, ModalBoxCell } from 'components/common/modal/ModalBox';
+import ModalInfoHealthFactor from 'components/common/modal/ModalInfo/ModalInfoHealthFactor';
+import { useModalStatus } from 'contexts/ModalStatusContext';
+import ModalInfoBorrowLimit from 'components/common/modal/ModalInfo/ModalInfoBorrowLimit';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 
 const Deposit: FC = () => {
+  const { operation } = useModalStatus();
   const { walletAddress } = useWeb3();
   const { accountData, getAccountData } = useContext(AccountDataContext);
   const { market } = useContext(MarketContext);
@@ -220,7 +224,18 @@ const Deposit: FC = () => {
 
   return (
     <>
-      <ModalTitle title={translations[lang].variableRateDeposit} />
+      <ModalBox>
+        <ModalBoxRow>Row1</ModalBoxRow>
+        <ModalBoxRow>
+          <ModalBoxCell>
+            <ModalInfoHealthFactor qty={qty} symbol={symbol} operation={operation} />
+          </ModalBoxCell>
+          <ModalBoxCell divisor>
+            <ModalInfoBorrowLimit qty={qty} symbol={symbol} operation={operation} />
+          </ModalBoxCell>
+        </ModalBoxRow>
+      </ModalBox>
+
       <ModalAsset
         asset={symbol}
         assetTitle={translations[lang].action.toUpperCase()}

@@ -45,7 +45,7 @@ const theme = createTheme({
       '500': '#9a9a9a',
       '600': '#62666A',
       '700': '#6F737B',
-      '900': '#1f1939',
+      '900': '#0D0E0F',
     },
     operation: {
       fixed: '#0095FF',
@@ -86,6 +86,9 @@ const theme = createTheme({
       color: '#9a9a9a',
       fontFamily: 'IBM Plex Mono',
     },
+  },
+  shape: {
+    borderRadius: 6,
   },
   components: {
     MuiButton: {

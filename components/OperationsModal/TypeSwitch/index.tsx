@@ -58,14 +58,12 @@ function TypeSwitch() {
   return (
     <Box
       sx={{
-        height: 24,
-        border: 1,
-        borderColor: theme.palette.grey[300],
-        borderStyle: 'solid',
-        p: 0,
-        borderRadius: 16,
         display: 'flex',
         alignItems: 'center',
+        height: 24,
+        border: `1px ${theme.palette.grey[300]} solid`,
+        borderRadius: 16,
+        padding: 0,
       }}
     >
       {options.map((o) => (
