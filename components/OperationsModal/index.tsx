@@ -1,33 +1,40 @@
 import React from 'react';
 
-import OperationsSelector from './OperationsSelector';
-import OperationContainer from './OperationContainer';
-
-import { Dialog, DialogContent, IconButton } from '@mui/material';
+import { Box, Dialog, DialogContent, DialogTitle, IconButton, Typography, capitalize } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
+
 import { useModalStatus } from 'contexts/ModalStatusContext';
+import OperationContainer from './OperationContainer';
+import TypeSwitch from './TypeSwitch';
 
 function OperationsModal() {
-  const { open, closeModal } = useModalStatus();
+  const { open, closeModal, operation } = useModalStatus();
 
   return (
     <Dialog open={open} onClose={closeModal}>
-      <DialogContent sx={{ display: 'flex' }}>
-        <IconButton
-          aria-label="close"
-          onClick={closeModal}
-          sx={{
-            position: 'absolute',
-            right: 10,
-            top: 10,
-            color: (theme) => theme.palette.grey[500],
-          }}
-        >
-          <CloseIcon />
-        </IconButton>
-        <OperationsSelector />
-        <OperationContainer />
-      </DialogContent>
+      <IconButton
+        aria-label="close"
+        onClick={closeModal}
+        sx={{
+          position: 'absolute',
+          right: 4,
+          top: 4,
+          color: 'grey.500',
+        }}
+      >
+        <CloseIcon fontSize="small" />
+      </IconButton>
+      <Box sx={{ maxWidth: 488, padding: '40px 32px 32px', borderTop: '4px #000 solid' }}>
+        <DialogTitle sx={{ p: 0, display: 'flex', justifyContent: 'space-between' }}>
+          <Typography fontWeight={700} fontSize={24}>
+            {capitalize(operation?.replaceAll('AtMaturity', '') ?? '')}
+          </Typography>
+          <TypeSwitch />
+        </DialogTitle>
+        <DialogContent sx={{ padding: '32px 0 0 0' }}>
+          <OperationContainer />
+        </DialogContent>
+      </Box>
     </Dialog>
   );
 }
