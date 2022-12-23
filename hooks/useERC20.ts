@@ -12,7 +12,7 @@ export default (): ERC20 | undefined => {
   const { market } = useContext(MarketContext);
   const { symbol } = useOperationContext();
 
-  const marketContract = useMarket(market?.value);
+  const marketContract = useMarket(market);
 
   const [assetAddress, setAssetAddress] = useState<string | undefined>();
 

@@ -71,14 +71,12 @@ function Faucet() {
     <>
       <div className={styles.faucetContainer}>
         <div className={styles.titlesContainer}>
-          <h3 className={styles.title}>Faucet</h3>
           <h4 className={styles.addTokens} onClick={addTokens}>
             Add tokens to Metamask
           </h4>
         </div>
         <div className={styles.header}>
           <p>Asset</p>
-          <p></p>
         </div>
         {assets.map((asset) => {
           if (asset === 'WETH') {
