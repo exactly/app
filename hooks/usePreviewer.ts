@@ -12,15 +12,15 @@ export default () => {
   const provider = useProvider({ chainId: chain?.id });
 
   return useMemo(() => {
-    if (!chain) return null;
+    if (!chain || !chain) return null;
 
+    // TODO: add optimism network
     const address = {
-      goerli: goerliPreviewer.address,
-      mainnet: mainnetPreviewer.address,
-    }[chain.network];
+      5: goerliPreviewer.address,
+      1: mainnetPreviewer.address,
+    }[chain.id];
 
     if (!address) return null;
-
     return new Contract(address, previewerABI, provider) as Previewer;
   }, [chain, provider]);
 };
