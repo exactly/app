@@ -38,7 +38,7 @@ function TableRowFixedPool({ symbol, amount, type, maturityDate, market, decimal
   const { query } = useRouter();
 
   const exchangeRate: number | undefined = useMemo(() => {
-    if (!symbol || !accountData) return;
+    if (!accountData) return;
     const rate = parseFloat(formatFixed(accountData[symbol].usdPrice, 18));
     return rate;
   }, [accountData, symbol]);
@@ -50,7 +50,7 @@ function TableRowFixedPool({ symbol, amount, type, maturityDate, market, decimal
 
     if (!allTransactions || !exchangeRate) return [];
     const transformedTxs = allTransactions.map((transaction: any) => {
-      const assets = symbol && formatFixed(transaction.assets, decimals);
+      const assets = formatFixed(transaction.assets, decimals);
 
       const txType = transaction?.fee
         ? type === 'borrow'
@@ -80,34 +80,32 @@ function TableRowFixedPool({ symbol, amount, type, maturityDate, market, decimal
     });
 
     return transformedTxs;
-  }, [withdrawTxs, repayTxs, depositTxs, borrowTxs, type, exchangeRate, decimals, symbol]);
+  }, [withdrawTxs, repayTxs, depositTxs, borrowTxs, type, exchangeRate, decimals]);
 
   return (
-    <React.Fragment>
+    <>
       <TableRow sx={{ '& > *': { borderBottom: 'unset' }, backgroundColor: open ? 'grey.50' : 'transparent' }} hover>
         <Link href={{ pathname: `/${symbol}`, query }} legacyBehavior>
           <TableCell component="th" align="left" sx={{ cursor: 'pointer' }} width={240}>
             <Stack direction="row" spacing={1}>
-              {(symbol && (
-                <Image
-                  src={`/img/assets/${symbol}.svg`}
-                  alt={symbol}
-                  width={24}
-                  height={24}
-                  style={{
-                    maxWidth: '100%',
-                    height: 'auto',
-                  }}
-                />
-              )) || <Skeleton variant="circular" height={24} width={24} />}
+              <Image
+                src={`/img/assets/${symbol}.svg`}
+                alt={symbol}
+                width={24}
+                height={24}
+                style={{
+                  maxWidth: '100%',
+                  height: 'auto',
+                }}
+              />
               <Typography fontWeight="600" ml={1} display="inline" alignSelf="center">
-                {(symbol && formatSymbol(symbol)) || <Skeleton width={50} />}
+                {formatSymbol(symbol)}
               </Typography>
             </Stack>
           </TableCell>
         </Link>
         <TableCell align="left" size="small">
-          {symbol && exchangeRate && amount ? (
+          {exchangeRate ? (
             `$${formatNumber(parseFloat(formatFixed(amount, decimals)) * exchangeRate, 'USD', true)}`
           ) : (
             <Skeleton width={60} />
@@ -129,12 +127,12 @@ function TableRowFixedPool({ symbol, amount, type, maturityDate, market, decimal
           </Box>
         </TableCell>
         <TableCell align="left" width={50} size="small" sx={{ px: 1 }}>
-          {(symbol && maturityDate && (
+          {(maturityDate && (
             <Button
               variant="outlined"
               onClick={() => {
                 setDate({ value: maturityDate, label: parseTimestamp(maturityDate) });
-                setMarket({ value: market });
+                setMarket(market);
                 openOperationModal(type === 'borrow' ? 'repayAtMaturity' : 'withdrawAtMaturity');
               }}
             >
@@ -165,7 +163,7 @@ function TableRowFixedPool({ symbol, amount, type, maturityDate, market, decimal
           <CollapseFixedPool open={open} transactions={transactions} />
         </TableCell>
       </TableRow>
-    </React.Fragment>
+    </>
   );
 }
 

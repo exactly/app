@@ -68,7 +68,7 @@ const Deposit: FC = () => {
 
   const ETHRouterContract = useETHRouter();
   const assetContract = useERC20();
-  const marketContract = useMarket(market?.value);
+  const marketContract = useMarket(market);
 
   const { decimals = 18 } = useAccountData(symbol);
 
@@ -225,7 +225,7 @@ const Deposit: FC = () => {
   return (
     <>
       <ModalBox>
-        <ModalBoxRow>Row1</ModalBoxRow>
+        <ModalBoxRow></ModalBoxRow>
         <ModalBoxRow>
           <ModalBoxCell>
             <ModalInfoHealthFactor qty={qty} symbol={symbol} operation={operation} />

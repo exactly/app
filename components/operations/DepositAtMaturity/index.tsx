@@ -71,7 +71,7 @@ const DepositAtMaturity: FC = () => {
   const [gtMaxYield, setGtMaxYield] = useState<boolean>(false);
 
   const ETHRouterContract = useETHRouter();
-  const marketContract = useMarket(market?.value);
+  const marketContract = useMarket(market);
 
   const assetContract = useERC20();
 

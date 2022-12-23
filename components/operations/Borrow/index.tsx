@@ -68,7 +68,7 @@ const Borrow: FC = () => {
   const ETHRouterContract = useETHRouter();
   const assetContract = useERC20();
 
-  const marketContract = useMarket(market?.value);
+  const marketContract = useMarket(market);
 
   const {
     approve,

@@ -66,7 +66,7 @@ const WithdrawAtMaturity: FC = () => {
   const [minAmountToWithdraw, setMinAmountToWithdraw] = useState(Zero);
   const [amountToWithdraw, setAmountToWithdraw] = useState(Zero);
 
-  const marketContract = useMarket(market?.value);
+  const marketContract = useMarket(market);
   const ETHRouterContract = useETHRouter();
 
   const previewerContract = usePreviewer();

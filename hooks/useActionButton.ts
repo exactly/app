@@ -26,7 +26,7 @@ export default function useActionButton() {
 
       const { market } = accountData[symbol];
 
-      setMarket({ value: market });
+      setMarket(market);
 
       if (maturity) {
         setDate({

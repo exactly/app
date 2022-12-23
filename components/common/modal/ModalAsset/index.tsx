@@ -8,7 +8,6 @@ import formatSymbol from 'utils/formatSymbol';
 import AssetSelector from 'components/AssetSelector';
 
 import AccountDataContext from 'contexts/AccountDataContext';
-import { MarketContext } from 'contexts/MarketContext';
 
 import styles from './style.module.scss';
 
@@ -23,7 +22,6 @@ type Props = {
 // refactor the operations using this component and add new prop "decimals" to do the parse here
 function ModalAsset({ asset, assetTitle, amount, amountTitle }: Props) {
   const { accountData } = useContext(AccountDataContext);
-  const { market } = useContext(MarketContext);
 
   const parsedSymbol = useMemo(() => {
     return formatSymbol(asset);
@@ -39,7 +37,7 @@ function ModalAsset({ asset, assetTitle, amount, amountTitle }: Props) {
     <div className={styles.assetContainer}>
       <div className={styles.informationContainer}>
         {assetTitle && <p className={styles.title}>{assetTitle}</p>}
-        <AssetSelector defaultAddress={market?.value} />
+        <AssetSelector />
       </div>
       {amount ? (
         <div className={styles.assetPriceContainer}>

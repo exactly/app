@@ -71,7 +71,7 @@ const RepayAtMaturity: FC = () => {
   const ETHRouterContract = useETHRouter();
   const assetContract = useERC20();
 
-  const marketContract = useMarket(market?.value);
+  const marketContract = useMarket(market);
 
   const rawSlippage = useMemo(() => 1 + Number(slippage) / 100, [slippage]);
   const { decimals = 18 } = useAccountData(symbol);
