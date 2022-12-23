@@ -93,7 +93,7 @@ function TableRowFloatingPool({ symbol, depositAmount, borrowedAmount, exaTokenA
         <Button
           variant="contained"
           onClick={() => {
-            market && setMarket({ value: market });
+            market && setMarket(market);
             openOperationModal(type);
           }}
         >
@@ -106,7 +106,7 @@ function TableRowFloatingPool({ symbol, depositAmount, borrowedAmount, exaTokenA
           variant="outlined"
           sx={{ backgroundColor: 'white' }}
           onClick={() => {
-            market && setMarket({ value: market });
+            market && setMarket(market);
             openOperationModal(type === 'deposit' ? 'withdraw' : 'repay');
           }}
         >

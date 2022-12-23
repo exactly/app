@@ -30,7 +30,7 @@ function OperationsModal() {
           <Typography fontWeight={700} fontSize={24}>
             {capitalize(operation?.replaceAll('AtMaturity', '') ?? '')}
           </Typography>
-          <TypeSwitch />
+          {operation !== 'faucet' && <TypeSwitch />}
         </DialogTitle>
         <DialogContent sx={{ padding: theme.spacing(4, 0, 0, 0) }}>
           <OperationContainer />

@@ -60,7 +60,7 @@ function Repay() {
 
   const ETHRouterContract = useETHRouter();
 
-  const marketContract = useMarket(market?.value);
+  const marketContract = useMarket(market);
   const assetContract = useERC20();
 
   const walletBalance = useBalance(symbol, assetContract);

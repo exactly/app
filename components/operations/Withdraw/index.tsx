@@ -71,7 +71,7 @@ const Withdraw: FC = () => {
   }, [accountData, assets, symbol]);
 
   const ETHRouterContract = useETHRouter();
-  const marketContract = useMarket(market?.value);
+  const marketContract = useMarket(market);
 
   const {
     approve,
