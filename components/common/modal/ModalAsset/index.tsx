@@ -5,7 +5,7 @@ import Skeleton from 'react-loading-skeleton';
 import formatNumber from 'utils/formatNumber';
 import formatSymbol from 'utils/formatSymbol';
 
-import AssetSelector from 'components/AssetSelector';
+import AssetSelector from 'components/OperationsModal/AssetSelector';
 
 import AccountDataContext from 'contexts/AccountDataContext';
 

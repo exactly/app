@@ -36,9 +36,14 @@ import analytics from 'utils/analytics';
 import useAccountData from 'hooks/useAccountData';
 import { useOperationContext, usePreviewTx } from 'contexts/OperationContext';
 import { ModalBox, ModalBoxRow, ModalBoxCell } from 'components/common/modal/ModalBox';
-import ModalInfoHealthFactor from 'components/common/modal/ModalInfo/ModalInfoHealthFactor';
 import { useModalStatus } from 'contexts/ModalStatusContext';
-import ModalInfoBorrowLimit from 'components/common/modal/ModalInfo/ModalInfoBorrowLimit';
+import ModalInfoHealthFactor from 'components/OperationsModal/Info/ModalInfoHealthFactor';
+import ModalInfoBorrowLimit from 'components/OperationsModal/Info/ModalInfoBorrowLimit';
+import AssetSelector from 'components/OperationsModal/AssetSelector';
+import { Box } from '@mui/material';
+import WalletBalance from 'components/OperationsModal/WalletBalance';
+import USDValue from 'components/OperationsModal/USDValue';
+import AssetInput from 'components/OperationsModal/AssetInput';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 
@@ -225,7 +230,17 @@ const Deposit: FC = () => {
   return (
     <>
       <ModalBox>
-        <ModalBoxRow></ModalBoxRow>
+        <ModalBoxRow>
+          <AssetInput
+            qty={qty}
+            symbol={symbol}
+            onMax={onMax}
+            onChange={handleInputChange}
+            error={errorData}
+            label="Wallet balance"
+            amount={walletBalance}
+          />
+        </ModalBoxRow>
         <ModalBoxRow>
           <ModalBoxCell>
             <ModalInfoHealthFactor qty={qty} symbol={symbol} operation={operation} />
@@ -236,19 +251,6 @@ const Deposit: FC = () => {
         </ModalBoxRow>
       </ModalBox>
 
-      <ModalAsset
-        asset={symbol}
-        assetTitle={translations[lang].action.toUpperCase()}
-        amount={walletBalance}
-        amountTitle={translations[lang].walletBalance.toUpperCase()}
-      />
-      <ModalInput
-        onMax={onMax}
-        value={qty}
-        onChange={handleInputChange}
-        symbol={symbol}
-        error={errorData?.component === 'input'}
-      />
       {errorData?.component !== 'gas' && <ModalTxCost gasCost={gasCost} />}
       <ModalRow text={translations[lang].exactlyBalance} value={depositedAmount} line />
       <ModalRowHealthFactor qty={qty} symbol={symbol} operation="deposit" />
