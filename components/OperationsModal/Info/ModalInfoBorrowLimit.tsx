@@ -8,16 +8,17 @@ import AccountDataContext from 'contexts/AccountDataContext';
 import formatNumber from 'utils/formatNumber';
 import getBeforeBorrowLimit from 'utils/getBeforeBorrowLimit';
 import { checkPrecision } from 'utils/utils';
-import ModalInfo, { FromTo } from 'components/common/modal/ModalInfo';
+import ModalInfo, { FromTo, Variant } from 'components/common/modal/ModalInfo';
 import { Operation } from 'contexts/ModalStatusContext';
 
 type Props = {
   qty: string;
   symbol: string;
   operation: Operation;
+  variant?: Variant;
 };
 
-function ModalInfoBorrowLimit({ qty, symbol, operation }: Props) {
+function ModalInfoBorrowLimit({ qty, symbol, operation, variant = 'column' }: Props) {
   const { accountData } = useContext(AccountDataContext);
 
   const newQty = useMemo(() => {
@@ -46,6 +47,7 @@ function ModalInfoBorrowLimit({ qty, symbol, operation }: Props) {
 
     switch (operation) {
       case 'deposit':
+      case 'depositAtMaturity':
         if (isCollateral) {
           const adjustedDepositBorrowLimit = newQtyUsd.mul(adjustFactor).div(WeiPerEther);
 
@@ -58,14 +60,17 @@ function ModalInfoBorrowLimit({ qty, symbol, operation }: Props) {
         break;
 
       case 'withdraw':
+      case 'withdrawAtMaturity':
         newAfterBorrowLimit = Number(formatFixed(beforeBorrowLimitUSD.sub(newQtyUsd), 18)).toFixed(2);
         break;
 
       case 'borrow':
+      case 'borrowAtMaturity':
         newAfterBorrowLimit = Number(formatFixed(beforeBorrowLimitUSD.sub(newQtyUsd), 18)).toFixed(2);
         break;
 
       case 'repay':
+      case 'repayAtMaturity':
         if (isCollateral) {
           const adjustedRepayBorrowLimit = newQtyUsd.mul(adjustFactor).div(WeiPerEther);
 
@@ -80,10 +85,11 @@ function ModalInfoBorrowLimit({ qty, symbol, operation }: Props) {
   }, [accountData, symbol, newQty, operation]);
 
   return (
-    <ModalInfo label="Borrow Limit" icon={SwapHorizIcon}>
+    <ModalInfo label="Borrow Limit" icon={SwapHorizIcon} variant={variant}>
       <FromTo
-        from={beforeBorrowLimit ? `$${formatNumber(beforeBorrowLimit, 'usd')}` : undefined}
-        to={afterBorrowLimit ? `$${formatNumber(afterBorrowLimit, 'usd')}` : undefined}
+        from={beforeBorrowLimit ? `$${formatNumber(beforeBorrowLimit, 'USD')}` : undefined}
+        to={afterBorrowLimit ? `$${formatNumber(afterBorrowLimit, 'USD')}` : undefined}
+        variant={variant}
       />
     </ModalInfo>
   );

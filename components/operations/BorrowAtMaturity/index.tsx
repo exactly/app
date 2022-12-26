@@ -2,22 +2,10 @@ import React, { ChangeEvent, FC, useCallback, useContext, useEffect, useMemo, us
 import { WeiPerEther, Zero } from '@ethersproject/constants';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { ErrorCode } from '@ethersproject/logger';
-import Box from '@mui/material/Box';
-import LoadingButton from '@mui/lab/LoadingButton';
 import { captureException } from '@sentry/nextjs';
 
-import ModalAsset from 'components/common/modal/ModalAsset';
-import ModalInput from 'components/common/modal/ModalInput';
-import ModalRowHealthFactor from 'components/common/modal/ModalRowHealthFactor';
-import ModalTitle from 'components/common/modal/ModalTitle';
 import ModalTxCost from 'components/common/modal/ModalTxCost';
 import ModalGif from 'components/common/modal/ModalGif';
-import ModalRowEditable from 'components/common/modal/ModalRowEditable';
-import ModalMaturityEditable from 'components/common/modal/ModalMaturityEditable';
-import ModalError from 'components/common/modal/ModalError';
-import ModalRowBorrowLimit from 'components/common/modal/ModalRowBorrowLimit';
-import ModalRowUtilizationRate from 'components/common/modal/ModalRowUtilizationRate';
-import ModalCell from 'components/common/modal/ModalCell';
 
 import { LangKeys } from 'types/Lang';
 import { HealthFactor } from 'types/HealthFactor';
@@ -45,10 +33,25 @@ import numbers from 'config/numbers.json';
 import analytics from 'utils/analytics';
 import { useOperationContext, usePreviewTx } from 'contexts/OperationContext';
 import getHealthFactorData from 'utils/getHealthFactorData';
+import { Grid } from '@mui/material';
+import { ModalBox, ModalBoxCell, ModalBoxRow } from 'components/common/modal/ModalBox';
+import AssetInput from 'components/OperationsModal/AssetInput';
+import DateSelector from 'components/OperationsModal/DateSelector';
+import ModalInfoFixedAPR from 'components/OperationsModal/Info/ModalInfoFixedAPR';
+import ModalInfoHealthFactor from 'components/OperationsModal/Info/ModalInfoHealthFactor';
+import { useModalStatus } from 'contexts/ModalStatusContext';
+import ModalInfoFixedUtilizationRate from 'components/OperationsModal/Info/ModalInfoFixedUtilizationRate';
+import ModalAdvancedSettings from 'components/common/modal/ModalAdvancedSettings';
+import ModalInfoBorrowLimit from 'components/OperationsModal/Info/ModalInfoBorrowLimit';
+import ModalInfoEditableSlippage from 'components/OperationsModal/Info/ModalInfoEditableSlippage';
+import ModalAlert from 'components/common/modal/ModalAlert';
+import ModalSubmit from 'components/common/modal/ModalSubmit';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
+const DEFAULT_SLIPPAGE = (numbers.slippage * 100).toFixed(2);
 
 const BorrowAtMaturity: FC = () => {
+  const { operation } = useModalStatus();
   const { walletAddress } = useWeb3();
   const { accountData, getAccountData } = useContext(AccountDataContext);
   const { date, market } = useContext(MarketContext);
@@ -72,10 +75,9 @@ const BorrowAtMaturity: FC = () => {
   } = useOperationContext();
 
   const [fixedRate, setFixedRate] = useState<number | undefined>();
-  const [slippage, setSlippage] = useState<number>(numbers.slippage);
-  const [isSlippageEditable, setIsSlippageEditable] = useState(false);
-  const [urBefore, setUrBefore] = useState<string | undefined>();
-  const [urAfter, setUrAfter] = useState<string | undefined>();
+  const [rawSlippage, setRawSlippage] = useState(DEFAULT_SLIPPAGE);
+
+  const slippage = useMemo(() => parseFixed(String(1 + Number(rawSlippage) / 100), 18), [rawSlippage]);
 
   const healthFactor = useMemo<HealthFactor | undefined>(
     () => (accountData ? getHealthFactorData(accountData) : undefined),
@@ -131,18 +133,18 @@ const BorrowAtMaturity: FC = () => {
 
       if (symbol === 'WETH') {
         const amount = quantity ? parseFixed(quantity, 18) : DEFAULT_AMOUNT;
-        const maxAmount = amount.mul(parseFixed(String(1 + slippage), 18)).div(WeiPerEther);
+        const maxAmount = amount.mul(slippage).div(WeiPerEther);
 
-        const gasEstimation = await ETHRouterContract.estimateGas.borrowAtMaturity(date.value, amount, maxAmount);
+        const gasEstimation = await ETHRouterContract.estimateGas.borrowAtMaturity(date, amount, maxAmount);
 
         return gasPrice.mul(gasEstimation);
       }
 
       const decimals = await marketContract.decimals();
       const amount = quantity ? parseFixed(quantity, decimals) : DEFAULT_AMOUNT;
-      const maxAmount = amount.mul(parseFixed(String(1 + slippage), 18)).div(WeiPerEther);
+      const maxAmount = amount.mul(slippage).div(WeiPerEther);
       const gasEstimation = await marketContract.estimateGas.borrowAtMaturity(
-        date.value,
+        date,
         amount,
         maxAmount,
         walletAddress,
@@ -230,7 +232,7 @@ const BorrowAtMaturity: FC = () => {
   const borrow = useCallback(async () => {
     setIsLoadingOp(true);
 
-    if (fixedRate && slippage < fixedRate) {
+    if (fixedRate && Number(formatFixed(slippage, 18)) < fixedRate) {
       setIsLoadingOp(false);
 
       return setErrorData({
@@ -243,30 +245,30 @@ const BorrowAtMaturity: FC = () => {
 
     const { decimals } = accountData[symbol];
     const amount = parseFixed(qty, decimals);
-    const maxAmount = amount.mul(parseFixed(String(1 + slippage), 18)).div(WeiPerEther);
+    const maxAmount = amount.mul(slippage).div(WeiPerEther);
 
     let borrowTx;
     try {
       if (symbol === 'WETH') {
         if (!ETHRouterContract) throw new Error('ETHRouterContract is undefined');
 
-        const gasEstimation = await ETHRouterContract.estimateGas.borrowAtMaturity(date.value, amount, maxAmount);
+        const gasEstimation = await ETHRouterContract.estimateGas.borrowAtMaturity(date, amount, maxAmount);
 
-        borrowTx = await ETHRouterContract.borrowAtMaturity(date.value, amount, maxAmount, {
+        borrowTx = await ETHRouterContract.borrowAtMaturity(date, amount, maxAmount, {
           gasLimit: gasEstimation.mul(parseFixed(String(numbers.gasLimitMultiplier), 18)).div(WeiPerEther),
         });
       } else {
         if (!marketContract) return;
 
         const gasEstimation = await marketContract.estimateGas.borrowAtMaturity(
-          date.value,
+          date,
           amount,
           maxAmount,
           walletAddress,
           walletAddress,
         );
 
-        borrowTx = await marketContract.borrowAtMaturity(date.value, amount, maxAmount, walletAddress, walletAddress, {
+        borrowTx = await marketContract.borrowAtMaturity(date, amount, maxAmount, walletAddress, walletAddress, {
           gasLimit: gasEstimation.mul(parseFixed(String(numbers.gasLimitMultiplier), 18)).div(WeiPerEther),
         });
       }
@@ -279,7 +281,7 @@ const BorrowAtMaturity: FC = () => {
       void analytics.track(status ? 'borrowAtMaturity' : 'borrowAtMaturityRevert', {
         amount: qty,
         asset: symbol,
-        maturity: date.value,
+        maturity: date,
         hash: transactionHash,
       });
 
@@ -329,18 +331,19 @@ const BorrowAtMaturity: FC = () => {
     try {
       const { assets: finalAssets } = await previewerContract.previewBorrowAtMaturity(
         marketContract.address,
-        date.value,
+        date,
         initialAssets,
       );
 
-      const currentTimestamp = new Date().getTime() / 1000;
-      const time = 31_536_000 / (Number(date.value) - currentTimestamp);
+      const currentTimestamp = Date.now() / 1000;
+      const time = 31_536_000 / (Number(date) - currentTimestamp);
 
       const rate = finalAssets.mul(WeiPerEther).div(initialAssets);
 
       const fixedAPR = (Number(formatFixed(rate, 18)) - 1) * time;
       const slippageAPR = fixedAPR * (1 + numbers.slippage);
-      setSlippage(slippageAPR);
+
+      setRawSlippage((slippageAPR * 100).toFixed(2));
       setFixedRate(fixedAPR);
     } catch (error) {
       setFixedRate(undefined);
@@ -352,39 +355,6 @@ const BorrowAtMaturity: FC = () => {
     updateAPR().catch(captureException);
   }, [updateAPR]);
 
-  // load initial utilization rate
-  useEffect(() => {
-    if (!accountData || !date) return;
-
-    const fixedPool = accountData[symbol].fixedPools.find(({ maturity }) => maturity.toString() === date.value);
-    if (!fixedPool) return;
-    setUrBefore((Number(formatFixed(fixedPool.utilization, 18)) * 100).toFixed(2));
-  }, [accountData, date, symbol]);
-
-  const updateURAfter = useCallback(async () => {
-    if (!marketContract || !previewerContract || !date || !accountData) return;
-    if (!qty) return setUrAfter(urBefore);
-
-    try {
-      const { decimals, usdPrice } = accountData[symbol];
-      const initialAssets = qty ? parseFixed(qty, decimals) : getOneDollar(usdPrice, decimals);
-
-      const { utilization } = await previewerContract.previewBorrowAtMaturity(
-        marketContract.address,
-        date.value,
-        initialAssets,
-      );
-
-      setUrAfter((Number(formatFixed(utilization, 18)) * 100).toFixed(2));
-    } catch (error) {
-      setUrAfter('N/A');
-    }
-  }, [accountData, date, qty, marketContract, previewerContract, symbol, urBefore]);
-
-  useEffect(() => {
-    updateURAfter().catch(captureException);
-  }, [updateURAfter]);
-
   const handleSubmitAction = useCallback(async () => {
     if (isLoading) return;
     if (requiresApproval) {
@@ -395,71 +365,74 @@ const BorrowAtMaturity: FC = () => {
 
     void analytics.track('borrowAtMaturityRequest', {
       amount: qty,
-      maturity: date?.value,
+      maturity: date,
       asset: symbol,
     });
 
     return borrow();
-  }, [isLoading, requiresApproval, qty, date?.value, symbol, borrow, approve, setRequiresApproval, needsApproval]);
+  }, [isLoading, requiresApproval, qty, date, symbol, borrow, approve, setRequiresApproval, needsApproval]);
 
   if (tx) return <ModalGif tx={tx} tryAgain={borrow} />;
 
   return (
-    <>
-      <ModalTitle title={translations[lang].fixedRateBorrow} />
-      <ModalAsset
-        asset={symbol}
-        assetTitle={translations[lang].action.toUpperCase()}
-        amount={walletBalance}
-        amountTitle={translations[lang].walletBalance.toUpperCase()}
-      />
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          borderBottom: '1px dashed #d9d9d9',
-        }}
-      >
-        <ModalMaturityEditable text={translations[lang].maturityPool} />
-        <ModalCell text={translations[lang].apr} value={toPercentage(fixedRate)} line />
-      </Box>
-      <ModalInput
-        onMax={onMax}
-        value={qty}
-        onChange={handleInputChange}
-        symbol={symbol}
-        error={errorData?.component === 'input'}
-      />
-      {errorData?.component !== 'gas' && symbol !== 'WETH' && <ModalTxCost gasCost={gasCost} />}
-      <ModalRowEditable
-        text={translations[lang].maximumBorrowApr}
-        value={toPercentage(slippage)}
-        editable={isSlippageEditable}
-        onChange={({ target: { value } }: ChangeEvent<HTMLInputElement>) => {
-          setSlippage(Number(value) / 100);
-          errorData?.message === translations[lang].notEnoughSlippage && setErrorData(undefined);
-        }}
-        onClick={() => setIsSlippageEditable((prev) => !prev)}
-        line
-      />
-      <ModalRowHealthFactor qty={qty} symbol={symbol} operation="borrow" />
-      <ModalRowBorrowLimit qty={qty} symbol={symbol} operation="borrow" line />
-      <ModalRowUtilizationRate urBefore={urBefore} urAfter={urAfter} line />
+    <Grid container flexDirection="column">
+      <Grid item>
+        <ModalBox>
+          <ModalBoxRow>
+            <AssetInput
+              qty={qty}
+              symbol={symbol}
+              onMax={onMax}
+              onChange={handleInputChange}
+              error={errorData}
+              label="Wallet balance"
+              amount={walletBalance}
+            />
+          </ModalBoxRow>
+          <ModalBoxRow>
+            <ModalBoxCell>
+              <DateSelector />
+            </ModalBoxCell>
+            <ModalBoxCell>
+              <ModalInfoFixedAPR fixedAPR={toPercentage(fixedRate)} />
+            </ModalBoxCell>
+          </ModalBoxRow>
+          <ModalBoxRow>
+            <ModalBoxCell>
+              <ModalInfoHealthFactor qty={qty} symbol={symbol} operation={operation} />
+            </ModalBoxCell>
+            <ModalBoxCell divisor>
+              <ModalInfoFixedUtilizationRate qty={qty} symbol={symbol} operation="borrowAtMaturity" />
+            </ModalBoxCell>
+          </ModalBoxRow>
+        </ModalBox>
+      </Grid>
 
-      {errorData && <ModalError message={errorData.message} />}
+      <Grid item mt={2}>
+        {errorData?.component !== 'gas' && <ModalTxCost gasCost={gasCost} />}
+        <ModalAdvancedSettings>
+          <ModalInfoBorrowLimit qty={qty} symbol={symbol} operation={operation} variant="row" />
+          <ModalInfoEditableSlippage value={rawSlippage} onChange={(e) => setRawSlippage(e.target.value)} />
+        </ModalAdvancedSettings>
+      </Grid>
 
-      <LoadingButton
-        fullWidth
-        sx={{ mt: 2 }}
-        loading={isLoading}
-        onClick={handleSubmitAction}
-        color="primary"
-        variant="contained"
-        disabled={!qty || parseFloat(qty) <= 0 || isLoading || errorData?.status}
-      >
-        {requiresApproval ? translations[lang].approve : translations[lang].borrow}
-      </LoadingButton>
-    </>
+      {errorData?.status && (
+        <Grid item mt={2}>
+          <ModalAlert variant="error" message={errorData.message} />
+        </Grid>
+      )}
+
+      <Grid item mt={4}>
+        <ModalSubmit
+          label="Borrow"
+          symbol={symbol}
+          submit={handleSubmitAction}
+          isLoading={isLoading}
+          disabled={!qty || parseFloat(qty) <= 0 || isLoading || errorData?.status}
+          requiresApproval={requiresApproval}
+        />
+      </Grid>
+    </Grid>
   );
 };
 

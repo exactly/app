@@ -12,15 +12,16 @@ import AccountDataContext from 'contexts/AccountDataContext';
 import { Operation } from 'contexts/ModalStatusContext';
 import { checkPrecision } from 'utils/utils';
 
-import ModalInfo, { FromTo } from 'components/common/modal/ModalInfo';
+import ModalInfo, { FromTo, Variant } from 'components/common/modal/ModalInfo';
 
 type Props = {
   qty: string;
   symbol: string;
   operation: Operation;
+  variant?: Variant;
 };
 
-function ModalInfoHealthFactor({ qty, symbol, operation }: Props) {
+function ModalInfoHealthFactor({ qty, symbol, operation, variant = 'column' }: Props) {
   const { accountData } = useContext(AccountDataContext);
 
   const newQty = useMemo(() => {
@@ -59,6 +60,7 @@ function ModalInfoHealthFactor({ qty, symbol, operation }: Props) {
     const newQtyUsd = newQty.mul(usdPrice).div(parseFixed('1', decimals));
 
     switch (operation) {
+      case 'depositAtMaturity':
       case 'deposit': {
         if (isCollateral) {
           const adjustedNewQtyUsd = newQtyUsd.mul(adjustFactor).div(WeiPerEther);
@@ -68,6 +70,8 @@ function ModalInfoHealthFactor({ qty, symbol, operation }: Props) {
           return parseHealthFactor(healthFactor.debt, healthFactor.collateral);
         }
       }
+
+      case 'withdrawAtMaturity':
       case 'withdraw': {
         if (isCollateral) {
           const adjustedNewQtyUsd = newQtyUsd.mul(WeiPerEther).div(adjustFactor);
@@ -77,11 +81,15 @@ function ModalInfoHealthFactor({ qty, symbol, operation }: Props) {
           return parseHealthFactor(healthFactor.debt, healthFactor.collateral);
         }
       }
+
+      case 'borrowAtMaturity':
       case 'borrow': {
         const adjustedNewQtyUsd = newQtyUsd.mul(WeiPerEther).div(adjustFactor);
 
         return parseHealthFactor(healthFactor.debt.add(adjustedNewQtyUsd), healthFactor.collateral);
       }
+
+      case 'repayAtMaturity':
       case 'repay': {
         const adjustedNewQtyUsd = newQtyUsd.mul(adjustFactor).div(WeiPerEther);
 
@@ -91,8 +99,8 @@ function ModalInfoHealthFactor({ qty, symbol, operation }: Props) {
   }, [healthFactor, newQty, accountData, operation, symbol]);
 
   return (
-    <ModalInfo label="Health Factor" icon={FavoriteBorderOutlinedIcon}>
-      <FromTo from={beforeHealthFactor} to={afterHealthFactor} />
+    <ModalInfo label="Your Health Factor" icon={FavoriteBorderOutlinedIcon} variant={variant}>
+      <FromTo from={beforeHealthFactor} to={afterHealthFactor} variant={variant} />
     </ModalInfo>
   );
 }

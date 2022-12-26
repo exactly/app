@@ -12,7 +12,7 @@ function OperationsModal() {
   const { open, closeModal, operation } = useModalStatus();
 
   return (
-    <Dialog open={open} onClose={closeModal} sx={{ '& .MuiPaper-root': { maxWidth: 'fit-content' } }}>
+    <Dialog open={open} onClose={closeModal}>
       <IconButton
         aria-label="close"
         onClick={closeModal}
