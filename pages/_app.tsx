@@ -17,8 +17,10 @@ import { ThemeProvider as MUIThemeProvider } from '@mui/material/styles';
 import { wagmi, walletConnectId, web3modal } from 'utils/client';
 import theme, { globals } from 'styles/theme';
 import Footer from 'components/Footer';
-import Navbar from 'components/Navbar';
 import { Grid, useMediaQuery } from '@mui/material';
+import dynamic from 'next/dynamic';
+
+const Navbar = dynamic(() => import('../components/Navbar'));
 
 const { maxWidth } = globals;
 
