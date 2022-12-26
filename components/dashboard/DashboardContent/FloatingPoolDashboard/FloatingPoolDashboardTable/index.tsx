@@ -9,6 +9,7 @@ import {
   Paper,
   Tooltip,
   Typography,
+  Box,
 } from '@mui/material';
 
 import { FloatingPoolItemData } from 'types/FloatingPoolItemData';
@@ -77,6 +78,7 @@ function FloatingPoolDashboardTable({ type, rows }: Props) {
                     variant="subtitle2"
                     sx={{ color: 'grey.500', visibility: header.hidden ? 'hidden' : '' }}
                     fontWeight={600}
+                    width="fit-content"
                   >
                     {header.label}
                   </Typography>
