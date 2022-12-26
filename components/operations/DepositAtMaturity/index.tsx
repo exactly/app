@@ -1,19 +1,9 @@
 import React, { ChangeEvent, FC, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { WeiPerEther } from '@ethersproject/constants';
-import LoadingButton from '@mui/lab/LoadingButton';
-import Box from '@mui/material/Box';
 
-import ModalAsset from 'components/common/modal/ModalAsset';
-import ModalInput from 'components/common/modal/ModalInput';
-import ModalTitle from 'components/common/modal/ModalTitle';
 import ModalTxCost from 'components/common/modal/ModalTxCost';
 import ModalGif from 'components/common/modal/ModalGif';
-import ModalStepper from 'components/common/modal/ModalStepper';
-import ModalRowEditable from 'components/common/modal/ModalRowEditable';
-import ModalMaturityEditable from 'components/common/modal/ModalMaturityEditable';
-import ModalError from 'components/common/modal/ModalError';
-import ModalCell from 'components/common/modal/ModalCell';
 
 import { LangKeys } from 'types/Lang';
 import getOneDollar from 'utils/getOneDollar';
@@ -35,14 +25,30 @@ import useERC20 from 'hooks/useERC20';
 import analytics from 'utils/analytics';
 import { useOperationContext, usePreviewTx } from 'contexts/OperationContext';
 import { toPercentage } from 'utils/utils';
-import ModalRow from 'components/common/modal/ModalRow';
-import formatNumber from 'utils/formatNumber';
 import handleOperationError from 'utils/handleOperationError';
 import useAccountData from 'hooks/useAccountData';
+import { Grid } from '@mui/material';
+import { ModalBox, ModalBoxCell, ModalBoxRow } from 'components/common/modal/ModalBox';
+import AssetInput from 'components/OperationsModal/AssetInput';
+import ModalInfoHealthFactor from 'components/OperationsModal/Info/ModalInfoHealthFactor';
+import ModalInfoBorrowLimit from 'components/OperationsModal/Info/ModalInfoBorrowLimit';
+import { useModalStatus } from 'contexts/ModalStatusContext';
+import ModalAdvancedSettings from 'components/common/modal/ModalAdvancedSettings';
+import ModalInfoTotalDeposits from 'components/OperationsModal/Info/ModalInfoTotalDeposits';
+import ModalAlert from 'components/common/modal/ModalAlert';
+import ModalSubmit from 'components/common/modal/ModalSubmit';
+import DateSelector from 'components/OperationsModal/DateSelector';
+import ModalInfoFixedAPR from 'components/OperationsModal/Info/ModalInfoFixedAPR';
+import ModalInfoFixedUtilizationRate from 'components/OperationsModal/Info/ModalInfoFixedUtilizationRate';
+import ModalInfo from 'components/common/modal/ModalInfo';
+import formatNumber from 'utils/formatNumber';
+import ModalInfoEditableSlippage from 'components/OperationsModal/Info/ModalInfoEditableSlippage';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
+const DEFAULT_SLIPPAGE = (100 * numbers.slippage).toFixed(2);
 
 const DepositAtMaturity: FC = () => {
+  const { operation } = useModalStatus();
   const { walletAddress } = useWeb3();
   const { date, market } = useContext(MarketContext);
   const { accountData, getAccountData } = useContext(AccountDataContext);
@@ -65,10 +71,11 @@ const DepositAtMaturity: FC = () => {
     setIsLoading: setIsLoadingOp,
   } = useOperationContext();
 
-  const [slippage, setSlippage] = useState<number>(0);
-  const [editSlippage, setEditSlippage] = useState<boolean>(false);
+  const [rawSlippage, setRawSlippage] = useState(DEFAULT_SLIPPAGE);
   const [fixedRate, setFixedRate] = useState<number | undefined>();
   const [gtMaxYield, setGtMaxYield] = useState<boolean>(false);
+
+  const slippage = useMemo(() => parseFixed(String(1 - Number(rawSlippage) / 100), 18), [rawSlippage]);
 
   const ETHRouterContract = useETHRouter();
   const marketContract = useMarket(market);
@@ -101,22 +108,17 @@ const DepositAtMaturity: FC = () => {
 
       if (symbol === 'WETH') {
         const amount = quantity ? parseFixed(quantity, 18) : DEFAULT_AMOUNT;
-        const minAmount = amount.mul(parseFixed(String(1 - slippage), 18)).div(WeiPerEther);
-        const gasEstimation = await ETHRouterContract.estimateGas.depositAtMaturity(date.value, minAmount, {
+        const minAmount = amount.mul(slippage).div(WeiPerEther);
+        const gasEstimation = await ETHRouterContract.estimateGas.depositAtMaturity(date, minAmount, {
           value: amount,
         });
         return gasPrice.mul(gasEstimation);
       }
 
       const amount = quantity ? parseFixed(quantity, decimals) : DEFAULT_AMOUNT;
-      const minAmount = amount.mul(parseFixed(String(1 - slippage), 18)).div(WeiPerEther);
+      const minAmount = amount.mul(slippage).div(WeiPerEther);
 
-      const gasEstimation = await marketContract.estimateGas.depositAtMaturity(
-        date.value,
-        amount,
-        minAmount,
-        walletAddress,
-      );
+      const gasEstimation = await marketContract.estimateGas.depositAtMaturity(date, amount, minAmount, walletAddress);
 
       return gasPrice.mul(gasEstimation);
     },
@@ -150,9 +152,9 @@ const DepositAtMaturity: FC = () => {
   const optimalDepositAmount = useMemo<BigNumber | undefined>(() => {
     if (!accountData) return;
     const { fixedPools = [] } = accountData[symbol];
-    const pool = fixedPools.find((p) => formatFixed(p.maturity) === date?.value);
+    const pool = fixedPools.find((p) => formatFixed(p.maturity) === date);
     return pool?.optimalDeposit;
-  }, [accountData, symbol, date?.value]);
+  }, [accountData, symbol, date]);
 
   const handleInputChange = useCallback(
     ({ target: { value, valueAsNumber } }: ChangeEvent<HTMLInputElement>) => {
@@ -178,26 +180,26 @@ const DepositAtMaturity: FC = () => {
     let depositTx;
     try {
       const amount = parseFixed(qty, decimals);
-      const minAmount = amount.mul(parseFixed(String(1 - slippage), 18)).div(WeiPerEther);
+      const minAmount = amount.mul(slippage).div(WeiPerEther);
 
       if (symbol === 'WETH') {
-        const gasEstimation = await ETHRouterContract.estimateGas.depositAtMaturity(date.value, minAmount, {
+        const gasEstimation = await ETHRouterContract.estimateGas.depositAtMaturity(date, minAmount, {
           value: amount,
         });
 
-        depositTx = await ETHRouterContract.depositAtMaturity(date.value, minAmount, {
+        depositTx = await ETHRouterContract.depositAtMaturity(date, minAmount, {
           value: amount,
           gasLimit: gasEstimation.mul(parseFixed(String(numbers.gasLimitMultiplier), 18)).div(WeiPerEther),
         });
       } else {
         const gasEstimation = await marketContract.estimateGas.depositAtMaturity(
-          date.value,
+          date,
           amount,
           minAmount,
           walletAddress,
         );
 
-        depositTx = await marketContract.depositAtMaturity(date.value, amount, minAmount, walletAddress, {
+        depositTx = await marketContract.depositAtMaturity(date, amount, minAmount, walletAddress, {
           gasLimit: gasEstimation.mul(parseFixed(String(numbers.gasLimitMultiplier), 18)).div(WeiPerEther),
         });
       }
@@ -210,7 +212,7 @@ const DepositAtMaturity: FC = () => {
       void analytics.track(status ? 'depositAtMaturity' : 'depositAtMaturityRevert', {
         amount: qty,
         asset: symbol,
-        maturity: date.value,
+        maturity: date,
         hash: transactionHash,
       });
 
@@ -247,11 +249,11 @@ const DepositAtMaturity: FC = () => {
 
     void analytics.track('depositAtMaturityRequest', {
       amount: qty,
-      maturity: date?.value,
+      maturity: date,
       asset: symbol,
     });
     return deposit();
-  }, [approve, date?.value, deposit, isLoading, needsApproval, qty, requiresApproval, setRequiresApproval, symbol]);
+  }, [approve, date, deposit, isLoading, needsApproval, qty, requiresApproval, setRequiresApproval, symbol]);
 
   const updateAPR = useCallback(async () => {
     if (!accountData || !date || !previewerContract || !marketContract) return;
@@ -262,18 +264,18 @@ const DepositAtMaturity: FC = () => {
     try {
       const { assets: finalAssets } = await previewerContract.previewDepositAtMaturity(
         marketContract.address,
-        date.value,
+        date,
         initialAssets,
       );
 
-      const currentTimestamp = new Date().getTime() / 1000;
-      const time = 31_536_000 / (parseInt(date?.value) - currentTimestamp);
+      const currentTimestamp = Date.now() / 1000;
+      const time = 31_536_000 / (parseInt(date) - currentTimestamp);
 
       const rate = finalAssets.mul(WeiPerEther).div(initialAssets);
       const fixedAPR = (Number(formatFixed(rate, 18)) - 1) * time;
       const slippageAPR = fixedAPR * (1 - numbers.slippage);
 
-      setSlippage(slippageAPR);
+      setRawSlippage((slippageAPR * 100).toFixed(2));
       setFixedRate(fixedAPR);
     } catch (error) {
       setFixedRate(undefined);
@@ -287,71 +289,71 @@ const DepositAtMaturity: FC = () => {
   if (tx) return <ModalGif tx={tx} tryAgain={deposit} />;
 
   return (
-    <>
-      <ModalTitle title={translations[lang].fixedRateDeposit} />
-      <ModalAsset
-        asset={symbol}
-        assetTitle={translations[lang].action.toUpperCase()}
-        amount={walletBalance}
-        amountTitle={translations[lang].walletBalance.toUpperCase()}
-      />
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          borderBottom: '1px dashed #d9d9d9',
-        }}
-      >
-        <ModalMaturityEditable text={translations[lang].maturityPool.toUpperCase()} />
-        <ModalCell text={translations[lang].apr.toUpperCase()} value={toPercentage(fixedRate)} column />
-      </Box>
-      <ModalInput
-        onMax={onMax}
-        value={qty}
-        onChange={handleInputChange}
-        symbol={symbol}
-        error={errorData?.component === 'input'}
-      />
-      {errorData?.component !== 'gas' && <ModalTxCost gasCost={gasCost} />}
-      <ModalRowEditable
-        text={translations[lang].minimumApr}
-        value={toPercentage(slippage)}
-        editable={editSlippage}
-        onChange={(e: ChangeEvent<HTMLInputElement>) => {
-          setSlippage(e.target.valueAsNumber);
-        }}
-        onClick={() => {
-          setEditSlippage((prev) => !prev);
-        }}
-        line
-      />
+    <Grid container flexDirection="column">
+      <Grid item>
+        <ModalBox>
+          <ModalBoxRow>
+            <AssetInput
+              qty={qty}
+              symbol={symbol}
+              onMax={onMax}
+              onChange={handleInputChange}
+              error={errorData}
+              label="Wallet balance"
+              amount={walletBalance}
+            />
+          </ModalBoxRow>
+          <ModalBoxRow>
+            <ModalBoxCell>
+              <DateSelector />
+            </ModalBoxCell>
+            <ModalBoxCell>
+              <ModalInfoFixedAPR fixedAPR={toPercentage(fixedRate)} />
+            </ModalBoxCell>
+          </ModalBoxRow>
+          <ModalBoxRow>
+            <ModalBoxCell>
+              <ModalInfoHealthFactor qty={qty} symbol={symbol} operation={operation} />
+            </ModalBoxCell>
+            <ModalBoxCell divisor>
+              <ModalInfoFixedUtilizationRate qty={qty} symbol={symbol} operation="depositAtMaturity" />
+            </ModalBoxCell>
+          </ModalBoxRow>
+        </ModalBox>
+      </Grid>
 
-      {optimalDepositAmount && (
-        <ModalRow
-          text="Optimal deposit amount"
-          value={formatNumber(formatFixed(optimalDepositAmount, decimals), symbol)}
-          asset={symbol}
-          line
-        />
+      <Grid item mt={2}>
+        {errorData?.component !== 'gas' && <ModalTxCost gasCost={gasCost} />}
+        <ModalAdvancedSettings>
+          <ModalInfoBorrowLimit qty={qty} symbol={symbol} operation={operation} variant="row" />
+          <ModalInfoTotalDeposits qty={qty} symbol={symbol} operation="deposit" variant="row" />
+          {optimalDepositAmount && (
+            <ModalInfo label="Optimal deposit amount" variant="row">
+              {formatNumber(formatFixed(optimalDepositAmount, decimals), symbol)}
+            </ModalInfo>
+          )}
+          <ModalInfoEditableSlippage value={rawSlippage} onChange={(e) => setRawSlippage(e.target.value)} />
+        </ModalAdvancedSettings>
+      </Grid>
+
+      {(errorData?.status || gtMaxYield) && (
+        <Grid item mt={2}>
+          {gtMaxYield && <ModalAlert variant="warning" message="You have reached the maximum yield possible" />}
+          {errorData?.status && <ModalAlert variant="error" message={errorData.message} />}
+        </Grid>
       )}
 
-      <ModalStepper currentStep={requiresApproval ? 1 : 2} totalSteps={3} />
-
-      {gtMaxYield && <ModalError message="You have reached the maximum yield possible" />}
-      {errorData && <ModalError message={errorData.message} />}
-
-      <LoadingButton
-        fullWidth
-        sx={{ mt: 2 }}
-        loading={isLoading}
-        onClick={handleSubmitAction}
-        color="primary"
-        variant="contained"
-        disabled={!qty || parseFloat(qty) <= 0 || isLoading || errorData?.status}
-      >
-        {requiresApproval ? translations[lang].approve : translations[lang].deposit}
-      </LoadingButton>
-    </>
+      <Grid item mt={4}>
+        <ModalSubmit
+          label="Deposit"
+          symbol={symbol}
+          submit={handleSubmitAction}
+          isLoading={isLoading}
+          disabled={!qty || parseFloat(qty) <= 0 || isLoading || errorData?.status}
+          requiresApproval={requiresApproval}
+        />
+      </Grid>
+    </Grid>
   );
 };
 

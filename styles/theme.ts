@@ -9,12 +9,14 @@ export const globals = {
 
 declare module '@mui/material/styles' {
   interface Palette {
+    blue: string;
     operation: {
       fixed: string;
       variable: string;
     };
   }
   interface PaletteOptions {
+    blue: string;
     operation: {
       fixed: string;
       variable: string;
@@ -23,9 +25,20 @@ declare module '@mui/material/styles' {
 
   interface TypographyVariants {
     fontFamilyMonospaced: string;
+    modalRow: TypographyVariants['body1'];
+    modalCol: TypographyVariants['body1'];
   }
   interface TypographyVariantsOptions {
     fontFamilyMonospaced: string;
+    modalRow: TypographyVariants['body1'];
+    modalCol: TypographyVariants['body1'];
+  }
+}
+
+declare module '@mui/material/Typography' {
+  interface TypographyPropsVariantOverrides {
+    modalRow: true;
+    modalCol: true;
   }
 }
 
@@ -39,16 +52,17 @@ const theme = createTheme({
     },
     grey: {
       '50': '#fafafa',
-      '100': '#e1e1e1',
+      '100': '#F9FAFB',
       '200': '#EDF0F2',
       '300': '#E3E5E8',
       '500': '#9a9a9a',
       '600': '#62666A',
-      '700': '#6F737B',
+      '700': '#303336',
       '900': '#0D0E0F',
     },
+    blue: '#0095FF',
     operation: {
-      fixed: '#0095FF',
+      fixed: 'blue',
       variable: '#33CC59',
     },
   },
@@ -85,6 +99,16 @@ const theme = createTheme({
     caption: {
       color: '#9a9a9a',
       fontFamily: 'IBM Plex Mono',
+    },
+    modalRow: {
+      color: '#303336',
+      fontSize: 14,
+      fontWeight: 500,
+    },
+    modalCol: {
+      color: '#0D0E0F',
+      fontSize: 20,
+      fontWeight: 600,
     },
   },
   shape: {

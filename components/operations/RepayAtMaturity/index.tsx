@@ -1,26 +1,13 @@
 import React, { ChangeEvent, FC, useCallback, useContext, useMemo, useState } from 'react';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { WeiPerEther, Zero } from '@ethersproject/constants';
-import LoadingButton from '@mui/lab/LoadingButton';
 
-import ModalAsset from 'components/common/modal/ModalAsset';
-import ModalError from 'components/common/modal/ModalError';
 import ModalGif from 'components/common/modal/ModalGif';
-import ModalInput from 'components/common/modal/ModalInput';
-import ModalMaturityEditable from 'components/common/modal/ModalMaturityEditable';
-import ModalRow from 'components/common/modal/ModalRow';
-import ModalRowBorrowLimit from 'components/common/modal/ModalRowBorrowLimit';
-import ModalRowEditable from 'components/common/modal/ModalRowEditable';
-import ModalRowHealthFactor from 'components/common/modal/ModalRowHealthFactor';
-import ModalTitle from 'components/common/modal/ModalTitle';
 import ModalTxCost from 'components/common/modal/ModalTxCost';
-
-import { LangKeys } from 'types/Lang';
 
 import formatNumber from 'utils/formatNumber';
 
 import AccountDataContext from 'contexts/AccountDataContext';
-import LangContext from 'contexts/LangContext';
 import { MarketContext } from 'contexts/MarketContext';
 import { useWeb3 } from 'hooks/useWeb3';
 
@@ -28,7 +15,6 @@ import numbers from 'config/numbers.json';
 
 import useETHRouter from 'hooks/useETHRouter';
 import useMarket from 'hooks/useMarket';
-import keys from './translations.json';
 import useERC20 from 'hooks/useERC20';
 import useApprove from 'hooks/useApprove';
 import handleOperationError from 'utils/handleOperationError';
@@ -36,17 +22,29 @@ import useBalance from 'hooks/useBalance';
 import analytics from 'utils/analytics';
 import { useOperationContext, usePreviewTx } from 'contexts/OperationContext';
 import useAccountData from 'hooks/useAccountData';
+import { Grid } from '@mui/material';
+import { ModalBox, ModalBoxCell, ModalBoxRow } from 'components/common/modal/ModalBox';
+import AssetInput from 'components/OperationsModal/AssetInput';
+import { useModalStatus } from 'contexts/ModalStatusContext';
+import DateSelector from 'components/OperationsModal/DateSelector';
+import ModalInfoMaturityStatus from 'components/OperationsModal/Info/ModalInfoMaturityStatus';
+import ModalInfoAmount from 'components/OperationsModal/Info/ModalInfoAmount';
+import ModalInfoHealthFactor from 'components/OperationsModal/Info/ModalInfoHealthFactor';
+import ModalInfoFixedUtilizationRate from 'components/OperationsModal/Info/ModalInfoFixedUtilizationRate';
+import ModalAdvancedSettings from 'components/common/modal/ModalAdvancedSettings';
+import ModalInfoEditableSlippage from 'components/OperationsModal/Info/ModalInfoEditableSlippage';
+import ModalAlert from 'components/common/modal/ModalAlert';
+import ModalSubmit from 'components/common/modal/ModalSubmit';
+import ModalInfoBorrowLimit from 'components/OperationsModal/Info/ModalInfoBorrowLimit';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 const DEFAULT_SLIPPAGE = (numbers.slippage * 100).toFixed(2);
 
 const RepayAtMaturity: FC = () => {
+  const { operation } = useModalStatus();
   const { walletAddress } = useWeb3();
   const { date, market } = useContext(MarketContext);
   const { accountData, getAccountData } = useContext(AccountDataContext);
-
-  const lang: string = useContext(LangContext);
-  const translations: { [key: string]: LangKeys } = keys;
 
   const {
     symbol,
@@ -63,36 +61,31 @@ const RepayAtMaturity: FC = () => {
     setIsLoading: setIsLoadingOp,
   } = useOperationContext();
 
-  const [isSlippageEditable, setIsSlippageEditable] = useState(false);
   const [penaltyAssets, setPenaltyAssets] = useState(Zero);
   const [positionAssetsAmount, setPositionAssetsAmount] = useState(Zero);
-  const [slippage, setSlippage] = useState(DEFAULT_SLIPPAGE);
+  const [rawSlippage, setRawSlippage] = useState(DEFAULT_SLIPPAGE);
 
   const ETHRouterContract = useETHRouter();
   const assetContract = useERC20();
 
   const marketContract = useMarket(market);
 
-  const rawSlippage = useMemo(() => 1 + Number(slippage) / 100, [slippage]);
+  const slippage = useMemo(() => parseFixed(String(1 + Number(rawSlippage) / 100), 18), [rawSlippage]);
   const { decimals = 18 } = useAccountData(symbol);
 
   const maxAmountToRepay = useMemo(
-    () =>
-      positionAssetsAmount
-        .add(penaltyAssets)
-        .mul(parseFixed(String(rawSlippage), 18))
-        .div(WeiPerEther),
-    [positionAssetsAmount, penaltyAssets, rawSlippage],
+    () => positionAssetsAmount.add(penaltyAssets).mul(slippage).div(WeiPerEther),
+    [positionAssetsAmount, penaltyAssets, slippage],
   );
 
   const walletBalance = useBalance(symbol, assetContract);
 
-  const isLateRepay = useMemo(() => date && Date.now() / 1000 > parseInt(date.value), [date]);
+  const isLateRepay = useMemo(() => date && Date.now() / 1000 > parseInt(date), [date]);
 
   const totalPositionAssets = useMemo(() => {
     if (!accountData || !date) return Zero;
     const pool = accountData[symbol].fixedBorrowPositions.find(
-      ({ maturity }) => maturity.toNumber().toString() === date.value,
+      ({ maturity }) => maturity.toNumber().toString() === date,
     );
 
     return pool ? pool.position.principal.add(pool.position.fee) : Zero;
@@ -104,7 +97,7 @@ const RepayAtMaturity: FC = () => {
     const { penaltyRate } = accountData[symbol];
 
     const currentTimestamp = Math.floor(Date.now() / 1000);
-    const maturityTimestamp = parseFloat(date.value);
+    const maturityTimestamp = parseFloat(date);
     const penaltyTime = currentTimestamp - maturityTimestamp;
 
     return penaltyRate.mul(penaltyTime).mul(totalPositionAssets).div(WeiPerEther);
@@ -130,19 +123,17 @@ const RepayAtMaturity: FC = () => {
       }
 
       const amount = positionAssetsAmount.isZero() ? DEFAULT_AMOUNT : positionAssetsAmount;
-      const maxAmount = maxAmountToRepay.isZero()
-        ? DEFAULT_AMOUNT.mul(parseFixed(String(rawSlippage * 10), 18)).div(WeiPerEther)
-        : maxAmountToRepay;
+      const maxAmount = maxAmountToRepay.isZero() ? DEFAULT_AMOUNT.mul(slippage).div(WeiPerEther) : maxAmountToRepay;
 
       if (symbol === 'WETH') {
-        const gasLimit = await ETHRouterContract.estimateGas.repayAtMaturity(date.value, amount, {
+        const gasLimit = await ETHRouterContract.estimateGas.repayAtMaturity(date, amount, {
           value: maxAmount,
         });
 
         return gasPrice.mul(gasLimit);
       }
 
-      const gasLimit = await marketContract.estimateGas.repayAtMaturity(date.value, amount, maxAmount, walletAddress);
+      const gasLimit = await marketContract.estimateGas.repayAtMaturity(date, amount, maxAmount, walletAddress);
 
       return gasPrice.mul(gasLimit);
     },
@@ -154,7 +145,7 @@ const RepayAtMaturity: FC = () => {
       requiresApproval,
       positionAssetsAmount,
       maxAmountToRepay,
-      rawSlippage,
+      slippage,
       symbol,
       approveEstimateGas,
     ],
@@ -167,7 +158,7 @@ const RepayAtMaturity: FC = () => {
     [isLoadingOp, approveIsLoading, previewIsLoading],
   );
 
-  const handleOnMax = useCallback(() => {
+  const onMax = useCallback(() => {
     setPenaltyAssets(totalPenalties);
     setPositionAssetsAmount(totalPositionAssets);
     setQty(formatFixed(totalPositionAssets.add(totalPenalties), decimals));
@@ -213,31 +204,25 @@ const RepayAtMaturity: FC = () => {
       setIsLoadingOp(true);
 
       if (symbol === 'WETH') {
-        const gasEstimation = await ETHRouterContract.estimateGas.repayAtMaturity(date.value, positionAssetsAmount, {
+        const gasEstimation = await ETHRouterContract.estimateGas.repayAtMaturity(date, positionAssetsAmount, {
           value: maxAmountToRepay,
         });
 
-        repayTx = await ETHRouterContract.repayAtMaturity(date.value, positionAssetsAmount, {
+        repayTx = await ETHRouterContract.repayAtMaturity(date, positionAssetsAmount, {
           gasLimit: gasEstimation.mul(parseFixed(String(numbers.gasLimitMultiplier), 18)).div(WeiPerEther),
           value: maxAmountToRepay,
         });
       } else {
         const gasEstimation = await marketContract.estimateGas.repayAtMaturity(
-          date.value,
+          date,
           positionAssetsAmount,
           maxAmountToRepay,
           walletAddress,
         );
 
-        repayTx = await marketContract.repayAtMaturity(
-          date.value,
-          positionAssetsAmount,
-          maxAmountToRepay,
-          walletAddress,
-          {
-            gasLimit: gasEstimation.mul(parseFixed(String(numbers.gasLimitMultiplier), 18)).div(WeiPerEther),
-          },
-        );
+        repayTx = await marketContract.repayAtMaturity(date, positionAssetsAmount, maxAmountToRepay, walletAddress, {
+          gasLimit: gasEstimation.mul(parseFixed(String(numbers.gasLimitMultiplier), 18)).div(WeiPerEther),
+        });
       }
 
       setTx({ status: 'processing', hash: repayTx?.hash });
@@ -249,7 +234,7 @@ const RepayAtMaturity: FC = () => {
       void analytics.track(status ? 'repayAtMaturity' : 'repayAtMaturityRevert', {
         amount: qty,
         asset: symbol,
-        maturity: date.value,
+        maturity: date,
         hash: transactionHash,
       });
 
@@ -286,87 +271,104 @@ const RepayAtMaturity: FC = () => {
 
     void analytics.track('repayAtMaturityRequest', {
       amount: qty,
-      maturity: date?.value,
+      maturity: date,
       asset: symbol,
     });
 
     return repay();
-  }, [approve, date?.value, isLoading, needsApproval, qty, repay, requiresApproval, setRequiresApproval, symbol]);
+  }, [approve, date, isLoading, needsApproval, qty, repay, requiresApproval, setRequiresApproval, symbol]);
 
   if (tx) return <ModalGif tx={tx} tryAgain={repay} />;
 
   return (
-    <>
-      <ModalTitle title={isLateRepay ? translations[lang].lateRepay : translations[lang].earlyRepay} />
-      <ModalAsset
-        asset={symbol}
-        assetTitle={translations[lang].action.toUpperCase()}
-        amount={formatFixed(totalPositionAssets, decimals)}
-        amountTitle={translations[lang].debtAmount.toUpperCase()}
-      />
-      <ModalMaturityEditable text={translations[lang].maturityPool} line />
-      <ModalInput
-        onMax={handleOnMax}
-        value={qty}
-        onChange={handleInputChange}
-        symbol={symbol}
-        error={errorData?.component === 'input'}
-      />
-      {errorData?.component !== 'gas' && <ModalTxCost gasCost={gasCost} />}
-      <ModalRow
-        text={translations[lang].amountAtFinish}
-        value={formatNumber(formatFixed(totalPositionAssets, decimals), symbol, true)}
-        asset={symbol}
-        line
-      />
-      {isLateRepay && (
-        <ModalRow
-          text="Penalties to be paid"
-          value={formatNumber(formatFixed(penaltyAssets, decimals), symbol, true)}
-          asset={symbol}
-          line
-        />
+    <Grid container flexDirection="column">
+      <Grid item>
+        <ModalBox>
+          <ModalBoxRow>
+            <AssetInput
+              qty={qty}
+              symbol={symbol}
+              onMax={onMax}
+              onChange={handleInputChange}
+              error={errorData}
+              label="Debt amount"
+              amount={formatFixed(totalPositionAssets, decimals)}
+            />
+          </ModalBoxRow>
+          <ModalBoxRow>
+            <ModalBoxCell>
+              <DateSelector />
+            </ModalBoxCell>
+            <ModalBoxCell>{date && <ModalInfoMaturityStatus date={date} />}</ModalBoxCell>
+            <ModalBoxCell>
+              <ModalInfoAmount
+                label="Amount at maturity"
+                symbol={symbol}
+                value={formatNumber(formatFixed(totalPositionAssets, decimals), symbol, true)}
+              />
+            </ModalBoxCell>
+            <ModalBoxCell>
+              <ModalInfoAmount
+                label="Max. amount to be paid"
+                value={formatNumber(formatFixed(maxAmountToRepay, decimals), symbol, true)}
+                symbol={symbol}
+              />
+            </ModalBoxCell>
+            {isLateRepay && (
+              <>
+                <ModalBoxCell>
+                  <ModalInfoAmount
+                    label="Penalties to be paid"
+                    value={formatNumber(formatFixed(penaltyAssets, decimals), symbol, true)}
+                    symbol={symbol}
+                  />
+                </ModalBoxCell>
+                <ModalBoxCell>
+                  <ModalInfoAmount
+                    label="Assets to be paid"
+                    value={formatNumber(formatFixed(positionAssetsAmount, decimals), symbol, true)}
+                    symbol={symbol}
+                  />
+                </ModalBoxCell>
+              </>
+            )}
+          </ModalBoxRow>
+          <ModalBoxRow>
+            <ModalBoxCell>
+              <ModalInfoHealthFactor qty={qty} symbol={symbol} operation={operation} />
+            </ModalBoxCell>
+            <ModalBoxCell divisor>
+              <ModalInfoFixedUtilizationRate qty={qty} symbol={symbol} operation="HERE" />
+            </ModalBoxCell>
+          </ModalBoxRow>
+        </ModalBox>
+      </Grid>
+
+      <Grid item mt={2}>
+        {errorData?.component !== 'gas' && <ModalTxCost gasCost={gasCost} />}
+        <ModalAdvancedSettings>
+          <ModalInfoBorrowLimit qty={qty} symbol={symbol} operation={operation} variant="row" />
+          <ModalInfoEditableSlippage value={rawSlippage} onChange={(e) => setRawSlippage(e.target.value)} />
+        </ModalAdvancedSettings>
+      </Grid>
+
+      {errorData?.status && (
+        <Grid item mt={2}>
+          <ModalAlert variant="error" message={errorData.message} />
+        </Grid>
       )}
-      <ModalRow
-        text="Assets to be paid"
-        value={formatNumber(formatFixed(positionAssetsAmount, decimals), symbol, true)}
-        asset={symbol}
-        line
-      />
-      <ModalRowEditable
-        value={slippage}
-        editable={isSlippageEditable}
-        onChange={({ target: { value } }: ChangeEvent<HTMLInputElement>) => {
-          setSlippage(value);
-        }}
-        symbol="%"
-        onClick={() => {
-          if (!slippage) setSlippage(DEFAULT_SLIPPAGE);
-          setIsSlippageEditable((prev) => !prev);
-        }}
-        line
-      />
-      <ModalRow
-        text="Max amount to be paid"
-        value={formatNumber(formatFixed(maxAmountToRepay, decimals), symbol, true)}
-        asset={symbol}
-        line
-      />
-      <ModalRowHealthFactor qty={qty} symbol={symbol} operation="repay" />
-      <ModalRowBorrowLimit qty={qty} symbol={symbol} operation="repay" line />
-      {errorData && <ModalError message={errorData.message} />}
-      <LoadingButton
-        fullWidth
-        sx={{ mt: 2 }}
-        variant="contained"
-        color="primary"
-        onClick={handleSubmitAction}
-        loading={isLoading}
-        disabled={!qty || parseFloat(qty) <= 0 || isLoading || errorData?.status}
-      >
-        {requiresApproval ? 'Approve' : translations[lang].repay}
-      </LoadingButton>
-    </>
+
+      <Grid item mt={4}>
+        <ModalSubmit
+          label="Repay"
+          symbol={symbol}
+          submit={handleSubmitAction}
+          isLoading={isLoading}
+          disabled={!qty || parseFloat(qty) <= 0 || isLoading || errorData?.status}
+          requiresApproval={requiresApproval}
+        />
+      </Grid>
+    </Grid>
   );
 };
 

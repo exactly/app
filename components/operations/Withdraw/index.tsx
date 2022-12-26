@@ -1,15 +1,8 @@
 import React, { ChangeEvent, FC, useCallback, useContext, useMemo, useState } from 'react';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 
-import ModalAsset from 'components/common/modal/ModalAsset';
-import ModalInput from 'components/common/modal/ModalInput';
-import ModalRow from 'components/common/modal/ModalRow';
-import ModalRowHealthFactor from 'components/common/modal/ModalRowHealthFactor';
-import ModalTitle from 'components/common/modal/ModalTitle';
 import ModalTxCost from 'components/common/modal/ModalTxCost';
 import ModalGif from 'components/common/modal/ModalGif';
-import ModalError from 'components/common/modal/ModalError';
-import ModalRowBorrowLimit from 'components/common/modal/ModalRowBorrowLimit';
 
 import { LangKeys } from 'types/Lang';
 
@@ -17,8 +10,6 @@ import LangContext from 'contexts/LangContext';
 import { useWeb3 } from 'hooks/useWeb3';
 import AccountDataContext from 'contexts/AccountDataContext';
 import { MarketContext } from 'contexts/MarketContext';
-
-import formatNumber from 'utils/formatNumber';
 
 import numbers from 'config/numbers.json';
 
@@ -28,13 +19,24 @@ import useETHRouter from 'hooks/useETHRouter';
 import { WeiPerEther } from '@ethersproject/constants';
 import handleOperationError from 'utils/handleOperationError';
 import useApprove from 'hooks/useApprove';
-import { LoadingButton } from '@mui/lab';
 import analytics from 'utils/analytics';
 import { useOperationContext, usePreviewTx } from 'contexts/OperationContext';
+import { Grid } from '@mui/material';
+import { ModalBox, ModalBoxCell, ModalBoxRow } from 'components/common/modal/ModalBox';
+import AssetInput from 'components/OperationsModal/AssetInput';
+import ModalInfoHealthFactor from 'components/OperationsModal/Info/ModalInfoHealthFactor';
+import { useModalStatus } from 'contexts/ModalStatusContext';
+import ModalInfoTotalDeposits from 'components/OperationsModal/Info/ModalInfoTotalDeposits';
+import ModalAdvancedSettings from 'components/common/modal/ModalAdvancedSettings';
+import ModalInfoFloatingUtilizationRate from 'components/OperationsModal/Info/ModalInfoFloatingUtilizationRate';
+import ModalInfoBorrowLimit from 'components/OperationsModal/Info/ModalInfoBorrowLimit';
+import ModalAlert from 'components/common/modal/ModalAlert';
+import ModalSubmit from 'components/common/modal/ModalSubmit';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 
 const Withdraw: FC = () => {
+  const { operation } = useModalStatus();
   const { walletAddress } = useWeb3();
   const { accountData, getAccountData } = useContext(AccountDataContext);
   const { market } = useContext(MarketContext);
@@ -59,16 +61,11 @@ const Withdraw: FC = () => {
 
   const [isMax, setIsMax] = useState(false);
 
-  const assets = useMemo(() => {
-    if (!accountData) return;
-    return accountData[symbol].floatingDepositAssets;
+  const parsedAmount = useMemo(() => {
+    if (!accountData) return '0';
+    const { floatingDepositAssets, decimals } = accountData[symbol];
+    return formatFixed(floatingDepositAssets, decimals);
   }, [symbol, accountData]);
-
-  const [parsedAmount, formattedAmount] = useMemo(() => {
-    if (!assets || !accountData) return ['0', '0'];
-    const amount = formatFixed(assets, accountData[symbol].decimals);
-    return [amount, formatNumber(amount, symbol)];
-  }, [accountData, assets, symbol]);
 
   const ETHRouterContract = useETHRouter();
   const marketContract = useMarket(market);
@@ -243,38 +240,56 @@ const Withdraw: FC = () => {
   if (tx) return <ModalGif tx={tx} tryAgain={withdraw} />;
 
   return (
-    <>
-      <ModalTitle title={translations[lang].withdraw} />
-      <ModalAsset
-        asset={symbol}
-        assetTitle={translations[lang].action.toUpperCase()}
-        amount={parsedAmount}
-        amountTitle={translations[lang].depositedAmount.toUpperCase()}
-      />
-      <ModalInput
-        onMax={onMax}
-        value={qty}
-        onChange={handleInputChange}
-        symbol={symbol}
-        error={errorData?.component === 'input'}
-      />
-      {errorData?.component !== 'gas' && <ModalTxCost gasCost={gasCost} />}
-      <ModalRow text={translations[lang].exactlyBalance} value={formattedAmount} line />
-      <ModalRowHealthFactor qty={qty} symbol={symbol} operation="withdraw" />
-      <ModalRowBorrowLimit qty={qty} symbol={symbol} operation="withdraw" line />
-      {errorData && <ModalError message={errorData.message} />}
-      <LoadingButton
-        fullWidth
-        sx={{ mt: 2 }}
-        loading={isLoading}
-        onClick={handleSubmitAction}
-        color="primary"
-        variant="contained"
-        disabled={!qty || parseFloat(qty) <= 0 || isLoading || errorData?.status}
-      >
-        {requiresApproval ? translations[lang].approve : translations[lang].withdraw}
-      </LoadingButton>
-    </>
+    <Grid container flexDirection="column">
+      <Grid item>
+        <ModalBox>
+          <ModalBoxRow>
+            <AssetInput
+              qty={qty}
+              symbol={symbol}
+              onMax={onMax}
+              onChange={handleInputChange}
+              error={errorData}
+              label="Available"
+              amount={parsedAmount}
+            />
+          </ModalBoxRow>
+          <ModalBoxRow>
+            <ModalBoxCell>
+              <ModalInfoHealthFactor qty={qty} symbol={symbol} operation={operation} />
+            </ModalBoxCell>
+            <ModalBoxCell divisor>
+              <ModalInfoTotalDeposits qty={qty} symbol={symbol} operation="withdraw" />
+            </ModalBoxCell>
+          </ModalBoxRow>
+        </ModalBox>
+      </Grid>
+
+      <Grid item mt={2}>
+        {errorData?.component !== 'gas' && <ModalTxCost gasCost={gasCost} />}
+        <ModalAdvancedSettings>
+          <ModalInfoBorrowLimit qty={qty} symbol={symbol} operation={operation} variant="row" />
+          <ModalInfoFloatingUtilizationRate qty={qty} symbol={symbol} operation="withdraw" variant="row" />
+        </ModalAdvancedSettings>
+      </Grid>
+
+      {errorData?.status && (
+        <Grid item mt={2}>
+          <ModalAlert variant="error" message={errorData.message} />
+        </Grid>
+      )}
+
+      <Grid item mt={4}>
+        <ModalSubmit
+          label="Withdraw"
+          symbol={symbol}
+          submit={handleSubmitAction}
+          isLoading={isLoading}
+          disabled={!qty || parseFloat(qty) <= 0 || isLoading || errorData?.status}
+          requiresApproval={requiresApproval}
+        />
+      </Grid>
+    </Grid>
   );
 };
 

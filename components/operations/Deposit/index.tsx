@@ -2,21 +2,10 @@ import React, { ChangeEvent, FC, useCallback, useContext, useMemo } from 'react'
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { WeiPerEther } from '@ethersproject/constants';
 
-import LoadingButton from '@mui/lab/LoadingButton';
-
-import ModalAsset from 'components/common/modal/ModalAsset';
-import ModalInput from 'components/common/modal/ModalInput';
-import ModalRow from 'components/common/modal/ModalRow';
-import ModalRowHealthFactor from 'components/common/modal/ModalRowHealthFactor';
 import ModalTxCost from 'components/common/modal/ModalTxCost';
 import ModalGif from 'components/common/modal/ModalGif';
-import ModalStepper from 'components/common/modal/ModalStepper';
-import ModalError from 'components/common/modal/ModalError';
-import ModalRowBorrowLimit from 'components/common/modal/ModalRowBorrowLimit';
 
 import { LangKeys } from 'types/Lang';
-
-import formatNumber from 'utils/formatNumber';
 
 import useETHRouter from 'hooks/useETHRouter';
 
@@ -39,18 +28,20 @@ import { ModalBox, ModalBoxRow, ModalBoxCell } from 'components/common/modal/Mod
 import { useModalStatus } from 'contexts/ModalStatusContext';
 import ModalInfoHealthFactor from 'components/OperationsModal/Info/ModalInfoHealthFactor';
 import ModalInfoBorrowLimit from 'components/OperationsModal/Info/ModalInfoBorrowLimit';
-import AssetSelector from 'components/OperationsModal/AssetSelector';
-import { Box } from '@mui/material';
-import WalletBalance from 'components/OperationsModal/WalletBalance';
-import USDValue from 'components/OperationsModal/USDValue';
+import { Grid } from '@mui/material';
 import AssetInput from 'components/OperationsModal/AssetInput';
+import ModalAdvancedSettings from 'components/common/modal/ModalAdvancedSettings';
+import ModalSubmit from 'components/common/modal/ModalSubmit';
+import ModalAlert from 'components/common/modal/ModalAlert';
+import ModalInfoTotalDeposits from 'components/OperationsModal/Info/ModalInfoTotalDeposits';
+import ModalInfoFloatingUtilizationRate from 'components/OperationsModal/Info/ModalInfoFloatingUtilizationRate';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 
 const Deposit: FC = () => {
   const { operation } = useModalStatus();
   const { walletAddress } = useWeb3();
-  const { accountData, getAccountData } = useContext(AccountDataContext);
+  const { getAccountData } = useContext(AccountDataContext);
   const { market } = useContext(MarketContext);
 
   const {
@@ -76,13 +67,6 @@ const Deposit: FC = () => {
   const marketContract = useMarket(market);
 
   const { decimals = 18 } = useAccountData(symbol);
-
-  const depositedAmount = useMemo(() => {
-    if (!symbol || !accountData) return '0';
-
-    const { floatingDepositAssets } = accountData[symbol];
-    return formatNumber(formatFixed(floatingDepositAssets, decimals), symbol);
-  }, [accountData, symbol, decimals]);
 
   const walletBalance = useBalance(symbol, assetContract);
 
@@ -228,47 +212,56 @@ const Deposit: FC = () => {
   if (tx) return <ModalGif tx={tx} tryAgain={deposit} />;
 
   return (
-    <>
-      <ModalBox>
-        <ModalBoxRow>
-          <AssetInput
-            qty={qty}
-            symbol={symbol}
-            onMax={onMax}
-            onChange={handleInputChange}
-            error={errorData}
-            label="Wallet balance"
-            amount={walletBalance}
-          />
-        </ModalBoxRow>
-        <ModalBoxRow>
-          <ModalBoxCell>
-            <ModalInfoHealthFactor qty={qty} symbol={symbol} operation={operation} />
-          </ModalBoxCell>
-          <ModalBoxCell divisor>
-            <ModalInfoBorrowLimit qty={qty} symbol={symbol} operation={operation} />
-          </ModalBoxCell>
-        </ModalBoxRow>
-      </ModalBox>
+    <Grid container flexDirection="column">
+      <Grid item>
+        <ModalBox>
+          <ModalBoxRow>
+            <AssetInput
+              qty={qty}
+              symbol={symbol}
+              onMax={onMax}
+              onChange={handleInputChange}
+              error={errorData}
+              label="Wallet balance"
+              amount={walletBalance}
+            />
+          </ModalBoxRow>
+          <ModalBoxRow>
+            <ModalBoxCell>
+              <ModalInfoHealthFactor qty={qty} symbol={symbol} operation={operation} />
+            </ModalBoxCell>
+            <ModalBoxCell divisor>
+              <ModalInfoBorrowLimit qty={qty} symbol={symbol} operation={operation} />
+            </ModalBoxCell>
+          </ModalBoxRow>
+        </ModalBox>
+      </Grid>
 
-      {errorData?.component !== 'gas' && <ModalTxCost gasCost={gasCost} />}
-      <ModalRow text={translations[lang].exactlyBalance} value={depositedAmount} line />
-      <ModalRowHealthFactor qty={qty} symbol={symbol} operation="deposit" />
-      <ModalRowBorrowLimit qty={qty} symbol={symbol} operation="deposit" line />
-      <ModalStepper currentStep={requiresApproval ? 1 : 2} totalSteps={3} />
-      {errorData?.status && <ModalError message={errorData.message} />}
-      <LoadingButton
-        fullWidth
-        sx={{ mt: 2 }}
-        loading={isLoading}
-        onClick={handleSubmitAction}
-        color="primary"
-        variant="contained"
-        disabled={!qty || parseFloat(qty) <= 0 || isLoading || errorData?.status}
-      >
-        {requiresApproval ? translations[lang].approve : translations[lang].deposit}
-      </LoadingButton>
-    </>
+      <Grid item mt={2}>
+        {errorData?.component !== 'gas' && <ModalTxCost gasCost={gasCost} />}
+        <ModalAdvancedSettings>
+          <ModalInfoTotalDeposits qty={qty} symbol={symbol} operation="deposit" variant="row" />
+          <ModalInfoFloatingUtilizationRate qty={qty} symbol={symbol} operation="deposit" variant="row" />
+        </ModalAdvancedSettings>
+      </Grid>
+
+      {errorData?.status && (
+        <Grid item mt={2}>
+          <ModalAlert variant="error" message={errorData.message} />
+        </Grid>
+      )}
+
+      <Grid item mt={4}>
+        <ModalSubmit
+          label="Deposit"
+          symbol={symbol}
+          submit={handleSubmitAction}
+          isLoading={isLoading}
+          disabled={!qty || parseFloat(qty) <= 0 || isLoading || errorData?.status}
+          requiresApproval={requiresApproval}
+        />
+      </Grid>
+    </Grid>
   );
 };
 

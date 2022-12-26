@@ -1,21 +1,11 @@
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 import React, { ChangeEvent, FC, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { AddressZero, WeiPerEther, Zero } from '@ethersproject/constants';
-import LoadingButton from '@mui/lab/LoadingButton';
 
-import ModalAsset from 'components/common/modal/ModalAsset';
-import ModalError from 'components/common/modal/ModalError';
 import ModalGif from 'components/common/modal/ModalGif';
-import ModalInput from 'components/common/modal/ModalInput';
-import ModalMaturityEditable from 'components/common/modal/ModalMaturityEditable';
-import ModalRow from 'components/common/modal/ModalRow';
-import ModalRowEditable from 'components/common/modal/ModalRowEditable';
-import ModalTitle from 'components/common/modal/ModalTitle';
 import ModalTxCost from 'components/common/modal/ModalTxCost';
 
 import { LangKeys } from 'types/Lang';
-
-import formatNumber from 'utils/formatNumber';
 
 import AccountDataContext from 'contexts/AccountDataContext';
 import { MarketContext } from 'contexts/MarketContext';
@@ -33,11 +23,27 @@ import usePreviewer from 'hooks/usePreviewer';
 import analytics from 'utils/analytics';
 import { useOperationContext, usePreviewTx } from 'contexts/OperationContext';
 import useAccountData from 'hooks/useAccountData';
+import { Grid } from '@mui/material';
+import { ModalBox, ModalBoxCell, ModalBoxRow } from 'components/common/modal/ModalBox';
+import AssetInput from 'components/OperationsModal/AssetInput';
+import DateSelector from 'components/OperationsModal/DateSelector';
+import ModalInfoHealthFactor from 'components/OperationsModal/Info/ModalInfoHealthFactor';
+import { useModalStatus } from 'contexts/ModalStatusContext';
+import ModalInfoFixedUtilizationRate from 'components/OperationsModal/Info/ModalInfoFixedUtilizationRate';
+import ModalAdvancedSettings from 'components/common/modal/ModalAdvancedSettings';
+import ModalInfoEditableSlippage from 'components/OperationsModal/Info/ModalInfoEditableSlippage';
+import ModalAlert from 'components/common/modal/ModalAlert';
+import ModalSubmit from 'components/common/modal/ModalSubmit';
+import ModalInfoAmount from 'components/OperationsModal/Info/ModalInfoAmount';
+import formatNumber from 'utils/formatNumber';
+import ModalInfo from 'components/common/modal/ModalInfo';
+import ModalInfoMaturityStatus from 'components/OperationsModal/Info/ModalInfoMaturityStatus';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 const DEFAULT_SLIPPAGE = (100 * numbers.slippage).toFixed(2);
 
 const WithdrawAtMaturity: FC = () => {
+  const { operation } = useModalStatus();
   const { walletAddress } = useWeb3();
   const { date, market } = useContext(MarketContext);
   const { accountData, getAccountData } = useContext(AccountDataContext);
@@ -60,8 +66,7 @@ const WithdrawAtMaturity: FC = () => {
     setIsLoading: setIsLoadingOp,
   } = useOperationContext();
 
-  const [slippage, setSlippage] = useState(DEFAULT_SLIPPAGE);
-  const [editSlippage, setEditSlippage] = useState(false);
+  const [rawSlippage, setRawSlippage] = useState(DEFAULT_SLIPPAGE);
 
   const [minAmountToWithdraw, setMinAmountToWithdraw] = useState(Zero);
   const [amountToWithdraw, setAmountToWithdraw] = useState(Zero);
@@ -71,20 +76,18 @@ const WithdrawAtMaturity: FC = () => {
 
   const previewerContract = usePreviewer();
 
-  const rawSlippage = useMemo(() => parseFixed(String(1 - Number(slippage) / 100), 18), [slippage]);
+  const slippage = useMemo(() => parseFixed(String(1 - Number(rawSlippage) / 100), 18), [rawSlippage]);
   const { decimals = 18 } = useAccountData(symbol);
 
   const isEarlyWithdraw = useMemo(() => {
     if (!date) return false;
-    return Date.now() / 1000 < parseInt(date.value);
+    return Date.now() / 1000 < parseInt(date);
   }, [date]);
 
   const positionAssets = useMemo(() => {
     if (!accountData || !date) return '0';
 
-    const pool = accountData[symbol].fixedDepositPositions.find(
-      ({ maturity }) => String(maturity.toNumber()) === date.value,
-    );
+    const pool = accountData[symbol].fixedDepositPositions.find(({ maturity }) => String(maturity.toNumber()) === date);
     return pool ? pool.position.principal.add(pool.position.fee) : Zero;
   }, [date, accountData, symbol]);
 
@@ -108,14 +111,14 @@ const WithdrawAtMaturity: FC = () => {
     const parsedQtyValue = parseFixed(qty, decimals);
     const amount = await previewerContract.previewWithdrawAtMaturity(
       marketContract.address,
-      date.value,
+      date,
       parsedQtyValue,
       walletAddress ?? AddressZero,
     );
 
     setAmountToWithdraw(amount);
-    setMinAmountToWithdraw(isEarlyWithdraw ? amount.mul(rawSlippage).div(WeiPerEther) : amount);
-  }, [decimals, date, qty, marketContract, previewerContract, rawSlippage, isEarlyWithdraw, walletAddress]);
+    setMinAmountToWithdraw(isEarlyWithdraw ? amount.mul(slippage).div(WeiPerEther) : amount);
+  }, [decimals, date, qty, marketContract, previewerContract, slippage, isEarlyWithdraw, walletAddress]);
 
   useEffect(() => {
     if (errorData?.status) return;
@@ -138,16 +141,12 @@ const WithdrawAtMaturity: FC = () => {
       const amount = amountToWithdraw.isZero() ? DEFAULT_AMOUNT : amountToWithdraw;
 
       if (symbol === 'WETH') {
-        const gasEstimation = await ETHRouterContract.estimateGas.withdrawAtMaturity(
-          date.value,
-          amount,
-          minAmountToWithdraw,
-        );
+        const gasEstimation = await ETHRouterContract.estimateGas.withdrawAtMaturity(date, amount, minAmountToWithdraw);
         return gasPrice.mul(gasEstimation);
       }
 
       const gasEstimation = await marketContract.estimateGas.withdrawAtMaturity(
-        date.value,
+        date,
         amount,
         minAmountToWithdraw,
         walletAddress,
@@ -211,16 +210,16 @@ const WithdrawAtMaturity: FC = () => {
         if (!ETHRouterContract) return;
 
         const gasEstimation = await ETHRouterContract.estimateGas.withdrawAtMaturity(
-          date.value,
+          date,
           parseFixed(qty, 18),
           minAmountToWithdraw,
         );
-        withdrawTx = await ETHRouterContract.withdrawAtMaturity(date.value, parseFixed(qty, 18), minAmountToWithdraw, {
+        withdrawTx = await ETHRouterContract.withdrawAtMaturity(date, parseFixed(qty, 18), minAmountToWithdraw, {
           gasLimit: gasEstimation.mul(parseFixed(String(numbers.gasLimitMultiplier), 18)).div(WeiPerEther),
         });
       } else {
         const gasEstimation = await marketContract.estimateGas.withdrawAtMaturity(
-          date.value,
+          date,
           parseFixed(qty, decimals),
           minAmountToWithdraw,
           walletAddress,
@@ -228,7 +227,7 @@ const WithdrawAtMaturity: FC = () => {
         );
 
         withdrawTx = await marketContract.withdrawAtMaturity(
-          date.value,
+          date,
           parseFixed(qty, decimals),
           minAmountToWithdraw,
           walletAddress,
@@ -248,7 +247,7 @@ const WithdrawAtMaturity: FC = () => {
       void analytics.track(status ? 'withdrawAtMaturity' : 'withdrawAtMaturityRevert', {
         amount: qty,
         asset: symbol,
-        maturity: date.value,
+        maturity: date,
         hash: transactionHash,
       });
 
@@ -284,79 +283,90 @@ const WithdrawAtMaturity: FC = () => {
 
     void analytics.track('withdrawAtMaturityRequest', {
       amount: qty,
-      maturity: date?.value,
+      maturity: date,
       asset: symbol,
     });
 
     return withdraw();
-  }, [isLoading, requiresApproval, qty, date?.value, symbol, withdraw, approve, setRequiresApproval, needsApproval]);
+  }, [isLoading, requiresApproval, qty, date, symbol, withdraw, approve, setRequiresApproval, needsApproval]);
 
   if (tx) return <ModalGif tx={tx} tryAgain={withdraw} />;
 
   return (
-    <>
-      <ModalTitle title={isEarlyWithdraw ? translations[lang].earlyWithdraw : translations[lang].withdraw} />
-      <ModalAsset
-        asset={symbol}
-        assetTitle={translations[lang].action.toUpperCase()}
-        amount={amountAtFinish}
-        amountTitle={translations[lang].depositedAmount.toUpperCase()}
-      />
-      <ModalMaturityEditable text={translations[lang].maturityPool} line />
-      <ModalInput
-        onMax={onMax}
-        value={qty}
-        onChange={handleInputChange}
-        symbol={symbol}
-        error={errorData?.component === 'input'}
-      />
-      {errorData?.component !== 'gas' && <ModalTxCost gasCost={gasCost} />}
-      <ModalRow
-        text={translations[lang].amountAtFinish}
-        value={amountAtFinish && `${formatNumber(amountAtFinish, symbol, true)}`}
-        asset={symbol}
-        line
-      />
-      <ModalRow
-        text={translations[lang].amountToReceive}
-        value={formatNumber(formatFixed(amountToWithdraw, decimals), symbol, true)}
-        asset={symbol}
-        line
-      />
-      {isEarlyWithdraw && (
-        <ModalRowEditable
-          value={slippage}
-          editable={editSlippage}
-          symbol="%"
-          onChange={({ target: { value } }: ChangeEvent<HTMLInputElement>) => {
-            setSlippage(value);
-          }}
-          onClick={() => {
-            if (!slippage) setSlippage(DEFAULT_SLIPPAGE);
-            setEditSlippage((prev) => !prev);
-          }}
-          line
-        />
+    <Grid container flexDirection="column">
+      <Grid item>
+        <ModalBox>
+          <ModalBoxRow>
+            <AssetInput
+              qty={qty}
+              symbol={symbol}
+              onMax={onMax}
+              onChange={handleInputChange}
+              error={errorData}
+              label="Deposited"
+              amount={amountAtFinish}
+            />
+          </ModalBoxRow>
+          <ModalBoxRow>
+            <ModalBoxCell>
+              <DateSelector />
+            </ModalBoxCell>
+            <ModalBoxCell>{date && <ModalInfoMaturityStatus date={date} />}</ModalBoxCell>
+            <ModalBoxCell>
+              <ModalInfoAmount
+                label="Amount at maturity"
+                symbol={symbol}
+                value={formatNumber(amountAtFinish, symbol, true)}
+              />
+            </ModalBoxCell>
+            <ModalBoxCell>
+              <ModalInfoAmount
+                label="Min. amount to receive"
+                value={formatNumber(formatFixed(amountToWithdraw, decimals), symbol, true)}
+                symbol={symbol}
+              />
+            </ModalBoxCell>
+          </ModalBoxRow>
+          <ModalBoxRow>
+            <ModalBoxCell>
+              <ModalInfoHealthFactor qty={qty} symbol={symbol} operation={operation} />
+            </ModalBoxCell>
+            <ModalBoxCell divisor>
+              <ModalInfoFixedUtilizationRate qty={qty} symbol={symbol} operation="HERE" />
+            </ModalBoxCell>
+          </ModalBoxRow>
+        </ModalBox>
+      </Grid>
+
+      <Grid item mt={2}>
+        {errorData?.component !== 'gas' && <ModalTxCost gasCost={gasCost} />}
+        <ModalAdvancedSettings>
+          <ModalInfo label="Min amount to withdraw" variant="row">
+            {formatNumber(formatFixed(minAmountToWithdraw, decimals), symbol, true)}
+          </ModalInfo>
+          {isEarlyWithdraw && (
+            <ModalInfoEditableSlippage value={rawSlippage} onChange={(e) => setRawSlippage(e.target.value)} />
+          )}
+        </ModalAdvancedSettings>
+      </Grid>
+
+      {errorData?.status && (
+        <Grid item mt={2}>
+          <ModalAlert variant="error" message={errorData.message} />
+        </Grid>
       )}
-      <ModalRow
-        text="Min amount to withdraw"
-        value={formatNumber(formatFixed(minAmountToWithdraw, decimals), symbol, true)}
-        asset={symbol}
-        line
-      />
-      {errorData && <ModalError message={errorData.message} />}
-      <LoadingButton
-        fullWidth
-        sx={{ mt: 2 }}
-        loading={isLoading}
-        onClick={handleSubmitAction}
-        color="primary"
-        variant="contained"
-        disabled={!qty || parseFloat(qty) <= 0 || isLoading || errorData?.status}
-      >
-        {requiresApproval ? translations[lang].approve : translations[lang].withdraw}
-      </LoadingButton>
-    </>
+
+      <Grid item mt={4}>
+        <ModalSubmit
+          label="Withdraw"
+          symbol={symbol}
+          submit={handleSubmitAction}
+          isLoading={isLoading}
+          disabled={!qty || parseFloat(qty) <= 0 || isLoading || errorData?.status}
+          requiresApproval={requiresApproval}
+        />
+      </Grid>
+    </Grid>
   );
 };
 

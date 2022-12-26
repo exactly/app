@@ -46,7 +46,7 @@ export const OperationContextProvider: FC<PropsWithChildren> = ({ children }) =>
   const [gasCost, setGasCost] = useState<BigNumber | undefined>();
   const [tx, setTx] = useState<Transaction | undefined>();
   const [isLoading, setIsLoading] = useState(false);
-  const [requiresApproval, setRequiresApproval] = useState(true);
+  const [requiresApproval, setRequiresApproval] = useState(false);
 
   useEffect(() => {
     setTx(undefined);
