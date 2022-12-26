@@ -17,17 +17,15 @@ import { ThemeProvider as MUIThemeProvider } from '@mui/material/styles';
 import { wagmi, walletConnectId, web3modal } from 'utils/client';
 import theme, { globals } from 'styles/theme';
 import Footer from 'components/Footer';
-import { Grid, useMediaQuery } from '@mui/material';
-import dynamic from 'next/dynamic';
-
-const Navbar = dynamic(() => import('../components/Navbar'), { ssr: false });
+import Navbar from 'components/Navbar';
+import { Grid, NoSsr, useMediaQuery } from '@mui/material';
 
 const { maxWidth } = globals;
 
 export default function App({ Component, pageProps }: AppProps) {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   return (
-    <>
+    <NoSsr>
       <Head>
         <title>Exactly App - Decentralizing the time value of money</title>
         <meta name="description" content="Exactly App - Decentralizing the time value of money" />
@@ -63,6 +61,6 @@ export default function App({ Component, pageProps }: AppProps) {
           </LangProvider>
         </MUIThemeProvider>
       </ThemeProvider>
-    </>
+    </NoSsr>
   );
 }
