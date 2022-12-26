@@ -16,6 +16,7 @@ import MobileTabs from 'components/MobileTabs';
 import DashboardMobile from './DashboardMobile';
 import ConnectYourWallet from './ConnectYourWallet';
 import { useTheme } from '@mui/material/styles';
+import ClientOnly from 'components/common/ClientOnly';
 
 const depositTab = {
   label: 'Your Deposits',
@@ -56,32 +57,34 @@ function DashboardContent() {
     [],
   );
 
-  if (!isConnected) {
-    return <ConnectYourWallet />;
-  }
-
   return (
-    <>
-      {!isMobile && ( // display={onlyDesktop} throws an error when used with mui tabs
-        <Grid mt={5}>
-          <DashboardTabs initialTab={allTabs[0].value} allTabs={allTabs} />
-        </Grid>
+    <ClientOnly>
+      {isConnected ? (
+        <>
+          {!isMobile && ( // display={onlyDesktop} throws an error when used with mui tabs
+            <Grid mt={5}>
+              <DashboardTabs initialTab={allTabs[0].value} allTabs={allTabs} />
+            </Grid>
+          )}
+          <Box display={onlyMobile} my={2}>
+            <MobileTabs
+              tabs={[
+                {
+                  title: 'Your Deposits',
+                  content: <DashboardMobile type="deposit" />,
+                },
+                {
+                  title: 'Your Borrows',
+                  content: <DashboardMobile type="borrow" />,
+                },
+              ]}
+            />
+          </Box>
+        </>
+      ) : (
+        <ConnectYourWallet />
       )}
-      <Box display={onlyMobile} my={2}>
-        <MobileTabs
-          tabs={[
-            {
-              title: 'Your Deposits',
-              content: <DashboardMobile type="deposit" />,
-            },
-            {
-              title: 'Your Borrows',
-              content: <DashboardMobile type="borrow" />,
-            },
-          ]}
-        />
-      </Box>
-    </>
+    </ClientOnly>
   );
 }
 
