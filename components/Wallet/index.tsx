@@ -91,7 +91,6 @@ function Wallet() {
               <CopyToClipboardButton text={walletAddress} />
             </Box>
           </Box>
-          <Button variant="outlined">Switch wallet</Button>
           <Button
             variant="outlined"
             onClick={() => {
