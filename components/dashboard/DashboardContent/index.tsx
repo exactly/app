@@ -3,7 +3,7 @@ import dynamic from 'next/dynamic';
 import Grid from '@mui/material/Grid';
 import { globals } from 'styles/theme';
 
-const { onlyMobile, onlyDesktop } = globals;
+const { onlyMobile } = globals;
 
 // const DashboardUserCharts = dynamic(() => import('components/DashboardContent/DashboardUserCharts'));
 const FloatingPoolDashboard = dynamic(() => import('components/dashboard/DashboardContent/FloatingPoolDashboard'));
