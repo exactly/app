@@ -34,7 +34,7 @@ function MaturityLinearProgress({ maturityDate }: Props) {
   }, [maturityDate]);
 
   const daysLeft = useMemo(() => {
-    return Math.ceil((parseInt(maturityDate) - Date.now() / 1000) / (3600 * 24));
+    return Math.floor((parseInt(maturityDate) - Date.now() / 1000) / (3600 * 24));
   }, [maturityDate]);
 
   const isCompleted = progress === 100;
