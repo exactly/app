@@ -15,13 +15,14 @@ type AssetOptionProps = {
 };
 
 function Asset({ assetSymbol, option = false }: AssetOptionProps) {
+  const size = option ? 14 : 24;
   return (
     <>
       <Image
         src={`/img/assets/${assetSymbol}.svg`}
         alt={formatSymbol(assetSymbol)}
-        width={option ? 14 : 24}
-        height={option ? 14 : 24}
+        width={size}
+        height={size}
         style={{
           maxWidth: '100%',
           height: 'auto',

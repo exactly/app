@@ -13,7 +13,14 @@ function ModalInfo({ icon: Icon, label, children }: PropsWithChildren<ModalInfoP
   return (
     <Box>
       {Icon && <Icon sx={{ color: 'grey.900', fontSize: 14 }} />}
-      <Typography fontFamily="fontFamilyMonospaced" color="grey.600" fontSize={12} mb={1} fontWeight={500}>
+      <Typography
+        fontFamily="fontFamilyMonospaced"
+        color="grey.600"
+        fontSize={12}
+        mb={1}
+        fontWeight={500}
+        whiteSpace="nowrap"
+      >
         {label}
       </Typography>
       {children}
@@ -28,15 +35,31 @@ export function FromTo({ from, to }: FromToProps) {
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
       {from ? (
-        <Typography color="grey.900" fontSize={20} fontWeight={600} lineHeight={1}>
+        <Typography
+          color="grey.900"
+          fontSize={20}
+          fontWeight={600}
+          lineHeight={1}
+          textOverflow="ellipsis"
+          overflow="hidden"
+        >
           {from}
         </Typography>
       ) : (
         <Skeleton />
       )}
-      <Image src="/img/icons/arrowRight.svg" alt="to" width={14} height={14} layout="fixed" />
+      <Box sx={{ minWidth: '14px' }}>
+        <Image src="/img/icons/arrowRight.svg" alt="to" width={14} height={14} layout="fixed" />
+      </Box>
       {from ? (
-        <Typography color="grey.900" fontSize={20} fontWeight={600} lineHeight={1}>
+        <Typography
+          color="grey.900"
+          fontSize={20}
+          fontWeight={600}
+          lineHeight={1}
+          textOverflow="ellipsis"
+          overflow="hidden"
+        >
           {to}
         </Typography>
       ) : (

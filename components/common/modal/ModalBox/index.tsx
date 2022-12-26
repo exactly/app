@@ -24,8 +24,12 @@ export function ModalBoxRow(props: BoxProps) {
         display: 'flex',
         flexWrap: 'wrap',
         paddingY: 2,
+        minWidth: theme.spacing(20),
         '&:not(:first-child)': {
           borderTop: `1px solid ${theme.palette.grey[300]}`,
+        },
+        '&:first-child': {
+          paddingTop: 0,
         },
         '&:last-child': {
           paddingBottom: 0,
@@ -42,6 +46,7 @@ export function ModalBoxCell({ divisor = false, ...props }: { divisor?: boolean 
       sx={(theme) => ({
         flexGrow: 1,
         flexBasis: '50%',
+        minWidth: theme.spacing(8),
         '&:nth-child(2n+1)': {
           paddingRight: 2,
         },

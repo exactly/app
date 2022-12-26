@@ -2,8 +2,6 @@ import React, { useContext, useMemo } from 'react';
 import { parseFixed } from '@ethersproject/bignumber';
 import FavoriteBorderOutlinedIcon from '@mui/icons-material/FavoriteBorderOutlined';
 import { WeiPerEther, Zero } from '@ethersproject/constants';
-import Image from 'next/image';
-import Skeleton from 'react-loading-skeleton';
 
 import { HealthFactor } from 'types/HealthFactor';
 
@@ -14,7 +12,7 @@ import AccountDataContext from 'contexts/AccountDataContext';
 import { Operation } from 'contexts/ModalStatusContext';
 import { checkPrecision } from 'utils/utils';
 
-import ModalInfo, { FromTo } from '.';
+import ModalInfo, { FromTo } from 'components/common/modal/ModalInfo';
 
 type Props = {
   qty: string;
