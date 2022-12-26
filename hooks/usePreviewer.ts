@@ -12,7 +12,7 @@ export default () => {
   const provider = useProvider({ chainId: chain?.id });
 
   return useMemo(() => {
-    if (!chain || !chain) return null;
+    if (!chain) return null;
 
     // TODO: add optimism network
     const address = {
