@@ -1,6 +1,5 @@
 import React, { MouseEventHandler } from 'react';
-import { Box, Typography, Button } from '@mui/material';
-import Skeleton from 'react-loading-skeleton';
+import { Box, Typography, Button, Skeleton } from '@mui/material';
 
 import formatNumber from 'utils/formatNumber';
 

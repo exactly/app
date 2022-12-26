@@ -39,8 +39,12 @@ export default (operation: Operation, contract?: ERC20 | Market, spender?: strin
 
       if (!walletAddress || !contract || !spender) return true;
 
-      const allowance = await contract.allowance(walletAddress, spender);
-      return allowance.lt(parseFixed(qty || String(numbers.defaultAmount), await contract.decimals()));
+      try {
+        const allowance = await contract.allowance(walletAddress, spender);
+        return allowance.lt(parseFixed(qty || String(numbers.defaultAmount), await contract.decimals()));
+      } catch {
+        return true;
+      }
     },
     [operation, symbol, contract, spender, walletAddress],
   );

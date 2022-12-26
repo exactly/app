@@ -14,6 +14,10 @@ export type Operation =
   | 'repayAtMaturity'
   | 'faucet';
 
+export function isFixedOperation(operation: Operation): boolean {
+  return operation.endsWith('AtMaturity');
+}
+
 type ContextValues = {
   open: boolean;
   operation: Operation;
@@ -40,7 +44,7 @@ export const ModalStatusProvider: FC<PropsWithChildren> = ({ children }) => {
 
   const toggle = useCallback(() => {
     if (!operation) return;
-    if (operation.endsWith('AtMaturity')) {
+    if (isFixedOperation(operation)) {
       return setOperation(operation.replaceAll('AtMaturity', '') as Operation);
     }
     setOperation(`${operation}AtMaturity` as Operation);

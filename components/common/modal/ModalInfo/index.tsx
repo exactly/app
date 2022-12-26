@@ -1,72 +1,97 @@
 import React, { type PropsWithChildren } from 'react';
-import Image from 'next/image';
-import { Box, Typography } from '@mui/material';
+import { Box, Grid, SxProps, Typography, Skeleton } from '@mui/material';
 import { type SvgIconComponent } from '@mui/icons-material';
-import Skeleton from 'react-loading-skeleton';
+import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
 
-type ModalInfoProps = {
+export type Variant = 'column' | 'row';
+
+type Props = {
   label: string;
   icon?: SvgIconComponent;
+  variant?: Variant;
 };
 
-function ModalInfo({ icon: Icon, label, children }: PropsWithChildren<ModalInfoProps>) {
+function ModalInfoColumn({ icon: Icon, label, children }: PropsWithChildren<Omit<Props, 'variant'>>) {
   return (
-    <Box>
-      {Icon && <Icon sx={{ color: 'grey.900', fontSize: 14 }} />}
-      <Typography
-        fontFamily="fontFamilyMonospaced"
-        color="grey.600"
-        fontSize={12}
-        mb={1}
-        fontWeight={500}
-        whiteSpace="nowrap"
-      >
-        {label}
-      </Typography>
-      {children}
-    </Box>
+    <Grid container flexDirection="column">
+      {Icon && (
+        <Grid item>
+          <Icon sx={{ color: 'grey.900', fontSize: 14 }} />
+        </Grid>
+      )}
+      <Grid item>
+        <Typography fontFamily="fontFamilyMonospaced" color="grey.600" fontSize={12} mb={1} fontWeight={500} noWrap>
+          {label}
+        </Typography>
+      </Grid>
+      <Grid item>{children}</Grid>
+    </Grid>
   );
 }
 
-type FromToProps = { from?: string; to?: string };
+function ModalInfoRow({ label, children }: PropsWithChildren<Pick<Props, 'label'>>) {
+  if (typeof children === 'string') {
+    children = <Typography variant="modalRow">{children}</Typography>;
+  }
 
-export function FromTo({ from, to }: FromToProps) {
-  to = to ? to : from;
+  return (
+    <Grid
+      container
+      flexDirection="row"
+      justifyContent="space-between"
+      alignItems="center"
+      sx={{ px: 1, '&:not(:last-child)': { pb: 1 } }}
+    >
+      <Grid item>
+        <Typography color="grey.500" fontSize={14} fontWeight={500}>
+          {label}
+        </Typography>
+      </Grid>
+      <Grid item>{children}</Grid>
+    </Grid>
+  );
+}
+
+function ModalInfo({ variant = 'column', ...props }: PropsWithChildren<Props>) {
+  if (variant === 'column') {
+    return <ModalInfoColumn {...props} />;
+  }
+  return <ModalInfoRow {...props} />;
+}
+
+type FromToProps = {
+  from?: string;
+  to?: string;
+  variant?: Variant;
+};
+
+export function FromTo({ from, to, variant = 'column' }: FromToProps) {
+  const textSx: SxProps = {
+    lineHeight: 1,
+    textOverflow: 'ellipsis',
+    overflow: 'hidden',
+  };
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
       {from ? (
-        <Typography
-          color="grey.900"
-          fontSize={20}
-          fontWeight={600}
-          lineHeight={1}
-          textOverflow="ellipsis"
-          overflow="hidden"
-        >
+        <Typography variant={variant === 'column' ? 'modalCol' : 'modalRow'} sx={textSx}>
           {from}
         </Typography>
       ) : (
-        <Skeleton />
+        <Skeleton width={40} />
       )}
-      <Box sx={{ minWidth: '14px' }}>
-        <Image src="/img/icons/arrowRight.svg" alt="to" width={14} height={14} layout="fixed" />
+      <Box display="flex" alignItems="center">
+        <ArrowForwardRoundedIcon sx={{ color: 'blue', fontSize: 14 }} />
       </Box>
-      {from ? (
-        <Typography
-          color="grey.900"
-          fontSize={20}
-          fontWeight={600}
-          lineHeight={1}
-          textOverflow="ellipsis"
-          overflow="hidden"
-        >
+      {to ? (
+        <Typography variant={variant === 'column' ? 'modalCol' : 'modalRow'} sx={textSx}>
           {to}
         </Typography>
       ) : (
-        <Skeleton />
+        <Skeleton width={40} />
       )}
     </Box>
   );
 }
 
-export default ModalInfo;
+export default React.memo(ModalInfo);

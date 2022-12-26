@@ -4,7 +4,6 @@ import AccountDataContext from 'contexts/AccountDataContext';
 import { useWeb3 } from 'hooks/useWeb3';
 import { MarketContext } from 'contexts/MarketContext';
 import { Operation, useModalStatus } from 'contexts/ModalStatusContext';
-import parseTimestamp from 'utils/parseTimestamp';
 import numbers from 'config/numbers.json';
 
 const { minAPRValue } = numbers;
@@ -29,10 +28,7 @@ export default function useActionButton() {
       setMarket(market);
 
       if (maturity) {
-        setDate({
-          value: maturity.toString(),
-          label: parseTimestamp(maturity),
-        });
+        setDate(String(maturity));
       }
 
       openOperationModal(action);

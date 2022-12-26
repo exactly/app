@@ -1,5 +1,6 @@
 import type { BigNumber } from '@ethersproject/bignumber';
 import { formatFixed, parseFixed } from '@ethersproject/bignumber';
+import { WeiPerEther } from '@ethersproject/constants';
 
 import { AccountData } from 'types/AccountData';
 
@@ -10,16 +11,15 @@ function getBeforeBorrowLimit(
   decimals: number,
   type: string,
 ) {
-  const maxBorrowAssets = accountData![symbol].maxBorrowAssets;
-  const WAD = parseFixed('1', 18);
+  const maxBorrowAssets = accountData[symbol].maxBorrowAssets;
 
   let before = maxBorrowAssets.mul(usdPrice).div(parseFixed('1', decimals));
 
-  const hasDepositedToFloatingPool = Number(formatFixed(accountData![symbol].floatingDepositAssets, decimals)) > 0;
+  const hasDepositedToFloatingPool = Number(formatFixed(accountData[symbol].floatingDepositAssets, decimals)) > 0;
 
-  if (!accountData![symbol].isCollateral && hasDepositedToFloatingPool && type === 'borrow') {
+  if (!accountData[symbol].isCollateral && hasDepositedToFloatingPool && type === 'borrow') {
     before = maxBorrowAssets.add(
-      accountData![symbol].floatingDepositAssets.mul(accountData![symbol].adjustFactor).div(WAD),
+      accountData[symbol].floatingDepositAssets.mul(accountData[symbol].adjustFactor).div(WeiPerEther),
     );
   }
 

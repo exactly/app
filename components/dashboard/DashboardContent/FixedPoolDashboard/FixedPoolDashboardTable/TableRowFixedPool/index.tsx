@@ -131,8 +131,8 @@ function TableRowFixedPool({ symbol, amount, type, maturityDate, market, decimal
             <Button
               variant="outlined"
               onClick={() => {
-                setDate({ value: maturityDate, label: parseTimestamp(maturityDate) });
                 setMarket(market);
+                setDate(maturityDate);
                 openOperationModal(type === 'borrow' ? 'repayAtMaturity' : 'withdrawAtMaturity');
               }}
             >
