@@ -14,7 +14,13 @@ const CopyToClipboardButton: FC<Props> = ({ text }) => {
   };
 
   return (
-    <Tooltip title={copied ? 'Copied' : 'Copy'} placement="bottom" arrow enterTouchDelay={0}>
+    <Tooltip
+      title={copied ? 'Copied' : 'Copy'}
+      placement="bottom"
+      arrow
+      enterTouchDelay={0}
+      onMouseLeave={() => copied && setTimeout(() => setCopied(false), 200)}
+    >
       <IconButton onClick={handleClick} size="small">
         <ContentCopyIcon sx={{ fontSize: '12px', color: 'grey.400' }} />
       </IconButton>
