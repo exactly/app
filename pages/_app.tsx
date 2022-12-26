@@ -20,7 +20,7 @@ import Footer from 'components/Footer';
 import { Grid, useMediaQuery } from '@mui/material';
 import dynamic from 'next/dynamic';
 
-const Navbar = dynamic(() => import('../components/Navbar'));
+const Navbar = dynamic(() => import('../components/Navbar'), { ssr: false });
 
 const { maxWidth } = globals;
 
