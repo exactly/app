@@ -8,7 +8,7 @@ import AccountDataContext from 'contexts/AccountDataContext';
 import formatNumber from 'utils/formatNumber';
 import getBeforeBorrowLimit from 'utils/getBeforeBorrowLimit';
 import { checkPrecision } from 'utils/utils';
-import ModalInfo, { FromTo } from '.';
+import ModalInfo, { FromTo } from 'components/common/modal/ModalInfo';
 import { Operation } from 'contexts/ModalStatusContext';
 
 type Props = {
@@ -17,7 +17,7 @@ type Props = {
   operation: Operation;
 };
 
-function ModalRowBorrowLimit({ qty, symbol, operation }: Props) {
+function ModalInfoBorrowLimit({ qty, symbol, operation }: Props) {
   const { accountData } = useContext(AccountDataContext);
 
   const newQty = useMemo(() => {
@@ -89,4 +89,4 @@ function ModalRowBorrowLimit({ qty, symbol, operation }: Props) {
   );
 }
 
-export default React.memo(ModalRowBorrowLimit);
+export default React.memo(ModalInfoBorrowLimit);

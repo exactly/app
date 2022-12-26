@@ -2,47 +2,29 @@ import React, {
   ChangeEvent,
   ChangeEventHandler,
   KeyboardEvent,
-  MouseEventHandler,
   useCallback,
-  useMemo,
+  // useMemo,
   ClipboardEvent,
   useRef,
 } from 'react';
-import { formatFixed, parseFixed } from '@ethersproject/bignumber';
+import { InputBase } from '@mui/material';
 import useAccountData from 'hooks/useAccountData';
-import { WeiPerEther } from '@ethersproject/constants';
 
-import formatNumber from 'utils/formatNumber';
 import { checkPrecision } from 'utils/utils';
 
-import styles from './style.module.scss';
-
 type Props = {
-  value?: string;
   name?: string;
-  disabled?: boolean;
+  value?: string;
   symbol: string;
   error?: boolean;
   onChange?: ChangeEventHandler<HTMLInputElement>;
-  onMax?: MouseEventHandler;
 };
 
-function ModalInput({ value, name, disabled, symbol, error, onChange, onMax }: Props) {
-  const { decimals, usdPrice } = useAccountData(symbol);
+function ModalInput({ value, name, symbol, onChange }: Props) {
+  const { decimals } = useAccountData(symbol);
   const prev = useRef('');
 
   const isValid = useCallback((v: string): boolean => checkPrecision(v, decimals), [decimals]);
-
-  const usdValue = useMemo(() => {
-    if (!value || !decimals || !usdPrice) return;
-
-    if (!isValid(value)) return;
-
-    const parsedValue = parseFixed(value, decimals);
-    const usd = parsedValue.mul(usdPrice).div(WeiPerEther);
-
-    return formatFixed(usd, decimals);
-  }, [isValid, value, decimals, usdPrice]);
 
   const onChangeCallback = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
@@ -79,28 +61,27 @@ function ModalInput({ value, name, disabled, symbol, error, onChange, onMax }: P
   }, []);
 
   return (
-    <section className={error ? styles.error : styles.inputSection}>
-      <input
-        min={0.0}
-        type="number"
-        placeholder="0"
-        value={value}
-        onChange={onChangeCallback}
-        name={name}
-        disabled={disabled}
-        className={styles.input}
-        onPaste={onPaste}
-        onInput={onInput}
-        step="any"
-        autoFocus
-      />
-      <p className={styles.translatedValue}>${formatNumber(usdValue || '0', 'USD')}</p>
-      {onMax && (
-        <p className={styles.max} onClick={onMax}>
-          MAX
-        </p>
-      )}
-    </section>
+    <InputBase
+      inputProps={{
+        min: 0.0,
+        type: 'number',
+        placeholder: '0',
+        name: name,
+        step: 'any',
+        style: { padding: 0, textAlign: 'right' },
+        value: value,
+        onChange: onChangeCallback,
+        onPaste: onPaste,
+        onInput: onInput,
+      }}
+      autoFocus
+      sx={{
+        paddingTop: 0.5,
+        flexGrow: 1,
+        fontWeight: 700,
+        fontSize: 24,
+      }}
+    />
   );
 }
 
