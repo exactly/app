@@ -9,7 +9,6 @@ import {
   Paper,
   Tooltip,
   Typography,
-  Box,
 } from '@mui/material';
 
 import { FloatingPoolItemData } from 'types/FloatingPoolItemData';
