@@ -11,10 +11,11 @@ const FixedPoolDashboard = dynamic(() => import('components/dashboard/DashboardC
 
 import DashboardTabs from 'components/dashboard/DashboardContent/DashboardTabs';
 import { useWeb3 } from 'hooks/useWeb3';
-import { Box } from '@mui/material';
+import { Box, useMediaQuery } from '@mui/material';
 import MobileTabs from 'components/MobileTabs';
 import DashboardMobile from './DashboardMobile';
 import ConnectYourWallet from './ConnectYourWallet';
+import { useTheme } from '@mui/material/styles';
 
 const depositTab = {
   label: 'Your Deposits',
@@ -28,6 +29,8 @@ const borrowTab = {
 
 function DashboardContent() {
   const { isConnected } = useWeb3();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const allTabs = useMemo(
     () => [
@@ -59,9 +62,11 @@ function DashboardContent() {
 
   return (
     <>
-      <Grid mt={5} display={onlyDesktop}>
-        <DashboardTabs initialTab={allTabs[0].value} allTabs={allTabs} />
-      </Grid>
+      {!isMobile && ( // display={onlyDesktop} throws an error when used with mui tabs
+        <Grid mt={5}>
+          <DashboardTabs initialTab={allTabs[0].value} allTabs={allTabs} />
+        </Grid>
+      )}
       <Box display={onlyMobile} my={2}>
         <MobileTabs
           tabs={[

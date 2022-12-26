@@ -102,14 +102,14 @@ function SwitchCollateral({ symbol }: Props) {
       placement="top"
       arrow
     >
-      <div>
+      <span>
         <StyledSwitch
           checked={toggle}
           onChange={onToggle}
           inputProps={{ 'aria-label': 'controlled' }}
           disabled={disabled}
         />
-      </div>
+      </span>
     </Tooltip>
   );
 }

@@ -32,7 +32,9 @@ function MobileTabs({ tabs }: Props) {
           </Button>
         ))}
       </Box>
-      <Box>{tabs.map(({ content }, i) => selected === i && content)}</Box>
+      <Box>
+        {tabs.map(({ title, content }, i) => selected === i && <Box key={`mobile-content-${title}`}>{content}</Box>)}
+      </Box>
     </>
   );
 }
