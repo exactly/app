@@ -14,7 +14,6 @@ export default () => {
   return useMemo(() => {
     if (!chain) return null;
 
-    // TODO: add optimism network
     const address = {
       [goerli.id]: goerliPreviewer.address,
       [mainnet.id]: mainnetPreviewer.address,

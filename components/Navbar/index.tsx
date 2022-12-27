@@ -1,8 +1,8 @@
-import { goerli, useNetwork, useSwitchNetwork } from 'wagmi';
+import { goerli } from 'wagmi';
 import DisclaimerModal from 'components/DisclaimerModal';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
-import React, { useContext, useEffect, useMemo, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 
 import ThemeContext from 'contexts/ThemeContext';
 import { useWeb3 } from 'hooks/useWeb3';
@@ -25,10 +25,8 @@ const routes = [
 
 function Navbar() {
   const { walletAddress } = useWeb3();
-  const { switchNetworkAsync } = useSwitchNetwork();
   const { pathname: currentPathname, query } = useRouter();
   const { chain, isConnected } = useWeb3();
-  const { chains } = useNetwork();
 
   const { openOperationModal } = useModalStatus();
   const { theme } = useContext(ThemeContext);
@@ -38,16 +36,8 @@ function Navbar() {
     walletAddress && void analytics.identify(walletAddress);
   }, [walletAddress]);
 
-  const isSupportedChain = useMemo(() => chain?.id && chains.map((c) => c.id).includes(chain.id), [chain?.id, chains]);
-
   async function handleFaucetClick() {
-    if (!switchNetworkAsync) return;
-
-    if (isSupportedChain && chain?.id === goerli.id) {
-      return openOperationModal('faucet');
-    }
-
-    if (!isSupportedChain) await switchNetworkAsync(goerli.id);
+    if (chain?.id === goerli.id) return openOperationModal('faucet');
   }
 
   return (

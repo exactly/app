@@ -1,7 +1,6 @@
 import React, { type FC, useContext, useMemo } from 'react';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber/lib';
 import { Zero } from '@ethersproject/constants/lib';
-import { useNetwork } from 'wagmi';
 
 import HeaderInfo from 'components/common/HeaderInfo';
 import { ItemInfoProps } from 'components/common/ItemInfo';
@@ -16,8 +15,6 @@ import Image from 'next/image';
 const MarketsHeader: FC = () => {
   const { accountData } = useContext(AccountDataContext);
   const { chain } = useWeb3();
-  const { chains } = useNetwork();
-  const isSupportedChain = useMemo(() => chain?.id && chains.map((c) => c.id).includes(chain.id), [chain?.id, chains]);
 
   const { totalDeposited, totalBorrowed, totalAvailable } = useMemo<{
     totalDeposited?: BigNumber;
@@ -82,10 +79,8 @@ const MarketsHeader: FC = () => {
       itemsInfo={itemsInfo}
       title={
         <Box display="flex" gap={0.5}>
-          {isSupportedChain && (
-            <Image src={`/img/networks/${chain?.id}.svg`} alt={`chain id ${chain?.id}`} width={24} height={24} />
-          )}
-          <Box>{isSupportedChain ? `${chain?.name} Market` : 'Markets'}</Box>
+          <Image src={`/img/networks/${chain?.id}.svg`} alt={`chain id ${chain?.id}`} width={24} height={24} />
+          <Box>{`${chain?.name} Market`}</Box>
         </Box>
       }
     />
