@@ -14,7 +14,7 @@ import { AccountDataProvider } from 'contexts/AccountDataContext';
 import { SkeletonTheme } from 'react-loading-skeleton';
 import { ThemeProvider } from 'contexts/ThemeContext';
 import { ThemeProvider as MUIThemeProvider } from '@mui/material/styles';
-import { wagmi, walletConnectId, web3modal } from 'utils/client';
+import { defaultChain, wagmi, walletConnectId, web3modal } from 'utils/client';
 import theme, { globals } from 'styles/theme';
 import Footer from 'components/Footer';
 import Navbar from 'components/Navbar';
@@ -57,7 +57,7 @@ export default function App({ Component, pageProps }: AppProps) {
                 </MarketProvider>
               </AccountDataProvider>
             </WagmiConfig>
-            <Web3Modal projectId={walletConnectId} ethereumClient={web3modal} />
+            <Web3Modal projectId={walletConnectId} ethereumClient={web3modal} defaultChain={defaultChain} />
           </LangProvider>
         </MUIThemeProvider>
       </ThemeProvider>

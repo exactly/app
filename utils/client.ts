@@ -9,6 +9,8 @@ const { NEXT_PUBLIC_ENABLE_TESTNETS = 'false' } = process.env;
 
 export const supportedChains = [mainnet, ...(JSON.parse(NEXT_PUBLIC_ENABLE_TESTNETS) ? [goerli] : [])];
 
+export const defaultChain = { mainnet, goerli }[process.env.NEXT_PUBLIC_NETWORK ?? 'mainnet'];
+
 const { chains, provider } = configureChains(supportedChains, [
   publicProvider(),
   walletConnectProvider({ projectId: walletConnectId }),
