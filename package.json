@@ -42,7 +42,6 @@
     "react-dom": "^18.2.0",
     "react-dropdown": "^1.11.0",
     "react-loading-skeleton": "^3.1.0",
-    "react-spring": "^9.6.0",
     "recharts": "^2.2.0",
     "wagmi": "^0.9.2"
   },
