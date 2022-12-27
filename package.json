@@ -43,7 +43,7 @@
     "react-dropdown": "^1.11.0",
     "react-loading-skeleton": "^3.1.0",
     "recharts": "^2.2.0",
-    "wagmi": "^0.9.5"
+    "wagmi": "^0.10.0"
   },
   "devDependencies": {
     "@next/eslint-plugin-next": "^12.3.4",
