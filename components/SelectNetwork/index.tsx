@@ -13,9 +13,9 @@ import { globals } from 'styles/theme';
 const { onlyDesktop } = globals;
 
 const SelectNetwork: FC = () => {
-  const { chain } = useWeb3();
-  const { chains } = useNetwork();
-  const { isLoading, switchNetworkAsync } = useSwitchNetwork();
+  const { chain } = useNetwork();
+  const { chains } = useWeb3();
+  const { isLoading, switchNetwork } = useSwitchNetwork();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const openMenu = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget),
@@ -26,9 +26,9 @@ const SelectNetwork: FC = () => {
   const onSelectNetwork = useCallback(
     (chainId: number) => {
       closeMenu();
-      void switchNetworkAsync?.(chainId);
+      switchNetwork?.(chainId);
     },
-    [closeMenu, switchNetworkAsync],
+    [closeMenu, switchNetwork],
   );
 
   const isSupportedChain = useMemo(() => chain?.id && chains.map((c) => c.id).includes(chain.id), [chain?.id, chains]);
@@ -61,12 +61,7 @@ const SelectNetwork: FC = () => {
           <Box display="flex" justifyContent="space-between" width="100%" gap={{ xs: 0, sm: 1 }}>
             <Box display="flex" gap={0.5}>
               {isSupportedChain ? (
-                <Image
-                  src={`/img/networks/${chain?.id}.svg`}
-                  alt={`chain id ${isSupportedChain ? chain?.id : mainnet.id}`}
-                  width={24}
-                  height={24}
-                />
+                <Image src={`/img/networks/${chain?.id}.svg`} alt={`chain id ${chain?.id}`} width={24} height={24} />
               ) : (
                 <ErrorIcon />
               )}

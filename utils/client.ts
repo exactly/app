@@ -7,10 +7,12 @@ export const walletConnectId = '11ddaa8aaede72cb5d6b0dae2fed7baa';
 
 const { NEXT_PUBLIC_ENABLE_TESTNETS = 'false' } = process.env;
 
-const { chains, provider } = configureChains(
-  [mainnet, ...(JSON.parse(NEXT_PUBLIC_ENABLE_TESTNETS) ? [goerli] : [])],
-  [publicProvider(), walletConnectProvider({ projectId: walletConnectId })],
-);
+export const supportedChains = [mainnet, ...(JSON.parse(NEXT_PUBLIC_ENABLE_TESTNETS) ? [goerli] : [])];
+
+const { chains, provider } = configureChains(supportedChains, [
+  publicProvider(),
+  walletConnectProvider({ projectId: walletConnectId }),
+]);
 
 export const wagmi = createClient({
   autoConnect: true,
