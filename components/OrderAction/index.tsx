@@ -1,4 +1,5 @@
 import React, { FC, useContext } from 'react';
+import { useWeb3Modal } from '@web3modal/react';
 import Button from '@mui/material/Button';
 import Box from '@mui/system/Box';
 
@@ -11,13 +12,14 @@ import keys from './translations.json';
 import { Operation, useModalStatus } from 'contexts/ModalStatusContext';
 
 const OrderAction: FC = () => {
-  const { walletAddress, connect } = useWeb3();
+  const { open } = useWeb3Modal();
+  const { walletAddress } = useWeb3();
   const { openOperationModal } = useModalStatus();
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
   const handleAction = (action: Extract<Operation, 'deposit' | 'borrow' | 'depositAtMaturity'>) => {
-    if (!walletAddress && connect) return connect();
+    if (!walletAddress) return open();
 
     openOperationModal(action);
   };

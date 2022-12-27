@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { useEnsName } from 'wagmi';
+import { useDisconnect, useEnsName } from 'wagmi';
 import { useWeb3 } from 'hooks/useWeb3';
 import { formatWallet } from 'utils/utils';
 
@@ -16,7 +16,8 @@ function Wallet() {
   const openMenu = (event: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget);
   const closeMenu = () => setAnchorEl(null);
 
-  const { walletAddress, disconnect } = useWeb3();
+  const { walletAddress } = useWeb3();
+  const { disconnect } = useDisconnect();
   const { data: ens } = useEnsName({ address: walletAddress as `0x${string}` });
   const { open } = useWeb3Modal();
 
