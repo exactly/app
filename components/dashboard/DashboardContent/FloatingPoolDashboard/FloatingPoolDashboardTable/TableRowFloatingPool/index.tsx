@@ -20,11 +20,11 @@ type Props = {
   type: Extract<Operation, 'deposit' | 'borrow'>;
   depositAmount?: BigNumber;
   borrowedAmount?: BigNumber;
-  eTokenAmount?: BigNumber;
+  exaTokenAmount?: BigNumber;
   market?: string;
 };
 
-function TableRowFloatingPool({ symbol, depositAmount, borrowedAmount, eTokenAmount, type, market }: Props) {
+function TableRowFloatingPool({ symbol, depositAmount, borrowedAmount, exaTokenAmount, type, market }: Props) {
   const { decimals, usdPrice } = useAccountData(symbol);
   const { openOperationModal } = useModalStatus();
   const { setMarket } = useContext(MarketContext);
@@ -63,7 +63,7 @@ function TableRowFloatingPool({ symbol, depositAmount, borrowedAmount, eTokenAmo
       {type === 'deposit' ? (
         <TableCell align="left" size="small">
           <Typography>
-            {(eTokenAmount && `${formatNumber(formatFixed(eTokenAmount, decimals), symbol)}`) || (
+            {(exaTokenAmount && `${formatNumber(formatFixed(exaTokenAmount, decimals), symbol)}`) || (
               <Skeleton width={40} />
             )}{' '}
           </Typography>

@@ -36,8 +36,8 @@ function FloatingPoolDashboardTable({ type, rows }: Props) {
         align: 'left',
       },
       {
-        label: 'eToken',
-        key: 'eToken',
+        label: 'exaToken',
+        key: 'exaToken',
         hidden: type !== 'deposit',
         tooltipTitle: 'The Exactly voucher token (ERC-4626) for your deposit in the Variable Rate Pool.',
         align: 'left',
@@ -93,7 +93,7 @@ function FloatingPoolDashboardTable({ type, rows }: Props) {
               symbol={item.symbol}
               depositAmount={item.depositedAmount}
               borrowedAmount={item.borrowedAmount}
-              eTokenAmount={item.eTokens}
+              exaTokenAmount={item.exaTokens}
               type={type}
               market={item.market}
             />

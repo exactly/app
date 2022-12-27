@@ -1,6 +1,6 @@
 import React from 'react';
 
-import AddETokensButton from 'components/AddETokensButton';
+import AddExaTokensButton from 'components/AddExaTokensButton';
 
 import FloatingPoolDashboardTable from 'components/dashboard/DashboardContent/FloatingPoolDashboard/FloatingPoolDashboardTable';
 import { Grid, Typography } from '@mui/material';
@@ -26,7 +26,7 @@ function FloatingPoolDashboard({ type }: Props) {
     >
       <Stack direction="row" spacing={2} alignItems="center">
         <Typography variant="h6">Variable Interest Rate</Typography>
-        <AddETokensButton />
+        <AddExaTokensButton />
       </Stack>
       <FloatingPoolDashboardTable rows={floatingRows} type={type} />
     </Grid>

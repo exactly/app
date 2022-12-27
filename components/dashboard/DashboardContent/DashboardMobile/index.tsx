@@ -24,7 +24,7 @@ const DashboardMobile: FC<Props> = ({ type }) => {
 
   return (
     <Box width="100%" display="flex" flexDirection="column" gap={1}>
-      {floatingRows.map(({ symbol, eTokens, depositedAmount, borrowedAmount }) => (
+      {floatingRows.map(({ symbol, exaTokens, depositedAmount, borrowedAmount }) => (
         <MobileAssetCard key={`dashboard_floating_mobile_${symbol}_${type}`} symbol={symbol} isFloating>
           <>
             <Box display="flex" flexDirection="column" gap={1} width="100%">
@@ -43,12 +43,12 @@ const DashboardMobile: FC<Props> = ({ type }) => {
               </FlexItem>
               {isDeposit && (
                 <FlexItem
-                  title="eToken"
+                  title="exaToken"
                   tooltip="The Exactly voucher token (ERC-4626) for your deposit in the Variable Rate Pool."
                 >
-                  {(eTokens &&
+                  {(exaTokens &&
                     symbol &&
-                    `${formatNumber(formatFixed(eTokens, accountData?.[symbol].decimals), symbol)}`) || (
+                    `${formatNumber(formatFixed(exaTokens, accountData?.[symbol].decimals), symbol)}`) || (
                     <Skeleton width={40} />
                   )}
                 </FlexItem>
