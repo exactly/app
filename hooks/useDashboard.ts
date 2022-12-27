@@ -25,20 +25,15 @@ export default function useDashboard(type: string) {
       },
     );
 
-    return allMarkets.map((market) => {
-      const symbol = market.assetSymbol;
-      const depositBalance = market.floatingDepositAssets;
-      const eTokens = market.floatingDepositShares;
-      const borrowBalance = market.floatingBorrowAssets;
-
-      return {
-        symbol: symbol,
-        eTokens: eTokens,
-        depositedAmount: depositBalance,
-        borrowedAmount: borrowBalance,
-        market: market.market,
-      };
-    });
+    return allMarkets.map(
+      ({ assetSymbol, floatingDepositAssets, floatingDepositShares, floatingBorrowAssets, market }) => ({
+        symbol: assetSymbol,
+        exaTokens: floatingDepositShares,
+        depositedAmount: floatingDepositAssets,
+        borrowedAmount: floatingBorrowAssets,
+        market,
+      }),
+    );
   }, [accountData, orderAssets]);
 
   const fixedDeposits = useMemo(() => {
