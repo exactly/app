@@ -5,7 +5,7 @@ import { Tooltip } from '@mui/material';
 import AccountDataContext from 'contexts/AccountDataContext';
 import styles from './style.module.scss';
 
-const AddETokensButton = () => {
+const AddExaTokensButton = () => {
   const { accountData } = useContext(AccountDataContext);
   const { connector } = useAccount();
 
@@ -23,12 +23,12 @@ const AddETokensButton = () => {
   }, [accountData, connector]);
 
   return connector?.watchAsset ? (
-    <Tooltip title="Add eTokens to Metamask" placement="top" arrow>
+    <Tooltip title="Add exaTokens to Metamask" placement="top" arrow>
       <p className={styles.addAssets} onClick={onClick}>
-        + eTokens
+        + exaTokens
       </p>
     </Tooltip>
   ) : null;
 };
 
-export default AddETokensButton;
+export default AddExaTokensButton;
