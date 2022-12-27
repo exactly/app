@@ -30,7 +30,6 @@
     "@mui/material": "^5.10.17",
     "@sentry/integrations": "^7.25.0",
     "@sentry/nextjs": "^7.25.0",
-    "@walletconnect/web3-provider": "^1.8.0",
     "@web3modal/ethereum": "^2.0.0-beta.9",
     "@web3modal/react": "^2.0.0-beta.9",
     "analytics": "^0.8.1",
