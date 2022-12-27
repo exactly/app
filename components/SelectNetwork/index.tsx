@@ -7,14 +7,14 @@ import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 import ErrorIcon from '@mui/icons-material/Error';
 import { LoadingButton } from '@mui/lab';
 import { Box, CircularProgress, Divider, Menu, MenuItem, Typography } from '@mui/material';
-import { allowedChains, mainnetChains, testnetChains, enableTestnets } from 'utils/client';
-import { goerli, mainnet, useSwitchNetwork } from 'wagmi';
+import { goerli, mainnet, useNetwork, useSwitchNetwork } from 'wagmi';
 import Image from 'next/image';
 import { globals } from 'styles/theme';
 const { onlyDesktop } = globals;
 
 const SelectNetwork: FC = () => {
   const { chain } = useWeb3();
+  const { chains } = useNetwork();
   const { isLoading, switchNetworkAsync } = useSwitchNetwork();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const openMenu = useCallback(
@@ -31,7 +31,7 @@ const SelectNetwork: FC = () => {
     [closeMenu, switchNetworkAsync],
   );
 
-  const isSupportedChain = useMemo(() => chain?.id && allowedChains.map((c) => c.id).includes(chain.id), [chain?.id]);
+  const isSupportedChain = useMemo(() => chain?.id && chains.map((c) => c.id).includes(chain.id), [chain?.id, chains]);
 
   const buttonBgColor = useMemo(
     () => (chain?.id === mainnet.id || chain?.id === goerli.id ? '#627EEA' : '#EE2939'),
@@ -104,57 +104,61 @@ const SelectNetwork: FC = () => {
           horizontal: 'left',
         }}
       >
-        {mainnetChains.map(({ id, name }) => (
-          <MenuItem
-            key={`mainnnet_chain_${id}`}
-            value={id}
-            onClick={() => onSelectNetwork(id)}
-            sx={{ bgcolor: chain?.id === id ? '#F9FAFB' : 'transparent', py: 1 }}
-          >
-            <Box display="flex" justifyContent="space-between" width="100%">
-              <Box display="flex" gap={1}>
-                <Image src={`/img/networks/${id}.svg`} alt={`chain id ${id}`} width={24} height={24} />
-                <Typography fontSize="16px" fontWeight={700}>
-                  {name}
-                </Typography>
-              </Box>
+        {chains
+          .filter((c) => !c?.testnet)
+          .map(({ id, name }) => (
+            <MenuItem
+              key={`mainnnet_chain_${id}`}
+              value={id}
+              onClick={() => onSelectNetwork(id)}
+              sx={{ bgcolor: chain?.id === id ? '#F9FAFB' : 'transparent', py: 1 }}
+            >
+              <Box display="flex" justifyContent="space-between" width="100%">
+                <Box display="flex" gap={1}>
+                  <Image src={`/img/networks/${id}.svg`} alt={`chain id ${id}`} width={24} height={24} />
+                  <Typography fontSize="16px" fontWeight={700}>
+                    {name}
+                  </Typography>
+                </Box>
 
-              {chain?.id === id && <FiberManualRecordIcon sx={{ fontSize: '10px', my: 'auto' }} />}
-            </Box>
-          </MenuItem>
-        ))}
-        {enableTestnets && (
+                {chain?.id === id && <FiberManualRecordIcon sx={{ fontSize: '10px', my: 'auto' }} />}
+              </Box>
+            </MenuItem>
+          ))}
+        {chains.find((c) => c?.testnet) && (
           <Box>
             <Divider />
-            {testnetChains.map(({ id, name }) => (
-              <MenuItem
-                key={`testnet_chain_${id}`}
-                value={id}
-                onClick={() => onSelectNetwork(id)}
-                sx={{ bgcolor: chain?.id === id ? '#F9FAFB' : 'transparent' }}
-              >
-                <Box display="flex" justifyContent="space-between" width="100%">
-                  <Box display="flex" gap={1}>
-                    <Image src={`/img/networks/${id}.svg`} alt={`chain id ${id}`} width={24} height={24} />
-                    <Typography fontSize="16px" fontWeight={700}>
-                      {name}
-                    </Typography>
-                    <Typography
-                      variant="subtitle2"
-                      py="2px"
-                      px="4px"
-                      bgcolor="grey.200"
-                      color="grey.600"
-                      fontSize="9px"
-                      my="auto"
-                    >
-                      TESTNET
-                    </Typography>
+            {chains
+              .filter((c) => c?.testnet)
+              .map(({ id, name }) => (
+                <MenuItem
+                  key={`testnet_chain_${id}`}
+                  value={id}
+                  onClick={() => onSelectNetwork(id)}
+                  sx={{ bgcolor: chain?.id === id ? '#F9FAFB' : 'transparent' }}
+                >
+                  <Box display="flex" justifyContent="space-between" width="100%">
+                    <Box display="flex" gap={1}>
+                      <Image src={`/img/networks/${id}.svg`} alt={`chain id ${id}`} width={24} height={24} />
+                      <Typography fontSize="16px" fontWeight={700}>
+                        {name}
+                      </Typography>
+                      <Typography
+                        variant="subtitle2"
+                        py="2px"
+                        px="4px"
+                        bgcolor="grey.200"
+                        color="grey.600"
+                        fontSize="9px"
+                        my="auto"
+                      >
+                        TESTNET
+                      </Typography>
+                    </Box>
+                    {chain?.id === id && <FiberManualRecordIcon sx={{ fontSize: '10px', my: 'auto' }} />}
                   </Box>
-                  {chain?.id === id && <FiberManualRecordIcon sx={{ fontSize: '10px', my: 'auto' }} />}
-                </Box>
-              </MenuItem>
-            ))}
+                </MenuItem>
+              ))}
           </Box>
         )}
       </Menu>

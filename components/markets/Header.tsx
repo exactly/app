@@ -1,6 +1,7 @@
 import React, { type FC, useContext, useMemo } from 'react';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber/lib';
 import { Zero } from '@ethersproject/constants/lib';
+import { useNetwork } from 'wagmi';
 
 import HeaderInfo from 'components/common/HeaderInfo';
 import { ItemInfoProps } from 'components/common/ItemInfo';
@@ -9,14 +10,14 @@ import AccountDataContext from 'contexts/AccountDataContext';
 
 import formatNumber from 'utils/formatNumber';
 import { Box } from '@mui/material';
-import { allowedChains } from 'utils/client';
 import { useWeb3 } from 'hooks/useWeb3';
 import Image from 'next/image';
 
 const MarketsHeader: FC = () => {
   const { accountData } = useContext(AccountDataContext);
   const { chain } = useWeb3();
-  const isSupportedChain = useMemo(() => chain?.id && allowedChains.map((c) => c.id).includes(chain.id), [chain?.id]);
+  const { chains } = useNetwork();
+  const isSupportedChain = useMemo(() => chain?.id && chains.map((c) => c.id).includes(chain.id), [chain?.id, chains]);
 
   const { totalDeposited, totalBorrowed, totalAvailable } = useMemo<{
     totalDeposited?: BigNumber;

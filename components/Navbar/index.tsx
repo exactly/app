@@ -1,4 +1,4 @@
-import { goerli, useSwitchNetwork } from 'wagmi';
+import { goerli, useNetwork, useSwitchNetwork } from 'wagmi';
 import DisclaimerModal from 'components/DisclaimerModal';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
@@ -16,7 +16,6 @@ import MobileMenu from 'components/MobileMenu';
 import Link from 'next/link';
 import Wallet from 'components/Wallet';
 import SelectNetwork from 'components/SelectNetwork';
-import { allowedChains } from 'utils/client';
 const { maxWidth, onlyMobile, onlyDesktop, onlyDesktopFlex } = globals;
 
 const routes = [
@@ -29,6 +28,7 @@ function Navbar() {
   const { switchNetworkAsync } = useSwitchNetwork();
   const { pathname: currentPathname, query } = useRouter();
   const { chain, isConnected } = useWeb3();
+  const { chains } = useNetwork();
 
   const { openOperationModal } = useModalStatus();
   const { theme } = useContext(ThemeContext);
@@ -38,7 +38,7 @@ function Navbar() {
     walletAddress && void analytics.identify(walletAddress);
   }, [walletAddress]);
 
-  const isSupportedChain = useMemo(() => chain?.id && allowedChains.map((c) => c.id).includes(chain.id), [chain?.id]);
+  const isSupportedChain = useMemo(() => chain?.id && chains.map((c) => c.id).includes(chain.id), [chain?.id, chains]);
 
   async function handleFaucetClick() {
     if (!switchNetworkAsync) return;
