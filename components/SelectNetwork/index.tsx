@@ -1,4 +1,6 @@
-import React, { FC, useCallback, useMemo } from 'react';
+import React, { type FC, useCallback, useMemo, useState, useEffect } from 'react';
+import { useWeb3Modal } from '@web3modal/react';
+import { RouterCtrl } from '@web3modal/core';
 import { useWeb3 } from 'hooks/useWeb3';
 
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
@@ -7,7 +9,7 @@ import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 import ErrorIcon from '@mui/icons-material/Error';
 import { LoadingButton } from '@mui/lab';
 import { Box, CircularProgress, Divider, Menu, MenuItem, Typography } from '@mui/material';
-import { goerli, mainnet, useNetwork, useSwitchNetwork } from 'wagmi';
+import { goerli, mainnet, useNetwork } from 'wagmi';
 import Image from 'next/image';
 import { globals } from 'styles/theme';
 const { onlyDesktop } = globals;
@@ -15,20 +17,33 @@ const { onlyDesktop } = globals;
 const SelectNetwork: FC = () => {
   const { chain } = useNetwork();
   const { chains } = useWeb3();
-  const { isLoading, switchNetwork } = useSwitchNetwork();
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const { close, open, isOpen } = useWeb3Modal();
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const openMenu = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget),
     [setAnchorEl],
   );
   const closeMenu = useCallback(() => setAnchorEl(null), [setAnchorEl]);
 
+  const [unsubscribe, setUnsubscribe] = useState<(() => void) | undefined>(undefined);
   const onSelectNetwork = useCallback(
     (chainId: number) => {
       closeMenu();
-      switchNetwork?.(chainId);
+
+      RouterCtrl.replace('SwitchNetwork');
+      RouterCtrl.state.data = { SwitchNetwork: chains.find((c) => c.id === chainId) };
+      open();
+
+      setUnsubscribe(() => RouterCtrl.subscribe(({ view }) => view === 'Account' && close()));
     },
-    [closeMenu, switchNetwork],
+    [chains, close, closeMenu, open],
+  );
+  useEffect(
+    () => () => {
+      unsubscribe?.();
+      setUnsubscribe(undefined);
+    },
+    [unsubscribe, isOpen],
   );
 
   const isSupportedChain = useMemo(() => chain?.id && chains.map((c) => c.id).includes(chain.id), [chain?.id, chains]);
@@ -42,7 +57,6 @@ const SelectNetwork: FC = () => {
     <>
       <LoadingButton
         loadingIndicator={<CircularProgress sx={{ color: 'white' }} size={16} />}
-        loading={isLoading}
         onClick={openMenu}
         sx={{
           pr: '10px',
@@ -57,23 +71,21 @@ const SelectNetwork: FC = () => {
           },
         }}
       >
-        {!isLoading && (
-          <Box display="flex" justifyContent="space-between" width="100%" gap={{ xs: 0, sm: 1 }}>
-            <Box display="flex" gap={0.5}>
-              {isSupportedChain ? (
-                <Image src={`/img/networks/${chain?.id}.svg`} alt={`chain id ${chain?.id}`} width={24} height={24} />
-              ) : (
-                <ErrorIcon />
-              )}
-              <Box display={onlyDesktop}>{isSupportedChain ? chain?.name : 'Unsupported network'}</Box>
-            </Box>
-            {anchorEl ? (
-              <ExpandLessIcon sx={{ my: 'auto' }} fontSize="small" />
+        <Box display="flex" justifyContent="space-between" width="100%" gap={{ xs: 0, sm: 1 }}>
+          <Box display="flex" gap={0.5}>
+            {isSupportedChain ? (
+              <Image src={`/img/networks/${chain?.id}.svg`} alt={`chain id ${chain?.id}`} width={24} height={24} />
             ) : (
-              <ExpandMoreIcon sx={{ my: 'auto' }} fontSize="small" />
+              <ErrorIcon />
             )}
+            <Box display={onlyDesktop}>{isSupportedChain ? chain?.name : 'Unsupported network'}</Box>
           </Box>
-        )}
+          {anchorEl ? (
+            <ExpandLessIcon sx={{ my: 'auto' }} fontSize="small" />
+          ) : (
+            <ExpandMoreIcon sx={{ my: 'auto' }} fontSize="small" />
+          )}
+        </Box>
       </LoadingButton>
       <Menu
         anchorEl={anchorEl}
