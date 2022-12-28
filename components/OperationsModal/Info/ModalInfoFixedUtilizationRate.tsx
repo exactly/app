@@ -14,7 +14,7 @@ import useMarket from 'hooks/useMarket';
 type Props = {
   qty: string;
   symbol: string;
-  operation: Extract<Operation, 'depositAtMaturity' | 'borrowAtMaturity'>;
+  operation: Extract<Operation, 'depositAtMaturity' | 'withdrawAtMaturity' | 'borrowAtMaturity' | 'repayAtMaturity'>;
   variant?: Variant;
 };
 
@@ -60,6 +60,10 @@ function ModalInfoFixedUtilizationRate({ qty, symbol, operation, variant = 'colu
             uti = utilization;
           }
           break;
+
+        case 'withdrawAtMaturity':
+          // TODO(jg): Previewer contract misses this call. ADD WHEN READY
+          break;
         case 'borrowAtMaturity':
           {
             const { utilization } = await previewerContract.previewBorrowAtMaturity(
@@ -70,9 +74,14 @@ function ModalInfoFixedUtilizationRate({ qty, symbol, operation, variant = 'colu
             uti = utilization;
           }
           break;
+        case 'repayAtMaturity':
+          // TODO(jg): Previewer contract misses this call. ADD WHEN READY
+          break;
       }
 
-      setTo(toPercentage(Number(formatFixed(uti, 18)) * 100));
+      if (uti) {
+        setTo(toPercentage(Number(formatFixed(uti, 18)) * 100));
+      }
     } catch {
       setTo('N/A');
     }

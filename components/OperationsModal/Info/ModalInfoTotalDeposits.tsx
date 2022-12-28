@@ -30,7 +30,7 @@ function ModalInfoTotalDeposits({ qty, symbol, operation, variant = 'column' }: 
 
     let f: BigNumber = floatingDepositAssets;
     if (isFixedOperation(operation) && date) {
-      const pool = fixedDepositPositions.find(({ maturity }) => String(maturity.toNumber()) === date);
+      const pool = fixedDepositPositions.find(({ maturity }) => maturity.toString() === date);
       f = pool ? pool.position.principal.add(pool.position.fee) : Zero;
     }
 

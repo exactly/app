@@ -84,9 +84,7 @@ const RepayAtMaturity: FC = () => {
 
   const totalPositionAssets = useMemo(() => {
     if (!accountData || !date) return Zero;
-    const pool = accountData[symbol].fixedBorrowPositions.find(
-      ({ maturity }) => maturity.toNumber().toString() === date,
-    );
+    const pool = accountData[symbol].fixedBorrowPositions.find(({ maturity }) => maturity.toString() === date);
 
     return pool ? pool.position.principal.add(pool.position.fee) : Zero;
   }, [date, accountData, symbol]);
@@ -338,7 +336,7 @@ const RepayAtMaturity: FC = () => {
               <ModalInfoHealthFactor qty={qty} symbol={symbol} operation={operation} />
             </ModalBoxCell>
             <ModalBoxCell divisor>
-              <ModalInfoFixedUtilizationRate qty={qty} symbol={symbol} operation="HERE" />
+              <ModalInfoFixedUtilizationRate qty={qty} symbol={symbol} operation="repayAtMaturity" />
             </ModalBoxCell>
           </ModalBoxRow>
         </ModalBox>

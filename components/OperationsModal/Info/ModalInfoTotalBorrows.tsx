@@ -30,7 +30,7 @@ function ModalInfoTotalBorrows({ qty, symbol, operation, variant = 'column' }: P
 
     let f: BigNumber = floatingBorrowAssets;
     if (isFixedOperation(operation) && date) {
-      const pool = fixedBorrowPositions.find(({ maturity }) => String(maturity.toNumber()) === date);
+      const pool = fixedBorrowPositions.find(({ maturity }) => maturity.toString() === date);
       f = pool ? pool.position.principal.add(pool.position.fee) : Zero;
     }
 
