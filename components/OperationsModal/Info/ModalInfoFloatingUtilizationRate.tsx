@@ -23,10 +23,11 @@ function ModalInfoFloatingUtilizationRate({ qty, symbol, operation, variant = 'c
     try {
       let deposited = totalFloatingDepositAssets ?? Zero;
       let borrowed = totalFloatingBorrowAssets ?? Zero;
-      const f = borrowed.div(deposited);
-      const delta = parseFixed(qty || '0', decimals);
 
-      // const totalDepositUSD = formatFixed(totalDeposited.mul(exchangeRate).div(WeiPerEther), decimals);
+      const decimalWAD = parseFixed('1', decimals);
+
+      const f = borrowed.mul(decimalWAD).div(deposited);
+      const delta = parseFixed(qty || '0', decimals);
 
       switch (operation) {
         case 'deposit':
@@ -43,8 +44,8 @@ function ModalInfoFloatingUtilizationRate({ qty, symbol, operation, variant = 'c
           break;
       }
 
-      const t = borrowed.div(deposited);
-      return [toPercentage(Number(formatFixed(f, 18))), toPercentage(Number(formatFixed(t, 18)))];
+      const t = borrowed.mul(decimalWAD).div(deposited);
+      return [toPercentage(Number(formatFixed(f, decimals))), toPercentage(Number(formatFixed(t, decimals)))];
     } catch {
       return [undefined, undefined];
     }

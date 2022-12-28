@@ -28,7 +28,7 @@ export default function useActionButton() {
       setMarket(market);
 
       if (maturity) {
-        setDate(String(maturity));
+        setDate(maturity.toString());
       }
 
       openOperationModal(action);

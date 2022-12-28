@@ -87,7 +87,7 @@ const WithdrawAtMaturity: FC = () => {
   const positionAssets = useMemo(() => {
     if (!accountData || !date) return '0';
 
-    const pool = accountData[symbol].fixedDepositPositions.find(({ maturity }) => String(maturity.toNumber()) === date);
+    const pool = accountData[symbol].fixedDepositPositions.find(({ maturity }) => maturity.toString() === date);
     return pool ? pool.position.principal.add(pool.position.fee) : Zero;
   }, [date, accountData, symbol]);
 
@@ -321,7 +321,7 @@ const WithdrawAtMaturity: FC = () => {
             </ModalBoxCell>
             <ModalBoxCell>
               <ModalInfoAmount
-                label="Min. amount to receive"
+                label="Amount to receive"
                 value={formatNumber(formatFixed(amountToWithdraw, decimals), symbol, true)}
                 symbol={symbol}
               />
@@ -332,7 +332,7 @@ const WithdrawAtMaturity: FC = () => {
               <ModalInfoHealthFactor qty={qty} symbol={symbol} operation={operation} />
             </ModalBoxCell>
             <ModalBoxCell divisor>
-              <ModalInfoFixedUtilizationRate qty={qty} symbol={symbol} operation="HERE" />
+              <ModalInfoFixedUtilizationRate qty={qty} symbol={symbol} operation="withdrawAtMaturity" />
             </ModalBoxCell>
           </ModalBoxRow>
         </ModalBox>
