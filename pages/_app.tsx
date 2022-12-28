@@ -57,7 +57,14 @@ export default function App({ Component, pageProps }: AppProps) {
                 </MarketProvider>
               </AccountDataProvider>
             </WagmiConfig>
-            <Web3Modal projectId={walletConnectId} ethereumClient={web3modal} defaultChain={defaultChain} />
+            <Web3Modal
+              projectId={walletConnectId}
+              defaultChain={defaultChain}
+              ethereumClient={web3modal}
+              themeMode="light"
+              themeColor="blackWhite"
+              themeBackground="themeColor"
+            />
           </LangProvider>
         </MUIThemeProvider>
       </ThemeProvider>
