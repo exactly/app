@@ -19,7 +19,7 @@ const OrderAction: FC = () => {
   const translations: { [key: string]: LangKeys } = keys;
 
   const handleAction = (action: Extract<Operation, 'deposit' | 'borrow' | 'depositAtMaturity'>) => {
-    if (!walletAddress) return open();
+    if (!walletAddress) return open({ route: 'ConnectWallet' });
 
     openOperationModal(action);
   };

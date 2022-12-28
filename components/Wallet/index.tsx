@@ -30,7 +30,7 @@ function Wallet() {
 
   if (!walletAddress) {
     return (
-      <Button onClick={() => open()} variant="contained">
+      <Button onClick={() => open({ route: 'ConnectWallet' })} variant="contained">
         Connect wallet
       </Button>
     );

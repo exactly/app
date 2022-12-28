@@ -20,7 +20,7 @@ export default function useActionButton() {
     (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, action: Operation, symbol: string, maturity?: number) => {
       e.preventDefault();
 
-      if (!walletAddress) return open();
+      if (!walletAddress) return open({ route: 'ConnectWallet' });
 
       if (!accountData) return;
 
