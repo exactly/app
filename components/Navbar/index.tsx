@@ -1,4 +1,4 @@
-import { goerli } from 'wagmi';
+import { goerli, useClient } from 'wagmi';
 import DisclaimerModal from 'components/DisclaimerModal';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
@@ -24,6 +24,7 @@ const routes = [
 ];
 
 function Navbar() {
+  const { connector } = useClient();
   const { walletAddress } = useWeb3();
   const { pathname: currentPathname, query } = useRouter();
   const { chain, isConnected } = useWeb3();
@@ -79,7 +80,7 @@ function Navbar() {
             {isConnected && chain?.id === goerli.id && (
               <Chip label="Goerli Faucet" onClick={handleFaucetClick} sx={{ my: 'auto', display: onlyDesktopFlex }} />
             )}
-            {isConnected && <SelectNetwork />}
+            {connector?.switchChain && <SelectNetwork />}
             <Wallet />
           </Box>
           <IconButton
