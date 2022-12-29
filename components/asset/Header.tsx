@@ -91,7 +91,16 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
   return (
     <Grid sx={{ bgcolor: 'white' }} width="100%" p="24px" boxShadow="0px 4px 12px rgba(175, 177, 182, 0.2)">
       <Grid item container mb={2.5}>
-        <Image src={`/img/assets/${symbol}.svg`} alt={symbol} width={29} height={29} />
+        <Image
+          src={`/img/assets/${symbol}.svg`}
+          alt={symbol}
+          width={29}
+          height={29}
+          style={{
+            maxWidth: '100%',
+            height: 'auto',
+          }}
+        />
         <Typography variant="h2" ml={1}>
           {formatSymbol(symbol)}
           {etherscan && (

@@ -63,6 +63,10 @@ function AssetSelector({ title, defaultAddress, onChange }: Props) {
               className={style.marketImage}
               width={24}
               height={24}
+              style={{
+                maxWidth: '100%',
+                height: 'auto',
+              }}
             />{' '}
             <span className={style.marketName}>{formatSymbol(marketData.symbol)}</span>
           </div>

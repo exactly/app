@@ -79,7 +79,16 @@ const ExplorerMenu: FC<Props> = ({ symbol, assetAddress, eMarketAddress, rateMod
           </Typography>
         </Box>
         <MenuItem>
-          <Image src={`/img/assets/${symbol}.svg`} alt={symbol} width={20} height={20} />
+          <Image
+            src={`/img/assets/${symbol}.svg`}
+            alt={symbol}
+            width={20}
+            height={20}
+            style={{
+              maxWidth: '100%',
+              height: 'auto',
+            }}
+          />
           <Box ml={1}>
             <a href={assetEtherscan} target="_blank" rel="noopener noreferrer">
               {symbol}
@@ -87,7 +96,16 @@ const ExplorerMenu: FC<Props> = ({ symbol, assetAddress, eMarketAddress, rateMod
           </Box>
         </MenuItem>
         <MenuItem>
-          <Image src={`/img/assets/${symbol}.svg`} alt={symbol} width={20} height={20} />
+          <Image
+            src={`/img/assets/${symbol}.svg`}
+            alt={symbol}
+            width={20}
+            height={20}
+            style={{
+              maxWidth: '100%',
+              height: 'auto',
+            }}
+          />
           <Box ml={1}>
             <a href={eMarketEtherscan} target="_blank" rel="noopener noreferrer">
               {`e${symbol}`}

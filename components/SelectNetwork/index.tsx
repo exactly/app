@@ -56,7 +56,16 @@ const SelectNetwork: FC = () => {
     >
       <Box display="flex" gap={0.5} mr={{ xs: 0, sm: 1 }} ml="3px">
         {isSupportedChain ? (
-          <Image src={`/img/networks/${chain?.id}.svg`} alt={`chain id ${chain?.id}`} width={24} height={24} />
+          <Image
+            src={`/img/networks/${chain?.id}.svg`}
+            alt={`chain id ${chain?.id}`}
+            width={24}
+            height={24}
+            style={{
+              maxWidth: '100%',
+              height: 'auto',
+            }}
+          />
         ) : (
           <ErrorIcon />
         )}

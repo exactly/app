@@ -49,7 +49,18 @@ function ModalGif({ tx, tryAgain }: Props) {
   return (
     <section className={styles.container}>
       <section className={styles.header}>
-        {tx.status !== 'processing' && <Image src={options[tx.status].img} width={74} height={74} />}
+        {tx.status !== 'processing' && (
+          <Image
+            alt="processing"
+            src={options[tx.status].img}
+            width={74}
+            height={74}
+            style={{
+              maxWidth: '100%',
+              height: 'auto',
+            }}
+          />
+        )}
         {tx.status === 'processing' && <Loading color="primary" />}
         <section className={styles.titleContainer}>
           <h3 className={styles.title}>{options[tx.status].title}</h3>

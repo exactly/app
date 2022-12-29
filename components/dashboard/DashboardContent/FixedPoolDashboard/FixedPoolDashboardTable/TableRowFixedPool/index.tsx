@@ -88,9 +88,18 @@ function TableRowFixedPool({ symbol, amount, type, maturityDate, market, decimal
         <Link href={{ pathname: `/${symbol}`, query }} legacyBehavior>
           <TableCell component="th" align="left" sx={{ cursor: 'pointer' }} width={240}>
             <Stack direction="row" spacing={1}>
-              {(symbol && <Image src={`/img/assets/${symbol}.svg`} alt={symbol} width={24} height={24} />) || (
-                <Skeleton variant="circular" height={24} width={24} />
-              )}
+              {(symbol && (
+                <Image
+                  src={`/img/assets/${symbol}.svg`}
+                  alt={symbol}
+                  width={24}
+                  height={24}
+                  style={{
+                    maxWidth: '100%',
+                    height: 'auto',
+                  }}
+                />
+              )) || <Skeleton variant="circular" height={24} width={24} />}
               <Typography fontWeight="600" ml={1} display="inline" alignSelf="center">
                 {(symbol && formatSymbol(symbol)) || <Skeleton width={50} />}
               </Typography>

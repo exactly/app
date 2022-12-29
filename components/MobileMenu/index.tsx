@@ -44,7 +44,7 @@ function MobileMenu({ open, handleClose }: Props) {
         >
           <Box display="flex" flexDirection="column" gap="20px">
             <Box display="flex" justifyContent="space-between">
-              <Image src="/img/logo.svg" alt="Exactly Logo" layout="fixed" width={103} height={30} />
+              <Image src="/img/logo.svg" alt="Exactly Logo" width={103} height={30} />
               <IconButton size="small" edge="start" aria-label="close" onClick={handleClose}>
                 <CloseIcon sx={{ color: 'grey.300' }} />
               </IconButton>

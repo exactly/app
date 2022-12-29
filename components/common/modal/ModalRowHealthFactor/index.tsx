@@ -102,7 +102,16 @@ function ModalRowHealthFactor({ qty, symbol, operation }: Props) {
       <p className={styles.text}>{translations[lang].healthFactor}</p>
       <section className={styles.values}>
         <span className={styles.value}>{(symbol && beforeHealthFactor) || <Skeleton />}</span>
-        <Image src="/img/icons/arrowRight.svg" alt="arrowRight" width={15} height={15} />
+        <Image
+          src="/img/icons/arrowRight.svg"
+          alt="arrowRight"
+          width={15}
+          height={15}
+          style={{
+            maxWidth: '100%',
+            height: 'auto',
+          }}
+        />
         <span className={styles.value}>
           {(symbol && afterHealthFactor ? afterHealthFactor : beforeHealthFactor) || <Skeleton />}
         </span>
