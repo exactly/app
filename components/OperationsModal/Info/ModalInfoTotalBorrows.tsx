@@ -35,7 +35,7 @@ function ModalInfoTotalBorrows({ qty, symbol, operation, variant = 'column' }: P
     }
 
     let t = f[operation.startsWith('borrow') ? 'add' : 'sub'](delta);
-    t = t < Zero ? Zero : t;
+    t = t.lt(Zero) ? Zero : t;
 
     return [formatNumber(formatFixed(f, decimals), symbol), formatNumber(formatFixed(t, decimals), symbol)];
   }, [qty, symbol, operation, floatingBorrowAssets, fixedBorrowPositions, decimals, date]);
