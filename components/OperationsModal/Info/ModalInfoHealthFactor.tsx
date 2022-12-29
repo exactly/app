@@ -60,7 +60,6 @@ function ModalInfoHealthFactor({ qty, symbol, operation, variant = 'column' }: P
     const newQtyUsd = newQty.mul(usdPrice).div(parseFixed('1', decimals));
 
     switch (operation) {
-      case 'depositAtMaturity':
       case 'deposit': {
         if (isCollateral) {
           const adjustedNewQtyUsd = newQtyUsd.mul(adjustFactor).div(WeiPerEther);
@@ -71,7 +70,10 @@ function ModalInfoHealthFactor({ qty, symbol, operation, variant = 'column' }: P
         }
       }
 
-      case 'withdrawAtMaturity':
+      case 'depositAtMaturity': {
+        return parseHealthFactor(healthFactor.debt, healthFactor.collateral);
+      }
+
       case 'withdraw': {
         if (isCollateral) {
           const adjustedNewQtyUsd = newQtyUsd.mul(WeiPerEther).div(adjustFactor);
@@ -80,6 +82,10 @@ function ModalInfoHealthFactor({ qty, symbol, operation, variant = 'column' }: P
         } else {
           return parseHealthFactor(healthFactor.debt, healthFactor.collateral);
         }
+      }
+
+      case 'withdrawAtMaturity': {
+        return parseHealthFactor(healthFactor.debt, healthFactor.collateral);
       }
 
       case 'borrowAtMaturity':
