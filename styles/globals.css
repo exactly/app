@@ -9,6 +9,7 @@ body {
   background-color: var(--background);
   color: var(--text-color);
   height: 100%;
+  overflow-y: scroll;
 }
 
 #__next {
