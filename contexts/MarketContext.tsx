@@ -2,7 +2,7 @@ import React, { type FC, useMemo, createContext, useContext, useEffect, useState
 import dayjs from 'dayjs';
 
 import { Address } from 'types/Address';
-import { Maturity } from 'types/Date';
+import { Maturity } from 'types/Maturity';
 
 import AccountDataContext from './AccountDataContext';
 import type { Previewer } from 'types/contracts';
