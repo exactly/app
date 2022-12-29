@@ -6,9 +6,10 @@ import { SafeConnector } from './SafeConnector';
 
 export const walletConnectId = '11ddaa8aaede72cb5d6b0dae2fed7baa';
 
-const { NEXT_PUBLIC_ENABLE_TESTNETS = 'false' } = process.env;
-
-export const supportedChains = [mainnet, ...(JSON.parse(NEXT_PUBLIC_ENABLE_TESTNETS) ? [goerli] : [])];
+export const supportedChains = [
+  mainnet,
+  ...(JSON.parse(process.env.NEXT_PUBLIC_ENABLE_TESTNETS ?? 'false') ? [goerli] : []),
+];
 
 export const defaultChain = { mainnet, goerli }[process.env.NEXT_PUBLIC_NETWORK ?? 'mainnet'];
 
