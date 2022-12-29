@@ -65,6 +65,7 @@ export default function App({ Component, pageProps }: AppProps) {
               themeColor="blackWhite"
               themeBackground="themeColor"
               walletImages={{ safe: '/img/wallets/safe.png' }}
+              chainImages={{ 1: '/img/networks/1.svg' }}
             />
           </LangProvider>
         </MUIThemeProvider>
