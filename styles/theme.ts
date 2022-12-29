@@ -9,6 +9,10 @@ export const globals = {
 
 declare module '@mui/material/styles' {
   interface Palette {
+    figma: {
+      grey: Partial<Palette['grey']>;
+    };
+
     blue: string;
     operation: {
       fixed: string;
@@ -16,6 +20,10 @@ declare module '@mui/material/styles' {
     };
   }
   interface PaletteOptions {
+    figma: {
+      grey: Partial<Palette['grey']>;
+    };
+
     blue: string;
     operation: {
       fixed: string;
@@ -61,6 +69,13 @@ const theme = createTheme({
       '700': '#303336',
       '900': '#0D0E0F',
     },
+
+    figma: {
+      grey: {
+        '300': '#94979E',
+      },
+    },
+
     blue: '#0095FF',
     operation: {
       fixed: 'blue',

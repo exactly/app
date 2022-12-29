@@ -89,7 +89,7 @@ function Navbar() {
             sx={{ display: onlyMobile }}
             onClick={() => setOpenMenu(true)}
           >
-            <MenuIcon sx={{ color: 'grey.300' }} />
+            <MenuIcon sx={{ color: 'figma.grey.300' }} />
           </IconButton>
           <Box display={onlyMobile}>
             <MobileMenu open={openMenu} handleClose={() => setOpenMenu(false)} />

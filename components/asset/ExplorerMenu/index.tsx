@@ -74,7 +74,7 @@ const ExplorerMenu: FC<Props> = ({ symbol, assetAddress, eMarketAddress, rateMod
         }}
       >
         <Box px={2} py={1}>
-          <Typography variant="subtitle1" sx={{ color: 'grey.300' }}>
+          <Typography variant="subtitle1" sx={{ color: 'figma.grey.300' }}>
             View in etherscan
           </Typography>
         </Box>

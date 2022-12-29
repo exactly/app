@@ -334,9 +334,11 @@ const RepayAtMaturity: FC = () => {
             <ModalBoxCell>
               <ModalInfoHealthFactor qty={qty} symbol={symbol} operation={operation} />
             </ModalBoxCell>
-            <ModalBoxCell divisor>
-              <ModalInfoFixedUtilizationRate qty={qty} symbol={symbol} operation="repayAtMaturity" />
-            </ModalBoxCell>
+            {!isLateRepay && (
+              <ModalBoxCell divisor>
+                <ModalInfoFixedUtilizationRate qty={qty} symbol={symbol} operation="repayAtMaturity" />
+              </ModalBoxCell>
+            )}
           </ModalBoxRow>
         </ModalBox>
       </Grid>
