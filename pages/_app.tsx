@@ -18,7 +18,7 @@ import { defaultChain, wagmi, walletConnectId, web3modal } from 'utils/client';
 import theme, { globals } from 'styles/theme';
 import Footer from 'components/Footer';
 import Navbar from 'components/Navbar';
-import { Grid, useMediaQuery } from '@mui/material';
+import { Box, Grid, useMediaQuery } from '@mui/material';
 
 const { maxWidth } = globals;
 
@@ -39,18 +39,14 @@ export default function App({ Component, pageProps }: AppProps) {
                 <MarketProvider>
                   <ModalStatusProvider>
                     <SkeletonTheme baseColor="var(--skeleton-base)" highlightColor="var(--skeleton-highlight)">
-                      <Grid
-                        maxWidth={maxWidth}
-                        display="flex"
-                        flexDirection="column"
-                        mx={isMobile ? 1 : 'auto'}
-                        height="100%"
-                      >
-                        <Navbar />
-                        <main style={{ flexGrow: 1 }}>
-                          <Component {...pageProps} />
-                        </main>
-                        <Footer />
+                      <Grid maxWidth={maxWidth} display="flex" flexDirection="column" mx="auto" height="100%">
+                        <Box mx={1}>
+                          <Navbar />
+                          <main style={{ flexGrow: 1 }}>
+                            <Component {...pageProps} />
+                          </main>
+                          <Footer />
+                        </Box>
                       </Grid>
                     </SkeletonTheme>
                   </ModalStatusProvider>
