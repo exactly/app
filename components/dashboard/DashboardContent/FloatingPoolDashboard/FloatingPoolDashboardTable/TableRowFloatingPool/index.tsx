@@ -14,6 +14,7 @@ import formatSymbol from 'utils/formatSymbol';
 import Link from 'next/link';
 import SwitchCollateral from 'components/dashboard/DashboardContent/FloatingPoolDashboard/FloatingPoolDashboardTable/SwitchCollateral';
 import useAccountData from 'hooks/useAccountData';
+import useActionButton from 'hooks/useActionButton';
 
 type Props = {
   symbol: string;
@@ -29,6 +30,8 @@ function TableRowFloatingPool({ symbol, depositAmount, borrowedAmount, exaTokenA
   const { openOperationModal } = useModalStatus();
   const { setMarket } = useContext(MarketContext);
   const { query } = useRouter();
+
+  const { handleActionClick } = useActionButton();
 
   const rate = useMemo<number | undefined>(() => {
     if (!usdPrice) return;
@@ -90,13 +93,7 @@ function TableRowFloatingPool({ symbol, depositAmount, borrowedAmount, exaTokenA
       )}
 
       <TableCell align="left" width={50} size="small" sx={{ px: 0.5 }}>
-        <Button
-          variant="contained"
-          onClick={() => {
-            market && setMarket(market);
-            openOperationModal(type);
-          }}
-        >
+        <Button variant="contained" onClick={(e) => handleActionClick(e, type, symbol)}>
           {type === 'deposit' ? 'Deposit' : 'Borrow'}
         </Button>
       </TableCell>
@@ -105,10 +102,7 @@ function TableRowFloatingPool({ symbol, depositAmount, borrowedAmount, exaTokenA
         <Button
           variant="outlined"
           sx={{ backgroundColor: 'white' }}
-          onClick={() => {
-            market && setMarket(market);
-            openOperationModal(type === 'deposit' ? 'withdraw' : 'repay');
-          }}
+          onClick={(e) => handleActionClick(e, type === 'deposit' ? 'withdraw' : 'repay', symbol)}
         >
           {type === 'deposit' ? 'Withdraw' : 'Repay'}
         </Button>

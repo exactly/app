@@ -7,7 +7,6 @@ import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import { Box, Button, IconButton, Skeleton, Stack, TableCell, TableRow, Typography } from '@mui/material';
 import MaturityLinearProgress from 'components/common/MaturityLinearProgress';
 import AccountDataContext from 'contexts/AccountDataContext';
-import { MarketContext } from 'contexts/MarketContext';
 import useFixedOperation from 'hooks/useFixedPoolTransactions';
 
 import React, { useContext, useMemo, useState } from 'react';
@@ -17,8 +16,8 @@ import formatNumber from 'utils/formatNumber';
 import formatSymbol from 'utils/formatSymbol';
 import parseTimestamp from 'utils/parseTimestamp';
 import CollapseFixedPool from '../CollapseFixedPool';
-import { useModalStatus } from 'contexts/ModalStatusContext';
 import APRItem from '../APRItem';
+import useActionButton from 'hooks/useActionButton';
 
 type Props = {
   symbol: string;
@@ -31,11 +30,10 @@ type Props = {
 
 function TableRowFixedPool({ symbol, amount, type, maturityDate, market, decimals }: Props) {
   const { accountData } = useContext(AccountDataContext);
-  const { openOperationModal } = useModalStatus();
-  const { setMarket, setDate } = useContext(MarketContext);
   const { withdrawTxs, repayTxs, depositTxs, borrowTxs } = useFixedOperation(type, maturityDate, market);
   const [open, setOpen] = useState(false);
   const { query } = useRouter();
+  const { handleActionClick } = useActionButton();
 
   const exchangeRate: number | undefined = useMemo(() => {
     if (!accountData) return;
@@ -130,11 +128,9 @@ function TableRowFixedPool({ symbol, amount, type, maturityDate, market, decimal
           {(maturityDate && (
             <Button
               variant="outlined"
-              onClick={() => {
-                setMarket(market);
-                setDate(maturityDate);
-                openOperationModal(type === 'borrow' ? 'repayAtMaturity' : 'withdrawAtMaturity');
-              }}
+              onClick={(e) =>
+                handleActionClick(e, type === 'borrow' ? 'repayAtMaturity' : 'withdrawAtMaturity', symbol, maturityDate)
+              }
             >
               {type === 'borrow' ? 'Repay' : 'Withdraw'}
             </Button>

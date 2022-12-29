@@ -1,4 +1,4 @@
-import { Maturity } from './Date';
+import { Maturity } from './Maturity';
 
 export type Market = {
   [key: string]: number | string | boolean | Maturity;
