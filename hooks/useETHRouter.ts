@@ -24,7 +24,7 @@ export default () => {
       setMarketETHRouterContract(new Contract(address, MarketETHRouterABI, signer) as MarketETHRouter);
     };
     loadMarketETHRouter().catch(captureException);
-  }, []);
+  }, [chain?.id, chain?.name, signer]);
 
   return marketETHRouterContract;
 };
