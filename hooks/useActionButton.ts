@@ -16,12 +16,7 @@ export default function useActionButton() {
   const { openOperationModal } = useModalStatus();
 
   const handleActionClick = useCallback(
-    (
-      e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
-      action: Operation,
-      symbol: string,
-      maturity?: number | string,
-    ) => {
+    (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, action: Operation, symbol: string, maturity?: number) => {
       e.preventDefault();
 
       if (!walletAddress) return open({ route: 'ConnectWallet' });
@@ -33,7 +28,7 @@ export default function useActionButton() {
       setMarket(market);
 
       if (maturity) {
-        setDate(maturity.toString());
+        setDate(maturity);
       }
 
       openOperationModal(action);

@@ -4,7 +4,7 @@ import useFixedOperation from 'hooks/useFixedPoolTransactions';
 import React, { FC, useMemo } from 'react';
 import calculateAPR from 'utils/calculateAPR';
 
-const APRItem: FC<{ type: 'deposit' | 'borrow'; maturityDate: string; market: string; decimals: number }> = ({
+const APRItem: FC<{ type: 'deposit' | 'borrow'; maturityDate: number; market: string; decimals: number }> = ({
   type,
   maturityDate,
   market,

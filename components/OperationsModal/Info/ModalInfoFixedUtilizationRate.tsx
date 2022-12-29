@@ -28,7 +28,7 @@ function ModalInfoFixedUtilizationRate({ qty, symbol, operation, variant = 'colu
   const from: string | undefined = useMemo(() => {
     if (!date) return;
 
-    const pool = fixedPools?.find(({ maturity }) => maturity.toString() === date);
+    const pool = fixedPools?.find(({ maturity }) => maturity.toNumber() === date);
     if (!pool) return;
 
     return toPercentage(Number(formatFixed(pool.utilization, 18)) * 100);

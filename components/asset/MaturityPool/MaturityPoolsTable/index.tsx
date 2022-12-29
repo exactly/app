@@ -39,7 +39,6 @@ const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ APRsPerMaturity, symb
   const { minAPRValue } = numbers;
   const rows = useMaturityPools(APRsPerMaturity, symbol);
 
-  // TODO: add translations
   return (
     <TableContainer component={Paper}>
       <Table sx={{ minWidth: 650, bgcolor: 'transparent' }} aria-label="simple table">
@@ -88,7 +87,7 @@ const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ APRsPerMaturity, symb
                 <Button
                   disabled={depositAPR < minAPRValue}
                   variant="contained"
-                  onClick={(e) => handleActionClick(e, 'depositAtMaturity', symbol, parseInt(maturity))}
+                  onClick={(e) => handleActionClick(e, 'depositAtMaturity', symbol, maturity)}
                 >
                   Deposit
                 </Button>
@@ -105,7 +104,7 @@ const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ APRsPerMaturity, symb
                   disabled={borrowAPR < minAPRValue}
                   variant="outlined"
                   sx={{ backgroundColor: 'white' }}
-                  onClick={(e) => handleActionClick(e, 'borrowAtMaturity', symbol, parseInt(maturity))}
+                  onClick={(e) => handleActionClick(e, 'borrowAtMaturity', symbol, maturity)}
                 >
                   Borrow
                 </Button>

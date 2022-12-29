@@ -11,7 +11,7 @@ export default (symbol: string) => {
 
   const { fixedPools, decimals } = accountData[symbol];
 
-  const maturityData = fixedPools.find(({ maturity }) => maturity.toString() === maturityDate);
+  const maturityData = fixedPools.find(({ maturity }) => maturity.toNumber() === maturityDate);
 
   if (!maturityData) return;
 

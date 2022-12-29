@@ -9,7 +9,7 @@ import AccountDataContext from 'contexts/AccountDataContext';
 export type APRsPerMaturityType = Record<string, { borrow: number; deposit: number }>;
 
 type TableRow = {
-  maturity: string;
+  maturity: number;
   totalDeposited: string;
   totalBorrowed: string;
   depositAPR: number;
@@ -31,7 +31,7 @@ export default function useMaturityPools(APRsPerMaturity: APRsPerMaturityType, s
       const totalBorrowed = formatNumber(formatFixed(borrowed.mul(exchangeRate).div(WeiPerEther), decimals));
 
       tempRows.push({
-        maturity: maturityKey,
+        maturity: maturity.toNumber(),
         totalDeposited,
         totalBorrowed,
         depositAPR: APRsPerMaturity[maturityKey]?.deposit,

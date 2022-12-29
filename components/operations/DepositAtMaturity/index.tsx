@@ -152,7 +152,7 @@ const DepositAtMaturity: FC = () => {
   const optimalDepositAmount = useMemo<BigNumber | undefined>(() => {
     if (!accountData) return;
     const { fixedPools = [] } = accountData[symbol];
-    const pool = fixedPools.find((p) => formatFixed(p.maturity) === date);
+    const pool = fixedPools.find(({ maturity }) => maturity.toNumber() === date);
     return pool?.optimalDeposit;
   }, [accountData, symbol, date]);
 
@@ -269,7 +269,7 @@ const DepositAtMaturity: FC = () => {
       );
 
       const currentTimestamp = Date.now() / 1000;
-      const time = 31_536_000 / (parseInt(date) - currentTimestamp);
+      const time = 31_536_000 / (date - currentTimestamp);
 
       const rate = finalAssets.mul(WeiPerEther).div(initialAssets);
       const fixedAPR = (Number(formatFixed(rate, 18)) - 1) * time;

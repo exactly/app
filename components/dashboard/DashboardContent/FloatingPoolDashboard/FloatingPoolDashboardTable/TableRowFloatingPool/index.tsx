@@ -1,13 +1,12 @@
 import type { BigNumber } from '@ethersproject/bignumber';
-import React, { useContext, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { formatFixed } from '@ethersproject/bignumber';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
 
 import { Button, TableRow, TableCell, Stack, Typography, Skeleton } from '@mui/material';
 
-import { Operation, useModalStatus } from 'contexts/ModalStatusContext';
-import { MarketContext } from 'contexts/MarketContext';
+import { Operation } from 'contexts/ModalStatusContext';
 
 import formatNumber from 'utils/formatNumber';
 import formatSymbol from 'utils/formatSymbol';
@@ -22,13 +21,10 @@ type Props = {
   depositAmount?: BigNumber;
   borrowedAmount?: BigNumber;
   exaTokenAmount?: BigNumber;
-  market?: string;
 };
 
-function TableRowFloatingPool({ symbol, depositAmount, borrowedAmount, exaTokenAmount, type, market }: Props) {
+function TableRowFloatingPool({ symbol, depositAmount, borrowedAmount, exaTokenAmount, type }: Props) {
   const { decimals, usdPrice } = useAccountData(symbol);
-  const { openOperationModal } = useModalStatus();
-  const { setMarket } = useContext(MarketContext);
   const { query } = useRouter();
 
   const { handleActionClick } = useActionButton();

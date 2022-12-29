@@ -95,7 +95,6 @@ function FloatingPoolDashboardTable({ type, rows }: Props) {
               borrowedAmount={item.borrowedAmount}
               exaTokenAmount={item.exaTokens}
               type={type}
-              market={item.market}
             />
           ))}
         </TableBody>
