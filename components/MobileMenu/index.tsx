@@ -54,18 +54,16 @@ function MobileMenu({ open, handleClose }: Props) {
             </Typography>
             <Box display="flex" flexDirection="column" gap={2}>
               {headers.map(({ title, pathname }) => (
-                <Link href={{ pathname, query }} key={`mobile_tabs_${title}`}>
-                  <a onClick={handleClose}>
-                    <Typography
-                      sx={{
-                        textDecoration: currentPathname === pathname ? 'underline' : 'none',
-                        fontWeight: 600,
-                        fontSize: 32,
-                      }}
-                    >
-                      {title}
-                    </Typography>
-                  </a>
+                <Link href={{ pathname, query }} key={`mobile_tabs_${title}`} onClick={handleClose}>
+                  <Typography
+                    sx={{
+                      textDecoration: currentPathname === pathname ? 'underline' : 'none',
+                      fontWeight: 600,
+                      fontSize: 32,
+                    }}
+                  >
+                    {title}
+                  </Typography>
                 </Link>
               ))}
             </Box>

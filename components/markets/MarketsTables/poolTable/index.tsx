@@ -84,7 +84,7 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
         <TableBody>
           {tempRows.map(
             ({ symbol, totalDeposited, totalBorrowed, depositAPR, borrowAPR, depositMaturity, borrowMaturity }) => (
-              <Link href={{ pathname: `/${symbol}`, query }} key={symbol} rel="noopener noreferrer">
+              <Link href={{ pathname: `/${symbol}`, query }} key={symbol} rel="noopener noreferrer" legacyBehavior>
                 <TableRow
                   key={symbol}
                   sx={{
