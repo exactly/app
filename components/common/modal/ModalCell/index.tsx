@@ -20,7 +20,18 @@ function ModalCell({ text, value, line, asset }: Props) {
       <p className={styles.text}>{text}</p>
 
       <>
-        {asset && <Image src={`/img/assets/${asset}.svg`} alt={asset} width="24" height="24" />}
+        {asset && (
+          <Image
+            src={`/img/assets/${asset}.svg`}
+            alt={asset}
+            width="24"
+            height="24"
+            style={{
+              maxWidth: '100%',
+              height: 'auto',
+            }}
+          />
+        )}
 
         <p className={styles.value}>
           <strong>{value || <Skeleton />}</strong>

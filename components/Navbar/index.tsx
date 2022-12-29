@@ -51,7 +51,6 @@ function Navbar() {
               <Image
                 src={theme === 'light' ? '/img/logo.svg' : '/img/logo-white.png'}
                 alt="Exactly Logo"
-                layout="fixed"
                 width={103}
                 height={30}
               />

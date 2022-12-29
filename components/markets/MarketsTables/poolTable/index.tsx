@@ -98,7 +98,16 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
                       {isLoading ? (
                         <Skeleton variant="circular" width={24} height={24} />
                       ) : (
-                        <Image src={`/img/assets/${symbol}.svg`} alt={symbol} width="24" height="24" />
+                        <Image
+                          src={`/img/assets/${symbol}.svg`}
+                          alt={symbol}
+                          width="24"
+                          height="24"
+                          style={{
+                            maxWidth: '100%',
+                            height: 'auto',
+                          }}
+                        />
                       )}
                       <Typography fontWeight="600" ml={1} display="inline" alignSelf="center">
                         {isLoading ? <Skeleton width={60} /> : formatSymbol(symbol)}

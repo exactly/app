@@ -85,7 +85,16 @@ function Faucet() {
             return (
               <div className={styles.assetContainer} key={asset}>
                 <p className={styles.asset}>
-                  <Image src={`/img/assets/weth.svg`} alt={asset} width={40} height={40} />
+                  <Image
+                    src={`/img/assets/weth.svg`}
+                    alt={asset}
+                    width={40}
+                    height={40}
+                    style={{
+                      maxWidth: '100%',
+                      height: 'auto',
+                    }}
+                  />
                   ETH
                 </p>
                 <div className={styles.buttonContainer}>
@@ -100,7 +109,16 @@ function Faucet() {
             return (
               <div className={styles.assetContainer} key={asset}>
                 <p className={styles.asset}>
-                  <Image src={`/img/assets/${asset}.svg`} alt={asset} width={40} height={40} />
+                  <Image
+                    src={`/img/assets/${asset}.svg`}
+                    alt={asset}
+                    width={40}
+                    height={40}
+                    style={{
+                      maxWidth: '100%',
+                      height: 'auto',
+                    }}
+                  />
                   {asset}
                 </p>
                 <div className={styles.buttonContainer}>
@@ -114,7 +132,16 @@ function Faucet() {
           return (
             <div className={styles.assetContainer} key={asset}>
               <p className={styles.asset}>
-                <Image src={`/img/assets/${asset}.svg`} alt={asset} width={40} height={40} />
+                <Image
+                  src={`/img/assets/${asset}.svg`}
+                  alt={asset}
+                  width={40}
+                  height={40}
+                  style={{
+                    maxWidth: '100%',
+                    height: 'auto',
+                  }}
+                />
                 {asset}
               </p>
               <div className={styles.buttonContainer}>

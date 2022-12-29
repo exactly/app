@@ -17,7 +17,18 @@ function Tooltip({ value, image, children, disableImage, orientation = 'up' }: P
   return (
     <div className={styles.tooltipContainer} onMouseEnter={() => setShow(true)} onMouseLeave={() => setShow(false)}>
       {children}
-      {!disableImage && <Image src={image ?? '/img/icons/tooltip.svg'} alt="tooltip" width={18} height={18} />}
+      {!disableImage && (
+        <Image
+          src={image ?? '/img/icons/tooltip.svg'}
+          alt="tooltip"
+          width={18}
+          height={18}
+          style={{
+            maxWidth: '100%',
+            height: 'auto',
+          }}
+        />
+      )}
 
       {orientation === 'up' && (
         <div className={`${styles.tooltipUp} ${show ? styles.show : styles.hidden}`}>
