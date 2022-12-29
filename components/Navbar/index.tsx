@@ -53,6 +53,10 @@ function Navbar() {
                 alt="Exactly Logo"
                 width={103}
                 height={30}
+                style={{
+                  maxWidth: '100%',
+                  height: 'auto',
+                }}
               />
             </Box>
           </Link>
