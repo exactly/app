@@ -39,16 +39,16 @@
     "dayjs": "^1.11.7",
     "graphql": "^16.6.0",
     "graphql-request": "^5.1.0",
-    "next": "^12.3.4",
+    "next": "^13.1.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-dropdown": "^1.11.0",
     "react-loading-skeleton": "^3.1.0",
     "recharts": "^2.2.0",
-    "wagmi": "^0.10.0"
+    "wagmi": "^0.10.1"
   },
   "devDependencies": {
-    "@next/eslint-plugin-next": "^12.3.4",
+    "@next/eslint-plugin-next": "^13.1.1",
     "@sentry/cli": "^2.11.0",
     "@typechain/ethers-v5": "^10.2.0",
     "@types/eslint": "^8.4.10",
