@@ -10,6 +10,8 @@ import { MarketContext } from 'contexts/MarketContext';
 import usePreviewer from 'hooks/usePreviewer';
 import useDelayedEffect from 'hooks/useDelayedEffect';
 import useMarket from 'hooks/useMarket';
+import { useWeb3 } from 'hooks/useWeb3';
+import { AddressZero } from '@ethersproject/constants';
 
 type Props = {
   qty: string;
@@ -20,6 +22,7 @@ type Props = {
 
 function ModalInfoFixedUtilizationRate({ qty, symbol, operation, variant = 'column' }: Props) {
   const previewerContract = usePreviewer();
+  const { walletAddress } = useWeb3();
   const { fixedPools, usdPrice, decimals } = useAccountData(symbol);
   const { date, market } = useContext(MarketContext);
 
@@ -50,42 +53,52 @@ function ModalInfoFixedUtilizationRate({ qty, symbol, operation, variant = 'colu
       const initialAssets = parseFixed(qty, decimals);
       let uti: BigNumber | undefined = undefined;
       switch (operation) {
-        case 'depositAtMaturity':
-          {
-            const { utilization } = await previewerContract.previewDepositAtMaturity(
-              marketContract.address,
-              date,
-              initialAssets,
-            );
-            uti = utilization;
-          }
+        case 'depositAtMaturity': {
+          const { utilization } = await previewerContract.previewDepositAtMaturity(
+            marketContract.address,
+            date,
+            initialAssets,
+          );
+          uti = utilization;
           break;
+        }
 
-        case 'withdrawAtMaturity':
-          // TODO(jg): Previewer contract misses this call. ADD WHEN READY
+        case 'withdrawAtMaturity': {
+          const { utilization } = await previewerContract.previewWithdrawAtMaturity(
+            marketContract.address,
+            date,
+            initialAssets,
+            walletAddress ?? AddressZero,
+          );
+          uti = utilization;
           break;
-        case 'borrowAtMaturity':
-          {
-            const { utilization } = await previewerContract.previewBorrowAtMaturity(
-              marketContract.address,
-              date,
-              initialAssets,
-            );
-            uti = utilization;
-          }
+        }
+        case 'borrowAtMaturity': {
+          const { utilization } = await previewerContract.previewBorrowAtMaturity(
+            marketContract.address,
+            date,
+            initialAssets,
+          );
+          uti = utilization;
           break;
-        case 'repayAtMaturity':
-          // TODO(jg): Previewer contract misses this call. ADD WHEN READY
+        }
+        case 'repayAtMaturity': {
+          const { utilization } = await previewerContract.previewRepayAtMaturity(
+            marketContract.address,
+            date,
+            initialAssets,
+            walletAddress ?? AddressZero,
+          );
+          uti = utilization;
           break;
+        }
       }
 
-      if (uti) {
-        setTo(toPercentage(Number(formatFixed(uti, 18))));
-      }
+      setTo(toPercentage(Number(formatFixed(uti, 18))));
     } catch {
       setTo('N/A');
     }
-  }, [date, decimals, from, marketContract, operation, previewerContract, qty, usdPrice]);
+  }, [date, decimals, from, marketContract, operation, previewerContract, qty, usdPrice, walletAddress]);
 
   const { isLoading } = useDelayedEffect({ effect: preview });
 
