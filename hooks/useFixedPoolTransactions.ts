@@ -13,7 +13,7 @@ import { WithdrawMP } from 'types/WithdrawMP';
 import { useWeb3 } from './useWeb3';
 import networkData from 'config/networkData.json' assert { type: 'json' };
 
-export default (type: 'borrow' | 'deposit', maturity: string, market: string) => {
+export default (type: 'borrow' | 'deposit', maturity: number, market: string) => {
   const { accountData } = useContext(AccountDataContext);
   const { walletAddress, chain } = useWeb3();
   const [withdrawTxs, setWithdrawTxs] = useState<WithdrawMP[]>([]);

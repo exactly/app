@@ -81,13 +81,13 @@ const WithdrawAtMaturity: FC = () => {
 
   const isEarlyWithdraw = useMemo(() => {
     if (!date) return false;
-    return Date.now() / 1000 < parseInt(date);
+    return Date.now() / 1000 < date;
   }, [date]);
 
   const positionAssets = useMemo(() => {
     if (!accountData || !date) return '0';
 
-    const pool = accountData[symbol].fixedDepositPositions.find(({ maturity }) => maturity.toString() === date);
+    const pool = accountData[symbol].fixedDepositPositions.find(({ maturity }) => maturity.toNumber() === date);
     return pool ? pool.position.principal.add(pool.position.fee) : Zero;
   }, [date, accountData, symbol]);
 

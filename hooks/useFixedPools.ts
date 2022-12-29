@@ -11,7 +11,7 @@ export default () => {
 
     Object.values(accountData).forEach((asset) => {
       asset.fixedDepositPositions.forEach((pool) => {
-        const date = pool.maturity.toString();
+        const date = pool.maturity.toNumber();
         data.deposits = data.deposits ?? {};
 
         data.deposits[date] = data.deposits[date]
@@ -39,7 +39,7 @@ export default () => {
       });
 
       asset.fixedBorrowPositions.forEach((pool) => {
-        const date = pool.maturity.toString();
+        const date = pool.maturity.toNumber();
         data.borrows = data.borrows ?? {};
 
         data.borrows[date] = data.borrows[date]

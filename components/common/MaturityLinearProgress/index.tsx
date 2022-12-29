@@ -19,7 +19,7 @@ const StyledLinearProgress = styled(LinearProgress, {
 }));
 
 type Props = {
-  maturityDate: string;
+  maturityDate: number;
 };
 
 function MaturityLinearProgress({ maturityDate }: Props) {
@@ -28,13 +28,13 @@ function MaturityLinearProgress({ maturityDate }: Props) {
     const oneDay = oneHour * 24;
     const maturityLife = oneDay * 7 * 12;
     const nowInSeconds = Date.now() / 1000;
-    const startDate = parseInt(maturityDate) - maturityLife;
+    const startDate = maturityDate - maturityLife;
     const current = nowInSeconds - startDate;
     return Math.min((current * 100) / maturityLife, 100);
   }, [maturityDate]);
 
   const daysLeft = useMemo(() => {
-    return Math.floor((parseInt(maturityDate) - Date.now() / 1000) / (3600 * 24));
+    return Math.floor((maturityDate - Date.now() / 1000) / (3600 * 24));
   }, [maturityDate]);
 
   const isCompleted = progress === 100;

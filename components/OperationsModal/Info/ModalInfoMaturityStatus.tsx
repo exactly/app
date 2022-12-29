@@ -5,7 +5,7 @@ import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded';
 import ModalInfo from 'components/common/modal/ModalInfo';
 
 type Props = {
-  date: string;
+  date: number;
 };
 
 const Icon = () => <CheckCircleRoundedIcon sx={{ fontSize: 12, color: '#fff !important' }} />;
@@ -26,8 +26,8 @@ const chipSx: SxProps = {
 };
 
 function ModalInfoMaturityStatus({ date }: Props) {
-  const isCompleted = Date.now() / 1000 >= parseInt(date);
-  const daysLeft = Math.ceil((parseInt(date) - Date.now() / 1000) / (3600 * 24));
+  const isCompleted = Date.now() / 1000 >= date;
+  const daysLeft = Math.ceil((date - Date.now() / 1000) / (3600 * 24));
 
   return (
     <ModalInfo label="Status" variant="column">

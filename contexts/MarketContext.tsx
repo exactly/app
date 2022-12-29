@@ -2,7 +2,6 @@ import React, { type FC, useMemo, createContext, useContext, useEffect, useState
 import dayjs from 'dayjs';
 
 import { Address } from 'types/Address';
-import { Maturity } from 'types/Maturity';
 
 import AccountDataContext from './AccountDataContext';
 import type { Previewer } from 'types/contracts';
@@ -11,9 +10,9 @@ type ContextValues = {
   market: Address | undefined;
   account: Previewer.MarketAccountStructOutput | undefined;
   setMarket: (address: Address) => void;
-  date: Maturity | undefined;
-  setDate: (date: Maturity) => void;
-  dates: Maturity[];
+  date: number | undefined;
+  setDate: (date: number) => void;
+  dates: number[];
 };
 
 const defaultValues: ContextValues = {
@@ -29,11 +28,11 @@ const MarketContext = createContext<ContextValues>(defaultValues);
 
 const MarketProvider: FC<PropsWithChildren> = ({ children }) => {
   const [market, setMarket] = useState<Address>();
-  const [date, setDate] = useState<Maturity>();
+  const [date, setDate] = useState<number>();
 
   const { accountData } = useContext(AccountDataContext);
 
-  const dates = useMemo<Maturity[]>(() => {
+  const dates = useMemo<number[]>(() => {
     const currentTimestamp = dayjs().unix();
     const interval = 2_419_200;
     let timestamp = currentTimestamp - (currentTimestamp % interval);
@@ -46,9 +45,7 @@ const MarketProvider: FC<PropsWithChildren> = ({ children }) => {
       pools.push(timestamp);
     }
 
-    const formattedDates = pools.map((pool: number) => pool.toString());
-
-    return formattedDates;
+    return pools;
   }, [accountData?.maxFuturePools]);
 
   useEffect(() => {

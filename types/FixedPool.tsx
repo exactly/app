@@ -1,7 +1,7 @@
 import { BigNumber } from '@ethersproject/bignumber';
 
 export type Pool = {
-  maturity: string;
+  maturity: number;
   symbol: string;
   market: string;
   fee: BigNumber;

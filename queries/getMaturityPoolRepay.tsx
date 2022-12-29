@@ -1,7 +1,7 @@
-export function getMaturityPoolRepaysQuery(address: string, maturity: string, market: string) {
+export function getMaturityPoolRepaysQuery(address: string, maturity: number, market: string) {
   return `
   {
-    repayAtMaturities(where:{borrower: "${address}", maturity: ${parseInt(maturity)}, market: "${market}"}) {	
+    repayAtMaturities(where:{borrower: "${address}", maturity: ${maturity}, market: "${market}"}) {
       id
       market
       maturity
