@@ -2,6 +2,7 @@ import { EthereumClient, modalConnectors, walletConnectProvider } from '@web3mod
 import { createClient, configureChains } from 'wagmi';
 import { mainnet, goerli } from 'wagmi/chains';
 import { publicProvider } from 'wagmi/providers/public';
+import { SafeConnector } from './SafeConnector';
 
 export const walletConnectId = '11ddaa8aaede72cb5d6b0dae2fed7baa';
 
@@ -17,8 +18,7 @@ const { chains, provider } = configureChains(supportedChains, [
 ]);
 
 export const wagmi = createClient({
-  autoConnect: true,
-  connectors: modalConnectors({ appName: 'exactly', chains }),
+  connectors: [...modalConnectors({ appName: 'exactly', chains }), new SafeConnector({ chains })],
   provider,
 });
 
