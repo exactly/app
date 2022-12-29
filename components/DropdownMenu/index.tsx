@@ -2,13 +2,13 @@ import React, { PropsWithChildren, ReactNode, useCallback, useState } from 'reac
 import { Box, Button, Menu, MenuItem } from '@mui/material';
 import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownRounded';
 
-type Props = {
+interface Props<T> {
   label: string;
-  options: string[];
-  onChange: (value: string) => void;
+  options: T[];
+  onChange: (value: T) => void;
   renderValue: ReactNode;
-  renderOption: (value: string) => ReactNode;
-};
+  renderOption: (value: T) => ReactNode;
+}
 
 function InnerButton({ children }: PropsWithChildren) {
   return (
@@ -39,7 +39,7 @@ function OptionItem({ onClick, children }: PropsWithChildren<{ onClick: () => vo
   );
 }
 
-function DropdownMenu({ label, options, onChange, renderValue, renderOption }: Props) {
+const DropdownMenu = <T,>({ label, options, onChange, renderValue, renderOption }: Props<T>) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
   const handleClick = useCallback((event: React.MouseEvent<HTMLElement>) => {
@@ -86,7 +86,7 @@ function DropdownMenu({ label, options, onChange, renderValue, renderOption }: P
       >
         {Object.values(options).map((o) => (
           <OptionItem
-            key={o}
+            key={String(o)}
             onClick={() => {
               onChange(o);
               handleClose();
@@ -98,6 +98,6 @@ function DropdownMenu({ label, options, onChange, renderValue, renderOption }: P
       </Menu>
     </>
   );
-}
+};
 
-export default React.memo(DropdownMenu);
+export default DropdownMenu;

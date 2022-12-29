@@ -129,7 +129,7 @@ const DashboardMobile: FC<Props> = ({ type }) => {
                 fullWidth
                 sx={{ height: '34px' }}
                 onClick={(e) =>
-                  handleActionClick(e, isDeposit ? 'withdrawAtMaturity' : 'repayAtMaturity', symbol, parseInt(maturity))
+                  handleActionClick(e, isDeposit ? 'withdrawAtMaturity' : 'repayAtMaturity', symbol, maturity)
                 }
               >
                 {isDeposit ? 'Withdraw' : 'Repay'}

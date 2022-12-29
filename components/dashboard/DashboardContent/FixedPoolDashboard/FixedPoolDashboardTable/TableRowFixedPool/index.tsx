@@ -23,7 +23,7 @@ type Props = {
   symbol: string;
   amount: BigNumber;
   type: 'deposit' | 'borrow';
-  maturityDate: string;
+  maturityDate: number;
   market: string;
   decimals: number;
 };

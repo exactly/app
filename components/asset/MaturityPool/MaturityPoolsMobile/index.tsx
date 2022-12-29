@@ -50,7 +50,7 @@ const MaturityPoolsMobile: FC<Props> = ({ APRsPerMaturity, symbol }) => {
                 fullWidth
                 variant="contained"
                 sx={{ height: '34px' }}
-                onClick={(e) => handleActionClick(e, 'depositAtMaturity', symbol, parseInt(maturity))}
+                onClick={(e) => handleActionClick(e, 'depositAtMaturity', symbol, maturity)}
               >
                 Deposit
               </Button>
@@ -58,7 +58,7 @@ const MaturityPoolsMobile: FC<Props> = ({ APRsPerMaturity, symbol }) => {
                 variant="outlined"
                 fullWidth
                 sx={{ height: '34px' }}
-                onClick={(e) => handleActionClick(e, 'borrowAtMaturity', symbol, parseInt(maturity))}
+                onClick={(e) => handleActionClick(e, 'borrowAtMaturity', symbol, maturity)}
               >
                 Borrow
               </Button>

@@ -31,7 +31,7 @@ function DateSelector() {
           options={dates}
           onChange={setDate}
           renderValue={date ? <DateOption label={parseTimestamp(date)} /> : null}
-          renderOption={(o: string) => <DateOption option label={parseTimestamp(o)} />}
+          renderOption={(o: number) => <DateOption option label={parseTimestamp(o)} />}
         />
       </Box>
     </ModalInfo>

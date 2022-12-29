@@ -80,11 +80,11 @@ const RepayAtMaturity: FC = () => {
 
   const walletBalance = useBalance(symbol, assetContract);
 
-  const isLateRepay = useMemo(() => date && Date.now() / 1000 > parseInt(date), [date]);
+  const isLateRepay = useMemo(() => date && Date.now() / 1000 > date, [date]);
 
   const totalPositionAssets = useMemo(() => {
     if (!accountData || !date) return Zero;
-    const pool = accountData[symbol].fixedBorrowPositions.find(({ maturity }) => maturity.toString() === date);
+    const pool = accountData[symbol].fixedBorrowPositions.find(({ maturity }) => maturity.toNumber() === date);
 
     return pool ? pool.position.principal.add(pool.position.fee) : Zero;
   }, [date, accountData, symbol]);
@@ -95,8 +95,7 @@ const RepayAtMaturity: FC = () => {
     const { penaltyRate } = accountData[symbol];
 
     const currentTimestamp = Math.floor(Date.now() / 1000);
-    const maturityTimestamp = parseFloat(date);
-    const penaltyTime = currentTimestamp - maturityTimestamp;
+    const penaltyTime = currentTimestamp - date;
 
     return penaltyRate.mul(penaltyTime).mul(totalPositionAssets).div(WeiPerEther);
   }, [accountData, date, isLateRepay, totalPositionAssets, symbol]);

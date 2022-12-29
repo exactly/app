@@ -38,12 +38,12 @@ export default function useDashboard(type: string) {
 
   const fixedDeposits = useMemo(() => {
     if (!deposits) return [];
-    return Object.keys(deposits)?.flatMap((maturity) => deposits[maturity]);
+    return Object.keys(deposits)?.flatMap((maturity) => deposits[parseInt(maturity)]);
   }, [deposits]);
 
   const fixedBorrows = useMemo(() => {
     if (!borrows) return [];
-    return Object.keys(borrows)?.flatMap((maturity) => borrows[maturity]);
+    return Object.keys(borrows)?.flatMap((maturity) => borrows[parseInt(maturity)]);
   }, [borrows]);
 
   const fixedRows = useMemo(() => (isDeposit ? fixedDeposits : fixedBorrows), [isDeposit, fixedDeposits, fixedBorrows]);
