@@ -44,7 +44,7 @@ const SelectNetwork: FC = () => {
       sx={{
         pr: '10px',
         pl: '6px',
-        minWidth: { xs: '60px', sm: '120px' },
+        minWidth: { xs: '45px', sm: '100px' },
         borderRadius: '32px',
         bgcolor: buttonBgColor,
         color: 'white',
@@ -54,15 +54,13 @@ const SelectNetwork: FC = () => {
         },
       }}
     >
-      <Box display="flex" justifyContent="space-between" width="100%" gap={{ xs: 0, sm: 1 }}>
-        <Box display="flex" gap={0.5}>
-          {isSupportedChain ? (
-            <Image src={`/img/networks/${chain?.id}.svg`} alt={`chain id ${chain?.id}`} width={24} height={24} />
-          ) : (
-            <ErrorIcon />
-          )}
-          <Box display={onlyDesktop}>{isSupportedChain ? chain?.name : 'Unsupported network'}</Box>
-        </Box>
+      <Box display="flex" gap={0.5} mr={{ xs: 0, sm: 1 }} ml="3px">
+        {isSupportedChain ? (
+          <Image src={`/img/networks/${chain?.id}.svg`} alt={`chain id ${chain?.id}`} width={24} height={24} />
+        ) : (
+          <ErrorIcon />
+        )}
+        <Box display={onlyDesktop}>{isSupportedChain ? chain?.name : 'Unsupported network'}</Box>
       </Box>
     </Button>
   );
