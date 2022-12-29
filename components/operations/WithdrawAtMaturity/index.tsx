@@ -109,7 +109,7 @@ const WithdrawAtMaturity: FC = () => {
     }
 
     const parsedQtyValue = parseFixed(qty, decimals);
-    const amount = await previewerContract.previewWithdrawAtMaturity(
+    const { assets: amount } = await previewerContract.previewWithdrawAtMaturity(
       marketContract.address,
       date,
       parsedQtyValue,
