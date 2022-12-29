@@ -47,7 +47,6 @@ function ModalInfoBorrowLimit({ qty, symbol, operation, variant = 'column' }: Pr
 
     switch (operation) {
       case 'deposit':
-      case 'depositAtMaturity':
         if (isCollateral) {
           const adjustedDepositBorrowLimit = newQtyUsd.mul(adjustFactor).div(WeiPerEther);
 
@@ -59,8 +58,12 @@ function ModalInfoBorrowLimit({ qty, symbol, operation, variant = 'column' }: Pr
         }
         break;
 
-      case 'withdraw':
       case 'withdrawAtMaturity':
+      case 'depositAtMaturity':
+        newAfterBorrowLimit = Number(formatFixed(beforeBorrowLimitUSD, 18)).toFixed(2);
+        break;
+
+      case 'withdraw':
         newAfterBorrowLimit = Number(formatFixed(beforeBorrowLimitUSD.sub(newQtyUsd), 18)).toFixed(2);
         break;
 

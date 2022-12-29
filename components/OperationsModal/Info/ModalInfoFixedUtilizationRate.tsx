@@ -31,7 +31,7 @@ function ModalInfoFixedUtilizationRate({ qty, symbol, operation, variant = 'colu
     const pool = fixedPools?.find(({ maturity }) => maturity.toNumber() === date);
     if (!pool) return;
 
-    return toPercentage(Number(formatFixed(pool.utilization, 18)) * 100);
+    return toPercentage(Number(formatFixed(pool.utilization, 18)));
   }, [date, fixedPools]);
 
   const [to, setTo] = useState<string | undefined>();
@@ -80,7 +80,7 @@ function ModalInfoFixedUtilizationRate({ qty, symbol, operation, variant = 'colu
       }
 
       if (uti) {
-        setTo(toPercentage(Number(formatFixed(uti, 18)) * 100));
+        setTo(toPercentage(Number(formatFixed(uti, 18))));
       }
     } catch {
       setTo('N/A');

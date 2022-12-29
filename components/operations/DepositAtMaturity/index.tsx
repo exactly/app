@@ -31,7 +31,6 @@ import { Grid } from '@mui/material';
 import { ModalBox, ModalBoxCell, ModalBoxRow } from 'components/common/modal/ModalBox';
 import AssetInput from 'components/OperationsModal/AssetInput';
 import ModalInfoHealthFactor from 'components/OperationsModal/Info/ModalInfoHealthFactor';
-import ModalInfoBorrowLimit from 'components/OperationsModal/Info/ModalInfoBorrowLimit';
 import { useModalStatus } from 'contexts/ModalStatusContext';
 import ModalAdvancedSettings from 'components/common/modal/ModalAdvancedSettings';
 import ModalInfoTotalDeposits from 'components/OperationsModal/Info/ModalInfoTotalDeposits';
@@ -325,7 +324,6 @@ const DepositAtMaturity: FC = () => {
       <Grid item mt={2}>
         {errorData?.component !== 'gas' && <ModalTxCost gasCost={gasCost} />}
         <ModalAdvancedSettings>
-          <ModalInfoBorrowLimit qty={qty} symbol={symbol} operation={operation} variant="row" />
           <ModalInfoTotalDeposits qty={qty} symbol={symbol} operation="deposit" variant="row" />
           {optimalDepositAmount && (
             <ModalInfo label="Optimal deposit amount" variant="row">
