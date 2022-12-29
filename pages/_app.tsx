@@ -27,8 +27,8 @@ export default function App({ Component, pageProps }: AppProps) {
   return (
     <>
       <Head>
-        <title>Exactly App - Decentralizing the time value of money</title>
-        <meta name="description" content="Exactly App - Decentralizing the time value of money" />
+        <title>Exactly - Decentralizing the time-value of money</title>
+        <meta name="description" content="Exactly - Decentralizing the time-value of money" />
         <link rel="icon" href="/icon.ico" />
       </Head>
       <ThemeProvider>
@@ -64,6 +64,7 @@ export default function App({ Component, pageProps }: AppProps) {
               themeMode="light"
               themeColor="blackWhite"
               themeBackground="themeColor"
+              walletImages={{ safe: '/img/wallets/safe.png' }}
             />
           </LangProvider>
         </MUIThemeProvider>

@@ -2,6 +2,7 @@ import React, { createContext, useCallback, useEffect, useState } from 'react';
 import type { FC, PropsWithChildren } from 'react';
 import { AddressZero } from '@ethersproject/constants';
 import { captureException } from '@sentry/nextjs';
+import { useClient, useConnect } from 'wagmi';
 
 import { AccountData } from 'types/AccountData';
 
@@ -21,7 +22,15 @@ const AccountDataContext = createContext<ContextValues>({
 
 export const AccountDataProvider: FC<PropsWithChildren> = ({ children }) => {
   const [accountData, setAccountData] = useState<AccountData | undefined>();
+  const { connect, connectors } = useConnect();
   const { walletAddress } = useWeb3();
+  const client = useClient();
+
+  useEffect(() => {
+    const safeConnector = connectors.find(({ id, ready }) => ready && id === 'safe');
+    if (safeConnector) connect({ connector: safeConnector });
+    else void client.autoConnect();
+  }, [client, connect, connectors]);
 
   const previewer = usePreviewer();
 
