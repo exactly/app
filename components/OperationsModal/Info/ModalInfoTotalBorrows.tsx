@@ -44,7 +44,16 @@ function ModalInfoTotalBorrows({ qty, symbol, operation, variant = 'column' }: P
     <ModalInfo label="Debt amount" icon={SwapHorizIcon} variant={variant}>
       <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 0.5 }}>
         {variant === 'column' && (
-          <Image src={`/img/assets/${symbol}.svg`} alt={formatSymbol(symbol)} width={16} height={16} />
+          <Image
+            src={`/img/assets/${symbol}.svg`}
+            alt={formatSymbol(symbol)}
+            width={16}
+            height={16}
+            style={{
+              maxWidth: '100%',
+              height: 'auto',
+            }}
+          />
         )}
         <FromTo from={from} to={to} variant={variant} />
       </Box>
