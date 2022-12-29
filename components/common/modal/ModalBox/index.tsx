@@ -25,10 +25,10 @@ export function ModalBoxRow(props: BoxProps) {
         flexWrap: 'wrap',
         paddingY: 2,
         minWidth: theme.spacing(20),
-        '&:not(:first-child)': {
+        '&:not(:nth-of-type(1))': {
           borderTop: `1px solid ${theme.palette.grey[300]}`,
         },
-        '&:first-child': {
+        '&:nth-of-type(1)': {
           paddingTop: 0,
         },
         '&:last-child': {
@@ -47,14 +47,14 @@ export function ModalBoxCell({ divisor = false, ...props }: { divisor?: boolean 
         flexGrow: 1,
         flexBasis: '50%',
         minWidth: theme.spacing(8),
-        '&:nth-child(2n+1)': {
+        '&:nth-of-type(2n+1)': {
           paddingRight: 2,
         },
-        '&:nth-child(2n)': {
+        '&:nth-of-type(2n)': {
           borderLeft: divisor ? `1px solid ${theme.palette.grey[300]}` : 'none',
           paddingLeft: 2,
         },
-        '&:nth-child(n+3)': {
+        '&:nth-of-type(n+3)': {
           marginTop: 2,
         },
       })}

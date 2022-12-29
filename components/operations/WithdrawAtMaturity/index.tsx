@@ -331,9 +331,11 @@ const WithdrawAtMaturity: FC = () => {
             <ModalBoxCell>
               <ModalInfoHealthFactor qty={qty} symbol={symbol} operation={operation} />
             </ModalBoxCell>
-            <ModalBoxCell divisor>
-              <ModalInfoFixedUtilizationRate qty={qty} symbol={symbol} operation="withdrawAtMaturity" />
-            </ModalBoxCell>
+            {isEarlyWithdraw && (
+              <ModalBoxCell divisor>
+                <ModalInfoFixedUtilizationRate qty={qty} symbol={symbol} operation="withdrawAtMaturity" />
+              </ModalBoxCell>
+            )}
           </ModalBoxRow>
         </ModalBox>
       </Grid>

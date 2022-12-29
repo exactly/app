@@ -78,12 +78,12 @@ const GridItem: FC<{ title: string; value: string; tooltip?: string; isLoading?:
 }) => (
   <Grid item xs={6}>
     <Box display="flex">
-      <Typography fontSize="16px" color="grey.300" lineHeight="20px">
+      <Typography fontSize="16px" color="figma.grey.300" lineHeight="20px">
         {title}
       </Typography>
       {tooltip && (
         <Tooltip title={tooltip} placement="top" arrow enterTouchDelay={0}>
-          <HelpOutlineIcon sx={{ color: 'grey.300', fontSize: '16px', my: 'auto', ml: '4px' }} />
+          <HelpOutlineIcon sx={{ color: 'figma.grey.300', fontSize: '16px', my: 'auto', ml: '4px' }} />
         </Tooltip>
       )}
     </Box>
