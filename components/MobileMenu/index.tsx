@@ -46,7 +46,7 @@ function MobileMenu({ open, handleClose }: Props) {
             <Box display="flex" justifyContent="space-between">
               <Image src="/img/logo.svg" alt="Exactly Logo" width={103} height={30} />
               <IconButton size="small" edge="start" aria-label="close" onClick={handleClose}>
-                <CloseIcon sx={{ color: 'grey.300' }} />
+                <CloseIcon sx={{ color: 'figma.grey.300' }} />
               </IconButton>
             </Box>
             <Typography variant="subtitle2" color="grey.500" fontWeight={600} mt="18px">
@@ -84,7 +84,7 @@ function MobileMenu({ open, handleClose }: Props) {
               <TwitterIcon fontSize="small" sx={{ color: 'grey.500', my: 'auto' }} />
             </LinkItem>
           </Box>
-          <Typography fontSize="16px" sx={{ color: 'grey.300' }}>
+          <Typography fontSize="16px" sx={{ color: 'figma.grey.300' }}>
             © Exactly {date.getFullYear()}
           </Typography>
         </Box>

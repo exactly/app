@@ -40,7 +40,7 @@ const Footer = () => {
             display: 'flex',
             justifyContent: 'space-between',
             padding: '16px 0px',
-            color: 'grey.300',
+            color: 'figma.grey.300',
             fontWeight: '500',
           }}
         >

@@ -145,12 +145,12 @@ const DashboardMobile: FC<Props> = ({ type }) => {
 const FlexItem: FC<PropsWithChildren & { title: string; tooltip?: string }> = ({ title, children, tooltip }) => (
   <Box display="flex" justifyContent="space-between">
     <Box display="flex">
-      <Typography fontSize="16px" color="grey.300" lineHeight="20px">
+      <Typography fontSize="16px" color="figma.grey.300" lineHeight="20px" fontWeight={500}>
         {title}
       </Typography>
       {tooltip && (
         <Tooltip title={tooltip} placement="top" arrow enterTouchDelay={0}>
-          <HelpOutlineIcon sx={{ color: 'grey.300', fontSize: '16px', my: 'auto', ml: '4px' }} />
+          <HelpOutlineIcon sx={{ color: 'figma.grey.300', fontSize: '16px', my: 'auto', ml: '4px' }} />
         </Tooltip>
       )}
     </Box>
