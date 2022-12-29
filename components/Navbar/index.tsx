@@ -46,7 +46,7 @@ function Navbar() {
       <DisclaimerModal />
       <AppBar position="static" color="transparent" sx={{ maxWidth }}>
         <Toolbar disableGutters sx={{ padding: '0 0', gap: '8px' }}>
-          <Link href={{ pathname: '/', query }}>
+          <Link href={{ pathname: '/', query }} legacyBehavior>
             <Box mr="10px" sx={{ cursor: 'pointer' }}>
               <Image
                 src={theme === 'light' ? '/img/logo.svg' : '/img/logo-white.png'}
@@ -58,7 +58,7 @@ function Navbar() {
             </Box>
           </Link>
           {routes.map(({ name, pathname }) => (
-            <Link key={pathname} href={{ pathname, query }}>
+            <Link key={pathname} href={{ pathname, query }} legacyBehavior>
               <Box
                 sx={{
                   mx: '8px',

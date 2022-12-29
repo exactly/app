@@ -37,7 +37,7 @@ function TableRowFloatingPool({ symbol, depositAmount, borrowedAmount, exaTokenA
 
   return (
     <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }} hover>
-      <Link href={{ pathname: `/assets/${symbol}`, query }}>
+      <Link href={{ pathname: `/assets/${symbol}`, query }} legacyBehavior>
         <TableCell component="th" align="left" sx={{ cursor: 'pointer' }} width={240}>
           <Stack direction="row" spacing={1}>
             <Image src={`/img/assets/${symbol}.svg`} alt={symbol} width={24} height={24} />
