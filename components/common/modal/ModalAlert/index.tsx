@@ -1,5 +1,5 @@
 import React from 'react';
-import { Grid, SxProps, Typography } from '@mui/material';
+import { Box, SxProps, Typography } from '@mui/material';
 import InfoIcon from '@mui/icons-material/InfoRounded';
 import WarningIcon from '@mui/icons-material/ErrorRounded';
 import ErrorIcon from '@mui/icons-material/ReportProblemRounded';
@@ -34,7 +34,7 @@ const icon: Record<Variant, typeof InfoIcon> = {
 };
 
 function ModalAlert({ variant = 'info', message }: Props) {
-  const gridSx: SxProps = {
+  const containerSx: SxProps = {
     p: 1,
     backgroundColor: bg[variant],
     borderRadius: 1,
@@ -47,25 +47,24 @@ function ModalAlert({ variant = 'info', message }: Props) {
   const iconSx: SxProps = {
     fontSize: 14,
     color: fg[variant],
-    mt: '2px',
+    mt: '4px',
+    ml: 'auto',
   };
   const textSx: SxProps = {
     fontSize: 14,
     fontWeight: 500,
     color: fg[variant],
+    mr: 'auto',
+    maxWidth: '370px',
   };
 
   const Icon = icon[variant];
 
   return (
-    <Grid container sx={gridSx} flexDirection="row" alignItems="flex-start">
-      <Grid item>
-        <Icon sx={iconSx} />
-      </Grid>
-      <Grid item>
-        <Typography sx={textSx}>{message}</Typography>
-      </Grid>
-    </Grid>
+    <Box sx={containerSx} display="flex" alignItems="flex-center">
+      <Icon sx={iconSx} />
+      <Typography sx={textSx}>{message}</Typography>
+    </Box>
   );
 }
 
