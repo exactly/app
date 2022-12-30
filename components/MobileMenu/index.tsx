@@ -83,6 +83,9 @@ function MobileMenu({ open, handleClose }: Props) {
             <LinkItem title="Twitter" href="https://twitter.com/exactlyprotocol">
               <TwitterIcon fontSize="small" sx={{ color: 'grey.500', my: 'auto' }} />
             </LinkItem>
+            <LinkItem title="Discord" href="https://discord.gg/exactly">
+              <img alt="discord" src="/img/social/discord.png" width={20} height={20} style={{ alignSelf: 'center' }} />
+            </LinkItem>
           </Box>
           <Typography fontSize="16px" sx={{ color: 'figma.grey.300' }}>
             © Exactly {date.getFullYear()}
