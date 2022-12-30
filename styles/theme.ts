@@ -35,11 +35,13 @@ declare module '@mui/material/styles' {
     fontFamilyMonospaced: string;
     modalRow: TypographyVariants['body1'];
     modalCol: TypographyVariants['body1'];
+    link: TypographyVariants['body1'];
   }
   interface TypographyVariantsOptions {
     fontFamilyMonospaced: string;
     modalRow: TypographyVariants['body1'];
     modalCol: TypographyVariants['body1'];
+    link: TypographyVariants['body1'];
   }
 }
 
@@ -47,6 +49,7 @@ declare module '@mui/material/Typography' {
   interface TypographyPropsVariantOverrides {
     modalRow: true;
     modalCol: true;
+    link: true;
   }
 }
 
@@ -125,6 +128,11 @@ const theme = createTheme({
       color: '#0D0E0F',
       fontSize: 20,
       fontWeight: 600,
+    },
+    link: {
+      color: '#4193f7',
+      fontSize: 14,
+      fontWeight: 700,
     },
   },
   shape: {
