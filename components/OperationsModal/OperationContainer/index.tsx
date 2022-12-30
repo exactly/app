@@ -11,13 +11,12 @@ import RepayAtMaturity from 'components/operations/RepayAtMaturity';
 import Faucet from 'components/operations/Faucet';
 
 import { useModalStatus } from 'contexts/ModalStatusContext';
-import { OperationContextProvider } from 'contexts/OperationContext';
 
 function OperationContainer() {
   const { operation } = useModalStatus();
 
   return (
-    <OperationContextProvider>
+    <>
       {operation === 'deposit' && <Deposit />}
       {operation === 'borrow' && <Borrow />}
       {operation === 'withdraw' && <Withdraw />}
@@ -27,7 +26,7 @@ function OperationContainer() {
       {operation === 'withdrawAtMaturity' && <WithdrawAtMaturity />}
       {operation === 'repayAtMaturity' && <RepayAtMaturity />}
       {operation === 'faucet' && <Faucet />}
-    </OperationContextProvider>
+    </>
   );
 }
 
