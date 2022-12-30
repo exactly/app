@@ -36,6 +36,7 @@ export const AccountDataProvider: FC<PropsWithChildren> = ({ children }) => {
 
   const getAccountData = useCallback(async () => {
     if (!previewer) return;
+
     const account = walletAddress ?? AddressZero;
 
     const exactly = await previewer.exactly(account);
