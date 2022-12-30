@@ -16,7 +16,6 @@ type Props = {
   name?: string;
   value?: string;
   symbol: string;
-  error?: boolean;
   onChange?: ChangeEventHandler<HTMLInputElement>;
 };
 
