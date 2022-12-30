@@ -11,10 +11,10 @@ import keys from './translations.json';
 
 import LangContext from 'contexts/LangContext';
 
-import Button from 'components/common/Button';
 import Loading from 'components/common/Loading';
 import { useWeb3 } from 'hooks/useWeb3';
 import networkData from 'config/networkData.json' assert { type: 'json' };
+import { Button } from '@mui/material';
 
 type Props = {
   tx: Transaction;
@@ -83,7 +83,9 @@ function ModalGif({ tx, tryAgain }: Props) {
 
       {tx.status === 'error' && (
         <div className={styles.buttonContainer}>
-          <Button text={translations[lang].errorButton} onClick={tryAgain} />
+          <Button onClick={tryAgain} variant="contained">
+            {translations[lang].errorButton}
+          </Button>
         </div>
       )}
     </section>
