@@ -1,6 +1,6 @@
 import React, { useContext, useMemo } from 'react';
 import Image from 'next/image';
-import { Typography } from '@mui/material';
+import { Skeleton, Typography } from '@mui/material';
 
 import { MarketContext } from 'contexts/MarketContext';
 import AccountDataContext from 'contexts/AccountDataContext';
@@ -10,12 +10,17 @@ import { Address } from 'types/Address';
 import DropdownMenu from 'components/DropdownMenu';
 
 type AssetOptionProps = {
-  assetSymbol: string;
+  assetSymbol?: string;
   option?: boolean;
 };
 
 function Asset({ assetSymbol, option = false }: AssetOptionProps) {
   const size = option ? 14 : 24;
+
+  if (!assetSymbol) {
+    return <Skeleton width={80} />;
+  }
+
   return (
     <>
       <Image
@@ -56,8 +61,8 @@ function AssetSelector() {
       label="Asset"
       options={Object.keys(options)}
       onChange={setMarket}
-      renderValue={market ? <Asset assetSymbol={options[market].assetSymbol} /> : null}
-      renderOption={(o: string) => <Asset option assetSymbol={options[o].assetSymbol} />}
+      renderValue={market ? <Asset assetSymbol={options[market]?.assetSymbol} /> : null}
+      renderOption={(o: string) => <Asset option assetSymbol={options[o]?.assetSymbol} />}
     />
   );
 }
