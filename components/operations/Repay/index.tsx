@@ -270,7 +270,6 @@ function Repay() {
               symbol={symbol}
               onMax={onMax}
               onChange={handleInputChange}
-              error={errorData}
               label="Wallet balance"
               amount={walletBalance}
             />

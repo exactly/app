@@ -249,7 +249,6 @@ const Withdraw: FC = () => {
               symbol={symbol}
               onMax={onMax}
               onChange={handleInputChange}
-              error={errorData}
               label="Available"
               amount={parsedAmount}
             />
