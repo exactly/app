@@ -1,9 +1,9 @@
 import React from 'react';
-import Button from 'components/common/Button';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 
 import styles from './style.module.scss';
+import { Button } from '@mui/material';
 
 type Props = {
   code: number;
@@ -18,8 +18,8 @@ function ErrorPageMessage({ code, description, message }: Props) {
       <h1 className={styles.code}>{code}</h1>
       <h2 className={styles.description}>{description}</h2>
       <p className={styles.message}>{message}</p>
-      <Link href={{ pathname: '/', query }} className={styles.buttonContainer}>
-        <Button text="Go to Markets" />
+      <Link href={{ pathname: '/', query }}>
+        <Button variant="contained">Go to Markets</Button>
       </Link>
     </section>
   );
