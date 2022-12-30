@@ -54,7 +54,7 @@ const HeadCell: FC<TableHead> = ({ title, tooltipTitle, width }) => {
   return (
     <TableCell align="left" sx={{ minWidth: width }}>
       <Tooltip title={tooltipTitle} placement="top" arrow>
-        <Typography variant="subtitle2" sx={{ color: 'grey.500' }} fontWeight={600}>
+        <Typography variant="subtitle2" sx={{ color: 'grey.500' }} fontWeight={600} width="fit-content">
           {title}
         </Typography>
       </Tooltip>
