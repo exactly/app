@@ -7,8 +7,8 @@ import React, {
   useContext,
   useState,
   useMemo,
-  useEffect,
   useCallback,
+  useEffect,
 } from 'react';
 import { ErrorData } from 'types/Error';
 import { Transaction } from 'types/Transaction';
@@ -37,7 +37,7 @@ type ContextValues = {
 const OperationContext = createContext<ContextValues | null>(null);
 
 export const OperationContextProvider: FC<PropsWithChildren> = ({ children }) => {
-  const { account } = useContext(MarketContext);
+  const { account, market } = useContext(MarketContext);
   const { open, operation } = useModalStatus();
 
   const [errorData, setErrorData] = useState<ErrorData | undefined>();
@@ -49,13 +49,13 @@ export const OperationContextProvider: FC<PropsWithChildren> = ({ children }) =>
   const [requiresApproval, setRequiresApproval] = useState(false);
 
   useEffect(() => {
+    setQty('');
     setTx(undefined);
     setErrorData(undefined);
-    setQty('');
     setIsLoading(false);
     setRequiresApproval(true);
     setGasCost(undefined);
-  }, [account?.assetSymbol, operation, open]);
+  }, [market, operation, open]);
 
   const value: ContextValues = useMemo(
     () => ({
