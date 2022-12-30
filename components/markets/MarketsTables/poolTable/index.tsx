@@ -138,7 +138,7 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
                         arrow
                         placement="top"
                       >
-                        <Typography>
+                        <Typography width="fit-content">
                           {toPercentage(depositAPR && depositAPR > minAPRValue ? depositAPR : undefined)}
                         </Typography>
                       </Tooltip>
@@ -162,7 +162,7 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
                         arrow
                         placement="top"
                       >
-                        <Typography>
+                        <Typography width="fit-content">
                           {toPercentage(borrowAPR && borrowAPR > minAPRValue ? borrowAPR : undefined)}
                         </Typography>
                       </Tooltip>
