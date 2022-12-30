@@ -175,7 +175,6 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
                     }
                     arrow
                     placement="top"
-                    followCursor
                   >
                     <TableCell
                       align="left"
@@ -229,7 +228,6 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
                         title="In order to borrow you need to have a deposit in the Variable Rate Pool marked as collateral in your Dashboard"
                         arrow
                         placement="top"
-                        followCursor
                       >
                         <Button
                           variant="outlined"
