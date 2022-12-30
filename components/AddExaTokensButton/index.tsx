@@ -1,9 +1,8 @@
 import React, { useCallback, useContext } from 'react';
 import { useAccount } from 'wagmi';
-import { Tooltip } from '@mui/material';
+import { Tooltip, Typography } from '@mui/material';
 
 import AccountDataContext from 'contexts/AccountDataContext';
-import styles from './style.module.scss';
 
 const AddExaTokensButton = () => {
   const { accountData } = useContext(AccountDataContext);
@@ -24,9 +23,9 @@ const AddExaTokensButton = () => {
 
   return connector?.watchAsset ? (
     <Tooltip title="Add exaTokens to Metamask" placement="top" arrow>
-      <p className={styles.addAssets} onClick={onClick}>
+      <Typography variant="link" onClick={onClick}>
         + exaTokens
-      </p>
+      </Typography>
     </Tooltip>
   ) : null;
 };

@@ -4,14 +4,14 @@ import { parseFixed } from '@ethersproject/bignumber';
 import { Contract } from '@ethersproject/contracts';
 import Image from 'next/image';
 
-import Button from 'components/common/Button';
-
 import faucetAbi from './abi.json';
 
 import AccountDataContext from 'contexts/AccountDataContext';
 import useAssets from 'hooks/useAssets';
 
-import styles from './style.module.scss';
+import { Box, Button, Divider, Typography } from '@mui/material';
+import formatSymbol from 'utils/formatSymbol';
+import { LoadingButton } from '@mui/lab';
 
 const images: Record<string, string> = {
   DAI: 'https://gateway.ipfs.io/ipfs/QmXyHPX8GS99dUiChsq7iRfZ4y3aofQqPjMjFJyCpkWs8e',
@@ -68,88 +68,46 @@ function Faucet() {
   }, [accountData, connector]);
 
   return (
-    <>
-      <div className={styles.faucetContainer}>
-        <div className={styles.titlesContainer}>
-          <h4 className={styles.addTokens} onClick={addTokens}>
-            Add tokens to Metamask
-          </h4>
-        </div>
-        <div className={styles.header}>
-          <p>Asset</p>
-        </div>
-        {assets.map((asset) => {
-          if (asset === 'WETH') {
-            return (
-              <div className={styles.assetContainer} key={asset}>
-                <p className={styles.asset}>
-                  <Image
-                    src={`/img/assets/weth.svg`}
-                    alt={asset}
-                    width={40}
-                    height={40}
-                    style={{
-                      maxWidth: '100%',
-                      height: 'auto',
-                    }}
-                  />
-                  ETH
-                </p>
-                <div className={styles.buttonContainer}>
-                  <a href="https://goerlifaucet.com/" target="_blank" rel="noopener noreferrer">
-                    <Button text="Mint" />
-                  </a>
-                </div>
-              </div>
-            );
-          }
-          if (asset === 'wstETH') {
-            return (
-              <div className={styles.assetContainer} key={asset}>
-                <p className={styles.asset}>
-                  <Image
-                    src={`/img/assets/${asset}.svg`}
-                    alt={asset}
-                    width={40}
-                    height={40}
-                    style={{
-                      maxWidth: '100%',
-                      height: 'auto',
-                    }}
-                  />
-                  {asset}
-                </p>
-                <div className={styles.buttonContainer}>
-                  <a href="https://stake.testnet.fi/" target="_blank" rel="noopener noreferrer">
-                    <Button text="Mint" />
-                  </a>
-                </div>
-              </div>
-            );
-          }
-          return (
-            <div className={styles.assetContainer} key={asset}>
-              <p className={styles.asset}>
-                <Image
-                  src={`/img/assets/${asset}.svg`}
-                  alt={asset}
-                  width={40}
-                  height={40}
-                  style={{
-                    maxWidth: '100%',
-                    height: 'auto',
-                  }}
-                />
-                {asset}
-              </p>
-              <div className={styles.buttonContainer}>
-                <Button text="Mint" onClick={() => mint(asset)} loading={asset === loading} />
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </>
+    <Box minWidth={{ xs: 200, sm: 350 }}>
+      <Typography variant="link" onClick={addTokens} sx={{ cursor: 'pointer' }}>
+        Add tokens to Metamask
+      </Typography>
+      <Divider sx={{ my: 3 }} />
+      <Box display="flex" flexDirection="column" gap={3}>
+        {assets.map((asset) => (
+          <Box key={`faucet_${asset}`} display="flex" justifyContent="space-between">
+            <Box display="flex" gap={1.5}>
+              <Image
+                src={`/img/assets/${asset}.svg`}
+                alt={asset}
+                width={40}
+                height={40}
+                style={{
+                  maxWidth: '100%',
+                  height: 'auto',
+                }}
+              />
+              <Typography fontWeight="600" alignSelf="center">
+                {formatSymbol(asset)}
+              </Typography>
+            </Box>
+            {asset === 'WETH' || asset === 'wstETH' ? (
+              <a
+                href={asset === 'wstETH' ? 'https://stake.testnet.fi/' : 'https://goerlifaucet.com/'}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Button variant="contained">Mint</Button>
+              </a>
+            ) : (
+              <LoadingButton variant="contained" onClick={() => mint(asset)} loading={asset === loading}>
+                Mint
+              </LoadingButton>
+            )}
+          </Box>
+        ))}
+      </Box>
+    </Box>
   );
 }
 
