@@ -63,6 +63,9 @@ const Footer = () => {
             <a target="_blank" rel="noreferrer noopener" href="https://twitter.com/exactlyprotocol">
               <TwitterIcon fontSize="small" />
             </a>
+            <a target="_blank" rel="noreferrer noopener" href="https://discord.gg/exactly">
+              <img alt="discord" src="/img/social/discord.png" width={20} />
+            </a>
           </Box>
         </Box>
       </Box>
