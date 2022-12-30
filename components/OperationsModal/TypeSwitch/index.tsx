@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { Box, Button, useTheme, type ButtonProps } from '@mui/material';
 import { useModalStatus } from 'contexts/ModalStatusContext';
+import { useOperationContext } from 'contexts/OperationContext';
 
 type SelectorProps = {
   label: string;
@@ -35,6 +36,7 @@ function Selector({ label, backgroundColor, selected, ...props }: SelectorProps)
 function TypeSwitch() {
   const theme = useTheme();
   const { operation, toggle } = useModalStatus();
+  const { tx } = useOperationContext();
 
   const options = useMemo<SelectorProps[]>(() => {
     const isFixed = operation?.endsWith('AtMaturity') ?? true;
@@ -54,6 +56,10 @@ function TypeSwitch() {
       },
     ];
   }, [operation, theme, toggle]);
+
+  if (tx || operation === 'faucet') {
+    return null;
+  }
 
   return (
     <Box
