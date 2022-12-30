@@ -291,7 +291,6 @@ const Borrow: FC = () => {
               symbol={symbol}
               onMax={onMax}
               onChange={handleInputChange}
-              error={errorData}
               label="Wallet balance"
               amount={walletBalance}
             />

@@ -302,7 +302,6 @@ const WithdrawAtMaturity: FC = () => {
               symbol={symbol}
               onMax={onMax}
               onChange={handleInputChange}
-              error={errorData}
               label="Deposited"
               amount={amountAtFinish}
             />

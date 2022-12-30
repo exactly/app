@@ -287,7 +287,6 @@ const RepayAtMaturity: FC = () => {
               symbol={symbol}
               onMax={onMax}
               onChange={handleInputChange}
-              error={errorData}
               label="Debt amount"
               amount={formatFixed(totalPositionAssets, decimals)}
             />
