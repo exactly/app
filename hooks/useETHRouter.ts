@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useSigner } from 'wagmi';
+import { mainnet } from 'wagmi/chains';
 import { Contract } from '@ethersproject/contracts';
 import { MarketETHRouter } from 'types/contracts';
 import MarketETHRouterABI from 'abi/MarketETHRouter.json';
@@ -14,17 +15,19 @@ export default () => {
 
   useEffect(() => {
     const loadMarketETHRouter = async () => {
-      if (!chain?.id || !signer) return;
+      if (!chain || !signer) return;
 
       const { address } = await import(
-        `@exactly-protocol/protocol/deployments/${chain.name.toLowerCase()}/MarketETHRouter.json`,
+        `@exactly-protocol/protocol/deployments/${
+          { [mainnet.id]: 'mainnet' }[chain.id] ?? chain.network
+        }/MarketETHRouter.json`,
         { assert: { type: 'json' } }
       );
 
       setMarketETHRouterContract(new Contract(address, MarketETHRouterABI, signer) as MarketETHRouter);
     };
     loadMarketETHRouter().catch(captureException);
-  }, [chain?.id, chain?.name, signer]);
+  }, [chain, signer]);
 
   return marketETHRouterContract;
 };
