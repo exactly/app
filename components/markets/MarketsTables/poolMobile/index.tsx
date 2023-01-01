@@ -35,7 +35,7 @@ const PoolMobile: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) 
                 </Grid>
                 <GridItem header={headers[2]} value={`$${totalBorrowed}`} isLoading={totalBorrowed === undefined} />
                 <GridItem
-                  header={headers[3]}
+                  header={headers[4]}
                   value={toPercentage(borrowAPR && borrowAPR > minAPRValue ? borrowAPR : undefined)}
                   isLoading={borrowAPR === undefined}
                 />
