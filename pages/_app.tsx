@@ -11,7 +11,6 @@ import { LangProvider } from 'contexts/LangContext';
 import { ModalStatusProvider } from 'contexts/ModalStatusContext';
 import { MarketProvider } from 'contexts/MarketContext';
 import { AccountDataProvider } from 'contexts/AccountDataContext';
-import { SkeletonTheme } from 'react-loading-skeleton';
 import { ThemeProvider } from 'contexts/ThemeContext';
 import { ThemeProvider as MUIThemeProvider } from '@mui/material/styles';
 import { defaultChain, wagmi, walletConnectId, web3modal } from 'utils/client';
@@ -37,17 +36,15 @@ export default function App({ Component, pageProps }: AppProps) {
               <AccountDataProvider>
                 <MarketProvider>
                   <ModalStatusProvider>
-                    <SkeletonTheme baseColor="var(--skeleton-base)" highlightColor="var(--skeleton-highlight)">
-                      <Grid maxWidth={maxWidth} mx="auto" height="100%">
-                        <Box display="flex" flexDirection="column" mx={1} height="100%">
-                          <Navbar />
-                          <main style={{ flexGrow: 1 }}>
-                            <Component {...pageProps} />
-                          </main>
-                          <Footer />
-                        </Box>
-                      </Grid>
-                    </SkeletonTheme>
+                    <Grid maxWidth={maxWidth} mx="auto" height="100%">
+                      <Box display="flex" flexDirection="column" mx={1} height="100%">
+                        <Navbar />
+                        <main style={{ flexGrow: 1 }}>
+                          <Component {...pageProps} />
+                        </main>
+                        <Footer />
+                      </Box>
+                    </Grid>
                   </ModalStatusProvider>
                 </MarketProvider>
               </AccountDataProvider>
