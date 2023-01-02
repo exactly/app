@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { Contract } from '@ethersproject/contracts';
-import { useSigner } from 'wagmi';
+import { useSigner, mainnet, goerli } from 'wagmi';
 import type { Auditor } from 'types/contracts/Auditor';
 import mainnetAuditor from '@exactly-protocol/protocol/deployments/mainnet/Auditor.json' assert { type: 'json' };
 import goerliAuditor from '@exactly-protocol/protocol/deployments/goerli/Auditor.json' assert { type: 'json' };
@@ -15,9 +15,9 @@ export default () => {
     if (!signer || !chain) return null;
 
     const address = {
-      goerli: goerliAuditor.address,
-      mainnet: mainnetAuditor.address,
-    }[chain.network];
+      [goerli.id]: goerliAuditor.address,
+      [mainnet.id]: mainnetAuditor.address,
+    }[chain.id];
     if (!address) return null;
 
     return new Contract(address, auditorABI, signer) as Auditor;
