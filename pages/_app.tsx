@@ -39,7 +39,7 @@ export default function App({ Component, pageProps }: AppProps) {
                   <ModalStatusProvider>
                     <SkeletonTheme baseColor="var(--skeleton-base)" highlightColor="var(--skeleton-highlight)">
                       <Grid maxWidth={maxWidth} mx="auto" height="100%">
-                        <Box mx={1} height="100%">
+                        <Box display="flex" flexDirection="column" mx={1} height="100%">
                           <Navbar />
                           <main style={{ flexGrow: 1 }}>
                             <Component {...pageProps} />
