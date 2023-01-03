@@ -14,7 +14,7 @@ function FixedPoolDashboard({ type }: Props) {
   return (
     <Grid
       width={'100%'}
-      my={4}
+      mb="16px"
       p="24px"
       boxShadow="0px 4px 12px rgba(175, 177, 182, 0.2)"
       borderRadius="0px 0px 6px 6px"

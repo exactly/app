@@ -63,7 +63,7 @@ function DashboardContent() {
   return (
     <>
       {!isMobile && ( // display={onlyDesktop} throws an error when used with mui tabs
-        <Grid mt={5}>
+        <Grid mt="24px">
           <DashboardTabs initialTab={allTabs[0].value} allTabs={allTabs} />
         </Grid>
       )}
