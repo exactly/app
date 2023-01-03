@@ -76,7 +76,7 @@ function ModalInfoHealthFactor({ qty, symbol, operation, variant = 'column' }: P
 
       case 'withdraw': {
         if (isCollateral) {
-          const adjustedNewQtyUsd = newQtyUsd.mul(WeiPerEther).div(adjustFactor);
+          const adjustedNewQtyUsd = newQtyUsd.mul(adjustFactor).div(WeiPerEther);
 
           return parseHealthFactor(healthFactor.debt, healthFactor.collateral.sub(adjustedNewQtyUsd));
         } else {
