@@ -91,15 +91,14 @@ function ModalInfoHealthFactor({ qty, symbol, operation, variant = 'column' }: P
       case 'borrowAtMaturity':
       case 'borrow': {
         const adjustedNewQtyUsd = newQtyUsd.mul(WeiPerEther).div(adjustFactor);
-
         return parseHealthFactor(healthFactor.debt.add(adjustedNewQtyUsd), healthFactor.collateral);
       }
 
       case 'repayAtMaturity':
       case 'repay': {
-        const adjustedNewQtyUsd = newQtyUsd.mul(adjustFactor).div(WeiPerEther);
+        const adjustedNewQtyUsd = newQtyUsd.mul(WeiPerEther).div(adjustFactor);
 
-        return parseHealthFactor(healthFactor.debt, healthFactor.collateral.add(adjustedNewQtyUsd));
+        return parseHealthFactor(healthFactor.debt.sub(adjustedNewQtyUsd), healthFactor.collateral);
       }
     }
   }, [healthFactor, newQty, accountData, operation, symbol]);
