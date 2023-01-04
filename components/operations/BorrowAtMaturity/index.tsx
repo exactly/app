@@ -46,6 +46,7 @@ import ModalInfoBorrowLimit from 'components/OperationsModal/Info/ModalInfoBorro
 import ModalInfoEditableSlippage from 'components/OperationsModal/Info/ModalInfoEditableSlippage';
 import ModalAlert from 'components/common/modal/ModalAlert';
 import ModalSubmit from 'components/common/modal/ModalSubmit';
+import useAccountData from 'hooks/useAccountData';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 const DEFAULT_SLIPPAGE = (numbers.slippage * 100).toFixed(2);
@@ -73,6 +74,8 @@ const BorrowAtMaturity: FC = () => {
     isLoading: isLoadingOp,
     setIsLoading: setIsLoadingOp,
   } = useOperationContext();
+
+  const { decimals = 18 } = useAccountData(symbol);
 
   const [fixedRate, setFixedRate] = useState<number | undefined>();
   const [rawSlippage, setRawSlippage] = useState(DEFAULT_SLIPPAGE);
@@ -197,13 +200,13 @@ const BorrowAtMaturity: FC = () => {
   }, [accountData, healthFactor, setErrorData, setQty, symbol]);
 
   const handleInputChange = useCallback(
-    ({ target: { value, valueAsNumber } }: ChangeEvent<HTMLInputElement>) => {
+    ({ target: { value } }: ChangeEvent<HTMLInputElement>) => {
       if (!accountData) return;
       const { decimals, usdPrice } = accountData[symbol];
 
       setQty(value);
 
-      if (poolLiquidity && poolLiquidity < valueAsNumber) {
+      if (poolLiquidity && poolLiquidity < parseFloat(value)) {
         return setErrorData({
           status: true,
           message: translations[lang].availableLiquidityError,
@@ -382,6 +385,7 @@ const BorrowAtMaturity: FC = () => {
             <AssetInput
               qty={qty}
               symbol={symbol}
+              decimals={decimals}
               onMax={onMax}
               onChange={handleInputChange}
               label="Wallet balance"

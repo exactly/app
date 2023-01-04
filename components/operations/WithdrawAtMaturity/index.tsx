@@ -300,6 +300,7 @@ const WithdrawAtMaturity: FC = () => {
             <AssetInput
               qty={qty}
               symbol={symbol}
+              decimals={decimals}
               onMax={onMax}
               onChange={handleInputChange}
               label="Deposited"

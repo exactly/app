@@ -34,6 +34,7 @@ import ModalInfoBorrowLimit from 'components/OperationsModal/Info/ModalInfoBorro
 import ModalInfoFloatingUtilizationRate from 'components/OperationsModal/Info/ModalInfoFloatingUtilizationRate';
 import ModalAlert from 'components/common/modal/ModalAlert';
 import ModalSubmit from 'components/common/modal/ModalSubmit';
+import useAccountData from 'hooks/useAccountData';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 
@@ -60,6 +61,8 @@ function Repay() {
     isLoading: isLoadingOp,
     setIsLoading: setIsLoadingOp,
   } = useOperationContext();
+
+  const { decimals = 18 } = useAccountData(symbol);
 
   const [isMax, setIsMax] = useState(false);
 
@@ -99,10 +102,10 @@ function Repay() {
   }, [setQty, finalAmount, walletBalance, setErrorData, translations, lang]);
 
   const handleInputChange = useCallback(
-    ({ target: { value, valueAsNumber } }: ChangeEvent<HTMLInputElement>) => {
+    ({ target: { value } }: ChangeEvent<HTMLInputElement>) => {
       setQty(value);
 
-      if (walletBalance && valueAsNumber > parseFloat(walletBalance)) {
+      if (walletBalance && parseFloat(value) > parseFloat(walletBalance)) {
         return setErrorData({
           status: true,
           message: translations[lang].insufficientBalance,
@@ -268,6 +271,7 @@ function Repay() {
             <AssetInput
               qty={qty}
               symbol={symbol}
+              decimals={decimals}
               onMax={onMax}
               onChange={handleInputChange}
               label="Wallet balance"

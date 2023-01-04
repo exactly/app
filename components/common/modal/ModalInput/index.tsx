@@ -1,77 +1,47 @@
-import React, {
-  ChangeEvent,
-  ChangeEventHandler,
-  KeyboardEvent,
-  useCallback,
-  // useMemo,
-  ClipboardEvent,
-  useRef,
-} from 'react';
-import { InputBase } from '@mui/material';
-import useAccountData from 'hooks/useAccountData';
+import React, { ChangeEventHandler } from 'react';
+import { InputBase, InputBaseComponentProps } from '@mui/material';
+import { NumericFormat } from 'react-number-format';
 
-import { checkPrecision } from 'utils/utils';
+type CustomProps = {
+  decimals: number;
+};
+
+const NumberFormatCustom = React.forwardRef<HTMLInputElement, InputBaseComponentProps & CustomProps>(
+  function NumberFormatCustom(props, ref) {
+    const { onChange, decimals, ...other } = props;
+
+    return (
+      <NumericFormat
+        {...other}
+        getInputRef={ref}
+        decimalScale={decimals}
+        onChange={onChange}
+        allowNegative={false}
+        defaultValue={0.0}
+      />
+    );
+  },
+);
 
 type Props = {
   name?: string;
   value?: string;
-  symbol: string;
   onChange?: ChangeEventHandler<HTMLInputElement>;
-};
+} & CustomProps;
 
-function ModalInput({ value, name, symbol, onChange }: Props) {
-  const { decimals } = useAccountData(symbol);
-  const prev = useRef('');
-
-  const isValid = useCallback((v: string): boolean => checkPrecision(v, decimals), [decimals]);
-
-  const onChangeCallback = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      const { value: currentValue } = e.currentTarget;
-      if (!isValid(currentValue)) {
-        return e.preventDefault();
-      }
-
-      prev.current = currentValue;
-
-      onChange?.(e);
-    },
-    [isValid, onChange],
-  );
-
-  const onPaste = useCallback(
-    (e: ClipboardEvent<HTMLInputElement>) => {
-      const text = e.clipboardData.getData('text');
-      if (!isValid(text)) {
-        return e.preventDefault();
-      }
-
-      prev.current = text;
-    },
-    [isValid],
-  );
-
-  const onInput = useCallback((e: KeyboardEvent<HTMLInputElement>) => {
-    const { validity } = e.currentTarget;
-    if (validity.valid) {
-      return true;
-    }
-    e.currentTarget.value = prev.current;
-  }, []);
-
+function ModalInput({ value, name, decimals, onChange }: Props) {
   return (
     <InputBase
       inputProps={{
-        min: 0.0,
-        type: 'number',
         placeholder: '0',
+        min: 0.0,
         name: name,
         step: 'any',
+        inputMode: 'decimal',
         style: { padding: 0, textAlign: 'right' },
         value: value,
-        onChange: onChangeCallback,
-        onPaste: onPaste,
-        onInput: onInput,
+        onChange: onChange,
+        decimals: decimals,
       }}
       autoFocus
       sx={{
@@ -80,6 +50,7 @@ function ModalInput({ value, name, symbol, onChange }: Props) {
         fontWeight: 700,
         fontSize: 24,
       }}
+      inputComponent={NumberFormatCustom}
     />
   );
 }

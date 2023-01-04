@@ -156,10 +156,10 @@ const DepositAtMaturity: FC = () => {
   }, [accountData, symbol, date]);
 
   const handleInputChange = useCallback(
-    ({ target: { value, valueAsNumber } }: ChangeEvent<HTMLInputElement>) => {
+    ({ target: { value } }: ChangeEvent<HTMLInputElement>) => {
       setQty(value);
 
-      if (walletBalance && valueAsNumber > parseFloat(walletBalance)) {
+      if (walletBalance && parseFloat(value) > parseFloat(walletBalance)) {
         return setErrorData({
           status: true,
           message: translations[lang].insufficientBalance,
@@ -295,6 +295,7 @@ const DepositAtMaturity: FC = () => {
             <AssetInput
               qty={qty}
               symbol={symbol}
+              decimals={decimals}
               onMax={onMax}
               onChange={handleInputChange}
               label="Wallet balance"
