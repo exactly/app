@@ -285,6 +285,7 @@ const RepayAtMaturity: FC = () => {
             <AssetInput
               qty={qty}
               symbol={symbol}
+              decimals={decimals}
               onMax={onMax}
               onChange={handleInputChange}
               label="Debt amount"

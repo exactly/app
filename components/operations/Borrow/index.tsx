@@ -37,6 +37,7 @@ import ModalAdvancedSettings from 'components/common/modal/ModalAdvancedSettings
 import ModalInfoFloatingUtilizationRate from 'components/OperationsModal/Info/ModalInfoFloatingUtilizationRate';
 import ModalAlert from 'components/common/modal/ModalAlert';
 import ModalSubmit from 'components/common/modal/ModalSubmit';
+import useAccountData from 'hooks/useAccountData';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 
@@ -64,6 +65,7 @@ const Borrow: FC = () => {
     setIsLoading: setIsLoadingOp,
   } = useOperationContext();
 
+  const { decimals = 18 } = useAccountData(symbol);
   const healthFactor = useMemo<HealthFactor | undefined>(
     () => (accountData ? getHealthFactorData(accountData) : undefined),
     [accountData],
@@ -288,6 +290,7 @@ const Borrow: FC = () => {
           <ModalBoxRow>
             <AssetInput
               qty={qty}
+              decimals={decimals}
               symbol={symbol}
               onMax={onMax}
               onChange={handleInputChange}

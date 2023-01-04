@@ -32,6 +32,7 @@ import ModalInfoFloatingUtilizationRate from 'components/OperationsModal/Info/Mo
 import ModalInfoBorrowLimit from 'components/OperationsModal/Info/ModalInfoBorrowLimit';
 import ModalAlert from 'components/common/modal/ModalAlert';
 import ModalSubmit from 'components/common/modal/ModalSubmit';
+import useAccountData from 'hooks/useAccountData';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 
@@ -58,6 +59,8 @@ const Withdraw: FC = () => {
     isLoading: isLoadingOp,
     setIsLoading: setIsLoadingOp,
   } = useOperationContext();
+
+  const { decimals = 18 } = useAccountData(symbol);
 
   const [isMax, setIsMax] = useState(false);
 
@@ -126,10 +129,10 @@ const Withdraw: FC = () => {
   }, [parsedAmount, setQty]);
 
   const handleInputChange = useCallback(
-    ({ target: { value, valueAsNumber } }: ChangeEvent<HTMLInputElement>) => {
+    ({ target: { value } }: ChangeEvent<HTMLInputElement>) => {
       setQty(value);
 
-      if (valueAsNumber > parseFloat(parsedAmount)) {
+      if (parseFloat(value) > parseFloat(parsedAmount)) {
         return setErrorData({
           status: true,
           message: translations[lang].insufficientBalance,
@@ -247,6 +250,7 @@ const Withdraw: FC = () => {
             <AssetInput
               qty={qty}
               symbol={symbol}
+              decimals={decimals}
               onMax={onMax}
               onChange={handleInputChange}
               label="Available"

@@ -9,15 +9,16 @@ import AssetSelector from '../AssetSelector';
 type Props = {
   qty: string;
   symbol: string;
+  decimals: number;
   onChange: ChangeEventHandler<HTMLInputElement>;
 } & AAProps;
 
-function AssetInput({ qty, onChange, symbol, amount, label, onMax }: Props) {
+function AssetInput({ qty, onChange, symbol, decimals, amount, label, onMax }: Props) {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
       <Box sx={{ marginLeft: -1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <AssetSelector />
-        <ModalInput value={qty} onChange={onChange} symbol={symbol} />
+        <ModalInput value={qty} decimals={decimals} onChange={onChange} />
       </Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 0.25, height: 20 }}>
         <AvailableAmount symbol={symbol} label={label} amount={amount} onMax={onMax} />

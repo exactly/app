@@ -27,6 +27,6 @@ export const toPercentage = (value?: number) => {
 };
 
 export const checkPrecision = (value: string, decimals?: number): boolean => {
-  const regex = new RegExp(`^\\d*([.,]\\d{1,${decimals ?? 18}})?$`, 'g');
+  const regex = new RegExp(`^\\d*(.\\d{1,${decimals ?? 18}})?$`, 'g');
   return regex.test(value);
 };
