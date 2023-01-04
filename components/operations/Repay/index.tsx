@@ -305,7 +305,7 @@ function Repay() {
 
       <Grid item mt={4}>
         <ModalSubmit
-          label="Withdraw"
+          label="Repay"
           symbol={symbol}
           submit={handleSubmitAction}
           isLoading={isLoading}
