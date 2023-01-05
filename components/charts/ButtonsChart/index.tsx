@@ -15,6 +15,7 @@ const ButtonsChart: FC<Props> = ({ buttons, defaultSelected }) => {
   const [selected, setSelected] = useState<number>(defaultSelected || 0);
 
   const handleClick = (index: number) => {
+    if (selected === index) return;
     setSelected(index);
     buttons[index].onClick();
   };
