@@ -28,14 +28,13 @@ export default function useHistoricalRates(symbol: string, initialCount = 30, in
 
       const { market: marketAddress, maxFuturePools } = accountData[symbol];
 
-      const rates = await queryRates(subgraphUrl, marketAddress, type, {
+      return await queryRates(subgraphUrl, marketAddress, type, {
         maxFuturePools,
         roundTicks: true,
         interval,
         count,
         offset,
       });
-      return rates;
     },
     [accountData, chain, symbol],
   );
@@ -43,17 +42,16 @@ export default function useHistoricalRates(symbol: string, initialCount = 30, in
   const getRates = useCallback(
     async (count: number, interval: number) => {
       setLoading(true);
-      const result = [];
-
-      // We can only get 30 data points at a time, so we need to make multiple requests
+      // We can only get 30 data points at a time, so we need to make multiple *concurrent* requests
       const iterations = Math.ceil(count / MAX_COUNT);
-      for (let i = 0; i < iterations; i++) {
-        const depositAPRs = await getRatesBatch('deposit', Math.min(count, MAX_COUNT), interval, i * MAX_COUNT);
-        const borrowAPRs = await getRatesBatch('borrow', Math.min(count, MAX_COUNT), interval, i * MAX_COUNT);
-        result.push(...depositAPRs.map((d, i) => ({ date: d.date, depositApr: d.apr, borrowApr: borrowAPRs[i].apr })));
-      }
-
-      setRates(result);
+      const ratesBatched = await Promise.all(
+        Array.from(Array(iterations).keys()).map(async (i) => {
+          const depositAPRs = await getRatesBatch('deposit', Math.min(count, MAX_COUNT), interval, i * MAX_COUNT);
+          const borrowAPRs = await getRatesBatch('borrow', Math.min(count, MAX_COUNT), interval, i * MAX_COUNT);
+          return depositAPRs.map((d, j) => ({ date: d.date, depositApr: d.apr, borrowApr: borrowAPRs[j].apr }));
+        }),
+      );
+      setRates(ratesBatched.reverse().flatMap((r) => r));
       setLoading(false);
     },
     [getRatesBatch],
