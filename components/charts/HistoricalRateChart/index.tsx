@@ -36,7 +36,7 @@ const HistoricalRateChart: FC<Props> = ({ symbol }) => {
 
   return (
     <Box display="flex" flexDirection="column" width="100%" height="100%" gap={2}>
-      <Box display="flex" justifyContent="space-between">
+      <Box display="flex" justifyContent="space-between" mx={3}>
         <Typography variant="h6">Historical Rates</Typography>
         <Box>
           <ButtonsChart buttons={buttons} />
