@@ -24,7 +24,7 @@ const HistoricalRateChart: FC<Props> = ({ symbol }) => {
       },
       {
         label: '3M',
-        onClick: () => getRates(90, 3_600),
+        onClick: () => getRates(90, 3_600 * 24),
       },
     ],
     [getRates],
