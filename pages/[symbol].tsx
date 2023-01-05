@@ -10,7 +10,6 @@ import { useRouter } from 'next/router';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { Box, IconButton, Tooltip, Typography, Grid } from '@mui/material';
 import analytics from 'utils/analytics';
-import useAccountData from 'hooks/useAccountData';
 
 type Props = {
   symbol: string;
@@ -18,13 +17,12 @@ type Props = {
 
 const Market: NextPage<Props> = ({ symbol }: Props) => {
   const router = useRouter();
-  const { market } = useAccountData(symbol);
 
   useEffect(() => void analytics.page(), []);
 
   return (
     <>
-      <Grid container mt={-1}>
+      <Grid container mt={-1} mb={2}>
         <Box sx={{ display: 'flex', gap: 0.5 }} mb={1}>
           <IconButton size="small" onClick={() => router.back()}>
             <Tooltip title="Go Back" placement="top">
@@ -38,7 +36,7 @@ const Market: NextPage<Props> = ({ symbol }: Props) => {
         <AssetHeaderInfo symbol={symbol} />
         <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} my="16px" gap="16px">
           <Box maxWidth={{ xs: '100%', sm: '610px' }}>
-            <AssetFloatingPool symbol={symbol} eMarketAddress={market} />
+            <AssetFloatingPool symbol={symbol} />
           </Box>
           <Box maxWidth={{ xs: '100%', sm: '610px' }}>
             <AssetMaturityPools symbol={symbol} />
