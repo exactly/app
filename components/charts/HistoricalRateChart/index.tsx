@@ -1,6 +1,6 @@
 import { Box, Typography } from '@mui/material';
 import useHistoricalRates from 'hooks/useHistoricalRates';
-import React, { FC, useMemo } from 'react';
+import React, { FC, useCallback, useMemo } from 'react';
 import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import ButtonsChart from '../ButtonsChart';
 import LoadingChart from '../LoadingChart';
@@ -30,6 +30,10 @@ const HistoricalRateChart: FC<Props> = ({ symbol }) => {
     [getRates],
   );
 
+  const formatDate = useCallback((date: Date) => {
+    return date.toLocaleDateString('en-us', { year: 'numeric', month: 'short', day: '2-digit' });
+  }, []);
+
   return (
     <Box display="flex" flexDirection="column" width="100%" height="100%" gap={2}>
       <Box display="flex" justifyContent="space-between">
@@ -44,12 +48,23 @@ const HistoricalRateChart: FC<Props> = ({ symbol }) => {
         ) : (
           <LineChart data={rates} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="date" />
-            <YAxis />
-            <Tooltip />
+            <XAxis
+              minTickGap={50}
+              padding={{ left: 20, right: 50 }}
+              dataKey="date"
+              tickFormatter={(value) => (value instanceof Date ? formatDate(value as Date) : '')}
+            />
+            <YAxis
+              padding={{ top: 5, bottom: 5 }}
+              tickFormatter={(value) => `${((value as number) * 100).toFixed(2)}%`}
+            />
+            <Tooltip
+              labelFormatter={(value) => (value instanceof Date ? formatDate(value as Date) : '')}
+              formatter={(value, name) => [`${((value as number) * 100).toFixed(2)}%`, name]}
+            />
             <Legend />
-            <Line type="monotone" dataKey="depositApr" stroke="#8884d8" activeDot={{ r: 8 }} />
-            <Line type="monotone" dataKey="borrowApr" stroke="#82ca9d" />
+            <Line type="monotone" dataKey="depositApr" name="Deposit APR" stroke="#8884d8" dot={false} />
+            <Line type="monotone" dataKey="borrowApr" name="Borrow APR" stroke="#82ca9d" dot={false} />
           </LineChart>
         )}
       </ResponsiveContainer>
