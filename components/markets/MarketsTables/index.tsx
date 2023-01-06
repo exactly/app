@@ -131,7 +131,7 @@ const MarketTables: FC = () => {
           totalDeposited: totalFloatingDeposited,
           totalBorrowed: totalFloatingBorrowed,
           depositAPR: floatingDepositAPR,
-          borrowAPR: parseFloat(formatFixed(floatingBorrowRate, 18)),
+          borrowAPR: Number(floatingBorrowRate) / 1e18,
         });
 
         let totalDeposited = Zero;

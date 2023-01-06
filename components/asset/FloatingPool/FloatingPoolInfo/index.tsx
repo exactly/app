@@ -46,10 +46,10 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol, eMarketAddress })
       usdPrice: exchangeRate,
     } = accountData[symbol];
 
-    const totalDepositUSD = formatFixed(totalDeposited.mul(exchangeRate).div(WeiPerEther), decimals);
-    const totalBorrowUSD = formatFixed(totalBorrowed.mul(exchangeRate).div(WeiPerEther), decimals);
-
-    return { deposited: parseFloat(totalDepositUSD), borrowed: parseFloat(totalBorrowUSD) };
+    return {
+      deposited: Number(totalDeposited.mul(exchangeRate).div(WeiPerEther)) / 10 ** decimals,
+      borrowed: Number(totalBorrowed.mul(exchangeRate).div(WeiPerEther)) / 10 ** decimals,
+    };
   }, [accountData, symbol]);
 
   const fetchAPRs = useCallback(async () => {
@@ -69,7 +69,7 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol, eMarketAddress })
     fetchAPRs().catch(captureException);
   }, [fetchAPRs]);
 
-  const borrowAPR = floatingBorrowRate ? toPercentage(parseFloat(formatFixed(floatingBorrowRate, 18))) : undefined;
+  const borrowAPR = floatingBorrowRate ? toPercentage(Number(floatingBorrowRate) / 1e18) : undefined;
 
   const itemsInfo: ItemInfoProps[] = [
     {
