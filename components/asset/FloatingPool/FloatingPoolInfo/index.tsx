@@ -34,7 +34,7 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol, eMarketAddress })
 
   const { floatingBorrowRate } = useAccountData(symbol);
 
-  const [depositAPR, setDepositAPR] = useState<string | undefined>(undefined);
+  const [depositAPR, setDepositAPR] = useState<number | undefined>();
 
   const { deposited, borrowed } = useMemo(() => {
     if (!accountData) return {};
@@ -61,7 +61,7 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol, eMarketAddress })
     const [{ apr: depositAPRRate }] = await queryRates(subgraphUrl, eMarketAddress, 'deposit', {
       maxFuturePools,
     });
-    setDepositAPR(`${(depositAPRRate * 100).toFixed(2)}%`);
+    setDepositAPR(depositAPRRate);
   }, [accountData, eMarketAddress, symbol, chain]);
 
   useEffect(() => {
@@ -85,7 +85,7 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol, eMarketAddress })
     },
     {
       label: translations[lang].depositAPR,
-      value: depositAPR,
+      value: toPercentage(depositAPR),
       tooltipTitle: 'Change in the underlying Variable Rate Pool shares value over the last 15 minutes, annualized.',
     },
     {
