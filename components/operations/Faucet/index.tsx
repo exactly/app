@@ -22,7 +22,7 @@ const images: Record<string, string> = {
 function Faucet() {
   const { data: signer } = useSigner();
   const { connector } = useAccount();
-  const { accountData } = useContext(AccountDataContext);
+  const { accountData, getAccountData } = useContext(AccountDataContext);
   const [loading, setLoading] = useState<string | undefined>(undefined);
   const assets = useAssets();
 
@@ -42,13 +42,15 @@ function Faucet() {
         const faucet = new Contract('0x1ca525Cd5Cb77DB5Fa9cBbA02A0824e283469DBe', faucetAbi, signer ?? undefined);
         const tx = await faucet?.mint(asset, parseFixed(amounts[symbol], decimals));
         await tx.wait();
+
+        void getAccountData();
       } catch {
         setLoading(undefined);
       } finally {
         setLoading(undefined);
       }
     },
-    [accountData, signer],
+    [accountData, getAccountData, signer],
   );
 
   const addTokens = useCallback(async () => {
