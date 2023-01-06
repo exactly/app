@@ -9,6 +9,7 @@ import { AccountData } from 'types/AccountData';
 import { useWeb3 } from 'hooks/useWeb3';
 
 import usePreviewer from 'hooks/usePreviewer';
+import useDelayedEffect from 'hooks/useDelayedEffect';
 
 type ContextValues = {
   accountData: AccountData | undefined;
@@ -34,24 +35,40 @@ export const AccountDataProvider: FC<PropsWithChildren> = ({ children }) => {
 
   const previewer = usePreviewer();
 
-  const getAccountData = useCallback(async () => {
+  const queryAccountData = useCallback(async () => {
     if (!previewer) return;
 
     const account = walletAddress ?? AddressZero;
 
     const exactly = await previewer.exactly(account);
 
-    const data = Object.fromEntries(exactly.map((market) => [market.assetSymbol, market]));
+    return Object.fromEntries(exactly.map((market) => [market.assetSymbol, market]));
+  }, [previewer, walletAddress]);
+
+  const getAccountData = useCallback(async () => {
+    const data = await queryAccountData();
     setAccountData(data);
     return data;
-  }, [walletAddress, previewer]);
+  }, [queryAccountData]);
+
+  const syncAccountData = useCallback(
+    async (cancelled?: () => boolean) => {
+      const data = await queryAccountData();
+      if (cancelled?.()) return;
+      setAccountData(data);
+    },
+    [queryAccountData],
+  );
+
+  useDelayedEffect({
+    effect: syncAccountData,
+    delay: 250,
+  });
 
   useEffect(() => {
-    void getAccountData();
-
-    const interval = setInterval(() => getAccountData().catch(captureException), 600_000);
+    const interval = setInterval(() => syncAccountData().catch(captureException), 600_000);
     return () => clearInterval(interval);
-  }, [getAccountData]);
+  }, [syncAccountData]);
 
   return <AccountDataContext.Provider value={{ accountData, getAccountData }}>{children}</AccountDataContext.Provider>;
 };

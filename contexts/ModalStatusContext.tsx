@@ -29,8 +29,6 @@ type ContextValues = {
 const ModalStatusContext = createContext<ContextValues | null>(null);
 
 export const ModalStatusProvider: FC<PropsWithChildren> = ({ children }) => {
-  const { getAccountData } = useContext(AccountDataContext);
-
   const [open, setOpen] = useState<boolean>(false);
 
   const [operation, setOperation] = useState<Operation>('deposit');
@@ -49,12 +47,6 @@ export const ModalStatusProvider: FC<PropsWithChildren> = ({ children }) => {
     }
     setOperation(`${operation}AtMaturity` as Operation);
   }, [operation]);
-
-  useEffect(() => {
-    if (!open) {
-      setTimeout(() => void getAccountData(), 5000);
-    }
-  }, [open, getAccountData]);
 
   const value: ContextValues = useMemo(
     () => ({
