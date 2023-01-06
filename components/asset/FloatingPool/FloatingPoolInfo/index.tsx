@@ -1,5 +1,4 @@
 import React, { FC, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { formatFixed } from '@ethersproject/bignumber';
 import { WeiPerEther } from '@ethersproject/constants';
 
 import LangContext from 'contexts/LangContext';
