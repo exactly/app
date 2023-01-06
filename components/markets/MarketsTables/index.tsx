@@ -37,13 +37,14 @@ const floatingHeaders = [
   },
   {
     title: 'Deposit APR',
-    tooltipTitle: 'Change in the underlying Variable Rate Pool shares value over the last hour, annualized.',
+    tooltipTitle: 'Change in the underlying Variable Rate Pool shares value over the last 15 minutes, annualized.',
   },
   {
     title: 'Borrow APR',
     tooltipTitle: 'Change in the underlying Variable Rate Pool shares value over the last hour, annualized.',
   },
 ];
+
 const fixedHeaders = [
   {
     title: 'Asset',
@@ -99,7 +100,7 @@ const MarketTables: FC = () => {
   );
 
   const defineRows = useCallback(async () => {
-    if (!accountData || !markets || !chain) return;
+    if (!accountData || !chain) return;
 
     const tempFloatingRows: TableRow[] = [];
     const tempFixedRows: TableRow[] = [];
@@ -113,6 +114,7 @@ const MarketTables: FC = () => {
           usdPrice,
           decimals,
           maxFuturePools,
+          floatingBorrowRate,
         } = accountData[symbol];
 
         const totalFloatingDeposited = formatNumber(
@@ -123,14 +125,13 @@ const MarketTables: FC = () => {
         );
 
         const floatingDepositAPR = await getRates(chain.id, 'deposit', maxFuturePools, marketAddress);
-        const floatingBorrowAPR = await getRates(chain.id, 'borrow', maxFuturePools, marketAddress);
 
         tempFloatingRows.push({
           symbol,
           totalDeposited: totalFloatingDeposited,
           totalBorrowed: totalFloatingBorrowed,
           depositAPR: floatingDepositAPR,
-          borrowAPR: floatingBorrowAPR,
+          borrowAPR: parseFloat(formatFixed(floatingBorrowRate, 18)),
         });
 
         let totalDeposited = Zero;
@@ -167,10 +168,7 @@ const MarketTables: FC = () => {
     setFloatingRows(sortByDefault(defaultRows, tempFloatingRows));
     setFixedRows(sortByDefault(defaultRows, tempFixedRows));
 
-    setTimeout(() => {
-      // HACK to prevent loading flashes on the table when change the data
-      setIsLoading(false);
-    }, 2000);
+    setIsLoading(false);
   }, [accountData, chain, markets, defaultRows, getRates]);
 
   useEffect(() => {

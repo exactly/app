@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useContext, useEffect, useState } from 'react';
+import React, { FC, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { formatFixed } from '@ethersproject/bignumber';
 import { WeiPerEther } from '@ethersproject/constants';
 
@@ -20,6 +20,7 @@ import { captureException } from '@sentry/nextjs';
 import { useWeb3 } from 'hooks/useWeb3';
 import networkData from 'config/networkData.json' assert { type: 'json' };
 import { Box } from '@mui/material';
+import useAccountData from 'hooks/useAccountData';
 
 type FloatingPoolInfoProps = {
   symbol: string;
@@ -32,14 +33,12 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol, eMarketAddress })
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
 
-  const [deposited, setDeposited] = useState<number | undefined>(undefined);
-  const [borrowed, setBorrowed] = useState<number | undefined>(undefined);
+  const { floatingBorrowRate } = useAccountData(symbol);
+
   const [depositAPR, setDepositAPR] = useState<string | undefined>(undefined);
-  const [borrowAPR, setBorrowAPR] = useState<string | undefined>(undefined);
 
-  const fetchPoolData = useCallback(async () => {
-    if (!accountData || !symbol) return;
-
+  const { deposited, borrowed } = useMemo(() => {
+    if (!accountData) return {};
     const {
       totalFloatingDepositAssets: totalDeposited,
       totalFloatingBorrowAssets: totalBorrowed,
@@ -48,16 +47,10 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol, eMarketAddress })
     } = accountData[symbol];
 
     const totalDepositUSD = formatFixed(totalDeposited.mul(exchangeRate).div(WeiPerEther), decimals);
-
     const totalBorrowUSD = formatFixed(totalBorrowed.mul(exchangeRate).div(WeiPerEther), decimals);
 
-    setDeposited(parseFloat(totalDepositUSD));
-    setBorrowed(parseFloat(totalBorrowUSD));
+    return { deposited: parseFloat(totalDepositUSD), borrowed: parseFloat(totalBorrowUSD) };
   }, [accountData, symbol]);
-
-  useEffect(() => {
-    fetchPoolData().catch(captureException);
-  }, [fetchPoolData]);
 
   const fetchAPRs = useCallback(async () => {
     if (!accountData || !eMarketAddress || !chain) return;
@@ -69,15 +62,14 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol, eMarketAddress })
     const [{ apr: depositAPRRate }] = await queryRates(subgraphUrl, eMarketAddress, 'deposit', {
       maxFuturePools,
     });
-    const [{ apr: borrowAPRRate }] = await queryRates(subgraphUrl, eMarketAddress, 'borrow');
     setDepositAPR(`${(depositAPRRate * 100).toFixed(2)}%`);
-
-    setBorrowAPR(`${(borrowAPRRate * 100).toFixed(2)}%`);
   }, [accountData, eMarketAddress, symbol, chain]);
 
   useEffect(() => {
     fetchAPRs().catch(captureException);
   }, [fetchAPRs]);
+
+  const borrowAPR = floatingBorrowRate ? toPercentage(parseFloat(formatFixed(floatingBorrowRate, 18))) : undefined;
 
   const itemsInfo: ItemInfoProps[] = [
     {
@@ -95,7 +87,7 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol, eMarketAddress })
     {
       label: translations[lang].depositAPR,
       value: depositAPR,
-      tooltipTitle: 'Change in the underlying Variable Rate Pool shares value over the last hour, annualized.',
+      tooltipTitle: 'Change in the underlying Variable Rate Pool shares value over the last 15 minutes, annualized.',
     },
     {
       label: translations[lang].borrowAPR,
