@@ -85,7 +85,7 @@ export default async (
   {
     maxFuturePools,
     roundTicks = false,
-    interval = 3_600,
+    interval = 900,
     offset = 0,
     count = 1,
   }: {
