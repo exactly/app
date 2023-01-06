@@ -1,6 +1,5 @@
-import React, { createContext, useContext, useEffect, useState, useMemo, useCallback } from 'react';
+import React, { createContext, useContext, useState, useMemo, useCallback } from 'react';
 import type { FC, PropsWithChildren } from 'react';
-import AccountDataContext from './AccountDataContext';
 import OperationsModal from 'components/OperationsModal';
 
 export type Operation =
