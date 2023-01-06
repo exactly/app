@@ -3,5 +3,5 @@ import AccountDataContext from '../contexts/AccountDataContext';
 
 export default (): string[] => {
   const { accountData } = useContext(AccountDataContext);
-  return useMemo<string[]>(() => Object.keys(accountData ?? {}), [accountData]);
+  return useMemo<string[]>(() => Object.keys(accountData ?? { WETH: true, USDC: true, DAI: true }), [accountData]);
 };
