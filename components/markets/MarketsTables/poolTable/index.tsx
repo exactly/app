@@ -9,7 +9,7 @@ import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Grid';
 import Button from '@mui/material/Button';
-import { Skeleton, Tooltip } from '@mui/material';
+import { Box, Skeleton, Tooltip } from '@mui/material';
 
 import Image from 'next/image';
 import { useRouter } from 'next/router';
@@ -120,7 +120,7 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
                   <TableCell align="left" sx={{ width: '200px' }}>
                     <Typography>{isLoading ? <Skeleton width={80} /> : `$${totalBorrowed}`}</Typography>
                   </TableCell>
-                  <TableCell align="left" sx={{ width: '200px' }}>
+                  <TableCell align="left" sx={{ width: '200px', py: 1 }}>
                     {isLoading ? (
                       <Skeleton width={60} />
                     ) : (
@@ -138,13 +138,20 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
                         arrow
                         placement="top"
                       >
-                        <Typography width="fit-content">
-                          {toPercentage(depositAPR && depositAPR > minAPRValue ? depositAPR : undefined)}
-                        </Typography>
+                        <Box display="flex" flexDirection="column" width="fit-content">
+                          <Typography width="fit-content">
+                            {toPercentage(depositAPR && depositAPR > minAPRValue ? depositAPR : undefined)}
+                          </Typography>
+                          {rateType === 'fixed' && (
+                            <Typography width="fit-content" variant="subtitle2" sx={{ color: 'grey.500' }}>
+                              {depositMaturity ? parseTimestamp(depositMaturity, 'MMM DD') : ''}
+                            </Typography>
+                          )}
+                        </Box>
                       </Tooltip>
                     )}
                   </TableCell>
-                  <TableCell align="left" sx={{ width: '200px' }}>
+                  <TableCell align="left" sx={{ width: '200px', py: 1 }}>
                     {isLoading ? (
                       <Skeleton width={60} />
                     ) : (
@@ -162,9 +169,16 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
                         arrow
                         placement="top"
                       >
-                        <Typography width="fit-content">
-                          {toPercentage(borrowAPR && borrowAPR > minAPRValue ? borrowAPR : undefined)}
-                        </Typography>
+                        <Box display="flex" flexDirection="column" width="fit-content">
+                          <Typography width="fit-content">
+                            {toPercentage(borrowAPR && borrowAPR > minAPRValue ? borrowAPR : undefined)}
+                          </Typography>
+                          {rateType === 'fixed' && (
+                            <Typography width="fit-content" variant="subtitle2" sx={{ color: 'grey.500' }}>
+                              {borrowMaturity ? parseTimestamp(borrowMaturity, 'MMM DD') : ''}
+                            </Typography>
+                          )}
+                        </Box>
                       </Tooltip>
                     )}
                   </TableCell>
