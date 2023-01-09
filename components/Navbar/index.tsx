@@ -2,7 +2,7 @@ import { goerli, useClient } from 'wagmi';
 import DisclaimerModal from 'components/DisclaimerModal';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 
 import ThemeContext from 'contexts/ThemeContext';
 import { useWeb3 } from 'hooks/useWeb3';
@@ -37,9 +37,9 @@ function Navbar() {
     walletAddress && void analytics.identify(walletAddress);
   }, [walletAddress]);
 
-  async function handleFaucetClick() {
+  const handleFaucetClick = useCallback(() => {
     if (chain?.id === goerli.id) return openOperationModal('faucet');
-  }
+  }, [chain?.id, openOperationModal]);
 
   return (
     <Box sx={{ display: 'flex', justifyContent: 'center' }}>
