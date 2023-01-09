@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react';
-import PropTypes from 'prop-types';
 import { basename } from 'path';
 import { readdir, readFile } from 'fs/promises';
 import type { GetStaticPaths, GetStaticProps, NextPage } from 'next';
@@ -13,7 +12,11 @@ import { Box, IconButton, Tooltip, Typography, Grid } from '@mui/material';
 import analytics from 'utils/analytics';
 import useAccountData from 'hooks/useAccountData';
 
-const Market: NextPage<{ symbol: string }> = ({ symbol }) => {
+type Props = {
+  symbol: string;
+};
+
+const Market: NextPage<Props> = ({ symbol }: Props) => {
   const router = useRouter();
   const { market } = useAccountData(symbol);
 
@@ -46,13 +49,9 @@ const Market: NextPage<{ symbol: string }> = ({ symbol }) => {
   );
 };
 
-Market.propTypes = {
-  symbol: PropTypes.string.isRequired,
-};
-
 export default Market;
 
-export const getStaticPaths: GetStaticPaths<{ symbol: string }> = async () => {
+export const getStaticPaths: GetStaticPaths<Props> = async () => {
   const deploymentsDir = 'node_modules/@exactly-protocol/protocol/deployments';
   const networks = await readdir(deploymentsDir);
   const markets = await Promise.all(
@@ -74,7 +73,7 @@ export const getStaticPaths: GetStaticPaths<{ symbol: string }> = async () => {
   };
 };
 
-export const getStaticProps: GetStaticProps<{ symbol: string }, { symbol: string }> = ({ params }) => {
+export const getStaticProps: GetStaticProps<Props, Props> = ({ params }) => {
   if (!params) throw new Error('missing params');
   return { props: { symbol: params.symbol } };
 };
