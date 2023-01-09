@@ -85,11 +85,7 @@ function UtilizationRateChart({ type, current: [currentUtilization, currentRate]
             UMax: interestRateModel.fixedMaxUtilization,
           };
 
-    const curve = interestRateCurve(
-      parseFloat(formatFixed(A, 18)),
-      parseFloat(formatFixed(B, 18)),
-      parseFloat(formatFixed(UMax, 18)),
-    );
+    const curve = interestRateCurve(Number(A) / 1e18, Number(B) / 1e18, Number(UMax) / 1e18);
 
     return Array.from({ length: MAX / INTERVAL })
       .map((_, i) => {
