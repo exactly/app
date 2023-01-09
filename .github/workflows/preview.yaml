@@ -1,0 +1,26 @@
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    environment: Preview
+    env:
+      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+      SENTRY_ORG: exactly
+      SENTRY_PROJECT: webapp
+      SENTRY_ENVIRONMENT: development
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - uses: getsentry/action-release@v1
+        with:
+          environment: ${{ env.SENTRY_ENVIRONMENT }}
