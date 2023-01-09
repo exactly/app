@@ -20,7 +20,11 @@ type Rate = {
   rate: BigNumber;
 };
 
-const AssetMaturityPools: FC<{ symbol: string }> = ({ symbol }) => {
+type Props = {
+  symbol: string;
+};
+
+const AssetMaturityPools: FC<Props> = ({ symbol }) => {
   const { accountData } = useContext(AccountDataContext);
 
   const [totalDeposited, setTotalDeposited] = useState<number | undefined>(undefined);

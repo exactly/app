@@ -1,36 +1,23 @@
-import React, { FC, useContext } from 'react';
-import { useWeb3Modal } from '@web3modal/react';
+import React, { FC } from 'react';
 import Button from '@mui/material/Button';
 import Box from '@mui/system/Box';
 
-import LangContext from 'contexts/LangContext';
-import { useWeb3 } from 'hooks/useWeb3';
+import useActionButton from 'hooks/useActionButton';
 
-import { LangKeys } from 'types/Lang';
+type Props = {
+  symbol: string;
+};
 
-import keys from './translations.json';
-import { Operation, useModalStatus } from 'contexts/ModalStatusContext';
-
-const OrderAction: FC = () => {
-  const { open } = useWeb3Modal();
-  const { walletAddress } = useWeb3();
-  const { openOperationModal } = useModalStatus();
-  const lang: string = useContext(LangContext);
-  const translations: { [key: string]: LangKeys } = keys;
-
-  const handleAction = (action: Extract<Operation, 'deposit' | 'borrow' | 'depositAtMaturity'>) => {
-    if (!walletAddress) return open({ route: 'ConnectWallet' });
-
-    openOperationModal(action);
-  };
+const OrderAction: FC<Props> = ({ symbol }) => {
+  const { handleActionClick } = useActionButton();
 
   return (
     <Box display="flex" gap={1}>
-      <Button variant="contained" onClick={() => handleAction('deposit')} fullWidth>
-        {translations[lang].deposit}
+      <Button variant="contained" onClick={(e) => handleActionClick(e, 'deposit', symbol)} fullWidth>
+        Deposit
       </Button>
-      <Button variant="outlined" onClick={() => handleAction('borrow')} fullWidth>
-        {translations[lang].borrow}
+      <Button variant="outlined" onClick={(e) => handleActionClick(e, 'borrow', symbol)} fullWidth>
+        Borrow
       </Button>
     </Box>
   );

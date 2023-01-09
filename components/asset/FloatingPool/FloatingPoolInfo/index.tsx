@@ -103,7 +103,7 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol, eMarketAddress })
     <Box display="flex" justifyContent="space-between" flexDirection={{ xs: 'column', sm: 'row' }} gap={2}>
       <HeaderInfo title="Variable Interest Rate" itemsInfo={itemsInfo} shadow={false} />
       <Box p={3} mt={{ xs: -4, sm: 'auto' }}>
-        <OrderAction />
+        <OrderAction symbol={symbol} />
       </Box>
     </Box>
   );
