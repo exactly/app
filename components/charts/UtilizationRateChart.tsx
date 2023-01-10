@@ -13,7 +13,7 @@ import {
   Label,
 } from 'recharts';
 import type { TooltipProps } from 'recharts';
-import { BigNumber, formatFixed } from '@ethersproject/bignumber';
+import { BigNumber } from '@ethersproject/bignumber';
 
 import { Previewer } from 'types/contracts';
 import { toPercentage } from 'utils/utils';
@@ -21,8 +21,6 @@ import interestRateCurve from 'utils/interestRateCurve';
 
 const MAX = 1;
 const INTERVAL = 0.005;
-
-const tickFormatter = (tick: number) => `${tick * 100}%`;
 
 type TooltipRowProps = {
   label: string;
@@ -61,9 +59,6 @@ type Props = {
   interestRateModel?: Previewer.InterestRateModelStructOutput;
 };
 
-const xTicks = [0, 0.25, 0.5, 0.75, 1];
-const yTicks = [0.1, 0.2, 0.3, 0.4, 0.5];
-
 function UtilizationRateChart({ type, current: [currentUtilization, currentRate], interestRateModel }: Props) {
   const { palette, typography } = useTheme();
 
@@ -87,12 +82,10 @@ function UtilizationRateChart({ type, current: [currentUtilization, currentRate]
 
     const curve = interestRateCurve(Number(A) / 1e18, Number(B) / 1e18, Number(UMax) / 1e18);
 
-    return Array.from({ length: MAX / INTERVAL })
-      .map((_, i) => {
-        const utilization = i * INTERVAL;
-        return { utilization, apr: curve(utilization) };
-      })
-      .filter(({ apr }) => apr < 0.65);
+    return Array.from({ length: MAX / INTERVAL }).map((_, i) => {
+      const utilization = i * INTERVAL;
+      return { utilization, apr: curve(utilization) };
+    });
   }, [type, interestRateModel]);
 
   const [parsedCurrentUtilization, parsedCurrentRate] = useMemo(() => {
@@ -100,7 +93,7 @@ function UtilizationRateChart({ type, current: [currentUtilization, currentRate]
       return [undefined, undefined];
     }
 
-    return [parseFloat(formatFixed(currentUtilization, 18)), parseFloat(formatFixed(currentRate, 18))];
+    return [Number(currentUtilization) / 1e18, Number(currentRate) / 1e18];
   }, [currentUtilization, currentRate]);
 
   return (
@@ -113,8 +106,7 @@ function UtilizationRateChart({ type, current: [currentUtilization, currentRate]
           <XAxis
             type="number"
             dataKey="utilization"
-            tickFormatter={tickFormatter}
-            ticks={xTicks}
+            tickFormatter={toPercentage}
             tickLine={false}
             stroke={palette.grey[800]}
             label={{
@@ -130,11 +122,9 @@ function UtilizationRateChart({ type, current: [currentUtilization, currentRate]
           <YAxis
             type="number"
             dataKey="apr"
-            ticks={yTicks}
-            tickFormatter={tickFormatter}
+            tickFormatter={(v) => (v === 0 ? '' : toPercentage(v))}
             mirror
             tickLine={false}
-            domain={[0, 0]}
             stroke={palette.grey[800]}
             label={{
               value: 'Borrow APR',
