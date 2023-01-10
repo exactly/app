@@ -1,17 +1,6 @@
-import React, { useMemo, useState } from 'react';
+import React, { CSSProperties, useMemo } from 'react';
 import { Box, Typography, useTheme } from '@mui/material';
-import {
-  LineChart,
-  XAxis,
-  YAxis,
-  Tooltip,
-  Line,
-  ResponsiveContainer,
-  ReferenceLine,
-  CartesianGrid,
-  ReferenceDot,
-  Label,
-} from 'recharts';
+import { LineChart, XAxis, Tooltip, Line, ResponsiveContainer, ReferenceLine, CartesianGrid } from 'recharts';
 import type { TooltipProps } from 'recharts';
 import { BigNumber } from '@ethersproject/bignumber';
 
@@ -96,57 +85,34 @@ function UtilizationRateChart({ type, current: [currentUtilization, currentRate]
     return [Number(currentUtilization) / 1e18, Number(currentRate) / 1e18];
   }, [currentUtilization, currentRate]);
 
+  const label: CSSProperties = {
+    fontWeight: 500,
+    fontFamily: typography.fontFamilyMonospaced,
+    fill: palette.grey[900],
+  };
+
   return (
-    <>
+    <Box boxShadow="0px 4px 12px rgba(175, 177, 182, 0.2)" p={3} bgcolor="white" borderRadius={1}>
       <Typography variant="h6" mb={2.5}>
         Utilization Rate
       </Typography>
       <ResponsiveContainer width="100%" minHeight={320} height={320}>
-        <LineChart data={data} width={500} height={500} margin={{ left: 30, bottom: 20 }}>
+        <LineChart data={data} width={500} height={500}>
+          <CartesianGrid stroke={palette.grey[300]} vertical={false} />
           <XAxis
             type="number"
             dataKey="utilization"
             tickFormatter={toPercentage}
             tickLine={false}
-            stroke={palette.grey[800]}
-            label={{
-              value: 'Utilization',
-              position: 'bottom',
-              style: {
-                fontFamily: typography.fontFamilyMonospaced,
-                fontWeight: 500,
-                fill: palette.grey[900],
-              },
-            }}
+            stroke={palette.grey[400]}
+            tick={{ fill: palette.grey[500], fontWeight: 500, fontSize: 12 }}
           />
-          <YAxis
-            type="number"
-            dataKey="apr"
-            tickFormatter={(v) => (v === 0 ? '' : toPercentage(v))}
-            mirror
-            tickLine={false}
-            stroke={palette.grey[800]}
-            label={{
-              value: 'Borrow APR',
-              angle: -90,
-              position: 'left',
-              offset: 20,
-              style: {
-                fontFamily: typography.fontFamilyMonospaced,
-                fontWeight: 500,
-                fill: palette.grey[900],
-              },
-            }}
+          <Tooltip
+            active={true}
+            cursor={{ strokeWidth: 1, fill: palette.grey[500], strokeDasharray: '3' }}
+            content={<ChartTooltip />}
           />
-          <CartesianGrid strokeDasharray="4" stroke={palette.grey[300]} />
-          <Tooltip content={<ChartTooltip />} />
 
-          <ReferenceLine x={1} stroke={palette.grey[600]} strokeWidth={2} />
-          <ReferenceDot x={parsedCurrentUtilization} y={parsedCurrentRate} strokeWidth={2} r={5} fill="#000">
-            <Label position="top" style={{ fontFamily: typography.fontFamilyMonospaced, fill: palette.grey[900] }}>
-              {toPercentage(parsedCurrentRate)}
-            </Label>
-          </ReferenceDot>
           <Line
             type="monotone"
             dataKey="apr"
@@ -156,9 +122,22 @@ function UtilizationRateChart({ type, current: [currentUtilization, currentRate]
             activeDot={{ r: 5 }}
             isAnimationActive={false}
           />
+
+          <ReferenceLine
+            x={parsedCurrentUtilization}
+            strokeWidth={2}
+            stroke={palette.operation.variable}
+            label={{
+              value: `APR ${toPercentage(parsedCurrentRate)}`,
+              position: parsedCurrentUtilization && parsedCurrentUtilization < 0.5 ? 'insideLeft' : 'insideRight',
+              offset: 15,
+              angle: -90,
+              style: { ...label, fill: palette.operation.variable },
+            }}
+          />
         </LineChart>
       </ResponsiveContainer>
-    </>
+    </Box>
   );
 }
 
