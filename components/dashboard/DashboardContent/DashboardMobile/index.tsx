@@ -32,7 +32,6 @@ const DashboardMobile: FC<Props> = ({ type }) => {
                 {(accountData &&
                   depositedAmount &&
                   borrowedAmount &&
-                  symbol &&
                   `$${formatNumber(
                     parseFloat(
                       formatFixed(isDeposit ? depositedAmount : borrowedAmount, accountData?.[symbol].decimals),
@@ -46,9 +45,7 @@ const DashboardMobile: FC<Props> = ({ type }) => {
                   title="exaToken"
                   tooltip="The Exactly voucher token (ERC-4626) for your deposit in the Variable Rate Pool."
                 >
-                  {(exaTokens &&
-                    symbol &&
-                    `${formatNumber(formatFixed(exaTokens, accountData?.[symbol].decimals), symbol)}`) || (
+                  {(exaTokens && `${formatNumber(formatFixed(exaTokens, accountData?.[symbol].decimals), symbol)}`) || (
                     <Skeleton width={40} />
                   )}
                 </FlexItem>
