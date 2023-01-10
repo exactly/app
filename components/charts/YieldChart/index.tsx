@@ -3,37 +3,21 @@ import React, { FC } from 'react';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import updateLocale from 'dayjs/plugin/updateLocale';
-import { CartesianGrid, LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts';
+import { ResponsiveContainer, XAxis, YAxis, Tooltip, ReferenceLine, AreaChart, Area } from 'recharts';
 import useAssets from 'hooks/useAssets';
 import useYieldRates from 'hooks/useYieldRates';
+import parseTimestamp from 'utils/parseTimestamp';
+import { toPercentage } from 'utils/utils';
 
 type Props = {
   symbol?: string;
 };
 
-function formatXAxis(tick: number) {
-  dayjs.extend(relativeTime);
-  dayjs.extend(updateLocale);
-  dayjs.updateLocale('en', {
-    relativeTime: {
-      M: '1 month',
-      MM: '%d months',
-      y: '%d months',
-    },
-  });
-
-  const newTick = dayjs(tick * 1000).fromNow(true);
-
-  return newTick;
-}
-
-const tick = {
-  fontSize: '12px',
+const getRandomColor = () => {
+  return '#' + ((Math.random() * 0xffffff) << 0).toString(16).padStart(6, '0');
 };
 
-const ticks = getXAxisTicks();
-
-function getXAxisTicks() {
+const getReferenceLines = () => {
   const data = [];
   let now = new Date().getTime() / 1000;
   const monthInSeconds = 30 * 86_400;
@@ -44,16 +28,30 @@ function getXAxisTicks() {
   }
 
   return data;
-}
+};
+
+const formatXAxis = (tick: number) => {
+  return parseTimestamp(tick);
+};
+
+const referenceLabel = (t: number) => {
+  dayjs.extend(relativeTime);
+  dayjs.extend(updateLocale);
+  dayjs.updateLocale('en', {
+    relativeTime: {
+      M: '1 month',
+      MM: '%d months',
+      y: '%d months',
+    },
+  });
+
+  return dayjs(t * 1000).fromNow(true);
+};
 
 const YieldChart: FC<Props> = () => {
   const { depositsRates } = useYieldRates();
 
   const assets = useAssets();
-
-  function getRandomColor() {
-    return '#' + ((Math.random() * 0xffffff) << 0).toString(16).padStart(6, '0');
-  }
 
   return (
     <Box display="flex" flexDirection="column" width="100%" height="100%" gap={2}>
@@ -62,25 +60,30 @@ const YieldChart: FC<Props> = () => {
       </Box>
 
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={depositsRates}>
-          <CartesianGrid strokeDasharray="3 1" horizontal={false} />
+        <AreaChart data={depositsRates}>
           <XAxis
             dataKey="maturity"
             type="number"
             stroke="#8f8c9c"
             tickMargin={16}
             tickFormatter={(t) => formatXAxis(t)}
-            tick={tick}
-            ticks={ticks}
-            domain={[0, 3 * 30 * 86_400].map((ts) => Date.now() / 1000 + ts)}
+            domain={['dataMin', 'dataMax']}
             scale="time"
           />
-          <YAxis unit="%" type="number" yAxisId="1" tickLine={false} tick={tick} />
-          <Tooltip />
+          <YAxis tickFormatter={(value) => toPercentage(value as number)} type="number" tickLine={false} />
+          <Tooltip
+            formatter={(value) => toPercentage(value as number)}
+            labelFormatter={(value) => {
+              return `${parseTimestamp(value)}`;
+            }}
+          />
           {assets.map((asset) => (
-            <Line key={asset} yAxisId="1" dataKey={asset} stroke={getRandomColor()} animationDuration={300} />
+            <Area key={asset} type="monotone" dataKey={asset} stroke={getRandomColor()} fillOpacity={0} />
           ))}
-        </LineChart>
+          {getReferenceLines().map((reference) => (
+            <ReferenceLine key={reference} x={reference} label={referenceLabel(reference)} />
+          ))}
+        </AreaChart>
       </ResponsiveContainer>
     </Box>
   );
