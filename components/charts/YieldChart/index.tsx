@@ -11,7 +11,7 @@ type Props = {
   symbol?: string;
 };
 
-function formatXAxis(tick: any) {
+function formatXAxis(tick: number) {
   dayjs.extend(relativeTime);
   dayjs.extend(updateLocale);
   dayjs.updateLocale('en', {
@@ -22,9 +22,9 @@ function formatXAxis(tick: any) {
     },
   });
 
-  const parseTick = dayjs(tick * 1000).fromNow(true);
+  const newTick = dayjs(tick * 1000).fromNow(true);
 
-  return parseTick;
+  return newTick;
 }
 
 const tick = {
@@ -36,7 +36,7 @@ const ticks = getXAxisTicks();
 function getXAxisTicks() {
   const data = [];
   let now = new Date().getTime() / 1000;
-  const monthInSeconds = 2592000; // 30 days ;
+  const monthInSeconds = 30 * 86_400;
 
   for (let i = 1; i <= 3; i++) {
     data.push(now + monthInSeconds);
@@ -52,7 +52,7 @@ const YieldChart: FC<Props> = () => {
   const assets = useAssets();
 
   function getRandomColor() {
-    return '#' + Math.floor(Math.random() * 16777215).toString(16);
+    return '#' + ((Math.random() * 0xffffff) << 0).toString(16).padStart(6, '0');
   }
 
   return (
@@ -69,10 +69,10 @@ const YieldChart: FC<Props> = () => {
             type="number"
             stroke="#8f8c9c"
             tickMargin={16}
-            tickFormatter={(tick) => formatXAxis(tick)}
+            tickFormatter={(t) => formatXAxis(t)}
             tick={tick}
             ticks={ticks}
-            domain={[() => Date.now() / 1000, () => Date.now() / 1000 + 7776000]}
+            domain={[0, 3 * 30 * 86_400].map((ts) => Date.now() / 1000 + ts)}
             scale="time"
           />
           <YAxis unit="%" type="number" yAxisId="1" tickLine={false} tick={tick} />
