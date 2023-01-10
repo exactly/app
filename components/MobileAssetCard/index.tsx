@@ -6,12 +6,12 @@ import { useRouter } from 'next/router';
 import React, { FC, PropsWithChildren } from 'react';
 import getSymbolDescription from 'utils/getSymbolDescription';
 
-type Props = {
+type Props = PropsWithChildren<{
   symbol: string;
   isFloating?: boolean;
-};
+}>;
 
-const MobileAssetCard: FC<PropsWithChildren & Props> = ({ symbol, isFloating, children }) => {
+const MobileAssetCard: FC<Props> = ({ symbol, isFloating, children }) => {
   const { query } = useRouter();
 
   return (

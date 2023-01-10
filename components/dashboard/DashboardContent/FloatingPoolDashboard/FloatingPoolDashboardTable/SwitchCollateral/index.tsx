@@ -1,5 +1,5 @@
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { CircularProgress, Skeleton, Tooltip, Typography } from '@mui/material';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
+import { CircularProgress, Tooltip, Typography } from '@mui/material';
 import { captureException } from '@sentry/nextjs';
 import { WeiPerEther } from '@ethersproject/constants';
 import { ErrorCode } from '@ethersproject/logger';
@@ -10,14 +10,12 @@ import parseHealthFactor from 'utils/parseHealthFactor';
 import { HealthFactor } from 'types/HealthFactor';
 import useAuditor from 'hooks/useAuditor';
 import getHealthFactorData from 'utils/getHealthFactorData';
-import { useWeb3 } from 'hooks/useWeb3';
 
 type Props = {
-  symbol?: string;
+  symbol: string;
 };
 
 function SwitchCollateral({ symbol }: Props) {
-  const { walletAddress } = useWeb3();
   const { accountData, getAccountData } = useContext(AccountDataContext);
   const auditor = useAuditor();
 
@@ -26,73 +24,60 @@ function SwitchCollateral({ symbol }: Props) {
     return getHealthFactorData(accountData);
   }, [accountData]);
 
-  const [toggle, setToggle] = useState<boolean>(false);
-  const [disabled, setDisabled] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [disabledText, setDisabledText] = useState<string | undefined>();
+  const checked = useMemo<boolean>(() => {
+    if (!accountData) return false;
+    return accountData[symbol].isCollateral;
+  }, [accountData, symbol]);
 
-  const checkCollaterals = useCallback(() => {
-    if (!accountData || !symbol) return;
-    setToggle(false);
-    setDisabled(false);
+  const { disabled, disabledText } = useMemo<{ disabled: boolean; disabledText?: string }>(() => {
+    if (!accountData || !healthFactor) return { disabled: true };
 
-    const { [symbol]: currentMarket } = accountData;
-    const floatingPositions = currentMarket.floatingBorrowAssets;
-    const fixedPositions = currentMarket.fixedBorrowPositions;
+    const { floatingBorrowAssets, fixedBorrowPositions, isCollateral, usdPrice, floatingDepositAssets } =
+      accountData[symbol];
 
-    if (!floatingPositions.isZero() || fixedPositions.length > 0) {
-      setDisabledText(`You can't disable collateral on this asset because you have an active borrow`);
-      setDisabled(true);
+    if (!floatingBorrowAssets.isZero() || fixedBorrowPositions.length > 0) {
+      return {
+        disabled: true,
+        disabledText: "You can't disable collateral on this asset because you have an active borrow",
+      };
     }
 
-    if (currentMarket.isCollateral) {
-      setToggle(true);
-      if (!healthFactor) return;
+    const collateralUsd = floatingDepositAssets.mul(usdPrice).div(WeiPerEther);
+    const newHF = parseFloat(parseHealthFactor(healthFactor.debt, healthFactor.collateral.sub(collateralUsd)));
 
-      const usdPrice = currentMarket.usdPrice;
-      const collateralAssets = currentMarket.floatingDepositAssets;
-      const collateralUsd = collateralAssets.mul(usdPrice).div(WeiPerEther);
-
-      const newHF = parseFloat(parseHealthFactor(healthFactor.debt, healthFactor.collateral.sub(collateralUsd)));
-
-      if (newHF < 1) {
-        setDisabledText('Disabling this collateral will make your health factor less than 1');
-      }
+    if (isCollateral && newHF < 1) {
+      return { disabled: true, disabledText: 'Disabling this collateral will make your health factor less than 1' };
     }
+
+    return { disabled: false };
   }, [accountData, healthFactor, symbol]);
 
-  useEffect(() => {
-    checkCollaterals();
-  }, [accountData, walletAddress, healthFactor, checkCollaterals]);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const onToggle = useCallback(async () => {
-    setToggle((prev) => !prev);
-    if (!accountData || !symbol || !auditor) return;
+    if (!accountData || !auditor) return;
     const { market } = accountData[symbol];
 
+    setLoading(true);
     try {
-      setLoading(true);
-      const tx = await (toggle ? auditor.exitMarket(market) : auditor.enterMarket(market));
+      const tx = await (checked ? auditor.exitMarket(market) : auditor.enterMarket(market));
       await tx.wait();
-      setToggle(!toggle);
-      setLoading(false);
 
       await getAccountData();
     } catch (error: any) {
       if (error.code !== ErrorCode.ACTION_REJECTED) captureException(error);
-      setToggle((prev) => !prev);
+    } finally {
       setLoading(false);
     }
-  }, [accountData, auditor, getAccountData, symbol, toggle]);
+  }, [accountData, auditor, getAccountData, symbol, checked]);
 
-  if (!symbol) return <Skeleton animation="wave" width={40} height={36} sx={{ borderRadius: '12px' }} />;
   if (loading) return <CircularProgress color="primary" size={24} thickness={8} />;
 
   return (
     <Tooltip
       title={
         <Typography fontSize="1.2em" fontWeight={600}>
-          {!toggle
+          {!checked
             ? 'Enable this asset as collateral'
             : disabledText && disabled
             ? disabledText
@@ -104,9 +89,9 @@ function SwitchCollateral({ symbol }: Props) {
     >
       <span>
         <StyledSwitch
-          checked={toggle}
+          checked={checked}
           onChange={onToggle}
-          inputProps={{ 'aria-label': 'controlled' }}
+          inputProps={{ 'aria-label': 'Use this asset as collateral' }}
           disabled={disabled}
         />
       </span>
