@@ -10,6 +10,7 @@ import { useWeb3 } from 'hooks/useWeb3';
 
 import usePreviewer from 'hooks/usePreviewer';
 import useDelayedEffect from 'hooks/useDelayedEffect';
+import { ErrorCode } from '@ethersproject/logger';
 
 type ContextValues = {
   accountData: AccountData | undefined;
@@ -40,9 +41,12 @@ export const AccountDataProvider: FC<PropsWithChildren> = ({ children }) => {
 
     const account = walletAddress ?? AddressZero;
 
-    const exactly = await previewer.exactly(account);
-
-    return Object.fromEntries(exactly.map((market) => [market.assetSymbol, market]));
+    try {
+      const exactly = await previewer.exactly(account);
+      return Object.fromEntries(exactly.map((market) => [market.assetSymbol, market]));
+    } catch (error: any) {
+      if (error?.code !== ErrorCode.CALL_EXCEPTION) captureException(error);
+    }
   }, [previewer, walletAddress]);
 
   const getAccountData = useCallback(async () => {
