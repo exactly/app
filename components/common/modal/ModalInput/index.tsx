@@ -1,24 +1,26 @@
-import React, { ChangeEventHandler } from 'react';
+import React from 'react';
 import { InputBase, InputBaseComponentProps } from '@mui/material';
 import { NumericFormat } from 'react-number-format';
 
 type CustomProps = {
   decimals: number;
+  onValueChange: (value: string) => void;
 };
 
 const NumberFormatCustom = React.forwardRef<HTMLInputElement, InputBaseComponentProps & CustomProps>(
   function NumberFormatCustom(props, ref) {
-    const { onChange, decimals, ...other } = props;
-
+    const { onValueChange, decimals, ...other } = props;
     return (
       <NumericFormat
         {...other}
         getInputRef={ref}
         decimalScale={decimals}
-        onChange={onChange}
+        onValueChange={({ value }) => onValueChange(value)}
         allowedDecimalSeparators={[',']}
         allowNegative={false}
         defaultValue={0.0}
+        thousandSeparator=","
+        valueIsNumericString
       />
     );
   },
@@ -27,10 +29,9 @@ const NumberFormatCustom = React.forwardRef<HTMLInputElement, InputBaseComponent
 type Props = {
   name?: string;
   value?: string;
-  onChange?: ChangeEventHandler<HTMLInputElement>;
 } & CustomProps;
 
-function ModalInput({ value, name, decimals, onChange }: Props) {
+function ModalInput({ value, name, decimals, onValueChange }: Props) {
   return (
     <InputBase
       inputProps={{
@@ -40,10 +41,10 @@ function ModalInput({ value, name, decimals, onChange }: Props) {
         step: 'any',
         inputMode: 'decimal',
         style: { padding: 0, textAlign: 'right' },
-        value: value,
-        onChange: onChange,
+        onValueChange: onValueChange,
         decimals: decimals,
       }}
+      value={value}
       autoFocus
       sx={{
         paddingTop: 0.5,

@@ -1,4 +1,4 @@
-import React, { ChangeEvent, FC, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { FC, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { WeiPerEther, Zero } from '@ethersproject/constants';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { ErrorCode } from '@ethersproject/logger';
@@ -200,7 +200,7 @@ const BorrowAtMaturity: FC = () => {
   }, [accountData, healthFactor, setErrorData, setQty, symbol]);
 
   const handleInputChange = useCallback(
-    ({ target: { value } }: ChangeEvent<HTMLInputElement>) => {
+    (value: string) => {
       if (!accountData) return;
       const { decimals, usdPrice } = accountData[symbol];
 

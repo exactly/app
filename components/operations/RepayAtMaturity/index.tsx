@@ -1,4 +1,4 @@
-import React, { ChangeEvent, FC, useCallback, useContext, useMemo, useState } from 'react';
+import React, { FC, useCallback, useContext, useMemo, useState } from 'react';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { WeiPerEther, Zero } from '@ethersproject/constants';
 
@@ -167,7 +167,7 @@ const RepayAtMaturity: FC = () => {
   }, [totalPenalties, totalPositionAssets, setQty, decimals, walletBalance, setErrorData]);
 
   const handleInputChange = useCallback(
-    ({ target: { value } }: ChangeEvent<HTMLInputElement>) => {
+    (value: string) => {
       setQty(value);
 
       const input = parseFixed(value || '0', decimals);

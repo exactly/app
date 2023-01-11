@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useContext, useMemo, useState, useCallback } from 'react';
+import React, { useContext, useMemo, useState, useCallback } from 'react';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { WeiPerEther } from '@ethersproject/constants';
 
@@ -102,7 +102,7 @@ function Repay() {
   }, [setQty, finalAmount, walletBalance, setErrorData, translations, lang]);
 
   const handleInputChange = useCallback(
-    ({ target: { value } }: ChangeEvent<HTMLInputElement>) => {
+    (value: string) => {
       setQty(value);
 
       if (walletBalance && parseFloat(value) > parseFloat(walletBalance)) {

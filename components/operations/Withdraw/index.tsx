@@ -1,4 +1,4 @@
-import React, { ChangeEvent, FC, useCallback, useContext, useMemo, useState } from 'react';
+import React, { FC, useCallback, useContext, useMemo, useState } from 'react';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 
 import ModalTxCost from 'components/common/modal/ModalTxCost';
@@ -129,7 +129,7 @@ const Withdraw: FC = () => {
   }, [parsedAmount, setQty]);
 
   const handleInputChange = useCallback(
-    ({ target: { value } }: ChangeEvent<HTMLInputElement>) => {
+    (value: string) => {
       setQty(value);
 
       if (parseFloat(value) > parseFloat(parsedAmount)) {
