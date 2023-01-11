@@ -1,26 +1,16 @@
-import { useContext, useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useSigner } from 'wagmi';
 import { Contract } from '@ethersproject/contracts';
 import type { ERC20 } from 'types/contracts/ERC20';
 import erc20ABI from 'abi/ERC20.json';
 import { useOperationContext } from 'contexts/OperationContext';
-import { MarketContext } from 'contexts/MarketContext';
-import useMarket from './useMarket';
+import useAccountData from './useAccountData';
 
 export default (): ERC20 | undefined => {
   const { data: signer } = useSigner();
-  const { market } = useContext(MarketContext);
   const { symbol } = useOperationContext();
 
-  const marketContract = useMarket(market);
-
-  const [assetAddress, setAssetAddress] = useState<string | undefined>();
-
-  useEffect(() => {
-    if (!marketContract || symbol === 'WETH') return;
-
-    void marketContract.asset().then(setAssetAddress);
-  }, [marketContract, symbol]);
+  const { asset: assetAddress } = useAccountData(symbol);
 
   const assetContract = useMemo(() => {
     if (!signer || !assetAddress) return;
