@@ -7,19 +7,14 @@ import ModalGif from 'components/common/modal/ModalGif';
 
 import { LangKeys } from 'types/Lang';
 
-import useETHRouter from 'hooks/useETHRouter';
-
 import LangContext from 'contexts/LangContext';
 import { useWeb3 } from 'hooks/useWeb3';
 import AccountDataContext from 'contexts/AccountDataContext';
-import { MarketContext } from 'contexts/MarketContext';
 
 import keys from './translations.json';
 import numbers from 'config/numbers.json';
 import useApprove from 'hooks/useApprove';
 import useBalance from 'hooks/useBalance';
-import useMarket from 'hooks/useMarket';
-import useERC20 from 'hooks/useERC20';
 import handleOperationError from 'utils/handleOperationError';
 import analytics from 'utils/analytics';
 import useAccountData from 'hooks/useAccountData';
@@ -42,7 +37,6 @@ const Deposit: FC = () => {
   const { operation } = useModalStatus();
   const { walletAddress } = useWeb3();
   const { getAccountData } = useContext(AccountDataContext);
-  const { market } = useContext(MarketContext);
 
   const {
     symbol,
@@ -57,14 +51,13 @@ const Deposit: FC = () => {
     setRequiresApproval,
     isLoading: isLoadingOp,
     setIsLoading: setIsLoadingOp,
+    marketContract,
+    assetContract,
+    ETHRouterContract,
   } = useOperationContext();
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
-
-  const ETHRouterContract = useETHRouter();
-  const assetContract = useERC20();
-  const marketContract = useMarket(market);
 
   const { decimals = 18 } = useAccountData(symbol);
 

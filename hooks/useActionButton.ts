@@ -1,6 +1,5 @@
 import { useCallback, useContext } from 'react';
 import { useWeb3Modal } from '@web3modal/react';
-import AccountDataContext from 'contexts/AccountDataContext';
 import { useWeb3 } from 'hooks/useWeb3';
 import { MarketContext } from 'contexts/MarketContext';
 import { Operation, useModalStatus } from 'contexts/ModalStatusContext';
@@ -11,8 +10,7 @@ const { minAPRValue } = numbers;
 export default function useActionButton() {
   const { open } = useWeb3Modal();
   const { walletAddress } = useWeb3();
-  const { accountData } = useContext(AccountDataContext);
-  const { setDate, setMarket } = useContext(MarketContext);
+  const { setDate, setMarketSymbol } = useContext(MarketContext);
   const { openOperationModal } = useModalStatus();
 
   const handleActionClick = useCallback(
@@ -21,11 +19,7 @@ export default function useActionButton() {
 
       if (!walletAddress) return open({ route: 'ConnectWallet' });
 
-      if (!accountData) return;
-
-      const { market } = accountData[symbol];
-
-      setMarket(market);
+      setMarketSymbol(symbol);
 
       if (maturity) {
         setDate(maturity);
@@ -33,7 +27,7 @@ export default function useActionButton() {
 
       openOperationModal(action);
     },
-    [accountData, open, openOperationModal, setDate, setMarket, walletAddress],
+    [open, openOperationModal, setDate, setMarketSymbol, walletAddress],
   );
 
   const isDisable = (rateType: 'floating' | 'fixed', apr: number | undefined) => {

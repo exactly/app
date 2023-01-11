@@ -4,7 +4,7 @@ import { Contract } from '@ethersproject/contracts';
 import type { Market } from 'types/contracts/Market';
 import marketABI from 'abi/Market.json';
 
-export default (address?: string) => {
+export default (address?: string): Market | undefined => {
   const { data: signer } = useSigner();
 
   const marketContract = useMemo(() => {

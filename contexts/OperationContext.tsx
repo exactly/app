@@ -1,15 +1,20 @@
 import { BigNumber } from '@ethersproject/bignumber';
+import useAccountData from 'hooks/useAccountData';
 import useDelayedEffect from 'hooks/useDelayedEffect';
+import useERC20 from 'hooks/useERC20';
+import useETHRouter from 'hooks/useETHRouter';
+import useMarket from 'hooks/useMarket';
+import { useWeb3 } from 'hooks/useWeb3';
 import React, {
   createContext,
   type PropsWithChildren,
   type FC,
   useContext,
   useState,
-  useMemo,
   useCallback,
   useEffect,
 } from 'react';
+import { ERC20, Market, MarketETHRouter } from 'types/contracts';
 import { ErrorData } from 'types/Error';
 import { Transaction } from 'types/Transaction';
 import handleOperationError from 'utils/handleOperationError';
@@ -32,12 +37,17 @@ type ContextValues = {
 
   requiresApproval: boolean;
   setRequiresApproval: React.Dispatch<React.SetStateAction<boolean>>;
+
+  marketContract?: Market;
+  assetContract?: ERC20;
+  ETHRouterContract?: MarketETHRouter;
 };
 
 const OperationContext = createContext<ContextValues | null>(null);
 
 export const OperationContextProvider: FC<PropsWithChildren> = ({ children }) => {
-  const { account, market } = useContext(MarketContext);
+  const { chain } = useWeb3();
+  const { marketSymbol = 'DAI' } = useContext(MarketContext);
   const { open, operation } = useModalStatus();
 
   const [errorData, setErrorData] = useState<ErrorData | undefined>();
@@ -47,6 +57,7 @@ export const OperationContextProvider: FC<PropsWithChildren> = ({ children }) =>
   const [tx, setTx] = useState<Transaction | undefined>();
   const [isLoading, setIsLoading] = useState(false);
   const [requiresApproval, setRequiresApproval] = useState(false);
+  const { market, asset } = useAccountData(marketSymbol);
 
   useEffect(() => {
     setQty('');
@@ -55,26 +66,31 @@ export const OperationContextProvider: FC<PropsWithChildren> = ({ children }) =>
     setIsLoading(false);
     setRequiresApproval(true);
     setGasCost(undefined);
-  }, [market, operation, open]);
+  }, [chain?.id, marketSymbol, operation, open]);
 
-  const value: ContextValues = useMemo(
-    () => ({
-      symbol: account?.assetSymbol ?? 'DAI',
-      errorData,
-      setErrorData,
-      qty,
-      setQty,
-      gasCost,
-      setGasCost,
-      tx,
-      setTx,
-      isLoading,
-      setIsLoading,
-      requiresApproval,
-      setRequiresApproval,
-    }),
-    [errorData, gasCost, isLoading, qty, requiresApproval, account?.assetSymbol, tx],
-  );
+  const assetContract = useERC20(asset);
+  const marketContract = useMarket(market);
+  const ETHRouterContract = useETHRouter();
+
+  const value: ContextValues = {
+    symbol: marketSymbol,
+    errorData,
+    setErrorData,
+    qty,
+    setQty,
+    gasCost,
+    setGasCost,
+    tx,
+    setTx,
+    isLoading,
+    setIsLoading,
+    requiresApproval,
+    setRequiresApproval,
+
+    assetContract,
+    marketContract,
+    ETHRouterContract,
+  };
 
   return <OperationContext.Provider value={value}>{children}</OperationContext.Provider>;
 };

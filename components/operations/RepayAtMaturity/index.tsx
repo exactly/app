@@ -13,9 +13,6 @@ import { useWeb3 } from 'hooks/useWeb3';
 
 import numbers from 'config/numbers.json';
 
-import useETHRouter from 'hooks/useETHRouter';
-import useMarket from 'hooks/useMarket';
-import useERC20 from 'hooks/useERC20';
 import useApprove from 'hooks/useApprove';
 import handleOperationError from 'utils/handleOperationError';
 import useBalance from 'hooks/useBalance';
@@ -43,7 +40,7 @@ const DEFAULT_SLIPPAGE = (numbers.slippage * 100).toFixed(2);
 const RepayAtMaturity: FC = () => {
   const { operation } = useModalStatus();
   const { walletAddress } = useWeb3();
-  const { date, market } = useContext(MarketContext);
+  const { date } = useContext(MarketContext);
   const { accountData, getAccountData } = useContext(AccountDataContext);
 
   const {
@@ -59,16 +56,14 @@ const RepayAtMaturity: FC = () => {
     setRequiresApproval,
     isLoading: isLoadingOp,
     setIsLoading: setIsLoadingOp,
+    marketContract,
+    assetContract,
+    ETHRouterContract,
   } = useOperationContext();
 
   const [penaltyAssets, setPenaltyAssets] = useState(Zero);
   const [positionAssetsAmount, setPositionAssetsAmount] = useState(Zero);
   const [rawSlippage, setRawSlippage] = useState(DEFAULT_SLIPPAGE);
-
-  const ETHRouterContract = useETHRouter();
-  const assetContract = useERC20();
-
-  const marketContract = useMarket(market);
 
   const slippage = useMemo(() => parseFixed(String(1 + Number(rawSlippage) / 100), 18), [rawSlippage]);
   const { decimals = 18 } = useAccountData(symbol);

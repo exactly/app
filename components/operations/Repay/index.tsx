@@ -10,16 +10,12 @@ import { LangKeys } from 'types/Lang';
 import LangContext from 'contexts/LangContext';
 import { useWeb3 } from 'hooks/useWeb3';
 import AccountDataContext from 'contexts/AccountDataContext';
-import { MarketContext } from 'contexts/MarketContext';
 
 import numbers from 'config/numbers.json';
 
 import keys from './translations.json';
 import useApprove from 'hooks/useApprove';
-import useMarket from 'hooks/useMarket';
-import useETHRouter from 'hooks/useETHRouter';
 import handleOperationError from 'utils/handleOperationError';
-import useERC20 from 'hooks/useERC20';
 import useBalance from 'hooks/useBalance';
 import analytics from 'utils/analytics';
 import { useOperationContext, usePreviewTx } from 'contexts/OperationContext';
@@ -42,7 +38,6 @@ function Repay() {
   const { operation } = useModalStatus();
   const { walletAddress } = useWeb3();
   const { accountData, getAccountData } = useContext(AccountDataContext);
-  const { market } = useContext(MarketContext);
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
@@ -60,16 +55,14 @@ function Repay() {
     setRequiresApproval,
     isLoading: isLoadingOp,
     setIsLoading: setIsLoadingOp,
+    marketContract,
+    assetContract,
+    ETHRouterContract,
   } = useOperationContext();
 
   const { decimals = 18 } = useAccountData(symbol);
 
   const [isMax, setIsMax] = useState(false);
-
-  const ETHRouterContract = useETHRouter();
-
-  const marketContract = useMarket(market);
-  const assetContract = useERC20();
 
   const walletBalance = useBalance(symbol, assetContract);
 

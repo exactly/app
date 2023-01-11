@@ -10,19 +10,14 @@ import { HealthFactor } from 'types/HealthFactor';
 
 import getBeforeBorrowLimit from 'utils/getBeforeBorrowLimit';
 
-import useETHRouter from 'hooks/useETHRouter';
-
 import LangContext from 'contexts/LangContext';
 import { useWeb3 } from 'hooks/useWeb3';
-import { MarketContext } from 'contexts/MarketContext';
 import AccountDataContext from 'contexts/AccountDataContext';
 
 import keys from './translations.json';
 import numbers from 'config/numbers.json';
 import useApprove from 'hooks/useApprove';
 import useBalance from 'hooks/useBalance';
-import useMarket from 'hooks/useMarket';
-import useERC20 from 'hooks/useERC20';
 import handleOperationError from 'utils/handleOperationError';
 import analytics from 'utils/analytics';
 import { useOperationContext, usePreviewTx } from 'contexts/OperationContext';
@@ -45,7 +40,6 @@ const Borrow: FC = () => {
   const { operation } = useModalStatus();
   const { walletAddress } = useWeb3();
   const { accountData, getAccountData } = useContext(AccountDataContext);
-  const { market } = useContext(MarketContext);
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
@@ -63,6 +57,9 @@ const Borrow: FC = () => {
     setRequiresApproval,
     isLoading: isLoadingOp,
     setIsLoading: setIsLoadingOp,
+    marketContract,
+    assetContract,
+    ETHRouterContract,
   } = useOperationContext();
 
   const { decimals = 18 } = useAccountData(symbol);
@@ -70,11 +67,6 @@ const Borrow: FC = () => {
     () => (accountData ? getHealthFactorData(accountData) : undefined),
     [accountData],
   );
-
-  const ETHRouterContract = useETHRouter();
-  const assetContract = useERC20();
-
-  const marketContract = useMarket(market);
 
   const {
     approve,

@@ -17,11 +17,8 @@ import AccountDataContext from 'contexts/AccountDataContext';
 
 import keys from './translations.json';
 import useBalance from 'hooks/useBalance';
-import useMarket from 'hooks/useMarket';
 import useApprove from 'hooks/useApprove';
-import useETHRouter from 'hooks/useETHRouter';
 import usePreviewer from 'hooks/usePreviewer';
-import useERC20 from 'hooks/useERC20';
 import analytics from 'utils/analytics';
 import { useOperationContext, usePreviewTx } from 'contexts/OperationContext';
 import { toPercentage } from 'utils/utils';
@@ -49,7 +46,7 @@ const DEFAULT_SLIPPAGE = (100 * numbers.slippage).toFixed(2);
 const DepositAtMaturity: FC = () => {
   const { operation } = useModalStatus();
   const { walletAddress } = useWeb3();
-  const { date, market } = useContext(MarketContext);
+  const { date } = useContext(MarketContext);
   const { accountData, getAccountData } = useContext(AccountDataContext);
 
   const lang: string = useContext(LangContext);
@@ -68,6 +65,9 @@ const DepositAtMaturity: FC = () => {
     setRequiresApproval,
     isLoading: isLoadingOp,
     setIsLoading: setIsLoadingOp,
+    marketContract,
+    assetContract,
+    ETHRouterContract,
   } = useOperationContext();
 
   const [rawSlippage, setRawSlippage] = useState(DEFAULT_SLIPPAGE);
@@ -75,11 +75,6 @@ const DepositAtMaturity: FC = () => {
   const [gtMaxYield, setGtMaxYield] = useState<boolean>(false);
 
   const slippage = useMemo(() => parseFixed(String(1 - Number(rawSlippage) / 100), 18), [rawSlippage]);
-
-  const ETHRouterContract = useETHRouter();
-  const marketContract = useMarket(market);
-
-  const assetContract = useERC20();
 
   const walletBalance = useBalance(symbol, assetContract);
   const { decimals = 18 } = useAccountData(symbol);
