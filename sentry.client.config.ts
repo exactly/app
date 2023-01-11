@@ -7,4 +7,5 @@ Sentry.init({
   dsn: SENTRY_DSN,
   tracesSampleRate: 1.0,
   integrations: [new ExtraErrorData({ depth: 5 })],
+  environment: process.env.SENTRY_ENVIRONMENT,
 });
