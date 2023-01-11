@@ -15,8 +15,6 @@ import { useWeb3 } from 'hooks/useWeb3';
 import numbers from 'config/numbers.json';
 
 import keys from './translations.json';
-import useMarket from 'hooks/useMarket';
-import useETHRouter from 'hooks/useETHRouter';
 import useApprove from 'hooks/useApprove';
 import handleOperationError from 'utils/handleOperationError';
 import usePreviewer from 'hooks/usePreviewer';
@@ -45,7 +43,7 @@ const DEFAULT_SLIPPAGE = (100 * numbers.slippage).toFixed(2);
 const WithdrawAtMaturity: FC = () => {
   const { operation } = useModalStatus();
   const { walletAddress } = useWeb3();
-  const { date, market } = useContext(MarketContext);
+  const { date } = useContext(MarketContext);
   const { accountData, getAccountData } = useContext(AccountDataContext);
 
   const lang: string = useContext(LangContext);
@@ -64,15 +62,14 @@ const WithdrawAtMaturity: FC = () => {
     setRequiresApproval,
     isLoading: isLoadingOp,
     setIsLoading: setIsLoadingOp,
+    marketContract,
+    ETHRouterContract,
   } = useOperationContext();
 
   const [rawSlippage, setRawSlippage] = useState(DEFAULT_SLIPPAGE);
 
   const [minAmountToWithdraw, setMinAmountToWithdraw] = useState(Zero);
   const [amountToWithdraw, setAmountToWithdraw] = useState(Zero);
-
-  const marketContract = useMarket(market);
-  const ETHRouterContract = useETHRouter();
 
   const previewerContract = usePreviewer();
 

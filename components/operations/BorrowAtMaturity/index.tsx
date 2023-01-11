@@ -19,13 +19,10 @@ import { useWeb3 } from 'hooks/useWeb3';
 import { MarketContext } from 'contexts/MarketContext';
 import AccountDataContext from 'contexts/AccountDataContext';
 
-import useETHRouter from 'hooks/useETHRouter';
-import useMarket from 'hooks/useMarket';
 import useBalance from 'hooks/useBalance';
 import usePoolLiquidity from 'hooks/usePoolLiquidity';
 import useApprove from 'hooks/useApprove';
 import usePreviewer from 'hooks/usePreviewer';
-import useERC20 from 'hooks/useERC20';
 
 import keys from './translations.json';
 
@@ -55,7 +52,7 @@ const BorrowAtMaturity: FC = () => {
   const { operation } = useModalStatus();
   const { walletAddress } = useWeb3();
   const { accountData, getAccountData } = useContext(AccountDataContext);
-  const { date, market } = useContext(MarketContext);
+  const { date } = useContext(MarketContext);
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
@@ -73,6 +70,9 @@ const BorrowAtMaturity: FC = () => {
     setRequiresApproval,
     isLoading: isLoadingOp,
     setIsLoading: setIsLoadingOp,
+    marketContract,
+    assetContract,
+    ETHRouterContract,
   } = useOperationContext();
 
   const { decimals = 18 } = useAccountData(symbol);
@@ -86,11 +86,6 @@ const BorrowAtMaturity: FC = () => {
     () => (accountData ? getHealthFactorData(accountData) : undefined),
     [accountData],
   );
-
-  const ETHRouterContract = useETHRouter();
-  const assetContract = useERC20();
-
-  const marketContract = useMarket(market);
 
   const previewerContract = usePreviewer();
 

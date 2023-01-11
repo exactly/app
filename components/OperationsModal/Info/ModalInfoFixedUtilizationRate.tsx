@@ -9,9 +9,9 @@ import { toPercentage } from 'utils/utils';
 import { MarketContext } from 'contexts/MarketContext';
 import usePreviewer from 'hooks/usePreviewer';
 import useDelayedEffect from 'hooks/useDelayedEffect';
-import useMarket from 'hooks/useMarket';
 import { useWeb3 } from 'hooks/useWeb3';
 import { AddressZero } from '@ethersproject/constants';
+import { useOperationContext } from 'contexts/OperationContext';
 
 type Props = {
   qty: string;
@@ -24,9 +24,9 @@ function ModalInfoFixedUtilizationRate({ qty, symbol, operation, variant = 'colu
   const previewerContract = usePreviewer();
   const { walletAddress } = useWeb3();
   const { fixedPools, usdPrice, decimals } = useAccountData(symbol);
-  const { date, market } = useContext(MarketContext);
+  const { date } = useContext(MarketContext);
 
-  const marketContract = useMarket(market);
+  const { marketContract } = useOperationContext();
 
   const from: string | undefined = useMemo(() => {
     if (!date) return;

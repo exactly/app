@@ -9,13 +9,10 @@ import { LangKeys } from 'types/Lang';
 import LangContext from 'contexts/LangContext';
 import { useWeb3 } from 'hooks/useWeb3';
 import AccountDataContext from 'contexts/AccountDataContext';
-import { MarketContext } from 'contexts/MarketContext';
 
 import numbers from 'config/numbers.json';
 
 import keys from './translations.json';
-import useMarket from 'hooks/useMarket';
-import useETHRouter from 'hooks/useETHRouter';
 import { WeiPerEther } from '@ethersproject/constants';
 import handleOperationError from 'utils/handleOperationError';
 import useApprove from 'hooks/useApprove';
@@ -40,7 +37,6 @@ const Withdraw: FC = () => {
   const { operation } = useModalStatus();
   const { walletAddress } = useWeb3();
   const { accountData, getAccountData } = useContext(AccountDataContext);
-  const { market } = useContext(MarketContext);
 
   const lang: string = useContext(LangContext);
   const translations: { [key: string]: LangKeys } = keys;
@@ -58,6 +54,8 @@ const Withdraw: FC = () => {
     setRequiresApproval,
     isLoading: isLoadingOp,
     setIsLoading: setIsLoadingOp,
+    marketContract,
+    ETHRouterContract,
   } = useOperationContext();
 
   const { decimals = 18 } = useAccountData(symbol);
@@ -69,9 +67,6 @@ const Withdraw: FC = () => {
     const { floatingDepositAssets, decimals } = accountData[symbol];
     return formatFixed(floatingDepositAssets, decimals);
   }, [symbol, accountData]);
-
-  const ETHRouterContract = useETHRouter();
-  const marketContract = useMarket(market);
 
   const {
     approve,

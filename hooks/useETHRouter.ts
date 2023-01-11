@@ -7,7 +7,7 @@ import MarketETHRouterABI from 'abi/MarketETHRouter.json';
 import { captureException } from '@sentry/nextjs';
 import { useWeb3 } from './useWeb3';
 
-export default () => {
+export default (): MarketETHRouter | undefined => {
   const { data: signer } = useSigner();
   const { chain } = useWeb3();
 
