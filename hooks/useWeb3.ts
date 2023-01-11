@@ -19,7 +19,7 @@ export const useWeb3 = () => {
     }
   }, [chain, isQueryChainSupported, queryChain?.id, switchNetwork]);
 
-  const walletAddress = useDebounce(address);
+  const walletAddress = useDebounce(address, 50);
   return {
     isConnected: !!walletAddress,
     walletAddress,
