@@ -1,5 +1,5 @@
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
-import React, { ChangeEvent, FC, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { FC, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { AddressZero, WeiPerEther, Zero } from '@ethersproject/constants';
 
 import ModalGif from 'components/common/modal/ModalGif';
@@ -178,7 +178,7 @@ const WithdrawAtMaturity: FC = () => {
   const onMax = useCallback(() => setQty(formatFixed(positionAssets, decimals)), [decimals, positionAssets, setQty]);
 
   const handleInputChange = useCallback(
-    ({ target: { value } }: ChangeEvent<HTMLInputElement>) => {
+    (value: string) => {
       setQty(value);
 
       const parsedValue = parseFixed(value || '0', decimals);

@@ -1,4 +1,4 @@
-import React, { ChangeEventHandler } from 'react';
+import React from 'react';
 import { Box } from '@mui/material';
 
 import ModalInput from 'components/common/modal/ModalInput';
@@ -10,7 +10,7 @@ type Props = {
   qty: string;
   symbol: string;
   decimals: number;
-  onChange: ChangeEventHandler<HTMLInputElement>;
+  onChange: (value: string) => void;
 } & AAProps;
 
 function AssetInput({ qty, onChange, symbol, decimals, amount, label, onMax }: Props) {
@@ -18,7 +18,7 @@ function AssetInput({ qty, onChange, symbol, decimals, amount, label, onMax }: P
     <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
       <Box sx={{ marginLeft: -1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <AssetSelector />
-        <ModalInput value={qty} decimals={decimals} onChange={onChange} />
+        <ModalInput value={qty} decimals={decimals} onValueChange={onChange} />
       </Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 0.25, height: 20 }}>
         <AvailableAmount symbol={symbol} label={label} amount={amount} onMax={onMax} />
