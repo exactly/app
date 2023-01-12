@@ -48,7 +48,7 @@ function Wallet() {
         sx={{ borderColor: '#E3E5E8', px: '10px' }}
       >
         <Avatar alt="Blocky Avatar" src={avatarImgSrc} sx={{ width: 20, height: 20, mr: '5px' }} />
-        <Typography variant="subtitle1" color="#0D0E0F">
+        <Typography variant="subtitle1" color="#0D0E0F" data-test-id="user-address">
           {ens ?? formattedWallet}
         </Typography>
       </Button>
