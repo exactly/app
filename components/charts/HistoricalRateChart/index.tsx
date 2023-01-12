@@ -55,6 +55,15 @@ const HistoricalRateChart: FC<Props> = ({ symbol }) => {
               tickFormatter={(value) => (value instanceof Date ? formatDate(value as Date) : '')}
             />
             <YAxis
+              label={{ value: 'APR', angle: -90, position: 'left' }}
+              yAxisId="left"
+              padding={{ top: 5, bottom: 5 }}
+              tickFormatter={(value) => `${((value as number) * 100).toFixed(2)}%`}
+            />
+            <YAxis
+              label={{ value: 'Utilization Rate', angle: -270, position: 'right' }}
+              yAxisId="right"
+              orientation="right"
               padding={{ top: 5, bottom: 5 }}
               tickFormatter={(value) => `${((value as number) * 100).toFixed(2)}%`}
             />
@@ -63,8 +72,33 @@ const HistoricalRateChart: FC<Props> = ({ symbol }) => {
               formatter={(value, name) => [`${((value as number) * 100).toFixed(2)}%`, name]}
             />
             <Legend />
-            <Line type="monotone" dataKey="depositApr" name="Deposit APR" stroke="#8884d8" dot={false} />
-            <Line type="monotone" dataKey="borrowApr" name="Borrow APR" stroke="#82ca9d" dot={false} />
+            <Line
+              yAxisId="left"
+              type="monotone"
+              dataKey="depositApr"
+              name="Deposit APR"
+              stroke="#8884d8"
+              dot={false}
+              strokeWidth={2}
+            />
+            <Line
+              yAxisId="left"
+              type="monotone"
+              dataKey="borrowApr"
+              name="Borrow APR"
+              stroke="#82ca9d"
+              dot={false}
+              strokeWidth={2}
+            />
+            <Line
+              yAxisId="right"
+              type="monotone"
+              dataKey="utilization"
+              name="Utilization Rate"
+              stroke="black"
+              dot={false}
+              strokeDasharray="5 5"
+            />
           </LineChart>
         )}
       </ResponsiveContainer>
