@@ -8,6 +8,7 @@ type HistoricalRateData = {
   date: Date;
   depositApr: number;
   borrowApr: number;
+  utilization: number;
 };
 
 // This is the maximum number of data points we can get from the subgraph
@@ -48,7 +49,12 @@ export default function useHistoricalRates(symbol: string, initialCount = 30, in
         Array.from(Array(iterations).keys()).map(async (i) => {
           const depositAPRs = await getRatesBatch('deposit', Math.min(count, MAX_COUNT), interval, i * MAX_COUNT);
           const borrowAPRs = await getRatesBatch('borrow', Math.min(count, MAX_COUNT), interval, i * MAX_COUNT);
-          return depositAPRs.map((d, j) => ({ date: d.date, depositApr: d.apr, borrowApr: borrowAPRs[j].apr }));
+          return depositAPRs.map((d, j) => ({
+            date: d.date,
+            depositApr: d.apr,
+            utilization: d.utilization,
+            borrowApr: borrowAPRs[j].apr,
+          }));
         }),
       );
       setRates(ratesBatched.reverse().flatMap((r) => r));
