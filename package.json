@@ -49,6 +49,7 @@
   "devDependencies": {
     "@next/eslint-plugin-next": "^13.2.0",
     "@sentry/cli": "^2.13.0",
+    "@synthetixio/synpress": "^3.0.5",
     "@typechain/ethers-v5": "^10.2.0",
     "@types/eslint": "^8.21.1",
     "@types/node": "^18.14.1",
