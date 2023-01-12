@@ -71,7 +71,7 @@ function Wallet() {
         }}
       >
         <Avatar alt="Address avatar" src={avatarImgSrc} sx={{ width: 20, height: 20, mr: { xs: 0, sm: '5px' } }} />
-        <Typography variant="subtitle1" color="grey.900" display={onlyDesktop}>
+        <Typography variant="subtitle1" color="grey.900" display={onlyDesktop} data-test-id="user-address">
           {ens && !ensError ? ens : formattedWallet}
         </Typography>
       </Button>
