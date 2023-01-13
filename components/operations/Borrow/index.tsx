@@ -113,7 +113,6 @@ const Borrow: FC = () => {
         return gasPrice.mul(gasEstimation);
       }
 
-      const decimals = await marketContract.decimals();
       const gasEstimation = await marketContract.estimateGas.borrow(
         quantity ? parseFixed(quantity, decimals) : DEFAULT_AMOUNT,
         walletAddress,
@@ -121,7 +120,7 @@ const Borrow: FC = () => {
       );
       return gasPrice.mul(gasEstimation);
     },
-    [walletAddress, marketContract, ETHRouterContract, requiresApproval, symbol, approveEstimateGas],
+    [walletAddress, marketContract, ETHRouterContract, requiresApproval, symbol, approveEstimateGas, decimals],
   );
 
   const { isLoading: previewIsLoading } = usePreviewTx({ qty, needsApproval, previewGasCost });
@@ -213,7 +212,6 @@ const Borrow: FC = () => {
       } else {
         if (!marketContract || !walletAddress) return;
 
-        const decimals = await marketContract.decimals();
         const amount = parseFixed(qty, decimals);
         const gasEstimation = await marketContract.estimateGas.borrow(amount, walletAddress, walletAddress);
         borrowTx = await marketContract.borrow(amount, walletAddress, walletAddress, {
@@ -255,6 +253,7 @@ const Borrow: FC = () => {
     setTx,
     symbol,
     walletAddress,
+    decimals,
   ]);
 
   const handleSubmitAction = useCallback(async () => {

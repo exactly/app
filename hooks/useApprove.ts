@@ -8,11 +8,14 @@ import numbers from 'config/numbers.json';
 import { Operation } from 'contexts/ModalStatusContext';
 import { useWeb3 } from './useWeb3';
 import { useOperationContext } from 'contexts/OperationContext';
+import useAccountData from './useAccountData';
 
 export default (operation: Operation, contract?: ERC20 | Market, spender?: string) => {
   const { walletAddress } = useWeb3();
   const { symbol, setErrorData } = useOperationContext();
   const [isLoading, setIsLoading] = useState(false);
+
+  const { decimals = 18 } = useAccountData(symbol);
 
   const estimateGas = useCallback(async () => {
     if (!contract || !spender) return;
@@ -41,12 +44,12 @@ export default (operation: Operation, contract?: ERC20 | Market, spender?: strin
 
       try {
         const allowance = await contract.allowance(walletAddress, spender);
-        return allowance.lt(parseFixed(qty || String(numbers.defaultAmount), await contract.decimals()));
+        return allowance.lt(parseFixed(qty || String(numbers.defaultAmount), decimals));
       } catch {
         return true;
       }
     },
-    [operation, symbol, contract, spender, walletAddress],
+    [operation, symbol, contract, spender, walletAddress, decimals],
   );
 
   const approve = useCallback(async () => {

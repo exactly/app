@@ -72,7 +72,7 @@ const Deposit: FC = () => {
 
   const previewGasCost = useCallback(
     async (quantity: string): Promise<BigNumber | undefined> => {
-      if (!walletAddress || !ETHRouterContract || !marketContract) return;
+      if (!walletAddress || !ETHRouterContract || !marketContract || !quantity) return;
 
       const gasPrice = (await ETHRouterContract.provider.getFeeData()).maxFeePerGas;
       if (!gasPrice) return;

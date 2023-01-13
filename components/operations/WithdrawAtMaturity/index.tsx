@@ -130,7 +130,6 @@ const WithdrawAtMaturity: FC = () => {
       if (!gasPrice) return;
 
       if (requiresApproval) {
-        // only WETH needs allowance -> estimates directly with the ETH router
         const gasEstimation = await approveEstimateGas();
         return gasEstimation?.mul(gasPrice);
       }
