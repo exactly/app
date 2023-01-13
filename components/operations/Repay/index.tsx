@@ -196,7 +196,7 @@ function Repay() {
 
   const previewGasCost = useCallback(
     async (quantity: string): Promise<BigNumber | undefined> => {
-      if (!walletAddress || !ETHRouterContract || !marketContract) return;
+      if (!walletAddress || !ETHRouterContract || !marketContract || !quantity) return;
 
       const gasPrice = (await ETHRouterContract.provider.getFeeData()).maxFeePerGas;
       if (!gasPrice) return;
@@ -220,7 +220,6 @@ function Repay() {
         return gasPrice.mul(gasLimit);
       }
 
-      const decimals = await marketContract.decimals();
       const gasLimit = await marketContract.estimateGas.repay(
         quantity ? parseFixed(quantity, decimals) : DEFAULT_AMOUNT,
         walletAddress,
@@ -228,7 +227,7 @@ function Repay() {
 
       return gasPrice.mul(gasLimit);
     },
-    [walletAddress, ETHRouterContract, marketContract, requiresApproval, symbol, approveEstimateGas],
+    [walletAddress, ETHRouterContract, marketContract, requiresApproval, symbol, approveEstimateGas, decimals],
   );
 
   const { isLoading: previewIsLoading } = usePreviewTx({ qty, needsApproval, previewGasCost });

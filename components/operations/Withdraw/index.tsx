@@ -94,7 +94,6 @@ const Withdraw: FC = () => {
         return gasPrice.mul(gasEstimation);
       }
 
-      const decimals = await marketContract.decimals();
       const amount = isMax ? floatingDepositShares : quantity ? parseFixed(quantity, decimals) : DEFAULT_AMOUNT;
       const gasEstimation = await marketContract.estimateGas.redeem(amount, walletAddress, walletAddress);
       return gasPrice.mul(gasEstimation);
@@ -108,6 +107,7 @@ const Withdraw: FC = () => {
       requiresApproval,
       symbol,
       walletAddress,
+      decimals,
     ],
   );
 

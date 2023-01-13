@@ -138,7 +138,6 @@ const BorrowAtMaturity: FC = () => {
         return gasPrice.mul(gasEstimation);
       }
 
-      const decimals = await marketContract.decimals();
       const amount = quantity ? parseFixed(quantity, decimals) : DEFAULT_AMOUNT;
       const maxAmount = amount.mul(slippage).div(WeiPerEther);
       const gasEstimation = await marketContract.estimateGas.borrowAtMaturity(
@@ -150,7 +149,17 @@ const BorrowAtMaturity: FC = () => {
       );
       return gasPrice.mul(gasEstimation);
     },
-    [walletAddress, marketContract, ETHRouterContract, date, requiresApproval, symbol, slippage, approveEstimateGas],
+    [
+      walletAddress,
+      marketContract,
+      ETHRouterContract,
+      date,
+      requiresApproval,
+      symbol,
+      slippage,
+      approveEstimateGas,
+      decimals,
+    ],
   );
 
   const { isLoading: previewIsLoading } = usePreviewTx({ qty, needsApproval, previewGasCost });

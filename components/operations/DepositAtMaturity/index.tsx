@@ -90,7 +90,7 @@ const DepositAtMaturity: FC = () => {
 
   const previewGasCost = useCallback(
     async (quantity: string): Promise<BigNumber | undefined> => {
-      if (!walletAddress || !marketContract || !ETHRouterContract || !date) return;
+      if (!walletAddress || !marketContract || !ETHRouterContract || !date || !quantity) return;
 
       const gasPrice = (await ETHRouterContract.provider.getFeeData()).maxFeePerGas;
       if (!gasPrice) return;
