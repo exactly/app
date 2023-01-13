@@ -168,7 +168,7 @@ const RepayAtMaturity: FC = () => {
       const input = parseFixed(value || '0', decimals);
 
       if (input.isZero() || totalPositionAssets.isZero()) {
-        return setErrorData({ status: true, message: "Can't repay 0" });
+        return setErrorData({ status: true, message: 'Cannot repay 0' });
       }
 
       const newPositionAssetsAmount = totalPositionAssets.isZero()

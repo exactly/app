@@ -34,10 +34,14 @@ export default (error: any) => {
         case 'InvalidPrice':
           captureException(error);
           return 'Invalid price';
-        case 'ZeroRepay':
-          return "Can't repay 0";
+        case 'ZeroDeposit':
+          return 'Cannot deposit 0';
         case 'ZeroWithdraw':
-          return "Can't withdraw 0";
+          return 'Cannot withdraw 0';
+        case 'ZeroRepay':
+          return 'Cannot repay 0';
+        case 'ZeroBorrow':
+          return 'Cannot borrow 0';
         case 'UtilizationExceeded':
           return 'Utilization rate exceeded';
 
