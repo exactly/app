@@ -15,7 +15,12 @@ const NumberFormatCustom = React.forwardRef<HTMLInputElement, InputBaseComponent
         {...other}
         getInputRef={ref}
         decimalScale={decimals}
-        onValueChange={({ value }) => onValueChange(value)}
+        onValueChange={({ value }) => {
+          if (value === '.') {
+            return onValueChange('0.');
+          }
+          onValueChange(value);
+        }}
         allowedDecimalSeparators={[',']}
         allowNegative={false}
         defaultValue={0.0}
