@@ -7,7 +7,6 @@ import AccountDataContext from 'contexts/AccountDataContext';
 
 import formatNumber from 'utils/formatNumber';
 import getBeforeBorrowLimit from 'utils/getBeforeBorrowLimit';
-import { checkPrecision } from 'utils/utils';
 import ModalInfo, { FromTo, Variant } from 'components/common/modal/ModalInfo';
 import { Operation } from 'contexts/ModalStatusContext';
 
@@ -27,8 +26,6 @@ function ModalInfoBorrowLimit({ qty, symbol, operation, variant = 'column' }: Pr
     if (!qty) return Zero;
 
     const { decimals } = accountData[symbol];
-
-    if (!checkPrecision(qty, decimals)) return;
 
     return parseFixed(qty, decimals);
   }, [accountData, symbol, qty]);

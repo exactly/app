@@ -10,7 +10,6 @@ import getHealthFactorData from 'utils/getHealthFactorData';
 
 import AccountDataContext from 'contexts/AccountDataContext';
 import { Operation } from 'contexts/ModalStatusContext';
-import { checkPrecision } from 'utils/utils';
 
 import ModalInfo, { FromTo, Variant } from 'components/common/modal/ModalInfo';
 
@@ -30,8 +29,6 @@ function ModalInfoHealthFactor({ qty, symbol, operation, variant = 'column' }: P
     if (!qty) return Zero;
 
     const { decimals } = accountData[symbol];
-
-    if (!checkPrecision(qty, decimals)) return;
 
     return parseFixed(qty, decimals);
   }, [accountData, symbol, qty]);
