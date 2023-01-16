@@ -1,8 +1,6 @@
 import React, { FC, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { WeiPerEther, Zero } from '@ethersproject/constants';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
-import { ErrorCode } from '@ethersproject/logger';
-import { captureException } from '@sentry/nextjs';
 
 import ModalTxCost from 'components/common/modal/ModalTxCost';
 import ModalGif from 'components/common/modal/ModalGif';
@@ -44,6 +42,7 @@ import ModalInfoEditableSlippage from 'components/OperationsModal/Info/ModalInfo
 import ModalAlert from 'components/common/modal/ModalAlert';
 import ModalSubmit from 'components/common/modal/ModalSubmit';
 import useAccountData from 'hooks/useAccountData';
+import handleOperationError from 'utils/handleOperationError';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 const DEFAULT_SLIPPAGE = (numbers.slippage * 100).toFixed(2);
@@ -294,19 +293,12 @@ const BorrowAtMaturity: FC = () => {
 
       void getAccountData();
     } catch (error: any) {
-      if (error?.code === ErrorCode.ACTION_REJECTED) {
-        return setErrorData({
-          status: true,
-          message: translations[lang].deniedTransaction,
-        });
-      }
+      if (borrowTx?.hash) setTx({ status: 'error', hash: borrowTx.hash });
 
-      setTx({ status: 'error', hash: borrowTx?.hash });
       setErrorData({
         status: true,
-        message: translations[lang].generalError,
+        message: handleOperationError(error),
       });
-      captureException(error);
     } finally {
       setIsLoadingOp(false);
     }
@@ -359,7 +351,7 @@ const BorrowAtMaturity: FC = () => {
 
   // update APR
   useEffect(() => {
-    updateAPR().catch(captureException);
+    void updateAPR();
   }, [updateAPR]);
 
   const handleSubmitAction = useCallback(async () => {
