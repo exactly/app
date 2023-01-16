@@ -7,6 +7,7 @@ import { PoolTableProps, TableHead, TableRow } from '../poolTable';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import useAssets from 'hooks/useAssets';
 import MobileAssetCard from 'components/MobileAssetCard';
+import parseTimestamp from 'utils/parseTimestamp';
 
 const { minAPRValue } = numbers;
 
@@ -29,6 +30,7 @@ const PoolMobile: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) 
                   header={headers[3]}
                   value={toPercentage(depositAPR && depositAPR > minAPRValue ? depositAPR : undefined)}
                   isLoading={depositAPR === undefined}
+                  maturity={depositMaturity?.toString()}
                 />
                 <Grid item xs={12} my={1.8}>
                   <Divider />
@@ -38,6 +40,7 @@ const PoolMobile: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) 
                   header={headers[4]}
                   value={toPercentage(borrowAPR && borrowAPR > minAPRValue ? borrowAPR : undefined)}
                   isLoading={borrowAPR === undefined}
+                  maturity={borrowMaturity?.toString()}
                 />
               </Grid>
               <Box display="flex" gap={0.5}>
@@ -71,7 +74,12 @@ const PoolMobile: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) 
   );
 };
 
-const GridItem: FC<{ header: TableHead; value: string; isLoading?: boolean }> = ({ header, value, isLoading }) => (
+const GridItem: FC<{ header: TableHead; value: string; isLoading?: boolean; maturity?: string }> = ({
+  header,
+  value,
+  isLoading,
+  maturity,
+}) => (
   <Grid item xs={6}>
     <Box display="flex">
       <Typography fontSize="16px" color="figma.grey.300" lineHeight="20px">
@@ -88,6 +96,9 @@ const GridItem: FC<{ header: TableHead; value: string; isLoading?: boolean }> = 
     ) : (
       <Typography fontSize="16px" fontWeight={700} lineHeight="20px">
         {value}
+        <Typography width="fit-content" variant="subtitle2" sx={{ color: 'grey.500' }}>
+          {maturity ? parseTimestamp(maturity, 'MMM DD YYYY') : ''}
+        </Typography>
       </Typography>
     )}
   </Grid>
