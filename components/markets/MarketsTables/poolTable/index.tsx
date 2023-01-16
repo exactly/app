@@ -192,6 +192,7 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
                             )
                           }
                           disabled={isDisable(rateType, depositAPR)}
+                          data-test-id={`${rateType}-deposit-${symbol}`}
                         >
                           Deposit
                         </Button>

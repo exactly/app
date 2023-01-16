@@ -5,6 +5,8 @@
   "license": "BUSL-1.1",
   "scripts": {
     "dev": "NODE_ENV=development NET=local next dev",
+    "serve:test": "NODE_ENV=development NET=local NEXT_PUBLIC_USE_TENDERLY_RPC=true NEXT_PUBLIC_NETWORK=mainnet next dev",
+    "test": "npx synpress run --config supportFile='tests/e2e/support.ts' baseUrl='http://localhost:3000'",
     "build": "next build",
     "goerli": "NODE_ENV=production NET=goerli next start",
     "start": "NODE_ENV=production NET=mainnet next start",

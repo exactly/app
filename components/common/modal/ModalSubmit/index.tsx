@@ -33,6 +33,7 @@ function ModalSubmit({ requiresApproval = false, isLoading = false, disabled = f
         color="primary"
         variant="contained"
         disabled={disabled || requiresApproval}
+        data-test-id="modal-submit"
       >
         {label}
       </LoadingButton>
