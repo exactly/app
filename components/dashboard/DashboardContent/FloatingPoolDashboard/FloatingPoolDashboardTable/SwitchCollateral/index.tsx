@@ -1,8 +1,6 @@
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { CircularProgress, Tooltip, Typography } from '@mui/material';
-import { captureException } from '@sentry/nextjs';
 import { WeiPerEther } from '@ethersproject/constants';
-import { ErrorCode } from '@ethersproject/logger';
 
 import StyledSwitch from 'components/Switch';
 import AccountDataContext from 'contexts/AccountDataContext';
@@ -10,6 +8,7 @@ import parseHealthFactor from 'utils/parseHealthFactor';
 import { HealthFactor } from 'types/HealthFactor';
 import useAuditor from 'hooks/useAuditor';
 import getHealthFactorData from 'utils/getHealthFactorData';
+import handleOperationError from 'utils/handleOperationError';
 
 type Props = {
   symbol: string;
@@ -65,7 +64,7 @@ function SwitchCollateral({ symbol }: Props) {
 
       await getAccountData();
     } catch (error: any) {
-      if (error.code !== ErrorCode.ACTION_REJECTED) captureException(error);
+      handleOperationError(error);
     } finally {
       setLoading(false);
     }

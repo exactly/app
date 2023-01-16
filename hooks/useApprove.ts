@@ -64,10 +64,9 @@ export default (operation: Operation, contract?: ERC20 | Market, spender?: strin
         gasLimit: gasEstimation.mul(parseFixed(String(numbers.gasLimitMultiplier), 18)).div(WeiPerEther),
       });
 
-      // awaits the tx to be confirmed so isLoading stays true
       return await approveTx.wait();
     } catch (error: any) {
-      const isDenied = error?.code === ErrorCode.ACTION_REJECTED;
+      const isDenied = [ErrorCode.ACTION_REJECTED, ErrorCode.TRANSACTION_REPLACED].includes(error?.code);
 
       if (!isDenied) captureException(error);
 

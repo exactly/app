@@ -11,6 +11,8 @@ export default (error: any) => {
   switch (error?.code) {
     case ErrorCode.ACTION_REJECTED:
       return 'Transaction rejected by user';
+    case ErrorCode.TRANSACTION_REPLACED:
+      return 'Transaction cancelled by user';
     case ErrorCode.UNSUPPORTED_OPERATION:
       return 'Unsupported operation';
     case ErrorCode.INSUFFICIENT_FUNDS:
