@@ -20,6 +20,14 @@ declare module '@mui/material/styles' {
       fixed: string;
       variable: string;
     };
+
+    symbol: {
+      WETH: string;
+      DAI: string;
+      USDC: string;
+      WBTC: string;
+      wstETH: string;
+    };
   }
   interface PaletteOptions {
     figma: {
@@ -32,6 +40,14 @@ declare module '@mui/material/styles' {
     operation: {
       fixed: string;
       variable: string;
+    };
+
+    symbol: {
+      WETH: string;
+      DAI: string;
+      USDC: string;
+      WBTC: string;
+      wstETH: string;
     };
   }
 
@@ -91,6 +107,14 @@ const theme = createTheme({
     operation: {
       fixed: 'blue',
       variable: '#33CC59',
+    },
+
+    symbol: {
+      WETH: '#0095FF',
+      DAI: '#031D30',
+      USDC: '#085891',
+      WBTC: '#5500FF',
+      wstETH: '#AA00FF',
     },
   },
   typography: {

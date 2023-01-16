@@ -1,9 +1,9 @@
-import { Box, Typography } from '@mui/material';
+import { Box, Typography, useTheme } from '@mui/material';
 import React, { FC, useMemo, useState } from 'react';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import updateLocale from 'dayjs/plugin/updateLocale';
-import { ResponsiveContainer, XAxis, YAxis, Tooltip, ReferenceLine, AreaChart, Area } from 'recharts';
+import { ResponsiveContainer, XAxis, Tooltip, ReferenceLine, AreaChart, Area, CartesianGrid } from 'recharts';
 import useAssets from 'hooks/useAssets';
 import useYieldRates from 'hooks/useYieldRates';
 import parseTimestamp from 'utils/parseTimestamp';
@@ -15,9 +15,9 @@ type Props = {
   symbol?: string;
 };
 
-const getRandomColor = () => {
-  return '#' + ((Math.random() * 0xffffff) << 0).toString(16).padStart(6, '0');
-};
+// const getRandomColor = () => {
+//   return '#' + ((Math.random() * 0xffffff) << 0).toString(16).padStart(6, '0');
+// };
 
 const getReferenceLines = () => {
   const data = [];
@@ -54,6 +54,7 @@ const YieldChart: FC<Props> = () => {
   const { depositsRates, borrowsRates, loading } = useYieldRates();
   const [operation, setOperation] = useState<'Deposits' | 'Borrows'>('Deposits');
   const assets = useAssets();
+  const { palette } = useTheme();
 
   const buttons = useMemo(
     () => [
@@ -91,16 +92,24 @@ const YieldChart: FC<Props> = () => {
               tickFormatter={(t) => formatXAxis(t)}
               domain={['dataMin', 'dataMax']}
               scale="time"
+              tick={{ fill: palette.grey[500], fontWeight: 500, fontSize: 12 }}
             />
-            <YAxis tickFormatter={(value) => toPercentage(value as number)} type="number" tickLine={false} />
             <Tooltip
               formatter={(value) => toPercentage(value as number)}
               labelFormatter={(value) => {
                 return `${parseTimestamp(value)}`;
               }}
             />
+            <CartesianGrid stroke={palette.grey[300]} vertical={false} />
             {assets.map((asset) => (
-              <Area key={asset} type="monotone" dataKey={asset} stroke={getRandomColor()} fillOpacity={0} />
+              <Area
+                key={asset}
+                type="monotone"
+                dataKey={asset}
+                stroke={palette.symbol[asset as 'WETH' | 'DAI' | 'USDC' | 'WBTC' | 'wstETH']}
+                strokeWidth={2}
+                fillOpacity={0}
+              />
             ))}
             {getReferenceLines().map((reference) => (
               <ReferenceLine key={reference} x={reference} label={referenceLabel(reference)} />
