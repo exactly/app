@@ -60,7 +60,12 @@ function ModalSubmit({ requiresApproval = false, isLoading = false, disabled = f
         onClick={submit}
         color="primary"
         variant="contained"
+<<<<<<< HEAD
         disabled={disabled}
+=======
+        disabled={disabled || requiresApproval}
+        data-test-id="modal-submit"
+>>>>>>> dce211c9 (✨ add tenderly rpc for testing + deposit test)
       >
         Approve {symbol}
       </LoadingButton>
