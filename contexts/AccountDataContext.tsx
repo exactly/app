@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useEffect, useState } from 'react';
+import React, { createContext, useCallback, useEffect, useState, startTransition } from 'react';
 import type { FC, PropsWithChildren } from 'react';
 import { AddressZero } from '@ethersproject/constants';
 import { captureException } from '@sentry/nextjs';
@@ -30,8 +30,10 @@ export const AccountDataProvider: FC<PropsWithChildren> = ({ children }) => {
 
   useEffect(() => {
     const safeConnector = connectors.find(({ id, ready }) => ready && id === 'safe');
-    if (safeConnector) connect({ connector: safeConnector });
-    else void client.autoConnect();
+    startTransition(() => {
+      if (safeConnector) connect({ connector: safeConnector });
+      else void client.autoConnect();
+    });
   }, [client, connect, connectors]);
 
   const previewer = usePreviewer();
