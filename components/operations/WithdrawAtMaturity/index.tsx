@@ -357,7 +357,7 @@ const WithdrawAtMaturity: FC = () => {
       <Grid item mt={4}>
         <ModalSubmit
           label="Withdraw"
-          symbol={symbol}
+          symbol={symbol === 'WETH' && accountData ? accountData[symbol].symbol : symbol}
           submit={handleSubmitAction}
           isLoading={isLoading}
           disabled={!qty || parseFloat(qty) <= 0 || isLoading || errorData?.status}
