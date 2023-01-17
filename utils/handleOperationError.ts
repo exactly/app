@@ -2,13 +2,13 @@ import { ErrorCode } from '@ethersproject/logger';
 import { captureException } from '@sentry/nextjs';
 import ErrorInterface from './ErrorInterface';
 
-export default (error: any) => {
+export default (error: any): string => {
   if (!error?.code) {
     captureException(error);
     return 'There was an error, please try again';
   }
 
-  switch (error?.code) {
+  switch (error.code) {
     case ErrorCode.ACTION_REJECTED:
       return 'Transaction rejected by user';
     case ErrorCode.TRANSACTION_REPLACED:
@@ -58,6 +58,10 @@ export default (error: any) => {
           }
       }
     }
+  }
+
+  if (error.code && error.message) {
+    return error.message;
   }
 
   // if none of the above, report to sentry
