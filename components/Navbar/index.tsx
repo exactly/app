@@ -1,3 +1,4 @@
+import { setUser } from '@sentry/nextjs';
 import { goerli, useClient } from 'wagmi';
 import DisclaimerModal from 'components/DisclaimerModal';
 import Image from 'next/image';
@@ -34,7 +35,10 @@ function Navbar() {
   const [openMenu, setOpenMenu] = useState<boolean>(false);
 
   useEffect(() => {
-    walletAddress && void analytics.identify(walletAddress);
+    if (!walletAddress) return;
+
+    setUser({ id: walletAddress });
+    void analytics.identify(walletAddress);
   }, [walletAddress]);
 
   const handleFaucetClick = useCallback(() => {
