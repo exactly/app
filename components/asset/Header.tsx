@@ -109,6 +109,7 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
               assetAddress={assetAddress}
               eMarketAddress={eMarketAddress}
               rateModelAddress={rateModelAddress?.id}
+              exaToken={accountData && accountData[symbol].symbol}
             />
           )}
         </Typography>

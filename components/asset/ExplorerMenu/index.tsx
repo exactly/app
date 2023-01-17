@@ -11,9 +11,10 @@ type Props = {
   assetAddress?: string;
   eMarketAddress?: string;
   rateModelAddress?: string;
+  exaToken?: string;
 };
 
-const ExplorerMenu: FC<Props> = ({ symbol, assetAddress, eMarketAddress, rateModelAddress }) => {
+const ExplorerMenu: FC<Props> = ({ symbol, assetAddress, eMarketAddress, rateModelAddress, exaToken }) => {
   const { chain } = useWeb3();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -108,7 +109,7 @@ const ExplorerMenu: FC<Props> = ({ symbol, assetAddress, eMarketAddress, rateMod
           />
           <Box ml={1}>
             <a href={eMarketEtherscan} target="_blank" rel="noopener noreferrer">
-              {`e${symbol}`}
+              {exaToken}
             </a>
           </Box>
         </MenuItem>
