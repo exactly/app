@@ -28,6 +28,7 @@ const PoolMobile: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) 
                 <GridItem header={headers[1]} value={`$${totalDeposited}`} isLoading={totalDeposited === undefined} />
                 <GridItem
                   header={headers[3]}
+                  // value={toPercentage(depositAPR && depositAPR > minAPRValue ? depositAPR : undefined)}
                   value={toPercentage(depositAPR && depositAPR > minAPRValue ? depositAPR : undefined)}
                   isLoading={depositAPR === undefined}
                   maturity={depositMaturity?.toString()}
@@ -98,9 +99,12 @@ const GridItem: FC<{ header: TableHead; value: string; isLoading?: boolean; matu
         <Typography fontSize="16px" fontWeight={700} lineHeight="20px">
           {value}
         </Typography>
-        <Typography component="p" width="fit-content" variant="subtitle2" sx={{ color: 'grey.500' }}>
-          {maturity ? parseTimestamp(maturity, 'MMM DD YYYY') : ''}
-        </Typography>
+
+        {maturity && maturity !== '0' && (
+          <Typography component="p" width="fit-content" variant="subtitle2" sx={{ color: 'grey.500' }}>
+            {parseTimestamp(maturity)}
+          </Typography>
+        )}
       </>
     )}
   </Grid>
