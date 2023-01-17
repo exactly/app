@@ -28,7 +28,6 @@ const PoolMobile: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) 
                 <GridItem header={headers[1]} value={`$${totalDeposited}`} isLoading={totalDeposited === undefined} />
                 <GridItem
                   header={headers[3]}
-                  // value={toPercentage(depositAPR && depositAPR > minAPRValue ? depositAPR : undefined)}
                   value={toPercentage(depositAPR && depositAPR > minAPRValue ? depositAPR : undefined)}
                   isLoading={depositAPR === undefined}
                   maturity={depositMaturity?.toString()}
