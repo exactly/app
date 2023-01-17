@@ -144,7 +144,7 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
                           </Typography>
                           {rateType === 'fixed' && (
                             <Typography width="fit-content" variant="subtitle2" sx={{ color: 'grey.500' }}>
-                              {depositMaturity ? parseTimestamp(depositMaturity, 'MMM DD YYYY') : ''}
+                              {depositMaturity ? parseTimestamp(depositMaturity) : ''}
                             </Typography>
                           )}
                         </Box>
@@ -175,7 +175,7 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
                           </Typography>
                           {rateType === 'fixed' && (
                             <Typography width="fit-content" variant="subtitle2" sx={{ color: 'grey.500' }}>
-                              {borrowMaturity ? parseTimestamp(borrowMaturity, 'MMM DD YYYY') : ''}
+                              {borrowMaturity ? parseTimestamp(borrowMaturity) : ''}
                             </Typography>
                           )}
                         </Box>
