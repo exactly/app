@@ -1,4 +1,4 @@
-import { setUser } from '@sentry/nextjs';
+import { setContext, setUser } from '@sentry/nextjs';
 import { goerli, useClient } from 'wagmi';
 import DisclaimerModal from 'components/DisclaimerModal';
 import Image from 'next/image';
@@ -38,8 +38,9 @@ function Navbar() {
     if (!walletAddress) return;
 
     setUser({ id: walletAddress });
+    setContext('wallet', { connector: connector?.id, name: connector?.name });
     void analytics.identify(walletAddress);
-  }, [walletAddress]);
+  }, [walletAddress, connector]);
 
   const handleFaucetClick = useCallback(() => {
     if (chain?.id === goerli.id) return openOperationModal('faucet');
