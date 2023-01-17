@@ -94,12 +94,14 @@ const GridItem: FC<{ header: TableHead; value: string; isLoading?: boolean; matu
     {isLoading ? (
       <Skeleton width={60} />
     ) : (
-      <Typography fontSize="16px" fontWeight={700} lineHeight="20px">
-        {value}
-        <Typography width="fit-content" variant="subtitle2" sx={{ color: 'grey.500' }}>
+      <>
+        <Typography fontSize="16px" fontWeight={700} lineHeight="20px">
+          {value}
+        </Typography>
+        <Typography component="p" width="fit-content" variant="subtitle2" sx={{ color: 'grey.500' }}>
           {maturity ? parseTimestamp(maturity, 'MMM DD YYYY') : ''}
         </Typography>
-      </Typography>
+      </>
     )}
   </Grid>
 );
