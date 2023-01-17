@@ -9,6 +9,7 @@ import { Operation } from 'contexts/ModalStatusContext';
 import { useWeb3 } from './useWeb3';
 import { useOperationContext } from 'contexts/OperationContext';
 import useAccountData from './useAccountData';
+import handleOperationError from 'utils/handleOperationError';
 
 export default (operation: Operation, contract?: ERC20 | Market, spender?: string) => {
   const { walletAddress } = useWeb3();
@@ -64,11 +65,11 @@ export default (operation: Operation, contract?: ERC20 | Market, spender?: strin
         gasLimit: gasEstimation.mul(parseFixed(String(numbers.gasLimitMultiplier), 18)).div(WeiPerEther),
       });
 
-      return await approveTx.wait();
+      await approveTx.wait();
     } catch (error: any) {
       const isDenied = [ErrorCode.ACTION_REJECTED, ErrorCode.TRANSACTION_REPLACED].includes(error?.code);
 
-      if (!isDenied) captureException(error);
+      if (!isDenied) handleOperationError(error);
 
       setErrorData({
         status: true,
