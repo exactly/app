@@ -20,6 +20,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
+      - run: npx unimported
       - uses: getsentry/action-release@v1
         with:
           environment: ${{ env.SENTRY_ENVIRONMENT }}

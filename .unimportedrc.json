@@ -1,3 +1,4 @@
 {
+  "ignoreUnused": ["recharts"],
   "entry": ["pages/**/*", "scripts/**/*", "sentry.*.config.ts"]
 }
