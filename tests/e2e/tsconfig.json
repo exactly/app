@@ -1,7 +1,17 @@
 {
   "compilerOptions": {
+    "target": "es5",
+    "lib": ["es5", "dom"],
     "allowJs": true,
-    "baseUrl": "../../node_modules",
+    "skipLibCheck": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "baseUrl": "./",
     "types": [
       "cypress",
       "@synthetixio/synpress/support",
@@ -11,5 +21,5 @@
     "jsx": "preserve",
     "outDir": "./output"
   },
-  "include": ["**/*.*"]
+  "include": ["**/*.ts"]
 }
