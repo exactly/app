@@ -163,7 +163,7 @@ const DepositAtMaturity: FC = () => {
       }
       setErrorData(undefined);
 
-      setGtMaxYield(!!optimalDepositAmount && parseFixed(value, decimals).gt(optimalDepositAmount));
+      setGtMaxYield(!!optimalDepositAmount && parseFixed(value || '0', decimals).gt(optimalDepositAmount));
     },
     [setQty, walletBalance, setErrorData, translations, lang, optimalDepositAmount, decimals],
   );
