@@ -1,25 +1,5 @@
 {
   "compilerOptions": {
-    "target": "es5",
-    "lib": ["es5", "dom"],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "forceConsistentCasingInFileNames": true,
-    "noEmit": true,
-    "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "node",
-    "resolveJsonModule": true,
-    "baseUrl": "./",
-    "types": [
-      "cypress",
-      "@synthetixio/synpress/support",
-      "cypress-wait-until",
-      "@testing-library/cypress"
-    ],
-    "jsx": "preserve",
-    "outDir": "./output"
-  },
-  "include": ["../node_modules/cypress", "**/*.ts"]
+    "types": ["cypress", "cypress-wait-until", "@testing-library/cypress", "@synthetixio/synpress/support"]
+  }
 }
