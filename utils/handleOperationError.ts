@@ -2,10 +2,12 @@ import { ErrorCode } from '@ethersproject/logger';
 import { captureException } from '@sentry/nextjs';
 import ErrorInterface from './ErrorInterface';
 
+const defaultErr = 'There was an error, please try again';
+
 export default (error: any): string => {
   if (!error?.code) {
     captureException(error);
-    return 'There was an error, please try again';
+    return defaultErr;
   }
 
   switch (error.code) {
@@ -56,6 +58,11 @@ export default (error: any): string => {
             case 'ZERO_ASSETS':
               return 'Cannot withdraw 0';
           }
+          break;
+
+        case 'Panic':
+          captureException(error);
+          return defaultErr;
       }
     }
   }
@@ -66,5 +73,5 @@ export default (error: any): string => {
 
   // if none of the above, report to sentry
   captureException(error);
-  return 'There was an error, please try again';
+  return defaultErr;
 };
