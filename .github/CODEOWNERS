@@ -2,3 +2,4 @@
 /scripts/ @cruzdanilo
 .github/ @cruzdanilo
 .eslint* @cruzdanilo
+tsconfig.json @cruzdanilo
