@@ -50,7 +50,7 @@ function Navbar() {
   return (
     <Box sx={{ display: 'flex', justifyContent: 'center' }}>
       <DisclaimerModal />
-      <AppBar position="static" color="transparent" sx={{ maxWidth }}>
+      <AppBar position="static" color="transparent" sx={{ maxWidth }} data-test-id="navbar">
         <Toolbar disableGutters sx={{ padding: '0 0', gap: '8px' }}>
           <Link href={{ pathname: '/', query }} legacyBehavior>
             <Box mr="10px" sx={{ cursor: 'pointer' }}>

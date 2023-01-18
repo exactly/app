@@ -1,3 +1,5 @@
+import { mintDAI } from '../../utils/tenderly';
+
 describe('Markets', () => {
   before(() => {
     cy.visit('/', {
@@ -7,41 +9,45 @@ describe('Markets', () => {
     });
     cy.get('[data-test-id=connect-wallet]').click();
     cy.get('w3m-modal').shadow().find('[name="MetaMask"]', { includeShadowDom: true }).click();
-    // cy.acceptMetamaskAccess();
+    cy.acceptMetamaskAccess();
+
+    mintDAI('0x8967782Fb0917bab83F13Bd17db3b41C700b368D', 9999);
+    cy.wait(999999);
   });
 
-  // eslint-disable-next-line ui-testing/missing-assertion-in-test
+  after(() => {
+    cy.disconnectMetamaskWalletFromAllDapps();
+  });
+
   it('Floating Deposit WETH', () => {
-    testDepositFloatingPools('WETH');
+    expectFloatingDepositSuccess('WETH');
   });
 
-  // eslint-disable-next-line ui-testing/missing-assertion-in-test
   it('Floating Deposit DAI', () => {
-    testDepositFloatingPools('DAI');
+    expectFloatingDepositSuccess('DAI');
   });
 
-  // eslint-disable-next-line ui-testing/missing-assertion-in-test
   it('Floating Deposit USDC', () => {
-    testDepositFloatingPools('USDC');
+    expectFloatingDepositSuccess('USDC');
   });
 
-  // eslint-disable-next-line ui-testing/missing-assertion-in-test
   it('Floating Deposit WBTC', () => {
-    testDepositFloatingPools('WBTC');
+    expectFloatingDepositSuccess('WBTC');
   });
 
-  // eslint-disable-next-line ui-testing/missing-assertion-in-test
   it('Floating Deposit wstETH', () => {
-    testDepositFloatingPools('wstETH');
+    expectFloatingDepositSuccess('wstETH');
   });
 });
 
-const testDepositFloatingPools = (symbol: string) => {
+const expectFloatingDepositSuccess = (symbol: string) => {
   cy.getByDataTestId(`floating-deposit-${symbol}`).click();
   cy.getByDataTestId(`modal-input`).type('10');
 
-  // eslint-disable-next-line cypress/no-unnecessary-waiting, ui-testing/no-hard-wait, testing-library/await-async-utils
-  cy.wait(10000); // TODO: try to avoid this wait
+  cy.waitUntil(
+    () => cy.getByDataTestId('modal-submit', { timeout: 15000 }).then(($btn) => $btn.attr('disabled') !== 'disabled'),
+    { timeout: 15000, interval: 1000 },
+  );
   cy.getByDataTestId('modal').then(($modal) => {
     if ($modal.find('[data-test-id=modal-approve]').length) {
       cy.getByDataTestId('modal-approve', { timeout: 15000 }).click();

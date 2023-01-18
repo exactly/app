@@ -1,3 +1,5 @@
+import { mintDAI } from '../../utils/tenderly';
+
 describe('Test Connect Wallet', () => {
   let userAddress: string | undefined;
 
@@ -8,6 +10,13 @@ describe('Test Connect Wallet', () => {
         window.localStorage.setItem('tos', 'true');
       },
     });
+
+    mintDAI('0x8967782Fb0917bab83F13Bd17db3b41C700b368D', 9999);
+    cy.wait(999999);
+  });
+
+  after(() => {
+    cy.disconnectMetamaskWalletFromAllDapps();
   });
 
   it('Connects with Metamask', () => {
