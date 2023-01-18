@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 
 import {
   Box,
@@ -22,9 +22,10 @@ import { OperationContextProvider } from 'contexts/OperationContext';
 import Draggable from 'react-draggable';
 
 function PaperComponent(props: PaperProps | undefined) {
+  const ref = useRef<HTMLDivElement>(null);
   return (
-    <Draggable handle="#draggable-dialog-title" cancel={'[class*="MuiDialogContent-root"]'}>
-      <Paper {...props} />
+    <Draggable nodeRef={ref} cancel={'[class*="MuiDialogContent-root"]'}>
+      <Paper ref={ref} {...props} />
     </Draggable>
   );
 }
@@ -35,12 +36,7 @@ function OperationsModal() {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   return (
-    <Dialog
-      open={open}
-      onClose={closeModal}
-      PaperComponent={isMobile ? undefined : PaperComponent}
-      aria-labelledby="draggable-dialog-title"
-    >
+    <Dialog open={open} onClose={closeModal} PaperComponent={isMobile ? undefined : PaperComponent}>
       <IconButton
         aria-label="close"
         onClick={closeModal}
