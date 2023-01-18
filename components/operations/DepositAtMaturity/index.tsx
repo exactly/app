@@ -1,12 +1,11 @@
 import React, { FC, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
-import { WeiPerEther } from '@ethersproject/constants';
+import { WeiPerEther, Zero } from '@ethersproject/constants';
 
 import ModalTxCost from 'components/common/modal/ModalTxCost';
 import ModalGif from 'components/common/modal/ModalGif';
 
 import { LangKeys } from 'types/Lang';
-import getOneDollar from 'utils/getOneDollar';
 
 import numbers from 'config/numbers.json';
 
@@ -143,11 +142,18 @@ const DepositAtMaturity: FC = () => {
     }
   }, [setErrorData, setQty, walletBalance]);
 
-  const optimalDepositAmount = useMemo<BigNumber | undefined>(() => {
-    if (!accountData) return;
+  const { optimalDepositAmount, depositRate } = useMemo<{
+    optimalDepositAmount?: BigNumber;
+    depositRate?: BigNumber;
+  }>(() => {
+    if (!accountData) return { optimalDepositAmount: Zero, depositRate: Zero };
+
     const { fixedPools = [] } = accountData[symbol];
     const pool = fixedPools.find(({ maturity }) => maturity.toNumber() === date);
-    return pool?.optimalDeposit;
+    return {
+      optimalDepositAmount: pool?.optimalDeposit,
+      depositRate: pool?.depositRate,
+    };
   }, [accountData, symbol, date]);
 
   const handleInputChange = useCallback(
@@ -250,31 +256,37 @@ const DepositAtMaturity: FC = () => {
   }, [approve, date, deposit, isLoading, needsApproval, qty, requiresApproval, setRequiresApproval, symbol]);
 
   const updateAPR = useCallback(async () => {
-    if (!accountData || !date || !previewerContract || !marketContract) return;
+    if (!accountData || !date || !previewerContract || !marketContract || !depositRate) return;
 
-    const { usdPrice } = accountData[symbol];
-    const initialAssets = qty ? parseFixed(qty, decimals) : getOneDollar(usdPrice, decimals);
+    if (qty) {
+      const initialAssets = parseFixed(qty, decimals);
+      try {
+        const { assets: finalAssets } = await previewerContract.previewDepositAtMaturity(
+          marketContract.address,
+          date,
+          initialAssets,
+        );
 
-    try {
-      const { assets: finalAssets } = await previewerContract.previewDepositAtMaturity(
-        marketContract.address,
-        date,
-        initialAssets,
-      );
+        const currentTimestamp = Date.now() / 1000;
+        const time = 31_536_000 / (date - currentTimestamp);
 
-      const currentTimestamp = Date.now() / 1000;
-      const time = 31_536_000 / (date - currentTimestamp);
+        const rate = finalAssets.mul(WeiPerEther).div(initialAssets);
+        const fixedAPR = (Number(formatFixed(rate, 18)) - 1) * time;
 
-      const rate = finalAssets.mul(WeiPerEther).div(initialAssets);
-      const fixedAPR = (Number(formatFixed(rate, 18)) - 1) * time;
+        const slippageAPR = fixedAPR * (1 - numbers.slippage);
+
+        setRawSlippage((slippageAPR * 100).toFixed(2));
+        setFixedRate(fixedAPR);
+      } catch (error) {
+        setFixedRate(undefined);
+      }
+    } else {
+      const fixedAPR = Number(depositRate.toBigInt()) / 1e18;
       const slippageAPR = fixedAPR * (1 - numbers.slippage);
-
       setRawSlippage((slippageAPR * 100).toFixed(2));
       setFixedRate(fixedAPR);
-    } catch (error) {
-      setFixedRate(undefined);
     }
-  }, [accountData, date, qty, marketContract, previewerContract, symbol, decimals]);
+  }, [accountData, date, previewerContract, marketContract, qty, decimals, depositRate]);
 
   useEffect(() => {
     void updateAPR();

@@ -9,7 +9,6 @@ import { LangKeys } from 'types/Lang';
 import { HealthFactor } from 'types/HealthFactor';
 
 import { toPercentage } from 'utils/utils';
-import getOneDollar from 'utils/getOneDollar';
 import getBeforeBorrowLimit from 'utils/getBeforeBorrowLimit';
 
 import LangContext from 'contexts/LangContext';
@@ -85,6 +84,14 @@ const BorrowAtMaturity: FC = () => {
     () => (accountData ? getHealthFactorData(accountData) : undefined),
     [accountData],
   );
+
+  const minBorrowRate = useMemo<BigNumber | undefined>(() => {
+    if (!accountData) return;
+
+    const { fixedPools = [] } = accountData[symbol];
+    const pool = fixedPools.find(({ maturity }) => maturity.toNumber() === date);
+    return pool?.minBorrowRate;
+  }, [accountData, date, symbol]);
 
   const previewerContract = usePreviewer();
 
@@ -321,33 +328,37 @@ const BorrowAtMaturity: FC = () => {
   ]);
 
   const updateAPR = useCallback(async () => {
-    if (!accountData || !date || !previewerContract || !marketContract) return;
+    if (!accountData || !date || !previewerContract || !marketContract || !minBorrowRate) return;
 
-    const { usdPrice } = accountData[symbol];
+    if (qty) {
+      const initialAssets = parseFixed(qty, decimals);
+      try {
+        const { assets: finalAssets } = await previewerContract.previewBorrowAtMaturity(
+          marketContract.address,
+          date,
+          initialAssets,
+        );
 
-    const initialAssets = qty ? parseFixed(qty, decimals) : getOneDollar(usdPrice, decimals);
+        const currentTimestamp = Date.now() / 1000;
+        const time = 31_536_000 / (Number(date) - currentTimestamp);
 
-    try {
-      const { assets: finalAssets } = await previewerContract.previewBorrowAtMaturity(
-        marketContract.address,
-        date,
-        initialAssets,
-      );
+        const rate = finalAssets.mul(WeiPerEther).div(initialAssets);
 
-      const currentTimestamp = Date.now() / 1000;
-      const time = 31_536_000 / (Number(date) - currentTimestamp);
+        const fixedAPR = (Number(formatFixed(rate, 18)) - 1) * time;
+        const slippageAPR = fixedAPR * (1 + numbers.slippage);
 
-      const rate = finalAssets.mul(WeiPerEther).div(initialAssets);
-
-      const fixedAPR = (Number(formatFixed(rate, 18)) - 1) * time;
-      const slippageAPR = fixedAPR * (1 + numbers.slippage);
-
+        setRawSlippage((slippageAPR * 100).toFixed(2));
+        setFixedRate(fixedAPR);
+      } catch (error) {
+        setFixedRate(undefined);
+      }
+    } else {
+      const fixedAPR = Number(minBorrowRate.toBigInt()) / 1e18;
+      const slippageAPR = fixedAPR * (1 - numbers.slippage);
       setRawSlippage((slippageAPR * 100).toFixed(2));
       setFixedRate(fixedAPR);
-    } catch (error) {
-      setFixedRate(undefined);
     }
-  }, [accountData, date, qty, marketContract, previewerContract, symbol, decimals]);
+  }, [accountData, date, previewerContract, marketContract, minBorrowRate, qty, decimals]);
 
   // update APR
   useEffect(() => {
