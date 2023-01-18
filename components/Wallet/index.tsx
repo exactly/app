@@ -43,6 +43,7 @@ function Wallet() {
         onClick={() => open({ route: 'ConnectWallet' })}
         variant="contained"
         sx={{ fontSize: { xs: 10, sm: 13 } }}
+        data-test-id="connect-wallet"
       >
         Connect wallet
       </Button>

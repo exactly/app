@@ -238,6 +238,7 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
                               borrowMaturity,
                             )
                           }
+                          data-test-id={`${rateType}-borrow-${symbol}`}
                         >
                           Borrow
                         </Button>

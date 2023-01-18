@@ -20,12 +20,12 @@ type Props = {
 function ModalSubmit({ requiresApproval = false, isLoading = false, disabled = false, submit, symbol, label }: Props) {
   const { loadingButton, isLoading: isLoadingOp, tx, errorButton } = useOperationContext();
   const { operation } = useModalStatus();
-  const { walletAddress, chain: displayNetwork } = useWeb3();
+  const { isConnected, chain: displayNetwork } = useWeb3();
   const { open } = useWeb3Modal();
   const { chain } = useNetwork();
   const { switchNetwork, isLoading: switchIsLoading } = useSwitchNetwork();
 
-  if (!walletAddress) {
+  if (!isConnected) {
     return (
       <Button fullWidth onClick={() => open({ route: 'ConnectWallet' })} variant="contained">
         Connect wallet
@@ -40,6 +40,7 @@ function ModalSubmit({ requiresApproval = false, isLoading = false, disabled = f
         onClick={() => switchNetwork?.(displayNetwork.id)}
         variant="contained"
         loading={switchIsLoading}
+        data-test-id="modal-submit"
       >
         Please switch to {displayNetwork.name} network
       </LoadingButton>
@@ -60,12 +61,8 @@ function ModalSubmit({ requiresApproval = false, isLoading = false, disabled = f
         onClick={submit}
         color="primary"
         variant="contained"
-<<<<<<< HEAD
         disabled={disabled}
-=======
-        disabled={disabled || requiresApproval}
         data-test-id="modal-submit"
->>>>>>> dce211c9 (✨ add tenderly rpc for testing + deposit test)
       >
         Approve {symbol}
       </LoadingButton>
