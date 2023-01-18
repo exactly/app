@@ -74,7 +74,12 @@ function Navbar() {
   return (
     <Box sx={{ display: 'flex', justifyContent: 'center' }}>
       <DisclaimerModal />
-      <AppBar position="static" color="transparent" sx={{ height: '56px', mb: { xs: 0, sm: 2.5 } }}>
+      <AppBar
+        position="static"
+        color="transparent"
+        sx={{ height: '56px', mb: { xs: 0, sm: 2.5 } }}
+        data-test-id="navbar"
+      >
         <Toolbar disableGutters sx={{ padding: '0 0', gap: '8px' }}>
           <Link href={{ pathname: '/', query }} legacyBehavior>
             <Box sx={{ cursor: 'pointer' }} display="flex" alignItems="center">
