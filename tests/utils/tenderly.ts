@@ -1,4 +1,7 @@
-import { ethers } from 'ethers';
+import { hexValue } from '@ethersproject/bytes';
+import { Contract } from '@ethersproject/contracts';
+import { StaticJsonRpcProvider } from '@ethersproject/providers';
+import { formatFixed, parseFixed } from '@ethersproject/bignumber';
 import ERC20 from '@exactly-protocol/protocol/deployments/mainnet/DAI.json' assert { type: 'json' };
 
 const constants = {
@@ -60,8 +63,8 @@ export const createFork = async (networkId = '1', blockNumber = 14386016) => {
 export const increaseBalance = async (address: string, amount: number) => {
   const forkId = 'a58acb82-0ddf-4e31-90c3-1c37ddfd2c9e';
   const forkRPC = `https://rpc.tenderly.co/fork/${forkId}`;
-  const provider = new ethers.providers.JsonRpcProvider(forkRPC);
-  const params = [[address], ethers.utils.hexValue(ethers.utils.parseUnits(amount.toString(), 'ether').toHexString())];
+  const provider = new StaticJsonRpcProvider(forkRPC);
+  const params = [[address], hexValue(parseFixed(amount.toString(), 18).toHexString())];
 
   return await provider.send('tenderly_addBalance', params);
 };
@@ -69,8 +72,8 @@ export const increaseBalance = async (address: string, amount: number) => {
 export const setBalance = async (address: string, amount: number) => {
   const forkId = 'a58acb82-0ddf-4e31-90c3-1c37ddfd2c9e';
   const forkRPC = `https://rpc.tenderly.co/fork/${forkId}`;
-  const provider = new ethers.providers.JsonRpcProvider(forkRPC);
-  const params = [[address], ethers.utils.hexValue(ethers.utils.parseUnits(amount.toString(), 'ether').toHexString())];
+  const provider = new StaticJsonRpcProvider(forkRPC);
+  const params = [[address], hexValue(parseFixed(amount.toString(), 18).toHexString())];
 
   return await provider.send('tenderly_setBalance', params);
 };
@@ -78,26 +81,21 @@ export const setBalance = async (address: string, amount: number) => {
 export const getBalance = async (address: string) => {
   const forkId = 'a58acb82-0ddf-4e31-90c3-1c37ddfd2c9e';
   const forkRPC = `https://rpc.tenderly.co/fork/${forkId}`;
-  const provider = new ethers.providers.JsonRpcProvider(forkRPC);
+  const provider = new StaticJsonRpcProvider(forkRPC);
   const params = [address, 'latest'];
   const balance = await provider.send('eth_getBalance', params);
 
-  return ethers.utils.formatEther(balance);
+  return formatFixed(balance, 18);
 };
 
-const transferToken = async (
-  tokenAddress: string,
-  units: number,
-  toAddress: string,
-  amount: number,
-) => {
+const transferToken = async (tokenAddress: string, units: number, toAddress: string, amount: number) => {
   const forkId = 'a58acb82-0ddf-4e31-90c3-1c37ddfd2c9e';
   const forkRPC = `https://rpc.tenderly.co/fork/${forkId}`;
-  const provider = new ethers.providers.JsonRpcProvider(forkRPC);
+  const provider = new StaticJsonRpcProvider(forkRPC);
   const signer = provider.getSigner();
-  const tokenContract = new ethers.Contract(tokenAddress, ERC20.abi, signer);
+  const tokenContract = new Contract(tokenAddress, ERC20.abi, signer);
 
-  const tokenAmount = ethers.utils.hexValue(ethers.utils.parseUnits(amount.toString(), units).toHexString());
+  const tokenAmount = hexValue(parseFixed(amount.toString(), units).toHexString());
 
   await setBalance(tokenAddress, 10000);
   // const unsignedTx = await tokenContract.populateTransaction.approve(await signer.getAddress(), tokenAmount);
@@ -106,9 +104,9 @@ const transferToken = async (
   //     to: tokenContract.address,
   //     from: fromAddress,
   //     data: unsignedTx.data,
-  //     gas: ethers.utils.hexValue(3000000),
-  //     gasPrice: ethers.utils.hexValue(1),
-  //     value: ethers.utils.hexValue(0),
+  //     gas: hexValue(3000000),
+  //     gasPrice: hexValue(1),
+  //     value: hexValue(0),
   //   },
   // ];
 
@@ -116,20 +114,14 @@ const transferToken = async (
   await tokenContract.transfer(toAddress, tokenAmount);
 };
 
-const mintToken = async (
-  tokenAddress: string,
-  tokenAbi: string,
-  units: number,
-  toAddress: string,
-  amount: number,
-) => {
+const mintToken = async (tokenAddress: string, tokenAbi: string, units: number, toAddress: string, amount: number) => {
   const forkId = 'a58acb82-0ddf-4e31-90c3-1c37ddfd2c9e';
   const forkRPC = `https://rpc.tenderly.co/fork/${forkId}`;
-  const provider = new ethers.providers.JsonRpcProvider(forkRPC);
+  const provider = new StaticJsonRpcProvider(forkRPC);
   const signer = provider.getSigner();
-  const tokenContract = new ethers.Contract(tokenAddress, tokenAbi, signer);
+  const tokenContract = new Contract(tokenAddress, tokenAbi, signer);
 
-  const tokenAmount = ethers.utils.hexValue(ethers.utils.parseUnits(amount.toString(), units).toHexString());
+  const tokenAmount = hexValue(parseFixed(amount.toString(), units).toHexString());
 
   await setBalance(tokenAddress, 10000);
   // const unsignedTx = await tokenContract.populateTransaction.approve(await signer.getAddress(), tokenAmount);
@@ -138,9 +130,9 @@ const mintToken = async (
   //     to: tokenContract.address,
   //     from: tokenAddress,
   //     data: unsignedTx.data,
-  //     gas: ethers.utils.hexValue(3000000),
-  //     gasPrice: ethers.utils.hexValue(1),
-  //     value: ethers.utils.hexValue(0),
+  //     gas: hexValue(3000000),
+  //     gasPrice: hexValue(1),
+  //     value: hexValue(0),
   //   },
   // ];
 
