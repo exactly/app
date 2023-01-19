@@ -1,7 +1,6 @@
 import { parseFixed } from '@ethersproject/bignumber';
 import { MaxUint256, WeiPerEther } from '@ethersproject/constants';
 import { ErrorCode } from '@ethersproject/logger';
-import { captureException } from '@sentry/nextjs';
 import { useCallback, useState } from 'react';
 import { ERC20, Market } from 'types/contracts';
 import numbers from 'config/numbers.json';
