@@ -78,7 +78,7 @@ function Navbar() {
         position="static"
         color="transparent"
         sx={{ height: '56px', mb: { xs: 0, sm: 2.5 } }}
-        data-test-id="navbar"
+        data-testid="navbar"
       >
         <Toolbar disableGutters sx={{ padding: '0 0', gap: '8px' }}>
           <Link href={{ pathname: '/', query }} legacyBehavior>

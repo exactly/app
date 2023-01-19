@@ -43,7 +43,7 @@ function Wallet() {
         onClick={() => open({ route: 'ConnectWallet' })}
         variant="contained"
         sx={{ fontSize: { xs: 10, sm: 13 } }}
-        data-test-id="connect-wallet"
+        data-testid="connect-wallet"
       >
         Connect wallet
       </Button>
@@ -72,7 +72,7 @@ function Wallet() {
         }}
       >
         <Avatar alt="Address avatar" src={avatarImgSrc} sx={{ width: 20, height: 20, mr: { xs: 0, sm: '5px' } }} />
-        <Typography variant="subtitle1" color="grey.900" display={onlyDesktop} data-test-id="user-address">
+        <Typography variant="subtitle1" color="grey.900" display={onlyDesktop} data-testid="user-address">
           {ens && !ensError ? ens : formattedWallet}
         </Typography>
       </Button>

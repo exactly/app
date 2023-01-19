@@ -27,7 +27,12 @@ function ModalSubmit({ requiresApproval = false, isLoading = false, disabled = f
 
   if (!isConnected) {
     return (
-      <Button fullWidth onClick={() => open({ route: 'ConnectWallet' })} variant="contained">
+      <Button
+        fullWidth
+        onClick={() => open({ route: 'ConnectWallet' })}
+        variant="contained"
+        data-testid="modal-connect-wallet"
+      >
         Connect wallet
       </Button>
     );
@@ -40,7 +45,7 @@ function ModalSubmit({ requiresApproval = false, isLoading = false, disabled = f
         onClick={() => switchNetwork?.(displayNetwork.id)}
         variant="contained"
         loading={switchIsLoading}
-        data-test-id="modal-submit"
+        data-testid="modal-switch-network"
       >
         Please switch to {displayNetwork.name} network
       </LoadingButton>
@@ -62,7 +67,7 @@ function ModalSubmit({ requiresApproval = false, isLoading = false, disabled = f
         color="primary"
         variant="contained"
         disabled={disabled}
-        data-test-id="modal-submit"
+        data-testid="modal-approve"
       >
         Approve {symbol}
       </LoadingButton>

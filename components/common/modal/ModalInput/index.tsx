@@ -32,7 +32,7 @@ const NumberFormatCustom = React.forwardRef<HTMLInputElement, InputBaseComponent
         defaultValue={0.0}
         thousandSeparator=","
         valueIsNumericString
-        data-test-id="modal-input"
+        data-testid="modal-input"
       />
     );
   },

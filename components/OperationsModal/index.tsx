@@ -68,7 +68,7 @@ function OperationsModal() {
       sx={isMobile ? { top: 'auto' } : { backdropFilter: tx ? 'blur(1.5px)' : '' }}
       BackdropProps={{ style: { backgroundColor: tx ? 'rgb(100, 100, 100 , 0.1)' : '' } }}
       disableEscapeKeyDown={loadingTx}
-      data-test-id="modal"
+      data-testid="modal"
     >
       {!loadingTx && (
         <IconButton
@@ -80,7 +80,7 @@ function OperationsModal() {
             top: 8,
             color: 'grey.500',
           }}
-          data-test-id="modal-close"
+          data-testid="modal-close"
         >
           <CloseIcon sx={{ fontSize: 19 }} />
         </IconButton>
