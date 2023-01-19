@@ -58,7 +58,7 @@ function OperationsModal() {
       fullScreen={isMobile}
       sx={isMobile ? { top: 'auto' } : {}}
       disableEscapeKeyDown={loadingTx}
-      data-test-id="modal"
+      data-testid="modal"
     >
       {(!isMobile || tx) && !loadingTx && (
         <IconButton
@@ -70,7 +70,7 @@ function OperationsModal() {
             top: 8,
             color: 'grey.500',
           }}
-          data-test-id="modal-close"
+          data-testid="modal-close"
         >
           <CloseIcon sx={{ fontSize: 16 }} />
         </IconButton>

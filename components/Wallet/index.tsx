@@ -30,7 +30,7 @@ function Wallet() {
 
   if (!walletAddress) {
     return (
-      <Button onClick={() => open({ route: 'ConnectWallet' })} variant="contained" data-test-id="connect-wallet">
+      <Button onClick={() => open({ route: 'ConnectWallet' })} variant="contained" data-testid="connect-wallet">
         Connect wallet
       </Button>
     );
@@ -48,7 +48,7 @@ function Wallet() {
         sx={{ borderColor: '#E3E5E8', px: '10px' }}
       >
         <Avatar alt="Blocky Avatar" src={avatarImgSrc} sx={{ width: 20, height: 20, mr: '5px' }} />
-        <Typography variant="subtitle1" color="#0D0E0F" data-test-id="user-address">
+        <Typography variant="subtitle1" color="#0D0E0F" data-testid="user-address">
           {ens ?? formattedWallet}
         </Typography>
       </Button>

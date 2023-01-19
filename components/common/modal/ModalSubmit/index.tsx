@@ -22,7 +22,7 @@ function ModalSubmit({ requiresApproval = false, isLoading = false, disabled = f
           variant="contained"
           disabled={disabled}
           sx={{ mb: 1 }}
-          data-test-id="modal-approve"
+          data-testid="modal-approve"
         >
           Approve {symbol}
         </LoadingButton>
@@ -34,7 +34,7 @@ function ModalSubmit({ requiresApproval = false, isLoading = false, disabled = f
         color="primary"
         variant="contained"
         disabled={disabled || requiresApproval}
-        data-test-id="modal-submit"
+        data-testid="modal-submit"
       >
         {label}
       </LoadingButton>

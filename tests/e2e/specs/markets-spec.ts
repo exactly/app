@@ -41,23 +41,23 @@ describe('Markets', () => {
 });
 
 const expectFloatingDepositSuccess = (symbol: string) => {
-  cy.getByDataTestId(`floating-deposit-${symbol}`).click();
-  cy.getByDataTestId(`modal-input`).type('10');
+  cy.getByTestId(`floating-deposit-${symbol}`).click();
+  cy.getByTestId(`modal-input`).type('10');
 
   cy.waitUntil(
-    () => cy.getByDataTestId('modal-submit', { timeout: 15000 }).then(($btn) => $btn.attr('disabled') !== 'disabled'),
+    () => cy.getByTestId('modal-submit', { timeout: 15000 }).then(($btn) => $btn.attr('disabled') !== 'disabled'),
     { timeout: 15000, interval: 1000 },
   );
-  cy.getByDataTestId('modal').then(($modal) => {
-    if ($modal.find('[data-test-id=modal-approve]').length) {
-      cy.getByDataTestId('modal-approve', { timeout: 15000 }).click();
+  cy.getByTestId('modal').then(($modal) => {
+    if ($modal.find('[data-testid=modal-approve]').length) {
+      cy.getByTestId('modal-approve', { timeout: 15000 }).click();
       cy.confirmMetamaskPermissionToSpend();
     }
   });
 
-  cy.getByDataTestId('modal-submit', { timeout: 15000 }).click();
+  cy.getByTestId('modal-submit', { timeout: 15000 }).click();
   cy.confirmMetamaskTransaction();
 
   cy.contains('Transaction Completed!').should('be.visible');
-  cy.getByDataTestId('modal-close').click();
+  cy.getByTestId('modal-close').click();
 };

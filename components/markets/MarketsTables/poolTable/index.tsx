@@ -192,7 +192,7 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
                             )
                           }
                           disabled={isDisable(rateType, depositAPR)}
-                          data-test-id={`${rateType}-deposit-${symbol}`}
+                          data-testid={`${rateType}-deposit-${symbol}`}
                         >
                           Deposit
                         </Button>
@@ -231,7 +231,7 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
                               borrowMaturity,
                             )
                           }
-                          data-test-id={`${rateType}-borrow-${symbol}`}
+                          data-testid={`${rateType}-borrow-${symbol}`}
                         >
                           Borrow
                         </Button>
