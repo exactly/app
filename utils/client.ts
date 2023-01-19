@@ -5,6 +5,13 @@ import { mainnet, goerli, optimism } from 'wagmi/chains';
 import { publicProvider } from 'wagmi/providers/public';
 import { SafeConnector } from 'wagmi/connectors/safe';
 
+declare global {
+  interface Window {
+    rpcURL?: string;
+  }
+}
+const rpcURL = typeof window !== 'undefined' ? window?.rpcURL : undefined;
+
 export const walletConnectId = '11ddaa8aaede72cb5d6b0dae2fed7baa';
 
 export const supportedChains = [
@@ -16,9 +23,7 @@ export const supportedChains = [
 export const defaultChain = { mainnet, optimism, goerli }[process.env.NEXT_PUBLIC_NETWORK ?? 'mainnet'];
 
 const { chains, provider } = configureChains(supportedChains, [
-  ...(JSON.parse(process.env.NEXT_PUBLIC_USE_TENDERLY_RPC ?? 'false')
-    ? [jsonRpcProvider({ rpc: () => ({ http: 'https://rpc.tenderly.co/fork/a58acb82-0ddf-4e31-90c3-1c37ddfd2c9e' }) })]
-    : []),
+  ...(rpcURL ? [jsonRpcProvider({ rpc: () => ({ http: rpcURL }) })] : []),
   publicProvider({ priority: 1 }),
   walletConnectProvider({ projectId: walletConnectId }),
 ]);

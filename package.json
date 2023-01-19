@@ -5,7 +5,7 @@
   "license": "BUSL-1.1",
   "scripts": {
     "dev": "NODE_ENV=development next dev",
-    "serve:test": "NODE_ENV=development NEXT_PUBLIC_USE_TENDERLY_RPC=true NEXT_PUBLIC_NETWORK=mainnet next dev",
+    "serve:test": "NODE_ENV=development NEXT_PUBLIC_USE_TENDERLY_RPC=true NEXT_PUBLIC_NETWORK=mainnet NEXT_PUBLIC_IS_E2E=true next dev",
     "test": "synpress run --config supportFile='tests/e2e/support.ts' baseUrl='http://localhost:3000'",
     "build": "next build",
     "start": "NODE_ENV=production next start",

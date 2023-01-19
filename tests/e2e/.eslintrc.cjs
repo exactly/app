@@ -1,7 +1,6 @@
 /** @type {import('eslint').Linter.Config} */
 module.exports = {
   extends: [
-    'plugin:mocha/recommended',
     'plugin:cypress/recommended',
     'plugin:ui-testing/cypress',
     'plugin:chai-expect/recommended',
@@ -9,7 +8,7 @@ module.exports = {
     'plugin:testing-library/react',
   ],
   rules: {
-    'mocha/no-mocha-arrows': 'off',
-    'mocha/no-exclusive-tests': 'error',
+    'ui-testing/missing-assertion-in-test': 0,
+    'testing-library/prefer-screen-queries': 0,
   },
 };

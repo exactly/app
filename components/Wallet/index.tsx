@@ -1,5 +1,5 @@
-import React, { useMemo } from 'react';
-import { useDisconnect, useEnsAvatar, useEnsName } from 'wagmi';
+import React, { useCallback, useMemo } from 'react';
+import { useConnect, useDisconnect, useEnsAvatar, useEnsName } from 'wagmi';
 import { mainnet } from 'wagmi/chains';
 import { useWeb3 } from 'hooks/useWeb3';
 import { formatWallet } from 'utils/utils';
@@ -14,6 +14,7 @@ import { globals } from 'styles/theme';
 const { onlyDesktop } = globals;
 
 function Wallet() {
+  const { connectors, connect } = useConnect();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const isMenuOpen = Boolean(anchorEl);
 
@@ -31,6 +32,15 @@ function Wallet() {
 
   const formattedWallet = formatWallet(walletAddress);
 
+  const walletConnect = useCallback(() => {
+    if (JSON.parse(process.env.NEXT_PUBLIC_IS_E2E ?? 'false')) {
+      const meta = connectors.find(({ id, ready, name }) => ready && id === 'injected' && name === 'MetaMask');
+      connect({ connector: meta });
+    } else {
+      open({ route: 'ConnectWallet' });
+    }
+  }, [connectors, connect, open]);
+
   const avatarImgSrc = useMemo(() => {
     if (!walletAddress) return '';
     if (ensAvatar && !ensAvatarError) return ensAvatar;
@@ -40,7 +50,7 @@ function Wallet() {
   if (!walletAddress) {
     return (
       <Button
-        onClick={() => open({ route: 'ConnectWallet' })}
+        onClick={walletConnect}
         variant="contained"
         sx={{ fontSize: { xs: 10, sm: 13 } }}
         data-testid="connect-wallet"

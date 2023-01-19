@@ -1,5 +1,9 @@
 {
   "compilerOptions": {
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
     "types": ["cypress", "cypress-wait-until", "@testing-library/cypress", "@synthetixio/synpress/support"]
   }
 }

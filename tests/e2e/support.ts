@@ -9,4 +9,8 @@ declare global {
       getByTestId: typeof this.get;
     }
   }
+
+  interface Window {
+    rpcURL?: string;
+  }
 }
