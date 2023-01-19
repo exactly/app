@@ -65,8 +65,10 @@ export default (operation: Operation, contract?: ERC20 | Market, spender?: strin
       });
 
       await approveTx.wait();
-    } catch (error: any) {
-      const isDenied = [ErrorCode.ACTION_REJECTED, ErrorCode.TRANSACTION_REPLACED].includes(error?.code);
+    } catch (error) {
+      const isDenied = [ErrorCode.ACTION_REJECTED, ErrorCode.TRANSACTION_REPLACED].includes(
+        (error as { code: ErrorCode }).code,
+      );
 
       if (!isDenied) handleOperationError(error);
 

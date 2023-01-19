@@ -118,7 +118,7 @@ function Repay() {
     let repayTx;
     try {
       setIsLoadingOp(true);
-      const { decimals, floatingBorrowShares, floatingBorrowAssets } = accountData[symbol];
+      const { floatingBorrowShares, floatingBorrowAssets } = accountData[symbol];
 
       if (symbol === 'WETH') {
         if (!ETHRouterContract) return;
@@ -174,7 +174,7 @@ function Repay() {
       });
 
       void getAccountData();
-    } catch (error: any) {
+    } catch (error) {
       if (repayTx) setTx({ status: 'error', hash: repayTx?.hash });
       setErrorData({ status: true, message: handleOperationError(error) });
     } finally {
@@ -192,6 +192,7 @@ function Repay() {
     setTx,
     symbol,
     walletAddress,
+    decimals,
   ]);
 
   const previewGasCost = useCallback(

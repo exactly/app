@@ -89,12 +89,12 @@ export default async (
     offset = 0,
     count = 1,
   }: {
-    maxFuturePools?: number;
+    maxFuturePools: number;
     roundTicks?: boolean;
     interval?: number;
     offset?: number;
     count?: number;
-  } = {},
+  },
 ) => {
   const now = Math.floor(Date.now() / 1_000) - offset * interval;
   const lastTimestamp = roundTicks ? now - (now % interval) : now;
@@ -164,7 +164,7 @@ export default async (
         ) {
           treasuryFeeRate
         }
-        ${[...new Array(maxFuturePools! + 1)]
+        ${[...new Array(maxFuturePools + 1)]
           .map((__, j) => timestamp - (timestamp % FIXED_INTERVAL) + j * FIXED_INTERVAL)
           .map(
             (maturity) => `
@@ -190,7 +190,7 @@ export default async (
   );
 
   const states = [...Array(count + 1)].map((_, i) => {
-    const timestamp = lastTimestamp - (count - i) * interval;
+    const timestamp: number = lastTimestamp - (count - i) * interval;
     const key = `k_${market}_${timestamp}`;
     const marketState = response[`${key}_marketState`][0] as MarketState;
     const floatingDebtState = response[`${key}_floatingDebtState`][0] as FloatingDebtState;
@@ -198,7 +198,7 @@ export default async (
     const accumulatorAccrual = response[`${key}_accumulatorAccrual`]?.[0]?.accumulatorAccrual as number;
     const smoothFactor = response[`${key}_smoothFactor`]?.[0]?.smoothFactor as string;
     const treasuryFeeRate = (response[`${key}_treasuryFeeRate`]?.[0]?.treasuryFeeRate as string) ?? '0';
-    const fixedPools = [...new Array(type === 'deposit' ? maxFuturePools! + 1 : 0)]
+    const fixedPools = [...new Array(type === 'deposit' ? maxFuturePools + 1 : 0)]
       .map((__, j) => timestamp - (timestamp % FIXED_INTERVAL) + j * FIXED_INTERVAL)
       .map((maturity) => response[`${key}_pool_${maturity}`]?.[0] as FixedPool);
 

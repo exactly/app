@@ -1,5 +1,4 @@
-import type { FC, ReactNode } from 'react';
-import React, { createContext, useEffect, useState } from 'react';
+import React, { createContext, FC, PropsWithChildren, useCallback, useEffect, useState } from 'react';
 
 type ContextValues = {
   theme: 'light' | 'dark';
@@ -13,7 +12,7 @@ const defaultValues: ContextValues = {
 
 const ThemeContext = createContext(defaultValues);
 
-export const ThemeProvider: FC<{ children?: ReactNode }> = ({ children }) => {
+export const ThemeProvider: FC<PropsWithChildren> = ({ children }) => {
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
 
   useEffect(() => {
@@ -33,24 +32,17 @@ export const ThemeProvider: FC<{ children?: ReactNode }> = ({ children }) => {
     }
   }, []);
 
+  const changeTheme = useCallback(() => {
+    const target = theme === 'light' ? 'dark' : 'light';
+    setTheme(target);
+    localStorage.setItem('theme', JSON.stringify(target));
+  }, [theme]);
+
   useEffect(() => {
     if (document?.body?.dataset?.theme && document?.body?.dataset?.theme !== theme) {
       document.body.dataset.theme = theme;
     }
   }, [theme, changeTheme]);
-
-  function changeTheme() {
-    switch (theme) {
-      case 'light':
-        setTheme('dark');
-        localStorage.setItem('theme', JSON.stringify('dark'));
-        break;
-      case 'dark':
-        setTheme('light');
-        localStorage.setItem('theme', JSON.stringify('light'));
-        break;
-    }
-  }
 
   return <ThemeContext.Provider value={{ theme, changeTheme }}>{children}</ThemeContext.Provider>;
 };

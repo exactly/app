@@ -34,14 +34,27 @@ export default (type: 'borrow' | 'deposit', maturity: number, market: string) =>
 
       const borrows: Borrow[] = [];
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       getMaturityPoolBorrows.borrowAtMaturities.forEach((borrow: any) => {
-        const { id, market, symbol, maturity, assets, fee, caller, receiver, borrower, timestamp, editable } = borrow;
+        const {
+          id,
+          market: borrowMarket,
+          symbol,
+          maturity: borrowMaturity,
+          assets,
+          fee,
+          caller,
+          receiver,
+          borrower,
+          timestamp,
+          editable,
+        } = borrow;
 
         borrows.push({
           id,
-          market,
+          market: borrowMarket,
           symbol,
-          maturity: parseFloat(maturity),
+          maturity: parseFloat(borrowMaturity),
           assets: parseFixed(assets),
           fee: parseFixed(fee),
           caller,
@@ -61,13 +74,23 @@ export default (type: 'borrow' | 'deposit', maturity: number, market: string) =>
 
       const repays: Repay[] = [];
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       getMaturityPoolRepays.repayAtMaturities.forEach((repay: any) => {
-        const { id, market, maturity, caller, borrower, assets, debtCovered, timestamp } = repay;
+        const {
+          id,
+          market: repayMarket,
+          maturity: repayMaturity,
+          caller,
+          borrower,
+          assets,
+          debtCovered,
+          timestamp,
+        } = repay;
 
         repays.push({
           id,
-          market,
-          maturity: parseFloat(maturity),
+          market: repayMarket,
+          maturity: parseFloat(repayMaturity),
           caller,
           borrower,
           assets: parseFixed(assets),
@@ -85,14 +108,26 @@ export default (type: 'borrow' | 'deposit', maturity: number, market: string) =>
 
       const deposits: Deposit[] = [];
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       getMaturityPoolDeposits.depositAtMaturities.forEach((deposit: any) => {
-        const { id, market, symbol, maturity, assets, fee, owner, caller, timestamp, editable } = deposit;
+        const {
+          id,
+          market: depositMarket,
+          symbol,
+          maturity: depositMaturity,
+          assets,
+          fee,
+          owner,
+          caller,
+          timestamp,
+          editable,
+        } = deposit;
 
         deposits.push({
           id,
-          market,
+          market: depositMarket,
           symbol,
-          maturity: parseFloat(maturity),
+          maturity: parseFloat(depositMaturity),
           assets: parseFixed(assets),
           fee: parseFixed(fee),
           owner,
@@ -111,14 +146,25 @@ export default (type: 'borrow' | 'deposit', maturity: number, market: string) =>
 
       const withdraws: WithdrawMP[] = [];
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       getMaturityPoolWithdraws.withdrawAtMaturities.forEach((withdraw: any) => {
-        const { id, assets, market, maturity, owner, caller, positionAssets, receiver, timestamp } = withdraw;
+        const {
+          id,
+          assets,
+          market: withdrawMarket,
+          maturity: withdrawMaturity,
+          owner,
+          caller,
+          positionAssets,
+          receiver,
+          timestamp,
+        } = withdraw;
 
         withdraws.push({
           id,
           assets: parseFixed(assets),
-          market,
-          maturity: parseFloat(maturity),
+          market: withdrawMarket,
+          maturity: parseFloat(withdrawMaturity),
           owner,
           caller,
           positionAssets: parseFixed(positionAssets),

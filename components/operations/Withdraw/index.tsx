@@ -64,9 +64,9 @@ const Withdraw: FC = () => {
 
   const parsedAmount = useMemo(() => {
     if (!accountData) return '0';
-    const { floatingDepositAssets, decimals } = accountData[symbol];
+    const { floatingDepositAssets } = accountData[symbol];
     return formatFixed(floatingDepositAssets, decimals);
-  }, [symbol, accountData]);
+  }, [symbol, accountData, decimals]);
 
   const {
     approve,
@@ -146,7 +146,7 @@ const Withdraw: FC = () => {
     let withdrawTx;
     try {
       setIsLoadingOp(true);
-      const { decimals, floatingDepositShares } = accountData[symbol];
+      const { floatingDepositShares } = accountData[symbol];
 
       if (symbol === 'WETH') {
         if (!ETHRouterContract) return;
@@ -199,7 +199,7 @@ const Withdraw: FC = () => {
       });
 
       void getAccountData();
-    } catch (error: any) {
+    } catch (error) {
       if (withdrawTx) setTx({ status: 'error', hash: withdrawTx?.hash });
       setErrorData({ status: true, message: handleOperationError(error) });
     } finally {
@@ -217,6 +217,7 @@ const Withdraw: FC = () => {
     setTx,
     symbol,
     walletAddress,
+    decimals,
   ]);
 
   const handleSubmitAction = useCallback(async () => {

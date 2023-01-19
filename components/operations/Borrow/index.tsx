@@ -133,7 +133,7 @@ const Borrow: FC = () => {
   const onMax = useCallback(() => {
     if (!accountData || !healthFactor) return;
 
-    const { decimals, adjustFactor, usdPrice, floatingDepositAssets, isCollateral } = accountData[symbol];
+    const { adjustFactor, usdPrice, floatingDepositAssets, isCollateral } = accountData[symbol];
 
     let col = healthFactor.collateral;
     const hf = parseFixed('1.05', 18);
@@ -156,13 +156,13 @@ const Borrow: FC = () => {
 
     setQty(safeMaximumBorrow);
     setErrorData(undefined);
-  }, [accountData, healthFactor, symbol, setQty, setErrorData]);
+  }, [accountData, healthFactor, symbol, setQty, setErrorData, decimals]);
 
   const handleInputChange = useCallback(
     (value: string) => {
       if (!liquidity || !accountData) return;
 
-      const { decimals, usdPrice } = accountData[symbol];
+      const { usdPrice } = accountData[symbol];
 
       const maxBorrowAssets = getBeforeBorrowLimit(accountData, symbol, usdPrice, decimals, 'borrow');
 
@@ -191,7 +191,7 @@ const Borrow: FC = () => {
       }
       setErrorData(undefined);
     },
-    [liquidity, accountData, symbol, setQty, hasCollateral, setErrorData, translations, lang],
+    [liquidity, accountData, symbol, setQty, hasCollateral, setErrorData, translations, lang, decimals],
   );
 
   const borrow = useCallback(async () => {
@@ -232,7 +232,7 @@ const Borrow: FC = () => {
       });
 
       void getAccountData();
-    } catch (error: any) {
+    } catch (error) {
       if (borrowTx?.hash) setTx({ status: 'error', hash: borrowTx.hash });
 
       setErrorData({

@@ -12,6 +12,7 @@ import useAssets from 'hooks/useAssets';
 import { Box, Button, Divider, Typography } from '@mui/material';
 import formatSymbol from 'utils/formatSymbol';
 import { LoadingButton } from '@mui/lab';
+import handleOperationError from 'utils/handleOperationError';
 
 const images: Record<string, string> = {
   DAI: 'https://gateway.ipfs.io/ipfs/QmXyHPX8GS99dUiChsq7iRfZ4y3aofQqPjMjFJyCpkWs8e',
@@ -64,8 +65,8 @@ function Faucet() {
             connector?.watchAsset?.({ symbol, address, decimals, image: images[symbol] }),
           ),
       );
-    } catch (error: any) {
-      if (error.code !== 4001) throw error;
+    } catch (error) {
+      handleOperationError(error);
     }
   }, [accountData, connector]);
 

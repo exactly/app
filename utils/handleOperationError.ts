@@ -4,6 +4,7 @@ import ErrorInterface from './ErrorInterface';
 
 const defaultErr = 'There was an error, please try again';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default (error: any): string => {
   if (!error?.code) {
     captureException(error);
@@ -67,7 +68,7 @@ export default (error: any): string => {
     }
   }
 
-  if (error.code && error.message) {
+  if (error.code !== ErrorCode.UNPREDICTABLE_GAS_LIMIT && error.message) {
     return error.message;
   }
 

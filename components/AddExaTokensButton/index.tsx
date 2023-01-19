@@ -3,6 +3,7 @@ import { useAccount } from 'wagmi';
 import { Tooltip, Typography } from '@mui/material';
 
 import AccountDataContext from 'contexts/AccountDataContext';
+import handleOperationError from 'utils/handleOperationError';
 
 const AddExaTokensButton = () => {
   const { accountData } = useContext(AccountDataContext);
@@ -16,8 +17,8 @@ const AddExaTokensButton = () => {
           connector?.watchAsset?.({ address: market, decimals, symbol }),
         ),
       );
-    } catch (error: any) {
-      if (error.code !== 4001) throw error;
+    } catch (error) {
+      handleOperationError(error);
     }
   }, [accountData, connector]);
 

@@ -211,7 +211,7 @@ const DepositAtMaturity: FC = () => {
       });
 
       void getAccountData();
-    } catch (error: any) {
+    } catch (error) {
       if (depositTx) setTx({ status: 'error', hash: depositTx.hash });
       setErrorData({ status: true, message: handleOperationError(error) });
     } finally {

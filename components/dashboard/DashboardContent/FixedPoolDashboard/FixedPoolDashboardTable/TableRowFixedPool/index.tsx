@@ -18,6 +18,10 @@ import parseTimestamp from 'utils/parseTimestamp';
 import CollapseFixedPool from '../CollapseFixedPool';
 import APRItem from '../APRItem';
 import useActionButton from 'hooks/useActionButton';
+import type { Deposit } from 'types/Deposit';
+import type { WithdrawMP } from 'types/WithdrawMP';
+import { Borrow } from 'types/Borrow';
+import { Repay } from 'types/Repay';
 
 type Props = {
   symbol: string;
@@ -47,20 +51,16 @@ function TableRowFixedPool({ symbol, amount, type, maturityDate, market, decimal
     );
 
     if (!allTransactions || !exchangeRate) return [];
-    const transformedTxs = allTransactions.map((transaction: any) => {
+    const transformedTxs = allTransactions.map((transaction: Deposit | Borrow | WithdrawMP | Repay) => {
       const assets = formatFixed(transaction.assets, decimals);
 
-      const txType = transaction?.fee
-        ? type === 'borrow'
-          ? 'Borrow'
-          : 'Deposit'
-        : type === 'borrow'
-        ? 'Repay'
-        : 'Withdraw';
+      const txType =
+        'fee' in transaction ? (type === 'borrow' ? 'Borrow' : 'Deposit') : type === 'borrow' ? 'Repay' : 'Withdraw';
 
-      const { transactionAPR } = transaction?.fee
-        ? calculateAPR(transaction.fee, decimals, transaction.assets, transaction.timestamp, transaction.maturity)
-        : { transactionAPR: undefined };
+      const { transactionAPR } =
+        'fee' in transaction
+          ? calculateAPR(transaction.fee, decimals, transaction.assets, transaction.timestamp, transaction.maturity)
+          : { transactionAPR: undefined };
 
       const isBorrowOrDeposit = txType.toLowerCase() === 'borrow' || txType.toLowerCase() === 'deposit';
       const date = parseTimestamp(transaction?.timestamp || '0');

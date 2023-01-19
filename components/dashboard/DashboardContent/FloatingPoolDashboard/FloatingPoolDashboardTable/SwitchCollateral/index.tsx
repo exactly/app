@@ -63,7 +63,7 @@ function SwitchCollateral({ symbol }: Props) {
       await tx.wait();
 
       await getAccountData();
-    } catch (error: any) {
+    } catch (error) {
       handleOperationError(error);
     } finally {
       setLoading(false);

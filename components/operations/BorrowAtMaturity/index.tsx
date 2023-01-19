@@ -171,7 +171,7 @@ const BorrowAtMaturity: FC = () => {
   const onMax = useCallback(() => {
     if (!accountData || !healthFactor) return;
 
-    const { decimals, usdPrice, adjustFactor, floatingDepositAssets, isCollateral } = accountData[symbol];
+    const { usdPrice, adjustFactor, floatingDepositAssets, isCollateral } = accountData[symbol];
 
     let col = healthFactor.collateral;
     const hf = parseFixed('1.05', 18);
@@ -200,12 +200,12 @@ const BorrowAtMaturity: FC = () => {
 
     setQty(safeMaximumBorrow);
     setErrorData(undefined);
-  }, [accountData, healthFactor, setErrorData, setQty, symbol]);
+  }, [accountData, decimals, healthFactor, setErrorData, setQty, symbol]);
 
   const handleInputChange = useCallback(
     (value: string) => {
       if (!accountData) return;
-      const { decimals, usdPrice } = accountData[symbol];
+      const { usdPrice } = accountData[symbol];
 
       setQty(value);
 
@@ -232,7 +232,7 @@ const BorrowAtMaturity: FC = () => {
       }
       setErrorData(undefined);
     },
-    [accountData, symbol, setQty, poolLiquidity, setErrorData, translations, lang],
+    [accountData, symbol, setQty, poolLiquidity, decimals, setErrorData, translations, lang],
   );
 
   const borrow = useCallback(async () => {
@@ -249,7 +249,6 @@ const BorrowAtMaturity: FC = () => {
 
     if (!accountData || !date || !qty || !walletAddress) return;
 
-    const { decimals } = accountData[symbol];
     const amount = parseFixed(qty, decimals);
     const maxAmount = amount.mul(slippage).div(WeiPerEther);
 
@@ -292,7 +291,7 @@ const BorrowAtMaturity: FC = () => {
       });
 
       void getAccountData();
-    } catch (error: any) {
+    } catch (error) {
       if (borrowTx?.hash) setTx({ status: 'error', hash: borrowTx.hash });
 
       setErrorData({
@@ -318,12 +317,13 @@ const BorrowAtMaturity: FC = () => {
     symbol,
     translations,
     walletAddress,
+    decimals,
   ]);
 
   const updateAPR = useCallback(async () => {
     if (!accountData || !date || !previewerContract || !marketContract) return;
 
-    const { decimals, usdPrice } = accountData[symbol];
+    const { usdPrice } = accountData[symbol];
 
     const initialAssets = qty ? parseFixed(qty, decimals) : getOneDollar(usdPrice, decimals);
 
@@ -347,7 +347,7 @@ const BorrowAtMaturity: FC = () => {
     } catch (error) {
       setFixedRate(undefined);
     }
-  }, [accountData, date, qty, marketContract, previewerContract, symbol]);
+  }, [accountData, date, qty, marketContract, previewerContract, symbol, decimals]);
 
   // update APR
   useEffect(() => {

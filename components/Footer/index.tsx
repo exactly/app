@@ -1,4 +1,5 @@
 import React from 'react';
+import Image from 'next/image';
 import { Box, Typography } from '@mui/material';
 import TwitterIcon from '@mui/icons-material/Twitter';
 import GitHubIcon from '@mui/icons-material/GitHub';
@@ -64,7 +65,7 @@ const Footer = () => {
               <TwitterIcon fontSize="small" />
             </a>
             <a target="_blank" rel="noreferrer noopener" href="https://discord.gg/exactly">
-              <img alt="discord" src="/img/social/discord.png" width={20} />
+              <Image alt="discord" src="/img/social/discord.png" width={20} height={20} />
             </a>
           </Box>
         </Box>

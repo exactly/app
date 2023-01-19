@@ -9,7 +9,7 @@ type Props = {
   onChange: ChangeEventHandler<HTMLInputElement>;
 };
 
-function filterPasteValue(e: any) {
+function filterPasteValue(e: React.ClipboardEvent<HTMLInputElement | HTMLTextAreaElement>) {
   if (e.type === 'paste') {
     const data = e.clipboardData.getData('Text');
     if (/[^\d|.]+/gi.test(data)) e.preventDefault();
@@ -33,7 +33,7 @@ function ModalInfoEditableSlippage({ value, onChange }: Props) {
                 onChange: onChange,
                 name: 'Slippage Tolerance',
                 onKeyDown: (e) => blockedCharacters.includes(e.key) && e.preventDefault(),
-                onPaste: (e) => filterPasteValue(e),
+                onPaste: filterPasteValue,
                 step: 'any',
                 autoFocus: true,
                 style: { textAlign: 'right', padding: 0, height: 'fit-content' },

@@ -1,7 +1,7 @@
 import type { BigNumber } from '@ethersproject/bignumber';
 
 export type Borrow = {
-  id?: string;
+  id: string;
   market: string;
   symbol?: string;
   maturity: number;

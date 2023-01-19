@@ -46,8 +46,9 @@ export const AccountDataProvider: FC<PropsWithChildren> = ({ children }) => {
     try {
       const exactly = await previewer.exactly(account);
       return Object.fromEntries(exactly.map((market) => [market.assetSymbol, market]));
-    } catch (error: any) {
-      if (error?.code !== ErrorCode.CALL_EXCEPTION) captureException(error);
+    } catch (error) {
+      const e = error as { code: ErrorCode };
+      if (e.code !== ErrorCode.CALL_EXCEPTION) captureException(error);
     }
   }, [previewer, walletAddress]);
 
