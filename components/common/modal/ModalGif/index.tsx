@@ -36,7 +36,6 @@ function ModalGif({ tx, tryAgain }: Props) {
     success: {
       img: '/img/icons/successTick.svg',
       title: translations[lang].successTitle,
-      text: translations[lang].successText,
     },
     error: {
       img: '/img/icons/errorTick.svg',
