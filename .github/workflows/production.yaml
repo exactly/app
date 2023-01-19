@@ -19,6 +19,7 @@ jobs:
           node-version: 18
           cache: npm
       - run: npm ci
+      - run: npm run lint
       - run: npm run build
       - run: npx unimported
       - uses: getsentry/action-release@v1

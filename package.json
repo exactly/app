@@ -10,7 +10,7 @@
     "export": "NODE_ENV=production next export",
     "serve": "npx serve out",
     "postinstall": "ts-node -P tsconfig.dev.json scripts/postinstall.ts",
-    "lint": "eslint ."
+    "lint": "eslint --max-warnings=0 ."
   },
   "engines": {
     "node": ">=16"

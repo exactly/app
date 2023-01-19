@@ -18,11 +18,8 @@ module.exports = {
   ],
   rules: {
     eqeqeq: ['error', 'always', { null: 'ignore' }],
-    'no-console': 'warn', // HACK set to error
-    '@typescript-eslint/no-shadow': 'warn', // HACK set to error
+    '@typescript-eslint/no-shadow': 'error',
     'eslint-comments/no-unused-disable': 'error',
-    '@typescript-eslint/no-explicit-any': 'warn', // HACK set to error
-    '@typescript-eslint/no-floating-promises': 'warn', // HACK set to error
     '@typescript-eslint/no-unused-vars': ['error', { ignoreRestSiblings: true }],
   },
   overrides: [
