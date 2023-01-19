@@ -60,11 +60,11 @@ const fixedHeaders = [
   },
   {
     title: 'Best Deposit APR',
-    tooltipTitle: 'The highest fixed interest rate APR for a $1 deposit in all the available Fixed Rated Pools.',
+    tooltipTitle: 'The highest fixed Interest rate for a deposit up to de optimal deposit size.',
   },
   {
     title: 'Best Borrow APR',
-    tooltipTitle: 'The lowest fixed interest rate APR for a $1 borrow in all the available Fixed Rated Pools.',
+    tooltipTitle: 'The lowest fixed Borrowing Interest rate (APR) at current utilization levels.',
   },
 ];
 

@@ -50,13 +50,13 @@ const MaturityPoolInfo: FC<MaturityPoolInfoProps> = ({
       label: translations[lang].bestDepositRate,
       value: toPercentage(bestDepositRate && bestDepositRate > minAPRValue ? bestDepositRate : undefined),
       underLabel: bestDepositMaturity ? parseTimestamp(bestDepositMaturity) : undefined,
-      tooltipTitle: 'The highest fixed interest rate APR for a $1 deposit in all the available Fixed Rated Pools.',
+      tooltipTitle: 'The highest fixed Interest rate for a deposit up to de optimal deposit size.',
     },
     {
       label: translations[lang].bestBorrowRate,
       value: toPercentage(bestBorrowRate && bestBorrowRate > minAPRValue ? bestBorrowRate : undefined),
       underLabel: bestBorrowMaturity ? parseTimestamp(bestBorrowMaturity) : undefined,
-      tooltipTitle: 'The lowest fixed interest rate APR for a $1 borrow in all the available Fixed Rated Pools.',
+      tooltipTitle: 'The lowest fixed Borrowing Interest rate (APR) at current utilization levels.',
     },
   ];
 

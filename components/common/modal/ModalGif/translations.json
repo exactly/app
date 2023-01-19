@@ -5,8 +5,8 @@
     "errorButton": "Try again",
     "successTitle": "Transaction Completed!",
     "successText": "We are good to go!",
-    "loadingTitle": "Please wait",
-    "loadingText": "Waiting for the network to finish the transaction...",
+    "loadingTitle": "Please Wait",
+    "loadingText": "Your transaction is being executed on the blochchain",
     "errorTitle": "There was an error!",
     "errorText": "The transaction failed, please try again"
   },
