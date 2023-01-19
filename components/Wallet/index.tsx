@@ -1,5 +1,5 @@
-import React, { useMemo } from 'react';
-import { useDisconnect, useEnsName } from 'wagmi';
+import React, { useCallback, useMemo } from 'react';
+import { useConnect, useDisconnect, useEnsName } from 'wagmi';
 import { useWeb3 } from 'hooks/useWeb3';
 import { formatWallet } from 'utils/utils';
 
@@ -10,6 +10,7 @@ import CopyToClipboardButton from 'components/common/CopyToClipboardButton';
 import { useWeb3Modal } from '@web3modal/react';
 
 function Wallet() {
+  const { connectors, connect } = useConnect();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const isMenuOpen = Boolean(anchorEl);
 
@@ -23,6 +24,15 @@ function Wallet() {
 
   const formattedWallet = formatWallet(walletAddress);
 
+  const walletConnect = useCallback(() => {
+    if (JSON.parse(process.env.NEXT_PUBLIC_IS_E2E ?? 'false')) {
+      const meta = connectors.find(({ id, ready, name }) => ready && id === 'injected' && name === 'MetaMask');
+      connect({ connector: meta });
+    } else {
+      open({ route: 'ConnectWallet' });
+    }
+  }, [connectors, connect, open]);
+
   const avatarImgSrc = useMemo(() => {
     if (!walletAddress) return '';
     return blockies.create({ seed: walletAddress.toLocaleLowerCase() }).toDataURL();
@@ -30,7 +40,7 @@ function Wallet() {
 
   if (!walletAddress) {
     return (
-      <Button onClick={() => open({ route: 'ConnectWallet' })} variant="contained" data-testid="connect-wallet">
+      <Button onClick={walletConnect} variant="contained" data-testid="connect-wallet">
         Connect wallet
       </Button>
     );

@@ -1,18 +1,10 @@
-import { mintDAI } from '../../utils/tenderly';
+import { connectMetamask, setupFork } from '../steps/setup';
 
 describe('Test Connect Wallet', () => {
-  let userAddress: string | undefined;
+  const { visit, userAddress } = setupFork();
 
-  before(() => {
-    cy.getMetamaskWalletAddress().then((address) => (userAddress = address));
-    cy.visit('/', {
-      onBeforeLoad: function (window) {
-        window.localStorage.setItem('tos', 'true');
-      },
-    });
-
-    mintDAI('0x8967782Fb0917bab83F13Bd17db3b41C700b368D', 9999);
-    cy.wait(999999);
+  before('Visit web page', () => {
+    visit('/');
   });
 
   after(() => {
@@ -20,13 +12,11 @@ describe('Test Connect Wallet', () => {
   });
 
   it('Connects with Metamask', () => {
-    cy.getByTestId('connect-wallet').click();
-    cy.get('w3m-modal').shadow().find('[name="MetaMask"]', { includeShadowDom: true }).click();
-    cy.acceptMetamaskAccess();
+    connectMetamask();
 
     cy.getByTestId('user-address')
       .should('be.visible')
-      .and('contain', userAddress?.substring(0, 6))
-      .and('contain', userAddress?.substring(38));
+      .and('contain', userAddress()?.substring(0, 6))
+      .and('contain', userAddress()?.substring(38));
   });
 });

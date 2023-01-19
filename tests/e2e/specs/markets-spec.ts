@@ -1,18 +1,16 @@
-import { mintDAI } from '../../utils/tenderly';
+import { deposit } from '../steps/actions';
+import { connectMetamask, setupFork } from '../steps/setup';
 
 describe('Markets', () => {
-  before(() => {
-    cy.visit('/', {
-      onBeforeLoad: function (window) {
-        window.localStorage.setItem('tos', 'true');
-      },
-    });
-    cy.get('[data-test-id=connect-wallet]').click();
-    cy.get('w3m-modal').shadow().find('[name="MetaMask"]', { includeShadowDom: true }).click();
-    cy.acceptMetamaskAccess();
+  const { visit, setUserBalance } = setupFork();
 
-    mintDAI('0x8967782Fb0917bab83F13Bd17db3b41C700b368D', 9999);
-    cy.wait(999999);
+  before(() => {
+    visit('/');
+    connectMetamask();
+  });
+
+  before('Set user balance', async () => {
+    await setUserBalance();
   });
 
   after(() => {
@@ -20,44 +18,26 @@ describe('Markets', () => {
   });
 
   it('Floating Deposit WETH', () => {
-    expectFloatingDepositSuccess('WETH');
+    floatingDepositSuccess('WETH');
   });
 
   it('Floating Deposit DAI', () => {
-    expectFloatingDepositSuccess('DAI');
+    floatingDepositSuccess('DAI');
   });
 
   it('Floating Deposit USDC', () => {
-    expectFloatingDepositSuccess('USDC');
+    floatingDepositSuccess('USDC');
   });
 
   it('Floating Deposit WBTC', () => {
-    expectFloatingDepositSuccess('WBTC');
+    floatingDepositSuccess('WBTC');
   });
 
   it('Floating Deposit wstETH', () => {
-    expectFloatingDepositSuccess('wstETH');
+    floatingDepositSuccess('wstETH');
   });
 });
 
-const expectFloatingDepositSuccess = (symbol: string) => {
-  cy.getByTestId(`floating-deposit-${symbol}`).click();
-  cy.getByTestId(`modal-input`).type('10');
-
-  cy.waitUntil(
-    () => cy.getByTestId('modal-submit', { timeout: 15000 }).then(($btn) => $btn.attr('disabled') !== 'disabled'),
-    { timeout: 15000, interval: 1000 },
-  );
-  cy.getByTestId('modal').then(($modal) => {
-    if ($modal.find('[data-testid=modal-approve]').length) {
-      cy.getByTestId('modal-approve', { timeout: 15000 }).click();
-      cy.confirmMetamaskPermissionToSpend();
-    }
-  });
-
-  cy.getByTestId('modal-submit', { timeout: 15000 }).click();
-  cy.confirmMetamaskTransaction();
-
-  cy.contains('Transaction Completed!').should('be.visible');
-  cy.getByTestId('modal-close').click();
+const floatingDepositSuccess = (symbol: string) => {
+  deposit({ type: 'floating', symbol, amount: 10 });
 };
