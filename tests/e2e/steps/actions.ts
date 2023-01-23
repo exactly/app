@@ -2,7 +2,7 @@ type Params = {
   type: 'floating' | 'fixed';
   action: string;
   symbol: string;
-  amount: number;
+  amount: string;
 };
 
 export const executeOperation = ({ type, action, symbol, amount }: Params) => {

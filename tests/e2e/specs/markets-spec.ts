@@ -39,5 +39,5 @@ describe('Markets', () => {
 });
 
 const floatingDepositSuccess = (symbol: string) => {
-  deposit({ type: 'floating', symbol, amount: 10 });
+  deposit({ type: 'floating', symbol, amount: '10' });
 };

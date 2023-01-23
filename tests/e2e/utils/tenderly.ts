@@ -9,6 +9,10 @@ import wstETH from '@exactly-protocol/protocol/deployments/mainnet/wstETH.json';
 
 const { TENDERLY_USER, TENDERLY_PROJECT, TENDERLY_ACCESS_KEY } = Cypress.env();
 
+if (!TENDERLY_USER || !TENDERLY_PROJECT || !TENDERLY_ACCESS_KEY) {
+  throw new Error('Tenderly environment variables not set');
+}
+
 const FORK_URL = `https://api.tenderly.co/api/v1/account/${TENDERLY_USER}/project/${TENDERLY_PROJECT}/fork`;
 
 const HEADERS = {

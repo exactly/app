@@ -21,7 +21,9 @@ export const supportedChains = [
 export const defaultChain = { mainnet, goerli }[process.env.NEXT_PUBLIC_NETWORK ?? 'mainnet'];
 
 const { chains, provider } = configureChains(supportedChains, [
-  ...(rpcURL ? [jsonRpcProvider({ rpc: () => ({ http: rpcURL }) })] : []),
+  ...(JSON.parse(process.env.NEXT_PUBLIC_IS_E2E ?? 'false') && rpcURL
+    ? [jsonRpcProvider({ rpc: () => ({ http: rpcURL }) })]
+    : []),
   publicProvider(),
   walletConnectProvider({ projectId: walletConnectId }),
 ]);
