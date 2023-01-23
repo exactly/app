@@ -11,25 +11,26 @@ export type ItemInfoProps = {
   underLabel?: string;
   statusColot?: string;
   tooltipTitle?: string;
+  xs?: number;
 };
 
-const ItemInfo: FC<ItemInfoProps> = ({ label, value, underLabel, tooltipTitle }) => {
+const ItemInfo: FC<ItemInfoProps> = ({ label, value, underLabel, tooltipTitle, xs }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   return (
-    <Grid item xs={isMobile ? 6 : 0}>
+    <Grid item xs={isMobile ? 6 : xs ? xs : 0}>
       <Tooltip title={tooltipTitle} arrow placement="top">
-        <Typography variant="subtitle2" sx={{ color: 'grey.500' }}>
-          {label}
+        <Typography variant="subtitle1" fontSize="10px" color="grey.500">
+          {label.toUpperCase()}
         </Typography>
       </Tooltip>
-      <Typography variant="h2" component="p">
+      <Typography variant="h5" fontWeight={700} component="p">
         {(!!value && value) || <Skeleton height={50} />}
       </Typography>
       {!!underLabel && (
-        <Typography variant="subtitle2" sx={{ color: 'grey.500' }}>
-          {underLabel}
+        <Typography variant="subtitle1" fontSize="10px" color="grey.500">
+          {underLabel.toUpperCase()}
         </Typography>
       )}
     </Grid>

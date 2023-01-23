@@ -77,7 +77,6 @@ const AssetMaturityPools: FC<Props> = ({ symbol }) => {
     <Grid
       container
       width={'100%'}
-      my={2}
       boxShadow="0px 4px 12px rgba(175, 177, 182, 0.2)"
       borderRadius="0px 0px 6px 6px"
       bgcolor="white"
@@ -93,7 +92,7 @@ const AssetMaturityPools: FC<Props> = ({ symbol }) => {
           bestDepositMaturity={bestDeposit && Number(bestDeposit.maturity)}
         />
       </Grid>
-      <Grid item xs={12} px="24px" pb="24px" bgcolor="white" display={onlyDesktop}>
+      <Grid item xs={12} px="24px" pb="24px" bgcolor="white" mt={-1} display={onlyDesktop}>
         <MaturityPoolsTable APRsPerMaturity={APRsPerMaturity} symbol={symbol} />
       </Grid>
       <Box display={onlyMobile} px="24px" pt={1} width="100%">
