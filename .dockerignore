@@ -1,12 +1,6 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+node_modules
 
-# dependencies
 /node_modules
-/.pnp
-.pnp.js
-
-# testing
-/coverage
 
 # next.js
 /.next/
@@ -14,10 +8,6 @@
 
 # production
 /build
-
-# protocol
-/abi/
-/types/contracts/
 
 # misc
 .vscode/
@@ -38,10 +28,10 @@ yarn-error.log*
 # vercel
 .vercel
 
-# Sentry
-.sentryclirc
-
 # cypress
 /tests/e2e/videos
 /tests/e2e/videos-ci
 /tests/e2e/screenshots
+
+Dockerfile
+docker-compose.ci.yml
