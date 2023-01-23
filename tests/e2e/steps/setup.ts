@@ -36,7 +36,7 @@ export const setupFork = ({ chainId = '1' }: ForkParams = {}) => {
 
   return {
     visit: (url: string) => {
-      cy.visit(url, {
+      return cy.visit(url, {
         onBeforeLoad: function (window) {
           window.localStorage.setItem('tos', 'true');
           window.rpcURL = rpcURL(forkId);
