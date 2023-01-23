@@ -1,4 +1,4 @@
-import { Box, Button } from '@mui/material';
+import { Box, Button, Typography, useTheme } from '@mui/material';
 import React, { FC, useState } from 'react';
 
 type Props = {
@@ -12,6 +12,7 @@ type ButtonChart = {
 };
 
 const ButtonsChart: FC<Props> = ({ buttons, defaultSelected }) => {
+  const theme = useTheme();
   const [selected, setSelected] = useState<number>(defaultSelected || 0);
 
   const handleClick = (index: number) => {
@@ -21,26 +22,20 @@ const ButtonsChart: FC<Props> = ({ buttons, defaultSelected }) => {
   };
 
   return (
-    <Box display="flex">
+    <Box display="flex" border={`1px ${theme.palette.grey[300]} solid`} borderRadius="16px">
       {buttons.map(({ label }, i) => (
         <Button
           key={`button_chart_${label}_${i}`}
           onClick={() => handleClick(i)}
-          variant={i === selected ? 'contained' : 'outlined'}
+          variant={i === selected ? 'contained' : 'text'}
           sx={{
-            height: '32px',
-            borderRadius: 0,
-            '&:nth-of-type(1)': {
-              borderTopLeftRadius: 6,
-              borderBottomLeftRadius: 6,
-            },
-            '&:nth-last-of-type(1)': {
-              borderTopRightRadius: 6,
-              borderBottomRightRadius: 6,
-            },
+            height: '24px',
+            minWidth: '35px',
+            px: '0',
+            color: i === selected ? 'white' : 'figma.grey.600',
           }}
         >
-          {label}
+          <Typography variant="subtitle2">{label}</Typography>
         </Button>
       ))}
     </Box>

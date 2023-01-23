@@ -64,8 +64,10 @@ export default function useHistoricalRates(symbol: string, initialCount = 30, in
   );
 
   useEffect(() => {
-    void getRates(initialCount, initialInterval);
-  }, [getRates, initialCount, initialInterval]);
+    if (!rates.length) {
+      void getRates(initialCount, initialInterval);
+    }
+  }, [getRates, initialCount, initialInterval, rates]);
 
   return { loading, rates, getRates };
 }
