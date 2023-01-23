@@ -34,7 +34,7 @@ const AssetFloatingPool: FC<AssetFloatingPoolProps> = ({ symbol, eMarketAddress 
         p="16px"
         display={onlyDesktop} // TODO: are we going to have it on mobile?
         width={610}
-        height={350}
+        height={280}
       >
         <HistoricalRateChart symbol={symbol} />
       </Box>
