@@ -55,7 +55,7 @@ const ExplorerMenu: FC<Props> = ({ symbol, assetAddress, eMarketAddress, rateMod
           aria-expanded={open ? 'true' : undefined}
           onClick={handleClick}
         >
-          <OpenInNewIcon sx={{ alignSelf: 'center', height: '1.1rem', width: '1.1rem', color: 'black' }} />
+          <OpenInNewIcon sx={{ alignSelf: 'center', height: '1rem', width: '1rem', color: 'grey.700' }} />
         </IconButton>
       </Tooltip>
       <Menu
@@ -75,8 +75,8 @@ const ExplorerMenu: FC<Props> = ({ symbol, assetAddress, eMarketAddress, rateMod
         }}
       >
         <Box px={2} py={1}>
-          <Typography variant="subtitle1" sx={{ color: 'figma.grey.300' }}>
-            View in etherscan
+          <Typography variant="subtitle1" fontSize="12px" color="figma.grey.300">
+            VIEW IN ETHERSCAN
           </Typography>
         </Box>
         <MenuItem>

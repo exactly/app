@@ -11,7 +11,6 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { Box, IconButton, Tooltip, Typography, Grid } from '@mui/material';
 import analytics from 'utils/analytics';
 import useAccountData from 'hooks/useAccountData';
-import HistoricalRateChart from 'components/charts/HistoricalRateChart';
 
 type Props = {
   symbol: string;
@@ -37,19 +36,14 @@ const Market: NextPage<Props> = ({ symbol }: Props) => {
           </Typography>
         </Box>
         <AssetHeaderInfo symbol={symbol} />
-        <Grid container mt={3}>
-          <Grid item container>
+        <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} my="16px" gap="16px">
+          <Box maxWidth={{ xs: '100%', sm: '610px' }}>
             <AssetFloatingPool symbol={symbol} eMarketAddress={market} />
-          </Grid>
-          <Grid item container>
-            <Box width={1250} height={500} my={2}>
-              <HistoricalRateChart symbol={symbol} />
-            </Box>
-          </Grid>
-          <Grid item container>
+          </Box>
+          <Box maxWidth={{ xs: '100%', sm: '610px' }}>
             <AssetMaturityPools symbol={symbol} />
-          </Grid>
-        </Grid>
+          </Box>
+        </Box>
       </Grid>
     </>
   );

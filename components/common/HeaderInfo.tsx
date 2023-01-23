@@ -24,9 +24,10 @@ type HeaderInfoProps = {
     | 'overline'
     | undefined;
   shadow?: boolean;
+  xs?: number;
 };
 
-const HeaderInfo: FC<HeaderInfoProps> = ({ title, itemsInfo, variant = 'h6', shadow = true }) => {
+const HeaderInfo: FC<HeaderInfoProps> = ({ title, itemsInfo, variant = 'h6', shadow = true, xs }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -39,7 +40,7 @@ const HeaderInfo: FC<HeaderInfoProps> = ({ title, itemsInfo, variant = 'h6', sha
       <Grid item mb="20px">
         <Typography variant={variant}>{title}</Typography>
       </Grid>
-      <Grid item container spacing={isMobile ? 2 : 4}>
+      <Grid item container spacing={isMobile ? 2 : xs ? 1 : 4}>
         {itemsInfo.map(({ label, value, underLabel, tooltipTitle }) => (
           <ItemInfo
             key={label.trim()}
@@ -47,6 +48,7 @@ const HeaderInfo: FC<HeaderInfoProps> = ({ title, itemsInfo, variant = 'h6', sha
             value={value}
             underLabel={underLabel}
             tooltipTitle={tooltipTitle}
+            xs={xs}
           />
         ))}
       </Grid>
