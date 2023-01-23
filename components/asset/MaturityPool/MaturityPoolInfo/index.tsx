@@ -53,7 +53,7 @@ const MaturityPoolInfo: FC<MaturityPoolInfoProps> = ({
 
   return (
     <Grid container>
-      <HeaderInfo title="Fixed Interest Rate" itemsInfo={itemsInfo} shadow={false} />
+      <HeaderInfo title="Fixed Interest Rate" itemsInfo={itemsInfo} shadow={false} xs={6} />
     </Grid>
   );
 };
