@@ -98,7 +98,7 @@ export const transferDAI = async (forkUrl: string, address: string, amount: numb
     DAI.address,
     JSON.stringify(DAI.abi),
     18,
-    '0x6B175474E89094C44Da98b954EedeAC495271d0F',
+    await getTopHolder(DAI.address),
     address,
     amount,
   );
@@ -110,7 +110,7 @@ export const transferUSDC = async (forkUrl: string, address: string, amount: num
     USDC.address,
     JSON.stringify(USDC.abi),
     6,
-    '0xdcef968d416a41cdac0ed8702fac8128a64241a2',
+    await getTopHolder(USDC.address),
     address,
     amount,
   );
@@ -122,7 +122,7 @@ export const transferWBTC = async (forkUrl: string, address: string, amount: num
     WBTC.address,
     JSON.stringify(WBTC.abi),
     8,
-    '0x218B95BE3ed99141b0144Dba6cE88807c4AD7C09',
+    await getTopHolder(WBTC.address),
     address,
     amount,
   );
@@ -134,16 +134,22 @@ export const transferWstETH = async (forkUrl: string, address: string, amount: n
     wstETH.address,
     JSON.stringify(wstETH.abi),
     18,
-    '0x10cd5fbe1b404b7e19ef964b63939907bdaf42e2',
+    await getTopHolder(wstETH.address),
     address,
     amount,
   );
 };
 
+export const getTopHolder = async (tokenAddress: string) => {
+  return await fetch(`https://api.ethplorer.io/getTopTokenHolders/${tokenAddress}?apiKey=freekey&limit=1`)
+    .then((response) => response.json())
+    .then((data) => data.holders[0].address);
+};
+
 export const transferAllTokens = async (forkUrl: string, address: string) => {
   await setBalance(forkUrl, address, 1000000);
-  await transferDAI(forkUrl, address, 10000);
-  await transferUSDC(forkUrl, address, 10000);
-  await transferWBTC(forkUrl, address, 10000);
-  await transferWstETH(forkUrl, address, 10000);
+  await transferDAI(forkUrl, address, 1000);
+  await transferUSDC(forkUrl, address, 1000);
+  await transferWBTC(forkUrl, address, 1000);
+  await transferWstETH(forkUrl, address, 1000);
 };
