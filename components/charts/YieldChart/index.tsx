@@ -89,10 +89,12 @@ const YieldChart: FC<Props> = () => {
               type="number"
               stroke="#8f8c9c"
               tickMargin={16}
+              interval={0}
               tickFormatter={(t) => formatXAxis(t)}
-              domain={['dataMin', 'dataMax']}
+              domain={[(dataMin: number) => dataMin - 3600 * 24 * 2, (dataMax: number) => dataMax + 3600 * 24 * 2]}
               scale="time"
               tick={{ fill: palette.grey[500], fontWeight: 500, fontSize: 12 }}
+              allowDataOverflow
             />
             <Tooltip
               formatter={(value) => toPercentage(value as number)}
