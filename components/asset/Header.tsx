@@ -12,6 +12,7 @@ import { useWeb3 } from 'hooks/useWeb3';
 import networkData from 'config/networkData.json' assert { type: 'json' };
 import useAccountData from 'hooks/useAccountData';
 import ExplorerMenu from './ExplorerMenu';
+import { Box } from '@mui/material';
 
 type Props = {
   symbol: string;
@@ -90,20 +91,22 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
   const etherscan = networkData[String(chain?.id) as keyof typeof networkData]?.etherscan;
   return (
     <Grid sx={{ bgcolor: 'white' }} width="100%" p="24px" boxShadow="0px 4px 12px rgba(175, 177, 182, 0.2)">
-      <Grid item container mb={2.5}>
+      <Grid item container mb="24px">
         <Image
           src={`/img/assets/${symbol}.svg`}
           alt={symbol}
-          width={29}
-          height={29}
+          width={30}
+          height={30}
           style={{
             maxWidth: '100%',
             height: 'auto',
           }}
         />
-        <Typography variant="h2" ml={1}>
+        <Typography variant="h1" ml={1}>
           {formatSymbol(symbol)}
-          {etherscan && (
+        </Typography>
+        {etherscan && (
+          <Box mt="12px">
             <ExplorerMenu
               symbol={symbol}
               assetAddress={assetAddress}
@@ -111,8 +114,8 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
               rateModelAddress={rateModelAddress?.id}
               exaToken={accountData && accountData[symbol].symbol}
             />
-          )}
-        </Typography>
+          </Box>
+        )}
       </Grid>
       <Grid item container spacing={4}>
         {itemsInfo.map(({ label, value, underLabel, tooltipTitle }) => (

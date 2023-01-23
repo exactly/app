@@ -80,6 +80,7 @@ const theme = createTheme({
     figma: {
       grey: {
         '300': '#94979E',
+        '700': '#6F737B',
       },
     },
 
