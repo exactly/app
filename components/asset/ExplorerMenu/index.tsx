@@ -55,7 +55,7 @@ const ExplorerMenu: FC<Props> = ({ symbol, assetAddress, eMarketAddress, rateMod
           aria-expanded={open ? 'true' : undefined}
           onClick={handleClick}
         >
-          <OpenInNewIcon sx={{ alignSelf: 'center', height: '1rem', width: '1rem', color: 'grey.700' }} />
+          <OpenInNewIcon sx={{ alignSelf: 'center', height: '1rem', width: '1rem', color: 'figma.grey.700' }} />
         </IconButton>
       </Tooltip>
       <Menu

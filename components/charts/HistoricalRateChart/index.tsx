@@ -1,7 +1,7 @@
 import { Box, Typography } from '@mui/material';
 import useHistoricalRates from 'hooks/useHistoricalRates';
 import React, { FC, useCallback, useMemo } from 'react';
-import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis } from 'recharts';
 import ButtonsChart from '../ButtonsChart';
 import LoadingChart from '../LoadingChart';
 
@@ -30,14 +30,16 @@ const HistoricalRateChart: FC<Props> = ({ symbol }) => {
     [getRates],
   );
 
-  const formatDate = useCallback((date: Date) => {
-    return date.toLocaleDateString('en-us', { year: 'numeric', month: 'short', day: '2-digit' });
+  const formatDate = useCallback((date: Date, year?: boolean) => {
+    return date.toLocaleDateString('en-us', { year: year ? 'numeric' : undefined, month: 'short', day: '2-digit' });
   }, []);
 
   return (
     <Box display="flex" flexDirection="column" width="100%" height="100%" gap={2}>
-      <Box display="flex" justifyContent="space-between" mx={3}>
-        <Typography variant="h6">Historical Rates</Typography>
+      <Box display="flex" justifyContent="space-between">
+        <Typography variant="h6" fontSize="16px">
+          Historical rates
+        </Typography>
         <Box>
           <ButtonsChart buttons={buttons} />
         </Box>
@@ -46,15 +48,17 @@ const HistoricalRateChart: FC<Props> = ({ symbol }) => {
         {loading ? (
           <LoadingChart />
         ) : (
-          <LineChart data={rates} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" />
+          <LineChart data={rates} margin={{ top: 5, bottom: 5 }}>
+            <CartesianGrid horizontal vertical={false} stroke="#EDF0F2" />
             <XAxis
               minTickGap={50}
               padding={{ left: 20, right: 50 }}
               dataKey="date"
               tickFormatter={(value) => (value instanceof Date ? formatDate(value as Date) : '')}
+              stroke="#B4BABF"
+              fontSize="12px"
             />
-            <YAxis
+            {/* <YAxis
               label={{ value: 'APR', angle: -90, position: 'left' }}
               yAxisId="left"
               padding={{ top: 5, bottom: 5 }}
@@ -66,12 +70,12 @@ const HistoricalRateChart: FC<Props> = ({ symbol }) => {
               orientation="right"
               padding={{ top: 5, bottom: 5 }}
               tickFormatter={(value) => `${((value as number) * 100).toFixed(2)}%`}
-            />
+            /> */}
             <Tooltip
-              labelFormatter={(value) => (value instanceof Date ? formatDate(value as Date) : '')}
+              labelFormatter={(value) => (value instanceof Date ? formatDate(value as Date, true) : '')}
               formatter={(value, name) => [`${((value as number) * 100).toFixed(2)}%`, name]}
             />
-            <Legend />
+            {/* <Legend /> */}
             <Line
               yAxisId="left"
               type="monotone"
@@ -90,7 +94,7 @@ const HistoricalRateChart: FC<Props> = ({ symbol }) => {
               dot={false}
               strokeWidth={2}
             />
-            <Line
+            {/* <Line
               yAxisId="right"
               type="monotone"
               dataKey="utilization"
@@ -98,7 +102,7 @@ const HistoricalRateChart: FC<Props> = ({ symbol }) => {
               stroke="black"
               dot={false}
               strokeDasharray="5 5"
-            />
+            /> */}
           </LineChart>
         )}
       </ResponsiveContainer>
