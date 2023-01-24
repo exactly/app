@@ -110,7 +110,7 @@ const AssetMaturityPools: FC<Props> = ({ symbol }) => {
         width={610}
         height={280}
       >
-        <YieldChart />
+        <YieldChart symbol={symbol} />
       </Box>
     </Box>
   );
