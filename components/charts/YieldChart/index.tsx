@@ -12,14 +12,6 @@ import ButtonsChart from '../ButtonsChart';
 import LoadingChart from '../LoadingChart';
 import TooltipChart from '../TooltipChart';
 
-type Props = {
-  symbol?: string;
-};
-
-// const getRandomColor = () => {
-//   return '#' + ((Math.random() * 0xffffff) << 0).toString(16).padStart(6, '0');
-// };
-
 const getReferenceLines = () => {
   const data = [];
   let now = new Date().getTime() / 1000;
@@ -51,8 +43,12 @@ const referenceLabel = (t: number) => {
   return dayjs(t * 1000).fromNow(true);
 };
 
-const YieldChart: FC<Props> = () => {
-  const { depositsRates, borrowsRates, loading } = useYieldRates();
+type Props = {
+  symbol?: string;
+};
+
+const YieldChart: FC<Props> = ({ symbol }) => {
+  const { depositsRates, borrowsRates, loading } = useYieldRates(symbol);
   const [operation, setOperation] = useState<'Deposits' | 'Borrows'>('Deposits');
   const assets = useAssets();
   const { palette, typography } = useTheme();
@@ -119,7 +115,7 @@ const YieldChart: FC<Props> = () => {
             ))}
             {getReferenceLines().map((reference) => (
               <ReferenceLine
-                alwaysShow
+                ifOverflow="extendDomain"
                 key={reference}
                 x={reference}
                 label={{ value: referenceLabel(reference), fontSize: 14, fontFamily: typography.fontFamilyMonospaced }}
