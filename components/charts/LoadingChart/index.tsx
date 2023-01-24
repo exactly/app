@@ -6,7 +6,7 @@ function LoadingChart() {
     <Box display="flex" width="100%" height="100%">
       <Box display="flex" flexDirection="column" justifyContent="center" m="auto" gap={1}>
         <CircularProgress sx={{ color: 'grey.500', mx: 'auto' }} size={24} thickness={4} />
-        <Typography color="grey.500" variant="h6" fontSize="16px">
+        <Typography color="grey.500" variant="subtitle2" fontSize="16px">
           Loading data...
         </Typography>
       </Box>

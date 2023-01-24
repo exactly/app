@@ -31,7 +31,7 @@ const ButtonsChart: FC<Props> = ({ buttons, defaultSelected }) => {
           sx={{
             height: '24px',
             minWidth: '35px',
-            px: '0',
+            px: '10px',
             color: i === selected ? 'white' : 'figma.grey.600',
           }}
         >
