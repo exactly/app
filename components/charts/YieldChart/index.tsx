@@ -10,6 +10,7 @@ import parseTimestamp from 'utils/parseTimestamp';
 import { toPercentage } from 'utils/utils';
 import ButtonsChart from '../ButtonsChart';
 import LoadingChart from '../LoadingChart';
+import TooltipChart from '../TooltipChart';
 
 type Props = {
   symbol?: string;
@@ -33,7 +34,7 @@ const getReferenceLines = () => {
 };
 
 const formatXAxis = (tick: number) => {
-  return parseTimestamp(tick);
+  return parseTimestamp(tick, 'MMM DD');
 };
 
 const referenceLabel = (t: number) => {
@@ -54,16 +55,16 @@ const YieldChart: FC<Props> = () => {
   const { depositsRates, borrowsRates, loading } = useYieldRates();
   const [operation, setOperation] = useState<'Deposits' | 'Borrows'>('Deposits');
   const assets = useAssets();
-  const { palette } = useTheme();
+  const { palette, typography } = useTheme();
 
   const buttons = useMemo(
     () => [
       {
-        label: 'Deposits',
+        label: 'DEPOSITS',
         onClick: () => setOperation('Deposits'),
       },
       {
-        label: 'Borrows',
+        label: 'BORROWS',
         onClick: () => setOperation('Borrows'),
       },
     ],
@@ -73,7 +74,9 @@ const YieldChart: FC<Props> = () => {
   return (
     <Box display="flex" flexDirection="column" width="100%" height="100%" gap={2}>
       <Box display="flex" justifyContent="space-between">
-        <Typography variant="h6">Yield Curve</Typography>
+        <Typography variant="h6" fontSize="16px">
+          Yield curve
+        </Typography>
         <Box>
           <ButtonsChart buttons={buttons} />
         </Box>
@@ -90,17 +93,18 @@ const YieldChart: FC<Props> = () => {
               stroke="#8f8c9c"
               tickMargin={16}
               interval={0}
+              padding={{ left: 20, right: 20 }}
               tickFormatter={(t) => formatXAxis(t)}
               domain={[(dataMin: number) => dataMin - 3600 * 24 * 2, (dataMax: number) => dataMax + 3600 * 24 * 2]}
               scale="time"
               tick={{ fill: palette.grey[500], fontWeight: 500, fontSize: 12 }}
               allowDataOverflow
+              fontSize="12px"
             />
             <Tooltip
               formatter={(value) => toPercentage(value as number)}
-              labelFormatter={(value) => {
-                return `${parseTimestamp(value)}`;
-              }}
+              labelFormatter={(value) => `${parseTimestamp(value)}`}
+              content={<TooltipChart />}
             />
             <CartesianGrid stroke={palette.grey[300]} vertical={false} />
             {assets.map((asset) => (
@@ -114,7 +118,12 @@ const YieldChart: FC<Props> = () => {
               />
             ))}
             {getReferenceLines().map((reference) => (
-              <ReferenceLine key={reference} x={reference} label={referenceLabel(reference)} />
+              <ReferenceLine
+                alwaysShow
+                key={reference}
+                x={reference}
+                label={{ value: referenceLabel(reference), fontSize: 14, fontFamily: typography.fontFamilyMonospaced }}
+              />
             ))}
           </AreaChart>
         )}

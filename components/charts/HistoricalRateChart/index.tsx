@@ -1,15 +1,18 @@
-import { Box, Typography } from '@mui/material';
+import { Box, Typography, useTheme } from '@mui/material';
 import useHistoricalRates from 'hooks/useHistoricalRates';
 import React, { FC, useCallback, useMemo } from 'react';
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis } from 'recharts';
+import { toPercentage } from 'utils/utils';
 import ButtonsChart from '../ButtonsChart';
 import LoadingChart from '../LoadingChart';
+import TooltipChart from '../TooltipChart';
 
 type Props = {
   symbol: string;
 };
 
 const HistoricalRateChart: FC<Props> = ({ symbol }) => {
+  const { palette } = useTheme();
   const { loading, rates, getRates } = useHistoricalRates(symbol);
 
   const buttons = useMemo(
@@ -49,10 +52,10 @@ const HistoricalRateChart: FC<Props> = ({ symbol }) => {
           <LoadingChart />
         ) : (
           <LineChart data={rates} margin={{ top: 5, bottom: 5 }}>
-            <CartesianGrid horizontal vertical={false} stroke="#EDF0F2" />
+            <CartesianGrid horizontal vertical={false} stroke={palette.grey[300]} />
             <XAxis
               minTickGap={50}
-              padding={{ left: 20, right: 50 }}
+              padding={{ left: 20, right: 30 }}
               dataKey="date"
               tickFormatter={(value) => (value instanceof Date ? formatDate(value as Date) : '')}
               stroke="#B4BABF"
@@ -73,7 +76,8 @@ const HistoricalRateChart: FC<Props> = ({ symbol }) => {
             /> */}
             <Tooltip
               labelFormatter={(value) => (value instanceof Date ? formatDate(value as Date, true) : '')}
-              formatter={(value, name) => [`${((value as number) * 100).toFixed(2)}%`, name]}
+              formatter={(value) => toPercentage(value as number)}
+              content={<TooltipChart />}
             />
             {/* <Legend /> */}
             <Line
@@ -81,7 +85,7 @@ const HistoricalRateChart: FC<Props> = ({ symbol }) => {
               type="monotone"
               dataKey="depositApr"
               name="Deposit APR"
-              stroke="#8884d8"
+              stroke="#000000"
               dot={false}
               strokeWidth={2}
             />
@@ -90,7 +94,7 @@ const HistoricalRateChart: FC<Props> = ({ symbol }) => {
               type="monotone"
               dataKey="borrowApr"
               name="Borrow APR"
-              stroke="#82ca9d"
+              stroke="#34B253"
               dot={false}
               strokeWidth={2}
             />
