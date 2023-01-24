@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  preview:
+  check:
     runs-on: ubuntu-latest
     environment: Preview
     env:
@@ -21,7 +21,13 @@ jobs:
       - run: npm run lint
       - run: npm run build
       - run: npx unimported
-      # e2e
+
+  e2e:
+    runs-on: ubuntu-latest
+    environment: Preview
+    needs: check
+    steps:
+      - uses: actions/checkout@v3
       - uses: docker/setup-qemu-action@v2
       - uses: docker/setup-buildx-action@v2
       - uses: actions/cache@v3
@@ -33,6 +39,8 @@ jobs:
       - run: |
           docker-compose -f docker-compose.ci.yml up --build --exit-code-from synpress
         env:
+          COMPOSE_DOCKER_CLI_BUILD: 1
+          DOCKER_BUILDKIT: 1
           DOCKER_DEFAULT_PLATFORM: linux/amd64
           CYPRESS_TENDERLY_ACCESS_KEY: ${{ secrets.TENDERLY_ACCESS_KEY }}
           CYPRESS_TENDERLY_PROJECT: exactly
