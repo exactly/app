@@ -6,7 +6,7 @@ type YieldRates = {
   [key: string]: number;
 };
 
-export default function useYieldRates() {
+export default function useYieldRates(symbol?: string) {
   const { accountData } = useContext(AccountDataContext);
   const [loading, setLoading] = useState<boolean>(true);
   const [depositsRates, setDepositsRates] = useState<YieldRates[]>([]);
@@ -19,9 +19,7 @@ export default function useYieldRates() {
     const depositRates: YieldRates[] = [];
     const borrowRates: YieldRates[] = [];
 
-    Object.values(accountData).forEach((market) => {
-      const { fixedPools, assetSymbol } = market;
-
+    Object.values(accountData).forEach(({ fixedPools, assetSymbol }) => {
       Object.values(
         fixedPools.map(({ maturity, depositRate, minBorrowRate }) => {
           const depositIndex = depositRates.findIndex((deposit) => deposit.maturity === maturity.toNumber());
@@ -46,11 +44,26 @@ export default function useYieldRates() {
       );
     });
 
-    setDepositsRates(depositRates);
+    const assetsWithPositiveRates = [
+      ...new Set(
+        depositRates.flatMap((yieldRate) => [symbol, ...Object.keys(yieldRate).filter((key) => yieldRate[key] > 0)]),
+      ),
+    ];
+
+    const positiveDepositRates = depositRates.map((deposit) =>
+      Object.keys(deposit)
+        .filter((key) => assetsWithPositiveRates.includes(key))
+        .reduce((obj, key) => {
+          obj[key] = deposit[key];
+          return obj;
+        }, {} as YieldRates),
+    );
+
+    setDepositsRates(positiveDepositRates);
     setBorrowsRates(borrowRates);
 
     setLoading(false);
-  }, [accountData]);
+  }, [accountData, symbol]);
 
   useEffect(() => {
     void getYields();
