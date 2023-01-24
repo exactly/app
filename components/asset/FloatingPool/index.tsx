@@ -14,7 +14,7 @@ type AssetFloatingPoolProps = {
 };
 
 const AssetFloatingPool: FC<AssetFloatingPoolProps> = ({ symbol }) => {
-  const { market, floatingUtilization, floatingBorrowRate, interestRateModel } = useAccountData(symbol);
+  const { market, floatingUtilization, interestRateModel } = useAccountData(symbol);
   return (
     <Box display="flex" flexDirection="column" gap="8px">
       <Grid
@@ -48,12 +48,7 @@ const AssetFloatingPool: FC<AssetFloatingPoolProps> = ({ symbol }) => {
         width={610}
         height={280}
       >
-        <UtilizationRateChart
-          type="floating"
-          current={[floatingUtilization, floatingBorrowRate]}
-          interestRateModel={interestRateModel}
-        />
-        <HistoricalRateChart symbol={symbol} />
+        <UtilizationRateChart type="floating" current={floatingUtilization} interestRateModel={interestRateModel} />
       </Box>
     </Box>
   );
