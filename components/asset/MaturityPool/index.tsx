@@ -12,6 +12,7 @@ import { Box } from '@mui/material';
 import { globals } from 'styles/theme';
 import { APRsPerMaturityType } from 'hooks/useMaturityPools';
 import MaturityPoolsMobile from './MaturityPoolsMobile';
+import YieldChart from 'components/charts/YieldChart';
 
 const { onlyMobile, onlyDesktop } = globals;
 
@@ -74,31 +75,44 @@ const AssetMaturityPools: FC<Props> = ({ symbol }) => {
   useEffect(() => void getMaturitiesData(), [getMaturitiesData]);
 
   return (
-    <Grid
-      container
-      width={'100%'}
-      boxShadow="0px 4px 12px rgba(175, 177, 182, 0.2)"
-      borderRadius="0px 0px 6px 6px"
-      bgcolor="white"
-      borderTop="4px solid #008CF4"
-    >
-      <Grid item xs={12}>
-        <MaturityPoolInfo
-          totalDeposited={totalDeposited}
-          totalBorrowed={totalBorrowed}
-          bestBorrowRate={bestBorrow && Number(bestBorrow.rate) / 1e18}
-          bestDepositRate={bestDeposit && Number(bestDeposit.rate) / 1e18}
-          bestBorrowMaturity={bestBorrow && Number(bestBorrow.maturity)}
-          bestDepositMaturity={bestDeposit && Number(bestDeposit.maturity)}
-        />
+    <Box display="flex" flexDirection="column" gap="8px">
+      <Grid
+        container
+        width={'100%'}
+        boxShadow="0px 4px 12px rgba(175, 177, 182, 0.2)"
+        borderRadius="0px 0px 6px 6px"
+        bgcolor="white"
+        borderTop="4px solid #008CF4"
+      >
+        <Grid item xs={12}>
+          <MaturityPoolInfo
+            totalDeposited={totalDeposited}
+            totalBorrowed={totalBorrowed}
+            bestBorrowRate={bestBorrow && Number(bestBorrow.rate) / 1e18}
+            bestDepositRate={bestDeposit && Number(bestDeposit.rate) / 1e18}
+            bestBorrowMaturity={bestBorrow && Number(bestBorrow.maturity)}
+            bestDepositMaturity={bestDeposit && Number(bestDeposit.maturity)}
+          />
+        </Grid>
+        <Grid item xs={12} px="24px" pb="24px" bgcolor="white" mt={-1} display={onlyDesktop}>
+          <MaturityPoolsTable APRsPerMaturity={APRsPerMaturity} symbol={symbol} />
+        </Grid>
+        <Box display={onlyMobile} px="24px" pt={1} width="100%">
+          <MaturityPoolsMobile APRsPerMaturity={APRsPerMaturity} symbol={symbol} />
+        </Box>
       </Grid>
-      <Grid item xs={12} px="24px" pb="24px" bgcolor="white" mt={-1} display={onlyDesktop}>
-        <MaturityPoolsTable APRsPerMaturity={APRsPerMaturity} symbol={symbol} />
-      </Grid>
-      <Box display={onlyMobile} px="24px" pt={1} width="100%">
-        <MaturityPoolsMobile APRsPerMaturity={APRsPerMaturity} symbol={symbol} />
+      <Box
+        boxShadow="0px 4px 12px rgba(175, 177, 182, 0.2)"
+        borderRadius="0px 0px 6px 6px"
+        bgcolor="white"
+        p="16px"
+        display={onlyDesktop} // TODO: are we going to have it on mobile?
+        width={610}
+        height={280}
+      >
+        <YieldChart />
       </Box>
-    </Grid>
+    </Box>
   );
 };
 
