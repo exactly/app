@@ -18,14 +18,13 @@ import useAccountData from 'hooks/useAccountData';
 
 type FloatingPoolInfoProps = {
   symbol: string;
-  eMarketAddress?: string;
 };
 
-const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol, eMarketAddress }) => {
+const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol }) => {
   const { chain } = useWeb3();
   const { accountData } = useContext(AccountDataContext);
 
-  const { floatingBorrowRate } = useAccountData(symbol);
+  const { floatingBorrowRate, market } = useAccountData(symbol);
 
   const [depositAPR, setDepositAPR] = useState<number | undefined>();
 
@@ -45,17 +44,17 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol, eMarketAddress })
   }, [accountData, symbol]);
 
   const fetchAPRs = useCallback(async () => {
-    if (!accountData || !eMarketAddress || !chain) return;
+    if (!accountData || !market || !chain) return;
     const subgraphUrl = networkData[String(chain.id) as keyof typeof networkData]?.subgraph;
     if (!subgraphUrl) return;
     const { maxFuturePools } = accountData[symbol];
 
     // TODO: consider storing these results in a new context so it's only fetched once - already added in tech debt docs
-    const [{ apr: depositAPRRate }] = await queryRates(subgraphUrl, eMarketAddress, 'deposit', {
+    const [{ apr: depositAPRRate }] = await queryRates(subgraphUrl, market, 'deposit', {
       maxFuturePools,
     });
     setDepositAPR(depositAPRRate);
-  }, [accountData, eMarketAddress, symbol, chain]);
+  }, [accountData, market, symbol, chain]);
 
   useEffect(() => {
     fetchAPRs().catch(captureException);

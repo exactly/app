@@ -21,29 +21,27 @@ const Market: NextPage<Props> = ({ symbol }: Props) => {
   useEffect(() => void analytics.page(), []);
 
   return (
-    <>
-      <Grid container mt={-1} mb={2}>
-        <Box sx={{ display: 'flex', gap: 0.5 }} mb={1}>
-          <IconButton size="small" onClick={() => router.back()}>
-            <Tooltip title="Go Back" placement="top">
-              <ArrowBackIcon fontSize="small" />
-            </Tooltip>
-          </IconButton>
-          <Typography color="grey.500" sx={{ fontSize: '14px', fontWeight: 600, my: 'auto' }}>
-            Back
-          </Typography>
+    <Grid container mt={-1}>
+      <Box sx={{ display: 'flex', gap: 0.5 }} mb={1}>
+        <IconButton size="small" onClick={() => router.back()}>
+          <Tooltip title="Go Back" placement="top">
+            <ArrowBackIcon fontSize="small" />
+          </Tooltip>
+        </IconButton>
+        <Typography color="grey.500" sx={{ fontSize: '14px', fontWeight: 600, my: 'auto' }}>
+          Back
+        </Typography>
+      </Box>
+      <AssetHeaderInfo symbol={symbol} />
+      <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} my="16px" gap="16px">
+        <Box maxWidth={{ xs: '100%', sm: '610px' }}>
+          <AssetFloatingPool symbol={symbol} />
         </Box>
-        <AssetHeaderInfo symbol={symbol} />
-        <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} my="16px" gap="16px">
-          <Box maxWidth={{ xs: '100%', sm: '610px' }}>
-            <AssetFloatingPool symbol={symbol} />
-          </Box>
-          <Box maxWidth={{ xs: '100%', sm: '610px' }}>
-            <AssetMaturityPools symbol={symbol} />
-          </Box>
+        <Box maxWidth={{ xs: '100%', sm: '610px' }}>
+          <AssetMaturityPools symbol={symbol} />
         </Box>
-      </Grid>
-    </>
+      </Box>
+    </Grid>
   );
 };
 
