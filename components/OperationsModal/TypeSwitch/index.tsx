@@ -70,6 +70,7 @@ function TypeSwitch() {
         border: `1px ${theme.palette.grey[300]} solid`,
         borderRadius: 16,
         padding: 0,
+        my: 'auto',
       }}
     >
       {options.map((o) => (
