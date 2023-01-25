@@ -45,11 +45,8 @@ export function ModalBoxCell({ divisor = false, ...props }: { divisor?: boolean 
       {...props}
       sx={(theme) => ({
         flexGrow: 1,
-        flexBasis: { xs: '100%', sm: '50%' },
+        flexBasis: '50%',
         minWidth: theme.spacing(8),
-        '&:not(:nth-of-type(1))': {
-          marginTop: { xs: 2, sm: 0 },
-        },
         '&:nth-of-type(2n+1)': {
           paddingRight: { xs: 0, sm: 2 },
         },
