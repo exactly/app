@@ -24,7 +24,7 @@ jobs:
 
   e2e:
     runs-on: ubuntu-latest
-    environment: Preview
+    environment: Test
     needs: check
     steps:
       - uses: actions/checkout@v3
