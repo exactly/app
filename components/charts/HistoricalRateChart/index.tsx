@@ -1,7 +1,7 @@
 import { Box, Typography, useTheme } from '@mui/material';
 import useHistoricalRates from 'hooks/useHistoricalRates';
 import React, { FC, useCallback, useMemo } from 'react';
-import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis } from 'recharts';
+import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { toPercentage } from 'utils/utils';
 import ButtonsChart from '../ButtonsChart';
 import LoadingChart from '../LoadingChart';
@@ -41,7 +41,7 @@ const HistoricalRateChart: FC<Props> = ({ symbol }) => {
     <Box display="flex" flexDirection="column" width="100%" height="100%" gap={2}>
       <Box display="flex" justifyContent="space-between">
         <Typography variant="h6" fontSize="16px">
-          Historical rates
+          Historical Variable rates
         </Typography>
         <Box>
           <ButtonsChart buttons={buttons} />
@@ -61,13 +61,14 @@ const HistoricalRateChart: FC<Props> = ({ symbol }) => {
               stroke="#B4BABF"
               fontSize="12px"
             />
-            {/* <YAxis
-              label={{ value: 'APR', angle: -90, position: 'left' }}
-              yAxisId="left"
-              padding={{ top: 5, bottom: 5 }}
-              tickFormatter={(value) => `${((value as number) * 100).toFixed(2)}%`}
-            />
             <YAxis
+              yAxisId="left"
+              tickFormatter={(t) => toPercentage(t)}
+              axisLine={false}
+              tick={{ fill: palette.grey[500], fontWeight: 500, fontSize: 12 }}
+              tickLine={false}
+            />
+            {/* <YAxis
               label={{ value: 'Utilization Rate', angle: -270, position: 'right' }}
               yAxisId="right"
               orientation="right"
