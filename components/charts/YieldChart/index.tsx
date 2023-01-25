@@ -3,7 +3,7 @@ import React, { FC, useMemo, useState } from 'react';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import updateLocale from 'dayjs/plugin/updateLocale';
-import { ResponsiveContainer, XAxis, Tooltip, ReferenceLine, AreaChart, Area, CartesianGrid } from 'recharts';
+import { ResponsiveContainer, XAxis, Tooltip, ReferenceLine, AreaChart, Area, CartesianGrid, YAxis } from 'recharts';
 import useAssets from 'hooks/useAssets';
 import useYieldRates from 'hooks/useYieldRates';
 import parseTimestamp from 'utils/parseTimestamp';
@@ -23,10 +23,6 @@ const getReferenceLines = () => {
   }
 
   return data;
-};
-
-const formatXAxis = (tick: number) => {
-  return parseTimestamp(tick, 'MMM DD');
 };
 
 const referenceLabel = (t: number) => {
@@ -56,11 +52,11 @@ const YieldChart: FC<Props> = ({ symbol }) => {
   const buttons = useMemo(
     () => [
       {
-        label: 'DEPOSITS',
+        label: 'DEPOSIT APR',
         onClick: () => setOperation('Deposits'),
       },
       {
-        label: 'BORROWS',
+        label: 'BORROW APR',
         onClick: () => setOperation('Borrows'),
       },
     ],
@@ -71,7 +67,7 @@ const YieldChart: FC<Props> = ({ symbol }) => {
     <Box display="flex" flexDirection="column" width="100%" height="100%" gap={2}>
       <Box display="flex" justifyContent="space-between">
         <Typography variant="h6" fontSize="16px">
-          Yield curve
+          Current Yield curves
         </Typography>
         <Box>
           <ButtonsChart buttons={buttons} />
@@ -90,12 +86,19 @@ const YieldChart: FC<Props> = ({ symbol }) => {
               tickMargin={16}
               interval={0}
               padding={{ left: 20, right: 20 }}
-              tickFormatter={(t) => formatXAxis(t)}
+              tickFormatter={(t) => parseTimestamp(t, 'MMM DD')}
               domain={[(dataMin: number) => dataMin - 3600 * 24 * 2, (dataMax: number) => dataMax + 3600 * 24 * 2]}
               scale="time"
               tick={{ fill: palette.grey[500], fontWeight: 500, fontSize: 12 }}
               allowDataOverflow
               fontSize="12px"
+            />
+            <YAxis
+              tickFormatter={(t) => toPercentage(t)}
+              yAxisId="yaxis"
+              axisLine={false}
+              tick={{ fill: palette.grey[500], fontWeight: 500, fontSize: 12 }}
+              tickLine={false}
             />
             <Tooltip
               formatter={(value) => toPercentage(value as number)}
@@ -107,6 +110,7 @@ const YieldChart: FC<Props> = ({ symbol }) => {
               <Area
                 key={asset}
                 type="monotone"
+                yAxisId="yaxis"
                 dataKey={asset}
                 stroke={palette.symbol[asset as 'WETH' | 'DAI' | 'USDC' | 'WBTC' | 'wstETH']}
                 strokeWidth={2}
@@ -117,8 +121,17 @@ const YieldChart: FC<Props> = ({ symbol }) => {
               <ReferenceLine
                 ifOverflow="extendDomain"
                 key={reference}
+                yAxisId="yaxis"
+                strokeDasharray="3 3"
                 x={reference}
-                label={{ value: referenceLabel(reference), fontSize: 14, fontFamily: typography.fontFamilyMonospaced }}
+                label={{
+                  value: referenceLabel(reference),
+                  fontSize: 14,
+                  fontFamily: typography.fontFamilyMonospaced,
+                  fill: palette.grey[400],
+                  position: 'insideTop',
+                }}
+                stroke={palette.grey[400]}
               />
             ))}
           </AreaChart>
