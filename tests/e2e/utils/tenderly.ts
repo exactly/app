@@ -21,6 +21,35 @@ const HEADERS = {
   'X-Access-Key': TENDERLY_ACCESS_KEY as string,
 };
 
+type ERC20Token = {
+  address: string;
+  abi: string;
+  decimals: number;
+};
+
+const TOKENS: { [key: string]: ERC20Token } = {
+  DAI: {
+    ...DAI,
+    abi: JSON.stringify(DAI.abi),
+    decimals: 18,
+  },
+  USDC: {
+    ...USDC,
+    abi: JSON.stringify(USDC.abi),
+    decimals: 6,
+  },
+  WBTC: {
+    ...WBTC,
+    abi: JSON.stringify(WBTC.abi),
+    decimals: 8,
+  },
+  wstETH: {
+    ...wstETH,
+    abi: JSON.stringify(wstETH.abi),
+    decimals: 18,
+  },
+};
+
 export const createFork = async (networkId = '1', blockNumber = undefined): Promise<string> => {
   const body = JSON.stringify({
     network_id: networkId,
@@ -64,20 +93,19 @@ export const getBalance = async (forkUrl: string, address: string) => {
   return formatFixed(balance, 18);
 };
 
-const transferToken = async (
+const transferERC20 = async (
   forkUrl: string,
-  tokenAddress: string,
-  tokenAbi: string,
-  units: number,
+  symbol: string,
   fromAddress: string,
   toAddress: string,
   amount: number,
 ) => {
   const provider = new StaticJsonRpcProvider(forkUrl);
   const signer = provider.getSigner();
-  const tokenContract = new Contract(tokenAddress, tokenAbi, signer);
+  const token = TOKENS[symbol];
+  const tokenContract = new Contract(token.address, token.abi, signer);
 
-  const tokenAmount = hexValue(parseFixed(amount.toString(), units).toHexString());
+  const tokenAmount = hexValue(parseFixed(amount.toString(), token.decimals).toHexString());
 
   await setBalance(forkUrl, fromAddress, 10000);
   const unsignedTx = await tokenContract.populateTransaction.approve(await signer.getAddress(), tokenAmount);
@@ -96,64 +124,20 @@ const transferToken = async (
   await tokenContract.transferFrom(fromAddress, toAddress, tokenAmount);
 };
 
-export const transferDAI = async (forkUrl: string, address: string, amount: number) => {
-  await transferToken(
-    forkUrl,
-    DAI.address,
-    JSON.stringify(DAI.abi),
-    18,
-    await getTopHolder(DAI.address),
-    address,
-    amount,
-  );
-};
-
-export const transferUSDC = async (forkUrl: string, address: string, amount: number) => {
-  await transferToken(
-    forkUrl,
-    USDC.address,
-    JSON.stringify(USDC.abi),
-    6,
-    await getTopHolder(USDC.address),
-    address,
-    amount,
-  );
-};
-
-export const transferWBTC = async (forkUrl: string, address: string, amount: number) => {
-  await transferToken(
-    forkUrl,
-    WBTC.address,
-    JSON.stringify(WBTC.abi),
-    8,
-    await getTopHolder(WBTC.address),
-    address,
-    amount,
-  );
-};
-
-export const transferWstETH = async (forkUrl: string, address: string, amount: number) => {
-  await transferToken(
-    forkUrl,
-    wstETH.address,
-    JSON.stringify(wstETH.abi),
-    18,
-    await getTopHolder(wstETH.address),
-    address,
-    amount,
-  );
-};
-
-export const getTopHolder = async (tokenAddress: string) => {
+const getTopHolder = async (tokenAddress: string) => {
   return await fetch(`https://api.ethplorer.io/getTopTokenHolders/${tokenAddress}?apiKey=freekey&limit=1`)
     .then((response) => response.json())
     .then((data) => data.holders[0].address);
 };
 
+export const transferToken = async (forkUrl: string, address: string, symbol: string, amount: number) => {
+  const from = await getTopHolder(TOKENS[symbol].address);
+  await transferERC20(forkUrl, symbol, from, address, amount);
+};
+
 export const transferAllTokens = async (forkUrl: string, address: string) => {
   await setBalance(forkUrl, address, 1000000);
-  await transferDAI(forkUrl, address, 1000);
-  await transferUSDC(forkUrl, address, 1000);
-  await transferWBTC(forkUrl, address, 1000);
-  await transferWstETH(forkUrl, address, 1000);
+  for (const symbol of Object.keys(TOKENS)) {
+    await transferToken(forkUrl, address, symbol, 1000);
+  }
 };
