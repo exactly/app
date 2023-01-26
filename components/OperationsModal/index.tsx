@@ -1,4 +1,4 @@
-import React, { forwardRef, ReactElement, Ref, useRef } from 'react';
+import React, { forwardRef, ReactElement, Ref, useMemo, useRef } from 'react';
 
 import {
   Box,
@@ -20,9 +20,9 @@ import CloseIcon from '@mui/icons-material/Close';
 import { useModalStatus } from 'contexts/ModalStatusContext';
 import OperationContainer from './OperationContainer';
 import TypeSwitch from './TypeSwitch';
-import { OperationContextProvider } from 'contexts/OperationContext';
 import Draggable from 'react-draggable';
 import { TransitionProps } from '@mui/material/transitions';
+import { useOperationContext } from 'contexts/OperationContext';
 
 function PaperComponent(props: PaperProps | undefined) {
   const ref = useRef<HTMLDivElement>(null);
@@ -45,18 +45,21 @@ const Transition = forwardRef(function Transition(
 function OperationsModal() {
   const theme = useTheme();
   const { open, closeModal, operation } = useModalStatus();
+  const { tx } = useOperationContext();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const loadingTx = useMemo(() => tx && (tx.status === 'loading' || tx.status === 'processing'), [tx]);
 
   return (
     <Dialog
       open={open}
-      onClose={closeModal}
+      onClose={loadingTx ? undefined : closeModal}
       PaperComponent={isMobile ? undefined : PaperComponent}
       TransitionComponent={isMobile ? Transition : undefined}
       fullScreen={isMobile}
       sx={isMobile ? { height: 'fit-content', top: 'auto' } : {}}
+      disableEscapeKeyDown={loadingTx}
     >
-      {!isMobile && (
+      {(!isMobile || tx) && (
         <IconButton
           aria-label="close"
           onClick={closeModal}
@@ -66,32 +69,31 @@ function OperationsModal() {
             top: 8,
             color: 'grey.500',
           }}
+          disabled={loadingTx}
         >
           <CloseIcon sx={{ fontSize: 16 }} />
         </IconButton>
       )}
       <Box sx={{ padding: { xs: '24px 16px 16px', sm: theme.spacing(5, 4, 4) }, borderTop: '4px #000 solid' }}>
-        <OperationContextProvider>
-          <DialogTitle
-            sx={{
-              p: 0,
-              display: 'flex',
-              justifyContent: 'space-between',
-              mb: { xs: '24px', sm: 4 },
-              cursor: { xs: '', sm: 'move' },
-            }}
-            id="draggable-dialog-title"
-          >
-            <Typography fontWeight={700} fontSize={24}>
-              {capitalize(operation?.replaceAll('AtMaturity', '') ?? '')}
-            </Typography>
-            <TypeSwitch />
-          </DialogTitle>
-          <DialogContent sx={{ padding: theme.spacing(4, 0, 0, 0) }}>
-            <OperationContainer />
-          </DialogContent>
-        </OperationContextProvider>
-        {isMobile && (
+        <DialogTitle
+          sx={{
+            p: 0,
+            display: 'flex',
+            justifyContent: 'space-between',
+            mb: { xs: '24px', sm: 4 },
+            cursor: { xs: '', sm: 'move' },
+          }}
+          id="draggable-dialog-title"
+        >
+          <Typography fontWeight={700} fontSize={24}>
+            {capitalize(operation?.replaceAll('AtMaturity', '') ?? '')}
+          </Typography>
+          <TypeSwitch />
+        </DialogTitle>
+        <DialogContent sx={{ padding: theme.spacing(4, 0, 0, 0) }}>
+          <OperationContainer />
+        </DialogContent>
+        {isMobile && !tx && (
           <Button fullWidth variant="text" sx={{ color: 'grey.700', mt: '8px' }} onClick={closeModal}>
             Cancel
           </Button>
