@@ -45,7 +45,7 @@ type Props = {
 
 const YieldChart: FC<Props> = ({ symbol }) => {
   const { depositsRates, borrowsRates, loading } = useYieldRates(symbol);
-  const [operation, setOperation] = useState<'Deposits' | 'Borrows'>('Deposits');
+  const [operation, setOperation] = useState<'Deposits' | 'Borrows'>('Borrows');
   const assets = useAssets();
   const { palette, typography } = useTheme();
 
@@ -67,10 +67,10 @@ const YieldChart: FC<Props> = ({ symbol }) => {
     <Box display="flex" flexDirection="column" width="100%" height="100%" gap={2}>
       <Box display="flex" justifyContent="space-between">
         <Typography variant="h6" fontSize="16px">
-          Current Yield curves
+          Current Yield Curves
         </Typography>
         <Box>
-          <ButtonsChart buttons={buttons} />
+          <ButtonsChart buttons={buttons} defaultSelected={1} />
         </Box>
       </Box>
 
