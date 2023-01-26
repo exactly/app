@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useMemo, useCallback, useRe
 import type { FC, PropsWithChildren } from 'react';
 import OperationsModal from 'components/OperationsModal';
 import AccountDataContext from './AccountDataContext';
+import { OperationContextProvider } from './OperationContext';
 
 export type Operation =
   | 'borrow'
@@ -71,7 +72,9 @@ export const ModalStatusProvider: FC<PropsWithChildren> = ({ children }) => {
   return (
     <ModalStatusContext.Provider value={value}>
       {children}
-      <OperationsModal />
+      <OperationContextProvider>
+        <OperationsModal />
+      </OperationContextProvider>
     </ModalStatusContext.Provider>
   );
 };
