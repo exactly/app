@@ -39,8 +39,9 @@ function Navbar() {
 
     setUser({ id: walletAddress });
     setContext('wallet', { connector: connector?.id, name: connector?.name });
+    setContext('chain', { id: chain?.id, name: chain?.name, network: chain?.network, testnet: chain?.testnet });
     void analytics.identify(walletAddress);
-  }, [walletAddress, connector]);
+  }, [walletAddress, connector, chain]);
 
   const handleFaucetClick = useCallback(() => {
     if (chain?.id === goerli.id) return openOperationModal('faucet');
