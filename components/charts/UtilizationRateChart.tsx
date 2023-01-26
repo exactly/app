@@ -1,6 +1,6 @@
 import React, { CSSProperties } from 'react';
 import { Typography, useTheme, Box } from '@mui/material';
-import { LineChart, XAxis, Tooltip, Line, ResponsiveContainer, ReferenceLine, CartesianGrid } from 'recharts';
+import { LineChart, XAxis, Tooltip, Line, ResponsiveContainer, ReferenceLine, CartesianGrid, YAxis } from 'recharts';
 
 import { toPercentage } from 'utils/utils';
 import useUtilizationRate from 'hooks/useUtilizationRate';
@@ -36,13 +36,21 @@ function UtilizationRateChart({ type, symbol }: Props) {
             <XAxis
               type="number"
               dataKey="utilization"
-              tickFormatter={toPercentage}
+              tickFormatter={(t) => toPercentage(t, 0)}
               stroke={palette.grey[400]}
               tick={{ fill: palette.grey[500], fontWeight: 500, fontSize: 12 }}
+            />
+            <YAxis
+              tickFormatter={(t) => toPercentage(t, 0)}
+              yAxisId="yaxis"
+              axisLine={false}
+              tick={{ fill: palette.grey[500], fontWeight: 500, fontSize: 12 }}
+              tickLine={false}
             />
             <ReferenceLine
               x={currentUtilization}
               strokeWidth={2}
+              yAxisId="yaxis"
               stroke={palette.operation.variable}
               label={{
                 value: toPercentage(currentUtilization),
@@ -63,6 +71,7 @@ function UtilizationRateChart({ type, symbol }: Props) {
             <Line
               name="Utilization"
               type="monotone"
+              yAxisId="yaxis"
               dataKey="utilization"
               dot={false}
               stroke="#000"
@@ -70,7 +79,15 @@ function UtilizationRateChart({ type, symbol }: Props) {
               activeDot={false}
             />
 
-            <Line name="Borrow APR" type="monotone" dataKey="apr" stroke="#000" dot={false} strokeWidth={2} />
+            <Line
+              name="Borrow APR"
+              yAxisId="yaxis"
+              type="monotone"
+              dataKey="apr"
+              stroke="#000"
+              dot={false}
+              strokeWidth={2}
+            />
           </LineChart>
         )}
       </ResponsiveContainer>

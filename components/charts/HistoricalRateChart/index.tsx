@@ -41,7 +41,7 @@ const HistoricalRateChart: FC<Props> = ({ symbol }) => {
     <Box display="flex" flexDirection="column" width="100%" height="100%" gap={2}>
       <Box display="flex" justifyContent="space-between">
         <Typography variant="h6" fontSize="16px">
-          Historical Variable rates
+          Historical Variable Rates
         </Typography>
         <Box>
           <ButtonsChart buttons={buttons} />
