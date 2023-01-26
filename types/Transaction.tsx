@@ -1,4 +1,4 @@
 export type Transaction = {
-  status: string;
+  status: 'loading' | 'processing' | 'success' | 'error';
   hash: string | undefined;
 };
