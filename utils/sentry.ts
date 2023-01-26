@@ -6,10 +6,10 @@ import MarketETHRouter from '@exactly-protocol/protocol/deployments/goerli/Marke
 type ErrorMap = { [key: string]: RegExp[] };
 
 const ignored: ErrorMap = {
-  TypeError: [/network request failed/gi, /NetworkError when attempting to fetch resource/gi],
-  Error: [/websocket error/gi, /transaction.*rejected/gi],
-  AbortError: [/aborted/gi],
-  ChunkLoadError: [/loading chunk/gi],
+  TypeError: [/^Network request failed$/, /^NetworkError when attempting to fetch resource$/],
+  Error: [/^websocket error 1006:/],
+  AbortError: [/^Aborted$/],
+  ChunkLoadError: [/^Loading chunk .* failed\./],
 };
 
 const isIgnored = (err: Error): boolean => {
@@ -32,13 +32,12 @@ export const beforeSend: Options['beforeSend'] = (event, hint) => {
       return event;
     }
 
-    if (!('code' in error) || !('transaction' in error)) {
+    if (!error.transaction || !error.code) {
       return event;
     }
 
-    // See https://discordapp.com/channels/846682395553824808/985912903880302632/1067449799038742548
-    const { transaction, code } = error as { code: string; transaction: { to: string } };
-    if (code === ErrorCode.UNPREDICTABLE_GAS_LIMIT && transaction.to === MarketETHRouter.address) {
+    const { to } = error.transaction as { to: string };
+    if (error.code === ErrorCode.UNPREDICTABLE_GAS_LIMIT && to === MarketETHRouter.address) {
       return null;
     }
   }
