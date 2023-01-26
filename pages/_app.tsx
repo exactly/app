@@ -6,17 +6,17 @@ import Head from 'next/head';
 import { Web3Modal } from '@web3modal/react';
 import { WagmiConfig } from 'wagmi';
 import type { AppProps } from 'next/app';
+import { Box, Grid } from '@mui/material';
+import { ThemeProvider as MUIThemeProvider } from '@mui/material/styles';
 
 import { ModalStatusProvider } from 'contexts/ModalStatusContext';
 import { MarketProvider } from 'contexts/MarketContext';
 import { AccountDataProvider } from 'contexts/AccountDataContext';
 import { ThemeProvider } from 'contexts/ThemeContext';
-import { ThemeProvider as MUIThemeProvider } from '@mui/material/styles';
 import { defaultChain, wagmi, walletConnectId, web3modal } from 'utils/client';
-import theme, { globals } from 'styles/theme';
 import Footer from 'components/Footer';
 import Navbar from 'components/Navbar';
-import { Box, Grid } from '@mui/material';
+import theme, { globals } from 'styles/theme';
 
 const { maxWidth } = globals;
 
