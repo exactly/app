@@ -3,12 +3,12 @@ export function formatWallet(walletAddress?: string) {
   return `${walletAddress.substring(0, 6)}...${walletAddress.substring(38)}`;
 }
 
-export const toPercentage = (value?: number) => {
+export const toPercentage = (value?: number, fractionDigits = 2) => {
   if (value != null) {
     return value.toLocaleString(undefined, {
       style: 'percent',
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
+      minimumFractionDigits: fractionDigits,
+      maximumFractionDigits: fractionDigits,
     });
   }
 
