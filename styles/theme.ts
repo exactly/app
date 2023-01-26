@@ -14,6 +14,8 @@ declare module '@mui/material/styles' {
     };
 
     blue: string;
+    green: string;
+    red: string;
     operation: {
       fixed: string;
       variable: string;
@@ -25,6 +27,8 @@ declare module '@mui/material/styles' {
     };
 
     blue: string;
+    green: string;
+    red: string;
     operation: {
       fixed: string;
       variable: string;
@@ -80,6 +84,8 @@ const theme = createTheme({
     },
 
     blue: '#0095FF',
+    green: '#33CC59',
+    red: '#AD1F1F',
     operation: {
       fixed: 'blue',
       variable: '#33CC59',

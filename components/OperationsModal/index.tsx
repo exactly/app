@@ -43,10 +43,10 @@ const Transition = forwardRef(function Transition(
 });
 
 function OperationsModal() {
-  const theme = useTheme();
+  const { breakpoints, spacing } = useTheme();
   const { open, closeModal, operation } = useModalStatus();
   const { tx } = useOperationContext();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isMobile = useMediaQuery(breakpoints.down('sm'));
   const loadingTx = useMemo(() => tx && (tx.status === 'loading' || tx.status === 'processing'), [tx]);
 
   return (
@@ -59,7 +59,7 @@ function OperationsModal() {
       sx={isMobile ? { height: 'fit-content', top: 'auto' } : {}}
       disableEscapeKeyDown={loadingTx}
     >
-      {(!isMobile || tx) && (
+      {(!isMobile || tx) && !loadingTx && (
         <IconButton
           aria-label="close"
           onClick={closeModal}
@@ -69,28 +69,29 @@ function OperationsModal() {
             top: 8,
             color: 'grey.500',
           }}
-          disabled={loadingTx}
         >
           <CloseIcon sx={{ fontSize: 16 }} />
         </IconButton>
       )}
-      <Box sx={{ padding: { xs: '24px 16px 16px', sm: theme.spacing(5, 4, 4) }, borderTop: '4px #000 solid' }}>
-        <DialogTitle
-          sx={{
-            p: 0,
-            display: 'flex',
-            justifyContent: 'space-between',
-            mb: { xs: '24px', sm: 4 },
-            cursor: { xs: '', sm: 'move' },
-          }}
-          id="draggable-dialog-title"
-        >
-          <Typography fontWeight={700} fontSize={24}>
-            {capitalize(operation?.replaceAll('AtMaturity', '') ?? '')}
-          </Typography>
-          <TypeSwitch />
-        </DialogTitle>
-        <DialogContent sx={{ padding: theme.spacing(4, 0, 0, 0) }}>
+      <Box sx={{ padding: { xs: spacing(3, 2, 2), sm: spacing(5, 4, 4) }, borderTop: '4px #000 solid' }}>
+        {!tx && (
+          <DialogTitle
+            sx={{
+              p: 0,
+              display: 'flex',
+              justifyContent: 'space-between',
+              mb: { xs: '24px', sm: 4 },
+              cursor: { xs: '', sm: 'move' },
+            }}
+            id="draggable-dialog-title"
+          >
+            <Typography fontWeight={700} fontSize={24}>
+              {capitalize(operation?.replaceAll('AtMaturity', '') ?? '')}
+            </Typography>
+            <TypeSwitch />
+          </DialogTitle>
+        )}
+        <DialogContent sx={{ padding: spacing(4, 0, 0, 0) }}>
           <OperationContainer />
         </DialogContent>
         {isMobile && !tx && (
