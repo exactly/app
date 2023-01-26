@@ -8,6 +8,7 @@ import { useWeb3 } from 'hooks/useWeb3';
 import { useModalStatus } from 'contexts/ModalStatusContext';
 import pastParticiple from 'utils/pastParticiple';
 import { useOperationContext } from 'contexts/OperationContext';
+import formatSymbol from 'utils/formatSymbol';
 
 type Props = {
   tx: Transaction;
@@ -48,8 +49,8 @@ function ModalGif({ tx, tryAgain }: Props) {
             {isError && 'Transaction error'}
           </Typography>
           <Typography fontSize="14px" fontWeight={500} color="grey.500">
-            {isLoading && `${capitalize(operationName)}ing ${qty} ${symbol}`}
-            {isSuccess && `${capitalize(pastParticiple(operationName))} ${qty} ${symbol}`}
+            {isLoading && `${capitalize(operationName)}ing ${qty} ${formatSymbol(symbol)}`}
+            {isSuccess && `${capitalize(pastParticiple(operationName))} ${qty} ${formatSymbol(symbol)}`}
             {isError && 'Something went wrong'}
           </Typography>
         </Box>
