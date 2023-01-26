@@ -1,7 +1,7 @@
 const symbolDescriptions: Record<string, string> = {
   USDC: 'USD Coin',
   DAI: 'DAI Stablecoin',
-  WETH: 'Wrapped ETH',
+  WETH: 'Ether',
   WBTC: 'Wrapped BTC',
   wstETH: 'Lido Wrapped Staked ETH',
 };

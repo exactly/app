@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import React, { FC, PropsWithChildren } from 'react';
+import formatSymbol from 'utils/formatSymbol';
 import getSymbolDescription from 'utils/getSymbolDescription';
 
 type Props = PropsWithChildren<{
@@ -39,11 +40,11 @@ const MobileAssetCard: FC<Props> = ({ symbol, isFloating, children }) => {
               }}
             />
             <Box display="flex" flexDirection="column" my="auto">
-              <Typography fontSize="14px" lineHeight="12px" color="grey.500">
+              <Typography fontSize="14px" lineHeight="14px" color="grey.500">
                 {getSymbolDescription(symbol)}
               </Typography>
               <Typography variant="h5" lineHeight="24px">
-                {symbol}
+                {formatSymbol(symbol)}
               </Typography>
             </Box>
           </Box>
