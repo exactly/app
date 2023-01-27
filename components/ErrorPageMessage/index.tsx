@@ -1,9 +1,7 @@
 import React from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
-
-import styles from './style.module.scss';
-import { Button } from '@mui/material';
+import { Box, Button, Typography } from '@mui/material';
 
 type Props = {
   code: number;
@@ -14,14 +12,20 @@ type Props = {
 function ErrorPageMessage({ code, description, message }: Props) {
   const { query } = useRouter();
   return (
-    <section className={styles.errorContainer}>
-      <h1 className={styles.code}>{code}</h1>
-      <h2 className={styles.description}>{description}</h2>
-      <p className={styles.message}>{message}</p>
-      <Link href={{ pathname: '/', query }}>
-        <Button variant="contained">Go to Markets</Button>
-      </Link>
-    </section>
+    <Box display="flex" height="100%">
+      <Box display="flex" flexDirection="column" m="auto" alignItems="center" gap={1}>
+        <Typography variant="h1" fontWeight={700}>
+          {code}
+        </Typography>
+        <Typography variant="h2" fontWeight={700}>
+          {description}
+        </Typography>
+        <Typography>{message}</Typography>
+        <Link href={{ pathname: '/', query }}>
+          <Button variant="contained">Go to Markets</Button>
+        </Link>
+      </Box>
+    </Box>
   );
 }
 
