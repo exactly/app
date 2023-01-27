@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useMemo } from 'react';
 import { Box, Typography } from '@mui/material';
 
 type Entry = {
@@ -14,10 +14,16 @@ type Props = {
   label?: Date;
   labelFormatter?: (value: Date | undefined) => ReactNode;
   formatter?: (value: number | undefined) => ReactNode;
+  itemSorter?: (a: Entry, b: Entry) => number;
 };
 
-function TooltipChart({ active, payload, label, labelFormatter, formatter }: Props) {
-  if (!active || !payload || !payload.length) return null;
+function TooltipChart({ active, payload, label, labelFormatter, formatter, itemSorter }: Props) {
+  const sortedPayload = useMemo(
+    () => (itemSorter && payload ? payload.sort(itemSorter) : payload),
+    [payload, itemSorter],
+  );
+
+  if (!active || !sortedPayload || !sortedPayload.length) return null;
 
   return (
     <Box
@@ -31,7 +37,7 @@ function TooltipChart({ active, payload, label, labelFormatter, formatter }: Pro
       <Typography variant="subtitle2" fontSize="10px" mb={0.5}>
         {labelFormatter ? labelFormatter(label) : JSON.stringify(label)}
       </Typography>
-      {payload.map(({ dataKey, name, value, color }) => (
+      {sortedPayload.map(({ dataKey, name, value, color }) => (
         <Typography key={dataKey} variant="h6" fontSize="12px" color={color}>
           {`${name}: ${formatter ? formatter(value) : value}`}
         </Typography>
