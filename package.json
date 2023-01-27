@@ -2,6 +2,7 @@
   "name": "@exactly-protocol/app",
   "version": "0.1.0",
   "private": true,
+  "license": "BUSL-1.1",
   "scripts": {
     "dev": "NODE_ENV=development NET=local next dev",
     "build": "next build",
