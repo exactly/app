@@ -11,7 +11,6 @@ import AccountDataContext from 'contexts/AccountDataContext';
 import numbers from 'config/numbers.json';
 import useApprove from 'hooks/useApprove';
 import useBalance from 'hooks/useBalance';
-import handleOperationError from 'utils/handleOperationError';
 import analytics from 'utils/analytics';
 import useAccountData from 'hooks/useAccountData';
 import { useOperationContext, usePreviewTx } from 'contexts/OperationContext';
@@ -26,6 +25,7 @@ import ModalSubmit from 'components/common/modal/ModalSubmit';
 import ModalAlert from 'components/common/modal/ModalAlert';
 import ModalInfoTotalDeposits from 'components/OperationsModal/Info/ModalInfoTotalDeposits';
 import ModalInfoFloatingUtilizationRate from 'components/OperationsModal/Info/ModalInfoFloatingUtilizationRate';
+import useHandleOperationError from 'hooks/useHandleOperationError';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 
@@ -51,6 +51,8 @@ const Deposit: FC = () => {
     assetContract,
     ETHRouterContract,
   } = useOperationContext();
+
+  const handleOperationError = useHandleOperationError();
 
   const { decimals = 18 } = useAccountData(symbol);
 
@@ -177,6 +179,7 @@ const Deposit: FC = () => {
     ETHRouterContract,
     decimals,
     setErrorData,
+    handleOperationError,
   ]);
 
   const handleSubmitAction = useCallback(async () => {

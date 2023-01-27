@@ -3,6 +3,7 @@ import useAccountData from 'hooks/useAccountData';
 import useDelayedEffect from 'hooks/useDelayedEffect';
 import useERC20 from 'hooks/useERC20';
 import useETHRouter from 'hooks/useETHRouter';
+import useHandleOperationError from 'hooks/useHandleOperationError';
 import useMarket from 'hooks/useMarket';
 import { useWeb3 } from 'hooks/useWeb3';
 import React, {
@@ -17,7 +18,6 @@ import React, {
 import { ERC20, Market, MarketETHRouter } from 'types/contracts';
 import { ErrorData } from 'types/Error';
 import { Transaction } from 'types/Transaction';
-import handleOperationError from 'utils/handleOperationError';
 import { MarketContext } from './MarketContext';
 import { useModalStatus } from './ModalStatusContext';
 
@@ -113,6 +113,7 @@ export function usePreviewTx({
   previewGasCost: (qty: string) => Promise<BigNumber | undefined>;
 }) {
   const { errorData, setErrorData, setGasCost, setRequiresApproval } = useOperationContext();
+  const handleOperationError = useHandleOperationError();
 
   const previewTx = useCallback(
     async (cancelled: () => boolean) => {
@@ -133,7 +134,7 @@ export function usePreviewTx({
       setGasCost(gas);
       setRequiresApproval(approval);
     },
-    [needsApproval, previewGasCost, qty, setErrorData, setGasCost, setRequiresApproval],
+    [handleOperationError, needsApproval, previewGasCost, qty, setErrorData, setGasCost, setRequiresApproval],
   );
 
   return useDelayedEffect({

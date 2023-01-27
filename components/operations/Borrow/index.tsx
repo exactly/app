@@ -15,7 +15,6 @@ import AccountDataContext from 'contexts/AccountDataContext';
 import numbers from 'config/numbers.json';
 import useApprove from 'hooks/useApprove';
 import useBalance from 'hooks/useBalance';
-import handleOperationError from 'utils/handleOperationError';
 import analytics from 'utils/analytics';
 import { useOperationContext, usePreviewTx } from 'contexts/OperationContext';
 import getHealthFactorData from 'utils/getHealthFactorData';
@@ -30,6 +29,7 @@ import ModalInfoFloatingUtilizationRate from 'components/OperationsModal/Info/Mo
 import ModalAlert from 'components/common/modal/ModalAlert';
 import ModalSubmit from 'components/common/modal/ModalSubmit';
 import useAccountData from 'hooks/useAccountData';
+import useHandleOperationError from 'hooks/useHandleOperationError';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 
@@ -55,6 +55,8 @@ const Borrow: FC = () => {
     assetContract,
     ETHRouterContract,
   } = useOperationContext();
+
+  const handleOperationError = useHandleOperationError();
 
   const { decimals = 18 } = useAccountData(symbol);
   const healthFactor = useMemo<HealthFactor | undefined>(
@@ -242,17 +244,18 @@ const Borrow: FC = () => {
       setIsLoadingOp(false);
     }
   }, [
-    ETHRouterContract,
     accountData,
-    getAccountData,
-    marketContract,
-    qty,
-    setErrorData,
     setIsLoadingOp,
-    setTx,
     symbol,
+    setTx,
+    qty,
+    getAccountData,
+    ETHRouterContract,
+    marketContract,
     walletAddress,
     decimals,
+    setErrorData,
+    handleOperationError,
   ]);
 
   const handleSubmitAction = useCallback(async () => {
