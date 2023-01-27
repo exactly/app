@@ -78,7 +78,7 @@ const HistoricalRateChart: FC<Props> = ({ symbol }) => {
             <Tooltip
               labelFormatter={(value) => (value instanceof Date ? formatDate(value as Date, true) : '')}
               formatter={(value) => toPercentage(value as number)}
-              content={<TooltipChart />}
+              content={<TooltipChart itemSorter={(a, b) => (a.value > b.value ? -1 : 1)} />}
             />
             {/* <Legend /> */}
             <Line
