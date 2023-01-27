@@ -5,13 +5,11 @@ import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 import ModalTxCost from 'components/common/modal/ModalTxCost';
 import ModalGif from 'components/common/modal/ModalGif';
 
-import { LangKeys } from 'types/Lang';
 import { HealthFactor } from 'types/HealthFactor';
 
 import { toPercentage } from 'utils/utils';
 import getBeforeBorrowLimit from 'utils/getBeforeBorrowLimit';
 
-import LangContext from 'contexts/LangContext';
 import { useWeb3 } from 'hooks/useWeb3';
 import { MarketContext } from 'contexts/MarketContext';
 import AccountDataContext from 'contexts/AccountDataContext';
@@ -20,8 +18,6 @@ import useBalance from 'hooks/useBalance';
 import usePoolLiquidity from 'hooks/usePoolLiquidity';
 import useApprove from 'hooks/useApprove';
 import usePreviewer from 'hooks/usePreviewer';
-
-import keys from './translations.json';
 
 import numbers from 'config/numbers.json';
 import analytics from 'utils/analytics';
@@ -51,9 +47,6 @@ const BorrowAtMaturity: FC = () => {
   const { walletAddress } = useWeb3();
   const { accountData, getAccountData } = useContext(AccountDataContext);
   const { date } = useContext(MarketContext);
-
-  const lang: string = useContext(LangContext);
-  const translations: { [key: string]: LangKeys } = keys;
 
   const {
     symbol,
@@ -118,10 +111,11 @@ const BorrowAtMaturity: FC = () => {
     if (!hasCollateral) {
       setErrorData({
         status: true,
-        message: translations[lang].noCollateral,
+        message:
+          'In order to borrow you need to have a deposit in the Variable Rate Pool marked as collateral in your Dashboard',
       });
     }
-  }, [accountData, lang, setErrorData, symbol, translations]);
+  }, [accountData, setErrorData, symbol]);
 
   const previewGasCost = useCallback(
     async (quantity: string): Promise<BigNumber | undefined> => {
@@ -219,7 +213,7 @@ const BorrowAtMaturity: FC = () => {
       if (poolLiquidity && poolLiquidity < parseFloat(value)) {
         return setErrorData({
           status: true,
-          message: translations[lang].availableLiquidityError,
+          message: 'There is not enough liquidity in this pool',
         });
       }
 
@@ -234,12 +228,12 @@ const BorrowAtMaturity: FC = () => {
       ) {
         return setErrorData({
           status: true,
-          message: translations[lang].borrowLimit,
+          message: `You can't borrow more than your borrow limit`,
         });
       }
       setErrorData(undefined);
     },
-    [accountData, symbol, setQty, poolLiquidity, decimals, setErrorData, translations, lang],
+    [accountData, symbol, setQty, poolLiquidity, decimals, setErrorData],
   );
 
   const borrow = useCallback(async () => {
@@ -250,7 +244,7 @@ const BorrowAtMaturity: FC = () => {
 
       return setErrorData({
         status: true,
-        message: translations[lang].notEnoughSlippage,
+        message: 'The transaction failed, please check your Maximum Deposit Rate',
       });
     }
 
@@ -314,7 +308,6 @@ const BorrowAtMaturity: FC = () => {
     date,
     fixedRate,
     getAccountData,
-    lang,
     marketContract,
     qty,
     setErrorData,
@@ -322,7 +315,6 @@ const BorrowAtMaturity: FC = () => {
     setTx,
     slippage,
     symbol,
-    translations,
     walletAddress,
     decimals,
   ]);

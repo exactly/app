@@ -5,16 +5,12 @@ import { AddressZero, WeiPerEther, Zero } from '@ethersproject/constants';
 import ModalGif from 'components/common/modal/ModalGif';
 import ModalTxCost from 'components/common/modal/ModalTxCost';
 
-import { LangKeys } from 'types/Lang';
-
 import AccountDataContext from 'contexts/AccountDataContext';
 import { MarketContext } from 'contexts/MarketContext';
-import LangContext from 'contexts/LangContext';
 import { useWeb3 } from 'hooks/useWeb3';
 
 import numbers from 'config/numbers.json';
 
-import keys from './translations.json';
 import useApprove from 'hooks/useApprove';
 import handleOperationError from 'utils/handleOperationError';
 import usePreviewer from 'hooks/usePreviewer';
@@ -45,9 +41,6 @@ const WithdrawAtMaturity: FC = () => {
   const { walletAddress } = useWeb3();
   const { date } = useContext(MarketContext);
   const { accountData, getAccountData } = useContext(AccountDataContext);
-
-  const lang: string = useContext(LangContext);
-  const translations: { [key: string]: LangKeys } = keys;
 
   const {
     symbol,
@@ -186,13 +179,13 @@ const WithdrawAtMaturity: FC = () => {
       if (parsedValue.gt(positionAssets)) {
         return setErrorData({
           status: true,
-          message: translations[lang].insufficientBalance,
+          message: `You can't withdraw more than the deposited amount`,
         });
       }
 
       setErrorData(undefined);
     },
-    [setQty, decimals, positionAssets, setErrorData, translations, lang],
+    [setQty, decimals, positionAssets, setErrorData],
   );
 
   const withdraw = useCallback(async () => {

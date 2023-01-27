@@ -5,15 +5,11 @@ import { WeiPerEther } from '@ethersproject/constants';
 import ModalTxCost from 'components/common/modal/ModalTxCost';
 import ModalGif from 'components/common/modal/ModalGif';
 
-import { LangKeys } from 'types/Lang';
-
-import LangContext from 'contexts/LangContext';
 import { useWeb3 } from 'hooks/useWeb3';
 import AccountDataContext from 'contexts/AccountDataContext';
 
 import numbers from 'config/numbers.json';
 
-import keys from './translations.json';
 import useApprove from 'hooks/useApprove';
 import handleOperationError from 'utils/handleOperationError';
 import useBalance from 'hooks/useBalance';
@@ -38,9 +34,6 @@ function Repay() {
   const { operation } = useModalStatus();
   const { walletAddress } = useWeb3();
   const { accountData, getAccountData } = useContext(AccountDataContext);
-
-  const lang: string = useContext(LangContext);
-  const translations: { [key: string]: LangKeys } = keys;
 
   const {
     symbol,
@@ -86,13 +79,13 @@ function Repay() {
     if (walletBalance && parseFloat(finalAmount) > parseFloat(walletBalance)) {
       return setErrorData({
         status: true,
-        message: translations[lang].insufficientBalance,
+        message: `You can't repay more than you have in your wallet`,
         component: 'input',
       });
     }
 
     setErrorData(undefined);
-  }, [setQty, finalAmount, walletBalance, setErrorData, translations, lang]);
+  }, [setQty, finalAmount, walletBalance, setErrorData]);
 
   const handleInputChange = useCallback(
     (value: string) => {
@@ -101,7 +94,7 @@ function Repay() {
       if (walletBalance && parseFloat(value) > parseFloat(walletBalance)) {
         return setErrorData({
           status: true,
-          message: translations[lang].insufficientBalance,
+          message: `You can't repay more than you have in your wallet`,
           component: 'input',
         });
       }
@@ -109,7 +102,7 @@ function Repay() {
       setErrorData(undefined);
       setIsMax(false);
     },
-    [setQty, walletBalance, setErrorData, translations, lang],
+    [setQty, walletBalance, setErrorData],
   );
 
   const repay = useCallback(async () => {

@@ -4,15 +4,11 @@ import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 import ModalTxCost from 'components/common/modal/ModalTxCost';
 import ModalGif from 'components/common/modal/ModalGif';
 
-import { LangKeys } from 'types/Lang';
-
-import LangContext from 'contexts/LangContext';
 import { useWeb3 } from 'hooks/useWeb3';
 import AccountDataContext from 'contexts/AccountDataContext';
 
 import numbers from 'config/numbers.json';
 
-import keys from './translations.json';
 import { WeiPerEther } from '@ethersproject/constants';
 import handleOperationError from 'utils/handleOperationError';
 import useApprove from 'hooks/useApprove';
@@ -37,9 +33,6 @@ const Withdraw: FC = () => {
   const { operation } = useModalStatus();
   const { walletAddress } = useWeb3();
   const { accountData, getAccountData } = useContext(AccountDataContext);
-
-  const lang: string = useContext(LangContext);
-  const translations: { [key: string]: LangKeys } = keys;
 
   const {
     symbol,
@@ -130,14 +123,14 @@ const Withdraw: FC = () => {
       if (parseFloat(value) > parseFloat(parsedAmount)) {
         return setErrorData({
           status: true,
-          message: translations[lang].insufficientBalance,
+          message: `You can't withdraw more than the deposited amount`,
         });
       }
 
       setErrorData(undefined);
       setIsMax(false);
     },
-    [lang, parsedAmount, setErrorData, setQty, translations],
+    [parsedAmount, setErrorData, setQty],
   );
 
   const withdraw = useCallback(async () => {
