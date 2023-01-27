@@ -10,7 +10,6 @@ import AccountDataContext from 'contexts/AccountDataContext';
 import numbers from 'config/numbers.json';
 
 import { WeiPerEther } from '@ethersproject/constants';
-import handleOperationError from 'utils/handleOperationError';
 import useApprove from 'hooks/useApprove';
 import analytics from 'utils/analytics';
 import { useOperationContext, usePreviewTx } from 'contexts/OperationContext';
@@ -26,6 +25,7 @@ import ModalInfoBorrowLimit from 'components/OperationsModal/Info/ModalInfoBorro
 import ModalAlert from 'components/common/modal/ModalAlert';
 import ModalSubmit from 'components/common/modal/ModalSubmit';
 import useAccountData from 'hooks/useAccountData';
+import useHandleOperationError from 'hooks/useHandleOperationError';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 
@@ -50,6 +50,8 @@ const Withdraw: FC = () => {
     marketContract,
     ETHRouterContract,
   } = useOperationContext();
+
+  const handleOperationError = useHandleOperationError();
 
   const { decimals = 18 } = useAccountData(symbol);
 
@@ -199,18 +201,19 @@ const Withdraw: FC = () => {
       setIsLoadingOp(false);
     }
   }, [
-    ETHRouterContract,
     accountData,
-    getAccountData,
-    isMax,
-    marketContract,
-    qty,
-    setErrorData,
-    setIsLoadingOp,
-    setTx,
-    symbol,
     walletAddress,
+    marketContract,
+    setIsLoadingOp,
+    symbol,
+    setTx,
+    qty,
+    getAccountData,
+    ETHRouterContract,
+    isMax,
     decimals,
+    setErrorData,
+    handleOperationError,
   ]);
 
   const handleSubmitAction = useCallback(async () => {

@@ -11,7 +11,6 @@ import AccountDataContext from 'contexts/AccountDataContext';
 import numbers from 'config/numbers.json';
 
 import useApprove from 'hooks/useApprove';
-import handleOperationError from 'utils/handleOperationError';
 import useBalance from 'hooks/useBalance';
 import analytics from 'utils/analytics';
 import { useOperationContext, usePreviewTx } from 'contexts/OperationContext';
@@ -27,6 +26,7 @@ import ModalInfoFloatingUtilizationRate from 'components/OperationsModal/Info/Mo
 import ModalAlert from 'components/common/modal/ModalAlert';
 import ModalSubmit from 'components/common/modal/ModalSubmit';
 import useAccountData from 'hooks/useAccountData';
+import useHandleOperationError from 'hooks/useHandleOperationError';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 
@@ -52,6 +52,8 @@ function Repay() {
     assetContract,
     ETHRouterContract,
   } = useOperationContext();
+
+  const handleOperationError = useHandleOperationError();
 
   const { decimals = 18 } = useAccountData(symbol);
 
@@ -174,18 +176,19 @@ function Repay() {
       setIsLoadingOp(false);
     }
   }, [
-    ETHRouterContract,
     accountData,
-    getAccountData,
-    isMax,
-    marketContract,
     qty,
-    setErrorData,
-    setIsLoadingOp,
-    setTx,
-    symbol,
+    marketContract,
     walletAddress,
+    setIsLoadingOp,
+    symbol,
+    setTx,
+    getAccountData,
+    ETHRouterContract,
+    isMax,
     decimals,
+    setErrorData,
+    handleOperationError,
   ]);
 
   const previewGasCost = useCallback(

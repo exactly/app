@@ -1,11 +1,11 @@
 import { ErrorCode } from '@ethersproject/logger';
-import { captureException } from '@sentry/nextjs';
+import { captureException as sentryCaptureException } from '@sentry/nextjs';
 import ErrorInterface from './ErrorInterface';
 
 const defaultErr = 'There was an error, please try again';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export default (error: any): string => {
+export default (error: any, captureException: typeof sentryCaptureException = sentryCaptureException): string => {
   if (!error?.code) {
     captureException(error);
     return defaultErr;
@@ -72,7 +72,7 @@ export default (error: any): string => {
     return error.message;
   }
 
-  // if none of the above, report to sentry
+  // if none of the above, report
   captureException(error);
   return defaultErr;
 };

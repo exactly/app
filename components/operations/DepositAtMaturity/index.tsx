@@ -17,7 +17,6 @@ import usePreviewer from 'hooks/usePreviewer';
 import analytics from 'utils/analytics';
 import { useOperationContext, usePreviewTx } from 'contexts/OperationContext';
 import { toPercentage } from 'utils/utils';
-import handleOperationError from 'utils/handleOperationError';
 import useAccountData from 'hooks/useAccountData';
 import { Grid } from '@mui/material';
 import { ModalBox, ModalBoxCell, ModalBoxRow } from 'components/common/modal/ModalBox';
@@ -34,6 +33,7 @@ import ModalInfoFixedUtilizationRate from 'components/OperationsModal/Info/Modal
 import ModalInfo from 'components/common/modal/ModalInfo';
 import formatNumber from 'utils/formatNumber';
 import ModalInfoEditableSlippage from 'components/OperationsModal/Info/ModalInfoEditableSlippage';
+import useHandleOperationError from 'hooks/useHandleOperationError';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 const DEFAULT_SLIPPAGE = (100 * numbers.slippage).toFixed(2);
@@ -61,6 +61,8 @@ const DepositAtMaturity: FC = () => {
     assetContract,
     ETHRouterContract,
   } = useOperationContext();
+
+  const handleOperationError = useHandleOperationError();
 
   const [rawSlippage, setRawSlippage] = useState(DEFAULT_SLIPPAGE);
   const [fixedRate, setFixedRate] = useState<number | undefined>();
@@ -217,19 +219,20 @@ const DepositAtMaturity: FC = () => {
       setIsLoadingOp(false);
     }
   }, [
-    ETHRouterContract,
     accountData,
     date,
-    getAccountData,
-    marketContract,
     qty,
-    setErrorData,
-    setIsLoadingOp,
-    setTx,
-    slippage,
-    symbol,
+    ETHRouterContract,
+    marketContract,
     walletAddress,
     decimals,
+    slippage,
+    symbol,
+    setTx,
+    getAccountData,
+    setErrorData,
+    handleOperationError,
+    setIsLoadingOp,
   ]);
 
   const handleSubmitAction = useCallback(async () => {

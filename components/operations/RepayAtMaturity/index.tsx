@@ -14,7 +14,6 @@ import { useWeb3 } from 'hooks/useWeb3';
 import numbers from 'config/numbers.json';
 
 import useApprove from 'hooks/useApprove';
-import handleOperationError from 'utils/handleOperationError';
 import useBalance from 'hooks/useBalance';
 import analytics from 'utils/analytics';
 import { useOperationContext, usePreviewTx } from 'contexts/OperationContext';
@@ -33,6 +32,7 @@ import ModalInfoEditableSlippage from 'components/OperationsModal/Info/ModalInfo
 import ModalAlert from 'components/common/modal/ModalAlert';
 import ModalSubmit from 'components/common/modal/ModalSubmit';
 import ModalInfoBorrowLimit from 'components/OperationsModal/Info/ModalInfoBorrowLimit';
+import useHandleOperationError from 'hooks/useHandleOperationError';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 const DEFAULT_SLIPPAGE = (numbers.slippage * 100).toFixed(2);
@@ -60,6 +60,8 @@ const RepayAtMaturity: FC = () => {
     assetContract,
     ETHRouterContract,
   } = useOperationContext();
+
+  const handleOperationError = useHandleOperationError();
 
   const [penaltyAssets, setPenaltyAssets] = useState(Zero);
   const [positionAssetsAmount, setPositionAssetsAmount] = useState(Zero);
@@ -242,6 +244,7 @@ const RepayAtMaturity: FC = () => {
     accountData,
     date,
     getAccountData,
+    handleOperationError,
     marketContract,
     maxAmountToRepay,
     positionAssetsAmount,

@@ -37,7 +37,7 @@ import ModalInfoEditableSlippage from 'components/OperationsModal/Info/ModalInfo
 import ModalAlert from 'components/common/modal/ModalAlert';
 import ModalSubmit from 'components/common/modal/ModalSubmit';
 import useAccountData from 'hooks/useAccountData';
-import handleOperationError from 'utils/handleOperationError';
+import useHandleOperationError from 'hooks/useHandleOperationError';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 const DEFAULT_SLIPPAGE = (numbers.slippage * 100).toFixed(2);
@@ -65,6 +65,8 @@ const BorrowAtMaturity: FC = () => {
     assetContract,
     ETHRouterContract,
   } = useOperationContext();
+
+  const handleOperationError = useHandleOperationError();
 
   const { decimals = 18 } = useAccountData(symbol);
 
@@ -303,20 +305,21 @@ const BorrowAtMaturity: FC = () => {
       setIsLoadingOp(false);
     }
   }, [
-    ETHRouterContract,
+    setIsLoadingOp,
+    fixedRate,
+    slippage,
     accountData,
     date,
-    fixedRate,
-    getAccountData,
-    marketContract,
     qty,
-    setErrorData,
-    setIsLoadingOp,
-    setTx,
-    slippage,
-    symbol,
     walletAddress,
     decimals,
+    setErrorData,
+    symbol,
+    setTx,
+    getAccountData,
+    ETHRouterContract,
+    marketContract,
+    handleOperationError,
   ]);
 
   const updateAPR = useCallback(async () => {

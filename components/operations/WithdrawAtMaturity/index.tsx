@@ -12,7 +12,6 @@ import { useWeb3 } from 'hooks/useWeb3';
 import numbers from 'config/numbers.json';
 
 import useApprove from 'hooks/useApprove';
-import handleOperationError from 'utils/handleOperationError';
 import usePreviewer from 'hooks/usePreviewer';
 import analytics from 'utils/analytics';
 import { useOperationContext, usePreviewTx } from 'contexts/OperationContext';
@@ -32,6 +31,7 @@ import ModalInfoAmount from 'components/OperationsModal/Info/ModalInfoAmount';
 import formatNumber from 'utils/formatNumber';
 import ModalInfo from 'components/common/modal/ModalInfo';
 import ModalInfoMaturityStatus from 'components/OperationsModal/Info/ModalInfoMaturityStatus';
+import useHandleOperationError from 'hooks/useHandleOperationError';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 const DEFAULT_SLIPPAGE = (100 * numbers.slippage).toFixed(2);
@@ -58,6 +58,8 @@ const WithdrawAtMaturity: FC = () => {
     marketContract,
     ETHRouterContract,
   } = useOperationContext();
+
+  const handleOperationError = useHandleOperationError();
 
   const [rawSlippage, setRawSlippage] = useState(DEFAULT_SLIPPAGE);
 
@@ -113,7 +115,7 @@ const WithdrawAtMaturity: FC = () => {
   useEffect(() => {
     if (errorData?.status) return;
     previewWithdrawAtMaturity().catch((error) => setErrorData({ status: true, message: handleOperationError(error) }));
-  }, [previewWithdrawAtMaturity, errorData?.status, setErrorData]);
+  }, [previewWithdrawAtMaturity, errorData?.status, setErrorData, handleOperationError]);
 
   const previewGasCost = useCallback(
     async (quantity: string): Promise<BigNumber | undefined> => {
@@ -260,6 +262,7 @@ const WithdrawAtMaturity: FC = () => {
     minAmountToWithdraw,
     decimals,
     setErrorData,
+    handleOperationError,
   ]);
 
   const handleSubmitAction = useCallback(async () => {
