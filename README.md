@@ -63,3 +63,7 @@ npm run dev
 We use Vercel. New pull requests will be deployed will receive previews deployed to be reviewed.
 
 Any code merged to `main` will be immediately deployed to production.
+
+## License
+
+Licensed under the [BUSL-1.1 License](./LICENSE).
