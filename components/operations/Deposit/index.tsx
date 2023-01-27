@@ -5,13 +5,9 @@ import { WeiPerEther } from '@ethersproject/constants';
 import ModalTxCost from 'components/common/modal/ModalTxCost';
 import ModalGif from 'components/common/modal/ModalGif';
 
-import { LangKeys } from 'types/Lang';
-
-import LangContext from 'contexts/LangContext';
 import { useWeb3 } from 'hooks/useWeb3';
 import AccountDataContext from 'contexts/AccountDataContext';
 
-import keys from './translations.json';
 import numbers from 'config/numbers.json';
 import useApprove from 'hooks/useApprove';
 import useBalance from 'hooks/useBalance';
@@ -55,9 +51,6 @@ const Deposit: FC = () => {
     assetContract,
     ETHRouterContract,
   } = useOperationContext();
-
-  const lang: string = useContext(LangContext);
-  const translations: { [key: string]: LangKeys } = keys;
 
   const { decimals = 18 } = useAccountData(symbol);
 
@@ -121,14 +114,14 @@ const Deposit: FC = () => {
       if (walletBalance && parseFloat(value) > parseFloat(walletBalance)) {
         return setErrorData({
           status: true,
-          message: translations[lang].insufficientBalance,
+          message: `You can't deposit more than you have in your wallet`,
           component: 'input',
         });
       }
 
       setErrorData(undefined);
     },
-    [setQty, walletBalance, setErrorData, translations, lang],
+    [setQty, walletBalance, setErrorData],
   );
 
   const deposit = useCallback(async () => {

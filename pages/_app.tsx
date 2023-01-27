@@ -7,7 +7,6 @@ import { Web3Modal } from '@web3modal/react';
 import { WagmiConfig } from 'wagmi';
 import type { AppProps } from 'next/app';
 
-import { LangProvider } from 'contexts/LangContext';
 import { ModalStatusProvider } from 'contexts/ModalStatusContext';
 import { MarketProvider } from 'contexts/MarketContext';
 import { AccountDataProvider } from 'contexts/AccountDataContext';
@@ -31,35 +30,33 @@ export default function App({ Component, pageProps }: AppProps) {
       </Head>
       <ThemeProvider>
         <MUIThemeProvider theme={theme}>
-          <LangProvider value={'en'}>
-            <WagmiConfig client={wagmi}>
-              <AccountDataProvider>
-                <MarketProvider>
-                  <ModalStatusProvider>
-                    <Grid maxWidth={maxWidth} mx="auto" height="100%">
-                      <Box display="flex" flexDirection="column" mx={1} height="100%">
-                        <Navbar />
-                        <main style={{ flexGrow: 1 }}>
-                          <Component {...pageProps} />
-                        </main>
-                        <Footer />
-                      </Box>
-                    </Grid>
-                  </ModalStatusProvider>
-                </MarketProvider>
-              </AccountDataProvider>
-            </WagmiConfig>
-            <Web3Modal
-              projectId={walletConnectId}
-              defaultChain={defaultChain}
-              ethereumClient={web3modal}
-              themeMode="light"
-              themeColor="blackWhite"
-              themeBackground="themeColor"
-              walletImages={{ safe: '/img/wallets/safe.png' }}
-              chainImages={{ 1: '/img/networks/1.svg' }}
-            />
-          </LangProvider>
+          <WagmiConfig client={wagmi}>
+            <AccountDataProvider>
+              <MarketProvider>
+                <ModalStatusProvider>
+                  <Grid maxWidth={maxWidth} mx="auto" height="100%">
+                    <Box display="flex" flexDirection="column" mx={1} height="100%">
+                      <Navbar />
+                      <main style={{ flexGrow: 1 }}>
+                        <Component {...pageProps} />
+                      </main>
+                      <Footer />
+                    </Box>
+                  </Grid>
+                </ModalStatusProvider>
+              </MarketProvider>
+            </AccountDataProvider>
+          </WagmiConfig>
+          <Web3Modal
+            projectId={walletConnectId}
+            defaultChain={defaultChain}
+            ethereumClient={web3modal}
+            themeMode="light"
+            themeColor="blackWhite"
+            themeBackground="themeColor"
+            walletImages={{ safe: '/img/wallets/safe.png' }}
+            chainImages={{ 1: '/img/networks/1.svg' }}
+          />
         </MUIThemeProvider>
       </ThemeProvider>
     </>

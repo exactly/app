@@ -1,11 +1,5 @@
-import React, { FC, useContext } from 'react';
+import React, { FC } from 'react';
 import Grid from '@mui/material/Grid';
-
-import LangContext from 'contexts/LangContext';
-
-import { LangKeys } from 'types/Lang';
-
-import keys from './translations.json';
 
 import formatNumber from 'utils/formatNumber';
 import HeaderInfo from 'components/common/HeaderInfo';
@@ -32,28 +26,25 @@ const MaturityPoolInfo: FC<MaturityPoolInfoProps> = ({
   bestBorrowRate,
   bestBorrowMaturity,
 }) => {
-  const lang: string = useContext(LangContext);
-  const translations: { [key: string]: LangKeys } = keys;
-
   const { minAPRValue } = numbers;
 
   const itemsInfo: ItemInfoProps[] = [
     {
-      label: translations[lang].totalDeposited,
+      label: 'Total Deposits',
       value: totalDeposited != null ? `$${formatNumber(totalDeposited)}` : undefined,
     },
     {
-      label: translations[lang].totalBorrowed,
+      label: 'Total Borrows',
       value: totalBorrowed != null ? `$${formatNumber(totalBorrowed)}` : undefined,
     },
     {
-      label: translations[lang].bestDepositRate,
+      label: 'Best Deposit APR',
       value: toPercentage(bestDepositRate && bestDepositRate > minAPRValue ? bestDepositRate : undefined),
       underLabel: bestDepositMaturity ? parseTimestamp(bestDepositMaturity) : undefined,
       tooltipTitle: 'The highest fixed Interest rate for a deposit up to de optimal deposit size.',
     },
     {
-      label: translations[lang].bestBorrowRate,
+      label: 'Best Borrow APR',
       value: toPercentage(bestBorrowRate && bestBorrowRate > minAPRValue ? bestBorrowRate : undefined),
       underLabel: bestBorrowMaturity ? parseTimestamp(bestBorrowMaturity) : undefined,
       tooltipTitle: 'The lowest fixed Borrowing Interest rate (APR) at current utilization levels.',

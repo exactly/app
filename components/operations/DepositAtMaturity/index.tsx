@@ -5,16 +5,12 @@ import { WeiPerEther, Zero } from '@ethersproject/constants';
 import ModalTxCost from 'components/common/modal/ModalTxCost';
 import ModalGif from 'components/common/modal/ModalGif';
 
-import { LangKeys } from 'types/Lang';
-
 import numbers from 'config/numbers.json';
 
-import LangContext from 'contexts/LangContext';
 import { useWeb3 } from 'hooks/useWeb3';
 import { MarketContext } from 'contexts/MarketContext';
 import AccountDataContext from 'contexts/AccountDataContext';
 
-import keys from './translations.json';
 import useBalance from 'hooks/useBalance';
 import useApprove from 'hooks/useApprove';
 import usePreviewer from 'hooks/usePreviewer';
@@ -47,9 +43,6 @@ const DepositAtMaturity: FC = () => {
   const { walletAddress } = useWeb3();
   const { date } = useContext(MarketContext);
   const { accountData, getAccountData } = useContext(AccountDataContext);
-
-  const lang: string = useContext(LangContext);
-  const translations: { [key: string]: LangKeys } = keys;
 
   const {
     symbol,
@@ -163,7 +156,7 @@ const DepositAtMaturity: FC = () => {
       if (walletBalance && parseFloat(value) > parseFloat(walletBalance)) {
         return setErrorData({
           status: true,
-          message: translations[lang].insufficientBalance,
+          message: `You can't deposit more than you have in your wallet`,
           component: 'input',
         });
       }
@@ -171,7 +164,7 @@ const DepositAtMaturity: FC = () => {
 
       setGtMaxYield(!!optimalDepositAmount && parseFixed(value || '0', decimals).gt(optimalDepositAmount));
     },
-    [setQty, walletBalance, setErrorData, translations, lang, optimalDepositAmount, decimals],
+    [setQty, walletBalance, setErrorData, optimalDepositAmount, decimals],
   );
 
   const deposit = useCallback(async () => {

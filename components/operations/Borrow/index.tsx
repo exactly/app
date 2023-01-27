@@ -5,16 +5,13 @@ import { WeiPerEther, Zero } from '@ethersproject/constants';
 import ModalTxCost from 'components/common/modal/ModalTxCost';
 import ModalGif from 'components/common/modal/ModalGif';
 
-import { LangKeys } from 'types/Lang';
 import { HealthFactor } from 'types/HealthFactor';
 
 import getBeforeBorrowLimit from 'utils/getBeforeBorrowLimit';
 
-import LangContext from 'contexts/LangContext';
 import { useWeb3 } from 'hooks/useWeb3';
 import AccountDataContext from 'contexts/AccountDataContext';
 
-import keys from './translations.json';
 import numbers from 'config/numbers.json';
 import useApprove from 'hooks/useApprove';
 import useBalance from 'hooks/useBalance';
@@ -40,9 +37,6 @@ const Borrow: FC = () => {
   const { operation } = useModalStatus();
   const { walletAddress } = useWeb3();
   const { accountData, getAccountData } = useContext(AccountDataContext);
-
-  const lang: string = useContext(LangContext);
-  const translations: { [key: string]: LangKeys } = keys;
 
   const {
     symbol,
@@ -168,12 +162,17 @@ const Borrow: FC = () => {
 
       setQty(value);
 
-      if (!hasCollateral) return setErrorData({ status: true, message: translations[lang].noCollateral });
+      if (!hasCollateral)
+        return setErrorData({
+          status: true,
+          message:
+            'In order to borrow you need to have a deposit in the Variable Rate Pool marked as collateral in your Dashboard',
+        });
 
       if (liquidity.lt(parseFixed(value || '0', decimals))) {
         return setErrorData({
           status: true,
-          message: translations[lang].availableLiquidityError,
+          message: 'There is not enough liquidity',
         });
       }
 
@@ -186,12 +185,12 @@ const Borrow: FC = () => {
       ) {
         return setErrorData({
           status: true,
-          message: translations[lang].borrowLimit,
+          message: `You can't borrow more than your borrow limit`,
         });
       }
       setErrorData(undefined);
     },
-    [liquidity, accountData, symbol, setQty, hasCollateral, setErrorData, translations, lang, decimals],
+    [liquidity, accountData, symbol, setQty, hasCollateral, setErrorData, decimals],
   );
 
   const borrow = useCallback(async () => {

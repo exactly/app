@@ -1,12 +1,7 @@
 import React, { FC, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { WeiPerEther } from '@ethersproject/constants';
 
-import LangContext from 'contexts/LangContext';
 import AccountDataContext from 'contexts/AccountDataContext';
-
-import { LangKeys } from 'types/Lang';
-
-import keys from './translations.json';
 
 import formatNumber from 'utils/formatNumber';
 import queryRates from 'utils/queryRates';
@@ -29,8 +24,6 @@ type FloatingPoolInfoProps = {
 const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol, eMarketAddress }) => {
   const { chain } = useWeb3();
   const { accountData } = useContext(AccountDataContext);
-  const lang: string = useContext(LangContext);
-  const translations: { [key: string]: LangKeys } = keys;
 
   const { floatingBorrowRate } = useAccountData(symbol);
 
@@ -72,29 +65,29 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol, eMarketAddress })
 
   const itemsInfo: ItemInfoProps[] = [
     {
-      label: translations[lang].totalDeposited,
+      label: 'Total Deposits',
       value: deposited != null ? `$${formatNumber(deposited)}` : undefined,
     },
     {
-      label: translations[lang].totalBorrowed,
+      label: 'Total Borrows',
       value: borrowed != null ? `$${formatNumber(borrowed)}` : undefined,
     },
     {
-      label: translations[lang].TVL,
+      label: 'Total Available',
       value: deposited != null && borrowed != null ? `$${formatNumber(deposited - borrowed)}` : undefined,
     },
     {
-      label: translations[lang].depositAPR,
+      label: 'Deposit APR',
       value: toPercentage(depositAPR),
       tooltipTitle: 'Change in the underlying Variable Rate Pool shares value over the last 15 minutes, annualized.',
     },
     {
-      label: translations[lang].borrowAPR,
+      label: 'Borrow APR',
       value: borrowAPR,
       tooltipTitle: 'Change in the underlying Variable Rate Pool shares value over the last hour, annualized.',
     },
     {
-      label: translations[lang].utilizationRate,
+      label: 'Utilization Rate',
       value: toPercentage(deposited != null && borrowed != null && deposited > 0 ? borrowed / deposited : undefined),
     },
   ];
