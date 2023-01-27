@@ -1,5 +1,5 @@
 import React from 'react';
-import { InputBase, InputBaseComponentProps } from '@mui/material';
+import { InputBase, InputBaseComponentProps, useMediaQuery, useTheme } from '@mui/material';
 import { NumericFormat } from 'react-number-format';
 
 type CustomProps = {
@@ -37,6 +37,9 @@ type Props = {
 } & CustomProps;
 
 function ModalInput({ value, name, decimals, onValueChange }: Props) {
+  const { breakpoints } = useTheme();
+  const isMobile = useMediaQuery(breakpoints.down('sm'));
+
   return (
     <InputBase
       inputProps={{
@@ -50,7 +53,7 @@ function ModalInput({ value, name, decimals, onValueChange }: Props) {
         decimals: decimals,
       }}
       value={value}
-      autoFocus
+      autoFocus={!isMobile}
       sx={{
         paddingTop: 0.5,
         flexGrow: 1,
