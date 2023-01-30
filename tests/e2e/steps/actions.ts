@@ -27,6 +27,6 @@ export const executeOperation = ({ type, action, symbol, amount }: Params) => {
 
 export const deposit = (params: Omit<Params, 'action'>) => {
   executeOperation({ action: 'deposit', ...params });
-  cy.contains('Transaction Completed!').should('be.visible');
+  cy.contains('Transaction completed').should('be.visible');
   cy.getByTestId('modal-close').click();
 };

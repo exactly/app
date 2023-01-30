@@ -25,7 +25,7 @@ export const setupFork = ({ chainId = '1' }: ForkParams = {}) => {
       rpcUrl: rpcURL(forkId),
       isTestnet: false,
     });
-    cy.getMetamaskWalletAddress().then((address) => (userAddress = address));
+    cy.fetchMetamaskWalletAddress().then((address) => (userAddress = address));
   });
 
   after(async () => {
