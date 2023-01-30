@@ -95,7 +95,7 @@ export const getBalance = async (forkUrl: string, address: string) => {
 
 const transferERC20 = async (
   forkUrl: string,
-  symbol: string,
+  symbol: keyof typeof TOKENS,
   fromAddress: string,
   toAddress: string,
   amount: number,
@@ -130,7 +130,7 @@ const getTopHolder = async (tokenAddress: string) => {
     .then((data) => data.holders[0].address);
 };
 
-export const transferToken = async (forkUrl: string, address: string, symbol: string, amount: number) => {
+export const transferToken = async (forkUrl: string, address: string, symbol: keyof typeof TOKENS, amount: number) => {
   const from = await getTopHolder(TOKENS[symbol].address);
   await transferERC20(forkUrl, symbol, from, address, amount);
 };
