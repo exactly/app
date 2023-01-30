@@ -3,7 +3,9 @@ version: '3.9'
 services:
   synpress:
     container_name: synpress
-    build: .
+    build:
+      context: .
+    image: exactly/synpress
     environment:
       DISPLAY: display:0.0
       CYPRESS_TENDERLY_ACCESS_KEY: ${CYPRESS_TENDERLY_ACCESS_KEY}
