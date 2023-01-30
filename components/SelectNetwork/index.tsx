@@ -31,7 +31,10 @@ const SelectNetwork: FC = () => {
   }, [close, open]);
   useEffect(() => () => unsubscribe?.(), [unsubscribe]);
 
-  const isSupportedChain = useMemo(() => chain?.id && chains.map((c) => c.id).includes(chain.id), [chain?.id, chains]);
+  const isSupportedChain = useMemo(
+    () => chain?.id && (chains.map((c) => c.id) as number[]).includes(chain.id),
+    [chain?.id, chains],
+  );
 
   const buttonBgColor = useMemo(
     () => (chain?.id === mainnet.id || chain?.id === goerli.id ? '#627EEA' : '#EE2939'),
