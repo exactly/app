@@ -1,4 +1,5 @@
-import { createFork, deleteFork, rpcURL, transferAllTokens } from '../utils/tenderly';
+import { init, createFork, deleteFork, rpcURL, setBalance } from '../utils/tenderly';
+import type { Balance } from '../utils/tenderly';
 
 export const connectMetamask = () => {
   cy.getByTestId('connect-wallet').click();
@@ -14,6 +15,7 @@ export const setupFork = ({ chainId = '1' }: ForkParams = {}) => {
   let userAddress: string | undefined = undefined;
 
   before(async () => {
+    await init();
     forkId = await createFork(chainId);
   });
 
@@ -44,6 +46,6 @@ export const setupFork = ({ chainId = '1' }: ForkParams = {}) => {
       });
     },
     userAddress: () => userAddress,
-    setUserBalance: () => transferAllTokens(rpcURL(forkId), userAddress),
+    setBalance: (address: string, balance: Balance) => setBalance(rpcURL(forkId), address, balance),
   };
 };

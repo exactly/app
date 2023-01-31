@@ -12,6 +12,7 @@ export default (symbol?: string, assetContract?: ERC20): string | undefined => {
     token: symbol === 'WETH' ? undefined : (assetContract?.address as `0x${string}` | undefined),
     chainId: chain.id,
   });
+
   return useMemo(() => {
     if (!data || (!assetContract?.address && symbol !== 'WETH')) return;
     if (error) return;

@@ -102,7 +102,7 @@ function OperationsModal() {
             }}
             id="draggable-dialog-title"
           >
-            <Typography fontWeight={700} fontSize={24}>
+            <Typography fontWeight={700} fontSize={24} data-testid="modal-title">
               {capitalize(operation?.replaceAll('AtMaturity', '') ?? '')}
             </Typography>
             <TypeSwitch />

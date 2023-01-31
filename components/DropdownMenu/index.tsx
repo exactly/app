@@ -8,6 +8,7 @@ interface Props<T> {
   onChange: (value: T) => void;
   renderValue: ReactNode;
   renderOption: (value: T) => ReactNode;
+  'data-testid'?: string;
 }
 
 function InnerButton({ children }: PropsWithChildren) {
@@ -40,7 +41,7 @@ function OptionItem({ onClick, children }: PropsWithChildren<{ onClick: () => vo
   );
 }
 
-const DropdownMenu = <T,>({ label, options, onChange, renderValue, renderOption }: Props<T>) => {
+const DropdownMenu = <T,>({ label, options, onChange, renderValue, renderOption, 'data-testid': testId }: Props<T>) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
   const handleClick = useCallback((event: React.MouseEvent<HTMLElement>) => {
@@ -62,6 +63,7 @@ const DropdownMenu = <T,>({ label, options, onChange, renderValue, renderOption 
         aria-expanded={open ? 'true' : undefined}
         onClick={handleClick}
         sx={{ borderRadius: '16px', p: 1, ml: -1 }}
+        data-testid={testId}
       >
         <InnerButton>{renderValue}</InnerButton>
       </Button>

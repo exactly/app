@@ -6,7 +6,7 @@ declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Cypress {
     interface Chainable {
-      getByTestId: typeof this.get;
+      getByTestId: typeof cy.get;
     }
   }
 

@@ -26,6 +26,8 @@ function Selector({ label, backgroundColor, selected, ...props }: SelectorProps)
           backgroundColor: selected ? backgroundColor : undefined,
         },
       })}
+      aria-selected={selected}
+      data-testid={`modal-type-switch-${label}`}
       {...props}
     >
       {label}

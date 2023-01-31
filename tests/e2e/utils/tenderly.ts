@@ -2,10 +2,6 @@ import { hexValue } from '@ethersproject/bytes';
 import { Contract } from '@ethersproject/contracts';
 import { StaticJsonRpcProvider } from '@ethersproject/providers';
 import { formatFixed, parseFixed } from '@ethersproject/bignumber';
-import DAI from '@exactly-protocol/protocol/deployments/mainnet/DAI.json';
-import USDC from '@exactly-protocol/protocol/deployments/mainnet/USDC.json';
-import WBTC from '@exactly-protocol/protocol/deployments/mainnet/WBTC.json';
-import wstETH from '@exactly-protocol/protocol/deployments/mainnet/wstETH.json';
 
 const { TENDERLY_USER, TENDERLY_PROJECT, TENDERLY_ACCESS_KEY } = Cypress.env();
 
@@ -15,7 +11,7 @@ if (!TENDERLY_USER || !TENDERLY_PROJECT || !TENDERLY_ACCESS_KEY) {
 
 const FORK_URL = `https://api.tenderly.co/api/v1/account/${TENDERLY_USER}/project/${TENDERLY_PROJECT}/fork`;
 
-const HEADERS = {
+const headers = {
   Accept: 'application/json',
   'Content-Type': 'application/json',
   'X-Access-Key': TENDERLY_ACCESS_KEY as string,
@@ -27,27 +23,34 @@ type ERC20Token = {
   decimals: number;
 };
 
-const TOKENS: { [key: string]: ERC20Token } = {
-  DAI: {
-    ...DAI,
-    abi: JSON.stringify(DAI.abi),
-    decimals: 18,
-  },
-  USDC: {
-    ...USDC,
-    abi: JSON.stringify(USDC.abi),
-    decimals: 6,
-  },
-  WBTC: {
-    ...WBTC,
-    abi: JSON.stringify(WBTC.abi),
-    decimals: 8,
-  },
-  wstETH: {
-    ...wstETH,
-    abi: JSON.stringify(wstETH.abi),
-    decimals: 18,
-  },
+const ERC20TokenSymbols = ['DAI', 'USDC', 'WBTC', 'wstETH'] as const;
+export type ERC20TokenSymbol = (typeof ERC20TokenSymbols)[number];
+export type Coin = ERC20TokenSymbol | 'ETH';
+
+const decimals: Record<Coin, number> = {
+  ETH: 18,
+  DAI: 18,
+  USDC: 6,
+  WBTC: 8,
+  wstETH: 18,
+};
+
+type Tokens = {
+  [key in ERC20TokenSymbol]?: ERC20Token;
+};
+
+const tokens: Tokens = {};
+
+export const init = async () => {
+  for (const symbol of ERC20TokenSymbols) {
+    const contract = await import(`@exactly-protocol/protocol/deployments/mainnet/${symbol}.json`);
+    console.log(contract);
+    tokens[symbol] = {
+      ...contract,
+      abi: JSON.stringify(contract.abi),
+      decimals: decimals[symbol],
+    };
+  }
 };
 
 export const createFork = async (networkId = '1', blockNumber = undefined): Promise<string> => {
@@ -56,7 +59,7 @@ export const createFork = async (networkId = '1', blockNumber = undefined): Prom
     block_number: blockNumber,
   });
 
-  const rawResponse = await fetch(FORK_URL, { method: 'POST', headers: HEADERS, body });
+  const rawResponse = await fetch(FORK_URL, { method: 'POST', headers, body });
   const response = await rawResponse.json();
   return response.simulation_fork.id as string;
 };
@@ -64,21 +67,14 @@ export const createFork = async (networkId = '1', blockNumber = undefined): Prom
 export const deleteFork = async (forkId: string): Promise<void> => {
   const TENDERLY_FORK_API = `${FORK_URL}/${forkId}`;
 
-  await fetch(TENDERLY_FORK_API, { method: 'DELETE', headers: HEADERS });
+  await fetch(TENDERLY_FORK_API, { method: 'DELETE', headers });
 };
 
 export const rpcURL = (forkId: string) => {
   return `https://rpc.tenderly.co/fork/${forkId}`;
 };
 
-export const increaseBalance = async (forkUrl: string, address: string, amount: number) => {
-  const provider = new StaticJsonRpcProvider(forkUrl);
-  const params = [[address], hexValue(parseFixed(amount.toString(), 18).toHexString())];
-
-  return await provider.send('tenderly_addBalance', params);
-};
-
-export const setBalance = async (forkUrl: string, address: string, amount: number) => {
+const setNativeBalance = async (forkUrl: string, address: string, amount: number) => {
   const provider = new StaticJsonRpcProvider(forkUrl);
   const params = [[address], hexValue(parseFixed(amount.toString(), 18).toHexString())];
 
@@ -95,19 +91,19 @@ export const getBalance = async (forkUrl: string, address: string) => {
 
 const transferERC20 = async (
   forkUrl: string,
-  symbol: keyof typeof TOKENS,
+  symbol: ERC20TokenSymbol,
   fromAddress: string,
   toAddress: string,
   amount: number,
 ) => {
   const provider = new StaticJsonRpcProvider(forkUrl);
+  const token = tokens[symbol];
   const signer = provider.getSigner();
-  const token = TOKENS[symbol];
   const tokenContract = new Contract(token.address, token.abi, signer);
 
   const tokenAmount = hexValue(parseFixed(amount.toString(), token.decimals).toHexString());
 
-  await setBalance(forkUrl, fromAddress, 10000);
+  await setNativeBalance(forkUrl, fromAddress, 10);
   const unsignedTx = await tokenContract.populateTransaction.approve(await signer.getAddress(), tokenAmount);
   const transactionParameters = [
     {
@@ -130,14 +126,23 @@ const getTopHolder = async (tokenAddress: string) => {
     .then((data) => data.holders[0].address);
 };
 
-export const transferToken = async (forkUrl: string, address: string, symbol: keyof typeof TOKENS, amount: number) => {
-  const from = await getTopHolder(TOKENS[symbol].address);
+const setERC20TokenBalance = async (forkUrl: string, address: string, symbol: ERC20TokenSymbol, amount: number) => {
+  const from = await getTopHolder(tokens[symbol].address);
   await transferERC20(forkUrl, symbol, from, address, amount);
 };
 
-export const transferAllTokens = async (forkUrl: string, address: string) => {
-  await setBalance(forkUrl, address, 1000000);
-  for (const symbol of Object.keys(TOKENS)) {
-    await transferToken(forkUrl, address, symbol, 1000);
+export type Balance = {
+  [key in Coin]?: number;
+};
+
+export const setBalance = async (forkUrl: string, address: string, balance: Balance) => {
+  for (const symbol of Object.keys(balance) as Array<keyof typeof balance>) {
+    switch (symbol) {
+      case 'ETH':
+        await setNativeBalance(forkUrl, address, balance[symbol]);
+        break;
+      default:
+        await setERC20TokenBalance(forkUrl, address, symbol, balance[symbol]);
+    }
   }
 };
