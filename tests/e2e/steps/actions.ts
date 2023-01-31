@@ -1,32 +1,31 @@
+import { Coin } from '../utils/tenderly';
+import { pastParticiple, capitalize } from '../utils/strings';
+import * as Modal from './modal';
+import type { Operation } from './modal';
+
 type Params = {
   type: 'floating' | 'fixed';
-  action: string;
-  symbol: string;
+  action: Operation;
+  symbol: Coin;
   amount: string;
 };
 
-export const executeOperation = ({ type, action, symbol, amount }: Params) => {
-  cy.getByTestId(`${type}-${action}-${symbol}`).click();
-  cy.getByTestId(`modal-input`).type(`${amount}`);
+const executeOperation = ({ type, action, symbol, amount }: Params) => {
+  Modal.open(type, action, symbol);
 
-  cy.waitUntil(
-    () => cy.getByTestId('modal-submit', { timeout: 15000 }).then(($btn) => !$btn.hasClass('MuiLoadingButton-loading')),
-    { timeout: 15000, interval: 1000 },
-  );
+  Modal.input(amount);
+  Modal.waitForSubmit();
 
-  cy.getByTestId('modal').then(($modal) => {
-    if ($modal.find('[data-testid="modal-approve"]').length) {
-      cy.getByTestId('modal-approve', { timeout: 15000 }).click();
-      cy.confirmMetamaskPermissionToSpend();
-    }
-  });
+  Modal.approveIfRequired();
 
-  cy.getByTestId('modal-submit', { timeout: 15000 }).click();
-  cy.confirmMetamaskTransaction();
+  Modal.submit();
+  Modal.waitForTransaction(action);
+
+  Modal.checkTransactionStatus('success', `${capitalize(pastParticiple(action))} ${amount} ${symbol}`);
+
+  Modal.close();
 };
 
 export const deposit = (params: Omit<Params, 'action'>) => {
   executeOperation({ action: 'deposit', ...params });
-  cy.contains('Transaction completed').should('be.visible');
-  cy.getByTestId('modal-close').click();
 };

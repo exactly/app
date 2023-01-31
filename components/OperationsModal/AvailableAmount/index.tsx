@@ -13,7 +13,7 @@ export type Props = {
 function AvailableAmount({ symbol, amount, label, onMax }: Props) {
   return amount ? (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-      <Typography color="grey.600" fontSize={14} fontWeight={500}>
+      <Typography color="grey.600" fontSize={14} fontWeight={500} data-testid="modal-wallet-balance">
         {label}: {formatNumber(amount, symbol)}
       </Typography>
       <Button
@@ -28,6 +28,7 @@ function AvailableAmount({ symbol, amount, label, onMax }: Props) {
           fontWeight: 700,
           fontSize: 12,
         }}
+        data-testid="modal-on-max"
       >
         Max
       </Button>

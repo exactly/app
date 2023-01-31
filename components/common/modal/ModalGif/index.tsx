@@ -43,12 +43,12 @@ function ModalGif({ tx, tryAgain }: Props) {
           />
         )}
         <Box display="flex" flexDirection="column" alignItems="center">
-          <Typography variant="h6" fontSize="16px">
+          <Typography variant="h6" fontSize="16px" data-testid="modal-transaction-status">
             {isLoading && `Sending ${operationName}...`}
             {isSuccess && 'Transaction completed'}
             {isError && 'Transaction error'}
           </Typography>
-          <Typography fontSize="14px" fontWeight={500} color="grey.500">
+          <Typography fontSize="14px" fontWeight={500} color="grey.500" data-testid="modal-transaction-summary">
             {isLoading && `${capitalize(operationName)}ing ${qty} ${formatSymbol(symbol)}`}
             {isSuccess && `${capitalize(pastParticiple(operationName))} ${qty} ${formatSymbol(symbol)}`}
             {isError && 'Something went wrong'}

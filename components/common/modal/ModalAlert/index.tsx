@@ -61,7 +61,7 @@ function ModalAlert({ variant = 'info', message }: Props) {
   const Icon = icon[variant];
 
   return (
-    <Box sx={containerSx} display="flex" alignItems="flex-center">
+    <Box sx={containerSx} display="flex" alignItems="flex-center" data-testid={`modal-alert-${variant}`}>
       <Icon sx={iconSx} />
       <Typography sx={textSx}>{message}</Typography>
     </Box>

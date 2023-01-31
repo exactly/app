@@ -4,6 +4,7 @@ import { jsonRpcProvider } from 'wagmi/providers/jsonRpc';
 import { mainnet, goerli } from 'wagmi/chains';
 import { publicProvider } from 'wagmi/providers/public';
 import { SafeConnector } from './SafeConnector';
+
 declare global {
   interface Window {
     rpcURL?: string;

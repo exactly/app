@@ -50,6 +50,7 @@ function AssetSelector() {
       onChange={setMarketSymbol}
       renderValue={marketSymbol ? <Asset assetSymbol={marketSymbol} /> : null}
       renderOption={(o: string) => <Asset option assetSymbol={o} />}
+      data-testid="modal-asset-selector"
     />
   );
 }

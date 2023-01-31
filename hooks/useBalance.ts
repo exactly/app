@@ -10,6 +10,7 @@ export default (symbol?: string, assetContract?: ERC20): string | undefined => {
     address: walletAddress as `0x${string}` | undefined,
     token: symbol === 'WETH' ? undefined : (assetContract?.address as `0x${string}` | undefined),
   });
+
   return useMemo(() => {
     if (!data || (!assetContract?.address && symbol !== 'WETH')) return;
 
