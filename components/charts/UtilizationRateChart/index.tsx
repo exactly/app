@@ -4,8 +4,9 @@ import { LineChart, XAxis, Tooltip, Line, ResponsiveContainer, ReferenceLine, Ca
 
 import { toPercentage } from 'utils/utils';
 import useUtilizationRate from 'hooks/useUtilizationRate';
-import TooltipChart from './TooltipChart';
-import LoadingChart from './LoadingChart';
+import TooltipChart from '../TooltipChart';
+import LoadingChart from '../LoadingChart';
+import { Brush } from '@mui/icons-material';
 
 type Props = {
   type: 'floating' | 'fixed';
@@ -41,9 +42,15 @@ function UtilizationRateChart({ type, symbol }: Props) {
               tickFormatter={(t) => toPercentage(t, 0)}
               stroke={palette.grey[400]}
               tick={{ fill: palette.grey[500], fontWeight: 500, fontSize: 12 }}
-              height={20}
+              allowDataOverflow={true}
+              domain={[(dataMin: number) => dataMin + 0.2, (dataMax: number) => dataMax - 0.2]}
             />
+            <Brush />
             <YAxis
+              allowDataOverflow={true}
+              orientation="left"
+              type="number"
+              domain={['dataMin', 'dataMax']}
               tickFormatter={(t) => toPercentage(t, 0)}
               yAxisId="yaxis"
               axisLine={false}
