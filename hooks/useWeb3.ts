@@ -1,11 +1,18 @@
-import { useAccount, useNetwork, useSwitchNetwork } from 'wagmi';
+import { Chain, useAccount, useNetwork, useSwitchNetwork } from 'wagmi';
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import * as chains from 'wagmi/chains';
 import { defaultChain, supportedChains } from 'utils/client';
 import useDebounce from './useDebounce';
 
-export const useWeb3 = () => {
+type Web3 = {
+  isConnected: boolean;
+  walletAddress?: `0x${string}`;
+  chains: Chain[];
+  chain?: Chain;
+};
+
+export const useWeb3 = (): Web3 => {
   const { switchNetwork } = useSwitchNetwork();
   const { address } = useAccount();
   const { chain } = useNetwork();
