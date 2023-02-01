@@ -23,10 +23,13 @@ function SwitchCollateral({ symbol }: Props) {
     return getHealthFactorData(accountData);
   }, [accountData]);
 
+  const [optimistic, setOptimistic] = useState<boolean | undefined>();
+
   const checked = useMemo<boolean>(() => {
     if (!accountData) return false;
+    if (optimistic !== undefined) return optimistic;
     return accountData[symbol].isCollateral;
-  }, [accountData, symbol]);
+  }, [accountData, symbol, optimistic]);
 
   const { disabled, disabledText } = useMemo<{ disabled: boolean; disabledText?: string }>(() => {
     if (!accountData || !healthFactor) return { disabled: true };
@@ -56,6 +59,7 @@ function SwitchCollateral({ symbol }: Props) {
   const onToggle = useCallback(async () => {
     if (!accountData || !auditor) return;
     const { market } = accountData[symbol];
+    let target = !checked;
 
     setLoading(true);
     try {
@@ -64,18 +68,23 @@ function SwitchCollateral({ symbol }: Props) {
 
       await getAccountData();
     } catch (error) {
+      target = checked;
       handleOperationError(error);
     } finally {
+      setOptimistic(target);
       setLoading(false);
     }
   }, [accountData, auditor, getAccountData, symbol, checked]);
 
-  if (loading) return <CircularProgress color="primary" size={24} thickness={8} />;
+  if (loading)
+    return (
+      <CircularProgress color="primary" size={24} thickness={8} data-testid={`switch-collateral-${symbol}-loading`} />
+    );
 
   return (
     <Tooltip
       title={
-        <Typography fontSize="1.2em" fontWeight={600}>
+        <Typography fontSize="1.2em" fontWeight={600} data-testid={`switch-collateral-${symbol}-tooltip`}>
           {!checked
             ? 'Enable this asset as collateral'
             : disabledText && disabled
@@ -90,7 +99,10 @@ function SwitchCollateral({ symbol }: Props) {
         <StyledSwitch
           checked={checked}
           onChange={onToggle}
-          inputProps={{ 'aria-label': 'Use this asset as collateral' }}
+          inputProps={{
+            'aria-label': 'Use this asset as collateral',
+            'data-testid': `switch-collateral-${symbol}`,
+          }}
           disabled={disabled}
         />
       </span>
