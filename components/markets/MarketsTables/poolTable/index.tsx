@@ -9,7 +9,7 @@ import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Grid';
 import Button from '@mui/material/Button';
-import { Box, Skeleton, Tooltip } from '@mui/material';
+import { Box, Skeleton, TableSortLabel, Tooltip } from '@mui/material';
 
 import Image from 'next/image';
 import { useRouter } from 'next/router';
@@ -24,6 +24,7 @@ import numbers from 'config/numbers.json';
 
 import useAssets from 'hooks/useAssets';
 import useActionButton from 'hooks/useActionButton';
+import useSorting from 'hooks/useSorting';
 
 const { minAPRValue } = numbers;
 
@@ -38,6 +39,10 @@ export type TableHead = {
   title: string;
   tooltipTitle?: string;
   width?: string;
+  sortActive?: boolean;
+  sortDirection?: 'asc' | 'desc';
+  sort?: () => void;
+  columnKey?: keyof TableRow;
 };
 
 export type TableRow = {
@@ -50,14 +55,16 @@ export type TableRow = {
   borrowMaturity?: number;
 };
 
-const HeadCell: FC<TableHead> = ({ title, tooltipTitle, width }) => {
+const HeadCell: FC<TableHead> = ({ title, tooltipTitle, width, sortActive, sortDirection, sort }) => {
   return (
     <TableCell align="left" sx={{ minWidth: width }}>
-      <Tooltip title={tooltipTitle} placement="top" arrow>
-        <Typography variant="subtitle2" sx={{ color: 'grey.500' }} fontWeight={600} width="fit-content">
-          {title}
-        </Typography>
-      </Tooltip>
+      <TableSortLabel active={sortActive} direction={sortDirection} onClick={sort}>
+        <Tooltip title={tooltipTitle} placement="top" arrow>
+          <Typography variant="subtitle2" sx={{ color: 'grey.500' }} fontWeight={600} width="fit-content">
+            {title}
+          </Typography>
+        </Tooltip>
+      </TableSortLabel>
     </TableCell>
   );
 };
@@ -66,6 +73,7 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
   const { handleActionClick, isDisable } = useActionButton();
   const assets = useAssets();
   const defaultRows = useMemo<TableRow[]>(() => assets.map((s) => ({ symbol: s })), [assets]);
+  const { setOrderBy, sortData, direction: sortDirection, isActive: sortActive } = useSorting<TableRow>();
   const tempRows = isLoading ? defaultRows : rows; // HACK this with the timeout in "marketsTables" is to avoid a screen flash when MUI  recive the new data of rows
   const { query } = useRouter();
 
@@ -74,15 +82,24 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
       <Table aria-label="simple table">
         <TableHead>
           <TableRow>
-            {headers.map(({ title, tooltipTitle, width }) => (
-              <HeadCell key={title.trim()} title={title} tooltipTitle={tooltipTitle} width={width} />
+            {headers.map(({ title, tooltipTitle, width, columnKey }) => (
+              <HeadCell
+                key={title.trim()}
+                title={title}
+                tooltipTitle={tooltipTitle}
+                width={width}
+                sortActive={columnKey && sortActive(columnKey)}
+                sortDirection={columnKey && sortDirection(columnKey)}
+                sort={() => setOrderBy(columnKey)}
+                columnKey={columnKey}
+              />
             ))}
             <TableCell />
             <TableCell />
           </TableRow>
         </TableHead>
         <TableBody>
-          {tempRows.map(
+          {sortData(tempRows).map(
             ({ symbol, totalDeposited, totalBorrowed, depositAPR, borrowAPR, depositMaturity, borrowMaturity }) => (
               <Link href={{ pathname: `/${symbol}`, query }} key={symbol} rel="noopener noreferrer" legacyBehavior>
                 <TableRow
