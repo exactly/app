@@ -1,5 +1,5 @@
 import type { BigNumber } from '@ethersproject/bignumber';
-import React, { useMemo } from 'react';
+import React from 'react';
 import { formatFixed } from '@ethersproject/bignumber';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
@@ -18,21 +18,15 @@ import useActionButton from 'hooks/useActionButton';
 type Props = {
   symbol: string;
   type: Extract<Operation, 'deposit' | 'borrow'>;
-  depositAmount?: BigNumber;
-  borrowedAmount?: BigNumber;
+  valueUSD?: number;
   exaTokenAmount?: BigNumber;
 };
 
-function TableRowFloatingPool({ symbol, depositAmount, borrowedAmount, exaTokenAmount, type }: Props) {
-  const { decimals, usdPrice } = useAccountData(symbol);
+function TableRowFloatingPool({ symbol, valueUSD, exaTokenAmount, type }: Props) {
+  const { decimals } = useAccountData(symbol);
   const { query } = useRouter();
 
   const { handleActionClick } = useActionButton();
-
-  const rate = useMemo<number | undefined>(() => {
-    if (!usdPrice) return;
-    return parseFloat(formatFixed(usdPrice, 18));
-  }, [usdPrice]);
 
   return (
     <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }} hover>
@@ -57,14 +51,7 @@ function TableRowFloatingPool({ symbol, depositAmount, borrowedAmount, exaTokenA
       </Link>
       <TableCell align="left" size="small">
         <Typography>
-          {(depositAmount &&
-            borrowedAmount &&
-            rate &&
-            `$${formatNumber(
-              parseFloat(formatFixed(type === 'deposit' ? depositAmount : borrowedAmount, decimals)) * rate,
-              'USD',
-              true,
-            )}`) || <Skeleton width={70} />}
+          {(valueUSD !== undefined && `$${formatNumber(valueUSD, 'USD', true)}`) || <Skeleton width={70} />}
         </Typography>
       </TableCell>
 

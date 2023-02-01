@@ -16,7 +16,10 @@ export default <T>() => {
   const setOrderBy = (key?: keyof T) => {
     if (!key) return;
     sort.key === key
-      ? setSort({ key, direction: sort.direction === 'asc' ? 'desc' : undefined })
+      ? setSort({
+          key: sort.direction === 'desc' ? undefined : key,
+          direction: sort.direction === 'asc' ? 'desc' : undefined,
+        })
       : setSort({ key, direction: 'asc' });
   };
 

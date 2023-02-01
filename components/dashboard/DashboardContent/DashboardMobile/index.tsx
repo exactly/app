@@ -24,21 +24,14 @@ const DashboardMobile: FC<Props> = ({ type }) => {
 
   return (
     <Box width="100%" display="flex" flexDirection="column" gap={1}>
-      {floatingRows.map(({ symbol, exaTokens, depositedAmount, borrowedAmount }) => (
+      {floatingRows.map(({ symbol, exaTokens, valueUSD }) => (
         <MobileAssetCard key={`dashboard_floating_mobile_${symbol}_${type}`} symbol={symbol} isFloating>
           <>
             <Box display="flex" flexDirection="column" gap={1} width="100%">
               <FlexItem title={isDeposit ? 'Deposited' : 'Debt'}>
-                {(accountData &&
-                  depositedAmount &&
-                  borrowedAmount &&
-                  `$${formatNumber(
-                    parseFloat(
-                      formatFixed(isDeposit ? depositedAmount : borrowedAmount, accountData?.[symbol].decimals),
-                    ) * parseFloat(formatFixed(accountData[symbol].usdPrice, 18)),
-                    'USD',
-                    true,
-                  )}`) || <Skeleton width={40} />}
+                {(accountData && valueUSD !== undefined && `$${formatNumber(valueUSD, 'USD', true)}`) || (
+                  <Skeleton width={40} />
+                )}
               </FlexItem>
               {isDeposit && (
                 <FlexItem

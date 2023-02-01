@@ -1,6 +1,6 @@
 import React, { FC, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import Grid from '@mui/material/Grid';
-import PoolTable, { TableHead, TableRow } from './poolTable';
+import PoolTable, { TableRow } from './poolTable';
 
 import { formatFixed } from '@ethersproject/bignumber';
 import { MaxUint256, WeiPerEther, Zero } from '@ethersproject/constants';
@@ -21,60 +21,61 @@ import networkData from 'config/networkData.json' assert { type: 'json' };
 import useAssets from 'hooks/useAssets';
 import PoolMobile from './poolMobile';
 import MobileTabs from 'components/MobileTabs';
+import { TableHeader } from 'components/common/TableHeadCell';
 
 const { onlyMobile, onlyDesktop } = globals;
 
-const floatingHeaders: TableHead[] = [
+const floatingHeaders: TableHeader<TableRow>[] = [
   {
     title: 'Asset',
     width: '130px',
-    columnKey: 'symbol',
+    sortKey: 'symbol',
   },
   {
     title: 'Total Deposits',
-    columnKey: 'totalDeposited',
+    sortKey: 'totalDeposited',
   },
   {
     title: 'Total Borrows',
-    columnKey: 'totalBorrowed',
+    sortKey: 'totalBorrowed',
   },
   {
     title: 'Deposit APR',
     tooltipTitle: 'Change in the underlying Variable Rate Pool shares value over the last 15 minutes, annualized.',
-    columnKey: 'depositAPR',
+    sortKey: 'depositAPR',
   },
   {
     title: 'Borrow APR',
     tooltipTitle: 'Change in the underlying Variable Rate Pool shares value over the last hour, annualized.',
-    columnKey: 'borrowAPR',
+    sortKey: 'borrowAPR',
   },
 ];
 
-const fixedHeaders: TableHead[] = [
+const fixedHeaders: TableHeader<TableRow>[] = [
   {
     title: 'Asset',
     width: '130px',
-    columnKey: 'symbol',
+    sortKey: 'symbol',
   },
   {
     title: 'Total Deposits',
     tooltipTitle: 'Sum of all the deposits in all the Fixed Rate Pools.',
-    columnKey: 'totalDeposited',
+    sortKey: 'totalDeposited',
   },
   {
     title: 'Total Borrows',
     tooltipTitle: 'Sum of all the borrows in all the Fixed Rate Pools.',
-    columnKey: 'totalBorrowed',
+    sortKey: 'totalBorrowed',
   },
   {
     title: 'Best Deposit APR',
     tooltipTitle: 'The highest fixed Interest rate for a deposit up to de optimal deposit size.',
-    columnKey: 'depositAPR',
+    sortKey: 'depositAPR',
   },
   {
     title: 'Best Borrow APR',
     tooltipTitle: 'The lowest fixed Borrowing Interest rate (APR) at current utilization levels.',
-    columnKey: 'borrowAPR',
+    sortKey: 'borrowAPR',
   },
 ];
 

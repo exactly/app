@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { BigNumber, formatFixed } from '@ethersproject/bignumber';
+import { formatFixed } from '@ethersproject/bignumber';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import { Box, Button, IconButton, Skeleton, Stack, TableCell, TableRow, Typography } from '@mui/material';
@@ -25,14 +25,14 @@ import { Repay } from 'types/Repay';
 
 type Props = {
   symbol: string;
-  amount: BigNumber;
+  valueUSD?: number;
   type: 'deposit' | 'borrow';
   maturityDate: number;
   market: string;
   decimals: number;
 };
 
-function TableRowFixedPool({ symbol, amount, type, maturityDate, market, decimals }: Props) {
+function TableRowFixedPool({ symbol, valueUSD, type, maturityDate, market, decimals }: Props) {
   const { accountData } = useContext(AccountDataContext);
   const { withdrawTxs, repayTxs, depositTxs, borrowTxs } = useFixedOperation(type, maturityDate, market);
   const [open, setOpen] = useState(false);
@@ -103,11 +103,7 @@ function TableRowFixedPool({ symbol, amount, type, maturityDate, market, decimal
           </TableCell>
         </Link>
         <TableCell align="left" size="small">
-          {exchangeRate ? (
-            `$${formatNumber(parseFloat(formatFixed(amount, decimals)) * exchangeRate, 'USD', true)}`
-          ) : (
-            <Skeleton width={60} />
-          )}
+          {valueUSD !== undefined ? `$${formatNumber(valueUSD, 'USD', true)}` : <Skeleton width={60} />}
         </TableCell>
         <TableCell align="left" size="small">
           <APRItem type={type} maturityDate={maturityDate} market={market} decimals={decimals} />

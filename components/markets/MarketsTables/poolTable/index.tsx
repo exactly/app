@@ -9,7 +9,7 @@ import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Grid';
 import Button from '@mui/material/Button';
-import { Box, Skeleton, TableSortLabel, Tooltip } from '@mui/material';
+import { Box, Skeleton, Tooltip } from '@mui/material';
 
 import Image from 'next/image';
 import { useRouter } from 'next/router';
@@ -25,24 +25,15 @@ import numbers from 'config/numbers.json';
 import useAssets from 'hooks/useAssets';
 import useActionButton from 'hooks/useActionButton';
 import useSorting from 'hooks/useSorting';
+import TableHeadCell, { TableHeader } from 'components/common/TableHeadCell';
 
 const { minAPRValue } = numbers;
 
 export type PoolTableProps = {
   isLoading: boolean;
-  headers: TableHead[];
+  headers: TableHeader<TableRow>[];
   rows: TableRow[];
   rateType: 'floating' | 'fixed';
-};
-
-export type TableHead = {
-  title: string;
-  tooltipTitle?: string;
-  width?: string;
-  sortActive?: boolean;
-  sortDirection?: 'asc' | 'desc';
-  sort?: () => void;
-  columnKey?: keyof TableRow;
 };
 
 export type TableRow = {
@@ -53,20 +44,6 @@ export type TableRow = {
   depositMaturity?: number;
   borrowAPR?: number;
   borrowMaturity?: number;
-};
-
-const HeadCell: FC<TableHead> = ({ title, tooltipTitle, width, sortActive, sortDirection, sort }) => {
-  return (
-    <TableCell align="left" sx={{ minWidth: width }}>
-      <TableSortLabel active={sortActive} direction={sortDirection} onClick={sort}>
-        <Tooltip title={tooltipTitle} placement="top" arrow>
-          <Typography variant="subtitle2" sx={{ color: 'grey.500' }} fontWeight={600} width="fit-content">
-            {title}
-          </Typography>
-        </Tooltip>
-      </TableSortLabel>
-    </TableCell>
-  );
 };
 
 const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) => {
@@ -82,16 +59,16 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
       <Table aria-label="simple table">
         <TableHead>
           <TableRow>
-            {headers.map(({ title, tooltipTitle, width, columnKey }) => (
-              <HeadCell
+            {headers.map(({ title, tooltipTitle, width, sortKey }) => (
+              <TableHeadCell
                 key={title.trim()}
                 title={title}
                 tooltipTitle={tooltipTitle}
                 width={width}
-                sortActive={columnKey && sortActive(columnKey)}
-                sortDirection={columnKey && sortDirection(columnKey)}
-                sort={() => setOrderBy(columnKey)}
-                columnKey={columnKey}
+                sortActive={sortKey && sortActive(sortKey)}
+                sortDirection={sortKey && sortDirection(sortKey)}
+                sort={() => setOrderBy(sortKey)}
+                isSortEnabled={!!sortKey}
               />
             ))}
             <TableCell />

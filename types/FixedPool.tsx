@@ -7,6 +7,7 @@ export type Pool = {
   fee: BigNumber;
   decimals: number;
   previewValue: BigNumber;
+  valueUSD?: number;
 };
 
 export type FixedPool = Record<string, Pool[]>;

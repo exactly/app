@@ -1,20 +1,11 @@
 import React, { useMemo } from 'react';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Tooltip,
-  Typography,
-} from '@mui/material';
+import { Table, TableBody, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 
 import { FloatingPoolItemData } from 'types/FloatingPoolItemData';
 
 import TableRowFloatingPool from './TableRowFloatingPool';
-import type { TableHeader } from 'types/TableHeader';
+import TableHeadCell, { TableHeader } from 'components/common/TableHeadCell';
+import useSorting from 'hooks/useSorting';
 
 type Props = {
   type: 'deposit' | 'borrow';
@@ -22,39 +13,43 @@ type Props = {
 };
 
 function FloatingPoolDashboardTable({ type, rows }: Props) {
-  const headers: TableHeader[] = useMemo(() => {
+  const { setOrderBy, sortData, direction: sortDirection, isActive: sortActive } = useSorting<FloatingPoolItemData>();
+
+  const headers: TableHeader<FloatingPoolItemData>[] = useMemo(() => {
     return [
       {
-        label: 'Asset',
+        title: 'Asset',
         key: 'asset',
         tooltipPlacement: 'top-start',
         align: 'left',
+        sortKey: 'symbol',
       },
       {
-        label: 'Value',
+        title: 'Value',
         key: 'value',
         align: 'left',
+        sortKey: 'valueUSD',
       },
       {
-        label: 'exaToken',
+        title: 'exaToken',
         key: 'exaToken',
         hidden: type !== 'deposit',
         tooltipTitle: 'The Exactly voucher token (ERC-4626) for your deposit in the Variable Rate Pool.',
         align: 'left',
       },
       {
-        label: 'Collateral',
+        title: 'Collateral',
         key: 'collateral',
         hidden: type !== 'deposit',
         align: 'left',
       },
       {
-        label: '',
+        title: '',
         key: 'deposit',
         align: 'left',
       },
       {
-        label: '',
+        title: '',
         key: 'borrow',
         align: 'left',
       },
@@ -66,34 +61,29 @@ function FloatingPoolDashboardTable({ type, rows }: Props) {
       <Table>
         <TableHead>
           <TableRow>
-            {headers.map((header) => (
-              <TableCell key={`header_${header.key}_${type}`} align={header.align || 'center'}>
-                <Tooltip
-                  title={header.hidden ? '' : header.tooltipTitle}
-                  placement={header.tooltipPlacement || 'top'}
-                  arrow
-                >
-                  <Typography
-                    variant="subtitle2"
-                    sx={{ color: 'grey.500', visibility: header.hidden ? 'hidden' : '' }}
-                    fontWeight={600}
-                    width="fit-content"
-                  >
-                    {header.label}
-                  </Typography>
-                </Tooltip>
-              </TableCell>
+            {headers.map(({ key, title, align, hidden, tooltipTitle, tooltipPlacement, sortKey }) => (
+              <TableHeadCell
+                key={`header_${key}_${type}`}
+                title={title}
+                tooltipTitle={tooltipTitle}
+                align={align}
+                hidden={hidden}
+                tooltipPlacement={tooltipPlacement}
+                sortActive={sortKey && sortActive(sortKey)}
+                sortDirection={sortKey && sortDirection(sortKey)}
+                sort={() => setOrderBy(sortKey)}
+                isSortEnabled={!!sortKey}
+              />
             ))}
           </TableRow>
         </TableHead>
         <TableBody>
-          {rows.map((item: FloatingPoolItemData) => (
+          {sortData(rows).map(({ symbol, valueUSD, exaTokens }) => (
             <TableRowFloatingPool
-              key={`floating_row_${item.symbol}_${type}`}
-              symbol={item.symbol}
-              depositAmount={item.depositedAmount}
-              borrowedAmount={item.borrowedAmount}
-              exaTokenAmount={item.exaTokens}
+              key={`floating_row_${symbol}_${type}`}
+              symbol={symbol}
+              valueUSD={valueUSD}
+              exaTokenAmount={exaTokens}
               type={type}
             />
           ))}
