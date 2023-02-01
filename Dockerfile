@@ -6,5 +6,5 @@ WORKDIR /app
 COPY package.json package-lock.json tsconfig.dev.json ./
 COPY scripts ./scripts
 RUN npm ci
-COPY . .
 RUN ./node_modules/.bin/cypress install --force
+COPY . .
