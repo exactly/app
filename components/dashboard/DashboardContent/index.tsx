@@ -1,11 +1,7 @@
 import React, { useMemo } from 'react';
 import dynamic from 'next/dynamic';
 import Grid from '@mui/material/Grid';
-import { globals } from 'styles/theme';
 
-const { onlyMobile } = globals;
-
-// const DashboardUserCharts = dynamic(() => import('components/DashboardContent/DashboardUserCharts'));
 const FloatingPoolDashboard = dynamic(() => import('components/dashboard/DashboardContent/FloatingPoolDashboard'));
 const FixedPoolDashboard = dynamic(() => import('components/dashboard/DashboardContent/FixedPoolDashboard'));
 
@@ -60,14 +56,9 @@ function DashboardContent() {
     return <ConnectYourWallet />;
   }
 
-  return (
-    <>
-      {!isMobile && ( // display={onlyDesktop} throws an error when used with mui tabs
-        <Grid mt="24px">
-          <DashboardTabs initialTab={allTabs[0].value} allTabs={allTabs} />
-        </Grid>
-      )}
-      <Box display={onlyMobile} my={2}>
+  if (isMobile) {
+    return (
+      <Box my={2}>
         <MobileTabs
           tabs={[
             {
@@ -81,7 +72,13 @@ function DashboardContent() {
           ]}
         />
       </Box>
-    </>
+    );
+  }
+
+  return (
+    <Grid mt="24px">
+      <DashboardTabs initialTab={allTabs[0].value} allTabs={allTabs} />
+    </Grid>
   );
 }
 

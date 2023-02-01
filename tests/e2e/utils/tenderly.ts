@@ -23,12 +23,13 @@ type ERC20Token = {
   decimals: number;
 };
 
-const ERC20TokenSymbols = ['DAI', 'USDC', 'WBTC', 'wstETH'] as const;
+const ERC20TokenSymbols = ['WETH', 'DAI', 'USDC', 'WBTC', 'wstETH'] as const;
 export type ERC20TokenSymbol = (typeof ERC20TokenSymbols)[number];
 export type Coin = ERC20TokenSymbol | 'ETH';
 
 const decimals: Record<Coin, number> = {
   ETH: 18,
+  WETH: 18,
   DAI: 18,
   USDC: 6,
   WBTC: 8,

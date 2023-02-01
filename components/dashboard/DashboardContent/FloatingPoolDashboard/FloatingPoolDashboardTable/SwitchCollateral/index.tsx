@@ -23,7 +23,12 @@ function SwitchCollateral({ symbol }: Props) {
 
   const healthFactor = useHealthFactor();
 
-  const checked = useMemo<boolean>(() => Boolean(marketAccount?.isCollateral), [marketAccount]);
+  const [optimistic, setOptimistic] = useState<boolean | undefined>();
+  const checked = useMemo<boolean>(() => {
+    if (!marketAccount) return false;
+    if (optimistic !== undefined) return optimistic;
+    return Boolean(marketAccount?.isCollateral);
+  }, [marketAccount, optimistic]);
 
   const { disabled, disabledText } = useMemo<{ disabled: boolean; disabledText?: string }>(() => {
     if (!marketAccount || !healthFactor) return { disabled: true };
@@ -62,6 +67,7 @@ function SwitchCollateral({ symbol }: Props) {
   const onToggle = useCallback(async () => {
     if (!marketAccount || !auditor) return;
     const { market } = marketAccount;
+    let target = !checked;
 
     setLoading(true);
     try {
@@ -70,13 +76,24 @@ function SwitchCollateral({ symbol }: Props) {
 
       await refreshAccountData();
     } catch (error) {
+      target = checked;
       handleOperationError(error);
     } finally {
+      setOptimistic(target);
       setLoading(false);
     }
   }, [marketAccount, auditor, checked, refreshAccountData]);
 
-  if (loading) return <CircularProgress color="primary" size={24} thickness={8} sx={{ ml: '7px' }} />;
+  if (loading)
+    return (
+      <CircularProgress
+        color="primary"
+        size={24}
+        thickness={8}
+        sx={{ ml: '7px' }}
+        data-testid={`switch-collateral-${symbol}-loading`}
+      />
+    );
 
   const tooltip =
     disabled && disabledText
@@ -88,7 +105,7 @@ function SwitchCollateral({ symbol }: Props) {
   return (
     <Tooltip
       title={
-        <Typography fontSize="1.2em" fontWeight={600}>
+        <Typography fontSize="1.2em" fontWeight={600} data-testid={`switch-collateral-${symbol}-tooltip`}>
           {tooltip}
         </Typography>
       }
@@ -99,7 +116,10 @@ function SwitchCollateral({ symbol }: Props) {
         <StyledSwitch
           checked={checked}
           onChange={onToggle}
-          inputProps={{ 'aria-label': 'Use this asset as collateral' }}
+          inputProps={{
+            'aria-label': 'Use this asset as collateral',
+            'data-testid': `switch-collateral-${symbol}`,
+          }}
           disabled={disabled}
         />
       </span>
