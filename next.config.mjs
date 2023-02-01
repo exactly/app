@@ -1,9 +1,16 @@
 import { withSentryConfig } from '@sentry/nextjs';
 
+const DISABLE_SENTRY_PLUGIN = JSON.parse(process.env.DISABLE_SENTRY_PLUGIN ?? 'false');
+
 export default withSentryConfig({
   reactStrictMode: true,
   productionBrowserSourceMaps: true,
-  sentry: { widenClientFileUpload: true, hideSourceMaps: false },
+  sentry: {
+    widenClientFileUpload: true,
+    hideSourceMaps: false,
+    disableServerWebpackPlugin: DISABLE_SENTRY_PLUGIN,
+    disableClientWebpackPlugin: DISABLE_SENTRY_PLUGIN,
+  },
 
   redirects: () => [
     { source: '/markets', destination: '/', permanent: true },

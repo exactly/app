@@ -7,9 +7,11 @@
     "dev": "NODE_ENV=development next dev",
     "dev:e2e": "NODE_ENV=development NEXT_PUBLIC_NETWORK=mainnet NEXT_PUBLIC_IS_E2E=true next dev",
     "test": "synpress run --config supportFile='tests/e2e/support.ts' baseUrl='http://localhost:3000'",
-    "ci": "start-server-and-test dev:e2e http://localhost:3000 test",
+    "ci": "start-server-and-test start:e2e http-get://localhost:3000 test",
     "build": "next build",
+    "build:e2e": "DISABLE_SENTRY_PLUGIN=true NEXT_PUBLIC_NETWORK=mainnet NEXT_PUBLIC_IS_E2E=true next build",
     "start": "NODE_ENV=production next start",
+    "start:e2e": "npm run build:e2e && NODE_ENV=production next start",
     "export": "NODE_ENV=production next export",
     "postinstall": "ts-node -P tsconfig.dev.json scripts/postinstall.ts",
     "lint": "eslint --max-warnings=0 ."
