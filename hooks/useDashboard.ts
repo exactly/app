@@ -1,9 +1,10 @@
-import { useContext, useMemo } from 'react';
+import { useCallback, useContext, useMemo } from 'react';
 import AccountDataContext from 'contexts/AccountDataContext';
 import { FloatingPoolItemData } from 'types/FloatingPoolItemData';
 import useAssets from './useAssets';
 import { Previewer } from 'types/contracts';
 import useFixedPools from './useFixedPools';
+import { BigNumber, formatFixed } from '@ethersproject/bignumber';
 
 export default function useDashboard(type: string) {
   const { accountData } = useContext(AccountDataContext);
@@ -14,6 +15,17 @@ export default function useDashboard(type: string) {
   const defaultRows: FloatingPoolItemData[] = useMemo<FloatingPoolItemData[]>(
     () => orderAssets.map((s) => ({ symbol: s })),
     [orderAssets],
+  );
+
+  const getValueInUSD = useCallback(
+    (symbol: string, amount: BigNumber): number => {
+      const { decimals, usdPrice } = accountData?.[symbol] ?? {};
+      if (!decimals || !usdPrice) return 0;
+
+      const rate = parseFloat(formatFixed(usdPrice, 18));
+      return parseFloat(formatFixed(amount, decimals)) * rate;
+    },
+    [accountData],
   );
 
   const floatingData = useMemo<FloatingPoolItemData[] | undefined>(() => {
@@ -29,12 +41,11 @@ export default function useDashboard(type: string) {
       ({ assetSymbol, floatingDepositAssets, floatingDepositShares, floatingBorrowAssets, market }) => ({
         symbol: assetSymbol,
         exaTokens: floatingDepositShares,
-        depositedAmount: floatingDepositAssets,
-        borrowedAmount: floatingBorrowAssets,
+        valueUSD: getValueInUSD(assetSymbol, isDeposit ? floatingDepositAssets : floatingBorrowAssets),
         market,
       }),
     );
-  }, [accountData, orderAssets]);
+  }, [accountData, orderAssets, getValueInUSD, isDeposit]);
 
   const fixedDeposits = useMemo(() => {
     if (!deposits) return [];
@@ -46,7 +57,10 @@ export default function useDashboard(type: string) {
     return Object.keys(borrows)?.flatMap((maturity) => borrows[parseInt(maturity)]);
   }, [borrows]);
 
-  const fixedRows = useMemo(() => (isDeposit ? fixedDeposits : fixedBorrows), [isDeposit, fixedDeposits, fixedBorrows]);
+  const fixedRows = useMemo(() => {
+    const fixedData = isDeposit ? fixedDeposits : fixedBorrows;
+    return fixedData.map((pool) => ({ ...pool, valueUSD: getValueInUSD(pool.symbol, pool.previewValue) }));
+  }, [isDeposit, fixedDeposits, fixedBorrows, getValueInUSD]);
 
   return { floatingRows: floatingData || defaultRows, fixedRows };
 }

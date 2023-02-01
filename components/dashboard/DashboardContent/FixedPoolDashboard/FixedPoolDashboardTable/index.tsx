@@ -1,16 +1,14 @@
 import React, { useMemo } from 'react';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-import Typography from '@mui/material/Typography';
 import Paper from '@mui/material/Paper';
 import TableRowFixedPool from './TableRowFixedPool';
-import { Tooltip } from '@mui/material';
-import { TableHeader } from 'types/TableHeader';
 import { Pool } from 'types/FixedPool';
+import TableHeadCell, { TableHeader } from 'components/common/TableHeadCell';
+import useSorting from 'hooks/useSorting';
 
 type Props = {
   type: 'deposit' | 'borrow';
@@ -18,43 +16,47 @@ type Props = {
 };
 
 function FixedPoolDashboardTable({ type, rows }: Props) {
-  const headers: TableHeader[] = useMemo(() => {
+  const { setOrderBy, sortData, direction: sortDirection, isActive: sortActive } = useSorting<Pool>();
+  const headers: TableHeader<Pool>[] = useMemo(() => {
     return [
       {
-        label: 'Asset',
+        title: 'Asset',
         key: 'asset',
         tooltipPlacement: 'top-start',
         align: 'left',
+        sortKey: 'symbol',
       },
       {
-        label: 'Market value',
+        title: 'Market value',
         key: 'deposited amount',
         align: 'left',
+        sortKey: 'valueUSD',
       },
       {
-        label: 'Average Fixed Rate',
+        title: 'Average Fixed Rate',
         key: 'average fixed rate',
         tooltipTitle: 'Average rate for existing deposits',
         tooltipPlacement: 'top-start',
         align: 'left',
       },
       {
-        label: 'Maturity Date',
+        title: 'Maturity Date',
         key: 'maturity date',
         align: 'left',
+        sortKey: 'maturity',
       },
       {
-        label: 'Time Elapsed',
+        title: 'Time Elapsed',
         key: 'time elapsed',
         align: 'left',
       },
       {
-        label: '',
+        title: '',
         key: 'action',
         align: 'left',
       },
       {
-        label: '',
+        title: '',
         key: 'expandable button',
         hidden: true,
         align: 'left',
@@ -67,32 +69,28 @@ function FixedPoolDashboardTable({ type, rows }: Props) {
       <Table>
         <TableHead>
           <TableRow>
-            {headers.map((header) => (
-              <TableCell key={`header_${header.key}_${type}`} align={header.align || 'center'}>
-                <Tooltip
-                  title={header.hidden ? '' : header.tooltipTitle}
-                  placement={header.tooltipPlacement || 'top'}
-                  arrow
-                >
-                  <Typography
-                    variant="subtitle2"
-                    sx={{ color: 'grey.500', visibility: header.hidden ? 'hidden' : '' }}
-                    fontWeight={600}
-                    width="fit-content"
-                  >
-                    {header.label}
-                  </Typography>
-                </Tooltip>
-              </TableCell>
+            {headers.map(({ key, title, align, hidden, tooltipTitle, tooltipPlacement, sortKey }) => (
+              <TableHeadCell
+                key={`header_${key}_${type}`}
+                title={title}
+                tooltipTitle={tooltipTitle}
+                align={align}
+                hidden={hidden}
+                tooltipPlacement={tooltipPlacement}
+                sortActive={sortKey && sortActive(sortKey)}
+                sortDirection={sortKey && sortDirection(sortKey)}
+                sort={() => setOrderBy(sortKey)}
+                isSortEnabled={!!sortKey}
+              />
             ))}
           </TableRow>
         </TableHead>
         <TableBody>
-          {rows.map(({ previewValue, maturity, symbol, market, decimals }) => (
+          {sortData(rows).map(({ valueUSD, maturity, symbol, market, decimals }) => (
             <TableRowFixedPool
-              key={`${symbol}_${maturity}_${previewValue}`}
+              key={`${symbol}_${maturity}_${valueUSD}`}
               type={type}
-              amount={previewValue}
+              valueUSD={valueUSD}
               maturityDate={maturity}
               symbol={symbol}
               market={market}

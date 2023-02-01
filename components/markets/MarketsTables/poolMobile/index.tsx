@@ -3,11 +3,12 @@ import { Box, Button, Divider, Grid, Skeleton, Tooltip, Typography } from '@mui/
 import numbers from 'config/numbers.json';
 import useActionButton from 'hooks/useActionButton';
 import { toPercentage } from 'utils/utils';
-import { PoolTableProps, TableHead, TableRow } from '../poolTable';
+import { PoolTableProps, TableRow } from '../poolTable';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import useAssets from 'hooks/useAssets';
 import MobileAssetCard from 'components/MobileAssetCard';
 import parseTimestamp from 'utils/parseTimestamp';
+import { TableHeader } from 'components/common/TableHeadCell';
 
 const { minAPRValue } = numbers;
 
@@ -74,7 +75,7 @@ const PoolMobile: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) 
   );
 };
 
-const GridItem: FC<{ header: TableHead; value: string; isLoading?: boolean; maturity?: string }> = ({
+const GridItem: FC<{ header: TableHeader<TableRow>; value: string; isLoading?: boolean; maturity?: string }> = ({
   header,
   value,
   isLoading,

@@ -11,28 +11,28 @@ import {
   Typography,
 } from '@mui/material';
 import { FixedPoolTransaction } from 'types/FixedPoolTransaction';
-import { TableHeader } from 'types/TableHeader';
+import { TableHeader } from 'components/common/TableHeadCell';
 
 type Props = {
   open: boolean;
   transactions: FixedPoolTransaction[];
 };
 
-const headers: TableHeader[] = [
+const headers: TableHeader<FixedPoolTransaction>[] = [
   {
-    label: 'Date',
+    title: 'Date',
     align: 'left',
   },
   {
-    label: 'Operation',
+    title: 'Operation',
     align: 'left',
   },
   {
-    label: 'Amount',
+    title: 'Amount',
     align: 'left',
   },
   {
-    label: 'APR',
+    title: 'APR',
     align: 'left',
   },
 ];
@@ -43,10 +43,10 @@ function CollapseFixedPool({ open, transactions }: Props) {
       <Table size="small" aria-label="purchases">
         <TableHead sx={{ backgroundColor: '#ebebeb' }}>
           <TableRow>
-            {headers.map(({ label, align }) => (
-              <TableCell key={`collapse_fixed_pool_header_${label}`} align={align} sx={{ px: 1 }}>
+            {headers.map(({ title, align }) => (
+              <TableCell key={`collapse_fixed_pool_header_${title}`} align={align} sx={{ px: 1 }}>
                 <Typography variant="subtitle2" sx={{ color: 'grey.600' }} fontWeight={600}>
-                  {label}
+                  {title}
                 </Typography>
               </TableCell>
             ))}
