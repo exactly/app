@@ -41,7 +41,7 @@ const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ APRsPerMaturity, symb
 
   return (
     <TableContainer component={Paper}>
-      <Table sx={{ minWidth: 650, bgcolor: 'transparent' }} aria-label="simple table">
+      <Table sx={{ bgcolor: 'transparent' }} aria-label="simple table">
         <TableHead>
           <TableRow>
             <HeadCell title="Maturity" />
@@ -65,19 +65,27 @@ const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ APRsPerMaturity, symb
               }}
               hover
             >
-              <TableCell component="th" scope="row">
+              <TableCell component="th" scope="row" width={120}>
                 <Typography variant="body1" color="black" fontWeight={600}>
                   {parseTimestamp(maturity)}
                 </Typography>
               </TableCell>
-              <TableCell align="left">${totalDeposited}</TableCell>
-              <TableCell align="left">${totalBorrowed}</TableCell>
-              <TableCell align="left">{toPercentage(depositAPR > minAPRValue ? depositAPR : undefined)}</TableCell>
-              <TableCell align="left">{toPercentage(borrowAPR > minAPRValue ? borrowAPR : undefined)}</TableCell>
+              <TableCell align="left" width={80}>
+                ${totalDeposited}
+              </TableCell>
+              <TableCell align="left" width={75}>
+                ${totalBorrowed}
+              </TableCell>
+              <TableCell align="left" width={65}>
+                {toPercentage(depositAPR > minAPRValue ? depositAPR : undefined)}
+              </TableCell>
+              <TableCell align="left" width={50}>
+                {toPercentage(borrowAPR > minAPRValue ? borrowAPR : undefined)}
+              </TableCell>
               <TableCell
                 align="left"
                 size="small"
-                width={50}
+                width={40}
                 onClick={(e) => e.preventDefault()}
                 sx={{ cursor: 'default', px: 0.5 }}
               >
@@ -93,7 +101,6 @@ const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ APRsPerMaturity, symb
               <TableCell
                 align="left"
                 size="small"
-                width={50}
                 onClick={(e) => e.preventDefault()}
                 sx={{ cursor: 'default', px: 0.5 }}
               >
