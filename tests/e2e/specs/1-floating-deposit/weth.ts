@@ -19,5 +19,5 @@ describe('WETH floating deposit', () => {
     cy.disconnectMetamaskWalletFromAllDapps();
   });
 
-  deposit({ symbol: 'ETH', type: 'floating', decimals: 18, balance: '100.0', amount: '10' });
+  deposit({ type: 'floating', symbol: 'ETH', decimals: 18, balance: '100.0', amount: '10' });
 });

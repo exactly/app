@@ -19,7 +19,7 @@ describe('WETH enter/exit market', () => {
     cy.disconnectMetamaskWalletFromAllDapps();
   });
 
-  enterMarket({ symbol: 'ETH' });
+  enterMarket({ symbol: 'WETH' });
 
-  exitMarket({ symbol: 'ETH' });
+  exitMarket({ symbol: 'WETH' });
 });

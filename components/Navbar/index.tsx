@@ -80,6 +80,7 @@ function Navbar() {
                   fontSize: '14px',
                   fontWeight: 700,
                 }}
+                data-testid={`navbar-link-${name.toLowerCase()}`}
               >
                 {name}
               </Box>

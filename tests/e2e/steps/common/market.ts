@@ -6,8 +6,6 @@ type TestParams = {
 };
 
 export const enterMarket = ({ symbol }: TestParams) => {
-  symbol = symbol === 'ETH' ? 'WETH' : symbol;
-
   describe(`${symbol} enter market`, () => {
     it('should not be checked or disabled', () => {
       Dashboard.checkCollateralSwitchStatus(symbol, false, false);
@@ -37,8 +35,6 @@ export const enterMarket = ({ symbol }: TestParams) => {
 };
 
 export const exitMarket = ({ symbol }: TestParams) => {
-  symbol = symbol === 'ETH' ? 'WETH' : symbol;
-
   describe(`${symbol} exit market`, () => {
     it('should be checked and not disabled', () => {
       Dashboard.checkCollateralSwitchStatus(symbol, false, true);

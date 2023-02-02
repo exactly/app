@@ -32,7 +32,7 @@ function TableRowFloatingPool({ symbol, valueUSD, exaTokenAmount, type }: Props)
     <TableRow
       sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
       hover
-      data-testid={`floating-pool-row-${symbol}`}
+      data-testid={`dashboard-floating-pool-row-${symbol}`}
     >
       <Link href={{ pathname: `/${symbol}`, query }} legacyBehavior>
         <TableCell component="th" align="left" sx={{ cursor: 'pointer' }} width={240}>

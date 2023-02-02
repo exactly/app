@@ -1,16 +1,17 @@
 import { Coin } from '../utils/tenderly';
 import { pastParticiple, capitalize } from '../utils/strings';
 import * as Modal from './modal';
+import * as Dashboard from './dashboard';
 import type { Operation } from './modal';
 
-type Params = {
+type OperationParams = {
   type: 'floating' | 'fixed';
   action: Operation;
   symbol: Coin;
   amount: string;
 };
 
-const executeOperation = ({ type, action, symbol, amount }: Params) => {
+const executeOperation = ({ type, action, symbol, amount }: OperationParams) => {
   Modal.open(type, action, symbol);
 
   Modal.input(amount);
@@ -26,6 +27,18 @@ const executeOperation = ({ type, action, symbol, amount }: Params) => {
   Modal.close();
 };
 
-export const deposit = (params: Omit<Params, 'action'>) => {
+export const deposit = (params: Omit<OperationParams, 'action'>) => {
   executeOperation({ action: 'deposit', ...params });
+};
+
+type MarketParams = {
+  symbol: Coin;
+};
+
+export const enterMarket = ({ symbol }: MarketParams) => {
+  symbol = symbol === 'ETH' ? 'WETH' : symbol;
+
+  Dashboard.attemptEnterMarket(symbol);
+  cy.confirmMetamaskTransaction();
+  Dashboard.waitForTransaction(symbol);
 };
