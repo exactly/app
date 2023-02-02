@@ -21,16 +21,16 @@ const ItemInfo: FC<ItemInfoProps> = ({ label, value, underLabel, tooltipTitle, x
   return (
     <Grid item xs={isMobile ? 6 : xs ? xs : 0}>
       <Tooltip title={tooltipTitle} arrow placement="top">
-        <Typography variant="subtitle1" fontSize="10px" color="grey.500">
-          {label.toUpperCase()}
+        <Typography variant="subtitle1" fontSize="10px" color="grey.500" textTransform="uppercase">
+          {label}
         </Typography>
       </Tooltip>
       <Typography variant="h5" fontWeight={700} component="p">
         {(!!value && value) || <Skeleton height={50} />}
       </Typography>
       {!!underLabel && (
-        <Typography variant="subtitle1" fontSize="10px" color="grey.500">
-          {underLabel.toUpperCase()}
+        <Typography variant="subtitle1" fontSize="10px" color="grey.500" textTransform="uppercase">
+          {underLabel}
         </Typography>
       )}
     </Grid>

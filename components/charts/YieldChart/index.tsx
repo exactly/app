@@ -87,7 +87,7 @@ const YieldChart: FC<Props> = ({ symbol }) => {
               interval={0}
               padding={{ left: 20, right: 20 }}
               tickFormatter={(t) => parseTimestamp(t, 'MMM DD')}
-              domain={[(dataMin: number) => dataMin - 3600 * 24 * 2, (dataMax: number) => dataMax + 3600 * 24 * 2]}
+              domain={[(dataMin: number) => dataMin - 3_600 * 24 * 2, (dataMax: number) => dataMax + 3_600 * 24 * 2]}
               scale="time"
               tick={{ fill: palette.grey[500], fontWeight: 500, fontSize: 12 }}
               allowDataOverflow
@@ -112,7 +112,7 @@ const YieldChart: FC<Props> = ({ symbol }) => {
                 type="monotone"
                 yAxisId="yaxis"
                 dataKey={asset}
-                stroke={palette.symbol[asset as 'WETH' | 'DAI' | 'USDC' | 'WBTC' | 'wstETH']}
+                stroke={palette.symbol[asset]}
                 strokeWidth={2}
                 fillOpacity={0}
               />
