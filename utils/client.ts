@@ -25,9 +25,7 @@ export const defaultChain = { mainnet, optimism, goerli }[process.env.NEXT_PUBLI
 const { chains, provider } = configureChains(supportedChains, [
   ...(JSON.parse(process.env.NEXT_PUBLIC_IS_E2E ?? 'false') && rpcURL
     ? [jsonRpcProvider({ rpc: () => ({ http: rpcURL }) })]
-    : []),
-  publicProvider({ priority: 1 }),
-  walletConnectProvider({ projectId: walletConnectId }),
+    : [publicProvider({ priority: 1 }), walletConnectProvider({ projectId: walletConnectId })]),
 ]);
 
 export const wagmi = createClient({
