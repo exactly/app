@@ -49,6 +49,50 @@ A development server can be started at `http://localhost:3000` with
 npm run dev
 ```
 
+## Testing
+
+We use the [Synpress](https://github.com/Synthetixio/synpress) testing framework
+to run our E2E tests and [Tenderly](https://tenderly.co/) to setup forks.
+
+The following environment variables are required to be present for them to
+work as expected
+
+```bash
+CYPRESS_TENDERLY_ACCESS_KEY=[ Tenderly access token ]
+CYPRESS_TENDERLY_PROJECT=exactly
+CYPRESS_TENDERLY_USER=exactly
+
+SECRET_WORDS=[ 12 word mnemonic phrase ]
+
+DISPLAY_WIDTH=1920
+DISPLAY_HEIGHT=1080
+```
+
+The full suite can be run using
+
+```bash
+npm run ci
+```
+
+the command above will setup a production server and run tests on it.
+Which is the same as running
+
+```bash
+npm run start:e2e             # Or `npm run dev:e2e` for a dev server
+```
+
+and in another terminal
+
+```bash
+npm run test
+```
+
+To run a single test use the same above but specifiy the spec to run with
+
+```bash
+npm run test -- --spec [path] # e.g. tests/e2e/specs/0-connect-wallet-spec.ts
+```
+
 ## Deployment
 
 We use Vercel. New pull requests will be deployed will receive previews deployed
