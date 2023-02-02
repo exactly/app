@@ -12,6 +12,8 @@ type Props = {
   symbol: string;
 };
 
+const formatEmpty = () => '';
+
 function UtilizationRateChart({ type, symbol }: Props) {
   const { palette, typography } = useTheme();
   const { currentUtilization, data, loading } = useUtilizationRate(type, symbol);
@@ -64,7 +66,7 @@ function UtilizationRateChart({ type, symbol }: Props) {
             />
 
             <Tooltip
-              labelFormatter={() => ''}
+              labelFormatter={formatEmpty}
               formatter={(value) => toPercentage(value as number)}
               content={<TooltipChart />}
               cursor={{ strokeWidth: 1, fill: palette.grey[500], strokeDasharray: '3' }}

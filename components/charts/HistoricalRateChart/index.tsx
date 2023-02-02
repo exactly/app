@@ -1,6 +1,6 @@
-import { Box, Typography, useTheme } from '@mui/material';
+import { Box, Checkbox, Typography, useTheme } from '@mui/material';
 import useHistoricalRates from 'hooks/useHistoricalRates';
-import React, { FC, useCallback, useMemo } from 'react';
+import React, { FC, useCallback, useMemo, useState } from 'react';
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { toPercentage } from 'utils/utils';
 import ButtonsChart from '../ButtonsChart';
@@ -12,6 +12,7 @@ type Props = {
 };
 
 const HistoricalRateChart: FC<Props> = ({ symbol }) => {
+  const [showUtilization, setShowUtilization] = useState(false);
   const { palette } = useTheme();
   const { loading, rates, getRates } = useHistoricalRates(symbol);
 
@@ -35,6 +36,10 @@ const HistoricalRateChart: FC<Props> = ({ symbol }) => {
 
   const formatDate = useCallback((date: Date, year?: boolean) => {
     return date.toLocaleDateString('en-us', { year: year ? 'numeric' : undefined, month: 'short', day: '2-digit' });
+  }, []);
+
+  const onShowUtilizationChange = useCallback(() => {
+    setShowUtilization((prev) => !prev);
   }, []);
 
   return (
@@ -70,25 +75,28 @@ const HistoricalRateChart: FC<Props> = ({ symbol }) => {
               tickLine={false}
               width={50}
             />
-            {/* <YAxis
-              label={{ value: 'Utilization Rate', angle: -270, position: 'right' }}
-              yAxisId="right"
-              orientation="right"
-              padding={{ top: 5, bottom: 5 }}
-              tickFormatter={(value) => `${((value as number) * 100).toFixed(2)}%`}
-            /> */}
+            {showUtilization && (
+              <YAxis
+                yAxisId="right"
+                orientation="right"
+                tickFormatter={(value) => `${((value as number) * 100).toFixed(2)}%`}
+                tick={{ fill: palette.blue, fontWeight: 500, fontSize: 12 }}
+                axisLine={false}
+                tickLine={false}
+                width={50}
+              />
+            )}
             <Tooltip
               labelFormatter={(value) => (value instanceof Date ? formatDate(value as Date, true) : '')}
               formatter={(value) => toPercentage(value as number)}
               content={<TooltipChart itemSorter={(a, b) => (a.value > b.value ? -1 : 1)} />}
             />
-            {/* <Legend /> */}
             <Line
               yAxisId="left"
               type="monotone"
               dataKey="depositApr"
               name="Deposit APR"
-              stroke="#000000"
+              stroke="black"
               dot={false}
               strokeWidth={2}
             />
@@ -97,22 +105,39 @@ const HistoricalRateChart: FC<Props> = ({ symbol }) => {
               type="monotone"
               dataKey="borrowApr"
               name="Borrow APR"
-              stroke="#34B253"
+              stroke={palette.green}
               dot={false}
               strokeWidth={2}
             />
-            {/* <Line
-              yAxisId="right"
-              type="monotone"
-              dataKey="utilization"
-              name="Utilization Rate"
-              stroke="black"
-              dot={false}
-              strokeDasharray="5 5"
-            /> */}
+            {showUtilization && (
+              <Line
+                yAxisId="right"
+                type="monotone"
+                dataKey="utilization"
+                name="Utilization Rate"
+                stroke={palette.blue}
+                dot={false}
+                strokeDasharray="5 5"
+              />
+            )}
           </LineChart>
         )}
       </ResponsiveContainer>
+      <Box display="flex" alignItems="center" mt={-2.5}>
+        <Checkbox
+          size="small"
+          onChange={onShowUtilizationChange}
+          sx={{
+            color: palette.blue,
+            '&.Mui-checked': {
+              color: palette.blue,
+            },
+          }}
+        />
+        <Typography variant="subtitle1" fontSize="12px">
+          Show utilization
+        </Typography>
+      </Box>
     </Box>
   );
 };
