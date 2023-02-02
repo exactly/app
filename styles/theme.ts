@@ -21,13 +21,7 @@ declare module '@mui/material/styles' {
       variable: string;
     };
 
-    symbol: {
-      WETH: string;
-      DAI: string;
-      USDC: string;
-      WBTC: string;
-      wstETH: string;
-    };
+    symbol: Record<string, string>;
   }
   interface PaletteOptions {
     figma: {
@@ -42,13 +36,7 @@ declare module '@mui/material/styles' {
       variable: string;
     };
 
-    symbol: {
-      WETH: string;
-      DAI: string;
-      USDC: string;
-      WBTC: string;
-      wstETH: string;
-    };
+    symbol: Record<string, string>;
   }
 
   interface TypographyVariants {

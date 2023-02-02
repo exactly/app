@@ -26,8 +26,8 @@ const HeadCell: FC<{ title: string; tooltipTitle?: string }> = ({ title, tooltip
   return (
     <TableCell align="left">
       <Tooltip title={tooltipTitle} placement="top" arrow>
-        <Typography variant="subtitle1" fontSize="10px" color="grey.500" fontWeight={600}>
-          {title.toUpperCase()}
+        <Typography variant="subtitle1" fontSize="10px" color="grey.500" fontWeight={600} textTransform="uppercase">
+          {title}
         </Typography>
       </Tooltip>
     </TableCell>
