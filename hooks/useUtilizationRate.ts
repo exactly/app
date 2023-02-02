@@ -2,12 +2,13 @@ import { useMemo } from 'react';
 
 import useAccountData from './useAccountData';
 import interestRateCurve from 'utils/interestRateCurve';
+import numbers from 'config/numbers.json';
 
 const MAX = 1;
-const INTERVAL = 0.005;
+const INTERVAL = numbers.chartInterval;
 
 export default function useUtilizationRate(type: 'floating' | 'fixed', symbol: string) {
-  const { floatingUtilization, interestRateModel } = useAccountData(symbol);
+  const { floatingUtilization, interestRateModel, fixedPools } = useAccountData(symbol);
 
   const data = useMemo(() => {
     if (!interestRateModel) {
@@ -36,12 +37,22 @@ export default function useUtilizationRate(type: 'floating' | 'fixed', symbol: s
   }, [type, interestRateModel]);
 
   const currentUtilization = useMemo(() => {
-    if (!floatingUtilization) {
+    if (!floatingUtilization || fixedPools === undefined) {
       return undefined;
     }
+    const allUtilizations: Record<string, number>[] = [];
 
-    return Number(floatingUtilization) / 1e18;
-  }, [floatingUtilization]);
+    if (type === 'fixed') {
+      fixedPools.forEach((pool) => {
+        allUtilizations.push({ maturity: pool.maturity.toNumber(), utilization: Number(pool.utilization) / 1e18 });
+      });
+    }
+
+    if (type === 'floating') {
+      allUtilizations.push({ utilization: Number(floatingUtilization) / 1e18 });
+    }
+    return allUtilizations;
+  }, [fixedPools, floatingUtilization, type]);
 
   return { currentUtilization, data, loading: !currentUtilization || !interestRateModel };
 }

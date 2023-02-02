@@ -13,6 +13,7 @@ import { globals } from 'styles/theme';
 import { APRsPerMaturityType } from 'hooks/useMaturityPools';
 import MaturityPoolsMobile from './MaturityPoolsMobile';
 import YieldChart from 'components/charts/YieldChart';
+import UtilizationRateChart from 'components/charts/UtilizationRateChart';
 
 const { onlyMobile, onlyDesktop } = globals;
 
@@ -110,6 +111,17 @@ const AssetMaturityPools: FC<Props> = ({ symbol }) => {
         height={280}
       >
         <YieldChart symbol={symbol} />
+      </Box>
+      <Box
+        boxShadow="0px 4px 12px rgba(175, 177, 182, 0.2)"
+        borderRadius="0px 0px 6px 6px"
+        bgcolor="white"
+        p="16px"
+        display={onlyDesktop} // TODO: are we going to have it on mobile?
+        width={610}
+        height={280}
+      >
+        <UtilizationRateChart type="fixed" symbol={symbol} />
       </Box>
     </Box>
   );
