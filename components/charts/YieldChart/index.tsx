@@ -112,7 +112,7 @@ const YieldChart: FC<Props> = ({ symbol }) => {
                 type="monotone"
                 yAxisId="yaxis"
                 dataKey={asset}
-                stroke={palette.symbol[asset]}
+                stroke={palette.symbol[asset] || palette.grey[500]}
                 strokeWidth={2}
                 fillOpacity={0}
               />
