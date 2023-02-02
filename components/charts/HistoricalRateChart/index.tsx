@@ -60,6 +60,7 @@ const HistoricalRateChart: FC<Props> = ({ symbol }) => {
               tickFormatter={(value) => (value instanceof Date ? formatDate(value as Date) : '')}
               stroke="#B4BABF"
               fontSize="12px"
+              height={20}
             />
             <YAxis
               yAxisId="left"
@@ -67,6 +68,7 @@ const HistoricalRateChart: FC<Props> = ({ symbol }) => {
               axisLine={false}
               tick={{ fill: palette.grey[500], fontWeight: 500, fontSize: 12 }}
               tickLine={false}
+              width={50}
             />
             {/* <YAxis
               label={{ value: 'Utilization Rate', angle: -270, position: 'right' }}
