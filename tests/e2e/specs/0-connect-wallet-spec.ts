@@ -1,10 +1,15 @@
-import { connectMetamask, setupFork } from '../steps/setup';
+import { connectMetamask } from '../steps/setup';
 
 describe('Test Connect Wallet', () => {
-  const { visit, userAddress } = setupFork();
+  let userAddress: string | undefined;
 
-  before('Visit web page', () => {
-    visit('/');
+  before(() => {
+    cy.visit('/', {
+      onBeforeLoad: function (window) {
+        window.localStorage.setItem('tos', 'true');
+      },
+    });
+    cy.fetchMetamaskWalletAddress().then((address) => (userAddress = address));
   });
 
   after(() => {
@@ -16,7 +21,7 @@ describe('Test Connect Wallet', () => {
 
     cy.getByTestId('user-address')
       .should('be.visible')
-      .and('contain', userAddress()?.substring(0, 6))
-      .and('contain', userAddress()?.substring(38));
+      .and('contain', userAddress?.substring(0, 6))
+      .and('contain', userAddress?.substring(38));
   });
 });
