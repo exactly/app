@@ -1,5 +1,5 @@
 import { Box, Typography, useTheme } from '@mui/material';
-import React, { FC, useMemo, useState } from 'react';
+import React, { FC, useCallback, useMemo, useState } from 'react';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import updateLocale from 'dayjs/plugin/updateLocale';
@@ -63,6 +63,10 @@ const YieldChart: FC<Props> = ({ symbol }) => {
     [],
   );
 
+  const formatTimestamp = useCallback((value: string | number) => parseTimestamp(value, 'MMM DD'), []);
+  const formatTimestampLabel = useCallback((value: string | number) => `${parseTimestamp(value)}`, []);
+  const formatPercentage = useCallback((value: number) => toPercentage(value as number), []);
+
   return (
     <Box display="flex" flexDirection="column" width="100%" height="100%" gap={2}>
       <Box display="flex" justifyContent="space-between">
@@ -85,7 +89,7 @@ const YieldChart: FC<Props> = ({ symbol }) => {
               stroke="#8f8c9c"
               interval={0}
               padding={{ left: 20, right: 20 }}
-              tickFormatter={(t) => parseTimestamp(t, 'MMM DD')}
+              tickFormatter={formatTimestamp}
               domain={[(dataMin: number) => dataMin - 3_600 * 24 * 2, (dataMax: number) => dataMax + 3_600 * 24 * 2]}
               scale="time"
               tick={{ fill: palette.grey[500], fontWeight: 500, fontSize: 12 }}
@@ -94,7 +98,7 @@ const YieldChart: FC<Props> = ({ symbol }) => {
               height={20}
             />
             <YAxis
-              tickFormatter={(t) => toPercentage(t)}
+              tickFormatter={formatPercentage}
               yAxisId="yaxis"
               axisLine={false}
               tick={{ fill: palette.grey[500], fontWeight: 500, fontSize: 12 }}
@@ -103,7 +107,7 @@ const YieldChart: FC<Props> = ({ symbol }) => {
             />
             <Tooltip
               formatter={(value) => toPercentage(value as number)}
-              labelFormatter={(value) => `${parseTimestamp(value)}`}
+              labelFormatter={formatTimestampLabel}
               content={<TooltipChart />}
             />
             <CartesianGrid stroke={palette.grey[300]} vertical={false} />
