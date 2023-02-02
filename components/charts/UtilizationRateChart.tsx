@@ -25,7 +25,7 @@ function UtilizationRateChart({ type, symbol }: Props) {
   return (
     <Box display="flex" flexDirection="column" width="100%" height="100%" gap={2}>
       <Typography variant="h6" fontSize="16px">
-        Utilization Rate
+        Utilization Variable Rate
       </Typography>
       <ResponsiveContainer width="100%" height="100%">
         {loading ? (
@@ -39,6 +39,7 @@ function UtilizationRateChart({ type, symbol }: Props) {
               tickFormatter={(t) => toPercentage(t, 0)}
               stroke={palette.grey[400]}
               tick={{ fill: palette.grey[500], fontWeight: 500, fontSize: 12 }}
+              height={20}
             />
             <YAxis
               tickFormatter={(t) => toPercentage(t, 0)}
@@ -46,6 +47,7 @@ function UtilizationRateChart({ type, symbol }: Props) {
               axisLine={false}
               tick={{ fill: palette.grey[500], fontWeight: 500, fontSize: 12 }}
               tickLine={false}
+              width={38}
             />
             <ReferenceLine
               x={currentUtilization}

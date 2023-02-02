@@ -35,7 +35,9 @@ const ButtonsChart: FC<Props> = ({ buttons, defaultSelected }) => {
             color: i === selected ? 'white' : 'figma.grey.600',
           }}
         >
-          <Typography variant="subtitle2">{label}</Typography>
+          <Typography variant="subtitle2" fontSize={{ xs: '9px', sm: '12px' }}>
+            {label}
+          </Typography>
         </Button>
       ))}
     </Box>

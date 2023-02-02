@@ -83,7 +83,6 @@ const YieldChart: FC<Props> = ({ symbol }) => {
               dataKey="maturity"
               type="number"
               stroke="#8f8c9c"
-              tickMargin={16}
               interval={0}
               padding={{ left: 20, right: 20 }}
               tickFormatter={(t) => parseTimestamp(t, 'MMM DD')}
@@ -92,6 +91,7 @@ const YieldChart: FC<Props> = ({ symbol }) => {
               tick={{ fill: palette.grey[500], fontWeight: 500, fontSize: 12 }}
               allowDataOverflow
               fontSize="12px"
+              height={20}
             />
             <YAxis
               tickFormatter={(t) => toPercentage(t)}
@@ -99,6 +99,7 @@ const YieldChart: FC<Props> = ({ symbol }) => {
               axisLine={false}
               tick={{ fill: palette.grey[500], fontWeight: 500, fontSize: 12 }}
               tickLine={false}
+              width={50}
             />
             <Tooltip
               formatter={(value) => toPercentage(value as number)}

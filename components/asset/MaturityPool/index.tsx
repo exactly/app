@@ -106,8 +106,7 @@ const AssetMaturityPools: FC<Props> = ({ symbol }) => {
         borderRadius="0px 0px 6px 6px"
         bgcolor="white"
         p="16px"
-        display={onlyDesktop} // TODO: are we going to have it on mobile?
-        width={610}
+        width={{ sm: 610 }}
         height={280}
       >
         <YieldChart symbol={symbol} />
