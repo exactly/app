@@ -10,5 +10,6 @@
   "debounceTime": 500,
   "minAPRValue": 0.0001,
   "maxAPRValue": 0.3,
-  "defaultAmount": 69
+  "defaultAmount": 69,
+  "chartInterval": 0.0005
 }
