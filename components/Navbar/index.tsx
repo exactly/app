@@ -113,6 +113,7 @@ function Navbar() {
                         gap: 0.5,
                       }}
                       variant={pathname === currentPathname ? 'contained' : 'text'}
+                      data-testid={`navbar-link-${name.toLowerCase()}`}
                     >
                       {icon}
                       <Typography fontWeight={700} fontSize={13}>

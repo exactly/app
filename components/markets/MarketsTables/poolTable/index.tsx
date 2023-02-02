@@ -89,6 +89,7 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
                     cursor: 'pointer',
                   }}
                   hover
+                  data-testid={`markets-${rateType}-pool-row-${symbol}`}
                 >
                   <TableCell component="th" scope="row">
                     <Grid container alignItems="center">

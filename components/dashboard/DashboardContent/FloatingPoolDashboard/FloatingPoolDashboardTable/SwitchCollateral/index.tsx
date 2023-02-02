@@ -112,7 +112,7 @@ function SwitchCollateral({ symbol }: Props) {
       placement="top"
       arrow
     >
-      <span>
+      <span data-testid={`switch-collateral-${symbol}-wrapper`}>
         <StyledSwitch
           checked={checked}
           onChange={onToggle}

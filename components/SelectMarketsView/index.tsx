@@ -83,6 +83,7 @@ const SelectMarketsView: FC = () => {
             },
             cursor: 'pointer',
           }}
+          data-testid="navbar-link-markets"
         >
           <Box display="flex" alignItems="center" gap={0.5}>
             <BarChartRoundedIcon sx={{ fontSize: '13px' }} />

@@ -20,5 +20,5 @@ describe('WBTC floating deposit', () => {
     cy.disconnectMetamaskWalletFromAllDapps();
   });
 
-  deposit({ symbol: 'WBTC', type: 'floating', decimals: 8, balance: '100.0', amount: '1', shouldApprove: true });
+  deposit({ type: 'floating', symbol: 'WBTC', decimals: 8, balance: '100.0', amount: '1', shouldApprove: true });
 });

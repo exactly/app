@@ -45,7 +45,6 @@ const tokens: Tokens = {};
 export const init = async () => {
   for (const symbol of ERC20TokenSymbols) {
     const contract = await import(`@exactly-protocol/protocol/deployments/mainnet/${symbol}.json`);
-    console.log(contract);
     tokens[symbol] = {
       ...contract,
       abi: JSON.stringify(contract.abi),
