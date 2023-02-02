@@ -1,3 +1,9 @@
 {
-  "include": ["next.config.mjs", "**/.eslintrc.cjs", "**/*.config.ts", "scripts/**/*.ts", "tests/**/*.ts"]
+  "include": [
+    "next.config.mjs",
+    "**/.eslintrc.cjs",
+    "**/*.config.ts",
+    "scripts/**/*.ts",
+    "tests/**/*.ts"
+  ]
 }
