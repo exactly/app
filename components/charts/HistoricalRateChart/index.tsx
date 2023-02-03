@@ -1,4 +1,4 @@
-import { Box, Checkbox, Typography, useTheme } from '@mui/material';
+import { Box, Checkbox, FormControlLabel, Typography, useTheme } from '@mui/material';
 import useHistoricalRates from 'hooks/useHistoricalRates';
 import React, { FC, useCallback, useMemo, useState } from 'react';
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
@@ -123,20 +123,26 @@ const HistoricalRateChart: FC<Props> = ({ symbol }) => {
           </LineChart>
         )}
       </ResponsiveContainer>
-      <Box display="flex" alignItems="center" mt={-2.5}>
-        <Checkbox
-          size="small"
-          onChange={onShowUtilizationChange}
-          sx={{
-            color: palette.blue,
-            '&.Mui-checked': {
-              color: palette.blue,
-            },
-          }}
+      <Box display="flex" alignItems="center" mt={-2.5} pl={1}>
+        <FormControlLabel
+          control={
+            <Checkbox
+              size="small"
+              onChange={onShowUtilizationChange}
+              sx={{
+                color: palette.blue,
+                '&.Mui-checked': {
+                  color: palette.blue,
+                },
+              }}
+            />
+          }
+          label={
+            <Typography variant="subtitle1" fontSize="12px">
+              Show utilization
+            </Typography>
+          }
         />
-        <Typography variant="subtitle1" fontSize="12px">
-          Show utilization
-        </Typography>
       </Box>
     </Box>
   );
