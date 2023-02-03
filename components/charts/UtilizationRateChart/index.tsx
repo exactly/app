@@ -20,14 +20,16 @@ const formatEmpty = () => '';
 function UtilizationRateChart({ type, symbol }: Props) {
   const { palette, typography } = useTheme();
   const { currentUtilization, data, loading } = useUtilizationRate(type, symbol);
-  const [zoom, setZoom] = useState<'in' | 'out'>('in');
+  const [zoom, setZoom] = useState<boolean>(true);
 
   const slicedData = useMemo(() => {
-    if (!currentUtilization || currentUtilization.length === 0 || zoom === 'out') return data;
-    currentUtilization.sort((a, b) => a.utilization - b.utilization);
+    if (!currentUtilization || currentUtilization.length === 0 || !zoom) return data;
 
-    const left = currentUtilization[0].utilization * (1 - numbers.chartGap);
-    const right = currentUtilization[currentUtilization.length - 1].utilization * (1 + numbers.chartGap);
+    const minUtilization = Math.min(...currentUtilization.map((item) => item.utilization));
+    const maxUtilization = Math.max(...currentUtilization.map((item) => item.utilization));
+
+    const left = minUtilization * (1 - numbers.chartGap);
+    const right = maxUtilization * (1 + numbers.chartGap);
 
     return data.filter((item) => item.utilization >= left && item.utilization <= right);
   }, [currentUtilization, data, zoom]);
@@ -35,12 +37,12 @@ function UtilizationRateChart({ type, symbol }: Props) {
   const buttons = useMemo(
     () => [
       {
-        label: 'Zoom In',
-        onClick: () => setZoom('in'),
+        label: 'ZOOM IN',
+        onClick: () => setZoom(true),
       },
       {
-        label: 'Zoom Out',
-        onClick: () => setZoom('out'),
+        label: 'ZOOM OUT',
+        onClick: () => setZoom(false),
       },
     ],
     [],
@@ -71,7 +73,7 @@ function UtilizationRateChart({ type, symbol }: Props) {
             <XAxis
               type="number"
               dataKey="utilization"
-              tickFormatter={(t) => toPercentage(t, zoom === 'in' ? 2 : 0)}
+              tickFormatter={(t) => toPercentage(t, zoom ? 2 : 0)}
               stroke={palette.grey[400]}
               tick={{ fill: palette.grey[500], fontWeight: 500, fontSize: 12 }}
               allowDataOverflow={true}
@@ -90,14 +92,14 @@ function UtilizationRateChart({ type, symbol }: Props) {
               allowDataOverflow={true}
               orientation="left"
               type="number"
-              tickFormatter={(t) => toPercentage(t, zoom === 'in' ? 2 : 0)}
+              tickFormatter={(t) => toPercentage(t, zoom ? 2 : 0)}
               yAxisId="yaxis"
               axisLine={false}
               tick={{ fill: palette.grey[500], fontWeight: 500, fontSize: 12 }}
               tickLine={false}
               domain={[
                 (dataMin: number) => dataMin,
-                (dataMax: number) => (type === 'floating' && zoom === 'out' ? 1.5 : Math.min(1.5, dataMax)),
+                (dataMax: number) => (type === 'floating' && !zoom ? 1.5 : Math.min(1.5, dataMax)),
               ]}
               label={{
                 value: 'APR',
