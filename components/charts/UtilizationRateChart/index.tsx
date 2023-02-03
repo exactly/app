@@ -35,11 +35,11 @@ function UtilizationRateChart({ type, symbol }: Props) {
   const buttons = useMemo(
     () => [
       {
-        label: 'IN',
+        label: 'Zoom In',
         onClick: () => setZoom('in'),
       },
       {
-        label: 'OUT',
+        label: 'Zoom Out',
         onClick: () => setZoom('out'),
       },
     ],
@@ -76,6 +76,15 @@ function UtilizationRateChart({ type, symbol }: Props) {
               tick={{ fill: palette.grey[500], fontWeight: 500, fontSize: 12 }}
               allowDataOverflow={true}
               domain={['DataMin', 'DataMax']}
+              offset={10}
+              label={{
+                value: 'Utilization Rate',
+                position: 'insideBottom',
+                offset: 0,
+                fill: palette.grey[500],
+                fontWeight: 500,
+                fontSize: 12,
+              }}
             />
             <YAxis
               allowDataOverflow={true}
@@ -86,7 +95,19 @@ function UtilizationRateChart({ type, symbol }: Props) {
               axisLine={false}
               tick={{ fill: palette.grey[500], fontWeight: 500, fontSize: 12 }}
               tickLine={false}
-              domain={[(dataMin: number) => dataMin, (dataMax: number) => Math.min(1, dataMax)]}
+              domain={[
+                (dataMin: number) => dataMin,
+                (dataMax: number) => (type === 'floating' && zoom === 'out' ? 1.5 : Math.min(1.5, dataMax)),
+              ]}
+              label={{
+                value: 'APR',
+                position: 'insideRight',
+                fill: palette.grey[500],
+                fontWeight: 500,
+                offset: 50,
+                angle: -90,
+                fontSize: 12,
+              }}
             />
             <YAxis
               allowDataOverflow={true}
