@@ -117,8 +117,7 @@ const AssetMaturityPools: FC<Props> = ({ symbol }) => {
         borderRadius="0px 0px 6px 6px"
         bgcolor="white"
         p="16px"
-        display={onlyDesktop}
-        width={610}
+        width={{ sm: 610 }}
         height={280}
       >
         <UtilizationRateChart type="fixed" symbol={symbol} />
