@@ -160,7 +160,7 @@ const Borrow: FC = () => {
 
       const { usdPrice } = accountData[symbol];
 
-      const maxBorrowAssets = getBeforeBorrowLimit(accountData, symbol, usdPrice, decimals, 'borrow');
+      const maxBorrowAssets = getBeforeBorrowLimit(accountData[symbol], 'borrow');
 
       setQty(value);
 
