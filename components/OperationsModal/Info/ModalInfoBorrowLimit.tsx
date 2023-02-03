@@ -35,7 +35,7 @@ function ModalInfoBorrowLimit({ qty, symbol, operation, variant = 'column' }: Pr
 
     const { usdPrice, decimals, adjustFactor, isCollateral } = accountData[symbol];
 
-    const beforeBorrowLimitUSD = getBeforeBorrowLimit(accountData, symbol, usdPrice, decimals, operation);
+    const beforeBorrowLimitUSD = getBeforeBorrowLimit(accountData[symbol], operation);
 
     const newQtyUsd = newQty.mul(usdPrice).div(parseFixed('1', decimals));
 

@@ -1,25 +1,26 @@
 import type { BigNumber } from '@ethersproject/bignumber';
-import { formatFixed, parseFixed } from '@ethersproject/bignumber';
-import { WeiPerEther } from '@ethersproject/constants';
+import { parseFixed } from '@ethersproject/bignumber';
+import { WeiPerEther, Zero } from '@ethersproject/constants';
 
-import { AccountData } from 'types/AccountData';
+import { Previewer } from 'types/contracts/Previewer';
 
-function getBeforeBorrowLimit(
-  accountData: AccountData,
-  symbol: string,
-  usdPrice: BigNumber,
-  decimals: number,
-  type: string,
-) {
-  const maxBorrowAssets = accountData[symbol].maxBorrowAssets;
+function getBeforeBorrowLimit(marketAccount: Previewer.MarketAccountStructOutput, type: string): BigNumber {
+  const { maxBorrowAssets, usdPrice, decimals, isCollateral, floatingDepositAssets, adjustFactor } = marketAccount;
 
-  let before = maxBorrowAssets.mul(usdPrice).div(parseFixed('1', decimals));
+  const decimalWAD = parseFixed('1', decimals);
+  let before = maxBorrowAssets.mul(usdPrice).div(decimalWAD);
 
-  const hasDepositedToFloatingPool = Number(formatFixed(accountData[symbol].floatingDepositAssets, decimals)) > 0;
+  const hasDepositedToFloatingPool = floatingDepositAssets.gt(Zero);
 
-  if (!accountData[symbol].isCollateral && hasDepositedToFloatingPool && type === 'borrow') {
+  if (!isCollateral && hasDepositedToFloatingPool && type === 'borrow') {
     before = maxBorrowAssets.add(
-      accountData[symbol].floatingDepositAssets.mul(accountData[symbol].adjustFactor).div(WeiPerEther),
+      floatingDepositAssets
+        .mul(usdPrice)
+        .div(decimalWAD)
+        .mul(adjustFactor)
+        .div(WeiPerEther)
+        .mul(adjustFactor)
+        .div(WeiPerEther),
     );
   }
 

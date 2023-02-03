@@ -219,7 +219,7 @@ const BorrowAtMaturity: FC = () => {
         });
       }
 
-      const maxBorrowAssets = getBeforeBorrowLimit(accountData, symbol, usdPrice, decimals, 'borrow');
+      const maxBorrowAssets = getBeforeBorrowLimit(accountData[symbol], 'borrow');
 
       if (
         maxBorrowAssets.lt(
