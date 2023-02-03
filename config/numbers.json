@@ -11,5 +11,6 @@
   "minAPRValue": 0.0001,
   "maxAPRValue": 0.3,
   "defaultAmount": 69,
-  "chartInterval": 0.0005
+  "chartInterval": 0.0005,
+  "chartGap": 0.5
 }

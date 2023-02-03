@@ -22,6 +22,16 @@ function UtilizationRateChart({ type, symbol }: Props) {
   const { currentUtilization, data, loading } = useUtilizationRate(type, symbol);
   const [zoom, setZoom] = useState<'in' | 'out'>('in');
 
+  const slicedData = useMemo(() => {
+    if (!currentUtilization || currentUtilization.length === 0 || zoom === 'out') return data;
+    currentUtilization.sort((a, b) => a.utilization - b.utilization);
+
+    const left = currentUtilization[0].utilization * (1 - numbers.chartGap);
+    const right = currentUtilization[currentUtilization.length - 1].utilization * (1 + numbers.chartGap);
+
+    return data.filter((item) => item.utilization >= left && item.utilization <= right);
+  }, [currentUtilization, data, zoom]);
+
   const buttons = useMemo(
     () => [
       {
@@ -36,35 +46,6 @@ function UtilizationRateChart({ type, symbol }: Props) {
     [],
   );
 
-  const xAxisDomain = useMemo(() => {
-    if (currentUtilization && currentUtilization.length > 0 && zoom === 'in') {
-      currentUtilization.sort((a, b) => a.utilization - b.utilization);
-
-      const left = currentUtilization[0].utilization * 0.9;
-      const right = currentUtilization[currentUtilization.length - 1].utilization * 1.1;
-
-      return [left, right];
-    }
-    return ['DataMin', 'DataMax'];
-  }, [currentUtilization, zoom]);
-
-  const yAxisDomain = useMemo(() => {
-    if (currentUtilization && currentUtilization.length > 0 && zoom === 'in') {
-      currentUtilization.sort((a, b) => a.utilization - b.utilization);
-
-      const bottomIndex =
-        Math.floor(currentUtilization[0].utilization / numbers.chartInterval) - (type === 'floating' ? 40 : 1);
-      const topIndex =
-        Math.floor(currentUtilization[currentUtilization.length - 1].utilization / numbers.chartInterval) +
-        (type === 'floating' ? 40 : 5);
-
-      const slicedData = data.slice(bottomIndex, topIndex);
-
-      return [slicedData[0].apr, slicedData[slicedData.length - 1].apr];
-    }
-    return ['DataMin', 'DataMax'];
-  }, [currentUtilization, data, type, zoom]);
-
   const label: CSSProperties = {
     fontWeight: 500,
     fontFamily: typography.fontFamilyMonospaced,
@@ -75,7 +56,7 @@ function UtilizationRateChart({ type, symbol }: Props) {
     <Box display="flex" flexDirection="column" width="100%" height="100%" gap={2}>
       <Box display="flex" justifyContent="space-between">
         <Typography variant="h6" fontSize="16px">
-          Utilization Rate
+          {type === 'floating' ? 'Utilization Rate (Variable Rate Pool)' : 'Utilization Rates (Fixed Rate Pools)'}
         </Typography>
         <Box>
           <ButtonsChart buttons={buttons} />
@@ -85,7 +66,7 @@ function UtilizationRateChart({ type, symbol }: Props) {
         {loading ? (
           <LoadingChart />
         ) : (
-          <LineChart data={data} margin={{ top: 5, bottom: 5 }}>
+          <LineChart data={slicedData} margin={{ top: 5, bottom: 5 }}>
             <CartesianGrid stroke={palette.grey[300]} vertical={false} />
             <XAxis
               type="number"
@@ -94,19 +75,28 @@ function UtilizationRateChart({ type, symbol }: Props) {
               stroke={palette.grey[400]}
               tick={{ fill: palette.grey[500], fontWeight: 500, fontSize: 12 }}
               allowDataOverflow={true}
-              domain={xAxisDomain}
+              domain={['DataMin', 'DataMax']}
             />
             <YAxis
               allowDataOverflow={true}
               orientation="left"
-              domain={yAxisDomain}
               type="number"
               tickFormatter={(t) => toPercentage(t, zoom === 'in' ? 2 : 0)}
               yAxisId="yaxis"
               axisLine={false}
               tick={{ fill: palette.grey[500], fontWeight: 500, fontSize: 12 }}
               tickLine={false}
-              width={38}
+              domain={[(dataMin: number) => dataMin, (dataMax: number) => Math.min(1, dataMax)]}
+            />
+            <YAxis
+              allowDataOverflow={true}
+              orientation="right"
+              type="number"
+              tick={false}
+              yAxisId="yaxis2"
+              axisLine={false}
+              tickLine={false}
+              width={0}
             />
 
             <Tooltip
@@ -119,7 +109,7 @@ function UtilizationRateChart({ type, symbol }: Props) {
             <Line
               name="Utilization"
               type="monotone"
-              yAxisId="yaxis"
+              yAxisId="yaxis2"
               dataKey="utilization"
               dot={false}
               stroke="#000"
@@ -147,9 +137,7 @@ function UtilizationRateChart({ type, symbol }: Props) {
                   yAxisId="yaxis"
                   stroke={palette.operation.variable}
                   label={{
-                    value: `${toPercentage(utilization)} ${
-                      type === 'fixed' ? parseTimestamp(maturity, 'MMM,DD') : 'Variable pool'
-                    }`,
+                    value: `${toPercentage(utilization)} ${type === 'fixed' ? parseTimestamp(maturity, 'MMM,DD') : ''}`,
                     position: utilization < 0.5 ? 'insideBottomLeft' : 'insideTopRight',
                     offset: 15,
                     angle: -90,
