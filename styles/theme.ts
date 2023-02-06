@@ -83,7 +83,9 @@ const theme = createTheme({
 
     figma: {
       grey: {
+        '100': '#EDEFF2',
         '300': '#94979E',
+        '500': '#989FA6',
         '600': '#757A80',
         '700': '#6F737B',
       },
@@ -182,6 +184,17 @@ const theme = createTheme({
         root: {
           paddingLeft: 0,
           paddingRight: 0,
+        },
+      },
+    },
+    MuiRadio: {
+      styleOverrides: {
+        root: {
+          paddingLeft: 0,
+          paddingRight: '8px',
+          '& .MuiSvgIcon-root': {
+            fontSize: 18,
+          },
         },
       },
     },
