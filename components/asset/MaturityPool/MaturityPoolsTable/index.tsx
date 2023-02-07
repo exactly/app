@@ -15,10 +15,9 @@ import { toPercentage } from 'utils/utils';
 
 import numbers from 'config/numbers.json';
 import useActionButton from 'hooks/useActionButton';
-import useMaturityPools, { APRsPerMaturityType } from 'hooks/useMaturityPools';
+import useMaturityPools from 'hooks/useMaturityPools';
 
 type MaturityPoolsTableProps = {
-  APRsPerMaturity: APRsPerMaturityType;
   symbol: string;
 };
 
@@ -34,10 +33,10 @@ const HeadCell: FC<{ title: string; tooltipTitle?: string }> = ({ title, tooltip
   );
 };
 
-const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ APRsPerMaturity, symbol }) => {
+const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ symbol }) => {
   const { handleActionClick } = useActionButton();
   const { minAPRValue } = numbers;
-  const rows = useMaturityPools(APRsPerMaturity, symbol);
+  const rows = useMaturityPools(symbol);
 
   return (
     <TableContainer component={Paper}>
