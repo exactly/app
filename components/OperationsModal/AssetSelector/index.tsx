@@ -32,7 +32,7 @@ function Asset({ assetSymbol, option = false }: AssetOptionProps) {
           height: 'auto',
         }}
       />
-      <Typography fontWeight={600} fontSize={option ? 16 : 24} mt={option ? '4px' : '6px'}>
+      <Typography fontWeight={600} fontSize={option ? 16 : 24} my="auto">
         {formatSymbol(assetSymbol)}
       </Typography>
     </>
@@ -48,7 +48,7 @@ function AssetSelector() {
       label="Asset"
       options={options}
       onChange={setMarketSymbol}
-      renderValue={marketSymbol ? <Asset assetSymbol={marketSymbol} /> : null}
+      renderValue={<Asset assetSymbol={marketSymbol} />}
       renderOption={(o: string) => <Asset option assetSymbol={o} />}
     />
   );
