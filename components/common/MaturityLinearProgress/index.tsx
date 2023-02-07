@@ -3,6 +3,7 @@ import { Box, Typography } from '@mui/material';
 import LinearProgress, { linearProgressClasses } from '@mui/material/LinearProgress';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { styled } from '@mui/material/styles';
+import daysLeft from 'utils/daysLeft';
 
 const StyledLinearProgress = styled(LinearProgress, {
   shouldForwardProp: (prop) => prop !== 'barColor',
@@ -33,10 +34,7 @@ function MaturityLinearProgress({ maturityDate }: Props) {
     return Math.min((current * 100) / maturityLife, 100);
   }, [maturityDate]);
 
-  const daysLeft = useMemo(() => {
-    return Math.floor((maturityDate - Date.now() / 1000) / (3600 * 24));
-  }, [maturityDate]);
-
+  const daysToMaturity = useMemo(() => daysLeft(maturityDate), [maturityDate]);
   const isCompleted = progress === 100;
 
   return (
@@ -52,9 +50,7 @@ function MaturityLinearProgress({ maturityDate }: Props) {
         ) : (
           <>
             <Typography variant="subtitle2">{`${Math.round(progress)}%`}</Typography>
-            <Typography sx={{ fontWeight: 500, fontSize: 12, color: '#94999E' }}>
-              {`${daysLeft} ${daysLeft === 1 ? 'day' : 'days'} left`}
-            </Typography>
+            <Typography sx={{ fontWeight: 500, fontSize: 12, color: '#94999E' }}>{`${daysToMaturity} left`}</Typography>
           </>
         )}
       </Box>

@@ -1,22 +1,21 @@
 import React, { FC } from 'react';
 import { Box, Button, Divider, Grid, Skeleton, Tooltip, Typography } from '@mui/material';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
-import useMaturityPools, { APRsPerMaturityType } from 'hooks/useMaturityPools';
+import useMaturityPools from 'hooks/useMaturityPools';
 import numbers from 'config/numbers.json';
 import useActionButton from 'hooks/useActionButton';
 import parseTimestamp from 'utils/parseTimestamp';
 import { toPercentage } from 'utils/utils';
 
 type Props = {
-  APRsPerMaturity: APRsPerMaturityType;
   symbol: string;
 };
 
 const { minAPRValue } = numbers;
 
-const MaturityPoolsMobile: FC<Props> = ({ APRsPerMaturity, symbol }) => {
+const MaturityPoolsMobile: FC<Props> = ({ symbol }) => {
   const { handleActionClick } = useActionButton();
-  const rows = useMaturityPools(APRsPerMaturity, symbol);
+  const rows = useMaturityPools(symbol);
 
   return (
     <Box width="100%" pb={2}>

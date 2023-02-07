@@ -1,66 +1,36 @@
-import React, { FC, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { FC, useMemo } from 'react';
 import { WeiPerEther } from '@ethersproject/constants';
 
-import AccountDataContext from 'contexts/AccountDataContext';
-
 import formatNumber from 'utils/formatNumber';
-import queryRates from 'utils/queryRates';
 import { toPercentage } from 'utils/utils';
 
 import { ItemInfoProps } from 'components/common/ItemInfo';
 import HeaderInfo from 'components/common/HeaderInfo';
 import OrderAction from 'components/OrderAction';
-import { captureException } from '@sentry/nextjs';
-import { useWeb3 } from 'hooks/useWeb3';
-import networkData from 'config/networkData.json' assert { type: 'json' };
 import { Box } from '@mui/material';
 import useAccountData from 'hooks/useAccountData';
+import useFloatingPoolAPR from 'hooks/useFloatingPoolAPR';
 
 type FloatingPoolInfoProps = {
   symbol: string;
 };
 
 const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol }) => {
-  const { chain } = useWeb3();
-  const { accountData } = useContext(AccountDataContext);
-
-  const { floatingBorrowRate, market } = useAccountData(symbol);
-
-  const [depositAPR, setDepositAPR] = useState<number | undefined>();
+  const { depositAPR, borrowAPR } = useFloatingPoolAPR(symbol);
+  const {
+    totalFloatingDepositAssets: totalDeposited,
+    totalFloatingBorrowAssets: totalBorrowed,
+    decimals,
+    usdPrice,
+  } = useAccountData(symbol);
 
   const { deposited, borrowed } = useMemo(() => {
-    if (!accountData) return {};
-    const {
-      totalFloatingDepositAssets: totalDeposited,
-      totalFloatingBorrowAssets: totalBorrowed,
-      decimals,
-      usdPrice: exchangeRate,
-    } = accountData[symbol];
-
+    if (!totalDeposited || !totalBorrowed || !decimals || !usdPrice) return {};
     return {
-      deposited: Number(totalDeposited.mul(exchangeRate).div(WeiPerEther)) / 10 ** decimals,
-      borrowed: Number(totalBorrowed.mul(exchangeRate).div(WeiPerEther)) / 10 ** decimals,
+      deposited: Number(totalDeposited.mul(usdPrice).div(WeiPerEther)) / 10 ** decimals,
+      borrowed: Number(totalBorrowed.mul(usdPrice).div(WeiPerEther)) / 10 ** decimals,
     };
-  }, [accountData, symbol]);
-
-  const fetchAPRs = useCallback(async () => {
-    if (!accountData || !market || !chain) return;
-    const subgraphUrl = networkData[String(chain.id) as keyof typeof networkData]?.subgraph;
-    if (!subgraphUrl) return;
-    const { maxFuturePools } = accountData[symbol];
-
-    // TODO: consider storing these results in a new context so it's only fetched once - already added in tech debt docs
-    const [{ apr: depositAPRRate }] = await queryRates(subgraphUrl, market, 'deposit', {
-      maxFuturePools,
-    });
-    setDepositAPR(depositAPRRate);
-  }, [accountData, market, symbol, chain]);
-
-  useEffect(() => {
-    fetchAPRs().catch(captureException);
-  }, [fetchAPRs]);
-
-  const borrowAPR = floatingBorrowRate ? toPercentage(Number(floatingBorrowRate) / 1e18) : undefined;
+  }, [decimals, totalBorrowed, totalDeposited, usdPrice]);
 
   const itemsInfo: ItemInfoProps[] = [
     {
@@ -82,7 +52,7 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol }) => {
     },
     {
       label: 'Borrow APR',
-      value: borrowAPR,
+      value: toPercentage(borrowAPR),
       tooltipTitle: 'Change in the underlying Variable Rate Pool shares value over the last hour, annualized.',
     },
     {

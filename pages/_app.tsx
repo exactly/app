@@ -17,6 +17,7 @@ import { defaultChain, wagmi, walletConnectId, web3modal } from 'utils/client';
 import Footer from 'components/Footer';
 import Navbar from 'components/Navbar';
 import theme, { globals } from 'styles/theme';
+import { MarketsBasicProvider } from 'contexts/MarketsBasicContext';
 
 const { maxWidth } = globals;
 
@@ -60,15 +61,17 @@ export default function App({ Component, pageProps }: AppProps) {
             <AccountDataProvider>
               <MarketProvider>
                 <ModalStatusProvider>
-                  <Grid maxWidth={maxWidth} mx="auto" height="100%">
-                    <Box display="flex" flexDirection="column" mx={1} height="100%">
-                      <Navbar />
-                      <main style={{ flexGrow: 1 }}>
-                        <Component {...pageProps} />
-                      </main>
-                      <Footer />
-                    </Box>
-                  </Grid>
+                  <MarketsBasicProvider>
+                    <Grid maxWidth={maxWidth} mx="auto" height="100%">
+                      <Box display="flex" flexDirection="column" mx={1} height="100%">
+                        <Navbar />
+                        <main style={{ flexGrow: 1 }}>
+                          <Component {...pageProps} />
+                        </main>
+                        <Footer />
+                      </Box>
+                    </Grid>
+                  </MarketsBasicProvider>
                 </ModalStatusProvider>
               </MarketProvider>
             </AccountDataProvider>
