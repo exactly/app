@@ -16,7 +16,7 @@ type Props = {
 function AssetInput({ qty, onChange, symbol, decimals, amount, label, onMax }: Props) {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
-      <Box sx={{ marginLeft: -1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <AssetSelector />
         <ModalInput value={qty} decimals={decimals} onValueChange={onChange} />
       </Box>
