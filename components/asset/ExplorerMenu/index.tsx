@@ -98,7 +98,7 @@ const ExplorerMenu: FC<Props> = ({ symbol, assetAddress, eMarketAddress, rateMod
         </MenuItem>
         <MenuItem>
           <Image
-            src={`/img/assets/${symbol}.svg`}
+            src={`/img/exaTokens/exa${symbol}.svg`}
             alt={symbol}
             width={20}
             height={20}

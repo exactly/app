@@ -12,7 +12,6 @@ import Button from '@mui/material/Button';
 import { Box, Skeleton, Tooltip } from '@mui/material';
 
 import Image from 'next/image';
-import { useRouter } from 'next/router';
 
 import { toPercentage } from 'utils/utils';
 import parseTimestamp from 'utils/parseTimestamp';
@@ -52,7 +51,6 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
   const defaultRows = useMemo<TableRow[]>(() => assets.map((s) => ({ symbol: s })), [assets]);
   const { setOrderBy, sortData, direction: sortDirection, isActive: sortActive } = useSorting<TableRow>();
   const tempRows = isLoading ? defaultRows : rows; // HACK this with the timeout in "marketsTables" is to avoid a screen flash when MUI  recive the new data of rows
-  const { query } = useRouter();
 
   return (
     <TableContainer component={Paper}>
@@ -78,7 +76,7 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
         <TableBody>
           {sortData(tempRows).map(
             ({ symbol, totalDeposited, totalBorrowed, depositAPR, borrowAPR, depositMaturity, borrowMaturity }) => (
-              <Link href={{ pathname: `/${symbol}`, query }} key={symbol} rel="noopener noreferrer" legacyBehavior>
+              <Link href={{ pathname: `/${symbol}` }} key={symbol} rel="noopener noreferrer" legacyBehavior>
                 <TableRow
                   key={symbol}
                   sx={{
