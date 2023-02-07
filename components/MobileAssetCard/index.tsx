@@ -1,9 +1,10 @@
 import { Typography } from '@mui/material';
 import { Box } from '@mui/system';
+import AccountDataContext from 'contexts/AccountDataContext';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import React, { FC, PropsWithChildren } from 'react';
+import React, { FC, PropsWithChildren, useCallback, useContext } from 'react';
 import formatSymbol from 'utils/formatSymbol';
 import getSymbolDescription from 'utils/getSymbolDescription';
 
@@ -14,6 +15,15 @@ type Props = PropsWithChildren<{
 
 const MobileAssetCard: FC<Props> = ({ symbol, isFloating, children }) => {
   const { query } = useRouter();
+  const { accountData } = useContext(AccountDataContext);
+
+  const assetDescription = useCallback(
+    (s: string) => {
+      if (!accountData) return '';
+      return getSymbolDescription(accountData, s);
+    },
+    [accountData],
+  );
 
   return (
     <Box
@@ -41,7 +51,7 @@ const MobileAssetCard: FC<Props> = ({ symbol, isFloating, children }) => {
             />
             <Box display="flex" flexDirection="column" my="auto">
               <Typography fontSize="14px" lineHeight="14px" color="grey.500">
-                {getSymbolDescription(symbol)}
+                {assetDescription(symbol)}
               </Typography>
               <Typography variant="h5" lineHeight="24px">
                 {formatSymbol(symbol)}

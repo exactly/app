@@ -1,11 +1,5 @@
-const symbolDescriptions: Record<string, string> = {
-  USDC: 'USD Coin',
-  DAI: 'DAI Stablecoin',
-  WETH: 'Ether',
-  WBTC: 'Wrapped BTC',
-  wstETH: 'Lido Wrapped Staked ETH',
-};
+import { AccountData } from 'types/AccountData';
 
-export default (symbol: string) => {
-  return symbolDescriptions[symbol] || 'Coin';
+export default (accountData: AccountData, symbol: string) => {
+  return symbol === 'WETH' ? 'Ether' : accountData[symbol].assetName;
 };
