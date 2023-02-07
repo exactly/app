@@ -71,8 +71,8 @@ export const ModalStatusProvider: FC<PropsWithChildren> = ({ children }) => {
 
   return (
     <ModalStatusContext.Provider value={value}>
-      {children}
       <OperationContextProvider>
+        {children}
         <OperationsModal />
       </OperationContextProvider>
     </ModalStatusContext.Provider>
