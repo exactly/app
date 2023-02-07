@@ -10,7 +10,6 @@ import MaturityPoolsTable from './MaturityPoolsTable';
 import MaturityPoolInfo from './MaturityPoolInfo';
 import { Box } from '@mui/material';
 import { globals } from 'styles/theme';
-import { APRsPerMaturityType } from 'hooks/useMaturityPools';
 import MaturityPoolsMobile from './MaturityPoolsMobile';
 import YieldChart from 'components/charts/YieldChart';
 import UtilizationRateChart from 'components/charts/UtilizationRateChart';
@@ -33,21 +32,11 @@ const AssetMaturityPools: FC<Props> = ({ symbol }) => {
   const [totalBorrowed, setTotalBorrowed] = useState<number | undefined>(undefined);
   const [bestDeposit, setBestDeposit] = useState<Rate | undefined>(undefined);
   const [bestBorrow, setBestBorrow] = useState<Rate | undefined>(undefined);
-  const [APRsPerMaturity, setAPRsPerMaturity] = useState<APRsPerMaturityType>({});
 
   const getMaturitiesData = useCallback(async () => {
     if (!accountData) return;
 
     const { fixedPools, usdPrice, decimals } = accountData[symbol];
-
-    setAPRsPerMaturity(
-      Object.fromEntries(
-        fixedPools.map(({ maturity, depositRate, minBorrowRate }) => [
-          maturity,
-          { borrow: Number(minBorrowRate.toBigInt()) / 1e18, deposit: Number(depositRate.toBigInt()) / 1e18 },
-        ]),
-      ),
-    );
 
     let tempTotalDeposited = Zero;
     let tempTotalBorrowed = Zero;
@@ -96,10 +85,10 @@ const AssetMaturityPools: FC<Props> = ({ symbol }) => {
           />
         </Grid>
         <Grid item xs={12} px="24px" pb="24px" bgcolor="white" mt={-1} display={onlyDesktop}>
-          <MaturityPoolsTable APRsPerMaturity={APRsPerMaturity} symbol={symbol} />
+          <MaturityPoolsTable symbol={symbol} />
         </Grid>
         <Box display={onlyMobile} px="24px" pt={1} width="100%">
-          <MaturityPoolsMobile APRsPerMaturity={APRsPerMaturity} symbol={symbol} />
+          <MaturityPoolsMobile symbol={symbol} />
         </Box>
       </Grid>
       <Box

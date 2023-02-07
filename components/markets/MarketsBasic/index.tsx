@@ -6,14 +6,24 @@ import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import LockIcon from '@mui/icons-material/Lock';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import Image from 'next/image';
+import useMaturityPools from 'hooks/useMaturityPools';
+import numbers from 'config/numbers.json';
+import { toPercentage } from 'utils/utils';
+import daysLeft from 'utils/daysLeft';
+import useFloatingPoolAPR from 'hooks/useFloatingPoolAPR';
+import OperationTabs from './OperationTabs';
+import { useMarketsBasic } from 'contexts/MarketsBasicContext';
 
 const MarketsBasic: FC = () => {
-  const defaultSymbol = 'USDC';
-  const pools = [
-    { maturity: '28 days', apr: '2.34%', type: 'fixed' },
-    { maturity: '58 days', apr: '1.82%', type: 'fixed' },
-    { maturity: '88 days', apr: '0.75%', type: 'fixed' },
-    { maturity: 'No maturity', apr: '3.91%', type: 'floating' },
+  const { symbol = 'DAI', operation } = useMarketsBasic();
+
+  const maturityPools = useMaturityPools(symbol);
+  const { depositAPR: floatingDepositAPR, borrowAPR: floatingBorrowAPR } = useFloatingPoolAPR(symbol);
+
+  const { minAPRValue } = numbers;
+  const allPools: { maturity?: number; depositAPR?: number; borrowAPR?: number }[] = [
+    { depositAPR: floatingDepositAPR, borrowAPR: floatingBorrowAPR },
+    ...maturityPools.map(({ maturity, depositAPR, borrowAPR }) => ({ maturity, depositAPR, borrowAPR })),
   ];
 
   return (
@@ -24,19 +34,12 @@ const MarketsBasic: FC = () => {
         p={2}
         gap={1}
         bgcolor="grey.100"
-        maxWidth="480px"
+        maxWidth="400px"
         minHeight="600px"
         sx={{ borderRadius: '16px' }}
         boxShadow="4px 8px 16px rgba(227, 229, 232, 0.5), -4px -8px 16px rgba(248, 249, 249, 0.25)"
       >
-        <Box display="flex" gap={2}>
-          <Typography fontWeight={700} fontSize={16} color="grey.900" sx={{ cursor: 'pointer' }}>
-            Deposit
-          </Typography>
-          <Typography fontWeight={700} fontSize={16} color="figma.grey.600" sx={{ cursor: 'pointer' }}>
-            Borrow
-          </Typography>
-        </Box>
+        <OperationTabs />
 
         <Box display="flex" flexDirection="column" bgcolor="white" border="1px solid #EDF0F2" borderRadius="8px">
           <Box px={2} py={1.5}>
@@ -46,7 +49,7 @@ const MarketsBasic: FC = () => {
             <AssetInput
               qty={'0'}
               decimals={18}
-              symbol={defaultSymbol}
+              symbol={symbol}
               onMax={undefined}
               onChange={() => 1}
               label="Wallet balance"
@@ -59,9 +62,9 @@ const MarketsBasic: FC = () => {
               Days to maturity
             </Typography>
             <RadioGroup value={1} onChange={undefined} sx={{ pt: 1 }}>
-              {pools.map(({ maturity, apr, type }) => (
+              {allPools.map(({ maturity, depositAPR, borrowAPR }) => (
                 <FormControlLabel
-                  key={maturity}
+                  key={`${maturity}_${depositAPR}_${borrowAPR}`}
                   value="female"
                   control={<Radio />}
                   componentsProps={{ typography: { width: '100%' } }}
@@ -70,11 +73,11 @@ const MarketsBasic: FC = () => {
                     <Box display="flex" flexDirection="row" py="7px" justifyContent="space-between" width="100%">
                       <Box display="flex" flexDirection="column">
                         <Typography fontWeight={700} fontSize={14} color="grey.900">
-                          {maturity}
+                          {maturity ? daysLeft(maturity) : 'Flexible'}
                         </Typography>
                         <Box display="flex" gap={0.3}>
                           <Typography fontWeight={500} fontSize={13} color="figma.grey.500">
-                            {type === 'fixed' ? 'Fixed rate' : 'Variable rate'}
+                            {maturity ? 'Fixed rate' : 'Variable rate'}
                           </Typography>
                           <InfoOutlinedIcon sx={{ fontSize: '11px', my: 'auto', color: 'figma.grey.500' }} />
                         </Box>
@@ -82,11 +85,14 @@ const MarketsBasic: FC = () => {
                       <Box display="flex" flexDirection="column">
                         <Box display="flex" gap={0.3} justifyContent="right">
                           <Typography fontWeight={700} fontSize={14} color="grey.900" textAlign="right">
-                            +{apr}
+                            +
+                            {operation === 'deposit'
+                              ? toPercentage((depositAPR || 0) > minAPRValue ? depositAPR : undefined)
+                              : toPercentage((borrowAPR || 0) > minAPRValue ? borrowAPR : undefined)}
                           </Typography>
                           <Image
-                            src={`/img/assets/${defaultSymbol}.svg`}
-                            alt={defaultSymbol}
+                            src={`/img/assets/${symbol}.svg`}
+                            alt={symbol}
                             width="12"
                             height="12"
                             style={{ maxWidth: '100%', height: 'auto' }}
@@ -122,8 +128,8 @@ const MarketsBasic: FC = () => {
           </Typography>
           <Box display="flex" gap={0.5} mb={1}>
             <Image
-              src={`/img/assets/${defaultSymbol}.svg`}
-              alt={defaultSymbol}
+              src={`/img/assets/${symbol}.svg`}
+              alt={symbol}
               width="20"
               height="20"
               style={{ maxWidth: '100%', height: 'auto' }}
@@ -141,8 +147,8 @@ const MarketsBasic: FC = () => {
                 4300
               </Typography>
               <Image
-                src={`/img/assets/${defaultSymbol}.svg`}
-                alt={defaultSymbol}
+                src={`/img/assets/${symbol}.svg`}
+                alt={symbol}
                 width="12"
                 height="12"
                 style={{ maxWidth: '100%', height: 'auto' }}
@@ -158,8 +164,8 @@ const MarketsBasic: FC = () => {
                 32.25
               </Typography>
               <Image
-                src={`/img/assets/${defaultSymbol}.svg`}
-                alt={defaultSymbol}
+                src={`/img/assets/${symbol}.svg`}
+                alt={symbol}
                 width="12"
                 height="12"
                 style={{ maxWidth: '100%', height: 'auto' }}
@@ -177,7 +183,7 @@ const MarketsBasic: FC = () => {
         </Box>
         <Box mt={1}>
           <Button fullWidth variant="contained">
-            Deposit USDC
+            Borrow USDC
           </Button>
         </Box>
       </Box>
