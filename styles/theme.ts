@@ -21,7 +21,7 @@ declare module '@mui/material/styles' {
       variable: string;
     };
 
-    symbol: Record<string, string>;
+    colorByIndex: Record<string, string>;
   }
   interface PaletteOptions {
     figma: {
@@ -36,7 +36,7 @@ declare module '@mui/material/styles' {
       variable: string;
     };
 
-    symbol: Record<string, string>;
+    colorByIndex: Record<string, string>;
   }
 
   interface TypographyVariants {
@@ -97,12 +97,12 @@ const theme = createTheme({
       variable: '#33CC59',
     },
 
-    symbol: {
-      WETH: '#0095FF',
-      DAI: '#031D30',
-      USDC: '#085891',
-      WBTC: '#5500FF',
-      wstETH: '#AA00FF',
+    colorByIndex: {
+      0: '#0095FF',
+      1: '#031D30',
+      2: '#085891',
+      3: '#5500FF',
+      4: '#AA00FF',
     },
   },
   typography: {
