@@ -26,8 +26,8 @@ const OperationTabs: FC = () => {
   const { operation, onChangeOperation } = useMarketsBasic();
   return (
     <Box display="flex" gap={2}>
-      <OperationTab label="Borrow" isSelected={operation === 'borrow'} onClick={() => onChangeOperation('borrow')} />
       <OperationTab label="Deposit" isSelected={operation === 'deposit'} onClick={() => onChangeOperation('deposit')} />
+      <OperationTab label="Borrow" isSelected={operation === 'borrow'} onClick={() => onChangeOperation('borrow')} />
     </Box>
   );
 };
