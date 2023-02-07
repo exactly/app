@@ -111,13 +111,13 @@ const YieldChart: FC<Props> = ({ symbol }) => {
               content={<TooltipChart />}
             />
             <CartesianGrid stroke={palette.grey[300]} vertical={false} />
-            {assets.map((asset) => (
+            {assets.map((asset, i) => (
               <Area
                 key={asset}
                 type="monotone"
                 yAxisId="yaxis"
                 dataKey={asset}
-                stroke={palette.symbol[asset] || palette.grey[500]}
+                stroke={palette.colorByIndex[i] || palette.grey[500]}
                 strokeWidth={2}
                 fillOpacity={0}
               />
