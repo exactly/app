@@ -1,6 +1,5 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter } from 'next/router';
 import { formatFixed } from '@ethersproject/bignumber';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
@@ -36,7 +35,6 @@ function TableRowFixedPool({ symbol, valueUSD, type, maturityDate, market, decim
   const { accountData } = useContext(AccountDataContext);
   const { withdrawTxs, repayTxs, depositTxs, borrowTxs } = useFixedOperation(type, maturityDate, market);
   const [open, setOpen] = useState(false);
-  const { query } = useRouter();
   const { handleActionClick } = useActionButton();
 
   const exchangeRate: number | undefined = useMemo(() => {
@@ -83,7 +81,7 @@ function TableRowFixedPool({ symbol, valueUSD, type, maturityDate, market, decim
   return (
     <>
       <TableRow sx={{ '& > *': { borderBottom: 'unset' }, backgroundColor: open ? 'grey.50' : 'transparent' }} hover>
-        <Link href={{ pathname: `/${symbol}`, query }} legacyBehavior>
+        <Link href={{ pathname: `/${symbol}` }} legacyBehavior>
           <TableCell component="th" align="left" sx={{ cursor: 'pointer' }} width={240}>
             <Stack direction="row" spacing={1}>
               <Image
