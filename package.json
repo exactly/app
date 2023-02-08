@@ -24,7 +24,7 @@
     "@ethersproject/contracts": "^5.7.0",
     "@ethersproject/logger": "^5.7.0",
     "@ethersproject/providers": "^5.7.2",
-    "@exactly-protocol/protocol": "^0.2.5",
+    "@exactly-protocol/protocol": "exactly/protocol#deploy",
     "@gnosis.pm/safe-apps-provider": "^0.15.1",
     "@gnosis.pm/safe-apps-sdk": "^7.8.0",
     "@mui/icons-material": "^5.11.0",
