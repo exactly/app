@@ -21,7 +21,7 @@ declare module '@mui/material/styles' {
       variable: string;
     };
 
-    colorByIndex: Record<string, string>;
+    colors: string[];
   }
   interface PaletteOptions {
     figma: {
@@ -36,7 +36,7 @@ declare module '@mui/material/styles' {
       variable: string;
     };
 
-    colorByIndex: Record<string, string>;
+    colors: string[];
   }
 
   interface TypographyVariants {
@@ -97,13 +97,7 @@ const theme = createTheme({
       variable: '#33CC59',
     },
 
-    colorByIndex: {
-      0: '#0095FF',
-      1: '#031D30',
-      2: '#085891',
-      3: '#5500FF',
-      4: '#AA00FF',
-    },
+    colors: ['#0095FF', '#031D30', '#085891', '#5500FF', '#AA00FF'],
   },
   typography: {
     fontFamily: 'articulat-cf',
