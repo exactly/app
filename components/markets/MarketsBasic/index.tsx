@@ -42,12 +42,17 @@ const MarketsBasic: FC = () => {
   } = useFloatingPoolAPR(symbol);
 
   const { minAPRValue } = numbers;
-  const allPools: MarketsBasicOptions[] = useMemo(
+  const allOptions: MarketsBasicOptions[] = useMemo(
     () => [
       { maturity: 0, depositAPR: floatingDepositAPR, borrowAPR: floatingBorrowAPR },
       ...fixedOptions.map(({ maturity, depositAPR, borrowAPR }) => ({ maturity, depositAPR, borrowAPR })),
     ],
     [fixedOptions, floatingBorrowAPR, floatingDepositAPR],
+  );
+
+  const currentOption = useMemo(
+    () => allOptions.find((option) => option.maturity === selected),
+    [allOptions, selected],
   );
 
   return (
@@ -66,7 +71,9 @@ const MarketsBasic: FC = () => {
 
         <Box display="flex" flexDirection="column" bgcolor="white" border="1px solid #EDF0F2" borderRadius="8px">
           <Box px={2} py={1.5}>
-            <Typography variant="cardTitle">Asset to {operation}</Typography>
+            <Typography variant="cardTitle">{`Asset to be ${
+              operation === 'deposit' ? 'deposited' : 'borrowed'
+            }`}</Typography>
             <AssetInput
               qty={qty}
               symbol={symbol}
@@ -81,7 +88,7 @@ const MarketsBasic: FC = () => {
           <Box px={2} py={1.5}>
             <Typography variant="cardTitle">Days to maturity</Typography>
             <RadioGroup value={selected} onChange={(e) => setSelected(parseInt(e.target.value))} sx={{ pt: 1 }}>
-              {allPools.map(({ maturity, depositAPR, borrowAPR }, index) => (
+              {allOptions.map(({ maturity, depositAPR, borrowAPR }, index) => (
                 <FormControlLabel
                   key={`${maturity}_${depositAPR}_${borrowAPR}_${index}`}
                   value={maturity}
@@ -145,7 +152,9 @@ const MarketsBasic: FC = () => {
           </Box>
         </Box>
 
-        {Boolean(selected) && Boolean(qty) && <Overview symbol={symbol} />}
+        {Boolean(selected) && Boolean(qty) && Boolean(currentOption) && (
+          <Overview symbol={symbol} operation={operation} qty={qty} option={currentOption || {}} />
+        )}
 
         <Box mt={1}>
           <Button fullWidth variant="contained">
