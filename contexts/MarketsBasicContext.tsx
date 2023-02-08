@@ -1,9 +1,16 @@
 import React, { createContext, useContext, useState, useMemo, useCallback, useEffect } from 'react';
 import type { FC, PropsWithChildren } from 'react';
 import { MarketContext } from './MarketContext';
+import { BigNumber } from '@ethersproject/bignumber';
 
 export type MarketsBasicOperation = 'borrow' | 'deposit';
-export type MarketsBasicOptions = { maturity?: number; depositAPR?: number; borrowAPR?: number };
+export type MarketsBasicOptions = {
+  maturity?: number;
+  depositAPR?: number;
+  borrowAPR?: number;
+  optimalDeposit?: BigNumber;
+  slippageAPR?: string;
+};
 
 type ContextValues = {
   symbol?: string;

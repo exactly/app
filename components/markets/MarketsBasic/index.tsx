@@ -1,5 +1,5 @@
-import { Box, Button, Divider, FormControlLabel, Radio, RadioGroup, Typography } from '@mui/material';
-import React, { FC, useCallback } from 'react';
+import { Box, Button, Divider, FormControlLabel, Radio, RadioGroup, Skeleton, Typography } from '@mui/material';
+import React, { FC, useCallback, useMemo } from 'react';
 import EditIcon from '@mui/icons-material/Edit';
 import AssetInput from 'components/OperationsModal/AssetInput';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
@@ -7,7 +7,6 @@ import LockIcon from '@mui/icons-material/Lock';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import SwapVertIcon from '@mui/icons-material/SwapVert';
 import Image from 'next/image';
-import useMaturityPools from 'hooks/useMaturityPools';
 import numbers from 'config/numbers.json';
 import { toPercentage } from 'utils/utils';
 import daysLeft from 'utils/daysLeft';
@@ -18,6 +17,7 @@ import { useOperationContext } from 'contexts/OperationContext';
 import useBalance from 'hooks/useBalance';
 import useAccountData from 'hooks/useAccountData';
 import Overview from './Overview';
+import usePreviewFixedOperation from 'hooks/usePreviewFixedOperation';
 
 const MarketsBasic: FC = () => {
   const { symbol = 'DAI', operation, selected, setSelected } = useMarketsBasic();
@@ -34,14 +34,21 @@ const MarketsBasic: FC = () => {
 
   const handleInputChange = useCallback((value: string) => setQty(value), [setQty]);
 
-  const maturityPools = useMaturityPools(symbol);
-  const { depositAPR: floatingDepositAPR, borrowAPR: floatingBorrowAPR } = useFloatingPoolAPR(symbol);
+  const { options: fixedOptions, loading: loadingFixedOptions } = usePreviewFixedOperation(operation);
+  const {
+    depositAPR: floatingDepositAPR,
+    borrowAPR: floatingBorrowAPR,
+    loading: loadingFloatingOption,
+  } = useFloatingPoolAPR(symbol);
 
   const { minAPRValue } = numbers;
-  const allPools: MarketsBasicOptions[] = [
-    { depositAPR: floatingDepositAPR, borrowAPR: floatingBorrowAPR },
-    ...maturityPools.map(({ maturity, depositAPR, borrowAPR }) => ({ maturity, depositAPR, borrowAPR })),
-  ];
+  const allPools: MarketsBasicOptions[] = useMemo(
+    () => [
+      { maturity: 0, depositAPR: floatingDepositAPR, borrowAPR: floatingBorrowAPR },
+      ...fixedOptions.map(({ maturity, depositAPR, borrowAPR }) => ({ maturity, depositAPR, borrowAPR })),
+    ],
+    [fixedOptions, floatingBorrowAPR, floatingDepositAPR],
+  );
 
   return (
     <Box display="flex" flexDirection="column" gap={2}>
@@ -74,26 +81,42 @@ const MarketsBasic: FC = () => {
           <Box px={2} py={1.5}>
             <Typography variant="cardTitle">Days to maturity</Typography>
             <RadioGroup value={selected} onChange={(e) => setSelected(parseInt(e.target.value))} sx={{ pt: 1 }}>
-              {allPools.map(({ maturity, depositAPR, borrowAPR }) => (
+              {allPools.map(({ maturity, depositAPR, borrowAPR }, index) => (
                 <FormControlLabel
-                  key={`${maturity}_${depositAPR}_${borrowAPR}`}
-                  value={maturity || 0}
+                  key={`${maturity}_${depositAPR}_${borrowAPR}_${index}`}
+                  value={maturity}
                   control={<Radio />}
                   componentsProps={{ typography: { width: '100%' } }}
                   sx={{ m: 0, ':hover': { backgroundColor: 'grey.50' } }}
+                  disabled={maturity !== 0 && !maturity}
                   label={
-                    <Box display="flex" flexDirection="row" py="7px" justifyContent="space-between" width="100%">
-                      <Typography fontWeight={700} fontSize={14} color="grey.900" my="auto">
-                        {maturity ? daysLeft(maturity) : 'Flexible'}
-                      </Typography>
+                    <Box
+                      display="flex"
+                      flexDirection="row"
+                      py="7px"
+                      justifyContent="space-between"
+                      alignItems="center"
+                      width="100%"
+                    >
+                      {maturity || maturity === 0 ? (
+                        <Typography fontWeight={700} fontSize={14} color="grey.900" my="auto">
+                          {maturity ? daysLeft(maturity) : 'Flexible'}
+                        </Typography>
+                      ) : (
+                        <Skeleton width={52} height={20} />
+                      )}
                       <Box display="flex" flexDirection="column">
                         <Box display="flex" gap={0.3} justifyContent="right">
-                          <Typography fontWeight={700} fontSize={14} color="grey.900" textAlign="right">
-                            +
-                            {operation === 'deposit'
-                              ? toPercentage((depositAPR || 0) > minAPRValue ? depositAPR : undefined)
-                              : toPercentage((borrowAPR || 0) > minAPRValue ? borrowAPR : undefined)}
-                          </Typography>
+                          {(maturity === 0 ? !loadingFloatingOption : !loadingFixedOptions) ? (
+                            <Typography fontWeight={700} fontSize={14} color="grey.900" textAlign="right">
+                              +
+                              {operation === 'deposit'
+                                ? toPercentage((depositAPR || 0) > minAPRValue ? depositAPR : undefined)
+                                : toPercentage((borrowAPR || 0) > minAPRValue ? borrowAPR : undefined)}
+                            </Typography>
+                          ) : (
+                            <Skeleton width={40} height={20} />
+                          )}
                           <Image
                             src={`/img/assets/${symbol}.svg`}
                             alt={symbol}
@@ -109,7 +132,7 @@ const MarketsBasic: FC = () => {
                             <SwapVertIcon sx={{ fontSize: '11px', my: 'auto', color: 'figma.grey.500' }} />
                           )}
                           <Typography fontWeight={500} fontSize={13} color="figma.grey.500" textAlign="right">
-                            {maturity ? 'Fixed' : 'Variable'} APR
+                            {maturity === 0 ? 'Variable' : 'Fixed'} APR
                           </Typography>
                           <InfoOutlinedIcon sx={{ fontSize: '11px', my: 'auto', color: 'figma.grey.500' }} />
                         </Box>
