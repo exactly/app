@@ -1,7 +1,6 @@
 import { formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { WeiPerEther } from '@ethersproject/constants';
 import { captureException } from '@sentry/nextjs';
-import numbers from 'config/numbers.json';
 import AccountDataContext from 'contexts/AccountDataContext';
 import { MarketsBasicOperation, MarketsBasicOption } from 'contexts/MarketsBasicContext';
 import { useOperationContext } from 'contexts/OperationContext';
@@ -10,7 +9,6 @@ import useAccountData from './useAccountData';
 import useMaturityPools from './useMaturityPools';
 import usePreviewer from './usePreviewer';
 
-const DEFAULT_SLIPPAGE = (100 * numbers.slippage).toFixed(2);
 const MIN_OPTIONS = 3;
 
 type PreviewFixedOperation = {
@@ -23,7 +21,7 @@ export default (operation: MarketsBasicOperation): PreviewFixedOperation => {
   const previewerContract = usePreviewer();
   const { symbol, qty, marketContract } = useOperationContext();
   const maturityPools = useMaturityPools(symbol);
-  const { decimals = 18, fixedPools = [] } = useAccountData(symbol);
+  const { decimals = 18 } = useAccountData(symbol);
   const [options, setOptions] = useState<MarketsBasicOption[]>(Array(maturityPools.length || MIN_OPTIONS).fill({}));
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -31,7 +29,7 @@ export default (operation: MarketsBasicOperation): PreviewFixedOperation => {
     if (!accountData || !previewerContract || !marketContract) return;
     setLoading(true);
     if (!qty || parseFloat(qty) === 0) {
-      setOptions([...maturityPools.map((pool) => ({ ...pool, slippageAPR: DEFAULT_SLIPPAGE }))]);
+      setOptions([...maturityPools]);
       setLoading(false);
       return;
     }
@@ -49,17 +47,12 @@ export default (operation: MarketsBasicOperation): PreviewFixedOperation => {
       const fixedOptions: MarketsBasicOption[] = previewPools.map(({ maturity, assets }) => {
         const time = 31_536_000 / (maturity.toNumber() - currentTimestamp);
         const rate = assets.mul(WeiPerEther).div(initialAssets);
-        const currentPool = fixedPools.find(({ maturity: date }) => date.toNumber() === maturity.toNumber());
-        const { optimalDeposit } = currentPool || {};
         const fixedAPR = (Number(formatFixed(rate, 18)) - 1) * time;
-        const slippageAPR = (fixedAPR * (1 - numbers.slippage) * 100).toFixed(2);
 
         return {
           maturity: maturity.toNumber(),
           depositAPR: fixedAPR,
           borrowAPR: fixedAPR,
-          slippageAPR,
-          optimalDeposit,
         };
       });
       setOptions(fixedOptions);
@@ -69,7 +62,7 @@ export default (operation: MarketsBasicOperation): PreviewFixedOperation => {
     } finally {
       setLoading(false);
     }
-  }, [accountData, previewerContract, marketContract, qty, decimals, maturityPools, operation, fixedPools]);
+  }, [accountData, previewerContract, marketContract, qty, decimals, maturityPools, operation]);
 
   useEffect(() => {
     void updateAPR();
