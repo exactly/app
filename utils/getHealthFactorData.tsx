@@ -3,7 +3,7 @@ import { Zero } from '@ethersproject/constants';
 
 import { AccountData } from 'types/AccountData';
 import { HealthFactor } from 'types/HealthFactor';
-import { WAD } from './fixedPointMathLib';
+import { WAD } from './queryRates';
 
 function getHealthFactorData(accountData: AccountData): HealthFactor {
   let collateral = Zero;

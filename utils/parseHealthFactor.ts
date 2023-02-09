@@ -1,6 +1,6 @@
 import type { BigNumber } from '@ethersproject/bignumber';
 import { formatFixed } from '@ethersproject/bignumber';
-import { WAD } from './fixedPointMathLib';
+import { WAD } from './queryRates';
 
 function parseHealthFactor(debt: BigNumber, collateral: BigNumber) {
   //TODO => check case when the user doesn't have any collateral or debt
