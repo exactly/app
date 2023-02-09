@@ -1,7 +1,7 @@
 import React, { FC, useCallback, useMemo } from 'react';
-import { Box, Button, Divider, Typography } from '@mui/material';
+import { Box, Divider, Typography } from '@mui/material';
 import AssetInput from 'components/OperationsModal/AssetInput';
-import { MarketsBasicOptions, useMarketsBasic } from 'contexts/MarketsBasicContext';
+import { MarketsBasicOption, useMarketsBasic } from 'contexts/MarketsBasicContext';
 import { useOperationContext } from 'contexts/OperationContext';
 import useAccountData from 'hooks/useAccountData';
 import useBalance from 'hooks/useBalance';
@@ -11,10 +11,11 @@ import OperationTabs from './OperationTabs';
 import Options from './Options';
 import Overview from './Overview';
 import MoreSettings from './MoreSettings';
+import Submit from './Submit';
 
 const MarketsBasic: FC = () => {
   const { symbol = 'DAI', operation, selected, setSelected } = useMarketsBasic();
-  const { setErrorData, qty, setQty, assetContract } = useOperationContext();
+  const { errorData, requiresApproval, setErrorData, qty, setQty, assetContract } = useOperationContext();
   const { decimals = 18 } = useAccountData(symbol);
   const walletBalance = useBalance(symbol, assetContract);
   const { options: fixedOptions, loading: loadingFixedOptions } = usePreviewFixedOperation(operation);
@@ -24,6 +25,7 @@ const MarketsBasic: FC = () => {
     loading: loadingFloatingOption,
   } = useFloatingPoolAPR(symbol);
 
+  //TODO: replace
   const onMax = useCallback(() => {
     if (walletBalance) {
       setQty(walletBalance);
@@ -33,7 +35,7 @@ const MarketsBasic: FC = () => {
 
   const handleInputChange = useCallback((value: string) => setQty(value), [setQty]);
 
-  const allOptions: MarketsBasicOptions[] = useMemo(
+  const allOptions: MarketsBasicOption[] = useMemo(
     () => [
       { maturity: 0, depositAPR: floatingDepositAPR, borrowAPR: floatingBorrowAPR },
       ...fixedOptions.map(({ maturity, depositAPR, borrowAPR }) => ({ maturity, depositAPR, borrowAPR })),
@@ -95,9 +97,14 @@ const MarketsBasic: FC = () => {
         )}
 
         <Box mt={1}>
-          <Button fullWidth variant="contained">
-            {`${operation === 'deposit' ? 'Deposit' : 'Borrow'} ${symbol}`}
-          </Button>
+          <Submit
+            symbol={symbol}
+            operation={operation}
+            option={currentOption || {}}
+            qty={qty}
+            errorData={errorData}
+            requiresApproval={requiresApproval}
+          />
         </Box>
       </Box>
       <Box display="flex" flexDirection="column" gap={0} px={3}>

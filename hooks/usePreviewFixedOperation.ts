@@ -3,7 +3,7 @@ import { WeiPerEther } from '@ethersproject/constants';
 import { captureException } from '@sentry/nextjs';
 import numbers from 'config/numbers.json';
 import AccountDataContext from 'contexts/AccountDataContext';
-import { MarketsBasicOperation, MarketsBasicOptions } from 'contexts/MarketsBasicContext';
+import { MarketsBasicOperation, MarketsBasicOption } from 'contexts/MarketsBasicContext';
 import { useOperationContext } from 'contexts/OperationContext';
 import { useCallback, useContext, useEffect, useState } from 'react';
 import useAccountData from './useAccountData';
@@ -14,7 +14,7 @@ const DEFAULT_SLIPPAGE = (100 * numbers.slippage).toFixed(2);
 const MIN_OPTIONS = 3;
 
 type PreviewFixedOperation = {
-  options: MarketsBasicOptions[];
+  options: MarketsBasicOption[];
   loading: boolean;
 };
 
@@ -24,7 +24,7 @@ export default (operation: MarketsBasicOperation): PreviewFixedOperation => {
   const { symbol, qty, marketContract } = useOperationContext();
   const maturityPools = useMaturityPools(symbol);
   const { decimals = 18, fixedPools = [] } = useAccountData(symbol);
-  const [options, setOptions] = useState<MarketsBasicOptions[]>(Array(maturityPools.length || MIN_OPTIONS).fill({}));
+  const [options, setOptions] = useState<MarketsBasicOption[]>(Array(maturityPools.length || MIN_OPTIONS).fill({}));
   const [loading, setLoading] = useState<boolean>(true);
 
   const updateAPR = useCallback(async () => {
@@ -46,7 +46,7 @@ export default (operation: MarketsBasicOperation): PreviewFixedOperation => {
 
       const currentTimestamp = Date.now() / 1000;
 
-      const fixedOptions: MarketsBasicOptions[] = previewPools.map(({ maturity, assets }) => {
+      const fixedOptions: MarketsBasicOption[] = previewPools.map(({ maturity, assets }) => {
         const time = 31_536_000 / (maturity.toNumber() - currentTimestamp);
         const rate = assets.mul(WeiPerEther).div(initialAssets);
         const currentPool = fixedPools.find(({ maturity: date }) => date.toNumber() === maturity.toNumber());

@@ -1,5 +1,5 @@
 import { Box, Typography } from '@mui/material';
-import { MarketsBasicOperation, MarketsBasicOptions } from 'contexts/MarketsBasicContext';
+import { MarketsBasicOperation, MarketsBasicOption } from 'contexts/MarketsBasicContext';
 import Image from 'next/image';
 import React, { FC, useMemo } from 'react';
 import daysLeft from 'utils/daysLeft';
@@ -11,7 +11,7 @@ type Props = {
   symbol: string;
   operation: MarketsBasicOperation;
   qty: string;
-  option: MarketsBasicOptions;
+  option: MarketsBasicOption;
 };
 
 const Overview: FC<Props> = ({ symbol, operation, qty, option }) => {
