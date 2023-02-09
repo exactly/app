@@ -50,14 +50,14 @@ const Overview: FC<Props> = ({ symbol, operation, qty, option }) => {
           Assets to be {operation === 'borrow' ? 'borrowed' : 'deposited'}
         </Typography>
         <Box display="flex" gap={0.3}>
-          <Typography fontWeight={700} fontSize={13}>
+          <Typography fontWeight={700} fontSize={14}>
             {formatNumber(qty, symbol)}
           </Typography>
           <Image
             src={`/img/assets/${symbol}.svg`}
             alt={symbol}
-            width="12"
-            height="12"
+            width="14"
+            height="14"
             style={{ maxWidth: '100%', height: 'auto' }}
           />
         </Box>
@@ -67,14 +67,14 @@ const Overview: FC<Props> = ({ symbol, operation, qty, option }) => {
           Total interest to be paid ({toPercentage(rate)})
         </Typography>
         <Box display="flex" gap={0.3}>
-          <Typography fontWeight={700} fontSize={13}>
+          <Typography fontWeight={700} fontSize={14}>
             {formatNumber(interest, symbol)}
           </Typography>
           <Image
             src={`/img/assets/${symbol}.svg`}
             alt={symbol}
-            width="12"
-            height="12"
+            width="14"
+            height="14"
             style={{ maxWidth: '100%', height: 'auto' }}
           />
         </Box>
@@ -83,7 +83,7 @@ const Overview: FC<Props> = ({ symbol, operation, qty, option }) => {
         <Typography fontWeight={500} fontSize={13} color="figma.grey.500">
           Maturity date (In {daysLeft(option.maturity || 0)})
         </Typography>
-        <Typography fontWeight={700} fontSize={13}>
+        <Typography fontWeight={700} fontSize={14}>
           {parseTimestamp(option.maturity || 0)}
         </Typography>
       </Box>
