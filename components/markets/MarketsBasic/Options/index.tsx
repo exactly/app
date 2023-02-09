@@ -5,13 +5,13 @@ import SwapVertIcon from '@mui/icons-material/SwapVert';
 import { Box, FormControlLabel, Radio, RadioGroup, Skeleton, Typography } from '@mui/material';
 import Image from 'next/image';
 import daysLeft from 'utils/daysLeft';
-import { MarketsBasicOperation, MarketsBasicOptions } from 'contexts/MarketsBasicContext';
+import { MarketsBasicOperation, MarketsBasicOption } from 'contexts/MarketsBasicContext';
 import { toPercentage } from 'utils/utils';
 import numbers from 'config/numbers.json';
 
 type Props = {
   symbol: string;
-  allOptions: MarketsBasicOptions[];
+  allOptions: MarketsBasicOption[];
   selected?: number;
   setSelected: (value: number) => void;
   loadingFloatingOption: boolean;

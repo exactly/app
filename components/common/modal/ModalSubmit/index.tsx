@@ -13,7 +13,7 @@ type Props = {
 function ModalSubmit({ requiresApproval = false, isLoading = false, disabled = false, submit, symbol, label }: Props) {
   return (
     <>
-      {requiresApproval && (
+      {requiresApproval ? (
         <LoadingButton
           fullWidth
           loading={isLoading}
@@ -25,17 +25,18 @@ function ModalSubmit({ requiresApproval = false, isLoading = false, disabled = f
         >
           Approve {symbol}
         </LoadingButton>
+      ) : (
+        <LoadingButton
+          fullWidth
+          loading={isLoading}
+          onClick={submit}
+          color="primary"
+          variant="contained"
+          disabled={disabled || requiresApproval}
+        >
+          {label}
+        </LoadingButton>
       )}
-      <LoadingButton
-        fullWidth
-        loading={isLoading}
-        onClick={submit}
-        color="primary"
-        variant="contained"
-        disabled={disabled || requiresApproval}
-      >
-        {label}
-      </LoadingButton>
     </>
   );
 }
