@@ -26,6 +26,7 @@ import useAssets from 'hooks/useAssets';
 import useActionButton from 'hooks/useActionButton';
 import useSorting from 'hooks/useSorting';
 import TableHeadCell, { TableHeader } from 'components/common/TableHeadCell';
+import getLiquidTokenInfo from 'utils/getLiquidTokenInfo';
 
 const { minAPRValue } = numbers;
 
@@ -118,11 +119,7 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
                     {isLoading ? (
                       <Skeleton width={60} />
                     ) : (
-                      <Tooltip
-                        title={symbol === 'wstETH' && "The displayed APR doesn't include the Lido Staked ETH APR"}
-                        arrow
-                        placement="top"
-                      >
+                      <Tooltip title={getLiquidTokenInfo(symbol)} arrow placement="top">
                         <Box display="flex" flexDirection="column" width="fit-content">
                           <Typography width="fit-content">
                             {toPercentage(depositAPR && depositAPR > minAPRValue ? depositAPR : undefined)}
@@ -140,11 +137,7 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
                     {isLoading ? (
                       <Skeleton width={60} />
                     ) : (
-                      <Tooltip
-                        title={symbol === 'wstETH' && "The displayed APR doesn't include the Lido Staked ETH APR"}
-                        arrow
-                        placement="top"
-                      >
+                      <Tooltip title={getLiquidTokenInfo(symbol)} arrow placement="top">
                         <Box display="flex" flexDirection="column" width="fit-content">
                           <Typography width="fit-content">
                             {toPercentage(borrowAPR && borrowAPR > minAPRValue ? borrowAPR : undefined)}
