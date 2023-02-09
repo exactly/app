@@ -6,5 +6,9 @@
   "5": {
     "etherscan": "https://goerli.etherscan.io",
     "subgraph": "https://api.thegraph.com/subgraphs/name/exactly-protocol/exactly-goerli"
+  },
+  "420": {
+    "etherscan": "https://goerli-optimism.etherscan.io/",
+    "subgraph": "https://api.thegraph.com/subgraphs/name/exactly/exactly-optimism-goerli"
   }
 }
