@@ -8,8 +8,7 @@ export const walletConnectId = '11ddaa8aaede72cb5d6b0dae2fed7baa';
 
 export const supportedChains = [
   mainnet,
-  ...(JSON.parse(process.env.NEXT_PUBLIC_ENABLE_TESTNETS ?? 'false') ? [goerli] : []),
-  optimismGoerli,
+  ...(JSON.parse(process.env.NEXT_PUBLIC_ENABLE_TESTNETS ?? 'false') ? [goerli, optimismGoerli] : []),
 ];
 
 export const defaultChain = { mainnet, goerli, optimismGoerli }[process.env.NEXT_PUBLIC_NETWORK ?? 'mainnet'];
