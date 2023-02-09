@@ -25,7 +25,6 @@ const MarketsBasic: FC = () => {
     loading: loadingFloatingOption,
   } = useFloatingPoolAPR(symbol);
 
-  //TODO: replace
   const onMax = useCallback(() => {
     if (walletBalance) {
       setQty(walletBalance);
