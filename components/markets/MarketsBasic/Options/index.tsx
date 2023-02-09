@@ -60,10 +60,11 @@ const Options: FC<Props> = ({
                 <Box display="flex" gap={0.3} justifyContent="right">
                   {(maturity === 0 ? !loadingFloatingOption : !loadingFixedOptions) ? (
                     <Typography fontWeight={700} fontSize={14} color="grey.900" textAlign="right">
-                      +
-                      {operation === 'deposit'
-                        ? toPercentage((depositAPR || 0) > minAPRValue ? depositAPR : undefined)
-                        : toPercentage((borrowAPR || 0) > minAPRValue ? borrowAPR : undefined)}
+                      {`${
+                        operation === 'deposit'
+                          ? toPercentage((depositAPR || 0) > minAPRValue ? depositAPR : undefined)
+                          : toPercentage((borrowAPR || 0) > minAPRValue ? borrowAPR : undefined)
+                      } APR`}
                     </Typography>
                   ) : (
                     <Skeleton width={40} height={20} />
@@ -83,7 +84,7 @@ const Options: FC<Props> = ({
                     <SwapVertIcon sx={{ fontSize: '11px', my: 'auto', color: 'figma.grey.500' }} />
                   )}
                   <Typography fontWeight={500} fontSize={13} color="figma.grey.500" textAlign="right">
-                    {maturity === 0 ? 'Variable' : 'Fixed'} APR
+                    {maturity === 0 ? 'Variable' : 'Fixed'} interest rate
                   </Typography>
                   <InfoOutlinedIcon sx={{ fontSize: '11px', my: 'auto', color: 'figma.grey.500' }} />
                 </Box>

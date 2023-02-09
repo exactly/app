@@ -47,7 +47,7 @@ const Overview: FC<Props> = ({ symbol, operation, qty, option }) => {
       </Box>
       <Box display="flex" justifyContent="space-between">
         <Typography fontWeight={500} fontSize={13} color="figma.grey.500">
-          Assets to borrow
+          Assets to be {operation === 'borrow' ? 'borrowed' : 'deposited'}
         </Typography>
         <Box display="flex" gap={0.3}>
           <Typography fontWeight={700} fontSize={13}>
@@ -64,7 +64,7 @@ const Overview: FC<Props> = ({ symbol, operation, qty, option }) => {
       </Box>
       <Box display="flex" justifyContent="space-between">
         <Typography fontWeight={500} fontSize={13} color="figma.grey.500">
-          Total interest (+{toPercentage(rate)})
+          Total interest to be paid ({toPercentage(rate)})
         </Typography>
         <Box display="flex" gap={0.3}>
           <Typography fontWeight={700} fontSize={13}>
