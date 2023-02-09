@@ -4,7 +4,7 @@ import { MarketContext } from './MarketContext';
 import { BigNumber } from '@ethersproject/bignumber';
 
 export type MarketsBasicOperation = 'borrow' | 'deposit';
-export type MarketsBasicOptions = {
+export type MarketsBasicOption = {
   maturity?: number;
   depositAPR?: number;
   borrowAPR?: number;
@@ -16,8 +16,8 @@ type ContextValues = {
   symbol?: string;
   operation: MarketsBasicOperation;
   onChangeOperation: (op: MarketsBasicOperation) => void;
-  selected?: MarketsBasicOptions['maturity'];
-  setSelected: (option: MarketsBasicOptions['maturity']) => void;
+  selected?: MarketsBasicOption['maturity'];
+  setSelected: (option: MarketsBasicOption['maturity']) => void;
 };
 
 const MarketsBasicContext = createContext<ContextValues | null>(null);
@@ -25,7 +25,7 @@ const MarketsBasicContext = createContext<ContextValues | null>(null);
 export const MarketsBasicProvider: FC<PropsWithChildren> = ({ children }) => {
   const { marketSymbol: symbol, setMarketSymbol } = useContext(MarketContext);
   const [operation, setOperation] = useState<MarketsBasicOperation>('deposit');
-  const [selected, setSelected] = useState<MarketsBasicOptions['maturity']>(0);
+  const [selected, setSelected] = useState<MarketsBasicOption['maturity']>(0);
   const onChangeOperation = useCallback((op: MarketsBasicOperation) => setOperation(op), [setOperation]);
 
   useEffect(() => setMarketSymbol('DAI'), [setMarketSymbol]);
