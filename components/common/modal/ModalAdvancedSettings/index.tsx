@@ -3,7 +3,11 @@ import { Button, Grid, Box, Typography } from '@mui/material';
 import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownRounded';
 import KeyboardArrowRightRoundedIcon from '@mui/icons-material/KeyboardArrowRightRounded';
 
-function ModalAdvancedSettings({ children }: PropsWithChildren) {
+type Props = {
+  bgColor?: string;
+};
+
+function ModalAdvancedSettings({ children, bgColor }: PropsWithChildren & Props) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -36,7 +40,7 @@ function ModalAdvancedSettings({ children }: PropsWithChildren) {
       </Grid>
       {open && (
         <Grid item mt={1}>
-          <Box sx={{ backgroundColor: 'grey.100', py: 1, borderRadius: 1 }}>{children}</Box>
+          <Box sx={{ backgroundColor: bgColor || 'grey.100', py: 1, borderRadius: 1 }}>{children}</Box>
         </Grid>
       )}
     </Grid>

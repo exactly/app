@@ -1,5 +1,5 @@
 import React, { ChangeEventHandler, useState } from 'react';
-import { Box, Button, InputBase, Typography } from '@mui/material';
+import { Box, Button, ClickAwayListener, InputBase, Typography } from '@mui/material';
 import ModeEditRoundedIcon from '@mui/icons-material/ModeEditRounded';
 
 import ModalInfo from 'components/common/modal/ModalInfo';
@@ -22,43 +22,44 @@ function ModalInfoEditableSlippage({ value, onChange }: Props) {
 
   return (
     <ModalInfo label="Slippage Tolerance" variant="row">
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-        {editable ? (
-          <>
-            <InputBase
-              inputProps={{
-                min: 0.0,
-                type: 'number',
-                value: value,
-                onChange: onChange,
-                name: 'Slippage Tolerance',
-                onKeyDown: (e) => blockedCharacters.includes(e.key) && e.preventDefault(),
-                onPaste: filterPasteValue,
-                step: 'any',
-                autoFocus: true,
-                style: { textAlign: 'right', padding: 0, height: 'fit-content' },
-              }}
-              sx={(theme) => ({ fontSize: 14, lineHeight: 1, borderBottom: `1px solid ${theme.palette.grey[500]}` })}
-            />
-            <Typography variant="modalRow">%</Typography>
-          </>
-        ) : (
-          <Typography variant="modalRow">{value} %</Typography>
-        )}
-        <Button
-          onClick={() => setEditable((p) => !p)}
-          sx={{
-            '&:hover': { backgroundColor: 'transparent' },
-            p: 0,
-            height: 'fit-content',
-            minWidth: 'fit-content',
-            mb: '1px',
-          }}
-          disableRipple
-        >
-          <ModeEditRoundedIcon sx={{ fontSize: 12, color: 'grey.400' }} />
-        </Button>
-      </Box>
+      <ClickAwayListener onClickAway={() => setEditable(false)}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }} onClick={() => setEditable(true)}>
+          {editable ? (
+            <>
+              <InputBase
+                inputProps={{
+                  min: 0.0,
+                  type: 'number',
+                  value: value,
+                  onChange: onChange,
+                  name: 'Slippage Tolerance',
+                  onKeyDown: (e) => blockedCharacters.includes(e.key) && e.preventDefault(),
+                  onPaste: filterPasteValue,
+                  step: 'any',
+                  autoFocus: true,
+                  style: { textAlign: 'right', padding: 0, height: 'fit-content', maxWidth: 50 },
+                }}
+                sx={(theme) => ({ fontSize: 14, lineHeight: 1, borderBottom: `1px solid ${theme.palette.grey[500]}` })}
+              />
+              <Typography variant="modalRow">%</Typography>
+            </>
+          ) : (
+            <Typography variant="modalRow">{value} %</Typography>
+          )}
+          <Button
+            sx={{
+              '&:hover': { backgroundColor: 'transparent' },
+              p: 0,
+              height: 'fit-content',
+              minWidth: 'fit-content',
+              mb: '1px',
+            }}
+            disableRipple
+          >
+            <ModeEditRoundedIcon sx={{ fontSize: 12, color: 'grey.400' }} />
+          </Button>
+        </Box>
+      </ClickAwayListener>
     </ModalInfo>
   );
 }
