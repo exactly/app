@@ -107,7 +107,7 @@ const MarketsBasic: FC = () => {
         </Box>
       </Box>
       <Box display="flex" flexDirection="column" gap={0} px={3}>
-        <MoreSettings />
+        <MoreSettings operation={operation} />
       </Box>
     </Box>
   );
