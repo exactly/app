@@ -17,6 +17,7 @@ type Props = {
   loadingFloatingOption: boolean;
   loadingFixedOptions: boolean;
   operation: MarketsBasicOperation;
+  bestOption: MarketsBasicOption['maturity'];
 };
 
 const Options: FC<Props> = ({
@@ -27,6 +28,7 @@ const Options: FC<Props> = ({
   loadingFloatingOption,
   loadingFixedOptions,
   operation,
+  bestOption,
 }) => {
   const { minAPRValue } = numbers;
 
@@ -49,13 +51,30 @@ const Options: FC<Props> = ({
               alignItems="center"
               width="100%"
             >
-              {maturity || maturity === 0 ? (
-                <Typography fontWeight={700} fontSize={14} color="grey.900" my="auto">
-                  {maturity ? daysLeft(maturity) : 'Flexible'}
-                </Typography>
-              ) : (
-                <Skeleton width={52} height={20} />
-              )}
+              <Box display="flex" gap={0.5} alignItems="center">
+                {maturity || maturity === 0 ? (
+                  <Typography fontWeight={700} fontSize={14} color="grey.900" my="auto">
+                    {maturity ? daysLeft(maturity) : 'Flexible'}
+                  </Typography>
+                ) : (
+                  <Skeleton width={52} height={20} />
+                )}
+                {bestOption === maturity && (
+                  <Box
+                    display="flex"
+                    alignItems="center"
+                    height="16px"
+                    py="3px"
+                    px="6px"
+                    borderRadius="8px"
+                    sx={{ background: 'linear-gradient(66.92deg, #00CC68 34.28%, #00CC8F 100%)' }}
+                  >
+                    <Typography variant="chip" color="white">
+                      BEST
+                    </Typography>
+                  </Box>
+                )}
+              </Box>
               <Box display="flex" flexDirection="column">
                 <Box display="flex" gap={0.3} justifyContent="right">
                   {(maturity === 0 ? !loadingFloatingOption : !loadingFixedOptions) ? (
