@@ -17,6 +17,7 @@ import MobileMenu from 'components/MobileMenu';
 import Link from 'next/link';
 import Wallet from 'components/Wallet';
 import SelectNetwork from 'components/SelectNetwork';
+import SelectView from 'components/SelectView';
 const { maxWidth, onlyMobile, onlyDesktop, onlyDesktopFlex } = globals;
 
 const routes = [
@@ -89,6 +90,7 @@ function Navbar() {
             {isConnected && chain?.id === goerli.id && (
               <Chip label="Goerli Faucet" onClick={handleFaucetClick} sx={{ my: 'auto', display: onlyDesktopFlex }} />
             )}
+            <SelectView />
             {connector?.switchChain && <SelectNetwork />}
             <Wallet />
           </Box>
