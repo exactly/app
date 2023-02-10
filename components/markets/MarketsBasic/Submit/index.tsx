@@ -44,7 +44,7 @@ const Submit: FC<SubmitProps> = ({ symbol, operation, option, qty, errorData, re
 
   return (
     <ModalSubmit
-      label={`${operation === 'deposit' ? 'Deposit' : 'Borrow'} ${symbol}`}
+      label={`${operation === 'deposit' ? 'Deposit' : 'Borrow'} ${symbol} (${isFloating ? 'variable' : 'fixed'} rate)`}
       symbol={symbol}
       submit={handleSubmitAction}
       isLoading={isLoading}
