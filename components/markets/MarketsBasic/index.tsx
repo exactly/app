@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useMemo } from 'react';
+import React, { FC, useCallback, useEffect, useMemo } from 'react';
 import { Box, Divider, Typography } from '@mui/material';
 import AssetInput from 'components/OperationsModal/AssetInput';
 import { MarketsBasicOption, useMarketsBasic } from 'contexts/MarketsBasicContext';
@@ -12,10 +12,12 @@ import Options from './Options';
 import Overview from './Overview';
 import MoreSettings from './MoreSettings';
 import Submit from './Submit';
+import { useModalStatus } from 'contexts/ModalStatusContext';
 
 const MarketsBasic: FC = () => {
+  const { openOperationModal } = useModalStatus();
   const { symbol = 'DAI', operation, selected, setSelected } = useMarketsBasic();
-  const { errorData, requiresApproval, setErrorData, qty, setQty, assetContract } = useOperationContext();
+  const { errorData, requiresApproval, setErrorData, qty, setQty, assetContract, tx } = useOperationContext();
   const { decimals = 18 } = useAccountData(symbol);
   const walletBalance = useBalance(symbol, assetContract);
   const { options: fixedOptions, loading: loadingFixedOptions } = usePreviewFixedOperation(operation);
@@ -65,6 +67,10 @@ const MarketsBasic: FC = () => {
     () => allOptions.find((option) => option.maturity === selected),
     [allOptions, selected],
   );
+
+  useEffect(() => {
+    if (tx) openOperationModal(`${operation}${currentOption?.maturity ? 'AtMaturity' : ''}`);
+  }, [currentOption?.maturity, openOperationModal, operation, tx]);
 
   return (
     <Box display="flex" flexDirection="column" gap={2}>
