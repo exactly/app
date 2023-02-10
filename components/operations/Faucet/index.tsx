@@ -3,6 +3,7 @@ import { useAccount, useSigner } from 'wagmi';
 import { parseFixed } from '@ethersproject/bignumber';
 import { Contract } from '@ethersproject/contracts';
 import Image from 'next/image';
+import imageToBase64 from 'utils/imageToBase64';
 
 import faucetAbi from './abi.json';
 
@@ -13,12 +14,6 @@ import { Box, Button, Divider, Typography } from '@mui/material';
 import formatSymbol from 'utils/formatSymbol';
 import { LoadingButton } from '@mui/lab';
 import handleOperationError from 'utils/handleOperationError';
-
-const images: Record<string, string> = {
-  DAI: 'https://gateway.ipfs.io/ipfs/QmXyHPX8GS99dUiChsq7iRfZ4y3aofQqPjMjFJyCpkWs8e',
-  WBTC: 'https://gateway.ipfs.io/ipfs/QmZHbqjFzzbf5sR2LJtVPi5UeEqS7fmzLBiWFRAM1dsJRm',
-  USDC: 'https://gateway.ipfs.io/ipfs/QmSi4utTywi5EANuedkPT2gi5qj6g3aeXzPjMWkeYdk7Ag',
-};
 
 function Faucet() {
   const { data: signer } = useSigner();
@@ -57,18 +52,27 @@ function Faucet() {
   const addTokens = useCallback(async () => {
     if (!accountData) return;
 
+    const imagesBase64: Record<string, string> = {};
+
+    await Promise.all(
+      assets.map(
+        async (asset) =>
+          await imageToBase64(`img/assets/${asset}.svg`).then((base64) => (imagesBase64[asset] = base64 as string)),
+      ),
+    );
+
     try {
       await Promise.all(
         Object.values(accountData)
           .filter(({ assetSymbol }) => assetSymbol !== 'WETH')
           .map(({ asset: address, decimals, assetSymbol: symbol }) =>
-            connector?.watchAsset?.({ symbol, address, decimals, image: images[symbol] }),
+            connector?.watchAsset?.({ symbol, address, decimals, image: imagesBase64[symbol] }),
           ),
       );
     } catch (error) {
       handleOperationError(error);
     }
-  }, [accountData, connector]);
+  }, [accountData, assets, connector]);
 
   return (
     <Box minWidth={{ xs: 200, sm: 350 }}>

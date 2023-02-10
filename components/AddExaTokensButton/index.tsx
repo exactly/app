@@ -4,27 +4,42 @@ import { Tooltip, Typography } from '@mui/material';
 
 import AccountDataContext from 'contexts/AccountDataContext';
 import handleOperationError from 'utils/handleOperationError';
+import useAssets from 'hooks/useAssets';
+import imageToBase64 from 'utils/imageToBase64';
 
 const AddExaTokensButton = () => {
   const { accountData } = useContext(AccountDataContext);
   const { connector } = useAccount();
+  const assets = useAssets();
 
   const onClick = useCallback(async () => {
     if (!accountData) return;
+
+    const imagesBase64: Record<string, string> = {};
+
+    await Promise.all(
+      assets.map(
+        async (asset) =>
+          await imageToBase64(`img/exaTokens/exa${asset}.svg`).then(
+            (base64) => (imagesBase64[asset] = base64 as string),
+          ),
+      ),
+    );
+
     try {
       await Promise.all(
-        Object.values(accountData).map(({ market, decimals, symbol }) =>
-          connector?.watchAsset?.({ address: market, decimals, symbol }),
+        Object.values(accountData).map(({ market, decimals, assetSymbol, symbol }) =>
+          connector?.watchAsset?.({ address: market, decimals, symbol, image: imagesBase64[assetSymbol] }),
         ),
       );
     } catch (error) {
       handleOperationError(error);
     }
-  }, [accountData, connector]);
+  }, [accountData, assets, connector]);
 
   return connector?.watchAsset ? (
     <Tooltip title="Add exaTokens to Metamask" placement="top" arrow>
-      <Typography variant="link" onClick={onClick}>
+      <Typography variant="link" onClick={onClick} sx={{ cursor: 'pointer' }}>
         + exaTokens
       </Typography>
     </Tooltip>
