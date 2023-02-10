@@ -4,6 +4,7 @@ const dictionary: Record<string, number> = {
   USDC: 2,
   WETH: 6,
   WBTC: 6,
+  wstETH: 6,
 };
 
 function formatNumber(number: string | number, symbol?: string, standard?: boolean) {
