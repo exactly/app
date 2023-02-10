@@ -6,6 +6,7 @@ import useETHRouter from 'hooks/useETHRouter';
 import useHandleOperationError from 'hooks/useHandleOperationError';
 import useMarket from 'hooks/useMarket';
 import { useWeb3 } from 'hooks/useWeb3';
+import { useRouter } from 'next/router';
 import React, {
   createContext,
   type PropsWithChildren,
@@ -46,8 +47,9 @@ type ContextValues = {
 const OperationContext = createContext<ContextValues | null>(null);
 
 export const OperationContextProvider: FC<PropsWithChildren> = ({ children }) => {
+  const { pathname } = useRouter();
   const { chain } = useWeb3();
-  const { marketSymbol = 'DAI' } = useContext(MarketContext);
+  const { marketSymbol = 'DAI', view } = useContext(MarketContext);
   const { open, operation } = useModalStatus();
 
   const [errorData, setErrorData] = useState<ErrorData | undefined>();
@@ -61,12 +63,12 @@ export const OperationContextProvider: FC<PropsWithChildren> = ({ children }) =>
 
   useEffect(() => {
     setQty('');
-    setTx(undefined);
+    if (!(open && view === 'simple' && pathname === '/')) setTx(undefined);
     setErrorData(undefined);
     setIsLoading(false);
     setRequiresApproval(true);
     setGasCost(undefined);
-  }, [chain?.id, marketSymbol, operation, open]);
+  }, [chain?.id, marketSymbol, operation, open, view, pathname]);
 
   const assetContract = useERC20(asset);
   const marketContract = useMarket(market);
