@@ -155,7 +155,7 @@ function UtilizationRateChart({ type, symbol }: Props) {
               currentUtilization.map(({ maturity, utilization }) => (
                 <ReferenceLine
                   x={utilization}
-                  key={utilization}
+                  key={`${utilization}_${maturity}}`}
                   strokeWidth={2}
                   yAxisId="yaxis"
                   stroke={palette.operation.variable}
