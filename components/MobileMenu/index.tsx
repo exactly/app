@@ -7,7 +7,7 @@ import MenuBookIcon from '@mui/icons-material/MenuBook';
 import { Divider, IconButton, Modal, Slide, Typography } from '@mui/material';
 import { Box } from '@mui/system';
 import Image from 'next/image';
-import { useRouter } from 'next/router';
+import useRouter from 'hooks/useRouter';
 import Link from 'next/link';
 
 type Props = {

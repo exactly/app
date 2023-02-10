@@ -1,7 +1,6 @@
 import type { BigNumber } from '@ethersproject/bignumber';
 import React from 'react';
 import { formatFixed } from '@ethersproject/bignumber';
-import { useRouter } from 'next/router';
 import Image from 'next/image';
 
 import { Button, TableRow, TableCell, Stack, Typography, Skeleton } from '@mui/material';
@@ -14,6 +13,7 @@ import Link from 'next/link';
 import SwitchCollateral from 'components/dashboard/DashboardContent/FloatingPoolDashboard/FloatingPoolDashboardTable/SwitchCollateral';
 import useAccountData from 'hooks/useAccountData';
 import useActionButton from 'hooks/useActionButton';
+import useRouter from 'hooks/useRouter';
 
 type Props = {
   symbol: string;

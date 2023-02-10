@@ -1,9 +1,9 @@
 import { Chain, useAccount, useNetwork, useSwitchNetwork } from 'wagmi';
 import { useEffect } from 'react';
-import { useRouter } from 'next/router';
 import * as chains from 'wagmi/chains';
 import { defaultChain, supportedChains } from 'utils/client';
 import useDebounce from './useDebounce';
+import useRouter from './useRouter';
 
 type Web3 = {
   isConnected: boolean;

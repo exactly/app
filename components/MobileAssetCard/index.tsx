@@ -3,7 +3,7 @@ import { Box } from '@mui/system';
 import AccountDataContext from 'contexts/AccountDataContext';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter } from 'next/router';
+import useRouter from 'hooks/useRouter';
 import React, { FC, PropsWithChildren, useCallback, useContext } from 'react';
 import formatSymbol from 'utils/formatSymbol';
 import getSymbolDescription from 'utils/getSymbolDescription';
