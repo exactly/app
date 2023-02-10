@@ -1,5 +1,5 @@
 import React from 'react';
-import { useRouter } from 'next/router';
+import useRouter from 'hooks/useRouter';
 import Link from 'next/link';
 import { Box, Button, Typography } from '@mui/material';
 

@@ -12,7 +12,7 @@ import Button from '@mui/material/Button';
 import { Box, Skeleton, Tooltip } from '@mui/material';
 
 import Image from 'next/image';
-import { useRouter } from 'next/router';
+import useRouter from 'hooks/useRouter';
 
 import { toPercentage } from 'utils/utils';
 import parseTimestamp from 'utils/parseTimestamp';
