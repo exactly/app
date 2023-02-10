@@ -9,7 +9,11 @@ type ContextValues = {
   date: number | undefined;
   setDate: (date: number) => void;
   dates: number[];
+  view: MarketView;
+  setView: (view: MarketView) => void;
 };
+
+export type MarketView = 'simple' | 'advanced';
 
 const defaultValues: ContextValues = {
   marketSymbol: undefined,
@@ -17,11 +21,14 @@ const defaultValues: ContextValues = {
   date: undefined,
   setDate: () => undefined,
   dates: [],
+  view: 'simple',
+  setView: () => undefined,
 };
 
 const MarketContext = createContext<ContextValues>(defaultValues);
 
 const MarketProvider: FC<PropsWithChildren> = ({ children }) => {
+  const [view, setView] = useState<MarketView>('simple');
   const [marketSymbol, setMarketSymbol] = useState<string>();
   const [date, setDate] = useState<number>();
 
@@ -50,7 +57,7 @@ const MarketProvider: FC<PropsWithChildren> = ({ children }) => {
   }, [accountData, date, dates]);
 
   return (
-    <MarketContext.Provider value={{ marketSymbol, setMarketSymbol, date, setDate, dates }}>
+    <MarketContext.Provider value={{ marketSymbol, setMarketSymbol, date, setDate, dates, view, setView }}>
       {children}
     </MarketContext.Provider>
   );

@@ -62,6 +62,7 @@ function Wallet() {
         }}
         PaperProps={{
           style: {
+            marginTop: '8px',
             padding: '16px',
             boxShadow: '0px 4px 12px rgba(97, 100, 107, 0.2)',
             borderRadius: '6px',
