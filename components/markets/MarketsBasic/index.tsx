@@ -13,6 +13,9 @@ import Overview from './Overview';
 import MoreSettings from './MoreSettings';
 import Submit from './Submit';
 import { useModalStatus } from 'contexts/ModalStatusContext';
+import ModalAlert from 'components/common/modal/ModalAlert';
+import useDepositAtMaturity from 'hooks/useDepositAtMaturity';
+import useBorrow from 'hooks/useBorrow';
 
 const MarketsBasic: FC = () => {
   const { openOperationModal } = useModalStatus();
@@ -21,6 +24,8 @@ const MarketsBasic: FC = () => {
   const { decimals = 18 } = useAccountData(symbol);
   const walletBalance = useBalance(symbol, assetContract);
   const { options: fixedOptions, loading: loadingFixedOptions } = usePreviewFixedOperation(operation);
+  const { handleInputChange: handleDeposit } = useDepositAtMaturity();
+  const { handleBasicInputChange: handleBorrow } = useBorrow();
   const {
     depositAPR: floatingDepositAPR,
     borrowAPR: floatingBorrowAPR,
@@ -33,8 +38,6 @@ const MarketsBasic: FC = () => {
       setErrorData(undefined);
     }
   }, [walletBalance, setQty, setErrorData]);
-
-  const handleInputChange = useCallback((value: string) => setQty(value), [setQty]);
 
   const allOptions: MarketsBasicOption[] = useMemo(
     () => [
@@ -96,7 +99,7 @@ const MarketsBasic: FC = () => {
               symbol={symbol}
               decimals={decimals}
               onMax={onMax}
-              onChange={handleInputChange}
+              onChange={operation === 'deposit' ? handleDeposit : handleBorrow}
               label="Wallet balance"
               amount={walletBalance}
             />
@@ -120,6 +123,8 @@ const MarketsBasic: FC = () => {
         {Boolean(selected) && Boolean(qty) && Boolean(currentOption) && (
           <Overview symbol={symbol} operation={operation} qty={qty} option={currentOption || {}} />
         )}
+
+        {errorData?.status && <ModalAlert variant="error" message={errorData.message} />}
 
         <Box mt={1}>
           <Submit
