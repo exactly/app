@@ -3,7 +3,7 @@ import { WeiPerEther, Zero } from '@ethersproject/constants';
 import numbers from 'config/numbers.json';
 import AccountDataContext from 'contexts/AccountDataContext';
 import { MarketContext } from 'contexts/MarketContext';
-import { useOperationContext, usePreviewTx } from 'contexts/OperationContext';
+import { useOperationContext } from 'contexts/OperationContext';
 import useAccountData from 'hooks/useAccountData';
 import useApprove from 'hooks/useApprove';
 import useHandleOperationError from 'hooks/useHandleOperationError';
@@ -12,6 +12,7 @@ import usePreviewer from 'hooks/usePreviewer';
 import { useWeb3 } from 'hooks/useWeb3';
 import { useCallback, useContext, useMemo, useState } from 'react';
 import { HealthFactor } from 'types/HealthFactor';
+import { OperationHook } from 'types/OperationHook';
 import analytics from 'utils/analytics';
 import getBeforeBorrowLimit from 'utils/getBeforeBorrowLimit';
 import getHealthFactorData from 'utils/getHealthFactorData';
@@ -20,17 +21,13 @@ const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 const DEFAULT_SLIPPAGE = (numbers.slippage * 100).toFixed(2);
 
 type BorrowAtMaturity = {
-  isLoading: boolean;
-  onMax: () => void;
-  handleInputChange: (value: string) => void;
-  handleSubmitAction: () => void;
   borrow: () => void;
   updateAPR: () => void;
   rawSlippage: string;
   setRawSlippage: (value: string) => void;
   fixedRate: number | undefined;
   hasCollateral: boolean;
-};
+} & OperationHook;
 
 export default (): BorrowAtMaturity => {
   const { walletAddress } = useWeb3();
@@ -140,12 +137,7 @@ export default (): BorrowAtMaturity => {
     ],
   );
 
-  const { isLoading: previewIsLoading } = usePreviewTx({ qty, needsApproval, previewGasCost });
-
-  const isLoading = useMemo(
-    () => isLoadingOp || approveIsLoading || previewIsLoading,
-    [isLoadingOp, approveIsLoading, previewIsLoading],
-  );
+  const isLoading = useMemo(() => isLoadingOp || approveIsLoading, [isLoadingOp, approveIsLoading]);
 
   const onMax = useCallback(() => {
     if (!accountData || !healthFactor) return;
@@ -359,5 +351,7 @@ export default (): BorrowAtMaturity => {
     setRawSlippage,
     fixedRate,
     hasCollateral,
+    previewGasCost,
+    needsApproval,
   };
 };

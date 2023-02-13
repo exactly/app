@@ -3,7 +3,7 @@ import { WeiPerEther, Zero } from '@ethersproject/constants';
 import numbers from 'config/numbers.json';
 import AccountDataContext from 'contexts/AccountDataContext';
 import { MarketContext } from 'contexts/MarketContext';
-import { useOperationContext, usePreviewTx } from 'contexts/OperationContext';
+import { useOperationContext } from 'contexts/OperationContext';
 import useAccountData from 'hooks/useAccountData';
 import useApprove from 'hooks/useApprove';
 import useBalance from 'hooks/useBalance';
@@ -11,16 +11,13 @@ import useHandleOperationError from 'hooks/useHandleOperationError';
 import usePreviewer from 'hooks/usePreviewer';
 import { useWeb3 } from 'hooks/useWeb3';
 import { useCallback, useContext, useMemo, useState } from 'react';
+import { OperationHook } from 'types/OperationHook';
 import analytics from 'utils/analytics';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 const DEFAULT_SLIPPAGE = (100 * numbers.slippage).toFixed(2);
 
 type DepositAtMaturity = {
-  isLoading: boolean;
-  onMax: () => void;
-  handleInputChange: (value: string) => void;
-  handleSubmitAction: () => void;
   deposit: () => void;
   updateAPR: () => void;
   optimalDepositAmount: BigNumber | undefined;
@@ -28,7 +25,7 @@ type DepositAtMaturity = {
   setRawSlippage: (value: string) => void;
   fixedRate: number | undefined;
   gtMaxYield: boolean;
-};
+} & OperationHook;
 
 export default (): DepositAtMaturity => {
   const { walletAddress } = useWeb3();
@@ -111,12 +108,7 @@ export default (): DepositAtMaturity => {
     ],
   );
 
-  const { isLoading: previewIsLoading } = usePreviewTx({ qty, needsApproval, previewGasCost });
-
-  const isLoading = useMemo(
-    () => approveIsLoading || isLoadingOp || previewIsLoading,
-    [approveIsLoading, isLoadingOp, previewIsLoading],
-  );
+  const isLoading = useMemo(() => approveIsLoading || isLoadingOp, [approveIsLoading, isLoadingOp]);
 
   const onMax = useCallback(() => {
     if (walletBalance) {
@@ -162,6 +154,7 @@ export default (): DepositAtMaturity => {
 
     let depositTx;
     try {
+      setIsLoadingOp(true);
       const amount = parseFixed(qty, decimals);
       const minAmount = amount.mul(slippage).div(WeiPerEther);
 
@@ -284,5 +277,7 @@ export default (): DepositAtMaturity => {
     setRawSlippage,
     fixedRate,
     gtMaxYield,
+    previewGasCost,
+    needsApproval,
   };
 };
