@@ -2,24 +2,21 @@ import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { WeiPerEther } from '@ethersproject/constants';
 import numbers from 'config/numbers.json';
 import AccountDataContext from 'contexts/AccountDataContext';
-import { useOperationContext, usePreviewTx } from 'contexts/OperationContext';
+import { useOperationContext } from 'contexts/OperationContext';
 import useAccountData from 'hooks/useAccountData';
 import useApprove from 'hooks/useApprove';
 import useBalance from 'hooks/useBalance';
 import useHandleOperationError from 'hooks/useHandleOperationError';
 import { useWeb3 } from 'hooks/useWeb3';
 import { useCallback, useContext, useMemo } from 'react';
+import { OperationHook } from 'types/OperationHook';
 import analytics from 'utils/analytics';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 
 type Deposit = {
-  isLoading: boolean;
-  onMax: () => void;
-  handleInputChange: (value: string) => void;
-  handleSubmitAction: () => void;
   deposit: () => void;
-};
+} & OperationHook;
 
 export default (): Deposit => {
   const { walletAddress } = useWeb3();
@@ -83,12 +80,7 @@ export default (): Deposit => {
     [decimals, ETHRouterContract, approveEstimateGas, marketContract, requiresApproval, symbol, walletAddress],
   );
 
-  const { isLoading: previewIsLoading } = usePreviewTx({ qty, needsApproval, previewGasCost });
-
-  const isLoading = useMemo(
-    () => approveIsLoading || isLoadingOp || previewIsLoading,
-    [approveIsLoading, isLoadingOp, previewIsLoading],
-  );
+  const isLoading = useMemo(() => approveIsLoading || isLoadingOp, [approveIsLoading, isLoadingOp]);
 
   const onMax = useCallback(() => {
     if (walletBalance) {
@@ -186,5 +178,5 @@ export default (): Deposit => {
     return deposit();
   }, [isLoading, requiresApproval, qty, symbol, deposit, approve, setRequiresApproval, needsApproval]);
 
-  return { isLoading, onMax, handleInputChange, handleSubmitAction, deposit };
+  return { isLoading, onMax, handleInputChange, handleSubmitAction, needsApproval, previewGasCost, deposit };
 };
