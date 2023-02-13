@@ -19,6 +19,7 @@ type Borrow = {
   isLoading: boolean;
   onMax: () => void;
   handleInputChange: (value: string) => void;
+  handleBasicInputChange: (value: string) => void;
   handleSubmitAction: () => void;
   borrow: () => void;
 };
@@ -178,6 +179,33 @@ export default (): Borrow => {
     [liquidity, accountData, symbol, setQty, hasCollateral, setErrorData, decimals],
   );
 
+  const handleBasicInputChange = useCallback(
+    (value: string) => {
+      if (!accountData) return;
+
+      const { usdPrice } = accountData[symbol];
+
+      const maxBorrowAssets = getBeforeBorrowLimit(accountData[symbol], 'borrow');
+
+      setQty(value);
+
+      if (
+        maxBorrowAssets.lt(
+          parseFixed(value || '0', decimals)
+            .mul(usdPrice)
+            .div(WeiPerEther),
+        )
+      ) {
+        return setErrorData({
+          status: true,
+          message: `You can't borrow more than your borrow limit`,
+        });
+      }
+      setErrorData(undefined);
+    },
+    [accountData, symbol, setQty, setErrorData, decimals],
+  );
+
   const borrow = useCallback(async () => {
     if (!accountData) return;
 
@@ -257,5 +285,5 @@ export default (): Borrow => {
     return borrow();
   }, [approve, borrow, isLoading, needsApproval, qty, requiresApproval, setRequiresApproval, symbol]);
 
-  return { isLoading, onMax, handleInputChange, handleSubmitAction, borrow };
+  return { isLoading, onMax, handleInputChange, handleBasicInputChange, handleSubmitAction, borrow };
 };
