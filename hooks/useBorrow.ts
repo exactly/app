@@ -19,6 +19,7 @@ const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 type Borrow = {
   handleBasicInputChange: (value: string) => void;
   borrow: () => void;
+  safeMaximumBorrow: string;
 } & OperationHook;
 
 export default (): Borrow => {
@@ -53,6 +54,11 @@ export default (): Borrow => {
     isLoading: approveIsLoading,
     needsApproval,
   } = useApprove('borrow', marketContract, ETHRouterContract?.address);
+
+  const maxBorrowAssets: BigNumber = useMemo(
+    () => (accountData ? getBeforeBorrowLimit(accountData[symbol], 'borrow') : Zero),
+    [accountData, symbol],
+  );
 
   const liquidity = useMemo(() => {
     if (!accountData) return undefined;
@@ -101,41 +107,47 @@ export default (): Borrow => {
 
   const isLoading = useMemo(() => isLoadingOp || approveIsLoading, [isLoadingOp, approveIsLoading]);
 
-  const onMax = useCallback(() => {
-    if (!accountData || !healthFactor) return;
+  const safeMaximumBorrow = useMemo((): string => {
+    if (!accountData || !healthFactor) return '';
 
     const { adjustFactor, usdPrice, floatingDepositAssets, isCollateral } = accountData[symbol];
 
     let col = healthFactor.collateral;
     const hf = parseFixed('1.05', 18);
-    const WAD = parseFixed('1', 18);
 
     const hasDepositedToFloatingPool = Number(formatFixed(floatingDepositAssets, decimals)) > 0;
 
     if (!isCollateral && hasDepositedToFloatingPool) {
-      col = col.add(floatingDepositAssets.mul(adjustFactor).div(WAD));
+      col = col.add(floatingDepositAssets.mul(adjustFactor).div(WeiPerEther));
     }
 
     const debt = healthFactor.debt;
 
-    const safeMaximumBorrow = Number(
+    return Number(
       formatFixed(
-        col.sub(hf.mul(debt).div(WAD)).mul(WAD).div(hf).mul(WAD).div(usdPrice).mul(adjustFactor).div(WAD),
+        col
+          .sub(hf.mul(debt).div(WeiPerEther))
+          .mul(WeiPerEther)
+          .div(hf)
+          .mul(WeiPerEther)
+          .div(usdPrice)
+          .mul(adjustFactor)
+          .div(WeiPerEther),
         18,
       ),
     ).toFixed(decimals);
+  }, [accountData, healthFactor, symbol, decimals]);
 
+  const onMax = useCallback(() => {
     setQty(safeMaximumBorrow);
     setErrorData(undefined);
-  }, [accountData, healthFactor, symbol, setQty, setErrorData, decimals]);
+  }, [setQty, safeMaximumBorrow, setErrorData]);
 
   const handleInputChange = useCallback(
     (value: string) => {
       if (!liquidity || !accountData) return;
 
       const { usdPrice } = accountData[symbol];
-
-      const maxBorrowAssets = getBeforeBorrowLimit(accountData[symbol], 'borrow');
 
       setQty(value);
 
@@ -167,7 +179,7 @@ export default (): Borrow => {
       }
       setErrorData(undefined);
     },
-    [liquidity, accountData, symbol, setQty, hasCollateral, setErrorData, decimals],
+    [liquidity, accountData, symbol, setQty, hasCollateral, setErrorData, decimals, maxBorrowAssets],
   );
 
   const handleBasicInputChange = useCallback(
@@ -175,8 +187,6 @@ export default (): Borrow => {
       if (!accountData) return;
 
       const { usdPrice } = accountData[symbol];
-
-      const maxBorrowAssets = getBeforeBorrowLimit(accountData[symbol], 'borrow');
 
       setQty(value);
 
@@ -194,7 +204,7 @@ export default (): Borrow => {
       }
       setErrorData(undefined);
     },
-    [accountData, symbol, setQty, setErrorData, decimals],
+    [accountData, symbol, setQty, maxBorrowAssets, decimals, setErrorData],
   );
 
   const borrow = useCallback(async () => {
@@ -285,5 +295,6 @@ export default (): Borrow => {
     borrow,
     previewGasCost,
     needsApproval,
+    safeMaximumBorrow,
   };
 };

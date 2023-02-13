@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useEffect, useMemo } from 'react';
+import React, { FC, useEffect, useMemo } from 'react';
 import { Box, Divider, Typography } from '@mui/material';
 import AssetInput from 'components/OperationsModal/AssetInput';
 import { MarketsBasicOption, useMarketsBasic } from 'contexts/MarketsBasicContext';
@@ -20,24 +20,19 @@ import useBorrow from 'hooks/useBorrow';
 const MarketsBasic: FC = () => {
   const { openOperationModal } = useModalStatus();
   const { symbol = 'DAI', operation, selected, setSelected } = useMarketsBasic();
-  const { errorData, requiresApproval, setErrorData, qty, setQty, assetContract, tx } = useOperationContext();
+  const { errorData, requiresApproval, qty, assetContract, tx } = useOperationContext();
   const { decimals = 18 } = useAccountData(symbol);
   const walletBalance = useBalance(symbol, assetContract);
   const { options: fixedOptions, loading: loadingFixedOptions } = usePreviewFixedOperation(operation);
-  const { handleInputChange: handleDeposit } = useDepositAtMaturity();
-  const { handleBasicInputChange: handleBorrow } = useBorrow();
+  const { handleInputChange: handleDeposit, onMax: onMaxDeposit } = useDepositAtMaturity();
+  const { handleBasicInputChange: handleBorrow, onMax: onMaxBorrow, safeMaximumBorrow } = useBorrow();
   const {
     depositAPR: floatingDepositAPR,
     borrowAPR: floatingBorrowAPR,
     loading: loadingFloatingOption,
   } = useFloatingPoolAPR(symbol);
 
-  const onMax = useCallback(() => {
-    if (walletBalance) {
-      setQty(walletBalance);
-      setErrorData(undefined);
-    }
-  }, [walletBalance, setQty, setErrorData]);
+  const isDeposit = useMemo(() => operation === 'deposit', [operation]);
 
   const allOptions: MarketsBasicOption[] = useMemo(
     () => [
@@ -50,7 +45,7 @@ const MarketsBasic: FC = () => {
   const bestOption = useMemo(() => {
     const options = allOptions.map(({ maturity, depositAPR, borrowAPR }) => ({
       maturity,
-      apr: operation === 'deposit' ? depositAPR : borrowAPR,
+      apr: isDeposit ? depositAPR : borrowAPR,
     }));
 
     const bestDepositOption = options.reduce((acc, option) => ((option.apr || 0) > (acc.apr || 0) ? option : acc), {
@@ -63,8 +58,8 @@ const MarketsBasic: FC = () => {
       { maturity: 0, apr: Infinity },
     ).maturity;
 
-    return operation === 'deposit' ? bestDepositOption : bestBorrowOption;
-  }, [allOptions, operation]);
+    return isDeposit ? bestDepositOption : bestBorrowOption;
+  }, [allOptions, isDeposit]);
 
   const currentOption = useMemo(
     () => allOptions.find((option) => option.maturity === selected),
@@ -91,17 +86,15 @@ const MarketsBasic: FC = () => {
 
         <Box display="flex" flexDirection="column" bgcolor="white" border="1px solid #EDF0F2" borderRadius="8px">
           <Box px={2} py={1.5}>
-            <Typography variant="cardTitle">{`Asset to be ${
-              operation === 'deposit' ? 'deposited' : 'borrowed'
-            }`}</Typography>
+            <Typography variant="cardTitle">{`Asset to be ${isDeposit ? 'deposited' : 'borrowed'}`}</Typography>
             <AssetInput
               qty={qty}
               symbol={symbol}
               decimals={decimals}
-              onMax={onMax}
-              onChange={operation === 'deposit' ? handleDeposit : handleBorrow}
-              label="Wallet balance"
-              amount={walletBalance}
+              onMax={isDeposit ? onMaxDeposit : onMaxBorrow}
+              onChange={isDeposit ? handleDeposit : handleBorrow}
+              label={isDeposit ? 'Wallet balance' : 'Borrow limit'}
+              amount={isDeposit ? walletBalance : safeMaximumBorrow}
             />
           </Box>
           <Divider sx={{ background: 'figma.grey.700' }} />
