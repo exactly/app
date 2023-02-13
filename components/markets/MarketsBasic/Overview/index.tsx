@@ -91,4 +91,4 @@ const Overview: FC<Props> = ({ symbol, operation, qty, option }) => {
   );
 };
 
-export default Overview;
+export default React.memo(Overview);
