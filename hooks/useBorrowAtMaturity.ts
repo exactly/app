@@ -27,6 +27,7 @@ type BorrowAtMaturity = {
   setRawSlippage: (value: string) => void;
   fixedRate: number | undefined;
   hasCollateral: boolean;
+  safeMaximumBorrow: string;
 } & OperationHook;
 
 export default (): BorrowAtMaturity => {
@@ -139,8 +140,8 @@ export default (): BorrowAtMaturity => {
 
   const isLoading = useMemo(() => isLoadingOp || approveIsLoading, [isLoadingOp, approveIsLoading]);
 
-  const onMax = useCallback(() => {
-    if (!accountData || !healthFactor) return;
+  const safeMaximumBorrow = useMemo((): string => {
+    if (!accountData || !healthFactor) return '';
 
     const { usdPrice, adjustFactor, floatingDepositAssets, isCollateral } = accountData[symbol];
 
@@ -155,7 +156,7 @@ export default (): BorrowAtMaturity => {
 
     const { debt } = healthFactor;
 
-    const safeMaximumBorrow = Number(
+    return Number(
       formatFixed(
         col
           .sub(hf.mul(debt).div(WeiPerEther))
@@ -168,10 +169,12 @@ export default (): BorrowAtMaturity => {
         18,
       ),
     ).toFixed(decimals);
+  }, [accountData, healthFactor, symbol, decimals]);
 
+  const onMax = useCallback(() => {
     setQty(safeMaximumBorrow);
     setErrorData(undefined);
-  }, [accountData, decimals, healthFactor, setErrorData, setQty, symbol]);
+  }, [safeMaximumBorrow, setErrorData, setQty]);
 
   const handleInputChange = useCallback(
     (value: string) => {
@@ -353,5 +356,6 @@ export default (): BorrowAtMaturity => {
     hasCollateral,
     previewGasCost,
     needsApproval,
+    safeMaximumBorrow,
   };
 };
