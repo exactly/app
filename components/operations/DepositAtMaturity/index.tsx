@@ -5,7 +5,7 @@ import ModalTxCost from 'components/common/modal/ModalTxCost';
 import ModalGif from 'components/common/modal/ModalGif';
 
 import useBalance from 'hooks/useBalance';
-import { useOperationContext } from 'contexts/OperationContext';
+import { useOperationContext, usePreviewTx } from 'contexts/OperationContext';
 import { toPercentage } from 'utils/utils';
 import useAccountData from 'hooks/useAccountData';
 import { Grid } from '@mui/material';
@@ -39,12 +39,16 @@ const DepositAtMaturity: FC = () => {
     setRawSlippage,
     fixedRate,
     gtMaxYield,
+    needsApproval,
+    previewGasCost,
   } = useDepositAtMaturity();
   const { symbol, errorData, qty, gasCost, tx, requiresApproval, assetContract } = useOperationContext();
   const walletBalance = useBalance(symbol, assetContract);
   const { decimals = 18 } = useAccountData(symbol);
 
   useEffect(() => void updateAPR(), [updateAPR]);
+
+  const { isLoading: previewIsLoading } = usePreviewTx({ qty, needsApproval, previewGasCost });
 
   if (tx) return <ModalGif tx={tx} tryAgain={deposit} />;
 
@@ -107,8 +111,8 @@ const DepositAtMaturity: FC = () => {
           label="Deposit"
           symbol={symbol}
           submit={handleSubmitAction}
-          isLoading={isLoading}
-          disabled={!qty || parseFloat(qty) <= 0 || isLoading || errorData?.status}
+          isLoading={isLoading || previewIsLoading}
+          disabled={!qty || parseFloat(qty) <= 0 || isLoading || previewIsLoading || errorData?.status}
           requiresApproval={requiresApproval}
         />
       </Grid>
