@@ -44,23 +44,23 @@ const Submit: FC<SubmitProps> = ({ symbol, operation, option, qty, errorData, re
       case 'borrow':
         return {
           ...borrow,
-          isFloating: false,
+          isFloating: true,
         };
       case 'borrowAtMaturity':
         return {
           ...borrowAtMaturity,
-          isFloating: true,
+          isFloating: false,
         };
 
       case 'deposit':
         return {
           ...deposit,
-          isFloating: false,
+          isFloating: true,
         };
       case 'depositAtMaturity':
         return {
           ...depositAtMaturity,
-          isFloating: true,
+          isFloating: false,
         };
     }
   }, [borrow, borrowAtMaturity, deposit, depositAtMaturity, operation, option.maturity]);
