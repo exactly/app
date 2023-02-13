@@ -7,7 +7,7 @@ import { toPercentage } from 'utils/utils';
 
 import AccountDataContext from 'contexts/AccountDataContext';
 
-import { useOperationContext } from 'contexts/OperationContext';
+import { useOperationContext, usePreviewTx } from 'contexts/OperationContext';
 import { Grid } from '@mui/material';
 import { ModalBox, ModalBoxCell, ModalBoxRow } from 'components/common/modal/ModalBox';
 import AssetInput from 'components/OperationsModal/AssetInput';
@@ -40,6 +40,8 @@ const BorrowAtMaturity: FC = () => {
     fixedRate,
     hasCollateral,
     safeMaximumBorrow,
+    needsApproval,
+    previewGasCost,
   } = useBorrowAtMaturity();
   const { decimals = 18 } = useAccountData(symbol);
 
@@ -53,6 +55,8 @@ const BorrowAtMaturity: FC = () => {
       });
     }
   }, [hasCollateral, setErrorData]);
+
+  const { isLoading: previewIsLoading } = usePreviewTx({ qty, needsApproval, previewGasCost });
 
   if (tx) return <ModalGif tx={tx} tryAgain={borrow} />;
 
@@ -109,8 +113,8 @@ const BorrowAtMaturity: FC = () => {
           label="Borrow"
           symbol={symbol === 'WETH' && accountData ? accountData[symbol].symbol : symbol}
           submit={handleSubmitAction}
-          isLoading={isLoading}
-          disabled={!qty || parseFloat(qty) <= 0 || isLoading || errorData?.status}
+          isLoading={isLoading || previewIsLoading}
+          disabled={!qty || parseFloat(qty) <= 0 || isLoading || previewIsLoading || errorData?.status}
           requiresApproval={requiresApproval}
         />
       </Grid>
