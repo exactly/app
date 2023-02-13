@@ -2,7 +2,7 @@ import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { WeiPerEther, Zero } from '@ethersproject/constants';
 import numbers from 'config/numbers.json';
 import AccountDataContext from 'contexts/AccountDataContext';
-import { useOperationContext, } from 'contexts/OperationContext';
+import { useOperationContext } from 'contexts/OperationContext';
 import useAccountData from 'hooks/useAccountData';
 import useApprove from 'hooks/useApprove';
 import useHandleOperationError from 'hooks/useHandleOperationError';

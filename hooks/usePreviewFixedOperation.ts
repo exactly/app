@@ -4,8 +4,9 @@ import { captureException } from '@sentry/nextjs';
 import AccountDataContext from 'contexts/AccountDataContext';
 import { MarketsBasicOperation, MarketsBasicOption } from 'contexts/MarketsBasicContext';
 import { useOperationContext } from 'contexts/OperationContext';
-import { useCallback, useContext, useEffect, useState } from 'react';
+import { useCallback, useContext, useState } from 'react';
 import useAccountData from './useAccountData';
+import useDelayedEffect from './useDelayedEffect';
 import useMaturityPools from './useMaturityPools';
 import usePreviewer from './usePreviewer';
 
@@ -26,48 +27,53 @@ export default (operation: MarketsBasicOperation): PreviewFixedOperation => {
   const [options, setOptions] = useState<MarketsBasicOption[]>(Array(maturityPools.length || MIN_OPTIONS).fill({}));
   const [loading, setLoading] = useState<boolean>(true);
 
-  const updateAPR = useCallback(async () => {
-    if (!accountData || !previewerContract || !marketContract) return;
-    setLoading(true);
-    if (!qty || parseFloat(qty) === 0) {
-      setOptions([...maturityPools]);
-      setLoading(false);
-      return;
-    }
+  const updateAPR = useCallback(
+    async (cancelled: () => boolean) => {
+      if (!accountData || !previewerContract || !marketContract) return;
 
-    const initialAssets = parseFixed(qty, decimals);
-    try {
-      const preview =
-        operation === 'deposit'
-          ? previewerContract.previewDepositAtAllMaturities
-          : previewerContract.previewBorrowAtAllMaturities;
-      const previewPools = await preview(marketContract.address, initialAssets);
+      if (!qty || parseFloat(qty) === 0) {
+        setOptions([...maturityPools]);
+        return;
+      }
 
-      const currentTimestamp = Date.now() / 1000;
+      try {
+        setLoading(true);
+        const initialAssets = parseFixed(qty, decimals);
 
-      const fixedOptions: MarketsBasicOption[] = previewPools.map(({ maturity, assets }) => {
-        const time = 31_536_000 / (maturity.toNumber() - currentTimestamp);
-        const rate = assets.mul(WeiPerEther).div(initialAssets);
-        const fixedAPR = (Number(formatFixed(rate, 18)) - 1) * time;
+        const preview =
+          operation === 'deposit'
+            ? previewerContract.previewDepositAtAllMaturities
+            : previewerContract.previewBorrowAtAllMaturities;
+        const previewPools = await preview(marketContract.address, initialAssets);
 
-        return {
-          maturity: maturity.toNumber(),
-          depositAPR: Math.min(fixedAPR, MAX_APR),
-          borrowAPR: Math.min(fixedAPR, MAX_APR),
-        };
-      });
-      setOptions(fixedOptions);
-    } catch (error) {
-      captureException(error);
-      setOptions(Array(maturityPools.length || MIN_OPTIONS).fill({}));
-    } finally {
-      setLoading(false);
-    }
-  }, [accountData, previewerContract, marketContract, qty, decimals, maturityPools, operation]);
+        const currentTimestamp = Date.now() / 1000;
 
-  useEffect(() => {
-    void updateAPR();
-  }, [updateAPR]);
+        const fixedOptions: MarketsBasicOption[] = previewPools.map(({ maturity, assets }) => {
+          const time = 31_536_000 / (maturity.toNumber() - currentTimestamp);
+          const rate = assets.mul(WeiPerEther).div(initialAssets);
+          const fixedAPR = (Number(formatFixed(rate, 18)) - 1) * time;
 
-  return { options, loading };
+          return {
+            maturity: maturity.toNumber(),
+            depositAPR: Math.min(fixedAPR, MAX_APR),
+            borrowAPR: Math.min(fixedAPR, MAX_APR),
+          };
+        });
+
+        if (cancelled()) return;
+        setOptions(fixedOptions);
+      } catch (error) {
+        captureException(error);
+        if (cancelled()) return;
+        setOptions(Array(maturityPools.length || MIN_OPTIONS).fill({}));
+      } finally {
+        setLoading(false);
+      }
+    },
+    [accountData, previewerContract, marketContract, qty, decimals, maturityPools, operation],
+  );
+
+  const { isLoading: delayedLoading } = useDelayedEffect({ effect: updateAPR });
+
+  return { options, loading: loading || delayedLoading };
 };
