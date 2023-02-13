@@ -2,13 +2,14 @@ import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { WeiPerEther, Zero } from '@ethersproject/constants';
 import numbers from 'config/numbers.json';
 import AccountDataContext from 'contexts/AccountDataContext';
-import { useOperationContext, usePreviewTx } from 'contexts/OperationContext';
+import { useOperationContext, } from 'contexts/OperationContext';
 import useAccountData from 'hooks/useAccountData';
 import useApprove from 'hooks/useApprove';
 import useHandleOperationError from 'hooks/useHandleOperationError';
 import { useWeb3 } from 'hooks/useWeb3';
 import { useCallback, useContext, useMemo } from 'react';
 import { HealthFactor } from 'types/HealthFactor';
+import { OperationHook } from 'types/OperationHook';
 import analytics from 'utils/analytics';
 import getBeforeBorrowLimit from 'utils/getBeforeBorrowLimit';
 import getHealthFactorData from 'utils/getHealthFactorData';
@@ -16,13 +17,9 @@ import getHealthFactorData from 'utils/getHealthFactorData';
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 
 type Borrow = {
-  isLoading: boolean;
-  onMax: () => void;
-  handleInputChange: (value: string) => void;
   handleBasicInputChange: (value: string) => void;
-  handleSubmitAction: () => void;
   borrow: () => void;
-};
+} & OperationHook;
 
 export default (): Borrow => {
   const { walletAddress } = useWeb3();
@@ -60,8 +57,7 @@ export default (): Borrow => {
   const liquidity = useMemo(() => {
     if (!accountData) return undefined;
 
-    const limit = accountData[symbol].floatingAvailableAssets;
-    return limit ?? undefined;
+    return accountData[symbol].floatingAvailableAssets;
   }, [accountData, symbol]);
 
   const hasCollateral = useMemo(() => {
@@ -103,12 +99,7 @@ export default (): Borrow => {
     [walletAddress, marketContract, ETHRouterContract, requiresApproval, symbol, approveEstimateGas, decimals],
   );
 
-  const { isLoading: previewIsLoading } = usePreviewTx({ qty, needsApproval, previewGasCost });
-
-  const isLoading = useMemo(
-    () => isLoadingOp || approveIsLoading || previewIsLoading,
-    [isLoadingOp, approveIsLoading, previewIsLoading],
-  );
+  const isLoading = useMemo(() => isLoadingOp || approveIsLoading, [isLoadingOp, approveIsLoading]);
 
   const onMax = useCallback(() => {
     if (!accountData || !healthFactor) return;
@@ -285,5 +276,14 @@ export default (): Borrow => {
     return borrow();
   }, [approve, borrow, isLoading, needsApproval, qty, requiresApproval, setRequiresApproval, symbol]);
 
-  return { isLoading, onMax, handleInputChange, handleBasicInputChange, handleSubmitAction, borrow };
+  return {
+    isLoading,
+    onMax,
+    handleInputChange,
+    handleBasicInputChange,
+    handleSubmitAction,
+    borrow,
+    previewGasCost,
+    needsApproval,
+  };
 };

@@ -18,6 +18,7 @@ import React, {
 } from 'react';
 import { ERC20, Market, MarketETHRouter } from 'types/contracts';
 import { ErrorData } from 'types/Error';
+import { OperationHook } from 'types/OperationHook';
 import { Transaction } from 'types/Transaction';
 import { MarketContext } from './MarketContext';
 import { useModalStatus } from './ModalStatusContext';
@@ -111,9 +112,7 @@ export function usePreviewTx({
   previewGasCost,
 }: {
   qty: string;
-  needsApproval: (qty: string) => Promise<boolean>;
-  previewGasCost: (qty: string) => Promise<BigNumber | undefined>;
-}) {
+} & Pick<OperationHook, 'needsApproval' | 'previewGasCost'>) {
   const { errorData, setErrorData, setGasCost, setRequiresApproval } = useOperationContext();
   const handleOperationError = useHandleOperationError();
 
