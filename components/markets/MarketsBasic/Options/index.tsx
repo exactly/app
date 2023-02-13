@@ -116,4 +116,4 @@ const Options: FC<Props> = ({
   );
 };
 
-export default Options;
+export default React.memo(Options);
