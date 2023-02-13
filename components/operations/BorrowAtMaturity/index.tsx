@@ -7,8 +7,6 @@ import { toPercentage } from 'utils/utils';
 
 import AccountDataContext from 'contexts/AccountDataContext';
 
-import useBalance from 'hooks/useBalance';
-
 import { useOperationContext } from 'contexts/OperationContext';
 import { Grid } from '@mui/material';
 import { ModalBox, ModalBoxCell, ModalBoxRow } from 'components/common/modal/ModalBox';
@@ -29,7 +27,7 @@ import useBorrowAtMaturity from 'hooks/useBorrowAtMaturity';
 const BorrowAtMaturity: FC = () => {
   const { operation } = useModalStatus();
   const { accountData } = useContext(AccountDataContext);
-  const { symbol, errorData, setErrorData, qty, gasCost, tx, requiresApproval, assetContract } = useOperationContext();
+  const { symbol, errorData, setErrorData, qty, gasCost, tx, requiresApproval } = useOperationContext();
   const {
     isLoading,
     onMax,
@@ -41,9 +39,9 @@ const BorrowAtMaturity: FC = () => {
     setRawSlippage,
     fixedRate,
     hasCollateral,
+    safeMaximumBorrow,
   } = useBorrowAtMaturity();
   const { decimals = 18 } = useAccountData(symbol);
-  const walletBalance = useBalance(symbol, assetContract);
 
   useEffect(() => void updateAPR(), [updateAPR]);
   useEffect(() => {
@@ -69,8 +67,8 @@ const BorrowAtMaturity: FC = () => {
               decimals={decimals}
               onMax={onMax}
               onChange={handleInputChange}
-              label="Wallet balance"
-              amount={walletBalance}
+              label="Borrow limit"
+              amount={safeMaximumBorrow}
             />
           </ModalBoxRow>
           <ModalBoxRow>

@@ -211,6 +211,9 @@ const theme = createTheme({
           '& .MuiSvgIcon-root': {
             fontSize: 18,
           },
+          '&:hover': {
+            backgroundColor: 'transparent',
+          },
         },
       },
     },

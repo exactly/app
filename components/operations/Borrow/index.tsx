@@ -4,7 +4,6 @@ import ModalGif from 'components/common/modal/ModalGif';
 
 import AccountDataContext from 'contexts/AccountDataContext';
 
-import useBalance from 'hooks/useBalance';
 import { useOperationContext } from 'contexts/OperationContext';
 import { Grid } from '@mui/material';
 import { ModalBox, ModalBoxCell, ModalBoxRow } from 'components/common/modal/ModalBox';
@@ -22,10 +21,9 @@ import useBorrow from 'hooks/useBorrow';
 const Borrow: FC = () => {
   const { operation } = useModalStatus();
   const { accountData } = useContext(AccountDataContext);
-  const { symbol, errorData, qty, gasCost, tx, requiresApproval, assetContract } = useOperationContext();
-  const { isLoading, onMax, handleInputChange, handleSubmitAction, borrow } = useBorrow();
+  const { symbol, errorData, qty, gasCost, tx, requiresApproval } = useOperationContext();
+  const { isLoading, onMax, handleInputChange, handleSubmitAction, borrow, safeMaximumBorrow } = useBorrow();
   const { decimals = 18 } = useAccountData(symbol);
-  const walletBalance = useBalance(symbol, assetContract);
 
   if (tx) return <ModalGif tx={tx} tryAgain={borrow} />;
 
@@ -40,8 +38,8 @@ const Borrow: FC = () => {
               symbol={symbol}
               onMax={onMax}
               onChange={handleInputChange}
-              label="Wallet balance"
-              amount={walletBalance}
+              label="Borrow limit"
+              amount={safeMaximumBorrow}
             />
           </ModalBoxRow>
           <ModalBoxRow>
