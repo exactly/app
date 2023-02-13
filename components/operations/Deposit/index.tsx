@@ -5,7 +5,7 @@ import ModalGif from 'components/common/modal/ModalGif';
 
 import useBalance from 'hooks/useBalance';
 import useAccountData from 'hooks/useAccountData';
-import { useOperationContext } from 'contexts/OperationContext';
+import { useOperationContext, usePreviewTx } from 'contexts/OperationContext';
 import { ModalBox, ModalBoxRow, ModalBoxCell } from 'components/common/modal/ModalBox';
 import { useModalStatus } from 'contexts/ModalStatusContext';
 import ModalInfoHealthFactor from 'components/OperationsModal/Info/ModalInfoHealthFactor';
@@ -22,9 +22,12 @@ import useDeposit from 'hooks/useDeposit';
 const Deposit: FC = () => {
   const { operation } = useModalStatus();
   const { symbol, errorData, qty, gasCost, tx, requiresApproval, assetContract } = useOperationContext();
-  const { isLoading, onMax, handleInputChange, handleSubmitAction, deposit } = useDeposit();
+  const { isLoading, onMax, handleInputChange, handleSubmitAction, deposit, needsApproval, previewGasCost } =
+    useDeposit();
   const { decimals = 18 } = useAccountData(symbol);
   const walletBalance = useBalance(symbol, assetContract);
+
+  const { isLoading: previewIsLoading } = usePreviewTx({ qty, needsApproval, previewGasCost });
 
   if (tx) return <ModalGif tx={tx} tryAgain={deposit} />;
 
@@ -73,8 +76,8 @@ const Deposit: FC = () => {
           label="Deposit"
           symbol={symbol}
           submit={handleSubmitAction}
-          isLoading={isLoading}
-          disabled={!qty || parseFloat(qty) <= 0 || isLoading || errorData?.status}
+          isLoading={isLoading || previewIsLoading}
+          disabled={!qty || parseFloat(qty) <= 0 || isLoading || previewIsLoading || errorData?.status}
           requiresApproval={requiresApproval}
         />
       </Grid>
