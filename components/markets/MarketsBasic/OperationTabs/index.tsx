@@ -1,5 +1,6 @@
 import { Box, Typography } from '@mui/material';
-import { useMarketsBasic } from 'contexts/MarketsBasicContext';
+import { MarketsBasicOperation, useMarketsBasic } from 'contexts/MarketsBasicContext';
+import { useOperationContext } from 'contexts/OperationContext';
 import React, { FC } from 'react';
 
 type OperationTabProps = {
@@ -24,10 +25,25 @@ const OperationTab: FC<OperationTabProps> = ({ label, isSelected, onClick }) => 
 
 const OperationTabs: FC = () => {
   const { operation, onChangeOperation } = useMarketsBasic();
+  const { setQty } = useOperationContext();
+
+  const handleOperationChange = (op: MarketsBasicOperation) => {
+    setQty('');
+    onChangeOperation(op);
+  };
+
   return (
     <Box display="flex" gap={2}>
-      <OperationTab label="Deposit" isSelected={operation === 'deposit'} onClick={() => onChangeOperation('deposit')} />
-      <OperationTab label="Borrow" isSelected={operation === 'borrow'} onClick={() => onChangeOperation('borrow')} />
+      <OperationTab
+        label="Deposit"
+        isSelected={operation === 'deposit'}
+        onClick={() => handleOperationChange('deposit')}
+      />
+      <OperationTab
+        label="Borrow"
+        isSelected={operation === 'borrow'}
+        onClick={() => handleOperationChange('borrow')}
+      />
     </Box>
   );
 };
