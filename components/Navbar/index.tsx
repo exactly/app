@@ -20,6 +20,7 @@ import Wallet from 'components/Wallet';
 import SelectNetwork from 'components/SelectNetwork';
 import SelectMarketsView from 'components/SelectMarketsView';
 import { MarketContext } from 'contexts/MarketContext';
+import ClaimRewards from 'components/ClaimRewards';
 const { maxWidth, onlyMobile, onlyDesktopFlex } = globals;
 
 const routes: {
@@ -119,6 +120,7 @@ function Navbar() {
             {isConnected && chain?.id === goerli.id && (
               <Chip label="Goerli Faucet" onClick={handleFaucetClick} sx={{ my: 'auto', display: onlyDesktopFlex }} />
             )}
+            <ClaimRewards />
             {connector?.switchChain && <SelectNetwork />}
             <Wallet />
           </Box>
