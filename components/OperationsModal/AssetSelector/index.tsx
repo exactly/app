@@ -14,7 +14,7 @@ type AssetOptionProps = {
 };
 
 function Asset({ assetSymbol, option = false }: AssetOptionProps) {
-  const size = option ? 14 : 24;
+  const size = option ? 18 : 24;
 
   if (!assetSymbol) {
     return <Skeleton width={80} />;
@@ -28,6 +28,7 @@ function Asset({ assetSymbol, option = false }: AssetOptionProps) {
         width={size}
         height={size}
         style={{
+          margin: option ? '8px 4px 8px 0' : 0,
           maxWidth: '100%',
           height: 'auto',
         }}
