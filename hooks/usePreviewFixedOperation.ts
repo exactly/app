@@ -33,6 +33,7 @@ export default (operation: MarketsBasicOperation): PreviewFixedOperation => {
 
       if (!qty || parseFloat(qty) === 0) {
         setOptions([...maturityPools]);
+        setLoading(false);
         return;
       }
 
