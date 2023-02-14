@@ -22,6 +22,11 @@ declare module '@mui/material/styles' {
     };
 
     colors: string[];
+
+    markets: {
+      simple: string;
+      advanced: string;
+    };
   }
   interface PaletteOptions {
     figma: {
@@ -37,6 +42,11 @@ declare module '@mui/material/styles' {
     };
 
     colors: string[];
+
+    markets: {
+      simple: string;
+      advanced: string;
+    };
   }
 
   interface TypographyVariants {
@@ -106,6 +116,11 @@ const theme = createTheme({
     },
 
     colors: ['#0095FF', '#031D30', '#085891', '#5500FF', '#AA00FF'],
+
+    markets: {
+      simple: '#EDEFF2',
+      advanced: '#F9FAFB',
+    },
   },
   typography: {
     fontFamily: 'articulat-cf',
