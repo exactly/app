@@ -12,8 +12,8 @@ export type Props = {
 
 function AvailableAmount({ symbol, amount, label, onMax }: Props) {
   return amount ? (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-      <Typography color="grey.600" fontSize={14} fontWeight={500}>
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25 }}>
+      <Typography color="figma.grey.500" fontSize={13} fontWeight={500}>
         {label}: {formatNumber(amount, symbol)}
       </Typography>
       <Button
@@ -24,9 +24,9 @@ function AvailableAmount({ symbol, amount, label, onMax }: Props) {
           p: 0.5,
           minWidth: 'fit-content',
           height: 'fit-content',
-          color: 'grey.600',
-          fontWeight: 700,
-          fontSize: 12,
+          color: 'figma.grey.500',
+          fontWeight: 600,
+          fontSize: 13,
         }}
       >
         Max

@@ -1,6 +1,6 @@
 import React, { useContext, useMemo } from 'react';
 import { BigNumber, formatFixed } from '@ethersproject/bignumber';
-import { Typography, Skeleton } from '@mui/material';
+import { Typography, Skeleton, Box } from '@mui/material';
 
 import AccountDataContext from 'contexts/AccountDataContext';
 import { WeiPerEther } from '@ethersproject/constants';
@@ -19,7 +19,12 @@ function ModalTxCost({ gasCost }: Props) {
     const eth = parseFloat(formatFixed(gasCost, 18)).toFixed(6);
     const usd = parseFloat(formatFixed(gasCost.mul(accountData.WETH.usdPrice).div(WeiPerEther), 18)).toFixed(2);
 
-    return <Typography variant="modalRow">{`~$ ${usd} / ${eth} ETH`}</Typography>;
+    return (
+      <Box display="flex" gap={0.5}>
+        <Typography variant="modalRow">{`~$${usd}`}</Typography>
+        <Typography variant="modalRow" color="figma.grey.600">{`(${eth} ETH)`}</Typography>
+      </Box>
+    );
   }, [gasCost, accountData]);
 
   return (
