@@ -8,7 +8,7 @@ import React, { ReactNode, useCallback, useContext, useEffect, useState } from '
 import ThemeContext from 'contexts/ThemeContext';
 import { useWeb3 } from 'hooks/useWeb3';
 
-import { AppBar, Box, Chip, IconButton, Toolbar } from '@mui/material';
+import { AppBar, Box, Chip, IconButton, Toolbar, useTheme } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import { globals } from 'styles/theme';
@@ -19,6 +19,7 @@ import Link from 'next/link';
 import Wallet from 'components/Wallet';
 import SelectNetwork from 'components/SelectNetwork';
 import SelectMarketsView from 'components/SelectMarketsView';
+import { MarketContext } from 'contexts/MarketContext';
 const { maxWidth, onlyMobile, onlyDesktopFlex } = globals;
 
 const routes: {
@@ -41,8 +42,10 @@ function Navbar() {
   const { pathname: currentPathname, query } = useRouter();
   const { chain, isConnected } = useWeb3();
 
-  const { openOperationModal } = useModalStatus();
   const { theme } = useContext(ThemeContext);
+  const { palette } = useTheme();
+  const { view } = useContext(MarketContext);
+  const { openOperationModal } = useModalStatus();
   const [openMenu, setOpenMenu] = useState<boolean>(false);
 
   useEffect(() => {
@@ -57,6 +60,16 @@ function Navbar() {
   const handleFaucetClick = useCallback(() => {
     if (chain?.id === goerli.id) return openOperationModal('faucet');
   }, [chain?.id, openOperationModal]);
+
+  const setBodyColor = (color: string) => {
+    document.body.style.backgroundColor = color;
+  };
+
+  useEffect(() => {
+    view === 'simple' && currentPathname === '/'
+      ? setBodyColor(palette.markets.simple)
+      : setBodyColor(palette.markets.advanced);
+  }, [currentPathname, view, palette.markets.advanced, palette.markets.simple]);
 
   return (
     <Box sx={{ display: 'flex', justifyContent: 'center' }}>
