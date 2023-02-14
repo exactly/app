@@ -8,6 +8,8 @@ import ViewCompactOutlinedIcon from '@mui/icons-material/ViewCompactOutlined';
 import { Box, Button, Menu, MenuItem, Typography } from '@mui/material';
 // import { globals } from 'styles/theme';
 import { MarketContext, MarketView } from 'contexts/MarketContext';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
 // const { onlyDesktop } = globals; //TODO: add mobile support
 
 type ViewOption = {
@@ -17,7 +19,8 @@ type ViewOption = {
   icon: ReactElement;
 };
 
-const SelectView: FC = () => {
+const SelectMarketsView: FC = () => {
+  const { query } = useRouter();
   const { view, setView } = useContext(MarketContext);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const openMenu = useCallback(
@@ -57,7 +60,7 @@ const SelectView: FC = () => {
         variant="contained"
         onClick={openMenu}
         sx={{
-          pr: '2px',
+          pr: '4px',
           pl: '6px',
           minWidth: { xs: '60px', sm: '110px' },
           borderRadius: '32px',
@@ -72,7 +75,7 @@ const SelectView: FC = () => {
         <Box display="flex" gap={0.5}>
           <BarChartRoundedIcon sx={{ fontSize: '14px', my: 'auto' }} />
           <Typography fontWeight={700} fontSize={14}>
-            Market
+            Markets
           </Typography>
           {anchorEl ? (
             <ExpandLessIcon sx={{ fontSize: '14px', my: 'auto', color: 'grey.500' }} fontSize="small" />
@@ -113,21 +116,23 @@ const SelectView: FC = () => {
             onClick={() => onSelectType(type)}
             sx={{ bgcolor: view === type ? 'grey.100' : 'transparent', p: 1, borderRadius: '4px' }}
           >
-            <Box display="flex" width="100%" gap={1.5}>
-              <Box my="auto" px={1}>
-                {cloneElement(icon, {
-                  sx: { fontSize: '24px', my: 'auto', color: view === type ? 'blue' : 'figma.grey.700' },
-                })}
+            <Link href={{ pathname: '/', query }} legacyBehavior>
+              <Box display="flex" width="100%" gap={1.5}>
+                <Box my="auto" px={1}>
+                  {cloneElement(icon, {
+                    sx: { fontSize: '24px', my: 'auto', color: view === type ? 'blue' : 'figma.grey.700' },
+                  })}
+                </Box>
+                <Box display="flex" flexDirection="column" justifyContent="left">
+                  <Typography fontSize="14px" fontWeight={700}>
+                    {title}
+                  </Typography>
+                  <Typography fontSize="13px" fontWeight={500} color="figma.grey.600">
+                    {description}
+                  </Typography>
+                </Box>
               </Box>
-              <Box display="flex" flexDirection="column" justifyContent="left">
-                <Typography fontSize="14px" fontWeight={700}>
-                  {title}
-                </Typography>
-                <Typography fontSize="13px" fontWeight={500} color="figma.grey.600">
-                  {description}
-                </Typography>
-              </Box>
-            </Box>
+            </Link>
           </MenuItem>
         ))}
       </Menu>
@@ -135,4 +140,4 @@ const SelectView: FC = () => {
   );
 };
 
-export default SelectView;
+export default SelectMarketsView;
