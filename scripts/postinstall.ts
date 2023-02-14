@@ -16,8 +16,9 @@ void Promise.all([
   readABI('node_modules/@exactly-protocol/protocol/deployments/optimism-goerli/MarketDAI.json'),
   readABI('node_modules/@exactly-protocol/protocol/deployments/optimism-goerli/MarketETHRouter.json'),
   readABI('node_modules/@exactly-protocol/protocol/deployments/optimism-goerli/InterestRateModelDAI.json'),
+  readABI('node_modules/@exactly-protocol/protocol/deployments/optimism-goerli/RewardsController.json'),
   mkdir('abi', { recursive: true }),
-]).then(async ([erc20, auditor, previewer, market, marketETHRouter, irm]) => {
+]).then(async ([erc20, auditor, previewer, market, marketETHRouter, irm, rewards]) => {
   const allFiles = await Promise.all([
     writeABI('abi/ERC20.json', erc20),
     writeABI('abi/Market.json', market),
@@ -25,6 +26,7 @@ void Promise.all([
     writeABI('abi/Previewer.json', previewer),
     writeABI('abi/MarketETHRouter.json', marketETHRouter),
     writeABI('abi/InterestRateModel.json', irm),
+    writeABI('abi/RewardsController.json', rewards),
   ]);
   await runTypeChain({
     cwd: cwd(),
