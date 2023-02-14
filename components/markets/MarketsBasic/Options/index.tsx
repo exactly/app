@@ -36,7 +36,7 @@ const Options: FC<Props> = ({
     <RadioGroup value={selected} onChange={(e) => setSelected(parseInt(e.target.value))} sx={{ pt: 1 }}>
       {allOptions.map(
         ({ maturity, depositAPR, borrowAPR }, index) =>
-          (operation === 'borrow' || Boolean(depositAPR && depositAPR >= minAPRValue)) && (
+          (operation === 'borrow' || depositAPR === undefined || depositAPR >= minAPRValue) && (
             <FormControlLabel
               key={`${maturity}_${depositAPR}_${borrowAPR}_${index}`}
               value={maturity}
