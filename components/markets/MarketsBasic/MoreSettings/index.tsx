@@ -31,7 +31,9 @@ const MoreSettings: FC<Props> = ({ operation }) => {
       <Box display="flex" flexDirection="column">
         {errorData?.component !== 'gas' && <ModalTxCost gasCost={gasCost} />}
         <ModalAdvancedSettings bgColor="transparent">
-          <ModalInfoEditableSlippage value={rawSlippage} onChange={(e) => setRawSlippage(e.target.value)} />
+          <Box mt={-1.5}>
+            <ModalInfoEditableSlippage value={rawSlippage} onChange={(e) => setRawSlippage(e.target.value)} />
+          </Box>
         </ModalAdvancedSettings>
       </Box>
     </>
