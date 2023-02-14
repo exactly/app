@@ -24,11 +24,12 @@ const OperationTab: FC<OperationTabProps> = ({ label, isSelected, onClick }) => 
 };
 
 const OperationTabs: FC = () => {
-  const { operation, onChangeOperation } = useMarketsBasic();
+  const { operation, onChangeOperation, setSelected } = useMarketsBasic();
   const { setQty } = useOperationContext();
 
   const handleOperationChange = (op: MarketsBasicOperation) => {
     setQty('');
+    setSelected(0);
     onChangeOperation(op);
   };
 
