@@ -6,11 +6,9 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ViewAgendaOutlinedIcon from '@mui/icons-material/ViewAgendaOutlined';
 import ViewCompactOutlinedIcon from '@mui/icons-material/ViewCompactOutlined';
 import { Box, Button, Menu, MenuItem, Typography } from '@mui/material';
-// import { globals } from 'styles/theme';
 import { MarketContext, MarketView } from 'contexts/MarketContext';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-// const { onlyDesktop } = globals; //TODO: add mobile support
 
 type ViewOption = {
   type: MarketView;

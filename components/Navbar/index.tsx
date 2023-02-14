@@ -91,14 +91,14 @@ function Navbar() {
             </Box>
           </Link>
           {routes.map(({ name, pathname, custom, icon }) => (
-            <Box key={pathname}>
+            <Box key={pathname} display={onlyDesktopFlex}>
               {custom || (
                 <Link href={{ pathname, query }} legacyBehavior>
                   <Box
                     sx={{
                       mx: '8px',
                       py: '4px',
-                      display: onlyDesktopFlex,
+                      display: 'flex',
                       cursor: 'pointer',
                       color: currentPathname === pathname ? 'primary' : 'grey.700',
                       borderBottom: currentPathname === pathname ? '2px solid' : '2px solid transparent',
