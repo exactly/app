@@ -91,7 +91,7 @@ function OperationsModal() {
           </DialogTitle>
         )}
         <DialogContent sx={{ padding: spacing(4, 0, 0, 0) }}>
-          <OperationContainer />
+          <OperationContainer operation={operation} />
         </DialogContent>
       </Box>
     </Dialog>
