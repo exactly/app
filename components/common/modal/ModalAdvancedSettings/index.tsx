@@ -11,7 +11,7 @@ function ModalAdvancedSettings({ children, bgColor }: PropsWithChildren & Props)
   const [open, setOpen] = useState(false);
 
   return (
-    <Grid container flexDirection="column">
+    <Grid container flexDirection="column" mt={-0.8}>
       <Grid item>
         <Button
           variant="text"
