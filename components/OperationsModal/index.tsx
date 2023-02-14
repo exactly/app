@@ -92,7 +92,7 @@ function OperationsModal() {
           </DialogTitle>
         )}
         <DialogContent sx={{ padding: spacing(4, 0, 0, 0) }}>
-          <OperationContainer />
+          <OperationContainer operation={operation} />
         </DialogContent>
         {isMobile && !tx && (
           <Button fullWidth variant="text" sx={{ color: 'grey.700', mt: '8px' }} onClick={closeModal}>

@@ -10,11 +10,13 @@ import WithdrawAtMaturity from 'components/operations/WithdrawAtMaturity';
 import RepayAtMaturity from 'components/operations/RepayAtMaturity';
 import Faucet from 'components/operations/Faucet';
 
-import { useModalStatus } from 'contexts/ModalStatusContext';
+import type { Operation } from 'contexts/ModalStatusContext';
 
-function OperationContainer() {
-  const { operation } = useModalStatus();
+type Props = {
+  operation: Operation;
+};
 
+function OperationContainer({ operation }: Props) {
   return (
     <>
       {operation === 'deposit' && <Deposit />}
@@ -30,4 +32,4 @@ function OperationContainer() {
   );
 }
 
-export default OperationContainer;
+export default React.memo(OperationContainer);
