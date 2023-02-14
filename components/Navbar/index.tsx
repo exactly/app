@@ -3,13 +3,14 @@ import { goerli, useClient } from 'wagmi';
 import DisclaimerModal from 'components/DisclaimerModal';
 import Image from 'next/image';
 import useRouter from 'hooks/useRouter';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { ReactNode, useCallback, useContext, useEffect, useState } from 'react';
 
 import ThemeContext from 'contexts/ThemeContext';
 import { useWeb3 } from 'hooks/useWeb3';
 
 import { AppBar, Box, Chip, IconButton, Toolbar } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
+import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import { globals } from 'styles/theme';
 import analytics from 'utils/analytics';
 import { useModalStatus } from 'contexts/ModalStatusContext';
@@ -17,12 +18,21 @@ import MobileMenu from 'components/MobileMenu';
 import Link from 'next/link';
 import Wallet from 'components/Wallet';
 import SelectNetwork from 'components/SelectNetwork';
-import SelectView from 'components/SelectView';
-const { maxWidth, onlyMobile, onlyDesktop, onlyDesktopFlex } = globals;
+import SelectMarketsView from 'components/SelectMarketsView';
+const { maxWidth, onlyMobile, onlyDesktopFlex } = globals;
 
-const routes = [
-  { pathname: '/', name: 'Markets' },
-  { pathname: '/dashboard', name: 'Dashboard' },
+const routes: {
+  pathname: string;
+  name: string;
+  custom?: ReactNode;
+  icon?: ReactNode;
+}[] = [
+  { pathname: '/', name: 'Markets', custom: <SelectMarketsView /> },
+  {
+    pathname: '/dashboard',
+    name: 'Dashboard',
+    icon: <AccountBalanceWalletIcon sx={{ fontSize: '14px', my: 'auto' }} />,
+  },
 ];
 
 function Navbar() {
@@ -67,30 +77,35 @@ function Navbar() {
               />
             </Box>
           </Link>
-          {routes.map(({ name, pathname }) => (
-            <Link key={pathname} href={{ pathname, query }} legacyBehavior>
-              <Box
-                sx={{
-                  mx: '8px',
-                  py: '4px',
-                  display: onlyDesktop,
-                  cursor: 'pointer',
-                  color: currentPathname === pathname ? 'primary' : 'grey.600',
-                  borderBottom: currentPathname === pathname ? '2px solid' : '2px solid transparent',
-                  ':hover': { borderBottom: '2px solid' },
-                  fontSize: '14px',
-                  fontWeight: 700,
-                }}
-              >
-                {name}
-              </Box>
-            </Link>
+          {routes.map(({ name, pathname, custom, icon }) => (
+            <Box key={pathname}>
+              {custom || (
+                <Link href={{ pathname, query }} legacyBehavior>
+                  <Box
+                    sx={{
+                      mx: '8px',
+                      py: '4px',
+                      display: onlyDesktopFlex,
+                      cursor: 'pointer',
+                      color: currentPathname === pathname ? 'primary' : 'grey.700',
+                      borderBottom: currentPathname === pathname ? '2px solid' : '2px solid transparent',
+                      ':hover': { borderBottom: '2px solid' },
+                      fontSize: '14px',
+                      fontWeight: 700,
+                      gap: 0.5,
+                    }}
+                  >
+                    {icon}
+                    <Box my="auto">{name}</Box>
+                  </Box>
+                </Link>
+              )}
+            </Box>
           ))}
           <Box display="flex" gap={0.5} ml="auto" flexDirection={{ xs: 'row-reverse', sm: 'row' }}>
             {isConnected && chain?.id === goerli.id && (
               <Chip label="Goerli Faucet" onClick={handleFaucetClick} sx={{ my: 'auto', display: onlyDesktopFlex }} />
             )}
-            <SelectView />
             {connector?.switchChain && <SelectNetwork />}
             <Wallet />
           </Box>
