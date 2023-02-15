@@ -1,6 +1,6 @@
 import { formatFixed } from '@ethersproject/bignumber';
 import { Zero } from '@ethersproject/constants';
-import { Box, Typography } from '@mui/material';
+import { Box, Typography, useTheme } from '@mui/material';
 import { MarketsBasicOperation, MarketsBasicOption } from 'contexts/MarketsBasicContext';
 import useAccountData from 'hooks/useAccountData';
 import Image from 'next/image';
@@ -19,21 +19,21 @@ type Props = {
 
 const Overview: FC<Props> = ({ symbol, operation, qty, option }) => {
   const { penaltyRate } = useAccountData(symbol);
-  console.log('penaltyRate', penaltyRate?.toString());
   const rate = useMemo(
     () => (operation === 'borrow' ? option.borrowAPR : option.depositAPR) || 0,
     [operation, option.borrowAPR, option.depositAPR],
   );
   const interest = useMemo(() => parseFloat(qty) * rate, [qty, rate]);
   const total = useMemo(() => parseFloat(qty) + interest, [qty, interest]);
+  const { palette } = useTheme();
 
   return (
     <Box
       display="flex"
       flexDirection="column"
       p={2}
-      bgcolor="grey.100"
-      border="1px solid #E3E5E8"
+      bgcolor="grey.50"
+      border={`1px solid ${palette.grey[200]}`}
       borderRadius="8px"
       gap={0.2}
     >
