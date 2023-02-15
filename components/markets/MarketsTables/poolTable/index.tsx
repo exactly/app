@@ -27,6 +27,8 @@ import useActionButton from 'hooks/useActionButton';
 import useSorting from 'hooks/useSorting';
 import TableHeadCell, { TableHeader } from 'components/common/TableHeadCell';
 import getLiquidTokenInfo from 'utils/getLiquidTokenInfo';
+import useRewards from 'hooks/useRewards';
+import RewardPill from 'components/markets/RewardPill';
 
 const { minAPRValue } = numbers;
 
@@ -50,6 +52,7 @@ export type TableRow = {
 const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) => {
   const { handleActionClick, isDisable } = useActionButton();
   const assets = useAssets();
+  const { rates } = useRewards();
   const defaultRows = useMemo<TableRow[]>(() => assets.map((s) => ({ symbol: s })), [assets]);
   const { setOrderBy, sortData, direction: sortDirection, isActive: sortActive } = useSorting<TableRow>();
   const tempRows = isLoading ? defaultRows : rows; // HACK this with the timeout in "marketsTables" is to avoid a screen flash when MUI  recive the new data of rows
@@ -89,7 +92,7 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
                   hover
                 >
                   <TableCell component="th" scope="row">
-                    <Grid container sx={{ alignContent: 'center' }}>
+                    <Grid container alignItems="center">
                       {isLoading ? (
                         <Skeleton variant="circular" width={24} height={24} />
                       ) : (
@@ -104,7 +107,7 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
                           }}
                         />
                       )}
-                      <Typography fontWeight="600" ml={1} display="inline" alignSelf="center">
+                      <Typography fontWeight="600" ml={1}>
                         {isLoading ? <Skeleton width={60} /> : formatSymbol(symbol)}
                       </Typography>
                     </Grid>
@@ -121,11 +124,18 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
                     ) : (
                       <Tooltip title={getLiquidTokenInfo(symbol)} arrow placement="top">
                         <Box display="flex" flexDirection="column" width="fit-content">
-                          <Typography width="fit-content">
-                            {toPercentage(depositAPR && depositAPR > minAPRValue ? depositAPR : undefined)}
-                          </Typography>
+                          <Grid container alignItems="center" gap={1}>
+                            <Typography width="fit-content" lineHeight={1}>
+                              {toPercentage(depositAPR && depositAPR > minAPRValue ? depositAPR : undefined)}
+                            </Typography>
+                            {rateType !== 'fixed'
+                              ? rates[symbol]?.map((r) => (
+                                  <RewardPill key={r.asset} rate={r.floatingDeposit} symbol={r.assetSymbol} />
+                                ))
+                              : null}
+                          </Grid>
                           {rateType === 'fixed' && (
-                            <Typography width="fit-content" variant="subtitle2" sx={{ color: 'grey.500' }}>
+                            <Typography width="fit-content" variant="subtitle2" color="grey.500">
                               {depositMaturity ? parseTimestamp(depositMaturity) : ''}
                             </Typography>
                           )}
@@ -139,11 +149,16 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
                     ) : (
                       <Tooltip title={getLiquidTokenInfo(symbol)} arrow placement="top">
                         <Box display="flex" flexDirection="column" width="fit-content">
-                          <Typography width="fit-content">
-                            {toPercentage(borrowAPR && borrowAPR > minAPRValue ? borrowAPR : undefined)}
-                          </Typography>
+                          <Grid container alignItems="center" gap={1}>
+                            <Typography width="fit-content">
+                              {toPercentage(borrowAPR && borrowAPR > minAPRValue ? borrowAPR : undefined)}
+                            </Typography>
+                            {rates[symbol]?.map((r) => (
+                              <RewardPill key={r.asset} rate={r.borrow} symbol={r.assetSymbol} />
+                            ))}
+                          </Grid>
                           {rateType === 'fixed' && (
-                            <Typography width="fit-content" variant="subtitle2" sx={{ color: 'grey.500' }}>
+                            <Typography width="fit-content" variant="subtitle2" color="grey.500">
                               {borrowMaturity ? parseTimestamp(borrowMaturity) : ''}
                             </Typography>
                           )}
