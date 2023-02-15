@@ -14,6 +14,8 @@ const Markets: NextPage = () => {
   const { view } = useContext(MarketContext);
   useEffect(() => void analytics.page(), []);
 
+  if (!view) return null;
+
   return (
     <Grid>
       {view === 'advanced' ? (
