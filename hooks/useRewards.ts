@@ -9,7 +9,7 @@ import handleOperationError from 'utils/handleOperationError';
 import { Previewer } from 'types/contracts';
 
 type Rewards = Record<string, BigNumber>;
-type Rates = Record<string, Record<string, Previewer.RewardRateStructOutput>>;
+type Rates = Record<string, Previewer.RewardRateStructOutput[]>;
 
 export default () => {
   const { walletAddress } = useWeb3();
@@ -51,17 +51,9 @@ export default () => {
 
   const rates = useMemo<Rates>(() => {
     if (!accountData) return {};
-
-    const ret: Rates = {};
-    Object.values(accountData).forEach(({ assetSymbol, rewardRates }) => {
-      rewardRates.forEach((rate) => {
-        if (!ret[assetSymbol]) {
-          ret[assetSymbol] = {};
-        }
-        ret[assetSymbol][rate.assetSymbol] = rate;
-      });
-    });
-    return ret;
+    return Object.fromEntries(
+      Object.values(accountData).map(({ assetSymbol, rewardRates }) => [assetSymbol, rewardRates]),
+    );
   }, [accountData]);
 
   return { rewards, rates, claimable, claim, isLoading };
