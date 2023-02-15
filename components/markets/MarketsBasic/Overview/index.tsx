@@ -1,5 +1,8 @@
+import { formatFixed } from '@ethersproject/bignumber';
+import { Zero } from '@ethersproject/constants';
 import { Box, Typography } from '@mui/material';
 import { MarketsBasicOperation, MarketsBasicOption } from 'contexts/MarketsBasicContext';
+import useAccountData from 'hooks/useAccountData';
 import Image from 'next/image';
 import React, { FC, useMemo } from 'react';
 import daysLeft from 'utils/daysLeft';
@@ -15,6 +18,8 @@ type Props = {
 };
 
 const Overview: FC<Props> = ({ symbol, operation, qty, option }) => {
+  const { penaltyRate } = useAccountData(symbol);
+  console.log('penaltyRate', penaltyRate?.toString());
   const rate = useMemo(
     () => (operation === 'borrow' ? option.borrowAPR : option.depositAPR) || 0,
     [operation, option.borrowAPR, option.depositAPR],
@@ -87,6 +92,16 @@ const Overview: FC<Props> = ({ symbol, operation, qty, option }) => {
           {parseTimestamp(option.maturity || 0)}
         </Typography>
       </Box>
+      {operation === 'borrow' && (
+        <Box display="flex" justifyContent="space-between">
+          <Typography fontWeight={500} fontSize={13} color="figma.grey.500">
+            Late payment penalty
+          </Typography>
+          <Typography fontWeight={700} fontSize={14}>
+            {`${toPercentage(parseFloat(formatFixed(penaltyRate || Zero, 18)) * 86_400)} daily`}
+          </Typography>
+        </Box>
+      )}
     </Box>
   );
 };
