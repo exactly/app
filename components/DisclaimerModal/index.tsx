@@ -9,7 +9,7 @@ import { Typography } from '@mui/material';
 
 import Link from '@mui/material/Link';
 
-export default function DisclamerModal() {
+export default function DisclaimerModal() {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
