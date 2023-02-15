@@ -21,13 +21,12 @@ export default () => {
   const rewards = useMemo<Rewards>(() => {
     if (!accountData) return {};
 
-    const ret: Rewards = {};
-    Object.values(accountData).forEach(({ claimableRewards }) => {
-      claimableRewards.forEach(
-        ({ assetSymbol, amount }) => (ret[assetSymbol] = ret[assetSymbol] ? ret[assetSymbol].add(amount) : amount),
-      );
-    });
-    return ret;
+    return Object.values(accountData)
+      .flatMap(({ claimableRewards }) => claimableRewards)
+      .reduce((acc, { assetSymbol, amount }) => {
+        acc[assetSymbol] = acc[assetSymbol] ? acc[assetSymbol].add(amount) : amount;
+        return acc;
+      }, {} as Rewards);
   }, [accountData]);
 
   const claimable = useMemo<boolean>(() => {
