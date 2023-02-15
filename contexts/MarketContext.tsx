@@ -9,7 +9,7 @@ type ContextValues = {
   date: number | undefined;
   setDate: (date: number) => void;
   dates: number[];
-  view: MarketView;
+  view?: MarketView;
   setView: (view: MarketView) => void;
 };
 
@@ -21,14 +21,14 @@ const defaultValues: ContextValues = {
   date: undefined,
   setDate: () => undefined,
   dates: [],
-  view: 'simple',
+  view: undefined,
   setView: () => undefined,
 };
 
 const MarketContext = createContext<ContextValues>(defaultValues);
 
 const MarketProvider: FC<PropsWithChildren> = ({ children }) => {
-  const [view, setView] = useState<MarketView>('simple');
+  const [view, setView] = useState<MarketView>();
   const [marketSymbol, setMarketSymbol] = useState<string>();
   const [date, setDate] = useState<number>();
 
@@ -56,8 +56,19 @@ const MarketProvider: FC<PropsWithChildren> = ({ children }) => {
     }
   }, [accountData, date, dates]);
 
+  useEffect(() => {
+    setView((localStorage.getItem('marketView') as MarketView) || 'simple');
+  }, [setView]);
+
+  const setViewLocalStorage = (newView: MarketView) => {
+    localStorage.setItem('marketView', newView);
+    setView(newView);
+  };
+
   return (
-    <MarketContext.Provider value={{ marketSymbol, setMarketSymbol, date, setDate, dates, view, setView }}>
+    <MarketContext.Provider
+      value={{ marketSymbol, setMarketSymbol, date, setDate, dates, view, setView: setViewLocalStorage }}
+    >
       {children}
     </MarketContext.Provider>
   );
