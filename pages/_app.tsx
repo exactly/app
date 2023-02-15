@@ -25,8 +25,34 @@ export default function App({ Component, pageProps }: AppProps) {
     <>
       <Head>
         <title>Exactly - Decentralizing the time-value of money</title>
-        <meta name="description" content="Exactly - Decentralizing the time-value of money" />
+        <meta
+          name="description"
+          content="Exactly is a decentralized, non-custodial and open-source protocol that provides an autonomous fixed and variable interest rate market enabling users to exchange the time value of their assets and completing the DeFi credit market."
+        />
         <link rel="icon" href="/icon.ico" />
+
+        <meta property="og:url" content="https://app.exact.ly" />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="Exactly - Decentralizing the time-value of money" />
+        <meta
+          property="og:description"
+          content="Exactly is a decentralized, non-custodial and open-source protocol that provides an autonomous fixed and variable interest rate market enabling users to exchange the time value of their assets and completing the DeFi credit market."
+        />
+        <meta property="og:image" content="https://app.exact.ly/img/social/ogp.png" />
+        <meta property="og:image:secure_url" content="https://app.exact.ly/img/social/ogp.png" />
+        <meta property="og:image:type" content="image/png" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta property="twitter:domain" content="exact.ly" />
+        <meta property="twitter:url" content="https://exact.ly" />
+        <meta name="twitter:title" content="Exactly - Decentralizing the time-value of money" />
+        <meta
+          name="twitter:description"
+          content="Exactly is a decentralized, non-custodial and open-source protocol that provides an autonomous fixed and variable interest rate market enabling users to exchange the time value of their assets and completing the DeFi credit market."
+        />
+        <meta name="twitter:image" content="https://app.exact.ly/img/social/ogp.png" />
       </Head>
       <ThemeProvider>
         <MUIThemeProvider theme={theme}>
