@@ -86,8 +86,8 @@ const theme = createTheme({
       '200': '#a6a6f4',
     },
     grey: {
-      '50': '#fafafa',
-      '100': '#F9FAFB',
+      '50': '#F9FAFB',
+      '100': '#EDF0F2',
       '200': '#EDF0F2',
       '300': '#E3E5E8',
       '400': '#BCBFC2',
