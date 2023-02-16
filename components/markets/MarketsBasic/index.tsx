@@ -16,6 +16,7 @@ import { useModalStatus } from 'contexts/ModalStatusContext';
 import ModalAlert from 'components/common/modal/ModalAlert';
 import useDepositAtMaturity from 'hooks/useDepositAtMaturity';
 import useBorrow from 'hooks/useBorrow';
+import useRewards from 'hooks/useRewards';
 
 const MarketsBasic: FC = () => {
   const { openOperationModal } = useModalStatus();
@@ -32,15 +33,30 @@ const MarketsBasic: FC = () => {
     loading: loadingFloatingOption,
   } = useFloatingPoolAPR(symbol);
 
+  const { rates } = useRewards();
   const isDeposit = useMemo(() => operation === 'deposit', [operation]);
 
-  const allOptions: MarketsBasicOption[] = useMemo(
-    () => [
-      { maturity: 0, depositAPR: floatingDepositAPR, borrowAPR: floatingBorrowAPR },
-      ...fixedOptions.map(({ maturity, depositAPR, borrowAPR }) => ({ maturity, depositAPR, borrowAPR })),
-    ],
-    [fixedOptions, floatingBorrowAPR, floatingDepositAPR],
-  );
+  const allOptions: MarketsBasicOption[] = useMemo(() => {
+    const borrowRewards = rates[symbol]?.map(({ assetSymbol, borrow }) => ({ assetSymbol, rate: borrow }));
+    return [
+      {
+        maturity: 0,
+        depositAPR: floatingDepositAPR,
+        borrowAPR: floatingBorrowAPR,
+        depositRewards: rates[symbol]?.map(({ assetSymbol, floatingDeposit }) => ({
+          assetSymbol,
+          rate: floatingDeposit,
+        })),
+        borrowRewards,
+      },
+      ...fixedOptions.map(({ maturity, depositAPR, borrowAPR }) => ({
+        maturity,
+        depositAPR,
+        borrowAPR,
+        borrowRewards,
+      })),
+    ];
+  }, [fixedOptions, floatingBorrowAPR, floatingDepositAPR, rates, symbol]);
 
   const bestOption = useMemo(() => {
     const options = allOptions.map(({ maturity, depositAPR, borrowAPR }) => ({

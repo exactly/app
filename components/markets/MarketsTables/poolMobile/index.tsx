@@ -1,5 +1,6 @@
 import React, { FC, useMemo } from 'react';
 import { Box, Button, Divider, Grid, Skeleton, Tooltip, Typography } from '@mui/material';
+import { BigNumber } from '@ethersproject/bignumber';
 
 import numbers from 'config/numbers.json';
 import useActionButton from 'hooks/useActionButton';
@@ -12,7 +13,6 @@ import parseTimestamp from 'utils/parseTimestamp';
 import { TableHeader } from 'components/common/TableHeadCell';
 import useRewards from 'hooks/useRewards';
 import RewardPill from 'components/markets/RewardPill';
-import { BigNumber } from '@ethersproject/bignumber';
 
 const { minAPRValue } = numbers;
 
