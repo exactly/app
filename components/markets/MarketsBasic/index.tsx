@@ -66,6 +66,8 @@ const MarketsBasic: FC = () => {
     [allOptions, selected],
   );
 
+  useEffect(() => setSelected(bestOption), [bestOption, setSelected]);
+
   useEffect(() => {
     if (tx) openOperationModal(`${operation}${currentOption?.maturity ? 'AtMaturity' : ''}`);
   }, [currentOption?.maturity, openOperationModal, operation, tx]);
