@@ -9,6 +9,7 @@ import { useModalStatus } from 'contexts/ModalStatusContext';
 import pastParticiple from 'utils/pastParticiple';
 import { useOperationContext } from 'contexts/OperationContext';
 import formatSymbol from 'utils/formatSymbol';
+import Reminder from 'components/Reminder';
 
 type Props = {
   tx: Transaction;
@@ -70,6 +71,7 @@ function ModalGif({ tx, tryAgain }: Props) {
             View on Etherscan
           </Button>
         </Box>
+        <Reminder />
       </Box>
     </Box>
   );
