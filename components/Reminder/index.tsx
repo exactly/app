@@ -1,31 +1,30 @@
-import React, { FC, useRef } from 'react';
+import React, { FC, useCallback, useRef } from 'react';
 import { Box, Button, Typography } from '@mui/material';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import { atcb_action } from 'add-to-calendar-button';
+import parseTimestamp from 'utils/parseTimestamp';
 
 type Props = {
-  maturity?: number;
+  operationName: string;
+  maturity: number;
 };
 
-const Reminder: FC<Props> = ({ maturity }) => {
+const Reminder: FC<Props> = ({ operationName, maturity }) => {
   const buttonRef = useRef<HTMLInputElement>(null);
 
-  const onClick = () => {
+  const onClick = useCallback(() => {
     const config = {
-      name: `[Reminder] Exactly maturity date ${maturity}`,
+      name: `[Exactly] ${operationName} maturity date reminder`,
       description: 'Description',
-      startDate: '2023-02-19',
-      startTime: '10:15',
-      endTime: '23:30',
+      startDate: parseTimestamp(maturity, 'YYYY-MM-DD'),
+      startTime: '00:00',
+      endTime: '00:00',
       options: ['Apple', 'Google', 'iCal', 'Microsoft365', 'MicrosoftTeams', 'Outlook.com', 'Yahoo'],
-      timeZone: 'America/Los_Angeles',
-      location: 'World Wide Web',
-      // lightMode: 'dark',
-      listStyle: 'dropdown-static',
+      timeZone: 'UTC',
     };
 
     if (buttonRef.current) atcb_action(config as Parameters<typeof atcb_action>[0], buttonRef.current);
-  };
+  }, [maturity, operationName]);
 
   return (
     <Box
