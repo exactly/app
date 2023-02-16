@@ -59,18 +59,20 @@ const MarketsBasic: FC = () => {
   }, [fixedOptions, floatingBorrowAPR, floatingDepositAPR, rates, symbol]);
 
   const bestOption = useMemo(() => {
-    const options = allOptions.map(({ maturity, depositAPR, borrowAPR }) => ({
-      maturity,
-      apr: isDeposit ? depositAPR : borrowAPR,
-    }));
+    const options = allOptions
+      .map(({ maturity, depositAPR, borrowAPR }) => ({
+        maturity,
+        apr: isDeposit ? depositAPR : borrowAPR,
+      }))
+      .map((option) => ({ ...option, apr: parseFloat((option.apr || 0).toFixed(4)) }));
 
-    const bestDepositOption = options.reduce((acc, option) => ((option.apr || 0) > (acc.apr || 0) ? option : acc), {
+    const bestDepositOption = options.reduce((acc, option) => (option.apr >= acc.apr ? option : acc), {
       maturity: 0,
       apr: 0,
     }).maturity;
 
     const bestBorrowOption = options.reduce(
-      (acc, option) => ((option.apr || Infinity) < (acc.apr || Infinity) ? option : acc),
+      (acc, option) => ((option.apr || Infinity) <= (acc.apr || Infinity) ? option : acc),
       { maturity: 0, apr: Infinity },
     ).maturity;
 
