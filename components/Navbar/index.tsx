@@ -120,8 +120,8 @@ function Navbar() {
             {isConnected && chain?.id === goerli.id && (
               <Chip label="Goerli Faucet" onClick={handleFaucetClick} sx={{ my: 'auto', display: onlyDesktopFlex }} />
             )}
-            <ClaimRewards />
             {connector?.switchChain && <SelectNetwork />}
+            <ClaimRewards />
             <Wallet />
           </Box>
           <IconButton
