@@ -70,14 +70,18 @@ const Submit: FC<SubmitProps> = ({ symbol, operation, option, qty, errorData, re
   const { isLoading: previewIsLoading } = usePreviewTx({ qty, needsApproval, previewGasCost });
 
   return (
-    <ModalSubmit
-      label={`${operation === 'deposit' ? 'Deposit' : 'Borrow'} ${symbol} (${isFloating ? 'variable' : 'fixed'} rate)`}
-      symbol={symbol}
-      submit={handleSubmitAction}
-      isLoading={isLoading || previewIsLoading}
-      disabled={!qty || parseFloat(qty) <= 0 || isLoading || previewIsLoading || errorData?.status}
-      requiresApproval={requiresApproval}
-    />
+    <>
+      <ModalSubmit
+        label={`${operation === 'deposit' ? 'Deposit' : 'Borrow'} ${symbol} (${
+          isFloating ? 'variable' : 'fixed'
+        } rate)`}
+        symbol={symbol}
+        submit={handleSubmitAction}
+        isLoading={isLoading || previewIsLoading}
+        disabled={!qty || parseFloat(qty) <= 0 || isLoading || previewIsLoading || errorData?.status}
+        requiresApproval={requiresApproval}
+      />
+    </>
   );
 };
 
