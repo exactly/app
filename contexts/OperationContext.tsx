@@ -63,12 +63,14 @@ export const OperationContextProvider: FC<PropsWithChildren> = ({ children }) =>
   const { market, asset } = useAccountData(marketSymbol);
 
   useEffect(() => {
-    setQty('');
-    if (!(open && view === 'simple' && pathname === '/')) setTx(undefined);
+    if (!(open && view === 'simple' && pathname === '/')) {
+      setQty('');
+      setTx(undefined);
+      setRequiresApproval(true);
+      setGasCost(undefined);
+    }
     setErrorData(undefined);
     setIsLoading(false);
-    setRequiresApproval(true);
-    setGasCost(undefined);
   }, [chain?.id, marketSymbol, operation, open, view, pathname]);
 
   const assetContract = useERC20(asset);

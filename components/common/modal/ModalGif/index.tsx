@@ -1,4 +1,4 @@
-import React, { ReactNode, useMemo } from 'react';
+import React, { ReactNode, useContext, useMemo } from 'react';
 import { Transaction } from 'types/Transaction';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
@@ -10,6 +10,8 @@ import pastParticiple from 'utils/pastParticiple';
 import { useOperationContext } from 'contexts/OperationContext';
 import formatSymbol from 'utils/formatSymbol';
 import Reminder from 'components/Reminder';
+import { MarketContext } from 'contexts/MarketContext';
+import parseTimestamp from 'utils/parseTimestamp';
 
 type Props = {
   tx: Transaction;
@@ -20,15 +22,17 @@ function ModalGif({ tx, tryAgain }: Props) {
   const { chain } = useWeb3();
   const { operation } = useModalStatus();
   const { symbol, qty } = useOperationContext();
+  const { date } = useContext(MarketContext);
 
   const isLoading = useMemo(() => tx.status === 'processing' || tx.status === 'loading', [tx]);
   const isSuccess = useMemo(() => tx.status === 'success', [tx]);
   const isError = useMemo(() => tx.status === 'error', [tx]);
   const etherscan = useMemo(() => networkData[String(chain?.id) as keyof typeof networkData]?.etherscan, [chain]);
   const operationName = useMemo(() => operation?.replaceAll('AtMaturity', ''), [operation]);
+  const withMaturity = useMemo(() => operation?.includes('AtMaturity'), [operation]);
 
   return (
-    <Box display="flex" minWidth={{ sm: '480px' }}>
+    <Box display="flex" minWidth="340px" minHeight="240px">
       <Box display="flex" flexDirection="column" mx="auto" alignItems="center" py={{ xs: '30px', sm: '0' }} gap="32px">
         {isLoading && <CircularProgress size={100} thickness={1.5} />}
         {isSuccess && (
@@ -45,33 +49,36 @@ function ModalGif({ tx, tryAgain }: Props) {
         )}
         <Box display="flex" flexDirection="column" alignItems="center">
           <Typography variant="h6" fontSize="16px">
-            {isLoading && `Sending ${operationName}...`}
+            {isLoading && `Processing ${operationName}...`}
             {isSuccess && 'Transaction completed'}
             {isError && 'Transaction error'}
           </Typography>
           <Typography fontSize="14px" fontWeight={500} color="grey.500">
             {isLoading && `${capitalize(operationName)}ing ${qty} ${formatSymbol(symbol)}`}
-            {isSuccess && `${capitalize(pastParticiple(operationName))} ${qty} ${formatSymbol(symbol)}`}
+            {isSuccess &&
+              `You ${pastParticiple(operationName)} ${qty} ${formatSymbol(symbol)} ${
+                withMaturity && date ? `until ${parseTimestamp(date)}` : ''
+              }`}
             {isError && 'Something went wrong'}
           </Typography>
-        </Box>
-        <Box display="flex" flexDirection="column" alignItems="center" gap="8px">
-          {isError && (
-            <Button variant="contained" sx={{ width: '220px', height: '38px' }} onClick={tryAgain}>
-              Try again
+          <Box display="flex" flexDirection="column" alignItems="center" gap="8px" pt={1}>
+            {isError && (
+              <Button variant="contained" sx={{ width: '220px', height: '38px' }} onClick={tryAgain}>
+                Try again
+              </Button>
+            )}
+            <Button
+              variant="outlined"
+              sx={{ width: '150px', height: '32px', fontWeight: 500 }}
+              target="_blank"
+              href={`${etherscan}/tx/${tx.hash}`}
+              disabled={!tx.hash}
+            >
+              View on Etherscan
             </Button>
-          )}
-          <Button
-            variant="outlined"
-            sx={{ width: '150px', height: '32px', fontWeight: 500 }}
-            target="_blank"
-            href={`${etherscan}/tx/${tx.hash}`}
-            disabled={!tx.hash}
-          >
-            View on Etherscan
-          </Button>
+          </Box>
         </Box>
-        <Reminder />
+        {isSuccess && withMaturity && date && <Reminder operationName={capitalize(operationName)} maturity={date} />}
       </Box>
     </Box>
   );
