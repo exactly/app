@@ -40,8 +40,8 @@ function RewardPill({ symbol, rate }: Props) {
       sx={{
         mb: 0.5,
         padding: '4px 5px 4px 4px',
-        border: `1px solid ${theme.palette.grey[100]}`,
-        backgroundColor: 'grey.50',
+        border: `1px solid ${theme.palette.grey[200]}`,
+        backgroundColor: 'grey.100',
         color: 'grey.700',
         '& .MuiChip-label': {
           p: 0,
