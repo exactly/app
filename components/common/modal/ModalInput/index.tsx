@@ -16,11 +16,17 @@ const NumberFormatCustom = React.forwardRef<HTMLInputElement, InputBaseComponent
         getInputRef={ref}
         decimalScale={decimals}
         onValueChange={({ value }) => {
-          if (value === '.') {
-            return onValueChange('0.');
+          switch (true) {
+            case value === '.':
+              return onValueChange('0.');
+            default:
+              return onValueChange(value);
           }
-          onValueChange(value);
         }}
+        isAllowed={({ value }) => {
+          return !/^0\d/.test(value);
+        }}
+        allowLeadingZeros={false}
         allowedDecimalSeparators={[',']}
         allowNegative={false}
         defaultValue={0.0}
