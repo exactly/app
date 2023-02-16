@@ -1,12 +1,17 @@
 import React, { createContext, useContext, useState, useMemo, useCallback, useEffect } from 'react';
 import type { FC, PropsWithChildren } from 'react';
+import { BigNumber } from '@ethersproject/bignumber';
+
 import { MarketContext } from './MarketContext';
 
 export type MarketsBasicOperation = 'borrow' | 'deposit';
+export type MarketsBasicRewardRate = { assetSymbol: string; rate: BigNumber };
 export type MarketsBasicOption = {
   maturity?: number;
   depositAPR?: number;
   borrowAPR?: number;
+  depositRewards?: MarketsBasicRewardRate[];
+  borrowRewards?: MarketsBasicRewardRate[];
 };
 
 type ContextValues = {

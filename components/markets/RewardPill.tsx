@@ -22,7 +22,7 @@ function RewardPill({ symbol, rate }: Props) {
       label={
         <Box display="flex" alignItems="center" gap={0.5}>
           <Typography fontFamily="fontFamilyMonospaced" fontWeight={500} fontSize={12}>
-            {toPercentage(Number(rate) / 1e18)}
+            {toPercentage(Math.min(Number(rate) / 1e18, 10))}
           </Typography>
           <Image
             src={`/img/assets/${symbol}.svg`}
