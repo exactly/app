@@ -28,9 +28,9 @@ function ModalAdvancedSettings({ children }: PropsWithChildren) {
             Advanced settings
           </Typography>
           {open ? (
-            <KeyboardArrowDownRoundedIcon sx={{ fontSize: 12, color: 'grey.500' }} />
+            <KeyboardArrowDownRoundedIcon sx={{ fontSize: 12, color: 'grey.500', my: 'auto' }} />
           ) : (
-            <KeyboardArrowRightRoundedIcon sx={{ fontSize: 12, color: 'grey.500' }} />
+            <KeyboardArrowRightRoundedIcon sx={{ fontSize: 12, color: 'grey.500', my: 'auto' }} />
           )}
         </Button>
       </Grid>
