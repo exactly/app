@@ -235,12 +235,12 @@ const Deposit: FC = () => {
       </Grid>
 
       {errorData?.status && (
-        <Grid item mt={2}>
+        <Grid item mt={1}>
           <ModalAlert variant="error" message={errorData.message} />
         </Grid>
       )}
 
-      <Grid item mt={4}>
+      <Grid item mt={{ xs: 2, sm: 3 }}>
         <ModalSubmit
           label="Deposit"
           symbol={symbol}

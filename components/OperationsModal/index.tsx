@@ -13,7 +13,6 @@ import {
   Paper,
   useMediaQuery,
   Slide,
-  Button,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 
@@ -59,7 +58,7 @@ function OperationsModal() {
       sx={isMobile ? { top: 'auto' } : {}}
       disableEscapeKeyDown={loadingTx}
     >
-      {(!isMobile || tx) && !loadingTx && (
+      {!loadingTx && (
         <IconButton
           aria-label="close"
           onClick={closeModal}
@@ -80,7 +79,7 @@ function OperationsModal() {
               p: 0,
               display: 'flex',
               justifyContent: 'space-between',
-              mb: { xs: '24px', sm: 4 },
+              mb: { xs: 2, sm: 3 },
               cursor: { xs: '', sm: 'move' },
             }}
             id="draggable-dialog-title"
@@ -94,11 +93,6 @@ function OperationsModal() {
         <DialogContent sx={{ padding: spacing(4, 0, 0, 0) }}>
           <OperationContainer />
         </DialogContent>
-        {isMobile && !tx && (
-          <Button fullWidth variant="text" sx={{ color: 'grey.700', mt: '8px' }} onClick={closeModal}>
-            Cancel
-          </Button>
-        )}
       </Box>
     </Dialog>
   );
