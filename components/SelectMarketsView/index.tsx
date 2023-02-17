@@ -3,13 +3,12 @@ import React, { cloneElement, FC, ReactElement, useCallback, useContext, useMemo
 import BarChartRoundedIcon from '@mui/icons-material/BarChartRounded';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import ViewAgendaOutlinedIcon from '@mui/icons-material/ViewAgendaOutlined';
-import ViewCompactOutlinedIcon from '@mui/icons-material/ViewCompactOutlined';
 import { Box, Button, Menu, MenuItem, popoverClasses, Typography } from '@mui/material';
 import { MarketContext, MarketView } from 'contexts/MarketContext';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { Timeout } from 'react-number-format/types/types';
+import { SimpleViewIcon, AdvancedViewIcon } from 'components/Icons';
 
 type ViewOption = {
   type: MarketView;
@@ -52,13 +51,13 @@ const SelectMarketsView: FC = () => {
         type: 'simple',
         title: 'Simple view',
         description: 'Intuitive and user-friendly interface',
-        icon: <ViewAgendaOutlinedIcon />,
+        icon: <SimpleViewIcon />,
       },
       {
         type: 'advanced',
         title: 'Advanced view',
         description: 'An in-depth look at APR values',
-        icon: <ViewCompactOutlinedIcon />,
+        icon: <AdvancedViewIcon />,
       },
     ],
     [],
@@ -158,9 +157,9 @@ const SelectMarketsView: FC = () => {
           >
             <Link href={{ pathname: '/', query }} legacyBehavior>
               <Box display="flex" width="100%" gap={1.5}>
-                <Box my="auto" px={1}>
+                <Box display="flex" alignItems="center" my="auto" px={1}>
                   {cloneElement(icon, {
-                    sx: { fontSize: '24px', my: 'auto', color: view === type ? 'blue' : 'figma.grey.700' },
+                    sx: { fontSize: '22px', my: 'auto', color: view === type ? 'blue' : 'figma.grey.700' },
                   })}
                 </Box>
                 <Box display="flex" flexDirection="column" justifyContent="left">
