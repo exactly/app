@@ -4,7 +4,7 @@ import { Box, Typography } from '@mui/material';
 import TwitterIcon from '@mui/icons-material/Twitter';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import { globals } from 'styles/theme';
-const { maxWidth } = globals;
+const { maxWidth, onlyDesktopFlex } = globals;
 
 const Footer = () => {
   const date = new Date();
@@ -19,12 +19,14 @@ const Footer = () => {
             width: '100%',
             border: '1px solid #E0E0E0',
             borderRadius: '6px',
-            padding: '16px 24px',
-            gap: '8px',
+            padding: 2,
+            gap: 0.5,
           }}
         >
-          <Typography fontWeight={600}>Have feedback?</Typography>
-          <Typography color="grey.700">
+          <Typography fontWeight={700} fontSize={14}>
+            Have feedback?
+          </Typography>
+          <Typography color="figma.grey.600" fontWeight={500} fontSize={14}>
             We are always looking for ways to improve. If you have suggestions,{' '}
             <a
               target="_blank"
@@ -39,14 +41,14 @@ const Footer = () => {
         <Box
           sx={{
             display: 'flex',
-            justifyContent: 'space-between',
+            justifyContent: { xs: 'center', sm: 'space-between' },
             padding: '16px 0px',
             color: 'figma.grey.300',
             fontWeight: '500',
           }}
         >
           <Typography fontSize="0.85em">© Exactly {date.getFullYear()}</Typography>
-          <Box sx={{ display: 'flex', gap: 1.5 }}>
+          <Box sx={{ display: onlyDesktopFlex, gap: 1.5 }}>
             <Typography fontSize="0.85em">
               <a target="_blank" rel="noreferrer noopener" href="https://docs.exact.ly/security/audits">
                 Audits
