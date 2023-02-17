@@ -8,7 +8,7 @@ import React, { ReactNode, useCallback, useContext, useEffect, useState } from '
 import ThemeContext from 'contexts/ThemeContext';
 import { useWeb3 } from 'hooks/useWeb3';
 
-import { AppBar, Box, Chip, IconButton, Toolbar, useTheme } from '@mui/material';
+import { AppBar, Box, Button, Chip, IconButton, Toolbar, useTheme } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import { globals } from 'styles/theme';
@@ -33,7 +33,7 @@ const routes: {
   {
     pathname: '/dashboard',
     name: 'Dashboard',
-    icon: <AccountBalanceWalletIcon sx={{ fontSize: '14px', my: 'auto' }} />,
+    icon: <AccountBalanceWalletIcon sx={{ fontSize: '16px', my: 'auto' }} />,
   },
 ];
 
@@ -91,31 +91,29 @@ function Navbar() {
               />
             </Box>
           </Link>
-          {routes.map(({ name, pathname, custom, icon }) => (
-            <Box key={pathname} display={onlyDesktopFlex}>
-              {custom || (
-                <Link href={{ pathname, query }} legacyBehavior>
-                  <Box
-                    sx={{
-                      mx: '8px',
-                      py: '4px',
-                      display: 'flex',
-                      cursor: 'pointer',
-                      color: currentPathname === pathname ? 'primary' : 'grey.700',
-                      borderBottom: currentPathname === pathname ? '2px solid' : '2px solid transparent',
-                      ':hover': { borderBottom: '2px solid' },
-                      fontSize: '14px',
-                      fontWeight: 700,
-                      gap: 0.5,
-                    }}
-                  >
-                    {icon}
-                    <Box my="auto">{name}</Box>
-                  </Box>
-                </Link>
-              )}
-            </Box>
-          ))}
+          <Box display="flex" gap={0.2}>
+            {routes.map(({ name, pathname, custom, icon }) => (
+              <Box key={pathname} display={onlyDesktopFlex}>
+                {custom || (
+                  <Link href={{ pathname, query }} legacyBehavior>
+                    <Button
+                      sx={{
+                        px: 1.5,
+                        color: currentPathname === pathname ? 'primary' : 'grey.700',
+                        display: 'flex',
+                        fontSize: '14px',
+                        fontWeight: 700,
+                        gap: 0.5,
+                      }}
+                    >
+                      {icon}
+                      <Box my="auto">{name}</Box>
+                    </Button>
+                  </Link>
+                )}
+              </Box>
+            ))}
+          </Box>
           <Box display="flex" gap={0.5} ml="auto" flexDirection={{ xs: 'row-reverse', sm: 'row' }}>
             {isConnected && chain?.id === goerli.id && (
               <Chip label="Goerli Faucet" onClick={handleFaucetClick} sx={{ my: 'auto', display: onlyDesktopFlex }} />
