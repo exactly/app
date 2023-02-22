@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import Image from 'next/image';
-import { Box, Typography } from '@mui/material';
+import { Box, Typography, useMediaQuery, useTheme } from '@mui/material';
 import TwitterIcon from '@mui/icons-material/Twitter';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import { globals } from 'styles/theme';
@@ -12,11 +12,13 @@ const Footer = () => {
   const date = new Date();
   const { view } = useContext(MarketContext);
   const { pathname } = useRouter();
+  const { breakpoints } = useTheme();
+  const isMobile = useMediaQuery(breakpoints.down('sm'));
 
   return (
     <Box sx={{ display: 'flex', justifyContent: 'center' }}>
       <Box sx={{ maxWidth, width: '100%' }}>
-        {(view === 'advanced' || pathname !== '/') && (
+        {(isMobile || view === 'advanced' || pathname !== '/') && (
           <Box
             sx={{
               display: 'flex',
