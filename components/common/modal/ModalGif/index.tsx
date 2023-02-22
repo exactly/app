@@ -78,7 +78,7 @@ function ModalGif({ tx, tryAgain }: Props) {
             </Button>
           </Box>
         </Box>
-        {isSuccess && withMaturity && date && <Reminder operationName={capitalize(operationName)} maturity={date} />}
+        {isSuccess && withMaturity && date && <Reminder operationName={operationName} maturity={date} />}
       </Box>
     </Box>
   );
