@@ -39,7 +39,7 @@ const Options: FC<Props> = ({
       {allOptions.map(({ maturity, depositAPR, borrowAPR, borrowRewards, depositRewards }, index) => {
         const hasRewards = ((operation === 'deposit' ? depositRewards : borrowRewards)?.length || 0) > 0;
         return (
-          (operation === 'borrow' || depositAPR === undefined || depositAPR >= minAPRValue) && (
+          (maturity === 0 || operation === 'borrow' || depositAPR === undefined || depositAPR >= minAPRValue) && (
             <FormControlLabel
               key={`${maturity}_${depositAPR}_${borrowAPR}_${index}`}
               value={maturity}
