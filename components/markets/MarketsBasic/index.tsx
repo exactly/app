@@ -17,6 +17,9 @@ import ModalAlert from 'components/common/modal/ModalAlert';
 import useDepositAtMaturity from 'hooks/useDepositAtMaturity';
 import useBorrow from 'hooks/useBorrow';
 import useRewards from 'hooks/useRewards';
+import numbers from 'config/numbers.json';
+
+const { minAPRValue } = numbers;
 
 const MarketsBasic: FC = () => {
   const { openOperationModal } = useModalStatus();
@@ -55,28 +58,25 @@ const MarketsBasic: FC = () => {
         borrowAPR,
         borrowRewards,
       })),
-    ];
-  }, [fixedOptions, floatingBorrowAPR, floatingDepositAPR, rates, symbol]);
+    ].filter(
+      (o) => operation === 'borrow' || o.maturity === 0 || o.depositAPR === undefined || o.depositAPR >= minAPRValue,
+    );
+  }, [fixedOptions, floatingBorrowAPR, floatingDepositAPR, rates, symbol, operation]);
 
   const bestOption = useMemo(() => {
     const options = allOptions
+      .filter(({ maturity }) => maturity && maturity !== 0)
       .map(({ maturity, depositAPR, borrowAPR }) => ({
         maturity,
         apr: isDeposit ? depositAPR : borrowAPR,
       }))
       .map((option) => ({ ...option, apr: parseFloat((option.apr || 0).toFixed(4)) }));
 
-    const bestDepositOption = options.reduce((acc, option) => (option.apr >= acc.apr ? option : acc), {
-      maturity: 0,
-      apr: 0,
-    }).maturity;
+    const APRs = options.map(({ apr }) => apr);
 
-    const bestBorrowOption = options.reduce(
-      (acc, option) => ((option.apr || Infinity) <= (acc.apr || Infinity) ? option : acc),
-      { maturity: 0, apr: Infinity },
-    ).maturity;
+    const bestAPR = isDeposit ? Math.max(...APRs) : Math.min(...APRs);
 
-    return isDeposit ? bestDepositOption : bestBorrowOption;
+    return options.find(({ apr }) => apr === bestAPR)?.maturity;
   }, [allOptions, isDeposit]);
 
   const currentOption = useMemo(
@@ -84,7 +84,7 @@ const MarketsBasic: FC = () => {
     [allOptions, selected],
   );
 
-  useEffect(() => setSelected(bestOption), [bestOption, setSelected]);
+  useEffect(() => setSelected(bestOption ?? 0), [bestOption, setSelected]);
 
   useEffect(() => {
     if (tx) openOperationModal(`${operation}${currentOption?.maturity ? 'AtMaturity' : ''}`);
