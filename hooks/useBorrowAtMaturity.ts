@@ -156,17 +156,20 @@ export default (): BorrowAtMaturity => {
 
     const { debt } = healthFactor;
 
-    return Number(
-      formatFixed(
-        col
-          .sub(hf.mul(debt).div(WeiPerEther))
-          .mul(WeiPerEther)
-          .div(hf)
-          .mul(WeiPerEther)
-          .div(usdPrice)
-          .mul(adjustFactor)
-          .div(WeiPerEther),
-        18,
+    return Math.max(
+      0,
+      Number(
+        formatFixed(
+          col
+            .sub(hf.mul(debt).div(WeiPerEther))
+            .mul(WeiPerEther)
+            .div(hf)
+            .mul(WeiPerEther)
+            .div(usdPrice)
+            .mul(adjustFactor)
+            .div(WeiPerEther),
+          18,
+        ),
       ),
     ).toFixed(decimals);
   }, [accountData, healthFactor, symbol, decimals]);

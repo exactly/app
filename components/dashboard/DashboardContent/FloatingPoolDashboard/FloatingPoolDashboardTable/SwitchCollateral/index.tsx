@@ -70,7 +70,7 @@ function SwitchCollateral({ symbol }: Props) {
     }
   }, [accountData, auditor, getAccountData, symbol, checked]);
 
-  if (loading) return <CircularProgress color="primary" size={24} thickness={8} />;
+  if (loading) return <CircularProgress color="primary" size={24} thickness={8} sx={{ ml: '7px' }} />;
 
   return (
     <Tooltip

@@ -71,8 +71,9 @@ const BorrowAtMaturity: FC = () => {
               decimals={decimals}
               onMax={onMax}
               onChange={handleInputChange}
-              label="Borrow limit"
+              label="Safe borrow limit"
               amount={safeMaximumBorrow}
+              tooltip="The maximum amount you can borrow without putting your health factor at risk"
             />
           </ModalBoxRow>
           <ModalBoxRow>
