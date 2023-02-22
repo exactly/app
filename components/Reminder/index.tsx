@@ -1,5 +1,5 @@
-import React, { FC, useCallback, useRef } from 'react';
-import { Box, Button, Typography } from '@mui/material';
+import React, { FC, useCallback, useMemo, useRef } from 'react';
+import { Box, Button, capitalize, Typography } from '@mui/material';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import { atcb_action } from 'add-to-calendar-button';
 import parseTimestamp from 'utils/parseTimestamp';
@@ -12,14 +12,16 @@ type Props = {
 const Reminder: FC<Props> = ({ operationName, maturity }) => {
   const buttonRef = useRef<HTMLInputElement>(null);
 
+  const isBorrow = useMemo(() => operationName === 'borrow', [operationName]);
+
   const onClick = useCallback(() => {
     const config = {
-      name: `[Exactly] ${operationName} maturity date reminder`,
-      description: 'Description',
+      name: `[Exactly] ${capitalize(operationName)} maturity date reminder`,
+      description: 'https://app.exact.ly/dashboard',
       startDate: parseTimestamp(maturity, 'YYYY-MM-DD'),
       startTime: '00:00',
       endTime: '00:00',
-      options: ['Apple', 'Google', 'iCal', 'Microsoft365', 'MicrosoftTeams', 'Outlook.com', 'Yahoo'],
+      options: ['Google', 'Apple', 'iCal', 'Microsoft365', 'MicrosoftTeams', 'Outlook.com', 'Yahoo'],
       timeZone: 'UTC',
     };
 
@@ -39,15 +41,17 @@ const Reminder: FC<Props> = ({ operationName, maturity }) => {
       border="1px solid #E3E5E8"
     >
       <Typography fontSize={16} fontWeight={700}>
-        Remember to pay on time
+        {isBorrow ? 'Remember to pay on time' : 'Remember to withdraw your assets'}
       </Typography>
       <Box display="flex" flexDirection="column" justifyContent="center" alignItems="center" textAlign="center">
         <Typography fontSize={14} fontWeight={500} color="figma.grey.600">
-          You are borrowing from a fixed-rate pool.
+          {isBorrow ? 'You are borrowing from a fixed-rate pool.' : 'You are depositing to a fixed-rate pool.'}
         </Typography>
-        <Typography fontSize={14} fontWeight={500} color="figma.grey.600">
-          Avoid penalties by paying your debt on time.
-        </Typography>
+        {isBorrow && (
+          <Typography fontSize={14} fontWeight={500} color="figma.grey.600">
+            Avoid penalties by paying your debt on time.
+          </Typography>
+        )}
       </Box>
       <Box mt={1}>
         <div ref={buttonRef}>
