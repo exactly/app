@@ -41,7 +41,7 @@ const Reminder: FC<Props> = ({ operationName, maturity }) => {
       border="1px solid #E3E5E8"
     >
       <Typography fontSize={16} fontWeight={700}>
-        {isBorrow ? 'Remember to pay on time' : 'Remember to withdraw your assets'}
+        {isBorrow ? 'Remember to pay before the maturity date' : 'Remember to withdraw your assets'}
       </Typography>
       <Box display="flex" flexDirection="column" justifyContent="center" alignItems="center" textAlign="center">
         <Typography fontSize={14} fontWeight={500} color="figma.grey.600">
@@ -49,7 +49,7 @@ const Reminder: FC<Props> = ({ operationName, maturity }) => {
         </Typography>
         {isBorrow && (
           <Typography fontSize={14} fontWeight={500} color="figma.grey.600">
-            Avoid penalties by paying your debt on time.
+            Avoid penalties by paying your debt before the maturity date.
           </Typography>
         )}
       </Box>
