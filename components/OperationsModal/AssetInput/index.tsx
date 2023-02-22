@@ -11,9 +11,10 @@ type Props = {
   symbol: string;
   decimals: number;
   onChange: (value: string) => void;
+  tooltip?: string;
 } & AAProps;
 
-function AssetInput({ qty, onChange, symbol, decimals, amount, label, onMax }: Props) {
+function AssetInput({ qty, onChange, symbol, decimals, amount, label, onMax, tooltip }: Props) {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -21,7 +22,7 @@ function AssetInput({ qty, onChange, symbol, decimals, amount, label, onMax }: P
         <ModalInput value={qty} decimals={decimals} onValueChange={onChange} />
       </Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 0.25, height: 20 }}>
-        <AvailableAmount symbol={symbol} label={label} amount={amount} onMax={onMax} />
+        <AvailableAmount symbol={symbol} label={label} amount={amount} onMax={onMax} tooltip={tooltip} />
         <USDValue qty={qty} symbol={symbol} />
       </Box>
     </Box>
