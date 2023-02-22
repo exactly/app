@@ -25,7 +25,7 @@ function DateSelector() {
 
   return (
     <ModalInfo label="Fixed rate pool">
-      <Box sx={{ ml: -1, mt: -1 }}>
+      <Box sx={{ mt: -1 }}>
         <DropdownMenu
           label="Maturity"
           options={dates}
