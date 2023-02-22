@@ -8,9 +8,9 @@ export default (address?: string): Market | undefined => {
   const { data: signer } = useSigner();
 
   const marketContract = useMemo(() => {
-    if (!address || !signer) return;
+    if (!address) return;
 
-    return new Contract(address, marketABI, signer) as Market;
+    return new Contract(address, marketABI, signer ?? undefined) as Market;
   }, [address, signer]);
 
   return marketContract;
