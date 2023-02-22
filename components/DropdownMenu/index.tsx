@@ -25,6 +25,7 @@ function OptionItem({ onClick, children }: PropsWithChildren<{ onClick: () => vo
       onClick={onClick}
       sx={{
         minWidth: '112px',
+        minHeight: '32px',
         mx: 1,
         mb: '2px',
         px: 0.5,
@@ -81,6 +82,7 @@ const DropdownMenu = <T,>({ label, options, onChange, renderValue, renderOption 
         sx={{
           '& .MuiPaper-root': {
             boxShadow: '0px 2px 8px rgba(148, 151, 158, 0.2)',
+            borderRadius: '16px',
           },
         }}
       >
