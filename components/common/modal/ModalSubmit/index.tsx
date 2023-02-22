@@ -21,7 +21,6 @@ function ModalSubmit({ requiresApproval = false, isLoading = false, disabled = f
           color="primary"
           variant="contained"
           disabled={disabled}
-          sx={{ mb: 1 }}
         >
           Approve {symbol}
         </LoadingButton>
