@@ -9,6 +9,9 @@ import useBorrowAtMaturity from 'hooks/useBorrowAtMaturity';
 import useDeposit from 'hooks/useDeposit';
 import useDepositAtMaturity from 'hooks/useDepositAtMaturity';
 import { ErrorData } from 'types/Error';
+import { useWeb3 } from 'hooks/useWeb3';
+import { useWeb3Modal } from '@web3modal/react';
+import { Button } from '@mui/material';
 
 const getOperation = (
   op: MarketsBasicOperation,
@@ -32,6 +35,7 @@ type SubmitProps = {
 };
 
 const Submit: FC<SubmitProps> = ({ symbol, operation, option, qty, errorData, requiresApproval }) => {
+  const { walletAddress } = useWeb3();
   const { setDate } = useContext(MarketContext);
   const deposit = useDeposit();
   const depositAtMaturity = useDepositAtMaturity();
@@ -68,6 +72,16 @@ const Submit: FC<SubmitProps> = ({ symbol, operation, option, qty, errorData, re
   useEffect(() => setDate(option.maturity || 0), [setDate, option.maturity]);
 
   const { isLoading: previewIsLoading } = usePreviewTx({ qty, needsApproval, previewGasCost });
+
+  const { open } = useWeb3Modal();
+
+  if (!walletAddress) {
+    return (
+      <Button sx={{ width: '100%' }} onClick={() => open({ route: 'ConnectWallet' })} variant="contained">
+        Connect wallet
+      </Button>
+    );
+  }
 
   return (
     <ModalSubmit
