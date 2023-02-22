@@ -91,7 +91,7 @@ const MarketsBasic: FC = () => {
   }, [currentOption?.maturity, openOperationModal, operation, tx]);
 
   return (
-    <Box display="flex" flexDirection="column" gap={2}>
+    <Box display="flex" flexDirection="column" gap={2} maxWidth="100vw" sx={{ overflowX: 'hidden' }}>
       <Box
         display="flex"
         flexDirection="column"

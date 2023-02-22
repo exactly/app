@@ -2,6 +2,7 @@ import React, { type FC, useMemo, createContext, useContext, useEffect, useState
 import dayjs from 'dayjs';
 
 import AccountDataContext from './AccountDataContext';
+import { useMediaQuery, useTheme } from '@mui/material';
 
 type ContextValues = {
   marketSymbol: string | undefined;
@@ -31,6 +32,8 @@ const MarketProvider: FC<PropsWithChildren> = ({ children }) => {
   const [view, setView] = useState<MarketView>();
   const [marketSymbol, setMarketSymbol] = useState<string>();
   const [date, setDate] = useState<number>();
+  const { breakpoints } = useTheme();
+  const isMobile = useMediaQuery(breakpoints.down('sm'));
 
   const { accountData } = useContext(AccountDataContext);
 
@@ -57,8 +60,8 @@ const MarketProvider: FC<PropsWithChildren> = ({ children }) => {
   }, [accountData, date, dates]);
 
   useEffect(() => {
-    setView((localStorage.getItem('marketView') as MarketView) || 'simple');
-  }, [setView]);
+    setView(isMobile ? 'simple' : (localStorage.getItem('marketView') as MarketView) || 'simple');
+  }, [setView, isMobile]);
 
   const setViewLocalStorage = (newView: MarketView) => {
     localStorage.setItem('marketView', newView);

@@ -1,10 +1,13 @@
 import React from 'react';
 import { Box } from '@mui/material';
+import { globals } from 'styles/theme';
 
+const { onlyDesktop } = globals;
 export default function BackgroundCircle() {
   return (
     <Box
       sx={{
+        display: onlyDesktop,
         paddingTop: '108px',
         width: '100vh',
         height: '100vh',

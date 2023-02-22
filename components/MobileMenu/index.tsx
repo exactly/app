@@ -49,7 +49,7 @@ function MobileMenu({ open, handleClose }: Props) {
                 <CloseIcon sx={{ color: 'figma.grey.300' }} />
               </IconButton>
             </Box>
-            <Typography variant="subtitle2" color="grey.500" fontWeight={600} mt="18px">
+            <Typography fontFamily="fontFamilyMonospaced" fontSize={14} color="figma.grey.500" fontWeight={600}>
               Menu
             </Typography>
             <Box display="flex" flexDirection="column" gap={2}>
@@ -58,8 +58,8 @@ function MobileMenu({ open, handleClose }: Props) {
                   <Typography
                     sx={{
                       textDecoration: currentPathname === pathname ? 'underline' : 'none',
-                      fontWeight: 600,
-                      fontSize: 32,
+                      fontWeight: 700,
+                      fontSize: 30,
                     }}
                   >
                     {title}
@@ -68,7 +68,7 @@ function MobileMenu({ open, handleClose }: Props) {
               ))}
             </Box>
             <Divider sx={{ my: '12px' }} />
-            <Typography variant="subtitle2" color="grey.500" fontWeight={600}>
+            <Typography fontFamily="fontFamilyMonospaced" fontSize={14} color="figma.grey.500" fontWeight={600}>
               Links
             </Typography>
             <LinkItem title="Audits" href="https://docs.exact.ly/security/audits">
