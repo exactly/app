@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import Image from 'next/image';
-import { Skeleton, Typography } from '@mui/material';
+import { Box, Skeleton, Typography } from '@mui/material';
 
 import { MarketContext } from 'contexts/MarketContext';
 
@@ -14,29 +14,25 @@ type AssetOptionProps = {
 };
 
 function Asset({ assetSymbol, option = false }: AssetOptionProps) {
-  const size = option ? 18 : 24;
+  const size = option ? 20 : 24;
 
   if (!assetSymbol) {
     return <Skeleton width={80} />;
   }
 
   return (
-    <>
+    <Box display="flex" gap={0.5} my={0.5} mx={option ? 0.5 : 0}>
       <Image
         src={`/img/assets/${assetSymbol}.svg`}
         alt={formatSymbol(assetSymbol)}
         width={size}
         height={size}
-        style={{
-          margin: option ? '8px 4px 8px 0' : 0,
-          maxWidth: '100%',
-          height: 'auto',
-        }}
+        style={{ maxWidth: '100%', height: 'auto' }}
       />
-      <Typography fontWeight={600} fontSize={option ? 16 : 24} my="auto">
+      <Typography fontWeight={700} fontSize={option ? 20 : 24} my="auto">
         {formatSymbol(assetSymbol)}
       </Typography>
-    </>
+    </Box>
   );
 }
 
