@@ -39,78 +39,76 @@ const Options: FC<Props> = ({
       {allOptions.map(({ maturity, depositAPR, borrowAPR, borrowRewards, depositRewards }, index) => {
         const hasRewards = ((operation === 'deposit' ? depositRewards : borrowRewards)?.length || 0) > 0;
         return (
-          (maturity === 0 || operation === 'borrow' || depositAPR === undefined || depositAPR >= minAPRValue) && (
-            <FormControlLabel
-              key={`${maturity}_${depositAPR}_${borrowAPR}_${index}`}
-              value={maturity}
-              control={<Radio />}
-              componentsProps={{ typography: { width: '100%' } }}
-              sx={{ m: 0, ':hover': { backgroundColor: 'grey.50' } }}
-              disabled={maturity !== 0 && !maturity}
-              label={
-                <Box display="flex" flexDirection="row" py="7px" alignItems="center" width="100%" gap={2}>
-                  <Box display="flex" gap={0.5} alignItems="center" flex={1}>
-                    {maturity || maturity === 0 ? (
-                      <Typography fontWeight={700} fontSize={14} color="grey.900" my="auto">
-                        {maturity ? daysLeft(maturity) : 'Flexible'}
+          <FormControlLabel
+            key={`${maturity}_${depositAPR}_${borrowAPR}_${index}`}
+            value={maturity}
+            control={<Radio />}
+            componentsProps={{ typography: { width: '100%' } }}
+            sx={{ m: 0, ':hover': { backgroundColor: 'grey.50' } }}
+            disabled={maturity !== 0 && !maturity}
+            label={
+              <Box display="flex" flexDirection="row" py="7px" alignItems="center" width="100%" gap={2}>
+                <Box display="flex" gap={0.5} alignItems="center" flex={1}>
+                  {maturity || maturity === 0 ? (
+                    <Typography fontWeight={700} fontSize={14} color="grey.900" my="auto">
+                      {maturity ? daysLeft(maturity) : 'Flexible'}
+                    </Typography>
+                  ) : (
+                    <Skeleton width={52} height={20} />
+                  )}
+                  {bestOption === maturity && (
+                    <Box
+                      display="flex"
+                      alignItems="center"
+                      height="16px"
+                      py="3px"
+                      px="6px"
+                      borderRadius="8px"
+                      sx={{ background: 'linear-gradient(66.92deg, #00CC68 34.28%, #00CC8F 100%)' }}
+                    >
+                      <Typography variant="chip" color="white">
+                        BEST
                       </Typography>
-                    ) : (
-                      <Skeleton width={52} height={20} />
-                    )}
-                    {bestOption === maturity && (
-                      <Box
-                        display="flex"
-                        alignItems="center"
-                        height="16px"
-                        py="3px"
-                        px="6px"
-                        borderRadius="8px"
-                        sx={{ background: 'linear-gradient(66.92deg, #00CC68 34.28%, #00CC8F 100%)' }}
-                      >
-                        <Typography variant="chip" color="white">
-                          BEST
-                        </Typography>
-                      </Box>
-                    )}
-                  </Box>
+                    </Box>
+                  )}
+                </Box>
+                <OptionRate
+                  isLoading={maturity === 0 ? loadingFloatingOption : loadingFixedOptions}
+                  symbol={symbol}
+                  value={`${
+                    operation === 'deposit'
+                      ? toPercentage((depositAPR || 0) > minAPRValue ? depositAPR : undefined)
+                      : toPercentage((borrowAPR || 0) > minAPRValue ? borrowAPR : undefined)
+                  } APR`}
+                  bottom={
+                    <>
+                      {maturity ? <LockIcon sx={bottomIconSx} /> : <SwapVertIcon sx={bottomIconSx} />}
+                      <Typography fontWeight={500} fontSize={13} color="figma.grey.500" textAlign="right">
+                        {maturity === 0 ? 'Variable' : 'Fixed'} {hasRewards ? 'APR' : 'interest rate'}
+                      </Typography>
+                    </>
+                  }
+                />
+
+                {(operation === 'deposit' ? depositRewards : borrowRewards)?.map(({ assetSymbol, rate }) => (
                   <OptionRate
+                    key={assetSymbol}
                     isLoading={maturity === 0 ? loadingFloatingOption : loadingFixedOptions}
-                    symbol={symbol}
-                    value={`${
-                      operation === 'deposit'
-                        ? toPercentage((depositAPR || 0) > minAPRValue ? depositAPR : undefined)
-                        : toPercentage((borrowAPR || 0) > minAPRValue ? borrowAPR : undefined)
-                    } APR`}
+                    symbol={assetSymbol}
+                    value={toPercentage(Math.min(Number(rate) / 1e18, 10))}
                     bottom={
                       <>
-                        {maturity ? <LockIcon sx={bottomIconSx} /> : <SwapVertIcon sx={bottomIconSx} />}
                         <Typography fontWeight={500} fontSize={13} color="figma.grey.500" textAlign="right">
-                          {maturity === 0 ? 'Variable' : 'Fixed'} {hasRewards ? 'APR' : 'interest rate'}
+                          Rewards
                         </Typography>
+                        <InfoOutlinedIcon sx={bottomIconSx} />
                       </>
                     }
                   />
-
-                  {(operation === 'deposit' ? depositRewards : borrowRewards)?.map(({ assetSymbol, rate }) => (
-                    <OptionRate
-                      key={assetSymbol}
-                      isLoading={maturity === 0 ? loadingFloatingOption : loadingFixedOptions}
-                      symbol={assetSymbol}
-                      value={toPercentage(Math.min(Number(rate) / 1e18, 10))}
-                      bottom={
-                        <>
-                          <Typography fontWeight={500} fontSize={13} color="figma.grey.500" textAlign="right">
-                            Rewards
-                          </Typography>
-                          <InfoOutlinedIcon sx={bottomIconSx} />
-                        </>
-                      }
-                    />
-                  ))}
-                </Box>
-              }
-            />
-          )
+                ))}
+              </Box>
+            }
+          />
         );
       })}
     </RadioGroup>
