@@ -34,7 +34,6 @@ import ModalInfoMaturityStatus from 'components/OperationsModal/Info/ModalInfoMa
 import useHandleOperationError from 'hooks/useHandleOperationError';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
-const DEFAULT_SLIPPAGE = (100 * numbers.slippage).toFixed(2);
 
 const WithdrawAtMaturity: FC = () => {
   const { operation } = useModalStatus();
@@ -57,18 +56,18 @@ const WithdrawAtMaturity: FC = () => {
     setIsLoading: setIsLoadingOp,
     marketContract,
     ETHRouterContract,
+    rawSlippage,
+    setRawSlippage,
+    slippage,
   } = useOperationContext();
 
   const handleOperationError = useHandleOperationError();
-
-  const [rawSlippage, setRawSlippage] = useState(DEFAULT_SLIPPAGE);
 
   const [minAmountToWithdraw, setMinAmountToWithdraw] = useState(Zero);
   const [amountToWithdraw, setAmountToWithdraw] = useState(Zero);
 
   const previewerContract = usePreviewer();
 
-  const slippage = useMemo(() => parseFixed(String(1 - Number(rawSlippage) / 100), 18), [rawSlippage]);
   const { decimals = 18 } = useAccountData(symbol);
 
   const isEarlyWithdraw = useMemo(() => {
