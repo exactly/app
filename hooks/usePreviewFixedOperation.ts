@@ -11,7 +11,6 @@ import useMaturityPools from './useMaturityPools';
 import usePreviewer from './usePreviewer';
 
 const MIN_OPTIONS = 3;
-const MAX_APR = 200;
 
 type PreviewFixedOperation = {
   options: MarketsBasicOption[];
@@ -56,8 +55,8 @@ export default (operation: MarketsBasicOperation): PreviewFixedOperation => {
 
           return {
             maturity: maturity.toNumber(),
-            depositAPR: Math.min(fixedAPR, MAX_APR),
-            borrowAPR: Math.min(fixedAPR, MAX_APR),
+            depositAPR: fixedAPR,
+            borrowAPR: fixedAPR,
           };
         });
 
