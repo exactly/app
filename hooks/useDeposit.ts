@@ -96,14 +96,14 @@ export default (): Deposit => {
       if (walletBalance && parseFloat(value) > parseFloat(walletBalance)) {
         return setErrorData({
           status: true,
-          message: `You can't deposit more than you have in your wallet`,
+          message: `You don't have enough ${symbol} to make this deposit`,
           component: 'input',
         });
       }
 
       setErrorData(undefined);
     },
-    [setQty, walletBalance, setErrorData],
+    [setQty, walletBalance, setErrorData, symbol],
   );
 
   const deposit = useCallback(async () => {
