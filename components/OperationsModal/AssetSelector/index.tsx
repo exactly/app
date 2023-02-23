@@ -21,7 +21,7 @@ function Asset({ assetSymbol, option = false }: AssetOptionProps) {
   }
 
   return (
-    <Box display="flex" gap={0.5} my={0.5} mx={option ? 0.5 : 0}>
+    <Box display="flex" gap={1} my={0.5} mx={option ? 0.5 : 0}>
       <Image
         src={`/img/assets/${assetSymbol}.svg`}
         alt={formatSymbol(assetSymbol)}
