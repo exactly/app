@@ -232,6 +232,27 @@ const theme = createTheme({
         },
       },
     },
+    MuiTooltip: {
+      styleOverrides: {
+        tooltip: {
+          backgroundColor: '#fff',
+          padding: '16px',
+          border: '1px solid #EDF0F2',
+          borderRadius: '8px',
+          color: '#0E0E0E',
+          fontSize: '13px',
+          filter: 'drop-shadow(0px 4px 10px rgba(97, 102, 107, 0.1))',
+        },
+        arrow: {
+          fontSize: '16px',
+          '&::before': {
+            backgroundColor: '#fff',
+            border: '1px solid #EDF0F2',
+            filter: 'drop-shadow(0px 4px 10px rgba(97, 102, 107, 0.1))',
+          },
+        },
+      },
+    },
   },
   shadows: Array(25).fill('none') as Shadows,
 });
