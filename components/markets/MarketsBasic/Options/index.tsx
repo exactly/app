@@ -2,7 +2,7 @@ import React, { FC } from 'react';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import LockIcon from '@mui/icons-material/Lock';
 import SwapVertIcon from '@mui/icons-material/SwapVert';
-import { Box, FormControlLabel, Radio, RadioGroup, Skeleton, Typography } from '@mui/material';
+import { Box, FormControlLabel, Radio, RadioGroup, Skeleton, Tooltip, Typography } from '@mui/material';
 import Image from 'next/image';
 import daysLeft from 'utils/daysLeft';
 import { MarketsBasicOperation, MarketsBasicOption } from 'contexts/MarketsBasicContext';
@@ -37,7 +37,6 @@ const Options: FC<Props> = ({
   return (
     <RadioGroup value={selected} onChange={(e) => setSelected(parseInt(e.target.value))} sx={{ pt: 1 }}>
       {allOptions.map(({ maturity, depositAPR, borrowAPR, borrowRewards, depositRewards }, index) => {
-        const hasRewards = ((operation === 'deposit' ? depositRewards : borrowRewards)?.length || 0) > 0;
         return (
           <FormControlLabel
             key={`${maturity}_${depositAPR}_${borrowAPR}_${index}`}
@@ -84,8 +83,15 @@ const Options: FC<Props> = ({
                     <>
                       {maturity ? <LockIcon sx={bottomIconSx} /> : <SwapVertIcon sx={bottomIconSx} />}
                       <Typography fontWeight={500} fontSize={13} color="figma.grey.500" textAlign="right">
-                        {maturity === 0 ? 'Variable' : 'Fixed'} {hasRewards ? 'APR' : 'interest rate'}
+                        {maturity === 0 ? 'Variable' : 'Fixed'} rate
                       </Typography>
+                      <Tooltip
+                        title={maturity === 0 ? <TooltipFloatingRate /> : <TooltipFixedRate />}
+                        placement="right"
+                        arrow
+                      >
+                        <InfoOutlinedIcon sx={bottomIconSx} />
+                      </Tooltip>
                     </>
                   }
                 />
@@ -114,6 +120,46 @@ const Options: FC<Props> = ({
     </RadioGroup>
   );
 };
+
+const TooltipFixedRate = () => (
+  <Box display="flex" flexDirection="column" gap={0.5}>
+    <Typography fontSize={13} color="grey.700">
+      This percentage stands for a loan&apos;s APR (Annual Percentage Rate).
+    </Typography>
+    <Typography fontSize={13} color="grey.700">
+      A fixed interest rate remains the same for the entire term of the loan.
+    </Typography>
+    <Typography fontSize={13} color="blue" sx={{ textDecoration: 'underline' }}>
+      <a
+        target="_blank"
+        rel="noreferrer noopener"
+        href="https://docs.exact.ly/getting-started/math-paper#4.-fixed-rate-pool"
+      >
+        Learn more about fixed rates.
+      </a>
+    </Typography>
+  </Box>
+);
+
+const TooltipFloatingRate = () => (
+  <Box display="flex" flexDirection="column" gap={0.5}>
+    <Typography fontSize={13} color="grey.700">
+      This percentage stands for a loan&apos;s APR (Annual Percentage Rate).
+    </Typography>
+    <Typography fontSize={13} color="grey.700">
+      A variable interest rate varies over time depending on market changes.
+    </Typography>
+    <Typography fontSize={13} color="blue" sx={{ textDecoration: 'underline' }}>
+      <a
+        target="_blank"
+        rel="noreferrer noopener"
+        href="https://docs.exact.ly/getting-started/math-paper#3.-variable-rate-pool"
+      >
+        Learn more about variable rates.
+      </a>
+    </Typography>
+  </Box>
+);
 
 const OptionRate: FC<{ isLoading?: boolean; value: string; symbol: string; bottom: React.ReactNode }> = ({
   isLoading = false,
