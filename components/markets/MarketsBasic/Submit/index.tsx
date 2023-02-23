@@ -14,6 +14,7 @@ import { useWeb3Modal } from '@web3modal/react';
 import { Button } from '@mui/material';
 import daysLeft from 'utils/daysLeft';
 import formatNumber from 'utils/formatNumber';
+import AccountDataContext from 'contexts/AccountDataContext';
 
 const getOperation = (
   op: MarketsBasicOperation,
@@ -37,6 +38,7 @@ type SubmitProps = {
 };
 
 const Submit: FC<SubmitProps> = ({ symbol, operation, option, qty, errorData, requiresApproval }) => {
+  const { accountData } = useContext(AccountDataContext);
   const { walletAddress } = useWeb3();
   const { setDate } = useContext(MarketContext);
   const deposit = useDeposit();
@@ -96,7 +98,7 @@ const Submit: FC<SubmitProps> = ({ symbol, operation, option, qty, errorData, re
   return (
     <ModalSubmit
       label={submitLabel}
-      symbol={symbol}
+      symbol={symbol === 'WETH' && accountData ? accountData[symbol].symbol : symbol}
       submit={handleSubmitAction}
       isLoading={isLoading || previewIsLoading}
       disabled={!qty || parseFloat(qty) <= 0 || isLoading || previewIsLoading || errorData?.status}
