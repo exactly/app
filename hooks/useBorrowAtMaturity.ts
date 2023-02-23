@@ -18,7 +18,6 @@ import getBeforeBorrowLimit from 'utils/getBeforeBorrowLimit';
 import getHealthFactorData from 'utils/getHealthFactorData';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
-const DEFAULT_SLIPPAGE = (numbers.slippage * 100).toFixed(2);
 
 type BorrowAtMaturity = {
   borrow: () => void;
@@ -47,6 +46,9 @@ export default (): BorrowAtMaturity => {
     setIsLoading: setIsLoadingOp,
     marketContract,
     ETHRouterContract,
+    rawSlippage,
+    setRawSlippage,
+    slippage,
   } = useOperationContext();
 
   const handleOperationError = useHandleOperationError();
@@ -54,9 +56,6 @@ export default (): BorrowAtMaturity => {
   const { decimals = 18 } = useAccountData(symbol);
 
   const [fixedRate, setFixedRate] = useState<number | undefined>();
-  const [rawSlippage, setRawSlippage] = useState(DEFAULT_SLIPPAGE);
-
-  const slippage = useMemo(() => parseFixed(String(1 + Number(rawSlippage) / 100), 18), [rawSlippage]);
 
   const healthFactor = useMemo<HealthFactor | undefined>(
     () => (accountData ? getHealthFactorData(accountData) : undefined),
@@ -279,9 +278,9 @@ export default (): BorrowAtMaturity => {
       setIsLoadingOp(false);
     }
   }, [
+    slippage,
     setIsLoadingOp,
     fixedRate,
-    slippage,
     accountData,
     date,
     qty,
@@ -327,7 +326,7 @@ export default (): BorrowAtMaturity => {
       setRawSlippage((slippageAPR * 100).toFixed(2));
       setFixedRate(fixedAPR);
     }
-  }, [accountData, date, previewerContract, marketContract, minBorrowRate, qty, decimals]);
+  }, [accountData, date, previewerContract, marketContract, minBorrowRate, qty, decimals, setRawSlippage]);
 
   const handleSubmitAction = useCallback(async () => {
     if (isLoading) return;

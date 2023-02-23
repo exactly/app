@@ -35,7 +35,6 @@ import ModalInfoBorrowLimit from 'components/OperationsModal/Info/ModalInfoBorro
 import useHandleOperationError from 'hooks/useHandleOperationError';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
-const DEFAULT_SLIPPAGE = (numbers.slippage * 100).toFixed(2);
 
 const RepayAtMaturity: FC = () => {
   const { operation } = useModalStatus();
@@ -59,15 +58,16 @@ const RepayAtMaturity: FC = () => {
     marketContract,
     assetContract,
     ETHRouterContract,
+    rawSlippage,
+    setRawSlippage,
+    slippage,
   } = useOperationContext();
 
   const handleOperationError = useHandleOperationError();
 
   const [penaltyAssets, setPenaltyAssets] = useState(Zero);
   const [positionAssetsAmount, setPositionAssetsAmount] = useState(Zero);
-  const [rawSlippage, setRawSlippage] = useState(DEFAULT_SLIPPAGE);
 
-  const slippage = useMemo(() => parseFixed(String(1 + Number(rawSlippage) / 100), 18), [rawSlippage]);
   const { decimals = 18 } = useAccountData(symbol);
 
   const maxAmountToRepay = useMemo(

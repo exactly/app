@@ -15,7 +15,6 @@ import { OperationHook } from 'types/OperationHook';
 import analytics from 'utils/analytics';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
-const DEFAULT_SLIPPAGE = (100 * numbers.slippage).toFixed(2);
 
 type DepositAtMaturity = {
   deposit: () => void;
@@ -45,15 +44,15 @@ export default (): DepositAtMaturity => {
     marketContract,
     assetContract,
     ETHRouterContract,
+    rawSlippage,
+    setRawSlippage,
+    slippage,
   } = useOperationContext();
 
   const handleOperationError = useHandleOperationError();
 
-  const [rawSlippage, setRawSlippage] = useState(DEFAULT_SLIPPAGE);
   const [fixedRate, setFixedRate] = useState<number | undefined>();
   const [gtMaxYield, setGtMaxYield] = useState<boolean>(false);
-
-  const slippage = useMemo(() => parseFixed(String(1 - Number(rawSlippage) / 100), 18), [rawSlippage]);
 
   const walletBalance = useBalance(symbol, assetContract);
   const { decimals = 18 } = useAccountData(symbol);
@@ -263,7 +262,7 @@ export default (): DepositAtMaturity => {
       setRawSlippage((slippageAPR * 100).toFixed(2));
       setFixedRate(fixedAPR);
     }
-  }, [accountData, date, previewerContract, marketContract, qty, decimals, depositRate]);
+  }, [accountData, date, previewerContract, marketContract, depositRate, qty, decimals, setRawSlippage]);
 
   return {
     isLoading,
