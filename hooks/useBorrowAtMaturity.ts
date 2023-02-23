@@ -313,20 +313,16 @@ export default (): BorrowAtMaturity => {
         const rate = finalAssets.mul(WeiPerEther).div(initialAssets);
 
         const fixedAPR = (Number(formatFixed(rate, 18)) - 1) * time;
-        const slippageAPR = fixedAPR * (1 + numbers.slippage);
 
-        setRawSlippage((slippageAPR * 100).toFixed(2));
         setFixedRate(fixedAPR);
       } catch (error) {
         setFixedRate(undefined);
       }
     } else {
       const fixedAPR = Number(minBorrowRate.toBigInt()) / 1e18;
-      const slippageAPR = fixedAPR * (1 - numbers.slippage);
-      setRawSlippage((slippageAPR * 100).toFixed(2));
       setFixedRate(fixedAPR);
     }
-  }, [accountData, date, previewerContract, marketContract, minBorrowRate, qty, decimals, setRawSlippage]);
+  }, [accountData, date, previewerContract, marketContract, minBorrowRate, qty, decimals]);
 
   const handleSubmitAction = useCallback(async () => {
     if (isLoading) return;
