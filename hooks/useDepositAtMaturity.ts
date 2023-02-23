@@ -138,7 +138,7 @@ export default (): DepositAtMaturity => {
       if (walletBalance && parseFloat(value) > parseFloat(walletBalance)) {
         return setErrorData({
           status: true,
-          message: `You can't deposit more than you have in your wallet`,
+          message: `You don't have enough ${symbol} to make this deposit`,
           component: 'input',
         });
       }
@@ -146,7 +146,7 @@ export default (): DepositAtMaturity => {
 
       setGtMaxYield(!!optimalDepositAmount && parseFixed(value || '0', decimals).gt(optimalDepositAmount));
     },
-    [setQty, walletBalance, setErrorData, optimalDepositAmount, decimals],
+    [setQty, walletBalance, setErrorData, optimalDepositAmount, decimals, symbol],
   );
 
   const deposit = useCallback(async () => {

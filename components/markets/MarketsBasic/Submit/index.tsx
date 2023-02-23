@@ -12,6 +12,8 @@ import { ErrorData } from 'types/Error';
 import { useWeb3 } from 'hooks/useWeb3';
 import { useWeb3Modal } from '@web3modal/react';
 import { Button } from '@mui/material';
+import daysLeft from 'utils/daysLeft';
+import formatNumber from 'utils/formatNumber';
 
 const getOperation = (
   op: MarketsBasicOperation,
@@ -75,6 +77,14 @@ const Submit: FC<SubmitProps> = ({ symbol, operation, option, qty, errorData, re
 
   const { open } = useWeb3Modal();
 
+  const submitLabel = useMemo(
+    () =>
+      `${operation === 'deposit' ? 'Deposit' : 'Borrow'} ${
+        parseFloat(qty) ? formatNumber(qty, symbol) : ''
+      } ${symbol} ${!isFloating && option.maturity ? `for ${daysLeft(option.maturity)}` : ''}`,
+    [isFloating, operation, option.maturity, qty, symbol],
+  );
+
   if (!walletAddress) {
     return (
       <Button sx={{ width: '100%' }} onClick={() => open({ route: 'ConnectWallet' })} variant="contained">
@@ -85,7 +95,7 @@ const Submit: FC<SubmitProps> = ({ symbol, operation, option, qty, errorData, re
 
   return (
     <ModalSubmit
-      label={`${operation === 'deposit' ? 'Deposit' : 'Borrow'} ${symbol} (${isFloating ? 'variable' : 'fixed'} rate)`}
+      label={submitLabel}
       symbol={symbol}
       submit={handleSubmitAction}
       isLoading={isLoading || previewIsLoading}
