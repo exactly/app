@@ -37,6 +37,9 @@ const Options: FC<Props> = ({
   return (
     <RadioGroup value={selected} onChange={(e) => setSelected(parseInt(e.target.value))} sx={{ pt: 1 }}>
       {allOptions.map(({ maturity, depositAPR, borrowAPR, borrowRewards, depositRewards }, index) => {
+        const apr = (operation === 'deposit' ? depositAPR : borrowAPR) ?? 0;
+        const value = apr > minAPRValue ? apr : undefined;
+        const optionRate = `${value && value > 200 ? '∞' : toPercentage(apr)} APR`;
         return (
           <FormControlLabel
             key={`${maturity}_${depositAPR}_${borrowAPR}_${index}`}
@@ -74,11 +77,7 @@ const Options: FC<Props> = ({
                 <OptionRate
                   isLoading={maturity === 0 ? loadingFloatingOption : loadingFixedOptions}
                   symbol={symbol}
-                  value={`${
-                    operation === 'deposit'
-                      ? toPercentage((depositAPR || 0) > minAPRValue ? depositAPR : undefined)
-                      : toPercentage((borrowAPR || 0) > minAPRValue ? borrowAPR : undefined)
-                  } APR`}
+                  value={optionRate}
                   bottom={
                     <>
                       {maturity ? <LockIcon sx={bottomIconSx} /> : <SwapVertIcon sx={bottomIconSx} />}
