@@ -101,7 +101,7 @@ const Options: FC<Props> = ({
                     key={assetSymbol}
                     isLoading={maturity === 0 ? loadingFloatingOption : loadingFixedOptions}
                     symbol={assetSymbol}
-                    value={toPercentage(Math.min(Number(rate) / 1e18, 10))}
+                    value={toPercentage(Number(rate) / 1e18)}
                     bottom={
                       <>
                         <Typography fontWeight={500} fontSize={13} color="figma.grey.500" textAlign="right">
