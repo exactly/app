@@ -1,4 +1,4 @@
-import { BigNumber } from '@ethersproject/bignumber';
+import { BigNumber, parseFixed } from '@ethersproject/bignumber';
 import useAccountData from 'hooks/useAccountData';
 import useDelayedEffect from 'hooks/useDelayedEffect';
 import useERC20 from 'hooks/useERC20';
@@ -15,6 +15,7 @@ import React, {
   useState,
   useCallback,
   useEffect,
+  useMemo,
 } from 'react';
 import { ERC20, Market, MarketETHRouter } from 'types/contracts';
 import { ErrorData } from 'types/Error';
@@ -22,6 +23,7 @@ import { OperationHook } from 'types/OperationHook';
 import { Transaction } from 'types/Transaction';
 import { MarketContext } from './MarketContext';
 import { useModalStatus } from './ModalStatusContext';
+import numbers from 'config/numbers.json';
 
 type ContextValues = {
   symbol: string;
@@ -43,9 +45,15 @@ type ContextValues = {
   marketContract?: Market;
   assetContract?: ERC20;
   ETHRouterContract?: MarketETHRouter;
+
+  rawSlippage: string;
+  setRawSlippage: React.Dispatch<React.SetStateAction<string>>;
+  slippage: BigNumber;
 };
 
 const OperationContext = createContext<ContextValues | null>(null);
+
+const DEFAULT_SLIPPAGE = (numbers.slippage * 100).toFixed(2);
 
 export const OperationContextProvider: FC<PropsWithChildren> = ({ children }) => {
   const { pathname } = useRouter();
@@ -61,6 +69,14 @@ export const OperationContextProvider: FC<PropsWithChildren> = ({ children }) =>
   const [isLoading, setIsLoading] = useState(false);
   const [requiresApproval, setRequiresApproval] = useState(false);
   const { market, asset } = useAccountData(marketSymbol);
+  const [rawSlippage, setRawSlippage] = useState(DEFAULT_SLIPPAGE);
+
+  const slippage = useMemo(() => {
+    console.log('operation', operation);
+    return ['deposit', 'depositAtMaturity', 'withdraw', 'withdrawAtMaturity'].includes(operation)
+      ? parseFixed(String(1 - Number(rawSlippage) / 100), 18)
+      : parseFixed(String(1 + Number(rawSlippage) / 100), 18);
+  }, [operation, rawSlippage]);
 
   useEffect(() => {
     if (!(open && view === 'simple' && pathname === '/')) {
@@ -71,6 +87,7 @@ export const OperationContextProvider: FC<PropsWithChildren> = ({ children }) =>
     }
     setErrorData(undefined);
     setIsLoading(false);
+    setRawSlippage(DEFAULT_SLIPPAGE);
   }, [chain?.id, marketSymbol, operation, open, view, pathname]);
 
   const assetContract = useERC20(asset);
@@ -95,6 +112,10 @@ export const OperationContextProvider: FC<PropsWithChildren> = ({ children }) =>
     assetContract,
     marketContract,
     ETHRouterContract,
+
+    rawSlippage,
+    setRawSlippage,
+    slippage,
   };
 
   return <OperationContext.Provider value={value}>{children}</OperationContext.Provider>;
