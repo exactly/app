@@ -22,11 +22,12 @@ export const supportedChains = [
 
 export const defaultChain = { mainnet, optimism, goerli }[process.env.NEXT_PUBLIC_NETWORK ?? 'mainnet'];
 
-const { chains, provider } = configureChains(supportedChains, [
-  ...(JSON.parse(process.env.NEXT_PUBLIC_IS_E2E ?? 'false') && rpcURL
+const { chains, provider } = configureChains(
+  supportedChains,
+  JSON.parse(process.env.NEXT_PUBLIC_IS_E2E ?? 'false') && rpcURL
     ? [jsonRpcProvider({ rpc: () => ({ http: rpcURL }) })]
-    : [publicProvider({ priority: 1 }), walletConnectProvider({ projectId: walletConnectId })]),
-]);
+    : [publicProvider({ priority: 1 }), walletConnectProvider({ projectId: walletConnectId })],
+);
 
 export const wagmi = createClient({
   connectors: [...modalConnectors({ appName: 'exactly', chains }), new SafeConnector({ chains })],
