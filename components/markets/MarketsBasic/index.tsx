@@ -76,7 +76,7 @@ const MarketsBasic: FC = () => {
 
     const bestAPR = isDeposit ? Math.max(...APRs) : Math.min(...APRs);
 
-    return options.find(({ apr }) => apr === bestAPR)?.maturity;
+    return options.reverse().find(({ apr }) => apr === bestAPR)?.maturity;
   }, [allOptions, isDeposit]);
 
   const currentOption = useMemo(
