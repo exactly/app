@@ -263,7 +263,7 @@ function Repay() {
               decimals={decimals}
               onMax={onMax}
               onChange={handleInputChange}
-              label="Wallet balance"
+              label="Your balance"
               amount={walletBalance}
             />
           </ModalBoxRow>

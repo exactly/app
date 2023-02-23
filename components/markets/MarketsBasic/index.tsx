@@ -113,7 +113,7 @@ const MarketsBasic: FC = () => {
               decimals={decimals}
               onMax={isDeposit ? onMaxDeposit : onMaxBorrow}
               onChange={isDeposit ? handleDeposit : handleBorrow}
-              label={isDeposit ? 'Wallet balance' : 'Safe borrow limit'}
+              label={isDeposit ? 'Your balance' : 'Safe borrow limit'}
               amount={isDeposit ? walletBalance : safeMaximumBorrow}
               tooltip={isDeposit ? '' : 'The maximum amount you can borrow without putting your health factor at risk'}
             />
