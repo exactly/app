@@ -8,6 +8,7 @@ import daysLeft from 'utils/daysLeft';
 import { MarketsBasicOperation, MarketsBasicOption } from 'contexts/MarketsBasicContext';
 import { toPercentage } from 'utils/utils';
 import numbers from 'config/numbers.json';
+import { Zero } from '@ethersproject/constants';
 
 type Props = {
   symbol: string;
@@ -74,22 +75,25 @@ const Options: FC<Props> = ({
                     </Box>
                   )}
                 </Box>
-                {(operation === 'deposit' ? depositRewards : borrowRewards)?.map(({ assetSymbol, rate }) => (
-                  <OptionRate
-                    key={assetSymbol}
-                    isLoading={maturity === 0 ? loadingFloatingOption : loadingFixedOptions}
-                    symbol={assetSymbol}
-                    value={toPercentage(Number(rate) / 1e18)}
-                    bottom={
-                      <>
-                        <Typography fontWeight={500} fontSize={13} color="figma.grey.500" textAlign="right">
-                          Rewards
-                        </Typography>
-                        <InfoOutlinedIcon sx={bottomIconSx} />
-                      </>
-                    }
-                  />
-                ))}
+                {(operation === 'deposit' ? depositRewards : borrowRewards)?.map(
+                  ({ assetSymbol, rate }) =>
+                    rate.gt(Zero) && (
+                      <OptionRate
+                        key={assetSymbol}
+                        isLoading={maturity === 0 ? loadingFloatingOption : loadingFixedOptions}
+                        symbol={assetSymbol}
+                        value={toPercentage(Number(rate) / 1e18)}
+                        bottom={
+                          <>
+                            <Typography fontWeight={500} fontSize={13} color="figma.grey.500" textAlign="right">
+                              Rewards
+                            </Typography>
+                            <InfoOutlinedIcon sx={bottomIconSx} />
+                          </>
+                        }
+                      />
+                    ),
+                )}
                 <OptionRate
                   isLoading={maturity === 0 ? loadingFloatingOption : loadingFixedOptions}
                   symbol={symbol}
