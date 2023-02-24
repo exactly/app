@@ -2,7 +2,7 @@ import { EthereumClient, modalConnectors, walletConnectProvider } from '@web3mod
 import { createClient, configureChains } from 'wagmi';
 import { mainnet, goerli, optimismGoerli } from 'wagmi/chains';
 import { publicProvider } from 'wagmi/providers/public';
-import { SafeConnector } from './SafeConnector';
+import { SafeConnector } from 'wagmi/connectors/safe';
 
 export const walletConnectId = '11ddaa8aaede72cb5d6b0dae2fed7baa';
 
