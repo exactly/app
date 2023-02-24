@@ -20,6 +20,7 @@ export default defineConfig({
   requestTimeout: 30000,
   e2e: {
     setupNodeEvents,
+    testIsolation: false,
     baseUrl: 'http://localhost:3000',
     specPattern: 'tests/e2e/specs/**/*.ts',
     supportFile: 'tests/e2e/support.ts',
