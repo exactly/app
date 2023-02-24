@@ -51,7 +51,7 @@ npm run dev
 
 ## Testing
 
-We use the [Synpress](https://github.com/Synthetixio/synpress) testing framework
+We use the Cypress testing framework
 to run our E2E tests and [Tenderly](https://tenderly.co/) to setup forks.
 
 The following environment variables are required to be present for them to

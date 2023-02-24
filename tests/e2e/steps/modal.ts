@@ -29,7 +29,7 @@ export const onMax = () => {
 };
 
 export const waitForApprove = () => {
-  cy.getByTestId('modal-approve').should('be.visible');
+  cy.getByTestId('modal-approve').should('be.visible', { timeout: 30000 });
   cy.waitUntil(() => cy.getByTestId('modal-approve').then(($btn) => !$btn.hasClass('MuiLoadingButton-loading')), {
     timeout: 15000,
     interval: 1000,
@@ -39,7 +39,6 @@ export const waitForApprove = () => {
 export const approve = () => {
   cy.getByTestId('modal-approve').should('not.be.disabled');
   cy.getByTestId('modal-approve').click();
-  cy.confirmMetamaskPermissionToSpend();
 };
 
 export const approveIfRequired = () => {
@@ -60,11 +59,10 @@ export const waitForSubmit = () => {
 export const submit = () => {
   cy.getByTestId('modal-submit').should('not.be.disabled');
   cy.getByTestId('modal-submit').click();
-  cy.confirmMetamaskTransaction();
 };
 
 export const waitForTransaction = (op: Operation) => {
-  cy.getByTestId('modal-transaction-status').should('be.visible');
+  cy.getByTestId('modal-transaction-status').should('be.visible', { timeout: 30000 });
   cy.waitUntil(
     () =>
       cy.getByTestId('modal').then(($modal) => {

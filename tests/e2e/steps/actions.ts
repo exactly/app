@@ -39,6 +39,5 @@ export const enterMarket = ({ symbol }: MarketParams) => {
   symbol = symbol === 'ETH' ? 'WETH' : symbol;
 
   Dashboard.attemptEnterMarket(symbol);
-  cy.confirmMetamaskTransaction();
   Dashboard.waitForTransaction(symbol);
 };

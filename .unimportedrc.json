@@ -1,5 +1,5 @@
 {
   "ignoreUnused": ["recharts"],
-  "ignoreUnimported": ["synpress.config.ts"],
+  "ignoreUnimported": ["cypress.config.ts"],
   "entry": ["pages/**/*", "scripts/**/*", "sentry.*.config.ts"]
 }

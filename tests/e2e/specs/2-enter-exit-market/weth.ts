@@ -1,12 +1,15 @@
+import * as Navbar from '../../steps/nabvar';
 import { enterMarket, exitMarket } from '../../steps/common/market';
-import { connectMetamask, setupFork } from '../../steps/setup';
+import { setupFork } from '../../steps/setup';
+import { connectWallet, disconnectWallet } from '../../steps/wallet';
 
 describe('WETH enter/exit market', () => {
   const { visit, setBalance, userAddress } = setupFork();
 
   before(() => {
-    visit('/dashboard');
-    connectMetamask();
+    visit('/');
+    connectWallet();
+    Navbar.goTo('dashboard');
   });
 
   before(async () => {
@@ -16,7 +19,7 @@ describe('WETH enter/exit market', () => {
   });
 
   after(() => {
-    cy.disconnectMetamaskWalletFromAllDapps();
+    disconnectWallet();
   });
 
   enterMarket({ symbol: 'WETH' });

@@ -1,4 +1,5 @@
-import '@synthetixio/synpress/support';
+import 'cypress-wait-until';
+import type { Eip1193Bridge } from '@ethersproject/experimental';
 
 Cypress.Commands.add('getByTestId', (selector, ...args) => cy.get(`[data-testid=${selector}]`, ...args));
 
@@ -12,5 +13,6 @@ declare global {
 
   interface Window {
     rpcURL?: string;
+    ethereum?: Eip1193Bridge;
   }
 }

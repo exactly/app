@@ -1,27 +1,23 @@
-import { connectMetamask } from '../steps/setup';
+import { setupFork } from '../steps/setup';
+import { connectWallet, disconnectWallet } from '../steps/wallet';
 
 describe('Test Connect Wallet', () => {
-  let userAddress: string | undefined;
+  const { visit, userAddress } = setupFork();
 
   before(() => {
-    cy.visit('/', {
-      onBeforeLoad: function (window) {
-        window.localStorage.setItem('tos', 'true');
-      },
-    });
-    cy.fetchMetamaskWalletAddress().then((address) => (userAddress = address));
+    visit('/');
   });
 
   after(() => {
-    cy.disconnectMetamaskWalletFromAllDapps();
+    disconnectWallet();
   });
 
-  it('Connects with Metamask', () => {
-    connectMetamask();
+  it('Connects with injected connector', () => {
+    connectWallet();
 
     cy.getByTestId('user-address')
       .should('be.visible')
-      .and('contain', userAddress?.substring(0, 6))
-      .and('contain', userAddress?.substring(38));
+      .and('contain', userAddress().substring(0, 6))
+      .and('contain', userAddress().substring(38));
   });
 });

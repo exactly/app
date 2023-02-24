@@ -1,7 +1,8 @@
 import { EthereumClient, modalConnectors, walletConnectProvider } from '@web3modal/ethereum';
 import { createClient, configureChains } from 'wagmi';
-import { jsonRpcProvider } from 'wagmi/providers/jsonRpc';
+import { InjectedConnector } from 'wagmi/connectors/injected';
 import { mainnet, goerli, optimism } from 'wagmi/chains';
+import { jsonRpcProvider } from 'wagmi/providers/jsonRpc';
 import { publicProvider } from 'wagmi/providers/public';
 import { SafeConnector } from 'wagmi/connectors/safe';
 
@@ -30,7 +31,20 @@ const { chains, provider } = configureChains(
 );
 
 export const wagmi = createClient({
-  connectors: [...modalConnectors({ appName: 'exactly', chains }), new SafeConnector({ chains })],
+  connectors: [
+    ...(JSON.parse(process.env.NEXT_PUBLIC_IS_E2E ?? 'false')
+      ? [
+          new InjectedConnector({
+            chains: supportedChains,
+            options: {
+              name: 'E2E',
+            },
+          }),
+        ]
+      : []),
+    ...modalConnectors({ appName: 'exactly', chains }),
+    new SafeConnector({ chains }),
+  ],
   provider,
 });
 

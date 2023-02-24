@@ -1,12 +1,13 @@
 import deposit from '../../steps/common/deposit';
-import { connectMetamask, setupFork } from '../../steps/setup';
+import { setupFork } from '../../steps/setup';
+import { connectWallet, disconnectWallet } from '../../steps/wallet';
 
 describe('WBTC floating deposit', () => {
   const { visit, setBalance, userAddress } = setupFork();
 
   before(() => {
     visit('/');
-    connectMetamask();
+    connectWallet();
   });
 
   before(async () => {
@@ -17,7 +18,7 @@ describe('WBTC floating deposit', () => {
   });
 
   after(() => {
-    cy.disconnectMetamaskWalletFromAllDapps();
+    disconnectWallet();
   });
 
   deposit({ type: 'floating', symbol: 'WBTC', decimals: 8, balance: '100.0', amount: '1', shouldApprove: true });

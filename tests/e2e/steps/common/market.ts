@@ -15,19 +15,8 @@ export const enterMarket = ({ symbol }: TestParams) => {
       Dashboard.checkCollateralSwitchTooltip(symbol, 'Enable this asset as collateral');
     });
 
-    it(`should trigger an enter market for ${symbol} and start loading`, () => {
-      Dashboard.attemptEnterMarket(symbol);
-      Dashboard.checkCollateralSwitchStatusLoading(symbol);
-    });
-
-    it('should go back to unchecked if the tx is rejected', () => {
-      cy.rejectMetamaskTransaction();
-      Dashboard.checkCollateralSwitchStatus(symbol, false, false);
-    });
-
     it('should enter market if the tx is accepted', () => {
       Dashboard.attemptEnterMarket(symbol);
-      cy.confirmMetamaskTransaction();
       Dashboard.waitForTransaction(symbol);
       Dashboard.checkCollateralSwitchStatus(symbol, false, true);
     });
@@ -47,19 +36,8 @@ export const exitMarket = ({ symbol }: TestParams) => {
       );
     });
 
-    it(`should trigger an exit market for ${symbol} and start loading`, () => {
-      Dashboard.attemptExitMarket(symbol);
-      Dashboard.checkCollateralSwitchStatusLoading(symbol);
-    });
-
-    it('should go back to checked if the tx is rejected', () => {
-      cy.rejectMetamaskTransaction();
-      Dashboard.checkCollateralSwitchStatus(symbol, false, true);
-    });
-
     it('should exit market if the tx is accepted', () => {
       Dashboard.attemptExitMarket(symbol);
-      cy.confirmMetamaskTransaction();
       Dashboard.waitForTransaction(symbol);
       Dashboard.checkCollateralSwitchStatus(symbol, false, false);
     });

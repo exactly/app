@@ -34,8 +34,8 @@ function Wallet() {
 
   const walletConnect = useCallback(() => {
     if (JSON.parse(process.env.NEXT_PUBLIC_IS_E2E ?? 'false')) {
-      const meta = connectors.find(({ id, ready, name }) => ready && id === 'injected' && name === 'MetaMask');
-      connect({ connector: meta });
+      const injected = connectors.find(({ id, ready, name }) => ready && id === 'injected' && name === 'E2E');
+      connect({ connector: injected });
     } else {
       open({ route: 'ConnectWallet' });
     }
@@ -80,6 +80,7 @@ function Wallet() {
             boxShadow: '0px 3px 4px rgba(97, 102, 107, 0.1)',
           },
         }}
+        data-testid="wallet-menu"
       >
         <Avatar alt="Address avatar" src={avatarImgSrc} sx={{ width: 20, height: 20, mr: { xs: 0, sm: '5px' } }} />
         <Typography variant="subtitle1" color="grey.900" display={onlyDesktop} data-testid="user-address">
@@ -128,6 +129,7 @@ function Wallet() {
             </Box>
           </Box>
           <Button
+            data-testid="wallet-menu-disconnect"
             variant="outlined"
             onClick={() => {
               closeMenu();

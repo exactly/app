@@ -1,12 +1,13 @@
 import deposit from '../../steps/common/deposit';
-import { connectMetamask, setupFork } from '../../steps/setup';
+import { setupFork } from '../../steps/setup';
+import { connectWallet, disconnectWallet } from '../../steps/wallet';
 
 describe('WETH floating deposit', () => {
   const { visit, setBalance, userAddress } = setupFork();
 
   before(() => {
     visit('/');
-    connectMetamask();
+    connectWallet();
   });
 
   before(async () => {
@@ -16,7 +17,7 @@ describe('WETH floating deposit', () => {
   });
 
   after(() => {
-    cy.disconnectMetamaskWalletFromAllDapps();
+    disconnectWallet();
   });
 
   deposit({ type: 'floating', symbol: 'ETH', decimals: 18, balance: '100.0', amount: '10' });
