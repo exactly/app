@@ -49,7 +49,7 @@ const Options: FC<Props> = ({
             sx={{ m: 0, ':hover': { backgroundColor: 'grey.50' } }}
             disabled={maturity !== 0 && !maturity}
             label={
-              <Box display="flex" flexDirection="row" py="7px" alignItems="center" width="100%" gap={2}>
+              <Box display="flex" flexDirection="row" py="7px" alignItems="center" width="100%" gap={1}>
                 <Box display="flex" gap={0.5} alignItems="center" flex={1}>
                   {maturity || maturity === 0 ? (
                     <Typography fontWeight={700} fontSize={14} color="grey.900" my="auto">
@@ -74,27 +74,6 @@ const Options: FC<Props> = ({
                     </Box>
                   )}
                 </Box>
-                <OptionRate
-                  isLoading={maturity === 0 ? loadingFloatingOption : loadingFixedOptions}
-                  symbol={symbol}
-                  value={optionRate}
-                  bottom={
-                    <>
-                      {maturity ? <LockIcon sx={bottomIconSx} /> : <SwapVertIcon sx={bottomIconSx} />}
-                      <Typography fontWeight={500} fontSize={13} color="figma.grey.500" textAlign="right">
-                        {maturity === 0 ? 'Variable' : 'Fixed'} rate
-                      </Typography>
-                      <Tooltip
-                        title={maturity === 0 ? <TooltipFloatingRate /> : <TooltipFixedRate />}
-                        placement="right"
-                        arrow
-                      >
-                        <InfoOutlinedIcon sx={bottomIconSx} />
-                      </Tooltip>
-                    </>
-                  }
-                />
-
                 {(operation === 'deposit' ? depositRewards : borrowRewards)?.map(({ assetSymbol, rate }) => (
                   <OptionRate
                     key={assetSymbol}
@@ -111,6 +90,27 @@ const Options: FC<Props> = ({
                     }
                   />
                 ))}
+                <OptionRate
+                  isLoading={maturity === 0 ? loadingFloatingOption : loadingFixedOptions}
+                  symbol={symbol}
+                  value={optionRate}
+                  minWidth={99}
+                  bottom={
+                    <>
+                      {maturity ? <LockIcon sx={bottomIconSx} /> : <SwapVertIcon sx={bottomIconSx} />}
+                      <Typography fontWeight={500} fontSize={13} color="figma.grey.500" textAlign="right">
+                        {maturity === 0 ? 'Variable' : 'Fixed'} rate
+                      </Typography>
+                      <Tooltip
+                        title={maturity === 0 ? <TooltipFloatingRate /> : <TooltipFixedRate />}
+                        placement="right"
+                        arrow
+                      >
+                        <InfoOutlinedIcon sx={bottomIconSx} />
+                      </Tooltip>
+                    </>
+                  }
+                />
               </Box>
             }
           />
@@ -160,14 +160,15 @@ const TooltipFloatingRate = () => (
   </Box>
 );
 
-const OptionRate: FC<{ isLoading?: boolean; value: string; symbol: string; bottom: React.ReactNode }> = ({
-  isLoading = false,
-  value,
-  symbol,
-  bottom,
-}) => {
+const OptionRate: FC<{
+  isLoading?: boolean;
+  value: string;
+  symbol: string;
+  bottom: React.ReactNode;
+  minWidth?: number;
+}> = ({ isLoading = false, value, symbol, bottom, minWidth = 0 }) => {
   return (
-    <Box display="flex" flexDirection="column">
+    <Box display="flex" flexDirection="column" minWidth={minWidth}>
       <Box display="flex" gap={0.3} justifyContent="right">
         {!isLoading ? (
           <Typography fontWeight={700} fontSize={14} color="grey.900" textAlign="right">

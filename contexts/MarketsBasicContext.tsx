@@ -3,6 +3,7 @@ import type { FC, PropsWithChildren } from 'react';
 import { BigNumber } from '@ethersproject/bignumber';
 
 import { MarketContext } from './MarketContext';
+import { Operation, useModalStatus } from './ModalStatusContext';
 
 export type MarketsBasicOperation = 'borrow' | 'deposit';
 export type MarketsBasicRewardRate = { assetSymbol: string; rate: BigNumber };
@@ -25,12 +26,17 @@ type ContextValues = {
 const MarketsBasicContext = createContext<ContextValues | null>(null);
 
 export const MarketsBasicProvider: FC<PropsWithChildren> = ({ children }) => {
+  const { setOperation: setModalOperation } = useModalStatus();
   const { marketSymbol: symbol, setMarketSymbol } = useContext(MarketContext);
   const [operation, setOperation] = useState<MarketsBasicOperation>('deposit');
   const [selected, setSelected] = useState<MarketsBasicOption['maturity']>(0);
   const onChangeOperation = useCallback((op: MarketsBasicOperation) => setOperation(op), [setOperation]);
 
   useEffect(() => setMarketSymbol('DAI'), [setMarketSymbol]);
+
+  useEffect(() => {
+    setModalOperation(`${operation}${selected && selected > 0 ? 'AtMaturity' : ''}` as Operation);
+  }, [operation, selected, setModalOperation]);
 
   const value: ContextValues = useMemo(
     () => ({

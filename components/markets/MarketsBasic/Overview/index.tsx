@@ -69,7 +69,7 @@ const Overview: FC<Props> = ({ symbol, operation, qty, option }) => {
       </Box>
       <Box display="flex" justifyContent="space-between">
         <Typography fontWeight={500} fontSize={13} color="figma.grey.500">
-          Total interest to be paid ({toPercentage(rate)})
+          Total interest fees to {operation === 'borrow' ? 'be paid' : 'receive'} ({toPercentage(rate)} APR)
         </Typography>
         <Box display="flex" gap={0.3}>
           <Typography fontWeight={700} fontSize={14}>
@@ -86,7 +86,7 @@ const Overview: FC<Props> = ({ symbol, operation, qty, option }) => {
       </Box>
       <Box display="flex" justifyContent="space-between">
         <Typography fontWeight={500} fontSize={13} color="figma.grey.500">
-          Maturity date (In {daysLeft(option.maturity || 0)})
+          {operation === 'borrow' ? 'Loan' : 'Deposit'} maturity date (In {daysLeft(option.maturity || 0)})
         </Typography>
         <Typography fontWeight={700} fontSize={14}>
           {parseTimestamp(option.maturity || 0)}
@@ -95,10 +95,10 @@ const Overview: FC<Props> = ({ symbol, operation, qty, option }) => {
       {operation === 'borrow' && (
         <Box display="flex" justifyContent="space-between">
           <Typography fontWeight={500} fontSize={13} color="figma.grey.500">
-            Late payment penalty
+            Late payment penalty daily rate
           </Typography>
           <Typography fontWeight={700} fontSize={14}>
-            {`${toPercentage(parseFloat(formatFixed(penaltyRate || Zero, 18)) * 86_400)} daily`}
+            {`${toPercentage(parseFloat(formatFixed(penaltyRate || Zero, 18)) * 86_400)}`}
           </Typography>
         </Box>
       )}

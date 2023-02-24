@@ -23,6 +23,7 @@ type ContextValues = {
   open: boolean;
   operation: Operation;
   openOperationModal: (op: Operation) => void;
+  setOperation: (op: Operation) => void;
   toggle: () => void;
   closeModal: () => void;
 };
@@ -65,8 +66,9 @@ export const ModalStatusProvider: FC<PropsWithChildren> = ({ children }) => {
       operation,
       openOperationModal,
       toggle,
+      setOperation,
     }),
-    [closeModal, open, openOperationModal, operation, toggle],
+    [closeModal, open, openOperationModal, operation, toggle, setOperation],
   );
 
   return (
