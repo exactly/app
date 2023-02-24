@@ -72,7 +72,6 @@ export const OperationContextProvider: FC<PropsWithChildren> = ({ children }) =>
   const [rawSlippage, setRawSlippage] = useState(DEFAULT_SLIPPAGE);
 
   const slippage = useMemo(() => {
-    console.log('operation', operation);
     return ['deposit', 'depositAtMaturity', 'withdraw', 'withdrawAtMaturity'].includes(operation)
       ? parseFixed(String(1 - Number(rawSlippage) / 100), 18)
       : parseFixed(String(1 + Number(rawSlippage) / 100), 18);
