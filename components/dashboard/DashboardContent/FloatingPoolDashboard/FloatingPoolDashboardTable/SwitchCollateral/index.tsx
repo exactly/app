@@ -31,7 +31,7 @@ function SwitchCollateral({ symbol }: Props) {
   const { disabled, disabledText } = useMemo<{ disabled: boolean; disabledText?: string }>(() => {
     if (!accountData || !healthFactor) return { disabled: true };
 
-    const { floatingBorrowAssets, fixedBorrowPositions, isCollateral, usdPrice, floatingDepositAssets } =
+    const { floatingBorrowAssets, fixedBorrowPositions, isCollateral, usdPrice, floatingDepositAssets, adjustFactor } =
       accountData[symbol];
 
     if (!floatingBorrowAssets.isZero() || fixedBorrowPositions.length > 0) {
@@ -42,7 +42,12 @@ function SwitchCollateral({ symbol }: Props) {
     }
 
     const collateralUsd = floatingDepositAssets.mul(usdPrice).div(WeiPerEther);
-    const newHF = parseFloat(parseHealthFactor(healthFactor.debt, healthFactor.collateral.sub(collateralUsd)));
+    const newHF = parseFloat(
+      parseHealthFactor(
+        healthFactor.debt,
+        healthFactor.collateral.sub(collateralUsd.mul(adjustFactor).div(WeiPerEther)),
+      ),
+    );
 
     if (isCollateral && newHF < 1) {
       return { disabled: true, disabledText: 'Disabling this collateral will make your health factor less than 1' };
