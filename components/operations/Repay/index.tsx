@@ -120,24 +120,24 @@ function Repay() {
 
         if (isMax) {
           const gasEstimation = await ETHRouterContract.estimateGas.refund(floatingBorrowShares, {
-            value: floatingBorrowAssets.mul(parseFixed(String(1 + numbers.slippage), 18)).div(WeiPerEther),
+            value: floatingBorrowAssets.mul(parseFixed(String(1 + numbers.ethRouterSlippage), 18)).div(WeiPerEther),
           });
 
           repayTx = await ETHRouterContract.refund(floatingBorrowShares, {
             gasLimit: gasEstimation.mul(parseFixed(String(numbers.gasLimitMultiplier), 18)).div(WeiPerEther),
-            value: floatingBorrowAssets.mul(parseFixed(String(1 + numbers.slippage), 18)).div(WeiPerEther),
+            value: floatingBorrowAssets.mul(parseFixed(String(1 + numbers.ethRouterSlippage), 18)).div(WeiPerEther),
           });
         } else {
           const gasEstimation = await ETHRouterContract.estimateGas.repay(parseFixed(qty, 18), {
             value: parseFixed(qty, 18)
-              .mul(parseFixed(String(1 + numbers.slippage), 18))
+              .mul(parseFixed(String(1 + numbers.ethRouterSlippage), 18))
               .div(WeiPerEther),
           });
 
           repayTx = await ETHRouterContract.repay(parseFixed(qty, 18), {
             gasLimit: gasEstimation.mul(parseFixed(String(numbers.gasLimitMultiplier), 18)).div(WeiPerEther),
             value: parseFixed(qty, 18)
-              .mul(parseFixed(String(1 + numbers.slippage), 18))
+              .mul(parseFixed(String(1 + numbers.ethRouterSlippage), 18))
               .div(WeiPerEther),
           });
         }
