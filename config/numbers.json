@@ -5,6 +5,7 @@
   "daysToWarning": 2,
   "daysToError": 0,
   "slippage": 0.05,
+  "ethRouterSlippage": 0.001,
   "usdAmount": 1,
   "gasLimitMultiplier": 1.25,
   "debounceTime": 500,
