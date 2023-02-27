@@ -33,11 +33,11 @@ export default function DisclaimerModal() {
       <DialogContent dividers>
         <>
           <Typography variant="body1" mb={2}>
-            Exactly is an open source, non-custodial protocol that operates on both the Ethereum Mainnet (L1) and
-            Optimism roll-up (L2) networks. The protocol is designed to bring fixed-income solutions for lenders and
-            borrowers (the &quot;Platform&quot;). The Platform will permit its users, among other things, enter into
-            certain transaction involving digital assets (including but not limited to digital loans and credit
-            products) (the &quot;Digital Assets Services&quot;).
+            Exactly is an open source, non-custodial protocol that operates on the Ethereum Mainnet network. The
+            protocol is designed to bring fixed-income solutions for lenders and borrowers (the &quot;Platform&quot;).
+            The Platform will permit its users, among other things, enter into certain transaction involving digital
+            assets (including but not limited to digital loans and credit products) (the &quot;Digital Assets
+            Services&quot;).
           </Typography>
           <Typography variant="body1" mb={2}>
             The Platform does not allow it use by, or operates in any way with, US Persons. US Persons are prohibited

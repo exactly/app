@@ -1,12 +1,10 @@
 import { useMemo } from 'react';
 import { Contract } from '@ethersproject/contracts';
 import { useProvider } from 'wagmi';
-import { mainnet, goerli, optimismGoerli } from 'wagmi/chains';
-
+import { mainnet, goerli } from 'wagmi/chains';
 import type { Previewer } from 'types/contracts/Previewer';
 import mainnetPreviewer from '@exactly-protocol/protocol/deployments/mainnet/Previewer.json' assert { type: 'json' };
 import goerliPreviewer from '@exactly-protocol/protocol/deployments/goerli/Previewer.json' assert { type: 'json' };
-import optimismGoerliPreviewer from '@exactly-protocol/protocol/deployments/optimism-goerli/Previewer.json' assert { type: 'json' };
 import previewerABI from 'abi/Previewer.json' assert { type: 'json' };
 import { useWeb3 } from './useWeb3';
 
@@ -20,10 +18,10 @@ export default () => {
     const address = {
       [goerli.id]: goerliPreviewer.address,
       [mainnet.id]: mainnetPreviewer.address,
-      [optimismGoerli.id]: optimismGoerliPreviewer.address,
     }[chain.id];
 
     if (!address) return null;
+
     return new Contract(address, previewerABI, provider) as Previewer;
   }, [chain, provider]);
 };
