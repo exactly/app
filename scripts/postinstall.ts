@@ -10,13 +10,13 @@ const writeABI = async (path: string, abi: unknown) => {
 };
 
 void Promise.all([
-  readABI('node_modules/@exactly-protocol/protocol/deployments/optimism-goerli/DAI.json'),
-  readABI('node_modules/@exactly-protocol/protocol/deployments/optimism-goerli/Auditor.json'),
-  readABI('node_modules/@exactly-protocol/protocol/deployments/optimism-goerli/Previewer.json'),
-  readABI('node_modules/@exactly-protocol/protocol/deployments/optimism-goerli/MarketDAI.json'),
-  readABI('node_modules/@exactly-protocol/protocol/deployments/optimism-goerli/MarketETHRouter.json'),
-  readABI('node_modules/@exactly-protocol/protocol/deployments/optimism-goerli/InterestRateModelDAI.json'),
-  readABI('node_modules/@exactly-protocol/protocol/deployments/optimism-goerli/RewardsController.json'),
+  readABI('node_modules/@exactly-protocol/protocol/deployments/goerli/DAI.json'),
+  readABI('node_modules/@exactly-protocol/protocol/deployments/goerli/Auditor.json'),
+  readABI('node_modules/@exactly-protocol/protocol/deployments/goerli/Previewer.json'),
+  readABI('node_modules/@exactly-protocol/protocol/deployments/goerli/MarketDAI.json'),
+  readABI('node_modules/@exactly-protocol/protocol/deployments/goerli/MarketETHRouter.json'),
+  readABI('node_modules/@exactly-protocol/protocol/deployments/goerli/InterestRateModelDAI.json'),
+  readABI('node_modules/@exactly-protocol/protocol/deployments/goerli/RewardsController.json'),
   mkdir('abi', { recursive: true }),
 ]).then(async ([erc20, auditor, previewer, market, marketETHRouter, irm, rewards]) => {
   const allFiles = await Promise.all([
