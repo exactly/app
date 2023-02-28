@@ -79,13 +79,13 @@ const Submit: FC<SubmitProps> = ({ symbol, operation, option, qty, errorData, re
 
   const { open } = useWeb3Modal();
 
-  const submitLabel = useMemo(
-    () =>
-      `${operation === 'deposit' ? 'Deposit' : 'Borrow'} ${
-        parseFloat(qty) ? formatNumber(qty, symbol) : ''
-      } ${symbol} ${!isFloating && option.maturity ? `for ${daysLeft(option.maturity)}` : ''}`,
-    [isFloating, operation, option.maturity, qty, symbol],
-  );
+  const submitLabel = useMemo(() => {
+    const parsed = parseFloat(qty);
+    const amount = parsed ? (Number.isInteger(parsed) ? parsed : formatNumber(qty, symbol)) : '';
+    return `${operation === 'deposit' ? 'Deposit' : 'Borrow'} ${amount} ${symbol} ${
+      !isFloating && option.maturity ? `for ${daysLeft(option.maturity)}` : ''
+    }`;
+  }, [isFloating, operation, option.maturity, qty, symbol]);
 
   if (!walletAddress) {
     return (
