@@ -6,7 +6,7 @@ import GitHubIcon from '@mui/icons-material/GitHub';
 import { globals } from 'styles/theme';
 import { MarketContext } from 'contexts/MarketContext';
 import useRouter from 'hooks/useRouter';
-const { onlyDesktopFlex } = globals;
+const { onlyDesktopFlex, maxWidth } = globals;
 
 const Footer = () => {
   const date = new Date();
@@ -28,6 +28,8 @@ const Footer = () => {
               borderRadius: '6px',
               padding: 2,
               gap: 0.5,
+              maxWidth,
+                mx: 'auto',
             }}
           >
             <Typography fontWeight={700} fontSize={14}>
