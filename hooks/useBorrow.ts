@@ -157,6 +157,7 @@ export default (): Borrow => {
       if (!hasCollateral)
         return setErrorData({
           status: true,
+          variant: 'warning',
           message:
             'In order to borrow you need to have a deposit in the Variable Rate Pool marked as collateral in your Dashboard',
         });
