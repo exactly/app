@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Box, SxProps, Typography } from '@mui/material';
 import InfoIcon from '@mui/icons-material/InfoRounded';
 import WarningIcon from '@mui/icons-material/ErrorRounded';
 import ErrorIcon from '@mui/icons-material/ReportProblemRounded';
 import SuccessIcon from '@mui/icons-material/CheckCircleRounded';
+import { MarketContext } from 'contexts/MarketContext';
+import useRouter from 'hooks/useRouter';
 
 type Variant = 'info' | 'warning' | 'error' | 'success';
 
@@ -34,11 +36,12 @@ const icon: Record<Variant, typeof InfoIcon> = {
 };
 
 function ModalAlert({ variant = 'info', message }: Props) {
+  const { view } = useContext(MarketContext);
+  const { pathname: currentPathname } = useRouter();
+
   const containerSx: SxProps = {
-    p: 1,
     backgroundColor: bg[variant],
     borderRadius: 1,
-    gap: 1,
 
     '&:not(:last-child)': {
       mb: 1,
@@ -61,9 +64,11 @@ function ModalAlert({ variant = 'info', message }: Props) {
   const Icon = icon[variant];
 
   return (
-    <Box sx={containerSx} display="flex" alignItems="flex-center">
-      <Icon sx={iconSx} />
-      <Typography sx={textSx}>{message}</Typography>
+    <Box sx={containerSx} display="flex" alignItems="flex-center" width="100%">
+      <Box display="flex" gap={0.5} py={1} px={view === 'simple' && currentPathname === '/' ? 2 : 1}>
+        <Icon sx={iconSx} />
+        <Typography sx={textSx}>{message}</Typography>
+      </Box>
     </Box>
   );
 }
