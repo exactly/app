@@ -18,7 +18,7 @@ type Props = {
 };
 
 const Overview: FC<Props> = ({ symbol, operation, qty, option }) => {
-  const { penaltyRate, decimals = 18 } = useAccountData(symbol);
+  const { penaltyRate } = useAccountData(symbol);
   const rate = useMemo(
     () => (operation === 'borrow' ? option.borrowAPR : option.depositAPR) || 0,
     [operation, option.borrowAPR, option.depositAPR],
