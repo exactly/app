@@ -47,7 +47,7 @@ const Overview: FC<Props> = ({ symbol, operation, qty, option }) => {
           style={{ maxWidth: '100%', height: 'auto' }}
         />
         <Typography fontWeight={700} fontSize={24}>
-          {total.toFixed(decimals)}
+          {formatNumber(total, symbol, true)}
         </Typography>
       </Box>
       <Box display="flex" justifyContent="space-between">
