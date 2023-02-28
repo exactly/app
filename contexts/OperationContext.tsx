@@ -25,6 +25,8 @@ import { MarketContext } from './MarketContext';
 import { useModalStatus } from './ModalStatusContext';
 import numbers from 'config/numbers.json';
 
+type LoadingButton = { withCircularProgress?: boolean; label?: string };
+
 type ContextValues = {
   symbol: string;
   errorData?: ErrorData;
@@ -49,6 +51,9 @@ type ContextValues = {
   rawSlippage: string;
   setRawSlippage: React.Dispatch<React.SetStateAction<string>>;
   slippage: BigNumber;
+
+  loadingButton: LoadingButton;
+  setLoadingButton: (loading: LoadingButton) => void;
 };
 
 const OperationContext = createContext<ContextValues | null>(null);
@@ -67,6 +72,7 @@ export const OperationContextProvider: FC<PropsWithChildren> = ({ children }) =>
   const [gasCost, setGasCost] = useState<BigNumber | undefined>();
   const [tx, setTx] = useState<Transaction | undefined>();
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingButton, setLoadingButton] = useState<LoadingButton>({});
   const [requiresApproval, setRequiresApproval] = useState(false);
   const { market, asset } = useAccountData(marketSymbol);
   const [rawSlippage, setRawSlippage] = useState(DEFAULT_SLIPPAGE);
@@ -83,9 +89,9 @@ export const OperationContextProvider: FC<PropsWithChildren> = ({ children }) =>
       setTx(undefined);
       setRequiresApproval(true);
       setGasCost(undefined);
+      setIsLoading(false);
     }
     setErrorData(undefined);
-    setIsLoading(false);
     setRawSlippage(DEFAULT_SLIPPAGE);
   }, [chain?.id, marketSymbol, operation, open, view, pathname]);
 
@@ -115,6 +121,9 @@ export const OperationContextProvider: FC<PropsWithChildren> = ({ children }) =>
     rawSlippage,
     setRawSlippage,
     slippage,
+
+    loadingButton,
+    setLoadingButton,
   };
 
   return <OperationContext.Provider value={value}>{children}</OperationContext.Provider>;
