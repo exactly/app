@@ -89,7 +89,7 @@ const MarketsHeader: FC = () => {
               height: 'auto',
             }}
           />
-          <Box>{`${chain?.name} Market`}</Box>
+          <Box>{`${chain?.name} Network`}</Box>
         </Box>
       }
     />
