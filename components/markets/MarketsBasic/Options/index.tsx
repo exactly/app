@@ -47,7 +47,7 @@ const Options: FC<Props> = ({
             value={maturity}
             control={<Radio />}
             componentsProps={{ typography: { width: '100%' } }}
-            sx={{ m: 0, ':hover': { backgroundColor: 'grey.50' } }}
+            sx={{ m: 0, ':hover': { backgroundColor: 'grey.50' }, px: 1, borderRadius: '4px' }}
             disabled={maturity !== 0 && !maturity}
             label={
               <Box display="flex" flexDirection="row" py="7px" alignItems="center" width="100%" gap={1}>

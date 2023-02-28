@@ -61,7 +61,7 @@ const DropdownMenu = <T,>({ label, options, onChange, renderValue, renderOption 
         aria-haspopup="true"
         aria-expanded={open ? 'true' : undefined}
         onClick={handleClick}
-        sx={{ borderRadius: 1, px: 0, py: 1 }}
+        sx={{ borderRadius: '16px', p: 1, ml: -1 }}
       >
         <InnerButton>{renderValue}</InnerButton>
       </Button>
