@@ -84,7 +84,7 @@ export const OperationContextProvider: FC<PropsWithChildren> = ({ children }) =>
   }, [operation, rawSlippage]);
 
   useEffect(() => {
-    if (!(!open && view === 'simple' && pathname === '/')) {
+    if (!(open && view === 'simple' && pathname === '/')) {
       setQty('');
       setTx(undefined);
       setRequiresApproval(true);
@@ -93,7 +93,7 @@ export const OperationContextProvider: FC<PropsWithChildren> = ({ children }) =>
     }
     setErrorData(undefined);
     setRawSlippage(DEFAULT_SLIPPAGE);
-  }, [chain?.id, marketSymbol, operation, open, view, pathname]);
+  }, [chain?.id, marketSymbol, open, view, pathname]);
 
   const assetContract = useERC20(asset);
   const marketContract = useMarket(market);
