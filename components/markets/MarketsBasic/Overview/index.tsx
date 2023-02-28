@@ -18,7 +18,7 @@ type Props = {
 };
 
 const Overview: FC<Props> = ({ symbol, operation, qty, option }) => {
-  const { penaltyRate } = useAccountData(symbol);
+  const { penaltyRate, decimals = 18 } = useAccountData(symbol);
   const rate = useMemo(
     () => (operation === 'borrow' ? option.borrowAPR : option.depositAPR) || 0,
     [operation, option.borrowAPR, option.depositAPR],
@@ -47,7 +47,7 @@ const Overview: FC<Props> = ({ symbol, operation, qty, option }) => {
           style={{ maxWidth: '100%', height: 'auto' }}
         />
         <Typography fontWeight={700} fontSize={24}>
-          {formatNumber(total, symbol)}
+          {total.toFixed(decimals)}
         </Typography>
       </Box>
       <Box display="flex" justifyContent="space-between">
