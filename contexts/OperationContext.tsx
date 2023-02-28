@@ -84,7 +84,7 @@ export const OperationContextProvider: FC<PropsWithChildren> = ({ children }) =>
   }, [operation, rawSlippage]);
 
   useEffect(() => {
-    if (!(open && view === 'simple' && pathname === '/')) {
+    if (!(!open && view === 'simple' && pathname === '/')) {
       setQty('');
       setTx(undefined);
       setRequiresApproval(true);
