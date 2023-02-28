@@ -29,7 +29,7 @@ const Footer = () => {
               padding: 2,
               gap: 0.5,
               maxWidth,
-                mx: 'auto',
+              mx: 'auto',
             }}
           >
             <Typography fontWeight={700} fontSize={14}>
