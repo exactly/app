@@ -3,6 +3,7 @@ import AccountDataContext from 'contexts/AccountDataContext';
 import networkData from 'config/networkData.json' assert { type: 'json' };
 import { useWeb3 } from './useWeb3';
 import queryRates from 'utils/queryRates';
+import { captureException } from '@sentry/nextjs';
 
 type HistoricalRateData = {
   date: Date;
@@ -12,7 +13,7 @@ type HistoricalRateData = {
 };
 
 // This is the maximum number of data points we can get from the subgraph
-const MAX_COUNT = 30;
+const MAX_COUNT = 24;
 
 export default function useHistoricalRates(symbol: string, initialCount = 30, initialInterval = 3_600 * 6) {
   const { chain } = useWeb3();
@@ -45,20 +46,25 @@ export default function useHistoricalRates(symbol: string, initialCount = 30, in
       setLoading(true);
       // We can only get 30 data points at a time, so we need to make multiple *concurrent* requests
       const iterations = Math.ceil(count / MAX_COUNT);
-      const ratesBatched = await Promise.all(
-        Array.from(Array(iterations).keys()).map(async (i) => {
-          const depositAPRs = await getRatesBatch('deposit', Math.min(count, MAX_COUNT), interval, i * MAX_COUNT);
-          const borrowAPRs = await getRatesBatch('borrow', Math.min(count, MAX_COUNT), interval, i * MAX_COUNT);
-          return depositAPRs.map((d, j) => ({
-            date: d.date,
-            depositApr: d.apr,
-            utilization: d.utilization,
-            borrowApr: borrowAPRs[j].apr,
-          }));
-        }),
-      );
-      setRates(ratesBatched.reverse().flatMap((r) => r));
-      setLoading(false);
+
+      try {
+        const ratesBatched = await Promise.all(
+          Array.from(Array(iterations).keys()).map(async (i) => {
+            const depositAPRs = await getRatesBatch('deposit', Math.min(count, MAX_COUNT), interval, i * MAX_COUNT);
+            const borrowAPRs = await getRatesBatch('borrow', Math.min(count, MAX_COUNT), interval, i * MAX_COUNT);
+            return depositAPRs.map((d, j) => ({
+              date: d.date,
+              depositApr: d.apr,
+              utilization: d.utilization,
+              borrowApr: borrowAPRs[j].apr,
+            }));
+          }),
+        );
+        setRates(ratesBatched.reverse().flatMap((r) => r));
+        setLoading(false);
+      } catch (error) {
+        captureException(error);
+      }
     },
     [getRatesBatch],
   );
