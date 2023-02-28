@@ -119,8 +119,10 @@ const MarketsBasic: FC = () => {
             />
           </Box>
           <Divider sx={{ borderColor: 'grey.200' }} />
-          <Box px={2} py={1.5}>
-            <Typography variant="cardTitle">Days to maturity</Typography>
+          <Box px={1} py={1.5}>
+            <Typography variant="cardTitle" sx={{ px: 1 }}>
+              Days to maturity
+            </Typography>
             <Options
               symbol={symbol}
               allOptions={allOptions}
