@@ -45,7 +45,16 @@ function Wallet() {
         aria-controls={isMenuOpen ? 'basic-menu' : undefined}
         aria-haspopup="true"
         aria-expanded={isMenuOpen ? 'true' : undefined}
-        sx={{ borderColor: '#CFD3D8', px: '10px' }}
+        sx={{
+          py: 1,
+          px: '10px',
+          borderColor: '#CFD3D8',
+          '&:hover': {
+            backgroundColor: '#fff',
+            borderColor: '#EDEFF2',
+            boxShadow: '0px 3px 4px rgba(97, 102, 107, 0.1)',
+          },
+        }}
       >
         <Avatar alt="Blocky Avatar" src={avatarImgSrc} sx={{ width: 20, height: 20, mr: '5px' }} />
         <Typography variant="subtitle1" color="#0D0E0F">
