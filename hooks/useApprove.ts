@@ -12,7 +12,7 @@ import handleOperationError from 'utils/handleOperationError';
 
 export default (operation: Operation, contract?: ERC20 | Market, spender?: string) => {
   const { walletAddress } = useWeb3();
-  const { symbol, setErrorData } = useOperationContext();
+  const { symbol, setErrorData, setLoadingButton } = useOperationContext();
   const [isLoading, setIsLoading] = useState(false);
 
   const { decimals = 18 } = useAccountData(symbol);
@@ -57,13 +57,14 @@ export default (operation: Operation, contract?: ERC20 | Market, spender?: strin
 
     try {
       setIsLoading(true);
+      setLoadingButton({ label: 'Sign the transaction on your wallet' });
       const gasEstimation = await estimateGas();
       if (!gasEstimation) return;
 
       const approveTx = await contract.approve(spender, MaxUint256, {
         gasLimit: gasEstimation.mul(parseFixed(String(numbers.gasLimitMultiplier), 18)).div(WeiPerEther),
       });
-
+      setLoadingButton({ withCircularProgress: true, label: `Approving ${symbol}` });
       await approveTx.wait();
     } catch (error) {
       const isDenied = [ErrorCode.ACTION_REJECTED, ErrorCode.TRANSACTION_REPLACED].includes(
@@ -78,8 +79,9 @@ export default (operation: Operation, contract?: ERC20 | Market, spender?: strin
       });
     } finally {
       setIsLoading(false);
+      setLoadingButton({});
     }
-  }, [spender, contract, estimateGas, setErrorData]);
+  }, [contract, spender, setLoadingButton, estimateGas, symbol, setErrorData]);
 
   return { approve, needsApproval, estimateGas, isLoading };
 };
