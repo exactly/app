@@ -206,7 +206,7 @@ function Repay() {
       if (symbol === 'WETH') {
         const amount = quantity
           ? parseFixed(quantity, 18)
-              .mul(parseFixed(String(1 + numbers.slippage), 18))
+              .mul(parseFixed(String(1 + numbers.ethRouterSlippage), 18))
               .div(WeiPerEther)
           : DEFAULT_AMOUNT;
 
