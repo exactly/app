@@ -6,7 +6,7 @@ import Head from 'next/head';
 import { Web3Modal } from '@web3modal/react';
 import { WagmiConfig } from 'wagmi';
 import type { AppProps } from 'next/app';
-import { Box, Grid } from '@mui/material';
+import { Box } from '@mui/material';
 import { ThemeProvider as MUIThemeProvider } from '@mui/material/styles';
 
 import { ModalStatusProvider } from 'contexts/ModalStatusContext';
@@ -62,15 +62,13 @@ export default function App({ Component, pageProps }: AppProps) {
               <MarketProvider>
                 <ModalStatusProvider>
                   <MarketsBasicProvider>
-                    <Grid maxWidth={maxWidth} mx="auto" height="100%">
-                      <Box display="flex" flexDirection="column" mx={1} height="100%">
-                        <Navbar />
-                        <main style={{ flexGrow: 1 }}>
-                          <Component {...pageProps} />
-                        </main>
-                        <Footer />
-                      </Box>
-                    </Grid>
+                    <Box display="flex" flexDirection="column" mx={1} height="100%">
+                      <Navbar />
+                      <main style={{ flexGrow: 1, maxWidth, margin: '0 auto' }}>
+                        <Component {...pageProps} />
+                      </main>
+                      <Footer />
+                    </Box>
                   </MarketsBasicProvider>
                 </ModalStatusProvider>
               </MarketProvider>

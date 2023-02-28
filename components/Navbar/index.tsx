@@ -21,7 +21,7 @@ import SelectNetwork from 'components/SelectNetwork';
 import SelectMarketsView from 'components/SelectMarketsView';
 import { MarketContext } from 'contexts/MarketContext';
 import ClaimRewards from 'components/ClaimRewards';
-const { maxWidth, onlyMobile, onlyDesktopFlex } = globals;
+const { onlyMobile, onlyDesktopFlex } = globals;
 
 const routes: {
   pathname: string;
@@ -75,7 +75,7 @@ function Navbar() {
   return (
     <Box sx={{ display: 'flex', justifyContent: 'center' }}>
       <DisclaimerModal />
-      <AppBar position="static" color="transparent" sx={{ maxWidth }}>
+      <AppBar position="static" color="transparent" sx={{ height: '56px' }}>
         <Toolbar disableGutters sx={{ padding: '0 0', gap: '8px' }}>
           <Link href={{ pathname: '/', query }} legacyBehavior>
             <Box mr="10px" sx={{ cursor: 'pointer' }}>

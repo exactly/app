@@ -17,7 +17,7 @@ const Footer = () => {
 
   return (
     <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-      <Box sx={{ maxWidth, width: '100%' }}>
+      <Box sx={{ width: '100%' }}>
         {(isMobile || view === 'advanced' || pathname !== '/') && (
           <Box
             sx={{
