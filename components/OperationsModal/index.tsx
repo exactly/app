@@ -24,10 +24,20 @@ import { TransitionProps } from '@mui/material/transitions';
 import { useOperationContext } from 'contexts/OperationContext';
 
 function PaperComponent(props: PaperProps | undefined) {
+  const { tx } = useOperationContext();
+
   const ref = useRef<HTMLDivElement>(null);
   return (
     <Draggable nodeRef={ref} cancel={'[class*="MuiDialogContent-root"]'}>
-      <Paper ref={ref} {...props} />
+      <Paper
+        ref={ref}
+        {...props}
+        sx={{
+          borderRadius: tx ? '16px' : '6px',
+          minWidth: '400px',
+          boxShadow: tx ? '4px 8px 16px rgba(227, 229, 232, 0.5), -4px -8px 16px rgba(248, 249, 249, 0.25)' : '',
+        }}
+      />
     </Draggable>
   );
 }
@@ -55,7 +65,8 @@ function OperationsModal() {
       PaperComponent={isMobile ? undefined : PaperComponent}
       TransitionComponent={isMobile ? Transition : undefined}
       fullScreen={isMobile}
-      sx={isMobile ? { top: 'auto' } : { backdropFilter: 'blur(1px)' }}
+      sx={isMobile ? { top: 'auto' } : { backdropFilter: 'blur(2px)' }}
+      BackdropProps={{ style: { backgroundColor: tx ? 'rgb(100, 100, 100 , 0.1)' : '' } }}
       disableEscapeKeyDown={loadingTx}
     >
       {!loadingTx && (
@@ -65,14 +76,19 @@ function OperationsModal() {
           sx={{
             position: 'absolute',
             right: 4,
-            top: 8,
+            top: 4,
             color: 'grey.500',
           }}
         >
-          <CloseIcon sx={{ fontSize: 16 }} />
+          <CloseIcon sx={{ fontSize: 20 }} />
         </IconButton>
       )}
-      <Box sx={{ padding: { xs: spacing(3, 2, 2), sm: spacing(5, 4, 4) }, borderTop: '4px #000 solid' }}>
+      <Box
+        sx={{
+          padding: { xs: spacing(3, 2, 2), sm: spacing(5, 4, 4) },
+          borderTop: tx ? '' : '4px #000 solid',
+        }}
+      >
         {!tx && (
           <DialogTitle
             sx={{
