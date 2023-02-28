@@ -65,7 +65,7 @@ function OperationsModal() {
       PaperComponent={isMobile ? undefined : PaperComponent}
       TransitionComponent={isMobile ? Transition : undefined}
       fullScreen={isMobile}
-      sx={isMobile ? { top: 'auto' } : { backdropFilter: 'blur(2px)' }}
+      sx={isMobile ? { top: 'auto' } : { backdropFilter: tx ? 'blur(2px)' : '' }}
       BackdropProps={{ style: { backgroundColor: tx ? 'rgb(100, 100, 100 , 0.1)' : '' } }}
       disableEscapeKeyDown={loadingTx}
     >
