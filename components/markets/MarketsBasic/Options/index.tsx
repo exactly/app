@@ -107,7 +107,6 @@ const Options: FC<Props> = ({
                       </Typography>
                       <Tooltip
                         componentsProps={{ tooltip: { sx: { maxWidth: 260 } } }}
-                        open={true}
                         title={maturity === 0 ? <TooltipFloatingRate /> : <TooltipFixedRate />}
                         placement="right"
                         arrow
