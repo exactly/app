@@ -118,7 +118,7 @@ const MarketsBasic: FC = () => {
               tooltip={isDeposit ? '' : 'The maximum amount you can borrow without putting your health factor at risk'}
             />
           </Box>
-          <Divider sx={{ background: 'figma.grey.700' }} />
+          <Divider sx={{ borderColor: 'grey.200' }} />
           <Box px={2} py={1.5}>
             <Typography variant="cardTitle">Days to maturity</Typography>
             <Options
