@@ -59,7 +59,7 @@ const Options: FC<Props> = ({
                   ) : (
                     <Skeleton width={52} height={20} />
                   )}
-                  {bestOption === maturity && (
+                  {bestOption && bestOption === maturity && (
                     <Box
                       display="flex"
                       alignItems="center"
