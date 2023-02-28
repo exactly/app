@@ -32,7 +32,7 @@ const Overview: FC<Props> = ({ symbol, operation, qty, option }) => {
       display="flex"
       flexDirection="column"
       p={2}
-      bgcolor="grey.50"
+      bgcolor="grey.100"
       border={`1px solid ${palette.grey[200]}`}
       borderRadius="8px"
       gap={0.2}
