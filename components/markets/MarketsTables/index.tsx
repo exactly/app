@@ -111,6 +111,8 @@ const MarketTables: FC = () => {
   );
 
   const defineRows = useCallback(async () => {
+    setIsLoading(true);
+
     if (!accountData || !chain) return;
 
     const tempFloatingRows: TableRow[] = [];

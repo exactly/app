@@ -18,6 +18,7 @@ import Footer from 'components/Footer';
 import Navbar from 'components/Navbar';
 import theme, { globals } from 'styles/theme';
 import { MarketsBasicProvider } from 'contexts/MarketsBasicContext';
+import { NetworkContextProvider } from 'contexts/NetworkContext';
 
 const { maxWidth } = globals;
 
@@ -58,21 +59,23 @@ export default function App({ Component, pageProps }: AppProps) {
       <ThemeProvider>
         <MUIThemeProvider theme={theme}>
           <WagmiConfig client={wagmi}>
-            <AccountDataProvider>
-              <MarketProvider>
-                <ModalStatusProvider>
-                  <MarketsBasicProvider>
-                    <Box display="flex" flexDirection="column" mx={2} height="100%">
-                      <Navbar />
-                      <main style={{ flexGrow: 1, maxWidth, margin: '0 auto', width: '100%' }}>
-                        <Component {...pageProps} />
-                      </main>
-                      <Footer />
-                    </Box>
-                  </MarketsBasicProvider>
-                </ModalStatusProvider>
-              </MarketProvider>
-            </AccountDataProvider>
+            <NetworkContextProvider>
+              <AccountDataProvider>
+                <MarketProvider>
+                  <ModalStatusProvider>
+                    <MarketsBasicProvider>
+                      <Box display="flex" flexDirection="column" mx={2} height="100%">
+                        <Navbar />
+                        <main style={{ flexGrow: 1, maxWidth, margin: '0 auto', width: '100%' }}>
+                          <Component {...pageProps} />
+                        </main>
+                        <Footer />
+                      </Box>
+                    </MarketsBasicProvider>
+                  </ModalStatusProvider>
+                </MarketProvider>
+              </AccountDataProvider>
+            </NetworkContextProvider>
           </WagmiConfig>
           <Web3Modal
             projectId={walletConnectId}
