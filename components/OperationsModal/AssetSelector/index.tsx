@@ -29,7 +29,7 @@ function Asset({ assetSymbol, option = false }: AssetOptionProps) {
         height={size}
         style={{ maxWidth: '100%', height: 'auto' }}
       />
-      <Typography fontWeight={700} fontSize={option ? 20 : 24} my="auto">
+      <Typography fontWeight={700} fontSize={size} my="auto">
         {formatSymbol(assetSymbol)}
       </Typography>
     </Box>

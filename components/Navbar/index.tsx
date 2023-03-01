@@ -75,7 +75,7 @@ function Navbar() {
   return (
     <Box sx={{ display: 'flex', justifyContent: 'center' }}>
       <DisclaimerModal />
-      <AppBar position="static" color="transparent" sx={{ height: '56px', mb: 2.5 }}>
+      <AppBar position="static" color="transparent" sx={{ height: '56px', mb: { xs: 0, sm: 2.5 } }}>
         <Toolbar disableGutters sx={{ padding: '0 0', gap: '8px' }}>
           <Link href={{ pathname: '/', query }} legacyBehavior>
             <Box mr="10px" sx={{ cursor: 'pointer' }}>
@@ -131,10 +131,10 @@ function Navbar() {
           >
             <MenuIcon sx={{ color: 'figma.grey.300' }} />
           </IconButton>
-          <Box display={onlyMobile}>
-            <MobileMenu open={openMenu} handleClose={() => setOpenMenu(false)} />
-          </Box>
         </Toolbar>
+        <Box display={onlyMobile}>
+          <MobileMenu open={openMenu} handleClose={() => setOpenMenu(false)} />
+        </Box>
       </AppBar>
     </Box>
   );
