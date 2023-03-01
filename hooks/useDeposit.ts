@@ -35,6 +35,7 @@ export default (): Deposit => {
     marketContract,
     assetContract,
     ETHRouterContract,
+    setErrorButton,
   } = useOperationContext();
 
   const handleOperationError = useHandleOperationError();
@@ -52,7 +53,14 @@ export default (): Deposit => {
 
   const previewGasCost = useCallback(
     async (quantity: string): Promise<BigNumber | undefined> => {
-      if (!walletAddress || !ETHRouterContract || !marketContract || !quantity) return;
+      if (
+        !walletAddress ||
+        !ETHRouterContract ||
+        !marketContract ||
+        !quantity ||
+        (walletBalance && parseFloat(quantity) > parseFloat(walletBalance))
+      )
+        return;
 
       const gasPrice = (await ETHRouterContract.provider.getFeeData()).maxFeePerGas;
       if (!gasPrice) return;
@@ -77,7 +85,16 @@ export default (): Deposit => {
 
       return gasPrice.mul(gasLimit);
     },
-    [decimals, ETHRouterContract, approveEstimateGas, marketContract, requiresApproval, symbol, walletAddress],
+    [
+      walletAddress,
+      ETHRouterContract,
+      marketContract,
+      walletBalance,
+      requiresApproval,
+      symbol,
+      decimals,
+      approveEstimateGas,
+    ],
   );
 
   const isLoading = useMemo(() => approveIsLoading || isLoadingOp, [approveIsLoading, isLoadingOp]);
@@ -94,16 +111,13 @@ export default (): Deposit => {
       setQty(value);
 
       if (walletBalance && parseFloat(value) > parseFloat(walletBalance)) {
-        return setErrorData({
-          status: true,
-          message: `You don't have enough ${symbol} to make this deposit`,
-          component: 'input',
-        });
+        setErrorButton('Insufficient balance');
+        return;
       }
-
+      setErrorButton(undefined);
       setErrorData(undefined);
     },
-    [setQty, walletBalance, setErrorData, symbol],
+    [setQty, walletBalance, setErrorData, setErrorButton],
   );
 
   const deposit = useCallback(async () => {

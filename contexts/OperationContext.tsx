@@ -54,6 +54,8 @@ type ContextValues = {
 
   loadingButton: LoadingButton;
   setLoadingButton: (loading: LoadingButton) => void;
+  errorButton?: string;
+  setErrorButton: (error?: string) => void;
 };
 
 const OperationContext = createContext<ContextValues | null>(null);
@@ -73,6 +75,7 @@ export const OperationContextProvider: FC<PropsWithChildren> = ({ children }) =>
   const [tx, setTx] = useState<Transaction | undefined>();
   const [isLoading, setIsLoading] = useState(false);
   const [loadingButton, setLoadingButton] = useState<LoadingButton>({});
+  const [errorButton, setErrorButton] = useState<string | undefined>();
   const [requiresApproval, setRequiresApproval] = useState(false);
   const { market, asset } = useAccountData(marketSymbol);
   const [rawSlippage, setRawSlippage] = useState(DEFAULT_SLIPPAGE);
@@ -124,6 +127,8 @@ export const OperationContextProvider: FC<PropsWithChildren> = ({ children }) =>
 
     loadingButton,
     setLoadingButton,
+    errorButton,
+    setErrorButton,
   };
 
   return <OperationContext.Provider value={value}>{children}</OperationContext.Provider>;

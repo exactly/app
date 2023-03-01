@@ -47,6 +47,7 @@ export default (): DepositAtMaturity => {
     rawSlippage,
     setRawSlippage,
     slippage,
+    setErrorButton,
   } = useOperationContext();
 
   const handleOperationError = useHandleOperationError();
@@ -68,7 +69,15 @@ export default (): DepositAtMaturity => {
 
   const previewGasCost = useCallback(
     async (quantity: string): Promise<BigNumber | undefined> => {
-      if (!walletAddress || !marketContract || !ETHRouterContract || !date || !quantity) return;
+      if (
+        !walletAddress ||
+        !marketContract ||
+        !ETHRouterContract ||
+        !date ||
+        !quantity ||
+        (walletBalance && parseFloat(quantity) > parseFloat(walletBalance))
+      )
+        return;
 
       const gasPrice = (await ETHRouterContract.provider.getFeeData()).maxFeePerGas;
       if (!gasPrice) return;
@@ -99,11 +108,12 @@ export default (): DepositAtMaturity => {
       marketContract,
       ETHRouterContract,
       date,
+      walletBalance,
       requiresApproval,
       symbol,
+      decimals,
       slippage,
       approveEstimateGas,
-      decimals,
     ],
   );
 
@@ -135,17 +145,15 @@ export default (): DepositAtMaturity => {
       setQty(value);
 
       if (walletBalance && parseFloat(value) > parseFloat(walletBalance)) {
-        return setErrorData({
-          status: true,
-          message: `You don't have enough ${symbol} to make this deposit`,
-          component: 'input',
-        });
+        setErrorButton('Insufficient balance');
+        return;
       }
+      setErrorButton(undefined);
       setErrorData(undefined);
 
       setGtMaxYield(!!optimalDepositAmount && parseFixed(value || '0', decimals).gt(optimalDepositAmount));
     },
-    [setQty, walletBalance, setErrorData, optimalDepositAmount, decimals, symbol],
+    [setQty, walletBalance, setErrorButton, setErrorData, optimalDepositAmount, decimals],
   );
 
   const deposit = useCallback(async () => {
