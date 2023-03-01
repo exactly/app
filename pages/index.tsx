@@ -24,7 +24,7 @@ const Markets: NextPage = () => {
           <MarketTables />
         </>
       ) : (
-        <Box display="flex" justifyContent="center" mb={2} mt={3}>
+        <Box display="flex" justifyContent="center" mb={2} mt={{ xs: 1, sm: 3 }}>
           <MarketsBasic />
           <BackgroundCircle />
         </Box>
