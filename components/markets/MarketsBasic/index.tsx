@@ -1,5 +1,5 @@
 import React, { FC, useEffect, useMemo } from 'react';
-import { Box, Divider, Typography } from '@mui/material';
+import { Box, capitalize, Divider, Typography } from '@mui/material';
 import AssetInput from 'components/OperationsModal/AssetInput';
 import { MarketsBasicOption, useMarketsBasic } from 'contexts/MarketsBasicContext';
 import { useOperationContext } from 'contexts/OperationContext';
@@ -121,7 +121,7 @@ const MarketsBasic: FC = () => {
           <Divider sx={{ borderColor: 'grey.200' }} />
           <Box px={1} py={1.5}>
             <Typography variant="cardTitle" sx={{ px: 1 }}>
-              Days to maturity
+              {`${capitalize(operation)} duration`}
             </Typography>
             <Options
               symbol={symbol}
