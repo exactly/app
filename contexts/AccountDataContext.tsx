@@ -49,6 +49,7 @@ export const AccountDataProvider: FC<PropsWithChildren> = ({ children }) => {
     } catch (error) {
       const e = error as { code: ErrorCode };
       if (e.code !== ErrorCode.CALL_EXCEPTION) captureException(error);
+      return undefined;
     }
   }, [previewer, walletAddress]);
 
