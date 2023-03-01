@@ -15,7 +15,7 @@ type Props = {
 };
 
 function ModalSubmit({ requiresApproval = false, isLoading = false, disabled = false, submit, symbol, label }: Props) {
-  const { loadingButton, isLoading: isLoadingOp, tx } = useOperationContext();
+  const { loadingButton, isLoading: isLoadingOp, tx, errorButton } = useOperationContext();
   const { operation } = useModalStatus();
 
   return (
@@ -55,9 +55,9 @@ function ModalSubmit({ requiresApproval = false, isLoading = false, disabled = f
           onClick={submit}
           color="primary"
           variant="contained"
-          disabled={disabled || requiresApproval}
+          disabled={disabled || requiresApproval || Boolean(errorButton)}
         >
-          {label}
+          {errorButton ? errorButton : label}
         </LoadingButton>
       )}
     </>
