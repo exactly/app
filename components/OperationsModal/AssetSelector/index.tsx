@@ -15,6 +15,7 @@ type AssetOptionProps = {
 
 function Asset({ assetSymbol, option = false }: AssetOptionProps) {
   const size = option ? 20 : 24;
+  const linePadding = option ? 4 : 6;
 
   if (!assetSymbol) {
     return <Skeleton width={80} />;
@@ -29,7 +30,7 @@ function Asset({ assetSymbol, option = false }: AssetOptionProps) {
         height={size}
         style={{ maxWidth: '100%', height: 'auto' }}
       />
-      <Typography fontWeight={700} fontSize={size} my="auto">
+      <Typography sx={{ fontWeight: 700, fontSize: size, height: size, lineHeight: `${size + linePadding}px` }}>
         {formatSymbol(assetSymbol)}
       </Typography>
     </Box>

@@ -46,7 +46,7 @@ const Overview: FC<Props> = ({ symbol, operation, qty, option }) => {
           height="20"
           style={{ maxWidth: '100%', height: 'auto' }}
         />
-        <Typography fontWeight={700} fontSize={24}>
+        <Typography fontWeight={700} fontSize={24} lineHeight="30px" height={24}>
           {formatNumber(total, symbol, true)}
         </Typography>
       </Box>
@@ -55,7 +55,7 @@ const Overview: FC<Props> = ({ symbol, operation, qty, option }) => {
           Assets to be {operation === 'borrow' ? 'borrowed' : 'deposited'}
         </Typography>
         <Box display="flex" gap={0.3}>
-          <Typography fontWeight={700} fontSize={14}>
+          <Typography fontWeight={700} fontSize={14} lineHeight="23px" height={14}>
             {formatNumber(qty, symbol)}
           </Typography>
           <Image
@@ -72,7 +72,7 @@ const Overview: FC<Props> = ({ symbol, operation, qty, option }) => {
           Total interest fees to {operation === 'borrow' ? 'be paid' : 'receive'} ({toPercentage(rate)} APR)
         </Typography>
         <Box display="flex" gap={0.3}>
-          <Typography fontWeight={700} fontSize={14}>
+          <Typography fontWeight={700} fontSize={14} lineHeight="23px" height={14}>
             {formatNumber(interest, symbol)}
           </Typography>
           <Image
