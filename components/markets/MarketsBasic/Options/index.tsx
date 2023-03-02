@@ -2,7 +2,7 @@ import React, { FC } from 'react';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import LockIcon from '@mui/icons-material/Lock';
 import SwapVertIcon from '@mui/icons-material/SwapVert';
-import { Box, FormControlLabel, Radio, RadioGroup, Skeleton, Tooltip, Typography } from '@mui/material';
+import { Box, Divider, FormControlLabel, Radio, RadioGroup, Skeleton, Tooltip, Typography } from '@mui/material';
 import Image from 'next/image';
 import daysLeft from 'utils/daysLeft';
 import { MarketsBasicOperation, MarketsBasicOption } from 'contexts/MarketsBasicContext';
@@ -42,83 +42,86 @@ const Options: FC<Props> = ({
         const value = apr > minAPRValue ? apr : undefined;
         const optionRate = `${value && value > 200 ? '∞' : toPercentage(apr)} APR`;
         return (
-          <FormControlLabel
-            key={`${maturity}_${depositAPR}_${borrowAPR}_${index}`}
-            value={maturity}
-            control={<Radio />}
-            componentsProps={{ typography: { width: '100%' } }}
-            sx={{ m: 0, ':hover': { backgroundColor: 'grey.50' }, px: 1, borderRadius: '4px' }}
-            disabled={maturity !== 0 && !maturity}
-            label={
-              <Box display="flex" flexDirection="row" py="7px" alignItems="center" width="100%" gap={1}>
-                <Box display="flex" gap={0.5} alignItems="center" flex={1}>
-                  {maturity || maturity === 0 ? (
-                    <Typography fontWeight={700} fontSize={14} color="grey.900" my="auto">
-                      {maturity ? daysLeft(maturity) : 'Flexible'}
-                    </Typography>
-                  ) : (
-                    <Skeleton width={52} height={20} />
-                  )}
-                  {bestOption && bestOption === maturity && (
-                    <Box
-                      display="flex"
-                      alignItems="center"
-                      height="16px"
-                      py="3px"
-                      px="6px"
-                      borderRadius="8px"
-                      sx={{ background: 'linear-gradient(66.92deg, #00CC68 34.28%, #00CC8F 100%)' }}
-                    >
-                      <Typography variant="chip" color="white">
-                        BEST
+          <>
+            <FormControlLabel
+              key={`${maturity}_${depositAPR}_${borrowAPR}_${index}`}
+              value={maturity}
+              control={<Radio />}
+              componentsProps={{ typography: { width: '100%' } }}
+              sx={{ m: 0, ':hover': { backgroundColor: 'grey.50' }, px: 1, borderRadius: '4px' }}
+              disabled={maturity !== 0 && !maturity}
+              label={
+                <Box display="flex" flexDirection="row" py="7px" alignItems="center" width="100%" gap={1}>
+                  <Box display="flex" gap={0.5} alignItems="center" flex={1}>
+                    {maturity || maturity === 0 ? (
+                      <Typography fontWeight={700} fontSize={14} color="grey.900" my="auto">
+                        {maturity ? daysLeft(maturity) : 'Flexible'}
                       </Typography>
-                    </Box>
-                  )}
-                </Box>
-                {(operation === 'deposit' ? depositRewards : borrowRewards)?.map(
-                  ({ assetSymbol, rate }) =>
-                    rate.gt(Zero) && (
-                      <OptionRate
-                        key={assetSymbol}
-                        isLoading={maturity === 0 ? loadingFloatingOption : loadingFixedOptions}
-                        symbol={assetSymbol}
-                        value={toPercentage(Number(rate) / 1e18)}
-                        bottom={
-                          <>
-                            <Typography fontWeight={500} fontSize={13} color="figma.grey.500" textAlign="right">
-                              Rewards
-                            </Typography>
-                            <InfoOutlinedIcon sx={bottomIconSx} />
-                          </>
-                        }
-                      />
-                    ),
-                )}
-                <OptionRate
-                  isLoading={maturity === 0 ? loadingFloatingOption : loadingFixedOptions}
-                  symbol={symbol}
-                  value={optionRate}
-                  minWidth={99}
-                  bottom={
-                    <>
-                      {maturity ? <LockIcon sx={bottomIconSx} /> : <SwapVertIcon sx={bottomIconSx} />}
-                      <Typography fontWeight={500} fontSize={13} color="figma.grey.500" textAlign="right">
-                        {maturity === 0 ? 'Variable' : 'Fixed'} rate
-                      </Typography>
-                      <Tooltip
-                        componentsProps={{ tooltip: { sx: { maxWidth: 260 } } }}
-                        title={maturity === 0 ? <TooltipFloatingRate /> : <TooltipFixedRate />}
-                        placement="right"
-                        arrow
+                    ) : (
+                      <Skeleton width={52} height={20} />
+                    )}
+                    {bestOption && bestOption === maturity && (
+                      <Box
+                        display="flex"
+                        alignItems="center"
+                        height="16px"
+                        py="3px"
+                        px="6px"
+                        borderRadius="8px"
+                        sx={{ background: 'linear-gradient(66.92deg, #00CC68 34.28%, #00CC8F 100%)' }}
                       >
-                        <InfoOutlinedIcon sx={bottomIconSx} />
-                      </Tooltip>
-                    </>
-                  }
-                />
-              </Box>
-            }
-          />
+                        <Typography variant="chip" color="white">
+                          BEST
+                        </Typography>
+                      </Box>
+                    )}
+                  </Box>
+                  {(operation === 'deposit' ? depositRewards : borrowRewards)?.map(
+                    ({ assetSymbol, rate }) =>
+                      rate.gt(Zero) && (
+                        <OptionRate
+                          key={assetSymbol}
+                          isLoading={maturity === 0 ? loadingFloatingOption : loadingFixedOptions}
+                          symbol={assetSymbol}
+                          value={toPercentage(Number(rate) / 1e18)}
+                          bottom={
+                            <>
+                              <Typography fontWeight={500} fontSize={13} color="figma.grey.500" textAlign="right">
+                                Rewards
+                              </Typography>
+                              <InfoOutlinedIcon sx={bottomIconSx} />
+                            </>
+                          }
+                        />
+                      ),
+                  )}
+                  <OptionRate
+                    isLoading={maturity === 0 ? loadingFloatingOption : loadingFixedOptions}
+                    symbol={symbol}
+                    value={optionRate}
+                    minWidth={99}
+                    bottom={
+                      <>
+                        {maturity ? <LockIcon sx={bottomIconSx} /> : <SwapVertIcon sx={bottomIconSx} />}
+                        <Typography fontWeight={500} fontSize={13} color="figma.grey.500" textAlign="right">
+                          {maturity === 0 ? 'Variable' : 'Fixed'} rate
+                        </Typography>
+                        <Tooltip
+                          componentsProps={{ tooltip: { sx: { maxWidth: 260 } } }}
+                          title={maturity === 0 ? <TooltipFloatingRate /> : <TooltipFixedRate />}
+                          placement="right"
+                          arrow
+                        >
+                          <InfoOutlinedIcon sx={bottomIconSx} />
+                        </Tooltip>
+                      </>
+                    }
+                  />
+                </Box>
+              }
+            />
+            {allOptions.length > 1 && maturity === 0 && <Divider sx={{ mx: 1, borderColor: 'grey.200' }} />}
+          </>
         );
       })}
     </RadioGroup>
