@@ -96,7 +96,6 @@ const AssetMaturityPools: FC<Props> = ({ symbol }) => {
         borderRadius="0px 0px 6px 6px"
         bgcolor="white"
         p="16px"
-        width={{ sm: 610 }}
         height={280}
       >
         <YieldChart symbol={symbol} />
@@ -106,7 +105,6 @@ const AssetMaturityPools: FC<Props> = ({ symbol }) => {
         borderRadius="0px 0px 6px 6px"
         bgcolor="white"
         p="16px"
-        width={{ sm: 610 }}
         height={280}
       >
         <UtilizationRateChart type="fixed" symbol={symbol} />
