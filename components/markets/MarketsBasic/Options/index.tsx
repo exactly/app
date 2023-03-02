@@ -88,7 +88,14 @@ const Options: FC<Props> = ({
                               <Typography fontWeight={500} fontSize={13} color="figma.grey.500" textAlign="right">
                                 Rewards
                               </Typography>
-                              <InfoOutlinedIcon sx={bottomIconSx} />
+                              <Tooltip
+                                componentsProps={{ tooltip: { sx: { maxWidth: 260 } } }}
+                                title={<TooltipRewards />}
+                                placement="right"
+                                arrow
+                              >
+                                <InfoOutlinedIcon sx={bottomIconSx} />
+                              </Tooltip>
                             </>
                           }
                         />
@@ -126,6 +133,17 @@ const Options: FC<Props> = ({
     </RadioGroup>
   );
 };
+
+const TooltipRewards = () => (
+  <Box display="flex" flexDirection="column" gap={0.5}>
+    <Typography fontSize={13} color="grey.700">
+      This percentage stands for the APR of rewards earned for operating on this pool.
+    </Typography>
+    <Typography fontSize={13} color="grey.700">
+      Please note that the APR of rewards can vary over time depending on the market conditions.
+    </Typography>
+  </Box>
+);
 
 const TooltipFixedRate = () => (
   <Box display="flex" flexDirection="column" gap={0.5}>
