@@ -1,6 +1,6 @@
 import { formatFixed } from '@ethersproject/bignumber';
 import { Zero } from '@ethersproject/constants';
-import { Box, Typography, useTheme } from '@mui/material';
+import { Box, Typography, useMediaQuery, useTheme } from '@mui/material';
 import { MarketsBasicOperation, MarketsBasicOption } from 'contexts/MarketsBasicContext';
 import useAccountData from 'hooks/useAccountData';
 import Image from 'next/image';
@@ -25,7 +25,8 @@ const Overview: FC<Props> = ({ symbol, operation, qty, option }) => {
   );
   const interest = useMemo(() => parseFloat(qty) * rate, [qty, rate]);
   const total = useMemo(() => parseFloat(qty) + interest, [qty, interest]);
-  const { palette } = useTheme();
+  const { palette, breakpoints } = useTheme();
+  const isMobile = useMediaQuery(breakpoints.down('sm'));
 
   return (
     <Box
@@ -37,7 +38,9 @@ const Overview: FC<Props> = ({ symbol, operation, qty, option }) => {
       borderRadius="8px"
       gap={0.2}
     >
-      <Typography variant="cardTitle">{operation === 'borrow' ? 'Your total debt' : 'Your total earnings'}</Typography>
+      <Typography mb={0.5} variant="cardTitle">
+        {operation === 'borrow' ? 'Your total debt' : 'Your total earnings'}
+      </Typography>
       <Box display="flex" gap={0.5} mb={1}>
         <Image
           src={`/img/assets/${symbol}.svg`}
@@ -46,7 +49,13 @@ const Overview: FC<Props> = ({ symbol, operation, qty, option }) => {
           height="20"
           style={{ maxWidth: '100%', height: 'auto' }}
         />
-        <Typography fontWeight={700} fontSize={24} lineHeight="30px" height={24}>
+        <Typography
+          variant="browserAlign"
+          fontWeight={700}
+          fontSize={24}
+          height={24}
+          lineHeight={isMobile ? 1.2 : undefined}
+        >
           {formatNumber(total, symbol, true)}
         </Typography>
       </Box>
@@ -54,8 +63,14 @@ const Overview: FC<Props> = ({ symbol, operation, qty, option }) => {
         <Typography fontWeight={500} fontSize={13} color="figma.grey.500">
           Assets to be {operation === 'borrow' ? 'borrowed' : 'deposited'}
         </Typography>
-        <Box display="flex" gap={0.3}>
-          <Typography fontWeight={700} fontSize={14} lineHeight="23px" height={14}>
+        <Box display="flex" gap={0.3} alignItems="center" minWidth={100} justifyContent="right">
+          <Typography
+            variant="browserAlign"
+            fontWeight={700}
+            fontSize={14}
+            lineHeight={isMobile ? 1.2 : undefined}
+            height={14}
+          >
             {formatNumber(qty, symbol)}
           </Typography>
           <Image
@@ -71,8 +86,14 @@ const Overview: FC<Props> = ({ symbol, operation, qty, option }) => {
         <Typography fontWeight={500} fontSize={13} color="figma.grey.500">
           Total interest fees to {operation === 'borrow' ? 'be paid' : 'receive'} ({toPercentage(rate)} APR)
         </Typography>
-        <Box display="flex" gap={0.3}>
-          <Typography fontWeight={700} fontSize={14} lineHeight="23px" height={14}>
+        <Box display="flex" gap={0.3} alignItems="center" minWidth={100} justifyContent="right">
+          <Typography
+            variant="browserAlign"
+            fontWeight={700}
+            fontSize={14}
+            lineHeight={isMobile ? 1.2 : undefined}
+            height={14}
+          >
             {formatNumber(interest, symbol)}
           </Typography>
           <Image
@@ -88,7 +109,7 @@ const Overview: FC<Props> = ({ symbol, operation, qty, option }) => {
         <Typography fontWeight={500} fontSize={13} color="figma.grey.500">
           {operation === 'borrow' ? 'Loan' : 'Deposit'} maturity date (In {daysLeft(option.maturity || 0)})
         </Typography>
-        <Typography fontWeight={700} fontSize={14}>
+        <Typography fontWeight={700} fontSize={14} noWrap minWidth={100} textAlign="right">
           {parseTimestamp(option.maturity || 0)}
         </Typography>
       </Box>
