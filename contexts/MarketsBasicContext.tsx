@@ -32,7 +32,7 @@ export const MarketsBasicProvider: FC<PropsWithChildren> = ({ children }) => {
   const [selected, setSelected] = useState<MarketsBasicOption['maturity']>(0);
   const onChangeOperation = useCallback((op: MarketsBasicOperation) => setOperation(op), [setOperation]);
 
-  useEffect(() => setMarketSymbol('DAI'), [setMarketSymbol]);
+  useEffect(() => setMarketSymbol('USDC'), [setMarketSymbol]);
 
   useEffect(() => {
     setModalOperation(`${operation}${selected && selected > 0 ? 'AtMaturity' : ''}` as Operation);

@@ -23,7 +23,7 @@ const { minAPRValue } = numbers;
 
 const MarketsBasic: FC = () => {
   const { openOperationModal } = useModalStatus();
-  const { symbol = 'DAI', operation, selected, setSelected } = useMarketsBasic();
+  const { symbol = 'USDC', operation, selected, setSelected } = useMarketsBasic();
   const { errorData, requiresApproval, qty, assetContract, tx } = useOperationContext();
   const { decimals = 18 } = useAccountData(symbol);
   const walletBalance = useBalance(symbol, assetContract);
