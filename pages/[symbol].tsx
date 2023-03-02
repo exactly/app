@@ -34,10 +34,10 @@ const Market: NextPage<Props> = ({ symbol }: Props) => {
       </Box>
       <AssetHeaderInfo symbol={symbol} />
       <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} my="16px" gap="16px">
-        <Box maxWidth={{ xs: '100%', sm: '610px' }}>
+        <Box maxWidth={{ xs: '100%', sm: '50%' }}>
           <AssetFloatingPool symbol={symbol} />
         </Box>
-        <Box maxWidth={{ xs: '100%', sm: '610px' }}>
+        <Box maxWidth={{ xs: '100%', sm: '50%' }}>
           <AssetMaturityPools symbol={symbol} />
         </Box>
       </Box>
