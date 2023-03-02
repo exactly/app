@@ -9,6 +9,8 @@ import { HealthFactor } from 'types/HealthFactor';
 import useAuditor from 'hooks/useAuditor';
 import getHealthFactorData from 'utils/getHealthFactorData';
 import handleOperationError from 'utils/handleOperationError';
+import { useNetwork, useSwitchNetwork } from 'wagmi';
+import { useNetworkContext } from 'contexts/NetworkContext';
 
 type Props = {
   symbol: string;
@@ -17,6 +19,9 @@ type Props = {
 function SwitchCollateral({ symbol }: Props) {
   const { accountData, getAccountData } = useContext(AccountDataContext);
   const auditor = useAuditor();
+  const { chain } = useNetwork();
+  const { switchNetworkAsync } = useSwitchNetwork();
+  const { displayNetwork } = useNetworkContext();
 
   const healthFactor = useMemo<HealthFactor | undefined>(() => {
     if (!accountData) return undefined;
@@ -64,6 +69,10 @@ function SwitchCollateral({ symbol }: Props) {
 
     setLoading(true);
     try {
+      if (chain && displayNetwork.id !== chain.id) {
+        return await switchNetworkAsync?.(displayNetwork.id);
+      }
+
       const tx = await (checked ? auditor.exitMarket(market) : auditor.enterMarket(market));
       await tx.wait();
 
@@ -73,7 +82,7 @@ function SwitchCollateral({ symbol }: Props) {
     } finally {
       setLoading(false);
     }
-  }, [accountData, auditor, getAccountData, symbol, checked]);
+  }, [accountData, auditor, symbol, chain, displayNetwork.id, checked, getAccountData, switchNetworkAsync]);
 
   if (loading) return <CircularProgress color="primary" size={24} thickness={8} sx={{ ml: '7px' }} />;
 
