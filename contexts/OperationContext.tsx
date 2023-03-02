@@ -94,7 +94,9 @@ export const OperationContextProvider: FC<PropsWithChildren> = ({ children }) =>
       setGasCost(undefined);
       setIsLoading(false);
     }
+    setLoadingButton({});
     setErrorData(undefined);
+    setErrorButton(undefined);
     setRawSlippage(DEFAULT_SLIPPAGE);
   }, [chain?.id, marketSymbol, open, view, pathname]);
 
