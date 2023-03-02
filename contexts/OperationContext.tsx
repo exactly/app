@@ -6,7 +6,7 @@ import useETHRouter from 'hooks/useETHRouter';
 import useHandleOperationError from 'hooks/useHandleOperationError';
 import useMarket from 'hooks/useMarket';
 import { useWeb3 } from 'hooks/useWeb3';
-import useRouter from 'hooks/useRouter';
+import { useRouter } from 'next/router';
 import React, {
   createContext,
   type PropsWithChildren,

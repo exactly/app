@@ -3,7 +3,6 @@ import { Box } from '@mui/system';
 import AccountDataContext from 'contexts/AccountDataContext';
 import Image from 'next/image';
 import Link from 'next/link';
-import useRouter from 'hooks/useRouter';
 import React, { FC, PropsWithChildren, useCallback, useContext } from 'react';
 import formatSymbol from 'utils/formatSymbol';
 import getSymbolDescription from 'utils/getSymbolDescription';
@@ -14,7 +13,6 @@ type Props = PropsWithChildren<{
 }>;
 
 const MobileAssetCard: FC<Props> = ({ symbol, isFloating, children }) => {
-  const { query } = useRouter();
   const { accountData } = useContext(AccountDataContext);
 
   const assetDescription = useCallback(
@@ -37,7 +35,7 @@ const MobileAssetCard: FC<Props> = ({ symbol, isFloating, children }) => {
       gap={2}
     >
       <Box display="flex" justifyContent="space-between">
-        <Link href={{ pathname: `/${symbol}`, query }} key={symbol} rel="noopener noreferrer" legacyBehavior>
+        <Link href={`/${symbol}`} key={symbol} rel="noopener noreferrer" legacyBehavior>
           <Box display="flex" gap={1.3}>
             <Image
               src={`/img/assets/${symbol}.svg`}

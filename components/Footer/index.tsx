@@ -1,11 +1,11 @@
 import React, { useContext } from 'react';
 import Image from 'next/image';
+import { useRouter } from 'next/router';
 import { Box, Typography, useMediaQuery, useTheme } from '@mui/material';
 import TwitterIcon from '@mui/icons-material/Twitter';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import { globals } from 'styles/theme';
 import { MarketContext } from 'contexts/MarketContext';
-import useRouter from 'hooks/useRouter';
 const { onlyDesktopFlex, maxWidth } = globals;
 
 const Footer = () => {

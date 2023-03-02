@@ -6,7 +6,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { Box, Button, Menu, MenuItem, popoverClasses, Typography } from '@mui/material';
 import { MarketContext, MarketView } from 'contexts/MarketContext';
 import Link from 'next/link';
-import useRouter from 'hooks/useRouter';
+import { useRouter } from 'next/router';
 import { Timeout } from 'react-number-format/types/types';
 import { SimpleViewIcon, AdvancedViewIcon } from 'components/Icons';
 
@@ -18,7 +18,7 @@ type ViewOption = {
 };
 
 const SelectMarketsView: FC = () => {
-  const { query, pathname: currentPathname } = useRouter();
+  const { pathname: currentPathname } = useRouter();
   const { view, setView } = useContext(MarketContext);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [currTimeout, setCurrTimeout] = useState<Timeout>();
@@ -65,7 +65,7 @@ const SelectMarketsView: FC = () => {
 
   return (
     <>
-      <Link href={{ pathname: '/', query }} legacyBehavior>
+      <Link href="/" legacyBehavior>
         <Button
           variant={currentPathname === '/' ? 'contained' : 'text'}
           onMouseOver={openMenu}
@@ -155,7 +155,7 @@ const SelectMarketsView: FC = () => {
               },
             }}
           >
-            <Link href={{ pathname: '/', query }} legacyBehavior>
+            <Link href="/" legacyBehavior>
               <Box display="flex" width="100%" gap={1.5}>
                 <Box display="flex" alignItems="center" my="auto" px={1}>
                   {cloneElement(icon, {

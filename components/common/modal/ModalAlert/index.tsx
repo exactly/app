@@ -5,7 +5,7 @@ import WarningIcon from '@mui/icons-material/ErrorRounded';
 import ErrorIcon from '@mui/icons-material/ReportProblemRounded';
 import SuccessIcon from '@mui/icons-material/CheckCircleRounded';
 import { MarketContext } from 'contexts/MarketContext';
-import useRouter from 'hooks/useRouter';
+import { useRouter } from 'next/router';
 
 type Variant = 'info' | 'warning' | 'error' | 'success';
 

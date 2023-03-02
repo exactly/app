@@ -1,9 +1,9 @@
+import React, { ReactNode, useCallback, useContext, useEffect, useState } from 'react';
 import { setContext, setUser } from '@sentry/nextjs';
 import { goerli, useClient } from 'wagmi';
 import DisclaimerModal from 'components/DisclaimerModal';
 import Image from 'next/image';
-import useRouter from 'hooks/useRouter';
-import React, { ReactNode, useCallback, useContext, useEffect, useState } from 'react';
+import { useRouter } from 'next/router';
 
 import ThemeContext from 'contexts/ThemeContext';
 import { useWeb3 } from 'hooks/useWeb3';
@@ -40,7 +40,7 @@ const routes: {
 function Navbar() {
   const { connector } = useClient();
   const { walletAddress } = useWeb3();
-  const { pathname: currentPathname, query } = useRouter();
+  const { pathname: currentPathname } = useRouter();
   const { chain, isConnected } = useWeb3();
 
   const { theme } = useContext(ThemeContext);
@@ -77,7 +77,7 @@ function Navbar() {
       <DisclaimerModal />
       <AppBar position="static" color="transparent" sx={{ height: '56px', mb: { xs: 0, sm: 2.5 } }}>
         <Toolbar disableGutters sx={{ padding: '0 0', gap: '8px' }}>
-          <Link href={{ pathname: '/', query }} legacyBehavior>
+          <Link href="/" legacyBehavior>
             <Box mr="10px" sx={{ cursor: 'pointer' }}>
               <Image
                 src={theme === 'light' ? '/img/logo.svg' : '/img/logo-white.png'}
@@ -95,7 +95,7 @@ function Navbar() {
             {routes.map(({ name, pathname, custom, icon }) => (
               <Box key={pathname} display={onlyDesktopFlex}>
                 {custom || (
-                  <Link href={{ pathname, query }} legacyBehavior>
+                  <Link href={pathname} legacyBehavior>
                     <Button
                       sx={{
                         px: 1.5,

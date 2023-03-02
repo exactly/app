@@ -1,9 +1,13 @@
 import React, { FC, MouseEventHandler } from 'react';
 import { LoadingButton } from '@mui/lab';
-import { capitalize, CircularProgress, Typography } from '@mui/material';
+import { Button, capitalize, CircularProgress, Typography } from '@mui/material';
 import { Box } from '@mui/system';
 import { useOperationContext } from 'contexts/OperationContext';
 import { useModalStatus } from 'contexts/ModalStatusContext';
+import { useNetwork, useSwitchNetwork } from 'wagmi';
+import { useWeb3 } from 'hooks/useWeb3';
+import { useWeb3Modal } from '@web3modal/react';
+import { useNetworkContext } from 'contexts/NetworkContext';
 
 type Props = {
   symbol: string;
@@ -17,50 +21,75 @@ type Props = {
 function ModalSubmit({ requiresApproval = false, isLoading = false, disabled = false, submit, symbol, label }: Props) {
   const { loadingButton, isLoading: isLoadingOp, tx, errorButton } = useOperationContext();
   const { operation } = useModalStatus();
+  const { walletAddress } = useWeb3();
+  const { open } = useWeb3Modal();
+  const { chain } = useNetwork();
+  const { switchNetwork, isLoading: switchIsLoading } = useSwitchNetwork();
+  const { displayNetwork } = useNetworkContext();
+
+  if (!walletAddress) {
+    return (
+      <Button fullWidth onClick={() => open({ route: 'ConnectWallet' })} variant="contained">
+        Connect wallet
+      </Button>
+    );
+  }
+
+  if (chain && chain.id !== displayNetwork.id) {
+    return (
+      <LoadingButton
+        fullWidth
+        onClick={() => switchNetwork?.(displayNetwork.id)}
+        variant="contained"
+        loading={switchIsLoading}
+      >
+        Please switch to {displayNetwork.name} network
+      </LoadingButton>
+    );
+  }
+
+  if (requiresApproval) {
+    return (
+      <LoadingButton
+        fullWidth
+        loading={isLoading}
+        loadingIndicator={
+          <LoadingIndicator
+            withCircularProgress={loadingButton.withCircularProgress || !loadingButton.label}
+            label={loadingButton.label}
+          />
+        }
+        onClick={submit}
+        color="primary"
+        variant="contained"
+        disabled={disabled}
+      >
+        Approve {symbol}
+      </LoadingButton>
+    );
+  }
 
   return (
-    <>
-      {requiresApproval ? (
-        <LoadingButton
-          fullWidth
-          loading={isLoading}
-          loadingIndicator={
-            <LoadingIndicator
-              withCircularProgress={loadingButton.withCircularProgress || !loadingButton.label}
-              label={loadingButton.label}
-            />
+    <LoadingButton
+      fullWidth
+      loading={isLoading}
+      loadingIndicator={
+        <LoadingIndicator
+          withCircularProgress={!isLoadingOp || Boolean(tx)}
+          label={
+            (isLoadingOp && !tx && 'Sign the transaction on your wallet') ||
+            ((isLoadingOp || Boolean(tx)) && `${capitalize(operation?.replaceAll('AtMaturity', ''))}ing ${symbol}`) ||
+            ''
           }
-          onClick={submit}
-          color="primary"
-          variant="contained"
-          disabled={disabled}
-        >
-          Approve {symbol}
-        </LoadingButton>
-      ) : (
-        <LoadingButton
-          fullWidth
-          loading={isLoading}
-          loadingIndicator={
-            <LoadingIndicator
-              withCircularProgress={!isLoadingOp || Boolean(tx)}
-              label={
-                (isLoadingOp && !tx && 'Sign the transaction on your wallet') ||
-                ((isLoadingOp || Boolean(tx)) &&
-                  `${capitalize(operation?.replaceAll('AtMaturity', ''))}ing ${symbol}`) ||
-                ''
-              }
-            />
-          }
-          onClick={submit}
-          color="primary"
-          variant="contained"
-          disabled={disabled || requiresApproval || Boolean(errorButton)}
-        >
-          {errorButton ? errorButton : label}
-        </LoadingButton>
-      )}
-    </>
+        />
+      }
+      onClick={submit}
+      color="primary"
+      variant="contained"
+      disabled={disabled || requiresApproval || Boolean(errorButton)}
+    >
+      {errorButton ? errorButton : label}
+    </LoadingButton>
   );
 }
 
