@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useSigner } from 'wagmi';
 import { mainnet } from 'wagmi/chains';
 import { Contract, ContractInterface } from '@ethersproject/contracts';
-import { captureException } from '@sentry/nextjs';
 
 import { useWeb3 } from './useWeb3';
 
@@ -26,7 +25,7 @@ export default function <T>(contractName: string, abi: ContractInterface): T | u
       setContract(new Contract(address, abi, signer) as T);
     };
 
-    loadContract().catch(captureException);
+    loadContract().catch(() => setContract(undefined));
   }, [contractName, chain, signer, abi]);
 
   return contract;
