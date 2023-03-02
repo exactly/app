@@ -41,15 +41,17 @@ const MarketsBasic: FC = () => {
 
   const allOptions: MarketsBasicOption[] = useMemo(() => {
     const borrowRewards = rates[symbol]?.map(({ assetSymbol, borrow }) => ({ assetSymbol, rate: borrow }));
+    const depositRewards = rates[symbol]?.map(({ assetSymbol, floatingDeposit }) => ({
+      assetSymbol,
+      rate: floatingDeposit,
+    }));
+
     return [
       {
         maturity: 0,
         depositAPR: floatingDepositAPR,
         borrowAPR: floatingBorrowAPR,
-        depositRewards: rates[symbol]?.map(({ assetSymbol, floatingDeposit }) => ({
-          assetSymbol,
-          rate: floatingDeposit,
-        })),
+        depositRewards,
         borrowRewards,
       },
       ...fixedOptions.map(({ maturity, depositAPR, borrowAPR }) => ({
