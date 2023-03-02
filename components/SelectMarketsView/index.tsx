@@ -18,7 +18,7 @@ type ViewOption = {
 };
 
 const SelectMarketsView: FC = () => {
-  const { query } = useRouter();
+  const { query, pathname: currentPathname } = useRouter();
   const { view, setView } = useContext(MarketContext);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [currTimeout, setCurrTimeout] = useState<Timeout>();
@@ -67,7 +67,7 @@ const SelectMarketsView: FC = () => {
     <>
       <Link href={{ pathname: '/', query }} legacyBehavior>
         <Button
-          variant="contained"
+          variant={currentPathname === '/' ? 'contained' : 'text'}
           onMouseOver={openMenu}
           onMouseLeave={handleCloseHover}
           sx={{
@@ -76,7 +76,7 @@ const SelectMarketsView: FC = () => {
             minWidth: { xs: '60px', sm: '110px' },
             borderRadius: '32px',
             bgcolor: 'primary',
-            color: 'white',
+            color: currentPathname === '/' ? 'white' : 'grey.700',
             '&:hover': {
               bgcolor: 'primary',
               filter: 'brightness(1.1)',

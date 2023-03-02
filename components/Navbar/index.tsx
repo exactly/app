@@ -33,7 +33,7 @@ const routes: {
   {
     pathname: '/dashboard',
     name: 'Dashboard',
-    icon: <AccountBalanceWalletIcon sx={{ fontSize: '16px', my: 'auto' }} />,
+    icon: <AccountBalanceWalletIcon sx={{ fontSize: '14px', my: 'auto' }} />,
   },
 ];
 
@@ -99,12 +99,13 @@ function Navbar() {
                     <Button
                       sx={{
                         px: 1.5,
-                        color: currentPathname === pathname ? 'primary' : 'grey.700',
+                        color: currentPathname === pathname ? 'white' : 'grey.700',
                         display: 'flex',
                         fontSize: '14px',
                         fontWeight: 700,
                         gap: 0.5,
                       }}
+                      variant={pathname === currentPathname ? 'contained' : 'text'}
                     >
                       {icon}
                       <Box my="auto">{name}</Box>
