@@ -42,9 +42,8 @@ const Options: FC<Props> = ({
         const value = apr > minAPRValue ? apr : undefined;
         const optionRate = `${value && value > 200 ? '∞' : toPercentage(apr)} APR`;
         return (
-          <>
+          <Box display="flex" flexDirection="column" key={`${maturity}_${depositAPR}_${borrowAPR}_${index}`}>
             <FormControlLabel
-              key={`${maturity}_${depositAPR}_${borrowAPR}_${index}`}
               value={maturity}
               control={<Radio />}
               componentsProps={{ typography: { width: '100%' } }}
@@ -121,7 +120,7 @@ const Options: FC<Props> = ({
               }
             />
             {allOptions.length > 1 && maturity === 0 && <Divider sx={{ mx: 1, borderColor: 'grey.200' }} />}
-          </>
+          </Box>
         );
       })}
     </RadioGroup>
