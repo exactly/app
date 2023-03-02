@@ -8,8 +8,7 @@ import { supportedChains, defaultChain } from 'utils/client';
 import usePreviousValue from 'hooks/usePreviousValue';
 
 function isSupported(id?: number): boolean {
-  if (!id) return false;
-  return Boolean(supportedChains.find((c) => c.id === id));
+  return Boolean(id && supportedChains.find((c) => c.id === id));
 }
 
 function getQueryParam(key: string): string | undefined {
