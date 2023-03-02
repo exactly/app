@@ -59,7 +59,7 @@ function ModalInput({ value, name, decimals, onValueChange }: Props) {
       autoFocus
       sx={{
         paddingTop: 0.5,
-        maxWidth: '60%',
+        maxWidth: { xs: '50%', sm: '60%' },
         flexGrow: 1,
         fontWeight: 700,
         fontSize: 24,
