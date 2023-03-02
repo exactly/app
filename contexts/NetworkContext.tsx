@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import type { FC, PropsWithChildren } from 'react';
 import { Chain, useNetwork } from 'wagmi';
 import * as wagmiChains from 'wagmi/chains';
