@@ -9,9 +9,6 @@ import useBorrowAtMaturity from 'hooks/useBorrowAtMaturity';
 import useDeposit from 'hooks/useDeposit';
 import useDepositAtMaturity from 'hooks/useDepositAtMaturity';
 import { ErrorData } from 'types/Error';
-import { useWeb3 } from 'hooks/useWeb3';
-import { useWeb3Modal } from '@web3modal/react';
-import { Button } from '@mui/material';
 import daysLeft from 'utils/daysLeft';
 import formatNumber from 'utils/formatNumber';
 import AccountDataContext from 'contexts/AccountDataContext';
@@ -39,7 +36,6 @@ type SubmitProps = {
 
 const Submit: FC<SubmitProps> = ({ symbol, operation, option, qty, errorData, requiresApproval }) => {
   const { accountData } = useContext(AccountDataContext);
-  const { walletAddress } = useWeb3();
   const { setDate } = useContext(MarketContext);
   const deposit = useDeposit();
   const depositAtMaturity = useDepositAtMaturity();
@@ -77,8 +73,6 @@ const Submit: FC<SubmitProps> = ({ symbol, operation, option, qty, errorData, re
 
   const { isLoading: previewIsLoading } = usePreviewTx({ qty, needsApproval, previewGasCost });
 
-  const { open } = useWeb3Modal();
-
   const submitLabel = useMemo(() => {
     const parsed = parseFloat(qty);
     const amount = parsed ? (Number.isInteger(parsed) ? parsed : formatNumber(qty, symbol)) : '';
@@ -86,14 +80,6 @@ const Submit: FC<SubmitProps> = ({ symbol, operation, option, qty, errorData, re
       !isFloating && option.maturity ? `for ${daysLeft(option.maturity)}` : ''
     }`;
   }, [isFloating, operation, option.maturity, qty, symbol]);
-
-  if (!walletAddress) {
-    return (
-      <Button sx={{ width: '100%' }} onClick={() => open({ route: 'ConnectWallet' })} variant="contained">
-        Connect wallet
-      </Button>
-    );
-  }
 
   return (
     <ModalSubmit

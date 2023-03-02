@@ -7,7 +7,7 @@ import MenuBookIcon from '@mui/icons-material/MenuBook';
 import { Divider, IconButton, Modal, Slide, Typography } from '@mui/material';
 import { Box } from '@mui/system';
 import Image from 'next/image';
-import useRouter from 'hooks/useRouter';
+import { useRouter } from 'next/router';
 import Link from 'next/link';
 
 type Props = {
@@ -27,7 +27,7 @@ const headers = [
 ];
 
 function MobileMenu({ open, handleClose }: Props) {
-  const { pathname: currentPathname, query } = useRouter();
+  const { pathname: currentPathname } = useRouter();
   const date = new Date();
 
   return (
@@ -54,7 +54,7 @@ function MobileMenu({ open, handleClose }: Props) {
             </Typography>
             <Box display="flex" flexDirection="column" gap={2}>
               {headers.map(({ title, pathname }) => (
-                <Link href={{ pathname, query }} key={`mobile_tabs_${title}`} onClick={handleClose}>
+                <Link href={pathname} key={`mobile_tabs_${title}`} onClick={handleClose}>
                   <Typography
                     sx={{
                       textDecoration: currentPathname === pathname ? 'underline' : 'none',
