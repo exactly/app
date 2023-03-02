@@ -185,7 +185,7 @@ const theme = createTheme({
       fontWeight: 700,
     },
     browserAlign: {
-      lineHeight: typeof window !== 'undefined' && (window as unknown as { chrome: boolean })?.chrome ? 1 : 'normal',
+      lineHeight: typeof window !== 'undefined' && window?.navigator?.userAgent?.indexOf('Firefox') > 0 ? 'normal' : 1,
     },
   },
   shape: {
