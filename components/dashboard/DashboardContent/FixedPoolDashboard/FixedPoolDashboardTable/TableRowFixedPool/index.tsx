@@ -21,7 +21,6 @@ import type { Deposit } from 'types/Deposit';
 import type { WithdrawMP } from 'types/WithdrawMP';
 import { Borrow } from 'types/Borrow';
 import { Repay } from 'types/Repay';
-import useRouter from 'hooks/useRouter';
 
 type Props = {
   symbol: string;
@@ -36,7 +35,6 @@ function TableRowFixedPool({ symbol, valueUSD, type, maturityDate, market, decim
   const { accountData } = useContext(AccountDataContext);
   const { withdrawTxs, repayTxs, depositTxs, borrowTxs } = useFixedOperation(type, maturityDate, market);
   const [open, setOpen] = useState(false);
-  const { query } = useRouter();
   const { handleActionClick } = useActionButton();
 
   const exchangeRate: number | undefined = useMemo(() => {
@@ -83,7 +81,7 @@ function TableRowFixedPool({ symbol, valueUSD, type, maturityDate, market, decim
   return (
     <>
       <TableRow sx={{ '& > *': { borderBottom: 'unset' }, backgroundColor: open ? 'grey.50' : 'transparent' }} hover>
-        <Link href={{ pathname: `/${symbol}`, query }} legacyBehavior>
+        <Link href={`/${symbol}`} legacyBehavior>
           <TableCell component="th" align="left" sx={{ cursor: 'pointer' }} width={240}>
             <Stack direction="row" spacing={1}>
               <Image

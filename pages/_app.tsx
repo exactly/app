@@ -13,14 +13,30 @@ import { ModalStatusProvider } from 'contexts/ModalStatusContext';
 import { MarketProvider } from 'contexts/MarketContext';
 import { AccountDataProvider } from 'contexts/AccountDataContext';
 import { ThemeProvider } from 'contexts/ThemeContext';
-import { defaultChain, wagmi, walletConnectId, web3modal } from 'utils/client';
+import { wagmi, walletConnectId, web3modal } from 'utils/client';
 import Footer from 'components/Footer';
 import Navbar from 'components/Navbar';
 import theme, { globals } from 'styles/theme';
 import { MarketsBasicProvider } from 'contexts/MarketsBasicContext';
-import { NetworkContextProvider } from 'contexts/NetworkContext';
+import { NetworkContextProvider, useNetworkContext } from 'contexts/NetworkContext';
 
 const { maxWidth } = globals;
+
+const Web3ModalWrapper = () => {
+  const { displayNetwork } = useNetworkContext();
+  return (
+    <Web3Modal
+      projectId={walletConnectId}
+      ethereumClient={web3modal}
+      defaultChain={displayNetwork}
+      themeMode="light"
+      themeColor="blackWhite"
+      themeBackground="themeColor"
+      walletImages={{ safe: '/img/wallets/safe.png' }}
+      chainImages={{ 1: '/img/networks/1.svg' }}
+    />
+  );
+};
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
@@ -75,18 +91,9 @@ export default function App({ Component, pageProps }: AppProps) {
                   </ModalStatusProvider>
                 </MarketProvider>
               </AccountDataProvider>
+              <Web3ModalWrapper />
             </NetworkContextProvider>
           </WagmiConfig>
-          <Web3Modal
-            projectId={walletConnectId}
-            defaultChain={defaultChain}
-            ethereumClient={web3modal}
-            themeMode="light"
-            themeColor="blackWhite"
-            themeBackground="themeColor"
-            walletImages={{ safe: '/img/wallets/safe.png' }}
-            chainImages={{ 1: '/img/networks/1.svg' }}
-          />
         </MUIThemeProvider>
       </ThemeProvider>
     </>
