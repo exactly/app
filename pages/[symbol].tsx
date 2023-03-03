@@ -6,7 +6,7 @@ import AssetMaturityPools from 'components/asset/MaturityPool';
 import AssetFloatingPool from 'components/asset/FloatingPool';
 import AssetHeaderInfo from 'components/asset/Header';
 
-import Router, { useRouter } from 'next/router';
+import Router from 'next/router';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { Box, IconButton, Tooltip, Typography, Grid } from '@mui/material';
 import analytics from 'utils/analytics';
@@ -18,7 +18,6 @@ type Props = {
 };
 
 const Market: NextPage<Props> = ({ symbol }: Props) => {
-  const router = useRouter();
   const { accountData } = useContext(AccountDataContext);
   useEffect(() => void analytics.page(), []);
 
