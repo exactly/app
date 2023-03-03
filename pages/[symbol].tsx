@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { basename } from 'path';
 import { readdir, readFile } from 'fs/promises';
 import type { GetStaticPaths, GetStaticProps, NextPage } from 'next';
@@ -6,10 +6,12 @@ import AssetMaturityPools from 'components/asset/MaturityPool';
 import AssetFloatingPool from 'components/asset/FloatingPool';
 import AssetHeaderInfo from 'components/asset/Header';
 
-import { useRouter } from 'next/router';
+import Router, { useRouter } from 'next/router';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { Box, IconButton, Tooltip, Typography, Grid } from '@mui/material';
 import analytics from 'utils/analytics';
+import AccountDataContext from 'contexts/AccountDataContext';
+import Link from 'next/link';
 
 type Props = {
   symbol: string;
@@ -17,17 +19,24 @@ type Props = {
 
 const Market: NextPage<Props> = ({ symbol }: Props) => {
   const router = useRouter();
-
+  const { accountData } = useContext(AccountDataContext);
   useEffect(() => void analytics.page(), []);
+
+  useEffect(() => {
+    if (!accountData) return;
+    if (!accountData[symbol]) Router.replace('/');
+  }, [accountData, symbol]);
 
   return (
     <Grid container mt={-1}>
       <Box sx={{ display: 'flex', gap: 0.5 }} mb={1}>
-        <IconButton size="small" onClick={() => router.back()}>
-          <Tooltip title="Go Back" placement="top">
-            <ArrowBackIcon fontSize="small" />
-          </Tooltip>
-        </IconButton>
+        <Link href="/" legacyBehavior>
+          <IconButton size="small">
+            <Tooltip title="Go Back" placement="top">
+              <ArrowBackIcon fontSize="small" />
+            </Tooltip>
+          </IconButton>
+        </Link>
         <Typography color="grey.500" sx={{ fontSize: '14px', fontWeight: 600, my: 'auto' }}>
           Back
         </Typography>
