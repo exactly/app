@@ -12,10 +12,12 @@ import Image from 'next/image';
 import { globals } from 'styles/theme';
 import { useNetworkContext } from 'contexts/NetworkContext';
 import AccountDataContext from 'contexts/AccountDataContext';
+import { MarketContext } from 'contexts/MarketContext';
 
 const { onlyDesktop } = globals;
 
 const SelectDisplayNetwork: FC = () => {
+  const { setMarketSymbol } = useContext(MarketContext);
   const { pathname } = useRouter();
   const { chains, chain } = useWeb3();
   const { setDisplayNetwork } = useNetworkContext();
@@ -32,6 +34,7 @@ const SelectDisplayNetwork: FC = () => {
     (displayChain: Chain) => {
       closeMenu();
       if (displayChain.id === chain.id) return;
+      setMarketSymbol('USDC');
 
       if (!['/', '/dashboard'].includes(pathname)) {
         return Router.push({
@@ -46,7 +49,7 @@ const SelectDisplayNetwork: FC = () => {
       resetAccountData();
       setDisplayNetwork(displayChain);
     },
-    [chain.id, closeMenu, resetAccountData, setDisplayNetwork, pathname],
+    [chain.id, closeMenu, resetAccountData, setDisplayNetwork, pathname, setMarketSymbol],
   );
 
   const buttonBgColor = useMemo(
