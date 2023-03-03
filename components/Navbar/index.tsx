@@ -85,8 +85,8 @@ function Navbar() {
                 <Image
                   src={theme === 'light' ? '/img/isologo.svg' : '/img/isologo-white.svg'}
                   alt="Exactly Logo"
-                  width={30}
-                  height={30}
+                  width={26}
+                  height={26}
                   style={{
                     maxWidth: '100%',
                     height: 'auto',

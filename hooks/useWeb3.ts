@@ -7,7 +7,7 @@ type Web3 = {
   isConnected: boolean;
   walletAddress?: `0x${string}`;
   chains: Chain[];
-  chain?: Chain;
+  chain: Chain;
 };
 
 export const useWeb3 = (): Web3 => {
