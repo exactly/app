@@ -15,18 +15,23 @@ import { ErrorCode } from '@ethersproject/logger';
 type ContextValues = {
   accountData: AccountData | undefined;
   getAccountData: () => Promise<AccountData | undefined>;
+  resetAccountData: () => void;
 };
 
 const AccountDataContext = createContext<ContextValues>({
   accountData: undefined,
   getAccountData: () => Promise.resolve({}),
+  resetAccountData: () => undefined,
 });
 
 export const AccountDataProvider: FC<PropsWithChildren> = ({ children }) => {
   const [accountData, setAccountData] = useState<AccountData | undefined>();
+
   const { connect, connectors } = useConnect();
   const { walletAddress } = useWeb3();
   const client = useClient();
+
+  const resetAccountData = useCallback(() => setAccountData(undefined), []);
 
   useEffect(() => {
     const safeConnector = connectors.find(({ id, ready }) => ready && id === 'safe');
@@ -78,7 +83,11 @@ export const AccountDataProvider: FC<PropsWithChildren> = ({ children }) => {
     return () => clearInterval(interval);
   }, [syncAccountData]);
 
-  return <AccountDataContext.Provider value={{ accountData, getAccountData }}>{children}</AccountDataContext.Provider>;
+  return (
+    <AccountDataContext.Provider value={{ accountData, getAccountData, resetAccountData }}>
+      {children}
+    </AccountDataContext.Provider>
+  );
 };
 
 export default AccountDataContext;

@@ -1,4 +1,4 @@
-import React, { type FC, useCallback, useMemo, useState } from 'react';
+import React, { type FC, useCallback, useMemo, useState, useContext } from 'react';
 import { useWeb3 } from 'hooks/useWeb3';
 
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
@@ -10,6 +10,7 @@ import { Chain, goerli, mainnet } from 'wagmi';
 import Image from 'next/image';
 import { globals } from 'styles/theme';
 import { useNetworkContext } from 'contexts/NetworkContext';
+import AccountDataContext from 'contexts/AccountDataContext';
 
 const { onlyDesktop } = globals;
 
@@ -23,12 +24,16 @@ const SelectDisplayNetwork: FC = () => {
   );
   const closeMenu = useCallback(() => setAnchorEl(null), [setAnchorEl]);
 
+  const { resetAccountData } = useContext(AccountDataContext);
+
   const onSelectNetwork = useCallback(
     (displayChain: Chain) => {
+      if (displayChain.id !== chain.id) resetAccountData();
+
       setDisplayNetwork(displayChain);
       closeMenu();
     },
-    [closeMenu, setDisplayNetwork],
+    [chain.id, closeMenu, resetAccountData, setDisplayNetwork],
   );
 
   const buttonBgColor = useMemo(
