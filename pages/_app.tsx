@@ -29,6 +29,7 @@ const Web3ModalWrapper = () => {
       projectId={walletConnectId}
       ethereumClient={web3modal}
       defaultChain={displayNetwork}
+      enableAccountView={false}
       themeMode="light"
       themeColor="blackWhite"
       themeBackground="themeColor"
