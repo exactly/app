@@ -1,4 +1,4 @@
-import React, { FC, PropsWithChildren } from 'react';
+import React, { FC, PropsWithChildren, useContext } from 'react';
 import CloseIcon from '@mui/icons-material/Close';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import TwitterIcon from '@mui/icons-material/Twitter';
@@ -9,6 +9,8 @@ import { Box } from '@mui/system';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import Switch from 'components/Switch';
+import { MarketContext } from 'contexts/MarketContext';
 
 type Props = {
   open: boolean;
@@ -27,6 +29,7 @@ const headers = [
 ];
 
 function MobileMenu({ open, handleClose }: Props) {
+  const { view, setView } = useContext(MarketContext);
   const { pathname: currentPathname } = useRouter();
   const date = new Date();
 
@@ -67,6 +70,16 @@ function MobileMenu({ open, handleClose }: Props) {
                 </Link>
               ))}
             </Box>
+
+            <Box display="flex" alignItems="center" justifyContent="space-between" gap={1}>
+              <Typography variant="browserAlign" height={20} fontSize={20} fontWeight={700}>
+                Advanced view
+              </Typography>
+              <Switch
+                checked={view === 'advanced'}
+                onChange={() => setView(view === 'advanced' ? 'simple' : 'advanced')}
+              />
+            </Box>
             <Divider sx={{ my: '12px' }} />
             <Typography fontFamily="fontFamilyMonospaced" fontSize={14} color="figma.grey.500" fontWeight={600}>
               Links
@@ -93,9 +106,11 @@ function MobileMenu({ open, handleClose }: Props) {
               />
             </LinkItem>
           </Box>
-          <Typography fontSize="16px" sx={{ color: 'figma.grey.300' }}>
-            © Exactly {date.getFullYear()}
-          </Typography>
+          <Box>
+            <Typography fontSize="16px" sx={{ color: 'figma.grey.300' }}>
+              © Exactly {date.getFullYear()}
+            </Typography>
+          </Box>
         </Box>
       </Slide>
     </Modal>
