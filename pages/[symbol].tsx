@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { basename } from 'path';
 import { readdir, readFile } from 'fs/promises';
 import type { GetStaticPaths, GetStaticProps, NextPage } from 'next';
@@ -6,11 +6,9 @@ import AssetMaturityPools from 'components/asset/MaturityPool';
 import AssetFloatingPool from 'components/asset/FloatingPool';
 import AssetHeaderInfo from 'components/asset/Header';
 
-import Router from 'next/router';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { Box, IconButton, Tooltip, Typography, Grid } from '@mui/material';
 import analytics from 'utils/analytics';
-import AccountDataContext from 'contexts/AccountDataContext';
 import Link from 'next/link';
 
 type Props = {
@@ -18,13 +16,7 @@ type Props = {
 };
 
 const Market: NextPage<Props> = ({ symbol }: Props) => {
-  const { accountData } = useContext(AccountDataContext);
   useEffect(() => void analytics.page(), []);
-
-  useEffect(() => {
-    if (!accountData) return;
-    if (!accountData[symbol]) Router.replace('/');
-  }, [accountData, symbol]);
 
   return (
     <Grid container mt={-1}>

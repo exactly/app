@@ -1,6 +1,7 @@
 import React, { type FC, useCallback, useMemo, useState, useContext } from 'react';
-import { useWeb3 } from 'hooks/useWeb3';
+import Router, { useRouter } from 'next/router';
 
+import { useWeb3 } from 'hooks/useWeb3';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
@@ -15,6 +16,7 @@ import AccountDataContext from 'contexts/AccountDataContext';
 const { onlyDesktop } = globals;
 
 const SelectDisplayNetwork: FC = () => {
+  const { pathname } = useRouter();
   const { chains, chain } = useWeb3();
   const { setDisplayNetwork } = useNetworkContext();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -28,12 +30,23 @@ const SelectDisplayNetwork: FC = () => {
 
   const onSelectNetwork = useCallback(
     (displayChain: Chain) => {
-      if (displayChain.id !== chain.id) resetAccountData();
-
-      setDisplayNetwork(displayChain);
       closeMenu();
+      if (displayChain.id === chain.id) return;
+
+      if (!['/', '/dashboard'].includes(pathname)) {
+        return Router.push({
+          pathname: '/',
+          search: `?n=${{ [mainnet.id]: 'mainnet' }[displayChain.id] ?? displayChain.network}`,
+        }).then(() => {
+          resetAccountData();
+          setDisplayNetwork(displayChain);
+        });
+      }
+
+      resetAccountData();
+      setDisplayNetwork(displayChain);
     },
-    [chain.id, closeMenu, resetAccountData, setDisplayNetwork],
+    [chain.id, closeMenu, resetAccountData, setDisplayNetwork, pathname],
   );
 
   const buttonBgColor = useMemo(
