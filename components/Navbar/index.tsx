@@ -8,7 +8,7 @@ import { useRouter } from 'next/router';
 import ThemeContext from 'contexts/ThemeContext';
 import { useWeb3 } from 'hooks/useWeb3';
 
-import { AppBar, Box, Button, Chip, IconButton, Toolbar, useTheme } from '@mui/material';
+import { AppBar, Box, Button, Chip, IconButton, Toolbar, useMediaQuery, useTheme } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import { globals } from 'styles/theme';
@@ -44,10 +44,12 @@ function Navbar() {
   const { chain, isConnected } = useWeb3();
 
   const { theme } = useContext(ThemeContext);
-  const { palette } = useTheme();
+  const { palette, breakpoints } = useTheme();
   const { view } = useContext(MarketContext);
   const { openOperationModal } = useModalStatus();
   const [openMenu, setOpenMenu] = useState<boolean>(false);
+
+  const isMobile = useMediaQuery(breakpoints.down('sm'));
 
   useEffect(() => {
     if (!walletAddress) return;
@@ -78,17 +80,30 @@ function Navbar() {
       <AppBar position="static" color="transparent" sx={{ height: '56px', mb: { xs: 0, sm: 2.5 } }}>
         <Toolbar disableGutters sx={{ padding: '0 0', gap: '8px' }}>
           <Link href="/" legacyBehavior>
-            <Box mr="10px" sx={{ cursor: 'pointer' }}>
-              <Image
-                src={theme === 'light' ? '/img/logo.svg' : '/img/logo-white.png'}
-                alt="Exactly Logo"
-                width={103}
-                height={30}
-                style={{
-                  maxWidth: '100%',
-                  height: 'auto',
-                }}
-              />
+            <Box mr="10px" sx={{ cursor: 'pointer' }} display="flex" alignItems="center">
+              {isMobile ? (
+                <Image
+                  src={theme === 'light' ? '/img/isologo.svg' : '/img/isologo-white.svg'}
+                  alt="Exactly Logo"
+                  width={30}
+                  height={30}
+                  style={{
+                    maxWidth: '100%',
+                    height: 'auto',
+                  }}
+                />
+              ) : (
+                <Image
+                  src={theme === 'light' ? '/img/logo.svg' : '/img/logo-white.png'}
+                  alt="Exactly Logo"
+                  width={103}
+                  height={30}
+                  style={{
+                    maxWidth: '100%',
+                    height: 'auto',
+                  }}
+                />
+              )}
             </Box>
           </Link>
           <Box display="flex" gap={0.2}>
