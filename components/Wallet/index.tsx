@@ -1,9 +1,11 @@
 import React, { useMemo } from 'react';
-import { useDisconnect, useEnsName } from 'wagmi';
+import { useDisconnect, useEnsName, useNetwork } from 'wagmi';
 import { useWeb3 } from 'hooks/useWeb3';
 import { formatWallet } from 'utils/utils';
 
-import { Avatar, Box, Button, Menu, Typography } from '@mui/material';
+import Image from 'next/image';
+
+import { Avatar, Box, Button, Divider, Menu, Typography } from '@mui/material';
 
 import * as blockies from 'blockies-ts';
 import CopyToClipboardButton from 'components/common/CopyToClipboardButton';
@@ -15,6 +17,7 @@ function Wallet() {
 
   const openMenu = (event: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget);
   const closeMenu = () => setAnchorEl(null);
+  const { chain } = useNetwork();
 
   const { walletAddress } = useWeb3();
   const { disconnect } = useDisconnect();
@@ -101,6 +104,13 @@ function Wallet() {
               </Typography>
               <CopyToClipboardButton text={walletAddress} />
             </Box>
+          </Box>
+          <Divider sx={{ borderColor: 'grey.200' }} />
+          <Box display="flex" my={1} alignItems="center" gap={0.5} justifyContent="center">
+            <Image src={`/img/networks/${chain?.id}.svg`} alt={`chain id ${chain?.id}`} width={24} height={24} />
+            <Typography fontSize="16px" color="grey.500">
+              {chain?.name}
+            </Typography>
           </Box>
           <Button
             variant="outlined"
