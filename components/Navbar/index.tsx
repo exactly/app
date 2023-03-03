@@ -17,10 +17,10 @@ import { useModalStatus } from 'contexts/ModalStatusContext';
 import MobileMenu from 'components/MobileMenu';
 import Link from 'next/link';
 import Wallet from 'components/Wallet';
-import SelectNetwork from 'components/SelectNetwork';
 import SelectMarketsView from 'components/SelectMarketsView';
 import { MarketContext } from 'contexts/MarketContext';
 import ClaimRewards from 'components/ClaimRewards';
+import SelectDisplayNetwork from 'components/SelectDisplayNetwork';
 const { onlyMobile, onlyDesktopFlex } = globals;
 
 const routes: {
@@ -119,7 +119,7 @@ function Navbar() {
             {isConnected && chain?.id === goerli.id && (
               <Chip label="Goerli Faucet" onClick={handleFaucetClick} sx={{ my: 'auto', display: onlyDesktopFlex }} />
             )}
-            {connector?.switchChain && <SelectNetwork />}
+            <SelectDisplayNetwork />
             <ClaimRewards />
             <Wallet />
           </Box>
