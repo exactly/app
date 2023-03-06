@@ -52,10 +52,12 @@ const SelectDisplayNetwork: FC = () => {
     [chain.id, closeMenu, resetAccountData, setDisplayNetwork, pathname, setMarketSymbol],
   );
 
-  const buttonBgColor = useMemo(
-    () => (chain?.id === mainnet.id || chain?.id === goerli.id ? '#627EEA' : '#EE2939'),
-    [chain?.id],
-  );
+  const { buttonBgColor, image } = useMemo(() => {
+    return {
+      buttonBgColor: chain?.id === mainnet.id || chain?.id === goerli.id ? '#627EEA' : '#EE2939',
+      image: `/img/networks/${chain?.id}.svg`,
+    };
+  }, [chain?.id]);
 
   return (
     <>
@@ -77,7 +79,7 @@ const SelectDisplayNetwork: FC = () => {
       >
         <Box display="flex" justifyContent="space-between" width="100%" gap={{ xs: 0, sm: 1 }}>
           <Box display="flex" gap={0.5}>
-            <Image src={`/img/networks/${chain?.id}.svg`} alt={`chain id ${chain?.id}`} width={24} height={24} />
+            <Image src={image} alt={`image ${image}`} width={24} height={24} />
             <Box display={onlyDesktop}>{chain?.name}</Box>
           </Box>
           {anchorEl ? (
