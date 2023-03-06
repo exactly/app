@@ -54,11 +54,13 @@ const MarketsBasic: FC = () => {
         depositRewards,
         borrowRewards,
       },
-      ...fixedOptions.map(({ maturity, depositAPR, borrowAPR }) => ({
+      ...fixedOptions.map(({ maturity, depositAPR, borrowAPR, interest, finalAssets }) => ({
         maturity,
         depositAPR,
         borrowAPR,
         borrowRewards,
+        interest,
+        finalAssets,
       })),
     ].filter(
       (o) => operation === 'borrow' || o.maturity === 0 || o.depositAPR === undefined || o.depositAPR >= minAPRValue,
