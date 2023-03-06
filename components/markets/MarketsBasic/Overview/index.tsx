@@ -1,6 +1,6 @@
 import { formatFixed } from '@ethersproject/bignumber';
 import { Zero } from '@ethersproject/constants';
-import { Box, Typography, useMediaQuery, useTheme } from '@mui/material';
+import { Box, Skeleton, Typography, useMediaQuery, useTheme } from '@mui/material';
 import { MarketsBasicOperation, MarketsBasicOption } from 'contexts/MarketsBasicContext';
 import useAccountData from 'hooks/useAccountData';
 import Image from 'next/image';
@@ -41,22 +41,28 @@ const Overview: FC<Props> = ({ symbol, operation, qty, option }) => {
         {operation === 'borrow' ? 'Your total debt' : 'Your total earnings'}
       </Typography>
       <Box display="flex" gap={0.5} mb={1}>
-        <Image
-          src={`/img/assets/${symbol}.svg`}
-          alt={symbol}
-          width="20"
-          height="20"
-          style={{ maxWidth: '100%', height: 'auto' }}
-        />
-        <Typography
-          variant="browserAlign"
-          fontWeight={700}
-          fontSize={24}
-          height={24}
-          lineHeight={isMobile ? 1.2 : undefined}
-        >
-          {option.finalAssets ? formatNumber(formatFixed(option.finalAssets, decimals), symbol, true) : '-'}
-        </Typography>
+        {option.finalAssets ? (
+          <>
+            <Image
+              src={`/img/assets/${symbol}.svg`}
+              alt={symbol}
+              width="20"
+              height="20"
+              style={{ maxWidth: '100%', height: 'auto' }}
+            />
+            <Typography
+              variant="browserAlign"
+              fontWeight={700}
+              fontSize={24}
+              height={24}
+              lineHeight={isMobile ? 1.2 : undefined}
+            >
+              {formatNumber(formatFixed(option.finalAssets, decimals), symbol, true)}
+            </Typography>
+          </>
+        ) : (
+          <Skeleton width={100} height={40} />
+        )}
       </Box>
       <Box display="flex" justifyContent="space-between">
         <Typography fontWeight={500} fontSize={13} color="figma.grey.500">
@@ -86,22 +92,28 @@ const Overview: FC<Props> = ({ symbol, operation, qty, option }) => {
           Total interest fees to {operation === 'borrow' ? 'be paid' : 'receive'} ({toPercentage(rate)} APR)
         </Typography>
         <Box display="flex" gap={0.3} alignItems="center" minWidth={100} justifyContent="right">
-          <Typography
-            variant="browserAlign"
-            fontWeight={700}
-            fontSize={14}
-            lineHeight={isMobile ? 1.2 : undefined}
-            height={14}
-          >
-            {option.interest ? formatNumber(formatFixed(option.interest, decimals), symbol) : '-'}
-          </Typography>
-          <Image
-            src={`/img/assets/${symbol}.svg`}
-            alt={symbol}
-            width="14"
-            height="14"
-            style={{ maxWidth: '100%', height: 'auto' }}
-          />
+          {option.interest ? (
+            <>
+              <Typography
+                variant="browserAlign"
+                fontWeight={700}
+                fontSize={14}
+                lineHeight={isMobile ? 1.2 : undefined}
+                height={14}
+              >
+                {formatNumber(formatFixed(option.interest, decimals), symbol)}
+              </Typography>
+              <Image
+                src={`/img/assets/${symbol}.svg`}
+                alt={symbol}
+                width="14"
+                height="14"
+                style={{ maxWidth: '100%', height: 'auto' }}
+              />
+            </>
+          ) : (
+            <Skeleton width={50} height={20} />
+          )}
         </Box>
       </Box>
       <Box display="flex" justifyContent="space-between">
