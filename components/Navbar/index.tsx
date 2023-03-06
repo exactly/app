@@ -8,7 +8,7 @@ import { useRouter } from 'next/router';
 import ThemeContext from 'contexts/ThemeContext';
 import { useWeb3 } from 'hooks/useWeb3';
 
-import { AppBar, Box, Button, Chip, IconButton, Toolbar, useMediaQuery, useTheme } from '@mui/material';
+import { AppBar, Box, Button, Chip, IconButton, Toolbar, useTheme } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import { globals } from 'styles/theme';
@@ -21,7 +21,7 @@ import SelectMarketsView from 'components/SelectMarketsView';
 import { MarketContext } from 'contexts/MarketContext';
 import ClaimRewards from 'components/ClaimRewards';
 import SelectDisplayNetwork from 'components/SelectDisplayNetwork';
-const { onlyMobile, onlyDesktopFlex } = globals;
+const { onlyMobile, onlyDesktop, onlyDesktopFlex } = globals;
 
 const routes: {
   pathname: string;
@@ -44,12 +44,10 @@ function Navbar() {
   const { chain, isConnected } = useWeb3();
 
   const { theme } = useContext(ThemeContext);
-  const { palette, breakpoints } = useTheme();
+  const { palette } = useTheme();
   const { view } = useContext(MarketContext);
   const { openOperationModal } = useModalStatus();
   const [openMenu, setOpenMenu] = useState<boolean>(false);
-
-  const isMobile = useMediaQuery(breakpoints.down('sm'));
 
   useEffect(() => {
     if (!walletAddress) return;
@@ -81,18 +79,7 @@ function Navbar() {
         <Toolbar disableGutters sx={{ padding: '0 0', gap: '8px' }}>
           <Link href="/" legacyBehavior>
             <Box mr="10px" sx={{ cursor: 'pointer' }} display="flex" alignItems="center">
-              {isMobile ? (
-                <Image
-                  src={theme === 'light' ? '/img/isologo.svg' : '/img/isologo-white.svg'}
-                  alt="Exactly Logo"
-                  width={26}
-                  height={26}
-                  style={{
-                    maxWidth: '100%',
-                    height: 'auto',
-                  }}
-                />
-              ) : (
+              <Box display={onlyDesktop}>
                 <Image
                   src={theme === 'light' ? '/img/logo.svg' : '/img/logo-white.png'}
                   alt="Exactly Logo"
@@ -103,7 +90,19 @@ function Navbar() {
                     height: 'auto',
                   }}
                 />
-              )}
+              </Box>
+              <Box display={onlyMobile}>
+                <Image
+                  src={theme === 'light' ? '/img/isologo.svg' : '/img/isologo-white.svg'}
+                  alt="Exactly Logo"
+                  width={26}
+                  height={26}
+                  style={{
+                    maxWidth: '100%',
+                    height: 'auto',
+                  }}
+                />
+              </Box>
             </Box>
           </Link>
           <Box display="flex" gap={0.2}>
