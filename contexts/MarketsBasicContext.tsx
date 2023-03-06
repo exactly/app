@@ -13,6 +13,8 @@ export type MarketsBasicOption = {
   borrowAPR?: number;
   depositRewards?: MarketsBasicRewardRate[];
   borrowRewards?: MarketsBasicRewardRate[];
+  interest?: BigNumber;
+  finalAssets?: BigNumber;
 };
 
 type ContextValues = {

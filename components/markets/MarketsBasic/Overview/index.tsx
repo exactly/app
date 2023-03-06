@@ -18,13 +18,12 @@ type Props = {
 };
 
 const Overview: FC<Props> = ({ symbol, operation, qty, option }) => {
-  const { penaltyRate } = useAccountData(symbol);
+  const { penaltyRate, decimals = 18 } = useAccountData(symbol);
   const rate = useMemo(
     () => (operation === 'borrow' ? option.borrowAPR : option.depositAPR) || 0,
     [operation, option.borrowAPR, option.depositAPR],
   );
-  const interest = useMemo(() => parseFloat(qty) * rate, [qty, rate]);
-  const total = useMemo(() => parseFloat(qty) + interest, [qty, interest]);
+
   const { palette, breakpoints } = useTheme();
   const isMobile = useMediaQuery(breakpoints.down('sm'));
 
@@ -56,7 +55,7 @@ const Overview: FC<Props> = ({ symbol, operation, qty, option }) => {
           height={24}
           lineHeight={isMobile ? 1.2 : undefined}
         >
-          {formatNumber(total, symbol, true)}
+          {option.finalAssets ? formatNumber(formatFixed(option.finalAssets, decimals), symbol, true) : '-'}
         </Typography>
       </Box>
       <Box display="flex" justifyContent="space-between">
@@ -94,7 +93,7 @@ const Overview: FC<Props> = ({ symbol, operation, qty, option }) => {
             lineHeight={isMobile ? 1.2 : undefined}
             height={14}
           >
-            {formatNumber(interest, symbol)}
+            {option.interest ? formatNumber(formatFixed(option.interest, decimals), symbol) : '-'}
           </Typography>
           <Image
             src={`/img/assets/${symbol}.svg`}

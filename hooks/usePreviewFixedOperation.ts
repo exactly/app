@@ -57,6 +57,8 @@ export default (operation: MarketsBasicOperation): PreviewFixedOperation => {
             maturity: maturity.toNumber(),
             depositAPR: fixedAPR,
             borrowAPR: fixedAPR,
+            interest: assets.sub(initialAssets),
+            finalAssets: assets,
           };
         });
 
