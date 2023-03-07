@@ -54,19 +54,17 @@ npm run dev
 We use the Cypress testing framework
 to run our E2E tests and [Tenderly](https://tenderly.co/) to setup forks.
 
-The following environment variables are required to be present for them to
+The following environment variables are required to be present for the tests to
 work as expected
 
 ```bash
 CYPRESS_TENDERLY_ACCESS_KEY=[ Tenderly access token ]
 CYPRESS_TENDERLY_PROJECT=exactly
 CYPRESS_TENDERLY_USER=exactly
-
-SECRET_WORDS=[ 12 word mnemonic phrase ]
-
-DISPLAY_WIDTH=1920
-DISPLAY_HEIGHT=1080
 ```
+
+If using an `.env` file use `export $(cat .env | xargs)` to make them visible to
+`npm`.
 
 The full suite can be run using
 
@@ -92,6 +90,8 @@ To run a single test use the same above but specifiy the spec to run with
 ```bash
 npm run test -- --spec [path] # e.g. tests/e2e/specs/0-connect-wallet-spec.ts
 ```
+
+Use the `--headed` flag to open the Cypress instance.
 
 ## Deployment
 
