@@ -84,7 +84,7 @@ function SwitchCollateral({ symbol }: Props) {
     }
   }, [marketAccount, auditor, checked, refreshAccountData]);
 
-  if (loading)
+  if (loading) {
     return (
       <CircularProgress
         color="primary"
@@ -94,6 +94,7 @@ function SwitchCollateral({ symbol }: Props) {
         data-testid={`switch-collateral-${symbol}-loading`}
       />
     );
+  }
 
   const tooltip =
     disabled && disabledText

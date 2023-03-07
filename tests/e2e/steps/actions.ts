@@ -1,5 +1,5 @@
 import { Coin } from '../utils/tenderly';
-import { pastParticiple, capitalize } from '../utils/strings';
+import { pastParticiple } from '../utils/strings';
 import * as Modal from './modal';
 import * as Dashboard from './dashboard';
 import type { Operation } from './modal';
@@ -13,6 +13,7 @@ type OperationParams = {
 
 const executeOperation = ({ type, action, symbol, amount }: OperationParams) => {
   Modal.open(type, action, symbol);
+  Modal.waitForSubmit();
 
   Modal.input(amount);
   Modal.waitForSubmit();
@@ -22,7 +23,7 @@ const executeOperation = ({ type, action, symbol, amount }: OperationParams) => 
   Modal.submit();
   Modal.waitForTransaction(action);
 
-  Modal.checkTransactionStatus('success', `${capitalize(pastParticiple(action))} ${amount} ${symbol}`);
+  Modal.checkTransactionStatus('success', `You ${pastParticiple(action)} ${amount} ${symbol}`);
 
   Modal.close();
 };

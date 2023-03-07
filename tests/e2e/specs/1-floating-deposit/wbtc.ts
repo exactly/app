@@ -21,5 +21,5 @@ describe('WBTC floating deposit', () => {
     disconnectWallet();
   });
 
-  deposit({ type: 'floating', symbol: 'WBTC', decimals: 8, balance: '100.0', amount: '1', shouldApprove: true });
+  deposit({ type: 'floating', symbol: 'WBTC', decimals: 8, balance: '100.0', amount: '1.5', shouldApprove: true });
 });

@@ -33,7 +33,7 @@ describe('USDC floating borrow', () => {
 
     it('should go to markets and deposit some ETH', () => {
       Navbar.goTo('markets');
-      deposit({ symbol: 'ETH', type: 'floating', amount: '0.01' });
+      deposit({ symbol: 'ETH', type: 'floating', amount: '1.5' });
     });
   });
 

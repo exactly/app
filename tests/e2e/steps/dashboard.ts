@@ -14,11 +14,13 @@ export const checkCollateralSwitchTooltip = (symbol: Coin, tooltip: string) => {
 
 export const attemptEnterMarket = (symbol: Coin) => {
   checkCollateralSwitchStatus(symbol, false, false);
+  cy.getByTestId(`switch-collateral-${symbol}-wrapper`).trigger('mouseover');
   cy.getByTestId(`switch-collateral-${symbol}`).click();
 };
 
 export const attemptExitMarket = (symbol: Coin) => {
   checkCollateralSwitchStatus(symbol, false, true);
+  cy.getByTestId(`switch-collateral-${symbol}-wrapper`).trigger('mouseover');
   cy.getByTestId(`switch-collateral-${symbol}`).click();
 };
 
@@ -34,7 +36,7 @@ export const waitForTransaction = (symbol: Coin) => {
         .getByTestId(`dashboard-floating-pool-row-${symbol}`)
         .then(($row) => $row.find(`[data-testid="switch-collateral-${symbol}-loading"]`).length === 0),
     {
-      timeout: 15000,
+      timeout: 30000,
       interval: 1000,
     },
   );

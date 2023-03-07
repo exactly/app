@@ -79,7 +79,7 @@ export default ({
         Modal.submit();
         Modal.waitForTransaction('borrow');
 
-        Modal.checkTransactionStatus('success', `Borrowed ${amount} ${symbol}`);
+        Modal.checkTransactionStatus('success', `You borrowed ${amount} ${symbol}`);
 
         Modal.close();
       });
@@ -109,7 +109,7 @@ export const attemptBorrow = ({ type, symbol, amount = '1' }: Omit<TestParams, '
       it(`should warn if the user tries to borrow with no collateral enabled for ${symbol}`, () => {
         Modal.input(amount);
         Modal.checkAlert(
-          'error',
+          'warning',
           'In order to borrow you need to have a deposit in the Variable Rate Pool marked as collateral in your Dashboard',
         );
       });

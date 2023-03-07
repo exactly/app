@@ -32,7 +32,14 @@ function MobileMenu({ open, handleClose }: Props) {
         <Typography fontSize={19} fontWeight={700}>
           Advanced view
         </Typography>
-        <Switch checked={view === 'advanced'} onChange={() => setView(view === 'advanced' ? 'simple' : 'advanced')} />
+        <Switch
+          checked={view === 'advanced'}
+          onChange={() => setView(view === 'advanced' ? 'simple' : 'advanced')}
+          inputProps={{
+            'aria-label': `Switch to ${view === 'advanced' ? 'simple' : 'advanced'} view`,
+            'data-testid': 'switch-markets-view',
+          }}
+        />
       </Box>
     );
   };

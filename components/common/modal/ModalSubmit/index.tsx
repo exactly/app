@@ -91,7 +91,8 @@ function ModalSubmit({ requiresApproval = false, isLoading = false, disabled = f
       onClick={submit}
       color="primary"
       variant="contained"
-      disabled={disabled || requiresApproval || Boolean(errorButton)}
+      disabled={disabled || Boolean(errorButton)}
+      data-testid="modal-submit"
     >
       {errorButton ? errorButton : label}
     </LoadingButton>

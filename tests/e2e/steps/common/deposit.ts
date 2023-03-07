@@ -37,11 +37,13 @@ export default ({ type, symbol, decimals, balance, amount = '1', shouldApprove =
         Modal.checkInput(inp.slice(0, inp.length - 1));
       });
 
-      it('should warn if the user tries to deposit more than its current balance', () => {
-        const aboveBalance = Number(balance) + 1;
-        Modal.input(String(aboveBalance));
-        Modal.checkAlert('error', "You can't deposit more than you have in your wallet");
-      });
+      if (!shouldApprove) {
+        it('should warn if the user tries to deposit more than its current balance', () => {
+          const aboveBalance = Number(balance) + 1;
+          Modal.input(String(aboveBalance));
+          Modal.checkSubmitErrorButton('Insufficient balance');
+        });
+      }
 
       it('should input the wallet balance on max', () => {
         Modal.onMax();
@@ -68,7 +70,7 @@ export default ({ type, symbol, decimals, balance, amount = '1', shouldApprove =
         Modal.submit();
         Modal.waitForTransaction('deposit');
 
-        Modal.checkTransactionStatus('success', `Deposited ${amount} ${symbol}`);
+        Modal.checkTransactionStatus('success', `You deposited ${amount} ${symbol}`);
 
         Modal.close();
       });

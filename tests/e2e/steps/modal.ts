@@ -13,7 +13,7 @@ export const close = () => {
 };
 
 export const input = (inp: string) => {
-  cy.getByTestId('modal-input').type(inp);
+  cy.getByTestId('modal-input').should('be.visible').type(inp);
 };
 
 export const checkInput = (inp: string) => {
@@ -105,9 +105,13 @@ export const checkWalletBalance = (balance: string) => {
 };
 
 export const checkAlert = (variant: 'info' | 'warning' | 'error' | 'success', message: string) => {
-  cy.getByTestId(`modal-alert-${variant}`).should('be.visible', message).and('have.text', message);
+  cy.getByTestId(`modal-alert-${variant}`).should('be.visible').and('have.text', message);
 };
 
 export const checkAlertNotFound = (variant: 'info' | 'warning' | 'error' | 'success') => {
   cy.getByTestId(`modal-alert-${variant}`).should('not.exist');
+};
+
+export const checkSubmitErrorButton = (message: string) => {
+  cy.getByTestId('modal-submit').should('be.visible').and('be.disabled').and('have.text', message);
 };
