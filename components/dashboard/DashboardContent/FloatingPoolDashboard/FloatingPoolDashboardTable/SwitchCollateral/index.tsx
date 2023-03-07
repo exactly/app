@@ -9,7 +9,7 @@ import { HealthFactor } from 'types/HealthFactor';
 import useAuditor from 'hooks/useAuditor';
 import getHealthFactorData from 'utils/getHealthFactorData';
 import handleOperationError from 'utils/handleOperationError';
-import { useNetwork, useSwitchNetwork } from 'wagmi';
+import { useNetwork } from 'wagmi';
 import { useNetworkContext } from 'contexts/NetworkContext';
 
 type Props = {
@@ -20,7 +20,6 @@ function SwitchCollateral({ symbol }: Props) {
   const { accountData, getAccountData } = useContext(AccountDataContext);
   const auditor = useAuditor();
   const { chain } = useNetwork();
-  const { switchNetworkAsync } = useSwitchNetwork();
   const { displayNetwork } = useNetworkContext();
 
   const healthFactor = useMemo<HealthFactor | undefined>(() => {
@@ -35,6 +34,10 @@ function SwitchCollateral({ symbol }: Props) {
 
   const { disabled, disabledText } = useMemo<{ disabled: boolean; disabledText?: string }>(() => {
     if (!accountData || !healthFactor) return { disabled: true };
+
+    if (chain && displayNetwork.id !== chain.id) {
+      return { disabled: true, disabledText: 'You are connected to a different network' };
+    }
 
     const { floatingBorrowAssets, fixedBorrowPositions, isCollateral, usdPrice, floatingDepositAssets, adjustFactor } =
       accountData[symbol];
@@ -59,7 +62,7 @@ function SwitchCollateral({ symbol }: Props) {
     }
 
     return { disabled: false };
-  }, [accountData, healthFactor, symbol]);
+  }, [accountData, healthFactor, symbol, chain, displayNetwork]);
 
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -69,10 +72,6 @@ function SwitchCollateral({ symbol }: Props) {
 
     setLoading(true);
     try {
-      if (chain && displayNetwork.id !== chain.id) {
-        return await switchNetworkAsync?.(displayNetwork.id);
-      }
-
       const tx = await (checked ? auditor.exitMarket(market) : auditor.enterMarket(market));
       await tx.wait();
 
@@ -82,19 +81,22 @@ function SwitchCollateral({ symbol }: Props) {
     } finally {
       setLoading(false);
     }
-  }, [accountData, auditor, symbol, chain, displayNetwork.id, checked, getAccountData, switchNetworkAsync]);
+  }, [accountData, auditor, symbol, checked, getAccountData]);
 
   if (loading) return <CircularProgress color="primary" size={24} thickness={8} sx={{ ml: '7px' }} />;
+
+  const tooltip =
+    disabled && disabledText
+      ? disabledText
+      : checked
+      ? 'Enable this asset as collateral'
+      : 'Disabling this asset as collateral affects your borrowing power and Health Factor';
 
   return (
     <Tooltip
       title={
         <Typography fontSize="1.2em" fontWeight={600}>
-          {!checked
-            ? 'Enable this asset as collateral'
-            : disabledText && disabled
-            ? disabledText
-            : 'Disabling this asset as collateral affects your borrowing power and Health Factor'}
+          {tooltip}
         </Typography>
       }
       placement="top"
