@@ -5,9 +5,9 @@ import { WAD } from './queryRates';
 function parseHealthFactor(debt: BigNumber, collateral: BigNumber) {
   //TODO => check case when the user doesn't have any collateral or debt
 
-  if (collateral.isZero() || debt.isZero()) {
+  if (collateral.isZero() && debt.isZero()) {
     return '∞';
-  } else {
+  } else if (!debt.isZero()) {
     const healthFactor = collateral.mul(WAD).div(debt);
 
     const formatedHealthFactor = Number(formatFixed(healthFactor, 18));
@@ -24,5 +24,7 @@ function parseHealthFactor(debt: BigNumber, collateral: BigNumber) {
 
     return `${formatedHealthFactor.toFixed(decimals)}x`;
   }
+
+  return '∞';
 }
 export default parseHealthFactor;
