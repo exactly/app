@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
-import { useDisconnect, useEnsName, useNetwork } from 'wagmi';
+import { useDisconnect, useEnsAvatar, useEnsName, useNetwork } from 'wagmi';
+import { mainnet } from 'wagmi/chains';
 import { useWeb3 } from 'hooks/useWeb3';
 import { formatWallet } from 'utils/utils';
 import ErrorIcon from '@mui/icons-material/Error';
@@ -23,7 +24,8 @@ function Wallet() {
 
   const { walletAddress } = useWeb3();
   const { disconnect } = useDisconnect();
-  const { data: ens } = useEnsName({ address: walletAddress as `0x${string}` });
+  const { data: ens } = useEnsName({ address: walletAddress as `0x${string}`, chainId: mainnet.id });
+  const { data: ensAvatar } = useEnsAvatar({ address: walletAddress as `0x${string}`, chainId: mainnet.id });
   const { open } = useWeb3Modal();
 
   const isSupportedChain = useMemo(
@@ -35,8 +37,9 @@ function Wallet() {
 
   const avatarImgSrc = useMemo(() => {
     if (!walletAddress) return '';
+    if (ensAvatar) return ensAvatar;
     return blockies.create({ seed: walletAddress.toLocaleLowerCase() }).toDataURL();
-  }, [walletAddress]);
+  }, [walletAddress, ensAvatar]);
 
   if (!walletAddress) {
     return (
@@ -66,7 +69,7 @@ function Wallet() {
           },
         }}
       >
-        <Avatar alt="Blocky Avatar" src={avatarImgSrc} sx={{ width: 20, height: 20, mr: '5px' }} />
+        <Avatar alt="Address avatar" src={avatarImgSrc} sx={{ width: 20, height: 20, mr: '5px' }} />
         <Typography variant="subtitle1" color="#0D0E0F">
           {ens ?? formattedWallet}
         </Typography>
