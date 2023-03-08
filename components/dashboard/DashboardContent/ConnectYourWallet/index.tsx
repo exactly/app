@@ -1,9 +1,9 @@
 import React from 'react';
 import { Box, Button, Typography } from '@mui/material';
-import { useWeb3Modal } from '@web3modal/react';
+import { useWeb3 } from 'hooks/useWeb3';
 
 function ConnectYourWallet() {
-  const { open } = useWeb3Modal();
+  const { connect } = useWeb3();
 
   return (
     <Box
@@ -20,7 +20,7 @@ function ConnectYourWallet() {
       <Typography textAlign="center" fontSize={13} color="grey.700">
         Please connect your wallet to see your deposits and borrowings.
       </Typography>
-      <Button onClick={() => open({ route: 'ConnectWallet' })} variant="contained" sx={{ marginTop: 2 }}>
+      <Button onClick={connect} variant="contained" sx={{ marginTop: 2 }}>
         Connect wallet
       </Button>
     </Box>

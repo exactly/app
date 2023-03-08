@@ -6,7 +6,6 @@ import { useOperationContext } from 'contexts/OperationContext';
 import { useModalStatus } from 'contexts/ModalStatusContext';
 import { useNetwork, useSwitchNetwork } from 'wagmi';
 import { useWeb3 } from 'hooks/useWeb3';
-import { useWeb3Modal } from '@web3modal/react';
 
 type Props = {
   symbol: string;
@@ -20,19 +19,13 @@ type Props = {
 function ModalSubmit({ requiresApproval = false, isLoading = false, disabled = false, submit, symbol, label }: Props) {
   const { loadingButton, isLoading: isLoadingOp, tx, errorButton } = useOperationContext();
   const { operation } = useModalStatus();
-  const { isConnected, chain: displayNetwork } = useWeb3();
-  const { open } = useWeb3Modal();
+  const { isConnected, chain: displayNetwork, connect } = useWeb3();
   const { chain } = useNetwork();
   const { switchNetwork, isLoading: switchIsLoading } = useSwitchNetwork();
 
   if (!isConnected) {
     return (
-      <Button
-        fullWidth
-        onClick={() => open({ route: 'ConnectWallet' })}
-        variant="contained"
-        data-testid="modal-connect-wallet"
-      >
+      <Button fullWidth onClick={connect} variant="contained" data-testid="modal-connect-wallet">
         Connect wallet
       </Button>
     );

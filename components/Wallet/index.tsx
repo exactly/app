@@ -1,5 +1,5 @@
-import React, { useCallback, useMemo } from 'react';
-import { useConnect, useDisconnect, useEnsAvatar, useEnsName } from 'wagmi';
+import React, { useMemo } from 'react';
+import { useDisconnect, useEnsAvatar, useEnsName } from 'wagmi';
 import { mainnet } from 'wagmi/chains';
 import { useWeb3 } from 'hooks/useWeb3';
 import { formatWallet } from 'utils/utils';
@@ -8,38 +8,26 @@ import { Avatar, Box, Button, Menu, Typography } from '@mui/material';
 
 import * as blockies from 'blockies-ts';
 import CopyToClipboardButton from 'components/common/CopyToClipboardButton';
-import { useWeb3Modal } from '@web3modal/react';
 import { globals } from 'styles/theme';
 
 const { onlyDesktop } = globals;
 
 function Wallet() {
-  const { connectors, connect } = useConnect();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const isMenuOpen = Boolean(anchorEl);
 
   const openMenu = (event: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget);
   const closeMenu = () => setAnchorEl(null);
 
-  const { walletAddress } = useWeb3();
+  const { walletAddress, connect } = useWeb3();
   const { disconnect } = useDisconnect();
   const { data: ens, error: ensError } = useEnsName({ address: walletAddress as `0x${string}`, chainId: mainnet.id });
   const { data: ensAvatar, error: ensAvatarError } = useEnsAvatar({
     address: walletAddress as `0x${string}`,
     chainId: mainnet.id,
   });
-  const { open } = useWeb3Modal();
 
   const formattedWallet = formatWallet(walletAddress);
-
-  const walletConnect = useCallback(() => {
-    if (JSON.parse(process.env.NEXT_PUBLIC_IS_E2E ?? 'false')) {
-      const injected = connectors.find(({ id, ready, name }) => ready && id === 'injected' && name === 'E2E');
-      connect({ connector: injected });
-    } else {
-      open({ route: 'ConnectWallet' });
-    }
-  }, [connectors, connect, open]);
 
   const avatarImgSrc = useMemo(() => {
     if (!walletAddress) return '';
@@ -49,12 +37,7 @@ function Wallet() {
 
   if (!walletAddress) {
     return (
-      <Button
-        onClick={walletConnect}
-        variant="contained"
-        sx={{ fontSize: { xs: 10, sm: 13 } }}
-        data-testid="connect-wallet"
-      >
+      <Button onClick={connect} variant="contained" sx={{ fontSize: { xs: 10, sm: 13 } }} data-testid="connect-wallet">
         Connect wallet
       </Button>
     );
