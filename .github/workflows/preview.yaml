@@ -48,4 +48,5 @@ jobs:
           record: false
           start: npm run start:e2e
           wait-on: 'http://127.0.0.1:3000'
+          wait-on-timeout: 300000
           command: npm run test
