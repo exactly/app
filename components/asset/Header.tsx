@@ -12,6 +12,7 @@ import networkData from 'config/networkData.json' assert { type: 'json' };
 import useAccountData from 'hooks/useAccountData';
 import ExplorerMenu from './ExplorerMenu';
 import { Box } from '@mui/material';
+import { toPercentage } from 'utils/utils';
 
 type Props = {
   symbol: string;
@@ -56,7 +57,8 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
   }, [marketAccount]);
 
   const itemsInfo: ItemInfoProps[] = useMemo((): ItemInfoProps[] => {
-    const decimals = marketAccount?.decimals;
+    if (!marketAccount) return [];
+    const { decimals, adjustFactor } = marketAccount;
     return [
       {
         label: 'Total Deposits',
@@ -84,6 +86,10 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
                 formatFixed(floatingDeposits.add(fixedDeposits).sub(floatingBorrows.add(fixedBorrows)), decimals),
               )}`
             : undefined,
+      },
+      {
+        label: 'Risk-Adjust Factor',
+        value: toPercentage(parseFloat(formatFixed(adjustFactor, 18))),
       },
     ];
   }, [marketAccount, floatingDeposits, fixedDeposits, floatingBorrows, fixedBorrows]);
