@@ -1,18 +1,14 @@
 import React, { useMemo } from 'react';
-import { useDisconnect, useEnsAvatar, useEnsName, useNetwork } from 'wagmi';
+import { useDisconnect, useEnsAvatar, useEnsName } from 'wagmi';
 import { mainnet } from 'wagmi/chains';
 import { useWeb3 } from 'hooks/useWeb3';
 import { formatWallet } from 'utils/utils';
-import ErrorIcon from '@mui/icons-material/Error';
 
-import Image from 'next/image';
-
-import { Avatar, Box, Button, Divider, Menu, Typography } from '@mui/material';
+import { Avatar, Box, Button, Menu, Typography } from '@mui/material';
 
 import * as blockies from 'blockies-ts';
 import CopyToClipboardButton from 'components/common/CopyToClipboardButton';
 import { useWeb3Modal } from '@web3modal/react';
-import { supportedChains } from 'utils/client';
 
 function Wallet() {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -20,18 +16,12 @@ function Wallet() {
 
   const openMenu = (event: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget);
   const closeMenu = () => setAnchorEl(null);
-  const { chain } = useNetwork();
 
   const { walletAddress } = useWeb3();
   const { disconnect } = useDisconnect();
   const { data: ens } = useEnsName({ address: walletAddress as `0x${string}`, chainId: mainnet.id });
   const { data: ensAvatar } = useEnsAvatar({ address: walletAddress as `0x${string}`, chainId: mainnet.id });
   const { open } = useWeb3Modal();
-
-  const isSupportedChain = useMemo(
-    () => chain?.id && (supportedChains.map((c) => c.id) as number[]).includes(chain.id),
-    [chain?.id],
-  );
 
   const formattedWallet = formatWallet(walletAddress);
 
@@ -114,24 +104,6 @@ function Wallet() {
               </Typography>
               <CopyToClipboardButton text={walletAddress} />
             </Box>
-          </Box>
-          <Divider sx={{ borderColor: 'grey.200' }} />
-          <Box display="flex" my={1} alignItems="center" gap={0.5} justifyContent="center">
-            {isSupportedChain ? (
-              <>
-                <Image src={`/img/networks/${chain?.id}.svg`} alt={`chain id ${chain?.id}`} width={24} height={24} />
-                <Typography fontWeight={600} fontSize="16px" color="grey.500">
-                  {chain?.name}
-                </Typography>
-              </>
-            ) : (
-              <>
-                <ErrorIcon sx={{ color: '#EE2939' }} />
-                <Typography fontWeight={600} fontSize="16px" color="grey.500">
-                  Unsupported network
-                </Typography>
-              </>
-            )}
           </Box>
           <Button
             variant="outlined"
