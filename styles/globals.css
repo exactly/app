@@ -1,10 +1,8 @@
-@import url('https://use.typekit.net/vah2ljw.css');
-
 html,
 body {
   padding: 0;
   margin: 0;
-  font-family: 'articulat-cf';
+  font-family: 'Inter';
   background-color: var(--background);
   color: var(--text-color);
   height: 100%;
