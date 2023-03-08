@@ -42,7 +42,7 @@ function ModalInfoTotalDeposits({ qty, symbol, operation, variant = 'column' }: 
 
   return (
     <ModalInfo label="Total deposits" icon={SaveAltRoundedIcon} variant={variant}>
-      <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 0.5 }}>
+      <Box display="flex" alignItems="center" gap={0.5}>
         {variant === 'column' && (
           <Image src={`/img/assets/${symbol}.svg`} alt={formatSymbol(symbol)} width={16} height={16} />
         )}

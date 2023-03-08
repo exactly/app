@@ -8,7 +8,7 @@ import { useRouter } from 'next/router';
 import ThemeContext from 'contexts/ThemeContext';
 import { useWeb3 } from 'hooks/useWeb3';
 
-import { AppBar, Box, Button, Chip, IconButton, Toolbar, useTheme } from '@mui/material';
+import { AppBar, Box, Button, Chip, IconButton, Toolbar, useTheme, Typography } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import { globals } from 'styles/theme';
@@ -33,7 +33,7 @@ const routes: {
   {
     pathname: '/dashboard',
     name: 'Dashboard',
-    icon: <AccountBalanceWalletIcon sx={{ fontSize: '14px', my: 'auto' }} />,
+    icon: <AccountBalanceWalletIcon sx={{ fontSize: '14px' }} />,
   },
 ];
 
@@ -115,6 +115,7 @@ function Navbar() {
                         px: 1.5,
                         color: currentPathname === pathname ? 'white' : 'grey.700',
                         display: 'flex',
+                        alignItems: 'center',
                         fontSize: '14px',
                         fontWeight: 700,
                         gap: 0.5,
@@ -122,7 +123,9 @@ function Navbar() {
                       variant={pathname === currentPathname ? 'contained' : 'text'}
                     >
                       {icon}
-                      <Box my="auto">{name}</Box>
+                      <Typography fontWeight={700} fontSize={14}>
+                        {name}
+                      </Typography>
                     </Button>
                   </Link>
                 )}
