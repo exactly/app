@@ -5,7 +5,7 @@ describe('Test Connect Wallet', () => {
   const { visit, userAddress } = setupFork();
 
   before(() => {
-    visit('/');
+    visit('/', { connectWallet: false });
   });
 
   after(() => {

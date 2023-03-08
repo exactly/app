@@ -1,14 +1,13 @@
 import * as Navbar from '../../steps/nabvar';
 import { enterMarket, exitMarket } from '../../steps/common/market';
 import { setupFork } from '../../steps/setup';
-import { connectWallet, disconnectWallet } from '../../steps/wallet';
+import { disconnectWallet } from '../../steps/wallet';
 
 describe('WETH enter/exit market', () => {
   const { visit, setBalance, userAddress } = setupFork();
 
   before(() => {
     visit('/');
-    connectWallet();
     Navbar.goTo('dashboard');
   });
 

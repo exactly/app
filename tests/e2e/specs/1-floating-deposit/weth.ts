@@ -1,13 +1,12 @@
 import deposit from '../../steps/common/deposit';
 import { setupFork } from '../../steps/setup';
-import { connectWallet, disconnectWallet } from '../../steps/wallet';
+import { disconnectWallet } from '../../steps/wallet';
 
 describe('WETH floating deposit', () => {
   const { visit, setBalance, userAddress } = setupFork();
 
   before(() => {
     visit('/');
-    connectWallet();
   });
 
   before(async () => {

@@ -4,14 +4,17 @@ import { JsonRpcProvider } from '@ethersproject/providers';
 import { init, createFork, deleteFork, rpcURL, setBalance } from '../utils/tenderly';
 import type { Balance } from '../utils/tenderly';
 import { CustomizedBridge } from '../utils/bridge';
+import { connectWallet } from './wallet';
 
 type MarketView = 'simple' | 'advanced';
 
 type VisitOptions = {
+  connectWallet?: boolean;
   marketView?: MarketView;
 };
 
 const defaultVisitOptions: VisitOptions = {
+  connectWallet: true,
   marketView: 'advanced',
 };
 
@@ -35,20 +38,26 @@ export const setupFork = ({ chainId = 1, wallet = Wallet.createRandom() }: ForkP
   });
 
   return {
-    visit: (url: string, options: { marketView?: 'simple' | 'advanced' } = {}) => {
+    visit: (url: string, options: VisitOptions = {}) => {
       const opts = { ...defaultVisitOptions, ...options };
       const provider = new JsonRpcProvider(rpcURL(forkId), chainId);
       const signer = new Wallet(wallet.privateKey, provider);
       const bridge = new CustomizedBridge(signer, provider, Number(chainId));
-      return cy.visit(url, {
-        onBeforeLoad: (window) => {
-          window.localStorage.setItem('tos', 'true');
-          window.localStorage.setItem('marketView', opts.marketView);
+      return cy
+        .visit(url, {
+          onBeforeLoad: (window) => {
+            window.localStorage.setItem('tos', 'true');
+            window.localStorage.setItem('marketView', opts.marketView);
 
-          window.ethereum = bridge;
-          window.rpcURL = rpcURL(forkId);
-        },
-      });
+            window.ethereum = bridge;
+            window.rpcURL = rpcURL(forkId);
+          },
+        })
+        .then(() => {
+          if (opts.connectWallet) {
+            connectWallet();
+          }
+        });
     },
     userAddress: () => wallet.address,
     setBalance: (address: string, balance: Balance) => setBalance(rpcURL(forkId), address, balance),

@@ -3,14 +3,13 @@ import * as Dashboard from '../../steps/dashboard';
 import { deposit, enterMarket } from '../../steps/actions';
 import borrow, { attemptBorrow } from '../../steps/common/borrow';
 import { setupFork } from '../../steps/setup';
-import { connectWallet, disconnectWallet } from '../../steps/wallet';
+import { disconnectWallet } from '../../steps/wallet';
 
 describe('USDC floating borrow', () => {
   const { visit, setBalance, userAddress } = setupFork();
 
   before(() => {
     visit('/');
-    connectWallet();
   });
 
   before(async () => {
