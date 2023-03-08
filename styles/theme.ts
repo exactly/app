@@ -126,7 +126,7 @@ const theme = createTheme({
     },
   },
   typography: {
-    fontFamily: 'articulat-cf',
+    fontFamily: 'Inter',
     fontFamilyMonospaced: 'IBM Plex Mono',
     h1: {
       fontSize: 36,
