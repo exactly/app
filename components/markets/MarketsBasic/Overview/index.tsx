@@ -1,6 +1,6 @@
 import { formatFixed } from '@ethersproject/bignumber';
 import { Zero } from '@ethersproject/constants';
-import { Box, Skeleton, Typography, useMediaQuery, useTheme } from '@mui/material';
+import { Box, Skeleton, Typography, useTheme } from '@mui/material';
 import { MarketsBasicOperation, MarketsBasicOption } from 'contexts/MarketsBasicContext';
 import useAccountData from 'hooks/useAccountData';
 import Image from 'next/image';
@@ -24,8 +24,7 @@ const Overview: FC<Props> = ({ symbol, operation, qty, option }) => {
     [operation, option.borrowAPR, option.depositAPR],
   );
 
-  const { palette, breakpoints } = useTheme();
-  const isMobile = useMediaQuery(breakpoints.down('sm'));
+  const { palette } = useTheme();
 
   return (
     <Box
@@ -50,13 +49,7 @@ const Overview: FC<Props> = ({ symbol, operation, qty, option }) => {
               height="20"
               style={{ maxWidth: '100%', height: 'auto' }}
             />
-            <Typography
-              variant="browserAlign"
-              fontWeight={700}
-              fontSize={24}
-              height={24}
-              lineHeight={isMobile ? 1.2 : undefined}
-            >
+            <Typography fontWeight={700} fontSize={24}>
               {formatNumber(formatFixed(option.finalAssets, decimals), symbol, true)}
             </Typography>
           </>
@@ -69,13 +62,7 @@ const Overview: FC<Props> = ({ symbol, operation, qty, option }) => {
           Assets to be {operation === 'borrow' ? 'borrowed' : 'deposited'}
         </Typography>
         <Box display="flex" gap={0.3} alignItems="center" minWidth={100} justifyContent="right">
-          <Typography
-            variant="browserAlign"
-            fontWeight={700}
-            fontSize={14}
-            lineHeight={isMobile ? 1.2 : undefined}
-            height={14}
-          >
+          <Typography fontWeight={700} fontSize={14}>
             {formatNumber(qty, symbol)}
           </Typography>
           <Image
@@ -94,13 +81,7 @@ const Overview: FC<Props> = ({ symbol, operation, qty, option }) => {
         <Box display="flex" gap={0.3} alignItems="center" minWidth={100} justifyContent="right">
           {option.interest ? (
             <>
-              <Typography
-                variant="browserAlign"
-                fontWeight={700}
-                fontSize={14}
-                lineHeight={isMobile ? 1.2 : undefined}
-                height={14}
-              >
+              <Typography fontWeight={700} fontSize={14}>
                 {formatNumber(formatFixed(option.interest, decimals), symbol)}
               </Typography>
               <Image

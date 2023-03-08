@@ -56,7 +56,6 @@ declare module '@mui/material/styles' {
     cardTitle: TypographyVariants['body1'];
     link: TypographyVariants['body1'];
     chip: TypographyVariants['body1'];
-    browserAlign: TypographyVariants['body1'];
   }
   interface TypographyVariantsOptions {
     fontFamilyMonospaced: string;
@@ -65,7 +64,6 @@ declare module '@mui/material/styles' {
     cardTitle: TypographyVariants['body1'];
     link: TypographyVariants['body1'];
     chip: TypographyVariants['body1'];
-    browserAlign: TypographyVariants['body1'];
   }
 }
 
@@ -76,7 +74,6 @@ declare module '@mui/material/Typography' {
     cardTitle: true;
     link: true;
     chip: true;
-    browserAlign: true;
   }
 }
 
@@ -183,9 +180,6 @@ const theme = createTheme({
       fontFamily: 'IBM Plex Mono',
       fontSize: 10,
       fontWeight: 700,
-    },
-    browserAlign: {
-      lineHeight: typeof window !== 'undefined' && window?.navigator?.userAgent?.indexOf('Firefox') > 0 ? 'normal' : 1,
     },
   },
   shape: {

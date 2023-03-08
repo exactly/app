@@ -84,8 +84,8 @@ const SelectMarketsView: FC = () => {
             cursor: 'pointer',
           }}
         >
-          <Box display="flex" gap={0.5}>
-            <BarChartRoundedIcon sx={{ fontSize: '14px', my: 'auto' }} />
+          <Box display="flex" alignItems="center" gap={0.5}>
+            <BarChartRoundedIcon sx={{ fontSize: '14px' }} />
             <Typography fontWeight={700} fontSize={14}>
               Markets
             </Typography>

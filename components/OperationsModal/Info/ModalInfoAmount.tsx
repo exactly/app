@@ -14,7 +14,7 @@ type Props = {
 function ModalInfoAmount({ label, value, symbol }: Props) {
   return (
     <ModalInfo variant="column" label={label}>
-      <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 0.5 }}>
+      <Box display="flex" alignItems="center" gap={0.5}>
         <Image
           src={`/img/assets/${symbol}.svg`}
           alt={formatSymbol(symbol)}
@@ -25,9 +25,7 @@ function ModalInfoAmount({ label, value, symbol }: Props) {
             height: 'auto',
           }}
         />
-        <Typography sx={{ lineHeight: 1 }} variant="modalCol">
-          {value}
-        </Typography>
+        <Typography variant="modalCol">{value}</Typography>
       </Box>
     </ModalInfo>
   );

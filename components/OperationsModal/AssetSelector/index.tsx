@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import Image from 'next/image';
-import { Box, Skeleton, Typography, useMediaQuery, useTheme } from '@mui/material';
+import { Box, Skeleton, Typography } from '@mui/material';
 
 import { MarketContext } from 'contexts/MarketContext';
 
@@ -14,9 +14,6 @@ type AssetOptionProps = {
 };
 
 function Asset({ assetSymbol, option = false }: AssetOptionProps) {
-  const { breakpoints } = useTheme();
-  const isMobile = useMediaQuery(breakpoints.down('sm'));
-
   const size = option ? 20 : 24;
 
   if (!assetSymbol) {
@@ -32,13 +29,7 @@ function Asset({ assetSymbol, option = false }: AssetOptionProps) {
         height={size}
         style={{ maxWidth: '100%', height: 'auto' }}
       />
-      <Typography
-        variant="browserAlign"
-        fontWeight={700}
-        fontSize={size}
-        height={size}
-        lineHeight={isMobile ? 1.2 : undefined}
-      >
+      <Typography fontWeight={700} fontSize={size}>
         {formatSymbol(assetSymbol)}
       </Typography>
     </Box>

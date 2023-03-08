@@ -72,7 +72,7 @@ function MobileMenu({ open, handleClose }: Props) {
             </Box>
 
             <Box display="flex" alignItems="center" justifyContent="space-between" gap={1}>
-              <Typography variant="browserAlign" height={20} fontSize={20} fontWeight={700}>
+              <Typography fontSize={20} fontWeight={700}>
                 Advanced view
               </Typography>
               <Switch

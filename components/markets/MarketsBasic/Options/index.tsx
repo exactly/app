@@ -194,7 +194,7 @@ const OptionRate: FC<{
 }> = ({ isLoading = false, value, symbol, bottom, minWidth = 0 }) => {
   return (
     <Box display="flex" flexDirection="column" minWidth={minWidth}>
-      <Box display="flex" gap={0.3} justifyContent="right">
+      <Box display="flex" alignItems="center" justifyContent="right" gap={0.3}>
         {!isLoading ? (
           <Typography fontWeight={700} fontSize={14} color="grey.900" textAlign="right">
             {value}
@@ -207,7 +207,7 @@ const OptionRate: FC<{
           alt={symbol}
           width="14"
           height="14"
-          style={{ maxWidth: '100%', height: 'auto', marginBottom: 2 }}
+          style={{ maxWidth: '100%', height: 'auto' }}
         />
       </Box>
       <Box display="flex" gap={0.3} justifyContent="right">
