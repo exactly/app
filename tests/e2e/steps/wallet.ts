@@ -13,8 +13,12 @@ export const connectWallet = () => {
           return false;
         }
       }),
-    { timeout: 15000, interval: 1000 },
-  );
+    { timeout: 20000, interval: 1000 },
+  ).then((connected: boolean) => {
+    if (!connected) {
+      throw new Error('Wallet connection failed');
+    }
+  });
 };
 
 export const disconnectWallet = () => {
