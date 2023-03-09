@@ -69,7 +69,6 @@ const MarketsBasic: FC = () => {
 
   const bestOption = useMemo(() => {
     const options = allOptions
-      .filter(({ maturity }) => maturity && maturity !== 0)
       .map(({ maturity, depositAPR, borrowAPR }) => ({
         maturity,
         apr: isDeposit ? depositAPR : borrowAPR,
