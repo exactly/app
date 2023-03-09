@@ -7,8 +7,7 @@ describe('WETH enter/exit market', () => {
   const { visit, setBalance, userAddress } = setupFork();
 
   before(() => {
-    visit('/');
-    Navbar.goTo('dashboard');
+    visit('/').then(() => Navbar.goTo('dashboard'));
   });
 
   before(async () => {
