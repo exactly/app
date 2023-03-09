@@ -2,7 +2,7 @@ import React, { FC } from 'react';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import LockIcon from '@mui/icons-material/Lock';
 import SwapVertIcon from '@mui/icons-material/SwapVert';
-import { Box, Divider, FormControlLabel, Radio, RadioGroup, Skeleton, Tooltip, Typography } from '@mui/material';
+import { Box, FormControlLabel, Radio, RadioGroup, Skeleton, Tooltip, Typography } from '@mui/material';
 import Image from 'next/image';
 import daysLeft from 'utils/daysLeft';
 import { MarketsBasicOperation, MarketsBasicOption } from 'contexts/MarketsBasicContext';
@@ -59,7 +59,7 @@ const Options: FC<Props> = ({
                     ) : (
                       <Skeleton width={52} height={20} />
                     )}
-                    {bestOption && bestOption === maturity && (
+                    {bestOption === maturity && (
                       <Box
                         display="flex"
                         alignItems="center"
@@ -126,7 +126,6 @@ const Options: FC<Props> = ({
                 </Box>
               }
             />
-            {allOptions.length > 1 && maturity === 0 && <Divider sx={{ mx: 1, borderColor: 'grey.200' }} />}
           </Box>
         );
       })}
