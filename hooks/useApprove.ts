@@ -41,10 +41,11 @@ export default (operation: Operation, contract?: ERC20 | Market, spender?: strin
       }
 
       if (!walletAddress || !contract || !spender) return true;
+      if (!qty) return false;
 
       try {
         const allowance = await contract.allowance(walletAddress, spender);
-        return allowance.isZero() || allowance.lt(parseFixed(qty || String(numbers.defaultAmount), decimals));
+        return allowance.isZero() || allowance.lt(parseFixed(qty, decimals));
       } catch {
         return true;
       }
