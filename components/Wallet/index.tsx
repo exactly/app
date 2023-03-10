@@ -9,6 +9,9 @@ import { Avatar, Box, Button, Menu, Typography } from '@mui/material';
 import * as blockies from 'blockies-ts';
 import CopyToClipboardButton from 'components/common/CopyToClipboardButton';
 import { useWeb3Modal } from '@web3modal/react';
+import { globals } from 'styles/theme';
+
+const { onlyDesktop } = globals;
 
 function Wallet() {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -60,7 +63,7 @@ function Wallet() {
         }}
       >
         <Avatar alt="Address avatar" src={avatarImgSrc} sx={{ width: 20, height: 20, mr: '5px' }} />
-        <Typography variant="subtitle1" color="#0D0E0F">
+        <Typography variant="subtitle1" color="#0D0E0F" display={onlyDesktop}>
           {ens ?? formattedWallet}
         </Typography>
       </Button>
