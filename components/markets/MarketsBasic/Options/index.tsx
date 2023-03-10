@@ -60,19 +60,28 @@ const Options: FC<Props> = ({
                       <Skeleton width={52} height={20} />
                     )}
                     {bestOption === maturity && (depositAPR || borrowAPR) && (
-                      <Box
-                        display="flex"
-                        alignItems="center"
-                        height="16px"
-                        py="3px"
-                        px="6px"
-                        borderRadius="8px"
-                        sx={{ background: 'linear-gradient(66.92deg, #00CC68 34.28%, #00CC8F 100%)' }}
+                      <Tooltip
+                        arrow
+                        title={
+                          maturity === 0
+                            ? 'This option currently offers the best APR, but please note that is a variable pool and it may change at any time based on market conditions.'
+                            : ''
+                        }
                       >
-                        <Typography variant="chip" color="white">
-                          BEST
-                        </Typography>
-                      </Box>
+                        <Box
+                          display="flex"
+                          alignItems="center"
+                          height="16px"
+                          py="3px"
+                          px="6px"
+                          borderRadius="8px"
+                          sx={{ background: 'linear-gradient(66.92deg, #00CC68 34.28%, #00CC8F 100%)' }}
+                        >
+                          <Typography variant="chip" color="white">
+                            BEST
+                          </Typography>
+                        </Box>
+                      </Tooltip>
                     )}
                   </Box>
                   {(operation === 'deposit' ? depositRewards : borrowRewards)?.map(
