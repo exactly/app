@@ -58,11 +58,11 @@ const Overview: FC<Props> = ({ symbol, operation, qty, option }) => {
         )}
       </Box>
       <Box display="flex" justifyContent="space-between">
-        <Typography fontWeight={500} fontSize={13} color="figma.grey.500">
+        <Typography fontWeight={500} fontSize={12} color="figma.grey.500">
           Assets to be {operation === 'borrow' ? 'borrowed' : 'deposited'}
         </Typography>
         <Box display="flex" gap={0.3} alignItems="center" minWidth={100} justifyContent="right">
-          <Typography fontWeight={700} fontSize={14}>
+          <Typography fontWeight={700} fontSize={13}>
             {formatNumber(qty, symbol)}
           </Typography>
           <Image
@@ -75,13 +75,13 @@ const Overview: FC<Props> = ({ symbol, operation, qty, option }) => {
         </Box>
       </Box>
       <Box display="flex" justifyContent="space-between">
-        <Typography fontWeight={500} fontSize={13} color="figma.grey.500">
+        <Typography fontWeight={500} fontSize={12} color="figma.grey.500">
           Total interest fees to {operation === 'borrow' ? 'be paid' : 'receive'} ({toPercentage(rate)} APR)
         </Typography>
         <Box display="flex" gap={0.3} alignItems="center" minWidth={100} justifyContent="right">
           {option.interest ? (
             <>
-              <Typography fontWeight={700} fontSize={14}>
+              <Typography fontWeight={700} fontSize={13}>
                 {formatNumber(formatFixed(option.interest, decimals), symbol)}
               </Typography>
               <Image
@@ -98,19 +98,19 @@ const Overview: FC<Props> = ({ symbol, operation, qty, option }) => {
         </Box>
       </Box>
       <Box display="flex" justifyContent="space-between">
-        <Typography fontWeight={500} fontSize={13} color="figma.grey.500">
+        <Typography fontWeight={500} fontSize={12} color="figma.grey.500">
           {operation === 'borrow' ? 'Loan' : 'Deposit'} maturity date (In {daysLeft(option.maturity || 0)})
         </Typography>
-        <Typography fontWeight={700} fontSize={14} noWrap minWidth={100} textAlign="right">
+        <Typography fontWeight={700} fontSize={13} noWrap minWidth={100} textAlign="right">
           {parseTimestamp(option.maturity || 0)}
         </Typography>
       </Box>
       {operation === 'borrow' && (
         <Box display="flex" justifyContent="space-between">
-          <Typography fontWeight={500} fontSize={13} color="figma.grey.500">
+          <Typography fontWeight={500} fontSize={12} color="figma.grey.500">
             Late payment penalty daily rate
           </Typography>
-          <Typography fontWeight={700} fontSize={14}>
+          <Typography fontWeight={700} fontSize={13}>
             {`${toPercentage(parseFloat(formatFixed(penaltyRate || Zero, 18)) * 86_400)}`}
           </Typography>
         </Box>

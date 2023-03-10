@@ -85,14 +85,14 @@ const SelectMarketsView: FC = () => {
           }}
         >
           <Box display="flex" alignItems="center" gap={0.5}>
-            <BarChartRoundedIcon sx={{ fontSize: '14px' }} />
-            <Typography fontWeight={700} fontSize={14}>
+            <BarChartRoundedIcon sx={{ fontSize: '13px' }} />
+            <Typography fontWeight={700} fontSize={13}>
               Markets
             </Typography>
             {anchorEl ? (
-              <ExpandLessIcon sx={{ fontSize: '14px', my: 'auto', color: 'grey.500' }} fontSize="small" />
+              <ExpandLessIcon sx={{ fontSize: '13px', my: 'auto', color: 'grey.500' }} fontSize="small" />
             ) : (
-              <ExpandMoreIcon sx={{ fontSize: '14px', my: 'auto', color: 'grey.500' }} fontSize="small" />
+              <ExpandMoreIcon sx={{ fontSize: '13px', my: 'auto', color: 'grey.500' }} fontSize="small" />
             )}
           </Box>
         </Button>

@@ -13,7 +13,7 @@ const OperationTab: FC<OperationTabProps> = ({ label, isSelected, onClick }) => 
   return (
     <Typography
       fontWeight={700}
-      fontSize={16}
+      fontSize={15}
       color={isSelected ? 'grey.900' : 'figma.grey.600'}
       sx={{ cursor: 'pointer', '&:hover': { color: 'grey.900' } }}
       onClick={onClick}

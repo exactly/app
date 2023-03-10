@@ -32,10 +32,10 @@ const Footer = () => {
               mx: 'auto',
             }}
           >
-            <Typography fontWeight={700} fontSize={14}>
+            <Typography fontWeight={700} fontSize={13}>
               Have feedback?
             </Typography>
-            <Typography color="figma.grey.600" fontWeight={500} fontSize={14}>
+            <Typography color="figma.grey.600" fontWeight={500} fontSize={13}>
               We are always looking for ways to improve. If you have suggestions,{' '}
               <a
                 target="_blank"

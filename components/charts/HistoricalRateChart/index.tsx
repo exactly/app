@@ -71,7 +71,7 @@ const HistoricalRateChart: FC<Props> = ({ symbol }) => {
               yAxisId="left"
               tickFormatter={(t) => toPercentage(t)}
               axisLine={false}
-              tick={{ fill: palette.grey[500], fontWeight: 500, fontSize: 12 }}
+              tick={{ fill: palette.grey[500], fontWeight: 500, fontSize: 11 }}
               tickLine={false}
               width={50}
             />
@@ -80,7 +80,7 @@ const HistoricalRateChart: FC<Props> = ({ symbol }) => {
                 yAxisId="right"
                 orientation="right"
                 tickFormatter={(value) => `${((value as number) * 100).toFixed(2)}%`}
-                tick={{ fill: palette.blue, fontWeight: 500, fontSize: 12 }}
+                tick={{ fill: palette.blue, fontWeight: 500, fontSize: 11 }}
                 axisLine={false}
                 tickLine={false}
                 width={50}

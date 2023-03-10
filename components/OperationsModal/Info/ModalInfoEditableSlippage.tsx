@@ -39,7 +39,7 @@ function ModalInfoEditableSlippage({ value, onChange }: Props) {
                   autoFocus: true,
                   style: { textAlign: 'right', padding: 0, height: 'fit-content', maxWidth: 50 },
                 }}
-                sx={(theme) => ({ fontSize: 14, lineHeight: 1, borderBottom: `1px solid ${theme.palette.grey[500]}` })}
+                sx={(theme) => ({ fontSize: 13, lineHeight: 1, borderBottom: `1px solid ${theme.palette.grey[500]}` })}
               />
               <Typography variant="modalRow">%</Typography>
             </>
@@ -56,7 +56,7 @@ function ModalInfoEditableSlippage({ value, onChange }: Props) {
             }}
             disableRipple
           >
-            <ModeEditRoundedIcon sx={{ fontSize: 12, color: 'grey.400' }} />
+            <ModeEditRoundedIcon sx={{ fontSize: 11, color: 'grey.400' }} />
           </Button>
         </Box>
       </ClickAwayListener>

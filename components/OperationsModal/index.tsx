@@ -80,7 +80,7 @@ function OperationsModal() {
             color: 'grey.500',
           }}
         >
-          <CloseIcon sx={{ fontSize: 20 }} />
+          <CloseIcon sx={{ fontSize: 19 }} />
         </IconButton>
       )}
       <Box

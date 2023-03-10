@@ -8,14 +8,14 @@ type Props = {
   date: number;
 };
 
-const Icon = () => <CheckCircleRoundedIcon sx={{ fontSize: 12, color: '#fff !important' }} />;
+const Icon = () => <CheckCircleRoundedIcon sx={{ fontSize: 11, color: '#fff !important' }} />;
 
 const chipSx: SxProps = {
   textTransform: 'uppercase',
   height: 20,
   width: 'fit-content',
   fontFamily: 'fontFamilyMonospaced',
-  fontSize: 10,
+  fontSize: 9,
   fontWeight: 600,
   '& .MuiChip-icon': {
     m: 0,
