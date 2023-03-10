@@ -90,6 +90,8 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
       {
         label: 'Risk-Adjust Factor',
         value: toPercentage(parseFloat(formatFixed(adjustFactor, 18))),
+        tooltipTitle:
+          'The risk-adjusted factor is a measure that helps evaluate how risky an asset is compared to others. The higher the number, the safer the asset is considered to be, making it more valuable as collateral when requesting a loan.',
       },
     ];
   }, [marketAccount, floatingDeposits, fixedDeposits, floatingBorrows, fixedBorrows]);
