@@ -126,11 +126,11 @@ const theme = createTheme({
     fontFamily: 'Inter',
     fontFamilyMonospaced: 'IBM Plex Mono',
     h1: {
-      fontSize: 36,
+      fontSize: 34,
       fontWeight: 600,
     },
     h2: {
-      fontSize: 32,
+      fontSize: 30,
       fontWeight: 600,
     },
     h5: {

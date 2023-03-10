@@ -80,7 +80,9 @@ const SelectDisplayNetwork: FC = () => {
         <Box display="flex" justifyContent="space-between" width="100%" gap={{ xs: 0, sm: 1 }}>
           <Box display="flex" gap={0.5}>
             <Image src={image} alt={`image ${image}`} width={24} height={24} />
-            <Box display={onlyDesktop}>{chain?.name}</Box>
+            <Box display={onlyDesktop} my="auto">
+              {chain?.name}
+            </Box>
           </Box>
           {anchorEl ? (
             <ExpandLessIcon sx={{ my: 'auto' }} fontSize="small" />
