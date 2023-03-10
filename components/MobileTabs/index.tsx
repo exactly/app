@@ -25,6 +25,7 @@ function MobileTabs({ tabs }: Props) {
               borderRadius: i === 0 ? '6px 0px 0px 6px' : i === tabs.length - 1 ? '0px 6px 6px 0px' : 0,
               borderWidth: '1px',
               color: selected === i ? 'white' : 'black',
+              whiteSpace: 'nowrap',
             }}
             onClick={() => setSelected(i)}
           >
