@@ -16,11 +16,11 @@ function ModalInfoColumn({ icon: Icon, label, children }: PropsWithChildren<Omit
     <Grid container flexDirection="column">
       {Icon && (
         <Grid item>
-          <Icon sx={{ color: 'grey.900', fontSize: 14 }} />
+          <Icon sx={{ color: 'grey.900', fontSize: 13 }} />
         </Grid>
       )}
       <Grid item>
-        <Typography fontFamily="fontFamilyMonospaced" color="grey.600" fontSize={12} mb={1} fontWeight={500} noWrap>
+        <Typography fontFamily="fontFamilyMonospaced" color="grey.600" fontSize={11} mb={1} fontWeight={500} noWrap>
           {label}
         </Typography>
       </Grid>
@@ -43,7 +43,7 @@ function ModalInfoRow({ label, children }: PropsWithChildren<Pick<Props, 'label'
       sx={{ px: 1, '&:not(:last-child)': { pb: 1 } }}
     >
       <Grid item>
-        <Typography color="grey.500" fontSize={14} fontWeight={500}>
+        <Typography color="grey.500" fontSize={13} fontWeight={500}>
           {label}
         </Typography>
       </Grid>
@@ -81,7 +81,7 @@ export function FromTo({ from, to, variant = 'column' }: FromToProps) {
         <Skeleton width={40} />
       )}
       <Box display="flex" alignItems="center">
-        <ArrowForwardRoundedIcon sx={{ color: 'blue', fontSize: 14 }} />
+        <ArrowForwardRoundedIcon sx={{ color: 'blue', fontSize: 13 }} />
       </Box>
       {to ? (
         <Typography variant={variant === 'column' ? 'modalCol' : 'modalRow'} sx={textSx}>

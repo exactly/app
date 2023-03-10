@@ -14,7 +14,7 @@ type AssetOptionProps = {
 };
 
 function Asset({ assetSymbol, option = false }: AssetOptionProps) {
-  const size = option ? 20 : 24;
+  const size = option ? 17 : 21;
 
   if (!assetSymbol) {
     return <Skeleton width={80} />;

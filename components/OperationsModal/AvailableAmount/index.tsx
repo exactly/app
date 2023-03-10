@@ -15,7 +15,7 @@ function AvailableAmount({ symbol, amount, label, onMax, tooltip }: Props) {
   return amount ? (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25 }}>
       <Tooltip title={tooltip} placement="bottom" arrow>
-        <Typography color="figma.grey.500" fontSize={13} fontWeight={500}>
+        <Typography color="figma.grey.500" fontSize={12} fontWeight={500}>
           {label}: {formatNumber(amount, symbol)}
         </Typography>
       </Tooltip>
@@ -30,7 +30,7 @@ function AvailableAmount({ symbol, amount, label, onMax, tooltip }: Props) {
             height: 'fit-content',
             color: 'figma.grey.500',
             fontWeight: 600,
-            fontSize: 13,
+            fontSize: 12,
           }}
         >
           Max

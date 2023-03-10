@@ -101,7 +101,7 @@ const LoadingIndicator: FC<LoadingIndicatorProps> = ({ withCircularProgress, lab
     <Box display="flex" gap={0.5} alignItems="center" width="max-content">
       {withCircularProgress && <CircularProgress color="inherit" size={16} />}
       {label && (
-        <Typography fontWeight={600} fontSize={14}>
+        <Typography fontWeight={600} fontSize={13}>
           {label}
         </Typography>
       )}

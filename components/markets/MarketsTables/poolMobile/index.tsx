@@ -106,7 +106,7 @@ const GridItem: FC<{
       </Typography>
       {header.tooltipTitle && (
         <Tooltip title={header.tooltipTitle} placement="top" arrow enterTouchDelay={0}>
-          <HelpOutlineIcon sx={{ color: 'figma.grey.300', fontSize: '16px', my: 'auto', ml: '4px' }} />
+          <HelpOutlineIcon sx={{ color: 'figma.grey.300', fontSize: '15px', my: 'auto', ml: '4px' }} />
         </Tooltip>
       )}
     </Box>

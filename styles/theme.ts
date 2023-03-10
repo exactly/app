@@ -139,17 +139,17 @@ const theme = createTheme({
     },
     h6: {
       fontWeight: 700,
-      fontSize: 20,
+      fontSize: 19,
     },
 
     subtitle1: {
       fontWeight: 500,
-      fontSize: 14,
+      fontSize: 13,
       color: '#9a9a9a',
       fontFamily: 'IBM Plex Mono',
     },
     subtitle2: {
-      fontSize: 12,
+      fontSize: 11,
       fontFamily: 'IBM Plex Mono',
     },
     caption: {
@@ -158,27 +158,27 @@ const theme = createTheme({
     },
     modalRow: {
       color: '#303336',
-      fontSize: 14,
+      fontSize: 13,
       fontWeight: 500,
     },
     modalCol: {
       color: '#0D0E0F',
-      fontSize: 20,
+      fontSize: 19,
       fontWeight: 600,
     },
     cardTitle: {
-      fontSize: 13,
+      fontSize: 12,
       fontWeight: 600,
       color: '#757A80',
     },
     link: {
       color: '#4193f7',
-      fontSize: 14,
+      fontSize: 13,
       fontWeight: 700,
     },
     chip: {
       fontFamily: 'IBM Plex Mono',
-      fontSize: 10,
+      fontSize: 9,
       fontWeight: 700,
     },
   },
@@ -191,7 +191,7 @@ const theme = createTheme({
         root: {
           textTransform: 'none',
           borderRadius: '32px',
-          fontSize: '14px',
+          fontSize: '13px',
           fontWeight: 600,
           padding: '6px 16px',
           height: '34px',
@@ -224,7 +224,7 @@ const theme = createTheme({
           paddingLeft: 0,
           paddingRight: '8px',
           '& .MuiSvgIcon-root': {
-            fontSize: 18,
+            fontSize: 17,
           },
           '&:hover': {
             backgroundColor: 'transparent',
@@ -240,11 +240,11 @@ const theme = createTheme({
           border: '1px solid #EDF0F2',
           borderRadius: '8px',
           color: '#0E0E0E',
-          fontSize: '13px',
+          fontSize: '12px',
           filter: 'drop-shadow(0px 4px 10px rgba(97, 102, 107, 0.1))',
         },
         arrow: {
-          fontSize: '16px',
+          fontSize: '15px',
           '&::before': {
             backgroundColor: '#fff',
             border: '1px solid #EDF0F2',

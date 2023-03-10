@@ -45,12 +45,12 @@ function MaturityLinearProgress({ maturityDate }: Props) {
             <Typography variant="subtitle2" color="#008CF4">
               Completed
             </Typography>
-            <CheckCircleIcon sx={{ color: '#008CF4', fontSize: '15px' }} />
+            <CheckCircleIcon sx={{ color: '#008CF4', fontSize: '14px' }} />
           </>
         ) : (
           <>
             <Typography variant="subtitle2">{`${Math.round(progress)}%`}</Typography>
-            <Typography sx={{ fontWeight: 500, fontSize: 12, color: '#94999E' }}>{`${daysToMaturity} left`}</Typography>
+            <Typography sx={{ fontWeight: 500, fontSize: 11, color: '#94999E' }}>{`${daysToMaturity} left`}</Typography>
           </>
         )}
       </Box>

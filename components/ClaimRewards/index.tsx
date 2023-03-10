@@ -91,7 +91,7 @@ const ClaimRewards: FC = () => {
         }}
       >
         <Box display="flex" flexDirection="column" alignItems="stretch" gap={1}>
-          <Typography fontWeight="500" textAlign="center" color="figma.grey.600" fontSize={14}>
+          <Typography fontWeight="500" textAlign="center" color="figma.grey.600" fontSize={13}>
             Your rewards
           </Typography>
           <Box display="flex" justifyContent="center" alignItems="center" gap={1} height={40} minWidth={128}>

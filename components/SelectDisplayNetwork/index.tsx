@@ -130,7 +130,7 @@ const SelectDisplayNetwork: FC = () => {
                   </Typography>
                 </Box>
 
-                {chain?.id === c.id && <FiberManualRecordIcon sx={{ fontSize: '10px', my: 'auto' }} />}
+                {chain?.id === c.id && <FiberManualRecordIcon sx={{ fontSize: '9px', my: 'auto' }} />}
               </Box>
             </MenuItem>
           ))}
@@ -164,7 +164,7 @@ const SelectDisplayNetwork: FC = () => {
                         TESTNET
                       </Typography>
                     </Box>
-                    {chain?.id === c.id && <FiberManualRecordIcon sx={{ fontSize: '10px', my: 'auto' }} />}
+                    {chain?.id === c.id && <FiberManualRecordIcon sx={{ fontSize: '9px', my: 'auto' }} />}
                   </Box>
                 </MenuItem>
               ))}

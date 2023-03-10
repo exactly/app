@@ -22,7 +22,7 @@ const CopyToClipboardButton: FC<Props> = ({ text }) => {
       onMouseLeave={() => copied && setTimeout(() => setCopied(false), 200)}
     >
       <IconButton onClick={handleClick} size="small">
-        <ContentCopyIcon sx={{ fontSize: '12px', color: 'grey.400' }} />
+        <ContentCopyIcon sx={{ fontSize: '11px', color: 'grey.400' }} />
       </IconButton>
     </Tooltip>
   );
