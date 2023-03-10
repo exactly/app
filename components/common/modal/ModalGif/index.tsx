@@ -69,7 +69,7 @@ function ModalGif({ tx, tryAgain }: Props) {
             )}
             <Button
               variant="outlined"
-              sx={{ width: '150px', height: '32px', fontWeight: 500 }}
+              sx={{ width: '150px', height: '32px', fontWeight: 500, whiteSpace: 'nowrap' }}
               target="_blank"
               href={`${etherscan}/tx/${tx.hash}`}
               disabled={!tx.hash}
