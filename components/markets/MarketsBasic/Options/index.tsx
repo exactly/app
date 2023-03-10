@@ -40,7 +40,7 @@ const Options: FC<Props> = ({
       {allOptions.map(({ maturity, depositAPR, borrowAPR, borrowRewards, depositRewards }, index) => {
         const apr = (operation === 'deposit' ? depositAPR : borrowAPR) ?? 0;
         const value = apr > minAPRValue ? apr : undefined;
-        const optionRate = `${value && value > 200 ? '∞' : toPercentage(apr)} APR`;
+        const optionRate = `${value && value > 200 ? '∞' : toPercentage(apr)}`;
         return (
           <Box display="flex" flexDirection="column" key={`${maturity}_${depositAPR}_${borrowAPR}_${index}`}>
             <FormControlLabel
@@ -196,7 +196,7 @@ const OptionRate: FC<{
       <Box display="flex" alignItems="center" justifyContent="right" gap={0.3}>
         {!isLoading ? (
           <Typography fontWeight={700} fontSize={14} color="grey.900" textAlign="right">
-            {value}
+            {value} APR
           </Typography>
         ) : (
           <Skeleton width={40} height={20} />
