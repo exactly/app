@@ -62,7 +62,7 @@ function MobileMenu({ open, handleClose }: Props) {
                     sx={{
                       textDecoration: currentPathname === pathname ? 'underline' : 'none',
                       fontWeight: 700,
-                      fontSize: 30,
+                      fontSize: 28,
                     }}
                   >
                     {title}
