@@ -68,6 +68,7 @@ const MaturityPoolInfo: FC<MaturityPoolInfoProps> = ({
                   ))}
                 </>
               ),
+              tooltipTitle: 'This APR assumes a constant price for the OP tokens and distribution rate.',
             },
           ]
         : []),
