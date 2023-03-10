@@ -38,7 +38,6 @@ function RewardPill({ symbol, rate }: Props) {
       }
       size="small"
       sx={{
-        mb: 0.5,
         padding: '4px 5px 4px 4px',
         border: `1px solid ${theme.palette.grey[200]}`,
         backgroundColor: 'grey.100',

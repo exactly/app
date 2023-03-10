@@ -1,5 +1,5 @@
 import React, { FC, useMemo } from 'react';
-import { WeiPerEther } from '@ethersproject/constants';
+import { WeiPerEther, Zero } from '@ethersproject/constants';
 
 import formatNumber from 'utils/formatNumber';
 import { toPercentage } from 'utils/utils';
@@ -10,6 +10,9 @@ import OrderAction from 'components/OrderAction';
 import { Box } from '@mui/material';
 import useAccountData from 'hooks/useAccountData';
 import useFloatingPoolAPR from 'hooks/useFloatingPoolAPR';
+import useRewards from 'hooks/useRewards';
+import RewardPill from 'components/markets/RewardPill';
+import ItemCell from 'components/common/ItemCell';
 
 type FloatingPoolInfoProps = {
   symbol: string;
@@ -24,6 +27,8 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol }) => {
     usdPrice,
   } = useAccountData(symbol);
 
+  const { rates } = useRewards();
+
   const { deposited, borrowed } = useMemo(() => {
     if (!totalDeposited || !totalBorrowed || !decimals || !usdPrice) return {};
     return {
@@ -32,34 +37,69 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol }) => {
     };
   }, [decimals, totalBorrowed, totalDeposited, usdPrice]);
 
-  const itemsInfo: ItemInfoProps[] = [
-    {
-      label: 'Total Deposits',
-      value: deposited != null ? `$${formatNumber(deposited)}` : undefined,
-    },
-    {
-      label: 'Total Borrows',
-      value: borrowed != null ? `$${formatNumber(borrowed)}` : undefined,
-    },
-    {
-      label: 'Total Available',
-      value: deposited != null && borrowed != null ? `$${formatNumber(deposited - borrowed)}` : undefined,
-    },
-    {
-      label: 'Deposit APR',
-      value: toPercentage(depositAPR),
-      tooltipTitle: 'Change in the underlying Variable Rate Pool shares value over the last 15 minutes, annualized.',
-    },
-    {
-      label: 'Borrow APR',
-      value: toPercentage(borrowAPR),
-      tooltipTitle: 'Change in the underlying Variable Rate Pool shares value over the last hour, annualized.',
-    },
-    {
-      label: 'Utilization Rate',
-      value: toPercentage(deposited != null && borrowed != null && deposited > 0 ? borrowed / deposited : undefined),
-    },
-  ];
+  const itemsInfo: ItemInfoProps[] = useMemo(
+    () => [
+      {
+        label: 'Total Deposits',
+        value: deposited != null ? `$${formatNumber(deposited)}` : undefined,
+      },
+      {
+        label: 'Total Borrows',
+        value: borrowed != null ? `$${formatNumber(borrowed)}` : undefined,
+      },
+      {
+        label: 'Total Available',
+        value: deposited != null && borrowed != null ? `$${formatNumber(deposited - borrowed)}` : undefined,
+      },
+      {
+        label: 'Deposit APR',
+        value: toPercentage(depositAPR),
+        tooltipTitle: 'Change in the underlying Variable Rate Pool shares value over the last 15 minutes, annualized.',
+      },
+      {
+        label: 'Borrow APR',
+        value: toPercentage(borrowAPR),
+        tooltipTitle: 'Change in the underlying Variable Rate Pool shares value over the last hour, annualized.',
+      },
+      {
+        label: 'Utilization Rate',
+        value: toPercentage(deposited != null && borrowed != null && deposited > 0 ? borrowed / deposited : undefined),
+      },
+      ...(rates[symbol] && rates[symbol].some((r) => r.floatingDeposit.gt(Zero))
+        ? [
+            {
+              label: 'Deposit Rewards',
+              value: (
+                <>
+                  {rates[symbol].map((r) => (
+                    <ItemCell
+                      key={r.asset}
+                      value={toPercentage(Number(r.floatingDeposit) / 1e18)}
+                      symbol={r.assetSymbol}
+                    />
+                  ))}
+                </>
+              ),
+            },
+          ]
+        : []),
+      ...(rates[symbol] && rates[symbol].some((r) => r.borrow.gt(Zero))
+        ? [
+            {
+              label: 'Borrow Rewards',
+              value: (
+                <>
+                  {rates[symbol].map((r) => (
+                    <ItemCell key={r.asset} value={toPercentage(Number(r.borrow) / 1e18)} symbol={r.assetSymbol} />
+                  ))}
+                </>
+              ),
+            },
+          ]
+        : []),
+    ],
+    [deposited, borrowed, depositAPR, borrowAPR, rates, symbol],
+  );
 
   return (
     <Box display="flex" justifyContent="space-between" flexDirection="column" gap={2}>

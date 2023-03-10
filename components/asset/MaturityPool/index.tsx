@@ -76,6 +76,7 @@ const AssetMaturityPools: FC<Props> = ({ symbol }) => {
       >
         <Grid item xs={12}>
           <MaturityPoolInfo
+            symbol={symbol}
             totalDeposited={totalDeposited}
             totalBorrowed={totalBorrowed}
             bestBorrowRate={bestBorrow && Number(bestBorrow.rate) / 1e18}
