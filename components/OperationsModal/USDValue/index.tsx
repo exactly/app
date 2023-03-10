@@ -25,7 +25,7 @@ function USDValue({ qty, symbol }: Props) {
   }, [qty, marketAccount]);
 
   return (
-    <Typography color="figma.grey.500" fontWeight={500} fontSize={13} fontFamily="fontFamilyMonospaced">
+    <Typography color="figma.grey.500" fontWeight={500} fontSize={12} fontFamily="fontFamilyMonospaced">
       ~${formatNumber(value || '0', 'USD')}
     </Typography>
   );

@@ -11,7 +11,7 @@ function ModalInfoFixedAPR({ fixedAPR }: Props) {
   return (
     <ModalInfo label="Your APR" variant="column">
       {fixedAPR ? (
-        <Typography fontWeight={600} fontSize={20} color="grey.900">
+        <Typography fontWeight={600} fontSize={19} color="grey.900">
           {fixedAPR}
         </Typography>
       ) : (

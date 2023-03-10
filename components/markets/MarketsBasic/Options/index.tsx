@@ -33,7 +33,7 @@ const Options: FC<Props> = ({
 }) => {
   const { minAPRValue } = numbers;
 
-  const bottomIconSx = { fontSize: '11px', my: 'auto', color: 'figma.grey.500' };
+  const bottomIconSx = { fontSize: '10px', my: 'auto', color: 'figma.grey.500' };
 
   return (
     <RadioGroup value={selected} onChange={(e) => setSelected(parseInt(e.target.value))} sx={{ pt: 1 }}>
@@ -53,7 +53,7 @@ const Options: FC<Props> = ({
                 <Box display="flex" flexDirection="row" py="7px" alignItems="center" width="100%" gap={1}>
                   <Box display="flex" gap={0.5} alignItems="center" flex={1}>
                     {maturity || maturity === 0 ? (
-                      <Typography fontWeight={700} fontSize={14} color="grey.900" my="auto">
+                      <Typography fontWeight={700} fontSize={13} color="grey.900" my="auto">
                         {maturity ? daysLeft(maturity) : 'Flexible'}
                       </Typography>
                     ) : (
@@ -85,7 +85,7 @@ const Options: FC<Props> = ({
                           value={toPercentage(Number(rate) / 1e18)}
                           bottom={
                             <>
-                              <Typography fontWeight={500} fontSize={13} color="figma.grey.500" textAlign="right">
+                              <Typography fontWeight={500} fontSize={12} color="figma.grey.500" textAlign="right">
                                 Rewards
                               </Typography>
                               <Tooltip
@@ -109,7 +109,7 @@ const Options: FC<Props> = ({
                     bottom={
                       <>
                         {maturity ? <LockIcon sx={bottomIconSx} /> : <SwapVertIcon sx={bottomIconSx} />}
-                        <Typography fontWeight={500} fontSize={13} color="figma.grey.500" textAlign="right">
+                        <Typography fontWeight={500} fontSize={12} color="figma.grey.500" textAlign="right">
                           {maturity === 0 ? 'Variable' : 'Fixed'} rate
                         </Typography>
                         <Tooltip
@@ -135,10 +135,10 @@ const Options: FC<Props> = ({
 
 const TooltipRewards = () => (
   <Box display="flex" flexDirection="column" gap={0.5}>
-    <Typography fontSize={13} color="grey.700">
+    <Typography fontSize={12} color="grey.700">
       This percentage stands for the APR of rewards earned for operating on this pool.
     </Typography>
-    <Typography fontSize={13} color="grey.700">
+    <Typography fontSize={12} color="grey.700">
       Please note that the APR of rewards can vary over time depending on the market conditions.
     </Typography>
   </Box>
@@ -146,13 +146,13 @@ const TooltipRewards = () => (
 
 const TooltipFixedRate = () => (
   <Box display="flex" flexDirection="column" gap={0.5}>
-    <Typography fontSize={13} color="grey.700">
+    <Typography fontSize={12} color="grey.700">
       This percentage stands for a loan&apos;s APR (Annual Percentage Rate).
     </Typography>
-    <Typography fontSize={13} color="grey.700">
+    <Typography fontSize={12} color="grey.700">
       A fixed interest rate remains the same for the entire term of the loan.
     </Typography>
-    <Typography fontSize={13} color="blue" sx={{ textDecoration: 'underline' }}>
+    <Typography fontSize={12} color="blue" sx={{ textDecoration: 'underline' }}>
       <a
         target="_blank"
         rel="noreferrer noopener"
@@ -166,13 +166,13 @@ const TooltipFixedRate = () => (
 
 const TooltipFloatingRate = () => (
   <Box display="flex" flexDirection="column" gap={0.5}>
-    <Typography fontSize={13} color="grey.700">
+    <Typography fontSize={12} color="grey.700">
       This percentage stands for a loan&apos;s APR (Annual Percentage Rate).
     </Typography>
-    <Typography fontSize={13} color="grey.700">
+    <Typography fontSize={12} color="grey.700">
       A variable interest rate varies over time depending on market changes.
     </Typography>
-    <Typography fontSize={13} color="blue" sx={{ textDecoration: 'underline' }}>
+    <Typography fontSize={12} color="blue" sx={{ textDecoration: 'underline' }}>
       <a
         target="_blank"
         rel="noreferrer noopener"
@@ -195,7 +195,7 @@ const OptionRate: FC<{
     <Box display="flex" flexDirection="column" minWidth={minWidth}>
       <Box display="flex" alignItems="center" justifyContent="right" gap={0.3}>
         {!isLoading ? (
-          <Typography fontWeight={700} fontSize={14} color="grey.900" textAlign="right">
+          <Typography fontWeight={700} fontSize={13} color="grey.900" textAlign="right">
             {value} APR
           </Typography>
         ) : (

@@ -83,10 +83,10 @@ const DashboardMobile: FC<Props> = ({ type }) => {
           alignItems="center"
           gap={1}
         >
-          <Typography fontWeight={700} fontSize={16}>
+          <Typography fontWeight={700} fontSize={15}>
             Fixed Interest Rate
           </Typography>
-          <Typography color="grey.500" fontSize={14}>
+          <Typography color="grey.500" fontSize={13}>
             No {type}s found
           </Typography>
         </Box>
@@ -143,7 +143,7 @@ const FlexItem: FC<PropsWithChildren & { title: string; tooltip?: string }> = ({
       </Typography>
       {tooltip && (
         <Tooltip title={tooltip} placement="top" arrow enterTouchDelay={0}>
-          <HelpOutlineIcon sx={{ color: 'figma.grey.300', fontSize: '16px', my: 'auto', ml: '4px' }} />
+          <HelpOutlineIcon sx={{ color: 'figma.grey.300', fontSize: '15px', my: 'auto', ml: '4px' }} />
         </Tooltip>
       )}
     </Box>

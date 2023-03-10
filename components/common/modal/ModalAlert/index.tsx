@@ -48,13 +48,13 @@ function ModalAlert({ variant = 'info', message }: Props) {
     },
   };
   const iconSx: SxProps = {
-    fontSize: 14,
+    fontSize: 13,
     color: fg[variant],
     mt: '4px',
     ml: 'auto',
   };
   const textSx: SxProps = {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: 500,
     color: fg[variant],
     mr: 'auto',

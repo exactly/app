@@ -40,15 +40,15 @@ const Reminder: FC<Props> = ({ operationName, maturity }) => {
       borderRadius={1}
       border="1px solid #E3E5E8"
     >
-      <Typography fontSize={16} fontWeight={700}>
+      <Typography fontSize={15} fontWeight={700}>
         {isBorrow ? 'Remember to pay before the maturity date' : 'Remember to withdraw your assets'}
       </Typography>
       <Box display="flex" flexDirection="column" justifyContent="center" alignItems="center" textAlign="center">
-        <Typography fontSize={14} fontWeight={500} color="figma.grey.600">
+        <Typography fontSize={13} fontWeight={500} color="figma.grey.600">
           {isBorrow ? 'You are borrowing from a fixed-rate pool.' : 'You are depositing to a fixed-rate pool.'}
         </Typography>
         {isBorrow && (
-          <Typography fontSize={14} fontWeight={500} color="figma.grey.600">
+          <Typography fontSize={13} fontWeight={500} color="figma.grey.600">
             Avoid penalties by paying your debt before the maturity date.
           </Typography>
         )}
@@ -57,8 +57,8 @@ const Reminder: FC<Props> = ({ operationName, maturity }) => {
         <div ref={buttonRef}>
           <Button variant="contained" onClick={onClick}>
             <Box display="flex" justifyContent="center" alignItems="center" gap={1}>
-              <CalendarTodayIcon sx={{ fontSize: '16px' }} />
-              <Typography fontSize={14} fontWeight={700}>
+              <CalendarTodayIcon sx={{ fontSize: '15px' }} />
+              <Typography fontSize={13} fontWeight={700}>
                 Add reminder to your calendar
               </Typography>
             </Box>

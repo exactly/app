@@ -28,13 +28,13 @@ function ModalAdvancedSettings({ children, bgColor, ...props }: PropsWithChildre
             height: 'fit-content',
           }}
         >
-          <Typography fontWeight={500} color="grey.500" fontSize={14}>
+          <Typography fontWeight={500} color="grey.500" fontSize={13}>
             Advanced settings
           </Typography>
           {open ? (
-            <KeyboardArrowDownRoundedIcon sx={{ fontSize: 12, color: 'grey.500', my: 'auto' }} />
+            <KeyboardArrowDownRoundedIcon sx={{ fontSize: 11, color: 'grey.500', my: 'auto' }} />
           ) : (
-            <KeyboardArrowRightRoundedIcon sx={{ fontSize: 12, color: 'grey.500', my: 'auto' }} />
+            <KeyboardArrowRightRoundedIcon sx={{ fontSize: 11, color: 'grey.500', my: 'auto' }} />
           )}
         </Button>
       </Grid>

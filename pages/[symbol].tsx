@@ -28,7 +28,7 @@ const Market: NextPage<Props> = ({ symbol }: Props) => {
             </Tooltip>
           </IconButton>
         </Link>
-        <Typography color="grey.500" sx={{ fontSize: '14px', fontWeight: 600, my: 'auto' }}>
+        <Typography color="grey.500" sx={{ fontSize: '13px', fontWeight: 600, my: 'auto' }}>
           Back
         </Typography>
       </Box>

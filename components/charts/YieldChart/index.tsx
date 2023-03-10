@@ -92,7 +92,7 @@ const YieldChart: FC<Props> = ({ symbol }) => {
               tickFormatter={formatTimestamp}
               domain={[(dataMin: number) => dataMin - 3_600 * 24 * 2, (dataMax: number) => dataMax + 3_600 * 24 * 2]}
               scale="time"
-              tick={{ fill: palette.grey[500], fontWeight: 500, fontSize: 12 }}
+              tick={{ fill: palette.grey[500], fontWeight: 500, fontSize: 11 }}
               allowDataOverflow
               fontSize="12px"
               height={20}
@@ -101,7 +101,7 @@ const YieldChart: FC<Props> = ({ symbol }) => {
               tickFormatter={formatPercentage}
               yAxisId="yaxis"
               axisLine={false}
-              tick={{ fill: palette.grey[500], fontWeight: 500, fontSize: 12 }}
+              tick={{ fill: palette.grey[500], fontWeight: 500, fontSize: 11 }}
               tickLine={false}
               width={50}
             />
@@ -131,7 +131,7 @@ const YieldChart: FC<Props> = ({ symbol }) => {
                 x={reference}
                 label={{
                   value: referenceLabel(reference),
-                  fontSize: 14,
+                  fontSize: 13,
                   fontFamily: typography.fontFamilyMonospaced,
                   fill: palette.grey[400],
                   position: 'insideTop',

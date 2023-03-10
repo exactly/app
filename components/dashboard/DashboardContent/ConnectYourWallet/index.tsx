@@ -17,7 +17,7 @@ function ConnectYourWallet() {
       gap={1}
     >
       <Typography fontWeight={700}>Connect your wallet</Typography>
-      <Typography textAlign="center" fontSize={14} color="grey.700">
+      <Typography textAlign="center" fontSize={13} color="grey.700">
         Please connect your wallet to see your deposits and borrowings.
       </Typography>
       <Button onClick={() => open({ route: 'ConnectWallet' })} variant="contained" sx={{ marginTop: 2 }}>

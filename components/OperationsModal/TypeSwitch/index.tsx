@@ -18,7 +18,7 @@ function Selector({ label, backgroundColor, selected, ...props }: SelectorProps)
         height: 24,
         color: selected ? '#fff' : theme.palette.grey[600],
         textTransform: 'uppercase',
-        fontSize: 12,
+        fontSize: 11,
         fontWeight: 600,
         fontFamily: theme.typography.fontFamilyMonospaced,
         backgroundColor: selected ? backgroundColor : undefined,

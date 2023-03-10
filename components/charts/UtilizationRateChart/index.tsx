@@ -75,7 +75,7 @@ function UtilizationRateChart({ type, symbol }: Props) {
               dataKey="utilization"
               tickFormatter={(t) => toPercentage(t, zoom ? 2 : 0)}
               stroke={palette.grey[400]}
-              tick={{ fill: palette.grey[500], fontWeight: 500, fontSize: 12 }}
+              tick={{ fill: palette.grey[500], fontWeight: 500, fontSize: 11 }}
               allowDataOverflow={true}
               domain={['DataMin', 'DataMax']}
               offset={10}
@@ -85,7 +85,7 @@ function UtilizationRateChart({ type, symbol }: Props) {
                 offset: 0,
                 fill: palette.grey[500],
                 fontWeight: 500,
-                fontSize: 12,
+                fontSize: 11,
               }}
             />
             <YAxis
@@ -95,7 +95,7 @@ function UtilizationRateChart({ type, symbol }: Props) {
               tickFormatter={(t) => toPercentage(t, zoom ? 2 : 0)}
               yAxisId="yaxis"
               axisLine={false}
-              tick={{ fill: palette.grey[500], fontWeight: 500, fontSize: 12 }}
+              tick={{ fill: palette.grey[500], fontWeight: 500, fontSize: 11 }}
               tickLine={false}
               domain={[
                 (dataMin: number) => dataMin,
@@ -108,7 +108,7 @@ function UtilizationRateChart({ type, symbol }: Props) {
                 fontWeight: 500,
                 offset: 50,
                 angle: -90,
-                fontSize: 12,
+                fontSize: 11,
               }}
             />
             <YAxis
@@ -164,7 +164,7 @@ function UtilizationRateChart({ type, symbol }: Props) {
                     position: utilization < 0.5 ? 'insideBottomLeft' : 'insideTopRight',
                     offset: 15,
                     angle: -90,
-                    style: { ...label, fontSize: 14, fill: palette.operation.variable },
+                    style: { ...label, fontSize: 13, fill: palette.operation.variable },
                   }}
                   isFront
                 />
