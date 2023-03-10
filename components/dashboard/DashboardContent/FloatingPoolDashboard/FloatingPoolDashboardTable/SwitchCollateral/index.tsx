@@ -7,9 +7,9 @@ import parseHealthFactor from 'utils/parseHealthFactor';
 import useAuditor from 'hooks/useAuditor';
 import handleOperationError from 'utils/handleOperationError';
 import { useNetwork } from 'wagmi';
-import { useNetworkContext } from 'contexts/NetworkContext';
 import useHealthFactor from 'hooks/useHealthFactor';
 import useAccountData from 'hooks/useAccountData';
+import { useWeb3 } from 'hooks/useWeb3';
 
 type Props = {
   symbol: string;
@@ -19,7 +19,7 @@ function SwitchCollateral({ symbol }: Props) {
   const { marketAccount, refreshAccountData } = useAccountData(symbol);
   const auditor = useAuditor();
   const { chain } = useNetwork();
-  const { displayNetwork } = useNetworkContext();
+  const { chain: displayNetwork } = useWeb3();
 
   const healthFactor = useHealthFactor();
 
