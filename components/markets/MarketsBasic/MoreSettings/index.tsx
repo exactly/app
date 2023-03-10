@@ -28,14 +28,12 @@ const MoreSettings: FC<Props> = ({ operation }) => {
 
   return (
     <>
-      <Box display="flex" flexDirection="column">
-        {errorData?.component !== 'gas' && <ModalTxCost gasCost={gasCost} />}
-        <ModalAdvancedSettings bgColor="transparent">
-          <Box mt={-1.5}>
-            <ModalInfoEditableSlippage value={rawSlippage} onChange={(e) => setRawSlippage(e.target.value)} />
-          </Box>
-        </ModalAdvancedSettings>
-      </Box>
+      <Box>{errorData?.component !== 'gas' && <ModalTxCost gasCost={gasCost} />}</Box>
+      <ModalAdvancedSettings bgColor="transparent" mt={0.5}>
+        <Box mt={-1.5}>
+          <ModalInfoEditableSlippage value={rawSlippage} onChange={(e) => setRawSlippage(e.target.value)} />
+        </Box>
+      </ModalAdvancedSettings>
     </>
   );
 };

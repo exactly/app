@@ -1,17 +1,17 @@
 import React, { useState, PropsWithChildren } from 'react';
-import { Button, Grid, Box, Typography } from '@mui/material';
+import { Button, Grid, Box, Typography, GridProps } from '@mui/material';
 import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownRounded';
 import KeyboardArrowRightRoundedIcon from '@mui/icons-material/KeyboardArrowRightRounded';
 
 type Props = {
   bgColor?: string;
-};
+} & GridProps;
 
-function ModalAdvancedSettings({ children, bgColor }: PropsWithChildren & Props) {
+function ModalAdvancedSettings({ children, bgColor, ...props }: PropsWithChildren & Props) {
   const [open, setOpen] = useState(false);
 
   return (
-    <Grid container flexDirection="column" mt={-0.8}>
+    <Grid container flexDirection="column" {...props}>
       <Grid item>
         <Button
           variant="text"

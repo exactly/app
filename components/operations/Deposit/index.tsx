@@ -18,6 +18,7 @@ import ModalAlert from 'components/common/modal/ModalAlert';
 import ModalInfoTotalDeposits from 'components/OperationsModal/Info/ModalInfoTotalDeposits';
 import ModalInfoFloatingUtilizationRate from 'components/OperationsModal/Info/ModalInfoFloatingUtilizationRate';
 import useDeposit from 'hooks/useDeposit';
+import ModalRewards from 'components/common/modal/ModalRewards';
 
 const Deposit: FC = () => {
   const { operation } = useModalStatus();
@@ -59,6 +60,7 @@ const Deposit: FC = () => {
 
       <Grid item mt={2}>
         {errorData?.component !== 'gas' && <ModalTxCost gasCost={gasCost} />}
+        <ModalRewards symbol={symbol} operation="deposit" />
         <ModalAdvancedSettings>
           <ModalInfoTotalDeposits qty={qty} symbol={symbol} operation="deposit" variant="row" />
           <ModalInfoFloatingUtilizationRate qty={qty} symbol={symbol} operation="deposit" variant="row" />
