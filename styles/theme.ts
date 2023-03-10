@@ -144,12 +144,12 @@ const theme = createTheme({
 
     subtitle1: {
       fontWeight: 500,
-      fontSize: 13,
+      fontSize: 14,
       color: '#9a9a9a',
       fontFamily: 'IBM Plex Mono',
     },
     subtitle2: {
-      fontSize: 11,
+      fontSize: 12,
       fontFamily: 'IBM Plex Mono',
     },
     caption: {
@@ -178,7 +178,7 @@ const theme = createTheme({
     },
     chip: {
       fontFamily: 'IBM Plex Mono',
-      fontSize: 9,
+      fontSize: 10,
       fontWeight: 700,
     },
   },

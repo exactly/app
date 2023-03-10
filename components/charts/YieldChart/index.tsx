@@ -131,7 +131,7 @@ const YieldChart: FC<Props> = ({ symbol }) => {
                 x={reference}
                 label={{
                   value: referenceLabel(reference),
-                  fontSize: 13,
+                  fontSize: 14,
                   fontFamily: typography.fontFamilyMonospaced,
                   fill: palette.grey[400],
                   position: 'insideTop',

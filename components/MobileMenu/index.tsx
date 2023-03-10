@@ -52,7 +52,7 @@ function MobileMenu({ open, handleClose }: Props) {
                 <CloseIcon sx={{ color: 'figma.grey.300' }} />
               </IconButton>
             </Box>
-            <Typography fontFamily="fontFamilyMonospaced" fontSize={13} color="figma.grey.500" fontWeight={600}>
+            <Typography fontFamily="fontFamilyMonospaced" fontSize={14} color="figma.grey.500" fontWeight={600}>
               Menu
             </Typography>
             <Box display="flex" flexDirection="column" gap={2}>
@@ -81,7 +81,7 @@ function MobileMenu({ open, handleClose }: Props) {
               />
             </Box>
             <Divider sx={{ my: '12px' }} />
-            <Typography fontFamily="fontFamilyMonospaced" fontSize={13} color="figma.grey.500" fontWeight={600}>
+            <Typography fontFamily="fontFamilyMonospaced" fontSize={14} color="figma.grey.500" fontWeight={600}>
               Links
             </Typography>
             <LinkItem title="Audits" href="https://docs.exact.ly/security/audits">
