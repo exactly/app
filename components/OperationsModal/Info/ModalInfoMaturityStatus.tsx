@@ -15,7 +15,7 @@ const chipSx: SxProps = {
   height: 20,
   width: 'fit-content',
   fontFamily: 'fontFamilyMonospaced',
-  fontSize: 9,
+  fontSize: 10,
   fontWeight: 600,
   '& .MuiChip-icon': {
     m: 0,

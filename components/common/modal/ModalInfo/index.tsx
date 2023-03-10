@@ -20,7 +20,7 @@ function ModalInfoColumn({ icon: Icon, label, children }: PropsWithChildren<Omit
         </Grid>
       )}
       <Grid item>
-        <Typography fontFamily="fontFamilyMonospaced" color="grey.600" fontSize={11} mb={1} fontWeight={500} noWrap>
+        <Typography fontFamily="fontFamilyMonospaced" color="grey.600" fontSize={12} mb={1} fontWeight={500} noWrap>
           {label}
         </Typography>
       </Grid>
