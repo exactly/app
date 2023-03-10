@@ -32,11 +32,13 @@ export const NetworkContextProvider: FC<PropsWithChildren> = ({ children }) => {
   const { pathname } = useRouter();
   const { chain } = useNetwork();
   const [displayNetwork, setDisplayNetwork] = useState<Chain>(defaultChain ?? wagmiChains.mainnet);
+  const [loading, setLoading] = useState(true);
   const first = useRef(true);
   const previousChain = usePreviousValue(chain);
   const { resetAccountData } = useContext(AccountDataContext);
 
   useEffect(() => {
+    setLoading(false);
     if (first.current) {
       // HACK: Follow the url for 3s
       setTimeout(() => (first.current = false), 3000);
@@ -68,7 +70,7 @@ export const NetworkContextProvider: FC<PropsWithChildren> = ({ children }) => {
     setDisplayNetwork,
   };
 
-  return <NetworkContext.Provider value={value}>{children}</NetworkContext.Provider>;
+  return <NetworkContext.Provider value={value}>{loading ? null : children}</NetworkContext.Provider>;
 };
 
 export function useNetworkContext() {

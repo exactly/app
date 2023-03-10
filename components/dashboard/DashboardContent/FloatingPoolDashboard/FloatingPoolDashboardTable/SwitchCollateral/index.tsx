@@ -10,7 +10,7 @@ import useAuditor from 'hooks/useAuditor';
 import getHealthFactorData from 'utils/getHealthFactorData';
 import handleOperationError from 'utils/handleOperationError';
 import { useNetwork } from 'wagmi';
-import { useNetworkContext } from 'contexts/NetworkContext';
+import { useWeb3 } from 'hooks/useWeb3';
 
 type Props = {
   symbol: string;
@@ -20,7 +20,7 @@ function SwitchCollateral({ symbol }: Props) {
   const { accountData, getAccountData } = useContext(AccountDataContext);
   const auditor = useAuditor();
   const { chain } = useNetwork();
-  const { displayNetwork } = useNetworkContext();
+  const { chain: displayNetwork } = useWeb3();
 
   const healthFactor = useMemo<HealthFactor | undefined>(() => {
     if (!accountData) return undefined;
