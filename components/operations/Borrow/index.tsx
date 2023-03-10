@@ -15,6 +15,7 @@ import ModalAlert from 'components/common/modal/ModalAlert';
 import ModalSubmit from 'components/common/modal/ModalSubmit';
 import useAccountData from 'hooks/useAccountData';
 import useBorrow from 'hooks/useBorrow';
+import ModalRewards from 'components/common/modal/ModalRewards';
 
 const Borrow: FC = () => {
   const { operation } = useModalStatus();
@@ -64,6 +65,7 @@ const Borrow: FC = () => {
 
       <Grid item mt={2}>
         {errorData?.component !== 'gas' && <ModalTxCost gasCost={gasCost} />}
+        <ModalRewards symbol={symbol} operation="borrow" />
         <ModalAdvancedSettings>
           <ModalInfoFloatingUtilizationRate qty={qty} symbol={symbol} operation="borrow" variant="row" />
         </ModalAdvancedSettings>
