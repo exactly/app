@@ -137,8 +137,10 @@ function Navbar() {
               <Chip label="Goerli Faucet" onClick={handleFaucetClick} sx={{ my: 'auto', display: onlyDesktopFlex }} />
             )}
             <SelectDisplayNetwork />
-            <ClaimRewards />
-            <Wallet />
+            <Box display="flex" gap={0.5}>
+              <ClaimRewards />
+              <Wallet />
+            </Box>
           </Box>
           <IconButton
             size="small"

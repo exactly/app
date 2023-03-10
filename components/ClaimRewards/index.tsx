@@ -6,9 +6,7 @@ import { formatFixed } from '@ethersproject/bignumber';
 
 import { useWeb3 } from 'hooks/useWeb3';
 import useRewards from 'hooks/useRewards';
-import { globals } from 'styles/theme';
 import formatNumber from 'utils/formatNumber';
-const { onlyDesktopFlex } = globals;
 
 const ClaimRewards: FC = () => {
   const { walletAddress } = useWeb3();
@@ -39,7 +37,7 @@ const ClaimRewards: FC = () => {
         aria-haspopup="true"
         aria-expanded={isOpen ? 'true' : undefined}
         sx={{
-          display: onlyDesktopFlex,
+          display: 'flex',
           gap: 0.5,
           p: 1,
           borderColor: '#CFD3D8',
