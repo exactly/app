@@ -11,7 +11,6 @@ import { Box } from '@mui/material';
 import useAccountData from 'hooks/useAccountData';
 import useFloatingPoolAPR from 'hooks/useFloatingPoolAPR';
 import useRewards from 'hooks/useRewards';
-import RewardPill from 'components/markets/RewardPill';
 import ItemCell from 'components/common/ItemCell';
 
 type FloatingPoolInfoProps = {
