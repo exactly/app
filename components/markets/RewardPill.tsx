@@ -26,7 +26,7 @@ function RewardPill({ symbol, rate }: Props) {
       <Chip
         label={
           <Box display="flex" alignItems="center" gap={0.5}>
-            <Typography fontFamily="fontFamilyMonospaced" fontWeight={500} fontSize={11}>
+            <Typography fontWeight={500} fontSize={11}>
               {toPercentage(Number(rate) / 1e18)}
             </Typography>
             <Image
