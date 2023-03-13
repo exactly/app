@@ -17,47 +17,52 @@ type FloatingPoolInfoProps = {
 
 const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol }) => {
   const { depositAPR, borrowAPR } = useFloatingPoolAPR(symbol);
-  const {
-    totalFloatingDepositAssets: totalDeposited,
-    totalFloatingBorrowAssets: totalBorrowed,
-    decimals,
-    usdPrice,
-  } = useAccountData(symbol);
+  const { marketAccount } = useAccountData(symbol);
 
   const { deposited, borrowed } = useMemo(() => {
-    if (!totalDeposited || !totalBorrowed || !decimals || !usdPrice) return {};
+    if (!marketAccount) return {};
+    const {
+      totalFloatingDepositAssets: totalDeposited,
+      totalFloatingBorrowAssets: totalBorrowed,
+      decimals,
+      usdPrice,
+    } = marketAccount;
+
     return {
       deposited: Number(totalDeposited.mul(usdPrice).div(WeiPerEther)) / 10 ** decimals,
       borrowed: Number(totalBorrowed.mul(usdPrice).div(WeiPerEther)) / 10 ** decimals,
     };
-  }, [decimals, totalBorrowed, totalDeposited, usdPrice]);
+  }, [marketAccount]);
 
   const itemsInfo: ItemInfoProps[] = [
     {
       label: 'Total Deposits',
-      value: deposited != null ? `$${formatNumber(deposited)}` : undefined,
+      value: deposited !== undefined ? `$${formatNumber(deposited)}` : undefined,
     },
     {
       label: 'Total Borrows',
-      value: borrowed != null ? `$${formatNumber(borrowed)}` : undefined,
+      value: borrowed !== undefined ? `$${formatNumber(borrowed)}` : undefined,
     },
     {
       label: 'Total Available',
-      value: deposited != null && borrowed != null ? `$${formatNumber(deposited - borrowed)}` : undefined,
+      value: deposited !== undefined && borrowed !== undefined ? `$${formatNumber(deposited - borrowed)}` : undefined,
     },
     {
       label: 'Deposit APR',
-      value: toPercentage(depositAPR),
+      value: depositAPR !== undefined ? toPercentage(depositAPR) : undefined,
       tooltipTitle: 'Change in the underlying Variable Rate Pool shares value over the last 15 minutes, annualized.',
     },
     {
       label: 'Borrow APR',
-      value: toPercentage(borrowAPR),
+      value: borrowAPR !== undefined ? toPercentage(borrowAPR) : undefined,
       tooltipTitle: 'Change in the underlying Variable Rate Pool shares value over the last hour, annualized.',
     },
     {
       label: 'Utilization Rate',
-      value: toPercentage(deposited != null && borrowed != null && deposited > 0 ? borrowed / deposited : undefined),
+      value:
+        deposited !== undefined && borrowed !== undefined
+          ? toPercentage(deposited > 0 ? borrowed / deposited : undefined)
+          : undefined,
     },
   ];
 

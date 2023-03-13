@@ -18,7 +18,7 @@ type Props = {
 };
 
 const Overview: FC<Props> = ({ symbol, operation, qty, option }) => {
-  const { penaltyRate, decimals = 18 } = useAccountData(symbol);
+  const { marketAccount } = useAccountData(symbol);
   const rate = useMemo(
     () => (operation === 'borrow' ? option.borrowAPR : option.depositAPR) || 0,
     [operation, option.borrowAPR, option.depositAPR],
@@ -40,7 +40,7 @@ const Overview: FC<Props> = ({ symbol, operation, qty, option }) => {
         {operation === 'borrow' ? 'Your total debt' : 'Your total earnings'}
       </Typography>
       <Box display="flex" gap={0.5} mb={1}>
-        {option.finalAssets ? (
+        {option.finalAssets && marketAccount ? (
           <>
             <Image
               src={`/img/assets/${symbol}.svg`}
@@ -50,7 +50,7 @@ const Overview: FC<Props> = ({ symbol, operation, qty, option }) => {
               style={{ maxWidth: '100%', height: 'auto' }}
             />
             <Typography fontWeight={700} fontSize={24}>
-              {formatNumber(formatFixed(option.finalAssets, decimals), symbol, true)}
+              {formatNumber(formatFixed(option.finalAssets, marketAccount.decimals), symbol, true)}
             </Typography>
           </>
         ) : (
@@ -79,10 +79,10 @@ const Overview: FC<Props> = ({ symbol, operation, qty, option }) => {
           Total interest fees to {operation === 'borrow' ? 'be paid' : 'receive'} ({toPercentage(rate)} APR)
         </Typography>
         <Box display="flex" gap={0.3} alignItems="center" minWidth={100} justifyContent="right">
-          {option.interest ? (
+          {option.interest && marketAccount ? (
             <>
               <Typography fontWeight={700} fontSize={14}>
-                {formatNumber(formatFixed(option.interest, decimals), symbol)}
+                {formatNumber(formatFixed(option.interest, marketAccount.decimals), symbol)}
               </Typography>
               <Image
                 src={`/img/assets/${symbol}.svg`}
@@ -111,7 +111,7 @@ const Overview: FC<Props> = ({ symbol, operation, qty, option }) => {
             Late payment penalty daily rate
           </Typography>
           <Typography fontWeight={700} fontSize={14}>
-            {`${toPercentage(parseFloat(formatFixed(penaltyRate || Zero, 18)) * 86_400)}`}
+            {`${toPercentage(parseFloat(formatFixed(marketAccount?.penaltyRate || Zero, 18)) * 86_400)}`}
           </Typography>
         </Box>
       )}

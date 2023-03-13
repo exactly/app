@@ -1,11 +1,9 @@
-import React, { FC, useContext, useEffect } from 'react';
+import React, { FC, useEffect } from 'react';
 
 import ModalTxCost from 'components/common/modal/ModalTxCost';
 import ModalGif from 'components/common/modal/ModalGif';
 
 import { toPercentage } from 'utils/utils';
-
-import AccountDataContext from 'contexts/AccountDataContext';
 
 import { useOperationContext, usePreviewTx } from 'contexts/OperationContext';
 import { Grid } from '@mui/material';
@@ -26,7 +24,6 @@ import useBorrowAtMaturity from 'hooks/useBorrowAtMaturity';
 
 const BorrowAtMaturity: FC = () => {
   const { operation } = useModalStatus();
-  const { accountData } = useContext(AccountDataContext);
   const { symbol, errorData, setErrorData, qty, gasCost, tx, requiresApproval } = useOperationContext();
   const {
     isLoading,
@@ -43,7 +40,7 @@ const BorrowAtMaturity: FC = () => {
     needsApproval,
     previewGasCost,
   } = useBorrowAtMaturity();
-  const { decimals = 18 } = useAccountData(symbol);
+  const { marketAccount } = useAccountData(symbol);
 
   useEffect(() => void updateAPR(), [updateAPR]);
   useEffect(() => {
@@ -69,7 +66,7 @@ const BorrowAtMaturity: FC = () => {
             <AssetInput
               qty={qty}
               symbol={symbol}
-              decimals={decimals}
+              decimals={marketAccount?.decimals ?? 18}
               onMax={onMax}
               onChange={handleInputChange}
               label="Safe borrow limit"
@@ -113,7 +110,7 @@ const BorrowAtMaturity: FC = () => {
       <Grid item mt={{ xs: 2, sm: 3 }}>
         <ModalSubmit
           label="Borrow"
-          symbol={symbol === 'WETH' && accountData ? accountData[symbol].symbol : symbol}
+          symbol={symbol === 'WETH' && marketAccount ? marketAccount.symbol : symbol}
           submit={handleSubmitAction}
           isLoading={isLoading || previewIsLoading}
           disabled={!qty || parseFloat(qty) <= 0 || isLoading || previewIsLoading || errorData?.status}

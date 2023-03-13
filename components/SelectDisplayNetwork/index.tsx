@@ -11,8 +11,8 @@ import { Chain, goerli, mainnet } from 'wagmi';
 import Image from 'next/image';
 import { globals } from 'styles/theme';
 import { useNetworkContext } from 'contexts/NetworkContext';
-import AccountDataContext from 'contexts/AccountDataContext';
 import { MarketContext } from 'contexts/MarketContext';
+import useAccountData from 'hooks/useAccountData';
 
 const { onlyDesktop } = globals;
 
@@ -28,7 +28,7 @@ const SelectDisplayNetwork: FC = () => {
   );
   const closeMenu = useCallback(() => setAnchorEl(null), [setAnchorEl]);
 
-  const { resetAccountData } = useContext(AccountDataContext);
+  const { resetAccountData } = useAccountData();
 
   const onSelectNetwork = useCallback(
     (displayChain: Chain) => {

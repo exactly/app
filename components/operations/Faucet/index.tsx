@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useAccount, useSigner } from 'wagmi';
 import { parseFixed } from '@ethersproject/bignumber';
 import { Contract } from '@ethersproject/contracts';
@@ -7,26 +7,27 @@ import imageToBase64 from 'utils/imageToBase64';
 
 import faucetAbi from './abi.json';
 
-import AccountDataContext from 'contexts/AccountDataContext';
 import useAssets from 'hooks/useAssets';
 
 import { Box, Button, Divider, Typography } from '@mui/material';
 import formatSymbol from 'utils/formatSymbol';
 import { LoadingButton } from '@mui/lab';
 import handleOperationError from 'utils/handleOperationError';
+import useAccountData from 'hooks/useAccountData';
 
 function Faucet() {
   const { data: signer } = useSigner();
   const { connector } = useAccount();
-  const { accountData, getAccountData } = useContext(AccountDataContext);
+  const { accountData, getMarketAccount, refreshAccountData } = useAccountData();
   const [loading, setLoading] = useState<string | undefined>(undefined);
   const assets = useAssets();
 
   const mint = useCallback(
     async (symbol: string) => {
-      if (!accountData) return;
+      const marketAccount = getMarketAccount(symbol);
+      if (!marketAccount) return;
       try {
-        const { asset, decimals } = accountData[symbol];
+        const { asset, decimals } = marketAccount;
 
         setLoading(symbol);
         const amounts: Record<string, string> = {
@@ -39,14 +40,14 @@ function Faucet() {
         const tx = await faucet?.mint(asset, parseFixed(amounts[symbol], decimals));
         await tx.wait();
 
-        void getAccountData();
+        await refreshAccountData();
       } catch {
         setLoading(undefined);
       } finally {
         setLoading(undefined);
       }
     },
-    [accountData, getAccountData, signer],
+    [getMarketAccount, refreshAccountData, signer],
   );
 
   const addTokens = useCallback(async () => {
@@ -62,12 +63,12 @@ function Faucet() {
     );
 
     try {
+      const marketAccounts = accountData.filter((marketAccount) => marketAccount.assetSymbol !== 'WETH');
       await Promise.all(
-        Object.values(accountData)
-          .filter(({ assetSymbol }) => assetSymbol !== 'WETH')
-          .map(({ asset: address, decimals, assetSymbol: symbol }) =>
-            connector?.watchAsset?.({ symbol, address, decimals, image: imagesBase64[symbol] }),
-          ),
+        marketAccounts.flatMap((marketAccount) => {
+          const { asset: address, decimals, assetSymbol: symbol } = marketAccount;
+          return connector?.watchAsset?.({ symbol, address, decimals, image: imagesBase64[symbol] });
+        }),
       );
     } catch (error) {
       handleOperationError(error);

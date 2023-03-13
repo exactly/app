@@ -1,14 +1,13 @@
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { WeiPerEther } from '@ethersproject/constants';
 import numbers from 'config/numbers.json';
-import AccountDataContext from 'contexts/AccountDataContext';
 import { useOperationContext } from 'contexts/OperationContext';
 import useAccountData from 'hooks/useAccountData';
 import useApprove from 'hooks/useApprove';
 import useBalance from 'hooks/useBalance';
 import useHandleOperationError from 'hooks/useHandleOperationError';
 import { useWeb3 } from 'hooks/useWeb3';
-import { useCallback, useContext, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { OperationHook } from 'types/OperationHook';
 import analytics from 'utils/analytics';
 
@@ -20,7 +19,6 @@ type Deposit = {
 
 export default (): Deposit => {
   const { walletAddress } = useWeb3();
-  const { getAccountData } = useContext(AccountDataContext);
 
   const {
     symbol,
@@ -40,7 +38,7 @@ export default (): Deposit => {
 
   const handleOperationError = useHandleOperationError();
 
-  const { decimals = 18 } = useAccountData(symbol);
+  const { marketAccount, refreshAccountData } = useAccountData(symbol);
 
   const walletBalance = useBalance(symbol, assetContract);
 
@@ -58,7 +56,8 @@ export default (): Deposit => {
         !ETHRouterContract ||
         !marketContract ||
         !quantity ||
-        (walletBalance && parseFloat(quantity) > parseFloat(walletBalance))
+        (walletBalance && parseFloat(quantity) > parseFloat(walletBalance)) ||
+        !marketAccount
       )
         return;
 
@@ -70,7 +69,7 @@ export default (): Deposit => {
         return gasEstimation?.mul(gasPrice);
       }
 
-      if (symbol === 'WETH') {
+      if (marketAccount.assetSymbol === 'WETH') {
         const gasLimit = await ETHRouterContract.estimateGas.deposit({
           value: quantity ? parseFixed(quantity, 18) : DEFAULT_AMOUNT,
         });
@@ -79,7 +78,7 @@ export default (): Deposit => {
       }
 
       const gasLimit = await marketContract.estimateGas.deposit(
-        quantity ? parseFixed(quantity, decimals) : DEFAULT_AMOUNT,
+        quantity ? parseFixed(quantity, marketAccount.decimals) : DEFAULT_AMOUNT,
         walletAddress,
       );
 
@@ -90,9 +89,8 @@ export default (): Deposit => {
       ETHRouterContract,
       marketContract,
       walletBalance,
+      marketAccount,
       requiresApproval,
-      symbol,
-      decimals,
       approveEstimateGas,
     ],
   );
@@ -121,11 +119,11 @@ export default (): Deposit => {
   );
 
   const deposit = useCallback(async () => {
-    if (!walletAddress || !marketContract) return;
+    if (!walletAddress || !marketContract || !marketAccount) return;
     let depositTx;
     try {
       setIsLoadingOp(true);
-      if (symbol === 'WETH') {
+      if (marketAccount.assetSymbol === 'WETH') {
         if (!ETHRouterContract) return;
 
         const gasEstimation = await ETHRouterContract.estimateGas.deposit({ value: parseFixed(qty, 18) });
@@ -135,7 +133,7 @@ export default (): Deposit => {
           gasLimit: gasEstimation.mul(parseFixed(String(numbers.gasLimitMultiplier), 18)).div(WeiPerEther),
         });
       } else {
-        const depositAmount = parseFixed(qty, decimals);
+        const depositAmount = parseFixed(qty, marketAccount.decimals);
         const gasEstimation = await marketContract.estimateGas.deposit(depositAmount, walletAddress);
 
         depositTx = await marketContract.deposit(depositAmount, walletAddress, {
@@ -151,11 +149,11 @@ export default (): Deposit => {
 
       void analytics.track(status ? 'deposit' : 'depositRevert', {
         amount: qty,
-        asset: symbol,
+        asset: marketAccount.assetSymbol,
         hash: transactionHash,
       });
 
-      void getAccountData();
+      await refreshAccountData();
     } catch (error) {
       if (depositTx) setTx({ status: 'error', hash: depositTx.hash });
       setErrorData({ status: true, message: handleOperationError(error) });
@@ -165,13 +163,12 @@ export default (): Deposit => {
   }, [
     walletAddress,
     marketContract,
+    marketAccount,
     setIsLoadingOp,
-    symbol,
     setTx,
     qty,
-    getAccountData,
+    refreshAccountData,
     ETHRouterContract,
-    decimals,
     setErrorData,
     handleOperationError,
   ]);

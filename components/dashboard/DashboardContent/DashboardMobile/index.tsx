@@ -1,23 +1,23 @@
-import React, { FC, PropsWithChildren, useContext } from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { formatFixed } from '@ethersproject/bignumber';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import { Box, Button, Skeleton, Tooltip, Typography } from '@mui/material';
 import MaturityLinearProgress from 'components/common/MaturityLinearProgress';
 import MobileAssetCard from 'components/MobileAssetCard';
-import AccountDataContext from 'contexts/AccountDataContext';
 import useActionButton from 'hooks/useActionButton';
 import useDashboard from 'hooks/useDashboard';
 import formatNumber from 'utils/formatNumber';
 import parseTimestamp from 'utils/parseTimestamp';
 import SwitchCollateral from '../FloatingPoolDashboard/FloatingPoolDashboardTable/SwitchCollateral';
 import APRItem from '../FixedPoolDashboard/FixedPoolDashboardTable/APRItem';
+import useAccountData from 'hooks/useAccountData';
 
 type Props = {
   type: 'deposit' | 'borrow';
 };
 
 const DashboardMobile: FC<Props> = ({ type }) => {
-  const { accountData } = useContext(AccountDataContext);
+  const { accountData, getMarketAccount } = useAccountData();
   const { handleActionClick } = useActionButton();
   const { floatingRows, fixedRows } = useDashboard(type);
   const isDeposit = type === 'deposit';
@@ -38,7 +38,8 @@ const DashboardMobile: FC<Props> = ({ type }) => {
                   title="exaToken"
                   tooltip="The Exactly voucher token (ERC-4626) for your deposit in the Variable Rate Pool."
                 >
-                  {(exaTokens && `${formatNumber(formatFixed(exaTokens, accountData?.[symbol].decimals), symbol)}`) || (
+                  {(exaTokens &&
+                    `${formatNumber(formatFixed(exaTokens, getMarketAccount(symbol)?.decimals), symbol)}`) || (
                     <Skeleton width={40} />
                   )}
                 </FlexItem>
@@ -90,43 +91,45 @@ const DashboardMobile: FC<Props> = ({ type }) => {
           </Typography>
         </Box>
       ) : (
-        fixedRows.map(({ symbol, previewValue, maturity, decimals, market }) => (
-          <MobileAssetCard key={`dashboard_fixed_mobile_${symbol}_${type}_${maturity}`} symbol={symbol}>
-            <>
-              <Box display="flex" flexDirection="column" gap={1} width="100%">
-                <FlexItem title="Market value">
-                  {accountData && symbol && previewValue ? (
-                    `$${formatNumber(
-                      parseFloat(formatFixed(previewValue, decimals)) *
-                        parseFloat(formatFixed(accountData[symbol].usdPrice, 18)),
-                      'USD',
-                      true,
-                    )}`
-                  ) : (
-                    <Skeleton sx={{ margin: 'auto' }} width={50} />
-                  )}
-                </FlexItem>
-                <FlexItem title="Avg Fixed Rate" tooltip="Average rate for existing deposits.">
-                  <APRItem type={type} maturityDate={maturity} market={market} decimals={decimals} />
-                </FlexItem>
-                <FlexItem title="MaturityDate">
-                  {maturity ? parseTimestamp(maturity) : <Skeleton width={80} />}
-                </FlexItem>
-              </Box>
-              <MaturityLinearProgress maturityDate={maturity} />
-              <Button
-                variant="outlined"
-                fullWidth
-                sx={{ height: '34px' }}
-                onClick={(e) =>
-                  handleActionClick(e, isDeposit ? 'withdrawAtMaturity' : 'repayAtMaturity', symbol, maturity)
-                }
-              >
-                {isDeposit ? 'Withdraw' : 'Repay'}
-              </Button>
-            </>
-          </MobileAssetCard>
-        ))
+        fixedRows.map(({ symbol, previewValue, maturity, decimals, market }) => {
+          const usdPrice = getMarketAccount(symbol)?.usdPrice;
+          return (
+            <MobileAssetCard key={`dashboard_fixed_mobile_${symbol}_${type}_${maturity}`} symbol={symbol}>
+              <>
+                <Box display="flex" flexDirection="column" gap={1} width="100%">
+                  <FlexItem title="Market value">
+                    {usdPrice && previewValue ? (
+                      `$${formatNumber(
+                        parseFloat(formatFixed(previewValue, decimals)) * parseFloat(formatFixed(usdPrice, 18)),
+                        'USD',
+                        true,
+                      )}`
+                    ) : (
+                      <Skeleton sx={{ margin: 'auto' }} width={50} />
+                    )}
+                  </FlexItem>
+                  <FlexItem title="Avg Fixed Rate" tooltip="Average rate for existing deposits.">
+                    <APRItem type={type} maturityDate={maturity} market={market} decimals={decimals} />
+                  </FlexItem>
+                  <FlexItem title="MaturityDate">
+                    {maturity ? parseTimestamp(maturity) : <Skeleton width={80} />}
+                  </FlexItem>
+                </Box>
+                <MaturityLinearProgress maturityDate={maturity} />
+                <Button
+                  variant="outlined"
+                  fullWidth
+                  sx={{ height: '34px' }}
+                  onClick={(e) =>
+                    handleActionClick(e, isDeposit ? 'withdrawAtMaturity' : 'repayAtMaturity', symbol, maturity)
+                  }
+                >
+                  {isDeposit ? 'Withdraw' : 'Repay'}
+                </Button>
+              </>
+            </MobileAssetCard>
+          );
+        })
       )}
     </Box>
   );

@@ -1,10 +1,9 @@
 import { formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { WeiPerEther } from '@ethersproject/constants';
 import { captureException } from '@sentry/nextjs';
-import AccountDataContext from 'contexts/AccountDataContext';
 import { MarketsBasicOperation, MarketsBasicOption } from 'contexts/MarketsBasicContext';
 import { useOperationContext } from 'contexts/OperationContext';
-import { useCallback, useContext, useState } from 'react';
+import { useCallback, useState } from 'react';
 import useAccountData from './useAccountData';
 import useDelayedEffect from './useDelayedEffect';
 import useMaturityPools from './useMaturityPools';
@@ -18,17 +17,16 @@ type PreviewFixedOperation = {
 };
 
 export default (operation: MarketsBasicOperation): PreviewFixedOperation => {
-  const { accountData } = useContext(AccountDataContext);
   const previewerContract = usePreviewer();
   const { symbol, qty, marketContract } = useOperationContext();
   const maturityPools = useMaturityPools(symbol);
-  const { decimals = 18 } = useAccountData(symbol);
+  const { marketAccount } = useAccountData(symbol);
   const [options, setOptions] = useState<MarketsBasicOption[]>(Array(maturityPools.length || MIN_OPTIONS).fill({}));
   const [loading, setLoading] = useState<boolean>(true);
 
   const updateAPR = useCallback(
     async (cancelled: () => boolean) => {
-      if (!accountData || !previewerContract || !marketContract) return;
+      if (!marketAccount || !previewerContract || !marketContract) return;
 
       if (!qty || parseFloat(qty) === 0) {
         setOptions([...maturityPools]);
@@ -38,7 +36,7 @@ export default (operation: MarketsBasicOperation): PreviewFixedOperation => {
 
       try {
         setLoading(true);
-        const initialAssets = parseFixed(qty, decimals);
+        const initialAssets = parseFixed(qty, marketAccount.decimals);
 
         const preview =
           operation === 'deposit'
@@ -72,7 +70,7 @@ export default (operation: MarketsBasicOperation): PreviewFixedOperation => {
         setLoading(false);
       }
     },
-    [accountData, previewerContract, marketContract, qty, decimals, maturityPools, operation],
+    [marketAccount, previewerContract, marketContract, qty, maturityPools, operation],
   );
 
   const { isLoading: delayedLoading } = useDelayedEffect({ effect: updateAPR });

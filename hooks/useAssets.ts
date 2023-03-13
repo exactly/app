@@ -1,7 +1,9 @@
-import { useContext, useMemo } from 'react';
-import AccountDataContext from '../contexts/AccountDataContext';
+import { useMemo } from 'react';
+import useAccountData from './useAccountData';
+
+const def = ['WETH', 'USDC', 'DAI'];
 
 export default (): string[] => {
-  const { accountData } = useContext(AccountDataContext);
-  return useMemo<string[]>(() => Object.keys(accountData ?? { WETH: true, USDC: true, DAI: true }), [accountData]);
+  const { accountData } = useAccountData();
+  return useMemo<string[]>(() => (accountData ? accountData.map((m) => m.assetSymbol) : def), [accountData]);
 };

@@ -1,9 +1,9 @@
-import { useCallback, useContext, useEffect, useState } from 'react';
-import AccountDataContext from 'contexts/AccountDataContext';
+import { useCallback, useEffect, useState } from 'react';
 import networkData from 'config/networkData.json' assert { type: 'json' };
 import { useWeb3 } from './useWeb3';
 import queryRates from 'utils/queryRates';
 import { captureException } from '@sentry/nextjs';
+import useAccountData from './useAccountData';
 
 type HistoricalRateData = {
   date: Date;
@@ -14,21 +14,23 @@ type HistoricalRateData = {
 
 // This is the maximum number of data points we can get from the subgraph
 const MAX_COUNT = 24;
+const emptyBatch: Awaited<ReturnType<typeof queryRates>> = [];
 
 export default function useHistoricalRates(symbol: string, initialCount = 30, initialInterval = 3_600 * 6) {
   const { chain } = useWeb3();
-  const { accountData } = useContext(AccountDataContext);
+  const { accountData, getMarketAccount } = useAccountData();
   const [loading, setLoading] = useState<boolean>(true);
   const [rates, setRates] = useState<HistoricalRateData[]>([]);
 
   const getRatesBatch = useCallback(
     async (type: 'borrow' | 'deposit', count: number, interval: number, offset: number) => {
-      if (!accountData || !chain || !symbol) return [];
+      if (!accountData || !chain) return emptyBatch;
 
       const subgraphUrl = networkData[String(chain.id) as keyof typeof networkData]?.subgraph;
-      if (!subgraphUrl) return [];
+      if (!subgraphUrl) return emptyBatch;
 
-      const { market: marketAddress, maxFuturePools } = accountData[symbol];
+      const { market: marketAddress, maxFuturePools } = getMarketAccount(symbol) ?? {};
+      if (!marketAddress || !maxFuturePools) return emptyBatch;
 
       return await queryRates(subgraphUrl, marketAddress, type, {
         maxFuturePools,
@@ -38,7 +40,7 @@ export default function useHistoricalRates(symbol: string, initialCount = 30, in
         offset,
       });
     },
-    [accountData, chain, symbol],
+    [accountData, chain, symbol, getMarketAccount],
   );
 
   const getRates = useCallback(
@@ -60,6 +62,10 @@ export default function useHistoricalRates(symbol: string, initialCount = 30, in
             }));
           }),
         );
+        const rs = ratesBatched.reverse().flatMap((r) => r);
+        if (rs.length === 0) {
+          return;
+        }
         setRates(ratesBatched.reverse().flatMap((r) => r));
         setLoading(false);
       } catch (error) {
@@ -70,10 +76,10 @@ export default function useHistoricalRates(symbol: string, initialCount = 30, in
   );
 
   useEffect(() => {
-    if (!rates.length) {
-      void getRates(initialCount, initialInterval);
-    }
-  }, [getRates, initialCount, initialInterval, rates]);
+    // if (!rates.length) {
+    void getRates(initialCount, initialInterval);
+    // }
+  }, [getRates, initialCount, initialInterval]);
 
   return { loading, rates, getRates };
 }

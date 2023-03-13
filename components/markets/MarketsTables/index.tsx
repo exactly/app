@@ -1,17 +1,12 @@
-import React, { FC, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import Grid from '@mui/material/Grid';
 import PoolTable, { TableRow } from './poolTable';
 
 import { formatFixed } from '@ethersproject/bignumber';
 import { MaxUint256, WeiPerEther, Zero } from '@ethersproject/constants';
 
-import AccountDataContext from 'contexts/AccountDataContext';
-
-import formatMarkets from 'utils/formatMarkets';
 import formatNumber from 'utils/formatNumber';
 import queryRate from 'utils/queryRates';
-
-import type { Market } from 'types/Market';
 
 import { Box, Typography } from '@mui/material';
 
@@ -22,6 +17,7 @@ import useAssets from 'hooks/useAssets';
 import PoolMobile from './poolMobile';
 import MobileTabs from 'components/MobileTabs';
 import { TableHeader } from 'components/common/TableHeadCell';
+import useAccountData from 'hooks/useAccountData';
 
 const { onlyMobile, onlyDesktop } = globals;
 
@@ -89,15 +85,13 @@ const sortByDefault = (defaultRows: TableRow[], toSort: TableRow[]) =>
 
 const MarketTables: FC = () => {
   const { chain } = useWeb3();
-  const { accountData } = useContext(AccountDataContext);
+  const { accountData } = useAccountData();
   const assets = useAssets();
   const defaultRows = useMemo<TableRow[]>(() => assets.map((s) => ({ symbol: s })), [assets]);
 
   const [floatingRows, setFloatingRows] = useState<TableRow[]>([...defaultRows]);
   const [fixedRows, setFixedRows] = useState<TableRow[]>([...defaultRows]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-
-  const markets = useMemo<Market[]>(() => (accountData ? formatMarkets(accountData) : []), [accountData]);
 
   const getRates = useCallback(
     async (chainId: number, type: 'borrow' | 'deposit', maxFuturePools: number, eMarketAddress: string) => {
@@ -119,8 +113,9 @@ const MarketTables: FC = () => {
     const tempFixedRows: TableRow[] = [];
 
     await Promise.all(
-      markets.map(async ({ symbol }) => {
-        const {
+      accountData.map(
+        async ({
+          assetSymbol: symbol,
           market: marketAddress,
           totalFloatingDepositAssets,
           totalFloatingBorrowAssets,
@@ -128,61 +123,61 @@ const MarketTables: FC = () => {
           decimals,
           maxFuturePools,
           floatingBorrowRate,
-        } = accountData[symbol];
+          fixedPools,
+        }) => {
+          const totalFloatingDeposited = formatNumber(
+            formatFixed(totalFloatingDepositAssets.mul(usdPrice).div(WeiPerEther), decimals),
+          );
+          const totalFloatingBorrowed = formatNumber(
+            formatFixed(totalFloatingBorrowAssets.mul(usdPrice).div(WeiPerEther), decimals),
+          );
 
-        const totalFloatingDeposited = formatNumber(
-          formatFixed(totalFloatingDepositAssets.mul(usdPrice).div(WeiPerEther), decimals),
-        );
-        const totalFloatingBorrowed = formatNumber(
-          formatFixed(totalFloatingBorrowAssets.mul(usdPrice).div(WeiPerEther), decimals),
-        );
+          const floatingDepositAPR = await getRates(chain.id, 'deposit', maxFuturePools, marketAddress);
 
-        const floatingDepositAPR = await getRates(chain.id, 'deposit', maxFuturePools, marketAddress);
+          tempFloatingRows.push({
+            symbol,
+            totalDeposited: totalFloatingDeposited,
+            totalBorrowed: totalFloatingBorrowed,
+            depositAPR: floatingDepositAPR,
+            borrowAPR: Number(floatingBorrowRate) / 1e18,
+          });
 
-        tempFloatingRows.push({
-          symbol,
-          totalDeposited: totalFloatingDeposited,
-          totalBorrowed: totalFloatingBorrowed,
-          depositAPR: floatingDepositAPR,
-          borrowAPR: Number(floatingBorrowRate) / 1e18,
-        });
+          let totalDeposited = Zero;
+          let totalBorrowed = Zero;
 
-        let totalDeposited = Zero;
-        let totalBorrowed = Zero;
+          // Set deposits and borrows total of fixed pools
+          fixedPools.forEach(({ supplied, borrowed }) => {
+            totalDeposited = totalDeposited.add(supplied);
+            totalBorrowed = totalBorrowed.add(borrowed);
+          });
 
-        // Set deposits and borrows total of fixed pools
-        const { fixedPools } = accountData[symbol];
-        fixedPools.forEach(({ supplied, borrowed }) => {
-          totalDeposited = totalDeposited.add(supplied);
-          totalBorrowed = totalBorrowed.add(borrowed);
-        });
+          const bestBorrow = fixedPools.reduce(
+            (best, { maturity, minBorrowRate: rate }) => (rate.lt(best.rate) ? { maturity, rate } : best),
+            { maturity: Zero, rate: MaxUint256 },
+          );
+          const bestDeposit = fixedPools.reduce(
+            (best, { maturity, depositRate: rate }) => (rate.gt(best.rate) ? { maturity, rate } : best),
+            { maturity: Zero, rate: Zero },
+          );
 
-        const bestBorrow = fixedPools.reduce(
-          (best, { maturity, minBorrowRate: rate }) => (rate.lt(best.rate) ? { maturity, rate } : best),
-          { maturity: Zero, rate: MaxUint256 },
-        );
-        const bestDeposit = fixedPools.reduce(
-          (best, { maturity, depositRate: rate }) => (rate.gt(best.rate) ? { maturity, rate } : best),
-          { maturity: Zero, rate: Zero },
-        );
-
-        tempFixedRows.push({
-          symbol,
-          totalDeposited: formatNumber(formatFixed(totalDeposited.mul(usdPrice).div(WeiPerEther), decimals)),
-          totalBorrowed: formatNumber(formatFixed(totalBorrowed.mul(usdPrice).div(WeiPerEther), decimals)),
-          borrowAPR: Number(bestBorrow.rate) / 1e18,
-          depositAPR: Number(bestDeposit.rate) / 1e18,
-          borrowMaturity: Number(bestBorrow.maturity),
-          depositMaturity: Number(bestDeposit.maturity),
-        });
-      }),
+          tempFixedRows.push({
+            symbol,
+            totalDeposited: formatNumber(formatFixed(totalDeposited.mul(usdPrice).div(WeiPerEther), decimals)),
+            totalBorrowed: formatNumber(formatFixed(totalBorrowed.mul(usdPrice).div(WeiPerEther), decimals)),
+            borrowAPR: Number(bestBorrow.rate) / 1e18,
+            depositAPR: Number(bestDeposit.rate) / 1e18,
+            borrowMaturity: Number(bestBorrow.maturity),
+            depositMaturity: Number(bestDeposit.maturity),
+          });
+        },
+      ),
     );
 
     setFloatingRows(sortByDefault(defaultRows, tempFloatingRows));
     setFixedRows(sortByDefault(defaultRows, tempFixedRows));
 
     setIsLoading(false);
-  }, [accountData, chain, markets, defaultRows, getRates]);
+  }, [accountData, chain, defaultRows, getRates]);
 
   useEffect(() => {
     void defineRows();

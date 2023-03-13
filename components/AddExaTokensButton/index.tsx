@@ -1,14 +1,14 @@
-import React, { useCallback, useContext } from 'react';
+import React, { useCallback } from 'react';
 import { useAccount } from 'wagmi';
 import { Tooltip, Typography } from '@mui/material';
 
-import AccountDataContext from 'contexts/AccountDataContext';
 import handleOperationError from 'utils/handleOperationError';
 import useAssets from 'hooks/useAssets';
 import imageToBase64 from 'utils/imageToBase64';
+import useAccountData from 'hooks/useAccountData';
 
 const AddExaTokensButton = () => {
-  const { accountData } = useContext(AccountDataContext);
+  const { accountData } = useAccountData();
   const { connector } = useAccount();
   const assets = useAssets();
 
@@ -28,7 +28,7 @@ const AddExaTokensButton = () => {
 
     try {
       await Promise.all(
-        Object.values(accountData).map(({ market, decimals, assetSymbol, symbol }) =>
+        accountData.map(({ market, decimals, assetSymbol, symbol }) =>
           connector?.watchAsset?.({ address: market, decimals, symbol, image: imagesBase64[assetSymbol] }),
         ),
       );

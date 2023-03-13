@@ -23,7 +23,7 @@ type Props = {
 function ModalInfoFixedUtilizationRate({ qty, symbol, operation, variant = 'column' }: Props) {
   const previewerContract = usePreviewer();
   const { walletAddress } = useWeb3();
-  const { fixedPools, usdPrice, decimals } = useAccountData(symbol);
+  const { marketAccount } = useAccountData(symbol);
   const { date } = useContext(MarketContext);
 
   const { marketContract } = useOperationContext();
@@ -31,16 +31,16 @@ function ModalInfoFixedUtilizationRate({ qty, symbol, operation, variant = 'colu
   const from: string | undefined = useMemo(() => {
     if (!date) return;
 
-    const pool = fixedPools?.find(({ maturity }) => maturity.toNumber() === date);
+    const pool = marketAccount?.fixedPools?.find(({ maturity }) => maturity.toNumber() === date);
     if (!pool) return;
 
     return toPercentage(Number(formatFixed(pool.utilization, 18)));
-  }, [date, fixedPools]);
+  }, [date, marketAccount]);
 
   const [to, setTo] = useState<string | undefined>();
 
   const preview = useCallback(async () => {
-    if (!marketContract || !previewerContract || !date || !decimals || !usdPrice) {
+    if (!marketAccount || !marketContract || !previewerContract || !date) {
       return setTo(undefined);
     }
     if (!qty) {
@@ -50,7 +50,7 @@ function ModalInfoFixedUtilizationRate({ qty, symbol, operation, variant = 'colu
     setTo(undefined);
 
     try {
-      const initialAssets = parseFixed(qty, decimals);
+      const initialAssets = parseFixed(qty, marketAccount.decimals);
       let uti: BigNumber | undefined = undefined;
       switch (operation) {
         case 'depositAtMaturity': {
@@ -98,7 +98,7 @@ function ModalInfoFixedUtilizationRate({ qty, symbol, operation, variant = 'colu
     } catch {
       setTo('N/A');
     }
-  }, [date, decimals, from, marketContract, operation, previewerContract, qty, usdPrice, walletAddress]);
+  }, [date, from, marketAccount, marketContract, operation, previewerContract, qty, walletAddress]);
 
   const { isLoading } = useDelayedEffect({ effect: preview });
 

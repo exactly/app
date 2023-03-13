@@ -40,7 +40,7 @@ const referenceLabel = (t: number) => {
 };
 
 type Props = {
-  symbol?: string;
+  symbol: string;
 };
 
 const YieldChart: FC<Props> = ({ symbol }) => {

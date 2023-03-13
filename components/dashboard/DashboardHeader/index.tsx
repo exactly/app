@@ -1,27 +1,21 @@
-import React, { useContext, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { Grid } from '@mui/material';
 import { Zero } from '@ethersproject/constants';
-
-import AccountDataContext from 'contexts/AccountDataContext';
-
-import { HealthFactor } from 'types/HealthFactor';
 
 import parseHealthFactor from 'utils/parseHealthFactor';
 import formatNumber from 'utils/formatNumber';
 import HeaderInfo from 'components/common/HeaderInfo';
 import { ItemInfoProps } from 'components/common/ItemInfo';
 import { useWeb3 } from 'hooks/useWeb3';
-import getHealthFactorData from 'utils/getHealthFactorData';
+import useHealthFactor from 'hooks/useHealthFactor';
+import useAccountData from 'hooks/useAccountData';
 
 function DashboardHeader() {
   const { walletAddress } = useWeb3();
-  const { accountData } = useContext(AccountDataContext);
+  const { accountData } = useAccountData();
 
-  const healthFactor = useMemo<HealthFactor | undefined>(() => {
-    if (!accountData) return undefined;
-    return getHealthFactorData(accountData);
-  }, [accountData]);
+  const healthFactor = useHealthFactor();
 
   const { totalDeposited, totalBorrowed } = useMemo<{
     totalDeposited?: BigNumber;
@@ -29,16 +23,18 @@ function DashboardHeader() {
   }>(() => {
     if (!accountData) return {};
 
-    const { totalDepositedUSD, totalBorrowedUSD } = Object.keys(accountData).reduce(
-      (acc, symbol) => {
-        const {
+    const { totalDepositedUSD, totalBorrowedUSD } = accountData.reduce(
+      (
+        acc,
+        {
           floatingDepositAssets,
           floatingBorrowAssets,
           usdPrice,
           fixedDepositPositions,
           fixedBorrowPositions,
           decimals,
-        } = accountData[symbol];
+        },
+      ) => {
         const WADDecimals = parseFixed('1', decimals);
 
         // iterate through fixed deposited pools to get totals

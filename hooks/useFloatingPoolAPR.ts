@@ -13,27 +13,35 @@ type FloatingPoolAPR = {
 
 export default (symbol: string): FloatingPoolAPR => {
   const { chain } = useWeb3();
-  const { floatingBorrowRate, maxFuturePools, market } = useAccountData(symbol);
+  const { marketAccount } = useAccountData(symbol);
   const [depositAPR, setDepositAPR] = useState<number | undefined>();
   const [loading, setLoading] = useState<boolean>(true);
 
   const fetchAPRs = useCallback(async () => {
-    if (!maxFuturePools || !market || !chain) return;
     setLoading(true);
+
+    if (!marketAccount || !chain) return setDepositAPR(undefined);
 
     try {
       const subgraphUrl = networkData[String(chain.id) as keyof typeof networkData]?.subgraph;
       if (!subgraphUrl) return;
-      const [{ apr: depositAPRRate }] = await queryRates(subgraphUrl, market, 'deposit', { maxFuturePools });
+      const [{ apr: depositAPRRate }] = await queryRates(subgraphUrl, marketAccount.market, 'deposit', {
+        maxFuturePools: marketAccount.maxFuturePools,
+      });
       setDepositAPR(depositAPRRate);
-    } finally {
       setLoading(false);
+    } catch {
+      setDepositAPR(undefined);
     }
-  }, [maxFuturePools, market, chain]);
+  }, [marketAccount, chain]);
 
   useEffect(() => {
     fetchAPRs().catch(captureException);
   }, [fetchAPRs]);
 
-  return { depositAPR, borrowAPR: floatingBorrowRate ? Number(floatingBorrowRate) / 1e18 : undefined, loading };
+  return {
+    depositAPR,
+    borrowAPR: marketAccount?.floatingBorrowRate ? Number(marketAccount.floatingBorrowRate) / 1e18 : undefined,
+    loading,
+  };
 };

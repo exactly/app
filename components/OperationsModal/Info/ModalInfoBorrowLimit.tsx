@@ -1,14 +1,13 @@
-import React, { useMemo, useContext } from 'react';
+import React, { useMemo } from 'react';
 import { WeiPerEther, Zero } from '@ethersproject/constants';
 import { parseFixed, formatFixed } from '@ethersproject/bignumber';
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
-
-import AccountDataContext from 'contexts/AccountDataContext';
 
 import formatNumber from 'utils/formatNumber';
 import getBeforeBorrowLimit from 'utils/getBeforeBorrowLimit';
 import ModalInfo, { FromTo, Variant } from 'components/common/modal/ModalInfo';
 import { Operation } from 'contexts/ModalStatusContext';
+import useAccountData from 'hooks/useAccountData';
 
 type Props = {
   qty: string;
@@ -18,24 +17,22 @@ type Props = {
 };
 
 function ModalInfoBorrowLimit({ qty, symbol, operation, variant = 'column' }: Props) {
-  const { accountData } = useContext(AccountDataContext);
+  const { marketAccount } = useAccountData(symbol);
 
   const newQty = useMemo(() => {
-    if (!accountData || !symbol) return;
+    if (!marketAccount || !symbol) return;
 
     if (!qty) return Zero;
 
-    const { decimals } = accountData[symbol];
-
-    return parseFixed(qty, decimals);
-  }, [accountData, symbol, qty]);
+    return parseFixed(qty, marketAccount.decimals);
+  }, [marketAccount, symbol, qty]);
 
   const [beforeBorrowLimit, afterBorrowLimit] = useMemo(() => {
-    if (!accountData || !newQty) return [undefined, undefined];
+    if (!marketAccount || !newQty) return [undefined, undefined];
 
-    const { usdPrice, decimals, adjustFactor, isCollateral } = accountData[symbol];
+    const { usdPrice, decimals, adjustFactor, isCollateral } = marketAccount;
 
-    const beforeBorrowLimitUSD = getBeforeBorrowLimit(accountData[symbol], operation);
+    const beforeBorrowLimitUSD = getBeforeBorrowLimit(marketAccount, operation);
 
     const newQtyUsd = newQty.mul(usdPrice).div(parseFixed('1', decimals));
 
@@ -82,7 +79,7 @@ function ModalInfoBorrowLimit({ qty, symbol, operation, variant = 'column' }: Pr
     }
 
     return [newBeforeBorrowLimit, newAfterBorrowLimit];
-  }, [accountData, symbol, newQty, operation]);
+  }, [marketAccount, newQty, operation]);
 
   return (
     <ModalInfo label="Borrow Limit" icon={SwapHorizIcon} variant={variant}>

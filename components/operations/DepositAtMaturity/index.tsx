@@ -44,13 +44,15 @@ const DepositAtMaturity: FC = () => {
   } = useDepositAtMaturity();
   const { symbol, errorData, qty, gasCost, tx, requiresApproval, assetContract } = useOperationContext();
   const walletBalance = useBalance(symbol, assetContract);
-  const { decimals = 18 } = useAccountData(symbol);
+  const { marketAccount } = useAccountData(symbol);
 
   useEffect(() => void updateAPR(), [updateAPR]);
 
   const { isLoading: previewIsLoading } = usePreviewTx({ qty, needsApproval, previewGasCost });
 
   if (tx) return <ModalGif tx={tx} tryAgain={deposit} />;
+
+  const decimals = marketAccount?.decimals ?? 18;
 
   return (
     <Grid container flexDirection="column">

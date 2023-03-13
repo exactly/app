@@ -1,10 +1,8 @@
-import React, { FC, useCallback, useContext, useEffect, useState } from 'react';
+import React, { useMemo, type FC } from 'react';
 import { Zero, WeiPerEther, MaxUint256 } from '@ethersproject/constants';
 import { formatFixed } from '@ethersproject/bignumber';
 import type { BigNumber } from '@ethersproject/bignumber';
 import Grid from '@mui/material/Grid';
-
-import AccountDataContext from 'contexts/AccountDataContext';
 
 import MaturityPoolsTable from './MaturityPoolsTable';
 import MaturityPoolInfo from './MaturityPoolInfo';
@@ -13,6 +11,7 @@ import { globals } from 'styles/theme';
 import MaturityPoolsMobile from './MaturityPoolsMobile';
 import YieldChart from 'components/charts/YieldChart';
 import UtilizationRateChart from 'components/charts/UtilizationRateChart';
+import useAccountData from 'hooks/useAccountData';
 
 const { onlyMobile, onlyDesktop } = globals;
 
@@ -26,17 +25,17 @@ type Props = {
 };
 
 const AssetMaturityPools: FC<Props> = ({ symbol }) => {
-  const { accountData } = useContext(AccountDataContext);
+  const { marketAccount } = useAccountData(symbol);
 
-  const [totalDeposited, setTotalDeposited] = useState<number | undefined>(undefined);
-  const [totalBorrowed, setTotalBorrowed] = useState<number | undefined>(undefined);
-  const [bestDeposit, setBestDeposit] = useState<Rate | undefined>(undefined);
-  const [bestBorrow, setBestBorrow] = useState<Rate | undefined>(undefined);
+  const { totalDeposited, totalBorrowed, bestDeposit, bestBorrow } = useMemo<{
+    totalDeposited?: number;
+    totalBorrowed?: number;
+    bestDeposit?: Rate;
+    bestBorrow?: Rate;
+  }>(() => {
+    if (!marketAccount) return {};
 
-  const getMaturitiesData = useCallback(async () => {
-    if (!accountData) return;
-
-    const { fixedPools, usdPrice, decimals } = accountData[symbol];
+    const { fixedPools, usdPrice, decimals } = marketAccount;
 
     let tempTotalDeposited = Zero;
     let tempTotalBorrowed = Zero;
@@ -45,24 +44,25 @@ const AssetMaturityPools: FC<Props> = ({ symbol }) => {
       tempTotalBorrowed = tempTotalBorrowed.add(borrowed);
     });
 
-    setTotalDeposited(Number(formatFixed(tempTotalDeposited.mul(usdPrice).div(WeiPerEther), decimals)));
-    setTotalBorrowed(Number(formatFixed(tempTotalBorrowed.mul(usdPrice).div(WeiPerEther), decimals)));
-
-    setBestDeposit(
-      fixedPools.reduce((best, { maturity, depositRate: rate }) => (rate.gt(best.rate) ? { maturity, rate } : best), {
-        maturity: Zero,
-        rate: Zero,
-      }),
-    );
-    setBestBorrow(
-      fixedPools.reduce((best, { maturity, minBorrowRate: rate }) => (rate.lt(best.rate) ? { maturity, rate } : best), {
-        maturity: Zero,
-        rate: MaxUint256,
-      }),
-    );
-  }, [accountData, symbol]);
-
-  useEffect(() => void getMaturitiesData(), [getMaturitiesData]);
+    return {
+      totalDeposited: Number(formatFixed(tempTotalDeposited.mul(usdPrice).div(WeiPerEther), decimals)),
+      totalBorrowed: Number(formatFixed(tempTotalBorrowed.mul(usdPrice).div(WeiPerEther), decimals)),
+      bestDeposit: fixedPools.reduce(
+        (best, { maturity, depositRate: rate }) => (rate.gt(best.rate) ? { maturity, rate } : best),
+        {
+          maturity: Zero,
+          rate: Zero,
+        },
+      ),
+      bestBorrow: fixedPools.reduce(
+        (best, { maturity, minBorrowRate: rate }) => (rate.lt(best.rate) ? { maturity, rate } : best),
+        {
+          maturity: Zero,
+          rate: MaxUint256,
+        },
+      ),
+    };
+  }, [marketAccount]);
 
   return (
     <Box display="flex" flexDirection="column" gap="8px">

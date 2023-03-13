@@ -1,8 +1,6 @@
-import React, { type FC, useContext } from 'react';
+import React, { type FC } from 'react';
 import ModalTxCost from 'components/common/modal/ModalTxCost';
 import ModalGif from 'components/common/modal/ModalGif';
-
-import AccountDataContext from 'contexts/AccountDataContext';
 
 import { useOperationContext, usePreviewTx } from 'contexts/OperationContext';
 import { Grid } from '@mui/material';
@@ -20,7 +18,6 @@ import useBorrow from 'hooks/useBorrow';
 
 const Borrow: FC = () => {
   const { operation } = useModalStatus();
-  const { accountData } = useContext(AccountDataContext);
   const { symbol, errorData, qty, gasCost, tx, requiresApproval } = useOperationContext();
   const {
     isLoading,
@@ -32,7 +29,7 @@ const Borrow: FC = () => {
     needsApproval,
     previewGasCost,
   } = useBorrow();
-  const { decimals = 18 } = useAccountData(symbol);
+  const { marketAccount } = useAccountData(symbol);
 
   const { isLoading: previewIsLoading } = usePreviewTx({ qty, needsApproval, previewGasCost });
 
@@ -45,7 +42,7 @@ const Borrow: FC = () => {
           <ModalBoxRow>
             <AssetInput
               qty={qty}
-              decimals={decimals}
+              decimals={marketAccount?.decimals ?? 18}
               symbol={symbol}
               onMax={onMax}
               onChange={handleInputChange}
@@ -81,7 +78,7 @@ const Borrow: FC = () => {
       <Grid item mt={{ xs: 2, sm: 3 }}>
         <ModalSubmit
           label="Borrow"
-          symbol={symbol === 'WETH' && accountData ? accountData[symbol].symbol : symbol}
+          symbol={symbol === 'WETH' && marketAccount ? marketAccount.symbol : symbol}
           submit={handleSubmitAction}
           isLoading={isLoading || previewIsLoading}
           disabled={!qty || parseFloat(qty) <= 0 || isLoading || previewIsLoading || errorData?.status}

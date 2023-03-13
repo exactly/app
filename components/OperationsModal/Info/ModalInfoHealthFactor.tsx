@@ -1,17 +1,15 @@
-import React, { useContext, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { parseFixed } from '@ethersproject/bignumber';
 import FavoriteBorderOutlinedIcon from '@mui/icons-material/FavoriteBorderOutlined';
 import { WeiPerEther, Zero } from '@ethersproject/constants';
 
-import { HealthFactor } from 'types/HealthFactor';
-
 import parseHealthFactor from 'utils/parseHealthFactor';
-import getHealthFactorData from 'utils/getHealthFactorData';
 
-import AccountDataContext from 'contexts/AccountDataContext';
 import { Operation } from 'contexts/ModalStatusContext';
 
 import ModalInfo, { FromTo, Variant } from 'components/common/modal/ModalInfo';
+import useHealthFactor from 'hooks/useHealthFactor';
+import useAccountData from 'hooks/useAccountData';
 
 type Props = {
   qty: string;
@@ -21,38 +19,27 @@ type Props = {
 };
 
 function ModalInfoHealthFactor({ qty, symbol, operation, variant = 'column' }: Props) {
-  const { accountData } = useContext(AccountDataContext);
+  const { marketAccount } = useAccountData(symbol);
+
+  const healthFactor = useHealthFactor();
 
   const newQty = useMemo(() => {
-    if (!accountData || !symbol) return;
+    if (!marketAccount) return;
 
     if (!qty) return Zero;
 
-    const { decimals } = accountData[symbol];
+    return parseFixed(qty, marketAccount.decimals);
+  }, [marketAccount, qty]);
 
-    return parseFixed(qty, decimals);
-  }, [accountData, symbol, qty]);
-
-  const {
-    beforeHealthFactor,
-    healthFactor,
-  }:
-    | { beforeHealthFactor: undefined; healthFactor: undefined }
-    | { beforeHealthFactor: string; healthFactor: HealthFactor } = useMemo(() => {
-    if (!accountData) return {};
-
-    const hf: HealthFactor = getHealthFactorData(accountData);
-
-    return {
-      beforeHealthFactor: parseHealthFactor(hf.debt, hf.collateral),
-      healthFactor: hf,
-    };
-  }, [accountData]);
+  const beforeHealthFactor = useMemo<string | undefined>(() => {
+    if (!healthFactor) return;
+    return parseHealthFactor(healthFactor.debt, healthFactor.collateral);
+  }, [healthFactor]);
 
   const afterHealthFactor = useMemo(() => {
-    if (!accountData || !newQty || !healthFactor) return;
+    if (!marketAccount || !newQty || !healthFactor) return;
 
-    const { adjustFactor, usdPrice, isCollateral, decimals } = accountData[symbol];
+    const { adjustFactor, usdPrice, isCollateral, decimals } = marketAccount;
 
     const newQtyUsd = newQty.mul(usdPrice).div(parseFixed('1', decimals));
 
@@ -98,7 +85,7 @@ function ModalInfoHealthFactor({ qty, symbol, operation, variant = 'column' }: P
         return parseHealthFactor(healthFactor.debt.sub(adjustedNewQtyUsd), healthFactor.collateral);
       }
     }
-  }, [healthFactor, newQty, accountData, operation, symbol]);
+  }, [healthFactor, newQty, marketAccount, operation]);
 
   return (
     <ModalInfo label="Your Health Factor" icon={FavoriteBorderOutlinedIcon} variant={variant}>

@@ -13,16 +13,16 @@ type Props = {
 };
 
 function USDValue({ qty, symbol }: Props) {
-  const { usdPrice, decimals = 18 } = useAccountData(symbol);
+  const { marketAccount } = useAccountData(symbol);
 
   const value = useMemo(() => {
-    if (!qty || !usdPrice || !checkPrecision(qty, decimals)) return;
+    if (!qty || !marketAccount || !checkPrecision(qty, marketAccount.decimals)) return;
 
-    const parsedqty = parseFixed(qty, decimals);
-    const usd = parsedqty.mul(usdPrice).div(WeiPerEther);
+    const parsedqty = parseFixed(qty, marketAccount.decimals);
+    const usd = parsedqty.mul(marketAccount.usdPrice).div(WeiPerEther);
 
-    return formatFixed(usd, decimals);
-  }, [qty, decimals, usdPrice]);
+    return formatFixed(usd, marketAccount.decimals);
+  }, [qty, marketAccount]);
 
   return (
     <Typography color="figma.grey.500" fontWeight={500} fontSize={13} fontFamily="fontFamilyMonospaced">

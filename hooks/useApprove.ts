@@ -15,7 +15,7 @@ export default (operation: Operation, contract?: ERC20 | Market, spender?: strin
   const { symbol, setErrorData, setLoadingButton } = useOperationContext();
   const [isLoading, setIsLoading] = useState(false);
 
-  const { decimals = 18 } = useAccountData(symbol);
+  const { marketAccount } = useAccountData(symbol);
 
   const estimateGas = useCallback(async () => {
     if (!contract || !spender) return;
@@ -40,16 +40,18 @@ export default (operation: Operation, contract?: ERC20 | Market, spender?: strin
           break;
       }
 
-      if (!walletAddress || !contract || !spender) return true;
+      if (!walletAddress || !marketAccount || !contract || !spender) return true;
 
       try {
         const allowance = await contract.allowance(walletAddress, spender);
-        return allowance.isZero() || allowance.lt(parseFixed(qty || String(numbers.defaultAmount), decimals));
+        return (
+          allowance.isZero() || allowance.lt(parseFixed(qty || String(numbers.defaultAmount), marketAccount.decimals))
+        );
       } catch {
         return true;
       }
     },
-    [operation, symbol, contract, spender, walletAddress, decimals],
+    [operation, walletAddress, marketAccount, contract, spender, symbol],
   );
 
   const approve = useCallback(async () => {

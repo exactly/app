@@ -12,17 +12,13 @@ import usePreviewer from 'hooks/usePreviewer';
 import useDelayedEffect from 'hooks/useDelayedEffect';
 import { ErrorCode } from '@ethersproject/logger';
 
-type ContextValues = {
+export type ContextValues = {
   accountData: AccountData | undefined;
-  getAccountData: () => Promise<AccountData | undefined>;
+  refreshAccountData: () => Promise<void>;
   resetAccountData: () => void;
 };
 
-const AccountDataContext = createContext<ContextValues>({
-  accountData: undefined,
-  getAccountData: () => Promise.resolve({}),
-  resetAccountData: () => undefined,
-});
+const AccountDataContext = createContext<ContextValues | null>(null);
 
 export const AccountDataProvider: FC<PropsWithChildren> = ({ children }) => {
   const [accountData, setAccountData] = useState<AccountData | undefined>();
@@ -58,12 +54,6 @@ export const AccountDataProvider: FC<PropsWithChildren> = ({ children }) => {
     }
   }, [previewer, walletAddress]);
 
-  const getAccountData = useCallback(async () => {
-    const data = await queryAccountData();
-    setAccountData(data);
-    return data;
-  }, [queryAccountData]);
-
   const syncAccountData = useCallback(
     async (cancelled?: () => boolean) => {
       const data = await queryAccountData();
@@ -84,7 +74,7 @@ export const AccountDataProvider: FC<PropsWithChildren> = ({ children }) => {
   }, [syncAccountData]);
 
   return (
-    <AccountDataContext.Provider value={{ accountData, getAccountData, resetAccountData }}>
+    <AccountDataContext.Provider value={{ accountData, refreshAccountData: syncAccountData, resetAccountData }}>
       {children}
     </AccountDataContext.Provider>
   );

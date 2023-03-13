@@ -1,19 +1,18 @@
-import React, { type FC, useContext, useMemo } from 'react';
+import React, { type FC, useMemo } from 'react';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber/lib';
 import { Zero } from '@ethersproject/constants/lib';
 
 import HeaderInfo from 'components/common/HeaderInfo';
 import { ItemInfoProps } from 'components/common/ItemInfo';
 
-import AccountDataContext from 'contexts/AccountDataContext';
-
 import formatNumber from 'utils/formatNumber';
 import { Box } from '@mui/material';
 import { useWeb3 } from 'hooks/useWeb3';
 import Image from 'next/image';
+import useAccountData from 'hooks/useAccountData';
 
 const MarketsHeader: FC = () => {
-  const { accountData } = useContext(AccountDataContext);
+  const { accountData } = useAccountData();
   const { chain } = useWeb3();
 
   const { totalDeposited, totalBorrowed, totalAvailable } = useMemo<{
@@ -22,11 +21,8 @@ const MarketsHeader: FC = () => {
     totalAvailable?: BigNumber;
   }>(() => {
     if (!accountData) return {};
-    const { totalDepositedUSD, totalBorrowedUSD } = Object.keys(accountData).reduce(
-      (acc, symbol) => {
-        const { totalFloatingDepositAssets, totalFloatingBorrowAssets, usdPrice, fixedPools, decimals } =
-          accountData[symbol];
-
+    const { totalDepositedUSD, totalBorrowedUSD } = accountData.reduce(
+      (acc, { totalFloatingDepositAssets, totalFloatingBorrowAssets, usdPrice, fixedPools, decimals }) => {
         // iterate through fixed pools to get totals
         const { fixedTotalDeposited, fixedTotalBorrowed } = fixedPools.reduce(
           (fixedPoolStats, pool) => {

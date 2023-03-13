@@ -20,25 +20,28 @@ type Props = {
 };
 
 function ModalInfoTotalDeposits({ qty, symbol, operation, variant = 'column' }: Props) {
-  const { floatingDepositAssets, fixedDepositPositions, decimals } = useAccountData(symbol);
+  const { marketAccount } = useAccountData(symbol);
   const { date } = useContext(MarketContext);
 
   const [from, to] = useMemo(() => {
-    if (!decimals || !floatingDepositAssets || !fixedDepositPositions) return [undefined, undefined];
+    if (!marketAccount) return [undefined, undefined];
 
-    const delta = parseFixed(qty || '0', decimals);
+    const delta = parseFixed(qty || '0', marketAccount.decimals);
 
-    let f: BigNumber = floatingDepositAssets;
+    let f: BigNumber = marketAccount.floatingDepositAssets;
     if (isFixedOperation(operation) && date) {
-      const pool = fixedDepositPositions.find(({ maturity }) => maturity.toNumber() === date);
+      const pool = marketAccount.fixedDepositPositions.find(({ maturity }) => maturity.toNumber() === date);
       f = pool ? pool.position.principal.add(pool.position.fee) : Zero;
     }
 
     let t = f[operation.startsWith('deposit') ? 'add' : 'sub'](delta);
     t = t < Zero ? Zero : t;
 
-    return [formatNumber(formatFixed(f, decimals), symbol), formatNumber(formatFixed(t, decimals), symbol)];
-  }, [qty, symbol, operation, floatingDepositAssets, fixedDepositPositions, decimals, date]);
+    return [
+      formatNumber(formatFixed(f, marketAccount.decimals), symbol),
+      formatNumber(formatFixed(t, marketAccount.decimals), symbol),
+    ];
+  }, [marketAccount, qty, operation, date, symbol]);
 
   return (
     <ModalInfo label="Total deposits" icon={SaveAltRoundedIcon} variant={variant}>

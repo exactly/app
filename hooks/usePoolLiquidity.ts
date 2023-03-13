@@ -1,15 +1,16 @@
 import { useContext } from 'react';
-import AccountDataContext from 'contexts/AccountDataContext';
-import { MarketContext } from 'contexts/MarketContext';
 import { formatFixed } from '@ethersproject/bignumber';
+
+import { MarketContext } from 'contexts/MarketContext';
+import useAccountData from './useAccountData';
 
 export default (symbol: string) => {
   const { date: maturityDate } = useContext(MarketContext);
-  const { accountData } = useContext(AccountDataContext);
+  const { marketAccount } = useAccountData(symbol);
 
-  if (!accountData || !maturityDate) return;
+  if (!marketAccount || !maturityDate) return;
 
-  const { fixedPools, decimals } = accountData[symbol];
+  const { fixedPools, decimals } = marketAccount;
 
   const maturityData = fixedPools.find(({ maturity }) => maturity.toNumber() === maturityDate);
 

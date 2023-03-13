@@ -1,4 +1,4 @@
-import React, { useContext, useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { WeiPerEther } from '@ethersproject/constants';
 
@@ -6,7 +6,6 @@ import ModalTxCost from 'components/common/modal/ModalTxCost';
 import ModalGif from 'components/common/modal/ModalGif';
 
 import { useWeb3 } from 'hooks/useWeb3';
-import AccountDataContext from 'contexts/AccountDataContext';
 
 import numbers from 'config/numbers.json';
 
@@ -33,7 +32,6 @@ const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 function Repay() {
   const { operation } = useModalStatus();
   const { walletAddress } = useWeb3();
-  const { accountData, getAccountData } = useContext(AccountDataContext);
 
   const {
     symbol,
@@ -55,16 +53,16 @@ function Repay() {
 
   const handleOperationError = useHandleOperationError();
 
-  const { decimals = 18 } = useAccountData(symbol);
+  const { marketAccount, refreshAccountData } = useAccountData(symbol);
 
   const [isMax, setIsMax] = useState(false);
 
   const walletBalance = useBalance(symbol, assetContract);
 
   const finalAmount = useMemo(() => {
-    if (!accountData) return '0';
-    return formatFixed(accountData[symbol].floatingBorrowAssets, accountData[symbol].decimals);
-  }, [accountData, symbol]);
+    if (!marketAccount) return '0';
+    return formatFixed(marketAccount.floatingBorrowAssets, marketAccount.decimals);
+  }, [marketAccount]);
 
   const {
     approve,
@@ -108,14 +106,14 @@ function Repay() {
   );
 
   const repay = useCallback(async () => {
-    if (!accountData || !qty || !marketContract || !walletAddress) return;
+    if (!marketAccount || !qty || !marketContract || !walletAddress) return;
 
     let repayTx;
     try {
       setIsLoadingOp(true);
-      const { floatingBorrowShares, floatingBorrowAssets } = accountData[symbol];
+      const { floatingBorrowShares, floatingBorrowAssets, decimals } = marketAccount;
 
-      if (symbol === 'WETH') {
+      if (marketAccount.assetSymbol === 'WETH') {
         if (!ETHRouterContract) return;
 
         if (isMax) {
@@ -164,11 +162,11 @@ function Repay() {
 
       void analytics.track(status ? 'repay' : 'repayRevert', {
         amount: qty,
-        asset: symbol,
+        asset: marketAccount.assetSymbol,
         hash: transactionHash,
       });
 
-      void getAccountData();
+      await refreshAccountData();
     } catch (error) {
       if (repayTx) setTx({ status: 'error', hash: repayTx?.hash });
       setErrorData({ status: true, message: handleOperationError(error) });
@@ -176,24 +174,22 @@ function Repay() {
       setIsLoadingOp(false);
     }
   }, [
-    accountData,
+    marketAccount,
     qty,
     marketContract,
     walletAddress,
     setIsLoadingOp,
-    symbol,
     setTx,
-    getAccountData,
+    refreshAccountData,
     ETHRouterContract,
     isMax,
-    decimals,
     setErrorData,
     handleOperationError,
   ]);
 
   const previewGasCost = useCallback(
     async (quantity: string): Promise<BigNumber | undefined> => {
-      if (!walletAddress || !ETHRouterContract || !marketContract || !quantity) return;
+      if (!marketAccount || !walletAddress || !ETHRouterContract || !marketContract || !quantity) return;
 
       const gasPrice = (await ETHRouterContract.provider.getFeeData()).maxFeePerGas;
       if (!gasPrice) return;
@@ -203,7 +199,7 @@ function Repay() {
         return gasEstimation?.mul(gasPrice);
       }
 
-      if (symbol === 'WETH') {
+      if (marketAccount.assetSymbol === 'WETH') {
         const amount = quantity
           ? parseFixed(quantity, 18)
               .mul(parseFixed(String(1 + numbers.ethRouterSlippage), 18))
@@ -218,13 +214,13 @@ function Repay() {
       }
 
       const gasLimit = await marketContract.estimateGas.repay(
-        quantity ? parseFixed(quantity, decimals) : DEFAULT_AMOUNT,
+        quantity ? parseFixed(quantity, marketAccount.decimals) : DEFAULT_AMOUNT,
         walletAddress,
       );
 
       return gasPrice.mul(gasLimit);
     },
-    [walletAddress, ETHRouterContract, marketContract, requiresApproval, symbol, approveEstimateGas, decimals],
+    [marketAccount, walletAddress, ETHRouterContract, marketContract, requiresApproval, approveEstimateGas],
   );
 
   const { isLoading: previewIsLoading } = usePreviewTx({ qty, needsApproval, previewGasCost });
@@ -260,7 +256,7 @@ function Repay() {
             <AssetInput
               qty={qty}
               symbol={symbol}
-              decimals={decimals}
+              decimals={marketAccount?.decimals ?? 18}
               onMax={onMax}
               onChange={handleInputChange}
               label="Your balance"

@@ -77,7 +77,7 @@ export const OperationContextProvider: FC<PropsWithChildren> = ({ children }) =>
   const [loadingButton, setLoadingButton] = useState<LoadingButton>({});
   const [errorButton, setErrorButton] = useState<string | undefined>();
   const [requiresApproval, setRequiresApproval] = useState(false);
-  const { market, asset } = useAccountData(marketSymbol);
+  const { marketAccount } = useAccountData(marketSymbol);
   const [rawSlippage, setRawSlippage] = useState(DEFAULT_SLIPPAGE);
 
   const slippage = useMemo(() => {
@@ -100,8 +100,8 @@ export const OperationContextProvider: FC<PropsWithChildren> = ({ children }) =>
     setRawSlippage(DEFAULT_SLIPPAGE);
   }, [chain?.id, marketSymbol, open, view, pathname]);
 
-  const assetContract = useERC20(asset);
-  const marketContract = useMarket(market);
+  const assetContract = useERC20(marketAccount?.asset);
+  const marketContract = useMarket(marketAccount?.market);
   const ETHRouterContract = useETHRouter();
 
   const value: ContextValues = {
