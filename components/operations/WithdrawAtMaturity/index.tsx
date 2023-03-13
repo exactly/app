@@ -13,7 +13,6 @@ import numbers from 'config/numbers.json';
 
 import useApprove from 'hooks/useApprove';
 import usePreviewer from 'hooks/usePreviewer';
-import analytics from 'utils/analytics';
 import { useOperationContext, usePreviewTx } from 'contexts/OperationContext';
 import useAccountData from 'hooks/useAccountData';
 import { Grid } from '@mui/material';
@@ -32,10 +31,12 @@ import formatNumber from 'utils/formatNumber';
 import ModalInfo from 'components/common/modal/ModalInfo';
 import ModalInfoMaturityStatus from 'components/OperationsModal/Info/ModalInfoMaturityStatus';
 import useHandleOperationError from 'hooks/useHandleOperationError';
+import useAnalytics from 'hooks/useAnalytics';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 
 const WithdrawAtMaturity: FC = () => {
+  const analytics = useAnalytics();
   const { operation } = useModalStatus();
   const { walletAddress } = useWeb3();
   const { date } = useContext(MarketContext);
@@ -256,6 +257,7 @@ const WithdrawAtMaturity: FC = () => {
     setIsLoadingOp,
     symbol,
     setTx,
+    analytics,
     getAccountData,
     ETHRouterContract,
     minAmountToWithdraw,
@@ -279,7 +281,18 @@ const WithdrawAtMaturity: FC = () => {
     });
 
     return withdraw();
-  }, [isLoading, requiresApproval, qty, date, symbol, withdraw, approve, setRequiresApproval, needsApproval]);
+  }, [
+    isLoading,
+    requiresApproval,
+    analytics,
+    qty,
+    date,
+    symbol,
+    withdraw,
+    approve,
+    setRequiresApproval,
+    needsApproval,
+  ]);
 
   if (tx) return <ModalGif tx={tx} tryAgain={withdraw} />;
 

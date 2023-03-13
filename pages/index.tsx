@@ -8,11 +8,12 @@ import MarketsBasic from 'components/markets/MarketsBasic';
 import BackgroundCircle from 'components/BackgroundCircle';
 
 import { MarketContext } from 'contexts/MarketContext';
-import analytics from 'utils/analytics';
+import useAnalytics from 'hooks/useAnalytics';
 
 const Markets: NextPage = () => {
+  const analytics = useAnalytics();
   const { view } = useContext(MarketContext);
-  useEffect(() => void analytics.page(), []);
+  useEffect(() => void analytics.page(), [analytics]);
 
   if (!view) return null;
 

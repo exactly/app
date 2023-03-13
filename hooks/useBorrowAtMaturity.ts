@@ -13,9 +13,9 @@ import { useWeb3 } from 'hooks/useWeb3';
 import { useCallback, useContext, useMemo, useState } from 'react';
 import { HealthFactor } from 'types/HealthFactor';
 import { OperationHook } from 'types/OperationHook';
-import analytics from 'utils/analytics';
 import getBeforeBorrowLimit from 'utils/getBeforeBorrowLimit';
 import getHealthFactorData from 'utils/getHealthFactorData';
+import useAnalytics from './useAnalytics';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 
@@ -30,6 +30,7 @@ type BorrowAtMaturity = {
 } & OperationHook;
 
 export default (): BorrowAtMaturity => {
+  const analytics = useAnalytics();
   const { walletAddress } = useWeb3();
   const { accountData, getAccountData } = useContext(AccountDataContext);
   const { date } = useContext(MarketContext);
@@ -278,9 +279,9 @@ export default (): BorrowAtMaturity => {
       setIsLoadingOp(false);
     }
   }, [
-    slippage,
     setIsLoadingOp,
     fixedRate,
+    slippage,
     accountData,
     date,
     qty,
@@ -289,6 +290,7 @@ export default (): BorrowAtMaturity => {
     setErrorData,
     symbol,
     setTx,
+    analytics,
     getAccountData,
     ETHRouterContract,
     marketContract,
@@ -339,7 +341,7 @@ export default (): BorrowAtMaturity => {
     });
 
     return borrow();
-  }, [isLoading, requiresApproval, qty, date, symbol, borrow, approve, setRequiresApproval, needsApproval]);
+  }, [isLoading, requiresApproval, analytics, qty, date, symbol, borrow, approve, setRequiresApproval, needsApproval]);
 
   return {
     isLoading,

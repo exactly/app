@@ -10,7 +10,7 @@ import useHandleOperationError from 'hooks/useHandleOperationError';
 import { useWeb3 } from 'hooks/useWeb3';
 import { useCallback, useContext, useMemo } from 'react';
 import { OperationHook } from 'types/OperationHook';
-import analytics from 'utils/analytics';
+import useAnalytics from './useAnalytics';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 
@@ -19,6 +19,7 @@ type Deposit = {
 } & OperationHook;
 
 export default (): Deposit => {
+  const analytics = useAnalytics();
   const { walletAddress } = useWeb3();
   const { getAccountData } = useContext(AccountDataContext);
 
@@ -168,6 +169,7 @@ export default (): Deposit => {
     setIsLoadingOp,
     symbol,
     setTx,
+    analytics,
     qty,
     getAccountData,
     ETHRouterContract,
@@ -190,7 +192,7 @@ export default (): Deposit => {
     });
 
     return deposit();
-  }, [isLoading, requiresApproval, qty, symbol, deposit, approve, setRequiresApproval, needsApproval]);
+  }, [isLoading, requiresApproval, analytics, qty, symbol, deposit, approve, setRequiresApproval, needsApproval]);
 
   return { isLoading, onMax, handleInputChange, handleSubmitAction, needsApproval, previewGasCost, deposit };
 };

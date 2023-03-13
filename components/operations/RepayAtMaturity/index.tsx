@@ -15,7 +15,6 @@ import numbers from 'config/numbers.json';
 
 import useApprove from 'hooks/useApprove';
 import useBalance from 'hooks/useBalance';
-import analytics from 'utils/analytics';
 import { useOperationContext, usePreviewTx } from 'contexts/OperationContext';
 import useAccountData from 'hooks/useAccountData';
 import { Grid } from '@mui/material';
@@ -33,10 +32,12 @@ import ModalAlert from 'components/common/modal/ModalAlert';
 import ModalSubmit from 'components/common/modal/ModalSubmit';
 import ModalInfoBorrowLimit from 'components/OperationsModal/Info/ModalInfoBorrowLimit';
 import useHandleOperationError from 'hooks/useHandleOperationError';
+import useAnalytics from 'hooks/useAnalytics';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 
 const RepayAtMaturity: FC = () => {
+  const analytics = useAnalytics();
   const { operation } = useModalStatus();
   const { walletAddress } = useWeb3();
   const { date } = useContext(MarketContext);
@@ -242,6 +243,7 @@ const RepayAtMaturity: FC = () => {
   }, [
     ETHRouterContract,
     accountData,
+    analytics,
     date,
     getAccountData,
     handleOperationError,
@@ -271,7 +273,7 @@ const RepayAtMaturity: FC = () => {
     });
 
     return repay();
-  }, [approve, date, isLoading, needsApproval, qty, repay, requiresApproval, setRequiresApproval, symbol]);
+  }, [analytics, approve, date, isLoading, needsApproval, qty, repay, requiresApproval, setRequiresApproval, symbol]);
 
   if (tx) return <ModalGif tx={tx} tryAgain={repay} />;
 
