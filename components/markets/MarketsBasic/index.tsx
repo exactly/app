@@ -25,7 +25,7 @@ const MarketsBasic: FC = () => {
   const { openOperationModal } = useModalStatus();
   const { symbol = 'USDC', operation, selected, setSelected } = useMarketsBasic();
   const { errorData, requiresApproval, qty, assetContract, tx } = useOperationContext();
-  const { decimals = 18 } = useAccountData(symbol);
+  const { marketAccount } = useAccountData(symbol);
   const walletBalance = useBalance(symbol, assetContract);
   const { options: fixedOptions, loading: loadingFixedOptions } = usePreviewFixedOperation(operation);
   const { handleInputChange: handleDeposit, onMax: onMaxDeposit } = useDepositAtMaturity();
@@ -114,7 +114,7 @@ const MarketsBasic: FC = () => {
             <AssetInput
               qty={qty}
               symbol={symbol}
-              decimals={decimals}
+              decimals={marketAccount?.decimals ?? 18}
               onMax={isDeposit ? onMaxDeposit : onMaxBorrow}
               onChange={isDeposit ? handleDeposit : handleBorrow}
               label={isDeposit ? 'Your balance' : 'Safe borrow limit'}

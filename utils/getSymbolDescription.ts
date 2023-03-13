@@ -1,5 +1,5 @@
-import { AccountData } from 'types/AccountData';
+import { Previewer } from 'types/contracts';
 
-export default (accountData: AccountData, symbol: string) => {
-  return symbol === 'WETH' ? 'Ether' : accountData[symbol]?.assetName;
+export default (marketAccount: Previewer.MarketAccountStructOutput, symbol: string) => {
+  return symbol === 'WETH' ? 'Ether' : marketAccount.assetName;
 };

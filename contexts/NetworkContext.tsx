@@ -6,7 +6,6 @@ import Router, { useRouter } from 'next/router';
 
 import { supportedChains, defaultChain } from 'utils/client';
 import usePreviousValue from 'hooks/usePreviousValue';
-import AccountDataContext from './AccountDataContext';
 
 function isSupported(id?: number): boolean {
   return Boolean(id && supportedChains.find((c) => c.id === id));
@@ -34,7 +33,6 @@ export const NetworkContextProvider: FC<PropsWithChildren> = ({ children }) => {
   const [displayNetwork, setDisplayNetwork] = useState<Chain>(defaultChain ?? wagmiChains.mainnet);
   const first = useRef(true);
   const previousChain = usePreviousValue(chain);
-  const { resetAccountData } = useContext(AccountDataContext);
 
   useEffect(() => {
     if (first.current) {
@@ -49,10 +47,9 @@ export const NetworkContextProvider: FC<PropsWithChildren> = ({ children }) => {
     }
 
     if (previousChain && chain && isSupported(chain.id) && previousChain.id !== chain.id) {
-      resetAccountData();
       return setDisplayNetwork(chain);
     }
-  }, [previousChain, chain, displayNetwork, resetAccountData]);
+  }, [previousChain, chain, displayNetwork]);
 
   useEffect(() => {
     if (first.current) {

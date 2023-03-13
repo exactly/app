@@ -1,7 +1,5 @@
-import React, { type FC, useMemo, createContext, useContext, useEffect, useState, type PropsWithChildren } from 'react';
+import React, { type FC, useMemo, createContext, useEffect, useState, type PropsWithChildren } from 'react';
 import dayjs from 'dayjs';
-
-import AccountDataContext from './AccountDataContext';
 
 type ContextValues = {
   marketSymbol: string | undefined;
@@ -32,13 +30,11 @@ const MarketProvider: FC<PropsWithChildren> = ({ children }) => {
   const [marketSymbol, setMarketSymbol] = useState<string>();
   const [date, setDate] = useState<number>();
 
-  const { accountData } = useContext(AccountDataContext);
-
   const dates = useMemo<number[]>(() => {
     const currentTimestamp = dayjs().unix();
+    const maxPools = 3;
     const interval = 2_419_200;
     let timestamp = currentTimestamp - (currentTimestamp % interval);
-    const maxPools = accountData?.maxFuturePools ?? 3;
 
     const pools: number[] = [];
 
@@ -48,13 +44,13 @@ const MarketProvider: FC<PropsWithChildren> = ({ children }) => {
     }
 
     return pools;
-  }, [accountData?.maxFuturePools]);
+  }, []);
 
   useEffect(() => {
     if (dates.length && !date) {
       setDate(dates[0]);
     }
-  }, [accountData, date, dates]);
+  }, [date, dates]);
 
   useEffect(() => {
     setView((localStorage.getItem('marketView') as MarketView) || 'simple');

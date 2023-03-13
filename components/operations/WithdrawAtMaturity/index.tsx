@@ -5,7 +5,6 @@ import { AddressZero, WeiPerEther, Zero } from '@ethersproject/constants';
 import ModalGif from 'components/common/modal/ModalGif';
 import ModalTxCost from 'components/common/modal/ModalTxCost';
 
-import AccountDataContext from 'contexts/AccountDataContext';
 import { MarketContext } from 'contexts/MarketContext';
 import { useWeb3 } from 'hooks/useWeb3';
 
@@ -39,7 +38,6 @@ const WithdrawAtMaturity: FC = () => {
   const { operation } = useModalStatus();
   const { walletAddress } = useWeb3();
   const { date } = useContext(MarketContext);
-  const { accountData, getAccountData } = useContext(AccountDataContext);
 
   const {
     symbol,
@@ -68,7 +66,7 @@ const WithdrawAtMaturity: FC = () => {
 
   const previewerContract = usePreviewer();
 
-  const { decimals = 18 } = useAccountData(symbol);
+  const { marketAccount, refreshAccountData } = useAccountData(symbol);
 
   const isEarlyWithdraw = useMemo(() => {
     if (!date) return false;
@@ -76,13 +74,16 @@ const WithdrawAtMaturity: FC = () => {
   }, [date]);
 
   const positionAssets = useMemo(() => {
-    if (!accountData || !date) return '0';
+    if (!marketAccount || !date) return '0';
 
-    const pool = accountData[symbol].fixedDepositPositions.find(({ maturity }) => maturity.toNumber() === date);
+    const pool = marketAccount.fixedDepositPositions.find(({ maturity }) => maturity.toNumber() === date);
     return pool ? pool.position.principal.add(pool.position.fee) : Zero;
-  }, [date, accountData, symbol]);
+  }, [date, marketAccount]);
 
-  const amountAtFinish = useMemo(() => formatFixed(positionAssets, decimals), [decimals, positionAssets]);
+  const amountAtFinish = useMemo(
+    () => formatFixed(positionAssets, marketAccount?.decimals ?? 18),
+    [positionAssets, marketAccount],
+  );
 
   const {
     approve,
@@ -92,14 +93,14 @@ const WithdrawAtMaturity: FC = () => {
   } = useApprove('withdrawAtMaturity', marketContract, ETHRouterContract?.address);
 
   const previewWithdrawAtMaturity = useCallback(async () => {
-    if (!date || !marketContract || !previewerContract) return;
+    if (!marketAccount || !date || !marketContract || !previewerContract) return;
 
     if (!qty) {
       setMinAmountToWithdraw(Zero);
       return;
     }
 
-    const parsedQtyValue = parseFixed(qty, decimals);
+    const parsedQtyValue = parseFixed(qty, marketAccount.decimals);
     const { assets: amount } = await previewerContract.previewWithdrawAtMaturity(
       marketContract.address,
       date,
@@ -109,7 +110,7 @@ const WithdrawAtMaturity: FC = () => {
 
     setAmountToWithdraw(amount);
     setMinAmountToWithdraw(isEarlyWithdraw ? amount.mul(slippage).div(WeiPerEther) : amount);
-  }, [decimals, date, qty, marketContract, previewerContract, slippage, isEarlyWithdraw, walletAddress]);
+  }, [marketAccount, date, qty, marketContract, previewerContract, slippage, isEarlyWithdraw, walletAddress]);
 
   useEffect(() => {
     if (errorData?.status) return;
@@ -118,7 +119,7 @@ const WithdrawAtMaturity: FC = () => {
 
   const previewGasCost = useCallback(
     async (quantity: string): Promise<BigNumber | undefined> => {
-      if (!walletAddress || !marketContract || !ETHRouterContract || !date || !quantity) return;
+      if (!marketAccount || !walletAddress || !marketContract || !ETHRouterContract || !date || !quantity) return;
 
       const gasPrice = (await ETHRouterContract.provider.getFeeData()).maxFeePerGas;
       if (!gasPrice) return;
@@ -130,7 +131,7 @@ const WithdrawAtMaturity: FC = () => {
 
       const amount = amountToWithdraw.isZero() ? DEFAULT_AMOUNT : amountToWithdraw;
 
-      if (symbol === 'WETH') {
+      if (marketAccount.assetSymbol === 'WETH') {
         const gasEstimation = await ETHRouterContract.estimateGas.withdrawAtMaturity(date, amount, minAmountToWithdraw);
         return gasPrice.mul(gasEstimation);
       }
@@ -146,13 +147,13 @@ const WithdrawAtMaturity: FC = () => {
       return gasPrice.mul(gasEstimation);
     },
     [
+      marketAccount,
       walletAddress,
       marketContract,
       ETHRouterContract,
       date,
       requiresApproval,
       amountToWithdraw,
-      symbol,
       minAmountToWithdraw,
       approveEstimateGas,
     ],
@@ -165,13 +166,16 @@ const WithdrawAtMaturity: FC = () => {
     [isLoadingOp, approveIsLoading, previewIsLoading],
   );
 
-  const onMax = useCallback(() => setQty(formatFixed(positionAssets, decimals)), [decimals, positionAssets, setQty]);
+  const onMax = useCallback(
+    () => setQty(formatFixed(positionAssets, marketAccount?.decimals ?? 18)),
+    [marketAccount, positionAssets, setQty],
+  );
 
   const handleInputChange = useCallback(
     (value: string) => {
       setQty(value);
 
-      const parsedValue = parseFixed(value || '0', decimals);
+      const parsedValue = parseFixed(value || '0', marketAccount?.decimals ?? 18);
 
       if (parsedValue.isZero()) {
         return setErrorData({ status: true, message: 'Cannot withdraw 0' });
@@ -186,17 +190,17 @@ const WithdrawAtMaturity: FC = () => {
 
       setErrorData(undefined);
     },
-    [setQty, decimals, positionAssets, setErrorData],
+    [setQty, positionAssets, setErrorData, marketAccount],
   );
 
   const withdraw = useCallback(async () => {
-    if (!date || !marketContract || !walletAddress || !qty) return;
+    if (!marketAccount || !date || !marketContract || !walletAddress || !qty) return;
 
     let withdrawTx;
     try {
       setIsLoadingOp(true);
 
-      if (symbol === 'WETH') {
+      if (marketAccount.assetSymbol === 'WETH') {
         if (!ETHRouterContract) return;
 
         const gasEstimation = await ETHRouterContract.estimateGas.withdrawAtMaturity(
@@ -210,7 +214,7 @@ const WithdrawAtMaturity: FC = () => {
       } else {
         const gasEstimation = await marketContract.estimateGas.withdrawAtMaturity(
           date,
-          parseFixed(qty, decimals),
+          parseFixed(qty, marketAccount.decimals),
           minAmountToWithdraw,
           walletAddress,
           walletAddress,
@@ -218,7 +222,7 @@ const WithdrawAtMaturity: FC = () => {
 
         withdrawTx = await marketContract.withdrawAtMaturity(
           date,
-          parseFixed(qty, decimals),
+          parseFixed(qty, marketAccount.decimals),
           minAmountToWithdraw,
           walletAddress,
           walletAddress,
@@ -236,12 +240,12 @@ const WithdrawAtMaturity: FC = () => {
 
       void analytics.track(status ? 'withdrawAtMaturity' : 'withdrawAtMaturityRevert', {
         amount: qty,
-        asset: symbol,
+        asset: marketAccount.assetSymbol,
         maturity: date,
         hash: transactionHash,
       });
 
-      void getAccountData();
+      await refreshAccountData();
     } catch (error) {
       if (withdrawTx) setTx({ status: 'error', hash: withdrawTx?.hash });
       setErrorData({ status: true, message: handleOperationError(error) });
@@ -249,17 +253,16 @@ const WithdrawAtMaturity: FC = () => {
       setIsLoadingOp(false);
     }
   }, [
+    marketAccount,
     date,
     marketContract,
     walletAddress,
     qty,
     setIsLoadingOp,
-    symbol,
     setTx,
-    getAccountData,
+    refreshAccountData,
     ETHRouterContract,
     minAmountToWithdraw,
-    decimals,
     setErrorData,
     handleOperationError,
   ]);
@@ -282,6 +285,8 @@ const WithdrawAtMaturity: FC = () => {
   }, [isLoading, requiresApproval, qty, date, symbol, withdraw, approve, setRequiresApproval, needsApproval]);
 
   if (tx) return <ModalGif tx={tx} tryAgain={withdraw} />;
+
+  const decimals = marketAccount?.decimals ?? 18;
 
   return (
     <Grid container flexDirection="column">
@@ -352,7 +357,7 @@ const WithdrawAtMaturity: FC = () => {
       <Grid item mt={{ xs: 2, sm: 3 }}>
         <ModalSubmit
           label="Withdraw"
-          symbol={symbol === 'WETH' && accountData ? accountData[symbol].symbol : symbol}
+          symbol={symbol === 'WETH' && marketAccount ? marketAccount.symbol : symbol}
           submit={handleSubmitAction}
           isLoading={isLoading}
           disabled={!qty || parseFloat(qty) <= 0 || isLoading || errorData?.status}

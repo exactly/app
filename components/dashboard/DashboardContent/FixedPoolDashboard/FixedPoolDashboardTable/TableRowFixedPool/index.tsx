@@ -5,10 +5,9 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import { Box, Button, IconButton, Skeleton, Stack, TableCell, TableRow, Typography } from '@mui/material';
 import MaturityLinearProgress from 'components/common/MaturityLinearProgress';
-import AccountDataContext from 'contexts/AccountDataContext';
 import useFixedOperation from 'hooks/useFixedPoolTransactions';
 
-import React, { useContext, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { FixedPoolTransaction } from 'types/FixedPoolTransaction';
 import calculateAPR from 'utils/calculateAPR';
 import formatNumber from 'utils/formatNumber';
@@ -21,6 +20,7 @@ import type { Deposit } from 'types/Deposit';
 import type { WithdrawMP } from 'types/WithdrawMP';
 import { Borrow } from 'types/Borrow';
 import { Repay } from 'types/Repay';
+import useAccountData from 'hooks/useAccountData';
 
 type Props = {
   symbol: string;
@@ -32,16 +32,15 @@ type Props = {
 };
 
 function TableRowFixedPool({ symbol, valueUSD, type, maturityDate, market, decimals }: Props) {
-  const { accountData } = useContext(AccountDataContext);
+  const { marketAccount } = useAccountData(symbol);
   const { withdrawTxs, repayTxs, depositTxs, borrowTxs } = useFixedOperation(type, maturityDate, market);
   const [open, setOpen] = useState(false);
   const { handleActionClick } = useActionButton();
 
   const exchangeRate: number | undefined = useMemo(() => {
-    if (!accountData) return;
-    const rate = parseFloat(formatFixed(accountData[symbol].usdPrice, 18));
-    return rate;
-  }, [accountData, symbol]);
+    if (!marketAccount) return;
+    return parseFloat(formatFixed(marketAccount.usdPrice, 18));
+  }, [marketAccount]);
 
   const transactions: FixedPoolTransaction[] = useMemo(() => {
     const allTransactions = [...withdrawTxs, ...repayTxs, ...depositTxs, ...borrowTxs].sort(

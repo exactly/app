@@ -1,20 +1,20 @@
 import { parseFixed } from '@ethersproject/bignumber';
-import AccountDataContext from 'contexts/AccountDataContext';
 import request from 'graphql-request';
 import { getMaturityPoolBorrowsQuery } from 'queries/getMaturityPoolBorrows';
 import { getMaturityPoolDepositsQuery } from 'queries/getMaturityPoolDeposits';
 import { getMaturityPoolRepaysQuery } from 'queries/getMaturityPoolRepay';
 import { getMaturityPoolWithdrawsQuery } from 'queries/getMaturityPoolWithdraw';
-import { useCallback, useContext, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Borrow } from 'types/Borrow';
 import { Deposit } from 'types/Deposit';
 import { Repay } from 'types/Repay';
 import { WithdrawMP } from 'types/WithdrawMP';
 import { useWeb3 } from './useWeb3';
 import networkData from 'config/networkData.json' assert { type: 'json' };
+import useAccountData from './useAccountData';
 
 export default (type: 'borrow' | 'deposit', maturity: number, market: string) => {
-  const { accountData } = useContext(AccountDataContext);
+  const { accountData } = useAccountData();
   const { walletAddress, chain } = useWeb3();
   const [withdrawTxs, setWithdrawTxs] = useState<WithdrawMP[]>([]);
   const [repayTxs, setRepayTxs] = useState<Repay[]>([]);

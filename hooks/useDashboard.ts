@@ -1,13 +1,13 @@
-import { useCallback, useContext, useMemo } from 'react';
-import AccountDataContext from 'contexts/AccountDataContext';
+import { useCallback, useMemo } from 'react';
 import { FloatingPoolItemData } from 'types/FloatingPoolItemData';
 import useAssets from './useAssets';
 import { Previewer } from 'types/contracts';
 import useFixedPools from './useFixedPools';
 import { BigNumber, formatFixed } from '@ethersproject/bignumber';
+import useAccountData from './useAccountData';
 
 export default function useDashboard(type: string) {
-  const { accountData } = useContext(AccountDataContext);
+  const { accountData, getMarketAccount } = useAccountData();
   const orderAssets = useAssets();
   const { deposits, borrows } = useFixedPools();
   const isDeposit = type === 'deposit';
@@ -19,13 +19,13 @@ export default function useDashboard(type: string) {
 
   const getValueInUSD = useCallback(
     (symbol: string, amount: BigNumber): number => {
-      const { decimals, usdPrice } = accountData?.[symbol] ?? {};
+      const { decimals, usdPrice } = getMarketAccount(symbol) ?? {};
       if (!decimals || !usdPrice) return 0;
 
       const rate = parseFloat(formatFixed(usdPrice, 18));
       return parseFloat(formatFixed(amount, decimals)) * rate;
     },
-    [accountData],
+    [getMarketAccount],
   );
 
   const floatingData = useMemo<FloatingPoolItemData[] | undefined>(() => {

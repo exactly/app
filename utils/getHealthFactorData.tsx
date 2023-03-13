@@ -1,18 +1,16 @@
 import { BigNumber, parseFixed } from '@ethersproject/bignumber';
 import { Zero } from '@ethersproject/constants';
 
-import { AccountData } from 'types/AccountData';
+import { Previewer } from 'types/contracts';
 import { HealthFactor } from 'types/HealthFactor';
 import { WAD } from './queryRates';
 
-function getHealthFactorData(accountData: AccountData): HealthFactor {
+function getHealthFactorData(accountData: Previewer.MarketAccountStructOutput[]): HealthFactor {
   let collateral = Zero;
   let debt = Zero;
 
-  const data = Object.values(accountData);
-
   try {
-    data.forEach((fixedLender) => {
+    accountData.forEach((fixedLender) => {
       let fixedLenderCollateral = Zero;
       let fixedLenderDebt = Zero;
       const decimals = fixedLender.decimals;

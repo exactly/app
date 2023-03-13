@@ -1,11 +1,10 @@
-import { Typography } from '@mui/material';
-import { Box } from '@mui/system';
-import AccountDataContext from 'contexts/AccountDataContext';
+import React, { FC, PropsWithChildren, useCallback } from 'react';
+import { Typography, Box } from '@mui/material';
 import Image from 'next/image';
 import Link from 'next/link';
-import React, { FC, PropsWithChildren, useCallback, useContext } from 'react';
 import formatSymbol from 'utils/formatSymbol';
 import getSymbolDescription from 'utils/getSymbolDescription';
+import useAccountData from 'hooks/useAccountData';
 
 type Props = PropsWithChildren<{
   symbol: string;
@@ -13,14 +12,14 @@ type Props = PropsWithChildren<{
 }>;
 
 const MobileAssetCard: FC<Props> = ({ symbol, isFloating, children }) => {
-  const { accountData } = useContext(AccountDataContext);
+  const { marketAccount } = useAccountData(symbol);
 
   const assetDescription = useCallback(
     (s: string) => {
-      if (!accountData) return '';
-      return getSymbolDescription(accountData, s);
+      if (!marketAccount) return '';
+      return getSymbolDescription(marketAccount, s);
     },
-    [accountData],
+    [marketAccount],
   );
 
   return (

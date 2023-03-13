@@ -1,7 +1,6 @@
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { WeiPerEther, Zero } from '@ethersproject/constants';
 import numbers from 'config/numbers.json';
-import AccountDataContext from 'contexts/AccountDataContext';
 import { MarketContext } from 'contexts/MarketContext';
 import { useOperationContext } from 'contexts/OperationContext';
 import useAccountData from 'hooks/useAccountData';
@@ -11,11 +10,10 @@ import usePoolLiquidity from 'hooks/usePoolLiquidity';
 import usePreviewer from 'hooks/usePreviewer';
 import { useWeb3 } from 'hooks/useWeb3';
 import { useCallback, useContext, useMemo, useState } from 'react';
-import { HealthFactor } from 'types/HealthFactor';
 import { OperationHook } from 'types/OperationHook';
 import analytics from 'utils/analytics';
 import getBeforeBorrowLimit from 'utils/getBeforeBorrowLimit';
-import getHealthFactorData from 'utils/getHealthFactorData';
+import useHealthFactor from './useHealthFactor';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 
@@ -31,7 +29,6 @@ type BorrowAtMaturity = {
 
 export default (): BorrowAtMaturity => {
   const { walletAddress } = useWeb3();
-  const { accountData, getAccountData } = useContext(AccountDataContext);
   const { date } = useContext(MarketContext);
 
   const {
@@ -53,22 +50,18 @@ export default (): BorrowAtMaturity => {
 
   const handleOperationError = useHandleOperationError();
 
-  const { decimals = 18 } = useAccountData(symbol);
+  const { accountData, marketAccount, refreshAccountData } = useAccountData(symbol);
 
   const [fixedRate, setFixedRate] = useState<number | undefined>();
 
-  const healthFactor = useMemo<HealthFactor | undefined>(
-    () => (accountData ? getHealthFactorData(accountData) : undefined),
-    [accountData],
-  );
-
+  const healthFactor = useHealthFactor();
   const minBorrowRate = useMemo<BigNumber | undefined>(() => {
-    if (!accountData) return;
+    if (!marketAccount) return;
 
-    const { fixedPools = [] } = accountData[symbol];
+    const { fixedPools = [] } = marketAccount;
     const pool = fixedPools.find(({ maturity }) => maturity.toNumber() === date);
     return pool?.minBorrowRate;
-  }, [accountData, date, symbol]);
+  }, [marketAccount, date]);
 
   const previewerContract = usePreviewer();
 
@@ -82,19 +75,19 @@ export default (): BorrowAtMaturity => {
   const poolLiquidity = usePoolLiquidity(symbol);
 
   const hasCollateral = useMemo(() => {
-    if (!accountData) return false;
+    if (!accountData || !marketAccount) return false;
 
     return (
       // isCollateral
-      accountData[symbol].floatingDepositAssets.gt(Zero) ||
+      marketAccount.floatingDepositAssets.gt(Zero) ||
       // hasDepositedToFloatingPool
-      Object.keys(accountData).some((aMarket) => accountData[aMarket].isCollateral)
+      accountData.some((aMarket) => aMarket.isCollateral)
     );
-  }, [accountData, symbol]);
+  }, [accountData, marketAccount]);
 
   const previewGasCost = useCallback(
     async (quantity: string): Promise<BigNumber | undefined> => {
-      if (!walletAddress || !marketContract || !ETHRouterContract || !date || !quantity) return;
+      if (!marketAccount || !walletAddress || !marketContract || !ETHRouterContract || !date || !quantity) return;
 
       const gasPrice = (await ETHRouterContract.provider.getFeeData()).maxFeePerGas;
       if (!gasPrice) return;
@@ -104,7 +97,7 @@ export default (): BorrowAtMaturity => {
         return gasEstimation?.mul(gasPrice);
       }
 
-      if (symbol === 'WETH') {
+      if (marketAccount.assetSymbol === 'WETH') {
         const amount = quantity ? parseFixed(quantity, 18) : DEFAULT_AMOUNT;
         const maxAmount = amount.mul(slippage).div(WeiPerEther);
 
@@ -113,7 +106,7 @@ export default (): BorrowAtMaturity => {
         return gasPrice.mul(gasEstimation);
       }
 
-      const amount = quantity ? parseFixed(quantity, decimals) : DEFAULT_AMOUNT;
+      const amount = quantity ? parseFixed(quantity, marketAccount.decimals) : DEFAULT_AMOUNT;
       const maxAmount = amount.mul(slippage).div(WeiPerEther);
       const gasEstimation = await marketContract.estimateGas.borrowAtMaturity(
         date,
@@ -125,24 +118,23 @@ export default (): BorrowAtMaturity => {
       return gasPrice.mul(gasEstimation);
     },
     [
+      marketAccount,
       walletAddress,
       marketContract,
       ETHRouterContract,
       date,
       requiresApproval,
-      symbol,
       slippage,
       approveEstimateGas,
-      decimals,
     ],
   );
 
   const isLoading = useMemo(() => isLoadingOp || approveIsLoading, [isLoadingOp, approveIsLoading]);
 
   const safeMaximumBorrow = useMemo((): string => {
-    if (!accountData || !healthFactor) return '';
+    if (!marketAccount || !healthFactor) return '';
 
-    const { usdPrice, adjustFactor, floatingDepositAssets, isCollateral } = accountData[symbol];
+    const { usdPrice, adjustFactor, floatingDepositAssets, isCollateral, decimals } = marketAccount;
 
     let col = healthFactor.collateral;
     const hf = parseFixed('1.05', 18);
@@ -171,7 +163,7 @@ export default (): BorrowAtMaturity => {
         ),
       ),
     ).toFixed(decimals);
-  }, [accountData, healthFactor, symbol, decimals]);
+  }, [marketAccount, healthFactor]);
 
   const onMax = useCallback(() => {
     setQty(safeMaximumBorrow);
@@ -180,8 +172,8 @@ export default (): BorrowAtMaturity => {
 
   const handleInputChange = useCallback(
     (value: string) => {
-      if (!accountData) return;
-      const { usdPrice } = accountData[symbol];
+      if (!marketAccount) return;
+      const { usdPrice, decimals } = marketAccount;
 
       setQty(value);
 
@@ -192,7 +184,7 @@ export default (): BorrowAtMaturity => {
         });
       }
 
-      const maxBorrowAssets = getBeforeBorrowLimit(accountData[symbol], 'borrow');
+      const maxBorrowAssets = getBeforeBorrowLimit(marketAccount, 'borrow');
 
       if (
         maxBorrowAssets.lt(
@@ -208,7 +200,7 @@ export default (): BorrowAtMaturity => {
       }
       setErrorData(undefined);
     },
-    [accountData, symbol, setQty, poolLiquidity, decimals, setErrorData],
+    [marketAccount, setQty, poolLiquidity, setErrorData],
   );
 
   const borrow = useCallback(async () => {
@@ -223,14 +215,14 @@ export default (): BorrowAtMaturity => {
       });
     }
 
-    if (!accountData || !date || !qty || !walletAddress) return;
+    if (!marketAccount || !date || !qty || !walletAddress) return;
 
-    const amount = parseFixed(qty, decimals);
+    const amount = parseFixed(qty, marketAccount.decimals);
     const maxAmount = amount.mul(slippage).div(WeiPerEther);
 
     let borrowTx;
     try {
-      if (symbol === 'WETH') {
+      if (marketAccount.assetSymbol === 'WETH') {
         if (!ETHRouterContract) throw new Error('ETHRouterContract is undefined');
 
         const gasEstimation = await ETHRouterContract.estimateGas.borrowAtMaturity(date, amount, maxAmount);
@@ -261,12 +253,12 @@ export default (): BorrowAtMaturity => {
 
       void analytics.track(status ? 'borrowAtMaturity' : 'borrowAtMaturityRevert', {
         amount: qty,
-        asset: symbol,
+        asset: marketAccount.assetSymbol,
         maturity: date,
         hash: transactionHash,
       });
 
-      void getAccountData();
+      await refreshAccountData();
     } catch (error) {
       if (borrowTx?.hash) setTx({ status: 'error', hash: borrowTx.hash });
 
@@ -281,25 +273,26 @@ export default (): BorrowAtMaturity => {
     slippage,
     setIsLoadingOp,
     fixedRate,
-    accountData,
+    marketAccount,
     date,
     qty,
     walletAddress,
-    decimals,
     setErrorData,
-    symbol,
     setTx,
-    getAccountData,
+    refreshAccountData,
     ETHRouterContract,
     marketContract,
     handleOperationError,
   ]);
 
   const updateAPR = useCallback(async () => {
-    if (!accountData || !date || !previewerContract || !marketContract || !minBorrowRate) return;
+    if (!marketAccount || !date || !previewerContract || !marketContract || !minBorrowRate) {
+      setFixedRate(undefined);
+      return;
+    }
 
     if (qty) {
-      const initialAssets = parseFixed(qty, decimals);
+      const initialAssets = parseFixed(qty, marketAccount.decimals);
       try {
         const { assets: finalAssets } = await previewerContract.previewBorrowAtMaturity(
           marketContract.address,
@@ -322,7 +315,7 @@ export default (): BorrowAtMaturity => {
       const fixedAPR = Number(minBorrowRate.toBigInt()) / 1e18;
       setFixedRate(fixedAPR);
     }
-  }, [accountData, date, previewerContract, marketContract, minBorrowRate, qty, decimals]);
+  }, [marketAccount, date, previewerContract, marketContract, minBorrowRate, qty]);
 
   const handleSubmitAction = useCallback(async () => {
     if (isLoading) return;

@@ -1,12 +1,12 @@
-import { useContext, useMemo, useCallback, useState } from 'react';
+import { useMemo, useCallback, useState } from 'react';
 import { BigNumber } from '@ethersproject/bignumber';
 import { Zero } from '@ethersproject/constants';
 
 import { useWeb3 } from './useWeb3';
 import useRewardsController from './useRewardsController';
-import AccountDataContext from 'contexts/AccountDataContext';
 import handleOperationError from 'utils/handleOperationError';
 import { Previewer } from 'types/contracts';
+import useAccountData from './useAccountData';
 
 type Rewards = Record<string, BigNumber>;
 type Rates = Record<string, Previewer.RewardRateStructOutput[]>;
@@ -14,14 +14,14 @@ type Rates = Record<string, Previewer.RewardRateStructOutput[]>;
 export default () => {
   const { walletAddress } = useWeb3();
   const RewardsController = useRewardsController();
-  const { accountData, getAccountData } = useContext(AccountDataContext);
+  const { accountData, refreshAccountData } = useAccountData();
 
   const [isLoading, setIsLoading] = useState(false);
 
   const rewards = useMemo<Rewards>(() => {
     if (!accountData) return {};
 
-    return Object.values(accountData)
+    return accountData
       .flatMap(({ claimableRewards }) => claimableRewards)
       .reduce((acc, { assetSymbol, amount }) => {
         acc[assetSymbol] = acc[assetSymbol] ? acc[assetSymbol].add(amount) : amount;
@@ -41,19 +41,17 @@ export default () => {
       const tx = await RewardsController.claimAll(walletAddress);
       await tx.wait();
 
-      await getAccountData();
+      await refreshAccountData();
     } catch (e) {
       handleOperationError(e);
     } finally {
       setIsLoading(false);
     }
-  }, [claimable, RewardsController, walletAddress, getAccountData]);
+  }, [claimable, RewardsController, walletAddress, refreshAccountData]);
 
   const rates = useMemo<Rates>(() => {
     if (!accountData) return {};
-    return Object.fromEntries(
-      Object.values(accountData).map(({ assetSymbol, rewardRates }) => [assetSymbol, rewardRates]),
-    );
+    return Object.fromEntries(accountData.map(({ assetSymbol, rewardRates }) => [assetSymbol, rewardRates]));
   }, [accountData]);
 
   return { rewards, rates, claimable, claim, isLoading };

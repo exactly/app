@@ -31,11 +31,11 @@ const MaturityPoolInfo: FC<MaturityPoolInfoProps> = ({
   const itemsInfo: ItemInfoProps[] = [
     {
       label: 'Total Deposits',
-      value: totalDeposited != null ? `$${formatNumber(totalDeposited)}` : undefined,
+      value: totalDeposited !== undefined ? `$${formatNumber(totalDeposited)}` : undefined,
     },
     {
       label: 'Total Borrows',
-      value: totalBorrowed != null ? `$${formatNumber(totalBorrowed)}` : undefined,
+      value: totalBorrowed !== undefined ? `$${formatNumber(totalBorrowed)}` : undefined,
     },
     {
       label: 'Best Deposit APR',

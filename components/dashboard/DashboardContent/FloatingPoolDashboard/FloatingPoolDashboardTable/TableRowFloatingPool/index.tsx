@@ -22,7 +22,7 @@ type Props = {
 };
 
 function TableRowFloatingPool({ symbol, valueUSD, exaTokenAmount, type }: Props) {
-  const { decimals } = useAccountData(symbol);
+  const { marketAccount } = useAccountData(symbol);
 
   const { handleActionClick } = useActionButton();
 
@@ -56,7 +56,7 @@ function TableRowFloatingPool({ symbol, valueUSD, exaTokenAmount, type }: Props)
       {type === 'deposit' ? (
         <TableCell align="left" size="small">
           <Typography>
-            {(exaTokenAmount && `${formatNumber(formatFixed(exaTokenAmount, decimals), symbol)}`) || (
+            {(exaTokenAmount && `${formatNumber(formatFixed(exaTokenAmount, marketAccount?.decimals), symbol)}`) || (
               <Skeleton width={40} />
             )}{' '}
           </Typography>

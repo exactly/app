@@ -1,18 +1,16 @@
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { WeiPerEther, Zero } from '@ethersproject/constants';
 import numbers from 'config/numbers.json';
-import AccountDataContext from 'contexts/AccountDataContext';
 import { useOperationContext } from 'contexts/OperationContext';
 import useAccountData from 'hooks/useAccountData';
 import useApprove from 'hooks/useApprove';
 import useHandleOperationError from 'hooks/useHandleOperationError';
 import { useWeb3 } from 'hooks/useWeb3';
-import { useCallback, useContext, useMemo } from 'react';
-import { HealthFactor } from 'types/HealthFactor';
+import { useCallback, useMemo } from 'react';
 import { OperationHook } from 'types/OperationHook';
 import analytics from 'utils/analytics';
 import getBeforeBorrowLimit from 'utils/getBeforeBorrowLimit';
-import getHealthFactorData from 'utils/getHealthFactorData';
+import useHealthFactor from './useHealthFactor';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 
@@ -24,7 +22,6 @@ type Borrow = {
 
 export default (): Borrow => {
   const { walletAddress } = useWeb3();
-  const { accountData, getAccountData } = useContext(AccountDataContext);
 
   const {
     symbol,
@@ -40,14 +37,10 @@ export default (): Borrow => {
     ETHRouterContract,
   } = useOperationContext();
 
+  const { marketAccount, accountData, refreshAccountData } = useAccountData(symbol);
   const handleOperationError = useHandleOperationError();
 
-  const { decimals = 18 } = useAccountData(symbol);
-  const healthFactor = useMemo<HealthFactor | undefined>(
-    () => (accountData ? getHealthFactorData(accountData) : undefined),
-    [accountData],
-  );
-
+  const healthFactor = useHealthFactor();
   const {
     approve,
     estimateGas: approveEstimateGas,
@@ -56,29 +49,26 @@ export default (): Borrow => {
   } = useApprove('borrow', marketContract, ETHRouterContract?.address);
 
   const maxBorrowAssets: BigNumber = useMemo(
-    () => (accountData ? getBeforeBorrowLimit(accountData[symbol], 'borrow') : Zero),
-    [accountData, symbol],
+    () => (marketAccount ? getBeforeBorrowLimit(marketAccount, 'borrow') : Zero),
+    [marketAccount],
   );
 
   const liquidity = useMemo(() => {
-    if (!accountData) return undefined;
-
-    return accountData[symbol].floatingAvailableAssets;
-  }, [accountData, symbol]);
+    return marketAccount?.floatingAvailableAssets;
+  }, [marketAccount]);
 
   const hasCollateral = useMemo(() => {
-    if (!accountData) return false;
+    if (!accountData || !marketAccount) return false;
 
     return (
       // hasDepositedToFloatingPool
-      accountData[symbol].floatingDepositAssets.gt(Zero) ||
-      Object.keys(accountData).some((aMarket) => accountData[aMarket].isCollateral)
+      marketAccount.floatingDepositAssets.gt(Zero) || accountData.some((aMarket) => aMarket.isCollateral)
     );
-  }, [accountData, symbol]);
+  }, [accountData, marketAccount]);
 
   const previewGasCost = useCallback(
     async (quantity: string): Promise<BigNumber | undefined> => {
-      if (!walletAddress || !marketContract || !ETHRouterContract || !quantity) return;
+      if (!marketAccount || !walletAddress || !marketContract || !ETHRouterContract || !quantity) return;
 
       const gasPrice = (await ETHRouterContract.provider.getFeeData()).maxFeePerGas;
       if (!gasPrice) return;
@@ -88,7 +78,7 @@ export default (): Borrow => {
         return gasEstimation?.mul(gasPrice);
       }
 
-      if (symbol === 'WETH') {
+      if (marketAccount.assetSymbol === 'WETH') {
         const gasEstimation = await ETHRouterContract.estimateGas.borrow(
           quantity ? parseFixed(quantity, 18) : DEFAULT_AMOUNT,
         );
@@ -96,21 +86,21 @@ export default (): Borrow => {
       }
 
       const gasEstimation = await marketContract.estimateGas.borrow(
-        quantity ? parseFixed(quantity, decimals) : DEFAULT_AMOUNT,
+        quantity ? parseFixed(quantity, marketAccount.decimals) : DEFAULT_AMOUNT,
         walletAddress,
         walletAddress,
       );
       return gasPrice.mul(gasEstimation);
     },
-    [walletAddress, marketContract, ETHRouterContract, requiresApproval, symbol, approveEstimateGas, decimals],
+    [walletAddress, marketContract, ETHRouterContract, requiresApproval, approveEstimateGas, marketAccount],
   );
 
   const isLoading = useMemo(() => isLoadingOp || approveIsLoading, [isLoadingOp, approveIsLoading]);
 
   const safeMaximumBorrow = useMemo((): string => {
-    if (!accountData || !healthFactor) return '';
+    if (!marketAccount || !healthFactor) return '';
 
-    const { adjustFactor, usdPrice, floatingDepositAssets, isCollateral } = accountData[symbol];
+    const { adjustFactor, usdPrice, floatingDepositAssets, isCollateral, decimals } = marketAccount;
 
     let col = healthFactor.collateral;
     const hf = parseFixed('1.05', 18);
@@ -139,7 +129,7 @@ export default (): Borrow => {
         ),
       ),
     ).toFixed(decimals);
-  }, [accountData, healthFactor, symbol, decimals]);
+  }, [marketAccount, healthFactor]);
 
   const onMax = useCallback(() => {
     setQty(safeMaximumBorrow);
@@ -148,9 +138,9 @@ export default (): Borrow => {
 
   const handleInputChange = useCallback(
     (value: string) => {
-      if (!liquidity || !accountData) return;
+      if (!liquidity || !marketAccount) return;
 
-      const { usdPrice } = accountData[symbol];
+      const { usdPrice, decimals } = marketAccount;
 
       setQty(value);
 
@@ -183,14 +173,14 @@ export default (): Borrow => {
       }
       setErrorData(undefined);
     },
-    [liquidity, accountData, symbol, setQty, hasCollateral, setErrorData, decimals, maxBorrowAssets],
+    [liquidity, marketAccount, setQty, hasCollateral, setErrorData, maxBorrowAssets],
   );
 
   const handleBasicInputChange = useCallback(
     (value: string) => {
-      if (!accountData) return;
+      if (!marketAccount) return;
 
-      const { usdPrice } = accountData[symbol];
+      const { usdPrice, decimals } = marketAccount;
 
       setQty(value);
 
@@ -208,17 +198,17 @@ export default (): Borrow => {
       }
       setErrorData(undefined);
     },
-    [accountData, symbol, setQty, maxBorrowAssets, decimals, setErrorData],
+    [marketAccount, setQty, maxBorrowAssets, setErrorData],
   );
 
   const borrow = useCallback(async () => {
-    if (!accountData) return;
+    if (!marketAccount) return;
 
     setIsLoadingOp(true);
     let borrowTx;
 
     try {
-      if (symbol === 'WETH') {
+      if (marketAccount.assetSymbol === 'WETH') {
         if (!ETHRouterContract) return;
 
         const amount = parseFixed(qty, 18);
@@ -229,7 +219,7 @@ export default (): Borrow => {
       } else {
         if (!marketContract || !walletAddress) return;
 
-        const amount = parseFixed(qty, decimals);
+        const amount = parseFixed(qty, marketAccount.decimals);
         const gasEstimation = await marketContract.estimateGas.borrow(amount, walletAddress, walletAddress);
         borrowTx = await marketContract.borrow(amount, walletAddress, walletAddress, {
           gasLimit: gasEstimation.mul(parseFixed(String(numbers.gasLimitMultiplier), 18)).div(WeiPerEther),
@@ -244,11 +234,11 @@ export default (): Borrow => {
 
       void analytics.track(status ? 'borrow' : 'borrowRevert', {
         amount: qty,
-        asset: symbol,
+        asset: marketAccount.assetSymbol,
         hash: transactionHash,
       });
 
-      void getAccountData();
+      await refreshAccountData();
     } catch (error) {
       if (borrowTx?.hash) setTx({ status: 'error', hash: borrowTx.hash });
 
@@ -260,16 +250,14 @@ export default (): Borrow => {
       setIsLoadingOp(false);
     }
   }, [
-    accountData,
+    marketAccount,
     setIsLoadingOp,
-    symbol,
     setTx,
     qty,
-    getAccountData,
+    refreshAccountData,
     ETHRouterContract,
     marketContract,
     walletAddress,
-    decimals,
     setErrorData,
     handleOperationError,
   ]);

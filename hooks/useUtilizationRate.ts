@@ -8,12 +8,14 @@ const MAX = 1;
 const INTERVAL = numbers.chartInterval;
 
 export default function useUtilizationRate(type: 'floating' | 'fixed', symbol: string) {
-  const { floatingUtilization, interestRateModel, fixedPools } = useAccountData(symbol);
+  const { marketAccount } = useAccountData(symbol);
 
   const data = useMemo(() => {
-    if (!interestRateModel) {
+    if (!marketAccount) {
       return [];
     }
+
+    const { interestRateModel } = marketAccount;
 
     const { A, B, UMax } =
       type === 'floating'
@@ -34,12 +36,16 @@ export default function useUtilizationRate(type: 'floating' | 'fixed', symbol: s
       const utilization = i * INTERVAL;
       return { utilization, apr: curve(utilization) };
     });
-  }, [type, interestRateModel]);
+  }, [type, marketAccount]);
 
   const currentUtilization = useMemo(() => {
+    if (!marketAccount) return undefined;
+
+    const { floatingUtilization, fixedPools } = marketAccount;
     if (!floatingUtilization || fixedPools === undefined) {
       return undefined;
     }
+
     const allUtilizations: Record<string, number>[] = [];
 
     if (type === 'fixed') {
@@ -52,7 +58,7 @@ export default function useUtilizationRate(type: 'floating' | 'fixed', symbol: s
       allUtilizations.push({ utilization: Number(floatingUtilization) / 1e18 });
     }
     return allUtilizations;
-  }, [fixedPools, floatingUtilization, type]);
+  }, [marketAccount, type]);
 
-  return { currentUtilization, data, loading: !currentUtilization || !interestRateModel };
+  return { currentUtilization, data, loading: !currentUtilization || !marketAccount };
 }

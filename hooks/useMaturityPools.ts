@@ -1,10 +1,10 @@
 import { formatFixed } from '@ethersproject/bignumber';
 import { WeiPerEther } from '@ethersproject/constants';
-import { useContext, useMemo } from 'react';
+import { useMemo } from 'react';
 
 import formatNumber from 'utils/formatNumber';
 
-import AccountDataContext from 'contexts/AccountDataContext';
+import useAccountData from './useAccountData';
 
 type APRsPerMaturityType = Record<string, { borrow: number; deposit: number }>;
 
@@ -17,11 +17,11 @@ type TableRow = {
 };
 
 export default function useMaturityPools(symbol: string) {
-  const { accountData } = useContext(AccountDataContext);
+  const { marketAccount } = useAccountData(symbol);
   return useMemo(() => {
-    if (!accountData) return [];
+    if (!marketAccount) return [];
 
-    const { fixedPools, usdPrice, decimals } = accountData[symbol];
+    const { fixedPools, usdPrice, decimals } = marketAccount;
 
     const APRsPerMaturity: APRsPerMaturityType = Object.fromEntries(
       fixedPools.map(({ maturity, depositRate, minBorrowRate }) => [
@@ -47,5 +47,5 @@ export default function useMaturityPools(symbol: string) {
     });
 
     return tempRows;
-  }, [accountData, symbol]);
+  }, [marketAccount]);
 }

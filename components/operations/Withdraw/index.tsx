@@ -1,11 +1,10 @@
-import React, { FC, useCallback, useContext, useMemo, useState } from 'react';
+import React, { FC, useCallback, useMemo, useState } from 'react';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 
 import ModalTxCost from 'components/common/modal/ModalTxCost';
 import ModalGif from 'components/common/modal/ModalGif';
 
 import { useWeb3 } from 'hooks/useWeb3';
-import AccountDataContext from 'contexts/AccountDataContext';
 
 import numbers from 'config/numbers.json';
 
@@ -32,7 +31,6 @@ const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 const Withdraw: FC = () => {
   const { operation } = useModalStatus();
   const { walletAddress } = useWeb3();
-  const { accountData, getAccountData } = useContext(AccountDataContext);
 
   const {
     symbol,
@@ -53,15 +51,15 @@ const Withdraw: FC = () => {
 
   const handleOperationError = useHandleOperationError();
 
-  const { decimals = 18 } = useAccountData(symbol);
+  const { marketAccount, refreshAccountData } = useAccountData(symbol);
 
   const [isMax, setIsMax] = useState(false);
 
   const parsedAmount = useMemo(() => {
-    if (!accountData) return '0';
-    const { floatingDepositAssets } = accountData[symbol];
+    if (!marketAccount) return '0';
+    const { floatingDepositAssets, decimals } = marketAccount;
     return formatFixed(floatingDepositAssets, decimals);
-  }, [symbol, accountData, decimals]);
+  }, [marketAccount]);
 
   const {
     approve,
@@ -72,7 +70,7 @@ const Withdraw: FC = () => {
 
   const previewGasCost = useCallback(
     async (quantity: string): Promise<BigNumber | undefined> => {
-      if (!walletAddress || !marketContract || !ETHRouterContract || !accountData || !quantity) return;
+      if (!walletAddress || !marketContract || !ETHRouterContract || !marketAccount || !quantity) return;
 
       const gasPrice = (await ETHRouterContract.provider.getFeeData()).maxFeePerGas;
       if (!gasPrice) return;
@@ -82,28 +80,22 @@ const Withdraw: FC = () => {
         return gasEstimation?.mul(gasPrice);
       }
 
-      const { floatingDepositShares } = accountData[symbol];
-      if (symbol === 'WETH') {
+      const { floatingDepositShares } = marketAccount;
+      if (marketAccount.assetSymbol === 'WETH') {
         const amount = isMax ? floatingDepositShares : quantity ? parseFixed(quantity, 18) : DEFAULT_AMOUNT;
         const gasEstimation = await ETHRouterContract.estimateGas.redeem(amount);
         return gasPrice.mul(gasEstimation);
       }
 
-      const amount = isMax ? floatingDepositShares : quantity ? parseFixed(quantity, decimals) : DEFAULT_AMOUNT;
+      const amount = isMax
+        ? floatingDepositShares
+        : quantity
+        ? parseFixed(quantity, marketAccount.decimals)
+        : DEFAULT_AMOUNT;
       const gasEstimation = await marketContract.estimateGas.redeem(amount, walletAddress, walletAddress);
       return gasPrice.mul(gasEstimation);
     },
-    [
-      ETHRouterContract,
-      accountData,
-      approveEstimateGas,
-      isMax,
-      marketContract,
-      requiresApproval,
-      symbol,
-      walletAddress,
-      decimals,
-    ],
+    [ETHRouterContract, marketAccount, approveEstimateGas, isMax, marketContract, requiresApproval, walletAddress],
   );
 
   const { isLoading: previewIsLoading } = usePreviewTx({ qty, needsApproval, previewGasCost });
@@ -136,14 +128,14 @@ const Withdraw: FC = () => {
   );
 
   const withdraw = useCallback(async () => {
-    if (!accountData || !walletAddress || !marketContract) return;
+    if (!marketAccount || !walletAddress || !marketContract) return;
 
     let withdrawTx;
     try {
       setIsLoadingOp(true);
-      const { floatingDepositShares } = accountData[symbol];
+      const { floatingDepositShares, decimals } = marketAccount;
 
-      if (symbol === 'WETH') {
+      if (marketAccount.assetSymbol === 'WETH') {
         if (!ETHRouterContract) return;
 
         if (isMax) {
@@ -189,11 +181,11 @@ const Withdraw: FC = () => {
 
       void analytics.track(status ? 'withdraw' : 'withdrawRevert', {
         amount: qty,
-        asset: symbol,
+        asset: marketAccount.assetSymbol,
         hash: transactionHash,
       });
 
-      void getAccountData();
+      await refreshAccountData();
     } catch (error) {
       if (withdrawTx) setTx({ status: 'error', hash: withdrawTx?.hash });
       setErrorData({ status: true, message: handleOperationError(error) });
@@ -201,17 +193,15 @@ const Withdraw: FC = () => {
       setIsLoadingOp(false);
     }
   }, [
-    accountData,
+    marketAccount,
     walletAddress,
     marketContract,
     setIsLoadingOp,
-    symbol,
     setTx,
     qty,
-    getAccountData,
+    refreshAccountData,
     ETHRouterContract,
     isMax,
-    decimals,
     setErrorData,
     handleOperationError,
   ]);
@@ -242,7 +232,7 @@ const Withdraw: FC = () => {
             <AssetInput
               qty={qty}
               symbol={symbol}
-              decimals={decimals}
+              decimals={marketAccount?.decimals ?? 18}
               onMax={onMax}
               onChange={handleInputChange}
               label="Available"
@@ -277,7 +267,7 @@ const Withdraw: FC = () => {
       <Grid item mt={{ xs: 2, sm: 3 }}>
         <ModalSubmit
           label="Withdraw"
-          symbol={symbol === 'WETH' && accountData ? accountData[symbol].symbol : symbol}
+          symbol={symbol === 'WETH' && marketAccount ? marketAccount.symbol : symbol}
           submit={handleSubmitAction}
           isLoading={isLoading}
           disabled={!qty || parseFloat(qty) <= 0 || isLoading || errorData?.status}

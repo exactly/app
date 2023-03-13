@@ -24,7 +24,7 @@ const Deposit: FC = () => {
   const { symbol, errorData, qty, gasCost, tx, requiresApproval, assetContract } = useOperationContext();
   const { isLoading, onMax, handleInputChange, handleSubmitAction, deposit, needsApproval, previewGasCost } =
     useDeposit();
-  const { decimals = 18 } = useAccountData(symbol);
+  const { marketAccount } = useAccountData(symbol);
   const walletBalance = useBalance(symbol, assetContract);
 
   const { isLoading: previewIsLoading } = usePreviewTx({ qty, needsApproval, previewGasCost });
@@ -39,7 +39,7 @@ const Deposit: FC = () => {
             <AssetInput
               qty={qty}
               symbol={symbol}
-              decimals={decimals}
+              decimals={marketAccount?.decimals ?? 18}
               onMax={onMax}
               onChange={handleInputChange}
               label="Your balance"

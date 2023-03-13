@@ -1,41 +1,41 @@
-import { useCallback, useContext, useEffect, useState } from 'react';
-import AccountDataContext from 'contexts/AccountDataContext';
+import { useMemo } from 'react';
+import useAccountData from './useAccountData';
 
 type YieldRates = {
   maturity: number;
   [key: string]: number;
 };
 
-export default function useYieldRates(symbol?: string) {
-  const { accountData } = useContext(AccountDataContext);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [depositsRates, setDepositsRates] = useState<YieldRates[]>([]);
-  const [borrowsRates, setBorrowsRates] = useState<YieldRates[]>([]);
+export default function useYieldRates(symbol: string) {
+  const { accountData, getMarketAccount } = useAccountData();
 
-  const getYields = useCallback(() => {
-    if (!accountData) return;
-    setLoading(true);
+  const { loading, depositsRates, borrowsRates } = useMemo<{
+    loading: boolean;
+    depositsRates: YieldRates[];
+    borrowsRates: YieldRates[];
+  }>(() => {
+    if (!accountData || !getMarketAccount(symbol)) return { loading: true, depositsRates: [], borrowsRates: [] };
 
-    const depositRates: YieldRates[] = [];
-    const borrowRates: YieldRates[] = [];
+    const dRates: YieldRates[] = [];
+    const bRates: YieldRates[] = [];
 
-    Object.values(accountData).forEach(({ fixedPools, assetSymbol }) => {
+    accountData.forEach(({ fixedPools, assetSymbol }) => {
       Object.values(
         fixedPools.map(({ maturity, depositRate, minBorrowRate }) => {
-          const depositIndex = depositRates.findIndex((deposit) => deposit.maturity === maturity.toNumber());
+          const depositIndex = dRates.findIndex((deposit) => deposit.maturity === maturity.toNumber());
           if (depositIndex > -1) {
-            depositRates[depositIndex][assetSymbol] = Number(depositRate.toBigInt()) / 1e18;
+            dRates[depositIndex][assetSymbol] = Number(depositRate.toBigInt()) / 1e18;
           } else {
-            depositRates.push({
+            dRates.push({
               maturity: maturity.toNumber(),
               [assetSymbol]: Number(depositRate.toBigInt()) / 1e18,
             });
           }
-          const borrowIndex = borrowRates.findIndex((deposit) => deposit.maturity === maturity.toNumber());
+          const borrowIndex = bRates.findIndex((deposit) => deposit.maturity === maturity.toNumber());
           if (borrowIndex > -1) {
-            borrowRates[borrowIndex][assetSymbol] = Number(minBorrowRate.toBigInt()) / 1e18;
+            bRates[borrowIndex][assetSymbol] = Number(minBorrowRate.toBigInt()) / 1e18;
           } else {
-            borrowRates.push({
+            bRates.push({
               maturity: maturity.toNumber(),
               [assetSymbol]: Number(minBorrowRate.toBigInt()) / 1e18,
             });
@@ -46,11 +46,11 @@ export default function useYieldRates(symbol?: string) {
 
     const assetsWithPositiveRates = [
       ...new Set(
-        depositRates.flatMap((yieldRate) => [symbol, ...Object.keys(yieldRate).filter((key) => yieldRate[key] > 0)]),
+        dRates.flatMap((yieldRate) => [symbol, ...Object.keys(yieldRate).filter((key) => yieldRate[key] > 0)]),
       ),
     ];
 
-    const positiveDepositRates = depositRates.map((deposit) =>
+    const positiveDepositRates = dRates.map((deposit) =>
       Object.keys(deposit)
         .filter((key) => assetsWithPositiveRates.includes(key))
         .reduce((obj, key) => {
@@ -59,15 +59,8 @@ export default function useYieldRates(symbol?: string) {
         }, {} as YieldRates),
     );
 
-    setDepositsRates(positiveDepositRates);
-    setBorrowsRates(borrowRates);
-
-    setLoading(false);
-  }, [accountData, symbol]);
-
-  useEffect(() => {
-    void getYields();
-  }, [getYields]);
+    return { depositsRates: positiveDepositRates, borrowsRates: bRates, loading: false };
+  }, [accountData, getMarketAccount, symbol]);
 
   return { loading, depositsRates, borrowsRates };
 }

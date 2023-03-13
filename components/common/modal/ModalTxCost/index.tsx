@@ -1,23 +1,23 @@
-import React, { useContext, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { BigNumber, formatFixed } from '@ethersproject/bignumber';
 import { Typography, Skeleton, Box } from '@mui/material';
 
-import AccountDataContext from 'contexts/AccountDataContext';
 import { WeiPerEther } from '@ethersproject/constants';
 import ModalInfo from '../ModalInfo';
+import useAccountData from 'hooks/useAccountData';
 
 type Props = {
   gasCost?: BigNumber;
 };
 
 function ModalTxCost({ gasCost }: Props) {
-  const { accountData } = useContext(AccountDataContext);
+  const { marketAccount } = useAccountData('WETH');
 
   const renderGas = useMemo(() => {
-    if (!gasCost || !accountData) return <Skeleton width={100} />;
+    if (!gasCost || !marketAccount) return <Skeleton width={100} />;
 
     const eth = parseFloat(formatFixed(gasCost, 18)).toFixed(6);
-    const usd = parseFloat(formatFixed(gasCost.mul(accountData.WETH.usdPrice).div(WeiPerEther), 18)).toFixed(2);
+    const usd = parseFloat(formatFixed(gasCost.mul(marketAccount.usdPrice).div(WeiPerEther), 18)).toFixed(2);
 
     return (
       <Box display="flex" gap={0.5}>
@@ -25,7 +25,7 @@ function ModalTxCost({ gasCost }: Props) {
         <Typography variant="modalRow" color="figma.grey.600">{`(${eth} ETH)`}</Typography>
       </Box>
     );
-  }, [gasCost, accountData]);
+  }, [gasCost, marketAccount]);
 
   return (
     <ModalInfo label="TX Cost" variant="row">

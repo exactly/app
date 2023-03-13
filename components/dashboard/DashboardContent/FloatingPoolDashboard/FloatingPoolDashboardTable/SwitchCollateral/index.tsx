@@ -1,46 +1,39 @@
-import React, { useCallback, useContext, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { CircularProgress, Tooltip, Typography } from '@mui/material';
 import { WeiPerEther } from '@ethersproject/constants';
 
 import StyledSwitch from 'components/Switch';
-import AccountDataContext from 'contexts/AccountDataContext';
 import parseHealthFactor from 'utils/parseHealthFactor';
-import { HealthFactor } from 'types/HealthFactor';
 import useAuditor from 'hooks/useAuditor';
-import getHealthFactorData from 'utils/getHealthFactorData';
 import handleOperationError from 'utils/handleOperationError';
 import { useNetwork } from 'wagmi';
 import { useNetworkContext } from 'contexts/NetworkContext';
+import useHealthFactor from 'hooks/useHealthFactor';
+import useAccountData from 'hooks/useAccountData';
 
 type Props = {
   symbol: string;
 };
 
 function SwitchCollateral({ symbol }: Props) {
-  const { accountData, getAccountData } = useContext(AccountDataContext);
+  const { marketAccount, refreshAccountData } = useAccountData(symbol);
   const auditor = useAuditor();
   const { chain } = useNetwork();
   const { displayNetwork } = useNetworkContext();
 
-  const healthFactor = useMemo<HealthFactor | undefined>(() => {
-    if (!accountData) return undefined;
-    return getHealthFactorData(accountData);
-  }, [accountData]);
+  const healthFactor = useHealthFactor();
 
-  const checked = useMemo<boolean>(() => {
-    if (!accountData) return false;
-    return accountData[symbol].isCollateral;
-  }, [accountData, symbol]);
+  const checked = useMemo<boolean>(() => Boolean(marketAccount?.isCollateral), [marketAccount]);
 
   const { disabled, disabledText } = useMemo<{ disabled: boolean; disabledText?: string }>(() => {
-    if (!accountData || !healthFactor) return { disabled: true };
+    if (!marketAccount || !healthFactor) return { disabled: true };
 
     if (chain && displayNetwork.id !== chain.id) {
       return { disabled: true, disabledText: 'You are connected to a different network' };
     }
 
     const { floatingBorrowAssets, fixedBorrowPositions, isCollateral, usdPrice, floatingDepositAssets, adjustFactor } =
-      accountData[symbol];
+      marketAccount;
 
     if (!floatingBorrowAssets.isZero() || fixedBorrowPositions.length > 0) {
       return {
@@ -62,26 +55,26 @@ function SwitchCollateral({ symbol }: Props) {
     }
 
     return { disabled: false };
-  }, [accountData, healthFactor, symbol, chain, displayNetwork]);
+  }, [marketAccount, healthFactor, chain, displayNetwork.id]);
 
   const [loading, setLoading] = useState<boolean>(false);
 
   const onToggle = useCallback(async () => {
-    if (!accountData || !auditor) return;
-    const { market } = accountData[symbol];
+    if (!marketAccount || !auditor) return;
+    const { market } = marketAccount;
 
     setLoading(true);
     try {
       const tx = await (checked ? auditor.exitMarket(market) : auditor.enterMarket(market));
       await tx.wait();
 
-      await getAccountData();
+      await refreshAccountData();
     } catch (error) {
       handleOperationError(error);
     } finally {
       setLoading(false);
     }
-  }, [accountData, auditor, symbol, checked, getAccountData]);
+  }, [marketAccount, auditor, checked, refreshAccountData]);
 
   if (loading) return <CircularProgress color="primary" size={24} thickness={8} sx={{ ml: '7px' }} />;
 

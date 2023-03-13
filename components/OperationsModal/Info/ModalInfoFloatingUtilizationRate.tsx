@@ -16,10 +16,11 @@ type Props = {
 };
 
 function ModalInfoFloatingUtilizationRate({ qty, symbol, operation, variant = 'column' }: Props) {
-  const { totalFloatingDepositAssets, totalFloatingBorrowAssets, decimals } = useAccountData(symbol);
+  const { marketAccount } = useAccountData(symbol);
 
   const [from, to] = useMemo(() => {
-    if (!decimals) return [undefined, undefined];
+    if (!marketAccount) return [undefined, undefined];
+    const { totalFloatingDepositAssets, totalFloatingBorrowAssets, decimals } = marketAccount;
     try {
       let deposited = totalFloatingDepositAssets ?? Zero;
       let borrowed = totalFloatingBorrowAssets ?? Zero;
@@ -49,7 +50,7 @@ function ModalInfoFloatingUtilizationRate({ qty, symbol, operation, variant = 'c
     } catch {
       return [undefined, undefined];
     }
-  }, [qty, totalFloatingDepositAssets, totalFloatingBorrowAssets, operation, decimals]);
+  }, [marketAccount, qty, operation]);
 
   return (
     <ModalInfo label="Pool Utilization Rate" icon={PieChartOutlineRoundedIcon} variant={variant}>

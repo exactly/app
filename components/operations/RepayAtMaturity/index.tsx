@@ -7,7 +7,6 @@ import ModalTxCost from 'components/common/modal/ModalTxCost';
 
 import formatNumber from 'utils/formatNumber';
 
-import AccountDataContext from 'contexts/AccountDataContext';
 import { MarketContext } from 'contexts/MarketContext';
 import { useWeb3 } from 'hooks/useWeb3';
 
@@ -40,7 +39,6 @@ const RepayAtMaturity: FC = () => {
   const { operation } = useModalStatus();
   const { walletAddress } = useWeb3();
   const { date } = useContext(MarketContext);
-  const { accountData, getAccountData } = useContext(AccountDataContext);
 
   const {
     symbol,
@@ -68,7 +66,7 @@ const RepayAtMaturity: FC = () => {
   const [penaltyAssets, setPenaltyAssets] = useState(Zero);
   const [positionAssetsAmount, setPositionAssetsAmount] = useState(Zero);
 
-  const { decimals = 18 } = useAccountData(symbol);
+  const { marketAccount, refreshAccountData } = useAccountData(symbol);
 
   const maxAmountToRepay = useMemo(
     () => positionAssetsAmount.add(penaltyAssets).mul(slippage).div(WeiPerEther),
@@ -80,22 +78,22 @@ const RepayAtMaturity: FC = () => {
   const isLateRepay = useMemo(() => date && Date.now() / 1000 > date, [date]);
 
   const totalPositionAssets = useMemo(() => {
-    if (!accountData || !date) return Zero;
-    const pool = accountData[symbol].fixedBorrowPositions.find(({ maturity }) => maturity.toNumber() === date);
+    if (!marketAccount || !date) return Zero;
+    const pool = marketAccount.fixedBorrowPositions.find(({ maturity }) => maturity.toNumber() === date);
 
     return pool ? pool.position.principal.add(pool.position.fee) : Zero;
-  }, [date, accountData, symbol]);
+  }, [date, marketAccount]);
 
   const totalPenalties = useMemo(() => {
-    if (!accountData || !date || !isLateRepay) return Zero;
+    if (!marketAccount || !date || !isLateRepay) return Zero;
 
-    const { penaltyRate } = accountData[symbol];
+    const { penaltyRate } = marketAccount;
 
     const currentTimestamp = Math.floor(Date.now() / 1000);
     const penaltyTime = currentTimestamp - date;
 
     return penaltyRate.mul(penaltyTime).mul(totalPositionAssets).div(WeiPerEther);
-  }, [accountData, date, isLateRepay, totalPositionAssets, symbol]);
+  }, [marketAccount, date, isLateRepay, totalPositionAssets]);
 
   const {
     approve,
@@ -106,7 +104,7 @@ const RepayAtMaturity: FC = () => {
 
   const previewGasCost = useCallback(
     async (quantity: string): Promise<BigNumber | undefined> => {
-      if (!walletAddress || !ETHRouterContract || !marketContract || !date || !quantity) return;
+      if (!marketAccount || !walletAddress || !ETHRouterContract || !marketContract || !date || !quantity) return;
 
       const gasPrice = (await ETHRouterContract.provider.getFeeData()).maxFeePerGas;
       if (!gasPrice) return;
@@ -119,7 +117,7 @@ const RepayAtMaturity: FC = () => {
       const amount = positionAssetsAmount.isZero() ? DEFAULT_AMOUNT : positionAssetsAmount;
       const maxAmount = maxAmountToRepay.isZero() ? DEFAULT_AMOUNT.mul(slippage).div(WeiPerEther) : maxAmountToRepay;
 
-      if (symbol === 'WETH') {
+      if (marketAccount.assetSymbol === 'WETH') {
         const gasLimit = await ETHRouterContract.estimateGas.repayAtMaturity(date, amount, {
           value: maxAmount,
         });
@@ -132,6 +130,7 @@ const RepayAtMaturity: FC = () => {
       return gasPrice.mul(gasLimit);
     },
     [
+      marketAccount,
       walletAddress,
       ETHRouterContract,
       marketContract,
@@ -140,7 +139,6 @@ const RepayAtMaturity: FC = () => {
       positionAssetsAmount,
       maxAmountToRepay,
       slippage,
-      symbol,
       approveEstimateGas,
     ],
   );
@@ -153,6 +151,8 @@ const RepayAtMaturity: FC = () => {
   );
 
   const onMax = useCallback(() => {
+    if (!marketAccount) return;
+    const { decimals } = marketAccount;
     setPenaltyAssets(totalPenalties);
     setPositionAssetsAmount(totalPositionAssets);
     setQty(formatFixed(totalPositionAssets.add(totalPenalties), decimals));
@@ -161,10 +161,13 @@ const RepayAtMaturity: FC = () => {
       return setErrorData({ status: true, message: 'Insufficient balance' });
 
     setErrorData(undefined);
-  }, [totalPenalties, totalPositionAssets, setQty, decimals, walletBalance, setErrorData]);
+  }, [marketAccount, totalPenalties, totalPositionAssets, setQty, walletBalance, setErrorData]);
 
   const handleInputChange = useCallback(
     (value: string) => {
+      if (!marketAccount) return;
+      const { decimals } = marketAccount;
+
       setQty(value);
 
       const input = parseFixed(value || '0', decimals);
@@ -187,17 +190,17 @@ const RepayAtMaturity: FC = () => {
 
       setErrorData(undefined);
     },
-    [setQty, decimals, totalPositionAssets, totalPenalties, walletBalance, setErrorData],
+    [marketAccount, setQty, totalPositionAssets, totalPenalties, walletBalance, setErrorData],
   );
 
   const repay = useCallback(async () => {
-    if (!accountData || !date || !ETHRouterContract || !qty || !marketContract || !walletAddress) return;
+    if (!marketAccount || !date || !ETHRouterContract || !qty || !marketContract || !walletAddress) return;
 
     let repayTx;
     try {
       setIsLoadingOp(true);
 
-      if (symbol === 'WETH') {
+      if (marketAccount.assetSymbol === 'WETH') {
         const gasEstimation = await ETHRouterContract.estimateGas.repayAtMaturity(date, positionAssetsAmount, {
           value: maxAmountToRepay,
         });
@@ -227,12 +230,12 @@ const RepayAtMaturity: FC = () => {
 
       void analytics.track(status ? 'repayAtMaturity' : 'repayAtMaturityRevert', {
         amount: qty,
-        asset: symbol,
+        asset: marketAccount.assetSymbol,
         maturity: date,
         hash: transactionHash,
       });
 
-      void getAccountData();
+      await refreshAccountData();
     } catch (error) {
       if (repayTx) setTx({ status: 'error', hash: repayTx?.hash });
       setErrorData({ status: true, message: handleOperationError(error) });
@@ -240,10 +243,10 @@ const RepayAtMaturity: FC = () => {
       setIsLoadingOp(false);
     }
   }, [
+    marketAccount,
     ETHRouterContract,
-    accountData,
     date,
-    getAccountData,
+    refreshAccountData,
     handleOperationError,
     marketContract,
     maxAmountToRepay,
@@ -252,7 +255,6 @@ const RepayAtMaturity: FC = () => {
     setErrorData,
     setIsLoadingOp,
     setTx,
-    symbol,
     walletAddress,
   ]);
 
@@ -274,6 +276,8 @@ const RepayAtMaturity: FC = () => {
   }, [approve, date, isLoading, needsApproval, qty, repay, requiresApproval, setRequiresApproval, symbol]);
 
   if (tx) return <ModalGif tx={tx} tryAgain={repay} />;
+
+  const decimals = marketAccount?.decimals ?? 18;
 
   return (
     <Grid container flexDirection="column">

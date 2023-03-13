@@ -1,15 +1,15 @@
-import AccountDataContext from 'contexts/AccountDataContext';
-import { useContext, useMemo } from 'react';
+import { useMemo } from 'react';
 import { FixedPool } from 'types/FixedPool';
+import useAccountData from './useAccountData';
 
 export default () => {
-  const { accountData } = useContext(AccountDataContext);
+  const { accountData } = useAccountData();
 
   const fixedPools = useMemo(() => {
     if (!accountData) return { deposits: undefined, borrows: undefined };
     const data: Record<string, FixedPool> = {};
 
-    Object.values(accountData).forEach((asset) => {
+    accountData.forEach((asset) => {
       asset.fixedDepositPositions.forEach((pool) => {
         const date = pool.maturity.toNumber();
         data.deposits = data.deposits ?? {};
