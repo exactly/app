@@ -30,20 +30,22 @@ const NetworkContext = createContext<ContextValues | null>(null);
 export const NetworkContextProvider: FC<PropsWithChildren> = ({ children }) => {
   const { pathname } = useRouter();
   const { chain } = useNetwork();
-  const [displayNetwork, setDisplayNetwork] = useState<Chain>(defaultChain ?? wagmiChains.mainnet);
   const first = useRef(true);
+  const [displayNetwork, setDisplayNetwork] = useState<Chain>(() => {
+    const n = getQueryParam('n');
+    const queryChain = typeof n === 'string' ? wagmiChains[n as keyof typeof wagmiChains] : undefined;
+    if (isSupported(queryChain?.id) && queryChain) {
+      return queryChain;
+    }
+
+    return defaultChain ?? wagmiChains.mainnet;
+  });
   const previousChain = usePreviousValue(chain);
 
   useEffect(() => {
     if (first.current) {
-      // HACK: Follow the url for 3s
-      setTimeout(() => (first.current = false), 3000);
-
-      const n = getQueryParam('n');
-      const queryChain = typeof n === 'string' ? wagmiChains[n as keyof typeof wagmiChains] : undefined;
-      if (isSupported(queryChain?.id) && queryChain) {
-        return setDisplayNetwork(queryChain);
-      }
+      first.current = false;
+      return;
     }
 
     if (previousChain && chain && isSupported(chain.id) && previousChain.id !== chain.id) {
@@ -65,7 +67,7 @@ export const NetworkContextProvider: FC<PropsWithChildren> = ({ children }) => {
     setDisplayNetwork,
   };
 
-  return <NetworkContext.Provider value={value}>{children}</NetworkContext.Provider>;
+  return <NetworkContext.Provider value={value}>{first.current ? null : children}</NetworkContext.Provider>;
 };
 
 export function useNetworkContext() {
