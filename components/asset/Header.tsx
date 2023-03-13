@@ -95,7 +95,7 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
       {
         label: 'Oracle Price',
         value: `$${formatNumber(formatFixed(usdPrice, 18), '', true)}`,
-        tooltipTitle: 'The oracle price displayed here is obtained from Chainlink.',
+        tooltipTitle: 'The price displayed here is obtained from Chainlink.',
       },
     ];
   }, [fixedBorrows, fixedDeposits, floatingBorrows, floatingDeposits, accountData, symbol]);
