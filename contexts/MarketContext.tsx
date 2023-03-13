@@ -1,5 +1,6 @@
 import React, { type FC, useMemo, createContext, useEffect, useState, type PropsWithChildren } from 'react';
 import dayjs from 'dayjs';
+import { useWeb3 } from 'hooks/useWeb3';
 
 type ContextValues = {
   marketSymbol: string | undefined;
@@ -26,8 +27,9 @@ const defaultValues: ContextValues = {
 const MarketContext = createContext<ContextValues>(defaultValues);
 
 const MarketProvider: FC<PropsWithChildren> = ({ children }) => {
+  const { chain } = useWeb3();
   const [view, setView] = useState<MarketView>();
-  const [marketSymbol, setMarketSymbol] = useState<string>();
+  const [marketSymbol, setMarketSymbol] = useState<string>('USDC');
   const [date, setDate] = useState<number>();
 
   const dates = useMemo<number[]>(() => {
@@ -55,6 +57,10 @@ const MarketProvider: FC<PropsWithChildren> = ({ children }) => {
   useEffect(() => {
     setView((localStorage.getItem('marketView') as MarketView) || 'simple');
   }, [setView]);
+
+  useEffect(() => {
+    setMarketSymbol('USDC');
+  }, [chain.id]);
 
   const setViewLocalStorage = (newView: MarketView) => {
     localStorage.setItem('marketView', newView);
