@@ -61,7 +61,7 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
 
   const itemsInfo: ItemInfoProps[] = useMemo((): ItemInfoProps[] => {
     if (!accountData) return [];
-    const { decimals, adjustFactor } = accountData[symbol];
+    const { decimals, adjustFactor, usdPrice } = accountData[symbol];
     return [
       {
         label: 'Total Deposits',
@@ -91,6 +91,11 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
         value: toPercentage(parseFloat(formatFixed(adjustFactor, 18))),
         tooltipTitle:
           'The risk-adjusted factor is a measure that helps evaluate how risky an asset is compared to others. The higher the number, the safer the asset is considered to be, making it more valuable as collateral when requesting a loan.',
+      },
+      {
+        label: 'Oracle Price',
+        value: `$${formatNumber(formatFixed(usdPrice, 18), '', true)}`,
+        tooltipTitle: 'The oracle price displayed here is obtained from Chainlink.',
       },
     ];
   }, [fixedBorrows, fixedDeposits, floatingBorrows, floatingDeposits, accountData, symbol]);
