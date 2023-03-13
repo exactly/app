@@ -1,9 +1,10 @@
 import React, { FC } from 'react';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
-import { Skeleton, Tooltip } from '@mui/material';
+import { Box, Skeleton, Tooltip } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
+import InfoOutlined from '@mui/icons-material/InfoOutlined';
 
 export type ItemInfoProps = {
   label: string;
@@ -21,9 +22,12 @@ const ItemInfo: FC<ItemInfoProps> = ({ label, value, underLabel, tooltipTitle, x
   return (
     <Grid item xs={isMobile ? 6 : xs ? xs : 0}>
       <Tooltip title={tooltipTitle} arrow placement="top" sx={{ cursor: tooltipTitle ? 'pointer' : '' }}>
-        <Typography variant="subtitle1" fontSize="10px" color="grey.500" textTransform="uppercase">
-          {label}
-        </Typography>
+        <Box display="flex" gap={0.5}>
+          <Typography variant="subtitle1" fontSize="10px" color="grey.500" textTransform="uppercase">
+            {label}
+          </Typography>
+          {tooltipTitle && <InfoOutlined sx={{ fontSize: '10px', my: 'auto', color: 'figma.grey.500' }} />}
+        </Box>
       </Tooltip>
       {value ? (
         typeof value === 'string' ? (
