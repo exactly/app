@@ -8,9 +8,9 @@ import useHandleOperationError from 'hooks/useHandleOperationError';
 import { useWeb3 } from 'hooks/useWeb3';
 import { useCallback, useMemo } from 'react';
 import { OperationHook } from 'types/OperationHook';
-import analytics from 'utils/analytics';
 import getBeforeBorrowLimit from 'utils/getBeforeBorrowLimit';
 import useHealthFactor from './useHealthFactor';
+import useAnalytics from './useAnalytics';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 
@@ -21,6 +21,7 @@ type Borrow = {
 } & OperationHook;
 
 export default (): Borrow => {
+  const analytics = useAnalytics();
   const { walletAddress } = useWeb3();
 
   const {
@@ -253,6 +254,7 @@ export default (): Borrow => {
     marketAccount,
     setIsLoadingOp,
     setTx,
+    analytics,
     qty,
     refreshAccountData,
     ETHRouterContract,
@@ -276,7 +278,7 @@ export default (): Borrow => {
     });
 
     return borrow();
-  }, [approve, borrow, isLoading, needsApproval, qty, requiresApproval, setRequiresApproval, symbol]);
+  }, [analytics, approve, borrow, isLoading, needsApproval, qty, requiresApproval, setRequiresApproval, symbol]);
 
   return {
     isLoading,
