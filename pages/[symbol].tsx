@@ -8,15 +8,16 @@ import AssetHeaderInfo from 'components/asset/Header';
 
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { Box, IconButton, Tooltip, Typography, Grid } from '@mui/material';
-import analytics from 'utils/analytics';
 import Link from 'next/link';
+import useAnalytics from 'hooks/useAnalytics';
 
 type Props = {
   symbol: string;
 };
 
 const Market: NextPage<Props> = ({ symbol }: Props) => {
-  useEffect(() => void analytics.page(), []);
+  const analytics = useAnalytics();
+  useEffect(() => void analytics.page(), [analytics]);
 
   return (
     <Grid container mt={-1}>

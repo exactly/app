@@ -12,7 +12,6 @@ import { AppBar, Box, Button, Chip, IconButton, Toolbar, useTheme, Typography } 
 import MenuIcon from '@mui/icons-material/Menu';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import { globals } from 'styles/theme';
-import analytics from 'utils/analytics';
 import { useModalStatus } from 'contexts/ModalStatusContext';
 import MobileMenu from 'components/MobileMenu';
 import Link from 'next/link';
@@ -21,6 +20,7 @@ import SelectMarketsView from 'components/SelectMarketsView';
 import { MarketContext } from 'contexts/MarketContext';
 import ClaimRewards from 'components/ClaimRewards';
 import SelectDisplayNetwork from 'components/SelectDisplayNetwork';
+import useAnalytics from 'hooks/useAnalytics';
 const { onlyMobile, onlyDesktop, onlyDesktopFlex } = globals;
 
 const routes: {
@@ -38,6 +38,7 @@ const routes: {
 ];
 
 function Navbar() {
+  const analytics = useAnalytics();
   const { connector } = useClient();
   const { walletAddress } = useWeb3();
   const { pathname: currentPathname } = useRouter();
@@ -56,7 +57,7 @@ function Navbar() {
     setContext('wallet', { connector: connector?.id, name: connector?.name });
     setContext('chain', { id: chain?.id, name: chain?.name, network: chain?.network, testnet: chain?.testnet });
     void analytics.identify(walletAddress);
-  }, [walletAddress, connector, chain]);
+  }, [walletAddress, connector, chain, analytics]);
 
   const handleFaucetClick = useCallback(() => {
     if (chain?.id === goerli.id) return openOperationModal('faucet');

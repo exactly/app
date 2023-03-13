@@ -11,7 +11,7 @@ import usePreviewer from 'hooks/usePreviewer';
 import { useWeb3 } from 'hooks/useWeb3';
 import { useCallback, useContext, useMemo, useState } from 'react';
 import { OperationHook } from 'types/OperationHook';
-import analytics from 'utils/analytics';
+import useAnalytics from './useAnalytics';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 
@@ -26,6 +26,7 @@ type DepositAtMaturity = {
 } & OperationHook;
 
 export default (): DepositAtMaturity => {
+  const analytics = useAnalytics();
   const { walletAddress } = useWeb3();
   const { date } = useContext(MarketContext);
 
@@ -213,12 +214,13 @@ export default (): DepositAtMaturity => {
     ETHRouterContract,
     marketContract,
     walletAddress,
+    setIsLoadingOp,
     slippage,
     setTx,
+    analytics,
     refreshAccountData,
     setErrorData,
     handleOperationError,
-    setIsLoadingOp,
   ]);
 
   const handleSubmitAction = useCallback(async () => {
@@ -235,7 +237,7 @@ export default (): DepositAtMaturity => {
       asset: symbol,
     });
     return deposit();
-  }, [approve, date, deposit, isLoading, needsApproval, qty, requiresApproval, setRequiresApproval, symbol]);
+  }, [analytics, approve, date, deposit, isLoading, needsApproval, qty, requiresApproval, setRequiresApproval, symbol]);
 
   const updateAPR = useCallback(async () => {
     if (!marketAccount || !date || !previewerContract || !marketContract || !depositRate) {
