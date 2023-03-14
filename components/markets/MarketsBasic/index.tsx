@@ -1,5 +1,5 @@
 import React, { FC, useEffect, useMemo } from 'react';
-import { Box, capitalize, Divider, Typography } from '@mui/material';
+import { Box, capitalize, Divider, Tooltip, Typography } from '@mui/material';
 import AssetInput from 'components/OperationsModal/AssetInput';
 import { MarketsBasicOption, useMarketsBasic } from 'contexts/MarketsBasicContext';
 import { useOperationContext } from 'contexts/OperationContext';
@@ -18,6 +18,7 @@ import useDepositAtMaturity from 'hooks/useDepositAtMaturity';
 import useBorrow from 'hooks/useBorrow';
 import useRewards from 'hooks/useRewards';
 import numbers from 'config/numbers.json';
+import InfoOutlined from '@mui/icons-material/InfoOutlined';
 
 const { minAPRValue } = numbers;
 
@@ -126,6 +127,18 @@ const MarketsBasic: FC = () => {
             <Typography variant="cardTitle" sx={{ px: 1 }}>
               {`${capitalize(operation)} duration`}
             </Typography>
+            <Tooltip
+              title={
+                operation === 'deposit'
+                  ? 'Your deposit can be withdrawn at any time, but please keep in mind that if you withdraw it before the maturity date, the current protocol rates will apply.'
+                  : 'You can repay your loan at any time before its maturity date. If you do so after the maturity date, a daily interest of 2% will apply.'
+              }
+              placement="top"
+              arrow
+            >
+              <InfoOutlined sx={{ fontSize: '10px', my: 'auto', color: 'figma.grey.500', cursor: 'pointer' }} />
+            </Tooltip>
+
             <Options
               symbol={symbol}
               allOptions={allOptions}
