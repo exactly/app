@@ -3,6 +3,7 @@ import { WeiPerEther, Zero } from '@ethersproject/constants';
 
 import formatNumber from 'utils/formatNumber';
 import { toPercentage } from 'utils/utils';
+import { formatFixed } from '@ethersproject/bignumber';
 
 import { ItemInfoProps } from 'components/common/ItemInfo';
 import HeaderInfo from 'components/common/HeaderInfo';
@@ -53,26 +54,41 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol }) => {
         value: deposited !== undefined && borrowed !== undefined ? `$${formatNumber(deposited - borrowed)}` : undefined,
       },
       {
-        label: 'Deposit APR',
-        value: depositAPR !== undefined ? toPercentage(depositAPR) : undefined,
-        tooltipTitle: 'Change in the underlying Variable Rate Pool shares value over the last 15 minutes, annualized.',
-      },
-      {
-        label: 'Borrow APR',
-        value: borrowAPR !== undefined ? toPercentage(borrowAPR) : undefined,
-        tooltipTitle: 'Change in the underlying Variable Rate Pool shares value over the last hour, annualized.',
-      },
-      {
         label: 'Utilization Rate',
         value:
           deposited !== undefined && borrowed !== undefined
             ? toPercentage(deposited > 0 ? borrowed / deposited : undefined)
             : undefined,
       },
+      {
+        label: 'Deposit APR',
+        value:
+          depositAPR !== undefined && marketAccount?.assetSymbol ? (
+            <ItemCell key={symbol} value={toPercentage(depositAPR)} symbol={marketAccount.assetSymbol} />
+          ) : undefined,
+        tooltipTitle: 'Change in the underlying Variable Rate Pool shares value over the last 15 minutes, annualized.',
+      },
+      {
+        label: 'Borrow APR',
+        value:
+          borrowAPR !== undefined && marketAccount?.assetSymbol ? (
+            <ItemCell key={symbol} value={toPercentage(borrowAPR)} symbol={marketAccount.assetSymbol} />
+          ) : undefined,
+        tooltipTitle: 'Change in the underlying Variable Rate Pool shares value over the last hour, annualized.',
+      },
+      {
+        label: 'Risk-Adjust Factor',
+        value: marketAccount?.adjustFactor
+          ? toPercentage(parseFloat(formatFixed(marketAccount.adjustFactor, 18)))
+          : undefined,
+        tooltipTitle:
+          'Deposit and Borrow risk-adjusted factor is a measure that helps evaluate how risky an asset is compared to others. The higher the number, the safer the asset is considered to be, making it more valuable as collateral when requesting a loan.',
+      },
+
       ...(rates[symbol] && rates[symbol].some((r) => r.floatingDeposit.gt(Zero))
         ? [
             {
-              label: 'Deposit Rewards',
+              label: 'Deposit Rewards APR',
               value: (
                 <>
                   {rates[symbol].map((r) => (
@@ -91,7 +107,7 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol }) => {
       ...(rates[symbol] && rates[symbol].some((r) => r.borrow.gt(Zero))
         ? [
             {
-              label: 'Borrow Rewards',
+              label: 'Borrow Rewards APR',
               value: (
                 <>
                   {rates[symbol].map((r) => (
@@ -104,7 +120,7 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol }) => {
           ]
         : []),
     ],
-    [deposited, borrowed, depositAPR, borrowAPR, rates, symbol],
+    [deposited, borrowed, depositAPR, marketAccount, symbol, borrowAPR, rates],
   );
 
   return (

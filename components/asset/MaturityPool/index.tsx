@@ -83,6 +83,7 @@ const AssetMaturityPools: FC<Props> = ({ symbol }) => {
             bestDepositRate={bestDeposit && Number(bestDeposit.rate) / 1e18}
             bestBorrowMaturity={bestBorrow && Number(bestBorrow.maturity)}
             bestDepositMaturity={bestDeposit && Number(bestDeposit.maturity)}
+            adjustFactor={marketAccount && marketAccount.adjustFactor}
           />
         </Grid>
         <Grid item xs={12} px="24px" pb="24px" bgcolor="white" mt={-1} display={onlyDesktop}>

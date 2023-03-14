@@ -10,7 +10,6 @@ export type ItemInfoProps = {
   label: string;
   value?: string | React.ReactNode;
   underLabel?: string;
-  statusColot?: string;
   tooltipTitle?: string;
   xs?: number;
 };
