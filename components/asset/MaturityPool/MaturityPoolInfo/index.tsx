@@ -11,6 +11,7 @@ import parseTimestamp from 'utils/parseTimestamp';
 import useRewards from 'hooks/useRewards';
 import { Zero } from '@ethersproject/constants';
 import ItemCell from 'components/common/ItemCell';
+import { BigNumber, formatFixed } from '@ethersproject/bignumber';
 
 type MaturityPoolInfoProps = {
   symbol: string;
@@ -20,6 +21,7 @@ type MaturityPoolInfoProps = {
   bestDepositMaturity?: number;
   bestBorrowRate?: number;
   bestBorrowMaturity?: number;
+  adjustFactor?: BigNumber;
 };
 
 const MaturityPoolInfo: FC<MaturityPoolInfoProps> = ({
@@ -30,6 +32,7 @@ const MaturityPoolInfo: FC<MaturityPoolInfoProps> = ({
   bestDepositMaturity,
   bestBorrowRate,
   bestBorrowMaturity,
+  adjustFactor,
 }) => {
   const { minAPRValue } = numbers;
 
@@ -45,22 +48,44 @@ const MaturityPoolInfo: FC<MaturityPoolInfoProps> = ({
         label: 'Total Borrows',
         value: totalBorrowed != null ? `$${formatNumber(totalBorrowed)}` : undefined,
       },
+      ...(adjustFactor
+        ? [
+            {
+              label: 'Risk-Adjust Factor',
+              value: toPercentage(parseFloat(formatFixed(adjustFactor, 18))),
+              tooltipTitle:
+                'The Borrow risk-adjusted factor is a measure that helps evaluate how risky an asset is compared to others. The higher the number, the safer the asset is considered to be, making it more valuable as collateral when requesting a loan.',
+            },
+          ]
+        : []),
       {
         label: 'Best Deposit APR',
-        value: toPercentage(bestDepositRate && bestDepositRate > minAPRValue ? bestDepositRate : undefined),
+        value: (
+          <ItemCell
+            key={symbol}
+            value={toPercentage(bestDepositRate && bestDepositRate > minAPRValue ? bestDepositRate : undefined)}
+            symbol={bestDepositRate && bestDepositRate > minAPRValue ? symbol : undefined}
+          />
+        ),
         underLabel: bestDepositMaturity ? parseTimestamp(bestDepositMaturity) : undefined,
         tooltipTitle: 'The highest fixed Interest rate for a deposit up to de optimal deposit size.',
       },
       {
         label: 'Best Borrow APR',
-        value: toPercentage(bestBorrowRate && bestBorrowRate > minAPRValue ? bestBorrowRate : undefined),
+        value: (
+          <ItemCell
+            key={symbol}
+            value={toPercentage(bestBorrowRate && bestBorrowRate > minAPRValue ? bestBorrowRate : undefined)}
+            symbol={symbol}
+          />
+        ),
         underLabel: bestBorrowMaturity ? parseTimestamp(bestBorrowMaturity) : undefined,
         tooltipTitle: 'The lowest fixed Borrowing Interest rate (APR) at current utilization levels.',
       },
       ...(rates[symbol] && rates[symbol].some((r) => r.borrow.gt(Zero))
         ? [
             {
-              label: 'Borrow Rewards',
+              label: 'Borrow Rewards APR',
               value: (
                 <>
                   {rates[symbol].map((r) => (
@@ -74,6 +99,7 @@ const MaturityPoolInfo: FC<MaturityPoolInfoProps> = ({
         : []),
     ],
     [
+      adjustFactor,
       bestBorrowMaturity,
       bestBorrowRate,
       bestDepositMaturity,

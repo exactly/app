@@ -3,6 +3,7 @@ import { WeiPerEther, Zero } from '@ethersproject/constants';
 
 import formatNumber from 'utils/formatNumber';
 import { toPercentage } from 'utils/utils';
+import { formatFixed } from '@ethersproject/bignumber';
 
 import { ItemInfoProps } from 'components/common/ItemInfo';
 import HeaderInfo from 'components/common/HeaderInfo';
@@ -24,6 +25,8 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol }) => {
     totalFloatingBorrowAssets: totalBorrowed,
     decimals,
     usdPrice,
+    adjustFactor,
+    assetSymbol,
   } = useAccountData(symbol);
 
   const { rates } = useRewards();
@@ -51,23 +54,33 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol }) => {
         value: deposited != null && borrowed != null ? `$${formatNumber(deposited - borrowed)}` : undefined,
       },
       {
+        label: 'Utilization Rate',
+        value: toPercentage(deposited != null && borrowed != null && deposited > 0 ? borrowed / deposited : undefined),
+      },
+      {
         label: 'Deposit APR',
-        value: toPercentage(depositAPR),
+        value: <ItemCell key={symbol} value={toPercentage(depositAPR)} symbol={assetSymbol} />,
         tooltipTitle: 'Change in the underlying Variable Rate Pool shares value over the last 15 minutes, annualized.',
       },
       {
         label: 'Borrow APR',
-        value: toPercentage(borrowAPR),
+        value: <ItemCell key={symbol} value={toPercentage(borrowAPR)} symbol={assetSymbol} />,
         tooltipTitle: 'Change in the underlying Variable Rate Pool shares value over the last hour, annualized.',
       },
-      {
-        label: 'Utilization Rate',
-        value: toPercentage(deposited != null && borrowed != null && deposited > 0 ? borrowed / deposited : undefined),
-      },
+      ...(adjustFactor
+        ? [
+            {
+              label: 'Risk-Adjust Factor',
+              value: toPercentage(parseFloat(formatFixed(adjustFactor, 18))),
+              tooltipTitle:
+                'Deposit and Borrow risk-adjusted factor is a measure that helps evaluate how risky an asset is compared to others. The higher the number, the safer the asset is considered to be, making it more valuable as collateral when requesting a loan.',
+            },
+          ]
+        : []),
       ...(rates[symbol] && rates[symbol].some((r) => r.floatingDeposit.gt(Zero))
         ? [
             {
-              label: 'Deposit Rewards',
+              label: 'Deposit Rewards APR',
               value: (
                 <>
                   {rates[symbol].map((r) => (
@@ -86,7 +99,7 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol }) => {
       ...(rates[symbol] && rates[symbol].some((r) => r.borrow.gt(Zero))
         ? [
             {
-              label: 'Borrow Rewards',
+              label: 'Borrow Rewards APR',
               value: (
                 <>
                   {rates[symbol].map((r) => (
@@ -99,7 +112,7 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol }) => {
           ]
         : []),
     ],
-    [deposited, borrowed, depositAPR, borrowAPR, rates, symbol],
+    [deposited, borrowed, symbol, depositAPR, assetSymbol, borrowAPR, adjustFactor, rates],
   );
 
   return (
