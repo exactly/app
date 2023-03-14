@@ -123,7 +123,7 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
                       <Tooltip title={getLiquidTokenInfo(symbol)} arrow placement="top">
                         <Box display="flex" flexDirection="column" width="fit-content">
                           <Grid container alignItems="center" gap={1}>
-                            <Typography width="fit-content" lineHeight={1}>
+                            <Typography minWidth={40} lineHeight={1}>
                               {toPercentage(depositAPR && depositAPR > minAPRValue ? depositAPR : undefined)}
                             </Typography>
                             {rateType !== 'fixed'
@@ -148,7 +148,7 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
                       <Tooltip title={getLiquidTokenInfo(symbol)} arrow placement="top">
                         <Box display="flex" flexDirection="column" width="fit-content">
                           <Grid container alignItems="center" gap={1}>
-                            <Typography width="fit-content">
+                            <Typography minWidth={40}>
                               {toPercentage(borrowAPR && borrowAPR > minAPRValue ? borrowAPR : undefined)}
                             </Typography>
                             {rates[symbol]?.map((r) => (
