@@ -12,7 +12,6 @@ import networkData from 'config/networkData.json' assert { type: 'json' };
 import useAccountData from 'hooks/useAccountData';
 import ExplorerMenu from './ExplorerMenu';
 import { Box } from '@mui/material';
-import { toPercentage } from 'utils/utils';
 
 type Props = {
   symbol: string;
@@ -57,7 +56,7 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
   }, [marketAccount]);
 
   const itemsInfo: ItemInfoProps[] = useMemo((): ItemInfoProps[] => {
-    const { decimals, adjustFactor, usdPrice } = marketAccount ?? {};
+    const { decimals, usdPrice } = marketAccount ?? {};
     return [
       {
         label: 'Total Deposits',
@@ -85,12 +84,6 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
                 formatFixed(floatingDeposits.add(fixedDeposits).sub(floatingBorrows.add(fixedBorrows)), decimals),
               )}`
             : undefined,
-      },
-      {
-        label: 'Risk-Adjust Factor',
-        value: adjustFactor ? toPercentage(parseFloat(formatFixed(adjustFactor, 18))) : undefined,
-        tooltipTitle:
-          'The risk-adjusted factor is a measure that helps evaluate how risky an asset is compared to others. The higher the number, the safer the asset is considered to be, making it more valuable as collateral when requesting a loan.',
       },
       {
         label: 'Oracle Price',
