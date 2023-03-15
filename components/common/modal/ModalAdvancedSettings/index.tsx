@@ -1,5 +1,5 @@
 import React, { useState, PropsWithChildren } from 'react';
-import { Button, Grid, Box, Typography, GridProps } from '@mui/material';
+import { Button, Grid, Box, Typography, type GridProps } from '@mui/material';
 import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownRounded';
 import KeyboardArrowRightRoundedIcon from '@mui/icons-material/KeyboardArrowRightRounded';
 

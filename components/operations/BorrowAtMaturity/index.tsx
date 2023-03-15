@@ -22,6 +22,7 @@ import ModalSubmit from 'components/common/modal/ModalSubmit';
 import useAccountData from 'hooks/useAccountData';
 import useBorrowAtMaturity from 'hooks/useBorrowAtMaturity';
 import ModalRewards from 'components/common/modal/ModalRewards';
+import ModalPenaltyRate from 'components/common/modal/ModalPenaltyRate';
 
 const BorrowAtMaturity: FC = () => {
   const { operation } = useModalStatus();
@@ -97,6 +98,7 @@ const BorrowAtMaturity: FC = () => {
       <Grid item mt={2}>
         {errorData?.component !== 'gas' && <ModalTxCost gasCost={gasCost} />}
         <ModalRewards symbol={symbol} operation="borrow" />
+        <ModalPenaltyRate symbol={symbol} />
         <ModalAdvancedSettings>
           <ModalInfoBorrowLimit qty={qty} symbol={symbol} operation={operation} variant="row" />
           <ModalInfoEditableSlippage value={rawSlippage} onChange={(e) => setRawSlippage(e.target.value)} />
