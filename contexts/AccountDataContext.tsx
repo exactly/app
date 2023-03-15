@@ -65,7 +65,7 @@ export const AccountDataProvider: FC<PropsWithChildren> = ({ children }) => {
 
   useDelayedEffect({
     effect: syncAccountData,
-    delay: 250,
+    delay: 500,
   });
 
   useEffect(() => {
