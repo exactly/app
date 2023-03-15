@@ -113,7 +113,7 @@ const DashboardMobile: FC<Props> = ({ type }) => {
                   {maturity ? parseTimestamp(maturity) : <Skeleton width={80} />}
                 </FlexItem>
               </Box>
-              <MaturityLinearProgress maturityDate={maturity} />
+              <MaturityLinearProgress maturityDate={maturity} operation={type} symbol={symbol} />
               <Button
                 variant="outlined"
                 fullWidth
