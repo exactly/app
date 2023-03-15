@@ -100,7 +100,7 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol }) => {
                   ))}
                 </>
               ),
-              tooltipTitle: 'This APR assumes a constant price for the OP tokens and distribution rate.',
+              tooltipTitle: 'This APR assumes a constant price for the OP token and distribution rate.',
             },
           ]
         : []),
@@ -115,7 +115,7 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol }) => {
                   ))}
                 </>
               ),
-              tooltipTitle: 'This APR assumes a constant price for the OP tokens and distribution rate.',
+              tooltipTitle: 'This APR assumes a constant price for the OP token and distribution rate.',
             },
           ]
         : []),
