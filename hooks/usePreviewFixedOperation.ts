@@ -29,7 +29,8 @@ export default (operation: MarketsBasicOperation): PreviewFixedOperation => {
       if (!marketAccount || !previewerContract || !marketContract) return;
 
       if (!qty || parseFloat(qty) === 0) {
-        setOptions([...maturityPools]);
+        if (cancelled()) return;
+        setOptions(maturityPools);
         setLoading(false);
         return;
       }

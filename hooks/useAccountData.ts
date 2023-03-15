@@ -15,6 +15,10 @@ function useAccountData(
   symbol?: string,
 ): Omit<AccountDataHook, 'getMarketAccount'> | Omit<AccountDataHook, 'marketAccount'> {
   const ctx = useContext(AccountDataContext);
+  if (!ctx) {
+    throw new Error('Using AccountDataContext outside of provider');
+  }
+
   const getMarketAccount = useCallback((s: string) => ctx?.accountData?.[s], [ctx]);
   const accountData = useMemo(() => {
     if (!ctx?.accountData) return undefined;
@@ -22,10 +26,6 @@ function useAccountData(
   }, [ctx?.accountData]);
 
   const marketAccount = useMemo(() => (symbol ? ctx?.accountData?.[symbol] : undefined), [ctx?.accountData, symbol]);
-
-  if (!ctx) {
-    throw new Error('Using AccountDataContext outside of provider');
-  }
 
   const mutators = { refreshAccountData: ctx.refreshAccountData, resetAccountData: ctx.resetAccountData };
 
