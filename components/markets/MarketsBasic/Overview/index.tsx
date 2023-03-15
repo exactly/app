@@ -111,7 +111,7 @@ const Overview: FC<Props> = ({ symbol, operation, qty, option }) => {
             Late payment penalty daily rate
           </Typography>
           <Typography fontWeight={700} fontSize={13}>
-            {`${toPercentage(parseFloat(formatFixed(penaltyRate || Zero, 18)) * 86_400)}`}
+            {toPercentage(parseFloat(formatFixed(penaltyRate || Zero, 18)) * 86_400)}
           </Typography>
         </Box>
       )}
