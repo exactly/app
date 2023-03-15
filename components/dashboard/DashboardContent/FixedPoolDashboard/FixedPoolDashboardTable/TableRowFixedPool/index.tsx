@@ -111,7 +111,7 @@ function TableRowFixedPool({ symbol, valueUSD, type, maturityDate, market, decim
         <TableCell align="left" size="small" width={200}>
           <Box width={150}>
             {maturityDate ? (
-              <MaturityLinearProgress maturityDate={maturityDate} />
+              <MaturityLinearProgress maturityDate={maturityDate} operation={type} symbol={symbol} />
             ) : (
               <Skeleton sx={{ margin: 'auto' }} width={150} />
             )}

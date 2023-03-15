@@ -1,9 +1,13 @@
 import React, { useMemo } from 'react';
-import { Box, Typography } from '@mui/material';
+import { Box, Typography, Tooltip } from '@mui/material';
 import LinearProgress, { linearProgressClasses } from '@mui/material/LinearProgress';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { styled, useTheme } from '@mui/material/styles';
+import ReportProblemRoundedIcon from '@mui/icons-material/ReportProblemRounded';
 import daysLeft from 'utils/daysLeft';
+import useAccountData from 'hooks/useAccountData';
+import { toPercentage } from 'utils/utils';
+import { formatFixed } from '@ethersproject/bignumber';
 
 const StyledLinearProgress = styled(LinearProgress, {
   shouldForwardProp: (prop) => prop !== 'barColor',
@@ -19,12 +23,21 @@ const StyledLinearProgress = styled(LinearProgress, {
   },
 }));
 
+const colors = {
+  info: '#008CF4',
+  warning: '#FFA500',
+  error: '#FF1414',
+} as const;
+
 type Props = {
+  symbol: string;
+  operation: 'deposit' | 'borrow';
   maturityDate: number;
 };
 
-function MaturityLinearProgress({ maturityDate }: Props) {
+function MaturityLinearProgress({ symbol, operation, maturityDate }: Props) {
   const { palette } = useTheme();
+  const { marketAccount } = useAccountData(symbol);
   const progress = useMemo(() => {
     const oneHour = 3600;
     const oneDay = oneHour * 24;
@@ -38,29 +51,50 @@ function MaturityLinearProgress({ maturityDate }: Props) {
   const daysToMaturity = useMemo(() => daysLeft(maturityDate), [maturityDate]);
   const isCompleted = progress === 100;
 
+  const { color, Icon } = useMemo(() => {
+    switch (operation) {
+      case 'deposit':
+        if (progress >= 100) {
+          return { color: colors['info'], Icon: CheckCircleIcon };
+        }
+        return { Icon: CheckCircleIcon };
+      case 'borrow':
+        if (progress >= 100) {
+          return { color: colors['error'], Icon: ReportProblemRoundedIcon };
+        } else if (progress > 80) {
+          return { color: colors['warning'] };
+        } else return {};
+    }
+  }, [operation, progress]);
+
+  const tooltip =
+    operation === 'borrow' && marketAccount
+      ? `Late repayment will result in a penalty daily rate of ${toPercentage(
+          parseFloat(formatFixed(marketAccount.penaltyRate, 18)) * 86_400,
+        )}`
+      : '';
+
   return (
-    <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-        {isCompleted ? (
-          <>
-            <Typography variant="subtitle2" color="#008CF4">
-              Completed
-            </Typography>
-            <CheckCircleIcon sx={{ color: '#008CF4', fontSize: '14px' }} />
-          </>
-        ) : (
-          <>
-            <Typography variant="subtitle2">{`${Math.round(progress)}%`}</Typography>
-            <Typography sx={{ fontWeight: 500, fontSize: 11, color: '#94999E' }}>{`${daysToMaturity} left`}</Typography>
-          </>
-        )}
+    <Tooltip title={tooltip} arrow>
+      <Box>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+          {isCompleted ? (
+            <>
+              <Typography variant="subtitle2" color={color}>
+                Completed
+              </Typography>
+              {Icon && <Icon sx={{ color, fontSize: '14px' }} />}
+            </>
+          ) : (
+            <>
+              <Typography variant="subtitle2">{Math.round(progress)}%</Typography>
+              <Typography sx={{ fontWeight: 500, fontSize: 11, color: '#94999E' }}>{daysToMaturity} left</Typography>
+            </>
+          )}
+        </Box>
+        <StyledLinearProgress variant="determinate" value={progress} barColor={color ? color : palette.grey[900]} />
       </Box>
-      <StyledLinearProgress
-        variant="determinate"
-        value={progress}
-        barColor={isCompleted ? '#008CF4' : palette.grey[900]}
-      />
-    </Box>
+    </Tooltip>
   );
 }
 
