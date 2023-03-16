@@ -26,7 +26,7 @@ type DepositAtMaturity = {
 } & OperationHook;
 
 export default (): DepositAtMaturity => {
-  const analytics = useAnalytics();
+  const { track } = useAnalytics();
   const { walletAddress } = useWeb3();
   const { date } = useContext(MarketContext);
 
@@ -193,7 +193,7 @@ export default (): DepositAtMaturity => {
       const { status, transactionHash } = await depositTx.wait();
       setTx({ status: status ? 'success' : 'error', hash: transactionHash });
 
-      void analytics.track(status ? 'depositAtMaturity' : 'depositAtMaturityRevert', {
+      void track(status ? 'depositAtMaturity' : 'depositAtMaturityRevert', {
         amount: qty,
         asset: marketAccount.assetSymbol,
         maturity: date,
@@ -217,7 +217,7 @@ export default (): DepositAtMaturity => {
     setIsLoadingOp,
     slippage,
     setTx,
-    analytics,
+    track,
     refreshAccountData,
     setErrorData,
     handleOperationError,
@@ -231,13 +231,13 @@ export default (): DepositAtMaturity => {
       return;
     }
 
-    void analytics.track('depositAtMaturityRequest', {
+    void track('depositAtMaturityRequest', {
       amount: qty,
       maturity: date,
       asset: symbol,
     });
     return deposit();
-  }, [analytics, approve, date, deposit, isLoading, needsApproval, qty, requiresApproval, setRequiresApproval, symbol]);
+  }, [approve, date, deposit, isLoading, needsApproval, qty, requiresApproval, setRequiresApproval, symbol, track]);
 
   const updateAPR = useCallback(async () => {
     if (!marketAccount || !date || !previewerContract || !marketContract || !depositRate) {

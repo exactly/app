@@ -16,8 +16,8 @@ type Props = {
 };
 
 const Market: NextPage<Props> = ({ symbol }: Props) => {
-  const analytics = useAnalytics();
-  useEffect(() => void analytics.page(), [analytics]);
+  const { page } = useAnalytics();
+  useEffect(() => void page(), [page]);
 
   return (
     <Grid container mt={-1}>

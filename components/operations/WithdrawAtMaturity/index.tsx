@@ -35,7 +35,7 @@ import useAnalytics from 'hooks/useAnalytics';
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 
 const WithdrawAtMaturity: FC = () => {
-  const analytics = useAnalytics();
+  const { track } = useAnalytics();
   const { operation } = useModalStatus();
   const { walletAddress } = useWeb3();
   const { date } = useContext(MarketContext);
@@ -239,7 +239,7 @@ const WithdrawAtMaturity: FC = () => {
 
       setTx({ status: status ? 'success' : 'error', hash: transactionHash });
 
-      void analytics.track(status ? 'withdrawAtMaturity' : 'withdrawAtMaturityRevert', {
+      void track(status ? 'withdrawAtMaturity' : 'withdrawAtMaturityRevert', {
         amount: qty,
         asset: marketAccount.assetSymbol,
         maturity: date,
@@ -261,7 +261,7 @@ const WithdrawAtMaturity: FC = () => {
     qty,
     setIsLoadingOp,
     setTx,
-    analytics,
+    track,
     refreshAccountData,
     ETHRouterContract,
     minAmountToWithdraw,
@@ -277,25 +277,14 @@ const WithdrawAtMaturity: FC = () => {
       return;
     }
 
-    void analytics.track('withdrawAtMaturityRequest', {
+    void track('withdrawAtMaturityRequest', {
       amount: qty,
       maturity: date,
       asset: symbol,
     });
 
     return withdraw();
-  }, [
-    isLoading,
-    requiresApproval,
-    analytics,
-    qty,
-    date,
-    symbol,
-    withdraw,
-    approve,
-    setRequiresApproval,
-    needsApproval,
-  ]);
+  }, [isLoading, requiresApproval, track, qty, date, symbol, withdraw, approve, setRequiresApproval, needsApproval]);
 
   if (tx) return <ModalGif tx={tx} tryAgain={withdraw} />;
 
