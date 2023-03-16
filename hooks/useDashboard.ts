@@ -37,14 +37,13 @@ export default function useDashboard(type: string) {
       },
     );
 
-    return allMarkets.map(
-      ({ assetSymbol, floatingDepositAssets, floatingDepositShares, floatingBorrowAssets, market }) => ({
-        symbol: assetSymbol,
-        exaTokens: floatingDepositShares,
-        valueUSD: getValueInUSD(assetSymbol, isDeposit ? floatingDepositAssets : floatingBorrowAssets),
-        market,
-      }),
-    );
+    return allMarkets.map(({ assetSymbol, floatingDepositAssets, floatingBorrowAssets, market }) => ({
+      symbol: assetSymbol,
+      depositedAmount: floatingDepositAssets,
+      borrowedAmount: floatingBorrowAssets,
+      valueUSD: getValueInUSD(assetSymbol, isDeposit ? floatingDepositAssets : floatingBorrowAssets),
+      market,
+    }));
   }, [accountData, orderAssets, getValueInUSD, isDeposit]);
 
   const fixedDeposits = useMemo(() => {

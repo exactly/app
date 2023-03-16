@@ -25,17 +25,16 @@ function FloatingPoolDashboardTable({ type, rows }: Props) {
         sortKey: 'symbol',
       },
       {
+        title: `${type === 'deposit' ? 'Deposited' : 'Borrowed'} Amount`,
+        key: 'tokenAmount',
+        tooltipTitle: `Amount of tokens ${type === 'deposit' ? 'deposited' : 'borrowed'} in the pool`,
+        align: 'left',
+      },
+      {
         title: 'Value',
         key: 'value',
         align: 'left',
         sortKey: 'valueUSD',
-      },
-      {
-        title: 'exaToken',
-        key: 'exaToken',
-        hidden: type !== 'deposit',
-        tooltipTitle: 'The Exactly voucher token (ERC-4626) for your deposit in the Variable Rate Pool.',
-        align: 'left',
       },
       {
         title: 'Collateral',
@@ -78,12 +77,13 @@ function FloatingPoolDashboardTable({ type, rows }: Props) {
           </TableRow>
         </TableHead>
         <TableBody>
-          {sortData(rows).map(({ symbol, valueUSD, exaTokens }) => (
+          {sortData(rows).map(({ symbol, valueUSD, depositedAmount, borrowedAmount }) => (
             <TableRowFloatingPool
               key={`floating_row_${symbol}_${type}`}
               symbol={symbol}
               valueUSD={valueUSD}
-              exaTokenAmount={exaTokens}
+              depositedAmount={depositedAmount}
+              borrowedAmount={borrowedAmount}
               type={type}
             />
           ))}
