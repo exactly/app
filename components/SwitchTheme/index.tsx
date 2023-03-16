@@ -4,7 +4,7 @@ import { styled } from '@mui/material/styles';
 import Switch from 'components/Switch';
 import { useCustomTheme } from 'contexts/ThemeContext';
 
-const StyledSwitch2 = styled((props: SwitchProps) => (
+const StyledSwitch = styled((props: SwitchProps) => (
   <Switch focusVisibleClassName=".Mui-focusVisible" disableRipple {...props} />
 ))(({ theme }) => ({
   '& .MuiSwitch-switchBase': {
@@ -41,7 +41,7 @@ const StyledSwitch2 = styled((props: SwitchProps) => (
 
 const SwitchTheme: FC = () => {
   const { theme, changeTheme } = useCustomTheme();
-  return <StyledSwitch2 checked={theme === 'light'} onChange={changeTheme} />;
+  return <StyledSwitch checked={theme === 'light'} onChange={changeTheme} />;
 };
 
 export default SwitchTheme;
