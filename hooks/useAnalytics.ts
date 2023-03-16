@@ -1,12 +1,13 @@
 import { useCallback, useMemo } from 'react';
 import { analytics } from 'utils/analytics';
 import { useWeb3 } from './useWeb3';
+import { mainnet } from 'wagmi';
 
 export default () => {
   const { chain } = useWeb3();
 
   const network = useMemo(() => {
-    if (chain.id === 1) return 'mainnet';
+    if (chain.id === mainnet.id) return 'mainnet';
 
     return chain.name;
   }, [chain.id, chain.name]);
