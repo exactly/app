@@ -18,6 +18,7 @@ module.exports = {
   ],
   rules: {
     eqeqeq: ['error', 'always', { null: 'ignore' }],
+    'no-console': 'error',
     '@typescript-eslint/no-shadow': 'error',
     'eslint-comments/no-unused-disable': 'error',
     '@typescript-eslint/no-unused-vars': ['error', { ignoreRestSiblings: true }],
