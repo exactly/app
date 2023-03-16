@@ -19,7 +19,7 @@ type Deposit = {
 } & OperationHook;
 
 export default (): Deposit => {
-  const analytics = useAnalytics();
+  const { track } = useAnalytics();
   const { walletAddress } = useWeb3();
   const { getAccountData } = useContext(AccountDataContext);
 
@@ -150,7 +150,7 @@ export default (): Deposit => {
 
       setTx({ status: status ? 'success' : 'error', hash: transactionHash });
 
-      void analytics.track(status ? 'deposit' : 'depositRevert', {
+      void track(status ? 'deposit' : 'depositRevert', {
         amount: qty,
         asset: symbol,
         hash: transactionHash,
@@ -169,7 +169,7 @@ export default (): Deposit => {
     setIsLoadingOp,
     symbol,
     setTx,
-    analytics,
+    track,
     qty,
     getAccountData,
     ETHRouterContract,
@@ -186,13 +186,13 @@ export default (): Deposit => {
       return;
     }
 
-    void analytics.track('depositRequest', {
+    void track('depositRequest', {
       amount: qty,
       asset: symbol,
     });
 
     return deposit();
-  }, [isLoading, requiresApproval, analytics, qty, symbol, deposit, approve, setRequiresApproval, needsApproval]);
+  }, [isLoading, requiresApproval, track, qty, symbol, deposit, approve, setRequiresApproval, needsApproval]);
 
   return { isLoading, onMax, handleInputChange, handleSubmitAction, needsApproval, previewGasCost, deposit };
 };

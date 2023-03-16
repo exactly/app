@@ -31,7 +31,7 @@ import useAnalytics from 'hooks/useAnalytics';
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 
 function Repay() {
-  const analytics = useAnalytics();
+  const { track } = useAnalytics();
   const { operation } = useModalStatus();
   const { walletAddress } = useWeb3();
   const { accountData, getAccountData } = useContext(AccountDataContext);
@@ -163,7 +163,7 @@ function Repay() {
 
       setTx({ status: status ? 'success' : 'error', hash: transactionHash });
 
-      void analytics.track(status ? 'repay' : 'repayRevert', {
+      void track(status ? 'repay' : 'repayRevert', {
         amount: qty,
         asset: symbol,
         hash: transactionHash,
@@ -184,7 +184,7 @@ function Repay() {
     setIsLoadingOp,
     symbol,
     setTx,
-    analytics,
+    track,
     getAccountData,
     ETHRouterContract,
     isMax,
@@ -244,13 +244,13 @@ function Repay() {
       return;
     }
 
-    void analytics.track('repayRequest', {
+    void track('repayRequest', {
       amount: qty,
       asset: symbol,
     });
 
     return repay();
-  }, [analytics, approve, isLoading, needsApproval, qty, repay, requiresApproval, setRequiresApproval, symbol]);
+  }, [approve, isLoading, needsApproval, qty, repay, requiresApproval, setRequiresApproval, symbol, track]);
 
   if (tx) return <ModalGif tx={tx} tryAgain={repay} />;
 

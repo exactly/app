@@ -30,7 +30,7 @@ type BorrowAtMaturity = {
 } & OperationHook;
 
 export default (): BorrowAtMaturity => {
-  const analytics = useAnalytics();
+  const { track } = useAnalytics();
   const { walletAddress } = useWeb3();
   const { accountData, getAccountData } = useContext(AccountDataContext);
   const { date } = useContext(MarketContext);
@@ -260,7 +260,7 @@ export default (): BorrowAtMaturity => {
       const { status, transactionHash } = await borrowTx.wait();
       setTx({ status: status ? 'success' : 'error', hash: transactionHash });
 
-      void analytics.track(status ? 'borrowAtMaturity' : 'borrowAtMaturityRevert', {
+      void track(status ? 'borrowAtMaturity' : 'borrowAtMaturityRevert', {
         amount: qty,
         asset: symbol,
         maturity: date,
@@ -290,7 +290,7 @@ export default (): BorrowAtMaturity => {
     setErrorData,
     symbol,
     setTx,
-    analytics,
+    track,
     getAccountData,
     ETHRouterContract,
     marketContract,
@@ -334,14 +334,14 @@ export default (): BorrowAtMaturity => {
       return;
     }
 
-    void analytics.track('borrowAtMaturityRequest', {
+    void track('borrowAtMaturityRequest', {
       amount: qty,
       maturity: date,
       asset: symbol,
     });
 
     return borrow();
-  }, [isLoading, requiresApproval, analytics, qty, date, symbol, borrow, approve, setRequiresApproval, needsApproval]);
+  }, [isLoading, requiresApproval, track, qty, date, symbol, borrow, approve, setRequiresApproval, needsApproval]);
 
   return {
     isLoading,

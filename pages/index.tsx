@@ -11,9 +11,9 @@ import { MarketContext } from 'contexts/MarketContext';
 import useAnalytics from 'hooks/useAnalytics';
 
 const Markets: NextPage = () => {
-  const analytics = useAnalytics();
+  const { page } = useAnalytics();
   const { view } = useContext(MarketContext);
-  useEffect(() => void analytics.page(), [analytics]);
+  useEffect(() => void page(), [page]);
 
   if (!view) return null;
 

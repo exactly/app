@@ -38,7 +38,7 @@ const routes: {
 ];
 
 function Navbar() {
-  const analytics = useAnalytics();
+  const { identify } = useAnalytics();
   const { connector } = useClient();
   const { walletAddress } = useWeb3();
   const { pathname: currentPathname } = useRouter();
@@ -56,8 +56,8 @@ function Navbar() {
     setUser({ id: walletAddress });
     setContext('wallet', { connector: connector?.id, name: connector?.name });
     setContext('chain', { id: chain?.id, name: chain?.name, network: chain?.network, testnet: chain?.testnet });
-    void analytics.identify(walletAddress);
-  }, [walletAddress, connector, chain, analytics]);
+    void identify(walletAddress);
+  }, [walletAddress, connector, chain, identify]);
 
   const handleFaucetClick = useCallback(() => {
     if (chain?.id === goerli.id) return openOperationModal('faucet');
