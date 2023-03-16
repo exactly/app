@@ -24,26 +24,26 @@ const DashboardMobile: FC<Props> = ({ type }) => {
 
   return (
     <Box width="100%" display="flex" flexDirection="column" gap={1}>
-      {floatingRows.map(({ symbol, exaTokens, valueUSD }) => (
+      {floatingRows.map(({ symbol, depositedAmount, borrowedAmount, valueUSD }) => (
         <MobileAssetCard key={`dashboard_floating_mobile_${symbol}_${type}`} symbol={symbol} isFloating>
           <>
             <Box display="flex" flexDirection="column" gap={1} width="100%">
+              <FlexItem
+                title={isDeposit ? 'Deposited Amount' : 'Borrowed Amount'}
+                tooltip={`Amount of tokens ${isDeposit ? 'deposited' : 'borrowed'} in the pool.`}
+              >
+                {(depositedAmount &&
+                  borrowedAmount &&
+                  `${formatNumber(
+                    formatFixed(isDeposit ? depositedAmount : borrowedAmount, getMarketAccount(symbol)?.decimals),
+                    symbol,
+                  )}`) || <Skeleton width={40} />}
+              </FlexItem>
               <FlexItem title={isDeposit ? 'Deposited' : 'Debt'}>
                 {(accountData && valueUSD !== undefined && `$${formatNumber(valueUSD, 'USD', true)}`) || (
                   <Skeleton width={40} />
                 )}
               </FlexItem>
-              {isDeposit && (
-                <FlexItem
-                  title="exaToken"
-                  tooltip="The Exactly voucher token (ERC-4626) for your deposit in the Variable Rate Pool."
-                >
-                  {(exaTokens &&
-                    `${formatNumber(formatFixed(exaTokens, getMarketAccount(symbol)?.decimals), symbol)}`) || (
-                    <Skeleton width={40} />
-                  )}
-                </FlexItem>
-              )}
               {isDeposit && (
                 <FlexItem title="Use as collateral">
                   <SwitchCollateral symbol={symbol} />

@@ -18,10 +18,11 @@ type Props = {
   symbol: string;
   type: Extract<Operation, 'deposit' | 'borrow'>;
   valueUSD?: number;
-  exaTokenAmount?: BigNumber;
+  depositedAmount?: BigNumber;
+  borrowedAmount?: BigNumber;
 };
 
-function TableRowFloatingPool({ symbol, valueUSD, exaTokenAmount, type }: Props) {
+function TableRowFloatingPool({ symbol, valueUSD, depositedAmount, borrowedAmount, type }: Props) {
   const { marketAccount } = useAccountData(symbol);
 
   const { handleActionClick } = useActionButton();
@@ -49,22 +50,19 @@ function TableRowFloatingPool({ symbol, valueUSD, exaTokenAmount, type }: Props)
       </Link>
       <TableCell align="left" size="small">
         <Typography>
+          {(depositedAmount &&
+            borrowedAmount &&
+            `${formatNumber(
+              formatFixed(type === 'deposit' ? depositedAmount : borrowedAmount, marketAccount?.decimals),
+              symbol,
+            )}`) || <Skeleton width={40} />}{' '}
+        </Typography>
+      </TableCell>
+      <TableCell align="left" size="small">
+        <Typography>
           {(valueUSD !== undefined && `$${formatNumber(valueUSD, 'USD', true)}`) || <Skeleton width={70} />}
         </Typography>
       </TableCell>
-
-      {type === 'deposit' ? (
-        <TableCell align="left" size="small">
-          <Typography>
-            {(exaTokenAmount && `${formatNumber(formatFixed(exaTokenAmount, marketAccount?.decimals), symbol)}`) || (
-              <Skeleton width={40} />
-            )}{' '}
-          </Typography>
-        </TableCell>
-      ) : (
-        <TableCell align="left" size="small" />
-      )}
-
       {type === 'deposit' ? (
         <TableCell align="left" size="small">
           <SwitchCollateral symbol={symbol} />
