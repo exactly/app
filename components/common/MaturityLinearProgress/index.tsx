@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { Box, Typography } from '@mui/material';
 import LinearProgress, { linearProgressClasses } from '@mui/material/LinearProgress';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import { styled } from '@mui/material/styles';
+import { styled, useTheme } from '@mui/material/styles';
 import daysLeft from 'utils/daysLeft';
 
 const StyledLinearProgress = styled(LinearProgress, {
@@ -24,6 +24,7 @@ type Props = {
 };
 
 function MaturityLinearProgress({ maturityDate }: Props) {
+  const { palette } = useTheme();
   const progress = useMemo(() => {
     const oneHour = 3600;
     const oneDay = oneHour * 24;
@@ -54,7 +55,11 @@ function MaturityLinearProgress({ maturityDate }: Props) {
           </>
         )}
       </Box>
-      <StyledLinearProgress variant="determinate" value={progress} barColor={isCompleted ? '#008CF4' : 'primary'} />
+      <StyledLinearProgress
+        variant="determinate"
+        value={progress}
+        barColor={isCompleted ? '#008CF4' : palette.grey[900]}
+      />
     </Box>
   );
 }

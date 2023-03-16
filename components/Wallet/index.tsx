@@ -56,14 +56,14 @@ function Wallet() {
           px: '10px',
           borderColor: '#CFD3D8',
           '&:hover': {
-            backgroundColor: '#fff',
-            borderColor: '#EDEFF2',
+            backgroundColor: 'components.bg',
+            borderColor: 'figma.grey.100',
             boxShadow: '0px 3px 4px rgba(97, 102, 107, 0.1)',
           },
         }}
       >
         <Avatar alt="Address avatar" src={avatarImgSrc} sx={{ width: 20, height: 20, mr: '5px' }} />
-        <Typography variant="subtitle1" color="#0D0E0F" display={onlyDesktop}>
+        <Typography variant="subtitle1" color="grey.900" display={onlyDesktop}>
           {ens ?? formattedWallet}
         </Typography>
       </Button>
@@ -80,7 +80,7 @@ function Wallet() {
             marginTop: '8px',
             padding: '16px',
             boxShadow: '0px 4px 12px rgba(97, 100, 107, 0.2)',
-            borderRadius: '6px',
+            borderRadius: 16,
             minWidth: '280px',
           },
         }}
@@ -114,6 +114,7 @@ function Wallet() {
               closeMenu();
               disconnect();
             }}
+            sx={{ color: 'grey.700', borderColor: '#CFD3D8' }}
           >
             Disconnect
           </Button>

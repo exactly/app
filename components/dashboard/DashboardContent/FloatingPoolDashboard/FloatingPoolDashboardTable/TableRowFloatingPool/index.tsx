@@ -82,7 +82,7 @@ function TableRowFloatingPool({ symbol, valueUSD, exaTokenAmount, type }: Props)
       <TableCell align="left" width={50} size="small" sx={{ px: 0.5 }}>
         <Button
           variant="outlined"
-          sx={{ backgroundColor: 'white' }}
+          sx={{ backgroundColor: 'components.bg' }}
           onClick={(e) => handleActionClick(e, type === 'deposit' ? 'withdraw' : 'repay', symbol)}
         >
           {type === 'deposit' ? 'Withdraw' : 'Repay'}

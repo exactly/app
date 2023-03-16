@@ -71,7 +71,7 @@ const AssetMaturityPools: FC<Props> = ({ symbol }) => {
         width={'100%'}
         boxShadow="0px 4px 12px rgba(175, 177, 182, 0.2)"
         borderRadius="0px 0px 6px 6px"
-        bgcolor="white"
+        bgcolor="components.bg"
         borderTop="4px solid #008CF4"
       >
         <Grid item xs={12}>
@@ -86,7 +86,7 @@ const AssetMaturityPools: FC<Props> = ({ symbol }) => {
             adjustFactor={accountData && accountData[symbol].adjustFactor}
           />
         </Grid>
-        <Grid item xs={12} px="24px" pb="24px" bgcolor="white" mt={-1} display={onlyDesktop}>
+        <Grid item xs={12} px="24px" pb="24px" bgcolor="components.bg" mt={-1} display={onlyDesktop}>
           <MaturityPoolsTable symbol={symbol} />
         </Grid>
         <Box display={onlyMobile} px="24px" pt={1} width="100%">
@@ -96,7 +96,7 @@ const AssetMaturityPools: FC<Props> = ({ symbol }) => {
       <Box
         boxShadow="0px 4px 12px rgba(175, 177, 182, 0.2)"
         borderRadius="0px 0px 6px 6px"
-        bgcolor="white"
+        bgcolor="components.bg"
         p="16px"
         height={280}
       >
@@ -105,7 +105,7 @@ const AssetMaturityPools: FC<Props> = ({ symbol }) => {
       <Box
         boxShadow="0px 4px 12px rgba(175, 177, 182, 0.2)"
         borderRadius="0px 0px 6px 6px"
-        bgcolor="white"
+        bgcolor="components.bg"
         p="16px"
         height={280}
       >

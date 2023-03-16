@@ -76,7 +76,7 @@ const SelectMarketsView: FC = () => {
             minWidth: { xs: '60px', sm: '110px' },
             borderRadius: '32px',
             bgcolor: 'primary',
-            color: currentPathname === '/' ? 'white' : 'grey.700',
+            color: currentPathname === '/' ? 'white' : '',
             '&:hover': {
               bgcolor: 'primary',
               filter: 'brightness(1.1)',

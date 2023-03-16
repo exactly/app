@@ -62,7 +62,7 @@ const SelectDisplayNetwork: FC = () => {
   return (
     <>
       <LoadingButton
-        loadingIndicator={<CircularProgress sx={{ color: 'white' }} size={16} />}
+        loadingIndicator={<CircularProgress sx={{ color: 'components.bg' }} size={16} />}
         onClick={openMenu}
         sx={{
           pr: '10px',
@@ -100,9 +100,10 @@ const SelectDisplayNetwork: FC = () => {
         }}
         PaperProps={{
           style: {
-            padding: '8px',
+            marginTop: '8px',
+            padding: '0 8px',
             boxShadow: '0px 4px 12px rgba(175, 177, 182, 0.2)',
-            borderRadius: '2px',
+            borderRadius: 16,
             minWidth: '270px',
           },
         }}
@@ -122,7 +123,7 @@ const SelectDisplayNetwork: FC = () => {
               key={`mainnnet_chain_${c.id}`}
               value={c.id}
               onClick={() => onSelectNetwork(c)}
-              sx={{ bgcolor: chain?.id === c.id ? '#F9FAFB' : 'transparent', py: 1 }}
+              sx={{ bgcolor: chain?.id === c.id ? 'markets.advanced' : 'transparent', py: 1, borderRadius: 1 }}
             >
               <Box display="flex" justifyContent="space-between" width="100%">
                 <Box display="flex" gap={1}>
@@ -146,7 +147,7 @@ const SelectDisplayNetwork: FC = () => {
                   key={`testnet_chain_${c.id}`}
                   value={c.id}
                   onClick={() => onSelectNetwork(c)}
-                  sx={{ bgcolor: chain?.id === c.id ? '#F9FAFB' : 'transparent' }}
+                  sx={{ bgcolor: chain?.id === c.id ? 'markets.advanced' : 'transparent', borderRadius: 1 }}
                 >
                   <Box display="flex" justifyContent="space-between" width="100%">
                     <Box display="flex" gap={1}>

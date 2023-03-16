@@ -4,7 +4,6 @@ import TableBody from '@mui/material/TableBody';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
 import TableRowFixedPool from './TableRowFixedPool';
 import { Pool } from 'types/FixedPool';
 import TableHeadCell, { TableHeader } from 'components/common/TableHeadCell';
@@ -65,7 +64,7 @@ function FixedPoolDashboardTable({ type, rows }: Props) {
   }, []);
 
   return (
-    <TableContainer component={Paper}>
+    <TableContainer>
       <Table>
         <TableHead>
           <TableRow>

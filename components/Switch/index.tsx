@@ -21,7 +21,7 @@ const StyledSwitch = styled((props: SwitchProps) => (
         border: 0,
       },
       '&.Mui-disabled + .MuiSwitch-track': {
-        backgroundColor: theme.palette.mode === 'dark' ? theme.palette.grey[50] : theme.palette.grey[300],
+        backgroundColor: theme.palette.mode === 'dark' ? theme.palette.grey[100] : theme.palette.grey[300],
         opacity: 1,
       },
     },
@@ -30,7 +30,7 @@ const StyledSwitch = styled((props: SwitchProps) => (
       border: '6px solid #fff',
     },
     '&.Mui-disabled .MuiSwitch-thumb': {
-      color: theme.palette.mode === 'light' ? 'white' : theme.palette.grey[600],
+      color: theme.palette.mode === 'light' ? theme.palette.components.bg : theme.palette.grey[600],
     },
     '&.Mui-disabled + .MuiSwitch-track': {
       opacity: theme.palette.mode === 'light' ? 0.5 : 0.3,
