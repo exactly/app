@@ -44,7 +44,6 @@ export default (operation: MarketsBasicOperation): PreviewFixedOperation => {
             ? previewerContract.previewDepositAtAllMaturities
             : previewerContract.previewBorrowAtAllMaturities;
         const previewPools = await preview(marketContract.address, initialAssets);
-
         const currentTimestamp = Date.now() / 1000;
 
         const fixedOptions: MarketsBasicOption[] = previewPools.map(({ maturity, assets }) => {

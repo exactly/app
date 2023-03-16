@@ -22,17 +22,20 @@ function Wallet() {
 
   const { walletAddress } = useWeb3();
   const { disconnect } = useDisconnect();
-  const { data: ens } = useEnsName({ address: walletAddress as `0x${string}`, chainId: mainnet.id });
-  const { data: ensAvatar } = useEnsAvatar({ address: walletAddress as `0x${string}`, chainId: mainnet.id });
+  const { data: ens, error: ensError } = useEnsName({ address: walletAddress as `0x${string}`, chainId: mainnet.id });
+  const { data: ensAvatar, error: ensAvatarError } = useEnsAvatar({
+    address: walletAddress as `0x${string}`,
+    chainId: mainnet.id,
+  });
   const { open } = useWeb3Modal();
 
   const formattedWallet = formatWallet(walletAddress);
 
   const avatarImgSrc = useMemo(() => {
     if (!walletAddress) return '';
-    if (ensAvatar) return ensAvatar;
+    if (ensAvatar && !ensAvatarError) return ensAvatar;
     return blockies.create({ seed: walletAddress.toLocaleLowerCase() }).toDataURL();
-  }, [walletAddress, ensAvatar]);
+  }, [walletAddress, ensAvatar, ensAvatarError]);
 
   if (!walletAddress) {
     return (
@@ -69,7 +72,7 @@ function Wallet() {
       >
         <Avatar alt="Address avatar" src={avatarImgSrc} sx={{ width: 20, height: 20, mr: { xs: 0, sm: '5px' } }} />
         <Typography variant="subtitle1" color="grey.900" display={onlyDesktop}>
-          {ens ?? formattedWallet}
+          {ens && !ensError ? ens : formattedWallet}
         </Typography>
       </Button>
       <Menu
@@ -101,7 +104,7 @@ function Wallet() {
         <Box display="flex" flexDirection="column" gap={1}>
           <Avatar alt="Blocky Avatar" src={avatarImgSrc} sx={{ mx: 'auto', width: 40, height: 40 }} />
           <Box display="flex" flexDirection="column" my={1} mx="auto" textAlign="center">
-            {ens && (
+            {ens && !ensError && (
               <Typography variant="h6" lineHeight="16px">
                 {ens}
               </Typography>
