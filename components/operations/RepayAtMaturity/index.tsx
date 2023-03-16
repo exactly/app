@@ -37,7 +37,7 @@ import useAnalytics from 'hooks/useAnalytics';
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 
 const RepayAtMaturity: FC = () => {
-  const analytics = useAnalytics();
+  const { track } = useAnalytics();
   const { operation } = useModalStatus();
   const { walletAddress } = useWeb3();
   const { date } = useContext(MarketContext);
@@ -226,7 +226,7 @@ const RepayAtMaturity: FC = () => {
 
       setTx({ status: status ? 'success' : 'error', hash: transactionHash });
 
-      void analytics.track(status ? 'repayAtMaturity' : 'repayAtMaturityRevert', {
+      void track(status ? 'repayAtMaturity' : 'repayAtMaturityRevert', {
         amount: qty,
         asset: symbol,
         maturity: date,
@@ -243,7 +243,6 @@ const RepayAtMaturity: FC = () => {
   }, [
     ETHRouterContract,
     accountData,
-    analytics,
     date,
     getAccountData,
     handleOperationError,
@@ -255,6 +254,7 @@ const RepayAtMaturity: FC = () => {
     setIsLoadingOp,
     setTx,
     symbol,
+    track,
     walletAddress,
   ]);
 
@@ -266,14 +266,14 @@ const RepayAtMaturity: FC = () => {
       return;
     }
 
-    void analytics.track('repayAtMaturityRequest', {
+    void track('repayAtMaturityRequest', {
       amount: qty,
       maturity: date,
       asset: symbol,
     });
 
     return repay();
-  }, [analytics, approve, date, isLoading, needsApproval, qty, repay, requiresApproval, setRequiresApproval, symbol]);
+  }, [approve, date, isLoading, needsApproval, qty, repay, requiresApproval, setRequiresApproval, symbol, track]);
 
   if (tx) return <ModalGif tx={tx} tryAgain={repay} />;
 

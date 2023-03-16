@@ -9,8 +9,8 @@ import useAnalytics from 'hooks/useAnalytics';
 const DashboardContent = dynamic(() => import('components/dashboard/DashboardContent'));
 
 const DashBoard: NextPage = () => {
-  const analytics = useAnalytics();
-  useEffect(() => void analytics.page(), [analytics]);
+  const { page } = useAnalytics();
+  useEffect(() => void page(), [page]);
 
   return (
     <Grid>
