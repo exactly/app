@@ -21,7 +21,7 @@ type Borrow = {
 } & OperationHook;
 
 export default (): Borrow => {
-  const analytics = useAnalytics();
+  const { track } = useAnalytics();
   const { walletAddress } = useWeb3();
 
   const {
@@ -233,7 +233,7 @@ export default (): Borrow => {
 
       setTx({ status: status ? 'success' : 'error', hash: transactionHash });
 
-      void analytics.track(status ? 'borrow' : 'borrowRevert', {
+      void track(status ? 'borrow' : 'borrowRevert', {
         amount: qty,
         asset: marketAccount.assetSymbol,
         hash: transactionHash,
@@ -254,7 +254,7 @@ export default (): Borrow => {
     marketAccount,
     setIsLoadingOp,
     setTx,
-    analytics,
+    track,
     qty,
     refreshAccountData,
     ETHRouterContract,
@@ -272,13 +272,13 @@ export default (): Borrow => {
       return;
     }
 
-    void analytics.track('borrowRequest', {
+    void track('borrowRequest', {
       amount: qty,
       asset: symbol,
     });
 
     return borrow();
-  }, [analytics, approve, borrow, isLoading, needsApproval, qty, requiresApproval, setRequiresApproval, symbol]);
+  }, [approve, borrow, isLoading, needsApproval, qty, requiresApproval, setRequiresApproval, symbol, track]);
 
   return {
     isLoading,

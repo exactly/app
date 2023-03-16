@@ -29,7 +29,7 @@ import useAnalytics from 'hooks/useAnalytics';
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 
 const Withdraw: FC = () => {
-  const analytics = useAnalytics();
+  const { track } = useAnalytics();
   const { operation } = useModalStatus();
   const { walletAddress } = useWeb3();
 
@@ -180,7 +180,7 @@ const Withdraw: FC = () => {
 
       setTx({ status: status ? 'success' : 'error', hash: transactionHash });
 
-      void analytics.track(status ? 'withdraw' : 'withdrawRevert', {
+      void track(status ? 'withdraw' : 'withdrawRevert', {
         amount: qty,
         asset: marketAccount.assetSymbol,
         hash: transactionHash,
@@ -199,7 +199,7 @@ const Withdraw: FC = () => {
     marketContract,
     setIsLoadingOp,
     setTx,
-    analytics,
+    track,
     qty,
     refreshAccountData,
     ETHRouterContract,
@@ -216,13 +216,13 @@ const Withdraw: FC = () => {
       return;
     }
 
-    void analytics.track('withdrawRequest', {
+    void track('withdrawRequest', {
       amount: qty,
       asset: symbol,
     });
 
     return withdraw();
-  }, [analytics, approve, isLoading, needsApproval, qty, requiresApproval, setRequiresApproval, symbol, withdraw]);
+  }, [approve, isLoading, needsApproval, qty, requiresApproval, setRequiresApproval, symbol, track, withdraw]);
 
   if (tx) return <ModalGif tx={tx} tryAgain={withdraw} />;
 
