@@ -1,5 +1,4 @@
 import React, { FC, useMemo } from 'react';
-import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -57,7 +56,7 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
   const tempRows = isLoading ? defaultRows : rows; // HACK this with the timeout in "marketsTables" is to avoid a screen flash when MUI  recive the new data of rows
 
   return (
-    <TableContainer component={Paper}>
+    <TableContainer>
       <Table aria-label="simple table">
         <TableHead>
           <TableRow>
@@ -227,7 +226,7 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
                       >
                         <Button
                           variant="outlined"
-                          sx={{ backgroundColor: 'white' }}
+                          sx={{ backgroundColor: 'components.bg' }}
                           onClick={(e) =>
                             handleActionClick(
                               e,

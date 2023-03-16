@@ -1,18 +1,19 @@
 import React, { useContext } from 'react';
-import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { Box, Typography, useMediaQuery, useTheme } from '@mui/material';
 import TwitterIcon from '@mui/icons-material/Twitter';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import { globals } from 'styles/theme';
 import { MarketContext } from 'contexts/MarketContext';
+import SwitchTheme from 'components/SwitchTheme';
+import { DiscordIcon } from 'components/Icons';
 const { onlyDesktopFlex, maxWidth } = globals;
 
 const Footer = () => {
   const date = new Date();
   const { view } = useContext(MarketContext);
   const { pathname } = useRouter();
-  const { breakpoints } = useTheme();
+  const { breakpoints, palette } = useTheme();
   const isMobile = useMediaQuery(breakpoints.down('sm'));
 
   return (
@@ -41,7 +42,7 @@ const Footer = () => {
                 target="_blank"
                 rel="noreferrer noopener"
                 href="https://discord.com/channels/846682395553824808/908758791057719358"
-                style={{ color: 'black', textDecoration: 'underline' }}
+                style={{ color: palette.mode === 'light' ? 'black' : 'white', textDecoration: 'underline' }}
               >
                 let us know here.
               </a>
@@ -65,7 +66,7 @@ const Footer = () => {
                 rel="noreferrer noopener"
                 href="https://discord.com/channels/846682395553824808/908758791057719358"
               >
-                Gives us feedback
+                Give us feedback
               </a>
             </Typography>
             <Typography fontSize="0.85em">|</Typography>
@@ -87,8 +88,9 @@ const Footer = () => {
               <TwitterIcon fontSize="small" />
             </a>
             <a target="_blank" rel="noreferrer noopener" href="https://discord.gg/exactly">
-              <Image alt="discord" src="/img/social/discord.png" width={20} height={20} />
+              <DiscordIcon fontSize="small" />
             </a>
+            <SwitchTheme />
           </Box>
         </Box>
       </Box>

@@ -5,7 +5,6 @@ import DisclaimerModal from 'components/DisclaimerModal';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 
-import ThemeContext from 'contexts/ThemeContext';
 import { useWeb3 } from 'hooks/useWeb3';
 
 import { AppBar, Box, Button, Chip, IconButton, Toolbar, useTheme, Typography } from '@mui/material';
@@ -44,7 +43,6 @@ function Navbar() {
   const { pathname: currentPathname } = useRouter();
   const { chain, isConnected } = useWeb3();
 
-  const { theme } = useContext(ThemeContext);
   const { palette } = useTheme();
   const { view } = useContext(MarketContext);
   const { openOperationModal } = useModalStatus();
@@ -82,7 +80,7 @@ function Navbar() {
             <Box mr="10px" sx={{ cursor: 'pointer' }} display="flex" alignItems="center">
               <Box display={onlyDesktop}>
                 <Image
-                  src={theme === 'light' ? '/img/logo.svg' : '/img/logo-white.png'}
+                  src={palette.mode === 'light' ? '/img/logo.svg' : '/img/logo-white.png'}
                   alt="Exactly Logo"
                   width={103}
                   height={30}
@@ -94,7 +92,7 @@ function Navbar() {
               </Box>
               <Box display={onlyMobile}>
                 <Image
-                  src={theme === 'light' ? '/img/isologo.svg' : '/img/isologo-white.svg'}
+                  src={palette.mode === 'light' ? '/img/isologo.svg' : '/img/isologo-white.svg'}
                   alt="Exactly Logo"
                   width={26}
                   height={26}
@@ -114,7 +112,7 @@ function Navbar() {
                     <Button
                       sx={{
                         px: 1.5,
-                        color: currentPathname === pathname ? 'white' : 'grey.700',
+                        color: currentPathname === pathname ? 'white' : '',
                         display: 'flex',
                         alignItems: 'center',
                         fontSize: '13px',

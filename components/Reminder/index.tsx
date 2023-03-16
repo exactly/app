@@ -1,5 +1,5 @@
 import React, { FC, useCallback, useMemo, useRef } from 'react';
-import { Box, Button, capitalize, Typography } from '@mui/material';
+import { Box, Button, capitalize, Typography, useTheme } from '@mui/material';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import { atcb_action } from 'add-to-calendar-button';
 import parseTimestamp from 'utils/parseTimestamp';
@@ -10,6 +10,7 @@ type Props = {
 };
 
 const Reminder: FC<Props> = ({ operationName, maturity }) => {
+  const { palette } = useTheme();
   const buttonRef = useRef<HTMLInputElement>(null);
 
   const isBorrow = useMemo(() => operationName === 'borrow', [operationName]);
@@ -23,10 +24,11 @@ const Reminder: FC<Props> = ({ operationName, maturity }) => {
       endTime: '00:00',
       options: ['Google', 'Apple', 'iCal', 'Microsoft365', 'MicrosoftTeams', 'Outlook.com', 'Yahoo'],
       timeZone: 'UTC',
+      lightMode: palette.mode,
     };
 
     if (buttonRef.current) atcb_action(config as Parameters<typeof atcb_action>[0], buttonRef.current);
-  }, [maturity, operationName]);
+  }, [maturity, operationName, palette.mode]);
 
   return (
     <Box

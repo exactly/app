@@ -1,5 +1,5 @@
 import React, { FC, useEffect, useMemo } from 'react';
-import { Box, capitalize, Divider, Tooltip, Typography } from '@mui/material';
+import { Box, capitalize, Divider, Tooltip, Typography, useTheme } from '@mui/material';
 import AssetInput from 'components/OperationsModal/AssetInput';
 import { MarketsBasicOption, useMarketsBasic } from 'contexts/MarketsBasicContext';
 import { useOperationContext } from 'contexts/OperationContext';
@@ -23,6 +23,7 @@ import InfoOutlined from '@mui/icons-material/InfoOutlined';
 const { minAPRValue } = numbers;
 
 const MarketsBasic: FC = () => {
+  const { palette } = useTheme();
   const { openOperationModal } = useModalStatus();
   const { symbol = 'USDC', operation, selected, setSelected } = useMarketsBasic();
   const { errorData, requiresApproval, qty, assetContract, tx } = useOperationContext();
@@ -104,11 +105,21 @@ const MarketsBasic: FC = () => {
         bgcolor="grey.100"
         maxWidth="400px"
         sx={{ borderRadius: '16px' }}
-        boxShadow="4px 8px 16px rgba(227, 229, 232, 0.5), -4px -8px 16px rgba(248, 249, 249, 0.25)"
+        boxShadow={
+          palette.mode === 'light'
+            ? '4px 8px 16px rgba(227, 229, 232, 0.5), -4px -8px 16px rgba(248, 249, 249, 0.25)'
+            : ''
+        }
       >
         <OperationTabs />
 
-        <Box display="flex" flexDirection="column" bgcolor="white" border="1px solid #EDF0F2" borderRadius="8px">
+        <Box
+          display="flex"
+          flexDirection="column"
+          bgcolor={palette.mode === 'light' ? 'white' : 'figma.grey.50'}
+          border={`1px solid ${palette.grey[200]}`}
+          borderRadius="8px"
+        >
           <Box px={2} py={1.5}>
             <Typography variant="cardTitle">{`Asset to be ${isDeposit ? 'deposited' : 'borrowed'}`}</Typography>
             <AssetInput

@@ -79,7 +79,7 @@ function TableRowFixedPool({ symbol, valueUSD, type, maturityDate, market, decim
 
   return (
     <>
-      <TableRow sx={{ '& > *': { borderBottom: 'unset' }, backgroundColor: open ? 'grey.50' : 'transparent' }} hover>
+      <TableRow sx={{ '& > *': { borderBottom: 'unset' }, backgroundColor: open ? 'grey.100' : 'transparent' }} hover>
         <Link href={`/${symbol}`} legacyBehavior>
           <TableCell component="th" align="left" sx={{ cursor: 'pointer' }} width={240}>
             <Stack direction="row" spacing={1}>

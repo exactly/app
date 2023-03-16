@@ -42,8 +42,8 @@ const ClaimRewards: FC = () => {
           p: 1,
           borderColor: '#CFD3D8',
           '&:hover': {
-            backgroundColor: '#fff',
-            borderColor: '#EDEFF2',
+            backgroundColor: 'components.bg',
+            borderColor: 'figma.grey.100',
             boxShadow: '0px 3px 4px rgba(97, 102, 107, 0.1)',
           },
         }}
@@ -58,7 +58,7 @@ const ClaimRewards: FC = () => {
             height: 'auto',
           }}
         />
-        <Typography variant="subtitle1" color="#0D0E0F">
+        <Typography variant="subtitle1" color="grey.900">
           {formatNumber(formatFixed(amount, 18))}
         </Typography>
       </Button>
@@ -104,7 +104,7 @@ const ClaimRewards: FC = () => {
                 marginBottom: 4,
               }}
             />
-            <Typography fontWeight="700" fontSize={24} color="#0D0E0F" lineHeight="1">
+            <Typography fontWeight="700" fontSize={24} color="grey.900" lineHeight="1">
               {formatNumber(formatFixed(amount, 18))}
             </Typography>
           </Box>

@@ -41,7 +41,7 @@ function CollapseFixedPool({ open, transactions }: Props) {
   return (
     <Collapse in={open} timeout="auto" unmountOnExit>
       <Table size="small" aria-label="purchases">
-        <TableHead sx={{ backgroundColor: '#ebebeb' }}>
+        <TableHead sx={{ backgroundColor: 'grey.200' }}>
           <TableRow>
             {headers.map(({ title, align }) => (
               <TableCell key={`collapse_fixed_pool_header_${title}`} align={align} sx={{ px: 1 }}>
