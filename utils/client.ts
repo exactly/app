@@ -15,7 +15,7 @@ export const supportedChains = [
 export const defaultChain = { mainnet, optimism, goerli }[process.env.NEXT_PUBLIC_NETWORK ?? 'mainnet'];
 
 const { chains, provider } = configureChains(supportedChains, [
-  publicProvider(),
+  publicProvider({ priority: 1 }),
   walletConnectProvider({ projectId: walletConnectId }),
 ]);
 
