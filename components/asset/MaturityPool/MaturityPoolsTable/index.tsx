@@ -1,6 +1,5 @@
 import React, { FC } from 'react';
 import Button from '@mui/material/Button';
-import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -16,6 +15,7 @@ import { toPercentage } from 'utils/utils';
 import numbers from 'config/numbers.json';
 import useActionButton from 'hooks/useActionButton';
 import useMaturityPools from 'hooks/useMaturityPools';
+import { useTheme } from '@mui/material';
 
 type MaturityPoolsTableProps = {
   symbol: string;
@@ -34,12 +34,13 @@ const HeadCell: FC<{ title: string; tooltipTitle?: string }> = ({ title, tooltip
 };
 
 const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ symbol }) => {
+  const { palette } = useTheme();
   const { handleActionClick } = useActionButton();
   const { minAPRValue } = numbers;
   const rows = useMaturityPools(symbol);
 
   return (
-    <TableContainer component={Paper}>
+    <TableContainer>
       <Table sx={{ bgcolor: 'transparent' }} aria-label="simple table">
         <TableHead>
           <TableRow>
@@ -65,7 +66,7 @@ const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ symbol }) => {
               hover
             >
               <TableCell component="th" scope="row" width={120}>
-                <Typography variant="body1" color="black" fontWeight={600}>
+                <Typography variant="body1" color={palette.mode === 'light' ? 'black' : 'white'} fontWeight={600}>
                   {parseTimestamp(maturity)}
                 </Typography>
               </TableCell>
@@ -106,7 +107,7 @@ const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ symbol }) => {
                 <Button
                   disabled={borrowAPR < minAPRValue}
                   variant="outlined"
-                  sx={{ backgroundColor: 'white' }}
+                  sx={{ backgroundColor: 'components.bg' }}
                   onClick={(e) => handleActionClick(e, 'borrowAtMaturity', symbol, maturity)}
                 >
                   Borrow

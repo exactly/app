@@ -4,13 +4,15 @@ import GitHubIcon from '@mui/icons-material/GitHub';
 import TwitterIcon from '@mui/icons-material/Twitter';
 import SecurityIcon from '@mui/icons-material/Security';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
-import { Divider, IconButton, Modal, Slide, Typography } from '@mui/material';
+import { Divider, IconButton, Modal, Slide, Typography, useTheme } from '@mui/material';
 import { Box } from '@mui/system';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import Switch from 'components/Switch';
 import { MarketContext } from 'contexts/MarketContext';
+import { DiscordIcon } from 'components/Icons';
+import SwitchTheme from 'components/SwitchTheme';
 
 type Props = {
   open: boolean;
@@ -29,6 +31,7 @@ const headers = [
 ];
 
 function MobileMenu({ open, handleClose }: Props) {
+  const { palette } = useTheme();
   const { view, setView } = useContext(MarketContext);
   const { pathname: currentPathname } = useRouter();
   const date = new Date();
@@ -39,7 +42,7 @@ function MobileMenu({ open, handleClose }: Props) {
         <Box
           width="100%"
           height="100%"
-          bgcolor="white"
+          bgcolor="components.bg"
           display="flex"
           flexDirection="column"
           justifyContent="space-between"
@@ -47,7 +50,12 @@ function MobileMenu({ open, handleClose }: Props) {
         >
           <Box display="flex" flexDirection="column" gap="20px">
             <Box display="flex" justifyContent="space-between">
-              <Image src="/img/logo.svg" alt="Exactly Logo" width={103} height={30} />
+              <Image
+                src={palette.mode === 'light' ? '/img/logo.svg' : '/img/logo-white.png'}
+                alt="Exactly Logo"
+                width={103}
+                height={30}
+              />
               <IconButton size="small" edge="start" aria-label="close" onClick={handleClose}>
                 <CloseIcon sx={{ color: 'figma.grey.300' }} />
               </IconButton>
@@ -97,19 +105,14 @@ function MobileMenu({ open, handleClose }: Props) {
               <TwitterIcon fontSize="small" sx={{ color: 'grey.500', my: 'auto' }} />
             </LinkItem>
             <LinkItem title="Discord" href="https://discord.gg/exactly">
-              <Image
-                alt="discord"
-                src="/img/social/discord.png"
-                width={20}
-                height={20}
-                style={{ alignSelf: 'center' }}
-              />
+              <DiscordIcon fontSize="small" sx={{ color: 'grey.500', my: 'auto' }} />
             </LinkItem>
           </Box>
-          <Box>
+          <Box display="flex" justifyContent="space-between">
             <Typography fontSize="16px" sx={{ color: 'figma.grey.300' }}>
               © Exactly {date.getFullYear()}
             </Typography>
+            <SwitchTheme />
           </Box>
         </Box>
       </Slide>

@@ -96,7 +96,7 @@ const HistoricalRateChart: FC<Props> = ({ symbol }) => {
               type="monotone"
               dataKey="depositApr"
               name="Deposit APR"
-              stroke="black"
+              stroke={palette.mode === 'light' ? 'black' : 'white'}
               dot={false}
               strokeWidth={2}
             />

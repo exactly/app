@@ -1,9 +1,10 @@
 import React from 'react';
-import { Box } from '@mui/material';
+import { Box, useTheme } from '@mui/material';
 import { globals } from 'styles/theme';
 
 const { onlyDesktop } = globals;
 export default function BackgroundCircle() {
+  const { palette } = useTheme();
   return (
     <Box
       sx={{
@@ -23,7 +24,7 @@ export default function BackgroundCircle() {
         sx={{
           width: '100vh',
           height: '100vh',
-          background: 'linear-gradient(0deg, #F9FAFB 0%, rgba(249, 250, 251, 0) 100%)',
+          background: `linear-gradient(0deg, ${palette.grey[100]} 0%, rgba(249, 250, 251, 0) 100%)`,
           borderRadius: '50%',
           opacity: 0.8,
         }}

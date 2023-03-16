@@ -31,7 +31,7 @@ function TooltipChart({ active, payload, label, labelFormatter, formatter, itemS
       flexDirection="column"
       border="1px solid #FFFFFF"
       boxShadow="0px 3px 4px rgba(97, 102, 107, 0.1)"
-      bgcolor="white"
+      bgcolor="components.bg"
       p="8px"
     >
       <Typography variant="subtitle2" fontSize="10px" mb={0.5}>

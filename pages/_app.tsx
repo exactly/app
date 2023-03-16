@@ -6,8 +6,7 @@ import Head from 'next/head';
 import { Web3Modal } from '@web3modal/react';
 import { WagmiConfig } from 'wagmi';
 import type { AppProps } from 'next/app';
-import { Box } from '@mui/material';
-import { ThemeProvider as MUIThemeProvider } from '@mui/material/styles';
+import { Box, useTheme } from '@mui/material';
 
 import { ModalStatusProvider } from 'contexts/ModalStatusContext';
 import { MarketProvider } from 'contexts/MarketContext';
@@ -16,13 +15,14 @@ import { ThemeProvider } from 'contexts/ThemeContext';
 import { wagmi, walletConnectId, web3modal } from 'utils/client';
 import Footer from 'components/Footer';
 import Navbar from 'components/Navbar';
-import theme, { globals } from 'styles/theme';
+import { globals } from 'styles/theme';
 import { MarketsBasicProvider } from 'contexts/MarketsBasicContext';
 import { NetworkContextProvider, useNetworkContext } from 'contexts/NetworkContext';
 
 const { maxWidth } = globals;
 
 const Web3ModalWrapper = () => {
+  const { palette } = useTheme();
   const { displayNetwork } = useNetworkContext();
   return (
     <Web3Modal
@@ -30,7 +30,7 @@ const Web3ModalWrapper = () => {
       ethereumClient={web3modal}
       defaultChain={displayNetwork}
       enableAccountView={false}
-      themeMode="light"
+      themeMode={palette.mode}
       themeColor="blackWhite"
       themeBackground="themeColor"
       walletImages={{ safe: '/img/wallets/safe.png' }}
@@ -74,28 +74,26 @@ export default function App({ Component, pageProps }: AppProps) {
         <meta name="twitter:image" content="https://app.exact.ly/img/social/ogp.png" />
       </Head>
       <ThemeProvider>
-        <MUIThemeProvider theme={theme}>
-          <WagmiConfig client={wagmi}>
-            <NetworkContextProvider>
-              <AccountDataProvider>
-                <MarketProvider>
-                  <ModalStatusProvider>
-                    <MarketsBasicProvider>
-                      <Box display="flex" flexDirection="column" mx={2} height="100%">
-                        <Navbar />
-                        <main style={{ flexGrow: 1, maxWidth, margin: '0 auto', width: '100%' }}>
-                          <Component {...pageProps} />
-                        </main>
-                        <Footer />
-                      </Box>
-                    </MarketsBasicProvider>
-                  </ModalStatusProvider>
-                </MarketProvider>
-              </AccountDataProvider>
-              <Web3ModalWrapper />
-            </NetworkContextProvider>
-          </WagmiConfig>
-        </MUIThemeProvider>
+        <WagmiConfig client={wagmi}>
+          <NetworkContextProvider>
+            <AccountDataProvider>
+              <MarketProvider>
+                <ModalStatusProvider>
+                  <MarketsBasicProvider>
+                    <Box display="flex" flexDirection="column" mx={2} height="100%">
+                      <Navbar />
+                      <main style={{ flexGrow: 1, maxWidth, margin: '0 auto', width: '100%' }}>
+                        <Component {...pageProps} />
+                      </main>
+                      <Footer />
+                    </Box>
+                  </MarketsBasicProvider>
+                </ModalStatusProvider>
+              </MarketProvider>
+            </AccountDataProvider>
+            <Web3ModalWrapper />
+          </NetworkContextProvider>
+        </WagmiConfig>
       </ThemeProvider>
     </>
   );
