@@ -9,9 +9,11 @@ import { useWeb3 } from './useWeb3';
 import { useOperationContext } from 'contexts/OperationContext';
 import useAccountData from './useAccountData';
 import handleOperationError from 'utils/handleOperationError';
+import { useNetwork } from 'wagmi';
 
 export default (operation: Operation, contract?: ERC20 | Market, spender?: string) => {
-  const { walletAddress } = useWeb3();
+  const { walletAddress, chain: displayNetwork } = useWeb3();
+  const { chain } = useNetwork();
   const { symbol, setErrorData, setLoadingButton } = useOperationContext();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -42,6 +44,8 @@ export default (operation: Operation, contract?: ERC20 | Market, spender?: strin
 
       if (!walletAddress || !marketAccount || !contract || !spender) return true;
 
+      if (chain?.id !== displayNetwork.id) return true;
+
       try {
         const allowance = await contract.allowance(walletAddress, spender);
         return (
@@ -51,7 +55,7 @@ export default (operation: Operation, contract?: ERC20 | Market, spender?: strin
         return true;
       }
     },
-    [operation, walletAddress, marketAccount, contract, spender, symbol],
+    [operation, chain, walletAddress, marketAccount, contract, spender, displayNetwork.id, symbol],
   );
 
   const approve = useCallback(async () => {
