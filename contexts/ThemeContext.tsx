@@ -1,4 +1,6 @@
-import React, { createContext, FC, PropsWithChildren, useCallback, useEffect, useState } from 'react';
+import React, { createContext, FC, PropsWithChildren, useCallback, useContext, useEffect, useState } from 'react';
+import { ThemeProvider as MUIThemeProvider } from '@mui/material/styles';
+import { lightTheme, darkTheme } from 'styles/theme';
 
 type ContextValues = {
   theme: 'light' | 'dark';
@@ -16,14 +18,13 @@ export const ThemeProvider: FC<PropsWithChildren> = ({ children }) => {
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
 
   useEffect(() => {
-    if (window?.localStorage?.getItem('theme')) {
-      const storage = window?.localStorage?.getItem('theme');
-      const storageTheme = storage && JSON.parse(storage);
+    const storageThemeRaw = window?.localStorage?.getItem('theme');
+    if (storageThemeRaw) {
+      const storageTheme = storageThemeRaw && JSON.parse(storageThemeRaw);
 
       if (storageTheme && (storageTheme === 'light' || storageTheme === 'dark')) {
         document.body.dataset.theme = storageTheme;
-        // setTheme(storageTheme);
-        setTheme('light'); //HACK disabling the darkmode option, force the light theme if the user change the localStorage
+        setTheme(storageTheme);
       }
     } else {
       if (window?.localStorage) {
@@ -44,7 +45,19 @@ export const ThemeProvider: FC<PropsWithChildren> = ({ children }) => {
     }
   }, [theme, changeTheme]);
 
-  return <ThemeContext.Provider value={{ theme, changeTheme }}>{children}</ThemeContext.Provider>;
+  return (
+    <ThemeContext.Provider value={{ theme, changeTheme }}>
+      <MUIThemeProvider theme={theme === 'light' ? lightTheme : darkTheme}>{children}</MUIThemeProvider>
+    </ThemeContext.Provider>
+  );
 };
+
+export function useCustomTheme() {
+  const ctx = useContext(ThemeContext);
+  if (!ctx) {
+    throw new Error('Using ThemeContext outside of provider');
+  }
+  return ctx;
+}
 
 export default ThemeContext;

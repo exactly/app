@@ -21,7 +21,7 @@ function FloatingPoolDashboard({ type }: Props) {
       p="24px"
       boxShadow="0px 4px 12px rgba(175, 177, 182, 0.2)"
       borderRadius="0px 0px 6px 6px"
-      bgcolor="white"
+      bgcolor="components.bg"
       borderTop="4px solid #34C53A"
     >
       <Stack direction="row" spacing={2} alignItems="center">

@@ -52,7 +52,7 @@ const Transition = forwardRef(function Transition(
 });
 
 function OperationsModal() {
-  const { breakpoints, spacing } = useTheme();
+  const { breakpoints, spacing, palette } = useTheme();
   const { open, closeModal, operation } = useModalStatus();
   const { tx } = useOperationContext();
   const isMobile = useMediaQuery(breakpoints.down('sm'));
@@ -76,7 +76,7 @@ function OperationsModal() {
           sx={{
             position: 'absolute',
             right: 4,
-            top: 4,
+            top: 8,
             color: 'grey.500',
           }}
         >
@@ -86,7 +86,7 @@ function OperationsModal() {
       <Box
         sx={{
           padding: { xs: spacing(3, 2, 2), sm: spacing(5, 4, 4) },
-          borderTop: tx ? '' : '4px #000 solid',
+          borderTop: tx ? '' : `4px ${palette.mode === 'light' ? 'black' : 'white'} solid`,
         }}
       >
         {!tx && (

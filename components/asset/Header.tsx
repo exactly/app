@@ -95,7 +95,7 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
 
   const etherscan = networkData[String(chain?.id) as keyof typeof networkData]?.etherscan;
   return (
-    <Grid sx={{ bgcolor: 'white' }} width="100%" p="24px" boxShadow="0px 4px 12px rgba(175, 177, 182, 0.2)">
+    <Grid sx={{ bgcolor: 'components.bg' }} width="100%" p="24px" boxShadow="0px 4px 12px rgba(175, 177, 182, 0.2)">
       <Grid item container mb="24px">
         <Image
           src={`/img/assets/${symbol}.svg`}

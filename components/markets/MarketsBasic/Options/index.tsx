@@ -2,7 +2,7 @@ import React, { FC } from 'react';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import LockIcon from '@mui/icons-material/Lock';
 import SwapVertIcon from '@mui/icons-material/SwapVert';
-import { Box, FormControlLabel, Radio, RadioGroup, Skeleton, Tooltip, Typography } from '@mui/material';
+import { Box, FormControlLabel, Radio, RadioGroup, Skeleton, Tooltip, Typography, useTheme } from '@mui/material';
 import Image from 'next/image';
 import daysLeft from 'utils/daysLeft';
 import { MarketsBasicOperation, MarketsBasicOption } from 'contexts/MarketsBasicContext';
@@ -31,6 +31,7 @@ const Options: FC<Props> = ({
   operation,
   bestOption,
 }) => {
+  const { palette } = useTheme();
   const { minAPRValue } = numbers;
 
   const bottomIconSx = { fontSize: '10px', my: 'auto', color: 'figma.grey.500' };
@@ -47,7 +48,12 @@ const Options: FC<Props> = ({
               value={maturity}
               control={<Radio />}
               componentsProps={{ typography: { width: '100%' } }}
-              sx={{ m: 0, ':hover': { backgroundColor: 'grey.50' }, px: 1, borderRadius: '4px' }}
+              sx={{
+                m: 0,
+                ':hover': { backgroundColor: palette.mode === 'light' ? 'grey.50' : 'grey.200' },
+                px: 1,
+                borderRadius: '4px',
+              }}
               disabled={maturity !== 0 && !maturity}
               label={
                 <Box display="flex" flexDirection="row" py="7px" alignItems="center" width="100%" gap={1}>
@@ -77,7 +83,7 @@ const Options: FC<Props> = ({
                           borderRadius="8px"
                           sx={{ background: 'linear-gradient(66.92deg, #00CC68 34.28%, #00CC8F 100%)' }}
                         >
-                          <Typography variant="chip" color="white">
+                          <Typography variant="chip" color="components.bg">
                             BEST
                           </Typography>
                         </Box>

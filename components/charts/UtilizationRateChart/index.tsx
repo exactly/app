@@ -135,7 +135,7 @@ function UtilizationRateChart({ type, symbol }: Props) {
               yAxisId="yaxis2"
               dataKey="utilization"
               dot={false}
-              stroke="#000"
+              stroke={palette.mode === 'light' ? 'black' : 'white'}
               strokeWidth={0}
               activeDot={false}
               animationDuration={2000}
@@ -146,7 +146,7 @@ function UtilizationRateChart({ type, symbol }: Props) {
               yAxisId="yaxis"
               type="monotone"
               dataKey="apr"
-              stroke="#000"
+              stroke={palette.mode === 'light' ? 'black' : 'white'}
               dot={false}
               strokeWidth={2}
               animationDuration={2000}

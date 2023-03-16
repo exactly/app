@@ -1,4 +1,4 @@
-import { Typography } from '@mui/material';
+import { Typography, useTheme } from '@mui/material';
 import { Box } from '@mui/system';
 import AccountDataContext from 'contexts/AccountDataContext';
 import Image from 'next/image';
@@ -13,6 +13,7 @@ type Props = PropsWithChildren<{
 }>;
 
 const MobileAssetCard: FC<Props> = ({ symbol, isFloating, children }) => {
+  const { palette } = useTheme();
   const { accountData } = useContext(AccountDataContext);
 
   const assetDescription = useCallback(
@@ -25,7 +26,7 @@ const MobileAssetCard: FC<Props> = ({ symbol, isFloating, children }) => {
 
   return (
     <Box
-      bgcolor="#FFFFFF"
+      bgcolor="components.bg"
       borderTop={isFloating ? '4px solid #33CC59' : '4px solid #0095FF'}
       boxShadow="0px 4px 12px rgba(175, 177, 182, 0.2)"
       borderRadius="6px"
@@ -34,7 +35,7 @@ const MobileAssetCard: FC<Props> = ({ symbol, isFloating, children }) => {
       flexDirection="column"
       gap={2}
     >
-      <Box display="flex" justifyContent="space-between">
+      <Box display="flex" gap={1} justifyContent="space-between">
         <Link href={`/${symbol}`} key={symbol} rel="noopener noreferrer" legacyBehavior>
           <Box display="flex" gap={1.3}>
             <Image
@@ -60,7 +61,7 @@ const MobileAssetCard: FC<Props> = ({ symbol, isFloating, children }) => {
         <Typography
           padding="6px 8px"
           variant="subtitle2"
-          bgcolor={isFloating ? '#F3FCF5' : '#F3F7FC'}
+          bgcolor={palette.mode === 'light' ? (isFloating ? '#F3FCF5' : '#F3F7FC') : 'grey.100'}
           color={isFloating ? '#33CC59' : '#0095FF'}
           mb="auto"
         >

@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Table, TableBody, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
+import { Table, TableBody, TableContainer, TableHead, TableRow } from '@mui/material';
 
 import { FloatingPoolItemData } from 'types/FloatingPoolItemData';
 
@@ -57,7 +57,7 @@ function FloatingPoolDashboardTable({ type, rows }: Props) {
   }, [type]);
 
   return (
-    <TableContainer component={Paper}>
+    <TableContainer>
       <Table>
         <TableHead>
           <TableRow>
