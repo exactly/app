@@ -52,6 +52,7 @@ function Wallet() {
         aria-haspopup="true"
         aria-expanded={isMenuOpen ? 'true' : undefined}
         sx={{
+          minWidth: '30px',
           py: 1,
           px: '10px',
           borderColor: '#CFD3D8',
@@ -62,7 +63,7 @@ function Wallet() {
           },
         }}
       >
-        <Avatar alt="Address avatar" src={avatarImgSrc} sx={{ width: 20, height: 20, mr: '5px' }} />
+        <Avatar alt="Address avatar" src={avatarImgSrc} sx={{ width: 20, height: 20, mr: { xs: 0, sm: '5px' } }} />
         <Typography variant="subtitle1" color="grey.900" display={onlyDesktop}>
           {ens ?? formattedWallet}
         </Typography>
