@@ -82,7 +82,7 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol }) => {
           ? toPercentage(parseFloat(formatFixed(marketAccount.adjustFactor, 18)))
           : undefined,
         tooltipTitle:
-          'Deposit and Borrow risk-adjusted factor is a measure that helps evaluate how risky an asset is compared to others. The higher the number, the safer the asset is considered to be, making it more valuable as collateral when requesting a loan.',
+          'Deposit and Borrow risk-adjust factor is a measure that helps evaluate how risky an asset is compared to others. The higher the number, the safer the asset is considered to be, making it more valuable as collateral when requesting a loan.',
       },
 
       ...(rates[symbol] && rates[symbol].some((r) => r.floatingDeposit.gt(Zero))

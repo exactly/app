@@ -52,7 +52,7 @@ const MaturityPoolInfo: FC<MaturityPoolInfoProps> = ({
         label: 'Risk-Adjust Factor',
         value: adjustFactor ? toPercentage(parseFloat(formatFixed(adjustFactor, 18))) : undefined,
         tooltipTitle:
-          'The Borrow risk-adjusted factor is a measure that helps evaluate how risky an asset is compared to others. The higher the number, the safer the asset is considered to be, making it more valuable as collateral when requesting a loan.',
+          'The Borrow risk-adjust factor is a measure that helps evaluate how risky an asset is compared to others. The higher the number, the safer the asset is considered to be, making it more valuable as collateral when requesting a loan.',
       },
       {
         label: 'Best Deposit APR',
