@@ -139,7 +139,7 @@ const Options: FC<Props> = ({
                     isLoading={maturity === 0 ? loadingFloatingOption : loadingFixedOptions}
                     symbol={symbol}
                     value={optionRate}
-                    minWidth={99}
+                    minWidth={90}
                     bottom={
                       <>
                         {maturity ? <LockIcon sx={bottomIconSx} /> : <SwapVertIcon sx={bottomIconSx} />}
