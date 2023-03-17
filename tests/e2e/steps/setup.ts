@@ -55,9 +55,11 @@ export const setupFork = ({ chainId = 1, wallet = Wallet.createRandom() }: ForkP
         })
         .then(async () => {
           // eslint-disable-next-line cypress/no-unnecessary-waiting, ui-testing/no-hard-wait, testing-library/await-async-utils
-          cy.wait(10000);
+          cy.wait(5000);
           if (opts.connectWallet) {
             connectWallet();
+            // eslint-disable-next-line cypress/no-unnecessary-waiting, ui-testing/no-hard-wait, testing-library/await-async-utils
+            cy.wait(5000);
           }
         });
     },
