@@ -20,7 +20,7 @@ import { MarketContext } from 'contexts/MarketContext';
 import ClaimRewards from 'components/ClaimRewards';
 import SelectDisplayNetwork from 'components/SelectDisplayNetwork';
 import useAnalytics from 'hooks/useAnalytics';
-const { onlyMobile, onlyDesktop, onlyDesktopFlex } = globals;
+const { onlyMobile, onlyDesktopFlex } = globals;
 
 const routes: {
   pathname: string;
@@ -77,25 +77,13 @@ function Navbar() {
       <AppBar position="static" color="transparent" sx={{ height: '56px', mb: { xs: 0, sm: 2.5 } }}>
         <Toolbar disableGutters sx={{ padding: '0 0', gap: '8px' }}>
           <Link href="/" legacyBehavior>
-            <Box mr="10px" sx={{ cursor: 'pointer' }} display="flex" alignItems="center">
-              <Box display={onlyDesktop}>
+            <Box sx={{ cursor: 'pointer' }} display="flex" alignItems="center">
+              <Box>
                 <Image
                   src={palette.mode === 'light' ? '/img/logo.svg' : '/img/logo-white.png'}
                   alt="Exactly Logo"
                   width={103}
                   height={30}
-                  style={{
-                    maxWidth: '100%',
-                    height: 'auto',
-                  }}
-                />
-              </Box>
-              <Box display={onlyMobile}>
-                <Image
-                  src={palette.mode === 'light' ? '/img/isologo.svg' : '/img/isologo-white.svg'}
-                  alt="Exactly Logo"
-                  width={26}
-                  height={26}
                   style={{
                     maxWidth: '100%',
                     height: 'auto',
