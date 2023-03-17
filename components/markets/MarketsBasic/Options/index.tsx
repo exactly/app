@@ -57,7 +57,13 @@ const Options: FC<Props> = ({
               disabled={maturity !== 0 && !maturity}
               label={
                 <Box display="flex" flexDirection="row" py="7px" alignItems="center" width="100%" gap={1}>
-                  <Box display="flex" gap={0.5} alignItems="center" flex={1}>
+                  <Box
+                    display="flex"
+                    flexDirection={{ xs: 'column', sm: 'row' }}
+                    gap={{ xs: 0, sm: 0.5 }}
+                    alignItems={{ xs: 'start', sm: 'center' }}
+                    flex={1}
+                  >
                     {maturity || maturity === 0 ? (
                       <Typography fontWeight={700} fontSize={13} color="grey.900" my="auto">
                         {maturity ? daysLeft(maturity) : 'Flexible'}
@@ -75,6 +81,7 @@ const Options: FC<Props> = ({
                         }
                       >
                         <Box
+                          width="fit-content"
                           display="flex"
                           alignItems="center"
                           height="16px"
@@ -210,9 +217,14 @@ const OptionRate: FC<{
     <Box display="flex" flexDirection="column" minWidth={minWidth}>
       <Box display="flex" alignItems="center" justifyContent="right" gap={0.3}>
         {!isLoading ? (
-          <Typography fontWeight={700} fontSize={13} color="grey.900" textAlign="right">
-            {value} APR
-          </Typography>
+          <Box display="flex" gap={0.5} alignItems="center">
+            <Typography fontWeight={700} fontSize={13} color="grey.900" textAlign="right">
+              {value}
+            </Typography>
+            <Typography fontWeight={700} fontSize={{ xs: 11, sm: 13 }} color="grey.900" textAlign="right">
+              APR
+            </Typography>
+          </Box>
         ) : (
           <Skeleton width={40} height={20} />
         )}
