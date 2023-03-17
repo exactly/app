@@ -36,7 +36,11 @@ function Wallet() {
 
   if (!walletAddress) {
     return (
-      <Button onClick={() => open({ route: 'ConnectWallet' })} variant="contained">
+      <Button
+        onClick={() => open({ route: 'ConnectWallet' })}
+        variant="contained"
+        sx={{ fontSize: { xs: 10, sm: 13 } }}
+      >
         Connect wallet
       </Button>
     );
