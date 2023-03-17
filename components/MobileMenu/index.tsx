@@ -12,6 +12,7 @@ import Link from 'next/link';
 import Switch from 'components/Switch';
 import { MarketContext } from 'contexts/MarketContext';
 import { DiscordIcon } from 'components/Icons';
+import QueryStatsIcon from '@mui/icons-material/QueryStats';
 import SwitchTheme from 'components/SwitchTheme';
 
 type Props = {
@@ -106,6 +107,9 @@ function MobileMenu({ open, handleClose }: Props) {
             </LinkItem>
             <LinkItem title="Discord" href="https://discord.gg/exactly">
               <DiscordIcon fontSize="small" sx={{ color: 'grey.500', my: 'auto' }} />
+            </LinkItem>
+            <LinkItem title="Stats" href="https://dune.com/exactly/exactly">
+              <QueryStatsIcon fontSize="small" sx={{ color: 'grey.500', my: 'auto' }} />
             </LinkItem>
           </Box>
           <Box display="flex" justifyContent="space-between">
