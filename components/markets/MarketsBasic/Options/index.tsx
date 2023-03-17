@@ -56,7 +56,14 @@ const Options: FC<Props> = ({
               }}
               disabled={maturity !== 0 && !maturity}
               label={
-                <Box display="flex" flexDirection="row" py="7px" alignItems="center" width="100%" gap={1}>
+                <Box
+                  display="flex"
+                  flexDirection="row"
+                  py="7px"
+                  alignItems="center"
+                  width="100%"
+                  gap={{ xs: 0, sm: 1 }}
+                >
                   <Box
                     display="flex"
                     flexDirection={{ xs: 'column', sm: 'row' }}
@@ -107,7 +114,12 @@ const Options: FC<Props> = ({
                           value={toPercentage(Number(rate) / 1e18)}
                           bottom={
                             <>
-                              <Typography fontWeight={500} fontSize={12} color="figma.grey.500" textAlign="right">
+                              <Typography
+                                fontWeight={500}
+                                fontSize={{ xs: 10, sm: 12 }}
+                                color="figma.grey.500"
+                                textAlign="right"
+                              >
                                 Rewards
                               </Typography>
                               <Tooltip
@@ -131,7 +143,12 @@ const Options: FC<Props> = ({
                     bottom={
                       <>
                         {maturity ? <LockIcon sx={bottomIconSx} /> : <SwapVertIcon sx={bottomIconSx} />}
-                        <Typography fontWeight={500} fontSize={12} color="figma.grey.500" textAlign="right">
+                        <Typography
+                          fontWeight={500}
+                          fontSize={{ xs: 10, sm: 12 }}
+                          color="figma.grey.500"
+                          textAlign="right"
+                        >
                           {maturity === 0 ? 'Variable' : 'Fixed'} rate
                         </Typography>
                         <Tooltip
