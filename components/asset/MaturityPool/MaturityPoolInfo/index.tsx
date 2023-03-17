@@ -57,10 +57,10 @@ const MaturityPoolInfo: FC<MaturityPoolInfoProps> = ({
       {
         label: 'Best Deposit APR',
         value:
-          bestDepositRate && bestDepositRate > minAPRValue ? (
+          (bestDepositRate && bestDepositRate > minAPRValue) || bestDepositRate === 0 ? (
             <ItemCell
               key={symbol}
-              value={toPercentage(bestDepositRate)}
+              value={toPercentage(bestDepositRate !== 0 ? bestDepositRate : undefined)}
               symbol={bestDepositRate && bestDepositRate > minAPRValue ? symbol : undefined}
             />
           ) : undefined,
