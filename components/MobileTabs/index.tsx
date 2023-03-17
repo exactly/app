@@ -26,6 +26,7 @@ function MobileTabs({ tabs }: Props) {
               borderWidth: '1px',
               color: selected === i ? 'white' : 'figma.grey.900',
               whiteSpace: 'nowrap',
+              fontSize: 12,
             }}
             onClick={() => setSelected(i)}
           >
