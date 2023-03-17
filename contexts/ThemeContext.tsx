@@ -27,8 +27,10 @@ export const ThemeProvider: FC<PropsWithChildren> = ({ children }) => {
         setTheme(storageTheme);
       }
     } else {
+      const colorScheme = window?.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      setTheme(colorScheme);
       if (window?.localStorage) {
-        window.localStorage.setItem('theme', JSON.stringify('light'));
+        window.localStorage.setItem('theme', JSON.stringify(colorScheme));
       }
     }
   }, []);
