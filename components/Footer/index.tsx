@@ -3,7 +3,6 @@ import { Box, Typography } from '@mui/material';
 import TwitterIcon from '@mui/icons-material/Twitter';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import { globals } from 'styles/theme';
-
 import SwitchTheme from 'components/SwitchTheme';
 import { DiscordIcon } from 'components/Icons';
 const { onlyDesktopFlex } = globals;
