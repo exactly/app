@@ -5,6 +5,7 @@ import Link from 'next/link';
 import formatSymbol from 'utils/formatSymbol';
 import getSymbolDescription from 'utils/getSymbolDescription';
 import useAccountData from 'hooks/useAccountData';
+import { useRouter } from 'next/router';
 
 type Props = PropsWithChildren<{
   symbol: string;
@@ -12,6 +13,7 @@ type Props = PropsWithChildren<{
 }>;
 
 const MobileAssetCard: FC<Props> = ({ symbol, isFloating, children }) => {
+  const { query } = useRouter();
   const { marketAccount } = useAccountData(symbol);
   const { palette } = useTheme();
 
@@ -35,7 +37,7 @@ const MobileAssetCard: FC<Props> = ({ symbol, isFloating, children }) => {
       gap={2}
     >
       <Box display="flex" gap={1} justifyContent="space-between">
-        <Link href={`/${symbol}`} key={symbol} rel="noopener noreferrer" legacyBehavior>
+        <Link href={{ pathname: `/${symbol}`, query }} key={symbol} rel="noopener noreferrer" legacyBehavior>
           <Box display="flex" gap={1.3}>
             <Image
               src={`/img/assets/${symbol}.svg`}

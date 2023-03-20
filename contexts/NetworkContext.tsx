@@ -6,18 +6,10 @@ import Router, { useRouter } from 'next/router';
 
 import { supportedChains, defaultChain } from 'utils/client';
 import usePreviousValue from 'hooks/usePreviousValue';
+import { getQueryParam } from 'utils/getQueryParam';
 
 function isSupported(id?: number): boolean {
   return Boolean(id && supportedChains.find((c) => c.id === id));
-}
-
-function getQueryParam(key: string): string | undefined {
-  if (typeof window !== 'undefined' && 'URLSearchParams' in window) {
-    const proxy = new Proxy(new URLSearchParams(window.location.search), {
-      get: (searchParams, prop) => searchParams.get(prop as string),
-    });
-    return (proxy as unknown as { [key: string]: string })[key];
-  }
 }
 
 type ContextValues = {
@@ -28,7 +20,7 @@ type ContextValues = {
 const NetworkContext = createContext<ContextValues | null>(null);
 
 export const NetworkContextProvider: FC<PropsWithChildren> = ({ children }) => {
-  const { pathname } = useRouter();
+  const { pathname, isReady } = useRouter();
   const { chain } = useNetwork();
   const first = useRef(true);
   const [displayNetwork, setDisplayNetwork] = useState<Chain>(() => {
@@ -54,13 +46,13 @@ export const NetworkContextProvider: FC<PropsWithChildren> = ({ children }) => {
   }, [previousChain, chain, displayNetwork]);
 
   useEffect(() => {
-    if (first.current) {
+    if (first.current || !isReady) {
       return;
     }
 
     const network = { [wagmiChains.mainnet.id]: 'mainnet' }[displayNetwork.id] ?? displayNetwork.network;
     Router.replace({ query: { ...Router.query, n: network } });
-  }, [displayNetwork, pathname]);
+  }, [displayNetwork, pathname, isReady]);
 
   const value: ContextValues = {
     displayNetwork,

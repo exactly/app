@@ -40,7 +40,7 @@ function Navbar() {
   const { identify } = useAnalytics();
   const { connector } = useClient();
   const { walletAddress } = useWeb3();
-  const { pathname: currentPathname } = useRouter();
+  const { pathname: currentPathname, query } = useRouter();
   const { chain, isConnected } = useWeb3();
 
   const { palette } = useTheme();
@@ -76,7 +76,7 @@ function Navbar() {
       <DisclaimerModal />
       <AppBar position="static" color="transparent" sx={{ height: '56px', mb: { xs: 0, sm: 2.5 } }}>
         <Toolbar disableGutters sx={{ padding: '0 0', gap: '8px' }}>
-          <Link href="/" legacyBehavior>
+          <Link href={{ pathname: '/', query }} legacyBehavior>
             <Box sx={{ cursor: 'pointer' }} display="flex" alignItems="center">
               <Box>
                 <Image
@@ -96,7 +96,7 @@ function Navbar() {
             {routes.map(({ name, pathname, custom, icon }) => (
               <Box key={pathname} display={onlyDesktopFlex}>
                 {custom || (
-                  <Link href={pathname} legacyBehavior>
+                  <Link href={{ pathname, query }} legacyBehavior>
                     <Button
                       sx={{
                         px: 1.5,

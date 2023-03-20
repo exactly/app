@@ -34,7 +34,7 @@ const headers = [
 function MobileMenu({ open, handleClose }: Props) {
   const { palette } = useTheme();
   const { view, setView } = useContext(MarketContext);
-  const { pathname: currentPathname } = useRouter();
+  const { pathname: currentPathname, query } = useRouter();
   const date = new Date();
 
   return (
@@ -66,7 +66,7 @@ function MobileMenu({ open, handleClose }: Props) {
             </Typography>
             <Box display="flex" flexDirection="column" gap={2}>
               {headers.map(({ title, pathname }) => (
-                <Link href={pathname} key={`mobile_tabs_${title}`} onClick={handleClose}>
+                <Link href={{ pathname, query }} key={`mobile_tabs_${title}`} onClick={handleClose}>
                   <Typography
                     sx={{
                       textDecoration: currentPathname === pathname ? 'underline' : 'none',

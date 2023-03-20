@@ -39,7 +39,10 @@ const SelectDisplayNetwork: FC = () => {
       if (!['/', '/dashboard'].includes(pathname)) {
         return Router.push({
           pathname: '/',
-          search: `?n=${{ [mainnet.id]: 'mainnet' }[displayChain.id] ?? displayChain.network}`,
+          query: {
+            ...Object.fromEntries(Object.entries(Router.query).filter((e) => e[0] !== 'symbol')),
+            n: `${{ [mainnet.id]: 'mainnet' }[displayChain.id] ?? displayChain.network}`,
+          },
         }).then(() => {
           resetAccountData();
           setDisplayNetwork(displayChain);
