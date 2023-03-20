@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { Box, Button, Typography } from '@mui/material';
+import { useRouter } from 'next/router';
 
 type Props = {
   code: number;
@@ -9,6 +10,8 @@ type Props = {
 };
 
 function ErrorPageMessage({ code, description, message }: Props) {
+  const { query } = useRouter();
+
   return (
     <Box display="flex" height="100%">
       <Box display="flex" flexDirection="column" m="auto" alignItems="center" gap={1}>
@@ -19,7 +22,7 @@ function ErrorPageMessage({ code, description, message }: Props) {
           {description}
         </Typography>
         <Typography>{message}</Typography>
-        <Link href="/">
+        <Link href={{ pathname: '/', query }}>
           <Button variant="contained">Go to Markets</Button>
         </Link>
       </Box>

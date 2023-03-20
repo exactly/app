@@ -10,19 +10,21 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { Box, IconButton, Tooltip, Typography, Grid } from '@mui/material';
 import Link from 'next/link';
 import useAnalytics from 'hooks/useAnalytics';
+import { useRouter } from 'next/router';
 
 type Props = {
   symbol: string;
 };
 
 const Market: NextPage<Props> = ({ symbol }: Props) => {
+  const { query } = useRouter();
   const { page } = useAnalytics();
   useEffect(() => void page(), [page]);
 
   return (
     <Grid container mt={-1}>
       <Box sx={{ display: 'flex', gap: 0.5 }} mb={1}>
-        <Link href="/" legacyBehavior>
+        <Link href={{ pathname: '/', query }} legacyBehavior>
           <IconButton size="small">
             <Tooltip title="Go Back" placement="top">
               <ArrowBackIcon fontSize="small" />

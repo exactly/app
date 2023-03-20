@@ -13,6 +13,7 @@ import Link from 'next/link';
 import SwitchCollateral from 'components/dashboard/DashboardContent/FloatingPoolDashboard/FloatingPoolDashboardTable/SwitchCollateral';
 import useAccountData from 'hooks/useAccountData';
 import useActionButton from 'hooks/useActionButton';
+import { useRouter } from 'next/router';
 
 type Props = {
   symbol: string;
@@ -23,13 +24,14 @@ type Props = {
 };
 
 function TableRowFloatingPool({ symbol, valueUSD, depositedAmount, borrowedAmount, type }: Props) {
+  const { query } = useRouter();
   const { marketAccount } = useAccountData(symbol);
 
   const { handleActionClick } = useActionButton();
 
   return (
     <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }} hover>
-      <Link href={`/${symbol}`} legacyBehavior>
+      <Link href={{ pathname: `/${symbol}`, query }} legacyBehavior>
         <TableCell component="th" align="left" sx={{ cursor: 'pointer' }} width={240}>
           <Stack direction="row" spacing={1}>
             <Image
