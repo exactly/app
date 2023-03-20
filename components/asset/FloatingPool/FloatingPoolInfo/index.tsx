@@ -54,13 +54,6 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol }) => {
         value: deposited !== undefined && borrowed !== undefined ? `$${formatNumber(deposited - borrowed)}` : undefined,
       },
       {
-        label: 'Utilization Rate',
-        value:
-          deposited !== undefined && borrowed !== undefined
-            ? toPercentage(deposited > 0 ? borrowed / deposited : undefined)
-            : undefined,
-      },
-      {
         label: 'Deposit APR',
         value:
           depositAPR !== undefined && marketAccount?.assetSymbol ? (
@@ -77,14 +70,12 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol }) => {
         tooltipTitle: 'Change in the underlying Variable Rate Pool shares value over the last hour, annualized.',
       },
       {
-        label: 'Risk-Adjust Factor',
-        value: marketAccount?.adjustFactor
-          ? toPercentage(parseFloat(formatFixed(marketAccount.adjustFactor, 18)))
-          : undefined,
-        tooltipTitle:
-          'Deposit and Borrow risk-adjust factor is a measure that helps evaluate how risky an asset is compared to others. The higher the number, the safer the asset is considered to be, making it more valuable as collateral when requesting a loan.',
+        label: 'Utilization',
+        value:
+          deposited !== undefined && borrowed !== undefined
+            ? toPercentage(deposited > 0 ? borrowed / deposited : undefined)
+            : undefined,
       },
-
       ...(rates[symbol] && rates[symbol].some((r) => r.floatingDeposit.gt(Zero))
         ? [
             {
@@ -119,6 +110,14 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol }) => {
             },
           ]
         : []),
+      {
+        label: 'Risk-Adjust Factor',
+        value: marketAccount?.adjustFactor
+          ? toPercentage(parseFloat(formatFixed(marketAccount.adjustFactor, 18)))
+          : undefined,
+        tooltipTitle:
+          'Deposit and Borrow risk-adjust factor is a measure that helps evaluate how risky an asset is compared to others. The higher the number, the safer the asset is considered to be, making it more valuable as collateral when requesting a loan.',
+      },
     ],
     [deposited, borrowed, depositAPR, marketAccount, symbol, borrowAPR, rates],
   );
