@@ -1,18 +1,18 @@
-import { formatFixed } from '@ethersproject/bignumber';
-import { WeiPerEther } from '@ethersproject/constants';
 import { useMemo } from 'react';
 import useAccountData from './useAccountData';
 
-const def = ['USDC', 'WETH', 'DAI'];
+const def = ['USDC', 'WETH'];
 
 export default (): string[] => {
   const { accountData } = useAccountData();
 
   if (accountData) {
     accountData.sort((a, b) => {
-      return (
-        parseFloat(formatFixed(b.totalFloatingDepositAssets.mul(b.usdPrice).div(WeiPerEther), b.decimals)) -
-        parseFloat(formatFixed(a.totalFloatingDepositAssets.mul(a.usdPrice).div(WeiPerEther), a.decimals))
+      return Number(
+        b.totalFloatingDepositAssets
+          .mul(b.usdPrice)
+          .div(10n ** BigInt(b.decimals))
+          .sub(a.totalFloatingDepositAssets.mul(a.usdPrice).div(10n ** BigInt(a.decimals))),
       );
     });
   }
