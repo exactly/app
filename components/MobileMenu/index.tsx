@@ -24,6 +24,7 @@ const headers = [
   {
     title: 'Markets',
     pathname: '/',
+    component: true,
   },
   {
     title: 'Dashboard',
@@ -65,29 +66,32 @@ function MobileMenu({ open, handleClose }: Props) {
               Menu
             </Typography>
             <Box display="flex" flexDirection="column" gap={2}>
-              {headers.map(({ title, pathname }) => (
-                <Link href={{ pathname, query }} key={`mobile_tabs_${title}`} onClick={handleClose}>
-                  <Typography
-                    sx={{
-                      textDecoration: currentPathname === pathname ? 'underline' : 'none',
-                      fontWeight: 700,
-                      fontSize: 28,
-                    }}
-                  >
-                    {title}
-                  </Typography>
-                </Link>
+              {headers.map(({ title, pathname, component }) => (
+                <>
+                  <Link href={{ pathname, query }} key={`mobile_tabs_${title}`} onClick={handleClose}>
+                    <Typography
+                      sx={{
+                        textDecoration: currentPathname === pathname ? 'underline' : 'none',
+                        fontWeight: 700,
+                        fontSize: 28,
+                      }}
+                    >
+                      {title}
+                    </Typography>
+                  </Link>
+                  {component && (
+                    <Box display="flex" alignItems="center" justifyContent="space-between" gap={1}>
+                      <Typography fontSize={19} fontWeight={700}>
+                        Advanced view
+                      </Typography>
+                      <Switch
+                        checked={view === 'advanced'}
+                        onChange={() => setView(view === 'advanced' ? 'simple' : 'advanced')}
+                      />
+                    </Box>
+                  )}
+                </>
               ))}
-            </Box>
-
-            <Box display="flex" alignItems="center" justifyContent="space-between" gap={1}>
-              <Typography fontSize={19} fontWeight={700}>
-                Advanced view
-              </Typography>
-              <Switch
-                checked={view === 'advanced'}
-                onChange={() => setView(view === 'advanced' ? 'simple' : 'advanced')}
-              />
             </Box>
             <Divider sx={{ my: '12px' }} />
             <Typography fontFamily="fontFamilyMonospaced" fontSize={14} color="figma.grey.500" fontWeight={600}>
