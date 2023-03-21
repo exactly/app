@@ -5,8 +5,11 @@ import { MarketsBasicOperation, MarketsBasicOption } from 'contexts/MarketsBasic
 import useAccountData from 'hooks/useAccountData';
 import Image from 'next/image';
 import React, { FC, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import daysLeft from 'utils/daysLeft';
 import formatNumber from 'utils/formatNumber';
+import useTranslateOperation from 'hooks/useTranslateOperation';
+
 import parseTimestamp from 'utils/parseTimestamp';
 import { toPercentage } from 'utils/utils';
 
@@ -18,6 +21,8 @@ type Props = {
 };
 
 const Overview: FC<Props> = ({ symbol, operation, qty, option }) => {
+  const { t } = useTranslation();
+  const translateOperation = useTranslateOperation();
   const { marketAccount } = useAccountData(symbol);
   const rate = useMemo(
     () => (operation === 'borrow' ? option.borrowAPR : option.depositAPR) || 0,
@@ -37,7 +42,7 @@ const Overview: FC<Props> = ({ symbol, operation, qty, option }) => {
       gap={0.2}
     >
       <Typography mb={0.5} variant="cardTitle">
-        {operation === 'borrow' ? 'Your total debt' : 'Your total earnings'}
+        {operation === 'borrow' ? t('Your total debt') : t('Your total earnings')}
       </Typography>
       <Box display="flex" gap={0.5} mb={1}>
         {option.finalAssets && marketAccount ? (
@@ -59,7 +64,7 @@ const Overview: FC<Props> = ({ symbol, operation, qty, option }) => {
       </Box>
       <Box display="flex" justifyContent="space-between">
         <Typography fontWeight={500} fontSize={12} color="figma.grey.500">
-          Assets to be {operation === 'borrow' ? 'borrowed' : 'deposited'}
+          {t('Assets to be {{action}}', { action: translateOperation(operation, { variant: 'past' }) })}
         </Typography>
         <Box display="flex" gap={0.3} alignItems="center" minWidth={100} justifyContent="right">
           <Typography fontWeight={700} fontSize={13}>
@@ -76,7 +81,10 @@ const Overview: FC<Props> = ({ symbol, operation, qty, option }) => {
       </Box>
       <Box display="flex" justifyContent="space-between">
         <Typography fontWeight={500} fontSize={12} color="figma.grey.500">
-          Total interest fees to {operation === 'borrow' ? 'be paid' : 'receive'} ({toPercentage(rate)} APR)
+          {t('Total interest fees to {{action}} ({{rate}} APR)', {
+            action: operation === 'borrow' ? t('be paid') : t('receive'),
+            rate: toPercentage(rate),
+          })}
         </Typography>
         <Box display="flex" gap={0.3} alignItems="center" minWidth={100} justifyContent="right">
           {option.interest && marketAccount ? (
@@ -99,7 +107,10 @@ const Overview: FC<Props> = ({ symbol, operation, qty, option }) => {
       </Box>
       <Box display="flex" justifyContent="space-between">
         <Typography fontWeight={500} fontSize={12} color="figma.grey.500">
-          {operation === 'borrow' ? 'Loan' : 'Deposit'} maturity date (In {daysLeft(option.maturity || 0)})
+          {t('{{operation}} maturity date (In {{daysLeft}})', {
+            operation: translateOperation(operation, { variant: 'noun' }),
+            daysLeft: daysLeft(option.maturity || 0),
+          })}
         </Typography>
         <Typography fontWeight={700} fontSize={13} noWrap minWidth={100} textAlign="right">
           {parseTimestamp(option.maturity || 0)}
@@ -108,7 +119,7 @@ const Overview: FC<Props> = ({ symbol, operation, qty, option }) => {
       {operation === 'borrow' && (
         <Box display="flex" justifyContent="space-between">
           <Typography fontWeight={500} fontSize={12} color="figma.grey.500">
-            Late payment penalty daily rate
+            {t('Late payment penalty daily rate')}
           </Typography>
           <Typography fontWeight={700} fontSize={13}>
             {toPercentage(parseFloat(formatFixed(marketAccount?.penaltyRate || Zero, 18)) * 86_400)}

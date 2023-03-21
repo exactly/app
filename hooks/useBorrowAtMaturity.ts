@@ -14,6 +14,7 @@ import { OperationHook } from 'types/OperationHook';
 import getBeforeBorrowLimit from 'utils/getBeforeBorrowLimit';
 import useHealthFactor from './useHealthFactor';
 import useAnalytics from './useAnalytics';
+import { useTranslation } from 'react-i18next';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 
@@ -28,6 +29,7 @@ type BorrowAtMaturity = {
 } & OperationHook;
 
 export default (): BorrowAtMaturity => {
+  const { t } = useTranslation();
   const { track } = useAnalytics();
   const { walletAddress } = useWeb3();
   const { date } = useContext(MarketContext);
@@ -176,7 +178,7 @@ export default (): BorrowAtMaturity => {
       if (poolLiquidity && poolLiquidity < parseFloat(value)) {
         return setErrorData({
           status: true,
-          message: 'There is not enough liquidity in this pool',
+          message: t('There is not enough liquidity in this pool'),
         });
       }
 
@@ -191,12 +193,12 @@ export default (): BorrowAtMaturity => {
       ) {
         return setErrorData({
           status: true,
-          message: `You can't borrow more than your borrow limit`,
+          message: t("You can't borrow more than your borrow limit"),
         });
       }
       setErrorData(undefined);
     },
-    [marketAccount, setQty, poolLiquidity, setErrorData],
+    [marketAccount, setQty, poolLiquidity, setErrorData, t],
   );
 
   const borrow = useCallback(async () => {
@@ -207,7 +209,7 @@ export default (): BorrowAtMaturity => {
 
       return setErrorData({
         status: true,
-        message: 'The transaction failed, please check your Maximum Deposit Rate',
+        message: t('The transaction failed, please check your Maximum Deposit Rate'),
       });
     }
 
@@ -280,6 +282,7 @@ export default (): BorrowAtMaturity => {
     ETHRouterContract,
     marketContract,
     handleOperationError,
+    t,
   ]);
 
   const updateAPR = useCallback(async () => {

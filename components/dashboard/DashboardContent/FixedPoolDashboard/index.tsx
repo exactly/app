@@ -3,12 +3,14 @@ import { Grid, Typography } from '@mui/material';
 
 import FixedPoolDashboardTable from 'components/dashboard/DashboardContent/FixedPoolDashboard/FixedPoolDashboardTable';
 import useDashboard from 'hooks/useDashboard';
+import { useTranslation } from 'react-i18next';
 
 type Props = {
   type: 'deposit' | 'borrow';
 };
 
 function FixedPoolDashboard({ type }: Props) {
+  const { t } = useTranslation();
   const { fixedRows } = useDashboard(type);
 
   return (
@@ -21,10 +23,10 @@ function FixedPoolDashboard({ type }: Props) {
       bgcolor="components.bg"
       borderTop="4px solid #008CF4"
     >
-      <Typography variant="h6">Fixed Interest Rate</Typography>
+      <Typography variant="h6">{t('Fixed Interest Rate')}</Typography>
       {fixedRows.length === 0 ? (
         <Typography color="grey.500" mt={1} fontSize="14px">
-          No {type}s found
+          {t('No {{operations}} found', { operations: type === 'deposit' ? t('deposits') : t('borrows') })}
         </Typography>
       ) : (
         <FixedPoolDashboardTable rows={fixedRows} type={type} />

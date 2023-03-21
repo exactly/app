@@ -1,8 +1,9 @@
 import { ErrorCode } from '@ethersproject/logger';
 import { captureException as sentryCaptureException } from '@sentry/nextjs';
 import ErrorInterface from './ErrorInterface';
+import i18n from 'i18n';
 
-const defaultErr = 'There was an error, please try again';
+const defaultErr = i18n.t('There was an error, please try again');
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default (error: any, captureException: typeof sentryCaptureException = sentryCaptureException): string => {
@@ -13,15 +14,15 @@ export default (error: any, captureException: typeof sentryCaptureException = se
 
   switch (error.code) {
     case ErrorCode.ACTION_REJECTED:
-      return 'Transaction rejected by user';
+      return i18n.t('Transaction rejected by user');
     case ErrorCode.TRANSACTION_REPLACED:
-      return 'Transaction cancelled by user';
+      return i18n.t('Transaction cancelled by user');
     case ErrorCode.UNSUPPORTED_OPERATION:
-      return 'Unsupported operation';
+      return i18n.t('Unsupported operation');
     case ErrorCode.INSUFFICIENT_FUNDS:
-      return 'Insufficient ether balance';
+      return i18n.t('Insufficient ether balance');
     case ErrorCode.NONCE_EXPIRED:
-      return 'Nonce expired';
+      return i18n.t('Nonce expired');
     case ErrorCode.UNPREDICTABLE_GAS_LIMIT: {
       if (!error?.error?.data?.originalError?.data) {
         break;
@@ -31,33 +32,33 @@ export default (error: any, captureException: typeof sentryCaptureException = se
 
       switch (name) {
         case 'InsufficientAccountLiquidity':
-          return 'There is not enough liquidity in your account';
+          return i18n.t('There is not enough liquidity in your account');
         case 'InsufficientProtocolLiquidity':
-          return 'There is not enough liquidity in the protocol';
+          return i18n.t('There is not enough liquidity in the protocol');
         case 'Disagreement':
-          return 'Not enough slippage';
+          return i18n.t('Not enough slippage');
         case 'InvalidPrice':
           captureException(error);
-          return 'Invalid price';
+          return i18n.t('Invalid price');
         case 'ZeroDeposit':
-          return 'Cannot deposit 0';
+          return i18n.t('Cannot deposit 0');
         case 'ZeroWithdraw':
-          return 'Cannot withdraw 0';
+          return i18n.t('Cannot withdraw 0');
         case 'ZeroRepay':
-          return 'Cannot repay 0';
+          return i18n.t('Cannot repay 0');
         case 'ZeroBorrow':
-          return 'Cannot borrow 0';
+          return i18n.t('Cannot borrow 0');
         case 'UtilizationExceeded':
-          return 'Utilization rate exceeded';
+          return i18n.t('Utilization rate exceeded');
 
         case 'Error':
           switch (args[0]) {
             case 'TRANSFER_FROM_FAILED':
-              return 'Insufficient assets or lack of approval, please try again';
+              return i18n.t('Insufficient assets or lack of approval, please try again');
             case 'ZERO_SHARES':
-              return 'Cannot deposit 0';
+              return i18n.t('Cannot deposit 0');
             case 'ZERO_ASSETS':
-              return 'Cannot withdraw 0';
+              return i18n.t('Cannot withdraw 0');
           }
           break;
 

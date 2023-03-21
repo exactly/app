@@ -16,12 +16,13 @@ import numbers from 'config/numbers.json';
 import useActionButton from 'hooks/useActionButton';
 import useMaturityPools from 'hooks/useMaturityPools';
 import { useTheme } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 
 type MaturityPoolsTableProps = {
   symbol: string;
 };
 
-const HeadCell: FC<{ title: string; tooltipTitle?: string }> = ({ title, tooltipTitle }) => {
+const HeadCell: FC<{ title: string; tooltipTitle?: string | null }> = ({ title, tooltipTitle }) => {
   return (
     <TableCell align="left">
       <Tooltip title={tooltipTitle} placement="top" arrow>
@@ -34,6 +35,7 @@ const HeadCell: FC<{ title: string; tooltipTitle?: string }> = ({ title, tooltip
 };
 
 const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ symbol }) => {
+  const { t } = useTranslation();
   const { palette } = useTheme();
   const { handleActionClick } = useActionButton();
   const { minAPRValue } = numbers;
@@ -44,16 +46,16 @@ const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ symbol }) => {
       <Table sx={{ bgcolor: 'transparent' }} aria-label="simple table">
         <TableHead>
           <TableRow>
-            <HeadCell title="Maturity" />
-            <HeadCell title="Total Deposits" />
-            <HeadCell title="Total Borrows" />
+            <HeadCell title={t('Maturity')} />
+            <HeadCell title={t('Total Deposits')} />
+            <HeadCell title={t('Total Borrows')} />
             <HeadCell
-              title="Deposit APR"
-              tooltipTitle="The fixed interest APR for a deposit up to the optimal deposit size."
+              title={t('Deposit APR')}
+              tooltipTitle={t('The fixed interest APR for a deposit up to the optimal deposit size.')}
             />
             <HeadCell
-              title="Borrow APR"
-              tooltipTitle="The fixed borrowing interest APR at current utilization level."
+              title={t('Borrow APR')}
+              tooltipTitle={t('The fixed borrowing interest APR at current utilization level.')}
             />
             <TableCell />
             <TableCell />
@@ -97,7 +99,7 @@ const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ symbol }) => {
                   variant="contained"
                   onClick={(e) => handleActionClick(e, 'depositAtMaturity', symbol, maturity)}
                 >
-                  Deposit
+                  {t('Deposit')}
                 </Button>
               </TableCell>
 
@@ -113,7 +115,7 @@ const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ symbol }) => {
                   sx={{ backgroundColor: 'components.bg' }}
                   onClick={(e) => handleActionClick(e, 'borrowAtMaturity', symbol, maturity)}
                 >
-                  Borrow
+                  {t('Borrow')}
                 </Button>
               </TableCell>
             </TableRow>

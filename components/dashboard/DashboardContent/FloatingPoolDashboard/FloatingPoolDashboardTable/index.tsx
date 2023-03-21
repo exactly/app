@@ -1,11 +1,13 @@
 import React, { useMemo } from 'react';
 import { Table, TableBody, TableContainer, TableHead, TableRow } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 
 import { FloatingPoolItemData } from 'types/FloatingPoolItemData';
 
 import TableRowFloatingPool from './TableRowFloatingPool';
 import TableHeadCell, { TableHeader } from 'components/common/TableHeadCell';
 import useSorting from 'hooks/useSorting';
+import useTranslateOperation from 'hooks/useTranslateOperation';
 
 type Props = {
   type: 'deposit' | 'borrow';
@@ -13,31 +15,35 @@ type Props = {
 };
 
 function FloatingPoolDashboardTable({ type, rows }: Props) {
+  const { t } = useTranslation();
+  const translateOperation = useTranslateOperation();
   const { setOrderBy, sortData, direction: sortDirection, isActive: sortActive } = useSorting<FloatingPoolItemData>();
 
   const headers: TableHeader<FloatingPoolItemData>[] = useMemo(() => {
     return [
       {
-        title: 'Asset',
+        title: t('Asset'),
         key: 'asset',
         tooltipPlacement: 'top-start',
         align: 'left',
         sortKey: 'symbol',
       },
       {
-        title: `${type === 'deposit' ? 'Deposited' : 'Borrowed'} Amount`,
+        title: t(`{{action}} Amount`, { action: translateOperation(type, { capitalize: true, variant: 'past' }) }),
         key: 'tokenAmount',
-        tooltipTitle: `Amount of tokens ${type === 'deposit' ? 'deposited' : 'borrowed'} in the pool`,
+        tooltipTitle: t(`Amount of tokens {{action}} in the pool`, {
+          action: type === 'deposit' ? t('deposited') : t('borrowed'),
+        }),
         align: 'left',
       },
       {
-        title: 'Value',
+        title: t('Value'),
         key: 'value',
         align: 'left',
         sortKey: 'valueUSD',
       },
       {
-        title: 'Collateral',
+        title: t('Collateral'),
         key: 'collateral',
         hidden: type !== 'deposit',
         align: 'left',
@@ -53,7 +59,7 @@ function FloatingPoolDashboardTable({ type, rows }: Props) {
         align: 'left',
       },
     ];
-  }, [type]);
+  }, [translateOperation, type, t]);
 
   return (
     <TableContainer>

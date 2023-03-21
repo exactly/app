@@ -4,12 +4,14 @@ import Box from '@mui/system/Box';
 
 import useActionButton from 'hooks/useActionButton';
 import useAccountData from 'hooks/useAccountData';
+import { useTranslation } from 'react-i18next';
 
 type Props = {
   symbol: string;
 };
 
 const OrderAction: FC<Props> = ({ symbol }) => {
+  const { t } = useTranslation();
   const { marketAccount } = useAccountData(symbol);
   const { handleActionClick } = useActionButton();
 
@@ -21,7 +23,7 @@ const OrderAction: FC<Props> = ({ symbol }) => {
         onClick={(e) => handleActionClick(e, 'deposit', symbol)}
         fullWidth
       >
-        Deposit
+        {t('Deposit')}
       </Button>
       <Button
         disabled={!marketAccount}
@@ -29,7 +31,7 @@ const OrderAction: FC<Props> = ({ symbol }) => {
         onClick={(e) => handleActionClick(e, 'borrow', symbol)}
         fullWidth
       >
-        Borrow
+        {t('Borrow')}
       </Button>
     </Box>
   );

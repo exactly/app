@@ -6,6 +6,7 @@ import { MarketContext } from 'contexts/MarketContext';
 import DropdownMenu from 'components/DropdownMenu';
 import parseTimestamp from 'utils/parseTimestamp';
 import ModalInfo from 'components/common/modal/ModalInfo';
+import { useTranslation } from 'react-i18next';
 
 type DateOptionProps = {
   label: string;
@@ -21,13 +22,14 @@ function DateOption({ label, option = false }: DateOptionProps) {
 }
 
 function DateSelector() {
+  const { t } = useTranslation();
   const { date, dates, setDate } = useContext(MarketContext);
 
   return (
-    <ModalInfo label="Fixed rate pool">
+    <ModalInfo label={t('Fixed rate pool')}>
       <Box sx={{ mt: -1 }}>
         <DropdownMenu
-          label="Maturity"
+          label={t('Maturity')}
           options={dates}
           onChange={setDate}
           renderValue={date ? <DateOption label={parseTimestamp(date)} /> : null}

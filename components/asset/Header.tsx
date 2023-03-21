@@ -12,12 +12,14 @@ import networkData from 'config/networkData.json' assert { type: 'json' };
 import useAccountData from 'hooks/useAccountData';
 import ExplorerMenu from './ExplorerMenu';
 import { Box } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 
 type Props = {
   symbol: string;
 };
 
 const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
+  const { t } = useTranslation();
   const { marketAccount } = useAccountData(symbol);
 
   const { chain } = useWeb3();
@@ -59,21 +61,21 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
     const { decimals, usdPrice } = marketAccount ?? {};
     return [
       {
-        label: 'Total Deposits',
+        label: t('Total Deposits'),
         value:
           floatingDeposits !== undefined && fixedDeposits !== undefined && decimals
             ? `$${formatNumber(formatFixed(floatingDeposits.add(fixedDeposits), decimals))}`
             : undefined,
       },
       {
-        label: 'Total Borrows',
+        label: t('Total Borrows'),
         value:
           floatingBorrows !== undefined && fixedBorrows !== undefined && decimals
             ? `$${formatNumber(formatFixed(floatingBorrows.add(fixedBorrows), decimals))}`
             : undefined,
       },
       {
-        label: 'Total Available',
+        label: t('Total Available'),
         value:
           floatingBorrows !== undefined &&
           fixedBorrows !== undefined &&
@@ -86,12 +88,12 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
             : undefined,
       },
       {
-        label: 'Oracle Price',
+        label: t('Oracle Price'),
         value: usdPrice ? `$${formatNumber(formatFixed(usdPrice, 18), '', true)}` : undefined,
-        tooltipTitle: 'The price displayed here is obtained from Chainlink.',
+        tooltipTitle: t('The price displayed here is obtained from Chainlink.'),
       },
     ];
-  }, [marketAccount, floatingDeposits, fixedDeposits, floatingBorrows, fixedBorrows]);
+  }, [marketAccount, floatingDeposits, fixedDeposits, floatingBorrows, fixedBorrows, t]);
 
   const etherscan = networkData[String(chain?.id) as keyof typeof networkData]?.etherscan;
   return (

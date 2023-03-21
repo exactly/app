@@ -1,4 +1,5 @@
-import React, { FC } from 'react';
+import React, { type FC } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import ModalTxCost from 'components/common/modal/ModalTxCost';
 import ModalGif from 'components/common/modal/ModalGif';
@@ -22,8 +23,11 @@ import ModalRewards from 'components/common/modal/ModalRewards';
 import useFloatingPoolAPR from 'hooks/useFloatingPoolAPR';
 import { toPercentage } from 'utils/utils';
 import ModalInfoAPR from 'components/OperationsModal/Info/ModalInfoAPR';
+import useTranslateOperation from 'hooks/useTranslateOperation';
 
 const Deposit: FC = () => {
+  const { t } = useTranslation();
+  const translateOperation = useTranslateOperation();
   const { operation } = useModalStatus();
   const { symbol, errorData, qty, gasCost, tx, requiresApproval, assetContract } = useOperationContext();
   const { isLoading, onMax, handleInputChange, handleSubmitAction, deposit, needsApproval, previewGasCost } =
@@ -47,7 +51,7 @@ const Deposit: FC = () => {
               decimals={marketAccount?.decimals ?? 18}
               onMax={onMax}
               onChange={handleInputChange}
-              label="Your balance"
+              label={t('Your balance')}
               amount={walletBalance}
             />
           </ModalBoxRow>
@@ -57,7 +61,7 @@ const Deposit: FC = () => {
             </ModalBoxCell>
             <ModalBoxCell divisor>
               <ModalInfoAPR
-                label="Current Variable APR"
+                label={t('Current Variable APR')}
                 apr={loading ? undefined : toPercentage(depositAPR)}
                 withIcon
                 symbol={symbol}
@@ -85,7 +89,7 @@ const Deposit: FC = () => {
 
       <Grid item mt={{ xs: 2, sm: 3 }}>
         <ModalSubmit
-          label="Deposit"
+          label={translateOperation(operation, { capitalize: true })}
           symbol={symbol}
           submit={handleSubmitAction}
           isLoading={isLoading || previewIsLoading}

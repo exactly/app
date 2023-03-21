@@ -1,5 +1,6 @@
 import React, { FC, useEffect, useMemo } from 'react';
-import { Box, capitalize, Divider, Tooltip, Typography, useTheme } from '@mui/material';
+import { useTranslation } from 'react-i18next';
+import { Box, Divider, Tooltip, Typography, useTheme } from '@mui/material';
 import AssetInput from 'components/OperationsModal/AssetInput';
 import { MarketsBasicOption, useMarketsBasic } from 'contexts/MarketsBasicContext';
 import { useOperationContext } from 'contexts/OperationContext';
@@ -19,10 +20,13 @@ import useBorrow from 'hooks/useBorrow';
 import useRewards from 'hooks/useRewards';
 import numbers from 'config/numbers.json';
 import InfoOutlined from '@mui/icons-material/InfoOutlined';
+import useTranslateOperation from 'hooks/useTranslateOperation';
 
 const { minAPRValue } = numbers;
 
 const MarketsBasic: FC = () => {
+  const { t } = useTranslation();
+  const translateOperation = useTranslateOperation();
   const { palette } = useTheme();
   const { openOperationModal } = useModalStatus();
   const { symbol = 'USDC', operation, selected, setSelected } = useMarketsBasic();
@@ -136,28 +140,36 @@ const MarketsBasic: FC = () => {
           borderRadius="8px"
         >
           <Box px={2} py={1.5}>
-            <Typography variant="cardTitle">{`Asset to be ${isDeposit ? 'deposited' : 'borrowed'}`}</Typography>
+            <Typography variant="cardTitle">
+              {t(`Asset to be {{action}}`, { action: translateOperation(operation, { variant: 'past' }) })}
+            </Typography>
             <AssetInput
               qty={qty}
               symbol={symbol}
               decimals={marketAccount?.decimals ?? 18}
               onMax={isDeposit ? onMaxDeposit : onMaxBorrow}
               onChange={isDeposit ? handleDeposit : handleBorrow}
-              label={isDeposit ? 'Your balance' : 'Safe borrow limit'}
+              label={isDeposit ? t('Your balance') : t('Safe borrow limit')}
               amount={isDeposit ? walletBalance : safeMaximumBorrow}
-              tooltip={isDeposit ? '' : 'The maximum amount you can borrow without putting your health factor at risk'}
+              tooltip={
+                isDeposit ? '' : t('The maximum amount you can borrow without putting your health factor at risk')
+              }
             />
           </Box>
           <Divider sx={{ borderColor: 'grey.200' }} />
           <Box px={1} py={1.5}>
             <Typography variant="cardTitle" sx={{ px: 1 }}>
-              {`${capitalize(operation)} duration`}
+              {t('{{operation}} duration', { operation: operation === 'borrow' ? t('Borrow') : t('Deposit') })}
             </Typography>
             <Tooltip
               title={
                 operation === 'deposit'
-                  ? 'Your deposit can be withdrawn at any time, but please keep in mind that if you withdraw it before the maturity date, the current protocol rates will apply.'
-                  : 'You can repay your loan at any time before its maturity date. If you do so after the maturity date, a daily interest of 2% will apply.'
+                  ? t(
+                      'Your deposit can be withdrawn at any time, but please keep in mind that if you withdraw it before the maturity date, the current protocol rates will apply.',
+                    )
+                  : t(
+                      'You can repay your loan at any time before its maturity date. If you do so after the maturity date, a daily interest of 2% will apply.',
+                    )
               }
               placement="top"
               arrow

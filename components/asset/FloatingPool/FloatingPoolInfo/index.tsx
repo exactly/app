@@ -13,12 +13,14 @@ import useAccountData from 'hooks/useAccountData';
 import useFloatingPoolAPR from 'hooks/useFloatingPoolAPR';
 import useRewards from 'hooks/useRewards';
 import ItemCell from 'components/common/ItemCell';
+import { useTranslation } from 'react-i18next';
 
 type FloatingPoolInfoProps = {
   symbol: string;
 };
 
 const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol }) => {
+  const { t } = useTranslation();
   const { depositAPR, borrowAPR } = useFloatingPoolAPR(symbol);
   const { marketAccount } = useAccountData(symbol);
 
@@ -42,35 +44,39 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol }) => {
   const itemsInfo: ItemInfoProps[] = useMemo(
     () => [
       {
-        label: 'Total Deposits',
+        label: t('Total Deposits'),
         value: deposited !== undefined ? `$${formatNumber(deposited)}` : undefined,
       },
       {
-        label: 'Total Borrows',
+        label: t('Total Borrows'),
         value: borrowed !== undefined ? `$${formatNumber(borrowed)}` : undefined,
       },
       {
-        label: 'Total Available',
+        label: t('Total Available'),
         value: deposited !== undefined && borrowed !== undefined ? `$${formatNumber(deposited - borrowed)}` : undefined,
       },
       {
-        label: 'Deposit APR',
+        label: t('Deposit APR'),
         value:
           depositAPR !== undefined && marketAccount?.assetSymbol ? (
             <ItemCell key={symbol} value={toPercentage(depositAPR)} symbol={marketAccount.assetSymbol} />
           ) : undefined,
-        tooltipTitle: 'Change in the underlying Variable Rate Pool shares value over the last 15 minutes, annualized.',
+        tooltipTitle: t(
+          'Change in the underlying Variable Rate Pool shares value over the last 15 minutes, annualized.',
+        ),
       },
       {
-        label: 'Borrow APR',
+        label: t('Borrow APR'),
         value:
           borrowAPR !== undefined && marketAccount?.assetSymbol ? (
             <ItemCell key={symbol} value={toPercentage(borrowAPR)} symbol={marketAccount.assetSymbol} />
           ) : undefined,
-        tooltipTitle: 'The borrowing interest APR related to the current utilization rate in the Variable Rate Pool.',
+        tooltipTitle: t(
+          'The borrowing interest APR related to the current utilization rate in the Variable Rate Pool.',
+        ),
       },
       {
-        label: 'Utilization Rate',
+        label: t('Utilization Rate'),
         value:
           deposited !== undefined && borrowed !== undefined
             ? toPercentage(deposited > 0 ? borrowed / deposited : undefined)
@@ -79,7 +85,7 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol }) => {
       ...(rates[symbol] && rates[symbol].some((r) => r.floatingDeposit.gt(Zero))
         ? [
             {
-              label: 'Deposit Rewards APR',
+              label: t('Deposit Rewards APR'),
               value: (
                 <>
                   {rates[symbol].map((r) => (
@@ -91,14 +97,14 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol }) => {
                   ))}
                 </>
               ),
-              tooltipTitle: 'This APR assumes a constant price for the OP token and distribution rate.',
+              tooltipTitle: t('This APR assumes a constant price for the OP token and distribution rate.'),
             },
           ]
         : []),
       ...(rates[symbol] && rates[symbol].some((r) => r.borrow.gt(Zero))
         ? [
             {
-              label: 'Borrow Rewards APR',
+              label: t('Borrow Rewards APR'),
               value: (
                 <>
                   {rates[symbol].map((r) => (
@@ -106,23 +112,24 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol }) => {
                   ))}
                 </>
               ),
-              tooltipTitle: 'This APR assumes a constant price for the OP token and distribution rate.',
+              tooltipTitle: t('This APR assumes a constant price for the OP token and distribution rate.'),
             },
           ]
         : []),
       {
-        label: 'Risk-Adjust Factor',
+        label: t('Risk-Adjust Factor'),
         value: marketAccount?.adjustFactor ? formatFixed(marketAccount.adjustFactor, 18) : undefined,
-        tooltipTitle:
+        tooltipTitle: t(
           'The Deposit and Borrow risk-adjust factor is a measure that helps evaluate how risky an asset is compared to others. The higher the number, the safer the asset is considered to be, making it more valuable as collateral when requesting a loan.',
+        ),
       },
     ],
-    [deposited, borrowed, depositAPR, marketAccount, symbol, borrowAPR, rates],
+    [deposited, borrowed, depositAPR, marketAccount, symbol, borrowAPR, rates, t],
   );
 
   return (
     <Box display="flex" justifyContent="space-between" flexDirection="column" gap={2}>
-      <HeaderInfo title="Variable Interest Rate" itemsInfo={itemsInfo} shadow={false} xs={4} />
+      <HeaderInfo title={t('Variable Interest Rate')} itemsInfo={itemsInfo} shadow={false} xs={4} />
       <Box pb={3} px={3} mt={{ xs: -1, sm: 0 }}>
         <OrderAction symbol={symbol} />
       </Box>

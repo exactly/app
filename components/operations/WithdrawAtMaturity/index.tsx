@@ -31,10 +31,14 @@ import ModalInfo from 'components/common/modal/ModalInfo';
 import ModalInfoMaturityStatus from 'components/OperationsModal/Info/ModalInfoMaturityStatus';
 import useHandleOperationError from 'hooks/useHandleOperationError';
 import useAnalytics from 'hooks/useAnalytics';
+import { useTranslation } from 'react-i18next';
+import useTranslateOperation from 'hooks/useTranslateOperation';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 
 const WithdrawAtMaturity: FC = () => {
+  const { t } = useTranslation();
+  const translateOperation = useTranslateOperation();
   const { track } = useAnalytics();
   const { operation } = useModalStatus();
   const { walletAddress } = useWeb3();
@@ -104,13 +108,13 @@ const WithdrawAtMaturity: FC = () => {
     const parsedQtyValue = parseFixed(qty, marketAccount.decimals);
 
     if (parsedQtyValue.isZero()) {
-      return setErrorData({ status: true, message: 'Cannot withdraw 0' });
+      return setErrorData({ status: true, message: t('Cannot withdraw 0') });
     }
 
     if (parsedQtyValue.gt(positionAssets)) {
       return setErrorData({
         status: true,
-        message: `You can't withdraw more than the deposited amount`,
+        message: t(`You can't withdraw more than the deposited amount`),
       });
     }
 
@@ -136,6 +140,7 @@ const WithdrawAtMaturity: FC = () => {
     walletAddress,
     isEarlyWithdraw,
     slippage,
+    t,
   ]);
 
   useEffect(() => {
@@ -304,7 +309,7 @@ const WithdrawAtMaturity: FC = () => {
               decimals={decimals}
               onMax={onMax}
               onChange={setQty}
-              label="Deposited"
+              label={t('Deposited')}
               amount={amountAtFinish}
             />
           </ModalBoxRow>
@@ -315,14 +320,14 @@ const WithdrawAtMaturity: FC = () => {
             <ModalBoxCell>{date && <ModalInfoMaturityStatus date={date} />}</ModalBoxCell>
             <ModalBoxCell>
               <ModalInfoAmount
-                label="Amount at maturity"
+                label={t('Amount at maturity')}
                 symbol={symbol}
                 value={formatNumber(amountAtFinish, symbol, true)}
               />
             </ModalBoxCell>
             <ModalBoxCell>
               <ModalInfoAmount
-                label="Amount to receive"
+                label={t('Amount to receive')}
                 value={formatNumber(formatFixed(amountToWithdraw, decimals), symbol, true)}
                 symbol={symbol}
               />
@@ -339,7 +344,7 @@ const WithdrawAtMaturity: FC = () => {
       <Grid item mt={2}>
         {errorData?.component !== 'gas' && <ModalTxCost gasCost={gasCost} />}
         <ModalAdvancedSettings>
-          <ModalInfo label="Min amount to withdraw" variant="row">
+          <ModalInfo label={t('Min amount to withdraw')} variant="row">
             {formatNumber(formatFixed(minAmountToWithdraw, decimals), symbol, true)}
           </ModalInfo>
           {isEarlyWithdraw && (
@@ -359,7 +364,7 @@ const WithdrawAtMaturity: FC = () => {
 
       <Grid item mt={{ xs: 2, sm: 3 }}>
         <ModalSubmit
-          label="Withdraw"
+          label={translateOperation(operation, { capitalize: true })}
           symbol={symbol === 'WETH' && marketAccount ? marketAccount.symbol : symbol}
           submit={handleSubmitAction}
           isLoading={isLoading}

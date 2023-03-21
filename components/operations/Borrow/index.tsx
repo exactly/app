@@ -1,4 +1,5 @@
 import React, { type FC } from 'react';
+import { useTranslation } from 'react-i18next';
 import ModalTxCost from 'components/common/modal/ModalTxCost';
 import ModalGif from 'components/common/modal/ModalGif';
 
@@ -19,8 +20,11 @@ import ModalRewards from 'components/common/modal/ModalRewards';
 import ModalInfoAPR from 'components/OperationsModal/Info/ModalInfoAPR';
 import { toPercentage } from 'utils/utils';
 import useFloatingPoolAPR from 'hooks/useFloatingPoolAPR';
+import useTranslateOperation from 'hooks/useTranslateOperation';
 
 const Borrow: FC = () => {
+  const { t } = useTranslation();
+  const translateOperation = useTranslateOperation();
   const { operation } = useModalStatus();
   const { symbol, errorData, qty, gasCost, tx, requiresApproval } = useOperationContext();
   const { borrowAPR } = useFloatingPoolAPR(symbol, qty, 'borrow');
@@ -51,9 +55,9 @@ const Borrow: FC = () => {
               symbol={symbol}
               onMax={onMax}
               onChange={handleInputChange}
-              label="Safe borrow limit"
+              label={t('Safe borrow limit')}
               amount={safeMaximumBorrow}
-              tooltip="The maximum amount you can borrow without putting your health factor at risk"
+              tooltip={t('The maximum amount you can borrow without putting your health factor at risk')}
             />
           </ModalBoxRow>
           <ModalBoxRow>
@@ -61,7 +65,7 @@ const Borrow: FC = () => {
               <ModalInfoHealthFactor qty={qty} symbol={symbol} operation={operation} />
             </ModalBoxCell>
             <ModalBoxCell divisor>
-              <ModalInfoAPR label="Current Variable APR" apr={toPercentage(borrowAPR)} withIcon symbol={symbol} />
+              <ModalInfoAPR label={t('Current Variable APR')} apr={toPercentage(borrowAPR)} withIcon symbol={symbol} />
             </ModalBoxCell>
           </ModalBoxRow>
         </ModalBox>
@@ -84,7 +88,7 @@ const Borrow: FC = () => {
 
       <Grid item mt={{ xs: 2, sm: 3 }}>
         <ModalSubmit
-          label="Borrow"
+          label={translateOperation(operation, { capitalize: true })}
           symbol={symbol === 'WETH' && marketAccount ? marketAccount.symbol : symbol}
           submit={handleSubmitAction}
           isLoading={isLoading || previewIsLoading}

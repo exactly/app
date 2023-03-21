@@ -7,7 +7,6 @@ import {
   DialogTitle,
   IconButton,
   Typography,
-  capitalize,
   useTheme,
   PaperProps,
   Paper,
@@ -22,6 +21,7 @@ import TypeSwitch from './TypeSwitch';
 import Draggable from 'react-draggable';
 import { TransitionProps } from '@mui/material/transitions';
 import { useOperationContext } from 'contexts/OperationContext';
+import useTranslateOperation from 'hooks/useTranslateOperation';
 
 function PaperComponent(props: PaperProps | undefined) {
   const { tx } = useOperationContext();
@@ -52,6 +52,7 @@ const Transition = forwardRef(function Transition(
 });
 
 function OperationsModal() {
+  const translateOperation = useTranslateOperation();
   const { breakpoints, spacing, palette } = useTheme();
   const { open, closeModal, operation } = useModalStatus();
   const { tx } = useOperationContext();
@@ -103,7 +104,7 @@ function OperationsModal() {
             id="draggable-dialog-title"
           >
             <Typography fontWeight={700} fontSize={24} data-testid="modal-title">
-              {capitalize(operation?.replaceAll('AtMaturity', '') ?? '')}
+              {translateOperation(operation, { capitalize: true })}
             </Typography>
             <TypeSwitch />
           </DialogTitle>

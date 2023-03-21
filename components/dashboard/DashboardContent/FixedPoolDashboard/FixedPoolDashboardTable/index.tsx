@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableContainer from '@mui/material/TableContainer';
@@ -8,6 +8,7 @@ import TableRowFixedPool from './TableRowFixedPool';
 import { Pool } from 'types/FixedPool';
 import TableHeadCell, { TableHeader } from 'components/common/TableHeadCell';
 import useSorting from 'hooks/useSorting';
+import { useTranslation } from 'react-i18next';
 
 type Props = {
   type: 'deposit' | 'borrow';
@@ -15,53 +16,52 @@ type Props = {
 };
 
 function FixedPoolDashboardTable({ type, rows }: Props) {
+  const { t } = useTranslation();
   const { setOrderBy, sortData, direction: sortDirection, isActive: sortActive } = useSorting<Pool>();
-  const headers: TableHeader<Pool>[] = useMemo(() => {
-    return [
-      {
-        title: 'Asset',
-        key: 'asset',
-        tooltipPlacement: 'top-start',
-        align: 'left',
-        sortKey: 'symbol',
-      },
-      {
-        title: 'Market value',
-        key: 'deposited amount',
-        align: 'left',
-        sortKey: 'valueUSD',
-      },
-      {
-        title: 'Average Fixed Rate',
-        key: 'average fixed rate',
-        tooltipTitle: 'Average rate for existing deposits',
-        tooltipPlacement: 'top-start',
-        align: 'left',
-      },
-      {
-        title: 'Maturity Date',
-        key: 'maturity date',
-        align: 'left',
-        sortKey: 'maturity',
-      },
-      {
-        title: 'Time Elapsed',
-        key: 'time elapsed',
-        align: 'left',
-      },
-      {
-        title: '',
-        key: 'action',
-        align: 'left',
-      },
-      {
-        title: '',
-        key: 'expandable button',
-        hidden: true,
-        align: 'left',
-      },
-    ];
-  }, []);
+  const headers: TableHeader<Pool>[] = [
+    {
+      title: t('Asset'),
+      key: 'asset',
+      tooltipPlacement: 'top-start',
+      align: 'left',
+      sortKey: 'symbol',
+    },
+    {
+      title: t('Market value'),
+      key: 'deposited amount',
+      align: 'left',
+      sortKey: 'valueUSD',
+    },
+    {
+      title: t('Average Fixed Rate'),
+      key: 'average fixed rate',
+      tooltipTitle: 'Average rate for existing deposits',
+      tooltipPlacement: 'top-start',
+      align: 'left',
+    },
+    {
+      title: t('Maturity Date'),
+      key: 'maturity date',
+      align: 'left',
+      sortKey: 'maturity',
+    },
+    {
+      title: t('Time Elapsed'),
+      key: 'time elapsed',
+      align: 'left',
+    },
+    {
+      title: '',
+      key: 'action',
+      align: 'left',
+    },
+    {
+      title: '',
+      key: 'expandable button',
+      hidden: true,
+      align: 'left',
+    },
+  ];
 
   return (
     <TableContainer>

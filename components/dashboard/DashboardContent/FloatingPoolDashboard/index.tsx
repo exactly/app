@@ -6,12 +6,14 @@ import FloatingPoolDashboardTable from 'components/dashboard/DashboardContent/Fl
 import { Grid, Typography } from '@mui/material';
 import Stack from '@mui/material/Stack';
 import useDashboard from 'hooks/useDashboard';
+import { useTranslation } from 'react-i18next';
 
 type Props = {
   type: 'deposit' | 'borrow';
 };
 
 function FloatingPoolDashboard({ type }: Props) {
+  const { t } = useTranslation();
   const { floatingRows } = useDashboard(type);
 
   return (
@@ -25,7 +27,7 @@ function FloatingPoolDashboard({ type }: Props) {
       borderTop="4px solid #34C53A"
     >
       <Stack direction="row" spacing={2} alignItems="center">
-        <Typography variant="h6">Variable Interest Rate</Typography>
+        <Typography variant="h6">{t('Variable Interest Rate')}</Typography>
         <AddExaTokensButton />
       </Stack>
       <FloatingPoolDashboardTable rows={floatingRows} type={type} />

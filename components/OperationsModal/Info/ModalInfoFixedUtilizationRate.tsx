@@ -14,6 +14,7 @@ import { AddressZero } from '@ethersproject/constants';
 import { useOperationContext } from 'contexts/OperationContext';
 import { Box } from '@mui/material';
 import UtilizationRateWithAreaChart from 'components/charts/UtilizationRateWithAreaChart';
+import { useTranslation } from 'react-i18next';
 
 type Props = {
   qty: string;
@@ -24,6 +25,7 @@ type Props = {
 };
 
 function ModalInfoFixedUtilizationRate({ qty, symbol, operation, variant = 'column', fixedRate }: Props) {
+  const { t } = useTranslation();
   const previewerContract = usePreviewer();
   const { walletAddress } = useWeb3();
   const { marketAccount } = useAccountData(symbol);
@@ -113,7 +115,7 @@ function ModalInfoFixedUtilizationRate({ qty, symbol, operation, variant = 'colu
 
   return (
     <>
-      <ModalInfo label="Pool Utilization Rate" icon={PieChartOutlineRoundedIcon} variant={variant}>
+      <ModalInfo label={t('Pool Utilization Rate')} icon={PieChartOutlineRoundedIcon} variant={variant}>
         <FromTo from={from} to={isLoading ? undefined : to} variant={variant} />
       </ModalInfo>
       {variant === 'row' && (

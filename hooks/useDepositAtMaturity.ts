@@ -10,6 +10,7 @@ import useHandleOperationError from 'hooks/useHandleOperationError';
 import usePreviewer from 'hooks/usePreviewer';
 import { useWeb3 } from 'hooks/useWeb3';
 import { useCallback, useContext, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { OperationHook } from 'types/OperationHook';
 import useAnalytics from './useAnalytics';
 
@@ -26,6 +27,7 @@ type DepositAtMaturity = {
 } & OperationHook;
 
 export default (): DepositAtMaturity => {
+  const { t } = useTranslation();
   const { track } = useAnalytics();
   const { walletAddress } = useWeb3();
   const { date } = useContext(MarketContext);
@@ -146,7 +148,7 @@ export default (): DepositAtMaturity => {
       setQty(value);
 
       if (walletBalance && parseFloat(value) > parseFloat(walletBalance)) {
-        setErrorButton('Insufficient balance');
+        setErrorButton(t('Insufficient balance'));
         return;
       }
       setErrorButton(undefined);
@@ -154,7 +156,7 @@ export default (): DepositAtMaturity => {
 
       setGtMaxYield(!!optimalDepositAmount && parseFixed(value || '0', decimals).gt(optimalDepositAmount));
     },
-    [setQty, walletBalance, setErrorButton, setErrorData, optimalDepositAmount, marketAccount],
+    [setQty, walletBalance, setErrorButton, setErrorData, optimalDepositAmount, marketAccount, t],
   );
 
   const deposit = useCallback(async () => {

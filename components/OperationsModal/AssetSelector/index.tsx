@@ -1,6 +1,7 @@
 import React, { useContext } from 'react';
 import Image from 'next/image';
 import { Box, Skeleton, Typography } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 
 import { MarketContext } from 'contexts/MarketContext';
 
@@ -37,12 +38,13 @@ function Asset({ assetSymbol, option = false }: AssetOptionProps) {
 }
 
 function AssetSelector() {
+  const { t } = useTranslation();
   const { marketSymbol, setMarketSymbol } = useContext(MarketContext);
   const options = useAssets();
 
   return (
     <DropdownMenu
-      label="Asset"
+      label={t('Asset')}
       options={options}
       onChange={setMarketSymbol}
       renderValue={<Asset assetSymbol={marketSymbol} />}

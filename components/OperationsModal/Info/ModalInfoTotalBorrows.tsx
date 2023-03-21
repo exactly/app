@@ -11,6 +11,7 @@ import ModalInfo, { Variant, FromTo } from 'components/common/modal/ModalInfo';
 import { isFixedOperation, Operation } from 'contexts/ModalStatusContext';
 import { MarketContext } from 'contexts/MarketContext';
 import formatSymbol from 'utils/formatSymbol';
+import { useTranslation } from 'react-i18next';
 
 type Props = {
   qty: string;
@@ -20,6 +21,7 @@ type Props = {
 };
 
 function ModalInfoTotalBorrows({ qty, symbol, operation, variant = 'column' }: Props) {
+  const { t } = useTranslation();
   const { marketAccount } = useAccountData(symbol);
   const { date } = useContext(MarketContext);
 
@@ -34,17 +36,17 @@ function ModalInfoTotalBorrows({ qty, symbol, operation, variant = 'column' }: P
       f = pool ? pool.position.principal.add(pool.position.fee) : Zero;
     }
 
-    let t = f[operation.startsWith('borrow') ? 'add' : 'sub'](delta);
-    t = t.lt(Zero) ? Zero : t;
+    let debt = f[operation.startsWith('borrow') ? 'add' : 'sub'](delta);
+    debt = debt.lt(Zero) ? Zero : debt;
 
     return [
       formatNumber(formatFixed(f, marketAccount.decimals), symbol),
-      formatNumber(formatFixed(t, marketAccount.decimals), symbol),
+      formatNumber(formatFixed(debt, marketAccount.decimals), symbol),
     ];
   }, [marketAccount, qty, operation, date, symbol]);
 
   return (
-    <ModalInfo label="Debt amount" icon={SwapHorizIcon} variant={variant}>
+    <ModalInfo label={t('Debt amount')} icon={SwapHorizIcon} variant={variant}>
       <Box display="flex" alignItems="center" gap={0.5}>
         {variant === 'column' && (
           <Image

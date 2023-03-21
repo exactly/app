@@ -11,12 +11,14 @@ import { Box, IconButton, Tooltip, Typography, Grid } from '@mui/material';
 import Link from 'next/link';
 import useAnalytics from 'hooks/useAnalytics';
 import { useRouter } from 'next/router';
+import { useTranslation } from 'react-i18next';
 
 type Props = {
   symbol: string;
 };
 
 const Market: NextPage<Props> = ({ symbol }: Props) => {
+  const { t } = useTranslation();
   const { query } = useRouter();
   const { page } = useAnalytics();
   useEffect(() => void page(), [page]);
@@ -26,13 +28,13 @@ const Market: NextPage<Props> = ({ symbol }: Props) => {
       <Box sx={{ display: 'flex', gap: 0.5 }} mb={1}>
         <Link href={{ pathname: '/', query }} legacyBehavior>
           <IconButton size="small">
-            <Tooltip title="Go Back" placement="top">
+            <Tooltip title={t('Go Back')} placement="top">
               <ArrowBackIcon fontSize="small" />
             </Tooltip>
           </IconButton>
         </Link>
         <Typography color="grey.500" sx={{ fontSize: '13px', fontWeight: 600, my: 'auto' }}>
-          Back
+          {t('Back')}
         </Typography>
       </Box>
       <AssetHeaderInfo symbol={symbol} />

@@ -1,3 +1,4 @@
 {
-  "entry": ["pages/**/*", "scripts/**/*", "sentry.*.config.ts", "cypress.config.ts"]
+  "ignoreUnresolved": ["i18n"],
+  "entry": ["*.config.ts", "*.config.cjs", "pages/**/*", "scripts/**/*", "i18n/index.ts"]
 }

@@ -6,6 +6,7 @@ import formatSymbol from 'utils/formatSymbol';
 import getSymbolDescription from 'utils/getSymbolDescription';
 import useAccountData from 'hooks/useAccountData';
 import { useRouter } from 'next/router';
+import { useTranslation } from 'react-i18next';
 
 type Props = PropsWithChildren<{
   symbol: string;
@@ -13,6 +14,7 @@ type Props = PropsWithChildren<{
 }>;
 
 const MobileAssetCard: FC<Props> = ({ symbol, isFloating, children }) => {
+  const { t } = useTranslation();
   const { query } = useRouter();
   const { marketAccount } = useAccountData(symbol);
   const { palette } = useTheme();
@@ -65,8 +67,9 @@ const MobileAssetCard: FC<Props> = ({ symbol, isFloating, children }) => {
           bgcolor={palette.mode === 'light' ? (isFloating ? '#F3FCF5' : '#F3F7FC') : 'grey.100'}
           color={isFloating ? '#33CC59' : '#0095FF'}
           mb="auto"
+          textTransform="uppercase"
         >
-          {isFloating ? 'VARIABLE' : 'FIXED'}
+          {isFloating ? t('variable') : t('fixed')}
         </Typography>
       </Box>
       {children}

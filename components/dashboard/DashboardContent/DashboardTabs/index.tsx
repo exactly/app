@@ -25,7 +25,6 @@ function DashboardTabs({ initialTab, allTabs }: Props) {
       <Box>
         <TabList
           onChange={(_: React.SyntheticEvent, newTab: string) => setCurrentTab(newTab)}
-          aria-label="lab API tabs example"
           TabIndicatorProps={{ sx: { height: 0 } }}
           textColor="inherit"
           sx={{

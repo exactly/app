@@ -2,6 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import { Box, Button, Typography } from '@mui/material';
 import { useRouter } from 'next/router';
+import { useTranslation } from 'react-i18next';
 
 type Props = {
   code: number;
@@ -10,6 +11,7 @@ type Props = {
 };
 
 function ErrorPageMessage({ code, description, message }: Props) {
+  const { t } = useTranslation();
   const { query } = useRouter();
 
   return (
@@ -23,7 +25,7 @@ function ErrorPageMessage({ code, description, message }: Props) {
         </Typography>
         <Typography>{message}</Typography>
         <Link href={{ pathname: '/', query }}>
-          <Button variant="contained">Go to Markets</Button>
+          <Button variant="contained">{t('Go to Markets')}</Button>
         </Link>
       </Box>
     </Box>

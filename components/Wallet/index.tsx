@@ -9,10 +9,12 @@ import { Avatar, Box, Button, Menu, Typography } from '@mui/material';
 import * as blockies from 'blockies-ts';
 import CopyToClipboardButton from 'components/common/CopyToClipboardButton';
 import { globals } from 'styles/theme';
+import { useTranslation } from 'react-i18next';
 
 const { onlyDesktop } = globals;
 
 function Wallet() {
+  const { t } = useTranslation();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const isMenuOpen = Boolean(anchorEl);
 
@@ -38,7 +40,7 @@ function Wallet() {
   if (!walletAddress) {
     return (
       <Button onClick={connect} variant="contained" sx={{ fontSize: { xs: 10, sm: 13 } }} data-testid="connect-wallet">
-        Connect wallet
+        {t('Connect wallet')}
       </Button>
     );
   }
@@ -48,8 +50,8 @@ function Wallet() {
       <Button
         variant="outlined"
         onClick={openMenu}
-        id="basic-button"
-        aria-controls={isMenuOpen ? 'basic-menu' : undefined}
+        id="wallet-button"
+        aria-controls={isMenuOpen ? 'wallet-menu' : undefined}
         aria-haspopup="true"
         aria-expanded={isMenuOpen ? 'true' : undefined}
         sx={{
@@ -71,12 +73,12 @@ function Wallet() {
         </Typography>
       </Button>
       <Menu
-        id="basic-menu"
+        id="wallet-menu"
         anchorEl={anchorEl}
         open={isMenuOpen}
         onClose={closeMenu}
         MenuListProps={{
-          'aria-labelledby': 'basic-button',
+          'aria-labelledby': 'wallet-button',
         }}
         PaperProps={{
           style: {
@@ -120,7 +122,7 @@ function Wallet() {
             }}
             sx={{ color: 'grey.700', borderColor: '#CFD3D8' }}
           >
-            Disconnect
+            {t('Disconnect')}
           </Button>
         </Box>
       </Menu>

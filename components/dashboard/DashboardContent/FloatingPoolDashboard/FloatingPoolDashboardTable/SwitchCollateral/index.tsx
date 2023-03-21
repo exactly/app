@@ -10,12 +10,14 @@ import { useNetwork } from 'wagmi';
 import useHealthFactor from 'hooks/useHealthFactor';
 import useAccountData from 'hooks/useAccountData';
 import { useWeb3 } from 'hooks/useWeb3';
+import { useTranslation } from 'react-i18next';
 
 type Props = {
   symbol: string;
 };
 
 function SwitchCollateral({ symbol }: Props) {
+  const { t } = useTranslation();
   const { marketAccount, refreshAccountData } = useAccountData(symbol);
   const auditor = useAuditor();
   const { chain } = useNetwork();
@@ -30,11 +32,11 @@ function SwitchCollateral({ symbol }: Props) {
     return Boolean(marketAccount?.isCollateral);
   }, [marketAccount, optimistic]);
 
-  const { disabled, disabledText } = useMemo<{ disabled: boolean; disabledText?: string }>(() => {
+  const { disabled, disabledText } = useMemo<{ disabled: boolean; disabledText?: string | null }>(() => {
     if (!marketAccount || !healthFactor) return { disabled: true };
 
     if (chain && displayNetwork.id !== chain.id) {
-      return { disabled: true, disabledText: 'You are connected to a different network' };
+      return { disabled: true, disabledText: t('You are connected to a different network') };
     }
 
     const { floatingBorrowAssets, fixedBorrowPositions, isCollateral, usdPrice, floatingDepositAssets, adjustFactor } =
@@ -43,7 +45,7 @@ function SwitchCollateral({ symbol }: Props) {
     if (!floatingBorrowAssets.isZero() || fixedBorrowPositions.length > 0) {
       return {
         disabled: true,
-        disabledText: "You can't disable collateral on this asset because you have an active borrow",
+        disabledText: t("You can't disable collateral on this asset because you have an active borrow"),
       };
     }
 
@@ -56,11 +58,11 @@ function SwitchCollateral({ symbol }: Props) {
     );
 
     if (isCollateral && newHF < 1) {
-      return { disabled: true, disabledText: 'Disabling this collateral will make your health factor less than 1' };
+      return { disabled: true, disabledText: t('Disabling this collateral will make your health factor less than 1') };
     }
 
     return { disabled: false };
-  }, [marketAccount, healthFactor, chain, displayNetwork.id]);
+  }, [marketAccount, healthFactor, chain, displayNetwork.id, t]);
 
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -100,8 +102,8 @@ function SwitchCollateral({ symbol }: Props) {
     disabled && disabledText
       ? disabledText
       : checked
-      ? 'Disabling this asset as collateral affects your borrowing power and Health Factor'
-      : 'Enable this asset as collateral';
+      ? t('Disabling this asset as collateral affects your borrowing power and Health Factor')
+      : t('Enable this asset as collateral');
 
   return (
     <Tooltip
@@ -118,7 +120,7 @@ function SwitchCollateral({ symbol }: Props) {
           checked={checked}
           onChange={onToggle}
           inputProps={{
-            'aria-label': 'Use this asset as collateral',
+            'aria-label': t('Use this asset as collateral') ?? undefined,
             'data-testid': `switch-collateral-${symbol}`,
           }}
           disabled={disabled}

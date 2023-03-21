@@ -4,17 +4,19 @@ import PercentIcon from '@mui/icons-material/Percent';
 import ModalInfo from 'components/common/modal/ModalInfo';
 import Image from 'next/image';
 import formatSymbol from 'utils/formatSymbol';
+import { useTranslation } from 'react-i18next';
 
 type Props = {
   apr?: string;
-  label?: string;
+  label?: string | null;
   withIcon?: boolean;
   symbol?: string;
 };
 
 function ModalInfoAPR({ apr, label, withIcon, symbol }: Props) {
+  const { t } = useTranslation();
   return (
-    <ModalInfo label={label || 'Your APR'} variant="column" icon={withIcon ? PercentIcon : undefined}>
+    <ModalInfo label={label || t('Your APR')} variant="column" icon={withIcon ? PercentIcon : undefined}>
       {apr ? (
         <Box display="flex" gap={1}>
           <Typography fontWeight={600} fontSize={19} color="grey.900">

@@ -8,6 +8,7 @@ import useBalance from 'hooks/useBalance';
 import useHandleOperationError from 'hooks/useHandleOperationError';
 import { useWeb3 } from 'hooks/useWeb3';
 import { useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { OperationHook } from 'types/OperationHook';
 import useAnalytics from './useAnalytics';
 
@@ -18,6 +19,7 @@ type Deposit = {
 } & OperationHook;
 
 export default (): Deposit => {
+  const { t } = useTranslation();
   const { track } = useAnalytics();
   const { walletAddress } = useWeb3();
 
@@ -110,13 +112,13 @@ export default (): Deposit => {
       setQty(value);
 
       if (walletBalance && parseFloat(value) > parseFloat(walletBalance)) {
-        setErrorButton('Insufficient balance');
+        setErrorButton(t('Insufficient balance'));
         return;
       }
       setErrorButton(undefined);
       setErrorData(undefined);
     },
-    [setQty, walletBalance, setErrorData, setErrorButton],
+    [setQty, walletBalance, setErrorData, setErrorButton, t],
   );
 
   const deposit = useCallback(async () => {

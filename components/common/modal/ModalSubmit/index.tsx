@@ -1,22 +1,26 @@
 import React, { FC, MouseEventHandler } from 'react';
 import { LoadingButton } from '@mui/lab';
-import { Button, capitalize, CircularProgress, Typography } from '@mui/material';
+import { Button, CircularProgress, Typography } from '@mui/material';
 import { Box } from '@mui/system';
 import { useOperationContext } from 'contexts/OperationContext';
 import { useModalStatus } from 'contexts/ModalStatusContext';
 import { useNetwork, useSwitchNetwork } from 'wagmi';
 import { useWeb3 } from 'hooks/useWeb3';
+import { useTranslation } from 'react-i18next';
+import useTranslateOperation from 'hooks/useTranslateOperation';
 
 type Props = {
   symbol: string;
   submit: MouseEventHandler;
-  label: string;
+  label: string | null;
   requiresApproval?: boolean;
   isLoading?: boolean;
   disabled?: boolean;
 };
 
 function ModalSubmit({ requiresApproval = false, isLoading = false, disabled = false, submit, symbol, label }: Props) {
+  const { t } = useTranslation();
+  const translateOperation = useTranslateOperation();
   const { loadingButton, isLoading: isLoadingOp, tx, errorButton } = useOperationContext();
   const { operation } = useModalStatus();
   const { isConnected, chain: displayNetwork, connect } = useWeb3();
@@ -26,7 +30,7 @@ function ModalSubmit({ requiresApproval = false, isLoading = false, disabled = f
   if (!isConnected) {
     return (
       <Button fullWidth onClick={connect} variant="contained" data-testid="modal-connect-wallet">
-        Connect wallet
+        {t('Connect wallet')}
       </Button>
     );
   }
@@ -40,7 +44,7 @@ function ModalSubmit({ requiresApproval = false, isLoading = false, disabled = f
         loading={switchIsLoading}
         data-testid="modal-switch-network"
       >
-        Please switch to {displayNetwork.name} network
+        {t('Please switch to {{network}} network', { network: displayNetwork.name })}
       </LoadingButton>
     );
   }
@@ -62,7 +66,7 @@ function ModalSubmit({ requiresApproval = false, isLoading = false, disabled = f
         disabled={disabled}
         data-testid="modal-approve"
       >
-        Approve {symbol}
+        {t('Approve {{symbol}}', { symbol })}
       </LoadingButton>
     );
   }
@@ -75,8 +79,9 @@ function ModalSubmit({ requiresApproval = false, isLoading = false, disabled = f
         <LoadingIndicator
           withCircularProgress={!isLoadingOp || Boolean(tx)}
           label={
-            (isLoadingOp && !tx && 'Sign the transaction on your wallet') ||
-            ((isLoadingOp || Boolean(tx)) && `${capitalize(operation?.replaceAll('AtMaturity', ''))}ing ${symbol}`) ||
+            (isLoadingOp && !tx && t('Sign the transaction on your wallet')) ||
+            ((isLoadingOp || Boolean(tx)) &&
+              `${translateOperation(operation, { variant: 'present', capitalize: true })} ${symbol}`) ||
             ''
           }
         />
@@ -94,7 +99,7 @@ function ModalSubmit({ requiresApproval = false, isLoading = false, disabled = f
 
 type LoadingIndicatorProps = {
   withCircularProgress?: boolean;
-  label?: string;
+  label?: string | null;
 };
 
 const LoadingIndicator: FC<LoadingIndicatorProps> = ({ withCircularProgress, label }) => {

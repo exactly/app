@@ -1,4 +1,5 @@
 import React, { ChangeEventHandler, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Box, Button, ClickAwayListener, InputBase, Typography } from '@mui/material';
 import ModeEditRoundedIcon from '@mui/icons-material/ModeEditRounded';
 
@@ -17,11 +18,12 @@ function filterPasteValue(e: React.ClipboardEvent<HTMLInputElement | HTMLTextAre
 }
 
 function ModalInfoEditableSlippage({ value, onChange }: Props) {
+  const { t } = useTranslation();
   const [editable, setEditable] = useState(false);
   const blockedCharacters = ['e', 'E', '+', '-', ','];
 
   return (
-    <ModalInfo label="Slippage Tolerance" variant="row">
+    <ModalInfo label={t('Slippage Tolerance')} variant="row">
       <ClickAwayListener onClickAway={() => setEditable(false)}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }} onClick={() => setEditable(true)}>
           {editable ? (
@@ -32,7 +34,7 @@ function ModalInfoEditableSlippage({ value, onChange }: Props) {
                   type: 'number',
                   value: value,
                   onChange: onChange,
-                  name: 'Slippage Tolerance',
+                  name: t('Slippage Tolerance'),
                   onKeyDown: (e) => blockedCharacters.includes(e.key) && e.preventDefault(),
                   onPaste: filterPasteValue,
                   step: 'any',

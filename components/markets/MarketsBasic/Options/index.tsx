@@ -9,6 +9,7 @@ import { MarketsBasicOperation, MarketsBasicOption } from 'contexts/MarketsBasic
 import { toPercentage } from 'utils/utils';
 import numbers from 'config/numbers.json';
 import { Zero } from '@ethersproject/constants';
+import { useTranslation } from 'react-i18next';
 
 type Props = {
   symbol: string;
@@ -31,6 +32,7 @@ const Options: FC<Props> = ({
   operation,
   bestOption,
 }) => {
+  const { t } = useTranslation();
   const { palette } = useTheme();
   const { minAPRValue } = numbers;
 
@@ -73,7 +75,7 @@ const Options: FC<Props> = ({
                   >
                     {maturity || maturity === 0 ? (
                       <Typography fontWeight={700} fontSize={13} color="grey.900" my="auto">
-                        {maturity ? daysLeft(maturity) : 'Flexible'}
+                        {maturity ? daysLeft(maturity) : t('Flexible')}
                       </Typography>
                     ) : (
                       <Skeleton width={52} height={20} />
@@ -83,7 +85,9 @@ const Options: FC<Props> = ({
                         arrow
                         title={
                           maturity === 0
-                            ? 'This option currently offers the best APR, but please note that is a variable pool and it may change at any time based on market conditions.'
+                            ? t(
+                                'This option currently offers the best APR, but please note that is a variable pool and it may change at any time based on market conditions.',
+                              )
                             : ''
                         }
                       >
@@ -98,7 +102,7 @@ const Options: FC<Props> = ({
                           sx={{ background: 'linear-gradient(66.92deg, #00CC68 34.28%, #00CC8F 100%)' }}
                         >
                           <Typography variant="chip" color="components.bg">
-                            BEST
+                            {t('BEST')}
                           </Typography>
                         </Box>
                       </Tooltip>
@@ -120,7 +124,7 @@ const Options: FC<Props> = ({
                                 color="figma.grey.500"
                                 textAlign="right"
                               >
-                                Rewards
+                                {t('Rewards')}
                               </Typography>
                               <Tooltip
                                 componentsProps={{ tooltip: { sx: { maxWidth: 260 } } }}
@@ -149,7 +153,7 @@ const Options: FC<Props> = ({
                           color="figma.grey.500"
                           textAlign="right"
                         >
-                          {maturity === 0 ? 'Variable' : 'Fixed'} rate
+                          {maturity === 0 ? t('Variable Rate') : t('Fixed Rate')}
                         </Typography>
                         <Tooltip
                           componentsProps={{ tooltip: { sx: { maxWidth: 260 } } }}
@@ -172,56 +176,65 @@ const Options: FC<Props> = ({
   );
 };
 
-const TooltipRewards = () => (
-  <Box display="flex" flexDirection="column" gap={0.5}>
-    <Typography fontSize={12} color="grey.700">
-      This percentage stands for the APR of rewards earned for operating on this pool.
-    </Typography>
-    <Typography fontSize={12} color="grey.700">
-      Please note that the APR of rewards can vary over time depending on the market conditions.
-    </Typography>
-  </Box>
-);
+const TooltipRewards = () => {
+  const { t } = useTranslation();
+  return (
+    <Box display="flex" flexDirection="column" gap={0.5}>
+      <Typography fontSize={12} color="grey.700">
+        {t('This percentage stands for the APR of rewards earned for operating on this pool.')}
+      </Typography>
+      <Typography fontSize={12} color="grey.700">
+        {t('Please note that the APR of rewards can vary over time depending on the market conditions.')}
+      </Typography>
+    </Box>
+  );
+};
 
-const TooltipFixedRate = () => (
-  <Box display="flex" flexDirection="column" gap={0.5}>
-    <Typography fontSize={12} color="grey.700">
-      This percentage stands for a loan&apos;s APR (Annual Percentage Rate).
-    </Typography>
-    <Typography fontSize={12} color="grey.700">
-      A fixed interest rate remains the same for the entire term of the loan.
-    </Typography>
-    <Typography fontSize={12} color="blue" sx={{ textDecoration: 'underline' }}>
-      <a
-        target="_blank"
-        rel="noreferrer noopener"
-        href="https://docs.exact.ly/getting-started/math-paper#4.-fixed-rate-pool"
-      >
-        Learn more about fixed rates.
-      </a>
-    </Typography>
-  </Box>
-);
+const TooltipFixedRate = () => {
+  const { t } = useTranslation();
+  return (
+    <Box display="flex" flexDirection="column" gap={0.5}>
+      <Typography fontSize={12} color="grey.700">
+        {t("This percentage stands for a loan's APR (Annual Percentage Rate).")}
+      </Typography>
+      <Typography fontSize={12} color="grey.700">
+        {t('A fixed interest rate remains the same for the entire term of the loan.')}
+      </Typography>
+      <Typography fontSize={12} color="blue" sx={{ textDecoration: 'underline' }}>
+        <a
+          target="_blank"
+          rel="noreferrer noopener"
+          href="https://docs.exact.ly/getting-started/math-paper#4.-fixed-rate-pool"
+        >
+          {t('Learn more about fixed rates.')}
+        </a>
+      </Typography>
+    </Box>
+  );
+};
 
-const TooltipFloatingRate = () => (
-  <Box display="flex" flexDirection="column" gap={0.5}>
-    <Typography fontSize={12} color="grey.700">
-      This percentage stands for a loan&apos;s APR (Annual Percentage Rate).
-    </Typography>
-    <Typography fontSize={12} color="grey.700">
-      A variable interest rate varies over time depending on market changes.
-    </Typography>
-    <Typography fontSize={12} color="blue" sx={{ textDecoration: 'underline' }}>
-      <a
-        target="_blank"
-        rel="noreferrer noopener"
-        href="https://docs.exact.ly/getting-started/math-paper#3.-variable-rate-pool"
-      >
-        Learn more about variable rates.
-      </a>
-    </Typography>
-  </Box>
-);
+const TooltipFloatingRate = () => {
+  const { t } = useTranslation();
+  return (
+    <Box display="flex" flexDirection="column" gap={0.5}>
+      <Typography fontSize={12} color="grey.700">
+        {t("This percentage stands for a loan's APR (Annual Percentage Rate).")}
+      </Typography>
+      <Typography fontSize={12} color="grey.700">
+        {t('A variable interest rate varies over time depending on market changes.')}
+      </Typography>
+      <Typography fontSize={12} color="blue" sx={{ textDecoration: 'underline' }}>
+        <a
+          target="_blank"
+          rel="noreferrer noopener"
+          href="https://docs.exact.ly/getting-started/math-paper#3.-variable-rate-pool"
+        >
+          {t('Learn more about variable rates.')}
+        </a>
+      </Typography>
+    </Box>
+  );
+};
 
 const OptionRate: FC<{
   isLoading?: boolean;
@@ -230,6 +243,7 @@ const OptionRate: FC<{
   bottom: React.ReactNode;
   minWidth?: number;
 }> = ({ isLoading = false, value, symbol, bottom, minWidth = 0 }) => {
+  const { t } = useTranslation();
   return (
     <Box display="flex" flexDirection="column" minWidth={minWidth}>
       <Box display="flex" alignItems="center" justifyContent="right" gap={0.3}>
@@ -239,7 +253,7 @@ const OptionRate: FC<{
               {value}
             </Typography>
             <Typography fontWeight={700} fontSize={{ xs: 11, sm: 13 }} color="grey.900" textAlign="right">
-              APR
+              {t('APR')}
             </Typography>
           </Box>
         ) : (

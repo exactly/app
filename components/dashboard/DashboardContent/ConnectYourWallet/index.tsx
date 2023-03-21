@@ -1,8 +1,10 @@
 import React from 'react';
 import { Box, Button, Typography } from '@mui/material';
 import { useWeb3 } from 'hooks/useWeb3';
+import { useTranslation } from 'react-i18next';
 
 function ConnectYourWallet() {
+  const { t } = useTranslation();
   const { connect } = useWeb3();
 
   return (
@@ -16,12 +18,12 @@ function ConnectYourWallet() {
       mt={5}
       gap={1}
     >
-      <Typography fontWeight={700}>Connect your wallet</Typography>
+      <Typography fontWeight={700}>{t('Connect your wallet')}</Typography>
       <Typography textAlign="center" fontSize={13} color="grey.700">
-        Please connect your wallet to see your deposits and borrowings.
+        {t('Please connect your wallet to see your deposits and borrowings.')}
       </Typography>
       <Button onClick={connect} variant="contained" sx={{ marginTop: 2 }}>
-        Connect wallet
+        {t('Connect wallet')}
       </Button>
     </Box>
   );

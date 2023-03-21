@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { parseFixed } from '@ethersproject/bignumber';
 import FavoriteBorderOutlinedIcon from '@mui/icons-material/FavoriteBorderOutlined';
 import { WeiPerEther, Zero } from '@ethersproject/constants';
+import { useTranslation } from 'react-i18next';
 
 import parseHealthFactor from 'utils/parseHealthFactor';
 
@@ -19,6 +20,7 @@ type Props = {
 };
 
 function ModalInfoHealthFactor({ qty, symbol, operation, variant = 'column' }: Props) {
+  const { t } = useTranslation();
   const { marketAccount } = useAccountData(symbol);
 
   const healthFactor = useHealthFactor();
@@ -88,7 +90,7 @@ function ModalInfoHealthFactor({ qty, symbol, operation, variant = 'column' }: P
   }, [healthFactor, newQty, marketAccount, operation]);
 
   return (
-    <ModalInfo label="Your Health Factor" icon={FavoriteBorderOutlinedIcon} variant={variant}>
+    <ModalInfo label={t('Your Health Factor')} icon={FavoriteBorderOutlinedIcon} variant={variant}>
       <FromTo from={beforeHealthFactor} to={afterHealthFactor} variant={variant} />
     </ModalInfo>
   );

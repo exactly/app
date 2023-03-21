@@ -1,7 +1,8 @@
-import { Box, Typography } from '@mui/material';
+import React, { FC } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Box, ButtonBase, Typography } from '@mui/material';
 import { MarketsBasicOperation, useMarketsBasic } from 'contexts/MarketsBasicContext';
 import { useOperationContext } from 'contexts/OperationContext';
-import React, { FC } from 'react';
 
 type OperationTabProps = {
   label: string;
@@ -11,19 +12,21 @@ type OperationTabProps = {
 
 const OperationTab: FC<OperationTabProps> = ({ label, isSelected, onClick }) => {
   return (
-    <Typography
-      fontWeight={700}
-      fontSize={15}
-      color={isSelected ? 'grey.900' : 'figma.grey.600'}
-      sx={{ cursor: 'pointer', '&:hover': { color: 'grey.900' } }}
-      onClick={onClick}
-    >
-      {label}
-    </Typography>
+    <ButtonBase onClick={onClick} disableRipple>
+      <Typography
+        fontWeight={700}
+        fontSize={15}
+        color={isSelected ? 'grey.900' : 'figma.grey.600'}
+        sx={{ '&:hover': { color: 'grey.900' } }}
+      >
+        {label}
+      </Typography>
+    </ButtonBase>
   );
 };
 
 const OperationTabs: FC = () => {
+  const { t } = useTranslation();
   const { operation, onChangeOperation, setSelected } = useMarketsBasic();
   const { setQty, setErrorData, setLoadingButton, setErrorButton } = useOperationContext();
 
@@ -39,12 +42,12 @@ const OperationTabs: FC = () => {
   return (
     <Box display="flex" gap={2}>
       <OperationTab
-        label="Deposit"
+        label={t('Deposit')}
         isSelected={operation === 'deposit'}
         onClick={() => handleOperationChange('deposit')}
       />
       <OperationTab
-        label="Borrow"
+        label={t('Borrow')}
         isSelected={operation === 'borrow'}
         onClick={() => handleOperationChange('borrow')}
       />
