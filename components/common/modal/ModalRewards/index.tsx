@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 import ModalInfo from '../ModalInfo';
 import useRewards from 'hooks/useRewards';
@@ -12,6 +13,7 @@ type Props = {
 };
 
 function ModalRewards({ symbol, operation }: Props) {
+  const { t } = useTranslation();
   const { rates, isLoading } = useRewards();
 
   const rate = rates[symbol];
@@ -21,7 +23,7 @@ function ModalRewards({ symbol, operation }: Props) {
   }
 
   return (
-    <ModalInfo label="Rewards" variant="row">
+    <ModalInfo label={t('Rewards')} variant="row">
       {isLoading ? (
         <Skeleton width={100} />
       ) : (

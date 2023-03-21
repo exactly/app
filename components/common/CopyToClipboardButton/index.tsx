@@ -1,12 +1,14 @@
 import React, { FC, useState } from 'react';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { IconButton, Tooltip } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 
 type Props = {
   text: string;
 };
 
 const CopyToClipboardButton: FC<Props> = ({ text }) => {
+  const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
   const handleClick = () => {
     setCopied(true);
@@ -15,7 +17,7 @@ const CopyToClipboardButton: FC<Props> = ({ text }) => {
 
   return (
     <Tooltip
-      title={copied ? 'Copied' : 'Copy'}
+      title={copied ? t('Copied') : t('Copy')}
       placement="bottom"
       arrow
       enterTouchDelay={0}

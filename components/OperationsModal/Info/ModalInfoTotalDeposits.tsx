@@ -11,6 +11,7 @@ import { isFixedOperation, Operation } from 'contexts/ModalStatusContext';
 import { MarketContext } from 'contexts/MarketContext';
 import formatSymbol from 'utils/formatSymbol';
 import { Box } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 
 type Props = {
   qty: string;
@@ -20,6 +21,7 @@ type Props = {
 };
 
 function ModalInfoTotalDeposits({ qty, symbol, operation, variant = 'column' }: Props) {
+  const { t } = useTranslation();
   const { marketAccount } = useAccountData(symbol);
   const { date } = useContext(MarketContext);
 
@@ -34,17 +36,17 @@ function ModalInfoTotalDeposits({ qty, symbol, operation, variant = 'column' }: 
       f = pool ? pool.position.principal.add(pool.position.fee) : Zero;
     }
 
-    let t = f[operation.startsWith('deposit') ? 'add' : 'sub'](delta);
-    t = t < Zero ? Zero : t;
+    let total = f[operation.startsWith('deposit') ? 'add' : 'sub'](delta);
+    total = total < Zero ? Zero : total;
 
     return [
       formatNumber(formatFixed(f, marketAccount.decimals), symbol),
-      formatNumber(formatFixed(t, marketAccount.decimals), symbol),
+      formatNumber(formatFixed(total, marketAccount.decimals), symbol),
     ];
   }, [marketAccount, qty, operation, date, symbol]);
 
   return (
-    <ModalInfo label="Total deposits" icon={SaveAltRoundedIcon} variant={variant}>
+    <ModalInfo label={t('Total deposits')} icon={SaveAltRoundedIcon} variant={variant}>
       <Box display="flex" alignItems="center" gap={0.5}>
         {variant === 'column' && (
           <Image src={`/img/assets/${symbol}.svg`} alt={formatSymbol(symbol)} width={16} height={16} />

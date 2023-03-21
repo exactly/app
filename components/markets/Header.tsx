@@ -1,17 +1,19 @@
 import React, { type FC, useMemo } from 'react';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber/lib';
 import { Zero } from '@ethersproject/constants/lib';
+import { useTranslation } from 'react-i18next';
+import Image from 'next/image';
+import { Box } from '@mui/material';
 
 import HeaderInfo from 'components/common/HeaderInfo';
 import { ItemInfoProps } from 'components/common/ItemInfo';
 
 import formatNumber from 'utils/formatNumber';
-import { Box } from '@mui/material';
 import { useWeb3 } from 'hooks/useWeb3';
-import Image from 'next/image';
 import useAccountData from 'hooks/useAccountData';
 
 const MarketsHeader: FC = () => {
+  const { t } = useTranslation();
   const { accountData } = useAccountData();
   const { chain } = useWeb3();
 
@@ -57,18 +59,20 @@ const MarketsHeader: FC = () => {
 
   const itemsInfo: ItemInfoProps[] = [
     {
-      label: 'Total Deposits',
+      label: t('Total Deposits'),
       value: totalDeposited ? `$${formatNumber(formatFixed(totalDeposited, 18))}` : undefined,
     },
     {
-      label: 'Total Borrows',
+      label: t('Total Borrows'),
       value: totalBorrowed ? `$${formatNumber(formatFixed(totalBorrowed, 18))}` : undefined,
     },
     {
-      label: 'Total Available',
+      label: t('Total Available'),
       value: totalAvailable ? `$${formatNumber(formatFixed(totalAvailable, 18))}` : undefined,
     },
   ];
+
+  const network = t('{{network}} Network', { network: chain?.name });
 
   return (
     <HeaderInfo
@@ -77,7 +81,7 @@ const MarketsHeader: FC = () => {
         <Box display="flex" gap={0.5}>
           <Image
             src={`/img/networks/${chain?.id}.svg`}
-            alt={`chain id ${chain?.id}`}
+            alt=""
             width={24}
             height={24}
             style={{
@@ -85,7 +89,7 @@ const MarketsHeader: FC = () => {
               height: 'auto',
             }}
           />
-          <Box>{`${chain?.name} Network`}</Box>
+          <Box>{network}</Box>
         </Box>
       }
     />

@@ -11,6 +11,7 @@ import { OperationHook } from 'types/OperationHook';
 import getBeforeBorrowLimit from 'utils/getBeforeBorrowLimit';
 import useHealthFactor from './useHealthFactor';
 import useAnalytics from './useAnalytics';
+import { useTranslation } from 'react-i18next';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 
@@ -21,6 +22,7 @@ type Borrow = {
 } & OperationHook;
 
 export default (): Borrow => {
+  const { t } = useTranslation();
   const { track } = useAnalytics();
   const { walletAddress } = useWeb3();
 
@@ -146,14 +148,15 @@ export default (): Borrow => {
         return setErrorData({
           status: true,
           variant: 'warning',
-          message:
+          message: t(
             'In order to borrow you need to have a deposit in the Variable Rate Pool marked as collateral in your Dashboard',
+          ),
         });
 
       if (liquidity.lt(parseFixed(value || '0', decimals))) {
         return setErrorData({
           status: true,
-          message: 'There is not enough liquidity',
+          message: t('There is not enough liquidity'),
         });
       }
 
@@ -166,12 +169,12 @@ export default (): Borrow => {
       ) {
         return setErrorData({
           status: true,
-          message: `You can't borrow more than your borrow limit`,
+          message: t("You can't borrow more than your borrow limit"),
         });
       }
       setErrorData(undefined);
     },
-    [liquidity, marketAccount, setQty, hasCollateral, setErrorData, maxBorrowAssets],
+    [liquidity, marketAccount, setQty, hasCollateral, setErrorData, maxBorrowAssets, t],
   );
 
   const handleBasicInputChange = useCallback(
@@ -191,12 +194,12 @@ export default (): Borrow => {
       ) {
         return setErrorData({
           status: true,
-          message: `You can't borrow more than your borrow limit`,
+          message: t("You can't borrow more than your borrow limit"),
         });
       }
       setErrorData(undefined);
     },
-    [marketAccount, setQty, maxBorrowAssets, setErrorData],
+    [marketAccount, setQty, maxBorrowAssets, setErrorData, t],
   );
 
   const borrow = useCallback(async () => {

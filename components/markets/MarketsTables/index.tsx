@@ -1,6 +1,7 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import Grid from '@mui/material/Grid';
 import PoolTable, { TableRow } from './poolTable';
+import { useTranslation } from 'react-i18next';
 
 import { formatFixed } from '@ethersproject/bignumber';
 import { MaxUint256, WeiPerEther, Zero } from '@ethersproject/constants';
@@ -21,60 +22,6 @@ import useAccountData from 'hooks/useAccountData';
 
 const { onlyMobile, onlyDesktop } = globals;
 
-const floatingHeaders: TableHeader<TableRow>[] = [
-  {
-    title: 'Asset',
-    width: '130px',
-    sortKey: 'symbol',
-  },
-  {
-    title: 'Total Deposits',
-    sortKey: 'totalDeposited',
-  },
-  {
-    title: 'Total Borrows',
-    sortKey: 'totalBorrowed',
-  },
-  {
-    title: 'Deposit APR',
-    tooltipTitle: 'Change in the underlying Variable Rate Pool shares value over the last 15 minutes, annualized.',
-    sortKey: 'depositAPR',
-  },
-  {
-    title: 'Borrow APR',
-    tooltipTitle: 'The borrowing interest APR related to the current utilization rate in the Variable Rate Pool.',
-    sortKey: 'borrowAPR',
-  },
-];
-
-const fixedHeaders: TableHeader<TableRow>[] = [
-  {
-    title: 'Asset',
-    width: '130px',
-    sortKey: 'symbol',
-  },
-  {
-    title: 'Total Deposits',
-    tooltipTitle: 'Sum of all the deposits in all the Fixed Rate Pools.',
-    sortKey: 'totalDeposited',
-  },
-  {
-    title: 'Total Borrows',
-    tooltipTitle: 'Sum of all the borrows in all the Fixed Rate Pools.',
-    sortKey: 'totalBorrowed',
-  },
-  {
-    title: 'Best Deposit APR',
-    tooltipTitle: 'The highest fixed interest APR for a deposit up to the optimal deposit size.',
-    sortKey: 'depositAPR',
-  },
-  {
-    title: 'Best Borrow APR',
-    tooltipTitle: 'The lowest fixed borrowing interest APR at current utilization levels for all the Fixed Rate Pools.',
-    sortKey: 'borrowAPR',
-  },
-];
-
 // sorts rows based on defaultRows symbol order
 const sortByDefault = (defaultRows: TableRow[], toSort: TableRow[]) =>
   toSort.sort(({ symbol: aSymbol }, { symbol: bSymbol }) => {
@@ -84,6 +31,7 @@ const sortByDefault = (defaultRows: TableRow[], toSort: TableRow[]) =>
   });
 
 const MarketTables: FC = () => {
+  const { t } = useTranslation();
   const { chain } = useWeb3();
   const { accountData } = useAccountData();
   const assets = useAssets();
@@ -103,6 +51,62 @@ const MarketTables: FC = () => {
     },
     [],
   );
+
+  const floatingHeaders: TableHeader<TableRow>[] = [
+    {
+      title: t('Asset'),
+      width: '130px',
+      sortKey: 'symbol',
+    },
+    {
+      title: t('Total Deposits'),
+      sortKey: 'totalDeposited',
+    },
+    {
+      title: t('Total Borrows'),
+      sortKey: 'totalBorrowed',
+    },
+    {
+      title: t('Deposit APR'),
+      tooltipTitle: t('Change in the underlying Variable Rate Pool shares value over the last 15 minutes, annualized.'),
+      sortKey: 'depositAPR',
+    },
+    {
+      title: t('Borrow APR'),
+      tooltipTitle: t('The borrowing interest APR related to the current utilization rate in the Variable Rate Pool.'),
+      sortKey: 'borrowAPR',
+    },
+  ];
+
+  const fixedHeaders: TableHeader<TableRow>[] = [
+    {
+      title: t('Asset'),
+      width: '130px',
+      sortKey: 'symbol',
+    },
+    {
+      title: t('Total Deposits'),
+      tooltipTitle: t('Sum of all the deposits in all the Fixed Rate Pools.'),
+      sortKey: 'totalDeposited',
+    },
+    {
+      title: t('Total Borrows'),
+      tooltipTitle: t('Sum of all the borrows in all the Fixed Rate Pools.'),
+      sortKey: 'totalBorrowed',
+    },
+    {
+      title: t('Best Deposit APR'),
+      tooltipTitle: t('The highest fixed interest APR for a deposit up to the optimal deposit size.'),
+      sortKey: 'depositAPR',
+    },
+    {
+      title: t('Best Borrow APR'),
+      tooltipTitle: t(
+        'The lowest fixed borrowing interest APR at current utilization levels for all the Fixed Rate Pools.',
+      ),
+      sortKey: 'borrowAPR',
+    },
+  ];
 
   const defineRows = useCallback(async () => {
     setIsLoading(true);
@@ -195,9 +199,9 @@ const MarketTables: FC = () => {
         display={onlyDesktop}
       >
         <Typography variant="h6" pb="16px">
-          Variable Interest Rate
+          {t('Variable Interest Rate')}
         </Typography>
-        <PoolTable isLoading={isLoading} headers={floatingHeaders} rows={floatingRows} rateType={'floating'} />
+        <PoolTable isLoading={isLoading} headers={floatingHeaders} rows={floatingRows} rateType="floating" />
       </Grid>
       <Grid
         width={'100%'}
@@ -210,7 +214,7 @@ const MarketTables: FC = () => {
         display={onlyDesktop}
       >
         <Typography variant="h6" pb="16px">
-          Fixed Interest Rate
+          {t('Fixed Interest Rate')}
         </Typography>
         <PoolTable isLoading={isLoading} headers={fixedHeaders} rows={fixedRows} rateType="fixed" />
       </Grid>
@@ -218,7 +222,7 @@ const MarketTables: FC = () => {
         <MobileTabs
           tabs={[
             {
-              title: 'Variable Interest Rate',
+              title: t('Variable Interest Rate'),
               content: (
                 <PoolMobile
                   key={`markets_pool_mobile_floating`}
@@ -230,7 +234,7 @@ const MarketTables: FC = () => {
               ),
             },
             {
-              title: 'Fixed Interest Rate',
+              title: t('Fixed Interest Rate'),
               content: (
                 <PoolMobile
                   key={`markets_pool_mobile_fixed`}

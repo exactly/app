@@ -14,6 +14,7 @@ import SwitchCollateral from 'components/dashboard/DashboardContent/FloatingPool
 import useAccountData from 'hooks/useAccountData';
 import useActionButton from 'hooks/useActionButton';
 import { useRouter } from 'next/router';
+import { useTranslation } from 'react-i18next';
 
 type Props = {
   symbol: string;
@@ -24,6 +25,7 @@ type Props = {
 };
 
 function TableRowFloatingPool({ symbol, valueUSD, depositedAmount, borrowedAmount, type }: Props) {
+  const { t } = useTranslation();
   const { query } = useRouter();
   const { marketAccount } = useAccountData(symbol);
 
@@ -79,7 +81,7 @@ function TableRowFloatingPool({ symbol, valueUSD, depositedAmount, borrowedAmoun
 
       <TableCell align="left" width={50} size="small" sx={{ px: 0.5 }}>
         <Button variant="contained" onClick={(e) => handleActionClick(e, type, symbol)}>
-          {type === 'deposit' ? 'Deposit' : 'Borrow'}
+          {type === 'deposit' ? t('Deposit') : t('Borrow')}
         </Button>
       </TableCell>
 
@@ -89,7 +91,7 @@ function TableRowFloatingPool({ symbol, valueUSD, depositedAmount, borrowedAmoun
           sx={{ backgroundColor: 'components.bg' }}
           onClick={(e) => handleActionClick(e, type === 'deposit' ? 'withdraw' : 'repay', symbol)}
         >
-          {type === 'deposit' ? 'Withdraw' : 'Repay'}
+          {type === 'deposit' ? t('Withdraw') : t('Repay')}
         </Button>
       </TableCell>
     </TableRow>

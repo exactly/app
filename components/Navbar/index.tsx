@@ -20,23 +20,11 @@ import { MarketContext } from 'contexts/MarketContext';
 import ClaimRewards from 'components/ClaimRewards';
 import SelectDisplayNetwork from 'components/SelectDisplayNetwork';
 import useAnalytics from 'hooks/useAnalytics';
+import { useTranslation } from 'react-i18next';
 const { onlyMobile, onlyDesktopFlex } = globals;
 
-const routes: {
-  pathname: string;
-  name: string;
-  custom?: ReactNode;
-  icon?: ReactNode;
-}[] = [
-  { pathname: '/', name: 'Markets', custom: <SelectMarketsView /> },
-  {
-    pathname: '/dashboard',
-    name: 'Dashboard',
-    icon: <AccountBalanceWalletIcon sx={{ fontSize: '13px' }} />,
-  },
-];
-
 function Navbar() {
+  const { t } = useTranslation();
   const { identify } = useAnalytics();
   const { connector } = useClient();
   const { walletAddress } = useWeb3();
@@ -70,6 +58,20 @@ function Navbar() {
       ? setBodyColor(palette.markets.simple)
       : setBodyColor(palette.markets.advanced);
   }, [currentPathname, view, palette.markets.advanced, palette.markets.simple]);
+
+  const routes: {
+    pathname: string;
+    name: string;
+    custom?: ReactNode;
+    icon?: ReactNode;
+  }[] = [
+    { pathname: '/', name: t('Markets'), custom: <SelectMarketsView /> },
+    {
+      pathname: '/dashboard',
+      name: t('Dashboard'),
+      icon: <AccountBalanceWalletIcon sx={{ fontSize: '13px' }} />,
+    },
+  ];
 
   return (
     <Box sx={{ display: 'flex', justifyContent: 'center' }}>

@@ -13,10 +13,12 @@ import parseTimestamp from 'utils/parseTimestamp';
 import { TableHeader } from 'components/common/TableHeadCell';
 import useRewards from 'hooks/useRewards';
 import RewardPill from 'components/markets/RewardPill';
+import useTranslateOperation from 'hooks/useTranslateOperation';
 
 const { minAPRValue } = numbers;
 
 const PoolMobile: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) => {
+  const translateOperation = useTranslateOperation();
   const { handleActionClick, isDisable } = useActionButton();
   const assets = useAssets();
   const defaultRows = useMemo<TableRow[]>(() => assets.map((s) => ({ symbol: s })), [assets]);
@@ -71,7 +73,7 @@ const PoolMobile: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) 
                   }
                   disabled={isDisable(rateType, depositAPR)}
                 >
-                  Deposit
+                  {translateOperation('deposit', { capitalize: true })}
                 </Button>
                 <Button
                   variant="outlined"
@@ -81,7 +83,7 @@ const PoolMobile: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) 
                     handleActionClick(e, isFloating ? 'borrow' : 'borrowAtMaturity', symbol, borrowMaturity)
                   }
                 >
-                  Borrow
+                  {translateOperation('borrow', { capitalize: true })}
                 </Button>
               </Box>
             </>

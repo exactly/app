@@ -4,6 +4,7 @@ import { parseFixed } from '@ethersproject/bignumber';
 import { Contract } from '@ethersproject/contracts';
 import Image from 'next/image';
 import imageToBase64 from 'utils/imageToBase64';
+import { useTranslation } from 'react-i18next';
 
 import faucetAbi from './abi.json';
 
@@ -16,6 +17,7 @@ import handleOperationError from 'utils/handleOperationError';
 import useAccountData from 'hooks/useAccountData';
 
 function Faucet() {
+  const { t } = useTranslation();
   const { data: signer } = useSigner();
   const { connector } = useAccount();
   const { accountData, getMarketAccount, refreshAccountData } = useAccountData();
@@ -78,7 +80,7 @@ function Faucet() {
   return (
     <Box minWidth={{ xs: 200, sm: 350 }}>
       <Typography variant="link" onClick={addTokens} sx={{ cursor: 'pointer' }}>
-        Add tokens to Metamask
+        {t('Add tokens to Metamask')}
       </Typography>
       <Divider sx={{ my: 3 }} />
       <Box display="flex" flexDirection="column" gap={3}>
@@ -105,11 +107,11 @@ function Faucet() {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <Button variant="contained">Mint</Button>
+                <Button variant="contained">{t('Mint')}</Button>
               </a>
             ) : (
               <LoadingButton variant="contained" onClick={() => mint(asset)} loading={asset === loading}>
-                Mint
+                {t('Mint')}
               </LoadingButton>
             )}
           </Box>

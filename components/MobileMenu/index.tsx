@@ -14,6 +14,8 @@ import { MarketContext } from 'contexts/MarketContext';
 import { DiscordIcon } from 'components/Icons';
 import QueryStatsIcon from '@mui/icons-material/QueryStats';
 import SwitchTheme from 'components/SwitchTheme';
+import { useTranslation } from 'react-i18next';
+import SelectLanguage from 'components/SelectLanguage';
 
 type Props = {
   open: boolean;
@@ -21,37 +23,19 @@ type Props = {
 };
 
 function MobileMenu({ open, handleClose }: Props) {
+  const { t } = useTranslation();
   const { palette } = useTheme();
-  const { view, setView } = useContext(MarketContext);
   const { pathname: currentPathname, query } = useRouter();
   const date = new Date();
 
-  const AdvancedViewSwitch: FC = () => {
-    return (
-      <Box display="flex" alignItems="center" justifyContent="space-between" gap={1}>
-        <Typography fontSize={19} fontWeight={700}>
-          Advanced view
-        </Typography>
-        <Switch
-          checked={view === 'advanced'}
-          onChange={() => setView(view === 'advanced' ? 'simple' : 'advanced')}
-          inputProps={{
-            'aria-label': `Switch to ${view === 'advanced' ? 'simple' : 'advanced'} view`,
-            'data-testid': 'switch-markets-view',
-          }}
-        />
-      </Box>
-    );
-  };
-
   const headers = [
     {
-      title: 'Markets',
+      title: t('Markets'),
       pathname: '/',
       component: <AdvancedViewSwitch />,
     },
     {
-      title: 'Dashboard',
+      title: t('Dashboard'),
       pathname: '/dashboard',
     },
   ];
@@ -81,7 +65,7 @@ function MobileMenu({ open, handleClose }: Props) {
               </IconButton>
             </Box>
             <Typography fontFamily="fontFamilyMonospaced" fontSize={14} color="figma.grey.500" fontWeight={600}>
-              Menu
+              {t('Menu')}
             </Typography>
             <Box display="flex" flexDirection="column" gap={2}>
               {headers.map(({ title, pathname, component }) => (
@@ -103,24 +87,24 @@ function MobileMenu({ open, handleClose }: Props) {
             </Box>
             <Divider sx={{ my: '12px' }} />
             <Typography fontFamily="fontFamilyMonospaced" fontSize={14} color="figma.grey.500" fontWeight={600}>
-              Links
+              {t('Links')}
             </Typography>
-            <LinkItem title="Audits" href="https://docs.exact.ly/security/audits">
+            <LinkItem title={t('Audits')} href="https://docs.exact.ly/security/audits">
               <SecurityIcon fontSize="small" sx={{ color: 'grey.500', my: 'auto' }} />
             </LinkItem>
-            <LinkItem title="Documentation" href="https://docs.exact.ly/">
+            <LinkItem title={t('Documentation')} href="https://docs.exact.ly/">
               <MenuBookIcon fontSize="small" sx={{ color: 'grey.500', my: 'auto' }} />
             </LinkItem>
-            <LinkItem title="Github" href="https://github.com/exactly">
+            <LinkItem title={t('Github')} href="https://github.com/exactly">
               <GitHubIcon fontSize="small" sx={{ color: 'grey.500', my: 'auto' }} />
             </LinkItem>
-            <LinkItem title="Twitter" href="https://twitter.com/exactlyprotocol">
+            <LinkItem title={t('Twitter')} href="https://twitter.com/exactlyprotocol">
               <TwitterIcon fontSize="small" sx={{ color: 'grey.500', my: 'auto' }} />
             </LinkItem>
-            <LinkItem title="Discord" href="https://discord.gg/exactly">
+            <LinkItem title={t('Discord')} href="https://discord.gg/exactly">
               <DiscordIcon fontSize="small" sx={{ color: 'grey.500', my: 'auto' }} />
             </LinkItem>
-            <LinkItem title="Stats" href="https://dune.com/exactly/exactly">
+            <LinkItem title={t('Stats')} href="https://dune.com/exactly/exactly">
               <QueryStatsIcon fontSize="small" sx={{ color: 'grey.500', my: 'auto' }} />
             </LinkItem>
           </Box>
@@ -128,7 +112,10 @@ function MobileMenu({ open, handleClose }: Props) {
             <Typography fontSize="16px" sx={{ color: 'figma.grey.300' }}>
               © Exactly {date.getFullYear()}
             </Typography>
-            <SwitchTheme />
+            <Box>
+              <SelectLanguage />
+              <SwitchTheme />
+            </Box>
           </Box>
         </Box>
       </Slide>
@@ -144,5 +131,26 @@ const LinkItem: FC<PropsWithChildren & { title: string; href: string }> = ({ chi
     </Box>
   </a>
 );
+
+const AdvancedViewSwitch: FC = () => {
+  const { t } = useTranslation();
+  const { view, setView } = useContext(MarketContext);
+  return (
+    <Box display="flex" alignItems="center" justifyContent="space-between" gap={1}>
+      <Typography fontSize={19} fontWeight={700}>
+        {t('Advanced view')}
+      </Typography>
+      <Switch
+        checked={view === 'advanced'}
+        onChange={() => setView(view === 'advanced' ? 'simple' : 'advanced')}
+        inputProps={{
+          'aria-label':
+            t('Switch to {{view}} view', { view: view === 'advanced' ? t('simple') : t('advanced') }) ?? undefined,
+          'data-testid': 'switch-markets-view',
+        }}
+      />
+    </Box>
+  );
+};
 
 export default MobileMenu;

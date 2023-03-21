@@ -25,10 +25,14 @@ import ModalSubmit from 'components/common/modal/ModalSubmit';
 import useAccountData from 'hooks/useAccountData';
 import useHandleOperationError from 'hooks/useHandleOperationError';
 import useAnalytics from 'hooks/useAnalytics';
+import { useTranslation } from 'react-i18next';
+import useTranslateOperation from 'hooks/useTranslateOperation';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 
 const Withdraw: FC = () => {
+  const { t } = useTranslation();
+  const translateOperation = useTranslateOperation();
   const { track } = useAnalytics();
   const { operation } = useModalStatus();
   const { walletAddress } = useWeb3();
@@ -118,14 +122,14 @@ const Withdraw: FC = () => {
       if (parseFloat(value) > parseFloat(parsedAmount)) {
         return setErrorData({
           status: true,
-          message: `You can't withdraw more than the deposited amount`,
+          message: t("You can't withdraw more than the deposited amount"),
         });
       }
 
       setErrorData(undefined);
       setIsMax(false);
     },
-    [parsedAmount, setErrorData, setQty],
+    [parsedAmount, setErrorData, setQty, t],
   );
 
   const withdraw = useCallback(async () => {
@@ -237,7 +241,7 @@ const Withdraw: FC = () => {
               decimals={marketAccount?.decimals ?? 18}
               onMax={onMax}
               onChange={handleInputChange}
-              label="Available"
+              label={t('Available')}
               amount={parsedAmount}
             />
           </ModalBoxRow>
@@ -268,7 +272,7 @@ const Withdraw: FC = () => {
 
       <Grid item mt={{ xs: 2, sm: 3 }}>
         <ModalSubmit
-          label="Withdraw"
+          label={translateOperation(operation, { capitalize: true })}
           symbol={symbol === 'WETH' && marketAccount ? marketAccount.symbol : symbol}
           submit={handleSubmitAction}
           isLoading={isLoading}

@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { Timeout } from 'react-number-format/types/types';
 import { SimpleViewIcon, AdvancedViewIcon } from 'components/Icons';
+import { useTranslation } from 'react-i18next';
 
 type ViewOption = {
   type: MarketView;
@@ -18,6 +19,7 @@ type ViewOption = {
 };
 
 const SelectMarketsView: FC = () => {
+  const { t } = useTranslation();
   const { pathname: currentPathname, query } = useRouter();
   const { view, setView } = useContext(MarketContext);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -49,18 +51,18 @@ const SelectMarketsView: FC = () => {
     () => [
       {
         type: 'simple',
-        title: 'Simple view',
-        description: 'Intuitive and user-friendly interface',
+        title: t('Simple view'),
+        description: t('Intuitive and user-friendly interface'),
         icon: <SimpleViewIcon />,
       },
       {
         type: 'advanced',
-        title: 'Advanced view',
-        description: 'An in-depth look at APR values',
+        title: t('Advanced view'),
+        description: t('An in-depth look at APR values'),
         icon: <AdvancedViewIcon />,
       },
     ],
-    [],
+    [t],
   );
 
   return (
@@ -88,7 +90,7 @@ const SelectMarketsView: FC = () => {
           <Box display="flex" alignItems="center" gap={0.5}>
             <BarChartRoundedIcon sx={{ fontSize: '13px' }} />
             <Typography fontWeight={700} fontSize={13}>
-              Markets
+              {t('Markets')}
             </Typography>
             {anchorEl ? (
               <ExpandLessIcon sx={{ fontSize: '13px', my: 'auto', color: 'grey.500' }} fontSize="small" />
@@ -103,7 +105,6 @@ const SelectMarketsView: FC = () => {
         open={Boolean(anchorEl)}
         onClose={closeMenu}
         MenuListProps={{
-          'aria-labelledby': 'basic-button',
           onMouseEnter: handleOnHover,
           onMouseLeave: handleCloseHover,
           style: { pointerEvents: 'auto' },

@@ -12,32 +12,33 @@ import {
 } from '@mui/material';
 import { FixedPoolTransaction } from 'types/FixedPoolTransaction';
 import { TableHeader } from 'components/common/TableHeadCell';
+import { useTranslation } from 'react-i18next';
 
 type Props = {
   open: boolean;
   transactions: FixedPoolTransaction[];
 };
 
-const headers: TableHeader<FixedPoolTransaction>[] = [
-  {
-    title: 'Date',
-    align: 'left',
-  },
-  {
-    title: 'Operation',
-    align: 'left',
-  },
-  {
-    title: 'Amount',
-    align: 'left',
-  },
-  {
-    title: 'APR',
-    align: 'left',
-  },
-];
-
 function CollapseFixedPool({ open, transactions }: Props) {
+  const { t } = useTranslation();
+  const headers: TableHeader<FixedPoolTransaction>[] = [
+    {
+      title: t('Date'),
+      align: 'left',
+    },
+    {
+      title: t('Operation'),
+      align: 'left',
+    },
+    {
+      title: t('Amount'),
+      align: 'left',
+    },
+    {
+      title: t('APR'),
+      align: 'left',
+    },
+  ];
   return (
     <Collapse in={open} timeout="auto" unmountOnExit>
       <Table size="small" aria-label="purchases">
@@ -77,7 +78,7 @@ function CollapseFixedPool({ open, transactions }: Props) {
                   {amount ? (
                     <>
                       {amount}
-                      <Tooltip title="Calculated with current asset price" placement="bottom-end">
+                      <Tooltip title={t('Calculated with current asset price')} placement="bottom-end">
                         <span style={{ fontSize: '0.9em', color: 'grey', paddingLeft: '4px' }}>(${amountUSD})</span>
                       </Tooltip>
                     </>

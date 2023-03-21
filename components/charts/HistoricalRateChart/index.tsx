@@ -1,6 +1,7 @@
 import { Box, Checkbox, FormControlLabel, Typography, useTheme } from '@mui/material';
 import useHistoricalRates from 'hooks/useHistoricalRates';
 import React, { FC, useCallback, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { toPercentage } from 'utils/utils';
 import ButtonsChart from '../ButtonsChart';
@@ -12,6 +13,7 @@ type Props = {
 };
 
 const HistoricalRateChart: FC<Props> = ({ symbol }) => {
+  const { t } = useTranslation();
   const [showUtilization, setShowUtilization] = useState(false);
   const { palette } = useTheme();
   const { loading, rates, getRates } = useHistoricalRates(symbol);
@@ -19,19 +21,19 @@ const HistoricalRateChart: FC<Props> = ({ symbol }) => {
   const buttons = useMemo(
     () => [
       {
-        label: '1W',
+        label: t('1W'),
         onClick: () => getRates(30, 3_600 * 6),
       },
       {
-        label: '1M',
+        label: t('1M'),
         onClick: () => getRates(30, 3_600 * 24),
       },
       {
-        label: '3M',
+        label: t('3M'),
         onClick: () => getRates(90, 3_600 * 24),
       },
     ],
-    [getRates],
+    [getRates, t],
   );
 
   const formatDate = useCallback((date: Date, year?: boolean) => {
@@ -46,7 +48,7 @@ const HistoricalRateChart: FC<Props> = ({ symbol }) => {
     <Box display="flex" flexDirection="column" width="100%" height="100%" gap={2}>
       <Box display="flex" justifyContent="space-between">
         <Typography variant="h6" fontSize="16px">
-          Historical Variable Rates
+          {t('Historical Variable Rates')}
         </Typography>
         <Box>
           <ButtonsChart buttons={buttons} />
@@ -69,7 +71,7 @@ const HistoricalRateChart: FC<Props> = ({ symbol }) => {
             />
             <YAxis
               yAxisId="left"
-              tickFormatter={(t) => toPercentage(t)}
+              tickFormatter={(tick) => toPercentage(tick)}
               axisLine={false}
               tick={{ fill: palette.grey[500], fontWeight: 500, fontSize: 11 }}
               tickLine={false}
@@ -95,7 +97,7 @@ const HistoricalRateChart: FC<Props> = ({ symbol }) => {
               yAxisId="left"
               type="monotone"
               dataKey="depositApr"
-              name="Deposit APR"
+              name={t('Deposit APR') ?? undefined}
               stroke={palette.mode === 'light' ? 'black' : 'white'}
               dot={false}
               strokeWidth={2}
@@ -104,7 +106,7 @@ const HistoricalRateChart: FC<Props> = ({ symbol }) => {
               yAxisId="left"
               type="monotone"
               dataKey="borrowApr"
-              name="Borrow APR"
+              name={t('Borrow APR') ?? undefined}
               stroke={palette.green}
               dot={false}
               strokeWidth={2}
@@ -114,7 +116,7 @@ const HistoricalRateChart: FC<Props> = ({ symbol }) => {
                 yAxisId="right"
                 type="monotone"
                 dataKey="utilization"
-                name="Utilization Rate"
+                name={t('Utilization Rate') ?? undefined}
                 stroke={palette.blue}
                 dot={false}
                 strokeDasharray="5 5"
@@ -139,7 +141,7 @@ const HistoricalRateChart: FC<Props> = ({ symbol }) => {
           }
           label={
             <Typography variant="subtitle1" fontSize="12px">
-              Show utilization
+              {t('Show utilization')}
             </Typography>
           }
         />

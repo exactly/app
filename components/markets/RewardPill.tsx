@@ -4,6 +4,7 @@ import { Box, Chip, Tooltip, Typography, useTheme } from '@mui/material';
 import Image from 'next/image';
 
 import { toPercentage } from 'utils/utils';
+import { useTranslation } from 'react-i18next';
 
 type Props = {
   symbol: string;
@@ -11,6 +12,7 @@ type Props = {
 };
 
 function RewardPill({ symbol, rate }: Props) {
+  const { t } = useTranslation();
   const theme = useTheme();
 
   if (rate.isZero()) {
@@ -19,7 +21,7 @@ function RewardPill({ symbol, rate }: Props) {
 
   return (
     <Tooltip
-      title={`This APR assumes a constant price for the ${symbol} tokens and distribution rate.`}
+      title={t('This APR assumes a constant price for the {{symbol}} tokens and distribution rate.', { symbol })}
       placement="top"
       arrow
     >

@@ -2,12 +2,14 @@ import React, { useState, PropsWithChildren } from 'react';
 import { Button, Grid, Box, Typography, type GridProps } from '@mui/material';
 import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownRounded';
 import KeyboardArrowRightRoundedIcon from '@mui/icons-material/KeyboardArrowRightRounded';
+import { useTranslation } from 'react-i18next';
 
 type Props = {
   bgColor?: string;
 } & GridProps;
 
 function ModalAdvancedSettings({ children, bgColor, ...props }: PropsWithChildren & Props) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
 
   return (
@@ -29,7 +31,7 @@ function ModalAdvancedSettings({ children, bgColor, ...props }: PropsWithChildre
           }}
         >
           <Typography fontWeight={500} color="grey.500" fontSize={13}>
-            Advanced settings
+            {t('Advanced settings')}
           </Typography>
           {open ? (
             <KeyboardArrowDownRoundedIcon sx={{ fontSize: 11, color: 'grey.500', my: 'auto' }} />

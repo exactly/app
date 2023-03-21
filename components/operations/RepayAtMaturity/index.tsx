@@ -32,10 +32,14 @@ import ModalSubmit from 'components/common/modal/ModalSubmit';
 import ModalInfoBorrowLimit from 'components/OperationsModal/Info/ModalInfoBorrowLimit';
 import useHandleOperationError from 'hooks/useHandleOperationError';
 import useAnalytics from 'hooks/useAnalytics';
+import { useTranslation } from 'react-i18next';
+import useTranslateOperation from 'hooks/useTranslateOperation';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 
 const RepayAtMaturity: FC = () => {
+  const { t } = useTranslation();
+  const translateOperation = useTranslateOperation();
   const { track } = useAnalytics();
   const { operation } = useModalStatus();
   const { walletAddress } = useWeb3();
@@ -292,7 +296,7 @@ const RepayAtMaturity: FC = () => {
               decimals={decimals}
               onMax={onMax}
               onChange={handleInputChange}
-              label="Debt amount"
+              label={t('Debt amount')}
               amount={formatFixed(totalPositionAssets, decimals)}
             />
           </ModalBoxRow>
@@ -303,14 +307,14 @@ const RepayAtMaturity: FC = () => {
             <ModalBoxCell>{date && <ModalInfoMaturityStatus date={date} />}</ModalBoxCell>
             <ModalBoxCell>
               <ModalInfoAmount
-                label="Amount at maturity"
+                label={t('Amount at maturity')}
                 symbol={symbol}
                 value={formatNumber(formatFixed(totalPositionAssets, decimals), symbol, true)}
               />
             </ModalBoxCell>
             <ModalBoxCell>
               <ModalInfoAmount
-                label="Max. amount to be paid"
+                label={t('Max. amount to be paid')}
                 value={formatNumber(formatFixed(maxAmountToRepay, decimals), symbol, true)}
                 symbol={symbol}
               />
@@ -319,14 +323,14 @@ const RepayAtMaturity: FC = () => {
               <>
                 <ModalBoxCell>
                   <ModalInfoAmount
-                    label="Penalties to be paid"
+                    label={t('Penalties to be paid')}
                     value={formatNumber(formatFixed(penaltyAssets, decimals), symbol, true)}
                     symbol={symbol}
                   />
                 </ModalBoxCell>
                 <ModalBoxCell>
                   <ModalInfoAmount
-                    label="Assets to be paid"
+                    label={t('Assets to be paid')}
                     value={formatNumber(formatFixed(positionAssetsAmount, decimals), symbol, true)}
                     symbol={symbol}
                   />
@@ -366,7 +370,7 @@ const RepayAtMaturity: FC = () => {
 
       <Grid item mt={{ xs: 2, sm: 3 }}>
         <ModalSubmit
-          label="Repay"
+          label={translateOperation(operation, { capitalize: true })}
           symbol={symbol}
           submit={handleSubmitAction}
           isLoading={isLoading}

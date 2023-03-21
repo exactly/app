@@ -26,10 +26,14 @@ import ModalSubmit from 'components/common/modal/ModalSubmit';
 import useAccountData from 'hooks/useAccountData';
 import useHandleOperationError from 'hooks/useHandleOperationError';
 import useAnalytics from 'hooks/useAnalytics';
+import { useTranslation } from 'react-i18next';
+import useTranslateOperation from 'hooks/useTranslateOperation';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
 
 function Repay() {
+  const { t } = useTranslation();
+  const translateOperation = useTranslateOperation();
   const { track } = useAnalytics();
   const { operation } = useModalStatus();
   const { walletAddress } = useWeb3();
@@ -80,13 +84,13 @@ function Repay() {
     if (walletBalance && parseFloat(finalAmount) > parseFloat(walletBalance)) {
       return setErrorData({
         status: true,
-        message: `You can't repay more than you have in your wallet`,
+        message: t("You can't repay more than you have in your wallet"),
         component: 'input',
       });
     }
 
     setErrorData(undefined);
-  }, [setQty, finalAmount, walletBalance, setErrorData]);
+  }, [setQty, finalAmount, walletBalance, setErrorData, t]);
 
   const handleInputChange = useCallback(
     (value: string) => {
@@ -95,7 +99,7 @@ function Repay() {
       if (walletBalance && parseFloat(value) > parseFloat(walletBalance)) {
         return setErrorData({
           status: true,
-          message: `You can't repay more than you have in your wallet`,
+          message: t("You can't repay more than you have in your wallet"),
           component: 'input',
         });
       }
@@ -103,7 +107,7 @@ function Repay() {
       setErrorData(undefined);
       setIsMax(false);
     },
-    [setQty, walletBalance, setErrorData],
+    [setQty, walletBalance, setErrorData, t],
   );
 
   const repay = useCallback(async () => {
@@ -261,7 +265,7 @@ function Repay() {
               decimals={marketAccount?.decimals ?? 18}
               onMax={onMax}
               onChange={handleInputChange}
-              label="Your balance"
+              label={t('Your balance')}
               amount={walletBalance}
             />
           </ModalBoxRow>
@@ -292,7 +296,7 @@ function Repay() {
 
       <Grid item mt={{ xs: 2, sm: 3 }}>
         <ModalSubmit
-          label="Repay"
+          label={translateOperation(operation, { capitalize: true })}
           symbol={symbol}
           submit={handleSubmitAction}
           isLoading={isLoading}

@@ -2,16 +2,17 @@ import React, { ReactNode, useContext, useMemo } from 'react';
 import { Transaction } from 'types/Transaction';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
-import { Box, Button, capitalize, CircularProgress, CircularProgressProps, Typography } from '@mui/material';
+import { Box, Button, CircularProgress, CircularProgressProps, Typography } from '@mui/material';
 import networkData from 'config/networkData.json' assert { type: 'json' };
 import { useWeb3 } from 'hooks/useWeb3';
 import { useModalStatus } from 'contexts/ModalStatusContext';
-import pastParticiple from 'utils/pastParticiple';
 import { useOperationContext } from 'contexts/OperationContext';
 import formatSymbol from 'utils/formatSymbol';
 import Reminder from 'components/Reminder';
 import { MarketContext } from 'contexts/MarketContext';
 import parseTimestamp from 'utils/parseTimestamp';
+import { useTranslation } from 'react-i18next';
+import useTranslateOperation from 'hooks/useTranslateOperation';
 
 type Props = {
   tx: Transaction;
@@ -19,6 +20,8 @@ type Props = {
 };
 
 function ModalGif({ tx, tryAgain }: Props) {
+  const { t } = useTranslation();
+  const translateOperation = useTranslateOperation();
   const { chain } = useWeb3();
   const { operation } = useModalStatus();
   const { symbol, qty } = useOperationContext();
@@ -28,7 +31,7 @@ function ModalGif({ tx, tryAgain }: Props) {
   const isSuccess = useMemo(() => tx.status === 'success', [tx]);
   const isError = useMemo(() => tx.status === 'error', [tx]);
   const etherscan = useMemo(() => networkData[String(chain?.id) as keyof typeof networkData]?.etherscan, [chain]);
-  const operationName = useMemo(() => operation.replaceAll('AtMaturity', ''), [operation]);
+  const operationName = useMemo(() => translateOperation(operation), [translateOperation, operation]);
   const reminder = useMemo(() => ['borrowAtMaturity', 'depositAtMaturity'].includes(operation), [operation]);
 
   return (
@@ -49,22 +52,27 @@ function ModalGif({ tx, tryAgain }: Props) {
         )}
         <Box display="flex" flexDirection="column" alignItems="center">
           <Typography variant="h6" fontSize="16px" data-testid="modal-transaction-status">
-            {isLoading && `Processing ${operationName}...`}
-            {isSuccess && 'Transaction completed'}
-            {isError && 'Transaction error'}
+            {isLoading && t('Processing {{operation}}...', { operation: operationName })}
+            {isSuccess && t('Transaction completed')}
+            {isError && t('Transaction error')}
           </Typography>
           <Typography fontSize="14px" fontWeight={500} color="grey.500" data-testid="modal-transaction-summary">
-            {isLoading && `${capitalize(operationName)}ing ${qty} ${formatSymbol(symbol)}`}
+            {isLoading &&
+              `${translateOperation(operation, { variant: 'present', capitalize: true })} ${qty} ${formatSymbol(
+                symbol,
+              )}`}
             {isSuccess &&
-              `You ${pastParticiple(operationName)} ${qty} ${formatSymbol(symbol)}${
-                reminder && date ? ` until ${parseTimestamp(date)}` : ''
-              }`}
-            {isError && 'Something went wrong'}
+              t('You {{pastAction}} {{qty}} {{symbol}}', {
+                pastAction: translateOperation(operation, { variant: 'past' }),
+                qty,
+                symbol: formatSymbol(symbol),
+              }) + (reminder && date ? t(' until {{daysLeft}}', { daysLeft: parseTimestamp(date) }) : '')}
+            {isError && t('Something went wrong')}
           </Typography>
           <Box display="flex" flexDirection="column" alignItems="center" gap="8px" pt={1}>
             {isError && (
               <Button variant="contained" sx={{ width: '220px', height: '38px' }} onClick={tryAgain}>
-                Try again
+                {t('Try again')}
               </Button>
             )}
             <Button
@@ -74,7 +82,7 @@ function ModalGif({ tx, tryAgain }: Props) {
               href={`${etherscan}/tx/${tx.hash}`}
               disabled={!tx.hash}
             >
-              View on Etherscan
+              {t('View on Etherscan')}
             </Button>
           </Box>
         </Box>

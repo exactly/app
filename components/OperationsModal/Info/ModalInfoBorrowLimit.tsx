@@ -8,6 +8,7 @@ import getBeforeBorrowLimit from 'utils/getBeforeBorrowLimit';
 import ModalInfo, { FromTo, Variant } from 'components/common/modal/ModalInfo';
 import { Operation } from 'contexts/ModalStatusContext';
 import useAccountData from 'hooks/useAccountData';
+import { useTranslation } from 'react-i18next';
 
 type Props = {
   qty: string;
@@ -17,6 +18,7 @@ type Props = {
 };
 
 function ModalInfoBorrowLimit({ qty, symbol, operation, variant = 'column' }: Props) {
+  const { t } = useTranslation();
   const { marketAccount } = useAccountData(symbol);
 
   const newQty = useMemo(() => {
@@ -82,7 +84,7 @@ function ModalInfoBorrowLimit({ qty, symbol, operation, variant = 'column' }: Pr
   }, [marketAccount, newQty, operation]);
 
   return (
-    <ModalInfo label="Borrow Limit" icon={SwapHorizIcon} variant={variant}>
+    <ModalInfo label={t('Borrow Limit')} icon={SwapHorizIcon} variant={variant}>
       <FromTo
         from={beforeBorrowLimit ? `$${formatNumber(beforeBorrowLimit, 'USD')}` : undefined}
         to={afterBorrowLimit ? `$${formatNumber(afterBorrowLimit, 'USD')}` : undefined}

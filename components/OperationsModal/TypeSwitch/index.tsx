@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { Box, Button, useTheme, type ButtonProps } from '@mui/material';
 import { useModalStatus } from 'contexts/ModalStatusContext';
 import { useOperationContext } from 'contexts/OperationContext';
+import { useTranslation } from 'react-i18next';
 
 type SelectorProps = {
   label: string;
@@ -36,6 +37,7 @@ function Selector({ label, backgroundColor, selected, ...props }: SelectorProps)
 }
 
 function TypeSwitch() {
+  const { t } = useTranslation();
   const theme = useTheme();
   const { operation, toggle } = useModalStatus();
   const { tx } = useOperationContext();
@@ -45,19 +47,19 @@ function TypeSwitch() {
 
     return [
       {
-        label: 'fixed',
+        label: t('fixed'),
         selected: isFixed,
         backgroundColor: theme.palette.operation.fixed,
         onClick: toggle,
       },
       {
-        label: 'variable',
+        label: t('variable'),
         selected: !isFixed,
         backgroundColor: theme.palette.operation.variable,
         onClick: toggle,
       },
     ];
-  }, [operation, theme, toggle]);
+  }, [operation, theme, toggle, t]);
 
   if (tx || operation === 'faucet') {
     return null;

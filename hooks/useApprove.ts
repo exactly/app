@@ -10,8 +10,10 @@ import { useOperationContext } from 'contexts/OperationContext';
 import useAccountData from './useAccountData';
 import handleOperationError from 'utils/handleOperationError';
 import { useNetwork } from 'wagmi';
+import { useTranslation } from 'react-i18next';
 
 export default (operation: Operation, contract?: ERC20 | Market, spender?: string) => {
+  const { t } = useTranslation();
   const { walletAddress, chain: displayNetwork } = useWeb3();
   const { chain } = useNetwork();
   const { symbol, setErrorData, setLoadingButton } = useOperationContext();
@@ -63,14 +65,14 @@ export default (operation: Operation, contract?: ERC20 | Market, spender?: strin
 
     try {
       setIsLoading(true);
-      setLoadingButton({ label: 'Sign the transaction on your wallet' });
+      setLoadingButton({ label: t('Sign the transaction on your wallet') });
       const gasEstimation = await estimateGas();
       if (!gasEstimation) return;
 
       const approveTx = await contract.approve(spender, MaxUint256, {
         gasLimit: gasEstimation.mul(parseFixed(String(numbers.gasLimitMultiplier), 18)).div(WeiPerEther),
       });
-      setLoadingButton({ withCircularProgress: true, label: `Approving ${symbol}` });
+      setLoadingButton({ withCircularProgress: true, label: t('Approving {{symbol}}', { symbol }) });
       await approveTx.wait();
     } catch (error) {
       const isDenied = [ErrorCode.ACTION_REJECTED, ErrorCode.TRANSACTION_REPLACED].includes(
@@ -81,13 +83,13 @@ export default (operation: Operation, contract?: ERC20 | Market, spender?: strin
 
       setErrorData({
         status: true,
-        message: isDenied ? 'Transaction rejected' : 'Approve failed, please try again',
+        message: isDenied ? t('Transaction rejected') : t('Approve failed, please try again'),
       });
     } finally {
       setIsLoading(false);
       setLoadingButton({});
     }
-  }, [contract, spender, setLoadingButton, estimateGas, symbol, setErrorData]);
+  }, [contract, spender, setLoadingButton, estimateGas, symbol, setErrorData, t]);
 
   return { approve, needsApproval, estimateGas, isLoading };
 };

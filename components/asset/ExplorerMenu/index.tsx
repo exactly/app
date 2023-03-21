@@ -5,6 +5,7 @@ import Image from 'next/image';
 import networkData from 'config/networkData.json' assert { type: 'json' };
 import { useWeb3 } from 'hooks/useWeb3';
 import LinkIcon from '@mui/icons-material/Link';
+import { useTranslation } from 'react-i18next';
 
 type Props = {
   symbol: string;
@@ -15,6 +16,7 @@ type Props = {
 };
 
 const ExplorerMenu: FC<Props> = ({ symbol, assetAddress, eMarketAddress, rateModelAddress, exaToken }) => {
+  const { t } = useTranslation();
   const { chain } = useWeb3();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -46,10 +48,10 @@ const ExplorerMenu: FC<Props> = ({ symbol, assetAddress, eMarketAddress, rateMod
 
   return (
     <>
-      <Tooltip title="View Token Contracts" placement="top" arrow>
+      <Tooltip title={t('View Token Contracts')} placement="top" arrow>
         <IconButton
           size="small"
-          id="basic-button"
+          id="view-contracts-button"
           aria-controls={open ? 'basic-menu' : undefined}
           aria-haspopup="true"
           aria-expanded={open ? 'true' : undefined}
@@ -64,7 +66,7 @@ const ExplorerMenu: FC<Props> = ({ symbol, assetAddress, eMarketAddress, rateMod
         open={open}
         onClose={handleClose}
         MenuListProps={{
-          'aria-labelledby': 'basic-button',
+          'aria-labelledby': 'view-contracts-button',
         }}
         PaperProps={{
           style: {
@@ -75,8 +77,8 @@ const ExplorerMenu: FC<Props> = ({ symbol, assetAddress, eMarketAddress, rateMod
         }}
       >
         <Box px={2} py={1}>
-          <Typography variant="subtitle1" fontSize="12px" color="figma.grey.300">
-            VIEW IN ETHERSCAN
+          <Typography variant="subtitle1" fontSize="12px" color="figma.grey.300" textTransform="uppercase">
+            {t('View in Etherscan')}
           </Typography>
         </Box>
         <MenuItem>
@@ -117,7 +119,7 @@ const ExplorerMenu: FC<Props> = ({ symbol, assetAddress, eMarketAddress, rateMod
           <LinkIcon fontSize="small" />
           <Box ml={1}>
             <a href={rateModelEtherscan} target="_blank" rel="noopener noreferrer">
-              Interest Rate Model
+              {t('Interest Rate Model')}
             </a>
           </Box>
         </MenuItem>

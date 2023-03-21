@@ -11,12 +11,14 @@ import parseTimestamp from 'utils/parseTimestamp';
 import SwitchCollateral from '../FloatingPoolDashboard/FloatingPoolDashboardTable/SwitchCollateral';
 import APRItem from '../FixedPoolDashboard/FixedPoolDashboardTable/APRItem';
 import useAccountData from 'hooks/useAccountData';
+import { useTranslation } from 'react-i18next';
 
 type Props = {
   type: 'deposit' | 'borrow';
 };
 
 const DashboardMobile: FC<Props> = ({ type }) => {
+  const { t } = useTranslation();
   const { accountData, getMarketAccount } = useAccountData();
   const { handleActionClick } = useActionButton();
   const { floatingRows, fixedRows } = useDashboard(type);
@@ -29,8 +31,10 @@ const DashboardMobile: FC<Props> = ({ type }) => {
           <>
             <Box display="flex" flexDirection="column" gap={1} width="100%">
               <FlexItem
-                title={isDeposit ? 'Deposited Amount' : 'Borrowed Amount'}
-                tooltip={`Amount of tokens ${isDeposit ? 'deposited' : 'borrowed'} in the pool.`}
+                title={isDeposit ? t('Deposited Amount') : t('Borrowed Amount')}
+                tooltip={t(`Amount of tokens {{action}} in the pool.`, {
+                  action: isDeposit ? t('deposited') : t('borrowed'),
+                })}
               >
                 {(depositedAmount &&
                   borrowedAmount &&
@@ -39,13 +43,13 @@ const DashboardMobile: FC<Props> = ({ type }) => {
                     symbol,
                   )}`) || <Skeleton width={40} />}
               </FlexItem>
-              <FlexItem title={isDeposit ? 'Deposited' : 'Debt'}>
+              <FlexItem title={isDeposit ? t('Deposited') : t('Debt')}>
                 {(accountData && valueUSD !== undefined && `$${formatNumber(valueUSD, 'USD', true)}`) || (
                   <Skeleton width={40} />
                 )}
               </FlexItem>
               {isDeposit && (
-                <FlexItem title="Use as collateral">
+                <FlexItem title={t('Use as collateral')}>
                   <SwitchCollateral symbol={symbol} />
                 </FlexItem>
               )}
@@ -57,7 +61,7 @@ const DashboardMobile: FC<Props> = ({ type }) => {
                 sx={{ height: '34px' }}
                 onClick={(e) => handleActionClick(e, type, symbol)}
               >
-                {isDeposit ? 'Deposit' : 'Borrow'}
+                {isDeposit ? t('Deposit') : t('Borrow')}
               </Button>
               <Button
                 variant="outlined"
@@ -65,7 +69,7 @@ const DashboardMobile: FC<Props> = ({ type }) => {
                 sx={{ height: '34px' }}
                 onClick={(e) => handleActionClick(e, isDeposit ? 'withdraw' : 'repay', symbol)}
               >
-                {isDeposit ? 'Withdraw' : 'Repay'}
+                {isDeposit ? t('Withdraw') : t('Repay')}
               </Button>
             </Box>
           </>
@@ -84,10 +88,10 @@ const DashboardMobile: FC<Props> = ({ type }) => {
           gap={1}
         >
           <Typography fontWeight={700} fontSize={15}>
-            Fixed Interest Rate
+            {t('Fixed Interest Rate')}
           </Typography>
           <Typography color="grey.500" fontSize={13}>
-            No {type}s found
+            {t('No {{operations}} found', { operations: type === 'deposit' ? t('deposits') : t('borrows') })}
           </Typography>
         </Box>
       ) : (
@@ -97,7 +101,7 @@ const DashboardMobile: FC<Props> = ({ type }) => {
             <MobileAssetCard key={`dashboard_fixed_mobile_${symbol}_${type}_${maturity}`} symbol={symbol}>
               <>
                 <Box display="flex" flexDirection="column" gap={1} width="100%">
-                  <FlexItem title="Market value">
+                  <FlexItem title={t('Market value')}>
                     {usdPrice && previewValue ? (
                       `$${formatNumber(
                         parseFloat(formatFixed(previewValue, decimals)) * parseFloat(formatFixed(usdPrice, 18)),
@@ -108,10 +112,10 @@ const DashboardMobile: FC<Props> = ({ type }) => {
                       <Skeleton sx={{ margin: 'auto' }} width={50} />
                     )}
                   </FlexItem>
-                  <FlexItem title="Avg Fixed Rate" tooltip="Average rate for existing deposits.">
+                  <FlexItem title={t('Avg Fixed Rate')} tooltip={t('Average rate for existing deposits.')}>
                     <APRItem type={type} maturityDate={maturity} market={market} decimals={decimals} />
                   </FlexItem>
-                  <FlexItem title="MaturityDate">
+                  <FlexItem title={t('Maturity Date')}>
                     {maturity ? parseTimestamp(maturity) : <Skeleton width={80} />}
                   </FlexItem>
                 </Box>
@@ -124,7 +128,7 @@ const DashboardMobile: FC<Props> = ({ type }) => {
                     handleActionClick(e, isDeposit ? 'withdrawAtMaturity' : 'repayAtMaturity', symbol, maturity)
                   }
                 >
-                  {isDeposit ? 'Withdraw' : 'Repay'}
+                  {isDeposit ? t('Withdraw') : t('Repay')}
                 </Button>
               </>
             </MobileAssetCard>
@@ -135,7 +139,7 @@ const DashboardMobile: FC<Props> = ({ type }) => {
   );
 };
 
-const FlexItem: FC<PropsWithChildren & { title: string; tooltip?: string }> = ({ title, children, tooltip }) => (
+const FlexItem: FC<PropsWithChildren & { title: string; tooltip?: string | null }> = ({ title, children, tooltip }) => (
   <Box display="flex" justifyContent="space-between">
     <Box display="flex">
       <Typography fontSize="16px" color="figma.grey.300" lineHeight="20px" fontWeight={500}>

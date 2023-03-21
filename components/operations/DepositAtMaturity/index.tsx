@@ -24,8 +24,12 @@ import ModalInfo from 'components/common/modal/ModalInfo';
 import formatNumber from 'utils/formatNumber';
 import ModalInfoEditableSlippage from 'components/OperationsModal/Info/ModalInfoEditableSlippage';
 import useDepositAtMaturity from 'hooks/useDepositAtMaturity';
+import { useTranslation } from 'react-i18next';
+import useTranslateOperation from 'hooks/useTranslateOperation';
 
 const DepositAtMaturity: FC = () => {
+  const { t } = useTranslation();
+  const translateOperation = useTranslateOperation();
   const { operation } = useModalStatus();
   const {
     isLoading,
@@ -65,7 +69,7 @@ const DepositAtMaturity: FC = () => {
               decimals={decimals}
               onMax={onMax}
               onChange={handleInputChange}
-              label="Your balance"
+              label={t('Your balance')}
               amount={walletBalance}
             />
           </ModalBoxRow>
@@ -92,7 +96,7 @@ const DepositAtMaturity: FC = () => {
         {errorData?.component !== 'gas' && <ModalTxCost gasCost={gasCost} />}
         <ModalAdvancedSettings>
           {optimalDepositAmount && (
-            <ModalInfo label="Optimal deposit amount" variant="row">
+            <ModalInfo label={t('Optimal deposit amount')} variant="row">
               {formatNumber(formatFixed(optimalDepositAmount, decimals), symbol)}
             </ModalInfo>
           )}
@@ -103,14 +107,14 @@ const DepositAtMaturity: FC = () => {
 
       {(errorData?.status || gtMaxYield) && (
         <Grid item mt={1}>
-          {gtMaxYield && <ModalAlert variant="warning" message="You have reached the maximum yield possible" />}
+          {gtMaxYield && <ModalAlert variant="warning" message={t('You have reached the maximum yield possible')} />}
           {errorData?.status && <ModalAlert variant="error" message={errorData.message} />}
         </Grid>
       )}
 
       <Grid item mt={{ xs: 2, sm: 3 }}>
         <ModalSubmit
-          label="Deposit"
+          label={translateOperation(operation, { capitalize: true })}
           symbol={symbol}
           submit={handleSubmitAction}
           isLoading={isLoading || previewIsLoading}

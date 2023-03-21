@@ -28,6 +28,7 @@ import getLiquidTokenInfo from 'utils/getLiquidTokenInfo';
 import useRewards from 'hooks/useRewards';
 import RewardPill from 'components/markets/RewardPill';
 import { useRouter } from 'next/router';
+import { useTranslation } from 'react-i18next';
 
 const { minAPRValue } = numbers;
 
@@ -49,6 +50,7 @@ export type TableRow = {
 };
 
 const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) => {
+  const { t } = useTranslation();
   const { query } = useRouter();
   const { handleActionClick, isDisable } = useActionButton();
   const assets = useAssets();
@@ -59,7 +61,7 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
 
   return (
     <TableContainer>
-      <Table aria-label="simple table">
+      <Table>
         <TableHead>
           <TableRow>
             {headers.map(({ title, tooltipTitle, width, sortKey }) => (
@@ -169,7 +171,9 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
                   <Tooltip
                     title={
                       rateType === 'fixed' &&
-                      'In order to deposit at a fixed rate, there must have been fixed rate loans at the same maturity previously to ensure the solvency condition'
+                      t(
+                        'In order to deposit at a fixed rate, there must have been fixed rate loans at the same maturity previously to ensure the solvency condition',
+                      )
                     }
                     arrow
                     placement="top"
@@ -202,7 +206,7 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
                           disabled={isDisable(rateType, depositAPR)}
                           data-testid={`${rateType}-deposit-${symbol}`}
                         >
-                          Deposit
+                          {t('Deposit')}
                         </Button>
                       )}
                     </TableCell>
@@ -224,7 +228,9 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
                       />
                     ) : (
                       <Tooltip
-                        title="In order to borrow you need to have a deposit in the Variable Rate Pool marked as collateral in your Dashboard"
+                        title={t(
+                          'In order to borrow you need to have a deposit in the Variable Rate Pool marked as collateral in your Dashboard',
+                        )}
                         arrow
                         placement="top"
                       >
@@ -241,7 +247,7 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
                           }
                           data-testid={`${rateType}-borrow-${symbol}`}
                         >
-                          Borrow
+                          {t('Borrow')}
                         </Button>
                       </Tooltip>
                     )}

@@ -1,15 +1,17 @@
 import React, { FC, useCallback, useMemo, useRef } from 'react';
 import { Box, Button, capitalize, Typography, useTheme } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import { atcb_action } from 'add-to-calendar-button';
 import parseTimestamp from 'utils/parseTimestamp';
 
 type Props = {
-  operationName: string;
+  operationName: string | null;
   maturity: number;
 };
 
 const Reminder: FC<Props> = ({ operationName, maturity }) => {
+  const { t } = useTranslation();
   const { palette } = useTheme();
   const buttonRef = useRef<HTMLInputElement>(null);
 
@@ -17,7 +19,7 @@ const Reminder: FC<Props> = ({ operationName, maturity }) => {
 
   const onClick = useCallback(() => {
     const config = {
-      name: `[Exactly] ${capitalize(operationName)} maturity date reminder`,
+      name: t(`[Exactly] {{operationName}} maturity date reminder`, { operationName: capitalize(operationName ?? '') }),
       description: 'https://app.exact.ly/dashboard',
       startDate: parseTimestamp(maturity, 'YYYY-MM-DD'),
       startTime: '00:00',
@@ -28,7 +30,7 @@ const Reminder: FC<Props> = ({ operationName, maturity }) => {
     };
 
     if (buttonRef.current) atcb_action(config as Parameters<typeof atcb_action>[0], buttonRef.current);
-  }, [maturity, operationName, palette.mode]);
+  }, [maturity, operationName, palette.mode, t]);
 
   return (
     <Box
@@ -43,15 +45,15 @@ const Reminder: FC<Props> = ({ operationName, maturity }) => {
       border="1px solid #E3E5E8"
     >
       <Typography fontSize={15} fontWeight={700}>
-        {isBorrow ? 'Remember to pay before the maturity date' : 'Remember to withdraw your assets'}
+        {isBorrow ? t('Remember to pay before the maturity date') : t('Remember to withdraw your assets')}
       </Typography>
       <Box display="flex" flexDirection="column" justifyContent="center" alignItems="center" textAlign="center">
         <Typography fontSize={13} fontWeight={500} color="figma.grey.600">
-          {isBorrow ? 'You are borrowing from a fixed-rate pool.' : 'You are depositing to a fixed-rate pool.'}
+          {isBorrow ? t('You are borrowing from a fixed-rate pool.') : t('You are depositing to a fixed-rate pool.')}
         </Typography>
         {isBorrow && (
           <Typography fontSize={13} fontWeight={500} color="figma.grey.600">
-            Avoid penalties by paying your debt before the maturity date.
+            {t('Avoid penalties by paying your debt before the maturity date.')}
           </Typography>
         )}
       </Box>
@@ -61,7 +63,7 @@ const Reminder: FC<Props> = ({ operationName, maturity }) => {
             <Box display="flex" justifyContent="center" alignItems="center" gap={1}>
               <CalendarTodayIcon sx={{ fontSize: '15px' }} />
               <Typography fontSize={13} fontWeight={700}>
-                Add reminder to your calendar
+                {t('Add reminder to your calendar')}
               </Typography>
             </Box>
           </Button>

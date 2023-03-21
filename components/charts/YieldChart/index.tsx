@@ -11,6 +11,7 @@ import { toPercentage } from 'utils/utils';
 import ButtonsChart from '../ButtonsChart';
 import LoadingChart from '../LoadingChart';
 import TooltipChart from '../TooltipChart';
+import { useTranslation } from 'react-i18next';
 
 const getReferenceLines = () => {
   const data = [];
@@ -25,42 +26,46 @@ const getReferenceLines = () => {
   return data;
 };
 
-const referenceLabel = (t: number) => {
-  dayjs.extend(relativeTime);
-  dayjs.extend(updateLocale);
-  dayjs.updateLocale('en', {
-    relativeTime: {
-      M: '1 month',
-      MM: '%d months',
-      y: '%d months',
-    },
-  });
-
-  return dayjs(t * 1000).fromNow(true);
-};
-
 type Props = {
   symbol: string;
 };
 
 const YieldChart: FC<Props> = ({ symbol }) => {
+  const { t } = useTranslation();
   const { depositsRates, borrowsRates, loading } = useYieldRates(symbol);
   const [operation, setOperation] = useState<'Deposits' | 'Borrows'>('Borrows');
   const assets = useAssets();
   const { palette, typography } = useTheme();
 
+  const referenceLabel = useCallback(
+    (timestamp: number) => {
+      dayjs.extend(relativeTime);
+      dayjs.extend(updateLocale);
+      dayjs.updateLocale('en', {
+        relativeTime: {
+          M: t('1 month'),
+          MM: t('%d months'),
+          y: t('%d months'),
+        },
+      });
+
+      return dayjs(timestamp * 1000).fromNow(true);
+    },
+    [t],
+  );
+
   const buttons = useMemo(
     () => [
       {
-        label: 'DEPOSIT APR',
+        label: t('DEPOSIT APR'),
         onClick: () => setOperation('Deposits'),
       },
       {
-        label: 'BORROW APR',
+        label: t('BORROW APR'),
         onClick: () => setOperation('Borrows'),
       },
     ],
-    [],
+    [t],
   );
 
   const formatTimestamp = useCallback((value: string | number) => parseTimestamp(value, 'MMM DD'), []);
@@ -71,7 +76,7 @@ const YieldChart: FC<Props> = ({ symbol }) => {
     <Box display="flex" flexDirection="column" width="100%" height="100%" gap={2}>
       <Box display="flex" justifyContent="space-between">
         <Typography variant="h6" fontSize="16px">
-          Current Yield Curves
+          {t('Current Yield Curves')}
         </Typography>
         <Box>
           <ButtonsChart buttons={buttons} defaultSelected={1} />

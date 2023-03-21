@@ -12,18 +12,26 @@ import MobileTabs from 'components/MobileTabs';
 import DashboardMobile from './DashboardMobile';
 import ConnectYourWallet from './ConnectYourWallet';
 import { useTheme } from '@mui/material/styles';
-
-const depositTab = {
-  label: 'Your Deposits',
-  value: 'deposit',
-};
-
-const borrowTab = {
-  label: 'Your Borrows',
-  value: 'borrow',
-};
+import { useTranslation } from 'react-i18next';
 
 function DashboardContent() {
+  const { t } = useTranslation();
+
+  const { depositTab, borrowTab } = useMemo(
+    () => ({
+      depositTab: {
+        label: t('Your Deposits'),
+        value: 'deposit',
+      },
+
+      borrowTab: {
+        label: t('Your Borrows'),
+        value: 'borrow',
+      },
+    }),
+    [t],
+  );
+
   const { isConnected } = useWeb3();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -49,7 +57,7 @@ function DashboardContent() {
         ),
       },
     ],
-    [],
+    [borrowTab, depositTab],
   );
 
   if (!isConnected) {
@@ -62,11 +70,11 @@ function DashboardContent() {
         <MobileTabs
           tabs={[
             {
-              title: 'Your Deposits',
+              title: t('Your Deposits'),
               content: <DashboardMobile type="deposit" />,
             },
             {
-              title: 'Your Borrows',
+              title: t('Your Borrows'),
               content: <DashboardMobile type="borrow" />,
             },
           ]}

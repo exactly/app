@@ -23,8 +23,12 @@ import useAccountData from 'hooks/useAccountData';
 import useBorrowAtMaturity from 'hooks/useBorrowAtMaturity';
 import ModalRewards from 'components/common/modal/ModalRewards';
 import ModalPenaltyRate from 'components/common/modal/ModalPenaltyRate';
+import { useTranslation } from 'react-i18next';
+import useTranslateOperation from 'hooks/useTranslateOperation';
 
 const BorrowAtMaturity: FC = () => {
+  const { t } = useTranslation();
+  const translateOperation = useTranslateOperation();
   const { operation } = useModalStatus();
   const { symbol, errorData, setErrorData, qty, gasCost, tx, requiresApproval } = useOperationContext();
   const {
@@ -50,11 +54,12 @@ const BorrowAtMaturity: FC = () => {
       setErrorData({
         status: true,
         variant: 'warning',
-        message:
+        message: t(
           'In order to borrow you need to have a deposit in the Variable Rate Pool marked as collateral in your Dashboard',
+        ),
       });
     }
-  }, [hasCollateral, setErrorData]);
+  }, [hasCollateral, setErrorData, t]);
 
   const { isLoading: previewIsLoading } = usePreviewTx({ qty, needsApproval, previewGasCost });
 
@@ -71,9 +76,9 @@ const BorrowAtMaturity: FC = () => {
               decimals={marketAccount?.decimals ?? 18}
               onMax={onMax}
               onChange={handleInputChange}
-              label="Safe borrow limit"
+              label={t('Safe borrow limit')}
               amount={safeMaximumBorrow}
-              tooltip="The maximum amount you can borrow without putting your health factor at risk"
+              tooltip={t('The maximum amount you can borrow without putting your health factor at risk')}
             />
           </ModalBoxRow>
           <ModalBoxRow>
@@ -119,7 +124,7 @@ const BorrowAtMaturity: FC = () => {
 
       <Grid item mt={{ xs: 2, sm: 3 }}>
         <ModalSubmit
-          label="Borrow"
+          label={translateOperation(operation, { capitalize: true })}
           symbol={symbol === 'WETH' && marketAccount ? marketAccount.symbol : symbol}
           submit={handleSubmitAction}
           isLoading={isLoading || previewIsLoading}

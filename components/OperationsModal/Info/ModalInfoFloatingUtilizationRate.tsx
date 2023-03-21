@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { Zero } from '@ethersproject/constants';
 import PieChartOutlineRoundedIcon from '@mui/icons-material/PieChartOutlineRounded';
+import { useTranslation } from 'react-i18next';
 
 import ModalInfo, { FromTo, Variant } from 'components/common/modal/ModalInfo';
 import { Operation } from 'contexts/ModalStatusContext';
@@ -19,11 +20,12 @@ type Props = {
 };
 
 function ModalInfoFloatingUtilizationRate({ qty, symbol, operation, variant = 'column' }: Props) {
+  const { t } = useTranslation();
   const { marketAccount } = useAccountData(symbol);
   const { borrowAPR } = useFloatingPoolAPR(symbol, qty, 'borrow');
 
   const [from, to, rawFrom, rawTo] = useMemo(() => {
-    if (!marketAccount) return [];
+    if (!marketAccount) return [undefined, undefined, undefined, undefined];
     const { totalFloatingDepositAssets, totalFloatingBorrowAssets, decimals } = marketAccount;
     try {
       let deposited = totalFloatingDepositAssets ?? Zero;
@@ -49,19 +51,19 @@ function ModalInfoFloatingUtilizationRate({ qty, symbol, operation, variant = 'c
           break;
       }
 
-      const t = borrowed.mul(decimalWAD).div(deposited);
+      const utilization = borrowed.mul(decimalWAD).div(deposited);
       const fromUtilization = Number(formatFixed(f, decimals));
-      const toUtilization = Number(formatFixed(t, decimals));
+      const toUtilization = Number(formatFixed(utilization, decimals));
 
       return [toPercentage(fromUtilization), toPercentage(toUtilization), fromUtilization, toUtilization];
     } catch {
-      return [];
+      return [undefined, undefined, undefined, undefined];
     }
   }, [marketAccount, qty, operation]);
 
   return (
     <>
-      <ModalInfo label="Pool Utilization Rate" icon={PieChartOutlineRoundedIcon} variant={variant}>
+      <ModalInfo label={t('Pool Utilization Rate')} icon={PieChartOutlineRoundedIcon} variant={variant}>
         <FromTo from={from} to={to} variant={variant} />
       </ModalInfo>
       {variant === 'row' && (

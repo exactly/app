@@ -25,7 +25,7 @@ import { MarketContext } from './MarketContext';
 import { useModalStatus } from './ModalStatusContext';
 import numbers from 'config/numbers.json';
 
-type LoadingButton = { withCircularProgress?: boolean; label?: string };
+type LoadingButton = { withCircularProgress?: boolean; label?: string | null };
 
 type ContextValues = {
   symbol: string;
@@ -54,8 +54,8 @@ type ContextValues = {
 
   loadingButton: LoadingButton;
   setLoadingButton: (loading: LoadingButton) => void;
-  errorButton?: string;
-  setErrorButton: (error?: string) => void;
+  errorButton?: string | null;
+  setErrorButton: (error?: string | null) => void;
 };
 
 const OperationContext = createContext<ContextValues | null>(null);
@@ -75,7 +75,7 @@ export const OperationContextProvider: FC<PropsWithChildren> = ({ children }) =>
   const [tx, setTx] = useState<Transaction | undefined>();
   const [isLoading, setIsLoading] = useState(false);
   const [loadingButton, setLoadingButton] = useState<LoadingButton>({});
-  const [errorButton, setErrorButton] = useState<string | undefined>();
+  const [errorButton, setErrorButton] = useState<string | undefined | null>();
   const [requiresApproval, setRequiresApproval] = useState(false);
   const { marketAccount } = useAccountData(marketSymbol);
   const [rawSlippage, setRawSlippage] = useState(DEFAULT_SLIPPAGE);

@@ -9,6 +9,7 @@ import LoadingChart from '../LoadingChart';
 import numbers from 'config/numbers.json';
 import parseTimestamp from 'utils/parseTimestamp';
 import ButtonsChart from '../ButtonsChart';
+import { useTranslation } from 'react-i18next';
 
 type Props = {
   type: 'floating' | 'fixed';
@@ -18,6 +19,7 @@ type Props = {
 const formatEmpty = () => '';
 
 function UtilizationRateChart({ type, symbol }: Props) {
+  const { t } = useTranslation();
   const { palette, typography } = useTheme();
   const { currentUtilization, data, loading } = useUtilizationRate(type, symbol);
   const [zoom, setZoom] = useState<boolean>(true);
@@ -37,15 +39,15 @@ function UtilizationRateChart({ type, symbol }: Props) {
   const buttons = useMemo(
     () => [
       {
-        label: 'ZOOM IN',
+        label: t('ZOOM IN'),
         onClick: () => setZoom(true),
       },
       {
-        label: 'ZOOM OUT',
+        label: t('ZOOM OUT'),
         onClick: () => setZoom(false),
       },
     ],
-    [],
+    [t],
   );
 
   const label: CSSProperties = {
@@ -58,7 +60,7 @@ function UtilizationRateChart({ type, symbol }: Props) {
     <Box display="flex" flexDirection="column" width="100%" height="100%" gap={2}>
       <Box display="flex" justifyContent="space-between">
         <Typography variant="h6" fontSize="16px">
-          {type === 'floating' ? 'Utilization Rate (Variable Rate Pool)' : 'Utilization Rates (Fixed Rate Pools)'}
+          {type === 'floating' ? t('Utilization Rate (Variable Rate Pool)') : t('Utilization Rates (Fixed Rate Pools)')}
         </Typography>
         <Box>
           <ButtonsChart buttons={buttons} />
@@ -73,14 +75,14 @@ function UtilizationRateChart({ type, symbol }: Props) {
             <XAxis
               type="number"
               dataKey="utilization"
-              tickFormatter={(t) => toPercentage(t, zoom ? 2 : 0)}
+              tickFormatter={(tick) => toPercentage(tick, zoom ? 2 : 0)}
               stroke={palette.grey[400]}
               tick={{ fill: palette.grey[500], fontWeight: 500, fontSize: 11 }}
-              allowDataOverflow={true}
+              allowDataOverflow
               domain={['DataMin', 'DataMax']}
               offset={10}
               label={{
-                value: 'Utilization Rate',
+                value: t('Utilization Rate'),
                 position: 'insideBottom',
                 offset: 0,
                 fill: palette.grey[500],
@@ -89,10 +91,10 @@ function UtilizationRateChart({ type, symbol }: Props) {
               }}
             />
             <YAxis
-              allowDataOverflow={true}
+              allowDataOverflow
               orientation="left"
               type="number"
-              tickFormatter={(t) => toPercentage(t, zoom ? 2 : 0)}
+              tickFormatter={(tick) => toPercentage(tick, zoom ? 2 : 0)}
               yAxisId="yaxis"
               axisLine={false}
               tick={{ fill: palette.grey[500], fontWeight: 500, fontSize: 11 }}
@@ -102,7 +104,7 @@ function UtilizationRateChart({ type, symbol }: Props) {
                 (dataMax: number) => (type === 'floating' && !zoom ? 1.5 : Math.min(1.5, dataMax)),
               ]}
               label={{
-                value: 'APR',
+                value: t('APR'),
                 position: 'insideRight',
                 fill: palette.grey[500],
                 fontWeight: 500,
@@ -130,7 +132,7 @@ function UtilizationRateChart({ type, symbol }: Props) {
             />
 
             <Line
-              name="Utilization"
+              name={t('Utilization') ?? undefined}
               type="monotone"
               yAxisId="yaxis2"
               dataKey="utilization"
@@ -142,7 +144,7 @@ function UtilizationRateChart({ type, symbol }: Props) {
             />
 
             <Line
-              name="Borrow APR"
+              name={t('Borrow APR') ?? undefined}
               yAxisId="yaxis"
               type="monotone"
               dataKey="apr"

@@ -6,6 +6,7 @@ import numbers from 'config/numbers.json';
 import useActionButton from 'hooks/useActionButton';
 import parseTimestamp from 'utils/parseTimestamp';
 import { toPercentage } from 'utils/utils';
+import { useTranslation } from 'react-i18next';
 
 type Props = {
   symbol: string;
@@ -14,13 +15,14 @@ type Props = {
 const { minAPRValue } = numbers;
 
 const MaturityPoolsMobile: FC<Props> = ({ symbol }) => {
+  const { t } = useTranslation();
   const { handleActionClick } = useActionButton();
   const rows = useMaturityPools(symbol);
 
   return (
     <Box width="100%" pb={2}>
       <Typography variant="subtitle2" sx={{ color: 'grey.500' }}>
-        Available Pools
+        {t('Available Pools')}
       </Typography>
       {rows.map(({ maturity, totalDeposited, totalBorrowed, depositAPR, borrowAPR }) => (
         <Box key={`Maturity_pools_mobile_${symbol}_${maturity}`}>
@@ -28,18 +30,26 @@ const MaturityPoolsMobile: FC<Props> = ({ symbol }) => {
           <Box display="flex" flexDirection="column" gap={2} mt={2}>
             <Typography variant="h6">{parseTimestamp(maturity)}</Typography>
             <Grid container>
-              <GridItem title="Total Deposits" value={`$${totalDeposited}`} isLoading={totalDeposited === undefined} />
-              <GridItem title="Total Borrows" value={`$${totalBorrowed}`} isLoading={totalBorrowed === undefined} />
+              <GridItem
+                title={t('Total Deposits')}
+                value={`$${totalDeposited}`}
+                isLoading={totalDeposited === undefined}
+              />
+              <GridItem
+                title={t('Total Borrows')}
+                value={`$${totalBorrowed}`}
+                isLoading={totalBorrowed === undefined}
+              />
               <Grid item xs={12} my={0.5} />
               <GridItem
-                title="Deposit APR"
-                tooltip="The fixed interest APR for a deposit up to the optimal deposit size."
+                title={t('Deposit APR')}
+                tooltip={t('The fixed interest APR for a deposit up to the optimal deposit size.')}
                 value={`${toPercentage(depositAPR > minAPRValue ? depositAPR : undefined)}`}
                 isLoading={depositAPR === undefined}
               />
               <GridItem
-                title="Borrow APR"
-                tooltip="The fixed borrowing interest APR at current utilization level."
+                title={t('Borrow APR')}
+                tooltip={t('The fixed borrowing interest APR at current utilization level.')}
                 value={`${toPercentage(borrowAPR > minAPRValue ? borrowAPR : undefined)}`}
                 isLoading={borrowAPR === undefined}
               />
@@ -51,7 +61,7 @@ const MaturityPoolsMobile: FC<Props> = ({ symbol }) => {
                 sx={{ height: '34px' }}
                 onClick={(e) => handleActionClick(e, 'depositAtMaturity', symbol, maturity)}
               >
-                Deposit
+                {t('Deposit')}
               </Button>
               <Button
                 variant="outlined"
@@ -59,7 +69,7 @@ const MaturityPoolsMobile: FC<Props> = ({ symbol }) => {
                 sx={{ height: '34px' }}
                 onClick={(e) => handleActionClick(e, 'borrowAtMaturity', symbol, maturity)}
               >
-                Borrow
+                {t('Borrow')}
               </Button>
             </Box>
           </Box>
@@ -69,7 +79,7 @@ const MaturityPoolsMobile: FC<Props> = ({ symbol }) => {
   );
 };
 
-const GridItem: FC<{ title: string; value: string; tooltip?: string; isLoading?: boolean }> = ({
+const GridItem: FC<{ title: string; value: string; tooltip?: string | null; isLoading?: boolean }> = ({
   title,
   value,
   tooltip,

@@ -22,6 +22,7 @@ import { Borrow } from 'types/Borrow';
 import { Repay } from 'types/Repay';
 import useAccountData from 'hooks/useAccountData';
 import { useRouter } from 'next/router';
+import { useTranslation } from 'react-i18next';
 
 type Props = {
   symbol: string;
@@ -33,6 +34,7 @@ type Props = {
 };
 
 function TableRowFixedPool({ symbol, valueUSD, type, maturityDate, market, decimals }: Props) {
+  const { t } = useTranslation();
   const { query } = useRouter();
   const { marketAccount } = useAccountData(symbol);
   const { withdrawTxs, repayTxs, depositTxs, borrowTxs } = useFixedOperation(type, maturityDate, market);
@@ -54,7 +56,13 @@ function TableRowFixedPool({ symbol, valueUSD, type, maturityDate, market, decim
       const assets = formatFixed(transaction.assets, decimals);
 
       const txType =
-        'fee' in transaction ? (type === 'borrow' ? 'Borrow' : 'Deposit') : type === 'borrow' ? 'Repay' : 'Withdraw';
+        'fee' in transaction
+          ? type === 'borrow'
+            ? t('Borrow')
+            : t('Deposit')
+          : type === 'borrow'
+          ? t('Repay')
+          : t('Withdraw');
 
       const { transactionAPR } =
         'fee' in transaction
@@ -77,7 +85,7 @@ function TableRowFixedPool({ symbol, valueUSD, type, maturityDate, market, decim
     });
 
     return transformedTxs;
-  }, [withdrawTxs, repayTxs, depositTxs, borrowTxs, type, exchangeRate, decimals]);
+  }, [withdrawTxs, repayTxs, depositTxs, borrowTxs, type, exchangeRate, decimals, t]);
 
   return (
     <>
@@ -127,7 +135,7 @@ function TableRowFixedPool({ symbol, valueUSD, type, maturityDate, market, decim
                 handleActionClick(e, type === 'borrow' ? 'repayAtMaturity' : 'withdrawAtMaturity', symbol, maturityDate)
               }
             >
-              {type === 'borrow' ? 'Repay' : 'Withdraw'}
+              {type === 'borrow' ? t('Repay') : t('Withdraw')}
             </Button>
           )) || (
             <Skeleton

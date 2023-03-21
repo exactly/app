@@ -7,8 +7,10 @@ import { formatFixed } from '@ethersproject/bignumber';
 import { useWeb3 } from 'hooks/useWeb3';
 import useRewards from 'hooks/useRewards';
 import formatNumber from 'utils/formatNumber';
+import { useTranslation } from 'react-i18next';
 
 const ClaimRewards: FC = () => {
+  const { t } = useTranslation();
   const { walletAddress } = useWeb3();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const { rewards, claimable, claim, isLoading } = useRewards();
@@ -90,7 +92,7 @@ const ClaimRewards: FC = () => {
       >
         <Box display="flex" flexDirection="column" alignItems="stretch" gap={1}>
           <Typography fontWeight="500" textAlign="center" color="figma.grey.600" fontSize={13}>
-            Your rewards
+            {t('Your rewards')}
           </Typography>
           <Box display="flex" justifyContent="center" alignItems="center" gap={1} height={40} minWidth={128}>
             <Image
@@ -116,7 +118,7 @@ const ClaimRewards: FC = () => {
             loading={isLoading}
             sx={{ color: 'grey.700', borderColor: '#CFD3D8' }}
           >
-            Claim
+            {t('Claim')}
           </LoadingButton>
         </Box>
       </Menu>

@@ -12,6 +12,7 @@ import useRewards from 'hooks/useRewards';
 import { Zero } from '@ethersproject/constants';
 import ItemCell from 'components/common/ItemCell';
 import { BigNumber, formatFixed } from '@ethersproject/bignumber';
+import { useTranslation } from 'react-i18next';
 
 type MaturityPoolInfoProps = {
   symbol: string;
@@ -34,6 +35,7 @@ const MaturityPoolInfo: FC<MaturityPoolInfoProps> = ({
   bestBorrowMaturity,
   adjustFactor,
 }) => {
+  const { t } = useTranslation();
   const { minAPRValue } = numbers;
 
   const { rates } = useRewards();
@@ -41,21 +43,22 @@ const MaturityPoolInfo: FC<MaturityPoolInfoProps> = ({
   const itemsInfo: ItemInfoProps[] = useMemo(
     () => [
       {
-        label: 'Total Deposits',
+        label: t('Total Deposits'),
         value: totalDeposited !== undefined ? `$${formatNumber(totalDeposited)}` : undefined,
       },
       {
-        label: 'Total Borrows',
+        label: t('Total Borrows'),
         value: totalBorrowed !== undefined ? `$${formatNumber(totalBorrowed)}` : undefined,
       },
       {
-        label: 'Risk-Adjust Factor',
+        label: t('Risk-Adjust Factor'),
         value: adjustFactor ? formatFixed(adjustFactor, 18) : undefined,
-        tooltipTitle:
+        tooltipTitle: t(
           'The Borrow risk-adjust factor is a measure that helps evaluate how risky an asset is compared to others. The higher the number, the safer the asset is considered to be, making it more valuable as collateral when requesting a loan.',
+        ),
       },
       {
-        label: 'Best Deposit APR',
+        label: t('Best Deposit APR'),
         value:
           (bestDepositRate && bestDepositRate > minAPRValue) || bestDepositRate === 0 ? (
             <ItemCell
@@ -65,7 +68,7 @@ const MaturityPoolInfo: FC<MaturityPoolInfoProps> = ({
             />
           ) : undefined,
         underLabel: bestDepositMaturity ? parseTimestamp(bestDepositMaturity) : undefined,
-        tooltipTitle: 'The highest fixed interest APR for a deposit up to the optimal deposit size.',
+        tooltipTitle: t('The highest fixed interest APR for a deposit up to the optimal deposit size.'),
       },
       {
         label: 'Best Borrow APR',
@@ -74,13 +77,14 @@ const MaturityPoolInfo: FC<MaturityPoolInfoProps> = ({
             <ItemCell key={symbol} value={toPercentage(bestBorrowRate)} symbol={symbol} />
           ) : undefined,
         underLabel: bestBorrowMaturity ? parseTimestamp(bestBorrowMaturity) : undefined,
-        tooltipTitle:
+        tooltipTitle: t(
           'The lowest fixed borrowing interest APR at current utilization levels for all the Fixed Rate Pools.',
+        ),
       },
       ...(rates[symbol] && rates[symbol].some((r) => r.borrow.gt(Zero))
         ? [
             {
-              label: 'Borrow Rewards APR',
+              label: t('Borrow Rewards APR'),
               value: (
                 <>
                   {rates[symbol].map((r) => (
@@ -88,7 +92,7 @@ const MaturityPoolInfo: FC<MaturityPoolInfoProps> = ({
                   ))}
                 </>
               ),
-              tooltipTitle: 'This APR assumes a constant price for the OP token and distribution rate.',
+              tooltipTitle: t('This APR assumes a constant price for the OP token and distribution rate.'),
             },
           ]
         : []),
@@ -104,12 +108,18 @@ const MaturityPoolInfo: FC<MaturityPoolInfoProps> = ({
       symbol,
       totalBorrowed,
       totalDeposited,
+      t,
     ],
   );
 
   return (
     <Grid container>
-      <HeaderInfo title="Fixed Interest Rate" itemsInfo={itemsInfo} shadow={false} xs={itemsInfo.length > 4 ? 4 : 6} />
+      <HeaderInfo
+        title={t('Fixed Interest Rate')}
+        itemsInfo={itemsInfo}
+        shadow={false}
+        xs={itemsInfo.length > 4 ? 4 : 6}
+      />
     </Grid>
   );
 };

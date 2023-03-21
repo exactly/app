@@ -8,6 +8,7 @@ import daysLeft from 'utils/daysLeft';
 import useAccountData from 'hooks/useAccountData';
 import { toPercentage } from 'utils/utils';
 import { formatFixed } from '@ethersproject/bignumber';
+import { useTranslation } from 'react-i18next';
 
 const StyledLinearProgress = styled(LinearProgress, {
   shouldForwardProp: (prop) => prop !== 'barColor',
@@ -36,6 +37,7 @@ type Props = {
 };
 
 function MaturityLinearProgress({ symbol, operation, maturityDate }: Props) {
+  const { t } = useTranslation();
   const { palette } = useTheme();
   const { marketAccount } = useAccountData(symbol);
   const progress = useMemo(() => {
@@ -69,9 +71,9 @@ function MaturityLinearProgress({ symbol, operation, maturityDate }: Props) {
 
   const tooltip =
     operation === 'borrow' && marketAccount
-      ? `Late repayment will result in a penalty daily rate of ${toPercentage(
-          parseFloat(formatFixed(marketAccount.penaltyRate, 18)) * 86_400,
-        )}`
+      ? t(`Late repayment will result in a penalty daily rate of {{penaltyRate}}`, {
+          penaltyRate: toPercentage(parseFloat(formatFixed(marketAccount.penaltyRate, 18)) * 86_400),
+        })
       : '';
 
   return (
@@ -81,14 +83,16 @@ function MaturityLinearProgress({ symbol, operation, maturityDate }: Props) {
           {isCompleted ? (
             <>
               <Typography variant="subtitle2" color={color}>
-                Completed
+                {t('Completed')}
               </Typography>
               {Icon && <Icon sx={{ color, fontSize: '14px' }} />}
             </>
           ) : (
             <>
               <Typography variant="subtitle2">{Math.round(progress)}%</Typography>
-              <Typography sx={{ fontWeight: 500, fontSize: 11, color: '#94999E' }}>{daysToMaturity} left</Typography>
+              <Typography sx={{ fontWeight: 500, fontSize: 11, color: '#94999E' }}>
+                {t('{{daysLeft}} left', { daysLeft: daysToMaturity })}
+              </Typography>
             </>
           )}
         </Box>

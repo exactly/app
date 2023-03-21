@@ -5,12 +5,14 @@ import { Typography, Skeleton, Box } from '@mui/material';
 import { WeiPerEther } from '@ethersproject/constants';
 import ModalInfo from '../ModalInfo';
 import useAccountData from 'hooks/useAccountData';
+import { useTranslation } from 'react-i18next';
 
 type Props = {
   gasCost?: BigNumber;
 };
 
 function ModalTxCost({ gasCost }: Props) {
+  const { t } = useTranslation();
   const { marketAccount } = useAccountData('WETH');
 
   const renderGas = useMemo(() => {
@@ -28,7 +30,7 @@ function ModalTxCost({ gasCost }: Props) {
   }, [gasCost, marketAccount]);
 
   return (
-    <ModalInfo label="TX Cost" variant="row">
+    <ModalInfo label={t('TX Cost')} variant="row">
       {renderGas}
     </ModalInfo>
   );

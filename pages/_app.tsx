@@ -1,6 +1,8 @@
 import '../styles/globals.css';
 import '../styles/variables.css';
 
+import 'i18n';
+
 import React from 'react';
 import Head from 'next/head';
 import { Web3Modal } from '@web3modal/react';

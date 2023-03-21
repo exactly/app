@@ -10,8 +10,10 @@ import { ItemInfoProps } from 'components/common/ItemInfo';
 import { useWeb3 } from 'hooks/useWeb3';
 import useHealthFactor from 'hooks/useHealthFactor';
 import useAccountData from 'hooks/useAccountData';
+import { useTranslation } from 'react-i18next';
 
 function DashboardHeader() {
+  const { t } = useTranslation();
   const { walletAddress } = useWeb3();
   const { accountData } = useAccountData();
 
@@ -76,29 +78,30 @@ function DashboardHeader() {
   const itemsInfo: ItemInfoProps[] = useMemo((): ItemInfoProps[] => {
     return [
       {
-        label: 'Your Deposits',
+        label: t('Your Deposits'),
         value: totalDeposited ? `$${formatNumber(formatFixed(totalDeposited, 18))}` : undefined,
       },
       {
-        label: 'Your Borrows',
+        label: t('Your Borrows'),
         value: totalBorrowed ? `$${formatNumber(formatFixed(totalBorrowed, 18))}` : undefined,
       },
       ...(healthFactor && walletAddress
         ? [
             {
-              label: 'Health Factor',
+              label: t('Health Factor'),
               value: healthFactor ? parseHealthFactor(healthFactor.debt, healthFactor.collateral) : undefined,
-              tooltipTitle:
-                'The Helth Factor represents how “safe” your leverage portfolio is, defined as the risk-adjusted proportion of collateral deposited versus the borrowed risk-adjusted amount. A health factor below 1x will be considered with a shortfall and open to liquidation.',
+              tooltipTitle: t(
+                'The Health Factor represents how “safe” your leverage portfolio is, defined as the risk-adjusted proportion of collateral deposited versus the borrowed risk-adjusted amount. A health factor below 1x will be considered with a shortfall and open to liquidation.',
+              ),
             },
           ]
         : []),
     ];
-  }, [healthFactor, totalBorrowed, totalDeposited, walletAddress]);
+  }, [healthFactor, totalBorrowed, totalDeposited, walletAddress, t]);
 
   return (
     <Grid item sx={{ alignSelf: 'center' }} width="100%">
-      <HeaderInfo itemsInfo={itemsInfo} title="Dashboard" />
+      <HeaderInfo itemsInfo={itemsInfo} title={t('Dashboard')} />
     </Grid>
   );
 }
