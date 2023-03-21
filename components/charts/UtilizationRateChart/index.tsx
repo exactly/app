@@ -13,26 +13,36 @@ import ButtonsChart from '../ButtonsChart';
 type Props = {
   type: 'floating' | 'fixed';
   symbol: string;
+  mini?: boolean;
+  previewUtilization?: number;
 };
 
 const formatEmpty = () => '';
 
-function UtilizationRateChart({ type, symbol }: Props) {
+function UtilizationRateChart({ type, symbol, mini, previewUtilization }: Props) {
   const { palette, typography } = useTheme();
   const { currentUtilization, data, loading } = useUtilizationRate(type, symbol);
   const [zoom, setZoom] = useState<boolean>(true);
 
+  const allUtilizations = useMemo(
+    () => [
+      ...(currentUtilization ? currentUtilization : []),
+      ...(previewUtilization ? [{ maturity: 1, utilization: previewUtilization }] : []),
+    ],
+    [currentUtilization, previewUtilization],
+  );
+
   const slicedData = useMemo(() => {
-    if (!currentUtilization || currentUtilization.length === 0 || !zoom) return data;
+    if (!allUtilizations || allUtilizations.length === 0 || !zoom) return data;
 
-    const minUtilization = Math.min(...currentUtilization.map((item) => item.utilization));
-    const maxUtilization = Math.max(...currentUtilization.map((item) => item.utilization));
+    const minUtilization = Math.min(...allUtilizations.map((item) => item.utilization));
+    const maxUtilization = Math.max(...allUtilizations.map((item) => item.utilization));
 
-    const left = minUtilization * (1 - numbers.chartGap);
-    const right = maxUtilization * (1 + numbers.chartGap);
+    const left = minUtilization * (1 - numbers.chartGap * (mini ? 0.05 : 1));
+    const right = maxUtilization * (1 + numbers.chartGap * (mini ? 0.05 : 1));
 
     return data.filter((item) => item.utilization >= left && item.utilization <= right);
-  }, [currentUtilization, data, zoom]);
+  }, [allUtilizations, data, zoom, mini]);
 
   const buttons = useMemo(
     () => [
@@ -56,14 +66,16 @@ function UtilizationRateChart({ type, symbol }: Props) {
 
   return (
     <Box display="flex" flexDirection="column" width="100%" height="100%" gap={2}>
-      <Box display="flex" justifyContent="space-between">
-        <Typography variant="h6" fontSize="16px">
-          {type === 'floating' ? 'Utilization Rate (Variable Rate Pool)' : 'Utilization Rates (Fixed Rate Pools)'}
-        </Typography>
-        <Box>
-          <ButtonsChart buttons={buttons} />
+      {!mini && (
+        <Box display="flex" justifyContent="space-between">
+          <Typography variant="h6" fontSize="16px">
+            {type === 'floating' ? 'Utilization Rate (Variable Rate Pool)' : 'Utilization Rates (Fixed Rate Pools)'}
+          </Typography>
+          <Box>
+            <ButtonsChart buttons={buttons} />
+          </Box>
         </Box>
-      </Box>
+      )}
       <ResponsiveContainer width="100%" height="100%">
         {loading ? (
           <LoadingChart />
@@ -151,20 +163,20 @@ function UtilizationRateChart({ type, symbol }: Props) {
               strokeWidth={2}
               animationDuration={2000}
             />
-            {currentUtilization &&
-              currentUtilization.map(({ maturity, utilization }) => (
+            {allUtilizations &&
+              allUtilizations.map(({ maturity, utilization }) => (
                 <ReferenceLine
                   x={utilization}
                   key={`${utilization}_${maturity}}`}
                   strokeWidth={2}
                   yAxisId="yaxis"
-                  stroke={palette.operation.variable}
+                  stroke={palette.operation[maturity ? 'fixed' : 'variable']}
                   label={{
                     value: `${toPercentage(utilization)} ${type === 'fixed' ? parseTimestamp(maturity, 'MMM,DD') : ''}`,
                     position: utilization < 0.5 ? 'insideBottomLeft' : 'insideTopRight',
                     offset: 15,
                     angle: -90,
-                    style: { ...label, fontSize: 13, fill: palette.operation.variable },
+                    style: { ...label, fontSize: 12, fill: palette.operation[maturity ? 'fixed' : 'variable'] },
                   }}
                   isFront
                 />
