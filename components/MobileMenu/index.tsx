@@ -20,23 +20,34 @@ type Props = {
   handleClose: () => void;
 };
 
-const headers = [
-  {
-    title: 'Markets',
-    pathname: '/',
-    component: true,
-  },
-  {
-    title: 'Dashboard',
-    pathname: '/dashboard',
-  },
-];
-
 function MobileMenu({ open, handleClose }: Props) {
   const { palette } = useTheme();
   const { view, setView } = useContext(MarketContext);
   const { pathname: currentPathname, query } = useRouter();
   const date = new Date();
+
+  const AdvancedViewSwitch: FC = () => {
+    return (
+      <Box display="flex" alignItems="center" justifyContent="space-between" gap={1}>
+        <Typography fontSize={19} fontWeight={700}>
+          Advanced view
+        </Typography>
+        <Switch checked={view === 'advanced'} onChange={() => setView(view === 'advanced' ? 'simple' : 'advanced')} />
+      </Box>
+    );
+  };
+
+  const headers = [
+    {
+      title: 'Markets',
+      pathname: '/',
+      component: <AdvancedViewSwitch />,
+    },
+    {
+      title: 'Dashboard',
+      pathname: '/dashboard',
+    },
+  ];
 
   return (
     <Modal open={open} aria-labelledby="user menu" aria-describedby="user menu on mobile">
@@ -79,17 +90,7 @@ function MobileMenu({ open, handleClose }: Props) {
                       {title}
                     </Typography>
                   </Link>
-                  {component && (
-                    <Box display="flex" alignItems="center" justifyContent="space-between" gap={1}>
-                      <Typography fontSize={19} fontWeight={700}>
-                        Advanced view
-                      </Typography>
-                      <Switch
-                        checked={view === 'advanced'}
-                        onChange={() => setView(view === 'advanced' ? 'simple' : 'advanced')}
-                      />
-                    </Box>
-                  )}
+                  {component}
                 </>
               ))}
             </Box>
