@@ -1,4 +1,4 @@
-import React, { CSSProperties, useMemo, useState } from 'react';
+import React, { CSSProperties, useCallback, useMemo, useState } from 'react';
 import { Typography, useTheme, Box } from '@mui/material';
 import { LineChart, XAxis, Tooltip, Line, ResponsiveContainer, ReferenceLine, CartesianGrid, YAxis } from 'recharts';
 
@@ -32,17 +32,28 @@ function UtilizationRateChart({ type, symbol, mini, previewUtilization }: Props)
     [currentUtilization, previewUtilization],
   );
 
-  const slicedData = useMemo(() => {
-    if (!allUtilizations || allUtilizations.length === 0 || !zoom) return data;
+  const [slicedData, maxGap] = useMemo(() => {
+    if (!allUtilizations || allUtilizations.length === 0 || !zoom) return [data, 0];
 
     const minUtilization = Math.min(...allUtilizations.map((item) => item.utilization));
     const maxUtilization = Math.max(...allUtilizations.map((item) => item.utilization));
+    const realGap = numbers.chartGap * (maxUtilization - minUtilization);
+    const gap = Math.max(numbers.chartInterval, realGap);
 
-    const left = minUtilization * (1 - numbers.chartGap * (mini ? 0.05 : 1));
-    const right = maxUtilization * (1 + numbers.chartGap * (mini ? 0.05 : 1));
+    const left = minUtilization - gap;
+    const right = maxUtilization + gap;
 
-    return data.filter((item) => item.utilization >= left && item.utilization <= right);
-  }, [allUtilizations, data, zoom, mini]);
+    return [data.filter((item) => item.utilization >= left && item.utilization <= right), realGap];
+  }, [allUtilizations, data, zoom]);
+
+  const getReferenceLineValue = useCallback(
+    (utilization: number, maturity: number): string => {
+      if (maturity === 1) return maxGap > numbers.minGap ? `to ${toPercentage(utilization)}` : '';
+      if (mini) return `${toPercentage(utilization)}`;
+      return `${toPercentage(utilization)} ${type === 'fixed' ? parseTimestamp(maturity, 'MMM,DD') : ''}`;
+    },
+    [maxGap, mini, type],
+  );
 
   const buttons = useMemo(
     () => [
@@ -170,14 +181,15 @@ function UtilizationRateChart({ type, symbol, mini, previewUtilization }: Props)
                   key={`${utilization}_${maturity}}`}
                   strokeWidth={2}
                   yAxisId="yaxis"
-                  stroke={palette.operation[maturity ? 'fixed' : 'variable']}
+                  stroke={palette.operation.variable}
                   label={{
-                    value: `${toPercentage(utilization)} ${type === 'fixed' ? parseTimestamp(maturity, 'MMM,DD') : ''}`,
+                    value: getReferenceLineValue(utilization, maturity),
                     position: utilization < 0.5 ? 'insideBottomLeft' : 'insideTopRight',
                     offset: 15,
                     angle: -90,
-                    style: { ...label, fontSize: 12, fill: palette.operation[maturity ? 'fixed' : 'variable'] },
+                    style: { ...label, fontSize: 12, fill: palette.operation.variable },
                   }}
+                  strokeDasharray={maturity === 1 ? '5 5' : ''}
                   isFront
                 />
               ))}
