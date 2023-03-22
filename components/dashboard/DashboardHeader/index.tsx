@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
-import { Grid } from '@mui/material';
+import { Box, Grid } from '@mui/material';
 import { Zero } from '@ethersproject/constants';
 
 import parseHealthFactor from 'utils/parseHealthFactor';
@@ -11,6 +11,7 @@ import { useWeb3 } from 'hooks/useWeb3';
 import useHealthFactor from 'hooks/useHealthFactor';
 import useAccountData from 'hooks/useAccountData';
 import { useTranslation } from 'react-i18next';
+import AssetsDistributionPieChart from 'components/charts/AssetsDistributionPieChart';
 
 function DashboardHeader() {
   const { t } = useTranslation();
@@ -100,8 +101,20 @@ function DashboardHeader() {
   }, [healthFactor, totalBorrowed, totalDeposited, walletAddress, t]);
 
   return (
-    <Grid item sx={{ alignSelf: 'center' }} width="100%">
-      <HeaderInfo itemsInfo={itemsInfo} title={t('Dashboard')} />
+    <Grid
+      sx={{ alignSelf: 'center' }}
+      display="flex"
+      bgcolor="components.bg"
+      justifyContent={'space-between'}
+      boxShadow={'0px 4px 12px rgba(175, 177, 182, 0.2)'}
+    >
+      <Box>
+        <HeaderInfo itemsInfo={itemsInfo} title="Dashboard" shadow={false} />
+      </Box>
+      <Box display="flex" marginRight={2}>
+        <AssetsDistributionPieChart type="deposit" />
+        <AssetsDistributionPieChart type="borrow" />
+      </Box>
     </Grid>
   );
 }
