@@ -1,3 +1,5 @@
+import 'dotenv/config';
+import dotenvPlugin from 'cypress-dotenv';
 import { defineConfig } from 'cypress';
 
 export default defineConfig({
@@ -19,5 +21,6 @@ export default defineConfig({
     baseUrl: 'http://localhost:3000',
     specPattern: 'tests/e2e/specs/**/*.ts',
     supportFile: 'tests/e2e/support.ts',
+    setupNodeEvents: (_, config) => dotenvPlugin(config),
   },
 });

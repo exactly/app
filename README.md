@@ -58,13 +58,10 @@ The following environment variables are required to be present for the tests to
 work as expected
 
 ```bash
-CYPRESS_TENDERLY_ACCESS_KEY=[ Tenderly access token ]
-CYPRESS_TENDERLY_PROJECT=exactly
-CYPRESS_TENDERLY_USER=exactly
+CYPRESS_TENDERLY_ACCESS_KEY=<tenderly access token>
+CYPRESS_TENDERLY_PROJECT=<tenderly project>
+CYPRESS_TENDERLY_USER=<tenderly user>
 ```
-
-If using an `.env` file use `export $(cat .env | xargs)` to make them visible to
-`npm`.
 
 The full suite can be run using
 
