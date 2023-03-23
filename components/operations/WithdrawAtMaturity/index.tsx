@@ -329,11 +329,6 @@ const WithdrawAtMaturity: FC = () => {
             <ModalBoxCell>
               <ModalInfoHealthFactor qty={qty} symbol={symbol} operation={operation} />
             </ModalBoxCell>
-            {isEarlyWithdraw && (
-              <ModalBoxCell divisor>
-                <ModalInfoFixedUtilizationRate qty={qty} symbol={symbol} operation="withdrawAtMaturity" />
-              </ModalBoxCell>
-            )}
           </ModalBoxRow>
         </ModalBox>
       </Grid>
@@ -346,6 +341,9 @@ const WithdrawAtMaturity: FC = () => {
           </ModalInfo>
           {isEarlyWithdraw && (
             <ModalInfoEditableSlippage value={rawSlippage} onChange={(e) => setRawSlippage(e.target.value)} />
+          )}
+          {isEarlyWithdraw && (
+            <ModalInfoFixedUtilizationRate qty={qty} symbol={symbol} operation="withdrawAtMaturity" variant="row" />
           )}
         </ModalAdvancedSettings>
       </Grid>

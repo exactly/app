@@ -1,4 +1,4 @@
-import React, { CSSProperties, useCallback, useMemo, useState } from 'react';
+import React, { CSSProperties, useMemo, useState } from 'react';
 import { Typography, useTheme, Box } from '@mui/material';
 import { LineChart, XAxis, Tooltip, Line, ResponsiveContainer, ReferenceLine, CartesianGrid, YAxis } from 'recharts';
 
@@ -13,47 +13,26 @@ import ButtonsChart from '../ButtonsChart';
 type Props = {
   type: 'floating' | 'fixed';
   symbol: string;
-  mini?: boolean;
-  previewUtilization?: number;
 };
 
 const formatEmpty = () => '';
 
-function UtilizationRateChart({ type, symbol, mini, previewUtilization }: Props) {
+function UtilizationRateChart({ type, symbol }: Props) {
   const { palette, typography } = useTheme();
   const { currentUtilization, data, loading } = useUtilizationRate(type, symbol);
   const [zoom, setZoom] = useState<boolean>(true);
 
-  const allUtilizations = useMemo(
-    () => [
-      ...(currentUtilization ? currentUtilization : []),
-      ...(previewUtilization ? [{ maturity: 1, utilization: previewUtilization }] : []),
-    ],
-    [currentUtilization, previewUtilization],
-  );
+  const slicedData = useMemo(() => {
+    if (!currentUtilization || currentUtilization.length === 0 || !zoom) return data;
 
-  const [slicedData, maxGap] = useMemo(() => {
-    if (!allUtilizations || allUtilizations.length === 0 || !zoom) return [data, 0];
+    const minUtilization = Math.min(...currentUtilization.map((item) => item.utilization));
+    const maxUtilization = Math.max(...currentUtilization.map((item) => item.utilization));
 
-    const minUtilization = Math.min(...allUtilizations.map((item) => item.utilization));
-    const maxUtilization = Math.max(...allUtilizations.map((item) => item.utilization));
-    const realGap = numbers.chartGap * (maxUtilization - minUtilization);
-    const gap = Math.max(numbers.chartInterval, realGap);
+    const left = minUtilization * (1 - numbers.chartGap);
+    const right = maxUtilization * (1 + numbers.chartGap);
 
-    const left = minUtilization - gap;
-    const right = maxUtilization + gap;
-
-    return [data.filter((item) => item.utilization >= left && item.utilization <= right), realGap];
-  }, [allUtilizations, data, zoom]);
-
-  const getReferenceLineValue = useCallback(
-    (utilization: number, maturity: number): string => {
-      if (maturity === 1) return maxGap > numbers.minGap ? `to ${toPercentage(utilization)}` : '';
-      if (mini) return `${toPercentage(utilization)}`;
-      return `${toPercentage(utilization)} ${type === 'fixed' ? parseTimestamp(maturity, 'MMM,DD') : ''}`;
-    },
-    [maxGap, mini, type],
-  );
+    return data.filter((item) => item.utilization >= left && item.utilization <= right);
+  }, [currentUtilization, data, zoom]);
 
   const buttons = useMemo(
     () => [
@@ -77,16 +56,14 @@ function UtilizationRateChart({ type, symbol, mini, previewUtilization }: Props)
 
   return (
     <Box display="flex" flexDirection="column" width="100%" height="100%" gap={2}>
-      {!mini && (
-        <Box display="flex" justifyContent="space-between">
-          <Typography variant="h6" fontSize="16px">
-            {type === 'floating' ? 'Utilization Rate (Variable Rate Pool)' : 'Utilization Rates (Fixed Rate Pools)'}
-          </Typography>
-          <Box>
-            <ButtonsChart buttons={buttons} />
-          </Box>
+      <Box display="flex" justifyContent="space-between">
+        <Typography variant="h6" fontSize="16px">
+          {type === 'floating' ? 'Utilization Rate (Variable Rate Pool)' : 'Utilization Rates (Fixed Rate Pools)'}
+        </Typography>
+        <Box>
+          <ButtonsChart buttons={buttons} />
         </Box>
-      )}
+      </Box>
       <ResponsiveContainer width="100%" height="100%">
         {loading ? (
           <LoadingChart />
@@ -174,8 +151,8 @@ function UtilizationRateChart({ type, symbol, mini, previewUtilization }: Props)
               strokeWidth={2}
               animationDuration={2000}
             />
-            {allUtilizations &&
-              allUtilizations.map(({ maturity, utilization }) => (
+            {currentUtilization &&
+              currentUtilization.map(({ maturity, utilization }) => (
                 <ReferenceLine
                   x={utilization}
                   key={`${utilization}_${maturity}}`}
@@ -183,13 +160,12 @@ function UtilizationRateChart({ type, symbol, mini, previewUtilization }: Props)
                   yAxisId="yaxis"
                   stroke={palette.operation.variable}
                   label={{
-                    value: getReferenceLineValue(utilization, maturity),
+                    value: `${toPercentage(utilization)} ${type === 'fixed' ? parseTimestamp(maturity, 'MMM,DD') : ''}`,
                     position: utilization < 0.5 ? 'insideBottomLeft' : 'insideTopRight',
                     offset: 15,
                     angle: -90,
-                    style: { ...label, fontSize: 12, fill: palette.operation.variable },
+                    style: { ...label, fontSize: 13, fill: palette.operation.variable },
                   }}
-                  strokeDasharray={maturity === 1 ? '5 5' : ''}
                   isFront
                 />
               ))}

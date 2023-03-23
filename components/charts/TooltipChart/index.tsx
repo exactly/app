@@ -15,9 +15,20 @@ type Props = {
   labelFormatter?: (value: Date | undefined) => ReactNode;
   formatter?: (value: number | undefined) => ReactNode;
   itemSorter?: (a: Entry, b: Entry) => number;
+  ignoreKeys?: string[];
+  additionalInfo?: ReactNode;
 };
 
-function TooltipChart({ active, payload, label, labelFormatter, formatter, itemSorter }: Props) {
+function TooltipChart({
+  active,
+  payload,
+  label,
+  labelFormatter,
+  formatter,
+  itemSorter,
+  ignoreKeys,
+  additionalInfo,
+}: Props) {
   const sortedPayload = useMemo(
     () => (itemSorter && payload ? payload.sort(itemSorter) : payload),
     [payload, itemSorter],
@@ -37,11 +48,14 @@ function TooltipChart({ active, payload, label, labelFormatter, formatter, itemS
       <Typography variant="subtitle2" fontSize="10px" mb={0.5}>
         {labelFormatter ? labelFormatter(label) : JSON.stringify(label)}
       </Typography>
-      {sortedPayload.map(({ dataKey, name, value, color }) => (
-        <Typography key={dataKey} variant="h6" fontSize="12px" color={color}>
-          {`${name}: ${formatter ? formatter(value) : value}`}
-        </Typography>
-      ))}
+      {sortedPayload
+        .filter(({ dataKey }) => !ignoreKeys || !ignoreKeys.includes(dataKey))
+        .map(({ dataKey, name, value, color }) => (
+          <Typography key={dataKey} variant="h6" fontSize="12px" color={color}>
+            {`${name}: ${formatter ? formatter(value) : value}`}
+          </Typography>
+        ))}
+      {additionalInfo}
     </Box>
   );
 }

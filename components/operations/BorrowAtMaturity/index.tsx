@@ -89,7 +89,7 @@ const BorrowAtMaturity: FC = () => {
               <ModalInfoHealthFactor qty={qty} symbol={symbol} operation={operation} />
             </ModalBoxCell>
             <ModalBoxCell divisor>
-              <ModalInfoFixedUtilizationRate qty={qty} symbol={symbol} operation="borrowAtMaturity" />
+              <ModalInfoBorrowLimit qty={qty} symbol={symbol} operation={operation} />
             </ModalBoxCell>
           </ModalBoxRow>
         </ModalBox>
@@ -100,8 +100,14 @@ const BorrowAtMaturity: FC = () => {
         <ModalRewards symbol={symbol} operation="borrow" />
         <ModalPenaltyRate symbol={symbol} />
         <ModalAdvancedSettings>
-          <ModalInfoBorrowLimit qty={qty} symbol={symbol} operation={operation} variant="row" />
           <ModalInfoEditableSlippage value={rawSlippage} onChange={(e) => setRawSlippage(e.target.value)} />
+          <ModalInfoFixedUtilizationRate
+            qty={qty}
+            symbol={symbol}
+            operation="borrowAtMaturity"
+            variant="row"
+            fixedRate={toPercentage(fixedRate)}
+          />
         </ModalAdvancedSettings>
       </Grid>
 

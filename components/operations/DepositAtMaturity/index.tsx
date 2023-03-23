@@ -82,7 +82,7 @@ const DepositAtMaturity: FC = () => {
               <ModalInfoHealthFactor qty={qty} symbol={symbol} operation={operation} />
             </ModalBoxCell>
             <ModalBoxCell divisor>
-              <ModalInfoFixedUtilizationRate qty={qty} symbol={symbol} operation="depositAtMaturity" />
+              <ModalInfoTotalDeposits qty={qty} symbol={symbol} operation="deposit" />
             </ModalBoxCell>
           </ModalBoxRow>
         </ModalBox>
@@ -91,13 +91,13 @@ const DepositAtMaturity: FC = () => {
       <Grid item mt={2}>
         {errorData?.component !== 'gas' && <ModalTxCost gasCost={gasCost} />}
         <ModalAdvancedSettings>
-          <ModalInfoTotalDeposits qty={qty} symbol={symbol} operation="deposit" variant="row" />
           {optimalDepositAmount && (
             <ModalInfo label="Optimal deposit amount" variant="row">
               {formatNumber(formatFixed(optimalDepositAmount, decimals), symbol)}
             </ModalInfo>
           )}
           <ModalInfoEditableSlippage value={rawSlippage} onChange={(e) => setRawSlippage(e.target.value)} />
+          <ModalInfoFixedUtilizationRate qty={qty} symbol={symbol} operation="depositAtMaturity" variant="row" />
         </ModalAdvancedSettings>
       </Grid>
 
