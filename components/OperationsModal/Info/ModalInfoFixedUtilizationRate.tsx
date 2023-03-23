@@ -12,15 +12,18 @@ import useDelayedEffect from 'hooks/useDelayedEffect';
 import { useWeb3 } from 'hooks/useWeb3';
 import { AddressZero } from '@ethersproject/constants';
 import { useOperationContext } from 'contexts/OperationContext';
+import { Box } from '@mui/material';
+import UtilizationRateWithAreaChart from 'components/charts/UtilizationRateWithAreaChart';
 
 type Props = {
   qty: string;
   symbol: string;
   operation: Extract<Operation, 'depositAtMaturity' | 'withdrawAtMaturity' | 'borrowAtMaturity' | 'repayAtMaturity'>;
   variant?: Variant;
+  fixedRate?: string;
 };
 
-function ModalInfoFixedUtilizationRate({ qty, symbol, operation, variant = 'column' }: Props) {
+function ModalInfoFixedUtilizationRate({ qty, symbol, operation, variant = 'column', fixedRate }: Props) {
   const previewerContract = usePreviewer();
   const { walletAddress } = useWeb3();
   const { marketAccount } = useAccountData(symbol);
@@ -28,26 +31,30 @@ function ModalInfoFixedUtilizationRate({ qty, symbol, operation, variant = 'colu
 
   const { marketContract } = useOperationContext();
 
-  const from: string | undefined = useMemo(() => {
-    if (!date) return;
+  const [rawFrom, from] = useMemo(() => {
+    if (!date) return [undefined, undefined];
 
     const pool = marketAccount?.fixedPools?.find(({ maturity }) => maturity.toNumber() === date);
-    if (!pool) return;
+    if (!pool) return [undefined, undefined];
 
-    return toPercentage(Number(formatFixed(pool.utilization, 18)));
+    return [Number(formatFixed(pool.utilization, 18)), toPercentage(Number(formatFixed(pool.utilization, 18)))];
   }, [date, marketAccount]);
 
   const [to, setTo] = useState<string | undefined>();
+  const [rawTo, setRawTo] = useState<number | undefined>();
 
   const preview = useCallback(async () => {
     if (!marketAccount || !marketContract || !previewerContract || !date) {
       return setTo(undefined);
     }
     if (!qty) {
-      return setTo(from);
+      setTo(from);
+      setRawTo(rawFrom);
+      return;
     }
 
     setTo(undefined);
+    setRawTo(undefined);
 
     try {
       const initialAssets = parseFixed(qty, marketAccount.decimals);
@@ -95,17 +102,33 @@ function ModalInfoFixedUtilizationRate({ qty, symbol, operation, variant = 'colu
       }
 
       setTo(toPercentage(Number(formatFixed(uti, 18))));
+      setRawTo(Number(formatFixed(uti, 18)));
     } catch {
       setTo('N/A');
+      setRawTo(undefined);
     }
-  }, [date, from, marketAccount, marketContract, operation, previewerContract, qty, walletAddress]);
+  }, [date, from, marketAccount, marketContract, operation, previewerContract, qty, rawFrom, walletAddress]);
 
   const { isLoading } = useDelayedEffect({ effect: preview });
 
   return (
-    <ModalInfo label="Pool Utilization Rate" icon={PieChartOutlineRoundedIcon} variant={variant}>
-      <FromTo from={from} to={isLoading ? undefined : to} variant={variant} />
-    </ModalInfo>
+    <>
+      <ModalInfo label="Pool Utilization Rate" icon={PieChartOutlineRoundedIcon} variant={variant}>
+        <FromTo from={from} to={isLoading ? undefined : to} variant={variant} />
+      </ModalInfo>
+      {variant === 'row' && (
+        <Box height={150} maxWidth="86vw" p={1} mx="auto">
+          <UtilizationRateWithAreaChart
+            type="fixed"
+            operation={operation}
+            symbol={symbol}
+            from={rawFrom}
+            to={rawTo}
+            fixedRate={fixedRate}
+          />
+        </Box>
+      )}
+    </>
   );
 }
 

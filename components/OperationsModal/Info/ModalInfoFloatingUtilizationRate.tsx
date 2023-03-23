@@ -7,8 +7,6 @@ import ModalInfo, { FromTo, Variant } from 'components/common/modal/ModalInfo';
 import { Operation } from 'contexts/ModalStatusContext';
 import useAccountData from 'hooks/useAccountData';
 import { toPercentage } from 'utils/utils';
-import UtilizationRateChart from 'components/charts/UtilizationRateChart';
-import { Box } from '@mui/material';
 
 type Props = {
   qty: string;
@@ -20,7 +18,7 @@ type Props = {
 function ModalInfoFloatingUtilizationRate({ qty, symbol, operation, variant = 'column' }: Props) {
   const { marketAccount } = useAccountData(symbol);
 
-  const [from, to, rawTo] = useMemo(() => {
+  const [from, to] = useMemo(() => {
     if (!marketAccount) return [undefined, undefined];
     const { totalFloatingDepositAssets, totalFloatingBorrowAssets, decimals } = marketAccount;
     try {
@@ -48,25 +46,16 @@ function ModalInfoFloatingUtilizationRate({ qty, symbol, operation, variant = 'c
       }
 
       const t = borrowed.mul(decimalWAD).div(deposited);
-      return [
-        toPercentage(Number(formatFixed(f, decimals))),
-        toPercentage(Number(formatFixed(t, decimals))),
-        Number(formatFixed(t, decimals)),
-      ];
+      return [toPercentage(Number(formatFixed(f, decimals))), toPercentage(Number(formatFixed(t, decimals)))];
     } catch {
       return [undefined, undefined];
     }
   }, [marketAccount, qty, operation]);
 
   return (
-    <>
-      <ModalInfo label="Pool Utilization Rate" icon={PieChartOutlineRoundedIcon} variant={variant}>
-        <FromTo from={from} to={to} variant={variant} />
-      </ModalInfo>
-      <Box height={150} maxWidth="86vw" p={1}>
-        <UtilizationRateChart type="floating" symbol={symbol} mini previewUtilization={rawTo} />
-      </Box>
-    </>
+    <ModalInfo label="Pool Utilization Rate" icon={PieChartOutlineRoundedIcon} variant={variant}>
+      <FromTo from={from} to={to} variant={variant} />
+    </ModalInfo>
   );
 }
 

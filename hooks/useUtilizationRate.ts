@@ -7,7 +7,7 @@ import numbers from 'config/numbers.json';
 const MAX = 1;
 const INTERVAL = numbers.chartInterval;
 
-export default function useUtilizationRate(type: 'floating' | 'fixed', symbol: string) {
+export default function useUtilizationRate(type: 'floating' | 'fixed', symbol: string, mandatoryPoints?: number[]) {
   const { marketAccount } = useAccountData(symbol);
 
   const data = useMemo(() => {
@@ -32,11 +32,17 @@ export default function useUtilizationRate(type: 'floating' | 'fixed', symbol: s
 
     const curve = interestRateCurve(Number(A) / 1e18, Number(B) / 1e18, Number(UMax) / 1e18);
 
-    return Array.from({ length: MAX / INTERVAL }).map((_, i) => {
+    const points = Array.from({ length: MAX / INTERVAL }).map((_, i) => {
       const utilization = i * INTERVAL;
       return { utilization, apr: curve(utilization) };
     });
-  }, [type, marketAccount]);
+
+    if (mandatoryPoints) {
+      points.push(...mandatoryPoints.map((utilization) => ({ utilization, apr: curve(utilization) })));
+      points.sort((a, b) => a.utilization - b.utilization);
+    }
+    return points;
+  }, [marketAccount, type, mandatoryPoints]);
 
   const currentUtilization = useMemo(() => {
     if (!marketAccount) return undefined;

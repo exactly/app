@@ -340,7 +340,7 @@ const RepayAtMaturity: FC = () => {
             </ModalBoxCell>
             {!isLateRepay && (
               <ModalBoxCell divisor>
-                <ModalInfoFixedUtilizationRate qty={qty} symbol={symbol} operation="repayAtMaturity" />
+                <ModalInfoBorrowLimit qty={qty} symbol={symbol} operation={operation} />
               </ModalBoxCell>
             )}
           </ModalBoxRow>
@@ -350,8 +350,11 @@ const RepayAtMaturity: FC = () => {
       <Grid item mt={2}>
         {errorData?.component !== 'gas' && <ModalTxCost gasCost={gasCost} />}
         <ModalAdvancedSettings>
-          <ModalInfoBorrowLimit qty={qty} symbol={symbol} operation={operation} variant="row" />
+          {isLateRepay && <ModalInfoBorrowLimit qty={qty} symbol={symbol} operation={operation} variant="row" />}
           <ModalInfoEditableSlippage value={rawSlippage} onChange={(e) => setRawSlippage(e.target.value)} />
+          {!isLateRepay && (
+            <ModalInfoFixedUtilizationRate qty={qty} symbol={symbol} operation="repayAtMaturity" variant="row" />
+          )}
         </ModalAdvancedSettings>
       </Grid>
 
