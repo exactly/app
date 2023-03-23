@@ -2,6 +2,7 @@ import { BigNumber, formatFixed } from '@ethersproject/bignumber';
 import { WeiPerEther } from '@ethersproject/constants';
 
 import { useMemo } from 'react';
+import { useTheme } from '@mui/material';
 import formatNumber from 'utils/formatNumber';
 import { toPercentage } from 'utils/utils';
 import useAccountData from './useAccountData';
@@ -18,6 +19,7 @@ type assetComposition = {
 export default function useAssetsComposition() {
   const { accountData } = useAccountData();
   const { totalDepositedUSD, totalBorrowedUSD } = useTotalsUsd();
+  const { palette } = useTheme();
 
   const { loading, depositsComposition, borrowsComposition } = useMemo<{
     loading?: boolean;
@@ -29,7 +31,7 @@ export default function useAssetsComposition() {
     const dComposition: assetComposition[] = [];
     const bComposition: assetComposition[] = [];
 
-    accountData.forEach((market) => {
+    accountData.forEach((market, i) => {
       const {
         floatingDepositAssets,
         floatingBorrowAssets,
@@ -59,31 +61,37 @@ export default function useAssetsComposition() {
       const depositedAssetUSD = totalDepositedAssets.mul(usdPrice).div(10n ** BigInt(decimals));
       const borrowedAssetUSD = totalBorrowedAssets.mul(usdPrice).div(10n ** BigInt(decimals));
 
-      const depositData: assetComposition = {
-        name: assetSymbol,
-        usdValue: parseFloat(formatFixed(depositedAssetUSD, 18)),
-        amount: formatNumber(formatFixed(totalDepositedAssets, decimals), assetSymbol, true),
-        percentage: toPercentage(
-          parseFloat(formatFixed(depositedAssetUSD.mul(WeiPerEther).div(totalDepositedUSD), 18)),
-          2,
-        ),
-      };
-      const borrowData: assetComposition = {
-        name: market.assetSymbol,
-        usdValue: parseFloat(formatFixed(borrowedAssetUSD, 18)),
-        amount: formatNumber(formatFixed(totalBorrowedAssets, decimals), assetSymbol),
-        percentage: toPercentage(
-          parseFloat(formatFixed(borrowedAssetUSD.mul(WeiPerEther).div(totalBorrowedUSD), 18)),
-          2,
-        ),
-      };
+      if (!totalDepositedAssets.isZero()) {
+        const depositData: assetComposition = {
+          name: assetSymbol,
+          usdValue: parseFloat(formatFixed(depositedAssetUSD, 18)),
+          amount: formatNumber(formatFixed(totalDepositedAssets, decimals), assetSymbol, true),
+          percentage: toPercentage(
+            parseFloat(formatFixed(depositedAssetUSD.mul(WeiPerEther).div(totalDepositedUSD), 18)),
+            2,
+          ),
+          fill: palette.colors[i] || palette.grey[500],
+        };
+        if (depositData.usdValue !== 0) dComposition.push(depositData);
+      }
 
-      dComposition.push(depositData);
-      bComposition.push(borrowData);
+      if (!totalBorrowedAssets.isZero()) {
+        const borrowData: assetComposition = {
+          name: market.assetSymbol,
+          usdValue: parseFloat(formatFixed(borrowedAssetUSD, 18)),
+          amount: formatNumber(formatFixed(totalBorrowedAssets, decimals), assetSymbol),
+          percentage: toPercentage(
+            parseFloat(formatFixed(borrowedAssetUSD.mul(WeiPerEther).div(totalBorrowedUSD), 18)),
+            2,
+          ),
+          fill: palette.colors[i] || palette.grey[500],
+        };
+        if (borrowData.usdValue !== 0) bComposition.push(borrowData);
+      }
     });
 
     return { depositsComposition: dComposition, borrowsComposition: bComposition, loading: false };
-  }, [accountData, totalBorrowedUSD, totalDepositedUSD]);
+  }, [accountData, palette.colors, palette.grey, totalBorrowedUSD, totalDepositedUSD]);
 
   return { loading, depositsComposition, borrowsComposition };
 }

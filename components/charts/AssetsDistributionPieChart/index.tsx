@@ -2,6 +2,7 @@ import { Box, Typography } from '@mui/material';
 import React, { FC } from 'react';
 import { PieChart, Pie, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import useAssetsComposition from 'hooks/useAssetsComposition';
+import TooltipChart from '../TooltipChart';
 
 type Props = {
   type: 'deposit' | 'borrow';
@@ -35,7 +36,7 @@ const AssetsDistributionPieChart: FC<Props> = ({ type }) => {
             endAngle={450}
           />
           <Legend iconSize={7} iconType="circle" layout="vertical" verticalAlign="middle" wrapperStyle={style} />
-          <Tooltip />
+          <Tooltip content={<TooltipChart />} />
         </PieChart>
       </ResponsiveContainer>
     </Box>

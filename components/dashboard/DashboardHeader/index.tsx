@@ -55,8 +55,8 @@ function DashboardHeader() {
         <HeaderInfo itemsInfo={itemsInfo} title="Dashboard" shadow={false} />
       </Box>
       <Box display="flex" marginRight={2}>
-        <AssetsDistributionPieChart type="deposit" />
-        <AssetsDistributionPieChart type="borrow" />
+        {!totalDepositedUSD.isZero() && <AssetsDistributionPieChart type="deposit" />}
+        {!totalBorrowedUSD.isZero() && <AssetsDistributionPieChart type="borrow" />}
       </Box>
     </Grid>
   );
