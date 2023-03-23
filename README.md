@@ -2,7 +2,7 @@
 
 [App](https://app.exact.ly) - [Twitter](https://twitter.com/ExactlyProtocol) - [Discord](https://exact.ly/discord)
 
-Decentralizing the time-value of money.
+Decentralizing the credit market, today.
 
 Exactly is a decentralized, non-custodial and open-source protocol that provides
 an autonomous fixed and variable interest rate market enabling users to
