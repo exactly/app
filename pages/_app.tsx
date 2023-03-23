@@ -43,7 +43,7 @@ export default function App({ Component, pageProps }: AppProps) {
   return (
     <>
       <Head>
-        <title>Exactly - Decentralizing the time-value of money</title>
+        <title>Exactly - Decentralizing the credit market, today</title>
         <meta
           name="description"
           content="Exactly is a decentralized, non-custodial and open-source protocol that provides an autonomous fixed and variable interest rate market enabling users to exchange the time value of their assets and completing the DeFi credit market."
@@ -52,7 +52,7 @@ export default function App({ Component, pageProps }: AppProps) {
 
         <meta property="og:url" content="https://app.exact.ly" />
         <meta property="og:type" content="website" />
-        <meta property="og:title" content="Exactly - Decentralizing the time-value of money" />
+        <meta property="og:title" content="Exactly - Decentralizing the credit market, today" />
         <meta
           property="og:description"
           content="Exactly is a decentralized, non-custodial and open-source protocol that provides an autonomous fixed and variable interest rate market enabling users to exchange the time value of their assets and completing the DeFi credit market."
@@ -66,7 +66,7 @@ export default function App({ Component, pageProps }: AppProps) {
         <meta name="twitter:card" content="summary_large_image" />
         <meta property="twitter:domain" content="exact.ly" />
         <meta property="twitter:url" content="https://exact.ly" />
-        <meta name="twitter:title" content="Exactly - Decentralizing the time-value of money" />
+        <meta name="twitter:title" content="Exactly - Decentralizing the credit market, today" />
         <meta
           name="twitter:description"
           content="Exactly is a decentralized, non-custodial and open-source protocol that provides an autonomous fixed and variable interest rate market enabling users to exchange the time value of their assets and completing the DeFi credit market."
