@@ -1,25 +1,15 @@
 import { Box, Typography } from '@mui/material';
 import React, { FC } from 'react';
 import { PieChart, Pie, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-
-const data02 = [
-  { name: 'Group A', value: 2400, fill: 'red' },
-  { name: 'Group B', value: 4567, fill: 'blue' },
-  { name: 'Group C', value: 1398, fill: 'green' },
-  { name: 'Group D', value: 9800, fill: 'yellow' },
-  { name: 'Group E', value: 0, fill: 'pink' },
-];
-
-const data01 = [
-  { name: 'Group A', value: 2400, fill: 'red' },
-  { name: 'Group B', value: 4567, fill: 'blue' },
-];
+import useAssetsComposition from 'hooks/useAssetsComposition';
 
 type Props = {
   type: 'deposit' | 'borrow';
 };
 
 const AssetsDistributionPieChart: FC<Props> = ({ type }) => {
+  const { depositsComposition, borrowsComposition } = useAssetsComposition();
+
   const style = {
     top: '50%',
     right: 0,
@@ -34,9 +24,16 @@ const AssetsDistributionPieChart: FC<Props> = ({ type }) => {
           {type} distribution
         </Typography>
       </Box>
-      <ResponsiveContainer minHeight={'140px'} minWidth={'250px'}>
+      <ResponsiveContainer minWidth={'250px'}>
         <PieChart>
-          <Pie dataKey="value" data={type === 'deposit' ? data01 : data02} innerRadius={20} outerRadius={40} />
+          <Pie
+            dataKey="usdValue"
+            data={type === 'deposit' ? depositsComposition : borrowsComposition}
+            innerRadius={20}
+            outerRadius={40}
+            startAngle={90}
+            endAngle={450}
+          />
           <Legend iconSize={7} iconType="circle" layout="vertical" verticalAlign="middle" wrapperStyle={style} />
           <Tooltip />
         </PieChart>
