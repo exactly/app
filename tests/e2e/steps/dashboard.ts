@@ -10,6 +10,7 @@ export const checkCollateralSwitchStatus = (symbol: Coin, disabled: boolean, che
 export const checkCollateralSwitchTooltip = (symbol: Coin, tooltip: string) => {
   cy.getByTestId(`switch-collateral-${symbol}-wrapper`).trigger('mouseover');
   cy.getByTestId(`switch-collateral-${symbol}-tooltip`).should('be.visible').and('have.text', tooltip);
+  cy.getByTestId(`switch-collateral-${symbol}-wrapper`).trigger('mouseout');
 };
 
 export const attemptEnterMarket = (symbol: Coin) => {
