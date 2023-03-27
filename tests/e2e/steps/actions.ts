@@ -1,7 +1,7 @@
 import { Coin } from '../utils/tenderly';
 import { pastParticiple } from '../utils/strings';
-import * as Modal from './modal';
-import * as Dashboard from './dashboard';
+import * as modal from './modal';
+import * as dashboard from './dashboard';
 import type { Operation } from './modal';
 
 type OperationParams = {
@@ -12,20 +12,20 @@ type OperationParams = {
 };
 
 const executeOperation = ({ type, action, symbol, amount }: OperationParams) => {
-  Modal.open(type, action, symbol);
-  Modal.waitForSubmit();
+  modal.open(type, action, symbol);
+  modal.waitForSubmit();
 
-  Modal.input(amount);
-  Modal.waitForSubmit();
+  modal.input(amount);
+  modal.waitForSubmit();
 
-  Modal.approveIfRequired();
+  modal.approveIfRequired();
 
-  Modal.submit();
-  Modal.waitForTransaction(action);
+  modal.submit();
+  modal.waitForTransaction(action);
 
-  Modal.checkTransactionStatus('success', `You ${pastParticiple(action)} ${amount} ${symbol}`);
+  modal.checkTransactionStatus('success', `You ${pastParticiple(action)} ${amount} ${symbol}`);
 
-  Modal.close();
+  modal.close();
 };
 
 export const deposit = (params: Omit<OperationParams, 'action'>) => {
@@ -39,6 +39,6 @@ type MarketParams = {
 export const enterMarket = ({ symbol }: MarketParams) => {
   symbol = symbol === 'ETH' ? 'WETH' : symbol;
 
-  Dashboard.attemptEnterMarket(symbol);
-  Dashboard.waitForTransaction(symbol);
+  dashboard.attemptEnterMarket(symbol);
+  dashboard.waitForTransaction(symbol);
 };

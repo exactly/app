@@ -1,4 +1,4 @@
-import * as Navbar from '../../steps/nabvar';
+import * as navbar from '../../steps/navbar';
 import { deposit, enterMarket } from '../../steps/actions';
 import borrow, { attemptBorrow } from '../../steps/common/borrow';
 import { setupFork } from '../../steps/setup';
@@ -25,12 +25,12 @@ describe('WETH floating borrow', () => {
 
   describe('Setup environment for a successful borrow', () => {
     it('should go to the dashboard and enter market for ETH', () => {
-      Navbar.goTo('dashboard');
+      navbar.goTo('dashboard');
       enterMarket({ symbol: 'ETH' });
     });
 
     it('should go to markets and deposit some ETH', () => {
-      Navbar.goTo('markets');
+      navbar.goTo('markets');
       deposit({ symbol: 'ETH', type: 'floating', amount: '1' });
     });
   });

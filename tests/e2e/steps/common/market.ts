@@ -1,4 +1,4 @@
-import * as Dashboard from '../dashboard';
+import * as dashboard from '../dashboard';
 import { Coin } from '../../utils/tenderly';
 
 type TestParams = {
@@ -8,17 +8,17 @@ type TestParams = {
 export const enterMarket = ({ symbol }: TestParams) => {
   describe(`${symbol} enter market`, () => {
     it('should not be checked or disabled', () => {
-      Dashboard.checkCollateralSwitchStatus(symbol, false, false);
+      dashboard.checkCollateralSwitchStatus(symbol, false, false);
     });
 
     it('should display a tooltip on mouseover', () => {
-      Dashboard.checkCollateralSwitchTooltip(symbol, 'Enable this asset as collateral');
+      dashboard.checkCollateralSwitchTooltip(symbol, 'Enable this asset as collateral');
     });
 
     it('should enter market if the tx is accepted', () => {
-      Dashboard.attemptEnterMarket(symbol);
-      Dashboard.waitForTransaction(symbol);
-      Dashboard.checkCollateralSwitchStatus(symbol, false, true);
+      dashboard.attemptEnterMarket(symbol);
+      dashboard.waitForTransaction(symbol);
+      dashboard.checkCollateralSwitchStatus(symbol, false, true);
     });
   });
 };
@@ -26,20 +26,20 @@ export const enterMarket = ({ symbol }: TestParams) => {
 export const exitMarket = ({ symbol }: TestParams) => {
   describe(`${symbol} exit market`, () => {
     it('should be checked and not disabled', () => {
-      Dashboard.checkCollateralSwitchStatus(symbol, false, true);
+      dashboard.checkCollateralSwitchStatus(symbol, false, true);
     });
 
     it('should display a tooltip on mouseover', () => {
-      Dashboard.checkCollateralSwitchTooltip(
+      dashboard.checkCollateralSwitchTooltip(
         symbol,
         'Disabling this asset as collateral affects your borrowing power and Health Factor',
       );
     });
 
     it('should exit market if the tx is accepted', () => {
-      Dashboard.attemptExitMarket(symbol);
-      Dashboard.waitForTransaction(symbol);
-      Dashboard.checkCollateralSwitchStatus(symbol, false, false);
+      dashboard.attemptExitMarket(symbol);
+      dashboard.waitForTransaction(symbol);
+      dashboard.checkCollateralSwitchStatus(symbol, false, false);
     });
   });
 };

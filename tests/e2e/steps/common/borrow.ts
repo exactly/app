@@ -1,4 +1,4 @@
-import * as Modal from '../modal';
+import * as modal from '../modal';
 import { repeat } from '../../utils/strings';
 import { Coin } from '../../utils/tenderly';
 
@@ -23,65 +23,65 @@ export default ({
 }: TestParams) => {
   describe(`${symbol} ${type} borrow`, () => {
     it('should open the modal', () => {
-      Modal.open(type, 'borrow', symbol);
+      modal.open(type, 'borrow', symbol);
     });
 
     describe('the modal', () => {
       it('should have the correct descriptions', () => {
-        Modal.checkTitle('Borrow');
-        Modal.checkType(type);
-        Modal.checkAssetSelection(symbol);
+        modal.checkTitle('Borrow');
+        modal.checkType(type);
+        modal.checkAssetSelection(symbol);
       });
     });
 
     describe('the input', () => {
       afterEach(() => {
-        Modal.clearInput();
+        modal.clearInput();
       });
 
       it('should not allow to input more decimals than the allowed', () => {
         const inp = `0.${repeat(decimals + 1, '1')}`;
-        Modal.input(inp);
-        Modal.checkInput(inp.slice(0, inp.length - 1));
+        modal.input(inp);
+        modal.checkInput(inp.slice(0, inp.length - 1));
       });
 
       if (aboveLimitAmount) {
         it('should warn if the user tries to borrow more than its current borrow limit', () => {
-          Modal.input(String(aboveLimitAmount));
-          Modal.checkAlert('error', "You can't borrow more than your borrow limit");
+          modal.input(String(aboveLimitAmount));
+          modal.checkAlert('error', "You can't borrow more than your borrow limit");
         });
       }
 
       if (aboveLiquidityAmount) {
         it('should warn if the user tries to borrow more than the current liquidity of the pool', () => {
-          Modal.input(String(aboveLiquidityAmount));
-          Modal.checkAlert('error', 'There is not enough liquidity');
+          modal.input(String(aboveLiquidityAmount));
+          modal.checkAlert('error', 'There is not enough liquidity');
         });
       }
 
       it(`should allow to input the amount ${amount}`, () => {
-        Modal.input(amount);
-        Modal.checkAlertNotFound('error');
+        modal.input(amount);
+        modal.checkAlertNotFound('error');
       });
     });
 
     describe('the transaction', () => {
       it('should be successful', () => {
-        Modal.input(amount);
+        modal.input(amount);
 
         if (shouldApprove) {
-          Modal.waitForApprove();
-          Modal.approve();
+          modal.waitForApprove();
+          modal.approve();
         }
 
-        Modal.waitForSubmit();
+        modal.waitForSubmit();
 
-        Modal.submit();
-        Modal.waitForTransaction('borrow');
+        modal.submit();
+        modal.waitForTransaction('borrow');
 
-        Modal.checkTransactionStatus('success', `You borrowed ${amount} ${symbol}`);
+        modal.checkTransactionStatus('success', `You borrowed ${amount} ${symbol}`);
 
-        Modal.close();
+        modal.close();
       });
     });
   });
@@ -90,25 +90,25 @@ export default ({
 export const attemptBorrow = ({ type, symbol, amount = '1' }: Omit<TestParams, 'shouldApprove' | 'decimals'>) => {
   describe(`${symbol} ${type} attempt borrow`, () => {
     after(() => {
-      Modal.close();
+      modal.close();
     });
 
     it('should open the modal', () => {
-      Modal.open(type, 'borrow', symbol);
+      modal.open(type, 'borrow', symbol);
     });
 
     describe('the modal', () => {
       it('should have the correct descriptions', () => {
-        Modal.checkTitle('Borrow');
-        Modal.checkType(type);
-        Modal.checkAssetSelection(symbol);
+        modal.checkTitle('Borrow');
+        modal.checkType(type);
+        modal.checkAssetSelection(symbol);
       });
     });
 
     describe('the input', () => {
       it(`should warn if the user tries to borrow with no collateral enabled for ${symbol}`, () => {
-        Modal.input(amount);
-        Modal.checkAlert(
+        modal.input(amount);
+        modal.checkAlert(
           'warning',
           'In order to borrow you need to have a deposit in the Variable Rate Pool marked as collateral in your Dashboard',
         );

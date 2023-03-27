@@ -1,4 +1,4 @@
-import * as Modal from '../modal';
+import * as modal from '../modal';
 import { repeat } from '../../utils/strings';
 import { Coin } from '../../utils/tenderly';
 
@@ -14,65 +14,65 @@ type TestParams = {
 export default ({ type, symbol, decimals, balance, amount = '1', shouldApprove = false }: TestParams) => {
   describe(`${symbol} ${type} deposit`, () => {
     it('should open the modal', () => {
-      Modal.open(type, 'deposit', symbol);
+      modal.open(type, 'deposit', symbol);
     });
 
     describe('the modal', () => {
       it('should have the correct descriptions', () => {
-        Modal.checkTitle('Deposit');
-        Modal.checkType(type);
-        Modal.checkAssetSelection(symbol);
-        Modal.checkWalletBalance(balance);
+        modal.checkTitle('Deposit');
+        modal.checkType(type);
+        modal.checkAssetSelection(symbol);
+        modal.checkWalletBalance(balance);
       });
     });
 
     describe('the input', () => {
       afterEach(() => {
-        Modal.clearInput();
+        modal.clearInput();
       });
 
       it('should not allow to input more decimals than the allowed', () => {
         const inp = `0.${repeat(decimals + 1, '1')}`;
-        Modal.input(inp);
-        Modal.checkInput(inp.slice(0, inp.length - 1));
+        modal.input(inp);
+        modal.checkInput(inp.slice(0, inp.length - 1));
       });
 
       if (!shouldApprove) {
         it('should warn if the user tries to deposit more than its current balance', () => {
           const aboveBalance = Number(balance) + 1;
-          Modal.input(String(aboveBalance));
-          Modal.checkSubmitErrorButton('Insufficient balance');
+          modal.input(String(aboveBalance));
+          modal.checkSubmitErrorButton('Insufficient balance');
         });
       }
 
       it('should input the wallet balance on max', () => {
-        Modal.onMax();
-        Modal.checkInput(balance);
+        modal.onMax();
+        modal.checkInput(balance);
       });
 
       it(`should allow to input the amount ${amount}`, () => {
-        Modal.input(amount);
-        Modal.checkAlertNotFound('error');
+        modal.input(amount);
+        modal.checkAlertNotFound('error');
       });
     });
 
     describe('the transaction', () => {
       it('should be successful', () => {
-        Modal.input(amount);
+        modal.input(amount);
 
         if (shouldApprove) {
-          Modal.waitForApprove();
-          Modal.approve();
+          modal.waitForApprove();
+          modal.approve();
         }
 
-        Modal.waitForSubmit();
+        modal.waitForSubmit();
 
-        Modal.submit();
-        Modal.waitForTransaction('deposit');
+        modal.submit();
+        modal.waitForTransaction('deposit');
 
-        Modal.checkTransactionStatus('success', `You deposited ${amount} ${symbol}`);
+        modal.checkTransactionStatus('success', `You deposited ${amount} ${symbol}`);
 
-        Modal.close();
+        modal.close();
       });
     });
   });
