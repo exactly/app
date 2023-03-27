@@ -3,7 +3,6 @@ import * as dashboard from '../../steps/dashboard';
 import { deposit, enterMarket } from '../../steps/actions';
 import borrow, { attemptBorrow } from '../../steps/common/borrow';
 import { setupFork } from '../../steps/setup';
-import { disconnectWallet } from '../../steps/wallet';
 
 describe('USDC floating borrow', () => {
   const { visit, setBalance, userAddress } = setupFork();
@@ -16,10 +15,6 @@ describe('USDC floating borrow', () => {
     await setBalance(userAddress(), {
       ETH: 100,
     });
-  });
-
-  after(() => {
-    disconnectWallet();
   });
 
   attemptBorrow({ type: 'floating', symbol: 'USDC', amount: '10' });

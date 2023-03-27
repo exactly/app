@@ -2,7 +2,6 @@ import * as navbar from '../../steps/navbar';
 import { deposit, enterMarket } from '../../steps/actions';
 import borrow, { attemptBorrow } from '../../steps/common/borrow';
 import { setupFork } from '../../steps/setup';
-import { disconnectWallet } from '../../steps/wallet';
 
 describe('WETH floating borrow', () => {
   const { visit, setBalance, userAddress } = setupFork();
@@ -15,10 +14,6 @@ describe('WETH floating borrow', () => {
     await setBalance(userAddress(), {
       ETH: 100,
     });
-  });
-
-  after(() => {
-    disconnectWallet();
   });
 
   attemptBorrow({ type: 'floating', symbol: 'ETH', amount: '1' });

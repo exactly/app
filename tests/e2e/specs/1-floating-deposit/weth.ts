@@ -1,6 +1,5 @@
 import deposit from '../../steps/common/deposit';
 import { setupFork } from '../../steps/setup';
-import { disconnectWallet } from '../../steps/wallet';
 
 describe('WETH floating deposit', () => {
   const { visit, setBalance, userAddress } = setupFork();
@@ -13,10 +12,6 @@ describe('WETH floating deposit', () => {
     await setBalance(userAddress(), {
       ETH: 100,
     });
-  });
-
-  after(() => {
-    disconnectWallet();
   });
 
   deposit({ type: 'floating', symbol: 'ETH', decimals: 18, balance: '100.0', amount: '10' });

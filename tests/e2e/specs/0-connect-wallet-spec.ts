@@ -1,15 +1,11 @@
 import { setupFork } from '../steps/setup';
-import { connectWallet, disconnectWallet } from '../steps/wallet';
+import { connectWallet } from '../steps/wallet';
 
 describe('Test Connect Wallet', () => {
   const { visit, userAddress } = setupFork();
 
   before(() => {
     visit('/', { connectWallet: false });
-  });
-
-  after(() => {
-    disconnectWallet();
   });
 
   it('Connects with injected connector', () => {

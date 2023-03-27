@@ -20,8 +20,3 @@ export const connectWallet = () => {
     }
   });
 };
-
-export const disconnectWallet = () => {
-  cy.getByTestId('wallet-menu').click();
-  cy.getByTestId('wallet-menu-disconnect').should('be.visible').click();
-};
