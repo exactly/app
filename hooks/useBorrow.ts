@@ -61,10 +61,7 @@ export default (): Borrow => {
   const hasCollateral = useMemo(() => {
     if (!accountData || !marketAccount) return false;
 
-    return (
-      // hasDepositedToFloatingPool
-      marketAccount.floatingDepositAssets.gt(Zero) || accountData.some((aMarket) => aMarket.isCollateral)
-    );
+    return marketAccount.floatingDepositAssets.gt(Zero) || accountData.some((aMarket) => aMarket.isCollateral);
   }, [accountData, marketAccount]);
 
   const previewGasCost = useCallback(
