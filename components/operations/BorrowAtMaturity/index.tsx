@@ -81,7 +81,7 @@ const BorrowAtMaturity: FC = () => {
               <DateSelector />
             </ModalBoxCell>
             <ModalBoxCell>
-              <ModalInfoFixedAPR fixedAPR={toPercentage(fixedRate)} />
+              <ModalInfoFixedAPR fixedAPR={toPercentage(Number(fixedRate) / 1e18)} />
             </ModalBoxCell>
           </ModalBoxRow>
           <ModalBoxRow>
@@ -106,7 +106,7 @@ const BorrowAtMaturity: FC = () => {
             symbol={symbol}
             operation="borrowAtMaturity"
             variant="row"
-            fixedRate={toPercentage(fixedRate)}
+            fixedRate={fixedRate}
           />
         </ModalAdvancedSettings>
       </Grid>

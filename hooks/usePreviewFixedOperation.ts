@@ -1,4 +1,4 @@
-import { formatFixed, parseFixed } from '@ethersproject/bignumber';
+import { parseFixed } from '@ethersproject/bignumber';
 import { WeiPerEther } from '@ethersproject/constants';
 import { captureException } from '@sentry/nextjs';
 import { MarketsBasicOperation, MarketsBasicOption } from 'contexts/MarketsBasicContext';
@@ -44,12 +44,11 @@ export default (operation: MarketsBasicOperation): PreviewFixedOperation => {
             ? previewerContract.previewDepositAtAllMaturities
             : previewerContract.previewBorrowAtAllMaturities;
         const previewPools = await preview(marketContract.address, initialAssets);
-        const currentTimestamp = Date.now() / 1000;
+        const currentTimestamp = Math.floor(Date.now() / 1000);
 
         const fixedOptions: MarketsBasicOption[] = previewPools.map(({ maturity, assets }) => {
-          const time = 31_536_000 / (maturity.toNumber() - currentTimestamp);
           const rate = assets.mul(WeiPerEther).div(initialAssets);
-          const fixedAPR = (Number(formatFixed(rate, 18)) - 1) * time;
+          const fixedAPR = Number(rate.sub(WeiPerEther).mul(31_536_000).div(maturity.sub(currentTimestamp))) / 1e18;
 
           return {
             maturity: maturity.toNumber(),

@@ -18,6 +18,7 @@ import TooltipChart from '../TooltipChart';
 import LoadingChart from '../LoadingChart';
 import numbers from 'config/numbers.json';
 import { Operation } from 'contexts/ModalStatusContext';
+import { BigNumber } from '@ethersproject/bignumber';
 
 type Props = {
   type: 'floating' | 'fixed';
@@ -25,56 +26,57 @@ type Props = {
   symbol: string;
   from?: number;
   to?: number;
-  fixedRate?: string;
+  fixedRate?: BigNumber;
 };
 
 const formatEmpty = () => '';
 
+const DATA_POINTS = 100;
+const MIN_UTILIZATION_RANGE = 0.0001;
+
 function UtilizationRateWithAreaChart({ type = 'fixed', operation, symbol, from, to, fixedRate }: Props) {
   const { palette, typography } = useTheme();
 
-  const { data, loading } = useUtilizationRate(type, symbol, [
-    ...(from !== undefined
-      ? [from, Math.max(0, from - numbers.chartInterval), Math.max(0, from + numbers.chartInterval)]
-      : []),
-    ...(to !== undefined ? [to, Math.max(0, to - numbers.chartInterval), Math.max(0, to + numbers.chartInterval)] : []),
-  ]);
+  const [interval, isSmallRange, utilizationMidPoint] = useMemo(() => {
+    if (from === undefined || to === undefined) return [numbers.chartInterval, true, 0];
+    const range = Math.abs(from - to);
+    return [Math.abs(from - to) / DATA_POINTS || numbers.chartInterval, range < MIN_UTILIZATION_RANGE, (from + to) / 2];
+  }, [from, to]);
+
+  const { data, loading } = useUtilizationRate(
+    type,
+    symbol,
+    Math.max(0, Math.min(from || 0, to || 0) - interval * Math.floor(DATA_POINTS * 0.4)),
+    Math.max(from || 0, to || 0) + interval * Math.floor(DATA_POINTS * 0.4),
+    interval,
+    [
+      ...(from !== undefined ? [from] : []),
+      ...(to !== undefined ? [to] : []),
+      ...(isSmallRange ? [utilizationMidPoint] : []),
+    ],
+    [...(fixedRate !== undefined && !isSmallRange ? [fixedRate] : [])],
+  );
 
   const allUtilizations = useMemo(
     () => [...(from !== undefined ? [{ utilization: from }] : []), ...(to !== undefined ? [{ utilization: to }] : [])],
     [from, to],
   );
 
-  const slicedData = useMemo(() => {
+  const dataWithArea = useMemo(() => {
     if (!data || from === undefined || to === undefined) return [[], 0];
 
     const minUtilization = Math.min(from, to);
     const maxUtilization = Math.max(from, to);
-    const realGap = numbers.chartGap * (maxUtilization - minUtilization);
-    const gap = Math.max(numbers.chartInterval, realGap);
-
-    const left = Math.max(0, minUtilization - gap);
-    const right = maxUtilization + gap;
 
     return [
-      ...data
-        .filter((item) => item.utilization >= left && item.utilization <= minUtilization)
-        .map((item) => ({ ...item, areaAPR: 0 })),
+      ...data.filter((item) => item.utilization <= minUtilization).map((item) => ({ ...item, areaAPR: 0 })),
       ...data
         .filter((item) => item.utilization >= minUtilization && item.utilization <= maxUtilization)
         .map((item) => ({ ...item, areaAPR: item.apr })),
-      ...data
-        .filter((item) => item.utilization >= maxUtilization && item.utilization <= right)
-        .map((item) => ({ ...item, areaAPR: 0 })),
+      ...data.filter((item) => item.utilization >= maxUtilization).map((item) => ({ ...item, areaAPR: 0 })),
     ];
   }, [data, from, to]);
-
-  const getReferenceLineValue = useCallback(
-    (utilization: number): string => {
-      return from?.toFixed(4) !== to?.toFixed(4) || utilization === from ? `${toPercentage(utilization)}` : '';
-    },
-    [from, to],
-  );
+  const getReferenceLineValue = useCallback((utilization: number): string => `${toPercentage(utilization)}`, []);
 
   const label: CSSProperties = {
     fontWeight: 500,
@@ -85,14 +87,22 @@ function UtilizationRateWithAreaChart({ type = 'fixed', operation, symbol, from,
   return (
     <Box display="flex" flexDirection="column" width="100%" height="100%" gap={2}>
       <ResponsiveContainer width="100%" height="100%">
-        {loading || !slicedData || !slicedData.length || from === undefined || to === undefined ? (
+        {loading || !dataWithArea || !dataWithArea.length || from === undefined || to === undefined ? (
           <LoadingChart />
         ) : (
-          <ComposedChart data={slicedData} margin={{ top: 5, bottom: 5 }}>
+          <ComposedChart data={dataWithArea} margin={{ top: 12, bottom: 5 }}>
             <defs>
               <linearGradient id="colorArea" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#82ca9d" stopOpacity={0.8} />
-                <stop offset="95%" stopColor="#82ca9d" stopOpacity={0} />
+                <stop
+                  offset="5%"
+                  stopColor={palette.operation[type === 'fixed' ? 'fixed' : 'variable']}
+                  stopOpacity={0.5}
+                />
+                <stop
+                  offset="95%"
+                  stopColor={palette.operation[type === 'fixed' ? 'fixed' : 'variable']}
+                  stopOpacity={0}
+                />
               </linearGradient>
             </defs>
             <CartesianGrid stroke={palette.grey[300]} vertical={false} />
@@ -113,6 +123,7 @@ function UtilizationRateWithAreaChart({ type = 'fixed', operation, symbol, from,
                 fontWeight: 500,
                 fontSize: 11,
               }}
+              padding={{ left: 40, right: 40 }}
             />
             <YAxis
               allowDataOverflow={true}
@@ -153,8 +164,12 @@ function UtilizationRateWithAreaChart({ type = 'fixed', operation, symbol, from,
                   additionalInfo={
                     fixedRate &&
                     operation === 'borrowAtMaturity' && (
-                      <Typography variant="h6" fontSize="12px" color="#82ca9d">
-                        Your APR: {fixedRate}
+                      <Typography
+                        variant="h6"
+                        fontSize="12px"
+                        color={palette.operation[type === 'fixed' ? 'fixed' : 'variable']}
+                      >
+                        Your APR: {toPercentage(Number(fixedRate) / 1e18)}
                       </Typography>
                     )
                   }
@@ -174,20 +189,33 @@ function UtilizationRateWithAreaChart({ type = 'fixed', operation, symbol, from,
               activeDot={false}
               animationDuration={2000}
             />
+            {fixedRate && (
+              <ReferenceLine
+                y={Number(fixedRate) / 1e18}
+                strokeWidth={2}
+                yAxisId="yaxis"
+                stroke={palette.operation[type === 'fixed' ? 'variable' : 'fixed']}
+                label={{
+                  value: `Your APR: ${toPercentage(Number(fixedRate) / 1e18)}`,
+                  position: 'insideBottomRight',
+                  style: { ...label, fontSize: 10, fill: palette.operation[type === 'fixed' ? 'variable' : 'fixed'] },
+                }}
+                strokeDasharray="5 5"
+                isFront
+              />
+            )}
             {allUtilizations &&
-              allUtilizations.map(({ utilization }) => (
+              allUtilizations.map(({ utilization }, index) => (
                 <ReferenceLine
                   x={utilization}
-                  key={`${utilization}`}
-                  strokeWidth={2}
+                  key={`${utilization}_${index}`}
+                  strokeWidth={1.5}
                   yAxisId="yaxis"
-                  stroke={palette.operation.variable}
+                  stroke={palette.operation[type === 'fixed' ? 'fixed' : 'variable']}
                   label={{
                     value: getReferenceLineValue(utilization),
-                    position: utilization === Math.min(from, to) ? 'insideRight' : 'insideBottomLeft',
-                    offset: utilization === Math.min(from, to) ? 11 : 15,
-                    angle: -90,
-                    style: { ...label, fontSize: 12, fill: palette.operation.variable },
+                    position: utilization === Math.min(from, to) ? 'insideBottomRight' : 'insideBottomLeft',
+                    style: { ...label, fontSize: 12, fill: palette.operation[type === 'fixed' ? 'fixed' : 'variable'] },
                   }}
                   strokeDasharray={utilization === to ? '5 5' : ''}
                   isFront
@@ -196,20 +224,27 @@ function UtilizationRateWithAreaChart({ type = 'fixed', operation, symbol, from,
             <Area
               type="monotone"
               dataKey="areaAPR"
-              stroke="#82ca9d"
-              fillOpacity={1}
+              stroke={palette.operation[type === 'fixed' ? 'fixed' : 'variable']}
+              fillOpacity={0.8}
               fill="url(#colorArea)"
               yAxisId="yaxis"
             />
             <Line
+              dot={(props) => (
+                <CustomDot
+                  {...props}
+                  color={palette.operation[type === 'fixed' ? 'variable' : 'fixed']}
+                  aprToHighlight={fixedRate && !isSmallRange ? Number(fixedRate) / 1e18 : undefined}
+                  utilizationToHighlight={fixedRate && isSmallRange ? utilizationMidPoint : undefined}
+                />
+              )}
               name="Borrow APR"
               yAxisId="yaxis"
               type="monotone"
               dataKey="apr"
               stroke={palette.mode === 'light' ? 'black' : 'white'}
-              opacity={0.5}
-              dot={false}
-              strokeWidth={2}
+              opacity={0.3}
+              strokeWidth={1}
               animationDuration={2000}
             />
           </ComposedChart>
@@ -218,5 +253,29 @@ function UtilizationRateWithAreaChart({ type = 'fixed', operation, symbol, from,
     </Box>
   );
 }
+
+const CustomDot = ({
+  cx,
+  cy,
+  payload,
+  color,
+  aprToHighlight,
+  utilizationToHighlight,
+}: {
+  cx: number;
+  cy: number;
+  payload: { utilization: number; apr: number };
+  color: string;
+  aprToHighlight?: number;
+  utilizationToHighlight?: number;
+}) => {
+  if (
+    (aprToHighlight && payload?.apr === aprToHighlight) ||
+    (utilizationToHighlight && payload?.utilization === utilizationToHighlight)
+  ) {
+    return <circle cx={cx} cy={cy} r={2} stroke={color} strokeWidth={1.5} fill={color} />;
+  }
+  return null;
+};
 
 export default React.memo(UtilizationRateWithAreaChart);
