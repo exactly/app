@@ -1,7 +1,9 @@
 import { hexValue } from '@ethersproject/bytes';
-import { Contract } from '@ethersproject/contracts';
 import { StaticJsonRpcProvider } from '@ethersproject/providers';
 import { formatFixed, parseFixed } from '@ethersproject/bignumber';
+
+import type { Coin, ERC20TokenSymbol } from './contracts';
+import { erc20 } from './contracts';
 
 const { TENDERLY_USER, TENDERLY_PROJECT, TENDERLY_ACCESS_KEY } = Cypress.env();
 
@@ -15,42 +17,6 @@ const headers = {
   Accept: 'application/json',
   'Content-Type': 'application/json',
   'X-Access-Key': TENDERLY_ACCESS_KEY as string,
-};
-
-type ERC20Token = {
-  address: string;
-  abi: string;
-  decimals: number;
-};
-
-const ERC20TokenSymbols = ['WETH', 'DAI', 'USDC', 'WBTC', 'wstETH'] as const;
-export type ERC20TokenSymbol = (typeof ERC20TokenSymbols)[number];
-export type Coin = ERC20TokenSymbol | 'ETH';
-
-const decimals: Record<Coin, number> = {
-  ETH: 18,
-  WETH: 18,
-  DAI: 18,
-  USDC: 6,
-  WBTC: 8,
-  wstETH: 18,
-};
-
-type Tokens = {
-  [key in ERC20TokenSymbol]?: ERC20Token;
-};
-
-const tokens: Tokens = {};
-
-export const init = async () => {
-  for (const symbol of ERC20TokenSymbols) {
-    const contract = await import(`@exactly-protocol/protocol/deployments/mainnet/${symbol}.json`);
-    tokens[symbol] = {
-      ...contract,
-      abi: JSON.stringify(contract.abi),
-      decimals: decimals[symbol],
-    };
-  }
 };
 
 export const createFork = async (networkId = '1', blockNumber = undefined): Promise<string> => {
@@ -97,13 +63,13 @@ const transferERC20 = async (
   amount: number,
 ) => {
   const provider = new StaticJsonRpcProvider(forkUrl);
-  const token = tokens[symbol];
   const signer = provider.getSigner();
-  const tokenContract = new Contract(token.address, token.abi, signer);
-
-  const tokenAmount = hexValue(parseFixed(amount.toString(), token.decimals).toHexString());
+  const tokenContract = await erc20(symbol, signer);
 
   await setNativeBalance(forkUrl, fromAddress, 10);
+
+  const tokenAmount = hexValue(parseFixed(String(amount), await tokenContract.decimals()).toHexString());
+
   const unsignedTx = await tokenContract.populateTransaction.approve(await signer.getAddress(), tokenAmount);
   const transactionParameters = [
     {
@@ -127,7 +93,8 @@ const getTopHolder = async (tokenAddress: string) => {
 };
 
 const setERC20TokenBalance = async (forkUrl: string, address: string, symbol: ERC20TokenSymbol, amount: number) => {
-  const from = await getTopHolder(tokens[symbol].address);
+  const token = await erc20(symbol);
+  const from = await getTopHolder(token.address);
   await transferERC20(forkUrl, symbol, from, address, amount);
 };
 

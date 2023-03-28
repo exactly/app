@@ -1,7 +1,7 @@
 import { Wallet } from '@ethersproject/wallet';
 import { JsonRpcProvider } from '@ethersproject/providers';
 
-import { init, createFork, deleteFork, rpcURL, setBalance } from '../utils/tenderly';
+import { createFork, deleteFork, rpcURL, setBalance } from '../utils/tenderly';
 import type { Balance } from '../utils/tenderly';
 import { CustomizedBridge } from '../utils/bridge';
 import { connectWallet } from './wallet';
@@ -27,7 +27,6 @@ export const setupFork = ({ chainId = 1, wallet = Wallet.createRandom() }: ForkP
   let forkId: string | undefined = undefined;
 
   before(async () => {
-    await init();
     forkId = await createFork(String(chainId));
   });
 
@@ -37,20 +36,24 @@ export const setupFork = ({ chainId = 1, wallet = Wallet.createRandom() }: ForkP
     }
   });
 
+  const provider = () => new JsonRpcProvider(rpcURL(forkId), chainId);
+  const signer = () => new Wallet(wallet.privateKey, provider());
+  const ethereum = () => new CustomizedBridge(signer(), provider(), Number(chainId));
+
+  Cypress.on('window:before:load', (window) => {
+    window.localStorage.setItem('tos', 'true');
+
+    window.ethereum = ethereum();
+    window.rpcURL = rpcURL(forkId);
+  });
+
   return {
     visit: (url: string, options: VisitOptions = {}) => {
       const opts = { ...defaultVisitOptions, ...options };
-      const provider = new JsonRpcProvider(rpcURL(forkId), chainId);
-      const signer = new Wallet(wallet.privateKey, provider);
-      const bridge = new CustomizedBridge(signer, provider, Number(chainId));
       return cy
         .visit(url, {
           onBeforeLoad: (window) => {
-            window.localStorage.setItem('tos', 'true');
             window.localStorage.setItem('marketView', opts.marketView);
-
-            window.ethereum = bridge;
-            window.rpcURL = rpcURL(forkId);
           },
         })
         .then(async () => {
@@ -65,5 +68,6 @@ export const setupFork = ({ chainId = 1, wallet = Wallet.createRandom() }: ForkP
     },
     userAddress: () => wallet.address,
     setBalance: (address: string, balance: Balance) => setBalance(rpcURL(forkId), address, balance),
+    signer,
   };
 };

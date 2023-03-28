@@ -1,9 +1,10 @@
-import { Coin } from '../utils/tenderly';
+import { ERC20TokenSymbol } from '../utils/contracts';
+import { formatSymbol } from '../utils/strings';
 
 export type Operation = 'deposit' | 'borrow' | 'withdraw' | 'repay';
 
-export const open = (type: 'floating' | 'fixed', action: Operation, symbol: Coin) => {
-  cy.getByTestId(`${type}-${action}-${symbol === 'ETH' ? 'WETH' : symbol}`).click();
+export const open = (type: 'floating' | 'fixed', action: Operation, symbol: ERC20TokenSymbol) => {
+  cy.getByTestId(`${type}-${action}-${symbol}`).click();
   cy.getByTestId('modal').should('be.visible');
 };
 
@@ -96,8 +97,8 @@ export const checkType = (type: 'floating' | 'fixed') => {
   );
 };
 
-export const checkAssetSelection = (symbol: Coin) => {
-  cy.getByTestId('modal-asset-selector').should('have.text', symbol);
+export const checkAssetSelection = (symbol: ERC20TokenSymbol) => {
+  cy.getByTestId('modal-asset-selector').should('have.text', formatSymbol(symbol));
 };
 
 export const checkWalletBalance = (balance: string) => {

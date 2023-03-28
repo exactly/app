@@ -1,10 +1,9 @@
-import * as navbar from '../../steps/navbar';
-import { deposit, enterMarket } from '../../steps/actions';
+import { deposit, enterMarket, reload } from '../../steps/actions';
 import borrow, { attemptBorrow } from '../../steps/common/borrow';
 import { setupFork } from '../../steps/setup';
 
 describe('WETH floating borrow', () => {
-  const { visit, setBalance, userAddress } = setupFork();
+  const { visit, setBalance, userAddress, signer } = setupFork();
 
   before(() => {
     visit('/');
@@ -16,23 +15,18 @@ describe('WETH floating borrow', () => {
     });
   });
 
-  attemptBorrow({ type: 'floating', symbol: 'ETH', amount: '1' });
+  attemptBorrow({ type: 'floating', symbol: 'WETH', amount: '1' });
 
   describe('Setup environment for a successful borrow', () => {
-    it('should go to the dashboard and enter market for ETH', () => {
-      navbar.goTo('dashboard');
-      enterMarket({ symbol: 'ETH' });
-    });
+    enterMarket('WETH', signer);
+    deposit({ symbol: 'ETH', amount: '1', receiver: userAddress() }, signer);
 
-    it('should go to markets and deposit some ETH', () => {
-      navbar.goTo('markets');
-      deposit({ symbol: 'ETH', type: 'floating', amount: '1' });
-    });
+    reload();
   });
 
   borrow({
     type: 'floating',
-    symbol: 'ETH',
+    symbol: 'WETH',
     decimals: 18,
     amount: '0.1',
     aboveLimitAmount: '1',

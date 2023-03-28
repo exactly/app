@@ -1,44 +1,47 @@
-import { Coin } from '../utils/tenderly';
-import { pastParticiple } from '../utils/strings';
-import * as modal from './modal';
-import * as dashboard from './dashboard';
-import type { Operation } from './modal';
+import { Signer } from '@ethersproject/abstract-signer';
+import { parseFixed } from '@ethersproject/bignumber';
 
-type OperationParams = {
-  type: 'floating' | 'fixed';
-  action: Operation;
+import { erc20, erc20Market, ethRouter, auditor, ERC20TokenSymbol, Coin } from '../utils/contracts';
+import type { Defer } from '../utils/types';
+
+export const enterMarket = (symbol: ERC20TokenSymbol, signer: Defer<Signer>) => {
+  it(`enters market for ${symbol}`, async () => {
+    const auditorContract = auditor(signer());
+    const erc20MarketContract = await erc20Market(symbol);
+    await auditorContract.enterMarket(erc20MarketContract.address);
+  });
+};
+
+export const exitMarket = (symbol: ERC20TokenSymbol, signer: Defer<Signer>) => {
+  it(`exits market for ${symbol}`, async () => {
+    const auditorContract = auditor(signer());
+    const erc20MarketContract = await erc20Market(symbol);
+    await auditorContract.exitMarket(erc20MarketContract.address);
+  });
+};
+
+type DepositParams = {
   symbol: Coin;
   amount: string;
+  receiver: string;
 };
 
-const executeOperation = ({ type, action, symbol, amount }: OperationParams) => {
-  modal.open(type, action, symbol);
-  modal.waitForSubmit();
-
-  modal.input(amount);
-  modal.waitForSubmit();
-
-  modal.approveIfRequired();
-
-  modal.submit();
-  modal.waitForTransaction(action);
-
-  modal.checkTransactionStatus('success', `You ${pastParticiple(action)} ${amount} ${symbol}`);
-
-  modal.close();
+export const deposit = ({ symbol, amount, receiver }: DepositParams, signer: Defer<Signer>) => {
+  it(`deposits ${amount} ${symbol} to floating pool`, async () => {
+    if (symbol === 'ETH') {
+      const weth = await erc20('WETH', signer());
+      const ethRouterContract = ethRouter(signer());
+      await ethRouterContract.deposit({ value: parseFixed(amount, await weth.decimals()) });
+    } else {
+      const erc20Contract = await erc20(symbol, signer());
+      const erc20MarketContract = await erc20Market(symbol);
+      const qty = parseFixed(amount, await erc20Contract.decimals());
+      await erc20Contract.approve(erc20MarketContract.address, qty);
+      await erc20MarketContract.deposit(qty, receiver);
+    }
+  });
 };
 
-export const deposit = (params: Omit<OperationParams, 'action'>) => {
-  executeOperation({ action: 'deposit', ...params });
-};
-
-type MarketParams = {
-  symbol: Coin;
-};
-
-export const enterMarket = ({ symbol }: MarketParams) => {
-  symbol = symbol === 'ETH' ? 'WETH' : symbol;
-
-  dashboard.attemptEnterMarket(symbol);
-  dashboard.waitForTransaction(symbol);
+export const reload = async () => {
+  it('reloads the app', () => cy.reload());
 };

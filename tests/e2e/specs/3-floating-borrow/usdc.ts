@@ -1,11 +1,11 @@
 import * as navbar from '../../steps/navbar';
 import * as dashboard from '../../steps/dashboard';
-import { deposit, enterMarket } from '../../steps/actions';
+import { deposit, enterMarket, reload } from '../../steps/actions';
 import borrow, { attemptBorrow } from '../../steps/common/borrow';
 import { setupFork } from '../../steps/setup';
 
 describe('USDC floating borrow', () => {
-  const { visit, setBalance, userAddress } = setupFork();
+  const { visit, setBalance, userAddress, signer } = setupFork();
 
   before(() => {
     visit('/');
@@ -20,15 +20,10 @@ describe('USDC floating borrow', () => {
   attemptBorrow({ type: 'floating', symbol: 'USDC', amount: '10' });
 
   describe('Setup environment for a successful borrow using ETH without entering USDC market', () => {
-    it('should go to the dashboard and enter market for ETH', () => {
-      navbar.goTo('dashboard');
-      enterMarket({ symbol: 'ETH' });
-    });
+    enterMarket('WETH', signer);
+    deposit({ symbol: 'ETH', amount: '1.5', receiver: userAddress() }, signer);
 
-    it('should go to markets and deposit some ETH', () => {
-      navbar.goTo('markets');
-      deposit({ symbol: 'ETH', type: 'floating', amount: '1.5' });
-    });
+    reload();
   });
 
   borrow({

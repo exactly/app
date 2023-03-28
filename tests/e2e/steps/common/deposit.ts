@@ -1,10 +1,10 @@
 import * as modal from '../modal';
-import { repeat } from '../../utils/strings';
-import { Coin } from '../../utils/tenderly';
+import { formatSymbol, repeat } from '../../utils/strings';
+import { ERC20TokenSymbol } from '../../utils/contracts';
 
 type TestParams = {
   type: 'floating' | 'fixed';
-  symbol: Coin;
+  symbol: ERC20TokenSymbol;
   decimals: number;
   balance: string;
   amount?: string;
@@ -70,7 +70,7 @@ export default ({ type, symbol, decimals, balance, amount = '1', shouldApprove =
         modal.submit();
         modal.waitForTransaction('deposit');
 
-        modal.checkTransactionStatus('success', `You deposited ${amount} ${symbol}`);
+        modal.checkTransactionStatus('success', `You deposited ${amount} ${formatSymbol(symbol)}`);
 
         modal.close();
       });

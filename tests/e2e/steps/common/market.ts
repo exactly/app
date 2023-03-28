@@ -1,8 +1,8 @@
 import * as dashboard from '../dashboard';
-import { Coin } from '../../utils/tenderly';
+import { ERC20TokenSymbol } from '../../utils/contracts';
 
 type TestParams = {
-  symbol: Coin;
+  symbol: ERC20TokenSymbol;
 };
 
 export const enterMarket = ({ symbol }: TestParams) => {
