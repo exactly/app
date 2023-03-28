@@ -22,11 +22,12 @@ import { BigNumber } from '@ethersproject/bignumber';
 
 type Props = {
   type: 'floating' | 'fixed';
-  operation: Extract<Operation, 'depositAtMaturity' | 'withdrawAtMaturity' | 'borrowAtMaturity' | 'repayAtMaturity'>;
+  operation: Exclude<Operation, 'faucet'>;
   symbol: string;
   from?: number;
   to?: number;
   fixedRate?: BigNumber;
+  floatingRate?: number;
 };
 
 const formatEmpty = () => '';
@@ -34,7 +35,7 @@ const formatEmpty = () => '';
 const DATA_POINTS = 100;
 const MIN_UTILIZATION_RANGE = 0.0001;
 
-function UtilizationRateWithAreaChart({ type = 'fixed', operation, symbol, from, to, fixedRate }: Props) {
+function UtilizationRateWithAreaChart({ type = 'fixed', operation, symbol, from, to, fixedRate, floatingRate }: Props) {
   const { palette, typography } = useTheme();
 
   const [interval, isSmallRange, utilizationMidPoint] = useMemo(() => {
@@ -83,6 +84,8 @@ function UtilizationRateWithAreaChart({ type = 'fixed', operation, symbol, from,
     fontFamily: typography.fontFamilyMonospaced,
     fill: palette.grey[900],
   };
+
+  const currentAPR = useMemo(() => (fixedRate ? Number(fixedRate) / 1e18 : floatingRate), [fixedRate, floatingRate]);
 
   return (
     <Box display="flex" flexDirection="column" width="100%" height="100%" gap={2}>
@@ -160,16 +163,17 @@ function UtilizationRateWithAreaChart({ type = 'fixed', operation, symbol, from,
               formatter={(value) => toPercentage(value as number)}
               content={
                 <TooltipChart
-                  ignoreKeys={['areaAPR', ...(operation !== 'borrowAtMaturity' ? ['apr'] : [])]}
+                  opacity={0.8}
+                  ignoreKeys={['areaAPR', ...(!operation.includes('borrow') ? ['apr'] : [])]}
                   additionalInfo={
-                    fixedRate &&
-                    operation === 'borrowAtMaturity' && (
+                    currentAPR !== undefined &&
+                    operation.includes('borrow') && (
                       <Typography
                         variant="h6"
                         fontSize="12px"
-                        color={palette.operation[type === 'fixed' ? 'fixed' : 'variable']}
+                        color={palette.operation[type === 'fixed' ? 'variable' : 'fixed']}
                       >
-                        Your APR: {toPercentage(Number(fixedRate) / 1e18)}
+                        Your APR: {toPercentage(currentAPR)}
                       </Typography>
                     )
                   }
@@ -189,14 +193,14 @@ function UtilizationRateWithAreaChart({ type = 'fixed', operation, symbol, from,
               activeDot={false}
               animationDuration={2000}
             />
-            {fixedRate && (
+            {operation.includes('borrow') && (
               <ReferenceLine
-                y={Number(fixedRate) / 1e18}
+                y={currentAPR}
                 strokeWidth={2}
                 yAxisId="yaxis"
                 stroke={palette.operation[type === 'fixed' ? 'variable' : 'fixed']}
                 label={{
-                  value: `Your APR: ${toPercentage(Number(fixedRate) / 1e18)}`,
+                  value: `Your APR: ${toPercentage(currentAPR)}`,
                   position: 'insideBottomRight',
                   style: { ...label, fontSize: 10, fill: palette.operation[type === 'fixed' ? 'variable' : 'fixed'] },
                 }}
@@ -234,8 +238,8 @@ function UtilizationRateWithAreaChart({ type = 'fixed', operation, symbol, from,
                 <CustomDot
                   {...props}
                   color={palette.operation[type === 'fixed' ? 'variable' : 'fixed']}
-                  aprToHighlight={fixedRate && !isSmallRange ? Number(fixedRate) / 1e18 : undefined}
-                  utilizationToHighlight={fixedRate && isSmallRange ? utilizationMidPoint : undefined}
+                  aprToHighlight={currentAPR !== undefined && !isSmallRange ? currentAPR : undefined}
+                  utilizationToHighlight={currentAPR !== undefined && isSmallRange ? utilizationMidPoint : undefined}
                 />
               )}
               name="Borrow APR"

@@ -127,7 +127,7 @@ export const lightTheme = createTheme({
       advanced: '#F9FAFB',
     },
     components: {
-      bg: 'white',
+      bg: '#FFFFFF',
     },
   },
   typography: {
@@ -431,7 +431,7 @@ export const darkTheme = createTheme({
           padding: '16px',
           border: '1px solid #62666A',
           borderRadius: '8px',
-          color: 'white',
+          color: '#FFFFFF',
           fontSize: '12px',
           filter: 'drop-shadow(0px 4px 10px rgba(97, 102, 107, 0.1))',
         },

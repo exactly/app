@@ -1,5 +1,5 @@
 import React, { ReactNode, useMemo } from 'react';
-import { Box, Typography } from '@mui/material';
+import { alpha, Box, Typography } from '@mui/material';
 
 type Entry = {
   dataKey: string;
@@ -17,6 +17,7 @@ type Props = {
   itemSorter?: (a: Entry, b: Entry) => number;
   ignoreKeys?: string[];
   additionalInfo?: ReactNode;
+  opacity?: number;
 };
 
 function TooltipChart({
@@ -28,6 +29,7 @@ function TooltipChart({
   itemSorter,
   ignoreKeys,
   additionalInfo,
+  opacity = 1,
 }: Props) {
   const sortedPayload = useMemo(
     () => (itemSorter && payload ? payload.sort(itemSorter) : payload),
@@ -42,7 +44,7 @@ function TooltipChart({
       flexDirection="column"
       border="1px solid #FFFFFF"
       boxShadow="0px 3px 4px rgba(97, 102, 107, 0.1)"
-      bgcolor="components.bg"
+      bgcolor={(theme) => alpha(theme.palette.components.bg, opacity)}
       p="8px"
     >
       <Typography variant="subtitle2" fontSize="10px" mb={0.5}>
