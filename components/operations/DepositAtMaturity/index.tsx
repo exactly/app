@@ -74,7 +74,7 @@ const DepositAtMaturity: FC = () => {
               <DateSelector />
             </ModalBoxCell>
             <ModalBoxCell>
-              <ModalInfoFixedAPR fixedAPR={toPercentage(fixedRate)} />
+              <ModalInfoFixedAPR fixedAPR={toPercentage(Number(fixedRate) / 1e18)} />
             </ModalBoxCell>
           </ModalBoxRow>
           <ModalBoxRow>

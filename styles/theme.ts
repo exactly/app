@@ -118,7 +118,7 @@ export const lightTheme = createTheme({
     green: '#33CC59',
     red: '#AD1F1F',
     operation: {
-      fixed: 'blue',
+      fixed: '#0095FF',
       variable: '#33CC59',
     },
     colors: ['#0095FF', '#031D30', '#085891', '#5500FF', '#AA00FF'],
@@ -298,7 +298,7 @@ export const darkTheme = createTheme({
     green: '#33CC59',
     red: '#AD1F1F',
     operation: {
-      fixed: 'blue',
+      fixed: '#0095FF',
       variable: '#33CC59',
     },
     colors: ['#0095FF', 'red', '#085891', '#5500FF', '#AA00FF'],

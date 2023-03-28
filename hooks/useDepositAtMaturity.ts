@@ -1,4 +1,4 @@
-import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
+import { BigNumber, parseFixed } from '@ethersproject/bignumber';
 import { WeiPerEther, Zero } from '@ethersproject/constants';
 import numbers from 'config/numbers.json';
 import { MarketContext } from 'contexts/MarketContext';
@@ -21,7 +21,7 @@ type DepositAtMaturity = {
   optimalDepositAmount: BigNumber | undefined;
   rawSlippage: string;
   setRawSlippage: (value: string) => void;
-  fixedRate: number | undefined;
+  fixedRate: BigNumber | undefined;
   gtMaxYield: boolean;
 } & OperationHook;
 
@@ -52,7 +52,7 @@ export default (): DepositAtMaturity => {
 
   const handleOperationError = useHandleOperationError();
 
-  const [fixedRate, setFixedRate] = useState<number | undefined>();
+  const [fixedRate, setFixedRate] = useState<BigNumber | undefined>();
   const [gtMaxYield, setGtMaxYield] = useState<boolean>(false);
 
   const walletBalance = useBalance(symbol, assetContract);
@@ -253,20 +253,16 @@ export default (): DepositAtMaturity => {
           date,
           initialAssets,
         );
-
-        const currentTimestamp = Date.now() / 1000;
-        const time = 31_536_000 / (date - currentTimestamp);
-
+        const currentTimestamp = Math.floor(Date.now() / 1000);
         const rate = finalAssets.mul(WeiPerEther).div(initialAssets);
-        const fixedAPR = (Number(formatFixed(rate, 18)) - 1) * time;
+        const fixedAPR = rate.sub(WeiPerEther).mul(31_536_000).div(BigNumber.from(date).sub(currentTimestamp));
 
         setFixedRate(fixedAPR);
       } catch (error) {
         setFixedRate(undefined);
       }
     } else {
-      const fixedAPR = Number(depositRate.toBigInt()) / 1e18;
-      setFixedRate(fixedAPR);
+      setFixedRate(depositRate);
     }
   }, [marketAccount, date, previewerContract, marketContract, depositRate, qty]);
 

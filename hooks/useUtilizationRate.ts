@@ -1,13 +1,22 @@
 import { useMemo } from 'react';
 
 import useAccountData from './useAccountData';
-import interestRateCurve from 'utils/interestRateCurve';
+import interestRateCurve, { inverseInterestRateCurve } from 'utils/interestRateCurve';
 import numbers from 'config/numbers.json';
+import { BigNumber } from '@ethersproject/bignumber';
 
 const MAX = 1;
 const INTERVAL = numbers.chartInterval;
 
-export default function useUtilizationRate(type: 'floating' | 'fixed', symbol: string, mandatoryPoints?: number[]) {
+export default function useUtilizationRate(
+  type: 'floating' | 'fixed',
+  symbol: string,
+  from = 0,
+  to = MAX,
+  interval = INTERVAL,
+  mandatoryPoints: number[] = [],
+  inversePoints: BigNumber[] = [],
+) {
   const { marketAccount } = useAccountData(symbol);
 
   const data = useMemo(() => {
@@ -31,18 +40,28 @@ export default function useUtilizationRate(type: 'floating' | 'fixed', symbol: s
           };
 
     const curve = interestRateCurve(Number(A) / 1e18, Number(B) / 1e18, Number(UMax) / 1e18);
-
-    const points = Array.from({ length: MAX / INTERVAL }).map((_, i) => {
-      const utilization = i * INTERVAL;
+    const points = Array.from({ length: Math.ceil(Math.abs(to - from) / interval) + 1 }).map((_, i) => {
+      const utilization = from + i * interval;
       return { utilization, apr: curve(utilization) };
     });
 
-    if (mandatoryPoints) {
+    if (mandatoryPoints.length) {
       points.push(...mandatoryPoints.map((utilization) => ({ utilization, apr: curve(utilization) })));
+    }
+
+    if (inversePoints.length) {
+      const inverseCurve = inverseInterestRateCurve(A, B, UMax);
+      points.push(
+        ...inversePoints.map((apr) => ({ utilization: Number(inverseCurve(apr)) / 1e18, apr: Number(apr) / 1e18 })),
+      );
+    }
+
+    if (mandatoryPoints.length || inversePoints.length) {
       points.sort((a, b) => a.utilization - b.utilization);
     }
+
     return points;
-  }, [marketAccount, type, mandatoryPoints]);
+  }, [marketAccount, type, from, to, interval, mandatoryPoints, inversePoints]);
 
   const currentUtilization = useMemo(() => {
     if (!marketAccount) return undefined;

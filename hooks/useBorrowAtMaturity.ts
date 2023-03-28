@@ -22,7 +22,7 @@ type BorrowAtMaturity = {
   updateAPR: () => void;
   rawSlippage: string;
   setRawSlippage: (value: string) => void;
-  fixedRate: number | undefined;
+  fixedRate: BigNumber | undefined;
   hasCollateral: boolean;
   safeMaximumBorrow: string;
 } & OperationHook;
@@ -53,7 +53,7 @@ export default (): BorrowAtMaturity => {
 
   const { accountData, marketAccount, refreshAccountData } = useAccountData(symbol);
 
-  const [fixedRate, setFixedRate] = useState<number | undefined>();
+  const [fixedRate, setFixedRate] = useState<BigNumber | undefined>();
 
   const healthFactor = useHealthFactor();
   const minBorrowRate = useMemo<BigNumber | undefined>(() => {
@@ -78,12 +78,7 @@ export default (): BorrowAtMaturity => {
   const hasCollateral = useMemo(() => {
     if (!accountData || !marketAccount) return false;
 
-    return (
-      // isCollateral
-      marketAccount.floatingDepositAssets.gt(Zero) ||
-      // hasDepositedToFloatingPool
-      accountData.some((aMarket) => aMarket.isCollateral)
-    );
+    return marketAccount.floatingDepositAssets.gt(Zero) || accountData.some((aMarket) => aMarket.isCollateral);
   }, [accountData, marketAccount]);
 
   const previewGasCost = useCallback(
@@ -207,7 +202,7 @@ export default (): BorrowAtMaturity => {
   const borrow = useCallback(async () => {
     setIsLoadingOp(true);
 
-    if (fixedRate && Number(formatFixed(slippage, 18)) < fixedRate) {
+    if (fixedRate && Number(formatFixed(slippage, 18)) < Number(fixedRate) / 1e18) {
       setIsLoadingOp(false);
 
       return setErrorData({
@@ -301,21 +296,16 @@ export default (): BorrowAtMaturity => {
           date,
           initialAssets,
         );
-
-        const currentTimestamp = Date.now() / 1000;
-        const time = 31_536_000 / (Number(date) - currentTimestamp);
-
+        const currentTimestamp = Math.floor(Date.now() / 1000);
         const rate = finalAssets.mul(WeiPerEther).div(initialAssets);
-
-        const fixedAPR = (Number(formatFixed(rate, 18)) - 1) * time;
+        const fixedAPR = rate.sub(WeiPerEther).mul(31_536_000).div(BigNumber.from(date).sub(currentTimestamp));
 
         setFixedRate(fixedAPR);
       } catch (error) {
         setFixedRate(undefined);
       }
     } else {
-      const fixedAPR = Number(minBorrowRate.toBigInt()) / 1e18;
-      setFixedRate(fixedAPR);
+      setFixedRate(minBorrowRate);
     }
   }, [marketAccount, date, previewerContract, marketContract, minBorrowRate, qty]);
 

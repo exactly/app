@@ -20,7 +20,7 @@ type Props = {
   symbol: string;
   operation: Extract<Operation, 'depositAtMaturity' | 'withdrawAtMaturity' | 'borrowAtMaturity' | 'repayAtMaturity'>;
   variant?: Variant;
-  fixedRate?: string;
+  fixedRate?: BigNumber;
 };
 
 function ModalInfoFixedUtilizationRate({ qty, symbol, operation, variant = 'column', fixedRate }: Props) {
