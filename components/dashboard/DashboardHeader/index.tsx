@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { formatFixed } from '@ethersproject/bignumber';
-import { Box, Grid } from '@mui/material';
+import { Grid, useMediaQuery, useTheme } from '@mui/material';
 
 import parseHealthFactor from 'utils/parseHealthFactor';
 import formatNumber from 'utils/formatNumber';
@@ -18,6 +18,8 @@ function DashboardHeader() {
   const { walletAddress } = useWeb3();
   const { totalDepositedUSD, totalBorrowedUSD } = useTotalsUsd();
   const healthFactor = useHealthFactor();
+  const { breakpoints } = useTheme();
+  const isMobile = useMediaQuery(breakpoints.down('sm'));
 
   const itemsInfo: ItemInfoProps[] = useMemo((): ItemInfoProps[] => {
     return [
@@ -50,14 +52,17 @@ function DashboardHeader() {
       bgcolor="components.bg"
       justifyContent={'space-between'}
       boxShadow={'0px 4px 12px rgba(175, 177, 182, 0.2)'}
+      container
     >
-      <Box>
+      <Grid item>
         <HeaderInfo itemsInfo={itemsInfo} title="Dashboard" shadow={false} />
-      </Box>
-      <Box display="flex" marginRight={2}>
-        {!totalDepositedUSD.isZero() && <AssetsDistributionPieChart type="deposit" />}
-        {!totalBorrowedUSD.isZero() && <AssetsDistributionPieChart type="borrow" />}
-      </Box>
+      </Grid>
+      {!isMobile && (
+        <Grid item display="flex" marginRight={2}>
+          {!totalDepositedUSD.isZero() && <AssetsDistributionPieChart type="deposit" />}
+          {!totalBorrowedUSD.isZero() && <AssetsDistributionPieChart type="borrow" />}
+        </Grid>
+      )}
     </Grid>
   );
 }
