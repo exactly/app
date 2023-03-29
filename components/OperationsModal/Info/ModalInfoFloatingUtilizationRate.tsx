@@ -9,7 +9,7 @@ import useAccountData from 'hooks/useAccountData';
 import { toPercentage } from 'utils/utils';
 import UtilizationRateWithAreaChart from 'components/charts/UtilizationRateWithAreaChart';
 import { Box } from '@mui/material';
-import interestRateCurve from 'utils/interestRateCurve';
+import useFloatingRate from 'hooks/useFloatingRate';
 
 type Props = {
   qty: string;
@@ -20,9 +20,10 @@ type Props = {
 
 function ModalInfoFloatingUtilizationRate({ qty, symbol, operation, variant = 'column' }: Props) {
   const { marketAccount } = useAccountData(symbol);
+  const rate = useFloatingRate(operation, symbol, qty);
 
-  const [from, to, rawFrom, rawTo, floatingRate] = useMemo(() => {
-    if (!marketAccount) return [undefined, undefined, undefined, undefined, undefined];
+  const [from, to, rawFrom, rawTo] = useMemo(() => {
+    if (!marketAccount) return [];
     const { totalFloatingDepositAssets, totalFloatingBorrowAssets, decimals } = marketAccount;
     try {
       let deposited = totalFloatingDepositAssets ?? Zero;
@@ -49,20 +50,12 @@ function ModalInfoFloatingUtilizationRate({ qty, symbol, operation, variant = 'c
       }
 
       const t = borrowed.mul(decimalWAD).div(deposited);
-
-      const { interestRateModel } = marketAccount;
-      const { A, B, UMax } = {
-        A: interestRateModel.floatingCurveA,
-        B: interestRateModel.floatingCurveB,
-        UMax: interestRateModel.floatingMaxUtilization,
-      };
-      const curve = interestRateCurve(Number(A) / 1e18, Number(B) / 1e18, Number(UMax) / 1e18);
       const fromUtilization = Number(formatFixed(f, decimals));
       const toUtilization = Number(formatFixed(t, decimals));
-      const rate = curve(toUtilization);
-      return [toPercentage(fromUtilization), toPercentage(toUtilization), fromUtilization, toUtilization, rate];
+
+      return [toPercentage(fromUtilization), toPercentage(toUtilization), fromUtilization, toUtilization];
     } catch {
-      return [undefined, undefined];
+      return [];
     }
   }, [marketAccount, qty, operation]);
 
@@ -79,7 +72,7 @@ function ModalInfoFloatingUtilizationRate({ qty, symbol, operation, variant = 'c
             symbol={symbol}
             from={rawFrom}
             to={rawTo}
-            floatingRate={floatingRate}
+            floatingRate={rate}
           />
         </Box>
       )}

@@ -10,5 +10,5 @@ export function inverseInterestRateCurve(a: BigNumber, b: BigNumber, uMax: BigNu
 }
 
 export default function interestRateCurve(a: number, b: number, uMax: number): InterestRateCurve {
-  return (u: number) => a / (uMax - u) + b;
+  return (u: number) => (uMax >= u ? a / (uMax - u) + b : Infinity);
 }

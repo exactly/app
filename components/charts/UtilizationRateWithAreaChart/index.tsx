@@ -173,7 +173,7 @@ function UtilizationRateWithAreaChart({ type = 'fixed', operation, symbol, from,
                         fontSize="12px"
                         color={palette.operation[type === 'fixed' ? 'variable' : 'fixed']}
                       >
-                        Your APR: {toPercentage(currentAPR)}
+                        {`${fixedRate ? 'Your APR:' : 'Current Variable APR:'} ${toPercentage(currentAPR)}`}
                       </Typography>
                     )
                   }
@@ -200,7 +200,7 @@ function UtilizationRateWithAreaChart({ type = 'fixed', operation, symbol, from,
                 yAxisId="yaxis"
                 stroke={palette.operation[type === 'fixed' ? 'variable' : 'fixed']}
                 label={{
-                  value: `Your APR: ${toPercentage(currentAPR)}`,
+                  value: `${fixedRate ? 'Your APR:' : 'Current Variable APR:'} ${toPercentage(currentAPR)}`,
                   position: 'insideBottomRight',
                   style: { ...label, fontSize: 10, fill: palette.operation[type === 'fixed' ? 'variable' : 'fixed'] },
                 }}
@@ -274,7 +274,7 @@ const CustomDot = ({
   utilizationToHighlight?: number;
 }) => {
   if (
-    (aprToHighlight && payload?.apr === aprToHighlight) ||
+    (!isNaN(cy) && !isNaN(cx) && aprToHighlight && payload?.apr === aprToHighlight) ||
     (utilizationToHighlight && payload?.utilization === utilizationToHighlight)
   ) {
     return <circle cx={cx} cy={cy} r={2} stroke={color} strokeWidth={1.5} fill={color} />;

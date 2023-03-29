@@ -10,7 +10,7 @@ import { Grid } from '@mui/material';
 import { ModalBox, ModalBoxCell, ModalBoxRow } from 'components/common/modal/ModalBox';
 import AssetInput from 'components/OperationsModal/AssetInput';
 import DateSelector from 'components/OperationsModal/DateSelector';
-import ModalInfoFixedAPR from 'components/OperationsModal/Info/ModalInfoFixedAPR';
+import ModalInfoAPR from 'components/OperationsModal/Info/ModalInfoAPR';
 import ModalInfoHealthFactor from 'components/OperationsModal/Info/ModalInfoHealthFactor';
 import { useModalStatus } from 'contexts/ModalStatusContext';
 import ModalInfoFixedUtilizationRate from 'components/OperationsModal/Info/ModalInfoFixedUtilizationRate';
@@ -81,7 +81,7 @@ const BorrowAtMaturity: FC = () => {
               <DateSelector />
             </ModalBoxCell>
             <ModalBoxCell>
-              <ModalInfoFixedAPR fixedAPR={toPercentage(Number(fixedRate) / 1e18)} />
+              <ModalInfoAPR apr={toPercentage(Number(fixedRate) / 1e18)} />
             </ModalBoxCell>
           </ModalBoxRow>
           <ModalBoxRow>
