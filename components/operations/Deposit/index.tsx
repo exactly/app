@@ -19,6 +19,9 @@ import ModalInfoTotalDeposits from 'components/OperationsModal/Info/ModalInfoTot
 import ModalInfoFloatingUtilizationRate from 'components/OperationsModal/Info/ModalInfoFloatingUtilizationRate';
 import useDeposit from 'hooks/useDeposit';
 import ModalRewards from 'components/common/modal/ModalRewards';
+import useFloatingPoolAPR from 'hooks/useFloatingPoolAPR';
+import { toPercentage } from 'utils/utils';
+import ModalInfoAPR from 'components/OperationsModal/Info/ModalInfoAPR';
 
 const Deposit: FC = () => {
   const { operation } = useModalStatus();
@@ -29,6 +32,7 @@ const Deposit: FC = () => {
   const walletBalance = useBalance(symbol, assetContract);
 
   const { isLoading: previewIsLoading } = usePreviewTx({ qty, needsApproval, previewGasCost });
+  const { depositAPR, loading } = useFloatingPoolAPR(symbol, qty, 'deposit');
 
   if (tx) return <ModalGif tx={tx} tryAgain={deposit} />;
 
@@ -52,7 +56,12 @@ const Deposit: FC = () => {
               <ModalInfoHealthFactor qty={qty} symbol={symbol} operation={operation} />
             </ModalBoxCell>
             <ModalBoxCell divisor>
-              <ModalInfoBorrowLimit qty={qty} symbol={symbol} operation={operation} />
+              <ModalInfoAPR
+                label="Current Variable APR"
+                apr={loading ? undefined : toPercentage(depositAPR)}
+                withIcon
+                symbol={symbol}
+              />
             </ModalBoxCell>
           </ModalBoxRow>
         </ModalBox>
@@ -62,6 +71,7 @@ const Deposit: FC = () => {
         {errorData?.component !== 'gas' && <ModalTxCost gasCost={gasCost} />}
         <ModalRewards symbol={symbol} operation="deposit" />
         <ModalAdvancedSettings>
+          <ModalInfoBorrowLimit qty={qty} symbol={symbol} operation={operation} variant="row" />
           <ModalInfoTotalDeposits qty={qty} symbol={symbol} operation="deposit" variant="row" />
           <ModalInfoFloatingUtilizationRate qty={qty} symbol={symbol} operation="deposit" variant="row" />
         </ModalAdvancedSettings>

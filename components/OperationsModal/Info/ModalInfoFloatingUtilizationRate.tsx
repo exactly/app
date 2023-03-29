@@ -9,7 +9,7 @@ import useAccountData from 'hooks/useAccountData';
 import { toPercentage } from 'utils/utils';
 import UtilizationRateWithAreaChart from 'components/charts/UtilizationRateWithAreaChart';
 import { Box } from '@mui/material';
-import useFloatingRate from 'hooks/useFloatingRate';
+import useFloatingPoolAPR from 'hooks/useFloatingPoolAPR';
 
 type Props = {
   qty: string;
@@ -20,7 +20,7 @@ type Props = {
 
 function ModalInfoFloatingUtilizationRate({ qty, symbol, operation, variant = 'column' }: Props) {
   const { marketAccount } = useAccountData(symbol);
-  const rate = useFloatingRate(operation, symbol, qty);
+  const { borrowAPR } = useFloatingPoolAPR(symbol, qty, 'borrow');
 
   const [from, to, rawFrom, rawTo] = useMemo(() => {
     if (!marketAccount) return [];
@@ -72,7 +72,7 @@ function ModalInfoFloatingUtilizationRate({ qty, symbol, operation, variant = 'c
             symbol={symbol}
             from={rawFrom}
             to={rawTo}
-            floatingRate={rate}
+            floatingRate={operation === 'borrow' ? borrowAPR : undefined}
           />
         </Box>
       )}

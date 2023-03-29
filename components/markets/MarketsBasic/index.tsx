@@ -36,7 +36,7 @@ const MarketsBasic: FC = () => {
     depositAPR: floatingDepositAPR,
     borrowAPR: floatingBorrowAPR,
     loading: loadingFloatingOption,
-  } = useFloatingPoolAPR(symbol);
+  } = useFloatingPoolAPR(symbol, qty);
 
   const { rates } = useRewards();
   const isDeposit = useMemo(() => operation === 'deposit', [operation]);
