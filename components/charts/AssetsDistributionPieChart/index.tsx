@@ -39,10 +39,11 @@ const AssetsDistributionPieChart: FC<Props> = ({ type }) => {
     return (
       <TooltipChart
         {...props}
-        formatter={(value) => `$${formatNumber(value as number, 'USD', true)}`}
+        formatter={() => ''}
+        opacity={0.8}
         additionalInfo={
-          <Typography variant="h6" fontSize="12px" color={palette.mode === 'light' ? 'black' : 'white'}>
-            {payload[0].payload.percentage} of your {type === 'deposit' ? 'deposits' : 'borrows'}
+          <Typography variant="h6" fontSize="12px" color={palette.mode === 'light' ? '#000' : '#fff'}>
+            ${formatNumber(payload[0].value as number, 'USD', true)} ({payload[0].payload.percentage})
           </Typography>
         }
       />
@@ -50,9 +51,9 @@ const AssetsDistributionPieChart: FC<Props> = ({ type }) => {
   };
 
   return (
-    <Grid item display="flex" flexDirection="column" p={'24px'} minHeight={'155px'}>
-      <Typography variant="h6" fontSize="14px" textAlign={'center'}>
-        {type === 'deposit' ? 'Deposits' : 'Borrows'} Distribution
+    <Grid item display="flex" flexDirection="column" p={'24px'} minWidth={'200px'} minHeight={'155px'}>
+      <Typography variant="h6" fontSize="14px">
+        Your {type === 'deposit' ? 'Deposits' : 'Borrows'}
       </Typography>
 
       <ResponsiveContainer width="100%" height="100%">
@@ -76,8 +77,16 @@ const AssetsDistributionPieChart: FC<Props> = ({ type }) => {
                 />
               ))}
           </Pie>
-          <Legend iconSize={7} iconType="circle" layout="vertical" verticalAlign="middle" wrapperStyle={style} />
+          <Legend
+            formatter={(value) => (value === 'WETH' ? 'ETH' : value)}
+            iconSize={7}
+            iconType="circle"
+            layout="vertical"
+            verticalAlign="middle"
+            wrapperStyle={style}
+          />
           <Tooltip
+            allowEscapeViewBox={{ x: true, y: true }}
             content={(props) => <CustomTooltip {...(props as CustomProps)} />}
             wrapperStyle={{ width: '170px' }}
           />
