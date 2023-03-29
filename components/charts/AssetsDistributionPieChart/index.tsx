@@ -1,4 +1,4 @@
-import { Box, Typography, useTheme } from '@mui/material';
+import { Grid, Typography, useTheme } from '@mui/material';
 import React, { FC } from 'react';
 import { PieChart, Pie, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import useAssetsComposition from 'hooks/useAssetsComposition';
@@ -14,9 +14,7 @@ const AssetsDistributionPieChart: FC<Props> = ({ type }) => {
   const { palette } = useTheme();
 
   const style = {
-    top: '50%',
-    right: 0,
-    transform: 'translate(0, -50%)',
+    right: -40,
     lineHeight: '16px',
     fontSize: '12px',
   };
@@ -52,13 +50,12 @@ const AssetsDistributionPieChart: FC<Props> = ({ type }) => {
   };
 
   return (
-    <Box display="flex" flexDirection="column">
-      <Box>
-        <Typography variant="h6" fontSize="14px" textAlign={'center'}>
-          {type} distribution
-        </Typography>
-      </Box>
-      <ResponsiveContainer minWidth={'250px'}>
+    <Grid item display="flex" flexDirection="column" p={'24px'}>
+      <Typography variant="h6" fontSize="14px" textAlign={'center'}>
+        {type === 'deposit' ? 'Deposits' : 'Borrows'} Distribution
+      </Typography>
+
+      <ResponsiveContainer width="100%" height="100%">
         <PieChart>
           <Pie
             dataKey="usdValue"
@@ -69,10 +66,13 @@ const AssetsDistributionPieChart: FC<Props> = ({ type }) => {
             endAngle={450}
           />
           <Legend iconSize={7} iconType="circle" layout="vertical" verticalAlign="middle" wrapperStyle={style} />
-          <Tooltip content={(props) => <CustomTooltip {...(props as CustomProps)} />} />
+          <Tooltip
+            content={(props) => <CustomTooltip {...(props as CustomProps)} />}
+            wrapperStyle={{ width: '170px' }}
+          />
         </PieChart>
       </ResponsiveContainer>
-    </Box>
+    </Grid>
   );
 };
 
