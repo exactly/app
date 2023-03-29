@@ -1,8 +1,9 @@
-import { Box, Typography } from '@mui/material';
+import { Box, Typography, useTheme } from '@mui/material';
 import React, { FC } from 'react';
 import { PieChart, Pie, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import useAssetsComposition from 'hooks/useAssetsComposition';
 import TooltipChart from '../TooltipChart';
+import formatNumber from 'utils/formatNumber';
 
 type Props = {
   type: 'deposit' | 'borrow';
@@ -10,6 +11,7 @@ type Props = {
 
 const AssetsDistributionPieChart: FC<Props> = ({ type }) => {
   const { depositsComposition, borrowsComposition } = useAssetsComposition();
+  const { palette } = useTheme();
 
   const style = {
     top: '50%',
@@ -18,6 +20,37 @@ const AssetsDistributionPieChart: FC<Props> = ({ type }) => {
     lineHeight: '16px',
     fontSize: '12px',
   };
+
+  type Entry = {
+    payload: Record<string, string>;
+    dataKey: string;
+    name: string;
+    value: number;
+    color: string;
+  };
+
+  type CustomProps = {
+    active?: boolean;
+    payload?: Entry[];
+  };
+
+  const CustomTooltip = (props: CustomProps) => {
+    const { active, payload } = props;
+    if (!active || !payload || !payload.length) return null;
+
+    return (
+      <TooltipChart
+        {...props}
+        formatter={(value) => `$${formatNumber(value as number, 'USD', true)}`}
+        additionalInfo={
+          <Typography variant="h6" fontSize="12px" color={palette.mode === 'light' ? 'black' : 'white'}>
+            {payload[0].payload.percentage} of your {type === 'deposit' ? 'deposits' : 'borrows'}
+          </Typography>
+        }
+      />
+    );
+  };
+
   return (
     <Box display="flex" flexDirection="column">
       <Box>
@@ -36,7 +69,7 @@ const AssetsDistributionPieChart: FC<Props> = ({ type }) => {
             endAngle={450}
           />
           <Legend iconSize={7} iconType="circle" layout="vertical" verticalAlign="middle" wrapperStyle={style} />
-          <Tooltip content={<TooltipChart />} />
+          <Tooltip content={(props) => <CustomTooltip {...(props as CustomProps)} />} />
         </PieChart>
       </ResponsiveContainer>
     </Box>
