@@ -18,7 +18,7 @@ import ModalInfoTotalDeposits from 'components/OperationsModal/Info/ModalInfoTot
 import ModalAlert from 'components/common/modal/ModalAlert';
 import ModalSubmit from 'components/common/modal/ModalSubmit';
 import DateSelector from 'components/OperationsModal/DateSelector';
-import ModalInfoFixedAPR from 'components/OperationsModal/Info/ModalInfoFixedAPR';
+import ModalInfoAPR from 'components/OperationsModal/Info/ModalInfoAPR';
 import ModalInfoFixedUtilizationRate from 'components/OperationsModal/Info/ModalInfoFixedUtilizationRate';
 import ModalInfo from 'components/common/modal/ModalInfo';
 import formatNumber from 'utils/formatNumber';
@@ -74,7 +74,7 @@ const DepositAtMaturity: FC = () => {
               <DateSelector />
             </ModalBoxCell>
             <ModalBoxCell>
-              <ModalInfoFixedAPR fixedAPR={toPercentage(Number(fixedRate) / 1e18)} />
+              <ModalInfoAPR apr={toPercentage(Number(fixedRate) / 1e18)} />
             </ModalBoxCell>
           </ModalBoxRow>
           <ModalBoxRow>

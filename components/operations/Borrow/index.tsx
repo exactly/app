@@ -16,10 +16,14 @@ import ModalSubmit from 'components/common/modal/ModalSubmit';
 import useAccountData from 'hooks/useAccountData';
 import useBorrow from 'hooks/useBorrow';
 import ModalRewards from 'components/common/modal/ModalRewards';
+import ModalInfoAPR from 'components/OperationsModal/Info/ModalInfoAPR';
+import { toPercentage } from 'utils/utils';
+import useFloatingRate from 'hooks/useFloatingRate';
 
 const Borrow: FC = () => {
   const { operation } = useModalStatus();
   const { symbol, errorData, qty, gasCost, tx, requiresApproval } = useOperationContext();
+  const rate = useFloatingRate(operation, symbol, qty);
   const {
     isLoading,
     onMax,
@@ -57,7 +61,7 @@ const Borrow: FC = () => {
               <ModalInfoHealthFactor qty={qty} symbol={symbol} operation={operation} />
             </ModalBoxCell>
             <ModalBoxCell divisor>
-              <ModalInfoBorrowLimit qty={qty} symbol={symbol} operation={operation} />
+              <ModalInfoAPR label="Current Variable APR" apr={toPercentage(rate)} withIcon />
             </ModalBoxCell>
           </ModalBoxRow>
         </ModalBox>
@@ -67,6 +71,7 @@ const Borrow: FC = () => {
         {errorData?.component !== 'gas' && <ModalTxCost gasCost={gasCost} />}
         <ModalRewards symbol={symbol} operation="borrow" />
         <ModalAdvancedSettings>
+          <ModalInfoBorrowLimit qty={qty} symbol={symbol} operation={operation} variant="row" />
           <ModalInfoFloatingUtilizationRate qty={qty} symbol={symbol} operation="borrow" variant="row" />
         </ModalAdvancedSettings>
       </Grid>

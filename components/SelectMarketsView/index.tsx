@@ -67,7 +67,7 @@ const SelectMarketsView: FC = () => {
     <>
       <Link href={{ pathname: '/', query }} legacyBehavior>
         <Button
-          variant={currentPathname === '/' ? 'contained' : 'text'}
+          variant={currentPathname !== '/dashboard' ? 'contained' : 'text'}
           onMouseOver={openMenu}
           onMouseLeave={handleCloseHover}
           sx={{
