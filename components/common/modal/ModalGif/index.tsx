@@ -28,8 +28,8 @@ function ModalGif({ tx, tryAgain }: Props) {
   const isSuccess = useMemo(() => tx.status === 'success', [tx]);
   const isError = useMemo(() => tx.status === 'error', [tx]);
   const etherscan = useMemo(() => networkData[String(chain?.id) as keyof typeof networkData]?.etherscan, [chain]);
-  const operationName = useMemo(() => operation?.replaceAll('AtMaturity', ''), [operation]);
-  const withMaturity = useMemo(() => operation?.includes('AtMaturity'), [operation]);
+  const operationName = useMemo(() => operation.replaceAll('AtMaturity', ''), [operation]);
+  const reminder = useMemo(() => ['borrowAtMaturity', 'depositAtMaturity'].includes(operation), [operation]);
 
   return (
     <Box display="flex" minWidth="340px" minHeight="240px">
@@ -57,7 +57,7 @@ function ModalGif({ tx, tryAgain }: Props) {
             {isLoading && `${capitalize(operationName)}ing ${qty} ${formatSymbol(symbol)}`}
             {isSuccess &&
               `You ${pastParticiple(operationName)} ${qty} ${formatSymbol(symbol)}${
-                withMaturity && date ? ` until ${parseTimestamp(date)}` : ''
+                reminder && date ? ` until ${parseTimestamp(date)}` : ''
               }`}
             {isError && 'Something went wrong'}
           </Typography>
@@ -78,7 +78,7 @@ function ModalGif({ tx, tryAgain }: Props) {
             </Button>
           </Box>
         </Box>
-        {isSuccess && withMaturity && date && <Reminder operationName={operationName} maturity={date} />}
+        {isSuccess && reminder && date && <Reminder operationName={operationName} maturity={date} />}
       </Box>
     </Box>
   );
