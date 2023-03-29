@@ -1,21 +1,35 @@
 import React from 'react';
-import { Typography, Skeleton } from '@mui/material';
+import { Typography, Skeleton, Box } from '@mui/material';
 import PercentIcon from '@mui/icons-material/Percent';
 import ModalInfo from 'components/common/modal/ModalInfo';
+import Image from 'next/image';
+import formatSymbol from 'utils/formatSymbol';
 
 type Props = {
   apr?: string;
   label?: string;
   withIcon?: boolean;
+  symbol?: string;
 };
 
-function ModalInfoAPR({ apr, label, withIcon }: Props) {
+function ModalInfoAPR({ apr, label, withIcon, symbol }: Props) {
   return (
     <ModalInfo label={label || 'Your APR'} variant="column" icon={withIcon ? PercentIcon : undefined}>
       {apr ? (
-        <Typography fontWeight={600} fontSize={19} color="grey.900">
-          {apr}
-        </Typography>
+        <Box display="flex" gap={1}>
+          <Typography fontWeight={600} fontSize={19} color="grey.900">
+            {apr}
+          </Typography>
+          {symbol && (
+            <Image
+              src={`/img/assets/${symbol}.svg`}
+              alt={formatSymbol(symbol)}
+              width={20}
+              height={20}
+              style={{ maxWidth: '100%', height: 'auto' }}
+            />
+          )}
+        </Box>
       ) : (
         <Skeleton width={80} />
       )}

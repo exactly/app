@@ -81,7 +81,7 @@ const BorrowAtMaturity: FC = () => {
               <DateSelector />
             </ModalBoxCell>
             <ModalBoxCell>
-              <ModalInfoAPR apr={toPercentage(Number(fixedRate) / 1e18)} />
+              <ModalInfoAPR apr={toPercentage(Number(fixedRate) / 1e18)} symbol={symbol} />
             </ModalBoxCell>
           </ModalBoxRow>
           <ModalBoxRow>
