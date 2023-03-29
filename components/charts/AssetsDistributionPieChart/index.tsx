@@ -40,6 +40,7 @@ const AssetsDistributionPieChart: FC<Props> = ({ type }) => {
       <TooltipChart
         {...props}
         formatter={() => ''}
+        formatterName={(name) => (name === 'WETH' ? 'ETH' : name)}
         opacity={0.8}
         additionalInfo={
           <Typography variant="h6" fontSize="12px" color={palette.mode === 'light' ? '#000' : '#fff'}>
