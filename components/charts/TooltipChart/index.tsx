@@ -14,6 +14,7 @@ type Props = {
   label?: Date;
   labelFormatter?: (value: Date | undefined) => ReactNode;
   formatter?: (value: number | undefined) => ReactNode;
+  formatterName?: (name: string | undefined) => ReactNode;
   itemSorter?: (a: Entry, b: Entry) => number;
   ignoreKeys?: string[];
   additionalInfo?: ReactNode;
@@ -25,6 +26,7 @@ function TooltipChart({
   payload,
   label,
   labelFormatter,
+  formatterName,
   formatter,
   itemSorter,
   ignoreKeys,
@@ -54,7 +56,7 @@ function TooltipChart({
         .filter(({ dataKey }) => !ignoreKeys || !ignoreKeys.includes(dataKey))
         .map(({ dataKey, name, value, color }) => (
           <Typography key={dataKey} variant="h6" fontSize="12px" color={color}>
-            {`${name}: ${formatter ? formatter(value) : value}`}
+            {`${formatterName ? formatterName(name) : name + ':'} ${formatter ? formatter(value) : value}`}
           </Typography>
         ))}
       {additionalInfo}
