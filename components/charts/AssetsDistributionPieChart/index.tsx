@@ -1,6 +1,6 @@
 import { Grid, Typography, useTheme } from '@mui/material';
 import React, { FC } from 'react';
-import { PieChart, Pie, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { PieChart, Pie, Tooltip, Legend, ResponsiveContainer, Cell } from 'recharts';
 import useAssetsComposition from 'hooks/useAssetsComposition';
 import TooltipChart from '../TooltipChart';
 import formatNumber from 'utils/formatNumber';
@@ -14,7 +14,7 @@ const AssetsDistributionPieChart: FC<Props> = ({ type }) => {
   const { palette } = useTheme();
 
   const style = {
-    right: -40,
+    right: -15,
     lineHeight: '16px',
     fontSize: '12px',
   };
@@ -50,7 +50,7 @@ const AssetsDistributionPieChart: FC<Props> = ({ type }) => {
   };
 
   return (
-    <Grid item display="flex" flexDirection="column" p={'24px'}>
+    <Grid item display="flex" flexDirection="column" p={'24px'} minHeight={'155px'}>
       <Typography variant="h6" fontSize="14px" textAlign={'center'}>
         {type === 'deposit' ? 'Deposits' : 'Borrows'} Distribution
       </Typography>
@@ -62,9 +62,20 @@ const AssetsDistributionPieChart: FC<Props> = ({ type }) => {
             data={type === 'deposit' ? depositsComposition : borrowsComposition}
             innerRadius={20}
             outerRadius={40}
+            cx={40}
+            cy={38}
             startAngle={90}
             endAngle={450}
-          />
+          >
+            {depositsComposition &&
+              depositsComposition.map((entry, index) => (
+                <Cell
+                  key={entry.name}
+                  fill={palette.colors[index % palette.colors.length]}
+                  stroke={palette.colors[index % palette.colors.length]}
+                />
+              ))}
+          </Pie>
           <Legend iconSize={7} iconType="circle" layout="vertical" verticalAlign="middle" wrapperStyle={style} />
           <Tooltip
             content={(props) => <CustomTooltip {...(props as CustomProps)} />}
