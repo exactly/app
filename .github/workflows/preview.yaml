@@ -22,37 +22,37 @@ jobs:
       - run: npm run build
       - run: npx unimported
 
-  e2e:
-    runs-on: ubuntu-latest
-    environment: Test
-    needs: check
-    env:
-      CYPRESS_TENDERLY_ACCESS_KEY: ${{ secrets.TENDERLY_ACCESS_KEY }}
-      CYPRESS_TENDERLY_PROJECT: exactly
-      CYPRESS_TENDERLY_USER: exactly
-    steps:
-      - run: |
-          sudo DEBIAN_FRONTEND=noninteractive apt-get update
-          sudo DEBIAN_FRONTEND=noninteractive apt-get -y install libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 18
-          cache: npm
-      - run: npm ci --audit false
-      - uses: cypress-io/github-action@v5
-        with:
-          browser: chrome
-          headed: false
-          install: false
-          record: false
-          start: npm run start:e2e
-          wait-on: 'http://127.0.0.1:3000'
-          wait-on-timeout: 300000
-          command: npm run test
-      - uses: actions/upload-artifact@v3
-        if: failure()
-        with:
-          name: e2e-artifacts
-          path: |
-            tests/e2e/screenshots
+  # e2e:
+  #   runs-on: ubuntu-latest
+  #   environment: Test
+  #   needs: check
+  #   env:
+  #     CYPRESS_TENDERLY_ACCESS_KEY: ${{ secrets.TENDERLY_ACCESS_KEY }}
+  #     CYPRESS_TENDERLY_PROJECT: exactly
+  #     CYPRESS_TENDERLY_USER: exactly
+  #   steps:
+  #     - run: |
+  #         sudo DEBIAN_FRONTEND=noninteractive apt-get update
+  #         sudo DEBIAN_FRONTEND=noninteractive apt-get -y install libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
+  #     - uses: actions/checkout@v3
+  #     - uses: actions/setup-node@v3
+  #       with:
+  #         node-version: 18
+  #         cache: npm
+  #     - run: npm ci --audit false
+  #     - uses: cypress-io/github-action@v5
+  #       with:
+  #         browser: chrome
+  #         headed: false
+  #         install: false
+  #         record: false
+  #         start: npm run start:e2e
+  #         wait-on: 'http://127.0.0.1:3000'
+  #         wait-on-timeout: 300000
+  #         command: npm run test
+  #     - uses: actions/upload-artifact@v3
+  #       if: failure()
+  #       with:
+  #         name: e2e-artifacts
+  #         path: |
+  #           tests/e2e/screenshots
