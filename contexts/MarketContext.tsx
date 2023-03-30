@@ -1,3 +1,5 @@
+'use client';
+
 import React, { type FC, useMemo, createContext, useEffect, useState, type PropsWithChildren } from 'react';
 import dayjs from 'dayjs';
 import { useWeb3 } from 'hooks/useWeb3';

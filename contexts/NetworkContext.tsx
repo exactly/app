@@ -1,8 +1,10 @@
-import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
+'use client';
+
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { FC, PropsWithChildren } from 'react';
 import { Chain, useNetwork } from 'wagmi';
 import * as wagmiChains from 'wagmi/chains';
-import Router, { useRouter } from 'next/router';
+import { usePathname, useSearchParams, useRouter } from 'next/navigation';
 
 import { supportedChains, defaultChain } from 'utils/client';
 import usePreviousValue from 'hooks/usePreviousValue';
@@ -20,9 +22,11 @@ type ContextValues = {
 const NetworkContext = createContext<ContextValues | null>(null);
 
 export const NetworkContextProvider: FC<PropsWithChildren> = ({ children }) => {
-  const { pathname, isReady } = useRouter();
+  const pathname = usePathname();
+  const query = useSearchParams();
+  const router = useRouter();
   const { chain } = useNetwork();
-  const first = useRef(true);
+  const [first, setFirst] = useState(true);
   const [displayNetwork, setDisplayNetwork] = useState<Chain>(() => {
     const n = getQueryParam('n');
     const queryChain = typeof n === 'string' ? wagmiChains[n as keyof typeof wagmiChains] : undefined;
@@ -35,31 +39,33 @@ export const NetworkContextProvider: FC<PropsWithChildren> = ({ children }) => {
   const previousChain = usePreviousValue(chain);
 
   useEffect(() => {
-    if (first.current) {
-      first.current = false;
-      return;
+    if (first) {
+      return setFirst(false);
     }
 
     if (previousChain && chain && isSupported(chain.id) && previousChain.id !== chain.id) {
       return setDisplayNetwork(chain);
     }
-  }, [previousChain, chain, displayNetwork]);
+  }, [previousChain, chain, displayNetwork, first]);
 
   useEffect(() => {
-    if (first.current || !isReady) {
+    if (first) {
       return;
     }
 
     const network = { [wagmiChains.mainnet.id]: 'mainnet' }[displayNetwork.id] ?? displayNetwork.network;
-    Router.replace({ query: { ...Router.query, n: network } });
-  }, [displayNetwork, pathname, isReady]);
+    const searchParams = new URLSearchParams(query);
+    searchParams.set('n', network);
+
+    router.replace(pathname + '?' + searchParams.toString());
+  }, [displayNetwork, pathname, query, router, first]);
 
   const value: ContextValues = {
     displayNetwork,
     setDisplayNetwork,
   };
 
-  return <NetworkContext.Provider value={value}>{first.current ? null : children}</NetworkContext.Provider>;
+  return <NetworkContext.Provider value={value}>{first ? null : children}</NetworkContext.Provider>;
 };
 
 export function useNetworkContext() {

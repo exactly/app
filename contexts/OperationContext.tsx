@@ -1,3 +1,5 @@
+'use client';
+
 import { BigNumber, parseFixed } from '@ethersproject/bignumber';
 import useAccountData from 'hooks/useAccountData';
 import useDelayedEffect from 'hooks/useDelayedEffect';
@@ -6,7 +8,7 @@ import useETHRouter from 'hooks/useETHRouter';
 import useHandleOperationError from 'hooks/useHandleOperationError';
 import useMarket from 'hooks/useMarket';
 import { useWeb3 } from 'hooks/useWeb3';
-import { useRouter } from 'next/router';
+import { usePathname } from 'next/navigation';
 import React, {
   createContext,
   type PropsWithChildren,
@@ -63,7 +65,8 @@ const OperationContext = createContext<ContextValues | null>(null);
 const DEFAULT_SLIPPAGE = (numbers.slippage * 100).toFixed(2);
 
 export const OperationContextProvider: FC<PropsWithChildren> = ({ children }) => {
-  const { pathname } = useRouter();
+  const pathname = usePathname();
+
   const { chain } = useWeb3();
   const { marketSymbol = 'DAI', view } = useContext(MarketContext);
   const { open, operation } = useModalStatus();

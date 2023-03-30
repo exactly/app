@@ -1,21 +1,23 @@
 import { useMemo } from 'react';
+import { useStaticContext } from 'contexts/StaticContext';
 import useAccountData from './useAccountData';
-
-const def = ['USDC', 'WETH'];
 
 export default (): string[] => {
   const { accountData } = useAccountData();
+  const { assets } = useStaticContext();
 
-  if (accountData) {
-    accountData.sort((a, b) => {
-      return Number(
-        b.totalFloatingDepositAssets
-          .mul(b.usdPrice)
-          .div(10n ** BigInt(b.decimals))
-          .sub(a.totalFloatingDepositAssets.mul(a.usdPrice).div(10n ** BigInt(a.decimals))),
-      );
-    });
-  }
+  return useMemo<string[]>(() => {
+    if (accountData) {
+      accountData.sort((a, b) => {
+        return Number(
+          b.totalFloatingDepositAssets
+            .mul(b.usdPrice)
+            .div(10n ** BigInt(b.decimals))
+            .sub(a.totalFloatingDepositAssets.mul(a.usdPrice).div(10n ** BigInt(a.decimals))),
+        );
+      });
+    }
 
-  return useMemo<string[]>(() => (accountData ? accountData.map((m) => m.assetSymbol) : def), [accountData]);
+    return accountData?.map(({ assetSymbol }) => assetSymbol) ?? assets;
+  }, [accountData, assets]);
 };

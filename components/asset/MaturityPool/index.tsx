@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useMemo, type FC } from 'react';
 import { Zero, WeiPerEther, MaxUint256 } from '@ethersproject/constants';
 import { formatFixed } from '@ethersproject/bignumber';

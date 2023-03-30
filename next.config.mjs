@@ -35,4 +35,6 @@ export default withSentryConfig({
   ],
 
   images: { unoptimized: true },
+
+  experimental: { appDir: true },
 });

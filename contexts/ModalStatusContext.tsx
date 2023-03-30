@@ -1,3 +1,5 @@
+'use client';
+
 import React, { createContext, useContext, useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import type { FC, PropsWithChildren } from 'react';
 import OperationsModal from 'components/OperationsModal';

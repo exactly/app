@@ -1,3 +1,5 @@
+'use client';
+
 import { createTheme, Shadows } from '@mui/material/styles';
 
 export const globals = {
@@ -131,8 +133,8 @@ export const lightTheme = createTheme({
     },
   },
   typography: {
-    fontFamily: 'Inter',
-    fontFamilyMonospaced: 'IBM Plex Mono',
+    fontFamily: 'var(--inter-font)',
+    fontFamilyMonospaced: 'var(--ibm-plex-mono-font)',
     h1: {
       fontSize: 34,
       fontWeight: 600,
@@ -154,15 +156,15 @@ export const lightTheme = createTheme({
       fontWeight: 500,
       fontSize: 14,
       color: '#9a9a9a',
-      fontFamily: 'IBM Plex Mono',
+      fontFamily: 'var(--ibm-plex-mono-font)',
     },
     subtitle2: {
       fontSize: 12,
-      fontFamily: 'IBM Plex Mono',
+      fontFamily: 'var(--ibm-plex-mono-font)',
     },
     caption: {
       color: '#9a9a9a',
-      fontFamily: 'IBM Plex Mono',
+      fontFamily: 'var(--ibm-plex-mono-font)',
     },
     modalRow: {
       color: '#303336',
@@ -185,7 +187,7 @@ export const lightTheme = createTheme({
       fontWeight: 700,
     },
     chip: {
-      fontFamily: 'IBM Plex Mono',
+      fontFamily: 'var(--ibm-plex-mono-font)',
       fontSize: 10,
       fontWeight: 700,
     },
@@ -311,8 +313,8 @@ export const darkTheme = createTheme({
     },
   },
   typography: {
-    fontFamily: 'Inter',
-    fontFamilyMonospaced: 'IBM Plex Mono',
+    fontFamily: 'var(--inter-font)',
+    fontFamilyMonospaced: 'var(--ibm-plex-mono-font)',
     h1: {
       fontSize: 34,
       fontWeight: 600,
@@ -334,15 +336,15 @@ export const darkTheme = createTheme({
       fontWeight: 500,
       fontSize: 14,
       color: '#E3E5E8',
-      fontFamily: 'IBM Plex Mono',
+      fontFamily: 'var(--ibm-plex-mono-font)',
     },
     subtitle2: {
       fontSize: 12,
-      fontFamily: 'IBM Plex Mono',
+      fontFamily: 'var(--ibm-plex-mono-font)',
     },
     caption: {
       color: '#E3E5E8',
-      fontFamily: 'IBM Plex Mono',
+      fontFamily: 'var(--ibm-plex-mono-font)',
     },
     modalRow: {
       color: '#F9FAFB',
@@ -365,7 +367,7 @@ export const darkTheme = createTheme({
       fontWeight: 700,
     },
     chip: {
-      fontFamily: 'IBM Plex Mono',
+      fontFamily: 'var(--ibm-plex-mono-font)',
       fontSize: 10,
       fontWeight: 700,
     },

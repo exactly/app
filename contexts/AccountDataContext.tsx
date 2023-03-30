@@ -1,3 +1,5 @@
+'use client';
+
 import React, { createContext, useCallback, useEffect, useState, startTransition } from 'react';
 import type { FC, PropsWithChildren } from 'react';
 import { AddressZero } from '@ethersproject/constants';

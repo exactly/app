@@ -1,5 +1,7 @@
-import { Box, Typography, useTheme } from '@mui/material';
+'use client';
+
 import React, { FC, useCallback, useMemo, useState } from 'react';
+import { Box, Typography, useTheme } from '@mui/material';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import updateLocale from 'dayjs/plugin/updateLocale';

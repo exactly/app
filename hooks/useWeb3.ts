@@ -1,3 +1,5 @@
+'use client';
+
 import { useMemo, useCallback } from 'react';
 import { Chain, useAccount, useConnect } from 'wagmi';
 import { useWeb3Modal } from '@web3modal/react';

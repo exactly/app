@@ -21,7 +21,7 @@ import type { WithdrawMP } from 'types/WithdrawMP';
 import { Borrow } from 'types/Borrow';
 import { Repay } from 'types/Repay';
 import useAccountData from 'hooks/useAccountData';
-import { useRouter } from 'next/router';
+import { useSearchParams } from 'next/navigation';
 
 type Props = {
   symbol: string;
@@ -33,7 +33,7 @@ type Props = {
 };
 
 function TableRowFixedPool({ symbol, valueUSD, type, maturityDate, market, decimals }: Props) {
-  const { query } = useRouter();
+  const query = useSearchParams().toString();
   const { marketAccount } = useAccountData(symbol);
   const { withdrawTxs, repayTxs, depositTxs, borrowTxs } = useFixedOperation(type, maturityDate, market);
   const [open, setOpen] = useState(false);

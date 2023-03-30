@@ -7,8 +7,8 @@ import MenuBookIcon from '@mui/icons-material/MenuBook';
 import { Divider, IconButton, Modal, Slide, Typography, useTheme } from '@mui/material';
 import { Box } from '@mui/system';
 import Image from 'next/image';
-import { useRouter } from 'next/router';
 import Link from 'next/link';
+import { usePathname, useSearchParams } from 'next/navigation';
 import Switch from 'components/Switch';
 import { MarketContext } from 'contexts/MarketContext';
 import { DiscordIcon } from 'components/Icons';
@@ -23,7 +23,8 @@ type Props = {
 function MobileMenu({ open, handleClose }: Props) {
   const { palette } = useTheme();
   const { view, setView } = useContext(MarketContext);
-  const { pathname: currentPathname, query } = useRouter();
+  const currentPathname = usePathname();
+  const query = useSearchParams().toString();
   const date = new Date();
 
   const AdvancedViewSwitch: FC = () => {
@@ -85,8 +86,8 @@ function MobileMenu({ open, handleClose }: Props) {
             </Typography>
             <Box display="flex" flexDirection="column" gap={2}>
               {headers.map(({ title, pathname, component }) => (
-                <>
-                  <Link href={{ pathname, query }} key={`mobile_tabs_${title}`} onClick={handleClose}>
+                <div key={`mobile_tabs_${title}`}>
+                  <Link href={{ pathname, query }} onClick={handleClose}>
                     <Typography
                       sx={{
                         textDecoration: currentPathname === pathname ? 'underline' : 'none',
@@ -98,7 +99,7 @@ function MobileMenu({ open, handleClose }: Props) {
                     </Typography>
                   </Link>
                   {component}
-                </>
+                </div>
               ))}
             </Box>
             <Divider sx={{ my: '12px' }} />

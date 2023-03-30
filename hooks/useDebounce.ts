@@ -1,3 +1,5 @@
+'use client';
+
 import { useEffect, useState } from 'react';
 import numbers from 'config/numbers.json';
 

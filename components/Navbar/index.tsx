@@ -1,9 +1,11 @@
+'use client';
+
 import React, { ReactNode, useCallback, useContext, useEffect, useState } from 'react';
 import { setContext, setUser } from '@sentry/nextjs';
 import { goerli, useClient } from 'wagmi';
 import DisclaimerModal from 'components/DisclaimerModal';
 import Image from 'next/image';
-import { useRouter } from 'next/router';
+import { usePathname, useSearchParams } from 'next/navigation';
 
 import { useWeb3 } from 'hooks/useWeb3';
 
@@ -39,9 +41,9 @@ const routes: {
 function Navbar() {
   const { identify } = useAnalytics();
   const { connector } = useClient();
-  const { walletAddress } = useWeb3();
-  const { pathname: currentPathname, query } = useRouter();
-  const { chain, isConnected } = useWeb3();
+  const currentPathname = usePathname();
+  const query = useSearchParams().toString();
+  const { walletAddress, chain, isConnected } = useWeb3();
 
   const { palette } = useTheme();
   const { view } = useContext(MarketContext);

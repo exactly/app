@@ -27,7 +27,7 @@ import TableHeadCell, { TableHeader } from 'components/common/TableHeadCell';
 import getLiquidTokenInfo from 'utils/getLiquidTokenInfo';
 import useRewards from 'hooks/useRewards';
 import RewardPill from 'components/markets/RewardPill';
-import { useRouter } from 'next/router';
+import { useSearchParams } from 'next/navigation';
 
 const { minAPRValue } = numbers;
 
@@ -49,7 +49,7 @@ export type TableRow = {
 };
 
 const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) => {
-  const { query } = useRouter();
+  const query = useSearchParams().toString();
   const { handleActionClick, isDisable } = useActionButton();
   const assets = useAssets();
   const { rates } = useRewards();

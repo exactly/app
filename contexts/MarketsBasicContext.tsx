@@ -1,3 +1,5 @@
+'use client';
+
 import React, { createContext, useContext, useState, useMemo, useCallback, useEffect } from 'react';
 import type { FC, PropsWithChildren } from 'react';
 import { BigNumber } from '@ethersproject/bignumber';

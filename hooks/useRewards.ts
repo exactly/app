@@ -1,3 +1,5 @@
+'use client';
+
 import { useMemo, useCallback, useState } from 'react';
 import { BigNumber } from '@ethersproject/bignumber';
 import { Zero } from '@ethersproject/constants';

@@ -1,3 +1,5 @@
+'use client';
+
 import React, { type FC, useMemo } from 'react';
 import Grid from '@mui/material/Grid';
 import Image from 'next/image';

@@ -1,8 +1,10 @@
+'use client';
+
+import { useCallback, useMemo, useState } from 'react';
 import { formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { WeiPerEther, Zero } from '@ethersproject/constants';
 import networkData from 'config/networkData.json' assert { type: 'json' };
 import { Operation } from 'contexts/ModalStatusContext';
-import { useCallback, useMemo, useState } from 'react';
 import interestRateCurve from 'utils/interestRateCurve';
 import queryRates from 'utils/queryRates';
 import useAccountData from './useAccountData';

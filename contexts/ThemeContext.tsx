@@ -1,3 +1,5 @@
+'use client';
+
 import React, { createContext, FC, PropsWithChildren, useCallback, useContext, useEffect, useState } from 'react';
 import { ThemeProvider as MUIThemeProvider } from '@mui/material/styles';
 import { lightTheme, darkTheme } from 'styles/theme';

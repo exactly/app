@@ -1,3 +1,5 @@
+'use client';
+
 import { Box, Checkbox, FormControlLabel, Typography, useTheme } from '@mui/material';
 import useHistoricalRates from 'hooks/useHistoricalRates';
 import React, { FC, useCallback, useMemo, useState } from 'react';

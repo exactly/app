@@ -1,3 +1,5 @@
+'use client';
+
 import React, { CSSProperties, useMemo, useState } from 'react';
 import { Typography, useTheme, Box } from '@mui/material';
 import { LineChart, XAxis, Tooltip, Line, ResponsiveContainer, ReferenceLine, CartesianGrid, YAxis } from 'recharts';

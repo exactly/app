@@ -1,3 +1,5 @@
+'use client';
+
 import React, { type FC, useMemo } from 'react';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber/lib';
 import { Zero } from '@ethersproject/constants/lib';
