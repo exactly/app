@@ -4,9 +4,24 @@ import { PieChart, Pie, Tooltip, Legend, ResponsiveContainer, Cell } from 'recha
 import useAssetsComposition from 'hooks/useAssetsComposition';
 import TooltipChart from '../TooltipChart';
 import formatNumber from 'utils/formatNumber';
+import formatSymbol from 'utils/formatSymbol';
 
 type Props = {
   type: 'deposit' | 'borrow';
+};
+
+type Entry = {
+  payload: Record<string, string>;
+  dataKey: string;
+  name: string;
+  value: number;
+  color: string;
+};
+
+type CustomProps = {
+  active?: boolean;
+  payload?: Entry[];
+  color?: string;
 };
 
 const AssetsDistributionPieChart: FC<Props> = ({ type }) => {
@@ -17,38 +32,6 @@ const AssetsDistributionPieChart: FC<Props> = ({ type }) => {
     right: -15,
     lineHeight: '16px',
     fontSize: '12px',
-  };
-
-  type Entry = {
-    payload: Record<string, string>;
-    dataKey: string;
-    name: string;
-    value: number;
-    color: string;
-  };
-
-  type CustomProps = {
-    active?: boolean;
-    payload?: Entry[];
-  };
-
-  const CustomTooltip = (props: CustomProps) => {
-    const { active, payload } = props;
-    if (!active || !payload || !payload.length) return null;
-
-    return (
-      <TooltipChart
-        {...props}
-        formatter={() => ''}
-        formatterName={(name) => (name === 'WETH' ? 'ETH' : name)}
-        opacity={0.8}
-        additionalInfo={
-          <Typography variant="h6" fontSize="12px" color={palette.mode === 'light' ? '#000' : '#fff'}>
-            ${formatNumber(payload[0].value as number, 'USD', true)} ({payload[0].payload.percentage})
-          </Typography>
-        }
-      />
-    );
   };
 
   return (
@@ -79,7 +62,7 @@ const AssetsDistributionPieChart: FC<Props> = ({ type }) => {
               ))}
           </Pie>
           <Legend
-            formatter={(value) => (value === 'WETH' ? 'ETH' : value)}
+            formatter={(value) => formatSymbol(value)}
             iconSize={7}
             iconType="circle"
             layout="vertical"
@@ -90,10 +73,30 @@ const AssetsDistributionPieChart: FC<Props> = ({ type }) => {
             allowEscapeViewBox={{ x: true, y: true }}
             content={(props) => <CustomTooltip {...(props as CustomProps)} />}
             wrapperStyle={{ width: '170px' }}
+            {...{ color: palette.mode === 'light' ? '#000' : '#fff' }}
           />
         </PieChart>
       </ResponsiveContainer>
     </Grid>
+  );
+};
+
+const CustomTooltip = (props: CustomProps) => {
+  const { active, payload, color } = props;
+  if (!active || !payload || !payload.length) return null;
+
+  return (
+    <TooltipChart
+      {...props}
+      formatter={() => ''}
+      formatterName={(name) => name && formatSymbol(name)}
+      opacity={0.8}
+      additionalInfo={
+        <Typography variant="h6" fontSize="12px" color={color}>
+          ${formatNumber(payload[0].value as number, 'USD', true)} ({payload[0].payload.percentage})
+        </Typography>
+      }
+    />
   );
 };
 
