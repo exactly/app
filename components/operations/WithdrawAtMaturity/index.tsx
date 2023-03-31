@@ -75,7 +75,7 @@ const WithdrawAtMaturity: FC = () => {
   }, [date]);
 
   const positionAssets = useMemo(() => {
-    if (!marketAccount || !date) return '0';
+    if (!marketAccount || !date) return Zero;
 
     const pool = marketAccount.fixedDepositPositions.find(({ maturity }) => maturity.toNumber() === date);
     return pool ? pool.position.principal.add(pool.position.fee) : Zero;
@@ -102,6 +102,20 @@ const WithdrawAtMaturity: FC = () => {
     }
 
     const parsedQtyValue = parseFixed(qty, marketAccount.decimals);
+
+    if (parsedQtyValue.isZero()) {
+      return setErrorData({ status: true, message: 'Cannot withdraw 0' });
+    }
+
+    if (parsedQtyValue.gt(positionAssets)) {
+      return setErrorData({
+        status: true,
+        message: `You can't withdraw more than the deposited amount`,
+      });
+    }
+
+    setErrorData(undefined);
+
     const { assets: amount } = await previewerContract.previewWithdrawAtMaturity(
       marketContract.address,
       date,
@@ -111,7 +125,18 @@ const WithdrawAtMaturity: FC = () => {
 
     setAmountToWithdraw(amount);
     setMinAmountToWithdraw(isEarlyWithdraw ? amount.mul(slippage).div(WeiPerEther) : amount);
-  }, [marketAccount, date, qty, marketContract, previewerContract, slippage, isEarlyWithdraw, walletAddress]);
+  }, [
+    setErrorData,
+    marketAccount,
+    date,
+    marketContract,
+    previewerContract,
+    qty,
+    positionAssets,
+    walletAddress,
+    isEarlyWithdraw,
+    slippage,
+  ]);
 
   useEffect(() => {
     if (errorData?.status) return;
@@ -170,28 +195,6 @@ const WithdrawAtMaturity: FC = () => {
   const onMax = useCallback(
     () => setQty(formatFixed(positionAssets, marketAccount?.decimals ?? 18)),
     [marketAccount, positionAssets, setQty],
-  );
-
-  const handleInputChange = useCallback(
-    (value: string) => {
-      setQty(value);
-
-      const parsedValue = parseFixed(value || '0', marketAccount?.decimals ?? 18);
-
-      if (parsedValue.isZero()) {
-        return setErrorData({ status: true, message: 'Cannot withdraw 0' });
-      }
-
-      if (parsedValue.gt(positionAssets)) {
-        return setErrorData({
-          status: true,
-          message: `You can't withdraw more than the deposited amount`,
-        });
-      }
-
-      setErrorData(undefined);
-    },
-    [setQty, positionAssets, setErrorData, marketAccount],
   );
 
   const withdraw = useCallback(async () => {
@@ -300,7 +303,7 @@ const WithdrawAtMaturity: FC = () => {
               symbol={symbol}
               decimals={decimals}
               onMax={onMax}
-              onChange={handleInputChange}
+              onChange={setQty}
               label="Deposited"
               amount={amountAtFinish}
             />
