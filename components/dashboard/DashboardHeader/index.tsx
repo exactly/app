@@ -89,7 +89,7 @@ function DashboardHeader() {
               label: 'Health Factor',
               value: healthFactor ? parseHealthFactor(healthFactor.debt, healthFactor.collateral) : undefined,
               tooltipTitle:
-                'How “safe” is your leverage portfolio, defined as the risk adjusted proportion of collateral deposited versus the risk adjusted amount borrowed. A health factor above 1.25 is recommended to avoid liquidation.',
+                'The Helth Factor represents how “safe” your leverage portfolio is, defined as the risk-adjusted proportion of collateral deposited versus the borrowed risk-adjusted amount. A health factor below 1x will be considered with a shortfall and open to liquidation.',
             },
           ]
         : []),
