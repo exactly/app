@@ -28,7 +28,7 @@
     "@ethersproject/contracts": "^5.7.0",
     "@ethersproject/logger": "^5.7.0",
     "@ethersproject/providers": "^5.7.2",
-    "@exactly-protocol/protocol": "^0.2.7",
+    "@exactly-protocol/protocol": "^0.2.9",
     "@mui/icons-material": "^5.11.9",
     "@mui/lab": "^5.0.0-alpha.120",
     "@mui/material": "^5.11.10",
