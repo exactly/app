@@ -13,8 +13,8 @@ import Link from 'next/link';
 import SwitchCollateral from 'components/dashboard/DashboardContent/FloatingPoolDashboard/FloatingPoolDashboardTable/SwitchCollateral';
 import useAccountData from 'hooks/useAccountData';
 import useActionButton from 'hooks/useActionButton';
-import { useRouter } from 'next/router';
 import { useTranslation } from 'react-i18next';
+import { useSearchParams } from 'next/navigation';
 
 type Props = {
   symbol: string;
@@ -26,7 +26,7 @@ type Props = {
 
 function TableRowFloatingPool({ symbol, valueUSD, depositedAmount, borrowedAmount, type }: Props) {
   const { t } = useTranslation();
-  const { query } = useRouter();
+  const query = useSearchParams().toString();
   const { marketAccount } = useAccountData(symbol);
 
   const { handleActionClick } = useActionButton();

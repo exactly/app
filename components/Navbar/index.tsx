@@ -3,7 +3,7 @@ import { setContext, setUser } from '@sentry/nextjs';
 import { goerli, useClient } from 'wagmi';
 import DisclaimerModal from 'components/DisclaimerModal';
 import Image from 'next/image';
-import { useRouter } from 'next/router';
+import { usePathname, useSearchParams } from 'next/navigation';
 
 import { useWeb3 } from 'hooks/useWeb3';
 
@@ -29,7 +29,8 @@ function Navbar() {
   const { identify } = useAnalytics();
   const { connector } = useClient();
   const { walletAddress } = useWeb3();
-  const { pathname: currentPathname, query } = useRouter();
+  const currentPathname = usePathname();
+  const query = useSearchParams().toString();
   const { chain, isConnected } = useWeb3();
 
   const { palette } = useTheme();

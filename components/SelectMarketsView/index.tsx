@@ -6,7 +6,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { Box, Button, Menu, MenuItem, popoverClasses, Typography } from '@mui/material';
 import { MarketContext, MarketView } from 'contexts/MarketContext';
 import Link from 'next/link';
-import { useRouter } from 'next/router';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { Timeout } from 'react-number-format/types/types';
 import { SimpleViewIcon, AdvancedViewIcon } from 'components/Icons';
 import { useTranslation } from 'react-i18next';
@@ -20,7 +20,9 @@ type ViewOption = {
 
 const SelectMarketsView: FC = () => {
   const { t } = useTranslation();
-  const { pathname: currentPathname, query } = useRouter();
+  const currentPathname = usePathname();
+  const query = useSearchParams().toString();
+
   const { view, setView } = useContext(MarketContext);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [currTimeout, setCurrTimeout] = useState<Timeout>();

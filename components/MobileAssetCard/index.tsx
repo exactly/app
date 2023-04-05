@@ -5,8 +5,8 @@ import Link from 'next/link';
 import formatSymbol from 'utils/formatSymbol';
 import getSymbolDescription from 'utils/getSymbolDescription';
 import useAccountData from 'hooks/useAccountData';
-import { useRouter } from 'next/router';
 import { useTranslation } from 'react-i18next';
+import { useSearchParams } from 'next/navigation';
 
 type Props = PropsWithChildren<{
   symbol: string;
@@ -15,7 +15,8 @@ type Props = PropsWithChildren<{
 
 const MobileAssetCard: FC<Props> = ({ symbol, isFloating, children }) => {
   const { t } = useTranslation();
-  const { query } = useRouter();
+  const query = useSearchParams().toString();
+
   const { marketAccount } = useAccountData(symbol);
   const { palette } = useTheme();
 

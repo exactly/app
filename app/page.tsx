@@ -1,4 +1,6 @@
-import React, { useContext, useEffect } from 'react';
+'use client';
+
+import React, { useContext } from 'react';
 import type { NextPage } from 'next';
 import { Box, Grid } from '@mui/material';
 
@@ -8,12 +10,12 @@ import MarketsBasic from 'components/markets/MarketsBasic';
 import BackgroundCircle from 'components/BackgroundCircle';
 
 import { MarketContext } from 'contexts/MarketContext';
-import useAnalytics from 'hooks/useAnalytics';
+import { usePageView } from 'hooks/useAnalytics';
 
 const Markets: NextPage = () => {
-  const { page } = useAnalytics();
+  usePageView();
+
   const { view } = useContext(MarketContext);
-  useEffect(() => void page(), [page]);
 
   if (!view) return null;
 

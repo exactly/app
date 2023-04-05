@@ -3,6 +3,7 @@ import type { FC, PropsWithChildren } from 'react';
 import { AddressZero } from '@ethersproject/constants';
 import { captureException } from '@sentry/nextjs';
 import { useClient, useConnect } from 'wagmi';
+import { ErrorCode } from '@ethersproject/logger';
 
 import { AccountData } from 'types/AccountData';
 
@@ -10,7 +11,6 @@ import { useWeb3 } from 'hooks/useWeb3';
 
 import usePreviewer from 'hooks/usePreviewer';
 import useDelayedEffect from 'hooks/useDelayedEffect';
-import { ErrorCode } from '@ethersproject/logger';
 
 export type ContextValues = {
   accountData: AccountData | undefined;
@@ -20,14 +20,16 @@ export type ContextValues = {
 
 const AccountDataContext = createContext<ContextValues | null>(null);
 
-export const AccountDataProvider: FC<PropsWithChildren> = ({ children }) => {
-  const [accountData, setAccountData] = useState<AccountData | undefined>();
+type ProviderProps = {
+  initial: AccountData;
+};
+
+export const AccountDataProvider: FC<PropsWithChildren<ProviderProps>> = ({ initial, children }) => {
+  const [accountData, setAccountData] = useState<AccountData | undefined>(initial);
 
   const { connect, connectors } = useConnect();
   const { walletAddress } = useWeb3();
   const client = useClient();
-
-  const resetAccountData = useCallback(() => setAccountData(undefined), []);
 
   useEffect(() => {
     const safeConnector = connectors.find(({ id, ready }) => ready && id === 'safe');
@@ -62,6 +64,10 @@ export const AccountDataProvider: FC<PropsWithChildren> = ({ children }) => {
     },
     [queryAccountData],
   );
+
+  const resetAccountData = useCallback(() => {
+    setAccountData(undefined);
+  }, []);
 
   useDelayedEffect({
     effect: syncAccountData,

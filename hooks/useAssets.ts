@@ -1,8 +1,6 @@
 import { useMemo } from 'react';
 import useAccountData from './useAccountData';
 
-const def = ['USDC', 'WETH'];
-
 export default (): string[] => {
   const { accountData } = useAccountData();
 
@@ -17,5 +15,5 @@ export default (): string[] => {
     });
   }
 
-  return useMemo<string[]>(() => (accountData ? accountData.map((m) => m.assetSymbol) : def), [accountData]);
+  return useMemo<string[]>(() => (accountData ? accountData.map((m) => m.assetSymbol) : []), [accountData]);
 };

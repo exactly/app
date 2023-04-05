@@ -9,6 +9,8 @@ import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Grid';
 import Button from '@mui/material/Button';
 import { Box, Skeleton, Tooltip } from '@mui/material';
+import { useSearchParams } from 'next/navigation';
+import { useTranslation } from 'react-i18next';
 
 import Image from 'next/image';
 
@@ -27,8 +29,6 @@ import TableHeadCell, { TableHeader } from 'components/common/TableHeadCell';
 import getLiquidTokenInfo from 'utils/getLiquidTokenInfo';
 import useRewards from 'hooks/useRewards';
 import RewardPill from 'components/markets/RewardPill';
-import { useRouter } from 'next/router';
-import { useTranslation } from 'react-i18next';
 
 const { minAPRValue } = numbers;
 
@@ -51,7 +51,8 @@ export type TableRow = {
 
 const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) => {
   const { t } = useTranslation();
-  const { query } = useRouter();
+  const query = useSearchParams().toString();
+
   const { handleActionClick, isDisable } = useActionButton();
   const assets = useAssets();
   const { rates } = useRewards();

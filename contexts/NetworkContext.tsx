@@ -1,16 +1,11 @@
-import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { FC, PropsWithChildren } from 'react';
 import { Chain, useNetwork } from 'wagmi';
-import * as wagmiChains from 'wagmi/chains';
-import Router, { useRouter } from 'next/router';
+import { mainnet } from 'wagmi/chains';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
-import { supportedChains, defaultChain } from 'utils/client';
+import { isSupported } from 'utils/chain';
 import usePreviousValue from 'hooks/usePreviousValue';
-import { getQueryParam } from 'utils/getQueryParam';
-
-function isSupported(id?: number): boolean {
-  return Boolean(id && supportedChains.find((c) => c.id === id));
-}
 
 type ContextValues = {
   displayNetwork: Chain;
@@ -19,47 +14,37 @@ type ContextValues = {
 
 const NetworkContext = createContext<ContextValues | null>(null);
 
-export const NetworkContextProvider: FC<PropsWithChildren> = ({ children }) => {
-  const { pathname, isReady } = useRouter();
-  const { chain } = useNetwork();
-  const first = useRef(true);
-  const [displayNetwork, setDisplayNetwork] = useState<Chain>(() => {
-    const n = getQueryParam('n');
-    const queryChain = typeof n === 'string' ? wagmiChains[n as keyof typeof wagmiChains] : undefined;
-    if (isSupported(queryChain?.id) && queryChain) {
-      return queryChain;
-    }
+type ProviderProps = {
+  initial: Chain;
+};
 
-    return defaultChain ?? wagmiChains.mainnet;
-  });
+export const NetworkContextProvider: FC<PropsWithChildren<ProviderProps>> = ({ initial, children }) => {
+  const router = useRouter();
+  const pathname = usePathname();
+  const query = useSearchParams();
+  const { chain } = useNetwork();
+  const [displayNetwork, setDisplayNetwork] = useState<Chain>(initial);
   const previousChain = usePreviousValue(chain);
 
   useEffect(() => {
-    if (first.current) {
-      first.current = false;
-      return;
-    }
-
     if (previousChain && chain && isSupported(chain.id) && previousChain.id !== chain.id) {
       return setDisplayNetwork(chain);
     }
   }, [previousChain, chain, displayNetwork]);
 
   useEffect(() => {
-    if (first.current || !isReady) {
-      return;
-    }
-
-    const network = { [wagmiChains.mainnet.id]: 'mainnet' }[displayNetwork.id] ?? displayNetwork.network;
-    Router.replace({ query: { ...Router.query, n: network } });
-  }, [displayNetwork, pathname, isReady]);
+    const network = { [mainnet.id]: 'mainnet' }[displayNetwork.id] ?? displayNetwork.network;
+    const q = new URLSearchParams(query);
+    q.set('n', network);
+    router.replace(`${pathname}?${q.toString()}`);
+  }, [displayNetwork, pathname, query, router]);
 
   const value: ContextValues = {
     displayNetwork,
     setDisplayNetwork,
   };
 
-  return <NetworkContext.Provider value={value}>{first.current ? null : children}</NetworkContext.Provider>;
+  return <NetworkContext.Provider value={value}>{children}</NetworkContext.Provider>;
 };
 
 export function useNetworkContext() {

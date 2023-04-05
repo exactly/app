@@ -2,7 +2,7 @@ html,
 body {
   padding: 0;
   margin: 0;
-  font-family: 'Inter';
+  font-family: var(--inter-font);
   background-color: var(--background);
   color: var(--text-color);
   height: 100%;

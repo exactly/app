@@ -1,7 +1,7 @@
 import { useMemo, useCallback } from 'react';
 import { Chain, useAccount, useConnect } from 'wagmi';
 import { useWeb3Modal } from '@web3modal/react';
-import { supportedChains } from 'utils/client';
+import { supportedChains } from 'utils/chain';
 import useDebounce from './useDebounce';
 import { useNetworkContext } from 'contexts/NetworkContext';
 import { getQueryParam } from 'utils/getQueryParam';

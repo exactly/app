@@ -1,7 +1,11 @@
 {
   "compilerOptions": {
     "target": "esnext",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "allowJs": false,
     "skipLibCheck": true,
     "strict": true,
@@ -15,21 +19,58 @@
     "jsx": "preserve",
     "baseUrl": "./",
     "paths": {
-      "abi/*": ["abi/*"],
-      "components/*": ["components/*"],
-      "config/*": ["config/*"],
-      "contexts/*": ["contexts/*"],
-      "dictionary/*": ["dictionary/*"],
-      "hooks/*": ["hooks/*"],
-      "pages/*": ["pages/*"],
-      "queries/*": ["queries/*"],
-      "reducers/*": ["reducers/*"],
-      "styles/*": ["styles/*"],
-      "types/*": ["types/*"],
-      "utils/*": ["utils/*"]
+      "abi/*": [
+        "abi/*"
+      ],
+      "components/*": [
+        "components/*"
+      ],
+      "config/*": [
+        "config/*"
+      ],
+      "contexts/*": [
+        "contexts/*"
+      ],
+      "dictionary/*": [
+        "dictionary/*"
+      ],
+      "hooks/*": [
+        "hooks/*"
+      ],
+      "pages/*": [
+        "pages/*"
+      ],
+      "queries/*": [
+        "queries/*"
+      ],
+      "reducers/*": [
+        "reducers/*"
+      ],
+      "styles/*": [
+        "styles/*"
+      ],
+      "types/*": [
+        "types/*"
+      ],
+      "utils/*": [
+        "utils/*"
+      ]
     },
-    "incremental": true
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
   },
-  "include": ["**/*.ts", "**/*.tsx"],
-  "exclude": ["node_modules", "scripts", "tests"]
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "scripts",
+    "tests"
+  ]
 }

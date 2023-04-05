@@ -1,8 +1,10 @@
+'use client';
+
 import React from 'react';
 import ErrorPageMessage from 'components/ErrorPageMessage';
 import { useTranslation } from 'react-i18next';
 
-export default function Custom404() {
+export default function NotFound() {
   const { t } = useTranslation();
   return (
     <ErrorPageMessage

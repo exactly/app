@@ -1,13 +1,14 @@
+import React, { useMemo, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { formatFixed } from '@ethersproject/bignumber';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import { Box, Button, IconButton, Skeleton, Stack, TableCell, TableRow, Typography } from '@mui/material';
+import { useSearchParams } from 'next/navigation';
+
 import MaturityLinearProgress from 'components/common/MaturityLinearProgress';
 import useFixedOperation from 'hooks/useFixedPoolTransactions';
-
-import React, { useMemo, useState } from 'react';
 import { FixedPoolTransaction } from 'types/FixedPoolTransaction';
 import calculateAPR from 'utils/calculateAPR';
 import formatNumber from 'utils/formatNumber';
@@ -21,7 +22,6 @@ import type { WithdrawMP } from 'types/WithdrawMP';
 import { Borrow } from 'types/Borrow';
 import { Repay } from 'types/Repay';
 import useAccountData from 'hooks/useAccountData';
-import { useRouter } from 'next/router';
 import { useTranslation } from 'react-i18next';
 
 type Props = {
@@ -35,7 +35,7 @@ type Props = {
 
 function TableRowFixedPool({ symbol, valueUSD, type, maturityDate, market, decimals }: Props) {
   const { t } = useTranslation();
-  const { query } = useRouter();
+  const query = useSearchParams().toString();
   const { marketAccount } = useAccountData(symbol);
   const { withdrawTxs, repayTxs, depositTxs, borrowTxs } = useFixedOperation(type, maturityDate, market);
   const [open, setOpen] = useState(false);

@@ -1,8 +1,8 @@
 import React from 'react';
 import Link from 'next/link';
 import { Box, Button, Typography } from '@mui/material';
-import { useRouter } from 'next/router';
 import { useTranslation } from 'react-i18next';
+import { useSearchParams } from 'next/navigation';
 
 type Props = {
   code: number;
@@ -12,7 +12,7 @@ type Props = {
 
 function ErrorPageMessage({ code, description, message }: Props) {
   const { t } = useTranslation();
-  const { query } = useRouter();
+  const query = useSearchParams().toString();
 
   return (
     <Box display="flex" height="100%">

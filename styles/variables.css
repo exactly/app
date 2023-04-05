@@ -68,7 +68,7 @@
   --tooltip-background: #1f1939;
 
   /* FONT */
-  --secondary-font: 'IBM Plex Mono', monospace;
+  --secondary-font: var(--ibm-plex-mono-font), monospace;
 }
 
 body[data-theme='light'] {
