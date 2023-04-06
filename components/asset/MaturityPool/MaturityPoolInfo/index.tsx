@@ -65,7 +65,7 @@ const MaturityPoolInfo: FC<MaturityPoolInfoProps> = ({
             />
           ) : undefined,
         underLabel: bestDepositMaturity ? parseTimestamp(bestDepositMaturity) : undefined,
-        tooltipTitle: 'The highest fixed Interest rate for a deposit up to de optimal deposit size.',
+        tooltipTitle: 'The highest fixed interest APR for a deposit up to the optimal deposit size.',
       },
       {
         label: 'Best Borrow APR',
@@ -74,7 +74,8 @@ const MaturityPoolInfo: FC<MaturityPoolInfoProps> = ({
             <ItemCell key={symbol} value={toPercentage(bestBorrowRate)} symbol={symbol} />
           ) : undefined,
         underLabel: bestBorrowMaturity ? parseTimestamp(bestBorrowMaturity) : undefined,
-        tooltipTitle: 'The lowest fixed Borrowing Interest rate (APR) at current utilization levels.',
+        tooltipTitle:
+          'The lowest fixed borrowing interest APR at current utilization levels for all the Fixed Rate Pools.',
       },
       ...(rates[symbol] && rates[symbol].some((r) => r.borrow.gt(Zero))
         ? [

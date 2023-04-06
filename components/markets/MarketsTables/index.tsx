@@ -42,7 +42,7 @@ const floatingHeaders: TableHeader<TableRow>[] = [
   },
   {
     title: 'Borrow APR',
-    tooltipTitle: 'Change in the underlying Variable Rate Pool shares value over the last hour, annualized.',
+    tooltipTitle: 'The borrowing interest APR related to the current utilization rate in the Variable Rate Pool.',
     sortKey: 'borrowAPR',
   },
 ];
@@ -65,12 +65,12 @@ const fixedHeaders: TableHeader<TableRow>[] = [
   },
   {
     title: 'Best Deposit APR',
-    tooltipTitle: 'The highest fixed Interest rate for a deposit up to de optimal deposit size.',
+    tooltipTitle: 'The highest fixed interest APR for a deposit up to the optimal deposit size.',
     sortKey: 'depositAPR',
   },
   {
     title: 'Best Borrow APR',
-    tooltipTitle: 'The lowest fixed Borrowing Interest rate (APR) at current utilization levels.',
+    tooltipTitle: 'The lowest fixed borrowing interest APR at current utilization levels for all the Fixed Rate Pools.',
     sortKey: 'borrowAPR',
   },
 ];

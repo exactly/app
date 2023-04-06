@@ -49,9 +49,12 @@ const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ symbol }) => {
             <HeadCell title="Total Borrows" />
             <HeadCell
               title="Deposit APR"
-              tooltipTitle="Fixed Interest rate for a deposit up to de optimal deposit size.."
+              tooltipTitle="The fixed interest APR for a deposit up to the optimal deposit size."
             />
-            <HeadCell title="Borrow APR" tooltipTitle="Borrowing Interest rate at current utilization levels." />
+            <HeadCell
+              title="Borrow APR"
+              tooltipTitle="The fixed borrowing interest APR at current utilization level."
+            />
             <TableCell />
             <TableCell />
           </TableRow>

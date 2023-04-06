@@ -33,13 +33,13 @@ const MaturityPoolsMobile: FC<Props> = ({ symbol }) => {
               <Grid item xs={12} my={0.5} />
               <GridItem
                 title="Deposit APR"
-                tooltip="Fixed Interest rate for a deposit up to de optimal deposit size."
+                tooltip="The fixed interest APR for a deposit up to the optimal deposit size."
                 value={`${toPercentage(depositAPR > minAPRValue ? depositAPR : undefined)}`}
                 isLoading={depositAPR === undefined}
               />
               <GridItem
                 title="Borrow APR"
-                tooltip="Borrowing Interest rate at current utilization levels."
+                tooltip="The fixed borrowing interest APR at current utilization level."
                 value={`${toPercentage(borrowAPR > minAPRValue ? borrowAPR : undefined)}`}
                 isLoading={borrowAPR === undefined}
               />
