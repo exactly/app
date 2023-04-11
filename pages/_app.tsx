@@ -33,8 +33,7 @@ const Web3ModalWrapper = () => {
       defaultChain={displayNetwork}
       enableAccountView={false}
       themeMode={palette.mode}
-      themeColor="blackWhite"
-      themeBackground="themeColor"
+      themeVariables={{ '--w3m-background-color': '#0D0E0F' }}
       walletImages={{ safe: '/img/wallets/safe.png' }}
       chainImages={{ 1: '/img/networks/1.svg' }}
     />
