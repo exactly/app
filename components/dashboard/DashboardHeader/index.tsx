@@ -8,7 +8,6 @@ import HeaderInfo from 'components/common/HeaderInfo';
 import { ItemInfoProps } from 'components/common/ItemInfo';
 import { useWeb3 } from 'hooks/useWeb3';
 import useHealthFactor from 'hooks/useHealthFactor';
-import useAccountData from 'hooks/useAccountData';
 import { useTranslation } from 'react-i18next';
 import useTotalsUsd from 'hooks/useTotalsUsd';
 import AssetsDistributionPieChart from 'components/charts/AssetsDistributionPieChart';
@@ -55,7 +54,7 @@ function DashboardHeader() {
       container
     >
       <Grid item>
-        <HeaderInfo itemsInfo={itemsInfo} title="Dashboard" shadow={false} />
+        <HeaderInfo itemsInfo={itemsInfo} title={t('Dashboard')} shadow={false} />
       </Grid>
       {!isMobile && (
         <Grid item display="flex" marginRight={2}>

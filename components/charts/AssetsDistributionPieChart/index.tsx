@@ -5,6 +5,7 @@ import useAssetsComposition from 'hooks/useAssetsComposition';
 import TooltipChart from '../TooltipChart';
 import formatNumber from 'utils/formatNumber';
 import formatSymbol from 'utils/formatSymbol';
+import { t } from 'i18next';
 
 type Props = {
   type: 'deposit' | 'borrow';
@@ -37,7 +38,7 @@ const AssetsDistributionPieChart: FC<Props> = ({ type }) => {
   return (
     <Grid item display="flex" flexDirection="column" p={'24px'} minWidth={'200px'} minHeight={'155px'}>
       <Typography variant="h6" fontSize="14px">
-        Your {type === 'deposit' ? 'Deposits' : 'Borrows'}
+        {type === 'deposit' ? t('Your Deposits') : t('Your Borrows')}
       </Typography>
 
       <ResponsiveContainer width="100%" height="100%">
