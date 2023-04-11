@@ -42,3 +42,7 @@ export const waitForTransaction = (symbol: ERC20TokenSymbol) => {
     },
   );
 };
+
+export const switchTab = (tab: 'deposit' | 'borrow') => {
+  cy.getByTestId(`tab-${tab}`).should('be.visible').click();
+};
