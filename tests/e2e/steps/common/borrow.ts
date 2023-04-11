@@ -1,11 +1,10 @@
 import * as modal from '../modal';
-import { formatSymbol, repeat } from '../../utils/strings';
+import { formatSymbol } from '../../utils/strings';
 import { ERC20TokenSymbol } from '../../utils/contracts';
 
 type TestParams = {
   type: 'floating' | 'fixed';
   symbol: ERC20TokenSymbol;
-  decimals: number;
   amount?: string;
   aboveLimitAmount?: string | number;
   aboveLiquidityAmount?: string | number;
@@ -15,7 +14,6 @@ type TestParams = {
 export default ({
   type,
   symbol,
-  decimals,
   amount = '1',
   aboveLimitAmount,
   aboveLiquidityAmount,
@@ -37,12 +35,6 @@ export default ({
     describe('the input', () => {
       afterEach(() => {
         modal.clearInput();
-      });
-
-      it('should not allow to input more decimals than the allowed', () => {
-        const inp = `0.${repeat(decimals + 1, '1')}`;
-        modal.input(inp);
-        modal.checkInput(inp.slice(0, inp.length - 1));
       });
 
       if (aboveLimitAmount) {

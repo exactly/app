@@ -1,4 +1,4 @@
-import { ERC20TokenSymbol } from '../utils/tenderly';
+import { type ERC20TokenSymbol } from '../utils/contracts';
 
 type Path = 'markets' | 'dashboard' | ERC20TokenSymbol;
 

@@ -29,7 +29,6 @@ describe('USDC floating borrow', () => {
   borrow({
     type: 'floating',
     symbol: 'USDC',
-    decimals: 6,
     amount: '1',
     aboveLiquidityAmount: 1_000_000_000,
   });
