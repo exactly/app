@@ -21,6 +21,7 @@ import ClaimRewards from 'components/ClaimRewards';
 import SelectDisplayNetwork from 'components/SelectDisplayNetwork';
 import useAnalytics from 'hooks/useAnalytics';
 import { useTranslation } from 'react-i18next';
+import MaturityDateReminder from 'components/MaturityDateReminder';
 const { onlyMobile, onlyDesktopFlex } = globals;
 
 function Navbar() {
@@ -76,6 +77,7 @@ function Navbar() {
   return (
     <Box sx={{ display: 'flex', justifyContent: 'center' }}>
       <DisclaimerModal />
+      <MaturityDateReminder />
       <AppBar
         position="static"
         color="transparent"

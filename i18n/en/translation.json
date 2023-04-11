@@ -250,5 +250,6 @@
   "The highest fixed interest APR for a deposit up to the optimal deposit size.": "The highest fixed interest APR for a deposit up to the optimal deposit size.",
   "The lowest fixed borrowing interest APR at current utilization levels for all the Fixed Rate Pools.": "The lowest fixed borrowing interest APR at current utilization levels for all the Fixed Rate Pools.",
   "The fixed interest APR for a deposit up to the optimal deposit size.": "The fixed interest APR for a deposit up to the optimal deposit size.",
-  "The fixed borrowing interest APR at current utilization level.": "The fixed borrowing interest APR at current utilization level."
+  "The fixed borrowing interest APR at current utilization level.": "The fixed borrowing interest APR at current utilization level.",
+  "Make sure to repay your borrows before {{date}} to avoid penalty fees.": "Make sure to repay your borrows before {{date}} to avoid penalty fees."
 }
