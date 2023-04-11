@@ -34,7 +34,7 @@ export const deposit = ({ symbol, amount, receiver }: DepositParams, signer: Def
       await ethRouterContract.deposit({ value: parseFixed(amount, await weth.decimals()) });
     } else {
       const erc20Contract = await erc20(symbol, signer());
-      const erc20MarketContract = await erc20Market(symbol);
+      const erc20MarketContract = await erc20Market(symbol, signer());
       const qty = parseFixed(amount, await erc20Contract.decimals());
       await erc20Contract.approve(erc20MarketContract.address, qty);
       await erc20MarketContract.deposit(qty, receiver);
@@ -43,5 +43,9 @@ export const deposit = ({ symbol, amount, receiver }: DepositParams, signer: Def
 };
 
 export const reload = async () => {
-  it('reloads the app', () => cy.reload());
+  it('reloads the app', () => {
+    cy.reload();
+    // eslint-disable-next-line cypress/no-unnecessary-waiting, ui-testing/no-hard-wait, testing-library/await-async-utils
+    cy.wait(5000);
+  });
 };

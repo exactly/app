@@ -27,7 +27,6 @@ describe('WETH floating borrow', () => {
   borrow({
     type: 'floating',
     symbol: 'WETH',
-    decimals: 18,
     amount: '0.1',
     aboveLimitAmount: '1',
     aboveLiquidityAmount: 1_000_000,
