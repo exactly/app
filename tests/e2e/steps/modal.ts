@@ -5,7 +5,27 @@ export type Operation = 'deposit' | 'borrow' | 'withdraw' | 'repay';
 
 export const open = (type: 'floating' | 'fixed', action: Operation, symbol: ERC20TokenSymbol) => {
   cy.getByTestId(`${type}-${action}-${symbol}`).click();
+  waitForModalReady();
+};
+
+export const waitForModalReady = () => {
   cy.getByTestId('modal').should('be.visible');
+  cy.waitUntil(
+    () =>
+      cy.getByTestId('modal').then(($modal) => {
+        return ['submit', 'approve'].every((action) => {
+          const $btn = $modal.find(`[data-testid="modal-${action}"]`);
+          if ($btn.length) {
+            return !$btn.hasClass('MuiLoadingButton-loading');
+          }
+          return true;
+        });
+      }),
+    {
+      timeout: 15000,
+      interval: 1000,
+    },
+  );
 };
 
 export const close = () => {
@@ -40,14 +60,6 @@ export const waitForApprove = () => {
 export const approve = () => {
   cy.getByTestId('modal-approve').should('not.be.disabled');
   cy.getByTestId('modal-approve').click();
-};
-
-export const approveIfRequired = () => {
-  cy.getByTestId('modal').then(($modal) => {
-    if ($modal.find('[data-testid="modal-approve"]').length) {
-      approve();
-    }
-  });
 };
 
 export const waitForSubmit = () => {

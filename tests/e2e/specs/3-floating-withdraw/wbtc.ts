@@ -28,6 +28,5 @@ describe('WBTC floating withdraw', () => {
     type: 'floating',
     symbol: 'WBTC',
     amount: '0.5',
-    shouldApprove: false,
   });
 });

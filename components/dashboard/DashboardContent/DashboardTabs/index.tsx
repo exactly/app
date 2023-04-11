@@ -35,6 +35,7 @@ function DashboardTabs({ initialTab, allTabs }: Props) {
         >
           {allTabs.map(({ label, value }) => (
             <Tab
+              data-testid={`tab-${value}`}
               key={`tab_${value}`}
               value={value}
               sx={{ paddingX: 2.5, textTransform: 'none' }}

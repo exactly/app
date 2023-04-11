@@ -31,13 +31,32 @@ export const deposit = ({ symbol, amount, receiver }: DepositParams, signer: Def
     if (symbol === 'ETH') {
       const weth = await erc20('WETH', signer());
       const ethRouterContract = ethRouter(signer());
-      await ethRouterContract.deposit({ value: parseFixed(amount, await weth.decimals()) });
+      const qty = parseFixed(amount, await weth.decimals());
+      await ethRouterContract.deposit({ value: qty });
     } else {
       const erc20Contract = await erc20(symbol, signer());
       const erc20MarketContract = await erc20Market(symbol, signer());
       const qty = parseFixed(amount, await erc20Contract.decimals());
       await erc20Contract.approve(erc20MarketContract.address, qty);
       await erc20MarketContract.deposit(qty, receiver);
+    }
+  });
+};
+
+export const borrow = ({ symbol, amount, receiver }: DepositParams, signer: Defer<Signer>) => {
+  it(`borrows ${amount} ${symbol} to floating pool`, async () => {
+    if (symbol === 'ETH') {
+      const weth = await erc20('WETH', signer());
+      const wethMarketContract = await erc20Market('WETH', signer());
+      const ethRouterContract = ethRouter(signer());
+      const qty = parseFixed(amount, await weth.decimals());
+      await wethMarketContract.approve(ethRouterContract.address, qty);
+      await ethRouterContract.borrow(qty);
+    } else {
+      const erc20Contract = await erc20(symbol, signer());
+      const erc20MarketContract = await erc20Market(symbol, signer());
+      const qty = parseFixed(amount, await erc20Contract.decimals());
+      await erc20MarketContract.borrow(qty, receiver, receiver);
     }
   });
 };
