@@ -251,5 +251,5 @@
   "The lowest fixed borrowing interest APR at current utilization levels for all the Fixed Rate Pools.": "La TNA fija más baja para préstamos en los niveles actuales de utilización para todos los Pools de Tasa Fija.",
   "The fixed interest APR for a deposit up to the optimal deposit size.": "La TNA fija para un depósito hasta el monto de depósito óptimo.",
   "The fixed borrowing interest APR at current utilization level.": "La TNA fija para préstamo en el nivel actual de utilización.",
-  "Make sure to repay your borrows before {{date}} to avoid penalty fees.": "Asegúrese de repagar sus préstamos antes del {{date}} para evitar multas"
+  "Make sure to repay your fixed borrows before {{date}} to avoid penalty fees.": "Asegúrese de repagar sus préstamos a tasa fija antes del {{date}} para evitar multas"
 }

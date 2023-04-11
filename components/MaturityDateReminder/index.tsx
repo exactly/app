@@ -51,7 +51,7 @@ export default function MaturityDateReminder() {
       anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
     >
       <Alert severity="warning">
-        {t('Make sure to repay your borrows before {{date}} to avoid penalty fees.', { date: date })}
+        {t('Make sure to repay your fixed borrows before {{date}} to avoid penalty fees.', { date: date })}
       </Alert>
     </Snackbar>
   );
