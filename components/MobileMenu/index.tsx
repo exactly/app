@@ -69,8 +69,8 @@ function MobileMenu({ open, handleClose }: Props) {
             </Typography>
             <Box display="flex" flexDirection="column" gap={2}>
               {headers.map(({ title, pathname, component }) => (
-                <>
-                  <Link href={{ pathname, query }} key={`mobile_tabs_${title}`} onClick={handleClose}>
+                <Box key={`mobile_tabs_${title}`} display="flex" flexDirection="column" gap={2}>
+                  <Link href={{ pathname, query }} onClick={handleClose}>
                     <Typography
                       sx={{
                         textDecoration: currentPathname === pathname ? 'underline' : 'none',
@@ -82,7 +82,7 @@ function MobileMenu({ open, handleClose }: Props) {
                     </Typography>
                   </Link>
                   {component}
-                </>
+                </Box>
               ))}
             </Box>
             <Divider sx={{ my: '12px' }} />
