@@ -87,7 +87,7 @@
   "You are connected to a different network": "Estás conectado a una red diferente",
   "You can't disable collateral on this asset because you have an active borrow": "No puedes deshabilitar el colateral en este activo porque tienes un préstamo pendiente",
   "Disabling this collateral will make your health factor less than 1": "Desactivar este colateral hara que su factor de salud sea menor a 1",
-  "Disabling this asset as collateral affects your borrowing power and Health Factor": "Desactivar este activo como colateral afectará su poder de prestamo y factor de salud",
+  "Disabling this asset as collateral affects your borrowing power and Health Factor": "Desactivar este activo como colateral afectará su poder de préstamo y factor de salud",
   "Enable this asset as collateral": "Habilitar ese activo como colateral",
   "Use this asset as collateral": "Usar este activo como colateral",
   "Variable Interest Rate": "Tasa de Interés Variable",
