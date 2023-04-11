@@ -90,6 +90,24 @@ npm run test -- --spec [path] # e.g. tests/e2e/specs/0-connect-wallet-spec.ts
 
 Use the `--headed` flag to open the Cypress instance.
 
+## i18n
+
+Use the `t` utility function on all strings present in the app.
+The function can be obtained by calling `useTranslation` on functional components,
+or by importing the `i18n` instance. The later should always be used in functions
+(or any code that can be re-evaluated), do not use it at global scope as once it
+gets executed the string value will not be updated if a language change happens.
+
+Translations can be found in `i18n/`. New entries are added via executing
+
+```bash
+npm run i18n:scan
+```
+
+The script will scan the whole project in search of `t` usages, adding the newly
+discovered to the translation file and removing unused keys. Be sure to provide
+a translation or remove the entry to default to the english key used.
+
 ## Deployment
 
 We use Vercel. New pull requests will be deployed will receive previews deployed
