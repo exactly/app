@@ -1,4 +1,4 @@
-import { EthereumClient, modalConnectors, walletConnectProvider } from '@web3modal/ethereum';
+import { EthereumClient, w3mConnectors, w3mProvider } from '@web3modal/ethereum';
 import { createClient, configureChains } from 'wagmi';
 import { InjectedConnector } from 'wagmi/connectors/injected';
 import { mainnet, goerli, optimism } from 'wagmi/chains';
@@ -27,7 +27,7 @@ const { chains, provider } = configureChains(
   supportedChains,
   JSON.parse(process.env.NEXT_PUBLIC_IS_E2E ?? 'false') && rpcURL
     ? [jsonRpcProvider({ rpc: () => ({ http: rpcURL }) })]
-    : [publicProvider({ priority: 1 }), walletConnectProvider({ projectId: walletConnectId })],
+    : [publicProvider({ priority: 1 }), w3mProvider({ projectId: walletConnectId })],
 );
 
 export const wagmi = createClient({
@@ -42,7 +42,7 @@ export const wagmi = createClient({
           }),
         ]
       : []),
-    ...modalConnectors({ appName: 'exactly', chains }),
+    ...w3mConnectors({ projectId: walletConnectId, version: 1, chains }),
     new SafeConnector({ chains }),
   ],
   provider,
