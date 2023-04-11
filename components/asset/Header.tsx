@@ -1,8 +1,6 @@
-import React, { type FC, useMemo } from 'react';
+import React, { type FC, useMemo, useCallback } from 'react';
+import Router from 'next/router';
 import Grid from '@mui/material/Grid';
-import Image from 'next/image';
-import Typography from '@mui/material/Typography';
-import formatSymbol from 'utils/formatSymbol';
 import ItemInfo, { ItemInfoProps } from 'components/common/ItemInfo';
 import { formatFixed } from '@ethersproject/bignumber';
 import { WeiPerEther, Zero } from '@ethersproject/constants';
@@ -11,8 +9,10 @@ import { useWeb3 } from 'hooks/useWeb3';
 import networkData from 'config/networkData.json' assert { type: 'json' };
 import useAccountData from 'hooks/useAccountData';
 import ExplorerMenu from './ExplorerMenu';
-import { Box } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import DropdownMenu from 'components/DropdownMenu';
+import useAssets from 'hooks/useAssets';
+import AssetOption from './AssetOption';
 
 type Props = {
   symbol: string;
@@ -21,7 +21,7 @@ type Props = {
 const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
   const { t } = useTranslation();
   const { marketAccount } = useAccountData(symbol);
-
+  const options = useAssets();
   const { chain } = useWeb3();
 
   const { floatingDeposits, floatingBorrows } = useMemo(() => {
@@ -95,33 +95,29 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
     ];
   }, [marketAccount, floatingDeposits, fixedDeposits, floatingBorrows, fixedBorrows, t]);
 
+  const onChangeAssetDropdown = useCallback((newSymbol: string) => {
+    Router.push({ pathname: '/[symbol]', query: { ...Router.query, symbol: newSymbol } });
+  }, []);
+
   const etherscan = networkData[String(chain?.id) as keyof typeof networkData]?.etherscan;
   return (
     <Grid sx={{ bgcolor: 'components.bg' }} width="100%" p="24px" boxShadow="0px 4px 12px rgba(175, 177, 182, 0.2)">
-      <Grid item container mb="24px">
-        <Image
-          src={`/img/assets/${symbol}.svg`}
-          alt={symbol}
-          width={30}
-          height={30}
-          style={{
-            maxWidth: '100%',
-            height: 'auto',
-          }}
+      <Grid item container mb="24px" alignItems="end">
+        <DropdownMenu
+          label={t('Asset')}
+          options={options}
+          onChange={onChangeAssetDropdown}
+          renderValue={<AssetOption assetSymbol={symbol} optionSize={22} selectedSize={30} />}
+          renderOption={(o: string) => <AssetOption option assetSymbol={o} optionSize={22} selectedSize={30} />}
         />
-        <Typography variant="h1" ml={1}>
-          {formatSymbol(symbol)}
-        </Typography>
         {etherscan && marketAccount && (
-          <Box mt="12px">
-            <ExplorerMenu
-              symbol={symbol}
-              assetAddress={marketAccount.asset}
-              eMarketAddress={marketAccount.market}
-              rateModelAddress={marketAccount.interestRateModel.id}
-              exaToken={marketAccount.symbol}
-            />
-          </Box>
+          <ExplorerMenu
+            symbol={symbol}
+            assetAddress={marketAccount.asset}
+            eMarketAddress={marketAccount.market}
+            rateModelAddress={marketAccount.interestRateModel.id}
+            exaToken={marketAccount.symbol}
+          />
         )}
       </Grid>
       <Grid item container spacing={4}>
