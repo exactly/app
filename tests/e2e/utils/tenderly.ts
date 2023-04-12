@@ -68,21 +68,12 @@ const transferERC20 = async (
 
   await setNativeBalance(forkUrl, fromAddress, 10);
 
-  const tokenAmount = hexValue(parseFixed(String(amount), await tokenContract.decimals()).toHexString());
+  const tokenAmount = parseFixed(String(amount), await tokenContract.decimals());
 
   const unsignedTx = await tokenContract.populateTransaction.approve(await signer.getAddress(), tokenAmount);
-  const transactionParameters = [
-    {
-      to: tokenContract.address,
-      from: fromAddress,
-      data: unsignedTx.data,
-      gas: hexValue(3000000),
-      gasPrice: hexValue(1),
-      value: hexValue(0),
-    },
-  ];
+  unsignedTx.from = fromAddress;
 
-  await provider.send('eth_sendTransaction', transactionParameters);
+  await provider.send('eth_sendTransaction', [unsignedTx]);
   await tokenContract.transferFrom(fromAddress, toAddress, tokenAmount);
 };
 
