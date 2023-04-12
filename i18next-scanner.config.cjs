@@ -13,17 +13,11 @@ module.exports = {
       list: ['i18n.t', 't'],
       extensions: ['.ts', '.tsx'],
     },
-    lngs: ['en', 'es'],
+    lngs: ['es'],
     ns: ['translation'],
     defaultLng: 'en',
     defaultNs: 'translation',
-    defaultValue: (lng, _ns, key) => {
-      if (lng === 'en') {
-        return key;
-      }
-
-      return '__STRING_NOT_TRANSLATED__';
-    },
+    defaultValue: '__STRING_NOT_TRANSLATED__',
     resource: {
       loadPath: 'i18n/{{lng}}/{{ns}}.json',
       savePath: 'i18n/{{lng}}/{{ns}}.json',
