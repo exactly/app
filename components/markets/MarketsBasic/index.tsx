@@ -21,6 +21,7 @@ import useRewards from 'hooks/useRewards';
 import numbers from 'config/numbers.json';
 import InfoOutlined from '@mui/icons-material/InfoOutlined';
 import useTranslateOperation from 'hooks/useTranslateOperation';
+import { toPercentage } from 'utils/utils';
 
 const { minAPRValue } = numbers;
 
@@ -167,8 +168,12 @@ const MarketsBasic: FC = () => {
                   ? t(
                       'Your deposit can be withdrawn at any time, but please keep in mind that if you withdraw it before the maturity date, the current protocol rates will apply.',
                     )
-                  : t(
-                      'You can repay your loan at any time before its maturity date. If you do so after the maturity date, a daily interest of 2% will apply.',
+                  : marketAccount &&
+                    t(
+                      'You can repay your loan at any time before its maturity date. If you do so after the maturity date, a daily interest of {{penaltyRate}} will apply.',
+                      {
+                        penaltyRate: toPercentage(Number(marketAccount.penaltyRate.mul(86_400)) / 1e18),
+                      },
                     )
               }
               placement="top"

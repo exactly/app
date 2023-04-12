@@ -117,7 +117,7 @@
   "The maximum amount you can borrow without putting your health factor at risk": "The maximum amount you can borrow without putting your health factor at risk",
   "{{operation}} duration": "{{operation}} duration",
   "Your deposit can be withdrawn at any time, but please keep in mind that if you withdraw it before the maturity date, the current protocol rates will apply.": "Your deposit can be withdrawn at any time, but please keep in mind that if you withdraw it before the maturity date, the current protocol rates will apply.",
-  "You can repay your loan at any time before its maturity date. If you do so after the maturity date, a daily interest of 2% will apply.": "You can repay your loan at any time before its maturity date. If you do so after the maturity date, a daily interest of 2% will apply.",
+  "You can repay your loan at any time before its maturity date. If you do so after the maturity date, a daily interest of {{penaltyRate}} will apply.": "You can repay your loan at any time before its maturity date. If you do so after the maturity date, a daily interest of {{penaltyRate}} will apply.",
   "Flexible": "Flexible",
   "This option currently offers the best APR, but please note that is a variable pool and it may change at any time based on market conditions.": "This option currently offers the best APR, but please note that is a variable pool and it may change at any time based on market conditions.",
   "BEST": "BEST",
