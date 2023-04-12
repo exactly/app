@@ -1,8 +1,8 @@
 import React, { PropsWithChildren, ReactNode, useCallback, useState } from 'react';
-import { Box, Button, Menu, MenuItem } from '@mui/material';
+import { Box, Button, Menu, type MenuProps, MenuItem } from '@mui/material';
 import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownRounded';
 
-interface Props<T> {
+interface Props<T> extends Pick<MenuProps, 'anchorOrigin' | 'transformOrigin'> {
   label: string;
   options: T[];
   onChange: (value: T) => void;
@@ -41,7 +41,16 @@ function OptionItem({ onClick, children }: PropsWithChildren<{ onClick: () => vo
   );
 }
 
-const DropdownMenu = <T,>({ label, options, onChange, renderValue, renderOption, 'data-testid': testId }: Props<T>) => {
+const DropdownMenu = <T,>({
+  label,
+  options,
+  onChange,
+  renderValue,
+  renderOption,
+  'data-testid': testId,
+  anchorOrigin = { vertical: 'top', horizontal: 'left' },
+  transformOrigin = { vertical: 'top', horizontal: 'left' },
+}: Props<T>) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
   const handleClick = useCallback((event: React.MouseEvent<HTMLElement>) => {
@@ -73,14 +82,8 @@ const DropdownMenu = <T,>({ label, options, onChange, renderValue, renderOption,
         anchorEl={anchorEl}
         open={open}
         onClose={handleClose}
-        anchorOrigin={{
-          vertical: 'top',
-          horizontal: 'left',
-        }}
-        transformOrigin={{
-          vertical: 'top',
-          horizontal: 'left',
-        }}
+        anchorOrigin={anchorOrigin}
+        transformOrigin={transformOrigin}
         sx={{
           '& .MuiPaper-root': {
             boxShadow: '0px 2px 8px rgba(148, 151, 158, 0.2)',
