@@ -22,6 +22,7 @@ import numbers from 'config/numbers.json';
 import InfoOutlined from '@mui/icons-material/InfoOutlined';
 import useTranslateOperation from 'hooks/useTranslateOperation';
 import { toPercentage } from 'utils/utils';
+import { Zero } from '@ethersproject/constants';
 
 const { minAPRValue } = numbers;
 
@@ -91,17 +92,25 @@ const MarketsBasic: FC = () => {
 
   const bestOption = useMemo(() => {
     const options = allOptions
-      .map(({ maturity, depositAPR, borrowAPR }) => ({
+      .map(({ maturity, depositAPR, borrowAPR, borrowRewards, depositRewards }) => ({
         maturity,
-        apr: isDeposit ? depositAPR : borrowAPR,
+        apr: (isDeposit ? depositAPR : borrowAPR) || 0,
+        rewardAPR:
+          (isDeposit
+            ? depositRewards?.flatMap(({ rate }) => rate)?.reduce((partialSum, a) => partialSum.add(a), Zero)
+            : borrowRewards?.flatMap(({ rate }) => rate)?.reduce((partialSum, a) => partialSum.sub(a), Zero)) || Zero,
       }))
-      .map((option) => ({ ...option, apr: parseFloat((option.apr || 0).toFixed(4)) }));
+      .map(({ maturity, apr, rewardAPR }) => ({
+        maturity,
+        apr: parseFloat(apr.toFixed(4)),
+        totalAPR: parseFloat((apr + Number(rewardAPR) / 1e18).toFixed(4)),
+      }));
 
-    const APRs = options.map(({ apr }) => apr);
+    const APRs = options.map(({ totalAPR }) => totalAPR);
 
     const bestAPR = isDeposit ? Math.max(...APRs) : Math.min(...APRs);
 
-    return options.reverse().find(({ apr }) => apr === bestAPR)?.maturity;
+    return options.reverse().find(({ totalAPR }) => totalAPR === bestAPR)?.maturity;
   }, [allOptions, isDeposit]);
 
   const currentOption = useMemo(
