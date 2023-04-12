@@ -61,10 +61,28 @@ export const borrow = ({ symbol, amount, receiver }: DepositParams, signer: Defe
   });
 };
 
+type BalanceParams = {
+  symbol: ERC20TokenSymbol;
+  amount: string;
+};
+
+export const checkBalance = ({ symbol, amount }: BalanceParams, signer: Defer<Signer>) => {
+  it(`checks ${symbol} balance to be ${amount}`, async () => {
+    const erc20Contract = await erc20(symbol, signer());
+    const balance = await erc20Contract.balanceOf(await signer().getAddress());
+    const expectedBalance = parseFixed(amount, await erc20Contract.decimals());
+    expect(balance.toString()).to.eq(expectedBalance.toString());
+  });
+};
+
 export const reload = async () => {
   it('reloads the app', () => {
     cy.reload();
-    // eslint-disable-next-line cypress/no-unnecessary-waiting, ui-testing/no-hard-wait, testing-library/await-async-utils
-    cy.wait(5000);
+    justWait();
   });
+};
+
+export const justWait = () => {
+  // eslint-disable-next-line cypress/no-unnecessary-waiting, ui-testing/no-hard-wait
+  return cy.wait(5000);
 };
