@@ -1,4 +1,5 @@
 import * as modal from '../modal';
+import * as navbar from '../navbar';
 import { formatSymbol } from '../../utils/strings';
 import { ERC20TokenSymbol } from '../../utils/contracts';
 
@@ -11,6 +12,14 @@ type TestParams = {
 
 export default ({ type, symbol, amount = '1', shouldApprove = false }: TestParams) => {
   describe(`${symbol} ${type} withdraw`, () => {
+    it('should be in the correct page', () => {
+      cy.url().then((url) => {
+        if (!url.includes('/dashboard')) {
+          navbar.goTo('dashboard');
+        }
+      });
+    });
+
     it('should open the modal', () => {
       modal.open(type, 'withdraw', symbol);
     });
@@ -54,6 +63,14 @@ export const attemptWithdraw = ({ type, symbol, amount = '1' }: Omit<TestParams,
   describe(`${symbol} ${type} attempt withdraw`, () => {
     after(() => {
       modal.close();
+    });
+
+    it('should be in the correct page', () => {
+      cy.url().then((url) => {
+        if (!url.includes('/dashboard')) {
+          navbar.goTo('dashboard');
+        }
+      });
     });
 
     it('should open the modal', () => {

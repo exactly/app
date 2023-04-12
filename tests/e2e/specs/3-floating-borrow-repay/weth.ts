@@ -1,8 +1,9 @@
 import { deposit, enterMarket, reload } from '../../steps/actions';
 import borrow, { attemptBorrow } from '../../steps/common/borrow';
+import repay from '../../steps/common/repay';
 import { setupFork } from '../../steps/setup';
 
-describe('WETH floating borrow', () => {
+describe('WETH floating borrow/repay', () => {
   const { visit, setBalance, userAddress, signer } = setupFork();
 
   before(() => {
@@ -27,9 +28,16 @@ describe('WETH floating borrow', () => {
   borrow({
     type: 'floating',
     symbol: 'WETH',
-    amount: '0.1',
+    amount: '0.5',
     aboveLimitAmount: '1',
     aboveLiquidityAmount: 1_000_000,
     shouldApprove: true,
+  });
+
+  repay({
+    type: 'floating',
+    symbol: 'WETH',
+    amount: '0.25',
+    balance: '100',
   });
 });

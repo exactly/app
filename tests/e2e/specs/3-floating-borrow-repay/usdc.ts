@@ -1,10 +1,11 @@
 import * as navbar from '../../steps/navbar';
 import * as dashboard from '../../steps/dashboard';
-import { deposit, enterMarket, reload } from '../../steps/actions';
+import { checkBalance, deposit, enterMarket, reload } from '../../steps/actions';
 import borrow, { attemptBorrow } from '../../steps/common/borrow';
 import { setupFork } from '../../steps/setup';
+import repay from '../../steps/common/repay';
 
-describe('USDC floating borrow', () => {
+describe('USDC floating borrow/repay', () => {
   const { visit, setBalance, userAddress, signer } = setupFork();
 
   before(() => {
@@ -21,7 +22,7 @@ describe('USDC floating borrow', () => {
 
   describe('Setup environment for a successful borrow using ETH without entering USDC market', () => {
     enterMarket('WETH', signer);
-    deposit({ symbol: 'ETH', amount: '1.5', receiver: userAddress() }, signer);
+    deposit({ symbol: 'ETH', amount: '10', receiver: userAddress() }, signer);
 
     reload();
   });
@@ -29,11 +30,13 @@ describe('USDC floating borrow', () => {
   borrow({
     type: 'floating',
     symbol: 'USDC',
-    amount: '1',
+    amount: '50',
     aboveLiquidityAmount: 1_000_000_000,
   });
 
-  describe('dashboard after borrow', () => {
+  describe('status after borrow', () => {
+    checkBalance({ symbol: 'USDC', amount: '50' }, signer);
+
     it('should navigate to dashboard', () => {
       navbar.goTo('dashboard');
     });
@@ -53,5 +56,21 @@ describe('USDC floating borrow', () => {
         "You can't disable collateral on this asset because you have an active borrow",
       );
     });
+
+    it('should switch to borrows', () => {
+      dashboard.switchTab('borrow');
+    });
+  });
+
+  repay({
+    type: 'floating',
+    symbol: 'USDC',
+    amount: '25',
+    balance: '50',
+    shouldApprove: true,
+  });
+
+  describe('status after repay', () => {
+    checkBalance({ symbol: 'USDC', amount: '25' }, signer);
   });
 });

@@ -1,4 +1,5 @@
 import { type ERC20TokenSymbol } from '../utils/contracts';
+import { justWait } from './actions';
 
 type Path = 'markets' | 'dashboard' | ERC20TokenSymbol;
 
@@ -6,8 +7,12 @@ export const goTo = (path: Path) => {
   switch (path) {
     case 'markets':
     case 'dashboard':
-      return cy.getByTestId(`navbar-link-${path}`).click();
+      cy.getByTestId(`navbar-link-${path}`).click();
+      break;
     default:
-      return cy.getByTestId(`markets-floating-pool-row-${path}`);
+      cy.getByTestId(`markets-floating-pool-row-${path}`);
+      break;
   }
+
+  return justWait();
 };
