@@ -104,7 +104,7 @@
   "The maximum amount you can borrow without putting your health factor at risk": "El monto máximo que puede pedir prestado sin poner en riesgo tu factor de salud",
   "{{operation}} duration": "Duración {{operation}}",
   "Your deposit can be withdrawn at any time, but please keep in mind that if you withdraw it before the maturity date, the current protocol rates will apply.": "Puede retirar su depósito en cualquier momento, pero tenga en cuenta que si retira antes de la fecha de vencimiento, se aplicarán las tasas del protocolo actual.",
-  "You can repay your loan at any time before its maturity date. If you do so after the maturity date, a daily interest of 2% will apply.": "Puede pagar su préstamo en cualquier momento antes de su fecha de vencimiento. Si lo hace después de la fecha de vencimiento, se aplicará un interés diario del 2%.",
+  "You can repay your loan at any time before its maturity date. If you do so after the maturity date, a daily interest of {{penaltyRate}} will apply.": "Puede pagar su préstamo en cualquier momento antes de su fecha de vencimiento. Si lo hace después de la fecha de vencimiento, se aplicará un interés diario del {{penaltyRate}}.",
   "Flexible": "Flexible",
   "This option currently offers the best APR, but please note that is a variable pool and it may change at any time based on market conditions.": "Esta opción ofrece actualmente la mejor TNA, pero tenga en cuenta la tasa es variable y puede cambiar en cualquier momento según las condiciones del mercado.",
   "BEST": "MEJOR",
