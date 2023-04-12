@@ -71,7 +71,12 @@ const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ symbol }) => {
               hover
             >
               <TableCell component="th" scope="row" width={120}>
-                <Typography variant="body1" color={palette.mode === 'light' ? 'black' : 'white'} fontWeight={600}>
+                <Typography
+                  variant="body1"
+                  color={palette.mode === 'light' ? 'black' : 'white'}
+                  fontWeight={600}
+                  whiteSpace="nowrap"
+                >
                   {parseTimestamp(maturity)}
                 </Typography>
               </TableCell>
@@ -98,6 +103,7 @@ const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ symbol }) => {
                   disabled={depositAPR < minAPRValue}
                   variant="contained"
                   onClick={(e) => handleActionClick(e, 'depositAtMaturity', symbol, maturity)}
+                  sx={{ 'white-space': 'nowrap' }}
                 >
                   {t('Deposit')}
                 </Button>
@@ -112,7 +118,7 @@ const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ symbol }) => {
                 <Button
                   disabled={borrowAPR < minAPRValue}
                   variant="outlined"
-                  sx={{ backgroundColor: 'components.bg' }}
+                  sx={{ backgroundColor: 'components.bg', 'white-space': 'nowrap' }}
                   onClick={(e) => handleActionClick(e, 'borrowAtMaturity', symbol, maturity)}
                 >
                   {t('Borrow')}

@@ -134,6 +134,7 @@ function TableRowFixedPool({ symbol, valueUSD, type, maturityDate, market, decim
               onClick={(e) =>
                 handleActionClick(e, type === 'borrow' ? 'repayAtMaturity' : 'withdrawAtMaturity', symbol, maturityDate)
               }
+              sx={{ 'white-space': 'nowrap' }}
             >
               {type === 'borrow' ? t('Repay') : t('Withdraw')}
             </Button>
