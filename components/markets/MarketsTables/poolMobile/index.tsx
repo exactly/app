@@ -1,5 +1,5 @@
 import React, { FC, useMemo } from 'react';
-import { Box, Button, Divider, Grid, Skeleton, Tooltip, Typography } from '@mui/material';
+import { Box, Button, Divider, Grid, Skeleton, SxProps, Tooltip, Typography } from '@mui/material';
 import { BigNumber } from '@ethersproject/bignumber';
 
 import numbers from 'config/numbers.json';
@@ -16,6 +16,11 @@ import RewardPill from 'components/markets/RewardPill';
 import useTranslateOperation from 'hooks/useTranslateOperation';
 
 const { minAPRValue } = numbers;
+
+const sxButton: SxProps = {
+  'white-space': 'nowrap',
+  height: '34px',
+};
 
 const PoolMobile: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) => {
   const translateOperation = useTranslateOperation();
@@ -67,7 +72,7 @@ const PoolMobile: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) 
                 <Button
                   fullWidth
                   variant="contained"
-                  sx={{ height: '34px' }}
+                  sx={sxButton}
                   onClick={(e) =>
                     handleActionClick(e, isFloating ? 'deposit' : 'depositAtMaturity', symbol, depositMaturity)
                   }
@@ -78,7 +83,7 @@ const PoolMobile: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) 
                 <Button
                   variant="outlined"
                   fullWidth
-                  sx={{ height: '34px' }}
+                  sx={sxButton}
                   onClick={(e) =>
                     handleActionClick(e, isFloating ? 'borrow' : 'borrowAtMaturity', symbol, borrowMaturity)
                   }

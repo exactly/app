@@ -1,11 +1,11 @@
 import { Grid, Typography, useTheme } from '@mui/material';
 import React, { FC } from 'react';
+import { useTranslation } from 'react-i18next';
 import { PieChart, Pie, Tooltip, Legend, ResponsiveContainer, Cell } from 'recharts';
 import useAssetsComposition from 'hooks/useAssetsComposition';
 import TooltipChart from '../TooltipChart';
 import formatNumber from 'utils/formatNumber';
 import formatSymbol from 'utils/formatSymbol';
-import { t } from 'i18next';
 
 type Props = {
   type: 'deposit' | 'borrow';
@@ -26,6 +26,7 @@ type CustomProps = {
 };
 
 const AssetsDistributionPieChart: FC<Props> = ({ type }) => {
+  const { t } = useTranslation();
   const { depositsComposition, borrowsComposition } = useAssetsComposition();
   const { palette } = useTheme();
 
