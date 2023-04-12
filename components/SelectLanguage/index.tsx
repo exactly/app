@@ -1,10 +1,18 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { Typography } from '@mui/material';
+import { Typography, SxProps } from '@mui/material';
+import CheckIcon from '@mui/icons-material/Check';
+import PublicIcon from '@mui/icons-material/Public';
+
 import { useTranslation } from 'react-i18next';
 
 import i18n from 'i18n';
 
 import DropdownMenu from 'components/DropdownMenu';
+
+const sx: SxProps = {
+  fontSize: 13.6,
+  color: 'figma.grey.600',
+};
 
 function SelectLanguage() {
   const { t } = useTranslation();
@@ -27,15 +35,23 @@ function SelectLanguage() {
       label={t('Switch language')}
       options={languages}
       onChange={onChange}
+      anchorOrigin={{ vertical: -34, horizontal: 'right' }}
+      transformOrigin={{ vertical: 'center', horizontal: 'right' }}
       renderValue={
-        <Typography fontWeight="700" color="figma.grey.600" fontSize={13.6}>
-          {names[lng]}
-        </Typography>
+        <>
+          <PublicIcon sx={sx} />
+          <Typography fontWeight="700" sx={sx}>
+            {names[lng]}
+          </Typography>
+        </>
       }
       renderOption={(o: string) => (
-        <Typography fontWeight="700" color="figma.grey.600" fontSize={13.6}>
-          {names[o]}
-        </Typography>
+        <>
+          <Typography fontWeight="700" sx={sx}>
+            {o.toUpperCase()} - {names[o]}
+          </Typography>
+          {o === lng && <CheckIcon sx={sx} />}
+        </>
       )}
     />
   );
