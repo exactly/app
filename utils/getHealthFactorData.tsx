@@ -1,5 +1,5 @@
 import { BigNumber, parseFixed } from '@ethersproject/bignumber';
-import { Zero } from '@ethersproject/constants';
+import { WeiPerEther, Zero } from '@ethersproject/constants';
 
 import { Previewer } from 'types/contracts';
 import { HealthFactor } from 'types/HealthFactor';
@@ -46,13 +46,14 @@ function getHealthFactorData(accountData: Previewer.MarketAccountStructOutput[])
 
         const position = principal.add(fee);
 
-        fixedLenderDebt = fixedLenderDebt.add(position.mul(oracle).div(decimalWAD));
-
-        if (currentTimestamp.gt(maturityTimestamp)) {
-          const time = currentTimestamp.sub(maturityTimestamp);
-
-          fixedLenderDebt = fixedLenderDebt.add(time.mul(penaltyRate));
-        }
+        fixedLenderDebt = fixedLenderDebt.add(
+          (currentTimestamp.gt(maturityTimestamp)
+            ? position.add(position.mul(currentTimestamp.sub(maturityTimestamp).mul(penaltyRate)).div(WeiPerEther))
+            : position
+          )
+            .mul(oracle)
+            .div(decimalWAD),
+        );
       });
 
       debt = debt.add(fixedLenderDebt.mul(WAD).div(adjustFactor));
