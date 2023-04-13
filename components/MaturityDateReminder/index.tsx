@@ -24,7 +24,7 @@ export default function MaturityDateReminder() {
         const currentTimestamp = BigNumber.from(Math.floor(Date.now() / 1000));
 
         if (maturity.gt(currentTimestamp)) {
-          const differenceInSeconds = currentTimestamp.sub(maturity);
+          const differenceInSeconds = maturity.sub(currentTimestamp);
 
           if (rangeInSeconds.gt(differenceInSeconds)) {
             setDate(parseTimestamp(maturity.toString(), 'MMM DD, YYYY, HH:mm:ss'));
