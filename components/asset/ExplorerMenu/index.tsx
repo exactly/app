@@ -1,6 +1,6 @@
 import React, { FC, useCallback, useMemo } from 'react';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
-import { Box, Button, IconButton, Menu, MenuItem, Tooltip, Typography } from '@mui/material';
+import { Box, Button, Menu, MenuItem, Typography, useTheme } from '@mui/material';
 import Image from 'next/image';
 import networkData from 'config/networkData.json' assert { type: 'json' };
 import { useWeb3 } from 'hooks/useWeb3';
@@ -18,6 +18,7 @@ type Props = {
 const ExplorerMenu: FC<Props> = ({ symbol, assetAddress, eMarketAddress, rateModelAddress, exaToken }) => {
   const { t } = useTranslation();
   const { chain } = useWeb3();
+  const { palette } = useTheme();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -54,19 +55,25 @@ const ExplorerMenu: FC<Props> = ({ symbol, assetAddress, eMarketAddress, rateMod
         aria-haspopup="true"
         aria-expanded={open ? 'true' : undefined}
         onClick={handleClick}
-        sx={{ bgcolor: 'figma.grey.100', py: 0.5, px: 1, height: 'auto' }}
+        sx={{ bgcolor: palette.mode === 'light' ? 'figma.grey.100' : 'grey.100', py: 0.5, px: 1, height: 'auto' }}
       >
         <Box display="flex" alignItems="center" gap={0.5}>
           <Typography
             fontSize={10}
             fontWeight={500}
             fontFamily="monospace"
-            color="figma.grey.600"
+            color={palette.mode === 'light' ? 'figma.grey.600' : 'grey.900'}
             textTransform="uppercase"
           >
             {t('View on Etherscan')}
           </Typography>
-          <OpenInNewIcon sx={{ height: '10px', width: '10px', color: 'figma.grey.600' }} />
+          <OpenInNewIcon
+            sx={{
+              height: '10px',
+              width: '10px',
+              color: palette.mode === 'light' ? 'figma.grey.600' : 'grey.900',
+            }}
+          />
         </Box>
       </Button>
       <Menu
