@@ -102,7 +102,7 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
   const etherscan = networkData[String(chain?.id) as keyof typeof networkData]?.etherscan;
   return (
     <Grid sx={{ bgcolor: 'components.bg' }} width="100%" p="24px" boxShadow="0px 4px 12px rgba(175, 177, 182, 0.2)">
-      <Grid item container mb="24px" alignItems="end">
+      <Grid item container mb="24px" justifyContent="space-between" alignItems="end">
         <DropdownMenu
           label={t('Asset')}
           options={options}
