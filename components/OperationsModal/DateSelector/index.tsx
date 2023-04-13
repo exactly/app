@@ -14,7 +14,12 @@ type DateOptionProps = {
 
 function DateOption({ label, option = false }: DateOptionProps) {
   return (
-    <Typography fontWeight={600} fontSize={option ? 14 : 18} mt={option ? '4px' : '6px'}>
+    <Typography
+      fontWeight={600}
+      fontSize={option ? 14 : 18}
+      mt={option ? '4px' : '6px'}
+      data-testid={!option ? 'modal-date-selector' : undefined}
+    >
       {label}
     </Typography>
   );

@@ -1,3 +1,5 @@
+import dayjs from 'dayjs';
+
 export const pastParticiple = (word: string): string => {
   const past: Record<string, string> = {
     deposit: 'deposited',
@@ -15,4 +17,8 @@ export const repeat = (len: number, c: string) => Array.from({ length: len }).fi
 
 export const formatSymbol = (symbol: string): string => {
   return symbol === 'WETH' ? 'ETH' : symbol;
+};
+
+export const formatMaturity = (timestamp: number): string => {
+  return dayjs.unix(timestamp).format('MMM DD, YYYY');
 };

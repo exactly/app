@@ -1,10 +1,10 @@
 import { ERC20TokenSymbol } from '../utils/contracts';
-import { formatSymbol } from '../utils/strings';
+import { formatMaturity, formatSymbol } from '../utils/strings';
 
 export type Operation = 'deposit' | 'borrow' | 'withdraw' | 'repay';
 
-export const open = (type: 'floating' | 'fixed', action: Operation, symbol: ERC20TokenSymbol) => {
-  cy.getByTestId(`${type}-${action}-${symbol}`).click();
+export const open = (type: 'floating' | 'fixed', action: Operation, symbol: ERC20TokenSymbol, maturity?: number) => {
+  cy.getByTestId(`${type}-${maturity ? `${maturity}-` : ''}${action}-${symbol}`).click();
   waitForModalReady();
 };
 
@@ -97,6 +97,14 @@ export const checkTransactionStatus = (target: 'success' | 'error', summary: str
   cy.getByTestId('modal-transaction-summary').should('have.text', summary);
 };
 
+export const checkReminderExists = (operation: Extract<Operation, 'deposit' | 'borrow'>) => {
+  cy.getByTestId('modal-transaction-reminder').should('be.visible');
+  cy.getByTestId('modal-transaction-reminder-title').should(
+    'have.text',
+    operation === 'deposit' ? 'Remember to withdraw your assets' : 'Remember to pay before the maturity date',
+  );
+};
+
 export const checkTitle = (title: string) => {
   cy.getByTestId('modal-title').should('have.text', title);
 };
@@ -115,6 +123,10 @@ export const checkAssetSelection = (symbol: ERC20TokenSymbol) => {
 
 export const checkWalletBalance = (balance: string) => {
   cy.getByTestId('modal-wallet-balance').should('contain.text', balance);
+};
+
+export const checkPoolDate = (maturity: number) => {
+  cy.getByTestId('modal-date-selector').should('contain.text', formatMaturity(maturity));
 };
 
 export const checkAlert = (variant: 'info' | 'warning' | 'error' | 'success', message: string) => {

@@ -34,6 +34,6 @@ export const auditor = (signer: Signer): Auditor => {
   return new Contract(auditorContract.address, auditorContract.abi, signer) as Auditor;
 };
 
-export const previewer = (provider: Provider): Previewer => {
+export const previewer = (provider: Provider | Signer): Previewer => {
   return new Contract(previewerContract.address, previewerContract.abi, provider) as Previewer;
 };

@@ -19,7 +19,7 @@ describe('WETH floating deposit/withdraw', () => {
     type: 'floating',
     symbol: 'WETH',
     decimals: 18,
-    balance: '100.0',
+    balance: '100',
     amount: '1',
   });
 

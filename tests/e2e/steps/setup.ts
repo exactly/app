@@ -68,5 +68,6 @@ export const setupFork = ({ chainId = 1, wallet = Wallet.createRandom() }: ForkP
     userAddress: () => wallet.address,
     setBalance: (address: string, balance: Balance) => setBalance(rpcURL(forkId), address, balance),
     signer,
+    provider,
   };
 };
