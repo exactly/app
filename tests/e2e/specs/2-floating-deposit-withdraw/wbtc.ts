@@ -26,7 +26,7 @@ describe('WBTC floating deposit/withdraw', () => {
     shouldApprove: true,
   });
 
-  describe('balance after deposit', () => {
+  describe('Status after deposit', () => {
     checkBalance({ symbol: 'WBTC', amount: '3.5' }, signer);
   });
 
@@ -38,7 +38,7 @@ describe('WBTC floating deposit/withdraw', () => {
     amount: '0.5',
   });
 
-  describe('balance after withdraw', () => {
+  describe('Status after withdraw', () => {
     checkBalance({ symbol: 'WBTC', amount: '4' }, signer);
   });
 });

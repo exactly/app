@@ -39,7 +39,7 @@ describe('WBTC fixed withdraw/deposit', () => {
     maturity: pool,
   });
 
-  describe('status after fixed deposit', () => {
+  describe('Status after fixed deposit', () => {
     checkBalance({ symbol: 'WBTC', amount: '95' }, signer);
 
     it('should navigate to the dashboard', () => {
@@ -58,7 +58,7 @@ describe('WBTC fixed withdraw/deposit', () => {
     maturity: pool,
   });
 
-  describe('status after fixed withdraw', () => {
+  describe('Status after fixed withdraw', () => {
     checkBalance({ symbol: 'WBTC', amount: '100', approx: 0.005 }, signer);
   });
 });

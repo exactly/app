@@ -38,7 +38,7 @@ describe('WETH fixed withdraw/deposit', () => {
     maturity: pool,
   });
 
-  describe('status after fixed deposit', () => {
+  describe('Status after fixed deposit', () => {
     it('should navigate to the dashboard', () => {
       navbar.goTo('dashboard');
     });
