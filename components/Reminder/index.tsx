@@ -43,8 +43,9 @@ const Reminder: FC<Props> = ({ operationName, maturity }) => {
       px={4}
       borderRadius={1}
       border="1px solid #E3E5E8"
+      data-testid="modal-transaction-reminder"
     >
-      <Typography fontSize={15} fontWeight={700}>
+      <Typography fontSize={15} fontWeight={700} data-testid="modal-transaction-reminder-title">
         {isBorrow ? t('Remember to pay before the maturity date') : t('Remember to withdraw your assets')}
       </Typography>
       <Box display="flex" flexDirection="column" justifyContent="center" alignItems="center" textAlign="center">

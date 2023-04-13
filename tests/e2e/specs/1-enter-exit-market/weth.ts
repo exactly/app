@@ -1,4 +1,3 @@
-import * as navbar from '../../steps/navbar';
 import { enterMarket, exitMarket } from '../../steps/common/market';
 import { setupFork } from '../../steps/setup';
 
@@ -6,7 +5,7 @@ describe('WETH enter/exit market', () => {
   const { visit, setBalance, userAddress } = setupFork();
 
   before(() => {
-    visit('/').then(() => navbar.goTo('dashboard'));
+    visit('/dashboard');
   });
 
   before(async () => {

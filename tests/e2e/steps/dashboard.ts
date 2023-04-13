@@ -46,3 +46,7 @@ export const waitForTransaction = (symbol: ERC20TokenSymbol) => {
 export const switchTab = (tab: 'deposit' | 'borrow') => {
   cy.getByTestId(`tab-${tab}`).should('be.visible').click();
 };
+
+export const checkFixedTableRow = (type: 'deposit' | 'borrow', symbol: ERC20TokenSymbol, maturity: number) => {
+  cy.getByTestId(`dashboard-fixed-${type}-row-${maturity}-${symbol}`).should('be.visible');
+};

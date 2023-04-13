@@ -89,7 +89,11 @@ function TableRowFixedPool({ symbol, valueUSD, type, maturityDate, market, decim
 
   return (
     <>
-      <TableRow sx={{ '& > *': { borderBottom: 'unset' }, backgroundColor: open ? 'grey.100' : 'transparent' }} hover>
+      <TableRow
+        sx={{ '& > *': { borderBottom: 'unset' }, backgroundColor: open ? 'grey.100' : 'transparent' }}
+        hover
+        data-testid={`dashboard-fixed-${type}-row-${maturityDate}-${symbol}`}
+      >
         <Link href={{ pathname: `/${symbol}`, query }} legacyBehavior>
           <TableCell component="th" align="left" sx={{ cursor: 'pointer' }} width={240}>
             <Stack direction="row" spacing={1}>
@@ -130,6 +134,7 @@ function TableRowFixedPool({ symbol, valueUSD, type, maturityDate, market, decim
         <TableCell align="left" width={50} size="small" sx={{ px: 1 }}>
           {(maturityDate && (
             <Button
+              data-testid={`fixed-${maturityDate}-${type === 'borrow' ? 'repay' : 'withdraw'}-${symbol}`}
               variant="outlined"
               onClick={(e) =>
                 handleActionClick(e, type === 'borrow' ? 'repayAtMaturity' : 'withdrawAtMaturity', symbol, maturityDate)

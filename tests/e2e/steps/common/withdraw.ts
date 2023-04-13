@@ -3,14 +3,22 @@ import * as navbar from '../navbar';
 import { formatSymbol } from '../../utils/strings';
 import { ERC20TokenSymbol } from '../../utils/contracts';
 
-type TestParams = {
-  type: 'floating' | 'fixed';
+type TestParams = (
+  | {
+      type: 'floating';
+      maturity?: number;
+    }
+  | {
+      type: 'fixed';
+      maturity: number;
+    }
+) & {
   symbol: ERC20TokenSymbol;
   amount?: string;
   shouldApprove?: boolean;
 };
 
-export default ({ type, symbol, amount = '1', shouldApprove = false }: TestParams) => {
+export default ({ type, symbol, amount = '1', shouldApprove = false, maturity }: TestParams) => {
   describe(`${symbol} ${type} withdraw`, () => {
     it('should be in the correct page', () => {
       cy.url().then((url) => {
@@ -21,7 +29,7 @@ export default ({ type, symbol, amount = '1', shouldApprove = false }: TestParam
     });
 
     it('should open the modal', () => {
-      modal.open(type, 'withdraw', symbol);
+      modal.open(type, 'withdraw', symbol, maturity);
     });
 
     describe('the modal', () => {
@@ -29,6 +37,10 @@ export default ({ type, symbol, amount = '1', shouldApprove = false }: TestParam
         modal.checkTitle('Withdraw');
         modal.checkType(type);
         modal.checkAssetSelection(symbol);
+
+        if (type === 'fixed') {
+          modal.checkPoolDate(maturity);
+        }
       });
     });
 
@@ -59,7 +71,7 @@ export default ({ type, symbol, amount = '1', shouldApprove = false }: TestParam
   });
 };
 
-export const attemptWithdraw = ({ type, symbol, amount = '1' }: Omit<TestParams, 'shouldApprove'>) => {
+export const attemptWithdraw = ({ type, symbol, amount = '1', maturity }: Omit<TestParams, 'shouldApprove'>) => {
   describe(`${symbol} ${type} attempt withdraw`, () => {
     after(() => {
       modal.close();
@@ -74,7 +86,7 @@ export const attemptWithdraw = ({ type, symbol, amount = '1' }: Omit<TestParams,
     });
 
     it('should open the modal', () => {
-      modal.open(type, 'withdraw', symbol);
+      modal.open(type, 'withdraw', symbol, maturity);
     });
 
     describe('the modal', () => {

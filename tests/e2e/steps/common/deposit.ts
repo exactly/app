@@ -1,20 +1,38 @@
 import * as modal from '../modal';
-import { formatSymbol, repeat } from '../../utils/strings';
+import { formatMaturity, formatSymbol, repeat } from '../../utils/strings';
 import { ERC20TokenSymbol } from '../../utils/contracts';
 
-type TestParams = {
-  type: 'floating' | 'fixed';
+type TestParams = (
+  | {
+      type: 'floating';
+      maturity?: number;
+    }
+  | {
+      type: 'fixed';
+      maturity: number;
+    }
+) & {
   symbol: ERC20TokenSymbol;
   decimals: number;
-  balance: string;
+  balance?: string;
   amount?: string;
+  maxYield?: string;
   shouldApprove?: boolean;
 };
 
-export default ({ type, symbol, decimals, balance, amount = '1', shouldApprove = false }: TestParams) => {
+export default ({
+  type,
+  symbol,
+  decimals,
+  balance,
+  amount = '1',
+  shouldApprove = false,
+  maturity,
+  maxYield,
+}: TestParams) => {
   describe(`${symbol} ${type} deposit`, () => {
     it('should open the modal', () => {
-      modal.open(type, 'deposit', symbol);
+      modal.open(type, 'deposit', symbol, maturity);
     });
 
     describe('the modal', () => {
@@ -23,6 +41,10 @@ export default ({ type, symbol, decimals, balance, amount = '1', shouldApprove =
         modal.checkType(type);
         modal.checkAssetSelection(symbol);
         modal.checkWalletBalance(balance);
+
+        if (type === 'fixed') {
+          modal.checkPoolDate(maturity);
+        }
       });
     });
 
@@ -43,12 +65,19 @@ export default ({ type, symbol, decimals, balance, amount = '1', shouldApprove =
           modal.input(String(aboveBalance));
           modal.checkSubmitErrorButton('Insufficient balance');
         });
+
+        it('should input the wallet balance on max', () => {
+          modal.onMax();
+          modal.checkInput(balance);
+        });
       }
 
-      it('should input the wallet balance on max', () => {
-        modal.onMax();
-        modal.checkInput(balance);
-      });
+      if (type === 'fixed' && maxYield) {
+        it('should warn the user about depositing more than the optimal amount', () => {
+          modal.input(maxYield);
+          modal.checkAlert('warning', 'You have reached the maximum yield possible');
+        });
+      }
 
       it(`should allow to input the amount ${amount}`, () => {
         modal.input(amount);
@@ -70,7 +99,16 @@ export default ({ type, symbol, decimals, balance, amount = '1', shouldApprove =
         modal.submit();
         modal.waitForTransaction('deposit');
 
-        modal.checkTransactionStatus('success', `You deposited ${amount} ${formatSymbol(symbol)}`);
+        modal.checkTransactionStatus(
+          'success',
+          `You deposited ${amount} ${formatSymbol(symbol)}${
+            type === 'fixed' ? ` until ${formatMaturity(maturity)}` : ''
+          }`,
+        );
+
+        if (type === 'fixed') {
+          modal.checkReminderExists('deposit');
+        }
 
         modal.close();
       });
