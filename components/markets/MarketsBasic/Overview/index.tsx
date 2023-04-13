@@ -108,7 +108,7 @@ const Overview: FC<Props> = ({ symbol, operation, qty, option }) => {
       <Box display="flex" justifyContent="space-between">
         <Typography fontWeight={500} fontSize={12} color="figma.grey.500">
           {t('{{operation}} maturity date (In {{daysLeft}})', {
-            operation: translateOperation(operation, { variant: 'noun' }),
+            operation: translateOperation(operation, { variant: 'noun', capitalize: true }),
             daysLeft: daysLeft(option.maturity || 0),
           })}
         </Typography>
