@@ -34,7 +34,7 @@ describe('USDC floating borrow/repay', () => {
     aboveLiquidityAmount: 1_000_000_000,
   });
 
-  describe('status after borrow', () => {
+  describe('Status after borrow', () => {
     checkBalance({ symbol: 'USDC', amount: '50' }, signer);
 
     it('should navigate to dashboard', () => {
@@ -70,7 +70,7 @@ describe('USDC floating borrow/repay', () => {
     shouldApprove: true,
   });
 
-  describe('status after repay', () => {
+  describe('Status after repay', () => {
     checkBalance({ symbol: 'USDC', amount: '25' }, signer);
   });
 });

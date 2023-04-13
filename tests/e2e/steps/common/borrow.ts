@@ -1,9 +1,17 @@
 import * as modal from '../modal';
-import { formatSymbol } from '../../utils/strings';
+import { formatMaturity, formatSymbol } from '../../utils/strings';
 import { ERC20TokenSymbol } from '../../utils/contracts';
 
-type TestParams = {
-  type: 'floating' | 'fixed';
+type TestParams = (
+  | {
+      type: 'floating';
+      maturity?: number;
+    }
+  | {
+      type: 'fixed';
+      maturity: number;
+    }
+) & {
   symbol: ERC20TokenSymbol;
   amount?: string;
   aboveLimitAmount?: string | number;
@@ -18,10 +26,11 @@ export default ({
   aboveLimitAmount,
   aboveLiquidityAmount,
   shouldApprove = false,
+  maturity,
 }: TestParams) => {
   describe(`${symbol} ${type} borrow`, () => {
     it('should open the modal', () => {
-      modal.open(type, 'borrow', symbol);
+      modal.open(type, 'borrow', symbol, maturity);
     });
 
     describe('the modal', () => {
@@ -29,6 +38,10 @@ export default ({
         modal.checkTitle('Borrow');
         modal.checkType(type);
         modal.checkAssetSelection(symbol);
+
+        if (type === 'fixed') {
+          modal.checkPoolDate(maturity);
+        }
       });
     });
 
@@ -71,7 +84,16 @@ export default ({
         modal.submit();
         modal.waitForTransaction('borrow');
 
-        modal.checkTransactionStatus('success', `You borrowed ${amount} ${formatSymbol(symbol)}`);
+        modal.checkTransactionStatus(
+          'success',
+          `You borrowed ${amount} ${formatSymbol(symbol)}${
+            type === 'fixed' ? ` until ${formatMaturity(maturity)}` : ''
+          }`,
+        );
+
+        if (type === 'fixed') {
+          modal.checkReminder('borrow');
+        }
 
         modal.close();
       });

@@ -4,15 +4,23 @@ import * as dashboard from '../dashboard';
 import { formatSymbol } from '../../utils/strings';
 import { ERC20TokenSymbol } from '../../utils/contracts';
 
-type TestParams = {
-  type: 'floating' | 'fixed';
+type TestParams = (
+  | {
+      type: 'floating';
+      maturity?: number;
+    }
+  | {
+      type: 'fixed';
+      maturity: number;
+    }
+) & {
   symbol: ERC20TokenSymbol;
   amount?: string;
   balance?: string;
   shouldApprove?: boolean;
 };
 
-export default ({ type, symbol, amount = '1', balance = '100', shouldApprove = false }: TestParams) => {
+export default ({ type, symbol, amount = '1', balance = '100', shouldApprove = false, maturity }: TestParams) => {
   describe(`${symbol} ${type} repay`, () => {
     it('should be in the correct page', () => {
       cy.url().then((url) => {
@@ -24,7 +32,7 @@ export default ({ type, symbol, amount = '1', balance = '100', shouldApprove = f
     });
 
     it('should open the modal', () => {
-      modal.open(type, 'repay', symbol);
+      modal.open(type, 'repay', symbol, maturity);
     });
 
     describe('the modal', () => {
@@ -32,6 +40,10 @@ export default ({ type, symbol, amount = '1', balance = '100', shouldApprove = f
         modal.checkTitle('Repay');
         modal.checkType(type);
         modal.checkAssetSelection(symbol);
+
+        if (type === 'fixed') {
+          modal.checkPoolDate(maturity);
+        }
       });
     });
 
@@ -40,7 +52,7 @@ export default ({ type, symbol, amount = '1', balance = '100', shouldApprove = f
         modal.clearInput();
       });
 
-      if (!shouldApprove) {
+      if (type !== 'fixed' && !shouldApprove) {
         it(`should not allow to repay more than what's present in the wallet (${balance} ${symbol})`, () => {
           const aboveBalanceAmount = String(Number(balance) + 1);
           modal.input(aboveBalanceAmount);

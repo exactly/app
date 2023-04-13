@@ -14,8 +14,8 @@ type TestParams = (
 ) & {
   symbol: ERC20TokenSymbol;
   decimals: number;
-  balance?: string;
   amount?: string;
+  balance?: string;
   maxYield?: string;
   shouldApprove?: boolean;
 };
@@ -107,7 +107,7 @@ export default ({
         );
 
         if (type === 'fixed') {
-          modal.checkReminderExists('deposit');
+          modal.checkReminder('deposit');
         }
 
         modal.close();

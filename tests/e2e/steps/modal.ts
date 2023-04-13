@@ -97,7 +97,7 @@ export const checkTransactionStatus = (target: 'success' | 'error', summary: str
   cy.getByTestId('modal-transaction-summary').should('have.text', summary);
 };
 
-export const checkReminderExists = (operation: Extract<Operation, 'deposit' | 'borrow'>) => {
+export const checkReminder = (operation: Extract<Operation, 'deposit' | 'borrow'>) => {
   cy.getByTestId('modal-transaction-reminder').should('be.visible');
   cy.getByTestId('modal-transaction-reminder-title').should(
     'have.text',
