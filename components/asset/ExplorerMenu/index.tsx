@@ -1,6 +1,6 @@
 import React, { FC, useCallback, useMemo } from 'react';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
-import { Box, IconButton, Menu, MenuItem, Tooltip, Typography } from '@mui/material';
+import { Box, Button, IconButton, Menu, MenuItem, Tooltip, Typography } from '@mui/material';
 import Image from 'next/image';
 import networkData from 'config/networkData.json' assert { type: 'json' };
 import { useWeb3 } from 'hooks/useWeb3';
@@ -48,18 +48,27 @@ const ExplorerMenu: FC<Props> = ({ symbol, assetAddress, eMarketAddress, rateMod
 
   return (
     <>
-      <Tooltip title={t('View Token Contracts')} placement="top" arrow>
-        <IconButton
-          size="small"
-          id="view-contracts-button"
-          aria-controls={open ? 'basic-menu' : undefined}
-          aria-haspopup="true"
-          aria-expanded={open ? 'true' : undefined}
-          onClick={handleClick}
-        >
-          <OpenInNewIcon sx={{ alignSelf: 'center', height: '1rem', width: '1rem', color: 'figma.grey.700' }} />
-        </IconButton>
-      </Tooltip>
+      <Button
+        id="view-contracts-button"
+        aria-controls={open ? 'basic-menu' : undefined}
+        aria-haspopup="true"
+        aria-expanded={open ? 'true' : undefined}
+        onClick={handleClick}
+        sx={{ bgcolor: 'figma.grey.100', py: 0.5, px: 1, height: 'auto' }}
+      >
+        <Box display="flex" alignItems="center" gap={0.5}>
+          <Typography
+            fontSize={10}
+            fontWeight={500}
+            fontFamily="monospace"
+            color="figma.grey.600"
+            textTransform="uppercase"
+          >
+            {t('View on Etherscan')}
+          </Typography>
+          <OpenInNewIcon sx={{ height: '10px', width: '10px', color: 'figma.grey.600' }} />
+        </Box>
+      </Button>
       <Menu
         id="basic-menu"
         anchorEl={anchorEl}
@@ -70,17 +79,21 @@ const ExplorerMenu: FC<Props> = ({ symbol, assetAddress, eMarketAddress, rateMod
         }}
         PaperProps={{
           style: {
+            marginTop: '8px',
             padding: '0 4px 4px 4px',
             boxShadow: '0px 4px 12px rgba(175, 177, 182, 0.2)',
-            borderRadius: '2px',
+            borderRadius: 16,
           },
         }}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'right',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
       >
-        <Box px={2} py={1}>
-          <Typography variant="subtitle1" fontSize="12px" color="figma.grey.300" textTransform="uppercase">
-            {t('View in Etherscan')}
-          </Typography>
-        </Box>
         <MenuItem>
           <Image
             src={`/img/assets/${symbol}.svg`}
