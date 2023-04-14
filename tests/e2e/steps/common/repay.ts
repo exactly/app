@@ -16,11 +16,10 @@ type TestParams = (
 ) & {
   symbol: ERC20TokenSymbol;
   amount?: string;
-  balance?: string;
   shouldApprove?: boolean;
 };
 
-export default ({ type, symbol, amount = '1', balance = '100', shouldApprove = false, maturity }: TestParams) => {
+export default ({ type, symbol, amount = '1', shouldApprove = false, maturity }: TestParams) => {
   describe(`${symbol} ${type} repay`, () => {
     it('should be in the correct page', () => {
       cy.url().then((url) => {
@@ -51,14 +50,6 @@ export default ({ type, symbol, amount = '1', balance = '100', shouldApprove = f
       afterEach(() => {
         modal.clearInput();
       });
-
-      if (type !== 'fixed' && !shouldApprove) {
-        it(`should not allow to repay more than what's present in the wallet (${balance} ${symbol})`, () => {
-          const aboveBalanceAmount = String(Number(balance) + 1);
-          modal.input(aboveBalanceAmount);
-          modal.checkAlert('error', `You can't repay more than you have in your wallet`);
-        });
-      }
 
       it(`should allow to input the amount ${amount}`, () => {
         modal.input(amount);

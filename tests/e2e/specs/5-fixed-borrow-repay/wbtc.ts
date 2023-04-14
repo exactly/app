@@ -53,7 +53,6 @@ describe('WBTC fixed borrow/repay', () => {
     symbol: 'WBTC',
     amount: '3',
     maturity: pool,
-    balance: '55',
   });
 
   describe('Status after fixed repay', () => {

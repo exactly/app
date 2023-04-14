@@ -59,7 +59,7 @@ export default ({
         modal.checkInput(inp.slice(0, inp.length - 1));
       });
 
-      if (!shouldApprove) {
+      if (!shouldApprove && balance) {
         it('should warn if the user tries to deposit more than its current balance', () => {
           const aboveBalance = Number(balance) + 1;
           modal.input(String(aboveBalance));

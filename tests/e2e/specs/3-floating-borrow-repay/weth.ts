@@ -38,6 +38,5 @@ describe('WETH floating borrow/repay', () => {
     type: 'floating',
     symbol: 'WETH',
     amount: '0.25',
-    balance: '100',
   });
 });
