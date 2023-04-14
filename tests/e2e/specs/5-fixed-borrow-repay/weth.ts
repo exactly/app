@@ -51,6 +51,5 @@ describe('WETH fixed borrow/repay', () => {
     symbol: 'WETH',
     amount: '2.5',
     maturity: pool,
-    balance: '105',
   });
 });

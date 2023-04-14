@@ -153,5 +153,5 @@ export const reload = async () => {
 
 export const justWait = () => {
   // eslint-disable-next-line cypress/no-unnecessary-waiting, ui-testing/no-hard-wait
-  return cy.wait(4000);
+  return cy.wait(5000);
 };

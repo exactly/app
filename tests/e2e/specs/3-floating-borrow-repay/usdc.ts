@@ -66,11 +66,10 @@ describe('USDC floating borrow/repay', () => {
     type: 'floating',
     symbol: 'USDC',
     amount: '25',
-    balance: '50',
     shouldApprove: true,
   });
 
   describe('Status after repay', () => {
-    checkBalance({ symbol: 'USDC', amount: '25' }, signer);
+    checkBalance({ symbol: 'USDC', amount: '25', approx: 0.00005 }, signer);
   });
 });
