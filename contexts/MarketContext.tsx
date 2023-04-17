@@ -1,6 +1,6 @@
 import React, { type FC, useMemo, createContext, useEffect, useState, type PropsWithChildren } from 'react';
-import dayjs from 'dayjs';
 import { useWeb3 } from 'hooks/useWeb3';
+import useAccountData from 'hooks/useAccountData';
 
 type ContextValues = {
   marketSymbol: string | undefined;
@@ -30,23 +30,13 @@ const MarketProvider: FC<PropsWithChildren> = ({ children }) => {
   const { chain } = useWeb3();
   const [view, setView] = useState<MarketView>();
   const [marketSymbol, setMarketSymbol] = useState<string>('USDC');
+  const { marketAccount } = useAccountData(marketSymbol);
   const [date, setDate] = useState<number>();
 
-  const dates = useMemo<number[]>(() => {
-    const currentTimestamp = dayjs().unix();
-    const maxPools = 3;
-    const interval = 2_419_200;
-    let timestamp = currentTimestamp - (currentTimestamp % interval);
-
-    const pools: number[] = [];
-
-    for (let i = 0; i < maxPools; i++) {
-      timestamp += interval;
-      pools.push(timestamp);
-    }
-
-    return pools;
-  }, []);
+  const dates = useMemo<number[]>(
+    () => marketAccount?.fixedPools.map((pool) => pool.maturity.toNumber()) ?? [],
+    [marketAccount],
+  );
 
   useEffect(() => {
     if (dates.length && !date) {

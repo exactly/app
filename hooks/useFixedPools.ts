@@ -1,69 +1,41 @@
 import { useMemo } from 'react';
-import { FixedPool } from 'types/FixedPool';
+import { FixedPool, Pool } from 'types/FixedPool';
 import useAccountData from './useAccountData';
 
 export default () => {
   const { accountData } = useAccountData();
 
   const fixedPools = useMemo(() => {
-    if (!accountData) return { deposits: undefined, borrows: undefined };
-    const data: Record<string, FixedPool> = {};
+    const data: Record<string, FixedPool> = { deposits: {}, borrows: {} };
+    if (!accountData) return data;
 
     accountData.forEach((asset) => {
       asset.fixedDepositPositions.forEach((pool) => {
         const date = pool.maturity.toNumber();
-        data.deposits = data.deposits ?? {};
+        const entry: Pool = {
+          maturity: date,
+          symbol: asset.assetSymbol,
+          market: asset.market,
+          fee: pool.position.fee,
+          decimals: asset.decimals,
+          previewValue: pool.previewValue,
+        };
 
-        data.deposits[date] = data.deposits[date]
-          ? [
-              ...data.deposits[date],
-              {
-                maturity: date,
-                symbol: asset.assetSymbol,
-                market: asset.market,
-                fee: pool.position.fee,
-                decimals: asset.decimals,
-                previewValue: pool.previewValue,
-              },
-            ]
-          : [
-              {
-                maturity: date,
-                symbol: asset.assetSymbol,
-                market: asset.market,
-                fee: pool.position.fee,
-                decimals: asset.decimals,
-                previewValue: pool.previewValue,
-              },
-            ];
+        data.deposits[date] = data.deposits[date] ? [...data.deposits[date], entry] : [entry];
       });
 
       asset.fixedBorrowPositions.forEach((pool) => {
         const date = pool.maturity.toNumber();
-        data.borrows = data.borrows ?? {};
+        const entry: Pool = {
+          maturity: date,
+          symbol: asset.assetSymbol,
+          market: asset.market,
+          fee: pool.position.fee,
+          decimals: asset.decimals,
+          previewValue: pool.previewValue,
+        };
 
-        data.borrows[date] = data.borrows[date]
-          ? [
-              ...data.borrows[date],
-              {
-                maturity: date,
-                symbol: asset.assetSymbol,
-                market: asset.market,
-                fee: pool.position.fee,
-                decimals: asset.decimals,
-                previewValue: pool.previewValue,
-              },
-            ]
-          : [
-              {
-                maturity: date,
-                symbol: asset.assetSymbol,
-                market: asset.market,
-                fee: pool.position.fee,
-                decimals: asset.decimals,
-                previewValue: pool.previewValue,
-              },
-            ];
+        data.borrows[date] = data.borrows[date] ? [...data.borrows[date], entry] : [entry];
       });
     });
 
