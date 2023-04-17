@@ -385,7 +385,7 @@ export const darkTheme = createTheme({
           height: '34px',
         },
         outlined: {
-          color: '#7f7d7d',
+          color: '#E3E5E8',
           borderColor: '#9a9a9a',
         },
         text: {
