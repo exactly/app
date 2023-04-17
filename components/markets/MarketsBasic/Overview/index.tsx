@@ -40,6 +40,7 @@ const Overview: FC<Props> = ({ symbol, operation, qty, option }) => {
       border={`1px solid ${palette.grey[200]}`}
       borderRadius="8px"
       gap={0.2}
+      data-testid="simple-view-overview"
     >
       <Typography mb={0.5} variant="cardTitle">
         {operation === 'borrow' ? t('Your total debt') : t('Your total earnings')}
@@ -112,7 +113,14 @@ const Overview: FC<Props> = ({ symbol, operation, qty, option }) => {
             daysLeft: daysLeft(option.maturity || 0),
           })}
         </Typography>
-        <Typography fontWeight={700} fontSize={13} noWrap minWidth={100} textAlign="right">
+        <Typography
+          fontWeight={700}
+          fontSize={13}
+          noWrap
+          minWidth={100}
+          textAlign="right"
+          data-testid="simple-view-overview-maturity"
+        >
           {parseTimestamp(option.maturity || 0)}
         </Typography>
       </Box>

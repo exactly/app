@@ -2,12 +2,12 @@ import * as navbar from '../../steps/navbar';
 import * as dashboard from '../../steps/dashboard';
 import { enterMarket, deposit, reload, borrowAtMaturity } from '../../steps/actions';
 import { selectFixedPool } from '../../steps/pools';
-import { setupFork } from '../../steps/setup';
+import { setup } from '../../steps/setup';
 import depositAtMaturity from '../../steps/common/deposit';
 import withdrawAtMaturity from '../../steps/common/withdraw';
 
 describe('WETH fixed withdraw/deposit', () => {
-  const { visit, setBalance, userAddress, signer } = setupFork();
+  const { visit, setBalance, userAddress, signer } = setup();
   const pool = selectFixedPool();
 
   before(() => {

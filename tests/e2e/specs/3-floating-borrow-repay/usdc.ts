@@ -2,11 +2,11 @@ import * as navbar from '../../steps/navbar';
 import * as dashboard from '../../steps/dashboard';
 import { checkBalance, deposit, enterMarket, reload } from '../../steps/actions';
 import borrow, { attemptBorrow } from '../../steps/common/borrow';
-import { setupFork } from '../../steps/setup';
+import { setup } from '../../steps/setup';
 import repay from '../../steps/common/repay';
 
 describe('USDC floating borrow/repay', () => {
-  const { visit, setBalance, userAddress, signer } = setupFork();
+  const { visit, setBalance, userAddress, signer } = setup();
 
   before(() => {
     visit('/');

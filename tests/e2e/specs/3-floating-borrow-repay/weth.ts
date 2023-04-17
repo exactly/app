@@ -1,10 +1,10 @@
 import { deposit, enterMarket, reload } from '../../steps/actions';
 import borrow, { attemptBorrow } from '../../steps/common/borrow';
 import repay from '../../steps/common/repay';
-import { setupFork } from '../../steps/setup';
+import { setup } from '../../steps/setup';
 
 describe('WETH floating borrow/repay', () => {
-  const { visit, setBalance, userAddress, signer } = setupFork();
+  const { visit, setBalance, userAddress, signer } = setup();
 
   before(() => {
     visit('/');

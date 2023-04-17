@@ -12,7 +12,12 @@ type OperationTabProps = {
 
 const OperationTab: FC<OperationTabProps> = ({ label, isSelected, onClick }) => {
   return (
-    <ButtonBase onClick={onClick} disableRipple>
+    <ButtonBase
+      onClick={onClick}
+      disableRipple
+      data-testid={`simple-view-${label.toLowerCase()}-tab`}
+      data-active={isSelected}
+    >
       <Typography
         fontWeight={700}
         fontSize={15}
