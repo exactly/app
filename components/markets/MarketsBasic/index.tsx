@@ -125,7 +125,14 @@ const MarketsBasic: FC = () => {
   }, [currentOption?.maturity, openOperationModal, operation, tx]);
 
   return (
-    <Box display="flex" flexDirection="column" gap={2} maxWidth="100vw" sx={{ overflowX: 'hidden' }}>
+    <Box
+      display="flex"
+      flexDirection="column"
+      gap={2}
+      maxWidth="100vw"
+      sx={{ overflowX: 'hidden' }}
+      data-testid="simple-view"
+    >
       <Box
         display="flex"
         flexDirection="column"
@@ -150,7 +157,7 @@ const MarketsBasic: FC = () => {
           borderRadius="8px"
         >
           <Box px={2} py={1.5}>
-            <Typography variant="cardTitle">
+            <Typography variant="cardTitle" data-testid="simple-view-asset-action">
               {t(`Asset to be {{action}}`, { action: translateOperation(operation, { variant: 'past' }) })}
             </Typography>
             <AssetInput

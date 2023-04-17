@@ -1,8 +1,8 @@
 import { enterMarket, exitMarket } from '../../steps/common/market';
-import { setupFork } from '../../steps/setup';
+import { setup } from '../../steps/setup';
 
 describe('WETH enter/exit market', () => {
-  const { visit, setBalance, userAddress } = setupFork();
+  const { visit, setBalance, userAddress } = setup();
 
   before(() => {
     visit('/dashboard');

@@ -1,10 +1,10 @@
 import { Wallet } from '@ethersproject/wallet';
-import { JsonRpcProvider } from '@ethersproject/providers';
+import { JsonRpcProvider, getDefaultProvider } from '@ethersproject/providers';
 
 import { createFork, deleteFork, rpcURL, setBalance } from '../utils/tenderly';
 import type { Balance } from '../utils/tenderly';
 import { CustomizedBridge } from '../utils/bridge';
-import { connectWallet } from './wallet';
+import { connectWallet, disconnectWallet } from './wallet';
 import { justWait } from './actions';
 
 type MarketView = 'simple' | 'advanced';
@@ -19,16 +19,23 @@ const defaultVisitOptions: VisitOptions = {
   marketView: 'advanced',
 };
 
-type ForkParams = {
-  chainId?: number | string;
+type SetupParams = {
+  chainId?: number;
   wallet?: { address: string; privateKey: string };
+  useDefaultProvider?: boolean;
 };
 
-export const setupFork = ({ chainId = 1, wallet = Wallet.createRandom() }: ForkParams = {}) => {
+export const setup = ({
+  chainId = 1,
+  wallet = Wallet.createRandom(),
+  useDefaultProvider = false,
+}: SetupParams = {}) => {
   let forkId: string | undefined = undefined;
 
   before(async () => {
-    forkId = await createFork(String(chainId));
+    if (!useDefaultProvider) {
+      forkId = await createFork(String(chainId));
+    }
   });
 
   after(async () => {
@@ -37,7 +44,8 @@ export const setupFork = ({ chainId = 1, wallet = Wallet.createRandom() }: ForkP
     }
   });
 
-  const provider = () => new JsonRpcProvider(rpcURL(forkId), chainId);
+  const provider = () =>
+    useDefaultProvider ? getDefaultProvider(chainId) : new JsonRpcProvider(rpcURL(forkId), chainId);
   const signer = () => new Wallet(wallet.privateKey, provider());
   const ethereum = () => new CustomizedBridge(signer(), provider(), Number(chainId));
 
@@ -45,7 +53,9 @@ export const setupFork = ({ chainId = 1, wallet = Wallet.createRandom() }: ForkP
     window.localStorage.setItem('tos', 'true');
 
     window.ethereum = ethereum();
-    window.rpcURL = rpcURL(forkId);
+    if (!useDefaultProvider) {
+      window.rpcURL = rpcURL(forkId);
+    }
   });
 
   return {
@@ -61,8 +71,10 @@ export const setupFork = ({ chainId = 1, wallet = Wallet.createRandom() }: ForkP
           justWait();
           if (opts.connectWallet) {
             connectWallet();
-            justWait();
+          } else {
+            disconnectWallet();
           }
+          justWait();
         });
     },
     userAddress: () => wallet.address,

@@ -2,12 +2,12 @@ import * as navbar from '../../steps/navbar';
 import * as dashboard from '../../steps/dashboard';
 import { checkBalance, deposit, enterMarket, reload } from '../../steps/actions';
 import { selectFixedPool } from '../../steps/pools';
-import { setupFork } from '../../steps/setup';
+import { setup } from '../../steps/setup';
 import borrowAtMaturity from '../../steps/common/borrow';
 import repayAtMaturity from '../../steps/common/repay';
 
 describe('WBTC fixed borrow/repay', () => {
-  const { visit, setBalance, userAddress, signer } = setupFork();
+  const { visit, setBalance, userAddress, signer } = setup();
   const pool = selectFixedPool();
 
   before(() => {

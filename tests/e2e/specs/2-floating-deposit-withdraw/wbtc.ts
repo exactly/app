@@ -1,10 +1,10 @@
 import { checkBalance } from '../../steps/actions';
 import deposit from '../../steps/common/deposit';
 import withdraw, { attemptWithdraw } from '../../steps/common/withdraw';
-import { setupFork } from '../../steps/setup';
+import { setup } from '../../steps/setup';
 
 describe('WBTC floating deposit/withdraw', () => {
-  const { visit, setBalance, userAddress, signer } = setupFork();
+  const { visit, setBalance, userAddress, signer } = setup();
 
   before(() => {
     visit('/');
