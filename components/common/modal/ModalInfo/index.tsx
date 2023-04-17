@@ -1,4 +1,4 @@
-import React, { type PropsWithChildren } from 'react';
+import React, { ReactNode, type PropsWithChildren } from 'react';
 import { Box, Grid, SxProps, Typography, Skeleton } from '@mui/material';
 import { type SvgIconComponent } from '@mui/icons-material';
 import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
@@ -6,7 +6,7 @@ import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
 export type Variant = 'column' | 'row';
 
 type Props = {
-  label: string;
+  label: ReactNode;
   icon?: SvgIconComponent;
   variant?: Variant;
 };
@@ -20,7 +20,15 @@ function ModalInfoColumn({ icon: Icon, label, children }: PropsWithChildren<Omit
         </Grid>
       )}
       <Grid item>
-        <Typography fontFamily="fontFamilyMonospaced" color="grey.600" fontSize={12} mb={1} fontWeight={500} noWrap>
+        <Typography
+          component="div"
+          fontFamily="fontFamilyMonospaced"
+          color="grey.600"
+          fontSize={12}
+          mb={1}
+          fontWeight={500}
+          noWrap
+        >
           {label}
         </Typography>
       </Grid>
