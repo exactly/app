@@ -1,6 +1,6 @@
 import React, { FC, useCallback, useContext, useMemo, useState } from 'react';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
-import { WeiPerEther, Zero } from '@ethersproject/constants';
+import { AddressZero, WeiPerEther, Zero } from '@ethersproject/constants';
 
 import ModalGif from 'components/common/modal/ModalGif';
 import ModalTxCost from 'components/common/modal/ModalTxCost';
@@ -34,8 +34,18 @@ import useHandleOperationError from 'hooks/useHandleOperationError';
 import useAnalytics from 'hooks/useAnalytics';
 import { useTranslation } from 'react-i18next';
 import useTranslateOperation from 'hooks/useTranslateOperation';
+import ModalInfoRepayWithDiscount from 'components/OperationsModal/Info/ModalInfoRepayWithDiscount';
+import usePreviewer from 'hooks/usePreviewer';
+import useDelayedEffect from 'hooks/useDelayedEffect';
 
 const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
+
+type RepayWithDiscount = {
+  principal: string;
+  feeAtMaturity: string;
+  amountWithDiscount: string;
+  discount: string;
+};
 
 const RepayAtMaturity: FC = () => {
   const { t } = useTranslation();
@@ -44,6 +54,7 @@ const RepayAtMaturity: FC = () => {
   const { operation } = useModalStatus();
   const { walletAddress } = useWeb3();
   const { date } = useContext(MarketContext);
+  const previewerContract = usePreviewer();
 
   const {
     symbol,
@@ -66,6 +77,8 @@ const RepayAtMaturity: FC = () => {
     slippage,
   } = useOperationContext();
 
+  const [previewData, setPreviewData] = useState<RepayWithDiscount | undefined>();
+
   const handleOperationError = useHandleOperationError();
 
   const [penaltyAssets, setPenaltyAssets] = useState(Zero);
@@ -85,9 +98,50 @@ const RepayAtMaturity: FC = () => {
   const totalPositionAssets = useMemo(() => {
     if (!marketAccount || !date) return Zero;
     const pool = marketAccount.fixedBorrowPositions.find(({ maturity }) => maturity.toNumber() === date);
-
     return pool ? pool.position.principal.add(pool.position.fee) : Zero;
   }, [date, marketAccount]);
+
+  const preview = useCallback(async () => {
+    if (
+      !marketContract ||
+      !date ||
+      !walletAddress ||
+      !previewerContract ||
+      !marketAccount ||
+      !qty ||
+      totalPositionAssets.isZero()
+    )
+      return;
+
+    const pool = marketAccount.fixedBorrowPositions.find(({ maturity }) => maturity.toNumber() === date);
+    if (!pool) return;
+
+    const userInput = parseFixed(qty, marketAccount.decimals);
+    const positionAssets = userInput >= totalPositionAssets ? totalPositionAssets : userInput;
+
+    const { assets } = await previewerContract.previewRepayAtMaturity(
+      marketContract.address,
+      date,
+      positionAssets,
+      walletAddress ?? AddressZero,
+    );
+    const feeAtMaturity = (positionAssets > pool.position.principal ? pool.position.principal : positionAssets)
+      .mul(pool.position.fee)
+      .div(WeiPerEther)
+      .mul(WeiPerEther)
+      .div(pool.position.principal);
+    const principal = positionAssets.sub(feeAtMaturity);
+    const discount = assets.sub(positionAssets);
+
+    setPreviewData({
+      principal: formatNumber(formatFixed(principal, marketAccount.decimals), marketAccount.symbol, true),
+      amountWithDiscount: formatNumber(formatFixed(assets, marketAccount.decimals), marketAccount.symbol, true),
+      feeAtMaturity: formatNumber(formatFixed(feeAtMaturity, marketAccount.decimals), marketAccount.symbol, true),
+      discount: formatNumber(formatFixed(discount, marketAccount.decimals), marketAccount.symbol, true),
+    });
+  }, [date, marketAccount, marketContract, previewerContract, qty, totalPositionAssets, walletAddress]);
+
+  const { isLoading: previewLoading } = useDelayedEffect({ effect: preview });
 
   const totalPenalties = useMemo(() => {
     if (!marketAccount || !date || !isLateRepay) return Zero;
@@ -352,6 +406,17 @@ const RepayAtMaturity: FC = () => {
       </Grid>
 
       <Grid item mt={2}>
+        {!isLateRepay && previewData?.discount && (
+          <ModalInfoRepayWithDiscount
+            label={t('You are paying with discount')}
+            symbol={symbol}
+            isLoading={previewLoading}
+            amountWithDiscount={previewData?.amountWithDiscount}
+            principal={previewData?.principal}
+            feeAtMaturity={previewData?.feeAtMaturity}
+            discount={previewData?.discount}
+          />
+        )}
         {errorData?.component !== 'gas' && <ModalTxCost gasCost={gasCost} />}
         <ModalAdvancedSettings>
           {isLateRepay && <ModalInfoBorrowLimit qty={qty} symbol={symbol} operation={operation} variant="row" />}
