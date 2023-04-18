@@ -10,7 +10,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { Box, IconButton, Tooltip, Typography, Grid } from '@mui/material';
 import Link from 'next/link';
 import useAnalytics from 'hooks/useAnalytics';
-import { useRouter } from 'next/router';
+import useRouter from 'hooks/useRouter';
 import { useTranslation } from 'react-i18next';
 
 type Props = {

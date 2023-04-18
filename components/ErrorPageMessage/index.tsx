@@ -1,7 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { Box, Button, Typography } from '@mui/material';
-import { useRouter } from 'next/router';
+import useRouter from 'hooks/useRouter';
 import { useTranslation } from 'react-i18next';
 
 type Props = {

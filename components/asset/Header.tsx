@@ -1,5 +1,4 @@
 import React, { type FC, useMemo, useCallback } from 'react';
-import Router from 'next/router';
 import Grid from '@mui/material/Grid';
 import ItemInfo, { ItemInfoProps } from 'components/common/ItemInfo';
 import { formatFixed } from '@ethersproject/bignumber';
@@ -13,6 +12,7 @@ import { useTranslation } from 'react-i18next';
 import DropdownMenu from 'components/DropdownMenu';
 import useAssets from 'hooks/useAssets';
 import AssetOption from './AssetOption';
+import useRouter from 'hooks/useRouter';
 
 type Props = {
   symbol: string;
@@ -23,6 +23,7 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
   const { marketAccount } = useAccountData(symbol);
   const options = useAssets();
   const { chain } = useWeb3();
+  const { push, query } = useRouter();
 
   const { floatingDeposits, floatingBorrows } = useMemo(() => {
     if (!marketAccount) return {};
@@ -95,9 +96,10 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
     ];
   }, [marketAccount, floatingDeposits, fixedDeposits, floatingBorrows, fixedBorrows, t]);
 
-  const onChangeAssetDropdown = useCallback((newSymbol: string) => {
-    Router.push({ pathname: '/[symbol]', query: { ...Router.query, symbol: newSymbol } });
-  }, []);
+  const onChangeAssetDropdown = useCallback(
+    (newSymbol: string) => push({ pathname: `/${newSymbol}`, query }),
+    [push, query],
+  );
 
   const etherscan = networkData[String(chain?.id) as keyof typeof networkData]?.etherscan;
   return (

@@ -21,7 +21,7 @@ import type { WithdrawMP } from 'types/WithdrawMP';
 import { Borrow } from 'types/Borrow';
 import { Repay } from 'types/Repay';
 import useAccountData from 'hooks/useAccountData';
-import { useRouter } from 'next/router';
+import useRouter from 'hooks/useRouter';
 import { useTranslation } from 'react-i18next';
 
 type Props = {

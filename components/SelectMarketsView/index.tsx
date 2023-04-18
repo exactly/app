@@ -6,7 +6,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { Box, Button, Menu, MenuItem, popoverClasses, Typography } from '@mui/material';
 import { MarketContext, MarketView } from 'contexts/MarketContext';
 import Link from 'next/link';
-import { useRouter } from 'next/router';
+import useRouter from 'hooks/useRouter';
 import { Timeout } from 'react-number-format/types/types';
 import { SimpleViewIcon, AdvancedViewIcon } from 'components/Icons';
 import { useTranslation } from 'react-i18next';

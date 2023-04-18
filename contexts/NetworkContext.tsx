@@ -2,7 +2,8 @@ import React, { createContext, useContext, useState, useEffect, useRef } from 'r
 import type { FC, PropsWithChildren } from 'react';
 import { Chain, useNetwork, useAccount } from 'wagmi';
 import * as wagmiChains from 'wagmi/chains';
-import Router, { useRouter } from 'next/router';
+import Router from 'next/router';
+import useRouter from 'hooks/useRouter';
 
 import { supportedChains, defaultChain, wagmi } from 'utils/client';
 import usePreviousValue from 'hooks/usePreviousValue';

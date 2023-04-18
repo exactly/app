@@ -13,7 +13,7 @@ import Link from 'next/link';
 import SwitchCollateral from 'components/dashboard/DashboardContent/FloatingPoolDashboard/FloatingPoolDashboardTable/SwitchCollateral';
 import useAccountData from 'hooks/useAccountData';
 import useActionButton from 'hooks/useActionButton';
-import { useRouter } from 'next/router';
+import useRouter from 'hooks/useRouter';
 import { useTranslation } from 'react-i18next';
 
 type Props = {

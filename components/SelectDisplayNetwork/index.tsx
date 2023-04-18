@@ -1,5 +1,4 @@
 import React, { type FC, useCallback, useMemo, useState, useContext } from 'react';
-import Router, { useRouter } from 'next/router';
 
 import { useWeb3 } from 'hooks/useWeb3';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
@@ -13,12 +12,13 @@ import { globals } from 'styles/theme';
 import { useNetworkContext } from 'contexts/NetworkContext';
 import { MarketContext } from 'contexts/MarketContext';
 import useAccountData from 'hooks/useAccountData';
+import useRouter from 'hooks/useRouter';
 
 const { onlyDesktop } = globals;
 
 const SelectDisplayNetwork: FC = () => {
   const { setMarketSymbol } = useContext(MarketContext);
-  const { pathname } = useRouter();
+  const { pathname, push, query } = useRouter();
   const { chains, chain } = useWeb3();
   const { setDisplayNetwork } = useNetworkContext();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -37,10 +37,10 @@ const SelectDisplayNetwork: FC = () => {
       setMarketSymbol('USDC');
 
       if (!['/', '/dashboard'].includes(pathname)) {
-        return Router.push({
+        return push({
           pathname: '/',
           query: {
-            ...Object.fromEntries(Object.entries(Router.query).filter((e) => e[0] !== 'symbol')),
+            ...Object.fromEntries(Object.entries(query).filter((e) => e[0] !== 'symbol')),
             n: `${{ [mainnet.id]: 'mainnet' }[displayChain.id] ?? displayChain.network}`,
           },
         }).then(() => {
@@ -52,7 +52,7 @@ const SelectDisplayNetwork: FC = () => {
       resetAccountData();
       setDisplayNetwork(displayChain);
     },
-    [chain.id, closeMenu, resetAccountData, setDisplayNetwork, pathname, setMarketSymbol],
+    [closeMenu, chain.id, setMarketSymbol, pathname, resetAccountData, setDisplayNetwork, push, query],
   );
 
   const { buttonBgColor, image } = useMemo(() => {

@@ -27,7 +27,7 @@ import TableHeadCell, { TableHeader } from 'components/common/TableHeadCell';
 import getLiquidTokenInfo from 'utils/getLiquidTokenInfo';
 import useRewards from 'hooks/useRewards';
 import RewardPill from 'components/markets/RewardPill';
-import { useRouter } from 'next/router';
+import useRouter from 'hooks/useRouter';
 import { useTranslation } from 'react-i18next';
 
 const { minAPRValue } = numbers;
