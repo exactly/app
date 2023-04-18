@@ -3,7 +3,7 @@ import { setContext, setUser } from '@sentry/nextjs';
 import { goerli, useClient } from 'wagmi';
 import DisclaimerModal from 'components/DisclaimerModal';
 import Image from 'next/image';
-import { useRouter } from 'next/router';
+import useRouter from 'hooks/useRouter';
 
 import { useWeb3 } from 'hooks/useWeb3';
 

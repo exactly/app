@@ -5,7 +5,7 @@ import Link from 'next/link';
 import formatSymbol from 'utils/formatSymbol';
 import getSymbolDescription from 'utils/getSymbolDescription';
 import useAccountData from 'hooks/useAccountData';
-import { useRouter } from 'next/router';
+import useRouter from 'hooks/useRouter';
 import { useTranslation } from 'react-i18next';
 
 type Props = PropsWithChildren<{
