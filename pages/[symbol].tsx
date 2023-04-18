@@ -19,9 +19,22 @@ type Props = {
 
 const Market: NextPage<Props> = ({ symbol }: Props) => {
   const { t } = useTranslation();
-  const { query } = useRouter();
+  const { query, events, replace } = useRouter();
   const { page } = useAnalytics();
   useEffect(() => void page(), [page]);
+
+  useEffect(() => {
+    const handleRouteChange = (url: string) => {
+      if (url.includes(`symbol=${symbol}`)) {
+        const finalUrl = url.replace(`?symbol=${symbol}`, '').replace(`&symbol=${symbol}`, '').replace(/^\/&/, '/?');
+        replace(finalUrl, undefined, { shallow: true });
+      }
+    };
+    events.on('routeChangeStart', handleRouteChange);
+    return () => {
+      events.off('routeChangeStart', handleRouteChange);
+    };
+  }, [events, replace, symbol]);
 
   return (
     <Grid container mt={-1}>
