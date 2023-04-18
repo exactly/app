@@ -1,10 +1,10 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import type { FC, PropsWithChildren } from 'react';
-import { Chain, useNetwork } from 'wagmi';
+import { Chain, useNetwork, useAccount } from 'wagmi';
 import * as wagmiChains from 'wagmi/chains';
 import Router, { useRouter } from 'next/router';
 
-import { supportedChains, defaultChain } from 'utils/client';
+import { supportedChains, defaultChain, wagmi } from 'utils/client';
 import usePreviousValue from 'hooks/usePreviousValue';
 import { getQueryParam } from 'utils/getQueryParam';
 
@@ -21,6 +21,7 @@ const NetworkContext = createContext<ContextValues | null>(null);
 
 export const NetworkContextProvider: FC<PropsWithChildren> = ({ children }) => {
   const { pathname, isReady } = useRouter();
+  const { connector } = useAccount();
   const { chain } = useNetwork();
   const first = useRef(true);
   const [displayNetwork, setDisplayNetwork] = useState<Chain>(() => {
@@ -33,6 +34,15 @@ export const NetworkContextProvider: FC<PropsWithChildren> = ({ children }) => {
     return defaultChain ?? wagmiChains.mainnet;
   });
   const previousChain = usePreviousValue(chain);
+
+  useEffect(() => {
+    if (!wagmi.data || !wagmi.data.chain || !(connector && connector.id === 'safe')) return;
+    const safeChainID = wagmi.data.chain.id;
+    if (isSupported(safeChainID)) {
+      const safeChain = supportedChains.find((c) => c.id === safeChainID);
+      setDisplayNetwork(safeChain as Chain);
+    }
+  }, [connector]);
 
   useEffect(() => {
     if (first.current) {
