@@ -3,6 +3,7 @@ import { Box, Typography, Tooltip } from '@mui/material';
 import LinearProgress, { linearProgressClasses } from '@mui/material/LinearProgress';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { styled, useTheme } from '@mui/material/styles';
+import dayjs from 'dayjs';
 import ReportProblemRoundedIcon from '@mui/icons-material/ReportProblemRounded';
 import daysLeft from 'utils/daysLeft';
 import useAccountData from 'hooks/useAccountData';
@@ -43,12 +44,12 @@ function MaturityLinearProgress({ symbol, operation, maturityDate }: Props) {
   const progress = useMemo(() => {
     const oneHour = 3600;
     const oneDay = oneHour * 24;
-    const maturityLife = oneDay * 7 * 12;
-    const nowInSeconds = Date.now() / 1000;
+    const maturityLife = oneDay * 7 * 4 * (marketAccount?.maxFuturePools ?? 4);
+    const nowInSeconds = dayjs().unix();
     const startDate = maturityDate - maturityLife;
     const current = nowInSeconds - startDate;
     return Math.min((current * 100) / maturityLife, 100);
-  }, [maturityDate]);
+  }, [maturityDate, marketAccount?.maxFuturePools]);
 
   const daysToMaturity = useMemo(() => daysLeft(maturityDate), [maturityDate]);
   const isCompleted = progress === 100;
