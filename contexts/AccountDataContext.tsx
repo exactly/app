@@ -68,15 +68,20 @@ export const AccountDataProvider: FC<PropsWithChildren> = ({ children }) => {
     delay: 500,
   });
 
-  useEffect(() => {
-    const interval = setInterval(() => syncAccountData().catch(captureException), 600_000);
-    return () => clearInterval(interval);
-  }, [syncAccountData]);
-
   const refreshAccountData = useCallback(
     async (delay = 2500) => new Promise<void>((r) => setTimeout(() => syncAccountData().then(r), delay)),
     [syncAccountData],
   );
+
+  useEffect(() => {
+    const handle = () => syncAccountData().catch(captureException);
+    const interval = setInterval(handle, 600_000);
+    window.addEventListener('focus', handle);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', handle);
+    };
+  }, [syncAccountData]);
 
   return (
     <AccountDataContext.Provider
