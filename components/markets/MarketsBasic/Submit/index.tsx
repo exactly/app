@@ -1,6 +1,6 @@
-import React, { FC, useContext, useEffect, useMemo } from 'react';
+import React, { FC, useEffect, useMemo } from 'react';
 import ModalSubmit from 'components/common/modal/ModalSubmit';
-import { MarketContext } from 'contexts/MarketContext';
+import { useMarketContext } from 'contexts/MarketContext';
 import { MarketsBasicOperation, MarketsBasicOption } from 'contexts/MarketsBasicContext';
 import { Operation } from 'contexts/ModalStatusContext';
 import { usePreviewTx } from 'contexts/OperationContext';
@@ -33,14 +33,13 @@ type SubmitProps = {
   option: MarketsBasicOption;
   qty: string;
   errorData?: ErrorData;
-  requiresApproval: boolean;
 };
 
-const Submit: FC<SubmitProps> = ({ symbol, operation, option, qty, errorData, requiresApproval }) => {
+const Submit: FC<SubmitProps> = ({ symbol, operation, option, qty, errorData }) => {
   const { t } = useTranslation();
   const translateOperation = useTranslateOperation();
   const { marketAccount } = useAccountData(symbol);
-  const { setDate } = useContext(MarketContext);
+  const { setDate } = useMarketContext();
   const deposit = useDeposit();
   const depositAtMaturity = useDepositAtMaturity();
   const borrow = useBorrow();
@@ -93,7 +92,6 @@ const Submit: FC<SubmitProps> = ({ symbol, operation, option, qty, errorData, re
       submit={handleSubmitAction}
       isLoading={isLoading || previewIsLoading}
       disabled={!qty || parseFloat(qty) <= 0 || isLoading || previewIsLoading || errorData?.status}
-      requiresApproval={requiresApproval}
     />
   );
 };

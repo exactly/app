@@ -1,7 +1,7 @@
+import { useCallback, useMemo, useState } from 'react';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { WeiPerEther, Zero } from '@ethersproject/constants';
-import numbers from 'config/numbers.json';
-import { MarketContext } from 'contexts/MarketContext';
+import { useTranslation } from 'react-i18next';
 import { useOperationContext } from 'contexts/OperationContext';
 import useAccountData from 'hooks/useAccountData';
 import useApprove from 'hooks/useApprove';
@@ -9,14 +9,11 @@ import useHandleOperationError from 'hooks/useHandleOperationError';
 import usePoolLiquidity from 'hooks/usePoolLiquidity';
 import usePreviewer from 'hooks/usePreviewer';
 import { useWeb3 } from 'hooks/useWeb3';
-import { useCallback, useContext, useMemo, useState } from 'react';
 import { OperationHook } from 'types/OperationHook';
 import getBeforeBorrowLimit from 'utils/getBeforeBorrowLimit';
 import useHealthFactor from './useHealthFactor';
 import useAnalytics from './useAnalytics';
-import { useTranslation } from 'react-i18next';
-
-const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
+import { defaultAmount, gasLimitMultiplier } from 'utils/const';
 
 type BorrowAtMaturity = {
   borrow: () => void;
@@ -32,7 +29,6 @@ export default (): BorrowAtMaturity => {
   const { t } = useTranslation();
   const { track } = useAnalytics();
   const { walletAddress } = useWeb3();
-  const { date } = useContext(MarketContext);
 
   const {
     symbol,
@@ -40,6 +36,7 @@ export default (): BorrowAtMaturity => {
     qty,
     setQty,
     setTx,
+    date,
     requiresApproval,
     setRequiresApproval,
     isLoading: isLoadingOp,
@@ -53,7 +50,7 @@ export default (): BorrowAtMaturity => {
 
   const handleOperationError = useHandleOperationError();
 
-  const { accountData, marketAccount, refreshAccountData } = useAccountData(symbol);
+  const { accountData, marketAccount } = useAccountData(symbol);
 
   const [fixedRate, setFixedRate] = useState<BigNumber | undefined>();
 
@@ -96,7 +93,7 @@ export default (): BorrowAtMaturity => {
       }
 
       if (marketAccount.assetSymbol === 'WETH') {
-        const amount = quantity ? parseFixed(quantity, 18) : DEFAULT_AMOUNT;
+        const amount = quantity ? parseFixed(quantity, 18) : defaultAmount;
         const maxAmount = amount.mul(slippage).div(WeiPerEther);
 
         const gasEstimation = await ETHRouterContract.estimateGas.borrowAtMaturity(date, amount, maxAmount);
@@ -104,7 +101,7 @@ export default (): BorrowAtMaturity => {
         return gasPrice.mul(gasEstimation);
       }
 
-      const amount = quantity ? parseFixed(quantity, marketAccount.decimals) : DEFAULT_AMOUNT;
+      const amount = quantity ? parseFixed(quantity, marketAccount.decimals) : defaultAmount;
       const maxAmount = amount.mul(slippage).div(WeiPerEther);
       const gasEstimation = await marketContract.estimateGas.borrowAtMaturity(
         date,
@@ -226,7 +223,7 @@ export default (): BorrowAtMaturity => {
         const gasEstimation = await ETHRouterContract.estimateGas.borrowAtMaturity(date, amount, maxAmount);
 
         borrowTx = await ETHRouterContract.borrowAtMaturity(date, amount, maxAmount, {
-          gasLimit: gasEstimation.mul(parseFixed(String(numbers.gasLimitMultiplier), 18)).div(WeiPerEther),
+          gasLimit: gasEstimation.mul(gasLimitMultiplier).div(WeiPerEther),
         });
       } else {
         if (!marketContract) return;
@@ -240,7 +237,7 @@ export default (): BorrowAtMaturity => {
         );
 
         borrowTx = await marketContract.borrowAtMaturity(date, amount, maxAmount, walletAddress, walletAddress, {
-          gasLimit: gasEstimation.mul(parseFixed(String(numbers.gasLimitMultiplier), 18)).div(WeiPerEther),
+          gasLimit: gasEstimation.mul(gasLimitMultiplier).div(WeiPerEther),
         });
       }
 
@@ -255,8 +252,6 @@ export default (): BorrowAtMaturity => {
         maturity: date,
         hash: transactionHash,
       });
-
-      await refreshAccountData();
     } catch (error) {
       if (borrowTx?.hash) setTx({ status: 'error', hash: borrowTx.hash });
 
@@ -278,7 +273,6 @@ export default (): BorrowAtMaturity => {
     setErrorData,
     setTx,
     track,
-    refreshAccountData,
     ETHRouterContract,
     marketContract,
     handleOperationError,

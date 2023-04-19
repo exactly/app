@@ -1,7 +1,7 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { MarketContext } from 'contexts/MarketContext';
+import { useMarketContext } from 'contexts/MarketContext';
 
 import DropdownMenu from 'components/DropdownMenu';
 import useAssets from 'hooks/useAssets';
@@ -9,7 +9,7 @@ import AssetOption from 'components/asset/AssetOption';
 
 function AssetSelector() {
   const { t } = useTranslation();
-  const { marketSymbol, setMarketSymbol } = useContext(MarketContext);
+  const { marketSymbol, setMarketSymbol } = useMarketContext();
   const options = useAssets();
 
   return (

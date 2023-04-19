@@ -46,7 +46,7 @@ const DepositAtMaturity: FC = () => {
     needsApproval,
     previewGasCost,
   } = useDepositAtMaturity();
-  const { symbol, errorData, qty, gasCost, tx, requiresApproval, assetContract } = useOperationContext();
+  const { symbol, errorData, qty, gasCost, tx, assetContract } = useOperationContext();
   const walletBalance = useBalance(symbol, assetContract);
   const { marketAccount } = useAccountData(symbol);
 
@@ -119,7 +119,6 @@ const DepositAtMaturity: FC = () => {
           submit={handleSubmitAction}
           isLoading={isLoading || previewIsLoading}
           disabled={!qty || parseFloat(qty) <= 0 || isLoading || previewIsLoading || errorData?.status}
-          requiresApproval={requiresApproval}
         />
       </Grid>
     </Grid>

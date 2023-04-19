@@ -1,4 +1,4 @@
-import React, { ReactNode, useCallback, useContext, useEffect, useState } from 'react';
+import React, { ReactNode, useCallback, useEffect, useState } from 'react';
 import { setContext, setUser } from '@sentry/nextjs';
 import { goerli, useClient } from 'wagmi';
 import DisclaimerModal from 'components/DisclaimerModal';
@@ -16,7 +16,7 @@ import MobileMenu from 'components/MobileMenu';
 import Link from 'next/link';
 import Wallet from 'components/Wallet';
 import SelectMarketsView from 'components/SelectMarketsView';
-import { MarketContext } from 'contexts/MarketContext';
+import { useMarketContext } from 'contexts/MarketContext';
 import ClaimRewards from 'components/ClaimRewards';
 import SelectDisplayNetwork from 'components/SelectDisplayNetwork';
 import useAnalytics from 'hooks/useAnalytics';
@@ -33,7 +33,7 @@ function Navbar() {
   const { chain, isConnected } = useWeb3();
 
   const { palette } = useTheme();
-  const { view } = useContext(MarketContext);
+  const { view } = useMarketContext();
   const { openOperationModal } = useModalStatus();
   const [openMenu, setOpenMenu] = useState<boolean>(false);
 

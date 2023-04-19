@@ -1,7 +1,6 @@
+import { useCallback, useMemo, useState } from 'react';
 import { BigNumber, parseFixed } from '@ethersproject/bignumber';
 import { WeiPerEther, Zero } from '@ethersproject/constants';
-import numbers from 'config/numbers.json';
-import { MarketContext } from 'contexts/MarketContext';
 import { useOperationContext } from 'contexts/OperationContext';
 import useAccountData from 'hooks/useAccountData';
 import useApprove from 'hooks/useApprove';
@@ -9,12 +8,10 @@ import useBalance from 'hooks/useBalance';
 import useHandleOperationError from 'hooks/useHandleOperationError';
 import usePreviewer from 'hooks/usePreviewer';
 import { useWeb3 } from 'hooks/useWeb3';
-import { useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { OperationHook } from 'types/OperationHook';
 import useAnalytics from './useAnalytics';
-
-const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
+import { defaultAmount, gasLimitMultiplier } from 'utils/const';
 
 type DepositAtMaturity = {
   deposit: () => void;
@@ -30,7 +27,6 @@ export default (): DepositAtMaturity => {
   const { t } = useTranslation();
   const { track } = useAnalytics();
   const { walletAddress } = useWeb3();
-  const { date } = useContext(MarketContext);
 
   const {
     symbol,
@@ -38,6 +34,7 @@ export default (): DepositAtMaturity => {
     qty,
     setQty,
     setTx,
+    date,
     requiresApproval,
     setRequiresApproval,
     isLoading: isLoadingOp,
@@ -50,7 +47,7 @@ export default (): DepositAtMaturity => {
     slippage,
     setErrorButton,
   } = useOperationContext();
-  const { marketAccount, refreshAccountData } = useAccountData(symbol);
+  const { marketAccount } = useAccountData(symbol);
 
   const handleOperationError = useHandleOperationError();
 
@@ -90,7 +87,7 @@ export default (): DepositAtMaturity => {
       }
 
       if (marketAccount.assetSymbol === 'WETH') {
-        const amount = quantity ? parseFixed(quantity, 18) : DEFAULT_AMOUNT;
+        const amount = quantity ? parseFixed(quantity, 18) : defaultAmount;
         const minAmount = amount.mul(slippage).div(WeiPerEther);
         const gasEstimation = await ETHRouterContract.estimateGas.depositAtMaturity(date, minAmount, {
           value: amount,
@@ -98,7 +95,7 @@ export default (): DepositAtMaturity => {
         return gasPrice.mul(gasEstimation);
       }
 
-      const amount = quantity ? parseFixed(quantity, marketAccount.decimals) : DEFAULT_AMOUNT;
+      const amount = quantity ? parseFixed(quantity, marketAccount.decimals) : defaultAmount;
       const minAmount = amount.mul(slippage).div(WeiPerEther);
 
       const gasEstimation = await marketContract.estimateGas.depositAtMaturity(date, amount, minAmount, walletAddress);
@@ -175,7 +172,7 @@ export default (): DepositAtMaturity => {
 
         depositTx = await ETHRouterContract.depositAtMaturity(date, minAmount, {
           value: amount,
-          gasLimit: gasEstimation.mul(parseFixed(String(numbers.gasLimitMultiplier), 18)).div(WeiPerEther),
+          gasLimit: gasEstimation.mul(gasLimitMultiplier).div(WeiPerEther),
         });
       } else {
         const gasEstimation = await marketContract.estimateGas.depositAtMaturity(
@@ -186,7 +183,7 @@ export default (): DepositAtMaturity => {
         );
 
         depositTx = await marketContract.depositAtMaturity(date, amount, minAmount, walletAddress, {
-          gasLimit: gasEstimation.mul(parseFixed(String(numbers.gasLimitMultiplier), 18)).div(WeiPerEther),
+          gasLimit: gasEstimation.mul(gasLimitMultiplier).div(WeiPerEther),
         });
       }
 
@@ -201,8 +198,6 @@ export default (): DepositAtMaturity => {
         maturity: date,
         hash: transactionHash,
       });
-
-      await refreshAccountData();
     } catch (error) {
       if (depositTx) setTx({ status: 'error', hash: depositTx.hash });
       setErrorData({ status: true, message: handleOperationError(error) });
@@ -220,7 +215,6 @@ export default (): DepositAtMaturity => {
     slippage,
     setTx,
     track,
-    refreshAccountData,
     setErrorData,
     handleOperationError,
   ]);

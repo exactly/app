@@ -1,4 +1,4 @@
-import React, { FC, MouseEventHandler } from 'react';
+import React, { FC, useCallback } from 'react';
 import { LoadingButton } from '@mui/lab';
 import { Button, CircularProgress, Typography } from '@mui/material';
 import { Box } from '@mui/system';
@@ -8,24 +8,32 @@ import { useNetwork, useSwitchNetwork } from 'wagmi';
 import { useWeb3 } from 'hooks/useWeb3';
 import { useTranslation } from 'react-i18next';
 import useTranslateOperation from 'hooks/useTranslateOperation';
+import useAccountData from 'hooks/useAccountData';
 
 type Props = {
   symbol: string;
-  submit: MouseEventHandler;
+  submit: () => Promise<void>;
   label: string | null;
-  requiresApproval?: boolean;
   isLoading?: boolean;
   disabled?: boolean;
 };
 
-function ModalSubmit({ requiresApproval = false, isLoading = false, disabled = false, submit, symbol, label }: Props) {
+function ModalSubmit({ isLoading = false, disabled = false, submit, symbol, label }: Props) {
   const { t } = useTranslation();
   const translateOperation = useTranslateOperation();
-  const { loadingButton, isLoading: isLoadingOp, tx, errorButton } = useOperationContext();
+  const { loadingButton, isLoading: isLoadingOp, tx, errorButton, requiresApproval } = useOperationContext();
   const { operation } = useModalStatus();
   const { isConnected, chain: displayNetwork, connect } = useWeb3();
   const { chain } = useNetwork();
   const { switchNetwork, isLoading: switchIsLoading } = useSwitchNetwork();
+  const { refreshAccountData } = useAccountData();
+
+  const handleSubmit = useCallback(async () => {
+    await submit();
+    if (!requiresApproval) {
+      await refreshAccountData();
+    }
+  }, [submit, refreshAccountData, requiresApproval]);
 
   if (!isConnected) {
     return (
@@ -60,7 +68,7 @@ function ModalSubmit({ requiresApproval = false, isLoading = false, disabled = f
             label={loadingButton.label}
           />
         }
-        onClick={submit}
+        onClick={handleSubmit}
         color="primary"
         variant="contained"
         disabled={disabled}
@@ -86,7 +94,7 @@ function ModalSubmit({ requiresApproval = false, isLoading = false, disabled = f
           }
         />
       }
-      onClick={submit}
+      onClick={handleSubmit}
       color="primary"
       variant="contained"
       disabled={disabled || Boolean(errorButton)}

@@ -1,4 +1,4 @@
-import React, { type FC, useCallback, useMemo, useState, useContext } from 'react';
+import React, { type FC, useCallback, useMemo, useState } from 'react';
 
 import { useWeb3 } from 'hooks/useWeb3';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
@@ -10,14 +10,14 @@ import { Chain, goerli, mainnet } from 'wagmi';
 import Image from 'next/image';
 import { globals } from 'styles/theme';
 import { useNetworkContext } from 'contexts/NetworkContext';
-import { MarketContext } from 'contexts/MarketContext';
 import useAccountData from 'hooks/useAccountData';
 import useRouter from 'hooks/useRouter';
+import { useMarketContext } from 'contexts/MarketContext';
 
 const { onlyDesktop } = globals;
 
 const SelectDisplayNetwork: FC = () => {
-  const { setMarketSymbol } = useContext(MarketContext);
+  const { setMarketSymbol } = useMarketContext();
   const { pathname, push, query } = useRouter();
   const { chains, chain } = useWeb3();
   const { setDisplayNetwork } = useNetworkContext();
@@ -98,9 +98,6 @@ const SelectDisplayNetwork: FC = () => {
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
         onClose={closeMenu}
-        MenuListProps={{
-          'aria-labelledby': 'basic-button',
-        }}
         PaperProps={{
           style: {
             marginTop: '8px',

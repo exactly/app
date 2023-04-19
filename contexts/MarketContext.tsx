@@ -1,9 +1,17 @@
-import React, { type FC, useMemo, createContext, useEffect, useState, type PropsWithChildren } from 'react';
-import { useWeb3 } from 'hooks/useWeb3';
+import React, {
+  type FC,
+  useMemo,
+  createContext,
+  useEffect,
+  useState,
+  type PropsWithChildren,
+  useCallback,
+  useContext,
+} from 'react';
 import useAccountData from 'hooks/useAccountData';
 
 type ContextValues = {
-  marketSymbol: string | undefined;
+  marketSymbol: string;
   setMarketSymbol: (symbol: string) => void;
   date: number | undefined;
   setDate: (date: number) => void;
@@ -14,20 +22,9 @@ type ContextValues = {
 
 export type MarketView = 'simple' | 'advanced';
 
-const defaultValues: ContextValues = {
-  marketSymbol: undefined,
-  setMarketSymbol: () => undefined,
-  date: undefined,
-  setDate: () => undefined,
-  dates: [],
-  view: undefined,
-  setView: () => undefined,
-};
+const MarketContext = createContext<ContextValues | null>(null);
 
-const MarketContext = createContext<ContextValues>(defaultValues);
-
-const MarketProvider: FC<PropsWithChildren> = ({ children }) => {
-  const { chain } = useWeb3();
+export const MarketProvider: FC<PropsWithChildren> = ({ children }) => {
   const [view, setView] = useState<MarketView>();
   const [marketSymbol, setMarketSymbol] = useState<string>('USDC');
   const { marketAccount } = useAccountData(marketSymbol);
@@ -48,14 +45,13 @@ const MarketProvider: FC<PropsWithChildren> = ({ children }) => {
     setView((localStorage.getItem('marketView') as MarketView) || 'simple');
   }, [setView]);
 
-  useEffect(() => {
-    setMarketSymbol('USDC');
-  }, [chain.id]);
-
-  const setViewLocalStorage = (newView: MarketView) => {
-    localStorage.setItem('marketView', newView);
-    setView(newView);
-  };
+  const setViewLocalStorage = useCallback(
+    (newView: MarketView) => {
+      localStorage.setItem('marketView', newView);
+      setView(newView);
+    },
+    [setView],
+  );
 
   return (
     <MarketContext.Provider
@@ -66,4 +62,12 @@ const MarketProvider: FC<PropsWithChildren> = ({ children }) => {
   );
 };
 
-export { MarketContext, MarketProvider };
+export const useMarketContext = () => {
+  const ctx = useContext(MarketContext);
+  if (!ctx) {
+    throw new Error('Using MarketContext outside of provider');
+  }
+  return ctx;
+};
+
+export default MarketContext;

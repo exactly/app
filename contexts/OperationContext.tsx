@@ -21,9 +21,9 @@ import { ERC20, Market, MarketETHRouter } from 'types/contracts';
 import { ErrorData } from 'types/Error';
 import { OperationHook } from 'types/OperationHook';
 import { Transaction } from 'types/Transaction';
-import { MarketContext } from './MarketContext';
 import { useModalStatus } from './ModalStatusContext';
 import numbers from 'config/numbers.json';
+import { useMarketContext } from './MarketContext';
 
 type LoadingButton = { withCircularProgress?: boolean; label?: string | null };
 
@@ -43,6 +43,8 @@ type ContextValues = {
 
   requiresApproval: boolean;
   setRequiresApproval: React.Dispatch<React.SetStateAction<boolean>>;
+
+  date: number | undefined;
 
   marketContract?: Market;
   assetContract?: ERC20;
@@ -65,7 +67,7 @@ const DEFAULT_SLIPPAGE = (numbers.slippage * 100).toFixed(2);
 export const OperationContextProvider: FC<PropsWithChildren> = ({ children }) => {
   const { pathname } = useRouter();
   const { chain } = useWeb3();
-  const { marketSymbol = 'DAI', view } = useContext(MarketContext);
+  const { marketSymbol, view, date } = useMarketContext();
   const { open, operation } = useModalStatus();
 
   const [errorData, setErrorData] = useState<ErrorData | undefined>();
@@ -118,6 +120,8 @@ export const OperationContextProvider: FC<PropsWithChildren> = ({ children }) =>
     setIsLoading,
     requiresApproval,
     setRequiresApproval,
+
+    date,
 
     assetContract,
     marketContract,

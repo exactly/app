@@ -1,17 +1,17 @@
-import React, { useContext, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { Zero } from '@ethersproject/constants';
 import SaveAltRoundedIcon from '@mui/icons-material/SaveAltRounded';
 import Image from 'next/image';
+import { useTranslation } from 'react-i18next';
 
 import useAccountData from 'hooks/useAccountData';
 import formatNumber from 'utils/formatNumber';
 import ModalInfo, { Variant, FromTo } from 'components/common/modal/ModalInfo';
 import { isFixedOperation, Operation } from 'contexts/ModalStatusContext';
-import { MarketContext } from 'contexts/MarketContext';
+import { useMarketContext } from 'contexts/MarketContext';
 import formatSymbol from 'utils/formatSymbol';
 import { Box } from '@mui/material';
-import { useTranslation } from 'react-i18next';
 
 type Props = {
   qty: string;
@@ -23,7 +23,7 @@ type Props = {
 function ModalInfoTotalDeposits({ qty, symbol, operation, variant = 'column' }: Props) {
   const { t } = useTranslation();
   const { marketAccount } = useAccountData(symbol);
-  const { date } = useContext(MarketContext);
+  const { date } = useMarketContext();
 
   const [from, to] = useMemo(() => {
     if (!marketAccount) return [undefined, undefined];

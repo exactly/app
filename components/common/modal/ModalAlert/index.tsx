@@ -1,11 +1,11 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import { Box, SxProps, Typography } from '@mui/material';
 import InfoIcon from '@mui/icons-material/InfoRounded';
 import WarningIcon from '@mui/icons-material/ErrorRounded';
 import ErrorIcon from '@mui/icons-material/ReportProblemRounded';
 import SuccessIcon from '@mui/icons-material/CheckCircleRounded';
-import { MarketContext } from 'contexts/MarketContext';
 import useRouter from 'hooks/useRouter';
+import { useMarketContext } from 'contexts/MarketContext';
 
 type Variant = 'info' | 'warning' | 'error' | 'success';
 
@@ -36,7 +36,7 @@ const icon: Record<Variant, typeof InfoIcon> = {
 };
 
 function ModalAlert({ variant = 'info', message }: Props) {
-  const { view } = useContext(MarketContext);
+  const { view } = useMarketContext();
   const { pathname: currentPathname } = useRouter();
 
   const containerSx: SxProps = {

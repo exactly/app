@@ -1,6 +1,5 @@
-import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
+import { BigNumber, parseFixed } from '@ethersproject/bignumber';
 import { WeiPerEther } from '@ethersproject/constants';
-import numbers from 'config/numbers.json';
 import { useOperationContext } from 'contexts/OperationContext';
 import useAccountData from 'hooks/useAccountData';
 import useApprove from 'hooks/useApprove';
@@ -11,8 +10,7 @@ import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { OperationHook } from 'types/OperationHook';
 import useAnalytics from './useAnalytics';
-
-const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
+import { defaultAmount, gasLimitMultiplier } from 'utils/const';
 
 type Deposit = {
   deposit: () => void;
@@ -41,7 +39,7 @@ export default (): Deposit => {
 
   const handleOperationError = useHandleOperationError();
 
-  const { marketAccount, refreshAccountData } = useAccountData(symbol);
+  const { marketAccount } = useAccountData(symbol);
 
   const walletBalance = useBalance(symbol, assetContract);
 
@@ -74,14 +72,14 @@ export default (): Deposit => {
 
       if (marketAccount.assetSymbol === 'WETH') {
         const gasLimit = await ETHRouterContract.estimateGas.deposit({
-          value: quantity ? parseFixed(quantity, 18) : DEFAULT_AMOUNT,
+          value: quantity ? parseFixed(quantity, 18) : defaultAmount,
         });
 
         return gasPrice.mul(gasLimit);
       }
 
       const gasLimit = await marketContract.estimateGas.deposit(
-        quantity ? parseFixed(quantity, marketAccount.decimals) : DEFAULT_AMOUNT,
+        quantity ? parseFixed(quantity, marketAccount.decimals) : defaultAmount,
         walletAddress,
       );
 
@@ -133,14 +131,14 @@ export default (): Deposit => {
 
         depositTx = await ETHRouterContract.deposit({
           value: parseFixed(qty, 18),
-          gasLimit: gasEstimation.mul(parseFixed(String(numbers.gasLimitMultiplier), 18)).div(WeiPerEther),
+          gasLimit: gasEstimation.mul(gasLimitMultiplier).div(WeiPerEther),
         });
       } else {
         const depositAmount = parseFixed(qty, marketAccount.decimals);
         const gasEstimation = await marketContract.estimateGas.deposit(depositAmount, walletAddress);
 
         depositTx = await marketContract.deposit(depositAmount, walletAddress, {
-          gasLimit: Math.ceil(Number(formatFixed(gasEstimation)) * numbers.gasLimitMultiplier),
+          gasLimit: gasEstimation.mul(gasLimitMultiplier).div(WeiPerEther),
         });
       }
 
@@ -155,8 +153,6 @@ export default (): Deposit => {
         asset: marketAccount.assetSymbol,
         hash: transactionHash,
       });
-
-      await refreshAccountData();
     } catch (error) {
       if (depositTx) setTx({ status: 'error', hash: depositTx.hash });
       setErrorData({ status: true, message: handleOperationError(error) });
@@ -171,7 +167,6 @@ export default (): Deposit => {
     setTx,
     track,
     qty,
-    refreshAccountData,
     ETHRouterContract,
     setErrorData,
     handleOperationError,

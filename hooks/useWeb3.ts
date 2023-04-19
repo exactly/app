@@ -14,8 +14,8 @@ type Web3 = {
   chain: Chain;
 };
 
-const isValidAddress = (address: string | undefined) => {
-  return address && /^(0x){1}[0-9a-fA-F]{40}$/i.test(address);
+const isValidAddress = (address: string | undefined): address is `0x${string}` => {
+  return !!address && /^(0x){1}[0-9a-fA-F]{40}$/i.test(address);
 };
 
 export const useWeb3 = (): Web3 => {
@@ -24,8 +24,7 @@ export const useWeb3 = (): Web3 => {
 
   const currentAddress: `0x${string}` | undefined = useMemo(() => {
     const param = getQueryParam('account');
-    const account = isValidAddress(param) ? (param as `0x${string}`) : undefined;
-    return account || address;
+    return isValidAddress(param) ? param : address;
   }, [address]);
 
   const walletAddress = useDebounce(currentAddress, 50);

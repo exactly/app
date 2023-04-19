@@ -31,8 +31,8 @@ const MarketsBasic: FC = () => {
   const translateOperation = useTranslateOperation();
   const { palette } = useTheme();
   const { openOperationModal } = useModalStatus();
-  const { symbol = 'USDC', operation, selected, setSelected } = useMarketsBasic();
-  const { errorData, requiresApproval, qty, assetContract, tx } = useOperationContext();
+  const { symbol, operation, selected, setSelected } = useMarketsBasic();
+  const { errorData, qty, assetContract, tx } = useOperationContext();
   const { marketAccount } = useAccountData(symbol);
   const walletBalance = useBalance(symbol, assetContract);
   const { options: fixedOptions, loading: loadingFixedOptions } = usePreviewFixedOperation(operation);
@@ -211,14 +211,7 @@ const MarketsBasic: FC = () => {
         {errorData?.status && <ModalAlert variant={errorData.variant || 'error'} message={errorData.message} />}
 
         <Box mt={1}>
-          <Submit
-            symbol={symbol}
-            operation={operation}
-            option={currentOption || {}}
-            qty={qty}
-            errorData={errorData}
-            requiresApproval={requiresApproval}
-          />
+          <Submit symbol={symbol} operation={operation} option={currentOption || {}} qty={qty} errorData={errorData} />
         </Box>
       </Box>
       <Box display="flex" flexDirection="column" gap={0} px={1} mt={-0.5}>

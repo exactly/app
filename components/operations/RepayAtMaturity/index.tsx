@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useContext, useMemo, useState } from 'react';
+import React, { FC, useCallback, useMemo, useState } from 'react';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { AddressZero, WeiPerEther, Zero } from '@ethersproject/constants';
 
@@ -7,10 +7,7 @@ import ModalTxCost from 'components/common/modal/ModalTxCost';
 
 import formatNumber from 'utils/formatNumber';
 
-import { MarketContext } from 'contexts/MarketContext';
 import { useWeb3 } from 'hooks/useWeb3';
-
-import numbers from 'config/numbers.json';
 
 import useApprove from 'hooks/useApprove';
 import useBalance from 'hooks/useBalance';
@@ -37,8 +34,7 @@ import useTranslateOperation from 'hooks/useTranslateOperation';
 import ModalInfoRepayWithDiscount from 'components/OperationsModal/Info/ModalInfoRepayWithDiscount';
 import usePreviewer from 'hooks/usePreviewer';
 import useDelayedEffect from 'hooks/useDelayedEffect';
-
-const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
+import { defaultAmount, gasLimitMultiplier } from 'utils/const';
 
 type RepayWithDiscount = {
   principal: string;
@@ -53,7 +49,6 @@ const RepayAtMaturity: FC = () => {
   const { track } = useAnalytics();
   const { operation } = useModalStatus();
   const { walletAddress } = useWeb3();
-  const { date } = useContext(MarketContext);
   const previewerContract = usePreviewer();
 
   const {
@@ -65,6 +60,7 @@ const RepayAtMaturity: FC = () => {
     gasCost,
     tx,
     setTx,
+    date,
     requiresApproval,
     setRequiresApproval,
     isLoading: isLoadingOp,
@@ -84,7 +80,7 @@ const RepayAtMaturity: FC = () => {
   const [penaltyAssets, setPenaltyAssets] = useState(Zero);
   const [positionAssetsAmount, setPositionAssetsAmount] = useState(Zero);
 
-  const { marketAccount, refreshAccountData } = useAccountData(symbol);
+  const { marketAccount } = useAccountData(symbol);
 
   const maxAmountToRepay = useMemo(
     () => positionAssetsAmount.add(penaltyAssets).mul(slippage).div(WeiPerEther),
@@ -173,8 +169,8 @@ const RepayAtMaturity: FC = () => {
         return gasEstimation?.mul(gasPrice);
       }
 
-      const amount = positionAssetsAmount.isZero() ? DEFAULT_AMOUNT : positionAssetsAmount;
-      const maxAmount = maxAmountToRepay.isZero() ? DEFAULT_AMOUNT.mul(slippage).div(WeiPerEther) : maxAmountToRepay;
+      const amount = positionAssetsAmount.isZero() ? defaultAmount : positionAssetsAmount;
+      const maxAmount = maxAmountToRepay.isZero() ? defaultAmount.mul(slippage).div(WeiPerEther) : maxAmountToRepay;
 
       if (marketAccount.assetSymbol === 'WETH') {
         const gasLimit = await ETHRouterContract.estimateGas.repayAtMaturity(date, amount, {
@@ -265,7 +261,7 @@ const RepayAtMaturity: FC = () => {
         });
 
         repayTx = await ETHRouterContract.repayAtMaturity(date, positionAssetsAmount, {
-          gasLimit: gasEstimation.mul(parseFixed(String(numbers.gasLimitMultiplier), 18)).div(WeiPerEther),
+          gasLimit: gasEstimation.mul(gasLimitMultiplier).div(WeiPerEther),
           value: maxAmountToRepay,
         });
       } else {
@@ -277,7 +273,7 @@ const RepayAtMaturity: FC = () => {
         );
 
         repayTx = await marketContract.repayAtMaturity(date, positionAssetsAmount, maxAmountToRepay, walletAddress, {
-          gasLimit: gasEstimation.mul(parseFixed(String(numbers.gasLimitMultiplier), 18)).div(WeiPerEther),
+          gasLimit: gasEstimation.mul(gasLimitMultiplier).div(WeiPerEther),
         });
       }
 
@@ -293,8 +289,6 @@ const RepayAtMaturity: FC = () => {
         maturity: date,
         hash: transactionHash,
       });
-
-      await refreshAccountData();
     } catch (error) {
       if (repayTx) setTx({ status: 'error', hash: repayTx?.hash });
       setErrorData({ status: true, message: handleOperationError(error) });
@@ -305,7 +299,6 @@ const RepayAtMaturity: FC = () => {
     marketAccount,
     ETHRouterContract,
     date,
-    refreshAccountData,
     handleOperationError,
     marketContract,
     maxAmountToRepay,
@@ -440,7 +433,6 @@ const RepayAtMaturity: FC = () => {
           submit={handleSubmitAction}
           isLoading={isLoading}
           disabled={!qty || parseFloat(qty) <= 0 || isLoading || errorData?.status}
-          requiresApproval={requiresApproval}
         />
       </Grid>
     </Grid>

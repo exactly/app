@@ -1,6 +1,7 @@
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { WeiPerEther, Zero } from '@ethersproject/constants';
-import numbers from 'config/numbers.json';
+import { useTranslation } from 'react-i18next';
+
 import { useOperationContext } from 'contexts/OperationContext';
 import useAccountData from 'hooks/useAccountData';
 import useApprove from 'hooks/useApprove';
@@ -11,9 +12,7 @@ import { OperationHook } from 'types/OperationHook';
 import getBeforeBorrowLimit from 'utils/getBeforeBorrowLimit';
 import useHealthFactor from './useHealthFactor';
 import useAnalytics from './useAnalytics';
-import { useTranslation } from 'react-i18next';
-
-const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
+import { defaultAmount, gasLimitMultiplier } from 'utils/const';
 
 type Borrow = {
   handleBasicInputChange: (value: string) => void;
@@ -40,7 +39,7 @@ export default (): Borrow => {
     ETHRouterContract,
   } = useOperationContext();
 
-  const { marketAccount, accountData, refreshAccountData } = useAccountData(symbol);
+  const { marketAccount, accountData } = useAccountData(symbol);
   const handleOperationError = useHandleOperationError();
 
   const healthFactor = useHealthFactor();
@@ -80,13 +79,13 @@ export default (): Borrow => {
 
       if (marketAccount.assetSymbol === 'WETH') {
         const gasEstimation = await ETHRouterContract.estimateGas.borrow(
-          quantity ? parseFixed(quantity, 18) : DEFAULT_AMOUNT,
+          quantity ? parseFixed(quantity, 18) : defaultAmount,
         );
         return gasPrice.mul(gasEstimation);
       }
 
       const gasEstimation = await marketContract.estimateGas.borrow(
-        quantity ? parseFixed(quantity, marketAccount.decimals) : DEFAULT_AMOUNT,
+        quantity ? parseFixed(quantity, marketAccount.decimals) : defaultAmount,
         walletAddress,
         walletAddress,
       );
@@ -215,7 +214,7 @@ export default (): Borrow => {
         const amount = parseFixed(qty, 18);
         const gasEstimation = await ETHRouterContract.estimateGas.borrow(amount);
         borrowTx = await ETHRouterContract.borrow(amount, {
-          gasLimit: gasEstimation.mul(parseFixed(String(numbers.gasLimitMultiplier), 18)).div(WeiPerEther),
+          gasLimit: gasEstimation.mul(gasLimitMultiplier).div(WeiPerEther),
         });
       } else {
         if (!marketContract || !walletAddress) return;
@@ -223,7 +222,7 @@ export default (): Borrow => {
         const amount = parseFixed(qty, marketAccount.decimals);
         const gasEstimation = await marketContract.estimateGas.borrow(amount, walletAddress, walletAddress);
         borrowTx = await marketContract.borrow(amount, walletAddress, walletAddress, {
-          gasLimit: gasEstimation.mul(parseFixed(String(numbers.gasLimitMultiplier), 18)).div(WeiPerEther),
+          gasLimit: gasEstimation.mul(gasLimitMultiplier).div(WeiPerEther),
         });
       }
 
@@ -238,8 +237,6 @@ export default (): Borrow => {
         asset: marketAccount.assetSymbol,
         hash: transactionHash,
       });
-
-      await refreshAccountData();
     } catch (error) {
       if (borrowTx?.hash) setTx({ status: 'error', hash: borrowTx.hash });
 
@@ -256,7 +253,6 @@ export default (): Borrow => {
     setTx,
     track,
     qty,
-    refreshAccountData,
     ETHRouterContract,
     marketContract,
     walletAddress,

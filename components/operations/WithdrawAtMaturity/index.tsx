@@ -1,14 +1,11 @@
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
-import React, { FC, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { AddressZero, WeiPerEther, Zero } from '@ethersproject/constants';
 
 import ModalGif from 'components/common/modal/ModalGif';
 import ModalTxCost from 'components/common/modal/ModalTxCost';
 
-import { MarketContext } from 'contexts/MarketContext';
 import { useWeb3 } from 'hooks/useWeb3';
-
-import numbers from 'config/numbers.json';
 
 import useApprove from 'hooks/useApprove';
 import usePreviewer from 'hooks/usePreviewer';
@@ -33,8 +30,7 @@ import useHandleOperationError from 'hooks/useHandleOperationError';
 import useAnalytics from 'hooks/useAnalytics';
 import { useTranslation } from 'react-i18next';
 import useTranslateOperation from 'hooks/useTranslateOperation';
-
-const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
+import { defaultAmount, gasLimitMultiplier } from 'utils/const';
 
 const WithdrawAtMaturity: FC = () => {
   const { t } = useTranslation();
@@ -42,7 +38,6 @@ const WithdrawAtMaturity: FC = () => {
   const { track } = useAnalytics();
   const { operation } = useModalStatus();
   const { walletAddress } = useWeb3();
-  const { date } = useContext(MarketContext);
 
   const {
     symbol,
@@ -53,6 +48,7 @@ const WithdrawAtMaturity: FC = () => {
     gasCost,
     tx,
     setTx,
+    date,
     requiresApproval,
     setRequiresApproval,
     isLoading: isLoadingOp,
@@ -71,7 +67,7 @@ const WithdrawAtMaturity: FC = () => {
 
   const previewerContract = usePreviewer();
 
-  const { marketAccount, refreshAccountData } = useAccountData(symbol);
+  const { marketAccount } = useAccountData(symbol);
 
   const isEarlyWithdraw = useMemo(() => {
     if (!date) return false;
@@ -160,7 +156,7 @@ const WithdrawAtMaturity: FC = () => {
         return gasEstimation?.mul(gasPrice);
       }
 
-      const amount = amountToWithdraw.isZero() ? DEFAULT_AMOUNT : amountToWithdraw;
+      const amount = amountToWithdraw.isZero() ? defaultAmount : amountToWithdraw;
 
       if (marketAccount.assetSymbol === 'WETH') {
         const gasEstimation = await ETHRouterContract.estimateGas.withdrawAtMaturity(date, amount, minAmountToWithdraw);
@@ -218,7 +214,7 @@ const WithdrawAtMaturity: FC = () => {
           minAmountToWithdraw,
         );
         withdrawTx = await ETHRouterContract.withdrawAtMaturity(date, parseFixed(qty, 18), minAmountToWithdraw, {
-          gasLimit: gasEstimation.mul(parseFixed(String(numbers.gasLimitMultiplier), 18)).div(WeiPerEther),
+          gasLimit: gasEstimation.mul(gasLimitMultiplier).div(WeiPerEther),
         });
       } else {
         const gasEstimation = await marketContract.estimateGas.withdrawAtMaturity(
@@ -236,7 +232,7 @@ const WithdrawAtMaturity: FC = () => {
           walletAddress,
           walletAddress,
           {
-            gasLimit: gasEstimation.mul(parseFixed(String(numbers.gasLimitMultiplier), 18)).div(WeiPerEther),
+            gasLimit: gasEstimation.mul(gasLimitMultiplier).div(WeiPerEther),
           },
         );
       }
@@ -253,8 +249,6 @@ const WithdrawAtMaturity: FC = () => {
         maturity: date,
         hash: transactionHash,
       });
-
-      await refreshAccountData();
     } catch (error) {
       if (withdrawTx) setTx({ status: 'error', hash: withdrawTx?.hash });
       setErrorData({ status: true, message: handleOperationError(error) });
@@ -270,7 +264,6 @@ const WithdrawAtMaturity: FC = () => {
     setIsLoadingOp,
     setTx,
     track,
-    refreshAccountData,
     ETHRouterContract,
     minAmountToWithdraw,
     setErrorData,
@@ -369,7 +362,6 @@ const WithdrawAtMaturity: FC = () => {
           submit={handleSubmitAction}
           isLoading={isLoading}
           disabled={!qty || parseFloat(qty) <= 0 || isLoading || errorData?.status}
-          requiresApproval={requiresApproval}
         />
       </Grid>
     </Grid>

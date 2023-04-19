@@ -6,8 +6,6 @@ import ModalGif from 'components/common/modal/ModalGif';
 
 import { useWeb3 } from 'hooks/useWeb3';
 
-import numbers from 'config/numbers.json';
-
 import { WeiPerEther } from '@ethersproject/constants';
 import useApprove from 'hooks/useApprove';
 import { useOperationContext, usePreviewTx } from 'contexts/OperationContext';
@@ -27,8 +25,7 @@ import useHandleOperationError from 'hooks/useHandleOperationError';
 import useAnalytics from 'hooks/useAnalytics';
 import { useTranslation } from 'react-i18next';
 import useTranslateOperation from 'hooks/useTranslateOperation';
-
-const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
+import { defaultAmount, gasLimitMultiplier } from 'utils/const';
 
 const Withdraw: FC = () => {
   const { t } = useTranslation();
@@ -56,7 +53,7 @@ const Withdraw: FC = () => {
 
   const handleOperationError = useHandleOperationError();
 
-  const { marketAccount, refreshAccountData } = useAccountData(symbol);
+  const { marketAccount } = useAccountData(symbol);
 
   const [isMax, setIsMax] = useState(false);
 
@@ -87,7 +84,7 @@ const Withdraw: FC = () => {
 
       const { floatingDepositShares } = marketAccount;
       if (marketAccount.assetSymbol === 'WETH') {
-        const amount = isMax ? floatingDepositShares : quantity ? parseFixed(quantity, 18) : DEFAULT_AMOUNT;
+        const amount = isMax ? floatingDepositShares : quantity ? parseFixed(quantity, 18) : defaultAmount;
         const gasEstimation = await ETHRouterContract.estimateGas.redeem(amount);
         return gasPrice.mul(gasEstimation);
       }
@@ -96,7 +93,7 @@ const Withdraw: FC = () => {
         ? floatingDepositShares
         : quantity
         ? parseFixed(quantity, marketAccount.decimals)
-        : DEFAULT_AMOUNT;
+        : defaultAmount;
       const gasEstimation = await marketContract.estimateGas.redeem(amount, walletAddress, walletAddress);
       return gasPrice.mul(gasEstimation);
     },
@@ -146,12 +143,12 @@ const Withdraw: FC = () => {
         if (isMax) {
           const gasEstimation = await ETHRouterContract.estimateGas.redeem(floatingDepositShares);
           withdrawTx = await ETHRouterContract.redeem(floatingDepositShares, {
-            gasLimit: gasEstimation.mul(parseFixed(String(numbers.gasLimitMultiplier), 18)).div(WeiPerEther),
+            gasLimit: gasEstimation.mul(gasLimitMultiplier).div(WeiPerEther),
           });
         } else {
           const gasEstimation = await ETHRouterContract.estimateGas.withdraw(parseFixed(qty, 18));
           withdrawTx = await ETHRouterContract.withdraw(parseFixed(qty, 18), {
-            gasLimit: gasEstimation.mul(parseFixed(String(numbers.gasLimitMultiplier), 18)).div(WeiPerEther),
+            gasLimit: gasEstimation.mul(gasLimitMultiplier).div(WeiPerEther),
           });
         }
       } else {
@@ -163,7 +160,7 @@ const Withdraw: FC = () => {
           );
 
           withdrawTx = await marketContract.redeem(floatingDepositShares, walletAddress, walletAddress, {
-            gasLimit: gasEstimation.mul(parseFixed(String(numbers.gasLimitMultiplier), 18)).div(WeiPerEther),
+            gasLimit: gasEstimation.mul(gasLimitMultiplier).div(WeiPerEther),
           });
         } else {
           const gasEstimation = await marketContract.estimateGas.withdraw(
@@ -173,7 +170,7 @@ const Withdraw: FC = () => {
           );
 
           withdrawTx = await marketContract.withdraw(parseFixed(qty, decimals), walletAddress, walletAddress, {
-            gasLimit: gasEstimation.mul(parseFixed(String(numbers.gasLimitMultiplier), 18)).div(WeiPerEther),
+            gasLimit: gasEstimation.mul(gasLimitMultiplier).div(WeiPerEther),
           });
         }
       }
@@ -189,8 +186,6 @@ const Withdraw: FC = () => {
         asset: marketAccount.assetSymbol,
         hash: transactionHash,
       });
-
-      await refreshAccountData();
     } catch (error) {
       if (withdrawTx) setTx({ status: 'error', hash: withdrawTx?.hash });
       setErrorData({ status: true, message: handleOperationError(error) });
@@ -205,7 +200,6 @@ const Withdraw: FC = () => {
     setTx,
     track,
     qty,
-    refreshAccountData,
     ETHRouterContract,
     isMax,
     setErrorData,
@@ -277,7 +271,6 @@ const Withdraw: FC = () => {
           submit={handleSubmitAction}
           isLoading={isLoading}
           disabled={!qty || parseFloat(qty) <= 0 || isLoading || errorData?.status}
-          requiresApproval={requiresApproval}
         />
       </Grid>
     </Grid>
