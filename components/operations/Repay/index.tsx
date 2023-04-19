@@ -7,8 +7,6 @@ import ModalGif from 'components/common/modal/ModalGif';
 
 import { useWeb3 } from 'hooks/useWeb3';
 
-import numbers from 'config/numbers.json';
-
 import useApprove from 'hooks/useApprove';
 import useBalance from 'hooks/useBalance';
 import { useOperationContext, usePreviewTx } from 'contexts/OperationContext';
@@ -28,8 +26,7 @@ import useHandleOperationError from 'hooks/useHandleOperationError';
 import useAnalytics from 'hooks/useAnalytics';
 import { useTranslation } from 'react-i18next';
 import useTranslateOperation from 'hooks/useTranslateOperation';
-
-const DEFAULT_AMOUNT = BigNumber.from(numbers.defaultAmount);
+import { defaultAmount, ethRouterSlippage, gasLimitMultiplier } from 'utils/const';
 
 function Repay() {
   const { t } = useTranslation();
@@ -58,7 +55,7 @@ function Repay() {
 
   const handleOperationError = useHandleOperationError();
 
-  const { marketAccount, refreshAccountData } = useAccountData(symbol);
+  const { marketAccount } = useAccountData(symbol);
 
   const [isMax, setIsMax] = useState(false);
 
@@ -123,25 +120,21 @@ function Repay() {
 
         if (isMax) {
           const gasEstimation = await ETHRouterContract.estimateGas.refund(floatingBorrowShares, {
-            value: floatingBorrowAssets.mul(parseFixed(String(1 + numbers.ethRouterSlippage), 18)).div(WeiPerEther),
+            value: floatingBorrowAssets.mul(ethRouterSlippage).div(WeiPerEther),
           });
 
           repayTx = await ETHRouterContract.refund(floatingBorrowShares, {
-            gasLimit: gasEstimation.mul(parseFixed(String(numbers.gasLimitMultiplier), 18)).div(WeiPerEther),
-            value: floatingBorrowAssets.mul(parseFixed(String(1 + numbers.ethRouterSlippage), 18)).div(WeiPerEther),
+            gasLimit: gasEstimation.mul(gasLimitMultiplier).div(WeiPerEther),
+            value: floatingBorrowAssets.mul(ethRouterSlippage).div(WeiPerEther),
           });
         } else {
           const gasEstimation = await ETHRouterContract.estimateGas.repay(parseFixed(qty, 18), {
-            value: parseFixed(qty, 18)
-              .mul(parseFixed(String(1 + numbers.ethRouterSlippage), 18))
-              .div(WeiPerEther),
+            value: parseFixed(qty, 18).mul(ethRouterSlippage).div(WeiPerEther),
           });
 
           repayTx = await ETHRouterContract.repay(parseFixed(qty, 18), {
-            gasLimit: gasEstimation.mul(parseFixed(String(numbers.gasLimitMultiplier), 18)).div(WeiPerEther),
-            value: parseFixed(qty, 18)
-              .mul(parseFixed(String(1 + numbers.ethRouterSlippage), 18))
-              .div(WeiPerEther),
+            gasLimit: gasEstimation.mul(gasLimitMultiplier).div(WeiPerEther),
+            value: parseFixed(qty, 18).mul(ethRouterSlippage).div(WeiPerEther),
           });
         }
       } else {
@@ -149,12 +142,12 @@ function Repay() {
           const gasEstimation = await marketContract.estimateGas.refund(floatingBorrowShares, walletAddress);
 
           repayTx = await marketContract.refund(floatingBorrowShares, walletAddress, {
-            gasLimit: gasEstimation.mul(parseFixed(String(numbers.gasLimitMultiplier), 18)).div(WeiPerEther),
+            gasLimit: gasEstimation.mul(gasLimitMultiplier).div(WeiPerEther),
           });
         } else {
           const gasEstimation = await marketContract.estimateGas.repay(parseFixed(qty, decimals), walletAddress);
           repayTx = await marketContract.repay(parseFixed(qty, decimals), walletAddress, {
-            gasLimit: gasEstimation.mul(parseFixed(String(numbers.gasLimitMultiplier), 18)).div(WeiPerEther),
+            gasLimit: gasEstimation.mul(gasLimitMultiplier).div(WeiPerEther),
           });
         }
       }
@@ -170,8 +163,6 @@ function Repay() {
         asset: marketAccount.assetSymbol,
         hash: transactionHash,
       });
-
-      await refreshAccountData();
     } catch (error) {
       if (repayTx) setTx({ status: 'error', hash: repayTx?.hash });
       setErrorData({ status: true, message: handleOperationError(error) });
@@ -186,7 +177,6 @@ function Repay() {
     setIsLoadingOp,
     setTx,
     track,
-    refreshAccountData,
     ETHRouterContract,
     isMax,
     setErrorData,
@@ -206,11 +196,7 @@ function Repay() {
       }
 
       if (marketAccount.assetSymbol === 'WETH') {
-        const amount = quantity
-          ? parseFixed(quantity, 18)
-              .mul(parseFixed(String(1 + numbers.ethRouterSlippage), 18))
-              .div(WeiPerEther)
-          : DEFAULT_AMOUNT;
+        const amount = quantity ? parseFixed(quantity, 18).mul(ethRouterSlippage).div(WeiPerEther) : defaultAmount;
 
         const gasLimit = await ETHRouterContract.estimateGas.repay(amount, {
           value: amount,
@@ -220,7 +206,7 @@ function Repay() {
       }
 
       const gasLimit = await marketContract.estimateGas.repay(
-        quantity ? parseFixed(quantity, marketAccount.decimals) : DEFAULT_AMOUNT,
+        quantity ? parseFixed(quantity, marketAccount.decimals) : defaultAmount,
         walletAddress,
       );
 
@@ -301,7 +287,6 @@ function Repay() {
           submit={handleSubmitAction}
           isLoading={isLoading}
           disabled={!qty || parseFloat(qty) <= 0 || isLoading || errorData?.status}
-          requiresApproval={requiresApproval}
         />
       </Grid>
     </Grid>

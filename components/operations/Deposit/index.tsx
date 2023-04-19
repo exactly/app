@@ -29,7 +29,7 @@ const Deposit: FC = () => {
   const { t } = useTranslation();
   const translateOperation = useTranslateOperation();
   const { operation } = useModalStatus();
-  const { symbol, errorData, qty, gasCost, tx, requiresApproval, assetContract } = useOperationContext();
+  const { symbol, errorData, qty, gasCost, tx, assetContract } = useOperationContext();
   const { isLoading, onMax, handleInputChange, handleSubmitAction, deposit, needsApproval, previewGasCost } =
     useDeposit();
   const { marketAccount } = useAccountData(symbol);
@@ -94,7 +94,6 @@ const Deposit: FC = () => {
           submit={handleSubmitAction}
           isLoading={isLoading || previewIsLoading}
           disabled={!qty || parseFloat(qty) <= 0 || isLoading || previewIsLoading || errorData?.status}
-          requiresApproval={requiresApproval}
         />
       </Grid>
     </Grid>

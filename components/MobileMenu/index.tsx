@@ -1,4 +1,4 @@
-import React, { FC, PropsWithChildren, useContext } from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import CloseIcon from '@mui/icons-material/Close';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import TwitterIcon from '@mui/icons-material/Twitter';
@@ -10,12 +10,12 @@ import Image from 'next/image';
 import useRouter from 'hooks/useRouter';
 import Link from 'next/link';
 import Switch from 'components/Switch';
-import { MarketContext } from 'contexts/MarketContext';
 import { DiscordIcon } from 'components/Icons';
 import QueryStatsIcon from '@mui/icons-material/QueryStats';
 import SwitchTheme from 'components/SwitchTheme';
 import { useTranslation } from 'react-i18next';
 import SelectLanguage from 'components/SelectLanguage';
+import { useMarketContext } from 'contexts/MarketContext';
 
 type Props = {
   open: boolean;
@@ -134,7 +134,7 @@ const LinkItem: FC<PropsWithChildren & { title: string; href: string }> = ({ chi
 
 const AdvancedViewSwitch: FC = () => {
   const { t } = useTranslation();
-  const { view, setView } = useContext(MarketContext);
+  const { view, setView } = useMarketContext();
   return (
     <Box display="flex" alignItems="center" justifyContent="space-between" gap={1}>
       <Typography fontSize={19} fontWeight={700}>

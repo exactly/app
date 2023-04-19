@@ -1,16 +1,9 @@
 {
-  "decimals": 2,
-  "approvalAmount": 90000000000,
-  "estimateGasAmount": 0.00001,
-  "daysToWarning": 2,
-  "daysToError": 0,
   "slippage": 0.05,
   "ethRouterSlippage": 0.001,
-  "usdAmount": 1,
   "gasLimitMultiplier": 1.25,
   "debounceTime": 500,
   "minAPRValue": 0.0001,
-  "maxAPRValue": 0.3,
   "defaultAmount": 69,
   "chartInterval": 0.0005,
   "chartGap": 0.5

@@ -1,14 +1,14 @@
-import { useCallback, useContext } from 'react';
+import { useCallback } from 'react';
 import { useWeb3 } from 'hooks/useWeb3';
-import { MarketContext } from 'contexts/MarketContext';
 import { Operation, useModalStatus } from 'contexts/ModalStatusContext';
 import numbers from 'config/numbers.json';
+import { useMarketContext } from 'contexts/MarketContext';
 
 const { minAPRValue } = numbers;
 
 export default function useActionButton() {
   const { walletAddress, connect } = useWeb3();
-  const { setDate, setMarketSymbol } = useContext(MarketContext);
+  const { setDate, setMarketSymbol } = useMarketContext();
   const { openOperationModal } = useModalStatus();
 
   const handleActionClick = useCallback(

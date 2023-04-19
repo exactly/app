@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 import PieChartOutlineRoundedIcon from '@mui/icons-material/PieChartOutlineRounded';
 
@@ -6,7 +6,6 @@ import ModalInfo, { FromTo, Variant } from 'components/common/modal/ModalInfo';
 import { Operation } from 'contexts/ModalStatusContext';
 import useAccountData from 'hooks/useAccountData';
 import { toPercentage } from 'utils/utils';
-import { MarketContext } from 'contexts/MarketContext';
 import usePreviewer from 'hooks/usePreviewer';
 import useDelayedEffect from 'hooks/useDelayedEffect';
 import { useWeb3 } from 'hooks/useWeb3';
@@ -15,6 +14,7 @@ import { useOperationContext } from 'contexts/OperationContext';
 import { Box } from '@mui/material';
 import UtilizationRateWithAreaChart from 'components/charts/UtilizationRateWithAreaChart';
 import { useTranslation } from 'react-i18next';
+import { useMarketContext } from 'contexts/MarketContext';
 
 type Props = {
   qty: string;
@@ -29,7 +29,7 @@ function ModalInfoFixedUtilizationRate({ qty, symbol, operation, variant = 'colu
   const previewerContract = usePreviewer();
   const { walletAddress } = useWeb3();
   const { marketAccount } = useAccountData(symbol);
-  const { date } = useContext(MarketContext);
+  const { date } = useMarketContext();
 
   const { marketContract } = useOperationContext();
 

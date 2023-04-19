@@ -1,11 +1,10 @@
-import { useContext } from 'react';
 import { formatFixed } from '@ethersproject/bignumber';
 
-import { MarketContext } from 'contexts/MarketContext';
+import { useMarketContext } from 'contexts/MarketContext';
 import useAccountData from './useAccountData';
 
 export default (symbol: string) => {
-  const { date: maturityDate } = useContext(MarketContext);
+  const { date: maturityDate } = useMarketContext();
   const { marketAccount } = useAccountData(symbol);
 
   if (!marketAccount || !maturityDate) return;

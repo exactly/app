@@ -1,12 +1,11 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import { Box, Typography } from '@mui/material';
-
-import { MarketContext } from 'contexts/MarketContext';
 
 import DropdownMenu from 'components/DropdownMenu';
 import parseTimestamp from 'utils/parseTimestamp';
 import ModalInfo from 'components/common/modal/ModalInfo';
 import { useTranslation } from 'react-i18next';
+import { useMarketContext } from 'contexts/MarketContext';
 
 type DateOptionProps = {
   label: string;
@@ -23,7 +22,7 @@ function DateOption({ label, option = false }: DateOptionProps) {
 
 function DateSelector() {
   const { t } = useTranslation();
-  const { date, dates, setDate } = useContext(MarketContext);
+  const { date, dates, setDate } = useMarketContext();
 
   return (
     <ModalInfo label={t('Fixed rate pool')}>

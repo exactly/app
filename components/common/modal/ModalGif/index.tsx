@@ -1,4 +1,4 @@
-import React, { ReactNode, useContext, useMemo } from 'react';
+import React, { ReactNode, useMemo } from 'react';
 import { Transaction } from 'types/Transaction';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
@@ -9,7 +9,7 @@ import { useModalStatus } from 'contexts/ModalStatusContext';
 import { useOperationContext } from 'contexts/OperationContext';
 import formatSymbol from 'utils/formatSymbol';
 import Reminder from 'components/Reminder';
-import { MarketContext } from 'contexts/MarketContext';
+import { useMarketContext } from 'contexts/MarketContext';
 import parseTimestamp from 'utils/parseTimestamp';
 import { useTranslation } from 'react-i18next';
 import useTranslateOperation from 'hooks/useTranslateOperation';
@@ -25,7 +25,7 @@ function ModalGif({ tx, tryAgain }: Props) {
   const { chain } = useWeb3();
   const { operation } = useModalStatus();
   const { symbol, qty } = useOperationContext();
-  const { date } = useContext(MarketContext);
+  const { date } = useMarketContext();
 
   const isLoading = useMemo(() => tx.status === 'processing' || tx.status === 'loading', [tx]);
   const isSuccess = useMemo(() => tx.status === 'success', [tx]);

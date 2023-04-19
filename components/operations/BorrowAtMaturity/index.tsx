@@ -30,7 +30,7 @@ const BorrowAtMaturity: FC = () => {
   const { t } = useTranslation();
   const translateOperation = useTranslateOperation();
   const { operation } = useModalStatus();
-  const { symbol, errorData, setErrorData, qty, gasCost, tx, requiresApproval } = useOperationContext();
+  const { symbol, errorData, setErrorData, qty, gasCost, tx } = useOperationContext();
   const {
     isLoading,
     onMax,
@@ -129,7 +129,6 @@ const BorrowAtMaturity: FC = () => {
           submit={handleSubmitAction}
           isLoading={isLoading || previewIsLoading}
           disabled={!qty || parseFloat(qty) <= 0 || isLoading || previewIsLoading || errorData?.status}
-          requiresApproval={requiresApproval}
         />
       </Grid>
     </Grid>

@@ -1,8 +1,7 @@
-import React, { createContext, useContext, useState, useMemo, useCallback, useRef, useEffect } from 'react';
+import React, { createContext, useContext, useState, useMemo, useCallback } from 'react';
 import type { FC, PropsWithChildren } from 'react';
 import OperationsModal from 'components/OperationsModal';
 import { OperationContextProvider } from './OperationContext';
-import useAccountData from 'hooks/useAccountData';
 
 export type Operation =
   | 'borrow'
@@ -31,25 +30,15 @@ type ContextValues = {
 const ModalStatusContext = createContext<ContextValues | null>(null);
 
 export const ModalStatusProvider: FC<PropsWithChildren> = ({ children }) => {
-  const { refreshAccountData } = useAccountData();
   const [open, setOpen] = useState<boolean>(false);
-  const first = useRef(true);
-
   const [operation, setOperation] = useState<Operation>('deposit');
 
   const openOperationModal = useCallback((op: Operation) => {
     setOperation(op);
     setOpen(true);
-    first.current = false;
   }, []);
 
   const closeModal = useCallback(() => setOpen(false), []);
-
-  useEffect(() => {
-    if (!open && !first.current) {
-      setTimeout(() => void refreshAccountData(), 5000);
-    }
-  }, [open, refreshAccountData]);
 
   const toggle = useCallback(() => {
     if (!operation) return;

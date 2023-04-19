@@ -14,7 +14,7 @@ import { ErrorCode } from '@ethersproject/logger';
 
 export type ContextValues = {
   accountData: AccountData | undefined;
-  refreshAccountData: () => Promise<void>;
+  refreshAccountData: (delay?: number) => Promise<void>;
   resetAccountData: () => void;
 };
 
@@ -73,8 +73,19 @@ export const AccountDataProvider: FC<PropsWithChildren> = ({ children }) => {
     return () => clearInterval(interval);
   }, [syncAccountData]);
 
+  const refreshAccountData = useCallback(
+    async (delay = 2500) => new Promise<void>((r) => setTimeout(() => syncAccountData().then(r), delay)),
+    [syncAccountData],
+  );
+
   return (
-    <AccountDataContext.Provider value={{ accountData, refreshAccountData: syncAccountData, resetAccountData }}>
+    <AccountDataContext.Provider
+      value={{
+        accountData,
+        refreshAccountData,
+        resetAccountData,
+      }}
+    >
       {children}
     </AccountDataContext.Provider>
   );
