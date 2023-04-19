@@ -32,23 +32,24 @@ type Props = {
 
 const formatEmpty = () => '';
 
-const DATA_POINTS = 100;
-const MIN_UTILIZATION_RANGE = 0.0001;
-
 function UtilizationRateWithAreaChart({ type = 'fixed', operation, symbol, from, to, fixedRate, floatingRate }: Props) {
   const { palette, typography } = useTheme();
 
   const [interval, isSmallRange, utilizationMidPoint] = useMemo(() => {
     if (from === undefined || to === undefined) return [numbers.chartInterval, true, 0];
     const range = Math.abs(from - to);
-    return [Math.abs(from - to) / DATA_POINTS || numbers.chartInterval, range < MIN_UTILIZATION_RANGE, (from + to) / 2];
+    return [
+      Math.abs(from - to) / numbers.dataPointsInChart || numbers.chartInterval,
+      range < numbers.minUtilizationRange,
+      (from + to) / 2,
+    ];
   }, [from, to]);
 
   const { data, loading } = useUtilizationRate(
     type,
     symbol,
-    Math.max(0, Math.min(from || 0, to || 0) - interval * Math.floor(DATA_POINTS * 0.4)),
-    Math.max(from || 0, to || 0) + interval * Math.floor(DATA_POINTS * 0.4),
+    Math.max(0, Math.min(from || 0, to || 0) - interval * Math.floor(numbers.dataPointsInChart * 0.4)),
+    Math.max(from || 0, to || 0) + interval * Math.floor(numbers.dataPointsInChart * 0.4),
     interval,
     [
       ...(from !== undefined ? [from] : []),

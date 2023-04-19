@@ -8,7 +8,7 @@ type Entry = {
   color: string;
 };
 
-type Props = {
+export type TooltipChartProps = {
   active?: boolean;
   payload?: Entry[];
   label?: Date;
@@ -18,6 +18,7 @@ type Props = {
   itemSorter?: (a: Entry, b: Entry) => number;
   ignoreKeys?: string[];
   additionalInfo?: ReactNode;
+  additionalInfoPosition?: 'top' | 'bottom';
   opacity?: number;
 };
 
@@ -32,7 +33,8 @@ function TooltipChart({
   ignoreKeys,
   additionalInfo,
   opacity = 1,
-}: Props) {
+  additionalInfoPosition = 'bottom',
+}: TooltipChartProps) {
   const sortedPayload = useMemo(
     () => (itemSorter && payload ? payload.sort(itemSorter) : payload),
     [payload, itemSorter],
@@ -52,6 +54,7 @@ function TooltipChart({
       <Typography variant="subtitle2" fontSize="10px" mb={0.5}>
         {labelFormatter ? labelFormatter(label) : JSON.stringify(label)}
       </Typography>
+      {additionalInfoPosition === 'top' && additionalInfo}
       {sortedPayload
         .filter(({ dataKey }) => !ignoreKeys || !ignoreKeys.includes(dataKey))
         .map(({ dataKey, name, value, color }) => (
@@ -59,7 +62,7 @@ function TooltipChart({
             {`${formatterName ? formatterName(name) : name + ':'} ${formatter ? formatter(value) : value}`}
           </Typography>
         ))}
-      {additionalInfo}
+      {additionalInfoPosition === 'bottom' && additionalInfo}
     </Box>
   );
 }
