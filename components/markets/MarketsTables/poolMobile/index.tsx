@@ -18,7 +18,7 @@ import useTranslateOperation from 'hooks/useTranslateOperation';
 const { minAPRValue } = numbers;
 
 const sxButton: SxProps = {
-  'white-space': 'nowrap',
+  whiteSpace: 'nowrap',
   height: '34px',
 };
 

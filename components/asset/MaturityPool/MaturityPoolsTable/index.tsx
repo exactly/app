@@ -103,7 +103,7 @@ const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ symbol }) => {
                   disabled={depositAPR < minAPRValue}
                   variant="contained"
                   onClick={(e) => handleActionClick(e, 'depositAtMaturity', symbol, maturity)}
-                  sx={{ 'white-space': 'nowrap' }}
+                  sx={{ whiteSpace: 'nowrap' }}
                 >
                   {t('Deposit')}
                 </Button>
@@ -118,7 +118,7 @@ const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ symbol }) => {
                 <Button
                   disabled={borrowAPR < minAPRValue}
                   variant="outlined"
-                  sx={{ backgroundColor: 'components.bg', 'white-space': 'nowrap' }}
+                  sx={{ backgroundColor: 'components.bg', whiteSpace: 'nowrap' }}
                   onClick={(e) => handleActionClick(e, 'borrowAtMaturity', symbol, maturity)}
                 >
                   {t('Borrow')}
