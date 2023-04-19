@@ -205,7 +205,7 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
                           }
                           disabled={isDisable(rateType, depositAPR)}
                           data-testid={`${rateType}-deposit-${symbol}`}
-                          sx={{ 'white-space': 'nowrap' }}
+                          sx={{ whiteSpace: 'nowrap' }}
                         >
                           {t('Deposit')}
                         </Button>
@@ -237,7 +237,7 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
                       >
                         <Button
                           variant="outlined"
-                          sx={{ backgroundColor: 'components.bg', 'white-space': 'nowrap' }}
+                          sx={{ backgroundColor: 'components.bg', whiteSpace: 'nowrap' }}
                           onClick={(e) =>
                             handleActionClick(
                               e,

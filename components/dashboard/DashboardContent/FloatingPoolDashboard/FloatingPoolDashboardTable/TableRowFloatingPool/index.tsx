@@ -80,11 +80,7 @@ function TableRowFloatingPool({ symbol, valueUSD, depositedAmount, borrowedAmoun
       )}
 
       <TableCell align="left" width={50} size="small" sx={{ px: 0.5 }}>
-        <Button
-          variant="contained"
-          onClick={(e) => handleActionClick(e, type, symbol)}
-          sx={{ 'white-space': 'nowrap' }}
-        >
+        <Button variant="contained" onClick={(e) => handleActionClick(e, type, symbol)} sx={{ whiteSpace: 'nowrap' }}>
           {type === 'deposit' ? t('Deposit') : t('Borrow')}
         </Button>
       </TableCell>
@@ -92,7 +88,7 @@ function TableRowFloatingPool({ symbol, valueUSD, depositedAmount, borrowedAmoun
       <TableCell align="left" width={50} size="small" sx={{ px: 0.5 }}>
         <Button
           variant="outlined"
-          sx={{ backgroundColor: 'components.bg', 'white-space': 'nowrap' }}
+          sx={{ backgroundColor: 'components.bg', whiteSpace: 'nowrap' }}
           onClick={(e) => handleActionClick(e, type === 'deposit' ? 'withdraw' : 'repay', symbol)}
         >
           {type === 'deposit' ? t('Withdraw') : t('Repay')}
