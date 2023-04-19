@@ -1,10 +1,10 @@
-import React, { CSSProperties, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { Typography, useTheme, Box } from '@mui/material';
-import { LineChart, XAxis, Tooltip, Line, ResponsiveContainer, ReferenceLine, CartesianGrid, YAxis } from 'recharts';
+import { LineChart, XAxis, Tooltip, Line, ResponsiveContainer, CartesianGrid, YAxis } from 'recharts';
 
 import { toPercentage } from 'utils/utils';
 import useUtilizationRate from 'hooks/useUtilizationRate';
-import TooltipChart from '../TooltipChart';
+import TooltipChart, { TooltipChartProps } from '../TooltipChart';
 import LoadingChart from '../LoadingChart';
 import numbers from 'config/numbers.json';
 import parseTimestamp from 'utils/parseTimestamp';
@@ -20,21 +20,49 @@ const formatEmpty = () => '';
 
 function UtilizationRateChart({ type, symbol }: Props) {
   const { t } = useTranslation();
-  const { palette, typography } = useTheme();
-  const { currentUtilization, data, loading } = useUtilizationRate(type, symbol);
+  const { palette } = useTheme();
   const [zoom, setZoom] = useState<boolean>(true);
+  const { currentUtilization } = useUtilizationRate(type, symbol);
 
-  const slicedData = useMemo(() => {
-    if (!currentUtilization || currentUtilization.length === 0 || !zoom) return data;
+  const [currentMin, currentMax, interval] = useMemo(() => {
+    if (!zoom || !currentUtilization) return [undefined, undefined, numbers.chartInterval];
+    if (!currentUtilization.length) return [numbers.chartInterval, undefined, undefined];
+    if (currentUtilization.length === 1)
+      return [
+        Math.max(0, currentUtilization[0].utilization - 10 * numbers.chartInterval),
+        currentUtilization[0].utilization + 9 * numbers.chartInterval,
+        numbers.chartInterval,
+      ];
 
-    const minUtilization = Math.min(...currentUtilization.map((item) => item.utilization));
-    const maxUtilization = Math.max(...currentUtilization.map((item) => item.utilization));
+    const min = Math.min(...currentUtilization.map((item) => item.utilization));
+    const max = Math.max(...currentUtilization.map((item) => item.utilization));
+    const gap = Math.abs(max - min) / numbers.dataPointsInChart || numbers.chartInterval;
 
-    const left = minUtilization * (1 - numbers.chartGap);
-    const right = maxUtilization * (1 + numbers.chartGap);
+    return [
+      Math.max(0, min - gap * Math.floor(numbers.dataPointsInChart * 0.05)),
+      max + gap * Math.floor(numbers.dataPointsInChart * 0.05),
+      gap,
+    ];
+  }, [currentUtilization, zoom]);
 
-    return data.filter((item) => item.utilization >= left && item.utilization <= right);
-  }, [currentUtilization, data, zoom]);
+  const { data, loading } = useUtilizationRate(
+    type,
+    symbol,
+    currentMin,
+    currentMax,
+    interval,
+    currentUtilization ? currentUtilization?.map((item) => item.utilization) : [],
+  );
+
+  const [cursorStyle, setCursorStyle] = useState('default');
+
+  const handleMouseEnter = () => {
+    setCursorStyle('pointer');
+  };
+
+  const handleMouseLeave = () => {
+    setCursorStyle('default');
+  };
 
   const buttons = useMemo(
     () => [
@@ -50,12 +78,6 @@ function UtilizationRateChart({ type, symbol }: Props) {
     [t],
   );
 
-  const label: CSSProperties = {
-    fontWeight: 500,
-    fontFamily: typography.fontFamilyMonospaced,
-    fill: palette.grey[900],
-  };
-
   return (
     <Box display="flex" flexDirection="column" width="100%" height="100%" gap={2}>
       <Box display="flex" justifyContent="space-between">
@@ -67,10 +89,10 @@ function UtilizationRateChart({ type, symbol }: Props) {
         </Box>
       </Box>
       <ResponsiveContainer width="100%" height="100%">
-        {loading ? (
+        {loading || !currentUtilization ? (
           <LoadingChart />
         ) : (
-          <LineChart data={slicedData} margin={{ top: 5, bottom: 5 }}>
+          <LineChart data={data} margin={{ top: 5, bottom: 5 }} style={{ cursor: cursorStyle }}>
             <CartesianGrid stroke={palette.grey[300]} vertical={false} />
             <XAxis
               type="number"
@@ -89,6 +111,7 @@ function UtilizationRateChart({ type, symbol }: Props) {
                 fontWeight: 500,
                 fontSize: 11,
               }}
+              padding={{ left: 20, right: 20 }}
             />
             <YAxis
               allowDataOverflow
@@ -112,6 +135,7 @@ function UtilizationRateChart({ type, symbol }: Props) {
                 angle: -90,
                 fontSize: 11,
               }}
+              padding={{ bottom: 5 }}
             />
             <YAxis
               allowDataOverflow={true}
@@ -127,7 +151,7 @@ function UtilizationRateChart({ type, symbol }: Props) {
             <Tooltip
               labelFormatter={formatEmpty}
               formatter={(value) => toPercentage(value as number)}
-              content={<TooltipChart />}
+              content={<CustomTooltipChart highlighted={currentUtilization} type={type} zoom={zoom} />}
               cursor={{ strokeWidth: 1, fill: palette.grey[500], strokeDasharray: '3' }}
             />
 
@@ -144,38 +168,100 @@ function UtilizationRateChart({ type, symbol }: Props) {
             />
 
             <Line
+              dot={(props) => (
+                <CustomDot
+                  {...props}
+                  color={palette.operation.variable}
+                  dotsToHighlight={currentUtilization.map((item) => item.utilization)}
+                  onMouseEnter={handleMouseEnter}
+                  onMouseLeave={handleMouseLeave}
+                />
+              )}
               name={t('Borrow APR') ?? undefined}
               yAxisId="yaxis"
               type="monotone"
               dataKey="apr"
               stroke={palette.mode === 'light' ? 'black' : 'white'}
-              dot={false}
               strokeWidth={2}
-              animationDuration={2000}
+              animationDuration={0}
+              activeDot={false}
             />
-            {currentUtilization &&
-              currentUtilization.map(({ maturity, utilization }) => (
-                <ReferenceLine
-                  x={utilization}
-                  key={`${utilization}_${maturity}}`}
-                  strokeWidth={2}
-                  yAxisId="yaxis"
-                  stroke={palette.operation.variable}
-                  label={{
-                    value: `${toPercentage(utilization)} ${type === 'fixed' ? parseTimestamp(maturity, 'MMM,DD') : ''}`,
-                    position: utilization < 0.5 ? 'insideBottomLeft' : 'insideTopRight',
-                    offset: 15,
-                    angle: -90,
-                    style: { ...label, fontSize: 13, fill: palette.operation.variable },
-                  }}
-                  isFront
-                />
-              ))}
           </LineChart>
         )}
       </ResponsiveContainer>
     </Box>
   );
 }
+
+const CustomDot = ({
+  cx,
+  cy,
+  payload: { utilization },
+  color,
+  dotsToHighlight,
+  onMouseEnter,
+  onMouseLeave,
+}: {
+  cx: number;
+  cy: number;
+  payload: { utilization: number; apr: number };
+  color: string;
+  dotsToHighlight?: number[];
+  onMouseEnter: () => void;
+  onMouseLeave: () => void;
+}) => {
+  const { palette } = useTheme();
+  if (!dotsToHighlight || !dotsToHighlight.includes(utilization)) return null;
+  return (
+    <circle
+      cx={cx}
+      cy={cy}
+      r={5}
+      stroke={color}
+      strokeWidth={2}
+      fill={palette.components.bg}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+    />
+  );
+};
+
+const CustomTooltipChart = ({
+  highlighted,
+  type,
+  payload,
+  zoom,
+  ...props
+}: TooltipChartProps & {
+  highlighted: Record<string, number>[];
+  type: 'fixed' | 'floating';
+  zoom: boolean;
+}) => {
+  const { palette } = useTheme();
+
+  const utilizationPayload = useMemo(() => payload?.find(({ dataKey }) => dataKey === 'utilization'), [payload]);
+
+  const round = useCallback((value: number) => parseFloat(value.toFixed(zoom ? 5 : 2)), [zoom]);
+
+  const matches = useMemo(
+    () => highlighted.filter(({ utilization }) => round(utilization) === round(utilizationPayload?.value || 0)),
+    [highlighted, round, utilizationPayload?.value],
+  );
+
+  if (!matches) return <TooltipChart payload={payload} {...props} />;
+
+  return (
+    <TooltipChart
+      payload={payload}
+      {...props}
+      additionalInfoPosition="top"
+      additionalInfo={matches.map(({ maturity }) => (
+        <Typography key={`maturity_${maturity}}`} variant="h6" fontSize="12px" color={palette.operation.variable}>
+          {type === 'floating' ? 'Current Utilization' : `Maturity: ${parseTimestamp(maturity, 'MMM DD')}`}
+        </Typography>
+      ))}
+    />
+  );
+};
 
 export default React.memo(UtilizationRateChart);

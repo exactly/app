@@ -6,5 +6,7 @@
   "minAPRValue": 0.0001,
   "defaultAmount": 69,
   "chartInterval": 0.0005,
-  "chartGap": 0.5
+  "chartGap": 0.5,
+  "minUtilizationRange": 0.0001,
+  "dataPointsInChart": 100
 }
