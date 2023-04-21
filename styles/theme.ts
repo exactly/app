@@ -266,6 +266,9 @@ export const lightTheme = createTheme({
         root: {
           color: '#000',
         },
+        underlineAlways: {
+          textDecorationColor: '#000',
+        },
       },
     },
   },
@@ -456,6 +459,9 @@ export const darkTheme = createTheme({
       styleOverrides: {
         root: {
           color: '#FFF',
+        },
+        underlineAlways: {
+          textDecorationColor: '#FFF',
         },
       },
     },
