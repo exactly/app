@@ -1,4 +1,4 @@
-import { Box, Typography, useTheme } from '@mui/material';
+import { Box, Checkbox, FormControlLabel, Typography, useTheme } from '@mui/material';
 import React, { FC, useCallback, useMemo, useState } from 'react';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
@@ -32,10 +32,16 @@ type Props = {
 
 const YieldChart: FC<Props> = ({ symbol }) => {
   const { t } = useTranslation();
-  const { depositsRates, borrowsRates, loading } = useYieldRates(symbol);
-  const [operation, setOperation] = useState<'Deposits' | 'Borrows'>('Borrows');
-  const assets = useAssets();
   const { palette, typography } = useTheme();
+  const { depositsRates, borrowsRates, loading } = useYieldRates(symbol);
+  const assets = useAssets();
+  const [operation, setOperation] = useState<'Deposits' | 'Borrows'>('Borrows');
+  const [showComparison, setShowComparison] = useState<boolean>(false);
+
+  const filteredAssets = useMemo(
+    () => (showComparison ? assets : assets.filter((asset) => asset === symbol)),
+    [assets, showComparison, symbol],
+  );
 
   const referenceLabel = useCallback(
     (timestamp: number) => {
@@ -71,6 +77,10 @@ const YieldChart: FC<Props> = ({ symbol }) => {
   const formatTimestamp = useCallback((value: string | number) => parseTimestamp(value, 'MMM DD'), []);
   const formatTimestampLabel = useCallback((value: string | number) => `${parseTimestamp(value)}`, []);
   const formatPercentage = useCallback((value: number) => toPercentage(value as number), []);
+
+  const onShowComparisonChange = useCallback(() => {
+    setShowComparison((prev) => !prev);
+  }, []);
 
   return (
     <Box display="flex" flexDirection="column" width="100%" height="100%" gap={2}>
@@ -116,7 +126,7 @@ const YieldChart: FC<Props> = ({ symbol }) => {
               content={<TooltipChart />}
             />
             <CartesianGrid stroke={palette.grey[300]} vertical={false} />
-            {assets.map((asset, i) => (
+            {filteredAssets.map((asset, i) => (
               <Area
                 key={asset}
                 type="monotone"
@@ -147,6 +157,27 @@ const YieldChart: FC<Props> = ({ symbol }) => {
           </AreaChart>
         )}
       </ResponsiveContainer>
+      <Box display="flex" alignItems="center" mt={-2.5} pl={1}>
+        <FormControlLabel
+          control={
+            <Checkbox
+              size="small"
+              onChange={onShowComparisonChange}
+              sx={{
+                color: palette.blue,
+                '&.Mui-checked': {
+                  color: palette.blue,
+                },
+              }}
+            />
+          }
+          label={
+            <Typography variant="subtitle1" fontSize="12px">
+              {t('Compare with other yield curves')}
+            </Typography>
+          }
+        />
+      </Box>
     </Box>
   );
 };
