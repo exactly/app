@@ -51,7 +51,7 @@ function ModalInfoRow({ label, children }: PropsWithChildren<Pick<Props, 'label'
       sx={{ px: 1, '&:not(:last-child)': { pb: 1 } }}
     >
       <Grid item>
-        <Typography color="grey.500" fontSize={13} fontWeight={500}>
+        <Typography component="div" color="grey.500" fontSize={13} fontWeight={500}>
           {label}
         </Typography>
       </Grid>
