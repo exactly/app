@@ -261,6 +261,13 @@ export const lightTheme = createTheme({
         },
       },
     },
+    MuiLink: {
+      styleOverrides: {
+        root: {
+          color: '#000',
+        },
+      },
+    },
   },
   shadows: Array(25).fill('none') as Shadows,
 });
@@ -442,6 +449,13 @@ export const darkTheme = createTheme({
             border: '1px solid #62666A',
             filter: 'drop-shadow(0px 4px 10px rgba(97, 102, 107, 0.1))',
           },
+        },
+      },
+    },
+    MuiLink: {
+      styleOverrides: {
+        root: {
+          color: '#FFF',
         },
       },
     },
