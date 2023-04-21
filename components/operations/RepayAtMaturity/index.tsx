@@ -113,7 +113,7 @@ const RepayAtMaturity: FC = () => {
     if (!pool) return;
 
     const userInput = parseFixed(qty, marketAccount.decimals);
-    const positionAssets = userInput >= totalPositionAssets ? totalPositionAssets : userInput;
+    const positionAssets = userInput.gte(totalPositionAssets) ? totalPositionAssets : userInput;
 
     const { assets } = await previewerContract.previewRepayAtMaturity(
       marketContract.address,
