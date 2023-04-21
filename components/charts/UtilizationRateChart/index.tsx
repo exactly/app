@@ -23,6 +23,7 @@ function UtilizationRateChart({ type, symbol }: Props) {
   const { palette } = useTheme();
   const [zoom, setZoom] = useState<boolean>(true);
   const { currentUtilization } = useUtilizationRate(type, symbol);
+  const [hoverUtilizations, setHoverUtilizations] = useState<number[]>([]);
 
   const [currentMin, currentMax, interval] = useMemo(() => {
     if (!zoom || !currentUtilization) return [undefined, undefined, numbers.chartInterval];
@@ -56,13 +57,25 @@ function UtilizationRateChart({ type, symbol }: Props) {
 
   const [cursorStyle, setCursorStyle] = useState('default');
 
-  const handleMouseEnter = () => {
+  const handleMouseEnter = (utilization: number) => {
+    setHoverUtilizations((currentHoverPools) => [...currentHoverPools.filter((u) => u !== utilization), utilization]);
     setCursorStyle('pointer');
   };
 
-  const handleMouseLeave = () => {
+  const handleMouseLeave = (utilization: number) => {
+    setHoverUtilizations((currentHoverPools) => currentHoverPools.filter((u) => u !== utilization));
     setCursorStyle('default');
   };
+
+  const maturitiesOnTooltip = useMemo(
+    () =>
+      currentUtilization
+        ? currentUtilization
+            .filter(({ utilization }) => hoverUtilizations.includes(utilization))
+            .map(({ maturity }) => maturity)
+        : [],
+    [currentUtilization, hoverUtilizations],
+  );
 
   const buttons = useMemo(
     () => [
@@ -151,7 +164,14 @@ function UtilizationRateChart({ type, symbol }: Props) {
             <Tooltip
               labelFormatter={formatEmpty}
               formatter={(value) => toPercentage(value as number)}
-              content={<CustomTooltipChart highlighted={currentUtilization} type={type} zoom={zoom} />}
+              content={
+                <CustomTooltipChart
+                  highlighted={currentUtilization}
+                  maturitiesOnTooltip={maturitiesOnTooltip}
+                  type={type}
+                  zoom={zoom}
+                />
+              }
               cursor={{ strokeWidth: 1, fill: palette.grey[500], strokeDasharray: '3' }}
             />
 
@@ -207,11 +227,24 @@ const CustomDot = ({
   payload: { utilization: number; apr: number };
   color: string;
   dotsToHighlight?: number[];
-  onMouseEnter: () => void;
-  onMouseLeave: () => void;
+  onMouseEnter: (utilization: number) => void;
+  onMouseLeave: (utilization: number) => void;
 }) => {
   const { palette } = useTheme();
+  const [fillColor, setFillColor] = useState(palette.components.bg);
+
+  const onHover = useCallback(() => {
+    setFillColor(color);
+    onMouseEnter(utilization);
+  }, [color, onMouseEnter, utilization]);
+
+  const onLeave = useCallback(() => {
+    setFillColor(palette.components.bg);
+    onMouseLeave(utilization);
+  }, [onMouseLeave, palette.components.bg, utilization]);
+
   if (!dotsToHighlight || !dotsToHighlight.includes(utilization)) return null;
+
   return (
     <circle
       cx={cx}
@@ -219,21 +252,23 @@ const CustomDot = ({
       r={5}
       stroke={color}
       strokeWidth={2}
-      fill={palette.components.bg}
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
+      fill={fillColor}
+      onMouseEnter={onHover}
+      onMouseLeave={onLeave}
     />
   );
 };
 
 const CustomTooltipChart = ({
   highlighted,
+  maturitiesOnTooltip,
   type,
   payload,
   zoom,
   ...props
 }: TooltipChartProps & {
   highlighted: Record<string, number>[];
+  maturitiesOnTooltip: number[];
   type: 'fixed' | 'floating';
   zoom: boolean;
 }) => {
@@ -248,6 +283,11 @@ const CustomTooltipChart = ({
     [highlighted, round, utilizationPayload?.value],
   );
 
+  const maturitiesToShow = useMemo(
+    () => [...new Set([...maturitiesOnTooltip, ...matches.map(({ maturity }) => maturity)])].sort(),
+    [matches, maturitiesOnTooltip],
+  );
+
   if (!matches) return <TooltipChart payload={payload} {...props} />;
 
   return (
@@ -255,7 +295,7 @@ const CustomTooltipChart = ({
       payload={payload}
       {...props}
       additionalInfoPosition="top"
-      additionalInfo={matches.map(({ maturity }) => (
+      additionalInfo={maturitiesToShow.map((maturity) => (
         <Typography key={`maturity_${maturity}}`} variant="h6" fontSize="12px" color={palette.operation.variable}>
           {type === 'floating' ? 'Current Utilization' : `Maturity: ${parseTimestamp(maturity, 'MMM DD')}`}
         </Typography>
