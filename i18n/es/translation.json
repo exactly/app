@@ -38,6 +38,7 @@
   "DEPOSIT APR": "TNA DEPÓSITO",
   "BORROW APR": "TNA PRÉSTAMO",
   "Current Yield Curves": "Curvas de Rendimiento Actuales",
+  "Current Utilization": "Utilización Actual",
   "Late repayment will result in a penalty daily rate of {{penaltyRate}}": "El retraso en el pago resultará en una tasa de penalización diaria de {{penaltyRate}}",
   "Completed": "Completado",
   "{{daysLeft}} left": "{{daysLeft}} restantes",

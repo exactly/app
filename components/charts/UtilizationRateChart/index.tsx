@@ -272,6 +272,7 @@ const CustomTooltipChart = ({
   type: 'fixed' | 'floating';
   zoom: boolean;
 }) => {
+  const { t } = useTranslation();
   const { palette } = useTheme();
 
   const utilizationPayload = useMemo(() => payload?.find(({ dataKey }) => dataKey === 'utilization'), [payload]);
@@ -297,7 +298,9 @@ const CustomTooltipChart = ({
       additionalInfoPosition="top"
       additionalInfo={maturitiesToShow.map((maturity) => (
         <Typography key={`maturity_${maturity}}`} variant="h6" fontSize="12px" color={palette.operation.variable}>
-          {type === 'floating' ? 'Current Utilization' : `Maturity: ${parseTimestamp(maturity, 'MMM DD')}`}
+          {type === 'floating'
+            ? t('Current Utilization')
+            : `${t('Maturity Date')}: ${parseTimestamp(maturity, 'MMM DD')}`}
         </Typography>
       ))}
     />
