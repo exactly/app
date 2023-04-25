@@ -1,9 +1,6 @@
 import { Box, Checkbox, FormControlLabel, Typography, useTheme } from '@mui/material';
 import React, { FC, useCallback, useMemo, useState } from 'react';
-import dayjs from 'dayjs';
-import relativeTime from 'dayjs/plugin/relativeTime';
-import updateLocale from 'dayjs/plugin/updateLocale';
-import { ResponsiveContainer, XAxis, Tooltip, ReferenceLine, AreaChart, Area, CartesianGrid, YAxis } from 'recharts';
+import { ResponsiveContainer, XAxis, Tooltip, AreaChart, Area, CartesianGrid, YAxis } from 'recharts';
 import useAssets from 'hooks/useAssets';
 import useYieldRates from 'hooks/useYieldRates';
 import parseTimestamp from 'utils/parseTimestamp';
@@ -13,26 +10,13 @@ import LoadingChart from '../LoadingChart';
 import TooltipChart from '../TooltipChart';
 import { useTranslation } from 'react-i18next';
 
-const getReferenceLines = () => {
-  const data = [];
-  let now = new Date().getTime() / 1000;
-  const monthInSeconds = 30 * 86_400;
-
-  for (let i = 1; i <= 3; i++) {
-    data.push(now + monthInSeconds);
-    now += monthInSeconds;
-  }
-
-  return data;
-};
-
 type Props = {
   symbol: string;
 };
 
 const YieldChart: FC<Props> = ({ symbol }) => {
   const { t } = useTranslation();
-  const { palette, typography } = useTheme();
+  const { palette } = useTheme();
   const { depositsRates, borrowsRates, loading } = useYieldRates(symbol);
   const assets = useAssets();
   const [operation, setOperation] = useState<'Deposits' | 'Borrows'>('Borrows');
@@ -43,21 +27,9 @@ const YieldChart: FC<Props> = ({ symbol }) => {
     [assets, showComparison, symbol],
   );
 
-  const referenceLabel = useCallback(
-    (timestamp: number) => {
-      dayjs.extend(relativeTime);
-      dayjs.extend(updateLocale);
-      dayjs.updateLocale('en', {
-        relativeTime: {
-          M: t('1 month'),
-          MM: t('%d months'),
-          y: t('%d months'),
-        },
-      });
-
-      return dayjs(timestamp * 1000).fromNow(true);
-    },
-    [t],
+  const data = useMemo(
+    () => (operation === 'Deposits' ? depositsRates : borrowsRates),
+    [operation, depositsRates, borrowsRates],
   );
 
   const buttons = useMemo(
@@ -97,7 +69,7 @@ const YieldChart: FC<Props> = ({ symbol }) => {
         {loading ? (
           <LoadingChart />
         ) : (
-          <AreaChart data={operation === 'Deposits' ? depositsRates : borrowsRates}>
+          <AreaChart data={data}>
             <XAxis
               dataKey="maturity"
               type="number"
@@ -118,7 +90,9 @@ const YieldChart: FC<Props> = ({ symbol }) => {
               axisLine={false}
               tick={{ fill: palette.grey[500], fontWeight: 500, fontSize: 11 }}
               tickLine={false}
+              domain={[0, (dataMax: number) => 1.5 * dataMax]}
               width={50}
+              padding={{ bottom: 8 }}
             />
             <Tooltip
               formatter={(value) => toPercentage(value as number)}
@@ -134,24 +108,19 @@ const YieldChart: FC<Props> = ({ symbol }) => {
                 dataKey={asset}
                 stroke={palette.colors[i] || palette.grey[500]}
                 strokeWidth={2}
-                fillOpacity={0}
-              />
-            ))}
-            {getReferenceLines().map((reference) => (
-              <ReferenceLine
-                ifOverflow="extendDomain"
-                key={reference}
-                yAxisId="yaxis"
-                strokeDasharray="3 3"
-                x={reference}
-                label={{
-                  value: referenceLabel(reference),
-                  fontSize: 14,
-                  fontFamily: typography.fontFamilyMonospaced,
-                  fill: palette.grey[400],
-                  position: 'insideTop',
-                }}
-                stroke={palette.grey[400]}
+                strokeDasharray={`5 5`}
+                strokeDashoffset={filteredAssets.length * i}
+                fillOpacity={0.05}
+                fill={palette.colors[i] || palette.grey[500]}
+                isAnimationActive={false}
+                dot={(props) => (
+                  <CustomDot
+                    {...props}
+                    symbol={asset}
+                    color={palette.colors[i] || palette.grey[500]}
+                    dotsToHighlight={data.map((item) => item[asset])}
+                  />
+                )}
               />
             ))}
           </AreaChart>
@@ -180,6 +149,29 @@ const YieldChart: FC<Props> = ({ symbol }) => {
       </Box>
     </Box>
   );
+};
+
+const CustomDot = ({
+  cx,
+  cy,
+  symbol,
+  payload,
+  color,
+  dotsToHighlight,
+}: {
+  cx: number;
+  cy: number;
+  payload: Record<string, number>;
+  symbol: string;
+  color: string;
+  dotsToHighlight?: number[];
+}) => {
+  const { palette } = useTheme();
+  const data = useMemo((): number => payload[symbol], [payload, symbol]);
+
+  if (!dotsToHighlight || !dotsToHighlight.includes(data)) return null;
+
+  return <circle cx={cx} cy={cy} r={5} stroke={color} strokeWidth={2} fill={palette.background.paper} />;
 };
 
 export default React.memo(YieldChart);
