@@ -10,10 +10,10 @@ const ignored: ErrorMap = {
 };
 
 const isIgnored = (err: Error): boolean => {
-  return ignored[err.name].some((msg) => msg.test(err.message));
+  return Boolean(ignored[err.name]?.some((msg) => msg.test(err.message)));
 };
 
-export const beforeSend: Options['beforeSend'] = (event, hint) => {
+export const beforeSend: Options['beforeSend'] = async (event, hint) => {
   const { originalException } = hint;
 
   if (originalException && originalException instanceof Error) {

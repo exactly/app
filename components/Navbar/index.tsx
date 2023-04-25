@@ -1,6 +1,6 @@
 import React, { ReactNode, useCallback, useEffect, useState } from 'react';
 import { setContext, setUser } from '@sentry/nextjs';
-import { goerli, useClient } from 'wagmi';
+import { goerli, useBlockNumber, useClient } from 'wagmi';
 import DisclaimerModal from 'components/DisclaimerModal';
 import Image from 'next/image';
 import useRouter from 'hooks/useRouter';
@@ -37,14 +37,22 @@ function Navbar() {
   const { openOperationModal } = useModalStatus();
   const [openMenu, setOpenMenu] = useState<boolean>(false);
 
+  const { data: blockNumber } = useBlockNumber({ chainId: chain?.id });
+
   useEffect(() => {
     if (!walletAddress) return;
 
     setUser({ id: walletAddress });
     setContext('wallet', { connector: connector?.id, name: connector?.name });
-    setContext('chain', { id: chain?.id, name: chain?.name, network: chain?.network, testnet: chain?.testnet });
+    setContext('chain', {
+      id: chain?.id,
+      name: chain?.name,
+      network: chain?.network,
+      blockNumber,
+      testnet: chain?.testnet,
+    });
     void identify(walletAddress);
-  }, [walletAddress, connector, chain, identify]);
+  }, [walletAddress, connector, chain, identify, blockNumber]);
 
   const handleFaucetClick = useCallback(() => {
     if (chain?.id === goerli.id) return openOperationModal('faucet');
