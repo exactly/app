@@ -64,7 +64,7 @@ export default (): DepositAtMaturity => {
     estimateGas: approveEstimateGas,
     isLoading: approveIsLoading,
     needsApproval,
-  } = useApprove('depositAtMaturity', assetContract, marketContract?.address);
+  } = useApprove('depositAtMaturity', assetContract, marketAccount?.market);
 
   const previewGasCost = useCallback(
     async (quantity: string): Promise<BigNumber | undefined> => {
@@ -242,7 +242,7 @@ export default (): DepositAtMaturity => {
   }, [approve, date, deposit, isLoading, needsApproval, qty, requiresApproval, setRequiresApproval, symbol, track]);
 
   const updateAPR = useCallback(async () => {
-    if (!marketAccount || !date || !previewerContract || !marketContract || !depositRate) {
+    if (!marketAccount || !date || !previewerContract || !depositRate) {
       setFixedRate(undefined);
       return;
     }
@@ -251,7 +251,7 @@ export default (): DepositAtMaturity => {
       const initialAssets = parseFixed(qty, marketAccount.decimals);
       try {
         const { assets: finalAssets } = await previewerContract.previewDepositAtMaturity(
-          marketContract.address,
+          marketAccount.market,
           date,
           initialAssets,
         );
@@ -266,7 +266,7 @@ export default (): DepositAtMaturity => {
     } else {
       setFixedRate(depositRate);
     }
-  }, [marketAccount, date, previewerContract, marketContract, depositRate, qty]);
+  }, [marketAccount, date, previewerContract, depositRate, qty]);
 
   return {
     isLoading,

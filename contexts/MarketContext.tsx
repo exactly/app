@@ -9,6 +9,7 @@ import React, {
   useContext,
 } from 'react';
 import useAccountData from 'hooks/useAccountData';
+import { useWeb3 } from 'hooks/useWeb3';
 
 type ContextValues = {
   marketSymbol: string;
@@ -25,6 +26,7 @@ export type MarketView = 'simple' | 'advanced';
 const MarketContext = createContext<ContextValues | null>(null);
 
 export const MarketProvider: FC<PropsWithChildren> = ({ children }) => {
+  const { chain } = useWeb3();
   const [view, setView] = useState<MarketView>();
   const [marketSymbol, setMarketSymbol] = useState<string>('USDC');
   const { marketAccount } = useAccountData(marketSymbol);
@@ -44,6 +46,8 @@ export const MarketProvider: FC<PropsWithChildren> = ({ children }) => {
   useEffect(() => {
     setView((localStorage.getItem('marketView') as MarketView) || 'simple');
   }, [setView]);
+
+  useEffect(() => setMarketSymbol('USDC'), [chain.id]);
 
   const setViewLocalStorage = useCallback(
     (newView: MarketView) => {

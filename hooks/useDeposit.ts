@@ -49,7 +49,7 @@ export default (): Deposit => {
     estimateGas: approveEstimateGas,
     isLoading: approveIsLoading,
     needsApproval,
-  } = useApprove('deposit', assetContract, marketContract?.address);
+  } = useApprove('deposit', assetContract, marketAccount?.market);
 
   const previewGasCost = useCallback(
     async (quantity: string): Promise<BigNumber | undefined> => {

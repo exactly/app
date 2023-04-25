@@ -94,7 +94,7 @@ const WithdrawAtMaturity: FC = () => {
   } = useApprove('withdrawAtMaturity', marketContract, ETHRouterContract?.address);
 
   const previewWithdrawAtMaturity = useCallback(async () => {
-    if (!marketAccount || !date || !marketContract || !previewerContract) return;
+    if (!marketAccount || !date || !previewerContract) return;
 
     if (!qty) {
       setMinAmountToWithdraw(Zero);
@@ -117,7 +117,7 @@ const WithdrawAtMaturity: FC = () => {
     setErrorData(undefined);
 
     const { assets: amount } = await previewerContract.previewWithdrawAtMaturity(
-      marketContract.address,
+      marketAccount.market,
       date,
       parsedQtyValue,
       walletAddress ?? AddressZero,
@@ -129,7 +129,6 @@ const WithdrawAtMaturity: FC = () => {
     setErrorData,
     marketAccount,
     date,
-    marketContract,
     previewerContract,
     qty,
     positionAssets,

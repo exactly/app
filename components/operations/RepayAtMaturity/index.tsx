@@ -98,45 +98,41 @@ const RepayAtMaturity: FC = () => {
     return pool ? pool.position.principal.add(pool.position.fee) : Zero;
   }, [date, marketAccount]);
 
-  const preview = useCallback(async () => {
-    if (
-      !marketContract ||
-      !date ||
-      !walletAddress ||
-      !previewerContract ||
-      !marketAccount ||
-      !qty ||
-      totalPositionAssets.isZero()
-    )
-      return;
+  const preview = useCallback(
+    async (cancelled: () => boolean) => {
+      if (!date || !walletAddress || !previewerContract || !marketAccount || !qty || totalPositionAssets.isZero())
+        return;
 
-    const pool = marketAccount.fixedBorrowPositions.find(({ maturity }) => maturity.toNumber() === date);
-    if (!pool) return;
+      const pool = marketAccount.fixedBorrowPositions.find(({ maturity }) => maturity.toNumber() === date);
+      if (!pool) return;
 
-    const userInput = parseFixed(qty, marketAccount.decimals);
-    const positionAssets = userInput.gte(totalPositionAssets) ? totalPositionAssets : userInput;
+      const userInput = parseFixed(qty, marketAccount.decimals);
+      const positionAssets = userInput.gte(totalPositionAssets) ? totalPositionAssets : userInput;
 
-    const { assets } = await previewerContract.previewRepayAtMaturity(
-      marketContract.address,
-      date,
-      positionAssets,
-      walletAddress ?? AddressZero,
-    );
-    const feeAtMaturity = (positionAssets > pool.position.principal ? pool.position.principal : positionAssets)
-      .mul(pool.position.fee)
-      .div(WeiPerEther)
-      .mul(WeiPerEther)
-      .div(pool.position.principal);
-    const principal = positionAssets.sub(feeAtMaturity);
-    const discount = assets.sub(positionAssets);
+      const { assets } = await previewerContract.previewRepayAtMaturity(
+        marketAccount.market,
+        date,
+        positionAssets,
+        walletAddress ?? AddressZero,
+      );
+      const feeAtMaturity = (positionAssets > pool.position.principal ? pool.position.principal : positionAssets)
+        .mul(pool.position.fee)
+        .div(WeiPerEther)
+        .mul(WeiPerEther)
+        .div(pool.position.principal);
+      const principal = positionAssets.sub(feeAtMaturity);
+      const discount = assets.sub(positionAssets);
 
-    setPreviewData({
-      principal: formatNumber(formatFixed(principal, marketAccount.decimals), marketAccount.symbol, true),
-      amountWithDiscount: formatNumber(formatFixed(assets, marketAccount.decimals), marketAccount.symbol, true),
-      feeAtMaturity: formatNumber(formatFixed(feeAtMaturity, marketAccount.decimals), marketAccount.symbol, true),
-      discount: formatNumber(formatFixed(discount, marketAccount.decimals), marketAccount.symbol, true),
-    });
-  }, [date, marketAccount, marketContract, previewerContract, qty, totalPositionAssets, walletAddress]);
+      if (cancelled()) return;
+      setPreviewData({
+        principal: formatNumber(formatFixed(principal, marketAccount.decimals), marketAccount.symbol, true),
+        amountWithDiscount: formatNumber(formatFixed(assets, marketAccount.decimals), marketAccount.symbol, true),
+        feeAtMaturity: formatNumber(formatFixed(feeAtMaturity, marketAccount.decimals), marketAccount.symbol, true),
+        discount: formatNumber(formatFixed(discount, marketAccount.decimals), marketAccount.symbol, true),
+      });
+    },
+    [date, marketAccount, previewerContract, qty, totalPositionAssets, walletAddress],
+  );
 
   const { isLoading: previewLoading } = useDelayedEffect({ effect: preview });
 
@@ -156,7 +152,7 @@ const RepayAtMaturity: FC = () => {
     estimateGas: approveEstimateGas,
     isLoading: approveIsLoading,
     needsApproval,
-  } = useApprove('repayAtMaturity', assetContract, marketContract?.address);
+  } = useApprove('repayAtMaturity', assetContract, marketAccount?.market);
 
   const previewGasCost = useCallback(
     async (quantity: string): Promise<BigNumber | undefined> => {
