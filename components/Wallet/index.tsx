@@ -4,7 +4,7 @@ import { mainnet } from 'wagmi/chains';
 import { useWeb3 } from 'hooks/useWeb3';
 import { formatWallet } from 'utils/utils';
 
-import { Avatar, Box, Button, Menu, Typography } from '@mui/material';
+import { Avatar, Badge, Box, Button, Menu, Typography } from '@mui/material';
 
 import * as blockies from 'blockies-ts';
 import CopyToClipboardButton from 'components/common/CopyToClipboardButton';
@@ -21,7 +21,7 @@ function Wallet() {
   const openMenu = (event: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget);
   const closeMenu = () => setAnchorEl(null);
 
-  const { walletAddress, connect } = useWeb3();
+  const { walletAddress, connect, impersonateActive, exitImpersonate } = useWeb3();
   const { disconnect } = useDisconnect();
   const { data: ens, error: ensError } = useEnsName({ address: walletAddress as `0x${string}`, chainId: mainnet.id });
   const { data: ensAvatar, error: ensAvatarError } = useEnsAvatar({
@@ -46,7 +46,15 @@ function Wallet() {
   }
 
   return (
-    <>
+    <Badge
+      variant="dot"
+      sx={{
+        '& .MuiBadge-badge': {
+          backgroundColor: 'red',
+        },
+      }}
+      invisible={!impersonateActive}
+    >
       <Button
         variant="outlined"
         onClick={openMenu}
@@ -58,7 +66,7 @@ function Wallet() {
           minWidth: '30px',
           py: 1,
           px: '10px',
-          borderColor: '#CFD3D8',
+          borderColor: impersonateActive ? 'red' : '#CFD3D8',
           '&:hover': {
             backgroundColor: 'components.bg',
             borderColor: 'figma.grey.100',
@@ -87,6 +95,7 @@ function Wallet() {
             boxShadow: '0px 4px 12px rgba(97, 100, 107, 0.2)',
             borderRadius: 16,
             minWidth: '280px',
+            maxWidth: '320px',
           },
         }}
         anchorOrigin={{
@@ -106,6 +115,7 @@ function Wallet() {
                 {ens}
               </Typography>
             )}
+            {impersonateActive && <Typography fontSize={12}>{t('Viewing as')}:</Typography>}
             <Box display="flex">
               <Typography variant="subtitle1" fontSize="16px" color="grey.500">
                 {formattedWallet}
@@ -113,20 +123,30 @@ function Wallet() {
               <CopyToClipboardButton text={walletAddress} />
             </Box>
           </Box>
+          {impersonateActive && (
+            <Box textAlign="center" mb={1} mt={-1}>
+              <Typography fontSize={14} fontWeight={400}>
+                {t('Impersonate mode')}
+              </Typography>
+              <Typography fontSize={14} fontWeight={400}>
+                {t('Features may be limited')}
+              </Typography>
+            </Box>
+          )}
           <Button
             data-testid="wallet-menu-disconnect"
             variant="outlined"
             onClick={() => {
               closeMenu();
-              disconnect();
+              impersonateActive ? exitImpersonate() : disconnect();
             }}
             sx={{ color: 'grey.700', borderColor: '#CFD3D8' }}
           >
-            {t('Disconnect')}
+            {impersonateActive ? t('Exit Impersonate') : t('Disconnect')}
           </Button>
         </Box>
       </Menu>
-    </>
+    </Badge>
   );
 }
 

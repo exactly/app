@@ -23,7 +23,7 @@ function ModalSubmit({ isLoading = false, disabled = false, submit, symbol, labe
   const translateOperation = useTranslateOperation();
   const { loadingButton, isLoading: isLoadingOp, tx, errorButton, requiresApproval } = useOperationContext();
   const { operation } = useModalStatus();
-  const { isConnected, chain: displayNetwork, connect } = useWeb3();
+  const { isConnected, chain: displayNetwork, connect, impersonateActive, exitImpersonate } = useWeb3();
   const { chain } = useNetwork();
   const { switchNetwork, isLoading: switchIsLoading } = useSwitchNetwork();
   const { refreshAccountData } = useAccountData();
@@ -34,6 +34,14 @@ function ModalSubmit({ isLoading = false, disabled = false, submit, symbol, labe
       await refreshAccountData();
     }
   }, [submit, refreshAccountData, requiresApproval]);
+
+  if (impersonateActive) {
+    return (
+      <Button fullWidth onClick={exitImpersonate} variant="contained" data-testid="modal-exit-impersonate">
+        {t('Exit Impersonate')}
+      </Button>
+    );
+  }
 
   if (!isConnected) {
     return (
