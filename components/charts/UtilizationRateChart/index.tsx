@@ -203,7 +203,7 @@ function UtilizationRateChart({ type, symbol }: Props) {
               dataKey="apr"
               stroke={palette.mode === 'light' ? 'black' : 'white'}
               strokeWidth={2}
-              animationDuration={0}
+              isAnimationActive={false}
               activeDot={false}
             />
           </LineChart>
@@ -231,7 +231,7 @@ const CustomDot = ({
   onMouseLeave: (utilization: number) => void;
 }) => {
   const { palette } = useTheme();
-  const [fillColor, setFillColor] = useState(palette.components.bg);
+  const [fillColor, setFillColor] = useState<string | undefined>();
 
   const onHover = useCallback(() => {
     setFillColor(color);
@@ -239,9 +239,9 @@ const CustomDot = ({
   }, [color, onMouseEnter, utilization]);
 
   const onLeave = useCallback(() => {
-    setFillColor(palette.components.bg);
+    setFillColor(undefined);
     onMouseLeave(utilization);
-  }, [onMouseLeave, palette.components.bg, utilization]);
+  }, [onMouseLeave, utilization]);
 
   if (!dotsToHighlight || !dotsToHighlight.includes(utilization)) return null;
 
@@ -252,7 +252,7 @@ const CustomDot = ({
       r={5}
       stroke={color}
       strokeWidth={2}
-      fill={fillColor}
+      fill={fillColor || palette.background.paper}
       onMouseEnter={onHover}
       onMouseLeave={onLeave}
     />
