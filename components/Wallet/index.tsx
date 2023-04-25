@@ -125,7 +125,7 @@ function Wallet() {
           </Box>
           {impersonateActive && (
             <Box textAlign="center" mb={1} mt={-1}>
-              <Typography fontSize={14} fontWeight={400}>
+              <Typography fontSize={12} fontWeight={600} textTransform="uppercase">
                 {t('Impersonate mode')}
               </Typography>
               <Typography fontSize={14} fontWeight={400}>
@@ -142,7 +142,7 @@ function Wallet() {
             }}
             sx={{ color: 'grey.700', borderColor: '#CFD3D8' }}
           >
-            {impersonateActive ? t('Exit Impersonate') : t('Disconnect')}
+            {impersonateActive ? t('Exit Impersonate Mode') : t('Disconnect')}
           </Button>
         </Box>
       </Menu>

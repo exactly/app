@@ -38,7 +38,7 @@ function ModalSubmit({ isLoading = false, disabled = false, submit, symbol, labe
   if (impersonateActive) {
     return (
       <Button fullWidth onClick={exitImpersonate} variant="contained" data-testid="modal-exit-impersonate">
-        {t('Exit Impersonate')}
+        {t('Exit Impersonate Mode')}
       </Button>
     );
   }
