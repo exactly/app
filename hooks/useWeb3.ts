@@ -25,7 +25,7 @@ export const useWeb3 = (): Web3 => {
   const { address } = useAccount();
   const { displayNetwork } = useNetworkContext();
 
-  const [currentAddress, impersonateActive]: [`0x${string}` | undefined, boolean] = useMemo(() => {
+  const [currentAddress, impersonateActive] = useMemo((): [`0x${string}` | undefined, boolean] => {
     const { account } = query;
     const isImpersonating = !(account instanceof Array) && isValidAddress(account);
     return [isImpersonating ? account : address, isImpersonating];
