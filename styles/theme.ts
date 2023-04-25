@@ -121,7 +121,7 @@ export const lightTheme = createTheme({
       fixed: '#0095FF',
       variable: '#33CC59',
     },
-    colors: ['#b8b8f0', '#a6a6f4', '#7AB8FF', '#FFC266', '#FFA7A7'],
+    colors: ['#5DADE2', '#F7DC6F', '#82E0AA', '#BB8FCE', '#F1948A'],
     markets: {
       simple: '#EDEFF2',
       advanced: '#F9FAFB',
@@ -311,7 +311,7 @@ export const darkTheme = createTheme({
       fixed: '#0095FF',
       variable: '#33CC59',
     },
-    colors: ['#B0B0B0', '#E0E0E0', '#4CB0FF', '#FFC94D', '#FF8989'],
+    colors: ['#5DADE2', '#F7DC6F', '#82E0AA', '#BB8FCE', '#F1948A'],
     markets: {
       simple: '#222',
       advanced: '#222',
