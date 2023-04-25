@@ -280,7 +280,7 @@ export default (): BorrowAtMaturity => {
   ]);
 
   const updateAPR = useCallback(async () => {
-    if (!marketAccount || !date || !previewerContract || !marketContract || !minBorrowRate) {
+    if (!marketAccount || !date || !previewerContract || !minBorrowRate) {
       setFixedRate(undefined);
       return;
     }
@@ -289,7 +289,7 @@ export default (): BorrowAtMaturity => {
       const initialAssets = parseFixed(qty, marketAccount.decimals);
       try {
         const { assets: finalAssets } = await previewerContract.previewBorrowAtMaturity(
-          marketContract.address,
+          marketAccount.market,
           date,
           initialAssets,
         );
@@ -304,7 +304,7 @@ export default (): BorrowAtMaturity => {
     } else {
       setFixedRate(minBorrowRate);
     }
-  }, [marketAccount, date, previewerContract, marketContract, minBorrowRate, qty]);
+  }, [marketAccount, date, previewerContract, minBorrowRate, qty]);
 
   const handleSubmitAction = useCallback(async () => {
     if (isLoading) return;

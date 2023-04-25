@@ -18,7 +18,7 @@ type PreviewFixedOperation = {
 
 export default (operation: MarketsBasicOperation): PreviewFixedOperation => {
   const previewerContract = usePreviewer();
-  const { symbol, qty, marketContract } = useOperationContext();
+  const { symbol, qty } = useOperationContext();
   const maturityPools = useMaturityPools(symbol);
   const { marketAccount } = useAccountData(symbol);
   const [options, setOptions] = useState<MarketsBasicOption[]>(Array(maturityPools.length || MIN_OPTIONS).fill({}));
@@ -26,7 +26,7 @@ export default (operation: MarketsBasicOperation): PreviewFixedOperation => {
 
   const updateAPR = useCallback(
     async (cancelled: () => boolean) => {
-      if (!marketAccount || !previewerContract || !marketContract) return;
+      if (!marketAccount || !previewerContract) return;
 
       if (!qty || parseFloat(qty) === 0) {
         if (cancelled()) return;
@@ -43,7 +43,7 @@ export default (operation: MarketsBasicOperation): PreviewFixedOperation => {
           operation === 'deposit'
             ? previewerContract.previewDepositAtAllMaturities
             : previewerContract.previewBorrowAtAllMaturities;
-        const previewPools = await preview(marketContract.address, initialAssets);
+        const previewPools = await preview(marketAccount.market, initialAssets);
         const currentTimestamp = Math.floor(Date.now() / 1000);
 
         const fixedOptions: MarketsBasicOption[] = previewPools.map(({ maturity, assets }) => {
@@ -69,7 +69,7 @@ export default (operation: MarketsBasicOperation): PreviewFixedOperation => {
         setLoading(false);
       }
     },
-    [marketAccount, previewerContract, marketContract, qty, maturityPools, operation],
+    [marketAccount, previewerContract, qty, maturityPools, operation],
   );
 
   const { isLoading: delayedLoading } = useDelayedEffect({ effect: updateAPR });

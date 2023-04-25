@@ -14,6 +14,7 @@ import formatNumber from 'utils/formatNumber';
 import useAccountData from 'hooks/useAccountData';
 import { useTranslation } from 'react-i18next';
 import useTranslateOperation from 'hooks/useTranslateOperation';
+import formatSymbol from 'utils/formatSymbol';
 
 const getOperation = (
   op: MarketsBasicOperation,
@@ -80,7 +81,7 @@ const Submit: FC<SubmitProps> = ({ symbol, operation, option, qty, errorData }) 
     const parsed = parseFloat(qty);
     const amount = parsed ? (Number.isInteger(parsed) ? parsed : formatNumber(qty, symbol)) : '';
 
-    return `${translateOperation(operation, { capitalize: true })} ${amount} ${symbol}${
+    return `${translateOperation(operation, { capitalize: true })} ${amount} ${formatSymbol(symbol)}${
       !isFloating && option.maturity ? t(' for {{daysLeft}}', { daysLeft: daysLeft(option.maturity) }) : ''
     }`;
   }, [isFloating, operation, option.maturity, qty, symbol, t, translateOperation]);

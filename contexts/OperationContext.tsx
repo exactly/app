@@ -100,7 +100,7 @@ export const OperationContextProvider: FC<PropsWithChildren> = ({ children }) =>
     setErrorData(undefined);
     setErrorButton(undefined);
     setRawSlippage(DEFAULT_SLIPPAGE);
-  }, [chain?.id, marketSymbol, open, view, pathname]);
+  }, [chain?.id, open, view, pathname]);
 
   const assetContract = useERC20(marketAccount?.asset);
   const marketContract = useMarket(marketAccount?.market);
