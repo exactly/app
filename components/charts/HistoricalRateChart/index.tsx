@@ -18,6 +18,8 @@ const HistoricalRateChart: FC<Props> = ({ symbol }) => {
   const { palette } = useTheme();
   const { loading, rates, getRates } = useHistoricalRates(symbol);
 
+  const sortedRates = useMemo(() => rates.sort((a, b) => (a.date > b.date ? 1 : -1)), [rates]);
+
   const buttons = useMemo(
     () => [
       {
@@ -58,7 +60,7 @@ const HistoricalRateChart: FC<Props> = ({ symbol }) => {
         {loading ? (
           <LoadingChart />
         ) : (
-          <LineChart data={rates} margin={{ top: 5, bottom: 5 }}>
+          <LineChart data={sortedRates} margin={{ top: 5, bottom: 5 }}>
             <CartesianGrid horizontal vertical={false} stroke={palette.grey[300]} />
             <XAxis
               minTickGap={50}
