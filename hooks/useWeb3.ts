@@ -4,11 +4,13 @@ import { useWeb3Modal } from '@web3modal/react';
 import { supportedChains } from 'utils/client';
 import useDebounce from './useDebounce';
 import { useNetworkContext } from 'contexts/NetworkContext';
-import { getQueryParam } from 'utils/getQueryParam';
+import useRouter from './useRouter';
 
 type Web3 = {
   connect: () => void;
   isConnected: boolean;
+  impersonateActive: boolean;
+  exitImpersonate: () => void;
   walletAddress?: `0x${string}`;
   chains: Chain[];
   chain: Chain;
@@ -19,13 +21,20 @@ const isValidAddress = (address: string | undefined): address is `0x${string}` =
 };
 
 export const useWeb3 = (): Web3 => {
+  const { query, replace } = useRouter();
   const { address } = useAccount();
   const { displayNetwork } = useNetworkContext();
 
-  const currentAddress: `0x${string}` | undefined = useMemo(() => {
-    const param = getQueryParam('account');
-    return isValidAddress(param) ? param : address;
-  }, [address]);
+  const [currentAddress, impersonateActive]: [`0x${string}` | undefined, boolean] = useMemo(() => {
+    const { account } = query;
+    const isImpersonating = !(account instanceof Array) && isValidAddress(account);
+    return [isImpersonating ? account : address, isImpersonating];
+  }, [address, query]);
+
+  const exitImpersonate = useCallback(async () => {
+    const { account, ...rest } = query;
+    await replace({ query: rest });
+  }, [query, replace]);
 
   const walletAddress = useDebounce(currentAddress, 50);
 
@@ -45,6 +54,8 @@ export const useWeb3 = (): Web3 => {
   return {
     connect: connectWallet,
     isConnected: !!walletAddress,
+    impersonateActive,
+    exitImpersonate,
     walletAddress,
     chains: supportedChains,
     chain: displayNetwork,
