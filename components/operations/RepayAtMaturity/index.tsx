@@ -35,6 +35,7 @@ import ModalInfoRepayWithDiscount from 'components/OperationsModal/Info/ModalInf
 import usePreviewer from 'hooks/usePreviewer';
 import useDelayedEffect from 'hooks/useDelayedEffect';
 import { defaultAmount, gasLimitMultiplier } from 'utils/const';
+import { CustomError } from 'types/Error';
 
 type RepayWithDiscount = {
   principal: string;
@@ -177,7 +178,13 @@ const RepayAtMaturity: FC = () => {
           value: maxAmount,
         });
 
-        return gasPrice.mul(gasLimit);
+        const gasEstimation = gasPrice.mul(gasLimit);
+
+        if (amount.add(gasEstimation).gte(parseFixed(walletBalance || '0', 18))) {
+          throw new CustomError(t('Reserve ETH for gas fees.'), 'warning');
+        }
+
+        return gasEstimation;
       }
 
       const gasLimit = await marketContract.estimateGas.repayAtMaturity(date, amount, maxAmount, walletAddress);
@@ -195,6 +202,8 @@ const RepayAtMaturity: FC = () => {
       maxAmountToRepay,
       slippage,
       approveEstimateGas,
+      walletBalance,
+      t,
     ],
   );
 
@@ -422,7 +431,7 @@ const RepayAtMaturity: FC = () => {
 
       {errorData?.status && (
         <Grid item mt={1}>
-          <ModalAlert variant="error" message={errorData.message} />
+          <ModalAlert variant={errorData.variant} message={errorData.message} />
         </Grid>
       )}
 

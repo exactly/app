@@ -8,6 +8,9 @@ const defaultErr = i18n.t('There was an error, please try again');
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default (error: any, captureException: typeof sentryCaptureException = sentryCaptureException): string => {
   if (!error?.code) {
+    if (error?.custom) {
+      return error.message;
+    }
     captureException(error);
     return defaultErr;
   }

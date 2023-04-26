@@ -82,7 +82,7 @@ const Borrow: FC = () => {
 
       {errorData?.status && (
         <Grid item mt={1}>
-          <ModalAlert variant={errorData.variant || 'error'} message={errorData.message} />
+          <ModalAlert variant={errorData.variant} message={errorData.message} />
         </Grid>
       )}
 

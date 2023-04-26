@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next';
 import { OperationHook } from 'types/OperationHook';
 import useAnalytics from './useAnalytics';
 import { defaultAmount, gasLimitMultiplier } from 'utils/const';
+import { CustomError } from 'types/Error';
 
 type Deposit = {
   deposit: () => void;
@@ -71,11 +72,13 @@ export default (): Deposit => {
       }
 
       if (marketAccount.assetSymbol === 'WETH') {
-        const gasLimit = await ETHRouterContract.estimateGas.deposit({
-          value: quantity ? parseFixed(quantity, 18) : defaultAmount,
-        });
-
-        return gasPrice.mul(gasLimit);
+        const value = quantity ? parseFixed(quantity, 18) : defaultAmount;
+        const gasLimit = await ETHRouterContract.estimateGas.deposit({ value });
+        const gasCost = gasPrice.mul(gasLimit);
+        if (value.add(gasCost).gte(parseFixed(walletBalance || '0', 18))) {
+          throw new CustomError(t('Reserve ETH for gas fees.'), 'warning');
+        }
+        return gasCost;
       }
 
       const gasLimit = await marketContract.estimateGas.deposit(
@@ -93,6 +96,7 @@ export default (): Deposit => {
       marketAccount,
       requiresApproval,
       approveEstimateGas,
+      t,
     ],
   );
 
