@@ -1,25 +1,30 @@
 import React, { FC, useCallback, useMemo, useRef } from 'react';
-import { Box, Button, capitalize, Typography, useTheme } from '@mui/material';
+import { Box, Button, Typography, useTheme } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import { atcb_action } from 'add-to-calendar-button';
 import parseTimestamp from 'utils/parseTimestamp';
+import { Operation } from 'contexts/ModalStatusContext';
+import useTranslateOperation from 'hooks/useTranslateOperation';
 
 type Props = {
-  operationName: string | null;
+  operation: Operation;
   maturity: number;
 };
 
-const Reminder: FC<Props> = ({ operationName, maturity }) => {
+const Reminder: FC<Props> = ({ operation, maturity }) => {
   const { t } = useTranslation();
+  const translateOperation = useTranslateOperation();
   const { palette } = useTheme();
   const buttonRef = useRef<HTMLInputElement>(null);
 
-  const isBorrow = useMemo(() => operationName === 'borrow', [operationName]);
+  const isBorrow = useMemo(() => operation?.startsWith('borrow'), [operation]);
 
   const onClick = useCallback(() => {
     const config = {
-      name: t(`[Exactly] {{operationName}} maturity date reminder`, { operationName: capitalize(operationName ?? '') }),
+      name: t(`[Exactly] {{operationName}} maturity date reminder`, {
+        operationName: translateOperation(operation, { capitalize: true, variant: 'noun' }),
+      }),
       description: 'https://app.exact.ly/dashboard',
       startDate: parseTimestamp(maturity, 'YYYY-MM-DD'),
       startTime: '00:00',
@@ -30,7 +35,7 @@ const Reminder: FC<Props> = ({ operationName, maturity }) => {
     };
 
     if (buttonRef.current) atcb_action(config as Parameters<typeof atcb_action>[0], buttonRef.current);
-  }, [maturity, operationName, palette.mode, t]);
+  }, [maturity, operation, palette.mode, t, translateOperation]);
 
   return (
     <Box

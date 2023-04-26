@@ -176,7 +176,7 @@ const MarketsBasic: FC = () => {
           <Divider sx={{ borderColor: 'grey.200' }} />
           <Box px={1} py={1.5}>
             <Typography variant="cardTitle" sx={{ px: 1 }}>
-              {t('{{operation}} duration', { operation: operation === 'borrow' ? t('Borrow') : t('Deposit') })}
+              {t('{{operation}} duration', { operation: translateOperation(operation, { variant: 'noun' }) })}
             </Typography>
             <Tooltip
               title={
