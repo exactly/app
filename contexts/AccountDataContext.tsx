@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useEffect, useState, startTransition } from 'react';
+import React, { createContext, useCallback, useEffect, useState, startTransition, useRef } from 'react';
 import type { FC, PropsWithChildren } from 'react';
 import { AddressZero } from '@ethersproject/constants';
 import { captureException } from '@sentry/nextjs';
@@ -26,6 +26,8 @@ export const AccountDataProvider: FC<PropsWithChildren> = ({ children }) => {
   const { connect, connectors } = useConnect();
   const { walletAddress } = useWeb3();
   const client = useClient();
+
+  const focusTimeout = useRef<number>();
 
   const resetAccountData = useCallback(() => setAccountData(undefined), []);
 
@@ -75,11 +77,20 @@ export const AccountDataProvider: FC<PropsWithChildren> = ({ children }) => {
 
   useEffect(() => {
     const handle = () => syncAccountData().catch(captureException);
+    const blur = () => (focusTimeout.current = Date.now());
+    const focus = () => {
+      if (focusTimeout.current && Date.now() - focusTimeout.current > 60_000) {
+        handle();
+      }
+      focusTimeout.current = undefined;
+    };
     const interval = setInterval(handle, 600_000);
-    window.addEventListener('focus', handle);
+    window.addEventListener('focus', focus);
+    window.addEventListener('blur', blur);
     return () => {
       clearInterval(interval);
-      window.removeEventListener('focus', handle);
+      window.removeEventListener('focus', focus);
+      window.removeEventListener('focus', blur);
     };
   }, [syncAccountData]);
 
