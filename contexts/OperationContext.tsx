@@ -167,7 +167,7 @@ export function usePreviewTx({
       });
 
       const gas = await previewGasCost(qty).catch((e) => {
-        error = { status: true, message: handleOperationError(e), component: 'gas' };
+        error = { status: true, message: handleOperationError(e), component: 'gas', variant: e.variant };
         return null;
       });
 

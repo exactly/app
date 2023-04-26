@@ -35,7 +35,7 @@ const icon: Record<Variant, typeof InfoIcon> = {
   success: SuccessIcon,
 };
 
-function ModalAlert({ variant = 'info', message }: Props) {
+function ModalAlert({ variant = 'error', message }: Props) {
   const { view } = useMarketContext();
   const { pathname: currentPathname } = useRouter();
 

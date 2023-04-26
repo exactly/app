@@ -215,7 +215,7 @@ const MarketsBasic: FC = () => {
           <Overview symbol={symbol} operation={operation} qty={qty} option={currentOption || {}} />
         )}
 
-        {errorData?.status && <ModalAlert variant={errorData.variant || 'error'} message={errorData.message} />}
+        {errorData?.status && <ModalAlert variant={errorData.variant} message={errorData.message} />}
 
         <Box mt={1}>
           <Submit symbol={symbol} operation={operation} option={currentOption || {}} qty={qty} errorData={errorData} />

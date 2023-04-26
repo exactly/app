@@ -108,7 +108,7 @@ const DepositAtMaturity: FC = () => {
       {(errorData?.status || gtMaxYield) && (
         <Grid item mt={1}>
           {gtMaxYield && <ModalAlert variant="warning" message={t('You have reached the maximum yield possible')} />}
-          {errorData?.status && <ModalAlert variant="error" message={errorData.message} />}
+          {errorData?.status && <ModalAlert variant={errorData.variant} message={errorData.message} />}
         </Grid>
       )}
 

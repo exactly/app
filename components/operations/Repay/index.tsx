@@ -27,6 +27,7 @@ import useAnalytics from 'hooks/useAnalytics';
 import { useTranslation } from 'react-i18next';
 import useTranslateOperation from 'hooks/useTranslateOperation';
 import { defaultAmount, ethRouterSlippage, gasLimitMultiplier } from 'utils/const';
+import { CustomError } from 'types/Error';
 
 function Repay() {
   const { t } = useTranslation();
@@ -202,7 +203,13 @@ function Repay() {
           value: amount,
         });
 
-        return gasPrice.mul(gasLimit);
+        const gasEstimation = gasPrice.mul(gasLimit);
+
+        if (amount.add(gasEstimation).gte(parseFixed(walletBalance || '0', 18))) {
+          throw new CustomError(t('Reserve ETH for gas fees.'), 'warning');
+        }
+
+        return gasEstimation;
       }
 
       const gasLimit = await marketContract.estimateGas.repay(
@@ -212,7 +219,16 @@ function Repay() {
 
       return gasPrice.mul(gasLimit);
     },
-    [marketAccount, walletAddress, ETHRouterContract, marketContract, requiresApproval, approveEstimateGas],
+    [
+      marketAccount,
+      walletAddress,
+      ETHRouterContract,
+      marketContract,
+      requiresApproval,
+      approveEstimateGas,
+      walletBalance,
+      t,
+    ],
   );
 
   const { isLoading: previewIsLoading } = usePreviewTx({ qty, needsApproval, previewGasCost });
@@ -276,7 +292,7 @@ function Repay() {
 
       {errorData?.status && (
         <Grid item mt={1}>
-          <ModalAlert variant="error" message={errorData.message} />
+          <ModalAlert variant={errorData.variant} message={errorData.message} />
         </Grid>
       )}
 
