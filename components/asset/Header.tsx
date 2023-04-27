@@ -97,8 +97,11 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
   }, [marketAccount, floatingDeposits, fixedDeposits, floatingBorrows, fixedBorrows, t]);
 
   const onChangeAssetDropdown = useCallback(
-    (newSymbol: string) => push({ pathname: `/${newSymbol}`, query }),
-    [push, query],
+    (newSymbol: string) => {
+      if (newSymbol === symbol) return;
+      push({ pathname: `/${newSymbol}`, query });
+    },
+    [push, query, symbol],
   );
 
   const etherscan = networkData[String(chain?.id) as keyof typeof networkData]?.etherscan;
