@@ -27,8 +27,10 @@ export const defaultChain = { mainnet, optimism, goerli }[process.env.NEXT_PUBLI
 
 const alchemyKey = process.env.NEXT_PUBLIC_ALCHEMY_API_KEY;
 
+export const isE2E: boolean = JSON.parse(process.env.NEXT_PUBLIC_IS_E2E ?? 'false');
+
 const providers: ChainProviderFn<Chain, BaseProvider, WebSocketProvider>[] =
-  JSON.parse(process.env.NEXT_PUBLIC_IS_E2E ?? 'false') && rpcURL
+  isE2E && rpcURL
     ? [jsonRpcProvider({ rpc: () => ({ http: rpcURL }) })]
     : [
         ...(alchemyKey ? [alchemyProvider({ priority: 0, apiKey: alchemyKey })] : []),
@@ -40,9 +42,7 @@ const { chains, provider } = configureChains<Chain, BaseProvider, WebSocketProvi
 
 export const wagmi = createClient({
   connectors: [
-    ...(JSON.parse(process.env.NEXT_PUBLIC_IS_E2E ?? 'false')
-      ? [new InjectedConnector({ chains: supportedChains, options: { name: 'E2E' } })]
-      : []),
+    ...(isE2E ? [new InjectedConnector({ chains: supportedChains, options: { name: 'E2E' } })] : []),
     ...w3mConnectors({ projectId: walletConnectId, version: 1, chains }),
     new SafeConnector({ chains }),
   ],
