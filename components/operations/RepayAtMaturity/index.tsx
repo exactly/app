@@ -36,6 +36,7 @@ import usePreviewer from 'hooks/usePreviewer';
 import useDelayedEffect from 'hooks/useDelayedEffect';
 import { defaultAmount, gasLimitMultiplier } from 'utils/const';
 import { CustomError } from 'types/Error';
+import useEstimateGas from 'hooks/useEstimateGas';
 
 type RepayWithDiscount = {
   principal: string;
@@ -154,38 +155,40 @@ const RepayAtMaturity: FC = () => {
     needsApproval,
   } = useApprove('repayAtMaturity', assetContract, marketAccount?.market);
 
+  const estimate = useEstimateGas();
+
   const previewGasCost = useCallback(
     async (quantity: string): Promise<BigNumber | undefined> => {
       if (!marketAccount || !walletAddress || !ETHRouterContract || !marketContract || !date || !quantity) return;
 
-      const gasPrice = (await ETHRouterContract.provider.getFeeData()).maxFeePerGas;
-      if (!gasPrice) return;
-
       if (requiresApproval) {
-        const gasEstimation = await approveEstimateGas();
-        return gasEstimation?.mul(gasPrice);
+        return approveEstimateGas();
       }
 
       const amount = positionAssetsAmount.isZero() ? defaultAmount : positionAssetsAmount;
       const maxAmount = maxAmountToRepay.isZero() ? defaultAmount.mul(slippage).div(WeiPerEther) : maxAmountToRepay;
 
       if (marketAccount.assetSymbol === 'WETH') {
-        const gasLimit = await ETHRouterContract.estimateGas.repayAtMaturity(date, amount, {
+        const populated = await ETHRouterContract.populateTransaction.repayAtMaturity(date, amount, {
           value: maxAmount,
         });
 
-        const gasEstimation = gasPrice.mul(gasLimit);
+        const gasEstimation = await estimate(populated);
 
-        if (amount.add(gasEstimation).gte(parseFixed(walletBalance || '0', 18))) {
+        if (amount.add(gasEstimation ?? Zero).gte(parseFixed(walletBalance || '0', 18))) {
           throw new CustomError(t('Reserve ETH for gas fees.'), 'warning');
         }
 
         return gasEstimation;
       }
 
-      const gasLimit = await marketContract.estimateGas.repayAtMaturity(date, amount, maxAmount, walletAddress);
-
-      return gasPrice.mul(gasLimit);
+      const populated = await marketContract.populateTransaction.repayAtMaturity(
+        date,
+        amount,
+        maxAmount,
+        walletAddress,
+      );
+      return estimate(populated);
     },
     [
       marketAccount,
@@ -197,6 +200,7 @@ const RepayAtMaturity: FC = () => {
       positionAssetsAmount,
       maxAmountToRepay,
       slippage,
+      estimate,
       approveEstimateGas,
       walletBalance,
       t,

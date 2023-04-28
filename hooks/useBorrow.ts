@@ -13,6 +13,7 @@ import getBeforeBorrowLimit from 'utils/getBeforeBorrowLimit';
 import useHealthFactor from './useHealthFactor';
 import useAnalytics from './useAnalytics';
 import { defaultAmount, gasLimitMultiplier } from 'utils/const';
+import useEstimateGas from './useEstimateGas';
 
 type Borrow = {
   handleBasicInputChange: (value: string) => void;
@@ -65,33 +66,31 @@ export default (): Borrow => {
     return marketAccount.floatingDepositAssets.gt(Zero) || accountData.some((aMarket) => aMarket.isCollateral);
   }, [accountData, marketAccount]);
 
+  const estimate = useEstimateGas();
+
   const previewGasCost = useCallback(
     async (quantity: string): Promise<BigNumber | undefined> => {
       if (!marketAccount || !walletAddress || !marketContract || !ETHRouterContract || !quantity) return;
 
-      const gasPrice = (await ETHRouterContract.provider.getFeeData()).maxFeePerGas;
-      if (!gasPrice) return;
-
       if (requiresApproval) {
-        const gasEstimation = await approveEstimateGas();
-        return gasEstimation?.mul(gasPrice);
+        return approveEstimateGas();
       }
 
       if (marketAccount.assetSymbol === 'WETH') {
-        const gasEstimation = await ETHRouterContract.estimateGas.borrow(
+        const populated = await ETHRouterContract.populateTransaction.borrow(
           quantity ? parseFixed(quantity, 18) : defaultAmount,
         );
-        return gasPrice.mul(gasEstimation);
+        return estimate(populated);
       }
 
-      const gasEstimation = await marketContract.estimateGas.borrow(
+      const populated = await marketContract.populateTransaction.borrow(
         quantity ? parseFixed(quantity, marketAccount.decimals) : defaultAmount,
         walletAddress,
         walletAddress,
       );
-      return gasPrice.mul(gasEstimation);
+      return estimate(populated);
     },
-    [walletAddress, marketContract, ETHRouterContract, requiresApproval, approveEstimateGas, marketAccount],
+    [marketAccount, walletAddress, marketContract, ETHRouterContract, requiresApproval, estimate, approveEstimateGas],
   );
 
   const isLoading = useMemo(() => isLoadingOp || approveIsLoading, [isLoadingOp, approveIsLoading]);

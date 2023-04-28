@@ -11,6 +11,7 @@ import useAccountData from './useAccountData';
 import handleOperationError from 'utils/handleOperationError';
 import { useNetwork } from 'wagmi';
 import { useTranslation } from 'react-i18next';
+import useEstimateGas from './useEstimateGas';
 
 export default (operation: Operation, contract?: ERC20 | Market, spender?: string) => {
   const { t } = useTranslation();
@@ -21,11 +22,14 @@ export default (operation: Operation, contract?: ERC20 | Market, spender?: strin
 
   const { marketAccount } = useAccountData(symbol);
 
+  const estimate = useEstimateGas();
+
   const estimateGas = useCallback(async () => {
     if (!contract || !spender) return;
 
-    return contract.estimateGas.approve(spender, MaxUint256);
-  }, [spender, contract]);
+    const tx = await contract.populateTransaction.approve(spender, MaxUint256);
+    return estimate(tx);
+  }, [contract, spender, estimate]);
 
   const needsApproval = useCallback(
     async (qty: string): Promise<boolean> => {

@@ -14,6 +14,7 @@ import getBeforeBorrowLimit from 'utils/getBeforeBorrowLimit';
 import useHealthFactor from './useHealthFactor';
 import useAnalytics from './useAnalytics';
 import { defaultAmount, gasLimitMultiplier } from 'utils/const';
+import useEstimateGas from './useEstimateGas';
 
 type BorrowAtMaturity = {
   borrow: () => void;
@@ -80,37 +81,34 @@ export default (): BorrowAtMaturity => {
     return marketAccount.floatingDepositAssets.gt(Zero) || accountData.some((aMarket) => aMarket.isCollateral);
   }, [accountData, marketAccount]);
 
+  const estimate = useEstimateGas();
+
   const previewGasCost = useCallback(
     async (quantity: string): Promise<BigNumber | undefined> => {
       if (!marketAccount || !walletAddress || !marketContract || !ETHRouterContract || !date || !quantity) return;
 
-      const gasPrice = (await ETHRouterContract.provider.getFeeData()).maxFeePerGas;
-      if (!gasPrice) return;
-
       if (requiresApproval) {
-        const gasEstimation = await approveEstimateGas();
-        return gasEstimation?.mul(gasPrice);
+        return approveEstimateGas();
       }
 
       if (marketAccount.assetSymbol === 'WETH') {
         const amount = quantity ? parseFixed(quantity, 18) : defaultAmount;
         const maxAmount = amount.mul(slippage).div(WeiPerEther);
 
-        const gasEstimation = await ETHRouterContract.estimateGas.borrowAtMaturity(date, amount, maxAmount);
-
-        return gasPrice.mul(gasEstimation);
+        const populated = await ETHRouterContract.populateTransaction.borrowAtMaturity(date, amount, maxAmount);
+        return estimate(populated);
       }
 
       const amount = quantity ? parseFixed(quantity, marketAccount.decimals) : defaultAmount;
       const maxAmount = amount.mul(slippage).div(WeiPerEther);
-      const gasEstimation = await marketContract.estimateGas.borrowAtMaturity(
+      const populated = await marketContract.populateTransaction.borrowAtMaturity(
         date,
         amount,
         maxAmount,
         walletAddress,
         walletAddress,
       );
-      return gasPrice.mul(gasEstimation);
+      return estimate(populated);
     },
     [
       marketAccount,
@@ -120,6 +118,7 @@ export default (): BorrowAtMaturity => {
       date,
       requiresApproval,
       slippage,
+      estimate,
       approveEstimateGas,
     ],
   );
