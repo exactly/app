@@ -1,5 +1,5 @@
 import { BigNumber, parseFixed } from '@ethersproject/bignumber';
-import { WeiPerEther } from '@ethersproject/constants';
+import { WeiPerEther, Zero } from '@ethersproject/constants';
 import { useOperationContext } from 'contexts/OperationContext';
 import useAccountData from 'hooks/useAccountData';
 import useApprove from 'hooks/useApprove';
@@ -12,6 +12,7 @@ import { OperationHook } from 'types/OperationHook';
 import useAnalytics from './useAnalytics';
 import { defaultAmount, gasLimitMultiplier } from 'utils/const';
 import { CustomError } from 'types/Error';
+import useEstimateGas from './useEstimateGas';
 
 type Deposit = {
   deposit: () => void;
@@ -51,6 +52,8 @@ export default (): Deposit => {
     needsApproval,
   } = useApprove('deposit', assetContract, marketAccount?.market);
 
+  const estimate = useEstimateGas();
+
   const previewGasCost = useCallback(
     async (quantity: string): Promise<BigNumber | undefined> => {
       if (
@@ -63,30 +66,25 @@ export default (): Deposit => {
       )
         return;
 
-      const gasPrice = (await ETHRouterContract.provider.getFeeData()).maxFeePerGas;
-      if (!gasPrice) return;
-
       if (requiresApproval) {
-        const gasEstimation = await approveEstimateGas();
-        return gasEstimation?.mul(gasPrice);
+        return approveEstimateGas();
       }
 
       if (marketAccount.assetSymbol === 'WETH') {
         const value = quantity ? parseFixed(quantity, 18) : defaultAmount;
-        const gasLimit = await ETHRouterContract.estimateGas.deposit({ value });
-        const gasCost = gasPrice.mul(gasLimit);
-        if (value.add(gasCost).gte(parseFixed(walletBalance || '0', 18))) {
+        const populated = await ETHRouterContract.populateTransaction.deposit({ value });
+        const gasCost = await estimate(populated);
+        if (value.add(gasCost ?? Zero).gte(parseFixed(walletBalance || '0', 18))) {
           throw new CustomError(t('Reserve ETH for gas fees.'), 'warning');
         }
         return gasCost;
       }
 
-      const gasLimit = await marketContract.estimateGas.deposit(
+      const populated = await marketContract.populateTransaction.deposit(
         quantity ? parseFixed(quantity, marketAccount.decimals) : defaultAmount,
         walletAddress,
       );
-
-      return gasPrice.mul(gasLimit);
+      return estimate(populated);
     },
     [
       walletAddress,
@@ -95,6 +93,7 @@ export default (): Deposit => {
       walletBalance,
       marketAccount,
       requiresApproval,
+      estimate,
       approveEstimateGas,
       t,
     ],
