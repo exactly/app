@@ -101,48 +101,44 @@ const ExplorerMenu: FC<Props> = ({ symbol, assetAddress, eMarketAddress, rateMod
           horizontal: 'right',
         }}
       >
-        <MenuItem>
-          <Image
-            src={`/img/assets/${symbol}.svg`}
-            alt={symbol}
-            width={20}
-            height={20}
-            style={{
-              maxWidth: '100%',
-              height: 'auto',
-            }}
-          />
-          <Box ml={1}>
-            <a href={assetEtherscan} target="_blank" rel="noopener noreferrer">
-              {symbol}
-            </a>
-          </Box>
-        </MenuItem>
-        <MenuItem>
-          <Image
-            src={`/img/exaTokens/exa${symbol}.svg`}
-            alt={symbol}
-            width={20}
-            height={20}
-            style={{
-              maxWidth: '100%',
-              height: 'auto',
-            }}
-          />
-          <Box ml={1}>
-            <a href={eMarketEtherscan} target="_blank" rel="noopener noreferrer">
-              {exaToken}
-            </a>
-          </Box>
-        </MenuItem>
-        <MenuItem>
-          <LinkIcon fontSize="small" />
-          <Box ml={1}>
-            <a href={rateModelEtherscan} target="_blank" rel="noopener noreferrer">
-              {t('Interest Rate Model')}
-            </a>
-          </Box>
-        </MenuItem>
+        <a href={assetEtherscan} target="_blank" rel="noopener noreferrer">
+          <MenuItem>
+            <Image
+              src={`/img/assets/${symbol}.svg`}
+              alt={symbol}
+              width={20}
+              height={20}
+              style={{
+                maxWidth: '100%',
+                height: 'auto',
+              }}
+            />
+            <Box ml={1}>{symbol}</Box>
+          </MenuItem>
+        </a>
+
+        <a href={eMarketEtherscan} target="_blank" rel="noopener noreferrer">
+          <MenuItem>
+            <Image
+              src={`/img/exaTokens/exa${symbol}.svg`}
+              alt={symbol}
+              width={20}
+              height={20}
+              style={{
+                maxWidth: '100%',
+                height: 'auto',
+              }}
+            />
+            <Box ml={1}>{exaToken}</Box>
+          </MenuItem>
+        </a>
+
+        <a href={rateModelEtherscan} target="_blank" rel="noopener noreferrer">
+          <MenuItem>
+            <LinkIcon fontSize="small" />
+            <Box ml={1}>{t('Interest Rate Model')}</Box>
+          </MenuItem>
+        </a>
       </Menu>
     </>
   );
