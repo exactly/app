@@ -67,7 +67,7 @@ const SelectMarketsView: FC = () => {
 
   return (
     <>
-      <Link href={{ pathname: '/', query }}>
+      <Link href={{ pathname: '/', query }} legacyBehavior>
         <Button
           variant={currentPathname !== '/dashboard' ? 'contained' : 'text'}
           onMouseOver={openMenu}
@@ -83,6 +83,7 @@ const SelectMarketsView: FC = () => {
               bgcolor: 'primary',
               filter: 'brightness(1.1)',
             },
+            cursor: 'pointer',
           }}
           data-testid="navbar-link-markets"
         >
@@ -156,7 +157,7 @@ const SelectMarketsView: FC = () => {
               },
             }}
           >
-            <Link href={{ pathname: '/', query }}>
+            <Link href={{ pathname: '/', query }} legacyBehavior>
               <Box display="flex" width="100%" gap={1.5}>
                 <Box display="flex" alignItems="center" my="auto" px={1}>
                   {cloneElement(icon, {

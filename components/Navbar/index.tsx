@@ -93,25 +93,27 @@ function Navbar() {
         data-testid="navbar"
       >
         <Toolbar disableGutters sx={{ padding: '0 0', gap: '8px' }}>
-          <Link href={{ pathname: '/', query }}>
-            <Box display="flex" alignItems="center">
-              <Image
-                src={palette.mode === 'light' ? '/img/logo.svg' : '/img/logo-white.png'}
-                alt="Exactly Logo"
-                width={103}
-                height={30}
-                style={{
-                  maxWidth: '100%',
-                  height: 'auto',
-                }}
-              />
+          <Link href={{ pathname: '/', query }} legacyBehavior>
+            <Box sx={{ cursor: 'pointer' }} display="flex" alignItems="center">
+              <Box>
+                <Image
+                  src={palette.mode === 'light' ? '/img/logo.svg' : '/img/logo-white.png'}
+                  alt="Exactly Logo"
+                  width={103}
+                  height={30}
+                  style={{
+                    maxWidth: '100%',
+                    height: 'auto',
+                  }}
+                />
+              </Box>
             </Box>
           </Link>
           <Box display="flex" gap={0.2}>
             {routes.map(({ name, pathname, custom, icon }) => (
               <Box key={pathname} display={onlyDesktopFlex}>
                 {custom || (
-                  <Link href={{ pathname, query }}>
+                  <Link href={{ pathname, query }} legacyBehavior>
                     <Button
                       sx={{
                         px: 1.5,
