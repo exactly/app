@@ -160,7 +160,6 @@ export function usePreviewTx({
 
   const previewTx = useCallback(
     async (cancelled: () => boolean) => {
-      if (!qty || parseFloat(qty) === 0) return;
       let error: ErrorData | undefined = undefined;
       const approval = await needsApproval(qty).catch((e) => {
         error = { status: true, message: handleOperationError(e) };
