@@ -8,7 +8,7 @@
     "subgraph": "https://api.thegraph.com/subgraphs/name/exactly-protocol/exactly-goerli"
   },
   "10": {
-    "etherscan": "https://optimistic.etherscan.io/",
+    "etherscan": "https://optimistic.etherscan.io",
     "subgraph": "https://api.thegraph.com/subgraphs/name/exactly/exactly-optimism"
   }
 }
