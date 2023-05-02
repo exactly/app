@@ -1,7 +1,7 @@
 import { useMemo, useCallback } from 'react';
 import { Chain, useAccount, useConnect } from 'wagmi';
 import { useWeb3Modal } from '@web3modal/react';
-import { isE2E, supportedChains } from 'utils/client';
+import { supportedChains } from 'utils/client';
 import useDebounce from './useDebounce';
 import { useNetworkContext } from 'contexts/NetworkContext';
 import useRouter from './useRouter';
@@ -43,7 +43,7 @@ export const useWeb3 = (): Web3 => {
   const { connectors, connect } = useConnect();
 
   const connectWallet = useCallback(() => {
-    if (isE2E) {
+    if (JSON.parse(process.env.NEXT_PUBLIC_IS_E2E ?? 'false')) {
       const injected = connectors.find(({ id, ready, name }) => ready && id === 'injected' && name === 'E2E');
       connect({ connector: injected });
     } else {
