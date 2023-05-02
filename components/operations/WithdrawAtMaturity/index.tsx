@@ -31,7 +31,6 @@ import useAnalytics from 'hooks/useAnalytics';
 import { useTranslation } from 'react-i18next';
 import useTranslateOperation from 'hooks/useTranslateOperation';
 import { defaultAmount, gasLimitMultiplier } from 'utils/const';
-import useEstimateGas from 'hooks/useEstimateGas';
 
 const WithdrawAtMaturity: FC = () => {
   const { t } = useTranslation();
@@ -144,29 +143,26 @@ const WithdrawAtMaturity: FC = () => {
     previewWithdrawAtMaturity().catch((error) => setErrorData({ status: true, message: handleOperationError(error) }));
   }, [previewWithdrawAtMaturity, errorData?.status, setErrorData, handleOperationError]);
 
-  const estimate = useEstimateGas();
-
   const previewGasCost = useCallback(
     async (quantity: string): Promise<BigNumber | undefined> => {
       if (!marketAccount || !walletAddress || !marketContract || !ETHRouterContract || !date || !quantity) return;
 
+      const gasPrice = (await ETHRouterContract.provider.getFeeData()).maxFeePerGas;
+      if (!gasPrice) return;
+
       if (requiresApproval) {
-        return approveEstimateGas();
+        const gasEstimation = await approveEstimateGas();
+        return gasEstimation?.mul(gasPrice);
       }
 
       const amount = amountToWithdraw.isZero() ? defaultAmount : amountToWithdraw;
 
       if (marketAccount.assetSymbol === 'WETH') {
-        const populated = await ETHRouterContract.populateTransaction.withdrawAtMaturity(
-          date,
-          amount,
-          minAmountToWithdraw,
-        );
-
-        return estimate(populated);
+        const gasEstimation = await ETHRouterContract.estimateGas.withdrawAtMaturity(date, amount, minAmountToWithdraw);
+        return gasPrice.mul(gasEstimation);
       }
 
-      const populated = await marketContract.populateTransaction.withdrawAtMaturity(
+      const gasEstimation = await marketContract.estimateGas.withdrawAtMaturity(
         date,
         amount,
         minAmountToWithdraw,
@@ -174,7 +170,7 @@ const WithdrawAtMaturity: FC = () => {
         walletAddress,
       );
 
-      return estimate(populated);
+      return gasPrice.mul(gasEstimation);
     },
     [
       marketAccount,
@@ -185,7 +181,6 @@ const WithdrawAtMaturity: FC = () => {
       requiresApproval,
       amountToWithdraw,
       minAmountToWithdraw,
-      estimate,
       approveEstimateGas,
     ],
   );

@@ -13,7 +13,6 @@ import { OperationHook } from 'types/OperationHook';
 import useAnalytics from './useAnalytics';
 import { defaultAmount, gasLimitMultiplier } from 'utils/const';
 import { CustomError } from 'types/Error';
-import useEstimateGas from './useEstimateGas';
 
 type DepositAtMaturity = {
   deposit: () => void;
@@ -67,8 +66,6 @@ export default (): DepositAtMaturity => {
     needsApproval,
   } = useApprove('depositAtMaturity', assetContract, marketAccount?.market);
 
-  const estimate = useEstimateGas();
-
   const previewGasCost = useCallback(
     async (quantity: string): Promise<BigNumber | undefined> => {
       if (
@@ -82,34 +79,33 @@ export default (): DepositAtMaturity => {
       )
         return;
 
+      const gasPrice = (await ETHRouterContract.provider.getFeeData()).maxFeePerGas;
+      if (!gasPrice) return;
+
       if (requiresApproval) {
-        return approveEstimateGas();
+        const gasEstimation = await approveEstimateGas();
+        return gasEstimation?.mul(gasPrice);
       }
 
       if (marketAccount.assetSymbol === 'WETH') {
         const amount = quantity ? parseFixed(quantity, 18) : defaultAmount;
         const minAmount = amount.mul(slippage).div(WeiPerEther);
-        const populated = await ETHRouterContract.populateTransaction.depositAtMaturity(date, minAmount, {
+        const gasEstimation = await ETHRouterContract.estimateGas.depositAtMaturity(date, minAmount, {
           value: amount,
         });
-        const gasCost = await estimate(populated);
-        if (amount.add(gasCost ?? Zero).gte(parseFixed(walletBalance || '0', 18))) {
+        const gasCost = gasPrice.mul(gasEstimation);
+        if (amount.add(gasCost).gte(parseFixed(walletBalance || '0', 18))) {
           throw new CustomError(t('Reserve ETH for gas fees.'), 'warning');
         }
-        return gasCost;
+        return gasPrice.mul(gasEstimation);
       }
 
       const amount = quantity ? parseFixed(quantity, marketAccount.decimals) : defaultAmount;
       const minAmount = amount.mul(slippage).div(WeiPerEther);
 
-      const populated = await marketContract.populateTransaction.depositAtMaturity(
-        date,
-        amount,
-        minAmount,
-        walletAddress,
-      );
+      const gasEstimation = await marketContract.estimateGas.depositAtMaturity(date, amount, minAmount, walletAddress);
 
-      return estimate(populated);
+      return gasPrice.mul(gasEstimation);
     },
     [
       marketAccount,
@@ -120,7 +116,6 @@ export default (): DepositAtMaturity => {
       walletBalance,
       requiresApproval,
       slippage,
-      estimate,
       approveEstimateGas,
       t,
     ],

@@ -26,7 +26,6 @@ import useAnalytics from 'hooks/useAnalytics';
 import { useTranslation } from 'react-i18next';
 import useTranslateOperation from 'hooks/useTranslateOperation';
 import { defaultAmount, gasLimitMultiplier } from 'utils/const';
-import useEstimateGas from 'hooks/useEstimateGas';
 
 const Withdraw: FC = () => {
   const { t } = useTranslation();
@@ -71,22 +70,23 @@ const Withdraw: FC = () => {
     needsApproval,
   } = useApprove('withdraw', marketContract, ETHRouterContract?.address);
 
-  const estimate = useEstimateGas();
-
   const previewGasCost = useCallback(
     async (quantity: string): Promise<BigNumber | undefined> => {
       if (!walletAddress || !marketContract || !ETHRouterContract || !marketAccount || !quantity) return;
 
+      const gasPrice = (await ETHRouterContract.provider.getFeeData()).maxFeePerGas;
+      if (!gasPrice) return;
+
       if (requiresApproval) {
-        return approveEstimateGas();
+        const gasEstimation = await approveEstimateGas();
+        return gasEstimation?.mul(gasPrice);
       }
 
       const { floatingDepositShares } = marketAccount;
       if (marketAccount.assetSymbol === 'WETH') {
         const amount = isMax ? floatingDepositShares : quantity ? parseFixed(quantity, 18) : defaultAmount;
-
-        const populated = await ETHRouterContract.populateTransaction.redeem(amount);
-        return estimate(populated);
+        const gasEstimation = await ETHRouterContract.estimateGas.redeem(amount);
+        return gasPrice.mul(gasEstimation);
       }
 
       const amount = isMax
@@ -94,19 +94,10 @@ const Withdraw: FC = () => {
         : quantity
         ? parseFixed(quantity, marketAccount.decimals)
         : defaultAmount;
-      const populated = await marketContract.populateTransaction.redeem(amount, walletAddress, walletAddress);
-      return estimate(populated);
+      const gasEstimation = await marketContract.estimateGas.redeem(amount, walletAddress, walletAddress);
+      return gasPrice.mul(gasEstimation);
     },
-    [
-      walletAddress,
-      marketContract,
-      ETHRouterContract,
-      marketAccount,
-      requiresApproval,
-      isMax,
-      estimate,
-      approveEstimateGas,
-    ],
+    [ETHRouterContract, marketAccount, approveEstimateGas, isMax, marketContract, requiresApproval, walletAddress],
   );
 
   const { isLoading: previewIsLoading } = usePreviewTx({ qty, needsApproval, previewGasCost });
@@ -123,13 +114,9 @@ const Withdraw: FC = () => {
 
   const handleInputChange = useCallback(
     (value: string) => {
-      if (!marketAccount) return;
-
       setQty(value);
 
-      const parsed = parseFixed(value || '0', marketAccount.decimals);
-
-      if (parsed.gt(marketAccount.floatingDepositAssets)) {
+      if (parseFloat(value) > parseFloat(parsedAmount)) {
         return setErrorData({
           status: true,
           message: t("You can't withdraw more than the deposited amount"),
@@ -139,7 +126,7 @@ const Withdraw: FC = () => {
       setErrorData(undefined);
       setIsMax(false);
     },
-    [marketAccount, setErrorData, setQty, t],
+    [parsedAmount, setErrorData, setQty, t],
   );
 
   const withdraw = useCallback(async () => {

@@ -6,11 +6,6 @@ import i18n from 'i18n';
 const defaultErr = i18n.t('There was an error, please try again');
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function getErrorData(error: any): string | null {
-  return error?.error?.data?.originalError?.data ?? error?.error?.error?.data ?? null;
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default (error: any, captureException: typeof sentryCaptureException = sentryCaptureException): string => {
   if (!error?.code) {
     if (error?.custom) {
@@ -32,12 +27,11 @@ export default (error: any, captureException: typeof sentryCaptureException = se
     case ErrorCode.NONCE_EXPIRED:
       return i18n.t('Nonce expired');
     case ErrorCode.UNPREDICTABLE_GAS_LIMIT: {
-      const err = getErrorData(error);
-      if (!err) {
+      if (!error?.error?.data?.originalError?.data) {
         break;
       }
 
-      const { name, args } = ErrorInterface.parseError(err);
+      const { name, args } = ErrorInterface.parseError(error.error.data.originalError.data);
 
       switch (name) {
         case 'InsufficientAccountLiquidity':

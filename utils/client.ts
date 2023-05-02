@@ -3,7 +3,7 @@ import { createClient, configureChains, ChainProviderFn, Chain } from 'wagmi';
 import { InjectedConnector } from 'wagmi/connectors/injected';
 import { mainnet, goerli, optimism } from 'wagmi/chains';
 import { jsonRpcProvider } from 'wagmi/providers/jsonRpc';
-import { alchemyProvider } from 'wagmi/providers/alchemy';
+import { alchemyProvider } from '@wagmi/core/providers/alchemy';
 import { publicProvider } from 'wagmi/providers/public';
 import { SafeConnector } from 'wagmi/connectors/safe';
 import { BaseProvider, WebSocketProvider } from '@ethersproject/providers';

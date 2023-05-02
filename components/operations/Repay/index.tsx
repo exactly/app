@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
-import { WeiPerEther, Zero } from '@ethersproject/constants';
+import { WeiPerEther } from '@ethersproject/constants';
 
 import ModalTxCost from 'components/common/modal/ModalTxCost';
 import ModalGif from 'components/common/modal/ModalGif';
@@ -28,7 +28,6 @@ import { useTranslation } from 'react-i18next';
 import useTranslateOperation from 'hooks/useTranslateOperation';
 import { defaultAmount, ethRouterSlippage, gasLimitMultiplier } from 'utils/const';
 import { CustomError } from 'types/Error';
-import useEstimateGas from 'hooks/useEstimateGas';
 
 function Repay() {
   const { t } = useTranslation();
@@ -185,36 +184,40 @@ function Repay() {
     handleOperationError,
   ]);
 
-  const estimate = useEstimateGas();
-
   const previewGasCost = useCallback(
     async (quantity: string): Promise<BigNumber | undefined> => {
       if (!marketAccount || !walletAddress || !ETHRouterContract || !marketContract || !quantity) return;
 
+      const gasPrice = (await ETHRouterContract.provider.getFeeData()).maxFeePerGas;
+      if (!gasPrice) return;
+
       if (requiresApproval) {
-        return approveEstimateGas();
+        const gasEstimation = await approveEstimateGas();
+        return gasEstimation?.mul(gasPrice);
       }
 
       if (marketAccount.assetSymbol === 'WETH') {
         const amount = quantity ? parseFixed(quantity, 18).mul(ethRouterSlippage).div(WeiPerEther) : defaultAmount;
 
-        const populated = await ETHRouterContract.populateTransaction.repay(amount, {
+        const gasLimit = await ETHRouterContract.estimateGas.repay(amount, {
           value: amount,
         });
-        const gasEstimation = await estimate(populated);
-        if (amount.add(gasEstimation ?? Zero).gte(parseFixed(walletBalance || '0', 18))) {
+
+        const gasEstimation = gasPrice.mul(gasLimit);
+
+        if (amount.add(gasEstimation).gte(parseFixed(walletBalance || '0', 18))) {
           throw new CustomError(t('Reserve ETH for gas fees.'), 'warning');
         }
 
         return gasEstimation;
       }
 
-      const populated = await marketContract.populateTransaction.repay(
+      const gasLimit = await marketContract.estimateGas.repay(
         quantity ? parseFixed(quantity, marketAccount.decimals) : defaultAmount,
         walletAddress,
       );
 
-      return estimate(populated);
+      return gasPrice.mul(gasLimit);
     },
     [
       marketAccount,
@@ -222,7 +225,6 @@ function Repay() {
       ETHRouterContract,
       marketContract,
       requiresApproval,
-      estimate,
       approveEstimateGas,
       walletBalance,
       t,
