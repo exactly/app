@@ -27,7 +27,7 @@ type DepositAtMaturity = {
 
 export default (): DepositAtMaturity => {
   const { t } = useTranslation();
-  const { track } = useAnalytics();
+  const { transaction } = useAnalytics();
   const { walletAddress } = useWeb3();
 
   const {
@@ -171,8 +171,10 @@ export default (): DepositAtMaturity => {
     if (!marketAccount || !date || !qty || !ETHRouterContract || !marketContract || !walletAddress) return;
 
     let depositTx;
+    setIsLoadingOp(true);
+
     try {
-      setIsLoadingOp(true);
+      transaction.addToCart();
       const amount = parseFixed(qty, marketAccount.decimals);
       const minAmount = amount.mul(slippage).div(WeiPerEther);
 
@@ -198,18 +200,15 @@ export default (): DepositAtMaturity => {
         });
       }
 
+      transaction.beginCheckout();
       setTx({ status: 'processing', hash: depositTx.hash });
 
       const { status, transactionHash } = await depositTx.wait();
       setTx({ status: status ? 'success' : 'error', hash: transactionHash });
 
-      void track(status ? 'depositAtMaturity' : 'depositAtMaturityRevert', {
-        amount: qty,
-        asset: marketAccount.assetSymbol,
-        maturity: date,
-        hash: transactionHash,
-      });
+      if (status) transaction.purchase();
     } catch (error) {
+      transaction.removeFromCart();
       if (depositTx) setTx({ status: 'error', hash: depositTx.hash });
       setErrorData({ status: true, message: handleOperationError(error) });
     } finally {
@@ -223,9 +222,9 @@ export default (): DepositAtMaturity => {
     marketContract,
     walletAddress,
     setIsLoadingOp,
+    transaction,
     slippage,
     setTx,
-    track,
     setErrorData,
     handleOperationError,
   ]);
@@ -238,13 +237,8 @@ export default (): DepositAtMaturity => {
       return;
     }
 
-    void track('depositAtMaturityRequest', {
-      amount: qty,
-      maturity: date,
-      asset: symbol,
-    });
     return deposit();
-  }, [approve, date, deposit, isLoading, needsApproval, qty, requiresApproval, setRequiresApproval, symbol, track]);
+  }, [approve, deposit, isLoading, needsApproval, qty, requiresApproval, setRequiresApproval]);
 
   const updateAPR = useCallback(async () => {
     if (!marketAccount || !date || !previewerContract || !depositRate) {

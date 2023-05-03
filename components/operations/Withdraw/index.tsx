@@ -31,7 +31,7 @@ import useEstimateGas from 'hooks/useEstimateGas';
 const Withdraw: FC = () => {
   const { t } = useTranslation();
   const translateOperation = useTranslateOperation();
-  const { track } = useAnalytics();
+  const { transaction } = useAnalytics();
   const { operation } = useModalStatus();
   const { walletAddress } = useWeb3();
 
@@ -148,6 +148,7 @@ const Withdraw: FC = () => {
     let withdrawTx;
     try {
       setIsLoadingOp(true);
+      transaction.addToCart();
       const { floatingDepositShares, decimals } = marketAccount;
 
       if (marketAccount.assetSymbol === 'WETH') {
@@ -188,18 +189,17 @@ const Withdraw: FC = () => {
         }
       }
 
+      transaction.beginCheckout();
+
       setTx({ status: 'processing', hash: withdrawTx?.hash });
 
       const { status, transactionHash } = await withdrawTx.wait();
 
       setTx({ status: status ? 'success' : 'error', hash: transactionHash });
 
-      void track(status ? 'withdraw' : 'withdrawRevert', {
-        amount: qty,
-        asset: marketAccount.assetSymbol,
-        hash: transactionHash,
-      });
+      if (status) transaction.purchase();
     } catch (error) {
+      transaction.removeFromCart();
       if (withdrawTx) setTx({ status: 'error', hash: withdrawTx?.hash });
       setErrorData({ status: true, message: handleOperationError(error) });
     } finally {
@@ -210,11 +210,11 @@ const Withdraw: FC = () => {
     walletAddress,
     marketContract,
     setIsLoadingOp,
+    transaction,
     setTx,
-    track,
-    qty,
     ETHRouterContract,
     isMax,
+    qty,
     setErrorData,
     handleOperationError,
   ]);
@@ -227,13 +227,8 @@ const Withdraw: FC = () => {
       return;
     }
 
-    void track('withdrawRequest', {
-      amount: qty,
-      asset: symbol,
-    });
-
     return withdraw();
-  }, [approve, isLoading, needsApproval, qty, requiresApproval, setRequiresApproval, symbol, track, withdraw]);
+  }, [approve, isLoading, needsApproval, qty, requiresApproval, setRequiresApproval, withdraw]);
 
   if (tx) return <ModalGif tx={tx} tryAgain={withdraw} />;
 

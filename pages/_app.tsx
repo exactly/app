@@ -22,6 +22,8 @@ import { MarketsBasicProvider } from 'contexts/MarketsBasicContext';
 import { NetworkContextProvider, useNetworkContext } from 'contexts/NetworkContext';
 import { DebtManagerContextProvider } from 'contexts/DebtManagerContext';
 import { GlobalErrorProvider } from 'contexts/GlobalErrorContext';
+import OperationsModal from 'components/OperationsModal';
+import { useInitGA } from 'hooks/useAnalytics';
 
 const { maxWidth } = globals;
 
@@ -42,6 +44,8 @@ const Web3ModalWrapper = () => {
 };
 
 export default function App({ Component, pageProps }: AppProps) {
+  useInitGA();
+
   return (
     <>
       <Head>
@@ -91,6 +95,7 @@ export default function App({ Component, pageProps }: AppProps) {
                           </main>
                           <Footer />
                         </Box>
+                        <OperationsModal />
                       </DebtManagerContextProvider>
                     </MarketsBasicProvider>
                   </ModalStatusProvider>

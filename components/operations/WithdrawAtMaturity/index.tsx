@@ -36,7 +36,7 @@ import useEstimateGas from 'hooks/useEstimateGas';
 const WithdrawAtMaturity: FC = () => {
   const { t } = useTranslation();
   const translateOperation = useTranslateOperation();
-  const { track } = useAnalytics();
+  const { transaction } = useAnalytics();
   const { operation } = useModalStatus();
   const { walletAddress } = useWeb3();
 
@@ -209,6 +209,8 @@ const WithdrawAtMaturity: FC = () => {
     try {
       setIsLoadingOp(true);
 
+      transaction.addToCart();
+
       if (marketAccount.assetSymbol === 'WETH') {
         if (!ETHRouterContract) return;
 
@@ -241,19 +243,17 @@ const WithdrawAtMaturity: FC = () => {
         );
       }
 
+      transaction.beginCheckout();
+
       setTx({ status: 'processing', hash: withdrawTx?.hash });
 
       const { status, transactionHash } = await withdrawTx.wait();
 
       setTx({ status: status ? 'success' : 'error', hash: transactionHash });
 
-      void track(status ? 'withdrawAtMaturity' : 'withdrawAtMaturityRevert', {
-        amount: qty,
-        asset: marketAccount.assetSymbol,
-        maturity: date,
-        hash: transactionHash,
-      });
+      if (status) transaction.purchase();
     } catch (error) {
+      transaction.removeFromCart();
       if (withdrawTx) setTx({ status: 'error', hash: withdrawTx?.hash });
       setErrorData({ status: true, message: handleOperationError(error) });
     } finally {
@@ -266,8 +266,8 @@ const WithdrawAtMaturity: FC = () => {
     walletAddress,
     qty,
     setIsLoadingOp,
+    transaction,
     setTx,
-    track,
     ETHRouterContract,
     minAmountToWithdraw,
     setErrorData,
@@ -282,14 +282,8 @@ const WithdrawAtMaturity: FC = () => {
       return;
     }
 
-    void track('withdrawAtMaturityRequest', {
-      amount: qty,
-      maturity: date,
-      asset: symbol,
-    });
-
     return withdraw();
-  }, [isLoading, requiresApproval, track, qty, date, symbol, withdraw, approve, setRequiresApproval, needsApproval]);
+  }, [isLoading, requiresApproval, qty, withdraw, approve, setRequiresApproval, needsApproval]);
 
   if (tx) return <ModalGif tx={tx} tryAgain={withdraw} />;
 

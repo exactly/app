@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { basename } from 'path';
 import { readdir, readFile } from 'fs/promises';
 import type { GetStaticPaths, GetStaticProps, NextPage } from 'next';
@@ -9,7 +9,7 @@ import AssetHeaderInfo from 'components/asset/Header';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { Box, IconButton, Tooltip, Typography, Grid } from '@mui/material';
 import Link from 'next/link';
-import useAnalytics from 'hooks/useAnalytics';
+import { usePageView } from 'hooks/useAnalytics';
 import useRouter from 'hooks/useRouter';
 import { useTranslation } from 'react-i18next';
 
@@ -20,8 +20,8 @@ type Props = {
 const Market: NextPage<Props> = ({ symbol }: Props) => {
   const { t } = useTranslation();
   const { query } = useRouter();
-  const { page } = useAnalytics();
-  useEffect(() => void page(), [page]);
+
+  usePageView(`/${symbol}`, `${symbol} Asset Page`);
 
   return (
     <Grid container mt={-1}>

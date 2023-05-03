@@ -33,7 +33,7 @@ import useEstimateGas from 'hooks/useEstimateGas';
 function Repay() {
   const { t } = useTranslation();
   const translateOperation = useTranslateOperation();
-  const { track } = useAnalytics();
+  const { transaction } = useAnalytics();
   const { operation } = useModalStatus();
   const { walletAddress } = useWeb3();
 
@@ -113,8 +113,9 @@ function Repay() {
     if (!marketAccount || !qty || !marketContract || !walletAddress) return;
 
     let repayTx;
+    setIsLoadingOp(true);
     try {
-      setIsLoadingOp(true);
+      transaction.addToCart();
       const { floatingBorrowShares, floatingBorrowAssets, decimals } = marketAccount;
 
       if (marketAccount.assetSymbol === 'WETH') {
@@ -154,18 +155,16 @@ function Repay() {
         }
       }
 
+      transaction.beginCheckout();
+
       setTx({ status: 'processing', hash: repayTx?.hash });
 
       const { status, transactionHash } = await repayTx.wait();
 
       setTx({ status: status ? 'success' : 'error', hash: transactionHash });
-
-      void track(status ? 'repay' : 'repayRevert', {
-        amount: qty,
-        asset: marketAccount.assetSymbol,
-        hash: transactionHash,
-      });
+      if (status) transaction.purchase();
     } catch (error) {
+      transaction.removeFromCart();
       if (repayTx) setTx({ status: 'error', hash: repayTx?.hash });
       setErrorData({ status: true, message: handleOperationError(error) });
     } finally {
@@ -177,8 +176,8 @@ function Repay() {
     marketContract,
     walletAddress,
     setIsLoadingOp,
+    transaction,
     setTx,
-    track,
     ETHRouterContract,
     isMax,
     setErrorData,
@@ -244,13 +243,8 @@ function Repay() {
       return;
     }
 
-    void track('repayRequest', {
-      amount: qty,
-      asset: symbol,
-    });
-
     return repay();
-  }, [approve, isLoading, needsApproval, qty, repay, requiresApproval, setRequiresApproval, symbol, track]);
+  }, [approve, isLoading, needsApproval, qty, repay, requiresApproval, setRequiresApproval]);
 
   if (tx) return <ModalGif tx={tx} tryAgain={repay} />;
 

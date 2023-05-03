@@ -20,7 +20,7 @@ type Deposit = {
 
 export default (): Deposit => {
   const { t } = useTranslation();
-  const { track } = useAnalytics();
+  const { transaction } = useAnalytics();
   const { walletAddress } = useWeb3();
 
   const {
@@ -127,6 +127,8 @@ export default (): Deposit => {
     let depositTx;
     try {
       setIsLoadingOp(true);
+      transaction.addToCart();
+
       if (marketAccount.assetSymbol === 'WETH') {
         if (!ETHRouterContract) return;
 
@@ -145,18 +147,18 @@ export default (): Deposit => {
         });
       }
 
+      transaction.beginCheckout();
+
       setTx({ status: 'processing', hash: depositTx.hash });
 
       const { status, transactionHash } = await depositTx.wait();
 
       setTx({ status: status ? 'success' : 'error', hash: transactionHash });
 
-      void track(status ? 'deposit' : 'depositRevert', {
-        amount: qty,
-        asset: marketAccount.assetSymbol,
-        hash: transactionHash,
-      });
+      if (status) transaction.purchase();
     } catch (error) {
+      transaction.removeFromCart();
+
       if (depositTx) setTx({ status: 'error', hash: depositTx.hash });
       setErrorData({ status: true, message: handleOperationError(error) });
     } finally {
@@ -167,10 +169,10 @@ export default (): Deposit => {
     marketContract,
     marketAccount,
     setIsLoadingOp,
+    transaction,
     setTx,
-    track,
-    qty,
     ETHRouterContract,
+    qty,
     setErrorData,
     handleOperationError,
   ]);
@@ -183,13 +185,8 @@ export default (): Deposit => {
       return;
     }
 
-    void track('depositRequest', {
-      amount: qty,
-      asset: symbol,
-    });
-
     return deposit();
-  }, [isLoading, requiresApproval, track, qty, symbol, deposit, approve, setRequiresApproval, needsApproval]);
+  }, [isLoading, requiresApproval, qty, deposit, approve, setRequiresApproval, needsApproval]);
 
   return { isLoading, onMax, handleInputChange, handleSubmitAction, needsApproval, previewGasCost, deposit };
 };

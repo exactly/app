@@ -48,7 +48,7 @@ type RepayWithDiscount = {
 const RepayAtMaturity: FC = () => {
   const { t } = useTranslation();
   const translateOperation = useTranslateOperation();
-  const { track } = useAnalytics();
+  const { transaction } = useAnalytics();
   const { operation } = useModalStatus();
   const { walletAddress } = useWeb3();
   const previewerContract = usePreviewer();
@@ -264,6 +264,8 @@ const RepayAtMaturity: FC = () => {
     try {
       setIsLoadingOp(true);
 
+      transaction.addToCart();
+
       if (marketAccount.assetSymbol === 'WETH') {
         const gasEstimation = await ETHRouterContract.estimateGas.repayAtMaturity(date, positionAssetsAmount, {
           value: maxAmountToRepay,
@@ -286,19 +288,17 @@ const RepayAtMaturity: FC = () => {
         });
       }
 
+      transaction.beginCheckout();
+
       setTx({ status: 'processing', hash: repayTx?.hash });
 
       const { status, transactionHash } = await repayTx.wait();
 
       setTx({ status: status ? 'success' : 'error', hash: transactionHash });
 
-      void track(status ? 'repayAtMaturity' : 'repayAtMaturityRevert', {
-        amount: qty,
-        asset: marketAccount.assetSymbol,
-        maturity: date,
-        hash: transactionHash,
-      });
+      if (status) transaction.purchase();
     } catch (error) {
+      transaction.removeFromCart();
       if (repayTx) setTx({ status: 'error', hash: repayTx?.hash });
       setErrorData({ status: true, message: handleOperationError(error) });
     } finally {
@@ -306,18 +306,18 @@ const RepayAtMaturity: FC = () => {
     }
   }, [
     marketAccount,
-    ETHRouterContract,
     date,
-    handleOperationError,
-    marketContract,
-    maxAmountToRepay,
-    positionAssetsAmount,
+    ETHRouterContract,
     qty,
-    setErrorData,
-    setIsLoadingOp,
-    setTx,
-    track,
+    marketContract,
     walletAddress,
+    setIsLoadingOp,
+    transaction,
+    setTx,
+    positionAssetsAmount,
+    maxAmountToRepay,
+    setErrorData,
+    handleOperationError,
   ]);
 
   const handleSubmitAction = useCallback(async () => {
@@ -328,14 +328,8 @@ const RepayAtMaturity: FC = () => {
       return;
     }
 
-    void track('repayAtMaturityRequest', {
-      amount: qty,
-      maturity: date,
-      asset: symbol,
-    });
-
     return repay();
-  }, [approve, date, isLoading, needsApproval, qty, repay, requiresApproval, setRequiresApproval, symbol, track]);
+  }, [approve, isLoading, needsApproval, qty, repay, requiresApproval, setRequiresApproval]);
 
   if (tx) return <ModalGif tx={tx} tryAgain={repay} />;
 

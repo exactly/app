@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useMemo, useCallback } from 'react';
 import type { FC, PropsWithChildren } from 'react';
-import OperationsModal from 'components/OperationsModal';
 import { OperationContextProvider } from './OperationContext';
 
 export type Operation =
@@ -62,10 +61,7 @@ export const ModalStatusProvider: FC<PropsWithChildren> = ({ children }) => {
 
   return (
     <ModalStatusContext.Provider value={value}>
-      <OperationContextProvider>
-        {children}
-        <OperationsModal />
-      </OperationContextProvider>
+      <OperationContextProvider>{children}</OperationContextProvider>
     </ModalStatusContext.Provider>
   );
 };

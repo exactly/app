@@ -23,7 +23,7 @@ type Borrow = {
 
 export default (): Borrow => {
   const { t } = useTranslation();
-  const { track } = useAnalytics();
+  const { transaction } = useAnalytics();
   const { walletAddress } = useWeb3();
 
   const {
@@ -205,8 +205,8 @@ export default (): Borrow => {
 
     setIsLoadingOp(true);
     let borrowTx;
-
     try {
+      transaction.addToCart();
       if (marketAccount.assetSymbol === 'WETH') {
         if (!ETHRouterContract) return;
 
@@ -225,18 +225,17 @@ export default (): Borrow => {
         });
       }
 
+      transaction.beginCheckout();
+
       setTx({ status: 'processing', hash: borrowTx.hash });
 
       const { status, transactionHash } = await borrowTx.wait();
 
       setTx({ status: status ? 'success' : 'error', hash: transactionHash });
 
-      void track(status ? 'borrow' : 'borrowRevert', {
-        amount: qty,
-        asset: marketAccount.assetSymbol,
-        hash: transactionHash,
-      });
+      if (status) transaction.purchase();
     } catch (error) {
+      transaction.removeFromCart();
       if (borrowTx?.hash) setTx({ status: 'error', hash: borrowTx.hash });
 
       setErrorData({
@@ -249,10 +248,10 @@ export default (): Borrow => {
   }, [
     marketAccount,
     setIsLoadingOp,
+    transaction,
     setTx,
-    track,
-    qty,
     ETHRouterContract,
+    qty,
     marketContract,
     walletAddress,
     setErrorData,
@@ -267,13 +266,8 @@ export default (): Borrow => {
       return;
     }
 
-    void track('borrowRequest', {
-      amount: qty,
-      asset: symbol,
-    });
-
     return borrow();
-  }, [approve, borrow, isLoading, needsApproval, qty, requiresApproval, setRequiresApproval, symbol, track]);
+  }, [approve, borrow, isLoading, needsApproval, qty, requiresApproval, setRequiresApproval]);
 
   return {
     isLoading,

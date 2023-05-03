@@ -19,14 +19,12 @@ import SelectMarketsView from 'components/SelectMarketsView';
 import { useMarketContext } from 'contexts/MarketContext';
 import ClaimRewards from 'components/ClaimRewards';
 import SelectDisplayNetwork from 'components/SelectDisplayNetwork';
-import useAnalytics from 'hooks/useAnalytics';
 import { useTranslation } from 'react-i18next';
 import MaturityDateReminder from 'components/MaturityDateReminder';
 const { onlyMobile, onlyDesktopFlex } = globals;
 
 function Navbar() {
   const { t } = useTranslation();
-  const { identify } = useAnalytics();
   const { connector } = useClient();
   const { walletAddress } = useWeb3();
   const { pathname: currentPathname, query } = useRouter();
@@ -51,8 +49,7 @@ function Navbar() {
       blockNumber,
       testnet: chain?.testnet,
     });
-    void identify(walletAddress);
-  }, [walletAddress, connector, chain, identify, blockNumber]);
+  }, [walletAddress, connector, chain, blockNumber]);
 
   const handleFaucetClick = useCallback(() => {
     if (chain?.id === goerli.id) return openOperationModal('faucet');

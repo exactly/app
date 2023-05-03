@@ -28,7 +28,7 @@ type BorrowAtMaturity = {
 
 export default (): BorrowAtMaturity => {
   const { t } = useTranslation();
-  const { track } = useAnalytics();
+  const { transaction } = useAnalytics();
   const { walletAddress } = useWeb3();
 
   const {
@@ -216,6 +216,7 @@ export default (): BorrowAtMaturity => {
 
     let borrowTx;
     try {
+      transaction.addToCart();
       if (marketAccount.assetSymbol === 'WETH') {
         if (!ETHRouterContract) throw new Error('ETHRouterContract is undefined');
 
@@ -240,18 +241,16 @@ export default (): BorrowAtMaturity => {
         });
       }
 
+      transaction.beginCheckout();
+
       setTx({ status: 'processing', hash: borrowTx?.hash });
 
       const { status, transactionHash } = await borrowTx.wait();
       setTx({ status: status ? 'success' : 'error', hash: transactionHash });
 
-      void track(status ? 'borrowAtMaturity' : 'borrowAtMaturityRevert', {
-        amount: qty,
-        asset: marketAccount.assetSymbol,
-        maturity: date,
-        hash: transactionHash,
-      });
+      if (status) transaction.purchase();
     } catch (error) {
+      transaction.removeFromCart();
       if (borrowTx?.hash) setTx({ status: 'error', hash: borrowTx.hash });
 
       setErrorData({
@@ -264,18 +263,18 @@ export default (): BorrowAtMaturity => {
   }, [
     setIsLoadingOp,
     fixedRate,
-    marketAccount,
     slippage,
+    marketAccount,
     date,
     qty,
     walletAddress,
     setErrorData,
+    t,
+    transaction,
     setTx,
-    track,
     ETHRouterContract,
     marketContract,
     handleOperationError,
-    t,
   ]);
 
   const updateAPR = useCallback(async () => {
@@ -313,14 +312,8 @@ export default (): BorrowAtMaturity => {
       return;
     }
 
-    void track('borrowAtMaturityRequest', {
-      amount: qty,
-      maturity: date,
-      asset: symbol,
-    });
-
     return borrow();
-  }, [isLoading, requiresApproval, track, qty, date, symbol, borrow, approve, setRequiresApproval, needsApproval]);
+  }, [isLoading, requiresApproval, qty, borrow, approve, setRequiresApproval, needsApproval]);
 
   return {
     isLoading,
