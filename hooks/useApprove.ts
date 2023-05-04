@@ -13,6 +13,7 @@ import { useNetwork } from 'wagmi';
 import { useTranslation } from 'react-i18next';
 import { gasLimitMultiplier } from 'utils/const';
 import useEstimateGas from './useEstimateGas';
+import useAnalytics from './useAnalytics';
 
 export default (operation: Operation, contract?: ERC20 | Market, spender?: string) => {
   const { t } = useTranslation();
@@ -20,6 +21,7 @@ export default (operation: Operation, contract?: ERC20 | Market, spender?: strin
   const { chain } = useNetwork();
   const { symbol, setErrorData, setLoadingButton } = useOperationContext();
   const [isLoading, setIsLoading] = useState(false);
+  const { transaction } = useAnalytics();
 
   const { marketAccount } = useAccountData(symbol);
 
@@ -70,14 +72,22 @@ export default (operation: Operation, contract?: ERC20 | Market, spender?: strin
 
     try {
       setIsLoading(true);
+      transaction.addToCart('approve');
+
       setLoadingButton({ label: t('Sign the transaction on your wallet') });
       const gasEstimation = await contract.estimateGas.approve(spender, MaxUint256);
       const approveTx = await contract.approve(spender, MaxUint256, {
         gasLimit: gasEstimation.mul(gasLimitMultiplier).div(WeiPerEther),
       });
+
+      transaction.beginCheckout('approve');
+
       setLoadingButton({ withCircularProgress: true, label: t('Approving {{symbol}}', { symbol }) });
-      await approveTx.wait();
+
+      const { status } = await approveTx.wait();
+      if (status) transaction.purchase('approve');
     } catch (error) {
+      transaction.removeFromCart('approve');
       const isDenied = [ErrorCode.ACTION_REJECTED, ErrorCode.TRANSACTION_REPLACED].includes(
         (error as { code: ErrorCode }).code,
       );
@@ -92,7 +102,7 @@ export default (operation: Operation, contract?: ERC20 | Market, spender?: strin
       setIsLoading(false);
       setLoadingButton({});
     }
-  }, [contract, spender, setLoadingButton, symbol, setErrorData, t]);
+  }, [contract, spender, transaction, setLoadingButton, t, symbol, setErrorData]);
 
   return { approve, needsApproval, estimateGas, isLoading };
 };

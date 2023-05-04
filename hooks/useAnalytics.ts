@@ -8,12 +8,13 @@ import { Zero } from '@ethersproject/constants';
 import { useOperationContext } from 'contexts/OperationContext';
 import { useWeb3 } from './useWeb3';
 import { useMarketContext } from 'contexts/MarketContext';
-import { useMarketsBasic } from 'contexts/MarketsBasicContext';
 import { useCustomTheme } from 'contexts/ThemeContext';
 import useAccountData from './useAccountData';
 import { useModalStatus } from 'contexts/ModalStatusContext';
 
-function useAnalyticsContext() {
+type ItemVariant = 'operation' | 'approve' | 'enterMarket' | 'exitMarket';
+
+function useAnalyticsContext(assetSymbol?: string) {
   const { i18n } = useTranslation();
   const lng = i18n.language.substring(0, 2);
 
@@ -23,7 +24,7 @@ function useAnalyticsContext() {
   const { operation } = useModalStatus();
   const { date, view } = useMarketContext();
 
-  const { marketAccount } = useAccountData(symbol);
+  const { marketAccount } = useAccountData(assetSymbol || symbol);
 
   const { theme } = useCustomTheme();
 
@@ -42,14 +43,14 @@ function useAnalyticsContext() {
   const itemContext = useMemo(
     () => ({
       chain_id: chain.id,
-      symbol,
+      symbol: assetSymbol || symbol,
       quantity: qty,
       item_id: `${marketAccount?.symbol}.${operation}`,
       item_name: `${marketAccount?.symbol} ${operation}`,
       price: formatFixed(marketAccount?.usdPrice ?? Zero, 18),
       ...(date && operation.includes('AtMaturity') ? { maturity: date } : {}),
     }),
-    [chain.id, date, marketAccount?.symbol, marketAccount?.usdPrice, operation, qty, symbol],
+    [assetSymbol, chain.id, date, marketAccount?.symbol, marketAccount?.usdPrice, operation, qty, symbol],
   );
 
   return { appContext, itemContext };
@@ -79,8 +80,8 @@ export function useInitGA() {
   }, []);
 }
 
-export default () => {
-  const { appContext, itemContext } = useAnalyticsContext();
+export default (symbol?: string) => {
+  const { appContext, itemContext } = useAnalyticsContext(symbol);
 
   const track = useCallback(
     (eventName: string, payload: object) => {
@@ -92,21 +93,44 @@ export default () => {
   // const viewItemList = useCallback(() => {}, []);
   // const selectItem = useCallback(() => {}, []);
 
-  const addToCart = useCallback(() => {
-    track('add_to_cart', { ...appContext, items: [{ ...itemContext }] });
-  }, [track, itemContext, appContext]);
+  const trackItem = useCallback(
+    ({ eventName, variant = 'operation' }: { eventName: string; variant: ItemVariant }) => {
+      track(eventName, {
+        items: [
+          {
+            ...itemContext,
+            ...(variant === 'operation'
+              ? {}
+              : {
+                  item_id: `${itemContext.item_id.split('.')[0]}.${variant}`,
+                  item_name: `${itemContext.item_id.split('.')[0]} ${variant}`,
+                }),
+          },
+        ],
+      });
+    },
+    [track, itemContext],
+  );
 
-  const beginCheckout = useCallback(() => {
-    track('begin_checkout', { ...appContext, items: [{ ...itemContext }] });
-  }, [track, itemContext, appContext]);
+  const addToCart = useCallback(
+    (variant: ItemVariant = 'operation') => trackItem({ eventName: 'add_to_cart', variant }),
+    [trackItem],
+  );
 
-  const purchase = useCallback(() => {
-    track('purchase', { ...appContext, items: [{ ...itemContext }] });
-  }, [track, itemContext, appContext]);
+  const beginCheckout = useCallback(
+    (variant: ItemVariant = 'operation') => trackItem({ eventName: 'begin_checkout', variant }),
+    [trackItem],
+  );
 
-  const removeFromCart = useCallback(() => {
-    track('remove_from_cart', { ...appContext, items: [{ ...itemContext }] });
-  }, [track, itemContext, appContext]);
+  const purchase = useCallback(
+    (variant: ItemVariant = 'operation') => trackItem({ eventName: 'purchase', variant }),
+    [trackItem],
+  );
+
+  const removeFromCart = useCallback(
+    (variant: ItemVariant = 'operation') => trackItem({ eventName: 'remove_from_cart', variant }),
+    [trackItem],
+  );
 
   return {
     transaction: { addToCart, removeFromCart, beginCheckout, purchase },
