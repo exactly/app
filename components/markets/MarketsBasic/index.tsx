@@ -1,6 +1,6 @@
 import React, { FC, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Box, Divider, Tooltip, Typography, capitalize, useTheme } from '@mui/material';
+import { Box, capitalize, Divider, Tooltip, Typography, useTheme } from '@mui/material';
 import AssetInput from 'components/OperationsModal/AssetInput';
 import { MarketsBasicOption, useMarketsBasic } from 'contexts/MarketsBasicContext';
 import { useOperationContext } from 'contexts/OperationContext';
@@ -23,6 +23,7 @@ import InfoOutlined from '@mui/icons-material/InfoOutlined';
 import useTranslateOperation from 'hooks/useTranslateOperation';
 import { toPercentage } from 'utils/utils';
 import { Zero } from '@ethersproject/constants';
+import usePreviousValue from 'hooks/usePreviousValue';
 
 const { minAPRValue } = numbers;
 
@@ -91,6 +92,10 @@ const MarketsBasic: FC = () => {
   ]);
 
   const bestOption = useMemo(() => {
+    if (loadingFloatingOption || loadingFixedOptions) {
+      return undefined;
+    }
+
     const options = allOptions
       .map(({ maturity, depositAPR, borrowAPR, borrowRewards, depositRewards }) => ({
         maturity,
@@ -111,14 +116,20 @@ const MarketsBasic: FC = () => {
     const bestAPR = isDeposit ? Math.max(...APRs) : Math.min(...APRs);
 
     return options.reverse().find(({ totalAPR }) => totalAPR === bestAPR)?.maturity;
-  }, [allOptions, isDeposit]);
+  }, [allOptions, isDeposit, loadingFixedOptions, loadingFloatingOption]);
+
+  const previousBestOption = usePreviousValue(bestOption);
 
   const currentOption = useMemo(
     () => allOptions.find((option) => option.maturity === selected),
     [allOptions, selected],
   );
 
-  useEffect(() => setSelected(bestOption ?? 0), [bestOption, setSelected]);
+  useEffect(() => {
+    if (bestOption !== undefined && previousBestOption !== bestOption) {
+      setSelected(bestOption);
+    }
+  }, [bestOption, setSelected, previousBestOption]);
 
   useEffect(() => {
     if (tx) openOperationModal(`${operation}${currentOption?.maturity ? 'AtMaturity' : ''}`);
@@ -177,7 +188,7 @@ const MarketsBasic: FC = () => {
           <Box px={1} py={1.5}>
             <Typography variant="cardTitle" sx={{ px: 1 }}>
               {capitalize(
-                t('{{operation}} duration', { operation: translateOperation(operation, { variant: 'noun' }) }),
+                t('{{operation}} duration', { operation: translateOperation(operation, { variant: 'noun' }) }) ?? '',
               )}
             </Typography>
             <Tooltip

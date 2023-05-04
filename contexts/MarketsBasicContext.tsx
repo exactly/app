@@ -4,6 +4,7 @@ import { BigNumber } from '@ethersproject/bignumber';
 
 import { Operation, useModalStatus } from './ModalStatusContext';
 import { useMarketContext } from './MarketContext';
+import useAnalytics from 'hooks/useAnalytics';
 
 export type MarketsBasicOperation = 'borrow' | 'deposit';
 export type MarketsBasicRewardRate = { assetSymbol: string; rate: BigNumber };
@@ -28,8 +29,11 @@ type ContextValues = {
 const MarketsBasicContext = createContext<ContextValues | null>(null);
 
 export const MarketsBasicProvider: FC<PropsWithChildren> = ({ children }) => {
+  const {
+    list: { selectItem },
+  } = useAnalytics();
   const { setOperation: setModalOperation } = useModalStatus();
-  const { marketSymbol: symbol } = useMarketContext();
+  const { marketSymbol: symbol, setDate } = useMarketContext();
   const [operation, setOperation] = useState<MarketsBasicOperation>('deposit');
   const [selected, setSelected] = useState<MarketsBasicOption['maturity']>(0);
   const onChangeOperation = useCallback((op: MarketsBasicOperation) => setOperation(op), [setOperation]);
@@ -38,15 +42,24 @@ export const MarketsBasicProvider: FC<PropsWithChildren> = ({ children }) => {
     setModalOperation(`${operation}${selected && selected > 0 ? 'AtMaturity' : ''}` as Operation);
   }, [operation, selected, setModalOperation]);
 
+  const setSelectedOption = useCallback(
+    (option: MarketsBasicOption['maturity']) => {
+      setSelected(option);
+      setDate(option || 0);
+      selectItem(option || 0);
+    },
+    [setDate, selectItem],
+  );
+
   const value: ContextValues = useMemo(
     () => ({
       symbol,
       operation,
       onChangeOperation,
       selected,
-      setSelected,
+      setSelected: setSelectedOption,
     }),
-    [symbol, operation, onChangeOperation, selected, setSelected],
+    [symbol, operation, onChangeOperation, selected, setSelectedOption],
   );
 
   return <MarketsBasicContext.Provider value={value}>{children}</MarketsBasicContext.Provider>;

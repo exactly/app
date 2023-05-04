@@ -73,8 +73,6 @@ const Submit: FC<SubmitProps> = ({ symbol, operation, option, qty, errorData }) 
     }
   }, [borrow, borrowAtMaturity, deposit, depositAtMaturity, operation, option.maturity]);
 
-  useEffect(() => setDate(option.maturity || 0), [setDate, option.maturity]);
-
   const { isLoading: previewIsLoading } = usePreviewTx({ qty, needsApproval, previewGasCost });
 
   const submitLabel = useMemo(() => {

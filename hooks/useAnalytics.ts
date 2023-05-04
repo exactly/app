@@ -11,8 +11,15 @@ import { useMarketContext } from 'contexts/MarketContext';
 import { useCustomTheme } from 'contexts/ThemeContext';
 import useAccountData from './useAccountData';
 import { useModalStatus } from 'contexts/ModalStatusContext';
+import { useTestEffect } from './usePreviousValue';
 
 type ItemVariant = 'operation' | 'approve' | 'enterMarket' | 'exitMarket';
+
+export function useInitGA() {
+  useEffect(() => {
+    ReactGA.initialize('G-VV2LM2XCSD', { gtagOptions: { anonymizeIp: true, debug_mode: true, send_page_view: false } });
+  }, []);
+}
 
 function useAnalyticsContext(assetSymbol?: string) {
   const { i18n } = useTranslation();
@@ -74,12 +81,6 @@ export function usePageView(pathname: string, title: string) {
   }, [pathname, title, appContext]);
 }
 
-export function useInitGA() {
-  useEffect(() => {
-    ReactGA.initialize('G-VV2LM2XCSD', { gtagOptions: { anonymizeIp: true, debug_mode: true, send_page_view: false } });
-  }, []);
-}
-
 export default (symbol?: string) => {
   const { appContext, itemContext } = useAnalyticsContext(symbol);
 
@@ -91,7 +92,20 @@ export default (symbol?: string) => {
   );
 
   // const viewItemList = useCallback(() => {}, []);
-  // const selectItem = useCallback(() => {}, []);
+
+  const selectItem = useCallback(
+    (maturity: number) => {
+      track('select_item', {
+        items: [
+          {
+            ...itemContext,
+            maturity,
+          },
+        ],
+      });
+    },
+    [track, itemContext],
+  );
 
   const trackItem = useCallback(
     ({ eventName, variant = 'operation' }: { eventName: string; variant: ItemVariant }) => {
@@ -132,7 +146,11 @@ export default (symbol?: string) => {
     [trackItem],
   );
 
-  return {
-    transaction: { addToCart, removeFromCart, beginCheckout, purchase },
-  };
+  return useMemo(
+    () => ({
+      transaction: { addToCart, removeFromCart, beginCheckout, purchase },
+      list: { selectItem },
+    }),
+    [addToCart, beginCheckout, purchase, removeFromCart, selectItem],
+  );
 };
