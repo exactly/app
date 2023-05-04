@@ -11,7 +11,7 @@ import { useMarketContext } from 'contexts/MarketContext';
 import { useCustomTheme } from 'contexts/ThemeContext';
 import useAccountData from './useAccountData';
 import { useModalStatus } from 'contexts/ModalStatusContext';
-import { useTestEffect } from './usePreviousValue';
+import { MarketsBasicOption } from 'contexts/MarketsBasicContext';
 
 type ItemVariant = 'operation' | 'approve' | 'enterMarket' | 'exitMarket';
 
@@ -91,13 +91,32 @@ export default (symbol?: string) => {
     [appContext],
   );
 
-  // const viewItemList = useCallback(() => {}, []);
+  const viewItemList = useCallback(
+    (list: MarketsBasicOption[]) => {
+      track('view_item_list', {
+        items: list.map((item, index) => {
+          const [market, ctxOperation] = itemContext.item_id.split('.');
+          const baseOperation = ctxOperation.replace('AtMaturity', '');
+          const operation = item.maturity ? `${baseOperation}AtMaturity` : baseOperation;
+          return {
+            ...itemContext,
+            index,
+            item_id: `${market}.${operation}`,
+            item_name: `${market} ${operation}`,
+            maturity: item.maturity,
+          };
+        }),
+      });
+    },
+    [track, itemContext],
+  );
 
   const selectItem = useCallback(
     (maturity: number) => {
       track('select_item', {
         items: [
           {
+            index: 0,
             ...itemContext,
             maturity,
           },
@@ -112,6 +131,7 @@ export default (symbol?: string) => {
       track(eventName, {
         items: [
           {
+            index: 0,
             ...itemContext,
             ...(variant === 'operation'
               ? {}
@@ -149,8 +169,8 @@ export default (symbol?: string) => {
   return useMemo(
     () => ({
       transaction: { addToCart, removeFromCart, beginCheckout, purchase },
-      list: { selectItem },
+      list: { selectItem, viewItemList },
     }),
-    [addToCart, beginCheckout, purchase, removeFromCart, selectItem],
+    [addToCart, beginCheckout, purchase, removeFromCart, selectItem, viewItemList],
   );
 };

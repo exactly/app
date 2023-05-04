@@ -24,11 +24,15 @@ import useTranslateOperation from 'hooks/useTranslateOperation';
 import { toPercentage } from 'utils/utils';
 import { Zero } from '@ethersproject/constants';
 import usePreviousValue from 'hooks/usePreviousValue';
+import useAnalytics from 'hooks/useAnalytics';
 
 const { minAPRValue } = numbers;
 
 const MarketsBasic: FC = () => {
   const { t } = useTranslation();
+  const {
+    list: { viewItemList },
+  } = useAnalytics();
   const translateOperation = useTranslateOperation();
   const { palette } = useTheme();
   const { openOperationModal } = useModalStatus();
@@ -119,6 +123,7 @@ const MarketsBasic: FC = () => {
   }, [allOptions, isDeposit, loadingFixedOptions, loadingFloatingOption]);
 
   const previousBestOption = usePreviousValue(bestOption);
+  const previousAllOptions = usePreviousValue(allOptions);
 
   const currentOption = useMemo(
     () => allOptions.find((option) => option.maturity === selected),
@@ -126,10 +131,22 @@ const MarketsBasic: FC = () => {
   );
 
   useEffect(() => {
+    if (allOptions !== previousAllOptions && !loadingFixedOptions && !loadingFloatingOption) {
+      viewItemList(allOptions);
+    }
     if (bestOption !== undefined && previousBestOption !== bestOption) {
       setSelected(bestOption);
     }
-  }, [bestOption, setSelected, previousBestOption]);
+  }, [
+    bestOption,
+    setSelected,
+    previousBestOption,
+    allOptions,
+    previousAllOptions,
+    loadingFixedOptions,
+    loadingFloatingOption,
+    viewItemList,
+  ]);
 
   useEffect(() => {
     if (tx) openOperationModal(`${operation}${currentOption?.maturity ? 'AtMaturity' : ''}`);
