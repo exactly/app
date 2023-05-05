@@ -7,8 +7,9 @@ import useRewardsController from './useRewardsController';
 import handleOperationError from 'utils/handleOperationError';
 import { Previewer } from 'types/contracts';
 import useAccountData from './useAccountData';
+import useAnalytics from './useAnalytics';
 
-type Rewards = Record<string, BigNumber>;
+export type Rewards = Record<string, BigNumber>;
 export type Rates = Record<string, Previewer.RewardRateStructOutput[]>;
 
 export default () => {
@@ -29,6 +30,8 @@ export default () => {
       }, {} as Rewards);
   }, [accountData]);
 
+  const { transaction } = useAnalytics({ rewards });
+
   const claimable = useMemo<boolean>(() => {
     return Object.values(rewards).some((amount) => amount.gt(Zero));
   }, [rewards]);
@@ -38,16 +41,23 @@ export default () => {
 
     try {
       setIsLoading(true);
+
+      transaction.addToCart('claimAll');
+
       const tx = await RewardsController.claimAll(walletAddress);
-      await tx.wait();
+      transaction.beginCheckout('claimAll');
+
+      const { status } = await tx.wait();
+      if (status) transaction.purchase('claimAll');
 
       await refreshAccountData();
     } catch (e) {
+      transaction.removeFromCart('claimAll');
       handleOperationError(e);
     } finally {
       setIsLoading(false);
     }
-  }, [claimable, RewardsController, walletAddress, refreshAccountData]);
+  }, [claimable, RewardsController, walletAddress, refreshAccountData, transaction]);
 
   const rates = useMemo<Rates>(() => {
     if (!accountData) return {};

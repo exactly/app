@@ -12,8 +12,10 @@ import { useCustomTheme } from 'contexts/ThemeContext';
 import useAccountData from './useAccountData';
 import { useModalStatus } from 'contexts/ModalStatusContext';
 import { MarketsBasicOption } from 'contexts/MarketsBasicContext';
+import { type Rewards } from './useRewards';
 
-type ItemVariant = 'operation' | 'approve' | 'enterMarket' | 'exitMarket';
+type ItemVariant = 'operation' | 'approve' | 'enterMarket' | 'exitMarket' | 'claimAll';
+type TrackItem = { eventName: string; variant: ItemVariant };
 
 export function useInitGA() {
   useEffect(() => {
@@ -81,7 +83,7 @@ export function usePageView(pathname: string, title: string) {
   }, [pathname, title, appContext]);
 }
 
-export default (symbol?: string) => {
+export default ({ symbol, rewards }: { symbol?: string; rewards?: Rewards } = {}) => {
   const { appContext, itemContext } = useAnalyticsContext(symbol);
 
   const track = useCallback(
@@ -127,23 +129,36 @@ export default (symbol?: string) => {
   );
 
   const trackItem = useCallback(
-    ({ eventName, variant = 'operation' }: { eventName: string; variant: ItemVariant }) => {
-      track(eventName, {
-        items: [
-          {
-            index: 0,
-            ...itemContext,
-            ...(variant === 'operation'
-              ? {}
-              : {
-                  item_id: `${itemContext.item_id.split('.')[0]}.${variant}`,
-                  item_name: `${itemContext.item_id.split('.')[0]} ${variant}`,
-                }),
-          },
-        ],
-      });
+    ({ eventName, variant = 'operation' }: TrackItem) => {
+      const items =
+        variant === 'claimAll' && rewards
+          ? Object.entries(rewards).map(([rewardSymbol, amount], index) => {
+              const { price, ...ctx } = itemContext;
+              return {
+                index,
+                ...ctx,
+                item_id: `${rewardSymbol}.claimAll`,
+                item_name: `${rewardSymbol} claimAll`,
+                quantity: formatFixed(amount, 18),
+                symbol: rewardSymbol,
+              };
+            })
+          : [
+              {
+                index: 0,
+                ...itemContext,
+                ...(variant === 'operation'
+                  ? {}
+                  : {
+                      item_id: `${itemContext.item_id.split('.')[0]}.${variant}`,
+                      item_name: `${itemContext.item_id.split('.')[0]} ${variant}`,
+                    }),
+              },
+            ];
+
+      track(eventName, { items });
     },
-    [track, itemContext],
+    [track, itemContext, rewards],
   );
 
   const addToCart = useCallback(

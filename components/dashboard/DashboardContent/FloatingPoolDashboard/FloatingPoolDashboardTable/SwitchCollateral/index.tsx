@@ -23,7 +23,7 @@ function SwitchCollateral({ symbol }: Props) {
   const auditor = useAuditor();
   const { chain } = useNetwork();
   const { chain: displayNetwork } = useWeb3();
-  const { transaction } = useAnalytics(symbol);
+  const { transaction } = useAnalytics({ symbol });
 
   const healthFactor = useHealthFactor();
 
