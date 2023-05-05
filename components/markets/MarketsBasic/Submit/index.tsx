@@ -1,6 +1,5 @@
-import React, { FC, useEffect, useMemo } from 'react';
+import React, { FC, useMemo } from 'react';
 import ModalSubmit from 'components/OperationsModal/ModalSubmit';
-import { useMarketContext } from 'contexts/MarketContext';
 import { MarketsBasicOperation, MarketsBasicOption } from 'contexts/MarketsBasicContext';
 import { Operation } from 'contexts/ModalStatusContext';
 import { usePreviewTx } from 'contexts/OperationContext';
@@ -40,7 +39,6 @@ const Submit: FC<SubmitProps> = ({ symbol, operation, option, qty, errorData }) 
   const { t } = useTranslation();
   const translateOperation = useTranslateOperation();
   const { marketAccount } = useAccountData(symbol);
-  const { setDate } = useMarketContext();
   const deposit = useDeposit();
   const depositAtMaturity = useDepositAtMaturity();
   const borrow = useBorrow();
