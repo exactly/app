@@ -98,16 +98,14 @@ export default ({ symbol, rewards }: { symbol?: string; rewards?: Rewards } = {}
   const viewItemListAdvance = useCallback(
     (list: TableRow[], rateType: 'floating' | 'fixed') => {
       const { price, quantity, ...ctx } = itemContext;
-
       const items = [
         list
           .map(({ borrowMaturity, depositMaturity, ...rest }) => ({
             maturity: borrowMaturity || depositMaturity,
             ...rest,
           }))
-          .flatMap((item, index) => [
+          .flatMap((item) => [
             {
-              index,
               ...ctx,
               item_id: `exa${item.symbol}.deposit${item.maturity ? 'AtMaturity' : ''}`,
               item_name: `exa${item.symbol} deposit${item.maturity ? 'AtMaturity' : ''}`,
@@ -117,7 +115,6 @@ export default ({ symbol, rewards }: { symbol?: string; rewards?: Rewards } = {}
             ...(rateType !== 'fixed' || !isDisable(rateType, item.depositAPR)
               ? [
                   {
-                    index,
                     ...ctx,
                     item_id: `exa${item.symbol}.borrow${item.maturity ? 'AtMaturity' : ''}`,
                     item_name: `exa${item.symbol} borrow${item.maturity ? 'AtMaturity' : ''}`,
@@ -126,7 +123,8 @@ export default ({ symbol, rewards }: { symbol?: string; rewards?: Rewards } = {}
                   },
                 ]
               : []),
-          ]),
+          ])
+          .map((item, index) => ({ ...item, index })),
       ];
 
       track('view_item_list', { items });
