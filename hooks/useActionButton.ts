@@ -30,12 +30,12 @@ export default function useActionButton() {
     [walletAddress, connect, setMarketSymbol, openOperationModal, setDate],
   );
 
-  const isDisable = (rateType: 'floating' | 'fixed', apr: number | undefined) => {
+  const isDisable = useCallback((rateType: 'floating' | 'fixed', apr: number | undefined) => {
     if (rateType === 'floating') return false;
     if (!apr) return true;
 
     return apr < minAPRValue;
-  };
+  }, []);
 
   return { handleActionClick, isDisable };
 }

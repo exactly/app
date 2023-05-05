@@ -13,6 +13,8 @@ import useAccountData from './useAccountData';
 import { useModalStatus } from 'contexts/ModalStatusContext';
 import { MarketsBasicOption } from 'contexts/MarketsBasicContext';
 import { type Rewards } from './useRewards';
+import { TableRow } from 'components/markets/MarketsTables/poolTable';
+import useActionButton from './useActionButton';
 
 type ItemVariant = 'operation' | 'approve' | 'enterMarket' | 'exitMarket' | 'claimAll';
 type TrackItem = { eventName: string; variant: ItemVariant };
@@ -31,7 +33,7 @@ function useAnalyticsContext(assetSymbol?: string) {
   const { chain, walletAddress, impersonateActive } = useWeb3();
   const { symbol, qty } = useOperationContext();
   const { operation } = useModalStatus();
-  const { date, view } = useMarketContext();
+  const { view } = useMarketContext();
 
   const { marketAccount } = useAccountData(assetSymbol || symbol);
 
@@ -57,9 +59,8 @@ function useAnalyticsContext(assetSymbol?: string) {
       item_id: `${marketAccount?.symbol}.${operation}`,
       item_name: `${marketAccount?.symbol} ${operation}`,
       price: formatFixed(marketAccount?.usdPrice ?? Zero, 18),
-      ...(date && operation.includes('AtMaturity') ? { maturity: date } : {}),
     }),
-    [assetSymbol, chain.id, date, marketAccount?.symbol, marketAccount?.usdPrice, operation, qty, symbol],
+    [assetSymbol, chain.id, marketAccount?.symbol, marketAccount?.usdPrice, operation, qty, symbol],
   );
 
   return { appContext, itemContext };
@@ -85,12 +86,73 @@ export function usePageView(pathname: string, title: string) {
 
 export default ({ symbol, rewards }: { symbol?: string; rewards?: Rewards } = {}) => {
   const { appContext, itemContext } = useAnalyticsContext(symbol);
+  const { isDisable } = useActionButton();
 
   const track = useCallback(
     (eventName: string, payload: object) => {
       ReactGA.event(eventName, { ...appContext, ...payload });
     },
     [appContext],
+  );
+
+  const viewItemListAdvance = useCallback(
+    (list: TableRow[], rateType: 'floating' | 'fixed') => {
+      let items: (Omit<typeof itemContext, 'price' | 'quantity'> & { index: number; maturity?: number })[] = [];
+      const { price, quantity, ...ctx } = itemContext;
+
+      for (const item of list) {
+        if (rateType === 'fixed') {
+          items = [
+            ...items,
+            {
+              index: items.length,
+              ...ctx,
+              item_id: `exa${item.symbol}.borrowAtMaturity`,
+              item_name: `exa${item.symbol} borrowAtMaturity`,
+              symbol: item.symbol,
+              maturity: item.borrowMaturity,
+            },
+          ];
+
+          if (!isDisable(rateType, item.depositAPR)) {
+            items = [
+              ...items,
+              {
+                index: items.length,
+                ...ctx,
+                item_id: `exa${item.symbol}.depositAtMaturity`,
+                item_name: `exa${item.symbol} depositAtMaturity`,
+                symbol: item.symbol,
+                maturity: item.depositMaturity,
+              },
+            ];
+          }
+
+          continue;
+        }
+
+        items = [
+          ...items,
+          {
+            index: items.length,
+            ...ctx,
+            item_id: `exa${item.symbol}.deposit`,
+            item_name: `exa${item.symbol} deposit`,
+            symbol: item.symbol,
+          },
+          {
+            index: items.length + 1,
+            ...ctx,
+            item_id: `exa${item.symbol}.borrow`,
+            item_name: `exa${item.symbol} borrow`,
+            symbol: item.symbol,
+          },
+        ];
+      }
+
+      track('view_item_list', { items });
+    },
+    [itemContext, isDisable, track],
   );
 
   const viewItemList = useCallback(
@@ -184,8 +246,8 @@ export default ({ symbol, rewards }: { symbol?: string; rewards?: Rewards } = {}
   return useMemo(
     () => ({
       transaction: { addToCart, removeFromCart, beginCheckout, purchase },
-      list: { selectItem, viewItemList },
+      list: { selectItem, viewItemList, viewItemListAdvance },
     }),
-    [addToCart, beginCheckout, purchase, removeFromCart, selectItem, viewItemList],
+    [addToCart, beginCheckout, purchase, removeFromCart, selectItem, viewItemList, viewItemListAdvance],
   );
 };

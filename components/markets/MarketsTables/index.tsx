@@ -19,6 +19,8 @@ import MobileTabs from 'components/MobileTabs';
 import { TableHeader } from 'components/common/TableHeadCell';
 import useAccountData from 'hooks/useAccountData';
 import { useGlobalError } from 'contexts/GlobalErrorContext';
+import usePreviousValue from 'hooks/usePreviousValue';
+import useAnalytics from 'hooks/useAnalytics';
 
 const { onlyMobile, onlyDesktop } = globals;
 
@@ -41,6 +43,10 @@ const MarketTables: FC = () => {
   const [fixedRows, setFixedRows] = useState<TableRow[]>([...defaultRows]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const { setIndexerError } = useGlobalError();
+
+  const {
+    list: { viewItemListAdvance },
+  } = useAnalytics();
 
   const floatingHeaders: TableHeader<TableRow>[] = [
     {
@@ -184,6 +190,19 @@ const MarketTables: FC = () => {
   useEffect(() => {
     void defineRows();
   }, [defineRows]);
+
+  const previousFloatingRows = usePreviousValue(floatingRows);
+  const previousFixedRows = usePreviousValue(fixedRows);
+
+  useEffect(() => {
+    if (previousFloatingRows !== floatingRows && !isLoading) {
+      viewItemListAdvance(floatingRows, 'floating');
+    }
+
+    if (previousFixedRows !== fixedRows && !isLoading) {
+      viewItemListAdvance(fixedRows, 'fixed');
+    }
+  }, [floatingRows, fixedRows, previousFloatingRows, previousFixedRows, viewItemListAdvance, isLoading]);
 
   return (
     <>
