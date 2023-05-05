@@ -97,58 +97,37 @@ export default ({ symbol, rewards }: { symbol?: string; rewards?: Rewards } = {}
 
   const viewItemListAdvance = useCallback(
     (list: TableRow[], rateType: 'floating' | 'fixed') => {
-      let items: (Omit<typeof itemContext, 'price' | 'quantity'> & { index: number; maturity?: number })[] = [];
       const { price, quantity, ...ctx } = itemContext;
 
-      for (const item of list) {
-        if (rateType === 'fixed') {
-          items = [
-            ...items,
+      const items = [
+        list
+          .map(({ borrowMaturity, depositMaturity, ...rest }) => ({
+            maturity: borrowMaturity || depositMaturity,
+            ...rest,
+          }))
+          .flatMap((item, index) => [
             {
-              index: items.length,
+              index,
               ...ctx,
-              item_id: `exa${item.symbol}.borrowAtMaturity`,
-              item_name: `exa${item.symbol} borrowAtMaturity`,
+              item_id: `exa${item.symbol}.deposit${item.maturity ? 'AtMaturity' : ''}`,
+              item_name: `exa${item.symbol} deposit${item.maturity ? 'AtMaturity' : ''}`,
               symbol: item.symbol,
-              maturity: item.borrowMaturity,
+              ...(item.maturity ? { maturity: item.maturity } : {}),
             },
-          ];
-
-          if (!isDisable(rateType, item.depositAPR)) {
-            items = [
-              ...items,
-              {
-                index: items.length,
-                ...ctx,
-                item_id: `exa${item.symbol}.depositAtMaturity`,
-                item_name: `exa${item.symbol} depositAtMaturity`,
-                symbol: item.symbol,
-                maturity: item.depositMaturity,
-              },
-            ];
-          }
-
-          continue;
-        }
-
-        items = [
-          ...items,
-          {
-            index: items.length,
-            ...ctx,
-            item_id: `exa${item.symbol}.deposit`,
-            item_name: `exa${item.symbol} deposit`,
-            symbol: item.symbol,
-          },
-          {
-            index: items.length + 1,
-            ...ctx,
-            item_id: `exa${item.symbol}.borrow`,
-            item_name: `exa${item.symbol} borrow`,
-            symbol: item.symbol,
-          },
-        ];
-      }
+            ...(rateType !== 'fixed' || !isDisable(rateType, item.depositAPR)
+              ? [
+                  {
+                    index,
+                    ...ctx,
+                    item_id: `exa${item.symbol}.borrow${item.maturity ? 'AtMaturity' : ''}`,
+                    item_name: `exa${item.symbol} borrow${item.maturity ? 'AtMaturity' : ''}`,
+                    symbol: item.symbol,
+                    ...(item.maturity ? { maturity: item.maturity } : {}),
+                  },
+                ]
+              : []),
+          ]),
+      ];
 
       track('view_item_list', { items });
     },
