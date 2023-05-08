@@ -15,6 +15,7 @@ import { MarketsBasicOption } from 'contexts/MarketsBasicContext';
 import { type Rewards } from './useRewards';
 import { TableRow } from 'components/markets/MarketsTables/poolTable';
 import useActionButton from './useActionButton';
+import useDelayedEffect from './useDelayedEffect';
 
 type ItemVariant = 'operation' | 'approve' | 'enterMarket' | 'exitMarket' | 'claimAll';
 type TrackItem = { eventName: string; variant: ItemVariant };
@@ -69,10 +70,14 @@ function useAnalyticsContext(assetSymbol?: string) {
 export function usePageView(pathname: string, title: string) {
   const { appContext } = useAnalyticsContext();
   const onView = useRef(true);
-  useEffect(() => {
-    if (!onView.current) return;
+  const lastAccount = useRef(appContext.account);
+  const pageView = useCallback(() => {
+    if (!appContext.view_mode) return;
+
+    if (!onView.current && lastAccount.current === appContext.account) return;
 
     onView.current = false;
+    lastAccount.current = appContext.account;
 
     void ReactGA.send({
       hitType: 'pageview',
@@ -81,7 +86,9 @@ export function usePageView(pathname: string, title: string) {
       location: pathname,
       ...appContext,
     });
-  }, [pathname, title, appContext]);
+  }, [appContext, pathname, title]);
+
+  useDelayedEffect({ effect: pageView });
 }
 
 export default ({ symbol, rewards }: { symbol?: string; rewards?: Rewards } = {}) => {
@@ -98,34 +105,32 @@ export default ({ symbol, rewards }: { symbol?: string; rewards?: Rewards } = {}
   const viewItemListAdvance = useCallback(
     (list: TableRow[], rateType: 'floating' | 'fixed') => {
       const { price, quantity, ...ctx } = itemContext;
-      const items = [
-        list
-          .map(({ borrowMaturity, depositMaturity, ...rest }) => ({
-            maturity: borrowMaturity || depositMaturity,
-            ...rest,
-          }))
-          .flatMap((item) => [
-            {
-              ...ctx,
-              item_id: `exa${item.symbol}.deposit${item.maturity ? 'AtMaturity' : ''}`,
-              item_name: `exa${item.symbol} deposit${item.maturity ? 'AtMaturity' : ''}`,
-              symbol: item.symbol,
-              ...(item.maturity ? { maturity: item.maturity } : {}),
-            },
-            ...(rateType !== 'fixed' || !isDisable(rateType, item.depositAPR)
-              ? [
-                  {
-                    ...ctx,
-                    item_id: `exa${item.symbol}.borrow${item.maturity ? 'AtMaturity' : ''}`,
-                    item_name: `exa${item.symbol} borrow${item.maturity ? 'AtMaturity' : ''}`,
-                    symbol: item.symbol,
-                    ...(item.maturity ? { maturity: item.maturity } : {}),
-                  },
-                ]
-              : []),
-          ])
-          .map((item, index) => ({ ...item, index })),
-      ];
+      const items = list
+        .map(({ borrowMaturity, depositMaturity, ...rest }) => ({
+          maturity: borrowMaturity || depositMaturity,
+          ...rest,
+        }))
+        .flatMap((item) => [
+          {
+            ...ctx,
+            item_id: `exa${item.symbol}.deposit${item.maturity ? 'AtMaturity' : ''}`,
+            item_name: `exa${item.symbol} deposit${item.maturity ? 'AtMaturity' : ''}`,
+            symbol: item.symbol,
+            ...(item.maturity ? { maturity: item.maturity } : {}),
+          },
+          ...(rateType !== 'fixed' || !isDisable(rateType, item.depositAPR)
+            ? [
+                {
+                  ...ctx,
+                  item_id: `exa${item.symbol}.borrow${item.maturity ? 'AtMaturity' : ''}`,
+                  item_name: `exa${item.symbol} borrow${item.maturity ? 'AtMaturity' : ''}`,
+                  symbol: item.symbol,
+                  ...(item.maturity ? { maturity: item.maturity } : {}),
+                },
+              ]
+            : []),
+        ])
+        .map((item, index) => ({ ...item, index }));
 
       track('view_item_list', { items });
     },
@@ -176,8 +181,8 @@ export default ({ symbol, rewards }: { symbol?: string; rewards?: Rewards } = {}
               return {
                 index,
                 ...ctx,
-                item_id: `${rewardSymbol}.claimAll`,
-                item_name: `${rewardSymbol} claimAll`,
+                item_id: `RewardsController.claimAll`,
+                item_name: `RewardsController claimAll`,
                 quantity: formatFixed(amount, 18),
                 symbol: rewardSymbol,
               };

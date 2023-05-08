@@ -2,7 +2,6 @@ import { useMemo, useCallback } from 'react';
 import { Chain, useAccount, useConnect } from 'wagmi';
 import { useWeb3Modal } from '@web3modal/react';
 import { isE2E, supportedChains } from 'utils/client';
-import useDebounce from './useDebounce';
 import { useNetworkContext } from 'contexts/NetworkContext';
 import useRouter from './useRouter';
 
@@ -22,7 +21,7 @@ const isValidAddress = (address: string | undefined): address is `0x${string}` =
 
 export const useWeb3 = (): Web3 => {
   const { query, replace } = useRouter();
-  const { address } = useAccount();
+  const { address, isConnected } = useAccount();
   const { displayNetwork } = useNetworkContext();
 
   const [currentAddress, impersonateActive] = useMemo((): [`0x${string}` | undefined, boolean] => {
@@ -35,8 +34,6 @@ export const useWeb3 = (): Web3 => {
     const { account, ...rest } = query;
     await replace({ query: rest });
   }, [query, replace]);
-
-  const walletAddress = useDebounce(currentAddress, 50);
 
   const { open } = useWeb3Modal();
 
@@ -53,10 +50,10 @@ export const useWeb3 = (): Web3 => {
 
   return {
     connect: connectWallet,
-    isConnected: !!walletAddress,
+    isConnected,
     impersonateActive,
     exitImpersonate,
-    walletAddress,
+    walletAddress: currentAddress,
     chains: supportedChains,
     chain: displayNetwork,
   };
