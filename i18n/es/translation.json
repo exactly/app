@@ -179,6 +179,7 @@
   "be paid": "ser pagados",
   "receive": "recibir",
   "{{operation}} maturity date (In {{daysLeft}})": "Fecha de vencimiento del {{operation}} (en {{daysLeft}})",
+  "Due at {{hour}}": "Vence a las {{hour}}",
   "Fixed borrows are due at {{hour}} on maturity date.": "Los préstamos a tasa fija vencen a las {{hour}} en la fecha de vencimiento.",
   "Optimal deposit amount": "Monto de depósito óptimo",
   "You can't repay more than you have in your wallet": "No puedes pagar más de lo que hay en tu billetera",
