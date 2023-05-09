@@ -18,8 +18,9 @@ export default function useEstimateGas() {
     async (tx: PopulatedTransaction) => {
       if (!provider) return;
 
-      const gasPrice = (await provider.getFeeData()).maxFeePerGas;
-      return gasPrice?.mul(await provider.estimateGas(tx));
+      const { maxFeePerGas, gasPrice } = await provider.getFeeData();
+      const price = maxFeePerGas ?? gasPrice;
+      return price?.mul(await provider.estimateGas(tx));
     },
     [provider],
   );

@@ -12,6 +12,7 @@ import handleOperationError from 'utils/handleOperationError';
 import { useNetwork } from 'wagmi';
 import { useTranslation } from 'react-i18next';
 import { gasLimitMultiplier } from 'utils/const';
+import useEstimateGas from './useEstimateGas';
 
 export default (operation: Operation, contract?: ERC20 | Market, spender?: string) => {
   const { t } = useTranslation();
@@ -22,11 +23,14 @@ export default (operation: Operation, contract?: ERC20 | Market, spender?: strin
 
   const { marketAccount } = useAccountData(symbol);
 
+  const estimate = useEstimateGas();
+
   const estimateGas = useCallback(async () => {
     if (!contract || !spender) return;
 
-    return await contract.estimateGas.approve(spender, MaxUint256);
-  }, [contract, spender]);
+    const tx = await contract.populateTransaction.approve(spender, MaxUint256);
+    return estimate(tx);
+  }, [contract, spender, estimate]);
 
   const needsApproval = useCallback(
     async (qty: string): Promise<boolean> => {
@@ -67,9 +71,7 @@ export default (operation: Operation, contract?: ERC20 | Market, spender?: strin
     try {
       setIsLoading(true);
       setLoadingButton({ label: t('Sign the transaction on your wallet') });
-      const gasEstimation = await estimateGas();
-      if (!gasEstimation) return;
-
+      const gasEstimation = await contract.estimateGas.approve(spender, MaxUint256);
       const approveTx = await contract.approve(spender, MaxUint256, {
         gasLimit: gasEstimation.mul(gasLimitMultiplier).div(WeiPerEther),
       });
@@ -90,7 +92,7 @@ export default (operation: Operation, contract?: ERC20 | Market, spender?: strin
       setIsLoading(false);
       setLoadingButton({});
     }
-  }, [contract, spender, setLoadingButton, estimateGas, symbol, setErrorData, t]);
+  }, [contract, spender, setLoadingButton, symbol, setErrorData, t]);
 
   return { approve, needsApproval, estimateGas, isLoading };
 };
