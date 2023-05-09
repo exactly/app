@@ -7,6 +7,7 @@ import ModalInfo from 'components/common/modal/ModalInfo';
 import { useTranslation } from 'react-i18next';
 import { useMarketContext } from 'contexts/MarketContext';
 import { useOperationContext } from 'contexts/OperationContext';
+import getHourUTC2Local from 'utils/getHourUTC2Local';
 
 type DateOptionProps = {
   label: string;
@@ -32,7 +33,7 @@ function DateSelector() {
   const { setQty } = useOperationContext();
 
   return (
-    <ModalInfo label={t('Fixed rate pool')}>
+    <ModalInfo label={t('Fixed rate pool')} underLabel={t('Due at {{hour}}', { hour: getHourUTC2Local() })}>
       <Box sx={{ mt: -1 }}>
         <DropdownMenu
           label={t('Maturity')}

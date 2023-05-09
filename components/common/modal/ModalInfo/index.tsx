@@ -9,9 +9,10 @@ type Props = {
   label: ReactNode;
   icon?: SvgIconComponent;
   variant?: Variant;
+  underLabel?: ReactNode;
 };
 
-function ModalInfoColumn({ icon: Icon, label, children }: PropsWithChildren<Omit<Props, 'variant'>>) {
+function ModalInfoColumn({ icon: Icon, label, children, underLabel }: PropsWithChildren<Omit<Props, 'variant'>>) {
   return (
     <Grid container flexDirection="column">
       {Icon && (
@@ -33,6 +34,18 @@ function ModalInfoColumn({ icon: Icon, label, children }: PropsWithChildren<Omit
         </Typography>
       </Grid>
       <Grid item>{children}</Grid>
+      {underLabel && (
+        <Typography
+          component="div"
+          fontFamily="fontFamilyMonospaced"
+          color="figma.grey.500"
+          fontSize={12}
+          fontWeight={600}
+          noWrap
+        >
+          {underLabel}
+        </Typography>
+      )}
     </Grid>
   );
 }
