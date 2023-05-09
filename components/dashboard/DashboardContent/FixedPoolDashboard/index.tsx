@@ -1,9 +1,11 @@
 import React from 'react';
-import { Grid, Typography } from '@mui/material';
+import { Box, Grid, Typography } from '@mui/material';
 
 import FixedPoolDashboardTable from 'components/dashboard/DashboardContent/FixedPoolDashboard/FixedPoolDashboardTable';
 import useDashboard from 'hooks/useDashboard';
 import { useTranslation } from 'react-i18next';
+import InfoIcon from '@mui/icons-material/Info';
+import getHourUTC2Local from 'utils/getHourUTC2Local';
 
 type Props = {
   type: 'deposit' | 'borrow';
@@ -23,7 +25,16 @@ function FixedPoolDashboard({ type }: Props) {
       bgcolor="components.bg"
       borderTop="4px solid #008CF4"
     >
-      <Typography variant="h6">{t('Fixed Interest Rate')}</Typography>
+      <Box display="flex" justifyContent="space-between" flexWrap="wrap">
+        <Typography variant="h6">{t('Fixed Interest Rate')}</Typography>
+        <Box display="flex" alignItems="center">
+          <InfoIcon sx={{ color: 'blue', height: 14 }} />
+          <Typography fontSize={13} fontWeight={500} color="blue">
+            {t('Fixed borrows are due at {{hour}} on maturity date.', { hour: getHourUTC2Local() })}
+          </Typography>
+        </Box>
+      </Box>
+
       {fixedRows.length === 0 ? (
         <Typography color="grey.500" mt={1} fontSize="14px">
           {t('No {{operations}} found', { operations: type === 'deposit' ? t('deposits') : t('borrows') })}
