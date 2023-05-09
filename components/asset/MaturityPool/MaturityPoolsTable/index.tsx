@@ -17,6 +17,7 @@ import useActionButton from 'hooks/useActionButton';
 import useMaturityPools from 'hooks/useMaturityPools';
 import { useTheme } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import getHourUTC2Local from 'utils/getHourUTC2Local';
 
 type MaturityPoolsTableProps = {
   symbol: string;
@@ -46,7 +47,10 @@ const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ symbol }) => {
       <Table sx={{ bgcolor: 'transparent' }} aria-label="simple table">
         <TableHead>
           <TableRow>
-            <HeadCell title={t('Maturity')} />
+            <HeadCell
+              title={t('Maturity')}
+              tooltipTitle={t('All fixed pools are due at {{hour}}.', { hour: getHourUTC2Local() })}
+            />
             <HeadCell title={t('Total Deposits')} />
             <HeadCell title={t('Total Borrows')} />
             <HeadCell
