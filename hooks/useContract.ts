@@ -17,9 +17,7 @@ export default function <T>(contractName: string, abi: ContractInterface): T | u
 
       setContract(undefined);
       const { address } = await import(
-        `@exactly-protocol/protocol/deployments/${
-          { [mainnet.id]: 'mainnet' }[chain.id] ?? chain.network
-        }/${contractName}.json`,
+        `@exactly/protocol/deployments/${{ [mainnet.id]: 'mainnet' }[chain.id] ?? chain.network}/${contractName}.json`,
         { assert: { type: 'json' } }
       );
       setContract(new Contract(address, abi, signer) as T);

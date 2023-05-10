@@ -53,7 +53,7 @@ const Market: NextPage<Props> = ({ symbol }: Props) => {
 export default Market;
 
 export const getStaticPaths: GetStaticPaths<Props> = async () => {
-  const deploymentsDir = 'node_modules/@exactly-protocol/protocol/deployments';
+  const deploymentsDir = 'node_modules/@exactly/protocol/deployments';
   const networks = await readdir(deploymentsDir);
   const markets = await Promise.all(
     networks.map(async (network) => {

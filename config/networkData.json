@@ -5,7 +5,7 @@
   },
   "5": {
     "etherscan": "https://goerli.etherscan.io",
-    "subgraph": "https://api.thegraph.com/subgraphs/name/exactly-protocol/exactly-goerli"
+    "subgraph": "https://api.thegraph.com/subgraphs/name/exactly/exactly-goerli"
   },
   "10": {
     "etherscan": "https://optimistic.etherscan.io",
