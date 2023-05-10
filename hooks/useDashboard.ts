@@ -1,14 +1,17 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { FloatingPoolItemData } from 'types/FloatingPoolItemData';
 import useAssets from './useAssets';
+import { useWeb3 } from 'hooks/useWeb3';
 import { Previewer } from 'types/contracts';
 import useFixedPools from './useFixedPools';
 import { BigNumber, formatFixed } from '@ethersproject/bignumber';
 import useAccountData from './useAccountData';
+import getFloatingDepositAPR from 'utils/getFloatingDepositAPR';
 
 export default function useDashboard(type: string) {
   const { accountData, getMarketAccount } = useAccountData();
   const orderAssets = useAssets();
+  const { chain } = useWeb3();
   const { deposits, borrows } = useFixedPools();
   const isDeposit = type === 'deposit';
 
@@ -16,6 +19,8 @@ export default function useDashboard(type: string) {
     () => orderAssets.map((s) => ({ symbol: s })),
     [orderAssets],
   );
+
+  const [floatingData, setFloatingData] = useState<FloatingPoolItemData[] | undefined>(defaultRows);
 
   const getValueInUSD = useCallback(
     (symbol: string, amount: BigNumber): number => {
@@ -28,7 +33,7 @@ export default function useDashboard(type: string) {
     [getMarketAccount],
   );
 
-  const floatingData = useMemo<FloatingPoolItemData[] | undefined>(() => {
+  const getFloatingData = useCallback(async (): Promise<FloatingPoolItemData[] | undefined> => {
     if (!accountData) return;
 
     const allMarkets = Object.values(accountData).sort(
@@ -37,14 +42,41 @@ export default function useDashboard(type: string) {
       },
     );
 
-    return allMarkets.map(({ assetSymbol, floatingDepositAssets, floatingBorrowAssets, market }) => ({
-      symbol: assetSymbol,
-      depositedAmount: floatingDepositAssets,
-      borrowedAmount: floatingBorrowAssets,
-      valueUSD: getValueInUSD(assetSymbol, isDeposit ? floatingDepositAssets : floatingBorrowAssets),
-      market,
-    }));
-  }, [accountData, orderAssets, getValueInUSD, isDeposit]);
+    return await Promise.all(
+      allMarkets.map(
+        async ({
+          assetSymbol,
+          floatingDepositAssets,
+          floatingBorrowAssets,
+          market,
+          maxFuturePools,
+          floatingBorrowRate,
+        }) => {
+          const apr = isDeposit
+            ? await getFloatingDepositAPR(chain.id, 'deposit', maxFuturePools, market)
+            : Number(floatingBorrowRate) / 1e18;
+
+          return {
+            symbol: assetSymbol,
+            depositedAmount: floatingDepositAssets,
+            borrowedAmount: floatingBorrowAssets,
+            apr,
+            valueUSD: getValueInUSD(assetSymbol, isDeposit ? floatingDepositAssets : floatingBorrowAssets),
+            market,
+          };
+        },
+      ),
+    );
+  }, [accountData, chain.id, getValueInUSD, isDeposit, orderAssets]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const asyncData = await getFloatingData();
+      setFloatingData(asyncData);
+    };
+
+    fetchData();
+  }, [getFloatingData]);
 
   const fixedDeposits = useMemo(() => {
     if (!deposits) return [];
