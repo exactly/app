@@ -43,7 +43,7 @@ export default function MaturityDateReminder() {
     return <Slide {...props} direction="down" />;
   }
 
-  return (
+  return openReminder ? (
     <Snackbar
       open={openReminder}
       onClose={handleClose}
@@ -54,5 +54,5 @@ export default function MaturityDateReminder() {
         {t('Make sure to repay your fixed borrows before {{date}} to avoid penalty fees.', { date: date })}
       </Alert>
     </Snackbar>
-  );
+  ) : null;
 }
