@@ -3,7 +3,7 @@ import React from 'react';
 import { formatFixed } from '@ethersproject/bignumber';
 import Image from 'next/image';
 
-import { Button, TableRow, TableCell, Stack, Typography, Skeleton } from '@mui/material';
+import { Button, TableRow, TableCell, Stack, Typography, Skeleton, Box } from '@mui/material';
 
 import { Operation } from 'contexts/ModalStatusContext';
 
@@ -14,7 +14,10 @@ import SwitchCollateral from 'components/dashboard/DashboardContent/FloatingPool
 import useAccountData from 'hooks/useAccountData';
 import useActionButton from 'hooks/useActionButton';
 import useRouter from 'hooks/useRouter';
+import useRewards from 'hooks/useRewards';
 import { useTranslation } from 'react-i18next';
+import { toPercentage } from 'utils/utils';
+import RewardPill from 'components/markets/RewardPill';
 
 type Props = {
   symbol: string;
@@ -22,11 +25,13 @@ type Props = {
   valueUSD?: number;
   depositedAmount?: BigNumber;
   borrowedAmount?: BigNumber;
+  apr?: number;
 };
 
-function TableRowFloatingPool({ symbol, valueUSD, depositedAmount, borrowedAmount, type }: Props) {
+function TableRowFloatingPool({ symbol, valueUSD, depositedAmount, borrowedAmount, type, apr }: Props) {
   const { t } = useTranslation();
   const { query } = useRouter();
+  const { rates } = useRewards();
   const { marketAccount } = useAccountData(symbol);
 
   const { handleActionClick } = useActionButton();
@@ -70,6 +75,20 @@ function TableRowFloatingPool({ symbol, valueUSD, depositedAmount, borrowedAmoun
         <Typography>
           {(valueUSD !== undefined && `$${formatNumber(valueUSD, 'USD', true)}`) || <Skeleton width={70} />}
         </Typography>
+      </TableCell>
+      <TableCell align="left" size="small">
+        <Box display="flex" width="fit-content" gap={1}>
+          <Typography>{(apr !== undefined && toPercentage(apr)) || <Skeleton width={70} />}</Typography>
+          {rates &&
+            rates[symbol] &&
+            rates[symbol]?.map((r) => (
+              <RewardPill
+                key={r.asset}
+                rate={type === 'deposit' ? r.floatingDeposit : r.borrow}
+                symbol={r.assetSymbol}
+              />
+            ))}
+        </Box>
       </TableCell>
       {type === 'deposit' ? (
         <TableCell align="left" size="small">

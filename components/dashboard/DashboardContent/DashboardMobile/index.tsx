@@ -12,6 +12,9 @@ import SwitchCollateral from '../FloatingPoolDashboard/FloatingPoolDashboardTabl
 import APRItem from '../FixedPoolDashboard/FixedPoolDashboardTable/APRItem';
 import useAccountData from 'hooks/useAccountData';
 import { useTranslation } from 'react-i18next';
+import { toPercentage } from 'utils/utils';
+import useRewards from 'hooks/useRewards';
+import RewardPill from 'components/markets/RewardPill';
 
 type Props = {
   type: 'deposit' | 'borrow';
@@ -21,12 +24,13 @@ const DashboardMobile: FC<Props> = ({ type }) => {
   const { t } = useTranslation();
   const { accountData, getMarketAccount } = useAccountData();
   const { handleActionClick } = useActionButton();
+  const { rates } = useRewards();
   const { floatingRows, fixedRows } = useDashboard(type);
   const isDeposit = type === 'deposit';
 
   return (
     <Box width="100%" display="flex" flexDirection="column" gap={1}>
-      {floatingRows.map(({ symbol, depositedAmount, borrowedAmount, valueUSD }) => (
+      {floatingRows.map(({ symbol, depositedAmount, borrowedAmount, valueUSD, apr }) => (
         <MobileAssetCard key={`dashboard_floating_mobile_${symbol}_${type}`} symbol={symbol} isFloating>
           <>
             <Box display="flex" flexDirection="column" gap={1} width="100%">
@@ -47,6 +51,20 @@ const DashboardMobile: FC<Props> = ({ type }) => {
                 {(accountData && valueUSD !== undefined && `$${formatNumber(valueUSD, 'USD', true)}`) || (
                   <Skeleton width={40} />
                 )}
+              </FlexItem>
+              <FlexItem title={t('Market APR')}>
+                <Box display="flex" width="fit-content" gap={1}>
+                  {rates &&
+                    rates[symbol] &&
+                    rates[symbol].map((r) => (
+                      <RewardPill
+                        key={r.asset}
+                        rate={type === 'deposit' ? r.floatingDeposit : r.borrow}
+                        symbol={r.assetSymbol}
+                      />
+                    ))}
+                  {(apr !== undefined && toPercentage(apr)) || <Skeleton width={40} />}
+                </Box>
               </FlexItem>
               {isDeposit && (
                 <FlexItem title={t('Use as collateral')}>

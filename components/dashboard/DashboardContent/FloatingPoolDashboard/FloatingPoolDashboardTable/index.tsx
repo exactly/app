@@ -43,6 +43,12 @@ function FloatingPoolDashboardTable({ type, rows }: Props) {
         sortKey: 'valueUSD',
       },
       {
+        title: t('Market APR'),
+        key: 'apr',
+        align: 'left',
+        sortKey: 'apr',
+      },
+      {
         title: t('Collateral'),
         key: 'collateral',
         hidden: type !== 'deposit',
@@ -83,7 +89,7 @@ function FloatingPoolDashboardTable({ type, rows }: Props) {
           </TableRow>
         </TableHead>
         <TableBody>
-          {sortData(rows).map(({ symbol, valueUSD, depositedAmount, borrowedAmount }) => (
+          {sortData(rows).map(({ symbol, valueUSD, depositedAmount, borrowedAmount, apr }) => (
             <TableRowFloatingPool
               key={`floating_row_${symbol}_${type}`}
               symbol={symbol}
@@ -91,6 +97,7 @@ function FloatingPoolDashboardTable({ type, rows }: Props) {
               depositedAmount={depositedAmount}
               borrowedAmount={borrowedAmount}
               type={type}
+              apr={apr}
             />
           ))}
         </TableBody>

@@ -7,13 +7,12 @@ import { formatFixed } from '@ethersproject/bignumber';
 import { MaxUint256, WeiPerEther, Zero } from '@ethersproject/constants';
 
 import formatNumber from 'utils/formatNumber';
-import queryRate from 'utils/queryRates';
+import getFloatingDepositAPR from 'utils/getFloatingDepositAPR';
 
 import { Box, Typography } from '@mui/material';
 
 import { globals } from 'styles/theme';
 import { useWeb3 } from 'hooks/useWeb3';
-import networkData from 'config/networkData.json' assert { type: 'json' };
 import useAssets from 'hooks/useAssets';
 import PoolMobile from './poolMobile';
 import MobileTabs from 'components/MobileTabs';
@@ -40,17 +39,6 @@ const MarketTables: FC = () => {
   const [floatingRows, setFloatingRows] = useState<TableRow[]>([...defaultRows]);
   const [fixedRows, setFixedRows] = useState<TableRow[]>([...defaultRows]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-
-  const getRates = useCallback(
-    async (chainId: number, type: 'borrow' | 'deposit', maxFuturePools: number, eMarketAddress: string) => {
-      const subgraphUrl = networkData[String(chainId) as keyof typeof networkData]?.subgraph;
-      if (!subgraphUrl) return;
-
-      const [{ apr }] = await queryRate(subgraphUrl, eMarketAddress, type, { maxFuturePools });
-      return apr;
-    },
-    [],
-  );
 
   const floatingHeaders: TableHeader<TableRow>[] = [
     {
@@ -136,7 +124,7 @@ const MarketTables: FC = () => {
             formatFixed(totalFloatingBorrowAssets.mul(usdPrice).div(WeiPerEther), decimals),
           );
 
-          const floatingDepositAPR = await getRates(chain.id, 'deposit', maxFuturePools, marketAddress);
+          const floatingDepositAPR = await getFloatingDepositAPR(chain.id, 'deposit', maxFuturePools, marketAddress);
 
           tempFloatingRows.push({
             symbol,
@@ -181,7 +169,7 @@ const MarketTables: FC = () => {
     setFixedRows(sortByDefault(defaultRows, tempFixedRows));
 
     setIsLoading(false);
-  }, [accountData, chain, defaultRows, getRates]);
+  }, [accountData, chain, defaultRows]);
 
   useEffect(() => {
     void defineRows();
