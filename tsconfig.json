@@ -19,7 +19,6 @@
       "components/*": ["components/*"],
       "config/*": ["config/*"],
       "contexts/*": ["contexts/*"],
-      "dictionary/*": ["dictionary/*"],
       "hooks/*": ["hooks/*"],
       "pages/*": ["pages/*"],
       "queries/*": ["queries/*"],
