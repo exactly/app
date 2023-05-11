@@ -30,7 +30,14 @@ type Row = {
 
 export function useInitGA() {
   useEffect(() => {
-    ReactGA.initialize('G-VV2LM2XCSD', { gtagOptions: { anonymizeIp: true, debug_mode: true, send_page_view: false } });
+    const key = process.env.NEXT_PUBLIC_GA_API_KEY;
+    if (!key) {
+      return;
+    }
+
+    ReactGA.initialize(key, {
+      gtagOptions: { anonymizeIp: true, debug_mode: true, send_page_view: false },
+    });
   }, []);
 }
 
