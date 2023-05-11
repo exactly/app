@@ -81,7 +81,8 @@ export default async (
 ) => {
   const now = Math.floor(Date.now() / 1_000) - offset * interval;
   const lastTimestamp = roundTicks ? now - (now % interval) : now;
-  const response = await request(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const response = await request<any>(
     subgraph,
     `{${[...Array(count + 1)]
       .map((_, i) => {

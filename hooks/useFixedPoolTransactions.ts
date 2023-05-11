@@ -27,7 +27,8 @@ export default (type: 'borrow' | 'deposit', maturity: number, market: string) =>
     if (!subgraphUrl) return;
 
     if (type === 'borrow') {
-      const getMaturityPoolBorrows = await request(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const getMaturityPoolBorrows = await request<any>(
         subgraphUrl,
         getMaturityPoolBorrowsQuery(walletAddress, maturity, market.toLowerCase()),
       );
@@ -67,7 +68,8 @@ export default (type: 'borrow' | 'deposit', maturity: number, market: string) =>
 
       setBorrowTxs(borrows);
 
-      const getMaturityPoolRepays = await request(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const getMaturityPoolRepays = await request<any>(
         subgraphUrl,
         getMaturityPoolRepaysQuery(walletAddress, maturity, market.toLowerCase()),
       );
@@ -101,7 +103,8 @@ export default (type: 'borrow' | 'deposit', maturity: number, market: string) =>
 
       setRepayTxs(repays);
     } else {
-      const getMaturityPoolDeposits = await request(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const getMaturityPoolDeposits = await request<any>(
         subgraphUrl,
         getMaturityPoolDepositsQuery(walletAddress, maturity, market.toLowerCase()),
       );
@@ -139,7 +142,8 @@ export default (type: 'borrow' | 'deposit', maturity: number, market: string) =>
 
       setDepositTxs(deposits);
 
-      const getMaturityPoolWithdraws = await request(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const getMaturityPoolWithdraws = await request<any>(
         subgraphUrl,
         getMaturityPoolWithdrawsQuery(walletAddress, maturity, market.toLowerCase()),
       );
