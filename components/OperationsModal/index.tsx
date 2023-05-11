@@ -1,4 +1,4 @@
-import React, { forwardRef, ReactElement, Ref, useMemo, useRef } from 'react';
+import React, { forwardRef, ReactElement, Ref, useCallback, useMemo, useRef } from 'react';
 
 import {
   Box,
@@ -22,6 +22,9 @@ import Draggable from 'react-draggable';
 import { TransitionProps } from '@mui/material/transitions';
 import { useOperationContext } from 'contexts/OperationContext';
 import useTranslateOperation from 'hooks/useTranslateOperation';
+import useAnalytics from 'hooks/useAnalytics';
+import { useMarketContext } from 'contexts/MarketContext';
+import useDelayedEffect from 'hooks/useDelayedEffect';
 
 function PaperComponent(props: PaperProps | undefined) {
   const { tx } = useOperationContext();
@@ -55,9 +58,21 @@ function OperationsModal() {
   const translateOperation = useTranslateOperation();
   const { breakpoints, spacing, palette } = useTheme();
   const { open, closeModal, operation } = useModalStatus();
+  const { date } = useMarketContext();
   const { tx } = useOperationContext();
   const isMobile = useMediaQuery(breakpoints.down('sm'));
   const loadingTx = useMemo(() => tx && (tx.status === 'loading' || tx.status === 'processing'), [tx]);
+  const {
+    list: { viewItem },
+  } = useAnalytics();
+
+  const viewEffect = useCallback(() => {
+    if (open && date) {
+      viewItem(date);
+    }
+  }, [date, open, viewItem]);
+
+  useDelayedEffect({ effect: viewEffect });
 
   return (
     <Dialog

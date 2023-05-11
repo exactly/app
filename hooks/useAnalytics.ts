@@ -1,4 +1,4 @@
-import { useMemo, useCallback, useRef, useEffect } from 'react';
+import { useMemo, useCallback, useEffect } from 'react';
 import ReactGA from 'react-ga4';
 import { useTranslation } from 'react-i18next';
 import { useAccount } from 'wagmi';
@@ -210,6 +210,21 @@ export default function useAnalytics({ symbol, rewards }: { symbol?: string; rew
     [trackWithContext, itemContext],
   );
 
+  const viewItem = useCallback(
+    (maturity: number) => {
+      trackWithContext('view_item', {
+        items: [
+          {
+            index: 0,
+            ...itemContext,
+            ...(itemContext.item_id.includes('AtMaturity') ? { maturity } : {}),
+          },
+        ],
+      });
+    },
+    [trackWithContext, itemContext],
+  );
+
   const trackItem = useCallback(
     ({ eventName, variant = 'operation' }: TrackItem) => {
       const items =
@@ -263,6 +278,6 @@ export default function useAnalytics({ symbol, rewards }: { symbol?: string; rew
 
   return {
     transaction: { addToCart, removeFromCart, beginCheckout, purchase },
-    list: { selectItem, viewItemList, viewItemListAdvance, viewItemListDashboard },
+    list: { viewItem, selectItem, viewItemList, viewItemListAdvance, viewItemListDashboard },
   };
 }
