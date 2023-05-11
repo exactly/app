@@ -61,7 +61,7 @@ export const MarketProvider: FC<PropsWithChildren> = ({ children }) => {
     <MarketContext.Provider
       value={{ marketSymbol, setMarketSymbol, date, setDate, dates, view, setView: setViewLocalStorage }}
     >
-      {children}
+      {view === undefined ? null : children}
     </MarketContext.Provider>
   );
 };

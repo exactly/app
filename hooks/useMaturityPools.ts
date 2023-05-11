@@ -16,7 +16,7 @@ type TableRow = {
   borrowAPR: number;
 };
 
-export default function useMaturityPools(symbol: string) {
+export default function useMaturityPools(symbol: string): TableRow[] {
   const { marketAccount } = useAccountData(symbol);
   return useMemo(() => {
     if (!marketAccount) return [];
@@ -30,22 +30,18 @@ export default function useMaturityPools(symbol: string) {
       ]),
     );
 
-    const tempRows: TableRow[] = [];
-    fixedPools.forEach(({ maturity, borrowed, supplied }) => {
+    return fixedPools.map(({ maturity, borrowed, supplied }) => {
       const maturityKey = maturity.toString();
-
       const totalDeposited = formatNumber(formatFixed(supplied.mul(usdPrice).div(WeiPerEther), decimals));
       const totalBorrowed = formatNumber(formatFixed(borrowed.mul(usdPrice).div(WeiPerEther), decimals));
 
-      tempRows.push({
+      return {
         maturity: maturity.toNumber(),
         totalDeposited,
         totalBorrowed,
         depositAPR: APRsPerMaturity[maturityKey]?.deposit,
         borrowAPR: APRsPerMaturity[maturityKey]?.borrow,
-      });
+      };
     });
-
-    return tempRows;
   }, [marketAccount]);
 }

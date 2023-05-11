@@ -13,17 +13,30 @@ import useAccountData from './useAccountData';
 import { useModalStatus } from 'contexts/ModalStatusContext';
 import { MarketsBasicOption } from 'contexts/MarketsBasicContext';
 import { type Rewards } from './useRewards';
-import { TableRow } from 'components/markets/MarketsTables/poolTable';
 import useActionButton from './useActionButton';
 import useDelayedEffect from './useDelayedEffect';
+import useSnapshot from './useSnapshot';
 
 type ItemVariant = 'operation' | 'approve' | 'enterMarket' | 'exitMarket' | 'claimAll';
 type TrackItem = { eventName: string; variant: ItemVariant };
+
+type Row = {
+  symbol: string;
+  depositAPR?: number;
+  borrowAPR?: number;
+  depositMaturity?: number;
+  borrowMaturity?: number;
+  maturity?: number;
+};
 
 export function useInitGA() {
   useEffect(() => {
     ReactGA.initialize('G-VV2LM2XCSD', { gtagOptions: { anonymizeIp: true, debug_mode: true, send_page_view: false } });
   }, []);
+}
+
+function track(eventName: string, payload: object) {
+  ReactGA.event(eventName, { ...payload });
 }
 
 function useAnalyticsContext(assetSymbol?: string) {
@@ -54,65 +67,51 @@ function useAnalyticsContext(assetSymbol?: string) {
 
   const itemContext = useMemo(
     () => ({
-      chain_id: chain.id,
       symbol: assetSymbol || symbol,
       quantity: qty,
       item_id: `${marketAccount?.symbol}.${operation}`,
       item_name: `${marketAccount?.symbol} ${operation}`,
       price: formatFixed(marketAccount?.usdPrice ?? Zero, 18),
     }),
-    [assetSymbol, chain.id, marketAccount?.symbol, marketAccount?.usdPrice, operation, qty, symbol],
+    [assetSymbol, marketAccount?.symbol, marketAccount?.usdPrice, operation, qty, symbol],
   );
 
-  return { appContext, itemContext };
+  return { appContext: useSnapshot(appContext), itemContext };
 }
 
 export function usePageView(pathname: string, title: string) {
   const { appContext } = useAnalyticsContext();
-  const onView = useRef(true);
-  const lastAccount = useRef(appContext.account);
   const pageView = useCallback(() => {
-    if (!appContext.view_mode) return;
-
-    if (!onView.current && lastAccount.current === appContext.account) return;
-
-    onView.current = false;
-    lastAccount.current = appContext.account;
-
     void ReactGA.send({
       hitType: 'pageview',
       page: pathname,
       title,
       location: pathname,
-      ...appContext,
+      ...appContext.current,
     });
   }, [appContext, pathname, title]);
 
   useDelayedEffect({ effect: pageView });
 }
 
-export default ({ symbol, rewards }: { symbol?: string; rewards?: Rewards } = {}) => {
+export default function useAnalytics({ symbol, rewards }: { symbol?: string; rewards?: Rewards } = {}) {
   const { appContext, itemContext } = useAnalyticsContext(symbol);
   const { isDisable } = useActionButton();
 
-  const track = useCallback(
-    (eventName: string, payload: object) => {
-      ReactGA.event(eventName, { ...appContext, ...payload });
-    },
+  const trackWithContext = useCallback(
+    (eventName: string, payload: object) => track(eventName, { ...appContext.current, ...payload }),
     [appContext],
   );
 
   const viewItemListAdvance = useCallback(
-    (list: TableRow[], rateType: 'floating' | 'fixed') => {
-      const { price, quantity, ...ctx } = itemContext;
+    (list: Row[], rateType: 'floating' | 'fixed') => {
       const items = list
-        .map(({ borrowMaturity, depositMaturity, ...rest }) => ({
-          maturity: borrowMaturity || depositMaturity,
+        .map(({ maturity, borrowMaturity, depositMaturity, ...rest }) => ({
+          maturity: maturity || borrowMaturity || depositMaturity,
           ...rest,
         }))
         .flatMap((item) => [
           {
-            ...ctx,
             item_id: `exa${item.symbol}.deposit${item.maturity ? 'AtMaturity' : ''}`,
             item_name: `exa${item.symbol} deposit${item.maturity ? 'AtMaturity' : ''}`,
             symbol: item.symbol,
@@ -121,7 +120,6 @@ export default ({ symbol, rewards }: { symbol?: string; rewards?: Rewards } = {}
           ...(rateType !== 'fixed' || !isDisable(rateType, item.depositAPR)
             ? [
                 {
-                  ...ctx,
                   item_id: `exa${item.symbol}.borrow${item.maturity ? 'AtMaturity' : ''}`,
                   item_name: `exa${item.symbol} borrow${item.maturity ? 'AtMaturity' : ''}`,
                   symbol: item.symbol,
@@ -132,14 +130,14 @@ export default ({ symbol, rewards }: { symbol?: string; rewards?: Rewards } = {}
         ])
         .map((item, index) => ({ ...item, index }));
 
-      track('view_item_list', { items });
+      trackWithContext('view_item_list', { items });
     },
-    [itemContext, isDisable, track],
+    [isDisable, trackWithContext],
   );
 
   const viewItemList = useCallback(
     (list: MarketsBasicOption[]) => {
-      track('view_item_list', {
+      trackWithContext('view_item_list', {
         items: list.map((item, index) => {
           const [market, ctxOperation] = itemContext.item_id.split('.');
           const baseOperation = ctxOperation.replace('AtMaturity', '');
@@ -154,12 +152,12 @@ export default ({ symbol, rewards }: { symbol?: string; rewards?: Rewards } = {}
         }),
       });
     },
-    [track, itemContext],
+    [trackWithContext, itemContext],
   );
 
   const selectItem = useCallback(
     (maturity: number) => {
-      track('select_item', {
+      trackWithContext('select_item', {
         items: [
           {
             index: 0,
@@ -169,7 +167,7 @@ export default ({ symbol, rewards }: { symbol?: string; rewards?: Rewards } = {}
         ],
       });
     },
-    [track, itemContext],
+    [trackWithContext, itemContext],
   );
 
   const trackItem = useCallback(
@@ -177,10 +175,8 @@ export default ({ symbol, rewards }: { symbol?: string; rewards?: Rewards } = {}
       const items =
         variant === 'claimAll' && rewards
           ? Object.entries(rewards).map(([rewardSymbol, amount], index) => {
-              const { price, ...ctx } = itemContext;
               return {
                 index,
-                ...ctx,
                 item_id: `RewardsController.claimAll`,
                 item_name: `RewardsController claimAll`,
                 quantity: formatFixed(amount, 18),
@@ -200,9 +196,9 @@ export default ({ symbol, rewards }: { symbol?: string; rewards?: Rewards } = {}
               },
             ];
 
-      track(eventName, { items });
+      trackWithContext(eventName, { items });
     },
-    [track, itemContext, rewards],
+    [trackWithContext, itemContext, rewards],
   );
 
   const addToCart = useCallback(
@@ -225,11 +221,8 @@ export default ({ symbol, rewards }: { symbol?: string; rewards?: Rewards } = {}
     [trackItem],
   );
 
-  return useMemo(
-    () => ({
-      transaction: { addToCart, removeFromCart, beginCheckout, purchase },
-      list: { selectItem, viewItemList, viewItemListAdvance },
-    }),
-    [addToCart, beginCheckout, purchase, removeFromCart, selectItem, viewItemList, viewItemListAdvance],
-  );
-};
+  return {
+    transaction: { addToCart, removeFromCart, beginCheckout, purchase },
+    list: { selectItem, viewItemList, viewItemListAdvance },
+  };
+}
