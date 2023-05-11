@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import React, { FC, useEffect } from 'react';
 import { Box, Button, Divider, Grid, Skeleton, Tooltip, Typography } from '@mui/material';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import useMaturityPools from 'hooks/useMaturityPools';
@@ -7,6 +7,7 @@ import useActionButton from 'hooks/useActionButton';
 import parseTimestamp from 'utils/parseTimestamp';
 import { toPercentage } from 'utils/utils';
 import { useTranslation } from 'react-i18next';
+import useAnalytics from 'hooks/useAnalytics';
 
 type Props = {
   symbol: string;
@@ -18,6 +19,19 @@ const MaturityPoolsMobile: FC<Props> = ({ symbol }) => {
   const { t } = useTranslation();
   const { handleActionClick } = useActionButton();
   const rows = useMaturityPools(symbol);
+
+  const {
+    list: { viewItemListAdvance },
+  } = useAnalytics();
+
+  useEffect(() => {
+    if (rows.length) {
+      viewItemListAdvance(
+        rows.map((r) => ({ ...r, symbol })),
+        'fixed',
+      );
+    }
+  }, [viewItemListAdvance, rows, symbol]);
 
   return (
     <Box width="100%" pb={2}>

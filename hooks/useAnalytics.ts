@@ -23,7 +23,6 @@ type TrackItem = { eventName: string; variant: ItemVariant };
 type Row = {
   symbol: string;
   depositAPR?: number;
-  borrowAPR?: number;
   depositMaturity?: number;
   borrowMaturity?: number;
   maturity?: number;
@@ -112,16 +111,16 @@ export default function useAnalytics({ symbol, rewards }: { symbol?: string; rew
         }))
         .flatMap((item) => [
           {
-            item_id: `exa${item.symbol}.deposit${item.maturity ? 'AtMaturity' : ''}`,
-            item_name: `exa${item.symbol} deposit${item.maturity ? 'AtMaturity' : ''}`,
+            item_id: `exa${item.symbol}.deposit${rateType === 'fixed' ? 'AtMaturity' : ''}`,
+            item_name: `exa${item.symbol} deposit${rateType === 'fixed' ? 'AtMaturity' : ''}`,
             symbol: item.symbol,
             ...(item.maturity ? { maturity: item.maturity } : {}),
           },
           ...(rateType !== 'fixed' || !isDisable(rateType, item.depositAPR)
             ? [
                 {
-                  item_id: `exa${item.symbol}.borrow${item.maturity ? 'AtMaturity' : ''}`,
-                  item_name: `exa${item.symbol} borrow${item.maturity ? 'AtMaturity' : ''}`,
+                  item_id: `exa${item.symbol}.borrow${rateType === 'fixed' ? 'AtMaturity' : ''}`,
+                  item_name: `exa${item.symbol} borrow${rateType === 'fixed' ? 'AtMaturity' : ''}`,
                   symbol: item.symbol,
                   ...(item.maturity ? { maturity: item.maturity } : {}),
                 },
@@ -133,6 +132,47 @@ export default function useAnalytics({ symbol, rewards }: { symbol?: string; rew
       trackWithContext('view_item_list', { items });
     },
     [isDisable, trackWithContext],
+  );
+
+  const viewItemListDashboard = useCallback(
+    (list: Row[], rateType: 'floating' | 'fixed', tab: 'deposit' | 'borrow') => {
+      const items = list
+        .map(({ maturity, borrowMaturity, depositMaturity, ...rest }) => ({
+          maturity: maturity || borrowMaturity || depositMaturity,
+          ...rest,
+        }))
+        .flatMap((item) => {
+          if (rateType === 'floating') {
+            const op1 = tab === 'deposit' ? 'deposit' : 'borrow';
+            const op2 = tab === 'deposit' ? 'withdraw' : 'repay';
+            return [
+              {
+                item_id: `exa${item.symbol}.${op1}`,
+                item_name: `exa${item.symbol} ${op1}`,
+                symbol: item.symbol,
+              },
+              {
+                item_id: `exa${item.symbol}.${op2}`,
+                item_name: `exa${item.symbol} ${op2}`,
+                symbol: item.symbol,
+              },
+            ];
+          } else {
+            const op = tab === 'deposit' ? 'withdrawAtMaturity' : 'repayAtMaturity';
+            return [
+              {
+                item_id: `exa${item.symbol}.${op}`,
+                item_name: `exa${item.symbol} ${op}`,
+                symbol: item.symbol,
+                maturity: item.maturity,
+              },
+            ];
+          }
+        });
+
+      trackWithContext('view_item_list', { items });
+    },
+    [trackWithContext],
   );
 
   const viewItemList = useCallback(
@@ -223,6 +263,6 @@ export default function useAnalytics({ symbol, rewards }: { symbol?: string; rew
 
   return {
     transaction: { addToCart, removeFromCart, beginCheckout, purchase },
-    list: { selectItem, viewItemList, viewItemListAdvance },
+    list: { selectItem, viewItemList, viewItemListAdvance, viewItemListDashboard },
   };
 }

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Box, Grid, Typography } from '@mui/material';
 
 import FixedPoolDashboardTable from 'components/dashboard/DashboardContent/FixedPoolDashboard/FixedPoolDashboardTable';
@@ -6,6 +6,7 @@ import useDashboard from 'hooks/useDashboard';
 import { useTranslation } from 'react-i18next';
 import InfoIcon from '@mui/icons-material/Info';
 import getHourUTC2Local from 'utils/getHourUTC2Local';
+import useAnalytics from 'hooks/useAnalytics';
 
 type Props = {
   type: 'deposit' | 'borrow';
@@ -14,6 +15,16 @@ type Props = {
 function FixedPoolDashboard({ type }: Props) {
   const { t } = useTranslation();
   const { fixedRows } = useDashboard(type);
+
+  const {
+    list: { viewItemListDashboard },
+  } = useAnalytics();
+
+  useEffect(() => {
+    if (fixedRows.length) {
+      viewItemListDashboard(fixedRows, 'fixed', type);
+    }
+  }, [fixedRows, viewItemListDashboard, type]);
 
   return (
     <Grid

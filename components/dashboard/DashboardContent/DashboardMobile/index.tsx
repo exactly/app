@@ -1,4 +1,4 @@
-import React, { FC, PropsWithChildren } from 'react';
+import React, { FC, PropsWithChildren, useEffect } from 'react';
 import { formatFixed } from '@ethersproject/bignumber';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import { Box, Button, ButtonGroup, Skeleton, Tooltip, Typography } from '@mui/material';
@@ -15,6 +15,7 @@ import { useTranslation } from 'react-i18next';
 import { toPercentage } from 'utils/utils';
 import useRewards from 'hooks/useRewards';
 import RewardPill from 'components/markets/RewardPill';
+import useAnalytics from 'hooks/useAnalytics';
 
 type Props = {
   type: 'deposit' | 'borrow';
@@ -28,6 +29,22 @@ const DashboardMobile: FC<Props> = ({ type }) => {
   const { rates } = useRewards();
   const { floatingRows, fixedRows } = useDashboard(type);
   const isDeposit = type === 'deposit';
+
+  const {
+    list: { viewItemListDashboard },
+  } = useAnalytics();
+
+  useEffect(() => {
+    if (floatingRows?.[0]?.apr) {
+      viewItemListDashboard(floatingRows, 'floating', type);
+    }
+  }, [floatingRows, viewItemListDashboard, type]);
+
+  useEffect(() => {
+    if (fixedRows.length) {
+      viewItemListDashboard(fixedRows, 'fixed', type);
+    }
+  }, [fixedRows, viewItemListDashboard, type]);
 
   return (
     <Box width="100%" display="flex" flexDirection="column" gap={1}>

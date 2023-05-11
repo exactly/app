@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import AddExaTokensButton from 'components/AddExaTokensButton';
 
@@ -7,6 +7,7 @@ import { Grid, Typography } from '@mui/material';
 import Stack from '@mui/material/Stack';
 import useDashboard from 'hooks/useDashboard';
 import { useTranslation } from 'react-i18next';
+import useAnalytics from 'hooks/useAnalytics';
 
 type Props = {
   type: 'deposit' | 'borrow';
@@ -15,6 +16,16 @@ type Props = {
 function FloatingPoolDashboard({ type }: Props) {
   const { t } = useTranslation();
   const { floatingRows } = useDashboard(type);
+
+  const {
+    list: { viewItemListDashboard },
+  } = useAnalytics();
+
+  useEffect(() => {
+    if (floatingRows?.[0]?.apr) {
+      viewItemListDashboard(floatingRows, 'floating', type);
+    }
+  }, [floatingRows, viewItemListDashboard, type]);
 
   return (
     <Grid

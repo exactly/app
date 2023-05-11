@@ -6,14 +6,11 @@ import Grid from '@mui/material/Grid';
 
 import MaturityPoolsTable from './MaturityPoolsTable';
 import MaturityPoolInfo from './MaturityPoolInfo';
-import { Box } from '@mui/material';
-import { globals } from 'styles/theme';
+import { Box, useMediaQuery, useTheme } from '@mui/material';
 import MaturityPoolsMobile from './MaturityPoolsMobile';
 import YieldChart from 'components/charts/YieldChart';
 import UtilizationRateChart from 'components/charts/UtilizationRateChart';
 import useAccountData from 'hooks/useAccountData';
-
-const { onlyMobile, onlyDesktop } = globals;
 
 type Rate = {
   maturity: BigNumber;
@@ -26,6 +23,8 @@ type Props = {
 
 const AssetMaturityPools: FC<Props> = ({ symbol }) => {
   const { marketAccount } = useAccountData(symbol);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const { totalDeposited, totalBorrowed, bestDeposit, bestBorrow } = useMemo<{
     totalDeposited?: number;
@@ -86,12 +85,15 @@ const AssetMaturityPools: FC<Props> = ({ symbol }) => {
             adjustFactor={marketAccount && marketAccount.adjustFactor}
           />
         </Grid>
-        <Grid item xs={12} px="24px" pb="24px" bgcolor="components.bg" mt={-1} display={onlyDesktop}>
-          <MaturityPoolsTable symbol={symbol} />
-        </Grid>
-        <Box display={onlyMobile} px="24px" pt={1} width="100%">
-          <MaturityPoolsMobile symbol={symbol} />
-        </Box>
+        {isMobile ? (
+          <Box px="24px" pt={1} width="100%">
+            <MaturityPoolsMobile symbol={symbol} />
+          </Box>
+        ) : (
+          <Grid item xs={12} px="24px" pb="24px" bgcolor="components.bg" mt={-1}>
+            <MaturityPoolsTable symbol={symbol} />
+          </Grid>
+        )}
       </Grid>
       <Box
         boxShadow="0px 4px 12px rgba(175, 177, 182, 0.2)"
