@@ -60,7 +60,7 @@ const DropdownMenu = <T,>({
     setAnchorEl(null);
   }, []);
 
-  const id = label.replaceAll(' ', '-');
+  const id = label?.replaceAll(' ', '-');
 
   return (
     <>
