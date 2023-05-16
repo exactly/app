@@ -42,7 +42,9 @@ const { chains, provider } = configureChains<Chain, BaseProvider, WebSocketProvi
 
 export const wagmi = createClient({
   connectors: [
-    ...(isE2E ? [new InjectedConnector({ chains: supportedChains, options: { name: 'E2E' } })] : []),
+    ...(isE2E
+      ? [new InjectedConnector({ chains: supportedChains, options: { name: 'E2E', shimDisconnect: false } })]
+      : []),
     ...w3mConnectors({ projectId: walletConnectId, version: 1, chains }),
     new SafeConnector({ chains }),
   ],
