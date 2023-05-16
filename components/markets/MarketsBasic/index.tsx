@@ -1,6 +1,6 @@
 import React, { FC, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Box, Divider, Tooltip, Typography, useTheme } from '@mui/material';
+import { Box, Divider, Tooltip, Typography, capitalize, useTheme } from '@mui/material';
 import AssetInput from 'components/OperationsModal/AssetInput';
 import { MarketsBasicOption, useMarketsBasic } from 'contexts/MarketsBasicContext';
 import { useOperationContext } from 'contexts/OperationContext';
@@ -176,13 +176,15 @@ const MarketsBasic: FC = () => {
           <Divider sx={{ borderColor: 'grey.200' }} />
           <Box px={1} py={1.5}>
             <Typography variant="cardTitle" sx={{ px: 1 }}>
-              {t('{{operation}} duration', { operation: translateOperation(operation, { variant: 'noun' }) })}
+              {capitalize(
+                t('{{operation}} duration', { operation: translateOperation(operation, { variant: 'noun' }) }),
+              )}
             </Typography>
             <Tooltip
               title={
                 operation === 'deposit'
                   ? t(
-                      'Your deposit can be withdrawn at any time, but please keep in mind that if you withdraw it before the maturity date, the current protocol rates will apply.',
+                      'Your deposit can be withdrawn at any time, but please keep in mind that if you withdraw it before the maturity date, the current borrow rates will apply.',
                     )
                   : marketAccount &&
                     t(
