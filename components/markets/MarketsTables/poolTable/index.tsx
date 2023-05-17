@@ -121,14 +121,14 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
                     <Typography>{isLoading ? <Skeleton width={80} /> : `$${totalBorrowed}`}</Typography>
                   </TableCell>
                   <TableCell align="left" sx={{ width: '200px', py: 1 }}>
-                    {isLoading ? (
-                      <Skeleton width={60} />
+                    {isLoading || depositAPR === undefined ? (
+                      <Skeleton width={80} />
                     ) : (
                       <Tooltip title={getLiquidTokenInfo(symbol)} arrow placement="top">
                         <Box display="flex" flexDirection="column" width="fit-content">
                           <Grid container alignItems="center" gap={1}>
                             <Typography minWidth={40} lineHeight={1}>
-                              {toPercentage(depositAPR && depositAPR > minAPRValue ? depositAPR : undefined)}
+                              {toPercentage(depositAPR > minAPRValue ? depositAPR : undefined)}
                             </Typography>
                             {rateType !== 'fixed'
                               ? rates[symbol]?.map((r) => (
@@ -146,14 +146,14 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
                     )}
                   </TableCell>
                   <TableCell align="left" sx={{ width: '200px', py: 1 }}>
-                    {isLoading ? (
-                      <Skeleton width={60} />
+                    {isLoading || borrowAPR === undefined ? (
+                      <Skeleton width={80} />
                     ) : (
                       <Tooltip title={getLiquidTokenInfo(symbol)} arrow placement="top">
                         <Box display="flex" flexDirection="column" width="fit-content">
                           <Grid container alignItems="center" gap={1}>
                             <Typography minWidth={40}>
-                              {toPercentage(borrowAPR && borrowAPR > minAPRValue ? borrowAPR : undefined)}
+                              {toPercentage(borrowAPR > minAPRValue ? borrowAPR : undefined)}
                             </Typography>
                             {rates[symbol]?.map((r) => (
                               <RewardPill key={r.asset} rate={r.borrow} symbol={r.assetSymbol} />

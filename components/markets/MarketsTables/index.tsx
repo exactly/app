@@ -124,7 +124,12 @@ const MarketTables: FC = () => {
             formatFixed(totalFloatingBorrowAssets.mul(usdPrice).div(WeiPerEther), decimals),
           );
 
-          const floatingDepositAPR = await getFloatingDepositAPR(chain.id, 'deposit', maxFuturePools, marketAddress);
+          const floatingDepositAPR = await getFloatingDepositAPR(
+            chain.id,
+            'deposit',
+            maxFuturePools,
+            marketAddress,
+          ).catch(() => undefined);
 
           tempFloatingRows.push({
             symbol,
