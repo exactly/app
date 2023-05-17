@@ -21,7 +21,6 @@
     "node": ">=16"
   },
   "dependencies": {
-    "@analytics/google-analytics": "^1.0.5",
     "@emotion/react": "^11.11.0",
     "@emotion/styled": "^11.11.0",
     "@ethersproject/bignumber": "^5.7.0",
@@ -38,7 +37,6 @@
     "@web3modal/ethereum": "~2.3.7",
     "@web3modal/react": "~2.3.7",
     "add-to-calendar-button": "^2.2.7",
-    "analytics": "^0.8.1",
     "blockies-ts": "^1.0.0",
     "dayjs": "^1.11.7",
     "graphql": "^16.6.0",
