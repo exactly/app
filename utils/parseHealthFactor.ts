@@ -12,17 +12,15 @@ function parseHealthFactor(debt: BigNumber, collateral: BigNumber) {
 
     const formatedHealthFactor = Number(formatFixed(healthFactor, 18));
 
-    let decimals = 0;
-
-    if (formatedHealthFactor < 10) {
-      decimals = 2;
-    }
-
     if (formatedHealthFactor > 100) {
       return '∞';
     }
 
-    return `${formatedHealthFactor.toFixed(decimals)}x`;
+    const decimalPrecision = formatedHealthFactor < 10 ? 3 : 0;
+    const factor = Math.pow(10, decimalPrecision);
+    const healthFactorRounded = Math.floor(formatedHealthFactor * factor) / factor;
+
+    return `${healthFactorRounded}x`;
   }
 
   return '∞';
