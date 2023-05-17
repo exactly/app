@@ -61,14 +61,14 @@ function useAnalyticsContext(assetSymbol?: string) {
 
   const appContext = useMemo(
     () => ({
-      chain_id: chain.id,
+      network: chain.network,
       ui_language: lng,
       account: address,
       view_mode: view,
       theme,
       ...(impersonateActive ? { impersonate_account: walletAddress } : {}),
     }),
-    [address, chain.id, impersonateActive, lng, theme, view, walletAddress],
+    [address, chain.network, impersonateActive, lng, theme, view, walletAddress],
   );
 
   const itemContext = useMemo(
