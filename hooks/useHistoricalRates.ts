@@ -4,6 +4,8 @@ import { useWeb3 } from './useWeb3';
 import queryRates from 'utils/queryRates';
 import { captureException } from '@sentry/nextjs';
 import useAccountData from './useAccountData';
+import { useGlobalError } from 'contexts/GlobalErrorContext';
+import { useTranslation } from 'react-i18next';
 
 type HistoricalRateData = {
   date: Date;
@@ -21,6 +23,8 @@ export default function useHistoricalRates(symbol: string, initialCount = 30, in
   const { accountData, getMarketAccount } = useAccountData();
   const [loading, setLoading] = useState<boolean>(true);
   const [rates, setRates] = useState<HistoricalRateData[]>([]);
+  const { setError } = useGlobalError();
+  const { t } = useTranslation();
 
   const getRatesBatch = useCallback(
     async (type: 'borrow' | 'deposit', count: number, interval: number, offset: number) => {
@@ -32,15 +36,24 @@ export default function useHistoricalRates(symbol: string, initialCount = 30, in
       const { market: marketAddress, maxFuturePools } = getMarketAccount(symbol) ?? {};
       if (!marketAddress || !maxFuturePools) return emptyBatch;
 
-      return await queryRates(subgraphUrl, marketAddress, type, {
-        maxFuturePools,
-        roundTicks: true,
-        interval,
-        count,
-        offset,
-      });
+      try {
+        return await queryRates(subgraphUrl, marketAddress, type, {
+          maxFuturePools,
+          roundTicks: true,
+          interval,
+          count,
+          offset,
+        });
+      } catch (error) {
+        setError(
+          t(
+            'Apologies! The Graph is currently experiencing issues. Some information may not be displayed. Thanks for your patience.',
+          ),
+        );
+        return emptyBatch;
+      }
     },
-    [accountData, chain, symbol, getMarketAccount],
+    [accountData, chain, getMarketAccount, symbol, setError, t],
   );
 
   const getRates = useCallback(

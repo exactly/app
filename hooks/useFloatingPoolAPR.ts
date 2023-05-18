@@ -8,6 +8,8 @@ import queryRates from 'utils/queryRates';
 import useAccountData from './useAccountData';
 import useDelayedEffect from './useDelayedEffect';
 import { useWeb3 } from './useWeb3';
+import { useGlobalError } from 'contexts/GlobalErrorContext';
+import { useTranslation } from 'react-i18next';
 
 type FloatingPoolAPR = {
   depositAPR: number | undefined;
@@ -24,6 +26,8 @@ export default (
   const { marketAccount } = useAccountData(symbol);
   const [depositAPR, setDepositAPR] = useState<number | undefined>();
   const [loading, setLoading] = useState<boolean>(true);
+  const { setError } = useGlobalError();
+  const { t: tr } = useTranslation();
 
   const borrowAPR = useMemo((): number | undefined => {
     if (!marketAccount) return undefined;
@@ -75,10 +79,15 @@ export default (
         setDepositAPR(finalAPR);
         setLoading(false);
       } catch {
+        setError(
+          tr(
+            'Apologies! The Graph is currently experiencing issues. Some information may not be displayed. Thanks for your patience.',
+          ),
+        );
         setDepositAPR(undefined);
       }
     },
-    [operation, marketAccount, chain, qty],
+    [operation, marketAccount, chain, qty, setError, tr],
   );
 
   const { isLoading: delayedLoading } = useDelayedEffect({ effect: fetchAPRs });

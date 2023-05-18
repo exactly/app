@@ -7,12 +7,16 @@ import useFixedPools from './useFixedPools';
 import { BigNumber, formatFixed } from '@ethersproject/bignumber';
 import useAccountData from './useAccountData';
 import getFloatingDepositAPR from 'utils/getFloatingDepositAPR';
+import { useGlobalError } from 'contexts/GlobalErrorContext';
+import { useTranslation } from 'react-i18next';
 
 export default function useDashboard(type: string) {
   const { accountData, getMarketAccount } = useAccountData();
   const orderAssets = useAssets();
   const { chain } = useWeb3();
   const { deposits, borrows } = useFixedPools();
+  const { setError } = useGlobalError();
+  const { t } = useTranslation();
   const isDeposit = type === 'deposit';
 
   const defaultRows: FloatingPoolItemData[] = useMemo<FloatingPoolItemData[]>(
@@ -53,7 +57,14 @@ export default function useDashboard(type: string) {
           floatingBorrowRate,
         }) => {
           const apr = isDeposit
-            ? await getFloatingDepositAPR(chain.id, 'deposit', maxFuturePools, market)
+            ? await getFloatingDepositAPR(chain.id, 'deposit', maxFuturePools, market).catch(() => {
+                setError(
+                  t(
+                    'Apologies! The Graph is currently experiencing issues. Some information may not be displayed. Thanks for your patience.',
+                  ),
+                );
+                return undefined;
+              })
             : Number(floatingBorrowRate) / 1e18;
 
           return {
@@ -67,7 +78,7 @@ export default function useDashboard(type: string) {
         },
       ),
     );
-  }, [accountData, chain.id, getValueInUSD, isDeposit, orderAssets]);
+  }, [accountData, chain.id, getValueInUSD, isDeposit, orderAssets, setError, t]);
 
   useEffect(() => {
     const fetchData = async () => {

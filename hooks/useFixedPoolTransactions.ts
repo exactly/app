@@ -12,6 +12,8 @@ import { WithdrawMP } from 'types/WithdrawMP';
 import { useWeb3 } from './useWeb3';
 import networkData from 'config/networkData.json' assert { type: 'json' };
 import useAccountData from './useAccountData';
+import { useGlobalError } from 'contexts/GlobalErrorContext';
+import { useTranslation } from 'react-i18next';
 
 export default (type: 'borrow' | 'deposit', maturity: number, market: string) => {
   const { accountData } = useAccountData();
@@ -20,6 +22,8 @@ export default (type: 'borrow' | 'deposit', maturity: number, market: string) =>
   const [repayTxs, setRepayTxs] = useState<Repay[]>([]);
   const [depositTxs, setDepositTxs] = useState<Deposit[]>([]);
   const [borrowTxs, setBorrowTxs] = useState<Borrow[]>([]);
+  const { setError } = useGlobalError();
+  const { t } = useTranslation();
 
   const getFixedPoolTransactions = useCallback(async () => {
     if (!walletAddress || !maturity || !market || !type || !chain || !accountData) return;
@@ -31,12 +35,19 @@ export default (type: 'borrow' | 'deposit', maturity: number, market: string) =>
       const getMaturityPoolBorrows = await request<any>(
         subgraphUrl,
         getMaturityPoolBorrowsQuery(walletAddress, maturity, market.toLowerCase()),
-      );
+      ).catch(() => {
+        setError(
+          t(
+            'Apologies! The Graph is currently experiencing issues. Some information may not be displayed. Thanks for your patience.',
+          ),
+        );
+        return undefined;
+      });
 
       const borrows: Borrow[] = [];
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      getMaturityPoolBorrows.borrowAtMaturities.forEach((borrow: any) => {
+      getMaturityPoolBorrows?.borrowAtMaturities.forEach((borrow: any) => {
         const {
           id,
           market: borrowMarket,
@@ -72,12 +83,19 @@ export default (type: 'borrow' | 'deposit', maturity: number, market: string) =>
       const getMaturityPoolRepays = await request<any>(
         subgraphUrl,
         getMaturityPoolRepaysQuery(walletAddress, maturity, market.toLowerCase()),
-      );
+      ).catch(() => {
+        setError(
+          t(
+            'Apologies! The Graph is currently experiencing issues. Some information may not be displayed. Thanks for your patience.',
+          ),
+        );
+        return undefined;
+      });
 
       const repays: Repay[] = [];
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      getMaturityPoolRepays.repayAtMaturities.forEach((repay: any) => {
+      getMaturityPoolRepays?.repayAtMaturities.forEach((repay: any) => {
         const {
           id,
           market: repayMarket,
@@ -107,12 +125,19 @@ export default (type: 'borrow' | 'deposit', maturity: number, market: string) =>
       const getMaturityPoolDeposits = await request<any>(
         subgraphUrl,
         getMaturityPoolDepositsQuery(walletAddress, maturity, market.toLowerCase()),
-      );
+      ).catch(() => {
+        setError(
+          t(
+            'Apologies! The Graph is currently experiencing issues. Some information may not be displayed. Thanks for your patience.',
+          ),
+        );
+        return undefined;
+      });
 
       const deposits: Deposit[] = [];
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      getMaturityPoolDeposits.depositAtMaturities.forEach((deposit: any) => {
+      getMaturityPoolDeposits?.depositAtMaturities.forEach((deposit: any) => {
         const {
           id,
           market: depositMarket,
@@ -146,12 +171,19 @@ export default (type: 'borrow' | 'deposit', maturity: number, market: string) =>
       const getMaturityPoolWithdraws = await request<any>(
         subgraphUrl,
         getMaturityPoolWithdrawsQuery(walletAddress, maturity, market.toLowerCase()),
-      );
+      ).catch(() => {
+        setError(
+          t(
+            'Apologies! The Graph is currently experiencing issues. Some information may not be displayed. Thanks for your patience.',
+          ),
+        );
+        return undefined;
+      });
 
       const withdraws: WithdrawMP[] = [];
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      getMaturityPoolWithdraws.withdrawAtMaturities.forEach((withdraw: any) => {
+      getMaturityPoolWithdraws?.withdrawAtMaturities.forEach((withdraw: any) => {
         const {
           id,
           assets,
@@ -179,7 +211,7 @@ export default (type: 'borrow' | 'deposit', maturity: number, market: string) =>
 
       setWithdrawTxs(withdraws);
     }
-  }, [walletAddress, maturity, market, type, chain, accountData]);
+  }, [walletAddress, maturity, market, type, chain, accountData, setError, t]);
 
   useEffect(() => {
     getFixedPoolTransactions();

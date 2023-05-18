@@ -18,6 +18,7 @@ import PoolMobile from './poolMobile';
 import MobileTabs from 'components/MobileTabs';
 import { TableHeader } from 'components/common/TableHeadCell';
 import useAccountData from 'hooks/useAccountData';
+import { useGlobalError } from 'contexts/GlobalErrorContext';
 
 const { onlyMobile, onlyDesktop } = globals;
 
@@ -39,6 +40,7 @@ const MarketTables: FC = () => {
   const [floatingRows, setFloatingRows] = useState<TableRow[]>([...defaultRows]);
   const [fixedRows, setFixedRows] = useState<TableRow[]>([...defaultRows]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const { setError } = useGlobalError();
 
   const floatingHeaders: TableHeader<TableRow>[] = [
     {
@@ -129,7 +131,14 @@ const MarketTables: FC = () => {
             'deposit',
             maxFuturePools,
             marketAddress,
-          ).catch(() => undefined);
+          ).catch(() => {
+            setError(
+              t(
+                'Apologies! The Graph is currently experiencing issues. Some information may not be displayed. Thanks for your patience.',
+              ),
+            );
+            return undefined;
+          });
 
           tempFloatingRows.push({
             symbol,
@@ -174,7 +183,7 @@ const MarketTables: FC = () => {
     setFixedRows(sortByDefault(defaultRows, tempFixedRows));
 
     setIsLoading(false);
-  }, [accountData, chain, defaultRows]);
+  }, [accountData, chain, defaultRows, setError, t]);
 
   useEffect(() => {
     void defineRows();
