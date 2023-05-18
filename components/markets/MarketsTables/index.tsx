@@ -40,7 +40,7 @@ const MarketTables: FC = () => {
   const [floatingRows, setFloatingRows] = useState<TableRow[]>([...defaultRows]);
   const [fixedRows, setFixedRows] = useState<TableRow[]>([...defaultRows]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const { setError } = useGlobalError();
+  const { setIndexerError } = useGlobalError();
 
   const floatingHeaders: TableHeader<TableRow>[] = [
     {
@@ -132,11 +132,7 @@ const MarketTables: FC = () => {
             maxFuturePools,
             marketAddress,
           ).catch(() => {
-            setError(
-              t(
-                'Apologies! The Graph is currently experiencing issues. Some information may not be displayed. Thanks for your patience.',
-              ),
-            );
+            setIndexerError();
             return undefined;
           });
 
@@ -183,7 +179,7 @@ const MarketTables: FC = () => {
     setFixedRows(sortByDefault(defaultRows, tempFixedRows));
 
     setIsLoading(false);
-  }, [accountData, chain, defaultRows, setError, t]);
+  }, [accountData, chain, defaultRows, setIndexerError]);
 
   useEffect(() => {
     void defineRows();

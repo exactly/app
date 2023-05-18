@@ -13,7 +13,6 @@ import { useWeb3 } from './useWeb3';
 import networkData from 'config/networkData.json' assert { type: 'json' };
 import useAccountData from './useAccountData';
 import { useGlobalError } from 'contexts/GlobalErrorContext';
-import { useTranslation } from 'react-i18next';
 
 export default (type: 'borrow' | 'deposit', maturity: number, market: string) => {
   const { accountData } = useAccountData();
@@ -22,8 +21,7 @@ export default (type: 'borrow' | 'deposit', maturity: number, market: string) =>
   const [repayTxs, setRepayTxs] = useState<Repay[]>([]);
   const [depositTxs, setDepositTxs] = useState<Deposit[]>([]);
   const [borrowTxs, setBorrowTxs] = useState<Borrow[]>([]);
-  const { setError } = useGlobalError();
-  const { t } = useTranslation();
+  const { setIndexerError } = useGlobalError();
 
   const getFixedPoolTransactions = useCallback(async () => {
     if (!walletAddress || !maturity || !market || !type || !chain || !accountData) return;
@@ -36,11 +34,7 @@ export default (type: 'borrow' | 'deposit', maturity: number, market: string) =>
         subgraphUrl,
         getMaturityPoolBorrowsQuery(walletAddress, maturity, market.toLowerCase()),
       ).catch(() => {
-        setError(
-          t(
-            'Apologies! The Graph is currently experiencing issues. Some information may not be displayed. Thanks for your patience.',
-          ),
-        );
+        setIndexerError();
         return undefined;
       });
 
@@ -84,11 +78,7 @@ export default (type: 'borrow' | 'deposit', maturity: number, market: string) =>
         subgraphUrl,
         getMaturityPoolRepaysQuery(walletAddress, maturity, market.toLowerCase()),
       ).catch(() => {
-        setError(
-          t(
-            'Apologies! The Graph is currently experiencing issues. Some information may not be displayed. Thanks for your patience.',
-          ),
-        );
+        setIndexerError();
         return undefined;
       });
 
@@ -126,11 +116,7 @@ export default (type: 'borrow' | 'deposit', maturity: number, market: string) =>
         subgraphUrl,
         getMaturityPoolDepositsQuery(walletAddress, maturity, market.toLowerCase()),
       ).catch(() => {
-        setError(
-          t(
-            'Apologies! The Graph is currently experiencing issues. Some information may not be displayed. Thanks for your patience.',
-          ),
-        );
+        setIndexerError();
         return undefined;
       });
 
@@ -172,11 +158,7 @@ export default (type: 'borrow' | 'deposit', maturity: number, market: string) =>
         subgraphUrl,
         getMaturityPoolWithdrawsQuery(walletAddress, maturity, market.toLowerCase()),
       ).catch(() => {
-        setError(
-          t(
-            'Apologies! The Graph is currently experiencing issues. Some information may not be displayed. Thanks for your patience.',
-          ),
-        );
+        setIndexerError();
         return undefined;
       });
 
@@ -211,7 +193,7 @@ export default (type: 'borrow' | 'deposit', maturity: number, market: string) =>
 
       setWithdrawTxs(withdraws);
     }
-  }, [walletAddress, maturity, market, type, chain, accountData, setError, t]);
+  }, [walletAddress, maturity, market, type, chain, accountData, setIndexerError]);
 
   useEffect(() => {
     getFixedPoolTransactions();

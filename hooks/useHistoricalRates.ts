@@ -5,7 +5,6 @@ import queryRates from 'utils/queryRates';
 import { captureException } from '@sentry/nextjs';
 import useAccountData from './useAccountData';
 import { useGlobalError } from 'contexts/GlobalErrorContext';
-import { useTranslation } from 'react-i18next';
 
 type HistoricalRateData = {
   date: Date;
@@ -23,8 +22,7 @@ export default function useHistoricalRates(symbol: string, initialCount = 30, in
   const { accountData, getMarketAccount } = useAccountData();
   const [loading, setLoading] = useState<boolean>(true);
   const [rates, setRates] = useState<HistoricalRateData[]>([]);
-  const { setError } = useGlobalError();
-  const { t } = useTranslation();
+  const { setIndexerError } = useGlobalError();
 
   const getRatesBatch = useCallback(
     async (type: 'borrow' | 'deposit', count: number, interval: number, offset: number) => {
@@ -45,15 +43,11 @@ export default function useHistoricalRates(symbol: string, initialCount = 30, in
           offset,
         });
       } catch (error) {
-        setError(
-          t(
-            'Apologies! The Graph is currently experiencing issues. Some information may not be displayed. Thanks for your patience.',
-          ),
-        );
+        setIndexerError();
         return emptyBatch;
       }
     },
-    [accountData, chain, getMarketAccount, symbol, setError, t],
+    [accountData, chain, getMarketAccount, symbol, setIndexerError],
   );
 
   const getRates = useCallback(

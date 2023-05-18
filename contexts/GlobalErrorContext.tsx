@@ -1,26 +1,38 @@
 import Close from '@mui/icons-material/Close';
 import { Alert, AlertTitle, IconButton, Slide, SlideProps, Snackbar } from '@mui/material';
 import React, { createContext, useState, useCallback, PropsWithChildren, FC, useContext } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export type GlobalErrorContextType = {
   setError: (error: string) => void;
+  setIndexerError: () => void;
 };
 
 export const GlobalErrorContext = createContext<GlobalErrorContextType>({
   setError: () => undefined,
+  setIndexerError: () => undefined,
 });
+
+function SlideTransition(props: SlideProps) {
+  return <Slide {...props} direction="down" />;
+}
 
 export const GlobalErrorProvider: FC<PropsWithChildren> = ({ children }) => {
   const [error, setError] = useState<string>('');
+  const { t } = useTranslation();
 
   const cleanError = useCallback(() => setError(''), []);
 
-  function SlideTransition(props: SlideProps) {
-    return <Slide {...props} direction="down" />;
-  }
+  const setIndexerError = useCallback(() => {
+    setError(
+      t(
+        'Apologies! The Graph is currently experiencing issues. Some information may not be displayed. Thanks for your patience.',
+      ) || '',
+    );
+  }, [t]);
 
   return (
-    <GlobalErrorContext.Provider value={{ setError }}>
+    <GlobalErrorContext.Provider value={{ setError, setIndexerError }}>
       {error && (
         <Snackbar
           open={true}
