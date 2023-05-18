@@ -66,6 +66,10 @@ declare module '@mui/material/styles' {
     cardTitle: TypographyVariants['body1'];
     link: TypographyVariants['body1'];
     chip: TypographyVariants['body1'];
+    dashboardTitle: TypographyVariants['body1'];
+    dashboardMainTitle: TypographyVariants['h6'];
+    dashboardMainSubtitle: TypographyVariants['body1'];
+    dashboardSubtitleNumber: TypographyVariants['body1'];
   }
   interface TypographyVariantsOptions {
     fontFamilyMonospaced: string;
@@ -74,6 +78,10 @@ declare module '@mui/material/styles' {
     cardTitle: TypographyVariants['body1'];
     link: TypographyVariants['body1'];
     chip: TypographyVariants['body1'];
+    dashboardTitle: TypographyVariants['body1'];
+    dashboardMainTitle: TypographyVariants['h6'];
+    dashboardMainSubtitle: TypographyVariants['h6'];
+    dashboardSubtitleNumber: TypographyVariants['body1'];
   }
 }
 
@@ -84,6 +92,10 @@ declare module '@mui/material/Typography' {
     cardTitle: true;
     link: true;
     chip: true;
+    dashboardTitle: true;
+    dashboardMainTitle: true;
+    dashboardMainSubtitle: true;
+    dashboardSubtitleNumber: true;
   }
 }
 
@@ -192,6 +204,30 @@ export const lightTheme = createTheme({
       fontFamily: 'IBM Plex Mono',
       fontSize: 10,
       fontWeight: 700,
+    },
+    dashboardTitle: {
+      fontSize: 16,
+      lineHeight: '16px',
+      fontWeight: 700,
+    },
+    dashboardMainTitle: {
+      fontSize: 19,
+      lineHeight: '23px',
+      fontWeight: 700,
+    },
+    dashboardSubtitleNumber: {
+      fontFamily: 'IBM Plex Mono',
+      color: '#989FA6',
+      fontSize: 14,
+      lineHeight: '18.2px',
+      fontWeight: 500,
+    },
+    dashboardMainSubtitle: {
+      fontFamily: 'IBM Plex Mono',
+      color: '#989FA6',
+      fontSize: 12,
+      lineHeight: '15.6px',
+      fontWeight: 600,
     },
   },
   shape: {
@@ -383,6 +419,30 @@ export const darkTheme = createTheme({
       fontFamily: 'IBM Plex Mono',
       fontSize: 10,
       fontWeight: 700,
+    },
+    dashboardTitle: {
+      fontSize: 16,
+      lineHeight: '16px',
+      fontWeight: 700,
+    },
+    dashboardMainTitle: {
+      fontSize: 19,
+      lineHeight: '23px',
+      fontWeight: 700,
+    },
+    dashboardSubtitleNumber: {
+      fontFamily: 'IBM Plex Mono',
+      color: '#989FA6',
+      fontSize: 14,
+      lineHeight: '18.2px',
+      fontWeight: 500,
+    },
+    dashboardMainSubtitle: {
+      fontFamily: 'IBM Plex Mono',
+      color: '#989FA6',
+      fontSize: 12,
+      lineHeight: '15.6px',
+      fontWeight: 600,
     },
   },
   shape: {
