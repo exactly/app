@@ -1,7 +1,7 @@
-import { useCallback, useMemo, useState, useEffect } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { FloatingPoolItemData } from 'types/FloatingPoolItemData';
 import useAssets from './useAssets';
-import { useWeb3 } from './useWeb3';
+import { useWeb3 } from 'hooks/useWeb3';
 import { Previewer } from 'types/contracts';
 import useFixedPools from './useFixedPools';
 import { BigNumber, formatFixed } from '@ethersproject/bignumber';

@@ -28,6 +28,13 @@ type Row = {
   maturity?: number;
 };
 
+function wrap(str: string | undefined) {
+  if (str === undefined) {
+    return str;
+  }
+  return `'${str}'`;
+}
+
 export function useInitGA() {
   useEffect(() => {
     const key = process.env.NEXT_PUBLIC_GA_API_KEY;
@@ -63,10 +70,10 @@ function useAnalyticsContext(assetSymbol?: string) {
     () => ({
       network: chain.network,
       ui_language: lng,
-      account: address,
+      account: wrap(address),
       view_mode: view,
       theme,
-      ...(impersonateActive ? { impersonate_account: walletAddress } : {}),
+      ...(impersonateActive ? { impersonate_account: wrap(walletAddress) } : {}),
     }),
     [address, chain.network, impersonateActive, lng, theme, view, walletAddress],
   );
@@ -77,7 +84,7 @@ function useAnalyticsContext(assetSymbol?: string) {
       quantity: qty,
       item_id: `${marketAccount?.symbol}.${operation}`,
       item_name: `${marketAccount?.symbol} ${operation}`,
-      price: formatFixed(marketAccount?.usdPrice ?? Zero, 18),
+      price: Number(formatFixed(marketAccount?.usdPrice ?? Zero, 18)),
     }),
     [assetSymbol, marketAccount?.symbol, marketAccount?.usdPrice, operation, qty, symbol],
   );
