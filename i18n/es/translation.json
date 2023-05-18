@@ -262,5 +262,5 @@
   "Make sure to repay your fixed borrows before {{date}} to avoid penalty fees.": "Asegúrese de repagar sus préstamos a tasa fija antes del {{date}} para evitar multas",
   "Reserve ETH for gas fees.": "Reserva ETH para el costo de la transacción.",
   "Market APR": "TNA del Mercado",
-  "Apologies! The Graph is currently experiencing issues. Some information may not be displayed. Thanks for your patience.": "¡Disculpas! The Graph está experimentando problemas. Es posible que no se muestre cierta información. Gracias por su paciencia."
+  "Whoops! Our <1>indexer node</1> is currently experiencing issues and some information may not be displayed.": "¡Ups! Nuestro <1>nodo indexador</1> está experimentando problemas y es posible que no se muestre cierta información."
 }

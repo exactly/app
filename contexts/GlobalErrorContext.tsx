@@ -1,7 +1,7 @@
 import Close from '@mui/icons-material/Close';
-import { Alert, AlertTitle, IconButton, Slide, SlideProps, Snackbar } from '@mui/material';
-import React, { createContext, useState, useCallback, PropsWithChildren, FC, useContext } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Alert, IconButton, Link, Slide, SlideProps, Snackbar, Typography } from '@mui/material';
+import React, { createContext, useState, useCallback, PropsWithChildren, FC, useContext, ReactNode } from 'react';
+import { Trans } from 'react-i18next';
 
 export type GlobalErrorContextType = {
   setError: (error: string) => void;
@@ -18,18 +18,30 @@ function SlideTransition(props: SlideProps) {
 }
 
 export const GlobalErrorProvider: FC<PropsWithChildren> = ({ children }) => {
-  const [error, setError] = useState<string>('');
-  const { t } = useTranslation();
+  const [error, setError] = useState<ReactNode>(null);
 
-  const cleanError = useCallback(() => setError(''), []);
+  const cleanError = useCallback(() => setError(null), []);
 
   const setIndexerError = useCallback(() => {
     setError(
-      t(
-        'Apologies! The Graph is currently experiencing issues. Some information may not be displayed. Thanks for your patience.',
-      ) || '',
+      <Typography>
+        <Trans
+          i18nKey="Whoops! Our <1>indexer node</1> is currently experiencing issues and some information may not be displayed."
+          components={{
+            1: (
+              <Link
+                href="https://status.thegraph.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ textDecoration: 'none' }}
+                sx={{ color: 'blue' }}
+              />
+            ),
+          }}
+        />
+      </Typography>,
     );
-  }, [t]);
+  }, []);
 
   return (
     <GlobalErrorContext.Provider value={{ setError, setIndexerError }}>
@@ -49,7 +61,6 @@ export const GlobalErrorProvider: FC<PropsWithChildren> = ({ children }) => {
               </IconButton>
             }
           >
-            <AlertTitle>Error</AlertTitle>
             {error}
           </Alert>
         </Snackbar>
