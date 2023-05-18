@@ -14,10 +14,13 @@ const BorrowLimit = () => {
       borderRadius="8px"
       boxSizing="border-box"
       bgcolor="#FFFFFF"
+      height="64px"
     >
       <Box display="flex" gap={1} alignItems="center">
         <PublishIcon sx={{ fontSize: 16 }} />
-        <Typography variant="dashboardTitle">Borrow Limit</Typography>
+        <Typography variant="dashboardTitle" noWrap>
+          Borrow Limit
+        </Typography>
       </Box>
       <Typography variant="dashboardMainTitle">~$3.5M</Typography>
     </Box>

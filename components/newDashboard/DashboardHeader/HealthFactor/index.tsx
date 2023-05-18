@@ -14,10 +14,13 @@ const HealthFactor = () => {
       borderRadius="8px"
       boxSizing="border-box"
       bgcolor="#FFF5F5"
+      height="64px"
     >
       <Box display="flex" gap={1} alignItems="center">
         <FavoriteBorderIcon sx={{ fontSize: 16 }} />
-        <Typography variant="dashboardTitle">Health Factor</Typography>
+        <Typography variant="dashboardTitle" noWrap>
+          Health Factor
+        </Typography>
       </Box>
       <Typography variant="dashboardMainTitle" color="#D92626">
         1.092x
