@@ -37,7 +37,7 @@ export default (
     const deposited = totalFloatingDepositAssets ?? Zero;
     const borrowed = (totalFloatingBorrowAssets ?? Zero).add(delta);
 
-    const t = borrowed.mul(decimalWAD).div(deposited);
+    const t = deposited.eq(Zero) ? Zero : borrowed.mul(decimalWAD).div(deposited);
     const toUtilization = Number(formatFixed(t, decimals));
 
     const { interestRateModel } = marketAccount;
@@ -71,7 +71,8 @@ export default (
         const { totalFloatingDepositAssets, decimals } = marketAccount;
 
         const futureSupply = totalFloatingDepositAssets.add(parseFixed(qty || '0', decimals));
-        const ratio = Number(totalFloatingDepositAssets.mul(WeiPerEther).div(futureSupply)) / 1e18;
+        const ratio =
+          Number(futureSupply.eq(Zero) ? Zero : totalFloatingDepositAssets.mul(WeiPerEther).div(futureSupply)) / 1e18;
         const finalAPR = ratio * depositAPRRate;
 
         setDepositAPR(finalAPR);

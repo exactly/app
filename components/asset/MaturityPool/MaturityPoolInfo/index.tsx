@@ -71,7 +71,7 @@ const MaturityPoolInfo: FC<MaturityPoolInfoProps> = ({
         tooltipTitle: t('The highest fixed interest APR for a deposit up to the optimal deposit size.'),
       },
       {
-        label: 'Best Borrow APR',
+        label: t('Best Borrow APR'),
         value:
           bestBorrowRate && bestBorrowRate > minAPRValue ? (
             <ItemCell key={symbol} value={toPercentage(bestBorrowRate)} symbol={symbol} />
