@@ -25,7 +25,7 @@ const FirstProgressBar = styled('div')<{ width: number; bgcolor: string }>(({ wi
   '&::before': {
     content: '""',
     position: 'absolute',
-    right: -5,
+    right: -4,
     top: 0,
     bottom: 0,
     width: 10,

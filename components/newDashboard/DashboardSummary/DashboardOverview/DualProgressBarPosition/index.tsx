@@ -1,20 +1,40 @@
-import React, { FC } from 'react';
+import React, { FC, useMemo } from 'react';
 import DualProgressBar from 'components/common/DualProgressBar';
 import { Box, Typography } from '@mui/material';
+import formatNumber from 'utils/formatNumber';
 
-interface DualProgressBarPositionProps {
+export type AssetPosition = {
   symbol: string;
-}
+  fixedAssets: number;
+  fixedValueUSD: number;
+  floatingAssets: number;
+  floatingValueUSD: number;
+  percentageOfTotal: number;
+};
 
-const DualProgressBarPosition: FC<DualProgressBarPositionProps> = ({ symbol }) => {
-  const value1 = 20;
-  const value2 = 20;
+const DualProgressBarPosition: FC<AssetPosition> = ({
+  symbol,
+  fixedAssets,
+  fixedValueUSD,
+  floatingAssets,
+  floatingValueUSD,
+  percentageOfTotal,
+}) => {
+  const value1 = useMemo(
+    () => (fixedValueUSD / (fixedValueUSD + floatingValueUSD)) * percentageOfTotal,
+    [fixedValueUSD, floatingValueUSD, percentageOfTotal],
+  );
+  const value2 = useMemo(
+    () => (floatingValueUSD / (fixedValueUSD + floatingValueUSD)) * percentageOfTotal,
+    [fixedValueUSD, floatingValueUSD, percentageOfTotal],
+  );
+
   return (
     <DualProgressBar
       value1={value1}
       value2={value2}
-      tooltip1={<TooltipContent symbol={symbol} type="fixed" />}
-      tooltip2={<TooltipContent symbol={symbol} type="variable" />}
+      tooltip1={<TooltipContent symbol={symbol} assets={fixedAssets} valueUSD={fixedValueUSD} type="fixed" />}
+      tooltip2={<TooltipContent symbol={symbol} assets={floatingAssets} valueUSD={floatingValueUSD} type="variable" />}
     />
   );
 };
@@ -22,16 +42,18 @@ const DualProgressBarPosition: FC<DualProgressBarPositionProps> = ({ symbol }) =
 type TooltipContentProps = {
   symbol: string;
   type: 'fixed' | 'variable';
+  assets: number;
+  valueUSD: number;
 };
 
-const TooltipContent: FC<TooltipContentProps> = ({ symbol, type }) => {
+const TooltipContent: FC<TooltipContentProps> = ({ symbol, type, assets, valueUSD }) => {
   return (
     <Box display="flex" flexDirection="column" gap={0.5} alignItems="center">
       <Typography fontWeight={600} fontSize={12} textTransform="uppercase" color={type === 'fixed' ? 'blue' : 'green'}>
         {type}
       </Typography>
       <Typography fontWeight={500} fontSize={13} lineHeight="15.73px" color="grey.700">
-        $23K | 1.32 {symbol}
+        ${formatNumber(valueUSD, 'USD')}| {assets} {symbol}
       </Typography>
     </Box>
   );

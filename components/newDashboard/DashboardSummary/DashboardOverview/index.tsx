@@ -1,6 +1,7 @@
 import React from 'react';
 import { Grid } from '@mui/material';
 import DepositsOverview from './DepositsOverview';
+import BorrowsOverview from './BorrowsOverview';
 
 const DashboardOverview = () => {
   return (
@@ -9,7 +10,7 @@ const DashboardOverview = () => {
         <DepositsOverview />
       </Grid>
       <Grid item xs={4}>
-        <DepositsOverview />
+        <BorrowsOverview />
       </Grid>
       <Grid item xs={4}>
         <DepositsOverview />

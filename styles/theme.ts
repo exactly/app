@@ -302,7 +302,7 @@ export const lightTheme = createTheme({
       styleOverrides: {
         tooltip: {
           backgroundColor: '#fff',
-          padding: '16px',
+          padding: '8px',
           border: '1px solid #EDF0F2',
           borderRadius: '8px',
           color: '#0E0E0E',
