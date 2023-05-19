@@ -1,5 +1,5 @@
 import React, { FC, useEffect, useMemo } from 'react';
-import ModalSubmit from 'components/common/modal/ModalSubmit';
+import ModalSubmit from 'components/OperationsModal/ModalSubmit';
 import { useMarketContext } from 'contexts/MarketContext';
 import { MarketsBasicOperation, MarketsBasicOption } from 'contexts/MarketsBasicContext';
 import { Operation } from 'contexts/ModalStatusContext';

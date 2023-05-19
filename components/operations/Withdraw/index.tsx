@@ -1,7 +1,7 @@
 import React, { FC, useCallback, useMemo, useState } from 'react';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 
-import ModalTxCost from 'components/common/modal/ModalTxCost';
+import ModalTxCost from 'components/OperationsModal/ModalTxCost';
 import ModalGif from 'components/common/modal/ModalGif';
 
 import { useWeb3 } from 'hooks/useWeb3';
@@ -19,7 +19,7 @@ import ModalAdvancedSettings from 'components/common/modal/ModalAdvancedSettings
 import ModalInfoFloatingUtilizationRate from 'components/OperationsModal/Info/ModalInfoFloatingUtilizationRate';
 import ModalInfoBorrowLimit from 'components/OperationsModal/Info/ModalInfoBorrowLimit';
 import ModalAlert from 'components/common/modal/ModalAlert';
-import ModalSubmit from 'components/common/modal/ModalSubmit';
+import ModalSubmit from 'components/OperationsModal/ModalSubmit';
 import useAccountData from 'hooks/useAccountData';
 import useHandleOperationError from 'hooks/useHandleOperationError';
 import useAnalytics from 'hooks/useAnalytics';

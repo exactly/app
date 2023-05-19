@@ -1,7 +1,7 @@
 import React, { type FC } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import ModalTxCost from 'components/common/modal/ModalTxCost';
+import ModalTxCost from 'components/OperationsModal/ModalTxCost';
 import ModalGif from 'components/common/modal/ModalGif';
 
 import useBalance from 'hooks/useBalance';
@@ -14,12 +14,12 @@ import ModalInfoBorrowLimit from 'components/OperationsModal/Info/ModalInfoBorro
 import { Grid } from '@mui/material';
 import AssetInput from 'components/OperationsModal/AssetInput';
 import ModalAdvancedSettings from 'components/common/modal/ModalAdvancedSettings';
-import ModalSubmit from 'components/common/modal/ModalSubmit';
+import ModalSubmit from 'components/OperationsModal/ModalSubmit';
 import ModalAlert from 'components/common/modal/ModalAlert';
 import ModalInfoTotalDeposits from 'components/OperationsModal/Info/ModalInfoTotalDeposits';
 import ModalInfoFloatingUtilizationRate from 'components/OperationsModal/Info/ModalInfoFloatingUtilizationRate';
 import useDeposit from 'hooks/useDeposit';
-import ModalRewards from 'components/common/modal/ModalRewards';
+import ModalRewards from 'components/OperationsModal/ModalRewards';
 import useFloatingPoolAPR from 'hooks/useFloatingPoolAPR';
 import { toPercentage } from 'utils/utils';
 import ModalInfoAPR from 'components/OperationsModal/Info/ModalInfoAPR';

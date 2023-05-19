@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box } from '@mui/material';
 
-import ModalInput from 'components/common/modal/ModalInput';
+import ModalInput from 'components/OperationsModal/ModalInput';
 import AvailableAmount, { Props as AAProps } from '../AvailableAmount';
 import USDValue from '../USDValue';
 import AssetSelector from '../AssetSelector';

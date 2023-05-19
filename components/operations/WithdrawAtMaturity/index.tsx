@@ -3,7 +3,7 @@ import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { AddressZero, WeiPerEther, Zero } from '@ethersproject/constants';
 
 import ModalGif from 'components/common/modal/ModalGif';
-import ModalTxCost from 'components/common/modal/ModalTxCost';
+import ModalTxCost from 'components/OperationsModal/ModalTxCost';
 
 import { useWeb3 } from 'hooks/useWeb3';
 
@@ -21,7 +21,7 @@ import ModalInfoFixedUtilizationRate from 'components/OperationsModal/Info/Modal
 import ModalAdvancedSettings from 'components/common/modal/ModalAdvancedSettings';
 import ModalInfoEditableSlippage from 'components/OperationsModal/Info/ModalInfoEditableSlippage';
 import ModalAlert from 'components/common/modal/ModalAlert';
-import ModalSubmit from 'components/common/modal/ModalSubmit';
+import ModalSubmit from 'components/OperationsModal/ModalSubmit';
 import ModalInfoAmount from 'components/OperationsModal/Info/ModalInfoAmount';
 import formatNumber from 'utils/formatNumber';
 import ModalInfo from 'components/common/modal/ModalInfo';

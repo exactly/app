@@ -3,7 +3,7 @@ import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { AddressZero, WeiPerEther, Zero } from '@ethersproject/constants';
 
 import ModalGif from 'components/common/modal/ModalGif';
-import ModalTxCost from 'components/common/modal/ModalTxCost';
+import ModalTxCost from 'components/OperationsModal/ModalTxCost';
 
 import formatNumber from 'utils/formatNumber';
 
@@ -25,7 +25,7 @@ import ModalInfoFixedUtilizationRate from 'components/OperationsModal/Info/Modal
 import ModalAdvancedSettings from 'components/common/modal/ModalAdvancedSettings';
 import ModalInfoEditableSlippage from 'components/OperationsModal/Info/ModalInfoEditableSlippage';
 import ModalAlert from 'components/common/modal/ModalAlert';
-import ModalSubmit from 'components/common/modal/ModalSubmit';
+import ModalSubmit from 'components/OperationsModal/ModalSubmit';
 import ModalInfoBorrowLimit from 'components/OperationsModal/Info/ModalInfoBorrowLimit';
 import useHandleOperationError from 'hooks/useHandleOperationError';
 import useAnalytics from 'hooks/useAnalytics';

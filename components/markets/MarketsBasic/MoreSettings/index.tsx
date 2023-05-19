@@ -1,7 +1,7 @@
 import React, { FC, useMemo } from 'react';
 import { Box } from '@mui/material';
 import ModalAdvancedSettings from 'components/common/modal/ModalAdvancedSettings';
-import ModalTxCost from 'components/common/modal/ModalTxCost';
+import ModalTxCost from 'components/OperationsModal/ModalTxCost';
 import ModalInfoEditableSlippage from 'components/OperationsModal/Info/ModalInfoEditableSlippage';
 import useDepositAtMaturity from 'hooks/useDepositAtMaturity';
 import useBorrowAtMaturity from 'hooks/useBorrowAtMaturity';

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
-import ModalInfo from '../ModalInfo';
+import ModalInfo from 'components/common/modal/ModalInfo';
 import useRewards from 'hooks/useRewards';
 import RewardPill from 'components/markets/RewardPill';
 import { Operation } from 'contexts/ModalStatusContext';

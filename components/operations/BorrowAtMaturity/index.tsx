@@ -1,6 +1,6 @@
 import React, { FC, useEffect } from 'react';
 
-import ModalTxCost from 'components/common/modal/ModalTxCost';
+import ModalTxCost from 'components/OperationsModal/ModalTxCost';
 import ModalGif from 'components/common/modal/ModalGif';
 
 import { toPercentage } from 'utils/utils';
@@ -18,11 +18,11 @@ import ModalAdvancedSettings from 'components/common/modal/ModalAdvancedSettings
 import ModalInfoBorrowLimit from 'components/OperationsModal/Info/ModalInfoBorrowLimit';
 import ModalInfoEditableSlippage from 'components/OperationsModal/Info/ModalInfoEditableSlippage';
 import ModalAlert from 'components/common/modal/ModalAlert';
-import ModalSubmit from 'components/common/modal/ModalSubmit';
+import ModalSubmit from 'components/OperationsModal/ModalSubmit';
 import useAccountData from 'hooks/useAccountData';
 import useBorrowAtMaturity from 'hooks/useBorrowAtMaturity';
-import ModalRewards from 'components/common/modal/ModalRewards';
-import ModalPenaltyRate from 'components/common/modal/ModalPenaltyRate';
+import ModalRewards from 'components/OperationsModal/ModalRewards';
+import ModalPenaltyRate from 'components/OperationsModal/ModalPenaltyRate';
 import { useTranslation } from 'react-i18next';
 import useTranslateOperation from 'hooks/useTranslateOperation';
 

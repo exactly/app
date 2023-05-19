@@ -1,11 +1,11 @@
 import React from 'react';
 import { formatFixed } from '@ethersproject/bignumber';
 import { Typography, Skeleton } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 
-import ModalInfo from '../ModalInfo';
+import ModalInfo from 'components/common/modal/ModalInfo';
 import useAccountData from 'hooks/useAccountData';
 import { toPercentage } from 'utils/utils';
-import { useTranslation } from 'react-i18next';
 
 type Props = {
   symbol: string;

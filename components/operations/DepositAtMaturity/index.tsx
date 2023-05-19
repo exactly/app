@@ -1,7 +1,7 @@
 import React, { FC, useEffect } from 'react';
 import { formatFixed } from '@ethersproject/bignumber';
 
-import ModalTxCost from 'components/common/modal/ModalTxCost';
+import ModalTxCost from 'components/OperationsModal/ModalTxCost';
 import ModalGif from 'components/common/modal/ModalGif';
 
 import useBalance from 'hooks/useBalance';
@@ -16,7 +16,7 @@ import { useModalStatus } from 'contexts/ModalStatusContext';
 import ModalAdvancedSettings from 'components/common/modal/ModalAdvancedSettings';
 import ModalInfoTotalDeposits from 'components/OperationsModal/Info/ModalInfoTotalDeposits';
 import ModalAlert from 'components/common/modal/ModalAlert';
-import ModalSubmit from 'components/common/modal/ModalSubmit';
+import ModalSubmit from 'components/OperationsModal/ModalSubmit';
 import DateSelector from 'components/OperationsModal/DateSelector';
 import ModalInfoAPR from 'components/OperationsModal/Info/ModalInfoAPR';
 import ModalInfoFixedUtilizationRate from 'components/OperationsModal/Info/ModalInfoFixedUtilizationRate';
