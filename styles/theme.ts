@@ -70,6 +70,8 @@ declare module '@mui/material/styles' {
     dashboardMainTitle: TypographyVariants['h6'];
     dashboardMainSubtitle: TypographyVariants['body1'];
     dashboardSubtitleNumber: TypographyVariants['body1'];
+    dashboardOverviewAmount: TypographyVariants['h1'];
+    dashboardOverviewSubtitle2: TypographyVariants['subtitle2'];
   }
   interface TypographyVariantsOptions {
     fontFamilyMonospaced: string;
@@ -82,6 +84,8 @@ declare module '@mui/material/styles' {
     dashboardMainTitle: TypographyVariants['h6'];
     dashboardMainSubtitle: TypographyVariants['h6'];
     dashboardSubtitleNumber: TypographyVariants['body1'];
+    dashboardOverviewAmount: TypographyVariants['h1'];
+    dashboardOverviewSubtitle2: TypographyVariants['subtitle2'];
   }
 }
 
@@ -96,6 +100,8 @@ declare module '@mui/material/Typography' {
     dashboardMainTitle: true;
     dashboardMainSubtitle: true;
     dashboardSubtitleNumber: true;
+    dashboardOverviewAmount: true;
+    dashboardOverviewSubtitle2: true;
   }
 }
 
@@ -229,6 +235,17 @@ export const lightTheme = createTheme({
       lineHeight: '15.6px',
       fontWeight: 600,
     },
+    dashboardOverviewAmount: {
+      fontSize: 34,
+      lineHeight: '41.15px',
+      fontWeight: 600,
+    },
+    dashboardOverviewSubtitle2: {
+      fontFamily: 'IBM Plex Mono',
+      fontSize: 12,
+      lineHeight: '12px',
+      fontWeight: 400,
+    },
   },
   shape: {
     borderRadius: 6,
@@ -242,11 +259,12 @@ export const lightTheme = createTheme({
           fontSize: '13px',
           fontWeight: 600,
           padding: '6px 16px',
-          height: '34px',
+          height: '32px',
         },
-        outlined: {
-          color: '#62666A',
-          borderColor: '#E3E5E8',
+        contained: {
+          '&:hover': {
+            backgroundColor: '#2B2B2B',
+          },
         },
       },
     },
@@ -444,6 +462,17 @@ export const darkTheme = createTheme({
       lineHeight: '15.6px',
       fontWeight: 600,
     },
+    dashboardOverviewAmount: {
+      fontSize: 34,
+      lineHeight: '41.15px',
+      fontWeight: 600,
+    },
+    dashboardOverviewSubtitle2: {
+      fontFamily: 'IBM Plex Mono',
+      fontSize: 12,
+      lineHeight: '12px',
+      fontWeight: 400,
+    },
   },
   shape: {
     borderRadius: 6,
@@ -457,7 +486,7 @@ export const darkTheme = createTheme({
           fontSize: '13px',
           fontWeight: 600,
           padding: '6px 16px',
-          height: '34px',
+          height: '32px',
         },
         outlined: {
           color: '#E3E5E8',

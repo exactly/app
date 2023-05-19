@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Typography } from '@mui/material';
-import PublishIcon from '@mui/icons-material/Publish';
+import { BorrowLimitIcon } from 'components/Icons';
 
 const BorrowLimit = () => {
   return (
@@ -17,7 +17,7 @@ const BorrowLimit = () => {
       height="64px"
     >
       <Box display="flex" gap={1} alignItems="center">
-        <PublishIcon sx={{ fontSize: 16 }} />
+        <BorrowLimitIcon sx={{ fontSize: 16 }} />
         <Typography variant="dashboardTitle" noWrap>
           Borrow Limit
         </Typography>

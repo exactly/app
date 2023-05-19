@@ -128,7 +128,6 @@ function TableRowFloatingPool({ symbol, valueUSD, depositedAmount, borrowedAmoun
               sx={{ backgroundColor: 'components.bg', whiteSpace: 'nowrap', '&:hover': { zIndex: 1 } }}
               onClick={(e) => handleActionClick(e, 'repay', symbol)}
               data-testid={`floating-repay-${symbol}`}
-              disabled={isRolloverDisabled(borrowedAmount)}
             >
               {t('Repay')}
             </Button>

@@ -58,7 +58,7 @@ export function useStartDebtManagerButton() {
   );
 
   const isRolloverDisabled = useCallback(
-    (borrow?: BigNumber) => !debtManager || (borrow && borrow.isZero()),
+    (borrow?: BigNumber) => !debtManager || (borrow && borrow.isZero()) || true,
     [debtManager],
   );
 
