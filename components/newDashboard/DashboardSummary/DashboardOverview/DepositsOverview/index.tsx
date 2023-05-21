@@ -5,6 +5,7 @@ import { DepositIcon } from 'components/Icons';
 import { AssetPosition } from '../DualProgressBarPosition';
 import OverviewCard from '../OverviewCard';
 import OverviewPositionBars from '../OverviewPositionBars';
+import formatNumber from 'utils/formatNumber';
 
 const DepositsOverview = () => {
   const assets: AssetPosition[] = [
@@ -54,8 +55,12 @@ const DepositsOverview = () => {
     <OverviewCard
       title="Your Deposits"
       icon={<DepositIcon sx={{ fontSize: 12 }} />}
-      fixedValue={134003.41}
-      floatingValue={426429.1}
+      total={`$${formatNumber(560432.51, 'USD', true)}`}
+      fixedValue={`$${formatNumber(134003.41, 'USD', true)}`}
+      floatingValue={`$${formatNumber(426429.1, 'USD', true)}`}
+      subFixedValue={`${23.91}%`}
+      subFloatingValue={`${76.08}%`}
+      viewAll
       actions={
         <Box display="flex" alignItems="center" justifyContent="space-between" gap={1}>
           <ButtonWithDropdown fullWidth>Deposit</ButtonWithDropdown>

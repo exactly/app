@@ -2,6 +2,7 @@ import React from 'react';
 import { Grid } from '@mui/material';
 import DepositsOverview from './DepositsOverview';
 import BorrowsOverview from './BorrowsOverview';
+import EarningsOverview from './EarningsOverview';
 
 const DashboardOverview = () => {
   return (
@@ -13,7 +14,7 @@ const DashboardOverview = () => {
         <BorrowsOverview />
       </Grid>
       <Grid item xs={4}>
-        <DepositsOverview />
+        <EarningsOverview />
       </Grid>
     </Grid>
   );

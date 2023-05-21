@@ -6,6 +6,7 @@ const dictionary: Record<string, number> = {
   WBTC: 6,
   wstETH: 6,
   OP: 6,
+  noDecimals: 0,
 };
 
 function formatNumber(number: string | number, symbol?: string, standard?: boolean) {
@@ -14,7 +15,7 @@ function formatNumber(number: string | number, symbol?: string, standard?: boole
   return new Intl.NumberFormat('en-GB', {
     notation: standard ? 'standard' : 'compact',
     compactDisplay: 'short',
-    minimumFractionDigits: 2,
+    minimumFractionDigits: Math.min(symbol ? dictionary[symbol] : 2, 2),
     maximumFractionDigits: symbol ? dictionary[symbol] : 2,
   }).format(parsedNumber);
 }

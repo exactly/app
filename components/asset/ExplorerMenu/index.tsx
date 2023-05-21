@@ -61,7 +61,7 @@ const ExplorerMenu: FC<Props> = ({ symbol, assetAddress, eMarketAddress, rateMod
           <Typography
             fontSize={10}
             fontWeight={500}
-            fontFamily="monospace"
+            fontFamily="IBM Plex Mono"
             color={palette.mode === 'light' ? 'figma.grey.600' : 'grey.900'}
             textTransform="uppercase"
           >

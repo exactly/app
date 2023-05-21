@@ -5,6 +5,7 @@ import { BorrowIcon } from 'components/Icons';
 import { AssetPosition } from '../DualProgressBarPosition';
 import OverviewCard from '../OverviewCard';
 import OverviewPositionBars from '../OverviewPositionBars';
+import formatNumber from 'utils/formatNumber';
 
 const BorrowsOverview = () => {
   const assets: AssetPosition[] = [
@@ -38,8 +39,12 @@ const BorrowsOverview = () => {
     <OverviewCard
       title="Your Borrows"
       icon={<BorrowIcon sx={{ fontSize: 12 }} />}
-      fixedValue={5904.03}
-      floatingValue={28817.92}
+      total={`$${formatNumber(34721.95, 'USD', true)}`}
+      fixedValue={`$${formatNumber(5904.03, 'USD', true)}`}
+      floatingValue={`$${formatNumber(28817.92, 'USD', true)}`}
+      subFixedValue={`${17.01}%`}
+      subFloatingValue={`${82.99}%`}
+      viewAll
       actions={
         <Box display="flex" alignItems="center" justifyContent="space-between" gap={1}>
           <ButtonWithDropdown fullWidth>Borrow</ButtonWithDropdown>

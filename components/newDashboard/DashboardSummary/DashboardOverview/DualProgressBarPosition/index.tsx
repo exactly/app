@@ -53,7 +53,7 @@ const TooltipContent: FC<TooltipContentProps> = ({ symbol, type, assets, valueUS
         {type}
       </Typography>
       <Typography fontWeight={500} fontSize={13} lineHeight="15.73px" color="grey.700">
-        ${formatNumber(valueUSD, 'USD')}| {assets} {symbol}
+        ${formatNumber(valueUSD, 'USD')} | {assets} {symbol}
       </Typography>
     </Box>
   );

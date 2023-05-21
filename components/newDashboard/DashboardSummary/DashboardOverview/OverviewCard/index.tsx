@@ -1,30 +1,32 @@
-import React, { FC, PropsWithChildren, useMemo } from 'react';
+import React, { FC, PropsWithChildren, ReactNode } from 'react';
 import { Box, Divider, Typography } from '@mui/material';
-import formatNumber from 'utils/formatNumber';
 
 type OverviewCardProps = {
   title: string;
-  icon: React.ReactNode;
-  fixedValue: number;
-  floatingValue: number;
-  actions?: React.ReactNode;
+  icon: ReactNode;
+  total: string;
+  subTotal?: ReactNode;
+  fixedValue: string;
+  floatingValue: string;
+  subFixedValue: string;
+  subFloatingValue: string;
+  viewAll?: boolean;
+  actions?: ReactNode;
 };
 
 const OverviewCard: FC<PropsWithChildren & OverviewCardProps> = ({
   title,
   icon,
+  total,
+  subTotal,
   fixedValue,
   floatingValue,
-  children,
+  subFixedValue,
+  subFloatingValue,
+  viewAll,
   actions,
+  children,
 }) => {
-  const total = useMemo(() => fixedValue + floatingValue, [fixedValue, floatingValue]);
-  const fixedPercentage = useMemo(() => (total ? (fixedValue / total) * 100 : 0).toFixed(2), [fixedValue, total]);
-  const floatingPercentage = useMemo(
-    () => (total ? (floatingValue / total) * 100 : 0).toFixed(2),
-    [floatingValue, total],
-  );
-
   return (
     <Box
       display="flex"
@@ -44,23 +46,28 @@ const OverviewCard: FC<PropsWithChildren & OverviewCardProps> = ({
               {icon}
               <Typography variant="dashboardTitle">{title}</Typography>
             </Box>
-            <Typography variant="dashboardMainSubtitle" textTransform="uppercase" sx={{ cursor: 'pointer' }}>
-              View All
-            </Typography>
+            {viewAll && (
+              <Typography variant="dashboardMainSubtitle" textTransform="uppercase" sx={{ cursor: 'pointer' }}>
+                View All
+              </Typography>
+            )}
           </Box>
           <Box display="flex" flexDirection="column" gap={2}>
-            <Typography variant="dashboardOverviewAmount">${formatNumber(total, 'USD', true)}</Typography>
+            <Box display="flex" flex="nowrap" alignItems="baseline" gap={1}>
+              <Typography variant="dashboardOverviewAmount">{total}</Typography>
+              {subTotal}
+            </Box>
             <Box display="flex" alignItems="center" gap={2}>
               <Box display="flex" flexDirection="column">
                 <Box display="flex" alignItems="center" gap={1}>
                   <Box width={16} height={16} borderRadius="4px" sx={{ bgcolor: 'blue' }} />
                   <Typography variant="dashboardMainTitle" fontWeight={600}>
-                    ${formatNumber(fixedValue, 'USD', true)}
+                    {fixedValue}
                   </Typography>
                 </Box>
                 <Box display="flex" alignItems="center" gap={1}>
                   <Box width={16} height={16} sx={{ bgcolor: 'transparent' }} />
-                  <Typography variant="dashboardSubtitleNumber">{fixedPercentage}%</Typography>
+                  <Typography variant="dashboardSubtitleNumber">{subFixedValue}</Typography>
                 </Box>
               </Box>
               <Divider orientation="vertical" flexItem />
@@ -68,12 +75,12 @@ const OverviewCard: FC<PropsWithChildren & OverviewCardProps> = ({
                 <Box display="flex" alignItems="center" gap={1}>
                   <Box width={16} height={16} borderRadius="4px" sx={{ bgcolor: 'green' }} />
                   <Typography variant="dashboardMainTitle" fontWeight={600}>
-                    ${formatNumber(floatingValue, 'USD', true)}
+                    {floatingValue}
                   </Typography>
                 </Box>
                 <Box display="flex" alignItems="center" gap={1}>
                   <Box width={16} height={16} sx={{ bgcolor: 'transparent' }} />
-                  <Typography variant="dashboardSubtitleNumber">{floatingPercentage}%</Typography>
+                  <Typography variant="dashboardSubtitleNumber">{subFloatingValue}</Typography>
                 </Box>
               </Box>
             </Box>
