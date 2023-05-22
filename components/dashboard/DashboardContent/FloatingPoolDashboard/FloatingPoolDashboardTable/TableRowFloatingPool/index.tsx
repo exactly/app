@@ -68,7 +68,7 @@ function TableRowFloatingPool({ symbol, valueUSD, depositedAmount, borrowedAmoun
             `${formatNumber(
               formatFixed(type === 'deposit' ? depositedAmount : borrowedAmount, marketAccount?.decimals),
               symbol,
-            )}`) || <Skeleton width={40} />}{' '}
+            )}`) || <Skeleton width={40} />}
         </Typography>
       </TableCell>
       <TableCell align="left" size="small">

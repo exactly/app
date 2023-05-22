@@ -22,11 +22,12 @@ const ModalSheet = forwardRef(function ModalSheet({ title, container, open, onCl
             position: 'absolute',
             left: 0,
             width: '100%',
-            height: '100%',
+            height: '500px',
             padding: { xs: spacing(3, 2, 2), sm: spacing(5, 4, 4) },
             borderTop: `4px ${palette.mode === 'light' ? 'black' : 'white'} solid`,
             backgroundColor: palette.mode === 'light' ? 'white' : 'black',
             zIndex: 2,
+            overflowY: 'hidden',
           }}
         >
           <IconButton
@@ -41,13 +42,13 @@ const ModalSheet = forwardRef(function ModalSheet({ title, container, open, onCl
           >
             <CloseIcon sx={{ fontSize: 19 }} />
           </IconButton>
-          <Box>
+          <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
             {title && (
               <Typography fontWeight={700} fontSize={24}>
                 {title}
               </Typography>
             )}
-            <Box mt={4}>{children}</Box>
+            <Box sx={{ mt: 4, flex: 1, overflowY: 'hidden' }}>{children}</Box>
           </Box>
         </Box>
       </Slide>
