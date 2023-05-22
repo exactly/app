@@ -3,7 +3,6 @@ import type { BigNumber } from '@ethersproject/bignumber';
 export type Borrow = {
   id: string;
   market: string;
-  symbol?: string;
   maturity: number;
   assets: BigNumber;
   fee: BigNumber;

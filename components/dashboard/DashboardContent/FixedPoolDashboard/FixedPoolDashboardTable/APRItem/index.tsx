@@ -1,6 +1,6 @@
 import { formatFixed } from '@ethersproject/bignumber';
 import { Skeleton } from '@mui/material';
-import useFixedOperation from 'hooks/useFixedPoolTransactions';
+import useFixedPoolTransactions from 'hooks/useFixedPoolTransactions';
 import React, { FC, useMemo } from 'react';
 import calculateAPR from 'utils/calculateAPR';
 
@@ -10,7 +10,7 @@ const APRItem: FC<{ type: 'deposit' | 'borrow'; maturityDate: number; market: st
   market,
   decimals,
 }) => {
-  const { depositTxs, borrowTxs } = useFixedOperation(type, maturityDate, market);
+  const { depositTxs, borrowTxs } = useFixedPoolTransactions(type, maturityDate, market);
 
   const APR: number | undefined = useMemo(() => {
     const allTransactions = [...depositTxs, ...borrowTxs];
@@ -20,7 +20,7 @@ const APRItem: FC<{ type: 'deposit' | 'borrow'; maturityDate: number; market: st
     let allAmounts = 0;
 
     allTransactions.forEach(({ fee, assets, timestamp, maturity }) => {
-      const { transactionAPR } = calculateAPR(fee, decimals, assets, timestamp, maturity);
+      const { transactionAPR } = calculateAPR(fee, assets, timestamp, maturity);
       allAPRbyAmount += transactionAPR * parseFloat(formatFixed(assets, decimals));
       allAmounts += parseFloat(formatFixed(assets, decimals));
     });

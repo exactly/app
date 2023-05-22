@@ -75,7 +75,6 @@ function DebtManagerModal() {
             top: 8,
             color: 'grey.500',
           }}
-          data-testid="modal-close"
         >
           <CloseIcon sx={{ fontSize: 19 }} />
         </IconButton>
@@ -95,7 +94,7 @@ function DebtManagerModal() {
             }}
           >
             <Typography fontWeight={700} fontSize={24}>
-              {t('Debt Manager')}
+              {t('Rollover')}
             </Typography>
           </DialogTitle>
         )}

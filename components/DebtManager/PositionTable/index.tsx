@@ -2,12 +2,25 @@ import React, { type PropsWithChildren } from 'react';
 import Image from 'next/image';
 import { BigNumber, formatFixed } from '@ethersproject/bignumber';
 import { WeiPerEther } from '@ethersproject/constants';
-import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
+import {
+  Box,
+  Skeleton,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography,
+  TypographyProps,
+} from '@mui/material';
 import { useTranslation } from 'react-i18next';
 
 import OperationSquare from 'components/common/OperationSquare';
 import parseTimestamp from 'utils/parseTimestamp';
 import formatNumber from 'utils/formatNumber';
+import { toPercentage } from 'utils/utils';
+import BestPill from 'components/common/BestPill';
 
 export type PositionTableRow = {
   symbol: string;
@@ -22,11 +35,12 @@ export type PositionTableRow = {
 type Props = {
   data: PositionTableRow[];
   onClick: (row: PositionTableRow) => void;
+  loading?: boolean;
+  showBalance?: boolean;
 };
 
-function PositionTable({ data, onClick }: Props) {
+function PositionTable({ data, onClick, loading = false, showBalance = false }: Props) {
   const { t } = useTranslation();
-  const showBalance = data.some((row) => row.balance);
   return (
     <TableContainer sx={{ maxHeight: '100%' }}>
       <Table stickyHeader>
@@ -40,41 +54,66 @@ function PositionTable({ data, onClick }: Props) {
           </TableRow>
         </TableHead>
         <TableBody>
-          {[...data, ...data].map((row) => {
-            const balance =
-              row.balance &&
-              '$' + formatNumber(formatFixed(row.balance.mul(row.usdPrice).div(WeiPerEther), row.decimals), 'USD');
-            return (
-              <TableRow
-                hover
-                tabIndex={-1}
-                key={row.symbol + row.maturity + row.balance}
-                sx={{
-                  '&:last-child td': { border: 0 },
-                  cursor: 'pointer',
-                }}
-                onClick={() => onClick(row)}
-              >
-                <TableCell sx={{ maxWidth: 64 }}>
-                  <AssetCell symbol={row.symbol} />
-                </TableCell>
-                <TableCell>
-                  <TypeCell maturity={row.maturity} />
-                </TableCell>
-                <TableCell>
-                  <TextCell>{row.maturity ? parseTimestamp(row.maturity) : t('Unlimited')}</TextCell>
-                </TableCell>
-                {showBalance && (
+          {loading
+            ? [1, 2, 3].map((i) => (
+                <TableRow key={i}>
                   <TableCell>
-                    <TextCell>{balance}</TextCell>
+                    <Skeleton width={60} />
                   </TableCell>
-                )}
-                <TableCell>
-                  <TextCell>0%</TextCell>
-                </TableCell>
-              </TableRow>
-            );
-          })}
+                  <TableCell>
+                    <Skeleton width={60} />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton width={100} />
+                  </TableCell>
+                  {showBalance && (
+                    <TableCell>
+                      <Skeleton width={60} />
+                    </TableCell>
+                  )}
+                  <TableCell>
+                    <Skeleton width={60} />
+                  </TableCell>
+                </TableRow>
+              ))
+            : data.map((row) => {
+                const balance =
+                  row.balance &&
+                  '$' + formatNumber(formatFixed(row.balance.mul(row.usdPrice).div(WeiPerEther), row.decimals), 'USD');
+                return (
+                  <TableRow
+                    hover
+                    tabIndex={-1}
+                    key={row.symbol + row.maturity + row.balance}
+                    sx={{
+                      '&:last-child td': { border: 0 },
+                      cursor: 'pointer',
+                    }}
+                    onClick={() => onClick(row)}
+                  >
+                    <TableCell sx={{ maxWidth: 64 }}>
+                      <AssetCell symbol={row.symbol} />
+                    </TableCell>
+                    <TableCell>
+                      <TypeCell maturity={row.maturity} />
+                    </TableCell>
+                    <TableCell>
+                      <TextCell>{row.maturity ? parseTimestamp(row.maturity) : t('Unlimited')}</TextCell>
+                    </TableCell>
+                    {showBalance && (
+                      <TableCell>
+                        <TextCell>{balance}</TextCell>
+                      </TableCell>
+                    )}
+                    <TableCell sx={{ maxWidth: 64 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mr: 1 }}>
+                        <TextCell flexGrow={1}>{toPercentage(Number(formatFixed(row.apr, 18)))}</TextCell>
+                        {row.isBest && <BestPill />}
+                      </Box>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
         </TableBody>
       </Table>
     </TableContainer>
@@ -84,7 +123,7 @@ function PositionTable({ data, onClick }: Props) {
 function HeaderCell({ children }: PropsWithChildren) {
   return (
     <TableCell sx={{ borderTop: '1px solid #E0E0E0' }}>
-      <Typography variant="subtitle2" color="figma.grey.500" fontWeight={500} width="fit-content" fontSize={14}>
+      <Typography variant="subtitle2" color="figma.grey.500" fontWeight={500} fontSize={14}>
         {children}
       </Typography>
     </TableCell>
@@ -106,12 +145,8 @@ function TypeCell({ maturity }: { maturity?: number }) {
   return <OperationSquare type={maturity ? 'fixed' : 'floating'} />;
 }
 
-function TextCell({ children }: PropsWithChildren) {
-  return (
-    <Typography fontWeight={500} fontSize={16} fontFamily="fontFamilyMonospaced" color="grey.900">
-      {children}
-    </Typography>
-  );
+function TextCell({ ...props }: TypographyProps) {
+  return <Typography fontWeight={500} fontSize={16} fontFamily="fontFamilyMonospaced" color="grey.900" {...props} />;
 }
 
 export default React.memo(PositionTable);

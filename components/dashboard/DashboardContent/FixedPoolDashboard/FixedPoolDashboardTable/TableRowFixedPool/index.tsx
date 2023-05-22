@@ -66,7 +66,7 @@ function TableRowFixedPool({ symbol, valueUSD, type, maturityDate, market, decim
 
       const { transactionAPR } =
         'fee' in transaction
-          ? calculateAPR(transaction.fee, decimals, transaction.assets, transaction.timestamp, transaction.maturity)
+          ? calculateAPR(transaction.fee, transaction.assets, transaction.timestamp, transaction.maturity)
           : { transactionAPR: undefined };
 
       const isBorrowOrDeposit = txType.toLowerCase() === 'borrow' || txType.toLowerCase() === 'deposit';

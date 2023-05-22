@@ -10,6 +10,7 @@ import { toPercentage } from 'utils/utils';
 import numbers from 'config/numbers.json';
 import { Zero } from '@ethersproject/constants';
 import { useTranslation } from 'react-i18next';
+import BestPill from 'components/common/BestPill';
 
 type Props = {
   symbol: string;
@@ -92,20 +93,7 @@ const Options: FC<Props> = ({
                             : ''
                         }
                       >
-                        <Box
-                          width="fit-content"
-                          display="flex"
-                          alignItems="center"
-                          height="16px"
-                          py="3px"
-                          px="6px"
-                          borderRadius="8px"
-                          sx={{ background: 'linear-gradient(66.92deg, #00CC68 34.28%, #00CC8F 100%)' }}
-                        >
-                          <Typography variant="chip" color="components.bg">
-                            {t('BEST')}
-                          </Typography>
-                        </Box>
+                        <BestPill />
                       </Tooltip>
                     )}
                   </Box>
