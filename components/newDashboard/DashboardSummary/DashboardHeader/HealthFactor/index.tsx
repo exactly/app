@@ -1,8 +1,10 @@
 import React, { useMemo } from 'react';
 import { Box, Typography, useMediaQuery, useTheme } from '@mui/material';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+import { useTranslation } from 'react-i18next';
 
 const HealthFactor = () => {
+  const { t } = useTranslation();
   const { breakpoints, palette } = useTheme();
   const isMobile = useMediaQuery(breakpoints.down('lg'));
 
@@ -29,7 +31,7 @@ const HealthFactor = () => {
       <Box display="flex" gap={1} alignItems="center">
         <FavoriteBorderIcon sx={{ fontSize: 16, color: palette.primary.main }} />
         <Typography variant="dashboardTitle" color="primary" noWrap>
-          Health Factor
+          {t('Health Factor')}
         </Typography>
       </Box>
       <Typography variant={isMobile ? 'dashboardOverviewAmount' : 'dashboardMainTitle'} color={healthFactorColor.color}>

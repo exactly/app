@@ -19,6 +19,7 @@ const ButtonWithDropdown: FC<ButtonProps & PropsWithChildren> = ({
           borderBottomRightRadius: 0,
           height: '32px',
           mr: variant === 'contained' ? 0 : '-0.5px',
+          whiteSpace: 'nowrap',
         }}
       >
         {children}
@@ -32,8 +33,10 @@ const ButtonWithDropdown: FC<ButtonProps & PropsWithChildren> = ({
           minWidth: '28px',
           padding: 0,
           height: '32px',
+          textTransform: 'nowrap',
           ml: variant === 'contained' ? 0 : '-0.5px',
           ...(variant !== 'contained' ? { borderLeftColor: 'transparent' } : {}),
+          whiteSpace: 'nowrap',
         }}
       >
         <KeyboardArrowDownIcon sx={{ fontSize: 16, padding: 0, margin: 0 }} />

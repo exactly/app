@@ -1,8 +1,10 @@
 import React from 'react';
 import { Box, Typography, useMediaQuery, useTheme } from '@mui/material';
 import { BorrowLimitIcon } from 'components/Icons';
+import { useTranslation } from 'react-i18next';
 
 const BorrowLimit = () => {
+  const { t } = useTranslation();
   const { breakpoints } = useTheme();
   const isMobile = useMediaQuery(breakpoints.down('lg'));
 
@@ -21,9 +23,7 @@ const BorrowLimit = () => {
     >
       <Box display="flex" gap={1} alignItems="center">
         <BorrowLimitIcon sx={{ fontSize: 16 }} />
-        <Typography variant="dashboardTitle" noWrap>
-          Borrow Limit
-        </Typography>
+        <Typography variant="dashboardTitle">{t('Borrow Limit')}</Typography>
       </Box>
       <Typography variant={isMobile ? 'dashboardOverviewAmount' : 'dashboardMainTitle'}>~$3.5M</Typography>
     </Box>

@@ -4,6 +4,7 @@ import StarsIcon from '@mui/icons-material/Stars';
 import formatNumber from 'utils/formatNumber';
 import Image from 'next/image';
 import ButtonWithDropdown from 'components/common/ButtonWithDropdown';
+import { useTranslation } from 'react-i18next';
 
 type RewardProps = {
   assetSymbol: string;
@@ -16,7 +17,7 @@ const Reward: FC<RewardProps> = ({ assetSymbol, amount, amountInUSD }) => {
   const isMobile = useMediaQuery(breakpoints.down('lg'));
 
   return (
-    <Box display="flex" flexDirection={{ xs: 'column', lg: 'row' }} gap={0.5}>
+    <Box display="flex" flexDirection={{ xs: 'column', lg: 'row' }} gap={0.5} sx={{ flexWrap: 'wrap' }}>
       <Box display="flex" alignItems="center" gap={0.5}>
         <Image
           src={`/img/assets/${assetSymbol}.svg`}
@@ -39,6 +40,7 @@ const Reward: FC<RewardProps> = ({ assetSymbol, amount, amountInUSD }) => {
 };
 
 const UserRewards = () => {
+  const { t } = useTranslation();
   const { breakpoints } = useTheme();
   const isMobile = useMediaQuery(breakpoints.down('lg'));
 
@@ -59,13 +61,11 @@ const UserRewards = () => {
       <Box display="flex" alignItems="center" justifyContent="space-between">
         <Box display="flex" gap={1} alignItems="center">
           <StarsIcon sx={{ fontSize: 16 }} />
-          <Typography variant="dashboardTitle" noWrap>
-            Your Rewards
-          </Typography>
+          <Typography variant="dashboardTitle">{t('Your Rewards')}</Typography>
         </Box>
         {isMobile && (
           <Typography variant="dashboardMainSubtitle" textTransform="uppercase" noWrap sx={{ cursor: 'pointer' }}>
-            Learn More
+            {t('Learn More')}
           </Typography>
         )}
       </Box>
@@ -74,7 +74,7 @@ const UserRewards = () => {
         <Divider orientation="vertical" flexItem />
         <Reward assetSymbol="OP" amount={349} amountInUSD={689.56} />
       </Box>
-      <ButtonWithDropdown fullWidth={isMobile}>Claim</ButtonWithDropdown>
+      <ButtonWithDropdown fullWidth={isMobile}>{t('Claim')}</ButtonWithDropdown>
     </Box>
   );
 };

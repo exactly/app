@@ -1,12 +1,13 @@
 import React from 'react';
 import { Box, Typography, useMediaQuery, useTheme } from '@mui/material';
-import ButtonWithDropdown from 'components/common/ButtonWithDropdown';
 import PaidIcon from '@mui/icons-material/Paid';
 import OverviewCard from '../OverviewCard';
 import formatNumber from 'utils/formatNumber';
 import OverviewTopPositions, { TopAssetPosition } from '../OverviewTopPositions';
+import { useTranslation } from 'react-i18next';
 
 const EarningsOverview = () => {
+  const { t } = useTranslation();
   const { breakpoints } = useTheme();
   const isMobile = useMediaQuery(breakpoints.down('lg'));
 
@@ -39,7 +40,7 @@ const EarningsOverview = () => {
 
   return (
     <OverviewCard
-      title="Your Earnings"
+      title={t('Your Earnings')}
       icon={<PaidIcon sx={{ fontSize: 16 }} />}
       total={`$${formatNumber(151318.03, isMobile ? 'noDecimals' : 'USD', !isMobile)}`}
       subTotal={
@@ -48,22 +49,14 @@ const EarningsOverview = () => {
             2.32
           </Typography>
           <Typography fontSize={18} fontWeight={500} color="figma.grey.500">
-            % APR
+            % {t('APR')}
           </Typography>
         </Box>
       }
       fixedValue={`$${formatNumber(84453.74, 'USD', true)}`}
       floatingValue={`$${formatNumber(66864.29, 'USD', true)}`}
-      subFixedValue={`${0.91}% APR`}
-      subFloatingValue={`${1.83}% APR`}
-      actions={
-        <Box display="flex" alignItems="center" justifyContent="space-between" gap={1}>
-          <ButtonWithDropdown fullWidth>Borrow</ButtonWithDropdown>
-          <ButtonWithDropdown fullWidth variant="outlined">
-            Repay
-          </ButtonWithDropdown>
-        </Box>
-      }
+      subFixedValue={`${0.91}% ${t('APR')}`}
+      subFloatingValue={`${1.83}% ${t('APR')}`}
     >
       <OverviewTopPositions assets={assets} />
     </OverviewCard>

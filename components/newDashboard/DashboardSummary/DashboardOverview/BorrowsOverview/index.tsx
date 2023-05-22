@@ -6,8 +6,10 @@ import { AssetPosition } from '../DualProgressBarPosition';
 import OverviewCard from '../OverviewCard';
 import OverviewPositionBars from '../OverviewPositionBars';
 import formatNumber from 'utils/formatNumber';
+import { useTranslation } from 'react-i18next';
 
 const BorrowsOverview = () => {
+  const { t } = useTranslation();
   const assets: AssetPosition[] = [
     {
       symbol: 'ETH',
@@ -37,7 +39,7 @@ const BorrowsOverview = () => {
 
   return (
     <OverviewCard
-      title="Your Borrows"
+      title={t('Your Borrows')}
       icon={<BorrowIcon sx={{ fontSize: 12 }} />}
       total={`$${formatNumber(34721.95, 'USD', true)}`}
       fixedValue={`$${formatNumber(5904.03, 'USD', true)}`}
@@ -47,9 +49,9 @@ const BorrowsOverview = () => {
       viewAll
       actions={
         <Box display="flex" alignItems="center" justifyContent="space-between" gap={1}>
-          <ButtonWithDropdown fullWidth>Borrow</ButtonWithDropdown>
+          <ButtonWithDropdown fullWidth>{t('Borrow')}</ButtonWithDropdown>
           <ButtonWithDropdown fullWidth variant="outlined">
-            Repay
+            {t('Repay')}
           </ButtonWithDropdown>
         </Box>
       }

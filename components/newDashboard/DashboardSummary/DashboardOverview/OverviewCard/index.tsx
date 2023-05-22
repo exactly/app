@@ -1,5 +1,6 @@
 import React, { FC, PropsWithChildren, ReactNode } from 'react';
 import { Box, Divider, Typography } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 
 type OverviewCardProps = {
   title: string;
@@ -27,6 +28,8 @@ const OverviewCard: FC<PropsWithChildren & OverviewCardProps> = ({
   actions,
   children,
 }) => {
+  const { t } = useTranslation();
+
   return (
     <Box
       display="flex"
@@ -48,7 +51,7 @@ const OverviewCard: FC<PropsWithChildren & OverviewCardProps> = ({
             </Box>
             {viewAll && (
               <Typography variant="dashboardMainSubtitle" textTransform="uppercase" sx={{ cursor: 'pointer' }}>
-                View All
+                {t('View All')}
               </Typography>
             )}
           </Box>
