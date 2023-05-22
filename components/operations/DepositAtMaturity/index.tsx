@@ -2,7 +2,7 @@ import React, { FC, useEffect } from 'react';
 import { formatFixed } from '@ethersproject/bignumber';
 
 import ModalTxCost from 'components/OperationsModal/ModalTxCost';
-import ModalGif from 'components/common/modal/ModalGif';
+import ModalGif from 'components/OperationsModal/ModalGif';
 
 import useBalance from 'hooks/useBalance';
 import { useOperationContext, usePreviewTx } from 'contexts/OperationContext';

@@ -3,7 +3,7 @@ import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { WeiPerEther, Zero } from '@ethersproject/constants';
 
 import ModalTxCost from 'components/OperationsModal/ModalTxCost';
-import ModalGif from 'components/common/modal/ModalGif';
+import ModalGif from 'components/OperationsModal/ModalGif';
 
 import { useWeb3 } from 'hooks/useWeb3';
 

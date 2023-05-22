@@ -20,6 +20,7 @@ import Navbar from 'components/Navbar';
 import { globals } from 'styles/theme';
 import { MarketsBasicProvider } from 'contexts/MarketsBasicContext';
 import { NetworkContextProvider, useNetworkContext } from 'contexts/NetworkContext';
+import { DebtManagerContextProvider } from 'contexts/DebtManagerContext';
 import { GlobalErrorProvider } from 'contexts/GlobalErrorContext';
 import Topbar from 'components/Topbar';
 
@@ -83,14 +84,16 @@ export default function App({ Component, pageProps }: AppProps) {
                 <MarketProvider>
                   <ModalStatusProvider>
                     <MarketsBasicProvider>
-                      <Topbar />
-                      <Box display="flex" flexDirection="column" mx={2} height="100%">
-                        <Navbar />
-                        <main style={{ flexGrow: 1, maxWidth, margin: '0 auto', width: '100%' }}>
-                          <Component {...pageProps} />
-                        </main>
-                        <Footer />
-                      </Box>
+                      <DebtManagerContextProvider>
+                        <Topbar />
+                        <Box display="flex" flexDirection="column" mx={2} height="100%">
+                          <Navbar />
+                          <main style={{ flexGrow: 1, maxWidth, margin: '0 auto', width: '100%' }}>
+                            <Component {...pageProps} />
+                          </main>
+                          <Footer />
+                        </Box>
+                      </DebtManagerContextProvider>
                     </MarketsBasicProvider>
                   </ModalStatusProvider>
                 </MarketProvider>

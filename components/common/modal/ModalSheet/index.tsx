@@ -1,0 +1,59 @@
+import React, { forwardRef, type PropsWithChildren } from 'react';
+import { Box, IconButton, Typography, useTheme, Slide, SlideProps, Backdrop } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
+
+type Props = PropsWithChildren<{
+  container: SlideProps['container'];
+  title?: string | null;
+  open: boolean;
+  onClose: () => void;
+}>;
+
+const ModalSheet = forwardRef(function ModalSheet({ title, container, open, onClose, children }: Props, ref) {
+  const { spacing, palette } = useTheme();
+
+  return (
+    <>
+      <Slide appear={false} direction="up" in={open} container={container}>
+        <Box
+          ref={ref}
+          sx={{
+            borderRadius: 1,
+            position: 'absolute',
+            left: 0,
+            width: '100%',
+            height: '100%',
+            padding: { xs: spacing(3, 2, 2), sm: spacing(5, 4, 4) },
+            borderTop: `4px ${palette.mode === 'light' ? 'black' : 'white'} solid`,
+            backgroundColor: palette.mode === 'light' ? 'white' : 'black',
+            zIndex: 2,
+          }}
+        >
+          <IconButton
+            aria-label="close"
+            onClick={onClose}
+            sx={{
+              position: 'absolute',
+              right: 4,
+              top: 8,
+              color: 'grey.500',
+            }}
+          >
+            <CloseIcon sx={{ fontSize: 19 }} />
+          </IconButton>
+          <Box>
+            {title && (
+              <Typography fontWeight={700} fontSize={24}>
+                {title}
+              </Typography>
+            )}
+            <Box mt={4}>{children}</Box>
+          </Box>
+        </Box>
+      </Slide>
+      <Backdrop open={open} onClick={onClose} />
+    </>
+  );
+});
+
+export default React.memo(ModalSheet);

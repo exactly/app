@@ -2,8 +2,8 @@ import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { AddressZero, WeiPerEther, Zero } from '@ethersproject/constants';
 
-import ModalGif from 'components/common/modal/ModalGif';
 import ModalTxCost from 'components/OperationsModal/ModalTxCost';
+import ModalGif from 'components/OperationsModal/ModalGif';
 
 import { useWeb3 } from 'hooks/useWeb3';
 

@@ -1,7 +1,7 @@
 import React, { type FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import ModalTxCost from 'components/OperationsModal/ModalTxCost';
-import ModalGif from 'components/common/modal/ModalGif';
+import ModalGif from 'components/OperationsModal/ModalGif';
 
 import { useOperationContext, usePreviewTx } from 'contexts/OperationContext';
 import { Grid } from '@mui/material';

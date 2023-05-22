@@ -2,8 +2,8 @@ import React, { FC, useCallback, useMemo, useState } from 'react';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { AddressZero, WeiPerEther, Zero } from '@ethersproject/constants';
 
-import ModalGif from 'components/common/modal/ModalGif';
 import ModalTxCost from 'components/OperationsModal/ModalTxCost';
+import ModalGif from 'components/OperationsModal/ModalGif';
 
 import formatNumber from 'utils/formatNumber';
 

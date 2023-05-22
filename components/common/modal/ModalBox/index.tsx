@@ -5,13 +5,16 @@ export function ModalBox(props: BoxProps) {
   return (
     <Box
       {...props}
-      sx={(theme) => ({
-        display: 'flex',
-        flexDirection: 'column',
-        padding: theme.spacing(1, 2, 2, 2),
-        borderRadius: 1,
-        border: `1px solid ${theme.palette.grey[300]}`,
-      })}
+      sx={[
+        (theme) => ({
+          display: 'flex',
+          flexDirection: 'column',
+          padding: theme.spacing(1, 2, 2, 2),
+          borderRadius: 1,
+          border: `1px solid ${theme.palette.grey[300]}`,
+        }),
+        ...(Array.isArray(props.sx) ? props.sx.flat() : [props.sx]),
+      ]}
     />
   );
 }
@@ -20,21 +23,24 @@ export function ModalBoxRow(props: BoxProps) {
   return (
     <Box
       {...props}
-      sx={(theme) => ({
-        display: 'flex',
-        flexWrap: 'wrap',
-        paddingY: 2,
-        minWidth: theme.spacing(20),
-        '&:not(:nth-of-type(1))': {
-          borderTop: `1px solid ${theme.palette.grey[300]}`,
-        },
-        '&:nth-of-type(1)': {
-          paddingTop: 0,
-        },
-        '&:last-child': {
-          paddingBottom: 0,
-        },
-      })}
+      sx={[
+        (theme) => ({
+          display: 'flex',
+          flexWrap: 'wrap',
+          paddingY: 2,
+          minWidth: theme.spacing(20),
+          '&:not(:nth-of-type(1))': {
+            borderTop: `1px solid ${theme.palette.grey[300]}`,
+          },
+          '&:nth-of-type(1)': {
+            paddingTop: 0,
+          },
+          '&:last-child': {
+            paddingBottom: 0,
+          },
+        }),
+        ...(Array.isArray(props.sx) ? props.sx.flat() : [props.sx]),
+      ]}
     />
   );
 }

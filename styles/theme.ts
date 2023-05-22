@@ -166,6 +166,7 @@ export const lightTheme = createTheme({
     caption: {
       color: '#9a9a9a',
       fontFamily: 'IBM Plex Mono',
+      fontWeight: 500,
     },
     modalRow: {
       color: '#303336',
