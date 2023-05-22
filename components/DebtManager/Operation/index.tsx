@@ -7,6 +7,7 @@ import { ModalBox, ModalBoxRow } from 'components/common/modal/ModalBox';
 import ModalInfo from 'components/common/modal/ModalInfo';
 import ModalAdvancedSettings from 'components/common/modal/ModalAdvancedSettings';
 import ModalSheet from 'components/common/modal/ModalSheet';
+import CustomSlider from 'components/common/CustomSlider';
 
 export default function Operation() {
   const { t } = useTranslation();
@@ -14,8 +15,12 @@ export default function Operation() {
   const container = useRef<HTMLDivElement>(null);
   const fromSheetRef = useRef<HTMLDivElement>(null);
   const toSheetRef = useRef<HTMLDivElement>(null);
-
+  const [value, setValue] = React.useState<number>(100);
   const onClose = useCallback(() => setSheetOpen([false, false]), []);
+
+  const handleChange = (event: Event, newValue: number | number[]) => {
+    setValue(newValue as number);
+  };
 
   return (
     <>
@@ -35,7 +40,7 @@ export default function Operation() {
         onClose={onClose}
         title={t('Select New Position')}
       >
-        Something
+        <CustomSlider value={value} onChange={handleChange} />
       </ModalSheet>
       <Box
         ref={container}
