@@ -53,7 +53,7 @@ const UserRewards = () => {
       gap={3}
       borderRadius="8px"
       boxSizing="border-box"
-      bgcolor="#FFFFFF"
+      bgcolor="components.bg"
       height={{ xs: '235px', lg: '64px' }}
     >
       <Box display="flex" alignItems="center" justifyContent="space-between">

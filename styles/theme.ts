@@ -32,6 +32,15 @@ declare module '@mui/material/styles' {
     components: {
       bg: string;
     };
+
+    healthFactor: {
+      bg: {
+        safe: string;
+        danger: string;
+      };
+      safe: string;
+      danger: string;
+    };
   }
   interface PaletteOptions {
     figma: {
@@ -56,6 +65,15 @@ declare module '@mui/material/styles' {
 
     components: {
       bg: string;
+    };
+
+    healthFactor: {
+      bg: {
+        safe: string;
+        danger: string;
+      };
+      safe: string;
+      danger: string;
     };
   }
 
@@ -149,6 +167,14 @@ export const lightTheme = createTheme({
     },
     components: {
       bg: '#FFFFFF',
+    },
+    healthFactor: {
+      bg: {
+        safe: '#F0FFF4',
+        danger: '#FFF5F5',
+      },
+      safe: '#33CC59',
+      danger: '#D92626',
     },
   },
   typography: {
@@ -377,6 +403,14 @@ export const darkTheme = createTheme({
     },
     components: {
       bg: '#222',
+    },
+    healthFactor: {
+      bg: {
+        safe: '#F0FFF4',
+        danger: '#FFF5F5',
+      },
+      safe: '#33CC59',
+      danger: '#D92626',
     },
   },
   typography: {

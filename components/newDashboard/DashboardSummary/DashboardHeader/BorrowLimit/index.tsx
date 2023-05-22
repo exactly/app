@@ -16,7 +16,7 @@ const BorrowLimit = () => {
       gap={3}
       borderRadius="8px"
       boxSizing="border-box"
-      bgcolor="#FFFFFF"
+      bgcolor="components.bg"
       height={{ xs: '73px', lg: '64px' }}
     >
       <Box display="flex" gap={1} alignItems="center">

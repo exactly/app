@@ -1,10 +1,17 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Box, Typography, useMediaQuery, useTheme } from '@mui/material';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 
 const HealthFactor = () => {
-  const { breakpoints } = useTheme();
+  const { breakpoints, palette } = useTheme();
   const isMobile = useMediaQuery(breakpoints.down('lg'));
+
+  const healthFactor = 7.352;
+
+  const healthFactorColor = useMemo(() => {
+    const status = healthFactor < 1.005 ? 'danger' : 'safe';
+    return { color: palette.healthFactor[status], bg: palette.healthFactor.bg[status] };
+  }, [palette.healthFactor]);
 
   return (
     <Box
@@ -16,17 +23,17 @@ const HealthFactor = () => {
       gap={3}
       borderRadius="8px"
       boxSizing="border-box"
-      bgcolor="#FFF5F5"
+      bgcolor={healthFactorColor.bg}
       height={{ xs: '73px', lg: '64px' }}
     >
       <Box display="flex" gap={1} alignItems="center">
-        <FavoriteBorderIcon sx={{ fontSize: 16 }} />
-        <Typography variant="dashboardTitle" noWrap>
+        <FavoriteBorderIcon sx={{ fontSize: 16, color: palette.primary.main }} />
+        <Typography variant="dashboardTitle" color="primary" noWrap>
           Health Factor
         </Typography>
       </Box>
-      <Typography variant={isMobile ? 'dashboardOverviewAmount' : 'dashboardMainTitle'} color="#D92626">
-        1.092x
+      <Typography variant={isMobile ? 'dashboardOverviewAmount' : 'dashboardMainTitle'} color={healthFactorColor.color}>
+        {healthFactor}x
       </Typography>
     </Box>
   );

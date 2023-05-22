@@ -36,7 +36,7 @@ const OverviewCard: FC<PropsWithChildren & OverviewCardProps> = ({
       gap={4}
       borderRadius="8px"
       boxSizing="border-box"
-      bgcolor="#FFFFFF"
+      bgcolor="components.bg"
       minHeight="450px"
     >
       <Box display="flex" flexDirection="column" gap={4}>
