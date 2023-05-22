@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Typography } from '@mui/material';
+import { Box, Typography, useMediaQuery, useTheme } from '@mui/material';
 import ButtonWithDropdown from 'components/common/ButtonWithDropdown';
 import PaidIcon from '@mui/icons-material/Paid';
 import OverviewCard from '../OverviewCard';
@@ -7,6 +7,9 @@ import formatNumber from 'utils/formatNumber';
 import OverviewTopPositions, { TopAssetPosition } from '../OverviewTopPositions';
 
 const EarningsOverview = () => {
+  const { breakpoints } = useTheme();
+  const isMobile = useMediaQuery(breakpoints.down('lg'));
+
   const assets: TopAssetPosition[] = [
     {
       symbol: 'WETH',
@@ -38,7 +41,7 @@ const EarningsOverview = () => {
     <OverviewCard
       title="Your Earnings"
       icon={<PaidIcon sx={{ fontSize: 16 }} />}
-      total={`$${formatNumber(151318.03, 'USD', true)}`}
+      total={`$${formatNumber(151318.03, isMobile ? 'noDecimals' : 'USD', !isMobile)}`}
       subTotal={
         <Box display="flex" flex="nowrap" alignItems="baseline">
           <Typography variant="dashboardOverviewAmount" fontWeight={400} color="figma.grey.500">
