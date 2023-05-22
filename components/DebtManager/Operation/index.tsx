@@ -3,7 +3,6 @@ import { Box, Typography } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import { useTranslation } from 'react-i18next';
 import { WeiPerEther, Zero } from '@ethersproject/constants';
-import { formatFixed } from '@ethersproject/bignumber';
 import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
 
 import { ModalBox, ModalBoxRow } from 'components/common/modal/ModalBox';
@@ -13,10 +12,11 @@ import ModalSheet from 'components/common/modal/ModalSheet';
 import CustomSlider from 'components/common/CustomSlider';
 import PositionTable, { PositionTableRow } from '../PositionTable';
 import useAccountData from 'hooks/useAccountData';
-import formatNumber from 'utils/formatNumber';
 import { useDebtManagerContext } from 'contexts/DebtManagerContext';
 import parseTimestamp from 'utils/parseTimestamp';
 import ModalSheetButton from 'components/common/modal/ModalSheetButton';
+import formatNumber from 'utils/formatNumber';
+import { formatFixed } from '@ethersproject/bignumber';
 
 function Operation() {
   const { accountData, getMarketAccount } = useAccountData();
@@ -41,19 +41,19 @@ function Operation() {
           ? [
               {
                 symbol: assetSymbol,
-                balance:
-                  '$' +
-                  formatNumber(formatFixed(floatingBorrowAssets.mul(usdPrice).div(WeiPerEther), decimals), 'USD', true),
+                balance: floatingBorrowAssets,
                 apr: floatingBorrowRate,
+                usdPrice,
+                decimals,
               },
             ]
           : []),
         ...fixedBorrowPositions.map((position) => ({
           symbol: assetSymbol,
           maturity: Number(position.maturity),
-          balance:
-            '$' +
-            formatNumber(formatFixed(position.previewValue.mul(usdPrice).div(WeiPerEther), decimals), 'USD', true),
+          balance: position.previewValue,
+          usdPrice,
+          decimals,
           // TODO: Calculate FixedBorrow APR
           apr: Zero,
         })),
@@ -72,20 +72,37 @@ function Operation() {
       return [];
     }
 
-    const { assetSymbol, floatingBorrowRate, fixedPools } = marketAccount;
+    const { assetSymbol, floatingBorrowRate, fixedPools, usdPrice, decimals } = marketAccount;
     return [
       {
         symbol: assetSymbol,
         apr: floatingBorrowRate,
+        usdPrice,
+        decimals,
       },
       ...fixedPools.map((pool) => ({
         symbol: assetSymbol,
         maturity: Number(pool.maturity),
+        usdPrice,
+        decimals,
         // TODO: Calculate FixedBorrow APR
         apr: Zero,
       })),
     ];
   }, [input.from, getMarketAccount]);
+
+  const usdAmount = useMemo(() => {
+    const row = fromRows.find((r) => r.symbol === input.from?.symbol && r.maturity === input.from?.maturity);
+    if (!row) {
+      return '';
+    }
+
+    return formatNumber(
+      formatFixed(row.balance?.mul(input.percent).mul(row.usdPrice).div(WeiPerEther) || Zero, row.decimals),
+      'USD',
+      true,
+    );
+  }, [input.from, input.percent, fromRows]);
 
   return (
     <>
@@ -111,7 +128,15 @@ function Operation() {
         onClose={onClose}
         title={t('Select New Position')}
       >
-        <CustomSlider value={input.percent} onChange={(e, value) => typeof value === 'number' && setPercent(value)} />
+        <Box display="flex" justifyContent="space-between">
+          <Typography variant="caption" color="figma.grey.600">
+            {t('Amount To Rollover')}
+          </Typography>
+          <Typography variant="caption" color="figma.grey.600">
+            ${usdAmount}
+          </Typography>
+        </Box>
+        <CustomSlider pt={2} value={input.percent} onChange={setPercent} mb={4} />
         <PositionTable
           data={toRows}
           onClick={({ symbol, maturity }) => {
@@ -136,7 +161,11 @@ function Operation() {
               {t('Select Debt To Rollover')}
             </Typography>
             <Box display="flex" justifyContent="space-between" alignItems="center">
-              <ModalSheetButton selected={Boolean(input.from)} onClick={() => setSheetOpen([true, false])}>
+              <ModalSheetButton
+                selected={Boolean(input.from)}
+                onClick={() => setSheetOpen([true, false])}
+                sx={{ ml: -0.5 }}
+              >
                 {input.from
                   ? input.from.maturity
                     ? parseTimestamp(input.from.maturity)
@@ -148,6 +177,7 @@ function Operation() {
                 selected={Boolean(input.to)}
                 onClick={() => setSheetOpen([false, true])}
                 disabled={!input.from}
+                sx={{ mr: -0.5 }}
               >
                 {input.to
                   ? input.to.maturity

@@ -13,7 +13,7 @@ function ModalSheetButton({ selected = false, children, ...props }: Props) {
     <Button
       {...props}
       sx={[
-        { display: 'flex', alignItems: 'center', gap: 0.5, p: 0, borderRadius: 1 },
+        { display: 'flex', alignItems: 'center', gap: 0.5, p: 0.5, borderRadius: 1 },
         ...(Array.isArray(props.sx) ? props.sx.flat() : [props.sx]),
       ]}
     >

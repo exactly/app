@@ -22,7 +22,7 @@ const ModalSheet = forwardRef(function ModalSheet({ title, container, open, onCl
             position: 'absolute',
             left: 0,
             width: '100%',
-            height: '500px',
+            height: '600px',
             padding: { xs: spacing(3, 2, 2), sm: spacing(5, 4, 4) },
             borderTop: `4px ${palette.mode === 'light' ? 'black' : 'white'} solid`,
             backgroundColor: palette.mode === 'light' ? 'white' : 'black',
@@ -48,7 +48,7 @@ const ModalSheet = forwardRef(function ModalSheet({ title, container, open, onCl
                 {title}
               </Typography>
             )}
-            <Box sx={{ mt: 4, flex: 1, overflowY: 'hidden' }}>{children}</Box>
+            <Box sx={{ mt: 4, flex: 1, display: 'flex', flexDirection: 'column', overflowY: 'hidden' }}>{children}</Box>
           </Box>
         </Box>
       </Slide>

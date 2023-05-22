@@ -1,16 +1,20 @@
 import React, { type PropsWithChildren } from 'react';
 import Image from 'next/image';
-import { BigNumber } from '@ethersproject/bignumber';
+import { BigNumber, formatFixed } from '@ethersproject/bignumber';
+import { WeiPerEther } from '@ethersproject/constants';
 import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 
 import OperationSquare from 'components/common/OperationSquare';
 import parseTimestamp from 'utils/parseTimestamp';
+import formatNumber from 'utils/formatNumber';
 
 export type PositionTableRow = {
   symbol: string;
   maturity?: number;
-  balance?: string;
+  balance?: BigNumber;
+  usdPrice: BigNumber;
+  decimals: number;
   apr: BigNumber;
   isBest?: boolean;
 };
@@ -24,7 +28,7 @@ function PositionTable({ data, onClick }: Props) {
   const { t } = useTranslation();
   const showBalance = data.some((row) => row.balance);
   return (
-    <TableContainer sx={{ height: '100%' }}>
+    <TableContainer sx={{ maxHeight: '100%' }}>
       <Table stickyHeader>
         <TableHead>
           <TableRow>
@@ -36,33 +40,41 @@ function PositionTable({ data, onClick }: Props) {
           </TableRow>
         </TableHead>
         <TableBody>
-          {data.map((row) => (
-            <TableRow
-              hover
-              tabIndex={-1}
-              key={row.symbol + row.maturity + row.balance}
-              sx={{ cursor: 'pointer' }}
-              onClick={() => onClick(row)}
-            >
-              <TableCell>
-                <AssetCell symbol={row.symbol} />
-              </TableCell>
-              <TableCell>
-                <TypeCell maturity={row.maturity} />
-              </TableCell>
-              <TableCell>
-                <TextCell>{row.maturity ? parseTimestamp(row.maturity) : t('Unlimited')}</TextCell>
-              </TableCell>
-              {showBalance && (
-                <TableCell>
-                  <TextCell>{row.balance}</TextCell>
+          {[...data, ...data].map((row) => {
+            const balance =
+              row.balance &&
+              '$' + formatNumber(formatFixed(row.balance.mul(row.usdPrice).div(WeiPerEther), row.decimals), 'USD');
+            return (
+              <TableRow
+                hover
+                tabIndex={-1}
+                key={row.symbol + row.maturity + row.balance}
+                sx={{
+                  '&:last-child td': { border: 0 },
+                  cursor: 'pointer',
+                }}
+                onClick={() => onClick(row)}
+              >
+                <TableCell sx={{ maxWidth: 64 }}>
+                  <AssetCell symbol={row.symbol} />
                 </TableCell>
-              )}
-              <TableCell>
-                <TextCell>0%</TextCell>
-              </TableCell>
-            </TableRow>
-          ))}
+                <TableCell>
+                  <TypeCell maturity={row.maturity} />
+                </TableCell>
+                <TableCell>
+                  <TextCell>{row.maturity ? parseTimestamp(row.maturity) : t('Unlimited')}</TextCell>
+                </TableCell>
+                {showBalance && (
+                  <TableCell>
+                    <TextCell>{balance}</TextCell>
+                  </TableCell>
+                )}
+                <TableCell>
+                  <TextCell>0%</TextCell>
+                </TableCell>
+              </TableRow>
+            );
+          })}
         </TableBody>
       </Table>
     </TableContainer>
@@ -82,7 +94,7 @@ function HeaderCell({ children }: PropsWithChildren) {
 function AssetCell({ symbol }: { symbol: string }) {
   return (
     <Box sx={{ display: 'flex', alignItems: 'center' }}>
-      <Image src={`/img/assets/${symbol}.svg`} alt={symbol} width="24" height="24" />
+      <Image src={`/img/assets/${symbol}.svg`} alt={symbol} width="16" height="16" />
       <Typography fontWeight={400} fontSize={14} ml={0.5} color="grey.900">
         {symbol}
       </Typography>

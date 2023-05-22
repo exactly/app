@@ -20,7 +20,9 @@ type Input = {
 };
 
 const initState: Input = {
-  percent: 1,
+  from: undefined,
+  to: undefined,
+  percent: 100,
 };
 
 const reducer = (state: Input, action: Partial<Input>): Input => {
@@ -63,7 +65,7 @@ export const DebtManagerContextProvider: FC<PropsWithChildren> = ({ children }) 
   const open = useCallback(() => setIsOpen(true), []);
   const close = useCallback(() => setIsOpen(false), []);
 
-  const setFrom = (from: Position) => dispatch({ from, to: undefined, percent: 1 });
+  const setFrom = (from: Position) => dispatch({ ...initState, from });
   const setTo = (to: Position) => dispatch({ to });
   const setPercent = (percent: number) => dispatch({ percent });
 
