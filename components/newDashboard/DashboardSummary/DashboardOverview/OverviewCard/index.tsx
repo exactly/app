@@ -40,7 +40,7 @@ const OverviewCard: FC<PropsWithChildren & OverviewCardProps> = ({
       borderRadius="8px"
       boxSizing="border-box"
       bgcolor="components.bg"
-      minHeight="450px"
+      minHeight={{ xs: '100px', lg: '450px' }}
     >
       <Box display="flex" flexDirection="column" gap={4}>
         <Box display="flex" flexDirection="column" gap={3.5}>
