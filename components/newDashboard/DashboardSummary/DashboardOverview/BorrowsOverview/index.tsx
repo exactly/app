@@ -39,7 +39,7 @@ const BorrowsOverview = () => {
 
   return (
     <OverviewCard
-      title={t('Your Borrows')}
+      title={t('Total Borrows')}
       icon={<BorrowIcon sx={{ fontSize: 12 }} />}
       total={`$${formatNumber(34721.95, 'USD', true)}`}
       fixedValue={`$${formatNumber(5904.03, 'USD', true)}`}

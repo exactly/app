@@ -56,7 +56,7 @@ const DepositsOverview = () => {
 
   return (
     <OverviewCard
-      title={t('Your Deposits')}
+      title={t('Total Deposits')}
       icon={<DepositIcon sx={{ fontSize: 12 }} />}
       total={`$${formatNumber(560432.51, 'USD', true)}`}
       fixedValue={`$${formatNumber(134003.41, 'USD', true)}`}

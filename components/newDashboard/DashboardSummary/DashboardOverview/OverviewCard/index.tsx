@@ -1,12 +1,12 @@
 import React, { FC, PropsWithChildren, ReactNode } from 'react';
 import { Box, Divider, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import OperationLegend from 'components/common/OperationLegend';
 
 type OverviewCardProps = {
   title: string;
   icon: ReactNode;
   total: string;
-  subTotal?: ReactNode;
   fixedValue: string;
   floatingValue: string;
   subFixedValue: string;
@@ -19,7 +19,6 @@ const OverviewCard: FC<PropsWithChildren & OverviewCardProps> = ({
   title,
   icon,
   total,
-  subTotal,
   fixedValue,
   floatingValue,
   subFixedValue,
@@ -56,14 +55,11 @@ const OverviewCard: FC<PropsWithChildren & OverviewCardProps> = ({
             )}
           </Box>
           <Box display="flex" flexDirection="column" gap={2}>
-            <Box display="flex" flex="nowrap" alignItems="baseline" gap={1}>
-              <Typography variant="dashboardOverviewAmount">{total}</Typography>
-              {subTotal}
-            </Box>
+            <Typography variant="dashboardOverviewAmount">{total}</Typography>
             <Box display="flex" alignItems="center" gap={2}>
               <Box display="flex" flexDirection="column">
                 <Box display="flex" alignItems="center" gap={1}>
-                  <Box width={16} height={16} borderRadius="4px" sx={{ bgcolor: 'blue' }} />
+                  <OperationLegend type="fixed" />
                   <Typography variant="dashboardMainTitle" fontSize={{ xs: 16, lg: 19 }} fontWeight={600}>
                     {fixedValue}
                   </Typography>
@@ -76,7 +72,7 @@ const OverviewCard: FC<PropsWithChildren & OverviewCardProps> = ({
               <Divider orientation="vertical" flexItem />
               <Box display="flex" flexDirection="column">
                 <Box display="flex" alignItems="center" gap={1}>
-                  <Box width={16} height={16} borderRadius="4px" sx={{ bgcolor: 'green' }} />
+                  <OperationLegend type="variable" />
                   <Typography variant="dashboardMainTitle" fontSize={{ xs: 16, lg: 19 }} fontWeight={600}>
                     {floatingValue}
                   </Typography>

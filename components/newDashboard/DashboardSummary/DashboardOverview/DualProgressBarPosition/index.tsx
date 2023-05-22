@@ -2,6 +2,7 @@ import React, { FC, useMemo } from 'react';
 import DualProgressBar from 'components/common/DualProgressBar';
 import { Box, Typography } from '@mui/material';
 import formatNumber from 'utils/formatNumber';
+import { useTranslation } from 'react-i18next';
 
 export type AssetPosition = {
   symbol: string;
@@ -47,10 +48,12 @@ type TooltipContentProps = {
 };
 
 const TooltipContent: FC<TooltipContentProps> = ({ symbol, type, assets, valueUSD }) => {
+  const { t } = useTranslation();
+
   return (
     <Box display="flex" flexDirection="column" gap={0.5} alignItems="center">
       <Typography fontWeight={600} fontSize={12} textTransform="uppercase" color={type === 'fixed' ? 'blue' : 'green'}>
-        {type}
+        {t(type)?.toUpperCase()}
       </Typography>
       <Typography fontWeight={500} fontSize={13} lineHeight="15.73px" color="grey.700">
         ${formatNumber(valueUSD, 'USD')} | {assets} {symbol}

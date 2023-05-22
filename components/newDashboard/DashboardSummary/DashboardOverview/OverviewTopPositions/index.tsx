@@ -2,10 +2,11 @@ import React, { FC } from 'react';
 import { Box, Divider, Grid, Typography } from '@mui/material';
 import Image from 'next/image';
 import formatSymbol from 'utils/formatSymbol';
+import OperationLegend from 'components/common/OperationLegend';
 
 export type TopAssetPosition = {
   symbol: string;
-  type: 'fixed' | 'floating';
+  type: 'fixed' | 'variable';
   totalUSD: string;
   apr: string;
 };
@@ -42,7 +43,7 @@ const OverviewTopPositions: FC<OverviewTopPositionsProps> = ({ assets }) => {
               </Typography>
             </Grid>
             <Grid item xs={2}>
-              <Box width={16} height={16} borderRadius="4px" sx={{ bgcolor: type === 'fixed' ? 'blue' : 'green' }} />
+              <OperationLegend type={type} />
             </Grid>
             <Grid item xs={3} textAlign="end">
               <Typography fontFamily="IBM Plex Mono" fontSize={16} fontWeight={500} textTransform="uppercase">

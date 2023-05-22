@@ -1,9 +1,9 @@
 {
   "Add exaVouchers to Metamask": "Añadir exaVouchers a Metamask",
   "Interest Rate Model": "Modelo de tasa de interés",
-  "Total Deposits": "Depósitos totales",
-  "Total Borrows": "Préstamos totales",
-  "Total Available": "Total disponible",
+  "Total Deposits": "Depósitos Totales",
+  "Total Borrows": "Préstamos Totales",
+  "Total Available": "Total Disponible",
   "Deposit APR": "TNA del Depósito",
   "Change in the underlying Variable Rate Pool shares value over the last 15 minutes, annualized.": "Cambio en el valor de las acciones del pool de tasa variable subyacente durante los últimos 15 minutos, anualizado.",
   "Borrow APR": "TNA del Préstamo",
@@ -292,5 +292,6 @@
   "Learn More": "Aprende más",
   "Your Earnings": "Tus Ganancias",
   "View All": "Ver Todo",
-  "Your rewards": "Tus recompensas"
+  "Your rewards": "Tus recompensas",
+  "Total Earnings": "Ganancias Totales"
 }

@@ -36,9 +36,11 @@ declare module '@mui/material/styles' {
     healthFactor: {
       bg: {
         safe: string;
+        warning: string;
         danger: string;
       };
       safe: string;
+      warning: string;
       danger: string;
     };
   }
@@ -70,9 +72,11 @@ declare module '@mui/material/styles' {
     healthFactor: {
       bg: {
         safe: string;
+        warning: string;
         danger: string;
       };
       safe: string;
+      warning: string;
       danger: string;
     };
   }
@@ -171,9 +175,11 @@ export const lightTheme = createTheme({
     healthFactor: {
       bg: {
         safe: '#F0FFF4',
+        warning: '#FFF7F0',
         danger: '#FFF5F5',
       },
       safe: '#33CC59',
+      warning: '#FF8C1A',
       danger: '#D92626',
     },
   },
@@ -407,9 +413,11 @@ export const darkTheme = createTheme({
     healthFactor: {
       bg: {
         safe: '#F0FFF4',
+        warning: '#FFF7F0',
         danger: '#FFF5F5',
       },
       safe: '#33CC59',
+      warning: '#FF8C1A',
       danger: '#D92626',
     },
   },

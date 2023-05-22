@@ -17,8 +17,8 @@ const Reward: FC<RewardProps> = ({ assetSymbol, amount, amountInUSD }) => {
   const isMobile = useMediaQuery(breakpoints.down('lg'));
 
   return (
-    <Box display="flex" flexDirection={{ xs: 'column', lg: 'row' }} gap={0.5} sx={{ flexWrap: 'wrap' }}>
-      <Box display="flex" alignItems="center" gap={0.5}>
+    <Box display="flex" flexDirection={{ xs: 'column', lg: 'row' }} gap={{ xs: 0, lg: 1 }} sx={{ flexWrap: 'wrap' }}>
+      <Box display="flex" alignItems="center" gap={1}>
         <Image
           src={`/img/assets/${assetSymbol}.svg`}
           alt={assetSymbol}
@@ -31,7 +31,7 @@ const Reward: FC<RewardProps> = ({ assetSymbol, amount, amountInUSD }) => {
         />
         <Typography variant={isMobile ? 'dashboardOverviewAmount' : 'dashboardMainTitle'}>{amount}</Typography>
       </Box>
-      <Box display="flex" alignItems="center" gap={0.5}>
+      <Box display="flex" alignItems="center" gap={1}>
         {isMobile && <Box width={32} height={32} />}
         <Typography variant="dashboardSubtitleNumber">{`$${formatNumber(amountInUSD, 'USD', true)}`}</Typography>
       </Box>
@@ -56,12 +56,12 @@ const UserRewards = () => {
       borderRadius="8px"
       boxSizing="border-box"
       bgcolor="components.bg"
-      height={{ xs: '235px', lg: '64px' }}
+      minHeight={{ xs: '233px', lg: '64px' }}
     >
       <Box display="flex" alignItems="center" justifyContent="space-between">
         <Box display="flex" gap={1} alignItems="center">
           <StarsIcon sx={{ fontSize: 16 }} />
-          <Typography variant="dashboardTitle">{t('Your Rewards')}</Typography>
+          <Typography variant="dashboardTitle">{t('Rewards')}</Typography>
         </Box>
         {isMobile && (
           <Typography variant="dashboardMainSubtitle" textTransform="uppercase" noWrap sx={{ cursor: 'pointer' }}>
@@ -69,9 +69,9 @@ const UserRewards = () => {
           </Typography>
         )}
       </Box>
-      <Box display="flex" gap={{ xs: 2, lg: 1 }} alignItems="center" mb={{ xs: 1, lg: 0 }}>
+      <Box display="flex" gap={{ xs: 3, lg: 2 }} alignItems="center">
         <Reward assetSymbol="USDC" amount={932} amountInUSD={2575.48} />
-        <Divider orientation="vertical" flexItem />
+        <Divider orientation="vertical" flexItem variant={isMobile ? 'middle' : undefined} />
         <Reward assetSymbol="OP" amount={349} amountInUSD={689.56} />
       </Box>
       <ButtonWithDropdown fullWidth={isMobile}>{t('Claim')}</ButtonWithDropdown>

@@ -8,10 +8,10 @@ const HealthFactor = () => {
   const { breakpoints, palette } = useTheme();
   const isMobile = useMediaQuery(breakpoints.down('lg'));
 
-  const healthFactor = 7.352;
+  const healthFactor = 1.092;
 
   const healthFactorColor = useMemo(() => {
-    const status = healthFactor < 1.005 ? 'danger' : 'safe';
+    const status = healthFactor >= 1.05 ? 'safe' : healthFactor <= 1 ? 'danger' : 'warning';
     return { color: palette.healthFactor[status], bg: palette.healthFactor.bg[status] };
   }, [palette.healthFactor]);
 
@@ -35,7 +35,7 @@ const HealthFactor = () => {
         </Typography>
       </Box>
       <Typography variant={isMobile ? 'dashboardOverviewAmount' : 'dashboardMainTitle'} color={healthFactorColor.color}>
-        {healthFactor}x
+        {healthFactor.toFixed(3)}x
       </Typography>
     </Box>
   );
