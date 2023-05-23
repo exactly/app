@@ -57,6 +57,7 @@ const UserRewards = () => {
       boxSizing="border-box"
       bgcolor="components.bg"
       minHeight={{ xs: '233px', lg: '64px' }}
+      maxHeight={{ xs: '233px', lg: '64px' }}
     >
       <Box display="flex" alignItems="center" justifyContent="space-between">
         <Box display="flex" gap={1} alignItems="center">
