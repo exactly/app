@@ -40,9 +40,9 @@ const AddExaTokensButton = () => {
   }, [accountData, assets, connector]);
 
   return connector?.watchAsset ? (
-    <Tooltip title={t('Add exaTokens to Metamask')} placement="top" arrow>
+    <Tooltip title={t('Add exaVouchers to Metamask')} placement="top" arrow>
       <Typography variant="link" onClick={onClick} sx={{ cursor: 'pointer' }}>
-        + exaTokens
+        + exaVouchers
       </Typography>
     </Tooltip>
   ) : null;
