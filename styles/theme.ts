@@ -16,6 +16,7 @@ declare module '@mui/material/styles' {
     blue: string;
     green: string;
     red: string;
+    orange: string;
     operation: {
       fixed: string;
       variable: string;
@@ -40,6 +41,7 @@ declare module '@mui/material/styles' {
     blue: string;
     green: string;
     red: string;
+    orange: string;
     operation: {
       fixed: string;
       variable: string;
@@ -117,6 +119,7 @@ export const lightTheme = createTheme({
     blue: '#0095FF',
     green: '#33CC59',
     red: '#AD1F1F',
+    orange: '#FF8C1A',
     operation: {
       fixed: '#0095FF',
       variable: '#33CC59',
@@ -307,6 +310,7 @@ export const darkTheme = createTheme({
     blue: '#0095FF',
     green: '#33CC59',
     red: '#AD1F1F',
+    orange: '#FF8C1A',
     operation: {
       fixed: '#0095FF',
       variable: '#33CC59',

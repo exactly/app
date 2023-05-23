@@ -261,5 +261,7 @@
   "The fixed borrowing interest APR at current utilization level.": "La TNA fija para préstamo en el nivel actual de utilización.",
   "Make sure to repay your fixed borrows before {{date}} to avoid penalty fees.": "Asegúrese de repagar sus préstamos a tasa fija antes del {{date}} para evitar multas",
   "Reserve ETH for gas fees.": "Reserva ETH para el costo de la transacción.",
-  "Market APR": "TNA del Mercado"
+  "Market APR": "TNA del Mercado",
+  "OP Mainnet upgrade to Bedrock release: June 6, 2023, 16:00 UTC. 2-4 hours downtime expected.": "Actualización de OP Mainnet a la versión Bedrock: 6 de junio de 2023, 16:00 UTC. Se espera un tiempo de inactividad de 2 a 4 horas.",
+  "more info": "más información"
 }
