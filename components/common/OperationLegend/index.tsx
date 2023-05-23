@@ -1,15 +1,17 @@
-import React, { FC } from 'react';
+import React, { FC, useMemo } from 'react';
 import { Box, Tooltip, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 
 type OperationLegendProps = {
   type: 'fixed' | 'variable';
-  small?: boolean;
+  size?: 'small' | 'medium' | 'large';
   hideTooltip?: boolean;
 };
 
-const OperationLegend: FC<OperationLegendProps> = ({ type, small, hideTooltip }) => {
+const OperationLegend: FC<OperationLegendProps> = ({ type, size = 'large', hideTooltip }) => {
   const { t } = useTranslation();
+
+  const side = useMemo(() => (size === 'large' ? 16 : size === 'medium' ? 12 : 8), [size]);
 
   return (
     <Tooltip
@@ -32,9 +34,11 @@ const OperationLegend: FC<OperationLegendProps> = ({ type, small, hideTooltip })
       arrow
     >
       <Box
-        width={small ? 8 : 16}
-        height={small ? 8 : 16}
-        borderRadius={small ? '2px' : '4px'}
+        minWidth={side}
+        minHeight={side}
+        width={side}
+        height={side}
+        borderRadius={size === 'large' ? '4px' : '2px'}
         sx={{ bgcolor: type === 'fixed' ? 'blue' : 'green', cursor: 'pointer' }}
       />
     </Tooltip>

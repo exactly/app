@@ -21,7 +21,7 @@ const Legends = () => {
     <Box display="flex" justifyContent="end" gap={1}>
       {LEGENDS.map(({ label, type }) => (
         <Box display="flex" gap={0.5} alignItems="center" key={`legend ${label}`}>
-          <OperationLegend type={type} small hideTooltip />
+          <OperationLegend type={type} size="small" hideTooltip />
           <Typography
             fontSize={10}
             lineHeight="13px"

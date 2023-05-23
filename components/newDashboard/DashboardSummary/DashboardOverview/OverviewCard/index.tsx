@@ -13,6 +13,7 @@ type OverviewCardProps = {
   subFloatingValue: string;
   viewAll?: boolean;
   actions?: ReactNode;
+  mobileWrap?: boolean;
 };
 
 const OverviewCard: FC<PropsWithChildren & OverviewCardProps> = ({
@@ -26,6 +27,7 @@ const OverviewCard: FC<PropsWithChildren & OverviewCardProps> = ({
   viewAll,
   actions,
   children,
+  mobileWrap,
 }) => {
   const { t } = useTranslation();
 
@@ -57,29 +59,35 @@ const OverviewCard: FC<PropsWithChildren & OverviewCardProps> = ({
           <Box display="flex" flexDirection="column" gap={2}>
             <Typography variant="dashboardOverviewAmount">{total}</Typography>
             <Box display="flex" alignItems="center" gap={2}>
-              <Box display="flex" flexDirection="column">
-                <Box display="flex" alignItems="center" gap={1}>
-                  <OperationLegend type="fixed" />
-                  <Typography variant="dashboardMainTitle" fontSize={{ xs: 16, lg: 19 }} fontWeight={600}>
-                    {fixedValue}
-                  </Typography>
-                </Box>
-                <Box display="flex" alignItems="center" gap={1}>
-                  <Box width={16} height={16} sx={{ bgcolor: 'transparent' }} />
-                  <Typography variant="dashboardSubtitleNumber">{subFixedValue}</Typography>
+              <Box display="flex" flexDirection="column" gap={0.5}>
+                <Typography variant="dashboardMainTitle" fontWeight={600}>
+                  {fixedValue}
+                </Typography>
+                <Box display="flex" flexDirection={{ xs: mobileWrap ? 'column' : 'row', lg: 'row' }} gap={0.5}>
+                  <Box display="flex" gap={0.5} alignItems="center">
+                    <OperationLegend type="fixed" size="medium" />
+                    <Typography variant="dashboardSubtitleNumber">{t('fixed')?.toUpperCase()}</Typography>
+                  </Box>
+                  <Box display="flex" alignItems="center" gap={0.5}>
+                    {mobileWrap && <Box width={12} height={12} display={{ xs: 'block', lg: 'none' }} />}
+                    <Typography variant="dashboardSubtitleNumber">{subFixedValue}</Typography>
+                  </Box>
                 </Box>
               </Box>
               <Divider orientation="vertical" flexItem />
-              <Box display="flex" flexDirection="column">
-                <Box display="flex" alignItems="center" gap={1}>
-                  <OperationLegend type="variable" />
-                  <Typography variant="dashboardMainTitle" fontSize={{ xs: 16, lg: 19 }} fontWeight={600}>
-                    {floatingValue}
-                  </Typography>
-                </Box>
-                <Box display="flex" alignItems="center" gap={1}>
-                  <Box width={16} height={16} sx={{ bgcolor: 'transparent' }} />
-                  <Typography variant="dashboardSubtitleNumber">{subFloatingValue}</Typography>
+              <Box display="flex" flexDirection="column" gap={0.5}>
+                <Typography variant="dashboardMainTitle" fontWeight={600}>
+                  {floatingValue}
+                </Typography>
+                <Box display="flex" flexDirection={{ xs: mobileWrap ? 'column' : 'row', lg: 'row' }} gap={0.5}>
+                  <Box display="flex" gap={0.5} alignItems="center">
+                    <OperationLegend type="variable" size="medium" />
+                    <Typography variant="dashboardSubtitleNumber">{t('variable')?.toUpperCase()}</Typography>
+                  </Box>
+                  <Box display="flex" alignItems="center" gap={0.5}>
+                    {mobileWrap && <Box width={12} height={12} display={{ xs: 'block', lg: 'none' }} />}
+                    <Typography variant="dashboardSubtitleNumber">{subFloatingValue}</Typography>
+                  </Box>
                 </Box>
               </Box>
             </Box>

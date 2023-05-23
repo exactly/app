@@ -47,6 +47,7 @@ const EarningsOverview = () => {
       floatingValue={`$${formatNumber(66864.29, 'USD', true)}`}
       subFixedValue={`${0.91}% ${t('APR')}`}
       subFloatingValue={`${1.83}% ${t('APR')}`}
+      mobileWrap
     >
       <OverviewTopPositions assets={assets} />
     </OverviewCard>
