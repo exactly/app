@@ -12,8 +12,15 @@ import { ErrorData } from 'types/Error';
 import { Transaction } from 'types/Transaction';
 import DebtManagerModal from 'components/DebtManager';
 import type { Position } from 'components/DebtManager/types';
+import useDebtManager from 'hooks/useDebtManager';
 
 import numbers from 'config/numbers.json';
+import useAccountData from 'hooks/useAccountData';
+import useMarket from 'hooks/useMarket';
+import { MaxUint256 } from '@ethersproject/constants';
+import { useWeb3 } from 'hooks/useWeb3';
+import { DebtManager, Market } from 'types/contracts';
+import { checkPrecision } from 'utils/utils';
 
 type Input = {
   from?: Position;
@@ -46,6 +53,9 @@ type ContextValues = {
   setPercent: (to: number) => void;
   setSlippage: (slippage: string) => void;
 
+  debtManager?: DebtManager;
+  market?: Market;
+
   errorData?: ErrorData;
   setErrorData: React.Dispatch<React.SetStateAction<ErrorData | undefined>>;
   gasCost?: BigNumber;
@@ -60,6 +70,7 @@ type ContextValues = {
 const DebtManagerContext = createContext<ContextValues | null>(null);
 
 export const DebtManagerContextProvider: FC<PropsWithChildren> = ({ children }) => {
+  const { getMarketAccount } = useAccountData();
   const [isOpen, setIsOpen] = useState(true);
   const [errorData, setErrorData] = useState<ErrorData | undefined>();
 
@@ -77,6 +88,10 @@ export const DebtManagerContextProvider: FC<PropsWithChildren> = ({ children }) 
   const setPercent = (percent: number) => dispatch({ percent });
   const setSlippage = (slippage: string) => dispatch({ slippage });
 
+  const debtManager = useDebtManager();
+
+  const market = useMarket(input.from && getMarketAccount(input.from.symbol)?.market);
+
   const value: ContextValues = {
     isOpen,
     open,
@@ -87,6 +102,9 @@ export const DebtManagerContextProvider: FC<PropsWithChildren> = ({ children }) 
     setTo,
     setPercent,
     setSlippage,
+
+    debtManager,
+    market,
 
     errorData,
     setErrorData,

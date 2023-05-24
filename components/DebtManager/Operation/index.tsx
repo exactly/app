@@ -2,13 +2,12 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Box, Typography } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import { useTranslation } from 'react-i18next';
-import { WeiPerEther, Zero } from '@ethersproject/constants';
+import { MaxUint256, WeiPerEther, Zero } from '@ethersproject/constants';
 import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 import dayjs from 'dayjs';
 
 import { ModalBox, ModalBoxRow } from 'components/common/modal/ModalBox';
-import ModalInfo from 'components/common/modal/ModalInfo';
 import ModalAdvancedSettings from 'components/common/modal/ModalAdvancedSettings';
 import ModalSheet from 'components/common/modal/ModalSheet';
 import CustomSlider from 'components/common/CustomSlider';
@@ -28,6 +27,10 @@ import { Borrow } from 'types/Borrow';
 
 import getAllBorrowsAtMaturity from 'queries/getAllBorrowsAtMaturity';
 import ModalInfoEditableSlippage from 'components/OperationsModal/Info/ModalInfoEditableSlippage';
+import { gasLimitMultiplier } from 'utils/const';
+import { useSigner } from 'wagmi';
+import useEstimateGas from 'hooks/useEstimateGas';
+import ModalTxCost from 'components/OperationsModal/ModalTxCost';
 
 function Operation() {
   const { t } = useTranslation();
@@ -40,7 +43,17 @@ function Operation() {
 
   const request = useGraphClient();
 
-  const { input, setTo, setFrom, setPercent, setSlippage } = useDebtManagerContext();
+  const {
+    input,
+    setTo,
+    setFrom,
+    setPercent,
+    setSlippage,
+    debtManager,
+    market: marketContract,
+    setGasCost,
+    gasCost,
+  } = useDebtManagerContext();
 
   const onClose = useCallback(() => setSheetOpen([false, false]), []);
 
@@ -224,6 +237,127 @@ function Operation() {
     ];
   }, [input.from, input.to, fromRows, toRows]);
 
+  const [maxRepayAssets, maxBorrowAssets] = useMemo(() => {
+    // const slippage = WeiPerEther.add(BigNumber.from(input.percent).mul())
+    const slippage = parseFixed(String(1 + Number(input.slippage) / 100), 18);
+
+    const ret: [BigNumber, BigNumber] = [Zero, Zero];
+    if (!fromRow || !toRow) {
+      return ret;
+    }
+
+    const fromBalance = fromRow.balance?.mul(input.percent).div(100) ?? Zero;
+
+    if (fromRow.maturity) {
+      ret[0] = fromBalance.mul(slippage).div(WeiPerEther);
+    } else {
+      ret[0] = fromBalance;
+    }
+
+    if (toRow.maturity) {
+      ret[1] = toRow.balance?.mul(slippage).div(WeiPerEther) ?? Zero;
+    } else {
+      ret[1] = fromBalance;
+    }
+
+    return ret;
+  }, [input.slippage, input.percent, fromRow, toRow]);
+
+  // -------
+
+  const [requiresApproval, setRequiresApproval] = useState(false);
+
+  const needsApproval = useCallback(async () => {
+    if (!walletAddress || !marketContract || !debtManager || maxBorrowAssets.isZero()) return;
+
+    const allowance = await marketContract.allowance(walletAddress, debtManager.address);
+
+    setRequiresApproval(allowance.isZero() || allowance.lt(maxBorrowAssets));
+  }, [walletAddress, marketContract, debtManager, maxBorrowAssets]);
+
+  useEffect(() => {
+    needsApproval();
+  }, [needsApproval]);
+
+  const approve = useCallback(async () => {
+    if (!debtManager || !marketContract) return;
+
+    try {
+      const gasEstimation = await marketContract.estimateGas.approve(debtManager.address, MaxUint256);
+      const approveTx = await marketContract.approve(debtManager.address, MaxUint256, {
+        gasLimit: gasEstimation.mul(gasLimitMultiplier).div(WeiPerEther),
+      });
+      await approveTx.wait();
+      await needsApproval();
+    } catch (error) {
+      console.log('FAILED APPROVE', error);
+      // const isDenied = [ErrorCode.ACTION_REJECTED, ErrorCode.TRANSACTION_REPLACED].includes(
+      //   (error as { code: ErrorCode }).code,
+      // );
+      // if (!isDenied) handleOperationError(error);
+      // setErrorData({
+      //   status: true,
+      //   message: isDenied ? t('Transaction rejected') : t('Approve failed, please try again'),
+      // });
+    } finally {
+      // setIsLoading(false);
+    }
+  }, [debtManager, marketContract, needsApproval]);
+
+  const populateTransaction = useCallback(() => {
+    if (!debtManager || !marketContract || !input.from || !input.to) return;
+
+    const percentage = BigNumber.from(input.percent).mul(WeiPerEther).div(100);
+
+    if (!input.from.maturity || !input.to.maturity) {
+      const floatingToFixed = Boolean(input.to.maturity);
+      const maturity = input.to.maturity ? input.to.maturity : input.from.maturity ? input.from.maturity : 0;
+      const maxAssets = floatingToFixed ? maxBorrowAssets : maxRepayAssets;
+      return debtManager.populateTransaction.floatingRoll(
+        marketContract.address,
+        floatingToFixed,
+        maturity,
+        maxAssets,
+        percentage,
+      );
+    } else {
+      return debtManager.populateTransaction.fixedRoll(
+        marketContract.address,
+        input.from.maturity,
+        input.to.maturity,
+        maxRepayAssets,
+        maxBorrowAssets,
+        percentage,
+      );
+    }
+  }, [debtManager, input.from, input.percent, input.to, marketContract, maxBorrowAssets, maxRepayAssets]);
+
+  const { data: signer } = useSigner();
+
+  const submit = useCallback(async () => {
+    if (!signer) return;
+
+    const transaction = await populateTransaction();
+    if (!transaction) return;
+
+    const tx = await signer?.sendTransaction(transaction);
+    tx?.wait();
+  }, [populateTransaction, signer]);
+
+  const estimate = useEstimateGas();
+
+  const estimateGas = useCallback(async () => {
+    const transaction = await populateTransaction();
+    if (!transaction) return;
+
+    setGasCost(await estimate(transaction));
+  }, [setGasCost, estimate, populateTransaction]);
+
+  useEffect(() => {
+    console.log('effect, estimate');
+    estimateGas();
+  }, [estimateGas]);
+
   return (
     <>
       <ModalSheet
@@ -318,15 +452,13 @@ function Operation() {
         )}
 
         <Box sx={{ mt: 4 }}>
-          <ModalInfo variant="row" label={t('TX Cost')}>
-            xd
-          </ModalInfo>
+          <ModalTxCost gasCost={gasCost} />
           <ModalAdvancedSettings mt={-1} mb={4}>
             <ModalInfoEditableSlippage value={input.slippage} onChange={(e) => setSlippage(e.target.value)} />
           </ModalAdvancedSettings>
         </Box>
-        <LoadingButton disabled={true} fullWidth variant="contained">
-          {t('Refinance your loan')}
+        <LoadingButton onClick={requiresApproval ? approve : submit} fullWidth variant="contained">
+          {requiresApproval ? t('Approve') : t('Refinance your loan')}
         </LoadingButton>
       </Box>
     </>

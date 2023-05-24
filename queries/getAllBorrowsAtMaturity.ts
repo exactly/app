@@ -1,7 +1,7 @@
 export default function getAllBorrowsAtMaturity(address: string) {
   return `
   {
-    borrowAtMaturities(where: { receiver: "${address}" }) {
+    borrowAtMaturities(where: { borrower: "${address}" }) {
       id
       market
       maturity

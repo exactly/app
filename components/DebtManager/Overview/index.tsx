@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import {
   Table,
@@ -11,12 +11,10 @@ import {
   Typography,
   type TypographyProps,
   Box,
-  Skeleton,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { WeiPerEther, Zero } from '@ethersproject/constants';
 import { BigNumber, formatFixed } from '@ethersproject/bignumber';
-import dayjs from 'dayjs';
 
 import useAccountData from 'hooks/useAccountData';
 import { toPercentage } from 'utils/utils';
@@ -25,7 +23,6 @@ import useRewards from 'hooks/useRewards';
 import useHealthFactor from 'hooks/useHealthFactor';
 import formatNumber from 'utils/formatNumber';
 import parseHealthFactor from 'utils/parseHealthFactor';
-import useDelayedEffect from 'hooks/useDelayedEffect';
 import usePreviewer from 'hooks/usePreviewer';
 import { useWeb3 } from 'hooks/useWeb3';
 
@@ -124,9 +121,9 @@ function Overview({ from, to, percent }: Props) {
             {formatNumber(formatFixed(from.balance.mul(percent).div(100), from.decimals), from.symbol)}
           </CurrencyTextValue>
         ),
-        new: to && to?.balance && (
+        new: to && (
           <CurrencyTextValue assetSymbol={to.symbol}>
-            {formatNumber(formatFixed(to.balance, to.decimals), to.symbol)}
+            {formatNumber(formatFixed(to.balance ? to.balance : originalDebt, to.decimals), to.symbol)}
           </CurrencyTextValue>
         ),
       },
