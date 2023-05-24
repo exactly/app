@@ -13,15 +13,21 @@ import { Transaction } from 'types/Transaction';
 import DebtManagerModal from 'components/DebtManager';
 import type { Position } from 'components/DebtManager/types';
 
+import numbers from 'config/numbers.json';
+
 type Input = {
   from?: Position;
   to?: Position;
+  slippage: string;
   percent: number;
 };
+
+const DEFAULT_SLIPPAGE = (numbers.slippage * 100).toFixed(2);
 
 const initState: Input = {
   from: undefined,
   to: undefined,
+  slippage: DEFAULT_SLIPPAGE,
   percent: 100,
 };
 
@@ -38,6 +44,7 @@ type ContextValues = {
   setFrom: (from: Position) => void;
   setTo: (to: Position) => void;
   setPercent: (to: number) => void;
+  setSlippage: (slippage: string) => void;
 
   errorData?: ErrorData;
   setErrorData: React.Dispatch<React.SetStateAction<ErrorData | undefined>>;
@@ -68,6 +75,7 @@ export const DebtManagerContextProvider: FC<PropsWithChildren> = ({ children }) 
   const setFrom = (from: Position) => dispatch({ ...initState, from });
   const setTo = (to: Position) => dispatch({ to });
   const setPercent = (percent: number) => dispatch({ percent });
+  const setSlippage = (slippage: string) => dispatch({ slippage });
 
   const value: ContextValues = {
     isOpen,
@@ -78,6 +86,7 @@ export const DebtManagerContextProvider: FC<PropsWithChildren> = ({ children }) 
     setFrom,
     setTo,
     setPercent,
+    setSlippage,
 
     errorData,
     setErrorData,

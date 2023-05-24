@@ -27,6 +27,7 @@ import { calculateAPR } from 'utils/calculateAPR';
 import { Borrow } from 'types/Borrow';
 
 import getAllBorrowsAtMaturity from 'queries/getAllBorrowsAtMaturity';
+import ModalInfoEditableSlippage from 'components/OperationsModal/Info/ModalInfoEditableSlippage';
 
 function Operation() {
   const { t } = useTranslation();
@@ -39,7 +40,7 @@ function Operation() {
 
   const request = useGraphClient();
 
-  const { input, setTo, setFrom, setPercent } = useDebtManagerContext();
+  const { input, setTo, setFrom, setPercent, setSlippage } = useDebtManagerContext();
 
   const onClose = useCallback(() => setSheetOpen([false, false]), []);
 
@@ -321,7 +322,7 @@ function Operation() {
             xd
           </ModalInfo>
           <ModalAdvancedSettings mt={-1} mb={4}>
-            HEHE
+            <ModalInfoEditableSlippage value={input.slippage} onChange={(e) => setSlippage(e.target.value)} />
           </ModalAdvancedSettings>
         </Box>
         <LoadingButton disabled={true} fullWidth variant="contained">
