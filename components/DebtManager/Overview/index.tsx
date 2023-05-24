@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import {
   Table,
@@ -11,10 +11,11 @@ import {
   Typography,
   type TypographyProps,
   Box,
+  Skeleton,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { WeiPerEther, Zero } from '@ethersproject/constants';
-import { formatFixed } from '@ethersproject/bignumber';
+import { BigNumber, formatFixed } from '@ethersproject/bignumber';
 import dayjs from 'dayjs';
 
 import useAccountData from 'hooks/useAccountData';
@@ -49,129 +50,88 @@ function Overview({ from, to, percent }: Props) {
   const healthFactor = useHealthFactor();
   const previewer = usePreviewer();
 
-  // const preview = useCallback(
-  //   async (cancelled: () => boolean) => {
-  //     if (!date || !walletAddress || !previewerContract || !marketAccount || !qty || totalPositionAssets.isZero())
-  //       return;
+  const rows = useMemo<Row[]>(() => {
+    if (!walletAddress || !marketAccount || !healthFactor || !from.balance || !previewer) {
+      return [];
+    }
 
-  //     const pool = marketAccount.fixedBorrowPositions.find(({ maturity }) => maturity.toNumber() === date);
-  //     if (!pool) return;
+    const { decimals, usdPrice, adjustFactor } = marketAccount;
 
-  //     const userInput = parseFixed(qty, marketAccount.decimals);
-  //     const positionAssets = userInput.gte(totalPositionAssets) ? totalPositionAssets : userInput;
+    const isFromFixed = Boolean(from.maturity);
+    const isToFixed = Boolean(to?.maturity);
 
-  //     const { assets } = await previewerContract.previewRepayAtMaturity(
-  //       marketAccount.market,
-  //       date,
-  //       positionAssets,
-  //       walletAddress ?? AddressZero,
-  //     );
-  //     const feeAtMaturity = (positionAssets > pool.position.principal ? pool.position.principal : positionAssets)
-  //       .mul(pool.position.fee)
-  //       .div(WeiPerEther)
-  //       .mul(WeiPerEther)
-  //       .div(pool.position.principal);
-  //     const principal = positionAssets.sub(feeAtMaturity);
-  //     const discount = assets.sub(positionAssets);
+    const rewardsFrom = rates[from.symbol];
+    const rewardsTo = to ? rates[to.symbol] : null;
 
-  //     if (cancelled()) return;
-  //     setPreviewData({
-  //       principal: formatNumber(formatFixed(principal, marketAccount.decimals), marketAccount.symbol, true),
-  //       amountWithDiscount: formatNumber(formatFixed(assets, marketAccount.decimals), marketAccount.symbol, true),
-  //       feeAtMaturity: formatNumber(formatFixed(feeAtMaturity, marketAccount.decimals), marketAccount.symbol, true),
-  //       discount: formatNumber(formatFixed(discount, marketAccount.decimals), marketAccount.symbol, true),
-  //     });
-  //   },
-  //   [date, marketAccount, previewerContract, qty, totalPositionAssets, walletAddress],
-  // );
+    const wad = BigNumber.from(10n ** BigInt(decimals));
 
-  const [rows, setRows] = useState<Row[]>([]);
+    const originalDebt = from.balance.mul(percent).div(100);
+    const previousBorrowDebt = originalDebt.mul(usdPrice).div(wad).mul(WeiPerEther).div(adjustFactor);
+    const futureBorrowDebt = (to && isToFixed ? to.balance ?? Zero : originalDebt)
+      .mul(usdPrice)
+      .div(wad)
+      .mul(WeiPerEther)
+      .div(adjustFactor);
 
-  const updateRows = useCallback(
-    async (cancelled: () => boolean) => {
-      if (!walletAddress || !marketAccount || !healthFactor || !from.balance || !previewer) {
-        return;
-      }
+    const newHF = to
+      ? parseHealthFactor(healthFactor.debt.sub(previousBorrowDebt).add(futureBorrowDebt), healthFactor.collateral)
+      : null;
 
-      const { decimals, penaltyRate, adjustFactor } = marketAccount;
-
-      const isFromFixed = Boolean(from.maturity);
-      const isToFixed = Boolean(to?.maturity);
-
-      const rewardsFrom = rates[from.symbol];
-      const rewardsTo = to ? rates[to.symbol] : null;
-
-      const now = dayjs().unix();
-      const isLateRepay = from.maturity ? now > from.maturity : false;
-      const penaltyTime = from.maturity ? now - from.maturity : 0;
-      const penalties = isLateRepay ? penaltyRate.mul(penaltyTime).mul(from.balance).div(WeiPerEther) : Zero;
-
-      // TODO: Use percentage to calculate amount
-      const toRepayAmount = from.balance.mul(percent).div(100);
-
-      // TODO
-      const previewBorrowAmount = isToFixed && to?.balance ? to.balance : toRepayAmount;
-
-      // const { assets } =
-      //   isFromFixed && from.maturity
-      //     ? await previewer.previewRepayAtMaturity(marketAccount.market, from.maturity, borrowAmount, walletAddress)
-      //     : { assets: borrowAmount };
-
-      if (cancelled()) return;
-
-      setRows([
-        {
-          key: 'PositionType',
-          label: t('Position type'),
-          current: <TextCell>{isFromFixed ? t('Fixed') : t('Unlimited')}</TextCell>,
-          new: to ? <TextCell>{isToFixed ? t('Fixed') : t('Unlimited')}</TextCell> : null,
-        },
-        {
-          key: 'APR',
-          label: t('APR'),
-          current: <TextCell>{toPercentage(Number(from.apr) / 1e18)}</TextCell>,
-          new: to ? <TextCell>{toPercentage(Number(to.apr) / 1e18)}</TextCell> : null,
-        },
-        ...(rewardsFrom.length
-          ? [
-              {
-                key: 'RewardsAPR',
-                label: t('Rewards APR'),
-                current: rewardsFrom.map((reward) => (
-                  <CurrencyCell key={reward.assetSymbol} assetSymbol={reward.assetSymbol}>
-                    {toPercentage(Number(reward.borrow) / 1e18)}
-                  </CurrencyCell>
-                )),
-                new: rewardsTo
-                  ? rewardsTo.map((reward) => (
-                      <CurrencyCell key={reward.assetSymbol} assetSymbol={reward.assetSymbol}>
-                        {toPercentage(Number(reward.borrow) / 1e18)}
-                      </CurrencyCell>
-                    ))
-                  : null,
-              },
-            ]
-          : []),
-        {
-          key: 'HealthFactor',
-          label: t('Health factor'),
-          current: <TextCell>{parseHealthFactor(healthFactor.debt, healthFactor.collateral)}</TextCell>,
-        },
-        {
-          key: 'TotalBorrowAmount',
-          label: t('Total borrow amount'),
-          current: from.balance && (
-            <CurrencyCell assetSymbol={from.symbol}>
-              {formatNumber(formatFixed(from.balance, from.decimals), from.symbol)}
-            </CurrencyCell>
-          ),
-        },
-      ]);
-    },
-    [walletAddress, marketAccount, from, to, t, rates, healthFactor, percent, previewer],
-  );
-
-  useDelayedEffect({ effect: updateRows });
+    return [
+      {
+        key: 'PositionType',
+        label: t('Position type'),
+        current: <TextValue>{isFromFixed ? t('Fixed') : t('Unlimited')}</TextValue>,
+        new: to ? <TextValue>{isToFixed ? t('Fixed') : t('Unlimited')}</TextValue> : null,
+      },
+      {
+        key: 'APR',
+        label: t('APR'),
+        current: <TextValue>{toPercentage(Number(from.apr) / 1e18)}</TextValue>,
+        new: to ? <TextValue>{toPercentage(Number(to.apr) / 1e18)}</TextValue> : null,
+      },
+      ...(rewardsFrom.length
+        ? [
+            {
+              key: 'RewardsAPR',
+              label: t('Rewards APR'),
+              current: rewardsFrom.map((reward) => (
+                <CurrencyTextValue key={reward.assetSymbol} assetSymbol={reward.assetSymbol}>
+                  {toPercentage(Number(reward.borrow) / 1e18)}
+                </CurrencyTextValue>
+              )),
+              new: rewardsTo
+                ? rewardsTo.map((reward) => (
+                    <CurrencyTextValue key={reward.assetSymbol} assetSymbol={reward.assetSymbol}>
+                      {toPercentage(Number(reward.borrow) / 1e18)}
+                    </CurrencyTextValue>
+                  ))
+                : null,
+            },
+          ]
+        : []),
+      {
+        key: 'HealthFactor',
+        label: t('Health factor'),
+        current: <TextValue>{parseHealthFactor(healthFactor.debt, healthFactor.collateral)}</TextValue>,
+        new: newHF ? <TextValue sx={{ color: newHF.startsWith('0') ? 'red' : undefined }}>{newHF}</TextValue> : null,
+      },
+      {
+        key: 'TotalBorrowAmount',
+        label: t('Total borrow amount'),
+        current: from.balance && (
+          <CurrencyTextValue assetSymbol={from.symbol}>
+            {formatNumber(formatFixed(from.balance.mul(percent).div(100), from.decimals), from.symbol)}
+          </CurrencyTextValue>
+        ),
+        new: to && to?.balance && (
+          <CurrencyTextValue assetSymbol={to.symbol}>
+            {formatNumber(formatFixed(to.balance, to.decimals), to.symbol)}
+          </CurrencyTextValue>
+        ),
+      },
+    ];
+  }, [walletAddress, marketAccount, from, to, t, rates, healthFactor, percent, previewer]);
 
   return (
     <TableContainer>
@@ -194,7 +154,7 @@ function Overview({ from, to, percent }: Props) {
               {typeof row.label === 'string' ? <RowHeader>{row.label}</RowHeader> : row.label}
               <ArrowCell>{row.current}</ArrowCell>
               <TableCell align="right" sx={{ minWidth: 96 }}>
-                {row.new ? row.new : <TextCell>-</TextCell>}
+                {row.new ? row.new : <TextValue>-</TextValue>}
               </TableCell>
             </TableRow>
           ))}
@@ -247,14 +207,17 @@ function ArrowCell({ ...props }: TableCellProps) {
   );
 }
 
-function TextCell({ ...props }: TypographyProps) {
+function TextValue({ ...props }: TypographyProps) {
   return <Typography fontWeight={700} fontSize={14} color="grey.900" {...props} />;
 }
 
-function CurrencyCell({ assetSymbol, children }: React.ComponentProps<typeof TextCell> & { assetSymbol: string }) {
+function CurrencyTextValue({
+  assetSymbol,
+  children,
+}: React.ComponentProps<typeof TextValue> & { assetSymbol: string }) {
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, justifyContent: 'flex-end' }}>
-      <TextCell>{children}</TextCell>
+      <TextValue>{children}</TextValue>
       <Image src={`/img/assets/${assetSymbol}.svg`} alt={assetSymbol} width={14} height={14} />
     </Box>
   );

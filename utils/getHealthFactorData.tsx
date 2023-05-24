@@ -3,7 +3,6 @@ import { WeiPerEther, Zero } from '@ethersproject/constants';
 
 import { Previewer } from 'types/contracts';
 import { HealthFactor } from 'types/HealthFactor';
-import { WAD } from './queryRates';
 
 function getHealthFactorData(accountData: Previewer.MarketAccountStructOutput[]): HealthFactor {
   let collateral = Zero;
@@ -26,7 +25,7 @@ function getHealthFactorData(accountData: Previewer.MarketAccountStructOutput[])
         fixedLenderCollateral = fixedLenderCollateral.add(assets.mul(oracle).div(decimalWAD));
       }
 
-      collateral = collateral.add(fixedLenderCollateral.mul(adjustFactor).div(WAD));
+      collateral = collateral.add(fixedLenderCollateral.mul(adjustFactor).div(WeiPerEther));
 
       //Floating Debt
       if (fixedLender.floatingBorrowAssets) {
@@ -56,7 +55,7 @@ function getHealthFactorData(accountData: Previewer.MarketAccountStructOutput[])
         );
       });
 
-      debt = debt.add(fixedLenderDebt.mul(WAD).div(adjustFactor));
+      debt = debt.add(fixedLenderDebt.mul(WeiPerEther).div(adjustFactor));
     });
 
     return { collateral, debt };

@@ -20,7 +20,7 @@ function parseHealthFactor(debt: BigNumber, collateral: BigNumber) {
     const factor = Math.pow(10, decimalPrecision);
     const healthFactorRounded = Math.floor(formatedHealthFactor * factor) / factor;
 
-    return `${healthFactorRounded}x`;
+    return `${healthFactorRounded.toFixed(decimalPrecision)}x`;
   }
 
   return '∞';

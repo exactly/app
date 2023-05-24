@@ -143,12 +143,12 @@ function Operation() {
 
       const { floatingBorrowRate, usdPrice, assetSymbol, decimals } = marketAccount;
 
-      const row = fromRows.find((r) => r.symbol === input.from?.symbol && r.maturity === input.from?.maturity);
-      if (!row) {
+      const fromRow = fromRows.find((r) => r.symbol === input.from?.symbol && r.maturity === input.from?.maturity);
+      if (!fromRow) {
         return;
       }
 
-      const initialAssets = row.balance?.mul(input.percent).div(100);
+      const initialAssets = fromRow.balance?.mul(input.percent).div(100);
       if (!initialAssets) {
         return;
       }
@@ -171,23 +171,21 @@ function Operation() {
           };
         });
 
-        if (cancelled()) return;
+        const fromMaturity = input.from.maturity;
         const options: PositionTableRow[] = [
-          ...(row.maturity
-            ? [
-                {
-                  symbol: assetSymbol,
-                  apr: floatingBorrowRate,
-                  usdPrice,
-                  decimals,
-                },
-              ]
-            : []),
+          {
+            symbol: assetSymbol,
+            apr: floatingBorrowRate,
+            usdPrice,
+            decimals,
+          },
           ...fixedOptions,
-        ];
+        ].filter((opt) => opt.maturity !== fromMaturity);
 
         const bestAPR = Math.min(...options.map((opt) => Number(opt.apr) / 1e18));
         const bestOption = [...options].reverse().find((opt) => Number(opt.apr) / 1e18 === bestAPR);
+
+        if (cancelled()) return;
 
         setToRows(
           options.map((opt) => ({
@@ -235,6 +233,7 @@ function Operation() {
         title={t('Select Current Position')}
       >
         <PositionTable
+          loading={fromRows.length === 0}
           data={fromRows}
           showBalance
           onClick={({ symbol, maturity }) => {
