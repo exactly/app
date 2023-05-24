@@ -24,11 +24,11 @@ const TopBar = () => {
       sx={{
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'space-between',
         bgcolor: palette.orange,
         color: 'white',
         height: { xs: '64px', sm: '32px' },
         width: '100%',
+        px: 1,
       }}
     >
       <Box
