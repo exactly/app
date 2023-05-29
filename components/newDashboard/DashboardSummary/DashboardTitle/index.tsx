@@ -10,7 +10,7 @@ const DashboardTitle = () => {
     <Box display="flex" alignItems="center" justifyContent="space-between" mb={0.5}>
       <Box display="flex" alignItems="center" gap={1}>
         <AssignmentIcon />
-        <Typography variant="dashboardMainTitle">{t('Summary')}</Typography>
+        <Typography variant="h6">{t('Summary')}</Typography>
       </Box>
       <Box display="flex" alignItems="center" gap={0.25}>
         <Typography variant="dashboardMainSubtitle" textAlign="right">

@@ -60,7 +60,7 @@ const OverviewCard: FC<PropsWithChildren & OverviewCardProps> = ({
             <Typography variant="dashboardOverviewAmount">{total}</Typography>
             <Box display="flex" alignItems="center" gap={2}>
               <Box display="flex" flexDirection="column" gap={0.5}>
-                <Typography variant="dashboardMainTitle" fontWeight={600}>
+                <Typography variant="h6" fontWeight={600}>
                   {fixedValue}
                 </Typography>
                 <Box display="flex" flexDirection={{ xs: mobileWrap ? 'column' : 'row', lg: 'row' }} gap={0.5}>
@@ -76,7 +76,7 @@ const OverviewCard: FC<PropsWithChildren & OverviewCardProps> = ({
               </Box>
               <Divider orientation="vertical" flexItem />
               <Box display="flex" flexDirection="column" gap={0.5}>
-                <Typography variant="dashboardMainTitle" fontWeight={600}>
+                <Typography variant="h6" fontWeight={600}>
                   {floatingValue}
                 </Typography>
                 <Box display="flex" flexDirection={{ xs: mobileWrap ? 'column' : 'row', lg: 'row' }} gap={0.5}>

@@ -25,7 +25,7 @@ const BorrowLimit = () => {
         <BorrowLimitIcon sx={{ fontSize: 16 }} />
         <Typography variant="dashboardTitle">{t('Borrow Limit')}</Typography>
       </Box>
-      <Typography variant={isMobile ? 'dashboardOverviewAmount' : 'dashboardMainTitle'}>~$3.5M</Typography>
+      <Typography variant={isMobile ? 'dashboardOverviewAmount' : 'h6'}>~$3.5M</Typography>
     </Box>
   );
 };

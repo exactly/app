@@ -89,7 +89,6 @@ declare module '@mui/material/styles' {
     link: TypographyVariants['body1'];
     chip: TypographyVariants['body1'];
     dashboardTitle: TypographyVariants['body1'];
-    dashboardMainTitle: TypographyVariants['h6'];
     dashboardMainSubtitle: TypographyVariants['body1'];
     dashboardSubtitleNumber: TypographyVariants['body1'];
     dashboardOverviewAmount: TypographyVariants['h1'];
@@ -103,7 +102,6 @@ declare module '@mui/material/styles' {
     link: TypographyVariants['body1'];
     chip: TypographyVariants['body1'];
     dashboardTitle: TypographyVariants['body1'];
-    dashboardMainTitle: TypographyVariants['h6'];
     dashboardMainSubtitle: TypographyVariants['h6'];
     dashboardSubtitleNumber: TypographyVariants['body1'];
     dashboardOverviewAmount: TypographyVariants['h1'];
@@ -119,7 +117,6 @@ declare module '@mui/material/Typography' {
     link: true;
     chip: true;
     dashboardTitle: true;
-    dashboardMainTitle: true;
     dashboardMainSubtitle: true;
     dashboardSubtitleNumber: true;
     dashboardOverviewAmount: true;
@@ -246,11 +243,6 @@ export const lightTheme = createTheme({
     dashboardTitle: {
       fontSize: 16,
       lineHeight: '16px',
-      fontWeight: 700,
-    },
-    dashboardMainTitle: {
-      fontSize: 19,
-      lineHeight: '23px',
       fontWeight: 700,
     },
     dashboardSubtitleNumber: {
@@ -483,11 +475,6 @@ export const darkTheme = createTheme({
     dashboardTitle: {
       fontSize: 16,
       lineHeight: '16px',
-      fontWeight: 700,
-    },
-    dashboardMainTitle: {
-      fontSize: 19,
-      lineHeight: '23px',
       fontWeight: 700,
     },
     dashboardSubtitleNumber: {

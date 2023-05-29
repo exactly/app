@@ -34,7 +34,7 @@ const HealthFactor = () => {
           {t('Health Factor')}
         </Typography>
       </Box>
-      <Typography variant={isMobile ? 'dashboardOverviewAmount' : 'dashboardMainTitle'} color={healthFactorColor.color}>
+      <Typography variant={isMobile ? 'dashboardOverviewAmount' : 'h6'} color={healthFactorColor.color}>
         {healthFactor.toFixed(3)}x
       </Typography>
     </Box>
