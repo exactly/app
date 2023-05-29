@@ -4,7 +4,7 @@ import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import { useTheme } from '@mui/material';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { useNetworkContext } from 'contexts/NetworkContext';
 
 const TopBar = () => {
@@ -26,7 +26,7 @@ const TopBar = () => {
         alignItems: 'center',
         bgcolor: palette.orange,
         color: 'white',
-        height: { xs: '64px', sm: '32px' },
+        height: { xs: '80px', sm: '32px' },
         width: '100%',
         px: 1,
       }}
@@ -35,15 +35,22 @@ const TopBar = () => {
         sx={{
           display: 'flex',
           justifyContent: 'center',
-          padding: '0 16px',
+          padding: '16px',
           width: '100%',
         }}
       >
         <Typography variant="modalRow" color="white">
-          {t('OP Mainnet upgrade to Bedrock release: June 6, 2023, 16:00 UTC. 2-4 hours downtime expected.')}{' '}
+          <Trans>
+            {t(
+              'The Optimism Mainnet upgrade to the Bedrock release will take place on <strong>{{date}}</strong> There will be 2-4 hours of downtime.',
+              {
+                date: t('June 6, 2023 at 16:00 UTC.'),
+              },
+            )}{' '}
+          </Trans>
           <Typography variant="link" color="white" sx={{ textDecoration: 'underline' }}>
             <a target="_blank" rel="noreferrer noopener" href="https://www.optimism.io/bedrock-upgrade">
-              {t('more info')}
+              {t('More info')}
             </a>
           </Typography>
         </Typography>
