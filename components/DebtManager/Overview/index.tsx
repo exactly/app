@@ -109,7 +109,7 @@ function Overview({ from, to, percent }: Props) {
         : []),
       {
         key: 'HealthFactor',
-        label: t('Health factor'),
+        label: t('Health Factor'),
         current: <TextValue>{parseHealthFactor(healthFactor.debt, healthFactor.collateral)}</TextValue>,
         new: newHF ? <TextValue sx={{ color: newHF.startsWith('0') ? 'red' : undefined }}>{newHF}</TextValue> : null,
       },
