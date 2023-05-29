@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Box, Typography } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import { useTranslation } from 'react-i18next';
-import { MaxUint256, WeiPerEther, Zero } from '@ethersproject/constants';
+import { One, WeiPerEther, Zero } from '@ethersproject/constants';
 import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 import dayjs from 'dayjs';
@@ -27,10 +27,9 @@ import { Borrow } from 'types/Borrow';
 
 import getAllBorrowsAtMaturity from 'queries/getAllBorrowsAtMaturity';
 import ModalInfoEditableSlippage from 'components/OperationsModal/Info/ModalInfoEditableSlippage';
-import { gasLimitMultiplier } from 'utils/const';
-import { useSigner } from 'wagmi';
-import useEstimateGas from 'hooks/useEstimateGas';
 import ModalTxCost from 'components/OperationsModal/ModalTxCost';
+import handleOperationError from 'utils/handleOperationError';
+import ModalAlert from 'components/common/modal/ModalAlert';
 
 function Operation() {
   const { t } = useTranslation();
@@ -53,6 +52,13 @@ function Operation() {
     market: marketContract,
     setGasCost,
     gasCost,
+    errorData,
+    setErrorData,
+    isLoading,
+    needsApproval,
+    approve,
+    estimateTx,
+    submit,
   } = useDebtManagerContext();
 
   const onClose = useCallback(() => setSheetOpen([false, false]), []);
@@ -215,7 +221,7 @@ function Operation() {
     [previewerContract, input.from, input.percent, getMarketAccount, fromRows],
   );
 
-  const { isLoading } = useDelayedEffect({ effect: updateToRows });
+  const { isLoading: loadingToRows } = useDelayedEffect({ effect: updateToRows });
 
   const usdAmount = useMemo(() => {
     const row = fromRows.find((r) => r.symbol === input.from?.symbol && r.maturity === input.from?.maturity);
@@ -230,16 +236,17 @@ function Operation() {
     );
   }, [input.from, input.percent, fromRows]);
 
-  const [fromRow, toRow] = useMemo<[PositionTableRow | undefined, PositionTableRow | undefined]>(() => {
-    return [
+  const [fromRow, toRow] = useMemo<[PositionTableRow | undefined, PositionTableRow | undefined]>(
+    () => [
       fromRows.find((row) => input.from?.symbol === row.symbol && input.from?.maturity === row.maturity),
       toRows.find((row) => input.to?.symbol === row.symbol && input.to?.maturity === row.maturity),
-    ];
-  }, [input.from, input.to, fromRows, toRows]);
+    ],
+    [input.from, input.to, fromRows, toRows],
+  );
 
   const [maxRepayAssets, maxBorrowAssets] = useMemo(() => {
-    // const slippage = WeiPerEther.add(BigNumber.from(input.percent).mul())
-    const slippage = parseFixed(String(1 + Number(input.slippage) / 100), 18);
+    const raw = input.slippage || '0';
+    const slippage = WeiPerEther.add(parseFixed(raw, 18).div(100));
 
     const ret: [BigNumber, BigNumber] = [Zero, Zero];
     if (!fromRow || !toRow) {
@@ -263,46 +270,7 @@ function Operation() {
     return ret;
   }, [input.slippage, input.percent, fromRow, toRow]);
 
-  // -------
-
   const [requiresApproval, setRequiresApproval] = useState(false);
-
-  const needsApproval = useCallback(async () => {
-    if (!walletAddress || !marketContract || !debtManager || maxBorrowAssets.isZero()) return;
-
-    const allowance = await marketContract.allowance(walletAddress, debtManager.address);
-
-    setRequiresApproval(allowance.isZero() || allowance.lt(maxBorrowAssets));
-  }, [walletAddress, marketContract, debtManager, maxBorrowAssets]);
-
-  useEffect(() => {
-    needsApproval();
-  }, [needsApproval]);
-
-  const approve = useCallback(async () => {
-    if (!debtManager || !marketContract) return;
-
-    try {
-      const gasEstimation = await marketContract.estimateGas.approve(debtManager.address, MaxUint256);
-      const approveTx = await marketContract.approve(debtManager.address, MaxUint256, {
-        gasLimit: gasEstimation.mul(gasLimitMultiplier).div(WeiPerEther),
-      });
-      await approveTx.wait();
-      await needsApproval();
-    } catch (error) {
-      console.log('FAILED APPROVE', error);
-      // const isDenied = [ErrorCode.ACTION_REJECTED, ErrorCode.TRANSACTION_REPLACED].includes(
-      //   (error as { code: ErrorCode }).code,
-      // );
-      // if (!isDenied) handleOperationError(error);
-      // setErrorData({
-      //   status: true,
-      //   message: isDenied ? t('Transaction rejected') : t('Approve failed, please try again'),
-      // });
-    } finally {
-      // setIsLoading(false);
-    }
-  }, [debtManager, marketContract, needsApproval]);
 
   const populateTransaction = useCallback(() => {
     if (!debtManager || !marketContract || !input.from || !input.to) return;
@@ -332,31 +300,30 @@ function Operation() {
     }
   }, [debtManager, input.from, input.percent, input.to, marketContract, maxBorrowAssets, maxRepayAssets]);
 
-  const { data: signer } = useSigner();
+  const load = useCallback(async () => {
+    try {
+      setErrorData(undefined);
+      setGasCost(undefined);
 
-  const submit = useCallback(async () => {
-    if (!signer) return;
+      const approvalRequired = await needsApproval(maxBorrowAssets);
+      setRequiresApproval(approvalRequired);
+      if (approvalRequired) return;
 
+      const transaction = await populateTransaction();
+      if (!transaction) return;
+      setGasCost(await estimateTx(transaction));
+    } catch (e: unknown) {
+      setErrorData({ status: true, message: handleOperationError(e) });
+    }
+  }, [estimateTx, maxBorrowAssets, needsApproval, populateTransaction, setGasCost, setErrorData]);
+
+  const { isLoading: loadingStatus } = useDelayedEffect({ effect: load });
+
+  const rollover = useCallback(async () => {
     const transaction = await populateTransaction();
     if (!transaction) return;
-
-    const tx = await signer?.sendTransaction(transaction);
-    tx?.wait();
-  }, [populateTransaction, signer]);
-
-  const estimate = useEstimateGas();
-
-  const estimateGas = useCallback(async () => {
-    const transaction = await populateTransaction();
-    if (!transaction) return;
-
-    setGasCost(await estimate(transaction));
-  }, [setGasCost, estimate, populateTransaction]);
-
-  useEffect(() => {
-    console.log('effect, estimate');
-    estimateGas();
-  }, [estimateGas]);
+    return submit(transaction);
+  }, [populateTransaction, submit]);
 
   return (
     <>
@@ -394,7 +361,7 @@ function Operation() {
         </Box>
         <CustomSlider pt={2} value={input.percent} onChange={setPercent} mb={4} />
         <PositionTable
-          loading={isLoading}
+          loading={loadingToRows}
           data={toRows}
           onClick={({ symbol, maturity }) => {
             setTo({ symbol, maturity });
@@ -451,13 +418,20 @@ function Operation() {
           </ModalBox>
         )}
 
-        <Box sx={{ mt: 4 }}>
+        <Box sx={{ mt: 4, mb: 4 }}>
           <ModalTxCost gasCost={gasCost} />
-          <ModalAdvancedSettings mt={-1} mb={4}>
+          <ModalAdvancedSettings mt={-1}>
             <ModalInfoEditableSlippage value={input.slippage} onChange={(e) => setSlippage(e.target.value)} />
           </ModalAdvancedSettings>
         </Box>
-        <LoadingButton onClick={requiresApproval ? approve : submit} fullWidth variant="contained">
+        {errorData?.status && <ModalAlert message={errorData.message} variant={errorData.variant} />}
+        <LoadingButton
+          disabled={!input.from || !input.to || errorData?.status}
+          loading={loadingStatus || isLoading}
+          onClick={requiresApproval ? approve : rollover}
+          variant="contained"
+          fullWidth
+        >
           {requiresApproval ? t('Approve') : t('Refinance your loan')}
         </LoadingButton>
       </Box>
