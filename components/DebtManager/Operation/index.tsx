@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Box, Typography } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import { useTranslation } from 'react-i18next';
-import { One, WeiPerEther, Zero } from '@ethersproject/constants';
+import { WeiPerEther, Zero } from '@ethersproject/constants';
 import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 import dayjs from 'dayjs';
@@ -30,6 +30,8 @@ import ModalInfoEditableSlippage from 'components/OperationsModal/Info/ModalInfo
 import ModalTxCost from 'components/OperationsModal/ModalTxCost';
 import handleOperationError from 'utils/handleOperationError';
 import ModalAlert from 'components/common/modal/ModalAlert';
+import useRewards from 'hooks/useRewards';
+import LoadingTransaction from '../Loading';
 
 function Operation() {
   const { t } = useTranslation();
@@ -40,9 +42,12 @@ function Operation() {
   const fromSheetRef = useRef<HTMLDivElement>(null);
   const toSheetRef = useRef<HTMLDivElement>(null);
 
+  const { rates } = useRewards();
+
   const request = useGraphClient();
 
   const {
+    tx,
     input,
     setTo,
     setFrom,
@@ -163,7 +168,7 @@ function Operation() {
 
       const { floatingBorrowRate, usdPrice, assetSymbol, decimals } = marketAccount;
 
-      const fromRow = fromRows.find((r) => r.symbol === input.from?.symbol && r.maturity === input.from?.maturity);
+      const fromRow = fromRows.find((r) => r.symbol === assetSymbol && r.maturity === input.from?.maturity);
       if (!fromRow) {
         return;
       }
@@ -177,6 +182,7 @@ function Operation() {
         const previewPools = await previewerContract.previewBorrowAtAllMaturities(marketAccount.market, initialAssets);
         const currentTimestamp = dayjs().unix();
 
+        const rewards = rates[assetSymbol];
         const fixedOptions: PositionTableRow[] = previewPools.map(({ maturity, assets }) => {
           const rate = assets.mul(WeiPerEther).div(initialAssets);
           const fixedAPR = rate.sub(WeiPerEther).mul(31_536_000).div(maturity.sub(currentTimestamp));
@@ -188,6 +194,7 @@ function Operation() {
             balance: assets,
             decimals: decimals,
             apr: fixedAPR,
+            rewards,
           };
         });
 
@@ -198,6 +205,7 @@ function Operation() {
             apr: floatingBorrowRate,
             usdPrice,
             decimals,
+            rewards,
           },
           ...fixedOptions,
         ].filter((opt) => opt.maturity !== fromMaturity);
@@ -218,7 +226,7 @@ function Operation() {
         setToRows([]);
       }
     },
-    [previewerContract, input.from, input.percent, getMarketAccount, fromRows],
+    [previewerContract, input.from, input.percent, getMarketAccount, fromRows, rates],
   );
 
   const { isLoading: loadingToRows } = useDelayedEffect({ effect: updateToRows });
@@ -324,6 +332,8 @@ function Operation() {
     if (!transaction) return;
     return submit(transaction);
   }, [populateTransaction, submit]);
+
+  if (tx && input.to) return <LoadingTransaction tx={tx} to={input.to} />;
 
   return (
     <>

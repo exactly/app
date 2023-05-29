@@ -10,7 +10,6 @@ import React, {
 import { BigNumber } from '@ethersproject/bignumber';
 import { useSigner } from 'wagmi';
 import { PopulatedTransaction } from '@ethersproject/contracts';
-import { TransactionResponse } from '@ethersproject/abstract-provider';
 
 import { ErrorData } from 'types/Error';
 import { Transaction } from 'types/Transaction';
@@ -66,7 +65,6 @@ type ContextValues = {
   gasCost?: BigNumber;
   setGasCost: React.Dispatch<React.SetStateAction<BigNumber | undefined>>;
   tx?: Transaction;
-  setTx: React.Dispatch<React.SetStateAction<Transaction | undefined>>;
 
   isLoading: boolean;
 
@@ -81,7 +79,7 @@ const DebtManagerContext = createContext<ContextValues | null>(null);
 export const DebtManagerContextProvider: FC<PropsWithChildren> = ({ children }) => {
   const { walletAddress } = useWeb3();
   const { data: signer } = useSigner();
-  const { getMarketAccount } = useAccountData();
+  const { getMarketAccount, refreshAccountData } = useAccountData();
   const [isOpen, setIsOpen] = useState(true);
   const [errorData, setErrorData] = useState<ErrorData | undefined>();
 
@@ -91,13 +89,17 @@ export const DebtManagerContextProvider: FC<PropsWithChildren> = ({ children }) 
   const [tx, setTx] = useState<Transaction | undefined>();
   const [isLoading, setIsLoading] = useState(false);
 
-  const open = useCallback(() => setIsOpen(true), []);
-  const close = useCallback(() => setIsOpen(false), []);
+  const setFrom = useCallback((from: Position) => dispatch({ ...initState, from }), []);
+  const setTo = useCallback((to: Position) => dispatch({ to }), []);
+  const setPercent = useCallback((percent: number) => dispatch({ percent }), []);
+  const setSlippage = useCallback((slippage: string) => dispatch({ slippage }), []);
 
-  const setFrom = useCallback((from: Position) => dispatch({ ...initState, from }), [dispatch]);
-  const setTo = useCallback((to: Position) => dispatch({ to }), [dispatch]);
-  const setPercent = useCallback((percent: number) => dispatch({ percent }), [dispatch]);
-  const setSlippage = useCallback((slippage: string) => dispatch({ slippage }), [dispatch]);
+  const open = useCallback(() => {
+    dispatch(initState);
+    setTx(undefined);
+    setIsOpen(true);
+  }, []);
+  const close = useCallback(() => setIsOpen(false), []);
 
   const debtManager = useDebtManager();
 
@@ -144,13 +146,15 @@ export const DebtManagerContextProvider: FC<PropsWithChildren> = ({ children }) 
         setTx({ status: 'processing', hash: transactionResponse.hash });
         const { status, transactionHash } = await transactionResponse.wait();
         setTx({ status: status ? 'success' : 'error', hash: transactionHash });
+
+        await refreshAccountData();
       } catch (e: unknown) {
         setErrorData({ status: true, message: handleOperationError(e) });
       } finally {
         setIsLoading(false);
       }
     },
-    [signer],
+    [signer, refreshAccountData],
   );
 
   const value: ContextValues = {
@@ -172,7 +176,6 @@ export const DebtManagerContextProvider: FC<PropsWithChildren> = ({ children }) 
     gasCost,
     setGasCost,
     tx,
-    setTx,
     isLoading,
 
     needsApproval,

@@ -9,7 +9,7 @@ import { Previewer } from 'types/contracts';
 import useAccountData from './useAccountData';
 
 type Rewards = Record<string, BigNumber>;
-type Rates = Record<string, Previewer.RewardRateStructOutput[]>;
+export type Rates = Record<string, Previewer.RewardRateStructOutput[]>;
 
 export default () => {
   const { walletAddress } = useWeb3();

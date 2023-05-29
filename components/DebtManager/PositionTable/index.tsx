@@ -13,6 +13,7 @@ import {
   TableRow,
   Typography,
   TypographyProps,
+  useTheme,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 
@@ -21,6 +22,8 @@ import parseTimestamp from 'utils/parseTimestamp';
 import formatNumber from 'utils/formatNumber';
 import { toPercentage } from 'utils/utils';
 import BestPill from 'components/common/BestPill';
+import { Rates } from 'hooks/useRewards';
+import RewardPill from 'components/markets/RewardPill';
 
 export type PositionTableRow = {
   symbol: string;
@@ -29,6 +32,7 @@ export type PositionTableRow = {
   usdPrice: BigNumber;
   decimals: number;
   apr: BigNumber;
+  rewards?: Rates[string];
   isBest?: boolean;
 };
 
@@ -79,7 +83,7 @@ function PositionTable({ data, onClick, loading = false, showBalance = false }: 
             : data.map((row) => {
                 const balance =
                   row.balance &&
-                  '$' + formatNumber(formatFixed(row.balance.mul(row.usdPrice).div(WeiPerEther), row.decimals), 'USD');
+                  formatNumber(formatFixed(row.balance.mul(row.usdPrice).div(WeiPerEther), row.decimals), 'USD');
                 return (
                   <TableRow
                     hover
@@ -102,12 +106,15 @@ function PositionTable({ data, onClick, loading = false, showBalance = false }: 
                     </TableCell>
                     {showBalance && (
                       <TableCell>
-                        <TextCell>{balance}</TextCell>
+                        <TextCell>${balance}</TextCell>
                       </TableCell>
                     )}
-                    <TableCell sx={{ maxWidth: 64 }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mr: 1 }}>
-                        <TextCell flexGrow={1}>{toPercentage(Number(formatFixed(row.apr, 18)))}</TextCell>
+                    <TableCell>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <TextCell>{toPercentage(Number(formatFixed(row.apr, 18)))}</TextCell>
+                        {row.rewards?.map((reward) => (
+                          <RewardPill key={reward.assetSymbol} symbol={reward.assetSymbol} rate={reward.borrow} />
+                        ))}
                         {row.isBest && <BestPill />}
                       </Box>
                     </TableCell>
@@ -121,8 +128,15 @@ function PositionTable({ data, onClick, loading = false, showBalance = false }: 
 }
 
 function HeaderCell({ children }: PropsWithChildren) {
+  const { palette } = useTheme();
   return (
-    <TableCell sx={{ borderTop: '1px solid #E0E0E0' }}>
+    <TableCell
+      sx={{
+        borderTop: 1,
+        borderTopColor: palette.mode === 'dark' ? '#515151' : 'grey.300',
+        backgroundColor: 'components.bg',
+      }}
+    >
       <Typography variant="subtitle2" color="figma.grey.500" fontWeight={500} fontSize={14}>
         {children}
       </Typography>

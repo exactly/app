@@ -25,7 +25,7 @@ const ModalSheet = forwardRef(function ModalSheet({ title, container, open, onCl
             height: '600px',
             padding: { xs: spacing(3, 2, 2), sm: spacing(5, 4, 4) },
             borderTop: `4px ${palette.mode === 'light' ? 'black' : 'white'} solid`,
-            backgroundColor: palette.mode === 'light' ? 'white' : 'black',
+            backgroundColor: 'components.bg',
             zIndex: 2,
             overflowY: 'hidden',
           }}

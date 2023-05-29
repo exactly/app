@@ -95,7 +95,7 @@ function ModalGif({ tx, tryAgain }: Props) {
   );
 }
 
-function CircularProgressWithIcon(props: CircularProgressProps & { icon: ReactNode }) {
+export function CircularProgressWithIcon(props: CircularProgressProps & { icon: ReactNode }) {
   return (
     <Box sx={{ position: 'relative', display: 'inline-flex' }}>
       <CircularProgress variant="determinate" value={100} size={100} thickness={1.5} {...props} />

@@ -5,14 +5,15 @@ import Slider, { type SliderProps } from '@mui/material/Slider';
 import { styled } from '@mui/material/styles';
 
 const StyledSlider = styled(Slider)(({ theme }) => ({
-  color: theme.palette.primary.main,
+  color: theme.palette.mode === 'light' ? theme.palette.common.black : theme.palette.common.white,
   height: 6,
   padding: '15px 0',
   overflow: 'visible',
   '& .MuiSlider-thumb': {
     height: 20,
     width: 20,
-    backgroundColor: theme.palette.primary.main,
+    backgroundColor: theme.palette.mode === 'light' ? theme.palette.common.black : theme.palette.common.white,
+    opacity: 1,
   },
 }));
 
