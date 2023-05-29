@@ -1,6 +1,4 @@
 import React from 'react';
-import { Box } from '@mui/material';
-import ButtonWithDropdown from 'components/common/ButtonWithDropdown';
 import { DepositIcon } from 'components/Icons';
 import { AssetPosition } from '../DualProgressBarPosition';
 import OverviewCard from '../OverviewCard';
@@ -56,7 +54,7 @@ const DepositsOverview = () => {
 
   return (
     <OverviewCard
-      title={t('Total Deposits')}
+      title={t('deposits')}
       icon={<DepositIcon sx={{ fontSize: 12 }} />}
       total={`$${formatNumber(560432.51, 'USD', true)}`}
       fixedValue={`$${formatNumber(134003.41, 'USD', true)}`}
@@ -64,14 +62,6 @@ const DepositsOverview = () => {
       subFixedValue={`${23.91}%`}
       subFloatingValue={`${76.08}%`}
       viewAll
-      actions={
-        <Box display="flex" alignItems="center" justifyContent="space-between" gap={1}>
-          <ButtonWithDropdown fullWidth>{t('Deposit')}</ButtonWithDropdown>
-          <ButtonWithDropdown fullWidth variant="outlined">
-            {t('Withdraw')}
-          </ButtonWithDropdown>
-        </Box>
-      }
     >
       <OverviewPositionBars assets={assets} />
     </OverviewCard>

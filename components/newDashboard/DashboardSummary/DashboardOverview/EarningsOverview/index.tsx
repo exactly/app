@@ -1,5 +1,4 @@
 import React from 'react';
-import { useMediaQuery, useTheme } from '@mui/material';
 import PaidIcon from '@mui/icons-material/Paid';
 import OverviewCard from '../OverviewCard';
 import formatNumber from 'utils/formatNumber';
@@ -8,8 +7,6 @@ import { useTranslation } from 'react-i18next';
 
 const EarningsOverview = () => {
   const { t } = useTranslation();
-  const { breakpoints } = useTheme();
-  const isMobile = useMediaQuery(breakpoints.down('lg'));
 
   const assets: TopAssetPosition[] = [
     {
@@ -40,9 +37,9 @@ const EarningsOverview = () => {
 
   return (
     <OverviewCard
-      title={t('Total Earnings')}
+      title={t('Earnings')}
       icon={<PaidIcon sx={{ fontSize: 16 }} />}
-      total={`$${formatNumber(151318.03, isMobile ? 'noDecimals' : 'USD', !isMobile)}`}
+      total={`$${formatNumber(151318.03, 'USD', true)}`}
       fixedValue={`$${formatNumber(84453.74, 'USD', true)}`}
       floatingValue={`$${formatNumber(66864.29, 'USD', true)}`}
       subFixedValue={`${0.91}% ${t('APR')}`}

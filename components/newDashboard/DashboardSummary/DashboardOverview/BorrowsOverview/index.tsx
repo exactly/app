@@ -1,6 +1,4 @@
 import React from 'react';
-import { Box } from '@mui/material';
-import ButtonWithDropdown from 'components/common/ButtonWithDropdown';
 import { BorrowIcon } from 'components/Icons';
 import { AssetPosition } from '../DualProgressBarPosition';
 import OverviewCard from '../OverviewCard';
@@ -39,7 +37,7 @@ const BorrowsOverview = () => {
 
   return (
     <OverviewCard
-      title={t('Total Borrows')}
+      title={t('borrows')}
       icon={<BorrowIcon sx={{ fontSize: 12 }} />}
       total={`$${formatNumber(34721.95, 'USD', true)}`}
       fixedValue={`$${formatNumber(5904.03, 'USD', true)}`}
@@ -47,14 +45,6 @@ const BorrowsOverview = () => {
       subFixedValue={`${17.01}%`}
       subFloatingValue={`${82.99}%`}
       viewAll
-      actions={
-        <Box display="flex" alignItems="center" justifyContent="space-between" gap={1}>
-          <ButtonWithDropdown fullWidth>{t('Borrow')}</ButtonWithDropdown>
-          <ButtonWithDropdown fullWidth variant="outlined">
-            {t('Repay')}
-          </ButtonWithDropdown>
-        </Box>
-      }
     >
       <OverviewPositionBars assets={assets} />
     </OverviewCard>

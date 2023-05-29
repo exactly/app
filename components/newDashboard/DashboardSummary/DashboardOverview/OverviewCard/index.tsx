@@ -41,14 +41,16 @@ const OverviewCard: FC<PropsWithChildren & OverviewCardProps> = ({
       borderRadius="8px"
       boxSizing="border-box"
       bgcolor="components.bg"
-      minHeight={{ xs: '100px', lg: '450px' }}
+      minHeight={{ xs: '100px', lg: '100%' }}
     >
       <Box display="flex" flexDirection="column" gap={4}>
         <Box display="flex" flexDirection="column" gap={3.5}>
           <Box display="flex" alignItems="center" justifyContent="space-between">
             <Box display="flex" alignItems="center" gap={1.2}>
               {icon}
-              <Typography variant="dashboardTitle">{title}</Typography>
+              <Typography variant="dashboardTitle" textTransform="capitalize">
+                {title}
+              </Typography>
             </Box>
             {viewAll && (
               <Typography variant="dashboardMainSubtitle" textTransform="uppercase" sx={{ cursor: 'pointer' }}>

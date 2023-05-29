@@ -1,9 +1,8 @@
 import React, { FC } from 'react';
-import { Box, Divider, Typography, useMediaQuery, useTheme } from '@mui/material';
+import { Box, Button, Divider, Typography, useMediaQuery, useTheme } from '@mui/material';
 import StarsIcon from '@mui/icons-material/Stars';
 import formatNumber from 'utils/formatNumber';
 import Image from 'next/image';
-import ButtonWithDropdown from 'components/common/ButtonWithDropdown';
 import { useTranslation } from 'react-i18next';
 
 type RewardProps = {
@@ -106,7 +105,9 @@ const UserRewards: FC<UserRewardsProps> = ({ rewards }) => {
           </Box>
         ))}
       </Box>
-      <ButtonWithDropdown fullWidth={isMobile}>{t('Claim')}</ButtonWithDropdown>
+      <Button variant="contained" fullWidth={isMobile} sx={{ px: 3 }}>
+        {t('Claim')}
+      </Button>
     </Box>
   );
 };
