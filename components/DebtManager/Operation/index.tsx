@@ -49,8 +49,8 @@ function Operation() {
   const {
     tx,
     input,
-    setTo,
     setFrom,
+    setTo,
     setPercent,
     setSlippage,
     debtManager,
@@ -333,6 +333,11 @@ function Operation() {
     return submit(transaction);
   }, [populateTransaction, submit]);
 
+  const approveRollover = useCallback(async () => {
+    await approve();
+    setRequiresApproval(await needsApproval(maxBorrowAssets));
+  }, [needsApproval, approve, maxBorrowAssets]);
+
   if (tx && input.to) return <LoadingTransaction tx={tx} to={input.to} />;
 
   return (
@@ -409,7 +414,12 @@ function Operation() {
               <ArrowForwardRoundedIcon sx={{ color: 'blue', fontSize: 14, fontWeight: 600 }} />
               <ModalSheetButton
                 selected={Boolean(input.to)}
-                onClick={() => setSheetOpen([false, true])}
+                onClick={() => {
+                  if (input.from) {
+                    setFrom(input.from);
+                  }
+                  setSheetOpen([false, true]);
+                }}
                 disabled={!input.from}
                 sx={{ mr: -0.5 }}
               >
@@ -438,7 +448,7 @@ function Operation() {
         <LoadingButton
           disabled={!input.from || !input.to || errorData?.status}
           loading={loadingStatus || isLoading}
-          onClick={requiresApproval ? approve : rollover}
+          onClick={requiresApproval ? approveRollover : rollover}
           variant="contained"
           fullWidth
         >
