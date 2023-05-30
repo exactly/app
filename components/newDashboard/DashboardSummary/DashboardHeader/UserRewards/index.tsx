@@ -1,5 +1,5 @@
 import React, { FC, useCallback, useMemo } from 'react';
-import { Box, Button, Divider, Typography, useMediaQuery, useTheme } from '@mui/material';
+import { Box, Button, Divider, Skeleton, Typography, useMediaQuery, useTheme } from '@mui/material';
 import StarsIcon from '@mui/icons-material/Stars';
 import formatNumber from 'utils/formatNumber';
 import Image from 'next/image';
@@ -54,23 +54,27 @@ const UserRewards = () => {
   const { rewards: rs, rates, claimable, claim, isLoading } = useRewards();
 
   const rewards = useMemo(() => {
+    if (!Object.keys(rates).length) return undefined;
+
     const ratesPerAsset = Object.values(rates)
       .flatMap((r) => r)
-      .flatMap((r) => ({ assetName: r.assetName, usdPrice: r.usdPrice }))
-      .reduce((acc: Record<string, BigNumber>, { assetName, usdPrice }) => {
-        if (!acc[assetName]) {
-          acc[assetName] = usdPrice;
+      .flatMap((r) => ({ assetSymbol: r.assetSymbol, usdPrice: r.usdPrice }))
+      .reduce((acc: Record<string, BigNumber>, { assetSymbol, usdPrice }) => {
+        if (!acc[assetSymbol]) {
+          acc[assetSymbol] = usdPrice;
         }
         return acc;
       }, {});
 
-    return Object.entries(rs).map(([assetSymbol, amount]) => ({
-      assetSymbol,
-      amount: formatNumber(formatFixed(amount, 18)),
-      amountInUSD: ratesPerAsset[assetSymbol]
-        ? formatNumber(formatFixed(amount.mul(ratesPerAsset[assetSymbol]).div(WeiPerEther), 18), 'noDecimals')
-        : undefined,
-    }));
+    return Object.entries(rs)
+      .map(([assetSymbol, amount]) => ({
+        assetSymbol,
+        amount: formatNumber(formatFixed(amount, 18)),
+        amountInUSD: ratesPerAsset[assetSymbol]
+          ? formatNumber(formatFixed(amount.mul(ratesPerAsset[assetSymbol]).div(WeiPerEther), 18), 'noDecimals')
+          : undefined,
+      }))
+      .filter(({ amountInUSD }) => amountInUSD !== '0');
   }, [rates, rs]);
 
   const onClickClaim = useCallback(async () => await claim(), [claim]);
@@ -83,7 +87,7 @@ const UserRewards = () => {
       alignItems={{ xs: 'none', lg: 'center' }}
       py={{ xs: 4, lg: 2 }}
       px={4}
-      gap={{ xs: 3.5, lg: rewards.length > 1 ? 3 : 2 }}
+      gap={{ xs: 3.5, lg: rewards && rewards.length > 1 ? 3 : 2 }}
       borderRadius="8px"
       boxSizing="border-box"
       bgcolor="components.bg"
@@ -101,32 +105,38 @@ const UserRewards = () => {
           </Typography>
         )}
       </Box>
+
       <Box
         display="flex"
         gap={{ xs: 3, lg: 2 }}
         alignItems="center"
-        mx={rewards.length > 1 ? 0 : 'auto'}
+        mx={rewards && rewards.length > 1 ? 0 : 'auto'}
         mb={{ xs: 0.5, lg: 0 }}
       >
-        {rewards.map(({ assetSymbol, amount, amountInUSD }, index) => (
-          <Box
-            key={`${assetSymbol}_${amount}_${amountInUSD}`}
-            display="flex"
-            gap={{ xs: 3, lg: 2 }}
-            alignItems="center"
-          >
-            <Reward
-              assetSymbol={assetSymbol}
-              amount={amount}
-              amountInUSD={amountInUSD}
-              xsDirection={rewards.length > 1 ? 'column' : 'row'}
-            />
-            {index !== rewards.length - 1 && (
-              <Divider orientation="vertical" flexItem variant={isMobile ? 'middle' : undefined} />
-            )}
-          </Box>
-        ))}
+        {rewards ? (
+          rewards.map(({ assetSymbol, amount, amountInUSD }, index) => (
+            <Box
+              key={`${assetSymbol}_${amount}_${amountInUSD}`}
+              display="flex"
+              gap={{ xs: 3, lg: 2 }}
+              alignItems="center"
+            >
+              <Reward
+                assetSymbol={assetSymbol}
+                amount={amount}
+                amountInUSD={amountInUSD}
+                xsDirection={rewards.length > 1 ? 'column' : 'row'}
+              />
+              {index !== rewards.length - 1 && (
+                <Divider orientation="vertical" flexItem variant={isMobile ? 'middle' : undefined} />
+              )}
+            </Box>
+          ))
+        ) : (
+          <Skeleton width={96} height={32} />
+        )}
       </Box>
+
       <Button
         variant="contained"
         fullWidth={isMobile}

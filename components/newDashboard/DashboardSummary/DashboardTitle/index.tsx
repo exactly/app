@@ -8,12 +8,13 @@ import dayjs from 'dayjs';
 
 const DashboardTitle = () => {
   const { t } = useTranslation();
-  const { refreshAccountData, lastSync } = useAccountData();
+  const { refreshAccountData, resetAccountData, lastSync } = useAccountData();
   const [loading, setLoading] = useState(false);
   const [minutes, setMinutes] = useState(dayjs(Date.now()).diff(lastSync, 'minutes'));
 
   const refreshData = async () => {
     setLoading(true);
+    await resetAccountData();
     await refreshAccountData();
     setLoading(false);
   };
