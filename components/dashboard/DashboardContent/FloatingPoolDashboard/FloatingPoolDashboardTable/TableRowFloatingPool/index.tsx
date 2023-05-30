@@ -12,12 +12,13 @@ import formatSymbol from 'utils/formatSymbol';
 import Link from 'next/link';
 import SwitchCollateral from 'components/dashboard/DashboardContent/FloatingPoolDashboard/FloatingPoolDashboardTable/SwitchCollateral';
 import useAccountData from 'hooks/useAccountData';
-import useActionButton from 'hooks/useActionButton';
+import useActionButton, { useStartDebtManagerButton } from 'hooks/useActionButton';
 import useRouter from 'hooks/useRouter';
 import useRewards from 'hooks/useRewards';
 import { useTranslation } from 'react-i18next';
 import { toPercentage } from 'utils/utils';
 import RewardPill from 'components/markets/RewardPill';
+import ButtonMenu from 'components/ButtonMenu';
 
 type Props = {
   symbol: string;
@@ -35,6 +36,7 @@ function TableRowFloatingPool({ symbol, valueUSD, depositedAmount, borrowedAmoun
   const { marketAccount } = useAccountData(symbol);
 
   const { handleActionClick } = useActionButton();
+  const startDebtManager = useStartDebtManagerButton();
 
   return (
     <TableRow
@@ -110,14 +112,29 @@ function TableRowFloatingPool({ symbol, valueUSD, depositedAmount, borrowedAmoun
       </TableCell>
 
       <TableCell align="left" width={50} size="small" sx={{ px: 0.5 }}>
-        <Button
-          variant="outlined"
-          sx={{ backgroundColor: 'components.bg', whiteSpace: 'nowrap' }}
-          onClick={(e) => handleActionClick(e, type === 'deposit' ? 'withdraw' : 'repay', symbol)}
-          data-testid={`floating-${type === 'deposit' ? 'withdraw' : 'repay'}-${symbol}`}
-        >
-          {type === 'deposit' ? t('Withdraw') : t('Repay')}
-        </Button>
+        {type === 'deposit' ? (
+          <Button
+            variant="outlined"
+            sx={{ backgroundColor: 'components.bg', whiteSpace: 'nowrap' }}
+            onClick={(e) => handleActionClick(e, type === 'deposit' ? 'withdraw' : 'repay', symbol)}
+            data-testid={`floating-withdraw-${symbol}`}
+          >
+            {t('Withdraw')}
+          </Button>
+        ) : (
+          <ButtonMenu
+            id={`floating-repay-${symbol}`}
+            variant="outlined"
+            sx={{ backgroundColor: 'components.bg', whiteSpace: 'nowrap' }}
+            onClick={(e) => handleActionClick(e, 'repay', symbol)}
+            data-testid={`floating-repay-${symbol}`}
+            options={[
+              { label: t('Rollover'), onClick: () => startDebtManager({ symbol }), disabled: borrowedAmount?.isZero() },
+            ]}
+          >
+            {t('Repay')}
+          </ButtonMenu>
+        )}
       </TableCell>
     </TableRow>
   );

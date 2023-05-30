@@ -48,7 +48,7 @@ const reducer = (state: Input, action: Partial<Input>): Input => {
 
 type ContextValues = {
   isOpen: boolean;
-  open: () => void;
+  openDebtManager: (from?: Position) => void;
   close: () => void;
 
   input: Input;
@@ -80,7 +80,7 @@ export const DebtManagerContextProvider: FC<PropsWithChildren> = ({ children }) 
   const { walletAddress } = useWeb3();
   const { data: signer } = useSigner();
   const { getMarketAccount, refreshAccountData } = useAccountData();
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
   const [errorData, setErrorData] = useState<ErrorData | undefined>();
 
   const [input, dispatch] = useReducer(reducer, initState);
@@ -94,11 +94,14 @@ export const DebtManagerContextProvider: FC<PropsWithChildren> = ({ children }) 
   const setPercent = useCallback((percent: number) => dispatch({ percent }), []);
   const setSlippage = useCallback((slippage: string) => dispatch({ slippage }), []);
 
-  const open = useCallback(() => {
-    dispatch(initState);
+  const openDebtManager = useCallback((from?: Position) => {
+    dispatch({ ...initState, from });
     setTx(undefined);
+    setGasCost(undefined);
+    setIsLoading(false);
     setIsOpen(true);
   }, []);
+
   const close = useCallback(() => setIsOpen(false), []);
 
   const debtManager = useDebtManager();
@@ -164,7 +167,7 @@ export const DebtManagerContextProvider: FC<PropsWithChildren> = ({ children }) 
 
   const value: ContextValues = {
     isOpen,
-    open,
+    openDebtManager,
     close,
 
     input,

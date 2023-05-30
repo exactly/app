@@ -3,6 +3,7 @@ import { useWeb3 } from 'hooks/useWeb3';
 import { Operation, useModalStatus } from 'contexts/ModalStatusContext';
 import numbers from 'config/numbers.json';
 import { useMarketContext } from 'contexts/MarketContext';
+import { useDebtManagerContext } from 'contexts/DebtManagerContext';
 
 const { minAPRValue } = numbers;
 
@@ -36,4 +37,20 @@ export default function useActionButton() {
   };
 
   return { handleActionClick, isDisable };
+}
+
+export function useStartDebtManagerButton() {
+  const { connect, isConnected } = useWeb3();
+  const { openDebtManager } = useDebtManagerContext();
+
+  return useCallback(
+    (...args: Parameters<typeof openDebtManager>) => {
+      if (!isConnected) {
+        return connect();
+      }
+
+      openDebtManager(...args);
+    },
+    [connect, isConnected, openDebtManager],
+  );
 }
