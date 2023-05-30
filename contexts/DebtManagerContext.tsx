@@ -109,8 +109,13 @@ export const DebtManagerContextProvider: FC<PropsWithChildren> = ({ children }) 
     async (qty: BigNumber): Promise<boolean> => {
       if (!walletAddress || !market || !debtManager || qty.isZero()) return true;
 
-      const allowance = await market.allowance(walletAddress, debtManager.address);
-      return allowance.isZero() || allowance.lt(qty);
+      try {
+        const allowance = await market.allowance(walletAddress, debtManager.address);
+        return allowance.isZero() || allowance.lt(qty);
+      } catch (e: unknown) {
+        setErrorData({ status: true, message: handleOperationError(e) });
+        return true;
+      }
     },
     [walletAddress, market, debtManager],
   );
