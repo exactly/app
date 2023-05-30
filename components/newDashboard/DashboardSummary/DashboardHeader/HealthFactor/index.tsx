@@ -13,7 +13,7 @@ const HealthFactor = () => {
   const healthFactor = useMemo(() => (hf ? parseFloat(parseHealthFactor(hf.debt, hf.collateral)) : undefined), [hf]);
 
   const healthFactorColor = useMemo(() => {
-    if (!healthFactor) return { color: '', bg: '' };
+    if (!healthFactor) return { color: palette.healthFactor.safe, bg: palette.healthFactor.bg.safe };
 
     const status = healthFactor >= 1.05 ? 'safe' : healthFactor <= 1 ? 'danger' : 'warning';
     return { color: palette.healthFactor[status], bg: palette.healthFactor.bg[status] };

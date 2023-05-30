@@ -1,14 +1,17 @@
-import React, { FC } from 'react';
+import React, { FC, useCallback, useMemo } from 'react';
 import { Box, Button, Divider, Typography, useMediaQuery, useTheme } from '@mui/material';
 import StarsIcon from '@mui/icons-material/Stars';
 import formatNumber from 'utils/formatNumber';
 import Image from 'next/image';
 import { useTranslation } from 'react-i18next';
+import useRewards from 'hooks/useRewards';
+import { BigNumber, formatFixed } from '@ethersproject/bignumber';
+import { WeiPerEther } from '@ethersproject/constants';
 
 type RewardProps = {
   assetSymbol: string;
-  amount: number;
-  amountInUSD: number;
+  amount: string;
+  amountInUSD?: string;
   xsDirection?: 'row' | 'column';
 };
 
@@ -38,20 +41,39 @@ const Reward: FC<RewardProps> = ({ assetSymbol, amount, amountInUSD, xsDirection
       </Box>
       <Box display="flex" alignItems="center" gap={1}>
         {isMobile && xsDirection === 'column' && <Box width={32} height={32} />}
-        <Typography variant="dashboardSubtitleNumber">{`$${formatNumber(amountInUSD, 'noDecimals', true)}`}</Typography>
+        {amountInUSD && <Typography variant="dashboardSubtitleNumber">${amountInUSD}</Typography>}
       </Box>
     </Box>
   );
 };
 
-type UserRewardsProps = {
-  rewards: RewardProps[];
-};
-
-const UserRewards: FC<UserRewardsProps> = ({ rewards }) => {
+const UserRewards = () => {
   const { t } = useTranslation();
   const { breakpoints } = useTheme();
   const isMobile = useMediaQuery(breakpoints.down('lg'));
+  const { rewards: rs, rates, claimable, claim, isLoading } = useRewards();
+
+  const rewards = useMemo(() => {
+    const ratesPerAsset = Object.values(rates)
+      .flatMap((r) => r)
+      .flatMap((r) => ({ assetName: r.assetName, usdPrice: r.usdPrice }))
+      .reduce((acc: Record<string, BigNumber>, { assetName, usdPrice }) => {
+        if (!acc[assetName]) {
+          acc[assetName] = usdPrice;
+        }
+        return acc;
+      }, {});
+
+    return Object.entries(rs).map(([assetSymbol, amount]) => ({
+      assetSymbol,
+      amount: formatNumber(formatFixed(amount, 18)),
+      amountInUSD: ratesPerAsset[assetSymbol]
+        ? formatNumber(formatFixed(amount.mul(ratesPerAsset[assetSymbol]).div(WeiPerEther), 18), 'noDecimals')
+        : undefined,
+    }));
+  }, [rates, rs]);
+
+  const onClickClaim = useCallback(async () => await claim(), [claim]);
 
   return (
     <Box
@@ -105,7 +127,13 @@ const UserRewards: FC<UserRewardsProps> = ({ rewards }) => {
           </Box>
         ))}
       </Box>
-      <Button variant="contained" fullWidth={isMobile} sx={{ px: 3 }}>
+      <Button
+        variant="contained"
+        fullWidth={isMobile}
+        sx={{ px: 3 }}
+        disabled={isLoading || !claimable}
+        onClick={onClickClaim}
+      >
         {t('Claim')}
       </Button>
     </Box>

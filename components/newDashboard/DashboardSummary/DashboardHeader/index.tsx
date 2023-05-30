@@ -3,37 +3,25 @@ import { Grid, useMediaQuery, useTheme } from '@mui/material';
 import HealthFactor from './HealthFactor';
 import UserRewards from './UserRewards';
 import BorrowLimit from './BorrowLimit';
+import useRewards from 'hooks/useRewards';
 
 const DashboardHeader = () => {
   const { breakpoints } = useTheme();
   const isMobile = useMediaQuery(breakpoints.down('lg'));
+  const { rewards } = useRewards();
 
-  const rewards = useMemo(
-    () => [
-      // {
-      //   assetSymbol: 'USDC',
-      //   amount: 932,
-      //   amountInUSD: 2575.48,
-      // },
-      {
-        assetSymbol: 'OP',
-        amount: 349,
-        amountInUSD: 689.56,
-      },
-    ],
-    [],
-  );
+  const rewardsQty = useMemo(() => Object.values(rewards).length, [rewards]);
 
   return (
     <Grid container spacing={2} sx={{ filter: 'drop-shadow(0px 3px 4px rgba(97, 102, 107, 0.1))' }}>
-      <Grid item xs={12} lg={rewards.length > 1 ? 3 : 4}>
+      <Grid item xs={12} lg={rewardsQty > 1 ? 3 : 4}>
         <HealthFactor />
       </Grid>
-      <Grid item xs={12} lg={rewards.length > 1 ? 6 : 4}>
-        {isMobile ? <BorrowLimit /> : <UserRewards rewards={rewards} />}
+      <Grid item xs={12} lg={rewardsQty > 1 ? 6 : 4}>
+        {isMobile ? <BorrowLimit /> : <UserRewards />}
       </Grid>
-      <Grid item xs={12} lg={rewards.length > 1 ? 3 : 4}>
-        {isMobile ? <UserRewards rewards={rewards} /> : <BorrowLimit />}
+      <Grid item xs={12} lg={rewardsQty > 1 ? 3 : 4}>
+        {isMobile ? <UserRewards /> : <BorrowLimit />}
       </Grid>
     </Grid>
   );
