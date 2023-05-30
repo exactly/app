@@ -4,6 +4,7 @@ import { Operation, useModalStatus } from 'contexts/ModalStatusContext';
 import numbers from 'config/numbers.json';
 import { useMarketContext } from 'contexts/MarketContext';
 import { useDebtManagerContext } from 'contexts/DebtManagerContext';
+import { BigNumber } from '@ethersproject/bignumber';
 
 const { minAPRValue } = numbers;
 
@@ -41,16 +42,28 @@ export default function useActionButton() {
 
 export function useStartDebtManagerButton() {
   const { connect, isConnected } = useWeb3();
-  const { openDebtManager } = useDebtManagerContext();
+  const { openDebtManager, debtManager } = useDebtManagerContext();
 
-  return useCallback(
+  const startDebtManager = useCallback(
     (...args: Parameters<typeof openDebtManager>) => {
       if (!isConnected) {
         return connect();
       }
 
+      if (!debtManager) return;
+
       openDebtManager(...args);
     },
-    [connect, isConnected, openDebtManager],
+    [debtManager, connect, isConnected, openDebtManager],
   );
+
+  const isRolloverDisabled = useCallback(
+    (borrow?: BigNumber) => !debtManager || !borrow || borrow.isZero(),
+    [debtManager],
+  );
+
+  return {
+    startDebtManager,
+    isRolloverDisabled,
+  };
 }
