@@ -1,19 +1,23 @@
 import React, { useMemo } from 'react';
-import { Box, Typography, useMediaQuery, useTheme } from '@mui/material';
+import { Box, Skeleton, Typography, useMediaQuery, useTheme } from '@mui/material';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import { useTranslation } from 'react-i18next';
+import useHealthFactor from 'hooks/useHealthFactor';
+import parseHealthFactor from 'utils/parseHealthFactor';
 
 const HealthFactor = () => {
   const { t } = useTranslation();
   const { breakpoints, palette } = useTheme();
   const isMobile = useMediaQuery(breakpoints.down('lg'));
-
-  const healthFactor = 1.092;
+  const hf = useHealthFactor();
+  const healthFactor = useMemo(() => (hf ? parseFloat(parseHealthFactor(hf.debt, hf.collateral)) : undefined), [hf]);
 
   const healthFactorColor = useMemo(() => {
+    if (!healthFactor) return { color: '', bg: '' };
+
     const status = healthFactor >= 1.05 ? 'safe' : healthFactor <= 1 ? 'danger' : 'warning';
     return { color: palette.healthFactor[status], bg: palette.healthFactor.bg[status] };
-  }, [palette.healthFactor]);
+  }, [healthFactor, palette.healthFactor]);
 
   return (
     <Box
@@ -34,9 +38,13 @@ const HealthFactor = () => {
           {t('Health Factor')}
         </Typography>
       </Box>
-      <Typography variant={isMobile ? 'dashboardOverviewAmount' : 'h6'} color={healthFactorColor.color}>
-        {healthFactor.toFixed(3)}x
-      </Typography>
+      {!healthFactor ? (
+        <Skeleton width={64} height={32} />
+      ) : (
+        <Typography variant={isMobile ? 'dashboardOverviewAmount' : 'h6'} color={healthFactorColor.color}>
+          {healthFactor.toFixed(3)}x
+        </Typography>
+      )}
     </Box>
   );
 };
