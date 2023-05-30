@@ -25,7 +25,7 @@ const DashboardMobile: FC<Props> = ({ type }) => {
   const { t } = useTranslation();
   const { accountData, getMarketAccount } = useAccountData();
   const { handleActionClick } = useActionButton();
-  const startDebtManager = useStartDebtManagerButton();
+  const { startDebtManager, isRolloverDisabled } = useStartDebtManagerButton();
   const { rates } = useRewards();
   const { floatingRows, fixedRows } = useDashboard(type);
   const isDeposit = type === 'deposit';
@@ -103,7 +103,7 @@ const DashboardMobile: FC<Props> = ({ type }) => {
                     {
                       label: t('Rollover'),
                       onClick: () => startDebtManager({ symbol }),
-                      disabled: borrowedAmount?.isZero(),
+                      disabled: isRolloverDisabled(borrowedAmount),
                     },
                   ]}
                 >
@@ -181,6 +181,7 @@ const DashboardMobile: FC<Props> = ({ type }) => {
                       {
                         label: t('Rollover'),
                         onClick: () => startDebtManager({ symbol, maturity }),
+                        disabled: isRolloverDisabled(),
                       },
                     ]}
                   >

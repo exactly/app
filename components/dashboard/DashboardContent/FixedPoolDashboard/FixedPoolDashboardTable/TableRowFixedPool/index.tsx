@@ -41,7 +41,7 @@ function TableRowFixedPool({ symbol, valueUSD, type, maturityDate, market, decim
   const { withdrawTxs, repayTxs, depositTxs, borrowTxs } = useFixedOperation(type, maturityDate, market);
   const [open, setOpen] = useState(false);
   const { handleActionClick } = useActionButton();
-  const startDebtManager = useStartDebtManagerButton();
+  const { startDebtManager, isRolloverDisabled } = useStartDebtManagerButton();
 
   const exchangeRate: number | undefined = useMemo(() => {
     if (!marketAccount) return;
@@ -155,6 +155,7 @@ function TableRowFixedPool({ symbol, valueUSD, type, maturityDate, market, decim
                   {
                     label: t('Rollover'),
                     onClick: () => startDebtManager({ symbol, maturity: maturityDate }),
+                    disabled: isRolloverDisabled(),
                   },
                 ]}
               >

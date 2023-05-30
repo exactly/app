@@ -36,7 +36,7 @@ function TableRowFloatingPool({ symbol, valueUSD, depositedAmount, borrowedAmoun
   const { marketAccount } = useAccountData(symbol);
 
   const { handleActionClick } = useActionButton();
-  const startDebtManager = useStartDebtManagerButton();
+  const { startDebtManager, isRolloverDisabled } = useStartDebtManagerButton();
 
   return (
     <TableRow
@@ -129,7 +129,11 @@ function TableRowFloatingPool({ symbol, valueUSD, depositedAmount, borrowedAmoun
             onClick={(e) => handleActionClick(e, 'repay', symbol)}
             data-testid={`floating-repay-${symbol}`}
             options={[
-              { label: t('Rollover'), onClick: () => startDebtManager({ symbol }), disabled: borrowedAmount?.isZero() },
+              {
+                label: t('Rollover'),
+                onClick: () => startDebtManager({ symbol }),
+                disabled: isRolloverDisabled(borrowedAmount),
+              },
             ]}
           >
             {t('Repay')}
