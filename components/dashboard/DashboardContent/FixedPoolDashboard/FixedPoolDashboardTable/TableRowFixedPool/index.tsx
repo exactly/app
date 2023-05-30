@@ -15,7 +15,7 @@ import formatSymbol from 'utils/formatSymbol';
 import parseTimestamp from 'utils/parseTimestamp';
 import CollapseFixedPool from '../CollapseFixedPool';
 import APRItem from '../APRItem';
-import useActionButton from 'hooks/useActionButton';
+import useActionButton, { useStartDebtManagerButton } from 'hooks/useActionButton';
 import type { Deposit } from 'types/Deposit';
 import type { WithdrawMP } from 'types/WithdrawMP';
 import { Borrow } from 'types/Borrow';
@@ -23,6 +23,7 @@ import { Repay } from 'types/Repay';
 import useAccountData from 'hooks/useAccountData';
 import useRouter from 'hooks/useRouter';
 import { useTranslation } from 'react-i18next';
+import ButtonMenu from 'components/ButtonMenu';
 
 type Props = {
   symbol: string;
@@ -40,6 +41,7 @@ function TableRowFixedPool({ symbol, valueUSD, type, maturityDate, market, decim
   const { withdrawTxs, repayTxs, depositTxs, borrowTxs } = useFixedOperation(type, maturityDate, market);
   const [open, setOpen] = useState(false);
   const { handleActionClick } = useActionButton();
+  const startDebtManager = useStartDebtManagerButton();
 
   const exchangeRate: number | undefined = useMemo(() => {
     if (!marketAccount) return;
@@ -132,18 +134,33 @@ function TableRowFixedPool({ symbol, valueUSD, type, maturityDate, market, decim
           </Box>
         </TableCell>
         <TableCell align="left" width={50} size="small" sx={{ px: 1 }}>
-          {(maturityDate && (
-            <Button
-              data-testid={`fixed-${maturityDate}-${type === 'borrow' ? 'repay' : 'withdraw'}-${symbol}`}
-              variant="outlined"
-              onClick={(e) =>
-                handleActionClick(e, type === 'borrow' ? 'repayAtMaturity' : 'withdrawAtMaturity', symbol, maturityDate)
-              }
-              sx={{ whiteSpace: 'nowrap' }}
-            >
-              {type === 'borrow' ? t('Repay') : t('Withdraw')}
-            </Button>
-          )) || (
+          {(maturityDate &&
+            (type === 'deposit' ? (
+              <Button
+                data-testid={`fixed-${maturityDate}-withdraw-${symbol}`}
+                variant="outlined"
+                onClick={(e) => handleActionClick(e, 'withdrawAtMaturity', symbol, maturityDate)}
+                sx={{ backgroundColor: 'components.bg', whiteSpace: 'nowrap' }}
+              >
+                {t('Withdraw')}
+              </Button>
+            ) : (
+              <ButtonMenu
+                id={`fixed-${maturityDate}-repay-${symbol}`}
+                variant="outlined"
+                sx={{ backgroundColor: 'components.bg', whiteSpace: 'nowrap' }}
+                onClick={(e) => handleActionClick(e, 'repayAtMaturity', symbol, maturityDate)}
+                data-testid={`floating-${maturityDate}-repay-${symbol}`}
+                options={[
+                  {
+                    label: t('Rollover'),
+                    onClick: () => startDebtManager({ symbol, maturity: maturityDate }),
+                  },
+                ]}
+              >
+                {t('Repay')}
+              </ButtonMenu>
+            ))) || (
             <Skeleton
               sx={{ margin: 'auto', borderRadius: '32px' }}
               variant="rounded"
