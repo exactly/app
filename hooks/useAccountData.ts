@@ -6,6 +6,7 @@ import type { Previewer } from 'types/contracts';
 type AccountDataHook = {
   marketAccount?: Previewer.MarketAccountStructOutput;
   accountData?: Previewer.MarketAccountStructOutput[];
+  lastSync?: number;
   getMarketAccount: (symbol: string) => Previewer.MarketAccountStructOutput | undefined;
 } & Omit<ContextValues, 'accountData'>;
 
@@ -32,6 +33,7 @@ function useAccountData(
   if (typeof symbol === 'undefined') {
     return {
       accountData,
+      lastSync: ctx.lastSync,
       getMarketAccount,
       ...mutators,
     };
@@ -40,6 +42,7 @@ function useAccountData(
   return {
     marketAccount,
     accountData,
+    lastSync: ctx.lastSync,
     ...mutators,
   };
 }

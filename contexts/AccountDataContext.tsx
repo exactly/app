@@ -13,7 +13,8 @@ import useDelayedEffect from 'hooks/useDelayedEffect';
 import { ErrorCode } from '@ethersproject/logger';
 
 export type ContextValues = {
-  accountData: AccountData | undefined;
+  accountData?: AccountData;
+  lastSync?: number;
   refreshAccountData: (delay?: number) => Promise<void>;
   resetAccountData: () => void;
 };
@@ -22,6 +23,7 @@ const AccountDataContext = createContext<ContextValues | null>(null);
 
 export const AccountDataProvider: FC<PropsWithChildren> = ({ children }) => {
   const [accountData, setAccountData] = useState<AccountData | undefined>();
+  const [lastSync, setLastSync] = useState<number | undefined>();
 
   const { connect, connectors } = useConnect();
   const { walletAddress } = useWeb3();
@@ -29,7 +31,10 @@ export const AccountDataProvider: FC<PropsWithChildren> = ({ children }) => {
 
   const focusTimeout = useRef<number>();
 
-  const resetAccountData = useCallback(() => setAccountData(undefined), []);
+  const resetAccountData = useCallback(() => {
+    setAccountData(undefined);
+    setLastSync(undefined);
+  }, []);
 
   useEffect(() => {
     const safeConnector = connectors.find(({ id, ready }) => ready && id === 'safe');
@@ -61,6 +66,7 @@ export const AccountDataProvider: FC<PropsWithChildren> = ({ children }) => {
       const data = await queryAccountData();
       if (cancelled?.()) return;
       setAccountData(data);
+      setLastSync(Date.now());
     },
     [queryAccountData],
   );
@@ -98,6 +104,7 @@ export const AccountDataProvider: FC<PropsWithChildren> = ({ children }) => {
     <AccountDataContext.Provider
       value={{
         accountData,
+        lastSync,
         refreshAccountData,
         resetAccountData,
       }}
