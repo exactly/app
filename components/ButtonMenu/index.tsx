@@ -20,6 +20,7 @@ export default function ButtonMenu({
   options = [],
   icon: Icon = MoreHorizIcon,
   variant,
+  fullWidth,
   ...props
 }: ButtonMenuProps) {
   const anchorRef = useRef<HTMLDivElement>(null);
@@ -30,7 +31,7 @@ export default function ButtonMenu({
 
   return (
     <>
-      <ButtonGroup variant={variant} ref={anchorRef}>
+      <ButtonGroup fullWidth={fullWidth} variant={variant} ref={anchorRef}>
         <Button
           variant={variant}
           {...props}
@@ -47,7 +48,13 @@ export default function ButtonMenu({
           aria-label="More options"
           aria-haspopup="menu"
           variant={variant}
-          sx={{ backgroundColor: 'components.bg', minWidth: 'fit-content', p: 0.5 }}
+          sx={{
+            backgroundColor: 'components.bg',
+            minWidth: 'fit-content',
+            p: 0.5,
+            maxWidth: 32,
+            ...(Array.isArray(props.sx) ? props.sx.flat() : [props.sx]),
+          }}
           onClick={handleClick}
         >
           <Icon />
@@ -60,11 +67,12 @@ export default function ButtonMenu({
         onClose={handleClose}
         anchorOrigin={{
           vertical: anchorRef.current?.clientHeight ? anchorRef.current.clientHeight + 4 : 'bottom',
-          horizontal: 'left',
+          horizontal: 'right',
         }}
+        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
         sx={{
           '& .MuiPaper-root': {
-            minWidth: anchorRef.current?.clientWidth,
+            minWidth: 108,
             boxShadow: '0px 2px 8px rgba(148, 151, 158, 0.2)',
             borderRadius: 2,
           },

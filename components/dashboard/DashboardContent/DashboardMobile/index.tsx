@@ -4,7 +4,7 @@ import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import { Box, Button, Skeleton, Tooltip, Typography } from '@mui/material';
 import MaturityLinearProgress from 'components/common/MaturityLinearProgress';
 import MobileAssetCard from 'components/MobileAssetCard';
-import useActionButton from 'hooks/useActionButton';
+import useActionButton, { useStartDebtManagerButton } from 'hooks/useActionButton';
 import useDashboard from 'hooks/useDashboard';
 import formatNumber from 'utils/formatNumber';
 import parseTimestamp from 'utils/parseTimestamp';
@@ -15,6 +15,7 @@ import { useTranslation } from 'react-i18next';
 import { toPercentage } from 'utils/utils';
 import useRewards from 'hooks/useRewards';
 import RewardPill from 'components/markets/RewardPill';
+import ButtonMenu from 'components/ButtonMenu';
 
 type Props = {
   type: 'deposit' | 'borrow';
@@ -24,6 +25,7 @@ const DashboardMobile: FC<Props> = ({ type }) => {
   const { t } = useTranslation();
   const { accountData, getMarketAccount } = useAccountData();
   const { handleActionClick } = useActionButton();
+  const startDebtManager = useStartDebtManagerButton();
   const { rates } = useRewards();
   const { floatingRows, fixedRows } = useDashboard(type);
   const isDeposit = type === 'deposit';
@@ -81,14 +83,33 @@ const DashboardMobile: FC<Props> = ({ type }) => {
               >
                 {isDeposit ? t('Deposit') : t('Borrow')}
               </Button>
-              <Button
-                variant="outlined"
-                fullWidth
-                sx={{ height: '34px' }}
-                onClick={(e) => handleActionClick(e, isDeposit ? 'withdraw' : 'repay', symbol)}
-              >
-                {isDeposit ? t('Withdraw') : t('Repay')}
-              </Button>
+              {isDeposit ? (
+                <Button
+                  variant="outlined"
+                  fullWidth
+                  sx={{ height: '34px' }}
+                  onClick={(e) => handleActionClick(e, 'withdraw', symbol)}
+                >
+                  {t('Withdraw')}
+                </Button>
+              ) : (
+                <ButtonMenu
+                  fullWidth
+                  id={`floating-repay-${symbol}`}
+                  variant="outlined"
+                  sx={{ backgroundColor: 'components.bg', whiteSpace: 'nowrap', height: '34px' }}
+                  onClick={(e) => handleActionClick(e, 'repay', symbol)}
+                  options={[
+                    {
+                      label: t('Rollover'),
+                      onClick: () => startDebtManager({ symbol }),
+                      disabled: borrowedAmount?.isZero(),
+                    },
+                  ]}
+                >
+                  {t('Repay')}
+                </ButtonMenu>
+              )}
             </Box>
           </>
         </MobileAssetCard>
@@ -138,16 +159,34 @@ const DashboardMobile: FC<Props> = ({ type }) => {
                   </FlexItem>
                 </Box>
                 <MaturityLinearProgress maturityDate={maturity} operation={type} symbol={symbol} />
-                <Button
-                  variant="outlined"
-                  fullWidth
-                  sx={{ height: '34px' }}
-                  onClick={(e) =>
-                    handleActionClick(e, isDeposit ? 'withdrawAtMaturity' : 'repayAtMaturity', symbol, maturity)
-                  }
-                >
-                  {isDeposit ? t('Withdraw') : t('Repay')}
-                </Button>
+                {isDeposit ? (
+                  <Button
+                    variant="outlined"
+                    fullWidth
+                    sx={{ height: '34px' }}
+                    onClick={(e) =>
+                      handleActionClick(e, isDeposit ? 'withdrawAtMaturity' : 'repayAtMaturity', symbol, maturity)
+                    }
+                  >
+                    {isDeposit ? t('Withdraw') : t('Repay')}
+                  </Button>
+                ) : (
+                  <ButtonMenu
+                    fullWidth
+                    id={`floating-repay-${symbol}`}
+                    variant="outlined"
+                    sx={{ backgroundColor: 'components.bg', whiteSpace: 'nowrap', height: '34px' }}
+                    onClick={(e) => handleActionClick(e, 'repay', symbol)}
+                    options={[
+                      {
+                        label: t('Rollover'),
+                        onClick: () => startDebtManager({ symbol, maturity }),
+                      },
+                    ]}
+                  >
+                    {t('Repay')}
+                  </ButtonMenu>
+                )}
               </>
             </MobileAssetCard>
           );
