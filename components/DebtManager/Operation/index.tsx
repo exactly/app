@@ -32,6 +32,7 @@ import handleOperationError from 'utils/handleOperationError';
 import ModalAlert from 'components/common/modal/ModalAlert';
 import useRewards from 'hooks/useRewards';
 import LoadingTransaction from '../Loading';
+import { gasLimitMultiplier } from 'utils/const';
 
 function Operation() {
   const { t } = useTranslation();
@@ -280,7 +281,7 @@ function Operation() {
 
   const [requiresApproval, setRequiresApproval] = useState(false);
 
-  const populateTransaction = useCallback(() => {
+  const populateTransaction = useCallback(async () => {
     if (!debtManager || !marketContract || !input.from || !input.to) return;
 
     const percentage = BigNumber.from(input.percent).mul(WeiPerEther).div(100);
@@ -289,22 +290,27 @@ function Operation() {
       const floatingToFixed = Boolean(input.to.maturity);
       const maturity = input.to.maturity ? input.to.maturity : input.from.maturity ? input.from.maturity : 0;
       const maxAssets = floatingToFixed ? maxBorrowAssets : maxRepayAssets;
-      return debtManager.populateTransaction.floatingRoll(
-        marketContract.address,
-        floatingToFixed,
-        maturity,
-        maxAssets,
-        percentage,
-      );
+
+      const args = [marketContract.address, floatingToFixed, maturity, maxAssets, percentage] as const;
+
+      const gasLimit = await debtManager.estimateGas.floatingRoll(...args);
+      return debtManager.populateTransaction.floatingRoll(...args, {
+        gasLimit: gasLimit.mul(gasLimitMultiplier).div(WeiPerEther),
+      });
     } else {
-      return debtManager.populateTransaction.fixedRoll(
+      const args = [
         marketContract.address,
         input.from.maturity,
         input.to.maturity,
         maxRepayAssets,
         maxBorrowAssets,
         percentage,
-      );
+      ] as const;
+
+      const gasLimit = await debtManager.estimateGas.fixedRoll(...args);
+      return debtManager.populateTransaction.fixedRoll(...args, {
+        gasLimit: gasLimit.mul(gasLimitMultiplier).div(WeiPerEther),
+      });
     }
   }, [debtManager, input.from, input.percent, input.to, marketContract, maxBorrowAssets, maxRepayAssets]);
 
