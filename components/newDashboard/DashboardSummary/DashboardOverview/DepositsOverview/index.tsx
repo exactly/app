@@ -1,69 +1,30 @@
 import React from 'react';
+import { formatFixed } from '@ethersproject/bignumber';
 import { DepositIcon } from 'components/Icons';
-import { AssetPosition } from '../DualProgressBarPosition';
+import useDashboardOverview from 'hooks/useDashboardOverview';
+import { useTranslation } from 'react-i18next';
+import formatNumber from 'utils/formatNumber';
+import { toPercentage } from 'utils/utils';
 import OverviewCard from '../OverviewCard';
 import OverviewPositionBars from '../OverviewPositionBars';
-import formatNumber from 'utils/formatNumber';
-import { useTranslation } from 'react-i18next';
 
 const DepositsOverview = () => {
   const { t } = useTranslation();
-
-  const assets: AssetPosition[] = [
-    {
-      symbol: 'DAI',
-      fixedAssets: 2000,
-      fixedValueUSD: 2000,
-      floatingAssets: 1000,
-      floatingValueUSD: 1000,
-      percentageOfTotal: 32.41,
-    },
-    {
-      symbol: 'USDC',
-      fixedAssets: 1800,
-      fixedValueUSD: 1800,
-      floatingAssets: 1000,
-      floatingValueUSD: 1000,
-      percentageOfTotal: 30.93,
-    },
-    {
-      symbol: 'ETH',
-      fixedAssets: 1000,
-      fixedValueUSD: 1000,
-      floatingAssets: 1000,
-      floatingValueUSD: 1000,
-      percentageOfTotal: 22.32,
-    },
-    {
-      symbol: 'WBTC',
-      fixedAssets: 1000,
-      fixedValueUSD: 1000,
-      floatingAssets: 1000,
-      floatingValueUSD: 1000,
-      percentageOfTotal: 9.1,
-    },
-    {
-      symbol: 'WstETH',
-      fixedAssets: 1000,
-      fixedValueUSD: 1000,
-      floatingAssets: 1000,
-      floatingValueUSD: 1000,
-      percentageOfTotal: 5.23,
-    },
-  ];
+  const { totalUSD, assetPositions, totalFixedUSD, totalFloatingUSD, fixedPercentage, floatingPercentage } =
+    useDashboardOverview('deposit');
 
   return (
     <OverviewCard
       title={t('deposits')}
       icon={<DepositIcon sx={{ fontSize: 12 }} />}
-      total={`$${formatNumber(560432.51, 'USD', true)}`}
-      fixedValue={`$${formatNumber(134003.41, 'USD', true)}`}
-      floatingValue={`$${formatNumber(426429.1, 'USD', true)}`}
-      subFixedValue={`${23.91}%`}
-      subFloatingValue={`${76.08}%`}
+      total={totalUSD ? `$${formatNumber(formatFixed(totalUSD, 18), 'USD', true)}` : undefined}
+      fixedValue={totalFixedUSD ? `$${formatNumber(formatFixed(totalFixedUSD, 18), 'USD', true)}` : undefined}
+      floatingValue={totalFloatingUSD ? `$${formatNumber(formatFixed(totalFloatingUSD, 18), 'USD', true)}` : undefined}
+      subFixedValue={fixedPercentage ? toPercentage(Number(fixedPercentage) / 1e18) : undefined}
+      subFloatingValue={floatingPercentage ? toPercentage(Number(floatingPercentage) / 1e18) : undefined}
       viewAll
     >
-      <OverviewPositionBars assets={assets} />
+      <OverviewPositionBars assets={assetPositions} />
     </OverviewCard>
   );
 };

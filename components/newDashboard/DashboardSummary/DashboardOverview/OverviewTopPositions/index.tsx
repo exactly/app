@@ -12,10 +12,10 @@ export type TopAssetPosition = {
 };
 
 type OverviewTopPositionsProps = {
-  assets: TopAssetPosition[];
+  assets?: TopAssetPosition[];
 };
 
-const OverviewTopPositions: FC<OverviewTopPositionsProps> = ({ assets }) => {
+const OverviewTopPositions: FC<OverviewTopPositionsProps> = ({ assets = [] }) => {
   return (
     <Box display="flex" flexDirection="column" gap={1.5}>
       {assets.map(({ symbol, type, totalUSD, apr }, index) => (

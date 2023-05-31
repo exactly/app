@@ -6,11 +6,11 @@ import OperationLegend from 'components/common/OperationLegend';
 type OverviewCardProps = {
   title: string;
   icon: ReactNode;
-  total: string;
-  fixedValue: string;
-  floatingValue: string;
-  subFixedValue: string;
-  subFloatingValue: string;
+  total?: string;
+  fixedValue?: string;
+  floatingValue?: string;
+  subFixedValue?: string;
+  subFloatingValue?: string;
   viewAll?: boolean;
   actions?: ReactNode;
   mobileWrap?: boolean;

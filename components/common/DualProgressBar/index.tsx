@@ -14,7 +14,7 @@ const ProgressBar = styled('div')(({ theme }) => ({
 
 const FirstProgressBar = styled('div')<{ width: number; bgcolor: string }>(({ width, bgcolor }) => ({
   width: `${width}%`,
-  borderRadius: '5px 0 0 5px',
+  borderRadius: '4px 0 0 4px',
   backgroundColor: bgcolor,
   transition: 'background-color 0.3s',
   position: 'relative',
@@ -38,7 +38,7 @@ const FirstProgressBar = styled('div')<{ width: number; bgcolor: string }>(({ wi
 
 const SecondProgressBar = styled('div')<{ width: number; bgcolor: string }>(({ width, bgcolor }) => ({
   width: `${width}%`,
-  borderRadius: '0 5px 5px 0',
+  borderRadius: '0 4px 4px 0',
   backgroundColor: bgcolor,
   transition: 'background-color 0.3s',
   '&:hover': {
