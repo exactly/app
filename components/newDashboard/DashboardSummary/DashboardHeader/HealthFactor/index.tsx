@@ -10,12 +10,13 @@ const HealthFactor = () => {
   const { breakpoints, palette } = useTheme();
   const isMobile = useMediaQuery(breakpoints.down('lg'));
   const hf = useHealthFactor();
-  const healthFactor = useMemo(() => (hf ? parseFloat(parseHealthFactor(hf.debt, hf.collateral)) : undefined), [hf]);
+  const healthFactor = useMemo(() => (hf ? parseHealthFactor(hf.debt, hf.collateral) : undefined), [hf]);
 
   const healthFactorColor = useMemo(() => {
     if (!healthFactor) return { color: palette.healthFactor.safe, bg: palette.healthFactor.bg.safe };
 
-    const status = healthFactor >= 1.05 ? 'safe' : healthFactor <= 1 ? 'danger' : 'warning';
+    const parsedHF = parseFloat(healthFactor);
+    const status = parsedHF < 1 ? 'danger' : parsedHF < 1.05 ? 'warning' : 'safe';
     return { color: palette.healthFactor[status], bg: palette.healthFactor.bg[status] };
   }, [healthFactor, palette.healthFactor]);
 
@@ -42,7 +43,7 @@ const HealthFactor = () => {
         <Skeleton width={64} height={32} />
       ) : (
         <Typography variant={isMobile ? 'dashboardOverviewAmount' : 'h6'} color={healthFactorColor.color}>
-          {healthFactor.toFixed(3)}x
+          {healthFactor}
         </Typography>
       )}
     </Box>

@@ -26,7 +26,7 @@ const Reward: FC<RewardProps> = ({ assetSymbol, amount, amountInUSD, xsDirection
       gap={{ xs: xsDirection === 'column' ? 0 : 1, lg: 1 }}
       sx={{ flexWrap: 'wrap' }}
     >
-      <Box display="flex" alignItems="center" gap={1}>
+      <Box display="flex" alignItems="center" gap={{ xs: 1, lg: 0.5 }}>
         <Image
           src={`/img/assets/${assetSymbol}.svg`}
           alt={assetSymbol}
@@ -66,15 +66,19 @@ const UserRewards = () => {
         return acc;
       }, {});
 
-    return Object.entries(rs)
-      .map(([assetSymbol, amount]) => ({
+    return Object.entries(rs).map(([assetSymbol, amount]) => {
+      const _amountInUSD = ratesPerAsset[assetSymbol]
+        ? amount.mul(ratesPerAsset[assetSymbol]).div(WeiPerEther)
+        : undefined;
+
+      return {
         assetSymbol,
         amount: formatNumber(formatFixed(amount, 18)),
-        amountInUSD: ratesPerAsset[assetSymbol]
-          ? formatNumber(formatFixed(amount.mul(ratesPerAsset[assetSymbol]).div(WeiPerEther), 18), 'noDecimals')
+        amountInUSD: _amountInUSD
+          ? formatNumber(formatFixed(_amountInUSD, 18), _amountInUSD.lt(WeiPerEther) ? 'USD' : 'noDecimals')
           : undefined,
-      }))
-      .filter(({ amountInUSD }) => amountInUSD !== '0');
+      };
+    });
   }, [rates, rs]);
 
   const onClickClaim = useCallback(async () => await claim(), [claim]);

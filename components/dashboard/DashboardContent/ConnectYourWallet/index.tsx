@@ -11,15 +11,20 @@ function ConnectYourWallet() {
     <Box
       display="flex"
       flexDirection="column"
+      justifyContent="center"
       alignItems="center"
       border="1px solid #E0E0E0"
       borderRadius="6px"
-      p={4}
+      py={5}
+      px={4}
       mt={5}
       gap={1}
+      height="320px"
     >
-      <Typography fontWeight={700}>{t('Connect your wallet')}</Typography>
-      <Typography textAlign="center" fontSize={13} color="grey.700">
+      <Typography fontWeight={700} fontSize={16}>
+        {t('Connect your wallet')}
+      </Typography>
+      <Typography textAlign="center" fontSize={14} color="figma.grey.500">
         {t('Please connect your wallet to see your deposits and borrowings.')}
       </Typography>
       <Button onClick={connect} variant="contained" sx={{ marginTop: 2 }}>

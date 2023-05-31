@@ -1,17 +1,33 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Box } from '@mui/material';
 import DashboardHeader from './DashboardHeader';
 import DashboardTitle from './DashboardTitle';
 import DashboardOverview from './DashboardOverview';
 import Legends from './Legends';
+import useTotalsUsd from 'hooks/useTotalsUsd';
+import StartEarning from 'components/common/StartEarning';
 
 const DashboardSummary = () => {
+  const { totalBorrowedUSD, totalDepositedUSD } = useTotalsUsd();
+
+  const isNewUser = useMemo(
+    () => totalBorrowedUSD.isZero() && totalDepositedUSD.isZero(),
+    [totalBorrowedUSD, totalDepositedUSD],
+  );
+
   return (
-    <Box display="flex" flexDirection="column" gap={2}>
-      <DashboardTitle />
-      <DashboardHeader />
-      <DashboardOverview />
-      <Legends />
+    <Box
+      display="flex"
+      flexDirection="column"
+      gap={2}
+      sx={{ filter: 'drop-shadow(0px 3px 4px rgba(97, 102, 107, 0.1))' }}
+    >
+      {isNewUser ? <StartEarning /> : <DashboardTitle />}
+      <Box display="flex" flexDirection="column" gap={2} sx={{ opacity: isNewUser ? 0.5 : 1 }}>
+        <DashboardHeader />
+        <DashboardOverview />
+        <Legends />
+      </Box>
     </Box>
   );
 };
