@@ -53,7 +53,7 @@ function PositionTable({ data, onClick, loading = false, showBalance = false }: 
             <HeaderCell>{t('Asset')}</HeaderCell>
             <HeaderCell>{t('Type')}</HeaderCell>
             <HeaderCell>{t('Maturity Date')}</HeaderCell>
-            {showBalance && <HeaderCell>{t('Balance')}</HeaderCell>}
+            {showBalance && <HeaderCell>{t('Value')}</HeaderCell>}
             <HeaderCell>{t('APR')}</HeaderCell>
           </TableRow>
         </TableHead>

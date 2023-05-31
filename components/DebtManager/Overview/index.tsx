@@ -78,8 +78,8 @@ function Overview({ from, to, percent }: Props) {
       {
         key: 'PositionType',
         label: t('Position type'),
-        current: <TextValue>{isFromFixed ? t('Fixed') : t('Unlimited')}</TextValue>,
-        new: to ? <TextValue>{isToFixed ? t('Fixed') : t('Unlimited')}</TextValue> : null,
+        current: <TextValue>{isFromFixed ? t('Fixed') : t('Variable')}</TextValue>,
+        new: to ? <TextValue>{isToFixed ? t('Fixed') : t('Variable')}</TextValue> : null,
       },
       {
         key: 'APR',
