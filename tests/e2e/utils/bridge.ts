@@ -1,5 +1,4 @@
 import { Eip1193Bridge } from '@ethersproject/experimental';
-import { JsonRpcProvider } from '@ethersproject/providers';
 import { Signer } from '@ethersproject/abstract-signer';
 import { Provider } from '@ethersproject/abstract-provider';
 
@@ -26,8 +25,14 @@ export class CustomizedBridge extends Eip1193Bridge {
           throw new Error('eth_sendTransaction requires an account');
         }
 
-        const req = JsonRpcProvider.hexlifyTransaction(params[0], { from: true, gas: true });
-        const tx = await this.signer.sendTransaction(req);
+        if (params.length !== 1) {
+          throw new Error('eth_sendTransaction requires a transaction');
+        }
+
+        const { gas, ...rest } = params[0];
+        const transaction = { gasLimit: gas, ...rest };
+
+        const tx = await this.signer.sendTransaction(transaction);
         return tx.hash;
       }
 
@@ -36,8 +41,7 @@ export class CustomizedBridge extends Eip1193Bridge {
           throw new Error('eth_call requires an account');
         }
 
-        const req = JsonRpcProvider.hexlifyTransaction(params[0], { from: true, gas: true });
-        return await this.signer.call(req, params[1]);
+        return await this.signer.call(params[0], params[1]);
       }
 
       default:
