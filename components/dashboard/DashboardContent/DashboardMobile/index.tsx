@@ -164,19 +164,17 @@ const DashboardMobile: FC<Props> = ({ type }) => {
                     variant="outlined"
                     fullWidth
                     sx={{ height: '34px' }}
-                    onClick={(e) =>
-                      handleActionClick(e, isDeposit ? 'withdrawAtMaturity' : 'repayAtMaturity', symbol, maturity)
-                    }
+                    onClick={(e) => handleActionClick(e, 'withdrawAtMaturity', symbol, maturity)}
                   >
                     {isDeposit ? t('Withdraw') : t('Repay')}
                   </Button>
                 ) : (
                   <ButtonMenu
                     fullWidth
-                    id={`floating-repay-${symbol}`}
+                    id={`fixed-${maturity}-repay-${symbol}`}
                     variant="outlined"
                     sx={{ backgroundColor: 'components.bg', whiteSpace: 'nowrap', height: '34px' }}
-                    onClick={(e) => handleActionClick(e, 'repay', symbol)}
+                    onClick={(e) => handleActionClick(e, 'repayAtMaturity', symbol, maturity)}
                     options={[
                       {
                         label: t('Rollover'),

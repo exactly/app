@@ -150,7 +150,7 @@ function TableRowFixedPool({ symbol, valueUSD, type, maturityDate, market, decim
                 variant="outlined"
                 sx={{ backgroundColor: 'components.bg', whiteSpace: 'nowrap' }}
                 onClick={(e) => handleActionClick(e, 'repayAtMaturity', symbol, maturityDate)}
-                data-testid={`floating-${maturityDate}-repay-${symbol}`}
+                data-testid={`fixed-${maturityDate}-repay-${symbol}`}
                 options={[
                   {
                     label: t('Rollover'),

@@ -116,7 +116,7 @@ function TableRowFloatingPool({ symbol, valueUSD, depositedAmount, borrowedAmoun
           <Button
             variant="outlined"
             sx={{ backgroundColor: 'components.bg', whiteSpace: 'nowrap' }}
-            onClick={(e) => handleActionClick(e, type === 'deposit' ? 'withdraw' : 'repay', symbol)}
+            onClick={(e) => handleActionClick(e, 'withdraw', symbol)}
             data-testid={`floating-withdraw-${symbol}`}
           >
             {t('Withdraw')}

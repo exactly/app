@@ -28,7 +28,7 @@ import { useWeb3 } from 'hooks/useWeb3';
 
 type Row = {
   key: string;
-  label: React.ReactNode | string | null;
+  label: React.ReactNode;
   current: React.ReactNode;
   new?: React.ReactNode;
 };
