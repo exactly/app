@@ -10,7 +10,9 @@ export const enterMarket = (symbol: ERC20TokenSymbol, signer: Defer<Signer>) => 
   it(`enter market for ${symbol}`, async () => {
     const auditorContract = auditor(signer());
     const erc20MarketContract = await erc20Market(symbol);
-    await auditorContract.enterMarket(erc20MarketContract.address);
+    const args = [erc20MarketContract.address] as const;
+    const gas = await auditorContract.estimateGas.enterMarket(...args);
+    await auditorContract.enterMarket(...args, { gasLimit: gas.mul(2) });
   });
 };
 
@@ -18,7 +20,9 @@ export const exitMarket = (symbol: ERC20TokenSymbol, signer: Defer<Signer>) => {
   it(`exit market for ${symbol}`, async () => {
     const auditorContract = auditor(signer());
     const erc20MarketContract = await erc20Market(symbol);
-    await auditorContract.exitMarket(erc20MarketContract.address);
+    const args = [erc20MarketContract.address] as const;
+    const gas = await auditorContract.estimateGas.exitMarket(...args);
+    await auditorContract.exitMarket(...args, { gasLimit: gas.mul(2) });
   });
 };
 
@@ -34,13 +38,19 @@ export const deposit = ({ symbol, amount, receiver }: FloatingOperationParams, s
       const weth = await erc20('WETH', signer());
       const ethRouterContract = ethRouter(signer());
       const qty = parseFixed(amount, await weth.decimals());
-      await ethRouterContract.deposit({ value: qty });
+      const args = { value: qty };
+      const gas = await ethRouterContract.estimateGas.deposit(args);
+      await ethRouterContract.deposit({ ...args, gasLimit: gas.mul(2) });
     } else {
       const erc20Contract = await erc20(symbol, signer());
       const erc20MarketContract = await erc20Market(symbol, signer());
       const qty = parseFixed(amount, await erc20Contract.decimals());
-      await erc20Contract.approve(erc20MarketContract.address, MaxUint256);
-      await erc20MarketContract.deposit(qty, receiver);
+      const approveArgs = [erc20MarketContract.address, MaxUint256] as const;
+      const approveGas = await erc20Contract.estimateGas.approve(...approveArgs);
+      await erc20Contract.approve(...approveArgs, { gasLimit: approveGas.mul(2) });
+      const args = [qty, receiver] as const;
+      const gas = await erc20MarketContract.estimateGas.deposit(...args);
+      await erc20MarketContract.deposit(...args, { gasLimit: gas.mul(2) });
     }
   });
 };
@@ -52,13 +62,19 @@ export const borrow = ({ symbol, amount, receiver }: FloatingOperationParams, si
       const wethMarketContract = await erc20Market('WETH', signer());
       const ethRouterContract = ethRouter(signer());
       const qty = parseFixed(amount, await weth.decimals());
-      await wethMarketContract.approve(ethRouterContract.address, MaxUint256);
-      await ethRouterContract.borrow(qty);
+      const approveArgs = [ethRouterContract.address, MaxUint256] as const;
+      const approveGas = await weth.estimateGas.approve(...approveArgs);
+      await wethMarketContract.approve(...approveArgs, { gasLimit: approveGas.mul(2) });
+      const args = [qty] as const;
+      const gas = await ethRouterContract.estimateGas.borrow(...args);
+      await ethRouterContract.borrow(...args, { gasLimit: gas.mul(2) });
     } else {
       const erc20Contract = await erc20(symbol, signer());
       const erc20MarketContract = await erc20Market(symbol, signer());
       const qty = parseFixed(amount, await erc20Contract.decimals());
-      await erc20MarketContract.borrow(qty, receiver, receiver);
+      const args = [qty, receiver, receiver] as const;
+      const gas = await erc20MarketContract.estimateGas.borrow(...args);
+      await erc20MarketContract.borrow(...args, { gasLimit: gas.mul(2) });
     }
   });
 };
@@ -84,13 +100,19 @@ export const depositAtMaturity = (
       const weth = await erc20('WETH', signer());
       const ethRouterContract = ethRouter(signer());
       const qty = parseFixed(amount, await weth.decimals());
-      await ethRouterContract.depositAtMaturity(maturity, minAssets(qty), { value: qty });
+      const args = [maturity, minAssets(qty)] as const;
+      const gas = await ethRouterContract.estimateGas.depositAtMaturity(...args, { value: qty });
+      await ethRouterContract.depositAtMaturity(...args, { value: qty, gasLimit: gas.mul(2) });
     } else {
       const erc20Contract = await erc20(symbol, signer());
       const erc20MarketContract = await erc20Market(symbol, signer());
       const qty = parseFixed(amount, await erc20Contract.decimals());
-      await erc20Contract.approve(erc20MarketContract.address, MaxUint256);
-      await erc20MarketContract.depositAtMaturity(maturity, qty, minAssets(qty), receiver);
+      const approveArgs = [erc20MarketContract.address, MaxUint256] as const;
+      const approveGas = await erc20Contract.estimateGas.approve(...approveArgs);
+      await erc20Contract.approve(...approveArgs, { gasLimit: approveGas.mul(2) });
+      const args = [maturity, qty, minAssets(qty), receiver] as const;
+      const gas = await erc20MarketContract.estimateGas.depositAtMaturity(...args);
+      await erc20MarketContract.depositAtMaturity(...args, { gasLimit: gas.mul(2) });
     }
   });
 };
@@ -107,13 +129,19 @@ export const borrowAtMaturity = (
       const wethMarketContract = await erc20Market('WETH', signer());
       const ethRouterContract = ethRouter(signer());
       const qty = parseFixed(amount, await weth.decimals());
-      await wethMarketContract.approve(ethRouterContract.address, MaxUint256);
-      await ethRouterContract.borrowAtMaturity(maturity, qty, maxAssets(qty));
+      const approveArgs = [ethRouterContract.address, MaxUint256] as const;
+      const approveGas = await wethMarketContract.estimateGas.approve(...approveArgs);
+      await wethMarketContract.approve(...approveArgs, { gasLimit: approveGas.mul(2) });
+      const args = [maturity, qty, maxAssets(qty)] as const;
+      const gas = await ethRouterContract.estimateGas.borrowAtMaturity(...args);
+      await ethRouterContract.borrowAtMaturity(...args, { gasLimit: gas.mul(2) });
     } else {
       const erc20Contract = await erc20(symbol, signer());
       const erc20MarketContract = await erc20Market(symbol, signer());
       const qty = parseFixed(amount, await erc20Contract.decimals());
-      await erc20MarketContract.borrowAtMaturity(maturity, qty, maxAssets(qty), receiver, receiver);
+      const args = [maturity, qty, maxAssets(qty), receiver, receiver] as const;
+      const gas = await erc20MarketContract.estimateGas.borrowAtMaturity(...args);
+      await erc20MarketContract.borrowAtMaturity(...args, { gasLimit: gas.mul(2) });
     }
   });
 };
