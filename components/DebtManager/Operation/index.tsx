@@ -287,18 +287,7 @@ function Operation() {
 
     const percentage = BigNumber.from(input.percent).mul(WeiPerEther).div(100);
 
-    if (!input.from.maturity || !input.to.maturity) {
-      const floatingToFixed = Boolean(input.to.maturity);
-      const maturity = input.to.maturity ? input.to.maturity : input.from.maturity ? input.from.maturity : 0;
-      const maxAssets = floatingToFixed ? maxBorrowAssets : maxRepayAssets;
-
-      const args = [marketContract.address, floatingToFixed, maturity, maxAssets, percentage] as const;
-
-      const gasLimit = await debtManager.estimateGas.floatingRoll(...args);
-      return debtManager.populateTransaction.floatingRoll(...args, {
-        gasLimit: gasLimit.mul(gasLimitMultiplier).div(WeiPerEther),
-      });
-    } else {
+    if (input.from.maturity && input.to.maturity) {
       const args = [
         marketContract.address,
         input.from.maturity,
@@ -310,6 +299,18 @@ function Operation() {
 
       const gasLimit = await debtManager.estimateGas.fixedRoll(...args);
       return debtManager.populateTransaction.fixedRoll(...args, {
+        gasLimit: gasLimit.mul(gasLimitMultiplier).div(WeiPerEther),
+      });
+    } else if (input.to.maturity) {
+      const args = [marketContract.address, input.to.maturity, maxBorrowAssets, percentage] as const;
+      const gasLimit = await debtManager.estimateGas.rollFloatingToFixed(...args);
+      return debtManager.populateTransaction.rollFloatingToFixed(...args, {
+        gasLimit: gasLimit.mul(gasLimitMultiplier).div(WeiPerEther),
+      });
+    } else if (input.from.maturity) {
+      const args = [marketContract.address, input.from.maturity, maxRepayAssets, percentage] as const;
+      const gasLimit = await debtManager.estimateGas.rollFixedToFloating(...args);
+      return debtManager.populateTransaction.rollFixedToFloating(...args, {
         gasLimit: gasLimit.mul(gasLimitMultiplier).div(WeiPerEther),
       });
     }
