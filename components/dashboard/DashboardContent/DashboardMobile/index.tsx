@@ -1,7 +1,7 @@
 import React, { FC, PropsWithChildren } from 'react';
 import { formatFixed } from '@ethersproject/bignumber';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
-import { Box, Button, Skeleton, Tooltip, Typography } from '@mui/material';
+import { Box, Button, ButtonGroup, Skeleton, Tooltip, Typography } from '@mui/material';
 import MaturityLinearProgress from 'components/common/MaturityLinearProgress';
 import MobileAssetCard from 'components/MobileAssetCard';
 import useActionButton, { useStartDebtManagerButton } from 'hooks/useActionButton';
@@ -15,7 +15,6 @@ import { useTranslation } from 'react-i18next';
 import { toPercentage } from 'utils/utils';
 import useRewards from 'hooks/useRewards';
 import RewardPill from 'components/markets/RewardPill';
-import ButtonMenu from 'components/ButtonMenu';
 
 type Props = {
   type: 'deposit' | 'borrow';
@@ -93,22 +92,32 @@ const DashboardMobile: FC<Props> = ({ type }) => {
                   {t('Withdraw')}
                 </Button>
               ) : (
-                <ButtonMenu
-                  fullWidth
-                  id={`floating-repay-${symbol}`}
-                  variant="outlined"
-                  sx={{ backgroundColor: 'components.bg', whiteSpace: 'nowrap', height: '34px' }}
-                  onClick={(e) => handleActionClick(e, 'repay', symbol)}
-                  options={[
-                    {
-                      label: t('Rollover'),
-                      onClick: () => startDebtManager({ symbol }),
-                      disabled: isRolloverDisabled(borrowedAmount),
-                    },
-                  ]}
-                >
-                  {t('Repay')}
-                </ButtonMenu>
+                <ButtonGroup fullWidth>
+                  <Button
+                    variant="outlined"
+                    sx={{
+                      backgroundColor: 'components.bg',
+                      whiteSpace: 'nowrap',
+                      height: '34px',
+                      '&:hover': { zIndex: 1 },
+                    }}
+                    onClick={(e) => handleActionClick(e, 'repay', symbol)}
+                  >
+                    {t('Repay')}
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    sx={{
+                      backgroundColor: 'components.bg',
+                      whiteSpace: 'nowrap',
+                      height: '34px',
+                    }}
+                    onClick={() => startDebtManager({ symbol })}
+                    disabled={isRolloverDisabled(borrowedAmount)}
+                  >
+                    {t('Rollover')}
+                  </Button>
+                </ButtonGroup>
               )}
             </Box>
           </>
@@ -169,22 +178,28 @@ const DashboardMobile: FC<Props> = ({ type }) => {
                     {isDeposit ? t('Withdraw') : t('Repay')}
                   </Button>
                 ) : (
-                  <ButtonMenu
-                    fullWidth
-                    id={`fixed-${maturity}-repay-${symbol}`}
-                    variant="outlined"
-                    sx={{ backgroundColor: 'components.bg', whiteSpace: 'nowrap', height: '34px' }}
-                    onClick={(e) => handleActionClick(e, 'repayAtMaturity', symbol, maturity)}
-                    options={[
-                      {
-                        label: t('Rollover'),
-                        onClick: () => startDebtManager({ symbol, maturity }),
-                        disabled: isRolloverDisabled(),
-                      },
-                    ]}
-                  >
-                    {t('Repay')}
-                  </ButtonMenu>
+                  <ButtonGroup fullWidth>
+                    <Button
+                      variant="outlined"
+                      sx={{
+                        backgroundColor: 'components.bg',
+                        whiteSpace: 'nowrap',
+                        height: '34px',
+                        '&:hover': { zIndex: 1 },
+                      }}
+                      onClick={(e) => handleActionClick(e, 'repayAtMaturity', symbol, maturity)}
+                    >
+                      {t('Repay')}
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      sx={{ backgroundColor: 'components.bg', whiteSpace: 'nowrap', height: '34px' }}
+                      onClick={() => startDebtManager({ symbol, maturity })}
+                      disabled={isRolloverDisabled()}
+                    >
+                      {t('Rollover')}
+                    </Button>
+                  </ButtonGroup>
                 )}
               </>
             </MobileAssetCard>
@@ -207,7 +222,7 @@ const FlexItem: FC<PropsWithChildren & { title: string; tooltip?: string | null 
         </Tooltip>
       )}
     </Box>
-    <Typography fontSize="16px" fontWeight={700} lineHeight="20px">
+    <Typography component="div" fontSize="16px" fontWeight={700} lineHeight="20px">
       {children}
     </Typography>
   </Box>

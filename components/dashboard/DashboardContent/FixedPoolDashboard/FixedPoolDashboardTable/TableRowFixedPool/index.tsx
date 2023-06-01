@@ -1,9 +1,10 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import { useTranslation } from 'react-i18next';
 import { formatFixed } from '@ethersproject/bignumber';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
-import { Box, Button, IconButton, Skeleton, Stack, TableCell, TableRow, Typography } from '@mui/material';
+import { Box, Button, ButtonGroup, IconButton, Skeleton, Stack, TableCell, TableRow, Typography } from '@mui/material';
 import MaturityLinearProgress from 'components/common/MaturityLinearProgress';
 import useFixedOperation from 'hooks/useFixedPoolTransactions';
 
@@ -22,8 +23,7 @@ import { Borrow } from 'types/Borrow';
 import { Repay } from 'types/Repay';
 import useAccountData from 'hooks/useAccountData';
 import useRouter from 'hooks/useRouter';
-import { useTranslation } from 'react-i18next';
-import ButtonMenu from 'components/ButtonMenu';
+import RolloverButton from 'components/DebtManager/Button';
 
 type Props = {
   symbol: string;
@@ -145,22 +145,24 @@ function TableRowFixedPool({ symbol, valueUSD, type, maturityDate, market, decim
                 {t('Withdraw')}
               </Button>
             ) : (
-              <ButtonMenu
-                id={`fixed-${maturityDate}-repay-${symbol}`}
-                variant="outlined"
-                sx={{ backgroundColor: 'components.bg', whiteSpace: 'nowrap' }}
-                onClick={(e) => handleActionClick(e, 'repayAtMaturity', symbol, maturityDate)}
-                data-testid={`fixed-${maturityDate}-repay-${symbol}`}
-                options={[
-                  {
-                    label: t('Rollover'),
-                    onClick: () => startDebtManager({ symbol, maturity: maturityDate }),
-                    disabled: isRolloverDisabled(),
-                  },
-                ]}
-              >
-                {t('Repay')}
-              </ButtonMenu>
+              <ButtonGroup>
+                <Button
+                  variant="outlined"
+                  sx={{ backgroundColor: 'components.bg', whiteSpace: 'nowrap', '&:hover': { zIndex: 1 } }}
+                  onClick={(e) => handleActionClick(e, 'repayAtMaturity', symbol, maturityDate)}
+                  data-testid={`fixed-${maturityDate}-repay-${symbol}`}
+                >
+                  {t('Repay')}
+                </Button>
+                <RolloverButton
+                  variant="outlined"
+                  sx={{ backgroundColor: 'components.bg', whiteSpace: 'nowrap' }}
+                  onClick={() => startDebtManager({ symbol, maturity: maturityDate })}
+                  disabled={isRolloverDisabled()}
+                >
+                  {t('Rollover')}
+                </RolloverButton>
+              </ButtonGroup>
             ))) || (
             <Skeleton
               sx={{ margin: 'auto', borderRadius: '32px' }}

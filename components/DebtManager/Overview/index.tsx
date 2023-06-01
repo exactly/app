@@ -54,7 +54,6 @@ function Overview({ from, to, percent }: Props) {
 
     const { decimals, usdPrice, adjustFactor } = marketAccount;
 
-    const isFromFixed = Boolean(from.maturity);
     const isToFixed = Boolean(to?.maturity);
 
     const rewardsFrom = rates[from.symbol];

@@ -3,7 +3,7 @@ import React from 'react';
 import { formatFixed } from '@ethersproject/bignumber';
 import Image from 'next/image';
 
-import { Button, TableRow, TableCell, Stack, Typography, Skeleton, Box } from '@mui/material';
+import { Button, TableRow, TableCell, Stack, Typography, Skeleton, Box, ButtonGroup } from '@mui/material';
 
 import { Operation } from 'contexts/ModalStatusContext';
 
@@ -18,7 +18,7 @@ import useRewards from 'hooks/useRewards';
 import { useTranslation } from 'react-i18next';
 import { toPercentage } from 'utils/utils';
 import RewardPill from 'components/markets/RewardPill';
-import ButtonMenu from 'components/ButtonMenu';
+import RolloverButton from 'components/DebtManager/Button';
 
 type Props = {
   symbol: string;
@@ -122,22 +122,24 @@ function TableRowFloatingPool({ symbol, valueUSD, depositedAmount, borrowedAmoun
             {t('Withdraw')}
           </Button>
         ) : (
-          <ButtonMenu
-            id={`floating-repay-${symbol}`}
-            variant="outlined"
-            sx={{ backgroundColor: 'components.bg', whiteSpace: 'nowrap' }}
-            onClick={(e) => handleActionClick(e, 'repay', symbol)}
-            data-testid={`floating-repay-${symbol}`}
-            options={[
-              {
-                label: t('Rollover'),
-                onClick: () => startDebtManager({ symbol }),
-                disabled: isRolloverDisabled(borrowedAmount),
-              },
-            ]}
-          >
-            {t('Repay')}
-          </ButtonMenu>
+          <ButtonGroup>
+            <Button
+              variant="outlined"
+              sx={{ backgroundColor: 'components.bg', whiteSpace: 'nowrap', '&:hover': { zIndex: 1 } }}
+              onClick={(e) => handleActionClick(e, 'repay', symbol)}
+              data-testid={`floating-repay-${symbol}`}
+            >
+              {t('Repay')}
+            </Button>
+            <RolloverButton
+              variant="outlined"
+              sx={{ backgroundColor: 'components.bg', whiteSpace: 'nowrap' }}
+              onClick={() => startDebtManager({ symbol })}
+              disabled={isRolloverDisabled(borrowedAmount)}
+            >
+              {t('Rollover')}
+            </RolloverButton>
+          </ButtonGroup>
         )}
       </TableCell>
     </TableRow>
