@@ -1,4 +1,4 @@
-import React, { FC, ReactNode } from 'react';
+import React, { FC, ReactNode, useMemo } from 'react';
 import Tooltip from '@mui/material/Tooltip';
 import { styled } from '@mui/system';
 
@@ -63,15 +63,18 @@ const DualProgressBar: FC<DualProgressBarProps> = ({
   tooltip1 = value1.toString(),
   tooltip2 = value2.toString(),
 }) => {
+  const scaleValue1 = useMemo(() => (value1 > 0 && value1 < 4 ? value1 + 4 : value1), [value1]);
+  const scaleValue2 = useMemo(() => (value2 > 0 && value2 < 4 ? value2 + 4 : value2), [value2]);
+
   return (
     <ProgressBar>
       {value1 > 0 && (
         <Tooltip title={tooltip1} placement="top" arrow enterTouchDelay={0}>
-          <FirstProgressBar width={value1} bgcolor={color1} />
+          <FirstProgressBar width={scaleValue1} bgcolor={color1} />
         </Tooltip>
       )}
       <Tooltip title={tooltip2} placement="top" arrow enterTouchDelay={0}>
-        <SecondProgressBar width={value2} bgcolor={color2} />
+        <SecondProgressBar width={scaleValue2} bgcolor={color2} />
       </Tooltip>
     </ProgressBar>
   );
