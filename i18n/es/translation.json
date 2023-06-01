@@ -289,6 +289,8 @@
   "N/A": "N/A",
   "Summary": "Resumen",
   "Updated {{minutes}} minutes ago": "Actualizado hace {{minutes}} minutos",
+  "Updated 1 minute ago": "Actualizado hace 1 minuto",
+  "Updated <1 minute ago": "Actualizado hace <1 minuto",
   "Learn More": "Aprende más",
   "Your Earnings": "Tus Ganancias",
   "Your rewards": "Tus recompensas",

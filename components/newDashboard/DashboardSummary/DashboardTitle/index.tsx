@@ -38,7 +38,11 @@ const DashboardTitle = () => {
           <Skeleton width={160} />
         ) : (
           <Typography variant="dashboardMainSubtitle" textAlign="right">
-            {t('Updated {{minutes}} minutes ago', { minutes })}
+            {minutes < 1
+              ? t('Updated <1 minute ago')
+              : minutes < 2
+              ? t('Updated 1 minute ago')
+              : t('Updated {{minutes}} minutes ago', { minutes })}
           </Typography>
         )}
 

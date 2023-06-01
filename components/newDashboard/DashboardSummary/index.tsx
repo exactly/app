@@ -6,9 +6,13 @@ import DashboardOverview from './DashboardOverview';
 import Legends from './Legends';
 import useTotalsUsd from 'hooks/useTotalsUsd';
 import StartEarning from 'components/common/StartEarning';
+import useAccountData from 'hooks/useAccountData';
 
 const DashboardSummary = () => {
+  const { accountData } = useAccountData();
   const { totalBorrowedUSD, totalDepositedUSD } = useTotalsUsd();
+
+  const loading = useMemo(() => !accountData, [accountData]);
 
   const isNewUser = useMemo(
     () => totalBorrowedUSD.isZero() && totalDepositedUSD.isZero(),
@@ -22,7 +26,7 @@ const DashboardSummary = () => {
       gap={2}
       sx={{ filter: 'drop-shadow(0px 3px 4px rgba(97, 102, 107, 0.1))' }}
     >
-      {isNewUser ? <StartEarning /> : <DashboardTitle />}
+      {!loading && isNewUser ? <StartEarning /> : <DashboardTitle />}
       <Box display="flex" flexDirection="column" gap={2} sx={{ opacity: isNewUser ? 0.5 : 1 }}>
         <DashboardHeader />
         <DashboardOverview />
