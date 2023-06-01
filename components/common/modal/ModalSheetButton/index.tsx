@@ -17,7 +17,14 @@ function ModalSheetButton({ selected = false, children, ...props }: Props) {
         ...(Array.isArray(props.sx) ? props.sx.flat() : [props.sx]),
       ]}
     >
-      <Typography fontWeight={700} fontSize={19} color={selected ? 'grey.900' : 'figma.grey.500'}>
+      <Typography
+        display="flex"
+        alignItems="center"
+        gap={0.5}
+        fontWeight={700}
+        fontSize={19}
+        color={selected ? 'grey.900' : 'figma.grey.500'}
+      >
         {children}
       </Typography>
       <KeyboardArrowDownRoundedIcon sx={{ width: 16, height: 16, color: 'figma.grey.500' }} />

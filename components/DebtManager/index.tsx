@@ -94,7 +94,7 @@ function DebtManagerModal() {
             }}
           >
             <Typography fontWeight={700} fontSize={24}>
-              {t('Rollover')}
+              {t('Debt Rollover')}
             </Typography>
           </DialogTitle>
         )}

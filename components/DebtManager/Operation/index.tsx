@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Box, Typography } from '@mui/material';
+import { Box, Grid, Typography } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import { useTranslation } from 'react-i18next';
 import { WeiPerEther, Zero } from '@ethersproject/constants';
@@ -33,6 +33,7 @@ import ModalAlert from 'components/common/modal/ModalAlert';
 import useRewards from 'hooks/useRewards';
 import LoadingTransaction from '../Loading';
 import { gasLimitMultiplier } from 'utils/const';
+import OperationSquare from 'components/common/OperationSquare';
 
 function Operation() {
   const { t } = useTranslation();
@@ -353,7 +354,7 @@ function Operation() {
         container={container.current}
         open={fromSheetOpen}
         onClose={onClose}
-        title={t('Select Current Position')}
+        title={t('Select Current Debt')}
       >
         <PositionTable
           loading={fromRows.length === 0}
@@ -370,7 +371,7 @@ function Operation() {
         container={container.current}
         open={toSheetOpen}
         onClose={onClose}
-        title={t('Select New Position')}
+        title={t('Select New Debt')}
       >
         <Box display="flex" justifyContent="space-between">
           <Typography variant="caption" color="figma.grey.600">
@@ -401,41 +402,72 @@ function Operation() {
         }}
       >
         <ModalBox sx={{ p: 2 }}>
-          <ModalBoxRow display="flex" flexDirection="column" alignItems="stretch">
-            <Typography variant="caption" color="figma.grey.600" mb={2}>
-              {t('Select Debt To Rollover')}
-            </Typography>
-            <Box display="flex" justifyContent="space-between" alignItems="center">
-              <ModalSheetButton
-                selected={Boolean(input.from)}
-                onClick={() => setSheetOpen([true, false])}
-                sx={{ ml: -0.5 }}
-              >
-                {input.from
-                  ? input.from.maturity
-                    ? parseTimestamp(input.from.maturity)
-                    : t('Unlimited')
-                  : t('Current Position')}
-              </ModalSheetButton>
-              <ArrowForwardRoundedIcon sx={{ color: 'blue', fontSize: 14, fontWeight: 600 }} />
-              <ModalSheetButton
-                selected={Boolean(input.to)}
-                onClick={() => {
-                  if (input.from) {
-                    setFrom(input.from);
-                  }
-                  setSheetOpen([false, true]);
-                }}
-                disabled={!input.from}
-                sx={{ mr: -0.5 }}
-              >
-                {input.to
-                  ? input.to.maturity
-                    ? parseTimestamp(input.to.maturity)
-                    : t('Unlimited')
-                  : t('New position')}
-              </ModalSheetButton>
-            </Box>
+          <ModalBoxRow>
+            <Grid container mb={1.5}>
+              <Grid item xs={7}>
+                <Typography variant="caption" color="figma.grey.600">
+                  {t('From')}
+                </Typography>
+              </Grid>
+              <Grid item xs={5}>
+                <Typography variant="caption" color="figma.grey.600">
+                  {t('To')}
+                </Typography>
+              </Grid>
+            </Grid>
+            <Grid container>
+              <Grid item xs={5}>
+                <ModalSheetButton
+                  selected={Boolean(input.from)}
+                  onClick={() => setSheetOpen([true, false])}
+                  sx={{ ml: -0.5 }}
+                >
+                  {input.from ? (
+                    <>
+                      <OperationSquare type={input.from.maturity ? 'fixed' : 'floating'} />
+                      {input.from.maturity ? t('Fixed') : t('Variable')}
+                    </>
+                  ) : (
+                    t('Current debt')
+                  )}
+                </ModalSheetButton>
+                <Typography component="div" variant="subtitle1" color="figma.grey.500">
+                  {input.from
+                    ? input.from.maturity
+                      ? parseTimestamp(input.from.maturity)
+                      : t('Unlimited')
+                    : t('Maturity')}
+                </Typography>
+              </Grid>
+              <Grid display="flex" alignItems="center" justifyContent="center" item xs={2}>
+                <ArrowForwardRoundedIcon sx={{ color: 'blue', fontSize: 14, fontWeight: 600 }} />
+              </Grid>
+              <Grid item xs={5}>
+                <ModalSheetButton
+                  selected={Boolean(input.to)}
+                  onClick={() => {
+                    if (input.from) {
+                      setFrom(input.from);
+                    }
+                    setSheetOpen([false, true]);
+                  }}
+                  disabled={!input.from}
+                  sx={{ ml: -0.5, mr: -0.5 }}
+                >
+                  {input.to ? (
+                    <>
+                      <OperationSquare type={input.to.maturity ? 'fixed' : 'floating'} />
+                      {input.to.maturity ? t('Fixed') : t('Variable')}
+                    </>
+                  ) : (
+                    t('New debt')
+                  )}
+                </ModalSheetButton>
+                <Typography component="div" variant="subtitle1" color="figma.grey.500">
+                  {input.to ? (input.to.maturity ? parseTimestamp(input.to.maturity) : t('Unlimited')) : t('Maturity')}
+                </Typography>
+              </Grid>
+            </Grid>
           </ModalBoxRow>
         </ModalBox>
         {fromRow && (

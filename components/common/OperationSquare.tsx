@@ -8,6 +8,8 @@ type Props = {
 function OperationSquare({ type, ...props }: Props) {
   return (
     <Box
+      component="span"
+      display="inline-block"
       width={16}
       height={16}
       borderRadius="4px"

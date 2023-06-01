@@ -76,12 +76,6 @@ function Overview({ from, to, percent }: Props) {
 
     return [
       {
-        key: 'PositionType',
-        label: t('Position type'),
-        current: <TextValue>{isFromFixed ? t('Fixed') : t('Variable')}</TextValue>,
-        new: to ? <TextValue>{isToFixed ? t('Fixed') : t('Variable')}</TextValue> : null,
-      },
-      {
         key: 'APR',
         label: t('APR'),
         current: <TextValue>{toPercentage(Number(from.apr) / 1e18)}</TextValue>,
