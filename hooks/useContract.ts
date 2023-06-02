@@ -5,7 +5,7 @@ import { Contract, ContractInterface } from '@ethersproject/contracts';
 
 import { useWeb3 } from './useWeb3';
 
-export default function <T>(contractName: string, abi: ContractInterface): T | undefined {
+export default function <T extends Contract>(contractName: string, abi?: ContractInterface): T | undefined {
   const { data: signer } = useSigner();
   const { chain } = useWeb3();
 
@@ -20,7 +20,7 @@ export default function <T>(contractName: string, abi: ContractInterface): T | u
         `@exactly/protocol/deployments/${{ [mainnet.id]: 'mainnet' }[chain.id] ?? chain.network}/${contractName}.json`,
         { assert: { type: 'json' } }
       );
-      setContract(new Contract(address, abi, signer) as T);
+      setContract(new Contract(address, abi ?? [], signer) as T);
     };
 
     loadContract().catch(() => setContract(undefined));

@@ -10,21 +10,22 @@ import React, {
 import { BigNumber } from '@ethersproject/bignumber';
 import { useSigner } from 'wagmi';
 import { PopulatedTransaction } from '@ethersproject/contracts';
+import { MaxUint256, WeiPerEther } from '@ethersproject/constants';
 
-import { ErrorData } from 'types/Error';
-import { Transaction } from 'types/Transaction';
+import type { ErrorData } from 'types/Error';
+import type { Transaction } from 'types/Transaction';
 import DebtManagerModal from 'components/DebtManager';
 import type { Position } from 'components/DebtManager/types';
 import useDebtManager from 'hooks/useDebtManager';
 import numbers from 'config/numbers.json';
 import useAccountData from 'hooks/useAccountData';
 import useMarket from 'hooks/useMarket';
-import { MaxUint256, WeiPerEther } from '@ethersproject/constants';
 import { useWeb3 } from 'hooks/useWeb3';
-import { DebtManager, Market } from 'types/contracts';
+import type { DebtManager, Market } from 'types/contracts';
 import { gasLimitMultiplier } from 'utils/const';
 import useEstimateGas from 'hooks/useEstimateGas';
 import handleOperationError from 'utils/handleOperationError';
+import useIsContract from 'hooks/useIsContract';
 
 type Input = {
   from?: Position;
@@ -62,16 +63,14 @@ type ContextValues = {
 
   errorData?: ErrorData;
   setErrorData: React.Dispatch<React.SetStateAction<ErrorData | undefined>>;
-  gasCost?: BigNumber;
-  setGasCost: React.Dispatch<React.SetStateAction<BigNumber | undefined>>;
   tx?: Transaction;
 
   isLoading: boolean;
 
   needsApproval: (qty: BigNumber) => Promise<boolean>;
-  approve: () => Promise<void>;
+  approve: (maxAssets: BigNumber) => Promise<void>;
   estimateTx: (transaction: PopulatedTransaction) => Promise<BigNumber | undefined>;
-  submit: (transaction: PopulatedTransaction) => Promise<void>;
+  submit: (populate: () => Promise<PopulatedTransaction | undefined>) => Promise<void>;
 };
 
 const DebtManagerContext = createContext<ContextValues | null>(null);
@@ -80,12 +79,12 @@ export const DebtManagerContextProvider: FC<PropsWithChildren> = ({ children }) 
   const { walletAddress } = useWeb3();
   const { data: signer } = useSigner();
   const { getMarketAccount, refreshAccountData } = useAccountData();
+  const isContract = useIsContract();
   const [isOpen, setIsOpen] = useState(false);
   const [errorData, setErrorData] = useState<ErrorData | undefined>();
 
   const [input, dispatch] = useReducer(reducer, initState);
 
-  const [gasCost, setGasCost] = useState<BigNumber | undefined>();
   const [tx, setTx] = useState<Transaction | undefined>();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -97,7 +96,6 @@ export const DebtManagerContextProvider: FC<PropsWithChildren> = ({ children }) 
   const openDebtManager = useCallback((from?: Position) => {
     dispatch({ ...initState, from });
     setTx(undefined);
-    setGasCost(undefined);
     setIsLoading(false);
     setIsOpen(true);
   }, []);
@@ -111,45 +109,51 @@ export const DebtManagerContextProvider: FC<PropsWithChildren> = ({ children }) 
   const needsApproval = useCallback(
     async (qty: BigNumber): Promise<boolean> => {
       if (!walletAddress || !market || !debtManager || qty.isZero()) return true;
-
       try {
+        if (!(await isContract(walletAddress))) return false;
         const allowance = await market.allowance(walletAddress, debtManager.address);
-        return allowance.isZero() || allowance.lt(qty);
+        return allowance.lt(qty);
       } catch (e: unknown) {
         setErrorData({ status: true, message: handleOperationError(e) });
         return true;
       }
     },
-    [walletAddress, market, debtManager],
+    [walletAddress, market, debtManager, isContract],
   );
 
-  const approve = useCallback(async () => {
-    if (!debtManager || !market) return;
+  const approve = useCallback(
+    async (maxAssets: BigNumber) => {
+      if (!debtManager || !market || !walletAddress || !signer) return;
 
-    setIsLoading(true);
-    try {
-      const gasEstimation = await market.estimateGas.approve(debtManager.address, MaxUint256);
-      const approveTx = await market.approve(debtManager.address, MaxUint256, {
-        gasLimit: gasEstimation.mul(gasLimitMultiplier).div(WeiPerEther),
-      });
-      await approveTx.wait();
-    } catch (e: unknown) {
-      setErrorData({ status: true, message: handleOperationError(e) });
-    } finally {
-      setIsLoading(false);
-    }
-  }, [debtManager, market]);
+      setIsLoading(true);
+      try {
+        const gasEstimation = await market.estimateGas.approve(debtManager.address, maxAssets);
+        const approveTx = await market.approve(debtManager.address, MaxUint256, {
+          gasLimit: gasEstimation.mul(gasLimitMultiplier).div(WeiPerEther),
+        });
+        await approveTx.wait();
+      } catch (e: unknown) {
+        setErrorData({ status: true, message: handleOperationError(e) });
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [debtManager, market, signer, walletAddress],
+  );
 
   const estimate = useEstimateGas();
 
   const estimateTx = useCallback(async (transaction: PopulatedTransaction) => estimate(transaction), [estimate]);
 
   const submit = useCallback(
-    async (transaction: PopulatedTransaction) => {
-      if (!signer) return;
+    async (populate: () => Promise<PopulatedTransaction | undefined>) => {
+      if (!walletAddress || !signer || !market || !debtManager) return;
 
       setIsLoading(true);
+
       try {
+        const transaction = await populate();
+        if (!transaction) return;
         const transactionResponse = await signer.sendTransaction(transaction);
         setTx({ status: 'processing', hash: transactionResponse.hash });
         const { status, transactionHash } = await transactionResponse.wait();
@@ -162,7 +166,7 @@ export const DebtManagerContextProvider: FC<PropsWithChildren> = ({ children }) 
         setIsLoading(false);
       }
     },
-    [signer, refreshAccountData],
+    [walletAddress, signer, market, debtManager, refreshAccountData],
   );
 
   const value: ContextValues = {
@@ -181,8 +185,6 @@ export const DebtManagerContextProvider: FC<PropsWithChildren> = ({ children }) 
 
     errorData,
     setErrorData,
-    gasCost,
-    setGasCost,
     tx,
     isLoading,
 

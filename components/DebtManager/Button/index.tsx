@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 
 export default function RolloverButton({ disabled, ...props }: ButtonProps) {
   if (disabled) {
-    return null;
+    return <Button disabled={disabled} {...props} />;
   }
 
   return (
