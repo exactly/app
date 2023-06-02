@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Box, Grid, Typography } from '@mui/material';
-import { LoadingButton } from '@mui/lab';
 import { useTranslation } from 'react-i18next';
 import { WeiPerEther, Zero } from '@ethersproject/constants';
 import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
@@ -34,6 +33,7 @@ import useRewards from 'hooks/useRewards';
 import LoadingTransaction from '../Loading';
 import { gasLimitMultiplier } from 'utils/const';
 import OperationSquare from 'components/common/OperationSquare';
+import Submit from '../Submit';
 
 function Operation() {
   const { t } = useTranslation();
@@ -484,7 +484,7 @@ function Operation() {
           </ModalAdvancedSettings>
         </Box>
         {errorData?.status && <ModalAlert message={errorData.message} variant={errorData.variant} />}
-        <LoadingButton
+        <Submit
           disabled={!input.from || !input.to || errorData?.status}
           loading={loadingStatus || isLoading}
           onClick={requiresApproval ? approveRollover : rollover}
@@ -492,7 +492,7 @@ function Operation() {
           fullWidth
         >
           {requiresApproval ? t('Approve') : t('Refinance your loan')}
-        </LoadingButton>
+        </Submit>
       </Box>
     </>
   );
