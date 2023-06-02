@@ -400,7 +400,7 @@ export const darkTheme = createTheme({
       advanced: '#222',
     },
     components: {
-      bg: '#222',
+      bg: '#303336',
     },
     healthFactor: {
       bg: {
