@@ -115,7 +115,6 @@ function Navbar() {
                     <Button
                       sx={{
                         px: 1.5,
-                        color: currentPathname === pathname ? 'white' : '',
                         display: 'flex',
                         alignItems: 'center',
                         fontSize: '13px',

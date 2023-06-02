@@ -78,7 +78,6 @@ const SelectMarketsView: FC = () => {
             minWidth: { xs: '60px', sm: '110px' },
             borderRadius: '32px',
             bgcolor: 'primary',
-            color: currentPathname === '/' ? 'white' : '',
             '&:hover': {
               bgcolor: 'primary',
               filter: 'brightness(1.1)',
@@ -92,9 +91,9 @@ const SelectMarketsView: FC = () => {
               {t('Markets')}
             </Typography>
             {anchorEl ? (
-              <ExpandLessIcon sx={{ fontSize: '13px', my: 'auto', color: 'grey.500' }} fontSize="small" />
+              <ExpandLessIcon sx={{ fontSize: '13px', my: 'auto' }} fontSize="small" />
             ) : (
-              <ExpandMoreIcon sx={{ fontSize: '13px', my: 'auto', color: 'grey.500' }} fontSize="small" />
+              <ExpandMoreIcon sx={{ fontSize: '13px', my: 'auto' }} fontSize="small" />
             )}
           </Box>
         </Button>

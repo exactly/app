@@ -361,10 +361,10 @@ export const darkTheme = createTheme({
   palette: {
     mode: 'dark',
     primary: {
-      main: '#111',
-      '50': '#282828',
-      '100': '#2c2c2c',
-      '200': '#313131',
+      main: '#fafafa',
+      '50': '#BCBFC2',
+      '100': '#9a9a9a',
+      '200': '#62666A',
     },
     grey: {
       '900': '#fafafa',
@@ -404,9 +404,9 @@ export const darkTheme = createTheme({
     },
     healthFactor: {
       bg: {
-        safe: '#F0FFF4',
-        warning: '#FFF7F0',
-        danger: '#FFF5F5',
+        safe: '#303336',
+        warning: '#303336',
+        danger: '#303336',
       },
       safe: '#33CC59',
       warning: '#FF8C1A',
