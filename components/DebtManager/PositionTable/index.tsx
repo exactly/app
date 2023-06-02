@@ -102,7 +102,7 @@ function PositionTable({ data, onClick, loading = false, showBalance = false }: 
                       <TypeCell maturity={row.maturity} />
                     </TableCell>
                     <TableCell>
-                      <TextCell>{row.maturity ? parseTimestamp(row.maturity) : t('Perpetual')}</TextCell>
+                      <TextCell>{row.maturity ? parseTimestamp(row.maturity) : t('Open-ended')}</TextCell>
                     </TableCell>
                     {showBalance && (
                       <TableCell>

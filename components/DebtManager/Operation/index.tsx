@@ -436,7 +436,7 @@ function Operation() {
                   {input.from
                     ? input.from.maturity
                       ? parseTimestamp(input.from.maturity)
-                      : t('Perpetual')
+                      : t('Open-ended')
                     : t('Maturity')}
                 </Typography>
               </Grid>
@@ -465,7 +465,7 @@ function Operation() {
                   )}
                 </ModalSheetButton>
                 <Typography component="div" variant="subtitle1" color="figma.grey.500">
-                  {input.to ? (input.to.maturity ? parseTimestamp(input.to.maturity) : t('Perpetual')) : t('Maturity')}
+                  {input.to ? (input.to.maturity ? parseTimestamp(input.to.maturity) : t('Open-ended')) : t('Maturity')}
                 </Typography>
               </Grid>
             </Grid>

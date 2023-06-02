@@ -77,7 +77,7 @@ const Options: FC<Props> = ({
                   >
                     {maturity || maturity === 0 ? (
                       <Typography fontWeight={700} fontSize={13} color="grey.900" my="auto">
-                        {maturity ? daysLeft(maturity) : t('Perpetual')}
+                        {maturity ? daysLeft(maturity) : t('Open-ended')}
                       </Typography>
                     ) : (
                       <Skeleton width={52} height={20} />
