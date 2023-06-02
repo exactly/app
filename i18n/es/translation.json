@@ -284,5 +284,7 @@
   "To": "Hacia",
   "Current debt": "Deuda actual",
   "New debt": "Deuda nueva",
-  "Open-ended": "Abierta"
+  "Open-ended": "Abierta",
+  "New fee": "Nueva comisión",
+  "N/A": "N/A"
 }

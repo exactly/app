@@ -29,6 +29,7 @@ export type PositionTableRow = {
   symbol: string;
   maturity?: number;
   balance?: BigNumber;
+  fee?: BigNumber;
   usdPrice: BigNumber;
   decimals: number;
   apr: BigNumber;

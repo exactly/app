@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import Image from 'next/image';
 import {
   Table,
@@ -11,10 +11,14 @@ import {
   Typography,
   type TypographyProps,
   Box,
+  IconButton,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { WeiPerEther, Zero } from '@ethersproject/constants';
 import { BigNumber, formatFixed } from '@ethersproject/bignumber';
+
+import AddIcon from '@mui/icons-material/Add';
+import ClearIcon from '@mui/icons-material/Clear';
 
 import useAccountData from 'hooks/useAccountData';
 import { toPercentage } from 'utils/utils';
@@ -31,6 +35,7 @@ type Row = {
   label: React.ReactNode;
   current: React.ReactNode;
   new?: React.ReactNode;
+  details?: boolean;
 };
 
 type Props = {
@@ -46,6 +51,10 @@ function Overview({ from, to, percent }: Props) {
   const { rates } = useRewards();
   const healthFactor = useHealthFactor();
   const previewer = usePreviewer();
+  const [openDetails, setOpenDetails] = useState(false);
+
+  const open = useCallback(() => setOpenDetails(true), []);
+  const close = useCallback(() => setOpenDetails(false), []);
 
   const rows = useMemo<Row[]>(() => {
     if (!walletAddress || !marketAccount || !healthFactor || !from.balance || !previewer) {
@@ -108,7 +117,26 @@ function Overview({ from, to, percent }: Props) {
       },
       {
         key: 'TotalBorrowAmount',
-        label: t('Total borrow amount'),
+        label: (
+          <RowHeader>
+            {t('Total borrow amount')}
+            {isToFixed && (
+              <IconButton
+                sx={{
+                  borderRadius: '2px',
+                  width: '16px',
+                  height: '16px',
+                  p: '2px',
+                  ml: 0.5,
+                  backgroundColor: 'figma.grey.100',
+                }}
+                onClick={openDetails ? close : open}
+              >
+                {openDetails ? <ClearIcon sx={{ fontSize: 16 }} /> : <AddIcon sx={{ fontSize: 16 }} />}
+              </IconButton>
+            )}
+          </RowHeader>
+        ),
         current: from.balance && (
           <CurrencyTextValue assetSymbol={from.symbol}>
             {formatNumber(formatFixed(from.balance.mul(percent).div(100), from.decimals), from.symbol)}
@@ -120,8 +148,39 @@ function Overview({ from, to, percent }: Props) {
           </CurrencyTextValue>
         ),
       },
+      ...(isToFixed && openDetails
+        ? [
+            {
+              key: 'Value',
+              label: <RowHeader>{t('Value')}:</RowHeader>,
+              details: true,
+              current: from.balance && (
+                <CurrencyTextValue assetSymbol={from.symbol} details>
+                  {formatNumber(formatFixed(from.balance.mul(percent).div(100), from.decimals), from.symbol)}
+                </CurrencyTextValue>
+              ),
+              new: to && to.balance && (
+                <CurrencyTextValue assetSymbol={to.symbol} details>
+                  {formatNumber(formatFixed(to.balance.sub(to.fee ?? Zero), to.decimals), to.symbol)}
+                </CurrencyTextValue>
+              ),
+            },
+
+            {
+              key: 'NewFee',
+              label: <RowHeader>{t('New fee')}:</RowHeader>,
+              details: true,
+              current: <TextValue details>{t('N/A')}</TextValue>,
+              new: to && to.fee && (
+                <CurrencyTextValue assetSymbol={to.symbol} details>
+                  {formatNumber(formatFixed(to.fee ?? Zero, to.decimals), to.symbol)}
+                </CurrencyTextValue>
+              ),
+            },
+          ]
+        : []),
     ];
-  }, [walletAddress, marketAccount, from, to, t, rates, healthFactor, percent, previewer]);
+  }, [walletAddress, marketAccount, from, to, t, rates, healthFactor, percent, previewer, openDetails, open, close]);
 
   return (
     <TableContainer>
@@ -142,7 +201,7 @@ function Overview({ from, to, percent }: Props) {
               }}
             >
               {typeof row.label === 'string' ? <RowHeader>{row.label}</RowHeader> : row.label}
-              <ArrowCell>{row.current}</ArrowCell>
+              {row.details ? <TableCell align="right">{row.current}</TableCell> : <ArrowCell>{row.current}</ArrowCell>}
               <TableCell align="right" sx={{ minWidth: 96 }}>
                 {row.new ? row.new : <TextValue>-</TextValue>}
               </TableCell>
@@ -197,17 +256,25 @@ function ArrowCell({ ...props }: TableCellProps) {
   );
 }
 
-function TextValue({ ...props }: TypographyProps) {
-  return <Typography fontWeight={700} fontSize={14} color="grey.900" {...props} />;
+function TextValue({ details, ...props }: TypographyProps & { details?: boolean }) {
+  return (
+    <Typography
+      fontWeight={700}
+      fontSize={details ? 12 : 14}
+      color={details ? 'figma.grey.500' : 'grey.900'}
+      {...props}
+    />
+  );
 }
 
 function CurrencyTextValue({
   assetSymbol,
+  details,
   children,
-}: React.ComponentProps<typeof TextValue> & { assetSymbol: string }) {
+}: React.ComponentProps<typeof TextValue> & { assetSymbol: string; details?: boolean }) {
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, justifyContent: 'flex-end' }}>
-      <TextValue>{children}</TextValue>
+      <TextValue details={details}>{children}</TextValue>
       <Image src={`/img/assets/${assetSymbol}.svg`} alt={assetSymbol} width={14} height={14} />
     </Box>
   );

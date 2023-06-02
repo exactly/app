@@ -188,13 +188,15 @@ function Operation() {
         const fixedOptions: PositionTableRow[] = previewPools.map(({ maturity, assets }) => {
           const rate = assets.mul(WeiPerEther).div(initialAssets);
           const fixedAPR = rate.sub(WeiPerEther).mul(31_536_000).div(maturity.sub(currentTimestamp));
+          const fee = assets.sub(initialAssets);
 
           return {
             symbol: assetSymbol,
             maturity: Number(maturity),
             usdPrice: usdPrice,
             balance: assets,
-            decimals: decimals,
+            fee: fee.isNegative() ? Zero : fee,
+            decimals,
             apr: fixedAPR,
             rewards,
           };
