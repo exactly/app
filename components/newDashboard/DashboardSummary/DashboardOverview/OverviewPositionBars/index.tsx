@@ -19,9 +19,7 @@ const OverviewPositionBars: FC<OverviewPositionBarsProps> = ({ assets = [] }) =>
             key={`${symbol}_${fixedValueUSD}_${floatingValueUSD}`}
           >
             <Grid item xs={2}>
-              <Typography variant="dashboardOverviewSubtitle2" textTransform="uppercase">
-                {symbol}
-              </Typography>
+              <Typography variant="dashboardOverviewSubtitle2">{symbol}</Typography>
             </Grid>
             <Grid item xs={8}>
               <DualProgressBarPosition

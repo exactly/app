@@ -200,7 +200,6 @@
   "You can't borrow more than your borrow limit": "No puedes pedir un monto mayor a tu límite",
   "There is not enough liquidity in this pool": "No hay suficiente liquidez en el pool",
   "The transaction failed, please check your Maximum Deposit Rate": "La transacción fallo, por favor revisa tu Tasa de Depósito Máxima",
-  "Your Rewards": "Tus Recompensas",
   "Claim": "Reclamar",
   "Copied": "Copiado",
   "Copy": "Copiar",
@@ -292,11 +291,9 @@
   "Updated 1 minute ago": "Actualizado hace 1 minuto",
   "Updated <1 minute ago": "Actualizado hace <1 minuto",
   "Learn More": "Aprende más",
-  "Your Earnings": "Tus Ganancias",
   "Your rewards": "Tus recompensas",
-  "Total Earnings": "Ganancias Totales",
   "View All": "Ver Todo",
-  "Top positions": "Posiciones principales",
   "Earnings": "Ganancias",
-  "Unlock the full potential of DeFi, start earning interest today!": "¡Desbloquea todo el potencial de DeFi, comienza a ganar intereses hoy!"
+  "Unlock the full potential of DeFi, start earning interest today!": "¡Desbloquea todo el potencial de DeFi, comienza a ganar intereses hoy!",
+  "Top {{number}} positions": "Top {{number}} posiciones"
 }

@@ -5,73 +5,62 @@ import formatNumber from 'utils/formatNumber';
 import OverviewTopPositions, { TopAssetPosition } from '../OverviewTopPositions';
 import { useTranslation } from 'react-i18next';
 import useAccountData from 'hooks/useAccountData';
-import { formatFixed } from '@ethersproject/bignumber';
+import { BigNumber, formatFixed } from '@ethersproject/bignumber';
+import { WeiPerEther } from '@ethersproject/constants';
+import { toPercentage } from 'utils/utils';
 
 const EarningsOverview = () => {
   const { t } = useTranslation();
   const { accountData } = useAccountData();
 
-  const { assetPositions } = useMemo(() => {
-    if (!accountData) return {};
+  const { assetPositions, totalUSD, totalFixedUSD, totalFloatingUSD, fixedPercentage, floatingPercentage } =
+    useMemo(() => {
+      if (!accountData) return {};
 
-    const floatingAssetPositions = accountData.map(({ assetSymbol, floatingDepositAssets, usdPrice, decimals }) => {
-      // const depositedUSD = floatingDepositAssets.mul(usdPrice).div(10n ** BigInt(decimals));
-      // const previewUSD = floatingDepositAssets.mul(usdPrice).div(10n ** BigInt(decimals));
+      const floatingAssetPositions = accountData.map(({ assetSymbol, floatingDepositAssets, usdPrice, decimals }) => {
+        // const depositedUSD = floatingDepositAssets.mul(usdPrice).div(10n ** BigInt(decimals));
+        // const previewUSD = floatingDepositAssets.mul(usdPrice).div(10n ** BigInt(decimals));
+
+        return {
+          symbol: assetSymbol,
+          type: 'variable' as const,
+          totalUSD: `$${formatNumber(
+            formatFixed(floatingDepositAssets.mul(usdPrice).div(10n ** BigInt(decimals)), 18),
+            'noDecimals',
+          )}`,
+          apr: `${(1.83).toFixed(2)}%`,
+        };
+      });
+
+      const _assetPositions: TopAssetPosition[] = [...floatingAssetPositions];
+      const _totalFixedUSD = BigNumber.from(84454).mul(WeiPerEther);
+
+      // const _totalFixedUSD = accountData.reduce((acc, { assetSymbol, fixedDepositAssets, usdPrice, decimals }) => {
+      //   return acc.add(fixedDepositAssets.mul(usdPrice).div(10n ** BigInt(decimals)));
+      // }, Zero);
+
+      const _totalFloatingUSD = BigNumber.from(66864).mul(WeiPerEther);
+      const _totalUSD = _totalFixedUSD.add(_totalFloatingUSD);
 
       return {
-        symbol: assetSymbol,
-        type: 'variable' as const,
-        totalUSD: `$${formatNumber(
-          formatFixed(floatingDepositAssets.mul(usdPrice).div(10n ** BigInt(decimals)), 18),
-          'noDecimals',
-        )}`,
-        apr: `${(1.83).toFixed(2)}%`,
+        assetPositions: _assetPositions,
+        totalUSD: _totalUSD,
+        totalFixedUSD: _totalFixedUSD,
+        totalFloatingUSD: _totalFloatingUSD,
+        fixedPercentage: _totalFixedUSD.mul(WeiPerEther).div(_totalUSD),
+        floatingPercentage: _totalFloatingUSD.mul(WeiPerEther).div(_totalUSD),
       };
-    });
-
-    const _assetPositions: TopAssetPosition[] = [...floatingAssetPositions];
-
-    return {
-      assetPositions: _assetPositions,
-    };
-  }, [accountData]);
-
-  // const assets: TopAssetPosition[] = [
-  //   {
-  //     symbol: 'WETH',
-  //     type: 'fixed',
-  //     totalUSD: `$${formatNumber(96000, 'noDecimals')}`,
-  //     apr: `${(1.66).toFixed(2)}%`,
-  //   },
-  //   {
-  //     symbol: 'WBTC',
-  //     type: 'variable',
-  //     totalUSD: `$${formatNumber(113000, 'noDecimals')}`,
-  //     apr: `${(1.37).toFixed(2)}%`,
-  //   },
-  //   {
-  //     symbol: 'USDC',
-  //     type: 'variable',
-  //     totalUSD: `$${formatNumber(68000, 'noDecimals')}`,
-  //     apr: `${(0.93).toFixed(2)}%`,
-  //   },
-  //   {
-  //     symbol: 'DAI',
-  //     type: 'variable',
-  //     totalUSD: `$${formatNumber(51000, 'noDecimals')}`,
-  //     apr: `${(1.26).toFixed(2)}%`,
-  //   },
-  // ];
+    }, [accountData]);
 
   return (
     <OverviewCard
-      title={t('Earnings')}
+      title={`Mock ${t('Earnings')}`}
       icon={<PaidIcon sx={{ fontSize: 16 }} />}
-      total={`$${formatNumber(151318.03, 'USD', true)}`}
-      fixedValue={`$${formatNumber(84453.74, 'USD', true)}`}
-      floatingValue={`$${formatNumber(66864.29, 'USD', true)}`}
-      subFixedValue={`${0.91}% ${t('APR')}`}
-      subFloatingValue={`${1.83}% ${t('APR')}`}
+      total={totalUSD ? `$${formatNumber(formatFixed(totalUSD, 18), 'USD', true)}` : undefined}
+      fixedValue={totalFixedUSD ? `$${formatNumber(formatFixed(totalFixedUSD, 18), 'USD', true)}` : undefined}
+      floatingValue={totalFloatingUSD ? `$${formatNumber(formatFixed(totalFloatingUSD, 18), 'USD', true)}` : undefined}
+      subFixedValue={fixedPercentage ? toPercentage(Number(fixedPercentage) / 1e18) : undefined}
+      subFloatingValue={floatingPercentage ? toPercentage(Number(floatingPercentage) / 1e18) : undefined}
       mobileWrap
     >
       <OverviewTopPositions assets={assetPositions} />
