@@ -23,7 +23,7 @@ const StyledSwitch = styled((props: Props) => (
         border: 0,
       },
       '&.Mui-disabled + .MuiSwitch-track': {
-        backgroundColor: theme.palette.mode === 'dark' ? theme.palette.grey[100] : theme.palette.grey[300],
+        backgroundColor: theme.palette.mode === 'dark' ? theme.palette.grey[200] : theme.palette.grey[300],
         opacity: 1,
       },
     },
@@ -45,7 +45,7 @@ const StyledSwitch = styled((props: Props) => (
   },
   '& .MuiSwitch-track': {
     borderRadius: 26 / 2,
-    backgroundColor: theme.palette.mode === 'light' ? theme.palette.grey[400] : '#39393D',
+    backgroundColor: theme.palette.mode === 'light' ? theme.palette.grey[400] : theme.palette.grey[200],
     opacity: 1,
     transition: theme.transitions.create(['background-color'], {
       duration: 500,
