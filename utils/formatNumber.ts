@@ -15,8 +15,8 @@ function formatNumber(number: string | number, symbol?: string, standard?: boole
   return new Intl.NumberFormat('en-GB', {
     notation: standard ? 'standard' : 'compact',
     compactDisplay: 'short',
-    minimumFractionDigits: Math.min(symbol ? dictionary[symbol] : 2, 2),
-    maximumFractionDigits: symbol ? dictionary[symbol] : 2,
+    minimumFractionDigits: Math.min(symbol ? dictionary[symbol] || 2 : 2, 2),
+    maximumFractionDigits: symbol ? dictionary[symbol] || 2 : 2,
   }).format(parsedNumber);
 }
 
