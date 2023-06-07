@@ -526,6 +526,13 @@ export const darkTheme = createTheme({
         },
       },
     },
+    MuiButtonGroup: {
+      styleOverrides: {
+        outlined: {
+          borderColor: 'red',
+        },
+      },
+    },
     MuiDialogTitle: {
       styleOverrides: {
         root: {

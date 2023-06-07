@@ -92,7 +92,7 @@ const DashboardMobile: FC<Props> = ({ type }) => {
                   {t('Withdraw')}
                 </Button>
               ) : (
-                <ButtonGroup fullWidth>
+                <ButtonGroup fullWidth disableElevation>
                   <Button
                     variant="outlined"
                     sx={{
@@ -111,6 +111,9 @@ const DashboardMobile: FC<Props> = ({ type }) => {
                       backgroundColor: 'components.bg',
                       whiteSpace: 'nowrap',
                       height: '34px',
+                      '&:disabled': {
+                        borderLeftColor: ({ palette }) => palette.grey[palette.mode === 'light' ? 500 : 300],
+                      },
                     }}
                     onClick={() => startDebtManager({ symbol })}
                     disabled={isRolloverDisabled(borrowedAmount)}
@@ -193,7 +196,14 @@ const DashboardMobile: FC<Props> = ({ type }) => {
                     </Button>
                     <Button
                       variant="outlined"
-                      sx={{ backgroundColor: 'components.bg', whiteSpace: 'nowrap', height: '34px' }}
+                      sx={{
+                        backgroundColor: 'components.bg',
+                        whiteSpace: 'nowrap',
+                        height: '34px',
+                        '&:disabled': {
+                          borderLeftColor: ({ palette }) => palette.grey[palette.mode === 'light' ? 500 : 300],
+                        },
+                      }}
                       onClick={() => startDebtManager({ symbol, maturity })}
                       disabled={isRolloverDisabled()}
                     >

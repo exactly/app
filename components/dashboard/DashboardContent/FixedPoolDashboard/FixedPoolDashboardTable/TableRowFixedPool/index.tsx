@@ -156,7 +156,13 @@ function TableRowFixedPool({ symbol, valueUSD, type, maturityDate, market, decim
                 </Button>
                 <RolloverButton
                   variant="outlined"
-                  sx={{ backgroundColor: 'components.bg', whiteSpace: 'nowrap' }}
+                  sx={{
+                    backgroundColor: 'components.bg',
+                    whiteSpace: 'nowrap',
+                    '&:disabled': {
+                      borderLeftColor: ({ palette }) => palette.grey[palette.mode === 'light' ? 500 : 300],
+                    },
+                  }}
                   onClick={() => startDebtManager({ symbol, maturity: maturityDate })}
                   disabled={isRolloverDisabled()}
                 >
