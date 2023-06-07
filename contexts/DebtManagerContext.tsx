@@ -112,7 +112,7 @@ export const DebtManagerContextProvider: FC<PropsWithChildren> = ({ children }) 
       try {
         if (!(await isContract(walletAddress)) && chain.id === goerli.id) return false;
         const allowance = await market.allowance(walletAddress, debtManager.address);
-        return allowance.lt(qty);
+        return allowance.lte(qty);
       } catch (e: unknown) {
         setErrorData({ status: true, message: handleOperationError(e) });
         return true;
@@ -127,8 +127,9 @@ export const DebtManagerContextProvider: FC<PropsWithChildren> = ({ children }) 
 
       setIsLoading(true);
       try {
-        const gasEstimation = await market.estimateGas.approve(debtManager.address, maxAssets);
-        const approveTx = await market.approve(debtManager.address, maxAssets, {
+        const max = maxAssets.mul(100_005).div(100_000);
+        const gasEstimation = await market.estimateGas.approve(debtManager.address, max);
+        const approveTx = await market.approve(debtManager.address, max, {
           gasLimit: gasEstimation.mul(gasLimitMultiplier).div(WeiPerEther),
         });
         await approveTx.wait();
