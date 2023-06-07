@@ -24,7 +24,7 @@ function MobileTabs({ tabs }: Props) {
             sx={{
               borderRadius: i === 0 ? '6px 0px 0px 6px' : i === tabs.length - 1 ? '0px 6px 6px 0px' : 0,
               borderWidth: '1px',
-              color: selected === i ? 'white' : 'figma.grey.900',
+              color: selected === i ? 'figma.grey.50' : 'figma.grey.900',
               whiteSpace: 'nowrap',
               fontSize: 12,
             }}
