@@ -5,7 +5,7 @@ import { WeiPerEther, Zero } from '@ethersproject/constants';
 import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
 import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 import { splitSignature } from '@ethersproject/bytes';
-import { goerli, useSignTypedData } from 'wagmi';
+import { useSignTypedData } from 'wagmi';
 import dayjs from 'dayjs';
 
 import { ModalBox, ModalBoxRow } from 'components/common/modal/ModalBox';
@@ -299,7 +299,7 @@ function Operation() {
 
     const percentage = BigNumber.from(input.percent).mul(WeiPerEther).div(100);
 
-    if (chain.id !== goerli.id || (await isContract(walletAddress))) {
+    if (await isContract(walletAddress)) {
       if (input.from.maturity && input.to.maturity) {
         const args = [
           marketContract.address,

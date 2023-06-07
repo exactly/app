@@ -8,7 +8,7 @@ import React, {
   useReducer,
 } from 'react';
 import { BigNumber } from '@ethersproject/bignumber';
-import { goerli, useSigner } from 'wagmi';
+import { useSigner } from 'wagmi';
 import { PopulatedTransaction } from '@ethersproject/contracts';
 import { WeiPerEther } from '@ethersproject/constants';
 
@@ -76,7 +76,7 @@ type ContextValues = {
 const DebtManagerContext = createContext<ContextValues | null>(null);
 
 export const DebtManagerContextProvider: FC<PropsWithChildren> = ({ children }) => {
-  const { walletAddress, chain } = useWeb3();
+  const { walletAddress } = useWeb3();
   const { data: signer } = useSigner();
   const { getMarketAccount, refreshAccountData } = useAccountData();
   const isContract = useIsContract();
@@ -110,7 +110,7 @@ export const DebtManagerContextProvider: FC<PropsWithChildren> = ({ children }) 
     async (qty: BigNumber): Promise<boolean> => {
       if (!walletAddress || !market || !debtManager || qty.isZero()) return true;
       try {
-        if (!(await isContract(walletAddress)) && chain.id === goerli.id) return false;
+        if (!(await isContract(walletAddress))) return false;
         const allowance = await market.allowance(walletAddress, debtManager.address);
         return allowance.lte(qty);
       } catch (e: unknown) {
@@ -118,7 +118,7 @@ export const DebtManagerContextProvider: FC<PropsWithChildren> = ({ children }) 
         return true;
       }
     },
-    [walletAddress, market, debtManager, isContract, chain.id],
+    [walletAddress, market, debtManager, isContract],
   );
 
   const approve = useCallback(
