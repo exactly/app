@@ -112,7 +112,7 @@ export const DebtManagerContextProvider: FC<PropsWithChildren> = ({ children }) 
       try {
         if (!(await isContract(walletAddress)) && chain.id === goerli.id) return false;
         const allowance = await market.allowance(walletAddress, debtManager.address);
-        return allowance.lt(qty);
+        return allowance.lte(qty);
       } catch (e: unknown) {
         setErrorData({ status: true, message: handleOperationError(e) });
         return true;
