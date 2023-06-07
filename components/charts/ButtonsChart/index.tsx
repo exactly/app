@@ -32,7 +32,7 @@ const ButtonsChart: FC<Props> = ({ buttons, defaultSelected }) => {
             height: '24px',
             minWidth: '35px',
             px: '10px',
-            color: i === selected ? 'white' : 'figma.grey.600',
+            color: i === selected ? 'figma.grey.50' : 'figma.grey.600',
           }}
         >
           <Typography variant="subtitle2" fontSize={{ xs: '9px', sm: '12px' }}>
