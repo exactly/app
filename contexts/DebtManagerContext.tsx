@@ -8,9 +8,9 @@ import React, {
   useReducer,
 } from 'react';
 import { BigNumber } from '@ethersproject/bignumber';
-import { useSigner } from 'wagmi';
+import { goerli, useSigner } from 'wagmi';
 import { PopulatedTransaction } from '@ethersproject/contracts';
-import { MaxUint256, WeiPerEther } from '@ethersproject/constants';
+import { WeiPerEther } from '@ethersproject/constants';
 
 import type { ErrorData } from 'types/Error';
 import type { Transaction } from 'types/Transaction';
@@ -76,7 +76,7 @@ type ContextValues = {
 const DebtManagerContext = createContext<ContextValues | null>(null);
 
 export const DebtManagerContextProvider: FC<PropsWithChildren> = ({ children }) => {
-  const { walletAddress } = useWeb3();
+  const { walletAddress, chain } = useWeb3();
   const { data: signer } = useSigner();
   const { getMarketAccount, refreshAccountData } = useAccountData();
   const isContract = useIsContract();
@@ -110,7 +110,7 @@ export const DebtManagerContextProvider: FC<PropsWithChildren> = ({ children }) 
     async (qty: BigNumber): Promise<boolean> => {
       if (!walletAddress || !market || !debtManager || qty.isZero()) return true;
       try {
-        if (!(await isContract(walletAddress))) return false;
+        if (!(await isContract(walletAddress)) && chain.id === goerli.id) return false;
         const allowance = await market.allowance(walletAddress, debtManager.address);
         return allowance.lt(qty);
       } catch (e: unknown) {
@@ -118,7 +118,7 @@ export const DebtManagerContextProvider: FC<PropsWithChildren> = ({ children }) 
         return true;
       }
     },
-    [walletAddress, market, debtManager, isContract],
+    [walletAddress, market, debtManager, isContract, chain.id],
   );
 
   const approve = useCallback(
@@ -128,7 +128,7 @@ export const DebtManagerContextProvider: FC<PropsWithChildren> = ({ children }) 
       setIsLoading(true);
       try {
         const gasEstimation = await market.estimateGas.approve(debtManager.address, maxAssets);
-        const approveTx = await market.approve(debtManager.address, MaxUint256, {
+        const approveTx = await market.approve(debtManager.address, maxAssets, {
           gasLimit: gasEstimation.mul(gasLimitMultiplier).div(WeiPerEther),
         });
         await approveTx.wait();
