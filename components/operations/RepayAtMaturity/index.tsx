@@ -161,7 +161,7 @@ const RepayAtMaturity: FC = () => {
     async (quantity: string): Promise<BigNumber | undefined> => {
       if (!marketAccount || !walletAddress || !ETHRouterContract || !marketContract || !date || !quantity) return;
 
-      if (requiresApproval) {
+      if (await needsApproval(quantity)) {
         return approveEstimateGas();
       }
 
@@ -196,7 +196,7 @@ const RepayAtMaturity: FC = () => {
       ETHRouterContract,
       marketContract,
       date,
-      requiresApproval,
+      needsApproval,
       positionAssetsAmount,
       maxAmountToRepay,
       slippage,

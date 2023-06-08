@@ -72,7 +72,7 @@ export default (): Borrow => {
     async (quantity: string): Promise<BigNumber | undefined> => {
       if (!marketAccount || !walletAddress || !marketContract || !ETHRouterContract || !quantity) return;
 
-      if (requiresApproval) {
+      if (await needsApproval(quantity)) {
         return approveEstimateGas();
       }
 
@@ -90,7 +90,7 @@ export default (): Borrow => {
       );
       return estimate(populated);
     },
-    [marketAccount, walletAddress, marketContract, ETHRouterContract, requiresApproval, estimate, approveEstimateGas],
+    [marketAccount, walletAddress, marketContract, ETHRouterContract, needsApproval, estimate, approveEstimateGas],
   );
 
   const isLoading = useMemo(() => isLoadingOp || approveIsLoading, [isLoadingOp, approveIsLoading]);

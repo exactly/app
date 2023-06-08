@@ -87,7 +87,7 @@ export default (): BorrowAtMaturity => {
     async (quantity: string): Promise<BigNumber | undefined> => {
       if (!marketAccount || !walletAddress || !marketContract || !ETHRouterContract || !date || !quantity) return;
 
-      if (requiresApproval) {
+      if (await needsApproval(quantity)) {
         return approveEstimateGas();
       }
 
@@ -116,7 +116,7 @@ export default (): BorrowAtMaturity => {
       marketContract,
       ETHRouterContract,
       date,
-      requiresApproval,
+      needsApproval,
       slippage,
       estimate,
       approveEstimateGas,

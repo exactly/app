@@ -66,7 +66,7 @@ export default (): Deposit => {
       )
         return;
 
-      if (requiresApproval) {
+      if (await needsApproval(quantity)) {
         return approveEstimateGas();
       }
 
@@ -92,7 +92,7 @@ export default (): Deposit => {
       marketContract,
       walletBalance,
       marketAccount,
-      requiresApproval,
+      needsApproval,
       estimate,
       approveEstimateGas,
       t,

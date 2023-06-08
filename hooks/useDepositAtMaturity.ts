@@ -82,7 +82,7 @@ export default (): DepositAtMaturity => {
       )
         return;
 
-      if (requiresApproval) {
+      if (await needsApproval(quantity)) {
         return approveEstimateGas();
       }
 
@@ -118,7 +118,7 @@ export default (): DepositAtMaturity => {
       ETHRouterContract,
       date,
       walletBalance,
-      requiresApproval,
+      needsApproval,
       slippage,
       estimate,
       approveEstimateGas,

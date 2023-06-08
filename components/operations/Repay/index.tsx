@@ -191,7 +191,7 @@ function Repay() {
     async (quantity: string): Promise<BigNumber | undefined> => {
       if (!marketAccount || !walletAddress || !ETHRouterContract || !marketContract || !quantity) return;
 
-      if (requiresApproval) {
+      if (await needsApproval(quantity)) {
         return approveEstimateGas();
       }
 
@@ -221,7 +221,7 @@ function Repay() {
       walletAddress,
       ETHRouterContract,
       marketContract,
-      requiresApproval,
+      needsApproval,
       estimate,
       approveEstimateGas,
       walletBalance,

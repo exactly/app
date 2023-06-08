@@ -150,7 +150,7 @@ const WithdrawAtMaturity: FC = () => {
     async (quantity: string): Promise<BigNumber | undefined> => {
       if (!marketAccount || !walletAddress || !marketContract || !ETHRouterContract || !date || !quantity) return;
 
-      if (requiresApproval) {
+      if (await needsApproval(quantity)) {
         return approveEstimateGas();
       }
 
@@ -182,7 +182,7 @@ const WithdrawAtMaturity: FC = () => {
       marketContract,
       ETHRouterContract,
       date,
-      requiresApproval,
+      needsApproval,
       amountToWithdraw,
       minAmountToWithdraw,
       estimate,
