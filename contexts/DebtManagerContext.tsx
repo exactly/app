@@ -26,8 +26,9 @@ import { gasLimitMultiplier } from 'utils/const';
 import useEstimateGas from 'hooks/useEstimateGas';
 import handleOperationError from 'utils/handleOperationError';
 import useIsContract from 'hooks/useIsContract';
+import useAnalytics from 'hooks/useAnalytics';
 
-type Input = {
+export type Input = {
   from?: Position;
   to?: Position;
   slippage: string;
@@ -76,6 +77,8 @@ type ContextValues = {
 const DebtManagerContext = createContext<ContextValues | null>(null);
 
 export const DebtManagerContextProvider: FC<PropsWithChildren> = ({ children }) => {
+  const { transaction: track } = useAnalytics();
+
   const { walletAddress } = useWeb3();
   const { data: signer } = useSigner();
   const { getMarketAccount, refreshAccountData } = useAccountData();
@@ -153,21 +156,28 @@ export const DebtManagerContextProvider: FC<PropsWithChildren> = ({ children }) 
       setIsLoading(true);
 
       try {
+        track.addToCart('roll', input);
         const transaction = await populate();
         if (!transaction) return;
         const transactionResponse = await signer.sendTransaction(transaction);
+
+        track.beginCheckout('roll', input);
+
         setTx({ status: 'processing', hash: transactionResponse.hash });
         const { status, transactionHash } = await transactionResponse.wait();
         setTx({ status: status ? 'success' : 'error', hash: transactionHash });
 
+        if (status) track.purchase('roll', input);
+
         await refreshAccountData();
       } catch (e: unknown) {
+        track.removeFromCart('roll', input);
         setErrorData({ status: true, message: handleOperationError(e) });
       } finally {
         setIsLoading(false);
       }
     },
-    [walletAddress, signer, market, debtManager, refreshAccountData],
+    [walletAddress, signer, market, debtManager, track, input, refreshAccountData],
   );
 
   const value: ContextValues = {

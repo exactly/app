@@ -86,8 +86,8 @@ export default function App({ Component, pageProps }: AppProps) {
               <AccountDataProvider>
                 <MarketProvider>
                   <ModalStatusProvider>
-                    <MarketsBasicProvider>
-                      <DebtManagerContextProvider>
+                    <DebtManagerContextProvider>
+                      <MarketsBasicProvider>
                         <Box display="flex" flexDirection="column" mx={2} height="100%">
                           <Navbar />
                           <main style={{ flexGrow: 1, maxWidth, margin: '0 auto', width: '100%' }}>
@@ -96,8 +96,8 @@ export default function App({ Component, pageProps }: AppProps) {
                           <Footer />
                         </Box>
                         <OperationsModal />
-                      </DebtManagerContextProvider>
-                    </MarketsBasicProvider>
+                      </MarketsBasicProvider>
+                    </DebtManagerContextProvider>
                   </ModalStatusProvider>
                 </MarketProvider>
               </AccountDataProvider>

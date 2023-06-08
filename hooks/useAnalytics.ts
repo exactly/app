@@ -5,6 +5,7 @@ import { useAccount } from 'wagmi';
 import { formatFixed } from '@ethersproject/bignumber';
 import { Zero } from '@ethersproject/constants';
 
+import { type Input } from 'contexts/DebtManagerContext';
 import { useOperationContext } from 'contexts/OperationContext';
 import { useWeb3 } from './useWeb3';
 import { useMarketContext } from 'contexts/MarketContext';
@@ -17,7 +18,7 @@ import useActionButton from './useActionButton';
 import useDelayedEffect from './useDelayedEffect';
 import useSnapshot from './useSnapshot';
 
-type ItemVariant = 'operation' | 'approve' | 'enterMarket' | 'exitMarket' | 'claimAll';
+type ItemVariant = 'operation' | 'approve' | 'enterMarket' | 'exitMarket' | 'claimAll' | 'roll';
 type TrackItem = { eventName: string; variant: ItemVariant };
 
 type Row = {
@@ -89,7 +90,22 @@ function useAnalyticsContext(assetSymbol?: string) {
     [assetSymbol, marketAccount?.symbol, marketAccount?.usdPrice, operation, qty, symbol],
   );
 
-  return { appContext: useSnapshot(appContext), itemContext };
+  const rolloverContext = useCallback((input: Input) => {
+    const op =
+      input.from?.maturity && input.to?.maturity
+        ? 'rollFixed'
+        : input.from?.maturity
+        ? 'rollFixedToFloating'
+        : 'rollFloatingToFixed';
+    return {
+      symbol: input.from?.symbol || input.to?.symbol,
+      quantity: input.percent,
+      item_id: `DebtManager.${op}`,
+      item_name: `DebtManager ${op}`,
+    };
+  }, []);
+
+  return { appContext: useSnapshot(appContext), itemContext, rolloverContext };
 }
 
 export function usePageView(pathname: string, title: string) {
@@ -108,7 +124,7 @@ export function usePageView(pathname: string, title: string) {
 }
 
 export default function useAnalytics({ symbol, rewards }: { symbol?: string; rewards?: Rewards } = {}) {
-  const { appContext, itemContext } = useAnalyticsContext(symbol);
+  const { appContext, itemContext, rolloverContext } = useAnalyticsContext(symbol);
   const { isDisable } = useActionButton();
 
   const trackWithContext = useCallback(
@@ -270,24 +286,35 @@ export default function useAnalytics({ symbol, rewards }: { symbol?: string; rew
     [trackWithContext, itemContext, rewards],
   );
 
+  const trackRollover = useCallback(
+    (eventName: string, input: Input) => trackWithContext(eventName, { items: [rolloverContext(input)] }),
+    [trackWithContext, rolloverContext],
+  );
+
+  const buildTransactionTrack = useCallback(
+    (variant: ItemVariant = 'operation', eventName: string, input?: Input) =>
+      variant === 'roll' && input ? trackRollover(eventName, input) : trackItem({ eventName, variant }),
+    [trackItem, trackRollover],
+  );
+
   const addToCart = useCallback(
-    (variant: ItemVariant = 'operation') => trackItem({ eventName: 'add_to_cart', variant }),
-    [trackItem],
+    (variant: ItemVariant = 'operation', input?: Input) => buildTransactionTrack(variant, 'add_to_cart', input),
+    [buildTransactionTrack],
   );
 
   const beginCheckout = useCallback(
-    (variant: ItemVariant = 'operation') => trackItem({ eventName: 'begin_checkout', variant }),
-    [trackItem],
+    (variant: ItemVariant = 'operation', input?: Input) => buildTransactionTrack(variant, 'begin_checkout', input),
+    [buildTransactionTrack],
   );
 
   const purchase = useCallback(
-    (variant: ItemVariant = 'operation') => trackItem({ eventName: 'purchase', variant }),
-    [trackItem],
+    (variant: ItemVariant = 'operation', input?: Input) => buildTransactionTrack(variant, 'purchase', input),
+    [buildTransactionTrack],
   );
 
   const removeFromCart = useCallback(
-    (variant: ItemVariant = 'operation') => trackItem({ eventName: 'remove_from_cart', variant }),
-    [trackItem],
+    (variant: ItemVariant = 'operation', input?: Input) => buildTransactionTrack(variant, 'remove_from_cart', input),
+    [buildTransactionTrack],
   );
 
   return {
