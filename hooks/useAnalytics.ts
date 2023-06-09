@@ -38,7 +38,7 @@ function wrap(str: string | undefined) {
 
 export function useInitGA() {
   useEffect(() => {
-    const key = process.env.NEXT_PUBLIC_GA_API_KEY;
+    const key = process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS;
     if (!key) {
       return;
     }
