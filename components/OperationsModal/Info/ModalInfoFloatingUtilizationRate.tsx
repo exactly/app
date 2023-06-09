@@ -1,8 +1,7 @@
 import React, { useMemo } from 'react';
-import { formatFixed, parseFixed } from '@ethersproject/bignumber';
-import { Zero } from '@ethersproject/constants';
 import PieChartOutlineRoundedIcon from '@mui/icons-material/PieChartOutlineRounded';
 import { useTranslation } from 'react-i18next';
+import { formatUnits, parseUnits } from 'viem';
 
 import ModalInfo, { FromTo, Variant } from 'components/common/modal/ModalInfo';
 import { Operation } from 'contexts/ModalStatusContext';
@@ -28,32 +27,32 @@ function ModalInfoFloatingUtilizationRate({ qty, symbol, operation, variant = 'c
     if (!marketAccount) return [undefined, undefined, undefined, undefined];
     const { totalFloatingDepositAssets, totalFloatingBorrowAssets, decimals } = marketAccount;
     try {
-      let deposited = totalFloatingDepositAssets ?? Zero;
-      let borrowed = totalFloatingBorrowAssets ?? Zero;
+      let deposited = totalFloatingDepositAssets;
+      let borrowed = totalFloatingBorrowAssets;
 
-      const decimalWAD = parseFixed('1', decimals);
+      const decimalWAD = parseUnits('1', decimals);
 
-      const f = borrowed.mul(decimalWAD).div(deposited);
-      const delta = parseFixed(qty || '0', decimals);
+      const f = (borrowed * decimalWAD) / deposited;
+      const delta = parseUnits((qty as `${number}`) || '0', decimals);
 
       switch (operation) {
         case 'deposit':
-          deposited = deposited.add(delta);
+          deposited += delta;
           break;
         case 'withdraw':
-          deposited = deposited.sub(delta);
+          deposited -= delta;
           break;
         case 'borrow':
-          borrowed = borrowed.add(delta);
+          borrowed += delta;
           break;
         case 'repay':
-          borrowed = borrowed.sub(delta);
+          borrowed -= delta;
           break;
       }
 
-      const utilization = borrowed.mul(decimalWAD).div(deposited);
-      const fromUtilization = Number(formatFixed(f, decimals));
-      const toUtilization = Number(formatFixed(utilization, decimals));
+      const utilization = (borrowed * decimalWAD) / deposited;
+      const fromUtilization = Number(formatUnits(f, decimals));
+      const toUtilization = Number(formatUnits(utilization, decimals));
 
       return [toPercentage(fromUtilization), toPercentage(toUtilization), fromUtilization, toUtilization];
     } catch {

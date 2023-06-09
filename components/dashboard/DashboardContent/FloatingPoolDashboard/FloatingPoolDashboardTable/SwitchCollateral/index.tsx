@@ -1,17 +1,18 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { CircularProgress, Tooltip, Typography } from '@mui/material';
-import { WeiPerEther } from '@ethersproject/constants';
+import { useNetwork } from 'wagmi';
+import { waitForTransaction } from '@wagmi/core';
 
 import StyledSwitch from 'components/Switch';
 import parseHealthFactor from 'utils/parseHealthFactor';
 import useAuditor from 'hooks/useAuditor';
 import handleOperationError from 'utils/handleOperationError';
-import { useNetwork } from 'wagmi';
 import useHealthFactor from 'hooks/useHealthFactor';
 import useAccountData from 'hooks/useAccountData';
 import { useWeb3 } from 'hooks/useWeb3';
 import { useTranslation } from 'react-i18next';
 import useAnalytics from 'hooks/useAnalytics';
+import { WEI_PER_ETHER } from 'utils/const';
 
 type Props = {
   symbol: string;
@@ -22,8 +23,8 @@ function SwitchCollateral({ symbol }: Props) {
   const { marketAccount, refreshAccountData } = useAccountData(symbol);
   const auditor = useAuditor();
   const { chain } = useNetwork();
-  const { chain: displayNetwork } = useWeb3();
   const { transaction } = useAnalytics({ symbol });
+  const { chain: displayNetwork, opts } = useWeb3();
 
   const healthFactor = useHealthFactor();
 
@@ -44,19 +45,16 @@ function SwitchCollateral({ symbol }: Props) {
     const { floatingBorrowAssets, fixedBorrowPositions, isCollateral, usdPrice, floatingDepositAssets, adjustFactor } =
       marketAccount;
 
-    if (!floatingBorrowAssets.isZero() || fixedBorrowPositions.length > 0) {
+    if (floatingBorrowAssets !== 0n || fixedBorrowPositions.length > 0) {
       return {
         disabled: true,
         disabledText: t("You can't disable collateral on this asset because you have an active borrow"),
       };
     }
 
-    const collateralUsd = floatingDepositAssets.mul(usdPrice).div(WeiPerEther);
+    const collateralUsd = (floatingDepositAssets * usdPrice) / 10n ** BigInt(marketAccount.decimals);
     const newHF = parseFloat(
-      parseHealthFactor(
-        healthFactor.debt,
-        healthFactor.collateral.sub(collateralUsd.mul(adjustFactor).div(WeiPerEther)),
-      ),
+      parseHealthFactor(healthFactor.debt, healthFactor.collateral - (collateralUsd * adjustFactor) / WEI_PER_ETHER),
     );
 
     if (isCollateral && newHF < 1) {
@@ -69,7 +67,7 @@ function SwitchCollateral({ symbol }: Props) {
   const [loading, setLoading] = useState<boolean>(false);
 
   const onToggle = useCallback(async () => {
-    if (!marketAccount || !auditor) return;
+    if (!marketAccount || !auditor || !opts) return;
     const { market } = marketAccount;
     let target = !checked;
 
@@ -77,10 +75,13 @@ function SwitchCollateral({ symbol }: Props) {
     const variant = checked ? 'exitMarket' : 'enterMarket';
     try {
       transaction.addToCart(variant);
-      const tx = await (checked ? auditor.exitMarket(market) : auditor.enterMarket(market));
+      const hash = await (checked
+        ? auditor.write.exitMarket([market], opts)
+        : auditor.write.enterMarket([market], opts));
       transaction.beginCheckout(variant);
-      const { status } = await tx.wait();
+      const { status } = await waitForTransaction({ hash });
       if (status) transaction.purchase(variant);
+
       await refreshAccountData();
     } catch (error) {
       transaction.removeFromCart(variant);
@@ -90,7 +91,7 @@ function SwitchCollateral({ symbol }: Props) {
       setOptimistic(target);
       setLoading(false);
     }
-  }, [marketAccount, auditor, checked, transaction, refreshAccountData]);
+  }, [marketAccount, auditor, opts, checked, transaction, refreshAccountData]);
 
   if (loading) {
     return (

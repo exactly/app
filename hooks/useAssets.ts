@@ -6,16 +6,18 @@ const def = ['USDC', 'WETH'];
 export default (): string[] => {
   const { accountData } = useAccountData();
 
-  if (accountData) {
-    accountData.sort((a, b) => {
-      return Number(
-        b.totalFloatingDepositAssets
-          .mul(b.usdPrice)
-          .div(10n ** BigInt(b.decimals))
-          .sub(a.totalFloatingDepositAssets.mul(a.usdPrice).div(10n ** BigInt(a.decimals))),
-      );
-    });
-  }
-
-  return useMemo<string[]>(() => (accountData ? accountData.map((m) => m.assetSymbol) : def), [accountData]);
+  return useMemo<string[]>(
+    () =>
+      accountData
+        ? [...accountData]
+            .sort((a, b) => {
+              return Number(
+                (b.totalFloatingDepositAssets * b.usdPrice) / 10n ** BigInt(b.decimals) -
+                  (a.totalFloatingDepositAssets * a.usdPrice) / 10n ** BigInt(a.decimals),
+              );
+            })
+            .map((m) => m.assetSymbol)
+        : def,
+    [accountData],
+  );
 };

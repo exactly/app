@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { goerli } from 'wagmi';
+import { goerli } from 'wagmi/chains';
 import { ErrorCode } from '@ethersproject/logger';
 import { captureException as sentryCaptureException } from '@sentry/nextjs';
 

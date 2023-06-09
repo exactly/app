@@ -4,10 +4,8 @@ export function getMaturityPoolWithdrawsQuery(address: string, maturity: number,
     withdrawAtMaturities(where:{receiver: "${address}", maturity: ${maturity}, market: "${market}"}){
       id
       market
-      timestamp
       maturity
-      receiver
-      owner
+      timestamp
       positionAssets
       assets
     }

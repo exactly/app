@@ -61,7 +61,7 @@ function TypeSwitch() {
     ];
   }, [operation, theme, toggle, t]);
 
-  if (tx || operation === 'faucet') {
+  if (tx) {
     return null;
   }
 

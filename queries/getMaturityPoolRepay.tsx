@@ -5,9 +5,7 @@ export function getMaturityPoolRepaysQuery(address: string, maturity: number, ma
       id
       market
       maturity
-      borrower
       assets
-      debtCovered
       timestamp
     }
   }

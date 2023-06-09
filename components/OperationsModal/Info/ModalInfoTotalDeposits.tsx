@@ -1,9 +1,8 @@
 import React, { useMemo } from 'react';
-import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
-import { Zero } from '@ethersproject/constants';
 import SaveAltRoundedIcon from '@mui/icons-material/SaveAltRounded';
 import Image from 'next/image';
 import { useTranslation } from 'react-i18next';
+import { formatUnits, parseUnits } from 'viem';
 
 import useAccountData from 'hooks/useAccountData';
 import formatNumber from 'utils/formatNumber';
@@ -28,20 +27,20 @@ function ModalInfoTotalDeposits({ qty, symbol, operation, variant = 'column' }: 
   const [from, to] = useMemo(() => {
     if (!marketAccount) return [undefined, undefined];
 
-    const delta = parseFixed(qty || '0', marketAccount.decimals);
+    const delta = parseUnits((qty as `${number}`) || '0', marketAccount.decimals);
 
-    let f: BigNumber = marketAccount.floatingDepositAssets;
+    let f: bigint = marketAccount.floatingDepositAssets;
     if (isFixedOperation(operation) && date) {
-      const pool = marketAccount.fixedDepositPositions.find(({ maturity }) => maturity.toNumber() === date);
-      f = pool ? pool.position.principal.add(pool.position.fee) : Zero;
+      const pool = marketAccount.fixedDepositPositions.find(({ maturity }) => maturity === BigInt(date));
+      f = pool ? pool.position.principal + pool.position.fee : 0n;
     }
 
-    let total = f[operation.startsWith('deposit') ? 'add' : 'sub'](delta);
-    total = total < Zero ? Zero : total;
+    let total = operation.startsWith('deposit') ? f + delta : f - delta;
+    total = total < 0n ? 0n : total;
 
     return [
-      formatNumber(formatFixed(f, marketAccount.decimals), symbol),
-      formatNumber(formatFixed(total, marketAccount.decimals), symbol),
+      formatNumber(formatUnits(f, marketAccount.decimals), symbol),
+      formatNumber(formatUnits(total, marketAccount.decimals), symbol),
     ];
   }, [marketAccount, qty, operation, date, symbol]);
 

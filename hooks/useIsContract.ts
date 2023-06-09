@@ -1,14 +1,9 @@
+import { Address } from 'viem';
 import { useCallback } from 'react';
-import { useProvider } from 'wagmi';
+import { usePublicClient } from 'wagmi';
 
 export default function useIsContract() {
-  const provider = useProvider();
+  const publicClient = usePublicClient();
 
-  return useCallback(
-    async (address: string) => {
-      const code = await provider.getCode(address);
-      return code !== '0x';
-    },
-    [provider],
-  );
+  return useCallback((address: Address) => publicClient.getBytecode({ address }).then(Boolean), [publicClient]);
 }

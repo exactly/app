@@ -2,7 +2,7 @@ import React, { useState, useCallback, type FC } from 'react';
 import Image from 'next/image';
 import { Box, Button, Menu, Typography } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
-import { formatFixed } from '@ethersproject/bignumber';
+import { formatUnits } from 'viem';
 
 import { useWeb3 } from 'hooks/useWeb3';
 import useRewards from 'hooks/useRewards';
@@ -61,7 +61,7 @@ const ClaimRewards: FC = () => {
           }}
         />
         <Typography variant="subtitle1" color="grey.900">
-          {formatNumber(formatFixed(amount, 18))}
+          {formatNumber(formatUnits(amount, 18))}
         </Typography>
       </Button>
       <Menu
@@ -107,7 +107,7 @@ const ClaimRewards: FC = () => {
               }}
             />
             <Typography fontWeight="700" fontSize={24} color="grey.900" lineHeight="1">
-              {formatNumber(formatFixed(amount, 18))}
+              {formatNumber(formatUnits(amount, 18))}
             </Typography>
           </Box>
 

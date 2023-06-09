@@ -5,7 +5,6 @@ export function getMaturityPoolDepositsQuery(address: string, maturity: number, 
       id
       market
       maturity
-      owner
       assets
       fee
       timestamp

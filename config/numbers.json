@@ -1,6 +1,6 @@
 {
   "slippage": 0.05,
-  "ethRouterSlippage": 0.001,
+  "ethRouterSlippage": 1.001,
   "gasLimitMultiplier": 1.25,
   "debounceTime": 500,
   "minAPRValue": 0.0001,

@@ -14,8 +14,6 @@ import {
   IconButton,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { WeiPerEther, Zero } from '@ethersproject/constants';
-import { BigNumber, formatFixed } from '@ethersproject/bignumber';
 
 import AddIcon from '@mui/icons-material/Add';
 import ClearIcon from '@mui/icons-material/Clear';
@@ -29,6 +27,8 @@ import formatNumber from 'utils/formatNumber';
 import parseHealthFactor from 'utils/parseHealthFactor';
 import usePreviewer from 'hooks/usePreviewer';
 import { useWeb3 } from 'hooks/useWeb3';
+import { WEI_PER_ETHER } from 'utils/const';
+import { formatUnits } from 'viem';
 
 type Row = {
   key: string;
@@ -41,7 +41,7 @@ type Row = {
 type Props = {
   from: PositionTableRow;
   to?: PositionTableRow;
-  percent: number;
+  percent: bigint;
 };
 
 function Overview({ from, to, percent }: Props) {
@@ -68,18 +68,15 @@ function Overview({ from, to, percent }: Props) {
     const rewardsFrom = rates[from.symbol];
     const rewardsTo = to ? rates[to.symbol] : null;
 
-    const wad = BigNumber.from(10n ** BigInt(decimals));
+    const wad = 10n ** BigInt(decimals);
 
-    const originalDebt = from.balance.mul(percent).div(100);
-    const previousBorrowDebt = originalDebt.mul(usdPrice).div(wad).mul(WeiPerEther).div(adjustFactor);
-    const futureBorrowDebt = (to && isToFixed ? to.balance ?? Zero : originalDebt)
-      .mul(usdPrice)
-      .div(wad)
-      .mul(WeiPerEther)
-      .div(adjustFactor);
+    const originalDebt = (from.balance * percent) / 100n;
+    const previousBorrowDebt = (((originalDebt * usdPrice) / wad) * WEI_PER_ETHER) / adjustFactor;
+    const futureBorrowDebt =
+      ((((to && isToFixed ? to.balance ?? 0n : originalDebt) * usdPrice) / wad) * WEI_PER_ETHER) / adjustFactor;
 
     const newHF = to
-      ? parseHealthFactor(healthFactor.debt.sub(previousBorrowDebt).add(futureBorrowDebt), healthFactor.collateral)
+      ? parseHealthFactor(healthFactor.debt - previousBorrowDebt + futureBorrowDebt, healthFactor.collateral)
       : null;
 
     return [
@@ -137,14 +134,14 @@ function Overview({ from, to, percent }: Props) {
             )}
           </RowHeader>
         ),
-        current: from.balance && (
+        current: from.balance ? (
           <CurrencyTextValue assetSymbol={from.symbol}>
-            {formatNumber(formatFixed(from.balance.mul(percent).div(100), from.decimals), from.symbol)}
+            {formatNumber(formatUnits((from.balance * percent) / 100n, from.decimals), from.symbol)}
           </CurrencyTextValue>
-        ),
+        ) : null,
         new: to && (
           <CurrencyTextValue assetSymbol={to.symbol}>
-            {formatNumber(formatFixed(to.balance ? to.balance : originalDebt, to.decimals), to.symbol)}
+            {formatNumber(formatUnits(to.balance ? to.balance : originalDebt, to.decimals), to.symbol)}
           </CurrencyTextValue>
         ),
       },
@@ -154,16 +151,17 @@ function Overview({ from, to, percent }: Props) {
               key: 'Value',
               label: <RowHeader>{t('Value')}:</RowHeader>,
               details: true,
-              current: from.balance && (
+              current: from.balance ? (
                 <CurrencyTextValue assetSymbol={from.symbol} details>
-                  {formatNumber(formatFixed(from.balance.mul(percent).div(100), from.decimals), from.symbol)}
+                  {formatNumber(formatUnits((from.balance * percent) / 100n, from.decimals), from.symbol)}
                 </CurrencyTextValue>
-              ),
-              new: to && to.balance && (
-                <CurrencyTextValue assetSymbol={to.symbol} details>
-                  {formatNumber(formatFixed(to.balance.sub(to.fee ?? Zero), to.decimals), to.symbol)}
-                </CurrencyTextValue>
-              ),
+              ) : null,
+              new:
+                to && to.balance && to.balance > 0n ? (
+                  <CurrencyTextValue assetSymbol={to.symbol} details>
+                    {formatNumber(formatUnits(to.balance - (to.fee ?? 0n), to.decimals), to.symbol)}
+                  </CurrencyTextValue>
+                ) : null,
             },
 
             {
@@ -171,11 +169,12 @@ function Overview({ from, to, percent }: Props) {
               label: <RowHeader>{t('New fee')}:</RowHeader>,
               details: true,
               current: <TextValue details>{t('N/A')}</TextValue>,
-              new: to && to.fee && (
-                <CurrencyTextValue assetSymbol={to.symbol} details>
-                  {formatNumber(formatFixed(to.fee ?? Zero, to.decimals), to.symbol)}
-                </CurrencyTextValue>
-              ),
+              new:
+                to && to.fee ? (
+                  <CurrencyTextValue assetSymbol={to.symbol} details>
+                    {formatNumber(formatUnits(to.fee, to.decimals), to.symbol)}
+                  </CurrencyTextValue>
+                ) : null,
             },
           ]
         : []),

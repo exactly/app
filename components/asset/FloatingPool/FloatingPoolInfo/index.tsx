@@ -1,9 +1,9 @@
 import React, { FC, useMemo } from 'react';
-import { WeiPerEther, Zero } from '@ethersproject/constants';
+import { useTranslation } from 'react-i18next';
+import { formatUnits } from 'viem';
 
 import formatNumber from 'utils/formatNumber';
 import { toPercentage } from 'utils/utils';
-import { formatFixed } from '@ethersproject/bignumber';
 
 import { ItemInfoProps } from 'components/common/ItemInfo';
 import HeaderInfo from 'components/common/HeaderInfo';
@@ -13,7 +13,7 @@ import useAccountData from 'hooks/useAccountData';
 import useFloatingPoolAPR from 'hooks/useFloatingPoolAPR';
 import useRewards from 'hooks/useRewards';
 import ItemCell from 'components/common/ItemCell';
-import { useTranslation } from 'react-i18next';
+import { WEI_PER_ETHER } from 'utils/const';
 
 type FloatingPoolInfoProps = {
   symbol: string;
@@ -36,8 +36,8 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol }) => {
     } = marketAccount;
 
     return {
-      deposited: Number(totalDeposited.mul(usdPrice).div(WeiPerEther)) / 10 ** decimals,
-      borrowed: Number(totalBorrowed.mul(usdPrice).div(WeiPerEther)) / 10 ** decimals,
+      deposited: Number((totalDeposited * usdPrice) / WEI_PER_ETHER) / 10 ** decimals,
+      borrowed: Number((totalBorrowed * usdPrice) / WEI_PER_ETHER) / 10 ** decimals,
     };
   }, [marketAccount]);
 
@@ -82,7 +82,7 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol }) => {
             ? toPercentage(deposited > 0 ? borrowed / deposited : undefined)
             : undefined,
       },
-      ...(rates[symbol] && rates[symbol].some((r) => r.floatingDeposit.gt(Zero))
+      ...(rates[symbol] && rates[symbol].some((r) => r.floatingDeposit > 0n)
         ? [
             {
               label: t('Deposit Rewards APR'),
@@ -101,7 +101,7 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol }) => {
             },
           ]
         : []),
-      ...(rates[symbol] && rates[symbol].some((r) => r.borrow.gt(Zero))
+      ...(rates[symbol] && rates[symbol].some((r) => r.borrow > 0n)
         ? [
             {
               label: t('Borrow Rewards APR'),
@@ -118,7 +118,7 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol }) => {
         : []),
       {
         label: t('Risk-Adjust Factor'),
-        value: marketAccount?.adjustFactor ? formatFixed(marketAccount.adjustFactor, 18) : undefined,
+        value: marketAccount?.adjustFactor ? formatUnits(marketAccount.adjustFactor, 18) : undefined,
         tooltipTitle: t(
           'The Deposit and Borrow risk-adjust factor is a measure that helps evaluate how risky an asset is compared to others. The higher the number, the safer the asset is considered to be, making it more valuable as collateral when requesting a loan.',
         ),

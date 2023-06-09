@@ -1,16 +1,16 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useTranslation } from 'react-i18next';
-import { formatFixed } from '@ethersproject/bignumber';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import { Box, Button, ButtonGroup, IconButton, Skeleton, Stack, TableCell, TableRow, Typography } from '@mui/material';
 import MaturityLinearProgress from 'components/common/MaturityLinearProgress';
 import useFixedOperation from 'hooks/useFixedPoolTransactions';
+import { Address, formatUnits } from 'viem';
 
 import React, { useMemo, useState } from 'react';
 import { FixedPoolTransaction } from 'types/FixedPoolTransaction';
-import calculateAPR from 'utils/calculateAPR';
+import { calculateAPR } from 'utils/calculateAPR';
 import formatNumber from 'utils/formatNumber';
 import formatSymbol from 'utils/formatSymbol';
 import parseTimestamp from 'utils/parseTimestamp';
@@ -30,7 +30,7 @@ type Props = {
   valueUSD?: number;
   type: 'deposit' | 'borrow';
   maturityDate: number;
-  market: string;
+  market: Address;
   decimals: number;
 };
 
@@ -45,17 +45,17 @@ function TableRowFixedPool({ symbol, valueUSD, type, maturityDate, market, decim
 
   const exchangeRate: number | undefined = useMemo(() => {
     if (!marketAccount) return;
-    return parseFloat(formatFixed(marketAccount.usdPrice, 18));
+    return parseFloat(formatUnits(marketAccount.usdPrice, 18));
   }, [marketAccount]);
 
   const transactions: FixedPoolTransaction[] = useMemo(() => {
     const allTransactions = [...withdrawTxs, ...repayTxs, ...depositTxs, ...borrowTxs].sort(
-      (a, b) => parseInt(b.timestamp) - parseInt(a.timestamp),
+      (a, b) => b.timestamp - a.timestamp,
     );
 
     if (!allTransactions || !exchangeRate) return [];
     const transformedTxs = allTransactions.map((transaction: Deposit | Borrow | WithdrawMP | Repay) => {
-      const assets = formatFixed(transaction.assets, decimals);
+      const assets = formatUnits(transaction.assets, decimals);
 
       const txType =
         'fee' in transaction
@@ -66,13 +66,18 @@ function TableRowFixedPool({ symbol, valueUSD, type, maturityDate, market, decim
           ? t('Repay')
           : t('Withdraw');
 
-      const { transactionAPR } =
+      const transactionAPR =
         'fee' in transaction
-          ? calculateAPR(transaction.fee, transaction.assets, transaction.timestamp, transaction.maturity)
-          : { transactionAPR: undefined };
+          ? calculateAPR(
+              transaction.fee,
+              transaction.assets,
+              BigInt(transaction.timestamp),
+              BigInt(transaction.maturity),
+            )
+          : undefined;
 
       const isBorrowOrDeposit = txType.toLowerCase() === 'borrow' || txType.toLowerCase() === 'deposit';
-      const date = parseTimestamp(transaction?.timestamp || '0');
+      const date = parseTimestamp(transaction.timestamp);
       const amountUSD = (parseFloat(assets) * exchangeRate).toFixed(2);
 
       return {
@@ -82,7 +87,7 @@ function TableRowFixedPool({ symbol, valueUSD, type, maturityDate, market, decim
         amount: assets,
         amountUSD,
         isBorrowOrDeposit,
-        APR: transactionAPR,
+        APR: transactionAPR ? Number(formatUnits(transactionAPR, 18)) : undefined,
       };
     });
 
@@ -163,7 +168,7 @@ function TableRowFixedPool({ symbol, valueUSD, type, maturityDate, market, decim
                       borderLeftColor: ({ palette }) => palette.grey[palette.mode === 'light' ? 500 : 300],
                     },
                   }}
-                  onClick={() => startDebtManager({ symbol, maturity: maturityDate })}
+                  onClick={() => startDebtManager({ symbol, maturity: BigInt(maturityDate) })}
                   disabled={isRolloverDisabled()}
                 >
                   {t('Rollover')}

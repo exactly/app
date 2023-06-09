@@ -5,8 +5,6 @@ export function getMaturityPoolBorrowsQuery(address: string, maturity: number, m
       id
       market
       maturity
-      receiver
-      borrower
       assets
       fee
       timestamp

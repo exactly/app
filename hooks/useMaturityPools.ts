@@ -1,6 +1,6 @@
-import { formatFixed } from '@ethersproject/bignumber';
-import { WeiPerEther } from '@ethersproject/constants';
 import { useMemo } from 'react';
+import { formatUnits } from 'viem';
+import { WEI_PER_ETHER } from 'utils/const';
 
 import formatNumber from 'utils/formatNumber';
 
@@ -18,7 +18,7 @@ type TableRow = {
 
 export default function useMaturityPools(symbol: string): TableRow[] {
   const { marketAccount } = useAccountData(symbol);
-  return useMemo(() => {
+  return useMemo<TableRow[]>(() => {
     if (!marketAccount) return [];
 
     const { fixedPools, usdPrice, decimals } = marketAccount;
@@ -26,17 +26,18 @@ export default function useMaturityPools(symbol: string): TableRow[] {
     const APRsPerMaturity: APRsPerMaturityType = Object.fromEntries(
       fixedPools.map(({ maturity, depositRate, minBorrowRate }) => [
         maturity,
-        { borrow: Number(minBorrowRate.toBigInt()) / 1e18, deposit: Number(depositRate.toBigInt()) / 1e18 },
+        { borrow: Number(minBorrowRate) / 1e18, deposit: Number(depositRate) / 1e18 },
       ]),
     );
 
     return fixedPools.map(({ maturity, borrowed, supplied }) => {
       const maturityKey = maturity.toString();
-      const totalDeposited = formatNumber(formatFixed(supplied.mul(usdPrice).div(WeiPerEther), decimals));
-      const totalBorrowed = formatNumber(formatFixed(borrowed.mul(usdPrice).div(WeiPerEther), decimals));
+
+      const totalDeposited = formatNumber(formatUnits((supplied * usdPrice) / WEI_PER_ETHER, decimals));
+      const totalBorrowed = formatNumber(formatUnits((borrowed * usdPrice) / WEI_PER_ETHER, decimals));
 
       return {
-        maturity: maturity.toNumber(),
+        maturity: Number(maturity),
         totalDeposited,
         totalBorrowed,
         depositAPR: APRsPerMaturity[maturityKey]?.deposit,

@@ -9,7 +9,7 @@ const dictionary: Record<string, number> = {
   noDecimals: 0,
 };
 
-function formatNumber(number: string | number, symbol?: string, standard?: boolean) {
+function formatNumber(number: string | number | bigint, symbol?: string, standard?: boolean) {
   const parsedNumber = typeof number === 'string' ? parseFloat(number) : number;
 
   return new Intl.NumberFormat('en-GB', {

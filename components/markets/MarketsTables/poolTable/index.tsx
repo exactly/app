@@ -57,7 +57,7 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
   const { rates } = useRewards();
   const defaultRows = useMemo<TableRow[]>(() => assets.map((s) => ({ symbol: s })), [assets]);
   const { setOrderBy, sortData, direction: sortDirection, isActive: sortActive } = useSorting<TableRow>();
-  const tempRows = isLoading ? defaultRows : rows; // HACK this with the timeout in "marketsTables" is to avoid a screen flash when MUI  recive the new data of rows
+  const tempRows = isLoading ? defaultRows : rows;
 
   return (
     <TableContainer>

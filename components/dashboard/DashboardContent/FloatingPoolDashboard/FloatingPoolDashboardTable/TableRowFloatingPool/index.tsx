@@ -1,7 +1,6 @@
-import type { BigNumber } from '@ethersproject/bignumber';
 import React from 'react';
-import { formatFixed } from '@ethersproject/bignumber';
 import Image from 'next/image';
+import { formatUnits } from 'viem';
 
 import { Button, TableRow, TableCell, Stack, Typography, Skeleton, Box, ButtonGroup } from '@mui/material';
 
@@ -24,8 +23,8 @@ type Props = {
   symbol: string;
   type: Extract<Operation, 'deposit' | 'borrow'>;
   valueUSD?: number;
-  depositedAmount?: BigNumber;
-  borrowedAmount?: BigNumber;
+  depositedAmount?: bigint;
+  borrowedAmount?: bigint;
   apr?: number;
 };
 
@@ -65,10 +64,10 @@ function TableRowFloatingPool({ symbol, valueUSD, depositedAmount, borrowedAmoun
       </Link>
       <TableCell align="left" size="small">
         <Typography>
-          {(depositedAmount &&
-            borrowedAmount &&
+          {(depositedAmount !== undefined &&
+            borrowedAmount !== undefined &&
             `${formatNumber(
-              formatFixed(type === 'deposit' ? depositedAmount : borrowedAmount, marketAccount?.decimals),
+              formatUnits(type === 'deposit' ? depositedAmount : borrowedAmount, marketAccount?.decimals ?? 18),
               symbol,
             )}`) || <Skeleton width={40} />}
         </Typography>

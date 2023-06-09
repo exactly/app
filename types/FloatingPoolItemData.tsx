@@ -1,9 +1,7 @@
-import type { BigNumber } from '@ethersproject/bignumber';
-
 export type FloatingPoolItemData = {
   symbol: string;
-  depositedAmount?: BigNumber;
-  borrowedAmount?: BigNumber;
+  depositedAmount?: bigint;
+  borrowedAmount?: bigint;
   apr?: number;
   valueUSD?: number;
   market?: string;

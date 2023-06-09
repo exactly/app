@@ -1,5 +1,6 @@
 import React, { FC, PropsWithChildren, useEffect } from 'react';
-import { formatFixed } from '@ethersproject/bignumber';
+import { formatUnits } from 'viem';
+
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import { Box, Button, ButtonGroup, Grid, Skeleton, Tooltip, Typography } from '@mui/material';
 import MaturityLinearProgress from 'components/common/MaturityLinearProgress';
@@ -61,7 +62,7 @@ const DashboardMobile: FC<Props> = ({ type }) => {
                 {(depositedAmount &&
                   borrowedAmount &&
                   `${formatNumber(
-                    formatFixed(isDeposit ? depositedAmount : borrowedAmount, getMarketAccount(symbol)?.decimals),
+                    formatUnits(isDeposit ? depositedAmount : borrowedAmount, getMarketAccount(symbol)?.decimals ?? 18),
                     symbol,
                   )}`) || <Skeleton width={40} />}
               </FlexItem>
@@ -192,7 +193,7 @@ const DashboardMobile: FC<Props> = ({ type }) => {
                   <FlexItem title={t('Market value')}>
                     {usdPrice && previewValue ? (
                       `$${formatNumber(
-                        parseFloat(formatFixed(previewValue, decimals)) * parseFloat(formatFixed(usdPrice, 18)),
+                        formatUnits((previewValue * usdPrice) / 10n ** BigInt(decimals), 18),
                         'USD',
                         true,
                       )}`
@@ -241,7 +242,7 @@ const DashboardMobile: FC<Props> = ({ type }) => {
                           borderLeftColor: ({ palette }) => palette.grey[palette.mode === 'light' ? 500 : 300],
                         },
                       }}
-                      onClick={() => startDebtManager({ symbol, maturity })}
+                      onClick={() => startDebtManager({ symbol, maturity: BigInt(maturity) })}
                       disabled={isRolloverDisabled()}
                     >
                       {t('Rollover')}

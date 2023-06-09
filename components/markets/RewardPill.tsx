@@ -1,5 +1,4 @@
 import React from 'react';
-import { BigNumber } from '@ethersproject/bignumber';
 import { Box, Chip, Tooltip, Typography, useTheme } from '@mui/material';
 import Image from 'next/image';
 
@@ -8,14 +7,14 @@ import { useTranslation } from 'react-i18next';
 
 type Props = {
   symbol: string;
-  rate: BigNumber;
+  rate: bigint;
 };
 
 function RewardPill({ symbol, rate }: Props) {
   const { t } = useTranslation();
   const theme = useTheme();
 
-  if (rate.isZero()) {
+  if (rate === 0n) {
     return null;
   }
 

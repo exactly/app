@@ -81,7 +81,7 @@ export default function App({ Component, pageProps }: AppProps) {
         <meta name="twitter:image" content="https://app.exact.ly/img/social/ogp.png" />
       </Head>
       <ThemeProvider>
-        <WagmiConfig client={wagmi}>
+        <WagmiConfig config={wagmi}>
           <GlobalErrorProvider>
             <NetworkContextProvider>
               <AccountDataProvider>

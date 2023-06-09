@@ -1,4 +1,5 @@
 import { useCallback, useMemo } from 'react';
+import { Hex, Address } from 'viem';
 
 import networkData from 'config/networkData.json' assert { type: 'json' };
 import { useWeb3 } from './useWeb3';
@@ -8,12 +9,9 @@ export default function useEtherscanLink() {
 
   const etherscan = useMemo(() => networkData[String(chain?.id) as keyof typeof networkData]?.etherscan, [chain.id]);
 
-  const tx = useCallback(
-    (hash: string) => {
-      return `${etherscan}/tx/${hash}`;
-    },
-    [etherscan],
-  );
+  const tx = useCallback((hash: Hex) => `${etherscan}/tx/${hash}`, [etherscan]);
 
-  return { tx };
+  const address = useCallback((addr: Address) => `${etherscan}/address/${addr}`, [etherscan]);
+
+  return { tx, address };
 }

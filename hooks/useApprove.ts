@@ -1,23 +1,22 @@
-import { parseFixed } from '@ethersproject/bignumber';
-import { MaxUint256, WeiPerEther } from '@ethersproject/constants';
-import { ErrorCode } from '@ethersproject/logger';
 import { useCallback, useState } from 'react';
-import { ERC20, Market } from 'types/contracts';
-import numbers from 'config/numbers.json';
+import { parseUnits } from 'viem';
+import { ErrorCode } from '@ethersproject/logger';
+import { ERC20 } from 'types/contracts';
 import { Operation } from 'contexts/ModalStatusContext';
 import { useWeb3 } from './useWeb3';
 import { useOperationContext } from 'contexts/OperationContext';
 import useAccountData from './useAccountData';
 import handleOperationError from 'utils/handleOperationError';
-import { useNetwork } from 'wagmi';
+import { Address, useNetwork } from 'wagmi';
 import { useTranslation } from 'react-i18next';
-import { gasLimitMultiplier } from 'utils/const';
+import { MAX_UINT256, WEI_PER_ETHER, GAS_LIMIT_MULTIPLIER } from 'utils/const';
 import useEstimateGas from './useEstimateGas';
 import useAnalytics from './useAnalytics';
+import { waitForTransaction } from '@wagmi/core';
 
-export default (operation: Operation, contract?: ERC20 | Market, spender?: string) => {
+export default (operation: Operation, contract?: ERC20, spender?: Address) => {
   const { t } = useTranslation();
-  const { walletAddress, chain: displayNetwork } = useWeb3();
+  const { walletAddress, chain: displayNetwork, opts } = useWeb3();
   const { chain } = useNetwork();
   const { symbol, setErrorData, setLoadingButton } = useOperationContext();
   const [isLoading, setIsLoading] = useState(false);
@@ -28,11 +27,11 @@ export default (operation: Operation, contract?: ERC20 | Market, spender?: strin
   const estimate = useEstimateGas();
 
   const estimateGas = useCallback(async () => {
-    if (!contract || !spender) return;
+    if (!contract || !spender || !walletAddress || !opts) return;
 
-    const tx = await contract.populateTransaction.approve(spender, MaxUint256);
-    return estimate(tx);
-  }, [contract, spender, estimate]);
+    const { request } = await contract.simulate.approve([spender, MAX_UINT256], opts);
+    return estimate(request);
+  }, [contract, spender, walletAddress, estimate, opts]);
 
   const needsApproval = useCallback(
     async (qty: string): Promise<boolean> => {
@@ -56,35 +55,35 @@ export default (operation: Operation, contract?: ERC20 | Market, spender?: strin
       if (chain?.id !== displayNetwork.id) return true;
 
       try {
-        const allowance = await contract.allowance(walletAddress, spender);
-        return (
-          allowance.isZero() || allowance.lt(parseFixed(qty || String(numbers.defaultAmount), marketAccount.decimals))
-        );
+        const allowance = await contract.read.allowance([walletAddress, spender], opts);
+        return allowance === 0n || allowance < parseUnits(qty as `${number}`, marketAccount.decimals);
       } catch {
         return true;
       }
     },
-    [operation, chain, walletAddress, marketAccount, contract, spender, displayNetwork.id, symbol],
+    [operation, walletAddress, marketAccount, contract, spender, chain?.id, displayNetwork.id, symbol, opts],
   );
 
   const approve = useCallback(async () => {
-    if (!contract || !spender) return;
+    if (!contract || !spender || !walletAddress || !opts) return;
 
     try {
       setIsLoading(true);
       transaction.addToCart('approve');
 
       setLoadingButton({ label: t('Sign the transaction on your wallet') });
-      const gasEstimation = await contract.estimateGas.approve(spender, MaxUint256);
-      const approveTx = await contract.approve(spender, MaxUint256, {
-        gasLimit: gasEstimation.mul(gasLimitMultiplier).div(WeiPerEther),
+      const args = [spender, MAX_UINT256] as const;
+      const gasEstimation = await contract.estimateGas.approve(args, opts);
+      const hash = await contract.write.approve(args, {
+        ...opts,
+        gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
       });
 
       transaction.beginCheckout('approve');
 
       setLoadingButton({ withCircularProgress: true, label: t('Approving {{symbol}}', { symbol }) });
 
-      const { status } = await approveTx.wait();
+      const { status } = await waitForTransaction({ hash });
       if (status) transaction.purchase('approve');
     } catch (error) {
       transaction.removeFromCart('approve');
@@ -102,7 +101,7 @@ export default (operation: Operation, contract?: ERC20 | Market, spender?: strin
       setIsLoading(false);
       setLoadingButton({});
     }
-  }, [contract, spender, transaction, setLoadingButton, t, symbol, setErrorData]);
+  }, [contract, spender, walletAddress, opts, transaction, setLoadingButton, t, symbol, setErrorData]);
 
   return { approve, needsApproval, estimateGas, isLoading };
 };

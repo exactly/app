@@ -1,5 +1,4 @@
 import React, { FC, useEffect } from 'react';
-import { formatFixed } from '@ethersproject/bignumber';
 
 import ModalTxCost from 'components/OperationsModal/ModalTxCost';
 import ModalGif from 'components/OperationsModal/ModalGif';
@@ -26,6 +25,7 @@ import ModalInfoEditableSlippage from 'components/OperationsModal/Info/ModalInfo
 import useDepositAtMaturity from 'hooks/useDepositAtMaturity';
 import { useTranslation } from 'react-i18next';
 import useTranslateOperation from 'hooks/useTranslateOperation';
+import { formatUnits } from 'viem';
 
 const DepositAtMaturity: FC = () => {
   const { t } = useTranslation();
@@ -47,7 +47,7 @@ const DepositAtMaturity: FC = () => {
     previewGasCost,
   } = useDepositAtMaturity();
   const { symbol, errorData, qty, gasCost, tx, assetContract } = useOperationContext();
-  const walletBalance = useBalance(symbol, assetContract);
+  const walletBalance = useBalance(symbol, assetContract?.address);
   const { marketAccount } = useAccountData(symbol);
 
   useEffect(() => void updateAPR(), [updateAPR]);
@@ -95,9 +95,9 @@ const DepositAtMaturity: FC = () => {
       <Grid item mt={2}>
         {errorData?.component !== 'gas' && <ModalTxCost gasCost={gasCost} />}
         <ModalAdvancedSettings>
-          {optimalDepositAmount && (
+          {optimalDepositAmount !== undefined && (
             <ModalInfo label={t('Optimal deposit amount')} variant="row">
-              {formatNumber(formatFixed(optimalDepositAmount, decimals), symbol)}
+              {formatNumber(formatUnits(optimalDepositAmount, decimals), symbol)}
             </ModalInfo>
           )}
           <ModalInfoEditableSlippage value={rawSlippage} onChange={(e) => setRawSlippage(e.target.value)} />

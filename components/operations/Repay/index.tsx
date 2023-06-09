@@ -1,6 +1,4 @@
 import React, { useMemo, useState, useCallback } from 'react';
-import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
-import { WeiPerEther, Zero } from '@ethersproject/constants';
 
 import ModalTxCost from 'components/OperationsModal/ModalTxCost';
 import ModalGif from 'components/OperationsModal/ModalGif';
@@ -26,16 +24,18 @@ import useHandleOperationError from 'hooks/useHandleOperationError';
 import useAnalytics from 'hooks/useAnalytics';
 import { useTranslation } from 'react-i18next';
 import useTranslateOperation from 'hooks/useTranslateOperation';
-import { ethRouterSlippage, gasLimitMultiplier } from 'utils/const';
+import { ETH_ROUTER_SLIPPAGE, GAS_LIMIT_MULTIPLIER, WEI_PER_ETHER } from 'utils/const';
 import { CustomError } from 'types/Error';
 import useEstimateGas from 'hooks/useEstimateGas';
+import { formatUnits, parseUnits } from 'viem';
+import { waitForTransaction } from '@wagmi/core';
 
 function Repay() {
   const { t } = useTranslation();
   const translateOperation = useTranslateOperation();
   const { transaction } = useAnalytics();
   const { operation } = useModalStatus();
-  const { walletAddress } = useWeb3();
+  const { walletAddress, opts } = useWeb3();
 
   const {
     symbol,
@@ -61,11 +61,11 @@ function Repay() {
 
   const [isMax, setIsMax] = useState(false);
 
-  const walletBalance = useBalance(symbol, assetContract);
+  const walletBalance = useBalance(symbol, assetContract?.address);
 
   const finalAmount = useMemo(() => {
     if (!marketAccount) return '0';
-    return formatFixed(marketAccount.floatingBorrowAssets, marketAccount.decimals);
+    return formatUnits(marketAccount.floatingBorrowAssets, marketAccount.decimals);
   }, [marketAccount]);
 
   const {
@@ -110,62 +110,72 @@ function Repay() {
   );
 
   const repay = useCallback(async () => {
-    if (!marketAccount || !qty || !marketContract || !walletAddress) return;
+    if (!marketAccount || !qty || !marketContract || !walletAddress || !opts) return;
 
-    let repayTx;
+    let hash;
     setIsLoadingOp(true);
     try {
       transaction.addToCart();
       const { floatingBorrowShares, floatingBorrowAssets, decimals } = marketAccount;
 
+      const amount = parseUnits(qty as `${number}`, decimals);
       if (marketAccount.assetSymbol === 'WETH') {
         if (!ETHRouterContract) return;
 
         if (isMax) {
-          const gasEstimation = await ETHRouterContract.estimateGas.refund(floatingBorrowShares, {
-            value: floatingBorrowAssets.mul(ethRouterSlippage).div(WeiPerEther),
+          const args = [floatingBorrowShares] as const;
+          const gasEstimation = await ETHRouterContract.estimateGas.refund(args, {
+            ...opts,
+            value: (floatingBorrowAssets * ETH_ROUTER_SLIPPAGE) / WEI_PER_ETHER,
           });
 
-          repayTx = await ETHRouterContract.refund(floatingBorrowShares, {
-            gasLimit: gasEstimation.mul(gasLimitMultiplier).div(WeiPerEther),
-            value: floatingBorrowAssets.mul(ethRouterSlippage).div(WeiPerEther),
+          hash = await ETHRouterContract.write.refund(args, {
+            ...opts,
+            value: (floatingBorrowAssets * ETH_ROUTER_SLIPPAGE) / WEI_PER_ETHER,
+            gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
           });
         } else {
-          const gasEstimation = await ETHRouterContract.estimateGas.repay(parseFixed(qty, 18), {
-            value: parseFixed(qty, 18).mul(ethRouterSlippage).div(WeiPerEther),
+          const args = [amount] as const;
+          const gasEstimation = await ETHRouterContract.estimateGas.repay(args, {
+            ...opts,
+            value: (amount * ETH_ROUTER_SLIPPAGE) / WEI_PER_ETHER,
           });
 
-          repayTx = await ETHRouterContract.repay(parseFixed(qty, 18), {
-            gasLimit: gasEstimation.mul(gasLimitMultiplier).div(WeiPerEther),
-            value: parseFixed(qty, 18).mul(ethRouterSlippage).div(WeiPerEther),
+          hash = await ETHRouterContract.write.repay(args, {
+            ...opts,
+            value: (amount * ETH_ROUTER_SLIPPAGE) / WEI_PER_ETHER,
+            gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
           });
         }
       } else {
         if (isMax) {
-          const gasEstimation = await marketContract.estimateGas.refund(floatingBorrowShares, walletAddress);
-
-          repayTx = await marketContract.refund(floatingBorrowShares, walletAddress, {
-            gasLimit: gasEstimation.mul(gasLimitMultiplier).div(WeiPerEther),
+          const args = [floatingBorrowAssets, walletAddress] as const;
+          const gasEstimation = await marketContract.estimateGas.refund(args, opts);
+          hash = await marketContract.write.refund(args, {
+            ...opts,
+            gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
           });
         } else {
-          const gasEstimation = await marketContract.estimateGas.repay(parseFixed(qty, decimals), walletAddress);
-          repayTx = await marketContract.repay(parseFixed(qty, decimals), walletAddress, {
-            gasLimit: gasEstimation.mul(gasLimitMultiplier).div(WeiPerEther),
+          const args = [amount, walletAddress] as const;
+          const gasEstimation = await marketContract.estimateGas.repay(args, opts);
+          hash = await marketContract.write.repay(args, {
+            ...opts,
+            gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
           });
         }
       }
 
       transaction.beginCheckout();
 
-      setTx({ status: 'processing', hash: repayTx?.hash });
+      setTx({ status: 'processing', hash });
 
-      const { status, transactionHash } = await repayTx.wait();
+      const { status, transactionHash } = await waitForTransaction({ hash });
 
       setTx({ status: status ? 'success' : 'error', hash: transactionHash });
       if (status) transaction.purchase();
     } catch (error) {
       transaction.removeFromCart();
-      if (repayTx) setTx({ status: 'error', hash: repayTx?.hash });
+      if (hash) setTx({ status: 'error', hash });
       setErrorData({ status: true, message: handleOperationError(error) });
     } finally {
       setIsLoadingOp(false);
@@ -175,6 +185,7 @@ function Repay() {
     qty,
     marketContract,
     walletAddress,
+    opts,
     setIsLoadingOp,
     transaction,
     setTx,
@@ -187,36 +198,36 @@ function Repay() {
   const estimate = useEstimateGas();
 
   const previewGasCost = useCallback(
-    async (quantity: string): Promise<BigNumber | undefined> => {
-      if (!marketAccount || !walletAddress || !ETHRouterContract || !marketContract || !quantity) return;
+    async (quantity: string): Promise<bigint | undefined> => {
+      if (!marketAccount || !walletAddress || !ETHRouterContract || !marketContract || !quantity || !opts) return;
 
       if (await needsApproval(quantity)) {
         return approveEstimateGas();
       }
 
       if (marketAccount.assetSymbol === 'WETH') {
-        const value = parseFixed(quantity, 18).mul(ethRouterSlippage).div(WeiPerEther);
-        const amount = isMax ? marketAccount.floatingBorrowShares : value;
+        const amount =
+          (parseUnits(quantity as `${number}`, marketAccount.decimals) * ETH_ROUTER_SLIPPAGE) / WEI_PER_ETHER;
 
-        const populated = await ETHRouterContract.populateTransaction[isMax ? 'refund' : 'repay'](amount, {
-          value,
+        const sim = await ETHRouterContract.simulate.repay([amount], {
+          ...opts,
+          value: amount,
         });
-        const gasEstimation = await estimate(populated);
-        if (amount.add(gasEstimation ?? Zero).gte(parseFixed(walletBalance || '0', 18))) {
+        const gasEstimation = await estimate(sim.request);
+        if (amount + (gasEstimation ?? 0n) >= parseUnits((walletBalance as `${number}`) || '0', 18)) {
           throw new CustomError(t('Reserve ETH for gas fees.'), 'warning');
         }
-
         return gasEstimation;
       }
 
-      const populated = await marketContract.populateTransaction[isMax ? 'refund' : 'repay'](
-        isMax ? marketAccount.floatingBorrowShares : parseFixed(quantity, marketAccount.decimals),
-        walletAddress,
+      const sim = await marketContract.simulate.repay(
+        [parseUnits(quantity as `${number}`, marketAccount.decimals), walletAddress],
+        opts,
       );
-
-      return estimate(populated);
+      return estimate(sim.request);
     },
     [
+      opts,
       marketAccount,
       walletAddress,
       ETHRouterContract,

@@ -64,7 +64,7 @@ function Loading({ tx, to }: Props) {
             )}
           </Box>
         </Box>
-        {isSuccess && to.maturity && <Reminder operation="borrowAtMaturity" maturity={to.maturity} />}
+        {isSuccess && Boolean(to.maturity) && <Reminder operation="borrowAtMaturity" maturity={to.maturity ?? 0n} />}
       </Box>
     </Box>
   );

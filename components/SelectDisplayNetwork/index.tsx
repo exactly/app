@@ -6,7 +6,8 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 import { LoadingButton } from '@mui/lab';
 import { Box, CircularProgress, Divider, Menu, MenuItem, Typography } from '@mui/material';
-import { Chain, goerli, mainnet } from 'wagmi';
+import { Chain } from 'wagmi';
+import { goerli, mainnet } from 'wagmi/chains';
 import Image from 'next/image';
 import { globals } from 'styles/theme';
 import { useNetworkContext } from 'contexts/NetworkContext';
@@ -28,7 +29,7 @@ const SelectDisplayNetwork: FC = () => {
   );
   const closeMenu = useCallback(() => setAnchorEl(null), [setAnchorEl]);
 
-  const { resetAccountData } = useAccountData();
+  const { refreshAccountData } = useAccountData();
 
   const onSelectNetwork = useCallback(
     (displayChain: Chain) => {
@@ -44,15 +45,15 @@ const SelectDisplayNetwork: FC = () => {
             n: `${{ [mainnet.id]: 'mainnet' }[displayChain.id] ?? displayChain.network}`,
           },
         }).then(() => {
-          resetAccountData();
+          refreshAccountData(0);
           setDisplayNetwork(displayChain);
         });
       }
 
-      resetAccountData();
+      refreshAccountData(0);
       setDisplayNetwork(displayChain);
     },
-    [closeMenu, chain.id, setMarketSymbol, pathname, resetAccountData, setDisplayNetwork, push, query],
+    [closeMenu, chain.id, setMarketSymbol, pathname, refreshAccountData, setDisplayNetwork, push, query],
   );
 
   const { buttonBgColor, image } = useMemo(() => {

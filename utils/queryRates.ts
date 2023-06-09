@@ -1,5 +1,5 @@
 import request from 'graphql-request';
-import { formatFixed } from '@ethersproject/bignumber';
+import { formatUnits } from 'viem';
 
 export const WAD = 1000000000000000000n;
 
@@ -222,9 +222,9 @@ export default async (
     const proportion = (shareValue * WAD) / prevShareValue;
     return {
       date: new Date(timestamp * 1_000),
-      apr: (Number(formatFixed(proportion, 18)) - 1) * (31_536_000 / interval),
-      apy: Number(formatFixed(proportion, 18)) ** (31_536_000 / interval) - 1,
-      utilization: Number(formatFixed(utilization, 18)),
+      apr: (Number(formatUnits(proportion, 18)) - 1) * (31_536_000 / interval),
+      apy: Number(formatUnits(proportion, 18)) ** (31_536_000 / interval) - 1,
+      utilization: Number(formatUnits(utilization, 18)),
     };
   });
 };

@@ -2,9 +2,7 @@ import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import Grid from '@mui/material/Grid';
 import PoolTable, { TableRow } from './poolTable';
 import { useTranslation } from 'react-i18next';
-
-import { formatFixed } from '@ethersproject/bignumber';
-import { MaxUint256, WeiPerEther, Zero } from '@ethersproject/constants';
+import { formatUnits } from 'viem';
 
 import formatNumber from 'utils/formatNumber';
 import getFloatingDepositAPR from 'utils/getFloatingDepositAPR';
@@ -21,6 +19,7 @@ import useAccountData from 'hooks/useAccountData';
 import { useGlobalError } from 'contexts/GlobalErrorContext';
 import usePreviousValue from 'hooks/usePreviousValue';
 import useAnalytics from 'hooks/useAnalytics';
+import { MAX_UINT256, WEI_PER_ETHER } from 'utils/const';
 
 const { onlyMobile, onlyDesktop } = globals;
 
@@ -126,10 +125,10 @@ const MarketTables: FC = () => {
           fixedPools,
         }) => {
           const totalFloatingDeposited = formatNumber(
-            formatFixed(totalFloatingDepositAssets.mul(usdPrice).div(WeiPerEther), decimals),
+            formatUnits((totalFloatingDepositAssets * usdPrice) / WEI_PER_ETHER, decimals),
           );
           const totalFloatingBorrowed = formatNumber(
-            formatFixed(totalFloatingBorrowAssets.mul(usdPrice).div(WeiPerEther), decimals),
+            formatUnits((totalFloatingBorrowAssets * usdPrice) / WEI_PER_ETHER, decimals),
           );
 
           const floatingDepositAPR = await getFloatingDepositAPR(
@@ -150,28 +149,28 @@ const MarketTables: FC = () => {
             borrowAPR: Number(floatingBorrowRate) / 1e18,
           });
 
-          let totalDeposited = Zero;
-          let totalBorrowed = Zero;
+          let totalDeposited = 0n;
+          let totalBorrowed = 0n;
 
           // Set deposits and borrows total of fixed pools
           fixedPools.forEach(({ supplied, borrowed }) => {
-            totalDeposited = totalDeposited.add(supplied);
-            totalBorrowed = totalBorrowed.add(borrowed);
+            totalDeposited += supplied;
+            totalBorrowed += borrowed;
           });
 
           const bestBorrow = fixedPools.reduce(
-            (best, { maturity, minBorrowRate: rate }) => (rate.lt(best.rate) ? { maturity, rate } : best),
-            { maturity: Zero, rate: MaxUint256 },
+            (best, { maturity, minBorrowRate: rate }) => (rate < best.rate ? { maturity, rate } : best),
+            { maturity: 0n, rate: MAX_UINT256 },
           );
           const bestDeposit = fixedPools.reduce(
-            (best, { maturity, depositRate: rate }) => (rate.gt(best.rate) ? { maturity, rate } : best),
-            { maturity: Zero, rate: Zero },
+            (best, { maturity, depositRate: rate }) => (rate > best.rate ? { maturity, rate } : best),
+            { maturity: 0n, rate: 0n },
           );
 
           tempFixedRows.push({
             symbol,
-            totalDeposited: formatNumber(formatFixed(totalDeposited.mul(usdPrice).div(WeiPerEther), decimals)),
-            totalBorrowed: formatNumber(formatFixed(totalBorrowed.mul(usdPrice).div(WeiPerEther), decimals)),
+            totalDeposited: formatNumber(formatUnits((totalDeposited * usdPrice) / WEI_PER_ETHER, decimals)),
+            totalBorrowed: formatNumber(formatUnits((totalBorrowed * usdPrice) / WEI_PER_ETHER, decimals)),
             borrowAPR: Number(bestBorrow.rate) / 1e18,
             depositAPR: Number(bestDeposit.rate) / 1e18,
             borrowMaturity: Number(bestBorrow.maturity),

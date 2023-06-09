@@ -1,14 +1,17 @@
-import { Interface, ErrorFragment, ParamType } from '@ethersproject/abi';
-import InterestRateModelABI from '../abi/InterestRateModel.json';
-import AuditorABI from '../abi/Auditor.json';
-import MarketABI from '../abi/Market.json';
+import { interestRateModelABI, auditorABI, marketABI } from 'types/abi';
 
-const { format } = ErrorFragment.prototype;
-
-export default new Interface([
-  ...MarketABI.filter(({ type }) => type === 'error'),
-  ...AuditorABI.filter(({ type }) => type === 'error'),
-  ...InterestRateModelABI.filter(({ type }) => type === 'error'),
-  { type: 'error', name: 'Panic', inputs: [ParamType.from('uint256')], _isFragment: true, format },
-  { type: 'error', name: 'Error', inputs: [ParamType.from('string')], _isFragment: true, format },
-]);
+export default [
+  ...marketABI.filter(({ type }) => type === 'error'),
+  ...auditorABI.filter(({ type }) => type === 'error'),
+  ...interestRateModelABI.filter(({ type }) => type === 'error'),
+  {
+    type: 'error',
+    name: 'Panic',
+    inputs: [{ name: '', internalType: 'uint256', type: 'uint256', indexed: false }],
+  },
+  {
+    type: 'error',
+    name: 'Error',
+    inputs: [{ name: '', internalType: 'string', type: 'string', indexed: false }],
+  },
+] as const;

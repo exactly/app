@@ -1,27 +1,20 @@
-import type { BigNumber } from '@ethersproject/bignumber';
-import { parseFixed } from '@ethersproject/bignumber';
-import { WeiPerEther, Zero } from '@ethersproject/constants';
+import { MarketAccount } from 'hooks/useAccountData';
+import { parseUnits } from 'viem';
+import { WEI_PER_ETHER } from './const';
 
-import { Previewer } from 'types/contracts/Previewer';
-
-function getBeforeBorrowLimit(marketAccount: Previewer.MarketAccountStructOutput, type: string): BigNumber {
+function getBeforeBorrowLimit(marketAccount: MarketAccount, type: string): bigint {
   const { maxBorrowAssets, usdPrice, decimals, isCollateral, floatingDepositAssets, adjustFactor } = marketAccount;
 
-  const decimalWAD = parseFixed('1', decimals);
-  let before = maxBorrowAssets.mul(usdPrice).div(decimalWAD);
+  const decimalWAD = parseUnits('1', decimals);
+  let before = (maxBorrowAssets * usdPrice) / decimalWAD;
 
-  const hasDepositedToFloatingPool = floatingDepositAssets.gt(Zero);
+  const hasDepositedToFloatingPool = floatingDepositAssets > 0n;
 
   if (!isCollateral && hasDepositedToFloatingPool && type === 'borrow') {
-    before = before.add(
-      floatingDepositAssets
-        .mul(usdPrice)
-        .div(decimalWAD)
-        .mul(adjustFactor)
-        .div(WeiPerEther)
-        .mul(adjustFactor)
-        .div(WeiPerEther),
-    );
+    before =
+      before +
+      (((((floatingDepositAssets * usdPrice) / decimalWAD) * adjustFactor) / WEI_PER_ETHER) * adjustFactor) /
+        WEI_PER_ETHER;
   }
 
   return before;

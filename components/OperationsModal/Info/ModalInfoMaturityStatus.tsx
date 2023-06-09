@@ -1,6 +1,7 @@
 import React from 'react';
 import { Chip, SxProps } from '@mui/material';
 import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded';
+import dayjs from 'dayjs';
 
 import ModalInfo from 'components/common/modal/ModalInfo';
 
@@ -26,8 +27,9 @@ const chipSx: SxProps = {
 };
 
 function ModalInfoMaturityStatus({ date }: Props) {
-  const isCompleted = Date.now() / 1000 >= date;
-  const daysLeft = Math.ceil((date - Date.now() / 1000) / (3600 * 24));
+  const today = dayjs().unix();
+  const isCompleted = today >= date;
+  const daysLeft = Math.ceil((date - today) / (3600 * 24));
 
   return (
     <ModalInfo label="Status" variant="column">

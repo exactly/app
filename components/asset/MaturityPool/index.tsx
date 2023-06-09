@@ -1,7 +1,4 @@
 import React, { useMemo, type FC } from 'react';
-import { Zero, WeiPerEther, MaxUint256 } from '@ethersproject/constants';
-import { formatFixed } from '@ethersproject/bignumber';
-import type { BigNumber } from '@ethersproject/bignumber';
 import Grid from '@mui/material/Grid';
 
 import MaturityPoolsTable from './MaturityPoolsTable';
@@ -11,10 +8,12 @@ import MaturityPoolsMobile from './MaturityPoolsMobile';
 import YieldChart from 'components/charts/YieldChart';
 import UtilizationRateChart from 'components/charts/UtilizationRateChart';
 import useAccountData from 'hooks/useAccountData';
+import { MAX_UINT256, WEI_PER_ETHER } from 'utils/const';
+import { formatUnits } from 'viem';
 
 type Rate = {
-  maturity: BigNumber;
-  rate: BigNumber;
+  maturity: bigint;
+  rate: bigint;
 };
 
 type Props = {
@@ -36,28 +35,28 @@ const AssetMaturityPools: FC<Props> = ({ symbol }) => {
 
     const { fixedPools, usdPrice, decimals } = marketAccount;
 
-    let tempTotalDeposited = Zero;
-    let tempTotalBorrowed = Zero;
-    fixedPools.map(({ borrowed, supplied: deposited }) => {
-      tempTotalDeposited = tempTotalDeposited.add(deposited);
-      tempTotalBorrowed = tempTotalBorrowed.add(borrowed);
+    let tempTotalDeposited = 0n;
+    let tempTotalBorrowed = 0n;
+    fixedPools.forEach(({ borrowed, supplied: deposited }) => {
+      tempTotalDeposited = tempTotalDeposited + deposited;
+      tempTotalBorrowed = tempTotalBorrowed + borrowed;
     });
 
     return {
-      totalDeposited: Number(formatFixed(tempTotalDeposited.mul(usdPrice).div(WeiPerEther), decimals)),
-      totalBorrowed: Number(formatFixed(tempTotalBorrowed.mul(usdPrice).div(WeiPerEther), decimals)),
+      totalDeposited: Number(formatUnits((tempTotalDeposited * usdPrice) / WEI_PER_ETHER, decimals)),
+      totalBorrowed: Number(formatUnits((tempTotalBorrowed * usdPrice) / WEI_PER_ETHER, decimals)),
       bestDeposit: fixedPools.reduce(
-        (best, { maturity, depositRate: rate }) => (rate.gt(best.rate) ? { maturity, rate } : best),
+        (best, { maturity, depositRate: rate }) => (rate > best.rate ? { maturity, rate } : best),
         {
-          maturity: Zero,
-          rate: Zero,
+          maturity: 0n,
+          rate: 0n,
         },
       ),
       bestBorrow: fixedPools.reduce(
-        (best, { maturity, minBorrowRate: rate }) => (rate.lt(best.rate) ? { maturity, rate } : best),
+        (best, { maturity, minBorrowRate: rate }) => (rate < best.rate ? { maturity, rate } : best),
         {
-          maturity: Zero,
-          rate: MaxUint256,
+          maturity: 0n,
+          rate: MAX_UINT256,
         },
       ),
     };

@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
-import { formatFixed } from '@ethersproject/bignumber';
 import { Grid, useMediaQuery, useTheme } from '@mui/material';
+import { formatUnits } from 'viem';
 
 import parseHealthFactor from 'utils/parseHealthFactor';
 import formatNumber from 'utils/formatNumber';
@@ -24,11 +24,11 @@ function DashboardHeader() {
     return [
       {
         label: t('Your Deposits'),
-        value: totalDepositedUSD ? `$${formatNumber(formatFixed(totalDepositedUSD, 18))}` : undefined,
+        value: `$${formatNumber(formatUnits(totalDepositedUSD, 18))}`,
       },
       {
         label: t('Your Borrows'),
-        value: totalBorrowedUSD ? `$${formatNumber(formatFixed(totalBorrowedUSD, 18))}` : undefined,
+        value: `$${formatNumber(formatUnits(totalBorrowedUSD, 18))}`,
       },
       ...(healthFactor && walletAddress
         ? [
@@ -58,8 +58,8 @@ function DashboardHeader() {
       </Grid>
       {!isMobile && (
         <Grid item display="flex" marginRight={2}>
-          {!totalDepositedUSD.isZero() && <AssetsDistributionPieChart type="deposit" />}
-          {!totalBorrowedUSD.isZero() && <AssetsDistributionPieChart type="borrow" />}
+          {totalDepositedUSD !== 0n && <AssetsDistributionPieChart type="deposit" />}
+          {totalBorrowedUSD !== 0n && <AssetsDistributionPieChart type="borrow" />}
         </Grid>
       )}
     </Grid>

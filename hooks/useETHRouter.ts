@@ -1,7 +1,6 @@
-import { MarketETHRouter } from 'types/contracts';
-import MarketETHRouterABI from 'abi/MarketETHRouter.json' assert { type: 'json' };
+import { marketEthRouterABI } from 'types/abi';
 import useContract from './useContract';
 
 export default () => {
-  return useContract<MarketETHRouter>('MarketETHRouter', MarketETHRouterABI);
+  return useContract('MarketETHRouter', marketEthRouterABI);
 };

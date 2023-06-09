@@ -1,14 +1,14 @@
 import React, { useMemo } from 'react';
-import { WeiPerEther, Zero } from '@ethersproject/constants';
-import { parseFixed, formatFixed } from '@ethersproject/bignumber';
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
+import { useTranslation } from 'react-i18next';
+import { formatUnits, parseUnits } from 'viem';
 
 import formatNumber from 'utils/formatNumber';
 import getBeforeBorrowLimit from 'utils/getBeforeBorrowLimit';
 import ModalInfo, { FromTo, Variant } from 'components/common/modal/ModalInfo';
 import { Operation } from 'contexts/ModalStatusContext';
 import useAccountData from 'hooks/useAccountData';
-import { useTranslation } from 'react-i18next';
+import { WEI_PER_ETHER } from 'utils/const';
 
 type Props = {
   qty: string;
@@ -24,9 +24,9 @@ function ModalInfoBorrowLimit({ qty, symbol, operation, variant = 'column' }: Pr
   const newQty = useMemo(() => {
     if (!marketAccount || !symbol) return;
 
-    if (!qty) return Zero;
+    if (!qty) return 0n;
 
-    return parseFixed(qty, marketAccount.decimals);
+    return parseUnits(qty as `${number}`, marketAccount.decimals);
   }, [marketAccount, symbol, qty]);
 
   const [beforeBorrowLimit, afterBorrowLimit] = useMemo(() => {
@@ -36,46 +36,44 @@ function ModalInfoBorrowLimit({ qty, symbol, operation, variant = 'column' }: Pr
 
     const beforeBorrowLimitUSD = getBeforeBorrowLimit(marketAccount, operation);
 
-    const newQtyUsd = newQty.mul(usdPrice).div(parseFixed('1', decimals));
+    const newQtyUsd = (newQty * usdPrice) / 10n ** BigInt(decimals);
 
-    const newBeforeBorrowLimit = Number(formatFixed(beforeBorrowLimitUSD, 18)).toFixed(2);
+    const newBeforeBorrowLimit = Number(formatUnits(beforeBorrowLimitUSD, 18)).toFixed(2);
     let newAfterBorrowLimit = newBeforeBorrowLimit;
 
     switch (operation) {
       case 'deposit':
         if (isCollateral) {
-          const adjustedDepositBorrowLimit = newQtyUsd.mul(adjustFactor).div(WeiPerEther);
+          const adjustedDepositBorrowLimit = (newQtyUsd * adjustFactor) / WEI_PER_ETHER;
 
-          newAfterBorrowLimit = Number(formatFixed(beforeBorrowLimitUSD.add(adjustedDepositBorrowLimit), 18)).toFixed(
-            2,
-          );
+          newAfterBorrowLimit = Number(formatUnits(beforeBorrowLimitUSD + adjustedDepositBorrowLimit, 18)).toFixed(2);
         } else {
-          newAfterBorrowLimit = Number(formatFixed(beforeBorrowLimitUSD, 18)).toFixed(2);
+          newAfterBorrowLimit = Number(formatUnits(beforeBorrowLimitUSD, 18)).toFixed(2);
         }
         break;
 
       case 'withdrawAtMaturity':
       case 'depositAtMaturity':
-        newAfterBorrowLimit = Number(formatFixed(beforeBorrowLimitUSD, 18)).toFixed(2);
+        newAfterBorrowLimit = Number(formatUnits(beforeBorrowLimitUSD, 18)).toFixed(2);
         break;
 
       case 'withdraw':
-        newAfterBorrowLimit = Number(formatFixed(beforeBorrowLimitUSD.sub(newQtyUsd), 18)).toFixed(2);
+        newAfterBorrowLimit = Number(formatUnits(beforeBorrowLimitUSD - newQtyUsd, 18)).toFixed(2);
         break;
 
       case 'borrow':
       case 'borrowAtMaturity':
-        newAfterBorrowLimit = Number(formatFixed(beforeBorrowLimitUSD.sub(newQtyUsd), 18)).toFixed(2);
+        newAfterBorrowLimit = Number(formatUnits(beforeBorrowLimitUSD - newQtyUsd, 18)).toFixed(2);
         break;
 
       case 'repay':
       case 'repayAtMaturity':
         if (isCollateral) {
-          const adjustedRepayBorrowLimit = newQtyUsd.mul(adjustFactor).div(WeiPerEther);
+          const adjustedRepayBorrowLimit = (newQtyUsd * adjustFactor) / WEI_PER_ETHER;
 
-          newAfterBorrowLimit = Number(formatFixed(beforeBorrowLimitUSD.add(adjustedRepayBorrowLimit), 18)).toFixed(2);
+          newAfterBorrowLimit = Number(formatUnits(beforeBorrowLimitUSD + adjustedRepayBorrowLimit, 18)).toFixed(2);
         } else {
-          newAfterBorrowLimit = Number(formatFixed(beforeBorrowLimitUSD, 18)).toFixed(2);
+          newAfterBorrowLimit = Number(formatUnits(beforeBorrowLimitUSD, 18)).toFixed(2);
         }
         break;
     }

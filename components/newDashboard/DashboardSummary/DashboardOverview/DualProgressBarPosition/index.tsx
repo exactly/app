@@ -3,17 +3,17 @@ import DualProgressBar from 'components/common/DualProgressBar';
 import { Box, Typography } from '@mui/material';
 import formatNumber from 'utils/formatNumber';
 import { useTranslation } from 'react-i18next';
-import { BigNumber, formatFixed } from '@ethersproject/bignumber';
-import { WeiPerEther } from '@ethersproject/constants';
+import { WEI_PER_ETHER } from 'utils/const';
+import { formatUnits } from 'viem';
 
 export type AssetPosition = {
   symbol: string;
   decimals: number;
-  fixedAssets: BigNumber;
-  fixedValueUSD: BigNumber;
-  floatingAssets: BigNumber;
-  floatingValueUSD: BigNumber;
-  percentageOfTotal: BigNumber;
+  fixedAssets: bigint;
+  fixedValueUSD: bigint;
+  floatingAssets: bigint;
+  floatingValueUSD: bigint;
+  percentageOfTotal: bigint;
 };
 
 const DualProgressBarPosition: FC<AssetPosition> = ({
@@ -25,24 +25,23 @@ const DualProgressBarPosition: FC<AssetPosition> = ({
   floatingValueUSD,
   percentageOfTotal,
 }) => {
-  const totalValueUSD = useMemo(() => fixedValueUSD.add(floatingValueUSD), [fixedValueUSD, floatingValueUSD]);
+  const totalValueUSD = useMemo(() => fixedValueUSD + floatingValueUSD, [fixedValueUSD, floatingValueUSD]);
 
   const value1 = useMemo(
     () =>
-      totalValueUSD.isZero()
+      totalValueUSD === 0n
         ? 0
-        : Number(fixedValueUSD.mul(WeiPerEther).div(totalValueUSD).mul(percentageOfTotal).div(WeiPerEther).mul(100)) /
+        : Number(((((fixedValueUSD * WEI_PER_ETHER) / totalValueUSD) * percentageOfTotal) / WEI_PER_ETHER) * 100n) /
           1e18,
     [fixedValueUSD, percentageOfTotal, totalValueUSD],
   );
 
   const value2 = useMemo(
     () =>
-      totalValueUSD.isZero()
+      totalValueUSD === 0n
         ? 0
-        : Number(
-            floatingValueUSD.mul(WeiPerEther).div(totalValueUSD).mul(percentageOfTotal).div(WeiPerEther).mul(100),
-          ) / 1e18,
+        : Number(((((floatingValueUSD * WEI_PER_ETHER) / totalValueUSD) * percentageOfTotal) / WEI_PER_ETHER) * 100n) /
+          1e18,
     [floatingValueUSD, percentageOfTotal, totalValueUSD],
   );
 
@@ -53,16 +52,16 @@ const DualProgressBarPosition: FC<AssetPosition> = ({
       tooltip1={
         <TooltipContent
           symbol={symbol}
-          assets={formatNumber(formatFixed(fixedAssets, decimals), symbol)}
-          valueUSD={formatNumber(formatFixed(fixedValueUSD, 18), 'USD')}
+          assets={formatNumber(formatUnits(fixedAssets, decimals), symbol)}
+          valueUSD={formatNumber(formatUnits(fixedValueUSD, 18), 'USD')}
           type="fixed"
         />
       }
       tooltip2={
         <TooltipContent
           symbol={symbol}
-          assets={formatNumber(formatFixed(floatingAssets, decimals), symbol)}
-          valueUSD={formatNumber(formatFixed(floatingValueUSD, 18), 'USD')}
+          assets={formatNumber(formatUnits(floatingAssets, decimals), symbol)}
+          valueUSD={formatNumber(formatUnits(floatingValueUSD, 18), 'USD')}
           type="variable"
         />
       }

@@ -1,12 +1,12 @@
-import React, { FC, useCallback, useMemo } from 'react';
+import React, { FC, useMemo } from 'react';
+import { formatUnits } from 'viem';
 import { Box, Button, Divider, Skeleton, Typography, useMediaQuery, useTheme } from '@mui/material';
 import StarsIcon from '@mui/icons-material/Stars';
 import formatNumber from 'utils/formatNumber';
 import Image from 'next/image';
 import { useTranslation } from 'react-i18next';
 import useRewards from 'hooks/useRewards';
-import { BigNumber, formatFixed } from '@ethersproject/bignumber';
-import { WeiPerEther } from '@ethersproject/constants';
+import { WEI_PER_ETHER } from 'utils/const';
 
 type RewardProps = {
   assetSymbol: string;
@@ -59,7 +59,7 @@ const UserRewards = () => {
     const ratesPerAsset = Object.values(rates)
       .flatMap((r) => r)
       .flatMap((r) => ({ assetSymbol: r.assetSymbol, usdPrice: r.usdPrice }))
-      .reduce((acc: Record<string, BigNumber>, { assetSymbol, usdPrice }) => {
+      .reduce((acc: Record<string, bigint>, { assetSymbol, usdPrice }) => {
         if (!acc[assetSymbol]) {
           acc[assetSymbol] = usdPrice;
         }
@@ -68,20 +68,18 @@ const UserRewards = () => {
 
     return Object.entries(rs).map(([assetSymbol, amount]) => {
       const _amountInUSD = ratesPerAsset[assetSymbol]
-        ? amount.mul(ratesPerAsset[assetSymbol]).div(WeiPerEther)
+        ? (amount * ratesPerAsset[assetSymbol]) / WEI_PER_ETHER
         : undefined;
 
       return {
         assetSymbol,
-        amount: formatNumber(formatFixed(amount, 18)),
+        amount: formatNumber(formatUnits(amount, 18)),
         amountInUSD: _amountInUSD
-          ? formatNumber(formatFixed(_amountInUSD, 18), _amountInUSD.lt(WeiPerEther) ? 'USD' : 'noDecimals')
+          ? formatNumber(formatUnits(_amountInUSD, 18), _amountInUSD < WEI_PER_ETHER ? 'USD' : 'noDecimals')
           : undefined,
       };
     });
   }, [rates, rs]);
-
-  const onClickClaim = useCallback(async () => await claim(), [claim]);
 
   return (
     <Box
@@ -146,7 +144,7 @@ const UserRewards = () => {
         fullWidth={isMobile}
         sx={{ px: 3 }}
         disabled={isLoading || !claimable}
-        onClick={onClickClaim}
+        onClick={claim}
       >
         {t('Claim')}
       </Button>

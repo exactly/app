@@ -1,5 +1,5 @@
 import React from 'react';
-import { formatFixed } from '@ethersproject/bignumber';
+import { formatUnits } from 'viem';
 import { Typography, Skeleton } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 
@@ -19,7 +19,7 @@ function ModalPenaltyRate({ symbol }: Props) {
     <ModalInfo label={t('Late payment penalty daily rate')} variant="row">
       {marketAccount ? (
         <Typography fontWeight={700} fontSize={14}>
-          {toPercentage(parseFloat(formatFixed(marketAccount.penaltyRate, 18)) * 86_400)}
+          {toPercentage(Number(formatUnits(marketAccount.penaltyRate, 18)) * 86_400)}
         </Typography>
       ) : (
         <Skeleton width={100} />

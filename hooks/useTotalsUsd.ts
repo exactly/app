@@ -1,16 +1,15 @@
-import { BigNumber, parseFixed } from '@ethersproject/bignumber';
-import { Zero } from '@ethersproject/constants';
 import { useMemo } from 'react';
+import { parseUnits } from 'viem';
 import useAccountData from './useAccountData';
 
 export default () => {
   const { accountData } = useAccountData();
 
   const { totalDepositedUSD, totalBorrowedUSD } = useMemo<{
-    totalDepositedUSD: BigNumber;
-    totalBorrowedUSD: BigNumber;
+    totalDepositedUSD: bigint;
+    totalBorrowedUSD: bigint;
   }>(() => {
-    if (!accountData) return { totalDepositedUSD: Zero, totalBorrowedUSD: Zero };
+    if (!accountData) return { totalDepositedUSD: 0n, totalBorrowedUSD: 0n };
 
     const { depositedUSD, borrowedUSD } = accountData.reduce(
       (
@@ -24,17 +23,17 @@ export default () => {
           decimals,
         },
       ) => {
-        const WADDecimals = parseFixed('1', decimals);
+        const WADDecimals = parseUnits('1', decimals);
 
         // iterate through fixed deposited pools to get totals
         const { fixedTotalDeposited } = fixedDepositPositions.reduce(
           (fixedPoolStats, pool) => {
             const { position } = pool;
 
-            fixedPoolStats.fixedTotalDeposited = fixedPoolStats.fixedTotalDeposited.add(position.principal);
+            fixedPoolStats.fixedTotalDeposited += position.principal;
             return fixedPoolStats;
           },
-          { fixedTotalDeposited: Zero },
+          { fixedTotalDeposited: 0n },
         );
 
         // iterate through fixed borrowed pools to get totals
@@ -42,21 +41,17 @@ export default () => {
           (fixedPoolStats, pool) => {
             const { position } = pool;
 
-            fixedPoolStats.fixedTotalBorrowed = fixedPoolStats.fixedTotalBorrowed.add(position.principal);
+            fixedPoolStats.fixedTotalBorrowed += position.principal;
             return fixedPoolStats;
           },
-          { fixedTotalBorrowed: Zero },
+          { fixedTotalBorrowed: 0n },
         );
 
-        acc.depositedUSD = acc.depositedUSD.add(
-          floatingDepositAssets.add(fixedTotalDeposited).mul(usdPrice).div(WADDecimals),
-        );
-        acc.borrowedUSD = acc.borrowedUSD.add(
-          floatingBorrowAssets.add(fixedTotalBorrowed).mul(usdPrice).div(WADDecimals),
-        );
+        acc.depositedUSD += ((floatingDepositAssets + fixedTotalDeposited) * usdPrice) / WADDecimals;
+        acc.borrowedUSD += ((floatingBorrowAssets + fixedTotalBorrowed) * usdPrice) / WADDecimals;
         return acc;
       },
-      { depositedUSD: Zero, borrowedUSD: Zero },
+      { depositedUSD: 0n, borrowedUSD: 0n },
     );
 
     return { totalDepositedUSD: depositedUSD, totalBorrowedUSD: borrowedUSD };

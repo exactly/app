@@ -1,5 +1,5 @@
 import React from 'react';
-import { formatFixed } from '@ethersproject/bignumber';
+import { formatUnits } from 'viem';
 import { BorrowIcon } from 'components/Icons';
 import useDashboardOverview from 'hooks/useDashboardOverview';
 import { useTranslation } from 'react-i18next';
@@ -17,9 +17,9 @@ const BorrowsOverview = () => {
     <OverviewCard
       title={t('borrows')}
       icon={<BorrowIcon sx={{ fontSize: 12 }} />}
-      total={totalUSD ? `$${formatNumber(formatFixed(totalUSD, 18), 'USD', true)}` : undefined}
-      fixedValue={totalFixedUSD ? `$${formatNumber(formatFixed(totalFixedUSD, 18), 'USD', true)}` : undefined}
-      floatingValue={totalFloatingUSD ? `$${formatNumber(formatFixed(totalFloatingUSD, 18), 'USD', true)}` : undefined}
+      total={totalUSD ? `$${formatNumber(formatUnits(totalUSD, 18), 'USD', true)}` : undefined}
+      fixedValue={totalFixedUSD ? `$${formatNumber(formatUnits(totalFixedUSD, 18), 'USD', true)}` : undefined}
+      floatingValue={totalFloatingUSD ? `$${formatNumber(formatUnits(totalFloatingUSD, 18), 'USD', true)}` : undefined}
       subFixedValue={fixedPercentage ? toPercentage(Number(fixedPercentage) / 1e18) : undefined}
       subFloatingValue={floatingPercentage ? toPercentage(Number(floatingPercentage) / 1e18) : undefined}
       viewAll

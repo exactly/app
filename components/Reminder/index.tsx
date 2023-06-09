@@ -9,7 +9,7 @@ import useTranslateOperation from 'hooks/useTranslateOperation';
 
 type Props = {
   operation: Operation;
-  maturity: number;
+  maturity: number | bigint;
 };
 
 const Reminder: FC<Props> = ({ operation, maturity }) => {
@@ -21,10 +21,11 @@ const Reminder: FC<Props> = ({ operation, maturity }) => {
   const isBorrow = useMemo(() => operation?.startsWith('borrow'), [operation]);
 
   const onClick = useCallback(() => {
-    const config = {
-      name: t(`[Exactly] {{operationName}} maturity date reminder`, {
-        operationName: translateOperation(operation, { capitalize: true, variant: 'noun' }),
-      }),
+    const config: Parameters<typeof atcb_action>[0] = {
+      name:
+        t(`[Exactly] {{operationName}} maturity date reminder`, {
+          operationName: translateOperation(operation, { capitalize: true, variant: 'noun' }),
+        }) ?? '',
       description: 'https://app.exact.ly/dashboard',
       startDate: parseTimestamp(maturity, 'YYYY-MM-DD'),
       startTime: '00:00',
@@ -34,7 +35,7 @@ const Reminder: FC<Props> = ({ operation, maturity }) => {
       lightMode: palette.mode,
     };
 
-    if (buttonRef.current) atcb_action(config as Parameters<typeof atcb_action>[0], buttonRef.current);
+    if (buttonRef.current) atcb_action(config, buttonRef.current);
   }, [maturity, operation, palette.mode, t, translateOperation]);
 
   return (

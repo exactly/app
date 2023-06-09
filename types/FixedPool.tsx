@@ -1,12 +1,12 @@
-import { BigNumber } from '@ethersproject/bignumber';
+import { Address } from 'viem';
 
 export type Pool = {
   maturity: number;
   symbol: string;
-  market: string;
-  fee: BigNumber;
+  market: Address;
+  fee: bigint;
   decimals: number;
-  previewValue: BigNumber;
+  previewValue: bigint;
   valueUSD?: number;
 };
 

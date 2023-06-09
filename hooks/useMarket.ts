@@ -1,17 +1,26 @@
 import { useMemo } from 'react';
-import { useSigner } from 'wagmi';
-import { Contract } from '@ethersproject/contracts';
-import type { Market } from 'types/contracts/Market';
-import marketABI from 'abi/Market.json';
+import { Address, useWalletClient } from 'wagmi';
+import { marketABI } from 'types/abi';
+import { getContract } from '@wagmi/core';
+import { Market } from 'types/contracts';
+import { useWeb3 } from './useWeb3';
 
-export default (address?: string): Market | undefined => {
-  const { data: signer } = useSigner();
+export default (address?: Address): Market | undefined => {
+  const { chain } = useWeb3();
+  const { data: walletClient } = useWalletClient();
 
   const marketContract = useMemo(() => {
-    if (!address) return;
+    if (!address || !walletClient) return;
 
-    return new Contract(address, marketABI, signer ?? undefined) as Market;
-  }, [address, signer]);
+    const contract = getContract({
+      chainId: chain.id,
+      address,
+      abi: marketABI,
+      walletClient,
+    });
+
+    return contract;
+  }, [chain.id, address, walletClient]);
 
   return marketContract;
 };

@@ -1,8 +1,7 @@
 import React, { useMemo } from 'react';
-import { parseFixed } from '@ethersproject/bignumber';
 import FavoriteBorderOutlinedIcon from '@mui/icons-material/FavoriteBorderOutlined';
-import { WeiPerEther, Zero } from '@ethersproject/constants';
 import { useTranslation } from 'react-i18next';
+import { parseUnits } from 'viem';
 
 import parseHealthFactor from 'utils/parseHealthFactor';
 
@@ -11,6 +10,7 @@ import { Operation } from 'contexts/ModalStatusContext';
 import ModalInfo, { FromTo, Variant } from 'components/common/modal/ModalInfo';
 import useHealthFactor from 'hooks/useHealthFactor';
 import useAccountData from 'hooks/useAccountData';
+import { WEI_PER_ETHER } from 'utils/const';
 
 type Props = {
   qty: string;
@@ -28,9 +28,9 @@ function ModalInfoHealthFactor({ qty, symbol, operation, variant = 'column' }: P
   const newQty = useMemo(() => {
     if (!marketAccount) return;
 
-    if (!qty) return Zero;
+    if (!qty) return 0n;
 
-    return parseFixed(qty, marketAccount.decimals);
+    return parseUnits(qty as `${number}`, marketAccount.decimals);
   }, [marketAccount, qty]);
 
   const beforeHealthFactor = useMemo<string | undefined>(() => {
@@ -43,14 +43,15 @@ function ModalInfoHealthFactor({ qty, symbol, operation, variant = 'column' }: P
 
     const { adjustFactor, usdPrice, isCollateral, decimals } = marketAccount;
 
-    const newQtyUsd = newQty.mul(usdPrice).div(parseFixed('1', decimals));
+    const wad = parseUnits('1', decimals);
+    const newQtyUsd = (newQty * usdPrice) / wad;
 
     switch (operation) {
       case 'deposit': {
         if (isCollateral) {
-          const adjustedNewQtyUsd = newQtyUsd.mul(adjustFactor).div(WeiPerEther);
+          const adjustedNewQtyUsd = (newQtyUsd * adjustFactor) / WEI_PER_ETHER;
 
-          return parseHealthFactor(healthFactor.debt, healthFactor.collateral.add(adjustedNewQtyUsd));
+          return parseHealthFactor(healthFactor.debt, healthFactor.collateral + adjustedNewQtyUsd);
         } else {
           return parseHealthFactor(healthFactor.debt, healthFactor.collateral);
         }
@@ -62,9 +63,9 @@ function ModalInfoHealthFactor({ qty, symbol, operation, variant = 'column' }: P
 
       case 'withdraw': {
         if (isCollateral) {
-          const adjustedNewQtyUsd = newQtyUsd.mul(adjustFactor).div(WeiPerEther);
+          const adjustedNewQtyUsd = (newQtyUsd * adjustFactor) / WEI_PER_ETHER;
 
-          return parseHealthFactor(healthFactor.debt, healthFactor.collateral.sub(adjustedNewQtyUsd));
+          return parseHealthFactor(healthFactor.debt, healthFactor.collateral - adjustedNewQtyUsd);
         } else {
           return parseHealthFactor(healthFactor.debt, healthFactor.collateral);
         }
@@ -76,15 +77,15 @@ function ModalInfoHealthFactor({ qty, symbol, operation, variant = 'column' }: P
 
       case 'borrowAtMaturity':
       case 'borrow': {
-        const adjustedNewQtyUsd = newQtyUsd.mul(WeiPerEther).div(adjustFactor);
-        return parseHealthFactor(healthFactor.debt.add(adjustedNewQtyUsd), healthFactor.collateral);
+        const adjustedNewQtyUsd = (newQtyUsd * WEI_PER_ETHER) / adjustFactor;
+        return parseHealthFactor(healthFactor.debt + adjustedNewQtyUsd, healthFactor.collateral);
       }
 
       case 'repayAtMaturity':
       case 'repay': {
-        const adjustedNewQtyUsd = newQtyUsd.mul(WeiPerEther).div(adjustFactor);
+        const adjustedNewQtyUsd = (newQtyUsd * WEI_PER_ETHER) / adjustFactor;
 
-        return parseHealthFactor(healthFactor.debt.sub(adjustedNewQtyUsd), healthFactor.collateral);
+        return parseHealthFactor(healthFactor.debt - adjustedNewQtyUsd, healthFactor.collateral);
       }
     }
   }, [healthFactor, newQty, marketAccount, operation]);

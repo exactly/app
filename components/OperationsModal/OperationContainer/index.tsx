@@ -8,7 +8,6 @@ import DepositAtMaturity from 'components/operations/DepositAtMaturity';
 import BorrowAtMaturity from 'components/operations/BorrowAtMaturity';
 import WithdrawAtMaturity from 'components/operations/WithdrawAtMaturity';
 import RepayAtMaturity from 'components/operations/RepayAtMaturity';
-import Faucet from 'components/operations/Faucet';
 
 import type { Operation } from 'contexts/ModalStatusContext';
 
@@ -27,7 +26,6 @@ function OperationContainer({ operation }: Props) {
       {operation === 'borrowAtMaturity' && <BorrowAtMaturity />}
       {operation === 'withdrawAtMaturity' && <WithdrawAtMaturity />}
       {operation === 'repayAtMaturity' && <RepayAtMaturity />}
-      {operation === 'faucet' && <Faucet />}
     </>
   );
 }

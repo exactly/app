@@ -18,15 +18,14 @@ import TooltipChart from '../TooltipChart';
 import LoadingChart from '../LoadingChart';
 import numbers from 'config/numbers.json';
 import { Operation } from 'contexts/ModalStatusContext';
-import { BigNumber } from '@ethersproject/bignumber';
 
 type Props = {
   type: 'floating' | 'fixed';
-  operation: Exclude<Operation, 'faucet'>;
+  operation: Operation;
   symbol: string;
   from?: number;
   to?: number;
-  fixedRate?: BigNumber;
+  fixedRate?: bigint;
   floatingRate?: number;
 };
 

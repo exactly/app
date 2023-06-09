@@ -58,7 +58,7 @@ const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ symbol }) => {
 
   return (
     <TableContainer>
-      <Table sx={{ bgcolor: 'transparent' }} aria-label="simple table">
+      <Table sx={{ bgcolor: 'transparent' }}>
         <TableHead>
           <TableRow>
             <HeadCell
