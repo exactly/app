@@ -1,17 +1,32 @@
 import React, { ReactNode, useCallback, useEffect, useState } from 'react';
 import { setContext, setUser } from '@sentry/nextjs';
-import { goerli, useBlockNumber, useClient } from 'wagmi';
+import { useBlockNumber, useConfig } from 'wagmi';
+import { goerli } from 'wagmi/chains';
 import DisclaimerModal from 'components/DisclaimerModal';
 import Image from 'next/image';
 import useRouter from 'hooks/useRouter';
 
 import { useWeb3 } from 'hooks/useWeb3';
 
-import { AppBar, Box, Button, Chip, IconButton, Toolbar, useTheme, Typography } from '@mui/material';
+import {
+  AppBar,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  Box,
+  Button,
+  Chip,
+  IconButton,
+  Toolbar,
+  useTheme,
+  Typography,
+} from '@mui/material';
+
+import CloseIcon from '@mui/icons-material/Close';
+
 import MenuIcon from '@mui/icons-material/Menu';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import { globals } from 'styles/theme';
-import { useModalStatus } from 'contexts/ModalStatusContext';
 import MobileMenu from 'components/MobileMenu';
 import Link from 'next/link';
 import Wallet from 'components/Wallet';
@@ -21,19 +36,20 @@ import ClaimRewards from 'components/ClaimRewards';
 import SelectDisplayNetwork from 'components/SelectDisplayNetwork';
 import { useTranslation } from 'react-i18next';
 import MaturityDateReminder from 'components/MaturityDateReminder';
+import Faucet from 'components/operations/Faucet';
 const { onlyMobile, onlyDesktopFlex } = globals;
 
 function Navbar() {
   const { t } = useTranslation();
-  const { connector } = useClient();
+  const { connector } = useConfig();
   const { walletAddress } = useWeb3();
   const { pathname: currentPathname, query } = useRouter();
   const { chain, isConnected } = useWeb3();
 
-  const { palette } = useTheme();
+  const { palette, spacing } = useTheme();
   const { view } = useMarketContext();
-  const { openOperationModal } = useModalStatus();
   const [openMenu, setOpenMenu] = useState<boolean>(false);
+  const [openFaucet, setOpenFaucet] = useState(false);
 
   const { data: blockNumber } = useBlockNumber({ chainId: chain?.id });
 
@@ -51,9 +67,11 @@ function Navbar() {
     });
   }, [walletAddress, connector, chain, blockNumber]);
 
+  const onClose = useCallback(() => setOpenFaucet(false), []);
+
   const handleFaucetClick = useCallback(() => {
-    if (chain?.id === goerli.id) return openOperationModal('faucet');
-  }, [chain?.id, openOperationModal]);
+    if (chain?.id === goerli.id) return setOpenFaucet(true);
+  }, [chain?.id]);
 
   const setBodyColor = (color: string) => {
     document.body.style.backgroundColor = color;
@@ -155,6 +173,42 @@ function Navbar() {
           <MobileMenu open={openMenu} handleClose={() => setOpenMenu(false)} />
         </Box>
       </AppBar>
+
+      <Dialog open={openFaucet} onClose={onClose}>
+        <IconButton
+          aria-label="close"
+          onClick={onClose}
+          sx={{
+            position: 'absolute',
+            right: 4,
+            top: 8,
+            color: 'grey.500',
+          }}
+          data-testid="modal-close"
+        >
+          <CloseIcon sx={{ fontSize: 19 }} />
+        </IconButton>
+        <Box
+          sx={{
+            padding: { xs: spacing(3, 2, 2), sm: spacing(5, 4, 4) },
+            borderTop: `4px ${palette.mode === 'light' ? 'black' : 'white'} solid`,
+          }}
+        >
+          <DialogTitle
+            sx={{
+              p: 0,
+              mb: { xs: 2, sm: 3 },
+            }}
+          >
+            <Typography fontWeight={700} fontSize={24} data-testid="modal-title">
+              {t('Faucet')}
+            </Typography>
+          </DialogTitle>
+          <DialogContent sx={{ padding: spacing(4, 0, 0, 0) }}>
+            <Faucet />
+          </DialogContent>
+        </Box>
+      </Dialog>
     </Box>
   );
 }

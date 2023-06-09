@@ -1,4 +1,4 @@
 export type Position = {
   symbol: string;
-  maturity?: number;
+  maturity?: bigint;
 };

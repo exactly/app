@@ -1,7 +1,5 @@
 import React, { type PropsWithChildren } from 'react';
 import Image from 'next/image';
-import { BigNumber, formatFixed } from '@ethersproject/bignumber';
-import { WeiPerEther } from '@ethersproject/constants';
 import {
   Box,
   Skeleton,
@@ -24,15 +22,17 @@ import { toPercentage } from 'utils/utils';
 import BestPill from 'components/common/BestPill';
 import { Rates } from 'hooks/useRewards';
 import RewardPill from 'components/markets/RewardPill';
+import { formatUnits } from 'viem';
+import { WEI_PER_ETHER } from 'utils/const';
 
 export type PositionTableRow = {
   symbol: string;
-  maturity?: number;
-  balance?: BigNumber;
-  fee?: BigNumber;
-  usdPrice: BigNumber;
+  maturity?: bigint;
+  balance?: bigint;
+  fee?: bigint;
+  usdPrice: bigint;
   decimals: number;
-  apr: BigNumber;
+  apr: bigint;
   rewards?: Rates[string];
   isBest?: boolean;
 };
@@ -82,9 +82,9 @@ function PositionTable({ data, onClick, loading = false, showBalance = false }: 
                 </TableRow>
               ))
             : data.map((row) => {
-                const balance =
-                  row.balance &&
-                  formatNumber(formatFixed(row.balance.mul(row.usdPrice).div(WeiPerEther), row.decimals), 'USD');
+                const balance = row.balance
+                  ? formatNumber(formatUnits((row.balance * row.usdPrice) / WEI_PER_ETHER, row.decimals), 'USD')
+                  : '0';
                 return (
                   <TableRow
                     hover
@@ -112,7 +112,7 @@ function PositionTable({ data, onClick, loading = false, showBalance = false }: 
                     )}
                     <TableCell>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                        <TextCell>{toPercentage(Number(formatFixed(row.apr, 18)))}</TextCell>
+                        <TextCell>{toPercentage(Number(formatUnits(row.apr, 18)))}</TextCell>
                         {row.rewards?.map((reward) => (
                           <RewardPill key={reward.assetSymbol} symbol={reward.assetSymbol} rate={reward.borrow} />
                         ))}
@@ -156,7 +156,7 @@ function AssetCell({ symbol }: { symbol: string }) {
   );
 }
 
-function TypeCell({ maturity }: { maturity?: number }) {
+function TypeCell({ maturity }: { maturity?: bigint }) {
   return <OperationSquare type={maturity ? 'fixed' : 'floating'} />;
 }
 

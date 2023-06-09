@@ -1,5 +1,6 @@
 import { useMemo, useCallback } from 'react';
-import { Chain, useAccount, useConnect } from 'wagmi';
+import { isAddress } from 'viem';
+import { Address, Chain, useAccount, useConnect } from 'wagmi';
 import { useWeb3Modal } from '@web3modal/react';
 import { isE2E, supportedChains } from 'utils/client';
 import { useNetworkContext } from 'contexts/NetworkContext';
@@ -10,13 +11,13 @@ type Web3 = {
   isConnected: boolean;
   impersonateActive: boolean;
   exitImpersonate: () => void;
-  walletAddress?: `0x${string}`;
+  walletAddress?: Address;
   chains: Chain[];
   chain: Chain;
-};
-
-const isValidAddress = (address: string | undefined): address is `0x${string}` => {
-  return !!address && /^(0x){1}[0-9a-fA-F]{40}$/i.test(address);
+  opts?: {
+    account: Address;
+    chain: Chain;
+  };
 };
 
 export const useWeb3 = (): Web3 => {
@@ -24,9 +25,10 @@ export const useWeb3 = (): Web3 => {
   const { address, isConnected } = useAccount();
   const { displayNetwork } = useNetworkContext();
 
-  const [currentAddress, impersonateActive] = useMemo((): [`0x${string}` | undefined, boolean] => {
+  const [walletAddress, impersonateActive] = useMemo((): [Address | undefined, boolean] => {
     const { account } = query;
-    const isImpersonating = !(account instanceof Array) && isValidAddress(account);
+    if (!account) return [address, false];
+    const isImpersonating = !(account instanceof Array) && isAddress(account);
     return [isImpersonating ? account : address, isImpersonating];
   }, [address, query]);
 
@@ -48,13 +50,19 @@ export const useWeb3 = (): Web3 => {
     }
   }, [open, connect, connectors]);
 
+  const opts = useMemo(
+    () => (walletAddress ? { account: walletAddress, chain: displayNetwork } : undefined),
+    [walletAddress, displayNetwork],
+  );
+
   return {
     connect: connectWallet,
     isConnected,
     impersonateActive,
     exitImpersonate,
-    walletAddress: currentAddress,
+    walletAddress,
     chains: supportedChains,
     chain: displayNetwork,
+    opts,
   };
 };

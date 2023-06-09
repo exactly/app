@@ -5,8 +5,6 @@ export default function getAllBorrowsAtMaturity(address: string) {
       id
       market
       maturity
-      receiver
-      borrower
       assets
       fee
       timestamp

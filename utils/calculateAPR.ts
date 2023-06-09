@@ -1,22 +1,9 @@
-import { BigNumber, formatFixed } from '@ethersproject/bignumber';
-import { WeiPerEther } from '@ethersproject/constants';
+import { WEI_PER_ETHER } from 'utils/const';
 
-const ONE_YEAR_MS = 31536000;
+const ONE_YEAR = 31_536_000n;
 
-export default (fee: BigNumber, assets: BigNumber, timestamp: string, maturity: number) => {
-  const transactionRate = fee.mul(WeiPerEther).div(assets);
-  const transactionTimestamp = parseFloat(timestamp);
-  const transactionMaturity = maturity;
-  const time = ONE_YEAR_MS / (transactionMaturity - transactionTimestamp);
-  const transactionAPR = parseFloat(formatFixed(transactionRate, 18)) * time * 100;
-
-  return { transactionAPR };
-};
-
-export function calculateAPR(fee: BigNumber, assets: BigNumber, timestamp: string, maturity: number): BigNumber {
-  const transactionRate = fee.mul(WeiPerEther).div(assets);
-  const transactionTimestamp = BigNumber.from(Number(timestamp));
-  const transactionMaturity = BigNumber.from(maturity);
-  const time = BigNumber.from(ONE_YEAR_MS).mul(WeiPerEther).div(transactionMaturity.sub(transactionTimestamp));
-  return transactionRate.mul(time).div(WeiPerEther);
+export function calculateAPR(fee: bigint, assets: bigint, timestamp: bigint, maturity: bigint): bigint {
+  const transactionRate = (fee * WEI_PER_ETHER) / assets;
+  const time = ONE_YEAR / (maturity - timestamp);
+  return transactionRate * time * 100n;
 }

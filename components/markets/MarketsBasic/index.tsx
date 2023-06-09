@@ -22,7 +22,6 @@ import numbers from 'config/numbers.json';
 import InfoOutlined from '@mui/icons-material/InfoOutlined';
 import useTranslateOperation from 'hooks/useTranslateOperation';
 import { toPercentage } from 'utils/utils';
-import { Zero } from '@ethersproject/constants';
 import usePreviousValue from 'hooks/usePreviousValue';
 import useAnalytics from 'hooks/useAnalytics';
 
@@ -39,7 +38,7 @@ const MarketsBasic: FC = () => {
   const { symbol, operation, selected, setSelected } = useMarketsBasic();
   const { errorData, qty, assetContract, tx } = useOperationContext();
   const { marketAccount } = useAccountData(symbol);
-  const walletBalance = useBalance(symbol, assetContract);
+  const walletBalance = useBalance(symbol, assetContract?.address);
   const { options: fixedOptions, loading: loadingFixedOptions } = usePreviewFixedOperation(operation);
   const { handleInputChange: handleDeposit, onMax: onMaxDeposit } = useDepositAtMaturity();
   const { handleBasicInputChange: handleBorrow, onMax: onMaxBorrow, safeMaximumBorrow } = useBorrow();
@@ -106,8 +105,8 @@ const MarketsBasic: FC = () => {
         apr: (isDeposit ? depositAPR : borrowAPR) || 0,
         rewardAPR:
           (isDeposit
-            ? depositRewards?.flatMap(({ rate }) => rate)?.reduce((partialSum, a) => partialSum.add(a), Zero)
-            : borrowRewards?.flatMap(({ rate }) => rate)?.reduce((partialSum, a) => partialSum.sub(a), Zero)) || Zero,
+            ? depositRewards?.flatMap(({ rate }) => rate)?.reduce((partialSum, a) => partialSum + a, 0n)
+            : borrowRewards?.flatMap(({ rate }) => rate)?.reduce((partialSum, a) => partialSum - a, 0n)) || 0n,
       }))
       .map(({ maturity, apr, rewardAPR }) => ({
         maturity,
@@ -218,7 +217,7 @@ const MarketsBasic: FC = () => {
                     t(
                       'You can repay your loan at any time before its maturity date. If you do so after the maturity date, a daily interest of {{penaltyRate}} will apply.',
                       {
-                        penaltyRate: toPercentage(Number(marketAccount.penaltyRate.mul(86_400)) / 1e18),
+                        penaltyRate: toPercentage(Number(marketAccount.penaltyRate * 86_400n) / 1e18),
                       },
                     )
               }

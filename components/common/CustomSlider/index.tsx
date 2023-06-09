@@ -24,7 +24,7 @@ type CustomSliderProps = {
 
 const CustomSlider: FC<CustomSliderProps> = ({ value, onChange, ...props }) => {
   const handle: SliderProps['onChange'] = useCallback(
-    (e: Event, newValue: number | number[]) => {
+    (_e: Event, newValue: number | number[]) => {
       if (Array.isArray(newValue)) return;
       onChange(newValue);
     },

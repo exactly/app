@@ -33,7 +33,7 @@ export const MarketProvider: FC<PropsWithChildren> = ({ children }) => {
   const [date, setDate] = useState<number>();
 
   const dates = useMemo<number[]>(
-    () => marketAccount?.fixedPools.map((pool) => pool.maturity.toNumber()) ?? [],
+    () => marketAccount?.fixedPools.map((pool) => Number(pool.maturity)) ?? [],
     [marketAccount],
   );
 

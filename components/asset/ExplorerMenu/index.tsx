@@ -1,23 +1,22 @@
-import React, { FC, useCallback, useMemo } from 'react';
+import React, { FC } from 'react';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import { Box, Button, Menu, MenuItem, Typography, useTheme } from '@mui/material';
 import Image from 'next/image';
-import networkData from 'config/networkData.json' assert { type: 'json' };
-import { useWeb3 } from 'hooks/useWeb3';
 import LinkIcon from '@mui/icons-material/Link';
 import { useTranslation } from 'react-i18next';
+import useEtherscanLink from 'hooks/useEtherscanLink';
+import { Address } from 'viem';
 
 type Props = {
   symbol: string;
-  assetAddress?: string;
-  eMarketAddress?: string;
-  rateModelAddress?: string;
-  exaToken?: string;
+  assetAddress: Address;
+  eMarketAddress: Address;
+  rateModelAddress: Address;
+  exaToken: string;
 };
 
 const ExplorerMenu: FC<Props> = ({ symbol, assetAddress, eMarketAddress, rateModelAddress, exaToken }) => {
   const { t } = useTranslation();
-  const { chain } = useWeb3();
   const { palette } = useTheme();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -28,24 +27,7 @@ const ExplorerMenu: FC<Props> = ({ symbol, assetAddress, eMarketAddress, rateMod
     setAnchorEl(null);
   };
 
-  const getAddressEtherscanUrl = useCallback(
-    (address?: string): string => {
-      if (!address || !chain) return '';
-      const etherscan = networkData[String(chain?.id) as keyof typeof networkData]?.etherscan;
-      return `${etherscan}/address/${address}`;
-    },
-    [chain],
-  );
-
-  const assetEtherscan = useMemo(() => getAddressEtherscanUrl(assetAddress), [assetAddress, getAddressEtherscanUrl]);
-  const eMarketEtherscan = useMemo(
-    () => getAddressEtherscanUrl(eMarketAddress),
-    [eMarketAddress, getAddressEtherscanUrl],
-  );
-  const rateModelEtherscan = useMemo(
-    () => getAddressEtherscanUrl(rateModelAddress),
-    [rateModelAddress, getAddressEtherscanUrl],
-  );
+  const { address } = useEtherscanLink();
 
   return (
     <>
@@ -101,7 +83,7 @@ const ExplorerMenu: FC<Props> = ({ symbol, assetAddress, eMarketAddress, rateMod
           horizontal: 'right',
         }}
       >
-        <a href={assetEtherscan} target="_blank" rel="noopener noreferrer">
+        <a href={address(assetAddress)} target="_blank" rel="noopener noreferrer">
           <MenuItem>
             <Image
               src={`/img/assets/${symbol}.svg`}
@@ -117,7 +99,7 @@ const ExplorerMenu: FC<Props> = ({ symbol, assetAddress, eMarketAddress, rateMod
           </MenuItem>
         </a>
 
-        <a href={eMarketEtherscan} target="_blank" rel="noopener noreferrer">
+        <a href={address(eMarketAddress)} target="_blank" rel="noopener noreferrer">
           <MenuItem>
             <Image
               src={`/img/exaTokens/exa${symbol}.svg`}
@@ -133,7 +115,7 @@ const ExplorerMenu: FC<Props> = ({ symbol, assetAddress, eMarketAddress, rateMod
           </MenuItem>
         </a>
 
-        <a href={rateModelEtherscan} target="_blank" rel="noopener noreferrer">
+        <a href={address(rateModelAddress)} target="_blank" rel="noopener noreferrer">
           <MenuItem>
             <LinkIcon fontSize="small" />
             <Box ml={1}>{t('Interest Rate Model')}</Box>

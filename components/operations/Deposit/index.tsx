@@ -33,7 +33,7 @@ const Deposit: FC = () => {
   const { isLoading, onMax, handleInputChange, handleSubmitAction, deposit, needsApproval, previewGasCost } =
     useDeposit();
   const { marketAccount } = useAccountData(symbol);
-  const walletBalance = useBalance(symbol, assetContract);
+  const walletBalance = useBalance(symbol, assetContract?.address);
 
   const { isLoading: previewIsLoading } = usePreviewTx({ qty, needsApproval, previewGasCost });
   const { depositAPR, loading } = useFloatingPoolAPR(symbol, qty, 'deposit');

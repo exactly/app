@@ -1,12 +1,12 @@
 import React, { useMemo } from 'react';
+import { formatUnits } from 'viem';
 import { Box, Skeleton, Typography, useMediaQuery, useTheme } from '@mui/material';
 import { BorrowLimitIcon } from 'components/Icons';
 import { useTranslation } from 'react-i18next';
 import useHealthFactor from 'hooks/useHealthFactor';
 import useAccountData from 'hooks/useAccountData';
-import { BigNumber, formatFixed } from '@ethersproject/bignumber';
-import { WeiPerEther } from '@ethersproject/constants';
 import formatNumber from 'utils/formatNumber';
+import { WEI_PER_ETHER } from 'utils/const';
 
 const BorrowLimit = () => {
   const { t } = useTranslation();
@@ -24,8 +24,8 @@ const BorrowLimit = () => {
         usdPrice,
         decimals,
       }))
-      .reduce((acc: { adjustFactor: BigNumber; usdPrice: BigNumber; decimals: number }, curr) => {
-        if (curr.adjustFactor.gt(acc.adjustFactor)) {
+      .reduce((acc: { adjustFactor: bigint; usdPrice: bigint; decimals: number }, curr) => {
+        if (curr.adjustFactor > acc.adjustFactor) {
           acc = curr;
         }
         return acc;
@@ -37,7 +37,7 @@ const BorrowLimit = () => {
     return formatNumber(
       Math.max(
         0,
-        Number(formatFixed(collateral.sub(debt).mul(WeiPerEther).div(usdPrice).mul(adjustFactor).div(WeiPerEther), 18)),
+        Number(formatUnits(((((collateral - debt) * WEI_PER_ETHER) / usdPrice) * adjustFactor) / WEI_PER_ETHER, 18)),
       ).toFixed(decimals),
       'USD',
       false,

@@ -1,5 +1,4 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 import PieChartOutlineRoundedIcon from '@mui/icons-material/PieChartOutlineRounded';
 
 import ModalInfo, { FromTo, Variant } from 'components/common/modal/ModalInfo';
@@ -9,18 +8,18 @@ import { toPercentage } from 'utils/utils';
 import usePreviewer from 'hooks/usePreviewer';
 import useDelayedEffect from 'hooks/useDelayedEffect';
 import { useWeb3 } from 'hooks/useWeb3';
-import { AddressZero } from '@ethersproject/constants';
 import { Box } from '@mui/material';
 import UtilizationRateWithAreaChart from 'components/charts/UtilizationRateWithAreaChart';
 import { useTranslation } from 'react-i18next';
 import { useMarketContext } from 'contexts/MarketContext';
+import { formatUnits, parseUnits, zeroAddress } from 'viem';
 
 type Props = {
   qty: string;
   symbol: string;
   operation: Extract<Operation, 'depositAtMaturity' | 'withdrawAtMaturity' | 'borrowAtMaturity' | 'repayAtMaturity'>;
   variant?: Variant;
-  fixedRate?: BigNumber;
+  fixedRate?: bigint;
 };
 
 function ModalInfoFixedUtilizationRate({ qty, symbol, operation, variant = 'column', fixedRate }: Props) {
@@ -33,10 +32,10 @@ function ModalInfoFixedUtilizationRate({ qty, symbol, operation, variant = 'colu
   const [rawFrom, from] = useMemo(() => {
     if (!date) return [undefined, undefined];
 
-    const pool = marketAccount?.fixedPools?.find(({ maturity }) => maturity.toNumber() === date);
+    const pool = marketAccount?.fixedPools?.find(({ maturity }) => maturity === BigInt(date));
     if (!pool) return [undefined, undefined];
 
-    return [Number(formatFixed(pool.utilization, 18)), toPercentage(Number(formatFixed(pool.utilization, 18)))];
+    return [Number(formatUnits(pool.utilization, 18)), toPercentage(Number(formatUnits(pool.utilization, 18)))];
   }, [date, marketAccount]);
 
   const [to, setTo] = useState<string | undefined>();
@@ -57,53 +56,53 @@ function ModalInfoFixedUtilizationRate({ qty, symbol, operation, variant = 'colu
       setRawTo(undefined);
 
       try {
-        const initialAssets = parseFixed(qty, marketAccount.decimals);
-        let uti: BigNumber | undefined = undefined;
+        const initialAssets = parseUnits(qty as `${number}`, marketAccount.decimals);
+        let uti: bigint | undefined = undefined;
         switch (operation) {
           case 'depositAtMaturity': {
-            const { utilization } = await previewerContract.previewDepositAtMaturity(
+            const { utilization } = await previewerContract.read.previewDepositAtMaturity([
               marketAccount.market,
-              date,
+              BigInt(date),
               initialAssets,
-            );
+            ]);
             uti = utilization;
             break;
           }
 
           case 'withdrawAtMaturity': {
-            const { utilization } = await previewerContract.previewWithdrawAtMaturity(
+            const { utilization } = await previewerContract.read.previewWithdrawAtMaturity([
               marketAccount.market,
-              date,
+              BigInt(date),
               initialAssets,
-              walletAddress ?? AddressZero,
-            );
+              walletAddress ?? zeroAddress,
+            ]);
             uti = utilization;
             break;
           }
           case 'borrowAtMaturity': {
-            const { utilization } = await previewerContract.previewBorrowAtMaturity(
+            const { utilization } = await previewerContract.read.previewBorrowAtMaturity([
               marketAccount.market,
-              date,
+              BigInt(date),
               initialAssets,
-            );
+            ]);
             uti = utilization;
             break;
           }
           case 'repayAtMaturity': {
-            const { utilization } = await previewerContract.previewRepayAtMaturity(
+            const { utilization } = await previewerContract.read.previewRepayAtMaturity([
               marketAccount.market,
-              date,
+              BigInt(date),
               initialAssets,
-              walletAddress ?? AddressZero,
-            );
+              walletAddress ?? zeroAddress,
+            ]);
             uti = utilization;
             break;
           }
         }
 
         if (cancelled()) return;
-        setTo(toPercentage(Number(formatFixed(uti, 18))));
-        setRawTo(Number(formatFixed(uti, 18)));
+        setTo(toPercentage(Number(formatUnits(uti, 18))));
+        setRawTo(Number(formatUnits(uti, 18)));
       } catch {
         setTo('N/A');
         setRawTo(undefined);

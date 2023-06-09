@@ -1,9 +1,8 @@
 import React, { useMemo } from 'react';
-import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
-import { Zero } from '@ethersproject/constants';
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 import { Box } from '@mui/material';
 import Image from 'next/image';
+import { formatUnits, parseUnits } from 'viem';
 
 import useAccountData from 'hooks/useAccountData';
 import formatNumber from 'utils/formatNumber';
@@ -28,20 +27,20 @@ function ModalInfoTotalBorrows({ qty, symbol, operation, variant = 'column' }: P
   const [from, to] = useMemo(() => {
     if (!marketAccount) return [undefined, undefined];
 
-    const delta = parseFixed(qty || '0', marketAccount.decimals);
+    const delta = parseUnits((qty as `${number}`) || '0', marketAccount.decimals);
 
-    let f: BigNumber = marketAccount.floatingBorrowAssets;
+    let f: bigint = marketAccount.floatingBorrowAssets;
     if (isFixedOperation(operation) && date) {
-      const pool = marketAccount.fixedBorrowPositions.find(({ maturity }) => maturity.toNumber() === date);
-      f = pool ? pool.position.principal.add(pool.position.fee) : Zero;
+      const pool = marketAccount.fixedBorrowPositions.find(({ maturity }) => maturity === BigInt(date));
+      f = pool ? pool.position.principal + pool.position.fee : 0n;
     }
 
-    let debt = f[operation.startsWith('borrow') ? 'add' : 'sub'](delta);
-    debt = debt.lt(Zero) ? Zero : debt;
+    let debt = operation.startsWith('borrow') ? f + delta : f - delta;
+    debt = debt < 0n ? 0n : debt;
 
     return [
-      formatNumber(formatFixed(f, marketAccount.decimals), symbol),
-      formatNumber(formatFixed(debt, marketAccount.decimals), symbol),
+      formatNumber(formatUnits(f, marketAccount.decimals), symbol),
+      formatNumber(formatUnits(debt, marketAccount.decimals), symbol),
     ];
   }, [marketAccount, qty, operation, date, symbol]);
 

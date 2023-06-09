@@ -1,12 +1,10 @@
 import React, { FC, useCallback, useMemo, useState } from 'react';
-import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
 
 import ModalTxCost from 'components/OperationsModal/ModalTxCost';
 import ModalGif from 'components/OperationsModal/ModalGif';
 
 import { useWeb3 } from 'hooks/useWeb3';
 
-import { WeiPerEther } from '@ethersproject/constants';
 import useApprove from 'hooks/useApprove';
 import { useOperationContext, usePreviewTx } from 'contexts/OperationContext';
 import { Grid } from '@mui/material';
@@ -25,15 +23,18 @@ import useHandleOperationError from 'hooks/useHandleOperationError';
 import useAnalytics from 'hooks/useAnalytics';
 import { useTranslation } from 'react-i18next';
 import useTranslateOperation from 'hooks/useTranslateOperation';
-import { gasLimitMultiplier } from 'utils/const';
+import { GAS_LIMIT_MULTIPLIER, WEI_PER_ETHER } from 'utils/const';
 import useEstimateGas from 'hooks/useEstimateGas';
+import { formatUnits, parseUnits } from 'viem';
+import { ERC20 } from 'types/contracts';
+import { waitForTransaction } from '@wagmi/core';
 
 const Withdraw: FC = () => {
   const { t } = useTranslation();
   const translateOperation = useTranslateOperation();
   const { transaction } = useAnalytics();
   const { operation } = useModalStatus();
-  const { walletAddress } = useWeb3();
+  const { walletAddress, opts } = useWeb3();
 
   const {
     symbol,
@@ -61,7 +62,7 @@ const Withdraw: FC = () => {
   const parsedAmount = useMemo(() => {
     if (!marketAccount) return '0';
     const { floatingDepositAssets, decimals } = marketAccount;
-    return formatFixed(floatingDepositAssets, decimals);
+    return formatUnits(floatingDepositAssets, decimals);
   }, [marketAccount]);
 
   const {
@@ -69,34 +70,27 @@ const Withdraw: FC = () => {
     estimateGas: approveEstimateGas,
     isLoading: approveIsLoading,
     needsApproval,
-  } = useApprove('withdraw', marketContract, ETHRouterContract?.address);
+  } = useApprove('withdraw', marketContract as ERC20 | undefined, ETHRouterContract?.address);
 
   const estimate = useEstimateGas();
 
   const previewGasCost = useCallback(
-    async (quantity: string): Promise<BigNumber | undefined> => {
-      if (!walletAddress || !marketContract || !ETHRouterContract || !marketAccount || !quantity) return;
+    async (quantity: string): Promise<bigint | undefined> => {
+      if (!walletAddress || !marketContract || !ETHRouterContract || !marketAccount || !quantity || !opts) return;
 
       if (await needsApproval(quantity)) {
         return approveEstimateGas();
       }
-
       const { floatingDepositShares } = marketAccount;
-      if (marketAccount.assetSymbol === 'WETH') {
-        const amount = isMax ? floatingDepositShares : parseFixed(quantity, 18);
 
-        const populated = await ETHRouterContract.populateTransaction[isMax ? 'redeem' : 'withdraw'](amount);
-        return estimate(populated);
+      const amount = isMax ? floatingDepositShares : parseUnits(quantity as `${number}`, marketAccount.decimals);
+      if (marketAccount.assetSymbol === 'WETH') {
+        const sim = await ETHRouterContract.simulate.redeem([amount], opts);
+        return estimate(sim.request);
       }
 
-      const amount = isMax ? floatingDepositShares : parseFixed(quantity, marketAccount.decimals);
-
-      const populated = await marketContract.populateTransaction[isMax ? 'redeem' : 'withdraw'](
-        amount,
-        walletAddress,
-        walletAddress,
-      );
-      return estimate(populated);
+      const sim = await marketContract.simulate.redeem([amount, walletAddress, walletAddress], opts);
+      return estimate(sim.request);
     },
     [
       walletAddress,
@@ -107,6 +101,7 @@ const Withdraw: FC = () => {
       isMax,
       estimate,
       approveEstimateGas,
+      opts,
     ],
   );
 
@@ -128,9 +123,9 @@ const Withdraw: FC = () => {
 
       setQty(value);
 
-      const parsed = parseFixed(value || '0', marketAccount.decimals);
+      const parsed = parseUnits((value as `${number}`) || '0', marketAccount.decimals);
 
-      if (parsed.gt(marketAccount.floatingDepositAssets)) {
+      if (parsed > marketAccount.floatingDepositAssets) {
         return setErrorData({
           status: true,
           message: t("You can't withdraw more than the deposited amount"),
@@ -145,64 +140,64 @@ const Withdraw: FC = () => {
   );
 
   const withdraw = useCallback(async () => {
-    if (!marketAccount || !walletAddress || !marketContract) return;
+    if (!marketAccount || !walletAddress || !marketContract || !opts) return;
 
-    let withdrawTx;
+    let hash;
+    setIsLoadingOp(true);
     try {
-      setIsLoadingOp(true);
       transaction.addToCart();
       const { floatingDepositShares, decimals } = marketAccount;
+
+      const amount = parseUnits(qty as `${number}`, decimals);
 
       if (marketAccount.assetSymbol === 'WETH') {
         if (!ETHRouterContract) return;
 
         if (isMax) {
-          const gasEstimation = await ETHRouterContract.estimateGas.redeem(floatingDepositShares);
-          withdrawTx = await ETHRouterContract.redeem(floatingDepositShares, {
-            gasLimit: gasEstimation.mul(gasLimitMultiplier).div(WeiPerEther),
+          const args = [floatingDepositShares] as const;
+          const gasEstimation = await ETHRouterContract.estimateGas.redeem(args, opts);
+          hash = await ETHRouterContract.write.redeem(args, {
+            ...opts,
+            gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
           });
         } else {
-          const gasEstimation = await ETHRouterContract.estimateGas.withdraw(parseFixed(qty, 18));
-          withdrawTx = await ETHRouterContract.withdraw(parseFixed(qty, 18), {
-            gasLimit: gasEstimation.mul(gasLimitMultiplier).div(WeiPerEther),
+          const args = [amount] as const;
+          const gasEstimation = await ETHRouterContract.estimateGas.withdraw(args, opts);
+          hash = await ETHRouterContract.write.withdraw(args, {
+            ...opts,
+            gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
           });
         }
       } else {
         if (isMax) {
-          const gasEstimation = await marketContract.estimateGas.redeem(
-            floatingDepositShares,
-            walletAddress,
-            walletAddress,
-          );
-
-          withdrawTx = await marketContract.redeem(floatingDepositShares, walletAddress, walletAddress, {
-            gasLimit: gasEstimation.mul(gasLimitMultiplier).div(WeiPerEther),
+          const args = [floatingDepositShares, walletAddress, walletAddress] as const;
+          const gasEstimation = await marketContract.estimateGas.redeem(args, opts);
+          hash = await marketContract.write.redeem(args, {
+            ...opts,
+            gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
           });
         } else {
-          const gasEstimation = await marketContract.estimateGas.withdraw(
-            parseFixed(qty, decimals),
-            walletAddress,
-            walletAddress,
-          );
-
-          withdrawTx = await marketContract.withdraw(parseFixed(qty, decimals), walletAddress, walletAddress, {
-            gasLimit: gasEstimation.mul(gasLimitMultiplier).div(WeiPerEther),
+          const args = [amount, walletAddress, walletAddress] as const;
+          const gasEstimation = await marketContract.estimateGas.withdraw(args, opts);
+          hash = await marketContract.write.withdraw(args, {
+            ...opts,
+            gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
           });
         }
       }
 
       transaction.beginCheckout();
 
-      setTx({ status: 'processing', hash: withdrawTx?.hash });
+      setTx({ status: 'processing', hash });
 
-      const { status, transactionHash } = await withdrawTx.wait();
+      const { status, transactionHash } = await waitForTransaction({ hash });
 
       setTx({ status: status ? 'success' : 'error', hash: transactionHash });
 
       if (status) transaction.purchase();
     } catch (error) {
       transaction.removeFromCart();
-      if (withdrawTx) setTx({ status: 'error', hash: withdrawTx?.hash });
+      if (hash) setTx({ status: 'error', hash });
       setErrorData({ status: true, message: handleOperationError(error) });
     } finally {
       setIsLoadingOp(false);
@@ -211,12 +206,13 @@ const Withdraw: FC = () => {
     marketAccount,
     walletAddress,
     marketContract,
+    opts,
     setIsLoadingOp,
     transaction,
+    qty,
     setTx,
     ETHRouterContract,
     isMax,
-    qty,
     setErrorData,
     handleOperationError,
   ]);

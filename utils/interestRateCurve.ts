@@ -1,12 +1,13 @@
-import { BigNumber } from '@ethersproject/bignumber';
-import { WeiPerEther } from '@ethersproject/constants';
+import { WEI_PER_ETHER } from './const';
 
 type InterestRateCurve = (u: number) => number;
-type InverseInterestRateCurve = (apr: BigNumber) => BigNumber;
+type InverseInterestRateCurve = (apr: bigint) => bigint;
 
-export function inverseInterestRateCurve(a: BigNumber, b: BigNumber, uMax: BigNumber): InverseInterestRateCurve {
-  return (apr: BigNumber) =>
-    apr.mul(uMax).div(WeiPerEther).sub(b.mul(uMax).div(WeiPerEther)).sub(a).mul(WeiPerEther).div(b.sub(apr)).abs();
+const abs = (n: bigint): bigint => (n < 0n ? -n : n);
+
+export function inverseInterestRateCurve(a: bigint, b: bigint, uMax: bigint): InverseInterestRateCurve {
+  return (apr: bigint) =>
+    abs((((apr * uMax) / WEI_PER_ETHER - (b * uMax) / WEI_PER_ETHER - a) * WEI_PER_ETHER) / (b - apr));
 }
 
 export default function interestRateCurve(a: number, b: number, uMax: number): InterestRateCurve {

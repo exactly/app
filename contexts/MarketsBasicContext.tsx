@@ -1,21 +1,20 @@
-import React, { createContext, useContext, useState, useMemo, useCallback, useEffect } from 'react';
 import type { FC, PropsWithChildren } from 'react';
-import { BigNumber } from '@ethersproject/bignumber';
+import React, { createContext, useContext, useState, useMemo, useCallback } from 'react';
 
 import { Operation, useModalStatus } from './ModalStatusContext';
 import { useMarketContext } from './MarketContext';
 import useAnalytics from 'hooks/useAnalytics';
 
 export type MarketsBasicOperation = 'borrow' | 'deposit';
-export type MarketsBasicRewardRate = { assetSymbol: string; rate: BigNumber };
+export type MarketsBasicRewardRate = { assetSymbol: string; rate: bigint };
 export type MarketsBasicOption = {
   maturity?: number;
   depositAPR?: number;
   borrowAPR?: number;
   depositRewards?: MarketsBasicRewardRate[];
   borrowRewards?: MarketsBasicRewardRate[];
-  interest?: BigNumber;
-  finalAssets?: BigNumber;
+  interest?: bigint;
+  finalAssets?: bigint;
 };
 
 type ContextValues = {
@@ -36,11 +35,13 @@ export const MarketsBasicProvider: FC<PropsWithChildren> = ({ children }) => {
   const { marketSymbol: symbol, setDate } = useMarketContext();
   const [operation, setOperation] = useState<MarketsBasicOperation>('deposit');
   const [selected, setSelected] = useState<MarketsBasicOption['maturity']>(0);
-  const onChangeOperation = useCallback((op: MarketsBasicOperation) => setOperation(op), [setOperation]);
-
-  useEffect(() => {
-    setModalOperation(`${operation}${selected && selected > 0 ? 'AtMaturity' : ''}` as Operation);
-  }, [operation, selected, setModalOperation]);
+  const onChangeOperation = useCallback(
+    (op: MarketsBasicOperation) => {
+      setModalOperation(`${op}${selected && selected > 0 ? 'AtMaturity' : ''}` as Operation);
+      setOperation(op);
+    },
+    [selected, setModalOperation],
+  );
 
   const setSelectedOption = useCallback(
     (option: MarketsBasicOption['maturity']) => {

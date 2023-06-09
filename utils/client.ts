@@ -1,12 +1,11 @@
 import { EthereumClient, w3mConnectors, w3mProvider } from '@web3modal/ethereum';
-import { createClient, configureChains, ChainProviderFn, Chain } from 'wagmi';
+import { createConfig, configureChains, ChainProviderFn, Chain } from 'wagmi';
 import { InjectedConnector } from 'wagmi/connectors/injected';
 import { mainnet, goerli, optimism } from 'wagmi/chains';
 import { jsonRpcProvider } from 'wagmi/providers/jsonRpc';
 import { alchemyProvider } from 'wagmi/providers/alchemy';
 import { publicProvider } from 'wagmi/providers/public';
 import { SafeConnector } from 'wagmi/connectors/safe';
-import { BaseProvider, WebSocketProvider } from '@ethersproject/providers';
 
 declare global {
   interface Window {
@@ -29,18 +28,18 @@ const alchemyKey = process.env.NEXT_PUBLIC_ALCHEMY_API_KEY;
 
 export const isE2E: boolean = JSON.parse(process.env.NEXT_PUBLIC_IS_E2E ?? 'false');
 
-const providers: ChainProviderFn<Chain, BaseProvider, WebSocketProvider>[] =
+const providers: ChainProviderFn<Chain>[] =
   isE2E && rpcURL
     ? [jsonRpcProvider({ rpc: () => ({ http: rpcURL }) })]
     : [
-        ...(alchemyKey ? [alchemyProvider({ priority: 0, apiKey: alchemyKey })] : []),
-        publicProvider({ priority: 1 }),
+        ...(alchemyKey ? [alchemyProvider({ apiKey: alchemyKey })] : []),
+        publicProvider(),
         w3mProvider({ projectId: walletConnectId }),
       ];
 
-const { chains, provider } = configureChains<Chain, BaseProvider, WebSocketProvider>(supportedChains, providers);
+const { chains, publicClient } = configureChains<Chain>(supportedChains, providers);
 
-export const wagmi = createClient({
+export const wagmi = createConfig({
   connectors: [
     ...(isE2E
       ? [new InjectedConnector({ chains: supportedChains, options: { name: 'E2E', shimDisconnect: false } })]
@@ -48,7 +47,7 @@ export const wagmi = createClient({
     ...w3mConnectors({ projectId: walletConnectId, version: 2, chains }),
     new SafeConnector({ chains }),
   ],
-  provider,
+  publicClient,
 });
 
 export const web3modal = new EthereumClient(wagmi, chains);

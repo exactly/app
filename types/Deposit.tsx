@@ -1,14 +1,10 @@
-import type { BigNumber } from '@ethersproject/bignumber';
+import { Address } from 'viem';
 
 export type Deposit = {
   id: string;
-  market: string;
-  symbol?: string;
+  market: Address;
   maturity: number;
-  assets: BigNumber;
-  fee: BigNumber;
-  owner?: string;
-  caller?: string;
-  timestamp: string;
-  editable?: boolean;
+  assets: bigint;
+  fee: bigint;
+  timestamp: number;
 };

@@ -1,27 +1,22 @@
 import { useCallback, useMemo } from 'react';
-import { AlchemyProvider } from '@ethersproject/providers';
-import { PopulatedTransaction } from '@ethersproject/contracts';
-import { useProvider } from 'wagmi';
-
+import { usePublicClient } from 'wagmi';
 import { useWeb3 } from './useWeb3';
 import { isE2E } from 'utils/client';
+import { getAlchemyProvider } from 'utils/providers';
+import { EstimateGasParameters } from 'viem';
 
 export default function useEstimateGas() {
   const { chain } = useWeb3();
-  const e2eProvider = useProvider();
-  const provider = useMemo(
-    () => (isE2E ? e2eProvider : new AlchemyProvider(chain.id, process.env.NEXT_PUBLIC_ALCHEMY_API_KEY)),
-    [chain.id, e2eProvider],
-  );
+  const e2ePublicClient = usePublicClient();
+  const publicClient = useMemo(() => (isE2E ? e2ePublicClient : getAlchemyProvider(chain)), [chain, e2ePublicClient]);
 
   return useCallback(
-    async (tx: PopulatedTransaction) => {
-      if (!provider) return;
+    async (request: EstimateGasParameters) => {
+      if (!publicClient) return;
 
-      const { maxFeePerGas, gasPrice } = await provider.getFeeData();
-      const price = maxFeePerGas ?? gasPrice;
-      return price?.mul(await provider.estimateGas(tx));
+      const gasPrice = await publicClient.getGasPrice();
+      return gasPrice * (await publicClient.estimateGas(request));
     },
-    [provider],
+    [publicClient],
   );
 }

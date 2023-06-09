@@ -3,8 +3,6 @@ import { Transaction } from 'types/Transaction';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import { Box, Button, CircularProgress, CircularProgressProps, Typography } from '@mui/material';
-import networkData from 'config/networkData.json' assert { type: 'json' };
-import { useWeb3 } from 'hooks/useWeb3';
 import { useModalStatus } from 'contexts/ModalStatusContext';
 import { useOperationContext } from 'contexts/OperationContext';
 import formatSymbol from 'utils/formatSymbol';
@@ -13,6 +11,7 @@ import { useMarketContext } from 'contexts/MarketContext';
 import parseTimestamp from 'utils/parseTimestamp';
 import { useTranslation } from 'react-i18next';
 import useTranslateOperation from 'hooks/useTranslateOperation';
+import useEtherscanLink from 'hooks/useEtherscanLink';
 
 type Props = {
   tx: Transaction;
@@ -22,7 +21,6 @@ type Props = {
 function ModalGif({ tx, tryAgain }: Props) {
   const { t } = useTranslation();
   const translateOperation = useTranslateOperation();
-  const { chain } = useWeb3();
   const { operation } = useModalStatus();
   const { symbol, qty } = useOperationContext();
   const { date } = useMarketContext();
@@ -30,12 +28,13 @@ function ModalGif({ tx, tryAgain }: Props) {
   const isLoading = useMemo(() => tx.status === 'processing' || tx.status === 'loading', [tx]);
   const isSuccess = useMemo(() => tx.status === 'success', [tx]);
   const isError = useMemo(() => tx.status === 'error', [tx]);
-  const etherscan = useMemo(() => networkData[String(chain?.id) as keyof typeof networkData]?.etherscan, [chain]);
   const operationName = useMemo(
     () => translateOperation(operation, { variant: 'noun' }),
     [translateOperation, operation],
   );
   const reminder = useMemo(() => ['borrowAtMaturity', 'depositAtMaturity'].includes(operation), [operation]);
+
+  const { tx: txLink } = useEtherscanLink();
 
   return (
     <Box display="flex" minWidth="340px" minHeight="240px">
@@ -79,10 +78,11 @@ function ModalGif({ tx, tryAgain }: Props) {
               </Button>
             )}
             <Button
+              component="a"
               variant="outlined"
               sx={{ width: '150px', height: '32px', fontWeight: 500, whiteSpace: 'nowrap' }}
               target="_blank"
-              href={`${etherscan}/tx/${tx.hash}`}
+              href={txLink(tx.hash ?? '0x')}
               disabled={!tx.hash}
             >
               {t('View on Etherscan')}

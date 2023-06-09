@@ -7,10 +7,10 @@ export default function useTranslateOperation() {
   const { t } = useTranslation();
 
   const { infinitive, present, past, noun } = useMemo<{
-    infinitive: Record<Exclude<Operation, 'faucet'>, string | null>;
-    past: Record<Exclude<Operation, 'faucet'>, string | null>;
-    present: Record<Exclude<Operation, 'faucet'>, string | null>;
-    noun: Record<Exclude<Operation, 'faucet'>, string | null>;
+    infinitive: Record<Operation, string | null>;
+    past: Record<Operation, string | null>;
+    present: Record<Operation, string | null>;
+    noun: Record<Operation, string | null>;
   }>(
     () => ({
       infinitive: {
@@ -74,9 +74,9 @@ export default function useTranslateOperation() {
         past,
         noun,
       }[variant];
-      const word = op === 'faucet' ? t('faucet') : record[op];
+      const word = record[op];
       return capitalize ? mCapitalize(word ?? '') : word;
     },
-    [infinitive, present, past, noun, t],
+    [infinitive, present, past, noun],
   );
 }

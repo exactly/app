@@ -1,9 +1,9 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import Snackbar from '@mui/material/Snackbar';
+import dayjs from 'dayjs';
 import { useTranslation } from 'react-i18next';
 import { Alert, Slide, SlideProps } from '@mui/material';
 import useAccountData from 'hooks/useAccountData';
-import { BigNumber } from '@ethersproject/bignumber';
 import parseTimestamp from 'utils/parseTimestamp';
 
 export default function MaturityDateReminder() {
@@ -19,14 +19,14 @@ export default function MaturityDateReminder() {
       fixedLender.fixedBorrowPositions.forEach((borrowPosition) => {
         const { maturity } = borrowPosition;
 
-        const secondsInADay = 86_400;
-        const rangeInSeconds = BigNumber.from(secondsInADay * 5);
-        const currentTimestamp = BigNumber.from(Math.floor(Date.now() / 1000));
+        const secondsInADay = 86_400n;
+        const rangeInSeconds = secondsInADay * 5n;
+        const currentTimestamp = BigInt(dayjs().unix());
 
-        if (maturity.gt(currentTimestamp)) {
-          const differenceInSeconds = maturity.sub(currentTimestamp);
+        if (maturity > currentTimestamp) {
+          const differenceInSeconds = maturity - currentTimestamp;
 
-          if (rangeInSeconds.gt(differenceInSeconds)) {
+          if (rangeInSeconds > differenceInSeconds) {
             setDate(parseTimestamp(maturity.toString(), 'MMM DD, YYYY, HH:mm:ss'));
             setOpenReminder(true);
           }
@@ -51,7 +51,7 @@ export default function MaturityDateReminder() {
       anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
     >
       <Alert severity="warning">
-        {t('Make sure to repay your fixed borrows before {{date}} to avoid penalty fees.', { date: date })}
+        {t('Make sure to repay your fixed borrows before {{date}} to avoid penalty fees.', { date })}
       </Alert>
     </Snackbar>
   ) : null;

@@ -16,6 +16,7 @@ module.exports = {
     'plugin:@typescript-eslint/recommended',
     'plugin:@next/next/recommended',
   ],
+  ignorePatterns: ['types/abi.ts'],
   rules: {
     eqeqeq: ['error', 'always', { null: 'ignore' }],
     'no-console': 'error',

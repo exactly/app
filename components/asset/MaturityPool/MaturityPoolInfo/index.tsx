@@ -9,10 +9,9 @@ import { toPercentage } from 'utils/utils';
 import numbers from 'config/numbers.json';
 import parseTimestamp from 'utils/parseTimestamp';
 import useRewards from 'hooks/useRewards';
-import { Zero } from '@ethersproject/constants';
 import ItemCell from 'components/common/ItemCell';
-import { BigNumber, formatFixed } from '@ethersproject/bignumber';
 import { useTranslation } from 'react-i18next';
+import { formatUnits } from 'viem';
 
 type MaturityPoolInfoProps = {
   symbol: string;
@@ -22,7 +21,7 @@ type MaturityPoolInfoProps = {
   bestDepositMaturity?: number;
   bestBorrowRate?: number;
   bestBorrowMaturity?: number;
-  adjustFactor?: BigNumber;
+  adjustFactor?: bigint;
 };
 
 const MaturityPoolInfo: FC<MaturityPoolInfoProps> = ({
@@ -52,7 +51,7 @@ const MaturityPoolInfo: FC<MaturityPoolInfoProps> = ({
       },
       {
         label: t('Risk-Adjust Factor'),
-        value: adjustFactor ? formatFixed(adjustFactor, 18) : undefined,
+        value: adjustFactor ? formatUnits(adjustFactor, 18) : undefined,
         tooltipTitle: t(
           'The Borrow risk-adjust factor is a measure that helps evaluate how risky an asset is compared to others. The higher the number, the safer the asset is considered to be, making it more valuable as collateral when requesting a loan.',
         ),
@@ -81,7 +80,7 @@ const MaturityPoolInfo: FC<MaturityPoolInfoProps> = ({
           'The lowest fixed borrowing interest APR at current utilization levels for all the Fixed Rate Pools.',
         ),
       },
-      ...(rates[symbol] && rates[symbol].some((r) => r.borrow.gt(Zero))
+      ...(rates[symbol] && rates[symbol].some((r) => r.borrow > 0n)
         ? [
             {
               label: t('Borrow Rewards APR'),

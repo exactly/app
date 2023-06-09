@@ -1,5 +1,3 @@
-import { BigNumber, parseFixed } from '@ethersproject/bignumber';
-import { WeiPerEther, Zero } from '@ethersproject/constants';
 import { useOperationContext } from 'contexts/OperationContext';
 import useAccountData from 'hooks/useAccountData';
 import useApprove from 'hooks/useApprove';
@@ -10,9 +8,11 @@ import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { OperationHook } from 'types/OperationHook';
 import useAnalytics from './useAnalytics';
-import { defaultAmount, gasLimitMultiplier } from 'utils/const';
+import { GAS_LIMIT_MULTIPLIER, WEI_PER_ETHER } from 'utils/const';
 import { CustomError } from 'types/Error';
 import useEstimateGas from './useEstimateGas';
+import { parseUnits } from 'viem';
+import { waitForTransaction } from '@wagmi/core';
 
 type Deposit = {
   deposit: () => void;
@@ -21,7 +21,7 @@ type Deposit = {
 export default (): Deposit => {
   const { t } = useTranslation();
   const { transaction } = useAnalytics();
-  const { walletAddress } = useWeb3();
+  const { walletAddress, opts } = useWeb3();
 
   const {
     symbol,
@@ -43,7 +43,7 @@ export default (): Deposit => {
 
   const { marketAccount } = useAccountData(symbol);
 
-  const walletBalance = useBalance(symbol, assetContract);
+  const walletBalance = useBalance(symbol, assetContract?.address);
 
   const {
     approve,
@@ -55,14 +55,15 @@ export default (): Deposit => {
   const estimate = useEstimateGas();
 
   const previewGasCost = useCallback(
-    async (quantity: string): Promise<BigNumber | undefined> => {
+    async (quantity: string): Promise<bigint | undefined> => {
       if (
         !walletAddress ||
         !ETHRouterContract ||
         !marketContract ||
         !quantity ||
         (walletBalance && parseFloat(quantity) > parseFloat(walletBalance)) ||
-        !marketAccount
+        !marketAccount ||
+        !opts
       )
         return;
 
@@ -70,21 +71,19 @@ export default (): Deposit => {
         return approveEstimateGas();
       }
 
+      const amount = parseUnits(quantity as `${number}`, marketAccount.decimals);
+
       if (marketAccount.assetSymbol === 'WETH') {
-        const value = quantity ? parseFixed(quantity, 18) : defaultAmount;
-        const populated = await ETHRouterContract.populateTransaction.deposit({ value });
-        const gasCost = await estimate(populated);
-        if (value.add(gasCost ?? Zero).gte(parseFixed(walletBalance || '0', 18))) {
+        const sim = await ETHRouterContract.simulate.deposit({ ...opts, value: amount });
+        const gasCost = await estimate(sim.request);
+        if (amount + (gasCost ?? 0n) >= parseUnits((walletBalance as `${number}`) || '0', marketAccount.decimals)) {
           throw new CustomError(t('Reserve ETH for gas fees.'), 'warning');
         }
         return gasCost;
       }
 
-      const populated = await marketContract.populateTransaction.deposit(
-        quantity ? parseFixed(quantity, marketAccount.decimals) : defaultAmount,
-        walletAddress,
-      );
-      return estimate(populated);
+      const sim = await marketContract.simulate.deposit([amount, walletAddress], opts);
+      return estimate(sim.request);
     },
     [
       walletAddress,
@@ -93,6 +92,7 @@ export default (): Deposit => {
       walletBalance,
       marketAccount,
       needsApproval,
+      opts,
       estimate,
       approveEstimateGas,
       t,
@@ -123,43 +123,45 @@ export default (): Deposit => {
   );
 
   const deposit = useCallback(async () => {
-    if (!walletAddress || !marketContract || !marketAccount) return;
-    let depositTx;
+    if (!walletAddress || !marketContract || !marketAccount || !opts) return;
+    let hash;
+    setIsLoadingOp(true);
     try {
-      setIsLoadingOp(true);
       transaction.addToCart();
 
+      const amount = parseUnits(qty as `${number}`, marketAccount.decimals);
       if (marketAccount.assetSymbol === 'WETH') {
         if (!ETHRouterContract) return;
 
-        const gasEstimation = await ETHRouterContract.estimateGas.deposit({ value: parseFixed(qty, 18) });
+        const gasEstimation = await ETHRouterContract.estimateGas.deposit({ ...opts, value: amount });
 
-        depositTx = await ETHRouterContract.deposit({
-          value: parseFixed(qty, 18),
-          gasLimit: gasEstimation.mul(gasLimitMultiplier).div(WeiPerEther),
+        hash = await ETHRouterContract.write.deposit({
+          ...opts,
+          value: amount,
+          gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
         });
       } else {
-        const depositAmount = parseFixed(qty, marketAccount.decimals);
-        const gasEstimation = await marketContract.estimateGas.deposit(depositAmount, walletAddress);
+        const args = [amount, walletAddress] as const;
+        const gasEstimation = await marketContract.estimateGas.deposit(args, opts);
 
-        depositTx = await marketContract.deposit(depositAmount, walletAddress, {
-          gasLimit: gasEstimation.mul(gasLimitMultiplier).div(WeiPerEther),
+        hash = await marketContract.write.deposit(args, {
+          ...opts,
+          gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
         });
       }
 
       transaction.beginCheckout();
 
-      setTx({ status: 'processing', hash: depositTx.hash });
+      setTx({ status: 'processing', hash });
 
-      const { status, transactionHash } = await depositTx.wait();
+      const { status, transactionHash } = await waitForTransaction({ hash });
 
       setTx({ status: status ? 'success' : 'error', hash: transactionHash });
 
       if (status) transaction.purchase();
     } catch (error) {
       transaction.removeFromCart();
-
-      if (depositTx) setTx({ status: 'error', hash: depositTx.hash });
+      if (hash) setTx({ status: 'error', hash });
       setErrorData({ status: true, message: handleOperationError(error) });
     } finally {
       setIsLoadingOp(false);
@@ -168,11 +170,12 @@ export default (): Deposit => {
     walletAddress,
     marketContract,
     marketAccount,
+    opts,
     setIsLoadingOp,
-    transaction,
-    setTx,
-    ETHRouterContract,
     qty,
+    setTx,
+    transaction,
+    ETHRouterContract,
     setErrorData,
     handleOperationError,
   ]);

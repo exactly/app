@@ -1,12 +1,3 @@
-import { BigNumber, parseFixed } from '@ethersproject/bignumber';
-import useAccountData from 'hooks/useAccountData';
-import useDelayedEffect from 'hooks/useDelayedEffect';
-import useERC20 from 'hooks/useERC20';
-import useETHRouter from 'hooks/useETHRouter';
-import useHandleOperationError from 'hooks/useHandleOperationError';
-import useMarket from 'hooks/useMarket';
-import { useWeb3 } from 'hooks/useWeb3';
-import useRouter from 'hooks/useRouter';
 import React, {
   createContext,
   type PropsWithChildren,
@@ -17,6 +8,16 @@ import React, {
   useEffect,
   useMemo,
 } from 'react';
+import { parseUnits } from 'viem';
+
+import useAccountData from 'hooks/useAccountData';
+import useDelayedEffect from 'hooks/useDelayedEffect';
+import useERC20 from 'hooks/useERC20';
+import useETHRouter from 'hooks/useETHRouter';
+import useHandleOperationError from 'hooks/useHandleOperationError';
+import useMarket from 'hooks/useMarket';
+import { useWeb3 } from 'hooks/useWeb3';
+import useRouter from 'hooks/useRouter';
 import { ERC20, Market, MarketETHRouter } from 'types/contracts';
 import { ErrorData } from 'types/Error';
 import { OperationHook } from 'types/OperationHook';
@@ -33,8 +34,8 @@ type ContextValues = {
   setErrorData: React.Dispatch<React.SetStateAction<ErrorData | undefined>>;
   qty: string;
   setQty: React.Dispatch<React.SetStateAction<string>>;
-  gasCost?: BigNumber;
-  setGasCost: React.Dispatch<React.SetStateAction<BigNumber | undefined>>;
+  gasCost?: bigint;
+  setGasCost: React.Dispatch<React.SetStateAction<bigint | undefined>>;
   tx?: Transaction;
   setTx: React.Dispatch<React.SetStateAction<Transaction | undefined>>;
 
@@ -52,7 +53,7 @@ type ContextValues = {
 
   rawSlippage: string;
   setRawSlippage: React.Dispatch<React.SetStateAction<string>>;
-  slippage: BigNumber;
+  slippage: bigint;
 
   loadingButton: LoadingButton;
   setLoadingButton: (loading: LoadingButton) => void;
@@ -73,7 +74,7 @@ export const OperationContextProvider: FC<PropsWithChildren> = ({ children }) =>
   const [errorData, setErrorData] = useState<ErrorData | undefined>();
 
   const [qty, setQty] = useState<string>('');
-  const [gasCost, setGasCost] = useState<BigNumber | undefined>();
+  const [gasCost, setGasCost] = useState<bigint | undefined>();
   const [tx, setTx] = useState<Transaction | undefined>();
   const [isLoading, setIsLoading] = useState(false);
   const [loadingButton, setLoadingButton] = useState<LoadingButton>({});
@@ -84,8 +85,8 @@ export const OperationContextProvider: FC<PropsWithChildren> = ({ children }) =>
 
   const slippage = useMemo(() => {
     return ['deposit', 'depositAtMaturity', 'withdraw', 'withdrawAtMaturity'].includes(operation)
-      ? parseFixed(String(1 - Number(rawSlippage) / 100), 18)
-      : parseFixed(String(1 + Number(rawSlippage) / 100), 18);
+      ? parseUnits(String(1 - Number(rawSlippage) / 100) as `${number}`, 18)
+      : parseUnits(String(1 + Number(rawSlippage) / 100) as `${number}`, 18);
   }, [operation, rawSlippage]);
 
   useEffect(() => {

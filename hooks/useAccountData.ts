@@ -1,54 +1,67 @@
 import { useCallback, useContext, useMemo } from 'react';
+import { AbiParametersToPrimitiveTypes, ExtractAbiFunction } from 'abitype';
 
-import AccountDataContext, { ContextValues } from 'contexts/AccountDataContext';
-import type { Previewer } from 'types/contracts';
+import AccountDataContext from 'contexts/AccountDataContext';
+import usePreviewerExactly from 'hooks/usePreviewerExactly';
+import { previewerABI } from 'types/abi';
+
+export type MarketAccount = AbiParametersToPrimitiveTypes<
+  ExtractAbiFunction<typeof previewerABI, 'exactly'>['outputs']
+>[number][number];
 
 type AccountDataHook = {
-  marketAccount?: Previewer.MarketAccountStructOutput;
-  accountData?: Previewer.MarketAccountStructOutput[];
+  marketAccount?: MarketAccount;
+  accountData?: readonly MarketAccount[];
   lastSync?: number;
-  getMarketAccount: (symbol: string) => Previewer.MarketAccountStructOutput | undefined;
-} & Omit<ContextValues, 'accountData'>;
+  getMarketAccount: (symbol: string) => MarketAccount | undefined;
+  refreshAccountData: (delay?: number) => Promise<void>;
+};
 
 function useAccountData(symbol: string): Omit<AccountDataHook, 'getMarketAccount'>;
 function useAccountData(): Omit<AccountDataHook, 'marketAccount'>;
 function useAccountData(
   symbol?: string,
 ): Omit<AccountDataHook, 'getMarketAccount'> | Omit<AccountDataHook, 'marketAccount'> {
+  const { isLoading, data, refetch } = usePreviewerExactly();
   const ctx = useContext(AccountDataContext);
-  if (!ctx) {
-    throw new Error('Using AccountDataContext outside of provider');
-  }
 
-  const getMarketAccount = useCallback((s: string) => ctx?.accountData?.[s], [ctx]);
-  const accountData = useMemo(() => {
-    if (!ctx?.accountData) return undefined;
-    return Object.values(ctx.accountData).filter(isDefined);
-  }, [ctx?.accountData]);
+  const getMarketAccount = useCallback(
+    (_symbol: string) => (data ? data.find((ma) => ma.assetSymbol === _symbol) : undefined),
+    [data],
+  );
 
-  const marketAccount = useMemo(() => (symbol ? ctx?.accountData?.[symbol] : undefined), [ctx?.accountData, symbol]);
+  const marketAccount = useMemo(() => (symbol ? getMarketAccount(symbol) : undefined), [symbol, getMarketAccount]);
 
-  const mutators = { refreshAccountData: ctx.refreshAccountData, resetAccountData: ctx.resetAccountData };
+  const refreshAccountData = useCallback(
+    async (delay = 2500) =>
+      new Promise<void>((r) =>
+        setTimeout(
+          () =>
+            refetch().then(() => {
+              ctx?.resetLastSync();
+              r();
+            }),
+          delay,
+        ),
+      ),
+    [refetch, ctx],
+  );
 
   if (typeof symbol === 'undefined') {
     return {
-      accountData,
-      lastSync: ctx.lastSync,
+      accountData: isLoading ? undefined : data,
+      lastSync: ctx?.lastSync,
       getMarketAccount,
-      ...mutators,
+      refreshAccountData,
     };
   }
 
   return {
     marketAccount,
-    accountData,
-    lastSync: ctx.lastSync,
-    ...mutators,
+    accountData: isLoading ? undefined : data,
+    lastSync: ctx?.lastSync,
+    refreshAccountData,
   };
-}
-
-function isDefined(ma: Previewer.MarketAccountStructOutput | undefined): ma is Previewer.MarketAccountStructOutput {
-  return !!ma;
 }
 
 export default useAccountData;

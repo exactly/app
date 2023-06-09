@@ -1,11 +1,7 @@
 import React, { type FC, useMemo, useCallback } from 'react';
 import Grid from '@mui/material/Grid';
 import ItemInfo, { ItemInfoProps } from 'components/common/ItemInfo';
-import { formatFixed } from '@ethersproject/bignumber';
-import { WeiPerEther, Zero } from '@ethersproject/constants';
 import formatNumber from 'utils/formatNumber';
-import { useWeb3 } from 'hooks/useWeb3';
-import networkData from 'config/networkData.json' assert { type: 'json' };
 import useAccountData from 'hooks/useAccountData';
 import ExplorerMenu from './ExplorerMenu';
 import { useTranslation } from 'react-i18next';
@@ -13,6 +9,8 @@ import DropdownMenu from 'components/DropdownMenu';
 import useAssets from 'hooks/useAssets';
 import AssetOption from './AssetOption';
 import useRouter from 'hooks/useRouter';
+import { WEI_PER_ETHER } from 'utils/const';
+import { formatUnits } from 'viem';
 
 type Props = {
   symbol: string;
@@ -22,7 +20,6 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
   const { t } = useTranslation();
   const { marketAccount } = useAccountData(symbol);
   const options = useAssets();
-  const { chain } = useWeb3();
   const { push, query } = useRouter();
 
   const { floatingDeposits, floatingBorrows } = useMemo(() => {
@@ -34,8 +31,8 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
       usdPrice: exchangeRate,
     } = marketAccount;
 
-    const totalFloatingDepositUSD = totalDeposited.mul(exchangeRate).div(WeiPerEther);
-    const totalFloatingBorrowUSD = totalBorrowed.mul(exchangeRate).div(WeiPerEther);
+    const totalFloatingDepositUSD = (totalDeposited * exchangeRate) / WEI_PER_ETHER;
+    const totalFloatingBorrowUSD = (totalBorrowed * exchangeRate) / WEI_PER_ETHER;
 
     return { floatingDeposits: totalFloatingDepositUSD, floatingBorrows: totalFloatingBorrowUSD };
   }, [marketAccount]);
@@ -44,16 +41,16 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
     if (!marketAccount) return {};
 
     const { fixedPools, usdPrice: exchangeRate } = marketAccount;
-    let tempTotalFixedDeposited = Zero;
-    let tempTotalFixedBorrowed = Zero;
 
-    fixedPools.map(({ borrowed, supplied: deposited }) => {
-      tempTotalFixedDeposited = tempTotalFixedDeposited.add(deposited);
-      tempTotalFixedBorrowed = tempTotalFixedBorrowed.add(borrowed);
+    let tempTotalFixedDeposited = 0n;
+    let tempTotalFixedBorrowed = 0n;
+    fixedPools.forEach(({ borrowed, supplied: deposited }) => {
+      tempTotalFixedDeposited = tempTotalFixedDeposited + deposited;
+      tempTotalFixedBorrowed = tempTotalFixedBorrowed + borrowed;
     });
 
-    const totalDepositedUSD = tempTotalFixedDeposited.mul(exchangeRate).div(WeiPerEther);
-    const totalBorrowedUSD = tempTotalFixedBorrowed.mul(exchangeRate).div(WeiPerEther);
+    const totalDepositedUSD = (tempTotalFixedDeposited * exchangeRate) / WEI_PER_ETHER;
+    const totalBorrowedUSD = (tempTotalFixedBorrowed * exchangeRate) / WEI_PER_ETHER;
 
     return { fixedDeposits: totalDepositedUSD, fixedBorrows: totalBorrowedUSD };
   }, [marketAccount]);
@@ -65,14 +62,14 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
         label: t('Total Deposits'),
         value:
           floatingDeposits !== undefined && fixedDeposits !== undefined && decimals
-            ? `$${formatNumber(formatFixed(floatingDeposits.add(fixedDeposits), decimals))}`
+            ? `$${formatNumber(formatUnits(floatingDeposits + fixedDeposits, decimals))}`
             : undefined,
       },
       {
         label: t('Total Borrows'),
         value:
           floatingBorrows !== undefined && fixedBorrows !== undefined && decimals
-            ? `$${formatNumber(formatFixed(floatingBorrows.add(fixedBorrows), decimals))}`
+            ? `$${formatNumber(formatUnits(floatingBorrows + fixedBorrows, decimals))}`
             : undefined,
       },
       {
@@ -84,13 +81,13 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
           fixedDeposits !== undefined &&
           decimals
             ? `$${formatNumber(
-                formatFixed(floatingDeposits.add(fixedDeposits).sub(floatingBorrows.add(fixedBorrows)), decimals),
+                formatUnits(floatingDeposits + fixedDeposits - (floatingBorrows + fixedBorrows), decimals),
               )}`
             : undefined,
       },
       {
         label: t('Oracle Price'),
-        value: usdPrice ? `$${formatNumber(formatFixed(usdPrice, 18), '', true)}` : undefined,
+        value: usdPrice ? `$${formatNumber(formatUnits(usdPrice, 18), '', true)}` : undefined,
         tooltipTitle: t('The price displayed here is obtained from Chainlink.'),
       },
     ];
@@ -104,7 +101,6 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
     [push, query, symbol],
   );
 
-  const etherscan = networkData[String(chain?.id) as keyof typeof networkData]?.etherscan;
   return (
     <Grid sx={{ bgcolor: 'components.bg' }} width="100%" p="24px" boxShadow="0px 4px 12px rgba(175, 177, 182, 0.2)">
       <Grid item container mb="24px" alignItems="center">
@@ -115,7 +111,7 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
           renderValue={<AssetOption assetSymbol={symbol} optionSize={22} selectedSize={30} />}
           renderOption={(o: string) => <AssetOption option assetSymbol={o} optionSize={22} selectedSize={30} />}
         />
-        {etherscan && marketAccount && (
+        {marketAccount && (
           <ExplorerMenu
             symbol={symbol}
             assetAddress={marketAccount.asset}

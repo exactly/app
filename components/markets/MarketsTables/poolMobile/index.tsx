@@ -1,6 +1,5 @@
 import React, { FC, useMemo } from 'react';
 import { Box, Button, Divider, Grid, Skeleton, SxProps, Tooltip, Typography } from '@mui/material';
-import { BigNumber } from '@ethersproject/bignumber';
 
 import numbers from 'config/numbers.json';
 import useActionButton from 'hooks/useActionButton';
@@ -51,7 +50,7 @@ const PoolMobile: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) 
                       : undefined
                   }
                   isLoading={depositAPR === undefined}
-                  maturity={depositMaturity?.toString()}
+                  maturity={depositMaturity}
                 />
                 <Grid item xs={12} my={1.8}>
                   <Divider />
@@ -65,7 +64,7 @@ const PoolMobile: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) 
                     rate: borrow,
                   }))}
                   isLoading={borrowAPR === undefined}
-                  maturity={borrowMaturity?.toString()}
+                  maturity={borrowMaturity}
                 />
               </Grid>
               <Box display="flex" gap={0.5}>
@@ -102,9 +101,9 @@ const PoolMobile: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) 
 const GridItem: FC<{
   header: TableHeader<TableRow>;
   value: string;
-  rewards?: { assetSymbol: string; rate: BigNumber }[];
+  rewards?: { assetSymbol: string; rate: bigint }[];
   isLoading?: boolean;
-  maturity?: string;
+  maturity?: number;
 }> = ({ header, value, isLoading = false, maturity, rewards }) => (
   <Grid item xs={6}>
     <Box display="flex">
@@ -130,7 +129,7 @@ const GridItem: FC<{
           ))}
         </Grid>
 
-        {maturity && maturity !== '0' && (
+        {maturity && maturity !== 0 && (
           <Typography component="p" width="fit-content" variant="subtitle2" sx={{ color: 'grey.500' }}>
             {parseTimestamp(maturity)}
           </Typography>

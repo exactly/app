@@ -1,6 +1,4 @@
 import { useCallback, useMemo, useState } from 'react';
-import { BigNumber, formatFixed, parseFixed } from '@ethersproject/bignumber';
-import { WeiPerEther, Zero } from '@ethersproject/constants';
 import { useTranslation } from 'react-i18next';
 import { useOperationContext } from 'contexts/OperationContext';
 import useAccountData from 'hooks/useAccountData';
@@ -13,15 +11,19 @@ import { OperationHook } from 'types/OperationHook';
 import getBeforeBorrowLimit from 'utils/getBeforeBorrowLimit';
 import useHealthFactor from './useHealthFactor';
 import useAnalytics from './useAnalytics';
-import { defaultAmount, gasLimitMultiplier } from 'utils/const';
+import { GAS_LIMIT_MULTIPLIER, WEI_PER_ETHER } from 'utils/const';
 import useEstimateGas from './useEstimateGas';
+import { ERC20 } from 'types/contracts';
+import { formatUnits, parseUnits } from 'viem';
+import { waitForTransaction } from '@wagmi/core';
+import dayjs from 'dayjs';
 
 type BorrowAtMaturity = {
   borrow: () => void;
   updateAPR: () => void;
   rawSlippage: string;
   setRawSlippage: (value: string) => void;
-  fixedRate: BigNumber | undefined;
+  fixedRate: bigint | undefined;
   hasCollateral: boolean;
   safeMaximumBorrow: string;
 } & OperationHook;
@@ -29,7 +31,7 @@ type BorrowAtMaturity = {
 export default (): BorrowAtMaturity => {
   const { t } = useTranslation();
   const { transaction } = useAnalytics();
-  const { walletAddress } = useWeb3();
+  const { walletAddress, opts } = useWeb3();
 
   const {
     symbol,
@@ -53,14 +55,14 @@ export default (): BorrowAtMaturity => {
 
   const { accountData, marketAccount } = useAccountData(symbol);
 
-  const [fixedRate, setFixedRate] = useState<BigNumber | undefined>();
+  const [fixedRate, setFixedRate] = useState<bigint | undefined>();
 
   const healthFactor = useHealthFactor();
-  const minBorrowRate = useMemo<BigNumber | undefined>(() => {
+  const minBorrowRate = useMemo<bigint | undefined>(() => {
     if (!marketAccount) return;
 
     const { fixedPools = [] } = marketAccount;
-    const pool = fixedPools.find(({ maturity }) => maturity.toNumber() === date);
+    const pool = fixedPools.find(({ maturity }) => maturity === BigInt(date ?? 0));
     return pool?.minBorrowRate;
   }, [marketAccount, date]);
 
@@ -71,44 +73,39 @@ export default (): BorrowAtMaturity => {
     estimateGas: approveEstimateGas,
     isLoading: approveIsLoading,
     needsApproval,
-  } = useApprove('borrowAtMaturity', marketContract, ETHRouterContract?.address);
+  } = useApprove('borrowAtMaturity', marketContract as ERC20 | undefined, ETHRouterContract?.address);
 
   const poolLiquidity = usePoolLiquidity(symbol);
 
   const hasCollateral = useMemo(() => {
     if (!accountData || !marketAccount) return false;
 
-    return marketAccount.floatingDepositAssets.gt(Zero) || accountData.some((aMarket) => aMarket.isCollateral);
+    return marketAccount.floatingDepositAssets > 0n || accountData.some((aMarket) => aMarket.isCollateral);
   }, [accountData, marketAccount]);
 
   const estimate = useEstimateGas();
 
   const previewGasCost = useCallback(
-    async (quantity: string): Promise<BigNumber | undefined> => {
-      if (!marketAccount || !walletAddress || !marketContract || !ETHRouterContract || !date || !quantity) return;
+    async (quantity: string): Promise<bigint | undefined> => {
+      if (!marketAccount || !walletAddress || !marketContract || !ETHRouterContract || !date || !quantity || !opts)
+        return;
 
       if (await needsApproval(quantity)) {
         return approveEstimateGas();
       }
 
+      const amount = parseUnits(quantity as `${number}`, marketAccount.decimals);
+      const maxAmount = (amount * slippage) / WEI_PER_ETHER;
       if (marketAccount.assetSymbol === 'WETH') {
-        const amount = quantity ? parseFixed(quantity, 18) : defaultAmount;
-        const maxAmount = amount.mul(slippage).div(WeiPerEther);
-
-        const populated = await ETHRouterContract.populateTransaction.borrowAtMaturity(date, amount, maxAmount);
-        return estimate(populated);
+        const sim = await ETHRouterContract.simulate.borrowAtMaturity([BigInt(date), amount, maxAmount], opts);
+        return estimate(sim.request);
       }
 
-      const amount = quantity ? parseFixed(quantity, marketAccount.decimals) : defaultAmount;
-      const maxAmount = amount.mul(slippage).div(WeiPerEther);
-      const populated = await marketContract.populateTransaction.borrowAtMaturity(
-        date,
-        amount,
-        maxAmount,
-        walletAddress,
-        walletAddress,
+      const sim = await marketContract.simulate.borrowAtMaturity(
+        [BigInt(date), amount, maxAmount, walletAddress, walletAddress],
+        opts,
       );
-      return estimate(populated);
+      return estimate(sim.request);
     },
     [
       marketAccount,
@@ -116,6 +113,7 @@ export default (): BorrowAtMaturity => {
       marketContract,
       ETHRouterContract,
       date,
+      opts,
       needsApproval,
       slippage,
       estimate,
@@ -131,12 +129,12 @@ export default (): BorrowAtMaturity => {
     const { usdPrice, adjustFactor, floatingDepositAssets, isCollateral, decimals } = marketAccount;
 
     let col = healthFactor.collateral;
-    const hf = parseFixed('1.05', 18);
+    const hf = parseUnits('1.05', 18);
 
-    const hasDepositedToFloatingPool = Number(formatFixed(floatingDepositAssets, decimals)) > 0;
+    const hasDepositedToFloatingPool = floatingDepositAssets > 0n;
 
     if (!isCollateral && hasDepositedToFloatingPool) {
-      col = col.add(floatingDepositAssets.mul(adjustFactor).div(WeiPerEther));
+      col = col + (floatingDepositAssets * adjustFactor) / WEI_PER_ETHER;
     }
 
     const { debt } = healthFactor;
@@ -144,15 +142,9 @@ export default (): BorrowAtMaturity => {
     return Math.max(
       0,
       Number(
-        formatFixed(
-          col
-            .sub(hf.mul(debt).div(WeiPerEther))
-            .mul(WeiPerEther)
-            .div(hf)
-            .mul(WeiPerEther)
-            .div(usdPrice)
-            .mul(adjustFactor)
-            .div(WeiPerEther),
+        formatUnits(
+          ((((((col - (hf * debt) / WEI_PER_ETHER) * WEI_PER_ETHER) / hf) * WEI_PER_ETHER) / usdPrice) * adjustFactor) /
+            WEI_PER_ETHER,
           18,
         ),
       ),
@@ -180,13 +172,7 @@ export default (): BorrowAtMaturity => {
 
       const borrowLimit = getBeforeBorrowLimit(marketAccount, 'borrow');
 
-      if (
-        borrowLimit.lt(
-          parseFixed(value || '0', decimals)
-            .mul(usdPrice)
-            .div(WeiPerEther),
-        )
-      ) {
+      if (borrowLimit < (parseUnits((value as `${number}`) || '0', decimals) * usdPrice) / WEI_PER_ETHER) {
         return setErrorData({
           status: true,
           message: t("You can't borrow more than your borrow limit"),
@@ -200,7 +186,7 @@ export default (): BorrowAtMaturity => {
   const borrow = useCallback(async () => {
     setIsLoadingOp(true);
 
-    if (fixedRate && Number(formatFixed(slippage, 18)) < Number(fixedRate) / 1e18) {
+    if (fixedRate && slippage < fixedRate) {
       setIsLoadingOp(false);
 
       return setErrorData({
@@ -209,49 +195,48 @@ export default (): BorrowAtMaturity => {
       });
     }
 
-    if (!marketAccount || !date || !qty || !walletAddress) return;
+    if (!marketAccount || !date || !qty || !walletAddress || !opts) return;
 
-    const amount = parseFixed(qty, marketAccount.decimals);
-    const maxAmount = amount.mul(slippage).div(WeiPerEther);
+    const amount = parseUnits(qty as `${number}`, marketAccount.decimals);
+    const maxAmount = (amount * slippage) / WEI_PER_ETHER;
 
-    let borrowTx;
+    let hash;
     try {
       transaction.addToCart();
       if (marketAccount.assetSymbol === 'WETH') {
-        if (!ETHRouterContract) throw new Error('ETHRouterContract is undefined');
+        if (!ETHRouterContract) return;
 
-        const gasEstimation = await ETHRouterContract.estimateGas.borrowAtMaturity(date, amount, maxAmount);
+        const args = [BigInt(date), amount, maxAmount] as const;
 
-        borrowTx = await ETHRouterContract.borrowAtMaturity(date, amount, maxAmount, {
-          gasLimit: gasEstimation.mul(gasLimitMultiplier).div(WeiPerEther),
+        const gasEstimation = await ETHRouterContract.estimateGas.borrowAtMaturity(args, opts);
+
+        hash = await ETHRouterContract.write.borrowAtMaturity(args, {
+          ...opts,
+          gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
         });
       } else {
         if (!marketContract) return;
 
-        const gasEstimation = await marketContract.estimateGas.borrowAtMaturity(
-          date,
-          amount,
-          maxAmount,
-          walletAddress,
-          walletAddress,
-        );
+        const args = [BigInt(date), amount, maxAmount, walletAddress, walletAddress] as const;
 
-        borrowTx = await marketContract.borrowAtMaturity(date, amount, maxAmount, walletAddress, walletAddress, {
-          gasLimit: gasEstimation.mul(gasLimitMultiplier).div(WeiPerEther),
+        const gasEstimation = await marketContract.estimateGas.borrowAtMaturity(args, opts);
+
+        hash = await marketContract.write.borrowAtMaturity(args, {
+          ...opts,
+          gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
         });
       }
 
       transaction.beginCheckout();
+      setTx({ status: 'processing', hash });
 
-      setTx({ status: 'processing', hash: borrowTx?.hash });
-
-      const { status, transactionHash } = await borrowTx.wait();
+      const { status, transactionHash } = await waitForTransaction({ hash });
       setTx({ status: status ? 'success' : 'error', hash: transactionHash });
 
       if (status) transaction.purchase();
     } catch (error) {
       transaction.removeFromCart();
-      if (borrowTx?.hash) setTx({ status: 'error', hash: borrowTx.hash });
+      if (hash) setTx({ status: 'error', hash });
 
       setErrorData({
         status: true,
@@ -268,6 +253,7 @@ export default (): BorrowAtMaturity => {
     date,
     qty,
     walletAddress,
+    opts,
     setErrorData,
     t,
     transaction,
@@ -284,16 +270,16 @@ export default (): BorrowAtMaturity => {
     }
 
     if (qty) {
-      const initialAssets = parseFixed(qty, marketAccount.decimals);
+      const initialAssets = parseUnits(qty as `${number}`, marketAccount.decimals);
       try {
-        const { assets: finalAssets } = await previewerContract.previewBorrowAtMaturity(
+        const { assets: finalAssets } = await previewerContract.read.previewBorrowAtMaturity([
           marketAccount.market,
-          date,
+          BigInt(date),
           initialAssets,
-        );
-        const currentTimestamp = Math.floor(Date.now() / 1000);
-        const rate = finalAssets.mul(WeiPerEther).div(initialAssets);
-        const fixedAPR = rate.sub(WeiPerEther).mul(31_536_000).div(BigNumber.from(date).sub(currentTimestamp));
+        ]);
+        const currentTimestamp = BigInt(dayjs().unix());
+        const rate = (finalAssets * WEI_PER_ETHER) / initialAssets;
+        const fixedAPR = ((rate - WEI_PER_ETHER) * 31_536_000n) / (BigInt(date) - currentTimestamp);
 
         setFixedRate(fixedAPR);
       } catch (error) {

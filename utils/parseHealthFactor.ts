@@ -1,16 +1,15 @@
-import type { BigNumber } from '@ethersproject/bignumber';
-import { formatFixed } from '@ethersproject/bignumber';
-import { WAD } from './queryRates';
+import { formatUnits } from 'viem';
+import { WEI_PER_ETHER } from './const';
 
-function parseHealthFactor(debt: BigNumber, collateral: BigNumber) {
+function parseHealthFactor(debt: bigint, collateral: bigint) {
   //TODO => check case when the user doesn't have any collateral or debt
 
-  if (collateral.isZero() && debt.isZero()) {
+  if (collateral === 0n && debt === 0n) {
     return '∞';
-  } else if (!debt.isZero()) {
-    const healthFactor = collateral.mul(WAD).div(debt);
+  } else if (debt !== 0n) {
+    const healthFactor = (collateral * WEI_PER_ETHER) / debt;
 
-    const formatedHealthFactor = Number(formatFixed(healthFactor, 18));
+    const formatedHealthFactor = Number(formatUnits(healthFactor, 18));
 
     if (formatedHealthFactor > 100) {
       return '∞';

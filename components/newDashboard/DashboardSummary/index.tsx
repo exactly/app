@@ -15,7 +15,7 @@ const DashboardSummary = () => {
   const loading = useMemo(() => !accountData, [accountData]);
 
   const isNewUser = useMemo(
-    () => totalBorrowedUSD.isZero() && totalDepositedUSD.isZero(),
+    () => totalBorrowedUSD === 0n && totalDepositedUSD === 0n,
     [totalBorrowedUSD, totalDepositedUSD],
   );
 

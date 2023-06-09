@@ -11,7 +11,7 @@ export default () => {
 
     accountData.forEach((asset) => {
       asset.fixedDepositPositions.forEach((pool) => {
-        const date = pool.maturity.toNumber();
+        const date = Number(pool.maturity);
         const entry: Pool = {
           maturity: date,
           symbol: asset.assetSymbol,
@@ -25,7 +25,7 @@ export default () => {
       });
 
       asset.fixedBorrowPositions.forEach((pool) => {
-        const date = pool.maturity.toNumber();
+        const date = Number(pool.maturity);
         const entry: Pool = {
           maturity: date,
           symbol: asset.assetSymbol,

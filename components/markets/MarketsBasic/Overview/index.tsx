@@ -1,5 +1,3 @@
-import { formatFixed } from '@ethersproject/bignumber';
-import { Zero } from '@ethersproject/constants';
 import { Box, Skeleton, Typography, useTheme } from '@mui/material';
 import { MarketsBasicOperation, MarketsBasicOption } from 'contexts/MarketsBasicContext';
 import useAccountData from 'hooks/useAccountData';
@@ -12,6 +10,7 @@ import useTranslateOperation from 'hooks/useTranslateOperation';
 
 import parseTimestamp from 'utils/parseTimestamp';
 import { toPercentage } from 'utils/utils';
+import { formatUnits } from 'viem';
 
 type Props = {
   symbol: string;
@@ -56,7 +55,7 @@ const Overview: FC<Props> = ({ symbol, operation, qty, option }) => {
               style={{ maxWidth: '100%', height: 'auto' }}
             />
             <Typography fontWeight={700} fontSize={24}>
-              {formatNumber(formatFixed(option.finalAssets, marketAccount.decimals), symbol, true)}
+              {formatNumber(formatUnits(option.finalAssets, marketAccount.decimals), symbol, true)}
             </Typography>
           </>
         ) : (
@@ -91,7 +90,7 @@ const Overview: FC<Props> = ({ symbol, operation, qty, option }) => {
           {option.interest && marketAccount ? (
             <>
               <Typography fontWeight={700} fontSize={13}>
-                {formatNumber(formatFixed(option.interest, marketAccount.decimals), symbol)}
+                {formatNumber(formatUnits(option.interest, marketAccount.decimals), symbol)}
               </Typography>
               <Image
                 src={`/img/assets/${symbol}.svg`}
@@ -130,7 +129,7 @@ const Overview: FC<Props> = ({ symbol, operation, qty, option }) => {
             {t('Late payment penalty daily rate')}
           </Typography>
           <Typography fontWeight={700} fontSize={13}>
-            {toPercentage(parseFloat(formatFixed(marketAccount?.penaltyRate || Zero, 18)) * 86_400)}
+            {toPercentage(parseFloat(formatUnits(marketAccount?.penaltyRate || 0n, 18)) * 86_400)}
           </Typography>
         </Box>
       )}

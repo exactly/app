@@ -1,17 +1,16 @@
-import { BigNumber, formatFixed } from '@ethersproject/bignumber';
-import { WeiPerEther } from '@ethersproject/constants';
-
 import { useMemo } from 'react';
+import { formatUnits } from 'viem';
 import { useTheme } from '@mui/material';
 import formatNumber from 'utils/formatNumber';
 import { toPercentage } from 'utils/utils';
 import useAccountData from './useAccountData';
 import useTotalsUsd from './useTotalsUsd';
+import { WEI_PER_ETHER } from 'utils/const';
 
-type assetComposition = {
+type AssetComposition = {
   name: string;
-  usdValue: BigNumber | number | string;
-  amount: BigNumber | number | string;
+  usdValue: number;
+  amount: string;
   percentage?: string;
   fill?: string;
 };
@@ -21,15 +20,14 @@ export default function useAssetsComposition() {
   const { totalDepositedUSD, totalBorrowedUSD } = useTotalsUsd();
   const { palette } = useTheme();
 
-  const { loading, depositsComposition, borrowsComposition } = useMemo<{
-    loading?: boolean;
-    depositsComposition?: assetComposition[];
-    borrowsComposition?: assetComposition[];
+  const { depositsComposition, borrowsComposition } = useMemo<{
+    depositsComposition?: AssetComposition[];
+    borrowsComposition?: AssetComposition[];
   }>(() => {
     if (!accountData) return {};
 
-    const dComposition: assetComposition[] = [];
-    const bComposition: assetComposition[] = [];
+    const dComposition: AssetComposition[] = [];
+    const bComposition: AssetComposition[] = [];
 
     accountData.forEach((market, i) => {
       const {
@@ -42,32 +40,28 @@ export default function useAssetsComposition() {
         assetSymbol,
       } = market;
 
-      const depositedAssets = [];
-      const borrowedAssets = [];
+      const depositedAssets = [
+        floatingDepositAssets,
+        ...fixedDepositPositions.map((depositPosition) => depositPosition.position.principal),
+      ];
+      const borrowedAssets = [
+        floatingBorrowAssets,
+        ...fixedBorrowPositions.map((borrowPosition) => borrowPosition.position.principal),
+      ];
 
-      depositedAssets.push(floatingDepositAssets);
-      borrowedAssets.push(floatingBorrowAssets);
+      const totalDepositedAssets = depositedAssets.reduce((accumulator, currentValue) => accumulator + currentValue);
+      const totalBorrowedAssets = borrowedAssets.reduce((accumulator, currentValue) => accumulator + currentValue);
 
-      fixedDepositPositions.forEach((depositPosition) => {
-        depositedAssets.push(depositPosition.position.principal);
-      });
-      fixedBorrowPositions.forEach((borrowPosition) => {
-        borrowedAssets.push(borrowPosition.position.principal);
-      });
+      const depositedAssetUSD = (totalDepositedAssets * usdPrice) / 10n ** BigInt(decimals);
+      const borrowedAssetUSD = (totalBorrowedAssets * usdPrice) / 10n ** BigInt(decimals);
 
-      const totalDepositedAssets = depositedAssets.reduce((accumulator, currentValue) => accumulator.add(currentValue));
-      const totalBorrowedAssets = borrowedAssets.reduce((accumulator, currentValue) => accumulator.add(currentValue));
-
-      const depositedAssetUSD = totalDepositedAssets.mul(usdPrice).div(10n ** BigInt(decimals));
-      const borrowedAssetUSD = totalBorrowedAssets.mul(usdPrice).div(10n ** BigInt(decimals));
-
-      if (!totalDepositedAssets.isZero()) {
-        const depositData: assetComposition = {
+      if (totalDepositedAssets !== 0n) {
+        const depositData: AssetComposition = {
           name: assetSymbol,
-          usdValue: parseFloat(formatFixed(depositedAssetUSD, 18)),
-          amount: formatNumber(formatFixed(totalDepositedAssets, decimals), assetSymbol, true),
+          usdValue: parseFloat(formatUnits(depositedAssetUSD, 18)),
+          amount: formatNumber(formatUnits(totalDepositedAssets, decimals), assetSymbol, true),
           percentage: toPercentage(
-            parseFloat(formatFixed(depositedAssetUSD.mul(WeiPerEther).div(totalDepositedUSD), 18)),
+            parseFloat(formatUnits((depositedAssetUSD * WEI_PER_ETHER) / totalDepositedUSD, 18)),
             2,
           ),
           fill: palette.colors[i] || palette.grey[500],
@@ -75,13 +69,13 @@ export default function useAssetsComposition() {
         if (depositData.usdValue !== 0) dComposition.push(depositData);
       }
 
-      if (!totalBorrowedAssets.isZero()) {
-        const borrowData: assetComposition = {
+      if (totalBorrowedAssets !== 0n) {
+        const borrowData: AssetComposition = {
           name: market.assetSymbol,
-          usdValue: parseFloat(formatFixed(borrowedAssetUSD, 18)),
-          amount: formatNumber(formatFixed(totalBorrowedAssets, decimals), assetSymbol),
+          usdValue: parseFloat(formatUnits(borrowedAssetUSD, 18)),
+          amount: formatNumber(formatUnits(totalBorrowedAssets, decimals), assetSymbol),
           percentage: toPercentage(
-            parseFloat(formatFixed(borrowedAssetUSD.mul(WeiPerEther).div(totalBorrowedUSD), 18)),
+            parseFloat(formatUnits((borrowedAssetUSD * WEI_PER_ETHER) / totalBorrowedUSD, 18)),
             2,
           ),
           fill: palette.colors[i] || palette.grey[500],
@@ -90,8 +84,8 @@ export default function useAssetsComposition() {
       }
     });
 
-    return { depositsComposition: dComposition, borrowsComposition: bComposition, loading: false };
+    return { depositsComposition: dComposition, borrowsComposition: bComposition };
   }, [accountData, palette.colors, palette.grey, totalBorrowedUSD, totalDepositedUSD]);
 
-  return { loading, depositsComposition, borrowsComposition };
+  return { depositsComposition, borrowsComposition };
 }

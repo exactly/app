@@ -1,29 +1,34 @@
 import { useMemo } from 'react';
-import { Contract } from '@ethersproject/contracts';
-import { useProvider } from 'wagmi';
+import { usePublicClient } from 'wagmi';
+import { getContract } from '@wagmi/core';
+import { isAddress } from 'viem';
 import { mainnet, goerli, optimism } from 'wagmi/chains';
-import type { Previewer } from 'types/contracts/Previewer';
+
+import { useWeb3 } from './useWeb3';
+import { previewerABI } from 'types/abi';
 import mainnetPreviewer from '@exactly/protocol/deployments/mainnet/Previewer.json' assert { type: 'json' };
 import optimismPreviewer from '@exactly/protocol/deployments/optimism/Previewer.json' assert { type: 'json' };
 import goerliPreviewer from '@exactly/protocol/deployments/goerli/Previewer.json' assert { type: 'json' };
-import previewerABI from 'abi/Previewer.json' assert { type: 'json' };
-import { useWeb3 } from './useWeb3';
+import { Previewer } from 'types/contracts';
 
-export default () => {
+export default (): Previewer | undefined => {
+  const publicClient = usePublicClient();
   const { chain } = useWeb3();
-  const provider = useProvider({ chainId: chain?.id });
 
   return useMemo(() => {
-    if (!chain) return null;
-
     const address = {
       [goerli.id]: goerliPreviewer.address,
       [optimism.id]: optimismPreviewer.address,
       [mainnet.id]: mainnetPreviewer.address,
     }[chain.id];
 
-    if (!address) return null;
+    if (!address || !isAddress(address)) return;
 
-    return new Contract(address, previewerABI, provider) as Previewer;
-  }, [chain, provider]);
+    return getContract({
+      chainId: chain.id,
+      address,
+      abi: previewerABI,
+      publicClient,
+    });
+  }, [chain.id, publicClient]);
 };

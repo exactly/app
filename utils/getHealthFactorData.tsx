@@ -1,19 +1,20 @@
-import { BigNumber, parseFixed } from '@ethersproject/bignumber';
-import { WeiPerEther, Zero } from '@ethersproject/constants';
+import { MarketAccount } from 'hooks/useAccountData';
+import { parseUnits } from 'viem';
+import dayjs from 'dayjs';
 
-import { Previewer } from 'types/contracts';
 import { HealthFactor } from 'types/HealthFactor';
+import { WEI_PER_ETHER } from './const';
 
-function getHealthFactorData(accountData: Previewer.MarketAccountStructOutput[]): HealthFactor {
-  let collateral = Zero;
-  let debt = Zero;
+function getHealthFactorData(accountData: readonly MarketAccount[]): HealthFactor {
+  let collateral = 0n;
+  let debt = 0n;
 
   try {
     accountData.forEach((fixedLender) => {
-      let fixedLenderCollateral = Zero;
-      let fixedLenderDebt = Zero;
+      let fixedLenderCollateral = 0n;
+      let fixedLenderDebt = 0n;
       const decimals = fixedLender.decimals;
-      const decimalWAD = parseFixed('1', decimals); //WAD based on the decimals of the fixedLender
+      const decimalWAD = parseUnits('1', decimals);
 
       const oracle = fixedLender.usdPrice;
       const adjustFactor = fixedLender.adjustFactor;
@@ -22,40 +23,38 @@ function getHealthFactorData(accountData: Previewer.MarketAccountStructOutput[])
       if (fixedLender.isCollateral) {
         const assets = fixedLender.floatingDepositAssets;
 
-        fixedLenderCollateral = fixedLenderCollateral.add(assets.mul(oracle).div(decimalWAD));
+        fixedLenderCollateral = fixedLenderCollateral + (assets * oracle) / decimalWAD;
       }
 
-      collateral = collateral.add(fixedLenderCollateral.mul(adjustFactor).div(WeiPerEther));
+      collateral = collateral + (fixedLenderCollateral * adjustFactor) / WEI_PER_ETHER;
 
       //Floating Debt
       if (fixedLender.floatingBorrowAssets) {
         const borrowAssets = fixedLender.floatingBorrowAssets;
 
-        fixedLenderDebt = fixedLenderDebt.add(borrowAssets.mul(oracle)).div(decimalWAD);
+        fixedLenderDebt = (fixedLenderDebt + borrowAssets * oracle) / decimalWAD;
       }
 
       //Fixed Debt
       fixedLender.fixedBorrowPositions.forEach((borrowPosition) => {
         const penaltyRate = fixedLender.penaltyRate;
-        const principal = borrowPosition.position.principal;
-        const fee = borrowPosition.position.fee;
-
+        const { principal, fee } = borrowPosition.position;
         const maturityTimestamp = borrowPosition.maturity;
-        const currentTimestamp = BigNumber.from(Math.floor(Date.now() / 1000));
 
-        const position = principal.add(fee);
+        const currentTimestamp = BigInt(Math.floor(dayjs().unix()));
 
-        fixedLenderDebt = fixedLenderDebt.add(
-          (currentTimestamp.gt(maturityTimestamp)
-            ? position.add(position.mul(currentTimestamp.sub(maturityTimestamp).mul(penaltyRate)).div(WeiPerEther))
-            : position
-          )
-            .mul(oracle)
-            .div(decimalWAD),
-        );
+        const position = principal + fee;
+
+        fixedLenderDebt =
+          fixedLenderDebt +
+          ((currentTimestamp > maturityTimestamp
+            ? position + (position * ((currentTimestamp - maturityTimestamp) * penaltyRate)) / WEI_PER_ETHER
+            : position) *
+            oracle) /
+            decimalWAD;
       });
 
-      debt = debt.add(fixedLenderDebt.mul(WeiPerEther).div(adjustFactor));
+      debt = debt + (fixedLenderDebt * WEI_PER_ETHER) / adjustFactor;
     });
 
     return { collateral, debt };

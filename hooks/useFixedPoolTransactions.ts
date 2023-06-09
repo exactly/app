@@ -1,9 +1,9 @@
-import { parseFixed } from '@ethersproject/bignumber';
+import { useCallback, useEffect, useState } from 'react';
+import { Address } from 'viem';
 import { getMaturityPoolBorrowsQuery } from 'queries/getMaturityPoolBorrows';
 import { getMaturityPoolDepositsQuery } from 'queries/getMaturityPoolDeposits';
 import { getMaturityPoolRepaysQuery } from 'queries/getMaturityPoolRepay';
 import { getMaturityPoolWithdrawsQuery } from 'queries/getMaturityPoolWithdraw';
-import { useCallback, useEffect, useState } from 'react';
 import { Borrow } from 'types/Borrow';
 import { Deposit } from 'types/Deposit';
 import { Repay } from 'types/Repay';
@@ -12,7 +12,7 @@ import { useWeb3 } from './useWeb3';
 import useAccountData from './useAccountData';
 import useGraphClient from './useGraphClient';
 
-export default (type: 'borrow' | 'deposit', maturity: number, market: string) => {
+export default (type: 'borrow' | 'deposit', maturity: number, market: Address) => {
   const { accountData } = useAccountData();
   const { walletAddress } = useWeb3();
   const [withdrawTxs, setWithdrawTxs] = useState<WithdrawMP[]>([]);
@@ -35,30 +35,15 @@ export default (type: 'borrow' | 'deposit', maturity: number, market: string) =>
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       getMaturityPoolBorrows?.borrowAtMaturities.forEach((borrow: any) => {
-        const {
-          id,
-          market: borrowMarket,
-          maturity: borrowMaturity,
-          assets,
-          fee,
-          caller,
-          receiver,
-          borrower,
-          timestamp,
-          editable,
-        } = borrow;
+        const { id, market: borrowMarket, maturity: borrowMaturity, assets, fee, timestamp } = borrow;
 
         borrows.push({
           id,
           market: borrowMarket,
-          maturity: parseFloat(borrowMaturity),
-          assets: parseFixed(assets),
-          fee: parseFixed(fee),
-          caller,
-          receiver,
-          borrower,
+          maturity: borrowMaturity,
+          assets: BigInt(assets),
+          fee: BigInt(fee),
           timestamp,
-          editable,
         });
       });
 
@@ -74,25 +59,13 @@ export default (type: 'borrow' | 'deposit', maturity: number, market: string) =>
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       getMaturityPoolRepays?.repayAtMaturities.forEach((repay: any) => {
-        const {
-          id,
-          market: repayMarket,
-          maturity: repayMaturity,
-          caller,
-          borrower,
-          assets,
-          debtCovered,
-          timestamp,
-        } = repay;
+        const { id, market: repayMarket, maturity: repayMaturity, assets, timestamp } = repay;
 
         repays.push({
           id,
           market: repayMarket,
-          maturity: parseFloat(repayMaturity),
-          caller,
-          borrower,
-          assets: parseFixed(assets),
-          debtCovered: parseFixed(debtCovered),
+          maturity: repayMaturity,
+          assets: BigInt(assets),
           timestamp,
         });
       });
@@ -109,30 +82,15 @@ export default (type: 'borrow' | 'deposit', maturity: number, market: string) =>
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       getMaturityPoolDeposits?.depositAtMaturities.forEach((deposit: any) => {
-        const {
-          id,
-          market: depositMarket,
-          symbol,
-          maturity: depositMaturity,
-          assets,
-          fee,
-          owner,
-          caller,
-          timestamp,
-          editable,
-        } = deposit;
+        const { id, market: depositMarket, maturity: depositMaturity, assets, fee, timestamp } = deposit;
 
         deposits.push({
           id,
           market: depositMarket,
-          symbol,
-          maturity: parseFloat(depositMaturity),
-          assets: parseFixed(assets),
-          fee: parseFixed(fee),
-          owner,
-          caller,
+          maturity: depositMaturity,
+          assets: BigInt(assets),
+          fee: BigInt(fee),
           timestamp,
-          editable,
         });
       });
 
@@ -148,27 +106,14 @@ export default (type: 'borrow' | 'deposit', maturity: number, market: string) =>
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       getMaturityPoolWithdraws?.withdrawAtMaturities.forEach((withdraw: any) => {
-        const {
-          id,
-          assets,
-          market: withdrawMarket,
-          maturity: withdrawMaturity,
-          owner,
-          caller,
-          positionAssets,
-          receiver,
-          timestamp,
-        } = withdraw;
+        const { id, assets, market: withdrawMarket, maturity: withdrawMaturity, positionAssets, timestamp } = withdraw;
 
         withdraws.push({
           id,
-          assets: parseFixed(assets),
+          assets: BigInt(assets),
           market: withdrawMarket,
-          maturity: parseFloat(withdrawMaturity),
-          owner,
-          caller,
-          positionAssets: parseFixed(positionAssets),
-          receiver,
+          maturity: withdrawMaturity,
+          positionAssets: BigInt(positionAssets),
           timestamp,
         });
       });

@@ -1,9 +1,8 @@
-import { BigNumber } from '@ethersproject/bignumber';
 import { useMemo } from 'react';
 import useAccountData from './useAccountData';
 import useTotalsUsd from './useTotalsUsd';
 import { AssetPosition } from 'components/newDashboard/DashboardSummary/DashboardOverview/DualProgressBarPosition';
-import { WeiPerEther, Zero } from '@ethersproject/constants';
+import { WEI_PER_ETHER } from 'utils/const';
 
 export default function useDashboardOverview(type: 'deposit' | 'borrow') {
   const { accountData } = useAccountData();
@@ -15,7 +14,7 @@ export default function useDashboardOverview(type: 'deposit' | 'borrow') {
   );
 
   const { assetPositions, totalFixedUSD, totalFloatingUSD, fixedPercentage, floatingPercentage } = useMemo(() => {
-    if (!accountData || totalUSD.isZero()) return {};
+    if (!accountData || totalUSD === 0n) return {};
 
     const _assetPositions: AssetPosition[] = accountData.map(
       ({
@@ -31,12 +30,12 @@ export default function useDashboardOverview(type: 'deposit' | 'borrow') {
         const floatingAssets = type === 'deposit' ? floatingDepositAssets : floatingBorrowAssets;
 
         const totalFixedAssets = fixedPositions.reduce(
-          (acc: BigNumber, { position: { principal } }) => acc.add(principal),
-          Zero,
+          (acc: bigint, { position: { principal } }) => acc + principal,
+          0n,
         );
 
-        const fixedValueUSD = totalFixedAssets.mul(usdPrice).div(10n ** BigInt(decimals));
-        const floatingValueUSD = floatingAssets.mul(usdPrice).div(10n ** BigInt(decimals));
+        const fixedValueUSD = (totalFixedAssets * usdPrice) / 10n ** BigInt(decimals);
+        const floatingValueUSD = (floatingAssets * usdPrice) / 10n ** BigInt(decimals);
 
         return {
           symbol: assetSymbol,
@@ -45,20 +44,20 @@ export default function useDashboardOverview(type: 'deposit' | 'borrow') {
           fixedValueUSD,
           floatingAssets: floatingAssets,
           floatingValueUSD,
-          percentageOfTotal: fixedValueUSD.add(floatingValueUSD).mul(WeiPerEther).div(totalUSD),
+          percentageOfTotal: ((fixedValueUSD + floatingValueUSD) * WEI_PER_ETHER) / totalUSD,
         };
       },
     );
 
-    const _totalFixedUSD = _assetPositions.reduce((acc, { fixedValueUSD }) => acc.add(fixedValueUSD), Zero);
-    const _totalFloatingUSD = _assetPositions.reduce((acc, { floatingValueUSD }) => acc.add(floatingValueUSD), Zero);
+    const _totalFixedUSD = _assetPositions.reduce((acc, { fixedValueUSD }) => acc + fixedValueUSD, 0n);
+    const _totalFloatingUSD = _assetPositions.reduce((acc, { floatingValueUSD }) => acc + floatingValueUSD, 0n);
 
     return {
       assetPositions: _assetPositions,
       totalFixedUSD: _totalFixedUSD,
       totalFloatingUSD: _totalFloatingUSD,
-      fixedPercentage: _totalFixedUSD.mul(WeiPerEther).div(totalUSD),
-      floatingPercentage: _totalFloatingUSD.mul(WeiPerEther).div(totalUSD),
+      fixedPercentage: (_totalFixedUSD * WEI_PER_ETHER) / totalUSD,
+      floatingPercentage: (_totalFloatingUSD * WEI_PER_ETHER) / totalUSD,
     };
   }, [accountData, totalUSD, type]);
 

@@ -1,12 +1,9 @@
-import { BigNumber } from '@ethersproject/bignumber';
+import { Address } from 'viem';
 
 export type Repay = {
   id: string;
-  market: string;
+  market: Address;
   maturity: number;
-  caller: string;
-  borrower: string;
-  assets: BigNumber;
-  debtCovered: BigNumber;
-  timestamp: string;
+  assets: bigint;
+  timestamp: number;
 };

@@ -10,8 +10,7 @@ export type Operation =
   | 'borrowAtMaturity'
   | 'depositAtMaturity'
   | 'withdrawAtMaturity'
-  | 'repayAtMaturity'
-  | 'faucet';
+  | 'repayAtMaturity';
 
 export function isFixedOperation(operation: Operation): boolean {
   return operation.endsWith('AtMaturity');

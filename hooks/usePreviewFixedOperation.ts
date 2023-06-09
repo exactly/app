@@ -1,9 +1,10 @@
-import { parseFixed } from '@ethersproject/bignumber';
-import { WeiPerEther } from '@ethersproject/constants';
+import { useCallback, useState } from 'react';
+import { parseUnits } from 'viem';
 import { captureException } from '@sentry/nextjs';
 import { MarketsBasicOperation, MarketsBasicOption } from 'contexts/MarketsBasicContext';
 import { useOperationContext } from 'contexts/OperationContext';
-import { useCallback, useState } from 'react';
+import dayjs from 'dayjs';
+import { WEI_PER_ETHER } from 'utils/const';
 import useAccountData from './useAccountData';
 import useDelayedEffect from './useDelayedEffect';
 import useMaturityPools from './useMaturityPools';
@@ -37,24 +38,24 @@ export default (operation: MarketsBasicOperation): PreviewFixedOperation => {
 
       try {
         setLoading(true);
-        const initialAssets = parseFixed(qty, marketAccount.decimals);
+        const initialAssets = parseUnits(qty as `${number}`, marketAccount.decimals);
 
         const preview =
           operation === 'deposit'
-            ? previewerContract.previewDepositAtAllMaturities
-            : previewerContract.previewBorrowAtAllMaturities;
-        const previewPools = await preview(marketAccount.market, initialAssets);
-        const currentTimestamp = Math.floor(Date.now() / 1000);
+            ? previewerContract.read.previewDepositAtAllMaturities
+            : previewerContract.read.previewBorrowAtAllMaturities;
+        const previewPools = await preview([marketAccount.market, initialAssets]);
+        const currentTimestamp = BigInt(dayjs().unix());
 
         const fixedOptions: MarketsBasicOption[] = previewPools.map(({ maturity, assets }) => {
-          const rate = assets.mul(WeiPerEther).div(initialAssets);
-          const fixedAPR = Number(rate.sub(WeiPerEther).mul(31_536_000).div(maturity.sub(currentTimestamp))) / 1e18;
+          const rate = (assets * WEI_PER_ETHER) / initialAssets;
+          const fixedAPR = Number(((rate - WEI_PER_ETHER) * 31_536_000n) / (maturity - currentTimestamp)) / 1e18;
 
           return {
-            maturity: maturity.toNumber(),
+            maturity: Number(maturity),
             depositAPR: fixedAPR,
             borrowAPR: fixedAPR,
-            interest: assets.sub(initialAssets),
+            interest: assets - initialAssets,
             finalAssets: assets,
           };
         });

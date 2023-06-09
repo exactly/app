@@ -1,13 +1,10 @@
-import { BigNumber } from '@ethersproject/bignumber';
+import { Address } from 'viem';
 
 export type WithdrawMP = {
   id: string;
-  market: string;
+  market: Address;
   maturity: number;
-  caller: string;
-  receiver: string;
-  owner: string;
-  positionAssets: BigNumber;
-  assets: BigNumber;
-  timestamp: string;
+  positionAssets: bigint;
+  assets: bigint;
+  timestamp: number;
 };

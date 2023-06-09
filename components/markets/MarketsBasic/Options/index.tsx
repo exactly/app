@@ -8,7 +8,6 @@ import daysLeft from 'utils/daysLeft';
 import { MarketsBasicOperation, MarketsBasicOption } from 'contexts/MarketsBasicContext';
 import { toPercentage } from 'utils/utils';
 import numbers from 'config/numbers.json';
-import { Zero } from '@ethersproject/constants';
 import { useTranslation } from 'react-i18next';
 import BestPill from 'components/common/BestPill';
 
@@ -99,7 +98,7 @@ const Options: FC<Props> = ({
                   </Box>
                   {(operation === 'deposit' ? depositRewards : borrowRewards)?.map(
                     ({ assetSymbol, rate }) =>
-                      rate.gt(Zero) && (
+                      rate > 0n && (
                         <OptionRate
                           key={assetSymbol}
                           isLoading={maturity === 0 ? loadingFloatingOption : loadingFixedOptions}

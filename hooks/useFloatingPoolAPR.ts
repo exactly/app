@@ -1,14 +1,14 @@
-import { formatFixed, parseFixed } from '@ethersproject/bignumber';
-import { WeiPerEther, Zero } from '@ethersproject/constants';
+import { useCallback, useMemo, useState } from 'react';
+import { formatUnits, parseUnits } from 'viem';
 import networkData from 'config/networkData.json' assert { type: 'json' };
 import { Operation } from 'contexts/ModalStatusContext';
-import { useCallback, useMemo, useState } from 'react';
 import interestRateCurve from 'utils/interestRateCurve';
 import queryRates from 'utils/queryRates';
 import useAccountData from './useAccountData';
 import useDelayedEffect from './useDelayedEffect';
 import { useWeb3 } from './useWeb3';
 import { useGlobalError } from 'contexts/GlobalErrorContext';
+import { WEI_PER_ETHER } from 'utils/const';
 
 type FloatingPoolAPR = {
   depositAPR: number | undefined;
@@ -31,14 +31,14 @@ export default (
     if (!marketAccount) return undefined;
     const { totalFloatingDepositAssets, totalFloatingBorrowAssets, decimals } = marketAccount;
 
-    const decimalWAD = parseFixed('1', decimals);
-    const delta = parseFixed(qty || '0', decimals);
+    const decimalWAD = parseUnits('1', decimals);
+    const delta = parseUnits((qty as `${number}`) || '0', decimals);
 
-    const deposited = totalFloatingDepositAssets ?? Zero;
-    const borrowed = (totalFloatingBorrowAssets ?? Zero).add(delta);
+    const deposited = totalFloatingDepositAssets ?? 0n;
+    const borrowed = (totalFloatingBorrowAssets ?? 0n) + delta;
 
-    const t = deposited.eq(Zero) ? Zero : borrowed.mul(decimalWAD).div(deposited);
-    const toUtilization = Number(formatFixed(t, decimals));
+    const t = deposited === 0n ? 0n : (borrowed * decimalWAD) / deposited;
+    const toUtilization = Number(formatUnits(t, decimals));
 
     const { interestRateModel } = marketAccount;
     const { A, B, UMax } = {
@@ -70,9 +70,9 @@ export default (
         if (cancelled()) return;
         const { totalFloatingDepositAssets, decimals } = marketAccount;
 
-        const futureSupply = totalFloatingDepositAssets.add(parseFixed(qty || '0', decimals));
+        const futureSupply = totalFloatingDepositAssets + parseUnits((qty as `${number}`) || '0', decimals);
         const ratio =
-          Number(futureSupply.eq(Zero) ? Zero : totalFloatingDepositAssets.mul(WeiPerEther).div(futureSupply)) / 1e18;
+          Number(futureSupply === 0n ? 0n : (totalFloatingDepositAssets * WEI_PER_ETHER) / futureSupply) / 1e18;
         const finalAPR = ratio * depositAPRRate;
 
         setDepositAPR(finalAPR);

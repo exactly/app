@@ -1,17 +1,24 @@
 import { useMemo } from 'react';
-import { useSigner } from 'wagmi';
-import { Contract } from '@ethersproject/contracts';
-import type { ERC20 } from 'types/contracts/ERC20';
-import erc20ABI from 'abi/ERC20.json';
+import { Address, useWalletClient } from 'wagmi';
+import { getContract } from '@wagmi/core';
+import { erc20ABI } from 'types/abi';
+import { ERC20 } from 'types/contracts';
+import { useWeb3 } from './useWeb3';
 
-export default (address?: string): ERC20 | undefined => {
-  const { data: signer } = useSigner();
+export default (address?: Address): ERC20 | undefined => {
+  const { chain } = useWeb3();
+  const { data: walletClient } = useWalletClient();
 
-  const assetContract = useMemo(() => {
-    if (!signer || !address) return;
+  return useMemo(() => {
+    if (!walletClient || !address) return;
 
-    return new Contract(address, erc20ABI, signer) as ERC20;
-  }, [address, signer]);
+    const contract = getContract({
+      chainId: chain.id,
+      address,
+      abi: erc20ABI,
+      walletClient,
+    });
 
-  return assetContract;
+    return contract;
+  }, [address, chain, walletClient]);
 };

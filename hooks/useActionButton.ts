@@ -4,7 +4,6 @@ import { Operation, useModalStatus } from 'contexts/ModalStatusContext';
 import numbers from 'config/numbers.json';
 import { useMarketContext } from 'contexts/MarketContext';
 import { useDebtManagerContext } from 'contexts/DebtManagerContext';
-import { BigNumber } from '@ethersproject/bignumber';
 
 const { minAPRValue } = numbers;
 
@@ -58,7 +57,7 @@ export function useStartDebtManagerButton() {
   );
 
   const isRolloverDisabled = useCallback(
-    (borrow?: BigNumber) => !debtManager || (borrow && borrow.isZero()),
+    (borrow?: bigint) => !debtManager || (borrow !== undefined && borrow === 0n),
     [debtManager],
   );
 

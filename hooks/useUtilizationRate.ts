@@ -3,7 +3,6 @@ import { useMemo } from 'react';
 import useAccountData from './useAccountData';
 import interestRateCurve, { inverseInterestRateCurve } from 'utils/interestRateCurve';
 import numbers from 'config/numbers.json';
-import { BigNumber } from '@ethersproject/bignumber';
 
 const MAX = 1;
 const INTERVAL = numbers.chartInterval;
@@ -15,7 +14,7 @@ export default function useUtilizationRate(
   to = MAX,
   interval = INTERVAL,
   mandatoryPoints: number[] = [],
-  inversePoints: BigNumber[] = [],
+  inversePoints: bigint[] = [],
 ) {
   const { marketAccount } = useAccountData(symbol);
 
@@ -75,7 +74,7 @@ export default function useUtilizationRate(
 
     if (type === 'fixed') {
       fixedPools.forEach((pool) => {
-        allUtilizations.push({ maturity: pool.maturity.toNumber(), utilization: Number(pool.utilization) / 1e18 });
+        allUtilizations.push({ maturity: Number(pool.maturity), utilization: Number(pool.utilization) / 1e18 });
       });
     }
 

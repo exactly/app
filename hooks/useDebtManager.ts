@@ -1,7 +1,6 @@
-import type { DebtManager } from 'types/contracts/DebtManager';
-import debtManagerABI from 'abi/DebtManager.json' assert { type: 'json' };
+import { debtManagerABI } from 'types/abi';
 import useContract from './useContract';
 
 export default () => {
-  return useContract<DebtManager>('DebtManager', debtManagerABI);
+  return useContract('DebtManager', debtManagerABI);
 };

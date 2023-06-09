@@ -1,28 +1,38 @@
 import React, { useCallback, useState } from 'react';
-import { useAccount, useSigner } from 'wagmi';
-import { parseFixed } from '@ethersproject/bignumber';
-import { Contract } from '@ethersproject/contracts';
+import { useAccount, useContractWrite, useWaitForTransaction } from 'wagmi';
 import Image from 'next/image';
 import imageToBase64 from 'utils/imageToBase64';
 import { useTranslation } from 'react-i18next';
-
-import faucetAbi from './abi.json';
+import { parseUnits } from 'viem';
 
 import useAssets from 'hooks/useAssets';
 
 import { Box, Button, Divider, Typography } from '@mui/material';
 import formatSymbol from 'utils/formatSymbol';
 import { LoadingButton } from '@mui/lab';
-import handleOperationError from 'utils/handleOperationError';
 import useAccountData from 'hooks/useAccountData';
+import { abi } from './abi';
 
 function Faucet() {
   const { t } = useTranslation();
-  const { data: signer } = useSigner();
   const { connector } = useAccount();
   const { accountData, getMarketAccount, refreshAccountData } = useAccountData();
   const [loading, setLoading] = useState<string | undefined>(undefined);
   const assets = useAssets();
+
+  const { data, write } = useContractWrite({
+    address: '0x1ca525Cd5Cb77DB5Fa9cBbA02A0824e283469DBe',
+    abi,
+    functionName: 'mint',
+  });
+
+  const { isLoading } = useWaitForTransaction({
+    hash: data?.hash,
+    onSettled: async () => {
+      await refreshAccountData();
+      setLoading(undefined);
+    },
+  });
 
   const mint = useCallback(
     async (symbol: string) => {
@@ -32,24 +42,18 @@ function Faucet() {
         const { asset, decimals } = marketAccount;
 
         setLoading(symbol);
-        const amounts: Record<string, string> = {
+        const amounts: Record<string, `${number}`> = {
           DAI: '50000',
           USDC: '50000',
           WBTC: '2',
         };
 
-        const faucet = new Contract('0x1ca525Cd5Cb77DB5Fa9cBbA02A0824e283469DBe', faucetAbi, signer ?? undefined);
-        const tx = await faucet?.mint(asset, parseFixed(amounts[symbol], decimals));
-        await tx.wait();
-
-        await refreshAccountData();
+        write({ args: [asset, parseUnits(amounts[symbol], decimals)] });
       } catch {
-        setLoading(undefined);
-      } finally {
         setLoading(undefined);
       }
     },
-    [getMarketAccount, refreshAccountData, signer],
+    [getMarketAccount, write],
   );
 
   const addTokens = useCallback(async () => {
@@ -72,8 +76,8 @@ function Faucet() {
           return connector?.watchAsset?.({ symbol, address, decimals, image: imagesBase64[symbol] });
         }),
       );
-    } catch (error) {
-      handleOperationError(error);
+    } catch {
+      // ignore
     }
   }, [accountData, assets, connector]);
 
@@ -110,7 +114,7 @@ function Faucet() {
                 <Button variant="contained">{t('Mint')}</Button>
               </a>
             ) : (
-              <LoadingButton variant="contained" onClick={() => mint(asset)} loading={asset === loading}>
+              <LoadingButton variant="contained" onClick={() => mint(asset)} loading={isLoading && asset === loading}>
                 {t('Mint')}
               </LoadingButton>
             )}

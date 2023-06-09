@@ -1,14 +1,14 @@
 import React, { useMemo } from 'react';
-import { BigNumber, formatFixed } from '@ethersproject/bignumber';
 import { Typography, Skeleton, Box } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import { formatUnits } from 'viem';
+import { WEI_PER_ETHER } from 'utils/const';
 
-import { WeiPerEther } from '@ethersproject/constants';
 import ModalInfo from 'components/common/modal/ModalInfo';
 import useAccountData from 'hooks/useAccountData';
 
 type Props = {
-  gasCost?: BigNumber;
+  gasCost?: bigint;
 };
 
 function ModalTxCost({ gasCost }: Props) {
@@ -18,8 +18,8 @@ function ModalTxCost({ gasCost }: Props) {
   const renderGas = useMemo(() => {
     if (!gasCost || !marketAccount) return <Skeleton width={100} />;
 
-    const eth = parseFloat(formatFixed(gasCost, 18)).toFixed(6);
-    const usd = parseFloat(formatFixed(gasCost.mul(marketAccount.usdPrice).div(WeiPerEther), 18)).toFixed(2);
+    const eth = parseFloat(formatUnits(gasCost, 18)).toFixed(6);
+    const usd = parseFloat(formatUnits((gasCost * marketAccount.usdPrice) / WEI_PER_ETHER, 18)).toFixed(2);
 
     return (
       <Box display="flex" gap={0.5}>

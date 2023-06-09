@@ -17,8 +17,7 @@ next-env.d.ts
 /build
 
 # protocol
-/abi/
-/types/contracts/
+/types/abi.ts
 
 # misc
 .vscode/

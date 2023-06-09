@@ -23,9 +23,9 @@ function Wallet() {
 
   const { walletAddress, connect, impersonateActive, exitImpersonate } = useWeb3();
   const { disconnect } = useDisconnect();
-  const { data: ens, error: ensError } = useEnsName({ address: walletAddress as `0x${string}`, chainId: mainnet.id });
+  const { data: ens, error: ensError } = useEnsName({ address: walletAddress, chainId: mainnet.id });
   const { data: ensAvatar, error: ensAvatarError } = useEnsAvatar({
-    address: walletAddress as `0x${string}`,
+    name: ens,
     chainId: mainnet.id,
   });
 
@@ -35,7 +35,7 @@ function Wallet() {
     if (!walletAddress) return '';
     if (ensAvatar && !ensAvatarError) return ensAvatar;
     return blockies.create({ seed: walletAddress.toLocaleLowerCase() }).toDataURL();
-  }, [walletAddress, ensAvatar, ensAvatarError]);
+  }, [ensAvatar, ensAvatarError, walletAddress]);
 
   if (!walletAddress) {
     return (

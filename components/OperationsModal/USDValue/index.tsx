@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { Typography } from '@mui/material';
-import { formatFixed, parseFixed } from '@ethersproject/bignumber';
-import { WeiPerEther } from '@ethersproject/constants';
+import { formatUnits, parseUnits } from 'viem';
+import { WEI_PER_ETHER } from 'utils/const';
 
 import useAccountData from 'hooks/useAccountData';
 import formatNumber from 'utils/formatNumber';
@@ -18,10 +18,10 @@ function USDValue({ qty, symbol }: Props) {
   const value = useMemo(() => {
     if (!qty || !marketAccount || !checkPrecision(qty, marketAccount.decimals)) return;
 
-    const parsedqty = parseFixed(qty, marketAccount.decimals);
-    const usd = parsedqty.mul(marketAccount.usdPrice).div(WeiPerEther);
+    const parsedqty = parseUnits(qty as `${number}`, marketAccount.decimals);
+    const usd = (parsedqty * marketAccount.usdPrice) / WEI_PER_ETHER;
 
-    return formatFixed(usd, marketAccount.decimals);
+    return formatUnits(usd, marketAccount.decimals);
   }, [qty, marketAccount]);
 
   return (
