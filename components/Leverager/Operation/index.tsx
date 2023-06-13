@@ -1,4 +1,4 @@
-import { Box, Grid, Typography } from '@mui/material';
+import { Box, FormControl, FormControlLabel, Grid, Radio, RadioGroup, Typography } from '@mui/material';
 import { ModalBox, ModalBoxCell, ModalBoxRow } from 'components/common/modal/ModalBox';
 import ModalSheetButton from 'components/common/modal/ModalSheetButton';
 import React from 'react';
@@ -6,6 +6,9 @@ import { useTranslation } from 'react-i18next';
 import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
 import { useLeveragerContext } from 'contexts/LeveragerContext';
 import MultiplierSlider from '../MultiplierSlider';
+import InfoRow from '../InfoRow';
+import LoopAPR from '../LoopAPR';
+import HealthFactor from '../HealthFactor';
 
 const Operation = () => {
   const { t } = useTranslation();
@@ -58,17 +61,51 @@ const Operation = () => {
           </Grid>
         </ModalBoxRow>
         <ModalBoxRow>
-          <MultiplierSlider />
+          <Box display="flex" flexDirection="column" width="100%" gap={2.5} mt={1}>
+            <MultiplierSlider />
+            <InfoRow title={t('Net Position')} symbol={input.collateral} assets={2.8} assetsUSD={4361.79} />
+          </Box>
         </ModalBoxRow>
         <ModalBoxRow>
-          <ModalBoxCell>Wallet</ModalBoxCell>
-          <ModalBoxCell />
-          <ModalBoxCell>Withdraw</ModalBoxCell>
-          <ModalBoxCell divisor>Deposit</ModalBoxCell>
+          <ModalBoxCell mt={1}>input</ModalBoxCell>
+          <ModalBoxCell mt={1}>
+            <FormControl>
+              <RadioGroup
+              // value={value}
+              // onChange={handleChange}
+              >
+                <FormControlLabel
+                  value="withdraw"
+                  control={<Radio sx={{ px: 1, pt: 1, pb: 0.5 }} />}
+                  label={
+                    <Typography variant="caption" mt={0.5}>
+                      {t('Withdraw')}
+                    </Typography>
+                  }
+                />
+                <FormControlLabel
+                  value="deposit"
+                  control={<Radio sx={{ px: 1, pt: 0.5, pb: 1 }} />}
+                  label={
+                    <Typography variant="caption" mb={0.5}>
+                      {t('Deposit')}
+                    </Typography>
+                  }
+                />
+              </RadioGroup>
+            </FormControl>
+          </ModalBoxCell>
+          <Box width="100%" mt={2.5}>
+            <InfoRow title={t('Wallet Balance')} symbol={input.collateral} assets={2.1} assetsUSD={4149.82} />
+          </Box>
         </ModalBoxRow>
         <ModalBoxRow>
-          <ModalBoxCell>Loop APR</ModalBoxCell>
-          <ModalBoxCell divisor>Health Factor</ModalBoxCell>
+          <ModalBoxCell mt={1}>
+            <LoopAPR />
+          </ModalBoxCell>
+          <ModalBoxCell divisor mt={1}>
+            <HealthFactor newHealthFactor="1.009x" />
+          </ModalBoxCell>
         </ModalBoxRow>
       </ModalBox>
     </Box>

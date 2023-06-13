@@ -12,7 +12,7 @@ const MultiplierSlider = () => {
   const [multiplier, setMultiplier] = React.useState<number>(currentValue);
 
   return (
-    <Box display="flex" flexDirection="column" width="100%" gap={2}>
+    <Box display="flex" flexDirection="column" gap={2}>
       <Box display="flex" justifyContent="space-between" alignItems="center">
         <Typography variant="caption" color="figma.grey.600">
           {t('Leverage')}
@@ -55,6 +55,7 @@ const MultiplierSlider = () => {
               },
             },
             '& .MuiSlider-valueLabel': {
+              margin: '4px',
               fontSize: 12,
               fontWeight: 700,
               padding: '1px 4px',
