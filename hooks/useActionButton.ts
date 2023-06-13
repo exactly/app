@@ -5,6 +5,8 @@ import numbers from 'config/numbers.json';
 import { useMarketContext } from 'contexts/MarketContext';
 import { useDebtManagerContext } from 'contexts/DebtManagerContext';
 
+import { useLeveragerContext } from 'contexts/LeveragerContext';
+
 const { minAPRValue } = numbers;
 
 const isDisable = (rateType: 'floating' | 'fixed', apr: number | undefined) => {
@@ -64,5 +66,33 @@ export function useStartDebtManagerButton() {
   return {
     startDebtManager,
     isRolloverDisabled,
+  };
+}
+
+export function useStartLeverager() {
+  const { connect, isConnected } = useWeb3();
+  const { openLeverager, debtManager } = useLeveragerContext();
+
+  const startLeverager = useCallback(
+    (...args: Parameters<typeof openLeverager>) => {
+      if (!isConnected) {
+        return connect();
+      }
+
+      if (!debtManager) return;
+
+      openLeverager(...args);
+    },
+    [debtManager, connect, isConnected, openLeverager],
+  );
+
+  const isLeveragerDisabled = useCallback(
+    (borrow?: bigint) => !debtManager || (borrow !== undefined && borrow === 0n),
+    [debtManager],
+  );
+
+  return {
+    startLeverager,
+    isLeveragerDisabled,
   };
 }

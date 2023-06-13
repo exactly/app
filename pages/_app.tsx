@@ -20,6 +20,7 @@ import Navbar from 'components/Navbar';
 import { globals } from 'styles/theme';
 import { MarketsBasicProvider } from 'contexts/MarketsBasicContext';
 import { DebtManagerContextProvider } from 'contexts/DebtManagerContext';
+import { LeveragerContextProvider } from 'contexts/LeveragerContext';
 import { GlobalErrorProvider } from 'contexts/GlobalErrorContext';
 import OperationsModal from 'components/OperationsModal';
 import { useInitGA } from 'hooks/useAnalytics';
@@ -88,15 +89,17 @@ export default function App({ Component, pageProps }: AppProps) {
                 <ModalStatusProvider>
                   <DebtManagerContextProvider>
                     <MarketsBasicProvider>
-                      <Topbar />
-                      <Box display="flex" flexDirection="column" mx={2} height="100%">
-                        <Navbar />
-                        <main style={{ flexGrow: 1, maxWidth, margin: '0 auto', width: '100%' }}>
-                          <Component {...pageProps} />
-                        </main>
-                        <Footer />
-                      </Box>
-                      <OperationsModal />
+                      <LeveragerContextProvider>
+                        <Topbar />
+                        <Box display="flex" flexDirection="column" mx={2} height="100%">
+                          <Navbar />
+                          <main style={{ flexGrow: 1, maxWidth, margin: '0 auto', width: '100%' }}>
+                            <Component {...pageProps} />
+                          </main>
+                          <Footer />
+                        </Box>
+                        <OperationsModal />
+                      </LeveragerContextProvider>
                     </MarketsBasicProvider>
                   </DebtManagerContextProvider>
                 </ModalStatusProvider>
