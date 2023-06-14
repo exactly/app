@@ -1,4 +1,4 @@
-import { Box, FormControl, FormControlLabel, Grid, Radio, RadioGroup, Typography } from '@mui/material';
+import { Box, FormControl, FormControlLabel, Grid, Radio, RadioGroup, Skeleton, Typography } from '@mui/material';
 import { ModalBox, ModalBoxCell, ModalBoxRow } from 'components/common/modal/ModalBox';
 import ModalSheetButton from 'components/common/modal/ModalSheetButton';
 import React from 'react';
@@ -9,6 +9,7 @@ import MultiplierSlider from '../MultiplierSlider';
 import InfoRow from '../InfoRow';
 import LoopAPR from '../LoopAPR';
 import HealthFactor from '../HealthFactor';
+import AssetInput from '../AssetInput';
 
 const Operation = () => {
   const { t } = useTranslation();
@@ -67,8 +68,7 @@ const Operation = () => {
           </Box>
         </ModalBoxRow>
         <ModalBoxRow>
-          <ModalBoxCell mt={1}>input</ModalBoxCell>
-          <ModalBoxCell mt={1}>
+          <Box display="flex" mt={1} justifyContent="space-between" gap={4}>
             <FormControl>
               <RadioGroup
               // value={value}
@@ -94,7 +94,12 @@ const Operation = () => {
                 />
               </RadioGroup>
             </FormControl>
-          </ModalBoxCell>
+            {input.collateral ? (
+              <AssetInput symbol={input.collateral} operation="deposit" />
+            ) : (
+              <Skeleton width={96} height={36} />
+            )}
+          </Box>
           <Box width="100%" mt={2.5}>
             <InfoRow title={t('Wallet Balance')} symbol={input.collateral} assets={2.1} assetsUSD={4149.82} />
           </Box>
