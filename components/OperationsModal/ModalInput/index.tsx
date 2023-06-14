@@ -41,18 +41,21 @@ const NumberFormatCustom = React.forwardRef<HTMLInputElement, InputBaseComponent
 type Props = {
   name?: string;
   value?: string;
+  symbol?: string;
+  maxWidth?: string;
+  align?: 'left' | 'center' | 'right';
 } & CustomProps;
 
-function ModalInput({ value, name, decimals, onValueChange }: Props) {
+function ModalInput({ value, name, decimals, onValueChange, symbol, maxWidth, align = 'right' }: Props) {
   return (
     <InputBase
       inputProps={{
-        placeholder: '0',
+        placeholder: symbol ? `0 ${symbol}` : '0',
         min: 0.0,
         name: name,
         step: 'any',
         inputMode: 'decimal',
-        style: { padding: 0, textAlign: 'right' },
+        style: { padding: 0, textAlign: align },
         onValueChange: onValueChange,
         decimals: decimals,
       }}
@@ -60,7 +63,7 @@ function ModalInput({ value, name, decimals, onValueChange }: Props) {
       autoFocus
       sx={{
         paddingTop: 0.5,
-        maxWidth: { xs: '50%', sm: '60%' },
+        maxWidth: { xs: maxWidth || '50%', sm: maxWidth || '60%' },
         flexGrow: 1,
         fontWeight: 700,
         fontSize: 24,

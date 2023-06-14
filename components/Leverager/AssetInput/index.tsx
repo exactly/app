@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo } from 'react';
-import { Box, Button, Skeleton, Typography } from '@mui/material';
+import { Box, Button, Skeleton } from '@mui/material';
 
 import ModalInput from 'components/OperationsModal/ModalInput';
 import USDValue from 'components/OperationsModal/USDValue';
@@ -29,20 +29,24 @@ function AssetInput({ operation, symbol }: Props) {
 
   return (
     <Box display="flex" flexDirection="column">
-      <Box display="flex" alignItems="center" justifyContent="right">
-        <ModalInput value={qty} decimals={decimals} onValueChange={onChange} />
-        <Box display="flex" alignItems="center">
-          <Image
-            src={`/img/assets/${symbol}.svg`}
-            alt={formatSymbol(symbol)}
-            width={20}
-            height={20}
-            style={{ maxWidth: '100%', height: 'auto' }}
-          />
-          <Typography variant="h6">{symbol}</Typography>
-        </Box>
+      <Box display="flex" alignItems="center" justifyContent="left" gap={0.5}>
+        <Image
+          src={`/img/assets/${symbol}.svg`}
+          alt={formatSymbol(symbol)}
+          width={20}
+          height={20}
+          style={{ maxWidth: '100%', height: 'auto' }}
+        />
+        <ModalInput
+          value={qty}
+          decimals={decimals}
+          onValueChange={onChange}
+          symbol={symbol}
+          maxWidth="100%"
+          align="left"
+        />
       </Box>
-      <Box display="flex" justifyContent="right" alignItems="center" marginTop={0.25} height={20} gap={1.5} pl="20px">
+      <Box display="flex" justifyContent="left" alignItems="center" marginTop={0.25} height={20} gap={1.5} pl={3}>
         <USDValue qty={qty} symbol={symbol} />
         {amount && Boolean(parseFloat(amount)) ? (
           <Button

@@ -68,7 +68,14 @@ const Operation = () => {
           </Box>
         </ModalBoxRow>
         <ModalBoxRow>
-          <Box display="flex" mt={1} justifyContent="space-between" gap={4}>
+          <ModalBoxCell display="flex" mt={1}>
+            {input.collateral ? (
+              <AssetInput symbol={input.collateral} operation="deposit" />
+            ) : (
+              <Skeleton width={96} height={36} />
+            )}
+          </ModalBoxCell>
+          <ModalBoxCell display="flex" mt={1}>
             <FormControl>
               <RadioGroup
               // value={value}
@@ -94,12 +101,7 @@ const Operation = () => {
                 />
               </RadioGroup>
             </FormControl>
-            {input.collateral ? (
-              <AssetInput symbol={input.collateral} operation="deposit" />
-            ) : (
-              <Skeleton width={96} height={36} />
-            )}
-          </Box>
+          </ModalBoxCell>
           <Box width="100%" mt={2.5}>
             <InfoRow title={t('Wallet Balance')} symbol={input.collateral} assets={2.1} assetsUSD={4149.82} />
           </Box>
