@@ -28,7 +28,7 @@ import useIsContract from 'hooks/useIsContract';
 
 type Input = {
   collateral?: string;
-  debt?: string;
+  borrow?: string;
   depositedSupply: number;
   walletSupply: number;
   leverageFactor: number;
@@ -39,7 +39,7 @@ const DEFAULT_SLIPPAGE = (numbers.slippage * 100).toFixed(2);
 
 const initState: Input = {
   collateral: undefined,
-  debt: undefined,
+  borrow: undefined,
   depositedSupply: 0,
   walletSupply: 0,
   leverageFactor: 1,
@@ -57,7 +57,7 @@ type ContextValues = {
 
   input: Input;
   setCollateral: (collateral: string) => void;
-  setDebt: (debt: string) => void;
+  setBorrow: (debt: string) => void;
   setDepositedSupply: (depositedSupply: number) => void;
   setWalletSupply: (walletSupply: number) => void;
   setLeverageFactor: (leverageFactor: number) => void;
@@ -94,9 +94,9 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
   const [isLoading, setIsLoading] = useState(false);
 
   const setCollateral = useCallback((collateral: string) => dispatch({ ...initState, collateral }), []);
-  const setDebt = useCallback((debt: string) => dispatch({ ...initState, debt }), []);
-  const setDepositedSupply = useCallback((depositedSupply: number) => dispatch({ ...initState, depositedSupply }), []);
-  const setWalletSupply = useCallback((walletSupply: number) => dispatch({ ...initState, walletSupply }), []);
+  const setBorrow = useCallback((borrow: string) => dispatch({ borrow: borrow }), []);
+  const setDepositedSupply = useCallback((depositedSupply: number) => dispatch({ depositedSupply }), []);
+  const setWalletSupply = useCallback((walletSupply: number) => dispatch({ walletSupply }), []);
   const setLeverageFactor = useCallback((leverageFactor: number) => dispatch({ leverageFactor }), []);
   const setSlippage = useCallback((slippage: string) => dispatch({ slippage }), []);
 
@@ -184,7 +184,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
 
     input,
     setCollateral,
-    setDebt,
+    setBorrow,
     setDepositedSupply,
     setWalletSupply,
     setLeverageFactor,

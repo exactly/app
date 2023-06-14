@@ -1,6 +1,15 @@
-import { Box, FormControl, FormControlLabel, Grid, Radio, RadioGroup, Skeleton, Typography } from '@mui/material';
+import {
+  Box,
+  Button,
+  FormControl,
+  FormControlLabel,
+  Grid,
+  Radio,
+  RadioGroup,
+  Skeleton,
+  Typography,
+} from '@mui/material';
 import { ModalBox, ModalBoxCell, ModalBoxRow } from 'components/common/modal/ModalBox';
-import ModalSheetButton from 'components/common/modal/ModalSheetButton';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
@@ -10,10 +19,13 @@ import InfoRow from '../InfoRow';
 import LoopAPR from '../LoopAPR';
 import HealthFactor from '../HealthFactor';
 import AssetInput from '../AssetInput';
+import useAssets from 'hooks/useAssets';
+import AssetSelector from '../AssetSelector';
 
 const Operation = () => {
   const { t } = useTranslation();
-  const { input, setCollateral } = useLeveragerContext();
+  const { input, setCollateral, setBorrow } = useLeveragerContext();
+  const options = useAssets();
 
   return (
     <Box>
@@ -27,37 +39,24 @@ const Operation = () => {
             </Grid>
             <Grid item xs={5}>
               <Typography variant="caption" color="figma.grey.600">
-                {t('Debt')}
+                {t('Borrow')}
               </Typography>
             </Grid>
           </Grid>
           <Grid container>
             <Grid item xs={5}>
-              <ModalSheetButton
-                selected={Boolean(input.collateral)}
-                // onClick={() => setSheetOpen([true, false])}
-                sx={{ ml: -0.5 }}
-              >
-                {t('Collateral')}
-              </ModalSheetButton>
+              <AssetSelector
+                title={t('Choose Asset')}
+                value={input.collateral}
+                options={options}
+                onChange={setCollateral}
+              />
             </Grid>
             <Grid display="flex" alignItems="center" justifyContent="center" item xs={2}>
               <ArrowForwardRoundedIcon sx={{ color: 'blue', fontSize: 14, fontWeight: 600 }} />
             </Grid>
             <Grid item xs={5}>
-              <ModalSheetButton
-                selected={Boolean(input.debt)}
-                onClick={() => {
-                  if (input.collateral) {
-                    setCollateral(input.collateral);
-                  }
-                  // setSheetOpen([false, true]);
-                }}
-                disabled={!input.collateral}
-                sx={{ ml: -0.5, mr: -0.5 }}
-              >
-                {t('Debt')}
-              </ModalSheetButton>
+              <AssetSelector title={t('Choose Asset')} value={input.borrow} options={options} onChange={setBorrow} />
             </Grid>
           </Grid>
         </ModalBoxRow>
@@ -72,7 +71,7 @@ const Operation = () => {
             {input.collateral ? (
               <AssetInput symbol={input.collateral} operation="deposit" />
             ) : (
-              <Skeleton width={96} height={36} />
+              <Skeleton width={112} height={56} />
             )}
           </ModalBoxCell>
           <ModalBoxCell display="flex" mt={1}>
@@ -115,6 +114,9 @@ const Operation = () => {
           </ModalBoxCell>
         </ModalBoxRow>
       </ModalBox>
+      <Button fullWidth variant="contained" sx={{ mt: 4 }}>
+        Leverage
+      </Button>
     </Box>
   );
 };

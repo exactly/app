@@ -18,7 +18,7 @@ const Leverager = () => {
     >
       <Typography variant="h6">Control Your Leverage</Typography>
       <Box display="flex" gap={1}>
-        <Button variant="contained" onClick={() => startLeverager('wstETH')}>
+        <Button variant="contained" onClick={() => startLeverager()}>
           Leverage
         </Button>
       </Box>
