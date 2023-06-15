@@ -22,8 +22,13 @@ const MultiplierSlider = () => {
     return { color: palette.healthFactor[status], bg: palette.healthFactor.bg[status] };
   }, [palette.healthFactor, newHealthFactor]);
 
+  const disabled = useMemo(
+    () => !input.collateralSymbol || !input.borrowSymbol,
+    [input.borrowSymbol, input.collateralSymbol],
+  );
+
   return (
-    <Box display="flex" flexDirection="column" gap={2}>
+    <Box display="flex" flexDirection="column" gap={2} sx={{ opacity: disabled ? 0.5 : 1 }}>
       <Box display="flex" justifyContent="space-between" alignItems="center">
         <Typography variant="caption" color="figma.grey.600">
           {t('Leverage')}
@@ -37,7 +42,9 @@ const MultiplierSlider = () => {
           onClick={onClick}
           sx={{ cursor: 'pointer' }}
         >
-          <Typography fontFamily="IBM Plex Mono" fontSize={10}>{`${t('Current').toUpperCase()}:${'2.0'}x`}</Typography>
+          <Typography fontFamily="IBM Plex Mono" fontSize={10}>{`${t(
+            'Current',
+          ).toUpperCase()}:${currentLeverageRatio.toFixed(1)}x`}</Typography>
         </Box>
       </Box>
       <Box display="flex" justifyItems="space-between" alignItems="center" gap={2}>
@@ -86,7 +93,7 @@ const MultiplierSlider = () => {
             },
           }}
         />
-        <Typography variant="h6">Max</Typography>
+        <Typography variant="h6">{t('Max')}</Typography>
       </Box>
     </Box>
   );

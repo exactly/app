@@ -1,5 +1,5 @@
-import React, { FC, PropsWithChildren } from 'react';
-import { Box, Typography, Avatar, AvatarGroup, Tooltip, Divider, IconButton, Skeleton } from '@mui/material';
+import React, { FC, PropsWithChildren, useMemo } from 'react';
+import { Box, Typography, Avatar, AvatarGroup, Tooltip, Divider, IconButton } from '@mui/material';
 import { toPercentage } from 'utils/utils';
 import { useTranslation } from 'react-i18next';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
@@ -7,23 +7,27 @@ import { useLeveragerContext } from 'contexts/LeveragerContext';
 
 const LoopAPR = () => {
   const { t } = useTranslation();
-  const { input, loopAPR } = useLeveragerContext();
+  const { input, loopAPR, currentLeverageRatio } = useLeveragerContext();
+
+  const disabled = useMemo(
+    () => !input.collateralSymbol || !input.borrowSymbol || (currentLeverageRatio === 1 && input.leverageRatio === 1),
+    [currentLeverageRatio, input.borrowSymbol, input.collateralSymbol, input.leverageRatio],
+  );
 
   return (
     <Box display="flex" flexDirection="column" gap={2}>
       <Typography variant="caption" color="figma.grey.600">
         {t('Loop APR')}
       </Typography>
-      {input.collateralSymbol && input.borrowSymbol ? (
+      {disabled ? (
+        <Typography variant="h6">{t('N/A')}</Typography>
+      ) : (
         <Box display="flex" gap={0.5} alignItems="center">
           <Tooltip title={<APRBreakdown />} placement="top" arrow enterTouchDelay={0} sx={{ cursor: 'pointer' }}>
             <Typography variant="h6">{toPercentage(loopAPR)}</Typography>
           </Tooltip>
-
           <RewardsGroup />
         </Box>
-      ) : (
-        <Skeleton width={112} height={36} />
       )}
     </Box>
   );

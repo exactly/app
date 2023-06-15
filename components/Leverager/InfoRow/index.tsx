@@ -8,33 +8,42 @@ type InfoRowProps = {
   title: string;
   symbol?: string;
   assets?: string;
+  disabledMessage: string;
 };
 
-const InfoRow: FC<InfoRowProps> = ({ title, symbol, assets }) => {
+const InfoRow: FC<InfoRowProps> = ({ title, symbol, assets, disabledMessage }) => {
   return (
     <Box display="flex" alignItems="center" bgcolor="grey.100" borderRadius="4px" px={1} py={0.5} gap={1} mx={-1}>
-      <Typography variant="caption">{title}:</Typography>
-      {symbol && assets ? (
+      {symbol ? (
         <>
-          <Box display="flex" gap={0.5}>
-            <Image
-              src={`/img/assets/${symbol}.svg`}
-              alt={symbol}
-              width={16}
-              height={16}
-              style={{
-                maxWidth: '100%',
-                height: 'auto',
-              }}
-            />
-            <Typography fontFamily="IBM Plex Mono" fontSize={13} fontWeight={500}>
-              {`${formatNumber(assets, symbol)} ${symbol}`}
-            </Typography>
-          </Box>
-          <USDValue qty={assets} symbol={symbol} />
+          <Typography variant="caption">{title}:</Typography>
+          {assets ? (
+            <>
+              <Box display="flex" gap={0.5}>
+                <Image
+                  src={`/img/assets/${symbol}.svg`}
+                  alt={symbol}
+                  width={16}
+                  height={16}
+                  style={{
+                    maxWidth: '100%',
+                    height: 'auto',
+                  }}
+                />
+                <Typography fontFamily="IBM Plex Mono" fontSize={13} fontWeight={500}>
+                  {`${formatNumber(assets, symbol)} ${symbol}`}
+                </Typography>
+              </Box>
+              <USDValue qty={assets} symbol={symbol} />
+            </>
+          ) : (
+            <Skeleton width={200} height={24} />
+          )}
         </>
       ) : (
-        <Skeleton width={200} height={24} />
+        <Typography variant="caption" color="grey.700">
+          {disabledMessage}
+        </Typography>
       )}
     </Box>
   );

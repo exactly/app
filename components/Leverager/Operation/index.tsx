@@ -1,6 +1,6 @@
-import { Box, Button, Grid, Skeleton, Typography } from '@mui/material';
+import { Box, Button, Grid, Typography } from '@mui/material';
 import { ModalBox, ModalBoxCell, ModalBoxRow } from 'components/common/modal/ModalBox';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
 import { useLeveragerContext } from 'contexts/LeveragerContext';
@@ -16,8 +16,18 @@ import ModalAlert from 'components/common/modal/ModalAlert';
 
 const Operation = () => {
   const { t } = useTranslation();
-  const { input, setCollateralSymbol, setBorrowSymbol, netPosition, available, errorData } = useLeveragerContext();
+  const { input, setCollateralSymbol, setBorrowSymbol, netPosition, available, errorData, currentLeverageRatio } =
+    useLeveragerContext();
   const options = useAssets();
+
+  const disabledSubmit = useMemo(
+    () =>
+      !input.collateralSymbol ||
+      !input.borrowSymbol ||
+      errorData?.status ||
+      (currentLeverageRatio === 1 && input.leverageRatio === 1),
+    [currentLeverageRatio, errorData?.status, input.borrowSymbol, input.collateralSymbol, input.leverageRatio],
+  );
 
   return (
     <Box>
@@ -61,16 +71,17 @@ const Operation = () => {
         <ModalBoxRow>
           <Box display="flex" flexDirection="column" width="100%" gap={2.5} mt={1}>
             <MultiplierSlider />
-            <InfoRow title={t('Net Position')} symbol={input.collateralSymbol} assets={netPosition} />
+            <InfoRow
+              title={t('Net Position')}
+              symbol={input.collateralSymbol}
+              assets={netPosition}
+              disabledMessage={t('Choose asset to see net position.')}
+            />
           </Box>
         </ModalBoxRow>
         <ModalBoxRow>
           <Box display="flex" justifyContent="space-between" mt={1} gap={3} width="100%">
-            {input.collateralSymbol ? (
-              <AssetInput symbol={input.collateralSymbol} />
-            ) : (
-              <Skeleton width={112} height={56} />
-            )}
+            <AssetInput symbol={input.collateralSymbol} />
             <RadioButtons />
           </Box>
           <Box width="100%" mt={2.5}>
@@ -78,6 +89,7 @@ const Operation = () => {
               title={`${t('Available to')} ${t(input.secondaryOperation).toLowerCase()}`}
               symbol={input.collateralSymbol}
               assets={available}
+              disabledMessage={t('Choose asset to see available amount.')}
             />
           </Box>
         </ModalBoxRow>
@@ -93,9 +105,13 @@ const Operation = () => {
 
       {errorData?.status && <ModalAlert message={errorData.message} variant={errorData.variant} />}
 
-      {!input.collateralSymbol || !input.borrowSymbol || errorData?.status ? (
+      {disabledSubmit ? (
         <Button fullWidth variant="contained" disabled>
           {t('Leverage')}
+        </Button>
+      ) : currentLeverageRatio !== 1 && input.leverageRatio === 1 ? (
+        <Button fullWidth variant="contained">
+          {t('Deleverage')}
         </Button>
       ) : (
         <Button fullWidth variant="contained">
