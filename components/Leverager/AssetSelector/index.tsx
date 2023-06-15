@@ -5,29 +5,31 @@ import { Typography } from '@mui/material';
 
 type AssetSelectorProps = {
   title: string;
-  value?: string;
-  options: string[];
+  currentValue?: string;
+  options: { symbol: string; value: string }[];
   onChange: (newValue: string) => void;
   disabled?: boolean;
 };
 
-const AssetSelector: FC<AssetSelectorProps> = ({ title, value, options, onChange, disabled = false }) => {
+const AssetSelector: FC<AssetSelectorProps> = ({ title, currentValue, options, onChange, disabled = false }) => {
   return (
     <DropdownMenu
       label={title}
       options={options}
-      onChange={(newValue: string) => onChange(newValue)}
+      onChange={(newValue: { symbol: string; value: string }) => onChange(newValue.symbol)}
       disabled={disabled}
       renderValue={
-        value ? (
-          <AssetOption assetSymbol={value} />
+        currentValue ? (
+          <AssetOption assetSymbol={currentValue} />
         ) : (
           <Typography variant="h6" color="figma.grey.500">
             {title}
           </Typography>
         )
       }
-      renderOption={(o: string) => <AssetOption option assetSymbol={o} />}
+      renderOption={({ symbol, value }: { symbol: string; value: string }) => (
+        <AssetOption option assetSymbol={symbol} value={value} />
+      )}
       data-testid="modal-asset-selector"
     />
   );

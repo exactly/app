@@ -28,6 +28,7 @@ import handleOperationError from 'utils/handleOperationError';
 import useIsContract from 'hooks/useIsContract';
 import useBalance from 'hooks/useBalance';
 import { useTranslation } from 'react-i18next';
+import useAssets from 'hooks/useAssets';
 
 type Input = {
   collateralSymbol?: string;
@@ -65,6 +66,9 @@ type ContextValues = {
   setUserInput: (userInput: string) => void;
   setLeverageRatio: (leverageRatio: number) => void;
   setSlippage: (slippage: string) => void;
+
+  collateralOptions: { symbol: string; value: string }[];
+  borrowOptions: { symbol: string; value: string }[];
 
   currentLeverageRatio: number;
   newHealthFactor: string | undefined;
@@ -113,6 +117,14 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
 
   const [tx, setTx] = useState<Transaction | undefined>();
   const [isLoading, setIsLoading] = useState(false);
+
+  const options = useAssets();
+
+  // TODO: calculate
+  const collateralOptions = useMemo(() => options.map((symbol) => ({ symbol, value: '$4.3k' })), [options]);
+
+  // TODO: calculate
+  const borrowOptions = useMemo(() => options.map((symbol) => ({ symbol, value: '$4.3k' })), [options]);
 
   const netPosition = useMemo(() => '430', []); // TODO: calculate
   const getCurrentLeverageRatio = useCallback(() => {
@@ -299,6 +311,9 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     setUserInput,
     setLeverageRatio,
     setSlippage,
+
+    collateralOptions,
+    borrowOptions,
 
     currentLeverageRatio,
     newHealthFactor,

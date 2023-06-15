@@ -9,16 +9,23 @@ import InfoRow from '../InfoRow';
 import LoopAPR from '../LoopAPR';
 import HealthFactor from '../HealthFactor';
 import AssetInput from '../AssetInput';
-import useAssets from 'hooks/useAssets';
 import AssetSelector from '../AssetSelector';
 import RadioButtons from '../RadioButtons';
 import ModalAlert from 'components/common/modal/ModalAlert';
 
 const Operation = () => {
   const { t } = useTranslation();
-  const { input, setCollateralSymbol, setBorrowSymbol, netPosition, available, errorData, currentLeverageRatio } =
-    useLeveragerContext();
-  const options = useAssets();
+  const {
+    input,
+    setCollateralSymbol,
+    setBorrowSymbol,
+    netPosition,
+    available,
+    errorData,
+    currentLeverageRatio,
+    collateralOptions,
+    borrowOptions,
+  } = useLeveragerContext();
 
   const disabledSubmit = useMemo(
     () =>
@@ -49,8 +56,8 @@ const Operation = () => {
             <Grid item xs={5}>
               <AssetSelector
                 title={t('Choose Asset')}
-                value={input.collateralSymbol}
-                options={options}
+                currentValue={input.collateralSymbol}
+                options={collateralOptions}
                 onChange={setCollateralSymbol}
               />
             </Grid>
@@ -60,8 +67,8 @@ const Operation = () => {
             <Grid item xs={5}>
               <AssetSelector
                 title={t('Choose Asset')}
-                value={input.borrowSymbol}
-                options={options}
+                currentValue={input.borrowSymbol}
+                options={borrowOptions}
                 onChange={setBorrowSymbol}
                 disabled={!input.collateralSymbol}
               />

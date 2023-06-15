@@ -96,7 +96,7 @@ const DropdownMenu = <T,>({
       >
         {Object.values(options).map((o) => (
           <OptionItem
-            key={String(o)}
+            key={JSON.stringify(o)}
             onClick={() => {
               onChange(o);
               handleClose();
