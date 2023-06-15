@@ -1,14 +1,4 @@
-import {
-  Box,
-  Button,
-  FormControl,
-  FormControlLabel,
-  Grid,
-  Radio,
-  RadioGroup,
-  Skeleton,
-  Typography,
-} from '@mui/material';
+import { Box, Button, Grid, Skeleton, Typography } from '@mui/material';
 import { ModalBox, ModalBoxCell, ModalBoxRow } from 'components/common/modal/ModalBox';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -21,10 +11,11 @@ import HealthFactor from '../HealthFactor';
 import AssetInput from '../AssetInput';
 import useAssets from 'hooks/useAssets';
 import AssetSelector from '../AssetSelector';
+import RadioButtons from '../RadioButtons';
 
 const Operation = () => {
   const { t } = useTranslation();
-  const { input, setCollateral, setBorrow } = useLeveragerContext();
+  const { input, setCollateralSymbol, setBorrowSymbol, netPosition, available } = useLeveragerContext();
   const options = useAssets();
 
   return (
@@ -47,60 +38,46 @@ const Operation = () => {
             <Grid item xs={5}>
               <AssetSelector
                 title={t('Choose Asset')}
-                value={input.collateral}
+                value={input.collateralSymbol}
                 options={options}
-                onChange={setCollateral}
+                onChange={setCollateralSymbol}
               />
             </Grid>
             <Grid display="flex" alignItems="center" justifyContent="center" item xs={2}>
               <ArrowForwardRoundedIcon sx={{ color: 'blue', fontSize: 14, fontWeight: 600 }} />
             </Grid>
             <Grid item xs={5}>
-              <AssetSelector title={t('Choose Asset')} value={input.borrow} options={options} onChange={setBorrow} />
+              <AssetSelector
+                title={t('Choose Asset')}
+                value={input.borrowSymbol}
+                options={options}
+                onChange={setBorrowSymbol}
+                disabled={!input.collateralSymbol}
+              />
             </Grid>
           </Grid>
         </ModalBoxRow>
         <ModalBoxRow>
           <Box display="flex" flexDirection="column" width="100%" gap={2.5} mt={1}>
             <MultiplierSlider />
-            <InfoRow title={t('Net Position')} symbol={input.collateral} assets={2.8} assetsUSD={4361.79} />
+            <InfoRow title={t('Net Position')} symbol={input.collateralSymbol} assets={netPosition} />
           </Box>
         </ModalBoxRow>
         <ModalBoxRow>
-          <Box display="flex" justifyContent="space-between" mt={1} gap={3}>
-            {input.collateral ? (
-              <AssetInput symbol={input.collateral} operation="deposit" />
+          <Box display="flex" justifyContent="space-between" mt={1} gap={3} width="100%">
+            {input.collateralSymbol ? (
+              <AssetInput symbol={input.collateralSymbol} />
             ) : (
               <Skeleton width={112} height={56} />
             )}
-            <FormControl>
-              <RadioGroup
-              // value={value}
-              // onChange={handleChange}
-              >
-                <FormControlLabel
-                  value="withdraw"
-                  control={<Radio sx={{ px: 1, pt: 1, pb: 0.5 }} />}
-                  label={
-                    <Typography variant="caption" mt={0.5}>
-                      {t('Withdraw')}
-                    </Typography>
-                  }
-                />
-                <FormControlLabel
-                  value="deposit"
-                  control={<Radio sx={{ px: 1, pt: 0.5, pb: 1 }} />}
-                  label={
-                    <Typography variant="caption" mb={0.5}>
-                      {t('Deposit')}
-                    </Typography>
-                  }
-                />
-              </RadioGroup>
-            </FormControl>
+            <RadioButtons />
           </Box>
           <Box width="100%" mt={2.5}>
-            <InfoRow title={t('Wallet Balance')} symbol={input.collateral} assets={2.1} assetsUSD={4149.82} />
+            <InfoRow
+              title={`${t('Available to')} ${t(input.secondaryOperation).toLowerCase()}`}
+              symbol={input.collateralSymbol}
+              assets={available}
+            />
           </Box>
         </ModalBoxRow>
         <ModalBoxRow>
@@ -108,7 +85,7 @@ const Operation = () => {
             <LoopAPR />
           </ModalBoxCell>
           <ModalBoxCell divisor mt={1}>
-            <HealthFactor newHealthFactor="1.009x" />
+            <HealthFactor />
           </ModalBoxCell>
         </ModalBoxRow>
       </ModalBox>

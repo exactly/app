@@ -6,6 +6,7 @@ import React, {
   useState,
   useCallback,
   useReducer,
+  useMemo,
 } from 'react';
 import { BigNumber } from '@ethersproject/bignumber';
 import { useSigner } from 'wagmi';
@@ -25,24 +26,26 @@ import { gasLimitMultiplier } from 'utils/const';
 import useEstimateGas from 'hooks/useEstimateGas';
 import handleOperationError from 'utils/handleOperationError';
 import useIsContract from 'hooks/useIsContract';
+import useBalance from 'hooks/useBalance';
+import { useTranslation } from 'react-i18next';
 
 type Input = {
-  collateral?: string;
-  borrow?: string;
-  depositedSupply: number;
-  walletSupply: number;
-  leverageFactor: number;
+  collateralSymbol?: string;
+  borrowSymbol?: string;
+  secondaryOperation: 'deposit' | 'withdraw';
+  userInput: string;
+  leverageRatio: number;
   slippage: string;
 };
 
 const DEFAULT_SLIPPAGE = (numbers.slippage * 100).toFixed(2);
 
 const initState: Input = {
-  collateral: undefined,
-  borrow: undefined,
-  depositedSupply: 0,
-  walletSupply: 0,
-  leverageFactor: 1,
+  collateralSymbol: undefined,
+  borrowSymbol: undefined,
+  secondaryOperation: 'deposit',
+  userInput: '',
+  leverageRatio: 1,
   slippage: DEFAULT_SLIPPAGE,
 };
 
@@ -52,16 +55,33 @@ const reducer = (state: Input, action: Partial<Input>): Input => {
 
 type ContextValues = {
   isOpen: boolean;
-  openLeverager: (collateral?: string) => void;
+  openLeverager: (collateralSymbol?: string) => void;
   close: () => void;
 
   input: Input;
-  setCollateral: (collateral: string) => void;
-  setBorrow: (debt: string) => void;
-  setDepositedSupply: (depositedSupply: number) => void;
-  setWalletSupply: (walletSupply: number) => void;
-  setLeverageFactor: (leverageFactor: number) => void;
+  setCollateralSymbol: (collateralSymbol: string) => void;
+  setBorrowSymbol: (debt: string) => void;
+  setSecondaryOperation: (secondaryOperation: 'deposit' | 'withdraw') => void;
+  setUserInput: (userInput: string) => void;
+  setLeverageRatio: (leverageRatio: number) => void;
   setSlippage: (slippage: string) => void;
+
+  currentLeverageRatio: number;
+  newHealthFactor: string | undefined;
+  minLeverageRatio: number;
+  maxLeverageRatio: number;
+  onMax: () => void;
+  handleInputChange: (value: string) => void;
+  netPosition: string | undefined;
+  available: string | undefined;
+
+  loopAPR: number | undefined;
+  marketAPR: number | undefined;
+  rewardsAPR: number | undefined;
+  nativeAPR: number | undefined;
+
+  marketRewards: string[];
+  nativeRewards: string[];
 
   debtManager?: DebtManager;
   market?: Market;
@@ -81,6 +101,7 @@ type ContextValues = {
 const LeveragerContext = createContext<ContextValues | null>(null);
 
 export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) => {
+  const { t } = useTranslation();
   const { walletAddress } = useWeb3();
   const { data: signer } = useSigner();
   const { getMarketAccount, refreshAccountData } = useAccountData();
@@ -93,15 +114,60 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
   const [tx, setTx] = useState<Transaction | undefined>();
   const [isLoading, setIsLoading] = useState(false);
 
-  const setCollateral = useCallback((collateral: string) => dispatch({ ...initState, collateral }), []);
-  const setBorrow = useCallback((borrow: string) => dispatch({ borrow: borrow }), []);
-  const setDepositedSupply = useCallback((depositedSupply: number) => dispatch({ depositedSupply }), []);
-  const setWalletSupply = useCallback((walletSupply: number) => dispatch({ walletSupply }), []);
-  const setLeverageFactor = useCallback((leverageFactor: number) => dispatch({ leverageFactor }), []);
+  const netPosition = useMemo(() => '430', []); // TODO: calculate
+  const getCurrentLeverageRatio = useCallback(() => {
+    // TODO: diff between collateral and borrow to take principal
+    // leverageRatio = collateral / principal
+    return 2;
+  }, []);
+
+  const currentLeverageRatio = useMemo(() => getCurrentLeverageRatio(), [getCurrentLeverageRatio]);
+
+  // TODO: calculate
+  const minLeverageRatio = useMemo(() => 1, []);
+
+  // TODO: calculate
+  const maxLeverageRatio = useMemo(() => 7, []);
+
+  // TODO: calculate
+  const newHealthFactor = useMemo(() => '1.009x', []);
+
+  const setCollateralSymbol = useCallback(
+    (collateralSymbol: string) => dispatch({ ...initState, collateralSymbol }),
+    [],
+  );
+  const setBorrowSymbol = useCallback(
+    (borrowSymbol: string) => {
+      const _currentLeverageRatio = getCurrentLeverageRatio();
+      dispatch({
+        ...initState,
+        collateralSymbol: input.collateralSymbol,
+        borrowSymbol: borrowSymbol,
+        leverageRatio: _currentLeverageRatio,
+      });
+    },
+    [getCurrentLeverageRatio, input.collateralSymbol],
+  );
+  const setSecondaryOperation = useCallback(
+    (secondaryOperation: 'deposit' | 'withdraw') => dispatch({ secondaryOperation, userInput: '' }),
+    [],
+  );
+  const setUserInput = useCallback((userInput: string) => dispatch({ userInput }), []);
+  const setLeverageRatio = useCallback(
+    (leverageRatio: number) => {
+      const _secondaryOperation = leverageRatio < currentLeverageRatio ? 'withdraw' : 'deposit';
+      dispatch({
+        leverageRatio,
+        secondaryOperation: _secondaryOperation,
+        userInput: _secondaryOperation !== input.secondaryOperation ? '' : input.userInput,
+      });
+    },
+    [currentLeverageRatio, input.secondaryOperation, input.userInput],
+  );
   const setSlippage = useCallback((slippage: string) => dispatch({ slippage }), []);
 
-  const openLeverager = useCallback((collateral?: string) => {
-    dispatch({ ...initState, collateral });
+  const openLeverager = useCallback((collateralSymbol?: string) => {
+    dispatch({ ...initState, collateralSymbol });
     setTx(undefined);
     setIsLoading(false);
     setIsOpen(true);
@@ -109,10 +175,45 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
 
   const close = useCallback(() => setIsOpen(false), []);
 
+  const market = useMarket(input.collateralSymbol && getMarketAccount(input.collateralSymbol)?.market);
+
+  const walletBalance = useBalance(input.collateralSymbol, market);
+
+  //TODO: handle withdraw
+  const onMax = useCallback(() => {
+    if (walletBalance) {
+      setUserInput(walletBalance);
+      setErrorData(undefined);
+    }
+  }, [walletBalance, setUserInput, setErrorData]);
+
+  //TODO: handle withdraw
+  const handleInputChange = useCallback(
+    (value: string) => {
+      setUserInput(value);
+
+      if (walletBalance && parseFloat(value) > parseFloat(walletBalance)) {
+        setErrorData({ status: true, message: t('Insufficient balance') });
+        return;
+      }
+      setErrorData(undefined);
+    },
+    [setUserInput, walletBalance, setErrorData, t],
+  );
+
+  //TODO: handle withdraw
+  const available = useMemo(() => walletBalance, [walletBalance]);
+
+  //TODO: calculate
+  const [loopAPR, marketAPR, rewardsAPR, nativeAPR] = useMemo(() => [0.137, 0.074, 0.021, 0.042], []);
+
+  // TODO: calculate
+  const marketRewards = useMemo(() => ['OP', 'USDC'], []);
+
+  // TODO: calculate
+  const nativeRewards = useMemo(() => ['WBTC'], []);
+
   const debtManager = useDebtManager();
-
-  const market = useMarket(input.collateral && getMarketAccount(input.collateral)?.market);
-
   const needsApproval = useCallback(
     async (qty: BigNumber): Promise<boolean> => {
       if (!walletAddress || !market || !debtManager || qty.isZero()) return true;
@@ -183,12 +284,29 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     close,
 
     input,
-    setCollateral,
-    setBorrow,
-    setDepositedSupply,
-    setWalletSupply,
-    setLeverageFactor,
+    setCollateralSymbol,
+    setBorrowSymbol,
+    setSecondaryOperation,
+    setUserInput,
+    setLeverageRatio,
     setSlippage,
+
+    currentLeverageRatio,
+    newHealthFactor,
+    minLeverageRatio,
+    maxLeverageRatio,
+    onMax,
+    handleInputChange,
+    netPosition,
+    available,
+
+    loopAPR,
+    marketAPR,
+    rewardsAPR,
+    nativeAPR,
+
+    marketRewards,
+    nativeRewards,
 
     debtManager,
     market,

@@ -44,9 +44,19 @@ type Props = {
   symbol?: string;
   maxWidth?: string;
   align?: 'left' | 'center' | 'right';
+  disabled?: boolean;
 } & CustomProps;
 
-function ModalInput({ value, name, decimals, onValueChange, symbol, maxWidth, align = 'right' }: Props) {
+function ModalInput({
+  value,
+  name,
+  decimals,
+  onValueChange,
+  symbol,
+  maxWidth,
+  align = 'right',
+  disabled = false,
+}: Props) {
   return (
     <InputBase
       inputProps={{
@@ -59,6 +69,7 @@ function ModalInput({ value, name, decimals, onValueChange, symbol, maxWidth, al
         onValueChange: onValueChange,
         decimals: decimals,
       }}
+      disabled={disabled}
       value={value}
       autoFocus
       sx={{

@@ -1,15 +1,16 @@
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Box, Slider, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import { useLeveragerContext } from 'contexts/LeveragerContext';
 
 const MultiplierSlider = () => {
   const { t } = useTranslation();
-
-  const minValue = useMemo(() => 1, []);
-  const maxValue = useMemo(() => 7, []);
-  const currentValue = useMemo(() => 2, []);
-  const currentMark = useMemo(() => [{ value: currentValue }], [currentValue]);
-  const [multiplier, setMultiplier] = React.useState<number>(currentValue);
+  const { input, setLeverageRatio, currentLeverageRatio, minLeverageRatio, maxLeverageRatio } = useLeveragerContext();
+  const currentMark = useMemo(() => [{ value: currentLeverageRatio }], [currentLeverageRatio]);
+  const onClick = useCallback(() => {
+    if (!input.collateralSymbol || !input.borrowSymbol) return;
+    setLeverageRatio(currentLeverageRatio);
+  }, [currentLeverageRatio, input.borrowSymbol, input.collateralSymbol, setLeverageRatio]);
 
   return (
     <Box display="flex" flexDirection="column" gap={2}>
@@ -23,7 +24,7 @@ const MultiplierSlider = () => {
           px={0.5}
           borderRadius="2px"
           alignItems="center"
-          onClick={() => setMultiplier(currentValue)}
+          onClick={onClick}
           sx={{ cursor: 'pointer' }}
         >
           <Typography fontFamily="IBM Plex Mono" fontSize={10}>{`${t('Current').toUpperCase()}:${'2.0'}x`}</Typography>
@@ -32,15 +33,16 @@ const MultiplierSlider = () => {
       <Box display="flex" justifyItems="space-between" alignItems="center" gap={2}>
         <Typography variant="h6">1x</Typography>
         <Slider
-          value={multiplier}
-          onChange={(_, value) => setMultiplier(value as number)}
+          value={input.leverageRatio}
+          onChange={(_, value) => setLeverageRatio(value as number)}
           marks={currentMark}
-          defaultValue={currentValue}
+          defaultValue={currentLeverageRatio}
           valueLabelDisplay="on"
-          min={minValue}
-          max={maxValue}
+          min={minLeverageRatio}
+          max={maxLeverageRatio}
           step={0.1}
           valueLabelFormat={(value) => `${value.toFixed(1)}x`}
+          disabled={!input.collateralSymbol || !input.borrowSymbol}
           sx={{
             height: 4,
             '& .MuiSlider-thumb': {

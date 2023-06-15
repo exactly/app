@@ -1,31 +1,21 @@
-import React, { useCallback, useMemo } from 'react';
+import React from 'react';
 import { Box, Button, Skeleton } from '@mui/material';
 
 import ModalInput from 'components/OperationsModal/ModalInput';
 import USDValue from 'components/OperationsModal/USDValue';
-import useDeposit from 'hooks/useDeposit';
-import { useOperationContext } from 'contexts/OperationContext';
 import useAccountData from 'hooks/useAccountData';
-import useBalance from 'hooks/useBalance';
 import Image from 'next/image';
 import formatSymbol from 'utils/formatSymbol';
+import { useLeveragerContext } from 'contexts/LeveragerContext';
 
 type Props = {
   symbol: string;
-  operation?: 'deposit' | 'withdraw';
 };
 
-function AssetInput({ operation, symbol }: Props) {
+function AssetInput({ symbol }: Props) {
+  const { input, handleInputChange, onMax, available } = useLeveragerContext();
   const { marketAccount } = useAccountData(symbol);
   const { decimals = 18 } = marketAccount ?? {};
-  const { handleInputChange: handleDeposit, onMax: onMaxDeposit } = useDeposit();
-  const { qty, assetContract } = useOperationContext(); // Agregar symbol
-  const walletBalance = useBalance(symbol, assetContract);
-
-  const isDeposit = useMemo(() => operation === 'deposit', [operation]);
-  const onChange = useCallback(() => (isDeposit ? handleDeposit : handleDeposit), [handleDeposit, isDeposit]);
-  const onMax = useCallback(() => (isDeposit ? onMaxDeposit : onMaxDeposit), [isDeposit, onMaxDeposit]);
-  const amount = useMemo(() => (isDeposit ? walletBalance : walletBalance), [isDeposit, walletBalance]);
 
   return (
     <Box display="flex" flexDirection="column">
@@ -38,17 +28,18 @@ function AssetInput({ operation, symbol }: Props) {
           style={{ maxWidth: '100%', height: 'auto' }}
         />
         <ModalInput
-          value={qty}
+          value={input.userInput}
           decimals={decimals}
-          onValueChange={onChange}
+          onValueChange={handleInputChange}
           symbol={symbol}
           maxWidth="100%"
           align="left"
+          disabled={!input.collateralSymbol || !input.borrowSymbol}
         />
       </Box>
       <Box display="flex" justifyContent="left" alignItems="center" marginTop={0.25} height={20} gap={1.5} pl={3}>
-        <USDValue qty={qty} symbol={symbol} />
-        {amount && Boolean(parseFloat(amount)) ? (
+        <USDValue qty={input.userInput} symbol={symbol} />
+        {available !== undefined ? (
           <Button
             onClick={onMax}
             sx={{
@@ -62,6 +53,7 @@ function AssetInput({ operation, symbol }: Props) {
               fontSize: 12,
             }}
             data-testid="modal-on-max"
+            disabled={!parseFloat(available)}
           >
             Max
           </Button>

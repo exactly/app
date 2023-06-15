@@ -1,16 +1,14 @@
-import React, { FC, useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Box, Skeleton, Typography, useTheme } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import useHealthFactor from 'hooks/useHealthFactor';
 import parseHealthFactor from 'utils/parseHealthFactor';
 import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
+import { useLeveragerContext } from 'contexts/LeveragerContext';
 
-type HealthFactorProps = {
-  newHealthFactor?: string;
-};
-
-const HealthFactor: FC<HealthFactorProps> = ({ newHealthFactor }) => {
+const HealthFactor = () => {
   const { t } = useTranslation();
+  const { newHealthFactor } = useLeveragerContext();
   const hf = useHealthFactor();
   const { palette } = useTheme();
 

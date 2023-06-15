@@ -9,6 +9,7 @@ interface Props<T> extends Pick<MenuProps, 'anchorOrigin' | 'transformOrigin'> {
   renderValue: ReactNode;
   renderOption: (value: T) => ReactNode;
   'data-testid'?: string;
+  disabled?: boolean;
 }
 
 function InnerButton({ children }: PropsWithChildren) {
@@ -50,6 +51,7 @@ const DropdownMenu = <T,>({
   'data-testid': testId,
   anchorOrigin = { vertical: 'top', horizontal: 'left' },
   transformOrigin = { vertical: 'top', horizontal: 'left' },
+  disabled = false,
 }: Props<T>) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -73,6 +75,7 @@ const DropdownMenu = <T,>({
         onClick={handleClick}
         sx={{ borderRadius: '16px', p: 1, ml: -1 }}
         data-testid={testId}
+        disabled={disabled}
       >
         <InnerButton>{renderValue}</InnerButton>
       </Button>

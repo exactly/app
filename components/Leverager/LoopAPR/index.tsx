@@ -1,39 +1,47 @@
 import React, { FC, PropsWithChildren } from 'react';
-import { Box, Typography, Avatar, AvatarGroup, Tooltip, Divider, IconButton } from '@mui/material';
+import { Box, Typography, Avatar, AvatarGroup, Tooltip, Divider, IconButton, Skeleton } from '@mui/material';
 import { toPercentage } from 'utils/utils';
 import { useTranslation } from 'react-i18next';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
+import { useLeveragerContext } from 'contexts/LeveragerContext';
 
 const LoopAPR = () => {
   const { t } = useTranslation();
+  const { input, loopAPR } = useLeveragerContext();
+
   return (
     <Box display="flex" flexDirection="column" gap={2}>
       <Typography variant="caption" color="figma.grey.600">
         {t('Loop APR')}
       </Typography>
-      <Box display="flex" gap={0.5} alignItems="center">
-        <Tooltip title={<APRBreakdown />} placement="top" arrow enterTouchDelay={0} sx={{ cursor: 'pointer' }}>
-          <Typography variant="h6">{toPercentage(0.137)}</Typography>
-        </Tooltip>
+      {input.collateralSymbol && input.borrowSymbol ? (
+        <Box display="flex" gap={0.5} alignItems="center">
+          <Tooltip title={<APRBreakdown />} placement="top" arrow enterTouchDelay={0} sx={{ cursor: 'pointer' }}>
+            <Typography variant="h6">{toPercentage(loopAPR)}</Typography>
+          </Tooltip>
 
-        <RewardsGroup />
-      </Box>
+          <RewardsGroup />
+        </Box>
+      ) : (
+        <Skeleton width={112} height={36} />
+      )}
     </Box>
   );
 };
 
 const APRBreakdown = () => {
   const { t } = useTranslation();
+  const { marketAPR, rewardsAPR, nativeAPR } = useLeveragerContext();
 
   return (
     <Box display="flex" flexDirection="column" gap={0.5}>
-      <APRBreakdownItem title={t('Market APR')} link="" value="7.4%" />
+      <APRBreakdownItem title={t('Market APR')} link="" value={toPercentage(marketAPR)} />
       <Divider flexItem sx={{ mx: 0.5 }} />
-      <APRBreakdownItem title={t('Rewards APR')} link="" value="2.1%">
+      <APRBreakdownItem title={t('Rewards APR')} link="" value={toPercentage(rewardsAPR)}>
         <RewardsGroup withNative={false} size={16} />
       </APRBreakdownItem>
       <Divider flexItem sx={{ mx: 0.5 }} />
-      <APRBreakdownItem title={t('Native APR')} link="" value="4.2%">
+      <APRBreakdownItem title={t('Native APR')} link="" value={toPercentage(nativeAPR)}>
         <RewardsGroup withRewards={false} size={16} />
       </APRBreakdownItem>
     </Box>
@@ -76,14 +84,14 @@ type RewardsGroupProps = {
 };
 
 const RewardsGroup: FC<RewardsGroupProps> = ({ withNative = true, withRewards = true, size = 20 }) => {
-  const native = [{ symbol: 'WBTC' }];
-  const rewards = [{ symbol: 'OP' }, { symbol: 'USDC' }];
-  const all = [...(withRewards ? rewards : []), ...(withNative ? native : [])];
+  const { nativeRewards, marketRewards } = useLeveragerContext();
+
+  const all = [...(withRewards ? marketRewards : []), ...(withNative ? nativeRewards : [])];
 
   return (
     <AvatarGroup max={6} sx={{ '& .MuiAvatar-root': { width: size, height: size, fontSize: 10 } }}>
-      {all.map(({ symbol }) => (
-        <Avatar key={symbol} alt={symbol} src={`/img/assets/${symbol}.svg`} />
+      {all.map((rewardSymbol) => (
+        <Avatar key={rewardSymbol} alt={rewardSymbol} src={`/img/assets/${rewardSymbol}.svg`} />
       ))}
     </AvatarGroup>
   );

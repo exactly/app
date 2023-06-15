@@ -8,14 +8,16 @@ type AssetSelectorProps = {
   value?: string;
   options: string[];
   onChange: (newValue: string) => void;
+  disabled?: boolean;
 };
 
-const AssetSelector: FC<AssetSelectorProps> = ({ title, value, options, onChange }) => {
+const AssetSelector: FC<AssetSelectorProps> = ({ title, value, options, onChange, disabled = false }) => {
   return (
     <DropdownMenu
       label={title}
       options={options}
       onChange={(newValue: string) => onChange(newValue)}
+      disabled={disabled}
       renderValue={
         value ? (
           <AssetOption assetSymbol={value} />
