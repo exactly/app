@@ -12,15 +12,16 @@ import AssetInput from '../AssetInput';
 import useAssets from 'hooks/useAssets';
 import AssetSelector from '../AssetSelector';
 import RadioButtons from '../RadioButtons';
+import ModalAlert from 'components/common/modal/ModalAlert';
 
 const Operation = () => {
   const { t } = useTranslation();
-  const { input, setCollateralSymbol, setBorrowSymbol, netPosition, available } = useLeveragerContext();
+  const { input, setCollateralSymbol, setBorrowSymbol, netPosition, available, errorData } = useLeveragerContext();
   const options = useAssets();
 
   return (
     <Box>
-      <ModalBox sx={{ p: 2 }}>
+      <ModalBox sx={{ p: 2, mb: errorData?.status ? 1 : 4 }}>
         <ModalBoxRow>
           <Grid container mb={1.5}>
             <Grid item xs={7}>
@@ -89,9 +90,18 @@ const Operation = () => {
           </ModalBoxCell>
         </ModalBoxRow>
       </ModalBox>
-      <Button fullWidth variant="contained" sx={{ mt: 4 }}>
-        Leverage
-      </Button>
+
+      {errorData?.status && <ModalAlert message={errorData.message} variant={errorData.variant} />}
+
+      {!input.collateralSymbol || !input.borrowSymbol || errorData?.status ? (
+        <Button fullWidth variant="contained" disabled>
+          {t('Leverage')}
+        </Button>
+      ) : (
+        <Button fullWidth variant="contained">
+          {`${t('Leverage')} ${netPosition} ${input.collateralSymbol} @ ${input.leverageRatio.toFixed(1)}x`}
+        </Button>
+      )}
     </Box>
   );
 };

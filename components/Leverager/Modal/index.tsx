@@ -93,7 +93,7 @@ function LeveragerModal() {
             }}
           >
             <Typography fontWeight={700} fontSize={24}>
-              {t('Leverage')}
+              {t('Leverage & Deleverage')}
             </Typography>
           </DialogTitle>
         )}

@@ -1,16 +1,26 @@
 import React, { useCallback, useMemo } from 'react';
-import { Box, Slider, Typography } from '@mui/material';
+import { Box, Slider, Typography, useTheme } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useLeveragerContext } from 'contexts/LeveragerContext';
 
 const MultiplierSlider = () => {
   const { t } = useTranslation();
-  const { input, setLeverageRatio, currentLeverageRatio, minLeverageRatio, maxLeverageRatio } = useLeveragerContext();
+  const { palette } = useTheme();
+  const { input, setLeverageRatio, currentLeverageRatio, minLeverageRatio, maxLeverageRatio, newHealthFactor } =
+    useLeveragerContext();
+
   const currentMark = useMemo(() => [{ value: currentLeverageRatio }], [currentLeverageRatio]);
   const onClick = useCallback(() => {
     if (!input.collateralSymbol || !input.borrowSymbol) return;
     setLeverageRatio(currentLeverageRatio);
   }, [currentLeverageRatio, input.borrowSymbol, input.collateralSymbol, setLeverageRatio]);
+
+  const healthFactorColor = useMemo(() => {
+    if (!newHealthFactor) return { color: palette.healthFactor.safe, bg: palette.healthFactor.bg.safe };
+    const parsedHF = parseFloat(newHealthFactor);
+    const status = parsedHF < 1.01 ? 'danger' : parsedHF < 1.05 ? 'warning' : 'safe';
+    return { color: palette.healthFactor[status], bg: palette.healthFactor.bg[status] };
+  }, [palette.healthFactor, newHealthFactor]);
 
   return (
     <Box display="flex" flexDirection="column" gap={2}>
@@ -46,7 +56,7 @@ const MultiplierSlider = () => {
           sx={{
             height: 4,
             '& .MuiSlider-thumb': {
-              bgcolor: 'green',
+              bgcolor: healthFactorColor.color,
               width: 16,
               height: 16,
               '&:before': {
@@ -61,7 +71,7 @@ const MultiplierSlider = () => {
               fontSize: 12,
               fontWeight: 700,
               padding: '1px 4px',
-              bgcolor: 'green',
+              bgcolor: healthFactorColor.color,
               color: 'white',
             },
             '& .MuiSlider-mark': {

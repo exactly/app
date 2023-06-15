@@ -130,15 +130,16 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
   const maxLeverageRatio = useMemo(() => 7, []);
 
   // TODO: calculate
-  const newHealthFactor = useMemo(() => '1.009x', []);
+  const newHealthFactor = useMemo(() => '1.05x', []);
 
-  const setCollateralSymbol = useCallback(
-    (collateralSymbol: string) => dispatch({ ...initState, collateralSymbol }),
-    [],
-  );
+  const setCollateralSymbol = useCallback((collateralSymbol: string) => {
+    setErrorData(undefined);
+    dispatch({ ...initState, collateralSymbol });
+  }, []);
   const setBorrowSymbol = useCallback(
     (borrowSymbol: string) => {
       const _currentLeverageRatio = getCurrentLeverageRatio();
+      setErrorData(undefined);
       dispatch({
         ...initState,
         collateralSymbol: input.collateralSymbol,
@@ -148,18 +149,26 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     },
     [getCurrentLeverageRatio, input.collateralSymbol],
   );
-  const setSecondaryOperation = useCallback(
-    (secondaryOperation: 'deposit' | 'withdraw') => dispatch({ secondaryOperation, userInput: '' }),
-    [],
-  );
-  const setUserInput = useCallback((userInput: string) => dispatch({ userInput }), []);
+  const setSecondaryOperation = useCallback((secondaryOperation: 'deposit' | 'withdraw') => {
+    setErrorData(undefined);
+    dispatch({ secondaryOperation, userInput: '' });
+  }, []);
+  const setUserInput = useCallback((userInput: string) => {
+    setErrorData(undefined);
+    dispatch({ userInput });
+  }, []);
   const setLeverageRatio = useCallback(
     (leverageRatio: number) => {
       const _secondaryOperation = leverageRatio < currentLeverageRatio ? 'withdraw' : 'deposit';
+      const changedOperation = _secondaryOperation !== input.secondaryOperation;
+      if (changedOperation) {
+        setErrorData(undefined);
+      }
+
       dispatch({
         leverageRatio,
         secondaryOperation: _secondaryOperation,
-        userInput: _secondaryOperation !== input.secondaryOperation ? '' : input.userInput,
+        userInput: changedOperation ? '' : input.userInput,
       });
     },
     [currentLeverageRatio, input.secondaryOperation, input.userInput],
