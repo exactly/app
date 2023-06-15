@@ -40,7 +40,7 @@ project with the following content
 
 ```bash
 NEXT_PUBLIC_NETWORK=goerli        # Network to use by default
-NEXT_PUBLIC_ENABLE_TESTNETS=true  # Enable testnets (required if NETWORK is a tesnet)
+NEXT_PUBLIC_ENABLE_TESTNETS=true  # Enable testnets (required if NETWORK is a testnet)
 ```
 
 A development server can be started at `http://localhost:3000` with
@@ -82,7 +82,7 @@ and in another terminal
 npm run test
 ```
 
-To run a single test use the same above but specifiy the spec to run with
+To run a single test use the same above but specify the spec to run with
 
 ```bash
 npm run test -- --spec [path] # e.g. tests/e2e/specs/0-connect-wallet-spec.ts
