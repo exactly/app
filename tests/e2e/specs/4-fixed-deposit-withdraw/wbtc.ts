@@ -7,7 +7,7 @@ import depositAtMaturity from '../../steps/common/deposit';
 import withdrawAtMaturity from '../../steps/common/withdraw';
 
 describe('WBTC fixed withdraw/deposit', () => {
-  const { visit, setBalance, userAddress, signer } = setup();
+  const { visit, setBalance, userAddress, walletClient, publicClient } = setup();
   const pool = selectFixedPool();
 
   before(() => {
@@ -22,9 +22,13 @@ describe('WBTC fixed withdraw/deposit', () => {
   });
 
   describe('Setup environment for successful fixed deposit', () => {
-    enterMarket('WBTC', signer);
-    deposit({ symbol: 'WBTC', amount: '400', receiver: userAddress() }, signer);
-    borrowAtMaturity({ symbol: 'WBTC', amount: '5', maturity: pool, receiver: userAddress() }, signer);
+    enterMarket('WBTC', walletClient);
+    deposit({ symbol: 'WBTC', amount: '400', receiver: userAddress() }, walletClient, publicClient);
+    borrowAtMaturity(
+      { symbol: 'WBTC', amount: '5', maturity: BigInt(pool), receiver: userAddress() },
+      walletClient,
+      publicClient,
+    );
 
     reload();
   });
@@ -40,7 +44,7 @@ describe('WBTC fixed withdraw/deposit', () => {
   });
 
   describe('Status after fixed deposit', () => {
-    checkBalance({ symbol: 'WBTC', amount: '95' }, signer);
+    checkBalance({ address: userAddress(), symbol: 'WBTC', amount: '95' }, publicClient);
 
     it('should navigate to the dashboard', () => {
       navbar.goTo('dashboard');
@@ -59,6 +63,6 @@ describe('WBTC fixed withdraw/deposit', () => {
   });
 
   describe('Status after fixed withdraw', () => {
-    checkBalance({ symbol: 'WBTC', amount: '100', approx: 0.005 }, signer);
+    checkBalance({ address: userAddress(), symbol: 'WBTC', amount: '100', delta: 0.005 }, publicClient);
   });
 });

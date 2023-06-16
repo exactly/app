@@ -1,5 +1,4 @@
 import { useMemo } from 'react';
-import { usePublicClient } from 'wagmi';
 import { getContract } from '@wagmi/core';
 import { isAddress } from 'viem';
 import { mainnet, goerli, optimism } from 'wagmi/chains';
@@ -12,7 +11,6 @@ import goerliPreviewer from '@exactly/protocol/deployments/goerli/Previewer.json
 import { Previewer } from 'types/contracts';
 
 export default (): Previewer | undefined => {
-  const publicClient = usePublicClient();
   const { chain } = useWeb3();
 
   return useMemo(() => {
@@ -28,7 +26,6 @@ export default (): Previewer | undefined => {
       chainId: chain.id,
       address,
       abi: previewerABI,
-      publicClient,
     });
-  }, [chain.id, publicClient]);
+  }, [chain.id]);
 };

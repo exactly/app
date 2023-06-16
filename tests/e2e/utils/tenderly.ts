@@ -1,6 +1,5 @@
-import { hexValue } from '@ethersproject/bytes';
-import { StaticJsonRpcProvider } from '@ethersproject/providers';
-import { formatFixed, parseFixed } from '@ethersproject/bignumber';
+import { Address, parseEther, parseUnits, createPublicClient, http, toHex, encodeFunctionData } from 'viem';
+import { Chain, mainnet } from 'viem/chains';
 
 import type { Coin, ERC20TokenSymbol } from './contracts';
 import { erc20 } from './contracts';
@@ -17,12 +16,21 @@ const headers = {
   Accept: 'application/json',
   'Content-Type': 'application/json',
   'X-Access-Key': TENDERLY_ACCESS_KEY as string,
+} as const;
+
+export type Tenderly = {
+  url: () => string;
+  setBalance: (address: Address, balance: Balance) => Promise<void>;
+  deleteFork: () => Promise<void>;
 };
 
-export const createFork = async (networkId = '1', blockNumber = undefined): Promise<string> => {
+export const rpcURL = (forkId: string) => {
+  return `https://rpc.tenderly.co/fork/${forkId}`;
+};
+
+export const createFork = async (networkId: number | string = mainnet.id): Promise<string> => {
   const body = JSON.stringify({
-    network_id: networkId,
-    block_number: blockNumber,
+    network_id: String(networkId),
   });
 
   const rawResponse = await fetch(FORK_URL, { method: 'POST', headers, body });
@@ -36,71 +44,64 @@ export const deleteFork = async (forkId: string): Promise<void> => {
   await fetch(TENDERLY_FORK_API, { method: 'DELETE', headers });
 };
 
-export const rpcURL = (forkId: string) => {
-  return `https://rpc.tenderly.co/fork/${forkId}`;
-};
-
-const setNativeBalance = async (forkUrl: string, address: string, amount: number) => {
-  const provider = new StaticJsonRpcProvider(forkUrl);
-  const params = [[address], hexValue(parseFixed(amount.toString(), 18).toHexString())];
-
-  return await provider.send('tenderly_setBalance', params);
-};
-
-export const getBalance = async (forkUrl: string, address: string) => {
-  const provider = new StaticJsonRpcProvider(forkUrl);
-  const params = [address, 'latest'];
-  const balance = await provider.send('eth_getBalance', params);
-
-  return formatFixed(balance, 18);
-};
-
-const transferERC20 = async (
-  forkUrl: string,
-  symbol: ERC20TokenSymbol,
-  fromAddress: string,
-  toAddress: string,
-  amount: number,
-) => {
-  const provider = new StaticJsonRpcProvider(forkUrl);
-  const signer = provider.getSigner();
-  const tokenContract = await erc20(symbol, signer);
-
-  await setNativeBalance(forkUrl, fromAddress, 10);
-
-  const tokenAmount = parseFixed(String(amount), await tokenContract.decimals());
-
-  const unsignedTx = await tokenContract.populateTransaction.approve(await signer.getAddress(), tokenAmount);
-  unsignedTx.from = fromAddress;
-
-  await provider.send('eth_sendTransaction', [unsignedTx]);
-  await tokenContract.transferFrom(fromAddress, toAddress, tokenAmount);
-};
-
 const getTopHolder = async (tokenAddress: string) => {
   return await fetch(`https://api.ethplorer.io/getTopTokenHolders/${tokenAddress}?apiKey=freekey&limit=1`)
     .then((response) => response.json())
     .then((data) => data.holders[0].address);
 };
 
-const setERC20TokenBalance = async (forkUrl: string, address: string, symbol: ERC20TokenSymbol, amount: number) => {
-  const token = await erc20(symbol);
-  const from = await getTopHolder(token.address);
-  await transferERC20(forkUrl, symbol, from, address, amount);
-};
-
 export type Balance = {
   [key in Coin]?: number;
 };
 
-export const setBalance = async (forkUrl: string, address: string, balance: Balance) => {
-  for (const symbol of Object.keys(balance) as Array<keyof typeof balance>) {
-    switch (symbol) {
-      case 'ETH':
-        await setNativeBalance(forkUrl, address, balance[symbol]);
-        break;
-      default:
-        await setERC20TokenBalance(forkUrl, address, symbol, balance[symbol]);
-    }
-  }
+export const tenderly = async ({ chain = mainnet }: { chain: Chain }): Promise<Tenderly> => {
+  const forkId = await createFork(chain.id);
+  const url = rpcURL(forkId);
+
+  const publicClient = createPublicClient({ chain, transport: http(url) });
+
+  const setNativeBalance = async (address: string, amount: number) => {
+    const params = [[address], toHex(parseEther(String(amount) as `${number}`))];
+    return await publicClient.request({ method: 'tenderly_setBalance', params });
+  };
+
+  const setERC20TokenBalance = async (address: Address, symbol: ERC20TokenSymbol, amount: number) => {
+    const token = await erc20(symbol);
+    const from = await getTopHolder(token.address);
+    await transferERC20(symbol, from, address, amount);
+  };
+
+  const transferERC20 = async (symbol: ERC20TokenSymbol, fromAddress: Address, toAddress: Address, amount: number) => {
+    await setNativeBalance(fromAddress, 10);
+
+    const tokenContract = await erc20(symbol, { publicClient });
+    const tokenAmount = parseUnits(String(amount) as `${number}`, await tokenContract.read.decimals());
+
+    const data = encodeFunctionData({
+      abi: tokenContract.abi,
+      functionName: 'transfer',
+      args: [toAddress, tokenAmount],
+    });
+
+    await publicClient.request({
+      method: 'eth_sendTransaction',
+      params: [{ from: fromAddress, to: tokenContract.address, data }],
+    });
+  };
+
+  return {
+    url: () => url,
+    setBalance: async (address: Address, balance: Balance) => {
+      for (const symbol of Object.keys(balance) as Array<keyof typeof balance>) {
+        switch (symbol) {
+          case 'ETH':
+            await setNativeBalance(address, balance[symbol]);
+            break;
+          default:
+            await setERC20TokenBalance(address, symbol, balance[symbol]);
+        }
+      }
+    },
+    deleteFork: async () => deleteFork(forkId),
+  };
 };

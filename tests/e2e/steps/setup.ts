@@ -1,11 +1,15 @@
-import { Wallet } from '@ethersproject/wallet';
-import { JsonRpcProvider, getDefaultProvider } from '@ethersproject/providers';
+import { Address, createPublicClient, createWalletClient, http } from 'viem';
+import { privateKeyToAccount, generatePrivateKey } from 'viem/accounts';
+import { Chain, mainnet } from 'viem/chains';
 
-import { createFork, deleteFork, rpcURL, setBalance } from '../utils/tenderly';
-import type { Balance } from '../utils/tenderly';
+import { Wallet } from '@ethersproject/wallet';
+
+import type { Balance, Tenderly } from '../utils/tenderly';
+import { tenderly } from '../utils/tenderly';
 import { CustomizedBridge } from '../utils/bridge';
 import { connectWallet, disconnectWallet } from './wallet';
 import { justWait } from './actions';
+import { getDefaultProvider, JsonRpcProvider } from '@ethersproject/providers';
 
 type MarketView = 'simple' | 'advanced';
 
@@ -20,41 +24,46 @@ const defaultVisitOptions: VisitOptions = {
 };
 
 type SetupParams = {
-  chainId?: number;
-  wallet?: { address: string; privateKey: string };
+  chain?: Chain;
+  privateKey?: Address;
   useDefaultProvider?: boolean;
 };
 
 export const setup = ({
-  chainId = 1,
-  wallet = Wallet.createRandom(),
+  chain = mainnet,
+  privateKey = generatePrivateKey(),
   useDefaultProvider = false,
 }: SetupParams = {}) => {
-  let forkId: string | undefined = undefined;
+  const account = privateKeyToAccount(privateKey);
 
+  let fork: Tenderly | null = null;
   before(async () => {
     if (!useDefaultProvider) {
-      forkId = await createFork(String(chainId));
+      fork = await tenderly({ chain });
     }
   });
 
   after(async () => {
-    if (forkId) {
-      await deleteFork(forkId);
+    if (fork) {
+      await fork.deleteFork();
     }
   });
 
-  const provider = () =>
-    useDefaultProvider ? getDefaultProvider(chainId) : new JsonRpcProvider(rpcURL(forkId), chainId);
-  const signer = () => new Wallet(wallet.privateKey, provider());
-  const ethereum = () => new CustomizedBridge(signer(), provider(), Number(chainId));
+  const walletClient = () => createWalletClient({ account, chain, transport: http(fork ? fork.url() : undefined) });
+  const publicClient = () => createPublicClient({ chain, transport: http(fork ? fork.url() : undefined) });
+
+  const ethereum = () => {
+    const provider = fork ? new JsonRpcProvider(fork.url(), chain.id) : getDefaultProvider(chain.id);
+    const signer = new Wallet(privateKey, provider);
+    return new CustomizedBridge(signer, chain.id);
+  };
 
   Cypress.on('window:before:load', (window) => {
     window.localStorage.setItem('tos', 'true');
 
     window.ethereum = ethereum();
-    if (!useDefaultProvider) {
-      window.rpcURL = rpcURL(forkId);
+    if (!useDefaultProvider && fork) {
+      window.rpcURL = fork.url();
     }
   });
 
@@ -77,9 +86,9 @@ export const setup = ({
           justWait();
         });
     },
-    userAddress: () => wallet.address,
-    setBalance: (address: string, balance: Balance) => setBalance(rpcURL(forkId), address, balance),
-    signer,
-    provider,
+    userAddress: () => account.address,
+    setBalance: (address: Address, balance: Balance) => fork.setBalance(address, balance),
+    publicClient,
+    walletClient,
   };
 };

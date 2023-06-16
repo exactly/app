@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { Box, Typography, Tooltip } from '@mui/material';
+import { formatUnits } from 'viem';
 import LinearProgress, { linearProgressClasses } from '@mui/material/LinearProgress';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { styled, useTheme } from '@mui/material/styles';
@@ -8,7 +9,6 @@ import ReportProblemRoundedIcon from '@mui/icons-material/ReportProblemRounded';
 import daysLeft from 'utils/daysLeft';
 import useAccountData from 'hooks/useAccountData';
 import { toPercentage } from 'utils/utils';
-import { formatFixed } from '@ethersproject/bignumber';
 import { useTranslation } from 'react-i18next';
 
 const StyledLinearProgress = styled(LinearProgress, {
@@ -73,7 +73,7 @@ function MaturityLinearProgress({ symbol, operation, maturityDate }: Props) {
   const tooltip =
     operation === 'borrow' && marketAccount
       ? t(`Late repayment will result in a penalty daily rate of {{penaltyRate}}`, {
-          penaltyRate: toPercentage(parseFloat(formatFixed(marketAccount.penaltyRate, 18)) * 86_400),
+          penaltyRate: toPercentage(parseFloat(formatUnits(marketAccount.penaltyRate, 18)) * 86_400),
         })
       : '';
 

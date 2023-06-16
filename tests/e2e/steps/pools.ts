@@ -1,26 +1,7 @@
 import dayjs from 'dayjs';
-import { Provider } from '@ethersproject/abstract-provider';
-import { AddressZero } from '@ethersproject/constants';
-
-import { type ERC20TokenSymbol, previewer } from '../utils/contracts';
-import type { Defer } from '../utils/types';
 
 const maxPools = 3;
 const interval = 2_419_200;
-
-export const selectFixedPoolAsync = async (asset: ERC20TokenSymbol, provider: Defer<Provider>) => {
-  const previewerContract = previewer(provider());
-  const exactly = await previewerContract.exactly(AddressZero);
-  const marketAccount = exactly.find((pool) => pool.assetSymbol === asset);
-
-  if (!marketAccount) {
-    throw new Error(`No ${asset} market found`);
-  }
-
-  const maturities = marketAccount.fixedPools.map((pool) => pool.maturity.toNumber()).sort();
-
-  return selectPool(maturities);
-};
 
 export const getFixedPools = (): number[] => {
   const now = dayjs().unix();

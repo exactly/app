@@ -7,7 +7,7 @@ import depositAtMaturity from '../../steps/common/deposit';
 import withdrawAtMaturity from '../../steps/common/withdraw';
 
 describe('WETH fixed withdraw/deposit', () => {
-  const { visit, setBalance, userAddress, signer } = setup();
+  const { visit, setBalance, userAddress, walletClient, publicClient } = setup();
   const pool = selectFixedPool();
 
   before(() => {
@@ -21,9 +21,13 @@ describe('WETH fixed withdraw/deposit', () => {
   });
 
   describe('Setup environment for successful fixed deposit', () => {
-    enterMarket('WETH', signer);
-    deposit({ symbol: 'ETH', amount: '50', receiver: userAddress() }, signer);
-    borrowAtMaturity({ symbol: 'ETH', amount: '25', maturity: pool, receiver: userAddress() }, signer);
+    enterMarket('WETH', walletClient);
+    deposit({ symbol: 'ETH', amount: '50', receiver: userAddress() }, walletClient, publicClient);
+    borrowAtMaturity(
+      { symbol: 'ETH', amount: '25', maturity: BigInt(pool), receiver: userAddress() },
+      walletClient,
+      publicClient,
+    );
 
     reload();
   });

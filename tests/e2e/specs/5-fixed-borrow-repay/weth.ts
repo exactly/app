@@ -7,7 +7,7 @@ import borrowAtMaturity from '../../steps/common/borrow';
 import repayAtMaturity from '../../steps/common/repay';
 
 describe('WETH fixed borrow/repay', () => {
-  const { visit, setBalance, userAddress, signer } = setup();
+  const { visit, setBalance, userAddress, walletClient, publicClient } = setup();
   const pool = selectFixedPool();
 
   before(() => {
@@ -21,8 +21,8 @@ describe('WETH fixed borrow/repay', () => {
   });
 
   describe('Setup environment for a successful fixed borrow', () => {
-    enterMarket('WETH', signer);
-    deposit({ symbol: 'ETH', amount: '100', receiver: userAddress() }, signer);
+    enterMarket('WETH', walletClient);
+    deposit({ symbol: 'ETH', amount: '100', receiver: userAddress() }, walletClient, publicClient);
 
     reload();
   });
