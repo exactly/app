@@ -29,6 +29,7 @@ import useIsContract from 'hooks/useIsContract';
 import useBalance from 'hooks/useBalance';
 import { useTranslation } from 'react-i18next';
 import useAssets from 'hooks/useAssets';
+import { useTheme } from '@mui/material';
 
 type Input = {
   collateralSymbol?: string;
@@ -59,6 +60,11 @@ type ContextValues = {
   openLeverager: (collateralSymbol?: string) => void;
   close: () => void;
 
+  viewSummary: boolean;
+  setViewSummary: (state: boolean) => void;
+  acceptedTerms: boolean;
+  setAcceptedTerms: (state: boolean) => void;
+
   input: Input;
   setCollateralSymbol: (collateralSymbol: string) => void;
   setBorrowSymbol: (debt: string) => void;
@@ -72,6 +78,8 @@ type ContextValues = {
 
   currentLeverageRatio: number;
   newHealthFactor: string | undefined;
+  newCollateral: number;
+  newBorrow: number;
   minLeverageRatio: number;
   maxLeverageRatio: number;
   onMax: () => void;
@@ -86,6 +94,12 @@ type ContextValues = {
 
   marketRewards: string[];
   nativeRewards: string[];
+
+  disabledSubmit: boolean;
+  disabledConfirm: boolean;
+
+  getHealthFactorColor: (_healthFactor: string | undefined) => { color: string; bg: string };
+  getHealthFactorRisk: (_healthFactor: string | undefined) => string;
 
   debtManager?: DebtManager;
   market?: Market;
@@ -106,17 +120,20 @@ const LeveragerContext = createContext<ContextValues | null>(null);
 
 export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) => {
   const { t } = useTranslation();
+  const { palette } = useTheme();
   const { walletAddress } = useWeb3();
   const { data: signer } = useSigner();
   const { getMarketAccount, refreshAccountData } = useAccountData();
   const isContract = useIsContract();
   const [isOpen, setIsOpen] = useState(false);
+  const [viewSummary, setViewSummary] = useState(false);
   const [errorData, setErrorData] = useState<ErrorData | undefined>();
 
   const [input, dispatch] = useReducer(reducer, initState);
 
   const [tx, setTx] = useState<Transaction | undefined>();
   const [isLoading, setIsLoading] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   const options = useAssets();
 
@@ -143,6 +160,12 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
 
   // TODO: calculate
   const newHealthFactor = useMemo(() => '1.05x', []);
+
+  // TODO: calculate
+  const newCollateral = useMemo(() => 32, []);
+
+  // TODO: calculate
+  const newBorrow = useMemo(() => 15.2, []);
 
   const setCollateralSymbol = useCallback((collateralSymbol: string) => {
     setErrorData(undefined);
@@ -234,6 +257,44 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
   // TODO: calculate
   const nativeRewards = useMemo(() => ['WBTC'], []);
 
+  const disabledSubmit = useMemo(
+    () =>
+      !input.collateralSymbol ||
+      !input.borrowSymbol ||
+      errorData?.status ||
+      (currentLeverageRatio === input.leverageRatio && !input.userInput),
+    [
+      currentLeverageRatio,
+      errorData?.status,
+      input.borrowSymbol,
+      input.collateralSymbol,
+      input.leverageRatio,
+      input.userInput,
+    ],
+  );
+
+  const disabledConfirm = useMemo(() => disabledSubmit || !acceptedTerms, [acceptedTerms, disabledSubmit]);
+
+  const getHealthFactorColor = useCallback(
+    (_healthFactor: string | undefined) => {
+      if (!_healthFactor) return { color: palette.healthFactor.safe, bg: palette.healthFactor.bg.safe };
+      const parsedHF = parseFloat(_healthFactor);
+      const status = parsedHF < 1.01 ? 'danger' : parsedHF < 1.05 ? 'warning' : 'safe';
+      return { color: palette.healthFactor[status], bg: palette.healthFactor.bg[status] };
+    },
+    [palette.healthFactor],
+  );
+
+  const getHealthFactorRisk = useCallback(
+    (_healthFactor: string | undefined) => {
+      if (!_healthFactor) return t('low risk');
+      const parsedHF = parseFloat(_healthFactor);
+      const risk = parsedHF < 1.01 ? 'high risk' : parsedHF < 1.05 ? 'mid risk' : 'low risk';
+      return t(risk);
+    },
+    [t],
+  );
+
   const debtManager = useDebtManager();
   const needsApproval = useCallback(
     async (qty: BigNumber): Promise<boolean> => {
@@ -304,6 +365,11 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     openLeverager,
     close,
 
+    viewSummary,
+    setViewSummary,
+    acceptedTerms,
+    setAcceptedTerms,
+
     input,
     setCollateralSymbol,
     setBorrowSymbol,
@@ -317,6 +383,8 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
 
     currentLeverageRatio,
     newHealthFactor,
+    newCollateral,
+    newBorrow,
     minLeverageRatio,
     maxLeverageRatio,
     onMax,
@@ -334,6 +402,12 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
 
     debtManager,
     market,
+
+    disabledSubmit,
+    disabledConfirm,
+
+    getHealthFactorColor,
+    getHealthFactorRisk,
 
     errorData,
     setErrorData,

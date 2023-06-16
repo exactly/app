@@ -1,9 +1,10 @@
 import React, { FC, PropsWithChildren, useMemo } from 'react';
-import { Box, Typography, Avatar, AvatarGroup, Tooltip, Divider, IconButton } from '@mui/material';
+import { Box, Typography, Tooltip, Divider, IconButton } from '@mui/material';
 import { toPercentage } from 'utils/utils';
 import { useTranslation } from 'react-i18next';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import { useLeveragerContext } from 'contexts/LeveragerContext';
+import RewardsGroup from '../RewardsGroup';
 
 const LoopAPR = () => {
   const { t } = useTranslation();
@@ -78,26 +79,6 @@ const APRBreakdownItem: FC<PropsWithChildren & APRBreakdownItemProps> = ({ title
         {children}
       </Box>
     </Box>
-  );
-};
-
-type RewardsGroupProps = {
-  withNative?: boolean;
-  withRewards?: boolean;
-  size?: number;
-};
-
-const RewardsGroup: FC<RewardsGroupProps> = ({ withNative = true, withRewards = true, size = 20 }) => {
-  const { nativeRewards, marketRewards } = useLeveragerContext();
-
-  const all = [...(withRewards ? marketRewards : []), ...(withNative ? nativeRewards : [])];
-
-  return (
-    <AvatarGroup max={6} sx={{ '& .MuiAvatar-root': { width: size, height: size, fontSize: 10 } }}>
-      {all.map((rewardSymbol) => (
-        <Avatar key={rewardSymbol} alt={rewardSymbol} src={`/img/assets/${rewardSymbol}.svg`} />
-      ))}
-    </AvatarGroup>
   );
 };
 

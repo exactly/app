@@ -1,6 +1,6 @@
 import { Box, Button, Grid, Typography } from '@mui/material';
 import { ModalBox, ModalBoxCell, ModalBoxRow } from 'components/common/modal/ModalBox';
-import React, { useMemo } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
 import { useLeveragerContext } from 'contexts/LeveragerContext';
@@ -25,16 +25,9 @@ const Operation = () => {
     currentLeverageRatio,
     collateralOptions,
     borrowOptions,
+    setViewSummary,
+    disabledSubmit,
   } = useLeveragerContext();
-
-  const disabledSubmit = useMemo(
-    () =>
-      !input.collateralSymbol ||
-      !input.borrowSymbol ||
-      errorData?.status ||
-      (currentLeverageRatio === 1 && input.leverageRatio === 1),
-    [currentLeverageRatio, errorData?.status, input.borrowSymbol, input.collateralSymbol, input.leverageRatio],
-  );
 
   return (
     <Box>
@@ -117,11 +110,11 @@ const Operation = () => {
           {t('Leverage')}
         </Button>
       ) : currentLeverageRatio !== 1 && input.leverageRatio === 1 ? (
-        <Button fullWidth variant="contained">
+        <Button fullWidth variant="contained" onClick={() => setViewSummary(true)}>
           {t('Deleverage')}
         </Button>
       ) : (
-        <Button fullWidth variant="contained">
+        <Button fullWidth variant="contained" onClick={() => setViewSummary(true)}>
           {`${t('Leverage')} ${netPosition} ${input.collateralSymbol} @ ${input.leverageRatio.toFixed(1)}x`}
         </Button>
       )}

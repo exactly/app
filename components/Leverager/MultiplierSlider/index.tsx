@@ -1,13 +1,19 @@
 import React, { useCallback, useMemo } from 'react';
-import { Box, Slider, Typography, useTheme } from '@mui/material';
+import { Box, Slider, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useLeveragerContext } from 'contexts/LeveragerContext';
 
 const MultiplierSlider = () => {
   const { t } = useTranslation();
-  const { palette } = useTheme();
-  const { input, setLeverageRatio, currentLeverageRatio, minLeverageRatio, maxLeverageRatio, newHealthFactor } =
-    useLeveragerContext();
+  const {
+    input,
+    setLeverageRatio,
+    currentLeverageRatio,
+    minLeverageRatio,
+    maxLeverageRatio,
+    newHealthFactor,
+    getHealthFactorColor,
+  } = useLeveragerContext();
 
   const currentMark = useMemo(() => [{ value: currentLeverageRatio }], [currentLeverageRatio]);
   const onClick = useCallback(() => {
@@ -15,12 +21,10 @@ const MultiplierSlider = () => {
     setLeverageRatio(currentLeverageRatio);
   }, [currentLeverageRatio, input.borrowSymbol, input.collateralSymbol, setLeverageRatio]);
 
-  const healthFactorColor = useMemo(() => {
-    if (!newHealthFactor) return { color: palette.healthFactor.safe, bg: palette.healthFactor.bg.safe };
-    const parsedHF = parseFloat(newHealthFactor);
-    const status = parsedHF < 1.01 ? 'danger' : parsedHF < 1.05 ? 'warning' : 'safe';
-    return { color: palette.healthFactor[status], bg: palette.healthFactor.bg[status] };
-  }, [palette.healthFactor, newHealthFactor]);
+  const healthFactorColor = useMemo(
+    () => getHealthFactorColor(newHealthFactor),
+    [getHealthFactorColor, newHealthFactor],
+  );
 
   const disabled = useMemo(
     () => !input.collateralSymbol || !input.borrowSymbol,

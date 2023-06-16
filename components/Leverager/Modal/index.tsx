@@ -19,6 +19,7 @@ import { useTranslation } from 'react-i18next';
 
 import { useLeveragerContext } from 'contexts/LeveragerContext';
 import Operation from '../Operation';
+import Summary from '../Summary';
 
 function PaperComponent(props: PaperProps | undefined) {
   const ref = useRef<HTMLDivElement>(null);
@@ -39,7 +40,7 @@ const Transition = forwardRef(function Transition(
 });
 
 function LeveragerModal() {
-  const { isOpen, close, tx } = useLeveragerContext();
+  const { isOpen, close, viewSummary, tx } = useLeveragerContext();
   const { t } = useTranslation();
   const { breakpoints, spacing, palette } = useTheme();
   const isMobile = useMediaQuery(breakpoints.down('sm'));
@@ -97,9 +98,7 @@ function LeveragerModal() {
             </Typography>
           </DialogTitle>
         )}
-        <DialogContent sx={{ p: 0, overflow: 'hidden' }}>
-          <Operation />
-        </DialogContent>
+        <DialogContent sx={{ p: 0, overflow: 'hidden' }}>{viewSummary ? <Summary /> : <Operation />}</DialogContent>
       </Box>
     </Dialog>
   );
