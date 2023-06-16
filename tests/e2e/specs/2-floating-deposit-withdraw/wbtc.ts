@@ -4,7 +4,7 @@ import withdraw, { attemptWithdraw } from '../../steps/common/withdraw';
 import { setup } from '../../steps/setup';
 
 describe('WBTC floating deposit/withdraw', () => {
-  const { visit, setBalance, userAddress, signer } = setup();
+  const { visit, setBalance, userAddress, publicClient } = setup();
 
   before(() => {
     visit('/');
@@ -27,7 +27,7 @@ describe('WBTC floating deposit/withdraw', () => {
   });
 
   describe('Status after deposit', () => {
-    checkBalance({ symbol: 'WBTC', amount: '3.5' }, signer);
+    checkBalance({ address: userAddress(), symbol: 'WBTC', amount: '3.5' }, publicClient);
   });
 
   attemptWithdraw({ type: 'floating', symbol: 'WBTC', amount: '5' });
@@ -39,6 +39,6 @@ describe('WBTC floating deposit/withdraw', () => {
   });
 
   describe('Status after withdraw', () => {
-    checkBalance({ symbol: 'WBTC', amount: '4' }, signer);
+    checkBalance({ address: userAddress(), symbol: 'WBTC', amount: '4' }, publicClient);
   });
 });

@@ -15,14 +15,12 @@
     "jsx": "preserve",
     "baseUrl": "./",
     "paths": {
-      "abi/*": ["abi/*"],
       "components/*": ["components/*"],
       "config/*": ["config/*"],
       "contexts/*": ["contexts/*"],
       "hooks/*": ["hooks/*"],
       "pages/*": ["pages/*"],
       "queries/*": ["queries/*"],
-      "reducers/*": ["reducers/*"],
       "styles/*": ["styles/*"],
       "types/*": ["types/*"],
       "utils/*": ["utils/*"]

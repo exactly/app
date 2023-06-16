@@ -6,7 +6,7 @@ import { setup } from '../../steps/setup';
 import repay from '../../steps/common/repay';
 
 describe('USDC floating borrow/repay', () => {
-  const { visit, setBalance, userAddress, signer } = setup();
+  const { visit, setBalance, userAddress, walletClient, publicClient } = setup();
 
   before(() => {
     visit('/');
@@ -21,8 +21,8 @@ describe('USDC floating borrow/repay', () => {
   attemptBorrow({ type: 'floating', symbol: 'USDC', amount: '10' });
 
   describe('Setup environment for a successful borrow using ETH without entering USDC market', () => {
-    enterMarket('WETH', signer);
-    deposit({ symbol: 'ETH', amount: '10', receiver: userAddress() }, signer);
+    enterMarket('WETH', walletClient);
+    deposit({ symbol: 'ETH', amount: '10', receiver: userAddress() }, walletClient, publicClient);
 
     reload();
   });
@@ -35,7 +35,7 @@ describe('USDC floating borrow/repay', () => {
   });
 
   describe('Status after borrow', () => {
-    checkBalance({ symbol: 'USDC', amount: '50' }, signer);
+    checkBalance({ address: userAddress(), symbol: 'USDC', amount: '50' }, publicClient);
 
     it('should navigate to dashboard', () => {
       navbar.goTo('dashboard');
@@ -70,6 +70,6 @@ describe('USDC floating borrow/repay', () => {
   });
 
   describe('Status after repay', () => {
-    checkBalance({ symbol: 'USDC', amount: '25', approx: 0.00005 }, signer);
+    checkBalance({ address: userAddress(), symbol: 'USDC', amount: '25', delta: 0.00005 }, publicClient);
   });
 });

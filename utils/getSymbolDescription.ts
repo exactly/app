@@ -1,5 +1,5 @@
-import { Previewer } from 'types/contracts';
+import { MarketAccount } from 'hooks/useAccountData';
 
-export default (marketAccount: Previewer.MarketAccountStructOutput, symbol: string) => {
+export default (marketAccount: MarketAccount, symbol: string) => {
   return symbol === 'WETH' ? 'Ether' : marketAccount.assetName;
 };

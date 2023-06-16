@@ -1,39 +1,34 @@
-import { Contract } from '@ethersproject/contracts';
-import { Signer } from '@ethersproject/abstract-signer';
-import { Provider } from '@ethersproject/abstract-provider';
+import { auditorABI, marketABI, marketEthRouterABI, erc20ABI } from '../../../types/abi';
+import { Auditor, Market, MarketETHRouter, ERC20 } from '../../../types/contracts';
 
-import type { Previewer } from '../../../types/contracts/Previewer';
-import type { Auditor } from '../../../types/contracts/Auditor';
-import type { Market } from '../../../types/contracts/Market';
-import type { MarketETHRouter } from '../../../types/contracts/MarketETHRouter';
-import type { ERC20 } from '../../../types/contracts/ERC20';
-
-import previewerContract from '@exactly/protocol/deployments/mainnet/Previewer.json';
 import auditorContract from '@exactly/protocol/deployments/mainnet/Auditor.json';
 import marketETHRouter from '@exactly/protocol/deployments/mainnet/MarketETHRouter.json';
+import { getContract, isAddress } from 'viem';
 
 const ERC20TokenSymbols = ['WETH', 'DAI', 'USDC', 'WBTC', 'wstETH'] as const;
 export type ERC20TokenSymbol = (typeof ERC20TokenSymbols)[number];
 export type Coin = ERC20TokenSymbol | 'ETH';
 
-export const erc20 = async (symbol: ERC20TokenSymbol, signer?: Signer): Promise<ERC20> => {
-  const contract = await import(`@exactly/protocol/deployments/mainnet/${symbol}.json`);
-  return new Contract(contract.address, contract.abi, signer) as ERC20;
+type Clients = Pick<Parameters<typeof getContract>[0], 'walletClient' | 'publicClient'>;
+
+export const erc20 = async (symbol: ERC20TokenSymbol, clients: Clients = {}): Promise<ERC20> => {
+  const { address } = await import(`@exactly/protocol/deployments/mainnet/${symbol}.json`);
+  if (!isAddress(address)) throw new Error('Invalid address');
+  return getContract({ address, abi: erc20ABI, ...clients });
 };
 
-export const erc20Market = async (symbol: ERC20TokenSymbol, signer?: Signer): Promise<Market> => {
-  const contract = await import(`@exactly/protocol/deployments/mainnet/Market${symbol}.json`);
-  return new Contract(contract.address, contract.abi, signer) as Market;
+export const erc20Market = async (symbol: ERC20TokenSymbol, clients: Clients = {}): Promise<Market> => {
+  const { address } = await import(`@exactly/protocol/deployments/mainnet/Market${symbol}.json`);
+  if (!isAddress(address)) throw new Error('Invalid address');
+  return getContract({ address, abi: marketABI, ...clients });
 };
 
-export const ethRouter = (signer: Signer): MarketETHRouter => {
-  return new Contract(marketETHRouter.address, marketETHRouter.abi, signer) as MarketETHRouter;
+export const ethRouter = async (clients: Clients = {}): Promise<MarketETHRouter> => {
+  if (!isAddress(marketETHRouter.address)) throw new Error('Invalid address');
+  return getContract({ address: marketETHRouter.address, abi: marketEthRouterABI, ...clients });
 };
 
-export const auditor = (signer: Signer): Auditor => {
-  return new Contract(auditorContract.address, auditorContract.abi, signer) as Auditor;
-};
-
-export const previewer = (provider: Provider | Signer): Previewer => {
-  return new Contract(previewerContract.address, previewerContract.abi, provider) as Previewer;
+export const auditor = async (clients: Clients = {}): Promise<Auditor> => {
+  if (!isAddress(auditorContract.address)) throw new Error('Invalid address');
+  return getContract({ address: auditorContract.address, abi: auditorABI, ...clients });
 };

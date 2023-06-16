@@ -7,7 +7,7 @@ import borrowAtMaturity from '../../steps/common/borrow';
 import repayAtMaturity from '../../steps/common/repay';
 
 describe('WBTC fixed borrow/repay', () => {
-  const { visit, setBalance, userAddress, signer } = setup();
+  const { visit, setBalance, userAddress, walletClient, publicClient } = setup();
   const pool = selectFixedPool();
 
   before(() => {
@@ -22,8 +22,8 @@ describe('WBTC fixed borrow/repay', () => {
   });
 
   describe('Setup environment for a successful fixed borrow', () => {
-    enterMarket('WBTC', signer);
-    deposit({ symbol: 'WBTC', amount: '200', receiver: userAddress() }, signer);
+    enterMarket('WBTC', walletClient);
+    deposit({ symbol: 'WBTC', amount: '200', receiver: userAddress() }, walletClient, publicClient);
 
     reload();
   });
@@ -36,7 +36,7 @@ describe('WBTC fixed borrow/repay', () => {
   });
 
   describe('Status after fixed borrow', () => {
-    checkBalance({ symbol: 'WBTC', amount: '55' }, signer);
+    checkBalance({ address: userAddress(), symbol: 'WBTC', amount: '55' }, publicClient);
 
     it('should navigate to the dashboard', () => {
       navbar.goTo('dashboard');
@@ -56,6 +56,6 @@ describe('WBTC fixed borrow/repay', () => {
   });
 
   describe('Status after fixed repay', () => {
-    checkBalance({ symbol: 'WBTC', amount: '52', approx: 0.005 }, signer);
+    checkBalance({ address: userAddress(), symbol: 'WBTC', amount: '52', delta: 0.005 }, publicClient);
   });
 });

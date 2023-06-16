@@ -1,12 +1,11 @@
 import { Eip1193Bridge } from '@ethersproject/experimental';
 import { Signer } from '@ethersproject/abstract-signer';
-import { Provider } from '@ethersproject/abstract-provider';
 
 export class CustomizedBridge extends Eip1193Bridge {
   chainId: number;
 
-  constructor(signer: Signer, provider: Provider, chainId?: number) {
-    super(signer, provider);
+  constructor(signer: Signer, chainId?: number) {
+    super(signer);
     this.chainId = chainId ?? 1;
   }
 

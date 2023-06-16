@@ -4,7 +4,7 @@ import repay from '../../steps/common/repay';
 import { setup } from '../../steps/setup';
 
 describe('WETH floating borrow/repay', () => {
-  const { visit, setBalance, userAddress, signer } = setup();
+  const { visit, setBalance, userAddress, walletClient, publicClient } = setup();
 
   before(() => {
     visit('/');
@@ -19,8 +19,8 @@ describe('WETH floating borrow/repay', () => {
   attemptBorrow({ type: 'floating', symbol: 'WETH', amount: '1' });
 
   describe('Setup environment for a successful borrow', () => {
-    enterMarket('WETH', signer);
-    deposit({ symbol: 'ETH', amount: '1', receiver: userAddress() }, signer);
+    enterMarket('WETH', walletClient);
+    deposit({ symbol: 'ETH', amount: '1', receiver: userAddress() }, walletClient, publicClient);
 
     reload();
   });

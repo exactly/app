@@ -2,8 +2,6 @@ import { useMemo, useCallback, useEffect } from 'react';
 import ReactGA from 'react-ga4';
 import { useTranslation } from 'react-i18next';
 import { useAccount } from 'wagmi';
-import { formatFixed } from '@ethersproject/bignumber';
-import { Zero } from '@ethersproject/constants';
 
 import { type Input } from 'contexts/DebtManagerContext';
 import { useOperationContext } from 'contexts/OperationContext';
@@ -17,6 +15,7 @@ import { type Rewards } from './useRewards';
 import useActionButton from './useActionButton';
 import useDelayedEffect from './useDelayedEffect';
 import useSnapshot from './useSnapshot';
+import { formatUnits } from 'viem';
 
 type ItemVariant = 'operation' | 'approve' | 'enterMarket' | 'exitMarket' | 'claimAll' | 'roll';
 type TrackItem = { eventName: string; variant: ItemVariant };
@@ -85,7 +84,7 @@ function useAnalyticsContext(assetSymbol?: string) {
       quantity: qty,
       item_id: `${marketAccount?.symbol}.${operation}`,
       item_name: `${marketAccount?.symbol} ${operation}`,
-      price: Number(formatFixed(marketAccount?.usdPrice ?? Zero, 18)),
+      price: Number(formatUnits(marketAccount?.usdPrice ?? 0n, 18)),
     }),
     [assetSymbol, marketAccount?.symbol, marketAccount?.usdPrice, operation, qty, symbol],
   );
@@ -264,7 +263,7 @@ export default function useAnalytics({ symbol, rewards }: { symbol?: string; rew
                 index,
                 item_id: `RewardsController.claimAll`,
                 item_name: `RewardsController claimAll`,
-                quantity: formatFixed(amount, 18),
+                quantity: formatUnits(amount, 18),
                 symbol: rewardSymbol,
               };
             })

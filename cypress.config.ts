@@ -1,5 +1,6 @@
 import 'dotenv/config';
 import dotenvPlugin from 'cypress-dotenv';
+import preprocessor from '@cypress/webpack-preprocessor';
 import { defineConfig } from 'cypress';
 
 export default defineConfig({
@@ -21,6 +22,16 @@ export default defineConfig({
     baseUrl: 'http://localhost:3000',
     specPattern: 'tests/e2e/specs/**/*.ts',
     supportFile: 'tests/e2e/support.ts',
-    setupNodeEvents: (_, config) => dotenvPlugin(config),
+    setupNodeEvents: (on, config) => {
+      const options = {
+        ...preprocessor.defaultOptions,
+        webpackOptions: {
+          resolve: { extensions: ['.ts', '.js'] },
+          module: { rules: [{ test: /\.ts$/, exclude: [/node_modules/], use: [{ loader: 'ts-loader' }] }] },
+        },
+      };
+      on('file:preprocessor', preprocessor(options));
+      return dotenvPlugin(config);
+    },
   },
 });

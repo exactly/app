@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
+import { formatUnits } from 'viem';
 import { Address, useBalance } from 'wagmi';
-import { formatFixed } from '@ethersproject/bignumber';
 import { useWeb3 } from './useWeb3';
 
 export default (symbol?: string, asset?: Address): string | undefined => {
@@ -16,6 +16,6 @@ export default (symbol?: string, asset?: Address): string | undefined => {
     if (!data || (!asset && symbol !== 'WETH')) return;
     if (error) return;
 
-    return formatFixed(data.value, data.decimals);
+    return formatUnits(data.value, data.decimals);
   }, [data, asset, symbol, error]);
 };
