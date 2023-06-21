@@ -2,10 +2,10 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Box, Grid, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
-import { splitSignature } from '@ethersproject/bytes';
 import { usePublicClient, useSignTypedData } from 'wagmi';
 import dayjs from 'dayjs';
 import { formatUnits, Hex, isAddress, parseUnits, trim, pad, WalletClient } from 'viem';
+import { splitSignature } from '@ethersproject/bytes';
 
 import { ModalBox, ModalBoxRow } from 'components/common/modal/ModalBox';
 import ModalAdvancedSettings from 'components/common/modal/ModalAdvancedSettings';
@@ -35,8 +35,6 @@ import { GAS_LIMIT_MULTIPLIER, WEI_PER_ETHER } from 'utils/const';
 import OperationSquare from 'components/common/OperationSquare';
 import Submit from '../Submit';
 import useIsContract from 'hooks/useIsContract';
-
-import { Permit } from './types';
 
 function Operation() {
   const { t } = useTranslation();
@@ -359,7 +357,21 @@ function Operation() {
         chainId: chain.id,
         verifyingContract,
       },
-      types: { Permit },
+      types: {
+        Permit: [
+          { name: 'owner', type: 'address' },
+          { name: 'spender', type: 'address' },
+          { name: 'value', type: 'uint256' },
+          { name: 'nonce', type: 'uint256' },
+          { name: 'deadline', type: 'uint256' },
+        ],
+        EIP712Domain: [
+          { name: 'name', type: 'string' },
+          { name: 'version', type: 'string' },
+          { name: 'chainId', type: 'uint256' },
+          { name: 'verifyingContract', type: 'address' },
+        ],
+      },
       message: {
         owner: walletAddress,
         spender: debtManager.address,
@@ -367,7 +379,8 @@ function Operation() {
         nonce: marketNonce,
         deadline,
       },
-    }).then(splitSignature);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any).then(splitSignature);
 
     const permit = {
       account: walletAddress,
