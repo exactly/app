@@ -24,6 +24,7 @@ import { DebtManagerContextProvider } from 'contexts/DebtManagerContext';
 import { GlobalErrorProvider } from 'contexts/GlobalErrorContext';
 import OperationsModal from 'components/OperationsModal';
 import { useInitGA } from 'hooks/useAnalytics';
+import Topbar from 'components/Topbar';
 
 const { maxWidth } = globals;
 
@@ -88,6 +89,7 @@ export default function App({ Component, pageProps }: AppProps) {
                   <ModalStatusProvider>
                     <DebtManagerContextProvider>
                       <MarketsBasicProvider>
+                        <Topbar />
                         <Box display="flex" flexDirection="column" mx={2} height="100%">
                           <Navbar />
                           <main style={{ flexGrow: 1, maxWidth, margin: '0 auto', width: '100%' }}>

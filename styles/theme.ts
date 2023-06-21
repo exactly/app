@@ -236,8 +236,8 @@ export const lightTheme = createTheme({
       fontWeight: 700,
     },
     chip: {
-      fontFamily: 'IBM Plex Mono',
-      fontSize: 10,
+      fontFamily: 'Inter',
+      fontSize: 11,
       fontWeight: 700,
     },
     dashboardTitle: {
@@ -468,8 +468,8 @@ export const darkTheme = createTheme({
       fontWeight: 700,
     },
     chip: {
-      fontFamily: 'IBM Plex Mono',
-      fontSize: 10,
+      fontFamily: 'Inter',
+      fontSize: 11,
       fontWeight: 700,
     },
     dashboardTitle: {
