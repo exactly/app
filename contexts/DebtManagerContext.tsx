@@ -154,7 +154,7 @@ export const DebtManagerContextProvider: FC<PropsWithChildren> = ({ children }) 
 
   const submit = useCallback(
     async (populate: () => Promise<PopulatedTransaction | undefined>): Promise<void> => {
-      if (!walletClient || !market || !debtManager) return;
+      if (!walletClient) return;
 
       setIsLoading(true);
       try {
@@ -177,7 +177,7 @@ export const DebtManagerContextProvider: FC<PropsWithChildren> = ({ children }) 
         setIsLoading(false);
       }
     },
-    [walletClient, market, debtManager, track, input, refreshAccountData],
+    [walletClient, track, input, refreshAccountData],
   );
 
   const value: ContextValues = {

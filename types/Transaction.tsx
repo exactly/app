@@ -1,4 +1,4 @@
-import { Hex, WalletClient } from 'viem';
+import type { Hex, WalletClient } from 'viem';
 
 export type Transaction = {
   status: 'loading' | 'processing' | 'success' | 'error';

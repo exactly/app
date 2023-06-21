@@ -26,6 +26,7 @@ function OptionItem({ onClick, children }: PropsWithChildren<{ onClick: () => vo
     <MenuItem
       onClick={onClick}
       sx={{
+        display: 'block',
         minWidth: '112px',
         minHeight: '32px',
         mx: 1,

@@ -8,13 +8,11 @@ import React, {
   useReducer,
   useMemo,
 } from 'react';
-import { BigNumber } from '@ethersproject/bignumber';
-import { useSigner } from 'wagmi';
-import { PopulatedTransaction } from '@ethersproject/contracts';
-import { WeiPerEther } from '@ethersproject/constants';
+import { useWalletClient } from 'wagmi';
+import { waitForTransaction } from '@wagmi/core';
 
 import type { ErrorData } from 'types/Error';
-import type { Transaction } from 'types/Transaction';
+import type { PopulatedTransaction, Transaction } from 'types/Transaction';
 import LeveragerModal from 'components/Leverager/Modal';
 import useDebtManager from 'hooks/useDebtManager';
 import numbers from 'config/numbers.json';
@@ -22,14 +20,15 @@ import useAccountData from 'hooks/useAccountData';
 import useMarket from 'hooks/useMarket';
 import { useWeb3 } from 'hooks/useWeb3';
 import type { DebtManager, Market } from 'types/contracts';
-import { gasLimitMultiplier } from 'utils/const';
-import useEstimateGas from 'hooks/useEstimateGas';
+import { GAS_LIMIT_MULTIPLIER, WEI_PER_ETHER } from 'utils/const';
 import handleOperationError from 'utils/handleOperationError';
 import useIsContract from 'hooks/useIsContract';
 import useBalance from 'hooks/useBalance';
 import { useTranslation } from 'react-i18next';
 import useAssets from 'hooks/useAssets';
 import { useTheme } from '@mui/material';
+import formatNumber from 'utils/formatNumber';
+import { formatEther } from 'viem';
 
 type Input = {
   collateralSymbol?: string;
@@ -71,8 +70,8 @@ type ContextValues = {
   setSecondaryOperation: (secondaryOperation: 'deposit' | 'withdraw') => void;
   setUserInput: (userInput: string) => void;
   setLeverageRatio: (leverageRatio: number) => void;
-  setSlippage: (slippage: string) => void;
 
+  setSlippage: (slippage: string) => void;
   collateralOptions: { symbol: string; value: string }[];
   borrowOptions: { symbol: string; value: string }[];
 
@@ -110,9 +109,8 @@ type ContextValues = {
 
   isLoading: boolean;
 
-  needsApproval: (qty: BigNumber) => Promise<boolean>;
-  approve: (maxAssets: BigNumber) => Promise<void>;
-  estimateTx: (transaction: PopulatedTransaction) => Promise<BigNumber | undefined>;
+  needsApproval: (qty: bigint) => Promise<boolean>;
+  approve: (maxAssets: bigint) => Promise<void>;
   submit: (populate: () => Promise<PopulatedTransaction | undefined>) => Promise<void>;
 };
 
@@ -121,8 +119,8 @@ const LeveragerContext = createContext<ContextValues | null>(null);
 export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) => {
   const { t } = useTranslation();
   const { palette } = useTheme();
-  const { walletAddress } = useWeb3();
-  const { data: signer } = useSigner();
+  const { walletAddress, opts } = useWeb3();
+  const { data: walletClient } = useWalletClient();
   const { getMarketAccount, refreshAccountData } = useAccountData();
   const isContract = useIsContract();
   const [isOpen, setIsOpen] = useState(false);
@@ -137,11 +135,33 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
 
   const options = useAssets();
 
-  // TODO: calculate
-  const collateralOptions = useMemo(() => options.map((symbol) => ({ symbol, value: '$4.3k' })), [options]);
-
-  // TODO: calculate
-  const borrowOptions = useMemo(() => options.map((symbol) => ({ symbol, value: '$4.3k' })), [options]);
+  const [collateralOptions, borrowOptions] = useMemo(
+    () => [
+      options.flatMap((symbol) => {
+        const marketAccount = getMarketAccount(symbol);
+        if (!marketAccount) return [];
+        const { floatingDepositAssets, usdPrice, decimals } = marketAccount;
+        return [
+          {
+            symbol,
+            value: '$' + formatNumber(formatEther((floatingDepositAssets * usdPrice) / 10n ** BigInt(decimals)), 'USD'),
+          },
+        ];
+      }),
+      options.flatMap((symbol) => {
+        const marketAccount = getMarketAccount(symbol);
+        if (!marketAccount) return [];
+        const { floatingBorrowAssets, usdPrice, decimals } = marketAccount;
+        return [
+          {
+            symbol,
+            value: '$' + formatNumber(formatEther((floatingBorrowAssets * usdPrice) / 10n ** BigInt(decimals)), 'USD'),
+          },
+        ];
+      }),
+    ],
+    [options, getMarketAccount],
+  );
 
   const netPosition = useMemo(() => '430', []); // TODO: calculate
   const getCurrentLeverageRatio = useCallback(() => {
@@ -219,9 +239,9 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
 
   const close = useCallback(() => setIsOpen(false), []);
 
-  const market = useMarket(input.collateralSymbol && getMarketAccount(input.collateralSymbol)?.market);
+  const market = useMarket(getMarketAccount(input?.collateralSymbol ?? 'USDC')?.market);
 
-  const walletBalance = useBalance(input.collateralSymbol, market);
+  const walletBalance = useBalance(input.collateralSymbol, market?.address);
 
   //TODO: handle withdraw
   const onMax = useCallback(() => {
@@ -296,58 +316,62 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
   );
 
   const debtManager = useDebtManager();
+
+  // TODO(jg): This should check both allowances in case of multisig. It should return imo in which instance we are.
+  // 1. ERC20.allowance([wallet, debtManager.address]) < ...
+  // 2. Market.allowance([wallet, debtManager.address]) < ...
   const needsApproval = useCallback(
-    async (qty: BigNumber): Promise<boolean> => {
-      if (!walletAddress || !market || !debtManager || qty.isZero()) return true;
+    async (qty: bigint): Promise<boolean> => {
+      if (!walletAddress || !market || !debtManager || !opts || qty === 0n) return true;
       try {
         if (!(await isContract(walletAddress))) return false;
-        const allowance = await market.allowance(walletAddress, debtManager.address);
-        return allowance.lte(qty);
+        const allowance = await market.read.allowance([walletAddress, debtManager.address], opts);
+        return allowance <= qty;
       } catch (e: unknown) {
         setErrorData({ status: true, message: handleOperationError(e) });
         return true;
       }
     },
-    [walletAddress, market, debtManager, isContract],
+    [walletAddress, market, debtManager, isContract, opts],
   );
 
+  // TODO(jg): This should approve both ERC20 in case of multisig. Depending on the instance approve 1 or 2.
+  // 1. ERC20.approve([debtManager.address, ...])
+  // 2. Market.approve([debtManager.address, ...])
   const approve = useCallback(
-    async (maxAssets: BigNumber) => {
-      if (!debtManager || !market || !walletAddress || !signer) return;
+    async (maxAssets: bigint) => {
+      if (!debtManager || !market || !opts) return;
 
       setIsLoading(true);
       try {
-        const max = maxAssets.mul(100_005).div(100_000);
-        const gasEstimation = await market.estimateGas.approve(debtManager.address, max);
-        const approveTx = await market.approve(debtManager.address, max, {
-          gasLimit: gasEstimation.mul(gasLimitMultiplier).div(WeiPerEther),
+        const max = (maxAssets * 100_005n) / 100_000n;
+        const gasEstimation = await market.estimateGas.approve([debtManager.address, max], opts);
+        const hash = await market.write.approve([debtManager.address, max], {
+          ...opts,
+          gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
         });
-        await approveTx.wait();
+        await waitForTransaction({ hash });
       } catch (e: unknown) {
         setErrorData({ status: true, message: handleOperationError(e) });
       } finally {
         setIsLoading(false);
       }
     },
-    [debtManager, market, signer, walletAddress],
+    [debtManager, market, opts],
   );
-
-  const estimate = useEstimateGas();
-
-  const estimateTx = useCallback(async (transaction: PopulatedTransaction) => estimate(transaction), [estimate]);
 
   const submit = useCallback(
     async (populate: () => Promise<PopulatedTransaction | undefined>) => {
-      if (!walletAddress || !signer || !market || !debtManager) return;
+      if (!walletClient) return;
 
       setIsLoading(true);
 
       try {
         const transaction = await populate();
         if (!transaction) return;
-        const transactionResponse = await signer.sendTransaction(transaction);
-        setTx({ status: 'processing', hash: transactionResponse.hash });
-        const { status, transactionHash } = await transactionResponse.wait();
+        const hash = await walletClient.writeContract(transaction);
+        setTx({ status: 'processing', hash });
+        const { status, transactionHash } = await waitForTransaction({ hash });
         setTx({ status: status ? 'success' : 'error', hash: transactionHash });
 
         await refreshAccountData();
@@ -357,7 +381,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
         setIsLoading(false);
       }
     },
-    [walletAddress, signer, market, debtManager, refreshAccountData],
+    [walletClient, refreshAccountData],
   );
 
   const value: ContextValues = {
@@ -416,7 +440,6 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
 
     needsApproval,
     approve,
-    estimateTx,
     submit,
   };
 
