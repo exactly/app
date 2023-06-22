@@ -15,7 +15,7 @@ const NetPosition = () => {
       <InfoRow
         title={t('Net Position')}
         symbol={input.collateralSymbol}
-        assets={netPosition}
+        assets={netPosition?.display}
         disabledMessage={t('Choose asset to see net position.')}
         expandable
       />
@@ -37,7 +37,7 @@ const NetPosition = () => {
         <InfoRow
           title={t('Net Position')}
           symbol={input.collateralSymbol}
-          assets={netPosition}
+          assets={netPosition?.display}
           disabledMessage={t('Choose asset to see net position.')}
         />
       </Box>

@@ -48,12 +48,12 @@ const Summary = () => {
               }}
             />
             <Typography variant="h6">{input.collateralSymbol}</Typography>
-            <Typography variant="h6">{newCollateral}</Typography>
+            <Typography variant="h6">{newCollateral.display}</Typography>
           </Box>
         ),
         subValue: (
           <Box display="flex" justifyContent="end">
-            <USDValue qty={newCollateral.toString()} symbol={input.collateralSymbol || ''} />
+            <USDValue qty={newCollateral.display} symbol={input.collateralSymbol || ''} />
           </Box>
         ),
       },

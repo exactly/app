@@ -42,7 +42,7 @@ const InfoRow: FC<InfoRowProps> = ({ title, symbol, assets, disabledMessage, exp
                   }}
                 />
                 <Typography fontFamily="IBM Plex Mono" fontSize={13} fontWeight={500}>
-                  {`${formatNumber(assets, symbol)}`}
+                  {`${formatNumber(assets, symbol)} ${symbol}`}
                 </Typography>
               </Box>
               <USDValue qty={assets} symbol={symbol} />
