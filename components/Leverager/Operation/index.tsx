@@ -5,13 +5,11 @@ import { useTranslation } from 'react-i18next';
 import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
 import { useLeveragerContext } from 'contexts/LeveragerContext';
 import MultiplierSlider from '../MultiplierSlider';
-import InfoRow from '../InfoRow';
 import LoopAPR from '../LoopAPR';
 import HealthFactor from '../HealthFactor';
-import AssetInput from '../AssetInput';
 import AssetSelector from '../AssetSelector';
-import RadioButtons from '../RadioButtons';
 import ModalAlert from 'components/common/modal/ModalAlert';
+import NetPosition from '../NetPosition';
 
 const Operation = () => {
   const { t } = useTranslation();
@@ -20,7 +18,6 @@ const Operation = () => {
     setCollateralSymbol,
     setBorrowSymbol,
     netPosition,
-    available,
     errorData,
     currentLeverageRatio,
     collateralOptions,
@@ -71,26 +68,7 @@ const Operation = () => {
         <ModalBoxRow>
           <Box display="flex" flexDirection="column" width="100%" gap={2.5} mt={1}>
             <MultiplierSlider />
-            <InfoRow
-              title={t('Net Position')}
-              symbol={input.collateralSymbol}
-              assets={netPosition}
-              disabledMessage={t('Choose asset to see net position.')}
-            />
-          </Box>
-        </ModalBoxRow>
-        <ModalBoxRow>
-          <Box display="flex" justifyContent="space-between" mt={1} gap={3} width="100%">
-            <AssetInput symbol={input.collateralSymbol} />
-            <RadioButtons />
-          </Box>
-          <Box width="100%" mt={2.5}>
-            <InfoRow
-              title={`${t('Available to')} ${t(input.secondaryOperation).toLowerCase()}`}
-              symbol={input.collateralSymbol}
-              assets={available}
-              disabledMessage={t('Choose asset to see available amount.')}
-            />
+            <NetPosition />
           </Box>
         </ModalBoxRow>
         <ModalBoxRow>

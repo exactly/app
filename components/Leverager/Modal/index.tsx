@@ -96,6 +96,11 @@ function LeveragerModal() {
             <Typography fontWeight={700} fontSize={24}>
               {t('Leverage & Deleverage')}
             </Typography>
+            <Typography sx={{ mt: 3 }} fontSize={14} fontWeight={500}>
+              {t(
+                'Remember you have the option to reclaim or supply assets in a single transaction when leveraging or deleveraging a position.',
+              )}
+            </Typography>
           </DialogTitle>
         )}
         <DialogContent sx={{ p: 0, overflow: 'hidden' }}>{viewSummary ? <Summary /> : <Operation />}</DialogContent>
