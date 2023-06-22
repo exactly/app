@@ -42,7 +42,7 @@ function Faucet() {
         const { asset, decimals } = marketAccount;
 
         setLoading(symbol);
-        const amounts: Record<string, `${number}`> = {
+        const amounts: Record<string, string> = {
           DAI: '50000',
           USDC: '50000',
           WBTC: '2',

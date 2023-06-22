@@ -84,7 +84,6 @@ const Withdraw: FC = () => {
       const { floatingDepositShares } = marketAccount;
 
       const amount = isMax ? floatingDepositShares : parseUnits(quantity, marketAccount.decimals);
-
       if (marketAccount.assetSymbol === 'WETH') {
         const sim = isMax
           ? await ETHRouterContract.simulate.redeem([amount], opts)
