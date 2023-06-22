@@ -34,7 +34,7 @@ const Summary = () => {
   const summaryData = useMemo(
     () => [
       {
-        label: t('New Collateral'),
+        label: t('Final Collateral'),
         value: (
           <Box display="flex" alignItems="center" gap={0.5}>
             <Image
@@ -58,7 +58,7 @@ const Summary = () => {
         ),
       },
       {
-        label: t('New Borrow'),
+        label: t('Final Borrow'),
         value: (
           <Box display="flex" alignItems="center" gap={0.5}>
             <Image

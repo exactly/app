@@ -239,6 +239,11 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
 
   const close = useCallback(() => setIsOpen(false), []);
 
+  const _setViewSummary = useCallback((_state: boolean) => {
+    setAcceptedTerms(false);
+    setViewSummary(_state);
+  }, []);
+
   const market = useMarket(getMarketAccount(input?.collateralSymbol ?? 'USDC')?.market);
 
   const walletBalance = useBalance(input.collateralSymbol, market?.address);
@@ -390,7 +395,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     close,
 
     viewSummary,
-    setViewSummary,
+    setViewSummary: _setViewSummary,
     acceptedTerms,
     setAcceptedTerms,
 

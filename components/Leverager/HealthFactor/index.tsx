@@ -8,17 +8,13 @@ import { useLeveragerContext } from 'contexts/LeveragerContext';
 
 const HealthFactor = () => {
   const { t } = useTranslation();
-  const { input, newHealthFactor, currentLeverageRatio, getHealthFactorColor, getHealthFactorRisk } =
-    useLeveragerContext();
+  const { input, newHealthFactor, currentLeverageRatio, getHealthFactorColor } = useLeveragerContext();
   const hf = useHealthFactor();
 
   const healthFactor = useMemo(() => (hf ? parseHealthFactor(hf.debt, hf.collateral) : undefined), [hf]);
 
   const hfCurrColor = useMemo(() => getHealthFactorColor(healthFactor), [getHealthFactorColor, healthFactor]);
-  const [hfNewColor, nfNewRisk] = useMemo(
-    () => [getHealthFactorColor(newHealthFactor), getHealthFactorRisk(newHealthFactor)],
-    [getHealthFactorColor, getHealthFactorRisk, newHealthFactor],
-  );
+  const hfNewColor = useMemo(() => getHealthFactorColor(newHealthFactor), [getHealthFactorColor, newHealthFactor]);
 
   const disabled = useMemo(
     () => !input.collateralSymbol || !input.borrowSymbol || (currentLeverageRatio === 1 && input.leverageRatio === 1),
@@ -29,18 +25,7 @@ const HealthFactor = () => {
     <Box display="flex" flexDirection="column" gap={2}>
       <Box display="flex" justifyContent="space-between" alignItems="center">
         <Typography variant="caption" color="figma.grey.600">
-          {t('Health Factor')}
-        </Typography>
-        <Typography
-          fontFamily="IBM Plex Mono"
-          fontSize={10}
-          fontWeight={500}
-          px={0.5}
-          py={0.25}
-          bgcolor={hfNewColor.bg}
-          color={hfNewColor.color}
-        >
-          {nfNewRisk.toUpperCase()}
+          {t('Account Health Factor')}
         </Typography>
       </Box>
       <Box display="flex" gap={0.8} alignItems="center">

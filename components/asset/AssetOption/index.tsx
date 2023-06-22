@@ -41,11 +41,13 @@ function AssetOption({ assetSymbol, option = false, optionSize = 17, selectedSiz
           {formatSymbol(assetSymbol)}
         </Typography>
       </Box>
-      {value && (
-        <Typography fontFamily="IBM Plex Mono" fontSize={13} fontWeight={500} color="figma.grey.500">
-          {value}
-        </Typography>
-      )}
+      <Box>
+        {value && (
+          <Typography fontFamily="IBM Plex Mono" fontSize={13} fontWeight={500} color="figma.grey.500">
+            {value}
+          </Typography>
+        )}
+      </Box>
     </Box>
   );
 }
