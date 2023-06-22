@@ -13,6 +13,7 @@ const MultiplierSlider = () => {
     maxLeverageRatio,
     newHealthFactor,
     getHealthFactorColor,
+    getCurrentNetPosition,
   } = useLeveragerContext();
 
   const currentMark = useMemo(() => [{ value: currentLeverageRatio }], [currentLeverageRatio]);
@@ -27,8 +28,11 @@ const MultiplierSlider = () => {
   );
 
   const disabled = useMemo(
-    () => !input.collateralSymbol || !input.borrowSymbol,
-    [input.borrowSymbol, input.collateralSymbol],
+    () =>
+      !input.collateralSymbol ||
+      !input.borrowSymbol ||
+      (getCurrentNetPosition(input.collateralSymbol, input.borrowSymbol) ?? -1) < 0n,
+    [getCurrentNetPosition, input.borrowSymbol, input.collateralSymbol],
   );
 
   return (
@@ -63,7 +67,7 @@ const MultiplierSlider = () => {
           max={maxLeverageRatio}
           step={0.1}
           valueLabelFormat={(value) => `${value.toFixed(1)}x`}
-          disabled={!input.collateralSymbol || !input.borrowSymbol}
+          disabled={disabled}
           sx={{
             height: 4,
             '& .MuiSlider-thumb': {

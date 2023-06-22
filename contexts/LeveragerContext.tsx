@@ -31,6 +31,7 @@ import formatNumber from 'utils/formatNumber';
 import { formatEther, formatUnits, parseEther, parseUnits } from 'viem';
 import useHealthFactor from 'hooks/useHealthFactor';
 import parseHealthFactor from 'utils/parseHealthFactor';
+import useERC20 from 'hooks/useERC20';
 
 type Input = {
   collateralSymbol?: string;
@@ -80,6 +81,7 @@ type ContextValues = {
   borrowOptions: { symbol: string; value: string }[];
 
   currentLeverageRatio: number;
+  getCurrentNetPosition: (col: string, bor: string) => bigint | undefined;
   newHealthFactor?: string;
   newCollateral: Value<bigint>;
   newBorrow: Value<bigint>;
@@ -140,6 +142,15 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
 
   const options = useAssets();
 
+  const ma = useMemo(
+    () => getMarketAccount(input.collateralSymbol ?? 'USDC'),
+    [getMarketAccount, input.collateralSymbol],
+  );
+
+  const market = useMarket(ma?.market);
+  const asset = useERC20(ma?.asset);
+  const walletBalance = useBalance(input.collateralSymbol, ma?.asset);
+
   const [collateralOptions, borrowOptions] = useMemo(
     () => [
       options.flatMap((symbol) => {
@@ -188,9 +199,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
         (parseUnits(input.userInput, collateralMarket.decimals) * collateralMarket.usdPrice) /
         10n ** BigInt(collateralMarket.decimals);
 
-      const resultUSD = collateralDeposited - borrowed + (input.secondaryOperation === 'deposit' ? _userInput : 0n);
-
-      return resultUSD;
+      return collateralDeposited - borrowed + (input.secondaryOperation === 'deposit' ? _userInput : 0n);
     },
     [getMarketAccount, input.secondaryOperation, input.userInput],
   );
@@ -204,7 +213,13 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     if (!collateralMarket || !resultUSD) return [undefined, undefined];
 
     const resultAssets = (resultUSD * 10n ** BigInt(collateralMarket.decimals)) / collateralMarket.usdPrice;
-    return [{ display: formatUnits(resultAssets, collateralMarket.decimals), value: resultAssets }, resultUSD];
+    return [
+      {
+        display: formatNumber(formatUnits(resultAssets, collateralMarket.decimals), input.collateralSymbol),
+        value: resultAssets,
+      },
+      resultUSD,
+    ];
   }, [getCurrentNetPosition, getMarketAccount, input.borrowSymbol, input.collateralSymbol]);
 
   const minLeverageRatio = 1;
@@ -354,37 +369,50 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     setViewSummary(_state);
   }, []);
 
-  const market = useMarket(getMarketAccount(input?.collateralSymbol ?? 'USDC')?.market);
-
-  const walletBalance = useBalance(input.collateralSymbol, market?.address);
-
-  //TODO: handle withdraw
+  // TODO: this should be computed by the backend as it should consider fees from the swap
   const onMax = useCallback(() => {
-    if (walletBalance) {
-      setUserInput(walletBalance);
-      setErrorData(undefined);
+    setErrorData(undefined);
+    if (input.secondaryOperation === 'deposit') {
+      if (walletBalance) {
+        return setUserInput(walletBalance);
+      }
     }
-  }, [walletBalance, setUserInput, setErrorData]);
+    setUserInput(netPosition?.display ?? '');
+  }, [input.secondaryOperation, netPosition?.display, setUserInput, walletBalance]);
 
-  //TODO: handle withdraw
+  // TODO: For errors we should use the data from previews to consider fees from the swap
   const handleInputChange = useCallback(
     (value: string) => {
       setUserInput(value);
 
-      if (walletBalance && parseFloat(value) > parseFloat(walletBalance)) {
-        setErrorData({ status: true, message: t('Insufficient balance') });
-        return;
+      const parsed = parseUnits(value, ma?.decimals ?? 18);
+
+      if (input.secondaryOperation === 'deposit') {
+        if (walletBalance && parseFloat(value) > parseFloat(walletBalance)) {
+          return setErrorData({ status: true, message: t('Insufficient balance') });
+        }
+      } else {
+        if (netPosition && parsed > netPosition.value) {
+          return setErrorData({ status: true, message: t('Insufficient funds') });
+        }
       }
       setErrorData(undefined);
     },
-    [setUserInput, walletBalance, setErrorData, t],
+    [setUserInput, ma?.decimals, input.secondaryOperation, walletBalance, t, netPosition],
   );
 
-  //TODO: handle withdraw
-  const available = useMemo(() => walletBalance, [walletBalance]);
+  const available = useMemo(() => {
+    if (input.secondaryOperation === 'deposit') {
+      return walletBalance;
+    }
 
-  //TODO: calculate
-  const [loopAPR, marketAPR, rewardsAPR, nativeAPR] = useMemo(() => [0.137, 0.074, 0.021, 0.042], []);
+    return formatNumber(netPosition?.display ?? '0', input?.collateralSymbol);
+  }, [input.secondaryOperation, input?.collateralSymbol, netPosition?.display, walletBalance]);
+
+  //TODO: calculate CONTINUE
+  const [loopAPR, marketAPR, rewardsAPR, nativeAPR] = useMemo(() => {
+    return [0.137, 0.074, 0.021, 0];
+  }, []);
 
   // TODO: calculate
   const marketRewards = useMemo(() => ['OP', 'USDC'], []);
@@ -397,7 +425,8 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
       !input.collateralSymbol ||
       !input.borrowSymbol ||
       errorData?.status ||
-      (currentLeverageRatio === input.leverageRatio && !input.userInput),
+      (currentLeverageRatio === input.leverageRatio && !input.userInput) ||
+      (getCurrentNetPosition(input.collateralSymbol, input.borrowSymbol) ?? -1n) < 0n,
     [
       currentLeverageRatio,
       errorData?.status,
@@ -405,6 +434,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
       input.collateralSymbol,
       input.leverageRatio,
       input.userInput,
+      getCurrentNetPosition,
     ],
   );
 
@@ -437,17 +467,18 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
   // 2. Market.allowance([wallet, debtManager.address]) < ...
   const needsApproval = useCallback(
     async (qty: bigint): Promise<boolean> => {
-      if (!walletAddress || !market || !debtManager || !opts || qty === 0n) return true;
+      if (!walletAddress || !market || !asset || !debtManager || !opts || qty === 0n) return true;
       try {
         if (!(await isContract(walletAddress))) return false;
+        const allowance1 = await asset.read.allowance([walletAddress, debtManager.address], opts);
         const allowance = await market.read.allowance([walletAddress, debtManager.address], opts);
-        return allowance <= qty;
+        return allowance <= qty || allowance1 === 0n;
       } catch (e: unknown) {
         setErrorData({ status: true, message: handleOperationError(e) });
         return true;
       }
     },
-    [walletAddress, market, debtManager, isContract, opts],
+    [walletAddress, market, asset, debtManager, opts, isContract],
   );
 
   // TODO(jg): This should approve both ERC20 in case of multisig. Depending on the instance approve 1 or 2.
@@ -521,6 +552,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     borrowOptions,
 
     currentLeverageRatio,
+    getCurrentNetPosition,
     newHealthFactor,
     newCollateral,
     newBorrow,
