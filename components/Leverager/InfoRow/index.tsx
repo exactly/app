@@ -1,9 +1,8 @@
-import { Box, IconButton, Skeleton, Typography } from '@mui/material';
+import { Box, Grid, Skeleton, Typography } from '@mui/material';
 import React, { FC } from 'react';
 import Image from 'next/image';
 import formatNumber from 'utils/formatNumber';
 import USDValue from 'components/OperationsModal/USDValue';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 type InfoRowProps = {
   title: string;
@@ -11,25 +10,20 @@ type InfoRowProps = {
   assets?: string;
   disabledMessage: string;
   expandable?: boolean;
+  onClick?: () => void;
 };
 
-const InfoRow: FC<InfoRowProps> = ({ title, symbol, assets, disabledMessage, expandable }) => {
+const InfoRow: FC<InfoRowProps> = ({ title, symbol, assets, disabledMessage }) => {
   return (
-    <Box
-      display="flex"
-      alignItems="center"
-      bgcolor="grey.100"
-      borderRadius="4px"
-      pl={1}
-      py={0.5}
-      gap={1}
-      pr={expandable ? 0 : 3.4}
-    >
+    <Box display="flex" alignItems="center" bgcolor="grey.100" borderRadius="4px" pl={1} py={0.5} gap={1}>
       {symbol ? (
-        <Box display="flex" justifyContent="space-between" gap={1} width="100%">
-          <Typography variant="caption">{title}:</Typography>
-          {assets ? (
-            <Box display="flex" gap={1}>
+        <Grid container width="100%">
+          <Grid item xs={6}>
+            <Typography variant="caption">{title}:</Typography>
+          </Grid>
+
+          <Grid item xs={6}>
+            {assets ? (
               <Box display="flex" gap={0.5}>
                 <Image
                   src={`/img/assets/${symbol}.svg`}
@@ -44,18 +38,13 @@ const InfoRow: FC<InfoRowProps> = ({ title, symbol, assets, disabledMessage, exp
                 <Typography fontFamily="IBM Plex Mono" fontSize={13} fontWeight={500}>
                   {`${formatNumber(assets, symbol)} ${symbol}`}
                 </Typography>
+                <USDValue qty={assets} symbol={symbol} />
               </Box>
-              <USDValue qty={assets} symbol={symbol} />
-              {expandable && (
-                <IconButton sx={{ width: 20, height: 20 }}>
-                  <ExpandMoreIcon sx={{ fontSize: 14 }} />
-                </IconButton>
-              )}
-            </Box>
-          ) : (
-            <Skeleton width={200} height={24} />
-          )}
-        </Box>
+            ) : (
+              <Skeleton width={200} height={24} />
+            )}
+          </Grid>
+        </Grid>
       ) : (
         <Typography variant="caption" color="grey.700">
           {disabledMessage}
