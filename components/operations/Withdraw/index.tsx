@@ -25,7 +25,7 @@ import useHandleOperationError from 'hooks/useHandleOperationError';
 import useAnalytics from 'hooks/useAnalytics';
 import { useTranslation } from 'react-i18next';
 import useTranslateOperation from 'hooks/useTranslateOperation';
-import { defaultAmount, gasLimitMultiplier } from 'utils/const';
+import { gasLimitMultiplier } from 'utils/const';
 import useEstimateGas from 'hooks/useEstimateGas';
 
 const Withdraw: FC = () => {
@@ -83,18 +83,19 @@ const Withdraw: FC = () => {
 
       const { floatingDepositShares } = marketAccount;
       if (marketAccount.assetSymbol === 'WETH') {
-        const amount = isMax ? floatingDepositShares : quantity ? parseFixed(quantity, 18) : defaultAmount;
+        const amount = isMax ? floatingDepositShares : parseFixed(quantity, 18);
 
-        const populated = await ETHRouterContract.populateTransaction.redeem(amount);
+        const populated = await ETHRouterContract.populateTransaction[isMax ? 'redeem' : 'withdraw'](amount);
         return estimate(populated);
       }
 
-      const amount = isMax
-        ? floatingDepositShares
-        : quantity
-        ? parseFixed(quantity, marketAccount.decimals)
-        : defaultAmount;
-      const populated = await marketContract.populateTransaction.redeem(amount, walletAddress, walletAddress);
+      const amount = isMax ? floatingDepositShares : parseFixed(quantity, marketAccount.decimals);
+
+      const populated = await marketContract.populateTransaction[isMax ? 'redeem' : 'withdraw'](
+        amount,
+        walletAddress,
+        walletAddress,
+      );
       return estimate(populated);
     },
     [
@@ -137,9 +138,10 @@ const Withdraw: FC = () => {
       }
 
       setErrorData(undefined);
-      setIsMax(false);
+
+      setIsMax(value === parsedAmount);
     },
-    [marketAccount, setErrorData, setQty, t],
+    [marketAccount, parsedAmount, setErrorData, setQty, t],
   );
 
   const withdraw = useCallback(async () => {

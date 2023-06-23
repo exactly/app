@@ -26,7 +26,7 @@ import useHandleOperationError from 'hooks/useHandleOperationError';
 import useAnalytics from 'hooks/useAnalytics';
 import { useTranslation } from 'react-i18next';
 import useTranslateOperation from 'hooks/useTranslateOperation';
-import { defaultAmount, ethRouterSlippage, gasLimitMultiplier } from 'utils/const';
+import { ethRouterSlippage, gasLimitMultiplier } from 'utils/const';
 import { CustomError } from 'types/Error';
 import useEstimateGas from 'hooks/useEstimateGas';
 
@@ -104,9 +104,9 @@ function Repay() {
       }
 
       setErrorData(undefined);
-      setIsMax(false);
+      setIsMax(value === finalAmount);
     },
-    [setQty, walletBalance, setErrorData, t],
+    [setQty, walletBalance, setErrorData, finalAmount, t],
   );
 
   const repay = useCallback(async () => {
@@ -195,10 +195,11 @@ function Repay() {
       }
 
       if (marketAccount.assetSymbol === 'WETH') {
-        const amount = quantity ? parseFixed(quantity, 18).mul(ethRouterSlippage).div(WeiPerEther) : defaultAmount;
+        const value = parseFixed(quantity, 18).mul(ethRouterSlippage).div(WeiPerEther);
+        const amount = isMax ? marketAccount.floatingBorrowShares : value;
 
-        const populated = await ETHRouterContract.populateTransaction.repay(amount, {
-          value: amount,
+        const populated = await ETHRouterContract.populateTransaction[isMax ? 'refund' : 'repay'](amount, {
+          value,
         });
         const gasEstimation = await estimate(populated);
         if (amount.add(gasEstimation ?? Zero).gte(parseFixed(walletBalance || '0', 18))) {
@@ -208,8 +209,8 @@ function Repay() {
         return gasEstimation;
       }
 
-      const populated = await marketContract.populateTransaction.repay(
-        quantity ? parseFixed(quantity, marketAccount.decimals) : defaultAmount,
+      const populated = await marketContract.populateTransaction[isMax ? 'refund' : 'repay'](
+        isMax ? marketAccount.floatingBorrowShares : parseFixed(quantity, marketAccount.decimals),
         walletAddress,
       );
 
@@ -221,6 +222,7 @@ function Repay() {
       ETHRouterContract,
       marketContract,
       needsApproval,
+      isMax,
       estimate,
       approveEstimateGas,
       walletBalance,
