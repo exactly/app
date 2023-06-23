@@ -10,6 +10,7 @@ import HealthFactor from '../HealthFactor';
 import AssetSelector from '../AssetSelector';
 import ModalAlert from 'components/common/modal/ModalAlert';
 import NetPosition from '../NetPosition';
+import formatNumber from 'utils/formatNumber';
 
 const Operation = () => {
   const { t } = useTranslation();
@@ -93,7 +94,9 @@ const Operation = () => {
         </Button>
       ) : (
         <Button fullWidth variant="contained" onClick={() => setViewSummary(true)}>
-          {`${t('Leverage')} ${netPosition?.display} ${input.collateralSymbol} @ ${input.leverageRatio.toFixed(1)}x`}
+          {`${t('Leverage')} ${formatNumber(netPosition?.display ?? '0', input.collateralSymbol)} ${
+            input.collateralSymbol
+          } @ ${input.leverageRatio.toFixed(1)}x`}
         </Button>
       )}
     </Box>

@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Box, Button, Checkbox, Divider, Grid, Typography, capitalize } from '@mui/material';
 import { ModalBox } from 'components/common/modal/ModalBox';
 import { useTranslation } from 'react-i18next';
@@ -8,6 +8,8 @@ import { toPercentage } from 'utils/utils';
 import USDValue from 'components/OperationsModal/USDValue';
 import Image from 'next/image';
 import RewardsGroup from '../RewardsGroup';
+import handleOperationError from 'utils/handleOperationError';
+import { LoadingButton } from '@mui/lab';
 
 const Summary = () => {
   const { t } = useTranslation();
@@ -23,6 +25,11 @@ const Summary = () => {
     setViewSummary,
     getHealthFactorColor,
     getHealthFactorRisk,
+    setErrorData,
+    approve,
+    submit,
+    needsApproval,
+    isLoading,
   } = useLeveragerContext();
 
   const healthFactorColor = useMemo(
@@ -72,7 +79,7 @@ const Summary = () => {
               }}
             />
             <Typography variant="h6">{input.borrowSymbol}</Typography>
-            <Typography variant="h6">{newBorrow}</Typography>
+            <Typography variant="h6">{newBorrow.display}</Typography>
           </Box>
         ),
         subValue: (
@@ -125,6 +132,25 @@ const Summary = () => {
     ],
   );
 
+  const [requiresApproval, setRequiresApproval] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        setErrorData(undefined);
+        if (!input.collateralSymbol || !input.borrowSymbol) return;
+        setRequiresApproval(await needsApproval());
+      } catch (e: unknown) {
+        setErrorData({ status: true, message: handleOperationError(e) });
+      }
+    })();
+  }, [input.borrowSymbol, input.collateralSymbol, needsApproval, setErrorData]);
+
+  const approveLeverage = useCallback(async () => {
+    await approve();
+    setRequiresApproval(await needsApproval());
+  }, [approve, needsApproval]);
+
   return (
     <Box display="flex" flexDirection="column" gap={3}>
       <ModalBox bgcolor="grey.100">
@@ -145,11 +171,12 @@ const Summary = () => {
       </ModalBox>
       <Box display="flex" justifyContent="start" alignItems="center" gap={1}>
         <Checkbox
+          id="accept-risk"
           sx={{ width: 18, height: 18 }}
           value={acceptedTerms}
           onChange={(e) => setAcceptedTerms(e.target.checked)}
         />
-        <Typography fontSize={14} fontWeight={500}>
+        <Typography component="label" htmlFor="accept-risk" fontSize={14} fontWeight={500}>
           {t('I fully acknowledge and accept the risks of leveraging.')}
         </Typography>
       </Box>
@@ -163,9 +190,15 @@ const Summary = () => {
           </Button>
         </Grid>
         <Grid item xs={9}>
-          <Button fullWidth variant="contained" disabled={disabledConfirm}>
-            {t('Confirm Leverage')}
-          </Button>
+          <LoadingButton
+            loading={isLoading}
+            onClick={requiresApproval ? approveLeverage : submit}
+            fullWidth
+            variant="contained"
+            disabled={disabledConfirm}
+          >
+            {requiresApproval ? t('Approve') : t('Confirm Leverage')}
+          </LoadingButton>
         </Grid>
       </Grid>
     </Box>

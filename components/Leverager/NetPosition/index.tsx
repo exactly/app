@@ -15,7 +15,7 @@ const NetPosition = () => {
   const containerRef = useRef(null);
 
   return (
-    <Collapse in={expanded} collapsedSize={44} sx={{ borderRadius: '4px' }}>
+    <Collapse in={expanded} timeout={600} collapsedSize={44} sx={{ borderRadius: '4px' }}>
       <Box bgcolor="grey.100" p={1} borderRadius="4px" position="relative">
         <Box position="absolute" top={8} right={8} zIndex={99999999}>
           <IconButton sx={{ width: 20, height: 20 }} onClick={() => setExpanded((_expanded) => !_expanded)}>
@@ -60,7 +60,7 @@ const NetPosition = () => {
                   direction="down"
                   in={expanded}
                   container={containerRef.current}
-                  timeout={1000}
+                  timeout={600}
                   easing="cubic-bezier(0.4, 0, 0.6, 1)"
                   unmountOnExit
                   mountOnEnter

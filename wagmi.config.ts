@@ -9,6 +9,7 @@ import MarketETHRouter from '@exactly/protocol/deployments/goerli/MarketETHRoute
 import InterestRateModel from '@exactly/protocol/deployments/goerli/InterestRateModelDAI.json' assert { type: 'json' };
 import RewardsController from '@exactly/protocol/deployments/goerli/RewardsController.json' assert { type: 'json' };
 import DebtManager from '@exactly/protocol/deployments/goerli/DebtManager.json' assert { type: 'json' };
+import Permit2 from '@exactly/protocol/deployments/goerli/Permit2.json' assert { type: 'json' };
 
 import { Abi } from 'viem';
 
@@ -23,6 +24,7 @@ export default defineConfig({
     { name: 'InterestRateModel', abi: InterestRateModel.abi as Abi },
     { name: 'RewardsController', abi: RewardsController.abi as Abi },
     { name: 'DebtManager', abi: DebtManager.abi as Abi },
+    { name: 'Permit2', abi: Permit2.abi as Abi },
   ],
   plugins: [
     react({
