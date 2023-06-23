@@ -11,7 +11,7 @@ type Props = {
 };
 
 function MobileTabs({ tabs }: Props) {
-  const [selected, setSelected] = useState<number>(0);
+  const [selected, setSelected] = useState<number>(1);
 
   return (
     <>

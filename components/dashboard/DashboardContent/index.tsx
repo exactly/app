@@ -85,7 +85,7 @@ function DashboardContent() {
 
   return (
     <Grid mt="24px">
-      <DashboardTabs initialTab={allTabs[0].value} allTabs={allTabs} />
+      <DashboardTabs initialTab={allTabs[1].value} allTabs={allTabs} />
     </Grid>
   );
 }
