@@ -9,13 +9,25 @@ type InfoRowProps = {
   symbol?: string;
   assets?: string;
   disabledMessage: string;
-  expandable?: boolean;
   onClick?: () => void;
 };
 
-const InfoRow: FC<InfoRowProps> = ({ title, symbol, assets, disabledMessage }) => {
+const InfoRow: FC<InfoRowProps> = ({ title, symbol, assets, disabledMessage, onClick }) => {
   return (
-    <Box display="flex" alignItems="center" bgcolor="grey.100" borderRadius="4px" pl={1} py={0.5} gap={1}>
+    <Box
+      display="flex"
+      alignItems="center"
+      bgcolor="grey.100"
+      borderRadius="4px"
+      pl={1}
+      pr={2.5}
+      py={0.5}
+      gap={1}
+      onClick={onClick}
+      sx={{
+        ...(onClick ? { cursor: 'pointer' } : {}),
+      }}
+    >
       {symbol ? (
         <Grid container width="100%">
           <Grid item xs={6}>
@@ -41,7 +53,7 @@ const InfoRow: FC<InfoRowProps> = ({ title, symbol, assets, disabledMessage }) =
                 <USDValue qty={assets} symbol={symbol} />
               </Box>
             ) : (
-              <Skeleton width={200} height={24} />
+              <Skeleton width={170} height={24} />
             )}
           </Grid>
         </Grid>

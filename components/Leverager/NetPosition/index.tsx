@@ -15,25 +15,32 @@ const NetPosition = () => {
   const containerRef = useRef(null);
 
   return (
-    <Collapse in={expanded} timeout={600} collapsedSize={44} sx={{ borderRadius: '4px' }}>
-      <Box bgcolor="grey.100" p={1} borderRadius="4px" position="relative">
-        <Box position="absolute" top={8} right={8} zIndex={99999999}>
-          <IconButton sx={{ width: 20, height: 20 }} onClick={() => setExpanded((_expanded) => !_expanded)}>
-            {expanded ? <ExpandLessIcon sx={{ fontSize: 16 }} /> : <ExpandMoreIcon sx={{ fontSize: 16 }} />}
-          </IconButton>
-        </Box>
+    <Collapse
+      in={expanded}
+      timeout={600}
+      collapsedSize={44}
+      sx={{ borderRadius: '4px' }}
+      easing="cubic-bezier(0.4, 0, 0.6, 1)"
+    >
+      <Box bgcolor="grey.100" p={0.75} borderRadius="4px" position="relative">
+        {input.collateralSymbol && (
+          <Box position="absolute" top={8} right={8} zIndex={99999999}>
+            <IconButton sx={{ width: 20, height: 20 }} onClick={() => setExpanded((_expanded) => !_expanded)}>
+              {expanded ? <ExpandLessIcon sx={{ fontSize: 16 }} /> : <ExpandMoreIcon sx={{ fontSize: 16 }} />}
+            </IconButton>
+          </Box>
+        )}
         {!expanded && (
           <InfoRow
             title={t('Net Position')}
             symbol={input.collateralSymbol}
             assets={netPosition?.display}
             disabledMessage={t('Choose asset to see net position.')}
-            expandable
-            onClick={() => setExpanded((_expanded) => !_expanded)}
+            onClick={input.collateralSymbol ? () => setExpanded((_expanded) => !_expanded) : undefined}
           />
         )}
         <Box ref={containerRef}>
-          {expanded ? (
+          {expanded && (
             <>
               <Fade in={expanded} timeout={2500} unmountOnExit mountOnEnter>
                 <Grid container mt={1}>
@@ -60,7 +67,7 @@ const NetPosition = () => {
                   direction="down"
                   in={expanded}
                   container={containerRef.current}
-                  timeout={600}
+                  timeout={500}
                   easing="cubic-bezier(0.4, 0, 0.6, 1)"
                   unmountOnExit
                   mountOnEnter
@@ -76,8 +83,6 @@ const NetPosition = () => {
                 </Slide>
               </Box>
             </>
-          ) : (
-            <Box height={120} />
           )}
         </Box>
       </Box>
