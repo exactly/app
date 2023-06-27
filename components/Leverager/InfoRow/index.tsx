@@ -32,7 +32,7 @@ const InfoRow: FC<InfoRowProps> = ({ title, symbol, assets, disabledMessage, onC
           </Grid>
 
           <Grid item xs={6}>
-            {assets ? (
+            {assets !== undefined ? (
               <Box display="flex" gap={0.5} alignItems="center" flexWrap="wrap">
                 <Image
                   src={`/img/assets/${symbol}.svg`}

@@ -23,6 +23,7 @@ import {
   hexToBigInt,
   keccak256,
   encodeAbiParameters,
+  encodeFunctionData,
 } from 'viem';
 import { splitSignature } from '@ethersproject/bytes';
 
@@ -49,6 +50,8 @@ import useERC20 from 'hooks/useERC20';
 import usePermit2 from 'hooks/usePermit2';
 import dayjs from 'dayjs';
 import { isPermitAllowed } from 'utils/permit';
+import useDebtPreviewer, { Leverage } from 'hooks/useDebtPreviewer';
+import useDelayedEffect from 'hooks/useDelayedEffect';
 
 type Input = {
   collateralSymbol?: string;
@@ -123,7 +126,6 @@ type ContextValues = {
   disabledConfirm: boolean;
 
   getHealthFactorColor: (_healthFactor?: string) => { color: string; bg: string };
-  getHealthFactorRisk: (_healthFactor?: string) => string;
 
   debtManager?: DebtManager;
   market?: Market;
@@ -169,7 +171,70 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
 
   const market = useMarket(ma?.market);
   const asset = useERC20(ma?.asset);
+  const debtManager = useDebtManager();
+  const debtPreviewer = useDebtPreviewer();
   const permit2 = usePermit2();
+
+  const [leveragePreview, setLeveragePreview] = useState<Leverage>();
+
+  const minLeverageRatio = 1;
+  const maxLeverageRatio = useMemo(() => {
+    return leveragePreview ? Number(leveragePreview.maxRatio) / 1e18 : minLeverageRatio;
+  }, [leveragePreview]);
+
+  const currentLeverageRatio = leveragePreview ? Number(leveragePreview.ratio) / 1e18 : minLeverageRatio;
+
+  const setLeverageRatio = useCallback(
+    (leverageRatio: number) => {
+      const _secondaryOperation = leverageRatio < currentLeverageRatio ? 'withdraw' : 'deposit';
+      const changedOperation = _secondaryOperation !== input.secondaryOperation;
+      setErrorData(undefined);
+
+      dispatch({
+        leverageRatio,
+        secondaryOperation: _secondaryOperation,
+        userInput: changedOperation ? '' : input.userInput,
+      });
+    },
+    [input.secondaryOperation, input.userInput, currentLeverageRatio],
+  );
+
+  const previewLeverage = useCallback(
+    async (cancelled: () => boolean, borrowSymbol: string | undefined = input.borrowSymbol) => {
+      if (!debtPreviewer || !walletAddress || !input.collateralSymbol || !borrowSymbol || !opts) {
+        setLeveragePreview(undefined);
+        return undefined;
+      }
+
+      const collateralMarket = getMarketAccount(input.collateralSymbol);
+      const borrowMarket = getMarketAccount(borrowSymbol);
+      if (!collateralMarket || !borrowMarket) {
+        setLeveragePreview(undefined);
+        return undefined;
+      }
+
+      const { result } = await debtPreviewer.simulate.leverage(
+        [collateralMarket.market, borrowMarket.market, walletAddress],
+        opts,
+      );
+
+      if (cancelled()) return undefined;
+
+      setLeveragePreview(result);
+      return result;
+    },
+    [debtPreviewer, getMarketAccount, input.borrowSymbol, input.collateralSymbol, opts, walletAddress],
+  );
+
+  const { isLoading: previewIsLoading } = useDelayedEffect({
+    effect: useCallback(
+      async (cancelled: () => boolean) => {
+        await previewLeverage(cancelled);
+      },
+      [previewLeverage],
+    ),
+  });
+
   const walletBalance = useBalance(input.collateralSymbol, ma?.asset);
 
   const [collateralOptions, borrowOptions] = useMemo(
@@ -200,88 +265,34 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     [options, getMarketAccount],
   );
 
-  const getCurrentNetPosition = useCallback(
-    (collateralSymbol: string, borrowSymbol: string) => {
-      if (!collateralSymbol || !borrowSymbol) return undefined;
+  const _userInput = useMemo(() => {
+    if (!input.collateralSymbol) return 0n;
+    const marketAccount = getMarketAccount(input.collateralSymbol);
+    if (!marketAccount) return 0n;
+    return parseUnits(input.userInput, marketAccount.decimals);
+  }, [getMarketAccount, input.collateralSymbol, input.userInput]);
 
-      const collateralMarket = getMarketAccount(collateralSymbol);
-      const borrowMarket = getMarketAccount(borrowSymbol);
-      if (!collateralMarket || !borrowMarket) return undefined;
-
-      const collateralDeposited =
-        (collateralMarket.floatingDepositAssets * collateralMarket.usdPrice) / 10n ** BigInt(collateralMarket.decimals);
-      const borrowed =
-        ((borrowMarket.floatingBorrowAssets +
-          borrowMarket.fixedBorrowPositions.reduce((acc, { previewValue }) => acc + previewValue, 0n)) *
-          borrowMarket.usdPrice) /
-        10n ** BigInt(borrowMarket.decimals);
-
-      const _userInput =
-        (parseUnits(input.userInput, collateralMarket.decimals) * collateralMarket.usdPrice) /
-        10n ** BigInt(collateralMarket.decimals);
-
-      return collateralDeposited - borrowed + (input.secondaryOperation === 'deposit' ? _userInput : 0n);
-    },
-    [getMarketAccount, input.secondaryOperation, input.userInput],
-  );
+  const getCurrentNetPosition = useCallback(() => {
+    if (!leveragePreview) return undefined;
+    return leveragePreview.principal + (input.secondaryOperation === 'deposit' ? _userInput : 0n);
+  }, [_userInput, input.secondaryOperation, leveragePreview]);
 
   const [netPosition, netPositionUSD] = useMemo(() => {
     if (!input.collateralSymbol || !input.borrowSymbol) return [undefined, undefined];
 
     const collateralMarket = getMarketAccount(input.collateralSymbol);
 
-    const resultUSD = getCurrentNetPosition(input.collateralSymbol, input.borrowSymbol);
-    if (!collateralMarket || !resultUSD) return [undefined, undefined];
-
-    const resultAssets = (resultUSD * 10n ** BigInt(collateralMarket.decimals)) / collateralMarket.usdPrice;
+    const assets = getCurrentNetPosition();
+    if (!collateralMarket || assets === undefined) return [undefined, undefined];
+    const usd = (assets * collateralMarket.usdPrice) / 10n ** BigInt(collateralMarket.decimals);
     return [
       {
-        display: formatUnits(resultAssets, collateralMarket.decimals),
-        value: resultAssets,
+        display: formatUnits(assets, collateralMarket.decimals),
+        value: assets,
       },
-      resultUSD,
+      usd,
     ];
   }, [getCurrentNetPosition, getMarketAccount, input.borrowSymbol, input.collateralSymbol]);
-
-  const minLeverageRatio = 1;
-
-  const maxLeverageRatio = useMemo(() => {
-    if (!input.collateralSymbol || !input.borrowSymbol) return minLeverageRatio;
-
-    const collateralMarket = getMarketAccount(input.collateralSymbol);
-    if (!collateralMarket) return minLeverageRatio;
-
-    const borrowMarket = getMarketAccount(input.borrowSymbol);
-    if (!borrowMarket) return minLeverageRatio;
-
-    // this is performing local health factor calculation
-    return Number(
-      formatEther(
-        (WEI_PER_ETHER * WEI_PER_ETHER) /
-          (WEI_PER_ETHER - (collateralMarket.adjustFactor * borrowMarket.adjustFactor) / WEI_PER_ETHER),
-      ),
-    );
-  }, [getMarketAccount, input.borrowSymbol, input.collateralSymbol]);
-
-  const getCurrentLeverageRatio = useCallback(
-    (_netPosition?: bigint) => {
-      if (!input.collateralSymbol || !_netPosition) return minLeverageRatio;
-
-      const collateralMarket = getMarketAccount(input.collateralSymbol);
-      if (!collateralMarket) return minLeverageRatio;
-
-      const collateralDeposited =
-        (collateralMarket.floatingDepositAssets * collateralMarket.usdPrice) / 10n ** BigInt(collateralMarket.decimals);
-
-      return Math.max(minLeverageRatio, Number(formatEther((collateralDeposited * WEI_PER_ETHER) / _netPosition)));
-    },
-    [getMarketAccount, input.collateralSymbol, minLeverageRatio],
-  );
-
-  const currentLeverageRatio = useMemo(
-    () => getCurrentLeverageRatio(netPositionUSD),
-    [getCurrentLeverageRatio, netPositionUSD],
-  );
 
   const [newCollateral, newCollateralUSD] = useMemo(() => {
     if (!netPositionUSD || !input.collateralSymbol) return [{ display: '0', value: 0n }, 0n];
@@ -291,7 +302,6 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     const _currentLeverageRatio = parseEther(input.leverageRatio.toString());
     const resultUSD = (netPositionUSD * _currentLeverageRatio) / WEI_PER_ETHER;
     const resultAssets = (resultUSD * 10n ** BigInt(collateralMarket.decimals)) / collateralMarket.usdPrice;
-
     return [
       {
         display: formatUnits(resultAssets, collateralMarket.decimals),
@@ -302,8 +312,8 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
   }, [getMarketAccount, input.collateralSymbol, input.leverageRatio, netPositionUSD]);
 
   const [newBorrow, newBorrowUSD] = useMemo(() => {
-    if (!netPositionUSD || !input.collateralSymbol) return [{ display: '0', value: 0n }, 0n];
-    const borrowMarket = getMarketAccount(input.collateralSymbol);
+    if (!netPositionUSD || !input.borrowSymbol) return [{ display: '0', value: 0n }, 0n];
+    const borrowMarket = getMarketAccount(input.borrowSymbol);
     if (!borrowMarket) return [{ display: '0', value: 0n }, 0n];
 
     const _currentLeverageRatio = parseEther(input.leverageRatio.toString());
@@ -326,7 +336,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     ];
   }, [
     getMarketAccount,
-    input.collateralSymbol,
+    input.borrowSymbol,
     input.leverageRatio,
     input.secondaryOperation,
     input.userInput,
@@ -340,19 +350,19 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     const borrowMarket = getMarketAccount(input.borrowSymbol);
     if (!collateralMarket || !borrowMarket) return undefined;
 
-    const floatingDepositUSD =
+    const depositsUSD =
       (collateralMarket.floatingDepositAssets * collateralMarket.usdPrice) / 10n ** BigInt(collateralMarket.decimals);
 
-    const floatingBorrowUSD =
+    const borrowsUSD =
       ((borrowMarket.floatingBorrowAssets +
         borrowMarket.fixedBorrowPositions.reduce((acc, { previewValue }) => acc + previewValue, 0n)) *
         borrowMarket.usdPrice) /
       10n ** BigInt(borrowMarket.decimals);
 
-    const diffCollateral = ((newCollateralUSD - floatingDepositUSD) * collateralMarket.adjustFactor) / WEI_PER_ETHER;
-    const diffBorrowCollateral = ((newBorrowUSD - floatingBorrowUSD) * borrowMarket.adjustFactor) / WEI_PER_ETHER;
+    const collateral = ((newCollateralUSD - depositsUSD) * collateralMarket.adjustFactor) / WEI_PER_ETHER;
+    const debt = ((newBorrowUSD - borrowsUSD) * WEI_PER_ETHER) / borrowMarket.adjustFactor;
 
-    return parseHealthFactor(healthFactor.debt + diffBorrowCollateral, healthFactor.collateral + diffCollateral);
+    return parseHealthFactor(healthFactor.debt + debt, healthFactor.collateral + collateral);
   }, [getMarketAccount, healthFactor, input.borrowSymbol, input.collateralSymbol, newBorrowUSD, newCollateralUSD]);
 
   const setCollateralSymbol = useCallback((collateralSymbol: string) => {
@@ -360,20 +370,18 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     dispatch({ ...initState, collateralSymbol });
   }, []);
   const setBorrowSymbol = useCallback(
-    (borrowSymbol: string) => {
+    async (borrowSymbol: string) => {
       if (!input.collateralSymbol) return;
-      const _netPosition = getCurrentNetPosition(input.collateralSymbol, borrowSymbol);
-      const _currentLeverageRatio = getCurrentLeverageRatio(_netPosition);
-
       setErrorData(undefined);
+      const res = await previewLeverage(() => false, borrowSymbol);
       dispatch({
         ...initState,
         collateralSymbol: input.collateralSymbol,
         borrowSymbol: borrowSymbol,
-        leverageRatio: _currentLeverageRatio,
+        leverageRatio: res ? Number(res.ratio) / 1e18 : 1,
       });
     },
-    [getCurrentLeverageRatio, getCurrentNetPosition, input.collateralSymbol],
+    [input.collateralSymbol, previewLeverage],
   );
   const setSecondaryOperation = useCallback((secondaryOperation: 'deposit' | 'withdraw') => {
     setErrorData(undefined);
@@ -383,20 +391,6 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     setErrorData(undefined);
     dispatch({ userInput });
   }, []);
-  const setLeverageRatio = useCallback(
-    (leverageRatio: number) => {
-      const _secondaryOperation = leverageRatio < currentLeverageRatio ? 'withdraw' : 'deposit';
-      const changedOperation = _secondaryOperation !== input.secondaryOperation;
-      setErrorData(undefined);
-
-      dispatch({
-        leverageRatio,
-        secondaryOperation: _secondaryOperation,
-        userInput: changedOperation ? '' : input.userInput,
-      });
-    },
-    [currentLeverageRatio, input.secondaryOperation, input.userInput],
-  );
   const setSlippage = useCallback((slippage: string) => dispatch({ slippage }), []);
 
   const close = useCallback(() => setIsOpen(false), []);
@@ -425,8 +419,8 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
         return setUserInput(walletBalance);
       }
     }
-    setUserInput(netPosition?.display ?? '');
-  }, [input.secondaryOperation, netPosition?.display, setUserInput, walletBalance]);
+    setUserInput(formatUnits(leveragePreview?.maxWithdraw ?? 0n, ma?.decimals ?? 18));
+  }, [input.secondaryOperation, leveragePreview?.maxWithdraw, ma?.decimals, setUserInput, walletBalance]);
 
   // TODO: For errors we should use the data from previews to consider fees from the swap
   const handleInputChange = useCallback(
@@ -474,7 +468,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
       !input.borrowSymbol ||
       errorData?.status ||
       (currentLeverageRatio === input.leverageRatio && !input.userInput) ||
-      (getCurrentNetPosition(input.collateralSymbol, input.borrowSymbol) ?? -1n) < 0n,
+      (getCurrentNetPosition() ?? -1n) < 0n,
     [
       currentLeverageRatio,
       errorData?.status,
@@ -497,18 +491,6 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     },
     [palette.healthFactor],
   );
-
-  const getHealthFactorRisk = useCallback(
-    (_healthFactor?: string) => {
-      if (!_healthFactor) return t('low risk');
-      const parsedHF = parseFloat(_healthFactor);
-      const risk = parsedHF < 1.01 ? 'high risk' : parsedHF < 1.05 ? 'mid risk' : 'low risk';
-      return t(risk);
-    },
-    [t],
-  );
-
-  const debtManager = useDebtManager();
 
   const approvalStatus = useRef<ApprovalStatus>('INIT');
   const needsApproval = useCallback(async (): Promise<boolean> => {
@@ -749,7 +731,6 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
 
     setIsLoading(true);
     try {
-      const userInput = parseUnits(input.userInput || '0', ma.decimals);
       const ratio = parseEther(String(input.leverageRatio));
 
       let hash: Hex | undefined;
@@ -757,7 +738,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
         if (input.collateralSymbol === input.borrowSymbol) {
           switch (input.secondaryOperation) {
             case 'deposit': {
-              const args = [market.address, userInput, ratio] as const;
+              const args = [market.address, _userInput, ratio] as const;
               const gasEstimation = await debtManager.estimateGas.leverage(args, opts);
               hash = await debtManager.write.leverage(args, {
                 ...opts,
@@ -766,7 +747,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
               break;
             }
             case 'withdraw': {
-              const args = [market.address, ratio, userInput] as const;
+              const args = [market.address, ratio, _userInput] as const;
               const gasEstimation = await debtManager.estimateGas.deleverage(args, opts);
               hash = await debtManager.write.deleverage(args, {
                 ...opts,
@@ -783,10 +764,10 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
           switch (input.secondaryOperation) {
             case 'deposit': {
               const borrowAssets = newBorrow.value;
-              const assetPermit = await signPermit(userInput, 'asset');
+              const assetPermit = await signPermit(_userInput, 'asset');
               const marketPermit = await signPermit(borrowAssets, 'market');
               if (!assetPermit || !marketPermit || marketPermit.type === 'permit2') return;
-              const args = [market.address, userInput, ratio, borrowAssets, marketPermit.value] as const;
+              const args = [market.address, _userInput, ratio, borrowAssets, marketPermit.value] as const;
               switch (assetPermit.type) {
                 case 'permit': {
                   const leverageArgs = [...args, assetPermit.value] as const;
@@ -812,10 +793,10 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
             case 'withdraw': {
               const permitAssets =
                 (ma.floatingBorrowAssets < newBorrow.value ? 0n : ma.floatingBorrowAssets - newBorrow.value) +
-                userInput;
+                _userInput;
               const marketPermit = await signPermit(permitAssets, 'market');
               if (!marketPermit || marketPermit.type === 'permit2') return;
-              const args = [market.address, ratio, userInput, permitAssets, marketPermit.value] as const;
+              const args = [market.address, ratio, _userInput, permitAssets, marketPermit.value] as const;
               const gasEstimation = await debtManager.estimateGas.deleverage(args, opts);
               hash = await debtManager.write.deleverage(args, {
                 ...opts,
@@ -842,7 +823,6 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     walletAddress,
     input.collateralSymbol,
     input.borrowSymbol,
-    input.userInput,
     input.leverageRatio,
     input.secondaryOperation,
     debtManager,
@@ -852,6 +832,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     opts,
     isContract,
     refreshAccountData,
+    _userInput,
     newBorrow.value,
     signPermit,
   ]);
@@ -904,12 +885,11 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     disabledConfirm,
 
     getHealthFactorColor,
-    getHealthFactorRisk,
 
     errorData,
     setErrorData,
     tx,
-    isLoading,
+    isLoading: isLoading || previewIsLoading,
 
     needsApproval,
     approve,

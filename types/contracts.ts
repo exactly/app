@@ -4,6 +4,7 @@ import { getContract } from '@wagmi/core';
 import {
   auditorABI,
   debtManagerABI,
+  debtPreviewerABI,
   erc20ABI,
   interestRateModelABI,
   marketABI,
@@ -23,3 +24,4 @@ export type MarketETHRouter = ContractType<typeof marketEthRouterABI>;
 export type InterestRateModel = ContractType<typeof interestRateModelABI>;
 export type RewardsController = ContractType<typeof rewardsControllerABI>;
 export type DebtManager = ContractType<typeof debtManagerABI>;
+export type DebtPreviewer = ContractType<typeof debtPreviewerABI>;
