@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Typography } from '@mui/material';
+import { Box, Button, Grid, Typography, useMediaQuery, useTheme } from '@mui/material';
 import { ModalBox, ModalBoxCell, ModalBoxRow } from 'components/common/modal/ModalBox';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -14,6 +14,8 @@ import formatNumber from 'utils/formatNumber';
 
 const Operation = () => {
   const { t } = useTranslation();
+  const { breakpoints } = useTheme();
+  const isMobile = useMediaQuery(breakpoints.down('sm'));
   const {
     input,
     setCollateralSymbol,
@@ -46,7 +48,7 @@ const Operation = () => {
           <Grid container>
             <Grid item xs={5}>
               <AssetSelector
-                title={t('Choose Asset')}
+                title={isMobile ? t('Choose') : t('Choose Asset')}
                 currentValue={input.collateralSymbol}
                 options={collateralOptions}
                 onChange={setCollateralSymbol}
@@ -57,7 +59,7 @@ const Operation = () => {
             </Grid>
             <Grid item xs={5}>
               <AssetSelector
-                title={t('Choose Asset')}
+                title={isMobile ? t('Choose') : t('Choose Asset')}
                 currentValue={input.borrowSymbol}
                 options={borrowOptions}
                 onChange={setBorrowSymbol}

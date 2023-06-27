@@ -20,7 +20,7 @@ const AssetSelector: FC<AssetSelectorProps> = ({ title, currentValue, options, o
       disabled={disabled}
       renderValue={
         currentValue ? (
-          <AssetOption assetSymbol={currentValue} />
+          <AssetOption assetSymbol={currentValue} unformattedSymbol={true} />
         ) : (
           <Typography variant="h6" color="figma.grey.500">
             {title}
@@ -28,7 +28,7 @@ const AssetSelector: FC<AssetSelectorProps> = ({ title, currentValue, options, o
         )
       }
       renderOption={({ symbol, value }: { symbol: string; value: string }) => (
-        <AssetOption option assetSymbol={symbol} value={value} />
+        <AssetOption option assetSymbol={symbol} value={value} unformattedSymbol={true} />
       )}
       data-testid="modal-asset-selector"
     />

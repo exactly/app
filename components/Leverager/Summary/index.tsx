@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Box, Button, Checkbox, Divider, Grid, Typography, capitalize } from '@mui/material';
+import { Box, Button, Checkbox, Divider, Grid, Typography } from '@mui/material';
 import { ModalBox } from 'components/common/modal/ModalBox';
 import { useTranslation } from 'react-i18next';
 import { useLeveragerContext } from 'contexts/LeveragerContext';
@@ -10,6 +10,7 @@ import Image from 'next/image';
 import RewardsGroup from '../RewardsGroup';
 import handleOperationError from 'utils/handleOperationError';
 import { LoadingButton } from '@mui/lab';
+import formatNumber from 'utils/formatNumber';
 
 const Summary = () => {
   const { t } = useTranslation();
@@ -24,7 +25,6 @@ const Summary = () => {
     setAcceptedTerms,
     setViewSummary,
     getHealthFactorColor,
-    getHealthFactorRisk,
     setErrorData,
     approve,
     submit,
@@ -36,12 +36,11 @@ const Summary = () => {
     () => getHealthFactorColor(newHealthFactor),
     [getHealthFactorColor, newHealthFactor],
   );
-  const healthFactorRisk = useMemo(() => getHealthFactorRisk(newHealthFactor), [getHealthFactorRisk, newHealthFactor]);
 
   const summaryData = useMemo(
     () => [
       {
-        label: t('Final Collateral'),
+        label: t('New Collateral'),
         value: (
           <Box display="flex" alignItems="center" gap={0.5}>
             <Image
@@ -55,7 +54,7 @@ const Summary = () => {
               }}
             />
             <Typography variant="h6">{input.collateralSymbol}</Typography>
-            <Typography variant="h6">{newCollateral.display}</Typography>
+            <Typography variant="h6">{formatNumber(newCollateral.display, input.collateralSymbol)}</Typography>
           </Box>
         ),
         subValue: (
@@ -65,7 +64,7 @@ const Summary = () => {
         ),
       },
       {
-        label: t('Final Borrow'),
+        label: t('New Borrow'),
         value: (
           <Box display="flex" alignItems="center" gap={0.5}>
             <Image
@@ -79,7 +78,7 @@ const Summary = () => {
               }}
             />
             <Typography variant="h6">{input.borrowSymbol}</Typography>
-            <Typography variant="h6">{newBorrow.display}</Typography>
+            <Typography variant="h6">{formatNumber(newBorrow.display, input.borrowSymbol)}</Typography>
           </Box>
         ),
         subValue: (
@@ -109,18 +108,9 @@ const Summary = () => {
           </Typography>
         ),
       },
-      {
-        label: t('Risk'),
-        value: (
-          <Typography variant="h6" color={healthFactorColor.color}>
-            {capitalize(healthFactorRisk)}
-          </Typography>
-        ),
-      },
     ],
     [
       healthFactorColor.color,
-      healthFactorRisk,
       input.borrowSymbol,
       input.collateralSymbol,
       input.leverageRatio,
@@ -176,7 +166,7 @@ const Summary = () => {
           value={acceptedTerms}
           onChange={(e) => setAcceptedTerms(e.target.checked)}
         />
-        <Typography component="label" htmlFor="accept-risk" fontSize={14} fontWeight={500}>
+        <Typography component="label" htmlFor="accept-risk" fontSize={14} fontWeight={500} sx={{ cursor: 'pointer' }}>
           {t('I fully acknowledge and accept the risks of leveraging.')}
         </Typography>
       </Box>

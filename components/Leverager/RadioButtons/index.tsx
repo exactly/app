@@ -21,7 +21,7 @@ const RadioButtons = () => {
     <RadioGroup
       value={input.secondaryOperation}
       onChange={(e) => setSecondaryOperation(e.target.value as 'deposit' | 'withdraw')}
-      sx={{ mx: 1 }}
+      sx={{ pl: 0.2 }}
     >
       <FormControlLabel
         disabled={disabledReclaim}

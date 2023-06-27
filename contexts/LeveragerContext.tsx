@@ -273,7 +273,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
       const collateralDeposited =
         (collateralMarket.floatingDepositAssets * collateralMarket.usdPrice) / 10n ** BigInt(collateralMarket.decimals);
 
-      return Number(formatEther((collateralDeposited * WEI_PER_ETHER) / _netPosition));
+      return Math.max(minLeverageRatio, Number(formatEther((collateralDeposited * WEI_PER_ETHER) / _netPosition)));
     },
     [getMarketAccount, input.collateralSymbol, minLeverageRatio],
   );

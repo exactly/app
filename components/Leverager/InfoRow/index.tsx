@@ -19,9 +19,6 @@ const InfoRow: FC<InfoRowProps> = ({ title, symbol, assets, disabledMessage, onC
       alignItems="center"
       bgcolor="grey.100"
       borderRadius="4px"
-      pl={1}
-      pr={2.5}
-      py={0.5}
       gap={1}
       onClick={onClick}
       sx={{
@@ -29,14 +26,14 @@ const InfoRow: FC<InfoRowProps> = ({ title, symbol, assets, disabledMessage, onC
       }}
     >
       {symbol ? (
-        <Grid container width="100%">
+        <Grid container width="100%" alignItems="top">
           <Grid item xs={6}>
             <Typography variant="caption">{title}:</Typography>
           </Grid>
 
           <Grid item xs={6}>
             {assets ? (
-              <Box display="flex" gap={0.5}>
+              <Box display="flex" gap={0.5} alignItems="center" flexWrap="wrap">
                 <Image
                   src={`/img/assets/${symbol}.svg`}
                   alt={symbol}
@@ -47,8 +44,8 @@ const InfoRow: FC<InfoRowProps> = ({ title, symbol, assets, disabledMessage, onC
                     height: 'auto',
                   }}
                 />
-                <Typography fontFamily="IBM Plex Mono" fontSize={13} fontWeight={500}>
-                  {`${formatNumber(assets, symbol)} ${symbol}`}
+                <Typography fontFamily="IBM Plex Mono" fontSize={13} fontWeight={500} sx={{ mr: 0.5 }}>
+                  {formatNumber(assets, symbol)}
                 </Typography>
                 <USDValue qty={assets} symbol={symbol} />
               </Box>
