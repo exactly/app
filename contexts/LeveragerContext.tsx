@@ -51,6 +51,8 @@ import dayjs from 'dayjs';
 import { isPermitAllowed } from 'utils/permit';
 import useDebtPreviewer, { Leverage } from 'hooks/useDebtPreviewer';
 import useDelayedEffect from 'hooks/useDelayedEffect';
+import useRewards from 'hooks/useRewards';
+import useFloatingPoolAPR from 'hooks/useFloatingPoolAPR';
 
 type Input = {
   collateralSymbol?: string;
@@ -165,6 +167,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
   const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   const options = useAssets();
+  const { rates } = useRewards();
 
   const ma = useMemo(
     () => getMarketAccount(input.collateralSymbol ?? 'USDC'),
@@ -373,6 +376,9 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     netPositionUSD,
   ]);
 
+  const { depositAPR } = useFloatingPoolAPR(input.collateralSymbol || 'USDC', undefined, 'deposit');
+  const { borrowAPR } = useFloatingPoolAPR(input.borrowSymbol || 'USDC', undefined, 'borrow');
+
   const newHealthFactor = useMemo(() => {
     if (!healthFactor || !input.collateralSymbol || !input.borrowSymbol || !leveragePreview) return undefined;
 
@@ -505,16 +511,49 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     return formatNumber(netPosition?.display ?? '0', input?.collateralSymbol);
   }, [input.secondaryOperation, input?.collateralSymbol, netPosition?.display, walletBalance]);
 
-  //TODO: calculate CONTINUE
   const [loopAPR, marketAPR, rewardsAPR, nativeAPR] = useMemo(() => {
-    return [0.137, 0.074, 0.021, 0];
-  }, []);
+    if (!input.collateralSymbol || !input.borrowSymbol) return [0, 0, 0, 0];
 
-  // TODO: calculate
-  const marketRewards = useMemo(() => ['OP', 'USDC'], []);
+    const ratio = Math.min(input.leverageRatio, input.maxLeverageRatio);
 
-  // TODO: calculate
-  const nativeRewards = useMemo(() => ['WBTC'], []);
+    const _marketAPR = depositAPR && borrowAPR ? depositAPR * ratio - borrowAPR * (ratio - 1) : 0;
+
+    const collateralRewardsAPR =
+      rates[input.collateralSymbol]
+        ?.map((r) => (Number(r.floatingDeposit) / 1e18) * ratio)
+        .reduce((acc, curr) => acc + curr, 0) ?? 0;
+
+    const borrowRewardsAPR =
+      rates[input.borrowSymbol]
+        ?.map((r) => (Number(r.borrow) / 1e18) * (ratio - 1))
+        .reduce((acc, curr) => acc + curr, 0) ?? 0;
+
+    const _rewardsAPR = collateralRewardsAPR + borrowRewardsAPR;
+
+    const _nativeAPR = 0;
+
+    const _loopAPR = _marketAPR + _rewardsAPR + _nativeAPR;
+
+    return [_loopAPR, _marketAPR, _rewardsAPR, _nativeAPR];
+  }, [
+    borrowAPR,
+    depositAPR,
+    input.borrowSymbol,
+    input.collateralSymbol,
+    input.leverageRatio,
+    input.maxLeverageRatio,
+    rates,
+  ]);
+
+  const marketRewards = useMemo(() => {
+    if (!input.collateralSymbol || !input.borrowSymbol) return [];
+
+    const collateralRewards = rates[input.collateralSymbol]?.map((r) => r.assetSymbol) ?? [];
+    const borrowRewards = rates[input.borrowSymbol]?.map((r) => r.assetSymbol) ?? [];
+    return [...new Set([...collateralRewards, ...borrowRewards])];
+  }, [input.borrowSymbol, input.collateralSymbol, rates]);
+
+  const nativeRewards = useMemo(() => [], []);
 
   const disabledSubmit = useMemo(
     () =>

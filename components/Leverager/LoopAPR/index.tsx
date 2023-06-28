@@ -41,14 +41,22 @@ const APRBreakdown = () => {
   return (
     <Box display="flex" flexDirection="column" gap={0.5}>
       <APRBreakdownItem title={t('Market APR')} link="" value={toPercentage(marketAPR)} />
-      <Divider flexItem sx={{ mx: 0.5 }} />
-      <APRBreakdownItem title={t('Rewards APR')} link="" value={toPercentage(rewardsAPR)}>
-        <RewardsGroup withNative={false} size={16} />
-      </APRBreakdownItem>
-      <Divider flexItem sx={{ mx: 0.5 }} />
-      <APRBreakdownItem title={t('Native APR')} link="" value={toPercentage(nativeAPR)}>
-        <RewardsGroup withRewards={false} size={16} />
-      </APRBreakdownItem>
+      {!!rewardsAPR && (
+        <>
+          <Divider flexItem sx={{ mx: 0.5 }} />
+          <APRBreakdownItem title={t('Rewards APR')} link="" value={toPercentage(rewardsAPR)}>
+            <RewardsGroup withNative={false} size={16} />
+          </APRBreakdownItem>
+        </>
+      )}
+      {!!nativeAPR && (
+        <>
+          <Divider flexItem sx={{ mx: 0.5 }} />
+          <APRBreakdownItem title={t('Native APR')} link="" value={toPercentage(nativeAPR)}>
+            <RewardsGroup withRewards={false} size={16} />
+          </APRBreakdownItem>
+        </>
+      )}
     </Box>
   );
 };
