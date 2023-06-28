@@ -23,7 +23,6 @@ import {
   hexToBigInt,
   keccak256,
   encodeAbiParameters,
-  encodeFunctionData,
 } from 'viem';
 import { splitSignature } from '@ethersproject/bytes';
 
@@ -59,6 +58,7 @@ type Input = {
   secondaryOperation: 'deposit' | 'withdraw';
   userInput: string;
   leverageRatio: number;
+  maxLeverageRatio: number;
   slippage: string;
 };
 
@@ -74,6 +74,7 @@ const initState: Input = {
   secondaryOperation: 'deposit',
   userInput: '',
   leverageRatio: 1,
+  maxLeverageRatio: 1,
   slippage: DEFAULT_SLIPPAGE,
 };
 
@@ -135,6 +136,7 @@ type ContextValues = {
   tx?: Transaction;
 
   isLoading: boolean;
+  loadingUserInput: boolean;
 
   needsApproval: () => Promise<boolean>;
   approve: () => Promise<void>;
@@ -178,9 +180,6 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
   const [leveragePreview, setLeveragePreview] = useState<Leverage>();
 
   const minLeverageRatio = 1;
-  const maxLeverageRatio = useMemo(() => {
-    return leveragePreview ? Number(leveragePreview.maxRatio) / 1e18 : minLeverageRatio;
-  }, [leveragePreview]);
 
   const currentLeverageRatio = leveragePreview ? Number(leveragePreview.ratio) / 1e18 : minLeverageRatio;
 
@@ -198,6 +197,12 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     },
     [input.secondaryOperation, input.userInput, currentLeverageRatio],
   );
+
+  const setMaxLeverageRatio = useCallback((maxLeverageRatio: number) => {
+    dispatch({
+      maxLeverageRatio,
+    });
+  }, []);
 
   const previewLeverage = useCallback(
     async (cancelled: () => boolean, borrowSymbol: string | undefined = input.borrowSymbol) => {
@@ -271,6 +276,31 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     if (!marketAccount) return 0n;
     return parseUnits(input.userInput, marketAccount.decimals);
   }, [getMarketAccount, input.collateralSymbol, input.userInput]);
+
+  const previewDeposit = useCallback(
+    async (cancelled: () => boolean) => {
+      if (!debtPreviewer || !walletAddress || !input.collateralSymbol || !input.collateralSymbol || !opts) return;
+
+      const collateralMarket = getMarketAccount(input.collateralSymbol);
+      const borrowMarket = getMarketAccount(input.collateralSymbol);
+      if (!collateralMarket || !borrowMarket) return;
+
+      const newMaxLeverageRatio = await debtPreviewer.read.previewDeposit(
+        [collateralMarket.market, borrowMarket.market, walletAddress, _userInput],
+        opts,
+      );
+
+      if (cancelled()) return;
+
+      setMaxLeverageRatio(Number(newMaxLeverageRatio) / 1e18);
+    },
+    [_userInput, debtPreviewer, getMarketAccount, input.collateralSymbol, opts, setMaxLeverageRatio, walletAddress],
+  );
+
+  const { isLoading: previewDepositIsLoading } = useDelayedEffect({
+    effect: useCallback(async (cancelled: () => boolean) => await previewDeposit(cancelled), [previewDeposit]),
+    skip: errorData?.status || previewIsLoading,
+  });
 
   const getCurrentNetPosition = useCallback(() => {
     if (!leveragePreview) return undefined;
@@ -384,7 +414,8 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
         ...initState,
         collateralSymbol: input.collateralSymbol,
         borrowSymbol: borrowSymbol,
-        leverageRatio: res ? Number(res.ratio) / 1e18 : 1,
+        leverageRatio: res ? Number(res.ratio) / 1e18 : minLeverageRatio,
+        maxLeverageRatio: res ? Number(res.maxRatio) / 1e18 : minLeverageRatio,
       });
     },
     [input.collateralSymbol, previewLeverage],
@@ -444,9 +475,26 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
           return setErrorData({ status: true, message: t('Insufficient funds') });
         }
       }
+
+      dispatch({
+        leverageRatio: Math.min(
+          !value && leveragePreview ? Number(leveragePreview.maxRatio) / 1e18 : input.maxLeverageRatio,
+          input.leverageRatio,
+        ),
+      });
       setErrorData(undefined);
     },
-    [setUserInput, ma?.decimals, input.secondaryOperation, walletBalance, t, netPosition],
+    [
+      setUserInput,
+      ma?.decimals,
+      input.secondaryOperation,
+      input.leverageRatio,
+      input.maxLeverageRatio,
+      leveragePreview,
+      walletBalance,
+      t,
+      netPosition,
+    ],
   );
 
   const available = useMemo(() => {
@@ -473,15 +521,18 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
       !input.collateralSymbol ||
       !input.borrowSymbol ||
       errorData?.status ||
+      netPositionUSD === undefined ||
+      netPositionUSD === 0n ||
       (currentLeverageRatio === input.leverageRatio && !input.userInput) ||
       (getCurrentNetPosition() ?? -1n) < 0n,
     [
-      currentLeverageRatio,
-      errorData?.status,
-      input.borrowSymbol,
       input.collateralSymbol,
+      input.borrowSymbol,
       input.leverageRatio,
       input.userInput,
+      errorData?.status,
+      netPositionUSD,
+      currentLeverageRatio,
       getCurrentNetPosition,
     ],
   );
@@ -737,7 +788,8 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
 
     setIsLoading(true);
     try {
-      const ratio = parseEther(String(input.leverageRatio));
+      // leverageRatio could be higher than maxLeverageRatio if the user has changed the input
+      const ratio = parseEther(String(Math.min(input.leverageRatio, input.maxLeverageRatio)));
 
       let hash: Hex | undefined;
       if (await isContract(walletAddress)) {
@@ -830,6 +882,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     input.collateralSymbol,
     input.borrowSymbol,
     input.leverageRatio,
+    input.maxLeverageRatio,
     input.secondaryOperation,
     debtManager,
     market,
@@ -870,7 +923,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     newCollateral,
     newBorrow,
     minLeverageRatio,
-    maxLeverageRatio,
+    maxLeverageRatio: input.maxLeverageRatio,
     onMax,
     handleInputChange,
     netPosition,
@@ -896,6 +949,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     setErrorData,
     tx,
     isLoading: isLoading || previewIsLoading,
+    loadingUserInput: previewDepositIsLoading,
 
     needsApproval,
     approve,
