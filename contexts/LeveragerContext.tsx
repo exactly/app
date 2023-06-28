@@ -344,26 +344,32 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
   ]);
 
   const newHealthFactor = useMemo(() => {
-    if (!healthFactor || !input.collateralSymbol || !input.borrowSymbol) return undefined;
+    if (!healthFactor || !input.collateralSymbol || !input.borrowSymbol || !leveragePreview) return undefined;
 
     const collateralMarket = getMarketAccount(input.collateralSymbol);
     const borrowMarket = getMarketAccount(input.borrowSymbol);
     if (!collateralMarket || !borrowMarket) return undefined;
 
     const depositsUSD =
-      (collateralMarket.floatingDepositAssets * collateralMarket.usdPrice) / 10n ** BigInt(collateralMarket.decimals);
+      ((newCollateral.value - leveragePreview.collateral) * collateralMarket.usdPrice) /
+      10n ** BigInt(collateralMarket.decimals);
 
     const borrowsUSD =
-      ((borrowMarket.floatingBorrowAssets +
-        borrowMarket.fixedBorrowPositions.reduce((acc, { previewValue }) => acc + previewValue, 0n)) *
-        borrowMarket.usdPrice) /
-      10n ** BigInt(borrowMarket.decimals);
+      ((newBorrow.value - leveragePreview.debt) * borrowMarket.usdPrice) / 10n ** BigInt(borrowMarket.decimals);
 
-    const collateral = ((newCollateralUSD - depositsUSD) * collateralMarket.adjustFactor) / WEI_PER_ETHER;
-    const debt = ((newBorrowUSD - borrowsUSD) * WEI_PER_ETHER) / borrowMarket.adjustFactor;
+    const collateral = (depositsUSD * collateralMarket.adjustFactor) / WEI_PER_ETHER;
+    const debt = (borrowsUSD * WEI_PER_ETHER) / borrowMarket.adjustFactor;
 
     return parseHealthFactor(healthFactor.debt + debt, healthFactor.collateral + collateral);
-  }, [getMarketAccount, healthFactor, input.borrowSymbol, input.collateralSymbol, newBorrowUSD, newCollateralUSD]);
+  }, [
+    getMarketAccount,
+    healthFactor,
+    input.borrowSymbol,
+    input.collateralSymbol,
+    leveragePreview,
+    newBorrow.value,
+    newCollateral.value,
+  ]);
 
   const setCollateralSymbol = useCallback((collateralSymbol: string) => {
     setErrorData(undefined);
