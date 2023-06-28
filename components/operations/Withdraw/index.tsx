@@ -83,13 +83,18 @@ const Withdraw: FC = () => {
       }
       const { floatingDepositShares } = marketAccount;
 
-      const amount = isMax ? floatingDepositShares : parseUnits(quantity as `${number}`, marketAccount.decimals);
+      const amount = isMax ? floatingDepositShares : parseUnits(quantity, marketAccount.decimals);
+
       if (marketAccount.assetSymbol === 'WETH') {
-        const sim = await ETHRouterContract.simulate.redeem([amount], opts);
+        const sim = isMax
+          ? await ETHRouterContract.simulate.redeem([amount], opts)
+          : await ETHRouterContract.simulate.withdraw([amount], opts);
         return estimate(sim.request);
       }
 
-      const sim = await marketContract.simulate.redeem([amount, walletAddress, walletAddress], opts);
+      const sim = isMax
+        ? await marketContract.simulate.redeem([amount, walletAddress, walletAddress], opts)
+        : await marketContract.simulate.withdraw([amount, walletAddress, walletAddress], opts);
       return estimate(sim.request);
     },
     [
@@ -123,7 +128,7 @@ const Withdraw: FC = () => {
 
       setQty(value);
 
-      const parsed = parseUnits((value as `${number}`) || '0', marketAccount.decimals);
+      const parsed = parseUnits(value || '0', marketAccount.decimals);
 
       if (parsed > marketAccount.floatingDepositAssets) {
         return setErrorData({
@@ -133,7 +138,6 @@ const Withdraw: FC = () => {
       }
 
       setErrorData(undefined);
-
       setIsMax(value === parsedAmount);
     },
     [marketAccount, parsedAmount, setErrorData, setQty, t],
@@ -148,7 +152,7 @@ const Withdraw: FC = () => {
       transaction.addToCart();
       const { floatingDepositShares, decimals } = marketAccount;
 
-      const amount = parseUnits(qty as `${number}`, decimals);
+      const amount = parseUnits(qty, decimals);
 
       if (marketAccount.assetSymbol === 'WETH') {
         if (!ETHRouterContract) return;

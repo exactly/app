@@ -77,7 +77,7 @@ export default (): Borrow => {
         return approveEstimateGas();
       }
 
-      const amount = parseUnits(quantity as `${number}`, marketAccount.decimals);
+      const amount = parseUnits(quantity, marketAccount.decimals);
 
       if (marketAccount.assetSymbol === 'WETH') {
         walletAddress;
@@ -152,14 +152,14 @@ export default (): Borrow => {
           ),
         });
 
-      if (liquidity < parseUnits((value as `${number}`) || '0', decimals)) {
+      if (liquidity < parseUnits(value || '0', decimals)) {
         return setErrorData({
           status: true,
           message: t('There is not enough liquidity'),
         });
       }
 
-      if (borrowLimit < (parseUnits((value as `${number}`) || '0', decimals) * usdPrice) / WEI_PER_ETHER) {
+      if (borrowLimit < (parseUnits(value || '0', decimals) * usdPrice) / WEI_PER_ETHER) {
         return setErrorData({
           status: true,
           message: t("You can't borrow more than your borrow limit"),
@@ -178,7 +178,7 @@ export default (): Borrow => {
 
       setQty(value);
 
-      if (borrowLimit < (parseUnits((value as `${number}`) || '0', decimals) * usdPrice) / WEI_PER_ETHER) {
+      if (borrowLimit < (parseUnits(value || '0', decimals) * usdPrice) / WEI_PER_ETHER) {
         return setErrorData({
           status: true,
           message: t("You can't borrow more than your borrow limit"),
@@ -196,7 +196,7 @@ export default (): Borrow => {
     let hash;
     try {
       transaction.addToCart();
-      const amount = parseUnits(qty as `${number}`, marketAccount.decimals);
+      const amount = parseUnits(qty, marketAccount.decimals);
       if (marketAccount.assetSymbol === 'WETH') {
         if (!ETHRouterContract) return;
         const args = [amount] as const;

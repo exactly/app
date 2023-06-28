@@ -107,7 +107,7 @@ const RepayAtMaturity: FC = () => {
       const pool = marketAccount.fixedBorrowPositions.find(({ maturity }) => maturity === BigInt(date ?? 0));
       if (!pool) return;
 
-      const userInput = parseUnits(qty as `${number}`, marketAccount.decimals);
+      const userInput = parseUnits(qty, marketAccount.decimals);
       const positionAssets = userInput >= totalPositionAssets ? totalPositionAssets : userInput;
 
       const { assets } = await previewerContract.read.previewRepayAtMaturity([
@@ -176,7 +176,7 @@ const RepayAtMaturity: FC = () => {
         });
 
         const gasEstimation = await estimate(sim.request);
-        if (amount + (gasEstimation ?? 0n) >= parseUnits((walletBalance as `${number}`) || '0', 18)) {
+        if (amount + (gasEstimation ?? 0n) >= parseUnits(walletBalance || '0', 18)) {
           throw new CustomError(t('Reserve ETH for gas fees.'), 'warning');
         }
         return gasEstimation;
@@ -216,7 +216,7 @@ const RepayAtMaturity: FC = () => {
     setPositionAssetsAmount(totalPositionAssets);
     setQty(formatUnits(totalPositionAssets + totalPenalties, decimals));
 
-    if (walletBalance && parseUnits(walletBalance as `${number}`, decimals) < totalPositionAssets + totalPenalties)
+    if (walletBalance && parseUnits(walletBalance, decimals) < totalPositionAssets + totalPenalties)
       return setErrorData({ status: true, message: 'Insufficient balance' });
 
     setErrorData(undefined);
@@ -229,7 +229,7 @@ const RepayAtMaturity: FC = () => {
 
       setQty(value);
 
-      const input = parseUnits((value as `${number}`) || '0', decimals);
+      const input = parseUnits(value || '0', decimals);
 
       if (input === 0n || totalPositionAssets === 0n) {
         return setErrorData({ status: true, message: 'Cannot repay 0' });
@@ -244,7 +244,7 @@ const RepayAtMaturity: FC = () => {
       setPositionAssetsAmount(newPositionAssetsAmount);
 
       const totalAmount = newPenaltyAssets + newPositionAssetsAmount;
-      if (walletBalance && parseUnits(walletBalance as `${number}`, decimals) < totalAmount) {
+      if (walletBalance && parseUnits(walletBalance, decimals) < totalAmount) {
         return setErrorData({ status: true, message: 'Insufficient balance' });
       }
 

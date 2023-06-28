@@ -33,7 +33,7 @@ function ModalInfoFloatingUtilizationRate({ qty, symbol, operation, variant = 'c
       const decimalWAD = parseUnits('1', decimals);
 
       const f = (borrowed * decimalWAD) / deposited;
-      const delta = parseUnits((qty as `${number}`) || '0', decimals);
+      const delta = parseUnits(qty || '0', decimals);
 
       switch (operation) {
         case 'deposit':

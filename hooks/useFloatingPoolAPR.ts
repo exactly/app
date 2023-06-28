@@ -32,7 +32,7 @@ export default (
     const { totalFloatingDepositAssets, totalFloatingBorrowAssets, decimals } = marketAccount;
 
     const decimalWAD = parseUnits('1', decimals);
-    const delta = parseUnits((qty as `${number}`) || '0', decimals);
+    const delta = parseUnits(qty || '0', decimals);
 
     const deposited = totalFloatingDepositAssets ?? 0n;
     const borrowed = (totalFloatingBorrowAssets ?? 0n) + delta;
@@ -70,7 +70,7 @@ export default (
         if (cancelled()) return;
         const { totalFloatingDepositAssets, decimals } = marketAccount;
 
-        const futureSupply = totalFloatingDepositAssets + parseUnits((qty as `${number}`) || '0', decimals);
+        const futureSupply = totalFloatingDepositAssets + parseUnits(qty || '0', decimals);
         const ratio =
           Number(futureSupply === 0n ? 0n : (totalFloatingDepositAssets * WEI_PER_ETHER) / futureSupply) / 1e18;
         const finalAPR = ratio * depositAPRRate;

@@ -27,7 +27,7 @@ function ModalInfoTotalDeposits({ qty, symbol, operation, variant = 'column' }: 
   const [from, to] = useMemo(() => {
     if (!marketAccount) return [undefined, undefined];
 
-    const delta = parseUnits((qty as `${number}`) || '0', marketAccount.decimals);
+    const delta = parseUnits(qty || '0', marketAccount.decimals);
 
     let f: bigint = marketAccount.floatingDepositAssets;
     if (isFixedOperation(operation) && date) {

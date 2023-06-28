@@ -8,11 +8,10 @@ import React, {
   useReducer,
 } from 'react';
 import { useWalletClient } from 'wagmi';
-import { WalletClient } from 'viem';
 import { waitForTransaction } from '@wagmi/core';
 
 import type { ErrorData } from 'types/Error';
-import type { Transaction } from 'types/Transaction';
+import type { PopulatedTransaction, Transaction } from 'types/Transaction';
 import DebtManagerModal from 'components/DebtManager';
 import type { Position } from 'components/DebtManager/types';
 import useDebtManager from 'hooks/useDebtManager';
@@ -68,7 +67,7 @@ type ContextValues = {
 
   needsApproval: (qty: bigint) => Promise<boolean>;
   approve: (maxAssets: bigint) => Promise<void>;
-  submit: (populate: () => Promise<Parameters<WalletClient['writeContract']>[0] | undefined>) => Promise<void>;
+  submit: (populate: () => Promise<PopulatedTransaction | undefined>) => Promise<void>;
 };
 
 const DebtManagerContext = createContext<ContextValues | null>(null);
@@ -143,7 +142,7 @@ export const DebtManagerContextProvider: FC<PropsWithChildren> = ({ children }) 
   );
 
   const submit = useCallback(
-    async (populate: () => Promise<Parameters<WalletClient['writeContract']>[0] | undefined>): Promise<void> => {
+    async (populate: () => Promise<PopulatedTransaction | undefined>): Promise<void> => {
       if (!walletClient || !market || !debtManager) return;
 
       setIsLoading(true);

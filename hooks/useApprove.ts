@@ -56,7 +56,7 @@ export default (operation: Operation, contract?: ERC20, spender?: Address) => {
 
       try {
         const allowance = await contract.read.allowance([walletAddress, spender], opts);
-        return allowance === 0n || allowance < parseUnits(qty as `${number}`, marketAccount.decimals);
+        return allowance === 0n || allowance < parseUnits(qty, marketAccount.decimals);
       } catch {
         return true;
       }

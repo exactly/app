@@ -46,7 +46,7 @@ export const deposit = (
     const pClient = publicClient();
     if (symbol === 'ETH') {
       const ethRouterContract = await ethRouter({ walletClient: wClient });
-      const qty = parseEther(amount as `${number}`);
+      const qty = parseEther(amount);
       const args = { value: qty };
       const gas = await ethRouterContract.estimateGas.deposit({ ...wClient, ...args });
       await ethRouterContract.write.deposit({
@@ -58,7 +58,7 @@ export const deposit = (
     } else {
       const erc20Contract = await erc20(symbol, { walletClient: wClient, publicClient: pClient });
       const erc20MarketContract = await erc20Market(symbol, { walletClient: wClient });
-      const qty = parseUnits(amount as `${number}`, await erc20Contract.read.decimals());
+      const qty = parseUnits(amount, await erc20Contract.read.decimals());
       const approveArgs = [erc20MarketContract.address, MaxUint256] as const;
       const approveGas = await erc20Contract.estimateGas.approve(approveArgs, { ...wClient });
       await erc20Contract.write.approve(approveArgs, {
@@ -88,7 +88,7 @@ export const borrow = (
     if (symbol === 'ETH') {
       const wethMarketContract = await erc20Market('WETH', { walletClient: wClient });
       const ethRouterContract = await ethRouter({ walletClient: wClient });
-      const qty = parseEther(amount as `${number}`);
+      const qty = parseEther(amount);
       const approveArgs = [ethRouterContract.address, MaxUint256] as const;
       const approveGas = await wethMarketContract.estimateGas.approve(approveArgs, { ...wClient });
       await wethMarketContract.write.approve(approveArgs, {
@@ -106,7 +106,7 @@ export const borrow = (
     } else {
       const erc20Contract = await erc20(symbol, { publicClient: pClient });
       const erc20MarketContract = await erc20Market(symbol, { walletClient: wClient });
-      const qty = parseUnits(amount as `${number}`, await erc20Contract.read.decimals());
+      const qty = parseUnits(amount, await erc20Contract.read.decimals());
       const args = [qty, receiver, receiver] as const;
       const gas = await erc20MarketContract.estimateGas.borrow(args, { ...wClient });
       await erc20MarketContract.write.borrow(args, {
@@ -139,7 +139,7 @@ export const depositAtMaturity = (
     const pClient = publicClient();
     if (symbol === 'ETH') {
       const ethRouterContract = await ethRouter({ walletClient: wClient });
-      const qty = parseEther(amount as `${number}`);
+      const qty = parseEther(amount);
       const args = [maturity, minAssets(qty)] as const;
       const gas = await ethRouterContract.estimateGas.depositAtMaturity(args, { ...wClient, value: qty });
       await ethRouterContract.write.depositAtMaturity(args, {
@@ -151,7 +151,7 @@ export const depositAtMaturity = (
     } else {
       const erc20Contract = await erc20(symbol, { walletClient: wClient, publicClient: pClient });
       const erc20MarketContract = await erc20Market(symbol, { walletClient: wClient });
-      const qty = parseUnits(amount as `${number}`, await erc20Contract.read.decimals());
+      const qty = parseUnits(amount, await erc20Contract.read.decimals());
       const approveArgs = [erc20MarketContract.address, MaxUint256] as const;
       const approveGas = await erc20Contract.estimateGas.approve(approveArgs, { ...wClient });
       await erc20Contract.write.approve(approveArgs, {
@@ -181,7 +181,7 @@ export const borrowAtMaturity = (
     if (symbol === 'ETH') {
       const wethMarketContract = await erc20Market('WETH', { walletClient: wClient });
       const ethRouterContract = await ethRouter({ walletClient: wClient });
-      const qty = parseEther(amount as `${number}`);
+      const qty = parseEther(amount);
       const approveArgs = [ethRouterContract.address, MaxUint256] as const;
       const approveGas = await wethMarketContract.estimateGas.approve(approveArgs, { ...wClient });
       await wethMarketContract.write.approve(approveArgs, {
@@ -199,7 +199,7 @@ export const borrowAtMaturity = (
     } else {
       const erc20Contract = await erc20(symbol, { publicClient: pClient });
       const erc20MarketContract = await erc20Market(symbol, { walletClient: wClient });
-      const qty = parseUnits(amount as `${number}`, await erc20Contract.read.decimals());
+      const qty = parseUnits(amount, await erc20Contract.read.decimals());
       const args = [maturity, qty, maxAssets(qty), receiver, receiver] as const;
       const gas = await erc20MarketContract.estimateGas.borrowAtMaturity(args, { ...wClient });
       await erc20MarketContract.write.borrowAtMaturity(args, {
@@ -224,11 +224,11 @@ export const checkBalance = ({ address, symbol, amount, delta }: BalanceParams, 
     const erc20Contract = await erc20(symbol, { publicClient: client });
     const balance = await erc20Contract.read.balanceOf([address]);
     const decimals = await erc20Contract.read.decimals();
-    const expected = parseUnits(amount as `${number}`, decimals);
+    const expected = parseUnits(amount, decimals);
     if (delta) {
       const wad = parseUnits('1', decimals);
-      const lower = (expected * parseUnits(String(1 - delta) as `${number}`, decimals)) / wad;
-      const upper = (expected * parseUnits(String(1 + delta) as `${number}`, decimals)) / wad;
+      const lower = (expected * parseUnits(String(1 - delta), decimals)) / wad;
+      const upper = (expected * parseUnits(String(1 + delta), decimals)) / wad;
 
       // eslint-disable-next-line chai-expect/no-inner-compare
       expect(balance > lower).to.eq(true);

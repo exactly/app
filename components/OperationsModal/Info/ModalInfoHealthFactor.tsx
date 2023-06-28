@@ -30,7 +30,7 @@ function ModalInfoHealthFactor({ qty, symbol, operation, variant = 'column' }: P
 
     if (!qty) return 0n;
 
-    return parseUnits(qty as `${number}`, marketAccount.decimals);
+    return parseUnits(qty, marketAccount.decimals);
   }, [marketAccount, qty]);
 
   const beforeHealthFactor = useMemo<string | undefined>(() => {

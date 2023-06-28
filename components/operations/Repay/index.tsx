@@ -118,7 +118,7 @@ function Repay() {
       transaction.addToCart();
       const { floatingBorrowShares, floatingBorrowAssets, decimals } = marketAccount;
 
-      const amount = parseUnits(qty as `${number}`, decimals);
+      const amount = parseUnits(qty, decimals);
       if (marketAccount.assetSymbol === 'WETH') {
         if (!ETHRouterContract) return;
 
@@ -206,32 +206,33 @@ function Repay() {
       }
 
       if (marketAccount.assetSymbol === 'WETH') {
-        const amount =
-          (parseUnits(quantity as `${number}`, marketAccount.decimals) * ETH_ROUTER_SLIPPAGE) / WEI_PER_ETHER;
+        const value = (parseUnits(quantity, marketAccount.decimals) * ETH_ROUTER_SLIPPAGE) / WEI_PER_ETHER;
+        const amount = isMax ? marketAccount.floatingBorrowShares : value;
 
-        const sim = await ETHRouterContract.simulate.repay([amount], {
-          ...opts,
-          value: amount,
-        });
+        const sim = isMax
+          ? await ETHRouterContract.simulate.refund([amount], { ...opts, value })
+          : await ETHRouterContract.simulate.repay([amount], {
+              ...opts,
+              value,
+            });
         const gasEstimation = await estimate(sim.request);
-        if (amount + (gasEstimation ?? 0n) >= parseUnits((walletBalance as `${number}`) || '0', 18)) {
+        if (amount + (gasEstimation ?? 0n) >= parseUnits(walletBalance || '0', 18)) {
           throw new CustomError(t('Reserve ETH for gas fees.'), 'warning');
         }
         return gasEstimation;
       }
 
-      const sim = await marketContract.simulate.repay(
-        [parseUnits(quantity as `${number}`, marketAccount.decimals), walletAddress],
-        opts,
-      );
+      const sim = isMax
+        ? await marketContract.simulate.refund([marketAccount.floatingBorrowShares, walletAddress], opts)
+        : await marketContract.simulate.repay([parseUnits(quantity, marketAccount.decimals), walletAddress], opts);
       return estimate(sim.request);
     },
     [
-      opts,
       marketAccount,
       walletAddress,
       ETHRouterContract,
       marketContract,
+      opts,
       needsApproval,
       isMax,
       estimate,

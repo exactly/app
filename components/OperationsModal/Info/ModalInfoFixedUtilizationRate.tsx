@@ -12,7 +12,7 @@ import { Box } from '@mui/material';
 import UtilizationRateWithAreaChart from 'components/charts/UtilizationRateWithAreaChart';
 import { useTranslation } from 'react-i18next';
 import { useMarketContext } from 'contexts/MarketContext';
-import { formatUnits, parseUnits, zeroAddress } from 'viem';
+import { formatEther, formatUnits, parseUnits, zeroAddress } from 'viem';
 
 type Props = {
   qty: string;
@@ -35,7 +35,7 @@ function ModalInfoFixedUtilizationRate({ qty, symbol, operation, variant = 'colu
     const pool = marketAccount?.fixedPools?.find(({ maturity }) => maturity === BigInt(date));
     if (!pool) return [undefined, undefined];
 
-    return [Number(formatUnits(pool.utilization, 18)), toPercentage(Number(formatUnits(pool.utilization, 18)))];
+    return [Number(formatEther(pool.utilization)), toPercentage(Number(formatEther(pool.utilization)))];
   }, [date, marketAccount]);
 
   const [to, setTo] = useState<string | undefined>();
@@ -56,7 +56,7 @@ function ModalInfoFixedUtilizationRate({ qty, symbol, operation, variant = 'colu
       setRawTo(undefined);
 
       try {
-        const initialAssets = parseUnits(qty as `${number}`, marketAccount.decimals);
+        const initialAssets = parseUnits(qty, marketAccount.decimals);
         let uti: bigint | undefined = undefined;
         switch (operation) {
           case 'depositAtMaturity': {
