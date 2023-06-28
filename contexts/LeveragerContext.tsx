@@ -174,8 +174,15 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     [getMarketAccount, input.collateralSymbol],
   );
 
+  const maBorrow = useMemo(
+    () => getMarketAccount(input.borrowSymbol ?? 'USDC'),
+    [getMarketAccount, input.borrowSymbol],
+  );
+
   const market = useMarket(ma?.market);
+  const marketBorrow = useMarket(maBorrow?.market);
   const asset = useERC20(ma?.asset);
+  const assetBorrow = useERC20(maBorrow?.asset);
   const debtManager = useDebtManager();
   const debtPreviewer = useDebtPreviewer();
   const permit2 = usePermit2();
@@ -332,7 +339,8 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     const collateralMarket = getMarketAccount(input.collateralSymbol);
     if (!collateralMarket) return [{ display: '0', value: 0n }, 0n];
 
-    const _currentLeverageRatio = parseEther(input.leverageRatio.toString());
+    const ratio = Math.min(input.leverageRatio, input.maxLeverageRatio);
+    const _currentLeverageRatio = parseEther(ratio.toString());
     const resultUSD = (netPositionUSD * _currentLeverageRatio) / WEI_PER_ETHER;
     const resultAssets = (resultUSD * 10n ** BigInt(collateralMarket.decimals)) / collateralMarket.usdPrice;
     return [
@@ -342,14 +350,15 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
       },
       resultUSD,
     ];
-  }, [getMarketAccount, input.collateralSymbol, input.leverageRatio, netPositionUSD]);
+  }, [getMarketAccount, input.collateralSymbol, input.leverageRatio, input.maxLeverageRatio, netPositionUSD]);
 
   const [newBorrow, newBorrowUSD] = useMemo(() => {
     if (!netPositionUSD || !input.borrowSymbol) return [{ display: '0', value: 0n }, 0n];
     const borrowMarket = getMarketAccount(input.borrowSymbol);
     if (!borrowMarket) return [{ display: '0', value: 0n }, 0n];
 
-    const _currentLeverageRatio = parseEther(input.leverageRatio.toString());
+    const ratio = Math.min(input.leverageRatio, input.maxLeverageRatio);
+    const _currentLeverageRatio = parseEther(ratio.toString());
 
     let positionUSD = netPositionUSD;
     if (input.secondaryOperation === 'withdraw') {
@@ -371,6 +380,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     getMarketAccount,
     input.borrowSymbol,
     input.leverageRatio,
+    input.maxLeverageRatio,
     input.secondaryOperation,
     input.userInput,
     netPositionUSD,
@@ -819,6 +829,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
       !input.borrowSymbol ||
       !debtManager ||
       !market ||
+      !marketBorrow ||
       !asset ||
       !ma ||
       !opts
@@ -854,7 +865,43 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
             }
           }
         } else {
-          // TODO: cross
+          if (!leveragePreview || !leveragePreview.pool.fee || !leveragePreview?.sqrtPriceX96) {
+            return;
+          }
+          switch (input.secondaryOperation) {
+            case 'deposit': {
+              const args = [
+                market.address,
+                marketBorrow.address,
+                leveragePreview.pool.fee,
+                _userInput,
+                ratio,
+                leveragePreview.sqrtPriceX96,
+              ] as const;
+              const gasEstimation = await debtManager.estimateGas.crossLeverage(args, opts);
+              hash = await debtManager.write.crossLeverage(args, {
+                ...opts,
+                gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
+              });
+              break;
+            }
+            case 'withdraw': {
+              const args = [
+                market.address,
+                marketBorrow.address,
+                leveragePreview.pool.fee,
+                _userInput,
+                ratio,
+                leveragePreview.sqrtPriceX96,
+              ] as const;
+              const gasEstimation = await debtManager.estimateGas.crossDeleverage(args, opts);
+              hash = await debtManager.write.crossDeleverage(args, {
+                ...opts,
+                gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
+              });
+              break;
+            }
+          }
         }
       } else {
         if (input.collateralSymbol === input.borrowSymbol) {
@@ -903,7 +950,87 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
             }
           }
         } else {
-          // TODO: cross
+          switch (input.secondaryOperation) {
+            case 'deposit': {
+              const borrowAssets = newBorrow.value;
+              const assetPermit = await signPermit(_userInput, 'asset');
+              const marketPermit = await signPermit(borrowAssets, 'market');
+              if (
+                !assetPermit ||
+                !marketPermit ||
+                !leveragePreview ||
+                !leveragePreview.pool.fee ||
+                !leveragePreview?.sqrtPriceX96 ||
+                marketPermit.type === 'permit2'
+              )
+                return;
+
+              const args = [
+                market.address,
+                marketBorrow.address,
+                leveragePreview.pool.fee,
+                _userInput,
+                ratio,
+                leveragePreview.sqrtPriceX96,
+                borrowAssets,
+                marketPermit.value,
+              ] as const;
+
+              switch (assetPermit.type) {
+                case 'permit': {
+                  const leverageArgs = [...args, assetPermit.value] as const;
+                  const gasEstimation = await debtManager.estimateGas.crossLeverage(leverageArgs, opts);
+                  hash = await debtManager.write.crossLeverage(leverageArgs, {
+                    ...opts,
+                    gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
+                  });
+                  break;
+                }
+                case 'permit2': {
+                  const leverageArgs = [...args, assetPermit.value] as const;
+                  const gasEstimation = await debtManager.estimateGas.crossLeverage(leverageArgs, opts);
+                  hash = await debtManager.write.crossLeverage(leverageArgs, {
+                    ...opts,
+                    gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
+                  });
+                  break;
+                }
+              }
+              break;
+            }
+            case 'withdraw': {
+              const permitAssets =
+                (ma.floatingBorrowAssets < newBorrow.value ? 0n : ma.floatingBorrowAssets - newBorrow.value) +
+                _userInput;
+              const marketPermit = await signPermit(permitAssets, 'market');
+              if (
+                !marketPermit ||
+                !leveragePreview ||
+                !leveragePreview.pool.fee ||
+                !leveragePreview?.sqrtPriceX96 ||
+                marketPermit.type === 'permit2'
+              )
+                return;
+
+              const args = [
+                market.address,
+                marketBorrow.address,
+                leveragePreview.pool.fee,
+                _userInput,
+                ratio,
+                leveragePreview.sqrtPriceX96,
+                permitAssets,
+                marketPermit.value,
+              ] as const;
+
+              const gasEstimation = await debtManager.estimateGas.crossDeleverage(args, opts);
+              hash = await debtManager.write.crossDeleverage(args, {
+                ...opts,
+                gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
+              });
+              break;
+            }
+          }
         }
       }
 
@@ -912,6 +1039,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
       await waitForTransaction({ hash });
       await refreshAccountData();
     } catch (e: unknown) {
+      console.log(e);
       setErrorData({ status: true, message: handleOperationError(e) });
     } finally {
       setIsLoading(false);
@@ -925,12 +1053,14 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     input.secondaryOperation,
     debtManager,
     market,
+    marketBorrow,
     asset,
     ma,
     opts,
     isContract,
     refreshAccountData,
     _userInput,
+    leveragePreview,
     newBorrow.value,
     signPermit,
   ]);
