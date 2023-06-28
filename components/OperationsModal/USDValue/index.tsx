@@ -18,7 +18,7 @@ function USDValue({ qty, symbol }: Props) {
   const value = useMemo(() => {
     if (!qty || !marketAccount || !checkPrecision(qty, marketAccount.decimals)) return;
 
-    const parsedqty = parseUnits(qty as `${number}`, marketAccount.decimals);
+    const parsedqty = parseUnits(qty, marketAccount.decimals);
     const usd = (parsedqty * marketAccount.usdPrice) / WEI_PER_ETHER;
 
     return formatUnits(usd, marketAccount.decimals);

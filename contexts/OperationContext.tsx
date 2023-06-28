@@ -85,8 +85,8 @@ export const OperationContextProvider: FC<PropsWithChildren> = ({ children }) =>
 
   const slippage = useMemo(() => {
     return ['deposit', 'depositAtMaturity', 'withdraw', 'withdrawAtMaturity'].includes(operation)
-      ? parseUnits(String(1 - Number(rawSlippage) / 100) as `${number}`, 18)
-      : parseUnits(String(1 + Number(rawSlippage) / 100) as `${number}`, 18);
+      ? parseUnits(String(1 - Number(rawSlippage) / 100), 18)
+      : parseUnits(String(1 + Number(rawSlippage) / 100), 18);
   }, [operation, rawSlippage]);
 
   useEffect(() => {

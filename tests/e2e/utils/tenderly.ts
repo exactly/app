@@ -61,7 +61,7 @@ export const tenderly = async ({ chain = mainnet }: { chain: Chain }): Promise<T
   const publicClient = createPublicClient({ chain, transport: http(url) });
 
   const setNativeBalance = async (address: string, amount: number) => {
-    const params = [[address], toHex(parseEther(String(amount) as `${number}`))];
+    const params = [[address], toHex(parseEther(String(amount)))];
     return await publicClient.request({ method: 'tenderly_setBalance', params });
   };
 
@@ -75,7 +75,7 @@ export const tenderly = async ({ chain = mainnet }: { chain: Chain }): Promise<T
     await setNativeBalance(fromAddress, 10);
 
     const tokenContract = await erc20(symbol, { publicClient });
-    const tokenAmount = parseUnits(String(amount) as `${number}`, await tokenContract.read.decimals());
+    const tokenAmount = parseUnits(String(amount), await tokenContract.read.decimals());
 
     const data = encodeFunctionData({
       abi: tokenContract.abi,

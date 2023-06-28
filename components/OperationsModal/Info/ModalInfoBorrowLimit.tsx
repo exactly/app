@@ -26,7 +26,7 @@ function ModalInfoBorrowLimit({ qty, symbol, operation, variant = 'column' }: Pr
 
     if (!qty) return 0n;
 
-    return parseUnits(qty as `${number}`, marketAccount.decimals);
+    return parseUnits(qty, marketAccount.decimals);
   }, [marketAccount, symbol, qty]);
 
   const [beforeBorrowLimit, afterBorrowLimit] = useMemo(() => {

@@ -103,7 +103,7 @@ const WithdrawAtMaturity: FC = () => {
       return;
     }
 
-    const parsedQtyValue = parseUnits(qty as `${number}`, marketAccount.decimals);
+    const parsedQtyValue = parseUnits(qty, marketAccount.decimals);
 
     if (parsedQtyValue === 0n) {
       return setErrorData({ status: true, message: t('Cannot withdraw 0') });
@@ -206,7 +206,7 @@ const WithdrawAtMaturity: FC = () => {
     setIsLoadingOp(true);
     try {
       transaction.addToCart();
-      const amount = parseUnits(qty as `${number}`, marketAccount.decimals);
+      const amount = parseUnits(qty, marketAccount.decimals);
       if (marketAccount.assetSymbol === 'WETH') {
         if (!ETHRouterContract) return;
         const args = [BigInt(date), amount, minAmountToWithdraw] as const;

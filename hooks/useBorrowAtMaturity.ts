@@ -94,7 +94,7 @@ export default (): BorrowAtMaturity => {
         return approveEstimateGas();
       }
 
-      const amount = parseUnits(quantity as `${number}`, marketAccount.decimals);
+      const amount = parseUnits(quantity, marketAccount.decimals);
       const maxAmount = (amount * slippage) / WEI_PER_ETHER;
       if (marketAccount.assetSymbol === 'WETH') {
         const sim = await ETHRouterContract.simulate.borrowAtMaturity([BigInt(date), amount, maxAmount], opts);
@@ -172,7 +172,7 @@ export default (): BorrowAtMaturity => {
 
       const borrowLimit = getBeforeBorrowLimit(marketAccount, 'borrow');
 
-      if (borrowLimit < (parseUnits((value as `${number}`) || '0', decimals) * usdPrice) / WEI_PER_ETHER) {
+      if (borrowLimit < (parseUnits(value || '0', decimals) * usdPrice) / WEI_PER_ETHER) {
         return setErrorData({
           status: true,
           message: t("You can't borrow more than your borrow limit"),
@@ -197,7 +197,7 @@ export default (): BorrowAtMaturity => {
 
     if (!marketAccount || !date || !qty || !walletAddress || !opts) return;
 
-    const amount = parseUnits(qty as `${number}`, marketAccount.decimals);
+    const amount = parseUnits(qty, marketAccount.decimals);
     const maxAmount = (amount * slippage) / WEI_PER_ETHER;
 
     let hash;
@@ -270,7 +270,7 @@ export default (): BorrowAtMaturity => {
     }
 
     if (qty) {
-      const initialAssets = parseUnits(qty as `${number}`, marketAccount.decimals);
+      const initialAssets = parseUnits(qty, marketAccount.decimals);
       try {
         const { assets: finalAssets } = await previewerContract.read.previewBorrowAtMaturity([
           marketAccount.market,

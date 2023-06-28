@@ -71,12 +71,12 @@ export default (): Deposit => {
         return approveEstimateGas();
       }
 
-      const amount = parseUnits(quantity as `${number}`, marketAccount.decimals);
+      const amount = parseUnits(quantity, marketAccount.decimals);
 
       if (marketAccount.assetSymbol === 'WETH') {
         const sim = await ETHRouterContract.simulate.deposit({ ...opts, value: amount });
         const gasCost = await estimate(sim.request);
-        if (amount + (gasCost ?? 0n) >= parseUnits((walletBalance as `${number}`) || '0', marketAccount.decimals)) {
+        if (amount + (gasCost ?? 0n) >= parseUnits(walletBalance || '0', marketAccount.decimals)) {
           throw new CustomError(t('Reserve ETH for gas fees.'), 'warning');
         }
         return gasCost;
@@ -129,7 +129,7 @@ export default (): Deposit => {
     try {
       transaction.addToCart();
 
-      const amount = parseUnits(qty as `${number}`, marketAccount.decimals);
+      const amount = parseUnits(qty, marketAccount.decimals);
       if (marketAccount.assetSymbol === 'WETH') {
         if (!ETHRouterContract) return;
 

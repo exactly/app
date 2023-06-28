@@ -27,7 +27,7 @@ function ModalInfoTotalBorrows({ qty, symbol, operation, variant = 'column' }: P
   const [from, to] = useMemo(() => {
     if (!marketAccount) return [undefined, undefined];
 
-    const delta = parseUnits((qty as `${number}`) || '0', marketAccount.decimals);
+    const delta = parseUnits(qty || '0', marketAccount.decimals);
 
     let f: bigint = marketAccount.floatingBorrowAssets;
     if (isFixedOperation(operation) && date) {

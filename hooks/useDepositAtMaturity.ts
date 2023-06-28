@@ -88,7 +88,7 @@ export default (): DepositAtMaturity => {
         return approveEstimateGas();
       }
 
-      const amount = parseUnits(quantity as `${number}`, marketAccount.decimals);
+      const amount = parseUnits(quantity, marketAccount.decimals);
       const minAmount = (amount * slippage) / WEI_PER_ETHER;
 
       if (marketAccount.assetSymbol === 'WETH') {
@@ -97,7 +97,7 @@ export default (): DepositAtMaturity => {
           value: amount,
         });
         const gasCost = await estimate(sim.request);
-        if (amount + (gasCost ?? 0n) >= parseUnits((walletBalance as `${number}`) || '0', 18)) {
+        if (amount + (gasCost ?? 0n) >= parseUnits(walletBalance || '0', 18)) {
           throw new CustomError(t('Reserve ETH for gas fees.'), 'warning');
         }
         return gasCost;
@@ -161,9 +161,7 @@ export default (): DepositAtMaturity => {
       setErrorButton(undefined);
       setErrorData(undefined);
 
-      setGtMaxYield(
-        !!optimalDepositAmount && parseUnits((value as `${number}`) || '0', decimals) > optimalDepositAmount,
-      );
+      setGtMaxYield(!!optimalDepositAmount && parseUnits(value || '0', decimals) > optimalDepositAmount);
     },
     [setQty, walletBalance, setErrorButton, setErrorData, optimalDepositAmount, marketAccount, t],
   );
@@ -175,7 +173,7 @@ export default (): DepositAtMaturity => {
     setIsLoadingOp(true);
     try {
       transaction.addToCart();
-      const amount = parseUnits(qty as `${number}`, marketAccount.decimals);
+      const amount = parseUnits(qty, marketAccount.decimals);
       const minAmount = (amount * slippage) / WEI_PER_ETHER;
       if (marketAccount.assetSymbol === 'WETH') {
         const args = [BigInt(date), minAmount] as const;
@@ -245,7 +243,7 @@ export default (): DepositAtMaturity => {
     }
 
     if (qty) {
-      const initialAssets = parseUnits(qty as `${number}`, marketAccount.decimals);
+      const initialAssets = parseUnits(qty, marketAccount.decimals);
       try {
         const { assets: finalAssets } = await previewerContract.read.previewDepositAtMaturity([
           marketAccount.market,

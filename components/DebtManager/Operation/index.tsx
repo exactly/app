@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
 import { usePublicClient, useSignTypedData } from 'wagmi';
 import dayjs from 'dayjs';
-import { formatUnits, Hex, isAddress, parseUnits, trim, pad, WalletClient } from 'viem';
+import { formatUnits, Hex, isAddress, parseUnits, parseEther, trim, pad } from 'viem';
 import { splitSignature } from '@ethersproject/bytes';
 
 import { ModalBox, ModalBoxRow } from 'components/common/modal/ModalBox';
@@ -35,6 +35,7 @@ import { GAS_LIMIT_MULTIPLIER, WEI_PER_ETHER } from 'utils/const';
 import OperationSquare from 'components/common/OperationSquare';
 import Submit from '../Submit';
 import useIsContract from 'hooks/useIsContract';
+import { PopulatedTransaction } from 'types/Transaction';
 
 function Operation() {
   const { t } = useTranslation();
@@ -266,7 +267,7 @@ function Operation() {
 
   const [maxRepayAssets, maxBorrowAssets] = useMemo(() => {
     const raw = input.slippage || '0';
-    const slippage = WEI_PER_ETHER + parseUnits(raw as `${number}`, 18) / 100n;
+    const slippage = WEI_PER_ETHER + parseEther(raw) / 100n;
 
     const ret: [bigint, bigint] = [0n, 0n];
     if (!fromRow || !toRow) {
@@ -292,9 +293,7 @@ function Operation() {
 
   const [requiresApproval, setRequiresApproval] = useState(false);
 
-  const populateTransaction = useCallback(async (): Promise<
-    Parameters<WalletClient['writeContract']>[0] | undefined
-  > => {
+  const populateTransaction = useCallback(async (): Promise<PopulatedTransaction | undefined> => {
     if (!walletAddress || !debtManager || !marketContract || !input.from || !input.to || !opts) {
       return;
     }

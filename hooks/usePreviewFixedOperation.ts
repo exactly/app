@@ -38,7 +38,7 @@ export default (operation: MarketsBasicOperation): PreviewFixedOperation => {
 
       try {
         setLoading(true);
-        const initialAssets = parseUnits(qty as `${number}`, marketAccount.decimals);
+        const initialAssets = parseUnits(qty, marketAccount.decimals);
 
         const preview =
           operation === 'deposit'
