@@ -45,7 +45,7 @@ export const wagmi = createClient({
     ...(isE2E
       ? [new InjectedConnector({ chains: supportedChains, options: { name: 'E2E', shimDisconnect: false } })]
       : []),
-    ...w3mConnectors({ projectId: walletConnectId, version: 1, chains }),
+    ...w3mConnectors({ projectId: walletConnectId, version: 2, chains }),
     new SafeConnector({ chains }),
   ],
   provider,
