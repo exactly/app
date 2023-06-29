@@ -83,7 +83,7 @@ const Summary = () => {
         ),
         subValue: (
           <Box display="flex" justifyContent="end">
-            <USDValue qty={newBorrow.toString()} symbol={input.borrowSymbol || ''} />
+            <USDValue qty={newBorrow.display} symbol={input.borrowSymbol || ''} />
           </Box>
         ),
       },
