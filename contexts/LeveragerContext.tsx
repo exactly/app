@@ -1126,7 +1126,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
       await waitForTransaction({ hash });
       await refreshAccountData();
     } catch (e: unknown) {
-      console.log(e);
+      // console.log(e);
       setErrorData({ status: true, message: handleOperationError(e) });
     } finally {
       setIsLoading(false);

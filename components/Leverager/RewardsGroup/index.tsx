@@ -3,15 +3,31 @@ import { useLeveragerContext } from 'contexts/LeveragerContext';
 import React, { FC } from 'react';
 
 type RewardsGroupProps = {
+  withMarket?: boolean;
   withNative?: boolean;
   withRewards?: boolean;
   size?: number;
 };
 
-const RewardsGroup: FC<RewardsGroupProps> = ({ withNative = true, withRewards = true, size = 20 }) => {
-  const { nativeRewards, marketRewards } = useLeveragerContext();
+const RewardsGroup: FC<RewardsGroupProps> = ({
+  withMarket = true,
+  withNative = true,
+  withRewards = true,
+  size = 20,
+}) => {
+  const {
+    input: { collateralSymbol = 'USDC', borrowSymbol = 'USDC' },
+    nativeRewards,
+    marketRewards,
+  } = useLeveragerContext();
 
-  const all = [...(withRewards ? marketRewards : []), ...(withNative ? nativeRewards : [])];
+  const all = [
+    ...new Set([
+      ...(withMarket ? [collateralSymbol, borrowSymbol] : []),
+      ...(withRewards ? marketRewards : []),
+      ...(withNative ? nativeRewards : []),
+    ]),
+  ];
 
   return (
     <AvatarGroup max={6} sx={{ '& .MuiAvatar-root': { width: size, height: size, fontSize: 10 } }}>
