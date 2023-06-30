@@ -3,7 +3,7 @@ import ReactGA from 'react-ga4';
 import { useTranslation } from 'react-i18next';
 import { useAccount } from 'wagmi';
 
-import { type Input } from 'contexts/DebtManagerContext';
+import { isRolloverInput, type RolloverInput } from 'contexts/DebtManagerContext';
 import { useOperationContext } from 'contexts/OperationContext';
 import { useWeb3 } from './useWeb3';
 import { useMarketContext } from 'contexts/MarketContext';
@@ -16,8 +16,10 @@ import useActionButton from './useActionButton';
 import useDelayedEffect from './useDelayedEffect';
 import useSnapshot from './useSnapshot';
 import { formatUnits } from 'viem';
+import { isBridgeInput } from 'components/BridgeContent/utils';
+import { BridgeInput } from 'types/Bridge';
 
-type ItemVariant = 'operation' | 'approve' | 'enterMarket' | 'exitMarket' | 'claimAll' | 'roll';
+type ItemVariant = 'operation' | 'approve' | 'enterMarket' | 'exitMarket' | 'claimAll' | 'roll' | 'bridge';
 type TrackItem = { eventName: string; variant: ItemVariant };
 
 type Row = {
@@ -89,7 +91,7 @@ function useAnalyticsContext(assetSymbol?: string) {
     [assetSymbol, marketAccount?.symbol, marketAccount?.usdPrice, operation, qty, symbol],
   );
 
-  const rolloverContext = useCallback((input: Input) => {
+  const rolloverContext = useCallback((input: RolloverInput) => {
     const op =
       input.from?.maturity && input.to?.maturity
         ? 'rollFixed'
@@ -104,7 +106,22 @@ function useAnalyticsContext(assetSymbol?: string) {
     };
   }, []);
 
-  return { appContext: useSnapshot(appContext), itemContext, rolloverContext };
+  const bridgeContext = useCallback((input: BridgeInput) => {
+    const isBridge = input.sourceChainId !== input.destinationChainId;
+    const isSwap = input.sourceToken !== input.destinationToken;
+
+    const operationLabel = isBridge ? (isSwap ? 'bridgeSwap' : 'bridge') : 'swap';
+
+    return {
+      item_id: operationLabel,
+      item_name: operationLabel,
+      symbol: input.destinationToken,
+      quantity: input.destinationToken,
+      ...input,
+    };
+  }, []);
+
+  return { appContext: useSnapshot(appContext), itemContext, rolloverContext, bridgeContext };
 }
 
 export function usePageView(pathname: string, title: string) {
@@ -123,7 +140,7 @@ export function usePageView(pathname: string, title: string) {
 }
 
 export default function useAnalytics({ symbol, rewards }: { symbol?: string; rewards?: Rewards } = {}) {
-  const { appContext, itemContext, rolloverContext } = useAnalyticsContext(symbol);
+  const { appContext, itemContext, rolloverContext, bridgeContext } = useAnalyticsContext(symbol);
   const { isDisable } = useActionButton();
 
   const trackWithContext = useCallback(
@@ -286,33 +303,55 @@ export default function useAnalytics({ symbol, rewards }: { symbol?: string; rew
   );
 
   const trackRollover = useCallback(
-    (eventName: string, input: Input) => trackWithContext(eventName, { items: [rolloverContext(input)] }),
+    (eventName: string, input: RolloverInput) => trackWithContext(eventName, { items: [rolloverContext(input)] }),
     [trackWithContext, rolloverContext],
   );
 
+  const trackBridge = useCallback(
+    (eventName: string, input: BridgeInput) => trackWithContext(eventName, { items: [bridgeContext(input)] }),
+    [bridgeContext, trackWithContext],
+  );
+
   const buildTransactionTrack = useCallback(
-    (variant: ItemVariant = 'operation', eventName: string, input?: Input) =>
-      variant === 'roll' && input ? trackRollover(eventName, input) : trackItem({ eventName, variant }),
-    [trackItem, trackRollover],
+    (variant: ItemVariant = 'operation', eventName: string, input?: object) => {
+      switch (variant) {
+        case 'roll': {
+          if (isRolloverInput(input)) {
+            trackRollover(eventName, input);
+          }
+          break;
+        }
+        case 'bridge': {
+          if (isBridgeInput(input)) {
+            trackBridge(eventName, input);
+          }
+          break;
+        }
+        default: {
+          trackItem({ eventName, variant });
+        }
+      }
+    },
+    [trackBridge, trackItem, trackRollover],
   );
 
   const addToCart = useCallback(
-    (variant: ItemVariant = 'operation', input?: Input) => buildTransactionTrack(variant, 'add_to_cart', input),
+    (variant: ItemVariant = 'operation', input?: object) => buildTransactionTrack(variant, 'add_to_cart', input),
     [buildTransactionTrack],
   );
 
   const beginCheckout = useCallback(
-    (variant: ItemVariant = 'operation', input?: Input) => buildTransactionTrack(variant, 'begin_checkout', input),
+    (variant: ItemVariant = 'operation', input?: object) => buildTransactionTrack(variant, 'begin_checkout', input),
     [buildTransactionTrack],
   );
 
   const purchase = useCallback(
-    (variant: ItemVariant = 'operation', input?: Input) => buildTransactionTrack(variant, 'purchase', input),
+    (variant: ItemVariant = 'operation', input?: object) => buildTransactionTrack(variant, 'purchase', input),
     [buildTransactionTrack],
   );
 
   const removeFromCart = useCallback(
-    (variant: ItemVariant = 'operation', input?: Input) => buildTransactionTrack(variant, 'remove_from_cart', input),
+    (variant: ItemVariant = 'operation', input?: object) => buildTransactionTrack(variant, 'remove_from_cart', input),
     [buildTransactionTrack],
   );
 

@@ -36,6 +36,7 @@ import { useTranslation } from 'react-i18next';
 import MaturityDateReminder from 'components/MaturityDateReminder';
 import Faucet from 'components/operations/Faucet';
 import SecondaryChain from 'components/SecondaryChain';
+
 const { onlyMobile, onlyDesktopFlex } = globals;
 
 function Navbar() {
@@ -151,6 +152,11 @@ function Navbar() {
             {isConnected && chain?.id === goerli.id && (
               <Chip label="Goerli Faucet" onClick={handleFaucetClick} sx={{ my: 'auto', display: onlyDesktopFlex }} />
             )}
+            <Link href={'/bridge'}>
+              <Button variant="contained" sx={{ minWidth: '125px' }}>
+                {t('Bridge & Swap')}
+              </Button>
+            </Link>
             <Box display="flex" gap={0.5}>
               <SecondaryChain />
               <ClaimRewards />
