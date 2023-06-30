@@ -1,6 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Box, Button, Checkbox, Divider, Grid, Skeleton, Typography } from '@mui/material';
+import { LoadingButton } from '@mui/lab';
 import { ModalBox } from 'components/common/modal/ModalBox';
+import ModalAlert from 'components/common/modal/ModalAlert';
+import LoadingTransaction from 'components/common/modal/Loading';
 import { useTranslation } from 'react-i18next';
 import { useLeveragerContext } from 'contexts/LeveragerContext';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -9,7 +12,6 @@ import USDValue from 'components/OperationsModal/USDValue';
 import Image from 'next/image';
 import RewardsGroup from '../RewardsGroup';
 import handleOperationError from 'utils/handleOperationError';
-import { LoadingButton } from '@mui/lab';
 import formatNumber from 'utils/formatNumber';
 
 const Summary = () => {
@@ -30,6 +32,8 @@ const Summary = () => {
     submit,
     needsApproval,
     isLoading,
+    errorData,
+    tx,
   } = useLeveragerContext();
 
   const healthFactorColor = useMemo(
@@ -143,6 +147,22 @@ const Summary = () => {
     setRequiresApproval(await needsApproval());
   }, [approve, needsApproval]);
 
+  if (tx) {
+    return (
+      <LoadingTransaction
+        tx={tx}
+        messages={{
+          pending: input.secondaryOperation === 'deposit' ? t('You are leveraging') : t('You are deleveraging'),
+          success:
+            input.secondaryOperation === 'deposit'
+              ? t('Your position has been leveraged')
+              : t('Your position has been deleveraged'),
+          error: t('Something went wrong'),
+        }}
+      />
+    );
+  }
+
   return (
     <Box display="flex" flexDirection="column" gap={3}>
       <ModalBox bgcolor="grey.100">
@@ -161,38 +181,41 @@ const Summary = () => {
           ))}
         </Box>
       </ModalBox>
-      <Box display="flex" justifyContent="start" alignItems="center" gap={1}>
-        <Checkbox
-          id="accept-risk"
-          sx={{ width: 18, height: 18 }}
-          value={acceptedTerms}
-          onChange={(e) => setAcceptedTerms(e.target.checked)}
-        />
-        <Typography component="label" htmlFor="accept-risk" fontSize={14} fontWeight={500} sx={{ cursor: 'pointer' }}>
-          {t('I fully acknowledge and accept the risks of leveraging.')}
-        </Typography>
+      <Box display="flex" flexDirection="column" gap={errorData?.status ? 1.5 : 3}>
+        <Box display="flex" justifyContent="start" alignItems="center" gap={1}>
+          <Checkbox
+            id="accept-risk"
+            sx={{ width: 18, height: 18 }}
+            value={acceptedTerms}
+            onChange={(e) => setAcceptedTerms(e.target.checked)}
+          />
+          <Typography component="label" htmlFor="accept-risk" fontSize={14} fontWeight={500} sx={{ cursor: 'pointer' }}>
+            {t('I fully acknowledge and accept the risks of leveraging.')}
+          </Typography>
+        </Box>
+        {errorData?.status && <ModalAlert message={errorData.message} variant={errorData.variant} />}
+        <Grid container spacing={1}>
+          <Grid item xs={3}>
+            <Button fullWidth variant="outlined" onClick={() => setViewSummary(false)}>
+              <Box display="flex" alignItems="center" gap={1}>
+                <ArrowBackIcon sx={{ fontSize: 16, ml: -1 }} />
+                {t('Back')}
+              </Box>
+            </Button>
+          </Grid>
+          <Grid item xs={9}>
+            <LoadingButton
+              loading={isLoading}
+              onClick={requiresApproval ? approveLeverage : submit}
+              fullWidth
+              variant="contained"
+              disabled={disabledConfirm}
+            >
+              {requiresApproval ? t('Approve') : t('Confirm Leverage')}
+            </LoadingButton>
+          </Grid>
+        </Grid>
       </Box>
-      <Grid container spacing={1}>
-        <Grid item xs={3}>
-          <Button fullWidth variant="outlined" onClick={() => setViewSummary(false)}>
-            <Box display="flex" alignItems="center" gap={1}>
-              <ArrowBackIcon sx={{ fontSize: 16, ml: -1 }} />
-              {t('Back')}
-            </Box>
-          </Button>
-        </Grid>
-        <Grid item xs={9}>
-          <LoadingButton
-            loading={isLoading}
-            onClick={requiresApproval ? approveLeverage : submit}
-            fullWidth
-            variant="contained"
-            disabled={disabledConfirm}
-          >
-            {requiresApproval ? t('Approve') : t('Confirm Leverage')}
-          </LoadingButton>
-        </Grid>
-      </Grid>
     </Box>
   );
 };

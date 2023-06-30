@@ -83,9 +83,7 @@ const Operation = () => {
           </ModalBoxCell>
         </ModalBoxRow>
       </ModalBox>
-
       {errorData?.status && <ModalAlert message={errorData.message} variant={errorData.variant} />}
-
       {disabledSubmit ? (
         <Button fullWidth variant="contained" disabled>
           {t('Leverage')}

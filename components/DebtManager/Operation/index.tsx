@@ -30,7 +30,7 @@ import ModalInfoEditableSlippage from 'components/OperationsModal/Info/ModalInfo
 import handleOperationError from 'utils/handleOperationError';
 import ModalAlert from 'components/common/modal/ModalAlert';
 import useRewards from 'hooks/useRewards';
-import LoadingTransaction from '../Loading';
+import LoadingTransaction from 'components/common/modal/Loading';
 import { GAS_LIMIT_MULTIPLIER, WEI_PER_ETHER } from 'utils/const';
 import OperationSquare from 'components/common/OperationSquare';
 import Submit from '../Submit';
@@ -448,7 +448,18 @@ function Operation() {
     setRequiresApproval(await needsApproval(maxBorrowAssets));
   }, [needsApproval, approve, maxBorrowAssets]);
 
-  if (tx && input.to) return <LoadingTransaction tx={tx} to={input.to} />;
+  if (tx && input.to)
+    return (
+      <LoadingTransaction
+        tx={tx}
+        maturity={input.to.maturity}
+        messages={{
+          pending: t('You are refinancing your position'),
+          success: t('Your position has been refinanced'),
+          error: t('Something went wrong'),
+        }}
+      />
+    );
 
   return (
     <>
