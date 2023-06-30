@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Box, Button, Checkbox, Divider, Grid, Typography } from '@mui/material';
+import { Box, Button, Checkbox, Divider, Grid, Skeleton, Typography } from '@mui/material';
 import { ModalBox } from 'components/common/modal/ModalBox';
 import { useTranslation } from 'react-i18next';
 import { useLeveragerContext } from 'contexts/LeveragerContext';
@@ -102,10 +102,12 @@ const Summary = () => {
       },
       {
         label: t('New Health Factor'),
-        value: (
+        value: newHealthFactor ? (
           <Typography variant="h6" color={healthFactorColor.color}>
             {newHealthFactor}
           </Typography>
+        ) : (
+          <Skeleton width={72} height={36} />
         ),
       },
     ],

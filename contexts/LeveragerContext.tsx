@@ -30,7 +30,6 @@ import type { ErrorData } from 'types/Error';
 import type { Transaction } from 'types/Transaction';
 import LeveragerModal from 'components/Leverager/Modal';
 import useDebtManager from 'hooks/useDebtManager';
-import numbers from 'config/numbers.json';
 import useAccountData from 'hooks/useAccountData';
 import useMarket from 'hooks/useMarket';
 import { useWeb3 } from 'hooks/useWeb3';
@@ -54,9 +53,6 @@ import useDelayedEffect from 'hooks/useDelayedEffect';
 import useRewards from 'hooks/useRewards';
 import useFloatingPoolAPR from 'hooks/useFloatingPoolAPR';
 
-const MIN_SQRT_RATIO = 4295128739n;
-const MAX_SQRT_RATIO = 1461446703485210103287273052203988822378723970342n;
-
 type Input = {
   collateralSymbol?: string;
   borrowSymbol?: string;
@@ -64,14 +60,15 @@ type Input = {
   userInput: string;
   leverageRatio: number;
   maxLeverageRatio: number;
-  slippage: string;
 };
 
 type Value<T> = { display: string; value: T };
 
 type ApprovalStatus = 'INIT' | 'ERC20' | 'ERC20-PERMIT2' | 'MARKET' | 'APPROVED';
 
-const DEFAULT_SLIPPAGE = (numbers.slippage * 100).toFixed(2);
+const DEFAULT_SLIPPAGE = 2n;
+
+const slippage = (value: bigint, up = true) => (value * (100n + (up ? 1n : -1n) * DEFAULT_SLIPPAGE)) / 100n;
 
 const initState: Input = {
   collateralSymbol: undefined,
@@ -80,7 +77,6 @@ const initState: Input = {
   userInput: '',
   leverageRatio: 1,
   maxLeverageRatio: 1,
-  slippage: DEFAULT_SLIPPAGE,
 };
 
 const reducer = (state: Input, action: Partial<Input>): Input => {
@@ -104,7 +100,6 @@ type ContextValues = {
   setUserInput: (userInput: string) => void;
   setLeverageRatio: (leverageRatio: number) => void;
 
-  setSlippage: (slippage: string) => void;
   collateralOptions: { symbol: string; value: string }[];
   borrowOptions: { symbol: string; value: string }[];
 
@@ -222,14 +217,17 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
         return undefined;
       }
 
-      const { result } = await debtPreviewer.simulate.leverage([maIn.market, maOut.market, walletAddress], opts);
+      const _maOut = getMarketAccount(borrowSymbol);
+      if (!_maOut) return undefined;
+
+      const { result } = await debtPreviewer.simulate.leverage([maIn.market, _maOut.market, walletAddress], opts);
 
       if (cancelled()) return undefined;
 
       setLeveragePreview(result);
       return result;
     },
-    [debtPreviewer, input.borrowSymbol, input.collateralSymbol, maIn, maOut, opts, walletAddress],
+    [debtPreviewer, getMarketAccount, input.borrowSymbol, input.collateralSymbol, maIn, maOut, opts, walletAddress],
   );
 
   const { isLoading: previewIsLoading } = useDelayedEffect({
@@ -355,7 +353,8 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
 
       try {
         if (input.secondaryOperation === 'deposit') {
-          const amountOut = (netPosition.value * (_currentLeverageRatio - WEI_PER_ETHER)) / WEI_PER_ETHER;
+          const amountOut = (netPosition.value * (_currentLeverageRatio - WEI_PER_ETHER)) / WEI_PER_ETHER; //newBorrow
+          // previewCrossLeverage
           const { result } = await debtPreviewer.simulate.previewOutputSwap(
             [assetOut.address, assetIn.address, amountOut, leveragePreview.pool.fee],
             opts,
@@ -366,7 +365,8 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
           setPreviewAsset(result);
         } else {
           const resultUSD = (netPositionUSD * (_currentLeverageRatio - WEI_PER_ETHER)) / WEI_PER_ETHER;
-          const amountOut = leveragePreview.debt - (resultUSD * 10n ** BigInt(maOut.decimals)) / maOut.usdPrice;
+          const amountOut = leveragePreview.debt - (resultUSD * 10n ** BigInt(maOut.decimals)) / maOut.usdPrice; //repayAmount
+          // previewCrossDeleverage
           const { result } = await debtPreviewer.simulate.previewOutputSwap(
             [assetIn.address, assetOut.address, amountOut, leveragePreview.pool.fee],
             opts,
@@ -534,7 +534,6 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     setErrorData(undefined);
     dispatch({ userInput });
   }, []);
-  const setSlippage = useCallback((slippage: string) => dispatch({ slippage }), []);
 
   const close = useCallback(() => setIsOpen(false), []);
 
@@ -1070,13 +1069,18 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
                 return;
               }
 
+              const limit =
+                assetOut.address === leveragePreview.pool.token0
+                  ? slippage(leveragePreview.sqrtPriceX96, false)
+                  : slippage(leveragePreview.sqrtPriceX96);
+
               const args = [
                 marketIn.address,
                 marketOut.address,
                 leveragePreview.pool.fee,
                 _userInput,
                 ratio,
-                assetOut.address === leveragePreview.pool.token0 ? MIN_SQRT_RATIO + 1n : MAX_SQRT_RATIO - 1n,
+                limit,
                 borrowAssets,
                 marketPermit.value,
               ] as const;
@@ -1091,13 +1095,21 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
               break;
             }
             case 'withdraw': {
-              const permitAssets =
-                (maIn.floatingBorrowAssets < newBorrow.value ? 0n : maIn.floatingBorrowAssets - newBorrow.value) +
-                _userInput;
+              const permitAssets = slippage(
+                (maIn.floatingDepositAssets < newCollateral.value
+                  ? 0n
+                  : maIn.floatingDepositAssets - newCollateral.value) + _userInput,
+              );
+
               const marketPermit = await signPermit(permitAssets, 'marketIn');
               if (!marketPermit || !leveragePreview || marketPermit.type === 'permit2') {
                 return;
               }
+
+              const limit =
+                assetIn.address === leveragePreview.pool.token0
+                  ? slippage(leveragePreview.sqrtPriceX96, false)
+                  : slippage(leveragePreview.sqrtPriceX96);
 
               const args = [
                 marketIn.address,
@@ -1105,7 +1117,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
                 leveragePreview.pool.fee,
                 _userInput,
                 ratio,
-                assetIn.address === leveragePreview.pool.token0 ? MIN_SQRT_RATIO + 1n : MAX_SQRT_RATIO - 1n,
+                limit,
                 permitAssets,
                 marketPermit.value,
               ] as const;
@@ -1151,6 +1163,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     leveragePreview,
     newBorrow.value,
     signPermit,
+    newCollateral.value,
   ]);
 
   const value: ContextValues = {
@@ -1169,7 +1182,6 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     setSecondaryOperation,
     setUserInput,
     setLeverageRatio,
-    setSlippage,
 
     collateralOptions,
     borrowOptions,
