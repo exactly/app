@@ -1,0 +1,276 @@
+[
+  {
+    "chainId": 1,
+    "name": "Ethereum",
+    "isL1": true,
+    "sendingEnabled": true,
+    "icon": "https://movricons.s3.ap-south-1.amazonaws.com/Ether.svg",
+    "receivingEnabled": true,
+    "refuel": {
+      "sendingEnabled": true,
+      "receivingEnabled": false
+    },
+    "currency": {
+      "address": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "icon": "https://maticnetwork.github.io/polygon-token-assets/assets/eth.svg",
+      "name": "Ether",
+      "symbol": "ETH",
+      "decimals": 18,
+      "minNativeCurrencyForGas": "15000000000000000"
+    },
+    "rpcs": ["https://rpc.ankr.com/eth"],
+    "explorers": ["https://etherscan.io"]
+  },
+  {
+    "chainId": 10,
+    "name": "Optimism",
+    "isL1": false,
+    "sendingEnabled": true,
+    "icon": "https://movricons.s3.ap-south-1.amazonaws.com/Optimism.svg",
+    "receivingEnabled": true,
+    "refuel": {
+      "sendingEnabled": true,
+      "receivingEnabled": true
+    },
+    "rpcs": ["https://mainnet.optimism.io/"],
+    "currency": {
+      "address": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "name": "Ether",
+      "symbol": "ETH",
+      "decimals": 18,
+      "icon": "https://maticnetwork.github.io/polygon-token-assets/assets/eth.svg",
+      "minNativeCurrencyForGas": "900000000000000"
+    },
+    "explorers": ["https://optimistic.etherscan.io"]
+  },
+  {
+    "chainId": 56,
+    "name": "BSC",
+    "isL1": false,
+    "icon": "https://movricons.s3.ap-south-1.amazonaws.com/BSC.svg",
+    "sendingEnabled": true,
+    "receivingEnabled": true,
+    "refuel": {
+      "sendingEnabled": true,
+      "receivingEnabled": true
+    },
+    "currency": {
+      "address": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "name": "Binance Chain Native Token",
+      "symbol": "BNB",
+      "decimals": 18,
+      "minNativeCurrencyForGas": "1400000000000000",
+      "icon": "https://maticnetwork.github.io/polygon-token-assets/assets/bnb.svg"
+    },
+    "rpcs": [
+      "https://bsc-dataseed1.binance.org",
+      "https://bsc-dataseed2.binance.org",
+      "https://bsc-dataseed3.binance.org",
+      "https://bsc-dataseed4.binance.org",
+      "https://bsc-dataseed1.defibit.io",
+      "https://bsc-dataseed2.defibit.io",
+      "https://bsc-dataseed3.defibit.io",
+      "https://bsc-dataseed4.defibit.io",
+      "https://bsc-dataseed1.ninicoin.io",
+      "https://bsc-dataseed2.ninicoin.io",
+      "https://bsc-dataseed3.ninicoin.io",
+      "https://bsc-dataseed4.ninicoin.io",
+      "wss://bsc-ws-node.nariox.org"
+    ],
+    "explorers": ["https://bscscan.com"]
+  },
+  {
+    "chainId": 100,
+    "name": "Gnosis",
+    "icon": "https://movricons.s3.ap-south-1.amazonaws.com/gnosis.svg",
+    "isL1": false,
+    "sendingEnabled": true,
+    "receivingEnabled": true,
+    "refuel": {
+      "sendingEnabled": true,
+      "receivingEnabled": true
+    },
+    "currency": {
+      "address": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "icon": "https://maticnetwork.github.io/polygon-token-assets/assets/dai.svg",
+      "name": "XDAI",
+      "symbol": "XDAI",
+      "decimals": 18,
+      "minNativeCurrencyForGas": "2100000000000000"
+    },
+    "rpcs": [
+      "https://rpc.xdaichain.com",
+      "https://xdai.poanetwork.dev",
+      "wss://rpc.xdaichain.com/wss",
+      "wss://xdai.poanetwork.dev/wss",
+      "http://xdai.poanetwork.dev",
+      "https://dai.poa.network",
+      "ws://xdai.poanetwork.dev:8546"
+    ],
+    "explorers": ["https://gnosisscan.io"]
+  },
+  {
+    "chainId": 137,
+    "name": "Polygon",
+    "icon": "https://movricons.s3.ap-south-1.amazonaws.com/Matic.svg",
+    "isL1": false,
+    "sendingEnabled": true,
+    "receivingEnabled": true,
+    "refuel": {
+      "sendingEnabled": true,
+      "receivingEnabled": true
+    },
+    "currency": {
+      "address": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "icon": "https://maticnetwork.github.io/polygon-token-assets/assets/matic.svg",
+      "name": "Matic",
+      "symbol": "MATIC",
+      "decimals": 18,
+      "minNativeCurrencyForGas": "30000000000000000"
+    },
+    "rpcs": [
+      "https://rpc-mainnet.matic.network",
+      "wss://ws-mainnet.matic.network",
+      "https://rpc-mainnet.matic.quiknode.pro",
+      "https://matic-mainnet.chainstacklabs.com"
+    ],
+    "explorers": ["https://polygonscan.com"]
+  },
+  {
+    "chainId": 250,
+    "name": "Fantom",
+    "icon": "https://movricons.s3.ap-south-1.amazonaws.com/Fantom.svg",
+    "isL1": false,
+    "sendingEnabled": true,
+    "receivingEnabled": true,
+    "refuel": {
+      "sendingEnabled": true,
+      "receivingEnabled": true
+    },
+    "rpcs": ["https://rpc.ftm.tools"],
+    "currency": {
+      "address": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "name": "Fantom",
+      "symbol": "FTM",
+      "decimals": 18,
+      "icon": "https://maticnetwork.github.io/polygon-token-assets/assets/ftm.svg",
+      "minNativeCurrencyForGas": "60000000000000000"
+    },
+    "explorers": ["https://ftmscan.com"]
+  },
+  {
+    "chainId": 324,
+    "name": "zkSync Era",
+    "isL1": false,
+    "sendingEnabled": true,
+    "refuel": {
+      "sendingEnabled": true,
+      "receivingEnabled": true
+    },
+    "icon": "https://movricons.s3.ap-south-1.amazonaws.com/zksync-era.svg",
+    "receivingEnabled": true,
+    "rpcs": ["https://mainnet.era.zksync.io"],
+    "currency": {
+      "address": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "name": "Ether",
+      "symbol": "ETH",
+      "decimals": 18,
+      "icon": "https://maticnetwork.github.io/polygon-token-assets/assets/eth.svg",
+      "minNativeCurrencyForGas": "900000000000000"
+    },
+    "explorers": ["https://explorer.zksync.io"]
+  },
+  {
+    "chainId": 1101,
+    "name": "Polygon zkEVM",
+    "isL1": false,
+    "sendingEnabled": true,
+    "refuel": {
+      "sendingEnabled": true,
+      "receivingEnabled": true
+    },
+    "icon": "https://movricons.s3.ap-south-1.amazonaws.com/zkEVM.svg",
+    "receivingEnabled": true,
+    "rpcs": ["https://zkevm-rpc.com"],
+    "currency": {
+      "address": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "name": "Ether",
+      "symbol": "ETH",
+      "decimals": 18,
+      "icon": "https://maticnetwork.github.io/polygon-token-assets/assets/eth.svg",
+      "minNativeCurrencyForGas": "900000000000000"
+    },
+    "explorers": ["https://zkevm.polygonscan.com"]
+  },
+  {
+    "chainId": 42161,
+    "name": "Arbitrum",
+    "icon": "https://movricons.s3.ap-south-1.amazonaws.com/Arbitrum.svg",
+    "isL1": false,
+    "sendingEnabled": true,
+    "receivingEnabled": true,
+    "refuel": {
+      "sendingEnabled": true,
+      "receivingEnabled": true
+    },
+    "currency": {
+      "address": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "icon": "https://maticnetwork.github.io/polygon-token-assets/assets/eth.svg",
+      "name": "Arbitrum Ether",
+      "symbol": "ETH",
+      "decimals": 18,
+      "minNativeCurrencyForGas": "1400000000000000"
+    },
+    "rpcs": [
+      "https://arbitrum-mainnet.infura.io/v3/${INFURA_API_KEY}",
+      "https://arb-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}",
+      "https://arb1.arbitrum.io/rpc",
+      "wss://arb1.arbitrum.io/ws"
+    ],
+    "explorers": ["https://arbiscan.io"]
+  },
+  {
+    "chainId": 43114,
+    "name": "Avalanche",
+    "isL1": false,
+    "icon": "https://movricons.s3.ap-south-1.amazonaws.com/Avalanche.svg",
+    "sendingEnabled": true,
+    "receivingEnabled": true,
+    "refuel": {
+      "sendingEnabled": true,
+      "receivingEnabled": true
+    },
+    "rpcs": ["https://api.avax-test.network/ext/bc/C/rpc"],
+    "currency": {
+      "address": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "name": "Avalanche",
+      "symbol": "AVAX",
+      "icon": "https://assets.coingecko.com/coins/images/12559/small/coin-round-red.png",
+      "decimals": 18,
+      "minNativeCurrencyForGas": "21000000000000000"
+    },
+    "explorers": ["https://snowtrace.io"]
+  },
+  {
+    "chainId": 1313161554,
+    "name": "Aurora",
+    "isL1": false,
+    "sendingEnabled": true,
+    "refuel": {
+      "sendingEnabled": true,
+      "receivingEnabled": true
+    },
+    "icon": "https://movricons.s3.ap-south-1.amazonaws.com/aurora.svg",
+    "receivingEnabled": true,
+    "rpcs": ["https://mainnet.aurora.dev"],
+    "currency": {
+      "address": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "name": "Ether",
+      "symbol": "ETH",
+      "decimals": 18,
+      "icon": "https://maticnetwork.github.io/polygon-token-assets/assets/eth.svg",
+      "minNativeCurrencyForGas": "900000000000000"
+    },
+    "explorers": ["https://aurorascan.dev"]
+  }
+]

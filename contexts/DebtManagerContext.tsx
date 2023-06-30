@@ -25,23 +25,34 @@ import handleOperationError from 'utils/handleOperationError';
 import useIsContract from 'hooks/useIsContract';
 import useAnalytics from 'hooks/useAnalytics';
 
-export type Input = {
+export type RolloverInput = {
   from?: Position;
   to?: Position;
   slippage: string;
   percent: number;
 };
 
+export function isRolloverInput(input: unknown): input is RolloverInput {
+  return (
+    typeof input === 'object' &&
+    input !== null &&
+    'from' in input &&
+    'to' in input &&
+    'slippage' in input &&
+    'percent' in input
+  );
+}
+
 const DEFAULT_SLIPPAGE = (numbers.slippage * 100).toFixed(2);
 
-const initState: Input = {
+const initState: RolloverInput = {
   from: undefined,
   to: undefined,
   slippage: DEFAULT_SLIPPAGE,
   percent: 100,
 };
 
-const reducer = (state: Input, action: Partial<Input>): Input => {
+const reducer = (state: RolloverInput, action: Partial<RolloverInput>): RolloverInput => {
   return { ...state, ...action };
 };
 
@@ -50,7 +61,7 @@ type ContextValues = {
   openDebtManager: (from?: Position) => void;
   close: () => void;
 
-  input: Input;
+  input: RolloverInput;
   setFrom: (from: Position) => void;
   setTo: (to: Position) => void;
   setPercent: (to: number) => void;

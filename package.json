@@ -33,6 +33,7 @@
     "@web3modal/react": "~2.6.2",
     "abitype": "^0.9.0",
     "add-to-calendar-button": "^2.2.9",
+    "@socket.tech/plugin": "^1.0.14",
     "blockies-ts": "^1.0.0",
     "dayjs": "^1.11.9",
     "graphql": "^16.7.1",
