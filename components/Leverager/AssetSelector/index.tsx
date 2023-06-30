@@ -3,10 +3,15 @@ import DropdownMenu from 'components/DropdownMenu';
 import AssetOption from 'components/asset/AssetOption';
 import { Typography } from '@mui/material';
 
+type AssetSelectorOption = {
+  symbol: string;
+  value: string;
+};
+
 type AssetSelectorProps = {
   title: string;
   currentValue?: string;
-  options: { symbol: string; value: string }[];
+  options: AssetSelectorOption[];
   onChange: (newValue: string) => void;
   disabled?: boolean;
 };
@@ -16,7 +21,7 @@ const AssetSelector: FC<AssetSelectorProps> = ({ title, currentValue, options, o
     <DropdownMenu
       label={title}
       options={options}
-      onChange={(newValue: { symbol: string; value: string }) => onChange(newValue.symbol)}
+      onChange={(newValue: AssetSelectorOption) => onChange(newValue.symbol)}
       disabled={disabled}
       renderValue={
         currentValue ? (
@@ -27,7 +32,7 @@ const AssetSelector: FC<AssetSelectorProps> = ({ title, currentValue, options, o
           </Typography>
         )
       }
-      renderOption={({ symbol, value }: { symbol: string; value: string }) => (
+      renderOption={({ symbol, value }: AssetSelectorOption) => (
         <AssetOption option assetSymbol={symbol} value={value} unformattedSymbol={true} />
       )}
       data-testid="modal-asset-selector"
