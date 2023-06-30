@@ -24,6 +24,7 @@ import {
   encodeAbiParameters,
 } from 'viem';
 import { splitSignature } from '@ethersproject/bytes';
+import { AbiParametersToPrimitiveTypes, ExtractAbiFunction, ExtractAbiFunctionNames } from 'abitype';
 
 import type { ErrorData } from 'types/Error';
 import type { Transaction } from 'types/Transaction';
@@ -51,6 +52,11 @@ import useDebtPreviewer, { Leverage } from 'hooks/useDebtPreviewer';
 import useDelayedEffect from 'hooks/useDelayedEffect';
 import useRewards from 'hooks/useRewards';
 import useFloatingPoolAPR from 'hooks/useFloatingPoolAPR';
+import { debtManagerABI } from 'types/abi';
+
+type Params<T extends ExtractAbiFunctionNames<typeof debtManagerABI>> = AbiParametersToPrimitiveTypes<
+  ExtractAbiFunction<typeof debtManagerABI, T>['inputs']
+>;
 
 type Input = {
   collateralSymbol?: string;
@@ -936,21 +942,26 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
       !assetIn ||
       !assetOut ||
       !maIn ||
+      !leveragePreview ||
       !opts
-    )
+    ) {
       return;
+    }
 
     setIsLoading(true);
     try {
       // leverageRatio could be higher than maxLeverageRatio if the user has changed the input
       const ratio = parseEther(String(Math.min(input.leverageRatio, input.maxLeverageRatio)));
+      const isMultiSig = await isContract(walletAddress);
 
       let hash: Hex | undefined;
-      if (await isContract(walletAddress)) {
-        if (input.collateralSymbol === input.borrowSymbol) {
-          switch (input.secondaryOperation) {
-            case 'deposit': {
-              const args = [marketIn.address, _userInput, ratio] as const;
+
+      if (input.collateralSymbol === input.borrowSymbol) {
+        switch (input.secondaryOperation) {
+          case 'deposit': {
+            let args: Params<'leverage'> = [marketIn.address, _userInput, ratio];
+
+            if (isMultiSig) {
               const gasEstimation = await debtManager.estimateGas.leverage(args, opts);
               hash = await debtManager.write.leverage(args, {
                 ...opts,
@@ -958,8 +969,28 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
               });
               break;
             }
-            case 'withdraw': {
-              const args = [marketIn.address, ratio, _userInput] as const;
+
+            const borrowAssets = newBorrow.value;
+            const [assetPermit, marketPermit] = await Promise.all([
+              signPermit(_userInput, 'assetIn'),
+              signPermit(borrowAssets, 'marketIn'),
+            ]);
+            if (!assetPermit || !marketPermit || assetPermit.type === 'permit' || marketPermit.type === 'permit2') {
+              return;
+            }
+
+            args = [...args, borrowAssets, marketPermit.value, assetPermit.value];
+            const gasEstimation = await debtManager.estimateGas.leverage(args, opts);
+            hash = await debtManager.write.leverage(args, {
+              ...opts,
+              gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
+            });
+            break;
+          }
+          case 'withdraw': {
+            let args: Params<'deleverage'> = [marketIn.address, ratio, _userInput] as const;
+
+            if (isMultiSig) {
               const gasEstimation = await debtManager.estimateGas.deleverage(args, opts);
               hash = await debtManager.write.deleverage(args, {
                 ...opts,
@@ -967,25 +998,42 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
               });
               break;
             }
+
+            const permitAssets =
+              (maIn.floatingBorrowAssets < newBorrow.value ? 0n : maIn.floatingBorrowAssets - newBorrow.value) +
+              _userInput;
+            const marketPermit = await signPermit(permitAssets, 'marketIn');
+
+            if (!marketPermit || marketPermit.type === 'permit2') {
+              return;
+            }
+
+            args = [...args, permitAssets, marketPermit.value] as const;
+            const gasEstimation = await debtManager.estimateGas.deleverage(args, opts);
+            hash = await debtManager.write.deleverage(args, {
+              ...opts,
+              gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
+            });
+            break;
           }
-        } else {
-          if (!leveragePreview) {
-            return;
-          }
-          switch (input.secondaryOperation) {
-            case 'deposit': {
-              const limit =
-                assetOut.address === leveragePreview.pool.token0
-                  ? slippage(leveragePreview.sqrtPriceX96, false)
-                  : slippage(leveragePreview.sqrtPriceX96);
-              const args = [
-                marketIn.address,
-                marketOut.address,
-                leveragePreview.pool.fee,
-                _userInput,
-                ratio,
-                limit,
-              ] as const;
+        }
+      } else {
+        switch (input.secondaryOperation) {
+          case 'deposit': {
+            const limit =
+              assetOut.address === leveragePreview.pool.token0
+                ? slippage(leveragePreview.sqrtPriceX96, false)
+                : slippage(leveragePreview.sqrtPriceX96);
+            let args: Params<'crossLeverage'> = [
+              marketIn.address,
+              marketOut.address,
+              leveragePreview.pool.fee,
+              _userInput,
+              ratio,
+              limit,
+            ] as const;
+
+            if (isMultiSig) {
               const gasEstimation = await debtManager.estimateGas.crossLeverage(args, opts);
               hash = await debtManager.write.crossLeverage(args, {
                 ...opts,
@@ -993,19 +1041,46 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
               });
               break;
             }
-            case 'withdraw': {
-              const limit =
-                assetIn.address === leveragePreview.pool.token0
-                  ? slippage(leveragePreview.sqrtPriceX96, false)
-                  : slippage(leveragePreview.sqrtPriceX96);
-              const args = [
-                marketIn.address,
-                marketOut.address,
-                leveragePreview.pool.fee,
-                _userInput,
-                ratio,
-                limit,
-              ] as const;
+
+            const borrowAssets = newBorrow.value;
+            const [assetPermit, marketPermit] = await Promise.all([
+              signPermit(_userInput, 'assetIn'),
+              signPermit(borrowAssets, 'marketOut'),
+            ]);
+            if (
+              !assetPermit ||
+              !marketPermit ||
+              !leveragePreview ||
+              marketPermit.type === 'permit2' ||
+              assetPermit.type === 'permit'
+            ) {
+              return;
+            }
+
+            args = [...args, borrowAssets, marketPermit.value, assetPermit.value] as const;
+
+            const gasEstimation = await debtManager.estimateGas.crossLeverage(args, opts);
+            hash = await debtManager.write.crossLeverage(args, {
+              ...opts,
+              gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
+            });
+            break;
+          }
+          case 'withdraw': {
+            const limit =
+              assetIn.address === leveragePreview.pool.token0
+                ? slippage(leveragePreview.sqrtPriceX96, false)
+                : slippage(leveragePreview.sqrtPriceX96);
+            let args: Params<'crossDeleverage'> = [
+              marketIn.address,
+              marketOut.address,
+              leveragePreview.pool.fee,
+              _userInput,
+              ratio,
+              limit,
+            ] as const;
+
+            if (isMultiSig) {
               const gasEstimation = await debtManager.estimateGas.crossDeleverage(args, opts);
               hash = await debtManager.write.crossDeleverage(args, {
                 ...opts,
@@ -1013,130 +1088,25 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
               });
               break;
             }
-          }
-        }
-      } else {
-        if (input.collateralSymbol === input.borrowSymbol) {
-          switch (input.secondaryOperation) {
-            case 'deposit': {
-              const borrowAssets = newBorrow.value;
-              const assetPermit = await signPermit(_userInput, 'assetIn');
-              const marketPermit = await signPermit(borrowAssets, 'marketIn');
-              if (!assetPermit || !marketPermit || marketPermit.type === 'permit2') return;
-              const args = [marketIn.address, _userInput, ratio, borrowAssets, marketPermit.value] as const;
-              switch (assetPermit.type) {
-                case 'permit': {
-                  const leverageArgs = [...args, assetPermit.value] as const;
-                  const gasEstimation = await debtManager.estimateGas.leverage(leverageArgs, opts);
-                  hash = await debtManager.write.leverage(leverageArgs, {
-                    ...opts,
-                    gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
-                  });
-                  break;
-                }
-                case 'permit2': {
-                  const leverageArgs = [...args, assetPermit.value] as const;
-                  const gasEstimation = await debtManager.estimateGas.leverage(leverageArgs, opts);
-                  hash = await debtManager.write.leverage(leverageArgs, {
-                    ...opts,
-                    gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
-                  });
-                  break;
-                }
-              }
-              break;
+
+            const permitAssets = slippage(
+              (maIn.floatingDepositAssets < newCollateral.value
+                ? 0n
+                : maIn.floatingDepositAssets - newCollateral.value) + _userInput,
+            );
+
+            const marketPermit = await signPermit(permitAssets, 'marketIn');
+            if (!marketPermit || !leveragePreview || marketPermit.type === 'permit2') {
+              return;
             }
-            case 'withdraw': {
-              const permitAssets =
-                (maIn.floatingBorrowAssets < newBorrow.value ? 0n : maIn.floatingBorrowAssets - newBorrow.value) +
-                _userInput;
-              const marketPermit = await signPermit(permitAssets, 'marketIn');
-              if (!marketPermit || marketPermit.type === 'permit2') return;
-              const args = [marketIn.address, ratio, _userInput, permitAssets, marketPermit.value] as const;
-              const gasEstimation = await debtManager.estimateGas.deleverage(args, opts);
-              hash = await debtManager.write.deleverage(args, {
-                ...opts,
-                gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
-              });
-              break;
-            }
-          }
-        } else {
-          switch (input.secondaryOperation) {
-            case 'deposit': {
-              const borrowAssets = newBorrow.value;
-              const assetPermit = await signPermit(_userInput, 'assetIn');
-              const marketPermit = await signPermit(borrowAssets, 'marketOut');
-              if (
-                !assetPermit ||
-                !marketPermit ||
-                !leveragePreview ||
-                marketPermit.type === 'permit2' ||
-                assetPermit.type === 'permit'
-              ) {
-                return;
-              }
 
-              const limit =
-                assetOut.address === leveragePreview.pool.token0
-                  ? slippage(leveragePreview.sqrtPriceX96, false)
-                  : slippage(leveragePreview.sqrtPriceX96);
-
-              const args = [
-                marketIn.address,
-                marketOut.address,
-                leveragePreview.pool.fee,
-                _userInput,
-                ratio,
-                limit,
-                borrowAssets,
-                marketPermit.value,
-              ] as const;
-
-              const leverageArgs = [...args, assetPermit.value] as const;
-
-              const gasEstimation = await debtManager.estimateGas.crossLeverage(leverageArgs, opts);
-              hash = await debtManager.write.crossLeverage(leverageArgs, {
-                ...opts,
-                gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
-              });
-              break;
-            }
-            case 'withdraw': {
-              const permitAssets = slippage(
-                (maIn.floatingDepositAssets < newCollateral.value
-                  ? 0n
-                  : maIn.floatingDepositAssets - newCollateral.value) + _userInput,
-              );
-
-              const marketPermit = await signPermit(permitAssets, 'marketIn');
-              if (!marketPermit || !leveragePreview || marketPermit.type === 'permit2') {
-                return;
-              }
-
-              const limit =
-                assetIn.address === leveragePreview.pool.token0
-                  ? slippage(leveragePreview.sqrtPriceX96, false)
-                  : slippage(leveragePreview.sqrtPriceX96);
-
-              const args = [
-                marketIn.address,
-                marketOut.address,
-                leveragePreview.pool.fee,
-                _userInput,
-                ratio,
-                limit,
-                permitAssets,
-                marketPermit.value,
-              ] as const;
-
-              const gasEstimation = await debtManager.estimateGas.crossDeleverage(args, opts);
-              hash = await debtManager.write.crossDeleverage(args, {
-                ...opts,
-                gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
-              });
-              break;
-            }
+            args = [...args, permitAssets, marketPermit.value] as const;
+            const gasEstimation = await debtManager.estimateGas.crossDeleverage(args, opts);
+            hash = await debtManager.write.crossDeleverage(args, {
+              ...opts,
+              gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
+            });
+            break;
           }
         }
       }

@@ -448,7 +448,7 @@ function Operation() {
     setRequiresApproval(await needsApproval(maxBorrowAssets));
   }, [needsApproval, approve, maxBorrowAssets]);
 
-  if (tx && input.to)
+  if (tx && input.to) {
     return (
       <LoadingTransaction
         tx={tx}
@@ -460,6 +460,7 @@ function Operation() {
         }}
       />
     );
+  }
 
   return (
     <>
