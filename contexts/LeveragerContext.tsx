@@ -7,7 +7,6 @@ import React, {
   useCallback,
   useReducer,
   useMemo,
-  useRef,
 } from 'react';
 import { useSignTypedData, usePublicClient } from 'wagmi';
 import { waitForTransaction } from '@wagmi/core';
@@ -64,7 +63,7 @@ type Input = {
 
 type Value<T> = { display: string; value: T };
 
-type ApprovalStatus = 'INIT' | 'ERC20' | 'ERC20-PERMIT2' | 'MARKET' | 'APPROVED';
+export type ApprovalStatus = 'INIT' | 'ERC20' | 'ERC20-PERMIT2' | 'MARKET' | 'APPROVED';
 
 const DEFAULT_SLIPPAGE = 2n;
 
@@ -138,6 +137,7 @@ type ContextValues = {
   isLoading: boolean;
   loadingUserInput: boolean;
 
+  approvalStatus: ApprovalStatus;
   needsApproval: () => Promise<boolean>;
   approve: () => Promise<void>;
   submit: () => Promise<void>;
@@ -687,7 +687,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     [palette.healthFactor],
   );
 
-  const approvalStatus = useRef<ApprovalStatus>('INIT');
+  const [approvalStatus, setApprovalStatus] = useState<ApprovalStatus>('INIT');
   const needsApproval = useCallback(async (): Promise<boolean> => {
     if (
       !maIn ||
@@ -706,30 +706,30 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     const borrowAssets = newBorrow.value;
     const deposit = parseUnits(input.userInput, maIn.decimals);
     setIsLoading(true);
-    approvalStatus.current = 'INIT';
+    setApprovalStatus('INIT');
     try {
       if (await isContract(walletAddress)) {
         if (input.secondaryOperation === 'deposit') {
-          approvalStatus.current = 'ERC20';
+          setApprovalStatus('ERC20');
           const assetAllowance = await assetIn.read.allowance([walletAddress, debtManager.address], opts);
           if (assetAllowance <= deposit) return true;
         }
 
-        approvalStatus.current = 'MARKET';
+        setApprovalStatus('MARKET');
         const marketOutAllownce = await marketOut.read.allowance([walletAddress, debtManager.address], opts);
         if (marketOutAllownce <= borrowAssets) return true;
 
-        approvalStatus.current = 'APPROVED';
+        setApprovalStatus('APPROVED');
         return false;
       }
 
       if (!isPermitAllowed(chain, maIn.assetSymbol) && input.secondaryOperation === 'deposit') {
-        approvalStatus.current = 'ERC20-PERMIT2';
+        setApprovalStatus('ERC20-PERMIT2');
         const allowance = await assetIn.read.allowance([walletAddress, permit2.address], opts);
         if (allowance <= deposit) return true;
       }
 
-      approvalStatus.current = 'APPROVED';
+      setApprovalStatus('APPROVED');
       return false;
     } catch (e: unknown) {
       setErrorData({ status: true, message: handleOperationError(e) });
@@ -764,7 +764,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     try {
       const args = [debtManager.address, max] as const;
       let hash: Hex | undefined;
-      switch (approvalStatus.current) {
+      switch (approvalStatus) {
         case 'ERC20': {
           const gasEstimation = await assetIn.estimateGas.approve(args, opts);
           hash = await assetIn.write.approve(args, {
@@ -801,7 +801,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     } finally {
       setIsLoading(false);
     }
-  }, [assetIn, debtManager, marketOut, opts, permit2]);
+  }, [approvalStatus, assetIn, debtManager, marketOut, opts, permit2]);
 
   const signPermit = useCallback(
     async (value: bigint, who: 'assetIn' | 'marketIn' | 'marketOut') => {
@@ -974,13 +974,17 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
           }
           switch (input.secondaryOperation) {
             case 'deposit': {
+              const limit =
+                assetOut.address === leveragePreview.pool.token0
+                  ? slippage(leveragePreview.sqrtPriceX96, false)
+                  : slippage(leveragePreview.sqrtPriceX96);
               const args = [
                 marketIn.address,
                 marketOut.address,
                 leveragePreview.pool.fee,
                 _userInput,
                 ratio,
-                leveragePreview.sqrtPriceX96,
+                limit,
               ] as const;
               const gasEstimation = await debtManager.estimateGas.crossLeverage(args, opts);
               hash = await debtManager.write.crossLeverage(args, {
@@ -990,13 +994,17 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
               break;
             }
             case 'withdraw': {
+              const limit =
+                assetIn.address === leveragePreview.pool.token0
+                  ? slippage(leveragePreview.sqrtPriceX96, false)
+                  : slippage(leveragePreview.sqrtPriceX96);
               const args = [
                 marketIn.address,
                 marketOut.address,
                 leveragePreview.pool.fee,
                 _userInput,
                 ratio,
-                leveragePreview.sqrtPriceX96,
+                limit,
               ] as const;
               const gasEstimation = await debtManager.estimateGas.crossDeleverage(args, opts);
               hash = await debtManager.write.crossDeleverage(args, {
@@ -1222,6 +1230,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     isLoading: isLoading || previewIsLoading,
     loadingUserInput: previewDepositIsLoading,
 
+    approvalStatus,
     needsApproval,
     approve,
     submit,

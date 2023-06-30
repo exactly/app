@@ -5,7 +5,7 @@ import { ModalBox } from 'components/common/modal/ModalBox';
 import ModalAlert from 'components/common/modal/ModalAlert';
 import LoadingTransaction from 'components/common/modal/Loading';
 import { useTranslation } from 'react-i18next';
-import { useLeveragerContext } from 'contexts/LeveragerContext';
+import { ApprovalStatus, useLeveragerContext } from 'contexts/LeveragerContext';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { toPercentage } from 'utils/utils';
 import USDValue from 'components/OperationsModal/USDValue';
@@ -13,11 +13,13 @@ import Image from 'next/image';
 import RewardsGroup from '../RewardsGroup';
 import handleOperationError from 'utils/handleOperationError';
 import formatNumber from 'utils/formatNumber';
+import useAccountData from 'hooks/useAccountData';
 
 const Summary = () => {
   const { t } = useTranslation();
   const {
     input,
+    currentLeverageRatio,
     loopAPR,
     newHealthFactor,
     newCollateral,
@@ -30,11 +32,14 @@ const Summary = () => {
     setErrorData,
     approve,
     submit,
+    approvalStatus,
     needsApproval,
     isLoading,
     errorData,
     tx,
   } = useLeveragerContext();
+
+  const { marketAccount } = useAccountData(input.borrowSymbol ?? 'USDC');
 
   const healthFactorColor = useMemo(
     () => getHealthFactorColor(newHealthFactor),
@@ -163,6 +168,14 @@ const Summary = () => {
     );
   }
 
+  const approvalMessage: Record<ApprovalStatus, React.ReactNode> = {
+    INIT: null,
+    APPROVED: null,
+    ERC20: t('Approve {{symbol}}', { symbol: input.collateralSymbol }),
+    'ERC20-PERMIT2': t('Approve {{symbol}}', { symbol: input.collateralSymbol }),
+    MARKET: t('Approve {{symbol}}', { symbol: marketAccount?.symbol }),
+  };
+
   return (
     <Box display="flex" flexDirection="column" gap={3}>
       <ModalBox bgcolor="grey.100">
@@ -211,7 +224,11 @@ const Summary = () => {
               variant="contained"
               disabled={disabledConfirm}
             >
-              {requiresApproval ? t('Approve') : t('Confirm Leverage')}
+              {requiresApproval
+                ? approvalMessage[approvalStatus] ?? t('Approve')
+                : currentLeverageRatio !== 1 && input.leverageRatio === 1
+                ? t('Confirm Deleverage')
+                : t('Confirm Leverage')}
             </LoadingButton>
           </Grid>
         </Grid>
