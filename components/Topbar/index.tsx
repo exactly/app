@@ -9,16 +9,22 @@ import Link from 'next/link';
 import useRouter from 'hooks/useRouter';
 
 const TopBar = () => {
-  const [showBar, setShowBar] = useState(true);
   const { palette } = useTheme();
   const { t } = useTranslation();
   const { query } = useRouter();
 
+  const now = Math.floor(Date.now() / 1000);
+  const expiration = 1688860800;
+  const [showBar, setShowBar] = useState(now <= expiration);
+
   const handleClose = () => {
+    localStorage.setItem('topbar_rollover', 'true');
     setShowBar(false);
   };
 
-  return showBar ? (
+  const seen = localStorage.getItem('topbar_rollover');
+
+  return showBar && !seen ? (
     <Box
       sx={{
         display: 'flex',
