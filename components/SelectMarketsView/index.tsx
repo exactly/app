@@ -70,7 +70,7 @@ const SelectMarketsView: FC = () => {
     <>
       <Link href={{ pathname: '/', query }}>
         <Button
-          variant={!['/dashboard', '/bridge'].includes(currentPathname) ? 'contained' : 'text'}
+          variant={!['/dashboard', '/strategies', '/bridge'].includes(currentPathname) ? 'contained' : 'text'}
           onMouseOver={openMenu}
           onMouseLeave={handleCloseHover}
           sx={{

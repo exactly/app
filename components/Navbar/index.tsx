@@ -23,6 +23,7 @@ import {
 } from '@mui/material';
 
 import CloseIcon from '@mui/icons-material/Close';
+import MovingSharpIcon from '@mui/icons-material/MovingSharp';
 
 import MenuIcon from '@mui/icons-material/Menu';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
@@ -101,6 +102,11 @@ function Navbar() {
         pathname: '/dashboard',
         name: t('Dashboard'),
         icon: <AccountBalanceWalletIcon sx={{ fontSize: 14 }} />,
+      },
+      {
+        pathname: '/strategies',
+        name: t('Strategies'),
+        icon: <MovingSharpIcon sx={{ fontSize: '13px' }} />,
       },
       ...(isOPMainnet
         ? [
