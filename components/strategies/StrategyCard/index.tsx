@@ -71,7 +71,7 @@ function Chip({ children, gradient }: PropsWithChildren<{ gradient: 'green' | 'b
         background: gradients[gradient],
       }}
     >
-      <Typography textTransform="uppercase" variant="chip">
+      <Typography textTransform="uppercase" variant="chip" color="white">
         {children}
       </Typography>
     </Box>
