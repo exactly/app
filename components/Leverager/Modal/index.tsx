@@ -54,7 +54,7 @@ function LeveragerModal() {
       PaperProps={{
         sx: {
           borderRadius: 1,
-          minWidth: '400px',
+          minWidth: '375px',
           maxWidth: '488px !important',
           width: '100%',
           overflowY: 'hidden !important',

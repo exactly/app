@@ -50,7 +50,7 @@ const InfoRow: FC<InfoRowProps> = ({ title, symbol, assets, disabledMessage, onC
                 <USDValue qty={assets} symbol={symbol} />
               </Box>
             ) : (
-              <Skeleton width={170} height={24} />
+              <Skeleton height={24} />
             )}
           </Grid>
         </Grid>
