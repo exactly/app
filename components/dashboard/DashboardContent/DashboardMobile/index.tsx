@@ -1,7 +1,7 @@
 import React, { FC, PropsWithChildren, useEffect } from 'react';
 import { formatFixed } from '@ethersproject/bignumber';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
-import { Box, Button, ButtonGroup, Skeleton, Tooltip, Typography } from '@mui/material';
+import { Box, Button, ButtonGroup, Grid, Skeleton, Tooltip, Typography } from '@mui/material';
 import MaturityLinearProgress from 'components/common/MaturityLinearProgress';
 import MobileAssetCard from 'components/MobileAssetCard';
 import useActionButton, { useStartDebtManagerButton } from 'hooks/useActionButton';
@@ -90,56 +90,60 @@ const DashboardMobile: FC<Props> = ({ type }) => {
                 </FlexItem>
               )}
             </Box>
-            <Box display="flex" gap={0.5}>
-              <Button
-                fullWidth
-                variant="contained"
-                sx={{ height: '34px' }}
-                onClick={(e) => handleActionClick(e, type, symbol)}
-              >
-                {isDeposit ? t('Deposit') : t('Borrow')}
-              </Button>
-              {isDeposit ? (
+            <Grid container spacing={0.5}>
+              <Grid item xs={isDeposit ? 6 : 4}>
                 <Button
-                  variant="outlined"
                   fullWidth
+                  variant="contained"
                   sx={{ height: '34px' }}
-                  onClick={(e) => handleActionClick(e, 'withdraw', symbol)}
+                  onClick={(e) => handleActionClick(e, type, symbol)}
                 >
-                  {t('Withdraw')}
+                  {isDeposit ? t('Deposit') : t('Borrow')}
                 </Button>
-              ) : (
-                <ButtonGroup fullWidth disableElevation>
+              </Grid>
+              <Grid item xs={isDeposit ? 6 : 8}>
+                {isDeposit ? (
                   <Button
                     variant="outlined"
-                    sx={{
-                      backgroundColor: 'components.bg',
-                      whiteSpace: 'nowrap',
-                      height: '34px',
-                      '&:hover': { zIndex: 1 },
-                    }}
-                    onClick={(e) => handleActionClick(e, 'repay', symbol)}
+                    fullWidth
+                    sx={{ height: '34px' }}
+                    onClick={(e) => handleActionClick(e, 'withdraw', symbol)}
                   >
-                    {t('Repay')}
+                    {t('Withdraw')}
                   </Button>
-                  <Button
-                    variant="outlined"
-                    sx={{
-                      backgroundColor: 'components.bg',
-                      whiteSpace: 'nowrap',
-                      height: '34px',
-                      '&:disabled': {
-                        borderLeftColor: ({ palette }) => palette.grey[palette.mode === 'light' ? 500 : 300],
-                      },
-                    }}
-                    onClick={() => startDebtManager({ symbol })}
-                    disabled={isRolloverDisabled(borrowedAmount)}
-                  >
-                    {t('Rollover')}
-                  </Button>
-                </ButtonGroup>
-              )}
-            </Box>
+                ) : (
+                  <ButtonGroup fullWidth disableElevation>
+                    <Button
+                      variant="outlined"
+                      sx={{
+                        backgroundColor: 'components.bg',
+                        whiteSpace: 'nowrap',
+                        height: '34px',
+                        '&:hover': { zIndex: 1 },
+                      }}
+                      onClick={(e) => handleActionClick(e, 'repay', symbol)}
+                    >
+                      {t('Repay')}
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      sx={{
+                        backgroundColor: 'components.bg',
+                        whiteSpace: 'nowrap',
+                        height: '34px',
+                        '&:disabled': {
+                          borderLeftColor: ({ palette }) => palette.grey[palette.mode === 'light' ? 500 : 300],
+                        },
+                      }}
+                      onClick={() => startDebtManager({ symbol })}
+                      disabled={isRolloverDisabled(borrowedAmount)}
+                    >
+                      {t('Rollover')}
+                    </Button>
+                  </ButtonGroup>
+                )}
+              </Grid>
+            </Grid>
           </>
         </MobileAssetCard>
       ))}
