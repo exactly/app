@@ -1,4 +1,4 @@
-import { Address, parseEther, parseUnits, createPublicClient, http, toHex, encodeFunctionData } from 'viem';
+import { Address, parseEther, parseUnits, createPublicClient, http, toHex, encodeFunctionData, pad, trim } from 'viem';
 import { Chain, mainnet } from 'viem/chains';
 
 import type { Coin, ERC20TokenSymbol } from './contracts';
@@ -40,14 +40,7 @@ export const createFork = async (networkId: number | string = mainnet.id): Promi
 
 export const deleteFork = async (forkId: string): Promise<void> => {
   const TENDERLY_FORK_API = `${FORK_URL}/${forkId}`;
-
   await fetch(TENDERLY_FORK_API, { method: 'DELETE', headers });
-};
-
-const getTopHolder = async (tokenAddress: string) => {
-  return await fetch(`https://api.ethplorer.io/getTopTokenHolders/${tokenAddress}?apiKey=freekey&limit=1`)
-    .then((response) => response.json())
-    .then((data) => data.holders[0].address);
 };
 
 export type Balance = {
@@ -66,26 +59,52 @@ export const tenderly = async ({ chain = mainnet }: { chain: Chain }): Promise<T
   };
 
   const setERC20TokenBalance = async (address: Address, symbol: ERC20TokenSymbol, amount: number) => {
-    const token = await erc20(symbol);
-    const from = await getTopHolder(token.address);
-    await transferERC20(symbol, from, address, amount);
-  };
-
-  const transferERC20 = async (symbol: ERC20TokenSymbol, fromAddress: Address, toAddress: Address, amount: number) => {
-    await setNativeBalance(fromAddress, 10);
-
     const tokenContract = await erc20(symbol, { publicClient });
     const tokenAmount = parseUnits(String(amount), await tokenContract.read.decimals());
 
-    const data = encodeFunctionData({
-      abi: tokenContract.abi,
-      functionName: 'transfer',
-      args: [toAddress, tokenAmount],
+    let owner = await publicClient.readContract({
+      address: tokenContract.address,
+      abi: [
+        {
+          stateMutability: 'view',
+          type: 'function',
+          inputs: [],
+          name: 'owner',
+          outputs: [{ name: 'owner', internalType: 'address', type: 'address' }],
+        },
+      ],
+      functionName: 'owner',
     });
+
+    if (symbol === 'USDC') {
+      const l2Bridge = await publicClient.getStorageAt({ address: tokenContract.address, slot: '0x6' });
+      owner = pad(trim(l2Bridge), { size: 20 });
+    }
 
     await publicClient.request({
       method: 'eth_sendTransaction',
-      params: [{ from: fromAddress, to: tokenContract.address, data }],
+      params: [
+        {
+          from: owner,
+          to: tokenContract.address,
+          data: encodeFunctionData({
+            abi: [
+              {
+                stateMutability: 'nonpayable',
+                type: 'function',
+                inputs: [
+                  { name: 'account', internalType: 'address', type: 'address' },
+                  { name: 'amount', internalType: 'uint256', type: 'uint256' },
+                ],
+                name: 'mint',
+                outputs: [],
+              },
+            ],
+            functionName: 'mint',
+            args: [address, tokenAmount],
+          }),
+        },
+      ],
     });
   };
 

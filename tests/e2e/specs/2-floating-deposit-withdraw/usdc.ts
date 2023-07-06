@@ -3,7 +3,7 @@ import deposit from '../../steps/common/deposit';
 import withdraw, { attemptWithdraw } from '../../steps/common/withdraw';
 import { setup } from '../../steps/setup';
 
-describe('WBTC floating deposit/withdraw', () => {
+describe('USDC floating deposit/withdraw', () => {
   const { visit, setBalance, userAddress, publicClient } = setup();
 
   before(() => {
@@ -13,32 +13,32 @@ describe('WBTC floating deposit/withdraw', () => {
   before(async () => {
     await setBalance(userAddress(), {
       ETH: 100,
-      WBTC: 5,
+      USDC: 5,
     });
   });
 
   deposit({
     type: 'floating',
-    symbol: 'WBTC',
-    decimals: 8,
+    symbol: 'USDC',
+    decimals: 6,
     balance: '5.0',
     amount: '1.5',
     shouldApprove: true,
   });
 
   describe('Status after deposit', () => {
-    checkBalance({ address: userAddress(), symbol: 'WBTC', amount: '3.5' }, publicClient);
+    checkBalance({ address: userAddress(), symbol: 'USDC', amount: '3.5' }, publicClient);
   });
 
-  attemptWithdraw({ type: 'floating', symbol: 'WBTC', amount: '5' });
+  attemptWithdraw({ type: 'floating', symbol: 'USDC', amount: '5' });
 
   withdraw({
     type: 'floating',
-    symbol: 'WBTC',
+    symbol: 'USDC',
     amount: '0.5',
   });
 
   describe('Status after withdraw', () => {
-    checkBalance({ address: userAddress(), symbol: 'WBTC', amount: '4' }, publicClient);
+    checkBalance({ address: userAddress(), symbol: 'USDC', amount: '4' }, publicClient);
   });
 });

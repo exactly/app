@@ -25,11 +25,5 @@ const selectPool = (pools: number[]): number => {
     throw new Error('Not enough fixed pools');
   }
 
-  const now = dayjs().unix();
-
-  if (now + 21_600 > pools[0]) {
-    return pools[1];
-  }
-
-  return pools[0];
+  return pools[1];
 };

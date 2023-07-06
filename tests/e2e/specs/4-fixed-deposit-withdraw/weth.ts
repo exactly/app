@@ -37,7 +37,6 @@ describe('WETH fixed withdraw/deposit', () => {
     symbol: 'WETH',
     decimals: 18,
     amount: '2',
-    maxYield: '100.0',
     balance: '174',
     maturity: pool,
   });

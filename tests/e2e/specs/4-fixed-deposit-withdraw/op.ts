@@ -6,26 +6,26 @@ import { setup } from '../../steps/setup';
 import depositAtMaturity from '../../steps/common/deposit';
 import withdrawAtMaturity from '../../steps/common/withdraw';
 
-describe('WBTC fixed withdraw/deposit', () => {
+describe('OP fixed withdraw/deposit', () => {
   const { visit, setBalance, userAddress, walletClient, publicClient } = setup();
   const pool = selectFixedPool();
 
   before(() => {
-    visit('/WBTC');
+    visit('/OP');
   });
 
   before(async () => {
     await setBalance(userAddress(), {
       ETH: 100,
-      WBTC: 500,
+      OP: 50_000,
     });
   });
 
   describe('Setup environment for successful fixed deposit', () => {
-    enterMarket('WBTC', walletClient);
-    deposit({ symbol: 'WBTC', amount: '400', receiver: userAddress() }, walletClient, publicClient);
+    enterMarket('OP', walletClient);
+    deposit({ symbol: 'OP', amount: '50000', receiver: userAddress() }, walletClient, publicClient);
     borrowAtMaturity(
-      { symbol: 'WBTC', amount: '5', maturity: BigInt(pool), receiver: userAddress() },
+      { symbol: 'OP', amount: '5000', maturity: BigInt(pool), receiver: userAddress() },
       walletClient,
       publicClient,
     );
@@ -35,34 +35,32 @@ describe('WBTC fixed withdraw/deposit', () => {
 
   depositAtMaturity({
     type: 'fixed',
-    symbol: 'WBTC',
-    decimals: 8,
-    amount: '10',
-    maxYield: '50',
-    balance: '105',
+    symbol: 'OP',
+    decimals: 18,
+    amount: '2500',
     maturity: pool,
   });
 
   describe('Status after fixed deposit', () => {
-    checkBalance({ address: userAddress(), symbol: 'WBTC', amount: '95' }, publicClient);
+    checkBalance({ address: userAddress(), symbol: 'OP', amount: '2500' }, publicClient);
 
     it('should navigate to the dashboard', () => {
       navbar.goTo('dashboard');
     });
 
     it('should have a fixed deposit for WBTC', () => {
-      dashboard.checkFixedTableRow('deposit', 'WBTC', pool);
+      dashboard.checkFixedTableRow('deposit', 'OP', pool);
     });
   });
 
   withdrawAtMaturity({
     type: 'fixed',
-    symbol: 'WBTC',
-    amount: '5',
+    symbol: 'OP',
+    amount: '1000',
     maturity: pool,
   });
 
   describe('Status after fixed withdraw', () => {
-    checkBalance({ address: userAddress(), symbol: 'WBTC', amount: '100', delta: 0.005 }, publicClient);
+    checkBalance({ address: userAddress(), symbol: 'OP', amount: '3500', delta: 0.005 }, publicClient);
   });
 });

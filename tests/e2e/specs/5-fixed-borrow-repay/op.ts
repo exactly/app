@@ -6,37 +6,37 @@ import { setup } from '../../steps/setup';
 import borrowAtMaturity from '../../steps/common/borrow';
 import repayAtMaturity from '../../steps/common/repay';
 
-describe('WBTC fixed borrow/repay', () => {
+describe('OP fixed borrow/repay', () => {
   const { visit, setBalance, userAddress, walletClient, publicClient } = setup();
   const pool = selectFixedPool();
 
   before(() => {
-    visit('/WBTC');
+    visit('/OP');
   });
 
   before(async () => {
     await setBalance(userAddress(), {
       ETH: 200,
-      WBTC: 250,
+      OP: 250,
     });
   });
 
   describe('Setup environment for a successful fixed borrow', () => {
-    enterMarket('WBTC', walletClient);
-    deposit({ symbol: 'WBTC', amount: '200', receiver: userAddress() }, walletClient, publicClient);
+    enterMarket('OP', walletClient);
+    deposit({ symbol: 'OP', amount: '200', receiver: userAddress() }, walletClient, publicClient);
 
     reload();
   });
 
   borrowAtMaturity({
     type: 'fixed',
-    symbol: 'WBTC',
+    symbol: 'OP',
     amount: '5',
     maturity: pool,
   });
 
   describe('Status after fixed borrow', () => {
-    checkBalance({ address: userAddress(), symbol: 'WBTC', amount: '55' }, publicClient);
+    checkBalance({ address: userAddress(), symbol: 'OP', amount: '55' }, publicClient);
 
     it('should navigate to the dashboard', () => {
       navbar.goTo('dashboard');
@@ -44,18 +44,18 @@ describe('WBTC fixed borrow/repay', () => {
     });
 
     it('should have a fixed borrow for WBTC', () => {
-      dashboard.checkFixedTableRow('borrow', 'WBTC', pool);
+      dashboard.checkFixedTableRow('borrow', 'OP', pool);
     });
   });
 
   repayAtMaturity({
     type: 'fixed',
-    symbol: 'WBTC',
+    symbol: 'OP',
     amount: '3',
     maturity: pool,
   });
 
   describe('Status after fixed repay', () => {
-    checkBalance({ address: userAddress(), symbol: 'WBTC', amount: '52', delta: 0.005 }, publicClient);
+    checkBalance({ address: userAddress(), symbol: 'OP', amount: '52', delta: 0.005 }, publicClient);
   });
 });
