@@ -3,7 +3,7 @@ import { isAddress } from 'viem';
 import { Address, Chain, useAccount, useConnect } from 'wagmi';
 import { useWeb3Modal } from '@web3modal/react';
 import { isE2E, supportedChains } from 'utils/client';
-import { useNetworkContext } from 'contexts/NetworkContext';
+import { optimism } from 'wagmi/chains';
 import useRouter from './useRouter';
 
 type Web3 = {
@@ -12,7 +12,6 @@ type Web3 = {
   impersonateActive: boolean;
   exitImpersonate: () => void;
   walletAddress?: Address;
-  chains: Chain[];
   chain: Chain;
   opts?: {
     account: Address;
@@ -23,7 +22,9 @@ type Web3 = {
 export const useWeb3 = (): Web3 => {
   const { query, replace } = useRouter();
   const { address, isConnected } = useAccount();
-  const { displayNetwork } = useNetworkContext();
+
+  const networkId = Number(process.env.NEXT_PUBLIC_DISPLAY_NETWORK_ID);
+  const displayNetwork = supportedChains.find((c) => c.id === networkId) ?? optimism;
 
   const [walletAddress, impersonateActive] = useMemo((): [Address | undefined, boolean] => {
     const { account } = query;
@@ -61,7 +62,6 @@ export const useWeb3 = (): Web3 => {
     impersonateActive,
     exitImpersonate,
     walletAddress,
-    chains: supportedChains,
     chain: displayNetwork,
     opts,
   };

@@ -16,13 +16,7 @@ const rpcURL = typeof window !== 'undefined' ? window?.rpcURL : undefined;
 
 export const walletConnectId = '11ddaa8aaede72cb5d6b0dae2fed7baa';
 
-export const supportedChains = [
-  mainnet,
-  optimism,
-  ...(JSON.parse(process.env.NEXT_PUBLIC_ENABLE_TESTNETS ?? 'false') ? [goerli] : []),
-];
-
-export const defaultChain = { mainnet, optimism, goerli }[process.env.NEXT_PUBLIC_NETWORK ?? 'mainnet'];
+export const supportedChains = [mainnet, optimism, goerli];
 
 const alchemyKey = process.env.NEXT_PUBLIC_ALCHEMY_API_KEY;
 

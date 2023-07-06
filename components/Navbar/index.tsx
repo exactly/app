@@ -33,7 +33,6 @@ import Wallet from 'components/Wallet';
 import SelectMarketsView from 'components/SelectMarketsView';
 import { useMarketContext } from 'contexts/MarketContext';
 import ClaimRewards from 'components/ClaimRewards';
-import SelectDisplayNetwork from 'components/SelectDisplayNetwork';
 import { useTranslation } from 'react-i18next';
 import MaturityDateReminder from 'components/MaturityDateReminder';
 import Faucet from 'components/operations/Faucet';
@@ -153,7 +152,6 @@ function Navbar() {
             {isConnected && chain?.id === goerli.id && (
               <Chip label="Goerli Faucet" onClick={handleFaucetClick} sx={{ my: 'auto', display: onlyDesktopFlex }} />
             )}
-            <SelectDisplayNetwork />
             <Box display="flex" gap={0.5}>
               <ClaimRewards />
               <Wallet />

@@ -19,18 +19,18 @@ import Footer from 'components/Footer';
 import Navbar from 'components/Navbar';
 import { globals } from 'styles/theme';
 import { MarketsBasicProvider } from 'contexts/MarketsBasicContext';
-import { NetworkContextProvider, useNetworkContext } from 'contexts/NetworkContext';
 import { DebtManagerContextProvider } from 'contexts/DebtManagerContext';
 import { GlobalErrorProvider } from 'contexts/GlobalErrorContext';
 import OperationsModal from 'components/OperationsModal';
 import { useInitGA } from 'hooks/useAnalytics';
 import Topbar from 'components/Topbar';
+import { useWeb3 } from 'hooks/useWeb3';
 
 const { maxWidth } = globals;
 
 const Web3ModalWrapper = () => {
   const { palette } = useTheme();
-  const { displayNetwork } = useNetworkContext();
+  const { chain: displayNetwork } = useWeb3();
   return (
     <Web3Modal
       projectId={walletConnectId}
@@ -83,28 +83,26 @@ export default function App({ Component, pageProps }: AppProps) {
       <ThemeProvider>
         <WagmiConfig config={wagmi}>
           <GlobalErrorProvider>
-            <NetworkContextProvider>
-              <AccountDataProvider>
-                <MarketProvider>
-                  <ModalStatusProvider>
-                    <DebtManagerContextProvider>
-                      <MarketsBasicProvider>
-                        <Topbar />
-                        <Box display="flex" flexDirection="column" mx={2} height="100%">
-                          <Navbar />
-                          <main style={{ flexGrow: 1, maxWidth, margin: '0 auto', width: '100%' }}>
-                            <Component {...pageProps} />
-                          </main>
-                          <Footer />
-                        </Box>
-                        <OperationsModal />
-                      </MarketsBasicProvider>
-                    </DebtManagerContextProvider>
-                  </ModalStatusProvider>
-                </MarketProvider>
-              </AccountDataProvider>
-              <Web3ModalWrapper />
-            </NetworkContextProvider>
+            <AccountDataProvider>
+              <MarketProvider>
+                <ModalStatusProvider>
+                  <DebtManagerContextProvider>
+                    <MarketsBasicProvider>
+                      <Topbar />
+                      <Box display="flex" flexDirection="column" mx={2} height="100%">
+                        <Navbar />
+                        <main style={{ flexGrow: 1, maxWidth, margin: '0 auto', width: '100%' }}>
+                          <Component {...pageProps} />
+                        </main>
+                        <Footer />
+                      </Box>
+                      <OperationsModal />
+                    </MarketsBasicProvider>
+                  </DebtManagerContextProvider>
+                </ModalStatusProvider>
+              </MarketProvider>
+            </AccountDataProvider>
+            <Web3ModalWrapper />
           </GlobalErrorProvider>
         </WagmiConfig>
       </ThemeProvider>
