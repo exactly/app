@@ -92,7 +92,7 @@ function TableRowFixedPool({ symbol, valueUSD, type, maturityDate, market, decim
   return (
     <>
       <TableRow
-        sx={{ '& > *': { borderBottom: 'unset' }, backgroundColor: open ? 'grey.100' : 'transparent' }}
+        sx={{ '& > *, & td': { borderBottom: 0 }, backgroundColor: open ? 'grey.100' : 'transparent' }}
         hover
         data-testid={`dashboard-fixed-${type}-row-${maturityDate}-${symbol}`}
       >
