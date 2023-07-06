@@ -43,7 +43,7 @@ function FloatingPoolDashboardTable({ type, rows }: Props) {
         sortKey: 'valueUSD',
       },
       {
-        title: t('Market APR'),
+        title: t('Total APR'),
         key: 'apr',
         align: 'left',
         sortKey: 'apr',

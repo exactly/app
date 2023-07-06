@@ -17,8 +17,8 @@ import useRouter from 'hooks/useRouter';
 import useRewards from 'hooks/useRewards';
 import { useTranslation } from 'react-i18next';
 import { toPercentage } from 'utils/utils';
-import RewardPill from 'components/markets/RewardPill';
 import RolloverButton from 'components/DebtManager/Button';
+import APRWithBreakdown from 'components/APRWithBreakdown';
 
 type Props = {
   symbol: string;
@@ -80,16 +80,30 @@ function TableRowFloatingPool({ symbol, valueUSD, depositedAmount, borrowedAmoun
       </TableCell>
       <TableCell align="left" size="small">
         <Box display="flex" width="fit-content" gap={1}>
-          <Typography>{(apr !== undefined && toPercentage(apr)) || <Skeleton width={70} />}</Typography>
-          {rates &&
-            rates[symbol] &&
-            rates[symbol]?.map((r) => (
-              <RewardPill
-                key={r.asset}
-                rate={type === 'deposit' ? r.floatingDeposit : r.borrow}
-                symbol={r.assetSymbol}
-              />
-            ))}
+          <APRWithBreakdown
+            markets={[{ apr, symbol }]}
+            rewards={
+              rates &&
+              rates[symbol] &&
+              rates[symbol]?.map((r) => ({
+                symbol: r.assetSymbol,
+                apr: Number(type === 'deposit' ? r.floatingDeposit : r.borrow) / 1e18,
+              }))
+            }
+          >
+            <Typography fontSize={16} fontWeight={700}>
+              {(apr !== undefined &&
+                toPercentage(
+                  apr +
+                    (rates && rates[symbol]
+                      ? rates[symbol]?.reduce(
+                          (acc, curr) => acc + Number(type === 'deposit' ? curr.floatingDeposit : curr.borrow) / 1e18,
+                          0,
+                        )
+                      : 0),
+                )) || <Skeleton width={70} />}
+            </Typography>
+          </APRWithBreakdown>
         </Box>
       </TableCell>
       {type === 'deposit' ? (

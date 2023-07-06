@@ -14,8 +14,8 @@ import useAccountData from 'hooks/useAccountData';
 import { useTranslation } from 'react-i18next';
 import { toPercentage } from 'utils/utils';
 import useRewards from 'hooks/useRewards';
-import RewardPill from 'components/markets/RewardPill';
 import useAnalytics from 'hooks/useAnalytics';
+import APRWithBreakdown from 'components/APRWithBreakdown';
 
 type Props = {
   type: 'deposit' | 'borrow';
@@ -70,18 +70,33 @@ const DashboardMobile: FC<Props> = ({ type }) => {
                   <Skeleton width={40} />
                 )}
               </FlexItem>
-              <FlexItem title={t('Market APR')}>
+              <FlexItem title={t('Total APR')}>
                 <Box display="flex" width="fit-content" gap={1}>
-                  {rates &&
-                    rates[symbol] &&
-                    rates[symbol].map((r) => (
-                      <RewardPill
-                        key={r.asset}
-                        rate={type === 'deposit' ? r.floatingDeposit : r.borrow}
-                        symbol={r.assetSymbol}
-                      />
-                    ))}
-                  {(apr !== undefined && toPercentage(apr)) || <Skeleton width={40} />}
+                  <APRWithBreakdown
+                    markets={[{ apr, symbol }]}
+                    rewards={
+                      rates &&
+                      rates[symbol] &&
+                      rates[symbol]?.map((r) => ({
+                        symbol: r.assetSymbol,
+                        apr: Number(type === 'deposit' ? r.floatingDeposit : r.borrow) / 1e18,
+                      }))
+                    }
+                  >
+                    <Typography fontSize={16} fontWeight={700}>
+                      {(apr !== undefined &&
+                        toPercentage(
+                          apr +
+                            (rates && rates[symbol]
+                              ? rates[symbol]?.reduce(
+                                  (acc, curr) =>
+                                    acc + Number(type === 'deposit' ? curr.floatingDeposit : curr.borrow) / 1e18,
+                                  0,
+                                )
+                              : 0),
+                        )) || <Skeleton width={70} />}
+                    </Typography>
+                  </APRWithBreakdown>
                 </Box>
               </FlexItem>
               {isDeposit && (
