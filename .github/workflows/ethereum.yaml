@@ -3,12 +3,15 @@ on:
     branches: [main]
 
 jobs:
-  goerli:
+  deploy:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        network: ['ethereum', 'goerli']
     steps:
       - uses: actions/checkout@v3
         with:
-          ref: goerli
+          ref: ${{ matrix.network }}
       - run: |
           git fetch --unshallow
           git reset --hard origin/main
