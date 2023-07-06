@@ -13,7 +13,7 @@ function getBeforeBorrowLimit(marketAccount: Previewer.MarketAccountStructOutput
   const hasDepositedToFloatingPool = floatingDepositAssets.gt(Zero);
 
   if (!isCollateral && hasDepositedToFloatingPool && type === 'borrow') {
-    before = maxBorrowAssets.add(
+    before = before.add(
       floatingDepositAssets
         .mul(usdPrice)
         .div(decimalWAD)

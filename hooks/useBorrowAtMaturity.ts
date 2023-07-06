@@ -178,10 +178,10 @@ export default (): BorrowAtMaturity => {
         });
       }
 
-      const maxBorrowAssets = getBeforeBorrowLimit(marketAccount, 'borrow');
+      const borrowLimit = getBeforeBorrowLimit(marketAccount, 'borrow');
 
       if (
-        maxBorrowAssets.lt(
+        borrowLimit.lt(
           parseFixed(value || '0', decimals)
             .mul(usdPrice)
             .div(WeiPerEther),

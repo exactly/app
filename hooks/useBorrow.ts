@@ -51,7 +51,7 @@ export default (): Borrow => {
     needsApproval,
   } = useApprove('borrow', marketContract, ETHRouterContract?.address);
 
-  const maxBorrowAssets: BigNumber = useMemo(
+  const borrowLimit: BigNumber = useMemo(
     () => (marketAccount ? getBeforeBorrowLimit(marketAccount, 'borrow') : Zero),
     [marketAccount],
   );
@@ -159,7 +159,7 @@ export default (): Borrow => {
       }
 
       if (
-        maxBorrowAssets.lt(
+        borrowLimit.lt(
           parseFixed(value || '0', decimals)
             .mul(usdPrice)
             .div(WeiPerEther),
@@ -172,7 +172,7 @@ export default (): Borrow => {
       }
       setErrorData(undefined);
     },
-    [liquidity, marketAccount, setQty, hasCollateral, setErrorData, maxBorrowAssets, t],
+    [liquidity, marketAccount, setQty, hasCollateral, setErrorData, borrowLimit, t],
   );
 
   const handleBasicInputChange = useCallback(
@@ -184,7 +184,7 @@ export default (): Borrow => {
       setQty(value);
 
       if (
-        maxBorrowAssets.lt(
+        borrowLimit.lt(
           parseFixed(value || '0', decimals)
             .mul(usdPrice)
             .div(WeiPerEther),
@@ -197,7 +197,7 @@ export default (): Borrow => {
       }
       setErrorData(undefined);
     },
-    [marketAccount, setQty, maxBorrowAssets, setErrorData, t],
+    [marketAccount, setQty, borrowLimit, setErrorData, t],
   );
 
   const borrow = useCallback(async () => {
