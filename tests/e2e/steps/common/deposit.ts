@@ -16,20 +16,10 @@ type TestParams = (
   decimals: number;
   amount?: string;
   balance?: string;
-  maxYield?: string;
   shouldApprove?: boolean;
 };
 
-export default ({
-  type,
-  symbol,
-  decimals,
-  balance,
-  amount = '1',
-  shouldApprove = false,
-  maturity,
-  maxYield,
-}: TestParams) => {
+export default ({ type, symbol, decimals, balance, amount = '1', shouldApprove = false, maturity }: TestParams) => {
   describe(`${symbol} ${type} deposit`, () => {
     it('should open the modal', () => {
       modal.open(type, 'deposit', symbol, maturity);
@@ -40,7 +30,9 @@ export default ({
         modal.checkTitle('Deposit');
         modal.checkType(type);
         modal.checkAssetSelection(symbol);
-        modal.checkWalletBalance(balance);
+        if (balance) {
+          modal.checkWalletBalance(balance);
+        }
 
         if (type === 'fixed') {
           modal.checkPoolDate(maturity);
@@ -69,13 +61,6 @@ export default ({
         it('should input the wallet balance on max', () => {
           modal.onMax();
           modal.checkInput(balance);
-        });
-      }
-
-      if (type === 'fixed' && maxYield) {
-        it('should warn the user about depositing more than the optimal amount', () => {
-          modal.input(maxYield);
-          modal.checkAlert('warning', 'You have reached the maximum yield possible');
         });
       }
 

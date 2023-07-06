@@ -1,6 +1,6 @@
 import { Address, createPublicClient, createWalletClient, http } from 'viem';
 import { privateKeyToAccount, generatePrivateKey } from 'viem/accounts';
-import { Chain, mainnet } from 'viem/chains';
+import { Chain, optimism } from 'viem/chains';
 
 import { Wallet } from '@ethersproject/wallet';
 
@@ -30,7 +30,7 @@ type SetupParams = {
 };
 
 export const setup = ({
-  chain = mainnet,
+  chain = optimism,
   privateKey = generatePrivateKey(),
   useDefaultProvider = false,
 }: SetupParams = {}) => {
