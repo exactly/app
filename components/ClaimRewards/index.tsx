@@ -13,15 +13,15 @@ const ClaimRewards: FC = () => {
   const { t } = useTranslation();
   const { walletAddress } = useWeb3();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const { rewards, claimable, claim, isLoading } = useRewards();
+  const { rewards, claimable, claimAll, isLoading } = useRewards();
 
   const open = useCallback((event: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget), []);
   const close = useCallback(() => setAnchorEl(null), []);
   const isOpen = Boolean(anchorEl);
   const onClickClaim = useCallback(async () => {
-    await claim();
+    await claimAll();
     close();
-  }, [claim, close]);
+  }, [claimAll, close]);
 
   if (!walletAddress || !claimable || Object.keys(rewards).length === 0) {
     return null;

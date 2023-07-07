@@ -51,7 +51,7 @@ const UserRewards = () => {
   const { t } = useTranslation();
   const { breakpoints } = useTheme();
   const isMobile = useMediaQuery(breakpoints.down('lg'));
-  const { rewards: rs, rates, claimable, claim, isLoading } = useRewards();
+  const { rewards: rs, rates, claimable, claimAll, isLoading } = useRewards();
 
   const rewards = useMemo(() => {
     if (!Object.keys(rates).length) return undefined;
@@ -66,7 +66,7 @@ const UserRewards = () => {
         return acc;
       }, {});
 
-    return Object.entries(rs).map(([assetSymbol, amount]) => {
+    return Object.entries(rs).map(([assetSymbol, { amount }]) => {
       const _amountInUSD = ratesPerAsset[assetSymbol]
         ? (amount * ratesPerAsset[assetSymbol]) / WEI_PER_ETHER
         : undefined;
@@ -144,7 +144,7 @@ const UserRewards = () => {
         fullWidth={isMobile}
         sx={{ px: 3 }}
         disabled={isLoading || !claimable}
-        onClick={claim}
+        onClick={claimAll}
       >
         {t('Claim')}
       </Button>

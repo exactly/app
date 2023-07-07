@@ -19,7 +19,7 @@ import { formatUnits } from 'viem';
 import { isBridgeInput } from 'components/BridgeContent/utils';
 import { BridgeInput } from 'types/Bridge';
 
-type ItemVariant = 'operation' | 'approve' | 'enterMarket' | 'exitMarket' | 'claimAll' | 'roll' | 'bridge';
+type ItemVariant = 'operation' | 'approve' | 'enterMarket' | 'exitMarket' | 'claimAll' | 'claim' | 'roll' | 'bridge';
 type TrackItem = { eventName: string; variant: ItemVariant };
 
 type Row = {
@@ -275,7 +275,7 @@ export default function useAnalytics({ symbol, rewards }: { symbol?: string; rew
     ({ eventName, variant = 'operation' }: TrackItem) => {
       const items =
         variant === 'claimAll' && rewards
-          ? Object.entries(rewards).map(([rewardSymbol, amount], index) => {
+          ? Object.entries(rewards).map(([rewardSymbol, { amount }], index) => {
               return {
                 index,
                 item_id: `RewardsController.claimAll`,
