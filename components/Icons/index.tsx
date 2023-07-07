@@ -1,4 +1,4 @@
-import { createSvgIcon } from '@mui/material';
+import { createSvgIcon, styled } from '@mui/material';
 import React from 'react';
 
 export const SimpleViewIcon = createSvgIcon(
@@ -48,3 +48,37 @@ export const BorrowLimitIcon = createSvgIcon(
   </svg>,
   'BorrowLimit',
 );
+
+export const CheckboxIcon = styled('span')(({ theme }) => ({
+  borderRadius: '4px',
+  width: 18,
+  height: 18,
+  boxShadow: theme.palette.mode === 'dark' ? '0 0 0 1px white' : 'inset 0 0 0 1px black, inset 0 -1px 0 black',
+  '.Mui-focusVisible &': {
+    outline: '2px auto rgba(19,124,189,.6)',
+    outlineOffset: 2,
+  },
+  'input:disabled ~ &': {
+    boxShadow: 'none',
+    background: theme.palette.mode === 'dark' ? 'rgba(57,75,89,.5)' : 'rgba(206,217,224,.5)',
+  },
+}));
+
+export const CheckboxCheckedIcon = styled(CheckboxIcon)(({ theme }) => ({
+  backgroundColor: theme.palette.mode === 'dark' ? 'white' : 'black',
+  '&:before': {
+    display: 'block',
+    width: 18,
+    height: 18,
+    backgroundImage:
+      "url(\"data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath" +
+      " fill-rule='evenodd' clip-rule='evenodd' d='M12 5c-.28 0-.53.11-.71.29L7 9.59l-2.29-2.3a1.003 " +
+      `1.003 0 00-1.42 1.42l3 3c.18.18.43.29.71.29s.53-.11.71-.29l5-5A1.003 1.003 0 0012 5z' fill='${
+        theme.palette.mode === 'dark' ? 'black' : 'white'
+      }'/%3E%3C/svg%3E")`,
+    content: '""',
+  },
+  'input:hover ~ &': {
+    backgroundColor: theme.palette.mode === 'dark' ? 'white' : 'black',
+  },
+}));

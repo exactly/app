@@ -25,6 +25,7 @@ import CloseIcon from '@mui/icons-material/Close';
 
 import MenuIcon from '@mui/icons-material/Menu';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
+import RepeatRoundedIcon from '@mui/icons-material/RepeatRounded';
 import { globals } from 'styles/theme';
 import MobileMenu from 'components/MobileMenu';
 import Link from 'next/link';
@@ -36,7 +37,7 @@ import { useTranslation } from 'react-i18next';
 import MaturityDateReminder from 'components/MaturityDateReminder';
 import Faucet from 'components/operations/Faucet';
 import SecondaryChain from 'components/SecondaryChain';
-import RepeatRoundedIcon from '@mui/icons-material/RepeatRounded';
+import RewardsModal from 'components/RewardsModal';
 
 const { onlyMobile, onlyDesktopFlex } = globals;
 
@@ -223,6 +224,8 @@ function Navbar() {
           </DialogContent>
         </Box>
       </Dialog>
+
+      <RewardsModal isOpen={true} close={undefined} />
     </Box>
   );
 }

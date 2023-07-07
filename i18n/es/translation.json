@@ -298,5 +298,15 @@
   "View TX": "Ver TX",
   "Transaction History": "Historial de transacciones",
   "No Transactions yet.": "Aún no hay transacciones.",
-  "Start bridging and swapping to see your transaction history here.": "Comience a intercambiar para ver su historial de transacciones aquí."
+  "Start bridging and swapping to see your transaction history here.": "Comience a intercambiar para ver su historial de transacciones aquí.",
+  "Claim Your Rewards": "Reclama Tus Recompensas",
+  "Access your rewards that are ready for claiming. You can claim them directly to your connected wallet or to a different wallet address of your choice.": "Accede a tus recompensas que están listas para reclamar. Puedes reclamarlas directamente a tu billetera conectada o a una dirección de billetera diferente de tu elección.",
+  "Processing transaction...": "Procesando transacción...",
+  "You are claiming your rewards": "Estás reclamando tus recompensas",
+  "You have claimed your rewards": "Has reclamado tus recompensas",
+  "Enter address": "Ingresar dirección",
+  "Claim to": "Reclamar a",
+  "Claim to connected wallet": "Reclamar a billetera conectada",
+  "or": "o",
+  "claim to a different address": "reclamar a una dirección diferente"
 }
