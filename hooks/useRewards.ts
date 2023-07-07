@@ -10,35 +10,37 @@ import useAnalytics from './useAnalytics';
 import { AbiParametersToPrimitiveTypes, ExtractAbiFunction } from 'abitype';
 import { previewerABI } from 'types/abi';
 import { GAS_LIMIT_MULTIPLIER, WEI_PER_ETHER } from 'utils/const';
+import { Transaction } from 'types/Transaction';
 
 export type RewardRates = AbiParametersToPrimitiveTypes<
   ExtractAbiFunction<typeof previewerABI, 'exactly'>['outputs']
 >[number][number]['rewardRates'];
 
-export type Rewards = Record<string, { address: Address; amount: bigint }>;
+export type Rewards = Record<string, { address: Address; amount: bigint; usdPrice?: bigint }>;
 export type Rates = Record<string, RewardRates>;
 
 export default () => {
   const { walletAddress, opts, isConnected } = useWeb3();
   const controller = useRewardsController();
-  const { accountData, refreshAccountData } = useAccountData();
+  const { accountData, getMarketAccount, refreshAccountData } = useAccountData();
 
   const [isLoading, setIsLoading] = useState(false);
 
   const rewards = useMemo<Rewards>(() => {
-    if (!accountData) return {};
+    if (!accountData || !getMarketAccount) return {};
 
     return accountData
       .flatMap(({ claimableRewards }) => claimableRewards)
       .reduce((acc, { asset, assetSymbol, amount }) => {
+        const ma = getMarketAccount(assetSymbol);
         if (!acc[assetSymbol]) {
-          acc[assetSymbol] = { address: asset, amount: amount };
+          acc[assetSymbol] = { address: asset, amount, usdPrice: ma?.usdPrice };
           return acc;
         }
         acc[assetSymbol].amount += amount;
         return acc;
       }, {} as Rewards);
-  }, [accountData]);
+  }, [accountData, getMarketAccount]);
 
   const { transaction } = useAnalytics({ rewards });
 
@@ -77,7 +79,15 @@ export default () => {
   }, [accountData]);
 
   const claim = useCallback(
-    async ({ assets, to = walletAddress }: { assets: string[]; to?: Address }) => {
+    async ({
+      assets,
+      to = walletAddress,
+      setTx,
+    }: {
+      assets: string[];
+      to?: Address;
+      setTx?: (tx: Transaction) => void;
+    }) => {
       if (!controller || !isConnected || !opts) return;
 
       setIsLoading(true);
@@ -97,7 +107,9 @@ export default () => {
           gasLimit: (gas * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
         });
         transaction.beginCheckout('claim');
+        setTx && setTx({ hash, status: 'loading' });
         const { status } = await waitForTransaction({ hash });
+        setTx && setTx({ hash, status: status ? 'success' : 'error' });
         if (status) transaction.purchase('claim');
 
         await refreshAccountData();

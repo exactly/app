@@ -224,7 +224,6 @@ function Navbar() {
           </DialogContent>
         </Box>
       </Dialog>
-
       <RewardsModal isOpen={true} close={undefined} />
     </Box>
   );

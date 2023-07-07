@@ -2,7 +2,7 @@ import React, { useState, useCallback, type FC } from 'react';
 import Image from 'next/image';
 import { Box, Button, Menu, Typography } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
-import { formatUnits } from 'viem';
+import { formatEther, formatUnits } from 'viem';
 
 import { useWeb3 } from 'hooks/useWeb3';
 import useRewards from 'hooks/useRewards';
@@ -27,7 +27,7 @@ const ClaimRewards: FC = () => {
     return null;
   }
 
-  const [assetSymbol, amount] = Object.entries(rewards)[0];
+  const [assetSymbol, { amount }] = Object.entries(rewards)[0];
 
   return (
     <>
@@ -61,7 +61,7 @@ const ClaimRewards: FC = () => {
           }}
         />
         <Typography variant="subtitle1" color="grey.900">
-          {formatNumber(formatUnits(amount, 18))}
+          {formatNumber(formatEther(amount))}
         </Typography>
       </Button>
       <Menu

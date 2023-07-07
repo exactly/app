@@ -23,11 +23,13 @@ import Draggable from 'react-draggable';
 import { useTranslation } from 'react-i18next';
 import Image from 'next/image';
 import { CheckboxIcon, CheckboxCheckedIcon } from 'components/Icons';
-import { isAddress } from 'viem';
+import { formatEther, isAddress } from 'viem';
 import { formatWallet } from 'utils/utils';
 import formatNumber from 'utils/formatNumber';
 import { Transaction } from 'types/Transaction';
 import Loading from 'components/common/modal/Loading';
+import useRewards from 'hooks/useRewards';
+import { WEI_PER_ETHER } from 'utils/const';
 
 function PaperComponent(props: PaperProps | undefined) {
   const ref = useRef<HTMLDivElement>(null);
@@ -57,6 +59,8 @@ const RewardsModal: FC<RewardsModalProps> = ({ isOpen, close }) => {
   const { breakpoints } = useTheme();
   const isMobile = useMediaQuery(breakpoints.down('sm'));
 
+  const { rewards: rs, claim } = useRewards();
+
   const [tx, setTx] = useState<Transaction | undefined>(undefined);
   const [input, setInput] = useState<string>('');
   const [showInput, setShowInput] = useState<boolean>(false);
@@ -69,28 +73,22 @@ const RewardsModal: FC<RewardsModalProps> = ({ isOpen, close }) => {
     [differentAddress, selected, showInput],
   );
 
-  const submit = useCallback(() => {
-    if (showInput && differentAddress) {
-      // claim to different address
-      setTx({ status: 'loading' });
-    } else {
-      // claim to connected wallet
-      setTx({ status: 'loading' });
-    }
-  }, [differentAddress, showInput]);
+  const submit = useCallback(async () => {
+    const assets = Object.entries(selected)
+      .filter(([, v]) => v)
+      .map(([symbol]) => symbol);
+    await claim({ assets, to: showInput && isAddress(input) ? input : undefined, setTx });
+  }, [claim, input, selected, showInput]);
 
-  const rewards = [
-    {
-      symbol: 'OP',
-      amount: 148,
-      valueUSD: 280,
-    },
-    {
-      symbol: 'USDC',
-      amount: 200,
-      valueUSD: 200,
-    },
-  ];
+  const rewards = useMemo(
+    () =>
+      Object.entries(rs).map(([symbol, { amount, usdPrice }]) => ({
+        symbol,
+        amount: formatEther(amount),
+        valueUSD: usdPrice ? formatEther((amount * usdPrice) / WEI_PER_ETHER) : undefined,
+      })),
+    [rs],
+  );
 
   return (
     <Dialog
@@ -139,7 +137,7 @@ const RewardsModal: FC<RewardsModalProps> = ({ isOpen, close }) => {
             {t('Claim Your Rewards')}
           </DialogTitle>
         )}
-        {tx && loadingTx ? (
+        {tx ? (
           <DialogContent>
             <Loading
               tx={tx}
@@ -188,7 +186,7 @@ const RewardsModal: FC<RewardsModalProps> = ({ isOpen, close }) => {
                           }}
                         />
                         <Typography variant="h6">{formatNumber(amount, symbol)}</Typography>
-                        <Typography fontSize={14}>${formatNumber(valueUSD, 'USD')}</Typography>
+                        {valueUSD && <Typography fontSize={14}>${formatNumber(valueUSD, 'USD')}</Typography>}
                       </Box>
                     }
                     control={
