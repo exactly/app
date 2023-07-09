@@ -95,12 +95,13 @@ function TableRowFloatingPool({ symbol, valueUSD, depositedAmount, borrowedAmoun
               {(apr !== undefined &&
                 toPercentage(
                   apr +
-                    (rates && rates[symbol]
-                      ? rates[symbol]?.reduce(
-                          (acc, curr) => acc + Number(type === 'deposit' ? curr.floatingDeposit : curr.borrow) / 1e18,
-                          0,
-                        )
-                      : 0),
+                    (type === 'deposit' ? 1 : -1) *
+                      (rates && rates[symbol]
+                        ? rates[symbol]?.reduce(
+                            (acc, curr) => acc + Number(type === 'deposit' ? curr.floatingDeposit : curr.borrow) / 1e18,
+                            0,
+                          )
+                        : 0),
                 )) || <Skeleton width={70} />}
             </Typography>
           </APRWithBreakdown>
