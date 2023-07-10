@@ -1,4 +1,16 @@
-import { Address, parseEther, parseUnits, createPublicClient, http, toHex, encodeFunctionData, pad, trim } from 'viem';
+import {
+  Address,
+  parseEther,
+  parseUnits,
+  createPublicClient,
+  http,
+  toHex,
+  encodeFunctionData,
+  pad,
+  trim,
+  createWalletClient,
+  isAddress,
+} from 'viem';
 import { Chain, mainnet } from 'viem/chains';
 
 import type { Coin, ERC20TokenSymbol } from './contracts';
@@ -52,10 +64,13 @@ export const tenderly = async ({ chain = mainnet }: { chain: Chain }): Promise<T
   const url = rpcURL(forkId);
 
   const publicClient = createPublicClient({ chain, transport: http(url) });
+  const walletClient = createWalletClient({ chain, transport: http(url) });
 
   const setNativeBalance = async (address: string, amount: number) => {
-    const params = [[address], toHex(parseEther(String(amount)))];
-    return await publicClient.request({ method: 'tenderly_setBalance', params });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const params = [[address], toHex(parseEther(String(amount)))] as any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return await walletClient.request({ method: 'tenderly_setBalance' as any, params });
   };
 
   const setERC20TokenBalance = async (address: Address, symbol: ERC20TokenSymbol, amount: number) => {
@@ -78,14 +93,21 @@ export const tenderly = async ({ chain = mainnet }: { chain: Chain }): Promise<T
 
     if (symbol === 'USDC') {
       const l2Bridge = await publicClient.getStorageAt({ address: tokenContract.address, slot: '0x6' });
+      if (!l2Bridge) throw new Error('L2 bridge not found');
       owner = pad(trim(l2Bridge), { size: 20 });
     }
 
-    await publicClient.request({
+    const from = String(owner);
+
+    if (!isAddress(from)) {
+      throw new Error('Invalid owner address');
+    }
+
+    await walletClient.request({
       method: 'eth_sendTransaction',
       params: [
         {
-          from: owner,
+          from,
           to: tokenContract.address,
           data: encodeFunctionData({
             abi: [
@@ -112,12 +134,14 @@ export const tenderly = async ({ chain = mainnet }: { chain: Chain }): Promise<T
     url: () => url,
     setBalance: async (address: Address, balance: Balance) => {
       for (const symbol of Object.keys(balance) as Array<keyof typeof balance>) {
+        const amount = balance[symbol];
+        if (!amount) return;
         switch (symbol) {
           case 'ETH':
-            await setNativeBalance(address, balance[symbol]);
+            await setNativeBalance(address, amount);
             break;
           default:
-            await setERC20TokenBalance(address, symbol, balance[symbol]);
+            await setERC20TokenBalance(address, symbol, amount);
         }
       }
     },

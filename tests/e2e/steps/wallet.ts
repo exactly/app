@@ -1,9 +1,11 @@
 export const connectWallet = () => {
+  let connected = false;
   cy.waitUntil(
     () =>
       cy.getByTestId('navbar').then(($navbar) => {
         const $wallet = $navbar.find('[data-testid="wallet-menu"]');
         if ($wallet.length) {
+          connected = true;
           return true;
         }
 
@@ -12,9 +14,10 @@ export const connectWallet = () => {
           $connect.trigger('click');
           return false;
         }
+        return false;
       }),
     { timeout: 20000, interval: 1000 },
-  ).then((connected: boolean) => {
+  ).then(() => {
     if (!connected) {
       throw new Error('Wallet connection failed');
     }
@@ -29,6 +32,7 @@ export const walletConnected = (address: string) => {
 };
 
 export const disconnectWallet = () => {
+  let disconnected = false;
   cy.waitUntil(
     () =>
       cy.getByTestId('navbar').then(($navbar) => {
@@ -41,11 +45,14 @@ export const disconnectWallet = () => {
 
         const $connect = $navbar.find('[data-testid="connect-wallet"]');
         if ($connect.length) {
+          disconnected = true;
           return true;
         }
+
+        return false;
       }),
     { timeout: 20000, interval: 1000 },
-  ).then((disconnected: boolean) => {
+  ).then(() => {
     if (!disconnected) {
       throw new Error('Wallet disconnection failed');
     }

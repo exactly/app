@@ -21,7 +21,7 @@ type VisitOptions = {
 const defaultVisitOptions: VisitOptions = {
   connectWallet: true,
   marketView: 'advanced',
-};
+} as const;
 
 type SetupParams = {
   chain?: Chain;
@@ -73,7 +73,7 @@ export const setup = ({
       return cy
         .visit(url, {
           onBeforeLoad: (window) => {
-            window.localStorage.setItem('marketView', opts.marketView);
+            window.localStorage.setItem('marketView', opts.marketView ?? 'advanced');
           },
         })
         .then(async () => {
@@ -87,7 +87,7 @@ export const setup = ({
         });
     },
     userAddress: () => account.address,
-    setBalance: (address: Address, balance: Balance) => fork.setBalance(address, balance),
+    setBalance: (address: Address, balance: Balance) => fork?.setBalance(address, balance),
     publicClient,
     walletClient,
   };
