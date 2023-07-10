@@ -15,7 +15,10 @@ export type ErrorData =
 export class CustomError extends Error {
   public custom = true;
 
-  constructor(message: string, public variant?: 'error' | 'warning') {
+  constructor(
+    message: string,
+    public variant?: 'error' | 'warning',
+  ) {
     super(message);
   }
 }

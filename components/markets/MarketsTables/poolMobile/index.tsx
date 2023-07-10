@@ -124,9 +124,7 @@ const GridItem: FC<{
           <Typography fontSize="16px" fontWeight={700} lineHeight="20px">
             {value}
           </Typography>
-          {rewards?.map((r) => (
-            <RewardPill key={r.assetSymbol} rate={r.rate} symbol={r.assetSymbol} />
-          ))}
+          {rewards?.map((r) => <RewardPill key={r.assetSymbol} rate={r.rate} symbol={r.assetSymbol} />)}
         </Grid>
 
         {maturity && maturity !== 0 && (
