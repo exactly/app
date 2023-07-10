@@ -104,7 +104,10 @@ const RewardsModal: FC<RewardsModalProps> = ({ isOpen, open, close }) => {
     <>
       <Button variant="outlined" onClick={open}>
         <Box display="flex" gap={0.5} alignItems="center">
-          <AvatarGroup max={6} sx={{ '& .MuiAvatar-root': { width: 16, height: 16, fontSize: 10 } }}>
+          <AvatarGroup
+            max={6}
+            sx={{ '& .MuiAvatar-root': { width: 16, height: 16, fontSize: 10, borderColor: 'transparent' } }}
+          >
             {rewards.map(({ symbol }) => (
               <Avatar key={symbol} alt={symbol} src={`/img/assets/${symbol}.svg`} />
             ))}
