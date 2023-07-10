@@ -32,7 +32,6 @@ import Link from 'next/link';
 import Wallet from 'components/Wallet';
 import SelectMarketsView from 'components/SelectMarketsView';
 import { useMarketContext } from 'contexts/MarketContext';
-import ClaimRewards from 'components/ClaimRewards';
 import { useTranslation } from 'react-i18next';
 import MaturityDateReminder from 'components/MaturityDateReminder';
 import Faucet from 'components/operations/Faucet';
@@ -52,6 +51,7 @@ function Navbar() {
   const { view } = useMarketContext();
   const [openMenu, setOpenMenu] = useState<boolean>(false);
   const [openFaucet, setOpenFaucet] = useState(false);
+  const [openRewardsModal, setOpenRewardsModal] = useState(false);
 
   const { data: blockNumber } = useBlockNumber({ chainId: chain?.id });
 
@@ -170,7 +170,11 @@ function Navbar() {
             )}
             <Box display="flex" gap={0.5}>
               <SecondaryChain />
-              <ClaimRewards />
+              <RewardsModal
+                isOpen={openRewardsModal}
+                open={() => setOpenRewardsModal(true)}
+                close={() => setOpenRewardsModal(false)}
+              />
               <Wallet />
             </Box>
           </Box>
@@ -224,7 +228,6 @@ function Navbar() {
           </DialogContent>
         </Box>
       </Dialog>
-      <RewardsModal isOpen={true} close={undefined} />
     </Box>
   );
 }
