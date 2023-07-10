@@ -138,7 +138,7 @@ const RewardsModal: FC<RewardsModalProps> = ({ isOpen, open, close }) => {
         {!loadingTx && (
           <IconButton
             aria-label="close"
-            onClick={close}
+            onClick={closeAndReset}
             sx={{
               position: 'absolute',
               right: 16,
@@ -199,6 +199,9 @@ const RewardsModal: FC<RewardsModalProps> = ({ isOpen, open, close }) => {
                           `1px solid ${
                             selected[symbol] ? (palette.mode === 'dark' ? 'white' : 'black') : 'transparent'
                           }`,
+                        '&:hover': {
+                          bgcolor: 'figma.grey.50',
+                        },
                       }}
                       labelPlacement="start"
                       label={
@@ -219,6 +222,7 @@ const RewardsModal: FC<RewardsModalProps> = ({ isOpen, open, close }) => {
                       }
                       control={
                         <Checkbox
+                          value={selected[symbol]}
                           icon={<CheckboxIcon sx={{ fontSize: 18 }} />}
                           checkedIcon={<CheckboxCheckedIcon sx={{ fontSize: 18 }} />}
                           onChange={() => setSelected((prev) => ({ ...prev, [symbol]: !prev[symbol] }))}

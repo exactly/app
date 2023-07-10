@@ -146,6 +146,7 @@ export const lightTheme = createTheme({
     },
     figma: {
       grey: {
+        '50': '#F9FAFB',
         '100': '#EDEFF2',
         '300': '#94979E',
         '500': '#989FA6',
@@ -384,6 +385,7 @@ export const darkTheme = createTheme({
         '500': '#989FA6',
         '300': '#757A80',
         '100': '#6F737B',
+        '50': '#303336',
       },
     },
     blue: '#0095FF',
