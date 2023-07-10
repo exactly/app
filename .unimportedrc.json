@@ -1,14 +1,11 @@
 {
   "ignoreUnresolved": ["i18n"],
   "entry": [
-    "sentry.client.config.ts",
-    "sentry.edge.config.ts",
-    "sentry.server.config.ts",
+    "sentry.*.config.ts",
     "*.config.cjs",
     "pages/**/*",
     "scripts/**/*",
     "i18n/index.ts"
   ],
-  "ignoreUnused": ["next", "react", "react-dom"],
   "ignoreUnimported": ["wagmi.config.ts", "cypress.config.ts"]
 }
