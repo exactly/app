@@ -116,8 +116,6 @@ const WithdrawAtMaturity: FC = () => {
       });
     }
 
-    setErrorData(undefined);
-
     const { assets: amount } = await previewerContract.read.previewWithdrawAtMaturity([
       marketAccount.market,
       BigInt(date),
@@ -125,6 +123,7 @@ const WithdrawAtMaturity: FC = () => {
       walletAddress ?? zeroAddress,
     ]);
 
+    setErrorData(undefined);
     setAmountToWithdraw(amount);
     setMinAmountToWithdraw(isEarlyWithdraw ? (amount * slippage) / WEI_PER_ETHER : amount);
   }, [
@@ -141,7 +140,6 @@ const WithdrawAtMaturity: FC = () => {
   ]);
 
   useEffect(() => {
-    if (errorData?.status) return;
     previewWithdrawAtMaturity().catch((error) => setErrorData({ status: true, message: handleOperationError(error) }));
   }, [previewWithdrawAtMaturity, errorData?.status, setErrorData, handleOperationError]);
 
