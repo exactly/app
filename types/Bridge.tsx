@@ -24,7 +24,12 @@ export type ActiveRoute = {
   toAmount: number;
   refuel: null;
   routeStatus: Status;
-  transactionData: TransactionData;
+  transactionData: {
+    '0': {
+      txHash: string;
+      chainId: number;
+    };
+  };
   bridgeTxHash: string;
   recipient: string;
   integratorId: number;
@@ -52,15 +57,6 @@ export type Asset = {
 export type IntegratorFee = {
   asset: Asset;
   amount: number;
-};
-
-export type TransactionData = {
-  '0': The0;
-};
-
-export type The0 = {
-  txHash: string;
-  chainId: number;
 };
 
 export type UserTx = {
