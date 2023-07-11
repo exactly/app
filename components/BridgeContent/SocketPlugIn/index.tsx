@@ -11,12 +11,11 @@ import { optimism } from 'viem/chains';
 import { tokens } from './tokens.json';
 import useAnalytics from 'hooks/useAnalytics';
 import { hexToRgb } from './utils';
+import useAssets from 'hooks/useAssets';
 
 const DynamicBridge = dynamic(() => import('@socket.tech/plugin').then((mod) => mod.Bridge), {
   ssr: false,
 });
-
-const OP_MARKETS = ['USDC', 'WETH', 'wstETH', 'OP']; /// TODO: can we ge this from somewhere else?
 
 type Props = {
   updateRutes: () => void;
@@ -32,20 +31,22 @@ const SocketPlugIn = ({ updateRutes }: Props) => {
   const [sourceNetwork, setSourceNetwork] = useState<Network | undefined>();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const assets = useAssets();
 
   const tokenList = useMemo(
     () =>
       tokens
         .filter(({ chainId, symbol }) => {
-          const isBridgeToOptimism = destinationNetwork?.chainId === 10 && sourceNetwork?.chainId !== 10;
+          const isBridgeToOPMainnet =
+            destinationNetwork?.chainId === optimism.id && sourceNetwork?.chainId !== optimism.id;
           const isSourceToken = chainId === sourceNetwork?.chainId;
 
-          return isBridgeToOptimism
-            ? isSourceToken || OP_MARKETS.includes(symbol)
+          return isBridgeToOPMainnet
+            ? isSourceToken || assets.includes(symbol)
             : isSourceToken || chainId === destinationNetwork?.chainId;
         })
-        .sort((t1, t2) => (OP_MARKETS.includes(t1.symbol) && !OP_MARKETS.includes(t2.symbol) ? -1 : 1)),
-    [destinationNetwork?.chainId, sourceNetwork?.chainId],
+        .sort((t1, t2) => (assets.includes(t1.symbol) && !assets.includes(t2.symbol) ? -1 : 1)),
+    [assets, destinationNetwork?.chainId, sourceNetwork?.chainId],
   );
 
   const handleSourceNetworkChange = useCallback(setSourceNetwork, [setSourceNetwork]);
@@ -93,7 +94,7 @@ const SocketPlugIn = ({ updateRutes }: Props) => {
         API_KEY={process.env.NEXT_PUBLIC_SOCKET_API_KEY || ''}
         defaultSourceNetwork={chain?.id || 10}
         destNetworks={[optimism.id]}
-        defaultDestNetwork={optimism.id} // TODO: check if it should be displayNetwork
+        defaultDestNetwork={optimism.id}
         customize={{
           primary: hexToRgb(palette.components.bg),
           secondary: hexToRgb(palette.components.bg),
