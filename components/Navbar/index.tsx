@@ -26,6 +26,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import MovingSharpIcon from '@mui/icons-material/MovingSharp';
 
 import MenuIcon from '@mui/icons-material/Menu';
+import GavelIcon from '@mui/icons-material/Gavel';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import RepeatRoundedIcon from '@mui/icons-material/RepeatRounded';
 import { globals } from 'styles/theme';
@@ -105,6 +106,12 @@ function Navbar() {
         icon: <AccountBalanceWalletIcon sx={{ fontSize: 14 }} />,
       },
       {
+        pathname: '/governance',
+        name: t('Governance'),
+        icon: <GavelIcon sx={{ fontSize: '13px' }} />,
+        isNew: true,
+      },
+      {
         pathname: '/strategies',
         name: t('Strategies'),
         icon: <MovingSharpIcon sx={{ fontSize: '13px' }} />,
@@ -174,9 +181,9 @@ function Navbar() {
                           fontSize={11}
                           fontWeight={700}
                           color="white"
-                          sx={{ background: palette.green, borderRadius: '4px', px: 0.5, textTransform: 'uppercase' }}
+                          sx={{ background: palette.green, borderRadius: '4px', px: 0.5 }}
                         >
-                          {t('New')}
+                          {t('New').toUpperCase()}
                         </Typography>
                       )}
                     </Button>
