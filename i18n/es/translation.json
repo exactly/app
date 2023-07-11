@@ -285,5 +285,16 @@
   "Unlock better loan terms with the new Rollover feature.": "Desbloquea mejores condiciones de préstamo con la nueva función de refinanciación.",
   "Try it out now!": "¡Pruébalo ahora!",
   "Go to": "Ir a",
-  "Faucet": "Faucet"
+  "Faucet": "Faucet",
+  "Bridge & Swap": "Bridge & Swap",
+  "Seamlessly bridge and swap assets to OP Mainnet from many different networks with ease. Experience a unified and streamlined approach to managing your assets effortlessly and start using Exactly's features.": "Pase y cambie activos de manera fluida a OP Mainnet desde muchas redes diferentes con facilidad. Experimente un enfoque unificado y simplificado para gestionar sus activos sin esfuerzo y comience a usar las características de Exactly.",
+  "Select network and assets": "Seleccionar red y activos",
+  "Ready": "Listo",
+  "Success": "Éxito",
+  "Failed": "Fallido",
+  "Pending": "Pendiente",
+  "Via": "Via",
+  "Status": "Estado",
+  "View TX": "Ver TX",
+  "Transaction History": "Historial de transacciones"
 }

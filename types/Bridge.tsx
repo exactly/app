@@ -36,8 +36,8 @@ export type ActiveRoute = {
   destinationCallData: null;
   bridgeInsuranceData: null;
   integratorFee: IntegratorFee;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
   currentUserTxIndex: number | null;
   fromAsset: Asset;
   toAsset: Asset;

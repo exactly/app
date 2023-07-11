@@ -5,6 +5,9 @@ import { ActiveRoute, StatusData, UserTxProtocol } from 'types/Bridge';
 import AssetAmount from '../AssetAmount';
 import Image from 'next/image';
 import Link from 'next/link';
+import dayjs from 'dayjs';
+import i18n from 'i18n';
+import { useTranslation } from 'react-i18next';
 
 type Props = {
   route: ActiveRoute;
@@ -15,15 +18,21 @@ type Props = {
 };
 
 const TxRow = ({ route, protocol, type, status: { Icon, color, statusLabel }, url }: Props) => {
+  const { t } = useTranslation();
+
   return (
-    <TableRow key={route.activeRouteId}>
+    <TableRow
+      key={route.activeRouteId}
+      sx={{
+        '&:last-child td, &:last-child th': { border: 0, paddingBottom: 0 },
+      }}
+    >
       <TableCell sx={{ paddingY: '32px' }}>
         <AssetAmount asset={route.fromAsset} amount={route.fromAmount} />
       </TableCell>
       <TableCell sx={{ paddingY: '32px' }}>
         <AssetAmount asset={route.toAsset} amount={route.toAmount} />
       </TableCell>
-
       <TableCell>
         {protocol && (
           <Box display={'flex'} gap={'8px'}>
@@ -58,13 +67,13 @@ const TxRow = ({ route, protocol, type, status: { Icon, color, statusLabel }, ur
               </Typography>
             </Box>
             <Typography fontSize={'12px'} fontWeight={500} color="grey.500">
-              {new Date(route.createdAt).toDateString()}
+              {dayjs(route.createdAt).locale(i18n.language).format('DD MMM YY, hh:mm ')}
             </Typography>
           </Box>
           <Box display={'flex'} flexDirection={'column'} flex={1}>
             <Link href={url} target={'_blank'}>
               <Button variant="contained" sx={{ borderRadius: '4px', padding: '4px', height: '20px' }}>
-                View TX
+                {t('View TX')}
               </Button>
             </Link>
           </Box>
