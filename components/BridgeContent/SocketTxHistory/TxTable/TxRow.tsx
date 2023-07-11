@@ -62,7 +62,7 @@ const TxRow = ({ route, protocol, type, status: { Icon, color, statusLabel }, ur
             </Typography>
           </Box>
           <Box display={'flex'} flexDirection={'column'} flex={1}>
-            <Link href={url}>
+            <Link href={url} target={'_blank'}>
               <Button variant="contained" sx={{ borderRadius: '4px', padding: '4px', height: '20px' }}>
                 View TX
               </Button>

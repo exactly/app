@@ -44,7 +44,7 @@ const BridgeContent = () => {
         my={'32px'}
         display={'flex'}
         flexDirection={'row'}
-        alignItems={'stetch'}
+        alignItems={'start'}
         gap={2}
         flexWrap={'wrap'}
         justifyContent={'center'}

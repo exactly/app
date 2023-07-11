@@ -1,18 +1,28 @@
-import React, { memo } from 'react';
+import React, { ReactElement, Ref, forwardRef, memo } from 'react';
 
 import Image from 'next/image';
 import Link from 'next/link';
 import CloseIcon from '@mui/icons-material/Close';
-import { Box, Button, Dialog, DialogTitle, IconButton, Typography } from '@mui/material';
+import { Box, Button, Dialog, DialogTitle, IconButton, Slide, Typography } from '@mui/material';
 
 import { TxData } from 'types/Bridge';
 import AssetAmount from '../AssetAmount';
+import { TransitionProps } from '@mui/material/transitions';
 
 type Props = {
   open: boolean;
   closeModal: () => void;
   txData: TxData;
 };
+
+const Transition = forwardRef(function Transition(
+  props: TransitionProps & {
+    children: ReactElement;
+  },
+  ref: Ref<unknown>,
+) {
+  return <Slide direction="up" ref={ref} {...props} />;
+});
 
 const TxModal = ({
   open,
@@ -25,7 +35,7 @@ const TxModal = ({
     url,
   },
 }: Props) => (
-  <Dialog open={open} onClose={closeModal} fullScreen>
+  <Dialog open={open} onClose={closeModal} fullScreen TransitionComponent={Transition} sx={{ top: 'auto' }}>
     <IconButton
       aria-label="close"
       onClick={closeModal}
@@ -43,9 +53,9 @@ const TxModal = ({
       display={'flex'}
       alignItems={'center'}
       flexDirection={'column'}
-      borderTop={'black solid 2px'}
+      borderTop={'black solid 4px'}
       gap={'24px'}
-      padding={'32px'}
+      padding={'24px'}
     >
       <Box
         display={'flex'}
@@ -68,8 +78,8 @@ const TxModal = ({
       >
         {type} {statusLabel}
       </DialogTitle>
-      <Box display={'flex'} flexDirection={'column'}>
-        <Box display={'flex'} gap={'16px'} margin={'16px'} maxWidth={'100%'} justifyContent={'space-between'}>
+      <Box display={'flex'} flexDirection={'column'} width={'100%'}>
+        <Box display={'flex'} gap={'16px'} margin={'16px'} justifyContent={'space-between'}>
           <Box display={'flex'} flex={1} flexDirection={'column'}>
             <Box marginBottom={'16px'} fontSize={'14px'}>
               From
@@ -108,7 +118,7 @@ const TxModal = ({
             <Typography fontSize={'12px'} fontWeight={500} color="grey.500">
               {new Date(route.createdAt).toDateString()}
             </Typography>
-            <Link href={url}>
+            <Link href={url} target="_blank">
               <Button variant="contained" sx={{ borderRadius: '4px', padding: '4px', height: '20px' }}>
                 View TX
               </Button>
