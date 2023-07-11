@@ -3,6 +3,7 @@
   "entry": [
     "sentry.*.config.ts",
     "*.config.cjs",
+    "middleware.ts",
     "pages/**/*",
     "scripts/**/*",
     "i18n/index.ts"

@@ -2,7 +2,6 @@ import React, { ReactNode, useCallback, useEffect, useState } from 'react';
 import { setContext, setUser } from '@sentry/nextjs';
 import { useBlockNumber, useConfig } from 'wagmi';
 import { goerli } from 'wagmi/chains';
-import DisclaimerModal from 'components/DisclaimerModal';
 import Image from 'next/image';
 import useRouter from 'hooks/useRouter';
 
@@ -99,7 +98,6 @@ function Navbar() {
 
   return (
     <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-      <DisclaimerModal />
       <MaturityDateReminder />
       <AppBar
         position="static"

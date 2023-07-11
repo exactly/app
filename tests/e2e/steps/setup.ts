@@ -59,8 +59,6 @@ export const setup = ({
   };
 
   Cypress.on('window:before:load', (window) => {
-    window.localStorage.setItem('tos', 'true');
-
     window.ethereum = ethereum();
     if (!useDefaultProvider && fork) {
       window.rpcURL = fork.url();
