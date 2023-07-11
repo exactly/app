@@ -5,11 +5,11 @@
   "license": "BUSL-1.1",
   "scripts": {
     "dev": "NODE_ENV=development next dev",
-    "dev:e2e": "NODE_ENV=development NEXT_PUBLIC_DISPLAY_NETWORK_ID=10 NEXT_PUBLIC_IS_E2E=true next dev",
+    "dev:e2e": "NODE_ENV=development NEXT_PUBLIC_NETWORK=10 NEXT_PUBLIC_IS_E2E=true next dev",
     "test": "cypress run --config-file cypress.config.ts",
     "ci": "start-server-and-test start:e2e http-get://localhost:3000 test",
     "build": "next build",
-    "build:e2e": "DISABLE_SENTRY_PLUGIN=true NEXT_PUBLIC_DISPLAY_NETWORK_ID=10 NEXT_PUBLIC_IS_E2E=true next build",
+    "build:e2e": "DISABLE_SENTRY_PLUGIN=true NEXT_PUBLIC_NETWORK=10 NEXT_PUBLIC_IS_E2E=true next build",
     "start": "NODE_ENV=production next start",
     "start:e2e": "npm run build:e2e && NODE_ENV=production next start",
     "export": "NODE_ENV=production next export",

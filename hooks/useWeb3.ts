@@ -23,7 +23,7 @@ export const useWeb3 = (): Web3 => {
   const { query, replace } = useRouter();
   const { address, isConnected } = useAccount();
 
-  const networkId = Number(process.env.NEXT_PUBLIC_DISPLAY_NETWORK_ID);
+  const networkId = Number(process.env.NEXT_PUBLIC_NETWORK);
   const displayNetwork = supportedChains.find((c) => c.id === networkId) ?? optimism;
 
   const [walletAddress, impersonateActive] = useMemo((): [Address | undefined, boolean] => {
