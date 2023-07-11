@@ -87,7 +87,14 @@ const SocketPlugIn = ({ updateRutes }: Props) => {
   );
 
   return (
-    <Box borderRadius={'8px'} display={'flex'} justifyContent={'center'} boxShadow={'0px 3px 4px 0px #61666B1A'}>
+    <Box
+      borderRadius={'8px'}
+      display={'flex'}
+      justifyContent={'center'}
+      boxShadow={'0px 3px 4px 0px #61666B1A'}
+      position={{ sm: 'relative', md: 'sticky' }}
+      top={{ sm: undefined, md: '32px' }}
+    >
       <DynamicBridge
         provider={provider}
         enableSameChainSwaps
