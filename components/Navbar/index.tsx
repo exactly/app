@@ -1,7 +1,7 @@
 import React, { ReactNode, useCallback, useEffect, useState } from 'react';
 import { setContext, setUser } from '@sentry/nextjs';
 import { useBlockNumber, useConfig } from 'wagmi';
-import { goerli } from 'wagmi/chains';
+import { optimism, goerli } from 'wagmi/chains';
 import Image from 'next/image';
 import useRouter from 'hooks/useRouter';
 
@@ -97,6 +97,8 @@ function Navbar() {
     },
   ];
 
+  const isOPMainnet = chain?.id === optimism.id;
+
   return (
     <Box sx={{ display: 'flex', justifyContent: 'center' }}>
       <MaturityDateReminder />
@@ -152,11 +154,13 @@ function Navbar() {
             {isConnected && chain?.id === goerli.id && (
               <Chip label="Goerli Faucet" onClick={handleFaucetClick} sx={{ my: 'auto', display: onlyDesktopFlex }} />
             )}
-            <Link href={'/bridge'}>
-              <Button variant="contained" sx={{ minWidth: '125px' }}>
-                {t('Bridge & Swap')}
-              </Button>
-            </Link>
+            {isOPMainnet && (
+              <Link href={'/bridge'}>
+                <Button variant="contained" sx={{ minWidth: '125px' }}>
+                  {t('Bridge & Swap')}
+                </Button>
+              </Link>
+            )}
             <Box display="flex" gap={0.5}>
               <SecondaryChain />
               <ClaimRewards />
