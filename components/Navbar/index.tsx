@@ -36,6 +36,7 @@ import ClaimRewards from 'components/ClaimRewards';
 import { useTranslation } from 'react-i18next';
 import MaturityDateReminder from 'components/MaturityDateReminder';
 import Faucet from 'components/operations/Faucet';
+import SecondaryChain from 'components/SecondaryChain';
 const { onlyMobile, onlyDesktopFlex } = globals;
 
 function Navbar() {
@@ -153,6 +154,7 @@ function Navbar() {
               <Chip label="Goerli Faucet" onClick={handleFaucetClick} sx={{ my: 'auto', display: onlyDesktopFlex }} />
             )}
             <Box display="flex" gap={0.5}>
+              <SecondaryChain />
               <ClaimRewards />
               <Wallet />
             </Box>

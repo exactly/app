@@ -7,10 +7,13 @@ import SwitchTheme from 'components/SwitchTheme';
 import { DiscordIcon } from 'components/Icons';
 import { useTranslation } from 'react-i18next';
 import SelectLanguage from 'components/SelectLanguage';
+import { useWeb3 } from 'hooks/useWeb3';
+import { optimism, mainnet } from 'wagmi/chains';
 const { onlyDesktopFlex } = globals;
 
 const Footer = () => {
   const { t } = useTranslation();
+  const { chain: displayNetwork } = useWeb3();
   const date = new Date();
   return (
     <Box sx={{ display: 'flex', justifyContent: 'center' }}>
@@ -27,6 +30,17 @@ const Footer = () => {
         >
           <Typography fontSize="0.85em">© Exactly {date.getFullYear()}</Typography>
           <Box sx={{ display: onlyDesktopFlex, gap: 1.5, alignItems: 'center' }}>
+            <Typography fontSize="0.85em">
+              <a
+                target="_blank"
+                rel="noreferrer noopener"
+                href={`https://${displayNetwork.id === optimism.id ? 'ethereum' : 'app'}.exact.ly`}
+              >
+                {t('Go to ')}
+                {displayNetwork.id === optimism.id ? mainnet.name : optimism.name}
+              </a>
+            </Typography>
+            <Typography fontSize="0.85em">|</Typography>
             <Typography fontSize="0.85em">
               <a
                 target="_blank"

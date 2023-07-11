@@ -7,19 +7,19 @@ import mainnetPreviewer from '@exactly/protocol/deployments/mainnet/Previewer.js
 import optimismPreviewer from '@exactly/protocol/deployments/optimism/Previewer.json' assert { type: 'json' };
 import goerliPreviewer from '@exactly/protocol/deployments/goerli/Previewer.json' assert { type: 'json' };
 
-export default () => {
+export default (override?: number) => {
   const { chain, walletAddress } = useWeb3();
 
   const address = {
     [goerli.id]: goerliPreviewer.address,
     [optimism.id]: optimismPreviewer.address,
     [mainnet.id]: mainnetPreviewer.address,
-  }[chain.id];
+  }[override ?? chain.id];
 
   if (!address || !isAddress(address)) throw new Error(`No deployment for ${chain.id}`);
 
   return usePreviewerExactly({
-    chainId: chain.id,
+    chainId: override ?? chain.id,
     address,
     args: [walletAddress ?? zeroAddress],
   });
