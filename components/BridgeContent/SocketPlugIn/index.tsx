@@ -94,6 +94,17 @@ const SocketPlugIn = ({ updateRutes }: Props) => {
       boxShadow={'0px 3px 4px 0px #61666B1A'}
       position={{ sm: 'relative', md: 'sticky' }}
       top={{ sm: undefined, md: '32px' }}
+      sx={{
+        '::-webkit-scrollbar': {
+          '-webkit-appearance': 'none',
+          width: '7px',
+        },
+        '::-webkit-scrollbar-thumb': {
+          'border-radius': '4px',
+          'background-color': 'rgba(0,0,0,.5)',
+          '-webkit-box-shadow': '0 0 1px rgba(255,255,255,.5)',
+        },
+      }}
     >
       <DynamicBridge
         provider={provider}
