@@ -1,7 +1,8 @@
 import React from 'react';
-import { Box, Button, Divider, Typography } from '@mui/material';
+import { Box, Divider, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import Image from 'next/image';
+import { LoadingButton } from '@mui/lab';
 
 const Claimable = () => {
   const { t } = useTranslation();
@@ -24,9 +25,9 @@ const Claimable = () => {
           </Typography>
         </Box>
       </Box>
-      <Button variant="contained" fullWidth>
+      <LoadingButton variant="contained" fullWidth>
         {t('Claim EXA & Self Delegate Votes')}
-      </Button>
+      </LoadingButton>
       <Typography fontSize={14} color="grey.500">
         {t(
           'When claiming your EXA you are also delegating your voting power to yourself. You can always choose to delegate it to another address later on.',
