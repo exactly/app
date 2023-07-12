@@ -3,7 +3,7 @@ import React, { cloneElement, FC, ReactElement, useCallback, useMemo, useState }
 import BarChartRoundedIcon from '@mui/icons-material/BarChartRounded';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { Box, Button, Menu, MenuItem, popoverClasses, Typography } from '@mui/material';
+import { Box, Button, Menu, MenuItem, popoverClasses, Typography, useTheme } from '@mui/material';
 import { MarketView, useMarketContext } from 'contexts/MarketContext';
 import Link from 'next/link';
 import useRouter from 'hooks/useRouter';
@@ -24,6 +24,7 @@ const SelectMarketsView: FC = () => {
   const { view, setView } = useMarketContext();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [currTimeout, setCurrTimeout] = useState<Timeout>();
+  const { palette } = useTheme();
 
   const openMenu = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -159,7 +160,11 @@ const SelectMarketsView: FC = () => {
               <Box display="flex" width="100%" gap={1.5}>
                 <Box display="flex" alignItems="center" my="auto" px={1}>
                   {cloneElement(icon, {
-                    sx: { fontSize: '22px', my: 'auto', color: view === type ? 'blue' : 'figma.grey.700' },
+                    sx: {
+                      fontSize: '22px',
+                      my: 'auto',
+                      fill: view === type ? palette.blue : palette.figma.grey[700],
+                    },
                   })}
                 </Box>
                 <Box display="flex" flexDirection="column" justifyContent="left">

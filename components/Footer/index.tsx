@@ -74,7 +74,7 @@ const Footer = () => {
               <TwitterIcon fontSize="small" />
             </a>
             <a target="_blank" rel="noreferrer noopener" href="https://discord.gg/exactly">
-              <DiscordIcon fontSize="small" sx={{ color: 'red' }} />
+              <DiscordIcon fontSize="small" sx={{ fill: ({ palette }) => palette.figma.grey[600] }} />
             </a>
             <SelectLanguage />
             <SwitchTheme />

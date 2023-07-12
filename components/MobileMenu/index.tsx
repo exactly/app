@@ -117,7 +117,7 @@ function MobileMenu({ open, handleClose }: Props) {
               <TwitterIcon fontSize="small" sx={{ color: 'figma.grey.500', my: 'auto' }} />
             </LinkItem>
             <LinkItem title={t('Discord')} href="https://discord.gg/exactly">
-              <DiscordIcon fontSize="small" sx={{ color: 'figma.grey.500', my: 'auto' }} />
+              <DiscordIcon fontSize="small" sx={{ fill: palette.figma.grey[500], my: 'auto' }} />
             </LinkItem>
             <LinkItem title={t('Stats')} href="https://dune.com/exactly/exactly">
               <QueryStatsIcon fontSize="small" sx={{ color: 'figma.grey.500', my: 'auto' }} />
