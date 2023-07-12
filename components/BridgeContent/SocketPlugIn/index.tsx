@@ -5,7 +5,7 @@ import { useNetwork } from 'wagmi';
 import { useTranslation } from 'react-i18next';
 import { Box, useMediaQuery, useTheme } from '@mui/material';
 
-import { Network, transactionDetails } from '@socket.tech/plugin';
+import { Network, WidgetProps, transactionDetails } from '@socket.tech/plugin';
 import useEthersProvider from 'hooks/useEthersProvider';
 import { optimism } from 'viem/chains';
 import { tokens } from './tokens.json';
@@ -20,6 +20,11 @@ const DynamicBridge = dynamic(() => import('@socket.tech/plugin').then((mod) => 
 type Props = {
   updateRoutes: () => void;
 };
+
+/**
+ * Wrapper used to re-render each time defaultSourceNetwork changes
+ */
+const PlugInWrapper = (props: WidgetProps) => <DynamicBridge {...props} key={props.defaultSourceNetwork} />;
 
 const SocketPlugIn = ({ updateRoutes }: Props) => {
   const { chain } = useNetwork();
@@ -118,12 +123,11 @@ const SocketPlugIn = ({ updateRoutes }: Props) => {
       minWidth={isMobile ? 348 : 448}
       minHeight={448}
     >
-      <DynamicBridge
+      <PlugInWrapper
         provider={provider}
         enableSameChainSwaps
         API_KEY={process.env.NEXT_PUBLIC_SOCKET_API_KEY || ''}
         defaultSourceNetwork={chain?.id || 10}
-        destNetworks={[optimism.id]}
         defaultDestNetwork={optimism.id}
         customize={{
           primary: hexToRgb(palette.components.bg),
