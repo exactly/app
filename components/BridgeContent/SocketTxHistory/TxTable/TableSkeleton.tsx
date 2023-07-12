@@ -2,7 +2,7 @@ import React from 'react';
 import { Skeleton, TableCell, TableRow } from '@mui/material';
 
 const CellSkeleton = () => (
-  <TableCell sx={{ paddingY: '32px' }}>
+  <TableCell sx={{ paddingY: 8 }}>
     <Skeleton width={80} />
     <Skeleton width={80} />
   </TableCell>

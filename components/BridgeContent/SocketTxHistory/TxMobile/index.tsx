@@ -28,7 +28,7 @@ const TxMobile = (txData: TxData) => {
     <>
       <TxModal open={modalOpen} closeModal={handleClose} txData={txData} />
       <button key={activeRouteId} style={{ all: 'unset', cursor: 'pointer' }} onClick={handleOpen}>
-        <Box display="flex" border={1} borderColor="grey.200" borderRadius="4px" p={2} alignItems="center">
+        <Box display="flex" border={1} borderColor="grey.200" borderRadius={0.5} p={2} alignItems="center">
           <Box gap={1} flexDirection={'column'} display="flex">
             <Box display="flex" alignItems="center" gap={0.5}>
               <Icon sx={{ color, fontSize: 18 }} />
@@ -58,7 +58,7 @@ const TxMobile = (txData: TxData) => {
               </Box>
             )}
           </Box>
-          <Box marginLeft="auto" bgcolor="grey.200" borderRadius="100$" width={24} height={24}>
+          <Box marginLeft="auto" bgcolor="grey.200" borderRadius="100%" width={24} height={24}>
             <ChevronRight sx={{ color: 'grey.500' }} />
           </Box>
         </Box>

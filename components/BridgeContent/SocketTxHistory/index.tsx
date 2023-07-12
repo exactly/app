@@ -20,14 +20,7 @@ const SocketTxHistory = ({ activeRoutes }: Props) => {
   const txData = useMemo(() => activeRoutes?.map(routeToTxData), [activeRoutes]);
 
   return (
-    <Box
-      p={4}
-      borderRadius="8px"
-      flex={1}
-      bgcolor="components.bg"
-      minHeight="100%"
-      boxShadow="0px 3px 4px 0px #61666B1A"
-    >
+    <Box p={4} borderRadius={1} flex={1} bgcolor="components.bg" minHeight="100%" boxShadow="0px 3px 4px 0px #61666B1A">
       {activeRoutes?.length === 0 ? (
         <Box display="flex" flexDirection="column" alignItems="center" gap={2} justifyContent="center" height="100%">
           <Box mb={6}>

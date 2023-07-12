@@ -19,6 +19,8 @@ import { useMarketContext } from 'contexts/MarketContext';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import RepeatRoundedIcon from '@mui/icons-material/RepeatRounded';
 import BarChartRoundedIcon from '@mui/icons-material/BarChartRounded';
+import { optimism } from 'wagmi/chains';
+import { useWeb3 } from 'hooks/useWeb3';
 
 type Props = {
   open: boolean;
@@ -30,6 +32,8 @@ function MobileMenu({ open, handleClose }: Props) {
   const { palette } = useTheme();
   const { pathname: currentPathname, query } = useRouter();
   const date = new Date();
+  const { chain } = useWeb3();
+  const isOPMainnet = chain?.id === optimism.id;
 
   const headers = [
     {
@@ -43,11 +47,15 @@ function MobileMenu({ open, handleClose }: Props) {
       pathname: '/dashboard',
       icon: <AccountBalanceWalletIcon sx={{ fontSize: 20 }} />,
     },
-    {
-      title: t('Bridge & Swap'),
-      pathname: '/bridge',
-      icon: <RepeatRoundedIcon sx={{ fontSize: 20 }} />,
-    },
+    ...(isOPMainnet
+      ? [
+          {
+            title: t('Bridge & Swap'),
+            pathname: '/bridge',
+            icon: <RepeatRoundedIcon sx={{ fontSize: 20 }} />,
+          },
+        ]
+      : []),
   ];
 
   return (

@@ -12,7 +12,10 @@ const BridgeContent = () => {
   const { walletAddress } = useWeb3();
 
   const updateRoutes = useCallback(async () => {
-    if (!walletAddress) return;
+    if (!walletAddress) {
+      setActiveRoutes([]);
+      return;
+    }
     const routes = await fetchActiveRoutes(walletAddress);
     setActiveRoutes(routes);
   }, [walletAddress]);

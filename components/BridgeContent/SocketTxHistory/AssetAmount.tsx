@@ -12,8 +12,8 @@ type Props = { asset: Asset; amount: number; mobile?: boolean };
 const AssetAmount = ({ asset, amount, mobile }: Props) => {
   const chain = useMemo(() => chains.find(({ chainId }) => chainId === asset.chainId), [asset.chainId]);
   return (
-    <Box display={'flex'} flexDirection={'column'} gap={'11px'}>
-      <Box display={'flex'} alignItems={'center'} height={16} gap={'4px'}>
+    <Box display={'flex'} flexDirection={'column'} gap={1.5}>
+      <Box display={'flex'} alignItems={'center'} height={16} gap={0.5}>
         <Image
           src={asset.logoURI}
           alt={asset.symbol}
@@ -33,7 +33,7 @@ const AssetAmount = ({ asset, amount, mobile }: Props) => {
           {formatNumber(formatUnits(BigInt(amount), asset.decimals))} {asset.symbol}
         </Typography>
       </Box>
-      <Box display={'flex'} alignItems={'center'} height={16} gap={'4px'}>
+      <Box display={'flex'} alignItems={'center'} height={16} gap={0.5}>
         <Image
           src={chain?.icon || ''}
           alt={asset.symbol}

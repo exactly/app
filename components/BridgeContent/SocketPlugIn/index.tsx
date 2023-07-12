@@ -88,7 +88,7 @@ const SocketPlugIn = ({ updateRoutes }: Props) => {
 
   return (
     <Box
-      borderRadius="8px"
+      borderRadius={1}
       display="flex"
       justifyContent="center"
       boxShadow="0px 3px 4px 0px #61666B1A"
@@ -97,12 +97,12 @@ const SocketPlugIn = ({ updateRoutes }: Props) => {
       p={1.5}
       bgcolor="components.bg"
       sx={{
-        '::-webkit-scrollbar': {
+        '& ::-webkit-scrollbar': {
           '-webkit-appearance': 'none',
-          width: '7px',
+          width: 1,
         },
-        '::-webkit-scrollbar-thumb': {
-          'border-radius': '4px',
+        '& ::-webkit-scrollbar-thumb': {
+          'border-radius': 0.5,
           'background-color': 'rgba(0,0,0,.5)',
           '-webkit-box-shadow': '0 0 1px rgba(255,255,255,.5)',
         },
@@ -144,6 +144,7 @@ const SocketPlugIn = ({ updateRoutes }: Props) => {
         onSourceNetworkChange={handleSourceNetworkChange}
         onDestinationNetworkChange={handleDestinationNetworkChange}
         tokenList={tokenList}
+        locale="es AR"
       />
     </Box>
   );

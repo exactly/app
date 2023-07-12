@@ -60,8 +60,8 @@ const TxModal = ({
         alignItems={'center'}
         flexDirection={'column'}
         borderTop={'black solid 4px'}
-        gap={'24px'}
-        padding={'24px'}
+        gap={3}
+        padding={3}
       >
         <Box
           display={'flex'}
@@ -85,24 +85,24 @@ const TxModal = ({
           {type} {statusLabel}
         </DialogTitle>
         <Box display={'flex'} flexDirection={'column'} width={'100%'}>
-          <Box display={'flex'} gap={'16px'} margin={'16px'} justifyContent={'space-between'}>
+          <Box display={'flex'} gap={2} margin={2} justifyContent={'space-between'}>
             <Box display={'flex'} flex={1} flexDirection={'column'}>
               <Box marginBottom={'16px'} fontSize={'14px'}>
                 From
               </Box>
               <AssetAmount mobile amount={route.fromAmount} asset={route.fromAsset} />
             </Box>
-            <Box display={'flex'} flex={1} flexDirection={'column'} fontSize={'14px'}>
-              <Box marginBottom={'16px'}>To</Box>
+            <Box display={'flex'} flex={1} flexDirection={'column'} fontSize={1.75}>
+              <Box marginBottom={2}>To</Box>
               <AssetAmount mobile amount={route.toAmount} asset={route.toAsset} />
             </Box>
           </Box>
           {protocol && (
             <Box
               display={'flex'}
-              gap={'8px'}
-              padding={'16px'}
-              borderRadius={'4px'}
+              gap={1}
+              padding={2}
+              borderRadius={0.5}
               alignItems={'center'}
               border={1}
               borderColor={'grey.200'}
@@ -126,7 +126,7 @@ const TxModal = ({
               </Typography>
               <Box marginLeft={'auto'}>
                 <Link href={url} target="_blank">
-                  <Button variant="contained" sx={{ borderRadius: '4px', padding: '4px', height: '20px' }}>
+                  <Button variant="contained" sx={{ borderRadius: 0.5, padding: 0.5, height: '20px' }}>
                     {t('View TX')}
                   </Button>
                 </Link>

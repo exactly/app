@@ -3,9 +3,9 @@ import React from 'react';
 import { Box, Skeleton } from '@mui/material';
 
 const MobileSkeleton = () => (
-  <Box display={'flex'} border={1} borderColor={'grey.200'} borderRadius={'4px'} padding={'16px'} alignItems={'center'}>
-    <Box gap={'8px'} flexDirection={'column'} display={'flex'}>
-      <Box display={'flex'} alignItems={'center'} gap={'4px'}>
+  <Box display={'flex'} border={1} borderColor={'grey.200'} borderRadius={0.5} padding={2} alignItems={'center'}>
+    <Box gap={1} flexDirection={'column'} display={'flex'}>
+      <Box display={'flex'} alignItems={'center'} gap={0.5}>
         <Skeleton
           width={18}
           height={28}
@@ -16,7 +16,7 @@ const MobileSkeleton = () => (
         />{' '}
         <Skeleton width={100} />
       </Box>
-      <Box display={'flex'} alignItems={'center'} gap={'4px'}>
+      <Box display={'flex'} alignItems={'center'} gap={0.5}>
         <Skeleton
           width={18}
           height={28}
