@@ -296,5 +296,7 @@
   "Via": "Via",
   "Status": "Estado",
   "View TX": "Ver TX",
-  "Transaction History": "Historial de transacciones"
+  "Transaction History": "Historial de transacciones",
+  "No Transactions yet.": "Aún no hay transacciones.",
+  "Start bridging and swapping to see your transaction history here.": "Comience a intercambiar para ver su historial de transacciones aquí."
 }

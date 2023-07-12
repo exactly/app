@@ -18,10 +18,10 @@ const DynamicBridge = dynamic(() => import('@socket.tech/plugin').then((mod) => 
 });
 
 type Props = {
-  updateRutes: () => void;
+  updateRoutes: () => void;
 };
 
-const SocketPlugIn = ({ updateRutes }: Props) => {
+const SocketPlugIn = ({ updateRoutes }: Props) => {
   const { chain } = useNetwork();
   const { palette } = useTheme();
   const { t } = useTranslation();
@@ -55,7 +55,7 @@ const SocketPlugIn = ({ updateRutes }: Props) => {
 
   const handleSubmit = useCallback(
     ({ sourceToken, destinationToken, sourceAmount, destinationAmount }: transactionDetails) => {
-      updateRutes();
+      updateRoutes();
       const bridgeInput = {
         sourceChainId: sourceNetwork?.chainId,
         sourceToken: sourceToken.symbol,
@@ -66,12 +66,12 @@ const SocketPlugIn = ({ updateRutes }: Props) => {
       };
       transaction.addToCart('bridge', bridgeInput);
     },
-    [destinationNetwork?.chainId, updateRutes, sourceNetwork?.chainId, transaction],
+    [destinationNetwork?.chainId, updateRoutes, sourceNetwork?.chainId, transaction],
   );
 
   const handleSuccess = useCallback(
     ({ sourceToken, destinationToken, sourceAmount, destinationAmount }: transactionDetails) => {
-      updateRutes();
+      updateRoutes();
       const bridgeInput = {
         sourceChainId: sourceNetwork?.chainId,
         sourceToken: sourceToken.symbol,
@@ -83,17 +83,19 @@ const SocketPlugIn = ({ updateRutes }: Props) => {
 
       transaction.purchase('bridge', bridgeInput);
     },
-    [destinationNetwork?.chainId, updateRutes, sourceNetwork?.chainId, transaction],
+    [destinationNetwork?.chainId, updateRoutes, sourceNetwork?.chainId, transaction],
   );
 
   return (
     <Box
-      borderRadius={'8px'}
-      display={'flex'}
-      justifyContent={'center'}
-      boxShadow={'0px 3px 4px 0px #61666B1A'}
+      borderRadius="8px"
+      display="flex"
+      justifyContent="center"
+      boxShadow="0px 3px 4px 0px #61666B1A"
       position={{ sm: 'relative', md: 'sticky' }}
-      top={{ sm: undefined, md: '32px' }}
+      top={{ sm: undefined, md: 4 }}
+      p={1.5}
+      bgcolor="components.bg"
       sx={{
         '::-webkit-scrollbar': {
           '-webkit-appearance': 'none',
@@ -104,7 +106,17 @@ const SocketPlugIn = ({ updateRutes }: Props) => {
           'background-color': 'rgba(0,0,0,.5)',
           '-webkit-box-shadow': '0 0 1px rgba(255,255,255,.5)',
         },
+        '& .skt-w-max-h-\\[150px\\]': {
+          maxHeight: '165px !important',
+          boxShadow: '0px 3px 4px rgba(97, 102, 107, 0.1)',
+        },
+        '& .skt-w-bg-black': {
+          backgroundColor: 'transparent !important',
+        },
       }}
+      alignSelf="start"
+      minWidth={isMobile ? 348 : 448}
+      minHeight={448}
     >
       <DynamicBridge
         provider={provider}
@@ -118,7 +130,7 @@ const SocketPlugIn = ({ updateRutes }: Props) => {
           secondary: hexToRgb(palette.components.bg),
           text: hexToRgb(palette.text.primary),
           secondaryText: hexToRgb(palette.text.primary),
-          interactive: hexToRgb(palette.components.bg),
+          interactive: hexToRgb(palette.grey[200]),
           outline: hexToRgb(palette.text.primary),
           accent: hexToRgb(palette.text.primary),
           onInteractive: hexToRgb(palette.text.primary),

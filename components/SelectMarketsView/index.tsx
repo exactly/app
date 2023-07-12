@@ -69,7 +69,7 @@ const SelectMarketsView: FC = () => {
     <>
       <Link href={{ pathname: '/', query }}>
         <Button
-          variant={currentPathname !== '/dashboard' ? 'contained' : 'text'}
+          variant={!['/dashboard', '/bridge'].includes(currentPathname) ? 'contained' : 'text'}
           onMouseOver={openMenu}
           onMouseLeave={handleCloseHover}
           sx={{
@@ -86,14 +86,14 @@ const SelectMarketsView: FC = () => {
           data-testid="navbar-link-markets"
         >
           <Box display="flex" alignItems="center" gap={0.5}>
-            <BarChartRoundedIcon sx={{ fontSize: '13px' }} />
-            <Typography fontWeight={700} fontSize={13}>
+            <BarChartRoundedIcon sx={{ fontSize: 14 }} />
+            <Typography fontWeight={700} fontSize={14}>
               {t('Markets')}
             </Typography>
             {anchorEl ? (
-              <ExpandLessIcon sx={{ fontSize: '13px', my: 'auto' }} fontSize="small" />
+              <ExpandLessIcon sx={{ fontSize: 14, my: 'auto' }} fontSize="small" />
             ) : (
-              <ExpandMoreIcon sx={{ fontSize: '13px', my: 'auto' }} fontSize="small" />
+              <ExpandMoreIcon sx={{ fontSize: 14, my: 'auto' }} fontSize="small" />
             )}
           </Box>
         </Button>

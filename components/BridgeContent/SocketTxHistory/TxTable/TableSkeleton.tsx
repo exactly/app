@@ -26,9 +26,6 @@ const TableSkeleton = () => (
     <RowSkeleton />
     <RowSkeleton />
     <RowSkeleton />
-    <RowSkeleton />
-    <RowSkeleton />
-    <RowSkeleton />
   </>
 );
 

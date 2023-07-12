@@ -1,4 +1,4 @@
-import React, { ReactNode, useCallback, useEffect, useState } from 'react';
+import React, { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 import { setContext, setUser } from '@sentry/nextjs';
 import { useBlockNumber, useConfig } from 'wagmi';
 import { optimism, goerli } from 'wagmi/chains';
@@ -36,6 +36,7 @@ import { useTranslation } from 'react-i18next';
 import MaturityDateReminder from 'components/MaturityDateReminder';
 import Faucet from 'components/operations/Faucet';
 import SecondaryChain from 'components/SecondaryChain';
+import RepeatRoundedIcon from '@mui/icons-material/RepeatRounded';
 
 const { onlyMobile, onlyDesktopFlex } = globals;
 
@@ -83,21 +84,33 @@ function Navbar() {
       : setBodyColor(palette.markets.advanced);
   }, [currentPathname, view, palette.markets.advanced, palette.markets.simple]);
 
+  const isOPMainnet = chain?.id === optimism.id;
+
   const routes: {
     pathname: string;
     name: string;
     custom?: ReactNode;
     icon?: ReactNode;
-  }[] = [
-    { pathname: '/', name: t('Markets'), custom: <SelectMarketsView /> },
-    {
-      pathname: '/dashboard',
-      name: t('Dashboard'),
-      icon: <AccountBalanceWalletIcon sx={{ fontSize: '13px' }} />,
-    },
-  ];
-
-  const isOPMainnet = chain?.id === optimism.id;
+  }[] = useMemo(
+    () => [
+      { pathname: '/', name: t('Markets'), custom: <SelectMarketsView /> },
+      {
+        pathname: '/dashboard',
+        name: t('Dashboard'),
+        icon: <AccountBalanceWalletIcon sx={{ fontSize: 14 }} />,
+      },
+      ...(isOPMainnet
+        ? [
+            {
+              pathname: '/bridge',
+              name: t('Bridge & Swap'),
+              icon: <RepeatRoundedIcon sx={{ fontSize: 14 }} />,
+            },
+          ]
+        : []),
+    ],
+    [isOPMainnet, t],
+  );
 
   return (
     <Box sx={{ display: 'flex', justifyContent: 'center' }}>
@@ -123,7 +136,7 @@ function Navbar() {
               />
             </Box>
           </Link>
-          <Box display="flex" gap={0.2}>
+          <Box display="flex" gap={0.5}>
             {routes.map(({ name, pathname, custom, icon }) => (
               <Box key={pathname} display={onlyDesktopFlex}>
                 {custom || (
@@ -133,7 +146,7 @@ function Navbar() {
                         px: 1.5,
                         display: 'flex',
                         alignItems: 'center',
-                        fontSize: '13px',
+                        fontSize: 14,
                         fontWeight: 700,
                         gap: 0.5,
                       }}
@@ -153,13 +166,6 @@ function Navbar() {
           <Box display="flex" gap={0.5} ml="auto" flexDirection={{ xs: 'row-reverse', sm: 'row' }}>
             {isConnected && chain?.id === goerli.id && (
               <Chip label="Goerli Faucet" onClick={handleFaucetClick} sx={{ my: 'auto', display: onlyDesktopFlex }} />
-            )}
-            {isOPMainnet && (
-              <Link href={'/bridge'}>
-                <Button variant="contained" sx={{ minWidth: '125px' }}>
-                  {t('Bridge & Swap')}
-                </Button>
-              </Link>
             )}
             <Box display="flex" gap={0.5}>
               <SecondaryChain />

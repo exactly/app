@@ -28,24 +28,17 @@ const TxMobile = (txData: TxData) => {
     <>
       <TxModal open={modalOpen} closeModal={handleClose} txData={txData} />
       <button key={activeRouteId} style={{ all: 'unset', cursor: 'pointer' }} onClick={handleOpen}>
-        <Box
-          display={'flex'}
-          border={1}
-          borderColor={'grey.200'}
-          borderRadius={'4px'}
-          padding={'16px'}
-          alignItems={'center'}
-        >
-          <Box gap={'8px'} flexDirection={'column'} display={'flex'}>
-            <Box display={'flex'} alignItems={'center'} gap={'4px'}>
-              <Icon sx={{ color, fontSize: '18px' }} />
-              <Typography variant="body1" fontSize={'14px'} fontWeight={500}>
+        <Box display="flex" border={1} borderColor="grey.200" borderRadius="4px" p={2} alignItems="center">
+          <Box gap={1} flexDirection={'column'} display="flex">
+            <Box display="flex" alignItems="center" gap={0.5}>
+              <Icon sx={{ color, fontSize: 18 }} />
+              <Typography variant="body1" fontSize={14} fontWeight={500}>
                 {formatNumber(formatUnits(BigInt(fromAmount), fromAsset.decimals))} {fromAsset.symbol} -{' '}
                 {formatNumber(formatUnits(BigInt(toAmount), toAsset.decimals))} {toAsset.symbol}
               </Typography>
             </Box>
             {protocol && (
-              <Box display={'flex'} alignItems={'center'} gap={'4px'}>
+              <Box display="flex" alignItems="center" gap={0.5}>
                 <Image
                   src={protocol.icon}
                   alt={protocol.displayName}
@@ -56,16 +49,16 @@ const TxMobile = (txData: TxData) => {
                     borderRadius: '100%',
                   }}
                 />
-                <Typography fontSize={'12px'} fontWeight={600}>
+                <Typography fontSize={12} fontWeight={600}>
                   {protocol.displayName}
                 </Typography>
-                <Typography fontSize={'12px'} fontWeight={600} color="grey.500">
+                <Typography fontSize={12} fontWeight={600} color="grey.500">
                   {type}
                 </Typography>
               </Box>
             )}
           </Box>
-          <Box marginLeft={'auto'} bgcolor={'grey.200'} borderRadius={'100%'} width={'24px'} height={'24px'}>
+          <Box marginLeft="auto" bgcolor="grey.200" borderRadius="100$" width={24} height={24}>
             <ChevronRight sx={{ color: 'grey.500' }} />
           </Box>
         </Box>
@@ -76,7 +69,7 @@ const TxMobile = (txData: TxData) => {
 
 const TxsMobile = ({ txsData }: Props) => {
   return (
-    <Box display={'flex'} gap={'8px'} flexDirection={'column'}>
+    <Box display="flex" gap={1} flexDirection={'column'}>
       {txsData ? (
         txsData.map((txData) => <TxMobile key={txData.route.activeRouteId} {...txData} />)
       ) : (

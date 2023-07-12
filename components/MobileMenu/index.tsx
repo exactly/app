@@ -16,6 +16,9 @@ import SwitchTheme from 'components/SwitchTheme';
 import { useTranslation } from 'react-i18next';
 import SelectLanguage from 'components/SelectLanguage';
 import { useMarketContext } from 'contexts/MarketContext';
+import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
+import RepeatRoundedIcon from '@mui/icons-material/RepeatRounded';
+import BarChartRoundedIcon from '@mui/icons-material/BarChartRounded';
 
 type Props = {
   open: boolean;
@@ -33,10 +36,17 @@ function MobileMenu({ open, handleClose }: Props) {
       title: t('Markets'),
       pathname: '/',
       component: <AdvancedViewSwitch />,
+      icon: <BarChartRoundedIcon sx={{ fontSize: 20 }} />,
     },
     {
       title: t('Dashboard'),
       pathname: '/dashboard',
+      icon: <AccountBalanceWalletIcon sx={{ fontSize: 20 }} />,
+    },
+    {
+      title: t('Bridge & Swap'),
+      pathname: '/bridge',
+      icon: <RepeatRoundedIcon sx={{ fontSize: 20 }} />,
     },
   ];
 
@@ -68,20 +78,25 @@ function MobileMenu({ open, handleClose }: Props) {
               {t('Menu')}
             </Typography>
             <Box display="flex" flexDirection="column" gap={2}>
-              {headers.map(({ title, pathname, component }) => (
+              {headers.map(({ title, pathname, component, icon }) => (
                 <Box key={`mobile_tabs_${title}`} display="flex" flexDirection="column" gap={2}>
-                  <Link href={{ pathname, query }} onClick={handleClose}>
-                    <Typography
-                      sx={{
-                        textDecoration: currentPathname === pathname ? 'underline' : 'none',
-                        fontWeight: 700,
-                        fontSize: 28,
-                      }}
-                    >
-                      {title}
-                    </Typography>
-                  </Link>
-                  {component}
+                  <Box display="flex" justifyContent="space-between">
+                    <Link href={{ pathname, query }} onClick={handleClose}>
+                      <Box display="flex" gap={1} alignItems="center">
+                        {icon}
+                        <Typography
+                          sx={{
+                            textDecoration: currentPathname === pathname ? 'underline' : 'none',
+                            fontWeight: 700,
+                            fontSize: 24,
+                          }}
+                        >
+                          {title}
+                        </Typography>
+                      </Box>
+                    </Link>
+                    {component}
+                  </Box>
                 </Box>
               ))}
             </Box>
@@ -90,26 +105,26 @@ function MobileMenu({ open, handleClose }: Props) {
               {t('Links')}
             </Typography>
             <LinkItem title={t('Audits')} href="https://docs.exact.ly/security/audits">
-              <SecurityIcon fontSize="small" sx={{ color: 'grey.500', my: 'auto' }} />
+              <SecurityIcon fontSize="small" sx={{ color: 'figma.grey.500', my: 'auto' }} />
             </LinkItem>
             <LinkItem title={t('Documentation')} href="https://docs.exact.ly/">
-              <MenuBookIcon fontSize="small" sx={{ color: 'grey.500', my: 'auto' }} />
+              <MenuBookIcon fontSize="small" sx={{ color: 'figma.grey.500', my: 'auto' }} />
             </LinkItem>
             <LinkItem title={t('Github')} href="https://github.com/exactly">
-              <GitHubIcon fontSize="small" sx={{ color: 'grey.500', my: 'auto' }} />
+              <GitHubIcon fontSize="small" sx={{ color: 'figma.grey.500', my: 'auto' }} />
             </LinkItem>
             <LinkItem title={t('Twitter')} href="https://twitter.com/exactlyprotocol">
-              <TwitterIcon fontSize="small" sx={{ color: 'grey.500', my: 'auto' }} />
+              <TwitterIcon fontSize="small" sx={{ color: 'figma.grey.500', my: 'auto' }} />
             </LinkItem>
             <LinkItem title={t('Discord')} href="https://discord.gg/exactly">
-              <DiscordIcon fontSize="small" sx={{ color: 'grey.500', my: 'auto' }} />
+              <DiscordIcon fontSize="small" sx={{ color: 'figma.grey.500', my: 'auto' }} />
             </LinkItem>
             <LinkItem title={t('Stats')} href="https://dune.com/exactly/exactly">
-              <QueryStatsIcon fontSize="small" sx={{ color: 'grey.500', my: 'auto' }} />
+              <QueryStatsIcon fontSize="small" sx={{ color: 'figma.grey.500', my: 'auto' }} />
             </LinkItem>
           </Box>
-          <Box display="flex" justifyContent="space-between">
-            <Typography fontSize="16px" sx={{ color: 'figma.grey.300' }}>
+          <Box display="flex" justifyContent="space-between" alignItems="center">
+            <Typography fontSize={14} sx={{ color: 'figma.grey.300' }}>
               © Exactly {date.getFullYear()}
             </Typography>
             <Box>
@@ -127,7 +142,9 @@ const LinkItem: FC<PropsWithChildren & { title: string; href: string }> = ({ chi
   <a target="_blank" rel="noreferrer noopener" href={href}>
     <Box display="flex" gap="10px">
       {children}
-      <Typography variant="h6">{title}</Typography>
+      <Typography fontWeight={500} color="figma.grey.500">
+        {title}
+      </Typography>
     </Box>
   </a>
 );
@@ -137,9 +154,7 @@ const AdvancedViewSwitch: FC = () => {
   const { view, setView } = useMarketContext();
   return (
     <Box display="flex" alignItems="center" justifyContent="space-between" gap={1}>
-      <Typography fontSize={19} fontWeight={700}>
-        {t('Advanced view')}
-      </Typography>
+      <Typography fontSize={14}>{t('Advanced view')}</Typography>
       <Switch
         checked={view === 'advanced'}
         onChange={() => setView(view === 'advanced' ? 'simple' : 'advanced')}

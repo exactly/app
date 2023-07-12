@@ -36,8 +36,7 @@ const Footer = () => {
                 rel="noreferrer noopener"
                 href={`https://${displayNetwork.id === optimism.id ? 'ethereum' : 'app'}.exact.ly`}
               >
-                {t('Go to ')}
-                {displayNetwork.id === optimism.id ? mainnet.name : optimism.name}
+                {t('Go to')} {displayNetwork.id === optimism.id ? mainnet.name : optimism.name}
               </a>
             </Typography>
             <Typography fontSize="0.85em">|</Typography>
@@ -75,7 +74,7 @@ const Footer = () => {
               <TwitterIcon fontSize="small" />
             </a>
             <a target="_blank" rel="noreferrer noopener" href="https://discord.gg/exactly">
-              <DiscordIcon fontSize="small" />
+              <DiscordIcon fontSize="small" sx={{ color: 'red' }} />
             </a>
             <SelectLanguage />
             <SwitchTheme />
