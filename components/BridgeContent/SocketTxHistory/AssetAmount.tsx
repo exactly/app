@@ -5,12 +5,12 @@ import { Asset } from 'types/Bridge';
 import Image from 'next/image';
 import formatNumber from 'utils/formatNumber';
 import { formatUnits } from 'viem';
-import chains from '../chains.json';
+import * as chains from 'wagmi/chains';
 
 type Props = { asset: Asset; amount: number; mobile?: boolean };
 
 const AssetAmount = ({ asset, amount, mobile }: Props) => {
-  const chain = useMemo(() => chains.find(({ chainId }) => chainId === asset.chainId), [asset.chainId]);
+  const chain = useMemo(() => Object.values(chains).find(({ id }) => id === asset.chainId), [asset.chainId]);
   return (
     <Box display={'flex'} flexDirection={'column'} gap={'11px'}>
       <Box display={'flex'} alignItems={'center'} height={16} gap={'4px'}>

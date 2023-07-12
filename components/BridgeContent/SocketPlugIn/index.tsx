@@ -8,7 +8,8 @@ import { Box, useMediaQuery, useTheme } from '@mui/material';
 import { Network, transactionDetails } from '@socket.tech/plugin';
 import useEthersProvider from 'hooks/useEthersProvider';
 import { optimism } from 'viem/chains';
-import { tokens } from './tokens.json';
+
+import { tokens } from '@uniswap/default-token-list';
 import useAnalytics from 'hooks/useAnalytics';
 import { hexToRgb } from './utils';
 import useAssets from 'hooks/useAssets';
