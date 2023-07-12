@@ -3,10 +3,11 @@ import SuccessIcon from '@mui/icons-material/CheckCircleRounded';
 import ErrorIcon from '@mui/icons-material/ErrorRounded';
 import InfoIcon from '@mui/icons-material/InfoRounded';
 import i18n from 'i18n';
-import chains from '../chains.json';
+import networkData from 'config/networkData.json' assert { type: 'json' };
+import { optimism } from 'wagmi/chains';
 
 export function routeToTxData(route: ActiveRoute) {
-  const { userTxs, bridgeTxHash, routeStatus, fromChainId } = route;
+  const { userTxs, bridgeTxHash, routeStatus } = route;
   const isBridge = userTxs.some(({ steps }) => steps?.some(({ type }) => type === 'bridge'));
   const isSwap = userTxs.some(({ steps }) => steps?.some(({ type }) => type === 'swap'));
 
@@ -32,15 +33,11 @@ export function routeToTxData(route: ActiveRoute) {
       Icon: InfoIcon,
     },
   };
-
-  const chain = chains.find(({ chainId }) => chainId === fromChainId);
-  const scanner = chain ? chain.explorers[0] : undefined;
-
   return {
     route,
     protocol: userTxs[0]?.protocol || userTxs[0]?.steps?.[0]?.protocol,
     type: isBridge ? (isSwap ? 'Bridge + Swap' : 'Bridge') : 'Swap',
     status: status[routeStatus],
-    url: `${isBridge ? 'https://socketscan.io/tx/' : `${scanner}/tx/`}${bridgeTxHash}`,
+    url: `${isBridge ? 'https://socketscan.io/tx/' : `${networkData[optimism.id].etherscan}/tx/`}${bridgeTxHash}`,
   };
 }

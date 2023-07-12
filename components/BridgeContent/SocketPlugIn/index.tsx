@@ -5,13 +5,14 @@ import { useNetwork } from 'wagmi';
 import { useTranslation } from 'react-i18next';
 import { Box, useMediaQuery, useTheme } from '@mui/material';
 
-import { Network, WidgetProps, transactionDetails } from '@socket.tech/plugin';
+import { Network, transactionDetails } from '@socket.tech/plugin';
 import useEthersProvider from 'hooks/useEthersProvider';
 import { optimism } from 'viem/chains';
-import { tokens } from './tokens.json';
+
+import tokensJSON from './tokens.json';
 import useAnalytics from 'hooks/useAnalytics';
 import { hexToRgb } from './utils';
-import useAssets from 'hooks/useAssets';
+import useAssetAddresses from 'hooks/useAssetAddresses';
 
 const DynamicBridge = dynamic(() => import('@socket.tech/plugin').then((mod) => mod.Bridge), {
   ssr: false,
@@ -20,11 +21,6 @@ const DynamicBridge = dynamic(() => import('@socket.tech/plugin').then((mod) => 
 type Props = {
   updateRoutes: () => void;
 };
-
-/**
- * Wrapper used to re-render each time defaultSourceNetwork changes
- */
-const PlugInWrapper = (props: WidgetProps) => <DynamicBridge {...props} key={props.defaultSourceNetwork} />;
 
 const SocketPlugIn = ({ updateRoutes }: Props) => {
   const { chain } = useNetwork();
@@ -36,23 +32,23 @@ const SocketPlugIn = ({ updateRoutes }: Props) => {
   const [sourceNetwork, setSourceNetwork] = useState<Network | undefined>();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const assets = useAssets();
+  const assets = useAssetAddresses();
+  const tokens = Object.values(tokensJSON.result).flat();
 
-  const tokenList = useMemo(
-    () =>
-      tokens
-        .filter(({ chainId, symbol }) => {
-          const isBridgeToOPMainnet =
-            destinationNetwork?.chainId === optimism.id && sourceNetwork?.chainId !== optimism.id;
-          const isSourceToken = chainId === sourceNetwork?.chainId;
+  const tokenList = useMemo(() => {
+    const markets = [...assets, '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'];
+    return tokens
+      .filter(({ chainId, address }) => {
+        const isBridgeToOPMainnet =
+          destinationNetwork?.chainId === optimism.id && sourceNetwork?.chainId !== optimism.id;
+        const isSourceToken = chainId === sourceNetwork?.chainId;
 
-          return isBridgeToOPMainnet
-            ? isSourceToken || assets.includes(symbol)
-            : isSourceToken || chainId === destinationNetwork?.chainId;
-        })
-        .sort((t1, t2) => (assets.includes(t1.symbol) && !assets.includes(t2.symbol) ? -1 : 1)),
-    [assets, destinationNetwork?.chainId, sourceNetwork?.chainId],
-  );
+        return isBridgeToOPMainnet
+          ? isSourceToken || markets.includes(address)
+          : isSourceToken || chainId === destinationNetwork?.chainId;
+      })
+      .sort((t1, t2) => (markets.includes(t1.symbol) && !markets.includes(t2.symbol) ? -1 : 1));
+  }, [assets, destinationNetwork?.chainId, sourceNetwork?.chainId, tokens]);
 
   const handleSourceNetworkChange = useCallback(setSourceNetwork, [setSourceNetwork]);
 
@@ -123,7 +119,7 @@ const SocketPlugIn = ({ updateRoutes }: Props) => {
       minWidth={isMobile ? 348 : 448}
       minHeight={448}
     >
-      <PlugInWrapper
+      <DynamicBridge
         provider={provider}
         enableSameChainSwaps
         API_KEY={process.env.NEXT_PUBLIC_SOCKET_API_KEY || ''}
@@ -148,7 +144,6 @@ const SocketPlugIn = ({ updateRoutes }: Props) => {
         onSourceNetworkChange={handleSourceNetworkChange}
         onDestinationNetworkChange={handleDestinationNetworkChange}
         tokenList={tokenList}
-        locale="es AR"
       />
     </Box>
   );

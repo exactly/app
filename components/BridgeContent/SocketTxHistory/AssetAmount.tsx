@@ -10,7 +10,7 @@ import chains from '../chains.json';
 type Props = { asset: Asset; amount: number; mobile?: boolean };
 
 const AssetAmount = ({ asset, amount, mobile }: Props) => {
-  const chain = useMemo(() => chains.find(({ chainId }) => chainId === asset.chainId), [asset.chainId]);
+  const chain = useMemo(() => Object.values(chains).find(({ chainId }) => chainId === asset.chainId), [asset.chainId]);
   return (
     <Box display={'flex'} flexDirection={'column'} gap={1.5}>
       <Box display={'flex'} alignItems={'center'} height={16} gap={0.5}>
