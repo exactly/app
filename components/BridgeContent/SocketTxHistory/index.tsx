@@ -11,17 +11,17 @@ import TxsMobile from './TxMobile';
 import Placeholder from './Placeholder';
 
 type Props = {
-  activeRoutes: ActiveRoute[];
+  activeRoutes?: ActiveRoute[];
 };
 
 const SocketTxHistory = ({ activeRoutes }: Props) => {
   const { t } = useTranslation();
   const { onlyMobile, onlyDesktopFlex } = globals;
-  const txData = useMemo(() => activeRoutes.map(routeToTxData), [activeRoutes]);
+  const txData = useMemo(() => activeRoutes?.map(routeToTxData), [activeRoutes]);
 
   return (
     <Box p={'32px'} borderRadius={'8px'} flex={1} bgcolor="components.bg" boxShadow={'0px 3px 4px 0px #61666B1A'}>
-      {activeRoutes.length === 0 ? (
+      {activeRoutes?.length === 0 ? (
         <Box
           display={'flex'}
           flexDirection={'column'}

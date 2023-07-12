@@ -4,8 +4,9 @@ import { Table, TableCell, TableContainer, TableHead, TableRow } from '@mui/mate
 import { useTranslation } from 'react-i18next';
 import TxRow from './TxRow';
 import { TxData } from 'types/Bridge';
+import TableSkeleton from './TableSkeleton';
 
-type Props = { txsData: TxData[] };
+type Props = { txsData?: TxData[] };
 
 const TxTable = ({ txsData }: Props) => {
   const { t } = useTranslation();
@@ -20,9 +21,7 @@ const TxTable = ({ txsData }: Props) => {
             <TableCell>{t('Status')}</TableCell>
           </TableRow>
         </TableHead>
-        {txsData.map((tx) => (
-          <TxRow key={tx.route.activeRouteId} {...tx} />
-        ))}
+        {txsData ? txsData.map((tx) => <TxRow key={tx.route.activeRouteId} {...tx} />) : <TableSkeleton />}
       </Table>
     </TableContainer>
   );

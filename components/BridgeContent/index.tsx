@@ -50,7 +50,7 @@ const BridgeContent = () => {
         justifyContent={'center'}
       >
         <SocketPlugIn updateRutes={updateRutes} />
-        {activeRoutes && <SocketTxHistory activeRoutes={activeRoutes} />}
+        {<SocketTxHistory activeRoutes={activeRoutes} />}
       </Box>
     </Box>
   );

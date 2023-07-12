@@ -8,8 +8,9 @@ import formatNumber from 'utils/formatNumber';
 import { TxData } from 'types/Bridge';
 import { ChevronRight } from '@mui/icons-material';
 import TxModal from './TxModal';
+import MobileSkeletons from './MobileSkeletons';
 
-type Props = { txsData: TxData[] };
+type Props = { txsData?: TxData[] };
 
 const TxMobile = (txData: TxData) => {
   const {
@@ -76,9 +77,11 @@ const TxMobile = (txData: TxData) => {
 const TxsMobile = ({ txsData }: Props) => {
   return (
     <Box display={'flex'} gap={'8px'} flexDirection={'column'}>
-      {txsData.map((txData) => (
-        <TxMobile key={txData.route.activeRouteId} {...txData} />
-      ))}
+      {txsData ? (
+        txsData.map((txData) => <TxMobile key={txData.route.activeRouteId} {...txData} />)
+      ) : (
+        <MobileSkeletons />
+      )}
     </Box>
   );
 };
