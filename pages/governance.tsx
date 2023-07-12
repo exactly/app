@@ -9,6 +9,7 @@ import ConnectWalletGovernance from 'components/governance/ConnectWalletGovernan
 import Claimable from 'components/governance/Claimable';
 import Delegation from 'components/governance/Delegation';
 import VotingPower from 'components/governance/VotingPower';
+import Proposals from 'components/governance/Proposals';
 
 const DashBoard: NextPage = () => {
   const { t } = useTranslation();
@@ -39,6 +40,7 @@ const DashBoard: NextPage = () => {
           <Claimable />
           <VotingPower />
           <Delegation />
+          <Proposals />
         </Box>
       ) : (
         <ConnectWalletGovernance />
