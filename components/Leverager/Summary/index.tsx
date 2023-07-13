@@ -22,8 +22,8 @@ const Summary = () => {
     currentLeverageRatio,
     loopAPR,
     newHealthFactor,
-    newCollateral,
-    newBorrow,
+    deposit,
+    borrow,
     disabledConfirm,
     acceptedTerms,
     setAcceptedTerms,
@@ -63,12 +63,12 @@ const Summary = () => {
               }}
             />
             <Typography variant="h6">{input.collateralSymbol}</Typography>
-            <Typography variant="h6">{formatNumber(newCollateral.display, input.collateralSymbol)}</Typography>
+            <Typography variant="h6">{formatNumber(deposit, input.collateralSymbol)}</Typography>
           </Box>
         ),
         subValue: (
           <Box display="flex" justifyContent="end">
-            <USDValue qty={newCollateral.display} symbol={input.collateralSymbol || ''} />
+            <USDValue qty={deposit} symbol={input.collateralSymbol || ''} />
           </Box>
         ),
       },
@@ -87,12 +87,12 @@ const Summary = () => {
               }}
             />
             <Typography variant="h6">{input.borrowSymbol}</Typography>
-            <Typography variant="h6">{formatNumber(newBorrow.display, input.borrowSymbol)}</Typography>
+            <Typography variant="h6">{formatNumber(borrow, input.borrowSymbol)}</Typography>
           </Box>
         ),
         subValue: (
           <Box display="flex" justifyContent="end">
-            <USDValue qty={newBorrow.display} symbol={input.borrowSymbol || ''} />
+            <USDValue qty={borrow} symbol={input.borrowSymbol || ''} />
           </Box>
         ),
       },
@@ -121,13 +121,13 @@ const Summary = () => {
       },
     ],
     [
+      borrow,
+      deposit,
       healthFactorColor.color,
       input.borrowSymbol,
       input.collateralSymbol,
       input.leverageRatio,
       loopAPR,
-      newBorrow,
-      newCollateral,
       newHealthFactor,
       t,
     ],

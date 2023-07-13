@@ -94,7 +94,7 @@ const Operation = () => {
         </Button>
       ) : (
         <Button fullWidth variant="contained" onClick={() => setViewSummary(true)}>
-          {`${t('Leverage')} ${formatNumber(netPosition?.display ?? '0', input.collateralSymbol)} ${
+          {`${t('Leverage')} ${formatNumber(netPosition ?? '0', input.collateralSymbol)} ${
             input.collateralSymbol
           } @ ${input.leverageRatio.toFixed(1)}x`}
         </Button>

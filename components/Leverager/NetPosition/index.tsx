@@ -53,7 +53,7 @@ const NetPosition = () => {
         <InfoRow
           title={t('Net Position')}
           symbol={input.collateralSymbol}
-          assets={netPosition?.display}
+          assets={netPosition}
           disabledMessage={t('Choose asset to see net position.')}
           onClick={input.collateralSymbol && !expanded ? () => setExpanded((_expanded) => !_expanded) : undefined}
         />

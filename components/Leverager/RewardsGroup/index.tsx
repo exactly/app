@@ -30,7 +30,10 @@ const RewardsGroup: FC<RewardsGroupProps> = ({
   ];
 
   return (
-    <AvatarGroup max={6} sx={{ '& .MuiAvatar-root': { width: size, height: size, fontSize: 10 } }}>
+    <AvatarGroup
+      max={6}
+      sx={{ '& .MuiAvatar-root': { width: size, height: size, fontSize: 10, borderColor: 'transparent' } }}
+    >
       {all.map((rewardSymbol) => (
         <Avatar key={rewardSymbol} alt={rewardSymbol} src={`/img/assets/${rewardSymbol}.svg`} />
       ))}
