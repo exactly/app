@@ -13,7 +13,7 @@
     "start": "NODE_ENV=production next start",
     "start:e2e": "npm run build:e2e && NODE_ENV=production next start",
     "export": "NODE_ENV=production next export",
-    "postinstall": "wagmi generate",
+    "postinstall": "patch-package && wagmi generate",
     "lint": "eslint --max-warnings=0 .",
     "i18n:scan": "i18next-scanner --config i18next-scanner.config.cjs"
   },
@@ -90,6 +90,7 @@
     "eslint-plugin-testing-library": "^5.11.0",
     "eslint-plugin-ui-testing": "^2.0.1",
     "i18next-scanner": "^4.2.0",
+    "patch-package": "^7.0.2",
     "prettier": "^3.0.0",
     "sass": "^1.63.6",
     "sharp": "^0.32.1",
