@@ -87,13 +87,13 @@ const TxModal = ({
         <Box display={'flex'} flexDirection={'column'} width={'100%'}>
           <Box display={'flex'} gap={2} margin={2} justifyContent={'space-between'}>
             <Box display={'flex'} flex={1} flexDirection={'column'}>
-              <Box marginBottom={'16px'} fontSize={'14px'}>
-                From
+              <Box mb={2} fontSize={14}>
+                {t('From')}
               </Box>
               <AssetAmount mobile amount={route.fromAmount} asset={route.fromAsset} />
             </Box>
-            <Box display={'flex'} flex={1} flexDirection={'column'} fontSize={1.75}>
-              <Box marginBottom={2}>To</Box>
+            <Box display={'flex'} flex={1} flexDirection={'column'} fontSize={14}>
+              <Box mb={2}>{t('To')}</Box>
               <AssetAmount mobile amount={route.toAmount} asset={route.toAsset} />
             </Box>
           </Box>
