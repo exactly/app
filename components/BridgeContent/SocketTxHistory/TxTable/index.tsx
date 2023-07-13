@@ -3,12 +3,12 @@ import React, { memo } from 'react';
 import { Table, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import TxRow from './TxRow';
-import { TxData } from 'types/Bridge';
+import { Chain, TxData } from 'types/Bridge';
 import TableSkeleton from './TableSkeleton';
 
-type Props = { txsData?: TxData[] };
+type Props = { txsData?: TxData[]; chains: Chain[] };
 
-const TxTable = ({ txsData }: Props) => {
+const TxTable = ({ txsData, chains }: Props) => {
   const { t } = useTranslation();
   return (
     <TableContainer>
@@ -21,7 +21,11 @@ const TxTable = ({ txsData }: Props) => {
             <TableCell>{t('Status')}</TableCell>
           </TableRow>
         </TableHead>
-        {txsData ? txsData.map((tx) => <TxRow key={tx.route.activeRouteId} {...tx} />) : <TableSkeleton />}
+        {txsData ? (
+          txsData.map((tx) => <TxRow key={tx.route.activeRouteId} {...tx} chains={chains} />)
+        ) : (
+          <TableSkeleton />
+        )}
       </Table>
     </TableContainer>
   );

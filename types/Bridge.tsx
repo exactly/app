@@ -205,3 +205,19 @@ export type TokensResponse = {
   success: boolean;
   result: Record<number, Asset[]>;
 };
+
+export type ChainsResponse = {
+  success: boolean;
+  result: Chain[];
+};
+
+export type Chain = {
+  chainId: number;
+  name: string;
+  isL1: boolean;
+  sendingEnabled: boolean;
+  icon: string;
+  receivingEnabled: boolean;
+  rpcs: string[];
+  explorers: string[];
+};

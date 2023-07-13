@@ -5,7 +5,7 @@ import Link from 'next/link';
 import CloseIcon from '@mui/icons-material/Close';
 import { Box, Button, Dialog, DialogTitle, IconButton, Slide, Typography } from '@mui/material';
 
-import { TxData } from 'types/Bridge';
+import { Chain, TxData } from 'types/Bridge';
 import AssetAmount from '../AssetAmount';
 import { TransitionProps } from '@mui/material/transitions';
 import i18n from 'i18n';
@@ -16,6 +16,7 @@ type Props = {
   open: boolean;
   closeModal: () => void;
   txData: TxData;
+  chains: Chain[];
 };
 
 const Transition = forwardRef(function Transition(
@@ -37,6 +38,7 @@ const TxModal = ({
     protocol,
     url,
   },
+  chains,
 }: Props) => {
   const { t } = useTranslation();
 
@@ -90,11 +92,11 @@ const TxModal = ({
               <Box mb={2} fontSize={14}>
                 {t('From')}
               </Box>
-              <AssetAmount mobile amount={route.fromAmount} asset={route.fromAsset} />
+              <AssetAmount mobile amount={route.fromAmount} asset={route.fromAsset} chains={chains} />
             </Box>
             <Box display={'flex'} flex={1} flexDirection={'column'} fontSize={14}>
               <Box mb={2}>{t('To')}</Box>
-              <AssetAmount mobile amount={route.toAmount} asset={route.toAsset} />
+              <AssetAmount mobile amount={route.toAmount} asset={route.toAsset} chains={chains} />
             </Box>
           </Box>
           {protocol && (

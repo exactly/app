@@ -1,16 +1,18 @@
 import React, { memo, useMemo } from 'react';
 
 import { Box, Typography } from '@mui/material';
-import { Asset } from 'types/Bridge';
+import { Asset, Chain } from 'types/Bridge';
 import Image from 'next/image';
 import formatNumber from 'utils/formatNumber';
 import { formatUnits } from 'viem';
-import chains from '../chains.json';
 
-type Props = { asset: Asset; amount: number; mobile?: boolean };
+type Props = { asset: Asset; amount: number; mobile?: boolean; chains: Chain[] };
 
-const AssetAmount = ({ asset, amount, mobile }: Props) => {
-  const chain = useMemo(() => Object.values(chains).find(({ chainId }) => chainId === asset.chainId), [asset.chainId]);
+const AssetAmount = ({ asset, amount, mobile, chains }: Props) => {
+  const chain = useMemo(() => {
+    if (!chains) return;
+    return chains.find(({ chainId }) => chainId === asset.chainId);
+  }, [asset.chainId, chains]);
   return (
     <Box display={'flex'} flexDirection={'column'} gap={1.5}>
       <Box display={'flex'} alignItems={'center'} height={16} gap={0.5}>

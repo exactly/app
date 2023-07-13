@@ -1,9 +1,9 @@
-import React, { memo, useMemo } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 
 import { Box, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 
-import { ActiveRoute } from 'types/Bridge';
+import { ActiveRoute, Chain } from 'types/Bridge';
 import { globals } from 'styles/theme';
 import { routeToTxData } from './utils';
 import TxTable from './TxTable';
@@ -17,7 +17,19 @@ type Props = {
 const SocketTxHistory = ({ activeRoutes }: Props) => {
   const { t } = useTranslation();
   const { onlyMobile, onlyDesktopFlex } = globals;
+  const [chains, setChains] = useState<Chain[]>();
   const txData = useMemo(() => activeRoutes?.map(routeToTxData), [activeRoutes]);
+
+  const fetchChains = useCallback(async () => {
+    const { result } = await fetch('https://api.socket.tech/v2/supported/chains', {
+      headers: {
+        'API-KEY': process.env.NEXT_PUBLIC_SOCKET_API_KEY || '',
+      },
+    }).then((res) => res.json());
+
+    setChains(result);
+  }, []);
+  fetchChains();
 
   return (
     <Box p={4} borderRadius={1} flex={1} bgcolor="components.bg" minHeight="100%" boxShadow="0px 3px 4px 0px #61666B1A">
@@ -38,10 +50,10 @@ const SocketTxHistory = ({ activeRoutes }: Props) => {
           </Typography>
 
           <Box display={onlyDesktopFlex}>
-            <TxTable txsData={txData} />
+            <TxTable txsData={txData} chains={chains} />
           </Box>
           <Box display={onlyMobile}>
-            <TxsMobile txsData={txData} />
+            <TxsMobile txsData={txData} chains={chains} />
           </Box>
         </>
       )}

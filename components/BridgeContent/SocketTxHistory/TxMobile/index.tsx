@@ -5,14 +5,14 @@ import { formatUnits } from 'viem';
 import { Box, Typography } from '@mui/material';
 
 import formatNumber from 'utils/formatNumber';
-import { TxData } from 'types/Bridge';
+import { Chain, TxData } from 'types/Bridge';
 import { ChevronRight } from '@mui/icons-material';
 import TxModal from './TxModal';
 import MobileSkeletons from './MobileSkeletons';
 
-type Props = { txsData?: TxData[] };
+type Props = { txsData?: TxData[]; chains: Chain[] };
 
-const TxMobile = (txData: TxData) => {
+const TxMobile = ({ txData, chains }: { txData: TxData; chains: Chain[] }) => {
   const {
     protocol,
     status: { Icon, color },
@@ -26,7 +26,7 @@ const TxMobile = (txData: TxData) => {
 
   return (
     <>
-      <TxModal open={modalOpen} closeModal={handleClose} txData={txData} />
+      <TxModal open={modalOpen} closeModal={handleClose} txData={txData} chains={chains} />
       <button key={activeRouteId} style={{ all: 'unset', cursor: 'pointer' }} onClick={handleOpen}>
         <Box display="flex" border={1} borderColor="grey.200" borderRadius={0.5} p={2} alignItems="center">
           <Box gap={1} flexDirection={'column'} display="flex">
@@ -67,11 +67,11 @@ const TxMobile = (txData: TxData) => {
   );
 };
 
-const TxsMobile = ({ txsData }: Props) => {
+const TxsMobile = ({ txsData, chains }: Props) => {
   return (
     <Box display="flex" gap={1} flexDirection={'column'}>
       {txsData ? (
-        txsData.map((txData) => <TxMobile key={txData.route.activeRouteId} {...txData} />)
+        txsData.map((txData) => <TxMobile key={txData.route.activeRouteId} txData={txData} chains={chains} />)
       ) : (
         <MobileSkeletons />
       )}

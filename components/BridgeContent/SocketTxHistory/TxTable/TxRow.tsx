@@ -1,7 +1,7 @@
 import React, { memo } from 'react';
 
 import { Box, Button, TableCell, TableRow, Typography } from '@mui/material';
-import { ActiveRoute, StatusData, UserTxProtocol } from 'types/Bridge';
+import { ActiveRoute, Chain, StatusData, UserTxProtocol } from 'types/Bridge';
 import AssetAmount from '../AssetAmount';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -15,9 +15,10 @@ type Props = {
   type: string;
   status: StatusData;
   url: string;
+  chains: Chain[];
 };
 
-const TxRow = ({ route, protocol, type, status: { Icon, color, statusLabel }, url }: Props) => {
+const TxRow = ({ route, protocol, type, status: { Icon, color, statusLabel }, url, chains }: Props) => {
   const { t } = useTranslation();
 
   return (
@@ -28,10 +29,10 @@ const TxRow = ({ route, protocol, type, status: { Icon, color, statusLabel }, ur
       }}
     >
       <TableCell sx={{ paddingY: '32px' }}>
-        <AssetAmount asset={route.fromAsset} amount={route.fromAmount} />
+        <AssetAmount asset={route.fromAsset} amount={route.fromAmount} chains={chains} />
       </TableCell>
       <TableCell sx={{ paddingY: '32px' }}>
-        <AssetAmount asset={route.toAsset} amount={route.toAmount} />
+        <AssetAmount asset={route.toAsset} amount={route.toAmount} chains={chains} />
       </TableCell>
       <TableCell>
         {protocol && (
