@@ -200,3 +200,8 @@ export type BridgeInput = {
   sourceAmount: string;
   destinationAmount: string;
 };
+
+export type TokensResponse = {
+  success: boolean;
+  result: Record<number, Asset[]>;
+};

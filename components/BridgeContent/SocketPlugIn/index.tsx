@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useMemo, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 
 import dynamic from 'next/dynamic';
 import { useNetwork } from 'wagmi';
@@ -9,10 +9,10 @@ import { Network, transactionDetails } from '@socket.tech/plugin';
 import useEthersProvider from 'hooks/useEthersProvider';
 import { optimism } from 'viem/chains';
 
-import tokensJSON from './tokens.json';
 import useAnalytics from 'hooks/useAnalytics';
 import { hexToRgb } from './utils';
 import useAssetAddresses from 'hooks/useAssetAddresses';
+import { Asset, TokensResponse } from 'types/Bridge';
 
 const DynamicBridge = dynamic(() => import('@socket.tech/plugin').then((mod) => mod.Bridge), {
   ssr: false,
@@ -33,10 +33,27 @@ const SocketPlugIn = ({ updateRoutes }: Props) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const assets = useAssetAddresses();
-  const tokens = Object.values(tokensJSON.result).flat();
+
+  const [tokens, setTokens] = useState<Asset[]>();
+
+  const fetchAssets = useCallback(async () => {
+    const { result } = (await fetch('https://api.socket.tech/v2/token-lists/all', {
+      headers: {
+        'API-KEY': process.env.NEXT_PUBLIC_SOCKET_API_KEY || '',
+      },
+    }).then((res) => res.json())) as TokensResponse;
+
+    setTokens(Object.values(result).flat());
+  }, []);
+
+  useEffect(() => {
+    fetchAssets();
+  }, [fetchAssets]);
 
   const tokenList = useMemo(() => {
     const markets = [...assets, '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'];
+    if (!tokens) return [];
+
     return tokens
       .filter(({ chainId, address }) => {
         const isBridgeToOPMainnet =
@@ -123,7 +140,7 @@ const SocketPlugIn = ({ updateRoutes }: Props) => {
         provider={provider}
         enableSameChainSwaps
         API_KEY={process.env.NEXT_PUBLIC_SOCKET_API_KEY || ''}
-        defaultSourceNetwork={chain?.id || 10}
+        defaultSourceNetwork={chain?.id || optimism.id}
         defaultDestNetwork={optimism.id}
         customize={{
           primary: hexToRgb(palette.components.bg),
