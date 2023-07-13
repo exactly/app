@@ -15,7 +15,7 @@ type Props = {
   type: string;
   status: StatusData;
   url: string;
-  chains: Chain[];
+  chains?: Chain[];
 };
 
 const TxRow = ({ route, protocol, type, status: { Icon, color, statusLabel }, url, chains }: Props) => {

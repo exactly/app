@@ -16,7 +16,7 @@ type Props = {
   open: boolean;
   closeModal: () => void;
   txData: TxData;
-  chains: Chain[];
+  chains?: Chain[];
 };
 
 const Transition = forwardRef(function Transition(

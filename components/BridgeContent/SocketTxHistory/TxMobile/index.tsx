@@ -10,9 +10,9 @@ import { ChevronRight } from '@mui/icons-material';
 import TxModal from './TxModal';
 import MobileSkeletons from './MobileSkeletons';
 
-type Props = { txsData?: TxData[]; chains: Chain[] };
+type Props = { txsData?: TxData[]; chains?: Chain[] };
 
-const TxMobile = ({ txData, chains }: { txData: TxData; chains: Chain[] }) => {
+const TxMobile = ({ txData, chains }: { txData: TxData; chains?: Chain[] }) => {
   const {
     protocol,
     status: { Icon, color },

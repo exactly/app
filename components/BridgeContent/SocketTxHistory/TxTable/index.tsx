@@ -6,7 +6,7 @@ import TxRow from './TxRow';
 import { Chain, TxData } from 'types/Bridge';
 import TableSkeleton from './TableSkeleton';
 
-type Props = { txsData?: TxData[]; chains: Chain[] };
+type Props = { txsData?: TxData[]; chains?: Chain[] };
 
 const TxTable = ({ txsData, chains }: Props) => {
   const { t } = useTranslation();

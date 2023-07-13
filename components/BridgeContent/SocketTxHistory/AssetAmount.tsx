@@ -6,7 +6,7 @@ import Image from 'next/image';
 import formatNumber from 'utils/formatNumber';
 import { formatUnits } from 'viem';
 
-type Props = { asset: Asset; amount: number; mobile?: boolean; chains: Chain[] };
+type Props = { asset: Asset; amount: number; mobile?: boolean; chains?: Chain[] };
 
 const AssetAmount = ({ asset, amount, mobile, chains }: Props) => {
   const chain = useMemo(() => {
