@@ -19,6 +19,7 @@ import { useMarketContext } from 'contexts/MarketContext';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import RepeatRoundedIcon from '@mui/icons-material/RepeatRounded';
 import BarChartRoundedIcon from '@mui/icons-material/BarChartRounded';
+import MovingSharpIcon from '@mui/icons-material/MovingSharp';
 import { optimism } from 'wagmi/chains';
 import { useWeb3 } from 'hooks/useWeb3';
 import SecondaryChain from 'components/SecondaryChain';
@@ -48,6 +49,11 @@ function MobileMenu({ open, handleClose }: Props) {
       pathname: '/dashboard',
       icon: <AccountBalanceWalletIcon sx={{ fontSize: 20 }} />,
     },
+    {
+      title: t('Strategies'),
+      pathname: '/strategies',
+      icon: <MovingSharpIcon sx={{ fontSize: 20 }} />,
+    },
     ...(isOPMainnet
       ? [
           {
@@ -63,6 +69,7 @@ function MobileMenu({ open, handleClose }: Props) {
     <Modal open={open} aria-labelledby="user menu" aria-describedby="user menu on mobile">
       <Slide direction="left" in={open}>
         <Box
+          overflow="auto"
           width="100%"
           height="100%"
           bgcolor="components.bg"
@@ -133,7 +140,7 @@ function MobileMenu({ open, handleClose }: Props) {
               <QueryStatsIcon fontSize="small" sx={{ color: 'figma.grey.500', my: 'auto' }} />
             </LinkItem>
           </Box>
-          <Box display="flex" justifyContent="space-between" alignItems="center">
+          <Box display="flex" justifyContent="space-between" alignItems="center" mt={2}>
             <Typography fontSize={14} sx={{ color: 'figma.grey.300' }}>
               © Exactly {date.getFullYear()}
             </Typography>
