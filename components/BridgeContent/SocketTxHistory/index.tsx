@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useMemo, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { Box, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
@@ -29,7 +29,10 @@ const SocketTxHistory = ({ activeRoutes }: Props) => {
 
     setChains(result);
   }, []);
-  fetchChains();
+
+  useEffect(() => {
+    fetchChains();
+  }, [fetchChains]);
 
   return (
     <Box p={4} borderRadius={1} flex={1} bgcolor="components.bg" minHeight="100%" boxShadow="0px 3px 4px 0px #61666B1A">
