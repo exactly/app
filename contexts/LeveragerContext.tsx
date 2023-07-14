@@ -53,6 +53,7 @@ import useDelayedEffect from 'hooks/useDelayedEffect';
 import useRewards from 'hooks/useRewards';
 import useFloatingPoolAPR from 'hooks/useFloatingPoolAPR';
 import { debtManagerABI } from 'types/abi';
+import useStETHNativeAPR from 'hooks/useStETHNativeAPR';
 
 type Params<T extends ExtractAbiFunctionNames<typeof debtManagerABI>> = AbiParametersToPrimitiveTypes<
   ExtractAbiFunction<typeof debtManagerABI, T>['inputs']
@@ -465,6 +466,8 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     ],
   );
 
+  const stETHNativeAPR = useStETHNativeAPR();
+
   const [loopAPR, marketAPR, rewardsAPR, nativeAPR] = useMemo(() => {
     if (!input.collateralSymbol || !input.borrowSymbol) return [0, 0, 0, 0];
 
@@ -484,12 +487,12 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
 
     const _rewardsAPR = collateralRewardsAPR + borrowRewardsAPR;
 
-    const _nativeAPR = 0;
+    const _nativeAPR = input.collateralSymbol === 'wstETH' ? Number(stETHNativeAPR) / 1e18 : 0;
 
     const _loopAPR = _marketAPR + _rewardsAPR + _nativeAPR;
 
     return [_loopAPR, _marketAPR, _rewardsAPR, _nativeAPR];
-  }, [borrowAPR, depositAPR, input.borrowSymbol, input.collateralSymbol, input.leverageRatio, rates]);
+  }, [borrowAPR, depositAPR, input.borrowSymbol, input.collateralSymbol, input.leverageRatio, rates, stETHNativeAPR]);
 
   const marketRewards = useMemo(() => {
     if (!input.collateralSymbol || !input.borrowSymbol) return [];
