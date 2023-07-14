@@ -36,12 +36,12 @@ const LoopAPR = () => {
       {disabled ? (
         <Typography variant="h6">{t('N/A')}</Typography>
       ) : (
-        <Box display="flex" gap={0.5} alignItems="center">
-          <Tooltip title={<APRBreakdown />} placement="top" arrow enterTouchDelay={0} sx={{ cursor: 'pointer' }}>
+        <Tooltip title={<APRBreakdown />} placement="top" arrow enterTouchDelay={0} sx={{ cursor: 'pointer' }}>
+          <Box display="flex" gap={0.5} alignItems="center" width="min-content">
             <Typography variant="h6">{toPercentage(loopAPR)}</Typography>
-          </Tooltip>
-          <RewardsGroup />
-        </Box>
+            <RewardsGroup />
+          </Box>
+        </Tooltip>
       )}
     </Box>
   );

@@ -539,19 +539,18 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
       return true;
     }
 
-    setIsLoading(true);
     setApprovalStatus('INIT');
     try {
       if (await isContract(walletAddress)) {
         if (input.secondaryOperation === 'deposit') {
           setApprovalStatus('ERC20');
           const assetAllowance = await assetIn.read.allowance([walletAddress, debtManager.address], opts);
-          if (assetAllowance <= userInput) return true;
+          if (assetAllowance < userInput) return true;
         }
 
         setApprovalStatus('MARKET');
         const marketOutAllownce = await marketOut.read.allowance([walletAddress, debtManager.address], opts);
-        if (marketOutAllownce <= limit.borrow) return true;
+        if (marketOutAllownce < limit.borrow) return true;
 
         setApprovalStatus('APPROVED');
         return false;
@@ -560,7 +559,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
       if (!isPermitAllowed(chain, maIn.assetSymbol) && input.secondaryOperation === 'deposit') {
         setApprovalStatus('ERC20-PERMIT2');
         const allowance = await assetIn.read.allowance([walletAddress, permit2.address], opts);
-        if (allowance <= userInput) return true;
+        if (allowance < userInput) return true;
       }
 
       setApprovalStatus('APPROVED');
@@ -568,8 +567,6 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     } catch (e: unknown) {
       setErrorData({ status: true, message: handleOperationError(e) });
       return true;
-    } finally {
-      setIsLoading(false);
     }
   }, [
     maIn,
