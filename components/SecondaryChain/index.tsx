@@ -1,24 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import usePreviewerExactly from 'hooks/usePreviewerExactly';
 import { useWeb3 } from 'hooks/useWeb3';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import { Button } from '@mui/material';
 import { optimism, mainnet } from 'wagmi/chains';
+import usePreviewerExactly from 'hooks/usePreviewerExactly';
 
 const SecondaryChain = () => {
   const { t } = useTranslation();
   const { chain: displayNetwork } = useWeb3();
-  const [secondaryChain, setSecondaryChain] = useState(false);
 
   const overrideChain = displayNetwork.id === optimism.id ? mainnet.id : optimism.id;
   const { data } = usePreviewerExactly(overrideChain);
 
-  useEffect(() => {
-    if (data?.some((item) => item?.fixedDepositPositions?.length > 0 || item?.floatingDepositAssets > 0)) {
-      setSecondaryChain(true);
-    }
-  }, [data, setSecondaryChain]);
+  const secondaryChain = useMemo(
+    () => data?.some((item) => item?.fixedDepositPositions?.length > 0 || item?.floatingDepositAssets > 0),
+    [data],
+  );
 
   return secondaryChain ? (
     <Button

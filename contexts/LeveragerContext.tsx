@@ -521,36 +521,24 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
 
   const disabledConfirm = useMemo(() => disabledSubmit || !acceptedTerms, [acceptedTerms, disabledSubmit]);
 
-  // TODO(jg): Change thresholds!
   const getHealthFactorColor = useCallback(
     (_healthFactor?: string) => {
-      if (!_healthFactor) return { color: palette.healthFactor.safe, bg: palette.healthFactor.bg.safe };
+      if (!_healthFactor || !maIn || !maOut)
+        return { color: palette.healthFactor.safe, bg: palette.healthFactor.bg.safe };
       const parsedHF = parseFloat(_healthFactor);
-      const status = parsedHF < 1.01 ? 'danger' : parsedHF < 1.05 ? 'warning' : 'safe';
+      const status =
+        parsedHF <= Number(minHealthFactor(maIn, maOut)) / 1e18 ? 'danger' : parsedHF < 1.25 ? 'warning' : 'safe';
       return { color: palette.healthFactor[status], bg: palette.healthFactor.bg[status] };
     },
-    [palette.healthFactor],
+    [maIn, maOut, palette.healthFactor],
   );
 
   const [approvalStatus, setApprovalStatus] = useState<ApprovalStatus>('INIT');
   const needsApproval = useCallback(async (): Promise<boolean> => {
-    if (
-      !maIn ||
-      !input.collateralSymbol ||
-      !input.borrowSymbol ||
-      !walletAddress ||
-      !marketOut ||
-      !assetIn ||
-      !permit2 ||
-      !debtManager ||
-      !limit ||
-      !opts
-    ) {
+    if (!maIn || !walletAddress || !marketOut || !assetIn || !permit2 || !debtManager || !limit || !opts) {
       return true;
     }
 
-    const borrowAssets = limit.borrow;
-    const _deposit = parseUnits(input.userInput, maIn.decimals);
     setIsLoading(true);
     setApprovalStatus('INIT');
     try {
@@ -558,12 +546,12 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
         if (input.secondaryOperation === 'deposit') {
           setApprovalStatus('ERC20');
           const assetAllowance = await assetIn.read.allowance([walletAddress, debtManager.address], opts);
-          if (assetAllowance <= _deposit) return true;
+          if (assetAllowance <= userInput) return true;
         }
 
         setApprovalStatus('MARKET');
         const marketOutAllownce = await marketOut.read.allowance([walletAddress, debtManager.address], opts);
-        if (marketOutAllownce <= borrowAssets) return true;
+        if (marketOutAllownce <= limit.borrow) return true;
 
         setApprovalStatus('APPROVED');
         return false;
@@ -572,7 +560,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
       if (!isPermitAllowed(chain, maIn.assetSymbol) && input.secondaryOperation === 'deposit') {
         setApprovalStatus('ERC20-PERMIT2');
         const allowance = await assetIn.read.allowance([walletAddress, permit2.address], opts);
-        if (allowance <= _deposit) return true;
+        if (allowance <= userInput) return true;
       }
 
       setApprovalStatus('APPROVED');
@@ -585,10 +573,6 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     }
   }, [
     maIn,
-    input.collateralSymbol,
-    input.borrowSymbol,
-    input.userInput,
-    input.secondaryOperation,
     walletAddress,
     marketOut,
     assetIn,
@@ -598,17 +582,16 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     opts,
     isContract,
     chain,
+    input.secondaryOperation,
+    userInput,
   ]);
 
   const approve = useCallback(async () => {
     if (!debtManager || !marketOut || !assetIn || !permit2 || !opts) return;
 
-    // TODO: Define max assets to approve (Uint256)
-    // Deposit for both ERC20, and newBorrow.value (for leverage) and floatingBorrowAssets - newBorrow (-withdraw?) for deleverage
-    const max = MAX_UINT256;
     setIsLoading(true);
     try {
-      const args = [debtManager.address, max] as const;
+      const args = [debtManager.address, MAX_UINT256] as const;
       let hash: Hex | undefined;
       switch (approvalStatus) {
         case 'ERC20': {
@@ -620,7 +603,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
           break;
         }
         case 'ERC20-PERMIT2': {
-          const approvePermit2 = [permit2.address, max] as const;
+          const approvePermit2 = [permit2.address, MAX_UINT256] as const;
           const gasEstimation = await assetIn.estimateGas.approve(approvePermit2, opts);
           hash = await assetIn.write.approve(approvePermit2, {
             ...opts,

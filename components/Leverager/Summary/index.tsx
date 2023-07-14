@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Box, Button, Checkbox, Divider, Grid, Skeleton, Typography } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
+import { useNetwork, useSwitchNetwork } from 'wagmi';
 import { ModalBox } from 'components/common/modal/ModalBox';
 import ModalAlert from 'components/common/modal/ModalAlert';
 import LoadingTransaction from 'components/common/modal/Loading';
@@ -14,9 +15,14 @@ import RewardsGroup from '../RewardsGroup';
 import handleOperationError from 'utils/handleOperationError';
 import formatNumber from 'utils/formatNumber';
 import useAccountData from 'hooks/useAccountData';
+import { useWeb3 } from 'hooks/useWeb3';
 
 const Summary = () => {
   const { t } = useTranslation();
+  const { chain: displayNetwork } = useWeb3();
+  const { chain } = useNetwork();
+  const { switchNetwork, isLoading: switchIsLoading } = useSwitchNetwork();
+
   const {
     input,
     currentLeverageRatio,
@@ -105,7 +111,7 @@ const Summary = () => {
         value: (
           <Box display="flex" alignItems="center" gap={0.5}>
             <RewardsGroup size={16} />
-            <Typography variant="h6">{toPercentage(loopAPR)}</Typography>
+            <Typography variant="h6">~{toPercentage(loopAPR)}</Typography>
           </Box>
         ),
       },
@@ -113,7 +119,7 @@ const Summary = () => {
         label: t('New Health Factor'),
         value: newHealthFactor ? (
           <Typography variant="h6" color={healthFactorColor.color}>
-            {newHealthFactor}
+            ~{newHealthFactor}
           </Typography>
         ) : (
           <Skeleton width={72} height={36} />
@@ -217,19 +223,30 @@ const Summary = () => {
             </Button>
           </Grid>
           <Grid item xs={9}>
-            <LoadingButton
-              loading={isLoading}
-              onClick={requiresApproval ? approveLeverage : submit}
-              fullWidth
-              variant="contained"
-              disabled={disabledConfirm}
-            >
-              {requiresApproval
-                ? approvalMessage[approvalStatus] ?? t('Approve')
-                : currentLeverageRatio !== 1 && input.leverageRatio === 1
-                ? t('Confirm Deleverage')
-                : t('Confirm Leverage')}
-            </LoadingButton>
+            {chain?.id !== displayNetwork.id ? (
+              <LoadingButton
+                fullWidth
+                onClick={() => switchNetwork?.(displayNetwork.id)}
+                variant="contained"
+                loading={switchIsLoading}
+              >
+                {t('Please switch to {{network}} network', { network: displayNetwork.name })}
+              </LoadingButton>
+            ) : (
+              <LoadingButton
+                loading={isLoading}
+                onClick={requiresApproval ? approveLeverage : submit}
+                fullWidth
+                variant="contained"
+                disabled={disabledConfirm}
+              >
+                {requiresApproval
+                  ? approvalMessage[approvalStatus] ?? t('Approve')
+                  : currentLeverageRatio !== 1 && input.leverageRatio === 1
+                  ? t('Confirm Deleverage')
+                  : t('Confirm Leverage')}
+              </LoadingButton>
+            )}
           </Grid>
         </Grid>
       </Box>
