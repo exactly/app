@@ -161,53 +161,75 @@ const Strategies: NextPage = () => {
   );
 
   const exactlyStrategies = useMemo(
-    () => [
-      {
-        title: t('Maximize your yield'),
-        description: t('Amplify gains or mitigate risk with the power of leverage and deleverage in your investments.'),
-        tags: [
-          { prefix: t('up to'), text: `${maxYield} APR` },
-          { text: t('Advanced'), size: 'small' as const },
-        ],
-        button: (
-          <Button fullWidth variant="contained" onClick={() => startLeverager()}>
-            {t('Leverage')}
-          </Button>
-        ),
-        isNew: true,
-      },
-      {
-        title: t('Reduce Exposure'),
-        description: t('Reduce your risk by decreasing your investment exposure and borrowing less.'),
-        tags: [
-          { prefix: t('Health Factor'), text: hfLabel },
-          { text: t('Advanced'), size: 'small' as const },
-        ],
-        button: (
-          <Button fullWidth variant="contained" onClick={() => startLeverager()}>
-            {t('Deleverage')}
-          </Button>
-        ),
-        isNew: true,
-      },
-      {
-        title: t('Refinance Loans'),
-        description: t(
-          'Seamlessly transfer your debt positions between different pools or convert from fixed to variable rates, and vice versa.',
-        ),
-        tags: [
-          { prefix: t('FROM'), text: `${lowestBorrowAPR} APR` },
-          { text: t('Basic'), size: 'small' as const },
-        ],
-        button: (
-          <Button fullWidth variant="contained" onClick={() => startDebtManager({})}>
-            {t('Rollover')}
-          </Button>
-        ),
-        isNew: true,
-      },
-    ],
-    [hfLabel, lowestBorrowAPR, maxYield, startDebtManager, startLeverager, t],
+    () =>
+      [
+        {
+          title: t('Maximize your yield'),
+          description: t(
+            'Amplify gains or mitigate risk with the power of leverage and deleverage in your investments.',
+          ),
+          tags: [
+            { prefix: t('up to'), text: `${maxYield} APR` },
+            { text: t('Advanced'), size: 'small' as const },
+          ],
+          button: (
+            <Button fullWidth variant="contained" onClick={() => startLeverager()}>
+              {t('Leverage')}
+            </Button>
+          ),
+          isNew: true,
+        },
+        {
+          title: t('Reduce Exposure'),
+          description: t('Reduce your risk by decreasing your investment exposure and borrowing less.'),
+          tags: [
+            { prefix: t('Health Factor'), text: hfLabel },
+            { text: t('Advanced'), size: 'small' as const },
+          ],
+          button: (
+            <Button fullWidth variant="contained" onClick={() => startLeverager()}>
+              {t('Deleverage')}
+            </Button>
+          ),
+          isNew: true,
+        },
+        {
+          title: t('Refinance Loans'),
+          description: t(
+            'Seamlessly transfer your debt positions between different pools or convert from fixed to variable rates, and vice versa.',
+          ),
+          tags: [
+            { prefix: t('FROM'), text: `${lowestBorrowAPR} APR` },
+            { text: t('Basic'), size: 'small' as const },
+          ],
+          button: (
+            <Button fullWidth variant="contained" onClick={() => startDebtManager({})}>
+              {t('Rollover')}
+            </Button>
+          ),
+          isNew: true,
+        },
+        {
+          chainId: optimism.id,
+          title: t('Get EXA'),
+          description: t(
+            "Ready to take part in the Protocol's Governance, Vesting Program, or simply hold EXA? Begin by getting EXA today.",
+          ),
+          tags: [
+            { prefix: t('GET'), text: 'EXA' },
+            { text: t('Basic'), size: 'small' as const },
+          ],
+          button: (
+            <Link href={{ pathname: '/get-exa', query }} style={{ width: '100%' }}>
+              <Button fullWidth variant="contained">
+                {t('Get EXA')}
+              </Button>
+            </Link>
+          ),
+          isNew: true,
+        },
+      ].filter((s) => s.chainId === chain.id || s.chainId === undefined),
+    [chain.id, hfLabel, lowestBorrowAPR, maxYield, query, startDebtManager, startLeverager, t],
   );
 
   const thirdPartyStrategies: (Strategy & { chainId?: number })[] = useMemo(

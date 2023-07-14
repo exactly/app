@@ -6,7 +6,12 @@ import Image from 'next/image';
 import formatNumber from 'utils/formatNumber';
 import { formatUnits } from 'viem';
 
-type Props = { asset: Asset; amount: number; mobile?: boolean; chains?: Chain[] };
+type Props = {
+  asset: Pick<Asset, 'chainId' | 'decimals' | 'logoURI' | 'symbol'>;
+  amount: number;
+  mobile?: boolean;
+  chains?: Chain[];
+};
 
 const AssetAmount = ({ asset, amount, mobile, chains }: Props) => {
   const chain = useMemo(() => {
@@ -17,7 +22,7 @@ const AssetAmount = ({ asset, amount, mobile, chains }: Props) => {
     <Box display={'flex'} flexDirection={'column'} gap={1.5}>
       <Box display={'flex'} alignItems={'center'} height={16} gap={0.5}>
         <Image
-          src={asset.logoURI}
+          src={asset.logoURI || ''}
           alt={asset.symbol}
           width={mobile ? 24 : 16}
           height={mobile ? 24 : 16}

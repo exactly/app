@@ -1,8 +1,7 @@
 import { Hex } from 'viem';
 import useAccountData from './useAccountData';
 import { useMemo } from 'react';
-
-const NATIVE_TOKEN_ADDRESS = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
+import { NATIVE_TOKEN_ADDRESS } from 'types/Bridge';
 
 const usePrices = (): Record<Hex, bigint> => {
   const { accountData } = useAccountData();

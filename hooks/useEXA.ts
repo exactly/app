@@ -12,6 +12,9 @@ import {
 } from 'types/abi';
 import useContract from './useContract';
 import useAccountData from './useAccountData';
+import usePrices from './usePrices';
+import { NATIVE_TOKEN_ADDRESS } from 'types/Bridge';
+import { WAD } from 'utils/queryRates';
 
 export const useEXA = () => {
   return useContract('EXA', exaABI);
@@ -92,4 +95,11 @@ export const useEXAPrice = () => {
       return x ? [x.usdPrice] : [];
     })[0];
   }, [accountData]);
+};
+
+export const useEXAETHPrice = () => {
+  const prices = usePrices();
+  const ETHPrice = prices[NATIVE_TOKEN_ADDRESS];
+  const EXAPrice = useEXAPrice();
+  return useMemo(() => (EXAPrice ? (EXAPrice * WAD) / ETHPrice : undefined), [ETHPrice, EXAPrice]);
 };

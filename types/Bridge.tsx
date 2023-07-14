@@ -1,6 +1,6 @@
 import { SvgIconProps } from '@mui/material';
 import { ComponentType } from 'react';
-import { Address } from 'viem';
+import { Address, Hash } from 'viem';
 
 export type ActiveRoutesResponse = {
   success: boolean;
@@ -271,10 +271,12 @@ export type BridgeStatus = {
   sourceTxStatus: Status;
   destinationTxStatus: Status;
   destinationTransactionHash: string;
-  sourceTransactionHash: string;
+  sourceTransactionHash: Hash;
 };
 
 export type DestinationCallData = {
   destinationPayload: string;
-  destinationGasLimit: bigint;
+  destinationGasLimit: string;
 };
+
+export const NATIVE_TOKEN_ADDRESS = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';

@@ -1,4 +1,4 @@
-import type { Asset, BridgeStatus, Chain, DestinationCallData, Route } from 'types/Bridge';
+import type { ActiveRoute, Asset, BridgeStatus, Chain, DestinationCallData, Route } from 'types/Bridge';
 
 export const socketRequest = async <Result>(
   path: string,
@@ -16,6 +16,9 @@ export const socketRequest = async <Result>(
     },
     body: JSON.stringify(body, (_, value) => (typeof value === 'bigint' ? String(value) : value)),
   });
+
+  if (!response.ok) throw new Error(`Socket request failed with status ${response.status}`);
+
   const { result } = (await response.json()) as { result: Result };
   return result;
 };
@@ -50,7 +53,7 @@ export const socketQuote = async ({
   fromTokenAddress: `0x${string}`;
   fromAmount: bigint;
   userAddress: `0x${string}`;
-  recipient: `0x${string}`;
+  recipient?: `0x${string}`;
   toTokenAddress: `0x${string}`;
   destinationPayload?: `0x${string}`;
   destinationGasLimit?: bigint;
@@ -65,12 +68,12 @@ export const socketQuote = async ({
     fromTokenAddress,
     toTokenAddress,
     userAddress,
-    recipient,
     sort: 'output',
     singleTxOnly: 'true',
     defaultSwapSlippage: '1',
     uniqueRoutesPerBridge: 'true',
     isContractCall: String(!!destinationPayload),
+    ...(recipient ? { recipient } : {}),
     ...(destinationPayload && { destinationPayload }),
     ...(destinationGasLimit && { destinationGasLimit: destinationGasLimit.toString() }),
   });
@@ -95,4 +98,11 @@ export const socketBridgeStatus = async ({
     transactionHash,
     fromChainId: String(fromChainId),
     toChainId: String(toChainId),
+  });
+
+export const socketActiveRoutes = async ({ userAddress }: { userAddress: string }) =>
+  socketRequest<{
+    activeRoutes: ActiveRoute[];
+  }>('route/active-routes/users', {
+    userAddress,
   });

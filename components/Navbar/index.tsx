@@ -109,19 +109,19 @@ function Navbar() {
                 pathname: '/security',
                 name: t('Security Hub'),
                 icon: <GppGoodRoundedIcon sx={{ fontSize: '13px' }} />,
-                isNew: true,
+                isNew: false,
               },
               {
                 pathname: '/activity',
                 name: t('Activity Monitor'),
                 icon: <MonitorHeartRoundedIcon sx={{ fontSize: '13px' }} />,
-                isNew: true,
+                isNew: false,
               },
               {
                 pathname: '/revoke',
                 name: t('Revoke Allowances'),
                 icon: <RemoveCircleOutlineRoundedIcon sx={{ fontSize: '13px' }} />,
-                isNew: true,
+                isNew: false,
               },
             ]}
           />

@@ -34,9 +34,9 @@ const VELO = {
   usdAmount: null,
 } satisfies Omit<AssetBalance, 'amount' | 'usdAmount'> & { amount: null; usdAmount: null };
 
-export default (disableFetch?: boolean, chainId?: number) => {
+export default (disableFetch?: boolean) => {
   const [assets, setAssets] = useState<AssetBalance[]>([ETH]);
-  const { walletAddress } = useWeb3();
+  const { walletAddress, chain } = useWeb3();
   const prices = usePrices();
   const veloBalance = useBalance(VELO.symbol, VELO.address, true);
   const { veloPrice } = useVELO();
@@ -52,7 +52,7 @@ export default (disableFetch?: boolean, chainId?: number) => {
 
     setAssets(
       [...result, VELO]
-        .filter((asset) => chainId === undefined || asset.chainId === chainId)
+        .filter(({ chainId }) => chainId === chain.id)
         .map((asset) => {
           const price = prices[asset.address.toLowerCase() as Hex];
           const amount = asset.amount ?? Number(veloBalance);
@@ -83,7 +83,7 @@ export default (disableFetch?: boolean, chainId?: number) => {
             : b.usdAmount - a.usdAmount,
         ),
     );
-  }, [chainId, disableFetch, prices, veloBalance, veloPrice, walletAddress]);
+  }, [chain.id, disableFetch, prices, veloBalance, veloPrice, walletAddress]);
 
   useEffect(() => {
     fetchAssets();

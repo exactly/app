@@ -54,7 +54,7 @@ export const useWeb3 = (): Web3 => {
   const opts = useMemo(
     () =>
       walletAddress
-        ? { account: walletAddress, chain: defaultChain, value: connector?.id === 'safe' ? 0n : undefined }
+        ? { account: walletAddress, chain: defaultChain, ...(connector?.id === 'safe' ? { value: 0n } : {}) }
         : undefined,
     [walletAddress, connector?.id],
   );

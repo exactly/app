@@ -12,13 +12,11 @@ import { optimism } from 'viem/chains';
 import useAnalytics from 'hooks/useAnalytics';
 import { hexToRgb } from './utils';
 import useAssetAddresses from 'hooks/useAssetAddresses';
-import { Asset, TokensResponse } from 'types/Bridge';
+import { Asset, NATIVE_TOKEN_ADDRESS, TokensResponse } from 'types/Bridge';
 
 const DynamicBridge = dynamic(() => import('@socket.tech/plugin').then((mod) => mod.Bridge), {
   ssr: false,
 });
-
-const NATIVE_TOKEN = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
 
 type Props = {
   updateRoutes: () => void;
@@ -53,7 +51,7 @@ const SocketPlugIn = ({ updateRoutes }: Props) => {
   }, [fetchAssets]);
 
   const tokenList = useMemo(() => {
-    const markets = [...assets, NATIVE_TOKEN];
+    const markets = [...assets, NATIVE_TOKEN_ADDRESS];
     if (!tokens) return [];
 
     return tokens
@@ -144,7 +142,7 @@ const SocketPlugIn = ({ updateRoutes }: Props) => {
         API_KEY={process.env.NEXT_PUBLIC_SOCKET_API_KEY || ''}
         defaultSourceNetwork={chain?.id || optimism.id}
         defaultDestNetwork={optimism.id}
-        defaultDestToken={NATIVE_TOKEN}
+        defaultDestToken={NATIVE_TOKEN_ADDRESS}
         customize={{
           primary: hexToRgb(palette.components.bg),
           secondary: hexToRgb(palette.components.bg),

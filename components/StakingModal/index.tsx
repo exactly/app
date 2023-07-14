@@ -40,7 +40,7 @@ import { waitForTransaction } from '@wagmi/core';
 import { ModalBox, ModalBoxCell, ModalBoxRow } from 'components/common/modal/ModalBox';
 import SocketAssetSelector from 'components/SocketAssetSelector';
 import useSocketAssets from 'hooks/useSocketAssets';
-import { AssetBalance } from 'types/Bridge';
+import { AssetBalance, NATIVE_TOKEN_ADDRESS } from 'types/Bridge';
 import ModalInput from 'components/OperationsModal/ModalInput';
 import Link from 'next/link';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
@@ -64,7 +64,6 @@ import useDelayedEffect from 'hooks/useDelayedEffect';
 import { gasLimit } from 'utils/gas';
 import { useModal } from 'contexts/ModalContext';
 
-const NATIVE_TOKEN_ADDRESS = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
 const MIN_SUPPLY = parseEther('0.002');
 const PROTO_STAKER_DOCS = 'https://docs.exact.ly/guides/periphery/proto-staker';
 

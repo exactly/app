@@ -5,7 +5,7 @@ import { erc20ABI } from 'types/abi';
 import { ERC20 } from 'types/contracts';
 import { useWeb3 } from './useWeb3';
 
-export default (address?: Address): ERC20 | undefined => {
+export default (address?: Address, chainId?: number): ERC20 | undefined => {
   const { chain } = useWeb3();
   const { data: walletClient } = useWalletClient();
 
@@ -13,12 +13,12 @@ export default (address?: Address): ERC20 | undefined => {
     if (!walletClient || !address) return;
 
     const contract = getContract({
-      chainId: chain.id,
+      chainId: chainId || chain.id,
       address,
       abi: erc20ABI,
       walletClient,
     });
 
     return contract;
-  }, [address, chain, walletClient]);
+  }, [address, chain.id, chainId, walletClient]);
 };
