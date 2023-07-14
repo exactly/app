@@ -34,7 +34,7 @@ import useAccountData, { type MarketAccount } from 'hooks/useAccountData';
 import useMarket from 'hooks/useMarket';
 import { useWeb3 } from 'hooks/useWeb3';
 import type { DebtManager, Market } from 'types/contracts';
-import { GAS_LIMIT_MULTIPLIER, MAX_UINT256, WEI_PER_ETHER } from 'utils/const';
+import { GAS_LIMIT_MULTIPLIER, WEI_PER_ETHER } from 'utils/const';
 import handleOperationError from 'utils/handleOperationError';
 import useIsContract from 'hooks/useIsContract';
 import useBalance from 'hooks/useBalance';
@@ -587,14 +587,14 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
   ]);
 
   const approve = useCallback(async () => {
-    if (!debtManager || !marketOut || !assetIn || !permit2 || !opts) return;
+    if (!debtManager || !marketOut || !assetIn || !permit2 || !limit || !opts) return;
 
     setIsLoading(true);
     try {
-      const args = [debtManager.address, MAX_UINT256] as const;
       let hash: Hex | undefined;
       switch (approvalStatus) {
         case 'ERC20': {
+          const args = [debtManager.address, userInput] as const;
           const gasEstimation = await assetIn.estimateGas.approve(args, opts);
           hash = await assetIn.write.approve(args, {
             ...opts,
@@ -603,15 +603,16 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
           break;
         }
         case 'ERC20-PERMIT2': {
-          const approvePermit2 = [permit2.address, MAX_UINT256] as const;
-          const gasEstimation = await assetIn.estimateGas.approve(approvePermit2, opts);
-          hash = await assetIn.write.approve(approvePermit2, {
+          const args = [permit2.address, userInput] as const;
+          const gasEstimation = await assetIn.estimateGas.approve(args, opts);
+          hash = await assetIn.write.approve(args, {
             ...opts,
             gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
           });
           break;
         }
         case 'MARKET': {
+          const args = [debtManager.address, slippage(limit.borrow)] as const;
           const gasEstimation = await marketOut.estimateGas.approve(args, opts);
           hash = await marketOut.write.approve(args, {
             ...opts,
@@ -630,7 +631,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     } finally {
       setIsLoading(false);
     }
-  }, [approvalStatus, assetIn, debtManager, marketOut, opts, permit2]);
+  }, [approvalStatus, assetIn, debtManager, limit, marketOut, opts, permit2, userInput]);
 
   const signPermit = useCallback(
     async (value: bigint, who: 'assetIn' | 'marketIn' | 'marketOut') => {
