@@ -207,15 +207,21 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
       const _maOut = getMarketAccount(borrowSymbol);
       if (!_maOut) return undefined;
 
-      const { result } = await debtPreviewer.simulate.leverage(
-        [maIn.market, _maOut.market, walletAddress, minHealthFactor(maIn, _maOut)],
-        opts,
-      );
+      try {
+        const { result } = await debtPreviewer.simulate.leverage(
+          [maIn.market, _maOut.market, walletAddress, minHealthFactor(maIn, _maOut)],
+          opts,
+        );
 
-      if (cancelled()) return undefined;
+        if (cancelled()) return undefined;
 
-      setLeverageStatus(result);
-      return result;
+        setLeverageStatus(result);
+        return result;
+      } catch (e: unknown) {
+        setLeverageStatus(undefined);
+        setErrorData({ status: true, message: handleOperationError(e) });
+        return undefined;
+      }
     },
     [debtPreviewer, getMarketAccount, input.borrowSymbol, input.collateralSymbol, maIn, opts, walletAddress],
   );
@@ -253,8 +259,12 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
   const [limit, setLimit] = useState<Limit>();
 
   const maxRatio = useMemo(() => {
-    return limit?.maxRatio ?? leverageStatus?.maxRatio ?? 1n;
-  }, [leverageStatus?.maxRatio, limit]);
+    return leverageStatus && limit
+      ? limit.ratio > limit.maxRatio
+        ? limit.ratio
+        : limit.maxRatio
+      : leverageStatus?.maxRatio ?? 1n;
+  }, [leverageStatus, limit]);
 
   const userInput = useMemo(() => {
     if (!maIn) return 0n;
@@ -263,7 +273,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
 
   const preview = useCallback(
     async (cancelled: () => boolean) => {
-      if (!debtPreviewer || !maIn || !maOut || !walletAddress || !opts) {
+      if (!debtPreviewer || !maIn || !maOut || !walletAddress || !leverageStatus || !opts) {
         return;
       }
 
@@ -295,6 +305,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
       debtPreviewer,
       input.leverageRatio,
       input.secondaryOperation,
+      leverageStatus,
       maIn,
       maOut,
       maxRatio,
@@ -510,7 +521,8 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
       !input.borrowSymbol ||
       errorData?.status ||
       (currentLeverageRatio === input.leverageRatio && !input.userInput) ||
-      (principal ?? -1n) < 0n,
+      (principal ?? -1n) < 0n ||
+      !leverageStatus,
     [
       input.collateralSymbol,
       input.borrowSymbol,
@@ -519,6 +531,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
       errorData?.status,
       currentLeverageRatio,
       principal,
+      leverageStatus,
     ],
   );
 
