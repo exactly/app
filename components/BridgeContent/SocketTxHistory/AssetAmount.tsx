@@ -1,6 +1,6 @@
 import React, { memo, useMemo } from 'react';
 
-import { Box, Typography } from '@mui/material';
+import { Box, Skeleton, Typography } from '@mui/material';
 import { Asset, Chain } from 'types/Bridge';
 import Image from 'next/image';
 import formatNumber from 'utils/formatNumber';
@@ -36,20 +36,26 @@ const AssetAmount = ({ asset, amount, mobile, chains }: Props) => {
         </Typography>
       </Box>
       <Box display={'flex'} alignItems={'center'} height={16} gap={0.5}>
-        <Image
-          src={chain?.icon || ''}
-          alt={asset.symbol}
-          width={16}
-          height={16}
-          style={{
-            maxWidth: '100%',
-            height: 'auto',
-            borderRadius: '100%',
-          }}
-        />
-        <Typography variant="body1" fontSize={'14px'} fontWeight={600}>
-          {chain?.name}
-        </Typography>
+        {chain ? (
+          <>
+            <Image
+              src={chain?.icon || ''}
+              alt={asset.symbol}
+              width={16}
+              height={16}
+              style={{
+                maxWidth: '100%',
+                height: 'auto',
+                borderRadius: '100%',
+              }}
+            />
+            <Typography variant="body1" fontSize={'14px'} fontWeight={600}>
+              {chain?.name}
+            </Typography>
+          </>
+        ) : (
+          <Skeleton width={100} />
+        )}
       </Box>
     </Box>
   );

@@ -18,6 +18,8 @@ const DynamicBridge = dynamic(() => import('@socket.tech/plugin').then((mod) => 
   ssr: false,
 });
 
+const NATIVE_TOKEN = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
+
 type Props = {
   updateRoutes: () => void;
 };
@@ -51,7 +53,7 @@ const SocketPlugIn = ({ updateRoutes }: Props) => {
   }, [fetchAssets]);
 
   const tokenList = useMemo(() => {
-    const markets = [...assets, '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'];
+    const markets = [...assets, NATIVE_TOKEN];
     if (!tokens) return [];
 
     return tokens
@@ -142,6 +144,7 @@ const SocketPlugIn = ({ updateRoutes }: Props) => {
         API_KEY={process.env.NEXT_PUBLIC_SOCKET_API_KEY || ''}
         defaultSourceNetwork={chain?.id || optimism.id}
         defaultDestNetwork={optimism.id}
+        defaultDestToken={NATIVE_TOKEN}
         customize={{
           primary: hexToRgb(palette.components.bg),
           secondary: hexToRgb(palette.components.bg),
