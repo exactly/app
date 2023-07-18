@@ -164,6 +164,7 @@ const SocketPlugIn = ({ updateRoutes }: Props) => {
         onSourceNetworkChange={handleSourceNetworkChange}
         onDestinationNetworkChange={handleDestinationNetworkChange}
         tokenList={tokenList}
+        singleTxOnly
       />
     </Box>
   );
