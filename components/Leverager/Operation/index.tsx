@@ -27,11 +27,13 @@ const Operation = () => {
     borrowOptions,
     setViewSummary,
     disabledSubmit,
+    isOverLeveraged,
+    blockModal,
   } = useLeveragerContext();
 
   return (
     <Box>
-      <ModalBox sx={{ p: 2, mb: errorData?.status ? 1 : 4 }}>
+      <ModalBox sx={{ p: 2, mb: errorData?.status || isOverLeveraged ? 1 : 4 }}>
         <ModalBoxRow>
           <Grid container mb={1.5}>
             <Grid item xs={7}>
@@ -84,6 +86,14 @@ const Operation = () => {
         </ModalBoxRow>
       </ModalBox>
       {errorData?.status && <ModalAlert message={errorData.message} variant={errorData.variant} />}
+      {isOverLeveraged && (
+        <ModalAlert
+          message={`${t('You are currently over leveraged with the selected markets.')} ${
+            blockModal ? '' : t('You will only be able to deleverage.')
+          }`}
+          variant="warning"
+        />
+      )}
       {disabledSubmit ? (
         <Button fullWidth variant="contained" disabled>
           {t('Leverage')}

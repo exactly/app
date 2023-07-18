@@ -13,7 +13,7 @@ type Props = {
 };
 
 function AssetInput({ symbol }: Props) {
-  const { input, handleInputChange, onMax, available } = useLeveragerContext();
+  const { input, handleInputChange, onMax, available, blockModal } = useLeveragerContext();
   const { marketAccount } = useAccountData(symbol || 'USDC');
   const { decimals = 18 } = marketAccount ?? {};
 
@@ -39,7 +39,7 @@ function AssetInput({ symbol }: Props) {
           symbol={symbol}
           maxWidth="100%"
           align="left"
-          disabled={!input.collateralSymbol || !input.borrowSymbol}
+          disabled={!input.collateralSymbol || !input.borrowSymbol || blockModal}
         />
       </Box>
       <Box display="flex" justifyContent="left" alignItems="center" marginTop={0.25} height={20} gap={1.5} pl={3}>

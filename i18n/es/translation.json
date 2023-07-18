@@ -343,5 +343,8 @@
   "Basic": "Básico",
   "Insufficient funds": "Fondos insuficientes",
   "All Strategies": "Estrategias",
-  "Take control of your investments with strategies that balance risk and reward for long-term success.": "Toma control de tus inversiones con estrategias que equilibren el riesgo y la recompensa para el éxito a largo plazo."
+  "Take control of your investments with strategies that balance risk and reward for long-term success.": "Toma control de tus inversiones con estrategias que equilibren el riesgo y la recompensa para el éxito a largo plazo.",
+  "You are currently over leveraged with the selected markets.": "Actualmente estás sobre apalancado con los mercados seleccionados.",
+  "You will only be able to deleverage.": "Sólo podrás desapalancar.",
+  "You need to deposit more than {{value}} {{symbol}}.": "Necesitas depositar más de {{value}} {{symbol}}."
 }

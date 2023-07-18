@@ -5,16 +5,16 @@ import { useLeveragerContext } from 'contexts/LeveragerContext';
 
 const RadioButtons = () => {
   const { t } = useTranslation();
-  const { input, setSecondaryOperation, currentLeverageRatio } = useLeveragerContext();
+  const { input, setSecondaryOperation, currentLeverageRatio, blockModal } = useLeveragerContext();
 
   const disabledReclaim = useMemo(
-    () => !input.collateralSymbol || !input.borrowSymbol || input.leverageRatio > currentLeverageRatio,
-    [currentLeverageRatio, input.borrowSymbol, input.collateralSymbol, input.leverageRatio],
+    () => !input.collateralSymbol || !input.borrowSymbol || input.leverageRatio > currentLeverageRatio || blockModal,
+    [blockModal, currentLeverageRatio, input.borrowSymbol, input.collateralSymbol, input.leverageRatio],
   );
 
   const disabledSupply = useMemo(
-    () => !input.collateralSymbol || !input.borrowSymbol || input.leverageRatio < currentLeverageRatio,
-    [currentLeverageRatio, input.borrowSymbol, input.collateralSymbol, input.leverageRatio],
+    () => !input.collateralSymbol || !input.borrowSymbol || input.leverageRatio < currentLeverageRatio || blockModal,
+    [blockModal, currentLeverageRatio, input.borrowSymbol, input.collateralSymbol, input.leverageRatio],
   );
 
   return (

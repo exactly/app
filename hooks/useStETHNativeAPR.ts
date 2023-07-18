@@ -22,7 +22,7 @@ export default function useStETHNativeAPR(): bigint {
         res.json(),
       )) as LidoResponse;
 
-      set(parseEther(String(response.data.apr)));
+      set(parseEther(String(response.data.apr / 100)));
     })();
   }, []);
 

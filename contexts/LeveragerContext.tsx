@@ -126,6 +126,8 @@ type ContextValues = {
 
   disabledSubmit: boolean;
   disabledConfirm: boolean;
+  blockModal: boolean;
+  isOverLeveraged: boolean;
 
   getHealthFactorColor: (healthFactor?: string) => { color: string; bg: string };
 
@@ -147,7 +149,6 @@ type ContextValues = {
 
 const LeveragerContext = createContext<ContextValues | null>(null);
 
-// TODO(jg): Define logic for minimum healthfactor
 const minHealthFactor = (maIn: MarketAccount, maOut: MarketAccount): bigint => {
   if (maIn.asset === maOut.asset) {
     return parseEther('1.02');
@@ -178,11 +179,14 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
   const { rates } = useRewards();
 
   const maIn = useMemo(
-    () => getMarketAccount(input.collateralSymbol ?? 'USDC'),
+    () => (input.collateralSymbol ? getMarketAccount(input.collateralSymbol) : undefined),
     [getMarketAccount, input.collateralSymbol],
   );
 
-  const maOut = useMemo(() => getMarketAccount(input.borrowSymbol ?? 'USDC'), [getMarketAccount, input.borrowSymbol]);
+  const maOut = useMemo(
+    () => (input.borrowSymbol ? getMarketAccount(input.borrowSymbol) : undefined),
+    [getMarketAccount, input.borrowSymbol],
+  );
 
   const marketIn = useMarket(maIn?.market);
   const marketOut = useMarket(maOut?.market);
@@ -259,17 +263,20 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
   const [limit, setLimit] = useState<Limit>();
 
   const maxRatio = useMemo(() => {
-    return leverageStatus && limit
-      ? limit.ratio > limit.maxRatio
-        ? limit.ratio
-        : limit.maxRatio
-      : leverageStatus?.maxRatio ?? 1n;
-  }, [leverageStatus, limit]);
+    return limit?.maxRatio ?? leverageStatus?.maxRatio ?? 1n;
+  }, [leverageStatus?.maxRatio, limit?.maxRatio]);
 
   const userInput = useMemo(() => {
     if (!maIn) return 0n;
     return parseUnits(input.userInput, maIn.decimals);
   }, [maIn, input.userInput]);
+
+  const [isOverLeveraged, blockModal] = useMemo(() => {
+    if (!leverageStatus) return [false, false];
+    const _isOverleveraged =
+      leverageStatus.ratio > leverageStatus.maxRatio || (leverageStatus.ratio === 0n && leverageStatus.minDeposit > 0n);
+    return [_isOverleveraged, _isOverleveraged && leverageStatus.principal < 0n];
+  }, [leverageStatus]);
 
   const preview = useCallback(
     async (cancelled: () => boolean) => {
@@ -295,6 +302,22 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
 
         if (cancelled()) return;
 
+        if (
+          !blockModal &&
+          input.secondaryOperation === 'deposit' &&
+          leverageStatus &&
+          userInput < leverageStatus.minDeposit
+        ) {
+          return setErrorData({
+            status: true,
+            message: t('You need to deposit more than {{value}} {{symbol}}.', {
+              symbol: maIn?.assetSymbol,
+              value: formatUnits(leverageStatus.minDeposit, maIn?.decimals ?? 18),
+            }),
+            variant: 'warning',
+          });
+        }
+
         setLimit(result);
       } catch {
         if (cancelled()) return;
@@ -302,6 +325,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
       }
     },
     [
+      blockModal,
       debtPreviewer,
       input.leverageRatio,
       input.secondaryOperation,
@@ -310,6 +334,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
       maOut,
       maxRatio,
       opts,
+      t,
       userInput,
       walletAddress,
     ],
@@ -345,11 +370,13 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
       if (!input.collateralSymbol) return;
       setErrorData(undefined);
       const res = await defaultLeverage(() => false, borrowSymbol);
+      const _secondaryOperation = res && res.ratio > res.maxRatio ? 'withdraw' : 'deposit';
       dispatch({
         ...initState,
+        secondaryOperation: _secondaryOperation,
         collateralSymbol: input.collateralSymbol,
         borrowSymbol: borrowSymbol,
-        leverageRatio: res ? Number(res.ratio) / 1e18 : minLeverageRatio,
+        leverageRatio: res ? Number(res.ratio > res.maxRatio ? res.maxRatio : res.ratio) / 1e18 : minLeverageRatio,
       });
     },
     [input.collateralSymbol, defaultLeverage],
@@ -402,17 +429,19 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
 
   const setLeverageRatio = useCallback(
     (leverageRatio: number) => {
-      const _secondaryOperation = leverageRatio < currentLeverageRatio ? 'withdraw' : 'deposit';
+      const _maxRatio = Number(maxRatio) / 1e18;
+      const _secondaryOperation =
+        leverageRatio < currentLeverageRatio || currentLeverageRatio > _maxRatio ? 'withdraw' : 'deposit';
       const changedOperation = _secondaryOperation !== input.secondaryOperation;
       setErrorData(undefined);
 
       dispatch({
-        leverageRatio,
+        leverageRatio: leverageRatio > _maxRatio ? _maxRatio : leverageRatio,
         secondaryOperation: _secondaryOperation,
         userInput: changedOperation ? '' : input.userInput,
       });
     },
-    [input.secondaryOperation, input.userInput, currentLeverageRatio],
+    [maxRatio, currentLeverageRatio, input.secondaryOperation, input.userInput],
   );
 
   const openLeverager = useCallback(
@@ -423,6 +452,8 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
       setTx(undefined);
       setIsLoading(false);
       setIsOpen(true);
+      setLimit(undefined);
+      setLeverageStatus(undefined);
       dispatch(initState);
     },
     [_setViewSummary],
@@ -443,7 +474,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
       const parsed = parseUnits(value, maIn?.decimals ?? 18);
 
       if (input.secondaryOperation === 'deposit') {
-        if (walletBalance && parseFloat(value) > parseFloat(walletBalance)) {
+        if (walletBalance && Number(value) > Number(walletBalance)) {
           return setErrorData({ status: true, message: t('Insufficient balance') });
         }
       } else {
@@ -480,7 +511,9 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
   const stETHNativeAPR = useStETHNativeAPR();
 
   const [loopAPR, marketAPR, rewardsAPR, nativeAPR] = useMemo(() => {
-    if (!input.collateralSymbol || !input.borrowSymbol) return [0, 0, 0, 0];
+    if (!input.collateralSymbol || !input.borrowSymbol || isOverLeveraged) {
+      return [undefined, undefined, undefined, undefined];
+    }
 
     const ratio = input.leverageRatio;
 
@@ -503,7 +536,16 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     const _loopAPR = _marketAPR + _rewardsAPR + _nativeAPR;
 
     return [_loopAPR, _marketAPR, _rewardsAPR, _nativeAPR];
-  }, [borrowAPR, depositAPR, input.borrowSymbol, input.collateralSymbol, input.leverageRatio, rates, stETHNativeAPR]);
+  }, [
+    borrowAPR,
+    depositAPR,
+    input.borrowSymbol,
+    input.collateralSymbol,
+    input.leverageRatio,
+    isOverLeveraged,
+    rates,
+    stETHNativeAPR,
+  ]);
 
   const marketRewards = useMemo(() => {
     if (!input.collateralSymbol || !input.borrowSymbol) return [];
@@ -513,7 +555,10 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     return [...new Set([...collateralRewards, ...borrowRewards])];
   }, [input.borrowSymbol, input.collateralSymbol, rates]);
 
-  const nativeRewards = useMemo(() => [], []);
+  const nativeRewards = useMemo(
+    () => (input.collateralSymbol === 'wstETH' ? ['wstETH'] : []),
+    [input.collateralSymbol],
+  );
 
   const disabledSubmit = useMemo(
     () =>
@@ -522,7 +567,8 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
       errorData?.status ||
       (currentLeverageRatio === input.leverageRatio && !input.userInput) ||
       (principal ?? -1n) < 0n ||
-      !leverageStatus,
+      !leverageStatus ||
+      blockModal,
     [
       input.collateralSymbol,
       input.borrowSymbol,
@@ -532,6 +578,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
       currentLeverageRatio,
       principal,
       leverageStatus,
+      blockModal,
     ],
   );
 
@@ -1025,6 +1072,8 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
 
     disabledSubmit,
     disabledConfirm,
+    blockModal,
+    isOverLeveraged,
 
     getHealthFactorColor,
 
