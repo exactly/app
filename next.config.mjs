@@ -15,6 +15,7 @@ export default withSentryConfig({
   redirects: () => [
     { source: '/markets', destination: '/', permanent: true },
     { source: '/assets/:symbol*', destination: '/:symbol*', permanent: true },
+    { source: '/claim', destination: 'https://app.poap.xyz/claim', permanent: true },
   ],
 
   headers: () => [
