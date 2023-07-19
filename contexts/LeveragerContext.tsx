@@ -153,6 +153,11 @@ const minHealthFactor = (maIn: MarketAccount, maOut: MarketAccount): bigint => {
   if (maIn.asset === maOut.asset) {
     return parseEther('1.02');
   }
+
+  if ([maIn, maOut].every((ma) => ma.assetSymbol.includes('ETH'))) {
+    return parseEther('1.03');
+  }
+
   return parseEther('1.05');
 };
 
