@@ -48,7 +48,7 @@ function DebtManagerModal() {
   return (
     <Dialog
       open={isOpen}
-      onClose={close}
+      onClose={loadingTx ? undefined : close}
       PaperComponent={isMobile ? undefined : PaperComponent}
       PaperProps={{
         sx: {

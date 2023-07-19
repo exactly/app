@@ -25,7 +25,6 @@ const Summary = () => {
 
   const {
     input,
-    currentLeverageRatio,
     loopAPR,
     newHealthFactor,
     deposit,
@@ -242,9 +241,9 @@ const Summary = () => {
               >
                 {requiresApproval
                   ? approvalMessage[approvalStatus] ?? t('Approve')
-                  : currentLeverageRatio !== 1 && input.leverageRatio === 1
-                  ? t('Confirm Deleverage')
-                  : t('Confirm Leverage')}
+                  : input.secondaryOperation === 'deposit'
+                  ? t('Confirm Leverage')
+                  : t('Confirm Deleverage')}
               </LoadingButton>
             )}
           </Grid>

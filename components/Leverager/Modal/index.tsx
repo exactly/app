@@ -40,7 +40,7 @@ const Transition = forwardRef(function Transition(
 });
 
 function LeveragerModal() {
-  const { isOpen, close, viewSummary, tx } = useLeveragerContext();
+  const { isOpen, close, input, viewSummary, tx } = useLeveragerContext();
   const { t } = useTranslation();
   const { breakpoints, spacing, palette } = useTheme();
   const isMobile = useMediaQuery(breakpoints.down('sm'));
@@ -49,7 +49,7 @@ function LeveragerModal() {
   return (
     <Dialog
       open={isOpen}
-      onClose={close}
+      onClose={loadingTx ? undefined : close}
       PaperComponent={isMobile ? undefined : PaperComponent}
       PaperProps={{
         sx: {
@@ -94,7 +94,11 @@ function LeveragerModal() {
             }}
           >
             <Typography fontWeight={700} fontSize={24}>
-              {t('Leverage & Deleverage')}
+              {viewSummary
+                ? input.secondaryOperation === 'deposit'
+                  ? t('Leverage')
+                  : t('Deleverage')
+                : t('Leverage & Deleverage')}
             </Typography>
             <Typography sx={{ my: 4 }} fontSize={14} fontWeight={400}>
               {t(
