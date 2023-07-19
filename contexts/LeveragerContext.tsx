@@ -268,7 +268,8 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
   const [limit, setLimit] = useState<Limit>();
 
   const maxRatio = useMemo(() => {
-    return limit?.maxRatio ?? leverageStatus?.maxRatio ?? 1n;
+    const ratio = limit?.maxRatio ?? leverageStatus?.maxRatio ?? 1n;
+    return ratio < WEI_PER_ETHER ? WEI_PER_ETHER : ratio;
   }, [leverageStatus?.maxRatio, limit?.maxRatio]);
 
   const userInput = useMemo(() => {
@@ -376,12 +377,16 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
       setErrorData(undefined);
       const res = await defaultLeverage(() => false, borrowSymbol);
       const _secondaryOperation = res && res.ratio > res.maxRatio ? 'withdraw' : 'deposit';
+      const _leverageRatio = res
+        ? Number(res.ratio > res.maxRatio ? res.maxRatio : res.ratio) / 1e18
+        : minLeverageRatio;
+
       dispatch({
         ...initState,
         secondaryOperation: _secondaryOperation,
         collateralSymbol: input.collateralSymbol,
         borrowSymbol: borrowSymbol,
-        leverageRatio: res ? Number(res.ratio > res.maxRatio ? res.maxRatio : res.ratio) / 1e18 : minLeverageRatio,
+        leverageRatio: Math.max(_leverageRatio, 1),
       });
     },
     [input.collateralSymbol, defaultLeverage],
@@ -421,7 +426,10 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
   }, [maIn?.decimals, principal]);
 
   const currentLeverageRatio = useMemo(
-    () => (leverageStatus ? Number(leverageStatus.ratio) / 1e18 : minLeverageRatio),
+    () =>
+      leverageStatus
+        ? Number(leverageStatus.ratio < WEI_PER_ETHER ? WEI_PER_ETHER : leverageStatus.ratio) / 1e18
+        : minLeverageRatio,
     [leverageStatus],
   );
 
@@ -440,8 +448,10 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
       const changedOperation = _secondaryOperation !== input.secondaryOperation;
       setErrorData(undefined);
 
+      const _leverageRatio = Math.max(Math.min(leverageRatio, _maxRatio), 1);
+
       dispatch({
-        leverageRatio: leverageRatio > _maxRatio ? _maxRatio : leverageRatio,
+        leverageRatio: _leverageRatio,
         secondaryOperation: _secondaryOperation,
         userInput: changedOperation ? '' : input.userInput,
       });
@@ -488,29 +498,9 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
         }
       }
 
-      dispatch({
-        leverageRatio: Math.min(
-          limit
-            ? Number(limit.maxRatio) / 1e18
-            : leverageStatus
-            ? Number(leverageStatus.maxRatio) / 1e18
-            : input.leverageRatio,
-          input.leverageRatio,
-        ),
-      });
       setErrorData(undefined);
     },
-    [
-      setUserInput,
-      maIn?.decimals,
-      input.secondaryOperation,
-      input.leverageRatio,
-      limit,
-      leverageStatus,
-      walletBalance,
-      t,
-      principal,
-    ],
+    [setUserInput, maIn?.decimals, input.secondaryOperation, walletBalance, t, principal],
   );
 
   const stETHNativeAPR = useStETHNativeAPR();
