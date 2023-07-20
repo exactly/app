@@ -31,7 +31,7 @@ function FixedPoolDashboard({ type }: Props) {
       width={'100%'}
       mb="16px"
       p="24px"
-      boxShadow="0px 4px 12px rgba(175, 177, 182, 0.2)"
+      boxShadow={({ palette }) => (palette.mode === 'light' ? '0px 4px 12px rgba(175, 177, 182, 0.2)' : '')}
       borderRadius="0px 0px 6px 6px"
       bgcolor="components.bg"
       borderTop="4px solid #008CF4"

@@ -21,7 +21,6 @@ import useAssets from 'hooks/useAssets';
 import useActionButton from 'hooks/useActionButton';
 import useSorting from 'hooks/useSorting';
 import TableHeadCell, { TableHeader } from 'components/common/TableHeadCell';
-import getLiquidTokenInfo from 'utils/getLiquidTokenInfo';
 import useRouter from 'hooks/useRouter';
 import { useTranslation } from 'react-i18next';
 import Rates from 'components/Rates';
@@ -117,36 +116,32 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
                     {isLoading || depositAPR === undefined ? (
                       <Skeleton width={80} />
                     ) : (
-                      <Tooltip title={getLiquidTokenInfo(symbol)} arrow placement="top">
-                        <Box display="flex" flexDirection="column" width="fit-content">
-                          <Grid container alignItems="center" gap={1}>
-                            <Rates symbol={symbol} apr={depositAPR} type="deposit" />
-                          </Grid>
-                          {rateType === 'fixed' && (
-                            <Typography width="fit-content" variant="subtitle2" color="grey.500">
-                              {depositMaturity ? parseTimestamp(depositMaturity) : ''}
-                            </Typography>
-                          )}
-                        </Box>
-                      </Tooltip>
+                      <Box display="flex" flexDirection="column" width="fit-content">
+                        <Grid container alignItems="center" gap={1}>
+                          <Rates symbol={symbol} apr={depositAPR} type="deposit" />
+                        </Grid>
+                        {rateType === 'fixed' && (
+                          <Typography width="fit-content" variant="subtitle2" color="grey.500">
+                            {depositMaturity ? parseTimestamp(depositMaturity) : ''}
+                          </Typography>
+                        )}
+                      </Box>
                     )}
                   </TableCell>
                   <TableCell align="left" sx={{ width: '200px', py: 1 }}>
                     {isLoading || borrowAPR === undefined ? (
                       <Skeleton width={80} />
                     ) : (
-                      <Tooltip title={getLiquidTokenInfo(symbol)} arrow placement="top">
-                        <Box display="flex" flexDirection="column" width="fit-content">
-                          <Grid container alignItems="center" gap={1}>
-                            <Rates symbol={symbol} apr={borrowAPR} type="borrow" />
-                          </Grid>
-                          {rateType === 'fixed' && (
-                            <Typography width="fit-content" variant="subtitle2" color="grey.500">
-                              {borrowMaturity ? parseTimestamp(borrowMaturity) : ''}
-                            </Typography>
-                          )}
-                        </Box>
-                      </Tooltip>
+                      <Box display="flex" flexDirection="column" width="fit-content">
+                        <Grid container alignItems="center" gap={1}>
+                          <Rates symbol={symbol} apr={borrowAPR} type="borrow" />
+                        </Grid>
+                        {rateType === 'fixed' && (
+                          <Typography width="fit-content" variant="subtitle2" color="grey.500">
+                            {borrowMaturity ? parseTimestamp(borrowMaturity) : ''}
+                          </Typography>
+                        )}
+                      </Box>
                     )}
                   </TableCell>
                   <Tooltip

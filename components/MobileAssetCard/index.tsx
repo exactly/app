@@ -31,7 +31,7 @@ const MobileAssetCard: FC<Props> = ({ symbol, isFloating, children }) => {
     <Box
       bgcolor="components.bg"
       borderTop={isFloating ? '4px solid #33CC59' : '4px solid #0095FF'}
-      boxShadow="0px 4px 12px rgba(175, 177, 182, 0.2)"
+      boxShadow={palette.mode === 'light' ? '0px 4px 12px rgba(175, 177, 182, 0.2)' : ''}
       borderRadius="6px"
       padding="16px 16px"
       display="flex"

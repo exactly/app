@@ -111,7 +111,10 @@ const SymbolGroup: FC<SymbolGroupProps> = ({ symbols, size = 16 }) => {
   if (!symbols) return null;
 
   return (
-    <AvatarGroup max={6} sx={{ '& .MuiAvatar-root': { width: size, height: size, fontSize: 10 } }}>
+    <AvatarGroup
+      max={6}
+      sx={{ '& .MuiAvatar-root': { width: size, height: size, fontSize: 10, borderColor: 'transparent' } }}
+    >
       {symbols.map((symbol) => (
         <Avatar key={symbol} alt={symbol} src={`/img/assets/${symbol}.svg`} />
       ))}

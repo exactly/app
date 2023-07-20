@@ -50,7 +50,7 @@ function DashboardHeader() {
       display="flex"
       bgcolor="components.bg"
       justifyContent={'space-between'}
-      boxShadow={'0px 4px 12px rgba(175, 177, 182, 0.2)'}
+      boxShadow={({ palette }) => (palette.mode === 'light' ? '0px 4px 12px rgba(175, 177, 182, 0.2)' : '')}
       container
     >
       <Grid item>

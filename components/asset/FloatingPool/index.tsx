@@ -16,7 +16,7 @@ const AssetFloatingPool: FC<AssetFloatingPoolProps> = ({ symbol }) => {
         item
         xs={12}
         width="100%"
-        boxShadow="0px 4px 12px rgba(175, 177, 182, 0.2)"
+        boxShadow={({ palette }) => (palette.mode === 'light' ? '0px 4px 12px rgba(175, 177, 182, 0.2)' : '')}
         borderRadius="0px 0px 6px 6px"
         bgcolor="components.bg"
         borderTop="4px solid #33CC59"
@@ -24,7 +24,7 @@ const AssetFloatingPool: FC<AssetFloatingPoolProps> = ({ symbol }) => {
         <FloatingPoolInfo symbol={symbol} />
       </Grid>
       <Box
-        boxShadow="0px 4px 12px rgba(175, 177, 182, 0.2)"
+        boxShadow={({ palette }) => (palette.mode === 'light' ? '0px 4px 12px rgba(175, 177, 182, 0.2)' : '')}
         borderRadius="0px 0px 6px 6px"
         bgcolor="components.bg"
         p="16px"
@@ -34,7 +34,7 @@ const AssetFloatingPool: FC<AssetFloatingPoolProps> = ({ symbol }) => {
         <HistoricalRateChart symbol={symbol} />
       </Box>
       <Box
-        boxShadow="0px 4px 12px rgba(175, 177, 182, 0.2)"
+        boxShadow={({ palette }) => (palette.mode === 'light' ? '0px 4px 12px rgba(175, 177, 182, 0.2)' : '')}
         borderRadius="0px 0px 6px 6px"
         bgcolor="components.bg"
         p="16px"

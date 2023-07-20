@@ -35,7 +35,7 @@ const HeaderInfo: FC<HeaderInfoProps> = ({ title, itemsInfo, variant = 'h6', sha
     <Grid
       sx={{ bgcolor: 'components.bg' }}
       p={isMobile ? '16px' : '24px'}
-      boxShadow={shadow ? '0px 4px 12px rgba(175, 177, 182, 0.2)' : ''}
+      boxShadow={({ palette }) => (palette.mode === 'light' && shadow ? '0px 4px 12px rgba(175, 177, 182, 0.2)' : '')}
     >
       <Grid item mb="20px">
         <Typography variant={variant}>{title}</Typography>

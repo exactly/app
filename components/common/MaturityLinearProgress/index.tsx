@@ -84,7 +84,7 @@ function MaturityLinearProgress({ symbol, operation, maturityDate }: Props) {
           {isCompleted ? (
             <>
               <Typography variant="subtitle2" color={color}>
-                {t('Completed')}
+                {operation === 'borrow' ? t('Expired') : t('Completed')}
               </Typography>
               {Icon && <Icon sx={{ color, fontSize: '14px' }} />}
             </>

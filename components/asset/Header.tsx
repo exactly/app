@@ -102,7 +102,12 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
   );
 
   return (
-    <Grid sx={{ bgcolor: 'components.bg' }} width="100%" p="24px" boxShadow="0px 4px 12px rgba(175, 177, 182, 0.2)">
+    <Grid
+      sx={{ bgcolor: 'components.bg' }}
+      width="100%"
+      p="24px"
+      boxShadow={({ palette }) => (palette.mode === 'light' ? '0px 4px 12px rgba(175, 177, 182, 0.2)' : '')}
+    >
       <Grid item container mb="24px" alignItems="center">
         <DropdownMenu
           label={t('Asset')}

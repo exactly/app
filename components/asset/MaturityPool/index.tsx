@@ -67,7 +67,7 @@ const AssetMaturityPools: FC<Props> = ({ symbol }) => {
       <Grid
         container
         width={'100%'}
-        boxShadow="0px 4px 12px rgba(175, 177, 182, 0.2)"
+        boxShadow={({ palette }) => (palette.mode === 'light' ? '0px 4px 12px rgba(175, 177, 182, 0.2)' : '')}
         borderRadius="0px 0px 6px 6px"
         bgcolor="components.bg"
         borderTop="4px solid #008CF4"
@@ -95,7 +95,7 @@ const AssetMaturityPools: FC<Props> = ({ symbol }) => {
         )}
       </Grid>
       <Box
-        boxShadow="0px 4px 12px rgba(175, 177, 182, 0.2)"
+        boxShadow={({ palette }) => (palette.mode === 'light' ? '0px 4px 12px rgba(175, 177, 182, 0.2)' : '')}
         borderRadius="0px 0px 6px 6px"
         bgcolor="components.bg"
         p="16px"
@@ -104,7 +104,7 @@ const AssetMaturityPools: FC<Props> = ({ symbol }) => {
         <YieldChart symbol={symbol} />
       </Box>
       <Box
-        boxShadow="0px 4px 12px rgba(175, 177, 182, 0.2)"
+        boxShadow={({ palette }) => (palette.mode === 'light' ? '0px 4px 12px rgba(175, 177, 182, 0.2)' : '')}
         borderRadius="0px 0px 6px 6px"
         bgcolor="components.bg"
         p="16px"
