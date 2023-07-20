@@ -9,11 +9,25 @@ type Props = {
   symbol: string;
   type: 'deposit' | 'borrow';
   apr?: number;
+  label?: string;
+  sx?: React.ComponentProps<typeof Typography>['sx'];
+  directionMobile?: 'row' | 'row-reverse';
+  iconsSize?: number;
+  isLoading?: boolean;
 };
 
 const { minAPRValue } = numbers;
 
-const Rates: FC<Props> = ({ symbol, type, apr }) => {
+const Rates: FC<Props> = ({
+  symbol,
+  type,
+  apr,
+  label,
+  sx = { fontSize: 16, fontWeight: 700 },
+  directionMobile,
+  iconsSize,
+  isLoading = false,
+}) => {
   const { rates } = useRewards();
 
   const totalAPR = useMemo(() => {
@@ -32,6 +46,8 @@ const Rates: FC<Props> = ({ symbol, type, apr }) => {
 
   return (
     <APRWithBreakdown
+      directionMobile={directionMobile}
+      iconsSize={iconsSize}
       markets={[{ apr, symbol }]}
       rewards={
         rates &&
@@ -42,8 +58,12 @@ const Rates: FC<Props> = ({ symbol, type, apr }) => {
         }))
       }
     >
-      <Typography fontSize={16} fontWeight={700}>
-        {(totalAPR !== undefined && toPercentage(totalAPR < minAPRValue ? undefined : totalAPR)) || (
+      <Typography sx={sx}>
+        {!isLoading && totalAPR !== undefined ? (
+          `${totalAPR > 999 ? '∞' : toPercentage(totalAPR < minAPRValue ? undefined : totalAPR)}${
+            label ? ' ' + label : ''
+          }`
+        ) : (
           <Skeleton width={70} />
         )}
       </Typography>

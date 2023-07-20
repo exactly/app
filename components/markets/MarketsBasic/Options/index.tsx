@@ -3,13 +3,11 @@ import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import LockIcon from '@mui/icons-material/Lock';
 import SwapVertIcon from '@mui/icons-material/SwapVert';
 import { Box, FormControlLabel, Radio, RadioGroup, Skeleton, Tooltip, Typography, useTheme } from '@mui/material';
-import Image from 'next/image';
 import daysLeft from 'utils/daysLeft';
 import { MarketsBasicOperation, MarketsBasicOption } from 'contexts/MarketsBasicContext';
-import { toPercentage } from 'utils/utils';
-import numbers from 'config/numbers.json';
 import { useTranslation } from 'react-i18next';
 import BestPill from 'components/common/BestPill';
+import Rates from 'components/Rates';
 
 type Props = {
   symbol: string;
@@ -34,16 +32,14 @@ const Options: FC<Props> = ({
 }) => {
   const { t } = useTranslation();
   const { palette } = useTheme();
-  const { minAPRValue } = numbers;
 
   const bottomIconSx = { fontSize: '10px', my: 'auto', color: 'figma.grey.500' };
 
   return (
     <RadioGroup value={selected} onChange={(e) => setSelected(parseInt(e.target.value))} sx={{ pt: 1 }}>
-      {allOptions.map(({ maturity, depositAPR, borrowAPR, borrowRewards, depositRewards }, index) => {
+      {allOptions.map(({ maturity, depositAPR, borrowAPR }, index) => {
         const apr = (operation === 'deposit' ? depositAPR : borrowAPR) ?? 0;
-        const value = apr > minAPRValue ? apr : undefined;
-        const optionRate = `${value && value > 200 ? '∞' : toPercentage(apr)}`;
+
         return (
           <Box display="flex" flexDirection="column" key={`${maturity}_${depositAPR}_${borrowAPR}_${index}`}>
             <FormControlLabel
@@ -67,13 +63,7 @@ const Options: FC<Props> = ({
                   width="100%"
                   gap={{ xs: 0, sm: 1 }}
                 >
-                  <Box
-                    display="flex"
-                    flexDirection={{ xs: 'column', sm: 'row' }}
-                    gap={{ xs: 0, sm: 0.5 }}
-                    alignItems={{ xs: 'start', sm: 'center' }}
-                    flex={1}
-                  >
+                  <Box display="flex" gap={0.5} alignItems="center" flex={1}>
                     {maturity || maturity === 0 ? (
                       <Typography fontWeight={700} fontSize={13} color="grey.900" my="auto">
                         {maturity ? daysLeft(maturity) : t('Open-ended')}
@@ -96,41 +86,11 @@ const Options: FC<Props> = ({
                       </Tooltip>
                     )}
                   </Box>
-                  {(operation === 'deposit' ? depositRewards : borrowRewards)?.map(
-                    ({ assetSymbol, rate }) =>
-                      rate > 0n && (
-                        <OptionRate
-                          key={assetSymbol}
-                          isLoading={maturity === 0 ? loadingFloatingOption : loadingFixedOptions}
-                          symbol={assetSymbol}
-                          value={toPercentage(Number(rate) / 1e18)}
-                          bottom={
-                            <>
-                              <Typography
-                                fontWeight={500}
-                                fontSize={{ xs: 10, sm: 12 }}
-                                color="figma.grey.500"
-                                textAlign="right"
-                              >
-                                {t('Rewards')}
-                              </Typography>
-                              <Tooltip
-                                componentsProps={{ tooltip: { sx: { maxWidth: 260 } } }}
-                                title={<TooltipRewards />}
-                                placement="right"
-                                arrow
-                              >
-                                <InfoOutlinedIcon sx={bottomIconSx} />
-                              </Tooltip>
-                            </>
-                          }
-                        />
-                      ),
-                  )}
                   <OptionRate
+                    apr={apr}
+                    type={operation}
                     isLoading={maturity === 0 ? loadingFloatingOption : loadingFixedOptions}
                     symbol={symbol}
-                    value={optionRate}
                     minWidth={90}
                     bottom={
                       <>
@@ -161,20 +121,6 @@ const Options: FC<Props> = ({
         );
       })}
     </RadioGroup>
-  );
-};
-
-const TooltipRewards = () => {
-  const { t } = useTranslation();
-  return (
-    <Box display="flex" flexDirection="column" gap={0.5}>
-      <Typography fontSize={12} color="grey.700">
-        {t('This percentage stands for the APR of rewards earned for operating on this pool.')}
-      </Typography>
-      <Typography fontSize={12} color="grey.700">
-        {t('Please note that the APR of rewards can vary over time depending on the market conditions.')}
-      </Typography>
-    </Box>
   );
 };
 
@@ -225,34 +171,26 @@ const TooltipFloatingRate = () => {
 };
 
 const OptionRate: FC<{
-  isLoading?: boolean;
-  value: string;
   symbol: string;
+  apr: number;
+  type: 'deposit' | 'borrow';
+  isLoading?: boolean;
   bottom: React.ReactNode;
   minWidth?: number;
-}> = ({ isLoading = false, value, symbol, bottom, minWidth = 0 }) => {
+}> = ({ symbol, apr, type, isLoading, bottom, minWidth = 0 }) => {
   const { t } = useTranslation();
   return (
     <Box display="flex" flexDirection="column" minWidth={minWidth}>
       <Box display="flex" alignItems="center" justifyContent="right" gap={0.3}>
-        {!isLoading ? (
-          <Box display="flex" gap={0.5} alignItems="center">
-            <Typography fontWeight={700} fontSize={13} color="grey.900" textAlign="right">
-              {value}
-            </Typography>
-            <Typography fontWeight={700} fontSize={{ xs: 11, sm: 13 }} color="grey.900" textAlign="right">
-              {t('APR')}
-            </Typography>
-          </Box>
-        ) : (
-          <Skeleton width={40} height={20} />
-        )}
-        <Image
-          src={`/img/assets/${symbol}.svg`}
-          alt={symbol}
-          width="14"
-          height="14"
-          style={{ maxWidth: '100%', height: 'auto' }}
+        <Rates
+          symbol={symbol}
+          apr={apr}
+          type={type}
+          label={t('APR')}
+          sx={{ fontSize: 13, fontWeight: 700 }}
+          directionMobile="row"
+          iconsSize={14}
+          isLoading={isLoading}
         />
       </Box>
       <Box display="flex" gap={0.3} justifyContent="right">

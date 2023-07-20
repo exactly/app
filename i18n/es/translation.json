@@ -106,8 +106,6 @@
   "You can repay your loan at any time before its maturity date. If you do so after the maturity date, a daily interest of {{penaltyRate}} will apply.": "Puede pagar su préstamo en cualquier momento antes de su fecha de vencimiento. Si lo hace después de la fecha de vencimiento, se aplicará un interés diario del {{penaltyRate}}.",
   "This option currently offers the best APR, but please note that is a variable pool and it may change at any time based on market conditions.": "Esta opción ofrece actualmente la mejor TNA, pero tenga en cuenta la tasa es variable y puede cambiar en cualquier momento según las condiciones del mercado.",
   "BEST": "MEJOR",
-  "This percentage stands for the APR of rewards earned for operating on this pool.": "Este porcentaje representa la TNA de las recompensas obtenidas por operar en este pool.",
-  "Please note that the APR of rewards can vary over time depending on the market conditions.": "Tenga en cuenta que la TNA de las recompensas puede variar con el tiempo según las condiciones del mercado.",
   "This percentage stands for a loan's APR (Annual Percentage Rate).": "Este porcentaje representa la TNA (Tasa Nominal Anual) de un préstamo.",
   "A fixed interest rate remains the same for the entire term of the loan.": "Una tasa de interés fija permanece inalterada durante el préstamo.",
   "Learn more about fixed rates.": "Aprender más sobre las tasas de interés fijas.",

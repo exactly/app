@@ -9,12 +9,16 @@ type APR = {
 };
 
 type APRWithBreakdownProps = {
+  directionMobile?: 'row' | 'row-reverse';
+  iconsSize?: number;
   markets: APR[];
   rewards?: APR[];
   natives?: APR[];
 };
 
 const APRWithBreakdown: FC<PropsWithChildren & APRWithBreakdownProps> = ({
+  directionMobile = 'row-reverse',
+  iconsSize = 16,
   children,
   markets,
   rewards = [],
@@ -31,7 +35,7 @@ const APRWithBreakdown: FC<PropsWithChildren & APRWithBreakdownProps> = ({
 
   return (
     <Box display="flex" flexDirection="column" gap={2}>
-      <Box display="flex" flexDirection={{ xs: 'row-reverse', md: 'row' }} gap={0.5} alignItems="center">
+      <Box display="flex" flexDirection={{ xs: directionMobile, md: 'row' }} gap={0.5} alignItems="center">
         <Box>{children}</Box>
         <Tooltip
           title={<APRBreakdown markets={markets} rewards={rewards} natives={natives} />}
@@ -41,7 +45,7 @@ const APRWithBreakdown: FC<PropsWithChildren & APRWithBreakdownProps> = ({
           sx={{ cursor: 'pointer' }}
         >
           <Box>
-            <SymbolGroup symbols={symbols} />
+            <SymbolGroup symbols={symbols} size={iconsSize} />
           </Box>
         </Tooltip>
       </Box>
@@ -88,7 +92,7 @@ const APRBreakdownItem: FC<APRBreakdownItemProps> = ({ title, values }) => {
         {values.map(({ symbol, apr }) => (
           <Box key={`${symbol}${apr}`} display="flex" alignItems="center" gap={0.5}>
             <Typography fontWeight={500} fontSize={14}>
-              {toPercentage(apr)}
+              {apr && apr > 999 ? '∞' : toPercentage(apr)}
             </Typography>
             <SymbolGroup symbols={[symbol]} />
           </Box>

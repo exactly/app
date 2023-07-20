@@ -2,10 +2,12 @@ import React from 'react';
 import { Box, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 
-export default function BestPill() {
+const BestPill = React.forwardRef(function BestPill(props, ref) {
   const { t } = useTranslation();
   return (
     <Box
+      {...props}
+      ref={ref}
       width="fit-content"
       display="flex"
       alignItems="center"
@@ -20,4 +22,6 @@ export default function BestPill() {
       </Typography>
     </Box>
   );
-}
+});
+
+export default BestPill;
