@@ -19,6 +19,7 @@ import {
   Toolbar,
   useTheme,
   Typography,
+  useMediaQuery,
 } from '@mui/material';
 
 import CloseIcon from '@mui/icons-material/Close';
@@ -47,11 +48,12 @@ function Navbar() {
   const { pathname: currentPathname, query } = useRouter();
   const { chain, isConnected } = useWeb3();
 
-  const { palette, spacing } = useTheme();
+  const { palette, spacing, breakpoints } = useTheme();
   const { view } = useMarketContext();
   const [openMenu, setOpenMenu] = useState<boolean>(false);
   const [openFaucet, setOpenFaucet] = useState(false);
   const [openRewardsModal, setOpenRewardsModal] = useState(false);
+  const isMobile = useMediaQuery(breakpoints.down('sm'));
 
   const { data: blockNumber } = useBlockNumber({ chainId: chain?.id });
 
@@ -169,7 +171,7 @@ function Navbar() {
               <Chip label="Goerli Faucet" onClick={handleFaucetClick} sx={{ my: 'auto', display: onlyDesktopFlex }} />
             )}
             <Box display="flex" gap={0.5}>
-              <SecondaryChain />
+              {!isMobile && <SecondaryChain />}
               <RewardsModal
                 isOpen={openRewardsModal}
                 open={() => setOpenRewardsModal(true)}

@@ -21,6 +21,7 @@ import RepeatRoundedIcon from '@mui/icons-material/RepeatRounded';
 import BarChartRoundedIcon from '@mui/icons-material/BarChartRounded';
 import { optimism } from 'wagmi/chains';
 import { useWeb3 } from 'hooks/useWeb3';
+import SecondaryChain from 'components/SecondaryChain';
 
 type Props = {
   open: boolean;
@@ -78,6 +79,7 @@ function MobileMenu({ open, handleClose }: Props) {
                 width={103}
                 height={30}
               />
+              <SecondaryChain />
               <IconButton size="small" edge="start" aria-label="close" onClick={handleClose}>
                 <CloseIcon sx={{ color: 'figma.grey.300' }} />
               </IconButton>
