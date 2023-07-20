@@ -1,5 +1,5 @@
 import React, { FC, PropsWithChildren, useMemo } from 'react';
-import { Box, Typography, Tooltip, Divider } from '@mui/material';
+import { Box, Typography, Tooltip, Divider, Skeleton } from '@mui/material';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { toPercentage } from 'utils/utils';
 import { useTranslation } from 'react-i18next';
@@ -8,7 +8,7 @@ import RewardsGroup from '../RewardsGroup';
 
 const LoopAPR = () => {
   const { t } = useTranslation();
-  const { input, loopAPR, currentLeverageRatio } = useLeveragerContext();
+  const { input, loopAPR, currentLeverageRatio, loadingUserInput } = useLeveragerContext();
 
   const disabled = useMemo(
     () => !input.collateralSymbol || !input.borrowSymbol || (currentLeverageRatio === 1 && input.leverageRatio === 1),
@@ -35,6 +35,8 @@ const LoopAPR = () => {
       </Tooltip>
       {disabled ? (
         <Typography variant="h6">{t('N/A')}</Typography>
+      ) : loadingUserInput ? (
+        <Skeleton width={72} height={36} />
       ) : (
         <Tooltip title={<APRBreakdown />} placement="top" arrow enterTouchDelay={0} sx={{ cursor: 'pointer' }}>
           <Box display="flex" gap={0.5} alignItems="center" width="min-content">

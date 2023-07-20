@@ -19,7 +19,7 @@ export default function useDelayedEffect({ effect, skip = false, delay = 1000 }:
       try {
         await effect(() => cancel);
       } finally {
-        setIsLoading(false);
+        setTimeout(() => setIsLoading(false), 250);
       }
     }, delay);
 

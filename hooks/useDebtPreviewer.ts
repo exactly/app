@@ -11,6 +11,10 @@ export type Limit = AbiParametersToPrimitiveTypes<
   ExtractAbiFunction<typeof debtPreviewerABI, 'previewLeverage'>['outputs']
 >[number];
 
+export type Rates = AbiParametersToPrimitiveTypes<
+  ExtractAbiFunction<typeof debtPreviewerABI, 'leverageRates'>['outputs']
+>[number];
+
 export default () => {
   return useContract('DebtPreviewer', debtPreviewerABI);
 };

@@ -48,7 +48,7 @@ import useERC20 from 'hooks/useERC20';
 import usePermit2 from 'hooks/usePermit2';
 import dayjs from 'dayjs';
 import { isPermitAllowed } from 'utils/permit';
-import useDebtPreviewer, { Limit, Leverage as LeverageStatus } from 'hooks/useDebtPreviewer';
+import useDebtPreviewer, { type Limit, type Leverage as LeverageStatus, type Rates } from 'hooks/useDebtPreviewer';
 import useDelayedEffect from 'hooks/useDelayedEffect';
 import useRewards from 'hooks/useRewards';
 import useFloatingPoolAPR from 'hooks/useFloatingPoolAPR';
@@ -202,6 +202,8 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
   const debtPreviewer = useDebtPreviewer();
   const permit2 = usePermit2();
 
+  const stETHNativeAPR = useStETHNativeAPR();
+
   const minLeverageRatio = 1;
 
   const [leverageStatus, setLeverageStatus] = useState<LeverageStatus>();
@@ -271,7 +273,10 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     [options, getMarketAccount, input.collateralSymbol],
   );
 
+  const { depositAPR } = useFloatingPoolAPR(input.collateralSymbol || 'USDC', undefined, 'deposit');
+
   const [limit, setLimit] = useState<Limit>();
+  const [loopRates, setLoopRates] = useState<Rates>();
 
   const maxRatio = useMemo(() => {
     const ratio = limit?.maxRatio ?? leverageStatus?.maxRatio ?? 1n;
@@ -307,10 +312,23 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
       ] as const;
 
       try {
-        const { result } =
+        const { result: _limit } =
           input.secondaryOperation === 'deposit'
             ? await debtPreviewer.simulate.previewLeverage(args, opts)
             : await debtPreviewer.simulate.previewDeleverage(args, opts);
+
+        const _loopRates = await debtPreviewer.read.leverageRates(
+          [
+            maIn.market,
+            maOut.market,
+            walletAddress,
+            (input.secondaryOperation === 'deposit' ? 1n : -1n) * userInput,
+            ratio < maxRatio ? ratio : maxRatio,
+            parseEther(String(depositAPR)),
+            input.collateralSymbol === 'wstETH' ? stETHNativeAPR : 0n,
+          ],
+          opts,
+        );
 
         if (cancelled()) return;
 
@@ -330,15 +348,19 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
           });
         }
 
-        setLimit(result);
+        setLoopRates(_loopRates);
+        setLimit(_limit);
       } catch {
         if (cancelled()) return;
         setLimit(undefined);
+        setLoopRates(undefined);
       }
     },
     [
       blockModal,
       debtPreviewer,
+      depositAPR,
+      input.collateralSymbol,
       input.leverageRatio,
       input.secondaryOperation,
       leverageStatus,
@@ -346,6 +368,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
       maOut,
       maxRatio,
       opts,
+      stETHNativeAPR,
       t,
       userInput,
       walletAddress,
@@ -353,9 +376,6 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
   );
 
   const { isLoading: previewIsLoading } = useDelayedEffect({ effect: preview });
-
-  const { depositAPR } = useFloatingPoolAPR(input.collateralSymbol || 'USDC', undefined, 'deposit');
-  const { borrowAPR } = useFloatingPoolAPR(input.borrowSymbol || 'USDC', undefined, 'borrow');
 
   const newHealthFactor = useMemo(() => {
     if (!healthFactor || !leverageStatus || !maIn || !maOut || !limit || previewIsLoading) {
@@ -509,44 +529,22 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     [setUserInput, maIn?.decimals, input.secondaryOperation, walletBalance, t, principal],
   );
 
-  const stETHNativeAPR = useStETHNativeAPR();
-
   const [loopAPR, marketAPR, rewardsAPR, nativeAPR] = useMemo(() => {
-    if (!input.collateralSymbol || !input.borrowSymbol || isOverLeveraged) {
+    if (!input.collateralSymbol || !input.borrowSymbol || !loopRates || isOverLeveraged) {
       return [undefined, undefined, undefined, undefined];
     }
 
-    const ratio = input.leverageRatio;
+    const _marketAPR = Number(loopRates.deposit - loopRates.borrow) / 1e18;
 
-    const _marketAPR = depositAPR && borrowAPR ? depositAPR * ratio - borrowAPR * (ratio - 1) : 0;
+    const _rewardsAPR =
+      Number(loopRates.rewards.reduce((_rate, reward) => _rate + reward.deposit + reward.borrow, 0n)) / 1e18;
 
-    const collateralRewardsAPR =
-      rates[input.collateralSymbol]
-        ?.map((r) => (Number(r.floatingDeposit) / 1e18) * ratio)
-        .reduce((acc, curr) => acc + curr, 0) ?? 0;
-
-    const borrowRewardsAPR =
-      rates[input.borrowSymbol]
-        ?.map((r) => (Number(r.borrow) / 1e18) * (ratio - 1))
-        .reduce((acc, curr) => acc + curr, 0) ?? 0;
-
-    const _rewardsAPR = collateralRewardsAPR + borrowRewardsAPR;
-
-    const _nativeAPR = input.collateralSymbol === 'wstETH' ? Number(stETHNativeAPR) / 1e18 : 0;
+    const _nativeAPR = Number(loopRates.native) / 1e18;
 
     const _loopAPR = _marketAPR + _rewardsAPR + _nativeAPR;
 
     return [_loopAPR, _marketAPR, _rewardsAPR, _nativeAPR];
-  }, [
-    borrowAPR,
-    depositAPR,
-    input.borrowSymbol,
-    input.collateralSymbol,
-    input.leverageRatio,
-    isOverLeveraged,
-    rates,
-    stETHNativeAPR,
-  ]);
+  }, [input.borrowSymbol, input.collateralSymbol, isOverLeveraged, loopRates]);
 
   const marketRewards = useMemo(() => {
     if (!input.collateralSymbol || !input.borrowSymbol) return [];
@@ -569,6 +567,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
       (currentLeverageRatio === input.leverageRatio && !input.userInput) ||
       (principal ?? -1n) < 0n ||
       !leverageStatus ||
+      previewIsLoading ||
       blockModal,
     [
       input.collateralSymbol,
@@ -579,6 +578,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
       currentLeverageRatio,
       principal,
       leverageStatus,
+      previewIsLoading,
       blockModal,
     ],
   );
