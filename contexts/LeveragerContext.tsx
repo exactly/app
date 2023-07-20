@@ -251,6 +251,12 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
         ];
       }),
       options.flatMap((symbol) => {
+        if (
+          ['OP', 'wstETH'].includes(input.collateralSymbol ?? '') &&
+          ['OP', 'wstETH'].includes(symbol) &&
+          input.collateralSymbol !== symbol
+        )
+          return [];
         const marketAccount = getMarketAccount(symbol);
         if (!marketAccount) return [];
         const { floatingBorrowAssets, usdPrice, decimals } = marketAccount;
@@ -262,7 +268,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
         ];
       }),
     ],
-    [options, getMarketAccount],
+    [options, getMarketAccount, input.collateralSymbol],
   );
 
   const [limit, setLimit] = useState<Limit>();

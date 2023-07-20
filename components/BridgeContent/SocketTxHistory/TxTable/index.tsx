@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
 
-import { Table, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import TxRow from './TxRow';
 import { Chain, TxData } from 'types/Bridge';
@@ -21,11 +21,13 @@ const TxTable = ({ txsData, chains }: Props) => {
             <TableCell>{t('Status')}</TableCell>
           </TableRow>
         </TableHead>
-        {txsData ? (
-          txsData.map((tx) => <TxRow key={tx.route.activeRouteId} {...tx} chains={chains} />)
-        ) : (
-          <TableSkeleton />
-        )}
+        <TableBody>
+          {txsData ? (
+            txsData.map((tx) => <TxRow key={tx.route.activeRouteId} {...tx} chains={chains} />)
+          ) : (
+            <TableSkeleton />
+          )}
+        </TableBody>
       </Table>
     </TableContainer>
   );
