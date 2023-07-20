@@ -28,15 +28,16 @@ function FixedPoolDashboard({ type }: Props) {
 
   return (
     <Grid
-      width={'100%'}
-      mb="16px"
-      p="24px"
+      width="100%"
+      mb={2}
+      px={1.5}
+      py={3}
       boxShadow={({ palette }) => (palette.mode === 'light' ? '0px 4px 12px rgba(175, 177, 182, 0.2)' : '')}
       borderRadius="0px 0px 6px 6px"
       bgcolor="components.bg"
       borderTop="4px solid #008CF4"
     >
-      <Box display="flex" justifyContent="space-between" flexWrap="wrap">
+      <Box display="flex" justifyContent="space-between" flexWrap="wrap" mx={1.5}>
         <Typography variant="h6">{t('Fixed Interest Rate')}</Typography>
         <Box display="flex" alignItems="center">
           <InfoIcon sx={{ color: 'blue', height: 14 }} />
@@ -47,7 +48,7 @@ function FixedPoolDashboard({ type }: Props) {
       </Box>
 
       {fixedRows.length === 0 ? (
-        <Typography color="grey.500" mt={1} fontSize="14px">
+        <Typography color="grey.500" mt={1} fontSize="14px" mx={1.5}>
           {t('No {{operations}} found', { operations: type === 'deposit' ? t('deposits') : t('borrows') })}
         </Typography>
       ) : (

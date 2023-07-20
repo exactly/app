@@ -84,6 +84,7 @@ function FloatingPoolDashboardTable({ type, rows }: Props) {
                 sortDirection={sortKey && sortDirection(sortKey)}
                 sort={() => setOrderBy(sortKey)}
                 isSortEnabled={!!sortKey}
+                sx={{ '&:first-child': { pl: 1.5 }, '&:last-child': { pr: 1.5 } }}
               />
             ))}
           </TableRow>

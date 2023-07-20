@@ -66,6 +66,7 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
                 sortDirection={sortKey && sortDirection(sortKey)}
                 sort={() => setOrderBy(sortKey)}
                 isSortEnabled={!!sortKey}
+                sx={{ '&:first-child': { pl: 1.5 }, '&:last-child': { pr: 1.5 } }}
               />
             ))}
             <TableCell />
@@ -85,7 +86,7 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
                   hover
                   data-testid={`markets-${rateType}-pool-row-${symbol}`}
                 >
-                  <TableCell component="th" scope="row">
+                  <TableCell component="th" scope="row" sx={{ pl: 1.5 }}>
                     <Grid container alignItems="center">
                       {isLoading ? (
                         <Skeleton variant="circular" width={24} height={24} />
@@ -194,7 +195,7 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
                     size="small"
                     width={50}
                     onClick={(e) => e.preventDefault()}
-                    sx={{ cursor: 'default', px: 0.5 }}
+                    sx={{ cursor: 'default', pr: 1.5 }}
                   >
                     {isLoading ? (
                       <Skeleton

@@ -206,30 +206,32 @@ const MarketTables: FC = () => {
   return (
     <>
       <Grid
-        my="16px"
-        p="24px"
+        my={2}
+        px={1.5}
+        py={3}
         boxShadow={({ palette }) => (palette.mode === 'light' ? '0px 4px 12px rgba(175, 177, 182, 0.2)' : '')}
         borderRadius="0px 0px 6px 6px"
         bgcolor="components.bg"
         borderTop="4px solid #34C53A"
         display={onlyDesktop}
       >
-        <Typography variant="h6" pb="16px">
+        <Typography variant="h6" mb={2} ml={1.5}>
           {t('Variable Interest Rate')}
         </Typography>
         <PoolTable isLoading={isLoading} headers={floatingHeaders} rows={floatingRows} rateType="floating" />
       </Grid>
       <Grid
-        width={'100%'}
-        mb="16px"
-        p="24px"
+        width="100%"
+        mb={2}
+        px={1.5}
+        py={3}
         boxShadow={({ palette }) => (palette.mode === 'light' ? '0px 4px 12px rgba(175, 177, 182, 0.2)' : '')}
         borderRadius="0px 0px 6px 6px"
         bgcolor="components.bg"
         borderTop="4px solid #008CF4"
         display={onlyDesktop}
       >
-        <Typography variant="h6" pb="16px">
+        <Typography variant="h6" mb={2} ml={1.5}>
           {t('Fixed Interest Rate')}
         </Typography>
         <PoolTable isLoading={isLoading} headers={fixedHeaders} rows={fixedRows} rateType="fixed" />

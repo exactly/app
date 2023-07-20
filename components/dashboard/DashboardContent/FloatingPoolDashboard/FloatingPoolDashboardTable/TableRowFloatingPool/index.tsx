@@ -41,7 +41,7 @@ function TableRowFloatingPool({ symbol, valueUSD, depositedAmount, borrowedAmoun
       data-testid={`dashboard-floating-pool-row-${symbol}`}
     >
       <Link href={{ pathname: `/${symbol}`, query }} legacyBehavior>
-        <TableCell component="th" align="left" sx={{ cursor: 'pointer' }} width={240}>
+        <TableCell component="th" align="left" sx={{ cursor: 'pointer', pl: 1.5 }} width={240}>
           <Stack direction="row" spacing={1}>
             <Image
               src={`/img/assets/${symbol}.svg`}
@@ -98,7 +98,7 @@ function TableRowFloatingPool({ symbol, valueUSD, depositedAmount, borrowedAmoun
         </Button>
       </TableCell>
 
-      <TableCell align="left" width={50} size="small" sx={{ px: 0.5 }}>
+      <TableCell align="left" width={50} size="small" sx={{ pr: 1.5 }}>
         {type === 'deposit' ? (
           <Button
             variant="outlined"

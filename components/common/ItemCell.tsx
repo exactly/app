@@ -9,7 +9,7 @@ type Props = {
 
 export default function ItemCell({ symbol, value }: Props) {
   return (
-    <Box display="flex" alignItems="center" gap={0.5}>
+    <Box display="flex" alignItems="center" gap={0.5} sx={{ '&:not(:last-child)': { mb: 0.5 } }}>
       <Typography minWidth={90} variant="h5" component="p" fontWeight={700}>
         {value}
       </Typography>

@@ -102,7 +102,7 @@ function TableRowFixedPool({ symbol, valueUSD, type, maturityDate, market, decim
         data-testid={`dashboard-fixed-${type}-row-${maturityDate}-${symbol}`}
       >
         <Link href={{ pathname: `/${symbol}`, query }} legacyBehavior>
-          <TableCell component="th" align="left" sx={{ cursor: 'pointer' }} width={240}>
+          <TableCell component="th" align="left" sx={{ cursor: 'pointer', pl: 1.5 }} width={240}>
             <Stack direction="row" spacing={1}>
               <Image
                 src={`/img/assets/${symbol}.svg`}
@@ -195,7 +195,7 @@ function TableRowFixedPool({ symbol, valueUSD, type, maturityDate, market, decim
         </TableCell>
       </TableRow>
       <TableRow>
-        <TableCell style={{ padding: 0 }} colSpan={7} size="small">
+        <TableCell sx={{ py: 0, pr: 1.5 }} colSpan={7} size="small">
           <CollapseFixedPool open={open} transactions={transactions} />
         </TableCell>
       </TableRow>

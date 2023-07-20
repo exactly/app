@@ -5,7 +5,7 @@ import ModalInfo from 'components/common/modal/ModalInfo';
 import useRewards from 'hooks/useRewards';
 import RewardPill from 'components/markets/RewardPill';
 import { Operation } from 'contexts/ModalStatusContext';
-import { Skeleton } from '@mui/material';
+import { Box, Skeleton } from '@mui/material';
 
 type Props = {
   symbol: string;
@@ -27,13 +27,15 @@ function ModalRewards({ symbol, operation }: Props) {
       {isLoading ? (
         <Skeleton width={100} />
       ) : (
-        rates[symbol]?.map((r) => (
-          <RewardPill
-            key={r.asset}
-            rate={operation === 'borrow' ? r.borrow : r.floatingDeposit}
-            symbol={r.assetSymbol}
-          />
-        ))
+        <Box display="flex" gap={0.5}>
+          {rates[symbol]?.map((r) => (
+            <RewardPill
+              key={r.asset}
+              rate={operation === 'borrow' ? r.borrow : r.floatingDeposit}
+              symbol={r.assetSymbol}
+            />
+          ))}
+        </Box>
       )}
     </ModalInfo>
   );

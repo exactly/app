@@ -14,6 +14,7 @@ export type TableHeader<T> = {
   sort?: () => void;
   isSortEnabled?: boolean;
   sortKey?: keyof T;
+  sx?: React.ComponentProps<typeof TableCell>['sx'];
 };
 
 export default function TableHeadCell<T>({
@@ -27,9 +28,10 @@ export default function TableHeadCell<T>({
   sortDirection,
   sort,
   isSortEnabled,
+  sx,
 }: TableHeader<T>) {
   return (
-    <TableCell align={align || 'left'} sx={{ minWidth: width }}>
+    <TableCell align={align || 'left'} sx={{ minWidth: width, ...sx }}>
       <TableSortLabel active={sortActive} direction={sortDirection} onClick={sort} hideSortIcon={!isSortEnabled}>
         <Tooltip title={hidden ? '' : tooltipTitle} placement={tooltipPlacement || 'top'} arrow>
           <Typography

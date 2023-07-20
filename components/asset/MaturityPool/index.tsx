@@ -66,7 +66,7 @@ const AssetMaturityPools: FC<Props> = ({ symbol }) => {
     <Box display="flex" flexDirection="column" gap="8px">
       <Grid
         container
-        width={'100%'}
+        width="100%"
         boxShadow={({ palette }) => (palette.mode === 'light' ? '0px 4px 12px rgba(175, 177, 182, 0.2)' : '')}
         borderRadius="0px 0px 6px 6px"
         bgcolor="components.bg"
@@ -89,7 +89,7 @@ const AssetMaturityPools: FC<Props> = ({ symbol }) => {
             <MaturityPoolsMobile symbol={symbol} />
           </Box>
         ) : (
-          <Grid item xs={12} px="24px" pb="24px" bgcolor="components.bg" mt={-1}>
+          <Grid item xs={12} px={1.5} pb={3} bgcolor="components.bg" mt={-1}>
             <MaturityPoolsTable symbol={symbol} />
           </Grid>
         )}

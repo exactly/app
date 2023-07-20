@@ -26,7 +26,7 @@ type MaturityPoolsTableProps = {
 
 const HeadCell: FC<{ title: string; tooltipTitle?: string | null }> = ({ title, tooltipTitle }) => {
   return (
-    <TableCell align="left">
+    <TableCell align="left" sx={{ '&:first-child': { pl: 1.5 }, '&:last-child': { pr: 1.5 } }}>
       <Tooltip title={tooltipTitle} placement="top" arrow>
         <Typography variant="subtitle1" fontSize="10px" color="grey.500" fontWeight={600} textTransform="uppercase">
           {title}
@@ -76,7 +76,6 @@ const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ symbol }) => {
               tooltipTitle={t('The fixed borrowing interest APR at current utilization level.')}
             />
             <TableCell />
-            <TableCell />
           </TableRow>
         </TableHead>
         <TableBody>
@@ -88,7 +87,7 @@ const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ symbol }) => {
               }}
               hover
             >
-              <TableCell component="th" scope="row" width={120}>
+              <TableCell component="th" scope="row" width={120} sx={{ pl: 1.5 }}>
                 <Typography
                   variant="body1"
                   color={palette.mode === 'light' ? 'black' : 'white'}
@@ -110,30 +109,16 @@ const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ symbol }) => {
               <TableCell align="left" width={50}>
                 {toPercentage(borrowAPR > minAPRValue ? borrowAPR : undefined)}
               </TableCell>
-              <TableCell
-                align="left"
-                size="small"
-                width={40}
-                onClick={(e) => e.preventDefault()}
-                sx={{ cursor: 'default', px: 0.5 }}
-              >
+              <TableCell align="right" size="small" sx={{ cursor: 'default', pr: 1.5 }}>
                 <Button
                   data-testid={`fixed-${maturity}-deposit-${symbol}`}
                   disabled={depositAPR < minAPRValue}
                   variant="contained"
                   onClick={(e) => handleActionClick(e, 'depositAtMaturity', symbol, maturity)}
-                  sx={{ whiteSpace: 'nowrap' }}
+                  sx={{ whiteSpace: 'nowrap', mr: 0.5 }}
                 >
                   {t('Deposit')}
                 </Button>
-              </TableCell>
-
-              <TableCell
-                align="left"
-                size="small"
-                onClick={(e) => e.preventDefault()}
-                sx={{ cursor: 'default', px: 0.5 }}
-              >
                 <Button
                   data-testid={`fixed-${maturity}-borrow-${symbol}`}
                   disabled={borrowAPR < minAPRValue}
