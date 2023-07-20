@@ -32,6 +32,7 @@ import { Transaction } from 'types/Transaction';
 import Loading from 'components/common/modal/Loading';
 import useRewards from 'hooks/useRewards';
 import { WEI_PER_ETHER } from 'utils/const';
+import { LoadingButton } from '@mui/lab';
 
 function PaperComponent(props: PaperProps | undefined) {
   const ref = useRef<HTMLDivElement>(null);
@@ -68,6 +69,7 @@ const RewardsModal: FC<RewardsModalProps> = ({ isOpen, open, close }) => {
   const [input, setInput] = useState<string>('');
   const [showInput, setShowInput] = useState<boolean>(false);
   const [selected, setSelected] = useState<Record<string, boolean>>({});
+  const [loading, setLoading] = useState<boolean>(false);
 
   const loadingTx = useMemo(() => tx && (tx.status === 'loading' || tx.status === 'processing'), [tx]);
   const differentAddress = useMemo(() => (input && isAddress(input) ? formatWallet(input) : ''), [input]);
@@ -80,7 +82,8 @@ const RewardsModal: FC<RewardsModalProps> = ({ isOpen, open, close }) => {
     const assets = Object.entries(selected)
       .filter(([, v]) => v)
       .map(([symbol]) => symbol);
-    await claim({ assets, to: showInput && isAddress(input) ? input : undefined, setTx });
+    setLoading(true);
+    claim({ assets, to: showInput && isAddress(input) ? input : undefined, setTx }).finally(() => setLoading(false));
   }, [claim, input, selected, showInput]);
 
   const rewards = useMemo(
@@ -98,6 +101,7 @@ const RewardsModal: FC<RewardsModalProps> = ({ isOpen, open, close }) => {
     setShowInput(false);
     setSelected({});
     setInput('');
+    setTx(undefined);
   }, [close]);
 
   return (
@@ -252,9 +256,15 @@ const RewardsModal: FC<RewardsModalProps> = ({ isOpen, open, close }) => {
                   </Collapse>
                 </Box>
                 <Box display="flex" flexDirection="column" gap={2} alignItems="center">
-                  <Button fullWidth variant="contained" disabled={disableSubmit} onClick={submit}>
+                  <LoadingButton
+                    fullWidth
+                    variant="contained"
+                    disabled={disableSubmit}
+                    onClick={submit}
+                    loading={loading}
+                  >
                     {showInput ? `${t('Claim to')} ${differentAddress}` : t('Claim to connected wallet')}
-                  </Button>
+                  </LoadingButton>
                   <Typography
                     fontSize={12}
                     color="grey.500"
