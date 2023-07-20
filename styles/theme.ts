@@ -523,9 +523,6 @@ export const darkTheme = createTheme({
           color: '#E3E5E8',
           borderColor: '#9a9a9a',
         },
-        text: {
-          color: '#959595',
-        },
       },
     },
     MuiButtonGroup: {

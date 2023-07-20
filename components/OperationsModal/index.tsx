@@ -38,7 +38,10 @@ function PaperComponent(props: PaperProps | undefined) {
         sx={{
           borderRadius: tx ? '16px' : '6px',
           minWidth: '400px',
-          boxShadow: tx ? '4px 8px 16px rgba(227, 229, 232, 0.5), -4px -8px 16px rgba(248, 249, 249, 0.25)' : '',
+          boxShadow: ({ palette }) =>
+            palette.mode === 'light' && tx
+              ? '4px 8px 16px rgba(227, 229, 232, 0.5), -4px -8px 16px rgba(248, 249, 249, 0.25)'
+              : '',
         }}
       />
     </Draggable>

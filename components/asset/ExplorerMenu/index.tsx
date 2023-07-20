@@ -66,12 +66,15 @@ const ExplorerMenu: FC<Props> = ({ symbol, assetAddress, eMarketAddress, rateMod
         MenuListProps={{
           'aria-labelledby': 'view-contracts-button',
         }}
-        PaperProps={{
-          style: {
-            marginTop: '8px',
-            padding: '0 4px 4px 4px',
-            boxShadow: '0px 4px 12px rgba(175, 177, 182, 0.2)',
-            borderRadius: 16,
+        slotProps={{
+          paper: {
+            sx: {
+              marginTop: '8px',
+              padding: '0 4px 4px 4px',
+              boxShadow: ({ palette: _palette }) =>
+                _palette.mode === 'light' ? '0px 4px 12px rgba(175, 177, 182, 0.2)' : '',
+              borderRadius: '16px',
+            },
           },
         }}
         anchorOrigin={{

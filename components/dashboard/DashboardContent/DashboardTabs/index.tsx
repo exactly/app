@@ -28,9 +28,14 @@ function DashboardTabs({ initialTab, allTabs }: Props) {
           TabIndicatorProps={{ sx: { height: 0 } }}
           textColor="inherit"
           sx={{
-            '& button:hover': { backgroundColor: '#5c5a5a', color: 'white' },
-            '& button:focus': { backgroundColor: '#0E0E0E', color: 'white' },
-            '& button.Mui-selected': { backgroundColor: '#0E0E0E', color: 'white' },
+            '& button:hover': {
+              backgroundColor: ({ palette }) => (palette.mode === 'light' ? '#5c5a5a' : '#fafafa'),
+              color: ({ palette }) => (palette.mode === 'light' ? 'white' : 'black'),
+            },
+            '& button.Mui-selected, & button:focus': {
+              backgroundColor: ({ palette }) => (palette.mode === 'light' ? '#0E0E0E' : '#fafafa'),
+              color: ({ palette }) => (palette.mode === 'light' ? 'white' : 'black'),
+            },
           }}
         >
           {allTabs.map(({ label, value }) => (

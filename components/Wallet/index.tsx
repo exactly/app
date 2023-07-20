@@ -88,14 +88,16 @@ function Wallet() {
         MenuListProps={{
           'aria-labelledby': 'wallet-button',
         }}
-        PaperProps={{
-          style: {
-            marginTop: '8px',
-            padding: '16px',
-            boxShadow: '0px 4px 12px rgba(97, 100, 107, 0.2)',
-            borderRadius: 16,
-            minWidth: '280px',
-            maxWidth: '320px',
+        slotProps={{
+          paper: {
+            sx: {
+              marginTop: '8px',
+              padding: '16px',
+              boxShadow: ({ palette }) => (palette.mode === 'light' ? '0px 4px 12px rgba(97, 100, 107, 0.2)' : ''),
+              borderRadius: '16px',
+              minWidth: '280px',
+              maxWidth: '320px',
+            },
           },
         }}
         anchorOrigin={{

@@ -108,13 +108,16 @@ const SelectMarketsView: FC = () => {
           onMouseLeave: handleCloseHover,
           style: { pointerEvents: 'auto' },
         }}
-        PaperProps={{
-          style: {
-            marginTop: '8px',
-            padding: '0px 8px',
-            boxShadow: '0px 4px 10px rgba(97, 102, 107, 0.1)',
-            borderRadius: '8px',
-            minWidth: '270px',
+        slotProps={{
+          paper: {
+            sx: {
+              marginTop: '8px',
+              padding: '0px 8px',
+              boxShadow: ({ palette: _palette }) =>
+                _palette.mode === 'light' ? '0px 4px 10px rgba(97, 102, 107, 0.1)' : '',
+              borderRadius: '8px',
+              minWidth: '270px',
+            },
           },
         }}
         anchorOrigin={{

@@ -86,7 +86,7 @@ const DropdownMenu = <T,>({
         transformOrigin={transformOrigin}
         sx={{
           '& .MuiPaper-root': {
-            boxShadow: '0px 2px 8px rgba(148, 151, 158, 0.2)',
+            boxShadow: ({ palette }) => (palette.mode === 'light' ? '0px 2px 8px rgba(148, 151, 158, 0.2)' : ''),
             borderRadius: '16px',
           },
         }}
