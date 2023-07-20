@@ -275,7 +275,6 @@
   "Updated 1 minute ago": "Actualizado hace 1 minuto",
   "Updated <1 minute ago": "Actualizado hace <1 minuto",
   "Learn More": "Aprende más",
-  "Your rewards": "Tus recompensas",
   "View All": "Ver Todo",
   "Earnings": "Ganancias",
   "Unlock the full potential of DeFi, start earning interest today!": "¡Desbloquea todo el potencial de DeFi, comienza a ganar intereses hoy!",
@@ -306,5 +305,6 @@
   "Claim to": "Reclamar a",
   "Claim to connected wallet": "Reclamar a billetera conectada",
   "or": "o",
-  "claim to a different address": "reclamar a una dirección diferente"
+  "claim to a different address": "reclamar a una dirección diferente",
+  "Expired": "Expirado"
 }
