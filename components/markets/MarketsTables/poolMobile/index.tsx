@@ -1,20 +1,15 @@
 import React, { FC, useMemo } from 'react';
 import { Box, Button, Divider, Grid, Skeleton, SxProps, Tooltip, Typography } from '@mui/material';
 
-import numbers from 'config/numbers.json';
 import useActionButton from 'hooks/useActionButton';
-import { toPercentage } from 'utils/utils';
 import { PoolTableProps, TableRow } from '../poolTable';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import useAssets from 'hooks/useAssets';
 import MobileAssetCard from 'components/MobileAssetCard';
 import parseTimestamp from 'utils/parseTimestamp';
 import { TableHeader } from 'components/common/TableHeadCell';
-import useRewards from 'hooks/useRewards';
-import RewardPill from 'components/markets/RewardPill';
 import useTranslateOperation from 'hooks/useTranslateOperation';
-
-const { minAPRValue } = numbers;
+import Rates from 'components/Rates';
 
 const sxButton: SxProps = {
   whiteSpace: 'nowrap',
@@ -28,7 +23,6 @@ const PoolMobile: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) 
   const defaultRows = useMemo<TableRow[]>(() => assets.map((s) => ({ symbol: s })), [assets]);
   const tempRows = isLoading ? defaultRows : rows;
   const isFloating = rateType === 'floating';
-  const { rates } = useRewards();
 
   return (
     <Box width="100%" display="flex" flexDirection="column" gap={1}>
@@ -38,17 +32,11 @@ const PoolMobile: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) 
             <>
               <Grid container my={0.5}>
                 <GridItem header={headers[1]} value={`$${totalDeposited}`} isLoading={totalDeposited === undefined} />
-                <GridItem
+                <GridAPRItem
+                  symbol={symbol}
                   header={headers[3]}
-                  value={toPercentage(depositAPR && depositAPR > minAPRValue ? depositAPR : undefined)}
-                  rewards={
-                    isFloating
-                      ? rates[symbol]?.map(({ assetSymbol, floatingDeposit }) => ({
-                          assetSymbol,
-                          rate: floatingDeposit,
-                        }))
-                      : undefined
-                  }
+                  apr={depositAPR}
+                  type="deposit"
                   isLoading={depositAPR === undefined}
                   maturity={depositMaturity}
                 />
@@ -56,13 +44,11 @@ const PoolMobile: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) 
                   <Divider />
                 </Grid>
                 <GridItem header={headers[2]} value={`$${totalBorrowed}`} isLoading={totalBorrowed === undefined} />
-                <GridItem
+                <GridAPRItem
+                  symbol={symbol}
                   header={headers[4]}
-                  value={toPercentage(borrowAPR && borrowAPR > minAPRValue ? borrowAPR : undefined)}
-                  rewards={rates[symbol]?.map(({ assetSymbol, borrow }) => ({
-                    assetSymbol,
-                    rate: borrow,
-                  }))}
+                  apr={borrowAPR}
+                  type="borrow"
                   isLoading={borrowAPR === undefined}
                   maturity={borrowMaturity}
                 />
@@ -98,13 +84,48 @@ const PoolMobile: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) 
   );
 };
 
+const GridAPRItem: FC<{
+  symbol: string;
+  apr?: number;
+  type: 'deposit' | 'borrow';
+  header: TableHeader<TableRow>;
+  isLoading?: boolean;
+  maturity?: number;
+}> = ({ symbol, apr, type, header, isLoading = false, maturity }) => (
+  <Grid item xs={6}>
+    <Box display="flex">
+      <Typography fontSize="16px" color="figma.grey.300" lineHeight="20px">
+        {header.title}
+      </Typography>
+      {header.tooltipTitle && (
+        <Tooltip title={header.tooltipTitle} placement="top" arrow enterTouchDelay={0}>
+          <HelpOutlineIcon sx={{ color: 'figma.grey.300', fontSize: '15px', my: 'auto', ml: '4px' }} />
+        </Tooltip>
+      )}
+    </Box>
+    {isLoading ? (
+      <Skeleton width={60} />
+    ) : (
+      <>
+        <Grid container alignItems="center" gap={1}>
+          <Rates symbol={symbol} apr={apr} type={type} />
+        </Grid>
+
+        {maturity && maturity !== 0 && (
+          <Typography component="p" width="fit-content" variant="subtitle2" sx={{ color: 'grey.500' }}>
+            {parseTimestamp(maturity)}
+          </Typography>
+        )}
+      </>
+    )}
+  </Grid>
+);
+
 const GridItem: FC<{
   header: TableHeader<TableRow>;
   value: string;
-  rewards?: { assetSymbol: string; rate: bigint }[];
   isLoading?: boolean;
-  maturity?: number;
-}> = ({ header, value, isLoading = false, maturity, rewards }) => (
+}> = ({ header, value, isLoading = false }) => (
   <Grid item xs={6}>
     <Box display="flex">
       <Typography fontSize="16px" color="figma.grey.300" lineHeight="20px">
@@ -124,14 +145,7 @@ const GridItem: FC<{
           <Typography fontSize="16px" fontWeight={700} lineHeight="20px">
             {value}
           </Typography>
-          {rewards?.map((r) => <RewardPill key={r.assetSymbol} rate={r.rate} symbol={r.assetSymbol} />)}
         </Grid>
-
-        {maturity && maturity !== 0 && (
-          <Typography component="p" width="fit-content" variant="subtitle2" sx={{ color: 'grey.500' }}>
-            {parseTimestamp(maturity)}
-          </Typography>
-        )}
       </>
     )}
   </Grid>

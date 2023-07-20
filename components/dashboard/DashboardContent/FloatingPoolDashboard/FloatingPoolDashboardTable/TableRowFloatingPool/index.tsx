@@ -13,11 +13,9 @@ import SwitchCollateral from 'components/dashboard/DashboardContent/FloatingPool
 import useAccountData from 'hooks/useAccountData';
 import useActionButton, { useStartDebtManagerButton } from 'hooks/useActionButton';
 import useRouter from 'hooks/useRouter';
-import useRewards from 'hooks/useRewards';
 import { useTranslation } from 'react-i18next';
-import { toPercentage } from 'utils/utils';
 import RolloverButton from 'components/DebtManager/Button';
-import APRWithBreakdown from 'components/APRWithBreakdown';
+import Rates from 'components/Rates';
 
 type Props = {
   symbol: string;
@@ -31,7 +29,6 @@ type Props = {
 function TableRowFloatingPool({ symbol, valueUSD, depositedAmount, borrowedAmount, type, apr }: Props) {
   const { t } = useTranslation();
   const { query } = useRouter();
-  const { rates } = useRewards();
   const { marketAccount } = useAccountData(symbol);
 
   const { handleActionClick } = useActionButton();
@@ -79,31 +76,7 @@ function TableRowFloatingPool({ symbol, valueUSD, depositedAmount, borrowedAmoun
       </TableCell>
       <TableCell align="left" size="small">
         <Box display="flex" width="fit-content" gap={1}>
-          <APRWithBreakdown
-            markets={[{ apr, symbol }]}
-            rewards={
-              rates &&
-              rates[symbol] &&
-              rates[symbol]?.map((r) => ({
-                symbol: r.assetSymbol,
-                apr: Number(type === 'deposit' ? r.floatingDeposit : r.borrow) / 1e18,
-              }))
-            }
-          >
-            <Typography fontSize={16} fontWeight={700}>
-              {(apr !== undefined &&
-                toPercentage(
-                  apr +
-                    (type === 'deposit' ? 1 : -1) *
-                      (rates && rates[symbol]
-                        ? rates[symbol]?.reduce(
-                            (acc, curr) => acc + Number(type === 'deposit' ? curr.floatingDeposit : curr.borrow) / 1e18,
-                            0,
-                          )
-                        : 0),
-                )) || <Skeleton width={70} />}
-            </Typography>
-          </APRWithBreakdown>
+          <Rates symbol={symbol} apr={apr} type={type} />
         </Box>
       </TableCell>
       {type === 'deposit' ? (

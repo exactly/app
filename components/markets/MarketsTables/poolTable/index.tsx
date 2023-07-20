@@ -12,25 +12,19 @@ import { Box, Skeleton, Tooltip } from '@mui/material';
 
 import Image from 'next/image';
 
-import { toPercentage } from 'utils/utils';
 import parseTimestamp from 'utils/parseTimestamp';
 import formatSymbol from 'utils/formatSymbol';
 
 import Link from 'next/link';
-
-import numbers from 'config/numbers.json';
 
 import useAssets from 'hooks/useAssets';
 import useActionButton from 'hooks/useActionButton';
 import useSorting from 'hooks/useSorting';
 import TableHeadCell, { TableHeader } from 'components/common/TableHeadCell';
 import getLiquidTokenInfo from 'utils/getLiquidTokenInfo';
-import useRewards from 'hooks/useRewards';
-import RewardPill from 'components/markets/RewardPill';
 import useRouter from 'hooks/useRouter';
 import { useTranslation } from 'react-i18next';
-
-const { minAPRValue } = numbers;
+import Rates from 'components/Rates';
 
 export type PoolTableProps = {
   isLoading: boolean;
@@ -54,7 +48,6 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
   const { query } = useRouter();
   const { handleActionClick, isDisable } = useActionButton();
   const assets = useAssets();
-  const { rates } = useRewards();
   const defaultRows = useMemo<TableRow[]>(() => assets.map((s) => ({ symbol: s })), [assets]);
   const { setOrderBy, sortData, direction: sortDirection, isActive: sortActive } = useSorting<TableRow>();
   const tempRows = isLoading ? defaultRows : rows;
@@ -127,14 +120,7 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
                       <Tooltip title={getLiquidTokenInfo(symbol)} arrow placement="top">
                         <Box display="flex" flexDirection="column" width="fit-content">
                           <Grid container alignItems="center" gap={1}>
-                            <Typography minWidth={40} lineHeight={1}>
-                              {toPercentage(depositAPR > minAPRValue ? depositAPR : undefined)}
-                            </Typography>
-                            {rateType !== 'fixed'
-                              ? rates[symbol]?.map((r) => (
-                                  <RewardPill key={r.asset} rate={r.floatingDeposit} symbol={r.assetSymbol} />
-                                ))
-                              : null}
+                            <Rates symbol={symbol} apr={depositAPR} type="deposit" />
                           </Grid>
                           {rateType === 'fixed' && (
                             <Typography width="fit-content" variant="subtitle2" color="grey.500">
@@ -152,12 +138,7 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
                       <Tooltip title={getLiquidTokenInfo(symbol)} arrow placement="top">
                         <Box display="flex" flexDirection="column" width="fit-content">
                           <Grid container alignItems="center" gap={1}>
-                            <Typography minWidth={40}>
-                              {toPercentage(borrowAPR > minAPRValue ? borrowAPR : undefined)}
-                            </Typography>
-                            {rates[symbol]?.map((r) => (
-                              <RewardPill key={r.asset} rate={r.borrow} symbol={r.assetSymbol} />
-                            ))}
+                            <Rates symbol={symbol} apr={borrowAPR} type="borrow" />
                           </Grid>
                           {rateType === 'fixed' && (
                             <Typography width="fit-content" variant="subtitle2" color="grey.500">
