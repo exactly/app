@@ -93,7 +93,7 @@ const MaturityPoolsMobile: FC<Props> = ({ symbol }) => {
   );
 };
 
-const GridItem: FC<{ title: string; value: string; tooltip?: string | null; isLoading?: boolean }> = ({
+const GridItem: FC<{ title: string; value: string; tooltip?: string; isLoading?: boolean }> = ({
   title,
   value,
   tooltip,

@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next';
 
 type Props = {
   apr?: string;
-  label?: string | null;
+  label?: string;
   withIcon?: boolean;
   symbol?: string;
 };

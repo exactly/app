@@ -230,7 +230,7 @@ const DashboardMobile: FC<Props> = ({ type }) => {
   );
 };
 
-const FlexItem: FC<PropsWithChildren & { title: string; tooltip?: string | null }> = ({ title, children, tooltip }) => (
+const FlexItem: FC<PropsWithChildren & { title: string; tooltip?: string }> = ({ title, children, tooltip }) => (
   <Box display="flex" justifyContent="space-between">
     <Box display="flex">
       <Typography fontSize="16px" color="figma.grey.300" lineHeight="20px" fontWeight={500}>

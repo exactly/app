@@ -99,7 +99,7 @@ const HistoricalRateChart: FC<Props> = ({ symbol }) => {
               yAxisId="left"
               type="monotone"
               dataKey="depositApr"
-              name={t('Deposit APR') ?? undefined}
+              name={t('Deposit APR')}
               stroke={palette.mode === 'light' ? 'black' : 'white'}
               dot={false}
               strokeWidth={2}
@@ -108,7 +108,7 @@ const HistoricalRateChart: FC<Props> = ({ symbol }) => {
               yAxisId="left"
               type="monotone"
               dataKey="borrowApr"
-              name={t('Borrow APR') ?? undefined}
+              name={t('Borrow APR')}
               stroke={palette.green}
               dot={false}
               strokeWidth={2}
@@ -118,7 +118,7 @@ const HistoricalRateChart: FC<Props> = ({ symbol }) => {
                 yAxisId="right"
                 type="monotone"
                 dataKey="utilization"
-                name={t('Utilization Rate') ?? undefined}
+                name={t('Utilization Rate')}
                 stroke={palette.blue}
                 dot={false}
                 strokeDasharray="5 5"

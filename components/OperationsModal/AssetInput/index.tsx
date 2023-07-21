@@ -12,7 +12,7 @@ type Props = {
   symbol: string;
   decimals: number;
   onChange: (value: string) => void;
-  tooltip?: string | null;
+  tooltip?: string;
 } & AAProps;
 
 function AssetInput({ qty, onChange, symbol, decimals, amount, label, onMax, tooltip }: Props) {

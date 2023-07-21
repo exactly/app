@@ -18,7 +18,7 @@ function SelectLanguage() {
   const { t } = useTranslation();
   const [lng, setLng] = useState(i18n.language.substring(0, 2));
 
-  const names: Record<string, string | null> = {
+  const names: Record<string, string> = {
     en: t('English'),
     es: t('Spanish'),
   } as const;

@@ -169,8 +169,7 @@ const AdvancedViewSwitch: FC = () => {
         checked={view === 'advanced'}
         onChange={() => setView(view === 'advanced' ? 'simple' : 'advanced')}
         inputProps={{
-          'aria-label':
-            t('Switch to {{view}} view', { view: view === 'advanced' ? t('simple') : t('advanced') }) ?? undefined,
+          'aria-label': t('Switch to {{view}} view', { view: view === 'advanced' ? t('simple') : t('advanced') }),
           'data-testid': 'switch-markets-view',
         }}
       />

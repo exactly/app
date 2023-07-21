@@ -22,10 +22,9 @@ const Reminder: FC<Props> = ({ operation, maturity }) => {
 
   const onClick = useCallback(() => {
     const config: Parameters<typeof atcb_action>[0] = {
-      name:
-        t(`[Exactly] {{operationName}} maturity date reminder`, {
-          operationName: translateOperation(operation, { capitalize: true, variant: 'noun' }),
-        }) ?? '',
+      name: t(`[Exactly] {{operationName}} maturity date reminder`, {
+        operationName: translateOperation(operation, { capitalize: true, variant: 'noun' }),
+      }),
       description: 'https://app.exact.ly/dashboard',
       startDate: parseTimestamp(maturity, 'YYYY-MM-DD'),
       startTime: '00:00',

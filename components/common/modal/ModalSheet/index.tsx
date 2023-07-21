@@ -4,7 +4,7 @@ import CloseIcon from '@mui/icons-material/Close';
 
 type Props = PropsWithChildren<{
   container: SlideProps['container'];
-  title?: string | null;
+  title?: string;
   open: boolean;
   onClose: () => void;
 }>;

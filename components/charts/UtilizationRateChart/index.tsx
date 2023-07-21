@@ -176,7 +176,7 @@ function UtilizationRateChart({ type, symbol }: Props) {
             />
 
             <Line
-              name={t('Utilization') ?? undefined}
+              name={t('Utilization')}
               type="monotone"
               yAxisId="yaxis2"
               dataKey="utilization"
@@ -197,7 +197,7 @@ function UtilizationRateChart({ type, symbol }: Props) {
                   onMouseLeave={handleMouseLeave}
                 />
               )}
-              name={t('Borrow APR') ?? undefined}
+              name={t('Borrow APR')}
               yAxisId="yaxis"
               type="monotone"
               dataKey="apr"

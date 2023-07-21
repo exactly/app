@@ -35,7 +35,7 @@ function SwitchCollateral({ symbol }: Props) {
     return Boolean(marketAccount?.isCollateral);
   }, [marketAccount, optimistic]);
 
-  const { disabled, disabledText } = useMemo<{ disabled: boolean; disabledText?: string | null }>(() => {
+  const { disabled, disabledText } = useMemo<{ disabled: boolean; disabledText?: string }>(() => {
     if (!marketAccount || !healthFactor) return { disabled: true };
 
     if (chain && displayNetwork.id !== chain.id) {
@@ -127,7 +127,7 @@ function SwitchCollateral({ symbol }: Props) {
           checked={checked}
           onChange={onToggle}
           inputProps={{
-            'aria-label': t('Use this asset as collateral') ?? undefined,
+            'aria-label': t('Use this asset as collateral'),
             'data-testid': `switch-collateral-${symbol}`,
           }}
           disabled={disabled}

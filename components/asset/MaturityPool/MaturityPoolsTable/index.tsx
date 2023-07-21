@@ -24,7 +24,7 @@ type MaturityPoolsTableProps = {
   symbol: string;
 };
 
-const HeadCell: FC<{ title: string; tooltipTitle?: string | null }> = ({ title, tooltipTitle }) => {
+const HeadCell: FC<{ title: string; tooltipTitle?: string }> = ({ title, tooltipTitle }) => {
   return (
     <TableCell align="left" sx={{ '&:first-child': { pl: 1.5 }, '&:last-child': { pr: 1.5 } }}>
       <Tooltip title={tooltipTitle} placement="top" arrow>

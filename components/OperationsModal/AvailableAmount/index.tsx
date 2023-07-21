@@ -8,7 +8,7 @@ export type Props = {
   amount?: string;
   label: string;
   onMax?: MouseEventHandler;
-  tooltip?: string | null;
+  tooltip?: string;
 };
 
 function AvailableAmount({ symbol, amount, label, onMax, tooltip }: Props) {

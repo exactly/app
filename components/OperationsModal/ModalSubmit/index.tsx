@@ -13,7 +13,7 @@ import useAccountData from 'hooks/useAccountData';
 type Props = {
   symbol: string;
   submit: () => Promise<void>;
-  label: string | null;
+  label: string;
   isLoading?: boolean;
   disabled?: boolean;
 };
@@ -115,7 +115,7 @@ function ModalSubmit({ isLoading = false, disabled = false, submit, symbol, labe
 
 type LoadingIndicatorProps = {
   withCircularProgress?: boolean;
-  label?: string | null;
+  label?: string;
 };
 
 const LoadingIndicator: FC<LoadingIndicatorProps> = ({ withCircularProgress, label }) => {

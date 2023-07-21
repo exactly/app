@@ -5,7 +5,7 @@ export type TableHeader<T> = {
   title: string;
   key?: string;
   width?: string;
-  tooltipTitle?: string | null;
+  tooltipTitle?: string;
   tooltipPlacement?: 'top' | 'top-start' | 'top-end';
   align?: 'left' | 'inherit' | 'center' | 'right' | 'justify';
   hidden?: boolean;
