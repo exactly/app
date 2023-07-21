@@ -84,7 +84,7 @@ const DashboardMobile: FC<Props> = ({ type }) => {
                 <Button
                   fullWidth
                   variant="contained"
-                  sx={{ height: '34px' }}
+                  sx={{ height: '34px', whiteSpace: 'nowrap' }}
                   onClick={(e) => handleActionClick(e, type, symbol)}
                 >
                   {isDeposit ? t('Deposit') : t('Borrow')}
