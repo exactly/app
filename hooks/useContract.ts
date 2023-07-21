@@ -18,7 +18,7 @@ export default function <T extends Abi>(contractName: string, abi: T) {
 
       setContract(undefined);
       const { address } = await import(
-        `@exactly/protocol/deployments/${{ [mainnet.id]: 'mainnet' }[chain.id] ?? chain.network}/${contractName}.json`,
+        `@exactly/protocol/deployments/${{ [mainnet.id]: 'ethereum' }[chain.id] ?? chain.network}/${contractName}.json`,
         { assert: { type: 'json' } }
       );
 
