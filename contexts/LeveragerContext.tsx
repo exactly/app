@@ -239,7 +239,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     [debtPreviewer, getMarketAccount, input.borrowSymbol, input.collateralSymbol, maIn, opts, walletAddress],
   );
 
-  const walletBalance = useBalance(input.collateralSymbol, maIn?.asset);
+  const walletBalance = useBalance(input.collateralSymbol, maIn?.asset, true);
 
   const [collateralOptions, borrowOptions] = useMemo(
     () => [
