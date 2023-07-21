@@ -24,6 +24,7 @@ import { GAS_LIMIT_MULTIPLIER, WEI_PER_ETHER } from 'utils/const';
 import handleOperationError from 'utils/handleOperationError';
 import useIsContract from 'hooks/useIsContract';
 import useAnalytics from 'hooks/useAnalytics';
+import useRewards, { Rates } from 'hooks/useRewards';
 
 export type RolloverInput = {
   from?: Position;
@@ -79,6 +80,7 @@ type ContextValues = {
   needsApproval: (qty: bigint) => Promise<boolean>;
   approve: (maxAssets: bigint) => Promise<void>;
   submit: (populate: () => Promise<PopulatedTransaction | undefined>) => Promise<void>;
+  rates: Rates;
 };
 
 const DebtManagerContext = createContext<ContextValues | null>(null);
@@ -96,6 +98,7 @@ export const DebtManagerContextProvider: FC<PropsWithChildren> = ({ children }) 
 
   const [tx, setTx] = useState<Transaction | undefined>();
   const [isLoading, setIsLoading] = useState(false);
+  const { rates } = useRewards();
 
   const setFrom = useCallback((from: Position) => dispatch({ ...initState, from }), []);
   const setTo = useCallback((to: Position) => dispatch({ to }), []);
@@ -202,6 +205,7 @@ export const DebtManagerContextProvider: FC<PropsWithChildren> = ({ children }) 
     needsApproval,
     approve,
     submit,
+    rates,
   };
 
   return (

@@ -3,8 +3,8 @@ import APRWithBreakdown from 'components/APRWithBreakdown';
 import React, { FC, useEffect, useMemo, useState } from 'react';
 import { toPercentage } from 'utils/utils';
 import numbers from 'config/numbers.json';
-import useRewards from 'hooks/useRewards';
 import { LidoResponse } from 'hooks/useStETHNativeAPR';
+import { useDebtManagerContext } from 'contexts/DebtManagerContext';
 
 type Props = {
   symbol: string;
@@ -29,7 +29,7 @@ const Rates: FC<Props> = ({
   iconsSize,
   isLoading = false,
 }) => {
-  const { rates } = useRewards();
+  const { rates } = useDebtManagerContext();
 
   const [native, setNative] = useState<number>(0);
 
