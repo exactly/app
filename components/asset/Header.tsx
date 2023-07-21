@@ -10,7 +10,9 @@ import useAssets from 'hooks/useAssets';
 import AssetOption from './AssetOption';
 import useRouter from 'hooks/useRouter';
 import { WEI_PER_ETHER } from 'utils/const';
-import { formatUnits } from 'viem';
+import { formatEther, formatUnits } from 'viem';
+import useStETHNativeAPR from 'hooks/useStETHNativeAPR';
+import { toPercentage } from 'utils/utils';
 
 type Props = {
   symbol: string;
@@ -21,6 +23,8 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
   const { marketAccount } = useAccountData(symbol);
   const options = useAssets();
   const { push, query } = useRouter();
+
+  const nativeAPR = useStETHNativeAPR();
 
   const { floatingDeposits, floatingBorrows } = useMemo(() => {
     if (!marketAccount) return {};
@@ -90,8 +94,17 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
         value: usdPrice ? `$${formatNumber(formatUnits(usdPrice, 18), '', true)}` : undefined,
         tooltipTitle: t('The price displayed here is obtained from Chainlink.'),
       },
+      ...(symbol === 'wstETH'
+        ? [
+            {
+              label: t('Native APR'),
+              value: nativeAPR ? toPercentage(Number(formatEther(nativeAPR))) : undefined,
+              tooltipTitle: t('The APR displayed comes from the Lido API.'),
+            },
+          ]
+        : []),
     ];
-  }, [marketAccount, floatingDeposits, fixedDeposits, floatingBorrows, fixedBorrows, t]);
+  }, [marketAccount, t, floatingDeposits, fixedDeposits, floatingBorrows, fixedBorrows, symbol, nativeAPR]);
 
   const onChangeAssetDropdown = useCallback(
     (newSymbol: string) => {

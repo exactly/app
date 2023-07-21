@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { parseEther } from 'viem';
 
-type LidoResponse = {
+export type LidoResponse = {
   data: {
     timeUnix: number;
     apr: number;
