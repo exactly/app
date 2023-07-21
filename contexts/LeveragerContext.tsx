@@ -70,6 +70,7 @@ type Input = {
 export type ApprovalStatus = 'INIT' | 'ERC20' | 'ERC20-PERMIT2' | 'MARKET' | 'APPROVED';
 
 const DEFAULT_SLIPPAGE = 2n;
+export const PRICE_IMPACT_THRESHOLD = 10n ** 18n;
 
 const slippage = (value: bigint, up = true) => (value * (100n + (up ? 1n : -1n) * DEFAULT_SLIPPAGE)) / 100n;
 
@@ -128,6 +129,7 @@ type ContextValues = {
   disabledConfirm: boolean;
   blockModal: boolean;
   isOverLeveraged: boolean;
+  isPriceImpactAboveThreshold: boolean;
 
   getHealthFactorColor: (healthFactor?: string) => { color: string; bg: string };
 
@@ -294,6 +296,16 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
       leverageStatus.ratio > leverageStatus.maxRatio || (leverageStatus.ratio === 0n && leverageStatus.minDeposit > 0n);
     return [_isOverleveraged, _isOverleveraged && leverageStatus.principal < 0n];
   }, [leverageStatus]);
+
+  const isPriceImpactAboveThreshold = useMemo(() => {
+    if (!limit) {
+      return false;
+    }
+
+    const priceImpact =
+      limit.swapRatio > WEI_PER_ETHER ? limit.swapRatio - WEI_PER_ETHER : WEI_PER_ETHER - limit.swapRatio;
+    return priceImpact > PRICE_IMPACT_THRESHOLD;
+  }, [limit]);
 
   const preview = useCallback(
     async (cancelled: () => boolean) => {
@@ -568,6 +580,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
       (principal ?? -1n) < 0n ||
       !leverageStatus ||
       previewIsLoading ||
+      isPriceImpactAboveThreshold ||
       blockModal,
     [
       input.collateralSymbol,
@@ -579,6 +592,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
       principal,
       leverageStatus,
       previewIsLoading,
+      isPriceImpactAboveThreshold,
       blockModal,
     ],
   );
@@ -1075,6 +1089,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     disabledConfirm,
     blockModal,
     isOverLeveraged,
+    isPriceImpactAboveThreshold,
 
     getHealthFactorColor,
 
