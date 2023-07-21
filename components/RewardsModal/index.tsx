@@ -240,7 +240,7 @@ const RewardsModal: FC<RewardsModalProps> = ({ isOpen, open, close }) => {
                         variant="outlined"
                         fullWidth
                         size="small"
-                        placeholder={t('Enter address') || ''}
+                        placeholder={t('Enter address')}
                         sx={{
                           '& .MuiOutlinedInput-root': {
                             p: 0.5,

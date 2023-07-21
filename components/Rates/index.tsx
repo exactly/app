@@ -60,9 +60,11 @@ const Rates: FC<Props> = ({
     >
       <Typography sx={sx}>
         {!isLoading && totalAPR !== undefined ? (
-          `${totalAPR > 999 ? '∞' : toPercentage(totalAPR < minAPRValue ? undefined : totalAPR)}${
-            label ? ' ' + label : ''
-          }`
+          `${
+            totalAPR > 999
+              ? '∞'
+              : toPercentage(type === 'borrow' ? totalAPR : totalAPR < minAPRValue ? undefined : totalAPR)
+          }${label ? ' ' + label : ''}`
         ) : (
           <Skeleton width={70} />
         )}
