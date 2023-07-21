@@ -155,7 +155,7 @@ function Navbar() {
                       data-testid={`navbar-link-${name.toLowerCase()}`}
                     >
                       {icon}
-                      <Typography fontWeight={700} fontSize={13}>
+                      <Typography fontWeight={700} fontSize={14}>
                         {name}
                       </Typography>
                     </Button>

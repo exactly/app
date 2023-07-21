@@ -66,12 +66,6 @@ function Wallet() {
           minWidth: '30px',
           py: 1,
           px: '10px',
-          borderColor: impersonateActive ? 'red' : '#CFD3D8',
-          '&:hover': {
-            backgroundColor: 'components.bg',
-            borderColor: 'figma.grey.100',
-            boxShadow: '0px 3px 4px rgba(97, 102, 107, 0.1)',
-          },
         }}
         data-testid="wallet-menu"
       >

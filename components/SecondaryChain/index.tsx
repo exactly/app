@@ -37,7 +37,8 @@ const SecondaryChain = () => {
       sx={{
         width: '150px',
         height: '32px',
-        fontWeight: 500,
+        fontSize: 14,
+        fontWeight: 700,
         whiteSpace: 'nowrap',
         color: 'grey.900',
       }}
