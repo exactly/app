@@ -23,6 +23,7 @@ function useAccountData(
   symbol?: string,
 ): Omit<AccountDataHook, 'getMarketAccount'> | Omit<AccountDataHook, 'marketAccount'> {
   const { isLoading, data, refetch } = usePreviewerExactly();
+
   const ctx = useContext(AccountDataContext);
 
   const getMarketAccount = useCallback(

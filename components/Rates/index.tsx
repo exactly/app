@@ -68,10 +68,12 @@ const Rates: FC<Props> = ({
       rewards={
         rates &&
         rates[symbol] &&
-        rates[symbol]?.map((r) => ({
-          symbol: r.assetSymbol,
-          apr: Number(type === 'deposit' ? r.floatingDeposit : r.borrow) / 1e18,
-        }))
+        rates[symbol]
+          ?.map((r) => ({
+            symbol: r.assetSymbol,
+            apr: Number(type === 'deposit' ? r.floatingDeposit : r.borrow) / 1e18,
+          }))
+          .filter((r) => r.apr > 0)
       }
       natives={symbol === 'wstETH' && type === 'deposit' ? [{ symbol: 'wstETH', apr: native }] : undefined}
     >
