@@ -60,21 +60,25 @@ const Rates: FC<Props> = ({
     );
   }, [apr, native, rates, symbol, type]);
 
+  const _rates = useMemo(() => {
+    return (
+      rates &&
+      rates[symbol] &&
+      rates[symbol]
+        ?.map((r) => ({
+          symbol: r.assetSymbol,
+          apr: Number(type === 'deposit' ? r.floatingDeposit : r.borrow) / 1e18,
+        }))
+        .filter((r) => r.apr > 0)
+    );
+  }, [rates, symbol, type]);
+
   return (
     <APRWithBreakdown
       directionMobile={directionMobile}
       iconsSize={iconsSize}
       markets={[{ apr, symbol }]}
-      rewards={
-        rates &&
-        rates[symbol] &&
-        rates[symbol]
-          ?.map((r) => ({
-            symbol: r.assetSymbol,
-            apr: Number(type === 'deposit' ? r.floatingDeposit : r.borrow) / 1e18,
-          }))
-          .filter((r) => r.apr > 0)
-      }
+      rewards={_rates}
       natives={symbol === 'wstETH' && type === 'deposit' ? [{ symbol: 'wstETH', apr: native }] : undefined}
     >
       <Typography sx={sx}>
@@ -92,4 +96,4 @@ const Rates: FC<Props> = ({
   );
 };
 
-export default Rates;
+export default React.memo(Rates);

@@ -22,5 +22,6 @@ export default (override?: number) => {
     chainId: override ?? chain.id,
     address,
     args: [walletAddress ?? zeroAddress],
+    structuralSharing: (prev, next) => (prev && JSON.stringify(prev) === JSON.stringify(next) ? prev : next),
   });
 };
