@@ -11,6 +11,8 @@ import RewardsController from '@exactly/protocol/deployments/goerli/RewardsContr
 import DebtManager from '@exactly/protocol/deployments/goerli/DebtManager.json' assert { type: 'json' };
 import DebtPreviewer from '@exactly/protocol/deployments/goerli/DebtPreviewer.json' assert { type: 'json' };
 import Permit2 from '@exactly/protocol/deployments/goerli/Permit2.json' assert { type: 'json' };
+import SablierV2LockupLinear from '@exactly/protocol/deployments/goerli/SablierV2LockupLinear.json' assert { type: 'json' };
+import SablierV2NFTDescriptor from '@exactly/protocol/deployments/goerli/SablierV2NFTDescriptor.json' assert { type: 'json' };
 
 import { Abi } from 'viem';
 
@@ -27,6 +29,8 @@ export default defineConfig({
     { name: 'DebtManager', abi: DebtManager.abi as Abi },
     { name: 'DebtPreviewer', abi: DebtPreviewer.abi as Abi },
     { name: 'Permit2', abi: Permit2.abi as Abi },
+    { name: 'SablierV2LockupLinear', abi: SablierV2LockupLinear.abi as Abi },
+    { name: 'SablierV2NFTDescriptor', abi: SablierV2NFTDescriptor.abi as Abi },
   ],
   plugins: [
     react({
