@@ -23,7 +23,7 @@
   "dependencies": {
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
-    "@exactly/protocol": "^0.2.14",
+    "@exactly/protocol": "exactly/protocol#airdrop",
     "@mui/icons-material": "^5.13.7",
     "@mui/lab": "^5.0.0-alpha.135",
     "@mui/material": "^5.13.7",
