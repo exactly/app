@@ -18,6 +18,7 @@ import {
   FormControlLabel,
   AvatarGroup,
   Avatar,
+  ButtonBase,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { TransitionProps } from '@mui/material/transitions';
@@ -34,6 +35,7 @@ import useRewards from 'hooks/useRewards';
 import { WEI_PER_ETHER } from 'utils/const';
 import { LoadingButton } from '@mui/lab';
 import { useWeb3 } from 'hooks/useWeb3';
+import { useNetwork, useSwitchNetwork } from 'wagmi';
 
 function PaperComponent(props: PaperProps | undefined) {
   const ref = useRef<HTMLDivElement>(null);
@@ -63,7 +65,10 @@ const RewardsModal: FC<RewardsModalProps> = ({ isOpen, open, close }) => {
   const { t } = useTranslation();
   const { breakpoints } = useTheme();
   const isMobile = useMediaQuery(breakpoints.down('sm'));
-  const { isConnected } = useWeb3();
+
+  const { walletAddress, chain: displayNetwork } = useWeb3();
+  const { chain } = useNetwork();
+  const { switchNetwork, isLoading: switchIsLoading } = useSwitchNetwork();
 
   const { rewards: rs, claim } = useRewards();
 
@@ -113,7 +118,7 @@ const RewardsModal: FC<RewardsModalProps> = ({ isOpen, open, close }) => {
     setTx(undefined);
   }, [close, rs]);
 
-  if (!isConnected) {
+  if (!walletAddress) {
     return null;
   }
 
@@ -269,26 +274,38 @@ const RewardsModal: FC<RewardsModalProps> = ({ isOpen, open, close }) => {
                   </Collapse>
                 </Box>
                 <Box display="flex" flexDirection="column" gap={2} alignItems="center">
-                  <LoadingButton
-                    fullWidth
-                    variant="contained"
-                    disabled={disableSubmit}
-                    onClick={submit}
-                    loading={loading}
-                  >
-                    {showInput ? `${t('Claim to')} ${differentAddress}` : t('Claim to connected wallet')}
-                  </LoadingButton>
-                  <Typography
-                    fontSize={12}
-                    color="grey.500"
-                    sx={{ cursor: 'pointer' }}
-                    onClick={() => setShowInput(!showInput)}
-                  >
-                    {t('or')}{' '}
-                    <u>
-                      {showInput ? t('Claim to connected wallet').toLowerCase() : t('claim to a different address')}
-                    </u>
-                  </Typography>
+                  {chain && chain.id !== displayNetwork.id ? (
+                    <LoadingButton
+                      fullWidth
+                      onClick={() => switchNetwork?.(displayNetwork.id)}
+                      variant="contained"
+                      loading={switchIsLoading}
+                    >
+                      {t('Please switch to {{network}} network', { network: displayNetwork.name })}
+                    </LoadingButton>
+                  ) : (
+                    <>
+                      <LoadingButton
+                        fullWidth
+                        variant="contained"
+                        disabled={disableSubmit}
+                        onClick={submit}
+                        loading={loading}
+                      >
+                        {showInput ? `${t('Claim to')} ${differentAddress}` : t('Claim to connected wallet')}
+                      </LoadingButton>
+                      <ButtonBase onClick={() => setShowInput(!showInput)} disableRipple>
+                        <Typography fontSize={12} color="grey.500" sx={{ cursor: 'pointer' }}>
+                          {t('or')}{' '}
+                          <span style={{ textDecoration: 'underline' }}>
+                            {showInput
+                              ? t('Claim to connected wallet').toLowerCase()
+                              : t('claim to a different address')}
+                          </span>
+                        </Typography>
+                      </ButtonBase>
+                    </>
+                  )}
                 </Box>
               </Box>
             </DialogContent>
