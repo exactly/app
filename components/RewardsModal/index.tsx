@@ -70,7 +70,9 @@ const RewardsModal: FC<RewardsModalProps> = ({ isOpen, open, close }) => {
   const [tx, setTx] = useState<Transaction | undefined>(undefined);
   const [input, setInput] = useState<string>('');
   const [showInput, setShowInput] = useState<boolean>(false);
-  const [selected, setSelected] = useState<Record<string, boolean>>({});
+  const [selected, setSelected] = useState<Record<string, boolean>>(() =>
+    Object.fromEntries(Object.keys(rs).map((k) => [k, true])),
+  );
   const [loading, setLoading] = useState<boolean>(false);
 
   const loadingTx = useMemo(() => tx && (tx.status === 'loading' || tx.status === 'processing'), [tx]);
@@ -101,10 +103,10 @@ const RewardsModal: FC<RewardsModalProps> = ({ isOpen, open, close }) => {
   const closeAndReset = useCallback(() => {
     close();
     setShowInput(false);
-    setSelected({});
+    setSelected(Object.fromEntries(Object.keys(rs).map((k) => [k, true])));
     setInput('');
     setTx(undefined);
-  }, [close]);
+  }, [close, rs]);
 
   if (!isConnected) {
     return null;
@@ -232,10 +234,10 @@ const RewardsModal: FC<RewardsModalProps> = ({ isOpen, open, close }) => {
                       }
                       control={
                         <Checkbox
-                          value={selected[symbol]}
+                          checked={selected[symbol]}
                           icon={<CheckboxIcon sx={{ fontSize: 18 }} />}
                           checkedIcon={<CheckboxCheckedIcon sx={{ fontSize: 18 }} />}
-                          onChange={() => setSelected((prev) => ({ ...prev, [symbol]: !prev[symbol] }))}
+                          onChange={(_, checked) => setSelected((prev) => ({ ...prev, [symbol]: checked }))}
                         />
                       }
                     />
