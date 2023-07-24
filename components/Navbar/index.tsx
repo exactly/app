@@ -95,6 +95,7 @@ function Navbar() {
     name: string;
     custom?: ReactNode;
     icon?: ReactNode;
+    isNew?: boolean;
   }[] = useMemo(
     () => [
       { pathname: '/', name: t('Markets'), custom: <SelectMarketsView /> },
@@ -107,6 +108,7 @@ function Navbar() {
         pathname: '/strategies',
         name: t('Strategies'),
         icon: <MovingSharpIcon sx={{ fontSize: '13px' }} />,
+        isNew: true,
       },
       ...(isOPMainnet
         ? [
@@ -114,6 +116,7 @@ function Navbar() {
               pathname: '/bridge',
               name: t('Bridge & Swap'),
               icon: <RepeatRoundedIcon sx={{ fontSize: 14 }} />,
+              isNew: true,
             },
           ]
         : []),
@@ -146,7 +149,7 @@ function Navbar() {
             </Box>
           </Link>
           <Box display="flex" gap={0.5}>
-            {routes.map(({ name, pathname, custom, icon }) => (
+            {routes.map(({ name, pathname, custom, icon, isNew }) => (
               <Box key={pathname} display={onlyDesktopFlex}>
                 {custom || (
                   <Link href={{ pathname, query }}>
@@ -166,6 +169,16 @@ function Navbar() {
                       <Typography fontWeight={700} fontSize={14}>
                         {name}
                       </Typography>
+                      {isNew && (
+                        <Typography
+                          fontSize={11}
+                          fontWeight={700}
+                          color="white"
+                          sx={{ background: palette.green, borderRadius: '4px', px: 0.5, textTransform: 'uppercase' }}
+                        >
+                          {t('New')}
+                        </Typography>
+                      )}
                     </Button>
                   </Link>
                 )}
