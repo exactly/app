@@ -2,7 +2,7 @@ import { type Chain, mainnet, optimism, goerli } from 'wagmi/chains';
 
 const permitAllowed: Record<Chain['id'], string[]> = {
   [mainnet.id]: [],
-  [optimism.id]: ['OP'],
+  [optimism.id]: [],
   [goerli.id]: ['wstETH'],
 };
 
