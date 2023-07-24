@@ -63,7 +63,13 @@ const Options: FC<Props> = ({
                   width="100%"
                   gap={{ xs: 0, sm: 1 }}
                 >
-                  <Box display="flex" gap={0.5} alignItems="center" flex={1}>
+                  <Box
+                    display="flex"
+                    flexDirection={{ xs: 'column', sm: 'row' }}
+                    gap={{ xs: 0, sm: 0.5 }}
+                    alignItems={{ xs: 'start', sm: 'center' }}
+                    flex={1}
+                  >
                     {maturity || maturity === 0 ? (
                       <Typography fontWeight={700} fontSize={13} color="grey.900" my="auto">
                         {maturity ? daysLeft(maturity) : t('Open-ended')}
@@ -188,7 +194,7 @@ const OptionRate: FC<{
           type={type}
           label={t('APR')}
           sx={{ fontSize: 13, fontWeight: 700 }}
-          directionMobile="row"
+          directionDesktop="row-reverse"
           iconsSize={14}
           isLoading={isLoading}
         />

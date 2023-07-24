@@ -13,6 +13,7 @@ type Props = {
   label?: string;
   sx?: React.ComponentProps<typeof Typography>['sx'];
   directionMobile?: 'row' | 'row-reverse';
+  directionDesktop?: 'row' | 'row-reverse';
   iconsSize?: number;
   isLoading?: boolean;
   hideMarket?: boolean;
@@ -27,6 +28,7 @@ const Rates: FC<Props> = ({
   label,
   sx = { fontSize: 16, fontWeight: 700 },
   directionMobile,
+  directionDesktop,
   iconsSize,
   isLoading = false,
   hideMarket = false,
@@ -47,20 +49,17 @@ const Rates: FC<Props> = ({
     })();
   }, [symbol, type]);
 
-  const totalAPR = useMemo(() => {
-    if (apr === undefined) return undefined;
+  const rewardRate = useMemo(() => {
     return (
-      apr +
       native +
-      (type === 'deposit' || hideMarket ? 1 : -1) *
-        (rates && rates[symbol]
-          ? rates[symbol]?.reduce(
-              (acc, curr) => acc + Number(type === 'deposit' ? curr.floatingDeposit : curr.borrow) / 1e18,
-              0,
-            )
-          : 0)
+      (rates && rates[symbol]
+        ? rates[symbol]?.reduce(
+            (acc, curr) => acc + Number(type === 'deposit' ? curr.floatingDeposit : curr.borrow) / 1e18,
+            0,
+          )
+        : 0)
     );
-  }, [apr, hideMarket, native, rates, symbol, type]);
+  }, [type, native, rates, symbol]);
 
   const _rates = useMemo(() => {
     return (
@@ -78,17 +77,21 @@ const Rates: FC<Props> = ({
   return (
     <APRWithBreakdown
       directionMobile={directionMobile}
+      directionDesktop={directionDesktop}
       iconsSize={iconsSize}
       markets={hideMarket ? [] : [{ apr, symbol }]}
       rewards={_rates}
       natives={symbol === 'wstETH' && type === 'deposit' ? [{ symbol: 'wstETH', apr: native }] : undefined}
+      rewardAPR={rewardRate === 0 ? undefined : rewardRate > 999 ? '∞' : toPercentage(rewardRate)}
     >
       <Typography sx={sx}>
-        {!isLoading && totalAPR !== undefined ? (
+        {!isLoading && apr !== undefined ? (
           `${
-            totalAPR > 999
+            hideMarket
+              ? ''
+              : apr > 999
               ? '∞'
-              : toPercentage(type === 'borrow' ? totalAPR : totalAPR < minAPRValue ? undefined : totalAPR)
+              : toPercentage(type === 'borrow' ? apr : apr < minAPRValue ? undefined : apr)
           }${label ? ' ' + label : ''}`
         ) : (
           <Skeleton width={70} />

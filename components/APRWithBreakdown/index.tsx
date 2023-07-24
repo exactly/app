@@ -2,6 +2,7 @@ import { Avatar, AvatarGroup, Box, Divider, Tooltip, Typography } from '@mui/mat
 import React, { FC, PropsWithChildren, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toPercentage } from 'utils/utils';
+import MultiRewardPill from 'components/markets/MultiRewardPill';
 
 type APR = {
   apr?: number;
@@ -9,33 +10,33 @@ type APR = {
 };
 
 type APRWithBreakdownProps = {
-  directionMobile?: 'row' | 'row-reverse';
+  directionMobile?: React.CSSProperties['flexDirection'];
+  directionDesktop?: React.CSSProperties['flexDirection'];
   iconsSize?: number;
   markets: APR[];
   rewards?: APR[];
   natives?: APR[];
+  rewardAPR?: string;
 };
 
 const APRWithBreakdown: FC<PropsWithChildren & APRWithBreakdownProps> = ({
   directionMobile = 'row-reverse',
+  directionDesktop = 'row',
   iconsSize = 16,
   children,
   markets,
   rewards = [],
   natives = [],
+  rewardAPR,
 }) => {
   const symbols = useMemo(
-    () => [
-      ...markets.map(({ symbol }) => symbol),
-      ...rewards.map(({ symbol }) => symbol),
-      ...natives.map(({ symbol }) => symbol),
-    ],
-    [markets, natives, rewards],
+    () => [...rewards.map(({ symbol }) => symbol), ...natives.map(({ symbol }) => symbol)],
+    [natives, rewards],
   );
 
   return (
     <Box display="flex" flexDirection="column" gap={2}>
-      <Box display="flex" flexDirection={{ xs: directionMobile, md: 'row' }} gap={0.5} alignItems="center">
+      <Box display="flex" flexDirection={{ xs: directionMobile, md: directionDesktop }} gap={1} alignItems="center">
         <Box sx={{ flex: 1 }}>{children}</Box>
         <Tooltip
           title={<APRBreakdown markets={markets} rewards={rewards} natives={natives} />}
@@ -45,7 +46,11 @@ const APRWithBreakdown: FC<PropsWithChildren & APRWithBreakdownProps> = ({
           sx={{ cursor: 'pointer' }}
         >
           <Box>
-            <SymbolGroup symbols={symbols} size={iconsSize} />
+            {rewardAPR && (
+              <MultiRewardPill rate={rewardAPR}>
+                <SymbolGroup symbols={symbols} size={iconsSize} />
+              </MultiRewardPill>
+            )}
           </Box>
         </Tooltip>
       </Box>
@@ -53,7 +58,7 @@ const APRWithBreakdown: FC<PropsWithChildren & APRWithBreakdownProps> = ({
   );
 };
 
-const APRBreakdown: FC<Omit<APRWithBreakdownProps, 'totalAPR'>> = ({ markets, rewards = [], natives = [] }) => {
+const APRBreakdown: FC<Omit<APRWithBreakdownProps, 'rewardAPR'>> = ({ markets, rewards = [], natives = [] }) => {
   const { t } = useTranslation();
 
   return (

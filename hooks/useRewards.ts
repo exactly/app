@@ -41,6 +41,7 @@ export default () => {
     return accountData
       .flatMap(({ claimableRewards }) => claimableRewards)
       .reduce((acc, { asset, assetSymbol, amount }) => {
+        if (assetSymbol === '') return acc;
         if (!acc[assetSymbol]) {
           acc[assetSymbol] = { address: asset, amount, usdPrice: price[assetSymbol] };
           return acc;
@@ -83,7 +84,12 @@ export default () => {
 
   const rates = useMemo<Rates>(() => {
     if (!accountData) return {};
-    return Object.fromEntries(accountData.map(({ assetSymbol, rewardRates }) => [assetSymbol, rewardRates]));
+    return Object.fromEntries(
+      accountData.map(({ assetSymbol, rewardRates }) => [
+        assetSymbol,
+        rewardRates.filter(({ assetSymbol: _assetSymbol }) => _assetSymbol !== ''),
+      ]),
+    );
   }, [accountData]);
 
   const claim = useCallback(
