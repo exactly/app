@@ -1,23 +1,22 @@
-import { useAccount } from 'wagmi';
 import { MerkleTree } from 'merkletreejs';
-import { keccak256, encodeAbiParameters } from 'viem';
+import { keccak256, encodeAbiParameters, Address } from 'viem';
 import airdrop from '@exactly/protocol/scripts/airdrop.json' assert { type: 'json' };
+const airdropJson: { [key: string]: string } = airdrop;
 
-const leaves = Object.entries(airdrop).map((tuple) =>
-  keccak256(encodeAbiParameters([{ type: 'address' }, { type: 'uint128' }], tuple)),
-);
+const encodeLeaf = (address: string, amount: string): string =>
+  keccak256(encodeAbiParameters([{ type: 'address' }, { type: 'uint128' }], [address, amount]));
+const leaves = Object.entries(airdropJson).map(([address, amount]) => encodeLeaf(address, amount));
 const tree = new MerkleTree(leaves, keccak256, { sort: true });
 
-export default (): {
-  leaves: string[];
+export default (
+  walletAddress?: Address,
+): {
+  canClaim: boolean;
+  amount?: string;
   proof: string[];
-  root: string;
 } => {
-  const { address } = useAccount();
-  const index = Object.keys(airdrop).findIndex((account) => address?.toLowerCase() === account.toLowerCase());
-  return {
-    leaves: leaves,
-    proof: tree.getHexProof(leaves[index] ?? ''),
-    root: tree.getHexRoot(),
-  };
+  const amount = walletAddress ? airdropJson[walletAddress] : undefined;
+  const proof = walletAddress && amount ? tree.getHexProof(encodeLeaf(walletAddress, amount)) : [];
+  const canClaim = Boolean(walletAddress && amount && proof.length > 0);
+  return { canClaim, amount, proof };
 };
