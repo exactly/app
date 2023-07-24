@@ -93,7 +93,7 @@ const Operation = () => {
           message={`${t('You are currently over leveraged with the selected markets.')} ${
             blockModal ? '' : t('You will only be able to deleverage.')
           }`}
-          variant="warning"
+          variant="info"
         />
       )}
       {isPriceImpactAboveThreshold && (
@@ -108,15 +108,12 @@ const Operation = () => {
         <Button fullWidth variant="contained" disabled>
           {t('Leverage')}
         </Button>
-      ) : currentLeverageRatio !== 1 && input.leverageRatio === 1 ? (
-        <Button fullWidth variant="contained" onClick={() => setViewSummary(true)}>
-          {t('Deleverage')}
-        </Button>
       ) : (
         <Button fullWidth variant="contained" onClick={() => setViewSummary(true)}>
-          {`${t('Leverage')} ${formatNumber(netPosition ?? '0', input.collateralSymbol)} ${
-            input.collateralSymbol
-          } @ ${input.leverageRatio.toFixed(1)}x`}
+          {`${input.secondaryOperation === 'deposit' ? t('Leverage') : t('Deleverage')} ${formatNumber(
+            netPosition ?? '0',
+            input.collateralSymbol,
+          )} ${input.collateralSymbol} @ ${input.leverageRatio.toFixed(1)}x`}
         </Button>
       )}
     </Box>
