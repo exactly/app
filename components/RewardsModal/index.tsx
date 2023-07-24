@@ -33,6 +33,7 @@ import Loading from 'components/common/modal/Loading';
 import useRewards from 'hooks/useRewards';
 import { WEI_PER_ETHER } from 'utils/const';
 import { LoadingButton } from '@mui/lab';
+import { useWeb3 } from 'hooks/useWeb3';
 
 function PaperComponent(props: PaperProps | undefined) {
   const ref = useRef<HTMLDivElement>(null);
@@ -62,6 +63,7 @@ const RewardsModal: FC<RewardsModalProps> = ({ isOpen, open, close }) => {
   const { t } = useTranslation();
   const { breakpoints } = useTheme();
   const isMobile = useMediaQuery(breakpoints.down('sm'));
+  const { isConnected } = useWeb3();
 
   const { rewards: rs, claim } = useRewards();
 
@@ -103,6 +105,10 @@ const RewardsModal: FC<RewardsModalProps> = ({ isOpen, open, close }) => {
     setInput('');
     setTx(undefined);
   }, [close]);
+
+  if (!isConnected) {
+    return null;
+  }
 
   return (
     <>
