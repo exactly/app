@@ -305,7 +305,7 @@
   "or": "o",
   "claim to a different address": "reclamar a una dirección diferente",
   "Claimable": "Reclamable",
-  "Claim EXA & Self Delegate Votes": "Reclamar EXA y Delegar Votos",
+  "Claim EXA": "Reclamar EXA",
   "When claiming your EXA you are also delegating your voting power to yourself. You can always choose to delegate it to another address later on.": "Al reclamar tu EXA también estás delegando tu poder de voto a ti mismo. Siempre podrás elegir delegarlo a otra dirección más adelante.",
   "Learn more about delegation.": "Aprende más sobre la delegación.",
   "EXA token holder?": "¿Tienes tokens EXA?",
@@ -313,7 +313,6 @@
   "Votes Delegation": "Delegación de Votos",
   "Delegate Votes": "Delegar Votos",
   "Voting Power": "Poder de Voto",
-  "You have no EXA balance in your connected wallet.": "No tienes saldo de EXA en tu billetera conectada.",
   "Governance": "Gobernanza",
   "Exactly Governance": "Gobernanza de Exactly",
   "All EXA token-holders will have voting power, enabling them to actively participate in discussions, propose enhancements, and cast votes to shape the protocol's evolution. For further insights, explore our Governance documentation.": "Todos los poseedores de tokens EXA tendrán poder de voto, lo que les permitirá participar activamente en las discusiones, proponer mejoras y emitir votos para dar forma a la evolución del protocolo. Para obtener más información, explore nuestra documentación de Gobernanza.",
@@ -371,5 +370,7 @@
   "You will only be able to deleverage.": "Sólo podrás desapalancar.",
   "You need to deposit more than {{value}} {{symbol}}.": "Necesitas depositar más de {{value}} {{symbol}}.",
   "The APR displayed comes from the Lido API.": "La TNA proviene de la API de Lido.",
-  "Price impact is above {{ threshold }}, operation is too risky.": "El impacto en el precio está por encima de {{ threshold }}, la operación es demasiado riesgosa."
+  "Price impact is above {{ threshold }}, operation is too risky.": "El impacto en el precio está por encima de {{ threshold }}, la operación es demasiado riesgosa.",
+  "You have no voting power in your connected wallet.": "No tienes poder de voto en tu billetera conectada.",
+  "Revoke delegation": "Revocar delegación"
 }

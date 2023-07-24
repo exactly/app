@@ -12,10 +12,11 @@ import VotingPower from 'components/governance/VotingPower';
 import Proposals from 'components/governance/Proposals';
 import useMerkleTree from 'hooks/useMerkleTree';
 
-const DashBoard: NextPage = () => {
+const Governance: NextPage = () => {
   const { t } = useTranslation();
-  const { isConnected } = useWeb3();
-  useMerkleTree(); // TESTING
+  const { isConnected, walletAddress } = useWeb3();
+  const { amount, proof } = useMerkleTree(walletAddress);
+
   usePageView('/governance', 'Governance');
 
   return (
@@ -39,7 +40,7 @@ const DashBoard: NextPage = () => {
           borderRadius="8px"
           bgcolor={({ palette }) => (palette.mode === 'dark' ? 'grey.100' : 'white')}
         >
-          <Claimable />
+          <Claimable amount={amount} proof={proof} />
           <VotingPower />
           <Delegation />
           <Proposals />
@@ -51,4 +52,4 @@ const DashBoard: NextPage = () => {
   );
 };
 
-export default DashBoard;
+export default Governance;

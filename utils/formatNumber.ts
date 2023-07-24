@@ -6,6 +6,7 @@ const dictionary: Record<string, number> = {
   WBTC: 6,
   wstETH: 6,
   OP: 6,
+  EXA: 6,
   noDecimals: 0,
 };
 

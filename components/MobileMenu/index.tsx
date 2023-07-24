@@ -4,6 +4,7 @@ import GitHubIcon from '@mui/icons-material/GitHub';
 import TwitterIcon from '@mui/icons-material/Twitter';
 import SecurityIcon from '@mui/icons-material/Security';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
+import GavelIcon from '@mui/icons-material/Gavel';
 import { Divider, IconButton, Modal, Slide, Typography, useTheme } from '@mui/material';
 import { Box } from '@mui/system';
 import Image from 'next/image';
@@ -53,6 +54,11 @@ function MobileMenu({ open, handleClose }: Props) {
       title: t('Strategies'),
       pathname: '/strategies',
       icon: <MovingSharpIcon sx={{ fontSize: 20 }} />,
+    },
+    {
+      title: t('Governance'),
+      pathname: '/governance',
+      icon: <GavelIcon sx={{ fontSize: 20 }} />,
     },
     ...(isOPMainnet
       ? [

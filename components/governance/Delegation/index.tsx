@@ -1,31 +1,110 @@
-import React, { useState } from 'react';
-import { Box, Collapse, Divider, TextField, Typography } from '@mui/material';
+import React, { useMemo, useState } from 'react';
+import { Avatar, Box, Collapse, Divider, Skeleton, TextField, Typography } from '@mui/material';
 import { Trans, useTranslation } from 'react-i18next';
 import { LoadingButton } from '@mui/lab';
 import HowToVoteIcon from '@mui/icons-material/HowToVote';
 import AddIcon from '@mui/icons-material/Add';
-import { isAddress } from 'viem';
+import { isAddress, zeroAddress } from 'viem';
 import { formatWallet } from 'utils/utils';
+import { useEXA, useEXADelegates, useEXAPrepareDelegate } from 'hooks/useEXA';
+import formatNumber from 'utils/formatNumber';
+import useBalance from 'hooks/useBalance';
+import { useWeb3 } from 'hooks/useWeb3';
+import { useExaDelegate } from 'types/abi';
+import { mainnet, useEnsAvatar, useEnsName, useWaitForTransaction } from 'wagmi';
+import * as blockies from 'blockies-ts';
 
 const Delegation = () => {
   const { t } = useTranslation();
+  const { walletAddress } = useWeb3();
   const [selected, setSelected] = useState<'self-delegate' | 'add-delegate'>('self-delegate');
   const [input, setInput] = useState<string>('');
+  const exa = useEXA();
+  const exaBalance = useBalance('EXA', exa?.address);
+  const { data: delegate, isLoading: isLoadingDelegate } = useEXADelegates({ watch: true });
+  const { config } = useEXAPrepareDelegate({
+    args:
+      delegate !== zeroAddress
+        ? [zeroAddress]
+        : selected === 'add-delegate' && isAddress(input)
+        ? [input]
+        : [walletAddress ?? zeroAddress],
+  });
+  const { write, isLoading: submitLoading, data } = useExaDelegate(config);
+  const { isLoading: waitingDelegate } = useWaitForTransaction({ hash: data?.hash });
+  const { data: delegateENS } = useEnsName({ address: delegate, chainId: mainnet.id });
+  const { data: delegateENSAvatar, error: ensAvatarError } = useEnsAvatar({
+    name: delegateENS,
+    chainId: mainnet.id,
+  });
+
+  const delegateAvatar = useMemo(() => {
+    if (!delegate) return '';
+    if (delegateENSAvatar && !ensAvatarError) return delegateENSAvatar;
+    return blockies.create({ seed: delegate.toLocaleLowerCase() }).toDataURL();
+  }, [delegate, delegateENSAvatar, ensAvatarError]);
+
+  if (isLoadingDelegate) {
+    return (
+      <Box display="flex" flexDirection="column" gap={4}>
+        <Divider flexItem />
+        <Skeleton height={60} />
+        <Skeleton height={60} />
+      </Box>
+    );
+  }
+
+  if (delegate !== zeroAddress) {
+    return (
+      <Box display="flex" flexDirection="column" gap={4}>
+        <Divider flexItem />
+        <Box display="flex" flexDirection="column" gap={3}>
+          <Typography variant="h6">{t('Votes Delegation')}</Typography>
+          {exaBalance !== undefined ? (
+            <Typography fontSize={14}>
+              <Trans
+                i18nKey="Your total of <1>{{amount}} voting power</1> is currently delegated to the following address:"
+                components={{
+                  1: <strong></strong>,
+                }}
+                values={{ amount: formatNumber(exaBalance) }}
+              />
+            </Typography>
+          ) : (
+            <Skeleton />
+          )}
+        </Box>
+        <Box display="flex" gap={1}>
+          <Avatar alt="Delegate avatar" src={delegateAvatar} sx={{ width: 24, height: 24 }} />
+          <Typography fontSize={16} fontFamily="IBM Plex Mono">
+            {formatWallet(delegate)}
+          </Typography>
+        </Box>
+        <LoadingButton fullWidth variant="outlined" onClick={write} loading={submitLoading || waitingDelegate}>
+          {t('Revoke delegation')}
+        </LoadingButton>
+      </Box>
+    );
+  }
 
   return (
     <Box display="flex" flexDirection="column" gap={4}>
       <Divider flexItem />
       <Box display="flex" flexDirection="column" gap={3}>
         <Typography variant="h6">{t('Votes Delegation')}</Typography>
-        <Typography fontSize={14}>
-          <Trans
-            i18nKey="You have a total of <1>{{amount}} voting power</1> available to delegate."
-            components={{
-              1: <strong></strong>,
-            }}
-            values={{ amount: '4,785' }}
-          />
-        </Typography>
+        {exaBalance !== undefined ? (
+          <Typography fontSize={14}>
+            <Trans
+              i18nKey="You have a total of <1>{{amount}} voting power</1> available to delegate."
+              components={{
+                1: <strong></strong>,
+              }}
+              values={{ amount: formatNumber(exaBalance) }}
+            />
+          </Typography>
+        ) : (
+          <Skeleton />
+        )}
       </Box>
       <Box display="flex" flexDirection="column">
         <Box
@@ -43,6 +122,7 @@ const Delegation = () => {
             },
             bgcolor: selected === 'self-delegate' ? 'grey.900' : '',
             color: selected === 'self-delegate' ? 'grey.50' : '',
+            pointerEvents: submitLoading || waitingDelegate ? 'none' : 'auto',
           }}
           onClick={() => setSelected('self-delegate')}
         >
@@ -70,6 +150,7 @@ const Delegation = () => {
             },
             bgcolor: selected === 'add-delegate' ? 'grey.900' : '',
             color: selected === 'add-delegate' ? 'grey.50' : '',
+            pointerEvents: submitLoading || waitingDelegate ? 'none' : 'auto',
           }}
           onClick={() => setSelected('add-delegate')}
         >
@@ -104,6 +185,7 @@ const Delegation = () => {
                   },
                 },
               }}
+              disabled={submitLoading || waitingDelegate}
               onChange={(e) => setInput(e.target.value)}
             />
           </Box>
@@ -113,6 +195,8 @@ const Delegation = () => {
         variant="contained"
         fullWidth
         disabled={selected === 'add-delegate' && !(input && isAddress(input))}
+        onClick={write}
+        loading={submitLoading || waitingDelegate}
       >
         {selected === 'add-delegate' && Boolean(input && isAddress(input))
           ? `${t('Delegate Votes to')} ${formatWallet(input)}`

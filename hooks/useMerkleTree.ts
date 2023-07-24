@@ -12,11 +12,11 @@ export default (
   walletAddress?: Address,
 ): {
   canClaim: boolean;
-  amount?: string;
+  amount?: bigint;
   proof: string[];
 } => {
-  const amount = walletAddress ? airdropJson[walletAddress] : undefined;
+  const amount = walletAddress ? airdropJson[walletAddress] || '' : '';
   const proof = walletAddress && amount ? tree.getHexProof(encodeLeaf(walletAddress, amount)) : [];
   const canClaim = Boolean(walletAddress && amount && proof.length > 0);
-  return { canClaim, amount, proof };
+  return { canClaim, amount: BigInt(amount), proof };
 };

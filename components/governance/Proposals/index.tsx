@@ -16,8 +16,9 @@ const Proposals = () => {
             fontWeight={700}
             color="grey.100"
             sx={{ px: 0.5, py: 0.1, bgcolor: 'grey.900', borderRadius: '4px' }}
+            textTransform="uppercase"
           >
-            {t('Coming soon').toUpperCase()}
+            {t('Coming soon')}
           </Typography>
         </Box>
         <Typography fontSize={14} color="grey.500">

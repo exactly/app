@@ -106,15 +106,15 @@ function Navbar() {
         icon: <AccountBalanceWalletIcon sx={{ fontSize: 14 }} />,
       },
       {
-        pathname: '/governance',
-        name: t('Governance'),
-        icon: <GavelIcon sx={{ fontSize: '13px' }} />,
-        isNew: true,
-      },
-      {
         pathname: '/strategies',
         name: t('Strategies'),
         icon: <MovingSharpIcon sx={{ fontSize: '13px' }} />,
+        isNew: true,
+      },
+      {
+        pathname: '/governance',
+        name: t('Governance'),
+        icon: <GavelIcon sx={{ fontSize: '13px' }} />,
         isNew: true,
       },
       ...(isOPMainnet
