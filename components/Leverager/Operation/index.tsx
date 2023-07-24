@@ -23,7 +23,6 @@ const Operation = () => {
     setBorrowSymbol,
     netPosition,
     errorData,
-    currentLeverageRatio,
     collateralOptions,
     borrowOptions,
     setViewSummary,

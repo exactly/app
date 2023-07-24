@@ -29,6 +29,7 @@ import usePreviewer from 'hooks/usePreviewer';
 import { useWeb3 } from 'hooks/useWeb3';
 import { WEI_PER_ETHER } from 'utils/const';
 import { formatUnits } from 'viem';
+import Rates from 'components/Rates';
 
 type Row = {
   key: string;
@@ -65,9 +66,6 @@ function Overview({ from, to, percent }: Props) {
 
     const isToFixed = Boolean(to?.maturity);
 
-    const rewardsFrom = rates[from.symbol];
-    const rewardsTo = to ? rates[to.symbol] : null;
-
     const wad = 10n ** BigInt(decimals);
 
     const originalDebt = (from.balance * percent) / 100n;
@@ -86,23 +84,29 @@ function Overview({ from, to, percent }: Props) {
         current: <TextValue>{toPercentage(Number(from.apr) / 1e18)}</TextValue>,
         new: to ? <TextValue>{toPercentage(Number(to.apr) / 1e18)}</TextValue> : null,
       },
-      ...(rewardsFrom.length
+      ...(rates[from.symbol].length
         ? [
             {
               key: 'RewardsAPR',
               label: t('Rewards APR'),
-              current: rewardsFrom.map((reward) => (
-                <CurrencyTextValue key={reward.assetSymbol} assetSymbol={reward.assetSymbol}>
-                  {toPercentage(Number(reward.borrow) / 1e18)}
-                </CurrencyTextValue>
-              )),
-              new: rewardsTo
-                ? rewardsTo.map((reward) => (
-                    <CurrencyTextValue key={reward.assetSymbol} assetSymbol={reward.assetSymbol}>
-                      {toPercentage(Number(reward.borrow) / 1e18)}
-                    </CurrencyTextValue>
-                  ))
-                : null,
+              current: (
+                <Rates
+                  symbol={from.symbol}
+                  apr={0}
+                  type="borrow"
+                  sx={{ flex: 1, fontWeight: 700, fontSize: 14, color: 'grey.900', textAlign: 'right' }}
+                  hideMarket
+                />
+              ),
+              new: to ? (
+                <Rates
+                  symbol={to.symbol}
+                  apr={0}
+                  type="borrow"
+                  sx={{ flex: 1, fontWeight: 700, fontSize: 14, color: 'grey.900', textAlign: 'right' }}
+                  hideMarket
+                />
+              ) : null,
             },
           ]
         : []),

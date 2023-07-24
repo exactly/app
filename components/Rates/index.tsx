@@ -15,6 +15,7 @@ type Props = {
   directionMobile?: 'row' | 'row-reverse';
   iconsSize?: number;
   isLoading?: boolean;
+  hideMarket?: boolean;
 };
 
 const { minAPRValue } = numbers;
@@ -28,6 +29,7 @@ const Rates: FC<Props> = ({
   directionMobile,
   iconsSize,
   isLoading = false,
+  hideMarket = false,
 }) => {
   const { rates } = useDebtManagerContext();
 
@@ -50,7 +52,7 @@ const Rates: FC<Props> = ({
     return (
       apr +
       native +
-      (type === 'deposit' ? 1 : -1) *
+      (type === 'deposit' || hideMarket ? 1 : -1) *
         (rates && rates[symbol]
           ? rates[symbol]?.reduce(
               (acc, curr) => acc + Number(type === 'deposit' ? curr.floatingDeposit : curr.borrow) / 1e18,
@@ -58,7 +60,7 @@ const Rates: FC<Props> = ({
             )
           : 0)
     );
-  }, [apr, native, rates, symbol, type]);
+  }, [apr, hideMarket, native, rates, symbol, type]);
 
   const _rates = useMemo(() => {
     return (
@@ -77,7 +79,7 @@ const Rates: FC<Props> = ({
     <APRWithBreakdown
       directionMobile={directionMobile}
       iconsSize={iconsSize}
-      markets={[{ apr, symbol }]}
+      markets={hideMarket ? [] : [{ apr, symbol }]}
       rewards={_rates}
       natives={symbol === 'wstETH' && type === 'deposit' ? [{ symbol: 'wstETH', apr: native }] : undefined}
     >

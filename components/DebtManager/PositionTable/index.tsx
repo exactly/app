@@ -18,12 +18,11 @@ import { useTranslation } from 'react-i18next';
 import OperationSquare from 'components/common/OperationSquare';
 import parseTimestamp from 'utils/parseTimestamp';
 import formatNumber from 'utils/formatNumber';
-import { toPercentage } from 'utils/utils';
 import BestPill from 'components/common/BestPill';
-import { Rates } from 'hooks/useRewards';
-import RewardPill from 'components/markets/RewardPill';
-import { formatUnits } from 'viem';
+import { Rates as RewardRates } from 'hooks/useRewards';
+import { formatEther, formatUnits } from 'viem';
 import { WEI_PER_ETHER } from 'utils/const';
+import Rates from 'components/Rates';
 
 export type PositionTableRow = {
   symbol: string;
@@ -33,7 +32,7 @@ export type PositionTableRow = {
   usdPrice: bigint;
   decimals: number;
   apr: bigint;
-  rewards?: Rates[string];
+  rewards?: RewardRates[string];
   isBest?: boolean;
 };
 
@@ -112,10 +111,7 @@ function PositionTable({ data, onClick, loading = false, showBalance = false }: 
                     )}
                     <TableCell>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                        <TextCell>{toPercentage(Number(formatUnits(row.apr, 18)))}</TextCell>
-                        {row.rewards?.map((reward) => (
-                          <RewardPill key={reward.assetSymbol} symbol={reward.assetSymbol} rate={reward.borrow} />
-                        ))}
+                        <Rates type="borrow" apr={Number(formatEther(row.apr))} symbol={row.symbol} />
                         {row.isBest && <BestPill />}
                       </Box>
                     </TableCell>

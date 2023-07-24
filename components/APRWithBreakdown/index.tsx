@@ -36,7 +36,7 @@ const APRWithBreakdown: FC<PropsWithChildren & APRWithBreakdownProps> = ({
   return (
     <Box display="flex" flexDirection="column" gap={2}>
       <Box display="flex" flexDirection={{ xs: directionMobile, md: 'row' }} gap={0.5} alignItems="center">
-        <Box>{children}</Box>
+        <Box sx={{ flex: 1 }}>{children}</Box>
         <Tooltip
           title={<APRBreakdown markets={markets} rewards={rewards} natives={natives} />}
           placement="top"
@@ -58,10 +58,10 @@ const APRBreakdown: FC<Omit<APRWithBreakdownProps, 'totalAPR'>> = ({ markets, re
 
   return (
     <Box display="flex" flexDirection="column" gap={1}>
-      <APRBreakdownItem title={t('Market APR')} values={markets} />
+      {Boolean(markets.length) && <APRBreakdownItem title={t('Market APR')} values={markets} />}
       {Boolean(rewards.length) && (
         <>
-          <Divider flexItem sx={{ mx: 0.5 }} />
+          {Boolean(markets.length) && <Divider flexItem sx={{ mx: 0.5 }} />}
           <APRBreakdownItem title={t('Rewards APR')} values={rewards} />
         </>
       )}
