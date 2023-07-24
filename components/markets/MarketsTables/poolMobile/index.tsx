@@ -108,12 +108,12 @@ const GridAPRItem: FC<{
     ) : (
       <>
         <Grid container alignItems="center" gap={1}>
-          <Rates symbol={symbol} apr={apr} type={type} />
+          <Rates symbol={symbol} apr={apr} type={type} rateType={maturity && maturity !== 0 ? 'fixed' : 'floating'} />
         </Grid>
 
-        {maturity && maturity !== 0 && (
+        {Boolean(maturity && maturity !== 0) && (
           <Typography component="p" width="fit-content" variant="subtitle2" sx={{ color: 'grey.500' }}>
-            {parseTimestamp(maturity)}
+            {parseTimestamp(maturity ?? 0)}
           </Typography>
         )}
       </>

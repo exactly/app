@@ -98,6 +98,7 @@ const Options: FC<Props> = ({
                     isLoading={maturity === 0 ? loadingFloatingOption : loadingFixedOptions}
                     symbol={symbol}
                     minWidth={90}
+                    rateType={maturity && maturity !== 0 ? 'fixed' : 'floating'}
                     bottom={
                       <>
                         {maturity ? <LockIcon sx={bottomIconSx} /> : <SwapVertIcon sx={bottomIconSx} />}
@@ -183,7 +184,8 @@ const OptionRate: FC<{
   isLoading?: boolean;
   bottom: React.ReactNode;
   minWidth?: number;
-}> = ({ symbol, apr, type, isLoading, bottom, minWidth = 0 }) => {
+  rateType?: 'fixed' | 'floating';
+}> = ({ symbol, apr, type, isLoading, bottom, minWidth = 0, rateType = 'floating' }) => {
   const { t } = useTranslation();
   return (
     <Box display="flex" flexDirection="column" minWidth={minWidth}>
@@ -197,6 +199,7 @@ const OptionRate: FC<{
           directionDesktop="row-reverse"
           iconsSize={14}
           isLoading={isLoading}
+          rateType={rateType}
         />
       </Box>
       <Box display="flex" gap={0.3} justifyContent="right">

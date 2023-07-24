@@ -17,6 +17,7 @@ type Props = {
   iconsSize?: number;
   isLoading?: boolean;
   hideMarket?: boolean;
+  rateType?: 'fixed' | 'floating';
 };
 
 const { minAPRValue } = numbers;
@@ -32,6 +33,7 @@ const Rates: FC<Props> = ({
   iconsSize,
   isLoading = false,
   hideMarket = false,
+  rateType = 'floating',
 }) => {
   const { rates } = useDebtManagerContext();
 
@@ -73,6 +75,20 @@ const Rates: FC<Props> = ({
         .filter((r) => r.apr > 0)
     );
   }, [rates, symbol, type]);
+
+  if (rateType === 'fixed' && type === 'deposit') {
+    return (
+      <Typography sx={sx}>
+        {!isLoading && apr !== undefined ? (
+          `${hideMarket ? '' : apr > 999 ? '∞' : toPercentage(apr < minAPRValue ? undefined : apr)}${
+            label ? ' ' + label : ''
+          }`
+        ) : (
+          <Skeleton width={70} />
+        )}
+      </Typography>
+    );
+  }
 
   return (
     <APRWithBreakdown

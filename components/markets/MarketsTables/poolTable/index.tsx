@@ -119,7 +119,7 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
                     ) : (
                       <Box display="flex" flexDirection="column" width="fit-content">
                         <Grid container alignItems="center" gap={1}>
-                          <Rates symbol={symbol} apr={depositAPR} type="deposit" />
+                          <Rates symbol={symbol} apr={depositAPR} type="deposit" rateType={rateType} />
                         </Grid>
                         {rateType === 'fixed' && (
                           <Typography width="fit-content" variant="subtitle2" color="grey.500">
@@ -135,7 +135,7 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
                     ) : (
                       <Box display="flex" flexDirection="column" width="fit-content">
                         <Grid container alignItems="center" gap={1}>
-                          <Rates symbol={symbol} apr={borrowAPR} type="borrow" />
+                          <Rates symbol={symbol} apr={borrowAPR} type="borrow" rateType={rateType} />
                         </Grid>
                         {rateType === 'fixed' && (
                           <Typography width="fit-content" variant="subtitle2" color="grey.500">
