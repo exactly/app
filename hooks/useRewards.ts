@@ -16,7 +16,7 @@ export type RewardRates = AbiParametersToPrimitiveTypes<
   ExtractAbiFunction<typeof previewerABI, 'exactly'>['outputs']
 >[number][number]['rewardRates'];
 
-export type Rewards = Record<string, { address: Address; amount: bigint; usdPrice?: bigint }>;
+export type Rewards = Record<string, { address: Address; amount: bigint; usdPrice: bigint }>;
 export type Rates = Record<string, RewardRates>;
 
 export default () => {

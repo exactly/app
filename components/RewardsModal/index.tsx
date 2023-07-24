@@ -100,6 +100,11 @@ const RewardsModal: FC<RewardsModalProps> = ({ isOpen, open, close }) => {
     [rs],
   );
 
+  const totalAmount = useMemo(
+    () => Object.values(rs).reduce((acc, { amount, usdPrice }) => acc + (amount * usdPrice) / WEI_PER_ETHER, 0n),
+    [rs],
+  );
+
   const closeAndReset = useCallback(() => {
     close();
     setShowInput(false);
@@ -125,7 +130,7 @@ const RewardsModal: FC<RewardsModalProps> = ({ isOpen, open, close }) => {
             ))}
           </AvatarGroup>
           <Typography fontSize={14} fontWeight={700}>
-            {t('Rewards')}
+            {totalAmount < WEI_PER_ETHER ? t('Rewards') : `$${formatNumber(formatEther(totalAmount), 'USD')}`}
           </Typography>
         </Box>
       </Button>
