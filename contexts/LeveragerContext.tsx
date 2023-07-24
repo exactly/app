@@ -875,16 +875,31 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
               signPermit(userInput, 'assetIn'),
               signPermit(borrowAssets, 'marketIn'),
             ]);
-            if (!assetPermit || !marketPermit || assetPermit.type === 'permit' || marketPermit.type === 'permit2') {
+
+            if (!assetPermit || !marketPermit || marketPermit.type === 'permit2') {
               return;
             }
 
-            args = [...args, borrowAssets, marketPermit.value, assetPermit.value];
-            const gasEstimation = await debtManager.estimateGas.leverage(args, opts);
-            hash = await debtManager.write.leverage(args, {
-              ...opts,
-              gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
-            });
+            switch (assetPermit.type) {
+              case 'permit': {
+                args = [...args, borrowAssets, marketPermit.value, assetPermit.value];
+                const gasEstimation = await debtManager.estimateGas.leverage(args, opts);
+                hash = await debtManager.write.leverage(args, {
+                  ...opts,
+                  gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
+                });
+                break;
+              }
+              case 'permit2': {
+                args = [...args, borrowAssets, marketPermit.value, assetPermit.value];
+                const gasEstimation = await debtManager.estimateGas.leverage(args, opts);
+                hash = await debtManager.write.leverage(args, {
+                  ...opts,
+                  gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
+                });
+                break;
+              }
+            }
             break;
           }
           case 'withdraw': {
@@ -946,23 +961,30 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
               signPermit(userInput, 'assetIn'),
               signPermit(borrowAssets, 'marketOut'),
             ]);
-            if (
-              !assetPermit ||
-              !marketPermit ||
-              !leverageStatus ||
-              marketPermit.type === 'permit2' ||
-              assetPermit.type === 'permit'
-            ) {
+            if (!assetPermit || !marketPermit || !leverageStatus || marketPermit.type === 'permit2') {
               return;
             }
 
-            args = [...args, borrowAssets, marketPermit.value, assetPermit.value] as const;
-
-            const gasEstimation = await debtManager.estimateGas.crossLeverage(args, opts);
-            hash = await debtManager.write.crossLeverage(args, {
-              ...opts,
-              gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
-            });
+            switch (assetPermit.type) {
+              case 'permit': {
+                args = [...args, borrowAssets, marketPermit.value, assetPermit.value] as const;
+                const gasEstimation = await debtManager.estimateGas.crossLeverage(args, opts);
+                hash = await debtManager.write.crossLeverage(args, {
+                  ...opts,
+                  gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
+                });
+                break;
+              }
+              case 'permit2': {
+                args = [...args, borrowAssets, marketPermit.value, assetPermit.value] as const;
+                const gasEstimation = await debtManager.estimateGas.crossLeverage(args, opts);
+                hash = await debtManager.write.crossLeverage(args, {
+                  ...opts,
+                  gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
+                });
+                break;
+              }
+            }
             break;
           }
           case 'withdraw': {
