@@ -29,12 +29,20 @@ export default () => {
   const rewards = useMemo<Rewards>(() => {
     if (!accountData || !getMarketAccount) return {};
 
+    const price = accountData
+      .flatMap(({ rewardRates }) => rewardRates)
+      .reduce(
+        (reward, { usdPrice, assetSymbol }) => {
+          return { ...reward, [assetSymbol]: usdPrice };
+        },
+        {} as Record<string, bigint>,
+      );
+
     return accountData
       .flatMap(({ claimableRewards }) => claimableRewards)
       .reduce((acc, { asset, assetSymbol, amount }) => {
-        const ma = getMarketAccount(assetSymbol);
         if (!acc[assetSymbol]) {
-          acc[assetSymbol] = { address: asset, amount, usdPrice: ma?.usdPrice };
+          acc[assetSymbol] = { address: asset, amount, usdPrice: price[assetSymbol] };
           return acc;
         }
         acc[assetSymbol].amount += amount;
