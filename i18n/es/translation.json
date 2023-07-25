@@ -306,8 +306,6 @@
   "claim to a different address": "reclamar a una dirección diferente",
   "Claimable": "Reclamable",
   "Claim EXA": "Reclamar EXA",
-  "When claiming your EXA you are also delegating your voting power to yourself. You can always choose to delegate it to another address later on.": "Al reclamar tu EXA también estás delegando tu poder de voto a ti mismo. Siempre podrás elegir delegarlo a otra dirección más adelante.",
-  "Learn more about delegation.": "Aprende más sobre la delegación.",
   "EXA token holder?": "¿Tienes tokens EXA?",
   "Connect your wallet to check for EXA tokens and start participating in the protocol’s Governance.": "Conecta tu billetera para verificar si tienes tokens EXA y comienza a participar en la Gobernanza del protocolo.",
   "Votes Delegation": "Delegación de Votos",
@@ -372,5 +370,6 @@
   "The APR displayed comes from the Lido API.": "La TNA proviene de la API de Lido.",
   "Price impact is above {{ threshold }}, operation is too risky.": "El impacto en el precio está por encima de {{ threshold }}, la operación es demasiado riesgosa.",
   "You have no voting power in your connected wallet.": "No tienes poder de voto en tu billetera conectada.",
-  "Revoke delegation": "Revocar delegación"
+  "Revoke delegation": "Revocar delegación",
+  "Withdraw {{ value }} EXA": "Retirar {{ value }} EXA"
 }
