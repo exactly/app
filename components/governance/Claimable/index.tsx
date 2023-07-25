@@ -54,11 +54,11 @@ const Claimable: FC<ClaimableProps> = ({ amount, proof }) => {
   return (
     <Box display="flex" flexDirection="column" gap={4}>
       <Box display="flex" justifyContent="space-between" alignItems="center">
-        <Typography variant="h6">{t('Claimable')}</Typography>
+        <Typography variant="h6">{claimed ? t('Claimed') : t('Claimable')}</Typography>
         <Box display="flex" gap={1} alignItems="center">
           {claimed === undefined || isLoadingClaimed || isLoadingNFT ? (
             <Skeleton width={60} height={32} />
-          ) : claimed ? null : (
+          ) : (
             <>
               <Image
                 src={`/img/assets/EXA.svg`}
@@ -74,6 +74,31 @@ const Claimable: FC<ClaimableProps> = ({ amount, proof }) => {
       </Box>
       {claimed && (
         <>
+          {chain && chain.id !== displayNetwork.id ? (
+            <LoadingButton
+              variant="contained"
+              fullWidth
+              onClick={() => switchNetwork?.(displayNetwork.id)}
+              loading={switchIsLoading}
+            >
+              {t('Please switch to {{network}} network', { network: displayNetwork.name })}
+            </LoadingButton>
+          ) : (
+            <LoadingButton
+              variant="contained"
+              fullWidth
+              onClick={withdraw}
+              disabled={
+                withdrawLoading ||
+                waitingWithdraw ||
+                isLoadingWithdrawable ||
+                (withdrawable ?? 0n) < parseEther('0.0049999999')
+              }
+              loading={withdrawLoading || waitingWithdraw || isLoadingWithdrawable}
+            >
+              {t('Withdraw {{ value }} EXA', { value: formatNumber(formatEther(withdrawable ?? 0n)) })}
+            </LoadingButton>
+          )}
           {nft === undefined || isLoadingNFT ? (
             <Skeleton sx={{ borderRadius: '8px' }} variant="rectangular" height={416} />
           ) : (
@@ -98,41 +123,27 @@ const Claimable: FC<ClaimableProps> = ({ amount, proof }) => {
         </>
       )}
 
-      {chain && chain.id !== displayNetwork.id ? (
-        <LoadingButton
-          variant="contained"
-          fullWidth
-          onClick={() => switchNetwork?.(displayNetwork.id)}
-          loading={switchIsLoading}
-        >
-          {t('Please switch to {{network}} network', { network: displayNetwork.name })}
-        </LoadingButton>
-      ) : claimed ? (
-        <LoadingButton
-          variant="contained"
-          fullWidth
-          onClick={withdraw}
-          disabled={
-            withdrawLoading ||
-            waitingWithdraw ||
-            isLoadingWithdrawable ||
-            (withdrawable ?? 0n) < parseEther('0.0049999999')
-          }
-          loading={withdrawLoading || waitingWithdraw || isLoadingWithdrawable}
-        >
-          {t('Withdraw {{ value }} EXA', { value: formatNumber(formatEther(withdrawable ?? 0n)) })}
-        </LoadingButton>
-      ) : (
-        <LoadingButton
-          variant="contained"
-          fullWidth
-          onClick={claim}
-          disabled={claimLoading || waitingClaim}
-          loading={isLoadingClaimed || claimLoading || waitingClaim}
-        >
-          {t('Claim EXA Stream')}
-        </LoadingButton>
-      )}
+      {!claimed &&
+        (chain && chain.id !== displayNetwork.id ? (
+          <LoadingButton
+            variant="contained"
+            fullWidth
+            onClick={() => switchNetwork?.(displayNetwork.id)}
+            loading={switchIsLoading}
+          >
+            {t('Please switch to {{network}} network', { network: displayNetwork.name })}
+          </LoadingButton>
+        ) : (
+          <LoadingButton
+            variant="contained"
+            fullWidth
+            onClick={claim}
+            disabled={claimLoading || waitingClaim}
+            loading={isLoadingClaimed || claimLoading || waitingClaim}
+          >
+            {t('Claim EXA Stream')}
+          </LoadingButton>
+        ))}
 
       <Divider flexItem />
     </Box>

@@ -370,5 +370,6 @@
   "You have no voting power in your connected wallet.": "No tienes poder de voto en tu billetera conectada.",
   "Revoke delegation": "Revocar delegación",
   "Withdraw {{ value }} EXA": "Retirar {{ value }} EXA",
-  "Exactly DAO Governance": "Governanza de Exactly DAO"
+  "Exactly DAO Governance": "Governanza de Exactly DAO",
+  "Claimed": "Reclamado"
 }
