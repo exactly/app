@@ -5,6 +5,7 @@ import {
   airdropABI,
   usePrepareAirdropClaim as _usePrepareAirdropClaim,
   useAirdropClaimed as _useAirdropClaimed,
+  useAirdropStreams as _useAirdropStreams,
 } from 'types/abi';
 import useContract from './useContract';
 
@@ -29,6 +30,18 @@ export const useAirdropClaimed = (args?: { watch?: boolean }) => {
   const airdrop = useAirdrop();
 
   return _useAirdropClaimed({
+    ...args,
+    chainId: chain.id,
+    address: airdrop?.address,
+    args: [walletAddress ?? zeroAddress],
+  });
+};
+
+export const useAirdropStreams = (args?: { watch?: boolean }) => {
+  const { chain, walletAddress } = useWeb3();
+  const airdrop = useAirdrop();
+
+  return _useAirdropStreams({
     ...args,
     chainId: chain.id,
     address: airdrop?.address,
