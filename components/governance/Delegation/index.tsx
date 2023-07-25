@@ -77,7 +77,7 @@ const Delegation = () => {
         <Box display="flex" gap={1}>
           <Avatar alt="Delegate avatar" src={delegateAvatar} sx={{ width: 24, height: 24 }} />
           <Typography fontSize={16} fontFamily="IBM Plex Mono">
-            {formatWallet(delegate)}
+            {delegateENS ? delegateENS : formatWallet(delegate)}
           </Typography>
         </Box>
         <LoadingButton fullWidth variant="outlined" onClick={write} loading={submitLoading || waitingDelegate}>
