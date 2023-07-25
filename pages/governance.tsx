@@ -15,7 +15,7 @@ import useMerkleTree from 'hooks/useMerkleTree';
 const Governance: NextPage = () => {
   const { t } = useTranslation();
   const { isConnected, walletAddress } = useWeb3();
-  const { amount, proof } = useMerkleTree(walletAddress);
+  const mTree = useMerkleTree(walletAddress);
 
   usePageView('/governance', 'Governance');
 
@@ -40,7 +40,7 @@ const Governance: NextPage = () => {
           borderRadius="8px"
           bgcolor={({ palette }) => (palette.mode === 'dark' ? 'grey.100' : 'white')}
         >
-          <Claimable amount={amount} proof={proof} />
+          {mTree.canClaim && <Claimable amount={mTree.amount} proof={mTree.proof} />}
           <VotingPower />
           <Delegation />
           <Proposals />
