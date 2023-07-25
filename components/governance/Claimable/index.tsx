@@ -42,14 +42,14 @@ const Claimable: FC<ClaimableProps> = ({ amount, proof }) => {
 
   const b64 = nft?.split(',')[1] ?? '';
   const json = atob(b64) || '{}';
-  const { image, description } = JSON.parse(json);
+  const { image, description, name } = JSON.parse(json);
+  const title = name ?? '';
+  const sablierDescription: string[] = (description?.split('\n') ?? ([] as string[]))[0];
 
   return (
     <Box display="flex" flexDirection="column" gap={4}>
       <Box display="flex" justifyContent="space-between" alignItems="center">
-        <Box display="flex" alignItems="center" gap={1}>
-          <Typography variant="h6">{t('Claimable')}</Typography>
-        </Box>
+        <Typography variant="h6">{t('Claimable')}</Typography>
         <Box display="flex" gap={1} alignItems="center">
           {claimed === undefined || isLoadingClaimed || isLoadingNFT ? (
             <Skeleton width={60} height={32} />
@@ -72,17 +72,23 @@ const Claimable: FC<ClaimableProps> = ({ amount, proof }) => {
           {nft === undefined || isLoadingNFT ? (
             <Skeleton sx={{ borderRadius: '8px' }} variant="rectangular" height={416} />
           ) : (
-            <Image
-              style={{
-                borderRadius: '8px',
-                maxWidth: '100%',
-                height: 'auto',
-              }}
-              src={image}
-              alt={description}
-              width={416}
-              height={416}
-            />
+            <Box display="flex" flexDirection="column" gap={4}>
+              <Image
+                style={{
+                  borderRadius: '8px',
+                  maxWidth: '100%',
+                  height: 'auto',
+                }}
+                src={image}
+                alt={description}
+                width={416}
+                height={416}
+              />
+              <Box display="flex" flexDirection="column" gap={1}>
+                <Typography variant="h6">{title}</Typography>
+                <Typography fontSize={14}>{sablierDescription}</Typography>
+              </Box>
+            </Box>
           )}
         </>
       )}
@@ -110,7 +116,7 @@ const Claimable: FC<ClaimableProps> = ({ amount, proof }) => {
           disabled={claimLoading || waitingClaim}
           loading={isLoadingClaimed || claimLoading || waitingClaim}
         >
-          {t('Claim EXA')}
+          {t('Claim EXA Stream')}
         </LoadingButton>
       )}
       <Divider flexItem />
