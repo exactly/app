@@ -44,8 +44,8 @@ const Governance: NextPage = () => {
           bgcolor={({ palette }) => (palette.mode === 'dark' ? 'grey.100' : 'white')}
         >
           {mTree.canClaim && <Claimable amount={mTree.amount} proof={mTree.proof} />}
-          <VotingPower />
-          <Delegation />
+          <VotingPower amount={mTree.canClaim ? mTree.amount : 0n} />
+          <Delegation amount={mTree.canClaim ? mTree.amount : 0n} />
           <Proposals />
         </Box>
       ) : (

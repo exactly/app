@@ -4,6 +4,7 @@ import {
   sablierV2LockupLinearABI,
   useSablierV2LockupLinearWithdrawableAmountOf as _useSablierV2LockupLinearWithdrawableAmountOf,
   usePrepareSablierV2LockupLinearWithdrawMax as _usePrepareSablierV2LockupLinearWithdrawMax,
+  useSablierV2LockupLinearGetWithdrawnAmount as _useSablierV2LockupLinearGetWithdrawnAmount,
   useSablierV2NftDescriptorTokenUri as _useSablierV2NftDescriptorTokenUri,
 } from 'types/abi';
 import useContract from './useContract';
@@ -21,6 +22,18 @@ export const useSablierV2LockupLinearWithdrawableAmountOf = (stream?: bigint) =>
   const sablier = useSablierV2LockupLinear();
 
   return _useSablierV2LockupLinearWithdrawableAmountOf({
+    chainId: chain.id,
+    address: sablier?.address,
+    args: stream !== undefined ? [stream] : undefined,
+    watch: true,
+  });
+};
+
+export const useSablierV2LockupLinearGetWithdrawnAmount = (stream?: bigint) => {
+  const { chain } = useWeb3();
+  const sablier = useSablierV2LockupLinear();
+
+  return _useSablierV2LockupLinearGetWithdrawnAmount({
     chainId: chain.id,
     address: sablier?.address,
     args: stream !== undefined ? [stream] : undefined,

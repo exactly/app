@@ -4,7 +4,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { LoadingButton } from '@mui/lab';
 import HowToVoteIcon from '@mui/icons-material/HowToVote';
 import AddIcon from '@mui/icons-material/Add';
-import { isAddress, zeroAddress } from 'viem';
+import { isAddress, parseEther, zeroAddress, formatEther } from 'viem';
 import { formatWallet } from 'utils/utils';
 import { useEXA, useEXADelegates, useEXAPrepareDelegate } from 'hooks/useEXA';
 import formatNumber from 'utils/formatNumber';
@@ -13,8 +13,14 @@ import { useWeb3 } from 'hooks/useWeb3';
 import { useExaDelegate } from 'types/abi';
 import { mainnet, useEnsAvatar, useEnsName, useNetwork, useSwitchNetwork, useWaitForTransaction } from 'wagmi';
 import * as blockies from 'blockies-ts';
+import { useAirdropStreams } from 'hooks/useAirdrop';
+import { useSablierV2LockupLinearGetWithdrawnAmount } from 'hooks/useSablier';
 
-const Delegation = () => {
+type Props = {
+  amount: bigint;
+};
+
+const Delegation = ({ amount }: Props) => {
   const { t } = useTranslation();
   const { chain: displayNetwork, walletAddress } = useWeb3();
   const [selected, setSelected] = useState<'self-delegate' | 'add-delegate'>('self-delegate');
@@ -40,6 +46,13 @@ const Delegation = () => {
 
   const { chain } = useNetwork();
   const { switchNetwork, isLoading: switchIsLoading } = useSwitchNetwork();
+
+  const { data: stream } = useAirdropStreams({ watch: true });
+  const { data: withdrawn } = useSablierV2LockupLinearGetWithdrawnAmount(stream);
+
+  const totalVotes = useMemo(() => {
+    return formatNumber(formatEther(parseEther(exaBalance ?? '0') + (amount - (withdrawn ?? 0n))));
+  }, [exaBalance, amount, withdrawn]);
 
   const delegateAvatar = useMemo(() => {
     if (!delegate) return '';
@@ -70,7 +83,7 @@ const Delegation = () => {
                 components={{
                   1: <strong></strong>,
                 }}
-                values={{ amount: formatNumber(exaBalance) }}
+                values={{ amount: totalVotes }}
               />
             </Typography>
           ) : (
@@ -113,7 +126,7 @@ const Delegation = () => {
               components={{
                 1: <strong></strong>,
               }}
-              values={{ amount: formatNumber(exaBalance) }}
+              values={{ amount: totalVotes }}
             />
           </Typography>
         ) : (
