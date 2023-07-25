@@ -51,7 +51,9 @@ const Claimable: FC<ClaimableProps> = ({ amount, proof }) => {
           <Typography variant="h6">{t('Claimable')}</Typography>
         </Box>
         <Box display="flex" gap={1} alignItems="center">
-          {claimed === undefined || claimed || isLoadingClaimed || isLoadingNFT ? null : (
+          {claimed === undefined || isLoadingClaimed || isLoadingNFT ? (
+            <Skeleton width={60} height={32} />
+          ) : claimed ? null : (
             <>
               <Image
                 src={`/img/assets/EXA.svg`}
@@ -60,28 +62,31 @@ const Claimable: FC<ClaimableProps> = ({ amount, proof }) => {
                 height={24}
                 style={{ maxWidth: '100%', height: 'auto' }}
               />
-              <Typography variant="h6">
-                {isLoadingClaimed ? <Skeleton width={60} height={32} /> : parsedAmount}
-              </Typography>
+              <Typography variant="h6">{parsedAmount}</Typography>
             </>
           )}
         </Box>
       </Box>
-      {nft === undefined || isLoadingNFT ? (
-        <Skeleton sx={{ borderRadius: '8px' }} variant="rectangular" height={416} />
-      ) : (
-        <Image
-          style={{
-            borderRadius: '8px',
-            maxWidth: '100%',
-            height: 'auto',
-          }}
-          src={image}
-          alt={description}
-          width={416}
-          height={416}
-        />
+      {claimed && (
+        <>
+          {nft === undefined || isLoadingNFT ? (
+            <Skeleton sx={{ borderRadius: '8px' }} variant="rectangular" height={416} />
+          ) : (
+            <Image
+              style={{
+                borderRadius: '8px',
+                maxWidth: '100%',
+                height: 'auto',
+              }}
+              src={image}
+              alt={description}
+              width={416}
+              height={416}
+            />
+          )}
+        </>
       )}
+
       {claimed ? (
         <LoadingButton
           variant="contained"
