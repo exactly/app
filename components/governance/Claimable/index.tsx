@@ -28,11 +28,11 @@ const Claimable: FC<ClaimableProps> = ({ amount, proof }) => {
   const { data: withdrawable, isLoading: isLoadingWithdrawable } = useSablierV2LockupLinearWithdrawableAmountOf(stream);
   const { data: nft, isLoading: isLoadingNFT } = useSablierV2NftDescriptorTokenUri(stream);
 
-  const { config } = usePrepareAirdropClaim({ args: [amount, proof] });
+  const { config } = usePrepareAirdropClaim({ args: [amount, proof], enabled: !claimed });
   const { write: claim, data: claimData, isLoading: claimLoading } = useAirdropClaim(config);
   const { isLoading: waitingClaim } = useWaitForTransaction({ hash: claimData?.hash });
 
-  const { config: withdrawConfig } = usePrepareSablierV2LockupLinearWithdrawMax(stream);
+  const { config: withdrawConfig } = usePrepareSablierV2LockupLinearWithdrawMax(stream, { enabled: claimed });
   const {
     write: withdraw,
     data: withdrawData,
@@ -68,9 +68,19 @@ const Claimable: FC<ClaimableProps> = ({ amount, proof }) => {
         </Box>
       </Box>
       {nft === undefined || isLoadingNFT ? (
-        <Skeleton sx={{ borderRadius: '8px' }} variant="rectangular" width={416} height={416} />
+        <Skeleton sx={{ borderRadius: '8px' }} variant="rectangular" height={416} />
       ) : (
-        <Image style={{ borderRadius: '8px' }} src={image} alt={description} width={416} height={416} />
+        <Image
+          style={{
+            borderRadius: '8px',
+            maxWidth: '100%',
+            height: 'auto',
+          }}
+          src={image}
+          alt={description}
+          width={416}
+          height={416}
+        />
       )}
       {claimed ? (
         <LoadingButton
@@ -78,7 +88,10 @@ const Claimable: FC<ClaimableProps> = ({ amount, proof }) => {
           fullWidth
           onClick={withdraw}
           disabled={
-            withdrawLoading || waitingWithdraw || isLoadingWithdrawable || (withdrawable ?? 0n) < parseEther('0.01')
+            withdrawLoading ||
+            waitingWithdraw ||
+            isLoadingWithdrawable ||
+            (withdrawable ?? 0n) < parseEther('0.0049999999')
           }
           loading={withdrawLoading || waitingWithdraw || isLoadingWithdrawable}
         >

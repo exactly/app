@@ -28,11 +28,15 @@ export const useSablierV2LockupLinearWithdrawableAmountOf = (stream?: bigint) =>
   });
 };
 
-export const usePrepareSablierV2LockupLinearWithdrawMax = (stream?: bigint) => {
+export const usePrepareSablierV2LockupLinearWithdrawMax = (
+  stream?: bigint,
+  args?: Parameters<typeof _usePrepareSablierV2LockupLinearWithdrawMax>[0],
+) => {
   const { chain, walletAddress } = useWeb3();
   const sablier = useSablierV2LockupLinear();
 
   return _usePrepareSablierV2LockupLinearWithdrawMax({
+    ...args,
     chainId: chain.id,
     address: sablier?.address,
     args: stream !== undefined && walletAddress ? [stream, walletAddress] : undefined,
