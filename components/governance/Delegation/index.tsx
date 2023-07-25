@@ -11,12 +11,12 @@ import formatNumber from 'utils/formatNumber';
 import useBalance from 'hooks/useBalance';
 import { useWeb3 } from 'hooks/useWeb3';
 import { useExaDelegate } from 'types/abi';
-import { mainnet, useEnsAvatar, useEnsName, useWaitForTransaction } from 'wagmi';
+import { mainnet, useEnsAvatar, useEnsName, useNetwork, useSwitchNetwork, useWaitForTransaction } from 'wagmi';
 import * as blockies from 'blockies-ts';
 
 const Delegation = () => {
   const { t } = useTranslation();
-  const { walletAddress } = useWeb3();
+  const { chain: displayNetwork, walletAddress } = useWeb3();
   const [selected, setSelected] = useState<'self-delegate' | 'add-delegate'>('self-delegate');
   const [input, setInput] = useState<string>('');
   const exa = useEXA();
@@ -37,6 +37,9 @@ const Delegation = () => {
     name: delegateENS,
     chainId: mainnet.id,
   });
+
+  const { chain } = useNetwork();
+  const { switchNetwork, isLoading: switchIsLoading } = useSwitchNetwork();
 
   const delegateAvatar = useMemo(() => {
     if (!delegate) return '';
@@ -80,9 +83,20 @@ const Delegation = () => {
             {delegateENS ? delegateENS : formatWallet(delegate)}
           </Typography>
         </Box>
-        <LoadingButton fullWidth variant="outlined" onClick={write} loading={submitLoading || waitingDelegate}>
-          {t('Revoke delegation')}
-        </LoadingButton>
+        {chain && chain.id !== displayNetwork.id ? (
+          <LoadingButton
+            fullWidth
+            variant="outlined"
+            onClick={() => switchNetwork?.(displayNetwork.id)}
+            loading={switchIsLoading}
+          >
+            {t('Please switch to {{network}} network', { network: displayNetwork.name })}
+          </LoadingButton>
+        ) : (
+          <LoadingButton fullWidth variant="outlined" onClick={write} loading={submitLoading || waitingDelegate}>
+            {t('Revoke delegation')}
+          </LoadingButton>
+        )}
       </Box>
     );
   }
@@ -191,17 +205,28 @@ const Delegation = () => {
           </Box>
         </Collapse>
       </Box>
-      <LoadingButton
-        variant="contained"
-        fullWidth
-        disabled={selected === 'add-delegate' && !(input && isAddress(input))}
-        onClick={write}
-        loading={submitLoading || waitingDelegate}
-      >
-        {selected === 'add-delegate' && Boolean(input && isAddress(input))
-          ? `${t('Delegate Votes to')} ${formatWallet(input)}`
-          : t('Delegate Votes')}
-      </LoadingButton>
+      {chain && chain.id !== displayNetwork.id ? (
+        <LoadingButton
+          variant="contained"
+          fullWidth
+          onClick={() => switchNetwork?.(displayNetwork.id)}
+          loading={switchIsLoading}
+        >
+          {t('Please switch to {{network}} network', { network: displayNetwork.name })}
+        </LoadingButton>
+      ) : (
+        <LoadingButton
+          variant="contained"
+          fullWidth
+          disabled={selected === 'add-delegate' && !(input && isAddress(input))}
+          onClick={write}
+          loading={submitLoading || waitingDelegate}
+        >
+          {selected === 'add-delegate' && Boolean(input && isAddress(input))
+            ? `${t('Delegate Votes to')} ${formatWallet(input)}`
+            : t('Delegate Votes')}
+        </LoadingButton>
+      )}
     </Box>
   );
 };

@@ -3,7 +3,7 @@ import type { NextPage } from 'next';
 
 import { usePageView } from 'hooks/useAnalytics';
 import { Box, Typography } from '@mui/material';
-import { useTranslation } from 'react-i18next';
+import { useTranslation, Trans } from 'react-i18next';
 import { useWeb3 } from 'hooks/useWeb3';
 import ConnectWalletGovernance from 'components/governance/ConnectWalletGovernance';
 import Claimable from 'components/governance/Claimable';
@@ -23,12 +23,15 @@ const Governance: NextPage = () => {
     <Box display="flex" flexDirection="column" mx="auto" gap={5} my={5} maxWidth={480}>
       <Box display="flex" flexDirection="column" gap={3}>
         <Typography fontSize={24} fontWeight={700}>
-          {t('Exactly Governance')}
+          {t('Exactly DAO Governance')}
         </Typography>
         <Typography>
-          {t(
-            "All EXA token-holders will have voting power, enabling them to actively participate in discussions, propose enhancements, and cast votes to shape the protocol's evolution. For further insights, explore our Governance documentation.",
-          )}
+          <Trans
+            i18nKey="All EXA token-holders will have voting power, enabling them to actively participate in discussions, propose enhancements, and cast votes to shape the protocol's evolution. More information will soon be available on our <1>docs</1>."
+            components={{
+              1: <a href="https://docs.exact.ly" style={{ textDecoration: 'underline' }}></a>,
+            }}
+          />
         </Typography>
       </Box>
       {isConnected ? (

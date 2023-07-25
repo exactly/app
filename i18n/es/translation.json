@@ -312,8 +312,6 @@
   "Delegate Votes": "Delegar Votos",
   "Voting Power": "Poder de Voto",
   "Governance": "Gobernanza",
-  "Exactly Governance": "Gobernanza de Exactly",
-  "All EXA token-holders will have voting power, enabling them to actively participate in discussions, propose enhancements, and cast votes to shape the protocol's evolution. For further insights, explore our Governance documentation.": "Todos los poseedores de tokens EXA tendrán poder de voto, lo que les permitirá participar activamente en las discusiones, proponer mejoras y emitir votos para dar forma a la evolución del protocolo. Para obtener más información, explore nuestra documentación de Gobernanza.",
   "Self Delegate": "Auto Delegar",
   "Use your voting rights to vote on proposals directly from your connected wallet.": "Usa tus derechos de voto para votar en propuestas directamente desde tu billetera conectada.",
   "Add Delegate": "Añadir Delegado",
@@ -371,5 +369,6 @@
   "Price impact is above {{ threshold }}, operation is too risky.": "El impacto en el precio está por encima de {{ threshold }}, la operación es demasiado riesgosa.",
   "You have no voting power in your connected wallet.": "No tienes poder de voto en tu billetera conectada.",
   "Revoke delegation": "Revocar delegación",
-  "Withdraw {{ value }} EXA": "Retirar {{ value }} EXA"
+  "Withdraw {{ value }} EXA": "Retirar {{ value }} EXA",
+  "Exactly DAO Governance": "Governanza de Exactly DAO"
 }

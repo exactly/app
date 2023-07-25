@@ -1,11 +1,12 @@
 import React, { FC, useMemo } from 'react';
 import { Hex, formatEther, parseEther } from 'viem';
 import Image from 'next/image';
-import { useWaitForTransaction } from 'wagmi';
+import { useNetwork, useWaitForTransaction, useSwitchNetwork } from 'wagmi';
 import { Box, Divider, Skeleton, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { LoadingButton } from '@mui/lab';
 import { usePrepareAirdropClaim, useAirdropClaimed, useAirdropStreams } from 'hooks/useAirdrop';
+import { useWeb3 } from 'hooks/useWeb3';
 import {
   useSablierV2LockupLinearWithdrawableAmountOf,
   useSablierV2NftDescriptorTokenUri,
@@ -21,6 +22,7 @@ type ClaimableProps = {
 
 const Claimable: FC<ClaimableProps> = ({ amount, proof }) => {
   const { t } = useTranslation();
+  const { chain: displayNetwork } = useWeb3();
   const parsedAmount = useMemo(() => (amount ? formatNumber(formatEther(amount)) : '0'), [amount]);
 
   const { data: claimed, isLoading: isLoadingClaimed } = useAirdropClaimed({ watch: true });
@@ -45,6 +47,9 @@ const Claimable: FC<ClaimableProps> = ({ amount, proof }) => {
   const { image, description, name } = JSON.parse(json);
   const title = name ?? '';
   const sablierDescription: string[] = (description?.split('\n') ?? ([] as string[]))[0];
+
+  const { chain } = useNetwork();
+  const { switchNetwork, isLoading: switchIsLoading } = useSwitchNetwork();
 
   return (
     <Box display="flex" flexDirection="column" gap={4}>
@@ -93,7 +98,16 @@ const Claimable: FC<ClaimableProps> = ({ amount, proof }) => {
         </>
       )}
 
-      {claimed ? (
+      {chain && chain.id !== displayNetwork.id ? (
+        <LoadingButton
+          variant="contained"
+          fullWidth
+          onClick={() => switchNetwork?.(displayNetwork.id)}
+          loading={switchIsLoading}
+        >
+          {t('Please switch to {{network}} network', { network: displayNetwork.name })}
+        </LoadingButton>
+      ) : claimed ? (
         <LoadingButton
           variant="contained"
           fullWidth
@@ -119,6 +133,7 @@ const Claimable: FC<ClaimableProps> = ({ amount, proof }) => {
           {t('Claim EXA Stream')}
         </LoadingButton>
       )}
+
       <Divider flexItem />
     </Box>
   );
