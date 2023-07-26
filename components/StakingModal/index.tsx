@@ -1,4 +1,4 @@
-import React, { FC, forwardRef, ReactElement, Ref, useCallback, useMemo, useRef, useState } from 'react';
+import React, { FC, forwardRef, ReactElement, Ref, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Box,
   Dialog,
@@ -19,6 +19,7 @@ import {
   AvatarGroup,
   Avatar,
   ButtonBase,
+  Skeleton,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { TransitionProps } from '@mui/material/transitions';
@@ -26,7 +27,7 @@ import Draggable from 'react-draggable';
 import { useTranslation } from 'react-i18next';
 import Image from 'next/image';
 import { CheckboxIcon, CheckboxCheckedIcon } from 'components/Icons';
-import { formatEther, isAddress } from 'viem';
+import { Address, formatEther, isAddress } from 'viem';
 import { formatWallet, toPercentage } from 'utils/utils';
 import formatNumber from 'utils/formatNumber';
 import { Transaction } from 'types/Transaction';
@@ -37,6 +38,12 @@ import { LoadingButton } from '@mui/lab';
 import { useWeb3 } from 'hooks/useWeb3';
 import { useNetwork, useSwitchNetwork } from 'wagmi';
 import { ModalBox, ModalBoxCell, ModalBoxRow } from 'components/common/modal/ModalBox';
+import SocketAssetSelector from 'components/SocketAssetSelector';
+import useSocketAssets from 'hooks/useSocketAssets';
+import { optimism } from 'wagmi/dist/chains';
+import { AssetBalance } from 'types/Bridge';
+import ModalInput from 'components/OperationsModal/ModalInput';
+import { set } from 'cypress/types/lodash';
 
 function PaperComponent(props: PaperProps | undefined) {
   const ref = useRef<HTMLDivElement>(null);
@@ -92,12 +99,28 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
   const balanceEXA = 9.111111111111111111;
   const balanceVELO = 8.111111111111111111;
 
+  const assets = useSocketAssets();
+  const [asset, setAsset] = useState<AssetBalance>();
+  const [qtyIn, setQtyIn] = useState('');
+
+  useEffect(() => {
+    if (!assets) return;
+    setAsset(assets.find((a) => a.symbol === 'ETH'));
+  }, [assets]);
+
+  const handleAssetChange = useCallback((asset_: AssetBalance) => {
+    setAsset(asset_);
+    setQtyIn('');
+  }, []);
+
   const submit = useCallback(async () => {
-    const assets = Object.entries(selected)
+    const assets_ = Object.entries(selected)
       .filter(([, v]) => v)
       .map(([symbol]) => symbol);
     setLoading(true);
-    claim({ assets, to: showInput && isAddress(input) ? input : undefined, setTx }).finally(() => setLoading(false));
+    claim({ assets: assets_, to: showInput && isAddress(input) ? input : undefined, setTx }).finally(() =>
+      setLoading(false),
+    );
   }, [claim, input, selected, showInput]);
 
   const rewards = useMemo(
@@ -303,7 +326,27 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
                     </ModalBoxCell>
                   </ModalBoxRow>
                 </ModalBox>
-                <ModalBox>REPLACE</ModalBox>
+                <ModalBox sx={{ display: 'flex', flexDirection: 'row', p: 2, alignItems: 'center' }}>
+                  {assets && asset ? (
+                    <>
+                      <Box width={'25%'}>
+                        <SocketAssetSelector asset={asset} options={assets} onChange={handleAssetChange} />
+                      </Box>
+                      <Box flex={1}>
+                        <ModalInput
+                          decimals={asset.decimals}
+                          symbol={asset.symbol}
+                          value={qtyIn}
+                          onValueChange={setQtyIn}
+                          align="right"
+                          maxWidth="100%"
+                        />
+                      </Box>
+                    </>
+                  ) : (
+                    <Skeleton />
+                  )}
+                </ModalBox>
               </Box>
               <Box display="flex" flexDirection="column" gap={2} alignItems="center">
                 {chain && chain.id !== displayNetwork.id ? (

@@ -46,7 +46,7 @@ export type ActiveRoute = {
 
 export type Asset = {
   chainId: number;
-  address: string;
+  address: Address;
   symbol: string;
   name: string;
   decimals: number;
