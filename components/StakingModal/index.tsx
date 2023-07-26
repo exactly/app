@@ -342,40 +342,44 @@ const PoolPreview: FC<PoolPreviewProps> = ({ exa, eth }) => {
       <ModalBoxRow>
         <ModalBoxCell height={32}>
           <Box position="relative" gap={0.5} alignItems="center">
-            <Avatar
-              alt="Velodrome Token"
-              src={`/img/assets/EXA.svg`}
-              sx={{
-                position: 'absolute',
-                top: 7,
-                left: 0,
-                width: 16,
-                height: 16,
-                fontSize: 10,
-                borderColor: 'transparent',
-              }}
-            />
-            <Box maxWidth="83%" overflow="auto" height={32} position="absolute" top={5} left={24}>
+            <Box display="flex" alignItems="center" gap={0.5} position="absolute" top={5} left={0}>
+              <Avatar
+                alt="Velodrome Token"
+                src={`/img/assets/EXA.svg`}
+                sx={{
+                  width: 20,
+                  height: 20,
+                  fontSize: 10,
+                  borderColor: 'transparent',
+                }}
+              />
+              <Typography fontSize={13} fontWeight={500}>
+                EXA
+              </Typography>
+            </Box>
+            <Box maxWidth="58%" overflow="auto" height={32} position="absolute" top={5} left={62}>
               <Typography fontSize={14}>{exa}</Typography>
             </Box>
           </Box>
         </ModalBoxCell>
         <ModalBoxCell divisor height={32}>
           <Box position="relative" gap={0.5} alignItems="center">
-            <Avatar
-              alt="Velodrome Token"
-              src={`/img/assets/WETH.svg`}
-              sx={{
-                position: 'absolute',
-                top: 7,
-                left: 0,
-                width: 16,
-                height: 16,
-                fontSize: 10,
-                borderColor: 'transparent',
-              }}
-            />
-            <Box maxWidth="83%" overflow="auto" height={32} position="absolute" top={5} left={24}>
+            <Box display="flex" alignItems="center" gap={0.5} position="absolute" top={5} left={0}>
+              <Avatar
+                alt="Velodrome Token"
+                src={`/img/assets/WETH.svg`}
+                sx={{
+                  width: 20,
+                  height: 20,
+                  fontSize: 10,
+                  borderColor: 'transparent',
+                }}
+              />
+              <Typography fontSize={13} fontWeight={500}>
+                ETH
+              </Typography>
+            </Box>
+            <Box maxWidth="58%" overflow="auto" height={32} position="absolute" top={5} left={62}>
               <Typography fontSize={14}>{eth}</Typography>
             </Box>
           </Box>
