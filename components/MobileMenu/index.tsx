@@ -1,4 +1,4 @@
-import React, { FC, PropsWithChildren } from 'react';
+import React, { FC, PropsWithChildren, useState } from 'react';
 import CloseIcon from '@mui/icons-material/Close';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import TwitterIcon from '@mui/icons-material/Twitter';
@@ -24,6 +24,7 @@ import MovingSharpIcon from '@mui/icons-material/MovingSharp';
 import { optimism } from 'wagmi/chains';
 import { useWeb3 } from 'hooks/useWeb3';
 import SecondaryChain from 'components/SecondaryChain';
+import RewardsModal from 'components/RewardsModal';
 
 type Props = {
   open: boolean;
@@ -37,6 +38,7 @@ function MobileMenu({ open, handleClose }: Props) {
   const date = new Date();
   const { chain } = useWeb3();
   const isOPMainnet = chain?.id === optimism.id;
+  const [openRewardsModal, setOpenRewardsModal] = useState(false);
 
   const headers = [
     {
@@ -123,7 +125,13 @@ function MobileMenu({ open, handleClose }: Props) {
                 </Box>
               ))}
             </Box>
-            <Divider sx={{ my: '12px' }} />
+            <Divider sx={{ my: 1.5 }} />
+            <RewardsModal
+              isOpen={openRewardsModal}
+              open={() => setOpenRewardsModal(true)}
+              close={() => setOpenRewardsModal(false)}
+            />
+            <Divider sx={{ my: 1.5 }} />
             <Typography fontFamily="fontFamilyMonospaced" fontSize={14} color="figma.grey.500" fontWeight={600}>
               {t('Links')}
             </Typography>

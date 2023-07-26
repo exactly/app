@@ -40,6 +40,7 @@ import MaturityDateReminder from 'components/MaturityDateReminder';
 import Faucet from 'components/operations/Faucet';
 import SecondaryChain from 'components/SecondaryChain';
 import RewardsModal from 'components/RewardsModal';
+import Velodrome from 'components/Velodrome';
 
 const { onlyMobile, onlyDesktopFlex } = globals;
 
@@ -109,7 +110,6 @@ function Navbar() {
         pathname: '/strategies',
         name: t('Strategies'),
         icon: <MovingSharpIcon sx={{ fontSize: '13px' }} />,
-        isNew: true,
       },
       {
         pathname: '/governance',
@@ -123,7 +123,6 @@ function Navbar() {
               pathname: '/bridge',
               name: t('Bridge & Swap'),
               icon: <RepeatRoundedIcon sx={{ fontSize: 14 }} />,
-              isNew: true,
             },
           ]
         : []),
@@ -198,11 +197,14 @@ function Navbar() {
             )}
             <Box display="flex" gap={0.5}>
               {!isMobile && <SecondaryChain />}
-              <RewardsModal
-                isOpen={openRewardsModal}
-                open={() => setOpenRewardsModal(true)}
-                close={() => setOpenRewardsModal(false)}
-              />
+              <Velodrome />
+              {!isMobile && (
+                <RewardsModal
+                  isOpen={openRewardsModal}
+                  open={() => setOpenRewardsModal(true)}
+                  close={() => setOpenRewardsModal(false)}
+                />
+              )}
               <Wallet />
             </Box>
           </Box>
