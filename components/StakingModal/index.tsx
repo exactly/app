@@ -44,6 +44,7 @@ import { optimism } from 'wagmi/dist/chains';
 import { AssetBalance } from 'types/Bridge';
 import ModalInput from 'components/OperationsModal/ModalInput';
 import { set } from 'cypress/types/lodash';
+import Link from 'next/link';
 
 function PaperComponent(props: PaperProps | undefined) {
   const ref = useRef<HTMLDivElement>(null);
@@ -96,8 +97,9 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
   );
 
   const velodromeAPR = 0.4;
-  const balanceEXA = 9.111111111111111111;
-  const balanceVELO = 8.111111111111111111;
+  const balanceEXA = '9.1111';
+  const balanceETH = '8.1111';
+  const veloRewards = '9.1111111';
 
   const assets = useSocketAssets();
   const [asset, setAsset] = useState<AssetBalance>();
@@ -196,11 +198,11 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
             <CloseIcon sx={{ fontSize: 24 }} />
           </IconButton>
         )}
-        <Box px={4} pt={4} pb={4}>
+        <Box px={4} pt={4} pb={3}>
           <DialogTitle
             sx={{
               p: 0,
-              mb: 3,
+              mb: 2,
               cursor: { xs: '', sm: 'move' },
               fontSize: 19,
               fontWeight: 700,
@@ -209,56 +211,46 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
             {t('Supplied')}
           </DialogTitle>
           <DialogContent sx={{ p: 0, overflow: 'hidden' }}>
-            <Box display="flex" flexDirection="column" gap={4}>
+            <Box display="flex" flexDirection="column" gap={2}>
               <Typography fontSize={14}>
-                {t(
-                  "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s.",
-                )}
+                {balanceETH || balanceEXA
+                  ? t(
+                      "As a liquidity provider, you've begun accruing $VELO rewards relative to your stake's size and duration, claimable at any time.",
+                    )
+                  : t('Stake your EXA in Velodrome pools to earn $VELO rewards.')}
               </Typography>
-              <ModalBox sx={{ height: 48 }}>
-                <ModalBoxRow>
-                  <ModalBoxCell height={32}>
-                    <Box position="relative" gap={0.5} alignItems="center">
-                      <Avatar
-                        alt="Velodrome Token"
-                        src={`/img/assets/EXA.svg`}
-                        sx={{
-                          position: 'absolute',
-                          top: 8,
-                          left: 0,
-                          width: 16,
-                          height: 16,
-                          fontSize: 10,
-                          borderColor: 'transparent',
-                        }}
-                      />
-                      <Box maxWidth="86%" overflow="auto" height={32} position="absolute" top={6} left={24}>
-                        <Typography fontSize={14}>{balanceEXA}</Typography>
-                      </Box>
-                    </Box>
-                  </ModalBoxCell>
-                  <ModalBoxCell divisor height={32}>
-                    <Box position="relative" gap={0.5} alignItems="center">
-                      <Avatar
-                        alt="Velodrome Token"
-                        src={`/img/assets/VELO.svg`}
-                        sx={{
-                          position: 'absolute',
-                          top: 8,
-                          left: 0,
-                          width: 16,
-                          height: 16,
-                          fontSize: 10,
-                          borderColor: 'transparent',
-                        }}
-                      />
-                      <Box maxWidth="86%" overflow="auto" height={32} position="absolute" top={6} left={24}>
-                        <Typography fontSize={14}>{balanceVELO}</Typography>
-                      </Box>
-                    </Box>
-                  </ModalBoxCell>
-                </ModalBoxRow>
-              </ModalBox>
+              <PoolPreview exa={String(balanceEXA)} eth={String(balanceETH)} />
+              <Link
+                target="_blank"
+                href="https://velodrome.finance/deposit?token0=0x1e925de1c68ef83bd98ee3e130ef14a50309c01b&token1=eth&stable=false"
+                rel="noreferrer noopener"
+              >
+                <Box
+                  display="flex"
+                  justifyContent="space-between"
+                  alignItems="center"
+                  gap={0.5}
+                  bgcolor="grey.100"
+                  p={0.75}
+                  borderRadius="4px"
+                  px={2}
+                  sx={{ cursor: 'pointer' }}
+                >
+                  <Typography fontSize={13} fontWeight={500}>
+                    {t('Your $VELO rewards')}:
+                  </Typography>
+                  <Box display="flex" gap={0.5} alignItems="center">
+                    <Avatar
+                      alt="Velodrome Token"
+                      src={`/img/assets/VELO.svg`}
+                      sx={{ width: 14, height: 14, fontSize: 10, borderColor: 'transparent' }}
+                    />
+                    <Typography fontSize={14} fontWeight={500}>
+                      {veloRewards}
+                    </Typography>
+                  </Box>
+                </Box>
+              </Link>
             </Box>
           </DialogContent>
         </Box>
@@ -266,7 +258,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
           <DialogTitle
             sx={{
               p: 0,
-              mb: 3,
+              mb: 2,
               cursor: { xs: '', sm: 'move' },
               fontSize: 19,
               fontWeight: 700,
@@ -275,57 +267,9 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
             {t('Supply EXA/ETH')}
           </DialogTitle>
           <DialogContent sx={{ p: 0, overflow: 'hidden' }}>
-            <Box display="flex" flexDirection="column" gap={4}>
-              <Typography fontSize={14}>
-                {t(
-                  "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s.",
-                )}
-              </Typography>
+            <Box display="flex" flexDirection="column" gap={2}>
               <Box display="flex" flexDirection="column" gap={2}>
-                <ModalBox sx={{ height: 48 }}>
-                  <ModalBoxRow>
-                    <ModalBoxCell height={32}>
-                      <Box position="relative" gap={0.5} alignItems="center">
-                        <Avatar
-                          alt="Velodrome Token"
-                          src={`/img/assets/EXA.svg`}
-                          sx={{
-                            position: 'absolute',
-                            top: 8,
-                            left: 0,
-                            width: 16,
-                            height: 16,
-                            fontSize: 10,
-                            borderColor: 'transparent',
-                          }}
-                        />
-                        <Box maxWidth="86%" overflow="auto" height={32} position="absolute" top={6} left={24}>
-                          <Typography fontSize={14}>{balanceEXA}</Typography>
-                        </Box>
-                      </Box>
-                    </ModalBoxCell>
-                    <ModalBoxCell divisor height={32}>
-                      <Box position="relative" gap={0.5} alignItems="center">
-                        <Avatar
-                          alt="Velodrome Token"
-                          src={`/img/assets/VELO.svg`}
-                          sx={{
-                            position: 'absolute',
-                            top: 8,
-                            left: 0,
-                            width: 16,
-                            height: 16,
-                            fontSize: 10,
-                            borderColor: 'transparent',
-                          }}
-                        />
-                        <Box maxWidth="86%" overflow="auto" height={32} position="absolute" top={6} left={24}>
-                          <Typography fontSize={14}>{balanceVELO}</Typography>
-                        </Box>
-                      </Box>
-                    </ModalBoxCell>
-                  </ModalBoxRow>
-                </ModalBox>
+                <PoolPreview exa={String(balanceEXA)} eth={String(balanceETH)} />
                 <ModalBox sx={{ display: 'flex', flexDirection: 'row', p: 2, alignItems: 'center' }}>
                   {assets && asset ? (
                     <>
@@ -375,6 +319,60 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
         </Box>
       </Dialog>
     </>
+  );
+};
+
+type PoolPreviewProps = {
+  exa: string;
+  eth: string;
+};
+
+const PoolPreview: FC<PoolPreviewProps> = ({ exa, eth }) => {
+  return (
+    <ModalBox sx={{ height: 48 }}>
+      <ModalBoxRow>
+        <ModalBoxCell height={32}>
+          <Box position="relative" gap={0.5} alignItems="center">
+            <Avatar
+              alt="Velodrome Token"
+              src={`/img/assets/EXA.svg`}
+              sx={{
+                position: 'absolute',
+                top: 7,
+                left: 0,
+                width: 16,
+                height: 16,
+                fontSize: 10,
+                borderColor: 'transparent',
+              }}
+            />
+            <Box maxWidth="83%" overflow="auto" height={32} position="absolute" top={5} left={24}>
+              <Typography fontSize={14}>{exa}</Typography>
+            </Box>
+          </Box>
+        </ModalBoxCell>
+        <ModalBoxCell divisor height={32}>
+          <Box position="relative" gap={0.5} alignItems="center">
+            <Avatar
+              alt="Velodrome Token"
+              src={`/img/assets/WETH.svg`}
+              sx={{
+                position: 'absolute',
+                top: 7,
+                left: 0,
+                width: 16,
+                height: 16,
+                fontSize: 10,
+                borderColor: 'transparent',
+              }}
+            />
+            <Box maxWidth="83%" overflow="auto" height={32} position="absolute" top={5} left={24}>
+              <Typography fontSize={14}>{eth}</Typography>
+            </Box>
+          </Box>
+        </ModalBoxCell>
+      </ModalBoxRow>
+    </ModalBox>
   );
 };
 
