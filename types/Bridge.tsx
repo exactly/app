@@ -14,13 +14,13 @@ export type Result = {
 
 export type ActiveRoute = {
   activeRouteId: number;
-  userAddress: string;
+  userAddress: Address;
   totalUserTx: number;
   userTxs: UserTx[];
   fromChainId: number;
   toChainId: number;
-  fromAssetAddress: string;
-  toAssetAddress: string;
+  fromAssetAddress: Address;
+  toAssetAddress: Address;
   fromAmount: number;
   toAmount: number;
   refuel: null;
@@ -50,8 +50,8 @@ export type Asset = {
   symbol: string;
   name: string;
   decimals: number;
-  icon: string;
-  logoURI: string;
+  icon?: string;
+  logoURI?: string;
   chainAgnosticId: string | null;
 };
 
@@ -91,8 +91,8 @@ export type UserTx = {
 
 export type ApprovalData = {
   owner: string;
-  allowanceTarget: string;
-  approvalTokenAddress: string;
+  allowanceTarget: Address;
+  approvalTokenAddress: Address;
   minimumApprovalAmount: number;
 };
 
@@ -121,7 +121,7 @@ export type SourceTransactionReceipt = {
   logsBloom: string;
   blockNumber: number;
   confirmations: number;
-  contractAddress: null;
+  contractAddress: Address | null;
   transactionHash: string;
   transactionIndex: number;
   cumulativeGasUsed: CumulativeGasUsed;
@@ -138,7 +138,7 @@ export type Type = 'BigNumber';
 export type Log = {
   data: string;
   topics: string[];
-  address: string;
+  address: Address;
   logIndex: number;
   blockHash: string;
   blockNumber: number;
@@ -231,4 +231,50 @@ export type TokenPrice = {
   tokenPrice: number;
   decimals: number;
   currency: string;
+};
+
+export type RoutesResponse = {
+  success: boolean;
+  result?: {
+    routes: Route[];
+    fromChainId: number;
+    fromAsset: Asset;
+    toChainId: number;
+    toAsset: Asset;
+  };
+};
+
+export type Route = {
+  routeId: string;
+  isOnlySwapRoute: boolean;
+  fromAmount: string;
+  toAmount: string;
+  sender: string;
+  recipient: string;
+  totalUserTx: number;
+  totalGasFeesInUsd: number;
+  userTxs: UserTx[];
+  usedDexName: string;
+  integratorFee: IntegratorFee;
+  outputValueInUsd: number;
+  receivedValueInUsd: number;
+  inputValueInUsd: number;
+};
+
+export type Protocol = {
+  name: string;
+  displayName: string;
+  icon: string;
+};
+
+export type BridgeStatus = {
+  sourceTxStatus: Status;
+  destinationTxStatus: Status;
+  destinationTransactionHash: string;
+  sourceTransactionHash: string;
+};
+
+export type DestinationCallData = {
+  destinationPayload: string;
+  destinationGasLimit: string;
 };

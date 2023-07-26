@@ -36,7 +36,7 @@ import useRewards from 'hooks/useRewards';
 import { WEI_PER_ETHER } from 'utils/const';
 import { LoadingButton } from '@mui/lab';
 import { useWeb3 } from 'hooks/useWeb3';
-import { useNetwork, useSwitchNetwork } from 'wagmi';
+import { erc20ABI, useNetwork, usePublicClient, useSwitchNetwork, useWalletClient } from 'wagmi';
 import { ModalBox, ModalBoxCell, ModalBoxRow } from 'components/common/modal/ModalBox';
 import SocketAssetSelector from 'components/SocketAssetSelector';
 import useSocketAssets from 'hooks/useSocketAssets';
@@ -46,6 +46,7 @@ import ModalInput from 'components/OperationsModal/ModalInput';
 import { set } from 'cypress/types/lodash';
 import Link from 'next/link';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
+import { socketBuildTX, socketQuote } from 'utils/socket';
 
 function PaperComponent(props: PaperProps | undefined) {
   const ref = useRef<HTMLDivElement>(null);
@@ -70,6 +71,8 @@ type StakingModalProps = {
   open: () => void;
   close: () => void;
 };
+
+const NATIVE_TOKEN_ADDRESS = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
 
 const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
   const { t } = useTranslation();
@@ -148,6 +151,68 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
     setInput('');
     setTx(undefined);
   }, [close, rs]);
+
+  const { data: walletClient } = useWalletClient({ chainId: chain?.id });
+  const publicClient = usePublicClient({ chainId: chain?.id });
+
+  const confirm = useCallback(async () => {
+    if (!asset || !walletAddress || !walletClient) return;
+
+    const {
+      routes: [route],
+      destinationCallData,
+    } = await socketQuote({
+      fromChainId: 10,
+      toChainId: 10,
+      fromAmount: Number(qtyIn) * 10 ** asset.decimals,
+      fromTokenAddress: asset.address,
+      toTokenAddress: NATIVE_TOKEN_ADDRESS,
+      userAddress: walletAddress,
+    });
+
+    const {
+      userTxs: [{ approvalData }],
+    } = route;
+
+    if (!approvalData) return;
+
+    try {
+      const allowance = await publicClient.readContract({
+        abi: erc20ABI,
+        address: approvalData.approvalTokenAddress,
+        functionName: 'allowance',
+        args: [walletAddress, approvalData.allowanceTarget],
+      });
+
+      if (allowance < BigInt(approvalData.minimumApprovalAmount)) {
+        const { request } = await publicClient.simulateContract({
+          abi: erc20ABI,
+          address: approvalData.approvalTokenAddress,
+          account: walletAddress,
+          functionName: 'approve',
+          args: [approvalData.allowanceTarget, BigInt(approvalData.minimumApprovalAmount)],
+        });
+
+        await walletClient.writeContract(request);
+      }
+
+      // confirm part
+
+      const { txTarget, txData, value } = await socketBuildTX({ route, destinationCallData });
+
+      const txHash_ = await walletClient.sendTransaction({
+        to: txTarget,
+        data: txData,
+        value: BigInt(value),
+      });
+
+      // eslint-disable-next-line no-console
+      console.log(txHash_);
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(err);
+    }
+  }, [asset, publicClient, qtyIn, walletAddress, walletClient]);
 
   if (!walletAddress) {
     return null;
@@ -316,7 +381,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
                     fullWidth
                     variant="contained"
                     disabled={disableSubmit}
-                    onClick={submit}
+                    onClick={confirm}
                     loading={loading}
                   >
                     {t('Supply EXA/ETH')}
