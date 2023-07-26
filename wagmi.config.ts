@@ -11,10 +11,11 @@ import EXAPool from '@exactly/protocol/deployments/optimism/EXAPool.json' assert
 import EXAGauge from '@exactly/protocol/deployments/optimism/EXAGauge.json' assert { type: 'json' };
 import Previewer from '@exactly/protocol/deployments/goerli/Previewer.json' assert { type: 'json' };
 import DebtManager from '@exactly/protocol/deployments/goerli/DebtManager.json' assert { type: 'json' };
+import ProtoStaker from '@exactly/protocol/deployments/optimism/ProtoStaker.json' assert { type: 'json' };
 import DebtPreviewer from '@exactly/protocol/deployments/goerli/DebtPreviewer.json' assert { type: 'json' };
 import MarketETHRouter from '@exactly/protocol/deployments/goerli/MarketETHRouter.json' assert { type: 'json' };
-import InterestRateModel from '@exactly/protocol/deployments/goerli/InterestRateModelDAI.json' assert { type: 'json' };
 import RewardsController from '@exactly/protocol/deployments/goerli/RewardsController.json' assert { type: 'json' };
+import InterestRateModel from '@exactly/protocol/deployments/goerli/InterestRateModelDAI.json' assert { type: 'json' };
 import SablierV2LockupLinear from '@exactly/protocol/deployments/goerli/SablierV2LockupLinear.json' assert { type: 'json' };
 import SablierV2NFTDescriptor from '@exactly/protocol/deployments/goerli/SablierV2NFTDescriptor.json' assert { type: 'json' };
 
@@ -33,6 +34,7 @@ export default defineConfig({
     { name: 'EXAGauge', abi: EXAGauge.abi as Abi },
     { name: 'Previewer', abi: Previewer.abi as Abi },
     { name: 'DebtManager', abi: DebtManager.abi as Abi },
+    { name: 'ProtoStaker', abi: ProtoStaker.abi as Abi },
     { name: 'DebtPreviewer', abi: DebtPreviewer.abi as Abi },
     { name: 'MarketETHRouter', abi: MarketETHRouter.abi as Abi },
     { name: 'InterestRateModel', abi: InterestRateModel.abi as Abi },

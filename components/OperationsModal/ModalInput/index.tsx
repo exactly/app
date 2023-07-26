@@ -1,5 +1,5 @@
 import React from 'react';
-import { InputBase, InputBaseComponentProps } from '@mui/material';
+import { InputBase, InputBaseComponentProps, InputBaseProps } from '@mui/material';
 import { NumericFormat } from 'react-number-format';
 
 type CustomProps = {
@@ -45,6 +45,7 @@ type Props = {
   maxWidth?: string;
   align?: 'left' | 'center' | 'right';
   disabled?: boolean;
+  sx?: InputBaseProps['sx'];
 } & CustomProps;
 
 function ModalInput({
@@ -56,6 +57,7 @@ function ModalInput({
   maxWidth,
   align = 'right',
   disabled = false,
+  ...props
 }: Props) {
   return (
     <InputBase
@@ -78,6 +80,7 @@ function ModalInput({
         flexGrow: 1,
         fontWeight: 700,
         fontSize: 24,
+        ...props.sx,
       }}
       inputComponent={NumberFormatCustom}
     />

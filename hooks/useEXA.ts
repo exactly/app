@@ -2,7 +2,14 @@ import { useMemo } from 'react';
 import { zeroAddress } from 'viem';
 
 import { useWeb3 } from './useWeb3';
-import { exaABI, useExaDelegates, useExaGetVotes, usePrepareExaDelegate } from 'types/abi';
+import {
+  exaABI,
+  useExaDelegates,
+  useExaGetVotes,
+  usePrepareExaDelegate,
+  useExaBalanceOf,
+  useExaNonces,
+} from 'types/abi';
 import useContract from './useContract';
 import useAccountData from './useAccountData';
 
@@ -22,11 +29,35 @@ export const useEXAGetVotes = (args?: { watch?: boolean }) => {
   });
 };
 
+export const useEXABalance = (args?: { watch?: boolean }) => {
+  const { chain, walletAddress } = useWeb3();
+  const exa = useEXA();
+
+  return useExaBalanceOf({
+    ...args,
+    chainId: chain.id,
+    address: exa?.address,
+    args: [walletAddress ?? zeroAddress],
+  });
+};
+
 export const useEXADelegates = (args?: { watch?: boolean }) => {
   const { chain, walletAddress } = useWeb3();
   const exa = useEXA();
 
   return useExaDelegates({
+    ...args,
+    chainId: chain.id,
+    address: exa?.address,
+    args: [walletAddress ?? zeroAddress],
+  });
+};
+
+export const useEXANonces = (args?: { watch?: boolean }) => {
+  const { chain, walletAddress } = useWeb3();
+  const exa = useEXA();
+
+  return useExaNonces({
     ...args,
     chainId: chain.id,
     address: exa?.address,

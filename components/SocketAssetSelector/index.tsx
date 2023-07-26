@@ -15,7 +15,7 @@ type AssetOptionProps = {
   selectedSize?: number;
 };
 
-function AssetOption({ asset, option = false, optionSize = 17, selectedSize = 20 }: AssetOptionProps) {
+function AssetOption({ asset, option = false, optionSize = 17, selectedSize = 16 }: AssetOptionProps) {
   const size = option ? optionSize : selectedSize;
 
   return (
@@ -49,7 +49,7 @@ function AssetOption({ asset, option = false, optionSize = 17, selectedSize = 20
             </Box>
           </>
         ) : (
-          <Typography fontWeight={600} fontSize={20} color="grey.900">
+          <Typography fontWeight={600} fontSize={size} color="grey.900">
             {asset.symbol}
           </Typography>
         )}

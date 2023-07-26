@@ -112,7 +112,7 @@ type SymbolGroupProps = {
   size?: number;
 };
 
-const SymbolGroup: FC<SymbolGroupProps> = ({ symbols, size = 16 }) => {
+export const SymbolGroup: FC<SymbolGroupProps> = ({ symbols, size = 16 }) => {
   if (!symbols) return null;
 
   return (

@@ -18,7 +18,7 @@ export default () => {
 
     const { result } = (await response.json()) as { result: AssetBalance[] };
 
-    setAssets(result.filter(({ chainId }) => chainId === chain.id));
+    setAssets(result.filter(({ chainId }) => chainId === chain.id).sort((a, b) => b.amount - a.amount));
   }, [chain.id, walletAddress]);
 
   useEffect(() => {

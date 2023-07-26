@@ -11,42 +11,37 @@ import {
   Paper,
   useMediaQuery,
   Slide,
-  Checkbox,
-  Button,
-  Collapse,
-  TextField,
-  FormControlLabel,
-  AvatarGroup,
   Avatar,
-  ButtonBase,
   Skeleton,
 } from '@mui/material';
+import dayjs from 'dayjs';
 import CloseIcon from '@mui/icons-material/Close';
+import { splitSignature } from '@ethersproject/bytes';
 import { TransitionProps } from '@mui/material/transitions';
 import Draggable from 'react-draggable';
 import { useTranslation } from 'react-i18next';
-import Image from 'next/image';
-import { CheckboxIcon, CheckboxCheckedIcon } from 'components/Icons';
-import { Address, formatEther, isAddress } from 'viem';
+import { formatEther, isAddress, Hex } from 'viem';
 import { formatWallet, toPercentage } from 'utils/utils';
-import formatNumber from 'utils/formatNumber';
 import { Transaction } from 'types/Transaction';
 import Loading from 'components/common/modal/Loading';
 import useRewards from 'hooks/useRewards';
 import { WEI_PER_ETHER } from 'utils/const';
 import { LoadingButton } from '@mui/lab';
 import { useWeb3 } from 'hooks/useWeb3';
-import { erc20ABI, useNetwork, usePublicClient, useSwitchNetwork, useWalletClient } from 'wagmi';
+import { erc20ABI, useNetwork, usePublicClient, useSwitchNetwork, useWalletClient, useSignTypedData } from 'wagmi';
 import { ModalBox, ModalBoxCell, ModalBoxRow } from 'components/common/modal/ModalBox';
 import SocketAssetSelector from 'components/SocketAssetSelector';
 import useSocketAssets from 'hooks/useSocketAssets';
-import { optimism } from 'wagmi/dist/chains';
 import { AssetBalance } from 'types/Bridge';
 import ModalInput from 'components/OperationsModal/ModalInput';
-import { set } from 'cypress/types/lodash';
 import Link from 'next/link';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import { socketBuildTX, socketQuote } from 'utils/socket';
+import { useEXAGaugeBalanceOf, useEXAGaugeRewardRate } from 'hooks/useEXAGauge';
+import { useEXA, useEXABalance } from 'hooks/useEXA';
+import { SymbolGroup } from 'components/APRWithBreakdown';
+import formatNumber from 'utils/formatNumber';
+import { useProtoStaker } from 'hooks/useProtoStaker';
 
 function PaperComponent(props: PaperProps | undefined) {
   const ref = useRef<HTMLDivElement>(null);
@@ -100,7 +95,12 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
     [differentAddress, selected, showInput],
   );
 
-  const velodromeAPR = 0.4;
+  const exa = useEXA();
+  const staker = useProtoStaker();
+  const { data: lpBalance } = useEXAGaugeBalanceOf();
+  const { data: velodromeAPR } = useEXAGaugeRewardRate();
+  const { data: exaBalance } = useEXABalance();
+
   const balanceEXA = '9.1111';
   const balanceETH = '8.1111';
   const veloRewards = '9.1111111';
@@ -118,6 +118,48 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
     setAsset(asset_);
     setQtyIn('');
   }, []);
+
+  const { signTypedDataAsync } = useSignTypedData();
+
+  const sign = useCallback(async () => {
+    if (!exa || !staker || !walletAddress) return;
+
+    const value = await exa.read.balanceOf([walletAddress]);
+    const nonce = await exa.read.nonces([walletAddress]);
+    const deadline = BigInt(dayjs().unix()) + 3_600n;
+
+    const { v, r, s } = await signTypedDataAsync({
+      domain: {
+        name: 'exactly',
+        version: '1',
+        chainId: displayNetwork.id,
+        verifyingContract: exa?.address,
+      },
+      types: {
+        Permit: [
+          { name: 'owner', type: 'address' },
+          { name: 'spender', type: 'address' },
+          { name: 'value', type: 'uint256' },
+          { name: 'nonce', type: 'uint256' },
+          { name: 'deadline', type: 'uint256' },
+        ],
+      },
+      message: {
+        owner: walletAddress,
+        spender: staker.address,
+        value,
+        nonce,
+        deadline,
+      },
+      primaryType: 'Permit',
+    }).then(splitSignature);
+
+    return {
+      account: walletAddress,
+      deadline,
+      ...{ v, r: r as Hex, s: s as Hex },
+    } as const;
+  }, [displayNetwork.id, exa, signTypedDataAsync, staker, walletAddress]);
 
   const submit = useCallback(async () => {
     const assets_ = Object.entries(selected)
@@ -220,7 +262,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
 
   return (
     <>
-      <Button variant="outlined" onClick={open}>
+      <LoadingButton variant="outlined" onClick={open} loading={velodromeAPR === undefined}>
         <Box display="flex" gap={0.5} alignItems="center">
           <Avatar
             alt="Velodrome Token"
@@ -228,10 +270,10 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
             sx={{ width: 16, height: 16, fontSize: 10, borderColor: 'transparent' }}
           />
           <Typography fontSize={14} fontWeight={700}>
-            {toPercentage(velodromeAPR)}
+            {toPercentage(Number(velodromeAPR) / 1e18)}
           </Typography>
         </Box>
-      </Button>
+      </LoadingButton>
       <Dialog
         open={isOpen}
         onClose={closeAndReset}
@@ -285,7 +327,26 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
                     )
                   : t('Stake your EXA in Velodrome pools to earn $VELO rewards.')}
               </Typography>
-              <PoolPreview exa={String(balanceEXA)} eth={String(balanceETH)} />
+              <Box
+                display="flex"
+                justifyContent="space-between"
+                alignItems="center"
+                gap={0.5}
+                bgcolor="grey.100"
+                p={0.75}
+                borderRadius="4px"
+                px={2}
+              >
+                <Typography fontSize={13} fontWeight={500}>
+                  {t('Your')} vAMMV2-EXA/WETH
+                </Typography>
+                <Box display="flex" gap={0.5} alignItems="center">
+                  <SymbolGroup size={14} symbols={['EXA', 'WETH']} />
+                  <Typography fontSize={14} fontWeight={500}>
+                    {formatNumber(formatEther(lpBalance ?? 0n))}
+                  </Typography>
+                </Box>
+              </Box>
               <Link
                 target="_blank"
                 href="https://velodrome.finance/deposit?token0=0x1e925de1c68ef83bd98ee3e130ef14a50309c01b&token1=eth&stable=false"
@@ -344,7 +405,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
             <Box display="flex" flexDirection="column" gap={2}>
               <Box display="flex" flexDirection="column" gap={2}>
                 <PoolPreview exa={String(balanceEXA)} eth={String(balanceETH)} />
-                <ModalBox sx={{ display: 'flex', flexDirection: 'row', p: 2, alignItems: 'center' }}>
+                <ModalBox sx={{ display: 'flex', flexDirection: 'row', p: 1, pl: 2, alignItems: 'center' }}>
                   {assets && asset ? (
                     <>
                       <Box width={'25%'}>
@@ -358,11 +419,12 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
                           onValueChange={setQtyIn}
                           align="right"
                           maxWidth="100%"
+                          sx={{ paddingTop: 0, fontSize: 16 }}
                         />
                       </Box>
                     </>
                   ) : (
-                    <Skeleton />
+                    <Skeleton variant="rectangular" height={20} width="100%" />
                   )}
                 </ModalBox>
               </Box>
@@ -409,7 +471,7 @@ const PoolPreview: FC<PoolPreviewProps> = ({ exa, eth }) => {
           <Box position="relative" gap={0.5} alignItems="center">
             <Box display="flex" alignItems="center" gap={0.5} position="absolute" top={5} left={0}>
               <Avatar
-                alt="Velodrome Token"
+                alt="EXA Token"
                 src={`/img/assets/EXA.svg`}
                 sx={{
                   width: 20,
@@ -418,7 +480,7 @@ const PoolPreview: FC<PoolPreviewProps> = ({ exa, eth }) => {
                   borderColor: 'transparent',
                 }}
               />
-              <Typography fontSize={13} fontWeight={500}>
+              <Typography fontSize={14} fontWeight={500}>
                 EXA
               </Typography>
             </Box>
@@ -431,7 +493,7 @@ const PoolPreview: FC<PoolPreviewProps> = ({ exa, eth }) => {
           <Box position="relative" gap={0.5} alignItems="center">
             <Box display="flex" alignItems="center" gap={0.5} position="absolute" top={5} left={0}>
               <Avatar
-                alt="Velodrome Token"
+                alt="WETH Token"
                 src={`/img/assets/WETH.svg`}
                 sx={{
                   width: 20,
@@ -440,7 +502,7 @@ const PoolPreview: FC<PoolPreviewProps> = ({ exa, eth }) => {
                   borderColor: 'transparent',
                 }}
               />
-              <Typography fontSize={13} fontWeight={500}>
+              <Typography fontSize={14} fontWeight={500}>
                 ETH
               </Typography>
             </Box>
