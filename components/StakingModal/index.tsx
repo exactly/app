@@ -45,6 +45,7 @@ import { AssetBalance } from 'types/Bridge';
 import ModalInput from 'components/OperationsModal/ModalInput';
 import { set } from 'cypress/types/lodash';
 import Link from 'next/link';
+import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 
 function PaperComponent(props: PaperProps | undefined) {
   const ref = useRef<HTMLDivElement>(null);
@@ -234,11 +235,19 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
                   p={0.75}
                   borderRadius="4px"
                   px={2}
-                  sx={{ cursor: 'pointer' }}
                 >
-                  <Typography fontSize={13} fontWeight={500}>
-                    {t('Your $VELO rewards')}:
-                  </Typography>
+                  <Box display="flex" gap={0.5} alignItems="center">
+                    <Typography fontSize={13} fontWeight={500}>
+                      {t('Your $VELO rewards')}
+                    </Typography>
+                    <OpenInNewIcon
+                      sx={{
+                        height: '10px',
+                        width: '10px',
+                        color: ({ palette }) => (palette.mode === 'light' ? 'figma.grey.600' : 'grey.900'),
+                      }}
+                    />
+                  </Box>
                   <Box display="flex" gap={0.5} alignItems="center">
                     <Avatar
                       alt="Velodrome Token"
