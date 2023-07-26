@@ -40,7 +40,7 @@ import MaturityDateReminder from 'components/MaturityDateReminder';
 import Faucet from 'components/operations/Faucet';
 import SecondaryChain from 'components/SecondaryChain';
 import RewardsModal from 'components/RewardsModal';
-import Velodrome from 'components/Velodrome';
+import StakingModal from 'components/StakingModal';
 
 const { onlyMobile, onlyDesktopFlex } = globals;
 
@@ -56,6 +56,7 @@ function Navbar() {
   const [openMenu, setOpenMenu] = useState<boolean>(false);
   const [openFaucet, setOpenFaucet] = useState(false);
   const [openRewardsModal, setOpenRewardsModal] = useState(false);
+  const [openStakingModal, setOpenStakingModal] = useState(false);
   const isMobile = useMediaQuery(breakpoints.down('sm'));
 
   const { data: blockNumber } = useBlockNumber({ chainId: chain?.id });
@@ -197,7 +198,11 @@ function Navbar() {
             )}
             <Box display="flex" gap={0.5}>
               {!isMobile && <SecondaryChain />}
-              <Velodrome />
+              <StakingModal
+                isOpen={openStakingModal}
+                open={() => setOpenStakingModal(true)}
+                close={() => setOpenStakingModal(false)}
+              />
               {!isMobile && (
                 <RewardsModal
                   isOpen={openRewardsModal}
