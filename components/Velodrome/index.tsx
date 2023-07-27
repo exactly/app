@@ -1,8 +1,6 @@
-import React, { useMemo } from 'react';
+import React, { FC, useMemo } from 'react';
 import { Avatar, Box, Button, Tooltip, Typography } from '@mui/material';
-import Link from 'next/link';
 import { useTranslation } from 'react-i18next';
-import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import { useAssetPrice } from 'hooks/useSocketAPI';
 import { useEXAGaugeRewardRate } from 'hooks/useEXAGauge';
 import { useEXAPrice } from 'hooks/useEXA';
@@ -14,7 +12,11 @@ import { WEI_PER_ETHER } from 'utils/const';
 import { toPercentage } from 'utils/utils';
 import { useWeb3 } from 'hooks/useWeb3';
 
-const Velodrome = () => {
+type VelodromeProps = {
+  onClick: () => void;
+};
+
+const Velodrome: FC<VelodromeProps> = ({ onClick }) => {
   const { t } = useTranslation();
   const { chain } = useWeb3();
   const velo = useAssetPrice('0x9560e827af36c94d2ac33a39bce1fe78631088db');
@@ -42,31 +44,18 @@ const Velodrome = () => {
 
   return (
     <Tooltip title={t('Stake EXA at Velodrome')} arrow placement="bottom">
-      <Link
-        target="_blank"
-        href="https://velodrome.finance/deposit?token0=0x1e925de1c68ef83bd98ee3e130ef14a50309c01b&token1=eth&stable=false"
-        rel="noreferrer noopener"
-      >
-        <Button variant="outlined">
-          <Box display="flex" gap={0.5} alignItems="center">
-            <Avatar
-              alt="Velodrome Token"
-              src={`/img/assets/VELO.svg`}
-              sx={{ width: 16, height: 16, fontSize: 10, borderColor: 'transparent' }}
-            />
-            <Typography fontSize={14} fontWeight={700} noWrap>
-              {veloAPR ? veloAPR : t('Stake EXA')}
-            </Typography>
-            <OpenInNewIcon
-              sx={{
-                height: 14,
-                width: 14,
-                color: 'grey.900',
-              }}
-            />
-          </Box>
-        </Button>
-      </Link>
+      <Button variant="outlined" onClick={onClick}>
+        <Box display="flex" gap={0.5} alignItems="center">
+          <Avatar
+            alt="Velodrome Token"
+            src={`/img/assets/VELO.svg`}
+            sx={{ width: 16, height: 16, fontSize: 10, borderColor: 'transparent' }}
+          />
+          <Typography fontSize={14} fontWeight={700} noWrap>
+            {veloAPR ? veloAPR : t('Stake EXA')}
+          </Typography>
+        </Box>
+      </Button>
     </Tooltip>
   );
 };

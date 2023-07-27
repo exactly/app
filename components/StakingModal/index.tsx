@@ -42,6 +42,7 @@ import { useEXA, useEXABalance } from 'hooks/useEXA';
 import { SymbolGroup } from 'components/APRWithBreakdown';
 import formatNumber from 'utils/formatNumber';
 import { useProtoStaker } from 'hooks/useProtoStaker';
+import Velodrome from 'components/Velodrome';
 
 function PaperComponent(props: PaperProps | undefined) {
   const ref = useRef<HTMLDivElement>(null);
@@ -262,18 +263,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
 
   return (
     <>
-      <LoadingButton variant="outlined" onClick={open} loading={velodromeAPR === undefined}>
-        <Box display="flex" gap={0.5} alignItems="center">
-          <Avatar
-            alt="Velodrome Token"
-            src={`/img/assets/VELO.svg`}
-            sx={{ width: 16, height: 16, fontSize: 10, borderColor: 'transparent' }}
-          />
-          <Typography fontSize={14} fontWeight={700}>
-            {toPercentage(Number(velodromeAPR) / 1e18)}
-          </Typography>
-        </Box>
-      </LoadingButton>
+      <Velodrome onClick={open} />
       <Dialog
         open={isOpen}
         onClose={closeAndReset}
