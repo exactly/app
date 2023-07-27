@@ -34,11 +34,11 @@ import ModalInput from 'components/OperationsModal/ModalInput';
 import Link from 'next/link';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import { socketBuildTX, socketQuote } from 'utils/socket';
-import { useEXAGaugeBalanceOf, useEXAGaugeEarned } from 'hooks/useEXAGauge';
+import { useEXAGaugeEarned } from 'hooks/useEXAGauge';
 import { useEXA, useEXABalance } from 'hooks/useEXA';
 import { SymbolGroup } from 'components/APRWithBreakdown';
 import formatNumber from 'utils/formatNumber';
-import { useProtoStaker } from 'hooks/useProtoStaker';
+import { useProtoStaker, useProtoStakerPreviewETH } from 'hooks/useProtoStaker';
 import Velodrome from 'components/Velodrome';
 import useVelo from 'hooks/useVelo';
 
@@ -88,12 +88,9 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
   const exa = useEXA();
   const { veloPrice, poolAPR, userBalanceUSD } = useVelo();
   const staker = useProtoStaker();
-  const { data: lpBalance } = useEXAGaugeBalanceOf();
-  const { data: exaBalance } = useEXABalance();
   const { data: veloEarned } = useEXAGaugeEarned();
-
-  const balanceEXA = '9.1111';
-  const balanceETH = '8.1111';
+  const { data: exaBalance } = useEXABalance();
+  const { data: previewETH } = useProtoStakerPreviewETH(exaBalance || 0n);
 
   const veloEarnedUSD = useMemo(() => {
     if (!veloEarned || !veloPrice) return undefined;
@@ -102,7 +99,6 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
 
   const assets = useSocketAssets();
   const [asset, setAsset] = useState<AssetBalance>();
-  const [qtyIn, setQtyIn] = useState('');
 
   useEffect(() => {
     if (!assets) return;
@@ -111,7 +107,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
 
   const handleAssetChange = useCallback((asset_: AssetBalance) => {
     setAsset(asset_);
-    setQtyIn('');
+    setInput('');
   }, []);
 
   const { signTypedDataAsync } = useSignTypedData();
@@ -222,7 +218,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
       // eslint-disable-next-line no-console
       console.error(err);
     }
-  }, [asset, publicClient, qtyIn, walletAddress, walletClient]);
+  }, [asset, publicClient, input, walletAddress, walletClient]);
 
   if (!walletAddress) {
     return null;
@@ -232,7 +228,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
     <>
       <Velodrome onClick={open} />
       <Dialog
-        open={isOpen}
+        open={isOpen || true}
         onClose={closeAndReset}
         PaperComponent={isMobile ? undefined : PaperComponent}
         PaperProps={{
@@ -278,7 +274,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
           <DialogContent sx={{ p: 0, overflow: 'hidden' }}>
             <Box display="flex" flexDirection="column" gap={2}>
               <Typography fontSize={14}>
-                {balanceETH || balanceEXA
+                {userBalanceUSD
                   ? t(
                       "As a liquidity provider, you've begun accruing $VELO rewards relative to your stake's size and duration, claimable at any time.",
                     )
@@ -368,31 +364,29 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
               <Box display="flex" flexDirection="column" gap={2}>
                 <Box display="flex" flexDirection="column" gap={1.5}>
                   <Typography fontSize={12} px={2}>
-                    {t('Preview your operation')}
+                    {t('Stake your EXA balance')}
                   </Typography>
-                  <PoolPreview exa={String(balanceEXA)} eth={String(balanceETH)} />
+                  <PoolPreview exa={formatEther(exaBalance || 0n)} eth={formatEther(previewETH || 0n)} />
                 </Box>
                 <Box display="flex" flexDirection="column" gap={1.5}>
                   <Typography fontSize={12} px={2}>
-                    {t('Add supply')}
+                    {t('Add more liquidity')}
                   </Typography>
-                  <ModalBox sx={{ display: 'flex', flexDirection: 'row', p: 1, pl: 2, alignItems: 'center' }}>
+                  <ModalBox sx={{ display: 'flex', flexDirection: 'row', p: 1, px: 2, alignItems: 'center' }}>
                     {assets && asset ? (
                       <>
                         <Box width={'25%'}>
-                          <SocketAssetSelector asset={asset} options={assets} onChange={handleAssetChange} />
+                          <SocketAssetSelector asset={asset} options={assets} onChange={handleAssetChange} disabled />
                         </Box>
-                        <Box flex={1}>
-                          <ModalInput
-                            decimals={asset.decimals}
-                            symbol={asset.symbol}
-                            value={qtyIn}
-                            onValueChange={setQtyIn}
-                            align="right"
-                            maxWidth="100%"
-                            sx={{ paddingTop: 0, fontSize: 16 }}
-                          />
-                        </Box>
+                        <ModalInput
+                          decimals={asset.decimals}
+                          symbol={asset.symbol}
+                          value={input}
+                          onValueChange={setInput}
+                          align="right"
+                          maxWidth="100%"
+                          sx={{ paddingTop: 0, fontSize: 16 }}
+                        />
                       </>
                     ) : (
                       <Skeleton variant="rectangular" height={20} width="100%" />

@@ -15,7 +15,7 @@ type AssetOptionProps = {
   selectedSize?: number;
 };
 
-function AssetOption({ asset, option = false, optionSize = 17, selectedSize = 16 }: AssetOptionProps) {
+function AssetOption({ asset, option = false, optionSize = 20, selectedSize = 20 }: AssetOptionProps) {
   const size = option ? optionSize : selectedSize;
 
   return (
@@ -49,7 +49,7 @@ function AssetOption({ asset, option = false, optionSize = 17, selectedSize = 16
             </Box>
           </>
         ) : (
-          <Typography fontWeight={600} fontSize={size} color="grey.900">
+          <Typography fontWeight={500} fontSize={16} color="grey.900">
             {asset.symbol}
           </Typography>
         )}
@@ -62,9 +62,10 @@ type Props = {
   options: AssetBalance[];
   onChange: (asset: AssetBalance) => void;
   asset: AssetBalance;
+  disabled?: boolean;
 };
 
-function AssetSelector({ options, onChange, asset }: Props) {
+function SocketAssetSelector({ options, onChange, asset, disabled = false }: Props) {
   const { t } = useTranslation();
 
   return (
@@ -74,9 +75,9 @@ function AssetSelector({ options, onChange, asset }: Props) {
       onChange={onChange}
       renderValue={<AssetOption asset={asset} />}
       renderOption={(o: AssetBalance) => <AssetOption option asset={o} />}
-      data-testid="modal-asset-selector"
+      disabled={disabled}
     />
   );
 }
 
-export default memo(AssetSelector);
+export default memo(SocketAssetSelector);
