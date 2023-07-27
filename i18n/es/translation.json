@@ -372,6 +372,15 @@
   "Withdraw {{ value }} EXA": "Retirar {{ value }} EXA",
   "Exactly DAO Governance": "Governanza de Exactly DAO",
   "Claimed": "Reclamado",
-  "Stake EXA at Velodrome": "Stake EXA en Velodrome",
-  "Stake EXA": "Stake EXA"
+  "Supplied": "Depositado",
+  "As a liquidity provider, you've begun accruing $VELO rewards relative to your stake's size and duration, claimable at any time.": "Como proveedor de liquidez, has comenzado a acumular recompensas $VELO en relación con el tamaño y la duración de tu participación, que se pueden reclamar en cualquier momento.",
+  "Provide EXA liquidity on Velodrome to earn $VELO rewards.": "Proporciona liquidez EXA en Velodrome para ganar recompensas $VELO.",
+  "Emissions APR": "TNA de Emisión",
+  "Your current balance": "Tu balance actual",
+  "Your $VELO rewards": "Tus recompensas $VELO",
+  "Supply EXA/ETH": "Depositar EXA/ETH",
+  "Provide EXA liquidity": "Proporcionar liquidez EXA",
+  "Add more liquidity": "Agregar más liquidez",
+  "Provide EXA liquidity on Velodrome and receive VELO rewards": "Proporciona liquidez EXA en Velodrome y recibe recompensas VELO",
+  "Supply EXA": "Depositar EXA"
 }

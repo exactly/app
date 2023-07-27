@@ -28,7 +28,7 @@ const Velodrome: FC<VelodromeProps> = ({ onClick }) => {
             sx={{ width: 16, height: 16, fontSize: 10, borderColor: 'transparent' }}
           />
           <Typography fontSize={14} fontWeight={700} noWrap>
-            {poolAPR ? poolAPR : t('Stake EXA')}
+            {poolAPR ? `${poolAPR} APR` : t('Supply EXA')}
           </Typography>
         </Box>
       </Button>
