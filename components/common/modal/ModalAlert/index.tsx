@@ -47,6 +47,7 @@ function ModalAlert({ variant = 'error', message }: Props) {
       mb: 1,
     },
   };
+
   const iconSx: SxProps = {
     fontSize: 13,
     color: fg[variant],

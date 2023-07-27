@@ -24,14 +24,16 @@ export const useProtoStakerPreviewETH = (exa: bigint) => {
   });
 };
 
-export const usePrepareProtoStakerStakeBalance = (args?: Parameters<typeof _usePrepareProtoStakerStakeBalance>[0]) => {
+export const usePrepareProtoStakerStakeBalance = (
+  args: Parameters<typeof _usePrepareProtoStakerStakeBalance>[0] & { value: bigint },
+) => {
   const { chain, walletAddress } = useWeb3();
   const protoStaker = useProtoStaker();
 
-  // return _usePrepareProtoStakerStakeBalance({
-  //   account: walletAddress ?? zeroAddress,
-  //   chainId: chain.id,
-  //   address: protoStaker?.address,
-  //   ...args,
-  // });
+  return _usePrepareProtoStakerStakeBalance({
+    account: walletAddress ?? zeroAddress,
+    chainId: chain.id,
+    address: protoStaker?.address,
+    ...args,
+  });
 };

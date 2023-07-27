@@ -22,10 +22,11 @@ import Draggable from 'react-draggable';
 import { useTranslation } from 'react-i18next';
 import { formatEther, Hex, parseEther } from 'viem';
 import { Transaction } from 'types/Transaction';
-import { WEI_PER_ETHER } from 'utils/const';
+import { GAS_LIMIT_MULTIPLIER, WEI_PER_ETHER } from 'utils/const';
 import { LoadingButton } from '@mui/lab';
 import { useWeb3 } from 'hooks/useWeb3';
 import { erc20ABI, useNetwork, usePublicClient, useSwitchNetwork, useWalletClient, useSignTypedData } from 'wagmi';
+import { waitForTransaction } from '@wagmi/core';
 import { ModalBox, ModalBoxCell, ModalBoxRow } from 'components/common/modal/ModalBox';
 import SocketAssetSelector from 'components/SocketAssetSelector';
 import useSocketAssets from 'hooks/useSocketAssets';
@@ -41,6 +42,11 @@ import formatNumber from 'utils/formatNumber';
 import { useProtoStaker, useProtoStakerPreviewETH } from 'hooks/useProtoStaker';
 import Velodrome from 'components/Velodrome';
 import useVelo from 'hooks/useVelo';
+import { useEXAPoolGetReserves } from 'hooks/useEXAPool';
+import ModalAlert from 'components/common/modal/ModalAlert';
+import { ErrorData } from 'types/Error';
+import handleOperationError from 'utils/handleOperationError';
+import Loading from 'components/common/modal/Loading';
 
 function PaperComponent(props: PaperProps | undefined) {
   const ref = useRef<HTMLDivElement>(null);
@@ -68,16 +74,20 @@ type StakingModalProps = {
 
 const NATIVE_TOKEN_ADDRESS = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
 
+const slippage = (value: bigint) => (value * 1001n) / 1000n;
+
 const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
   const { t } = useTranslation();
   const { breakpoints } = useTheme();
   const isMobile = useMediaQuery(breakpoints.down('sm'));
 
-  const { walletAddress, chain: displayNetwork } = useWeb3();
+  const { walletAddress, chain: displayNetwork, opts } = useWeb3();
   const { chain } = useNetwork();
   const { switchNetwork, isLoading: switchIsLoading } = useSwitchNetwork();
 
   const [tx, setTx] = useState<Transaction | undefined>(undefined);
+  const [errorData, setErrorData] = useState<ErrorData | undefined>(undefined);
+
   const [input, setInput] = useState<string>('');
 
   const [loading, setLoading] = useState<boolean>(false);
@@ -86,11 +96,13 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
   const disableSubmit = useMemo(() => false, []);
 
   const exa = useEXA();
+  const protoStaker = useProtoStaker();
   const { veloPrice, poolAPR, userBalanceUSD } = useVelo();
   const staker = useProtoStaker();
   const { data: veloEarned } = useEXAGaugeEarned();
   const { data: exaBalance } = useEXABalance();
   const { data: previewETH } = useProtoStakerPreviewETH(exaBalance || 0n);
+  const { data: reserves } = useEXAPoolGetReserves();
 
   const veloEarnedUSD = useMemo(() => {
     if (!veloEarned || !veloPrice) return undefined;
@@ -146,7 +158,8 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
     }).then(splitSignature);
 
     return {
-      account: walletAddress,
+      owner: walletAddress,
+      value,
       deadline,
       ...{ v, r: r as Hex, s: s as Hex },
     } as const;
@@ -156,10 +169,45 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
     close();
     setInput('');
     setTx(undefined);
+    setErrorData(undefined);
   }, [close]);
 
   const { data: walletClient } = useWalletClient({ chainId: chain?.id });
   const publicClient = usePublicClient({ chainId: chain?.id });
+
+  const submit = useCallback(async () => {
+    if (!protoStaker || !previewETH || !reserves || !opts) return;
+
+    setLoading(true);
+
+    try {
+      const permit = await sign();
+      if (!permit) return;
+
+      const supply = parseEther(input);
+      const minEXA = ((supply / 2n) * reserves[0]) / reserves[1];
+
+      const args = [permit, minEXA, 0n] as const;
+      const gas = await protoStaker.estimateGas.stakeBalance(args, {
+        value: slippage(previewETH),
+        ...opts,
+      });
+      const hash = await protoStaker.write.stakeBalance(args, {
+        value: slippage(previewETH),
+        gasLimit: (gas * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
+        ...opts,
+      });
+
+      setTx({ hash, status: 'loading' });
+      const { status, transactionHash } = await waitForTransaction({ hash });
+      setTx({ hash: transactionHash, status: status === 'success' ? 'success' : 'error' });
+    } catch (e: unknown) {
+      console.log(e);
+      setErrorData({ status: true, message: handleOperationError(e) });
+    } finally {
+      setLoading(false);
+    }
+  }, [protoStaker, previewETH, reserves, opts, sign, input]);
 
   const confirm = useCallback(async () => {
     if (!asset || !walletAddress || !walletClient) return;
@@ -170,7 +218,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
     } = await socketQuote({
       fromChainId: 10,
       toChainId: 10,
-      fromAmount: Number(qtyIn) * 10 ** asset.decimals,
+      fromAmount: Number(input) * 10 ** asset.decimals,
       fromTokenAddress: asset.address,
       toTokenAddress: NATIVE_TOKEN_ADDRESS,
       userAddress: walletAddress,
@@ -222,6 +270,10 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
 
   if (!walletAddress) {
     return null;
+  }
+
+  if (tx) {
+    return <Loading tx={tx} />;
   }
 
   return (
@@ -394,7 +446,8 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
                   </ModalBox>
                 </Box>
               </Box>
-              <Box display="flex" flexDirection="column" gap={2} alignItems="center" mt={2}>
+              {errorData?.status && <ModalAlert message={errorData.message} variant={errorData.variant} />}
+              <Box>
                 {chain && chain.id !== displayNetwork.id ? (
                   <LoadingButton
                     fullWidth
@@ -409,7 +462,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
                     fullWidth
                     variant="contained"
                     disabled={disableSubmit}
-                    onClick={confirm}
+                    onClick={submit}
                     loading={loading}
                   >
                     {t('Supply EXA/ETH')}
