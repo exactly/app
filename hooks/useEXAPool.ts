@@ -1,6 +1,12 @@
 import { useWeb3 } from './useWeb3';
 
-import { exaPoolABI, useExaPoolGetReserves } from 'types/abi';
+import {
+  exaPoolABI,
+  useExaPoolGetReserves,
+  useExaPoolReserve0,
+  useExaPoolReserve1,
+  useExaPoolTotalSupply,
+} from 'types/abi';
 import useContract from './useContract';
 
 export const useEXAPool = () => {
@@ -12,6 +18,17 @@ export const useEXAPoolGetReserves = (args?: { watch?: boolean }) => {
   const pool = useEXAPool();
 
   return useExaPoolGetReserves({
+    ...args,
+    chainId: chain.id,
+    address: pool?.address,
+  });
+};
+
+export const useEXAPoolTotalSupply = (args?: { watch?: boolean }) => {
+  const { chain } = useWeb3();
+  const pool = useEXAPool();
+
+  return useExaPoolTotalSupply({
     ...args,
     chainId: chain.id,
     address: pool?.address,

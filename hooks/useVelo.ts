@@ -2,8 +2,8 @@ import { useMemo } from 'react';
 import { useAssetPrice } from './useSocketAPI';
 import { useEXAPrice } from './useEXA';
 import useAccountData from './useAccountData';
-import { useEXAGaugeRewardRate } from './useEXAGauge';
-import { useEXAPoolGetReserves } from './useEXAPool';
+import { useEXAGaugeBalanceOf, useEXAGaugeRewardRate } from './useEXAGauge';
+import { useEXAPoolGetReserves, useEXAPoolTotalSupply } from './useEXAPool';
 import { parseEther } from 'viem';
 import { toPercentage } from 'utils/utils';
 import { WEI_PER_ETHER } from 'utils/const';
@@ -11,6 +11,7 @@ import { WEI_PER_ETHER } from 'utils/const';
 type Velo = {
   poolAPR?: string;
   veloPrice?: number;
+  userBalanceUSD?: bigint;
 };
 
 export default (): Velo => {
@@ -20,6 +21,8 @@ export default (): Velo => {
 
   const { data: rewardRate } = useEXAGaugeRewardRate();
   const { data: reserves } = useEXAPoolGetReserves();
+  const { data: totalSupply } = useEXAPoolTotalSupply();
+  const { data: balance } = useEXAGaugeBalanceOf();
 
   const veloAPR = useMemo(() => {
     if (!velo || !exa || !weth || !rewardRate || !reserves) return;
@@ -33,8 +36,18 @@ export default (): Velo => {
     );
   }, [velo, exa, weth, rewardRate, reserves]);
 
+  const userBalanceUSD = useMemo(() => {
+    if (!reserves || !balance || !totalSupply || !exa || !weth) return undefined;
+
+    const balanceEXA = (reserves[0] * balance) / totalSupply;
+    const balanceWETH = (reserves[1] * balance) / totalSupply;
+
+    return (balanceEXA * exa + balanceWETH * weth.usdPrice) / WEI_PER_ETHER;
+  }, [balance, exa, reserves, totalSupply, weth]);
+
   return {
     poolAPR: veloAPR,
     veloPrice: velo?.tokenPrice,
+    userBalanceUSD,
   };
 };
