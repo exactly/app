@@ -12,6 +12,7 @@ type Variant = 'info' | 'warning' | 'error' | 'success';
 type Props = {
   variant?: Variant;
   message: string;
+  mb?: number;
 };
 
 const bg: Record<Variant, string> = {
@@ -35,7 +36,7 @@ const icon: Record<Variant, typeof InfoIcon> = {
   success: SuccessIcon,
 };
 
-function ModalAlert({ variant = 'error', message }: Props) {
+function ModalAlert({ variant = 'error', message, mb = 1 }: Props) {
   const { view } = useMarketContext();
   const { pathname: currentPathname } = useRouter();
 
@@ -44,7 +45,7 @@ function ModalAlert({ variant = 'error', message }: Props) {
     borderRadius: 1,
 
     '&:not(:last-child)': {
-      mb: 1,
+      mb,
     },
   };
 

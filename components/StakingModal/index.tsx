@@ -100,7 +100,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
   const { veloPrice, poolAPR, userBalanceUSD } = useVelo();
   const staker = useProtoStaker();
   const { data: veloEarned } = useEXAGaugeEarned();
-  const { data: exaBalance } = useEXABalance();
+  const { data: exaBalance } = useEXABalance({ watch: true });
   const { data: previewETH } = useProtoStakerPreviewETH(exaBalance || 0n);
   const { data: reserves } = useEXAPoolGetReserves();
 
@@ -187,13 +187,15 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
       const supply = parseEther(input);
       const minEXA = ((supply / 2n) * reserves[0]) / reserves[1];
 
+      const value = slippage(previewETH + supply);
+
       const args = [permit, minEXA, 0n] as const;
       const gas = await protoStaker.estimateGas.stakeBalance(args, {
-        value: slippage(previewETH),
+        value,
         ...opts,
       });
       const hash = await protoStaker.write.stakeBalance(args, {
-        value: slippage(previewETH),
+        value,
         gasLimit: (gas * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
         ...opts,
       });
@@ -280,7 +282,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
     <>
       <Velodrome onClick={open} />
       <Dialog
-        open={isOpen || true}
+        open={isOpen}
         onClose={closeAndReset}
         PaperComponent={isMobile ? undefined : PaperComponent}
         PaperProps={{
@@ -330,12 +332,12 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
                   ? t(
                       "As a liquidity provider, you've begun accruing $VELO rewards relative to your stake's size and duration, claimable at any time.",
                     )
-                  : t('Stake your EXA in Velodrome pools to earn $VELO rewards.')}
+                  : t('Provide EXA liquidity on Velodrome to earn $VELO rewards.')}
               </Typography>
               <Box bgcolor="grey.100" borderRadius="8px">
                 <Box display="flex" justifyContent="space-between" alignItems="center" gap={0.5} p={0.75} px={2}>
                   <Typography fontSize={13} fontWeight={500}>
-                    {t('Stake APR')}
+                    {t('Emissions APR')}
                   </Typography>
                   <Box display="flex" gap={0.5} alignItems="center">
                     <Avatar
@@ -355,7 +357,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
 
                 <Box display="flex" justifyContent="space-between" alignItems="center" gap={0.5} p={0.75} px={2}>
                   <Typography fontSize={13} fontWeight={500}>
-                    {t('Your staked balance')}
+                    {t('Your current balance')}
                   </Typography>
                   <Box display="flex" gap={0.5} alignItems="center">
                     <SymbolGroup size={14} symbols={['EXA', 'WETH']} />
@@ -416,7 +418,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
               <Box display="flex" flexDirection="column" gap={2}>
                 <Box display="flex" flexDirection="column" gap={1.5}>
                   <Typography fontSize={12} px={2}>
-                    {t('Stake your EXA balance')}
+                    {t('Provide EXA liquidity')}
                   </Typography>
                   <PoolPreview exa={formatEther(exaBalance || 0n)} eth={formatEther(previewETH || 0n)} />
                 </Box>
@@ -446,7 +448,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
                   </ModalBox>
                 </Box>
               </Box>
-              {errorData?.status && <ModalAlert message={errorData.message} variant={errorData.variant} />}
+              {errorData?.status && <ModalAlert message={errorData.message} variant={errorData.variant} mb={0} />}
               <Box>
                 {chain && chain.id !== displayNetwork.id ? (
                   <LoadingButton

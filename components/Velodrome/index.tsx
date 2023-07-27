@@ -19,7 +19,7 @@ const Velodrome: FC<VelodromeProps> = ({ onClick }) => {
   }
 
   return (
-    <Tooltip title={t('Stake EXA at Velodrome')} arrow placement="bottom">
+    <Tooltip title={t('Provide EXA liquidity on Velodrome and receive VELO rewards')} arrow placement="bottom">
       <Button variant="outlined" onClick={onClick}>
         <Box display="flex" gap={0.5} alignItems="center">
           <Avatar
