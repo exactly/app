@@ -22,5 +22,6 @@ export default (override?: number) => {
     chainId: override ?? chain.id,
     address,
     args: [walletAddress ?? zeroAddress],
+    staleTime: 5_000,
   });
 };

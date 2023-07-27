@@ -3,10 +3,12 @@ import { react } from '@wagmi/cli/plugins';
 
 import EXA from '@exactly/protocol/deployments/goerli/EXA.json' assert { type: 'json' };
 import ERC20 from '@exactly/protocol/deployments/goerli/DAI.json' assert { type: 'json' };
-import Market from '@exactly/protocol/deployments/goerli/MarketDAI.json' assert { type: 'json' };
 import Airdrop from '@exactly/protocol/deployments/goerli/Airdrop.json' assert { type: 'json' };
 import Auditor from '@exactly/protocol/deployments/goerli/Auditor.json' assert { type: 'json' };
 import Permit2 from '@exactly/protocol/deployments/goerli/Permit2.json' assert { type: 'json' };
+import Market from '@exactly/protocol/deployments/goerli/MarketDAI.json' assert { type: 'json' };
+import EXAPool from '@exactly/protocol/deployments/optimism/EXAPool.json' assert { type: 'json' };
+import EXAGauge from '@exactly/protocol/deployments/optimism/EXAGauge.json' assert { type: 'json' };
 import Previewer from '@exactly/protocol/deployments/goerli/Previewer.json' assert { type: 'json' };
 import DebtManager from '@exactly/protocol/deployments/goerli/DebtManager.json' assert { type: 'json' };
 import DebtPreviewer from '@exactly/protocol/deployments/goerli/DebtPreviewer.json' assert { type: 'json' };
@@ -27,6 +29,8 @@ export default defineConfig({
     { name: 'Airdrop', abi: Airdrop.abi as Abi },
     { name: 'Auditor', abi: Auditor.abi as Abi },
     { name: 'Permit2', abi: Permit2.abi as Abi },
+    { name: 'EXAPool', abi: EXAPool.abi as Abi },
+    { name: 'EXAGauge', abi: EXAGauge.abi as Abi },
     { name: 'Previewer', abi: Previewer.abi as Abi },
     { name: 'DebtManager', abi: DebtManager.abi as Abi },
     { name: 'DebtPreviewer', abi: DebtPreviewer.abi as Abi },

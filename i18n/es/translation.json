@@ -371,5 +371,7 @@
   "Revoke delegation": "Revocar delegación",
   "Withdraw {{ value }} EXA": "Retirar {{ value }} EXA",
   "Exactly DAO Governance": "Governanza de Exactly DAO",
-  "Claimed": "Reclamado"
+  "Claimed": "Reclamado",
+  "Stake EXA at Velodrome": "Stake EXA en Velodrome",
+  "Stake EXA": "Stake EXA"
 }

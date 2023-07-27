@@ -1,8 +1,10 @@
+import { useMemo } from 'react';
 import { zeroAddress } from 'viem';
 
 import { useWeb3 } from './useWeb3';
 import { exaABI, useExaDelegates, useExaGetVotes, usePrepareExaDelegate } from 'types/abi';
 import useContract from './useContract';
+import useAccountData from './useAccountData';
 
 export const useEXA = () => {
   return useContract('EXA', exaABI);
@@ -42,4 +44,17 @@ export const useEXAPrepareDelegate = (args?: Parameters<typeof usePrepareExaDele
     chainId: chain.id,
     address: exa?.address,
   });
+};
+
+export const useEXAPrice = () => {
+  const { accountData } = useAccountData();
+
+  return useMemo(() => {
+    if (!accountData) return;
+
+    return accountData.flatMap((marketAccount) => {
+      const x = marketAccount.rewardRates.find((reward) => reward.assetSymbol === 'EXA');
+      return x ? [x.usdPrice] : [];
+    })[0];
+  }, [accountData]);
 };

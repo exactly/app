@@ -1,5 +1,6 @@
 import { SvgIconProps } from '@mui/material';
 import { ComponentType } from 'react';
+import { Address } from 'viem';
 
 export type ActiveRoutesResponse = {
   success: boolean;
@@ -220,4 +221,12 @@ export type Chain = {
   receivingEnabled: boolean;
   rpcs: string[];
   explorers: string[];
+};
+
+export type TokenPrice = {
+  chainId: number;
+  tokenAddress: Address;
+  tokenPrice: number;
+  decimals: number;
+  currency: string;
 };
