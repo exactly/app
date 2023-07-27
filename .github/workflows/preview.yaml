@@ -29,6 +29,7 @@ jobs:
     environment: Test
     needs: check
     env:
+      NEXT_PUBLIC_SOCKET_API_KEY: ${{ secrets.NEXT_PUBLIC_SOCKET_API_KEY }}
       CYPRESS_TENDERLY_ACCESS_KEY: ${{ secrets.TENDERLY_ACCESS_KEY }}
       CYPRESS_TENDERLY_PROJECT: exactly
       CYPRESS_TENDERLY_USER: exactly
