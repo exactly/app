@@ -542,7 +542,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
   );
 
   const [loopAPR, marketAPR, rewardsAPR, nativeAPR] = useMemo(() => {
-    if (!input.collateralSymbol || !input.borrowSymbol || !loopRates || isOverLeveraged) {
+    if (!input.collateralSymbol || !input.borrowSymbol || !loopRates) {
       return [undefined, undefined, undefined, undefined];
     }
 
@@ -556,7 +556,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     const _loopAPR = _marketAPR + _rewardsAPR + _nativeAPR;
 
     return [_loopAPR, _marketAPR, _rewardsAPR, _nativeAPR];
-  }, [input.borrowSymbol, input.collateralSymbol, isOverLeveraged, loopRates]);
+  }, [input.borrowSymbol, input.collateralSymbol, loopRates]);
 
   const marketRewards = useMemo(() => {
     if (!input.collateralSymbol || !input.borrowSymbol) return [];
