@@ -327,31 +327,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
                     )
                   : t('Stake your EXA in Velodrome pools to earn $VELO rewards.')}
               </Typography>
-              <Box
-                display="flex"
-                justifyContent="space-between"
-                alignItems="center"
-                gap={0.5}
-                bgcolor="grey.100"
-                p={0.75}
-                borderRadius="4px"
-                px={2}
-              >
-                <Typography fontSize={13} fontWeight={500}>
-                  {t('Your')} vAMMV2-EXA/WETH
-                </Typography>
-                <Box display="flex" gap={0.5} alignItems="center">
-                  <SymbolGroup size={14} symbols={['EXA', 'WETH']} />
-                  <Typography fontSize={14} fontWeight={500}>
-                    {formatNumber(formatEther(lpBalance ?? 0n))}
-                  </Typography>
-                </Box>
-              </Box>
-              <Link
-                target="_blank"
-                href="https://velodrome.finance/deposit?token0=0x1e925de1c68ef83bd98ee3e130ef14a50309c01b&token1=eth&stable=false"
-                rel="noreferrer noopener"
-              >
+              <Box>
                 <Box
                   display="flex"
                   justifyContent="space-between"
@@ -362,30 +338,56 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
                   borderRadius="4px"
                   px={2}
                 >
+                  <Typography fontSize={13} fontWeight={500}>
+                    {t('Your')} vAMMV2-EXA/WETH
+                  </Typography>
                   <Box display="flex" gap={0.5} alignItems="center">
-                    <Typography fontSize={13} fontWeight={500}>
-                      {t('Your $VELO rewards')}
-                    </Typography>
-                    <OpenInNewIcon
-                      sx={{
-                        height: '10px',
-                        width: '10px',
-                        color: ({ palette }) => (palette.mode === 'light' ? 'figma.grey.600' : 'grey.900'),
-                      }}
-                    />
-                  </Box>
-                  <Box display="flex" gap={0.5} alignItems="center">
-                    <Avatar
-                      alt="Velodrome Token"
-                      src={`/img/assets/VELO.svg`}
-                      sx={{ width: 14, height: 14, fontSize: 10, borderColor: 'transparent' }}
-                    />
+                    <SymbolGroup size={14} symbols={['EXA', 'WETH']} />
                     <Typography fontSize={14} fontWeight={500}>
-                      {veloRewards}
+                      {formatNumber(formatEther(lpBalance ?? 0n))}
                     </Typography>
                   </Box>
                 </Box>
-              </Link>
+                <Link
+                  target="_blank"
+                  href="https://velodrome.finance/deposit?token0=0x1e925de1c68ef83bd98ee3e130ef14a50309c01b&token1=eth&stable=false"
+                  rel="noreferrer noopener"
+                >
+                  <Box
+                    display="flex"
+                    justifyContent="space-between"
+                    alignItems="center"
+                    gap={0.5}
+                    bgcolor="grey.100"
+                    p={0.75}
+                    borderRadius="4px"
+                    px={2}
+                  >
+                    <Box display="flex" gap={0.5} alignItems="center">
+                      <Typography fontSize={13} fontWeight={500}>
+                        {t('Your $VELO rewards')}
+                      </Typography>
+                      <OpenInNewIcon
+                        sx={{
+                          height: '10px',
+                          width: '10px',
+                          color: ({ palette }) => (palette.mode === 'light' ? 'figma.grey.600' : 'grey.900'),
+                        }}
+                      />
+                    </Box>
+                    <Box display="flex" gap={0.5} alignItems="center">
+                      <Avatar
+                        alt="Velodrome Token"
+                        src={`/img/assets/VELO.svg`}
+                        sx={{ width: 14, height: 14, fontSize: 10, borderColor: 'transparent' }}
+                      />
+                      <Typography fontSize={14} fontWeight={500}>
+                        {veloRewards}
+                      </Typography>
+                    </Box>
+                  </Box>
+                </Link>
+              </Box>
             </Box>
           </DialogContent>
         </Box>
@@ -469,7 +471,7 @@ const PoolPreview: FC<PoolPreviewProps> = ({ exa, eth }) => {
       <ModalBoxRow>
         <ModalBoxCell height={32}>
           <Box position="relative" gap={0.5} alignItems="center">
-            <Box display="flex" alignItems="center" gap={0.5} position="absolute" top={5} left={0}>
+            <Box display="flex" alignItems="center" gap={0.5} position="absolute" top={3} left={0}>
               <Avatar
                 alt="EXA Token"
                 src={`/img/assets/EXA.svg`}
@@ -480,18 +482,18 @@ const PoolPreview: FC<PoolPreviewProps> = ({ exa, eth }) => {
                   borderColor: 'transparent',
                 }}
               />
-              <Typography fontSize={14} fontWeight={500}>
+              <Typography fontSize={16} fontWeight={500}>
                 EXA
               </Typography>
             </Box>
-            <Box maxWidth="58%" overflow="auto" height={32} position="absolute" top={5} left={62}>
-              <Typography fontSize={14}>{exa}</Typography>
+            <Box maxWidth="58%" overflow="auto" height={32} position="absolute" top={3} left={62}>
+              <Typography fontSize={16}>{exa}</Typography>
             </Box>
           </Box>
         </ModalBoxCell>
         <ModalBoxCell divisor height={32}>
           <Box position="relative" gap={0.5} alignItems="center">
-            <Box display="flex" alignItems="center" gap={0.5} position="absolute" top={5} left={0}>
+            <Box display="flex" alignItems="center" gap={0.5} position="absolute" top={3} left={0}>
               <Avatar
                 alt="WETH Token"
                 src={`/img/assets/WETH.svg`}
@@ -502,12 +504,12 @@ const PoolPreview: FC<PoolPreviewProps> = ({ exa, eth }) => {
                   borderColor: 'transparent',
                 }}
               />
-              <Typography fontSize={14} fontWeight={500}>
+              <Typography fontSize={16} fontWeight={500}>
                 ETH
               </Typography>
             </Box>
-            <Box maxWidth="58%" overflow="auto" height={32} position="absolute" top={5} left={62}>
-              <Typography fontSize={14}>{eth}</Typography>
+            <Box maxWidth="58%" overflow="auto" height={32} position="absolute" top={3} left={62}>
+              <Typography fontSize={16}>{eth}</Typography>
             </Box>
           </Box>
         </ModalBoxCell>
