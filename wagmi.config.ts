@@ -3,6 +3,7 @@ import { react } from '@wagmi/cli/plugins';
 
 import EXA from '@exactly/protocol/deployments/goerli/EXA.json' assert { type: 'json' };
 import ERC20 from '@exactly/protocol/deployments/goerli/DAI.json' assert { type: 'json' };
+import VELO from '@exactly/protocol/deployments/optimism/VELO.json' assert { type: 'json' };
 import Airdrop from '@exactly/protocol/deployments/goerli/Airdrop.json' assert { type: 'json' };
 import Auditor from '@exactly/protocol/deployments/goerli/Auditor.json' assert { type: 'json' };
 import Permit2 from '@exactly/protocol/deployments/goerli/Permit2.json' assert { type: 'json' };
@@ -25,6 +26,7 @@ export default defineConfig({
   out: 'types/abi.ts',
   contracts: [
     { name: 'EXA', abi: EXA.abi as Abi },
+    { name: 'VELO', abi: VELO.abi as Abi },
     { name: 'ERC20', abi: ERC20.abi as Abi },
     { name: 'Market', abi: Market.abi as Abi },
     { name: 'Airdrop', abi: Airdrop.abi as Abi },

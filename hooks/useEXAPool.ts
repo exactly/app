@@ -1,12 +1,6 @@
 import { useWeb3 } from './useWeb3';
 
-import {
-  exaPoolABI,
-  useExaPoolGetReserves,
-  useExaPoolReserve0,
-  useExaPoolReserve1,
-  useExaPoolTotalSupply,
-} from 'types/abi';
+import { exaPoolABI, useExaPoolGetReserves, useExaPoolTotalSupply } from 'types/abi';
 import useContract from './useContract';
 
 export const useEXAPool = () => {
