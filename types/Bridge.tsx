@@ -51,7 +51,7 @@ export type Asset = {
   name: string;
   decimals: number;
   icon?: string;
-  logoURI?: string;
+  logoURI: string;
   chainAgnosticId: string | null;
 };
 

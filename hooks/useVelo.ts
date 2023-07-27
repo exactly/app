@@ -4,7 +4,7 @@ import { useEXAPrice } from './useEXA';
 import useAccountData from './useAccountData';
 import { useEXAGaugeBalanceOf, useEXAGaugeRewardRate } from './useEXAGauge';
 import { useEXAPoolGetReserves, useEXAPoolTotalSupply } from './useEXAPool';
-import { parseEther, zeroAddress } from 'viem';
+import { parseEther } from 'viem';
 import { toPercentage } from 'utils/utils';
 import { WEI_PER_ETHER } from 'utils/const';
 
@@ -23,14 +23,14 @@ export const useVELO = () => {
 
 export default (): VELOAccountStatus => {
   const velo = useVELO();
-  const asset = useAssetPrice(velo?.address ?? zeroAddress);
+  const asset = useAssetPrice(velo?.address);
   const exa = useEXAPrice();
   const { marketAccount: weth } = useAccountData('WETH');
 
   const { data: rewardRate } = useEXAGaugeRewardRate();
   const { data: reserves } = useEXAPoolGetReserves();
   const { data: totalSupply } = useEXAPoolTotalSupply();
-  const { data: balance } = useEXAGaugeBalanceOf();
+  const { data: balance } = useEXAGaugeBalanceOf({ watch: true });
 
   const veloAPR = useMemo(() => {
     if (!asset || !exa || !weth || !rewardRate || !reserves) return;

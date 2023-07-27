@@ -20,6 +20,7 @@ export const useProtoStakerPreviewETH = (exa: bigint) => {
     account: walletAddress ?? zeroAddress,
     chainId: chain.id,
     address: protoStaker?.address,
+    watch: true,
     args: [exa],
   });
 };

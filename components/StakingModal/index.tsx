@@ -21,11 +21,10 @@ import { TransitionProps } from '@mui/material/transitions';
 import Draggable from 'react-draggable';
 import { useTranslation } from 'react-i18next';
 import { formatEther, Hex, parseEther } from 'viem';
-import { Transaction } from 'types/Transaction';
 import { GAS_LIMIT_MULTIPLIER, WEI_PER_ETHER } from 'utils/const';
 import { LoadingButton } from '@mui/lab';
 import { useWeb3 } from 'hooks/useWeb3';
-import { erc20ABI, useNetwork, usePublicClient, useSwitchNetwork, useWalletClient, useSignTypedData } from 'wagmi';
+import { useNetwork, useSwitchNetwork, useSignTypedData } from 'wagmi';
 import { waitForTransaction } from '@wagmi/core';
 import { ModalBox, ModalBoxCell, ModalBoxRow } from 'components/common/modal/ModalBox';
 import SocketAssetSelector from 'components/SocketAssetSelector';
@@ -34,7 +33,6 @@ import { AssetBalance } from 'types/Bridge';
 import ModalInput from 'components/OperationsModal/ModalInput';
 import Link from 'next/link';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
-import { socketBuildTX, socketQuote } from 'utils/socket';
 import { useEXAGaugeEarned } from 'hooks/useEXAGauge';
 import { useEXA, useEXABalance } from 'hooks/useEXA';
 import { SymbolGroup } from 'components/APRWithBreakdown';
@@ -46,7 +44,8 @@ import { useEXAPoolGetReserves } from 'hooks/useEXAPool';
 import ModalAlert from 'components/common/modal/ModalAlert';
 import { ErrorData } from 'types/Error';
 import handleOperationError from 'utils/handleOperationError';
-import Loading from 'components/common/modal/Loading';
+
+const MIN_SUPPLY = parseEther('0.002');
 
 function PaperComponent(props: PaperProps | undefined) {
   const ref = useRef<HTMLDivElement>(null);
@@ -72,10 +71,6 @@ type StakingModalProps = {
   close: () => void;
 };
 
-const NATIVE_TOKEN_ADDRESS = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
-
-const slippage = (value: bigint) => (value * 1001n) / 1000n;
-
 const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
   const { t } = useTranslation();
   const { breakpoints } = useTheme();
@@ -85,15 +80,11 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
   const { chain } = useNetwork();
   const { switchNetwork, isLoading: switchIsLoading } = useSwitchNetwork();
 
-  const [tx, setTx] = useState<Transaction | undefined>(undefined);
   const [errorData, setErrorData] = useState<ErrorData | undefined>(undefined);
 
   const [input, setInput] = useState<string>('');
 
   const [loading, setLoading] = useState<boolean>(false);
-
-  const loadingTx = useMemo(() => tx && (tx.status === 'loading' || tx.status === 'processing'), [tx]);
-  const disableSubmit = useMemo(() => false, []);
 
   const exa = useEXA();
   const protoStaker = useProtoStaker();
@@ -136,7 +127,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
         name: 'exactly',
         version: '1',
         chainId: displayNetwork.id,
-        verifyingContract: exa?.address,
+        verifyingContract: exa.address,
       },
       types: {
         Permit: [
@@ -150,7 +141,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
       message: {
         owner: walletAddress,
         spender: staker.address,
-        value,
+        value: value,
         nonce,
         deadline,
       },
@@ -168,15 +159,24 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
   const closeAndReset = useCallback(() => {
     close();
     setInput('');
-    setTx(undefined);
     setErrorData(undefined);
   }, [close]);
 
-  const { data: walletClient } = useWalletClient({ chainId: chain?.id });
-  const publicClient = usePublicClient({ chainId: chain?.id });
-
   const submit = useCallback(async () => {
-    if (!protoStaker || !previewETH || !reserves || !opts) return;
+    setErrorData(undefined);
+    if (exaBalance === undefined || !protoStaker || previewETH === undefined || !reserves || !opts) return;
+
+    const supply = parseEther(input || '0');
+    if (supply && supply < MIN_SUPPLY) {
+      return setErrorData({
+        status: true,
+        message: t('You must deposit at least {{minSupply}} ETH', { minSupply: formatEther(MIN_SUPPLY) }),
+      });
+    }
+
+    if (!exaBalance && !supply) {
+      return setErrorData({ status: true, message: t('You have no EXA balance. Supply ETH in order to continue') });
+    }
 
     setLoading(true);
 
@@ -184,11 +184,8 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
       const permit = await sign();
       if (!permit) return;
 
-      const supply = parseEther(input);
       const minEXA = ((supply / 2n) * reserves[0]) / reserves[1];
-
-      const value = slippage(previewETH + supply);
-
+      const value = previewETH + supply;
       const args = [permit, minEXA, 0n] as const;
       const gas = await protoStaker.estimateGas.stakeBalance(args, {
         value,
@@ -200,82 +197,16 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
         ...opts,
       });
 
-      setTx({ hash, status: 'loading' });
-      const { status, transactionHash } = await waitForTransaction({ hash });
-      setTx({ hash: transactionHash, status: status === 'success' ? 'success' : 'error' });
+      await waitForTransaction({ hash });
     } catch (e: unknown) {
-      console.log(e);
       setErrorData({ status: true, message: handleOperationError(e) });
     } finally {
       setLoading(false);
     }
-  }, [protoStaker, previewETH, reserves, opts, sign, input]);
-
-  const confirm = useCallback(async () => {
-    if (!asset || !walletAddress || !walletClient) return;
-
-    const {
-      routes: [route],
-      destinationCallData,
-    } = await socketQuote({
-      fromChainId: 10,
-      toChainId: 10,
-      fromAmount: Number(input) * 10 ** asset.decimals,
-      fromTokenAddress: asset.address,
-      toTokenAddress: NATIVE_TOKEN_ADDRESS,
-      userAddress: walletAddress,
-    });
-
-    const {
-      userTxs: [{ approvalData }],
-    } = route;
-
-    if (!approvalData) return;
-
-    try {
-      const allowance = await publicClient.readContract({
-        abi: erc20ABI,
-        address: approvalData.approvalTokenAddress,
-        functionName: 'allowance',
-        args: [walletAddress, approvalData.allowanceTarget],
-      });
-
-      if (allowance < BigInt(approvalData.minimumApprovalAmount)) {
-        const { request } = await publicClient.simulateContract({
-          abi: erc20ABI,
-          address: approvalData.approvalTokenAddress,
-          account: walletAddress,
-          functionName: 'approve',
-          args: [approvalData.allowanceTarget, BigInt(approvalData.minimumApprovalAmount)],
-        });
-
-        await walletClient.writeContract(request);
-      }
-
-      // confirm part
-
-      const { txTarget, txData, value } = await socketBuildTX({ route, destinationCallData });
-
-      const txHash_ = await walletClient.sendTransaction({
-        to: txTarget,
-        data: txData,
-        value: BigInt(value),
-      });
-
-      // eslint-disable-next-line no-console
-      console.log(txHash_);
-    } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error(err);
-    }
-  }, [asset, publicClient, input, walletAddress, walletClient]);
+  }, [protoStaker, previewETH, reserves, opts, input, exaBalance, t, sign]);
 
   if (!walletAddress) {
     return null;
-  }
-
-  if (tx) {
-    return <Loading tx={tx} />;
   }
 
   return (
@@ -296,10 +227,10 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
         }}
         TransitionComponent={isMobile ? Transition : undefined}
         fullScreen={isMobile}
-        sx={isMobile ? { top: 'auto' } : { backdropFilter: tx ? 'blur(1.5px)' : '' }}
-        disableEscapeKeyDown={loadingTx}
+        sx={isMobile ? { top: 'auto' } : { backdropFilter: loading ? 'blur(1.5px)' : '' }}
+        disableEscapeKeyDown={loading}
       >
-        {!loadingTx && (
+        {!loading && (
           <IconButton
             aria-label="close"
             onClick={closeAndReset}
@@ -449,7 +380,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
                 </Box>
               </Box>
               {errorData?.status && <ModalAlert message={errorData.message} variant={errorData.variant} mb={0} />}
-              <Box>
+              <Box mt={errorData ? 0 : 2}>
                 {chain && chain.id !== displayNetwork.id ? (
                   <LoadingButton
                     fullWidth
@@ -460,13 +391,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
                     {t('Please switch to {{network}} network', { network: displayNetwork.name })}
                   </LoadingButton>
                 ) : (
-                  <LoadingButton
-                    fullWidth
-                    variant="contained"
-                    disabled={disableSubmit}
-                    onClick={submit}
-                    loading={loading}
-                  >
+                  <LoadingButton fullWidth variant="contained" onClick={submit} loading={loading}>
                     {t('Supply EXA/ETH')}
                   </LoadingButton>
                 )}
