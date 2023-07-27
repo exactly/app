@@ -327,17 +327,8 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
                     )
                   : t('Stake your EXA in Velodrome pools to earn $VELO rewards.')}
               </Typography>
-              <Box>
-                <Box
-                  display="flex"
-                  justifyContent="space-between"
-                  alignItems="center"
-                  gap={0.5}
-                  bgcolor="grey.100"
-                  p={0.75}
-                  borderRadius="4px"
-                  px={2}
-                >
+              <Box bgcolor="grey.100" borderRadius="8px">
+                <Box display="flex" justifyContent="space-between" alignItems="center" gap={0.5} p={0.75} px={2}>
                   <Typography fontSize={13} fontWeight={500}>
                     {t('Your')} vAMMV2-EXA/WETH
                   </Typography>
@@ -353,16 +344,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
                   href="https://velodrome.finance/deposit?token0=0x1e925de1c68ef83bd98ee3e130ef14a50309c01b&token1=eth&stable=false"
                   rel="noreferrer noopener"
                 >
-                  <Box
-                    display="flex"
-                    justifyContent="space-between"
-                    alignItems="center"
-                    gap={0.5}
-                    bgcolor="grey.100"
-                    p={0.75}
-                    borderRadius="4px"
-                    px={2}
-                  >
+                  <Box display="flex" justifyContent="space-between" alignItems="center" gap={0.5} p={0.75} px={2}>
                     <Box display="flex" gap={0.5} alignItems="center">
                       <Typography fontSize={13} fontWeight={500}>
                         {t('Your $VELO rewards')}
@@ -406,31 +388,41 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
           <DialogContent sx={{ p: 0, overflow: 'hidden' }}>
             <Box display="flex" flexDirection="column" gap={2}>
               <Box display="flex" flexDirection="column" gap={2}>
-                <PoolPreview exa={String(balanceEXA)} eth={String(balanceETH)} />
-                <ModalBox sx={{ display: 'flex', flexDirection: 'row', p: 1, pl: 2, alignItems: 'center' }}>
-                  {assets && asset ? (
-                    <>
-                      <Box width={'25%'}>
-                        <SocketAssetSelector asset={asset} options={assets} onChange={handleAssetChange} />
-                      </Box>
-                      <Box flex={1}>
-                        <ModalInput
-                          decimals={asset.decimals}
-                          symbol={asset.symbol}
-                          value={qtyIn}
-                          onValueChange={setQtyIn}
-                          align="right"
-                          maxWidth="100%"
-                          sx={{ paddingTop: 0, fontSize: 16 }}
-                        />
-                      </Box>
-                    </>
-                  ) : (
-                    <Skeleton variant="rectangular" height={20} width="100%" />
-                  )}
-                </ModalBox>
+                <Box display="flex" flexDirection="column" gap={1.5}>
+                  <Typography fontSize={12} px={2}>
+                    {t('Preview your operation')}
+                  </Typography>
+                  <PoolPreview exa={String(balanceEXA)} eth={String(balanceETH)} />
+                </Box>
+                <Box display="flex" flexDirection="column" gap={1.5}>
+                  <Typography fontSize={12} px={2}>
+                    {t('Add supply')}
+                  </Typography>
+                  <ModalBox sx={{ display: 'flex', flexDirection: 'row', p: 1, pl: 2, alignItems: 'center' }}>
+                    {assets && asset ? (
+                      <>
+                        <Box width={'25%'}>
+                          <SocketAssetSelector asset={asset} options={assets} onChange={handleAssetChange} />
+                        </Box>
+                        <Box flex={1}>
+                          <ModalInput
+                            decimals={asset.decimals}
+                            symbol={asset.symbol}
+                            value={qtyIn}
+                            onValueChange={setQtyIn}
+                            align="right"
+                            maxWidth="100%"
+                            sx={{ paddingTop: 0, fontSize: 16 }}
+                          />
+                        </Box>
+                      </>
+                    ) : (
+                      <Skeleton variant="rectangular" height={20} width="100%" />
+                    )}
+                  </ModalBox>
+                </Box>
               </Box>
-              <Box display="flex" flexDirection="column" gap={2} alignItems="center">
+              <Box display="flex" flexDirection="column" gap={2} alignItems="center" mt={2}>
                 {chain && chain.id !== displayNetwork.id ? (
                   <LoadingButton
                     fullWidth
@@ -467,7 +459,7 @@ type PoolPreviewProps = {
 
 const PoolPreview: FC<PoolPreviewProps> = ({ exa, eth }) => {
   return (
-    <ModalBox sx={{ height: 48 }}>
+    <ModalBox sx={{ height: 48, bgcolor: 'grey.100' }}>
       <ModalBoxRow>
         <ModalBoxCell height={32}>
           <Box position="relative" gap={0.5} alignItems="center">
