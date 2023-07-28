@@ -22,11 +22,11 @@ import { splitSignature } from '@ethersproject/bytes';
 import { TransitionProps } from '@mui/material/transitions';
 import Draggable from 'react-draggable';
 import { useTranslation } from 'react-i18next';
-import { formatEther, Hex, parseEther } from 'viem';
+import { formatEther, Hex, parseEther, encodeFunctionData, parseUnits, decodeFunctionData } from 'viem';
 import { GAS_LIMIT_MULTIPLIER, WEI_PER_ETHER } from 'utils/const';
 import { LoadingButton } from '@mui/lab';
 import { useWeb3 } from 'hooks/useWeb3';
-import { useNetwork, useSwitchNetwork, useSignTypedData } from 'wagmi';
+import { useNetwork, useSwitchNetwork, useSignTypedData, useWalletClient } from 'wagmi';
 import { waitForTransaction } from '@wagmi/core';
 import { ModalBox, ModalBoxCell, ModalBoxRow } from 'components/common/modal/ModalBox';
 import SocketAssetSelector from 'components/SocketAssetSelector';
@@ -47,6 +47,9 @@ import ModalAlert from 'components/common/modal/ModalAlert';
 import { ErrorData } from 'types/Error';
 import handleOperationError from 'utils/handleOperationError';
 import formatSymbol from 'utils/formatSymbol';
+import { swapperABI } from 'types/abi';
+import { socketBuildTX, socketQuote } from 'utils/socket';
+import useERC20 from 'hooks/useERC20';
 
 const MIN_SUPPLY = parseEther('0.002');
 
@@ -214,6 +217,79 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
     }
   }, [protoStaker, previewETH, reserves, opts, input, exaBalance, t, sign]);
 
+  const { data: walletClient } = useWalletClient();
+
+  const NATIVE_TOKEN_ADDRESS = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
+
+  const erc20 = useERC20(asset?.address === NATIVE_TOKEN_ADDRESS ? undefined : asset?.address);
+
+  const confirm = useCallback(async () => {
+    if (!asset || !walletAddress || !walletClient || !erc20 || !opts) return;
+
+    const contractAddress = '0x52274fbf893d5E05372CB05A8a8c3835F1eACF96';
+
+    const {
+      routes: [route],
+      destinationCallData,
+    } = await socketQuote({
+      fromChainId: 10,
+      toChainId: 10,
+      fromAmount: parseUnits(input || '0', asset.decimals),
+      fromTokenAddress: asset.address,
+      toTokenAddress: NATIVE_TOKEN_ADDRESS,
+      userAddress: walletAddress,
+      recipient: contractAddress,
+      destinationPayload: encodeFunctionData({
+        abi: swapperABI,
+        functionName: 'swap',
+        args: [walletAddress, 0n, 0n],
+      }),
+      destinationGasLimit: 2000000,
+    });
+
+    if (!route) return;
+
+    const {
+      userTxs: [{ approvalData }],
+    } = route;
+
+    if (!approvalData) return;
+
+    try {
+      const allowance = await erc20.read.allowance([walletAddress, approvalData.allowanceTarget], opts);
+
+      if (allowance < BigInt(approvalData.minimumApprovalAmount)) {
+        const hash = await erc20.write.approve(
+          [approvalData.allowanceTarget, BigInt(approvalData.minimumApprovalAmount)],
+          opts,
+        );
+        const { status } = await waitForTransaction({ hash });
+
+        if (status === 'reverted') throw new Error('Approval transaction reverted');
+      }
+
+      const { txTarget, txData, value } = await socketBuildTX({
+        route,
+        destinationCallData,
+      });
+
+      // eslint-disable-next-line no-console
+      console.log({ txTarget, txData, value });
+
+      const txHash_ = await walletClient.sendTransaction({
+        to: txTarget,
+        data: txData,
+        value: BigInt(value), // is 0
+      });
+
+      // eslint-disable-next-line no-console
+      console.log(txHash_);
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(err);
+    }
+  }, [asset, erc20, input, opts, walletAddress, walletClient]);
+
   return (
     <>
       <Velodrome onClick={open} />
@@ -362,7 +438,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
                     {assets && asset ? (
                       <>
                         <Box width={'25%'}>
-                          <SocketAssetSelector asset={asset} options={assets} onChange={handleAssetChange} disabled />
+                          <SocketAssetSelector asset={asset} options={assets} onChange={handleAssetChange} />
                         </Box>
                         <ModalInput
                           decimals={asset.decimals}
@@ -400,7 +476,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
                   <LoadingButton
                     fullWidth
                     variant="contained"
-                    onClick={submit}
+                    onClick={confirm}
                     disabled={!isConnected}
                     loading={loading}
                   >

@@ -37,9 +37,12 @@ type QuoteRequestParams = {
   fromChainId: number;
   toChainId: number;
   fromTokenAddress: `0x${string}`;
-  fromAmount: number;
+  fromAmount: bigint;
   userAddress: `0x${string}`;
+  recipient: `0x${string}`;
   toTokenAddress: `0x${string}`;
+  destinationPayload: `0x${string}`;
+  destinationGasLimit: number;
 };
 
 export const socketQuote = async ({
@@ -49,6 +52,9 @@ export const socketQuote = async ({
   fromTokenAddress,
   toTokenAddress,
   userAddress,
+  recipient,
+  destinationPayload,
+  destinationGasLimit,
 }: QuoteRequestParams) =>
   socketRequest<{
     routes: Route[];
@@ -56,21 +62,18 @@ export const socketQuote = async ({
   }>('quote', {
     fromChainId: fromChainId.toString(),
     toChainId: toChainId.toString(),
-    fromAmount: BigInt(fromAmount).toString(),
+    fromAmount: fromAmount.toString(),
     fromTokenAddress,
     toTokenAddress,
     userAddress,
+    recipient,
     sort: 'output',
     singleTxOnly: 'true',
     defaultSwapSlippage: '1',
     uniqueRoutesPerBridge: 'true',
-    // isContractCall: 'true',
-    // destinationPayload: encodeFunctionData({
-    //   abi: forwarderABI,
-    //   functionName: 'deposit',
-    //   args: [marketAccount.market, walletAddress as `0x${string}`],
-    // }),
-    // recipient: forwarderOptimism,
+    isContractCall: 'true',
+    destinationPayload,
+    destinationGasLimit: destinationGasLimit.toString(),
   });
 
 type BuildTxBody = {
