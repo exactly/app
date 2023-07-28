@@ -2,7 +2,7 @@ import React, { FC, useMemo } from 'react';
 import { Hex, formatEther, parseEther } from 'viem';
 import Image from 'next/image';
 import { useNetwork, useWaitForTransaction, useSwitchNetwork } from 'wagmi';
-import { Box, Divider, Skeleton, Typography } from '@mui/material';
+import { Box, Button, Divider, Skeleton, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { LoadingButton } from '@mui/lab';
 import { usePrepareAirdropClaim, useAirdropClaimed, useAirdropStreams } from 'hooks/useAirdrop';
@@ -22,7 +22,7 @@ type ClaimableProps = {
 
 const Claimable: FC<ClaimableProps> = ({ amount, proof }) => {
   const { t } = useTranslation();
-  const { chain: displayNetwork } = useWeb3();
+  const { chain: displayNetwork, impersonateActive, exitImpersonate } = useWeb3();
   const parsedAmount = useMemo(() => (amount ? formatNumber(formatEther(amount)) : '0'), [amount]);
 
   const { data: claimed, isLoading: isLoadingClaimed } = useAirdropClaimed({ watch: true });
@@ -72,7 +72,7 @@ const Claimable: FC<ClaimableProps> = ({ amount, proof }) => {
           )}
         </Box>
       </Box>
-      {claimed && (
+      {claimed && !impersonateActive && (
         <>
           {chain && chain.id !== displayNetwork.id ? (
             <LoadingButton
@@ -124,6 +124,7 @@ const Claimable: FC<ClaimableProps> = ({ amount, proof }) => {
       )}
 
       {!claimed &&
+        !impersonateActive &&
         (chain && chain.id !== displayNetwork.id ? (
           <LoadingButton
             variant="contained"
@@ -144,6 +145,12 @@ const Claimable: FC<ClaimableProps> = ({ amount, proof }) => {
             {t('Claim EXA Stream')}
           </LoadingButton>
         ))}
+
+      {impersonateActive && (
+        <Button fullWidth onClick={exitImpersonate} variant="contained">
+          {t('Exit Impersonate Mode')}
+        </Button>
+      )}
 
       <Divider flexItem />
     </Box>

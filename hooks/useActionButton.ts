@@ -42,12 +42,12 @@ export default function useActionButton() {
 }
 
 export function useStartDebtManagerButton() {
-  const { connect, isConnected } = useWeb3();
+  const { connect, isConnected, impersonateActive } = useWeb3();
   const { openDebtManager, debtManager } = useDebtManagerContext();
 
   const startDebtManager = useCallback(
     (...args: Parameters<typeof openDebtManager>) => {
-      if (!isConnected) {
+      if (!isConnected && !impersonateActive) {
         return connect();
       }
 
@@ -55,7 +55,7 @@ export function useStartDebtManagerButton() {
 
       openDebtManager(...args);
     },
-    [debtManager, connect, isConnected, openDebtManager],
+    [isConnected, impersonateActive, debtManager, openDebtManager, connect],
   );
 
   const isRolloverDisabled = useCallback(
@@ -70,12 +70,12 @@ export function useStartDebtManagerButton() {
 }
 
 export function useStartLeverager() {
-  const { connect, isConnected } = useWeb3();
+  const { connect, isConnected, impersonateActive } = useWeb3();
   const { openLeverager, debtManager } = useLeveragerContext();
 
   const startLeverager = useCallback(
     (...args: Parameters<typeof openLeverager>) => {
-      if (!isConnected) {
+      if (!isConnected && !impersonateActive) {
         return connect();
       }
 
@@ -83,7 +83,7 @@ export function useStartLeverager() {
 
       openLeverager(...args);
     },
-    [debtManager, connect, isConnected, openLeverager],
+    [isConnected, impersonateActive, debtManager, openLeverager, connect],
   );
 
   const isLeveragerDisabled = useCallback(

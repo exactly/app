@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Avatar, Box, Collapse, Divider, Skeleton, TextField, Typography } from '@mui/material';
+import { Avatar, Box, Button, Collapse, Divider, Skeleton, TextField, Typography } from '@mui/material';
 import { Trans, useTranslation } from 'react-i18next';
 import { LoadingButton } from '@mui/lab';
 import HowToVoteIcon from '@mui/icons-material/HowToVote';
@@ -22,7 +22,7 @@ type Props = {
 
 const Delegation = ({ amount }: Props) => {
   const { t } = useTranslation();
-  const { chain: displayNetwork, walletAddress } = useWeb3();
+  const { chain: displayNetwork, walletAddress, impersonateActive, exitImpersonate } = useWeb3();
   const [selected, setSelected] = useState<'self-delegate' | 'add-delegate'>('self-delegate');
   const [input, setInput] = useState<string>('');
   const exa = useEXA();
@@ -218,7 +218,12 @@ const Delegation = ({ amount }: Props) => {
           </Box>
         </Collapse>
       </Box>
-      {chain && chain.id !== displayNetwork.id ? (
+
+      {impersonateActive ? (
+        <Button fullWidth onClick={exitImpersonate} variant="contained">
+          {t('Exit Impersonate Mode')}
+        </Button>
+      ) : chain && chain.id !== displayNetwork.id ? (
         <LoadingButton
           variant="contained"
           fullWidth

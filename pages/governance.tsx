@@ -14,7 +14,7 @@ import useMerkleTree from 'hooks/useMerkleTree';
 
 const Governance: NextPage = () => {
   const { t } = useTranslation();
-  const { isConnected, walletAddress } = useWeb3();
+  const { isConnected, walletAddress, impersonateActive } = useWeb3();
   const mTree = useMerkleTree(walletAddress);
 
   usePageView('/governance', 'Governance');
@@ -34,7 +34,7 @@ const Governance: NextPage = () => {
           />
         </Typography>
       </Box>
-      {isConnected ? (
+      {isConnected || impersonateActive ? (
         <Box
           display="flex"
           flexDirection="column"

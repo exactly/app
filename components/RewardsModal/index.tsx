@@ -66,7 +66,7 @@ const RewardsModal: FC<RewardsModalProps> = ({ isOpen, open, close }) => {
   const { breakpoints } = useTheme();
   const isMobile = useMediaQuery(breakpoints.down('sm'));
 
-  const { walletAddress, chain: displayNetwork } = useWeb3();
+  const { walletAddress, chain: displayNetwork, impersonateActive, exitImpersonate } = useWeb3();
   const { chain } = useNetwork();
   const { switchNetwork, isLoading: switchIsLoading } = useSwitchNetwork();
 
@@ -117,6 +117,11 @@ const RewardsModal: FC<RewardsModalProps> = ({ isOpen, open, close }) => {
     setInput('');
     setTx(undefined);
   }, [close, rs]);
+
+  const exitAndClose = useCallback(() => {
+    exitImpersonate();
+    closeAndReset();
+  }, [closeAndReset, exitImpersonate]);
 
   if (!walletAddress) {
     return null;
@@ -274,7 +279,11 @@ const RewardsModal: FC<RewardsModalProps> = ({ isOpen, open, close }) => {
                   </Collapse>
                 </Box>
                 <Box display="flex" flexDirection="column" gap={2} alignItems="center">
-                  {chain && chain.id !== displayNetwork.id ? (
+                  {impersonateActive ? (
+                    <Button fullWidth onClick={exitAndClose} variant="contained">
+                      {t('Exit Impersonate Mode')}
+                    </Button>
+                  ) : chain && chain.id !== displayNetwork.id ? (
                     <LoadingButton
                       fullWidth
                       onClick={() => switchNetwork?.(displayNetwork.id)}

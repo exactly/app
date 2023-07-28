@@ -1,6 +1,7 @@
 import React, { FC, forwardRef, ReactElement, Ref, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Box,
+  Button,
   Dialog,
   DialogContent,
   DialogTitle,
@@ -75,7 +76,7 @@ type StakingModalProps = {
 
 const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
   const { t } = useTranslation();
-  const { isConnected } = useWeb3();
+  const { isConnected, impersonateActive, exitImpersonate } = useWeb3();
   const { breakpoints } = useTheme();
   const isMobile = useMediaQuery(breakpoints.down('sm'));
 
@@ -164,6 +165,11 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
     setInput('');
     setErrorData(undefined);
   }, [close]);
+
+  const exitAndClose = useCallback(() => {
+    exitImpersonate();
+    close();
+  }, [close, exitImpersonate]);
 
   const submit = useCallback(async () => {
     setErrorData(undefined);
@@ -376,7 +382,11 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
               </Box>
               {errorData?.status && <ModalAlert message={errorData.message} variant={errorData.variant} mb={0} />}
               <Box mt={errorData ? 0 : 2}>
-                {chain && chain.id !== displayNetwork.id ? (
+                {impersonateActive ? (
+                  <Button fullWidth onClick={exitAndClose} variant="contained">
+                    {t('Exit Impersonate Mode')}
+                  </Button>
+                ) : chain && chain.id !== displayNetwork.id ? (
                   <LoadingButton
                     fullWidth
                     onClick={() => switchNetwork?.(displayNetwork.id)}

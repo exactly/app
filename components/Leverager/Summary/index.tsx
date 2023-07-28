@@ -19,7 +19,7 @@ import { useWeb3 } from 'hooks/useWeb3';
 
 const Summary = () => {
   const { t } = useTranslation();
-  const { chain: displayNetwork } = useWeb3();
+  const { chain: displayNetwork, impersonateActive, exitImpersonate } = useWeb3();
   const { chain } = useNetwork();
   const { switchNetwork, isLoading: switchIsLoading } = useSwitchNetwork();
 
@@ -42,6 +42,7 @@ const Summary = () => {
     isLoading,
     errorData,
     tx,
+    close,
   } = useLeveragerContext();
 
   const { marketAccount } = useAccountData(input.borrowSymbol ?? 'USDC');
@@ -50,6 +51,11 @@ const Summary = () => {
     () => getHealthFactorColor(newHealthFactor),
     [getHealthFactorColor, newHealthFactor],
   );
+
+  const exitAndClose = useCallback(() => {
+    exitImpersonate();
+    close();
+  }, [close, exitImpersonate]);
 
   const summaryData = useMemo(
     () => [
@@ -222,7 +228,11 @@ const Summary = () => {
             </Button>
           </Grid>
           <Grid item xs={9}>
-            {chain?.id !== displayNetwork.id ? (
+            {impersonateActive ? (
+              <Button fullWidth onClick={exitAndClose} variant="contained">
+                {t('Exit Impersonate Mode')}
+              </Button>
+            ) : chain?.id !== displayNetwork.id ? (
               <LoadingButton
                 fullWidth
                 onClick={() => switchNetwork?.(displayNetwork.id)}

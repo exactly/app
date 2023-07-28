@@ -1,20 +1,27 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useNetwork, useSwitchNetwork } from 'wagmi';
 import { useTranslation } from 'react-i18next';
 import { LoadingButton, type LoadingButtonProps } from '@mui/lab';
 import { Button } from '@mui/material';
 
 import { useWeb3 } from 'hooks/useWeb3';
+import { useDebtManagerContext } from 'contexts/DebtManagerContext';
 
 function Submit(props: LoadingButtonProps) {
   const { t } = useTranslation();
   const { isConnected, chain: displayNetwork, connect, impersonateActive, exitImpersonate } = useWeb3();
   const { chain } = useNetwork();
   const { switchNetwork, isLoading } = useSwitchNetwork();
+  const { close } = useDebtManagerContext();
+
+  const exitAndClose = useCallback(() => {
+    exitImpersonate();
+    close();
+  }, [close, exitImpersonate]);
 
   if (impersonateActive) {
     return (
-      <Button fullWidth onClick={exitImpersonate} variant="contained">
+      <Button fullWidth onClick={exitAndClose} variant="contained">
         {t('Exit Impersonate Mode')}
       </Button>
     );

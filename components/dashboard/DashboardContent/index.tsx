@@ -32,7 +32,7 @@ function DashboardContent() {
     [t],
   );
 
-  const { isConnected } = useWeb3();
+  const { isConnected, impersonateActive } = useWeb3();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -60,7 +60,7 @@ function DashboardContent() {
     [borrowTab, depositTab],
   );
 
-  if (!isConnected) {
+  if (!isConnected && !impersonateActive) {
     return <ConnectYourWallet />;
   }
 
