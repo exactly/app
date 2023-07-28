@@ -27,9 +27,9 @@ export default (): VELOAccountStatus => {
   const exa = useEXAPrice();
   const { marketAccount: weth } = useAccountData('WETH');
 
-  const { data: rewardRate } = useEXAGaugeRewardRate();
-  const { data: reserves } = useEXAPoolGetReserves();
-  const { data: totalSupply } = useEXAPoolTotalSupply();
+  const { data: rewardRate } = useEXAGaugeRewardRate({ watch: true });
+  const { data: reserves } = useEXAPoolGetReserves({ watch: true });
+  const { data: totalSupply } = useEXAPoolTotalSupply({ watch: true });
   const { data: balance } = useEXAGaugeBalanceOf({ watch: true });
 
   const veloAPR = useMemo(() => {

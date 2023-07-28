@@ -93,17 +93,17 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
   const protoStaker = useProtoStaker();
   const { veloPrice, poolAPR, userBalanceUSD } = useVelo();
   const staker = useProtoStaker();
-  const { data: veloEarned } = useEXAGaugeEarned();
+  const { data: veloEarned } = useEXAGaugeEarned({ watch: true });
   const { data: exaBalance } = useEXABalance({ watch: true });
   const { data: previewETH } = useProtoStakerPreviewETH(exaBalance || 0n);
-  const { data: reserves } = useEXAPoolGetReserves();
+  const { data: reserves } = useEXAPoolGetReserves({ watch: true });
 
   const veloEarnedUSD = useMemo(() => {
     if (!veloEarned || !veloPrice) return undefined;
     return formatNumber(formatEther((veloEarned * parseEther(String(veloPrice))) / WEI_PER_ETHER));
   }, [veloEarned, veloPrice]);
 
-  const assets = useSocketAssets();
+  const assets = useSocketAssets(true);
   const [asset, setAsset] = useState<AssetBalance>();
 
   useEffect(() => {
@@ -260,9 +260,9 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
               <Typography fontSize={14}>
                 {userBalanceUSD
                   ? t(
-                      "As a liquidity provider, you've begun accruing $VELO rewards relative to your stake's size and duration, claimable at any time.",
+                      "As a liquidity provider, you've begun accruing VELO rewards relative to your stake's size and duration, claimable at any time.",
                     )
-                  : t('Provide EXA liquidity on Velodrome to earn $VELO rewards.')}
+                  : t('Provide EXA liquidity on Velodrome to earn VELO rewards.')}
               </Typography>
               <Box bgcolor="grey.100" borderRadius="8px">
                 <Box display="flex" justifyContent="space-between" alignItems="center" gap={0.5} p={0.75} px={2}>
@@ -297,15 +297,11 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
                   </Box>
                 </Box>
 
-                <Link
-                  target="_blank"
-                  href="https://velodrome.finance/deposit?token0=0x1e925de1c68ef83bd98ee3e130ef14a50309c01b&token1=eth&stable=false"
-                  rel="noreferrer noopener"
-                >
+                <Link target="_blank" href="https://velodrome.finance/dash" rel="noreferrer noopener">
                   <Box display="flex" justifyContent="space-between" alignItems="center" gap={0.5} p={0.75} px={2}>
                     <Box display="flex" gap={0.5} alignItems="center">
                       <Typography fontSize={13} fontWeight={500}>
-                        {t('Your $VELO rewards')}
+                        {t('Your VELO rewards')}
                       </Typography>
                       <OpenInNewIcon
                         sx={{
