@@ -383,6 +383,6 @@
   "Add more liquidity": "Agregar más liquidez",
   "Provide EXA liquidity on Velodrome and receive VELO rewards": "Proporciona liquidez EXA en Velodrome y recibe recompensas VELO",
   "Supply EXA": "Depositar EXA",
-  "You must deposit at least {{minSupply}} ETH": "__STRING_NOT_TRANSLATED__",
-  "You have no EXA balance. Supply ETH in order to continue": "__STRING_NOT_TRANSLATED__"
+  "You must deposit at least {{minSupply}} ETH": "Debes depositar al menos {{minSupply}} ETH",
+  "You have no EXA balance. Supply ETH in order to continue": "No tienes balance de EXA. Deposita ETH para continuar"
 }

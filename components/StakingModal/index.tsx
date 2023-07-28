@@ -13,6 +13,7 @@ import {
   Slide,
   Avatar,
   Skeleton,
+  InputBase,
 } from '@mui/material';
 import dayjs from 'dayjs';
 import CloseIcon from '@mui/icons-material/Close';
@@ -44,6 +45,7 @@ import { useEXAPoolGetReserves } from 'hooks/useEXAPool';
 import ModalAlert from 'components/common/modal/ModalAlert';
 import { ErrorData } from 'types/Error';
 import handleOperationError from 'utils/handleOperationError';
+import formatSymbol from 'utils/formatSymbol';
 
 const MIN_SUPPLY = parseEther('0.002');
 
@@ -73,6 +75,7 @@ type StakingModalProps = {
 
 const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
   const { t } = useTranslation();
+  const { isConnected } = useWeb3();
   const { breakpoints } = useTheme();
   const isMobile = useMediaQuery(breakpoints.down('sm'));
 
@@ -204,10 +207,6 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
       setLoading(false);
     }
   }, [protoStaker, previewETH, reserves, opts, input, exaBalance, t, sign]);
-
-  if (!walletAddress) {
-    return null;
-  }
 
   return (
     <>
@@ -387,11 +386,18 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
                     onClick={() => switchNetwork?.(displayNetwork.id)}
                     variant="contained"
                     loading={switchIsLoading}
+                    disabled={!isConnected}
                   >
                     {t('Please switch to {{network}} network', { network: displayNetwork.name })}
                   </LoadingButton>
                 ) : (
-                  <LoadingButton fullWidth variant="contained" onClick={submit} loading={loading}>
+                  <LoadingButton
+                    fullWidth
+                    variant="contained"
+                    onClick={submit}
+                    disabled={!isConnected}
+                    loading={loading}
+                  >
                     {t('Supply EXA/ETH')}
                   </LoadingButton>
                 )}
@@ -411,54 +417,53 @@ type PoolPreviewProps = {
 
 const PoolPreview: FC<PoolPreviewProps> = ({ exa, eth }) => {
   return (
-    <ModalBox sx={{ height: 48, bgcolor: 'grey.100' }}>
+    <ModalBox sx={{ bgcolor: 'grey.100', px: 2, py: 1 }}>
       <ModalBoxRow>
-        <ModalBoxCell height={32}>
-          <Box position="relative" gap={0.5} alignItems="center">
-            <Box display="flex" alignItems="center" gap={0.8} position="absolute" top={3} left={0}>
-              <Avatar
-                alt="EXA Token"
-                src={`/img/assets/EXA.svg`}
-                sx={{
-                  width: 20,
-                  height: 20,
-                  fontSize: 10,
-                  borderColor: 'transparent',
-                }}
-              />
-              <Typography fontSize={16} fontWeight={500}>
-                EXA
-              </Typography>
-            </Box>
-            <Box maxWidth="58%" overflow="auto" height={32} position="absolute" top={3} left={66}>
-              <Typography fontSize={16}>{exa}</Typography>
-            </Box>
-          </Box>
+        <ModalBoxCell>
+          <PoolAsset symbol="EXA" amount={exa} />
         </ModalBoxCell>
-        <ModalBoxCell divisor height={32}>
-          <Box position="relative" gap={0.5} alignItems="center">
-            <Box display="flex" alignItems="center" gap={0.8} position="absolute" top={3} left={0}>
-              <Avatar
-                alt="WETH Token"
-                src={`/img/assets/WETH.svg`}
-                sx={{
-                  width: 20,
-                  height: 20,
-                  fontSize: 10,
-                  borderColor: 'transparent',
-                }}
-              />
-              <Typography fontSize={16} fontWeight={500}>
-                ETH
-              </Typography>
-            </Box>
-            <Box maxWidth="58%" overflow="auto" height={32} position="absolute" top={3} left={66}>
-              <Typography fontSize={16}>{eth}</Typography>
-            </Box>
-          </Box>
+        <ModalBoxCell divisor>
+          <PoolAsset symbol="WETH" amount={eth} />
         </ModalBoxCell>
       </ModalBoxRow>
     </ModalBox>
+  );
+};
+
+type PoolAsset = {
+  symbol: string;
+  amount: string;
+};
+
+const PoolAsset: FC<PoolAsset> = ({ symbol, amount }) => {
+  return (
+    <Box display="flex" gap={1} alignItems="center" justifyContent="space-between">
+      <Box display="flex" alignItems="center" gap={1}>
+        <Avatar
+          alt={`${formatSymbol(symbol)} Token`}
+          src={`/img/assets/${symbol}.svg`}
+          sx={{
+            width: 20,
+            height: 20,
+            fontSize: 10,
+            borderColor: 'transparent',
+          }}
+        />
+        <Typography fontSize={16} fontWeight={500}>
+          {formatSymbol(symbol)}
+        </Typography>
+      </Box>
+      <InputBase
+        inputProps={{
+          min: 0.0,
+          type: 'number',
+          value: amount,
+          step: 'any',
+          style: { textAlign: 'right', padding: 0, height: 'fit-content' },
+        }}
+        sx={{ fontSize: 15 }}
+      />
+    </Box>
   );
 };
 
