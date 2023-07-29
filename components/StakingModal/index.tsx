@@ -49,6 +49,7 @@ import handleOperationError from 'utils/handleOperationError';
 import formatSymbol from 'utils/formatSymbol';
 import { swapperABI } from 'types/abi';
 import { socketBuildTX, socketQuote } from 'utils/socket';
+import useContract from 'hooks/useContract';
 import useERC20 from 'hooks/useERC20';
 
 const MIN_SUPPLY = parseEther('0.002');
@@ -94,9 +95,9 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
   const [loading, setLoading] = useState<boolean>(false);
 
   const exa = useEXA();
-  const protoStaker = useProtoStaker();
-  const { veloPrice, poolAPR, userBalanceUSD } = useVELO();
   const staker = useProtoStaker();
+  const swapper = useContract('Swapper', swapperABI);
+  const { veloPrice, poolAPR, userBalanceUSD } = useVELO();
   const { data: veloEarned } = useEXAGaugeEarned({ watch: true });
   const { data: exaBalance } = useEXABalance({ watch: true });
   const { data: previewETH } = useProtoStakerPreviewETH(exaBalance || 0n);
@@ -107,7 +108,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
     return formatNumber(formatEther((veloEarned * parseEther(String(veloPrice))) / WEI_PER_ETHER));
   }, [veloEarned, veloPrice]);
 
-  const assets = useSocketAssets(true);
+  const assets = useSocketAssets();
   const [asset, setAsset] = useState<AssetBalance>();
 
   useEffect(() => {
@@ -176,7 +177,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
 
   const submit = useCallback(async () => {
     setErrorData(undefined);
-    if (exaBalance === undefined || !protoStaker || previewETH === undefined || !reserves || !opts) return;
+    if (exaBalance === undefined || !staker || previewETH === undefined || !reserves || !opts) return;
 
     const supply = parseEther(input || '0');
     if (supply && supply < MIN_SUPPLY) {
@@ -199,11 +200,11 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
       const minEXA = ((supply / 2n) * reserves[0]) / reserves[1];
       const value = previewETH + supply;
       const args = [permit, minEXA, 0n] as const;
-      const gas = await protoStaker.estimateGas.stakeBalance(args, {
+      const gas = await staker.estimateGas.stakeBalance(args, {
         ...opts,
         value,
       });
-      const hash = await protoStaker.write.stakeBalance(args, {
+      const hash = await staker.write.stakeBalance(args, {
         ...opts,
         value,
         gasLimit: (gas * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
@@ -215,7 +216,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
     } finally {
       setLoading(false);
     }
-  }, [protoStaker, previewETH, reserves, opts, input, exaBalance, t, sign]);
+  }, [staker, previewETH, reserves, opts, input, exaBalance, t, sign]);
 
   const { data: walletClient } = useWalletClient();
 
@@ -224,13 +225,10 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
   const erc20 = useERC20(asset?.address === NATIVE_TOKEN_ADDRESS ? undefined : asset?.address);
 
   const confirm = useCallback(async () => {
-    if (!asset || !walletAddress || !walletClient || !erc20 || !opts) return;
-
-    const contractAddress = '0x52274fbf893d5E05372CB05A8a8c3835F1eACF96';
+    if (!asset || !walletAddress || !walletClient || !erc20 || !opts || !swapper) return;
 
     const {
       routes: [route],
-      destinationCallData,
     } = await socketQuote({
       fromChainId: 10,
       toChainId: 10,
@@ -238,13 +236,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
       fromTokenAddress: asset.address,
       toTokenAddress: NATIVE_TOKEN_ADDRESS,
       userAddress: walletAddress,
-      recipient: contractAddress,
-      destinationPayload: encodeFunctionData({
-        abi: swapperABI,
-        functionName: 'swap',
-        args: [walletAddress, 0n, 0n],
-      }),
-      destinationGasLimit: 2000000,
+      recipient: swapper.address,
     });
 
     if (!route) return;
@@ -256,7 +248,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
     if (!approvalData) return;
 
     try {
-      const allowance = await erc20.read.allowance([walletAddress, approvalData.allowanceTarget], opts);
+      const allowance = await erc20.read.allowance([walletAddress, swapper.address], opts);
 
       if (allowance < BigInt(approvalData.minimumApprovalAmount)) {
         const hash = await erc20.write.approve(
@@ -268,13 +260,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
         if (status === 'reverted') throw new Error('Approval transaction reverted');
       }
 
-      const { txTarget, txData, value } = await socketBuildTX({
-        route,
-        destinationCallData,
-      });
-
-      // eslint-disable-next-line no-console
-      console.log({ txTarget, txData, value });
+      const { txTarget, txData, value } = await socketBuildTX({ route });
 
       const txHash_ = await walletClient.sendTransaction({
         to: txTarget,
@@ -288,7 +274,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
       // eslint-disable-next-line no-console
       console.error(err);
     }
-  }, [asset, erc20, input, opts, walletAddress, walletClient]);
+  }, [asset, erc20, input, opts, walletAddress, walletClient, swapper]);
 
   return (
     <>

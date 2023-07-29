@@ -276,5 +276,5 @@ export type BridgeStatus = {
 
 export type DestinationCallData = {
   destinationPayload: string;
-  destinationGasLimit: string;
+  destinationGasLimit: bigint;
 };
