@@ -40,7 +40,7 @@ import { SymbolGroup } from 'components/APRWithBreakdown';
 import formatNumber from 'utils/formatNumber';
 import { useProtoStaker, useProtoStakerPreviewETH } from 'hooks/useProtoStaker';
 import Velodrome from 'components/Velodrome';
-import useVelo from 'hooks/useVelo';
+import useVELO from 'hooks/useVELO';
 import { useEXAPoolGetReserves } from 'hooks/useEXAPool';
 import ModalAlert from 'components/common/modal/ModalAlert';
 import { ErrorData } from 'types/Error';
@@ -91,7 +91,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
 
   const exa = useEXA();
   const protoStaker = useProtoStaker();
-  const { veloPrice, poolAPR, userBalanceUSD } = useVelo();
+  const { veloPrice, poolAPR, userBalanceUSD } = useVELO();
   const staker = useProtoStaker();
   const { data: veloEarned } = useEXAGaugeEarned({ watch: true });
   const { data: exaBalance } = useEXABalance({ watch: true });

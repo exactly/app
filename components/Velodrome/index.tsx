@@ -3,7 +3,7 @@ import { Avatar, Box, Button, Tooltip, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { optimism } from 'wagmi/chains';
 import { useWeb3 } from 'hooks/useWeb3';
-import useVelo from 'hooks/useVelo';
+import useVELO from 'hooks/useVELO';
 
 type VelodromeProps = {
   onClick: () => void;
@@ -12,7 +12,7 @@ type VelodromeProps = {
 const Velodrome: FC<VelodromeProps> = ({ onClick }) => {
   const { t } = useTranslation();
   const { chain } = useWeb3();
-  const { poolAPR } = useVelo();
+  const { poolAPR } = useVELO();
 
   if (chain.id !== optimism.id) {
     return null;
