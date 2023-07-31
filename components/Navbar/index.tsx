@@ -1,6 +1,6 @@
 import React, { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 import { setContext, setUser } from '@sentry/nextjs';
-import { useBlockNumber, useConfig } from 'wagmi';
+import { mainnet, useBlockNumber, useConfig } from 'wagmi';
 import { optimism, goerli } from 'wagmi/chains';
 import Image from 'next/image';
 import useRouter from 'hooks/useRouter';
@@ -92,6 +92,7 @@ function Navbar() {
   }, [currentPathname, view, palette.markets.advanced, palette.markets.simple]);
 
   const isOPMainnet = chain?.id === optimism.id;
+  const isEthereum = chain?.id === mainnet.id;
 
   const routes: {
     pathname: string;
@@ -203,7 +204,7 @@ function Navbar() {
                 open={() => setOpenStakingModal(true)}
                 close={() => setOpenStakingModal(false)}
               />
-              {!isMobile && (
+              {!isMobile && !isEthereum && (
                 <RewardsModal
                   isOpen={openRewardsModal}
                   open={() => setOpenRewardsModal(true)}

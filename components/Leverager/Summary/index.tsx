@@ -110,7 +110,7 @@ const Summary = () => {
       },
       {
         label: t('Leverage'),
-        value: <Typography variant="h6">{input.leverageRatio.toFixed(1)}x</Typography>,
+        value: <Typography variant="h6">{input.leverageRatio.toFixed(2)}x</Typography>,
       },
       {
         label: t('Loop APR'),

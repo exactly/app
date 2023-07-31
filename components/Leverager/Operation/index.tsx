@@ -29,7 +29,6 @@ const Operation = () => {
     disabledSubmit,
     isOverLeveraged,
     isPriceImpactAboveThreshold,
-    blockModal,
   } = useLeveragerContext();
 
   return (
@@ -88,12 +87,7 @@ const Operation = () => {
       </ModalBox>
       {errorData?.status && <ModalAlert message={errorData.message} variant={errorData.variant} />}
       {isOverLeveraged && (
-        <ModalAlert
-          message={`${t('You are currently over leveraged with the selected markets.')} ${
-            blockModal ? '' : t('You will only be able to deleverage.')
-          }`}
-          variant="info"
-        />
+        <ModalAlert message={t('You are currently over leveraged with the selected markets.')} variant="info" />
       )}
       {isPriceImpactAboveThreshold && (
         <ModalAlert

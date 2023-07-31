@@ -33,6 +33,11 @@ const MultiplierSlider = () => {
     [blockModal, input.borrowSymbol, input.collateralSymbol, netPosition],
   );
 
+  const max = useMemo(
+    () => Math.floor(Math.max(currentLeverageRatio, maxLeverageRatio) * 1e10) / 1e10,
+    [currentLeverageRatio, maxLeverageRatio],
+  );
+
   return (
     <Box display="flex" flexDirection="column" gap={2} sx={{ opacity: disabled ? 0.5 : 1 }}>
       <Box display="flex" justifyContent="space-between" alignItems="center">
@@ -50,7 +55,7 @@ const MultiplierSlider = () => {
         >
           <Typography fontFamily="IBM Plex Mono" fontSize={10}>{`${t(
             'Current',
-          ).toUpperCase()}:${currentLeverageRatio.toFixed(1)}x`}</Typography>
+          ).toUpperCase()}:${currentLeverageRatio.toFixed(2)}x`}</Typography>
         </Box>
       </Box>
       <Box display="flex" justifyItems="space-between" alignItems="center" gap={2}>
@@ -62,9 +67,9 @@ const MultiplierSlider = () => {
           defaultValue={currentLeverageRatio}
           valueLabelDisplay="on"
           min={minLeverageRatio}
-          max={maxLeverageRatio}
-          step={0.1}
-          valueLabelFormat={(value) => `${value.toFixed(1)}x`}
+          max={max}
+          step={0.01}
+          valueLabelFormat={(value) => `${value.toFixed(2)}x`}
           disabled={disabled}
           sx={{
             height: 4,

@@ -83,6 +83,7 @@ function LeveragerModal() {
         sx={{
           padding: { xs: spacing(3, 2, 2), sm: spacing(5, 4, 4) },
           borderTop: tx ? '' : `4px ${palette.mode === 'light' ? 'black' : 'white'} solid`,
+          overflowY: 'auto',
         }}
       >
         {!tx && (

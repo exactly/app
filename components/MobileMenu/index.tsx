@@ -21,7 +21,7 @@ import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import RepeatRoundedIcon from '@mui/icons-material/RepeatRounded';
 import BarChartRoundedIcon from '@mui/icons-material/BarChartRounded';
 import MovingSharpIcon from '@mui/icons-material/MovingSharp';
-import { optimism } from 'wagmi/chains';
+import { mainnet, optimism } from 'wagmi/chains';
 import { useWeb3 } from 'hooks/useWeb3';
 import SecondaryChain from 'components/SecondaryChain';
 import RewardsModal from 'components/RewardsModal';
@@ -38,6 +38,7 @@ function MobileMenu({ open, handleClose }: Props) {
   const date = new Date();
   const { chain } = useWeb3();
   const isOPMainnet = chain?.id === optimism.id;
+  const isEthereum = chain?.id === mainnet.id;
   const [openRewardsModal, setOpenRewardsModal] = useState(false);
 
   const headers = [
@@ -126,11 +127,13 @@ function MobileMenu({ open, handleClose }: Props) {
               ))}
             </Box>
             <Divider sx={{ my: 1.5 }} />
-            <RewardsModal
-              isOpen={openRewardsModal}
-              open={() => setOpenRewardsModal(true)}
-              close={() => setOpenRewardsModal(false)}
-            />
+            {!isEthereum && (
+              <RewardsModal
+                isOpen={openRewardsModal}
+                open={() => setOpenRewardsModal(true)}
+                close={() => setOpenRewardsModal(false)}
+              />
+            )}
             <Divider sx={{ my: 1.5 }} />
             <Typography fontFamily="fontFamilyMonospaced" fontSize={14} color="figma.grey.500" fontWeight={600}>
               {t('Links')}

@@ -151,7 +151,7 @@ type ContextValues = {
 
 const LeveragerContext = createContext<ContextValues | null>(null);
 
-const minHealthFactor = (maIn: MarketAccount, maOut: MarketAccount): bigint => {
+const minHealthFactorMarkets = (maIn: MarketAccount, maOut: MarketAccount): bigint => {
   if (maIn.asset === maOut.asset) {
     return parseEther('1.02');
   }
@@ -210,6 +210,18 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
 
   const [leverageStatus, setLeverageStatus] = useState<LeverageStatus>();
 
+  const minHealthFactor = useCallback(
+    (_maIn: MarketAccount, _maOut: MarketAccount): bigint => {
+      const currentHF =
+        healthFactor && healthFactor.debt > 0
+          ? (healthFactor.collateral * WEI_PER_ETHER) / healthFactor.debt
+          : undefined;
+      const marketsMinHF = minHealthFactorMarkets(_maIn, _maOut);
+      return currentHF && currentHF < marketsMinHF ? currentHF : marketsMinHF;
+    },
+    [healthFactor],
+  );
+
   const defaultLeverage = useCallback(
     async (cancelled: () => boolean, borrowSymbol: string | undefined = input.borrowSymbol) => {
       if (!debtPreviewer || !walletAddress || !input.collateralSymbol || !borrowSymbol || !opts || !maIn) {
@@ -236,7 +248,16 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
         return undefined;
       }
     },
-    [debtPreviewer, getMarketAccount, input.borrowSymbol, input.collateralSymbol, maIn, opts, walletAddress],
+    [
+      debtPreviewer,
+      getMarketAccount,
+      input.borrowSymbol,
+      input.collateralSymbol,
+      maIn,
+      minHealthFactor,
+      opts,
+      walletAddress,
+    ],
   );
 
   const walletBalance = useBalance(input.collateralSymbol, maIn?.asset, true);
@@ -314,14 +335,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
       }
 
       const ratio = parseEther(String(input.leverageRatio));
-      const args = [
-        maIn.market,
-        maOut.market,
-        walletAddress,
-        userInput,
-        ratio < maxRatio ? ratio : maxRatio,
-        minHealthFactor(maIn, maOut),
-      ] as const;
+      const args = [maIn.market, maOut.market, walletAddress, userInput, ratio, minHealthFactor(maIn, maOut)] as const;
 
       try {
         const { result: _limit } =
@@ -335,7 +349,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
             maOut.market,
             walletAddress,
             (input.secondaryOperation === 'deposit' ? 1n : -1n) * userInput,
-            ratio < maxRatio ? ratio : maxRatio,
+            ratio,
             parseEther(String(depositAPR)),
             input.collateralSymbol === 'wstETH' ? stETHNativeAPR : 0n,
           ],
@@ -343,22 +357,6 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
         );
 
         if (cancelled()) return;
-
-        if (
-          !blockModal &&
-          input.secondaryOperation === 'deposit' &&
-          leverageStatus &&
-          userInput < leverageStatus.minDeposit
-        ) {
-          return setErrorData({
-            status: true,
-            message: t('You need to deposit more than {{value}} {{symbol}}.', {
-              symbol: maIn?.assetSymbol,
-              value: formatUnits(leverageStatus.minDeposit, maIn?.decimals ?? 18),
-            }),
-            variant: 'warning',
-          });
-        }
 
         setLoopRates(_loopRates);
         setLimit(_limit);
@@ -369,7 +367,6 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
       }
     },
     [
-      blockModal,
       debtPreviewer,
       depositAPR,
       input.collateralSymbol,
@@ -378,10 +375,9 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
       leverageStatus,
       maIn,
       maOut,
-      maxRatio,
+      minHealthFactor,
       opts,
       stETHNativeAPR,
-      t,
       userInput,
       walletAddress,
     ],
@@ -415,9 +411,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
       setErrorData(undefined);
       const res = await defaultLeverage(() => false, borrowSymbol);
       const _secondaryOperation = res && res.ratio > res.maxRatio ? 'withdraw' : 'deposit';
-      const _leverageRatio = res
-        ? Number(res.ratio > res.maxRatio ? res.maxRatio : res.ratio) / 1e18
-        : minLeverageRatio;
+      const _leverageRatio = res ? Number(res.ratio) / 1e18 : minLeverageRatio;
 
       dispatch({
         ...initState,
@@ -480,13 +474,11 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
 
   const setLeverageRatio = useCallback(
     (leverageRatio: number) => {
-      const _maxRatio = Number(maxRatio) / 1e18;
-      const _secondaryOperation =
-        leverageRatio < currentLeverageRatio || currentLeverageRatio > _maxRatio ? 'withdraw' : 'deposit';
+      const _secondaryOperation = leverageRatio < currentLeverageRatio ? 'withdraw' : 'deposit';
       const changedOperation = _secondaryOperation !== input.secondaryOperation;
       setErrorData(undefined);
 
-      const _leverageRatio = Math.max(Math.min(leverageRatio, _maxRatio), 1);
+      const _leverageRatio = Math.max(leverageRatio, 1);
 
       dispatch({
         leverageRatio: _leverageRatio,
@@ -494,7 +486,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
         userInput: changedOperation ? '' : input.userInput,
       });
     },
-    [maxRatio, currentLeverageRatio, input.secondaryOperation, input.userInput],
+    [currentLeverageRatio, input.secondaryOperation, input.userInput],
   );
 
   const openLeverager = useCallback(
@@ -577,7 +569,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
       !input.borrowSymbol ||
       errorData?.status ||
       (currentLeverageRatio === input.leverageRatio && !input.userInput) ||
-      (principal ?? -1n) < 0n ||
+      (principal ?? -1n) <= 0n ||
       !leverageStatus ||
       previewIsLoading ||
       isPriceImpactAboveThreshold ||
@@ -608,7 +600,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
         parsedHF <= Number(minHealthFactor(maIn, maOut)) / 1e18 ? 'danger' : parsedHF < 1.25 ? 'warning' : 'safe';
       return { color: palette.healthFactor[status], bg: palette.healthFactor.bg[status] };
     },
-    [maIn, maOut, palette.healthFactor],
+    [maIn, maOut, minHealthFactor, palette.healthFactor],
   );
 
   const [approvalStatus, setApprovalStatus] = useState<ApprovalStatus>('INIT');
