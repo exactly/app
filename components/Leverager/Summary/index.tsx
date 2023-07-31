@@ -45,7 +45,8 @@ const Summary = () => {
     close,
   } = useLeveragerContext();
 
-  const { marketAccount } = useAccountData(input.borrowSymbol ?? 'USDC');
+  const { marketAccount: marketIn } = useAccountData(input.collateralSymbol ?? 'USDC');
+  const { marketAccount: marketOut } = useAccountData(input.borrowSymbol ?? 'USDC');
 
   const healthFactorColor = useMemo(
     () => getHealthFactorColor(newHealthFactor),
@@ -184,7 +185,8 @@ const Summary = () => {
     APPROVED: null,
     ERC20: t('Approve {{symbol}}', { symbol: input.collateralSymbol }),
     'ERC20-PERMIT2': t('Approve {{symbol}}', { symbol: input.collateralSymbol }),
-    MARKET: t('Approve {{symbol}}', { symbol: marketAccount?.symbol }),
+    'MARKET-IN': t('Approve {{symbol}}', { symbol: marketIn?.symbol }),
+    'MARKET-OUT': t('Approve {{symbol}}', { symbol: marketOut?.symbol }),
   };
 
   return (

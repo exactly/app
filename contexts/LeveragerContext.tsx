@@ -34,7 +34,7 @@ import useAccountData, { type MarketAccount } from 'hooks/useAccountData';
 import useMarket from 'hooks/useMarket';
 import { useWeb3 } from 'hooks/useWeb3';
 import type { DebtManager, Market } from 'types/contracts';
-import { GAS_LIMIT_MULTIPLIER, WEI_PER_ETHER } from 'utils/const';
+import { GAS_LIMIT_MULTIPLIER, MAX_UINT256, WEI_PER_ETHER } from 'utils/const';
 import handleOperationError from 'utils/handleOperationError';
 import useIsContract from 'hooks/useIsContract';
 import useBalance from 'hooks/useBalance';
@@ -67,7 +67,7 @@ type Input = {
   leverageRatio: number;
 };
 
-export type ApprovalStatus = 'INIT' | 'ERC20' | 'ERC20-PERMIT2' | 'MARKET' | 'APPROVED';
+export type ApprovalStatus = 'INIT' | 'ERC20' | 'ERC20-PERMIT2' | 'MARKET-IN' | 'MARKET-OUT' | 'APPROVED';
 
 const DEFAULT_SLIPPAGE = 2n;
 export const PRICE_IMPACT_THRESHOLD = 10n ** 18n;
@@ -613,7 +613,19 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
 
   const [approvalStatus, setApprovalStatus] = useState<ApprovalStatus>('INIT');
   const needsApproval = useCallback(async (): Promise<boolean> => {
-    if (!maIn || !walletAddress || !marketOut || !assetIn || !permit2 || !debtManager || !limit || !opts) {
+    if (
+      !input.collateralSymbol ||
+      !input.borrowSymbol ||
+      !maIn ||
+      !walletAddress ||
+      !marketIn ||
+      !marketOut ||
+      !assetIn ||
+      !permit2 ||
+      !debtManager ||
+      !limit ||
+      !opts
+    ) {
       return true;
     }
 
@@ -624,11 +636,22 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
           setApprovalStatus('ERC20');
           const assetAllowance = await assetIn.read.allowance([walletAddress, debtManager.address], opts);
           if (assetAllowance < userInput) return true;
-        }
 
-        setApprovalStatus('MARKET');
-        const marketOutAllownce = await marketOut.read.allowance([walletAddress, debtManager.address], opts);
-        if (marketOutAllownce < limit.borrow) return true;
+          setApprovalStatus('MARKET-OUT');
+          const marketOutAllownce = await marketOut.read.allowance([walletAddress, debtManager.address], opts);
+          if (marketOutAllownce < limit.borrow) return true;
+        } else {
+          setApprovalStatus('MARKET-IN');
+          const permitAssets =
+            input.collateralSymbol === input.borrowSymbol
+              ? (maIn.floatingBorrowAssets < limit.borrow ? 0n : maIn.floatingBorrowAssets - limit.borrow) + userInput
+              : slippage(
+                  (maIn.floatingDepositAssets < limit.deposit ? 0n : maIn.floatingDepositAssets - limit.deposit) +
+                    userInput,
+                );
+          const marketInAllownce = await marketIn.read.allowance([walletAddress, debtManager.address], opts);
+          if (marketInAllownce < permitAssets) return true;
+        }
 
         setApprovalStatus('APPROVED');
         return false;
@@ -649,6 +672,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
   }, [
     maIn,
     walletAddress,
+    marketIn,
     marketOut,
     assetIn,
     permit2,
@@ -658,11 +682,13 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     isContract,
     chain,
     input.secondaryOperation,
+    input.collateralSymbol,
+    input.borrowSymbol,
     userInput,
   ]);
 
   const approve = useCallback(async () => {
-    if (!debtManager || !marketOut || !assetIn || !permit2 || !limit || !opts) return;
+    if (!debtManager || !maIn || !marketIn || !marketOut || !assetIn || !permit2 || !limit || !opts) return;
 
     setIsLoading(true);
     try {
@@ -678,7 +704,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
           break;
         }
         case 'ERC20-PERMIT2': {
-          const args = [permit2.address, userInput] as const;
+          const args = [permit2.address, MAX_UINT256] as const;
           const gasEstimation = await assetIn.estimateGas.approve(args, opts);
           hash = await assetIn.write.approve(args, {
             ...opts,
@@ -686,7 +712,23 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
           });
           break;
         }
-        case 'MARKET': {
+        case 'MARKET-IN': {
+          const permitAssets =
+            input.collateralSymbol === input.borrowSymbol
+              ? (maIn.floatingBorrowAssets < limit.borrow ? 0n : maIn.floatingBorrowAssets - limit.borrow) + userInput
+              : slippage(
+                  (maIn.floatingDepositAssets < limit.deposit ? 0n : maIn.floatingDepositAssets - limit.deposit) +
+                    userInput,
+                );
+          const args = [debtManager.address, permitAssets] as const;
+          const gasEstimation = await marketIn.estimateGas.approve(args, opts);
+          hash = await marketIn.write.approve(args, {
+            ...opts,
+            gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
+          });
+          break;
+        }
+        case 'MARKET-OUT': {
           const args = [debtManager.address, slippage(limit.borrow)] as const;
           const gasEstimation = await marketOut.estimateGas.approve(args, opts);
           hash = await marketOut.write.approve(args, {
@@ -706,7 +748,20 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     } finally {
       setIsLoading(false);
     }
-  }, [approvalStatus, assetIn, debtManager, limit, marketOut, opts, permit2, userInput]);
+  }, [
+    approvalStatus,
+    assetIn,
+    debtManager,
+    input.borrowSymbol,
+    input.collateralSymbol,
+    limit,
+    maIn,
+    marketIn,
+    marketOut,
+    opts,
+    permit2,
+    userInput,
+  ]);
 
   const signPermit = useCallback(
     async (value: bigint, who: 'assetIn' | 'marketIn' | 'marketOut') => {
