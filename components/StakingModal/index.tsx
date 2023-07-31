@@ -384,7 +384,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
               <Box mt={errorData ? 0 : 2}>
                 {impersonateActive ? (
                   <Button fullWidth onClick={exitAndClose} variant="contained">
-                    {t('Exit Impersonate Mode')}
+                    {t('Exit Read-Only Mode')}
                   </Button>
                 ) : chain && chain.id !== displayNetwork.id ? (
                   <LoadingButton

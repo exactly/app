@@ -148,7 +148,7 @@ const Claimable: FC<ClaimableProps> = ({ amount, proof }) => {
 
       {impersonateActive && (
         <Button fullWidth onClick={exitImpersonate} variant="contained">
-          {t('Exit Impersonate Mode')}
+          {t('Exit Read-Only Mode')}
         </Button>
       )}
 

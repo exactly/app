@@ -281,7 +281,7 @@ const RewardsModal: FC<RewardsModalProps> = ({ isOpen, open, close }) => {
                 <Box display="flex" flexDirection="column" gap={2} alignItems="center">
                   {impersonateActive ? (
                     <Button fullWidth onClick={exitAndClose} variant="contained">
-                      {t('Exit Impersonate Mode')}
+                      {t('Exit Read-Only Mode')}
                     </Button>
                   ) : chain && chain.id !== displayNetwork.id ? (
                     <LoadingButton

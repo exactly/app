@@ -22,7 +22,7 @@ function Submit(props: LoadingButtonProps) {
   if (impersonateActive) {
     return (
       <Button fullWidth onClick={exitAndClose} variant="contained">
-        {t('Exit Impersonate Mode')}
+        {t('Exit Read-Only Mode')}
       </Button>
     );
   }

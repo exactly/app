@@ -221,7 +221,7 @@ const Delegation = ({ amount }: Props) => {
 
       {impersonateActive ? (
         <Button fullWidth onClick={exitImpersonate} variant="contained">
-          {t('Exit Impersonate Mode')}
+          {t('Exit Read-Only Mode')}
         </Button>
       ) : chain && chain.id !== displayNetwork.id ? (
         <LoadingButton

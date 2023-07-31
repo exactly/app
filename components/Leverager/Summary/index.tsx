@@ -232,7 +232,7 @@ const Summary = () => {
           <Grid item xs={9}>
             {impersonateActive ? (
               <Button fullWidth onClick={exitAndClose} variant="contained">
-                {t('Exit Impersonate Mode')}
+                {t('Exit Read-Only Mode')}
               </Button>
             ) : chain?.id !== displayNetwork.id ? (
               <LoadingButton

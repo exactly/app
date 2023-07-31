@@ -106,7 +106,7 @@ const Operation = () => {
           {`${input.secondaryOperation === 'deposit' ? t('Leverage') : t('Deleverage')} ${formatNumber(
             netPosition ?? '0',
             input.collateralSymbol,
-          )} ${input.collateralSymbol} @ ${input.leverageRatio.toFixed(1)}x`}
+          )} ${input.collateralSymbol} @ ${input.leverageRatio.toFixed(2)}x`}
         </Button>
       )}
     </Box>

@@ -122,7 +122,7 @@ function Wallet() {
           {impersonateActive && (
             <Box textAlign="center" mb={1} mt={-1}>
               <Typography fontSize={12} fontWeight={600} textTransform="uppercase">
-                {t('Impersonate mode')}
+                {t('Read-Only Mode')}
               </Typography>
               <Typography fontSize={14} fontWeight={400}>
                 {t('Features may be limited')}
@@ -138,7 +138,7 @@ function Wallet() {
             }}
             sx={{ color: 'grey.700', borderColor: '#CFD3D8' }}
           >
-            {impersonateActive ? t('Exit Impersonate Mode') : t('Disconnect')}
+            {impersonateActive ? t('Exit Read-Only Mode') : t('Disconnect')}
           </Button>
         </Box>
       </Menu>
