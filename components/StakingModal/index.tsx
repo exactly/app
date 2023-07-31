@@ -191,13 +191,13 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
       const value = previewETH + supply;
       const args = [permit, minEXA, 0n] as const;
       const gas = await protoStaker.estimateGas.stakeBalance(args, {
-        value,
         ...opts,
+        value,
       });
       const hash = await protoStaker.write.stakeBalance(args, {
+        ...opts,
         value,
         gasLimit: (gas * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
-        ...opts,
       });
 
       await waitForTransaction({ hash });

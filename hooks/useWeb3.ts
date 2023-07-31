@@ -21,7 +21,7 @@ type Web3 = {
 
 export const useWeb3 = (): Web3 => {
   const { query, replace } = useRouter();
-  const { address, isConnected } = useAccount();
+  const { connector, address, isConnected } = useAccount();
 
   const networkId = Number(process.env.NEXT_PUBLIC_NETWORK);
   const displayNetwork = supportedChains.find((c) => c.id === networkId) ?? optimism;
@@ -52,8 +52,13 @@ export const useWeb3 = (): Web3 => {
   }, [open, connect, connectors]);
 
   const opts = useMemo(
-    () => (walletAddress ? { account: walletAddress, chain: displayNetwork } : undefined),
-    [walletAddress, displayNetwork],
+    () =>
+      walletAddress
+        ? connector?.id === 'safe'
+          ? { account: walletAddress, chain: displayNetwork, value: 0n }
+          : { account: walletAddress, chain: displayNetwork }
+        : undefined,
+    [walletAddress, connector?.id, displayNetwork],
   );
 
   return {
