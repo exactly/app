@@ -22,8 +22,8 @@ import { splitSignature } from '@ethersproject/bytes';
 import { TransitionProps } from '@mui/material/transitions';
 import Draggable from 'react-draggable';
 import { useTranslation } from 'react-i18next';
-import { formatEther, Hex, parseEther, parseUnits } from 'viem';
-import { GAS_LIMIT_MULTIPLIER, WEI_PER_ETHER } from 'utils/const';
+import { formatEther, Hex, parseEther, parseUnits, hexToBigInt, keccak256, encodeAbiParameters } from 'viem';
+import { GAS_LIMIT_MULTIPLIER, MAX_UINT256, WEI_PER_ETHER } from 'utils/const';
 import { LoadingButton } from '@mui/lab';
 import { useWeb3 } from 'hooks/useWeb3';
 import { useNetwork, useSwitchNetwork, useSignTypedData, useWalletClient } from 'wagmi';
@@ -50,8 +50,14 @@ import formatSymbol from 'utils/formatSymbol';
 import { socketBuildTX, socketQuote } from 'utils/socket';
 import useERC20 from 'hooks/useERC20';
 import useIsPermit from 'hooks/useIsPermit';
+import useIsContract from 'hooks/useIsContract';
+import usePermit2 from 'hooks/usePermit2';
+import useDelayedEffect from 'hooks/useDelayedEffect';
 
 const MIN_SUPPLY = parseEther('0.002');
+const NATIVE_TOKEN_ADDRESS = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
+
+type ApprovalStatus = 'INIT' | 'ERC20' | 'ERC20-PERMIT2' | 'APPROVED';
 
 function PaperComponent(props: PaperProps | undefined) {
   const ref = useRef<HTMLDivElement>(null);
@@ -122,7 +128,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
 
   const { signTypedDataAsync } = useSignTypedData();
 
-  const sign = useCallback(async () => {
+  const signEXA = useCallback(async () => {
     if (!exa || !staker || !walletAddress) return;
 
     const value = await exa.read.balanceOf([walletAddress]);
@@ -193,7 +199,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
     setLoading(true);
 
     try {
-      const permit = await sign();
+      const permit = await signEXA();
       if (!permit) return;
 
       const minEXA = ((supply / 2n) * reserves[0]) / reserves[1];
@@ -215,14 +221,211 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
     } finally {
       setLoading(false);
     }
-  }, [staker, previewETH, reserves, opts, input, exaBalance, t, sign]);
+  }, [staker, previewETH, reserves, opts, input, exaBalance, t, signEXA]);
 
   const { data: walletClient } = useWalletClient();
 
-  const NATIVE_TOKEN_ADDRESS = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
-
   const erc20 = useERC20(asset?.address === NATIVE_TOKEN_ADDRESS ? undefined : asset?.address);
+  const permit2 = usePermit2();
   const isPermit = useIsPermit();
+  const isContract = useIsContract();
+
+  const [approvalStatus, setApprovalStatus] = useState<ApprovalStatus>('INIT');
+  const needsApproval = useCallback(async (): Promise<boolean> => {
+    if (!walletAddress || !asset || !staker || !erc20 || !permit2 || !opts) {
+      return true;
+    }
+
+    if (asset.address === NATIVE_TOKEN_ADDRESS) {
+      setApprovalStatus('APPROVED');
+      return false;
+    }
+
+    const supply = parseUnits(input || '0', asset.decimals);
+
+    setApprovalStatus('INIT');
+    try {
+      if (await isContract(walletAddress)) {
+        const allowance = await erc20.read.allowance([walletAddress, staker.address], opts);
+        if (allowance < supply) return true;
+
+        setApprovalStatus('APPROVED');
+        return false;
+      }
+
+      if (!(await isPermit(asset.address))) {
+        const allowance = await erc20.read.allowance([walletAddress, permit2.address], opts);
+        if (allowance < supply) return true;
+      }
+
+      setApprovalStatus('APPROVED');
+      return false;
+    } catch (e: unknown) {
+      setErrorData({ status: true, message: handleOperationError(e) });
+      return true;
+    }
+  }, [asset, erc20, input, isContract, isPermit, opts, permit2, staker, walletAddress]);
+
+  const approve = useCallback(async () => {
+    if (!asset || !staker || !erc20 || !permit2 || !opts) {
+      return;
+    }
+
+    if (asset.address === NATIVE_TOKEN_ADDRESS) {
+      return;
+    }
+
+    const supply = parseUnits(input || '0', asset.decimals);
+
+    setLoading(true);
+    try {
+      let hash: Hex | undefined;
+      switch (approvalStatus) {
+        case 'ERC20': {
+          const args = [staker.address, supply] as const;
+          const gasEstimation = await erc20.estimateGas.approve(args, opts);
+          hash = await erc20.write.approve(args, {
+            ...opts,
+            gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
+          });
+          break;
+        }
+        case 'ERC20-PERMIT2': {
+          const args = [permit2.address, MAX_UINT256] as const;
+          const gasEstimation = await erc20.estimateGas.approve(args, opts);
+          hash = await erc20.write.approve(args, {
+            ...opts,
+            gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
+          });
+          break;
+        }
+        default:
+          return;
+      }
+
+      if (!hash) return;
+      await waitForTransaction({ hash });
+    } catch (e: unknown) {
+      setErrorData({ status: true, message: handleOperationError(e) });
+    } finally {
+      setLoading(false);
+    }
+  }, [approvalStatus, asset, erc20, input, opts, permit2, staker]);
+
+  const [requiresApproval, setRequiresApproval] = useState(false);
+  const load = useCallback(async () => {
+    if (!asset) return;
+    if (asset.address === NATIVE_TOKEN_ADDRESS) {
+      return setRequiresApproval(false);
+    }
+
+    try {
+      setErrorData(undefined);
+      setRequiresApproval(await needsApproval());
+    } catch (e: unknown) {
+      setErrorData({ status: true, message: handleOperationError(e) });
+    }
+  }, [asset, needsApproval]);
+
+  const { isLoading: previewIsLoading } = useDelayedEffect({ effect: load });
+
+  const sign = useCallback(async () => {
+    if (!walletAddress || !asset || !erc20 || !permit2 || !staker) return;
+
+    const deadline = BigInt(dayjs().unix() + 3_600);
+    const value = parseUnits(input || '0', asset.decimals);
+    const chainId = displayNetwork.id;
+
+    if (await isPermit(asset.address)) {
+      const nonce = await erc20.read.nonces([walletAddress], opts);
+      const name = await erc20.read.name(opts);
+
+      const { v, r, s } = await signTypedDataAsync({
+        primaryType: 'Permit',
+        domain: {
+          name,
+          version: '1',
+          chainId,
+          verifyingContract: staker.address,
+        },
+        types: {
+          Permit: [
+            { name: 'owner', type: 'address' },
+            { name: 'spender', type: 'address' },
+            { name: 'value', type: 'uint256' },
+            { name: 'nonce', type: 'uint256' },
+            { name: 'deadline', type: 'uint256' },
+          ],
+        },
+        message: {
+          owner: walletAddress,
+          spender: staker.address,
+          value,
+          nonce,
+          deadline,
+        },
+      }).then(splitSignature);
+
+      const permit = {
+        owner: walletAddress,
+        value,
+        deadline,
+        ...{ v, r: r as Hex, s: s as Hex },
+      } as const;
+
+      return { type: 'permit', value: permit } as const;
+    }
+
+    const signature = await signTypedDataAsync({
+      primaryType: 'PermitTransferFrom',
+      domain: {
+        name: 'Permit2',
+        chainId,
+        verifyingContract: permit2.address,
+      },
+      types: {
+        PermitTransferFrom: [
+          { name: 'permitted', type: 'TokenPermissions' },
+          { name: 'spender', type: 'address' },
+          { name: 'nonce', type: 'uint256' },
+          { name: 'deadline', type: 'uint256' },
+        ],
+        TokenPermissions: [
+          { name: 'token', type: 'address' },
+          { name: 'amount', type: 'uint256' },
+        ],
+      },
+      message: {
+        permitted: {
+          token: asset.address,
+          amount: value,
+        },
+        spender: staker.address,
+        deadline,
+        nonce: hexToBigInt(
+          keccak256(
+            encodeAbiParameters(
+              [
+                { name: 'sender', type: 'address' },
+                { name: 'token', type: 'address' },
+                { name: 'assets', type: 'uint256' },
+                { name: 'deadline', type: 'uint256' },
+              ],
+              [walletAddress, asset.address, value, deadline],
+            ),
+          ),
+        ),
+      },
+    });
+
+    const permit = {
+      amount: value,
+      deadline,
+      signature,
+    } as const;
+
+    return { type: 'permit2', value: permit } as const;
+  }, [asset, displayNetwork.id, erc20, input, isPermit, opts, permit2, signTypedDataAsync, staker, walletAddress]);
 
   const socketSubmit = useCallback(async () => {
     if (!asset || !walletAddress || !walletClient || !erc20 || !opts || !staker || !reserves) return;
@@ -244,26 +447,45 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
 
       if (!route) return;
 
-      const {
-        userTxs: [{ approvalData }],
-      } = route;
-
-      if (!approvalData) return;
-
-      const allowance = await erc20.read.allowance([walletAddress, staker.address], opts);
-
-      if (allowance < BigInt(approvalData.minimumApprovalAmount)) {
-        const hash = await erc20.write.approve([staker.address, BigInt(approvalData.minimumApprovalAmount)], opts);
-        const { status } = await waitForTransaction({ hash });
-
-        if (status === 'reverted') throw new Error('Approval transaction reverted');
-      }
       const { txData } = await socketBuildTX({ route });
 
       const [exaReserves, wethReserves] = reserves;
       const inETH = BigInt(route.toAmount);
       const minEXA = ((((inETH / 2n) * exaReserves) / wethReserves) * 98n) / 100n;
-      const hash = await staker.write.stakeAsset([erc20.address, fromAmount, txData, minEXA, 0n], opts);
+
+      const isMultiSig = await isContract(walletAddress);
+      let hash: Hex | undefined;
+
+      if (isMultiSig) {
+        const args = [erc20.address, fromAmount, txData, minEXA, 0n] as const;
+        const gas = await staker.estimateGas.stakeAsset(args, opts);
+        hash = await staker.write.stakeAsset(args, { ...opts, gasLimit: (gas * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER });
+      } else {
+        const permit = await sign();
+        if (!permit) return;
+        switch (permit.type) {
+          case 'permit': {
+            const args = [erc20.address, permit.value, txData, minEXA, 0n] as const;
+            const gas = await staker.estimateGas.stakeAsset(args, opts);
+            hash = await staker.write.stakeAsset(args, {
+              ...opts,
+              gasLimit: (gas * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
+            });
+            break;
+          }
+          case 'permit2': {
+            const args = [erc20.address, permit.value, txData, minEXA, 0n] as const;
+            const gas = await staker.estimateGas.stakeAsset(args, opts);
+            hash = await staker.write.stakeAsset(args, {
+              ...opts,
+              gasLimit: (gas * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
+            });
+            break;
+          }
+        }
+      }
+
+      if (!hash) return;
 
       const { status } = await waitForTransaction({ hash });
       if (status === 'reverted') throw new Error('Transaction reverted');
@@ -275,7 +497,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
     } finally {
       setLoading(false);
     }
-  }, [asset, walletAddress, walletClient, erc20, opts, staker, reserves, input]);
+  }, [asset, walletAddress, walletClient, erc20, opts, staker, reserves, input, isContract, sign]);
 
   return (
     <>
@@ -463,11 +685,11 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
                   <LoadingButton
                     fullWidth
                     variant="contained"
-                    onClick={asset?.symbol === 'ETH' ? submit : socketSubmit}
-                    disabled={!isConnected}
+                    onClick={asset?.symbol === 'ETH' ? submit : requiresApproval ? approve : socketSubmit}
+                    disabled={!isConnected || previewIsLoading}
                     loading={loading}
                   >
-                    {t('Supply EXA/ETH')}
+                    {requiresApproval ? t('Approve {{ asset }}', { asset: asset?.symbol }) : t('Supply EXA/ETH')}
                   </LoadingButton>
                 )}
               </Box>
