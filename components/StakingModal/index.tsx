@@ -22,7 +22,7 @@ import { splitSignature } from '@ethersproject/bytes';
 import { TransitionProps } from '@mui/material/transitions';
 import Draggable from 'react-draggable';
 import { useTranslation } from 'react-i18next';
-import { formatEther, Hex, parseEther, encodeFunctionData, parseUnits } from 'viem';
+import { formatEther, Hex, parseEther, parseUnits } from 'viem';
 import { GAS_LIMIT_MULTIPLIER, WEI_PER_ETHER } from 'utils/const';
 import { LoadingButton } from '@mui/lab';
 import { useWeb3 } from 'hooks/useWeb3';
@@ -223,7 +223,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
   const erc20 = useERC20(asset?.address === NATIVE_TOKEN_ADDRESS ? undefined : asset?.address);
 
   const socketSubmit = useCallback(async () => {
-    if (!asset || !walletAddress || !walletClient || !erc20 || !opts || !staker) return;
+    if (!asset || !walletAddress || !walletClient || !erc20 || !opts || !staker || !reserves) return;
 
     setLoading(true);
     try {
@@ -258,8 +258,10 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
       }
       const { txData } = await socketBuildTX({ route });
 
-      const minExa = 0n; // inEth * EXAPrice // TODO: set this
-      const hash = await staker.write.stakeAsset([erc20.address, fromAmount, txData, minExa, 0n], opts);
+      const [exaReserves, wethReserves] = reserves;
+      const inETH = BigInt(route.toAmount);
+      const minEXA = ((((inETH / 2n) * exaReserves) / wethReserves) * 98n) / 100n;
+      const hash = await staker.write.stakeAsset([erc20.address, fromAmount, txData, minEXA, 0n], opts);
 
       const { status } = await waitForTransaction({ hash });
       if (status === 'reverted') throw new Error('Transaction reverted');
@@ -271,7 +273,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
     } finally {
       setLoading(false);
     }
-  }, [asset, walletAddress, walletClient, erc20, opts, staker, input]);
+  }, [asset, walletAddress, walletClient, erc20, opts, staker, reserves, input]);
 
   return (
     <>
