@@ -22,7 +22,7 @@ import { splitSignature } from '@ethersproject/bytes';
 import { TransitionProps } from '@mui/material/transitions';
 import Draggable from 'react-draggable';
 import { useTranslation } from 'react-i18next';
-import { formatEther, Hex, parseEther, encodeFunctionData, parseUnits, decodeFunctionData } from 'viem';
+import { formatEther, Hex, parseEther, encodeFunctionData, parseUnits } from 'viem';
 import { GAS_LIMIT_MULTIPLIER, WEI_PER_ETHER } from 'utils/const';
 import { LoadingButton } from '@mui/lab';
 import { useWeb3 } from 'hooks/useWeb3';
@@ -47,9 +47,7 @@ import ModalAlert from 'components/common/modal/ModalAlert';
 import { ErrorData } from 'types/Error';
 import handleOperationError from 'utils/handleOperationError';
 import formatSymbol from 'utils/formatSymbol';
-import { swapperABI } from 'types/abi';
 import { socketBuildTX, socketQuote } from 'utils/socket';
-import useContract from 'hooks/useContract';
 import useERC20 from 'hooks/useERC20';
 
 const MIN_SUPPLY = parseEther('0.002');
@@ -96,7 +94,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
 
   const exa = useEXA();
   const staker = useProtoStaker();
-  const swapper = useContract('Swapper', swapperABI);
+
   const { veloPrice, poolAPR, userBalanceUSD } = useVELO();
   const { data: veloEarned } = useEXAGaugeEarned({ watch: true });
   const { data: exaBalance } = useEXABalance({ watch: true });
@@ -224,57 +222,56 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
 
   const erc20 = useERC20(asset?.address === NATIVE_TOKEN_ADDRESS ? undefined : asset?.address);
 
-  const confirm = useCallback(async () => {
-    if (!asset || !walletAddress || !walletClient || !erc20 || !opts || !swapper) return;
+  const socketSubmit = useCallback(async () => {
+    if (!asset || !walletAddress || !walletClient || !erc20 || !opts || !staker) return;
 
-    const {
-      routes: [route],
-    } = await socketQuote({
-      fromChainId: 10,
-      toChainId: 10,
-      fromAmount: parseUnits(input || '0', asset.decimals),
-      fromTokenAddress: asset.address,
-      toTokenAddress: NATIVE_TOKEN_ADDRESS,
-      userAddress: walletAddress,
-      recipient: swapper.address,
-    });
-
-    if (!route) return;
-
-    const {
-      userTxs: [{ approvalData }],
-    } = route;
-
-    if (!approvalData) return;
-
+    setLoading(true);
     try {
-      const allowance = await erc20.read.allowance([walletAddress, swapper.address], opts);
+      const fromAmount = parseUnits(input || '0', asset.decimals);
+      const {
+        routes: [route],
+      } = await socketQuote({
+        fromChainId: 10,
+        toChainId: 10,
+        fromAmount,
+        fromTokenAddress: asset.address,
+        toTokenAddress: NATIVE_TOKEN_ADDRESS,
+        userAddress: walletAddress,
+        recipient: staker.address,
+      });
+
+      if (!route) return;
+
+      const {
+        userTxs: [{ approvalData }],
+      } = route;
+
+      if (!approvalData) return;
+
+      const allowance = await erc20.read.allowance([walletAddress, staker.address], opts);
 
       if (allowance < BigInt(approvalData.minimumApprovalAmount)) {
-        const hash = await erc20.write.approve(
-          [approvalData.allowanceTarget, BigInt(approvalData.minimumApprovalAmount)],
-          opts,
-        );
+        const hash = await erc20.write.approve([staker.address, BigInt(approvalData.minimumApprovalAmount)], opts);
         const { status } = await waitForTransaction({ hash });
 
         if (status === 'reverted') throw new Error('Approval transaction reverted');
       }
+      const { txData } = await socketBuildTX({ route });
 
-      const { txTarget, txData, value } = await socketBuildTX({ route });
+      const minExa = 0n; // inEth * EXAPrice // TODO: set this
+      const hash = await staker.write.stakeAsset([erc20.address, fromAmount, txData, minExa, 0n], opts);
 
-      const txHash_ = await walletClient.sendTransaction({
-        to: txTarget,
-        data: txData,
-        value: BigInt(value), // is 0
-      });
-
-      // eslint-disable-next-line no-console
-      console.log(txHash_);
+      const { status } = await waitForTransaction({ hash });
+      if (status === 'reverted') throw new Error('Transaction reverted');
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error(err);
+
+      setErrorData({ status: true, message: handleOperationError(err) });
+    } finally {
+      setLoading(false);
     }
-  }, [asset, erc20, input, opts, walletAddress, walletClient, swapper]);
+  }, [asset, walletAddress, walletClient, erc20, opts, staker, input]);
 
   return (
     <>
@@ -462,7 +459,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
                   <LoadingButton
                     fullWidth
                     variant="contained"
-                    onClick={confirm}
+                    onClick={asset?.symbol === 'ETH' ? submit : socketSubmit}
                     disabled={!isConnected}
                     loading={loading}
                   >
