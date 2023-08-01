@@ -49,6 +49,7 @@ import handleOperationError from 'utils/handleOperationError';
 import formatSymbol from 'utils/formatSymbol';
 import { socketBuildTX, socketQuote } from 'utils/socket';
 import useERC20 from 'hooks/useERC20';
+import useIsPermit from 'hooks/useIsPermit';
 
 const MIN_SUPPLY = parseEther('0.002');
 
@@ -221,6 +222,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
   const NATIVE_TOKEN_ADDRESS = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
 
   const erc20 = useERC20(asset?.address === NATIVE_TOKEN_ADDRESS ? undefined : asset?.address);
+  const isPermit = useIsPermit();
 
   const socketSubmit = useCallback(async () => {
     if (!asset || !walletAddress || !walletClient || !erc20 || !opts || !staker || !reserves) return;
