@@ -23,7 +23,7 @@ type Props = {
 const Delegation = ({ amount }: Props) => {
   const { t } = useTranslation();
   const { chain: displayNetwork, walletAddress, impersonateActive, exitImpersonate } = useWeb3();
-  const [selected, setSelected] = useState<'self-delegate' | 'add-delegate'>('self-delegate');
+  const [selected, setSelected] = useState<'self-delegate' | 'add-delegate'>();
   const [input, setInput] = useState<string>('');
   const exa = useEXA();
   const exaBalance = useBalance('EXA', exa?.address);
@@ -236,7 +236,7 @@ const Delegation = ({ amount }: Props) => {
         <LoadingButton
           variant="contained"
           fullWidth
-          disabled={selected === 'add-delegate' && !(input && isAddress(input))}
+          disabled={!selected || (selected === 'add-delegate' && !(input && isAddress(input)))}
           onClick={write}
           loading={submitLoading || waitingDelegate}
         >
