@@ -34,7 +34,7 @@ const MultiplierSlider = () => {
   );
 
   const max = useMemo(
-    () => Math.floor(Math.max(currentLeverageRatio, maxLeverageRatio) * 1e10) / 1e10,
+    () => Math.floor(Math.max(currentLeverageRatio, maxLeverageRatio) * 100) / 100,
     [currentLeverageRatio, maxLeverageRatio],
   );
 

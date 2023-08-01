@@ -6,7 +6,7 @@ import { socketRequest } from 'utils/socket';
 const ETH = {
   chainId: 10,
   address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
-  name: 'Ethereum',
+  name: 'Ether',
   symbol: 'ETH',
   decimals: 18,
   chainAgnosticId: null,
@@ -33,6 +33,7 @@ export default (disableFetch?: boolean) => {
         .sort((a, b) => b.amount - a.amount)
         .map((asset) => ({
           ...asset,
+          name: asset.symbol === 'ETH' ? 'Ether' : asset.name,
           icon: asset.symbol === 'ETH' ? '/img/assets/WETH.svg' : asset.icon,
           logoURI: asset.symbol === 'ETH' ? '/img/assets/WETH.svg' : asset.logoURI,
         })),
