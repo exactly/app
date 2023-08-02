@@ -97,6 +97,11 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
 
   const [errorData, setErrorData] = useState<ErrorData | undefined>(undefined);
 
+  const [excess, setExcess] = useState({
+    exa: 0n,
+    eth: 0n,
+  });
+
   const [input, setInput] = useState<string>('');
 
   const [loading, setLoading] = useState<boolean>(false);
@@ -191,10 +196,10 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
     if (!walletAddress || exaBalance === undefined || !staker || previewETH === undefined || !reserves || !opts) return;
 
     const supply = parseEther(input || '0');
-    if (supply && supply < MIN_SUPPLY) {
+    if (supply && supply < previewETH) {
       return setErrorData({
         status: true,
-        message: t('You must deposit at least {{minSupply}} ETH', { minSupply: formatEther(MIN_SUPPLY) }),
+        message: t('You must deposit at least {{previewETH}} ETH', { previewETH: formatEther(previewETH) }),
       });
     }
 
@@ -205,8 +210,8 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
     setLoading(true);
 
     try {
-      const minEXA = ((supply / 2n) * reserves[0]) / reserves[1];
-      const value = previewETH + supply;
+      const minEXA = (((previewETH - supply) / 2n) * reserves[0]) / reserves[1];
+      const value = supply;
 
       let hash: Hex | undefined;
       if (await isContract(walletAddress)) {
@@ -284,7 +289,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
   }, [asset, erc20, exa, exaBalance, input, isContract, isPermit, opts, permit2, staker, walletAddress]);
 
   const approve = useCallback(async () => {
-    if (!asset || !staker || !exa || !erc20 || !permit2 || !opts) {
+    if (!asset || !staker || !exa || !erc20 || !permit2 || !opts || exaBalance === undefined) {
       return;
     }
 
@@ -295,7 +300,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
       let hash: Hex | undefined;
       switch (approvalStatus) {
         case 'EXA': {
-          const args = [staker.address, supply] as const;
+          const args = [staker.address, exaBalance] as const;
           const gas = await exa.estimateGas.approve(args, opts);
           hash = await exa.write.approve(args, {
             ...opts,
@@ -327,21 +332,38 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
 
       if (!hash) return;
       await waitForTransaction({ hash });
+      setRequiresApproval(await needsApproval());
     } catch (e: unknown) {
       setErrorData({ status: true, message: handleOperationError(e) });
     } finally {
       setLoading(false);
     }
-  }, [approvalStatus, asset, erc20, exa, input, opts, permit2, staker]);
+  }, [approvalStatus, asset, erc20, exa, exaBalance, input, needsApproval, opts, permit2, staker]);
 
   const [requiresApproval, setRequiresApproval] = useState(false);
+
   const load = useCallback(async () => {
     try {
       setRequiresApproval(await needsApproval());
+      if (!asset) return;
+      const supply = parseUnits(input, asset.decimals);
+
+      if (asset.symbol === 'ETH') {
+        if (previewETH === undefined || reserves === undefined) return;
+        if (supply === 0n || supply < previewETH) return setExcess({ eth: 0n, exa: 0n });
+
+        const extraETH = (supply - previewETH) / 2n;
+        const [exaReserves, wethReserves] = reserves;
+
+        setExcess({
+          eth: extraETH,
+          exa: (extraETH * exaReserves) / wethReserves,
+        });
+      }
     } catch (e: unknown) {
       setErrorData({ status: true, message: handleOperationError(e) });
     }
-  }, [needsApproval]);
+  }, [asset, input, needsApproval, previewETH, reserves]);
 
   const { isLoading: previewIsLoading } = useDelayedEffect({ effect: load });
 
@@ -452,7 +474,8 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
       !opts ||
       !staker ||
       !reserves ||
-      exaBalance === undefined
+      exaBalance === undefined ||
+      previewETH === undefined
     )
       return;
 
@@ -477,6 +500,9 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
 
       const [exaReserves, wethReserves] = reserves;
       const inETH = BigInt(route.toAmount);
+
+      const value = previewETH;
+
       const minEXA = ((((inETH / 2n) * exaReserves) / wethReserves) * 98n) / 100n;
 
       const isMultiSig = await isContract(walletAddress);
@@ -484,19 +510,18 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
 
       if (isMultiSig) {
         const args = [erc20.address, fromAmount, txData, exaBalance, minEXA, 0n] as const;
-        const gas = await staker.estimateGas.stakeAssetAndBalance(args, opts);
+        const gas = await staker.estimateGas.stakeAssetAndBalance(args, { ...opts });
         hash = await staker.write.stakeAssetAndBalance(args, {
           ...opts,
           gasLimit: gasLimit(gas),
         });
       } else {
-        const permit = await sign();
-        const permitEXA = await signEXA();
+        const [permit, permitEXA] = await Promise.all([sign(), signEXA()]);
         if (!permit || !permitEXA) return;
         switch (permit.type) {
           case 'permit': {
             const args = [erc20.address, permit.value, txData, permitEXA, minEXA, 0n] as const;
-            const gas = await staker.estimateGas.stakeAssetAndBalance(args, opts);
+            const gas = await staker.estimateGas.stakeAssetAndBalance(args, { ...opts });
             hash = await staker.write.stakeAssetAndBalance(args, {
               ...opts,
               gasLimit: gasLimit(gas),
@@ -505,7 +530,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
           }
           case 'permit2': {
             const args = [erc20.address, permit.value, txData, permitEXA, minEXA, 0n] as const;
-            const gas = await staker.estimateGas.stakeAssetAndBalance(args, opts);
+            const gas = await staker.estimateGas.stakeAssetAndBalance(args, { ...opts });
             hash = await staker.write.stakeAssetAndBalance(args, {
               ...opts,
               gasLimit: gasLimit(gas),
@@ -527,7 +552,21 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
     } finally {
       setLoading(false);
     }
-  }, [asset, walletAddress, walletClient, erc20, opts, staker, reserves, exaBalance, input, isContract, sign, signEXA]);
+  }, [
+    asset,
+    walletAddress,
+    walletClient,
+    erc20,
+    opts,
+    staker,
+    reserves,
+    exaBalance,
+    previewETH,
+    input,
+    isContract,
+    sign,
+    signEXA,
+  ]);
 
   return (
     <>
@@ -667,7 +706,10 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
                   <Typography fontSize={12} px={2}>
                     {t('Provide EXA liquidity')}
                   </Typography>
-                  <PoolPreview exa={formatEther(exaBalance || 0n)} eth={formatEther(previewETH || 0n)} />
+                  <PoolPreview
+                    exa={formatEther((exaBalance || 0n) + excess.exa)}
+                    eth={formatEther((previewETH || 0n) + excess.eth)}
+                  />
                 </Box>
                 <Box display="flex" flexDirection="column" gap={1.5}>
                   <Typography fontSize={12} px={2}>
@@ -716,7 +758,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
                     fullWidth
                     variant="contained"
                     onClick={asset?.symbol === 'ETH' ? submit : requiresApproval ? approve : socketSubmit}
-                    disabled={!isConnected || previewIsLoading}
+                    disabled={!isConnected || previewIsLoading || !input}
                     loading={loading}
                   >
                     {requiresApproval
@@ -782,7 +824,7 @@ const PoolAsset: FC<PoolAsset> = ({ symbol, amount }) => {
           type: 'number',
           value: amount,
           step: 'any',
-          style: { textAlign: 'right', padding: 0, height: 'fit-content' },
+          style: { textAlign: 'right', padding: 0, height: 'fit-content', cursor: 'default' },
         }}
         sx={{ fontSize: 15 }}
       />
