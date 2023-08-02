@@ -22,7 +22,16 @@ import { splitSignature } from '@ethersproject/bytes';
 import { TransitionProps } from '@mui/material/transitions';
 import Draggable from 'react-draggable';
 import { useTranslation } from 'react-i18next';
-import { formatEther, Hex, parseEther, parseUnits, hexToBigInt, keccak256, encodeAbiParameters } from 'viem';
+import {
+  formatEther,
+  Hex,
+  parseEther,
+  parseUnits,
+  hexToBigInt,
+  keccak256,
+  encodeAbiParameters,
+  formatUnits,
+} from 'viem';
 import { GAS_LIMIT_MULTIPLIER, MAX_UINT256, WEI_PER_ETHER } from 'utils/const';
 import { LoadingButton } from '@mui/lab';
 import { useWeb3 } from 'hooks/useWeb3';
@@ -54,7 +63,6 @@ import useIsContract from 'hooks/useIsContract';
 import usePermit2 from 'hooks/usePermit2';
 import useDelayedEffect from 'hooks/useDelayedEffect';
 
-const MIN_SUPPLY = parseEther('0.002');
 const NATIVE_TOKEN_ADDRESS = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
 
 type ApprovalStatus = 'INIT' | 'ERC20' | 'ERC20-PERMIT2' | 'EXA' | 'APPROVED';
@@ -133,6 +141,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
   }, [assets]);
 
   const handleAssetChange = useCallback((asset_: AssetBalance) => {
+    setErrorData(undefined);
     setAsset(asset_);
     setInput('');
   }, []);
@@ -196,13 +205,6 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
     if (!walletAddress || exaBalance === undefined || !staker || previewETH === undefined || !reserves || !opts) return;
 
     const supply = parseEther(input || '0');
-    if (supply && supply < previewETH) {
-      return setErrorData({
-        status: true,
-        message: t('You must deposit at least {{previewETH}} ETH', { previewETH: formatEther(previewETH) }),
-      });
-    }
-
     if (!exaBalance && !supply) {
       return setErrorData({ status: true, message: t('You have no EXA balance. Supply ETH in order to continue') });
     }
@@ -346,16 +348,76 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
     try {
       setRequiresApproval(await needsApproval());
       if (!asset) return;
-      const supply = parseUnits(input, asset.decimals);
 
+      if (input === '' || previewETH === undefined || reserves === undefined) {
+        return setExcess({ eth: 0n, exa: 0n });
+      }
+
+      setErrorData(undefined);
+
+      const [exaReserves, wethReserves] = reserves;
+      const supply = parseUnits(input, asset.decimals);
       if (asset.symbol === 'ETH') {
-        if (previewETH === undefined || reserves === undefined) return;
-        if (supply === 0n || supply < previewETH) return setExcess({ eth: 0n, exa: 0n });
+        if (supply === 0n || supply < previewETH) {
+          setErrorData({
+            status: true,
+            message: t('You need to supply more than {{ value }} ETH', { value: formatEther(previewETH) }),
+          });
+          return setExcess({ eth: 0n, exa: 0n });
+        }
 
         const extraETH = (supply - previewETH) / 2n;
-        const [exaReserves, wethReserves] = reserves;
 
-        setExcess({
+        return setExcess({
+          eth: extraETH,
+          exa: (extraETH * exaReserves) / wethReserves,
+        });
+      } else {
+        if (!walletAddress || !staker) return setExcess({ eth: 0n, exa: 0n });
+        const {
+          routes: [routeAsset],
+        } = await socketQuote({
+          fromChainId: 10,
+          toChainId: 10,
+          fromAmount: previewETH,
+          fromTokenAddress: NATIVE_TOKEN_ADDRESS,
+          toTokenAddress: asset.address,
+          userAddress: walletAddress,
+          recipient: staker.address,
+        });
+
+        if (!routeAsset) return setExcess({ eth: 0n, exa: 0n });
+        const previewAsset = BigInt(routeAsset.toAmount);
+
+        if (previewAsset === 0n || supply < previewAsset) {
+          setErrorData({
+            status: true,
+            message: t('You need to supply more than {{ value }} {{ symbol }}', {
+              value: formatUnits(previewAsset, asset.decimals),
+              symbol: asset.symbol,
+            }),
+          });
+          return setExcess({ eth: 0n, exa: 0n });
+        }
+
+        const extraAsset = (supply - previewAsset) / 2n;
+
+        const {
+          routes: [routeETH],
+        } = await socketQuote({
+          fromChainId: 10,
+          toChainId: 10,
+          fromAmount: extraAsset,
+          fromTokenAddress: asset.address,
+          toTokenAddress: NATIVE_TOKEN_ADDRESS,
+          userAddress: walletAddress,
+          recipient: staker.address,
+        });
+
+        if (!routeETH) return setExcess({ eth: 0n, exa: 0n });
+        const extraETH = BigInt(routeETH.toAmount);
+
+        return setExcess({
           eth: extraETH,
           exa: (extraETH * exaReserves) / wethReserves,
         });
@@ -363,7 +425,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
     } catch (e: unknown) {
       setErrorData({ status: true, message: handleOperationError(e) });
     }
-  }, [asset, input, needsApproval, previewETH, reserves]);
+  }, [asset, input, needsApproval, previewETH, reserves, staker, t, walletAddress]);
 
   const { isLoading: previewIsLoading } = useDelayedEffect({ effect: load });
 
@@ -476,18 +538,26 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
       !reserves ||
       exaBalance === undefined ||
       previewETH === undefined
-    )
+    ) {
       return;
+    }
+
+    const supply = parseUnits(input || '0', asset.decimals);
+    if (!exaBalance && !supply) {
+      return setErrorData({
+        status: true,
+        message: t('You have no EXA balance. Supply {{ symbol }} in order to continue', { symbol: asset.symbol }),
+      });
+    }
 
     setLoading(true);
     try {
-      const fromAmount = parseUnits(input || '0', asset.decimals);
       const {
         routes: [route],
       } = await socketQuote({
         fromChainId: 10,
         toChainId: 10,
-        fromAmount,
+        fromAmount: supply,
         fromTokenAddress: asset.address,
         toTokenAddress: NATIVE_TOKEN_ADDRESS,
         userAddress: walletAddress,
@@ -501,15 +571,13 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
       const [exaReserves, wethReserves] = reserves;
       const inETH = BigInt(route.toAmount);
 
-      const value = previewETH;
-
       const minEXA = ((((inETH / 2n) * exaReserves) / wethReserves) * 98n) / 100n;
 
       const isMultiSig = await isContract(walletAddress);
       let hash: Hex | undefined;
 
       if (isMultiSig) {
-        const args = [erc20.address, fromAmount, txData, exaBalance, minEXA, 0n] as const;
+        const args = [erc20.address, supply, txData, exaBalance, minEXA, 0n] as const;
         const gas = await staker.estimateGas.stakeAssetAndBalance(args, { ...opts });
         hash = await staker.write.stakeAssetAndBalance(args, {
           ...opts,
@@ -563,6 +631,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
     exaBalance,
     previewETH,
     input,
+    t,
     isContract,
     sign,
     signEXA,
@@ -758,8 +827,8 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
                     fullWidth
                     variant="contained"
                     onClick={asset?.symbol === 'ETH' ? submit : requiresApproval ? approve : socketSubmit}
-                    disabled={!isConnected || previewIsLoading || !input}
-                    loading={loading}
+                    disabled={!isConnected || previewIsLoading || !input || Boolean(errorData)}
+                    loading={loading || previewIsLoading}
                   >
                     {requiresApproval
                       ? t('Approve {{ asset }}', { asset: approvalStatus === 'EXA' ? 'EXA' : asset?.symbol })
