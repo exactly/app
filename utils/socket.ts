@@ -8,13 +8,6 @@ export const socketRequest = async <Result>(
 ) => {
   if (!process.env.NEXT_PUBLIC_SOCKET_API_KEY) throw new Error('NEXT_PUBLIC_SOCKET_API_KEY is not defined');
 
-  console.log(
-    method,
-    path,
-    params,
-    body,
-    JSON.stringify(body, (_, value) => (typeof value === 'bigint' ? String(value) : value)),
-  );
   const response = await fetch(`https://api.socket.tech/v2/${path}${params ? '?' : ''}${new URLSearchParams(params)}`, {
     method,
     headers: {
@@ -24,7 +17,6 @@ export const socketRequest = async <Result>(
     body: JSON.stringify(body, (_, value) => (typeof value === 'bigint' ? String(value) : value)),
   });
   const { result } = (await response.json()) as { result: Result };
-  console.log(result);
   return result;
 };
 

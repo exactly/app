@@ -379,7 +379,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
         } = await socketQuote({
           fromChainId: 10,
           toChainId: 10,
-          fromAmount: previewETH,
+          fromAmount: (previewETH * 1_001n) / 1_000n,
           fromTokenAddress: NATIVE_TOKEN_ADDRESS,
           toTokenAddress: asset.address,
           userAddress: walletAddress,
@@ -389,7 +389,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
         if (!routeAsset) return setExcess({ eth: 0n, exa: 0n });
         const previewAsset = BigInt(routeAsset.toAmount);
 
-        if (previewAsset === 0n || supply < previewAsset) {
+        if (supply === 0n || supply < previewAsset) {
           setErrorData({
             status: true,
             message: t('You need to supply more than {{ value }} {{ symbol }}', {
@@ -613,9 +613,6 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
       const { status } = await waitForTransaction({ hash });
       if (status === 'reverted') throw new Error('Transaction reverted');
     } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error(err);
-
       setErrorData({ status: true, message: handleOperationError(err) });
     } finally {
       setLoading(false);
@@ -778,6 +775,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
                   <PoolPreview
                     exa={formatEther((exaBalance || 0n) + excess.exa)}
                     eth={formatEther((previewETH || 0n) + excess.eth)}
+                    loading={previewIsLoading}
                   />
                 </Box>
                 <Box display="flex" flexDirection="column" gap={1.5}>
@@ -847,17 +845,18 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
 type PoolPreviewProps = {
   exa: string;
   eth: string;
+  loading: boolean;
 };
 
-const PoolPreview: FC<PoolPreviewProps> = ({ exa, eth }) => {
+const PoolPreview: FC<PoolPreviewProps> = ({ exa, eth, loading }) => {
   return (
     <ModalBox sx={{ bgcolor: 'grey.100', px: 2, py: 1 }}>
       <ModalBoxRow>
         <ModalBoxCell>
-          <PoolAsset symbol="EXA" amount={exa} />
+          <PoolAsset symbol="EXA" amount={exa} loading={loading} />
         </ModalBoxCell>
         <ModalBoxCell divisor>
-          <PoolAsset symbol="WETH" amount={eth} />
+          <PoolAsset symbol="WETH" amount={eth} loading={loading} />
         </ModalBoxCell>
       </ModalBoxRow>
     </ModalBox>
@@ -867,9 +866,10 @@ const PoolPreview: FC<PoolPreviewProps> = ({ exa, eth }) => {
 type PoolAsset = {
   symbol: string;
   amount: string;
+  loading: boolean;
 };
 
-const PoolAsset: FC<PoolAsset> = ({ symbol, amount }) => {
+const PoolAsset: FC<PoolAsset> = ({ symbol, amount, loading }) => {
   return (
     <Box display="flex" gap={1} alignItems="center" justifyContent="space-between">
       <Box display="flex" alignItems="center" gap={1}>
@@ -887,16 +887,20 @@ const PoolAsset: FC<PoolAsset> = ({ symbol, amount }) => {
           {formatSymbol(symbol)}
         </Typography>
       </Box>
-      <InputBase
-        inputProps={{
-          min: 0.0,
-          type: 'number',
-          value: amount,
-          step: 'any',
-          style: { textAlign: 'right', padding: 0, height: 'fit-content', cursor: 'default' },
-        }}
-        sx={{ fontSize: 15 }}
-      />
+      {loading ? (
+        <Skeleton width="100%" />
+      ) : (
+        <InputBase
+          inputProps={{
+            min: 0.0,
+            type: 'number',
+            value: amount,
+            step: 'any',
+            style: { textAlign: 'right', padding: 0, height: 'fit-content', cursor: 'default' },
+          }}
+          sx={{ fontSize: 15 }}
+        />
+      )}
     </Box>
   );
 };
