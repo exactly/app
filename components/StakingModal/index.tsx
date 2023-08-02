@@ -64,6 +64,7 @@ import usePermit2 from 'hooks/usePermit2';
 import useDelayedEffect from 'hooks/useDelayedEffect';
 
 const NATIVE_TOKEN_ADDRESS = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
+const MIN_SUPPLY = parseEther('0.002');
 
 type ApprovalStatus = 'INIT' | 'ERC20' | 'ERC20-PERMIT2' | 'EXA' | 'APPROVED';
 
@@ -245,6 +246,8 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
       if (!hash) return;
 
       await waitForTransaction({ hash });
+
+      setInput('');
     } catch (e: unknown) {
       setErrorData({ status: true, message: handleOperationError(e) });
     } finally {
@@ -379,7 +382,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
         } = await socketQuote({
           fromChainId: 10,
           toChainId: 10,
-          fromAmount: (previewETH * 1_001n) / 1_000n,
+          fromAmount: (previewETH * 101n) / 100n + MIN_SUPPLY,
           fromTokenAddress: NATIVE_TOKEN_ADDRESS,
           toTokenAddress: asset.address,
           userAddress: walletAddress,
@@ -612,6 +615,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
 
       const { status } = await waitForTransaction({ hash });
       if (status === 'reverted') throw new Error('Transaction reverted');
+      setInput('');
     } catch (err) {
       setErrorData({ status: true, message: handleOperationError(err) });
     } finally {
