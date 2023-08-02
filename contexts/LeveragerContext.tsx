@@ -336,7 +336,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
 
       const _max = leverageStatus.maxRatio ?? 1n;
       const parsedRatio = parseEther(String(input.leverageRatio));
-      const ratio = !userInput && parsedRatio < _max ? parsedRatio : _max;
+      const ratio = userInput ? parsedRatio : parsedRatio < _max ? parsedRatio : _max;
       const args = [maIn.market, maOut.market, walletAddress, userInput, ratio, minHealthFactor(maIn, maOut)] as const;
 
       try {
