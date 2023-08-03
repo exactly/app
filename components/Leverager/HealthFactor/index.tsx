@@ -8,18 +8,13 @@ import { useLeveragerContext } from 'contexts/LeveragerContext';
 
 const HealthFactor = () => {
   const { t } = useTranslation();
-  const { input, newHealthFactor, currentLeverageRatio, getHealthFactorColor } = useLeveragerContext();
+  const { newHealthFactor, getHealthFactorColor } = useLeveragerContext();
   const hf = useHealthFactor();
 
   const healthFactor = useMemo(() => (hf ? parseHealthFactor(hf.debt, hf.collateral) : undefined), [hf]);
 
   const hfCurrColor = useMemo(() => getHealthFactorColor(healthFactor), [getHealthFactorColor, healthFactor]);
   const hfNewColor = useMemo(() => getHealthFactorColor(newHealthFactor), [getHealthFactorColor, newHealthFactor]);
-
-  const disabled = useMemo(
-    () => !input.collateralSymbol || !input.borrowSymbol || (currentLeverageRatio === 1 && input.leverageRatio === 1),
-    [currentLeverageRatio, input.borrowSymbol, input.collateralSymbol, input.leverageRatio],
-  );
 
   return (
     <Box display="flex" flexDirection="column" gap={2}>
@@ -39,9 +34,7 @@ const HealthFactor = () => {
 
         <ArrowForwardRoundedIcon sx={{ color: 'blue', fontSize: 14, fontWeight: 600 }} />
 
-        {disabled ? (
-          <Typography variant="h6">{t('N/A')}</Typography>
-        ) : newHealthFactor ? (
+        {newHealthFactor ? (
           <Typography variant="h6" color={hfNewColor.color}>
             {newHealthFactor}
           </Typography>

@@ -8,11 +8,11 @@ import RewardsGroup from '../RewardsGroup';
 
 const LoopAPR = () => {
   const { t } = useTranslation();
-  const { input, loopAPR, currentLeverageRatio, loadingUserInput } = useLeveragerContext();
+  const { input, loopAPR, loadingUserInput } = useLeveragerContext();
 
   const disabled = useMemo(
-    () => !input.collateralSymbol || !input.borrowSymbol || (currentLeverageRatio === 1 && input.leverageRatio === 1),
-    [currentLeverageRatio, input.borrowSymbol, input.collateralSymbol, input.leverageRatio],
+    () => !input.collateralSymbol || !input.borrowSymbol,
+    [input.borrowSymbol, input.collateralSymbol],
   );
 
   return (
@@ -33,9 +33,7 @@ const LoopAPR = () => {
           <InfoOutlinedIcon sx={{ fontSize: 12, color: 'figma.grey.500' }} />
         </Box>
       </Tooltip>
-      {disabled ? (
-        <Typography variant="h6">{t('N/A')}</Typography>
-      ) : loadingUserInput ? (
+      {disabled || loadingUserInput ? (
         <Skeleton width={72} height={36} />
       ) : (
         <Tooltip title={<APRBreakdown />} placement="top" arrow enterTouchDelay={0} sx={{ cursor: 'pointer' }}>
