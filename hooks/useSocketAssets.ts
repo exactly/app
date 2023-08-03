@@ -27,7 +27,9 @@ export default (disableFetch?: boolean) => {
 
     const result = await socketRequest<AssetBalance[]>('balances', { userAddress: walletAddress });
 
-    if (result.length === 0) return;
+    if (result.length === 0) {
+      return setAssets([ETH]);
+    }
 
     setAssets(
       result
