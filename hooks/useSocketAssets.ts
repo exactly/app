@@ -1,7 +1,9 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { AssetBalance } from 'types/Bridge';
 import { useWeb3 } from './useWeb3';
 import { socketRequest } from 'utils/socket';
+import usePrices from './usePrices';
+import { parseUnits } from 'viem';
 
 const ETH = {
   chainId: 10,
@@ -17,8 +19,8 @@ const ETH = {
 
 export default (disableFetch?: boolean) => {
   const [assets, setAssets] = useState<AssetBalance[]>([ETH]);
-
   const { walletAddress, chain } = useWeb3();
+  const prices = usePrices();
 
   const fetchAssets = useCallback(async () => {
     if (!walletAddress || !process.env.NEXT_PUBLIC_SOCKET_API_KEY || disableFetch) return;
@@ -30,7 +32,19 @@ export default (disableFetch?: boolean) => {
     setAssets(
       result
         .filter(({ chainId }) => chainId === chain.id)
-        .sort((a, b) => b.amount - a.amount)
+        .sort((a, b) => {
+          if (prices[a.address] === undefined && prices[b.address] === undefined) {
+            return a.symbol.localeCompare(b.symbol);
+          }
+
+          if (prices[a.address] === undefined) return 1;
+          if (prices[b.address] === undefined) return -1;
+
+          return Number(
+            parseUnits(b.amount.toString(), b.decimals) * prices[b.address] -
+              parseUnits(a.amount.toString(), a.decimals) * prices[a.address],
+          );
+        })
         .map((asset) => ({
           ...asset,
           name: asset.symbol === 'ETH' ? 'Ether' : asset.name,
@@ -38,7 +52,7 @@ export default (disableFetch?: boolean) => {
           logoURI: asset.symbol === 'ETH' ? '/img/assets/WETH.svg' : asset.logoURI,
         })),
     );
-  }, [chain.id, disableFetch, walletAddress]);
+  }, [chain.id, disableFetch, prices, walletAddress]);
 
   useEffect(() => {
     fetchAssets();

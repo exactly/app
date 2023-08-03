@@ -138,7 +138,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
 
   useEffect(() => {
     if (!assets) return;
-    setAsset(assets.find((a) => a.symbol === 'ETH'));
+    setAsset(assets.filter(({ symbol }) => !['ETH', 'WETH'].includes(symbol))[0] || assets[0]);
   }, [assets]);
 
   const handleAssetChange = useCallback((asset_: AssetBalance) => {
