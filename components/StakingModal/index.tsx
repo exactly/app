@@ -207,7 +207,10 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
 
     const supply = parseEther(input || '0');
     if (!exaBalance && !supply) {
-      return setErrorData({ status: true, message: t('You have no EXA balance. Supply ETH in order to continue') });
+      return setErrorData({
+        status: true,
+        message: t('You have no EXA balance. Supply {{ symbol }} in order to continue', { symbol: 'ETH' }),
+      });
     }
 
     setLoading(true);
@@ -364,7 +367,10 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
         if (supply === 0n || supply < previewETH) {
           setErrorData({
             status: true,
-            message: t('You need to supply more than {{ value }} ETH', { value: formatEther(previewETH) }),
+            message: t('You need to supply more than {{ value }} {{ symbol }}', {
+              value: formatEther(previewETH),
+              symbol: 'ETH',
+            }),
           });
           return setExcess({ eth: 0n, exa: 0n });
         }
@@ -834,6 +840,8 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
                   >
                     {requiresApproval
                       ? t('Approve {{ asset }}', { asset: approvalStatus === 'EXA' ? 'EXA' : asset?.symbol })
+                      : asset?.symbol !== 'ETH'
+                      ? t('Swap & Supply EXA/ETH')
                       : t('Supply EXA/ETH')}
                   </LoadingButton>
                 )}
