@@ -47,13 +47,13 @@ import parseHealthFactor from 'utils/parseHealthFactor';
 import useERC20 from 'hooks/useERC20';
 import usePermit2 from 'hooks/usePermit2';
 import dayjs from 'dayjs';
-import { isPermitAllowed } from 'utils/permit';
 import useDebtPreviewer, { type Limit, type Leverage as LeverageStatus, type Rates } from 'hooks/useDebtPreviewer';
 import useDelayedEffect from 'hooks/useDelayedEffect';
 import useRewards from 'hooks/useRewards';
 import useFloatingPoolAPR from 'hooks/useFloatingPoolAPR';
 import { debtManagerABI } from 'types/abi';
 import useStETHNativeAPR from 'hooks/useStETHNativeAPR';
+import useIsPermit from 'hooks/useIsPermit';
 
 type Params<T extends ExtractAbiFunctionNames<typeof debtManagerABI>> = AbiParametersToPrimitiveTypes<
   ExtractAbiFunction<typeof debtManagerABI, T>['inputs']
@@ -170,6 +170,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
   const healthFactor = useHealthFactor();
   const { getMarketAccount, refreshAccountData } = useAccountData();
   const isContract = useIsContract();
+  const isPermit = useIsPermit();
   const { signTypedDataAsync } = useSignTypedData();
   const publicClient = usePublicClient();
   const [isOpen, setIsOpen] = useState(false);
@@ -651,7 +652,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
         return false;
       }
 
-      if (!isPermitAllowed(chain, maIn.assetSymbol) && input.secondaryOperation === 'deposit') {
+      if (!(await isPermit(maIn.asset)) && input.secondaryOperation === 'deposit') {
         setApprovalStatus('ERC20-PERMIT2');
         const allowance = await assetIn.read.allowance([walletAddress, permit2.address], opts);
         if (allowance < userInput) return true;
@@ -664,6 +665,9 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
       return true;
     }
   }, [
+    input.collateralSymbol,
+    input.borrowSymbol,
+    input.secondaryOperation,
     maIn,
     walletAddress,
     marketIn,
@@ -674,10 +678,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     limit,
     opts,
     isContract,
-    chain,
-    input.secondaryOperation,
-    input.collateralSymbol,
-    input.borrowSymbol,
+    isPermit,
     userInput,
   ]);
 
@@ -762,8 +763,9 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
       if (!walletAddress || !maIn || !marketIn || !marketOut || !assetIn || !permit2 || !debtManager) return;
 
       const deadline = BigInt(dayjs().unix() + 3_600);
+      const permitAllowed = await isPermit(assetIn.address);
 
-      if (who === 'assetIn' && !isPermitAllowed(chain, maIn.assetSymbol)) {
+      if (who === 'assetIn' && !permitAllowed) {
         const signature = await signTypedDataAsync({
           primaryType: 'PermitTransferFrom',
           domain: {
@@ -833,7 +835,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
       const { v, r, s } = await signTypedDataAsync({
         primaryType: 'Permit',
         domain: {
-          name: who.startsWith('market') ? '' : maIn.assetSymbol,
+          name: who.startsWith('market') ? '' : await assetIn.read.name(opts),
           version: '1',
           chainId: chain.id,
           verifyingContract,
@@ -866,8 +868,9 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     },
     [
       assetIn,
-      chain,
+      chain.id,
       debtManager,
+      isPermit,
       maIn,
       marketIn,
       marketOut,

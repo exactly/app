@@ -456,7 +456,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
           name,
           version: '1',
           chainId,
-          verifyingContract: staker.address,
+          verifyingContract: erc20.address,
         },
         types: {
           Permit: [
@@ -781,17 +781,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
               <Box display="flex" flexDirection="column" gap={2}>
                 <Box display="flex" flexDirection="column" gap={1.5}>
                   <Typography fontSize={12} px={2}>
-                    {t('Provide EXA liquidity')}
-                  </Typography>
-                  <PoolPreview
-                    exa={formatEther((exaBalance || 0n) + excess.exa)}
-                    eth={formatEther((previewETH || 0n) + excess.eth)}
-                    loading={previewIsLoading}
-                  />
-                </Box>
-                <Box display="flex" flexDirection="column" gap={1.5}>
-                  <Typography fontSize={12} px={2}>
-                    {t('Add more liquidity')}
+                    {t('Provide liquidity')}
                   </Typography>
                   <ModalBox sx={{ display: 'flex', flexDirection: 'row', p: 1, px: 2, alignItems: 'center' }}>
                     {assets && asset ? (
@@ -814,6 +804,11 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
                     )}
                   </ModalBox>
                 </Box>
+                <PoolPreview
+                  exa={formatEther((exaBalance || 0n) + excess.exa)}
+                  eth={formatEther((previewETH || 0n) + excess.eth)}
+                  loading={previewIsLoading}
+                />
               </Box>
               {errorData?.status && <ModalAlert message={errorData.message} variant={errorData.variant} mb={0} />}
 
@@ -881,8 +876,8 @@ type PoolPreviewProps = {
 
 const PoolPreview: FC<PoolPreviewProps> = ({ exa, eth, loading }) => {
   return (
-    <ModalBox sx={{ bgcolor: 'grey.100', px: 2, py: 1 }}>
-      <ModalBoxRow>
+    <ModalBox sx={{ bgcolor: 'grey.100', px: 2, py: 1, height: 50 }}>
+      <ModalBoxRow sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
         <ModalBoxCell>
           <PoolAsset symbol="EXA" amount={exa} loading={loading} />
         </ModalBoxCell>

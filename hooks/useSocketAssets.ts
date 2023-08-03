@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { AssetBalance } from 'types/Bridge';
 import { useWeb3 } from './useWeb3';
 import { socketRequest } from 'utils/socket';
