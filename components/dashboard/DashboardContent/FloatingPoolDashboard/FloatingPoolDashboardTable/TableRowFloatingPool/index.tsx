@@ -14,7 +14,6 @@ import useAccountData from 'hooks/useAccountData';
 import useActionButton, { useStartDebtManagerButton } from 'hooks/useActionButton';
 import useRouter from 'hooks/useRouter';
 import { useTranslation } from 'react-i18next';
-import RolloverButton from 'components/DebtManager/Button';
 import Rates from 'components/Rates';
 
 type Props = {
@@ -118,7 +117,7 @@ function TableRowFloatingPool({ symbol, valueUSD, depositedAmount, borrowedAmoun
             >
               {t('Repay')}
             </Button>
-            <RolloverButton
+            <Button
               variant="outlined"
               sx={{
                 backgroundColor: 'components.bg',
@@ -129,7 +128,7 @@ function TableRowFloatingPool({ symbol, valueUSD, depositedAmount, borrowedAmoun
               disabled={isRolloverDisabled(borrowedAmount)}
             >
               {t('Rollover')}
-            </RolloverButton>
+            </Button>
           </ButtonGroup>
         )}
       </TableCell>

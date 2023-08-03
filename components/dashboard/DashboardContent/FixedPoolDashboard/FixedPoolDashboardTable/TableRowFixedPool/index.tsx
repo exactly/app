@@ -23,7 +23,6 @@ import { Borrow } from 'types/Borrow';
 import { Repay } from 'types/Repay';
 import useAccountData from 'hooks/useAccountData';
 import useRouter from 'hooks/useRouter';
-import RolloverButton from 'components/DebtManager/Button';
 
 type Props = {
   symbol: string;
@@ -159,7 +158,7 @@ function TableRowFixedPool({ symbol, valueUSD, type, maturityDate, market, decim
                 >
                   {t('Repay')}
                 </Button>
-                <RolloverButton
+                <Button
                   variant="outlined"
                   sx={{
                     backgroundColor: 'components.bg',
@@ -172,7 +171,7 @@ function TableRowFixedPool({ symbol, valueUSD, type, maturityDate, market, decim
                   disabled={isRolloverDisabled()}
                 >
                   {t('Rollover')}
-                </RolloverButton>
+                </Button>
               </ButtonGroup>
             ))) || (
             <Skeleton
