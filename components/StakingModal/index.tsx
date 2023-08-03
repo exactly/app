@@ -21,7 +21,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import { splitSignature } from '@ethersproject/bytes';
 import { TransitionProps } from '@mui/material/transitions';
 import Draggable from 'react-draggable';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import {
   formatEther,
   Hex,
@@ -65,6 +65,7 @@ import useDelayedEffect from 'hooks/useDelayedEffect';
 
 const NATIVE_TOKEN_ADDRESS = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
 const MIN_SUPPLY = parseEther('0.002');
+const PROTO_STAKER_DOCS = 'https://docs.exact.ly/guides/periphery/proto-staker';
 
 type ApprovalStatus = 'INIT' | 'ERC20' | 'ERC20-PERMIT2' | 'EXA' | 'APPROVED';
 
@@ -815,7 +816,8 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
                 </Box>
               </Box>
               {errorData?.status && <ModalAlert message={errorData.message} variant={errorData.variant} mb={0} />}
-              <Box mt={errorData ? 0 : 2}>
+
+              <Box mt={errorData ? 0 : 2} display="flex" flexDirection="column" gap={1}>
                 {impersonateActive ? (
                   <Button fullWidth onClick={exitAndClose} variant="contained">
                     {t('Exit Read-Only Mode')}
@@ -845,6 +847,23 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
                       : t('Supply EXA/ETH')}
                   </LoadingButton>
                 )}
+                <Typography fontSize={12}>
+                  <Trans
+                    i18nKey="Providing liquidity to an AMM has risk. <a>Read More</a>"
+                    components={{
+                      a: (
+                        <a
+                          href={PROTO_STAKER_DOCS}
+                          target="_blank"
+                          rel="noreferrer noopener"
+                          style={{
+                            textDecoration: 'underline',
+                          }}
+                        />
+                      ),
+                    }}
+                  />
+                </Typography>
               </Box>
             </Box>
           </DialogContent>
