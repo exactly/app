@@ -587,33 +587,67 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
       let hash: Hex | undefined;
 
       if (isMultiSig) {
-        const args = [erc20.address, supply, txData, exaBalance, minEXA, 0n] as const;
-        const gas = await staker.estimateGas.stakeAssetAndBalance(args, { ...opts });
-        hash = await staker.write.stakeAssetAndBalance(args, {
-          ...opts,
-          gasLimit: gasLimit(gas),
-        });
+        if (exaBalance === 0n) {
+          const args = [erc20.address, supply, txData, minEXA, 0n] as const;
+          const gas = await staker.estimateGas.stakeAsset(args, opts);
+          hash = await staker.write.stakeAsset(args, {
+            ...opts,
+            gasLimit: gasLimit(gas),
+          });
+        } else {
+          const args = [erc20.address, supply, txData, exaBalance, minEXA, 0n] as const;
+          const gas = await staker.estimateGas.stakeAssetAndBalance(args, { ...opts });
+          hash = await staker.write.stakeAssetAndBalance(args, {
+            ...opts,
+            gasLimit: gasLimit(gas),
+          });
+        }
       } else {
-        const [permit, permitEXA] = await Promise.all([sign(), signEXA()]);
-        if (!permit || !permitEXA) return;
-        switch (permit.type) {
-          case 'permit': {
-            const args = [erc20.address, permit.value, txData, permitEXA, minEXA, 0n] as const;
-            const gas = await staker.estimateGas.stakeAssetAndBalance(args, { ...opts });
-            hash = await staker.write.stakeAssetAndBalance(args, {
-              ...opts,
-              gasLimit: gasLimit(gas),
-            });
-            break;
+        if (exaBalance === 0n) {
+          const permit = await sign();
+          if (!permit) return;
+          switch (permit.type) {
+            case 'permit': {
+              const args = [erc20.address, permit.value, txData, minEXA, 0n] as const;
+              const gas = await staker.estimateGas.stakeAsset(args, { ...opts });
+              hash = await staker.write.stakeAsset(args, {
+                ...opts,
+                gasLimit: gasLimit(gas),
+              });
+              break;
+            }
+            case 'permit2': {
+              const args = [erc20.address, permit.value, txData, minEXA, 0n] as const;
+              const gas = await staker.estimateGas.stakeAsset(args, { ...opts });
+              hash = await staker.write.stakeAsset(args, {
+                ...opts,
+                gasLimit: gasLimit(gas),
+              });
+              break;
+            }
           }
-          case 'permit2': {
-            const args = [erc20.address, permit.value, txData, permitEXA, minEXA, 0n] as const;
-            const gas = await staker.estimateGas.stakeAssetAndBalance(args, { ...opts });
-            hash = await staker.write.stakeAssetAndBalance(args, {
-              ...opts,
-              gasLimit: gasLimit(gas),
-            });
-            break;
+        } else {
+          const [permit, permitEXA] = await Promise.all([sign(), signEXA()]);
+          if (!permit || !permitEXA) return;
+          switch (permit.type) {
+            case 'permit': {
+              const args = [erc20.address, permit.value, txData, permitEXA, minEXA, 0n] as const;
+              const gas = await staker.estimateGas.stakeAssetAndBalance(args, { ...opts });
+              hash = await staker.write.stakeAssetAndBalance(args, {
+                ...opts,
+                gasLimit: gasLimit(gas),
+              });
+              break;
+            }
+            case 'permit2': {
+              const args = [erc20.address, permit.value, txData, permitEXA, minEXA, 0n] as const;
+              const gas = await staker.estimateGas.stakeAssetAndBalance(args, { ...opts });
+              hash = await staker.write.stakeAssetAndBalance(args, {
+                ...opts,
+                gasLimit: gasLimit(gas),
+              });
+              break;
+            }
           }
         }
       }
