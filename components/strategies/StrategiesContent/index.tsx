@@ -24,7 +24,7 @@ function StrategiesContent() {
         ),
       },
       {
-        title: t('Reduce Exposure'),
+        title: t('Reduce exposure'),
         description: t('Reduce your risk by decreasing your investment exposure and borrowing less.'),
         tags: ['advanced', 'new'],
         children: (
