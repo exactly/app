@@ -176,7 +176,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
       message: {
         owner: walletAddress,
         spender: staker.address,
-        value: value,
+        value,
         nonce,
         deadline,
       },
@@ -529,6 +529,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
     });
 
     const permit = {
+      owner: walletAddress,
       amount: value,
       deadline,
       signature,
@@ -596,7 +597,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
           });
         } else {
           const args = [erc20.address, supply, txData, exaBalance, minEXA, 0n] as const;
-          const gas = await staker.estimateGas.stakeAssetAndBalance(args, { ...opts });
+          const gas = await staker.estimateGas.stakeAssetAndBalance(args, opts);
           hash = await staker.write.stakeAssetAndBalance(args, {
             ...opts,
             gasLimit: gasLimit(gas),
@@ -609,7 +610,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
           switch (permit.type) {
             case 'permit': {
               const args = [erc20.address, permit.value, txData, minEXA, 0n] as const;
-              const gas = await staker.estimateGas.stakeAsset(args, { ...opts });
+              const gas = await staker.estimateGas.stakeAsset(args, opts);
               hash = await staker.write.stakeAsset(args, {
                 ...opts,
                 gasLimit: gasLimit(gas),
@@ -618,7 +619,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
             }
             case 'permit2': {
               const args = [erc20.address, permit.value, txData, minEXA, 0n] as const;
-              const gas = await staker.estimateGas.stakeAsset(args, { ...opts });
+              const gas = await staker.estimateGas.stakeAsset(args, opts);
               hash = await staker.write.stakeAsset(args, {
                 ...opts,
                 gasLimit: gasLimit(gas),
@@ -632,7 +633,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
           switch (permit.type) {
             case 'permit': {
               const args = [erc20.address, permit.value, txData, permitEXA, minEXA, 0n] as const;
-              const gas = await staker.estimateGas.stakeAssetAndBalance(args, { ...opts });
+              const gas = await staker.estimateGas.stakeAssetAndBalance(args, opts);
               hash = await staker.write.stakeAssetAndBalance(args, {
                 ...opts,
                 gasLimit: gasLimit(gas),
@@ -641,7 +642,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
             }
             case 'permit2': {
               const args = [erc20.address, permit.value, txData, permitEXA, minEXA, 0n] as const;
-              const gas = await staker.estimateGas.stakeAssetAndBalance(args, { ...opts });
+              const gas = await staker.estimateGas.stakeAssetAndBalance(args, opts);
               hash = await staker.write.stakeAssetAndBalance(args, {
                 ...opts,
                 gasLimit: gasLimit(gas),
