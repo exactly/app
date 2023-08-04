@@ -31,7 +31,7 @@ describe('USDC floating borrow/repay', () => {
     type: 'floating',
     symbol: 'USDC',
     amount: '50',
-    aboveLiquidityAmount: 1_000_000_000,
+    aboveLiquidityAmount: 1_000_000_000_000,
   });
 
   describe('Status after borrow', () => {

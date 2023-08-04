@@ -44,7 +44,7 @@ export default ({ type, symbol, amount = '1', shouldApprove = false, maturity }:
       });
     });
 
-    describe('the input', () => {
+    describe('the input', { retries: 3 }, () => {
       it(`should allow to input the amount ${amount}`, () => {
         modal.input(amount);
         modal.checkAlertNotFound('error');

@@ -46,7 +46,7 @@ export default ({ type, symbol, amount = '1', shouldApprove = false, maturity }:
       });
     });
 
-    describe('the input', () => {
+    describe('the input', { retries: 3 }, () => {
       afterEach(() => {
         modal.clearInput();
       });

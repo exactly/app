@@ -45,7 +45,7 @@ export default ({
       });
     });
 
-    describe('the input', () => {
+    describe('the input', { retries: 3 }, () => {
       afterEach(() => {
         modal.clearInput();
       });

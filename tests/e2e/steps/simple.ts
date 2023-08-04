@@ -21,7 +21,7 @@ export const selectOption = (maturity: number) => {
 };
 
 export const checkBalanceVisible = (visible: boolean) => {
-  cy.getByTestId('modal-wallet-balance').should(visible ? 'be.visible' : 'not.exist');
+  cy.getByTestId('modal-amount-info').should(visible ? 'be.visible' : 'not.exist');
 };
 
 export const waitForViewReady = () => {

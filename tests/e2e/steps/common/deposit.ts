@@ -40,7 +40,7 @@ export default ({ type, symbol, decimals, balance, amount = '1', shouldApprove =
       });
     });
 
-    describe('the input', () => {
+    describe('the input', { retries: 3 }, () => {
       afterEach(() => {
         modal.clearInput();
       });

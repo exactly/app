@@ -40,9 +40,13 @@ export const rpcURL = (forkId: string) => {
   return `https://rpc.tenderly.co/fork/${forkId}`;
 };
 
-export const createFork = async (networkId: number | string = mainnet.id): Promise<string> => {
+export const createFork = async (
+  networkId: number | string = mainnet.id,
+  blockNumber: number = 107789087,
+): Promise<string> => {
   const body = JSON.stringify({
     network_id: String(networkId),
+    block_number: blockNumber,
   });
 
   const rawResponse = await fetch(FORK_URL, { method: 'POST', headers, body });

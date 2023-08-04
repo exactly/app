@@ -122,7 +122,7 @@ export const checkAssetSelection = (symbol: ERC20TokenSymbol) => {
 };
 
 export const checkWalletBalance = (balance: string) => {
-  cy.getByTestId('modal-wallet-balance').should('contain.text', balance);
+  cy.getByTestId('modal-amount-info').should('contain.text', balance);
 };
 
 export const checkPoolDate = (maturity: number) => {

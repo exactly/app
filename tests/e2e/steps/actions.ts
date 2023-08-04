@@ -239,11 +239,12 @@ export const checkBalance = ({ address, symbol, amount, delta }: BalanceParams, 
 export const reload = async () => {
   it('reloads the app', () => {
     cy.reload();
+    justWait(1000);
+    cy.reload();
     justWait();
   });
 };
 
-export const justWait = () => {
-  // eslint-disable-next-line cypress/no-unnecessary-waiting, ui-testing/no-hard-wait
-  return cy.wait(5000);
+export const justWait = (timeout = 5000) => {
+  return cy.wait(timeout);
 };
