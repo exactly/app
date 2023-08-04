@@ -19,6 +19,7 @@ import {
   AvatarGroup,
   Avatar,
   ButtonBase,
+  Tooltip,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { TransitionProps } from '@mui/material/transitions';
@@ -36,6 +37,7 @@ import { WEI_PER_ETHER } from 'utils/const';
 import { LoadingButton } from '@mui/lab';
 import { useWeb3 } from 'hooks/useWeb3';
 import { useNetwork, useSwitchNetwork } from 'wagmi';
+import RewardsTooltip from 'components/RewardsTooltip';
 
 function PaperComponent(props: PaperProps | undefined) {
   const ref = useRef<HTMLDivElement>(null);
@@ -129,21 +131,23 @@ const RewardsModal: FC<RewardsModalProps> = ({ isOpen, open, close }) => {
 
   return (
     <>
-      <Button variant="outlined" onClick={open}>
-        <Box display="flex" gap={0.5} alignItems="center">
-          <AvatarGroup
-            max={6}
-            sx={{ '& .MuiAvatar-root': { width: 16, height: 16, fontSize: 10, borderColor: 'transparent' } }}
-          >
-            {rewards.map(({ symbol }) => (
-              <Avatar key={symbol} alt={symbol} src={`/img/assets/${symbol}.svg`} />
-            ))}
-          </AvatarGroup>
-          <Typography fontSize={14} fontWeight={700}>
-            {totalAmount < WEI_PER_ETHER ? t('Rewards') : `$${formatNumber(formatEther(totalAmount), 'USD')}`}
-          </Typography>
-        </Box>
-      </Button>
+      <Tooltip title={<RewardsTooltip />} arrow placement="bottom">
+        <Button variant="outlined" onClick={open}>
+          <Box display="flex" gap={0.5} alignItems="center">
+            <AvatarGroup
+              max={6}
+              sx={{ '& .MuiAvatar-root': { width: 16, height: 16, fontSize: 10, borderColor: 'transparent' } }}
+            >
+              {rewards.map(({ symbol }) => (
+                <Avatar key={symbol} alt={symbol} src={`/img/assets/${symbol}.svg`} />
+              ))}
+            </AvatarGroup>
+            <Typography fontSize={14} fontWeight={700}>
+              {totalAmount < WEI_PER_ETHER ? t('Rewards') : `$${formatNumber(formatEther(totalAmount), 'USD')}`}
+            </Typography>
+          </Box>
+        </Button>
+      </Tooltip>
       <Dialog
         open={isOpen}
         onClose={closeAndReset}
