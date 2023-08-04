@@ -46,6 +46,9 @@ function AssetOption({ asset, option = false, optionSize = 20, selectedSize = 20
             </Box>
             <Box>
               <Typography fontSize={12}>{asset.amount && formatNumber(asset.amount)}</Typography>
+              <Typography fontSize={10} color="grey.700">
+                {asset.usdAmount !== undefined ? `$${formatNumber(asset.usdAmount)}` : ''}
+              </Typography>
             </Box>
           </>
         ) : (

@@ -13,10 +13,10 @@ const usePrices = (): Record<Hex, bigint> => {
       accountData?.flatMap(({ asset, usdPrice, assetSymbol }) =>
         assetSymbol === 'WETH'
           ? [
-              [asset, usdPrice],
+              [asset.toLowerCase(), usdPrice],
               [NATIVE_TOKEN_ADDRESS, usdPrice],
             ]
-          : [[asset, usdPrice]],
+          : [[asset.toLowerCase(), usdPrice]],
       ),
     );
   }, [accountData]);
