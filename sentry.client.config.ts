@@ -1,4 +1,4 @@
-import { init, Replay } from '@sentry/nextjs';
+import { init, Replay } from '@sentry/browser';
 import { ExtraErrorData } from '@sentry/integrations';
 import { beforeSend } from './utils/sentry';
 
