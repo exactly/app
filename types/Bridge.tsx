@@ -55,7 +55,7 @@ export type Asset = {
   chainAgnosticId: string | null;
 };
 
-export type AssetBalance = Asset & { amount: number };
+export type AssetBalance = Asset & { amount: number; usdAmount?: number };
 
 export type IntegratorFee = {
   asset: Asset;
