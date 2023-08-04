@@ -1,1 +1,1 @@
-import './sentry.client.config';
+import './sentry.edge.config';

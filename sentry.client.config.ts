@@ -1,4 +1,4 @@
-import { init, Replay } from '@sentry/browser';
+import { init, Replay } from '@sentry/nextjs';
 import { ExtraErrorData } from '@sentry/integrations';
 import { beforeSend } from './utils/sentry';
 
@@ -10,6 +10,7 @@ init({
   environment: SENTRY_ENVIRONMENT,
   tracesSampleRate: 1.0,
   replaysOnErrorSampleRate: 1.0,
-  integrations: [new ExtraErrorData({ depth: 5 }), Replay && new Replay()].filter(Boolean),
+  replaysSessionSampleRate: 0.1,
+  integrations: [new ExtraErrorData({ depth: 5 }), new Replay()],
   beforeSend,
 });
