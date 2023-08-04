@@ -25,18 +25,15 @@ import { GlobalErrorProvider } from 'contexts/GlobalErrorContext';
 import OperationsModal from 'components/OperationsModal';
 import { useInitGA } from 'hooks/useAnalytics';
 import Topbar from 'components/Topbar';
-import { useWeb3 } from 'hooks/useWeb3';
 
 const { maxWidth } = globals;
 
 const Web3ModalWrapper = () => {
   const { palette } = useTheme();
-  const { chain: displayNetwork } = useWeb3();
   return (
     <Web3Modal
       projectId={walletConnectId}
       ethereumClient={web3modal}
-      defaultChain={displayNetwork}
       themeMode={palette.mode}
       themeVariables={{ '--w3m-background-color': '#0D0E0F' }}
       walletImages={{ safe: '/img/wallets/safe.png' }}
