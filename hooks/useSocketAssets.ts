@@ -5,6 +5,8 @@ import { socketRequest } from 'utils/socket';
 import usePrices from './usePrices';
 import useBalance from './useBalance';
 import { Hex } from 'viem';
+import VELO_ from '@exactly/protocol/deployments/optimism/VELO.json' assert { type: 'json' };
+import useVELO from './useVELO';
 
 const ETH = {
   chainId: 10,
@@ -21,8 +23,8 @@ const ETH = {
 
 const VELO = {
   chainId: 10,
-  address: '0x9560e827aF36c94D2Ac33a39bCE1Fe78631088Db',
-  name: 'Velodrome V2',
+  address: VELO_.address as Hex,
+  name: 'Velodrome',
   symbol: 'VELO',
   decimals: 18,
   chainAgnosticId: null,
@@ -37,6 +39,7 @@ export default (disableFetch?: boolean) => {
   const { walletAddress, chain } = useWeb3();
   const prices = usePrices();
   const veloBalance = useBalance(VELO.symbol, VELO.address, true);
+  const { veloPrice } = useVELO();
 
   const fetchAssets = useCallback(async () => {
     if (!walletAddress || !process.env.NEXT_PUBLIC_SOCKET_API_KEY || disableFetch) return;
@@ -55,11 +58,19 @@ export default (disableFetch?: boolean) => {
           const amount = asset.amount ?? Number(veloBalance);
           return {
             ...asset,
-            name: asset.symbol === 'ETH' ? 'Ether' : asset.name,
-            icon: asset.symbol === 'ETH' ? '/img/assets/WETH.svg' : asset.icon,
-            logoURI: asset.symbol === 'ETH' ? '/img/assets/WETH.svg' : asset.logoURI,
             amount,
             usdAmount: price ? amount * (Number(price) / 1e18) : undefined,
+            ...(asset.symbol === 'ETH'
+              ? {
+                  name: 'Ether',
+                  icon: '/img/assets/WETH.svg',
+                  logoURI: '/img/assets/WETH.svg',
+                }
+              : asset.symbol === 'VELO'
+              ? {
+                  usdAmount: veloPrice ? amount * veloPrice : undefined,
+                }
+              : {}),
           };
         })
         .sort((a, b) =>
@@ -72,7 +83,7 @@ export default (disableFetch?: boolean) => {
             : b.usdAmount - a.usdAmount,
         ),
     );
-  }, [chain.id, disableFetch, prices, veloBalance, walletAddress]);
+  }, [chain.id, disableFetch, prices, veloBalance, veloPrice, walletAddress]);
 
   useEffect(() => {
     fetchAssets();
