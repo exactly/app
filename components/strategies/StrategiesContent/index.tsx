@@ -16,7 +16,7 @@ function StrategiesContent() {
       {
         title: t('Maximize your yield'),
         description: t('Amplify gains or mitigate risk with the power of leverage and deleverage in your investments.'),
-        tags: ['advanced', 'new'],
+        tags: ['advanced'],
         children: (
           <Button fullWidth variant="contained" onClick={() => startLeverager()}>
             {t('Leverage')}
@@ -26,7 +26,7 @@ function StrategiesContent() {
       {
         title: t('Reduce exposure'),
         description: t('Reduce your risk by decreasing your investment exposure and borrowing less.'),
-        tags: ['advanced', 'new'],
+        tags: ['advanced'],
         children: (
           <Button fullWidth variant="contained" onClick={() => startLeverager()}>
             {t('Deleverage')}
@@ -38,7 +38,7 @@ function StrategiesContent() {
         description: t(
           'Seamlessly transfer your debt positions between different pools or convert from fixed to variable rates, and vice versa.',
         ),
-        tags: ['basic', 'new'],
+        tags: ['basic'],
         children: (
           <Button fullWidth variant="contained" onClick={() => startDebtManager()}>
             {t('Rollover')}
