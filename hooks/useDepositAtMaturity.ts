@@ -9,12 +9,13 @@ import { useWeb3 } from 'hooks/useWeb3';
 import { useTranslation } from 'react-i18next';
 import { OperationHook } from 'types/OperationHook';
 import useAnalytics from './useAnalytics';
-import { GAS_LIMIT_MULTIPLIER, WEI_PER_ETHER } from 'utils/const';
+import { WEI_PER_ETHER } from 'utils/const';
 import { CustomError } from 'types/Error';
 import useEstimateGas from './useEstimateGas';
 import { parseUnits } from 'viem';
 import { waitForTransaction } from '@wagmi/core';
 import dayjs from 'dayjs';
+import { gasLimit } from 'utils/gas';
 
 type DepositAtMaturity = {
   deposit: () => void;
@@ -184,14 +185,14 @@ export default (): DepositAtMaturity => {
         hash = await ETHRouterContract.write.depositAtMaturity(args, {
           ...opts,
           value: amount,
-          gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
+          gasLimit: gasLimit(gasEstimation),
         });
       } else {
         const args = [BigInt(date), amount, minAmount, walletAddress] as const;
         const gasEstimation = await marketContract.estimateGas.depositAtMaturity(args, opts);
         hash = await marketContract.write.depositAtMaturity(args, {
           ...opts,
-          gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
+          gasLimit: gasLimit(gasEstimation),
         });
       }
 

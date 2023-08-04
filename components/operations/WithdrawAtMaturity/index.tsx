@@ -28,11 +28,12 @@ import useHandleOperationError from 'hooks/useHandleOperationError';
 import useAnalytics from 'hooks/useAnalytics';
 import { useTranslation } from 'react-i18next';
 import useTranslateOperation from 'hooks/useTranslateOperation';
-import { GAS_LIMIT_MULTIPLIER, WEI_PER_ETHER } from 'utils/const';
+import { WEI_PER_ETHER } from 'utils/const';
 import useEstimateGas from 'hooks/useEstimateGas';
 import { formatUnits, parseUnits, zeroAddress } from 'viem';
 import { ERC20 } from 'types/contracts';
 import { waitForTransaction } from '@wagmi/core';
+import { gasLimit } from 'utils/gas';
 
 const WithdrawAtMaturity: FC = () => {
   const { t } = useTranslation();
@@ -212,7 +213,7 @@ const WithdrawAtMaturity: FC = () => {
         const gasEstimation = await ETHRouterContract.estimateGas.withdrawAtMaturity(args, opts);
         hash = await ETHRouterContract.write.withdrawAtMaturity(args, {
           ...opts,
-          gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
+          gasLimit: gasLimit(gasEstimation),
         });
       } else {
         const args = [BigInt(date), amount, minAmountToWithdraw, walletAddress, walletAddress] as const;
@@ -220,7 +221,7 @@ const WithdrawAtMaturity: FC = () => {
 
         hash = await marketContract.write.withdrawAtMaturity(args, {
           ...opts,
-          gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
+          gasLimit: gasLimit(gasEstimation),
         });
       }
 

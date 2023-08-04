@@ -11,12 +11,13 @@ import { OperationHook } from 'types/OperationHook';
 import getBeforeBorrowLimit from 'utils/getBeforeBorrowLimit';
 import useHealthFactor from './useHealthFactor';
 import useAnalytics from './useAnalytics';
-import { GAS_LIMIT_MULTIPLIER, WEI_PER_ETHER } from 'utils/const';
+import { WEI_PER_ETHER } from 'utils/const';
 import useEstimateGas from './useEstimateGas';
 import { ERC20 } from 'types/contracts';
 import { formatUnits, parseUnits } from 'viem';
 import { waitForTransaction } from '@wagmi/core';
 import dayjs from 'dayjs';
+import { gasLimit } from 'utils/gas';
 
 type BorrowAtMaturity = {
   borrow: () => void;
@@ -212,7 +213,7 @@ export default (): BorrowAtMaturity => {
 
         hash = await ETHRouterContract.write.borrowAtMaturity(args, {
           ...opts,
-          gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
+          gasLimit: gasLimit(gasEstimation),
         });
       } else {
         if (!marketContract) return;
@@ -223,7 +224,7 @@ export default (): BorrowAtMaturity => {
 
         hash = await marketContract.write.borrowAtMaturity(args, {
           ...opts,
-          gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
+          gasLimit: gasLimit(gasEstimation),
         });
       }
 

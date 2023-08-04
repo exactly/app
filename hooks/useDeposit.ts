@@ -8,11 +8,11 @@ import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { OperationHook } from 'types/OperationHook';
 import useAnalytics from './useAnalytics';
-import { GAS_LIMIT_MULTIPLIER, WEI_PER_ETHER } from 'utils/const';
 import { CustomError } from 'types/Error';
 import useEstimateGas from './useEstimateGas';
 import { parseUnits } from 'viem';
 import { waitForTransaction } from '@wagmi/core';
+import { gasLimit } from 'utils/gas';
 
 type Deposit = {
   deposit: () => void;
@@ -138,7 +138,7 @@ export default (): Deposit => {
         hash = await ETHRouterContract.write.deposit({
           ...opts,
           value: amount,
-          gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
+          gasLimit: gasLimit(gasEstimation),
         });
       } else {
         const args = [amount, walletAddress] as const;
@@ -146,7 +146,7 @@ export default (): Deposit => {
 
         hash = await marketContract.write.deposit(args, {
           ...opts,
-          gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
+          gasLimit: gasLimit(gasEstimation),
         });
       }
 

@@ -32,12 +32,13 @@ import useTranslateOperation from 'hooks/useTranslateOperation';
 import ModalInfoRepayWithDiscount from 'components/OperationsModal/Info/ModalInfoRepayWithDiscount';
 import usePreviewer from 'hooks/usePreviewer';
 import useDelayedEffect from 'hooks/useDelayedEffect';
-import { GAS_LIMIT_MULTIPLIER, WEI_PER_ETHER } from 'utils/const';
+import { WEI_PER_ETHER } from 'utils/const';
 import { CustomError } from 'types/Error';
 import useEstimateGas from 'hooks/useEstimateGas';
 import { formatUnits, parseUnits, zeroAddress } from 'viem';
 import dayjs from 'dayjs';
 import { waitForTransaction } from '@wagmi/core';
+import { gasLimit } from 'utils/gas';
 
 type RepayWithDiscount = {
   principal: string;
@@ -270,7 +271,7 @@ const RepayAtMaturity: FC = () => {
         hash = await ETHRouterContract.write.repayAtMaturity(args, {
           ...opts,
           value: maxAmountToRepay,
-          gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
+          gasLimit: gasLimit(gasEstimation),
         });
       } else {
         const args = [BigInt(date), positionAssetsAmount, maxAmountToRepay, walletAddress] as const;
@@ -278,7 +279,7 @@ const RepayAtMaturity: FC = () => {
 
         hash = await marketContract.write.repayAtMaturity(args, {
           ...opts,
-          gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
+          gasLimit: gasLimit(gasEstimation),
         });
       }
 

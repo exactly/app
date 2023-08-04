@@ -31,11 +31,12 @@ import handleOperationError from 'utils/handleOperationError';
 import ModalAlert from 'components/common/modal/ModalAlert';
 import useRewards from 'hooks/useRewards';
 import LoadingTransaction from 'components/common/modal/Loading';
-import { GAS_LIMIT_MULTIPLIER, WEI_PER_ETHER } from 'utils/const';
+import { WEI_PER_ETHER } from 'utils/const';
 import OperationSquare from 'components/common/OperationSquare';
 import Submit from '../Submit';
 import useIsContract from 'hooks/useIsContract';
 import { PopulatedTransaction } from 'types/Transaction';
+import { gasLimit } from 'utils/gas';
 
 function Operation() {
   const { t } = useTranslation();
@@ -310,26 +311,26 @@ function Operation() {
           maxBorrowAssets,
           percentage,
         ] as const;
-        const gasLimit = await debtManager.estimateGas.rollFixed(args, opts);
+        const gas = await debtManager.estimateGas.rollFixed(args, opts);
         const sim = await debtManager.simulate.rollFixed(args, {
           ...opts,
-          gasLimit: (gasLimit * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
+          gasLimit: gasLimit(gas),
         });
         return sim.request;
       } else if (input.to.maturity) {
         const args = [marketContract.address, input.to.maturity, maxBorrowAssets, percentage] as const;
-        const gasLimit = await debtManager.estimateGas.rollFloatingToFixed(args, opts);
+        const gas = await debtManager.estimateGas.rollFloatingToFixed(args, opts);
         const sim = await debtManager.simulate.rollFloatingToFixed(args, {
           ...opts,
-          gasLimit: (gasLimit * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
+          gasLimit: gasLimit(gas),
         });
         return sim.request;
       } else if (input.from.maturity) {
         const args = [marketContract.address, input.from.maturity, maxRepayAssets, percentage] as const;
-        const gasLimit = await debtManager.estimateGas.rollFixedToFloating(args, opts);
+        const gas = await debtManager.estimateGas.rollFixedToFloating(args, opts);
         const sim = await debtManager.simulate.rollFixedToFloating(args, {
           ...opts,
-          gasLimit: (gasLimit * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
+          gasLimit: gasLimit(gas),
         });
         return sim.request;
       } else return;
@@ -390,26 +391,26 @@ function Operation() {
         percentage,
         permit,
       ] as const;
-      const gasLimit = await debtManager.estimateGas.rollFixed(args, opts);
+      const gas = await debtManager.estimateGas.rollFixed(args, opts);
       const sim = await debtManager.simulate.rollFixed(args, {
         ...opts,
-        gasLimit: (gasLimit * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
+        gasLimit: gasLimit(gas),
       });
       return sim.request;
     } else if (input.to.maturity) {
       const args = [marketContract.address, input.to.maturity, maxBorrowAssets, percentage, permit] as const;
-      const gasLimit = await debtManager.estimateGas.rollFloatingToFixed(args, opts);
+      const gas = await debtManager.estimateGas.rollFloatingToFixed(args, opts);
       const sim = await debtManager.simulate.rollFloatingToFixed(args, {
         ...opts,
-        gasLimit: (gasLimit * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
+        gasLimit: gasLimit(gas),
       });
       return sim.request;
     } else if (input.from.maturity) {
       const args = [marketContract.address, input.from.maturity, maxRepayAssets, percentage, permit] as const;
-      const gasLimit = await debtManager.estimateGas.rollFixedToFloating(args, opts);
+      const gas = await debtManager.estimateGas.rollFixedToFloating(args, opts);
       const sim = await debtManager.simulate.rollFixedToFloating(args, {
         ...opts,
-        gasLimit: (gasLimit * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
+        gasLimit: gasLimit(gas),
       });
       return sim.request;
     }

@@ -9,8 +9,8 @@ import useAnalytics from './useAnalytics';
 
 import { AbiParametersToPrimitiveTypes, ExtractAbiFunction } from 'abitype';
 import { previewerABI } from 'types/abi';
-import { GAS_LIMIT_MULTIPLIER, WEI_PER_ETHER } from 'utils/const';
 import { Transaction } from 'types/Transaction';
+import { gasLimit } from 'utils/gas';
 
 export type RewardRates = AbiParametersToPrimitiveTypes<
   ExtractAbiFunction<typeof previewerABI, 'exactly'>['outputs']
@@ -67,7 +67,7 @@ export default () => {
       const gas = await controller.estimateGas.claimAll(args, opts);
       const hash = await controller.write.claimAll(args, {
         ...opts,
-        gasLimit: (gas * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
+        gasLimit: gasLimit(gas),
       });
       transaction.beginCheckout('claimAll');
       const { status } = await waitForTransaction({ hash });
@@ -118,7 +118,7 @@ export default () => {
         const gas = await controller.estimateGas.claim(args, opts);
         const hash = await controller.write.claim(args, {
           ...opts,
-          gasLimit: (gas * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
+          gasLimit: gasLimit(gas),
         });
         transaction.beginCheckout('claim');
         setTx && setTx({ hash, status: 'loading' });

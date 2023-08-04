@@ -24,11 +24,12 @@ import useHandleOperationError from 'hooks/useHandleOperationError';
 import useAnalytics from 'hooks/useAnalytics';
 import { useTranslation } from 'react-i18next';
 import useTranslateOperation from 'hooks/useTranslateOperation';
-import { ETH_ROUTER_SLIPPAGE, GAS_LIMIT_MULTIPLIER, WEI_PER_ETHER } from 'utils/const';
+import { ETH_ROUTER_SLIPPAGE, WEI_PER_ETHER } from 'utils/const';
 import { CustomError } from 'types/Error';
 import useEstimateGas from 'hooks/useEstimateGas';
 import { formatUnits, parseUnits } from 'viem';
 import { waitForTransaction } from '@wagmi/core';
+import { gasLimit } from 'utils/gas';
 
 function Repay() {
   const { t } = useTranslation();
@@ -132,7 +133,7 @@ function Repay() {
           hash = await ETHRouterContract.write.refund(args, {
             ...opts,
             value: (floatingBorrowAssets * ETH_ROUTER_SLIPPAGE) / WEI_PER_ETHER,
-            gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
+            gasLimit: gasLimit(gasEstimation),
           });
         } else {
           const args = [amount] as const;
@@ -144,7 +145,7 @@ function Repay() {
           hash = await ETHRouterContract.write.repay(args, {
             ...opts,
             value: (amount * ETH_ROUTER_SLIPPAGE) / WEI_PER_ETHER,
-            gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
+            gasLimit: gasLimit(gasEstimation),
           });
         }
       } else {
@@ -153,14 +154,14 @@ function Repay() {
           const gasEstimation = await marketContract.estimateGas.refund(args, opts);
           hash = await marketContract.write.refund(args, {
             ...opts,
-            gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
+            gasLimit: gasLimit(gasEstimation),
           });
         } else {
           const args = [amount, walletAddress] as const;
           const gasEstimation = await marketContract.estimateGas.repay(args, opts);
           hash = await marketContract.write.repay(args, {
             ...opts,
-            gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
+            gasLimit: gasLimit(gasEstimation),
           });
         }
       }

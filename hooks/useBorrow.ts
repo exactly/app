@@ -11,10 +11,11 @@ import { OperationHook } from 'types/OperationHook';
 import getBeforeBorrowLimit from 'utils/getBeforeBorrowLimit';
 import useHealthFactor from './useHealthFactor';
 import useAnalytics from './useAnalytics';
-import { GAS_LIMIT_MULTIPLIER, WEI_PER_ETHER } from 'utils/const';
+import { WEI_PER_ETHER } from 'utils/const';
 import useEstimateGas from './useEstimateGas';
 import { ERC20 } from 'types/contracts';
 import { parseUnits, formatUnits } from 'viem';
+import { gasLimit } from 'utils/gas';
 
 type Borrow = {
   handleBasicInputChange: (value: string) => void;
@@ -203,7 +204,7 @@ export default (): Borrow => {
         const gasEstimation = await ETHRouterContract.estimateGas.borrow(args, opts);
         hash = await ETHRouterContract.write.borrow(args, {
           ...opts,
-          gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
+          gasLimit: gasLimit(gasEstimation),
         });
       } else {
         if (!marketContract) return;
@@ -213,7 +214,7 @@ export default (): Borrow => {
         });
         hash = await marketContract.write.borrow(args, {
           ...opts,
-          gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
+          gasLimit: gasLimit(gasEstimation),
         });
       }
 

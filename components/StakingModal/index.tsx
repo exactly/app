@@ -32,7 +32,7 @@ import {
   encodeAbiParameters,
   formatUnits,
 } from 'viem';
-import { GAS_LIMIT_MULTIPLIER, MAX_UINT256, WEI_PER_ETHER } from 'utils/const';
+import { MAX_UINT256, WEI_PER_ETHER } from 'utils/const';
 import { LoadingButton } from '@mui/lab';
 import { useWeb3 } from 'hooks/useWeb3';
 import { useNetwork, useSwitchNetwork, useSignTypedData, useWalletClient } from 'wagmi';
@@ -62,14 +62,13 @@ import useIsPermit from 'hooks/useIsPermit';
 import useIsContract from 'hooks/useIsContract';
 import usePermit2 from 'hooks/usePermit2';
 import useDelayedEffect from 'hooks/useDelayedEffect';
+import { gasLimit } from 'utils/gas';
 
 const NATIVE_TOKEN_ADDRESS = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
 const MIN_SUPPLY = parseEther('0.002');
 const PROTO_STAKER_DOCS = 'https://docs.exact.ly/guides/periphery/proto-staker';
 
 type ApprovalStatus = 'INIT' | 'ERC20' | 'ERC20-PERMIT2' | 'EXA' | 'APPROVED';
-
-const gasLimit = (gas: bigint) => (gas * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER;
 
 function PaperComponent(props: PaperProps | undefined) {
   const ref = useRef<HTMLDivElement>(null);

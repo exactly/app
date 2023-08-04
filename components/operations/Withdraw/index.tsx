@@ -23,11 +23,11 @@ import useHandleOperationError from 'hooks/useHandleOperationError';
 import useAnalytics from 'hooks/useAnalytics';
 import { useTranslation } from 'react-i18next';
 import useTranslateOperation from 'hooks/useTranslateOperation';
-import { GAS_LIMIT_MULTIPLIER, WEI_PER_ETHER } from 'utils/const';
 import useEstimateGas from 'hooks/useEstimateGas';
 import { formatUnits, parseUnits } from 'viem';
 import { ERC20 } from 'types/contracts';
 import { waitForTransaction } from '@wagmi/core';
+import { gasLimit } from 'utils/gas';
 
 const Withdraw: FC = () => {
   const { t } = useTranslation();
@@ -161,14 +161,14 @@ const Withdraw: FC = () => {
           const gasEstimation = await ETHRouterContract.estimateGas.redeem(args, opts);
           hash = await ETHRouterContract.write.redeem(args, {
             ...opts,
-            gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
+            gasLimit: gasLimit(gasEstimation),
           });
         } else {
           const args = [amount] as const;
           const gasEstimation = await ETHRouterContract.estimateGas.withdraw(args, opts);
           hash = await ETHRouterContract.write.withdraw(args, {
             ...opts,
-            gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
+            gasLimit: gasLimit(gasEstimation),
           });
         }
       } else {
@@ -177,14 +177,14 @@ const Withdraw: FC = () => {
           const gasEstimation = await marketContract.estimateGas.redeem(args, opts);
           hash = await marketContract.write.redeem(args, {
             ...opts,
-            gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
+            gasLimit: gasLimit(gasEstimation),
           });
         } else {
           const args = [amount, walletAddress, walletAddress] as const;
           const gasEstimation = await marketContract.estimateGas.withdraw(args, opts);
           hash = await marketContract.write.withdraw(args, {
             ...opts,
-            gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
+            gasLimit: gasLimit(gasEstimation),
           });
         }
       }

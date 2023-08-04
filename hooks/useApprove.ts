@@ -9,10 +9,11 @@ import useAccountData from './useAccountData';
 import handleOperationError from 'utils/handleOperationError';
 import { Address, useNetwork } from 'wagmi';
 import { useTranslation } from 'react-i18next';
-import { MAX_UINT256, WEI_PER_ETHER, GAS_LIMIT_MULTIPLIER } from 'utils/const';
+import { MAX_UINT256 } from 'utils/const';
 import useEstimateGas from './useEstimateGas';
 import useAnalytics from './useAnalytics';
 import { waitForTransaction } from '@wagmi/core';
+import { gasLimit } from 'utils/gas';
 
 export default (operation: Operation, contract?: ERC20, spender?: Address) => {
   const { t } = useTranslation();
@@ -76,7 +77,7 @@ export default (operation: Operation, contract?: ERC20, spender?: Address) => {
       const gasEstimation = await contract.estimateGas.approve(args, opts);
       const hash = await contract.write.approve(args, {
         ...opts,
-        gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
+        gasLimit: gasLimit(gasEstimation),
       });
 
       transaction.beginCheckout('approve');

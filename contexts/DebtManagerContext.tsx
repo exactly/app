@@ -20,11 +20,11 @@ import useAccountData from 'hooks/useAccountData';
 import useMarket from 'hooks/useMarket';
 import { useWeb3 } from 'hooks/useWeb3';
 import type { DebtManager, Market } from 'types/contracts';
-import { GAS_LIMIT_MULTIPLIER, WEI_PER_ETHER } from 'utils/const';
 import handleOperationError from 'utils/handleOperationError';
 import useIsContract from 'hooks/useIsContract';
 import useAnalytics from 'hooks/useAnalytics';
 import useRewards, { Rates } from 'hooks/useRewards';
+import { gasLimit } from 'utils/gas';
 
 export type RolloverInput = {
   from?: Position;
@@ -143,7 +143,7 @@ export const DebtManagerContextProvider: FC<PropsWithChildren> = ({ children }) 
         const gasEstimation = await market.estimateGas.approve([debtManager.address, max], opts);
         const hash = await market.write.approve([debtManager.address, max], {
           ...opts,
-          gas: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
+          gasLimit: gasLimit(gasEstimation),
         });
         await waitForTransaction({ hash });
       } catch (e: unknown) {

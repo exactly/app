@@ -34,7 +34,7 @@ import useAccountData, { type MarketAccount } from 'hooks/useAccountData';
 import useMarket from 'hooks/useMarket';
 import { useWeb3 } from 'hooks/useWeb3';
 import type { DebtManager, Market } from 'types/contracts';
-import { GAS_LIMIT_MULTIPLIER, MAX_UINT256, WEI_PER_ETHER } from 'utils/const';
+import { MAX_UINT256, WEI_PER_ETHER } from 'utils/const';
 import handleOperationError from 'utils/handleOperationError';
 import useIsContract from 'hooks/useIsContract';
 import useBalance from 'hooks/useBalance';
@@ -54,6 +54,7 @@ import useFloatingPoolAPR from 'hooks/useFloatingPoolAPR';
 import { debtManagerABI } from 'types/abi';
 import useStETHNativeAPR from 'hooks/useStETHNativeAPR';
 import useIsPermit from 'hooks/useIsPermit';
+import { gasLimit } from 'utils/gas';
 
 type Params<T extends ExtractAbiFunctionNames<typeof debtManagerABI>> = AbiParametersToPrimitiveTypes<
   ExtractAbiFunction<typeof debtManagerABI, T>['inputs']
@@ -694,7 +695,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
           const gasEstimation = await assetIn.estimateGas.approve(args, opts);
           hash = await assetIn.write.approve(args, {
             ...opts,
-            gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
+            gasLimit: gasLimit(gasEstimation),
           });
           break;
         }
@@ -703,7 +704,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
           const gasEstimation = await assetIn.estimateGas.approve(args, opts);
           hash = await assetIn.write.approve(args, {
             ...opts,
-            gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
+            gasLimit: gasLimit(gasEstimation),
           });
           break;
         }
@@ -715,11 +716,11 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
                   (maIn.floatingDepositAssets < limit.deposit ? 0n : maIn.floatingDepositAssets - limit.deposit) +
                     userInput,
                 );
-          const args = [debtManager.address, permitAssets] as const;
+          const args = [debtManager.address, slippage(permitAssets)] as const;
           const gasEstimation = await marketIn.estimateGas.approve(args, opts);
           hash = await marketIn.write.approve(args, {
             ...opts,
-            gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
+            gasLimit: gasLimit(gasEstimation),
           });
           break;
         }
@@ -728,7 +729,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
           const gasEstimation = await marketOut.estimateGas.approve(args, opts);
           hash = await marketOut.write.approve(args, {
             ...opts,
-            gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
+            gasLimit: gasLimit(gasEstimation),
           });
           break;
         }
@@ -917,7 +918,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
               const gasEstimation = await debtManager.estimateGas.leverage(args, opts);
               hash = await debtManager.write.leverage(args, {
                 ...opts,
-                gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
+                gasLimit: gasLimit(gasEstimation),
               });
               break;
             }
@@ -938,7 +939,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
                 const gasEstimation = await debtManager.estimateGas.leverage(args, opts);
                 hash = await debtManager.write.leverage(args, {
                   ...opts,
-                  gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
+                  gasLimit: gasLimit(gasEstimation),
                 });
                 break;
               }
@@ -947,7 +948,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
                 const gasEstimation = await debtManager.estimateGas.leverage(args, opts);
                 hash = await debtManager.write.leverage(args, {
                   ...opts,
-                  gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
+                  gasLimit: gasLimit(gasEstimation),
                 });
                 break;
               }
@@ -961,7 +962,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
               const gasEstimation = await debtManager.estimateGas.deleverage(args, opts);
               hash = await debtManager.write.deleverage(args, {
                 ...opts,
-                gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
+                gasLimit: gasLimit(gasEstimation),
               });
               break;
             }
@@ -978,7 +979,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
             const gasEstimation = await debtManager.estimateGas.deleverage(args, opts);
             hash = await debtManager.write.deleverage(args, {
               ...opts,
-              gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
+              gasLimit: gasLimit(gasEstimation),
             });
             break;
           }
@@ -1003,7 +1004,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
               const gasEstimation = await debtManager.estimateGas.crossLeverage(args, opts);
               hash = await debtManager.write.crossLeverage(args, {
                 ...opts,
-                gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
+                gasLimit: gasLimit(gasEstimation),
               });
               break;
             }
@@ -1023,7 +1024,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
                 const gasEstimation = await debtManager.estimateGas.crossLeverage(args, opts);
                 hash = await debtManager.write.crossLeverage(args, {
                   ...opts,
-                  gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
+                  gasLimit: gasLimit(gasEstimation),
                 });
                 break;
               }
@@ -1032,7 +1033,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
                 const gasEstimation = await debtManager.estimateGas.crossLeverage(args, opts);
                 hash = await debtManager.write.crossLeverage(args, {
                   ...opts,
-                  gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
+                  gasLimit: gasLimit(gasEstimation),
                 });
                 break;
               }
@@ -1057,7 +1058,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
               const gasEstimation = await debtManager.estimateGas.crossDeleverage(args, opts);
               hash = await debtManager.write.crossDeleverage(args, {
                 ...opts,
-                gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
+                gasLimit: gasLimit(gasEstimation),
               });
               break;
             }
@@ -1076,7 +1077,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
             const gasEstimation = await debtManager.estimateGas.crossDeleverage(args, opts);
             hash = await debtManager.write.crossDeleverage(args, {
               ...opts,
-              gasLimit: (gasEstimation * GAS_LIMIT_MULTIPLIER) / WEI_PER_ETHER,
+              gasLimit: gasLimit(gasEstimation),
             });
             break;
           }
