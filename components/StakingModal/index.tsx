@@ -364,11 +364,11 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
       const [exaReserves, wethReserves] = reserves;
       const supply = parseUnits(input, asset.decimals);
       if (asset.symbol === 'ETH') {
-        if (supply === 0n || supply < previewETH) {
+        if (supply === 0n || supply < previewETH + MIN_SUPPLY) {
           setErrorData({
             status: true,
             message: t('You need to supply more than {{ value }} {{ symbol }}', {
-              value: formatEther(previewETH),
+              value: formatEther(previewETH + MIN_SUPPLY),
               symbol: 'ETH',
             }),
           });
