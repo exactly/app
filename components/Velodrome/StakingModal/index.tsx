@@ -49,8 +49,7 @@ import { useEXA, useEXABalance } from 'hooks/useEXA';
 import { SymbolGroup } from 'components/APRWithBreakdown';
 import formatNumber from 'utils/formatNumber';
 import { useProtoStaker, useProtoStakerPreviewETH } from 'hooks/useProtoStaker';
-import Velodrome from 'components/Velodrome';
-import useVELO from 'hooks/useVELO';
+import useVELOAccount from 'hooks/useVELO';
 import { useEXAPoolGetReserves } from 'hooks/useEXAPool';
 import ModalAlert from 'components/common/modal/ModalAlert';
 import { ErrorData } from 'types/Error';
@@ -90,11 +89,10 @@ const Transition = forwardRef(function Transition(
 
 type StakingModalProps = {
   isOpen: boolean;
-  open: () => void;
   close: () => void;
 };
 
-const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
+const StakingModal: FC<StakingModalProps> = ({ isOpen, close }) => {
   const { t } = useTranslation();
   const { isConnected, impersonateActive, exitImpersonate } = useWeb3();
   const { breakpoints } = useTheme();
@@ -118,7 +116,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
   const exa = useEXA();
   const staker = useProtoStaker();
 
-  const { veloPrice, poolAPR, userBalanceUSD } = useVELO();
+  const { veloPrice, poolAPR, userBalanceUSD } = useVELOAccount();
   const { data: veloEarned } = useEXAGaugeEarned({ watch: true });
   const { data: exaBalance } = useEXABalance({ watch: true });
   const { data: previewETH } = useProtoStakerPreviewETH(exaBalance || 0n);
@@ -680,225 +678,222 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, open, close }) => {
   ]);
 
   return (
-    <>
-      <Velodrome onClick={open} />
-      <Dialog
-        open={isOpen}
-        onClose={closeAndReset}
-        PaperComponent={isMobile ? undefined : PaperComponent}
-        PaperProps={{
-          sx: {
-            borderRadius: '16px',
-            minWidth: '400px',
-            maxWidth: '424px !important',
-            width: '100%',
-            overflowY: 'hidden !important',
-          },
-        }}
-        TransitionComponent={isMobile ? Transition : undefined}
-        fullScreen={isMobile}
-        sx={isMobile ? { top: 'auto' } : { backdropFilter: loading ? 'blur(1.5px)' : '' }}
-        disableEscapeKeyDown={loading}
-      >
-        {!loading && (
-          <IconButton
-            aria-label="close"
-            onClick={closeAndReset}
-            sx={{
-              position: 'absolute',
-              right: 16,
-              top: 16,
-              color: 'grey.400',
-            }}
-          >
-            <CloseIcon sx={{ fontSize: 24 }} />
-          </IconButton>
-        )}
-        <Box px={4} pt={4} pb={3}>
-          <DialogTitle
-            sx={{
-              p: 0,
-              mb: 2,
-              cursor: { xs: '', sm: 'move' },
-              fontSize: 19,
-              fontWeight: 700,
-            }}
-          >
-            {t('Supplied')}
-          </DialogTitle>
-          <DialogContent sx={{ p: 0, overflow: 'hidden' }}>
-            <Box display="flex" flexDirection="column" gap={2}>
-              <Typography fontSize={14}>
-                {userBalanceUSD
-                  ? t(
-                      "As a liquidity provider, you've begun accruing VELO rewards relative to your stake's size and duration, claimable at any time.",
-                    )
-                  : t('Provide EXA liquidity on Velodrome to earn VELO rewards.')}
-              </Typography>
-              <Box bgcolor="grey.100" borderRadius="8px">
-                <Box display="flex" justifyContent="space-between" alignItems="center" gap={0.5} p={0.75} px={2}>
-                  <Typography fontSize={13} fontWeight={500}>
-                    {t('Emissions APR')}
+    <Dialog
+      open={isOpen}
+      onClose={closeAndReset}
+      PaperComponent={isMobile ? undefined : PaperComponent}
+      PaperProps={{
+        sx: {
+          borderRadius: '16px',
+          minWidth: '400px',
+          maxWidth: '424px !important',
+          width: '100%',
+          overflowY: 'hidden !important',
+        },
+      }}
+      TransitionComponent={isMobile ? Transition : undefined}
+      fullScreen={isMobile}
+      sx={isMobile ? { top: 'auto' } : { backdropFilter: loading ? 'blur(1.5px)' : '' }}
+      disableEscapeKeyDown={loading}
+    >
+      {!loading && (
+        <IconButton
+          aria-label="close"
+          onClick={closeAndReset}
+          sx={{
+            position: 'absolute',
+            right: 16,
+            top: 16,
+            color: 'grey.400',
+          }}
+        >
+          <CloseIcon sx={{ fontSize: 24 }} />
+        </IconButton>
+      )}
+      <Box px={4} pt={4} pb={3}>
+        <DialogTitle
+          sx={{
+            p: 0,
+            mb: 2,
+            cursor: { xs: '', sm: 'move' },
+            fontSize: 19,
+            fontWeight: 700,
+          }}
+        >
+          {t('Supplied')}
+        </DialogTitle>
+        <DialogContent sx={{ p: 0, overflow: 'hidden' }}>
+          <Box display="flex" flexDirection="column" gap={2}>
+            <Typography fontSize={14}>
+              {userBalanceUSD
+                ? t(
+                    "As a liquidity provider, you've begun accruing VELO rewards relative to your stake's size and duration, claimable at any time.",
+                  )
+                : t('Provide EXA liquidity on Velodrome to earn VELO rewards.')}
+            </Typography>
+            <Box bgcolor="grey.100" borderRadius="8px">
+              <Box display="flex" justifyContent="space-between" alignItems="center" gap={0.5} p={0.75} px={2}>
+                <Typography fontSize={13} fontWeight={500}>
+                  {t('Emissions APR')}
+                </Typography>
+                <Box display="flex" gap={0.5} alignItems="center">
+                  <Avatar
+                    alt="Velodrome Token"
+                    src={`/img/assets/VELO.svg`}
+                    sx={{ width: 14, height: 14, fontSize: 10, borderColor: 'transparent' }}
+                  />
+                  {poolAPR ? (
+                    <Typography fontSize={14} fontWeight={500}>
+                      {poolAPR}
+                    </Typography>
+                  ) : (
+                    <Skeleton width={48} height={24} />
+                  )}
+                </Box>
+              </Box>
+
+              <Box display="flex" justifyContent="space-between" alignItems="center" gap={0.5} p={0.75} px={2}>
+                <Typography fontSize={13} fontWeight={500}>
+                  {t('Your current balance')}
+                </Typography>
+                <Box display="flex" gap={0.5} alignItems="center">
+                  <SymbolGroup size={14} symbols={['EXA', 'WETH']} />
+                  <Typography fontSize={14} fontWeight={500}>
+                    ${formatNumber(formatEther(userBalanceUSD ?? 0n))}
                   </Typography>
+                </Box>
+              </Box>
+
+              <Link target="_blank" href="https://velodrome.finance/dash" rel="noreferrer noopener">
+                <Box display="flex" justifyContent="space-between" alignItems="center" gap={0.5} p={0.75} px={2}>
+                  <Box display="flex" gap={0.5} alignItems="center">
+                    <Typography fontSize={13} fontWeight={500}>
+                      {t('Your VELO rewards')}
+                    </Typography>
+                    <OpenInNewIcon
+                      sx={{
+                        height: '10px',
+                        width: '10px',
+                        color: ({ palette }) => (palette.mode === 'light' ? 'figma.grey.600' : 'grey.900'),
+                      }}
+                    />
+                  </Box>
                   <Box display="flex" gap={0.5} alignItems="center">
                     <Avatar
                       alt="Velodrome Token"
                       src={`/img/assets/VELO.svg`}
                       sx={{ width: 14, height: 14, fontSize: 10, borderColor: 'transparent' }}
                     />
-                    {poolAPR ? (
-                      <Typography fontSize={14} fontWeight={500}>
-                        {poolAPR}
-                      </Typography>
-                    ) : (
-                      <Skeleton width={48} height={24} />
-                    )}
-                  </Box>
-                </Box>
-
-                <Box display="flex" justifyContent="space-between" alignItems="center" gap={0.5} p={0.75} px={2}>
-                  <Typography fontSize={13} fontWeight={500}>
-                    {t('Your current balance')}
-                  </Typography>
-                  <Box display="flex" gap={0.5} alignItems="center">
-                    <SymbolGroup size={14} symbols={['EXA', 'WETH']} />
                     <Typography fontSize={14} fontWeight={500}>
-                      ${formatNumber(formatEther(userBalanceUSD ?? 0n))}
+                      ${veloEarnedUSD || 0}
                     </Typography>
                   </Box>
                 </Box>
+              </Link>
+            </Box>
+          </Box>
+        </DialogContent>
+      </Box>
+      <Box px={4} pb={4}>
+        <DialogTitle
+          sx={{
+            p: 0,
+            mb: 2,
+            cursor: { xs: '', sm: 'move' },
+            fontSize: 19,
+            fontWeight: 700,
+          }}
+        >
+          {t('Supply EXA/ETH')}
+        </DialogTitle>
+        <DialogContent sx={{ p: 0, overflow: 'hidden' }}>
+          <Box display="flex" flexDirection="column" gap={2}>
+            <Box display="flex" flexDirection="column" gap={2}>
+              <Box display="flex" flexDirection="column" gap={1.5}>
+                <Typography fontSize={12} px={2}>
+                  {t('Provide liquidity')}
+                </Typography>
+                <ModalBox sx={{ display: 'flex', flexDirection: 'row', p: 1, px: 2, alignItems: 'center' }}>
+                  {assets && asset ? (
+                    <>
+                      <Box width={'25%'}>
+                        <SocketAssetSelector asset={asset} options={assets} onChange={handleAssetChange} />
+                      </Box>
+                      <ModalInput
+                        decimals={asset.decimals}
+                        symbol={asset.symbol}
+                        value={input}
+                        onValueChange={setInput}
+                        align="right"
+                        maxWidth="100%"
+                        sx={{ paddingTop: 0, fontSize: 16 }}
+                      />
+                    </>
+                  ) : (
+                    <Skeleton variant="rectangular" height={20} width="100%" />
+                  )}
+                </ModalBox>
+              </Box>
+              <PoolPreview
+                exa={formatEther((exaBalance || 0n) + excess.exa)}
+                eth={formatEther((previewETH || 0n) + excess.eth)}
+                loading={previewIsLoading}
+              />
+            </Box>
+            {errorData?.status && <ModalAlert message={errorData.message} variant={errorData.variant} mb={0} />}
 
-                <Link target="_blank" href="https://velodrome.finance/dash" rel="noreferrer noopener">
-                  <Box display="flex" justifyContent="space-between" alignItems="center" gap={0.5} p={0.75} px={2}>
-                    <Box display="flex" gap={0.5} alignItems="center">
-                      <Typography fontSize={13} fontWeight={500}>
-                        {t('Your VELO rewards')}
-                      </Typography>
-                      <OpenInNewIcon
-                        sx={{
-                          height: '10px',
-                          width: '10px',
-                          color: ({ palette }) => (palette.mode === 'light' ? 'figma.grey.600' : 'grey.900'),
+            <Box mt={errorData ? 0 : 2} display="flex" flexDirection="column" gap={1}>
+              {impersonateActive ? (
+                <Button fullWidth onClick={exitAndClose} variant="contained">
+                  {t('Exit Read-Only Mode')}
+                </Button>
+              ) : chain && chain.id !== displayNetwork.id ? (
+                <LoadingButton
+                  fullWidth
+                  onClick={() => switchNetwork?.(displayNetwork.id)}
+                  variant="contained"
+                  loading={switchIsLoading}
+                  disabled={!isConnected}
+                >
+                  {t('Please switch to {{network}} network', { network: displayNetwork.name })}
+                </LoadingButton>
+              ) : (
+                <LoadingButton
+                  fullWidth
+                  variant="contained"
+                  onClick={asset?.symbol === 'ETH' ? submit : requiresApproval ? approve : socketSubmit}
+                  disabled={!isConnected || previewIsLoading || !input || Boolean(errorData)}
+                  loading={loading || previewIsLoading}
+                >
+                  {requiresApproval
+                    ? t('Approve {{ asset }}', { asset: approvalStatus === 'EXA' ? 'EXA' : asset?.symbol })
+                    : asset?.symbol !== 'ETH'
+                    ? t('Swap & Supply EXA/ETH')
+                    : t('Supply EXA/ETH')}
+                </LoadingButton>
+              )}
+              <Typography fontSize={12}>
+                <Trans
+                  i18nKey="Providing liquidity to an AMM has risk. <a>Read More</a>"
+                  components={{
+                    a: (
+                      <a
+                        href={PROTO_STAKER_DOCS}
+                        target="_blank"
+                        rel="noreferrer noopener"
+                        style={{
+                          textDecoration: 'underline',
                         }}
                       />
-                    </Box>
-                    <Box display="flex" gap={0.5} alignItems="center">
-                      <Avatar
-                        alt="Velodrome Token"
-                        src={`/img/assets/VELO.svg`}
-                        sx={{ width: 14, height: 14, fontSize: 10, borderColor: 'transparent' }}
-                      />
-                      <Typography fontSize={14} fontWeight={500}>
-                        ${veloEarnedUSD || 0}
-                      </Typography>
-                    </Box>
-                  </Box>
-                </Link>
-              </Box>
-            </Box>
-          </DialogContent>
-        </Box>
-        <Box px={4} pb={4}>
-          <DialogTitle
-            sx={{
-              p: 0,
-              mb: 2,
-              cursor: { xs: '', sm: 'move' },
-              fontSize: 19,
-              fontWeight: 700,
-            }}
-          >
-            {t('Supply EXA/ETH')}
-          </DialogTitle>
-          <DialogContent sx={{ p: 0, overflow: 'hidden' }}>
-            <Box display="flex" flexDirection="column" gap={2}>
-              <Box display="flex" flexDirection="column" gap={2}>
-                <Box display="flex" flexDirection="column" gap={1.5}>
-                  <Typography fontSize={12} px={2}>
-                    {t('Provide liquidity')}
-                  </Typography>
-                  <ModalBox sx={{ display: 'flex', flexDirection: 'row', p: 1, px: 2, alignItems: 'center' }}>
-                    {assets && asset ? (
-                      <>
-                        <Box width={'25%'}>
-                          <SocketAssetSelector asset={asset} options={assets} onChange={handleAssetChange} />
-                        </Box>
-                        <ModalInput
-                          decimals={asset.decimals}
-                          symbol={asset.symbol}
-                          value={input}
-                          onValueChange={setInput}
-                          align="right"
-                          maxWidth="100%"
-                          sx={{ paddingTop: 0, fontSize: 16 }}
-                        />
-                      </>
-                    ) : (
-                      <Skeleton variant="rectangular" height={20} width="100%" />
-                    )}
-                  </ModalBox>
-                </Box>
-                <PoolPreview
-                  exa={formatEther((exaBalance || 0n) + excess.exa)}
-                  eth={formatEther((previewETH || 0n) + excess.eth)}
-                  loading={previewIsLoading}
+                    ),
+                  }}
                 />
-              </Box>
-              {errorData?.status && <ModalAlert message={errorData.message} variant={errorData.variant} mb={0} />}
-
-              <Box mt={errorData ? 0 : 2} display="flex" flexDirection="column" gap={1}>
-                {impersonateActive ? (
-                  <Button fullWidth onClick={exitAndClose} variant="contained">
-                    {t('Exit Read-Only Mode')}
-                  </Button>
-                ) : chain && chain.id !== displayNetwork.id ? (
-                  <LoadingButton
-                    fullWidth
-                    onClick={() => switchNetwork?.(displayNetwork.id)}
-                    variant="contained"
-                    loading={switchIsLoading}
-                    disabled={!isConnected}
-                  >
-                    {t('Please switch to {{network}} network', { network: displayNetwork.name })}
-                  </LoadingButton>
-                ) : (
-                  <LoadingButton
-                    fullWidth
-                    variant="contained"
-                    onClick={asset?.symbol === 'ETH' ? submit : requiresApproval ? approve : socketSubmit}
-                    disabled={!isConnected || previewIsLoading || !input || Boolean(errorData)}
-                    loading={loading || previewIsLoading}
-                  >
-                    {requiresApproval
-                      ? t('Approve {{ asset }}', { asset: approvalStatus === 'EXA' ? 'EXA' : asset?.symbol })
-                      : asset?.symbol !== 'ETH'
-                      ? t('Swap & Supply EXA/ETH')
-                      : t('Supply EXA/ETH')}
-                  </LoadingButton>
-                )}
-                <Typography fontSize={12}>
-                  <Trans
-                    i18nKey="Providing liquidity to an AMM has risk. <a>Read More</a>"
-                    components={{
-                      a: (
-                        <a
-                          href={PROTO_STAKER_DOCS}
-                          target="_blank"
-                          rel="noreferrer noopener"
-                          style={{
-                            textDecoration: 'underline',
-                          }}
-                        />
-                      ),
-                    }}
-                  />
-                </Typography>
-              </Box>
+              </Typography>
             </Box>
-          </DialogContent>
-        </Box>
-      </Dialog>
-    </>
+          </Box>
+        </DialogContent>
+      </Box>
+    </Dialog>
   );
 };
 

@@ -21,6 +21,27 @@ export const useVELO = () => {
   return useContract('VELO', veloABI);
 };
 
+export const useVELOPoolAPR = () => {
+  const velo = useVELO();
+  const asset = useAssetPrice(velo?.address);
+  const { data: rewardRate } = useEXAGaugeRewardRate();
+  const { data: reserves } = useEXAPoolGetReserves();
+
+  const { marketAccount: weth } = useAccountData('WETH');
+
+  const apr = useMemo(() => {
+    if (!asset || !weth || !rewardRate || !reserves) return;
+
+    const veloPrice = parseEther(String(asset.tokenPrice));
+
+    return toPercentage(
+      Number((rewardRate * 86_400n * 365n * veloPrice) / ((2n * reserves[1] * weth.usdPrice) / WEI_PER_ETHER)) / 1e18,
+    );
+  }, [asset, weth, rewardRate, reserves]);
+
+  return apr;
+};
+
 export default (): VELOAccountStatus => {
   const velo = useVELO();
   const asset = useAssetPrice(velo?.address);
