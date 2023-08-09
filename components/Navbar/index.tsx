@@ -1,6 +1,6 @@
 import React, { ReactNode, useEffect, useMemo, useState } from 'react';
 import { setContext, setUser } from '@sentry/nextjs';
-import { mainnet, useBlockNumber, useConfig } from 'wagmi';
+import { mainnet, useConfig } from 'wagmi';
 import { optimism, goerli } from 'wagmi/chains';
 import Image from 'next/image';
 import useRouter from 'hooks/useRouter';
@@ -42,8 +42,6 @@ function Navbar() {
   const [openMenu, setOpenMenu] = useState<boolean>(false);
   const isMobile = useMediaQuery(breakpoints.down('sm'));
 
-  const { data: blockNumber } = useBlockNumber({ chainId: chain?.id });
-
   useEffect(() => {
     if (!walletAddress) return;
 
@@ -53,10 +51,9 @@ function Navbar() {
       id: chain?.id,
       name: chain?.name,
       network: chain?.network,
-      blockNumber,
       testnet: chain?.testnet,
     });
-  }, [walletAddress, connector, chain, blockNumber]);
+  }, [walletAddress, connector, chain]);
 
   const setBodyColor = (color: string) => {
     document.body.style.backgroundColor = color;

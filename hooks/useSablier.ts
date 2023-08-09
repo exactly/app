@@ -25,7 +25,6 @@ export const useSablierV2LockupLinearWithdrawableAmountOf = (stream?: bigint) =>
     chainId: chain.id,
     address: sablier?.address,
     args: stream !== undefined ? [stream] : undefined,
-    watch: true,
   });
 };
 
@@ -38,6 +37,7 @@ export const useSablierV2LockupLinearGetWithdrawnAmount = (stream?: bigint) => {
     address: sablier?.address,
     args: stream !== undefined ? [stream] : undefined,
     watch: true,
+    staleTime: 30_000,
   });
 };
 

@@ -26,6 +26,7 @@ export const useEXAGetVotes = (args?: { watch?: boolean }) => {
     chainId: chain.id,
     address: exa?.address,
     args: [walletAddress ?? zeroAddress],
+    staleTime: 30_000,
   });
 };
 
@@ -38,6 +39,7 @@ export const useEXABalance = (args?: { watch?: boolean }) => {
     chainId: chain.id,
     address: exa?.address,
     args: [walletAddress ?? zeroAddress],
+    staleTime: 30_000,
   });
 };
 
@@ -50,6 +52,7 @@ export const useEXADelegates = (args?: { watch?: boolean }) => {
     chainId: chain.id,
     address: exa?.address,
     args: [walletAddress ?? zeroAddress],
+    staleTime: 30_000,
   });
 };
 
@@ -62,6 +65,7 @@ export const useEXANonces = (args?: { watch?: boolean }) => {
     chainId: chain.id,
     address: exa?.address,
     args: [walletAddress ?? zeroAddress],
+    staleTime: 30_000,
   });
 };
 
