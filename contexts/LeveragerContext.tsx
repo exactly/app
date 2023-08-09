@@ -384,7 +384,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
   const { isLoading: previewIsLoading } = useDelayedEffect({ effect: preview });
 
   const newHealthFactor = useMemo(() => {
-    if (!healthFactor || !leverageStatus || !maIn || !maOut || !limit || previewIsLoading) {
+    if (!healthFactor || !leverageStatus || !maIn || !maOut || !limit) {
       return undefined;
     }
 
@@ -396,7 +396,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     const debt = (borrowsUSD * WEI_PER_ETHER) / maOut.adjustFactor;
 
     return parseHealthFactor(healthFactor.debt + debt, healthFactor.collateral + collateral);
-  }, [healthFactor, leverageStatus, limit, maIn, maOut, previewIsLoading]);
+  }, [healthFactor, leverageStatus, limit, maIn, maOut]);
 
   const setCollateralSymbol = useCallback((collateralSymbol: string) => {
     setErrorData(undefined);
