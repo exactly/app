@@ -20,11 +20,11 @@ type Deposit = {
 
 export default (): Deposit => {
   const { t } = useTranslation();
-  const { transaction } = useAnalytics();
   const { walletAddress, opts } = useWeb3();
 
   const {
     symbol,
+    operation,
     setErrorData,
     qty,
     setQty,
@@ -38,6 +38,10 @@ export default (): Deposit => {
     ETHRouterContract,
     setErrorButton,
   } = useOperationContext();
+
+  const { transaction } = useAnalytics({
+    operationInput: useMemo(() => ({ operation, symbol, qty }), [operation, symbol, qty]),
+  });
 
   const handleOperationError = useHandleOperationError();
 

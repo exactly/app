@@ -97,7 +97,7 @@ const DropdownMenu = <T,>({
       >
         {Object.values(options).map((o) => (
           <OptionItem
-            key={JSON.stringify(o)}
+            key={JSON.stringify(o, (_, value) => (typeof value === 'bigint' ? String(value) : value))}
             onClick={() => {
               onChange(o);
               handleClose();

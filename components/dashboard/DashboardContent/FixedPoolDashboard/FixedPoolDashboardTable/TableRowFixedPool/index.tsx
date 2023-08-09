@@ -28,7 +28,7 @@ type Props = {
   symbol: string;
   valueUSD?: number;
   type: 'deposit' | 'borrow';
-  maturityDate: number;
+  maturityDate: bigint;
   market: Address;
   decimals: number;
 };
@@ -167,7 +167,7 @@ function TableRowFixedPool({ symbol, valueUSD, type, maturityDate, market, decim
                       borderLeftColor: ({ palette }) => palette.grey[palette.mode === 'light' ? 500 : 300],
                     },
                   }}
-                  onClick={() => startDebtManager({ symbol, maturity: BigInt(maturityDate) })}
+                  onClick={() => startDebtManager({ from: { symbol, maturity: maturityDate } })}
                   disabled={isRolloverDisabled()}
                 >
                   {t('Rollover')}

@@ -5,7 +5,7 @@ import WarningIcon from '@mui/icons-material/ErrorRounded';
 import ErrorIcon from '@mui/icons-material/ReportProblemRounded';
 import SuccessIcon from '@mui/icons-material/CheckCircleRounded';
 import useRouter from 'hooks/useRouter';
-import { useMarketContext } from 'contexts/MarketContext';
+import { useCustomTheme } from 'contexts/ThemeContext';
 
 type Variant = 'info' | 'warning' | 'error' | 'success';
 
@@ -37,7 +37,7 @@ const icon: Record<Variant, typeof InfoIcon> = {
 };
 
 function ModalAlert({ variant = 'error', message, mb = 1 }: Props) {
-  const { view } = useMarketContext();
+  const { view } = useCustomTheme();
   const { pathname: currentPathname } = useRouter();
 
   const containerSx: SxProps = {

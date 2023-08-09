@@ -3,11 +3,9 @@ import { Transaction } from 'types/Transaction';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import { Box, Button, CircularProgress, CircularProgressProps, Typography } from '@mui/material';
-import { useModalStatus } from 'contexts/ModalStatusContext';
 import { useOperationContext } from 'contexts/OperationContext';
 import formatSymbol from 'utils/formatSymbol';
 import Reminder from 'components/Reminder';
-import { useMarketContext } from 'contexts/MarketContext';
 import parseTimestamp from 'utils/parseTimestamp';
 import { useTranslation } from 'react-i18next';
 import useTranslateOperation from 'hooks/useTranslateOperation';
@@ -15,15 +13,13 @@ import useEtherscanLink from 'hooks/useEtherscanLink';
 
 type Props = {
   tx: Transaction;
-  tryAgain: () => void;
+  tryAgain?: () => void;
 };
 
 function ModalGif({ tx, tryAgain }: Props) {
   const { t } = useTranslation();
   const translateOperation = useTranslateOperation();
-  const { operation } = useModalStatus();
-  const { symbol, qty } = useOperationContext();
-  const { date } = useMarketContext();
+  const { operation, symbol, qty, date } = useOperationContext();
 
   const isLoading = useMemo(() => tx.status === 'processing' || tx.status === 'loading', [tx]);
   const isSuccess = useMemo(() => tx.status === 'success', [tx]);
@@ -72,7 +68,7 @@ function ModalGif({ tx, tryAgain }: Props) {
             {isError && t('Something went wrong')}
           </Typography>
           <Box display="flex" flexDirection="column" alignItems="center" gap="8px" pt={1}>
-            {isError && (
+            {isError && tryAgain && (
               <Button variant="contained" sx={{ width: '220px', height: '38px' }} onClick={tryAgain}>
                 {t('Try again')}
               </Button>
@@ -89,7 +85,7 @@ function ModalGif({ tx, tryAgain }: Props) {
             </Button>
           </Box>
         </Box>
-        {isSuccess && reminder && date && <Reminder operation={operation} maturity={date} />}
+        {isSuccess && reminder && date !== undefined && <Reminder operation={operation} maturity={date} />}
       </Box>
     </Box>
   );

@@ -12,7 +12,6 @@ import { waitForTransaction } from '@wagmi/core';
 
 import type { ErrorData } from 'types/Error';
 import type { PopulatedTransaction, Transaction } from 'types/Transaction';
-import DebtManagerModal from 'components/DebtManager';
 import type { Position } from 'components/DebtManager/types';
 import useDebtManager from 'hooks/useDebtManager';
 import numbers from 'config/numbers.json';
@@ -23,8 +22,8 @@ import type { DebtManager, Market } from 'types/contracts';
 import handleOperationError from 'utils/handleOperationError';
 import useIsContract from 'hooks/useIsContract';
 import useAnalytics from 'hooks/useAnalytics';
-import useRewards, { Rates } from 'hooks/useRewards';
 import { gasLimit } from 'utils/gas';
+import { Args } from './ModalContext';
 
 export type RolloverInput = {
   from?: Position;
@@ -58,10 +57,6 @@ const reducer = (state: RolloverInput, action: Partial<RolloverInput>): Rollover
 };
 
 type ContextValues = {
-  isOpen: boolean;
-  openDebtManager: (from?: Position) => void;
-  close: () => void;
-
   input: RolloverInput;
   setFrom: (from: Position) => void;
   setTo: (to: Position) => void;
@@ -80,39 +75,31 @@ type ContextValues = {
   needsApproval: (qty: bigint) => Promise<boolean>;
   approve: (maxAssets: bigint) => Promise<void>;
   submit: (populate: () => Promise<PopulatedTransaction | undefined>) => Promise<void>;
-  rates: Rates;
 };
 
 const DebtManagerContext = createContext<ContextValues | null>(null);
 
-export const DebtManagerContextProvider: FC<PropsWithChildren> = ({ children }) => {
+type Props = {
+  args: Args<'rollover'>;
+};
+
+export const DebtManagerContextProvider: FC<PropsWithChildren<Props>> = ({ args, children }) => {
   const { transaction: track } = useAnalytics();
   const { walletAddress, opts } = useWeb3();
   const { data: walletClient } = useWalletClient();
   const { getMarketAccount, refreshAccountData } = useAccountData();
   const isContract = useIsContract();
-  const [isOpen, setIsOpen] = useState(false);
   const [errorData, setErrorData] = useState<ErrorData | undefined>();
 
-  const [input, dispatch] = useReducer(reducer, initState);
+  const [input, dispatch] = useReducer(reducer, { ...initState, ...args });
 
   const [tx, setTx] = useState<Transaction | undefined>();
   const [isLoading, setIsLoading] = useState(false);
-  const { rates } = useRewards();
 
   const setFrom = useCallback((from: Position) => dispatch({ ...initState, from }), []);
   const setTo = useCallback((to: Position) => dispatch({ to }), []);
   const setPercent = useCallback((percent: number) => dispatch({ percent }), []);
   const setSlippage = useCallback((slippage: string) => dispatch({ slippage }), []);
-
-  const openDebtManager = useCallback((from?: Position) => {
-    dispatch({ ...initState, from });
-    setTx(undefined);
-    setIsLoading(false);
-    setIsOpen(true);
-  }, []);
-
-  const close = useCallback(() => setIsOpen(false), []);
 
   const debtManager = useDebtManager();
 
@@ -184,10 +171,6 @@ export const DebtManagerContextProvider: FC<PropsWithChildren> = ({ children }) 
   );
 
   const value: ContextValues = {
-    isOpen,
-    openDebtManager,
-    close,
-
     input,
     setFrom,
     setTo,
@@ -205,15 +188,9 @@ export const DebtManagerContextProvider: FC<PropsWithChildren> = ({ children }) 
     needsApproval,
     approve,
     submit,
-    rates,
   };
 
-  return (
-    <DebtManagerContext.Provider value={value}>
-      {children}
-      <DebtManagerModal />
-    </DebtManagerContext.Provider>
-  );
+  return <DebtManagerContext.Provider value={value}>{children}</DebtManagerContext.Provider>;
 };
 
 export function useDebtManagerContext() {

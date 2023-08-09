@@ -2,7 +2,6 @@ import { useCallback, useState } from 'react';
 import { parseUnits } from 'viem';
 import { ErrorCode } from '@ethersproject/logger';
 import { ERC20 } from 'types/contracts';
-import { Operation } from 'contexts/ModalStatusContext';
 import { useWeb3 } from './useWeb3';
 import { useOperationContext } from 'contexts/OperationContext';
 import useAccountData from './useAccountData';
@@ -14,6 +13,7 @@ import useEstimateGas from './useEstimateGas';
 import useAnalytics from './useAnalytics';
 import { waitForTransaction } from '@wagmi/core';
 import { gasLimit } from 'utils/gas';
+import type { Operation } from 'types/Operation';
 
 export default (operation: Operation, contract?: ERC20, spender?: Address) => {
   const { t } = useTranslation();

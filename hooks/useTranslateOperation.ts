@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from 'react';
 import { capitalize as mCapitalize } from '@mui/material';
-import { Operation } from 'contexts/ModalStatusContext';
+import type { Operation } from 'types/Operation';
 import { useTranslation } from 'react-i18next';
 
 export default function useTranslateOperation() {

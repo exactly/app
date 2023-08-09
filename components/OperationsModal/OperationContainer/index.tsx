@@ -9,7 +9,7 @@ import BorrowAtMaturity from 'components/operations/BorrowAtMaturity';
 import WithdrawAtMaturity from 'components/operations/WithdrawAtMaturity';
 import RepayAtMaturity from 'components/operations/RepayAtMaturity';
 
-import type { Operation } from 'contexts/ModalStatusContext';
+import type { Operation } from 'types/Operation';
 
 type Props = {
   operation: Operation;

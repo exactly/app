@@ -37,7 +37,7 @@ const OperationTabs: FC = () => {
 
   const handleOperationChange = (op: MarketsBasicOperation) => {
     setQty('');
-    setSelected(0);
+    setSelected(0n);
     onChangeOperation(op);
     setErrorData(undefined);
     setLoadingButton({});

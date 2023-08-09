@@ -4,7 +4,7 @@ import { Skeleton } from '@mui/material';
 import useFixedPoolTransactions from 'hooks/useFixedPoolTransactions';
 import { calculateAPR } from 'utils/calculateAPR';
 
-const APRItem: FC<{ type: 'deposit' | 'borrow'; maturityDate: number; market: Address; decimals: number }> = ({
+const APRItem: FC<{ type: 'deposit' | 'borrow'; maturityDate: bigint; market: Address; decimals: number }> = ({
   type,
   maturityDate,
   market,
@@ -21,7 +21,7 @@ const APRItem: FC<{ type: 'deposit' | 'borrow'; maturityDate: number; market: Ad
     let allAmounts = 0n;
 
     allTransactions.forEach(({ fee, assets, timestamp, maturity }) => {
-      const transactionAPR = calculateAPR(fee, assets, BigInt(timestamp), BigInt(maturity));
+      const transactionAPR = calculateAPR(fee, assets, BigInt(timestamp), maturity);
       allAPRbyAmount += (transactionAPR * assets) / wad;
       allAmounts += assets;
     });

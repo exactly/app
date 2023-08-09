@@ -1,7 +1,7 @@
 import React, { FC, useMemo } from 'react';
 import ModalSubmit from 'components/OperationsModal/ModalSubmit';
 import { MarketsBasicOperation, MarketsBasicOption } from 'contexts/MarketsBasicContext';
-import { Operation } from 'contexts/ModalStatusContext';
+import type { Operation } from 'types/Operation';
 import { usePreviewTx } from 'contexts/OperationContext';
 import useBorrow from 'hooks/useBorrow';
 import useBorrowAtMaturity from 'hooks/useBorrowAtMaturity';
@@ -45,7 +45,7 @@ const Submit: FC<SubmitProps> = ({ symbol, operation, option, qty, errorData }) 
   const borrowAtMaturity = useBorrowAtMaturity();
 
   const { isLoading, handleSubmitAction, needsApproval, previewGasCost, isFloating } = useMemo(() => {
-    const op = getOperation(operation, option.maturity === 0);
+    const op = getOperation(operation, option.maturity === 0n);
     switch (op) {
       case 'borrow':
         return {

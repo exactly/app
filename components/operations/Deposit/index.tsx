@@ -8,7 +8,6 @@ import useBalance from 'hooks/useBalance';
 import useAccountData from 'hooks/useAccountData';
 import { useOperationContext, usePreviewTx } from 'contexts/OperationContext';
 import { ModalBox, ModalBoxRow, ModalBoxCell } from 'components/common/modal/ModalBox';
-import { useModalStatus } from 'contexts/ModalStatusContext';
 import ModalInfoHealthFactor from 'components/OperationsModal/Info/ModalInfoHealthFactor';
 import ModalInfoBorrowLimit from 'components/OperationsModal/Info/ModalInfoBorrowLimit';
 import { Grid } from '@mui/material';
@@ -28,7 +27,6 @@ import useTranslateOperation from 'hooks/useTranslateOperation';
 const Deposit: FC = () => {
   const { t } = useTranslation();
   const translateOperation = useTranslateOperation();
-  const { operation } = useModalStatus();
   const { symbol, errorData, qty, gasCost, tx, assetContract } = useOperationContext();
   const { isLoading, onMax, handleInputChange, handleSubmitAction, deposit, needsApproval, previewGasCost } =
     useDeposit();
@@ -57,7 +55,7 @@ const Deposit: FC = () => {
           </ModalBoxRow>
           <ModalBoxRow>
             <ModalBoxCell>
-              <ModalInfoHealthFactor qty={qty} symbol={symbol} operation={operation} />
+              <ModalInfoHealthFactor qty={qty} symbol={symbol} operation="deposit" />
             </ModalBoxCell>
             <ModalBoxCell divisor>
               <ModalInfoAPR
@@ -75,7 +73,7 @@ const Deposit: FC = () => {
         {errorData?.component !== 'gas' && <ModalTxCost gasCost={gasCost} />}
         <ModalRewards symbol={symbol} operation="deposit" />
         <ModalAdvancedSettings>
-          <ModalInfoBorrowLimit qty={qty} symbol={symbol} operation={operation} variant="row" />
+          <ModalInfoBorrowLimit qty={qty} symbol={symbol} operation="deposit" variant="row" />
           <ModalInfoTotalDeposits qty={qty} symbol={symbol} operation="deposit" variant="row" />
           <ModalInfoFloatingUtilizationRate qty={qty} symbol={symbol} operation="deposit" variant="row" />
         </ModalAdvancedSettings>
@@ -89,7 +87,7 @@ const Deposit: FC = () => {
 
       <Grid item mt={{ xs: 2, sm: 3 }}>
         <ModalSubmit
-          label={translateOperation(operation, { capitalize: true })}
+          label={translateOperation('deposit', { capitalize: true })}
           symbol={symbol}
           submit={handleSubmitAction}
           isLoading={isLoading || previewIsLoading}

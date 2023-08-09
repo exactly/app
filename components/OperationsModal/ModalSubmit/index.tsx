@@ -3,7 +3,6 @@ import { LoadingButton } from '@mui/lab';
 import { Button, CircularProgress, Typography } from '@mui/material';
 import { Box } from '@mui/system';
 import { useOperationContext } from 'contexts/OperationContext';
-import { useModalStatus } from 'contexts/ModalStatusContext';
 import { useNetwork, useSwitchNetwork } from 'wagmi';
 import { useWeb3 } from 'hooks/useWeb3';
 import { useTranslation } from 'react-i18next';
@@ -21,8 +20,7 @@ type Props = {
 function ModalSubmit({ isLoading = false, disabled = false, submit, symbol, label }: Props) {
   const { t } = useTranslation();
   const translateOperation = useTranslateOperation();
-  const { loadingButton, isLoading: isLoadingOp, tx, errorButton, requiresApproval } = useOperationContext();
-  const { operation } = useModalStatus();
+  const { operation, loadingButton, isLoading: isLoadingOp, tx, errorButton, requiresApproval } = useOperationContext();
   const { isConnected, chain: displayNetwork, connect, impersonateActive, exitImpersonate } = useWeb3();
   const { chain } = useNetwork();
   const { switchNetwork, isLoading: switchIsLoading } = useSwitchNetwork();

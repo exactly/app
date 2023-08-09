@@ -2,7 +2,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import PieChartOutlineRoundedIcon from '@mui/icons-material/PieChartOutlineRounded';
 
 import ModalInfo, { FromTo, Variant } from 'components/common/modal/ModalInfo';
-import { Operation } from 'contexts/ModalStatusContext';
+import type { Operation } from 'types/Operation';
 import useAccountData from 'hooks/useAccountData';
 import { toPercentage } from 'utils/utils';
 import usePreviewer from 'hooks/usePreviewer';
@@ -11,8 +11,8 @@ import { useWeb3 } from 'hooks/useWeb3';
 import { Box } from '@mui/material';
 import UtilizationRateWithAreaChart from 'components/charts/UtilizationRateWithAreaChart';
 import { useTranslation } from 'react-i18next';
-import { useMarketContext } from 'contexts/MarketContext';
 import { formatEther, formatUnits, parseUnits, zeroAddress } from 'viem';
+import { useOperationContext } from 'contexts/OperationContext';
 
 type Props = {
   qty: string;
@@ -27,12 +27,12 @@ function ModalInfoFixedUtilizationRate({ qty, symbol, operation, variant = 'colu
   const previewerContract = usePreviewer();
   const { walletAddress } = useWeb3();
   const { marketAccount } = useAccountData(symbol);
-  const { date } = useMarketContext();
+  const { date } = useOperationContext();
 
   const [rawFrom, from] = useMemo(() => {
     if (!date) return [undefined, undefined];
 
-    const pool = marketAccount?.fixedPools?.find(({ maturity }) => maturity === BigInt(date));
+    const pool = marketAccount?.fixedPools?.find(({ maturity }) => maturity === date);
     if (!pool) return [undefined, undefined];
 
     return [Number(formatEther(pool.utilization)), toPercentage(Number(formatEther(pool.utilization)))];
@@ -62,7 +62,7 @@ function ModalInfoFixedUtilizationRate({ qty, symbol, operation, variant = 'colu
           case 'depositAtMaturity': {
             const { utilization } = await previewerContract.read.previewDepositAtMaturity([
               marketAccount.market,
-              BigInt(date),
+              date,
               initialAssets,
             ]);
             uti = utilization;
@@ -72,7 +72,7 @@ function ModalInfoFixedUtilizationRate({ qty, symbol, operation, variant = 'colu
           case 'withdrawAtMaturity': {
             const { utilization } = await previewerContract.read.previewWithdrawAtMaturity([
               marketAccount.market,
-              BigInt(date),
+              date,
               initialAssets,
               walletAddress ?? zeroAddress,
             ]);
@@ -82,7 +82,7 @@ function ModalInfoFixedUtilizationRate({ qty, symbol, operation, variant = 'colu
           case 'borrowAtMaturity': {
             const { utilization } = await previewerContract.read.previewBorrowAtMaturity([
               marketAccount.market,
-              BigInt(date),
+              date,
               initialAssets,
             ]);
             uti = utilization;
@@ -91,7 +91,7 @@ function ModalInfoFixedUtilizationRate({ qty, symbol, operation, variant = 'colu
           case 'repayAtMaturity': {
             const { utilization } = await previewerContract.read.previewRepayAtMaturity([
               marketAccount.market,
-              BigInt(date),
+              date,
               initialAssets,
               walletAddress ?? zeroAddress,
             ]);

@@ -11,7 +11,6 @@ import { Grid } from '@mui/material';
 import { ModalBox, ModalBoxCell, ModalBoxRow } from 'components/common/modal/ModalBox';
 import AssetInput from 'components/OperationsModal/AssetInput';
 import ModalInfoHealthFactor from 'components/OperationsModal/Info/ModalInfoHealthFactor';
-import { useModalStatus } from 'contexts/ModalStatusContext';
 import ModalAdvancedSettings from 'components/common/modal/ModalAdvancedSettings';
 import ModalInfoTotalDeposits from 'components/OperationsModal/Info/ModalInfoTotalDeposits';
 import ModalAlert from 'components/common/modal/ModalAlert';
@@ -30,7 +29,6 @@ import { formatUnits } from 'viem';
 const DepositAtMaturity: FC = () => {
   const { t } = useTranslation();
   const translateOperation = useTranslateOperation();
-  const { operation } = useModalStatus();
   const {
     isLoading,
     onMax,
@@ -83,10 +81,10 @@ const DepositAtMaturity: FC = () => {
           </ModalBoxRow>
           <ModalBoxRow>
             <ModalBoxCell>
-              <ModalInfoHealthFactor qty={qty} symbol={symbol} operation={operation} />
+              <ModalInfoHealthFactor qty={qty} symbol={symbol} operation="depositAtMaturity" />
             </ModalBoxCell>
             <ModalBoxCell divisor>
-              <ModalInfoTotalDeposits qty={qty} symbol={symbol} operation="deposit" />
+              <ModalInfoTotalDeposits qty={qty} symbol={symbol} operation="depositAtMaturity" />
             </ModalBoxCell>
           </ModalBoxRow>
         </ModalBox>
@@ -114,7 +112,7 @@ const DepositAtMaturity: FC = () => {
 
       <Grid item mt={{ xs: 2, sm: 3 }}>
         <ModalSubmit
-          label={translateOperation(operation, { capitalize: true })}
+          label={translateOperation('depositAtMaturity', { capitalize: true })}
           symbol={symbol}
           submit={handleSubmitAction}
           isLoading={isLoading || previewIsLoading}

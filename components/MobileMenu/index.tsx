@@ -1,4 +1,4 @@
-import React, { FC, PropsWithChildren, useState } from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import CloseIcon from '@mui/icons-material/Close';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import TwitterIcon from '@mui/icons-material/Twitter';
@@ -16,7 +16,6 @@ import QueryStatsIcon from '@mui/icons-material/QueryStats';
 import SwitchTheme from 'components/SwitchTheme';
 import { useTranslation } from 'react-i18next';
 import SelectLanguage from 'components/SelectLanguage';
-import { useMarketContext } from 'contexts/MarketContext';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import RepeatRoundedIcon from '@mui/icons-material/RepeatRounded';
 import BarChartRoundedIcon from '@mui/icons-material/BarChartRounded';
@@ -24,7 +23,8 @@ import MovingSharpIcon from '@mui/icons-material/MovingSharp';
 import { mainnet, optimism } from 'wagmi/chains';
 import { useWeb3 } from 'hooks/useWeb3';
 import SecondaryChain from 'components/SecondaryChain';
-import RewardsModal from 'components/RewardsModal';
+import { RewardsButton } from 'components/RewardsModal';
+import { useCustomTheme } from 'contexts/ThemeContext';
 
 type Props = {
   open: boolean;
@@ -39,7 +39,6 @@ function MobileMenu({ open, handleClose }: Props) {
   const { chain } = useWeb3();
   const isOPMainnet = chain?.id === optimism.id;
   const isEthereum = chain?.id === mainnet.id;
-  const [openRewardsModal, setOpenRewardsModal] = useState(false);
 
   const headers = [
     {
@@ -126,13 +125,11 @@ function MobileMenu({ open, handleClose }: Props) {
                 </Box>
               ))}
             </Box>
-            <Divider sx={{ my: 1.5 }} />
             {!isEthereum && (
-              <RewardsModal
-                isOpen={openRewardsModal}
-                open={() => setOpenRewardsModal(true)}
-                close={() => setOpenRewardsModal(false)}
-              />
+              <>
+                <Divider sx={{ my: 1.5 }} />
+                <RewardsButton />
+              </>
             )}
             <Divider sx={{ my: 1.5 }} />
             <Typography fontFamily="fontFamilyMonospaced" fontSize={14} color="figma.grey.500" fontWeight={600}>
@@ -185,7 +182,7 @@ const LinkItem: FC<PropsWithChildren & { title: string; href: string }> = ({ chi
 
 const AdvancedViewSwitch: FC = () => {
   const { t } = useTranslation();
-  const { view, setView } = useMarketContext();
+  const { view, setView } = useCustomTheme();
   return (
     <Box display="flex" alignItems="center" justifyContent="space-between" gap={1}>
       <Typography fontSize={14}>{t('Advanced view')}</Typography>

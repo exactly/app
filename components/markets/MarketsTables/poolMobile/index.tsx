@@ -90,7 +90,7 @@ const GridAPRItem: FC<{
   type: 'deposit' | 'borrow';
   header: TableHeader<TableRow>;
   isLoading?: boolean;
-  maturity?: number;
+  maturity?: bigint;
 }> = ({ symbol, apr, type, header, isLoading = false, maturity }) => (
   <Grid item xs={6}>
     <Box display="flex">
@@ -108,12 +108,12 @@ const GridAPRItem: FC<{
     ) : (
       <>
         <Grid container alignItems="center" gap={1}>
-          <Rates symbol={symbol} apr={apr} type={type} rateType={maturity && maturity !== 0 ? 'fixed' : 'floating'} />
+          <Rates symbol={symbol} apr={apr} type={type} rateType={maturity && maturity !== 0n ? 'fixed' : 'floating'} />
         </Grid>
 
-        {Boolean(maturity && maturity !== 0) && (
+        {Boolean(maturity && maturity !== 0n) && (
           <Typography component="p" width="fit-content" variant="subtitle2" sx={{ color: 'grey.500' }}>
-            {parseTimestamp(maturity ?? 0)}
+            {parseTimestamp(maturity || 0n)}
           </Typography>
         )}
       </>

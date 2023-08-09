@@ -25,11 +25,11 @@ type Borrow = {
 
 export default (): Borrow => {
   const { t } = useTranslation();
-  const { transaction } = useAnalytics();
   const { walletAddress, opts } = useWeb3();
 
   const {
     symbol,
+    operation,
     setErrorData,
     qty,
     setQty,
@@ -41,6 +41,10 @@ export default (): Borrow => {
     marketContract,
     ETHRouterContract,
   } = useOperationContext();
+
+  const { transaction } = useAnalytics({
+    operationInput: useMemo(() => ({ operation, symbol, qty }), [operation, symbol, qty]),
+  });
 
   const { marketAccount, accountData } = useAccountData(symbol);
   const handleOperationError = useHandleOperationError();

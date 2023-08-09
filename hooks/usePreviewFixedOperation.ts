@@ -52,7 +52,7 @@ export default (operation: MarketsBasicOperation): PreviewFixedOperation => {
           const fixedAPR = Number(((rate - WEI_PER_ETHER) * 31_536_000n) / (maturity - currentTimestamp)) / 1e18;
 
           return {
-            maturity: Number(maturity),
+            maturity,
             depositAPR: fixedAPR,
             borrowAPR: fixedAPR,
             interest: assets - initialAssets,

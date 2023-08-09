@@ -6,7 +6,7 @@ import { formatUnits, parseUnits } from 'viem';
 import formatNumber from 'utils/formatNumber';
 import getBeforeBorrowLimit from 'utils/getBeforeBorrowLimit';
 import ModalInfo, { FromTo, Variant } from 'components/common/modal/ModalInfo';
-import { Operation } from 'contexts/ModalStatusContext';
+import type { Operation } from 'types/Operation';
 import useAccountData from 'hooks/useAccountData';
 import { WEI_PER_ETHER } from 'utils/const';
 

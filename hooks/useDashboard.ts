@@ -79,20 +79,11 @@ export default function useDashboard(type: string) {
     fetchData();
   }, [getFloatingData]);
 
-  const fixedDeposits = useMemo(() => {
-    if (!deposits) return [];
-    return Object.keys(deposits)?.flatMap((maturity) => deposits[parseInt(maturity)]);
-  }, [deposits]);
-
-  const fixedBorrows = useMemo(() => {
-    if (!borrows) return [];
-    return Object.keys(borrows)?.flatMap((maturity) => borrows[parseInt(maturity)]);
-  }, [borrows]);
-
   const fixedRows = useMemo(() => {
-    const fixedData = isDeposit ? fixedDeposits : fixedBorrows;
-    return fixedData.map((pool) => ({ ...pool, valueUSD: getValueInUSD(pool.symbol, pool.previewValue) }));
-  }, [isDeposit, fixedDeposits, fixedBorrows, getValueInUSD]);
+    const fixedData = isDeposit ? deposits : borrows;
+    const flat = Object.values(fixedData).flatMap((x) => x);
+    return flat.map((pool) => ({ ...pool, valueUSD: getValueInUSD(pool.symbol, pool.previewValue) }));
+  }, [isDeposit, deposits, borrows, getValueInUSD]);
 
   return { floatingRows: floatingData || defaultRows, fixedRows };
 }

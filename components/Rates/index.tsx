@@ -4,7 +4,7 @@ import React, { FC, useEffect, useMemo, useState } from 'react';
 import { toPercentage } from 'utils/utils';
 import numbers from 'config/numbers.json';
 import { LidoResponse } from 'hooks/useStETHNativeAPR';
-import { useDebtManagerContext } from 'contexts/DebtManagerContext';
+import { useAccountDataContext } from 'contexts/AccountDataContext';
 
 type Props = {
   symbol: string;
@@ -35,7 +35,7 @@ const Rates: FC<Props> = ({
   hideMarket = false,
   rateType = 'floating',
 }) => {
-  const { rates } = useDebtManagerContext();
+  const { rates } = useAccountDataContext();
 
   const [native, setNative] = useState<number>(0);
 

@@ -14,7 +14,6 @@ import { ModalBox, ModalBoxCell, ModalBoxRow } from 'components/common/modal/Mod
 import AssetInput from 'components/OperationsModal/AssetInput';
 import DateSelector from 'components/OperationsModal/DateSelector';
 import ModalInfoHealthFactor from 'components/OperationsModal/Info/ModalInfoHealthFactor';
-import { useModalStatus } from 'contexts/ModalStatusContext';
 import ModalInfoFixedUtilizationRate from 'components/OperationsModal/Info/ModalInfoFixedUtilizationRate';
 import ModalAdvancedSettings from 'components/common/modal/ModalAdvancedSettings';
 import ModalInfoEditableSlippage from 'components/OperationsModal/Info/ModalInfoEditableSlippage';
@@ -38,12 +37,11 @@ import { gasLimit } from 'utils/gas';
 const WithdrawAtMaturity: FC = () => {
   const { t } = useTranslation();
   const translateOperation = useTranslateOperation();
-  const { transaction } = useAnalytics();
-  const { operation } = useModalStatus();
   const { walletAddress, opts } = useWeb3();
 
   const {
     symbol,
+    operation,
     errorData,
     setErrorData,
     qty,
@@ -63,6 +61,10 @@ const WithdrawAtMaturity: FC = () => {
     slippage,
   } = useOperationContext();
 
+  const { transaction } = useAnalytics({
+    operationInput: useMemo(() => ({ operation, symbol, qty }), [operation, symbol, qty]),
+  });
+
   const handleOperationError = useHandleOperationError();
 
   const [minAmountToWithdraw, setMinAmountToWithdraw] = useState(0n);
@@ -80,7 +82,7 @@ const WithdrawAtMaturity: FC = () => {
   const positionAssets = useMemo(() => {
     if (!marketAccount || !date) return 0n;
 
-    const pool = marketAccount.fixedDepositPositions.find(({ maturity }) => maturity === BigInt(date ?? 0));
+    const pool = marketAccount.fixedDepositPositions.find(({ maturity }) => maturity === date);
     return pool ? pool.position.principal + pool.position.fee : 0n;
   }, [date, marketAccount]);
 
@@ -119,7 +121,7 @@ const WithdrawAtMaturity: FC = () => {
 
     const { assets: amount } = await previewerContract.read.previewWithdrawAtMaturity([
       marketAccount.market,
-      BigInt(date),
+      date,
       parsedQtyValue,
       walletAddress ?? zeroAddress,
     ]);
@@ -158,15 +160,12 @@ const WithdrawAtMaturity: FC = () => {
       const amount = amountToWithdraw;
 
       if (marketAccount.assetSymbol === 'WETH') {
-        const sim = await ETHRouterContract.simulate.withdrawAtMaturity(
-          [BigInt(date), amount, minAmountToWithdraw],
-          opts,
-        );
+        const sim = await ETHRouterContract.simulate.withdrawAtMaturity([date, amount, minAmountToWithdraw], opts);
         return estimate(sim.request);
       }
 
       const sim = await marketContract.simulate.withdrawAtMaturity(
-        [BigInt(date), amount, minAmountToWithdraw, walletAddress, walletAddress],
+        [date, amount, minAmountToWithdraw, walletAddress, walletAddress],
         opts,
       );
       return estimate(sim.request);
@@ -208,7 +207,7 @@ const WithdrawAtMaturity: FC = () => {
       const amount = parseUnits(qty, marketAccount.decimals);
       if (marketAccount.assetSymbol === 'WETH') {
         if (!ETHRouterContract) return;
-        const args = [BigInt(date), amount, minAmountToWithdraw] as const;
+        const args = [date, amount, minAmountToWithdraw] as const;
 
         const gasEstimation = await ETHRouterContract.estimateGas.withdrawAtMaturity(args, opts);
         hash = await ETHRouterContract.write.withdrawAtMaturity(args, {
@@ -216,7 +215,7 @@ const WithdrawAtMaturity: FC = () => {
           gasLimit: gasLimit(gasEstimation),
         });
       } else {
-        const args = [BigInt(date), amount, minAmountToWithdraw, walletAddress, walletAddress] as const;
+        const args = [date, amount, minAmountToWithdraw, walletAddress, walletAddress] as const;
         const gasEstimation = await marketContract.estimateGas.withdrawAtMaturity(args, opts);
 
         hash = await marketContract.write.withdrawAtMaturity(args, {
@@ -291,7 +290,7 @@ const WithdrawAtMaturity: FC = () => {
             <ModalBoxCell>
               <DateSelector />
             </ModalBoxCell>
-            <ModalBoxCell>{date && <ModalInfoMaturityStatus date={date} />}</ModalBoxCell>
+            <ModalBoxCell>{date !== undefined && <ModalInfoMaturityStatus date={Number(date)} />}</ModalBoxCell>
             <ModalBoxCell>
               <ModalInfoAmount
                 label={t('Amount at maturity')}
@@ -309,7 +308,7 @@ const WithdrawAtMaturity: FC = () => {
           </ModalBoxRow>
           <ModalBoxRow>
             <ModalBoxCell>
-              <ModalInfoHealthFactor qty={qty} symbol={symbol} operation={operation} />
+              <ModalInfoHealthFactor qty={qty} symbol={symbol} operation="withdrawAtMaturity" />
             </ModalBoxCell>
           </ModalBoxRow>
         </ModalBox>
@@ -338,7 +337,7 @@ const WithdrawAtMaturity: FC = () => {
 
       <Grid item mt={{ xs: 2, sm: 3 }}>
         <ModalSubmit
-          label={translateOperation(operation, { capitalize: true })}
+          label={translateOperation('withdrawAtMaturity', { capitalize: true })}
           symbol={symbol === 'WETH' && marketAccount ? marketAccount.symbol : symbol}
           submit={handleSubmitAction}
           isLoading={isLoading}

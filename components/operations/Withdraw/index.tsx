@@ -11,7 +11,6 @@ import { Grid } from '@mui/material';
 import { ModalBox, ModalBoxCell, ModalBoxRow } from 'components/common/modal/ModalBox';
 import AssetInput from 'components/OperationsModal/AssetInput';
 import ModalInfoHealthFactor from 'components/OperationsModal/Info/ModalInfoHealthFactor';
-import { useModalStatus } from 'contexts/ModalStatusContext';
 import ModalInfoTotalDeposits from 'components/OperationsModal/Info/ModalInfoTotalDeposits';
 import ModalAdvancedSettings from 'components/common/modal/ModalAdvancedSettings';
 import ModalInfoFloatingUtilizationRate from 'components/OperationsModal/Info/ModalInfoFloatingUtilizationRate';
@@ -32,12 +31,11 @@ import { gasLimit } from 'utils/gas';
 const Withdraw: FC = () => {
   const { t } = useTranslation();
   const translateOperation = useTranslateOperation();
-  const { transaction } = useAnalytics();
-  const { operation } = useModalStatus();
   const { walletAddress, opts } = useWeb3();
 
   const {
     symbol,
+    operation,
     errorData,
     setErrorData,
     qty,
@@ -52,6 +50,10 @@ const Withdraw: FC = () => {
     marketContract,
     ETHRouterContract,
   } = useOperationContext();
+
+  const { transaction } = useAnalytics({
+    operationInput: useMemo(() => ({ operation, symbol, qty }), [operation, symbol, qty]),
+  });
 
   const handleOperationError = useHandleOperationError();
 
@@ -250,7 +252,7 @@ const Withdraw: FC = () => {
           </ModalBoxRow>
           <ModalBoxRow>
             <ModalBoxCell>
-              <ModalInfoHealthFactor qty={qty} symbol={symbol} operation={operation} />
+              <ModalInfoHealthFactor qty={qty} symbol={symbol} operation="withdraw" />
             </ModalBoxCell>
             <ModalBoxCell divisor>
               <ModalInfoTotalDeposits qty={qty} symbol={symbol} operation="withdraw" />
@@ -262,7 +264,7 @@ const Withdraw: FC = () => {
       <Grid item mt={2}>
         {errorData?.component !== 'gas' && <ModalTxCost gasCost={gasCost} />}
         <ModalAdvancedSettings>
-          <ModalInfoBorrowLimit qty={qty} symbol={symbol} operation={operation} variant="row" />
+          <ModalInfoBorrowLimit qty={qty} symbol={symbol} operation="withdraw" variant="row" />
           <ModalInfoFloatingUtilizationRate qty={qty} symbol={symbol} operation="withdraw" variant="row" />
         </ModalAdvancedSettings>
       </Grid>
@@ -275,7 +277,7 @@ const Withdraw: FC = () => {
 
       <Grid item mt={{ xs: 2, sm: 3 }}>
         <ModalSubmit
-          label={translateOperation(operation, { capitalize: true })}
+          label={translateOperation('withdraw', { capitalize: true })}
           symbol={symbol === 'WETH' && marketAccount ? marketAccount.symbol : symbol}
           submit={handleSubmitAction}
           isLoading={isLoading}

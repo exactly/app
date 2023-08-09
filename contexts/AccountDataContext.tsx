@@ -1,12 +1,14 @@
-import React, { createContext, useEffect, useState, startTransition, useRef } from 'react';
+import React, { createContext, useEffect, useState, startTransition, useRef, useContext } from 'react';
 import type { FC, PropsWithChildren } from 'react';
 import { useConfig, useConnect } from 'wagmi';
 import useAccountData from 'hooks/useAccountData';
 import { captureException } from '@sentry/nextjs';
+import useRewards, { type Rates } from 'hooks/useRewards';
 
 export type ContextValues = {
   lastSync: number;
   resetLastSync: () => void;
+  rates: Rates;
 };
 
 const AccountDataContext = createContext<ContextValues | null>(null);
@@ -17,6 +19,7 @@ export const AccountDataProvider: FC<PropsWithChildren> = ({ children }) => {
   const { connect, connectors } = useConnect();
   const client = useConfig();
   const { refreshAccountData } = useAccountData();
+  const { rates } = useRewards();
 
   const focusTimeout = useRef<number>();
 
@@ -50,6 +53,7 @@ export const AccountDataProvider: FC<PropsWithChildren> = ({ children }) => {
   return (
     <AccountDataContext.Provider
       value={{
+        rates,
         lastSync,
         resetLastSync: () => setLastSync(Date.now()),
       }}
@@ -58,5 +62,13 @@ export const AccountDataProvider: FC<PropsWithChildren> = ({ children }) => {
     </AccountDataContext.Provider>
   );
 };
+
+export function useAccountDataContext() {
+  const ctx = useContext(AccountDataContext);
+  if (!ctx) {
+    throw new Error('Using AccountDataContext outside of provider');
+  }
+  return ctx;
+}
 
 export default AccountDataContext;

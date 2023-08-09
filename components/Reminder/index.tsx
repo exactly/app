@@ -4,8 +4,8 @@ import { useTranslation } from 'react-i18next';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import { atcb_action } from 'add-to-calendar-button';
 import parseTimestamp from 'utils/parseTimestamp';
-import { Operation } from 'contexts/ModalStatusContext';
 import useTranslateOperation from 'hooks/useTranslateOperation';
+import type { Operation } from 'types/Operation';
 
 type Props = {
   operation: Operation;

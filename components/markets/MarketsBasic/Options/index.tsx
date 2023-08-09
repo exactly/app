@@ -12,8 +12,8 @@ import Rates from 'components/Rates';
 type Props = {
   symbol: string;
   allOptions: MarketsBasicOption[];
-  selected?: number;
-  setSelected: (value: number) => void;
+  selected?: bigint;
+  setSelected: (value: bigint) => void;
   loadingFloatingOption: boolean;
   loadingFixedOptions: boolean;
   operation: MarketsBasicOperation;
@@ -36,7 +36,7 @@ const Options: FC<Props> = ({
   const bottomIconSx = { fontSize: '10px', my: 'auto', color: 'figma.grey.500' };
 
   return (
-    <RadioGroup value={selected} onChange={(e) => setSelected(parseInt(e.target.value))} sx={{ pt: 1 }}>
+    <RadioGroup value={selected} onChange={(e) => setSelected(BigInt(e.target.value))} sx={{ pt: 1 }}>
       {allOptions.map(({ maturity, depositAPR, borrowAPR }, index) => {
         const apr = (operation === 'deposit' ? depositAPR : borrowAPR) ?? 0;
 
@@ -53,7 +53,7 @@ const Options: FC<Props> = ({
                 px: 1,
                 borderRadius: '4px',
               }}
-              disabled={maturity !== 0 && !maturity}
+              disabled={maturity !== 0n && !maturity}
               label={
                 <Box
                   display="flex"
@@ -70,7 +70,7 @@ const Options: FC<Props> = ({
                     alignItems={{ xs: 'start', sm: 'center' }}
                     flex={1}
                   >
-                    {maturity || maturity === 0 ? (
+                    {maturity || maturity === 0n ? (
                       <Typography fontWeight={700} fontSize={13} color="grey.900" my="auto">
                         {maturity ? daysLeft(maturity) : t('Open-ended')}
                       </Typography>
@@ -81,7 +81,7 @@ const Options: FC<Props> = ({
                       <Tooltip
                         arrow
                         title={
-                          maturity === 0
+                          maturity === 0n
                             ? t(
                                 'This option currently offers the best APR, but please note that is a variable pool and it may change at any time based on market conditions.',
                               )
@@ -95,10 +95,10 @@ const Options: FC<Props> = ({
                   <OptionRate
                     apr={apr}
                     type={operation}
-                    isLoading={maturity === 0 ? loadingFloatingOption : loadingFixedOptions}
+                    isLoading={maturity === 0n ? loadingFloatingOption : loadingFixedOptions}
                     symbol={symbol}
                     minWidth={90}
-                    rateType={maturity && maturity !== 0 ? 'fixed' : 'floating'}
+                    rateType={maturity && maturity !== 0n ? 'fixed' : 'floating'}
                     bottom={
                       <>
                         {maturity ? <LockIcon sx={bottomIconSx} /> : <SwapVertIcon sx={bottomIconSx} />}
@@ -108,11 +108,11 @@ const Options: FC<Props> = ({
                           color="figma.grey.500"
                           textAlign="right"
                         >
-                          {maturity === 0 ? t('Variable Rate') : t('Fixed Rate')}
+                          {maturity === 0n ? t('Variable Rate') : t('Fixed Rate')}
                         </Typography>
                         <Tooltip
                           componentsProps={{ tooltip: { sx: { maxWidth: 260 } } }}
-                          title={maturity === 0 ? <TooltipFloatingRate /> : <TooltipFixedRate />}
+                          title={maturity === 0n ? <TooltipFloatingRate /> : <TooltipFixedRate />}
                           placement="right"
                           arrow
                         >

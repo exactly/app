@@ -40,7 +40,7 @@ function StrategiesContent() {
         ),
         tags: ['basic'],
         children: (
-          <Button fullWidth variant="contained" onClick={() => startDebtManager()}>
+          <Button fullWidth variant="contained" onClick={() => startDebtManager({})}>
             {t('Rollover')}
           </Button>
         ),

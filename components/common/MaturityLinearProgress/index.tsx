@@ -34,7 +34,7 @@ const colors = {
 type Props = {
   symbol: string;
   operation: 'deposit' | 'borrow';
-  maturityDate: number;
+  maturityDate: bigint;
 };
 
 function MaturityLinearProgress({ symbol, operation, maturityDate }: Props) {
@@ -46,7 +46,7 @@ function MaturityLinearProgress({ symbol, operation, maturityDate }: Props) {
     const oneDay = oneHour * 24;
     const maturityLife = oneDay * 7 * 4 * (marketAccount?.maxFuturePools ?? 4);
     const nowInSeconds = dayjs().unix();
-    const startDate = maturityDate - maturityLife;
+    const startDate = Number(maturityDate) - maturityLife;
     const current = nowInSeconds - startDate;
     return Math.min((current * 100) / maturityLife, 100);
   }, [maturityDate, marketAccount?.maxFuturePools]);

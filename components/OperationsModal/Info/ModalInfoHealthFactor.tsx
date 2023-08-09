@@ -5,7 +5,7 @@ import { parseUnits } from 'viem';
 
 import parseHealthFactor from 'utils/parseHealthFactor';
 
-import { Operation } from 'contexts/ModalStatusContext';
+import type { Operation } from 'types/Operation';
 
 import ModalInfo, { FromTo, Variant } from 'components/common/modal/ModalInfo';
 import useHealthFactor from 'hooks/useHealthFactor';

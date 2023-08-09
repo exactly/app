@@ -81,7 +81,7 @@ const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ symbol }) => {
         <TableBody>
           {rows.map(({ maturity, totalDeposited, totalBorrowed, depositAPR, borrowAPR }) => (
             <TableRow
-              key={maturity}
+              key={Number(maturity)}
               sx={{
                 '&:last-child td, &:last-child th': { border: 0 },
               }}

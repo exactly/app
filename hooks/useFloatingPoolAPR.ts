@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import { formatUnits, parseUnits } from 'viem';
 import networkData from 'config/networkData.json' assert { type: 'json' };
-import { Operation } from 'contexts/ModalStatusContext';
+import type { Operation } from 'types/Operation';
 import interestRateCurve from 'utils/interestRateCurve';
 import queryRates from 'utils/queryRates';
 import useAccountData from './useAccountData';

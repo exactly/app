@@ -37,9 +37,9 @@ export type TableRow = {
   totalDeposited?: string;
   totalBorrowed?: string;
   depositAPR?: number;
-  depositMaturity?: number;
+  depositMaturity?: bigint;
   borrowAPR?: number;
-  borrowMaturity?: number;
+  borrowMaturity?: bigint;
 };
 
 const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) => {

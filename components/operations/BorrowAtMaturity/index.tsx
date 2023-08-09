@@ -12,7 +12,6 @@ import AssetInput from 'components/OperationsModal/AssetInput';
 import DateSelector from 'components/OperationsModal/DateSelector';
 import ModalInfoAPR from 'components/OperationsModal/Info/ModalInfoAPR';
 import ModalInfoHealthFactor from 'components/OperationsModal/Info/ModalInfoHealthFactor';
-import { useModalStatus } from 'contexts/ModalStatusContext';
 import ModalInfoFixedUtilizationRate from 'components/OperationsModal/Info/ModalInfoFixedUtilizationRate';
 import ModalAdvancedSettings from 'components/common/modal/ModalAdvancedSettings';
 import ModalInfoBorrowLimit from 'components/OperationsModal/Info/ModalInfoBorrowLimit';
@@ -29,7 +28,6 @@ import useTranslateOperation from 'hooks/useTranslateOperation';
 const BorrowAtMaturity: FC = () => {
   const { t } = useTranslation();
   const translateOperation = useTranslateOperation();
-  const { operation } = useModalStatus();
   const { symbol, errorData, setErrorData, qty, gasCost, tx } = useOperationContext();
   const {
     isLoading,
@@ -91,10 +89,10 @@ const BorrowAtMaturity: FC = () => {
           </ModalBoxRow>
           <ModalBoxRow>
             <ModalBoxCell>
-              <ModalInfoHealthFactor qty={qty} symbol={symbol} operation={operation} />
+              <ModalInfoHealthFactor qty={qty} symbol={symbol} operation="borrowAtMaturity" />
             </ModalBoxCell>
             <ModalBoxCell divisor>
-              <ModalInfoBorrowLimit qty={qty} symbol={symbol} operation={operation} />
+              <ModalInfoBorrowLimit qty={qty} symbol={symbol} operation="borrowAtMaturity" />
             </ModalBoxCell>
           </ModalBoxRow>
         </ModalBox>
@@ -124,7 +122,7 @@ const BorrowAtMaturity: FC = () => {
 
       <Grid item mt={{ xs: 2, sm: 3 }}>
         <ModalSubmit
-          label={translateOperation(operation, { capitalize: true })}
+          label={translateOperation('borrowAtMaturity', { capitalize: true })}
           symbol={symbol === 'WETH' && marketAccount ? marketAccount.symbol : symbol}
           submit={handleSubmitAction}
           isLoading={isLoading || previewIsLoading}

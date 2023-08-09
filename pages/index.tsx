@@ -7,12 +7,12 @@ import MarketTables from 'components/markets/MarketsTables';
 import MarketsBasic from 'components/markets/MarketsBasic';
 import BackgroundCircle from 'components/BackgroundCircle';
 
-import { useMarketContext } from 'contexts/MarketContext';
 import { usePageView } from 'hooks/useAnalytics';
+import { useCustomTheme } from 'contexts/ThemeContext';
 
 const Markets: NextPage = () => {
-  const { view } = useMarketContext();
   usePageView('/', 'Markets');
+  const { view } = useCustomTheme();
 
   if (!view) return null;
 

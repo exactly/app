@@ -17,9 +17,10 @@ import { TransitionProps } from '@mui/material/transitions';
 import Draggable from 'react-draggable';
 import { useTranslation } from 'react-i18next';
 
-import { useLeveragerContext } from 'contexts/LeveragerContext';
+import { LeveragerContextProvider, useLeveragerContext } from 'contexts/LeveragerContext';
 import Operation from '../Operation';
 import Summary from '../Summary';
+import { useModal } from 'contexts/ModalContext';
 
 function PaperComponent(props: PaperProps | undefined) {
   const ref = useRef<HTMLDivElement>(null);
@@ -39,8 +40,13 @@ const Transition = forwardRef(function Transition(
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-function LeveragerModal() {
-  const { isOpen, close, input, viewSummary, tx } = useLeveragerContext();
+type Props = {
+  isOpen: boolean;
+  close: () => void;
+};
+
+function LeveragerModal({ isOpen, close }: Props) {
+  const { input, viewSummary, tx } = useLeveragerContext();
   const { t } = useTranslation();
   const { breakpoints, spacing, palette } = useTheme();
   const isMobile = useMediaQuery(breakpoints.down('sm'));
@@ -114,4 +120,12 @@ function LeveragerModal() {
   );
 }
 
-export default LeveragerModal;
+export default function ModalWrapper() {
+  const { isOpen, close } = useModal('leverager');
+  if (!isOpen) return null;
+  return (
+    <LeveragerContextProvider>
+      <LeveragerModal isOpen={isOpen} close={close} />
+    </LeveragerContextProvider>
+  );
+}

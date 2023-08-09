@@ -28,7 +28,6 @@ import { AbiParametersToPrimitiveTypes, ExtractAbiFunction, ExtractAbiFunctionNa
 
 import type { ErrorData } from 'types/Error';
 import type { Transaction } from 'types/Transaction';
-import LeveragerModal from 'components/Leverager/Modal';
 import useDebtManager from 'hooks/useDebtManager';
 import useAccountData, { type MarketAccount } from 'hooks/useAccountData';
 import useMarket from 'hooks/useMarket';
@@ -88,10 +87,6 @@ const reducer = (state: Input, action: Partial<Input>): Input => {
 };
 
 type ContextValues = {
-  isOpen: boolean;
-  openLeverager: (collateralSymbol?: string) => void;
-  close: () => void;
-
   viewSummary: boolean;
   setViewSummary: (state: boolean) => void;
   acceptedTerms: boolean;
@@ -174,7 +169,6 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
   const isPermit = useIsPermit();
   const { signTypedDataAsync } = useSignTypedData();
   const publicClient = usePublicClient();
-  const [isOpen, setIsOpen] = useState(false);
   const [viewSummary, setViewSummary] = useState(false);
   const [errorData, setErrorData] = useState<ErrorData | undefined>();
 
@@ -469,8 +463,6 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     [leverageStatus],
   );
 
-  const close = useCallback(() => setIsOpen(false), []);
-
   const _setViewSummary = useCallback((_state: boolean) => {
     setAcceptedTerms(false);
     setViewSummary(_state);
@@ -491,21 +483,6 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
       });
     },
     [currentLeverageRatio, input.secondaryOperation, input.userInput],
-  );
-
-  const openLeverager = useCallback(
-    (collateralSymbol?: string) => {
-      dispatch({ ...initState, collateralSymbol });
-      _setViewSummary(false);
-      setErrorData(undefined);
-      setTx(undefined);
-      setIsLoading(false);
-      setIsOpen(true);
-      setLimit(undefined);
-      setLeverageStatus(undefined);
-      dispatch(initState);
-    },
-    [_setViewSummary],
   );
 
   const onMax = useCallback(() => {
@@ -1119,10 +1096,6 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
   ]);
 
   const value: ContextValues = {
-    isOpen,
-    openLeverager,
-    close,
-
     viewSummary,
     setViewSummary: _setViewSummary,
     acceptedTerms,
@@ -1180,12 +1153,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     submit,
   };
 
-  return (
-    <LeveragerContext.Provider value={value}>
-      {children}
-      <LeveragerModal />
-    </LeveragerContext.Provider>
-  );
+  return <LeveragerContext.Provider value={value}>{children}</LeveragerContext.Provider>;
 };
 
 export function useLeveragerContext() {

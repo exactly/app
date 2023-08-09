@@ -14,7 +14,6 @@ import useAccountData from 'hooks/useAccountData';
 import { Grid } from '@mui/material';
 import { ModalBox, ModalBoxCell, ModalBoxRow } from 'components/common/modal/ModalBox';
 import AssetInput from 'components/OperationsModal/AssetInput';
-import { useModalStatus } from 'contexts/ModalStatusContext';
 import DateSelector from 'components/OperationsModal/DateSelector';
 import ModalInfoMaturityStatus from 'components/OperationsModal/Info/ModalInfoMaturityStatus';
 import ModalInfoAmount from 'components/OperationsModal/Info/ModalInfoAmount';
@@ -50,13 +49,12 @@ type RepayWithDiscount = {
 const RepayAtMaturity: FC = () => {
   const { t } = useTranslation();
   const translateOperation = useTranslateOperation();
-  const { transaction } = useAnalytics();
-  const { operation } = useModalStatus();
   const { walletAddress, opts } = useWeb3();
   const previewerContract = usePreviewer();
 
   const {
     symbol,
+    operation,
     errorData,
     setErrorData,
     qty,
@@ -77,6 +75,10 @@ const RepayAtMaturity: FC = () => {
     slippage,
   } = useOperationContext();
 
+  const { transaction } = useAnalytics({
+    operationInput: useMemo(() => ({ operation, symbol, qty }), [operation, symbol, qty]),
+  });
+
   const [previewData, setPreviewData] = useState<RepayWithDiscount | undefined>();
 
   const handleOperationError = useHandleOperationError();
@@ -93,11 +95,11 @@ const RepayAtMaturity: FC = () => {
 
   const walletBalance = useBalance(symbol, assetContract?.address);
 
-  const isLateRepay = useMemo(() => date && Date.now() / 1000 > date, [date]);
+  const isLateRepay = useMemo(() => date !== undefined && BigInt(dayjs().unix()) > date, [date]);
 
   const totalPositionAssets = useMemo(() => {
     if (!marketAccount || !date) return 0n;
-    const pool = marketAccount.fixedBorrowPositions.find(({ maturity }) => maturity === BigInt(date ?? 0));
+    const pool = marketAccount.fixedBorrowPositions.find(({ maturity }) => maturity === date);
     return pool ? pool.position.principal + pool.position.fee : 0n;
   }, [date, marketAccount]);
 
@@ -105,7 +107,7 @@ const RepayAtMaturity: FC = () => {
     async (cancelled: () => boolean) => {
       if (!date || !walletAddress || !previewerContract || !marketAccount || !qty || totalPositionAssets === 0n) return;
 
-      const pool = marketAccount.fixedBorrowPositions.find(({ maturity }) => maturity === BigInt(date ?? 0));
+      const pool = marketAccount.fixedBorrowPositions.find(({ maturity }) => maturity === date);
       if (!pool) return;
 
       const userInput = parseUnits(qty, marketAccount.decimals);
@@ -113,7 +115,7 @@ const RepayAtMaturity: FC = () => {
 
       const { assets } = await previewerContract.read.previewRepayAtMaturity([
         marketAccount.market,
-        BigInt(date),
+        date,
         positionAssets,
         walletAddress ?? zeroAddress,
       ]);
@@ -144,7 +146,7 @@ const RepayAtMaturity: FC = () => {
     const { penaltyRate } = marketAccount;
 
     const currentTimestamp = BigInt(dayjs().unix());
-    const penaltyTime = currentTimestamp - BigInt(date);
+    const penaltyTime = currentTimestamp - date;
 
     return (penaltyRate * penaltyTime * totalPositionAssets) / WEI_PER_ETHER;
   }, [marketAccount, date, isLateRepay, totalPositionAssets]);
@@ -171,7 +173,7 @@ const RepayAtMaturity: FC = () => {
       const maxAmount = maxAmountToRepay;
 
       if (marketAccount.assetSymbol === 'WETH') {
-        const sim = await ETHRouterContract.simulate.repayAtMaturity([BigInt(date), amount], {
+        const sim = await ETHRouterContract.simulate.repayAtMaturity([date, amount], {
           ...opts,
           value: maxAmount,
         });
@@ -183,7 +185,7 @@ const RepayAtMaturity: FC = () => {
         return gasEstimation;
       }
 
-      const sim = await marketContract.simulate.repayAtMaturity([BigInt(date), amount, maxAmount, walletAddress], opts);
+      const sim = await marketContract.simulate.repayAtMaturity([date, amount, maxAmount, walletAddress], opts);
       return estimate(sim.request);
     },
     [
@@ -263,7 +265,7 @@ const RepayAtMaturity: FC = () => {
       transaction.addToCart();
 
       if (marketAccount.assetSymbol === 'WETH') {
-        const args = [BigInt(date), positionAssetsAmount] as const;
+        const args = [date, positionAssetsAmount] as const;
         const gasEstimation = await ETHRouterContract.estimateGas.repayAtMaturity(args, {
           ...opts,
           value: maxAmountToRepay,
@@ -274,7 +276,7 @@ const RepayAtMaturity: FC = () => {
           gasLimit: gasLimit(gasEstimation),
         });
       } else {
-        const args = [BigInt(date), positionAssetsAmount, maxAmountToRepay, walletAddress] as const;
+        const args = [date, positionAssetsAmount, maxAmountToRepay, walletAddress] as const;
         const gasEstimation = await marketContract.estimateGas.repayAtMaturity(args, opts);
 
         hash = await marketContract.write.repayAtMaturity(args, {
@@ -350,7 +352,7 @@ const RepayAtMaturity: FC = () => {
             <ModalBoxCell>
               <DateSelector />
             </ModalBoxCell>
-            <ModalBoxCell>{date && <ModalInfoMaturityStatus date={date} />}</ModalBoxCell>
+            <ModalBoxCell>{date !== undefined && <ModalInfoMaturityStatus date={Number(date)} />}</ModalBoxCell>
             <ModalBoxCell>
               <ModalInfoAmount
                 label={t('Amount at maturity')}
@@ -386,11 +388,11 @@ const RepayAtMaturity: FC = () => {
           </ModalBoxRow>
           <ModalBoxRow>
             <ModalBoxCell>
-              <ModalInfoHealthFactor qty={qty} symbol={symbol} operation={operation} />
+              <ModalInfoHealthFactor qty={qty} symbol={symbol} operation="repayAtMaturity" />
             </ModalBoxCell>
             {!isLateRepay && (
               <ModalBoxCell divisor>
-                <ModalInfoBorrowLimit qty={qty} symbol={symbol} operation={operation} />
+                <ModalInfoBorrowLimit qty={qty} symbol={symbol} operation="repayAtMaturity" />
               </ModalBoxCell>
             )}
           </ModalBoxRow>
@@ -411,7 +413,7 @@ const RepayAtMaturity: FC = () => {
         )}
         {errorData?.component !== 'gas' && <ModalTxCost gasCost={gasCost} />}
         <ModalAdvancedSettings>
-          {isLateRepay && <ModalInfoBorrowLimit qty={qty} symbol={symbol} operation={operation} variant="row" />}
+          {isLateRepay && <ModalInfoBorrowLimit qty={qty} symbol={symbol} operation="repayAtMaturity" variant="row" />}
           <ModalInfoEditableSlippage value={rawSlippage} onChange={(e) => setRawSlippage(e.target.value)} />
           {!isLateRepay && (
             <ModalInfoFixedUtilizationRate qty={qty} symbol={symbol} operation="repayAtMaturity" variant="row" />
@@ -427,7 +429,7 @@ const RepayAtMaturity: FC = () => {
 
       <Grid item mt={{ xs: 2, sm: 3 }}>
         <ModalSubmit
-          label={translateOperation(operation, { capitalize: true })}
+          label={translateOperation('repayAtMaturity', { capitalize: true })}
           symbol={symbol}
           submit={handleSubmitAction}
           isLoading={isLoading}

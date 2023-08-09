@@ -1,8 +1,8 @@
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Box, Button, useTheme, type ButtonProps } from '@mui/material';
-import { useModalStatus } from 'contexts/ModalStatusContext';
 import { useOperationContext } from 'contexts/OperationContext';
 import { useTranslation } from 'react-i18next';
+import { isFixedOperation, isValidOperation } from 'types/Operation';
 
 type SelectorProps = {
   label: string;
@@ -39,11 +39,17 @@ function Selector({ label, backgroundColor, selected, ...props }: SelectorProps)
 function TypeSwitch() {
   const { t } = useTranslation();
   const theme = useTheme();
-  const { operation, toggle } = useModalStatus();
-  const { tx } = useOperationContext();
+  const { tx, operation, setOperation } = useOperationContext();
+
+  const toggle = useCallback(() => {
+    const op = isFixedOperation(operation) ? operation.replaceAll('AtMaturity', '') : `${operation}AtMaturity`;
+    if (isValidOperation(op)) {
+      setOperation(op);
+    }
+  }, [operation, setOperation]);
 
   const options = useMemo<SelectorProps[]>(() => {
-    const isFixed = operation?.endsWith('AtMaturity') ?? true;
+    const isFixed = operation.endsWith('AtMaturity');
 
     return [
       {

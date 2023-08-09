@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { formatUnits, parseUnits } from 'viem';
 
 import ModalInfo, { FromTo, Variant } from 'components/common/modal/ModalInfo';
-import { Operation } from 'contexts/ModalStatusContext';
+import type { Operation } from 'types/Operation';
 import useAccountData from 'hooks/useAccountData';
 import { toPercentage } from 'utils/utils';
 import UtilizationRateWithAreaChart from 'components/charts/UtilizationRateWithAreaChart';

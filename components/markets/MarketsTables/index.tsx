@@ -173,8 +173,8 @@ const MarketTables: FC = () => {
             totalBorrowed: formatNumber(formatUnits((totalBorrowed * usdPrice) / WEI_PER_ETHER, decimals)),
             borrowAPR: Number(bestBorrow.rate) / 1e18,
             depositAPR: Number(bestDeposit.rate) / 1e18,
-            borrowMaturity: Number(bestBorrow.maturity),
-            depositMaturity: Number(bestDeposit.maturity),
+            borrowMaturity: bestBorrow.maturity,
+            depositMaturity: bestDeposit.maturity,
           });
         },
       ),

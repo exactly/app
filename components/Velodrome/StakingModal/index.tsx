@@ -62,6 +62,7 @@ import useIsContract from 'hooks/useIsContract';
 import usePermit2 from 'hooks/usePermit2';
 import useDelayedEffect from 'hooks/useDelayedEffect';
 import { gasLimit } from 'utils/gas';
+import { useModal } from 'contexts/ModalContext';
 
 const NATIVE_TOKEN_ADDRESS = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
 const MIN_SUPPLY = parseEther('0.002');
@@ -960,4 +961,8 @@ const PoolAsset: FC<PoolAsset> = ({ symbol, amount, loading }) => {
   );
 };
 
-export default StakingModal;
+export default function ModalWrapper() {
+  const { isOpen, close } = useModal('proto-staker');
+  if (!isOpen) return null;
+  return <StakingModal isOpen={isOpen} close={close} />;
+}

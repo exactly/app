@@ -4,7 +4,7 @@ import { formatUnits } from 'viem';
 
 import { Button, TableRow, TableCell, Stack, Typography, Skeleton, Box, ButtonGroup } from '@mui/material';
 
-import { Operation } from 'contexts/ModalStatusContext';
+import type { Operation } from 'types/Operation';
 
 import formatNumber from 'utils/formatNumber';
 import formatSymbol from 'utils/formatSymbol';
@@ -124,7 +124,7 @@ function TableRowFloatingPool({ symbol, valueUSD, depositedAmount, borrowedAmoun
                 whiteSpace: 'nowrap',
                 '&:disabled': { borderLeftColor: ({ palette }) => palette.grey[palette.mode === 'light' ? 500 : 300] },
               }}
-              onClick={() => startDebtManager({ symbol })}
+              onClick={() => startDebtManager({ from: { symbol } })}
               disabled={isRolloverDisabled(borrowedAmount)}
             >
               {t('Rollover')}

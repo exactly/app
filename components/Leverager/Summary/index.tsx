@@ -16,6 +16,7 @@ import handleOperationError from 'utils/handleOperationError';
 import formatNumber from 'utils/formatNumber';
 import useAccountData from 'hooks/useAccountData';
 import { useWeb3 } from 'hooks/useWeb3';
+import { useModal } from 'contexts/ModalContext';
 
 const Summary = () => {
   const { t } = useTranslation();
@@ -42,8 +43,8 @@ const Summary = () => {
     isLoading,
     errorData,
     tx,
-    close,
   } = useLeveragerContext();
+  const { close } = useModal('leverager');
 
   const { marketAccount: marketIn } = useAccountData(input.collateralSymbol ?? 'USDC');
   const { marketAccount: marketOut } = useAccountData(input.borrowSymbol ?? 'USDC');

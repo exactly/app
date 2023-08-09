@@ -15,16 +15,15 @@ import {
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 
-import { useModalStatus } from 'contexts/ModalStatusContext';
 import OperationContainer from './OperationContainer';
 import TypeSwitch from './TypeSwitch';
 import Draggable from 'react-draggable';
 import { TransitionProps } from '@mui/material/transitions';
-import { useOperationContext } from 'contexts/OperationContext';
+import { OperationContextProvider, useOperationContext } from 'contexts/OperationContext';
 import useTranslateOperation from 'hooks/useTranslateOperation';
 import useAnalytics from 'hooks/useAnalytics';
-import { useMarketContext } from 'contexts/MarketContext';
 import useDelayedEffect from 'hooks/useDelayedEffect';
+import { useModal } from 'contexts/ModalContext';
 
 function PaperComponent(props: PaperProps | undefined) {
   const { tx } = useOperationContext();
@@ -57,12 +56,15 @@ const Transition = forwardRef(function Transition(
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-function OperationsModal() {
+type Props = {
+  isOpen: boolean;
+  close: () => void;
+};
+
+function OperationsModal({ isOpen, close }: Props) {
   const translateOperation = useTranslateOperation();
   const { breakpoints, spacing, palette } = useTheme();
-  const { open, closeModal, operation } = useModalStatus();
-  const { date } = useMarketContext();
-  const { tx } = useOperationContext();
+  const { operation, tx, date } = useOperationContext();
   const isMobile = useMediaQuery(breakpoints.down('sm'));
   const loadingTx = useMemo(() => tx && (tx.status === 'loading' || tx.status === 'processing'), [tx]);
   const {
@@ -70,17 +72,17 @@ function OperationsModal() {
   } = useAnalytics();
 
   const viewEffect = useCallback(() => {
-    if (open && date) {
+    if (isOpen && date) {
       viewItem(date);
     }
-  }, [date, open, viewItem]);
+  }, [date, isOpen, viewItem]);
 
   useDelayedEffect({ effect: viewEffect });
 
   return (
     <Dialog
-      open={open}
-      onClose={loadingTx ? undefined : closeModal}
+      open={isOpen}
+      onClose={loadingTx ? undefined : close}
       PaperComponent={isMobile ? undefined : PaperComponent}
       TransitionComponent={isMobile ? Transition : undefined}
       fullScreen={isMobile}
@@ -92,7 +94,7 @@ function OperationsModal() {
       {!loadingTx && (
         <IconButton
           aria-label="close"
-          onClick={closeModal}
+          onClick={close}
           sx={{
             position: 'absolute',
             right: 4,
@@ -135,4 +137,13 @@ function OperationsModal() {
   );
 }
 
-export default OperationsModal;
+export default function ModalWrapper() {
+  const { isOpen, args, close } = useModal('operation');
+  if (!isOpen) return null;
+
+  return (
+    <OperationContextProvider args={args}>
+      <OperationsModal isOpen={isOpen} close={close} />;
+    </OperationContextProvider>
+  );
+}

@@ -7,10 +7,10 @@ import { formatUnits, parseUnits } from 'viem';
 import useAccountData from 'hooks/useAccountData';
 import formatNumber from 'utils/formatNumber';
 import ModalInfo, { Variant, FromTo } from 'components/common/modal/ModalInfo';
-import { isFixedOperation, Operation } from 'contexts/ModalStatusContext';
-import { useMarketContext } from 'contexts/MarketContext';
+import { isFixedOperation, type Operation } from 'types/Operation';
 import formatSymbol from 'utils/formatSymbol';
 import { Box } from '@mui/material';
+import { useOperationContext } from 'contexts/OperationContext';
 
 type Props = {
   qty: string;
@@ -22,7 +22,7 @@ type Props = {
 function ModalInfoTotalDeposits({ qty, symbol, operation, variant = 'column' }: Props) {
   const { t } = useTranslation();
   const { marketAccount } = useAccountData(symbol);
-  const { date } = useMarketContext();
+  const { date } = useOperationContext();
 
   const [from, to] = useMemo(() => {
     if (!marketAccount) return [undefined, undefined];
@@ -30,8 +30,8 @@ function ModalInfoTotalDeposits({ qty, symbol, operation, variant = 'column' }: 
     const delta = parseUnits(qty || '0', marketAccount.decimals);
 
     let f: bigint = marketAccount.floatingDepositAssets;
-    if (isFixedOperation(operation) && date) {
-      const pool = marketAccount.fixedDepositPositions.find(({ maturity }) => maturity === BigInt(date));
+    if (isFixedOperation(operation) && date !== undefined) {
+      const pool = marketAccount.fixedDepositPositions.find(({ maturity }) => maturity === date);
       f = pool ? pool.position.principal + pool.position.fee : 0n;
     }
 

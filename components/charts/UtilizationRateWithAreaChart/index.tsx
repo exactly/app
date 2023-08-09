@@ -17,7 +17,7 @@ import useUtilizationRate from 'hooks/useUtilizationRate';
 import TooltipChart from '../TooltipChart';
 import LoadingChart from '../LoadingChart';
 import numbers from 'config/numbers.json';
-import { Operation } from 'contexts/ModalStatusContext';
+import type { Operation } from 'types/Operation';
 
 type Props = {
   type: 'floating' | 'fixed';

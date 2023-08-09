@@ -1,11 +1,10 @@
 import React, { forwardRef, ReactElement, Ref, useMemo, useRef } from 'react';
+
 import {
   Box,
   Dialog,
   DialogContent,
-  DialogTitle,
   IconButton,
-  Typography,
   useTheme,
   PaperProps,
   Paper,
@@ -13,19 +12,31 @@ import {
   Slide,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import { TransitionProps } from '@mui/material/transitions';
-import Draggable from 'react-draggable';
-import { useTranslation } from 'react-i18next';
 
-import { DebtManagerContextProvider, useDebtManagerContext } from 'contexts/DebtManagerContext';
-import Operation from './Operation';
-import { useModal } from 'contexts/ModalContext';
+import Draggable from 'react-draggable';
+import { TransitionProps } from '@mui/material/transitions';
+import { useOperationContext } from 'contexts/OperationContext';
+import ModalGif from 'components/OperationsModal/ModalGif';
+import { Transaction } from 'types/Transaction';
 
 function PaperComponent(props: PaperProps | undefined) {
+  const { tx } = useOperationContext();
+
   const ref = useRef<HTMLDivElement>(null);
   return (
     <Draggable nodeRef={ref} cancel={'[class*="MuiDialogContent-root"]'}>
-      <Paper {...props} ref={ref} />
+      <Paper
+        ref={ref}
+        {...props}
+        sx={{
+          borderRadius: tx ? '16px' : '6px',
+          minWidth: '400px',
+          boxShadow: ({ palette }) =>
+            palette.mode === 'light' && tx
+              ? '4px 8px 16px rgba(227, 229, 232, 0.5), -4px -8px 16px rgba(248, 249, 249, 0.25)'
+              : '',
+        }}
+      />
     </Draggable>
   );
 }
@@ -42,11 +53,10 @@ const Transition = forwardRef(function Transition(
 type Props = {
   isOpen: boolean;
   close: () => void;
+  tx: Transaction;
 };
 
-function DebtManagerModal({ isOpen, close }: Props) {
-  const { tx } = useDebtManagerContext();
-  const { t } = useTranslation();
+export default function Loading({ isOpen, tx, close }: Props) {
   const { breakpoints, spacing, palette } = useTheme();
   const isMobile = useMediaQuery(breakpoints.down('sm'));
   const loadingTx = useMemo(() => tx && (tx.status === 'loading' || tx.status === 'processing'), [tx]);
@@ -56,15 +66,6 @@ function DebtManagerModal({ isOpen, close }: Props) {
       open={isOpen}
       onClose={loadingTx ? undefined : close}
       PaperComponent={isMobile ? undefined : PaperComponent}
-      PaperProps={{
-        sx: {
-          borderRadius: 1,
-          minWidth: '400px',
-          maxWidth: '488px !important',
-          width: '100%',
-          overflowY: 'hidden !important',
-        },
-      }}
       TransitionComponent={isMobile ? Transition : undefined}
       fullScreen={isMobile}
       sx={isMobile ? { top: 'auto' } : { backdropFilter: tx ? 'blur(1.5px)' : '' }}
@@ -91,33 +92,10 @@ function DebtManagerModal({ isOpen, close }: Props) {
           borderTop: tx ? '' : `4px ${palette.mode === 'light' ? 'black' : 'white'} solid`,
         }}
       >
-        {!tx && (
-          <DialogTitle
-            sx={{
-              p: 0,
-              mb: { xs: 2, sm: 3 },
-              cursor: { xs: '', sm: 'move' },
-            }}
-          >
-            <Typography fontWeight={700} fontSize={24}>
-              {t('Debt Rollover')}
-            </Typography>
-          </DialogTitle>
-        )}
-        <DialogContent sx={{ p: 0, overflow: 'hidden' }}>
-          <Operation />
+        <DialogContent sx={{ padding: spacing(4, 0, 0, 0) }}>
+          <ModalGif tx={tx} />
         </DialogContent>
       </Box>
     </Dialog>
-  );
-}
-
-export default function ModalWrapper() {
-  const { isOpen, args, close } = useModal('rollover');
-  if (!isOpen) return null;
-  return (
-    <DebtManagerContextProvider args={args}>
-      <DebtManagerModal isOpen={isOpen} close={close} />;
-    </DebtManagerContextProvider>
   );
 }

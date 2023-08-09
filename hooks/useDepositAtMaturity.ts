@@ -29,11 +29,11 @@ type DepositAtMaturity = {
 
 export default (): DepositAtMaturity => {
   const { t } = useTranslation();
-  const { transaction } = useAnalytics();
   const { walletAddress, opts } = useWeb3();
 
   const {
     symbol,
+    operation,
     setErrorData,
     qty,
     setQty,
@@ -51,6 +51,11 @@ export default (): DepositAtMaturity => {
     slippage,
     setErrorButton,
   } = useOperationContext();
+
+  const { transaction } = useAnalytics({
+    operationInput: useMemo(() => ({ operation, symbol, qty }), [operation, symbol, qty]),
+  });
+
   const { marketAccount } = useAccountData(symbol);
 
   const handleOperationError = useHandleOperationError();
@@ -93,7 +98,7 @@ export default (): DepositAtMaturity => {
       const minAmount = (amount * slippage) / WEI_PER_ETHER;
 
       if (marketAccount.assetSymbol === 'WETH') {
-        const sim = await ETHRouterContract.simulate.depositAtMaturity([BigInt(date), minAmount], {
+        const sim = await ETHRouterContract.simulate.depositAtMaturity([date, minAmount], {
           ...opts,
           value: amount,
         });
@@ -104,10 +109,7 @@ export default (): DepositAtMaturity => {
         return gasCost;
       }
 
-      const sim = await marketContract.simulate.depositAtMaturity(
-        [BigInt(date), amount, minAmount, walletAddress],
-        opts,
-      );
+      const sim = await marketContract.simulate.depositAtMaturity([date, amount, minAmount, walletAddress], opts);
       return estimate(sim.request);
     },
     [
@@ -142,7 +144,7 @@ export default (): DepositAtMaturity => {
     if (!marketAccount) return { optimalDepositAmount: 0n, depositRate: 0n };
 
     const { fixedPools = [] } = marketAccount;
-    const pool = fixedPools.find(({ maturity }) => maturity === BigInt(date ?? 0));
+    const pool = fixedPools.find(({ maturity }) => maturity === date);
     return {
       optimalDepositAmount: pool?.optimalDeposit,
       depositRate: pool?.depositRate,
@@ -177,7 +179,7 @@ export default (): DepositAtMaturity => {
       const amount = parseUnits(qty, marketAccount.decimals);
       const minAmount = (amount * slippage) / WEI_PER_ETHER;
       if (marketAccount.assetSymbol === 'WETH') {
-        const args = [BigInt(date), minAmount] as const;
+        const args = [date, minAmount] as const;
         const gasEstimation = await ETHRouterContract.estimateGas.depositAtMaturity(args, {
           ...opts,
           value: amount,
@@ -188,7 +190,7 @@ export default (): DepositAtMaturity => {
           gasLimit: gasLimit(gasEstimation),
         });
       } else {
-        const args = [BigInt(date), amount, minAmount, walletAddress] as const;
+        const args = [date, amount, minAmount, walletAddress] as const;
         const gasEstimation = await marketContract.estimateGas.depositAtMaturity(args, opts);
         hash = await marketContract.write.depositAtMaturity(args, {
           ...opts,
@@ -248,12 +250,12 @@ export default (): DepositAtMaturity => {
       try {
         const { assets: finalAssets } = await previewerContract.read.previewDepositAtMaturity([
           marketAccount.market,
-          BigInt(date),
+          date,
           initialAssets,
         ]);
         const currentTimestamp = BigInt(dayjs().unix());
         const rate = (finalAssets * WEI_PER_ETHER) / initialAssets;
-        const fixedAPR = ((rate - WEI_PER_ETHER) * 31_536_000n) / (BigInt(date) - currentTimestamp);
+        const fixedAPR = ((rate - WEI_PER_ETHER) * 31_536_000n) / (date - currentTimestamp);
 
         setFixedRate(fixedAPR);
       } catch (error) {

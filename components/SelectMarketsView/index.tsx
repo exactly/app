@@ -4,12 +4,12 @@ import BarChartRoundedIcon from '@mui/icons-material/BarChartRounded';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { Box, Button, Menu, MenuItem, popoverClasses, Typography, useTheme } from '@mui/material';
-import { MarketView, useMarketContext } from 'contexts/MarketContext';
 import Link from 'next/link';
 import useRouter from 'hooks/useRouter';
 import { Timeout } from 'react-number-format/types/types';
 import { SimpleViewIcon, AdvancedViewIcon } from 'components/Icons';
 import { useTranslation } from 'react-i18next';
+import { type MarketView, useCustomTheme } from 'contexts/ThemeContext';
 
 type ViewOption = {
   type: MarketView;
@@ -21,7 +21,7 @@ type ViewOption = {
 const SelectMarketsView: FC = () => {
   const { t } = useTranslation();
   const { pathname: currentPathname, query } = useRouter();
-  const { view, setView } = useMarketContext();
+  const { view, setView } = useCustomTheme();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [currTimeout, setCurrTimeout] = useState<Timeout>();
   const { palette } = useTheme();

@@ -1,7 +1,7 @@
 import { Address } from 'viem';
 
 export type Pool = {
-  maturity: number;
+  maturity: bigint;
   symbol: string;
   market: Address;
   fee: bigint;

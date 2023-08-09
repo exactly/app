@@ -12,7 +12,6 @@ import { Grid } from '@mui/material';
 import { ModalBox, ModalBoxCell, ModalBoxRow } from 'components/common/modal/ModalBox';
 import AssetInput from 'components/OperationsModal/AssetInput';
 import ModalInfoHealthFactor from 'components/OperationsModal/Info/ModalInfoHealthFactor';
-import { useModalStatus } from 'contexts/ModalStatusContext';
 import ModalInfoTotalBorrows from 'components/OperationsModal/Info/ModalInfoTotalBorrows';
 import ModalAdvancedSettings from 'components/common/modal/ModalAdvancedSettings';
 import ModalInfoBorrowLimit from 'components/OperationsModal/Info/ModalInfoBorrowLimit';
@@ -34,11 +33,10 @@ import { gasLimit } from 'utils/gas';
 function Repay() {
   const { t } = useTranslation();
   const translateOperation = useTranslateOperation();
-  const { transaction } = useAnalytics();
-  const { operation } = useModalStatus();
   const { walletAddress, opts } = useWeb3();
 
   const {
+    operation,
     symbol,
     errorData,
     setErrorData,
@@ -55,6 +53,10 @@ function Repay() {
     assetContract,
     ETHRouterContract,
   } = useOperationContext();
+
+  const { transaction } = useAnalytics({
+    operationInput: useMemo(() => ({ operation, symbol, qty }), [operation, symbol, qty]),
+  });
 
   const handleOperationError = useHandleOperationError();
 

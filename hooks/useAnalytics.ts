@@ -4,12 +4,9 @@ import { useTranslation } from 'react-i18next';
 import { useAccount } from 'wagmi';
 
 import { isRolloverInput, type RolloverInput } from 'contexts/DebtManagerContext';
-import { useOperationContext } from 'contexts/OperationContext';
 import { useWeb3 } from './useWeb3';
-import { useMarketContext } from 'contexts/MarketContext';
 import { useCustomTheme } from 'contexts/ThemeContext';
 import useAccountData from './useAccountData';
-import { useModalStatus } from 'contexts/ModalStatusContext';
 import { MarketsBasicOption } from 'contexts/MarketsBasicContext';
 import { type Rewards } from './useRewards';
 import useActionButton from './useActionButton';
@@ -18,16 +15,18 @@ import useSnapshot from './useSnapshot';
 import { formatUnits } from 'viem';
 import { isBridgeInput } from 'components/BridgeContent/utils';
 import { BridgeInput } from 'types/Bridge';
+import { Operation } from 'types/Operation';
 
 type ItemVariant = 'operation' | 'approve' | 'enterMarket' | 'exitMarket' | 'claimAll' | 'claim' | 'roll' | 'bridge';
 type TrackItem = { eventName: string; variant: ItemVariant };
+type OperationInput = { operation: Operation; symbol: string; qty: string };
 
 type Row = {
   symbol: string;
   depositAPR?: number;
-  depositMaturity?: number;
-  borrowMaturity?: number;
-  maturity?: number;
+  depositMaturity?: bigint;
+  borrowMaturity?: bigint;
+  maturity?: bigint;
 };
 
 function wrap(str: string | undefined) {
@@ -60,13 +59,9 @@ function useAnalyticsContext(assetSymbol?: string) {
 
   const { address } = useAccount();
   const { chain, walletAddress, impersonateActive } = useWeb3();
-  const { symbol, qty } = useOperationContext();
-  const { operation } = useModalStatus();
-  const { view } = useMarketContext();
+  const { theme, view } = useCustomTheme();
 
-  const { marketAccount } = useAccountData(assetSymbol || symbol);
-
-  const { theme } = useCustomTheme();
+  const { marketAccount } = useAccountData(assetSymbol ?? 'USDC');
 
   const appContext = useMemo(
     () => ({
@@ -80,15 +75,15 @@ function useAnalyticsContext(assetSymbol?: string) {
     [address, chain.network, impersonateActive, lng, theme, view, walletAddress],
   );
 
-  const itemContext = useMemo(
-    () => ({
+  const itemContext = useCallback(
+    ({ symbol, operation, qty }: OperationInput) => ({
       symbol: assetSymbol || symbol,
       quantity: qty,
       item_id: `${marketAccount?.symbol}.${operation}`,
       item_name: `${marketAccount?.symbol} ${operation}`,
       price: Number(formatUnits(marketAccount?.usdPrice ?? 0n, 18)),
     }),
-    [assetSymbol, marketAccount?.symbol, marketAccount?.usdPrice, operation, qty, symbol],
+    [assetSymbol, marketAccount?.symbol, marketAccount?.usdPrice],
   );
 
   const rolloverContext = useCallback((input: RolloverInput) => {
@@ -139,7 +134,11 @@ export function usePageView(pathname: string, title: string) {
   useDelayedEffect({ effect: pageView });
 }
 
-export default function useAnalytics({ symbol, rewards }: { symbol?: string; rewards?: Rewards } = {}) {
+export default function useAnalytics({
+  symbol,
+  rewards,
+  operationInput,
+}: { symbol?: string; rewards?: Rewards; operationInput?: OperationInput } = {}) {
   const { appContext, itemContext, rolloverContext, bridgeContext } = useAnalyticsContext(symbol);
   const { isDisable } = useActionButton();
 
@@ -152,7 +151,7 @@ export default function useAnalytics({ symbol, rewards }: { symbol?: string; rew
     (list: Row[], rateType: 'floating' | 'fixed') => {
       const items = list
         .map(({ maturity, borrowMaturity, depositMaturity, ...rest }) => ({
-          maturity: maturity || borrowMaturity || depositMaturity,
+          maturity: Number(maturity || borrowMaturity || depositMaturity),
           ...rest,
         }))
         .flatMap((item) => [
@@ -160,7 +159,7 @@ export default function useAnalytics({ symbol, rewards }: { symbol?: string; rew
             item_id: `exa${item.symbol}.deposit${rateType === 'fixed' ? 'AtMaturity' : ''}`,
             item_name: `exa${item.symbol} deposit${rateType === 'fixed' ? 'AtMaturity' : ''}`,
             symbol: item.symbol,
-            ...(item.maturity ? { maturity: item.maturity } : {}),
+            ...(item.maturity ? { maturity: Number(item.maturity) } : {}),
           },
           ...(rateType !== 'fixed' || !isDisable(rateType, item.depositAPR)
             ? [
@@ -168,7 +167,7 @@ export default function useAnalytics({ symbol, rewards }: { symbol?: string; rew
                   item_id: `exa${item.symbol}.borrow${rateType === 'fixed' ? 'AtMaturity' : ''}`,
                   item_name: `exa${item.symbol} borrow${rateType === 'fixed' ? 'AtMaturity' : ''}`,
                   symbol: item.symbol,
-                  ...(item.maturity ? { maturity: item.maturity } : {}),
+                  ...(item.maturity ? { maturity: Number(item.maturity) } : {}),
                 },
               ]
             : []),
@@ -184,7 +183,7 @@ export default function useAnalytics({ symbol, rewards }: { symbol?: string; rew
     (list: Row[], rateType: 'floating' | 'fixed', tab: 'deposit' | 'borrow') => {
       const items = list
         .map(({ maturity, borrowMaturity, depositMaturity, ...rest }) => ({
-          maturity: maturity || borrowMaturity || depositMaturity,
+          maturity: Number(maturity || borrowMaturity || depositMaturity),
           ...rest,
         }))
         .flatMap((item) => {
@@ -210,7 +209,7 @@ export default function useAnalytics({ symbol, rewards }: { symbol?: string; rew
                 item_id: `exa${item.symbol}.${op}`,
                 item_name: `exa${item.symbol} ${op}`,
                 symbol: item.symbol,
-                maturity: item.maturity,
+                maturity: Number(item.maturity),
               },
             ];
           }
@@ -224,31 +223,34 @@ export default function useAnalytics({ symbol, rewards }: { symbol?: string; rew
   const viewItemList = useCallback(
     (list: MarketsBasicOption[]) => {
       trackWithContext('view_item_list', {
-        items: list.map((item, index) => {
-          const [market, ctxOperation] = itemContext.item_id.split('.');
+        items: list.flatMap((item, index) => {
+          if (!operationInput) return [];
+          const [market, ctxOperation] = itemContext(operationInput).item_id.split('.');
           const baseOperation = ctxOperation.replace('AtMaturity', '');
           const operation = item.maturity ? `${baseOperation}AtMaturity` : baseOperation;
-          return {
-            ...itemContext,
-            index,
-            item_id: `${market}.${operation}`,
-            item_name: `${market} ${operation}`,
-            maturity: item.maturity,
-          };
+          return [
+            {
+              ...itemContext,
+              index,
+              item_id: `${market}.${operation}`,
+              item_name: `${market} ${operation}`,
+              maturity: Number(item.maturity),
+            },
+          ];
         }),
       });
     },
-    [trackWithContext, itemContext],
+    [trackWithContext, itemContext, operationInput],
   );
 
   const selectItem = useCallback(
-    (maturity: number) => {
+    (maturity: bigint) => {
       trackWithContext('select_item', {
         items: [
           {
             index: 0,
             ...itemContext,
-            maturity,
+            maturity: Number(maturity),
           },
         ],
       });
@@ -257,18 +259,20 @@ export default function useAnalytics({ symbol, rewards }: { symbol?: string; rew
   );
 
   const viewItem = useCallback(
-    (maturity: number) => {
+    (maturity: bigint) => {
       trackWithContext('view_item', {
         items: [
           {
             index: 0,
             ...itemContext,
-            ...(itemContext.item_id.includes('AtMaturity') ? { maturity } : {}),
+            ...(operationInput && itemContext(operationInput).item_id.includes('AtMaturity')
+              ? { maturity: Number(maturity) }
+              : {}),
           },
         ],
       });
     },
-    [trackWithContext, itemContext],
+    [trackWithContext, itemContext, operationInput],
   );
 
   const trackItem = useCallback(
@@ -291,15 +295,15 @@ export default function useAnalytics({ symbol, rewards }: { symbol?: string; rew
                 ...(variant === 'operation'
                   ? {}
                   : {
-                      item_id: `${itemContext.item_id.split('.')[0]}.${variant}`,
-                      item_name: `${itemContext.item_id.split('.')[0]} ${variant}`,
+                      item_id: `${symbol}.${variant}`,
+                      item_name: `${symbol} ${variant}`,
                     }),
               },
             ];
 
       trackWithContext(eventName, { items });
     },
-    [trackWithContext, itemContext, rewards],
+    [rewards, itemContext, symbol, trackWithContext],
   );
 
   const trackRollover = useCallback(

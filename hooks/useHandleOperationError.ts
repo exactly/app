@@ -5,7 +5,6 @@ import { captureException as sentryCaptureException } from '@sentry/nextjs';
 
 import { useOperationContext } from 'contexts/OperationContext';
 import { useWeb3 } from './useWeb3';
-import { useModalStatus } from 'contexts/ModalStatusContext';
 import handleOperationError from 'utils/handleOperationError';
 
 type HandleOperationErrorFunc = (
@@ -14,8 +13,7 @@ type HandleOperationErrorFunc = (
 
 export default function useHandleOperationError(): HandleOperationErrorFunc {
   const { chain } = useWeb3();
-  const { symbol } = useOperationContext();
-  const { operation } = useModalStatus();
+  const { symbol, operation } = useOperationContext();
 
   const captureException = useCallback<typeof sentryCaptureException>(
     (exception) => {

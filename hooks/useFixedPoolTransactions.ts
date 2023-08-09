@@ -12,7 +12,7 @@ import { useWeb3 } from './useWeb3';
 import useAccountData from './useAccountData';
 import useGraphClient from './useGraphClient';
 
-export default (type: 'borrow' | 'deposit', maturity: number, market: Address) => {
+export default (type: 'borrow' | 'deposit', maturity: bigint, market: Address) => {
   const { accountData } = useAccountData();
   const { walletAddress } = useWeb3();
   const [withdrawTxs, setWithdrawTxs] = useState<WithdrawMP[]>([]);
@@ -27,7 +27,7 @@ export default (type: 'borrow' | 'deposit', maturity: number, market: Address) =
     if (type === 'borrow') {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const getMaturityPoolBorrows = await request<any>(
-        getMaturityPoolBorrowsQuery(walletAddress, maturity, market.toLowerCase()),
+        getMaturityPoolBorrowsQuery(walletAddress, Number(maturity), market.toLowerCase()),
       );
       if (!getMaturityPoolBorrows) return;
 
@@ -40,7 +40,7 @@ export default (type: 'borrow' | 'deposit', maturity: number, market: Address) =
         borrows.push({
           id,
           market: borrowMarket,
-          maturity: borrowMaturity,
+          maturity: BigInt(borrowMaturity),
           assets: BigInt(assets),
           fee: BigInt(fee),
           timestamp,
@@ -51,7 +51,7 @@ export default (type: 'borrow' | 'deposit', maturity: number, market: Address) =
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const getMaturityPoolRepays = await request<any>(
-        getMaturityPoolRepaysQuery(walletAddress, maturity, market.toLowerCase()),
+        getMaturityPoolRepaysQuery(walletAddress, Number(maturity), market.toLowerCase()),
       );
       if (!getMaturityPoolRepays) return;
 
@@ -64,7 +64,7 @@ export default (type: 'borrow' | 'deposit', maturity: number, market: Address) =
         repays.push({
           id,
           market: repayMarket,
-          maturity: repayMaturity,
+          maturity: BigInt(repayMaturity),
           assets: BigInt(assets),
           timestamp,
         });
@@ -74,7 +74,7 @@ export default (type: 'borrow' | 'deposit', maturity: number, market: Address) =
     } else {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const getMaturityPoolDeposits = await request<any>(
-        getMaturityPoolDepositsQuery(walletAddress, maturity, market.toLowerCase()),
+        getMaturityPoolDepositsQuery(walletAddress, Number(maturity), market.toLowerCase()),
       );
       if (!getMaturityPoolDeposits) return;
 
@@ -87,7 +87,7 @@ export default (type: 'borrow' | 'deposit', maturity: number, market: Address) =
         deposits.push({
           id,
           market: depositMarket,
-          maturity: depositMaturity,
+          maturity: BigInt(depositMaturity),
           assets: BigInt(assets),
           fee: BigInt(fee),
           timestamp,
@@ -98,7 +98,7 @@ export default (type: 'borrow' | 'deposit', maturity: number, market: Address) =
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const getMaturityPoolWithdraws = await request<any>(
-        getMaturityPoolWithdrawsQuery(walletAddress, maturity, market.toLowerCase()),
+        getMaturityPoolWithdrawsQuery(walletAddress, Number(maturity), market.toLowerCase()),
       );
       if (!getMaturityPoolWithdraws) return;
 
@@ -112,7 +112,7 @@ export default (type: 'borrow' | 'deposit', maturity: number, market: Address) =
           id,
           assets: BigInt(assets),
           market: withdrawMarket,
-          maturity: withdrawMaturity,
+          maturity: BigInt(withdrawMaturity),
           positionAssets: BigInt(positionAssets),
           timestamp,
         });

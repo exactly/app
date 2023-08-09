@@ -1,15 +1,22 @@
 import React, { createContext, FC, PropsWithChildren, useCallback, useContext, useEffect, useState } from 'react';
 import { ThemeProvider as MUIThemeProvider } from '@mui/material/styles';
 import { lightTheme, darkTheme } from 'styles/theme';
+import useClientLocalStorage from 'hooks/useClientLocalStorage';
+
+export type MarketView = 'simple' | 'advanced';
 
 type ContextValues = {
   theme: 'light' | 'dark';
   changeTheme: () => void;
+  view?: MarketView;
+  setView: (view: MarketView) => void;
 };
 
 const defaultValues: ContextValues = {
   theme: 'light',
   changeTheme: () => undefined,
+  view: 'simple',
+  setView: () => undefined,
 };
 
 const ThemeContext = createContext(defaultValues);
@@ -47,9 +54,13 @@ export const ThemeProvider: FC<PropsWithChildren> = ({ children }) => {
     }
   }, [theme, changeTheme]);
 
+  const [view, setView] = useClientLocalStorage('marketView', defaultValues.view);
+
   return (
-    <ThemeContext.Provider value={{ theme, changeTheme }}>
-      <MUIThemeProvider theme={theme === 'light' ? lightTheme : darkTheme}>{children}</MUIThemeProvider>
+    <ThemeContext.Provider value={{ theme, changeTheme, view, setView }}>
+      <MUIThemeProvider theme={theme === 'light' ? lightTheme : darkTheme}>
+        {view === undefined ? null : children}
+      </MUIThemeProvider>
     </ThemeContext.Provider>
   );
 };

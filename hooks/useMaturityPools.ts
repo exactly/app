@@ -9,7 +9,7 @@ import useAccountData from './useAccountData';
 type APRsPerMaturityType = Record<string, { borrow: number; deposit: number }>;
 
 type TableRow = {
-  maturity: number;
+  maturity: bigint;
   totalDeposited: string;
   totalBorrowed: string;
   depositAPR: number;
@@ -37,7 +37,7 @@ export default function useMaturityPools(symbol: string): TableRow[] {
       const totalBorrowed = formatNumber(formatUnits((borrowed * usdPrice) / WEI_PER_ETHER, decimals));
 
       return {
-        maturity: Number(maturity),
+        maturity,
         totalDeposited,
         totalBorrowed,
         depositAPR: APRsPerMaturity[maturityKey]?.deposit,

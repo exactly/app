@@ -5,14 +5,14 @@ import { LoadingButton, type LoadingButtonProps } from '@mui/lab';
 import { Button } from '@mui/material';
 
 import { useWeb3 } from 'hooks/useWeb3';
-import { useDebtManagerContext } from 'contexts/DebtManagerContext';
+import { useModal } from 'contexts/ModalContext';
 
 function Submit(props: LoadingButtonProps) {
   const { t } = useTranslation();
   const { isConnected, chain: displayNetwork, connect, impersonateActive, exitImpersonate } = useWeb3();
   const { chain } = useNetwork();
   const { switchNetwork, isLoading } = useSwitchNetwork();
-  const { close } = useDebtManagerContext();
+  const { close } = useModal('rollover');
 
   const exitAndClose = useCallback(() => {
     exitImpersonate();

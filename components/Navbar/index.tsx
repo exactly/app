@@ -1,4 +1,4 @@
-import React, { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { ReactNode, useEffect, useMemo, useState } from 'react';
 import { setContext, setUser } from '@sentry/nextjs';
 import { mainnet, useBlockNumber, useConfig } from 'wagmi';
 import { optimism, goerli } from 'wagmi/chains';
@@ -7,22 +7,8 @@ import useRouter from 'hooks/useRouter';
 
 import { useWeb3 } from 'hooks/useWeb3';
 
-import {
-  AppBar,
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  Box,
-  Button,
-  Chip,
-  IconButton,
-  Toolbar,
-  useTheme,
-  Typography,
-  useMediaQuery,
-} from '@mui/material';
+import { AppBar, Box, Button, Chip, IconButton, Toolbar, useTheme, Typography, useMediaQuery } from '@mui/material';
 
-import CloseIcon from '@mui/icons-material/Close';
 import MovingSharpIcon from '@mui/icons-material/MovingSharp';
 
 import MenuIcon from '@mui/icons-material/Menu';
@@ -34,13 +20,13 @@ import MobileMenu from 'components/MobileMenu';
 import Link from 'next/link';
 import Wallet from 'components/Wallet';
 import SelectMarketsView from 'components/SelectMarketsView';
-import { useMarketContext } from 'contexts/MarketContext';
 import { useTranslation } from 'react-i18next';
 import MaturityDateReminder from 'components/MaturityDateReminder';
-import Faucet from 'components/operations/Faucet';
 import SecondaryChain from 'components/SecondaryChain';
-import RewardsModal from 'components/RewardsModal';
+import { RewardsButton } from 'components/RewardsModal';
 import Velodrome from 'components/Velodrome';
+import { useCustomTheme } from 'contexts/ThemeContext';
+import { useModal } from 'contexts/ModalContext';
 
 const { onlyMobile, onlyDesktopFlex } = globals;
 
@@ -51,11 +37,9 @@ function Navbar() {
   const { pathname: currentPathname, query } = useRouter();
   const { chain, isConnected } = useWeb3();
 
-  const { palette, spacing, breakpoints } = useTheme();
-  const { view } = useMarketContext();
+  const { palette, breakpoints } = useTheme();
+  const { view } = useCustomTheme();
   const [openMenu, setOpenMenu] = useState<boolean>(false);
-  const [openFaucet, setOpenFaucet] = useState(false);
-  const [openRewardsModal, setOpenRewardsModal] = useState(false);
   const isMobile = useMediaQuery(breakpoints.down('sm'));
 
   const { data: blockNumber } = useBlockNumber({ chainId: chain?.id });
@@ -73,12 +57,6 @@ function Navbar() {
       testnet: chain?.testnet,
     });
   }, [walletAddress, connector, chain, blockNumber]);
-
-  const onClose = useCallback(() => setOpenFaucet(false), []);
-
-  const handleFaucetClick = useCallback(() => {
-    if (chain?.id === goerli.id) return setOpenFaucet(true);
-  }, [chain?.id]);
 
   const setBodyColor = (color: string) => {
     document.body.style.backgroundColor = color;
@@ -131,6 +109,8 @@ function Navbar() {
     [isOPMainnet, t],
   );
 
+  const { open: openFaucet } = useModal('faucet');
+
   return (
     <Box sx={{ display: 'flex', justifyContent: 'center' }}>
       <MaturityDateReminder />
@@ -181,9 +161,9 @@ function Navbar() {
                           fontSize={11}
                           fontWeight={700}
                           color="white"
-                          sx={{ background: palette.green, borderRadius: '4px', px: 0.5 }}
+                          sx={{ background: palette.green, borderRadius: '4px', px: 0.5, textTransform: 'uppercase' }}
                         >
-                          {t('New').toUpperCase()}
+                          {t('New')}
                         </Typography>
                       )}
                     </Button>
@@ -194,18 +174,12 @@ function Navbar() {
           </Box>
           <Box display="flex" gap={0.5} ml="auto" flexDirection={{ xs: 'row-reverse', sm: 'row' }}>
             {isConnected && chain?.id === goerli.id && (
-              <Chip label="Goerli Faucet" onClick={handleFaucetClick} sx={{ my: 'auto', display: onlyDesktopFlex }} />
+              <Chip label="Goerli Faucet" onClick={openFaucet} sx={{ my: 'auto', display: onlyDesktopFlex }} />
             )}
             <Box display="flex" gap={0.5}>
               {!isMobile && <SecondaryChain />}
               {isOPMainnet && <Velodrome />}
-              {!isMobile && !isEthereum && (
-                <RewardsModal
-                  isOpen={openRewardsModal}
-                  open={() => setOpenRewardsModal(true)}
-                  close={() => setOpenRewardsModal(false)}
-                />
-              )}
+              {!isMobile && !isEthereum && <RewardsButton />}
               <Wallet />
             </Box>
           </Box>
@@ -223,42 +197,6 @@ function Navbar() {
           <MobileMenu open={openMenu} handleClose={() => setOpenMenu(false)} />
         </Box>
       </AppBar>
-
-      <Dialog open={openFaucet} onClose={onClose}>
-        <IconButton
-          aria-label="close"
-          onClick={onClose}
-          sx={{
-            position: 'absolute',
-            right: 4,
-            top: 8,
-            color: 'grey.500',
-          }}
-          data-testid="modal-close"
-        >
-          <CloseIcon sx={{ fontSize: 19 }} />
-        </IconButton>
-        <Box
-          sx={{
-            padding: { xs: spacing(3, 2, 2), sm: spacing(5, 4, 4) },
-            borderTop: `4px ${palette.mode === 'light' ? 'black' : 'white'} solid`,
-          }}
-        >
-          <DialogTitle
-            sx={{
-              p: 0,
-              mb: { xs: 2, sm: 3 },
-            }}
-          >
-            <Typography fontWeight={700} fontSize={24} data-testid="modal-title">
-              {t('Faucet')}
-            </Typography>
-          </DialogTitle>
-          <DialogContent sx={{ padding: spacing(4, 0, 0, 0) }}>
-            <Faucet />
-          </DialogContent>
-        </Box>
-      </Dialog>
     </Box>
   );
 }

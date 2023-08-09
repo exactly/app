@@ -1,25 +1,13 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { Box, Divider, Typography, useMediaQuery, useTheme } from '@mui/material';
-import useRewards from 'hooks/useRewards';
 import Image from 'next/image';
-import { WEI_PER_ETHER } from 'utils/const';
-import { formatEther } from 'viem';
 import formatNumber from 'utils/formatNumber';
 
-const RewardsTooltip = () => {
+type Props = { rewards: { symbol: string; amount: string; valueUSD?: string }[] };
+
+const RewardsTooltip = ({ rewards }: Props) => {
   const { breakpoints } = useTheme();
   const isMobile = useMediaQuery(breakpoints.down('sm'));
-  const { rewards: rs } = useRewards();
-
-  const rewards = useMemo(
-    () =>
-      Object.entries(rs).map(([symbol, { amount, usdPrice }]) => ({
-        symbol,
-        amount: formatEther(amount),
-        valueUSD: usdPrice ? formatEther((amount * usdPrice) / WEI_PER_ETHER) : undefined,
-      })),
-    [rs],
-  );
 
   if (isMobile) return null;
 
@@ -55,4 +43,4 @@ const RewardsTooltip = () => {
   );
 };
 
-export default RewardsTooltip;
+export default React.memo(RewardsTooltip);

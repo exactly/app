@@ -16,20 +16,22 @@ import useERC20 from 'hooks/useERC20';
 import useETHRouter from 'hooks/useETHRouter';
 import useHandleOperationError from 'hooks/useHandleOperationError';
 import useMarket from 'hooks/useMarket';
-import { useWeb3 } from 'hooks/useWeb3';
-import useRouter from 'hooks/useRouter';
 import { ERC20, Market, MarketETHRouter } from 'types/contracts';
 import { ErrorData } from 'types/Error';
 import { OperationHook } from 'types/OperationHook';
 import { Transaction } from 'types/Transaction';
-import { useModalStatus } from './ModalStatusContext';
 import numbers from 'config/numbers.json';
-import { useMarketContext } from './MarketContext';
+import type { Operation } from 'types/Operation';
+import { Args } from './ModalContext';
 
 type LoadingButton = { withCircularProgress?: boolean; label?: string };
 
 type ContextValues = {
+  operation: Operation;
+  setOperation: React.Dispatch<React.SetStateAction<Operation>>;
+
   symbol: string;
+  setSymbol: React.Dispatch<React.SetStateAction<string>>;
   errorData?: ErrorData;
   setErrorData: React.Dispatch<React.SetStateAction<ErrorData | undefined>>;
   qty: string;
@@ -45,7 +47,9 @@ type ContextValues = {
   requiresApproval: boolean;
   setRequiresApproval: React.Dispatch<React.SetStateAction<boolean>>;
 
-  date: number | undefined;
+  date?: bigint;
+  dates: bigint[];
+  setDate: React.Dispatch<React.SetStateAction<bigint | undefined>>;
 
   marketContract?: Market;
   assetContract?: ERC20;
@@ -63,13 +67,26 @@ type ContextValues = {
 
 const OperationContext = createContext<ContextValues | null>(null);
 
-const DEFAULT_SLIPPAGE = (numbers.slippage * 100).toFixed(2);
+export const DEFAULT_SLIPPAGE = (numbers.slippage * 100).toFixed(2);
 
-export const OperationContextProvider: FC<PropsWithChildren> = ({ children }) => {
-  const { pathname } = useRouter();
-  const { chain } = useWeb3();
-  const { marketSymbol, view, date } = useMarketContext();
-  const { open, operation } = useModalStatus();
+type Props = {
+  args?: Args<'operation'>;
+};
+
+export const OperationContextProvider: FC<PropsWithChildren<Props>> = ({ args, children }) => {
+  const [marketSymbol, setMarketSymbol] = useState<string>(args?.symbol ?? 'USDC');
+  const [operation, setOperation] = useState<Operation>(args?.operation ?? 'deposit');
+  const [date, setDate] = useState<bigint | undefined>(args?.maturity);
+
+  const { marketAccount } = useAccountData(marketSymbol);
+
+  const dates = useMemo<bigint[]>(() => marketAccount?.fixedPools.map((pool) => pool.maturity) ?? [], [marketAccount]);
+
+  useEffect(() => {
+    if (dates.length && date === undefined) {
+      setDate(dates[0]);
+    }
+  }, [date, dates]);
 
   const [errorData, setErrorData] = useState<ErrorData | undefined>();
 
@@ -80,7 +97,6 @@ export const OperationContextProvider: FC<PropsWithChildren> = ({ children }) =>
   const [loadingButton, setLoadingButton] = useState<LoadingButton>({});
   const [errorButton, setErrorButton] = useState<string | undefined>();
   const [requiresApproval, setRequiresApproval] = useState(false);
-  const { marketAccount } = useAccountData(marketSymbol);
   const [rawSlippage, setRawSlippage] = useState(DEFAULT_SLIPPAGE);
 
   const slippage = useMemo(() => {
@@ -89,26 +105,16 @@ export const OperationContextProvider: FC<PropsWithChildren> = ({ children }) =>
       : parseUnits(String(1 + Number(rawSlippage) / 100), 18);
   }, [operation, rawSlippage]);
 
-  useEffect(() => {
-    if (!(open && view === 'simple' && pathname === '/')) {
-      setQty('');
-      setTx(undefined);
-      setRequiresApproval(true);
-      setGasCost(undefined);
-      setIsLoading(false);
-    }
-    setLoadingButton({});
-    setErrorData(undefined);
-    setErrorButton(undefined);
-    setRawSlippage(DEFAULT_SLIPPAGE);
-  }, [chain?.id, open, view, pathname]);
-
   const assetContract = useERC20(marketAccount?.asset);
   const marketContract = useMarket(marketAccount?.market);
   const ETHRouterContract = useETHRouter();
 
   const value: ContextValues = {
+    operation,
+    setOperation,
+
     symbol: marketSymbol,
+    setSymbol: setMarketSymbol,
     errorData,
     setErrorData,
     qty,
@@ -123,6 +129,8 @@ export const OperationContextProvider: FC<PropsWithChildren> = ({ children }) =>
     setRequiresApproval,
 
     date,
+    dates,
+    setDate,
 
     assetContract,
     marketContract,

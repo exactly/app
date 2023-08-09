@@ -38,6 +38,7 @@ import { LoadingButton } from '@mui/lab';
 import { useWeb3 } from 'hooks/useWeb3';
 import { useNetwork, useSwitchNetwork } from 'wagmi';
 import RewardsTooltip from 'components/RewardsTooltip';
+import { useModal } from 'contexts/ModalContext';
 
 function PaperComponent(props: PaperProps | undefined) {
   const ref = useRef<HTMLDivElement>(null);
@@ -59,11 +60,10 @@ const Transition = forwardRef(function Transition(
 
 type RewardsModalProps = {
   isOpen: boolean;
-  open: () => void;
   close: () => void;
 };
 
-const RewardsModal: FC<RewardsModalProps> = ({ isOpen, open, close }) => {
+const RewardsModal: FC<RewardsModalProps> = ({ isOpen, close }) => {
   const { t } = useTranslation();
   const { breakpoints } = useTheme();
   const isMobile = useMediaQuery(breakpoints.down('sm'));
@@ -107,11 +107,6 @@ const RewardsModal: FC<RewardsModalProps> = ({ isOpen, open, close }) => {
     [rs],
   );
 
-  const totalAmount = useMemo(
-    () => Object.values(rs).reduce((acc, { amount, usdPrice }) => acc + (amount * usdPrice) / WEI_PER_ETHER, 0n),
-    [rs],
-  );
-
   const closeAndReset = useCallback(() => {
     close();
     setShowInput(false);
@@ -130,203 +125,225 @@ const RewardsModal: FC<RewardsModalProps> = ({ isOpen, open, close }) => {
   }
 
   return (
-    <>
-      <Tooltip title={<RewardsTooltip />} arrow placement="bottom">
-        <Button variant="outlined" onClick={open}>
-          <Box display="flex" gap={0.5} alignItems="center">
-            <AvatarGroup
-              max={6}
-              sx={{ '& .MuiAvatar-root': { width: 16, height: 16, fontSize: 10, borderColor: 'transparent' } }}
-            >
-              {rewards.map(({ symbol }) => (
-                <Avatar key={symbol} alt={symbol} src={`/img/assets/${symbol}.svg`} />
-              ))}
-            </AvatarGroup>
-            <Typography fontSize={14} fontWeight={700}>
-              {totalAmount < WEI_PER_ETHER ? t('Rewards') : `$${formatNumber(formatEther(totalAmount), 'USD')}`}
-            </Typography>
-          </Box>
-        </Button>
-      </Tooltip>
-      <Dialog
-        open={isOpen}
-        onClose={closeAndReset}
-        PaperComponent={isMobile ? undefined : PaperComponent}
-        PaperProps={{
-          sx: {
-            borderRadius: '16px',
-            minWidth: '400px',
-            maxWidth: '424px !important',
-            width: '100%',
-            overflowY: 'hidden !important',
-          },
-        }}
-        TransitionComponent={isMobile ? Transition : undefined}
-        fullScreen={isMobile}
-        sx={isMobile ? { top: 'auto' } : { backdropFilter: tx ? 'blur(1.5px)' : '' }}
-        disableEscapeKeyDown={loadingTx}
-      >
-        {!loadingTx && (
-          <IconButton
-            aria-label="close"
-            onClick={closeAndReset}
+    <Dialog
+      open={isOpen}
+      onClose={closeAndReset}
+      PaperComponent={isMobile ? undefined : PaperComponent}
+      PaperProps={{
+        sx: {
+          borderRadius: '16px',
+          minWidth: '400px',
+          maxWidth: '424px !important',
+          width: '100%',
+          overflowY: 'hidden !important',
+        },
+      }}
+      TransitionComponent={isMobile ? Transition : undefined}
+      fullScreen={isMobile}
+      sx={isMobile ? { top: 'auto' } : { backdropFilter: tx ? 'blur(1.5px)' : '' }}
+      disableEscapeKeyDown={loadingTx}
+    >
+      {!loadingTx && (
+        <IconButton
+          aria-label="close"
+          onClick={closeAndReset}
+          sx={{
+            position: 'absolute',
+            right: 16,
+            top: 16,
+            color: 'grey.400',
+          }}
+        >
+          <CloseIcon sx={{ fontSize: 24 }} />
+        </IconButton>
+      )}
+      <Box p={4}>
+        {!tx && (
+          <DialogTitle
             sx={{
-              position: 'absolute',
-              right: 16,
-              top: 16,
-              color: 'grey.400',
+              p: 0,
+              mb: 3,
+              cursor: { xs: '', sm: 'move' },
+              fontSize: 19,
+              fontWeight: 700,
             }}
           >
-            <CloseIcon sx={{ fontSize: 24 }} />
-          </IconButton>
+            {t('Claim Your Rewards')}
+          </DialogTitle>
         )}
-        <Box p={4}>
-          {!tx && (
-            <DialogTitle
-              sx={{
-                p: 0,
-                mb: 3,
-                cursor: { xs: '', sm: 'move' },
-                fontSize: 19,
-                fontWeight: 700,
+        {tx ? (
+          <DialogContent>
+            <Loading
+              tx={tx}
+              messages={{
+                pending: t('You are claiming your rewards'),
+                success: t('You have claimed your rewards'),
+                error: t('Something went wrong'),
               }}
-            >
-              {t('Claim Your Rewards')}
-            </DialogTitle>
-          )}
-          {tx ? (
-            <DialogContent>
-              <Loading
-                tx={tx}
-                messages={{
-                  pending: t('You are claiming your rewards'),
-                  success: t('You have claimed your rewards'),
-                  error: t('Something went wrong'),
-                }}
-              />
-            </DialogContent>
-          ) : (
-            <DialogContent sx={{ p: 0, overflow: 'hidden' }}>
-              <Box display="flex" flexDirection="column" gap={4}>
-                <Typography fontSize={14}>
-                  {t(
-                    'Access your rewards that are ready for claiming. You can claim them directly to your connected wallet or to a different wallet address of your choice.',
-                  )}
-                </Typography>
-                <Box display="flex" flexDirection="column" gap={0.5}>
-                  {rewards.map(({ symbol, amount, valueUSD }) => (
-                    <FormControlLabel
-                      key={symbol}
+            />
+          </DialogContent>
+        ) : (
+          <DialogContent sx={{ p: 0, overflow: 'hidden' }}>
+            <Box display="flex" flexDirection="column" gap={4}>
+              <Typography fontSize={14}>
+                {t(
+                  'Access your rewards that are ready for claiming. You can claim them directly to your connected wallet or to a different wallet address of your choice.',
+                )}
+              </Typography>
+              <Box display="flex" flexDirection="column" gap={0.5}>
+                {rewards.map(({ symbol, amount, valueUSD }) => (
+                  <FormControlLabel
+                    key={symbol}
+                    sx={{
+                      py: 1,
+                      pr: 1,
+                      pl: 2,
+                      m: 0,
+                      borderRadius: '4px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      border: ({ palette }) =>
+                        `1px solid ${selected[symbol] ? (palette.mode === 'dark' ? 'white' : 'black') : 'transparent'}`,
+                      '&:hover': {
+                        bgcolor: 'figma.grey.50',
+                      },
+                    }}
+                    labelPlacement="start"
+                    label={
+                      <Box display="flex" alignItems="center" gap={1}>
+                        <Image
+                          src={`/img/assets/${symbol}.svg`}
+                          alt={symbol}
+                          width={24}
+                          height={24}
+                          style={{
+                            maxWidth: '100%',
+                            height: 'auto',
+                          }}
+                        />
+                        <Typography variant="h6">{formatNumber(amount, symbol)}</Typography>
+                        {valueUSD && <Typography fontSize={14}>${formatNumber(valueUSD, 'USD')}</Typography>}
+                      </Box>
+                    }
+                    control={
+                      <Checkbox
+                        checked={selected[symbol]}
+                        icon={<CheckboxIcon sx={{ fontSize: 18 }} />}
+                        checkedIcon={<CheckboxCheckedIcon sx={{ fontSize: 18 }} />}
+                        onChange={(_, checked) => setSelected((prev) => ({ ...prev, [symbol]: checked }))}
+                      />
+                    }
+                  />
+                ))}
+                <Collapse in={showInput}>
+                  <Box mt={2.5}>
+                    <TextField
+                      variant="outlined"
+                      fullWidth
+                      size="small"
+                      placeholder={t('Enter address')}
                       sx={{
-                        py: 1,
-                        pr: 1,
-                        pl: 2,
-                        m: 0,
-                        borderRadius: '4px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        border: ({ palette }) =>
-                          `1px solid ${
-                            selected[symbol] ? (palette.mode === 'dark' ? 'white' : 'black') : 'transparent'
-                          }`,
-                        '&:hover': {
-                          bgcolor: 'figma.grey.50',
+                        '& .MuiOutlinedInput-root': {
+                          p: 0.5,
+                          fontSize: 14,
+                          '&.Mui-focused fieldset': {
+                            border: '1px solid',
+                          },
                         },
                       }}
-                      labelPlacement="start"
-                      label={
-                        <Box display="flex" alignItems="center" gap={1}>
-                          <Image
-                            src={`/img/assets/${symbol}.svg`}
-                            alt={symbol}
-                            width={24}
-                            height={24}
-                            style={{
-                              maxWidth: '100%',
-                              height: 'auto',
-                            }}
-                          />
-                          <Typography variant="h6">{formatNumber(amount, symbol)}</Typography>
-                          {valueUSD && <Typography fontSize={14}>${formatNumber(valueUSD, 'USD')}</Typography>}
-                        </Box>
-                      }
-                      control={
-                        <Checkbox
-                          checked={selected[symbol]}
-                          icon={<CheckboxIcon sx={{ fontSize: 18 }} />}
-                          checkedIcon={<CheckboxCheckedIcon sx={{ fontSize: 18 }} />}
-                          onChange={(_, checked) => setSelected((prev) => ({ ...prev, [symbol]: checked }))}
-                        />
-                      }
+                      onChange={(e) => setInput(e.target.value)}
                     />
-                  ))}
-                  <Collapse in={showInput}>
-                    <Box mt={2.5}>
-                      <TextField
-                        variant="outlined"
-                        fullWidth
-                        size="small"
-                        placeholder={t('Enter address')}
-                        sx={{
-                          '& .MuiOutlinedInput-root': {
-                            p: 0.5,
-                            fontSize: 14,
-                            '&.Mui-focused fieldset': {
-                              border: '1px solid',
-                            },
-                          },
-                        }}
-                        onChange={(e) => setInput(e.target.value)}
-                      />
-                    </Box>
-                  </Collapse>
-                </Box>
-                <Box display="flex" flexDirection="column" gap={2} alignItems="center">
-                  {impersonateActive ? (
-                    <Button fullWidth onClick={exitAndClose} variant="contained">
-                      {t('Exit Read-Only Mode')}
-                    </Button>
-                  ) : chain && chain.id !== displayNetwork.id ? (
+                  </Box>
+                </Collapse>
+              </Box>
+              <Box display="flex" flexDirection="column" gap={2} alignItems="center">
+                {impersonateActive ? (
+                  <Button fullWidth onClick={exitAndClose} variant="contained">
+                    {t('Exit Read-Only Mode')}
+                  </Button>
+                ) : chain && chain.id !== displayNetwork.id ? (
+                  <LoadingButton
+                    fullWidth
+                    onClick={() => switchNetwork?.(displayNetwork.id)}
+                    variant="contained"
+                    loading={switchIsLoading}
+                  >
+                    {t('Please switch to {{network}} network', { network: displayNetwork.name })}
+                  </LoadingButton>
+                ) : (
+                  <>
                     <LoadingButton
                       fullWidth
-                      onClick={() => switchNetwork?.(displayNetwork.id)}
                       variant="contained"
-                      loading={switchIsLoading}
+                      disabled={disableSubmit}
+                      onClick={submit}
+                      loading={loading}
                     >
-                      {t('Please switch to {{network}} network', { network: displayNetwork.name })}
+                      {showInput ? `${t('Claim to')} ${differentAddress}` : t('Claim to connected wallet')}
                     </LoadingButton>
-                  ) : (
-                    <>
-                      <LoadingButton
-                        fullWidth
-                        variant="contained"
-                        disabled={disableSubmit}
-                        onClick={submit}
-                        loading={loading}
-                      >
-                        {showInput ? `${t('Claim to')} ${differentAddress}` : t('Claim to connected wallet')}
-                      </LoadingButton>
-                      <ButtonBase onClick={() => setShowInput(!showInput)} disableRipple>
-                        <Typography fontSize={12} color="grey.500" sx={{ cursor: 'pointer' }}>
-                          {t('or')}{' '}
-                          <span style={{ textDecoration: 'underline' }}>
-                            {showInput
-                              ? t('Claim to connected wallet').toLowerCase()
-                              : t('claim to a different address')}
-                          </span>
-                        </Typography>
-                      </ButtonBase>
-                    </>
-                  )}
-                </Box>
+                    <ButtonBase onClick={() => setShowInput(!showInput)} disableRipple>
+                      <Typography fontSize={12} color="grey.500" sx={{ cursor: 'pointer' }}>
+                        {t('or')}{' '}
+                        <span style={{ textDecoration: 'underline' }}>
+                          {showInput ? t('Claim to connected wallet').toLowerCase() : t('claim to a different address')}
+                        </span>
+                      </Typography>
+                    </ButtonBase>
+                  </>
+                )}
               </Box>
-            </DialogContent>
-          )}
-        </Box>
-      </Dialog>
-    </>
+            </Box>
+          </DialogContent>
+        )}
+      </Box>
+    </Dialog>
   );
 };
 
-export default RewardsModal;
+export function RewardsButton() {
+  const { t } = useTranslation();
+  const { open } = useModal('rewards');
+  const { rewards: rs } = useRewards();
+
+  const rewards = useMemo(
+    () =>
+      Object.entries(rs).map(([symbol, { amount, usdPrice }]) => ({
+        symbol,
+        amount: formatEther(amount),
+        valueUSD: usdPrice ? formatEther((amount * usdPrice) / WEI_PER_ETHER) : undefined,
+      })),
+    [rs],
+  );
+
+  const totalAmount = useMemo(
+    () => Object.values(rs).reduce((acc, { amount, usdPrice }) => acc + (amount * usdPrice) / WEI_PER_ETHER, 0n),
+    [rs],
+  );
+
+  return (
+    <Tooltip title={<RewardsTooltip rewards={rewards} />} arrow placement="bottom">
+      <Button variant="outlined" onClick={open}>
+        <Box display="flex" gap={0.5} alignItems="center">
+          <AvatarGroup
+            max={6}
+            sx={{ '& .MuiAvatar-root': { width: 16, height: 16, fontSize: 10, borderColor: 'transparent' } }}
+          >
+            {rewards.map(({ symbol }) => (
+              <Avatar key={symbol} alt={symbol} src={`/img/assets/${symbol}.svg`} />
+            ))}
+          </AvatarGroup>
+          <Typography fontSize={14} fontWeight={700}>
+            {totalAmount < WEI_PER_ETHER ? t('Rewards') : `$${formatNumber(formatEther(totalAmount), 'USD')}`}
+          </Typography>
+        </Box>
+      </Button>
+    </Tooltip>
+  );
+}
+
+export default function ModalWrapper() {
+  const { isOpen, close } = useModal('rewards');
+  if (!isOpen) return null;
+  return <RewardsModal isOpen={isOpen} close={close} />;
+}

@@ -7,10 +7,10 @@ import { formatUnits, parseUnits } from 'viem';
 import useAccountData from 'hooks/useAccountData';
 import formatNumber from 'utils/formatNumber';
 import ModalInfo, { Variant, FromTo } from 'components/common/modal/ModalInfo';
-import { isFixedOperation, Operation } from 'contexts/ModalStatusContext';
+import { isFixedOperation, type Operation } from 'types/Operation';
 import formatSymbol from 'utils/formatSymbol';
 import { useTranslation } from 'react-i18next';
-import { useMarketContext } from 'contexts/MarketContext';
+import { useOperationContext } from 'contexts/OperationContext';
 
 type Props = {
   qty: string;
@@ -22,7 +22,7 @@ type Props = {
 function ModalInfoTotalBorrows({ qty, symbol, operation, variant = 'column' }: Props) {
   const { t } = useTranslation();
   const { marketAccount } = useAccountData(symbol);
-  const { date } = useMarketContext();
+  const { date } = useOperationContext();
 
   const [from, to] = useMemo(() => {
     if (!marketAccount) return [undefined, undefined];
@@ -31,7 +31,7 @@ function ModalInfoTotalBorrows({ qty, symbol, operation, variant = 'column' }: P
 
     let f: bigint = marketAccount.floatingBorrowAssets;
     if (isFixedOperation(operation) && date) {
-      const pool = marketAccount.fixedBorrowPositions.find(({ maturity }) => maturity === BigInt(date));
+      const pool = marketAccount.fixedBorrowPositions.find(({ maturity }) => maturity === date);
       f = pool ? pool.position.principal + pool.position.fee : 0n;
     }
 

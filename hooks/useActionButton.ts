@@ -1,11 +1,9 @@
 import { useCallback } from 'react';
 import { useWeb3 } from 'hooks/useWeb3';
-import { Operation, useModalStatus } from 'contexts/ModalStatusContext';
 import numbers from 'config/numbers.json';
-import { useMarketContext } from 'contexts/MarketContext';
-import { useDebtManagerContext } from 'contexts/DebtManagerContext';
-
-import { useLeveragerContext } from 'contexts/LeveragerContext';
+import useDebtManager from './useDebtManager';
+import { Operation } from 'types/Operation';
+import { useModal } from 'contexts/ModalContext';
 
 const { minAPRValue } = numbers;
 
@@ -18,24 +16,18 @@ const isDisable = (rateType: 'floating' | 'fixed', apr: number | undefined) => {
 
 export default function useActionButton() {
   const { walletAddress, connect } = useWeb3();
-  const { setDate, setMarketSymbol } = useMarketContext();
-  const { openOperationModal } = useModalStatus();
+
+  const { open } = useModal('operation');
 
   const handleActionClick = useCallback(
-    (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, action: Operation, symbol: string, maturity?: number) => {
+    (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, action: Operation, symbol: string, maturity?: bigint) => {
       e.preventDefault();
 
       if (!walletAddress) return connect();
 
-      setMarketSymbol(symbol);
-
-      if (maturity) {
-        setDate(maturity);
-      }
-
-      openOperationModal(action);
+      open({ operation: action, symbol, maturity });
     },
-    [walletAddress, connect, setMarketSymbol, openOperationModal, setDate],
+    [walletAddress, connect, open],
   );
 
   return { handleActionClick, isDisable };
@@ -43,19 +35,20 @@ export default function useActionButton() {
 
 export function useStartDebtManagerButton() {
   const { connect, isConnected, impersonateActive } = useWeb3();
-  const { openDebtManager, debtManager } = useDebtManagerContext();
+  const debtManager = useDebtManager();
+  const { open } = useModal('rollover');
 
   const startDebtManager = useCallback(
-    (...args: Parameters<typeof openDebtManager>) => {
+    (...args: Parameters<typeof open>) => {
       if (!isConnected && !impersonateActive) {
         return connect();
       }
 
       if (!debtManager) return;
 
-      openDebtManager(...args);
+      open(...args);
     },
-    [isConnected, impersonateActive, debtManager, openDebtManager, connect],
+    [isConnected, impersonateActive, debtManager, open, connect],
   );
 
   const isRolloverDisabled = useCallback(
@@ -71,20 +64,18 @@ export function useStartDebtManagerButton() {
 
 export function useStartLeverager() {
   const { connect, isConnected, impersonateActive } = useWeb3();
-  const { openLeverager, debtManager } = useLeveragerContext();
+  const debtManager = useDebtManager();
+  const { open } = useModal('leverager');
 
-  const startLeverager = useCallback(
-    (...args: Parameters<typeof openLeverager>) => {
-      if (!isConnected && !impersonateActive) {
-        return connect();
-      }
+  const startLeverager = useCallback(() => {
+    if (!isConnected && !impersonateActive) {
+      return connect();
+    }
 
-      if (!debtManager) return;
+    if (!debtManager) return;
 
-      openLeverager(...args);
-    },
-    [isConnected, impersonateActive, debtManager, openLeverager, connect],
-  );
+    open();
+  }, [isConnected, impersonateActive, debtManager, open, connect]);
 
   const isLeveragerDisabled = useCallback(
     (borrow?: bigint) => !debtManager || (borrow !== undefined && borrow === 0n),

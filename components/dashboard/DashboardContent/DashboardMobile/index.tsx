@@ -124,7 +124,7 @@ const DashboardMobile: FC<Props> = ({ type }) => {
                           borderLeftColor: ({ palette }) => palette.grey[palette.mode === 'light' ? 500 : 300],
                         },
                       }}
-                      onClick={() => startDebtManager({ symbol })}
+                      onClick={() => startDebtManager({ from: { symbol } })}
                       disabled={isRolloverDisabled(borrowedAmount)}
                     >
                       {t('Rollover')}
@@ -214,7 +214,7 @@ const DashboardMobile: FC<Props> = ({ type }) => {
                           borderLeftColor: ({ palette }) => palette.grey[palette.mode === 'light' ? 500 : 300],
                         },
                       }}
-                      onClick={() => startDebtManager({ symbol, maturity: BigInt(maturity) })}
+                      onClick={() => startDebtManager({ from: { symbol, maturity } })}
                       disabled={isRolloverDisabled()}
                     >
                       {t('Rollover')}
