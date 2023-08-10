@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useAssetPrice } from './useSocketAPI';
 import { useEXAPrice } from './useEXA';
 import useAccountData from './useAccountData';
@@ -15,6 +15,7 @@ type VELOAccountStatus = {
   poolAPR?: string;
   veloPrice?: number;
   userBalanceUSD?: bigint;
+  refetch: () => void;
 };
 
 export const useVELO = () => {
@@ -24,13 +25,13 @@ export const useVELO = () => {
 export const useVELOPoolAPR = () => {
   const velo = useVELO();
   const asset = useAssetPrice(velo?.address);
-  const { data: rewardRate } = useEXAGaugeRewardRate();
-  const { data: reserves } = useEXAPoolGetReserves();
+  const { data: rewardRate } = useEXAGaugeRewardRate({ staleTime: 30_000 });
+  const { data: reserves } = useEXAPoolGetReserves({ staleTime: 30_000 });
 
   const { marketAccount: weth } = useAccountData('WETH');
 
   const apr = useMemo(() => {
-    if (!asset || !weth || !rewardRate || !reserves) return;
+    if (!asset || !weth || rewardRate === undefined || !reserves) return;
 
     const veloPrice = parseEther(String(asset.tokenPrice));
 
@@ -48,10 +49,17 @@ export default (): VELOAccountStatus => {
   const exa = useEXAPrice();
   const { marketAccount: weth } = useAccountData('WETH');
 
-  const { data: rewardRate } = useEXAGaugeRewardRate({ watch: true });
-  const { data: reserves } = useEXAPoolGetReserves({ watch: true });
-  const { data: totalSupply } = useEXAPoolTotalSupply({ watch: true });
-  const { data: balance } = useEXAGaugeBalanceOf({ watch: true });
+  const { data: rewardRate, refetch: refetchEXAGaugeRewardRate } = useEXAGaugeRewardRate();
+  const { data: reserves, refetch: refetchEXAPoolGetReserves } = useEXAPoolGetReserves();
+  const { data: totalSupply, refetch: refetchEXAPoolTotalSupply } = useEXAPoolTotalSupply();
+  const { data: balance, refetch: refetchEXAGaugeBalanceOf } = useEXAGaugeBalanceOf();
+
+  const refetch = useCallback(() => {
+    refetchEXAGaugeRewardRate();
+    refetchEXAPoolGetReserves();
+    refetchEXAPoolTotalSupply();
+    refetchEXAGaugeBalanceOf();
+  }, [refetchEXAGaugeBalanceOf, refetchEXAGaugeRewardRate, refetchEXAPoolGetReserves, refetchEXAPoolTotalSupply]);
 
   const veloAPR = useMemo(() => {
     if (!asset || !weth || rewardRate === undefined || !reserves) return;
@@ -76,5 +84,6 @@ export default (): VELOAccountStatus => {
     poolAPR: veloAPR,
     veloPrice: asset?.tokenPrice,
     userBalanceUSD,
+    refetch,
   };
 };

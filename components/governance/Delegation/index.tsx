@@ -27,7 +27,7 @@ const Delegation = ({ amount }: Props) => {
   const [input, setInput] = useState<string>('');
   const exa = useEXA();
   const exaBalance = useBalance('EXA', exa?.address);
-  const { data: delegate, isLoading: isLoadingDelegate } = useEXADelegates({ watch: true });
+  const { data: delegate, isLoading: isLoadingDelegate, refetch: refetchDelegate } = useEXADelegates();
   const { config } = useEXAPrepareDelegate({
     args:
       delegate !== zeroAddress
@@ -37,7 +37,12 @@ const Delegation = ({ amount }: Props) => {
         : [walletAddress ?? zeroAddress],
   });
   const { write, isLoading: submitLoading, data } = useExaDelegate(config);
-  const { isLoading: waitingDelegate } = useWaitForTransaction({ hash: data?.hash });
+  const { isLoading: waitingDelegate } = useWaitForTransaction({
+    hash: data?.hash,
+    onSettled: () => {
+      refetchDelegate();
+    },
+  });
   const { data: delegateENS } = useEnsName({ address: delegate, chainId: mainnet.id });
   const { data: delegateENSAvatar, error: ensAvatarError } = useEnsAvatar({
     name: delegateENS,
@@ -47,7 +52,7 @@ const Delegation = ({ amount }: Props) => {
   const { chain } = useNetwork();
   const { switchNetwork, isLoading: switchIsLoading } = useSwitchNetwork();
 
-  const { data: stream } = useAirdropStreams({ watch: true });
+  const { data: stream } = useAirdropStreams();
   const { data: withdrawn } = useSablierV2LockupLinearGetWithdrawnAmount(stream);
 
   const totalVotes = useMemo(() => {

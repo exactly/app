@@ -117,11 +117,19 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, close }) => {
   const exa = useEXA();
   const staker = useProtoStaker();
 
-  const { veloPrice, poolAPR, userBalanceUSD } = useVELOAccount();
-  const { data: veloEarned } = useEXAGaugeEarned({ watch: true });
-  const { data: exaBalance } = useEXABalance({ watch: true });
-  const { data: previewETH } = useProtoStakerPreviewETH(exaBalance || 0n);
-  const { data: reserves } = useEXAPoolGetReserves({ watch: true });
+  const { veloPrice, poolAPR, userBalanceUSD, refetch: refetchVELOAccount } = useVELOAccount();
+  const { data: veloEarned, refetch: refetchGaugeEarned } = useEXAGaugeEarned();
+  const { data: exaBalance, refetch: refetchEXABalance } = useEXABalance();
+  const { data: previewETH, refetch: refetchPreviewETH } = useProtoStakerPreviewETH(exaBalance || 0n);
+  const { data: reserves, refetch: refetchPoolGetReserves } = useEXAPoolGetReserves();
+
+  const refetch = useCallback(() => {
+    refetchVELOAccount();
+    refetchGaugeEarned();
+    refetchEXABalance();
+    refetchPreviewETH();
+    refetchPoolGetReserves();
+  }, [refetchVELOAccount, refetchGaugeEarned, refetchEXABalance, refetchPreviewETH, refetchPoolGetReserves]);
 
   const permit2 = usePermit2();
   const isPermit = useIsPermit();
@@ -253,9 +261,10 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, close }) => {
     } catch (e: unknown) {
       setErrorData({ status: true, message: handleOperationError(e) });
     } finally {
+      refetch();
       setLoading(false);
     }
-  }, [walletAddress, exaBalance, staker, previewETH, reserves, opts, input, t, isContract, signEXA]);
+  }, [walletAddress, exaBalance, staker, previewETH, reserves, opts, input, t, isContract, signEXA, refetch]);
 
   const { data: walletClient } = useWalletClient();
 
@@ -659,6 +668,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, close }) => {
     } catch (err) {
       setErrorData({ status: true, message: handleOperationError(err) });
     } finally {
+      refetch();
       setLoading(false);
     }
   }, [
@@ -676,6 +686,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, close }) => {
     isContract,
     sign,
     signEXA,
+    refetch,
   ]);
 
   return (

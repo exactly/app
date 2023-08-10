@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useMemo } from 'react';
+import React, { FC, useMemo } from 'react';
 import { Hex, formatEther, parseEther } from 'viem';
 import Image from 'next/image';
 import { useNetwork, useWaitForTransaction, useSwitchNetwork } from 'wagmi';
@@ -81,13 +81,10 @@ const Claim: FC<ClaimableProps & { refresh: () => void }> = ({ amount, proof, re
 
   const { config } = usePrepareAirdropClaim({ args: [amount, proof] });
   const { write: claim, data: claimData, isLoading: claimLoading } = useAirdropClaim(config);
-  const { isLoading: waitingClaim, isSuccess } = useWaitForTransaction({ hash: claimData?.hash });
-
-  useEffect(() => {
-    if (isSuccess) {
-      refresh();
-    }
-  }, [refresh, isSuccess]);
+  const { isLoading: waitingClaim } = useWaitForTransaction({
+    hash: claimData?.hash,
+    onSettled: refresh,
+  });
 
   return (
     <LoadingButton
@@ -118,13 +115,10 @@ const NFT: FC = () => {
     data: withdrawData,
     isLoading: withdrawLoading,
   } = useSablierV2LockupLinearWithdrawMax(withdrawConfig);
-  const { isLoading: waitingWithdraw, isSuccess } = useWaitForTransaction({ hash: withdrawData?.hash });
-
-  useEffect(() => {
-    if (isSuccess) {
-      refetch();
-    }
-  }, [isSuccess, refetch]);
+  const { isLoading: waitingWithdraw } = useWaitForTransaction({
+    hash: withdrawData?.hash,
+    onSettled: () => refetch(),
+  });
 
   const b64 = nft?.split(',')[1] ?? '';
   const json = atob(b64) || '{}';

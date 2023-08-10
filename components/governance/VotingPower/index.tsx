@@ -15,9 +15,9 @@ type Props = {
 const VotingPower = ({ amount }: Props) => {
   const { t } = useTranslation();
   const { walletAddress } = useWeb3();
-  const { data: votes, isLoading } = useEXAGetVotes({ watch: true });
-  const { data: stream } = useAirdropStreams({ watch: true });
-  const { data: delegatee, isLoading: isLoadingDelegatee } = useEXADelegates({ watch: true });
+  const { data: votes, isLoading: isLoadingGetVotes } = useEXAGetVotes();
+  const { data: stream } = useAirdropStreams();
+  const { data: delegatee, isLoading: isLoadingDelegatee } = useEXADelegates();
   const { data: withdrawn, isLoading: isLoadingWithdrawn } = useSablierV2LockupLinearGetWithdrawnAmount(stream);
 
   const totalVotes = useMemo(() => {
@@ -28,7 +28,7 @@ const VotingPower = ({ amount }: Props) => {
     <Box display="flex" flexDirection="column" gap={4}>
       <Box display="flex" justifyContent="space-between" alignItems="center">
         <Typography variant="h6">{t('Voting Power')}</Typography>
-        {votes === undefined || isLoadingDelegatee || isLoadingWithdrawn || isLoading ? (
+        {votes === undefined || isLoadingDelegatee || isLoadingWithdrawn || isLoadingGetVotes ? (
           <Skeleton width={56} height={40} />
         ) : (
           <Typography fontSize={28} color="grey.700">

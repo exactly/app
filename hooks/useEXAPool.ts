@@ -7,7 +7,7 @@ export const useEXAPool = () => {
   return useContract('EXAPool', exaPoolABI);
 };
 
-export const useEXAPoolGetReserves = (args?: { watch?: boolean }) => {
+export const useEXAPoolGetReserves = (args?: { watch?: boolean; staleTime?: number }) => {
   const { chain } = useWeb3();
   const pool = useEXAPool();
 

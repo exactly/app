@@ -20,7 +20,7 @@ export const useEXAGaugeBalanceOf = (args?: { watch?: boolean }) => {
   });
 };
 
-export const useEXAGaugeRewardRate = (args?: { watch?: boolean }) => {
+export const useEXAGaugeRewardRate = (args?: { watch?: boolean; staleTime?: number }) => {
   const { chain } = useWeb3();
   const exaGauge = useEXAGauge();
 
