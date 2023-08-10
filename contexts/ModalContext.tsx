@@ -10,13 +10,7 @@ export type Args<T extends Identifier> = T extends 'operation'
   ? { operation: Operation; symbol: string; maturity?: bigint }
   : T extends 'rollover'
   ? { from?: Position }
-  : T extends 'rewards'
-  ? undefined
-  : T extends 'leverager'
-  ? undefined
-  : T extends 'proto-staker'
-  ? undefined
-  : T extends 'faucet'
+  : T extends 'rewards' | 'leverager' | 'proto-staker' | 'faucet'
   ? undefined
   : never;
 
