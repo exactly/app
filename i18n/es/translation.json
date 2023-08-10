@@ -274,7 +274,6 @@
   "Updated <1 minute ago": "Actualizado hace <1 minuto",
   "Learn More": "Aprende más",
   "View All": "Ver Todo",
-  "Earnings": "Ganancias",
   "Unlock the full potential of DeFi, start earning interest today!": "¡Desbloquea todo el potencial de DeFi, comienza a ganar intereses hoy!",
   "Top {{number}} positions": "Top {{number}} posiciones",
   "Unlock better loan terms with the new Rollover feature.": "Desbloquea mejores condiciones de préstamo con la nueva función de refinanciación.",
@@ -383,5 +382,6 @@
   "Approve {{ asset }}": "Aprobar {{ asset }}",
   "Swap & Supply EXA/ETH": "Swap & Depositar EXA/ETH",
   "Provide liquidity": "Proporcionar liquidez",
-  "Net APR": "TNA Neta"
+  "Net APR": "TNA Neta",
+  "Your Account": "Tu Cuenta"
 }

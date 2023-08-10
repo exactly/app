@@ -21,10 +21,10 @@ const OverviewCard: FC<PropsWithChildren & OverviewCardProps> = ({
   title,
   icon,
   total,
-  fixedValue,
-  floatingValue,
-  subFixedValue,
-  subFloatingValue,
+  fixedValue = '$0.00',
+  floatingValue = '$0.00',
+  subFixedValue = '0.00%',
+  subFloatingValue = '0.00%',
   viewAll,
   actions,
   children,
@@ -63,7 +63,7 @@ const OverviewCard: FC<PropsWithChildren & OverviewCardProps> = ({
               </Typography>
             )}
           </Box>
-          <Box display="flex" flexDirection="column" gap={2}>
+          <Box display="flex" flexDirection={{ xs: 'column', lg: 'row' }} justifyContent="space-between" gap={2}>
             {loading ? (
               <Skeleton width={128} height={64} />
             ) : (

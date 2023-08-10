@@ -45,7 +45,26 @@ const DashboardTitle = () => {
           </Typography>
         )}
 
-        <IconButton size="small" onClick={refreshData} disabled={loading}>
+        <IconButton
+          size="small"
+          onClick={refreshData}
+          disabled={loading}
+          sx={
+            loading
+              ? {
+                  animation: 'spin 1s linear infinite',
+                  '@keyframes spin': {
+                    '0%': {
+                      transform: 'rotate(360deg)',
+                    },
+                    '100%': {
+                      transform: 'rotate(0deg)',
+                    },
+                  },
+                }
+              : {}
+          }
+        >
           <ReplayIcon sx={{ fontSize: 20, color: 'figma.grey.500' }} />
         </IconButton>
       </Box>

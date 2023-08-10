@@ -1,12 +1,14 @@
 import React, { FC, useMemo } from 'react';
 import { formatUnits } from 'viem';
-import { Box, Button, Divider, Skeleton, Typography, useMediaQuery, useTheme } from '@mui/material';
+import { Box, Skeleton, Typography, useMediaQuery, useTheme } from '@mui/material';
 import StarsIcon from '@mui/icons-material/Stars';
 import formatNumber from 'utils/formatNumber';
 import Image from 'next/image';
 import { useTranslation } from 'react-i18next';
 import useRewards from 'hooks/useRewards';
 import { WEI_PER_ETHER } from 'utils/const';
+import { LoadingButton } from '@mui/lab';
+import { useWeb3 } from 'hooks/useWeb3';
 
 type RewardProps = {
   assetSymbol: string;
@@ -20,28 +22,19 @@ const Reward: FC<RewardProps> = ({ assetSymbol, amount, amountInUSD, xsDirection
   const isMobile = useMediaQuery(breakpoints.down('lg'));
 
   return (
-    <Box
-      display="flex"
-      flexDirection={{ xs: xsDirection, lg: 'row' }}
-      gap={{ xs: xsDirection === 'column' ? 0 : 1, lg: 1 }}
-      sx={{ flexWrap: 'wrap' }}
-    >
-      <Box display="flex" alignItems="center" gap={{ xs: 1, lg: 0.5 }}>
+    <Box display="flex" flexDirection={{ xs: xsDirection, lg: 'row' }} gap={2} sx={{ flexWrap: 'wrap' }}>
+      <Box display="flex" alignItems="center" gap={1}>
         <Image
           src={`/img/assets/${assetSymbol}.svg`}
           alt={assetSymbol}
-          width={isMobile ? 32 : 15}
-          height={isMobile ? 32 : 15}
+          width={isMobile ? 32 : 24}
+          height={isMobile ? 32 : 24}
           style={{
             maxWidth: '100%',
             height: 'auto',
           }}
         />
-        <Typography variant={isMobile ? 'dashboardOverviewAmount' : 'h6'}>{amount}</Typography>
-      </Box>
-      <Box display="flex" alignItems="center" gap={1}>
-        {isMobile && xsDirection === 'column' && <Box width={32} height={32} />}
-        {amountInUSD && <Typography variant="dashboardSubtitleNumber">${amountInUSD}</Typography>}
+        <Typography fontSize={28}>{amountInUSD ? `$${amountInUSD}` : amount}</Typography>
       </Box>
     </Box>
   );
@@ -49,6 +42,7 @@ const Reward: FC<RewardProps> = ({ assetSymbol, amount, amountInUSD, xsDirection
 
 const UserRewards = () => {
   const { t } = useTranslation();
+  const { impersonateActive } = useWeb3();
   const { breakpoints } = useTheme();
   const isMobile = useMediaQuery(breakpoints.down('lg'));
   const { rewards: rs, rates, claimable, claimAll, isLoading } = useRewards();
@@ -84,17 +78,14 @@ const UserRewards = () => {
   return (
     <Box
       display="flex"
-      flexDirection={{ xs: 'column', lg: 'row' }}
+      flexDirection={{ xs: 'column' }}
       justifyContent={{ xs: 'none', lg: 'space-between' }}
-      alignItems={{ xs: 'none', lg: 'center' }}
-      py={{ xs: 4, lg: 2 }}
-      px={4}
-      gap={{ xs: 3.5, lg: rewards && rewards.length > 1 ? 3 : 2 }}
+      p={4}
+      gap={{ xs: 3, lg: 2 }}
       borderRadius="8px"
       boxSizing="border-box"
       bgcolor="components.bg"
-      minHeight={{ lg: '64px' }}
-      maxHeight={{ xs: '233px', lg: '64px' }}
+      height="100%"
     >
       <Box display="flex" alignItems="center" justifyContent="space-between">
         <Box display="flex" gap={1} alignItems="center">
@@ -110,28 +101,21 @@ const UserRewards = () => {
 
       <Box
         display="flex"
-        gap={{ xs: 3, lg: 2 }}
-        alignItems="center"
+        flexDirection={{ xs: 'column', lg: 'row' }}
+        gap={{ xs: 1, lg: 2 }}
+        alignItems={{ xs: 'none', lg: 'center' }}
         mx={rewards && rewards.length > 1 ? 0 : 'auto'}
         mb={{ xs: 0.5, lg: 0 }}
       >
         {rewards ? (
-          rewards.map(({ assetSymbol, amount, amountInUSD }, index) => (
-            <Box
-              key={`${assetSymbol}_${amount}_${amountInUSD}`}
-              display="flex"
-              gap={{ xs: 3, lg: 2 }}
-              alignItems="center"
-            >
+          rewards.map(({ assetSymbol, amount, amountInUSD }) => (
+            <Box key={`${assetSymbol}_${amount}_${amountInUSD}`} display="flex" gap={2} alignItems="center">
               <Reward
                 assetSymbol={assetSymbol}
                 amount={amount}
                 amountInUSD={amountInUSD}
                 xsDirection={rewards.length > 1 ? 'column' : 'row'}
               />
-              {index !== rewards.length - 1 && (
-                <Divider orientation="vertical" flexItem variant={isMobile ? 'middle' : undefined} />
-              )}
             </Box>
           ))
         ) : (
@@ -139,15 +123,16 @@ const UserRewards = () => {
         )}
       </Box>
 
-      <Button
+      <LoadingButton
         variant="contained"
         fullWidth={isMobile}
         sx={{ px: 3 }}
-        disabled={isLoading || !claimable}
+        disabled={isLoading || !claimable || impersonateActive}
         onClick={claimAll}
+        loading={isLoading}
       >
         {t('Claim')}
-      </Button>
+      </LoadingButton>
     </Box>
   );
 };

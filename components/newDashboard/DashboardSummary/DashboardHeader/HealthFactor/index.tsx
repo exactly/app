@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Box, Skeleton, Typography, useMediaQuery, useTheme } from '@mui/material';
+import { Box, Skeleton, Typography, useTheme } from '@mui/material';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import { useTranslation } from 'react-i18next';
 import useHealthFactor from 'hooks/useHealthFactor';
@@ -7,8 +7,7 @@ import parseHealthFactor from 'utils/parseHealthFactor';
 
 const HealthFactor = () => {
   const { t } = useTranslation();
-  const { breakpoints, palette } = useTheme();
-  const isMobile = useMediaQuery(breakpoints.down('lg'));
+  const { palette } = useTheme();
   const hf = useHealthFactor();
   const healthFactor = useMemo(() => (hf ? parseHealthFactor(hf.debt, hf.collateral) : undefined), [hf]);
 
@@ -25,13 +24,12 @@ const HealthFactor = () => {
       display="flex"
       justifyContent="space-between"
       alignItems="center"
-      py={2}
+      py={3}
       px={4}
       gap={3}
       borderRadius="8px"
       boxSizing="border-box"
       bgcolor={healthFactorColor.bg}
-      height={{ xs: '73px', lg: '64px' }}
     >
       <Box display="flex" gap={1} alignItems="center">
         <FavoriteBorderIcon sx={{ fontSize: 16, color: palette.primary.main }} />
@@ -42,7 +40,7 @@ const HealthFactor = () => {
       {!healthFactor ? (
         <Skeleton width={64} height={32} />
       ) : (
-        <Typography variant={isMobile ? 'dashboardOverviewAmount' : 'h6'} color={healthFactorColor.color}>
+        <Typography fontSize={28} fontFamily="IBM Plex Mono" color={healthFactorColor.color}>
           {healthFactor}
         </Typography>
       )}

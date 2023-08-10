@@ -286,5 +286,6 @@ export default () => {
     marketAPR,
     rewardsAPR,
     netAPR,
+    netPosition,
   };
 };

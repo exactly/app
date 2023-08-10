@@ -16,38 +16,40 @@ export default function useDashboardOverview(type: 'deposit' | 'borrow') {
   const { assetPositions, totalFixedUSD, totalFloatingUSD, fixedPercentage, floatingPercentage } = useMemo(() => {
     if (!accountData || totalUSD === 0n) return {};
 
-    const _assetPositions: AssetPosition[] = accountData.map(
-      ({
-        assetSymbol,
-        floatingDepositAssets,
-        fixedDepositPositions,
-        floatingBorrowAssets,
-        fixedBorrowPositions,
-        usdPrice,
-        decimals,
-      }) => {
-        const fixedPositions = type === 'deposit' ? fixedDepositPositions : fixedBorrowPositions;
-        const floatingAssets = type === 'deposit' ? floatingDepositAssets : floatingBorrowAssets;
+    const _assetPositions: AssetPosition[] = accountData
+      .map(
+        ({
+          assetSymbol,
+          floatingDepositAssets,
+          fixedDepositPositions,
+          floatingBorrowAssets,
+          fixedBorrowPositions,
+          usdPrice,
+          decimals,
+        }) => {
+          const fixedPositions = type === 'deposit' ? fixedDepositPositions : fixedBorrowPositions;
+          const floatingAssets = type === 'deposit' ? floatingDepositAssets : floatingBorrowAssets;
 
-        const totalFixedAssets = fixedPositions.reduce(
-          (acc: bigint, { position: { principal } }) => acc + principal,
-          0n,
-        );
+          const totalFixedAssets = fixedPositions.reduce(
+            (acc: bigint, { position: { principal } }) => acc + principal,
+            0n,
+          );
 
-        const fixedValueUSD = (totalFixedAssets * usdPrice) / 10n ** BigInt(decimals);
-        const floatingValueUSD = (floatingAssets * usdPrice) / 10n ** BigInt(decimals);
+          const fixedValueUSD = (totalFixedAssets * usdPrice) / 10n ** BigInt(decimals);
+          const floatingValueUSD = (floatingAssets * usdPrice) / 10n ** BigInt(decimals);
 
-        return {
-          symbol: assetSymbol,
-          decimals: decimals,
-          fixedAssets: totalFixedAssets,
-          fixedValueUSD,
-          floatingAssets: floatingAssets,
-          floatingValueUSD,
-          percentageOfTotal: ((fixedValueUSD + floatingValueUSD) * WEI_PER_ETHER) / totalUSD,
-        };
-      },
-    );
+          return {
+            symbol: assetSymbol,
+            decimals: decimals,
+            fixedAssets: totalFixedAssets,
+            fixedValueUSD,
+            floatingAssets: floatingAssets,
+            floatingValueUSD,
+            percentageOfTotal: ((fixedValueUSD + floatingValueUSD) * WEI_PER_ETHER) / totalUSD,
+          };
+        },
+      )
+      .filter(({ fixedValueUSD, floatingValueUSD }) => fixedValueUSD + floatingValueUSD > 0n);
 
     const _totalFixedUSD = _assetPositions.reduce((acc, { fixedValueUSD }) => acc + fixedValueUSD, 0n);
     const _totalFloatingUSD = _assetPositions.reduce((acc, { floatingValueUSD }) => acc + floatingValueUSD, 0n);
