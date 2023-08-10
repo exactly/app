@@ -22,7 +22,6 @@ const DepositsOverview = () => {
       floatingValue={totalFloatingUSD ? `$${formatNumber(formatUnits(totalFloatingUSD, 18), 'USD', true)}` : undefined}
       subFixedValue={fixedPercentage ? toPercentage(Number(fixedPercentage) / 1e18) : undefined}
       subFloatingValue={floatingPercentage ? toPercentage(Number(floatingPercentage) / 1e18) : undefined}
-      viewAll
     >
       <OverviewPositionBars assets={assetPositions} />
     </OverviewCard>

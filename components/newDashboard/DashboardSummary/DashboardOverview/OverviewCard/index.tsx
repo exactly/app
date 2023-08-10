@@ -20,7 +20,7 @@ type OverviewCardProps = {
 const OverviewCard: FC<PropsWithChildren & OverviewCardProps> = ({
   title,
   icon,
-  total,
+  total = '$0.00',
   fixedValue = '$0.00',
   floatingValue = '$0.00',
   subFixedValue = '0.00%',

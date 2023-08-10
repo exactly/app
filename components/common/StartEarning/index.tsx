@@ -1,11 +1,14 @@
 import React from 'react';
 import { Box, Button, Typography, useMediaQuery, useTheme } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import Link from 'next/link';
+import useRouter from 'hooks/useRouter';
 
 function StartEarning() {
   const { breakpoints } = useTheme();
   const isMobile = useMediaQuery(breakpoints.down('md'));
   const { t } = useTranslation();
+  const { query } = useRouter();
 
   return (
     <Box
@@ -21,14 +24,11 @@ function StartEarning() {
       <Typography variant={isMobile ? 'h6' : 'h5'}>
         {t('Unlock the full potential of DeFi, start earning interest today!')}
       </Typography>
-      <Box display="flex" gap={1}>
-        <Button variant="contained" fullWidth={isMobile}>
-          Deposit
-        </Button>
+      <Link href={{ pathname: `/`, query }} legacyBehavior>
         <Button variant="outlined" fullWidth={isMobile}>
-          Markets
+          {t('Markets')}
         </Button>
-      </Box>
+      </Link>
     </Box>
   );
 }

@@ -67,7 +67,7 @@ const MarketsHeader: FC = () => {
     },
   ];
 
-  const network = t('{{network}}', { network: chain?.name });
+  const network = chain?.name;
 
   return (
     <HeaderInfo
