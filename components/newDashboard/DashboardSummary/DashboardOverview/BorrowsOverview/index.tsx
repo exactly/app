@@ -16,7 +16,7 @@ const BorrowsOverview = () => {
   return (
     <OverviewCard
       title={t('borrows')}
-      icon={<BorrowIcon sx={{ fontSize: 12 }} />}
+      icon={<BorrowIcon sx={{ fontSize: 12, fill: ({ palette }) => palette.grey[900] }} />}
       total={totalUSD ? `$${formatNumber(formatUnits(totalUSD, 18), 'USD', true)}` : undefined}
       fixedValue={totalFixedUSD ? `$${formatNumber(formatUnits(totalFixedUSD, 18), 'USD', true)}` : undefined}
       floatingValue={totalFloatingUSD ? `$${formatNumber(formatUnits(totalFloatingUSD, 18), 'USD', true)}` : undefined}

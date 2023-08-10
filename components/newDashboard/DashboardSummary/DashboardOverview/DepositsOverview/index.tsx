@@ -16,7 +16,7 @@ const DepositsOverview = () => {
   return (
     <OverviewCard
       title={t('deposits')}
-      icon={<DepositIcon sx={{ fontSize: 12 }} />}
+      icon={<DepositIcon sx={{ fontSize: 12, fill: ({ palette }) => palette.grey[900] }} />}
       total={totalUSD ? `$${formatNumber(formatUnits(totalUSD, 18), 'USD', true)}` : undefined}
       fixedValue={totalFixedUSD ? `$${formatNumber(formatUnits(totalFixedUSD, 18), 'USD', true)}` : undefined}
       floatingValue={totalFloatingUSD ? `$${formatNumber(formatUnits(totalFloatingUSD, 18), 'USD', true)}` : undefined}

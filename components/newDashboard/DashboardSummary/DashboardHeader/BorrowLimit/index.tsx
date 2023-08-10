@@ -55,7 +55,7 @@ const BorrowLimit = () => {
       bgcolor="components.bg"
     >
       <Box display="flex" gap={1} alignItems="center">
-        <BorrowLimitIcon sx={{ fontSize: 16 }} />
+        <BorrowLimitIcon sx={{ fontSize: 16, fill: ({ palette }) => palette.grey[900] }} />
         <Typography variant="dashboardTitle">{t('Borrow Limit')}</Typography>
       </Box>
       {maximumBorrow ? (
