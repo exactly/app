@@ -8,7 +8,7 @@ import getFloatingDepositAPR from 'utils/getFloatingDepositAPR';
 import { useGlobalError } from 'contexts/GlobalErrorContext';
 import { formatUnits } from 'viem';
 
-export default function useDashboard(type: string) {
+export default function useDashboard(type: 'deposit' | 'borrow') {
   const { accountData, getMarketAccount } = useAccountData();
   const orderAssets = useAssets();
   const { chain } = useWeb3();

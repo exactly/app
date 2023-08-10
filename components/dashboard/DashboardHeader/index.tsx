@@ -11,6 +11,8 @@ import useHealthFactor from 'hooks/useHealthFactor';
 import { useTranslation } from 'react-i18next';
 import useTotalsUsd from 'hooks/useTotalsUsd';
 import AssetsDistributionPieChart from 'components/charts/AssetsDistributionPieChart';
+import { toPercentage } from 'utils/utils';
+import useNetAPR from 'hooks/useNetAPR';
 
 function DashboardHeader() {
   const { t } = useTranslation();
@@ -19,6 +21,7 @@ function DashboardHeader() {
   const healthFactor = useHealthFactor();
   const { breakpoints } = useTheme();
   const isMobile = useMediaQuery(breakpoints.down('sm'));
+  const { netAPR } = useNetAPR();
 
   const itemsInfo: ItemInfoProps[] = useMemo((): ItemInfoProps[] => {
     return [
@@ -41,8 +44,16 @@ function DashboardHeader() {
             },
           ]
         : []),
+      ...(walletAddress && !!netAPR
+        ? [
+            {
+              label: t('Net APR'),
+              value: toPercentage(Number(netAPR) / 1e18),
+            },
+          ]
+        : []),
     ];
-  }, [healthFactor, totalBorrowedUSD, totalDepositedUSD, walletAddress, t]);
+  }, [t, totalDepositedUSD, totalBorrowedUSD, healthFactor, walletAddress, netAPR]);
 
   return (
     <Grid

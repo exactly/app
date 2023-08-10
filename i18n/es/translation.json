@@ -382,5 +382,6 @@
   "You have no EXA balance. Supply {{ symbol }} in order to continue": "No posees balance de EXA. Deposita {{ symbol }} para continuar",
   "Approve {{ asset }}": "Aprobar {{ asset }}",
   "Swap & Supply EXA/ETH": "Swap & Depositar EXA/ETH",
-  "Provide liquidity": "Proporcionar liquidez"
+  "Provide liquidity": "Proporcionar liquidez",
+  "Net APR": "TNA Neta"
 }

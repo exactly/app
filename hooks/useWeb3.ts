@@ -5,6 +5,7 @@ import { useWeb3Modal } from '@web3modal/react';
 import { isE2E, supportedChains } from 'utils/client';
 import { optimism } from 'wagmi/chains';
 import useRouter from './useRouter';
+import networkData from 'config/networkData.json' assert { type: 'json' };
 
 type Web3 = {
   connect: () => void;
@@ -13,6 +14,7 @@ type Web3 = {
   exitImpersonate: () => void;
   walletAddress?: Address;
   chain: Chain;
+  subgraphURL?: string;
   opts?: {
     account: Address;
     chain: Chain;
@@ -61,6 +63,8 @@ export const useWeb3 = (): Web3 => {
     [walletAddress, connector?.id, displayNetwork],
   );
 
+  const subgraphURL = networkData[String(displayNetwork.id) as keyof typeof networkData]?.subgraph;
+
   return {
     connect: connectWallet,
     isConnected,
@@ -68,6 +72,7 @@ export const useWeb3 = (): Web3 => {
     exitImpersonate,
     walletAddress,
     chain: displayNetwork,
+    subgraphURL,
     opts,
   };
 };
