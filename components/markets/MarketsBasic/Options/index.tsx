@@ -44,7 +44,7 @@ const Options: FC<Props> = ({
           <Box display="flex" flexDirection="column" key={`${maturity}_${depositAPR}_${borrowAPR}_${index}`}>
             <FormControlLabel
               data-testid={`simple-view-maturity-option-${maturity}`}
-              value={maturity}
+              value={String(maturity)}
               control={<Radio />}
               componentsProps={{ typography: { width: '100%' } }}
               sx={{
@@ -53,7 +53,7 @@ const Options: FC<Props> = ({
                 px: 1,
                 borderRadius: '4px',
               }}
-              disabled={maturity !== 0n && !maturity}
+              disabled={maturity === undefined}
               label={
                 <Box
                   display="flex"

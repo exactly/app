@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
 
-const maxPools = 3;
+const maxPools = 6;
 const interval = 2_419_200;
 
 export const getFixedPools = (): number[] => {
