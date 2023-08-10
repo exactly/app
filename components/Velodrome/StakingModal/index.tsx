@@ -128,7 +128,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, close }) => {
   const isContract = useIsContract();
 
   const veloEarnedUSD = useMemo(() => {
-    if (!veloEarned || !veloPrice) return undefined;
+    if (veloEarned === undefined || veloPrice === undefined) return undefined;
     return formatNumber(formatEther((veloEarned * parseEther(String(veloPrice))) / WEI_PER_ETHER));
   }, [veloEarned, veloPrice]);
 
@@ -743,7 +743,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, close }) => {
                     src={`/img/assets/VELO.svg`}
                     sx={{ width: 14, height: 14, fontSize: 10, borderColor: 'transparent' }}
                   />
-                  {poolAPR ? (
+                  {poolAPR !== undefined ? (
                     <Typography fontSize={14} fontWeight={500}>
                       {poolAPR}
                     </Typography>
@@ -759,9 +759,13 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, close }) => {
                 </Typography>
                 <Box display="flex" gap={0.5} alignItems="center">
                   <SymbolGroup size={14} symbols={['EXA', 'WETH']} />
-                  <Typography fontSize={14} fontWeight={500}>
-                    ${formatNumber(formatEther(userBalanceUSD ?? 0n))}
-                  </Typography>
+                  {userBalanceUSD !== undefined ? (
+                    <Typography fontSize={14} fontWeight={500}>
+                      ${formatNumber(formatEther(userBalanceUSD ?? 0n))}
+                    </Typography>
+                  ) : (
+                    <Skeleton width={48} height={24} />
+                  )}
                 </Box>
               </Box>
 
@@ -785,9 +789,13 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, close }) => {
                       src={`/img/assets/VELO.svg`}
                       sx={{ width: 14, height: 14, fontSize: 10, borderColor: 'transparent' }}
                     />
-                    <Typography fontSize={14} fontWeight={500}>
-                      ${veloEarnedUSD || 0}
-                    </Typography>
+                    {veloEarnedUSD !== undefined ? (
+                      <Typography fontSize={14} fontWeight={500}>
+                        ${veloEarnedUSD}
+                      </Typography>
+                    ) : (
+                      <Skeleton width={48} height={24} />
+                    )}
                   </Box>
                 </Box>
               </Link>

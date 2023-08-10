@@ -54,7 +54,7 @@ export default (): VELOAccountStatus => {
   const { data: balance } = useEXAGaugeBalanceOf({ watch: true });
 
   const veloAPR = useMemo(() => {
-    if (!asset || !weth || !rewardRate || !reserves) return;
+    if (!asset || !weth || rewardRate === undefined || !reserves) return;
 
     const veloPrice = parseEther(String(asset.tokenPrice));
 
@@ -64,7 +64,7 @@ export default (): VELOAccountStatus => {
   }, [asset, weth, rewardRate, reserves]);
 
   const userBalanceUSD = useMemo(() => {
-    if (!reserves || !balance || !totalSupply || !exa || !weth) return undefined;
+    if (!reserves || balance === undefined || totalSupply === undefined || exa === undefined || !weth) return undefined;
 
     const balanceEXA = (reserves[0] * balance) / totalSupply;
     const balanceWETH = (reserves[1] * balance) / totalSupply;
