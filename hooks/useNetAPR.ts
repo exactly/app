@@ -7,6 +7,7 @@ import { useWeb3 } from './useWeb3';
 import fetchAccounts, { Account } from 'queries/fetchAccounts';
 import useRewards from './useRewards';
 import useStETHNativeAPR from './useStETHNativeAPR';
+import dayjs from 'dayjs';
 
 export default () => {
   const [accounts, setAccounts] = useState<Account[]>([]);
@@ -17,6 +18,7 @@ export default () => {
   const markets = useMemo(() => Object.values(accountData), [accountData]);
   const { rates } = useRewards();
   const stETHNativeAPR = useStETHNativeAPR();
+  const now = dayjs().unix();
 
   useEffect(() => {
     if (!subgraphURL || !walletAddress) return;
@@ -31,13 +33,13 @@ export default () => {
     return _fixedPositions.length
       ? _fixedPositions.reduce(
           (acc, { rate, asset, maturity }) => {
-            acc[asset.toLowerCase() + maturity] = rate;
+            acc[asset.toLowerCase() + maturity] = maturity < now ? 0n : rate;
             return acc;
           },
           {} as Record<string, bigint>,
         )
       : undefined;
-  }, [accounts]);
+  }, [accounts, now]);
 
   const fixedBorrowsAPRs = useMemo(() => {
     if (!accounts.length) return;
@@ -47,13 +49,13 @@ export default () => {
     return _fixedPositions.length
       ? _fixedPositions.reduce(
           (acc, { rate, asset, maturity }) => {
-            acc[asset.toLowerCase() + maturity] = rate;
+            acc[asset.toLowerCase() + maturity] = maturity < now ? 0n : rate;
             return acc;
           },
           {} as Record<string, bigint>,
         )
       : undefined;
-  }, [accounts]);
+  }, [accounts, now]);
 
   const floatingDepositAPRs = useMemo(() => {
     if (!floatingDeposit[0].apr) return;
