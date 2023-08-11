@@ -6,6 +6,7 @@ import { jsonRpcProvider } from 'wagmi/providers/jsonRpc';
 import { alchemyProvider } from 'wagmi/providers/alchemy';
 import { publicProvider } from 'wagmi/providers/public';
 import { SafeConnector } from 'wagmi/connectors/safe';
+import { optimism } from 'wagmi/chains';
 
 declare global {
   interface Window {
@@ -16,7 +17,10 @@ const rpcURL = typeof window !== 'undefined' ? window?.rpcURL : undefined;
 
 export const walletConnectId = '11ddaa8aaede72cb5d6b0dae2fed7baa';
 
-export const supportedChains = Object.values(wagmiChains);
+const networkId = Number(process.env.NEXT_PUBLIC_NETWORK);
+export const defaultChain = Object.values(wagmiChains).find((c) => c.id === networkId) ?? optimism;
+
+const sortedChains = [defaultChain, ...Object.values(wagmiChains).filter((c) => c.id !== defaultChain.id)];
 
 const alchemyKey = process.env.NEXT_PUBLIC_ALCHEMY_API_KEY;
 
@@ -31,12 +35,12 @@ const providers: ChainProviderFn<Chain>[] =
         w3mProvider({ projectId: walletConnectId }),
       ];
 
-const { chains, publicClient } = configureChains<Chain>(supportedChains, providers);
+const { chains, publicClient } = configureChains<Chain>(sortedChains, providers);
 
 export const wagmi = createConfig({
   connectors: [
     ...(isE2E
-      ? [new InjectedConnector({ chains: supportedChains, options: { name: 'E2E', shimDisconnect: false } })]
+      ? [new InjectedConnector({ chains: sortedChains, options: { name: 'E2E', shimDisconnect: false } })]
       : []),
     ...w3mConnectors({ projectId: walletConnectId, chains }),
     new SafeConnector({ chains }),

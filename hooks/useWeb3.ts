@@ -2,8 +2,7 @@ import { useMemo, useCallback } from 'react';
 import { isAddress } from 'viem';
 import { Address, Chain, useAccount, useConnect } from 'wagmi';
 import { useWeb3Modal } from '@web3modal/react';
-import { isE2E, supportedChains } from 'utils/client';
-import { optimism } from 'wagmi/chains';
+import { isE2E, defaultChain } from 'utils/client';
 import useRouter from './useRouter';
 import networkData from 'config/networkData.json' assert { type: 'json' };
 
@@ -21,12 +20,11 @@ type Web3 = {
   };
 };
 
+const subgraphURL = networkData[String(defaultChain.id) as keyof typeof networkData]?.subgraph;
+
 export const useWeb3 = (): Web3 => {
   const { query, replace } = useRouter();
   const { connector, address, isConnected } = useAccount();
-
-  const networkId = Number(process.env.NEXT_PUBLIC_NETWORK);
-  const displayNetwork = supportedChains.find((c) => c.id === networkId) ?? optimism;
 
   const [walletAddress, impersonateActive] = useMemo((): [Address | undefined, boolean] => {
     const { account } = query;
@@ -56,14 +54,10 @@ export const useWeb3 = (): Web3 => {
   const opts = useMemo(
     () =>
       walletAddress
-        ? connector?.id === 'safe'
-          ? { account: walletAddress, chain: displayNetwork, value: 0n }
-          : { account: walletAddress, chain: displayNetwork }
+        ? { account: walletAddress, chain: defaultChain, value: connector?.id === 'safe' ? 0n : undefined }
         : undefined,
-    [walletAddress, connector?.id, displayNetwork],
+    [walletAddress, connector?.id],
   );
-
-  const subgraphURL = networkData[String(displayNetwork.id) as keyof typeof networkData]?.subgraph;
 
   return {
     connect: connectWallet,
@@ -71,7 +65,7 @@ export const useWeb3 = (): Web3 => {
     impersonateActive,
     exitImpersonate,
     walletAddress,
-    chain: displayNetwork,
+    chain: defaultChain,
     subgraphURL,
     opts,
   };
