@@ -223,7 +223,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, close }) => {
     setLoading(true);
 
     try {
-      const minEXA = (((previewETH - supply) / 2n) * reserves[0]) / reserves[1];
+      const minEXA = (((((previewETH - supply) / 2n) * reserves[0]) / reserves[1]) * 95n) / 100n;
       const value = supply;
 
       let hash: Hex | undefined;
@@ -589,7 +589,7 @@ const StakingModal: FC<StakingModalProps> = ({ isOpen, close }) => {
       const [exaReserves, wethReserves] = reserves;
       const inETH = BigInt(route.toAmount);
 
-      const minEXA = ((((inETH / 2n) * exaReserves) / wethReserves) * 98n) / 100n;
+      const minEXA = ((((inETH / 2n) * exaReserves) / wethReserves) * 95n) / 100n;
 
       const isMultiSig = await isContract(walletAddress);
       let hash: Hex | undefined;
