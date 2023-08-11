@@ -17,7 +17,7 @@ const rpcURL = typeof window !== 'undefined' ? window?.rpcURL : undefined;
 
 export const walletConnectId = '11ddaa8aaede72cb5d6b0dae2fed7baa';
 
-const networkId = Number(process.env.NEXT_PUBLIC_NETWORK);
+const networkId = Number(process.env.NEXT_PUBLIC_NETWORK ?? optimism.id);
 export const defaultChain = Object.values(wagmiChains).find((c) => c.id === networkId) ?? optimism;
 
 const sortedChains = [defaultChain, ...Object.values(wagmiChains).filter((c) => c.id !== defaultChain.id)];
@@ -41,9 +41,7 @@ export const wagmi = createConfig({
   connectors: [
     ...(isE2E
       ? [new InjectedConnector({ chains: sortedChains, options: { name: 'E2E', shimDisconnect: false } })]
-      : []),
-    ...w3mConnectors({ projectId: walletConnectId, chains }),
-    new SafeConnector({ chains }),
+      : [...w3mConnectors({ projectId: walletConnectId, chains }), new SafeConnector({ chains })]),
   ],
   publicClient,
 });
