@@ -9,6 +9,7 @@ import useRewards from 'hooks/useRewards';
 import { WEI_PER_ETHER } from 'utils/const';
 import { LoadingButton } from '@mui/lab';
 import { useWeb3 } from 'hooks/useWeb3';
+import { useModal } from 'contexts/ModalContext';
 
 type RewardProps = {
   assetSymbol: string;
@@ -45,7 +46,8 @@ const UserRewards = () => {
   const { impersonateActive } = useWeb3();
   const { breakpoints } = useTheme();
   const isMobile = useMediaQuery(breakpoints.down('lg'));
-  const { rewards: rs, rates, claimable, claimAll, isLoading } = useRewards();
+  const { rewards: rs, rates, claimable, isLoading } = useRewards();
+  const { open } = useModal('rewards');
 
   const rewards = useMemo(() => {
     if (!Object.keys(rates).length) return undefined;
@@ -87,16 +89,9 @@ const UserRewards = () => {
       bgcolor="components.bg"
       height="100%"
     >
-      <Box display="flex" alignItems="center" justifyContent="space-between">
-        <Box display="flex" gap={1} alignItems="center">
-          <StarsIcon sx={{ fontSize: 16 }} />
-          <Typography variant="dashboardTitle">{t('Rewards')}</Typography>
-        </Box>
-        {isMobile && (
-          <Typography variant="dashboardMainSubtitle" textTransform="uppercase" noWrap sx={{ cursor: 'pointer' }}>
-            {t('Learn More')}
-          </Typography>
-        )}
+      <Box display="flex" gap={1} alignItems="center">
+        <StarsIcon sx={{ fontSize: 16 }} />
+        <Typography variant="dashboardTitle">{t('Rewards')}</Typography>
       </Box>
 
       <Box
@@ -128,7 +123,7 @@ const UserRewards = () => {
         fullWidth={isMobile}
         sx={{ px: 3 }}
         disabled={isLoading || !claimable || impersonateActive}
-        onClick={claimAll}
+        onClick={open}
         loading={isLoading}
       >
         {t('Claim')}
