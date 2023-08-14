@@ -25,6 +25,7 @@ export const useSablierV2LockupLinearWithdrawableAmountOf = (stream?: bigint) =>
     chainId: chain.id,
     address: sablier?.address,
     args: stream !== undefined ? [stream] : undefined,
+    enabled: !!stream,
   });
 };
 
@@ -37,6 +38,7 @@ export const useSablierV2LockupLinearGetWithdrawnAmount = (stream?: bigint) => {
     address: sablier?.address,
     args: stream !== undefined ? [stream] : undefined,
     staleTime: 30_000,
+    enabled: !!stream,
   });
 };
 
@@ -52,6 +54,7 @@ export const usePrepareSablierV2LockupLinearWithdrawMax = (
     chainId: chain.id,
     address: sablier?.address,
     args: stream !== undefined && walletAddress ? [stream, walletAddress] : undefined,
+    enabled: !!stream,
   });
 };
 
@@ -64,5 +67,6 @@ export const useSablierV2NftDescriptorTokenUri = (stream?: bigint) => {
     chainId: chain.id,
     address: nftDescriptor?.address,
     args: sablier && stream !== undefined ? [sablier.address, stream] : undefined,
+    enabled: !!stream,
   });
 };
