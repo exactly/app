@@ -87,12 +87,17 @@ function Navbar() {
         name: t('Strategies'),
         icon: <MovingSharpIcon sx={{ fontSize: '13px' }} />,
       },
-      {
-        pathname: '/governance',
-        name: t('Governance'),
-        icon: <GavelIcon sx={{ fontSize: '13px' }} />,
-        isNew: true,
-      },
+      ...(!isEthereum
+        ? [
+            {
+              pathname: '/governance',
+              name: t('Governance'),
+              icon: <GavelIcon sx={{ fontSize: '13px' }} />,
+              isNew: true,
+            },
+          ]
+        : []),
+
       ...(isOPMainnet
         ? [
             {
@@ -103,7 +108,7 @@ function Navbar() {
           ]
         : []),
     ],
-    [isOPMainnet, t],
+    [isEthereum, isOPMainnet, t],
   );
 
   const { open: openFaucet } = useModal('faucet');
