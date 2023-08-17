@@ -11,7 +11,7 @@ import { WEI_PER_ETHER } from 'utils/const';
 const BorrowLimit = () => {
   const { t } = useTranslation();
   const healthFactor = useHealthFactor();
-  const { accountData } = useAccountData();
+  const { accountData, isFetching } = useAccountData();
 
   const maximumBorrow = useMemo((): string => {
     if (!accountData || !healthFactor) return '';
@@ -58,12 +58,12 @@ const BorrowLimit = () => {
         <BorrowLimitIcon sx={{ fontSize: 16, fill: ({ palette }) => palette.grey[900] }} />
         <Typography variant="dashboardTitle">{t('Borrow Limit')}</Typography>
       </Box>
-      {maximumBorrow ? (
+      {!isFetching && maximumBorrow ? (
         <Typography fontSize={28} fontFamily="IBM Plex Mono">
           ${maximumBorrow}
         </Typography>
       ) : (
-        <Skeleton width={64} height={32} />
+        <Skeleton width={100} height={42} />
       )}
     </Box>
   );

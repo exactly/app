@@ -10,99 +10,80 @@ import useStETHNativeAPR from './useStETHNativeAPR';
 import dayjs from 'dayjs';
 
 export default () => {
-  const [accounts, setAccounts] = useState<Account[]>([]);
+  const [accounts, setAccounts] = useState<Account[] | undefined>();
   const { walletAddress, subgraphURL } = useWeb3();
-  const { accountData = [] } = useAccountData();
+  const { accountData, isFetching } = useAccountData();
   const { floatingRows: floatingDeposit } = useDashboard('deposit');
   const { floatingRows: floatingBorrow } = useDashboard('borrow');
-  const markets = useMemo(() => Object.values(accountData), [accountData]);
-  const { rates } = useRewards();
   const stETHNativeAPR = useStETHNativeAPR();
-  const now = dayjs().unix();
+  const { rates } = useRewards();
 
   useEffect(() => {
     if (!subgraphURL || !walletAddress) return;
     fetchAccounts(subgraphURL, walletAddress).then(setAccounts);
   }, [subgraphURL, walletAddress]);
 
-  const fixedDepositsAPRs = useMemo(() => {
-    if (!accounts.length) return;
-    const _fixedPositions = accounts
-      .flatMap(({ market: { asset }, fixedPositions }) => fixedPositions.map((fp) => ({ ...fp, asset })))
-      .filter(({ borrow }) => !borrow);
-    return _fixedPositions.length
-      ? _fixedPositions.reduce(
-          (acc, { rate, asset, maturity }) => {
-            acc[asset.toLowerCase() + maturity] = maturity < now ? 0n : rate;
-            return acc;
-          },
-          {} as Record<string, bigint>,
-        )
-      : undefined;
-  }, [accounts, now]);
+  return useMemo(() => {
+    if (!accountData || !accounts || isFetching || !floatingDeposit[0].apr || !floatingBorrow[0].apr) return {};
 
-  const fixedBorrowsAPRs = useMemo(() => {
-    if (!accounts.length) return;
-    const _fixedPositions = accounts
-      .flatMap(({ market: { asset }, fixedPositions }) => fixedPositions.map((fp) => ({ ...fp, asset })))
-      .filter(({ borrow }) => borrow);
-    return _fixedPositions.length
-      ? _fixedPositions.reduce(
-          (acc, { rate, asset, maturity }) => {
-            acc[asset.toLowerCase() + maturity] = maturity < now ? 0n : rate;
-            return acc;
-          },
-          {} as Record<string, bigint>,
-        )
-      : undefined;
-  }, [accounts, now]);
+    const markets = Object.values(accountData);
+    const now = dayjs().unix();
 
-  const floatingDepositAPRs = useMemo(() => {
-    if (!floatingDeposit[0].apr) return;
-    return floatingDeposit.reduce(
+    const _fixedPositions = accounts.flatMap(({ market: { asset }, fixedPositions }) =>
+      fixedPositions.map((fp) => ({ ...fp, asset })),
+    );
+
+    const fixedDepositsAPRs = _fixedPositions
+      .filter(({ borrow }) => !borrow)
+      .reduce(
+        (acc, { rate, asset, maturity }) => {
+          acc[asset.toLowerCase() + maturity] = maturity < now ? 0n : rate;
+          return acc;
+        },
+        {} as Record<string, bigint>,
+      );
+
+    const fixedBorrowsAPRs = _fixedPositions
+      .filter(({ borrow }) => borrow)
+      .reduce(
+        (acc, { rate, asset, maturity }) => {
+          acc[asset.toLowerCase() + maturity] = maturity < now ? 0n : rate;
+          return acc;
+        },
+        {} as Record<string, bigint>,
+      );
+
+    const floatingDepositAPRs = floatingDeposit.reduce(
       (acc, { symbol, apr }) => {
         acc[symbol] = parseEther(String(apr));
         return acc;
       },
       {} as Record<string, bigint>,
     );
-  }, [floatingDeposit]);
 
-  const floatingBorrowAPRs = useMemo(() => {
-    if (!floatingBorrow[0].apr) return;
-    return floatingBorrow.reduce(
+    const floatingBorrowAPRs = floatingBorrow.reduce(
       (acc, { symbol, apr }) => {
         acc[symbol] = parseEther(String(apr));
         return acc;
       },
       {} as Record<string, bigint>,
     );
-  }, [floatingBorrow]);
 
-  const totalFloatingDeposits = useMemo(
-    () =>
-      markets.reduce(
-        (total, { floatingDepositAssets, decimals, usdPrice }) =>
-          total + (floatingDepositAssets * usdPrice) / BigInt(10 ** decimals),
-        0n,
-      ),
-    [markets],
-  );
+    const totalFloatingDeposits = markets.reduce(
+      (total, { floatingDepositAssets, decimals, usdPrice }) =>
+        total + (floatingDepositAssets * usdPrice) / BigInt(10 ** decimals),
+      0n,
+    );
 
-  const projectedFloatingDeposits = useMemo(() => {
-    if (!floatingDepositAPRs) return 0n;
-    return markets.reduce(
+    const projectedFloatingDeposits = markets.reduce(
       (total, { assetSymbol, floatingDepositAssets, decimals, usdPrice }) =>
         total +
         (((floatingDepositAssets * usdPrice) / BigInt(10 ** decimals)) * (floatingDepositAPRs[assetSymbol] || 0n)) /
           WEI_PER_ETHER,
       0n,
     );
-  }, [floatingDepositAPRs, markets]);
 
-  const projectedFloatingDepositRewards = useMemo(() => {
-    if (!floatingDepositAPRs) return 0n;
-    return markets.reduce(
+    const projectedFloatingDepositRewards = markets.reduce(
       (total, { assetSymbol, floatingDepositAssets, decimals, usdPrice }) =>
         total +
         rates[assetSymbol].reduce(
@@ -113,43 +94,30 @@ export default () => {
           WEI_PER_ETHER,
       0n,
     );
-  }, [floatingDepositAPRs, markets, rates]);
 
-  const projectedFloatingDepositNative = useMemo(() => {
-    if (!floatingDepositAPRs) return 0n;
-    return markets
+    const projectedFloatingDepositNative = markets
       .filter(({ assetSymbol }) => assetSymbol === 'wstETH')
       .reduce(
         (total, { floatingDepositAssets, decimals, usdPrice }) =>
           total + (((floatingDepositAssets * usdPrice) / BigInt(10 ** decimals)) * stETHNativeAPR) / WEI_PER_ETHER,
         0n,
       );
-  }, [floatingDepositAPRs, markets, stETHNativeAPR]);
 
-  const totalFloatingBorrows = useMemo(
-    () =>
-      markets.reduce(
-        (total, { floatingBorrowAssets, decimals, usdPrice }) =>
-          total + (floatingBorrowAssets * usdPrice) / BigInt(10 ** decimals),
-        0n,
-      ),
-    [markets],
-  );
+    const totalFloatingBorrows = markets.reduce(
+      (total, { floatingBorrowAssets, decimals, usdPrice }) =>
+        total + (floatingBorrowAssets * usdPrice) / BigInt(10 ** decimals),
+      0n,
+    );
 
-  const projectedFloatingBorrows = useMemo(() => {
-    if (!floatingBorrowAPRs) return 0n;
-    return markets.reduce(
+    const projectedFloatingBorrows = markets.reduce(
       (total, { assetSymbol, floatingBorrowAssets, decimals, usdPrice }) =>
         total +
         (((floatingBorrowAssets * usdPrice) / BigInt(10 ** decimals)) * (floatingBorrowAPRs[assetSymbol] || 0n)) /
           WEI_PER_ETHER,
       0n,
     );
-  }, [floatingBorrowAPRs, markets]);
 
-  const projectedFloatingBorrowRewards = useMemo(() => {
-    if (!floatingBorrowAPRs) return 0n;
-    return markets.reduce(
+    const projectedFloatingBorrowRewards = markets.reduce(
       (total, { assetSymbol, floatingBorrowAssets, decimals, usdPrice }) =>
         total +
         rates[assetSymbol].reduce(
@@ -160,23 +128,16 @@ export default () => {
           WEI_PER_ETHER,
       0n,
     );
-  }, [floatingBorrowAPRs, markets, rates]);
 
-  const totalFixedDeposits = useMemo(
-    () =>
-      markets.reduce((total, { fixedDepositPositions, decimals, usdPrice }) => {
-        const fixedPosition = fixedDepositPositions.reduce(
-          (fixedAcc, { position: { principal } }) => fixedAcc + principal,
-          0n,
-        );
-        return total + (fixedPosition * usdPrice) / BigInt(10 ** decimals);
-      }, 0n),
-    [markets],
-  );
+    const totalFixedDeposits = markets.reduce((total, { fixedDepositPositions, decimals, usdPrice }) => {
+      const fixedPosition = fixedDepositPositions.reduce(
+        (fixedAcc, { position: { principal } }) => fixedAcc + principal,
+        0n,
+      );
+      return total + (fixedPosition * usdPrice) / BigInt(10 ** decimals);
+    }, 0n);
 
-  const projectedFixedDeposits = useMemo(() => {
-    if (!fixedDepositsAPRs) return 0n;
-    return markets.reduce((total, { asset, fixedDepositPositions, decimals, usdPrice }) => {
+    const projectedFixedDeposits = markets.reduce((total, { asset, fixedDepositPositions, decimals, usdPrice }) => {
       const fixedPosition = fixedDepositPositions.reduce(
         (fixedAcc, { position: { principal }, maturity }) =>
           fixedAcc +
@@ -187,11 +148,8 @@ export default () => {
       );
       return total + fixedPosition;
     }, 0n);
-  }, [fixedDepositsAPRs, markets]);
 
-  const projectedFixedDepositNative = useMemo(() => {
-    if (!fixedDepositsAPRs) return 0n;
-    return markets
+    const projectedFixedDepositNative = markets
       .filter(({ assetSymbol }) => assetSymbol === 'wstETH')
       .reduce((total, { fixedDepositPositions, decimals, usdPrice }) => {
         const fixedPosition = fixedDepositPositions.reduce(
@@ -201,23 +159,16 @@ export default () => {
         );
         return total + fixedPosition;
       }, 0n);
-  }, [fixedDepositsAPRs, markets, stETHNativeAPR]);
 
-  const totalFixedBorrows = useMemo(
-    () =>
-      markets.reduce((total, { fixedBorrowPositions, decimals, usdPrice }) => {
-        const fixedPosition = fixedBorrowPositions.reduce(
-          (fixedAcc, { position: { principal } }) => fixedAcc + principal,
-          0n,
-        );
-        return total + (fixedPosition * usdPrice) / BigInt(10 ** decimals);
-      }, 0n),
-    [markets],
-  );
+    const totalFixedBorrows = markets.reduce((total, { fixedBorrowPositions, decimals, usdPrice }) => {
+      const fixedPosition = fixedBorrowPositions.reduce(
+        (fixedAcc, { position: { principal } }) => fixedAcc + principal,
+        0n,
+      );
+      return total + (fixedPosition * usdPrice) / BigInt(10 ** decimals);
+    }, 0n);
 
-  const projectedFixedBorrows = useMemo(() => {
-    if (!fixedBorrowsAPRs) return 0n;
-    return markets.reduce((total, { asset, fixedBorrowPositions, decimals, usdPrice }) => {
+    const projectedFixedBorrows = markets.reduce((total, { asset, fixedBorrowPositions, decimals, usdPrice }) => {
       const fixedPosition = fixedBorrowPositions.reduce(
         (fixedAcc, { position: { principal }, maturity }) =>
           fixedAcc +
@@ -228,66 +179,57 @@ export default () => {
       );
       return total + fixedPosition;
     }, 0n);
-  }, [fixedBorrowsAPRs, markets]);
 
-  const projectedFixedBorrowRewards = useMemo(() => {
-    if (!fixedBorrowsAPRs) return 0n;
-    return markets.reduce((total, { assetSymbol, fixedBorrowPositions, decimals, usdPrice }) => {
-      const fixedPosition = fixedBorrowPositions.reduce(
-        (fixedAcc, { position: { principal } }) =>
-          fixedAcc +
-          rates[assetSymbol].reduce(
-            (acc, { borrow }) => acc + ((principal * usdPrice) / BigInt(10 ** decimals)) * borrow,
-            0n,
-          ) /
-            WEI_PER_ETHER,
-        0n,
-      );
-      return total + fixedPosition;
-    }, 0n);
-  }, [fixedBorrowsAPRs, markets, rates]);
+    const projectedFixedBorrowRewards = markets.reduce(
+      (total, { assetSymbol, fixedBorrowPositions, decimals, usdPrice }) => {
+        const fixedPosition = fixedBorrowPositions.reduce(
+          (fixedAcc, { position: { principal } }) =>
+            fixedAcc +
+            rates[assetSymbol].reduce(
+              (acc, { borrow }) => acc + ((principal * usdPrice) / BigInt(10 ** decimals)) * borrow,
+              0n,
+            ) /
+              WEI_PER_ETHER,
+          0n,
+        );
+        return total + fixedPosition;
+      },
+      0n,
+    );
 
-  const netPosition = useMemo(
-    () => totalFloatingDeposits + totalFixedDeposits - totalFloatingBorrows - totalFixedBorrows,
-    [totalFixedBorrows, totalFixedDeposits, totalFloatingBorrows, totalFloatingDeposits],
-  );
+    const netPosition = totalFloatingDeposits + totalFixedDeposits - totalFloatingBorrows - totalFixedBorrows;
+    if (netPosition === 0n) {
+      return {
+        marketAPR: 0n,
+        rewardsAPR: 0n,
+        nativeAPR: 0n,
+        netAPR: 0n,
+        netPosition: 0n,
+      };
+    }
 
-  const projectedMarketEarnings = useMemo(
-    () => projectedFloatingDeposits + projectedFixedDeposits - projectedFloatingBorrows - projectedFixedBorrows,
-    [projectedFixedBorrows, projectedFixedDeposits, projectedFloatingBorrows, projectedFloatingDeposits],
-  );
+    const projectedMarketEarnings =
+      projectedFloatingDeposits + projectedFixedDeposits - projectedFloatingBorrows - projectedFixedBorrows;
 
-  const projectedRewardsEarnings = useMemo(
-    () => projectedFixedBorrowRewards + projectedFloatingBorrowRewards + projectedFloatingDepositRewards,
-    [projectedFixedBorrowRewards, projectedFloatingBorrowRewards, projectedFloatingDepositRewards],
-  );
+    const projectedRewardsEarnings =
+      projectedFixedBorrowRewards + projectedFloatingBorrowRewards + projectedFloatingDepositRewards;
 
-  const projectedNativeEarnings = useMemo(
-    () => projectedFixedDepositNative + projectedFloatingDepositNative,
-    [projectedFixedDepositNative, projectedFloatingDepositNative],
-  );
+    const projectedNativeEarnings = projectedFixedDepositNative + projectedFloatingDepositNative;
 
-  const marketAPR = useMemo(() => {
-    if (!netPosition) return 0n;
-    return (projectedMarketEarnings * WEI_PER_ETHER) / netPosition;
-  }, [projectedMarketEarnings, netPosition]);
+    const marketAPR = (projectedMarketEarnings * WEI_PER_ETHER) / netPosition;
 
-  const rewardsAPR = useMemo(() => {
-    if (!netPosition) return 0n;
-    return (projectedRewardsEarnings * WEI_PER_ETHER) / netPosition;
-  }, [projectedRewardsEarnings, netPosition]);
+    const rewardsAPR = (projectedRewardsEarnings * WEI_PER_ETHER) / netPosition;
 
-  const nativeAPR = useMemo(() => {
-    if (!netPosition) return 0n;
-    return (projectedNativeEarnings * WEI_PER_ETHER) / netPosition;
-  }, [projectedNativeEarnings, netPosition]);
+    const nativeAPR = (projectedNativeEarnings * WEI_PER_ETHER) / netPosition;
 
-  const netAPR = useMemo(() => marketAPR + rewardsAPR + nativeAPR, [marketAPR, nativeAPR, rewardsAPR]);
+    const netAPR = marketAPR + rewardsAPR + nativeAPR;
 
-  return {
-    marketAPR,
-    rewardsAPR,
-    netAPR,
-    netPosition,
-  };
+    return {
+      marketAPR,
+      rewardsAPR,
+      nativeAPR,
+      netAPR,
+      netPosition,
+    };
+  }, [accountData, accounts, floatingBorrow, floatingDeposit, isFetching, rates, stETHNativeAPR]);
 };

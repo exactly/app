@@ -31,7 +31,7 @@ const OverviewCard: FC<PropsWithChildren & OverviewCardProps> = ({
   mobileWrap,
 }) => {
   const { t } = useTranslation();
-  const { accountData } = useAccountData();
+  const { accountData, isFetching } = useAccountData();
 
   const loading = useMemo(() => !accountData, [accountData]);
   const empty = useMemo(() => total === '$0.00', [total]);
@@ -64,17 +64,21 @@ const OverviewCard: FC<PropsWithChildren & OverviewCardProps> = ({
             )}
           </Box>
           <Box display="flex" flexDirection={{ xs: 'column', lg: 'row' }} justifyContent="space-between" gap={2}>
-            {loading ? (
-              <Skeleton width={128} height={64} />
+            {isFetching || loading ? (
+              <Skeleton width={160} height={52} />
             ) : (
               <Typography variant="dashboardOverviewAmount">{total}</Typography>
             )}
             {!empty && (
               <Box display="flex" alignItems="center" gap={2}>
                 <Box display="flex" flexDirection="column" gap={0.5}>
-                  <Typography variant="h6" fontWeight={600}>
-                    {fixedValue}
-                  </Typography>
+                  {isFetching ? (
+                    <Skeleton width={80} height={28} />
+                  ) : (
+                    <Typography variant="h6" fontWeight={600}>
+                      {fixedValue}
+                    </Typography>
+                  )}
                   <Box display="flex" flexDirection={{ xs: mobileWrap ? 'column' : 'row', lg: 'row' }} gap={0.5}>
                     <Box display="flex" gap={0.5} alignItems="center">
                       <OperationLegend type="fixed" size="medium" />
@@ -88,9 +92,13 @@ const OverviewCard: FC<PropsWithChildren & OverviewCardProps> = ({
                 </Box>
                 <Divider orientation="vertical" flexItem />
                 <Box display="flex" flexDirection="column" gap={0.5}>
-                  <Typography variant="h6" fontWeight={600}>
-                    {floatingValue}
-                  </Typography>
+                  {isFetching ? (
+                    <Skeleton width={80} height={28} />
+                  ) : (
+                    <Typography variant="h6" fontWeight={600}>
+                      {floatingValue}
+                    </Typography>
+                  )}
                   <Box display="flex" flexDirection={{ xs: mobileWrap ? 'column' : 'row', lg: 'row' }} gap={0.5}>
                     <Box display="flex" gap={0.5} alignItems="center">
                       <OperationLegend type="variable" size="medium" />

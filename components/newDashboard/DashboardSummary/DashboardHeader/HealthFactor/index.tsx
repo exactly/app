@@ -4,10 +4,12 @@ import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import { useTranslation } from 'react-i18next';
 import useHealthFactor from 'hooks/useHealthFactor';
 import parseHealthFactor from 'utils/parseHealthFactor';
+import useAccountData from 'hooks/useAccountData';
 
 const HealthFactor = () => {
   const { t } = useTranslation();
   const { palette } = useTheme();
+  const { isFetching } = useAccountData();
   const hf = useHealthFactor();
   const healthFactor = useMemo(() => (hf ? parseHealthFactor(hf.debt, hf.collateral) : undefined), [hf]);
 
@@ -37,8 +39,8 @@ const HealthFactor = () => {
           {t('Health Factor')}
         </Typography>
       </Box>
-      {!healthFactor ? (
-        <Skeleton width={64} height={32} />
+      {isFetching || !healthFactor ? (
+        <Skeleton width={100} height={42} />
       ) : (
         <Typography fontSize={28} fontFamily="IBM Plex Mono" color={healthFactorColor.color}>
           {healthFactor}

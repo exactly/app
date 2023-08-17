@@ -13,6 +13,7 @@ type AccountDataHook = {
   marketAccount?: MarketAccount;
   accountData?: readonly MarketAccount[];
   lastSync?: number;
+  isFetching: boolean;
   getMarketAccount: (symbol: string) => MarketAccount | undefined;
   refreshAccountData: (delay?: number) => Promise<void>;
 };
@@ -22,7 +23,7 @@ function useAccountData(): Omit<AccountDataHook, 'marketAccount'>;
 function useAccountData(
   symbol?: string,
 ): Omit<AccountDataHook, 'getMarketAccount'> | Omit<AccountDataHook, 'marketAccount'> {
-  const { isLoading, data, refetch } = usePreviewerExactly();
+  const { isLoading, isFetching, data, refetch } = usePreviewerExactly();
 
   const ctx = useContext(AccountDataContext);
 
@@ -52,6 +53,7 @@ function useAccountData(
     return {
       accountData: isLoading ? undefined : data,
       lastSync: ctx?.lastSync,
+      isFetching,
       getMarketAccount,
       refreshAccountData,
     };
@@ -60,6 +62,7 @@ function useAccountData(
   return {
     marketAccount,
     accountData: isLoading ? undefined : data,
+    isFetching,
     lastSync: ctx?.lastSync,
     refreshAccountData,
   };

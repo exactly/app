@@ -10,6 +10,7 @@ import { WEI_PER_ETHER } from 'utils/const';
 import { LoadingButton } from '@mui/lab';
 import { useWeb3 } from 'hooks/useWeb3';
 import { useModal } from 'contexts/ModalContext';
+import useAccountData from 'hooks/useAccountData';
 
 type RewardProps = {
   assetSymbol: string;
@@ -43,6 +44,7 @@ const Reward: FC<RewardProps> = ({ assetSymbol, amount, amountInUSD, xsDirection
 
 const UserRewards = () => {
   const { t } = useTranslation();
+  const { isFetching } = useAccountData();
   const { impersonateActive } = useWeb3();
   const { breakpoints } = useTheme();
   const isMobile = useMediaQuery(breakpoints.down('lg'));
@@ -99,10 +101,9 @@ const UserRewards = () => {
         flexDirection={{ xs: 'column', lg: 'row' }}
         gap={{ xs: 1, lg: 2 }}
         alignItems={{ xs: 'none', lg: 'center' }}
-        mx={rewards && rewards.length > 1 ? 0 : 'auto'}
         mb={{ xs: 0.5, lg: 0 }}
       >
-        {rewards ? (
+        {!isFetching && rewards ? (
           rewards.map(({ assetSymbol, amount, amountInUSD }) => (
             <Box key={`${assetSymbol}_${amount}_${amountInUSD}`} display="flex" gap={2} alignItems="center">
               <Reward
@@ -114,7 +115,10 @@ const UserRewards = () => {
             </Box>
           ))
         ) : (
-          <Skeleton width={96} height={32} />
+          <>
+            <Skeleton width={120} height={42} />
+            <Skeleton width={120} height={42} />
+          </>
         )}
       </Box>
 

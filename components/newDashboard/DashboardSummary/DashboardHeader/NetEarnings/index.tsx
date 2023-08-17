@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Divider, Typography } from '@mui/material';
+import { Box, Divider, Skeleton, Typography } from '@mui/material';
 import PaidRoundedIcon from '@mui/icons-material/PaidRounded';
 import { useTranslation } from 'react-i18next';
 import useNetAPR from 'hooks/useNetAPR';
@@ -30,16 +30,24 @@ const NetEarnings = () => {
           <Typography variant="dashboardSubtitleNumber" color="grey.700">
             {t('Net APR')}
           </Typography>
-          <Typography fontSize={28} fontWeight={700}>
-            {toPercentage(Number(netAPR) / 1e18)}
-          </Typography>
+          {netAPR !== undefined ? (
+            <Typography fontSize={28} fontWeight={700}>
+              {toPercentage(Number(netAPR) / 1e18)}
+            </Typography>
+          ) : (
+            <Skeleton width={100} height={42} />
+          )}
         </Box>
         <Divider flexItem />
         <Box display="flex" justifyContent="space-between" alignItems="center" gap={1}>
           <Typography variant="dashboardSubtitleNumber" color="grey.700">
             {t('Net Position')}
           </Typography>
-          <Typography fontSize={28}>${formatNumber(Number(netPosition) / 1e18)}</Typography>
+          {netPosition !== undefined ? (
+            <Typography fontSize={28}>${formatNumber(Number(netPosition) / 1e18)}</Typography>
+          ) : (
+            <Skeleton width={100} height={42} />
+          )}
         </Box>
       </Box>
     </Box>
