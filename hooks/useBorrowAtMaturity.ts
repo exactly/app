@@ -13,7 +13,6 @@ import useHealthFactor from './useHealthFactor';
 import useAnalytics from './useAnalytics';
 import { WEI_PER_ETHER } from 'utils/const';
 import useEstimateGas from './useEstimateGas';
-import { ERC20 } from 'types/contracts';
 import { formatUnits, parseUnits } from 'viem';
 import { waitForTransaction } from '@wagmi/core';
 import dayjs from 'dayjs';
@@ -78,7 +77,7 @@ export default (): BorrowAtMaturity => {
     estimateGas: approveEstimateGas,
     isLoading: approveIsLoading,
     needsApproval,
-  } = useApprove('borrowAtMaturity', marketContract as ERC20 | undefined, ETHRouterContract?.address);
+  } = useApprove({ operation: 'borrowAtMaturity', contract: marketContract, spender: ETHRouterContract?.address });
 
   const poolLiquidity = usePoolLiquidity(symbol);
 

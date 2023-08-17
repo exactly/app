@@ -30,7 +30,6 @@ import useTranslateOperation from 'hooks/useTranslateOperation';
 import { WEI_PER_ETHER } from 'utils/const';
 import useEstimateGas from 'hooks/useEstimateGas';
 import { formatUnits, parseUnits, zeroAddress } from 'viem';
-import { ERC20 } from 'types/contracts';
 import { waitForTransaction } from '@wagmi/core';
 import { gasLimit } from 'utils/gas';
 
@@ -96,7 +95,7 @@ const WithdrawAtMaturity: FC = () => {
     estimateGas: approveEstimateGas,
     isLoading: approveIsLoading,
     needsApproval,
-  } = useApprove('withdrawAtMaturity', marketContract as ERC20 | undefined, ETHRouterContract?.address);
+  } = useApprove({ operation: 'withdrawAtMaturity', contract: marketContract, spender: ETHRouterContract?.address });
 
   const previewWithdrawAtMaturity = useCallback(async () => {
     if (!marketAccount || !date || !previewerContract) return;

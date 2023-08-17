@@ -156,7 +156,7 @@ const RepayAtMaturity: FC = () => {
     estimateGas: approveEstimateGas,
     isLoading: approveIsLoading,
     needsApproval,
-  } = useApprove('repayAtMaturity', assetContract, marketAccount?.market);
+  } = useApprove({ operation: 'repayAtMaturity', contract: assetContract, spender: marketAccount?.market });
 
   const estimate = useEstimateGas();
 

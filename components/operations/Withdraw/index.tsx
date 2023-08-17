@@ -24,7 +24,6 @@ import { useTranslation } from 'react-i18next';
 import useTranslateOperation from 'hooks/useTranslateOperation';
 import useEstimateGas from 'hooks/useEstimateGas';
 import { formatUnits, parseUnits } from 'viem';
-import { ERC20 } from 'types/contracts';
 import { waitForTransaction } from '@wagmi/core';
 import { gasLimit } from 'utils/gas';
 
@@ -72,7 +71,7 @@ const Withdraw: FC = () => {
     estimateGas: approveEstimateGas,
     isLoading: approveIsLoading,
     needsApproval,
-  } = useApprove('withdraw', marketContract as ERC20 | undefined, ETHRouterContract?.address);
+  } = useApprove({ operation: 'withdraw', contract: marketContract, spender: ETHRouterContract?.address });
 
   const estimate = useEstimateGas();
 

@@ -54,7 +54,7 @@ export default (): Deposit => {
     estimateGas: approveEstimateGas,
     isLoading: approveIsLoading,
     needsApproval,
-  } = useApprove('deposit', assetContract, marketAccount?.market);
+  } = useApprove({ operation: 'deposit', contract: assetContract, spender: marketAccount?.market });
 
   const estimate = useEstimateGas();
 

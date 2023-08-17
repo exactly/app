@@ -13,7 +13,6 @@ import useHealthFactor from './useHealthFactor';
 import useAnalytics from './useAnalytics';
 import { WEI_PER_ETHER } from 'utils/const';
 import useEstimateGas from './useEstimateGas';
-import { ERC20 } from 'types/contracts';
 import { parseUnits, formatUnits } from 'viem';
 import { gasLimit } from 'utils/gas';
 
@@ -55,7 +54,7 @@ export default (): Borrow => {
     estimateGas: approveEstimateGas,
     isLoading: approveIsLoading,
     needsApproval,
-  } = useApprove('borrow', marketContract as ERC20 | undefined, ETHRouterContract?.address);
+  } = useApprove({ operation: 'borrow', contract: marketContract, spender: ETHRouterContract?.address });
 
   const borrowLimit: bigint = useMemo(
     () => (marketAccount ? getBeforeBorrowLimit(marketAccount, 'borrow') : 0n),

@@ -76,7 +76,7 @@ function Repay() {
     estimateGas: approveEstimateGas,
     isLoading: approveIsLoading,
     needsApproval,
-  } = useApprove('repay', assetContract, marketAccount?.market);
+  } = useApprove({ operation: 'repay', contract: assetContract, spender: marketAccount?.market });
 
   const onMax = useCallback(() => {
     setQty(finalAmount);
