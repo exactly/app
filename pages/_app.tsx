@@ -27,6 +27,7 @@ import RewardsModal from 'components/RewardsModal';
 import StakingModal from 'components/Velodrome/StakingModal';
 import DebtManagerModal from 'components/DebtManager';
 import FaucetModal from 'components/operations/Faucet/Modal';
+import Revoke from 'components/Revoke';
 
 const { maxWidth } = globals;
 
@@ -97,6 +98,7 @@ export default function App({ Component, pageProps }: AppProps) {
           <ModalContextProvider>
             <GlobalErrorProvider>
               <AccountDataProvider>
+                <Revoke />
                 <Topbar />
                 <Box display="flex" flexDirection="column" mx={2} height="100%">
                   <Navbar />
