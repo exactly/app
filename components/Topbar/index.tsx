@@ -1,37 +1,16 @@
-import React, { useState } from 'react';
+import React from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-import IconButton from '@mui/material/IconButton';
-import CloseIcon from '@mui/icons-material/Close';
-import { useTheme } from '@mui/material';
-import { useTranslation } from 'react-i18next';
-import Link from 'next/link';
-import useRouter from 'hooks/useRouter';
 
 const TopBar = () => {
-  const { palette } = useTheme();
-  const { t } = useTranslation();
-  const { query } = useRouter();
-
-  const now = Math.floor(Date.now() / 1000);
-  const expiration = 1688860800;
-  const [showBar, setShowBar] = useState(now <= expiration);
-
-  const handleClose = () => {
-    localStorage.setItem('topbar_rollover', 'true');
-    setShowBar(false);
-  };
-
-  const seen = localStorage.getItem('topbar_rollover');
-
-  return showBar && !seen ? (
+  return (
     <Box
       sx={{
         display: 'flex',
         alignItems: 'center',
-        bgcolor: palette.green,
+        bgcolor: 'blue',
         color: 'white',
-        height: { xs: '64px', sm: '32px' },
+        height: 'auto',
         width: '100%',
         px: 1,
       }}
@@ -39,46 +18,27 @@ const TopBar = () => {
       <Box
         sx={{
           display: 'flex',
+          alignItems: 'center',
           justifyContent: 'center',
-          padding: '16px',
+          flexDirection: { xs: 'column', sm: 'row' },
+          padding: '24px',
           width: '100%',
         }}
-        gap={1}
+        gap={3}
       >
-        <Box
-          width="fit-content"
-          display="flex"
-          alignItems="center"
-          alignSelf="center"
-          height="16px"
-          py="3px"
-          px="6px"
-          borderRadius="8px"
-          sx={{ background: 'white', textTransform: 'uppercase' }}
-        >
-          <Typography variant="chip" color={palette.green}>
-            {t('New')}
-          </Typography>
-        </Box>
-        <Typography variant="modalRow" color="white">
-          {t('Unlock better loan terms with the new Rollover feature.')}
-          {` `}
-          <Typography variant="link" color="white" sx={{ textDecoration: 'underline' }}>
-            <Link href={{ pathname: '/dashboard', query }} onClick={() => handleClose()}>
-              <Typography variant="link" color="white" sx={{ textDecoration: 'underline' }}>
-                {t('Try it out now!')}
-              </Typography>
-            </Link>
-          </Typography>
+        <Typography fontSize={24} fontWeight={700} variant="modalRow" color="white">
+          IMPORTANT
+        </Typography>
+        <Typography fontSize={20} variant="modalRow" color="white">
+          The protocol is currently{' '}
+          <a style={{ textDecoration: 'underline' }} href="https://docs.exact.ly/security/access-control#pauser">
+            paused
+          </a>
+          . Withdraws are active. Follow updates on official social networks.
         </Typography>
       </Box>
-      <Box>
-        <IconButton edge="end" color="inherit" aria-label="close" size="small" onClick={handleClose}>
-          <CloseIcon fontSize="inherit" />
-        </IconButton>
-      </Box>
     </Box>
-  ) : null;
+  );
 };
 
 export default TopBar;
