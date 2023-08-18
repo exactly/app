@@ -117,7 +117,7 @@ export default function ModalWrapper() {
   if (!isOpen) return null;
   return (
     <DebtManagerContextProvider args={args}>
-      <DebtManagerModal isOpen={isOpen} close={close} />;
+      <DebtManagerModal isOpen={false} close={close} />;
     </DebtManagerContextProvider>
   );
 }
