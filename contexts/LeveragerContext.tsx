@@ -597,7 +597,8 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
       !permit2 ||
       !debtManager ||
       !limit ||
-      !opts
+      !opts ||
+      !leverageStatus
     ) {
       return true;
     }
@@ -612,17 +613,22 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
 
           setApprovalStatus('MARKET-OUT');
           const marketOutAllownce = await marketOut.read.allowance([walletAddress, debtManager.address], opts);
-          if (marketOutAllownce < limit.borrow) return true;
+          if (
+            marketOutAllownce <
+            (await marketOut.read.previewWithdraw([limit.borrow - leverageStatus.borrow + 100n], opts))
+          )
+            return true;
         } else {
           setApprovalStatus('MARKET-IN');
-          const permitAssets =
-            input.collateralSymbol === input.borrowSymbol
-              ? (maIn.floatingBorrowAssets < limit.borrow ? 0n : maIn.floatingBorrowAssets - limit.borrow) + userInput
-              : slippage(
-                  (maIn.floatingDepositAssets < limit.deposit ? 0n : maIn.floatingDepositAssets - limit.deposit) +
-                    userInput,
-                );
           const marketInAllownce = await marketIn.read.allowance([walletAddress, debtManager.address], opts);
+          const permitAssets = await marketOut.read.previewWithdraw(
+            [
+              slippage(
+                (maIn.floatingBorrowAssets < limit.borrow ? 0n : maIn.floatingBorrowAssets - limit.borrow) + userInput,
+              ),
+            ],
+            opts,
+          );
           if (marketInAllownce < permitAssets) return true;
         }
 
@@ -655,13 +661,15 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     debtManager,
     limit,
     opts,
+    leverageStatus,
     isContract,
     isPermit,
     userInput,
   ]);
 
   const approve = useCallback(async () => {
-    if (!debtManager || !maIn || !marketIn || !marketOut || !assetIn || !permit2 || !limit || !opts) return;
+    if (!debtManager || !maIn || !marketIn || !marketOut || !assetIn || !permit2 || !limit || !opts || !leverageStatus)
+      return;
 
     setIsLoading(true);
     try {
@@ -686,13 +694,14 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
           break;
         }
         case 'MARKET-IN': {
-          const permitAssets =
-            input.collateralSymbol === input.borrowSymbol
-              ? (maIn.floatingBorrowAssets < limit.borrow ? 0n : maIn.floatingBorrowAssets - limit.borrow) + userInput
-              : slippage(
-                  (maIn.floatingDepositAssets < limit.deposit ? 0n : maIn.floatingDepositAssets - limit.deposit) +
-                    userInput,
-                );
+          const permitAssets = await marketOut.read.previewWithdraw(
+            [
+              slippage(
+                (maIn.floatingBorrowAssets < limit.borrow ? 0n : maIn.floatingBorrowAssets - limit.borrow) + userInput,
+              ),
+            ],
+            opts,
+          );
           const args = [debtManager.address, slippage(permitAssets)] as const;
           const gasEstimation = await marketIn.estimateGas.approve(args, opts);
           hash = await marketIn.write.approve(args, {
@@ -702,7 +711,10 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
           break;
         }
         case 'MARKET-OUT': {
-          const args = [debtManager.address, slippage(limit.borrow)] as const;
+          const args = [
+            debtManager.address,
+            await marketOut.read.previewWithdraw([limit.borrow - leverageStatus.borrow + 100n], opts),
+          ] as const;
           const gasEstimation = await marketOut.estimateGas.approve(args, opts);
           hash = await marketOut.write.approve(args, {
             ...opts,
@@ -725,8 +737,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     approvalStatus,
     assetIn,
     debtManager,
-    input.borrowSymbol,
-    input.collateralSymbol,
+    leverageStatus,
     limit,
     maIn,
     marketIn,
@@ -900,7 +911,10 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
               break;
             }
 
-            const borrowAssets = limit.borrow;
+            const borrowAssets = await marketIn.read.previewWithdraw(
+              [limit.borrow - leverageStatus.borrow + 100n],
+              opts,
+            );
             const [assetPermit, marketPermit] = await Promise.all([
               signPermit(userInput, 'assetIn'),
               signPermit(borrowAssets, 'marketIn'),
@@ -944,8 +958,10 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
               break;
             }
 
-            const permitAssets =
-              (maIn.floatingBorrowAssets < limit.borrow ? 0n : maIn.floatingBorrowAssets - limit.borrow) + userInput;
+            const permitAssets = await marketIn.read.previewWithdraw(
+              [(maIn.floatingBorrowAssets < limit.borrow ? 0n : maIn.floatingBorrowAssets - limit.borrow) + userInput],
+              opts,
+            );
             const marketPermit = await signPermit(permitAssets, 'marketIn');
 
             if (!marketPermit || marketPermit.type === 'permit2') {
@@ -986,7 +1002,10 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
               break;
             }
 
-            const borrowAssets = limit.borrow;
+            const borrowAssets = await marketOut.read.previewWithdraw(
+              [limit.borrow - leverageStatus.borrow + 100n],
+              opts,
+            );
             const [assetPermit, marketPermit] = await Promise.all([
               signPermit(userInput, 'assetIn'),
               signPermit(borrowAssets, 'marketOut'),
@@ -1040,9 +1059,14 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
               break;
             }
 
-            const permitAssets = slippage(
-              (maIn.floatingDepositAssets < limit.deposit ? 0n : maIn.floatingDepositAssets - limit.deposit) +
-                userInput,
+            const permitAssets = await marketIn.read.previewWithdraw(
+              [
+                slippage(
+                  (maIn.floatingBorrowAssets < limit.borrow ? 0n : maIn.floatingBorrowAssets - limit.borrow) +
+                    userInput,
+                ),
+              ],
+              opts,
             );
 
             const marketPermit = await signPermit(permitAssets, 'marketIn');

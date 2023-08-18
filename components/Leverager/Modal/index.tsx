@@ -125,7 +125,7 @@ export default function ModalWrapper() {
   if (!isOpen) return null;
   return (
     <LeveragerContextProvider>
-      <LeveragerModal isOpen={false} close={close} />
+      <LeveragerModal isOpen={isOpen} close={close} />
     </LeveragerContextProvider>
   );
 }
