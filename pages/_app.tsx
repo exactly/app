@@ -18,7 +18,6 @@ import Navbar from 'components/Navbar';
 import { globals } from 'styles/theme';
 import { GlobalErrorProvider } from 'contexts/GlobalErrorContext';
 import { useInitGA } from 'hooks/useAnalytics';
-import Topbar from 'components/Topbar';
 
 import { ModalContextProvider } from 'contexts/ModalContext';
 import OperationsModal from 'components/OperationsModal';
@@ -97,7 +96,6 @@ export default function App({ Component, pageProps }: AppProps) {
           <ModalContextProvider>
             <GlobalErrorProvider>
               <AccountDataProvider>
-                <Topbar />
                 <Box display="flex" flexDirection="column" mx={2} height="100%">
                   <Navbar />
                   <main style={{ flexGrow: 1, maxWidth, margin: '0 auto', width: '100%' }}>
