@@ -26,15 +26,15 @@ const TopBar = () => {
         }}
         gap={3}
       >
-        <Typography fontSize={24} fontWeight={700} variant="modalRow" color="white">
+        <Typography fontSize={20} fontWeight={700} variant="modalRow" color="white">
           IMPORTANT
         </Typography>
-        <Typography fontSize={20} variant="modalRow" color="white">
+        <Typography fontSize={16} variant="modalRow" color="white">
           The protocol is currently{' '}
           <a style={{ textDecoration: 'underline' }} href="https://docs.exact.ly/security/access-control#pauser">
             paused
           </a>
-          . Withdraws are active. Follow updates on official social networks.
+          . It will be unpaused on <strong>2023-08-20 00:00 UTC</strong>. Follow updates on official social networks.
         </Typography>
       </Box>
     </Box>
