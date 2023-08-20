@@ -121,8 +121,7 @@ export default () => {
       (total, { assetSymbol, floatingBorrowAssets, decimals, usdPrice }) =>
         total +
         rates[assetSymbol].reduce(
-          (acc, { floatingDeposit: borrow }) =>
-            acc + ((floatingBorrowAssets * usdPrice) / BigInt(10 ** decimals)) * borrow,
+          (acc, { borrow }) => acc + ((floatingBorrowAssets * usdPrice) / BigInt(10 ** decimals)) * borrow,
           0n,
         ) /
           WEI_PER_ETHER,
