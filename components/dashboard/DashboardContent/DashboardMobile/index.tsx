@@ -15,6 +15,7 @@ import useAccountData from 'hooks/useAccountData';
 import { useTranslation } from 'react-i18next';
 import useAnalytics from 'hooks/useAnalytics';
 import Rates from 'components/Rates';
+import { useWeb3 } from 'hooks/useWeb3';
 
 type Props = {
   type: 'deposit' | 'borrow';
@@ -22,6 +23,7 @@ type Props = {
 
 const DashboardMobile: FC<Props> = ({ type }) => {
   const { t } = useTranslation();
+  const { disableFeature } = useWeb3();
   const { accountData, getMarketAccount } = useAccountData();
   const { handleActionClick } = useActionButton();
   const { startDebtManager, isRolloverDisabled } = useStartDebtManagerButton();
@@ -122,12 +124,15 @@ const DashboardMobile: FC<Props> = ({ type }) => {
                         height: '34px',
                         '&:disabled': {
                           borderLeftColor: ({ palette }) => palette.grey[palette.mode === 'light' ? 500 : 300],
+                          pointerEvents: disableFeature ? 'auto' : 'none',
                         },
                       }}
                       onClick={() => startDebtManager({ from: { symbol } })}
-                      disabled={isRolloverDisabled(borrowedAmount)}
+                      disabled={disableFeature || isRolloverDisabled(borrowedAmount)}
                     >
-                      {t('Rollover')}
+                      <Tooltip title={disableFeature ? t('Temporary disabled') : ''} arrow placement="top">
+                        <span>{t('Rollover')}</span>
+                      </Tooltip>
                     </Button>
                   </ButtonGroup>
                 )}
@@ -212,12 +217,15 @@ const DashboardMobile: FC<Props> = ({ type }) => {
                         height: '34px',
                         '&:disabled': {
                           borderLeftColor: ({ palette }) => palette.grey[palette.mode === 'light' ? 500 : 300],
+                          pointerEvents: disableFeature ? 'auto' : 'none',
                         },
                       }}
                       onClick={() => startDebtManager({ from: { symbol, maturity } })}
-                      disabled={isRolloverDisabled()}
+                      disabled={disableFeature || isRolloverDisabled()}
                     >
-                      {t('Rollover')}
+                      <Tooltip title={disableFeature ? t('Temporary disabled') : ''} arrow placement="top">
+                        <span>{t('Rollover')}</span>
+                      </Tooltip>
                     </Button>
                   </ButtonGroup>
                 )}

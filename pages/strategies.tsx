@@ -1,8 +1,8 @@
 import React from 'react';
 import type { NextPage } from 'next';
 import dynamic from 'next/dynamic';
-import { Box, Typography } from '@mui/material';
-import { useTranslation } from 'react-i18next';
+import { Alert, Box, Typography } from '@mui/material';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { usePageView } from 'hooks/useAnalytics';
 
@@ -13,7 +13,24 @@ const Strategies: NextPage = () => {
   const { t } = useTranslation();
 
   return (
-    <Box mt={4.5} maxWidth={1200} mx="auto">
+    <Box mt={2} maxWidth={1200} mx="auto">
+      <Alert severity="info" sx={{ mb: 2 }}>
+        <Trans
+          i18nKey={
+            'Due to a recent report in Balancer vaults, used by our strategies, these features are temporarily disabled. <1>More info</1>.'
+          }
+          components={{
+            1: (
+              <a
+                href="https://twitter.com/Balancer/status/1694014645378724280"
+                rel="noreferrer"
+                target="_blank"
+                style={{ textDecoration: 'underline' }}
+              />
+            ),
+          }}
+        />
+      </Alert>
       <Box>
         <Typography component="h1" variant="h5" fontSize={24} fontWeight={700}>
           {t('All Strategies')}

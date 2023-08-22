@@ -93,7 +93,6 @@ function Navbar() {
               pathname: '/governance',
               name: t('Governance'),
               icon: <GavelIcon sx={{ fontSize: '13px' }} />,
-              isNew: true,
             },
           ]
         : []),

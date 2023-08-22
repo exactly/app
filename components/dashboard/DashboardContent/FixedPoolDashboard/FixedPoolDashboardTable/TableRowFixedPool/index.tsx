@@ -3,7 +3,18 @@ import Link from 'next/link';
 import { useTranslation } from 'react-i18next';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
-import { Box, Button, ButtonGroup, IconButton, Skeleton, Stack, TableCell, TableRow, Typography } from '@mui/material';
+import {
+  Box,
+  Button,
+  ButtonGroup,
+  IconButton,
+  Skeleton,
+  Stack,
+  TableCell,
+  TableRow,
+  Tooltip,
+  Typography,
+} from '@mui/material';
 import MaturityLinearProgress from 'components/common/MaturityLinearProgress';
 import useFixedOperation from 'hooks/useFixedPoolTransactions';
 import { Address, formatUnits } from 'viem';
@@ -23,6 +34,7 @@ import { Borrow } from 'types/Borrow';
 import { Repay } from 'types/Repay';
 import useAccountData from 'hooks/useAccountData';
 import useRouter from 'hooks/useRouter';
+import { useWeb3 } from 'hooks/useWeb3';
 
 type Props = {
   symbol: string;
@@ -35,6 +47,7 @@ type Props = {
 
 function TableRowFixedPool({ symbol, valueUSD, type, maturityDate, market, decimals }: Props) {
   const { t } = useTranslation();
+  const { disableFeature } = useWeb3();
   const { query } = useRouter();
   const { marketAccount } = useAccountData(symbol);
   const { withdrawTxs, repayTxs, depositTxs, borrowTxs } = useFixedOperation(type, maturityDate, market);
@@ -165,12 +178,15 @@ function TableRowFixedPool({ symbol, valueUSD, type, maturityDate, market, decim
                     whiteSpace: 'nowrap',
                     '&:disabled': {
                       borderLeftColor: ({ palette }) => palette.grey[palette.mode === 'light' ? 500 : 300],
+                      pointerEvents: disableFeature ? 'auto' : 'none',
                     },
                   }}
                   onClick={() => startDebtManager({ from: { symbol, maturity: maturityDate } })}
-                  disabled={isRolloverDisabled()}
+                  disabled={disableFeature || isRolloverDisabled()}
                 >
-                  {t('Rollover')}
+                  <Tooltip title={disableFeature ? t('Temporary disabled') : ''} arrow placement="top">
+                    <span>{t('Rollover')}</span>
+                  </Tooltip>
                 </Button>
               </ButtonGroup>
             ))) || (

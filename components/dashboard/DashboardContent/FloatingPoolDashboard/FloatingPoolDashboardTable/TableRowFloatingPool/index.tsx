@@ -2,7 +2,7 @@ import React from 'react';
 import Image from 'next/image';
 import { formatUnits } from 'viem';
 
-import { Button, TableRow, TableCell, Stack, Typography, Skeleton, Box, ButtonGroup } from '@mui/material';
+import { Button, TableRow, TableCell, Stack, Typography, Skeleton, Box, ButtonGroup, Tooltip } from '@mui/material';
 
 import type { Operation } from 'types/Operation';
 
@@ -15,6 +15,7 @@ import useActionButton, { useStartDebtManagerButton } from 'hooks/useActionButto
 import useRouter from 'hooks/useRouter';
 import { useTranslation } from 'react-i18next';
 import Rates from 'components/Rates';
+import { useWeb3 } from 'hooks/useWeb3';
 
 type Props = {
   symbol: string;
@@ -29,6 +30,7 @@ function TableRowFloatingPool({ symbol, valueUSD, depositedAmount, borrowedAmoun
   const { t } = useTranslation();
   const { query } = useRouter();
   const { marketAccount } = useAccountData(symbol);
+  const { disableFeature } = useWeb3();
 
   const { handleActionClick } = useActionButton();
   const { startDebtManager, isRolloverDisabled } = useStartDebtManagerButton();
@@ -122,12 +124,17 @@ function TableRowFloatingPool({ symbol, valueUSD, depositedAmount, borrowedAmoun
               sx={{
                 backgroundColor: 'components.bg',
                 whiteSpace: 'nowrap',
-                '&:disabled': { borderLeftColor: ({ palette }) => palette.grey[palette.mode === 'light' ? 500 : 300] },
+                '&:disabled': {
+                  borderLeftColor: ({ palette }) => palette.grey[palette.mode === 'light' ? 500 : 300],
+                  pointerEvents: disableFeature ? 'auto' : 'none',
+                },
               }}
               onClick={() => startDebtManager({ from: { symbol } })}
-              disabled={isRolloverDisabled(borrowedAmount)}
+              disabled={disableFeature || isRolloverDisabled(borrowedAmount)}
             >
-              {t('Rollover')}
+              <Tooltip title={disableFeature ? t('Temporary disabled') : ''} arrow placement="top">
+                <span>{t('Rollover')}</span>
+              </Tooltip>
             </Button>
           </ButtonGroup>
         )}

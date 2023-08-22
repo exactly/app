@@ -1,4 +1,4 @@
-import React, { FC, PropsWithChildren } from 'react';
+import React, { FC, PropsWithChildren, useMemo } from 'react';
 import CloseIcon from '@mui/icons-material/Close';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import TwitterIcon from '@mui/icons-material/Twitter';
@@ -40,38 +40,41 @@ function MobileMenu({ open, handleClose }: Props) {
   const isOPMainnet = chain?.id === optimism.id;
   const isEthereum = chain?.id === mainnet.id;
 
-  const headers = [
-    {
-      title: t('Markets'),
-      pathname: '/',
-      component: <AdvancedViewSwitch />,
-      icon: <BarChartRoundedIcon sx={{ fontSize: 20 }} />,
-    },
-    {
-      title: t('Dashboard'),
-      pathname: '/dashboard',
-      icon: <AccountBalanceWalletIcon sx={{ fontSize: 20 }} />,
-    },
-    {
-      title: t('Strategies'),
-      pathname: '/strategies',
-      icon: <MovingSharpIcon sx={{ fontSize: 20 }} />,
-    },
-    {
-      title: t('Governance'),
-      pathname: '/governance',
-      icon: <GavelIcon sx={{ fontSize: 20 }} />,
-    },
-    ...(isOPMainnet
-      ? [
-          {
-            title: t('Bridge & Swap'),
-            pathname: '/bridge',
-            icon: <RepeatRoundedIcon sx={{ fontSize: 20 }} />,
-          },
-        ]
-      : []),
-  ];
+  const headers = useMemo(
+    () => [
+      {
+        title: t('Markets'),
+        pathname: '/',
+        component: <AdvancedViewSwitch />,
+        icon: <BarChartRoundedIcon sx={{ fontSize: 20 }} />,
+      },
+      {
+        title: t('Dashboard'),
+        pathname: '/dashboard',
+        icon: <AccountBalanceWalletIcon sx={{ fontSize: 20 }} />,
+      },
+      {
+        title: t('Strategies'),
+        pathname: '/strategies',
+        icon: <MovingSharpIcon sx={{ fontSize: 20 }} />,
+      },
+      {
+        title: t('Governance'),
+        pathname: '/governance',
+        icon: <GavelIcon sx={{ fontSize: 20 }} />,
+      },
+      ...(isOPMainnet
+        ? [
+            {
+              title: t('Bridge & Swap'),
+              pathname: '/bridge',
+              icon: <RepeatRoundedIcon sx={{ fontSize: 20 }} />,
+            },
+          ]
+        : []),
+    ],
+    [isOPMainnet, t],
+  );
 
   return (
     <Modal open={open} aria-labelledby="user menu" aria-describedby="user menu on mobile">
