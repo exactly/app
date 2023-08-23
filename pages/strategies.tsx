@@ -16,13 +16,11 @@ const Strategies: NextPage = () => {
     <Box mt={2} maxWidth={1200} mx="auto">
       <Alert severity="info" sx={{ mb: 2 }}>
         <Trans
-          i18nKey={
-            'Due to a recent report in Balancer vaults, used by our strategies, these features are temporarily disabled. <1>More info</1>.'
-          }
+          i18nKey="These features are temporarily disabled until further notice. <1>More info</1>."
           components={{
             1: (
               <a
-                href="https://twitter.com/Balancer/status/1694014645378724280"
+                href="https://medium.com/@exactly_protocol/update-on-the-web-app-strategies-section-8be4b60b13d5"
                 rel="noreferrer"
                 target="_blank"
                 style={{ textDecoration: 'underline' }}
