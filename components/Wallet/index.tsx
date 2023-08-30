@@ -3,13 +3,17 @@ import { useDisconnect, useEnsAvatar, useEnsName } from 'wagmi';
 import { mainnet } from 'wagmi/chains';
 import { useWeb3 } from 'hooks/useWeb3';
 import { formatWallet } from 'utils/utils';
+import SettingsIcon from '@mui/icons-material/Settings';
+import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 
-import { Avatar, Badge, Box, Button, Menu, Typography } from '@mui/material';
+import { Avatar, Badge, Box, Button, List, ListItem, ListItemButton, Menu, Typography } from '@mui/material';
 
 import * as blockies from 'blockies-ts';
 import CopyToClipboardButton from 'components/common/CopyToClipboardButton';
 import { globals } from 'styles/theme';
 import { useTranslation } from 'react-i18next';
+import Link from 'next/link';
+import useRouter from 'hooks/useRouter';
 
 const { onlyDesktop } = globals;
 
@@ -28,6 +32,7 @@ function Wallet() {
     name: ens,
     chainId: mainnet.id,
   });
+  const { query } = useRouter();
 
   const formattedWallet = formatWallet(walletAddress);
 
@@ -85,11 +90,10 @@ function Wallet() {
         slotProps={{
           paper: {
             sx: {
-              marginTop: '8px',
-              padding: '16px',
+              marginTop: 1,
               boxShadow: ({ palette }) => (palette.mode === 'light' ? '0px 4px 12px rgba(97, 100, 107, 0.2)' : ''),
               borderRadius: '16px',
-              minWidth: '280px',
+              minWidth: '216px',
               maxWidth: '320px',
             },
           },
@@ -103,7 +107,7 @@ function Wallet() {
           horizontal: 'right',
         }}
       >
-        <Box display="flex" flexDirection="column" gap={1}>
+        <Box display="flex" flexDirection="column" gap={1} paddingTop={2}>
           <Avatar alt="Blocky Avatar" src={avatarImgSrc} sx={{ mx: 'auto', width: 40, height: 40 }} />
           <Box display="flex" flexDirection="column" my={1} mx="auto" textAlign="center">
             {ens && !ensError && (
@@ -116,7 +120,7 @@ function Wallet() {
               <Typography variant="subtitle1" fontSize="16px" color="grey.500">
                 {formattedWallet}
               </Typography>
-              <CopyToClipboardButton text={walletAddress} />
+              <CopyToClipboardButton text={walletAddress} sx={{ width: 16, height: 16 }} />
             </Box>
           </Box>
           {impersonateActive && (
@@ -129,17 +133,32 @@ function Wallet() {
               </Typography>
             </Box>
           )}
-          <Button
-            data-testid="wallet-menu-disconnect"
-            variant="outlined"
-            onClick={() => {
-              closeMenu();
-              impersonateActive ? exitImpersonate() : disconnect();
-            }}
-            sx={{ color: 'grey.700', borderColor: '#CFD3D8' }}
-          >
-            {impersonateActive ? t('Exit Read-Only Mode') : t('Disconnect')}
-          </Button>
+          <List disablePadding sx={{ borderTop: 1, borderColor: 'grey.300', pt: 1, px: 1 }}>
+            <Link href={{ pathname: 'revoke', query }} legacyBehavior>
+              <ListItem disablePadding>
+                <ListItemButton sx={{ borderRadius: 1, p: 1 }}>
+                  <SettingsIcon sx={{ width: '16px', height: '16px' }} />
+                  <Typography fontSize={14} fontWeight={700} marginLeft={0.5}>
+                    {t('Manage Allowances')}
+                  </Typography>
+                </ListItemButton>
+              </ListItem>
+            </Link>
+            <ListItem disablePadding>
+              <ListItemButton
+                sx={{ borderRadius: 1, p: 1 }}
+                onClick={() => {
+                  closeMenu();
+                  impersonateActive ? exitImpersonate() : disconnect();
+                }}
+              >
+                <PowerSettingsNewIcon sx={{ width: '16px', height: '16px' }} />
+                <Typography fontSize={14} fontWeight={700} marginLeft={0.5}>
+                  {impersonateActive ? t('Exit Read-Only Mode') : t('Disconnect')}
+                </Typography>
+              </ListItemButton>
+            </ListItem>
+          </List>
         </Box>
       </Menu>
     </Badge>

@@ -1,13 +1,14 @@
 import React, { FC, useState } from 'react';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import { IconButton, Tooltip } from '@mui/material';
+import { IconButton, SxProps, Theme, Tooltip } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 
 type Props = {
   text: string;
+  sx?: SxProps<Theme>;
 };
 
-const CopyToClipboardButton: FC<Props> = ({ text }) => {
+const CopyToClipboardButton: FC<Props> = ({ text, sx }) => {
   const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
   const handleClick = () => {
@@ -24,7 +25,7 @@ const CopyToClipboardButton: FC<Props> = ({ text }) => {
       onMouseLeave={() => copied && setTimeout(() => setCopied(false), 200)}
     >
       <IconButton onClick={handleClick} size="small">
-        <ContentCopyIcon sx={{ fontSize: '11px', color: 'grey.400' }} />
+        <ContentCopyIcon sx={{ fontSize: '11px', color: 'grey.400', ...sx }} />
       </IconButton>
     </Tooltip>
   );

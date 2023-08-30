@@ -19,3 +19,5 @@ export const checkPrecision = (value: string, decimals?: number): boolean => {
   const regex = new RegExp(`^\\d*(.\\d{1,${decimals ?? 18}})?$`, 'g');
   return regex.test(value);
 };
+
+export const isDefined = <T,>(value: T | undefined): value is T => value !== undefined;

@@ -132,8 +132,6 @@
   "fixed": "fija",
   "variable": "variable",
   "Approving {{symbol}}": "Aprobando {{symbol}}",
-  "Transaction rejected": "Transacción rechazada",
-  "Approve failed, please try again": "Falla en la aprobación, por favor reintentar",
   "Insufficient balance": "Balance insuficiente",
   "Go Back": "Retroceder",
   "Back": "Atrás",
@@ -379,5 +377,14 @@
   "Provide liquidity": "Proporcionar liquidez",
   "Net APR": "TNA Neta",
   "Your Account": "Tu Cuenta",
-  "Temporary disabled": "Temporalmente deshabilitado"
+  "Temporary disabled": "Temporalmente deshabilitado",
+  "No approvals found!": "¡No se encontraron permisos!",
+  "Unlimited": "Ilimitada",
+  "Allowances & Revoke": "Permisos y Revocar",
+  "Every time you perform an operation within our Protocol, you need to grant spending permission to the Protocol's smart contracts": "Cada vez que realices una operación dentro de nuestro Protocolo, necesitas otorgar permiso de gasto a los contratos inteligentes del Protocolo.",
+  "To ensure your security against potential threats, we recommend checking your allowances regularly and revoking those you don't intend to use in the near future. Please remember that both allowing and revoking spending permissions involve on-chain transactions, which require gas fees.": "Para asegurar tu seguridad contra posibles amenazas, recomendamos revisar regularmente tus permisos y revocar aquellos que no tienes intención de usar en un futuro cercano. Por favor recuerda que tanto otorgar como revocar permisos de gasto involucran transacciones en la cadena, las cuales requieren tarifas de gas.",
+  "Revoke": "Revocar",
+  "Manage Allowances": "Administrar Permisos",
+  "Authorized Amount": "Cantidad Autorizada",
+  "Authorized Spender": "Gastador Autorizado"
 }
