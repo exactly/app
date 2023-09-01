@@ -220,7 +220,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
 
   const defaultLeverage = useCallback(
     async (cancelled: () => boolean, borrowSymbol: string | undefined = input.borrowSymbol) => {
-      if (!debtPreviewer || !walletAddress || !input.collateralSymbol || !borrowSymbol || !opts || !maIn) {
+      if (!debtPreviewer || !walletAddress || !borrowSymbol || !opts) {
         setLeverageStatus(undefined);
         return undefined;
       }
@@ -230,7 +230,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
 
       try {
         const { result } = await debtPreviewer.simulate.leverage(
-          [maIn.market, _maOut.market, walletAddress, minHealthFactor(maIn, _maOut)],
+          [_maOut.market, _maOut.market, walletAddress, minHealthFactor(_maOut, _maOut)],
           opts,
         );
 
@@ -244,16 +244,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
         return undefined;
       }
     },
-    [
-      debtPreviewer,
-      getMarketAccount,
-      input.borrowSymbol,
-      input.collateralSymbol,
-      maIn,
-      minHealthFactor,
-      opts,
-      walletAddress,
-    ],
+    [debtPreviewer, getMarketAccount, input.borrowSymbol, minHealthFactor, opts, walletAddress],
   );
 
   const walletBalance = useBalance(input.collateralSymbol, maIn?.asset, true);
@@ -398,14 +389,8 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
     return parseHealthFactor(healthFactor.debt + debt, healthFactor.collateral + collateral);
   }, [healthFactor, leverageStatus, limit, maIn, maOut]);
 
-  const setCollateralSymbol = useCallback((collateralSymbol: string) => {
-    setErrorData(undefined);
-    dispatch({ ...initState, collateralSymbol });
-  }, []);
-
   const setBorrowSymbol = useCallback(
     async (borrowSymbol: string) => {
-      if (!input.collateralSymbol) return;
       setErrorData(undefined);
       const res = await defaultLeverage(() => false, borrowSymbol);
       const _secondaryOperation = res && res.ratio > res.maxRatio ? 'withdraw' : 'deposit';
@@ -414,12 +399,17 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
       dispatch({
         ...initState,
         secondaryOperation: _secondaryOperation,
-        collateralSymbol: input.collateralSymbol,
+        collateralSymbol: borrowSymbol,
         borrowSymbol: borrowSymbol,
         leverageRatio: Math.max(_leverageRatio, 1),
       });
     },
-    [input.collateralSymbol, defaultLeverage],
+    [defaultLeverage],
+  );
+
+  const setCollateralSymbol = useCallback(
+    (collateralSymbol: string) => setBorrowSymbol(collateralSymbol),
+    [setBorrowSymbol],
   );
 
   const setSecondaryOperation = useCallback((secondaryOperation: 'deposit' | 'withdraw') => {
