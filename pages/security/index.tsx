@@ -47,11 +47,11 @@ const Security: NextPage = () => {
         </Link>
         <Divider />
         <Link href={{ pathname: `/security/periphery`, query }} legacyBehavior>
-          <Box display="flex" justifyContent="space-between" p={2} gap={1}>
+          <Box display="flex" justifyContent="space-between" p={2} gap={1} sx={{ cursor: 'pointer' }}>
             <Typography fontSize={16} fontWeight={700}>
               {t('Periphery Contracts')}
             </Typography>
-            <Box display="flex" alignItems="center" gap={1} sx={{ cursor: 'pointer' }}>
+            <Box display="flex" alignItems="center" gap={1}>
               <Typography
                 textTransform="uppercase"
                 fontSize={12}
@@ -68,7 +68,7 @@ const Security: NextPage = () => {
       </Box>
       <Divider flexItem sx={{ my: 3 }} />
       <Typography variant="h6">{t('Connecting to Exactly, Spending Limits and Revoking Allowances')}</Typography>
-      <Box>
+      <Box display="flex" flexDirection="column" gap={1}>
         <Typography>
           {t(
             "Connecting your wallet to Exactly (or any dapp) is different from allowing a smart contract to spend your tokens. Here, we'll explore these processes and their security distinctions.",
