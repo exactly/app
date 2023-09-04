@@ -15,6 +15,8 @@ import ExpandMoreRoundedIcon from '@mui/icons-material/ExpandMoreRounded';
 import ArticleRoundedIcon from '@mui/icons-material/ArticleRounded';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import { useTranslation } from 'react-i18next';
+import useEtherscanLink from 'hooks/useEtherscanLink';
+import { Address } from 'viem';
 
 const Accordion = styled((props: AccordionProps) => <MuiAccordion disableGutters elevation={0} square {...props} />)(
   () => ({
@@ -48,10 +50,9 @@ type Props = {
   description: string;
   reports: string[];
   information: string[];
-  proxy: string;
-  implementation: string;
+  proxy: Address;
+  implementation: Address | null;
   codeLink: string;
-  explorerLink: string;
   withBorder?: boolean;
 };
 
@@ -64,10 +65,10 @@ const ContractInfo: FC<Props> = ({
   proxy,
   implementation,
   codeLink,
-  explorerLink,
   withBorder = true,
 }) => {
   const { t } = useTranslation();
+  const { address } = useEtherscanLink();
 
   return (
     <Accordion
@@ -102,7 +103,11 @@ const ContractInfo: FC<Props> = ({
             <Link target="_blank" rel="noreferrer noopener" href={codeLink}>
               <GitHubIcon sx={{ fontSize: 20, color: 'grey.500' }} />
             </Link>
-            <Link target="_blank" rel="noreferrer noopener" href={explorerLink}>
+            <Link
+              target="_blank"
+              rel="noreferrer noopener"
+              href={'https://docs.exact.ly/guides/smart-contract-addresses'}
+            >
               <ArticleRoundedIcon sx={{ fontSize: 20, color: 'grey.500' }} />
             </Link>
           </Box>
@@ -148,8 +153,28 @@ const ContractInfo: FC<Props> = ({
               {t('Contract Address')}
             </Typography>
             <Box display="flex" flexDirection="column" gap={0.5}>
-              <Typography fontSize={14}>{proxy}</Typography>
-              <Typography fontSize={14}>{implementation}</Typography>
+              <Link target="_blank" rel="noreferrer noopener" href={address(proxy)}>
+                <Typography fontSize={14} color="blue" sx={{ textDecoration: 'underline' }}>
+                  {proxy}
+                </Typography>
+              </Link>
+            </Box>
+          </Box>
+          <Divider />
+          <Box display="flex" gap={2}>
+            <Typography minWidth={136} fontFamily="monospace" fontSize={12} color="figma.grey.300">
+              {t('Implementation')}
+            </Typography>
+            <Box display="flex" flexDirection="column" gap={0.5}>
+              {implementation ? (
+                <Link target="_blank" rel="noreferrer noopener" href={address(implementation)}>
+                  <Typography fontSize={14} color="blue" sx={{ textDecoration: 'underline' }}>
+                    {implementation}
+                  </Typography>
+                </Link>
+              ) : (
+                <Typography fontSize={14}>{t("Doesn't apply.")}</Typography>
+              )}
             </Box>
           </Box>
         </Box>

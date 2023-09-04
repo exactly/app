@@ -439,5 +439,10 @@
   "Description": "Descripción",
   "Auditor Report": "Informe del Auditor",
   "Information": "Información",
-  "Contract Address": "Direcciones"
+  "Contract Address": "Direcciones",
+  "Implementation": "__STRING_NOT_TRANSLATED__",
+  "Doesn't apply.": "__STRING_NOT_TRANSLATED__",
+  "The Auditor is the risk management layer of the protocol; it determines how much collateral a user is required to maintain, and whether (and by how much) a user can be liquidated. Each time a user borrows from a Market, the Auditor validates his account’s liquidity to determine his health factor.": "__STRING_NOT_TRANSLATED__",
+  "lines": "__STRING_NOT_TRANSLATED__",
+  "lines of code": "__STRING_NOT_TRANSLATED__"
 }

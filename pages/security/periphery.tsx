@@ -9,24 +9,47 @@ import Link from 'next/link';
 import useRouter from 'hooks/useRouter';
 import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
 import ContractInfo from 'components/ContractInfo';
+import { ContractInfoType } from 'types/ContractInfoType';
+import { useWeb3 } from 'hooks/useWeb3';
 
 const Security: NextPage = () => {
   usePageView('/security', 'Security');
   const { t } = useTranslation();
   const { query } = useRouter();
+  const { chain: displayNetwork } = useWeb3();
 
-  const contracts = [
+  const contracts: ContractInfoType[] = [
     {
       name: 'Auditor.sol',
       audited: true,
-      description:
+      description: t(
         'The Auditor is the risk management layer of the protocol; it determines how much collateral a user is required to maintain, and whether (and by how much) a user can be liquidated. Each time a user borrows from a Market, the Auditor validates his account’s liquidity to determine his health factor.',
+      ),
       reports: ['ABDK', 'Coinspect'],
-      information: ['482 lines of code', '20.5 kb'],
-      proxy: '0x00000',
-      implementation: '0x0000',
+      information: [`482 ${t('lines')} (409 ${t('lines of code')}), 20.5 kb`],
+      proxy: () => {
+        switch (displayNetwork.id) {
+          case 1:
+            return '0x';
+          case 5:
+            return '0x';
+          case 10:
+          default:
+            return '0xaEb62e6F27BC103702E7BC879AE98bceA56f027E';
+        }
+      },
+      implementation: () => {
+        switch (displayNetwork.id) {
+          case 1:
+            return '0x';
+          case 5:
+            return '0x';
+          case 10:
+          default:
+            return '0x3f55a319d2fd003F87a96C1c3484121936243c46';
+        }
+      },
       codeLink: 'https://github.com/exactly/protocol/blob/main/contracts/Auditor.sol',
-      explorerLink: 'https://optimistic.etherscan.io/address/0x00000',
     },
   ];
 
@@ -62,10 +85,9 @@ const Security: NextPage = () => {
             description={contract.description}
             reports={contract.reports}
             information={contract.information}
-            proxy={contract.proxy}
-            implementation={contract.implementation}
+            proxy={contract.proxy()}
+            implementation={contract.implementation()}
             codeLink={contract.codeLink}
-            explorerLink={contract.explorerLink}
           />
         ))}
       </Box>
