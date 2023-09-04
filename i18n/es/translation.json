@@ -434,5 +434,10 @@
   "This section outlines the specific roles and deployment details of the periphery contracts.": "Esta sección describe los roles específicos y los detalles de implementación de los contratos periféricos.",
   "Our rigorous security practices include subjecting each contract interacting with the app's frontend to meticulous external audits performed by reputable third-party organizations. Links to audit reports and GitHub repositories are provided for your review and confidence.": "Nuestras rigurosas prácticas de seguridad incluyen someter cada contrato que interactúa con el frontend de la aplicación a meticulosas auditorías externas realizadas por organizaciones de terceros de buena reputación. Se proporcionan enlaces a informes de auditoría y repositorios de GitHub para su revisión y confianza.",
   "Next": "Siguiente",
-  "This section outlines the specific roles and deployment details of the protocol's core contracts.": "Esta sección describe los roles específicos y los detalles de implementación de los contratos centrales del protocolo."
+  "This section outlines the specific roles and deployment details of the protocol's core contracts.": "Esta sección describe los roles específicos y los detalles de implementación de los contratos centrales del protocolo.",
+  "Auditing": "Auditando",
+  "Description": "Descripción",
+  "Auditor Report": "Informe del Auditor",
+  "Information": "Información",
+  "Contract Address": "Direcciones"
 }

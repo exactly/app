@@ -8,11 +8,27 @@ import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
 import Link from 'next/link';
 import useRouter from 'hooks/useRouter';
 import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
+import ContractInfo from 'components/ContractInfo';
 
 const Security: NextPage = () => {
   usePageView('/security', 'Security');
   const { t } = useTranslation();
   const { query } = useRouter();
+
+  const contracts = [
+    {
+      name: 'Auditor.sol',
+      audited: true,
+      description:
+        'The Auditor is the risk management layer of the protocol; it determines how much collateral a user is required to maintain, and whether (and by how much) a user can be liquidated. Each time a user borrows from a Market, the Auditor validates his account’s liquidity to determine his health factor.',
+      reports: ['ABDK', 'Coinspect'],
+      information: ['482 lines of code', '20.5 kb'],
+      proxy: '0x00000',
+      implementation: '0x0000',
+      codeLink: 'https://github.com/exactly/protocol/blob/main/contracts/Auditor.sol',
+      explorerLink: 'https://optimistic.etherscan.io/address/0x00000',
+    },
+  ];
 
   return (
     <Box display="flex" flexDirection="column" gap={3} maxWidth={640} mx="auto" my={3}>
@@ -37,7 +53,23 @@ const Security: NextPage = () => {
           )}
         </Typography>
       </Box>
-      <Box my={3}>Accordion</Box>
+      <Box my={3}>
+        {contracts.map((contract, index) => (
+          <ContractInfo
+            key={contract.name}
+            name={contract.name}
+            audited={contract.audited}
+            description={contract.description}
+            reports={contract.reports}
+            information={contract.information}
+            proxy={contract.proxy}
+            implementation={contract.implementation}
+            codeLink={contract.codeLink}
+            explorerLink={contract.explorerLink}
+            withBorder={index !== contracts.length - 1}
+          />
+        ))}
+      </Box>
       <Link href={{ pathname: `/security/periphery`, query }} legacyBehavior>
         <Box
           display="flex"
