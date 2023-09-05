@@ -1,6 +1,12 @@
+import { Hex } from 'viem';
+
 export function formatWallet(walletAddress?: string) {
   if (!walletAddress) return '';
   return `${walletAddress.substring(0, 6)}...${walletAddress.substring(38)}`;
+}
+
+export function formatTx(hash: Hex): string {
+  return `${hash.substring(0, 6)}...${hash.substring(48)}`;
 }
 
 export const toPercentage = (value?: number, fractionDigits = 2): string => {
