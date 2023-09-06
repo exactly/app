@@ -15,7 +15,9 @@
     "export": "NODE_ENV=production next export",
     "postinstall": "wagmi generate",
     "lint": "eslint --max-warnings=0 .",
-    "i18n:scan": "i18next-scanner --config i18next-scanner.config.cjs"
+    "i18n:scan": "i18next-scanner --config i18next-scanner.config.cjs",
+    "test:gui": "npx playwright test --project=chromium",
+    "test:gui:headed": "npx playwright test --project=chromium --headed"
   },
   "engines": {
     "node": ">=16"
@@ -60,6 +62,7 @@
     "@ethersproject/experimental": "^5.7.0",
     "@ethersproject/providers": "^5.7.2",
     "@ethersproject/wallet": "^5.7.0",
+    "@guardianui/test": "^1.0.4",
     "@next/eslint-plugin-next": "^13.4.12",
     "@sentry/cli": "^2.20.4",
     "@testing-library/cypress": "^9.0.0",

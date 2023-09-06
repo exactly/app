@@ -8,13 +8,6 @@ import { publicProvider } from 'wagmi/providers/public';
 import { SafeConnector } from 'wagmi/connectors/safe';
 import { optimism } from 'wagmi/chains';
 
-declare global {
-  interface Window {
-    rpcURL?: string;
-  }
-}
-const rpcURL = typeof window !== 'undefined' ? window?.rpcURL : undefined;
-
 export const walletConnectId = '11ddaa8aaede72cb5d6b0dae2fed7baa';
 
 const networkId = Number(process.env.NEXT_PUBLIC_NETWORK ?? optimism.id);
@@ -26,14 +19,13 @@ const alchemyKey = process.env.NEXT_PUBLIC_ALCHEMY_API_KEY;
 
 export const isE2E: boolean = JSON.parse(process.env.NEXT_PUBLIC_IS_E2E ?? 'false');
 
-const providers: ChainProviderFn<Chain>[] =
-  isE2E && rpcURL
-    ? [jsonRpcProvider({ rpc: () => ({ http: rpcURL }) })]
-    : [
-        ...(alchemyKey ? [alchemyProvider({ apiKey: alchemyKey })] : []),
-        publicProvider(),
-        w3mProvider({ projectId: walletConnectId }),
-      ];
+const providers: ChainProviderFn<Chain>[] = isE2E
+  ? [jsonRpcProvider({ rpc: () => ({ http: 'http://127.0.0.1:8545' }) })]
+  : [
+      ...(alchemyKey ? [alchemyProvider({ apiKey: alchemyKey })] : []),
+      publicProvider(),
+      w3mProvider({ projectId: walletConnectId }),
+    ];
 
 const { chains, publicClient } = configureChains<Chain>(sortedChains, providers);
 
