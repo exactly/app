@@ -16,7 +16,7 @@ import ArticleRoundedIcon from '@mui/icons-material/ArticleRounded';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import { useTranslation } from 'react-i18next';
 import useEtherscanLink from 'hooks/useEtherscanLink';
-import { Address } from 'viem';
+import { ContractDetails } from 'types/ContractInfoType';
 
 const Accordion = styled((props: AccordionProps) => <MuiAccordion disableGutters elevation={0} square {...props} />)(
   () => ({
@@ -50,8 +50,8 @@ type Props = {
   description: string;
   reports: string[];
   information: string[];
-  proxy: Address;
-  implementation: Address | null;
+  proxy: ContractDetails[];
+  implementation: ContractDetails[] | null;
   codeLink: string;
   withBorder?: boolean;
 };
@@ -153,11 +153,16 @@ const ContractInfo: FC<Props> = ({
               {t('Contract Address')}
             </Typography>
             <Box display="flex" flexDirection="column" gap={0.5}>
-              <Link target="_blank" rel="noreferrer noopener" href={address(proxy)}>
-                <Typography fontSize={14} color="blue" sx={{ textDecoration: 'underline' }}>
-                  {proxy}
+              {proxy.map((p) => (
+                <Typography key={p.name} fontSize={14} component="span">
+                  {p.name && `${p.name}: `}
+                  <Link target="_blank" rel="noreferrer noopener" href={address(p.address)}>
+                    <Typography fontSize={14} color="blue" sx={{ textDecoration: 'underline' }} component="span">
+                      {p.address}
+                    </Typography>
+                  </Link>
                 </Typography>
-              </Link>
+              ))}
             </Box>
           </Box>
           <Divider />
@@ -167,11 +172,16 @@ const ContractInfo: FC<Props> = ({
             </Typography>
             <Box display="flex" flexDirection="column" gap={0.5}>
               {implementation ? (
-                <Link target="_blank" rel="noreferrer noopener" href={address(implementation)}>
-                  <Typography fontSize={14} color="blue" sx={{ textDecoration: 'underline' }}>
-                    {implementation}
+                implementation.map((i) => (
+                  <Typography key={i.name} fontSize={14} component="span">
+                    {i.name && `${i.name}: `}
+                    <Link target="_blank" rel="noreferrer noopener" href={address(i.address)}>
+                      <Typography fontSize={14} color="blue" sx={{ textDecoration: 'underline' }} component="span">
+                        {i.address}
+                      </Typography>
+                    </Link>
                   </Typography>
-                </Link>
+                ))
               ) : (
                 <Typography fontSize={14}>{t("Doesn't apply.")}</Typography>
               )}

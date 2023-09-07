@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import type { NextPage } from 'next';
 
 import { usePageView } from 'hooks/useAnalytics';
@@ -9,49 +9,77 @@ import Link from 'next/link';
 import useRouter from 'hooks/useRouter';
 import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
 import ContractInfo from 'components/ContractInfo';
-import { useWeb3 } from 'hooks/useWeb3';
 import { ContractInfoType } from 'types/ContractInfoType';
+import useContractAddress from 'hooks/useContractAddress';
 
 const Security: NextPage = () => {
   usePageView('/security', 'Security');
   const { t } = useTranslation();
   const { query } = useRouter();
-  const { chain: displayNetwork } = useWeb3();
+  const [contractsData, setContractsData] = useState<ContractInfoType[]>([]);
+  const getContractAddress = useContractAddress();
 
-  const contracts: ContractInfoType[] = [
-    {
-      name: 'Auditor.sol',
-      audited: true,
-      description: t(
-        'The Auditor is the risk management layer of the protocol; it determines how much collateral a user is required to maintain, and whether (and by how much) a user can be liquidated. Each time a user borrows from a Market, the Auditor validates his account’s liquidity to determine his health factor.',
-      ),
-      reports: ['ABDK', 'Coinspect'],
-      information: [`482 ${t('lines')} (409 ${t('lines of code')}), 20.5 kb`],
-      proxy: () => {
-        switch (displayNetwork.id) {
-          case 1:
-            return '0x';
-          case 5:
-            return '0x';
-          case 10:
-          default:
-            return '0xaEb62e6F27BC103702E7BC879AE98bceA56f027E';
-        }
+  const contracts = useMemo(
+    () => [
+      {
+        name: 'Auditor.sol',
+        audited: true,
+        description: t(
+          'The Auditor is the risk management layer of the protocol; it determines how much collateral a user is required to maintain, and whether (and by how much) a user can be liquidated. Each time a user borrows from a Market, the Auditor validates his account’s liquidity to determine his health factor.',
+        ),
+        reports: ['ABDK', 'Coinspect'],
+        information: [`482 ${t('lines')} (409 ${t('lines of code')}), 20.5 kb`],
+        proxy: async () => {
+          return [{ name: '', address: await getContractAddress('Auditor') }];
+        },
+        implementation: async () => {
+          return [{ name: '', address: await getContractAddress('Auditor') }];
+        },
+        codeLink: 'https://github.com/exactly/protocol/blob/main/contracts/Auditor.sol',
       },
-      implementation: () => {
-        switch (displayNetwork.id) {
-          case 1:
-            return '0x';
-          case 5:
-            return '0x';
-          case 10:
-          default:
-            return '0x3f55a319d2fd003F87a96C1c3484121936243c46';
-        }
+      {
+        name: 'InterestRateModel.sol',
+        audited: true,
+        description: t(
+          'Given supply and demand values, the InterestRateModel is queried to calculate and return both fixed and variable rates. Contains parameters as state variables that are used to get the different points in the utilization curve for an asset. There’s one InterestRateModel contract per enabled asset.',
+        ),
+        reports: ['ABDK', 'Coinspect'],
+        information: [`131 ${t('lines')} (113 ${t('lines of code')}), 5.39 kb`],
+        proxy: async () => {
+          return [
+            { name: 'USDC', address: await getContractAddress('InterestRateModelUSDC') },
+            { name: 'WETH', address: await getContractAddress('InterestRateModelWETH') },
+            { name: 'wstETH', address: await getContractAddress('InterestRateModelwstETH') },
+          ];
+        },
+        implementation: (): null => {
+          return null;
+        },
+        codeLink: 'https://github.com/exactly/protocol/blob/main/contracts/InterestRateModel.sol',
       },
-      codeLink: 'https://github.com/exactly/protocol/blob/main/contracts/Auditor.sol',
-    },
-  ];
+    ],
+    [getContractAddress, t],
+  );
+
+  useEffect(() => {
+    async function fetchContractsData() {
+      const results = await Promise.all(
+        contracts.map(async (contract) => {
+          const proxyData = await contract.proxy();
+          const implementationData = await contract.implementation();
+          return {
+            ...contract,
+            proxy: proxyData,
+            implementation: implementationData,
+          };
+        }),
+      );
+      setContractsData(results);
+    }
+
+    fetchContractsData();
+  }, [contracts]);
+
   return (
     <Box display="flex" flexDirection="column" gap={3} maxWidth={640} mx="auto" my={3}>
       <Link href={{ pathname: `/security`, query }} legacyBehavior>
@@ -76,7 +104,7 @@ const Security: NextPage = () => {
         </Typography>
       </Box>
       <Box my={3}>
-        {contracts.map((contract, index) => (
+        {contractsData.map((contract, index) => (
           <ContractInfo
             key={contract.name}
             name={contract.name}
@@ -84,8 +112,8 @@ const Security: NextPage = () => {
             description={contract.description}
             reports={contract.reports}
             information={contract.information}
-            proxy={contract.proxy()}
-            implementation={contract.implementation()}
+            proxy={contract.proxy}
+            implementation={contract.implementation}
             codeLink={contract.codeLink}
             withBorder={index !== contracts.length - 1}
           />
