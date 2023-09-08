@@ -30,6 +30,8 @@
     "@sentry/integrations": "^7.61.1",
     "@sentry/nextjs": "^7.61.1",
     "@socket.tech/plugin": "^1.2.1",
+    "@upstash/ratelimit": "^0.4.4",
+    "@vercel/kv": "^0.2.2",
     "@web3modal/ethereum": "~2.7.1",
     "@web3modal/react": "~2.7.1",
     "abitype": "^0.9.6",

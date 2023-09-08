@@ -1,6 +1,18 @@
 import { type NextRequest, NextResponse } from 'next/server';
+import { Ratelimit } from '@upstash/ratelimit';
+import { kv } from '@vercel/kv';
 
-export function middleware(req: NextRequest) {
+const ratelimit = new Ratelimit({
+  redis: kv,
+  // 100 requests from the same IP in 5 seconds
+  limiter: Ratelimit.slidingWindow(100, '5 s'),
+});
+
+export async function middleware(req: NextRequest) {
+  if (process.env.NODE_ENV === 'development') {
+    return NextResponse.next();
+  }
+
   const country = req.geo?.country;
 
   if (country === 'US') {
@@ -10,5 +22,10 @@ export function middleware(req: NextRequest) {
     );
   }
 
-  return NextResponse.next();
+  const ip =
+    req.ip ?? req.headers.get('x-real-ip') ?? (req.headers.get('x-forwarded-for')?.split(',')[0] || '127.0.0.1');
+
+  const { success } = await ratelimit.limit(ip);
+
+  return success ? NextResponse.next() : new Response('Too many requests', { status: 429 });
 }
