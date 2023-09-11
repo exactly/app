@@ -26,6 +26,10 @@ import SecondaryChain from 'components/SecondaryChain';
 import { RewardsButton } from 'components/RewardsModal';
 import { useCustomTheme } from 'contexts/ThemeContext';
 
+import RemoveCircleOutlineRoundedIcon from '@mui/icons-material/RemoveCircleOutlineRounded';
+import MonitorHeartRoundedIcon from '@mui/icons-material/MonitorHeartRounded';
+import GppGoodRoundedIcon from '@mui/icons-material/GppGoodRounded';
+
 type Props = {
   open: boolean;
   handleClose: () => void;
@@ -72,6 +76,21 @@ function MobileMenu({ open, handleClose }: Props) {
             },
           ]
         : []),
+      {
+        title: t('Security Hub'),
+        pathname: '/security',
+        icon: <GppGoodRoundedIcon sx={{ fontSize: 20 }} />,
+      },
+      {
+        title: t('Activity Monitor'),
+        pathname: '/activity',
+        icon: <MonitorHeartRoundedIcon sx={{ fontSize: 20 }} />,
+      },
+      {
+        title: t('Revoke Allowances'),
+        pathname: '/revoke',
+        icon: <RemoveCircleOutlineRoundedIcon sx={{ fontSize: 20 }} />,
+      },
     ],
     [isOPMainnet, t],
   );

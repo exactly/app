@@ -10,6 +10,9 @@ import { useWeb3 } from 'hooks/useWeb3';
 import { AppBar, Box, Button, Chip, IconButton, Toolbar, useTheme, Typography, useMediaQuery } from '@mui/material';
 
 import MovingSharpIcon from '@mui/icons-material/MovingSharp';
+import RemoveCircleOutlineRoundedIcon from '@mui/icons-material/RemoveCircleOutlineRounded';
+import MonitorHeartRoundedIcon from '@mui/icons-material/MonitorHeartRounded';
+import GppGoodRoundedIcon from '@mui/icons-material/GppGoodRounded';
 
 import MenuIcon from '@mui/icons-material/Menu';
 import GavelIcon from '@mui/icons-material/Gavel';
@@ -27,6 +30,7 @@ import { RewardsButton } from 'components/RewardsModal';
 import Velodrome from 'components/Velodrome';
 import { useCustomTheme } from 'contexts/ThemeContext';
 import { useModal } from 'contexts/ModalContext';
+import MoreMenu from './MoreMenu';
 
 const { onlyMobile, onlyDesktopFlex } = globals;
 
@@ -65,11 +69,11 @@ function Navbar() {
       : setBodyColor(palette.markets.advanced);
   }, [currentPathname, view, palette.markets.advanced, palette.markets.simple]);
 
-  const isOPMainnet = chain?.id === optimism.id;
-  const isEthereum = chain?.id === mainnet.id;
+  const isOPMainnet = chain.id === optimism.id;
+  const isEthereum = chain.id === mainnet.id;
 
   const routes: {
-    pathname: string;
+    pathname: string | null;
     name: string;
     custom?: ReactNode;
     icon?: ReactNode;
@@ -87,25 +91,53 @@ function Navbar() {
         name: t('Strategies'),
         icon: <MovingSharpIcon sx={{ fontSize: '13px' }} />,
       },
-      ...(!isEthereum
-        ? [
-            {
-              pathname: '/governance',
-              name: t('Governance'),
-              icon: <GavelIcon sx={{ fontSize: '13px' }} />,
-            },
-          ]
-        : []),
+      {
+        pathname: null,
+        name: t('More'),
+        custom: (
+          <MoreMenu
+            options={[
+              ...(!isEthereum
+                ? [
+                    {
+                      pathname: '/governance',
+                      name: t('Governance'),
+                      icon: <GavelIcon sx={{ fontSize: '13px' }} />,
+                    },
+                  ]
+                : []),
 
-      ...(isOPMainnet
-        ? [
-            {
-              pathname: '/bridge',
-              name: t('Bridge & Swap'),
-              icon: <RepeatRoundedIcon sx={{ fontSize: 14 }} />,
-            },
-          ]
-        : []),
+              ...(isOPMainnet
+                ? [
+                    {
+                      pathname: '/bridge',
+                      name: t('Bridge & Swap'),
+                      icon: <RepeatRoundedIcon sx={{ fontSize: '13px' }} />,
+                    },
+                  ]
+                : []),
+              {
+                pathname: '/security',
+                name: t('Security Hub'),
+                icon: <GppGoodRoundedIcon sx={{ fontSize: '13px' }} />,
+                isNew: true,
+              },
+              {
+                pathname: '/activity',
+                name: t('Activity Monitor'),
+                icon: <MonitorHeartRoundedIcon sx={{ fontSize: '13px' }} />,
+                isNew: true,
+              },
+              {
+                pathname: '/revoke',
+                name: t('Revoke Allowances'),
+                icon: <RemoveCircleOutlineRoundedIcon sx={{ fontSize: '13px' }} />,
+                isNew: true,
+              },
+            ]}
+          />
+        ),
+      },
     ],
     [isEthereum, isOPMainnet, t],
   );

@@ -123,9 +123,11 @@ function Event({ tx }: EventProps) {
               component="span"
               variant="h6"
               fontWeight={500}
+              maxWidth={{ xs: 160, sm: 'min-content' }}
               sx={{
-                xs: { maxWidth: 160, whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflowX: 'hidden' },
-                sm: {},
+                whiteSpace: 'nowrap',
+                textOverflow: 'ellipsis',
+                overflowX: 'hidden',
               }}
             >
               {tx.txInfo.type === 'SettingsChange' && tx.txInfo.humanDescription
