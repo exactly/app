@@ -4,16 +4,22 @@ import type { GetStaticProps } from 'next';
 import { Box, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { readdir, readFile } from 'fs/promises';
+import { basename } from 'path';
+import { goerli, mainnet, optimism } from 'wagmi/chains';
 
+import { defaultChain } from 'utils/client';
 import Feed from 'components/RiskFeed/Feed';
 import { usePageView } from 'hooks/useAnalytics';
-import { goerli, mainnet, optimism } from 'wagmi/chains';
 import { Contracts } from 'components/RiskFeed/Decode';
-import { basename } from 'path';
 
 type Props = {
   contracts: Contracts;
 };
+
+const multisig = {
+  [optimism.id]: getAddress('0xC0d6Bc5d052d1e74523AD79dD5A954276c9286D3'),
+  [mainnet.id]: getAddress('0x7A65824d74B0C20730B6eE4929ABcc41Cbe843Aa'),
+}[defaultChain.id];
 
 const Activity = ({ contracts }: Props) => {
   usePageView('/activity', 'Activity');
@@ -37,7 +43,13 @@ const Activity = ({ contracts }: Props) => {
         </Typography>
       </Box>
       <Box mt={6}>
-        <Feed contracts={contracts} />
+        {multisig ? (
+          <Feed contracts={contracts} multisig={multisig} />
+        ) : (
+          <Typography textAlign="center" fontWeight={700} color="grey.900">
+            {t('There is no admin for this network')}
+          </Typography>
+        )}
       </Box>
     </Box>
   );
@@ -46,7 +58,7 @@ const Activity = ({ contracts }: Props) => {
 const ignore = ['.chainId', 'PriceFeed', 'Balancer', 'Uniswap', 'Socket'];
 
 const networks = {
-  [mainnet.id]: 'mainnet',
+  [mainnet.id]: 'ethereum',
   [optimism.id]: optimism.network,
   [goerli.id]: goerli.network,
 };

@@ -68,7 +68,7 @@ function Event({ tx }: EventProps) {
   const [open, setOpen] = useState(false);
   const actions = tx.txInfo.actionCount ?? 1;
 
-  const method = (methodName: string | null) => {
+  const method = (methodName: string | null, txType: string | null) => {
     if (methodName === 'multiSend') {
       return t('Multiple transactions');
     }
@@ -81,8 +81,14 @@ function Event({ tx }: EventProps) {
       return t('Schedule');
     }
 
+    if (txType) {
+      return txType;
+    }
+
     return t('Unknown');
   };
+
+  const context = { SettingSchange: 'Safe', Creation: 'Safe' }[tx.txInfo.type] ?? 'Protocol';
 
   return (
     <Accordion
@@ -111,13 +117,13 @@ function Event({ tx }: EventProps) {
         <Box>
           <Box display="flex" alignItems="center" gap={0.5} color="grey.900">
             <Typography component="span" fontSize={14} fontWeight={500} fontFamily="fontFamilyMonospaced">
-              {String(tx.executionInfo.nonce).padStart(2, '0')}
+              {String(tx?.executionInfo?.nonce ?? 0).padStart(2, '0')}
             </Typography>
             <Typography component="span" fontSize={14} fontWeight={500} fontFamily="fontFamilyMonospaced">
               •
             </Typography>
             <Typography component="span" variant="h6">
-              {tx.txInfo.type === 'SettingsChange' ? 'Safe' : 'Protocol'}:
+              {context}:
             </Typography>
             <Typography
               component="span"
@@ -132,16 +138,27 @@ function Event({ tx }: EventProps) {
             >
               {tx.txInfo.type === 'SettingsChange' && tx.txInfo.humanDescription
                 ? tx.txInfo.humanDescription
-                : capitalize(method(tx.txInfo.methodName))}
+                : capitalize(method(tx.txInfo.methodName, tx.txInfo.type))}
             </Typography>
           </Box>
           <Box display="flex" alignItems="center" gap={0.5}>
-            <Typography component="span" fontSize={14} textTransform="uppercase" fontWeight={500} color="grey.400">
-              {t('Approved by')}:
-            </Typography>
-            <Typography component="span" fontSize={14} fontWeight={700} color="grey.700">
-              {tx.executionInfo.confirmationsSubmitted}/{tx.executionInfo.confirmationsRequired}
-            </Typography>
+            {tx?.executionInfo?.confirmationsRequired !== undefined &&
+              tx?.executionInfo?.confirmationsSubmitted !== undefined && (
+                <>
+                  <Typography
+                    component="span"
+                    fontSize={14}
+                    textTransform="uppercase"
+                    fontWeight={500}
+                    color="grey.400"
+                  >
+                    {t('Approved by')}:
+                  </Typography>
+                  <Typography component="span" fontSize={14} fontWeight={700} color="grey.700">
+                    {tx.executionInfo.confirmationsSubmitted}/{tx?.executionInfo?.confirmationsRequired}
+                  </Typography>
+                </>
+              )}
           </Box>
         </Box>
         <Box display="flex" flexDirection="column" alignItems="flex-end">
@@ -220,6 +237,14 @@ function EventSummary({ tx }: EventProps) {
 
   if (isLoading || !data) {
     return <Skel />;
+  }
+
+  if (!data.txData) {
+    return (
+      <Typography textAlign="center" py={2}>
+        {t('Unable to decode transaction data')}
+      </Typography>
+    );
   }
 
   const isMultiSend =

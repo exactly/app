@@ -24,7 +24,7 @@ export type Transaction = {
   timestamp: number;
   txStatus: 'SUCCESS' | 'AWAITING_EXECUTION';
   txInfo: TxInfo;
-  executionInfo: ExecutionInfo;
+  executionInfo: null | ExecutionInfo;
 };
 
 type TxInfo = {
@@ -51,7 +51,7 @@ export type SafeTransaction = {
   executedAt: null | number;
   txStatus: 'SUCCESS' | 'AWAITING_EXECUTION';
   txInfo: TxInfo;
-  txData: TxData;
+  txData: null | TxData;
   txHash: Hex;
   detailedExecutionInfo: DetailedExecutionInfo;
 };

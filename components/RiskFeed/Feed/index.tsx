@@ -1,22 +1,20 @@
 import React from 'react';
-import { getAddress } from 'viem';
+import { Address } from 'viem';
 import { Box, Divider } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-
 import { useHistory, useQueued } from '../api';
 import { ABIContext, type Contracts } from '../Decode';
 import Events from '../Events';
 
-const MULTISIG = getAddress('0xC0d6Bc5d052d1e74523AD79dD5A954276c9286D3');
-
 type Props = {
+  multisig: Address;
   contracts: Contracts;
 };
 
-export default React.memo(function Feed({ contracts }: Props) {
+export default React.memo(function Feed({ contracts, multisig }: Props) {
   const { t } = useTranslation();
-  const { data: queued, isLoading: queuedIsLoading } = useQueued(MULTISIG);
-  const { data: history, isLoading: historyIsLoading } = useHistory(MULTISIG);
+  const { data: queued, isLoading: queuedIsLoading } = useQueued(multisig);
+  const { data: history, isLoading: historyIsLoading } = useHistory(multisig);
 
   return (
     <ABIContext.Provider value={contracts}>

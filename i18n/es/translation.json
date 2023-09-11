@@ -452,5 +452,7 @@
   "To be used by Exactly’s web-app, so accounts can operate with ETH on MarketWETH. Wraps ETH or unwraps WETH before and after interacting with MarketWETH. It saves one step for the user.": "Para ser utilizado por la aplicación web de Exactly, para que las cuentas puedan operar con ETH en MarketWETH. Envuelve ETH o desenvuelve WETH antes y después de interactuar con MarketWETH. Ahorra un paso para el usuario.",
   "The RewardsController is designed to store and distribute rewards to accounts that interact with the Markets different variable and fixed pools. It calculates the total amount of rewards to distribute and determines the allocation between the pools based on a dynamic distribution model. Accounts can claim their rewards through the contract, and their claimable rewards can be queried at any time using the claimable function.": "El RewardsController está diseñado para almacenar y distribuir recompensas a las cuentas que interactúan con los diferentes pools variables y fijos de los Mercados. Calcula el monto total de recompensas a distribuir y determina la asignación entre los pools en función de un modelo de distribución dinámico. Las cuentas pueden reclamar sus recompensas a través del contrato, y sus recompensas reclamables se pueden consultar en cualquier momento utilizando la función reclamable.",
   "Activity Monitor": "Monitor de Actividad",
-  "More": "Más"
+  "More": "Más",
+  "Unable to decode transaction data": "No se puede decodificar los datos de la transacción",
+  "There is no admin for this network": "No hay administrador para esta red"
 }
