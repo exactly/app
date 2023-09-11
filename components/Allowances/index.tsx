@@ -41,7 +41,7 @@ const Allowances = () => {
       <Box m="auto" display="flex" flexDirection="column">
         <Box>
           <Typography variant="h6" fontSize={24} fontWeight={700} mb={3}>
-            {t('Allowances & Revoke')}
+            {t('Revoke Allowances')}
           </Typography>
           <Typography fontSize={16} fontWeight={500} mb={1}>
             {t(
