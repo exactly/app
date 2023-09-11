@@ -12,7 +12,7 @@ import { Box, useTheme } from '@mui/material';
 
 import { AccountDataProvider } from 'contexts/AccountDataContext';
 import { ThemeProvider } from 'contexts/ThemeContext';
-import { wagmi, walletConnectId, web3modal } from 'utils/client';
+import { isE2E, wagmi, walletConnectId, web3modal } from 'utils/client';
 import Footer from 'components/Footer';
 import Navbar from 'components/Navbar';
 import { globals } from 'styles/theme';
@@ -53,7 +53,7 @@ const Modals = () => (
     <StakingModal />
     <FaucetModal />
     <Web3ModalWrapper />
-    <NewsModal />
+    {!isE2E && <NewsModal />}
   </>
 );
 
