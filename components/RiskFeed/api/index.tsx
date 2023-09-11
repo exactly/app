@@ -88,7 +88,7 @@ type TxData = {
   addressInfoIndex: Record<Address, Wallet>;
 };
 
-type DataDecoded = {
+export type DataDecoded = {
   method: string;
   parameters: Parameter[];
 };

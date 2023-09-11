@@ -4,7 +4,7 @@ import { Box, ButtonBase } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import Link from 'next/link';
 
-import { SafeTransaction } from '../api';
+import { DataDecoded } from '../api';
 import useEtherscanLink from 'hooks/useEtherscanLink';
 import { formatWallet } from 'utils/utils';
 
@@ -14,7 +14,7 @@ export const ABIContext = createContext<Contracts>({});
 
 type Props = {
   to: Address;
-  data: SafeTransaction['txData']['dataDecoded'];
+  data: DataDecoded | null;
 };
 
 export default function Decode({ to, data }: Props) {
