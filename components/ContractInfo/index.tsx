@@ -187,6 +187,7 @@ const ContractInfo: FC<Props> = ({
               )}
             </Box>
           </Box>
+          <Divider />
         </Box>
       </AccordionDetails>
     </Accordion>

@@ -11,6 +11,8 @@ import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
 import ContractInfo from 'components/ContractInfo';
 import useGetContractAddress from 'hooks/useContractAddress';
 import { ContractInfoType } from 'types/ContractInfoType';
+import { optimism } from 'viem/chains';
+import { useWeb3 } from 'hooks/useWeb3';
 
 const Security: NextPage = () => {
   usePageView('/security', 'Security');
@@ -18,47 +20,48 @@ const Security: NextPage = () => {
   const { query } = useRouter();
   const getContractAddress = useGetContractAddress();
   const [contractsData, setContractsData] = useState<ContractInfoType[]>([]);
+  const { chain: displayNetwork } = useWeb3();
 
   const contracts = useMemo(
     () => [
-      {
-        name: 'Auditor.sol',
-        audited: true,
-        description: t(
-          'The Auditor is the risk management layer of the protocol; it determines how much collateral a user is required to maintain, and whether (and by how much) a user can be liquidated. Each time a user borrows from a Market, the Auditor validates his account’s liquidity to determine his health factor.',
-        ),
-        reports: ['ABDK', 'Coinspect'],
-        information: [`482 ${t('lines')} (409 ${t('lines of code')}), 20.5 kb`],
-        proxy: async () => {
-          return [{ name: '', address: await getContractAddress('Auditor') }];
-        },
-        implementation: async () => {
-          return [{ name: '', address: await getContractAddress('Auditor') }];
-        },
-        codeLink: 'https://github.com/exactly/protocol/blob/main/contracts/Auditor.sol',
-      },
-      {
-        name: 'InterestRateModel.sol',
-        audited: true,
-        description: t(
-          'Given supply and demand values, the InterestRateModel is queried to calculate and return both fixed and variable rates. Contains parameters as state variables that are used to get the different points in the utilization curve for an asset. There’s one InterestRateModel contract per enabled asset.',
-        ),
-        reports: ['ABDK', 'Coinspect'],
-        information: [`131 ${t('lines')} (113 ${t('lines of code')}), 5.39 kb`],
-        proxy: async () => {
-          return [
-            { name: 'USDC', address: await getContractAddress('InterestRateModelUSDC') },
-            { name: 'WETH', address: await getContractAddress('InterestRateModelWETH') },
-            { name: 'wstETH', address: await getContractAddress('InterestRateModelwstETH') },
-          ];
-        },
-        implementation: (): null => {
-          return null;
-        },
-        codeLink: 'https://github.com/exactly/protocol/blob/main/contracts/InterestRateModel.sol',
-      },
+      ...(displayNetwork.id === optimism.id
+        ? [
+            {
+              name: 'Airdrop.sol',
+              audited: false,
+              description: t(
+                'The EXA smart contract encapsulates the functionality of the EXA ERC20 token. This smart contract uses OpenZeppelin’s ERC20VotesUpgradeable implementation.',
+              ),
+              reports: ['ABDK'],
+              information: [`24 ${t('lines')} (20 ${t('lines of code')}), 674 kb`],
+              proxy: async () => {
+                return [{ name: '', address: await getContractAddress('EXA_Proxy') }];
+              },
+              implementation: async () => {
+                return [{ name: '', address: await getContractAddress('EXA_Implementation') }];
+              },
+              codeLink: 'https://github.com/exactly/protocol/blob/main/contracts/periphery/EXA.sol',
+            },
+            {
+              name: 'EXA.sol',
+              audited: false,
+              description: t(
+                'Using Solmate’s Merkle tree library, this smart contract can validate the eligibility of an address for the airdrop and the appropriate amount based on a set of predetermined criteria.',
+              ),
+              reports: ['ABDK'],
+              information: [`79 ${t('lines')} (65 ${t('lines of code')}), 2.25 kb`],
+              proxy: async () => {
+                return [{ name: '', address: await getContractAddress('Airdrop_Proxy') }];
+              },
+              implementation: async () => {
+                return [{ name: '', address: await getContractAddress('Airdrop_Implementation') }];
+              },
+              codeLink: 'https://github.com/exactly/protocol/blob/main/contracts/periphery/Airdrop.sol',
+            },
+          ]
+        : []),
     ],
-    [getContractAddress, t],
+    [displayNetwork.id, getContractAddress, t],
   );
 
   useEffect(() => {

@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { useWeb3 } from './useWeb3';
 import { Address } from 'viem';
-import { mainnet } from 'wagmi';
+import { mainnet } from 'viem/chains';
 
 function useGetContractAddress() {
   const { chain: displayNetwork } = useWeb3();

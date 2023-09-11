@@ -7,11 +7,14 @@ import { Box, Divider, Typography } from '@mui/material';
 import KeyboardArrowRightRoundedIcon from '@mui/icons-material/KeyboardArrowRightRounded';
 import Link from 'next/link';
 import useRouter from 'hooks/useRouter';
+import { useWeb3 } from 'hooks/useWeb3';
+import { optimism } from 'viem/chains';
 
 const Security: NextPage = () => {
   usePageView('/security', 'Security');
   const { t } = useTranslation();
   const { query } = useRouter();
+  const { chain: displayNetwork } = useWeb3();
 
   return (
     <Box display="flex" flexDirection="column" gap={3} maxWidth={640} mx="auto" my={3}>
@@ -40,31 +43,35 @@ const Security: NextPage = () => {
                 bgcolor="green"
                 borderRadius="4px"
                 px={0.5}
-              >{`8 ${t('Audited')}`}</Typography>
+              >{`5 ${t('Audited')}`}</Typography>
               <KeyboardArrowRightRoundedIcon />
             </Box>
           </Box>
         </Link>
-        <Divider />
-        <Link href={{ pathname: `/security/periphery`, query }} legacyBehavior>
-          <Box display="flex" justifyContent="space-between" p={2} gap={1} sx={{ cursor: 'pointer' }}>
-            <Typography fontSize={16} fontWeight={700}>
-              {t('Periphery Contracts')}
-            </Typography>
-            <Box display="flex" alignItems="center" gap={1}>
-              <Typography
-                textTransform="uppercase"
-                fontSize={12}
-                fontWeight={700}
-                color="white"
-                bgcolor="green"
-                borderRadius="4px"
-                px={0.5}
-              >{`7 ${t('Audited')}`}</Typography>
-              <KeyboardArrowRightRoundedIcon />
-            </Box>
-          </Box>
-        </Link>
+        {displayNetwork.id === optimism.id && (
+          <>
+            <Divider />
+            <Link href={{ pathname: `/security/periphery`, query }} legacyBehavior>
+              <Box display="flex" justifyContent="space-between" p={2} gap={1} sx={{ cursor: 'pointer' }}>
+                <Typography fontSize={16} fontWeight={700}>
+                  {t('Periphery Contracts')}
+                </Typography>
+                <Box display="flex" alignItems="center" gap={1}>
+                  <Typography
+                    textTransform="uppercase"
+                    fontSize={12}
+                    fontWeight={700}
+                    color="white"
+                    bgcolor="orange"
+                    borderRadius="4px"
+                    px={0.5}
+                  >{`2 ${t('Auditing')}`}</Typography>
+                  <KeyboardArrowRightRoundedIcon />
+                </Box>
+              </Box>
+            </Link>
+          </>
+        )}
       </Box>
       <Divider flexItem sx={{ my: 3 }} />
       <Typography variant="h6">{t('Connecting to Exactly, Spending Limits and Revoking Allowances')}</Typography>

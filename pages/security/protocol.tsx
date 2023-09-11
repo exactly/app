@@ -11,6 +11,8 @@ import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
 import ContractInfo from 'components/ContractInfo';
 import { ContractInfoType } from 'types/ContractInfoType';
 import useContractAddress from 'hooks/useContractAddress';
+import { useWeb3 } from 'hooks/useWeb3';
+import { mainnet, goerli, optimism } from 'viem/chains';
 
 const Security: NextPage = () => {
   usePageView('/security', 'Security');
@@ -18,6 +20,7 @@ const Security: NextPage = () => {
   const { query } = useRouter();
   const [contractsData, setContractsData] = useState<ContractInfoType[]>([]);
   const getContractAddress = useContractAddress();
+  const { chain: displayNetwork } = useWeb3();
 
   const contracts = useMemo(
     () => [
@@ -50,6 +53,14 @@ const Security: NextPage = () => {
             { name: 'USDC', address: await getContractAddress('InterestRateModelUSDC') },
             { name: 'WETH', address: await getContractAddress('InterestRateModelWETH') },
             { name: 'wstETH', address: await getContractAddress('InterestRateModelwstETH') },
+            ...(displayNetwork.id === optimism.id
+              ? [{ name: 'OP', address: await getContractAddress('InterestRateModelOP') }]
+              : displayNetwork.id === mainnet.id || displayNetwork.id === goerli.id
+              ? [
+                  { name: 'DAI', address: await getContractAddress('InterestRateModelDAI') },
+                  { name: 'WBTC', address: await getContractAddress('InterestRateModelWBTC') },
+                ]
+              : []),
           ];
         },
         implementation: (): null => {
@@ -57,8 +68,80 @@ const Security: NextPage = () => {
         },
         codeLink: 'https://github.com/exactly/protocol/blob/main/contracts/InterestRateModel.sol',
       },
+      {
+        name: 'Market.sol',
+        audited: true,
+        description: t(
+          'ERC-4626 is an implementation of a standard API for tokenized vaults representing shares of a single underlying token. This standard is an extension of the ERC-20 token standard that provides basic functionality for depositing and withdrawing tokens and reading balances.',
+        ),
+        reports: ['ABDK', 'Coinspect'],
+        information: [`1299 ${t('lines')} (1107 ${t('lines of code')}), 57 kb`],
+        proxy: async () => {
+          return [
+            { name: 'USDC', address: await getContractAddress('MarketUSDC_Proxy') },
+            { name: 'WETH', address: await getContractAddress('MarketWETH_Proxy') },
+            { name: 'wstETH', address: await getContractAddress('MarketwstETH_Proxy') },
+            ...(displayNetwork.id === optimism.id
+              ? [{ name: 'OP', address: await getContractAddress('MarketOP_Proxy') }]
+              : displayNetwork.id === mainnet.id || displayNetwork.id === goerli.id
+              ? [
+                  { name: 'DAI', address: await getContractAddress('MarketDAI_Proxy') },
+                  { name: 'WBTC', address: await getContractAddress('InterestRateModelWBTC') },
+                ]
+              : []),
+          ];
+        },
+        implementation: async () => {
+          return [
+            { name: 'USDC', address: await getContractAddress('MarketUSDC_Implementation') },
+            { name: 'WETH', address: await getContractAddress('MarketWETH_Implementation') },
+            { name: 'wstETH', address: await getContractAddress('MarketwstETH_Implementation') },
+            ...(displayNetwork.id === optimism.id
+              ? [{ name: 'OP', address: await getContractAddress('MarketOP_Implementation') }]
+              : displayNetwork.id === mainnet.id || displayNetwork.id === goerli.id
+              ? [
+                  { name: 'DAI', address: await getContractAddress('MarketDAI_Implementation') },
+                  { name: 'WBTC', address: await getContractAddress('MarketWBTC_Implementation') },
+                ]
+              : []),
+          ];
+        },
+        codeLink: 'https://github.com/exactly/protocol/blob/main/contracts/Market.sol',
+      },
+      {
+        name: 'MarketETHRouter.sol',
+        audited: true,
+        description: t(
+          'To be used by Exactly’s web-app, so accounts can operate with ETH on MarketWETH. Wraps ETH or unwraps WETH before and after interacting with MarketWETH. It saves one step for the user.',
+        ),
+        reports: ['ABDK', 'Coinspect'],
+        information: [`150 ${t('lines')} (126 ${t('lines of code')}), 6.24 kb`],
+        proxy: async () => {
+          return [{ name: '', address: await getContractAddress('MarketETHRouter_Proxy') }];
+        },
+        implementation: async () => {
+          return [{ name: '', address: await getContractAddress('MarketETHRouter_Implementation') }];
+        },
+        codeLink: 'https://github.com/exactly/protocol/blob/main/contracts/MarketETHRouter.sol',
+      },
+      {
+        name: 'RewardsController.sol',
+        audited: true,
+        description: t(
+          'The RewardsController is designed to store and distribute rewards to accounts that interact with the Markets different variable and fixed pools. It calculates the total amount of rewards to distribute and determines the allocation between the pools based on a dynamic distribution model. Accounts can claim their rewards through the contract, and their claimable rewards can be queried at any time using the claimable function.',
+        ),
+        reports: ['ABDK', 'Coinspect'],
+        information: [`932 ${t('lines')} (873 ${t('lines of code')}), 36.5 kb`],
+        proxy: async () => {
+          return [{ name: '', address: await getContractAddress('RewardsController_Proxy') }];
+        },
+        implementation: async () => {
+          return [{ name: '', address: await getContractAddress('RewardsController_Implementation') }];
+        },
+        codeLink: '',
+      },
     ],
-    [getContractAddress, t],
+    [displayNetwork.id, getContractAddress, t],
   );
 
   useEffect(() => {
