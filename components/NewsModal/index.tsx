@@ -1,54 +1,72 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { Box, Button, Dialog, Grid, IconButton, Slide, Typography, useMediaQuery, useTheme } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import Image from 'next/image';
 import Link from 'next/link';
 import useRouter from 'hooks/useRouter';
-
-const news = [
-  {
-    title: 'Old',
-    description: ['See info'],
-    image: 'img/assets/EXA.svg',
-    buttonTitle: 'Get EXA',
-    pathname: '/governance',
-    until: '2023-08-31T23:59:59.000Z',
-  },
-  {
-    title: 'Airdrop is now live',
-    description: [
-      'Check if you are eligible for the EXA token airdrop in our Governance page.',
-      "Holding EXA will enable you to participate in discussions, propose enhancements, and cast votes to shape the protocol's evolution.",
-    ],
-    image: 'img/assets/EXA.svg',
-    buttonTitle: 'Get EXA',
-    pathname: '/governance',
-    until: '2023-10-31T23:59:59.000Z',
-  },
-  {
-    title: 'Protocol Activity Monitor',
-    description: ['See info'],
-    image: 'img/assets/EXA.svg',
-    buttonTitle: 'Get EXA',
-    pathname: '/governance',
-    until: '2023-10-31T23:59:59.000Z',
-  },
-];
+import { useTranslation } from 'react-i18next';
 
 const NEWS_READ_KEY = 'news_read';
 
+const getReadNews = () => {
+  const storedNews = localStorage.getItem(NEWS_READ_KEY);
+  return storedNews ? JSON.parse(storedNews) : [];
+};
+
+const isNewsRead = (id: string) => {
+  const readNews = getReadNews();
+  return readNews.includes(id);
+};
+
 const NewsModal = () => {
+  const { t } = useTranslation();
+  const news = useMemo(
+    () => [
+      {
+        id: 'Security Hub',
+        title: t('Security Hub'),
+        description: [
+          t('Stay up to date with all the security measures we put in place to keep the Protocol safe.'),
+          t("From smart contract audits to revoking token allowances, you'll find all the details right here."),
+        ],
+        image: 'img/news/1.png',
+        buttonTitle: t('Check it now'),
+        pathname: '/security',
+        until: '2023-10-31T23:59:59.000Z',
+      },
+      {
+        id: 'Protocol Activity Monitor',
+        title: t('Protocol Activity Monitor'),
+        description: [
+          t('This new tool offers real-time insights into the transactions and activities that shape the Protocol.'),
+          t("It's a vital resource to keep you informed about the direction the Protocol is taking."),
+        ],
+        image: 'img/news/2.png',
+        buttonTitle: t('Check transactions'),
+        pathname: '/activity',
+        until: '2023-10-31T23:59:59.000Z',
+      },
+      {
+        id: 'Revoke Allowances',
+        title: t('Revoke Allowances'),
+        description: [
+          t('Minimize risk exposure by revoking allowances made to smart contracts to spend tokens on your behalf.'),
+          t('This new tool further improves your security when interacting with the Protocol.'),
+        ],
+        image: 'img/news/3.png',
+        buttonTitle: 'Manage allowances',
+        pathname: '/revoke',
+        until: '2023-10-31T23:59:59.000Z',
+      },
+    ],
+    [t],
+  );
+
   const { pathname: currentPathname, query } = useRouter();
   const [open, setOpen] = useState(true);
   const [selected, setSelected] = useState(0);
-  const closeModal = useCallback(() => setOpen(false), []);
   const { breakpoints } = useTheme();
   const isMobile = useMediaQuery(breakpoints.down('md'));
-
-  const getReadNews = () => {
-    const storedNews = localStorage.getItem(NEWS_READ_KEY);
-    return storedNews ? JSON.parse(storedNews) : [];
-  };
 
   const markNewsAsRead = useCallback((titles: string[]) => {
     const readNews = getReadNews();
@@ -56,20 +74,20 @@ const NewsModal = () => {
     localStorage.setItem(NEWS_READ_KEY, JSON.stringify(newReadNews));
   }, []);
 
-  const isNewsRead = (title: string) => {
-    const readNews = getReadNews();
-    return readNews.includes(title);
-  };
-
   const filteredNews = news.filter(({ until, title }) => new Date(until) > new Date() && !isNewsRead(title));
-  const [readTitles, setReadTitles] = useState<string[]>(filteredNews[0]?.title ? [filteredNews[0].title] : []);
+  const [readIds, setReadIds] = useState<string[]>(filteredNews[0]?.id ? [filteredNews[0].id] : []);
+
+  const closeModal = useCallback(() => {
+    markNewsAsRead(readIds);
+    setOpen(false);
+  }, [markNewsAsRead, readIds]);
 
   const selectedNews = useMemo(() => filteredNews[selected], [filteredNews, selected]);
 
   const handleSetSelected = useCallback(
     (index: number) => {
       setSelected(index);
-      setReadTitles((r) => [...r, filteredNews[index].title]);
+      setReadIds((r) => [...r, filteredNews[index].id]);
     },
     [filteredNews],
   );
@@ -78,16 +96,11 @@ const NewsModal = () => {
     () => handleSetSelected((selected - 1 + filteredNews.length) % filteredNews.length),
     [filteredNews.length, handleSetSelected, selected],
   );
+
   const next = useCallback(
     () => handleSetSelected((selected + 1) % filteredNews.length),
     [filteredNews.length, handleSetSelected, selected],
   );
-
-  useEffect(() => {
-    return () => {
-      markNewsAsRead(readTitles);
-    };
-  }, [filteredNews, markNewsAsRead, readTitles]);
 
   if (currentPathname !== '/' || !selectedNews) return null;
 
@@ -111,18 +124,19 @@ const NewsModal = () => {
           color: 'grey.500',
           zIndex: 1,
         }}
-        data-testid="modal-close"
       >
         <CloseIcon sx={{ fontSize: 19 }} />
       </IconButton>
-      <Box width={{ xs: 'auto', md: 720 }} minHeight={308}>
-        <Grid container>
+      <Box width={{ xs: 'auto', md: 720 }}>
+        <Grid container minHeight={308} key={selected}>
           <Grid item xs={12} md={6} p={6} display="flex" flexDirection="column" justifyContent="space-between" gap={3}>
             <Box display="flex" flexDirection="column" gap={3}>
               <Typography variant="h6">{selectedNews.title}</Typography>
               <Box display="flex" flexDirection="column" gap={1}>
                 {selectedNews.description.map((text, index) => (
-                  <Typography key={`${text}-${index}`}>{text}</Typography>
+                  <Typography fontSize={14} key={`${text}-${index}`}>
+                    {text}
+                  </Typography>
                 ))}
               </Box>
             </Box>
@@ -132,11 +146,13 @@ const NewsModal = () => {
               </Button>
             </Link>
           </Grid>
-          <Grid item xs={12} md={6}>
-            <Box position="relative" width="100%" height="100%">
-              <Image src={selectedNews.image} alt="news image" layout="fill" objectFit="contain" />
-            </Box>
-          </Grid>
+          {!isMobile && (
+            <Grid item xs={12} md={6}>
+              <Box position="relative" width="100%" height="100%" bgcolor="#F9FAFB">
+                <Image src={selectedNews.image} alt="" layout="fill" objectFit="contain" />
+              </Box>
+            </Grid>
+          )}
         </Grid>
       </Box>
       {filteredNews.length > 1 && (
@@ -161,7 +177,7 @@ const NewsModal = () => {
                 height={selected === index ? 10 : 5}
                 borderRadius="50%"
                 bgcolor="grey.100"
-                sx={{ cursor: 'pointer' }}
+                sx={{ cursor: 'pointer', transition: 'all 0.1s ease-in' }}
                 onClick={() => setSelected(index)}
               />
             ))}

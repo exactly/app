@@ -454,5 +454,13 @@
   "Activity Monitor": "Monitor de Actividad",
   "More": "Más",
   "Unable to decode transaction data": "No se puede decodificar los datos de la transacción",
-  "There is no admin for this network": "No hay administrador para esta red"
+  "There is no admin for this network": "No hay administrador para esta red",
+  "Stay up to date with all the security measures we put in place to keep the Protocol safe.": "Mantente al día con todas las medidas de seguridad que implementamos para mantener el Protocolo seguro.",
+  "From smart contract audits to revoking token allowances, you'll find all the details right here.": "Desde auditorías de contratos inteligentes hasta revocar permisos de tokens, encontrarás todos los detalles aquí.",
+  "Check it now": "Revisar ahora",
+  "This new tool offers real-time insights into the transactions and activities that shape the Protocol.": "Esta nueva herramienta ofrece información en tiempo real sobre las transacciones y actividades que dan forma al Protocolo.",
+  "It's a vital resource to keep you informed about the direction the Protocol is taking.": "Es un recurso vital para mantenerte informado sobre la dirección que está tomando el Protocolo.",
+  "Check transactions": "Revisar transacciones",
+  "Minimize risk exposure by revoking allowances made to smart contracts to spend tokens on your behalf.": "Minimiza la exposición al riesgo revocando los permisos otorgados a los contratos inteligentes para utilizar tokens en tu nombre.",
+  "This new tool further improves your security when interacting with the Protocol.": "Esta nueva herramienta mejora aún más tu seguridad al interactuar con el Protocolo."
 }
