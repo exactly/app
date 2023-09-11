@@ -26,6 +26,7 @@ import RewardsModal from 'components/RewardsModal';
 import StakingModal from 'components/Velodrome/StakingModal';
 import DebtManagerModal from 'components/DebtManager';
 import FaucetModal from 'components/operations/Faucet/Modal';
+import NewsModal from 'components/NewsModal';
 
 const { maxWidth } = globals;
 
@@ -52,6 +53,7 @@ const Modals = () => (
     <StakingModal />
     <FaucetModal />
     <Web3ModalWrapper />
+    <NewsModal />
   </>
 );
 
