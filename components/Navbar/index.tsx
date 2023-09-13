@@ -31,6 +31,7 @@ import { useCustomTheme } from 'contexts/ThemeContext';
 import { useModal } from 'contexts/ModalContext';
 import MoreMenu from './MoreMenu';
 import ExtraFinance from 'components/ExtraFinance';
+import { isE2E } from 'utils/client';
 
 const { onlyMobile, onlyDesktopFlex } = globals;
 
@@ -210,7 +211,7 @@ function Navbar() {
               <Chip label="Goerli Faucet" onClick={openFaucet} sx={{ my: 'auto', display: onlyDesktopFlex }} />
             )}
             <Box display="flex" gap={0.5}>
-              {!isMobile && <SecondaryChain />}
+              {!isE2E && !isMobile && <SecondaryChain />}
               {isOPMainnet && <ExtraFinance />}
               {!isMobile && !isEthereum && <RewardsButton />}
               <Wallet />

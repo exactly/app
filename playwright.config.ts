@@ -1,14 +1,16 @@
 import { devices, PlaywrightTestConfig } from '@playwright/test';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
 const config: PlaywrightTestConfig = {
-  // globalSetup: require.resolve('./globalSetup'),
-  testDir: './tests',
-  testMatch: [/.*gui\.(js|ts|mjs)/],
+  testDir: './e2e/specs',
+  testMatch: [/.*spec\.ts/],
   /* Maximum time one test can run for. */
-  timeout: 90 * 1000,
+  timeout: 120_000,
   expect: {
     /**
      * Maximum time expect() should wait for the condition to be met.
@@ -41,6 +43,8 @@ const config: PlaywrightTestConfig = {
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
+
+    baseURL: 'http://localhost:3000',
   },
 
   /* Configure projects for major browsers */

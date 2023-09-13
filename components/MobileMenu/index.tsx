@@ -25,6 +25,7 @@ import { useWeb3 } from 'hooks/useWeb3';
 import SecondaryChain from 'components/SecondaryChain';
 import { RewardsButton } from 'components/RewardsModal';
 import { useCustomTheme } from 'contexts/ThemeContext';
+import { isE2E } from 'utils/client';
 
 import RemoveCircleOutlineRoundedIcon from '@mui/icons-material/RemoveCircleOutlineRounded';
 import MonitorHeartRoundedIcon from '@mui/icons-material/MonitorHeartRounded';
@@ -116,7 +117,7 @@ function MobileMenu({ open, handleClose }: Props) {
                 width={103}
                 height={30}
               />
-              <SecondaryChain />
+              {!isE2E && <SecondaryChain />}
               <IconButton size="small" edge="start" aria-label="close" onClick={handleClose}>
                 <CloseIcon sx={{ color: 'figma.grey.300' }} />
               </IconButton>

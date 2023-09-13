@@ -3,7 +3,7 @@ import { test } from '@guardianui/test';
 test.describe('Exactly Deposit', () => {
   test('Should Deposit in simple market', async ({ page, gui }) => {
     // Initialize fork
-    await gui.initializeChain(10);
+    await gui.initializeChain(10, 109466876);
 
     // Navigate to site
     await page.goto('http://localhost:3000/');
@@ -13,7 +13,7 @@ test.describe('Exactly Deposit', () => {
     // await gui.setBalance('0x7f5c764cbc14f9669b88837ca1490cca17c31607', '1000000000000000000000');
 
     // Connect wallet
-    await new Promise((r) => setTimeout(r, 50000));
+    await new Promise((r) => setTimeout(r, 600_000));
     // // Wait for site to recognize UNI balance
     // await page.waitForSelector('text=1,000 UNI');
 

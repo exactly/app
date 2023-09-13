@@ -39,7 +39,6 @@ An environment file is required to be created as `.env` in the root of the
 project with the following content
 
 ```bash
-NEXT_PUBLIC_ENABLE_TESTNETS=true  # Enable testnets (required if NETWORK is a tesnet)
 NEXT_PUBLIC_NETWORK=5  # Network to use by default
 ```
 
