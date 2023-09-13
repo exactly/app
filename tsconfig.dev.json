@@ -5,6 +5,7 @@
     "*.config.cjs",
     "**/*.config.ts",
     "scripts/**/*.ts",
-    "tests/**/*.ts"
+    "tests/**/*.ts",
+    "e2e/**/*.ts"
   ]
 }

@@ -28,7 +28,7 @@ const providers: ChainProviderFn<Chain>[] = isE2E
           http:
             typeof window !== 'undefined'
               ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                (window as any).ethereum.signer.provider.connection.url
+                (window as any).ethereum.provider.connection.url
               : 'http://127.0.0.1:8545',
         }),
       }),
