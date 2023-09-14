@@ -28,5 +28,5 @@
     "incremental": true
   },
   "include": ["**/*.ts", "**/*.tsx"],
-  "exclude": ["node_modules", "scripts"]
+  "exclude": ["node_modules", "scripts", "e2e"]
 }
