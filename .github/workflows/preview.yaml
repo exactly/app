@@ -44,19 +44,19 @@ jobs:
           node-version: 18
           cache: npm
       - run: npm ci --audit false
-      - uses: cypress-io/github-action@v5
-        with:
-          browser: chrome
-          headed: false
-          install: false
-          record: false
-          start: npm run start:e2e
-          wait-on: 'http://127.0.0.1:3000'
-          wait-on-timeout: 300000
-          command: npm run test
-      - uses: actions/upload-artifact@v3
-        if: failure()
-        with:
-          name: e2e-artifacts
-          path: |
-            tests/e2e/screenshots
+      # - uses: cypress-io/github-action@v5
+      #   with:
+      #     browser: chrome
+      #     headed: false
+      #     install: false
+      #     record: false
+      #     start: npm run start:e2e
+      #     wait-on: 'http://127.0.0.1:3000'
+      #     wait-on-timeout: 300000
+      #     command: npm run test
+      # - uses: actions/upload-artifact@v3
+      #   if: failure()
+      #   with:
+      #     name: e2e-artifacts
+      #     path: |
+      #       tests/e2e/screenshots

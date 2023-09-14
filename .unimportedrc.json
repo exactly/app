@@ -1,12 +1,13 @@
 {
-  "ignoreUnresolved": ["i18n"],
+  "ignoreUnresolved": ["fsevents", "electron/index.js", "i18n"],
   "entry": [
     "sentry.*.config.ts",
     "*.config.cjs",
     "middleware.ts",
     "pages/**/*",
     "scripts/**/*",
+    "e2e/specs/**/*.spec.ts",
     "i18n/index.ts"
   ],
-  "ignoreUnimported": ["wagmi.config.ts", "cypress.config.ts"]
+  "ignoreUnimported": ["playwright.config.ts", "wagmi.config.ts"]
 }
