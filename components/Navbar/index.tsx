@@ -27,10 +27,10 @@ import { useTranslation } from 'react-i18next';
 import MaturityDateReminder from 'components/MaturityDateReminder';
 import SecondaryChain from 'components/SecondaryChain';
 import { RewardsButton } from 'components/RewardsModal';
-import Velodrome from 'components/Velodrome';
 import { useCustomTheme } from 'contexts/ThemeContext';
 import { useModal } from 'contexts/ModalContext';
 import MoreMenu from './MoreMenu';
+import ExtraFinance from 'components/ExtraFinance';
 
 const { onlyMobile, onlyDesktopFlex } = globals;
 
@@ -211,7 +211,7 @@ function Navbar() {
             )}
             <Box display="flex" gap={0.5}>
               {!isMobile && <SecondaryChain />}
-              {isOPMainnet && <Velodrome />}
+              {isOPMainnet && <ExtraFinance />}
               {!isMobile && !isEthereum && <RewardsButton />}
               <Wallet />
             </Box>

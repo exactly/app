@@ -1,3 +1,7 @@
+import { WAD } from './queryRates';
+
+const YEAR_IN_SECONDS = 60n * 60n * 24n * 365n;
+
 import { Hex } from 'viem';
 
 export function formatWallet(walletAddress?: string) {
@@ -27,3 +31,8 @@ export const checkPrecision = (value: string, decimals?: number): boolean => {
 };
 
 export const isDefined = <T,>(value: T | undefined): value is T => value !== undefined;
+
+export const aprToAPY = (apr: bigint, interval: bigint) => {
+  const compounds = YEAR_IN_SECONDS / interval;
+  return (WAD + apr / compounds) ** compounds / WAD ** (compounds - 1n) - WAD;
+};
