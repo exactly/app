@@ -1,9 +1,12 @@
-import { IconButton, Menu, MenuItem } from '@mui/material';
+import { Box, IconButton, Menu, MenuItem, Typography } from '@mui/material';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
 import AdvancedViewSwitch from 'components/AdvancedSwitch';
+import SwitchTheme from 'components/SwitchTheme';
 
 const Settings = () => {
+  const { t } = useTranslation();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 
   const open = Boolean(anchorEl);
@@ -36,7 +39,7 @@ const Settings = () => {
           paper: {
             sx: {
               marginTop: 1,
-              padding: ({ spacing }) => spacing(0.5, 1, 0.5, 1),
+              padding: ({ spacing }) => spacing(0, 1, 0, 1),
               boxShadow: ({ palette: _palette }) =>
                 _palette.mode === 'light' ? '0px 4px 12px rgba(175, 177, 182, 0.2)' : '',
               borderRadius: '16px',
@@ -52,8 +55,14 @@ const Settings = () => {
           horizontal: 'right',
         }}
       >
-        <MenuItem sx={{ borderRadius: '8px' }}>
-          <AdvancedViewSwitch />
+        <MenuItem sx={{ borderRadius: '8px', p: 1 }}>
+          <AdvancedViewSwitch sx={{ width: '100%' }} />
+        </MenuItem>
+        <MenuItem sx={{ borderRadius: '8px', p: 1 }}>
+          <Box width="100%" display="flex" alignItems="center" justifyContent="space-between" gap={1}>
+            <Typography fontSize={14}>{t('Theme')}</Typography>
+            <SwitchTheme />
+          </Box>
         </MenuItem>
       </Menu>
     </>

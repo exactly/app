@@ -5,15 +5,16 @@ import { useTranslation } from 'react-i18next';
 import Switch from 'components/Switch';
 
 type Props = {
+  sx?: React.ComponentProps<typeof Box>['sx'];
   fontSize?: number;
 };
 
-const AdvancedViewSwitch: FC<Props> = ({ fontSize = 14 }) => {
+const AdvancedViewSwitch: FC<Props> = ({ sx, fontSize = 14 }) => {
   const { t } = useTranslation();
   const { view, setView } = useCustomTheme();
 
   return (
-    <Box display="flex" alignItems="center" justifyContent="space-between" gap={1}>
+    <Box display="flex" alignItems="center" justifyContent="space-between" gap={1} sx={{ ...sx }}>
       <Typography fontSize={fontSize}>{t('Advanced view')}</Typography>
       <Switch
         checked={view === 'advanced'}
