@@ -6,7 +6,7 @@ export default function (page: Page) {
   const goTo = async (path: Path) => {
     await page.getByTestId(`navbar-link-${path}`).click();
     await page.waitForURL(`**/${path}`, { timeout: 15_000 });
-    await new Promise((resolve) => setTimeout(resolve, 15_000));
+    await new Promise((resolve) => setTimeout(resolve, 30_000));
     await page.waitForFunction(
       () => {
         return document.querySelectorAll('.MuiSkeleton-root').length === 0;
