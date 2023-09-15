@@ -53,7 +53,6 @@ function MobileMenu({ open, handleClose }: Props) {
       {
         title: t('Markets'),
         pathname: '/',
-        component: <AdvancedViewSwitch />,
         icon: <BarChartRoundedIcon sx={{ fontSize: 20 }} />,
       },
       {
@@ -129,25 +128,22 @@ function MobileMenu({ open, handleClose }: Props) {
               {t('Menu')}
             </Typography>
             <Box display="flex" flexDirection="column" gap={2}>
-              {headers.map(({ title, pathname, component, icon }) => (
+              {headers.map(({ title, pathname, icon }) => (
                 <Box key={`mobile_tabs_${title}`} display="flex" flexDirection="column" gap={2}>
-                  <Box display="flex" justifyContent="space-between">
-                    <Link href={{ pathname, query }} onClick={handleClose}>
-                      <Box display="flex" gap={1} alignItems="center">
-                        {icon}
-                        <Typography
-                          sx={{
-                            textDecoration: currentPathname === pathname ? 'underline' : 'none',
-                            fontWeight: 700,
-                            fontSize: 24,
-                          }}
-                        >
-                          {title}
-                        </Typography>
-                      </Box>
-                    </Link>
-                    {component}
-                  </Box>
+                  <Link href={{ pathname, query }} onClick={handleClose}>
+                    <Box display="flex" gap={1} alignItems="center">
+                      {icon}
+                      <Typography
+                        sx={{
+                          textDecoration: currentPathname === pathname ? 'underline' : 'none',
+                          fontWeight: 700,
+                          fontSize: 24,
+                        }}
+                      >
+                        {title}
+                      </Typography>
+                    </Box>
+                  </Link>
                 </Box>
               ))}
             </Box>
@@ -157,6 +153,19 @@ function MobileMenu({ open, handleClose }: Props) {
                 <RewardsButton />
               </>
             )}
+            <Divider sx={{ my: 1.5 }} />
+            <Typography fontFamily="fontFamilyMonospaced" fontSize={14} color="figma.grey.500" fontWeight={600}>
+              {t('Settings')}
+            </Typography>
+            <AdvancedViewSwitch sx={{ width: '100%' }} fontSize={16} />
+            <Box width="100%" display="flex" alignItems="center" justifyContent="space-between" gap={1}>
+              <Typography fontSize={16}>{t('Theme')}</Typography>
+              <SwitchTheme />
+            </Box>
+            <Box width="100%" display="flex" alignItems="center" justifyContent="space-between" gap={1}>
+              <Typography fontSize={16}>{t('Language')}</Typography>
+              <SelectLanguage />
+            </Box>
             <Divider sx={{ my: 1.5 }} />
             <Typography fontFamily="fontFamilyMonospaced" fontSize={14} color="figma.grey.500" fontWeight={600}>
               {t('Links')}
@@ -180,14 +189,10 @@ function MobileMenu({ open, handleClose }: Props) {
               <QueryStatsIcon fontSize="small" sx={{ color: 'figma.grey.500', my: 'auto' }} />
             </LinkItem>
           </Box>
-          <Box display="flex" justifyContent="space-between" alignItems="center" mt={2}>
+          <Box mt={4}>
             <Typography fontSize={14} sx={{ color: 'figma.grey.300' }}>
               © Exactly {date.getFullYear()}
             </Typography>
-            <Box>
-              <SelectLanguage />
-              <SwitchTheme />
-            </Box>
           </Box>
         </Box>
       </Slide>
