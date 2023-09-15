@@ -368,8 +368,6 @@
   "Your current balance": "Tu balance actual",
   "Your VELO rewards": "Tus recompensas VELO",
   "Supply EXA/ETH": "Depositar EXA/ETH",
-  "Provide EXA liquidity on Velodrome and receive VELO rewards": "Proporciona liquidez EXA en Velodrome y recibe recompensas VELO",
-  "Supply EXA": "Depositar EXA",
   "You need to supply more than {{ value }} {{ symbol }}": "Necesitas depositar más de {{ value }} {{ symbol }}",
   "You have no EXA balance. Supply {{ symbol }} in order to continue": "No posees balance de EXA. Deposita {{ symbol }} para continuar",
   "Approve {{ asset }}": "Aprobar {{ asset }}",
