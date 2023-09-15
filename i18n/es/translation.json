@@ -462,5 +462,6 @@
   "It's a vital resource to keep you informed about the direction the Protocol is taking.": "Es un recurso vital para mantenerte informado sobre la dirección que está tomando el Protocolo.",
   "Check transactions": "Revisar transacciones",
   "Minimize risk exposure by revoking allowances made to smart contracts to spend tokens on your behalf.": "Minimiza la exposición al riesgo revocando los permisos otorgados a los contratos inteligentes para utilizar tokens en tu nombre.",
-  "This new tool further improves your security when interacting with the Protocol.": "Esta nueva herramienta mejora aún más tu seguridad al interactuar con el Protocolo."
+  "This new tool further improves your security when interacting with the Protocol.": "Esta nueva herramienta mejora aún más tu seguridad al interactuar con el Protocolo.",
+  "Theme": "Tema"
 }

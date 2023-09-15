@@ -3,7 +3,6 @@ import { Box, Typography } from '@mui/material';
 import TwitterIcon from '@mui/icons-material/Twitter';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import { globals } from 'styles/theme';
-import SwitchTheme from 'components/SwitchTheme';
 import { DiscordIcon } from 'components/Icons';
 import { useTranslation } from 'react-i18next';
 import SelectLanguage from 'components/SelectLanguage';
@@ -77,7 +76,6 @@ const Footer = () => {
               <DiscordIcon fontSize="small" sx={{ fill: ({ palette }) => palette.figma.grey[600] }} />
             </a>
             <SelectLanguage />
-            <SwitchTheme />
           </Box>
         </Box>
       </Box>
