@@ -31,6 +31,7 @@ import { useCustomTheme } from 'contexts/ThemeContext';
 import { useModal } from 'contexts/ModalContext';
 import MoreMenu from './MoreMenu';
 import ExtraFinance from 'components/ExtraFinance';
+import Settings from 'components/Settings';
 
 const { onlyMobile, onlyDesktopFlex } = globals;
 
@@ -214,6 +215,7 @@ function Navbar() {
               {isOPMainnet && <ExtraFinance />}
               {!isMobile && !isEthereum && <RewardsButton />}
               <Wallet />
+              {!isMobile && <Settings />}
             </Box>
           </Box>
           <IconButton
