@@ -463,5 +463,6 @@
   "Check transactions": "Revisar transacciones",
   "Minimize risk exposure by revoking allowances made to smart contracts to spend tokens on your behalf.": "Minimiza la exposición al riesgo revocando los permisos otorgados a los contratos inteligentes para utilizar tokens en tu nombre.",
   "This new tool further improves your security when interacting with the Protocol.": "Esta nueva herramienta mejora aún más tu seguridad al interactuar con el Protocolo.",
-  "Theme": "Tema"
+  "Theme": "Tema",
+  "Language": "Idioma"
 }

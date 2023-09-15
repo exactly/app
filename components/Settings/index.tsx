@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
 import AdvancedViewSwitch from 'components/AdvancedSwitch';
 import SwitchTheme from 'components/SwitchTheme';
+import SelectLanguage from 'components/SelectLanguage';
 
 const Settings = () => {
   const { t } = useTranslation();
@@ -43,6 +44,7 @@ const Settings = () => {
               boxShadow: ({ palette: _palette }) =>
                 _palette.mode === 'light' ? '0px 4px 12px rgba(175, 177, 182, 0.2)' : '',
               borderRadius: '16px',
+              minWidth: 250,
             },
           },
         }}
@@ -62,6 +64,12 @@ const Settings = () => {
           <Box width="100%" display="flex" alignItems="center" justifyContent="space-between" gap={1}>
             <Typography fontSize={14}>{t('Theme')}</Typography>
             <SwitchTheme />
+          </Box>
+        </MenuItem>
+        <MenuItem sx={{ borderRadius: '8px', p: 1 }}>
+          <Box width="100%" display="flex" alignItems="center" justifyContent="space-between" gap={1}>
+            <Typography fontSize={14}>{t('Language')}</Typography>
+            <SelectLanguage />
           </Box>
         </MenuItem>
       </Menu>
