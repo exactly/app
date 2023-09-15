@@ -53,6 +53,7 @@ function SelectLanguage() {
           {o === lng && <CheckIcon sx={sx} />}
         </>
       )}
+      buttonSx={{ minHeight: 26, maxHeight: 26 }}
     />
   );
 }

@@ -5,7 +5,6 @@ import GitHubIcon from '@mui/icons-material/GitHub';
 import { globals } from 'styles/theme';
 import { DiscordIcon } from 'components/Icons';
 import { useTranslation } from 'react-i18next';
-import SelectLanguage from 'components/SelectLanguage';
 import { useWeb3 } from 'hooks/useWeb3';
 import { optimism, mainnet } from 'wagmi/chains';
 const { onlyDesktopFlex } = globals;
@@ -75,7 +74,6 @@ const Footer = () => {
             <a target="_blank" rel="noreferrer noopener" href="https://discord.gg/exactly">
               <DiscordIcon fontSize="small" sx={{ fill: ({ palette }) => palette.figma.grey[600] }} />
             </a>
-            <SelectLanguage />
           </Box>
         </Box>
       </Box>
