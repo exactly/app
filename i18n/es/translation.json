@@ -465,5 +465,13 @@
   "This new tool further improves your security when interacting with the Protocol.": "Esta nueva herramienta mejora aún más tu seguridad al interactuar con el Protocolo.",
   "Theme": "Tema",
   "Language": "Idioma",
-  "Settings": "Configuración"
+  "Settings": "Configuración",
+  "Market APY": "TEA del Mercado",
+  "Rewards APY": "TEA de Recompensas",
+  "Native APY": "TEA Nativa",
+  "APY": "TEA",
+  "Deposit APY": "TEA de Depósito",
+  "Borrow APY": "TEA de Préstamo",
+  "The borrowing interest APY related to the current utilization rate in the Variable Rate Pool.": "La TEA para préstamos relacionada con la tasa de utilización actual en el Pool de Tasa Variable.",
+  "APR / APY": "TNA / TEA"
 }
