@@ -24,39 +24,63 @@ jobs:
       - run: npx unimported
 
   e2e:
+    needs: [check]
     if: github.event_name != 'pull_request' || !github.event.pull_request.draft
+    timeout-minutes: 60
     runs-on: ubuntu-latest
     environment: Test
-    needs: check
     env:
       NEXT_PUBLIC_SOCKET_API_KEY: ${{ secrets.NEXT_PUBLIC_SOCKET_API_KEY }}
-      CYPRESS_TENDERLY_ACCESS_KEY: ${{ secrets.TENDERLY_ACCESS_KEY }}
-      CYPRESS_TENDERLY_PROJECT: exactly
-      CYPRESS_TENDERLY_USER: exactly
+      TENDERLY_ACCESS_KEY: ${{ secrets.TENDERLY_ACCESS_KEY }}
+      TENDERLY_PROJECT: exactly
+      TENDERLY_USER: exactly
       NODE_OPTIONS: '--max_old_space_size=4096'
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1/4, 2/4, 3/4, 4/4]
     steps:
-      - run: |
-          sudo DEBIAN_FRONTEND=noninteractive apt-get update
-          sudo DEBIAN_FRONTEND=noninteractive apt-get -y install libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
           node-version: 18
           cache: npm
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.npm
+            ${{ github.workspace }}/.next/cache
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**/*.js', '**/*.jsx', '**/*.ts', '**/*.tsx') }}
+          restore-keys: |
+            ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
       - run: npm ci --audit false
-      # - uses: cypress-io/github-action@v5
-      #   with:
-      #     browser: chrome
-      #     headed: false
-      #     install: false
-      #     record: false
-      #     start: npm run start:e2e
-      #     wait-on: 'http://127.0.0.1:3000'
-      #     wait-on-timeout: 300000
-      #     command: npm run test
-      # - uses: actions/upload-artifact@v3
-      #   if: failure()
-      #   with:
-      #     name: e2e-artifacts
-      #     path: |
-      #       tests/e2e/screenshots
+      - run: npm run build:e2e
+      - run: npx playwright install chromium --with-deps
+      - run: npx playwright test --project=chromium --shard ${{ matrix.shard }}
+      - if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: blob-reports
+          path: blob-report
+          retention-days: 1
+
+  e2e-report:
+    needs: [e2e]
+    if: ${{ always() && needs.e2e.result == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - run: npm ci --audit false
+      - uses: actions/download-artifact@v3
+        with:
+          name: blob-reports
+          path: blob-reports
+      - run: npx playwright merge-reports --reporter html ./blob-reports
+      - uses: actions/upload-artifact@v3
+        with:
+          name: html-report--attempt-${{ github.run_attempt }}
+          path: playwright-report
+          retention-days: 30
