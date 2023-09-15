@@ -10,7 +10,6 @@ import { Box } from '@mui/system';
 import Image from 'next/image';
 import useRouter from 'hooks/useRouter';
 import Link from 'next/link';
-import Switch from 'components/Switch';
 import { DiscordIcon } from 'components/Icons';
 import QueryStatsIcon from '@mui/icons-material/QueryStats';
 import SwitchTheme from 'components/SwitchTheme';
@@ -24,11 +23,11 @@ import { mainnet, optimism } from 'wagmi/chains';
 import { useWeb3 } from 'hooks/useWeb3';
 import SecondaryChain from 'components/SecondaryChain';
 import { RewardsButton } from 'components/RewardsModal';
-import { useCustomTheme } from 'contexts/ThemeContext';
 
 import RemoveCircleOutlineRoundedIcon from '@mui/icons-material/RemoveCircleOutlineRounded';
 import MonitorHeartRoundedIcon from '@mui/icons-material/MonitorHeartRounded';
 import GppGoodRoundedIcon from '@mui/icons-material/GppGoodRounded';
+import AdvancedViewSwitch from 'components/AdvancedSwitch';
 
 type Props = {
   open: boolean;
@@ -201,23 +200,5 @@ const LinkItem: FC<PropsWithChildren & { title: string; href: string }> = ({ chi
     </Box>
   </a>
 );
-
-const AdvancedViewSwitch: FC = () => {
-  const { t } = useTranslation();
-  const { view, setView } = useCustomTheme();
-  return (
-    <Box display="flex" alignItems="center" justifyContent="space-between" gap={1}>
-      <Typography fontSize={14}>{t('Advanced view')}</Typography>
-      <Switch
-        checked={view === 'advanced'}
-        onChange={() => setView(view === 'advanced' ? 'simple' : 'advanced')}
-        inputProps={{
-          'aria-label': t('Switch to {{view}} view', { view: view === 'advanced' ? t('simple') : t('advanced') }),
-          'data-testid': 'switch-markets-view',
-        }}
-      />
-    </Box>
-  );
-};
 
 export default MobileMenu;
