@@ -2,6 +2,7 @@ import React, { createContext, FC, PropsWithChildren, useCallback, useContext, u
 import { ThemeProvider as MUIThemeProvider } from '@mui/material/styles';
 import { lightTheme, darkTheme } from 'styles/theme';
 import useClientLocalStorage from 'hooks/useClientLocalStorage';
+import { aprToAPY as _aprToAPY } from 'utils/utils';
 
 export type MarketView = 'simple' | 'advanced';
 
@@ -10,6 +11,9 @@ type ContextValues = {
   changeTheme: () => void;
   view?: MarketView;
   setView: (view: MarketView) => void;
+  showAPR?: true | false;
+  setShowAPR: (showAPR: true | false) => void;
+  aprToAPY: (apr: bigint, interval?: bigint) => bigint;
 };
 
 const defaultValues: ContextValues = {
@@ -17,6 +21,9 @@ const defaultValues: ContextValues = {
   changeTheme: () => undefined,
   view: 'simple',
   setView: () => undefined,
+  showAPR: true,
+  setShowAPR: () => undefined,
+  aprToAPY: () => 0n,
 };
 
 const ThemeContext = createContext(defaultValues);
@@ -55,9 +62,15 @@ export const ThemeProvider: FC<PropsWithChildren> = ({ children }) => {
   }, [theme, changeTheme]);
 
   const [view, setView] = useClientLocalStorage('marketView', defaultValues.view);
+  const [showAPR, setShowAPR] = useClientLocalStorage('showAPR', true as true | false);
+
+  const aprToAPY = useCallback(
+    (apr: bigint, interval = 86_400n) => (showAPR ? apr : _aprToAPY(apr, interval)),
+    [showAPR],
+  );
 
   return (
-    <ThemeContext.Provider value={{ theme, changeTheme, view, setView }}>
+    <ThemeContext.Provider value={{ theme, changeTheme, view, setView, showAPR, setShowAPR, aprToAPY }}>
       <MUIThemeProvider theme={theme === 'light' ? lightTheme : darkTheme}>
         {view === undefined ? null : children}
       </MUIThemeProvider>

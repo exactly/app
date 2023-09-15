@@ -24,14 +24,18 @@ import { toPercentage } from 'utils/utils';
 import usePreviousValue from 'hooks/usePreviousValue';
 import useAnalytics from 'hooks/useAnalytics';
 import Loading from './Loading';
+import { useCustomTheme } from 'contexts/ThemeContext';
+import { parseEther } from 'viem';
 
 const { minAPRValue } = numbers;
 
 const MarketsBasic: FC = () => {
   const { t } = useTranslation();
+
   const {
     list: { viewItemList },
   } = useAnalytics();
+  const { aprToAPY } = useCustomTheme();
   const translateOperation = useTranslateOperation();
   const { palette } = useTheme();
   const { errorData, qty, assetContract, tx } = useOperationContext();
@@ -42,10 +46,19 @@ const MarketsBasic: FC = () => {
   const { handleInputChange: handleDeposit, onMax: onMaxDeposit } = useDepositAtMaturity();
   const { handleBasicInputChange: handleBorrow, onMax: onMaxBorrow, safeMaximumBorrow } = useBorrow();
   const {
-    depositAPR: floatingDepositAPR,
-    borrowAPR: floatingBorrowAPR,
+    depositAPR: _depositAPR,
+    borrowAPR: _borrowAPR,
     loading: loadingFloatingOption,
   } = useFloatingPoolAPR(symbol, qty);
+
+  const floatingDepositAPR = useMemo(
+    () => Number(aprToAPY(parseEther(String(_depositAPR || 0)))) / 1e18,
+    [_depositAPR, aprToAPY],
+  );
+  const floatingBorrowAPR = useMemo(
+    () => Number(aprToAPY(parseEther(String(_borrowAPR || 0)))) / 1e18,
+    [_borrowAPR, aprToAPY],
+  );
 
   const { rates } = useRewards();
   const isDeposit = useMemo(() => operation === 'deposit', [operation]);

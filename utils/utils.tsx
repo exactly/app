@@ -32,7 +32,7 @@ export const checkPrecision = (value: string, decimals?: number): boolean => {
 
 export const isDefined = <T,>(value: T | undefined): value is T => value !== undefined;
 
-export const aprToAPY = (apr: bigint, interval: bigint) => {
+export const aprToAPY = (apr: bigint, interval = 86_400n) => {
   const compounds = YEAR_IN_SECONDS / interval;
   return (WAD + apr / compounds) ** compounds / WAD ** (compounds - 1n) - WAD;
 };

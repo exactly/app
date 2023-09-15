@@ -5,6 +5,7 @@ import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
 import AdvancedViewSwitch from 'components/AdvancedSwitch';
 import SwitchTheme from 'components/SwitchTheme';
 import SelectLanguage from 'components/SelectLanguage';
+import SwitchAPR from 'components/SwitchAPR';
 
 const Settings = () => {
   const { t } = useTranslation();
@@ -59,6 +60,9 @@ const Settings = () => {
       >
         <MenuItem sx={{ borderRadius: '8px', p: 1 }}>
           <AdvancedViewSwitch sx={{ width: '100%' }} />
+        </MenuItem>
+        <MenuItem sx={{ borderRadius: '8px', p: 1 }}>
+          <SwitchAPR sx={{ width: '100%' }} />
         </MenuItem>
         <MenuItem sx={{ borderRadius: '8px', p: 1 }}>
           <Box width="100%" display="flex" alignItems="center" justifyContent="space-between" gap={1}>

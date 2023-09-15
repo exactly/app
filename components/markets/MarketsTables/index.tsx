@@ -2,7 +2,7 @@ import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import Grid from '@mui/material/Grid';
 import PoolTable, { TableRow } from './poolTable';
 import { useTranslation } from 'react-i18next';
-import { formatUnits } from 'viem';
+import { formatUnits, parseEther } from 'viem';
 
 import formatNumber from 'utils/formatNumber';
 import getFloatingDepositAPR from 'utils/getFloatingDepositAPR';
@@ -20,6 +20,7 @@ import { useGlobalError } from 'contexts/GlobalErrorContext';
 import usePreviousValue from 'hooks/usePreviousValue';
 import useAnalytics from 'hooks/useAnalytics';
 import { MAX_UINT256, WEI_PER_ETHER } from 'utils/const';
+import { useCustomTheme } from 'contexts/ThemeContext';
 
 const { onlyMobile, onlyDesktop } = globals;
 
@@ -35,6 +36,7 @@ const MarketTables: FC = () => {
   const { t } = useTranslation();
   const { chain } = useWeb3();
   const { accountData } = useAccountData();
+  const { showAPR, aprToAPY } = useCustomTheme();
   const assets = useAssets();
   const defaultRows = useMemo<TableRow[]>(() => assets.map((s) => ({ symbol: s })), [assets]);
 
@@ -62,13 +64,15 @@ const MarketTables: FC = () => {
       sortKey: 'totalBorrowed',
     },
     {
-      title: t('Deposit APR'),
+      title: showAPR ? t('Deposit APR') : t('Deposit APY'),
       tooltipTitle: t('Change in the underlying Variable Rate Pool shares value over the last 15 minutes, annualized.'),
       sortKey: 'depositAPR',
     },
     {
-      title: t('Borrow APR'),
-      tooltipTitle: t('The borrowing interest APR related to the current utilization rate in the Variable Rate Pool.'),
+      title: showAPR ? t('Borrow APR') : t('Borrow APY'),
+      tooltipTitle: showAPR
+        ? t('The borrowing interest APR related to the current utilization rate in the Variable Rate Pool.')
+        : t('The borrowing interest APY related to the current utilization rate in the Variable Rate Pool.'),
       sortKey: 'borrowAPR',
     },
   ];
@@ -145,8 +149,8 @@ const MarketTables: FC = () => {
             symbol,
             totalDeposited: totalFloatingDeposited,
             totalBorrowed: totalFloatingBorrowed,
-            depositAPR: floatingDepositAPR,
-            borrowAPR: Number(floatingBorrowRate) / 1e18,
+            depositAPR: Number(aprToAPY(parseEther(String(floatingDepositAPR || 0)))) / 1e18,
+            borrowAPR: Number(aprToAPY(floatingBorrowRate)) / 1e18,
           });
 
           let totalDeposited = 0n;
@@ -184,7 +188,7 @@ const MarketTables: FC = () => {
     setFixedRows(sortByDefault(defaultRows, tempFixedRows));
 
     setIsLoading(false);
-  }, [accountData, chain, defaultRows, setIndexerError]);
+  }, [accountData, aprToAPY, chain, defaultRows, setIndexerError]);
 
   useEffect(() => {
     void defineRows();

@@ -8,6 +8,7 @@ import { MarketsBasicOperation, MarketsBasicOption } from 'contexts/MarketsBasic
 import { useTranslation } from 'react-i18next';
 import BestPill from 'components/common/BestPill';
 import Rates from 'components/Rates';
+import { useCustomTheme } from 'contexts/ThemeContext';
 
 type Props = {
   symbol: string;
@@ -187,6 +188,7 @@ const OptionRate: FC<{
   rateType?: 'fixed' | 'floating';
 }> = ({ symbol, apr, type, isLoading, bottom, minWidth = 0, rateType = 'floating' }) => {
   const { t } = useTranslation();
+  const { showAPR } = useCustomTheme();
   return (
     <Box display="flex" flexDirection="column" minWidth={minWidth}>
       <Box display="flex" alignItems="center" justifyContent="right" gap={0.3}>
@@ -194,7 +196,7 @@ const OptionRate: FC<{
           symbol={symbol}
           apr={apr}
           type={type}
-          label={t('APR')}
+          label={rateType === 'fixed' || showAPR ? t('APR') : t('APY')}
           sx={{ fontSize: 13, fontWeight: 700 }}
           directionDesktop="row-reverse"
           iconsSize={14}

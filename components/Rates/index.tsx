@@ -99,6 +99,7 @@ const Rates: FC<Props> = ({
       rewards={_rates}
       natives={symbol === 'wstETH' && type === 'deposit' ? [{ symbol: 'wstETH', apr: native }] : undefined}
       rewardAPR={rewardRate === 0 ? undefined : rewardRate > 999 ? '∞' : toPercentage(rewardRate)}
+      rateType={rateType}
     >
       <Typography sx={sx}>
         {!isLoading && apr !== undefined ? (
