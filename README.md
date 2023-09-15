@@ -50,32 +50,25 @@ npm run dev
 
 ## Testing
 
-We use the Cypress testing framework
+We use Playwright testing framework
 to run our E2E tests and [Tenderly](https://tenderly.co/) to setup forks.
 
 The following environment variables are required to be present for the tests to
 work as expected
 
 ```bash
-CYPRESS_TENDERLY_ACCESS_KEY=<tenderly access token>
-CYPRESS_TENDERLY_PROJECT=<tenderly project>
-CYPRESS_TENDERLY_USER=<tenderly user>
+TENDERLY_ACCESS_KEY=<tenderly access token>
+TENDERLY_PROJECT=<tenderly project>
+TENDERLY_USER=<tenderly user>
 ```
 
 The full suite can be run using
 
 ```bash
-npm run ci
-```
-
-the command above will setup a production server and run tests on it.
-Which is the same as running
-
-```bash
 npm run start:e2e             # Or `npm run dev:e2e` for a dev server
 ```
 
-and in another terminal
+to start the app and in another terminal
 
 ```bash
 npm run test
@@ -84,10 +77,10 @@ npm run test
 To run a single test use the same above but specifiy the spec to run with
 
 ```bash
-npm run test -- --spec [path] # e.g. tests/e2e/specs/0-connect-wallet-spec.ts
+npm run test -- [spec path] # e.g. e2e/specs/0-enter-exit-market/weth.spec.ts
 ```
 
-Use the `--headed` flag to open the Cypress instance.
+Use the `--headed` flag to review the test running in the browser.
 
 ## Deployment
 
