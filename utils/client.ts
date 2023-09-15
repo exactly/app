@@ -8,6 +8,12 @@ import { publicProvider } from 'wagmi/providers/public';
 import { SafeConnector } from 'wagmi/connectors/safe';
 import { optimism } from 'wagmi/chains';
 
+declare global {
+  interface Window {
+    ethereum: { provider: { connection: { url: string } } };
+  }
+}
+
 export const walletConnectId = '11ddaa8aaede72cb5d6b0dae2fed7baa';
 
 const networkId = Number(process.env.NEXT_PUBLIC_NETWORK ?? optimism.id);
@@ -25,11 +31,7 @@ const providers: ChainProviderFn<Chain>[] = isE2E
   ? [
       jsonRpcProvider({
         rpc: () => ({
-          http:
-            typeof window !== 'undefined'
-              ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                (window as any).ethereum.provider.connection.url
-              : 'http://127.0.0.1:8545',
+          http: typeof window !== 'undefined' ? window.ethereum.provider.connection.url : 'http://127.0.0.1:8545',
         }),
       }),
     ]

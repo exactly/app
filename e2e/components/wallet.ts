@@ -1,5 +1,5 @@
 import { type Page, expect } from '@playwright/test';
-import { Address } from 'viem';
+import type { Address } from 'viem';
 
 export default function (page: Page) {
   const connectedWallet = async (address: Address) => {
