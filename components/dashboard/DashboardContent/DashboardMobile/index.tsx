@@ -16,6 +16,7 @@ import { useTranslation } from 'react-i18next';
 import useAnalytics from 'hooks/useAnalytics';
 import Rates from 'components/Rates';
 import { useWeb3 } from 'hooks/useWeb3';
+import { useCustomTheme } from 'contexts/ThemeContext';
 
 type Props = {
   type: 'deposit' | 'borrow';
@@ -29,6 +30,7 @@ const DashboardMobile: FC<Props> = ({ type }) => {
   const { startDebtManager, isRolloverDisabled } = useStartDebtManagerButton();
   const { floatingRows, fixedRows } = useDashboard(type);
   const isDeposit = type === 'deposit';
+  const { showAPR } = useCustomTheme();
 
   const {
     list: { viewItemListDashboard },
@@ -70,7 +72,7 @@ const DashboardMobile: FC<Props> = ({ type }) => {
                   <Skeleton width={40} />
                 )}
               </FlexItem>
-              <FlexItem title={t('Total APR')}>
+              <FlexItem title={showAPR ? t('Total APR') : t('Total APY')}>
                 <Box display="flex" width="fit-content" gap={1}>
                   <Rates symbol={symbol} apr={apr} type={type} />
                 </Box>

@@ -5,10 +5,12 @@ import { useTranslation } from 'react-i18next';
 import useNetAPR from 'hooks/useNetAPR';
 import { toPercentage } from 'utils/utils';
 import formatNumber from 'utils/formatNumber';
+import { useCustomTheme } from 'contexts/ThemeContext';
 
 const NetEarnings = () => {
   const { t } = useTranslation();
   const { netAPR, netPosition } = useNetAPR();
+  const { showAPR } = useCustomTheme();
 
   return (
     <Box
@@ -28,7 +30,7 @@ const NetEarnings = () => {
       <Box display="flex" flexDirection="column" gap={1}>
         <Box display="flex" justifyContent="space-between" alignItems="center" gap={1}>
           <Typography variant="dashboardSubtitleNumber" color="grey.700">
-            {t('Net APR')}
+            {showAPR ? t('Net APR') : t('Net APY')}
           </Typography>
           {netAPR !== undefined ? (
             <Typography fontSize={28} fontWeight={700}>

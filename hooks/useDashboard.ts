@@ -6,7 +6,8 @@ import useFixedPools from './useFixedPools';
 import useAccountData, { MarketAccount } from './useAccountData';
 import getFloatingDepositAPR from 'utils/getFloatingDepositAPR';
 import { useGlobalError } from 'contexts/GlobalErrorContext';
-import { formatUnits } from 'viem';
+import { formatUnits, parseEther } from 'viem';
+import { useCustomTheme } from 'contexts/ThemeContext';
 
 export default function useDashboard(type: 'deposit' | 'borrow') {
   const { accountData, getMarketAccount } = useAccountData();
@@ -14,6 +15,7 @@ export default function useDashboard(type: 'deposit' | 'borrow') {
   const { chain } = useWeb3();
   const { deposits, borrows } = useFixedPools();
   const { setIndexerError } = useGlobalError();
+  const { aprToAPY } = useCustomTheme();
   const isDeposit = type === 'deposit';
 
   const defaultRows: FloatingPoolItemData[] = useMemo<FloatingPoolItemData[]>(
@@ -51,24 +53,28 @@ export default function useDashboard(type: 'deposit' | 'borrow') {
           floatingBorrowRate,
         }) => {
           const apr = isDeposit
-            ? await getFloatingDepositAPR(chain.id, 'deposit', maxFuturePools, market).catch(() => {
-                setIndexerError();
-                return undefined;
-              })
-            : Number(floatingBorrowRate) / 1e18;
+            ? parseEther(
+                String(
+                  (await getFloatingDepositAPR(chain.id, 'deposit', maxFuturePools, market).catch(() => {
+                    setIndexerError();
+                    return undefined;
+                  })) || 0,
+                ),
+              )
+            : floatingBorrowRate;
 
           return {
             symbol: assetSymbol,
             depositedAmount: floatingDepositAssets,
             borrowedAmount: floatingBorrowAssets,
-            apr,
+            apr: Number(aprToAPY(apr)) / 1e18,
             valueUSD: getValueInUSD(assetSymbol, isDeposit ? floatingDepositAssets : floatingBorrowAssets),
             market,
           };
         },
       ),
     );
-  }, [accountData, chain.id, getValueInUSD, isDeposit, orderAssets, setIndexerError]);
+  }, [accountData, aprToAPY, chain.id, getValueInUSD, isDeposit, orderAssets, setIndexerError]);
 
   useEffect(() => {
     const fetchData = async () => {

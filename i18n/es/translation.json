@@ -473,5 +473,7 @@
   "Deposit APY": "TEA de Depósito",
   "Borrow APY": "TEA de Préstamo",
   "The borrowing interest APY related to the current utilization rate in the Variable Rate Pool.": "La TEA para préstamos relacionada con la tasa de utilización actual en el Pool de Tasa Variable.",
-  "APR / APY": "TNA / TEA"
+  "APR / APY": "TNA / TEA",
+  "Total APY": "TEA Total",
+  "Net APY": "TEA Neta"
 }

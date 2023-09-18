@@ -8,6 +8,7 @@ import fetchAccounts, { Account } from 'queries/fetchAccounts';
 import useRewards from './useRewards';
 import useStETHNativeAPR from './useStETHNativeAPR';
 import dayjs from 'dayjs';
+import { useCustomTheme } from 'contexts/ThemeContext';
 
 export default () => {
   const [accounts, setAccounts] = useState<Account[] | undefined>();
@@ -17,6 +18,7 @@ export default () => {
   const { floatingRows: floatingBorrow } = useDashboard('borrow');
   const stETHNativeAPR = useStETHNativeAPR();
   const { rates } = useRewards();
+  const { aprToAPY } = useCustomTheme();
 
   useEffect(() => {
     if (!subgraphURL || !walletAddress) return;
@@ -215,13 +217,13 @@ export default () => {
 
     const projectedNativeEarnings = projectedFixedDepositNative + projectedFloatingDepositNative;
 
-    const marketAPR = (projectedMarketEarnings * WEI_PER_ETHER) / netPosition;
+    const marketAPR = aprToAPY((projectedMarketEarnings * WEI_PER_ETHER) / netPosition);
 
-    const rewardsAPR = (projectedRewardsEarnings * WEI_PER_ETHER) / netPosition;
+    const rewardsAPR = aprToAPY((projectedRewardsEarnings * WEI_PER_ETHER) / netPosition);
 
-    const nativeAPR = (projectedNativeEarnings * WEI_PER_ETHER) / netPosition;
+    const nativeAPR = aprToAPY((projectedNativeEarnings * WEI_PER_ETHER) / netPosition);
 
-    const netAPR = marketAPR + rewardsAPR + nativeAPR;
+    const netAPR = aprToAPY(marketAPR + rewardsAPR + nativeAPR);
 
     return {
       marketAPR,
@@ -230,5 +232,5 @@ export default () => {
       netAPR,
       netPosition,
     };
-  }, [accountData, accounts, floatingBorrow, floatingDeposit, isFetching, rates, stETHNativeAPR]);
+  }, [accountData, accounts, aprToAPY, floatingBorrow, floatingDeposit, isFetching, rates, stETHNativeAPR]);
 };

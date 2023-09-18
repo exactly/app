@@ -8,6 +8,7 @@ import TableRowFloatingPool from './TableRowFloatingPool';
 import TableHeadCell, { TableHeader } from 'components/common/TableHeadCell';
 import useSorting from 'hooks/useSorting';
 import useTranslateOperation from 'hooks/useTranslateOperation';
+import { useCustomTheme } from 'contexts/ThemeContext';
 
 type Props = {
   type: 'deposit' | 'borrow';
@@ -18,6 +19,7 @@ function FloatingPoolDashboardTable({ type, rows }: Props) {
   const { t } = useTranslation();
   const translateOperation = useTranslateOperation();
   const { setOrderBy, sortData, direction: sortDirection, isActive: sortActive } = useSorting<FloatingPoolItemData>();
+  const { showAPR } = useCustomTheme();
 
   const headers: TableHeader<FloatingPoolItemData>[] = useMemo(() => {
     return [
@@ -43,7 +45,7 @@ function FloatingPoolDashboardTable({ type, rows }: Props) {
         sortKey: 'valueUSD',
       },
       {
-        title: t('Total APR'),
+        title: showAPR ? t('Total APR') : t('Total APY'),
         key: 'apr',
         align: 'left',
         sortKey: 'apr',
@@ -65,7 +67,7 @@ function FloatingPoolDashboardTable({ type, rows }: Props) {
         align: 'left',
       },
     ];
-  }, [translateOperation, type, t]);
+  }, [t, translateOperation, type, showAPR]);
 
   return (
     <TableContainer>
