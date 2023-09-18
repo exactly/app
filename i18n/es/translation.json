@@ -376,7 +376,6 @@
   "Net APR": "TNA Neta",
   "Your Account": "Tu Cuenta",
   "Temporary disabled": "Temporalmente deshabilitado",
-  "Deposit EXA on Extra Finance and get {{apy}} APY": "Deposita EXA en Extra Finance y obtén {{apy}} TEA",
   "Deposit EXA": "Deposite EXA",
   "No approvals found!": "¡No se encontraron permisos!",
   "Unlimited": "Ilimitada",
@@ -475,5 +474,6 @@
   "The borrowing interest APY related to the current utilization rate in the Variable Rate Pool.": "La TEA para préstamos relacionada con la tasa de utilización actual en el Pool de Tasa Variable.",
   "APR / APY": "TNA / TEA",
   "Total APY": "TEA Total",
-  "Net APY": "TEA Neta"
+  "Net APY": "TEA Neta",
+  "Deposit EXA on Extra Finance": "Deposita EXA en Extra Finance"
 }

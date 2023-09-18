@@ -1,6 +1,7 @@
+import { useCustomTheme } from 'contexts/ThemeContext';
 import { useExtraFinanceLendingGetReserveStatus } from 'types/abi';
 import { WAD } from 'utils/queryRates';
-import { aprToAPY, toPercentage } from 'utils/utils';
+import { toPercentage } from 'utils/utils';
 import { optimism } from 'wagmi/chains';
 
 const EXA_RESERVE_ID = 50n;
@@ -20,8 +21,8 @@ const useExtraDepositAPR = () => {
 };
 
 export const useExtra = () => {
+  const { aprToAPY } = useCustomTheme();
   const apr = useExtraDepositAPR();
   if (!apr) return { apr: undefined, apy: undefined };
-  const apy = aprToAPY(apr, COMPOUNDING_INTERVAL);
-  return { apr: toPercentage(Number(apr) / 1e18), apy: toPercentage(Number(apy) / 1e18) };
+  return { apr: toPercentage(Number(aprToAPY(apr, COMPOUNDING_INTERVAL)) / 1e18) };
 };
