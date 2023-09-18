@@ -12,6 +12,7 @@ import useRewards from 'hooks/useRewards';
 import ItemCell from 'components/common/ItemCell';
 import { useTranslation } from 'react-i18next';
 import { formatUnits } from 'viem';
+import { useCustomTheme } from 'contexts/ThemeContext';
 
 type MaturityPoolInfoProps = {
   symbol: string;
@@ -36,7 +37,7 @@ const MaturityPoolInfo: FC<MaturityPoolInfoProps> = ({
 }) => {
   const { t } = useTranslation();
   const { minAPRValue } = numbers;
-
+  const { showAPR, aprToAPY } = useCustomTheme();
   const { rates } = useRewards();
 
   const itemsInfo: ItemInfoProps[] = useMemo(
@@ -83,31 +84,39 @@ const MaturityPoolInfo: FC<MaturityPoolInfoProps> = ({
       ...(rates[symbol] && rates[symbol].some((r) => r.borrow > 0n)
         ? [
             {
-              label: t('Borrow Rewards APR'),
+              label: showAPR ? t('Borrow Rewards APR') : t('Borrow Rewards APY'),
               value: (
                 <>
                   {rates[symbol].map((r) => (
-                    <ItemCell key={r.asset} value={toPercentage(Number(r.borrow) / 1e18)} symbol={r.assetSymbol} />
+                    <ItemCell
+                      key={r.asset}
+                      value={toPercentage(Number(aprToAPY(r.borrow)) / 1e18)}
+                      symbol={r.assetSymbol}
+                    />
                   ))}
                 </>
               ),
-              tooltipTitle: t('This APR assumes a constant price for the OP token and distribution rate.'),
+              tooltipTitle: showAPR
+                ? t('This APR assumes a constant price for the OP token and distribution rate.')
+                : t('This APY assumes a constant price for the OP token and distribution rate.'),
             },
           ]
         : []),
     ],
     [
+      t,
+      totalDeposited,
+      totalBorrowed,
       adjustFactor,
-      bestBorrowMaturity,
-      bestBorrowRate,
-      bestDepositMaturity,
       bestDepositRate,
       minAPRValue,
-      rates,
       symbol,
-      totalBorrowed,
-      totalDeposited,
-      t,
+      bestDepositMaturity,
+      bestBorrowRate,
+      bestBorrowMaturity,
+      rates,
+      showAPR,
+      aprToAPY,
     ],
   );
 

@@ -475,5 +475,8 @@
   "APR / APY": "TNA / TEA",
   "Total APY": "TEA Total",
   "Net APY": "TEA Neta",
-  "Deposit EXA on Extra Finance": "Deposita EXA en Extra Finance"
+  "Deposit EXA on Extra Finance": "Deposita EXA en Extra Finance",
+  "Deposit Rewards APY": "TEA de Recompensas de Depósito",
+  "This APY assumes a constant price for the OP token and distribution rate.": "Esta TEA asume un precio constante para el token OP y una tasa de distribución.",
+  "Borrow Rewards APY": "TEA de Recompensas de Préstamo"
 }
