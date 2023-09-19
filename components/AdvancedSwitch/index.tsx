@@ -1,11 +1,11 @@
 import React, { FC } from 'react';
-import { Box, Typography } from '@mui/material';
+import { Box, BoxProps, Typography } from '@mui/material';
 import { useCustomTheme } from 'contexts/ThemeContext';
 import { useTranslation } from 'react-i18next';
 import Switch from 'components/Switch';
 
 type Props = {
-  sx?: React.ComponentProps<typeof Box>['sx'];
+  sx?: BoxProps['sx'];
   fontSize?: number;
 };
 
@@ -14,7 +14,7 @@ const AdvancedViewSwitch: FC<Props> = ({ sx, fontSize = 14 }) => {
   const { view, setView } = useCustomTheme();
 
   return (
-    <Box display="flex" alignItems="center" justifyContent="space-between" gap={1} sx={{ ...sx }}>
+    <Box display="flex" alignItems="center" justifyContent="space-between" gap={1} sx={sx}>
       <Typography fontSize={fontSize}>{t('Advanced view')}</Typography>
       <Switch
         checked={view === 'advanced'}

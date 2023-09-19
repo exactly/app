@@ -17,24 +17,23 @@ const Settings = () => {
   return (
     <>
       <IconButton
-        id="view-contracts-button"
+        id="settings"
         aria-controls={open ? 'basic-menu' : undefined}
         aria-haspopup="true"
         aria-expanded={open ? 'true' : undefined}
         onClick={handleClick}
         size="small"
         sx={{ outline: '1px solid', width: '32px', height: '32px', borderRadius: '50%', p: '0px' }}
-        // variant="outlined"
       >
         <SettingsRoundedIcon sx={{ fontSize: 20 }} />
       </IconButton>
       <Menu
-        id="basic-menu"
+        id="settings-menu"
         anchorEl={anchorEl}
         open={open}
         onClose={handleClose}
         MenuListProps={{
-          'aria-labelledby': 'view-contracts-button',
+          'aria-labelledby': 'settings-menu',
         }}
         slotProps={{
           paper: {

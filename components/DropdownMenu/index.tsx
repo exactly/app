@@ -1,5 +1,5 @@
 import React, { PropsWithChildren, ReactNode, useCallback, useState } from 'react';
-import { Box, Button, Menu, type MenuProps, MenuItem } from '@mui/material';
+import { Box, Button, Menu, type MenuProps, MenuItem, ButtonProps } from '@mui/material';
 import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownRounded';
 
 interface Props<T> extends Pick<MenuProps, 'anchorOrigin' | 'transformOrigin'> {
@@ -10,7 +10,7 @@ interface Props<T> extends Pick<MenuProps, 'anchorOrigin' | 'transformOrigin'> {
   renderOption: (value: T) => ReactNode;
   'data-testid'?: string;
   disabled?: boolean;
-  buttonSx?: React.ComponentProps<typeof Button>['sx'];
+  buttonSx?: ButtonProps['sx'];
 }
 
 function InnerButton({ children }: PropsWithChildren) {
