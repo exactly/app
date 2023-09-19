@@ -465,5 +465,6 @@
   "This new tool further improves your security when interacting with the Protocol.": "Esta nueva herramienta mejora aún más tu seguridad al interactuar con el Protocolo.",
   "Theme": "Tema",
   "Language": "Idioma",
-  "Settings": "Configuración"
+  "Settings": "Configuración",
+  "The Health Factor represents how “safe” your leverage portfolio is, defined as the risk-adjusted proportion of collateral deposited versus the borrowed risk-adjusted amount. A health factor below 1x will be considered with a shortfall and open to liquidation.": "El Factor de Salud representa cuán “seguro“ es tu portafolio con apalancamiento, definido como la proporción ajustada al riesgo del colateral depositado frente al monto ajustado al riesgo que se ha tomado prestado. Un factor de salud por debajo de 1x se considerará con un déficit y estará abierto a la liquidación."
 }

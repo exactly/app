@@ -1,10 +1,11 @@
 import React, { useMemo } from 'react';
-import { Box, Skeleton, Typography, useTheme } from '@mui/material';
+import { Box, Skeleton, Tooltip, Typography, useTheme } from '@mui/material';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import { useTranslation } from 'react-i18next';
 import useHealthFactor from 'hooks/useHealthFactor';
 import parseHealthFactor from 'utils/parseHealthFactor';
 import useAccountData from 'hooks/useAccountData';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 
 const HealthFactor = () => {
   const { t } = useTranslation();
@@ -38,6 +39,15 @@ const HealthFactor = () => {
         <Typography variant="dashboardTitle" color="primary" noWrap>
           {t('Health Factor')}
         </Typography>
+        <Tooltip
+          title={t(
+            'The Health Factor represents how “safe” your leverage portfolio is, defined as the risk-adjusted proportion of collateral deposited versus the borrowed risk-adjusted amount. A health factor below 1x will be considered with a shortfall and open to liquidation.',
+          )}
+          placement="bottom"
+          arrow
+        >
+          <InfoOutlinedIcon sx={{ fontSize: 14 }} />
+        </Tooltip>
       </Box>
       {isFetching || !healthFactor ? (
         <Skeleton width={100} height={42} />
