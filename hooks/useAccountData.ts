@@ -35,7 +35,7 @@ function useAccountData(
   const marketAccount = useMemo(() => (symbol ? getMarketAccount(symbol) : undefined), [symbol, getMarketAccount]);
 
   const refreshAccountData = useCallback(
-    async (delay = 2500) =>
+    async (delay = 250) =>
       new Promise<void>((r) =>
         setTimeout(
           () =>

@@ -8,7 +8,7 @@ const config: PlaywrightTestConfig = {
   testMatch: [/.*spec\.ts/],
   timeout: 180_000,
   expect: {
-    timeout: 60_000,
+    timeout: 30_000,
   },
   fullyParallel: true,
   forbidOnly: !!process.env.CI,

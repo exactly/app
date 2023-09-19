@@ -1,5 +1,5 @@
 import { EthereumClient, w3mConnectors, w3mProvider } from '@web3modal/ethereum';
-import { createConfig, configureChains, ChainProviderFn, Chain } from 'wagmi';
+import { createConfig, configureChains, ChainProviderFn, Chain, createStorage } from 'wagmi';
 import { InjectedConnector } from 'wagmi/connectors/injected';
 import * as wagmiChains from 'wagmi/chains';
 import { jsonRpcProvider } from 'wagmi/providers/jsonRpc';
@@ -43,6 +43,12 @@ const providers: ChainProviderFn<Chain>[] = isE2E
 
 const { chains, publicClient } = configureChains<Chain>(sortedChains, providers);
 
+const noopStorage = {
+  getItem: () => '',
+  setItem: () => null,
+  removeItem: () => null,
+};
+
 export const wagmi = createConfig({
   connectors: [
     ...(isE2E
@@ -50,6 +56,7 @@ export const wagmi = createConfig({
       : [...w3mConnectors({ projectId: walletConnectId, chains }), new SafeConnector({ chains })]),
   ],
   publicClient,
+  ...(isE2E ? { storage: createStorage({ storage: noopStorage }) } : {}),
 });
 
 export const web3modal = new EthereumClient(wagmi, chains);
