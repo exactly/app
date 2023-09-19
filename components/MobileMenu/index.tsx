@@ -23,11 +23,7 @@ import { mainnet, optimism } from 'wagmi/chains';
 import { useWeb3 } from 'hooks/useWeb3';
 import SecondaryChain from 'components/SecondaryChain';
 import { RewardsButton } from 'components/RewardsModal';
-<<<<<<< HEAD
-import { useCustomTheme } from 'contexts/ThemeContext';
 import { isE2E } from 'utils/client';
-=======
->>>>>>> 431879f6 (♻️ refactor AdvancedSwitch)
 
 import RemoveCircleOutlineRoundedIcon from '@mui/icons-material/RemoveCircleOutlineRounded';
 import MonitorHeartRoundedIcon from '@mui/icons-material/MonitorHeartRounded';
