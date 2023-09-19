@@ -1,11 +1,11 @@
 on:
   pull_request:
-    types: [opened, reopened, synchronize, ready_for_review]
-  workflow_dispatch:
+    types: [opened, reopened, synchronize, ready_for_review, closed]
 
 jobs:
   check:
     runs-on: ubuntu-latest
+    if: ${{ contains('opened reopened synchronize ready_for_review', github.event.action) && !github.event.pull_request.merged }}
     environment: Preview
     env:
       SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
@@ -25,8 +25,8 @@ jobs:
 
   e2e:
     needs: [check]
-    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
-    timeout-minutes: 60
+    if: ${{ !github.event.pull_request.draft && github.event.action != 'closed' }}
+    timeout-minutes: 30
     runs-on: ubuntu-latest
     environment: Test
     env:
@@ -66,7 +66,7 @@ jobs:
 
   e2e-report:
     needs: [e2e]
-    if: ${{ always() && needs.e2e.result == 'success' }}
+    if: ${{ !cancelled() && !github.event.pull_request.draft && !github.event.pull_request.merged }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -81,6 +81,22 @@ jobs:
       - run: npx playwright merge-reports --reporter html ./blob-reports
       - uses: actions/upload-artifact@v3
         with:
-          name: html-report--attempt-${{ github.run_attempt }}
+          name: html-report
           path: playwright-report
           retention-days: 30
+
+  e2e-report-publish:
+    needs: [e2e-report]
+    if: ${{ always() && github.event.action == 'closed' && github.event.pull_request.merged }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          name: html-report
+          path: html-report
+      - uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: 569f3c4008862b4cc595f409db748f41
+          projectName: app-test
+          directory: html-report
