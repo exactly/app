@@ -34,7 +34,7 @@ function DashboardContent() {
 
   const { isConnected, impersonateActive } = useWeb3();
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isMobileOrTablet = useMediaQuery(theme.breakpoints.down('md'));
 
   const allTabs = useMemo(
     () => [
@@ -64,7 +64,7 @@ function DashboardContent() {
     return <ConnectYourWallet />;
   }
 
-  if (isMobile) {
+  if (isMobileOrTablet) {
     return (
       <Box my={2}>
         <MobileTabs

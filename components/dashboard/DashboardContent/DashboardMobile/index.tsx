@@ -58,8 +58,8 @@ const DashboardMobile: FC<Props> = ({ type }) => {
                   action: isDeposit ? t('deposited') : t('borrowed'),
                 })}
               >
-                {(depositedAmount &&
-                  borrowedAmount &&
+                {(depositedAmount !== undefined &&
+                  borrowedAmount !== undefined &&
                   `${formatNumber(
                     formatUnits(isDeposit ? depositedAmount : borrowedAmount, getMarketAccount(symbol)?.decimals ?? 18),
                     symbol,

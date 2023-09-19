@@ -3,7 +3,9 @@ import { createTheme, Shadows } from '@mui/material/styles';
 export const globals = {
   maxWidth: 1250,
   onlyMobile: { xs: 'block', sm: 'none' },
+  smOrLess: { xs: 'block', md: 'none' },
   onlyDesktop: { xs: 'none', sm: 'block' },
+  mdOrMore: { xs: 'none', md: 'block' },
   onlyDesktopFlex: { xs: 'none', sm: 'flex' },
 };
 

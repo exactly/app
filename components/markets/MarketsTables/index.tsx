@@ -21,7 +21,7 @@ import usePreviousValue from 'hooks/usePreviousValue';
 import useAnalytics from 'hooks/useAnalytics';
 import { MAX_UINT256, WEI_PER_ETHER } from 'utils/const';
 
-const { onlyMobile, onlyDesktop } = globals;
+const { smOrLess, mdOrMore } = globals;
 
 // sorts rows based on defaultRows symbol order
 const sortByDefault = (defaultRows: TableRow[], toSort: TableRow[]) =>
@@ -213,7 +213,7 @@ const MarketTables: FC = () => {
         borderRadius="0px 0px 6px 6px"
         bgcolor="components.bg"
         borderTop="4px solid #34C53A"
-        display={onlyDesktop}
+        display={mdOrMore}
       >
         <Typography variant="h6" mb={2} ml={1.5}>
           {t('Variable Interest Rate')}
@@ -229,14 +229,14 @@ const MarketTables: FC = () => {
         borderRadius="0px 0px 6px 6px"
         bgcolor="components.bg"
         borderTop="4px solid #008CF4"
-        display={onlyDesktop}
+        display={mdOrMore}
       >
         <Typography variant="h6" mb={2} ml={1.5}>
           {t('Fixed Interest Rate')}
         </Typography>
         <PoolTable isLoading={isLoading} headers={fixedHeaders} rows={fixedRows} rateType="fixed" />
       </Grid>
-      <Box display={onlyMobile} my={2}>
+      <Box display={smOrLess} my={2}>
         <MobileTabs
           tabs={[
             {
