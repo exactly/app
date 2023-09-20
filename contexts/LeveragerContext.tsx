@@ -887,13 +887,15 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
               break;
             }
 
-            const borrowAssets = await marketIn.read.previewWithdraw(
-              [limit.borrow - leverageStatus.borrow + 100n],
+            const _slippage =
+              (leverageStatus.borrow * ((maIn.floatingBorrowRate * 300n) / 31_536_000n)) / WEI_PER_ETHER;
+            const borrowShares = await marketIn.read.previewWithdraw(
+              [limit.borrow - leverageStatus.borrow + _slippage],
               opts,
             );
             const [assetPermit, marketPermit] = await Promise.all([
               signPermit(userInput, 'assetIn'),
-              signPermit(borrowAssets, 'marketIn'),
+              signPermit(borrowShares, 'marketIn'),
             ]);
 
             if (!assetPermit || !marketPermit || marketPermit.type === 'permit2') {
@@ -933,18 +935,24 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
               });
               break;
             }
+            const _slippage =
+              (maIn.floatingBorrowAssets * ((maIn.floatingBorrowRate * 300n) / 31_536_000n)) / WEI_PER_ETHER;
 
-            const permitAssets = await marketIn.read.previewWithdraw(
-              [(maIn.floatingBorrowAssets < limit.borrow ? 0n : maIn.floatingBorrowAssets - limit.borrow) + userInput],
+            const permitShares = await marketIn.read.previewWithdraw(
+              [
+                (maIn.floatingBorrowAssets < limit.borrow ? 0n : maIn.floatingBorrowAssets - limit.borrow) +
+                  userInput +
+                  _slippage,
+              ],
               opts,
             );
-            const marketPermit = await signPermit(permitAssets, 'marketIn');
+            const marketPermit = await signPermit(permitShares, 'marketIn');
 
             if (!marketPermit || marketPermit.type === 'permit2') {
               return;
             }
 
-            const _args = [marketIn.address, ratio, permitAssets, marketPermit.value] as const;
+            const _args = [marketIn.address, userInput, ratio, marketPermit.value] as const;
             const gasEstimation = await debtManager.estimateGas.deleverage(_args, opts);
             hash = await debtManager.write.deleverage(_args, {
               ...opts,
