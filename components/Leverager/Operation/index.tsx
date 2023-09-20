@@ -3,7 +3,7 @@ import { ModalBox, ModalBoxCell, ModalBoxRow } from 'components/common/modal/Mod
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
-import { PRICE_IMPACT_THRESHOLD, useLeveragerContext } from 'contexts/LeveragerContext';
+import { useLeveragerContext } from 'contexts/LeveragerContext';
 import MultiplierSlider from '../MultiplierSlider';
 import LoopAPR from '../LoopAPR';
 import HealthFactor from '../HealthFactor';
@@ -11,7 +11,6 @@ import AssetSelector from '../AssetSelector';
 import ModalAlert from 'components/common/modal/ModalAlert';
 import NetPosition from '../NetPosition';
 import formatNumber from 'utils/formatNumber';
-import { toPercentage } from 'utils/utils';
 
 const Operation = () => {
   const { t } = useTranslation();
@@ -28,12 +27,11 @@ const Operation = () => {
     setViewSummary,
     disabledSubmit,
     isOverLeveraged,
-    isPriceImpactAboveThreshold,
   } = useLeveragerContext();
 
   return (
     <Box>
-      <ModalBox sx={{ p: 2, mb: errorData?.status || isOverLeveraged || isPriceImpactAboveThreshold ? 1 : 4 }}>
+      <ModalBox sx={{ p: 2, mb: errorData?.status || isOverLeveraged ? 1 : 4 }}>
         <ModalBoxRow>
           <Grid container mb={1.5}>
             <Grid item xs={7}>
@@ -88,14 +86,6 @@ const Operation = () => {
       {errorData?.status && <ModalAlert message={errorData.message} variant={errorData.variant} />}
       {isOverLeveraged && (
         <ModalAlert message={t('You are currently over leveraged with the selected markets.')} variant="info" />
-      )}
-      {isPriceImpactAboveThreshold && (
-        <ModalAlert
-          message={t('Price impact is above {{ threshold }}, operation is too risky.', {
-            threshold: toPercentage(Number(PRICE_IMPACT_THRESHOLD) / 1e18),
-          })}
-          variant="warning"
-        />
       )}
       {disabledSubmit ? (
         <Button fullWidth variant="contained" disabled>
