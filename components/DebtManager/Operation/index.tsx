@@ -369,7 +369,7 @@ function Operation() {
       message: {
         owner: walletAddress,
         spender: debtManager.address,
-        value: input.from.maturity && !input.to.maturity ? maxRepayAssets : maxBorrowAssets,
+        value: input.from.maturity && !input.to.maturity ? maxRepayAssets : maxBorrowAssets, // TODO: check for partial repay
         nonce: marketNonce,
         deadline,
       },
@@ -378,6 +378,7 @@ function Operation() {
     const permit = {
       account: walletAddress,
       deadline,
+      value: input.from.maturity && !input.to.maturity ? maxRepayAssets : maxBorrowAssets, // TODO: check for partial repay
       ...{ v, r: r as Hex, s: s as Hex },
     } as const;
 
