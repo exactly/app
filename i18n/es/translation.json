@@ -355,7 +355,6 @@
   "Take control of your investments with strategies that balance risk and reward for long-term success.": "Toma control de tus inversiones con estrategias que equilibren el riesgo y la recompensa para el éxito a largo plazo.",
   "You are currently over leveraged with the selected markets.": "Actualmente estás sobre apalancado con los mercados seleccionados.",
   "The APR displayed comes from the Lido API.": "La TNA proviene de la API de Lido.",
-  "Price impact is above {{ threshold }}, operation is too risky.": "El impacto en el precio está por encima de {{ threshold }}, la operación es demasiado riesgosa.",
   "You have no voting power in your connected wallet.": "No tienes poder de voto en tu billetera conectada.",
   "Revoke delegation": "Revocar delegación",
   "Withdraw {{ value }} EXA": "Retirar {{ value }} EXA",
@@ -375,7 +374,6 @@
   "Provide liquidity": "Proporcionar liquidez",
   "Net APR": "TNA Neta",
   "Your Account": "Tu Cuenta",
-  "Temporary disabled": "Temporalmente deshabilitado",
   "Deposit EXA on Extra Finance and get {{apy}} APY": "Deposita EXA en Extra Finance y obtén {{apy}} TEA",
   "Deposit EXA": "Deposite EXA",
   "No approvals found!": "¡No se encontraron permisos!",
@@ -466,5 +464,6 @@
   "Theme": "Tema",
   "Language": "Idioma",
   "Settings": "Configuración",
-  "The Health Factor represents how “safe” your leverage portfolio is, defined as the risk-adjusted proportion of collateral deposited versus the borrowed risk-adjusted amount. A health factor below 1x will be considered with a shortfall and open to liquidation.": "El Factor de Salud representa cuán “seguro“ es tu portafolio con apalancamiento, definido como la proporción ajustada al riesgo del colateral depositado frente al monto ajustado al riesgo que se ha tomado prestado. Un factor de salud por debajo de 1x se considerará con un déficit y estará abierto a la liquidación."
+  "The Health Factor represents how “safe” your leverage portfolio is, defined as the risk-adjusted proportion of collateral deposited versus the borrowed risk-adjusted amount. A health factor below 1x will be considered with a shortfall and open to liquidation.": "El Factor de Salud representa cuán “seguro“ es tu portafolio con apalancamiento, definido como la proporción ajustada al riesgo del colateral depositado frente al monto ajustado al riesgo que se ha tomado prestado. Un factor de salud por debajo de 1x se considerará con un déficit y estará abierto a la liquidación.",
+  "Token allowance surplus after operation": "Excedente de permisos de token luego de la operación"
 }

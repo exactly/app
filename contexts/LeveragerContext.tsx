@@ -592,7 +592,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
           if (marketOutAllownce < borrowShares) return true;
         } else {
           setApprovalStatus('MARKET-IN');
-          const marketInAllownce = await marketIn.read.allowance([walletAddress, debtManager.address], opts);
+          const marketInAllowance = await marketIn.read.allowance([walletAddress, debtManager.address], opts);
           const _slippage =
             (maIn.floatingBorrowAssets * ((maIn.floatingBorrowRate * 300n) / 31_536_000n)) / WEI_PER_ETHER;
           const permitShares = await marketIn.read.previewWithdraw(
@@ -603,7 +603,7 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
             ],
             opts,
           );
-          if (marketInAllownce < permitShares) return true;
+          if (marketInAllowance < permitShares) return true;
         }
 
         setApprovalStatus('APPROVED');

@@ -270,26 +270,14 @@ function Operation() {
     const raw = input.slippage || '0';
     const slippage = WEI_PER_ETHER + parseEther(raw) / 100n;
 
-    const ret: [bigint, bigint] = [0n, 0n];
     if (!fromRow || !toRow) {
-      return ret;
+      return [0n, 0n];
     }
 
     const fromBalance = fromRow.balance ? (fromRow.balance * BigInt(input.percent)) / 100n : 0n;
+    const toBalance = toRow.balance ? toRow.balance : fromBalance;
 
-    if (fromRow.maturity) {
-      ret[0] = (fromBalance * slippage) / WEI_PER_ETHER;
-    } else {
-      ret[0] = fromBalance;
-    }
-
-    if (toRow.maturity) {
-      ret[1] = toRow.balance ? (toRow.balance * slippage) / WEI_PER_ETHER : 0n;
-    } else {
-      ret[1] = fromBalance;
-    }
-
-    return ret;
+    return [(fromBalance * slippage) / WEI_PER_ETHER, (toBalance * slippage) / WEI_PER_ETHER];
   }, [input.slippage, input.percent, fromRow, toRow]);
 
   const [requiresApproval, setRequiresApproval] = useState(false);
@@ -369,7 +357,7 @@ function Operation() {
       message: {
         owner: walletAddress,
         spender: debtManager.address,
-        value: input.from.maturity && !input.to.maturity ? maxRepayAssets : maxBorrowAssets, // TODO: check for partial repay
+        value: await marketContract.read.previewWithdraw([maxBorrowAssets]),
         nonce: marketNonce,
         deadline,
       },
@@ -378,7 +366,7 @@ function Operation() {
     const permit = {
       account: walletAddress,
       deadline,
-      value: input.from.maturity && !input.to.maturity ? maxRepayAssets : maxBorrowAssets, // TODO: check for partial repay
+      value: await marketContract.read.previewWithdraw([maxBorrowAssets]),
       ...{ v, r: r as Hex, s: s as Hex },
     } as const;
 

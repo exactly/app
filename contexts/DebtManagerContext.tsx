@@ -14,7 +14,6 @@ import type { ErrorData } from 'types/Error';
 import type { PopulatedTransaction, Transaction } from 'types/Transaction';
 import type { Position } from 'components/DebtManager/types';
 import useDebtManager from 'hooks/useDebtManager';
-import numbers from 'config/numbers.json';
 import useAccountData from 'hooks/useAccountData';
 import useMarket from 'hooks/useMarket';
 import { useWeb3 } from 'hooks/useWeb3';
@@ -43,7 +42,7 @@ export function isRolloverInput(input: unknown): input is RolloverInput {
   );
 }
 
-const DEFAULT_SLIPPAGE = (numbers.slippage * 100).toFixed(2);
+const DEFAULT_SLIPPAGE = '0.01';
 
 const initState: RolloverInput = {
   from: undefined,
@@ -109,9 +108,12 @@ export const DebtManagerContextProvider: FC<PropsWithChildren<Props>> = ({ args,
     async (qty: bigint): Promise<boolean> => {
       if (!walletAddress || !market || !debtManager || !opts || qty === 0n) return true;
       try {
-        if (!(await isContract(walletAddress))) return false;
+        const isMultiSig = await isContract(walletAddress);
+        if (!isMultiSig) return false;
+
+        const shares = await market.read.previewWithdraw([qty], opts);
         const allowance = await market.read.allowance([walletAddress, debtManager.address], opts);
-        return allowance <= qty;
+        return allowance < shares;
       } catch (e: unknown) {
         setErrorData({ status: true, message: handleOperationError(e) });
         return true;
@@ -121,12 +123,12 @@ export const DebtManagerContextProvider: FC<PropsWithChildren<Props>> = ({ args,
   );
 
   const approve = useCallback(
-    async (maxAssets: bigint) => {
+    async (assets: bigint) => {
       if (!debtManager || !market || !opts) return;
 
       setIsLoading(true);
       try {
-        const max = (maxAssets * 100_005n) / 100_000n;
+        const max = await market.read.previewWithdraw([(assets * 100_005n) / 100_000n], opts);
         const gasEstimation = await market.estimateGas.approve([debtManager.address, max], opts);
         const hash = await market.write.approve([debtManager.address, max], {
           ...opts,

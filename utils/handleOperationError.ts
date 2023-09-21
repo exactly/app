@@ -22,6 +22,8 @@ function parse(name?: string): string {
       return i18n.t('There is not enough liquidity in your account');
     case 'InsufficientProtocolLiquidity':
       return i18n.t('There is not enough liquidity in the protocol');
+    case 'AllowanceSurplus':
+      return i18n.t('Token allowance surplus after operation');
     case 'Disagreement':
       return i18n.t('Not enough slippage');
     case 'InvalidPrice':

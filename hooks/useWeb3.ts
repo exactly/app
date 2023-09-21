@@ -14,7 +14,6 @@ type Web3 = {
   walletAddress?: Address;
   chain: Chain;
   subgraphURL?: string;
-  disableFeature: boolean;
   opts?: {
     account: Address;
     chain: Chain;
@@ -60,8 +59,6 @@ export const useWeb3 = (): Web3 => {
     [walletAddress, connector?.id],
   );
 
-  const disableFeature = true;
-
   return {
     connect: connectWallet,
     isConnected,
@@ -70,7 +67,6 @@ export const useWeb3 = (): Web3 => {
     walletAddress,
     chain: defaultChain,
     subgraphURL,
-    disableFeature,
     opts,
   };
 };
