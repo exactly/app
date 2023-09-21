@@ -69,10 +69,6 @@ type Input = {
 
 export type ApprovalStatus = 'INIT' | 'ERC20' | 'ERC20-PERMIT2' | 'MARKET-IN' | 'MARKET-OUT' | 'APPROVED';
 
-const DEFAULT_SLIPPAGE = 2n;
-
-const slippage = (value: bigint, up = true) => (value * (100n + (up ? 1n : -1n) * DEFAULT_SLIPPAGE)) / 100n;
-
 const initState: Input = {
   collateralSymbol: undefined,
   borrowSymbol: undefined,
@@ -588,23 +584,26 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
 
           setApprovalStatus('MARKET-OUT');
           const marketOutAllownce = await marketOut.read.allowance([walletAddress, debtManager.address], opts);
-          if (
-            marketOutAllownce <
-            (await marketOut.read.previewWithdraw([limit.borrow - leverageStatus.borrow + 100n], opts))
-          )
-            return true;
+          const _slippage = (leverageStatus.borrow * ((maIn.floatingBorrowRate * 300n) / 31_536_000n)) / WEI_PER_ETHER;
+          const borrowShares = await marketIn.read.previewWithdraw(
+            [limit.borrow - leverageStatus.borrow + _slippage],
+            opts,
+          );
+          if (marketOutAllownce < borrowShares) return true;
         } else {
           setApprovalStatus('MARKET-IN');
           const marketInAllownce = await marketIn.read.allowance([walletAddress, debtManager.address], opts);
-          const permitAssets = await marketOut.read.previewWithdraw(
+          const _slippage =
+            (maIn.floatingBorrowAssets * ((maIn.floatingBorrowRate * 300n) / 31_536_000n)) / WEI_PER_ETHER;
+          const permitShares = await marketIn.read.previewWithdraw(
             [
-              slippage(
-                (maIn.floatingBorrowAssets < limit.borrow ? 0n : maIn.floatingBorrowAssets - limit.borrow) + userInput,
-              ),
+              (maIn.floatingBorrowAssets < limit.borrow ? 0n : maIn.floatingBorrowAssets - limit.borrow) +
+                userInput +
+                _slippage,
             ],
             opts,
           );
-          if (marketInAllownce < permitAssets) return true;
+          if (marketInAllownce < permitShares) return true;
         }
 
         setApprovalStatus('APPROVED');
@@ -669,15 +668,17 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
           break;
         }
         case 'MARKET-IN': {
-          const permitAssets = await marketOut.read.previewWithdraw(
+          const _slippage =
+            (maIn.floatingBorrowAssets * ((maIn.floatingBorrowRate * 5000n) / 31_536_000n)) / WEI_PER_ETHER;
+          const permitShares = await marketIn.read.previewWithdraw(
             [
-              slippage(
-                (maIn.floatingBorrowAssets < limit.borrow ? 0n : maIn.floatingBorrowAssets - limit.borrow) + userInput,
-              ),
+              (maIn.floatingBorrowAssets < limit.borrow ? 0n : maIn.floatingBorrowAssets - limit.borrow) +
+                userInput +
+                _slippage,
             ],
             opts,
           );
-          const args = [debtManager.address, slippage(permitAssets)] as const;
+          const args = [debtManager.address, permitShares] as const;
           const gasEstimation = await marketIn.estimateGas.approve(args, opts);
           hash = await marketIn.write.approve(args, {
             ...opts,
@@ -686,10 +687,12 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
           break;
         }
         case 'MARKET-OUT': {
-          const args = [
-            debtManager.address,
-            await marketOut.read.previewWithdraw([limit.borrow - leverageStatus.borrow + 100n], opts),
-          ] as const;
+          const _slippage = (leverageStatus.borrow * ((maIn.floatingBorrowRate * 5000n) / 31_536_000n)) / WEI_PER_ETHER;
+          const borrowShares = await marketIn.read.previewWithdraw(
+            [limit.borrow - leverageStatus.borrow + _slippage],
+            opts,
+          );
+          const args = [debtManager.address, borrowShares] as const;
           const gasEstimation = await marketOut.estimateGas.approve(args, opts);
           hash = await marketOut.write.approve(args, {
             ...opts,
@@ -935,9 +938,9 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
               });
               break;
             }
+
             const _slippage =
               (maIn.floatingBorrowAssets * ((maIn.floatingBorrowRate * 300n) / 31_536_000n)) / WEI_PER_ETHER;
-
             const permitShares = await marketIn.read.previewWithdraw(
               [
                 (maIn.floatingBorrowAssets < limit.borrow ? 0n : maIn.floatingBorrowAssets - limit.borrow) +

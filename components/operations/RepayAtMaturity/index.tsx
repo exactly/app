@@ -119,6 +119,7 @@ const RepayAtMaturity: FC = () => {
         positionAssets,
         walletAddress ?? zeroAddress,
       ]);
+
       const feeAtMaturity =
         ((((positionAssets > pool.position.principal ? pool.position.principal : positionAssets) * pool.position.fee) /
           WEI_PER_ETHER) *
@@ -128,6 +129,7 @@ const RepayAtMaturity: FC = () => {
       const discount = assets - positionAssets;
 
       if (cancelled()) return;
+
       setPreviewData({
         principal: formatNumber(formatUnits(principal, marketAccount.decimals), marketAccount.symbol, true),
         amountWithDiscount: formatNumber(formatUnits(assets, marketAccount.decimals), marketAccount.symbol, true),
