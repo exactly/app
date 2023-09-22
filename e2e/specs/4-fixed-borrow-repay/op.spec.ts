@@ -54,5 +54,5 @@ test('OP fixed borrow/repay', async ({ page, web3, setup }) => {
     maturity: pool,
   });
 
-  await balance.check({ address: web3.account.address, symbol: 'OP', amount: '52', delta: 0.005 });
+  await balance.check({ address: web3.account.address, symbol: 'OP', amount: '52', delta: '0.005' });
 });

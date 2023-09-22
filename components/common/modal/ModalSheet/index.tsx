@@ -1,5 +1,5 @@
 import React, { forwardRef, type PropsWithChildren } from 'react';
-import { Box, IconButton, Typography, useTheme, Slide, SlideProps, Backdrop } from '@mui/material';
+import { Box, IconButton, Typography, useTheme, Slide, SlideProps, Backdrop, BoxProps } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 
 type Props = PropsWithChildren<{
@@ -7,9 +7,10 @@ type Props = PropsWithChildren<{
   title?: string;
   open: boolean;
   onClose: () => void;
-}>;
+}> &
+  BoxProps;
 
-const ModalSheet = forwardRef(function ModalSheet({ title, container, open, onClose, children }: Props, ref) {
+const ModalSheet = forwardRef(function ModalSheet({ title, container, open, onClose, children, ...props }: Props, ref) {
   const { spacing, palette } = useTheme();
 
   return (
@@ -29,6 +30,7 @@ const ModalSheet = forwardRef(function ModalSheet({ title, container, open, onCl
             zIndex: 2,
             overflowY: 'hidden',
           }}
+          {...props}
         >
           <IconButton
             aria-label="close"

@@ -37,7 +37,7 @@ function TableRowFloatingPool({ symbol, valueUSD, depositedAmount, borrowedAmoun
     <TableRow
       sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
       hover
-      data-testid={`dashboard-floating-pool-row-${symbol}`}
+      data-testid={`dashboard-floating-${type}-row-${symbol}`}
     >
       <Link href={{ pathname: `/${symbol}`, query }} legacyBehavior>
         <TableCell component="th" align="left" sx={{ cursor: 'pointer', pl: 1.5 }} width={240}>
@@ -128,6 +128,7 @@ function TableRowFloatingPool({ symbol, valueUSD, depositedAmount, borrowedAmoun
               }}
               onClick={() => startDebtManager({ from: { symbol } })}
               disabled={isRolloverDisabled(borrowedAmount)}
+              data-testid={`floating-rollover-${symbol}`}
             >
               {t('Rollover')}
             </Button>

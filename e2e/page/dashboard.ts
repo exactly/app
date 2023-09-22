@@ -56,6 +56,11 @@ export default function (page: Page) {
     await t.click();
   };
 
+  const checkFloatingTableRow = async (type: 'deposit' | 'borrow', symbol: ERC20TokenSymbol) => {
+    const row = page.getByTestId(`dashboard-floating-${type}-row-${symbol}`);
+    await expect(row).toBeVisible();
+  };
+
   const checkFixedTableRow = async (type: 'deposit' | 'borrow', symbol: ERC20TokenSymbol, maturity: number) => {
     const row = page.getByTestId(`dashboard-fixed-${type}-row-${maturity}-${symbol}`);
     await expect(row).toBeVisible();
@@ -77,6 +82,7 @@ export default function (page: Page) {
     attemptEnterMarket,
     attemptExitMarket,
     switchTab,
+    checkFloatingTableRow,
     checkFixedTableRow,
     waitForTransaction,
   };

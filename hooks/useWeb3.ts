@@ -44,7 +44,7 @@ export const useWeb3 = (): Web3 => {
 
   const connectWallet = useCallback(() => {
     if (isE2E) {
-      const injected = connectors.find(({ id, ready, name }) => ready && id === 'injected' && name === 'E2E');
+      const injected = connectors.find(({ id, ready, name }) => ready && id === 'mock' && name === 'Mock');
       connect({ connector: injected, chainId: defaultChain.id });
     } else {
       open({ route: 'ConnectWallet' });

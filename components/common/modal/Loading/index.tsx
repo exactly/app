@@ -44,12 +44,12 @@ function Loading({ tx, maturity, messages: { pending, success, error } = {} }: P
           />
         )}
         <Box display="flex" flexDirection="column" alignItems="center">
-          <Typography variant="h6" fontSize="16px">
+          <Typography variant="h6" fontSize="16px" data-testid="transaction-status">
             {isLoading && t('Processing transaction...')}
             {isSuccess && t('Transaction completed')}
             {isError && t('Transaction error')}
           </Typography>
-          <Typography fontSize="14px" fontWeight={500} color="grey.500">
+          <Typography fontSize="14px" fontWeight={500} color="grey.500" data-testid="transaction-summary">
             {isLoading && pending}
             {isSuccess && success}
             {isError && error}

@@ -460,6 +460,7 @@ function Operation() {
         open={fromSheetOpen}
         onClose={onClose}
         title={t('Select Current Debt')}
+        data-testid="rollover-sheet-from"
       >
         <PositionTable
           loading={fromRows.length === 0}
@@ -477,6 +478,7 @@ function Operation() {
         open={toSheetOpen}
         onClose={onClose}
         title={t('Select New Debt')}
+        data-testid="rollover-sheet-to"
       >
         <Box display="flex" justifyContent="space-between">
           <Typography variant="caption" color="figma.grey.600">
@@ -526,6 +528,7 @@ function Operation() {
                   selected={Boolean(input.from)}
                   onClick={() => setSheetOpen([true, false])}
                   sx={{ ml: -0.5 }}
+                  data-testid="rollover-from"
                 >
                   {input.from ? (
                     <>
@@ -536,7 +539,12 @@ function Operation() {
                     t('Current debt')
                   )}
                 </ModalSheetButton>
-                <Typography component="div" variant="subtitle1" color="figma.grey.500">
+                <Typography
+                  component="div"
+                  variant="subtitle1"
+                  color="figma.grey.500"
+                  data-testid="rollover-from-label"
+                >
                   {input.from
                     ? input.from.maturity
                       ? parseTimestamp(input.from.maturity)
@@ -558,6 +566,7 @@ function Operation() {
                   }}
                   disabled={!input.from}
                   sx={{ ml: -0.5, mr: -0.5 }}
+                  data-testid="rollover-to"
                 >
                   {input.to ? (
                     <>
@@ -568,7 +577,7 @@ function Operation() {
                     t('New debt')
                   )}
                 </ModalSheetButton>
-                <Typography component="div" variant="subtitle1" color="figma.grey.500">
+                <Typography component="div" variant="subtitle1" color="figma.grey.500" data-testid="rollover-to-label">
                   {input.to ? (input.to.maturity ? parseTimestamp(input.to.maturity) : t('Open-ended')) : t('Maturity')}
                 </Typography>
               </Grid>
@@ -588,6 +597,7 @@ function Operation() {
         </Box>
         {errorData?.status && <ModalAlert message={errorData.message} variant={errorData.variant} />}
         <Submit
+          data-testid={requiresApproval ? 'rollover-approve' : 'rollover-submit'}
           disabled={!input.from || !input.to || errorData?.status}
           loading={loadingStatus || isLoading}
           onClick={requiresApproval ? approveRollover : rollover}

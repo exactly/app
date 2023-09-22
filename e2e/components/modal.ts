@@ -30,6 +30,7 @@ export default function (page: Page) {
     await page.getByTestId(`${type}-${maturity ? `${maturity}-` : ''}${action}-${symbol}`).click();
     await waitForModalReady();
   };
+
   const close = async () => {
     await page.getByTestId('modal-close').click();
     await expect(page.getByTestId('modal')).not.toBeVisible();

@@ -94,6 +94,7 @@ function PositionTable({ data, onClick, loading = false, showBalance = false }: 
                       cursor: 'pointer',
                     }}
                     onClick={() => onClick(row)}
+                    data-testid={`rollover-sheet-row-${row.symbol}${row.maturity ? `-${row.maturity}` : ''}`}
                   >
                     <TableCell sx={{ maxWidth: 64 }}>
                       <AssetCell symbol={row.symbol} />

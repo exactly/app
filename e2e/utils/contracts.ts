@@ -1,4 +1,4 @@
-import { getContract, isAddress } from 'viem';
+import { getContract, isAddress, type PublicClient, type WalletClient } from 'viem';
 import auditorContract from '@exactly/protocol/deployments/optimism/Auditor.json' assert { type: 'json' };
 import marketETHRouter from '@exactly/protocol/deployments/optimism/MarketETHRouter.json' assert { type: 'json' };
 
@@ -9,7 +9,10 @@ const ERC20TokenSymbols = ['WETH', 'USDC', 'OP'] as const;
 export type ERC20TokenSymbol = (typeof ERC20TokenSymbols)[number];
 export type Coin = ERC20TokenSymbol | 'ETH';
 
-type Clients = Pick<Parameters<typeof getContract>[0], 'walletClient' | 'publicClient'>;
+type Clients = {
+  publicClient?: PublicClient;
+  walletClient?: WalletClient;
+};
 
 export const erc20 = async (symbol: ERC20TokenSymbol, clients: Clients = {}): Promise<ERC20> => {
   const {

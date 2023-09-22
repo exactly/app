@@ -70,9 +70,11 @@ function DebtManagerModal({ isOpen, close }: Props) {
       sx={isMobile ? { top: 'auto' } : { backdropFilter: tx ? 'blur(1.5px)' : '' }}
       BackdropProps={{ style: { backgroundColor: tx ? 'rgb(100, 100, 100 , 0.1)' : '' } }}
       disableEscapeKeyDown={loadingTx}
+      data-testid="rollover-modal"
     >
       {!loadingTx && (
         <IconButton
+          data-testid="rollover-modal-close"
           aria-label="close"
           onClick={close}
           sx={{

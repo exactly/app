@@ -169,6 +169,7 @@ function TableRowFixedPool({ symbol, valueUSD, type, maturityDate, market, decim
                   }}
                   onClick={() => startDebtManager({ from: { symbol, maturity: maturityDate } })}
                   disabled={isRolloverDisabled()}
+                  data-testid={`fixed-rollover-${maturityDate}-${symbol}`}
                 >
                   {t('Rollover')}
                 </Button>

@@ -44,7 +44,7 @@ function Faucet() {
         setLoading(symbol);
         const amounts: Record<string, string> = {
           DAI: '50000',
-          USDC: '50000000',
+          USDC: '50000',
           WBTC: '2',
         };
 
