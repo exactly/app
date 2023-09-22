@@ -4,6 +4,7 @@ import type { NextPage } from 'next';
 import { usePageView } from 'hooks/useAnalytics';
 import { useTranslation } from 'react-i18next';
 import { Box, Button, Divider, Grid, Typography } from '@mui/material';
+import VestingInput from 'components/VestingInput';
 
 const Vesting: NextPage = () => {
   usePageView('/vesting', 'Vesting');
@@ -69,9 +70,8 @@ const Vesting: NextPage = () => {
               )}
             </Typography>
           </Grid>
-          {/* Replace with Vesting Component */}
           <Grid item xs={6} display="flex" justifyContent="center" alignItems="center">
-            Vesting Component
+            <VestingInput />
           </Grid>
         </Grid>
       </Box>
