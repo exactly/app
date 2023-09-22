@@ -1,0 +1,48 @@
+import { Address, stringToHex, zeroAddress } from 'viem';
+import {
+  useDelegateRegistryDelegation,
+  usePrepareDelegateRegistryClearDelegate,
+  usePrepareDelegateRegistrySetDelegate,
+} from 'types/abi';
+import { useWeb3 } from './useWeb3';
+import { useMemo } from 'react';
+
+const DELEGATE_REGISTRY_ADDRESS = '0x469788fE6E9E9681C6ebF3bF78e7Fd26Fc015446';
+
+export const useDelegation = () => {
+  const { chain, walletAddress } = useWeb3();
+  const space = useMemo(() => (chain.id === 10 ? 'gov.exa.eth' : 'exa.eth'), [chain.id]);
+  const encodedSpace = useMemo(() => stringToHex(space, { size: 32 }), [space]);
+
+  return useDelegateRegistryDelegation({
+    chainId: chain.id,
+    address: DELEGATE_REGISTRY_ADDRESS,
+    args: [walletAddress ?? zeroAddress, encodedSpace],
+  });
+};
+
+export const usePrepareDelegate = (address: Address) => {
+  const { chain, walletAddress } = useWeb3();
+  const space = useMemo(() => (chain.id === 10 ? 'gov.exa.eth' : 'exa.eth'), [chain.id]);
+  const encodedSpace = useMemo(() => stringToHex(space, { size: 32 }), [space]);
+
+  return usePrepareDelegateRegistrySetDelegate({
+    chainId: chain.id,
+    address: DELEGATE_REGISTRY_ADDRESS,
+    account: walletAddress ?? zeroAddress,
+    args: [encodedSpace, address],
+  });
+};
+
+export const usePrepareClearDelegate = () => {
+  const { chain, walletAddress } = useWeb3();
+  const space = useMemo(() => (chain.id === 10 ? 'gov.exa.eth' : 'exa.eth'), [chain.id]);
+  const encodedSpace = useMemo(() => stringToHex(space, { size: 32 }), [space]);
+
+  return usePrepareDelegateRegistryClearDelegate({
+    chainId: chain.id,
+    address: DELEGATE_REGISTRY_ADDRESS,
+    account: walletAddress ?? zeroAddress,
+    args: [encodedSpace],
+  });
+};

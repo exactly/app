@@ -1,46 +1,53 @@
-import React, { useMemo, useState } from 'react';
+import React, { FC, useMemo, useState } from 'react';
 import { Avatar, Box, Button, Collapse, Divider, Skeleton, TextField, Typography } from '@mui/material';
 import { Trans, useTranslation } from 'react-i18next';
 import { LoadingButton } from '@mui/lab';
 import HowToVoteIcon from '@mui/icons-material/HowToVote';
 import AddIcon from '@mui/icons-material/Add';
-import { isAddress, parseEther, zeroAddress, formatEther } from 'viem';
+import { isAddress, zeroAddress } from 'viem';
 import { formatWallet } from 'utils/utils';
-import { useEXA, useEXADelegates, useEXAPrepareDelegate } from 'hooks/useEXA';
-import formatNumber from 'utils/formatNumber';
+import { useEXA } from 'hooks/useEXA';
 import useBalance from 'hooks/useBalance';
 import { useWeb3 } from 'hooks/useWeb3';
-import { useExaDelegate } from 'types/abi';
+import { useDelegateRegistryClearDelegate, useDelegateRegistrySetDelegate } from 'types/abi';
 import { mainnet, useEnsAvatar, useEnsName, useNetwork, useSwitchNetwork, useWaitForTransaction } from 'wagmi';
 import * as blockies from 'blockies-ts';
-import { useAirdropStreams } from 'hooks/useAirdrop';
-import { useSablierV2LockupLinearGetWithdrawnAmount } from 'hooks/useSablier';
+import { useDelegation, usePrepareClearDelegate, usePrepareDelegate } from 'hooks/useDelegateRegistry';
+import formatNumber from 'utils/formatNumber';
+import useGovernance from 'hooks/useGovernance';
 
 type Props = {
-  amount: bigint;
+  fetchVotingPower: () => void;
 };
 
-const Delegation = ({ amount }: Props) => {
+const Delegation: FC<Props> = ({ fetchVotingPower }) => {
+  const { votingPower } = useGovernance(false);
   const { t } = useTranslation();
   const { chain: displayNetwork, walletAddress, impersonateActive, exitImpersonate } = useWeb3();
   const [selected, setSelected] = useState<'self-delegate' | 'add-delegate'>();
   const [input, setInput] = useState<string>('');
   const exa = useEXA();
   const exaBalance = useBalance('EXA', exa?.address);
-  const { data: delegate, isLoading: isLoadingDelegate, refetch: refetchDelegate } = useEXADelegates();
-  const { config } = useEXAPrepareDelegate({
-    args:
-      delegate !== zeroAddress
-        ? [zeroAddress]
-        : selected === 'add-delegate' && isAddress(input)
-        ? [input]
-        : [walletAddress ?? zeroAddress],
-  });
-  const { write, isLoading: submitLoading, data } = useExaDelegate(config);
+  const { data: delegate, isLoading: isLoadingDelegate, refetch: refetchDelegate } = useDelegation();
+  const { config } = usePrepareDelegate(
+    delegate !== zeroAddress
+      ? zeroAddress
+      : selected === 'add-delegate' && isAddress(input)
+      ? input
+      : walletAddress ?? zeroAddress,
+  );
+  const { write, isLoading: submitLoading, data } = useDelegateRegistrySetDelegate(config);
+  const { config: configClearDelegate } = usePrepareClearDelegate();
+  const {
+    write: writeClearDelegate,
+    isLoading: clearDelegateLoading,
+    data: clearDelegateData,
+  } = useDelegateRegistryClearDelegate(configClearDelegate);
   const { isLoading: waitingDelegate } = useWaitForTransaction({
-    hash: data?.hash,
+    hash: data?.hash ?? clearDelegateData?.hash,
     onSettled: () => {
       refetchDelegate();
+      fetchVotingPower();
     },
   });
   const { data: delegateENS } = useEnsName({ address: delegate, chainId: mainnet.id });
@@ -51,13 +58,6 @@ const Delegation = ({ amount }: Props) => {
 
   const { chain } = useNetwork();
   const { switchNetwork, isLoading: switchIsLoading } = useSwitchNetwork();
-
-  const { data: stream } = useAirdropStreams();
-  const { data: withdrawn } = useSablierV2LockupLinearGetWithdrawnAmount(stream);
-
-  const totalVotes = useMemo(() => {
-    return formatNumber(formatEther(parseEther(exaBalance ?? '0') + (amount - (withdrawn ?? 0n))));
-  }, [exaBalance, amount, withdrawn]);
 
   const delegateAvatar = useMemo(() => {
     if (!delegate) return '';
@@ -81,14 +81,14 @@ const Delegation = ({ amount }: Props) => {
         <Divider flexItem />
         <Box display="flex" flexDirection="column" gap={3}>
           <Typography variant="h6">{t('Votes Delegation')}</Typography>
-          {exaBalance !== undefined ? (
+          {exaBalance !== undefined && votingPower !== undefined ? (
             <Typography fontSize={14}>
               <Trans
                 i18nKey="Your total of <1>{{amount}} voting power</1> is currently delegated to the following address:"
                 components={{
                   1: <strong></strong>,
                 }}
-                values={{ amount: totalVotes }}
+                values={{ amount: formatNumber(votingPower, 'USD', true) }}
               />
             </Typography>
           ) : (
@@ -111,7 +111,12 @@ const Delegation = ({ amount }: Props) => {
             {t('Please switch to {{network}} network', { network: displayNetwork.name })}
           </LoadingButton>
         ) : (
-          <LoadingButton fullWidth variant="outlined" onClick={write} loading={submitLoading || waitingDelegate}>
+          <LoadingButton
+            fullWidth
+            variant="outlined"
+            onClick={writeClearDelegate}
+            loading={clearDelegateLoading || waitingDelegate}
+          >
             {t('Revoke delegation')}
           </LoadingButton>
         )}
@@ -124,14 +129,14 @@ const Delegation = ({ amount }: Props) => {
       <Divider flexItem />
       <Box display="flex" flexDirection="column" gap={3}>
         <Typography variant="h6">{t('Votes Delegation')}</Typography>
-        {exaBalance !== undefined ? (
+        {exaBalance !== undefined && votingPower !== undefined ? (
           <Typography fontSize={14}>
             <Trans
               i18nKey="You have a total of <1>{{amount}} voting power</1> available to delegate."
               components={{
                 1: <strong></strong>,
               }}
-              values={{ amount: totalVotes }}
+              values={{ amount: formatNumber(votingPower, 'USD', true) }}
             />
           </Typography>
         ) : (

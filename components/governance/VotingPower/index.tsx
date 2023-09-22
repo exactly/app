@@ -18,7 +18,7 @@ const VotingPower: FC<Props> = ({ votingPower }) => {
           <Skeleton width={56} height={40} />
         ) : (
           <Typography fontSize={28} color="grey.700">
-            {formatNumber(votingPower)}
+            {formatNumber(votingPower, 'USD', true)}
           </Typography>
         )}
       </Box>

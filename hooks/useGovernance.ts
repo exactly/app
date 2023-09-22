@@ -1,10 +1,10 @@
 import snapshot from '@snapshot-labs/snapshot.js';
 import { useWeb3 } from './useWeb3';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import optimismEXA from '@exactly/protocol/deployments/optimism/EXA.json';
 import goerliEXA from '@exactly/protocol/deployments/goerli/EXA.json';
 
-export default function useGovernance() {
+export default function useGovernance(delegation = true) {
   const [votingPower, setVotingPower] = useState<number | undefined>(undefined);
   const { chain, walletAddress } = useWeb3();
 
@@ -34,16 +34,28 @@ export default function useGovernance() {
     [exaAddress],
   );
 
-  const delegation = true;
   const url = 'https://score.snapshot.org/';
 
-  useEffect(() => {
+  const fetchVotingPower = useCallback(async () => {
     if (!walletAddress) return;
+    const { vp } = await snapshot.utils.getVp(
+      walletAddress,
+      String(chain.id),
+      strategies,
+      'latest',
+      space,
+      delegation,
+      {
+        url,
+      },
+    );
+    setVotingPower(vp);
+    return vp;
+  }, [chain.id, delegation, space, strategies, walletAddress]);
 
-    snapshot.utils
-      .getVp(walletAddress, String(chain.id), strategies, 'latest', space, delegation, { url })
-      .then(({ vp }) => setVotingPower(vp));
-  }, [chain.id, chain.network, delegation, space, strategies, url, votingPower, walletAddress]);
+  useEffect(() => {
+    fetchVotingPower();
+  }, [fetchVotingPower]);
 
-  return { votingPower };
+  return { votingPower, fetchVotingPower };
 }
