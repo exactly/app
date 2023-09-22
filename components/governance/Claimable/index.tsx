@@ -167,4 +167,4 @@ const NFT: FC = () => {
   );
 };
 
-export default Claimable;
+export default React.memo(Claimable);

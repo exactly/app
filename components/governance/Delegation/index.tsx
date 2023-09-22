@@ -254,4 +254,4 @@ const Delegation = ({ amount }: Props) => {
   );
 };
 
-export default Delegation;
+export default React.memo(Delegation);
