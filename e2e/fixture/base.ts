@@ -9,8 +9,7 @@ import {
   http,
 } from 'viem';
 import { privateKeyToAccount, generatePrivateKey } from 'viem/accounts';
-import { Chain, optimism } from 'viem/chains';
-import * as fs from 'fs/promises';
+import { optimism, type Chain } from 'viem/chains';
 
 import { type Tenderly, tenderly } from '../utils/tenderly';
 import actions, { Actions } from './actions';
@@ -25,14 +24,14 @@ const defaultOptions = {
   marketView: 'advanced',
 } as const;
 
+export const chain: Chain = optimism;
+
 type TestParams = {
-  chain?: Chain;
   privateKey?: Address;
   options?: Options;
 };
 
 const defaultTestParams = {
-  chain: optimism,
   privateKey: generatePrivateKey(),
   options: defaultOptions,
 } as const;
@@ -49,12 +48,17 @@ type TestProps = {
   setup: Actions;
 };
 
+declare global {
+  interface Window {
+    e2e: { rpc: string; chainId: number; privateKey: Address };
+  }
+}
+
 const base = (params: TestParams = defaultTestParams) =>
   test.extend<TestProps>({
     bypassCSP: true,
     web3: async ({ page }, use) => {
-      const { chain, privateKey, options } = {
-        chain: params.chain ?? defaultTestParams.chain,
+      const { privateKey, options } = {
         privateKey: params.privateKey ?? defaultTestParams.privateKey,
         options: {
           marketView: params.options?.marketView ?? defaultTestParams.options.marketView,
@@ -66,13 +70,11 @@ const base = (params: TestParams = defaultTestParams) =>
       const walletClient = createWalletClient({ account, chain, transport: http(fork.url()) });
       const publicClient = createPublicClient({ chain, transport: http(fork.url()) });
 
-      const { pathname: root } = new URL('../', import.meta.url);
-      const injected = (await fs.readFile(`${root}/fixture/injected.txt`, { encoding: 'utf-8' }))
-        .replace('__RPC_URL', fork.url())
-        .replace('__CHAIN_ID', String(chain.id))
-        .replace('__PRIVATE_KEY', privateKey);
+      const injected = { privateKey: privateKey, rpc: fork.url(), chainId: chain.id };
 
-      await page.addInitScript(injected);
+      await page.addInitScript((_injected) => {
+        window.e2e = _injected;
+      }, injected);
 
       await page.addInitScript((opts) => {
         window.localStorage.setItem('marketView', opts.marketView);

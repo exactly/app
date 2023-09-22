@@ -1,6 +1,6 @@
-import { Address, parseEther, parseUnits, type WalletClient, type PublicClient } from 'viem';
+import { Address, parseEther, parseUnits, type PublicClient, type WalletClient } from 'viem';
 
-import { erc20, erc20Market, ethRouter, auditor, ERC20TokenSymbol, Coin } from '../utils/contracts';
+import { erc20, erc20Market, ethRouter, auditor, type ERC20TokenSymbol, type Coin } from '../utils/contracts';
 
 const MaxUint256 = 2n ** 256n - 1n;
 const WeiPerEther = 10n ** 18n;

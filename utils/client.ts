@@ -1,6 +1,5 @@
 import { EthereumClient, w3mConnectors, w3mProvider } from '@web3modal/ethereum';
-import { createConfig, configureChains, ChainProviderFn, Chain, createStorage } from 'wagmi';
-import { InjectedConnector } from 'wagmi/connectors/injected';
+import { createConfig, configureChains, ChainProviderFn, Chain, createStorage, Address } from 'wagmi';
 import * as wagmiChains from 'wagmi/chains';
 import { jsonRpcProvider } from 'wagmi/providers/jsonRpc';
 import { alchemyProvider } from 'wagmi/providers/alchemy';
@@ -8,18 +7,20 @@ import { publicProvider } from 'wagmi/providers/public';
 import { SafeConnector } from 'wagmi/connectors/safe';
 import { optimism } from 'wagmi/chains';
 
+import E2EConnector from './connectors';
+
 declare global {
   interface Window {
-    ethereum: { provider: { connection: { url: string } } };
+    e2e: { rpc: string; chainId: number; privateKey: Address };
   }
 }
 
 export const walletConnectId = '11ddaa8aaede72cb5d6b0dae2fed7baa';
+const e2e = typeof window !== 'undefined' ? window.e2e : null;
+export const isE2E: boolean = JSON.parse(process.env.NEXT_PUBLIC_IS_E2E ?? 'false') && e2e;
 
 const networkId = Number(process.env.NEXT_PUBLIC_NETWORK ?? optimism.id);
 export const defaultChain = Object.values(wagmiChains).find((c) => c.id === networkId) ?? optimism;
-
-export const isE2E: boolean = JSON.parse(process.env.NEXT_PUBLIC_IS_E2E ?? 'false');
 
 const sortedChains = isE2E
   ? [defaultChain]
@@ -27,19 +28,14 @@ const sortedChains = isE2E
 
 const alchemyKey = process.env.NEXT_PUBLIC_ALCHEMY_API_KEY;
 
-const providers: ChainProviderFn<Chain>[] = isE2E
-  ? [
-      jsonRpcProvider({
-        rpc: () => ({
-          http: typeof window !== 'undefined' ? window.ethereum.provider.connection.url : 'http://127.0.0.1:8545',
-        }),
-      }),
-    ]
-  : [
-      ...(alchemyKey ? [alchemyProvider({ apiKey: alchemyKey })] : []),
-      publicProvider(),
-      w3mProvider({ projectId: walletConnectId }),
-    ];
+const providers: ChainProviderFn<Chain>[] =
+  isE2E && e2e
+    ? [jsonRpcProvider({ rpc: () => ({ http: e2e ? e2e.rpc : 'http://127.0.0.1:8545' }) })]
+    : [
+        ...(alchemyKey ? [alchemyProvider({ apiKey: alchemyKey })] : []),
+        publicProvider(),
+        w3mProvider({ projectId: walletConnectId }),
+      ];
 
 const { chains, publicClient } = configureChains<Chain>(sortedChains, providers);
 
@@ -51,8 +47,8 @@ const noopStorage = {
 
 export const wagmi = createConfig({
   connectors: [
-    ...(isE2E
-      ? [new InjectedConnector({ chains, options: { name: 'E2E', shimDisconnect: false } })]
+    ...(isE2E && e2e
+      ? [new E2EConnector({ chains, ...e2e })]
       : [...w3mConnectors({ projectId: walletConnectId, chains }), new SafeConnector({ chains })]),
   ],
   publicClient,
