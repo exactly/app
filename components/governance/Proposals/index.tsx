@@ -1,10 +1,18 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Box, Button, Divider, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
+import { optimism } from 'wagmi/chains';
+import { useWeb3 } from 'hooks/useWeb3';
 
 const Proposals = () => {
   const { t } = useTranslation();
+  const { chain } = useWeb3();
+
+  const spaceURL = useMemo(
+    () => (chain.id === optimism.id ? 'https://gov.exact.ly/' : 'https://demo.snapshot.org/#/exa.eth'),
+    [chain],
+  );
 
   return (
     <Box display="flex" flexDirection="column" gap={4}>
@@ -19,7 +27,7 @@ const Proposals = () => {
             </Typography>
           </Box>
         </Box>
-        <a href="https://gov.exact.ly/" target="_blank" rel="noreferrer noopener">
+        <a href={spaceURL} target="_blank" rel="noreferrer noopener">
           <Button variant="outlined" fullWidth endIcon={<OpenInNewIcon sx={{ height: 12 }} />}>
             https://gov.exact.ly/
           </Button>
