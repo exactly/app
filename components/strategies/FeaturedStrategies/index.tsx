@@ -5,7 +5,7 @@ import { Button, Grid } from '@mui/material';
 import StrategyCard, { type Props as Strategy } from 'components/strategies/StrategyCard';
 import { useStartDebtManagerButton, useStartLeverager } from 'hooks/useActionButton';
 
-function StrategiesContent() {
+function FeaturedStrategies() {
   const { t } = useTranslation();
 
   const { startLeverager } = useStartLeverager();
@@ -50,7 +50,7 @@ function StrategiesContent() {
   );
 
   return (
-    <Grid ml={-2} mt={0} container spacing={2}>
+    <Grid container spacing={3}>
       {strategies.map((props, i) => (
         <Grid item sm={12} md={4} display="flex" justifyContent="center" width="100%" key={i}>
           <StrategyCard {...props} />
@@ -60,4 +60,4 @@ function StrategiesContent() {
   );
 }
 
-export default React.memo(StrategiesContent);
+export default React.memo(FeaturedStrategies);

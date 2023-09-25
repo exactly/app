@@ -58,7 +58,7 @@ const Modals = () => (
   </>
 );
 
-export default function App({ Component, pageProps }: AppProps) {
+export default function App({ Component, pageProps, router }: AppProps) {
   useInitGA();
 
   return (
@@ -101,6 +101,11 @@ export default function App({ Component, pageProps }: AppProps) {
               <AccountDataProvider>
                 <Box display="flex" flexDirection="column" mx={2} height="100%">
                   <Navbar />
+                  {router.pathname === '/strategies' && (
+                    <Box position="relative" zIndex={-1} mx={-2}>
+                      <Box position="absolute" left={0} bgcolor="figma.grey.100" width="100vw" height={400} />
+                    </Box>
+                  )}
                   <main style={{ flexGrow: 1, maxWidth, margin: '0 auto', width: '100%' }}>
                     <Component {...pageProps} />
                   </main>
