@@ -5,10 +5,30 @@ import { usePageView } from 'hooks/useAnalytics';
 import { useTranslation } from 'react-i18next';
 import { Box, Button, Divider, Grid, Typography } from '@mui/material';
 import VestingInput from 'components/VestingInput';
+import ActiveStream from 'components/ActiveStream';
 
 const Vesting: NextPage = () => {
   usePageView('/vesting', 'Vesting');
   const { t } = useTranslation();
+
+  const activeStreams = [
+    {
+      tokenId: 120,
+      elapsed: 30,
+      duration: 90,
+      vested: 218480000000000000000n,
+      claimed: 95320000000000000000n,
+      reserved: 21848000000000000000n,
+    },
+    {
+      tokenId: 96,
+      elapsed: 60,
+      duration: 90,
+      vested: 80930000000000000000n,
+      claimed: 9450000000000000000n,
+      reserved: 8093000000000000000n,
+    },
+  ];
 
   return (
     <Box display="flex" flexDirection="column" gap={6} maxWidth={800} mx="auto" my={5}>
@@ -86,24 +106,46 @@ const Vesting: NextPage = () => {
           )}
         </Typography>
       </Box>
-      <Box
-        display="flex"
-        flexDirection="column"
-        justifyContent="center"
-        alignItems="center"
-        border={({ palette }) => `1px solid ${palette.grey[300]}`}
-        borderRadius="6px"
-        py={13}
-        px={5}
-        gap={1}
-      >
-        <Typography fontWeight={700} fontSize={16}>
-          {t('No vesting streams active yet.')}
-        </Typography>
-        <Typography textAlign="center" fontSize={14} color="figma.grey.500">
-          {t('Start vesting your esEXA and see the streams’ details here.')}
-        </Typography>
-      </Box>
+      {activeStreams.length > 0 ? (
+        <Box
+          borderRadius="8px"
+          bgcolor="components.bg"
+          boxShadow={({ palette }) => (palette.mode === 'light' ? '0px 3px 4px 0px rgba(97, 102, 107, 0.25)' : '')}
+        >
+          {activeStreams.map(({ tokenId, elapsed, duration, vested, claimed, reserved }, index) => (
+            <>
+              <ActiveStream
+                key={tokenId}
+                elapsed={elapsed}
+                duration={duration}
+                vested={vested}
+                claimed={claimed}
+                reserved={reserved}
+              />
+              {index !== activeStreams.length - 1 && <Divider key={`divider-${tokenId}`} />}
+            </>
+          ))}
+        </Box>
+      ) : (
+        <Box
+          display="flex"
+          flexDirection="column"
+          justifyContent="center"
+          alignItems="center"
+          border={({ palette }) => `1px solid ${palette.grey[300]}`}
+          borderRadius="6px"
+          py={13}
+          px={5}
+          gap={1}
+        >
+          <Typography fontWeight={700} fontSize={16}>
+            {t('No vesting streams active yet.')}
+          </Typography>
+          <Typography textAlign="center" fontSize={14} color="figma.grey.500">
+            {t('Start vesting your esEXA and see the streams’ details here.')}
+          </Typography>
+        </Box>
+      )}
     </Box>
   );
 };

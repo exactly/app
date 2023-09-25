@@ -520,5 +520,11 @@
   "Active Vesting Streams": "Streams de Vesting Activos",
   "Here, you can monitor all your active vesting streams, allowing you to easily track your current EXA earnings. Each vesting stream is represented by an NFT and comes with a 12-month vesting period.": "Aquí puedes monitorear todos tus streams de vesting activos, lo que te permite realizar un seguimiento fácil de tus ganancias actuales de EXA. Cada stream de vesting está representado por un NFT y viene con un período de vesting de 12 meses.",
   "No vesting streams active yet.": "Aún no hay streams de vesting activos.",
-  "Start vesting your esEXA and see the streams’ details here.": "Comienza a vestear tus esEXA y ve los detalles de los streams aquí."
+  "Start vesting your esEXA and see the streams’ details here.": "Comienza a vestear tus esEXA y ve los detalles de los streams aquí.",
+  "esEXA Vested": "esEXA Vesteados",
+  "Claimed EXA": "EXA Reclamado",
+  "Vesting Period": "Período de Vesting",
+  "{{duration}} days left": "{{duration}} días restantes",
+  "View NFT": "Ver NFT",
+  "Claim EXA": "Reclamar EXA"
 }
