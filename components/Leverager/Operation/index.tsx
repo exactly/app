@@ -52,6 +52,7 @@ const Operation = () => {
                 currentValue={input.collateralSymbol}
                 options={collateralOptions}
                 onChange={setCollateralSymbol}
+                data-testid="leverage-select-from"
               />
             </Grid>
             <Grid display="flex" alignItems="center" justifyContent="center" item xs={2}>
@@ -64,6 +65,7 @@ const Operation = () => {
                 options={borrowOptions}
                 onChange={setBorrowSymbol}
                 disabled={!input.collateralSymbol}
+                data-testid="leverage-select-to"
               />
             </Grid>
           </Grid>
@@ -88,11 +90,16 @@ const Operation = () => {
         <ModalAlert message={t('You are currently over leveraged with the selected markets.')} variant="info" />
       )}
       {disabledSubmit ? (
-        <Button fullWidth variant="contained" disabled>
+        <Button fullWidth variant="contained" disabled data-testid="leverage-modal-continue">
           {t('Leverage')}
         </Button>
       ) : (
-        <Button fullWidth variant="contained" onClick={() => setViewSummary(true)}>
+        <Button
+          fullWidth
+          variant="contained"
+          onClick={() => setViewSummary(true)}
+          data-testid="leverage-modal-continue"
+        >
           {`${input.secondaryOperation === 'deposit' ? t('Leverage') : t('Deleverage')} ${formatNumber(
             netPosition ?? '0',
             input.collateralSymbol,

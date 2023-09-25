@@ -53,14 +53,22 @@ const MultiplierSlider = () => {
           onClick={onClick}
           sx={{ cursor: 'pointer' }}
         >
-          <Typography fontFamily="IBM Plex Mono" fontSize={10}>{`${t(
+          <Typography fontFamily="IBM Plex Mono" fontSize={10} data-testid="leverage-slider-current">{`${t(
             'Current',
           ).toUpperCase()}:${currentLeverageRatio.toFixed(2)}x`}</Typography>
         </Box>
       </Box>
       <Box display="flex" justifyItems="space-between" alignItems="center" gap={2}>
-        <Typography variant="h6">1x</Typography>
+        <Typography
+          variant="h6"
+          onClick={() => setLeverageRatio(minLeverageRatio)}
+          sx={{ cursor: 'pointer' }}
+          data-testid="leverage-slider-min"
+        >
+          1x
+        </Typography>
         <Slider
+          data-testid="leverage-slider"
           value={input.leverageRatio}
           onChange={(_, value) => setLeverageRatio(value as number)}
           marks={currentMark}
@@ -104,7 +112,14 @@ const MultiplierSlider = () => {
             },
           }}
         />
-        <Typography variant="h6">{t('Max')}</Typography>
+        <Typography
+          variant="h6"
+          onClick={() => setLeverageRatio(max)}
+          sx={{ cursor: 'pointer' }}
+          data-testid="leverage-slider-max"
+        >
+          {t('Max')}
+        </Typography>
       </Box>
     </Box>
   );

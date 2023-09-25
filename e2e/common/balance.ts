@@ -25,8 +25,8 @@ export default function ({ test, publicClient }: CommonTest & { publicClient: Pu
         const lower = (expected * (wad - delta)) / wad;
         const upper = (expected * (wad + delta)) / wad;
 
-        expect(balance > lower).toBe(true);
-        expect(balance < upper).toBe(true);
+        expect(balance).toBeGreaterThan(lower);
+        expect(balance).toBeLessThan(upper);
       } else {
         expect(balance).toBe(expected);
       }

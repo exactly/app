@@ -54,6 +54,7 @@ function LeveragerModal({ isOpen, close }: Props) {
 
   return (
     <Dialog
+      data-testid="leverage-modal"
       open={isOpen}
       onClose={loadingTx ? undefined : close}
       PaperComponent={isMobile ? undefined : PaperComponent}
@@ -81,6 +82,7 @@ function LeveragerModal({ isOpen, close }: Props) {
             top: 8,
             color: 'grey.500',
           }}
+          data-testid="leverage-modal-close"
         >
           <CloseIcon sx={{ fontSize: 19 }} />
         </IconButton>

@@ -126,6 +126,4 @@ test('USDC rollover', async ({ page, web3, setup }) => {
 
     await dashboard.checkFloatingTableRow('borrow', 'USDC');
   });
-
-  await page.waitForTimeout(600_000);
 });

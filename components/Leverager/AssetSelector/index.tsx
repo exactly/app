@@ -14,9 +14,17 @@ type AssetSelectorProps = {
   options: AssetSelectorOption[];
   onChange: (newValue: string) => void;
   disabled?: boolean;
+  'data-testid'?: string;
 };
 
-const AssetSelector: FC<AssetSelectorProps> = ({ title, currentValue, options, onChange, disabled = false }) => {
+const AssetSelector: FC<AssetSelectorProps> = ({
+  title,
+  currentValue,
+  options,
+  onChange,
+  'data-testid': testId,
+  disabled = false,
+}) => {
   return (
     <DropdownMenu
       label={title}
@@ -33,9 +41,15 @@ const AssetSelector: FC<AssetSelectorProps> = ({ title, currentValue, options, o
         )
       }
       renderOption={({ symbol, value }: AssetSelectorOption) => (
-        <AssetOption option assetSymbol={symbol} value={value} unformattedSymbol={true} />
+        <AssetOption
+          option
+          assetSymbol={symbol}
+          value={value}
+          unformattedSymbol={true}
+          data-testid={`${testId}-${symbol}`}
+        />
       )}
-      data-testid="modal-asset-selector"
+      data-testid={testId}
     />
   );
 };

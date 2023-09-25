@@ -56,7 +56,6 @@ function AssetInput({ symbol }: Props) {
             fontWeight: 600,
             fontSize: 12,
           }}
-          data-testid="modal-on-max"
           disabled={!available || !parseFloat(available)}
         >
           Max

@@ -215,6 +215,7 @@ const Summary = () => {
             sx={{ width: 18, height: 18 }}
             value={acceptedTerms}
             onChange={(e) => setAcceptedTerms(e.target.checked)}
+            data-testid="leverage-accept-risk"
           />
           <Typography component="label" htmlFor="accept-risk" fontSize={14} fontWeight={500} sx={{ cursor: 'pointer' }}>
             {t('I fully acknowledge and accept the risks of leveraging.')}
@@ -251,6 +252,7 @@ const Summary = () => {
                 fullWidth
                 variant="contained"
                 disabled={disabledConfirm}
+                data-testid="leverage-submit"
               >
                 {requiresApproval
                   ? approvalMessage[approvalStatus] ?? t('Approve')

@@ -11,6 +11,7 @@ type AssetOptionProps = {
   selectedSize?: number;
   value?: string;
   unformattedSymbol?: boolean;
+  'data-testid'?: string;
 };
 
 function AssetOption({
@@ -20,6 +21,7 @@ function AssetOption({
   selectedSize = 21,
   value,
   unformattedSymbol = false,
+  'data-testid': testId,
 }: AssetOptionProps) {
   const size = option ? optionSize : selectedSize;
 
@@ -36,6 +38,7 @@ function AssetOption({
       alignItems="center"
       justifyContent="space-between"
       width="100%"
+      data-testid={testId}
     >
       <Box display="flex" gap={1} alignContent="center" justifyContent="center">
         <Image

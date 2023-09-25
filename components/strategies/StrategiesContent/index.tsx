@@ -18,7 +18,7 @@ function StrategiesContent() {
         description: t('Amplify gains or mitigate risk with the power of leverage and deleverage in your investments.'),
         tags: ['advanced'],
         children: (
-          <Button fullWidth variant="contained" onClick={() => startLeverager()}>
+          <Button fullWidth variant="contained" onClick={() => startLeverager()} data-testid="leverage">
             {t('Leverage')}
           </Button>
         ),
@@ -28,7 +28,7 @@ function StrategiesContent() {
         description: t('Reduce your risk by decreasing your investment exposure and borrowing less.'),
         tags: ['advanced'],
         children: (
-          <Button fullWidth variant="contained" onClick={() => startLeverager()}>
+          <Button fullWidth variant="contained" onClick={() => startLeverager()} data-testid="deleverage">
             {t('Deleverage')}
           </Button>
         ),
@@ -40,7 +40,7 @@ function StrategiesContent() {
         ),
         tags: ['basic'],
         children: (
-          <Button fullWidth variant="contained" onClick={() => startDebtManager({})}>
+          <Button fullWidth variant="contained" onClick={() => startDebtManager({})} data-testid="rollover">
             {t('Rollover')}
           </Button>
         ),

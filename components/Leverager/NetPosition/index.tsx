@@ -14,10 +14,14 @@ const NetPosition = () => {
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <Box position="relative">
+    <Box position="relative" data-testid="leverage-more-options" aria-expanded={expanded}>
       {input.collateralSymbol && (
         <Box position="absolute" top={8} right={8} zIndex={99999999}>
-          <IconButton sx={{ width: 20, height: 20 }} onClick={() => setExpanded((_expanded) => !_expanded)}>
+          <IconButton
+            sx={{ width: 20, height: 20 }}
+            onClick={() => setExpanded((_expanded) => !_expanded)}
+            data-testid="leverage-more-options-expand"
+          >
             {expanded ? <ExpandLessIcon sx={{ fontSize: 16 }} /> : <ExpandMoreIcon sx={{ fontSize: 16 }} />}
           </IconButton>
         </Box>
