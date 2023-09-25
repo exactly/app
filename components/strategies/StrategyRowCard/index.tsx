@@ -35,7 +35,7 @@ const StrategyRowCard: FC<Props> = ({ title, description, button, tags, imgPath,
           </Typography>
         )}
         {imgPath && (
-          <Image src={imgPath} alt="strategy" width={20} height={20} style={{ maxWidth: '100%', height: 'auto' }} />
+          <Image src={imgPath} alt="strategy" width={24} height={24} style={{ maxWidth: '100%', height: 'auto' }} />
         )}
         <Typography component="h3" fontSize={16} fontWeight={700}>
           {title}

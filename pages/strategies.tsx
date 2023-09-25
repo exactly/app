@@ -1,19 +1,23 @@
 import React from 'react';
 import type { NextPage } from 'next';
 import dynamic from 'next/dynamic';
-import { Box, Button, Typography } from '@mui/material';
+import { Box, Button, Divider, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 
 import { usePageView } from 'hooks/useAnalytics';
-import { useStartLeverager } from 'hooks/useActionButton';
+import { useStartDebtManagerButton, useStartLeverager } from 'hooks/useActionButton';
 import StrategyRowCard from 'components/strategies/StrategyRowCard';
+import Link from 'next/link';
+import useRouter from 'hooks/useRouter';
 
 const FeaturedStrategies = dynamic(() => import('components/strategies/FeaturedStrategies'));
 
 const Strategies: NextPage = () => {
   usePageView('/strategies', 'Strategies');
   const { t } = useTranslation();
+  const { query } = useRouter();
   const { startLeverager } = useStartLeverager();
+  const { startDebtManager } = useStartDebtManagerButton();
 
   const exactlyStrategies = [
     {
@@ -21,11 +25,39 @@ const Strategies: NextPage = () => {
       description: t('Amplify gains or mitigate risk with the power of leverage and deleverage in your investments.'),
       tags: [
         { prefix: t('up to'), text: '48.16 APR' },
-        { text: 'Advanced', size: 'small' as const },
+        { text: t('Advanced'), size: 'small' as const },
       ],
       button: (
         <Button fullWidth variant="contained" onClick={() => startLeverager()}>
           {t('Leverage')}
+        </Button>
+      ),
+    },
+    {
+      title: t('Reduce Exposure'),
+      description: t('Reduce your risk by decreasing your investment exposure and borrowing less.'),
+      tags: [
+        { prefix: t('Health Factor'), text: '2.010' },
+        { text: t('Advanced'), size: 'small' as const },
+      ],
+      button: (
+        <Button fullWidth variant="contained" onClick={() => startLeverager()}>
+          {t('Deleverage')}
+        </Button>
+      ),
+    },
+    {
+      title: t('Refinance Loans'),
+      description: t(
+        'Seamlessly transfer your debt positions between different pools or convert from fixed to variable rates, and vice versa.',
+      ),
+      tags: [
+        { prefix: t('FROM'), text: '1.83% APR' },
+        { text: t('Basic'), size: 'small' as const },
+      ],
+      button: (
+        <Button fullWidth variant="contained" onClick={() => startDebtManager({})}>
+          {t('Rollover')}
         </Button>
       ),
     },
@@ -37,15 +69,50 @@ const Strategies: NextPage = () => {
       description: t('Deposit EXA on Extra Finance and earn interest on it.'),
       tags: [
         { prefix: t('up to'), text: '48.16 APR' },
-        { text: 'Basic', size: 'small' as const },
+        { text: t('Basic'), size: 'small' as const },
       ],
       button: (
-        <a href="https://app.extrafi.io/lend/EXA" target="_blank" rel="noreferrer noopener">
+        <a href="https://app.extrafi.io/lend/EXA" target="_blank" rel="noreferrer noopener" style={{ width: '100%' }}>
           <Button fullWidth variant="contained">
             {t('Go to Extra Finance')}
           </Button>
         </a>
       ),
+      imgPath: '/img/assets/EXTRA.svg',
+    },
+    {
+      title: t('Provide Liquidity on Velodrome'),
+      description: t('Provide liquidity to the EXA/wETH pool.'),
+      tags: [
+        { prefix: t('up to'), text: '48.16 APR' },
+        { text: t('Basic'), size: 'small' as const },
+      ],
+      button: (
+        <a
+          href="https://velodrome.finance/deposit?token0=0x1e925de1c68ef83bd98ee3e130ef14a50309c01b&token1=eth"
+          target="_blank"
+          rel="noreferrer noopener"
+          style={{ width: '100%' }}
+        >
+          <Button fullWidth variant="contained">
+            {t('Go to Velodrome')}
+          </Button>
+        </a>
+      ),
+      imgPath: '/img/assets/VELO.svg',
+    },
+    {
+      title: t('Bridge & Swap with Socket'),
+      description: t('Seamlessly bridge and swap assets to OP Mainnet from many different networks.'),
+      tags: [{ text: t('Cross Network') }, { text: t('Basic'), size: 'small' as const }],
+      button: (
+        <Link href={{ pathname: `/bridge`, query }} style={{ width: '100%' }}>
+          <Button fullWidth variant="contained">
+            {t('Bridge & Swap')}
+          </Button>
+        </Link>
+      ),
+      imgPath: '/img/strategies/socket-logo.svg',
     },
   ];
 
@@ -75,8 +142,11 @@ const Strategies: NextPage = () => {
             borderRadius="8px"
             boxShadow={({ palette }) => (palette.mode === 'light' ? '0px 3px 4px 0px rgba(97, 102, 107, 0.25)' : '')}
           >
-            {exactlyStrategies.map((strategy) => (
-              <StrategyRowCard key={strategy.title} {...strategy} />
+            {exactlyStrategies.map((strategy, i) => (
+              <>
+                <StrategyRowCard key={strategy.title} {...strategy} />
+                {i !== exactlyStrategies.length - 1 && <Divider key={`divider_${i}`} flexItem />}
+              </>
             ))}
           </Box>
         </Box>
@@ -94,8 +164,11 @@ const Strategies: NextPage = () => {
             borderRadius="8px"
             boxShadow={({ palette }) => (palette.mode === 'light' ? '0px 3px 4px 0px rgba(97, 102, 107, 0.25)' : '')}
           >
-            {thirdPartStrategies.map((strategy) => (
-              <StrategyRowCard key={strategy.title} {...strategy} />
+            {thirdPartStrategies.map((strategy, i) => (
+              <>
+                <StrategyRowCard key={strategy.title} {...strategy} />
+                {i !== exactlyStrategies.length - 1 && <Divider key={`divider_${i}`} flexItem />}
+              </>
             ))}
           </Box>
         </Box>

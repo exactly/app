@@ -15,7 +15,7 @@ const StrategyTag: FC<StrategyTagProps> = ({ text, prefix, size = 'medium' }) =>
       justifyContent="center"
       gap={1}
       borderRadius="4px"
-      border={({ palette }) => `1px solid ${palette.grey[500]}`}
+      border={({ palette }) => `1px solid ${palette.grey[300]}`}
       px={1}
       minWidth={size === 'small' ? 96 : 168}
     >
