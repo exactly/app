@@ -1,11 +1,13 @@
 on:
   pull_request:
-    types: [opened, reopened, synchronize, ready_for_review, closed]
+    types: [opened, reopened, synchronize, ready_for_review]
+  push:
+    branches: [main]
+  workflow_dispatch:
 
 jobs:
   check:
     runs-on: ubuntu-latest
-    if: ${{ contains('opened reopened synchronize ready_for_review', github.event.action) && !github.event.pull_request.merged }}
     environment: Preview
     env:
       SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
@@ -25,7 +27,7 @@ jobs:
 
   e2e:
     needs: [check]
-    if: ${{ !github.event.pull_request.draft && github.event.action != 'closed' }}
+    if: ${{ !github.event.pull_request.draft }}
     timeout-minutes: 30
     runs-on: ubuntu-latest
     environment: Test
@@ -66,7 +68,7 @@ jobs:
 
   e2e-report:
     needs: [e2e]
-    if: ${{ !cancelled() && !github.event.pull_request.draft && !github.event.pull_request.merged }}
+    if: ${{ !github.event.pull_request.draft }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -87,7 +89,7 @@ jobs:
 
   e2e-report-publish:
     needs: [e2e-report]
-    if: ${{ always() && github.event.action == 'closed' && github.event.pull_request.merged }}
+    if: ${{ always() && needs.e2e-report.result == 'success' && github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v3
