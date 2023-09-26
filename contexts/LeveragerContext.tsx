@@ -22,7 +22,6 @@ import {
   hexToBigInt,
   keccak256,
   encodeAbiParameters,
-  encodeFunctionData,
 } from 'viem';
 import { splitSignature } from '@ethersproject/bytes';
 import { AbiParametersToPrimitiveTypes, ExtractAbiFunction, ExtractAbiFunctionNames } from 'abitype';
@@ -918,11 +917,6 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
               }
               case 'permit2': {
                 args = [...args, marketPermit.value, assetPermit.value];
-                console.log(
-                  debtManager.address,
-                  walletAddress,
-                  encodeFunctionData({ abi: debtManager.abi, functionName: 'leverage', args }),
-                );
                 const gasEstimation = await debtManager.estimateGas.leverage(args, opts);
                 hash = await debtManager.write.leverage(args, {
                   ...opts,
