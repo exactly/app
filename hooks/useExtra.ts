@@ -7,7 +7,7 @@ const EXA_RESERVE_ID = 50n;
 const COMPOUNDING_INTERVAL = 60n * 60n * 24n;
 const LENDING_CONTRACT_ADDRESS = '0xBB505c54D71E9e599cB8435b4F0cEEc05fC71cbD';
 
-const useExtraDepositAPR = () => {
+export const useExtraDepositAPR = () => {
   const { data: reserves } = useExtraFinanceLendingGetReserveStatus({
     args: [[EXA_RESERVE_ID]],
     address: LENDING_CONTRACT_ADDRESS,
