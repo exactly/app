@@ -66,5 +66,5 @@ test('USDC floating borrow/repay', async ({ page, web3, setup }) => {
     shouldApprove: true,
   });
 
-  await balance.check({ address: web3.account.address, symbol: 'USDC', amount: '25', delta: 0.00005 });
+  await balance.check({ address: web3.account.address, symbol: 'USDC', amount: '25', delta: '0.00005' });
 });
