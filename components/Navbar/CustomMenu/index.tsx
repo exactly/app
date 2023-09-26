@@ -41,9 +41,9 @@ function CustomMenu({ name: menuName, icon: menuIcon, options }: Props) {
   return (
     <>
       <Button
-        variant="text"
         onMouseOver={openMenu}
         onMouseLeave={handleCloseHover}
+        variant={options.map(({ pathname }) => pathname).includes(currentPathname) ? 'contained' : 'text'}
         sx={{
           pr: '4px',
           pl: '6px',

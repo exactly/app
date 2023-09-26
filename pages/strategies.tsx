@@ -186,7 +186,7 @@ const Strategies: NextPage = () => {
         'Seamlessly transfer your debt positions between different pools or convert from fixed to variable rates, and vice versa.',
       ),
       tags: [
-        { prefix: t('FROM'), text: `${lowestBorrowAPR}% APR` },
+        { prefix: t('FROM'), text: `${lowestBorrowAPR} APR` },
         { text: t('Basic'), size: 'small' as const },
       ],
       button: (
