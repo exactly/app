@@ -32,6 +32,7 @@ const Strategies: NextPage = () => {
           {t('Leverage')}
         </Button>
       ),
+      isNew: true,
     },
     {
       title: t('Reduce Exposure'),
@@ -45,6 +46,7 @@ const Strategies: NextPage = () => {
           {t('Deleverage')}
         </Button>
       ),
+      isNew: true,
     },
     {
       title: t('Refinance Loans'),
@@ -60,6 +62,7 @@ const Strategies: NextPage = () => {
           {t('Rollover')}
         </Button>
       ),
+      isNew: true,
     },
   ];
 
@@ -117,7 +120,7 @@ const Strategies: NextPage = () => {
   ];
 
   return (
-    <Box mt={5} maxWidth={1200} mx="auto">
+    <Box my={5} maxWidth={1200} mx="auto">
       <Box display="flex" flexDirection="column" gap={5}>
         <Typography component="h1" fontSize={24} fontWeight={700}>
           {t('Featured Strategies')}

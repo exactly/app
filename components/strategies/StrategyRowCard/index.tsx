@@ -60,4 +60,4 @@ const StrategyRowCard: FC<Props> = ({ title, description, button, tags, imgPath,
   );
 };
 
-export default StrategyRowCard;
+export default React.memo(StrategyRowCard);

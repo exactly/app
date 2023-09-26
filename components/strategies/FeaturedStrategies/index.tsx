@@ -16,34 +16,53 @@ function FeaturedStrategies() {
       {
         title: t('Maximize your yield'),
         description: t('Amplify gains or mitigate risk with the power of leverage and deleverage in your investments.'),
-        tags: ['advanced'],
-        children: (
-          <Button fullWidth variant="contained" onClick={() => startLeverager()} data-testid="leverage">
+        tags: [
+          { prefix: t('up to'), text: '48.16 APR' },
+          { text: t('Advanced'), size: 'small' as const },
+        ],
+        button: (
+          <Button fullWidth variant="contained" onClick={() => startLeverager()}>
             {t('Leverage')}
           </Button>
         ),
+        isNew: true,
+        source: 'exactly',
+        imgPath: '/img/strategies/featured_leverage.svg',
       },
       {
-        title: t('Reduce exposure'),
-        description: t('Reduce your risk by decreasing your investment exposure and borrowing less.'),
-        tags: ['advanced'],
-        children: (
-          <Button fullWidth variant="contained" onClick={() => startLeverager()} data-testid="deleverage">
-            {t('Deleverage')}
-          </Button>
-        ),
-      },
-      {
-        title: t('Refinance your loans'),
+        title: t('Refinance Loans'),
         description: t(
           'Seamlessly transfer your debt positions between different pools or convert from fixed to variable rates, and vice versa.',
         ),
-        tags: ['basic'],
-        children: (
-          <Button fullWidth variant="contained" onClick={() => startDebtManager({})} data-testid="rollover">
+        tags: [
+          { prefix: t('FROM'), text: '1.83% APR' },
+          { text: t('Basic'), size: 'small' as const },
+        ],
+        button: (
+          <Button fullWidth variant="contained" onClick={() => startDebtManager({})}>
             {t('Rollover')}
           </Button>
         ),
+        isNew: true,
+        source: 'exactly',
+        imgPath: '/img/strategies/featured_rollover.svg',
+      },
+      {
+        title: t('Deposit EXA on Extra Finance'),
+        description: t('Deposit EXA on Extra Finance and earn interest on it.'),
+        tags: [
+          { prefix: t('up to'), text: '48.16 APR' },
+          { text: t('Basic'), size: 'small' as const },
+        ],
+        button: (
+          <a href="https://app.extrafi.io/lend/EXA" target="_blank" rel="noreferrer noopener" style={{ width: '100%' }}>
+            <Button fullWidth variant="contained">
+              {t('Go to Extra Finance')}
+            </Button>
+          </a>
+        ),
+        source: 'third-party',
+        imgPath: '/img/strategies/featured_extra.svg',
       },
     ],
     [startDebtManager, startLeverager, t],

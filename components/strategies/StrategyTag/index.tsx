@@ -31,4 +31,4 @@ const StrategyTag: FC<StrategyTagProps> = ({ text, prefix, size = 'medium' }) =>
   );
 };
 
-export default StrategyTag;
+export default React.memo(StrategyTag);

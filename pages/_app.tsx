@@ -103,7 +103,13 @@ export default function App({ Component, pageProps, router }: AppProps) {
                   <Navbar />
                   {router.pathname === '/strategies' && (
                     <Box position="relative" zIndex={-1} mx={-2}>
-                      <Box position="absolute" left={0} bgcolor="figma.grey.100" width="100vw" height={400} />
+                      <Box
+                        position="absolute"
+                        left={0}
+                        bgcolor={({ palette }) => (palette.mode === 'dark' ? 'grey.100' : 'figma.grey.100')}
+                        width="100vw"
+                        height={440}
+                      />
                     </Box>
                   )}
                   <main style={{ flexGrow: 1, maxWidth, margin: '0 auto', width: '100%' }}>

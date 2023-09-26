@@ -1,26 +1,30 @@
-import React, { type PropsWithChildren } from 'react';
+import React from 'react';
 import { Box, Card, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import StrategyTag, { StrategyTagProps } from '../StrategyTag';
+import Image from 'next/image';
 
-export type Props = PropsWithChildren<{
+export type Props = {
   title: string;
   description: string;
-  tags: ('advanced' | 'basic' | 'new')[];
-}>;
+  button: React.ReactNode;
+  tags: StrategyTagProps[];
+  imgPath?: string;
+  isNew?: boolean;
+  source?: 'exactly' | 'third-party';
+};
 
-function StrategyCard({ title, description, tags, children }: Props) {
+function StrategyCard({ title, description, button, tags, imgPath, isNew, source }: Props) {
   const { t } = useTranslation();
   return (
     <Card
       sx={{
-        height: 258,
+        height: 420,
         maxWidth: 389,
         display: 'flex',
         flexDirection: 'column',
-        justifyContent: 'space-between',
         position: 'relative',
         borderRadius: '8px',
-        padding: '44px 32px 32px 32px',
         boxShadow: '0px 3px 4px 0px rgba(97, 102, 107, 0.1)',
         '&:hover': {
           boxShadow:
@@ -28,53 +32,56 @@ function StrategyCard({ title, description, tags, children }: Props) {
         },
       }}
     >
-      <Box sx={{ position: 'absolute', top: 0, right: 32, display: 'flex', gap: 0.5 }}>
-        {tags
-          .filter((tag) => tag !== 'new')
-          .map((tag) => (
-            <Chip key={tag} gradient="black">
-              {tag === 'advanced' ? t('Advanced') : t('Basic')}
-            </Chip>
-          ))}
-        {tags.includes('new') && <Chip gradient="green">{t('New')}</Chip>}
+      <Box height={152}>
+        <Box sx={{ position: 'absolute', top: 8, left: 8, display: 'flex', gap: 0.5 }}>
+          {source && (
+            <Typography
+              fontSize={11}
+              fontWeight={700}
+              color="white"
+              sx={{
+                background: ({ palette }) => palette.primary.main,
+                borderRadius: '4px',
+                px: 0.5,
+                textTransform: 'uppercase',
+              }}
+            >
+              {t(source)}
+            </Typography>
+          )}
+          {isNew && (
+            <Typography
+              fontSize={11}
+              fontWeight={700}
+              color="white"
+              sx={{
+                background: ({ palette }) => palette.green,
+                borderRadius: '4px',
+                px: 0.5,
+                textTransform: 'uppercase',
+              }}
+            >
+              {t('New')}
+            </Typography>
+          )}
+        </Box>
+        {imgPath && <Image src={imgPath} alt="strategy" width={389} height={152} />}
       </Box>
-      <Box>
-        <Typography variant="h6" component="div" color="grey.900">
-          {title}
-        </Typography>
-        <Typography component="div" mt={2} fontWeight={500} fontSize={14} color="grey.900">
-          {description}
-        </Typography>
+      <Box display="flex" flexDirection="column" p={4} gap={1} justifyContent="space-between" height={286}>
+        <Box display="flex" flexDirection="column" gap={2.2}>
+          <Box display="flex" alignItems="center" gap={1}>
+            {tags?.map((label, i) => <StrategyTag key={i} {...label} />)}
+          </Box>
+          <Typography variant="h6" component="div" color="grey.900">
+            {title}
+          </Typography>
+          <Typography component="div" fontWeight={500} fontSize={14} color="grey.900">
+            {description}
+          </Typography>
+        </Box>
+        <Box>{button}</Box>
       </Box>
-      <Box>{children}</Box>
     </Card>
-  );
-}
-
-const gradients = {
-  green: 'linear-gradient(66.92deg, #00CC68 34.28%, #00CC8F 100%)',
-  black: 'linear-gradient(77.86deg, #757A80 9.74%, #0D0E0F 100%)',
-} as const;
-
-function Chip({ children, gradient }: PropsWithChildren<{ gradient: 'green' | 'black' }>) {
-  return (
-    <Box
-      sx={{
-        width: 'fit-content',
-        display: 'flex',
-        alignItems: 'center',
-        height: 20,
-        py: '4px',
-        px: '6px',
-        borderBottomLeftRadius: '4px',
-        borderBottomRightRadius: '4px',
-        background: gradients[gradient],
-      }}
-    >
-      <Typography textTransform="uppercase" variant="chip" color="white">
-        {children}
-      </Typography>
-    </Box>
   );
 }
 
