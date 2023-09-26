@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, Fragment } from 'react';
 import type { NextPage } from 'next';
 import dynamic from 'next/dynamic';
 import { Box, Button, Divider, Typography } from '@mui/material';
@@ -303,10 +303,10 @@ const Strategies: NextPage = () => {
             boxShadow={({ palette }) => (palette.mode === 'light' ? '0px 3px 4px 0px rgba(97, 102, 107, 0.25)' : '')}
           >
             {exactlyStrategies.map((strategy, i) => (
-              <>
-                <StrategyRowCard key={strategy.title} {...strategy} />
+              <Fragment key={strategy.title}>
+                <StrategyRowCard {...strategy} />
                 {i !== exactlyStrategies.length - 1 && <Divider key={`divider_${i}`} flexItem />}
-              </>
+              </Fragment>
             ))}
           </Box>
         </Box>
@@ -325,10 +325,10 @@ const Strategies: NextPage = () => {
             boxShadow={({ palette }) => (palette.mode === 'light' ? '0px 3px 4px 0px rgba(97, 102, 107, 0.25)' : '')}
           >
             {thirdPartStrategies.map((strategy, i) => (
-              <>
-                <StrategyRowCard key={strategy.title} {...strategy} />
+              <Fragment key={strategy.title}>
+                <StrategyRowCard {...strategy} />
                 {i !== thirdPartStrategies.length - 1 && <Divider key={`divider_${i}`} flexItem />}
-              </>
+              </Fragment>
             ))}
           </Box>
         </Box>
