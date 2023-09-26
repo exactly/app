@@ -1,17 +1,13 @@
-import base from '../../fixture/base';
+import base, { chain } from '../../fixture/base';
 import _balance from '../../common/balance';
 import _allowance from '../../common/allowance';
 import _app from '../../common/app';
 import _leverage from '../../components/leverage';
-
-import { debtManager } from '../../utils/contracts';
+import { debtManager, permit2, erc20 } from '../../utils/contracts';
 
 const test = base();
 
 test.describe.configure({ mode: 'serial' });
-
-// FIXME: Skipping until new contract is deployed
-test.skip();
 
 test('USDC leverage', async ({ page, web3, setup }) => {
   await web3.fork.setBalance(web3.account.address, {
@@ -27,9 +23,12 @@ test('USDC leverage', async ({ page, web3, setup }) => {
   const leverage = _leverage(page);
 
   const spender = await debtManager();
+  const usdc = await erc20('USDC', { walletClient: web3.walletClient });
+  const p2 = await permit2();
 
   await setup.enterMarket('USDC');
   await setup.deposit({ symbol: 'USDC', amount: '10000', receiver: web3.account.address });
+  await usdc.write.approve([p2.address, 2n ** 256n - 1n], { account: web3.account.address, chain });
 
   await app.reload();
 
@@ -44,9 +43,11 @@ test('USDC leverage', async ({ page, web3, setup }) => {
     await leverage.selectAsset('from', 'USDC');
     await leverage.checkOption('to', { type: 'selected', symbol: 'USDC' });
 
+    await leverage.waitForSkeletons();
+
     await leverage.checkCurrentMultiplier(/1\.00x$/);
 
-    await leverage.selectMultiplier({ type: 'max' });
+    await leverage.selectMultiplier({ type: 'mid' });
 
     await leverage.waitForStepToContinue();
     await leverage.goToSummary();
@@ -89,7 +90,9 @@ test('USDC leverage', async ({ page, web3, setup }) => {
     await leverage.selectAsset('from', 'USDC');
     await leverage.checkOption('to', { type: 'selected', symbol: 'USDC' });
 
-    await leverage.checkCurrentMultiplier(/5\.32x$/);
+    await leverage.waitForSkeletons();
+
+    await leverage.checkCurrentMultiplier(/3\.15x$/);
 
     await leverage.selectMultiplier({ type: 'min' });
 
@@ -126,9 +129,10 @@ test('USDC leverage', async ({ page, web3, setup }) => {
     await leverage.selectAsset('from', 'USDC');
     await leverage.checkOption('to', { type: 'selected', symbol: 'USDC' });
 
-    await leverage.checkCurrentMultiplier(/1\.00x$/);
+    await leverage.waitForSkeletons();
 
-    await leverage.selectMultiplier({ type: 'max' });
+    await leverage.checkCurrentMultiplier(/1\.00x$/);
+    await leverage.selectMultiplier({ type: 'mid' });
 
     await leverage.openMoreOptions();
     await leverage.input('5000');

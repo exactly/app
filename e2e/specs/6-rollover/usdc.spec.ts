@@ -2,17 +2,16 @@ import { expect } from '@playwright/test';
 
 import base from '../../fixture/base';
 import _balance from '../../common/balance';
+import _allowance from '../../common/allowance';
 import _dashboard from '../../page/dashboard';
 import _app from '../../common/app';
 import _rollover from '../../components/rollover';
 import { getFixedPools } from '../../utils/pools';
+import { debtManager } from '../../utils/contracts';
 
 const test = base();
 
 test.describe.configure({ mode: 'serial' });
-
-// FIXME: Skipping until new contract is deployed
-test.skip();
 
 test('USDC rollover', async ({ page, web3, setup }) => {
   const pools = getFixedPools();
@@ -27,8 +26,11 @@ test('USDC rollover', async ({ page, web3, setup }) => {
 
   const app = _app({ test, page });
   const balance = _balance({ test, page, publicClient: web3.publicClient });
+  const allowance = _allowance({ test, page, publicClient: web3.publicClient });
   const dashboard = _dashboard(page);
   const rollover = _rollover(page);
+
+  const spender = await debtManager();
 
   await setup.enterMarket('USDC');
   await setup.deposit({ symbol: 'USDC', amount: '10000', receiver: web3.account.address });
@@ -63,6 +65,13 @@ test('USDC rollover', async ({ page, web3, setup }) => {
     await rollover.close();
 
     await balance.check({ address: web3.account.address, symbol: 'USDC', amount: '45000' });
+    await allowance.check({
+      address: web3.account.address,
+      type: 'market',
+      symbol: 'USDC',
+      less: '5',
+      spender: spender.address,
+    });
 
     await dashboard.checkFixedTableRow('borrow', 'USDC', pools[0]);
   });
@@ -93,6 +102,13 @@ test('USDC rollover', async ({ page, web3, setup }) => {
     await rollover.close();
 
     await balance.check({ address: web3.account.address, symbol: 'USDC', amount: '45000' });
+    await allowance.check({
+      address: web3.account.address,
+      type: 'market',
+      symbol: 'USDC',
+      less: '5',
+      spender: spender.address,
+    });
 
     await dashboard.checkFixedTableRow('borrow', 'USDC', pools[1]);
   });
@@ -123,6 +139,13 @@ test('USDC rollover', async ({ page, web3, setup }) => {
     await rollover.close();
 
     await balance.check({ address: web3.account.address, symbol: 'USDC', amount: '45000' });
+    await allowance.check({
+      address: web3.account.address,
+      type: 'market',
+      symbol: 'USDC',
+      less: '5',
+      spender: spender.address,
+    });
 
     await dashboard.checkFloatingTableRow('borrow', 'USDC');
   });

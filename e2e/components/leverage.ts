@@ -3,13 +3,16 @@ import { type Page, expect } from '@playwright/test';
 import type { ERC20TokenSymbol } from '../utils/contracts';
 
 export default function (page: Page) {
-  const waitForStepToContinue = async () => {
+  const waitSummaryToBeReady = async () => {
     await page.waitForFunction(
       () => {
-        const button = document.querySelector(`[data-testid="leverage-modal-continue"]`);
-        if (!button) return true;
-        const attr = button.getAttribute('disabled');
-        return attr === null;
+        return ['approve', 'submit'].every((value) => {
+          const button = document.querySelector(`[data-testid="leverage-${value}"]`);
+          if (!button) return true;
+          const clx = !button.classList.contains('MuiLoadingButton-loading');
+          const attr = button.getAttribute('disabled');
+          return clx && attr === null;
+        });
       },
       null,
       {
@@ -19,10 +22,25 @@ export default function (page: Page) {
     );
   };
 
-  const waitSummaryToBeReady = async () => {
+  const waitForSkeletons = async () => {
     await page.waitForFunction(
       () => {
-        const button = document.querySelector(`[data-testid="leverage-submit"]`);
+        const modal = document.querySelector('[data-testid="leverage-modal"]');
+        return modal && modal.querySelectorAll('.MuiSkeleton-root').length === 0;
+      },
+      null,
+      {
+        timeout: 30_000,
+        polling: 1_000,
+      },
+    );
+  };
+
+  const waitForStepToContinue = async () => {
+    await waitForSkeletons();
+    await page.waitForFunction(
+      () => {
+        const button = document.querySelector(`[data-testid="leverage-modal-continue"]`);
         if (!button) return true;
         const attr = button.getAttribute('disabled');
         return attr === null;
@@ -74,7 +92,9 @@ export default function (page: Page) {
     await row.click();
   };
 
-  const selectMultiplier = async (option: { type: 'min' } | { type: 'max' } | { type: 'custom'; value: number }) => {
+  const selectMultiplier = async (
+    option: { type: 'min' } | { type: 'max' } | { type: 'mid' } | { type: 'custom'; value: number },
+  ) => {
     const slider = page.getByTestId('leverage-slider');
     await expect(slider).not.toBeDisabled();
 
@@ -83,8 +103,18 @@ export default function (page: Page) {
         await page.getByTestId('leverage-slider-min').click();
         break;
       }
+
       case 'max': {
         await page.getByTestId('leverage-slider-max').click();
+        break;
+      }
+
+      case 'mid': {
+        const mid = await slider.evaluate((el) => {
+          return el.getBoundingClientRect().width / 2;
+        });
+        await slider.hover({ force: true, position: { x: mid, y: 0 } });
+        await slider.click({ position: { x: mid, y: 0 } });
         break;
       }
 
@@ -136,6 +166,22 @@ export default function (page: Page) {
     await expect(inp).toBeChecked();
   };
 
+  const goBack = async () => {
+    const button = page.getByTestId('leverage-go-back');
+    await expect(button).toBeVisible();
+    await expect(button).not.toBeDisabled();
+
+    await button.click();
+  };
+
+  const approve = async () => {
+    const button = page.getByTestId('leverage-approve');
+    await expect(button).toBeVisible();
+    await expect(button).not.toBeDisabled();
+
+    await button.click();
+  };
+
   const submit = async () => {
     const button = page.getByTestId('leverage-submit');
     await expect(button).toBeVisible();
@@ -182,7 +228,10 @@ export default function (page: Page) {
     goToSummary,
     acceptRisk,
     waitSummaryToBeReady,
+    goBack,
+    approve,
     submit,
+    waitForSkeletons,
     waitForTransaction,
     checkTransactionStatus,
   };

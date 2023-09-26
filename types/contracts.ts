@@ -11,6 +11,7 @@ import {
   marketEthRouterABI,
   previewerABI,
   rewardsControllerABI,
+  permit2ABI,
 } from './abi';
 
 export type ContractType<T extends Abi> = ReturnType<typeof getContract<T, WalletClient>>;
@@ -24,4 +25,5 @@ export type MarketETHRouter = ContractType<typeof marketEthRouterABI>;
 export type InterestRateModel = ContractType<typeof interestRateModelABI>;
 export type RewardsController = ContractType<typeof rewardsControllerABI>;
 export type DebtManager = ContractType<typeof debtManagerABI>;
+export type Permit2 = ContractType<typeof permit2ABI>;
 export type DebtPreviewer = ContractType<typeof debtPreviewerABI>;

@@ -147,22 +147,28 @@ const Summary = () => {
   );
 
   const [requiresApproval, setRequiresApproval] = useState(false);
+  const [summaryLoading, setSummaryLoading] = useState(false);
 
   useEffect(() => {
     (async () => {
       try {
+        setSummaryLoading(true);
         setErrorData(undefined);
         if (!input.collateralSymbol || !input.borrowSymbol) return;
         setRequiresApproval(await needsApproval());
       } catch (e: unknown) {
         setErrorData({ status: true, message: handleOperationError(e) });
+      } finally {
+        setSummaryLoading(false);
       }
     })();
   }, [input.borrowSymbol, input.collateralSymbol, needsApproval, setErrorData]);
 
   const approveLeverage = useCallback(async () => {
+    setSummaryLoading(true);
     await approve();
     setRequiresApproval(await needsApproval());
+    setSummaryLoading(false);
   }, [approve, needsApproval]);
 
   if (tx) {
@@ -213,9 +219,13 @@ const Summary = () => {
           <Checkbox
             id="accept-risk"
             sx={{ width: 18, height: 18 }}
-            value={acceptedTerms}
+            checked={acceptedTerms}
             onChange={(e) => setAcceptedTerms(e.target.checked)}
-            data-testid="leverage-accept-risk"
+            inputProps={
+              {
+                'data-testid': 'leverage-accept-risk',
+              } as React.InputHTMLAttributes<HTMLInputElement>
+            }
           />
           <Typography component="label" htmlFor="accept-risk" fontSize={14} fontWeight={500} sx={{ cursor: 'pointer' }}>
             {t('I fully acknowledge and accept the risks of leveraging.')}
@@ -224,7 +234,7 @@ const Summary = () => {
         {errorData?.status && <ModalAlert message={errorData.message} variant={errorData.variant} />}
         <Grid container spacing={1}>
           <Grid item xs={3}>
-            <Button fullWidth variant="outlined" onClick={() => setViewSummary(false)}>
+            <Button fullWidth variant="outlined" onClick={() => setViewSummary(false)} data-testid="leverage-go-back">
               <Box display="flex" alignItems="center" gap={1}>
                 <ArrowBackIcon sx={{ fontSize: 16, ml: -1 }} />
                 {t('Back')}
@@ -247,12 +257,12 @@ const Summary = () => {
               </LoadingButton>
             ) : (
               <LoadingButton
-                loading={isLoading}
+                loading={isLoading || summaryLoading}
                 onClick={requiresApproval ? approveLeverage : submit}
                 fullWidth
                 variant="contained"
-                disabled={disabledConfirm}
-                data-testid="leverage-submit"
+                disabled={disabledConfirm || summaryLoading}
+                data-testid={requiresApproval ? 'leverage-approve' : 'leverage-submit'}
               >
                 {requiresApproval
                   ? approvalMessage[approvalStatus] ?? t('Approve')
