@@ -108,7 +108,7 @@ export default function App({ Component, pageProps, router }: AppProps) {
                         left={0}
                         bgcolor={({ palette }) => (palette.mode === 'dark' ? 'grey.100' : 'figma.grey.100')}
                         width="100vw"
-                        height={440}
+                        height={{ xs: 1400, sm: 440 }}
                       />
                     </Box>
                   )}

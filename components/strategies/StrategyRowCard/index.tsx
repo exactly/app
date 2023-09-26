@@ -42,16 +42,22 @@ const StrategyRowCard: FC<Props> = ({ title, description, button, tags, imgPath,
         </Typography>
       </Box>
       <Grid container spacing={3}>
-        <Grid item xs={5}>
+        <Grid item xs={12} sm={5} md={5} lg={5}>
           <Typography>{description}</Typography>
         </Grid>
-        <Grid item xs={5}>
-          <Box display="flex" justifyContent="center" alignItems="center" gap={1}>
+        <Grid item xs={12} sm={4} md={4} lg={5}>
+          <Box
+            display="flex"
+            flexWrap="wrap"
+            justifyContent={{ xs: 'start', md: 'center' }}
+            alignItems="center"
+            gap={1}
+          >
             {tags?.map((label, i) => <StrategyTag key={i} {...label} />)}
           </Box>
         </Grid>
-        <Grid item xs={2}>
-          <Box display="flex" justifyContent="end" maxWidth={168} width="100%">
+        <Grid item xs={12} sm={3} md={3} lg={2}>
+          <Box display="flex" justifyContent="end" maxWidth={{ xs: '100%', sm: 168 }} width="100%">
             {button}
           </Box>
         </Grid>

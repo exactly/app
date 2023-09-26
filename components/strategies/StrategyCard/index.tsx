@@ -19,7 +19,7 @@ function StrategyCard({ title, description, button, tags, imgPath, isNew, source
   return (
     <Card
       sx={{
-        height: 420,
+        minHeight: 420,
         maxWidth: 389,
         display: 'flex',
         flexDirection: 'column',
@@ -32,15 +32,15 @@ function StrategyCard({ title, description, button, tags, imgPath, isNew, source
         },
       }}
     >
-      <Box height={152}>
-        <Box sx={{ position: 'absolute', top: 8, left: 8, display: 'flex', gap: 0.5 }}>
+      <Box height={152} bgcolor="#F9FAFB">
+        <Box sx={{ position: 'absolute', top: 8, left: 8, display: 'flex', gap: 0.5, zIndex: 1 }}>
           {source && (
             <Typography
               fontSize={11}
               fontWeight={700}
               color="white"
               sx={{
-                background: ({ palette }) => palette.primary.main,
+                background: '#0E0E0E',
                 borderRadius: '4px',
                 px: 0.5,
                 textTransform: 'uppercase',
@@ -65,11 +65,23 @@ function StrategyCard({ title, description, button, tags, imgPath, isNew, source
             </Typography>
           )}
         </Box>
-        {imgPath && <Image src={imgPath} alt="strategy" width={389} height={152} />}
+        {imgPath && (
+          <Box position="relative" width="100%" height={152}>
+            <Image src={imgPath} alt="" layout="fill" objectFit="contain" />
+          </Box>
+        )}
       </Box>
-      <Box display="flex" flexDirection="column" p={4} gap={1} justifyContent="space-between" height={286}>
+      <Box
+        display="flex"
+        flexDirection="column"
+        p={4}
+        gap={3}
+        justifyContent="space-between"
+        minHeight={286}
+        height="100%"
+      >
         <Box display="flex" flexDirection="column" gap={2.2}>
-          <Box display="flex" alignItems="center" gap={1}>
+          <Box display="flex" flexWrap="wrap" alignItems="center" gap={1}>
             {tags?.map((label, i) => <StrategyTag key={i} {...label} />)}
           </Box>
           <Typography variant="h6" component="div" color="grey.900">
