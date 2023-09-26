@@ -78,180 +78,203 @@ const Strategies: NextPage = () => {
   const veloRate = useVELOPoolAPR() ?? '0%';
   const extraRate = toPercentage(Number(useExtraDepositAPR() ?? 0) / 1e18);
 
-  const featured: (Strategy & { chainId?: number })[] = [
-    {
-      title: t('Maximize your yield'),
-      description: t('Amplify gains or mitigate risk with the power of leverage and deleverage in your investments.'),
-      tags: [
-        { prefix: t('up to'), text: `${maxYield} APR` },
-        { text: t('Advanced'), size: 'small' as const },
-      ],
-      button: (
-        <Button fullWidth variant="contained" onClick={() => startLeverager()} data-testid="leverage">
-          {t('Leverage')}
-        </Button>
-      ),
-      isNew: true,
-      source: 'exactly' as const,
-      imgPath: '/img/strategies/featured_leverage.svg',
-    },
-    {
-      title: t('Refinance Loans'),
-      description: t(
-        'Seamlessly transfer your debt positions between different pools or convert from fixed to variable rates, and vice versa.',
-      ),
-      tags: [
-        { prefix: t('FROM'), text: `${lowestBorrowAPR} APR` },
-        { text: t('Basic'), size: 'small' as const },
-      ],
-      button: (
-        <Button fullWidth variant="contained" onClick={() => startDebtManager({})} data-testid="rollover">
-          {t('Rollover')}
-        </Button>
-      ),
-      isNew: true,
-      source: 'exactly' as const,
-      imgPath: '/img/strategies/featured_rollover.svg',
-    },
-    {
-      chainId: optimism.id,
-      title: t('Deposit EXA on Extra Finance'),
-      description: t('Deposit EXA on Extra Finance and earn interest on it.'),
-      tags: [
-        { prefix: t('up to'), text: `${extraRate} APR` },
-        { text: t('Basic'), size: 'small' as const },
-      ],
-      button: (
-        <a href="https://app.extrafi.io/lend/EXA" target="_blank" rel="noreferrer noopener" style={{ width: '100%' }}>
-          <Button fullWidth variant="contained">
-            {t('Go to Extra Finance')}
-          </Button>
-        </a>
-      ),
-      source: 'third-party' as const,
-      imgPath: '/img/strategies/featured_extra.svg',
-    },
-    {
-      title: t('Reduce Exposure'),
-      description: t('Reduce your risk by decreasing your investment exposure and borrowing less.'),
-      tags: [
-        { prefix: t('Health Factor'), text: hfLabel },
-        { text: t('Advanced'), size: 'small' as const },
-      ],
-      button: (
-        <Button fullWidth variant="contained" onClick={() => startLeverager()}>
-          {t('Deleverage')}
-        </Button>
-      ),
-      isNew: true,
-      soruce: 'exactly' as const,
-      imgPath: '/img/strategies/featured_leverage.svg',
-    },
-  ]
-    .filter((s) => s.chainId === chain.id || s.chainId === undefined)
-    .slice(0, 3);
+  const featured: (Strategy & { chainId?: number })[] = useMemo(
+    () =>
+      [
+        {
+          title: t('Maximize your yield'),
+          description: t(
+            'Amplify gains or mitigate risk with the power of leverage and deleverage in your investments.',
+          ),
+          tags: [
+            { prefix: t('up to'), text: `${maxYield} APR` },
+            { text: t('Advanced'), size: 'small' as const },
+          ],
+          button: (
+            <Button fullWidth variant="contained" onClick={() => startLeverager()} data-testid="leverage">
+              {t('Leverage')}
+            </Button>
+          ),
+          isNew: true,
+          source: 'exactly' as const,
+          imgPath: '/img/strategies/featured_leverage.svg',
+        },
+        {
+          title: t('Refinance Loans'),
+          description: t(
+            'Seamlessly transfer your debt positions between different pools or convert from fixed to variable rates, and vice versa.',
+          ),
+          tags: [
+            { prefix: t('FROM'), text: `${lowestBorrowAPR} APR` },
+            { text: t('Basic'), size: 'small' as const },
+          ],
+          button: (
+            <Button fullWidth variant="contained" onClick={() => startDebtManager({})} data-testid="rollover">
+              {t('Rollover')}
+            </Button>
+          ),
+          isNew: true,
+          source: 'exactly' as const,
+          imgPath: '/img/strategies/featured_rollover.svg',
+        },
+        {
+          chainId: optimism.id,
+          title: t('Deposit EXA on Extra Finance'),
+          description: t('Deposit EXA on Extra Finance and earn interest on it.'),
+          tags: [
+            { prefix: t('up to'), text: `${extraRate} APR` },
+            { text: t('Basic'), size: 'small' as const },
+          ],
+          button: (
+            <a
+              href="https://app.extrafi.io/lend/EXA"
+              target="_blank"
+              rel="noreferrer noopener"
+              style={{ width: '100%' }}
+            >
+              <Button fullWidth variant="contained">
+                {t('Go to Extra Finance')}
+              </Button>
+            </a>
+          ),
+          source: 'third-party' as const,
+          imgPath: '/img/strategies/featured_extra.svg',
+        },
+        {
+          title: t('Reduce Exposure'),
+          description: t('Reduce your risk by decreasing your investment exposure and borrowing less.'),
+          tags: [
+            { prefix: t('Health Factor'), text: hfLabel },
+            { text: t('Advanced'), size: 'small' as const },
+          ],
+          button: (
+            <Button fullWidth variant="contained" onClick={() => startLeverager()}>
+              {t('Deleverage')}
+            </Button>
+          ),
+          isNew: true,
+          soruce: 'exactly' as const,
+          imgPath: '/img/strategies/featured_leverage.svg',
+        },
+      ]
+        .filter((s) => s.chainId === chain.id || s.chainId === undefined)
+        .slice(0, 3),
+    [chain.id, extraRate, hfLabel, lowestBorrowAPR, maxYield, startDebtManager, startLeverager, t],
+  );
 
-  const exactlyStrategies = [
-    {
-      title: t('Maximize your yield'),
-      description: t('Amplify gains or mitigate risk with the power of leverage and deleverage in your investments.'),
-      tags: [
-        { prefix: t('up to'), text: `${maxYield} APR` },
-        { text: t('Advanced'), size: 'small' as const },
-      ],
-      button: (
-        <Button fullWidth variant="contained" onClick={() => startLeverager()}>
-          {t('Leverage')}
-        </Button>
-      ),
-      isNew: true,
-    },
-    {
-      title: t('Reduce Exposure'),
-      description: t('Reduce your risk by decreasing your investment exposure and borrowing less.'),
-      tags: [
-        { prefix: t('Health Factor'), text: hfLabel },
-        { text: t('Advanced'), size: 'small' as const },
-      ],
-      button: (
-        <Button fullWidth variant="contained" onClick={() => startLeverager()}>
-          {t('Deleverage')}
-        </Button>
-      ),
-      isNew: true,
-    },
-    {
-      title: t('Refinance Loans'),
-      description: t(
-        'Seamlessly transfer your debt positions between different pools or convert from fixed to variable rates, and vice versa.',
-      ),
-      tags: [
-        { prefix: t('FROM'), text: `${lowestBorrowAPR} APR` },
-        { text: t('Basic'), size: 'small' as const },
-      ],
-      button: (
-        <Button fullWidth variant="contained" onClick={() => startDebtManager({})}>
-          {t('Rollover')}
-        </Button>
-      ),
-      isNew: true,
-    },
-  ];
+  const exactlyStrategies = useMemo(
+    () => [
+      {
+        title: t('Maximize your yield'),
+        description: t('Amplify gains or mitigate risk with the power of leverage and deleverage in your investments.'),
+        tags: [
+          { prefix: t('up to'), text: `${maxYield} APR` },
+          { text: t('Advanced'), size: 'small' as const },
+        ],
+        button: (
+          <Button fullWidth variant="contained" onClick={() => startLeverager()}>
+            {t('Leverage')}
+          </Button>
+        ),
+        isNew: true,
+      },
+      {
+        title: t('Reduce Exposure'),
+        description: t('Reduce your risk by decreasing your investment exposure and borrowing less.'),
+        tags: [
+          { prefix: t('Health Factor'), text: hfLabel },
+          { text: t('Advanced'), size: 'small' as const },
+        ],
+        button: (
+          <Button fullWidth variant="contained" onClick={() => startLeverager()}>
+            {t('Deleverage')}
+          </Button>
+        ),
+        isNew: true,
+      },
+      {
+        title: t('Refinance Loans'),
+        description: t(
+          'Seamlessly transfer your debt positions between different pools or convert from fixed to variable rates, and vice versa.',
+        ),
+        tags: [
+          { prefix: t('FROM'), text: `${lowestBorrowAPR} APR` },
+          { text: t('Basic'), size: 'small' as const },
+        ],
+        button: (
+          <Button fullWidth variant="contained" onClick={() => startDebtManager({})}>
+            {t('Rollover')}
+          </Button>
+        ),
+        isNew: true,
+      },
+    ],
+    [hfLabel, lowestBorrowAPR, maxYield, startDebtManager, startLeverager, t],
+  );
 
-  const thirdPartStrategies: (Strategy & { chainId?: number })[] = [
-    {
-      chainId: optimism.id,
-      title: t('Deposit EXA on Extra Finance'),
-      description: t('Deposit EXA on Extra Finance and earn interest on it.'),
-      tags: [
-        { prefix: t('up to'), text: `${extraRate} APR` },
-        { text: t('Basic'), size: 'small' as const },
-      ],
-      button: (
-        <a href="https://app.extrafi.io/lend/EXA" target="_blank" rel="noreferrer noopener" style={{ width: '100%' }}>
-          <Button fullWidth variant="contained">
-            {t('Go to Extra Finance')}
-          </Button>
-        </a>
-      ),
-      imgPath: '/img/assets/EXTRA.svg',
-    },
-    {
-      chainId: optimism.id,
-      title: t('Provide Liquidity on Velodrome'),
-      description: t('Provide liquidity to the EXA/wETH pool.'),
-      tags: [
-        { prefix: t('up to'), text: `${veloRate} APR` },
-        { text: t('Basic'), size: 'small' as const },
-      ],
-      button: (
-        <a
-          href="https://velodrome.finance/deposit?token0=0x1e925de1c68ef83bd98ee3e130ef14a50309c01b&token1=eth"
-          target="_blank"
-          rel="noreferrer noopener"
-          style={{ width: '100%' }}
-        >
-          <Button fullWidth variant="contained">
-            {t('Go to Velodrome')}
-          </Button>
-        </a>
-      ),
-      imgPath: '/img/assets/VELO.svg',
-    },
-    {
-      title: t('Bridge & Swap with Socket'),
-      description: t('Seamlessly bridge and swap assets to OP Mainnet from many different networks.'),
-      tags: [{ text: t('Cross Network') }, { text: t('Basic'), size: 'small' as const }],
-      button: (
-        <Link href={{ pathname: `/bridge`, query }} style={{ width: '100%' }}>
-          <Button fullWidth variant="contained">
-            {t('Bridge & Swap')}
-          </Button>
-        </Link>
-      ),
-      imgPath: '/img/strategies/socket-logo.svg',
-    },
-  ].filter((s) => s.chainId === chain.id || s.chainId === undefined);
+  const thirdPartStrategies: (Strategy & { chainId?: number })[] = useMemo(
+    () =>
+      [
+        {
+          chainId: optimism.id,
+          title: t('Deposit EXA on Extra Finance'),
+          description: t('Deposit EXA on Extra Finance and earn interest on it.'),
+          tags: [
+            { prefix: t('up to'), text: `${extraRate} APR` },
+            { text: t('Basic'), size: 'small' as const },
+          ],
+          button: (
+            <a
+              href="https://app.extrafi.io/lend/EXA"
+              target="_blank"
+              rel="noreferrer noopener"
+              style={{ width: '100%' }}
+            >
+              <Button fullWidth variant="contained">
+                {t('Go to Extra Finance')}
+              </Button>
+            </a>
+          ),
+          imgPath: '/img/assets/EXTRA.svg',
+        },
+        {
+          chainId: optimism.id,
+          title: t('Provide Liquidity on Velodrome'),
+          description: t('Provide liquidity to the EXA/wETH pool.'),
+          tags: [
+            { prefix: t('up to'), text: `${veloRate} APR` },
+            { text: t('Basic'), size: 'small' as const },
+          ],
+          button: (
+            <a
+              href="https://velodrome.finance/deposit?token0=0x1e925de1c68ef83bd98ee3e130ef14a50309c01b&token1=eth"
+              target="_blank"
+              rel="noreferrer noopener"
+              style={{ width: '100%' }}
+            >
+              <Button fullWidth variant="contained">
+                {t('Go to Velodrome')}
+              </Button>
+            </a>
+          ),
+          imgPath: '/img/assets/VELO.svg',
+        },
+        {
+          title: t('Bridge & Swap with Socket'),
+          description: t('Seamlessly bridge and swap assets to OP Mainnet from many different networks.'),
+          tags: [{ text: t('Cross Network') }, { text: t('Basic'), size: 'small' as const }],
+          button: (
+            <Link href={{ pathname: `/bridge`, query }} style={{ width: '100%' }}>
+              <Button fullWidth variant="contained">
+                {t('Bridge & Swap')}
+              </Button>
+            </Link>
+          ),
+          imgPath: '/img/strategies/socket-logo.svg',
+        },
+      ].filter((s) => s.chainId === chain.id || s.chainId === undefined),
+    [chain.id, extraRate, query, t, veloRate],
+  );
 
   return (
     <Box my={5} maxWidth={1200} mx="auto">
@@ -304,7 +327,7 @@ const Strategies: NextPage = () => {
             {thirdPartStrategies.map((strategy, i) => (
               <>
                 <StrategyRowCard key={strategy.title} {...strategy} />
-                {i !== exactlyStrategies.length - 1 && <Divider key={`divider_${i}`} flexItem />}
+                {i !== thirdPartStrategies.length - 1 && <Divider key={`divider_${i}`} flexItem />}
               </>
             ))}
           </Box>
