@@ -27,24 +27,40 @@ const Security: NextPage = () => {
       ...(displayNetwork.id === optimism.id
         ? [
             {
+              name: 'DebtManager.sol',
+              audited: true,
+              description: t(
+                'The DebtManager contract is responsible for the leverage, deleverage, and rollover functionality of the protocol.',
+              ),
+              reports: ['ABDK'],
+              information: [`629 ${t('lines')} (515 ${t('lines of code')}), 24.9 kb`], //TODO change
+              proxy: async () => {
+                return [{ name: '', address: await getContractAddress('DebtManager_Proxy') }];
+              },
+              implementation: async () => {
+                return [{ name: '', address: await getContractAddress('DebtManager_Implementation') }];
+              },
+              codeLink: 'https://github.com/exactly/protocol/blob/deploy/contracts/periphery/DebtManager.sol',
+            },
+            {
               name: 'Airdrop.sol',
-              audited: false,
+              audited: true,
               description: t(
                 'The EXA smart contract encapsulates the functionality of the EXA ERC20 token. This smart contract uses OpenZeppelin’s ERC20VotesUpgradeable implementation.',
               ),
               reports: ['ABDK'],
-              information: [`24 ${t('lines')} (20 ${t('lines of code')}), 674 kb`],
+              information: [`24 ${t('lines')} (20 ${t('lines of code')}), 674 bytes`],
               proxy: async () => {
                 return [{ name: '', address: await getContractAddress('EXA_Proxy') }];
               },
               implementation: async () => {
                 return [{ name: '', address: await getContractAddress('EXA_Implementation') }];
               },
-              codeLink: 'https://github.com/exactly/protocol/blob/main/contracts/periphery/EXA.sol',
+              codeLink: 'https://github.com/exactly/protocol/blob/deploy/contracts/periphery/EXA.sol',
             },
             {
               name: 'EXA.sol',
-              audited: false,
+              audited: true,
               description: t(
                 'Using Solmate’s Merkle tree library, this smart contract can validate the eligibility of an address for the airdrop and the appropriate amount based on a set of predetermined criteria.',
               ),
@@ -56,7 +72,7 @@ const Security: NextPage = () => {
               implementation: async () => {
                 return [{ name: '', address: await getContractAddress('Airdrop_Implementation') }];
               },
-              codeLink: 'https://github.com/exactly/protocol/blob/main/contracts/periphery/Airdrop.sol',
+              codeLink: 'https://github.com/exactly/protocol/blob/deploy/contracts/periphery/Airdrop.sol',
             },
           ]
         : []),

@@ -372,8 +372,6 @@
   "Provide liquidity": "Proporcionar liquidez",
   "Net APR": "TNA Neta",
   "Your Account": "Tu Cuenta",
-  "Deposit EXA on Extra Finance and get {{apy}} APY": "Deposita EXA en Extra Finance y obtén {{apy}} TEA",
-  "Deposit EXA": "Deposite EXA",
   "No approvals found!": "¡No se encontraron permisos!",
   "Unlimited": "Ilimitada",
   "Revoke Allowances": "Revocar Permisos",
@@ -482,5 +480,6 @@
   "Please be aware that these are third-party offerings. Exercise caution and do your due diligence to secure your funds.": "Ten en cuenta que estas son ofertas de terceros. Ten cuidado y haz tu debida diligencia para asegurar tus fondos.",
   "Exactly": "Exactly",
   "Third-Party": "Terceros",
-  "Security": "Seguridad"
+  "Security": "Seguridad",
+  "The DebtManager contract is responsible for the leverage, deleverage, and rollover functionality of the protocol.": "El contrato DebtManager es responsable de la funcionalidad de apalancamiento, desapalancamiento y refinanciamiento del protocolo."
 }
