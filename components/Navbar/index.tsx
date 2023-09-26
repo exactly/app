@@ -1,7 +1,7 @@
 import React, { ReactNode, useEffect, useMemo, useState } from 'react';
 import { setContext, setUser } from '@sentry/nextjs';
 import { mainnet, useConfig } from 'wagmi';
-import { optimism, goerli } from 'wagmi/chains';
+import { goerli } from 'wagmi/chains';
 import Image from 'next/image';
 import useRouter from 'hooks/useRouter';
 
@@ -17,7 +17,6 @@ import GppGoodRoundedIcon from '@mui/icons-material/GppGoodRounded';
 import MenuIcon from '@mui/icons-material/Menu';
 import GavelIcon from '@mui/icons-material/Gavel';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
-import RepeatRoundedIcon from '@mui/icons-material/RepeatRounded';
 import { globals } from 'styles/theme';
 import MobileMenu from 'components/MobileMenu';
 import Link from 'next/link';
@@ -25,13 +24,10 @@ import Wallet from 'components/Wallet';
 import SelectMarketsView from 'components/SelectMarketsView';
 import { useTranslation } from 'react-i18next';
 import MaturityDateReminder from 'components/MaturityDateReminder';
-import SecondaryChain from 'components/SecondaryChain';
 import { RewardsButton } from 'components/RewardsModal';
 import { useCustomTheme } from 'contexts/ThemeContext';
 import { useModal } from 'contexts/ModalContext';
-import MoreMenu from './MoreMenu';
-import ExtraFinance from 'components/ExtraFinance';
-import { isE2E } from 'utils/client';
+import CustomMenu from './CustomMenu';
 import Settings from 'components/Settings';
 
 const { onlyMobile, onlyDesktopFlex } = globals;
@@ -71,7 +67,6 @@ function Navbar() {
       : setBodyColor(palette.markets.advanced);
   }, [currentPathname, view, palette.markets.advanced, palette.markets.simple]);
 
-  const isOPMainnet = chain.id === optimism.id;
   const isEthereum = chain.id === mainnet.id;
 
   const routes: {
@@ -93,31 +88,23 @@ function Navbar() {
         name: t('Strategies'),
         icon: <MovingSharpIcon sx={{ fontSize: '13px' }} />,
       },
+      ...(!isEthereum
+        ? [
+            {
+              pathname: '/governance',
+              name: t('Governance'),
+              icon: <GavelIcon sx={{ fontSize: '13px' }} />,
+            },
+          ]
+        : []),
       {
         pathname: null,
-        name: t('More'),
+        name: t('Security'),
         custom: (
-          <MoreMenu
+          <CustomMenu
+            name={t('Security')}
+            icon={<GppGoodRoundedIcon sx={{ fontSize: 16 }} />}
             options={[
-              ...(!isEthereum
-                ? [
-                    {
-                      pathname: '/governance',
-                      name: t('Governance'),
-                      icon: <GavelIcon sx={{ fontSize: '13px' }} />,
-                    },
-                  ]
-                : []),
-
-              ...(isOPMainnet
-                ? [
-                    {
-                      pathname: '/bridge',
-                      name: t('Bridge & Swap'),
-                      icon: <RepeatRoundedIcon sx={{ fontSize: '13px' }} />,
-                    },
-                  ]
-                : []),
               {
                 pathname: '/security',
                 name: t('Security Hub'),
@@ -141,7 +128,7 @@ function Navbar() {
         ),
       },
     ],
-    [isEthereum, isOPMainnet, t],
+    [isEthereum, t],
   );
 
   const { open: openFaucet } = useModal('faucet');
@@ -212,8 +199,6 @@ function Navbar() {
               <Chip label="Goerli Faucet" onClick={openFaucet} sx={{ my: 'auto', display: onlyDesktopFlex }} />
             )}
             <Box display="flex" gap={0.5}>
-              {!isE2E && !isMobile && <SecondaryChain />}
-              {isOPMainnet && <ExtraFinance />}
               {!isMobile && !isEthereum && <RewardsButton />}
               <Wallet />
               {!isMobile && <Settings />}

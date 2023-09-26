@@ -2,13 +2,14 @@ import React, { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme, Box, Typography, popoverClasses, Menu, MenuItem, Button } from '@mui/material';
 import Link from 'next/link';
-import MoreHorizRoundedIcon from '@mui/icons-material/MoreHorizRounded';
 import ExpandLessIcon from '@mui/icons-material/ExpandLessRounded';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMoreRounded';
 
 import useRouter from 'hooks/useRouter';
 
 type Props = {
+  name: string;
+  icon: React.ReactElement;
   options: {
     pathname: string;
     name: string;
@@ -17,7 +18,7 @@ type Props = {
   }[];
 };
 
-function MoreMenu({ options }: Props) {
+function CustomMenu({ name: menuName, icon: menuIcon, options }: Props) {
   const { t } = useTranslation();
   const { pathname: currentPathname, query } = useRouter();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -56,9 +57,9 @@ function MoreMenu({ options }: Props) {
         }}
       >
         <Box display="flex" alignItems="center" gap={0.5}>
-          <MoreHorizRoundedIcon sx={{ fontSize: 14 }} />
+          {menuIcon}
           <Typography fontWeight={700} fontSize={14}>
-            {t('More')}
+            {menuName}
           </Typography>
           {anchorEl ? (
             <ExpandLessIcon sx={{ fontSize: 14, my: 'auto' }} fontSize="small" />
@@ -161,4 +162,4 @@ function MoreMenu({ options }: Props) {
   );
 }
 
-export default React.memo(MoreMenu);
+export default React.memo(CustomMenu);
