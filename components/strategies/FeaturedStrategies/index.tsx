@@ -10,9 +10,9 @@ type Props = {
 function FeaturedStrategies({ featured }: Props) {
   return (
     <Grid container spacing={3}>
-      {featured.map((props, i) => (
-        <Grid item sm={12} md={4} display="flex" justifyContent="center" width="100%" key={i}>
-          <StrategyCard {...props} />
+      {featured.map((strategy, i) => (
+        <Grid item sm={12} md={4} display="flex" justifyContent="center" width="100%" key={`${strategy.title}-${i}`}>
+          <StrategyCard {...strategy} />
         </Grid>
       ))}
     </Grid>

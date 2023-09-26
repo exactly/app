@@ -212,7 +212,7 @@ const Strategies: NextPage = () => {
     [hfLabel, lowestBorrowAPR, maxYield, startDebtManager, startLeverager, t],
   );
 
-  const thirdPartStrategies: (Strategy & { chainId?: number })[] = useMemo(
+  const thirdPartyStrategies: (Strategy & { chainId?: number })[] = useMemo(
     () =>
       [
         {
@@ -324,10 +324,10 @@ const Strategies: NextPage = () => {
             borderRadius="8px"
             boxShadow={({ palette }) => (palette.mode === 'light' ? '0px 3px 4px 0px rgba(97, 102, 107, 0.25)' : '')}
           >
-            {thirdPartStrategies.map((strategy, i) => (
+            {thirdPartyStrategies.map((strategy, i) => (
               <Fragment key={strategy.title}>
                 <StrategyRowCard {...strategy} />
-                {i !== thirdPartStrategies.length - 1 && <Divider key={`divider_${i}`} flexItem />}
+                {i !== thirdPartyStrategies.length - 1 && <Divider key={`divider_${i}`} flexItem />}
               </Fragment>
             ))}
           </Box>

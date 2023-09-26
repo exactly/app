@@ -82,7 +82,7 @@ function StrategyCard({ title, description, button, tags, imgPath, isNew, source
       >
         <Box display="flex" flexDirection="column" gap={2.2}>
           <Box display="flex" flexWrap="wrap" alignItems="center" gap={1}>
-            {tags?.map((label, i) => <StrategyTag key={i} {...label} />)}
+            {tags?.map((label, i) => <StrategyTag key={`${label.text}-${i}`} {...label} />)}
           </Box>
           <Typography variant="h6" component="div" color="grey.900">
             {title}

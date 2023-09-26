@@ -33,7 +33,7 @@ const Security: NextPage = () => {
                 'The DebtManager contract is responsible for the leverage, deleverage, and rollover functionality of the protocol.',
               ),
               reports: ['ABDK'],
-              information: [`629 ${t('lines')} (515 ${t('lines of code')}), 24.9 kb`], //TODO change
+              information: [`629 ${t('lines')} (515 ${t('lines of code')}), 24.9 kb`],
               proxy: async () => {
                 return [{ name: '', address: await getContractAddress('DebtManager_Proxy') }];
               },
