@@ -62,10 +62,10 @@ const Security: NextPage = () => {
                     fontSize={12}
                     fontWeight={700}
                     color="white"
-                    bgcolor="orange"
+                    bgcolor="green"
                     borderRadius="4px"
                     px={0.5}
-                  >{`2 ${t('Auditing')}`}</Typography>
+                  >{`3 ${t('Audited')}`}</Typography>
                   <KeyboardArrowRightRoundedIcon />
                 </Box>
               </Box>
