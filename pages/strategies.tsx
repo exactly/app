@@ -1,6 +1,5 @@
 import React, { useMemo, Fragment } from 'react';
 import type { NextPage } from 'next';
-import dynamic from 'next/dynamic';
 import { Box, Button, Divider, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import Link from 'next/link';
@@ -22,8 +21,7 @@ import { parseEther } from 'viem';
 import { useVELOPoolAPR } from 'hooks/useVELO';
 import { useExtraDepositAPR } from 'hooks/useExtra';
 import { useWeb3 } from 'hooks/useWeb3';
-
-const FeaturedStrategies = dynamic(() => import('components/strategies/FeaturedStrategies'));
+import FeaturedStrategies from 'components/strategies/FeaturedStrategies';
 
 const Strategies: NextPage = () => {
   usePageView('/strategies', 'Strategies');

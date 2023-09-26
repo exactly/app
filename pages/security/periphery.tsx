@@ -40,7 +40,7 @@ const Security: NextPage = () => {
               implementation: async () => {
                 return [{ name: '', address: await getContractAddress('DebtManager_Implementation') }];
               },
-              codeLink: 'https://github.com/exactly/protocol/blob/deploy/contracts/periphery/DebtManager.sol',
+              codeLink: 'https://github.com/exactly/protocol/blob/main/contracts/periphery/DebtManager.sol',
             },
             {
               name: 'Airdrop.sol',
@@ -56,7 +56,7 @@ const Security: NextPage = () => {
               implementation: async () => {
                 return [{ name: '', address: await getContractAddress('EXA_Implementation') }];
               },
-              codeLink: 'https://github.com/exactly/protocol/blob/deploy/contracts/periphery/EXA.sol',
+              codeLink: 'https://github.com/exactly/protocol/blob/main/contracts/periphery/EXA.sol',
             },
             {
               name: 'EXA.sol',
@@ -72,7 +72,7 @@ const Security: NextPage = () => {
               implementation: async () => {
                 return [{ name: '', address: await getContractAddress('Airdrop_Implementation') }];
               },
-              codeLink: 'https://github.com/exactly/protocol/blob/deploy/contracts/periphery/Airdrop.sol',
+              codeLink: 'https://github.com/exactly/protocol/blob/main/contracts/periphery/Airdrop.sol',
             },
           ]
         : []),
