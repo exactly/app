@@ -337,6 +337,7 @@ function Operation() {
     const verifyingContract = pad(trim(marketImpl), { size: 20 });
     if (!isAddress(verifyingContract)) return;
 
+    const value = await marketContract.read.previewWithdraw([maxBorrowAssets]);
     const { v, r, s } = await signTypedDataAsync({
       primaryType: 'Permit',
       domain: {
@@ -357,7 +358,7 @@ function Operation() {
       message: {
         owner: walletAddress,
         spender: debtManager.address,
-        value: await marketContract.read.previewWithdraw([maxBorrowAssets]),
+        value,
         nonce: marketNonce,
         deadline,
       },
@@ -366,7 +367,7 @@ function Operation() {
     const permit = {
       account: walletAddress,
       deadline,
-      value: await marketContract.read.previewWithdraw([maxBorrowAssets]),
+      value,
       ...{ v, r: r as Hex, s: s as Hex },
     } as const;
 
