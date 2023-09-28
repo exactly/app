@@ -1,14 +1,17 @@
 {
   "1": {
     "etherscan": "https://etherscan.io",
-    "subgraph": "https://gateway.thegraph.com/api/3bd03f49a36caaa5ed4efc5a27c5425d/subgraphs/id/As6Xz6GCvbW8B9Xb7Rx2LqQeJcL3FcUyD8Tk95L8rG5d"
+    "subgraph": "https://gateway.thegraph.com/api/3bd03f49a36caaa5ed4efc5a27c5425d/subgraphs/id/As6Xz6GCvbW8B9Xb7Rx2LqQeJcL3FcUyD8Tk95L8rG5d",
+    "sablierSubgraph": "https://api.thegraph.com/subgraphs/name/sablier-labs/sablier-v2"
   },
   "5": {
     "etherscan": "https://goerli.etherscan.io",
-    "subgraph": "https://api.thegraph.com/subgraphs/name/exactly/goerli"
+    "subgraph": "https://api.thegraph.com/subgraphs/name/exactly/goerli",
+    "sablierSubgraph": "https://api.thegraph.com/subgraphs/name/sablier-labs/sablier-v2-goerli"
   },
   "10": {
     "etherscan": "https://optimistic.etherscan.io",
-    "subgraph": "https://api.thegraph.com/subgraphs/name/exactly/optimism"
+    "subgraph": "https://api.thegraph.com/subgraphs/name/exactly/optimism",
+    "sablierSubgraph": "https://api.thegraph.com/subgraphs/name/sablier-labs/sablier-v2-optimism"
   }
 }

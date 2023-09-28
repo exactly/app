@@ -10,8 +10,10 @@ export default function useGraphClient() {
   const { setIndexerError } = useGlobalError();
 
   return useCallback(
-    async <T>(query: string): Promise<T | undefined> => {
-      const subgraphUrl = networkData[String(chain.id) as keyof typeof networkData]?.subgraph;
+    async <T>(query: string, sablier: boolean = false): Promise<T | undefined> => {
+      const subgraphType = sablier ? 'sablierSubgraph' : 'subgraph';
+
+      const subgraphUrl = networkData[String(chain.id) as keyof typeof networkData]?.[subgraphType];
       if (!subgraphUrl) return undefined;
 
       try {
