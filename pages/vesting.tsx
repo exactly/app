@@ -6,29 +6,12 @@ import { useTranslation } from 'react-i18next';
 import { Box, Button, Divider, Grid, Typography } from '@mui/material';
 import VestingInput from 'components/VestingInput';
 import ActiveStream from 'components/ActiveStream';
+import useUpdateStreams from 'hooks/useEscrowedEXA';
 
 const Vesting: NextPage = () => {
   usePageView('/vesting', 'Vesting');
   const { t } = useTranslation();
-
-  const activeStreams = [
-    {
-      tokenId: 120,
-      elapsed: 30,
-      duration: 90,
-      vested: 218480000000000000000n,
-      claimed: 95320000000000000000n,
-      reserved: 21848000000000000000n,
-    },
-    {
-      tokenId: 96,
-      elapsed: 60,
-      duration: 90,
-      vested: 80930000000000000000n,
-      claimed: 9450000000000000000n,
-      reserved: 8093000000000000000n,
-    },
-  ];
+  const { activeStreams } = useUpdateStreams();
 
   return (
     <Box display="flex" flexDirection="column" gap={6} maxWidth={800} mx="auto" my={5}>
@@ -112,15 +95,14 @@ const Vesting: NextPage = () => {
           bgcolor="components.bg"
           boxShadow={({ palette }) => (palette.mode === 'light' ? '0px 3px 4px 0px rgba(97, 102, 107, 0.25)' : '')}
         >
-          {activeStreams.map(({ tokenId, elapsed, duration, vested, claimed, reserved }, index) => (
+          {activeStreams.map(({ id, tokenId, depositAmount, withdrawnAmount, startTime, endTime }, index) => (
             <>
               <ActiveStream
-                key={tokenId}
-                elapsed={elapsed}
-                duration={duration}
-                vested={vested}
-                claimed={claimed}
-                reserved={reserved}
+                key={id}
+                depositAmount={BigInt(depositAmount)}
+                withdrawnAmount={BigInt(withdrawnAmount)}
+                startTime={startTime}
+                endTime={endTime}
               />
               {index !== activeStreams.length - 1 && <Divider key={`divider-${tokenId}`} />}
             </>
