@@ -11,14 +11,14 @@ const VotingPower: FC<Props> = ({ votingPower }) => {
   const { t } = useTranslation();
 
   return (
-    <Box display="flex" flexDirection="column" gap={4}>
+    <Box display="flex" flexDirection="column" gap={3}>
       <Box display="flex" justifyContent="space-between" alignItems="center">
         <Typography variant="h6">{t('Voting Power')}</Typography>
         {votingPower === undefined ? (
           <Skeleton width={56} height={40} />
         ) : (
           <Typography fontSize={28} color="grey.700">
-            {formatNumber(votingPower, 'USD', true)}
+            {votingPower === 0 ? 0 : formatNumber(votingPower, 'USD', true)}
           </Typography>
         )}
       </Box>
