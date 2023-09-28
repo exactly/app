@@ -19,20 +19,49 @@ const StyledLinearProgress = styled(LinearProgress, {
 }));
 
 type ActiveStreamProps = {
-  elapsed: number;
-  duration: number;
-  vested: bigint;
-  claimed: bigint;
-  reserved: bigint;
+  depositAmount: bigint;
+  withdrawnAmount: bigint;
+  startTime: number;
+  endTime: number;
 };
 
-const ActiveStream: FC<ActiveStreamProps> = ({ elapsed, duration, vested, claimed, reserved }) => {
+const ActiveStream: FC<ActiveStreamProps> = ({ depositAmount, withdrawnAmount, startTime, endTime }) => {
   const { t } = useTranslation();
 
+  const elapsed = useMemo(() => {
+    const now = Math.floor(Date.now() / 1000);
+    return now - startTime;
+  }, [startTime]);
+
+  const duration = useMemo(() => {
+    return endTime - startTime;
+  }, [startTime, endTime]);
+
   const progress = useMemo(() => {
-    if (elapsed >= duration || duration === 0) return 100;
+    if (elapsed >= duration) return 100;
     return (elapsed / duration) * 100;
   }, [elapsed, duration]);
+
+  const timeLeft = useMemo(() => {
+    const now = Math.floor(Date.now() / 1000);
+    const secondsLeft = endTime - now;
+    const daysLeft = Math.floor(secondsLeft / 86_400);
+
+    if (daysLeft > 1) {
+      return t('{{daysLeft}} days left', { daysLeft });
+    }
+
+    if (daysLeft === 1) {
+      return t('{{daysLeft}} day left', { daysLeft });
+    }
+
+    if (daysLeft === 0) {
+      const minutesLeft = Math.floor(secondsLeft / 60);
+      return t('{{minutesLeft}} minutes left', { minutesLeft });
+    }
+  }, [endTime, t]);
+
+  const reserved = (depositAmount * 20000000000000000000n) / 100000000000000000000n;
 
   return (
     <Box display="flex" flexDirection="column" gap={4} px={4} py={3.5} pb={3}>
@@ -51,7 +80,7 @@ const ActiveStream: FC<ActiveStreamProps> = ({ elapsed, duration, vested, claime
                 style={{ maxWidth: '100%', height: 'auto' }}
               />
               <Typography variant="h6" fontWeight={400}>
-                {formatNumber(Number(vested) / 1e18)}
+                {formatNumber(Number(depositAmount) / 1e18)}
               </Typography>
             </Box>
           </Box>
@@ -69,10 +98,10 @@ const ActiveStream: FC<ActiveStreamProps> = ({ elapsed, duration, vested, claime
                 style={{ maxWidth: '100%', height: 'auto' }}
               />
               <Typography variant="h6" fontWeight={400}>
-                {formatNumber(Number(claimed) / 1e18)}
+                {formatNumber(Number(withdrawnAmount) / 1e18)}
               </Typography>
               <Typography fontSize={14} color="grey.400">
-                {`/ ${formatNumber(Number(vested + reserved) / 1e18)}`}
+                {`/ ${formatNumber(Number(depositAmount + reserved) / 1e18)}`}
               </Typography>
             </Box>
           </Box>
@@ -82,7 +111,7 @@ const ActiveStream: FC<ActiveStreamProps> = ({ elapsed, duration, vested, claime
               {t('Vesting Period')}
             </Typography>
             <Typography variant="h6" fontWeight={400}>
-              {t('{{duration}} days left', { duration })}
+              {timeLeft}
             </Typography>
           </Box>
         </Box>
