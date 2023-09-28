@@ -103,7 +103,6 @@ const Delegation = () => {
 
   return (
     <Box display="flex" flexDirection="column" gap={4}>
-      <Divider flexItem />
       <DelegateInputDialog
         open={open}
         onClose={closeDialog}

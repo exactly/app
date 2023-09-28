@@ -5,18 +5,15 @@ import { usePageView } from 'hooks/useAnalytics';
 import { Box, Typography } from '@mui/material';
 import { useTranslation, Trans } from 'react-i18next';
 import { useWeb3 } from 'hooks/useWeb3';
-import useGovernance from 'hooks/useGovernance';
 import ConnectWalletGovernance from 'components/governance/ConnectWalletGovernance';
 import Claimable from 'components/governance/Claimable';
 import Delegation from 'components/governance/Delegation';
-import VotingPower from 'components/governance/VotingPower';
 import Proposals from 'components/governance/Proposals';
 import useMerkleTree from 'hooks/useMerkleTree';
 
 const Governance: NextPage = () => {
   const { t } = useTranslation();
   const { isConnected, walletAddress, impersonateActive } = useWeb3();
-  const { votingPower } = useGovernance();
   const mTree = useMerkleTree(walletAddress);
 
   usePageView('/governance', 'Governance');
@@ -46,7 +43,6 @@ const Governance: NextPage = () => {
           bgcolor={({ palette }) => (palette.mode === 'dark' ? 'grey.100' : 'white')}
         >
           {mTree.canClaim && <Claimable amount={mTree.amount} proof={mTree.proof} />}
-          <VotingPower votingPower={votingPower} />
           <Delegation />
           <Proposals />
         </Box>
