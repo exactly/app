@@ -88,7 +88,7 @@ const Delegation = () => {
 
   const delegatedToYou = useMemo(() => {
     if (votingPower === undefined || yourVotes === undefined) return undefined;
-    return delegate === zeroAddress ? votingPower - yourVotes : votingPower;
+    return delegate === zeroAddress && votingPower - yourVotes > 0 ? votingPower - yourVotes : votingPower;
   }, [delegate, votingPower, yourVotes]);
 
   if (isLoadingDelegate) {
@@ -131,7 +131,9 @@ const Delegation = () => {
             <Box display="flex" flexDirection="column" gap={2}>
               <Box display="flex" justifyContent="space-between" alignItems="center">
                 <Typography>{t('Delegated to you')}</Typography>
-                <Typography>{delegatedToYou === 0 ? 0 : formatNumber(delegatedToYou, 'USD', true)}</Typography>
+                <Typography fontWeight={600}>
+                  {delegatedToYou === 0 ? 0 : formatNumber(delegatedToYou, 'USD', true)}
+                </Typography>
               </Box>
               <Box display="flex" justifyContent="space-between" alignItems="center" gap={2}>
                 {delegate === zeroAddress ? (
@@ -147,7 +149,7 @@ const Delegation = () => {
                     </Box>
                   </Box>
                 )}
-                <Typography>{yourVotes === 0 ? 0 : formatNumber(yourVotes, 'USD', true)}</Typography>
+                <Typography fontWeight={600}>{yourVotes === 0 ? 0 : formatNumber(yourVotes, 'USD', true)}</Typography>
               </Box>
             </Box>
           )
