@@ -64,7 +64,7 @@ const SelectRoute = () => {
               <Typography fontSize={14} fontWeight={500}>
                 {t('Network')}:
               </Typography>
-              <ChainSelector disabled={!walletAddress} />
+              <ChainSelector disabled />
             </Box>
             {chain && (
               <Box ml="auto" display="flex" alignItems="center" gap={1} fontSize="14px">

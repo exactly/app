@@ -22,7 +22,7 @@ import {
 } from 'viem';
 import * as wagmiChains from 'wagmi/chains';
 
-import { useNetwork, useSignTypedData, useWalletClient } from 'wagmi';
+import { useSignTypedData, useWalletClient } from 'wagmi';
 import { optimism } from 'wagmi/chains';
 
 import {
@@ -129,7 +129,7 @@ export const GetEXAProvider: FC<PropsWithChildren> = ({ children }) => {
   const [activeRoutes, setActiveRoutes] = useState<ContextValues['activeRoutes']>();
   const [bridgeStatus, setBridgeStatus] = useState<ContextValues['bridgeStatus']>();
 
-  const { chain: activeChain } = useNetwork();
+  // const { chain: activeChain } = useNetwork();
   const { walletAddress, opts, chain: appChain } = useWeb3();
 
   const { data: walletClient } = useWalletClient({ chainId: chain?.chainId });
@@ -235,8 +235,7 @@ export const GetEXAProvider: FC<PropsWithChildren> = ({ children }) => {
           setTX({ status: status ? 'success' : 'error', hash: transactionHash });
         }
       }
-        setTXStep(TXStep.CONFIRM);
-      }
+      setTXStep(TXStep.CONFIRM);
     } catch (err) {
       setTXError({ message: t('Error approving token'), status: true });
     }
@@ -282,7 +281,7 @@ export const GetEXAProvider: FC<PropsWithChildren> = ({ children }) => {
       }).then(splitSignature);
 
       const permit = {
-        owner: walletAddress,
+        // owner: walletAddress,
         value,
         deadline,
         ...{ v, r: r as Hex, s: s as Hex },
@@ -532,10 +531,10 @@ export const GetEXAProvider: FC<PropsWithChildren> = ({ children }) => {
 
   useEffect(() => {
     if (!chains) return;
-    const id = activeChain?.id || optimism.id;
+    const id = optimism.id;
     const activeNetwork = chains.find(({ chainId }) => chainId === id);
     if (activeNetwork) setChain(activeNetwork);
-  }, [activeChain?.id, chains, setChain]);
+  }, [chains, setChain]);
 
   useEffect(() => {
     setAsset(chainAssets[0]);
