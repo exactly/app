@@ -345,7 +345,6 @@
   "Take control of your investments with strategies that balance risk and reward for long-term success.": "Toma control de tus inversiones con estrategias que equilibren el riesgo y la recompensa para el éxito a largo plazo.",
   "You are currently over leveraged with the selected markets.": "Actualmente estás sobre apalancado con los mercados seleccionados.",
   "The APR displayed comes from the Lido API.": "La TNA proviene de la API de Lido.",
-  "You have no voting power in your connected wallet.": "No tienes poder de voto en tu billetera conectada.",
   "Revoke delegation": "Revocar delegación",
   "Withdraw {{ value }} EXA": "Retirar {{ value }} EXA",
   "Exactly DAO Governance": "Governanza de Exactly DAO",
@@ -476,5 +475,9 @@
   "The DebtManager contract is responsible for the leverage, deleverage, and rollover functionality of the protocol.": "El contrato DebtManager es responsable de la funcionalidad de apalancamiento, desapalancamiento y refinanciamiento del protocolo.",
   "Delegate your voting rights to a trusted third-party Ethereum address. You never send EXA tokens, only your voting rights and can re-delegate or revoke the delegation at any time.": "Delega tus derechos de voto a una dirección de Ethereum de terceros de confianza. Nunca envías tokens EXA, solo tus derechos de voto y puedes volver a delegar o revocar la delegación en cualquier momento.",
   "Use your voting power to participate in discussions, propose enhancements, and cast votes to shape the Protocol's evolution on Snapchat": "Usa tu poder de voto para participar en discusiones, proponer mejoras y emitir votos para dar forma a la evolución del Protocolo en Snapchat",
-  "View Proposals": "Ver Propuestas"
+  "View Proposals": "Ver Propuestas",
+  "There is no voting power in the connected wallet, and no votes have been delegated to you.": "No hay poder de voto en la billetera conectada, y no se te han delegado votos.",
+  "Delegated to you": "Delegado a ti",
+  "On connected wallet": "En billetera conectada",
+  "Delegated to": "Delegado a"
 }

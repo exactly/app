@@ -15,7 +15,7 @@ import {
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 
-import { Trans, useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import { LoadingButton } from '@mui/lab';
 import { isAddress, zeroAddress } from 'viem';
 import { formatWallet } from 'utils/utils';
@@ -27,12 +27,9 @@ import { useDelegation, usePrepareClearDelegate, usePrepareDelegate } from 'hook
 import formatNumber from 'utils/formatNumber';
 import useGovernance from 'hooks/useGovernance';
 
-type Props = {
-  fetchVotingPower: () => void;
-};
-
-const Delegation: FC<Props> = ({ fetchVotingPower }) => {
-  const { votingPower } = useGovernance(false);
+const Delegation = () => {
+  const { votingPower: yourVotes } = useGovernance(false);
+  const { votingPower, fetchVotingPower } = useGovernance();
   const { t } = useTranslation();
   const { chain: displayNetwork, walletAddress, impersonateActive, exitImpersonate } = useWeb3();
   const [open, setOpen] = useState<boolean>(false);
@@ -89,6 +86,11 @@ const Delegation: FC<Props> = ({ fetchVotingPower }) => {
     setOpen(false);
   }, []);
 
+  const delegatedToYou = useMemo(() => {
+    if (votingPower === undefined || yourVotes === undefined) return undefined;
+    return delegate === zeroAddress ? votingPower - yourVotes : votingPower;
+  }, [delegate, votingPower, yourVotes]);
+
   if (isLoadingDelegate) {
     return (
       <Box display="flex" flexDirection="column" gap={4}>
@@ -111,36 +113,48 @@ const Delegation: FC<Props> = ({ fetchVotingPower }) => {
         isLoading={submitLoading || waitingDelegate}
       />
       <Box display="flex" flexDirection="column" gap={3}>
-        <Typography variant="h6">{t('Votes Delegation')}</Typography>
-        {votingPower !== undefined ? (
-          <Typography fontSize={14}>
-            {delegate !== zeroAddress ? (
-              <Trans
-                i18nKey="Your total of <1>{{amount}} voting power</1> is currently delegated to the following address:"
-                components={{
-                  1: <strong></strong>,
-                }}
-                values={{ amount: formatNumber(votingPower, 'USD', true) }}
-              />
-            ) : (
-              <Trans
-                i18nKey="Your total of <1>{{amount}} voting power</1> is currently assigned to the following address:"
-                components={{
-                  1: <strong></strong>,
-                }}
-                values={{ amount: formatNumber(votingPower, 'USD', true) }}
-              />
-            )}
-          </Typography>
+        <Box display="flex" justifyContent="space-between" alignItems="center">
+          <Typography variant="h6">{t('Voting Power')}</Typography>
+          {votingPower === undefined ? (
+            <Skeleton width={56} height={40} />
+          ) : (
+            <Typography fontSize={28} color="grey.700">
+              {votingPower === 0 ? 0 : formatNumber(votingPower, 'USD', true)}
+            </Typography>
+          )}
+        </Box>
+        {votingPower !== undefined && yourVotes !== undefined && delegatedToYou !== undefined ? (
+          yourVotes === 0 && votingPower === 0 ? (
+            <Typography fontSize={14} color="grey.500">
+              {t('There is no voting power in the connected wallet, and no votes have been delegated to you.')}
+            </Typography>
+          ) : (
+            <Box display="flex" flexDirection="column" gap={2}>
+              <Box display="flex" justifyContent="space-between" alignItems="center">
+                <Typography>{t('Delegated to you')}</Typography>
+                <Typography>{delegatedToYou === 0 ? 0 : formatNumber(delegatedToYou, 'USD', true)}</Typography>
+              </Box>
+              <Box display="flex" justifyContent="space-between" alignItems="center" gap={2}>
+                {delegate === zeroAddress ? (
+                  <Typography>{t('On connected wallet')}</Typography>
+                ) : (
+                  <Box display="flex" alignItems="center" gap={1}>
+                    <Typography>{t('Delegated to')}</Typography>
+                    <Box display="flex" alignItems="center" gap={1}>
+                      <Avatar alt="Delegate avatar" src={delegateAvatar} sx={{ width: 16, height: 16 }} />
+                      <Typography fontSize={16} fontFamily="IBM Plex Mono">
+                        {delegateENS ? delegateENS : formatWallet(delegate === zeroAddress ? walletAddress : delegate)}
+                      </Typography>
+                    </Box>
+                  </Box>
+                )}
+                <Typography>{yourVotes === 0 ? 0 : formatNumber(yourVotes, 'USD', true)}</Typography>
+              </Box>
+            </Box>
+          )
         ) : (
           <Skeleton height={30} />
         )}
-      </Box>
-      <Box display="flex" gap={1}>
-        <Avatar alt="Delegate avatar" src={delegateAvatar} sx={{ width: 24, height: 24 }} />
-        <Typography fontSize={16} fontFamily="IBM Plex Mono">
-          {delegateENS ? delegateENS : formatWallet(delegate === zeroAddress ? walletAddress : delegate)}
-        </Typography>
       </Box>
 
       {impersonateActive ? (

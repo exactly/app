@@ -24,7 +24,7 @@ const VotingPower: FC<Props> = ({ votingPower }) => {
       </Box>
       {votingPower === 0 && (
         <Typography fontSize={14} color="grey.500">
-          {t('You have no voting power in your connected wallet.')}
+          {t('There is no voting power in the connected wallet, and no votes have been delegated to you.')}
         </Typography>
       )}
     </Box>
