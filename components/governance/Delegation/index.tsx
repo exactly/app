@@ -88,7 +88,7 @@ const Delegation = () => {
 
   const delegatedToYou = useMemo(() => {
     if (votingPower === undefined || yourVotes === undefined) return undefined;
-    return delegate === zeroAddress && votingPower - yourVotes > 0 ? votingPower - yourVotes : votingPower;
+    return delegate === zeroAddress && votingPower - yourVotes >= 0 ? votingPower - yourVotes : votingPower;
   }, [delegate, votingPower, yourVotes]);
 
   if (isLoadingDelegate) {
