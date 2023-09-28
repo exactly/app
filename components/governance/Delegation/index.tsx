@@ -172,7 +172,7 @@ const Delegation = () => {
       ) : (
         <Box display="flex" gap={1}>
           <LoadingButton variant="contained" fullWidth onClick={openDialog} loading={submitLoading || waitingDelegate}>
-            {t('Delegate Votes')}
+            {t('Delegate votes')}
           </LoadingButton>
           {delegate !== zeroAddress && (
             <LoadingButton
@@ -271,11 +271,11 @@ const DelegateInputDialog: FC<DelegateInputDialogProps> = ({
           disabled={!input || !isAddress(input) || input === walletAddress}
           onClick={onDelegate}
         >
-          {t('Delegate Votes')}
+          {t('Delegate votes')}
         </LoadingButton>
       </Box>
     </Dialog>
   );
 };
 
-export default React.memo(Delegation);
+export default Delegation;
