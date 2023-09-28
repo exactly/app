@@ -21,6 +21,7 @@ import InterestRateModel from '@exactly/protocol/deployments/goerli/InterestRate
 import SablierV2LockupLinear from '@exactly/protocol/deployments/goerli/SablierV2LockupLinear.json' assert { type: 'json' };
 import SablierV2NFTDescriptor from '@exactly/protocol/deployments/goerli/SablierV2NFTDescriptor.json' assert { type: 'json' };
 import ExtraFinanceLendingABI from './abi/extraFinanceLending.json' assert { type: 'json' };
+import EscrowedEXA from '@exactly/protocol/deployments/goerli/EscrowedEXA.json' assert { type: 'json' };
 
 import { Abi } from 'viem';
 
@@ -47,6 +48,7 @@ export default defineConfig({
     { name: 'SablierV2LockupLinear', abi: SablierV2LockupLinear.abi as Abi },
     { name: 'SablierV2NFTDescriptor', abi: SablierV2NFTDescriptor.abi as Abi },
     { name: 'ExtraFinanceLending', abi: ExtraFinanceLendingABI as Abi },
+    { name: 'EscrowedEXA', abi: EscrowedEXA.abi as Abi },
   ],
   plugins: [
     react({
