@@ -108,14 +108,14 @@ function useApprove({
           break;
         case 'repay':
         case 'repayAtMaturity':
-          quantity = (parseUnits(qty, marketAccount.decimals) * 1005n) / 1000n;
+          quantity = (parseUnits(qty, marketAccount.decimals) * 101n) / 100n;
           break;
         case 'borrow':
         case 'borrowAtMaturity':
         case 'withdraw':
         case 'withdrawAtMaturity':
           quantity =
-            ((await contract.read.previewWithdraw([parseUnits(qty, marketAccount.decimals)], opts)) * 1005n) / 1000n;
+            ((await contract.read.previewWithdraw([parseUnits(qty, marketAccount.decimals)], opts)) * 101n) / 100n;
           break;
       }
 
