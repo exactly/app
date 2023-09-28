@@ -303,13 +303,7 @@
   "Delegate Votes": "Delegar Votos",
   "Voting Power": "Poder de Voto",
   "Governance": "Gobernanza",
-  "Self Delegate": "Auto Delegar",
-  "Use your voting rights to vote on proposals directly from your connected wallet.": "Usa tus derechos de voto para votar en propuestas directamente desde tu billetera conectada.",
-  "Add Delegate": "Añadir Delegado",
-  "Delegate your voting rights to a trusted third-party Ethereum address. You never send EXA tokens, only your voting rights and can revoke the delegation at any time.": "Delega tus derechos de voto a una dirección de Ethereum de terceros de confianza. Nunca envías tokens EXA, solo tus derechos de voto y puedes revocar la delegación en cualquier momento.",
   "Enter the address of the third-party you wish to delegate your voting rights to below. You can also check the Delegates List and find someone to represent you.": "Ingresa la dirección del tercero al que deseas delegar tus derechos de voto a continuación. También puedes consultar la Lista de Delegados y encontrar a alguien que te represente.",
-  "Enter delegate address": "Ingresa la dirección del delegado",
-  "Delegate Votes to": "Delegar Votos a",
   "Proposals": "Propuestas",
   "Expired": "Expirado",
   "Processing transaction...": "Procesando transacción...",
@@ -480,6 +474,7 @@
   "Third-Party": "Terceros",
   "Security": "Seguridad",
   "The DebtManager contract is responsible for the leverage, deleverage, and rollover functionality of the protocol.": "El contrato DebtManager es responsable de la funcionalidad de apalancamiento, desapalancamiento y refinanciamiento del protocolo.",
-  "See our proposals on the governance forum via Snapshot.": "Mira nuestras propuestas en el foro de gobernanza a través de Snapshot.",
-  "You can also create your own proposals and vote on other's proposals.": "También puedes crear tus propias propuestas y votar en las propuestas de otros."
+  "Delegate your voting rights to a trusted third-party Ethereum address. You never send EXA tokens, only your voting rights and can re-delegate or revoke the delegation at any time.": "Delega tus derechos de voto a una dirección de Ethereum de terceros de confianza. Nunca envías tokens EXA, solo tus derechos de voto y puedes volver a delegar o revocar la delegación en cualquier momento.",
+  "Use your voting power to participate in discussions, propose enhancements, and cast votes to shape the Protocol's evolution on Snapchat": "Usa tu poder de voto para participar en discusiones, proponer mejoras y emitir votos para dar forma a la evolución del Protocolo en Snapchat",
+  "View Proposals": "Ver Propuestas"
 }
