@@ -24,7 +24,6 @@ const SpinnerThing = ({
     <Box
       display="flex"
       flexDirection="column"
-      mx="auto"
       alignItems="center"
       py={{
         xs: '30px',
@@ -112,7 +111,14 @@ const BridgeTXStatus = () => {
   } as const;
   const swapTXProps = { status: tx?.status || 'loading', hash: tx?.hash || '0x0', url: optimisticEtherscanURL };
   return (
-    <Box display="flex" minWidth="340px" minHeight="240px" position="relative">
+    <Box
+      display="flex"
+      minWidth="340px"
+      minHeight="240px"
+      position="relative"
+      justifyContent="space-around"
+      alignItems="center"
+    >
       <SpinnerThing {...(isBridge ? bridgeTXProps : swapTXProps)} />
     </Box>
   );

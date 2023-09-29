@@ -16,7 +16,6 @@ const GetEXA = () => {
       p={4}
       display="flex"
       flexDirection="column"
-      width="480px"
       bgcolor={'components.bg'}
       borderRadius={1}
       gap={4}

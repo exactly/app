@@ -55,11 +55,9 @@ const ReviewRoute = () => {
                   </Typography>
                 </Box>
               </Box>
-              <ArrowForward
-                fontSize={'small'}
-                sx={{ color: 'blue', position: 'absolute', right: 16, top: '50%' }}
-                width={24}
-              />
+            </TableCell>
+            <TableCell>
+              <ArrowForward fontSize={'small'} sx={{ color: 'blue', marginX: 2 }} width={24} />
             </TableCell>
             <TableCell>
               <Typography fontSize={14} mb={1}>

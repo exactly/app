@@ -59,7 +59,7 @@ const SelectRoute = () => {
           <Typography color="grey.400" fontWeight={500} fontSize={14} pb={1}>
             {t('Pay with')}:
           </Typography>
-          <Box display="flex">
+          <Box display="flex" flexWrap="wrap" justifyContent="space-between">
             <Box display="flex" alignItems="center" gap={1} fontSize="14px">
               <Typography fontSize={14} fontWeight={500}>
                 {t('Network')}:
@@ -67,7 +67,7 @@ const SelectRoute = () => {
               <ChainSelector disabled />
             </Box>
             {chain && (
-              <Box ml="auto" display="flex" alignItems="center" gap={1} fontSize="14px">
+              <Box display="flex" alignItems="center" gap={1} fontSize="14px">
                 <Typography fontSize={14} fontWeight={500}>
                   {t('Asset')}:
                 </Typography>
