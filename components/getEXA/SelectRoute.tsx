@@ -154,7 +154,7 @@ const SelectRoute = () => {
             )}
             {exaBalance !== undefined ? (
               <Typography ml="auto" color="grey.400" fontWeight={400} whiteSpace="nowrap">
-                Balance: {formatNumber(formatUnits(exaBalance, 18))}
+                {t('Balance')}: {formatNumber(formatUnits(exaBalance, 18))}
               </Typography>
             ) : (
               <Skeleton width={200} />

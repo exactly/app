@@ -129,9 +129,7 @@ export const GetEXAProvider: FC<PropsWithChildren> = ({ children }) => {
   const [activeRoutes, setActiveRoutes] = useState<ContextValues['activeRoutes']>();
   const [bridgeStatus, setBridgeStatus] = useState<ContextValues['bridgeStatus']>();
 
-  // const { chain: activeChain } = useNetwork();
   const { walletAddress, opts, chain: appChain } = useWeb3();
-
   const { data: walletClient } = useWalletClient({ chainId: chain?.chainId });
   const { t } = useTranslation();
   const swapper = useSwapper();
@@ -281,7 +279,6 @@ export const GetEXAProvider: FC<PropsWithChildren> = ({ children }) => {
       }).then(splitSignature);
 
       const permit = {
-        // owner: walletAddress,
         value,
         deadline,
         ...{ v, r: r as Hex, s: s as Hex },

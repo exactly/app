@@ -2,9 +2,11 @@ import React, { Box, Skeleton } from '@mui/material';
 import { useGetEXA } from 'contexts/GetEXAContext';
 import { memo } from 'react';
 import Route from './Route';
+import { useTranslation } from 'react-i18next';
 
 const Routes = () => {
   const { routes } = useGetEXA();
+  const { t } = useTranslation();
 
   const fastestRouteId = routes?.sort(
     (r1, r2) => (r1.userTxs[0].serviceTime || 0) - (r2.userTxs[0].serviceTime || 0),
@@ -30,7 +32,7 @@ const Routes = () => {
           />
         ))
       ) : (
-        'no routes'
+        t('No routes')
       )}
     </Box>
   );

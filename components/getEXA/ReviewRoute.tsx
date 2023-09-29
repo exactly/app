@@ -43,7 +43,7 @@ const ReviewRoute = () => {
               </Typography>
               <Box display="flex" flexDirection="column" gap={0.5}>
                 <Box display="flex" gap={0.5} alignItems="center">
-                  {<Image width={24} height={24} src={asset.logoURI || ''} alt="EXA" />}
+                  <Image width={24} height={24} src={asset.logoURI || ''} alt={asset.symbol} />
                   <Typography fontSize={19} fontWeight={500}>
                     {formatNumber(qtyIn)} {asset.symbol}
                   </Typography>

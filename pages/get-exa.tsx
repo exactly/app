@@ -1,7 +1,7 @@
 import React from 'react';
 import { NextPage } from 'next';
 import { Box, Typography } from '@mui/material';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { GetEXAProvider } from '../contexts/GetEXAContext';
 import { usePageView } from '../hooks/useAnalytics';
 import GetEXA from '../components/getEXA';
@@ -18,18 +18,23 @@ const GetExaPage: NextPage = () => {
         {t(`Get EXA`)}
       </Typography>
       <Typography fontWeight={500} fontSize={16} mb={5}>
-        {t(`Getting EXA gives you the ability to make the most of the Protocol's offerings, actively engaging in 	`)}
-        <Link
-          href="/governance"
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{
-            textDecoration: 'underline',
+        <Trans
+          i18nKey="Getting EXA gives you the ability to make the most of the Protocol's offerings, actively engaging in <a>Governance</a>, or joining the community as an EXA holder."
+          components={{
+            a: (
+              <Link
+                href="/governance"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  textDecoration: 'underline',
+                }}
+              >
+                {t('Governance')}
+              </Link>
+            ),
           }}
-        >
-          Governance
-        </Link>
-        {t(`, or joining the community as an EXA holder.`)}
+        />
       </Typography>
       <GetEXAProvider>
         <GetEXA />

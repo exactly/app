@@ -125,7 +125,7 @@
   "Add tokens to Metamask": "Añadir tokens a Metamask",
   "Mint": "Mint",
   "Borrow Limit": "Límite de Préstamo",
-  "Slippage Tolerance": "Tolerancia de Slippage",
+  "Slippage Tolerance": "Tolerancia de ",
   "Pool Utilization Rate": "Tasa de Utilización del Pool",
   "Your Health Factor": "Tu Factor de Salud",
   "Total deposits": "Depósitos totales",
@@ -481,10 +481,10 @@
   "On connected wallet": "En billetera conectada",
   "Delegated to": "Delegado a",
   "Transaction Summary": "Resumen de la Transacción",
-  "Estimated Output": "Salida Estimada",
+  "Estimated Output": "Monto Estimado",
   "Dex": "Dex",
   "Gas Fee": "Tarifa de Gas",
-  "Swap Slippage": "Deslizamiento de Swap",
+  "Swap Slippage": "Tolerancia para el Swap",
   "Confirm": "Confirmar",
   "in": "en",
   "Get EXA": "Obtener EXA",
@@ -503,6 +503,9 @@
   "Error approving token": "Error al aprobar token",
   "Ready to take part in the Protocol's Governance, Vesting Program, or simply hold EXA? Begin by getting EXA today.": "¿Listo para participar en la Gobernanza del Protocolo, el Programa de Vencimiento o simplemente mantener EXA? Comienza obteniendo EXA hoy.",
   "GET": "OBTENER",
-  "Getting EXA gives you the ability to make the most of the Protocol's offerings, actively engaging in \t": "Obtener EXA te brinda la capacidad de aprovechar al máximo las ofertas del Protocolo, participando activamente en él. \t",
-  ", or joining the community as an EXA holder.": ", o unirte a la comunidad como poseedor de EXA."
+  "FASTEST": "MÁS RÁPIDO",
+  "BEST RETURN": "MEJOR RETORNO",
+  "Est. Output": "Monto Estimado",
+  "Gas fees": "Costo de la transacción",
+  "No routes": "No hay rutas"
 }

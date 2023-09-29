@@ -49,7 +49,7 @@ const Route = ({ route, tags }: Props) => {
       <Box display="flex" flexDirection="column">
         <Box display="flex" alignItems="center" gap={2}>
           <Box display="flex" gap={0.5}>
-            <Typography fontWeight={600}> {protocol?.displayName}</Typography>{' '}
+            <Typography fontWeight={600}> {protocol?.displayName}</Typography>
             {serviceTime && <Typography fontWeight={400}> ~ {Math.round(serviceTime / 60)} min</Typography>}
           </Box>
           <Box display="flex" gap={1}>
@@ -66,15 +66,19 @@ const Route = ({ route, tags }: Props) => {
                 bgcolor={tag === 'fastest' ? '#33CC59' : '#0095FF'}
               >
                 <Typography variant="chip" color="components.bg">
-                  {t(tag.toUpperCase())}
+                  {tag === 'fastest' ? t('FASTEST') : t('BEST RETURN')}
                 </Typography>
               </Box>
             ))}
           </Box>
         </Box>
         <Box display="flex" gap={0.5}>
-          <Typography fontSize={12}>Est. Output: {formatNumber(Number(toAmount) / 1e18)} EXA</Typography>
-          <Typography fontSize={12}>Gas fees: ${formatNumber(totalGasFeesInUsd)}</Typography>
+          <Typography fontSize={12}>
+            {t('Est. Output')}: {formatNumber(Number(toAmount) / 1e18)} EXA
+          </Typography>
+          <Typography fontSize={12}>
+            {t('Gas fees')}: ${formatNumber(totalGasFeesInUsd)}
+          </Typography>
         </Box>
       </Box>
     </Box>
