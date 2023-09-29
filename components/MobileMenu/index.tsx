@@ -184,6 +184,9 @@ function MobileMenu({ open, handleClose }: Props) {
             <LinkItem title={t('Stats')} href="https://dune.com/exactly/exactly">
               <QueryStatsIcon fontSize="small" sx={{ color: 'figma.grey.500', my: 'auto' }} />
             </LinkItem>
+            <LinkItem title={t('Terms and Conditions')} href="https://docs.exact.ly/legal/terms-and-conditions-of-use">
+              <MenuBookIcon fontSize="small" sx={{ color: 'figma.grey.500', my: 'auto' }} />
+            </LinkItem>
           </Box>
           <Box mt={4}>
             <Typography fontSize={14} sx={{ color: 'figma.grey.300' }}>

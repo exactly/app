@@ -32,6 +32,16 @@ const Footer = () => {
               <a
                 target="_blank"
                 rel="noreferrer noopener"
+                href="https://docs.exact.ly/legal/terms-and-conditions-of-use"
+              >
+                {t('Terms and Conditions')}
+              </a>
+            </Typography>
+            <Typography fontSize="0.85em">|</Typography>
+            <Typography fontSize="0.85em">
+              <a
+                target="_blank"
+                rel="noreferrer noopener"
                 href={`https://${displayNetwork.id === optimism.id ? 'ethereum' : 'app'}.exact.ly`}
               >
                 {t('Go to')} {displayNetwork.id === optimism.id ? mainnet.name : optimism.name}
