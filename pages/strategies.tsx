@@ -93,7 +93,6 @@ const Strategies: NextPage = () => {
               {t('Leverage')}
             </Button>
           ),
-          isNew: true,
           source: 'exactly' as const,
           imgPath: '/img/strategies/featured_leverage.svg',
         },
@@ -111,7 +110,6 @@ const Strategies: NextPage = () => {
               {t('Rollover')}
             </Button>
           ),
-          isNew: true,
           source: 'exactly' as const,
           imgPath: '/img/strategies/featured_rollover.svg',
         },
@@ -177,7 +175,6 @@ const Strategies: NextPage = () => {
               {t('Leverage')}
             </Button>
           ),
-          isNew: true,
         },
         {
           title: t('Reduce Exposure'),
@@ -191,7 +188,6 @@ const Strategies: NextPage = () => {
               {t('Deleverage')}
             </Button>
           ),
-          isNew: true,
         },
         {
           title: t('Refinance Loans'),
@@ -207,7 +203,6 @@ const Strategies: NextPage = () => {
               {t('Rollover')}
             </Button>
           ),
-          isNew: true,
         },
         {
           chainId: optimism.id,
