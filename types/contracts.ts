@@ -12,6 +12,8 @@ import {
   previewerABI,
   rewardsControllerABI,
   permit2ABI,
+  sablierV2LockupLinearABI,
+  escrowedExaABI,
 } from './abi';
 
 export type ContractType<T extends Abi> = ReturnType<typeof getContract<T, WalletClient>>;
@@ -27,3 +29,5 @@ export type RewardsController = ContractType<typeof rewardsControllerABI>;
 export type DebtManager = ContractType<typeof debtManagerABI>;
 export type Permit2 = ContractType<typeof permit2ABI>;
 export type DebtPreviewer = ContractType<typeof debtPreviewerABI>;
+export type SablierV2LockupLinear = ContractType<typeof sablierV2LockupLinearABI>;
+export type EscrowedEXA = ContractType<typeof escrowedExaABI>;

@@ -12,7 +12,9 @@ import { privateKeyToAccount, generatePrivateKey } from 'viem/accounts';
 import { optimism, type Chain } from 'viem/chains';
 
 import { type Tenderly, tenderly } from '../utils/tenderly';
-import actions, { Actions } from './actions';
+import actions, { type Actions } from './actions';
+import graph, { type Graph } from './graph';
+import time, { type Time } from './time';
 
 type MarketView = 'simple' | 'advanced';
 
@@ -36,6 +38,11 @@ const defaultTestParams = {
   options: defaultOptions,
 } as const;
 
+type Web2 = {
+  graph: Graph;
+  time: Time;
+};
+
 type Web3 = {
   account: Account;
   publicClient: PublicClient;
@@ -44,6 +51,7 @@ type Web3 = {
 };
 
 type TestProps = {
+  web2: Web2;
   web3: Web3;
   setup: Actions;
 };
@@ -57,6 +65,9 @@ declare global {
 const base = (params: TestParams = defaultTestParams) =>
   test.extend<TestProps>({
     bypassCSP: true,
+    web2: async ({ page }, use) => {
+      await use({ graph: graph(page), time: time(page) });
+    },
     web3: async ({ page }, use) => {
       const { privateKey, options } = {
         privateKey: params.privateKey ?? defaultTestParams.privateKey,
