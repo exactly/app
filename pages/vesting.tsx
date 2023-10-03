@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import type { NextPage } from 'next';
 
 import { usePageView } from 'hooks/useAnalytics';
@@ -6,12 +6,35 @@ import { useTranslation } from 'react-i18next';
 import { Box, Button, Divider, Grid, Typography } from '@mui/material';
 import VestingInput from 'components/VestingInput';
 import ActiveStream from 'components/ActiveStream';
-import useUpdateStreams from 'hooks/useEscrowedEXA';
+import useUpdateStreams, { useEscrowedEXA } from 'hooks/useEscrowedEXA';
+import { useWeb3 } from 'hooks/useWeb3';
+import { useNetwork, useSwitchNetwork } from 'wagmi';
+import { LoadingButton } from '@mui/lab';
+import { waitForTransaction } from '@wagmi/core';
 
 const Vesting: NextPage = () => {
   usePageView('/vesting', 'Vesting');
   const { t } = useTranslation();
-  const { activeStreams } = useUpdateStreams();
+  const { impersonateActive, chain: displayNetwork, opts } = useWeb3();
+  const { chain } = useNetwork();
+  const { activeStreams, loading: streamsLoading } = useUpdateStreams();
+  const { switchNetwork, isLoading: switchIsLoading } = useSwitchNetwork();
+
+  const [loading, setLoading] = useState<boolean>(false);
+  const escrowedEXA = useEscrowedEXA();
+
+  const handleClick = useCallback(async () => {
+    if (!activeStreams || !escrowedEXA || !opts) return;
+    setLoading(true);
+    try {
+      const tx = await escrowedEXA.write.withdrawMax([activeStreams.map(({ tokenId }) => BigInt(tokenId))], opts);
+      await waitForTransaction({ hash: tx });
+    } catch {
+      // if request fails, don't do anything
+    } finally {
+      setLoading(false);
+    }
+  }, [activeStreams, escrowedEXA, opts]);
 
   return (
     <Box display="flex" flexDirection="column" gap={6} maxWidth={800} mx="auto" my={5}>
@@ -89,16 +112,56 @@ const Vesting: NextPage = () => {
           )}
         </Typography>
       </Box>
-      {activeStreams.length > 0 ? (
+
+      {streamsLoading && <Box>loading...</Box>}
+
+      {activeStreams.length > 0 && !streamsLoading && (
         <Box
           borderRadius="8px"
           bgcolor="components.bg"
           boxShadow={({ palette }) => (palette.mode === 'light' ? '0px 3px 4px 0px rgba(97, 102, 107, 0.25)' : '')}
         >
+          <Box borderRadius="8px" bgcolor="components.bg">
+            <Box display="flex" flexDirection="column" gap={4} px={4} py={3.5} pb={3}>
+              <Box display="flex" alignItems="center" justifyContent="space-between" gap={3}>
+                <Box display="flex" alignItems="center" gap={3}>
+                  <Box display="flex" flexDirection="column" gap={0.5}>
+                    <Typography fontSize={14} fontWeight={500}>
+                      {t('You can claim all streams at once.')}
+                    </Typography>
+                  </Box>
+                </Box>
+                <Box display="flex" flexDirection="column" gap={2} alignItems="center">
+                  {impersonateActive ? (
+                    <Button fullWidth variant="contained">
+                      {t('Exit Read-Only Mode')}
+                    </Button>
+                  ) : chain && chain.id !== displayNetwork.id ? (
+                    <LoadingButton
+                      fullWidth
+                      onClick={() => switchNetwork?.(displayNetwork.id)}
+                      variant="contained"
+                      loading={switchIsLoading}
+                    >
+                      {t('Please switch to {{network}} network', { network: displayNetwork.name })}
+                    </LoadingButton>
+                  ) : (
+                    <>
+                      <LoadingButton fullWidth variant="contained" onClick={handleClick} loading={loading}>
+                        {t('Claim All')}
+                      </LoadingButton>
+                    </>
+                  )}
+                </Box>
+              </Box>
+            </Box>
+          </Box>
+          <Divider />
           {activeStreams.map(({ id, tokenId, depositAmount, withdrawnAmount, startTime, endTime }, index) => (
             <>
               <ActiveStream
                 key={id}
+                tokenId={Number(tokenId)}
                 depositAmount={BigInt(depositAmount)}
                 withdrawnAmount={BigInt(withdrawnAmount)}
                 startTime={Number(startTime)}
@@ -108,7 +171,9 @@ const Vesting: NextPage = () => {
             </>
           ))}
         </Box>
-      ) : (
+      )}
+
+      {activeStreams.length === 0 && !streamsLoading && (
         <Box
           display="flex"
           flexDirection="column"
