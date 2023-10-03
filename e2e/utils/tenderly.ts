@@ -7,14 +7,18 @@ import {
   toHex,
   encodeFunctionData,
   pad,
+  concat,
   trim,
   createWalletClient,
   isAddress,
+  keccak256,
 } from 'viem';
 import { Chain, optimism } from 'viem/chains';
 
-import type { Coin, ERC20TokenSymbol } from './contracts';
+import type { Coin } from './contracts';
 import { erc20 } from './contracts';
+import type { ERC20 } from '../../types/contracts';
+import { escrowedExaABI } from '../../types/abi';
 
 const { TENDERLY_USER, TENDERLY_PROJECT, TENDERLY_ACCESS_KEY } = process.env;
 
@@ -56,6 +60,7 @@ export type Balance = {
 export type Tenderly = {
   url: () => string;
   setBalance: (address: Address, balance: Balance) => Promise<void>;
+  increaseTime: (timestamp: number) => Promise<void>;
   deleteFork: () => Promise<void>;
 };
 
@@ -73,12 +78,61 @@ export const tenderly = async ({ chain = optimism }: { chain: Chain }): Promise<
     return await walletClient.request({ method: 'tenderly_setBalance' as any, params });
   };
 
-  const setERC20TokenBalance = async (address: Address, symbol: ERC20TokenSymbol, amount: number) => {
-    const tokenContract = await erc20(symbol, { publicClient });
-    const tokenAmount = parseUnits(String(amount), await tokenContract.read.decimals());
+  const setEXATokenBalance = async (token: ERC20, address: Address, amount: bigint) => {
+    const symbol = await token.read.symbol();
 
+    switch (symbol) {
+      case 'EXA': {
+        const timelock = '0x92024C4bDa9DA602b711B9AbB610d072018eb58b';
+        await walletClient.request({
+          method: 'eth_sendTransaction',
+          params: [
+            {
+              from: timelock,
+              to: token.address,
+              data: encodeFunctionData({
+                abi: token.abi,
+                functionName: 'transfer',
+                args: [address, amount],
+              }),
+            },
+          ],
+        });
+
+        break;
+      }
+      case 'esEXA': {
+        const exa = await erc20('EXA', { publicClient, walletClient });
+        await setEXATokenBalance(exa, address, amount);
+        await exa.write.approve([token.address, amount], { account: address, chain });
+        await walletClient.writeContract({
+          account: address,
+          address: token.address,
+          abi: escrowedExaABI,
+          functionName: 'mint',
+          args: [amount, address],
+        });
+
+        break;
+      }
+      default:
+        throw new Error('Invalid token');
+    }
+  };
+
+  const setERC20TokenBalance = async (token: ERC20, address: Address, amount: bigint) => {
+    const index = (await token.read.symbol()) === 'WETH' ? '0x3' : '0x0';
+    const slot = keccak256(concat([pad(address), pad(index)]));
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const params = [token.address, slot, pad(toHex(amount))] as any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await walletClient.request({ method: 'tenderly_setStorageAt' as any, params });
+  };
+
+  const setOwnedERC20TokenBalance = async (token: ERC20, address: Address, amount: bigint) => {
     let owner = await publicClient.readContract({
-      address: tokenContract.address,
+      address: token.address,
       abi: [
         {
           stateMutability: 'view',
@@ -91,8 +145,8 @@ export const tenderly = async ({ chain = optimism }: { chain: Chain }): Promise<
       functionName: 'owner',
     });
 
-    if (symbol === 'USDC') {
-      const l2Bridge = await publicClient.getStorageAt({ address: tokenContract.address, slot: '0x6' });
+    if ((await token.read.symbol()) === 'USDC') {
+      const l2Bridge = await publicClient.getStorageAt({ address: token.address, slot: '0x6' });
       if (!l2Bridge) throw new Error('L2 bridge not found');
       owner = pad(trim(l2Bridge), { size: 20 });
     }
@@ -108,7 +162,7 @@ export const tenderly = async ({ chain = optimism }: { chain: Chain }): Promise<
       params: [
         {
           from,
-          to: tokenContract.address,
+          to: token.address,
           data: encodeFunctionData({
             abi: [
               {
@@ -123,7 +177,7 @@ export const tenderly = async ({ chain = optimism }: { chain: Chain }): Promise<
               },
             ],
             functionName: 'mint',
-            args: [address, tokenAmount],
+            args: [address, amount],
           }),
         },
       ],
@@ -134,16 +188,37 @@ export const tenderly = async ({ chain = optimism }: { chain: Chain }): Promise<
     url: () => url,
     setBalance: async (address: Address, balance: Balance) => {
       for (const symbol of Object.keys(balance) as Array<keyof typeof balance>) {
-        const amount = balance[symbol];
-        if (!amount) return;
+        const _amount = balance[symbol];
+        if (!_amount) return;
+
+        if (symbol === 'ETH') {
+          await setNativeBalance(address, _amount);
+          return;
+        }
+
+        const token = await erc20(symbol, { publicClient });
+        const amount = parseUnits(String(_amount), await token.read.decimals());
+
         switch (symbol) {
-          case 'ETH':
-            await setNativeBalance(address, amount);
+          case 'USDC':
+          case 'OP':
+            await setOwnedERC20TokenBalance(token, address, amount);
             break;
-          default:
-            await setERC20TokenBalance(address, symbol, amount);
+
+          case 'WETH':
+            await setERC20TokenBalance(token, address, amount);
+            break;
+
+          case 'EXA':
+          case 'esEXA':
+            await setEXATokenBalance(token, address, amount);
+            break;
         }
       }
+    },
+    increaseTime: async (timestamp: number) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await walletClient.request({ method: 'evm_increaseTime' as any, params: [toHex(Math.floor(timestamp))] });
     },
     deleteFork: async () => deleteFork(forkId),
   };

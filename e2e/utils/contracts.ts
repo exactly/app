@@ -3,11 +3,31 @@ import auditorContract from '@exactly/protocol/deployments/optimism/Auditor.json
 import marketETHRouter from '@exactly/protocol/deployments/optimism/MarketETHRouter.json' assert { type: 'json' };
 import debtManagerContract from '@exactly/protocol/deployments/optimism/DebtManager.json' assert { type: 'json' };
 import permit2Contract from '@exactly/protocol/deployments/optimism/Permit2.json' assert { type: 'json' };
+import sablierV2LockupLinearContract from '@exactly/protocol/deployments/optimism/SablierV2LockupLinear.json' assert { type: 'json' };
+import escrowedEXAContract from '@exactly/protocol/deployments/optimism/EscrowedEXA.json' assert { type: 'json' };
 
-import { Auditor, Market, MarketETHRouter, ERC20, DebtManager, Permit2 } from '../../types/contracts';
-import { auditorABI, marketABI, marketEthRouterABI, erc20ABI, debtManagerABI, permit2ABI } from '../../types/abi';
+import type {
+  Auditor,
+  Market,
+  MarketETHRouter,
+  ERC20,
+  DebtManager,
+  Permit2,
+  SablierV2LockupLinear,
+  EscrowedEXA,
+} from '../../types/contracts';
+import {
+  auditorABI,
+  marketABI,
+  marketEthRouterABI,
+  erc20ABI,
+  debtManagerABI,
+  permit2ABI,
+  sablierV2LockupLinearABI,
+  escrowedExaABI,
+} from '../../types/abi';
 
-const ERC20TokenSymbols = ['WETH', 'USDC', 'OP'] as const;
+const ERC20TokenSymbols = ['WETH', 'USDC', 'OP', 'esEXA', 'EXA'] as const;
 export type ERC20TokenSymbol = (typeof ERC20TokenSymbols)[number];
 export type Coin = ERC20TokenSymbol | 'ETH';
 
@@ -19,7 +39,7 @@ type Clients = {
 export const erc20 = async (symbol: ERC20TokenSymbol, clients: Clients = {}): Promise<ERC20> => {
   const {
     default: { address },
-  } = await import(`@exactly/protocol/deployments/optimism/${symbol}.json`, {
+  } = await import(`@exactly/protocol/deployments/optimism/${symbol === 'esEXA' ? 'EscrowedEXA' : symbol}.json`, {
     assert: { type: 'json' },
   });
   if (!isAddress(address)) throw new Error('Invalid address');
@@ -54,4 +74,14 @@ export const debtManager = async (clients: Clients = {}): Promise<DebtManager> =
 export const permit2 = async (clients: Clients = {}): Promise<Permit2> => {
   if (!isAddress(permit2Contract.address)) throw new Error('Invalid address');
   return getContract({ address: permit2Contract.address, abi: permit2ABI, ...clients });
+};
+
+export const sablierV2LockupLinear = async (clients: Clients = {}): Promise<SablierV2LockupLinear> => {
+  if (!isAddress(sablierV2LockupLinearContract.address)) throw new Error('Invalid address');
+  return getContract({ address: sablierV2LockupLinearContract.address, abi: sablierV2LockupLinearABI, ...clients });
+};
+
+export const escrowedEXA = async (clients: Clients = {}): Promise<EscrowedEXA> => {
+  if (!isAddress(escrowedEXAContract.address)) throw new Error('Invalid address');
+  return getContract({ address: escrowedEXAContract.address, abi: escrowedExaABI, ...clients });
 };

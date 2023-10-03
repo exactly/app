@@ -101,8 +101,8 @@ const Vesting: NextPage = () => {
                 key={id}
                 depositAmount={BigInt(depositAmount)}
                 withdrawnAmount={BigInt(withdrawnAmount)}
-                startTime={startTime}
-                endTime={endTime}
+                startTime={Number(startTime)}
+                endTime={Number(endTime)}
               />
               {index !== activeStreams.length - 1 && <Divider key={`divider-${tokenId}`} />}
             </>

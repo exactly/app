@@ -13,13 +13,12 @@ export const useEscrowedEXA = () => {
 
 type Stream = {
   id: string;
-  tokenId: number;
-  chainId: number;
+  tokenId: string;
   recipient: Address;
-  startTime: number;
-  endTime: number;
-  depositAmount: bigint;
-  withdrawnAmount: bigint;
+  startTime: string;
+  endTime: string;
+  depositAmount: string;
+  withdrawnAmount: string;
   canceled: boolean;
 };
 
