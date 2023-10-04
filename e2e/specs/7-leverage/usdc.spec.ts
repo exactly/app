@@ -28,7 +28,7 @@ test('USDC leverage', async ({ page, web3, setup }) => {
 
   await setup.enterMarket('USDC');
   await setup.deposit({ symbol: 'USDC', amount: '10000', receiver: web3.account.address });
-  await usdc.write.approve([p2.address, 2n ** 256n - 1n], { account: web3.account.address, chain });
+  await usdc.write.approve([p2.address, 2n ** 256n - 1n], { account: web3.account, chain });
 
   await app.reload();
 

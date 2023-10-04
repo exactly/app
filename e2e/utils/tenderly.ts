@@ -193,7 +193,7 @@ export const tenderly = async ({ chain = optimism }: { chain: Chain }): Promise<
 
         if (symbol === 'ETH') {
           await setNativeBalance(address, _amount);
-          return;
+          continue;
         }
 
         const token = await erc20(symbol, { publicClient });
@@ -219,6 +219,8 @@ export const tenderly = async ({ chain = optimism }: { chain: Chain }): Promise<
     increaseTime: async (timestamp: number) => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await walletClient.request({ method: 'evm_increaseTime' as any, params: [toHex(Math.floor(timestamp))] });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await walletClient.request({ method: 'evm_increaseBlocks' as any, params: [toHex(1)] });
     },
     deleteFork: async () => deleteFork(forkId),
   };

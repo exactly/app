@@ -165,6 +165,7 @@ function VestingInput() {
                 align="right"
                 maxWidth="100%"
                 sx={{ paddingTop: 0, fontSize: 21 }}
+                data-testid="vesting-input"
               />
             </Box>
             <Box
@@ -178,9 +179,9 @@ function VestingInput() {
             >
               {isConnected ? (
                 balanceIsLoading ? (
-                  <Skeleton variant="text" width={20} />
+                  <Skeleton variant="text" width={80} />
                 ) : (
-                  <Typography color="figma.grey.500" fontSize={12} fontWeight={500} data-testid="modal-amount-info">
+                  <Typography color="figma.grey.500" fontSize={12} fontWeight={500} data-testid="vesting-balance">
                     {t('Available')}: {formatNumber(formatEther(balance || 0n))} esEXA
                   </Typography>
                 )
@@ -206,7 +207,7 @@ function VestingInput() {
             }}
           >
             {moreThanBalance ? (
-              <Typography color="#d92626" fontSize={14} fontWeight={500}>
+              <Typography color="#d92626" fontSize={14} fontWeight={500} data-testid="vesting-error">
                 <Trans
                   i18nKey="Not enough EXA for reserve. <1>Get EXA</1>."
                   components={{
@@ -216,7 +217,7 @@ function VestingInput() {
               </Typography>
             ) : (
               <>
-                <Typography color="#b4babf" fontSize={14} fontWeight={500}>
+                <Typography color="#b4babf" fontSize={14} fontWeight={500} data-testid="vesting-reserve-ratio">
                   {t('{{number}} Reserve', { number: toPercentage(Number(reserveRatio) / 1e18, 0) })}
                 </Typography>
                 <Box display="flex" gap={1} alignItems="center" justifyContent="center">
@@ -224,7 +225,7 @@ function VestingInput() {
                   <Typography fontWeight={700} fontSize={14} color="grey.900">
                     EXA
                   </Typography>
-                  <Typography fontWeight={500} fontSize={14} color="grey.900">
+                  <Typography fontWeight={500} fontSize={14} color="grey.900" data-testid="vesting-reserve">
                     {formatNumber(reserve)}
                   </Typography>
                 </Box>
@@ -249,7 +250,13 @@ function VestingInput() {
             {t('Please switch to {{network}} network', { network: displayNetwork.name })}
           </LoadingButton>
         ) : (
-          <LoadingButton fullWidth variant="contained" loading={isLoading} onClick={submit}>
+          <LoadingButton
+            fullWidth
+            variant="contained"
+            loading={isLoading}
+            onClick={submit}
+            data-testid="vesting-submit"
+          >
             {t('Vest esEXA')}
           </LoadingButton>
         )}

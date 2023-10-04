@@ -5,6 +5,7 @@ import { NumericFormat } from 'react-number-format';
 type CustomProps = {
   decimals: number;
   onValueChange: (value: string) => void;
+  'data-testid'?: string;
 };
 
 const NumberFormatCustom = React.forwardRef<HTMLInputElement, InputBaseComponentProps & CustomProps>(
@@ -32,7 +33,7 @@ const NumberFormatCustom = React.forwardRef<HTMLInputElement, InputBaseComponent
         defaultValue={0.0}
         thousandSeparator=","
         valueIsNumericString
-        data-testid="modal-input"
+        data-testid={props['data-testid']}
       />
     );
   },
@@ -57,6 +58,7 @@ function ModalInput({
   maxWidth,
   align = 'right',
   disabled = false,
+  'data-testid': testId = 'modal-input',
   ...props
 }: Props) {
   return (
@@ -70,6 +72,7 @@ function ModalInput({
         style: { padding: 0, textAlign: align },
         onValueChange: onValueChange,
         decimals: decimals,
+        'data-testid': testId,
       }}
       disabled={disabled}
       value={value}
