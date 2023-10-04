@@ -1,14 +1,24 @@
-import { Box, Button, Divider, LinearProgress, Typography, linearProgressClasses, styled } from '@mui/material';
+import {
+  Box,
+  Button,
+  Divider,
+  LinearProgress,
+  Skeleton,
+  Typography,
+  linearProgressClasses,
+  styled,
+} from '@mui/material';
 import React, { FC, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { waitForTransaction } from '@wagmi/core';
+import { LoadingButton } from '@mui/lab';
 import Image from 'next/image';
 import formatNumber from 'utils/formatNumber';
 import { toPercentage } from 'utils/utils';
 import { useWeb3 } from 'hooks/useWeb3';
 import { useNetwork, useSwitchNetwork } from 'wagmi';
-import { useEscrowedEXA } from 'hooks/useEscrowedEXA';
-import { waitForTransaction } from '@wagmi/core';
-import { LoadingButton } from '@mui/lab';
+import { useEscrowedEXA, useEscrowedEXAReserves } from 'hooks/useEscrowedEXA';
+import { useSablierV2LockupLinearWithdrawableAmountOf } from 'hooks/useSablier';
 
 const StyledLinearProgress = styled(LinearProgress, {
   shouldForwardProp: (prop) => prop !== 'barColor',
@@ -64,13 +74,25 @@ type ActiveStreamProps = {
   withdrawnAmount: bigint;
   startTime: number;
   endTime: number;
+  cancellable: boolean;
 };
 
-const ActiveStream: FC<ActiveStreamProps> = ({ tokenId, depositAmount, withdrawnAmount, startTime, endTime }) => {
+const ActiveStream: FC<ActiveStreamProps> = ({
+  tokenId,
+  depositAmount,
+  withdrawnAmount,
+  startTime,
+  endTime,
+  cancellable,
+}) => {
   const { t } = useTranslation();
   const { impersonateActive, chain: displayNetwork, opts } = useWeb3();
   const { chain } = useNetwork();
   const { switchNetwork, isLoading: switchIsLoading } = useSwitchNetwork();
+  const { data: reserve, isLoading: reserveIsLoading } = useEscrowedEXAReserves(BigInt(tokenId));
+  const { data: withdrawable, isLoading: withdrawableIsLoading } = useSablierV2LockupLinearWithdrawableAmountOf(
+    BigInt(tokenId),
+  );
   const escrowedEXA = useEscrowedEXA();
   const [loading, setLoading] = useState(false);
 
@@ -124,8 +146,6 @@ const ActiveStream: FC<ActiveStreamProps> = ({ tokenId, depositAmount, withdrawn
     }
   }, [endTime, t]);
 
-  const reserved = (depositAmount * 20000000000000000000n) / 100000000000000000000n;
-
   return (
     <Box display="flex" flexDirection="column" gap={4} px={4} py={3.5} pb={3}>
       <Box display="flex" alignItems="center" justifyContent="space-between" gap={3}>
@@ -154,12 +174,9 @@ const ActiveStream: FC<ActiveStreamProps> = ({ tokenId, depositAmount, withdrawn
                 // onClick={onClick}
                 sx={{ cursor: 'pointer' }}
               >
-                <Typography
-                  fontFamily="IBM Plex Mono"
-                  fontSize={12}
-                  fontWeight={500}
-                  data-testid="leverage-slider-current"
-                >{`${t('View NFT').toUpperCase()}`}</Typography>
+                <Typography fontFamily="IBM Plex Mono" fontSize={12} fontWeight={500} textTransform="uppercase">
+                  {t('View NFT')}
+                </Typography>
               </Box>
             </Box>
           </Box>
@@ -176,34 +193,34 @@ const ActiveStream: FC<ActiveStreamProps> = ({ tokenId, depositAmount, withdrawn
                 height={20}
                 style={{ maxWidth: '100%', height: 'auto' }}
               />
-              <Typography variant="h6" fontWeight={400}>
-                {formatNumber(Number(withdrawnAmount) / 1e18)}
-              </Typography>
-              <Typography fontSize={14} color="grey.400">
-                {`/ ${formatNumber(Number(reserved) / 1e18)}`}
-              </Typography>
-              <Box
-                display="flex"
-                bgcolor={({ palette: { mode } }) => (mode === 'light' ? '#EEEEEE' : '#2A2A2A')}
-                px={0.5}
-                borderRadius="2px"
-                alignItems="center"
-                // onClick={onClick}
-                sx={{ cursor: 'pointer' }}
-              >
-                <Typography
-                  fontFamily="IBM Plex Mono"
-                  fontSize={12}
-                  fontWeight={500}
-                  data-testid="leverage-slider-current"
-                >{`${t('Whitdraw').toUpperCase()}`}</Typography>
-              </Box>
+              {reserveIsLoading ? (
+                <Skeleton width={30} />
+              ) : (
+                <Typography variant="h6" fontWeight={400}>
+                  {formatNumber(Number(reserve ?? 0n) / 1e18)}
+                </Typography>
+              )}
+              {cancellable && (
+                <Box
+                  display="flex"
+                  bgcolor={({ palette: { mode } }) => (mode === 'light' ? '#EEEEEE' : '#2A2A2A')}
+                  px={0.5}
+                  borderRadius="2px"
+                  alignItems="center"
+                  // onClick={onClick}
+                  sx={{ cursor: 'pointer' }}
+                >
+                  <Typography fontFamily="IBM Plex Mono" fontSize={12} fontWeight={500} textTransform="uppercase">
+                    {t('Whitdraw')}
+                  </Typography>
+                </Box>
+              )}
             </Box>
           </Box>
           <Divider orientation="vertical" sx={{ borderColor: 'grey.200', my: 0.6 }} flexItem />
           <Box display="flex" flexDirection="column" gap={0.5}>
             <Typography fontSize={14} fontWeight={700}>
-              {t('Claimed EXA')}
+              {t('Claimable EXA')}
             </Typography>
             <Box display="flex" alignItems="center" gap={0.5}>
               <Image
@@ -213,11 +230,15 @@ const ActiveStream: FC<ActiveStreamProps> = ({ tokenId, depositAmount, withdrawn
                 height={20}
                 style={{ maxWidth: '100%', height: 'auto' }}
               />
-              <Typography variant="h6" fontWeight={400}>
-                {formatNumber(Number(withdrawnAmount) / 1e18)}
-              </Typography>
+              {withdrawableIsLoading ? (
+                <Skeleton width={30} />
+              ) : (
+                <Typography variant="h6" fontWeight={400}>
+                  {formatNumber(Number(withdrawable) / 1e18)}
+                </Typography>
+              )}
               <Typography fontSize={14} color="grey.400">
-                {`/ ${formatNumber(Number(depositAmount) / 1e18)}`}
+                / {formatNumber(Number(depositAmount - withdrawnAmount) / 1e18)}
               </Typography>
             </Box>
           </Box>

@@ -10,6 +10,7 @@ export function getStreams(assetAddress: string, address: string, canceled: bool
       depositAmount
       withdrawnAmount
       canceled
+      cancelable
     }
   }
   `;

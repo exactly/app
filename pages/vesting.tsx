@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { Box, Button, Divider, Grid, Typography } from '@mui/material';
 import VestingInput from 'components/VestingInput';
 import ActiveStream from 'components/ActiveStream';
-import useUpdateStreams, { useEscrowedEXA } from 'hooks/useEscrowedEXA';
+import { useUpdateStreams, useEscrowedEXA } from 'hooks/useEscrowedEXA';
 import { useWeb3 } from 'hooks/useWeb3';
 import { useNetwork, useSwitchNetwork } from 'wagmi';
 import { LoadingButton } from '@mui/lab';
@@ -157,19 +157,22 @@ const Vesting: NextPage = () => {
             </Box>
           </Box>
           <Divider />
-          {activeStreams.map(({ id, tokenId, depositAmount, withdrawnAmount, startTime, endTime }, index) => (
-            <>
-              <ActiveStream
-                key={id}
-                tokenId={Number(tokenId)}
-                depositAmount={BigInt(depositAmount)}
-                withdrawnAmount={BigInt(withdrawnAmount)}
-                startTime={Number(startTime)}
-                endTime={Number(endTime)}
-              />
-              {index !== activeStreams.length - 1 && <Divider key={`divider-${tokenId}`} />}
-            </>
-          ))}
+          {activeStreams.map(
+            ({ id, tokenId, depositAmount, withdrawnAmount, startTime, endTime, cancelable }, index) => (
+              <>
+                <ActiveStream
+                  key={id}
+                  tokenId={Number(tokenId)}
+                  depositAmount={BigInt(depositAmount)}
+                  withdrawnAmount={BigInt(withdrawnAmount)}
+                  startTime={Number(startTime)}
+                  endTime={Number(endTime)}
+                  cancellable={cancelable}
+                />
+                {index !== activeStreams.length - 1 && <Divider key={`divider-${tokenId}`} />}
+              </>
+            ),
+          )}
         </Box>
       )}
 

@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
-import { escrowedExaABI } from 'types/abi';
+import { Address, zeroAddress } from 'viem';
+import { escrowedExaABI, useEscrowedExaBalanceOf, useEscrowedExaReserveRatio, useEscrowedExaReserves } from 'types/abi';
 import useContract from './useContract';
 import { useEXA } from './useEXA';
 import useGraphClient from './useGraphClient';
 import { useWeb3 } from './useWeb3';
 import { getStreams } from 'queries/getStreams';
-import { Address } from 'viem';
 
 export const useEscrowedEXA = () => {
   return useContract('EscrowedEXA', escrowedExaABI);
@@ -20,9 +20,10 @@ type Stream = {
   depositAmount: string;
   withdrawnAmount: string;
   canceled: boolean;
+  cancelable: boolean;
 };
 
-export default function useUpdateStreams() {
+export function useUpdateStreams() {
   const EXA = useEXA();
   const { walletAddress } = useWeb3();
   const request = useGraphClient();
@@ -46,3 +47,38 @@ export default function useUpdateStreams() {
 
   return { activeStreams, loading };
 }
+
+export const useEscrowedEXAReserves = (stream: bigint) => {
+  const { chain } = useWeb3();
+  const esEXA = useEscrowedEXA();
+
+  return useEscrowedExaReserves({
+    chainId: chain.id,
+    address: esEXA?.address,
+    args: [stream],
+    staleTime: 30_000,
+  });
+};
+
+export const useEscrowedEXABalance = () => {
+  const { chain, walletAddress } = useWeb3();
+  const esEXA = useEscrowedEXA();
+
+  return useEscrowedExaBalanceOf({
+    chainId: chain.id,
+    address: esEXA?.address,
+    args: [walletAddress ?? zeroAddress],
+    staleTime: 30_000,
+  });
+};
+
+export const useEscrowedEXAReserveRatio = () => {
+  const { chain } = useWeb3();
+  const esEXA = useEscrowedEXA();
+
+  return useEscrowedExaReserveRatio({
+    chainId: chain.id,
+    address: esEXA?.address,
+    staleTime: 30_000,
+  });
+};
