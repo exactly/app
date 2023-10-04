@@ -34,7 +34,7 @@ const StyledLinearProgress = styled(LinearProgress, {
   },
 }));
 
-const CustomProgressBar: React.FC<{ value: number }> = ({ value }) => {
+const CustomProgressBar: React.FC<{ value: number; 'data-testid'?: string }> = ({ value, 'data-testid': testId }) => {
   return (
     <Box position="relative" display="flex" alignItems="center" width="70%" gap={2}>
       <Typography variant="body2" color="textSecondary">
@@ -56,7 +56,7 @@ const CustomProgressBar: React.FC<{ value: number }> = ({ value }) => {
             borderRadius: '4px',
           }}
         >
-          <Typography variant="body2" color="white">
+          <Typography variant="body2" color="white" data-testid={testId}>
             {toPercentage(value / 100, value === 100 ? 0 : 2)}
           </Typography>
         </Box>
@@ -147,7 +147,7 @@ const ActiveStream: FC<ActiveStreamProps> = ({
   }, [endTime, t]);
 
   return (
-    <Box display="flex" flexDirection="column" gap={4} px={4} py={3.5} pb={3}>
+    <Box display="flex" flexDirection="column" gap={4} px={4} py={3.5} pb={3} data-testid={`vesting-stream-${tokenId}`}>
       <Box display="flex" alignItems="center" justifyContent="space-between" gap={3}>
         <Box display="flex" alignItems="center" gap={3}>
           <Box display="flex" flexDirection="column" gap={0.5}>
@@ -162,7 +162,7 @@ const ActiveStream: FC<ActiveStreamProps> = ({
                 height={20}
                 style={{ maxWidth: '100%', height: 'auto' }}
               />
-              <Typography variant="h6" fontWeight={400}>
+              <Typography variant="h6" fontWeight={400} data-testid={`vesting-stream-${tokenId}-vested`}>
                 {formatNumber(Number(depositAmount) / 1e18)}
               </Typography>
               <Box
@@ -196,7 +196,7 @@ const ActiveStream: FC<ActiveStreamProps> = ({
               {reserveIsLoading ? (
                 <Skeleton width={30} />
               ) : (
-                <Typography variant="h6" fontWeight={400}>
+                <Typography variant="h6" fontWeight={400} data-testid={`vesting-stream-${tokenId}-reserved`}>
                   {formatNumber(Number(reserve ?? 0n) / 1e18)}
                 </Typography>
               )}
@@ -233,11 +233,11 @@ const ActiveStream: FC<ActiveStreamProps> = ({
               {withdrawableIsLoading ? (
                 <Skeleton width={30} />
               ) : (
-                <Typography variant="h6" fontWeight={400}>
+                <Typography variant="h6" fontWeight={400} data-testid={`vesting-stream-${tokenId}-withdrawable`}>
                   {formatNumber(Number(withdrawable) / 1e18)}
                 </Typography>
               )}
-              <Typography fontSize={14} color="grey.400">
+              <Typography fontSize={14} color="grey.400" data-testid={`vesting-stream-${tokenId}-left`}>
                 / {formatNumber(Number(depositAmount - withdrawnAmount) / 1e18)}
               </Typography>
             </Box>
@@ -260,7 +260,13 @@ const ActiveStream: FC<ActiveStreamProps> = ({
             </LoadingButton>
           ) : (
             <>
-              <LoadingButton fullWidth variant="contained" onClick={handleClick} loading={loading}>
+              <LoadingButton
+                fullWidth
+                variant="contained"
+                onClick={handleClick}
+                loading={loading}
+                data-testid={`vesting-stream-${tokenId}-claim`}
+              >
                 {progress === 100 ? t('Claim & Whitdraw EXA') : t('Claim EXA')}
               </LoadingButton>
             </>
@@ -272,11 +278,11 @@ const ActiveStream: FC<ActiveStreamProps> = ({
           <Typography fontSize={14} fontWeight={700} noWrap>
             {t('Vesting Period')}:
           </Typography>
-          <Typography fontSize={14} fontWeight={400}>
+          <Typography fontSize={14} fontWeight={400} data-testid={`vesting-stream-${tokenId}-timeleft`}>
             {timeLeft}
           </Typography>
         </Box>
-        <CustomProgressBar value={progress} />
+        <CustomProgressBar value={progress} data-testid={`vesting-stream-${tokenId}-progress`} />
       </Box>
     </Box>
   );

@@ -147,7 +147,13 @@ const Vesting: NextPage = () => {
                     </LoadingButton>
                   ) : (
                     <>
-                      <LoadingButton fullWidth variant="contained" onClick={handleClick} loading={loading}>
+                      <LoadingButton
+                        fullWidth
+                        variant="contained"
+                        onClick={handleClick}
+                        loading={loading}
+                        data-testid="vesting-claim-all"
+                      >
                         {t('Claim All')}
                       </LoadingButton>
                     </>
