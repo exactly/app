@@ -1,37 +1,54 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { Box, Button, Skeleton, Typography } from '@mui/material';
+import dayjs from 'dayjs';
+import { splitSignature } from '@ethersproject/bytes';
+import { type Hex, formatEther, parseEther } from 'viem';
+import { waitForTransaction } from '@wagmi/core';
+import { escrowedExaABI } from 'types/abi';
+import { AbiParametersToPrimitiveTypes, ExtractAbiFunction, ExtractAbiFunctionNames } from 'abitype';
 
 import { ModalBox } from 'components/common/modal/ModalBox';
 
 import ModalInput from 'components/OperationsModal/ModalInput';
 import { useWeb3 } from 'hooks/useWeb3';
-import { useSwitchNetwork } from 'wagmi';
+import { useNetwork, useSignTypedData, useSwitchNetwork } from 'wagmi';
 import { useTranslation, Trans } from 'react-i18next';
 import { LoadingButton } from '@mui/lab';
 import Image from 'next/image';
-import { useEXABalance, useEXAPrice } from 'hooks/useEXA';
-import { useEscrowedEXABalance, useEscrowedEXAReserveRatio } from 'hooks/useEscrowedEXA';
-import { formatEther, parseEther } from 'viem';
+import { useEXA, useEXABalance, useEXAPrice } from 'hooks/useEXA';
+import { useEscrowedEXA, useEscrowedEXABalance, useEscrowedEXAReserveRatio } from 'hooks/useEscrowedEXA';
 import formatNumber from 'utils/formatNumber';
 import { WEI_PER_ETHER } from 'utils/const';
 import { toPercentage } from 'utils/utils';
 import Link from 'next/link';
+import useIsContract from 'hooks/useIsContract';
+import { gasLimit } from 'utils/gas';
+
+type Params<T extends ExtractAbiFunctionNames<typeof escrowedExaABI>> = AbiParametersToPrimitiveTypes<
+  ExtractAbiFunction<typeof escrowedExaABI, T>['inputs']
+>;
 
 function VestingInput() {
   const { t } = useTranslation();
 
+  const { chain } = useNetwork();
+  const exa = useEXA();
+  const escrowedEXA = useEscrowedEXA();
   const { data: balance, isLoading: balanceIsLoading } = useEscrowedEXABalance();
   const { data: exaBalance } = useEXABalance();
   const { data: reserveRatio } = useEscrowedEXAReserveRatio();
   const EXAPrice = useEXAPrice();
-  const { impersonateActive, chain: displayNetwork, isConnected } = useWeb3();
-  const { isLoading: switchIsLoading } = useSwitchNetwork();
+  const { impersonateActive, chain: displayNetwork, isConnected, opts, walletAddress } = useWeb3();
+  const { isLoading: switchIsLoading, switchNetwork } = useSwitchNetwork();
+  const isContract = useIsContract();
+  const { signTypedDataAsync } = useSignTypedData();
+  const [isLoading, setIsLoading] = useState(false);
 
   const [qty, setQty] = useState<string>('');
 
   const errorData = false;
 
-  const value = useMemo(() => {
+  const usdValue = useMemo(() => {
     if (!qty || !EXAPrice) return;
 
     const parsedqty = parseEther(qty);
@@ -47,9 +64,76 @@ function VestingInput() {
     return [formatEther(_reserve), _reserve > exaBalance];
   }, [reserveRatio, qty, exaBalance]);
 
-  const submit = useCallback(() => {
-    if (reserveRatio === undefined) return;
-  }, [reserveRatio]);
+  const sign = useCallback(async () => {
+    if (!walletAddress || reserveRatio === undefined || !exa || !escrowedEXA) return;
+
+    const deadline = BigInt(dayjs().unix() + 3_600);
+    const _qty = parseEther(qty);
+    const value = (_qty * reserveRatio) / WEI_PER_ETHER;
+
+    const nonce = await exa.read.nonces([walletAddress], opts);
+    const name = await exa.read.name(opts);
+
+    const { v, r, s } = await signTypedDataAsync({
+      primaryType: 'Permit',
+      domain: {
+        name,
+        version: '1',
+        chainId: displayNetwork.id,
+        verifyingContract: exa.address,
+      },
+      types: {
+        Permit: [
+          { name: 'owner', type: 'address' },
+          { name: 'spender', type: 'address' },
+          { name: 'value', type: 'uint256' },
+          { name: 'nonce', type: 'uint256' },
+          { name: 'deadline', type: 'uint256' },
+        ],
+      },
+      message: {
+        owner: walletAddress,
+        spender: escrowedEXA.address,
+        value,
+        nonce,
+        deadline,
+      },
+    }).then(splitSignature);
+
+    return {
+      value,
+      deadline,
+      ...{ v, r: r as Hex, s: s as Hex },
+    } as const;
+  }, [displayNetwork.id, escrowedEXA, exa, opts, qty, reserveRatio, signTypedDataAsync, walletAddress]);
+
+  const submit = useCallback(async () => {
+    if (!walletAddress || reserve === undefined || !escrowedEXA || !opts || !qty) return;
+
+    setIsLoading(true);
+    try {
+      const amount = parseEther(qty);
+
+      let args: Params<'vest'> = [amount, walletAddress] as const;
+
+      if (await isContract(walletAddress)) {
+        // TODO
+        return;
+      }
+
+      const p = await sign();
+      if (!p) return;
+      args = [...args, p] as const;
+      const gas = await escrowedEXA.estimateGas.vest(args, opts);
+      const hash = await escrowedEXA.write.vest(args, { ...opts, gasLimit: gasLimit(gas) });
+
+      await waitForTransaction({ hash });
+    } catch (e) {
+      // TODO
+    } finally {
+      setIsLoading(false);
+    }
+  }, [walletAddress, reserve, escrowedEXA, qty, isContract, sign, opts]);
 
   return (
     <Box display="flex" flexDirection="column" gap={2}>
@@ -102,7 +186,7 @@ function VestingInput() {
                 )
               ) : null}
               <Typography color="figma.grey.500" fontWeight={500} fontSize={13} fontFamily="fontFamilyMonospaced">
-                ~${formatNumber(value || '0', 'USD')}
+                ~${formatNumber(usdValue || '0', 'USD')}
               </Typography>
             </Box>
           </Box>
@@ -155,9 +239,18 @@ function VestingInput() {
           <Button fullWidth variant="contained">
             {t('Exit Read-Only Mode')}
           </Button>
-        ) : (
-          <LoadingButton fullWidth variant="contained" loading={switchIsLoading}>
+        ) : displayNetwork.id !== chain?.id ? (
+          <LoadingButton
+            fullWidth
+            variant="contained"
+            loading={switchIsLoading}
+            onClick={() => switchNetwork?.(displayNetwork.id)}
+          >
             {t('Please switch to {{network}} network', { network: displayNetwork.name })}
+          </LoadingButton>
+        ) : (
+          <LoadingButton fullWidth variant="contained" loading={isLoading} onClick={submit}>
+            {t('Vest esEXA')}
           </LoadingButton>
         )}
       </Box>
