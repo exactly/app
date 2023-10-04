@@ -6,7 +6,7 @@ import { ModalBox } from 'components/common/modal/ModalBox';
 import ModalInput from 'components/OperationsModal/ModalInput';
 import { useWeb3 } from 'hooks/useWeb3';
 import { useSwitchNetwork } from 'wagmi';
-import { useTranslation } from 'react-i18next';
+import { useTranslation, Trans } from 'react-i18next';
 import { LoadingButton } from '@mui/lab';
 import Image from 'next/image';
 import { useEXABalance, useEXAPrice } from 'hooks/useEXA';
@@ -14,6 +14,8 @@ import { useEscrowedEXABalance, useEscrowedEXAReserveRatio } from 'hooks/useEscr
 import { formatEther, parseEther } from 'viem';
 import formatNumber from 'utils/formatNumber';
 import { WEI_PER_ETHER } from 'utils/const';
+import { toPercentage } from 'utils/utils';
+import Link from 'next/link';
 
 function VestingInput() {
   const { t } = useTranslation();
@@ -38,11 +40,12 @@ function VestingInput() {
     return formatEther(usd);
   }, [EXAPrice, qty]);
 
-  const reserve = useMemo(() => {
-    if (reserveRatio === undefined || !qty) return;
+  const [reserve, moreThanBalance] = useMemo(() => {
+    if (reserveRatio === undefined || exaBalance === undefined || !qty) return [undefined, false];
     const parsed = parseEther(qty);
-    return formatEther((parsed * reserveRatio) / WEI_PER_ETHER);
-  }, [reserveRatio, qty]);
+    const _reserve = (parsed * reserveRatio) / WEI_PER_ETHER;
+    return [formatEther(_reserve), _reserve > exaBalance];
+  }, [reserveRatio, qty, exaBalance]);
 
   const submit = useCallback(() => {
     if (reserveRatio === undefined) return;
@@ -51,10 +54,21 @@ function VestingInput() {
   return (
     <Box display="flex" flexDirection="column" gap={2}>
       <Box>
-        <ModalBox sx={{ display: 'flex', flexDirection: 'row', p: 1, px: 2, alignItems: 'center' }}>
+        <ModalBox
+          sx={{
+            display: 'flex',
+            flexDirection: 'row',
+            p: 1,
+            px: 2,
+            alignItems: 'center',
+            zIndex: 420,
+            position: 'relative',
+            backgroundColor: 'components.bg',
+          }}
+        >
           <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Box display="flex" gap={1} alignContent="center" justifyContent="center">
+              <Box display="flex" gap={1} alignItems="center" justifyContent="center">
                 <Image src={`/img/assets/EXA.svg`} alt="" width={24} height={24} />
                 <Typography fontWeight={700} fontSize={19} color="grey.900">
                   esEXA
@@ -93,7 +107,47 @@ function VestingInput() {
             </Box>
           </Box>
         </ModalBox>
-        <Box>{reserve ? formatNumber(reserve) : null}</Box>
+        {reserve ? (
+          <Box
+            sx={{
+              borderBottomLeftRadius: '8px',
+              borderBottomRightRadius: '8px',
+              backgroundColor: moreThanBalance ? '#fff5f5' : 'grey.100',
+              px: 2,
+              pt: 2,
+              pb: 1,
+              mt: -1,
+              display: 'flex',
+              justifyContent: 'space-between',
+            }}
+          >
+            {moreThanBalance ? (
+              <Typography color="#d92626" fontSize={14} fontWeight={500}>
+                <Trans
+                  i18nKey="Not enough EXA for reserve. <1>Get EXA</1>."
+                  components={{
+                    1: <Link href="/get-exa" style={{ fontWeight: 700, textDecoration: 'underline' }} />,
+                  }}
+                />
+              </Typography>
+            ) : (
+              <>
+                <Typography color="#b4babf" fontSize={14} fontWeight={500}>
+                  {t('{{number}} Reserve', { number: toPercentage(Number(reserveRatio) / 1e18, 0) })}
+                </Typography>
+                <Box display="flex" gap={1} alignItems="center" justifyContent="center">
+                  <Image src={`/img/assets/EXA.svg`} alt="" width={16} height={16} />
+                  <Typography fontWeight={700} fontSize={14} color="grey.900">
+                    EXA
+                  </Typography>
+                  <Typography fontWeight={500} fontSize={14} color="grey.900">
+                    {formatNumber(reserve)}
+                  </Typography>
+                </Box>
+              </>
+            )}
+          </Box>
+        ) : null}
       </Box>
 
       <Box mt={errorData ? 0 : 2} display="flex" flexDirection="column" gap={1}>
