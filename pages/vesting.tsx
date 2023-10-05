@@ -17,7 +17,7 @@ const Vesting: NextPage = () => {
   const { t } = useTranslation();
   const { impersonateActive, chain: displayNetwork, opts } = useWeb3();
   const { chain } = useNetwork();
-  const { activeStreams, loading: streamsLoading } = useUpdateStreams();
+  const { activeStreams, loading: streamsLoading, refetch } = useUpdateStreams();
   const { switchNetwork, isLoading: switchIsLoading } = useSwitchNetwork();
 
   const [loading, setLoading] = useState<boolean>(false);
@@ -97,7 +97,7 @@ const Vesting: NextPage = () => {
             </Typography>
           </Grid>
           <Grid item xs={6} display="flex" justifyContent="center" alignItems="center">
-            <VestingInput />
+            <VestingInput refetch={refetch} />
           </Grid>
         </Grid>
       </Box>

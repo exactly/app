@@ -51,7 +51,34 @@ export default function (page: Page) {
   };
 
   const waitForVestTransaction = async () => {
-    await waitForSubmitToBeReady();
+    const modal = page.getByTestId('vesting-vest-modal');
+    await expect(modal).toBeVisible();
+
+    const status = page.getByTestId('transaction-status');
+    await expect(status).toBeVisible({ timeout: 30_000 });
+
+    await page.waitForFunction(
+      (message) => {
+        const text = document.querySelector('[data-testid="transaction-status"]');
+        if (!text) return false;
+        return text.textContent !== message;
+      },
+      'Processing transaction...',
+      { timeout: 30_000, polling: 1_000 },
+    );
+  };
+
+  const closeVestTransaction = async () => {
+    const close = page.getByTestId('vesting-vest-modal-close');
+    await expect(close).toBeVisible();
+    await close.click();
+  };
+
+  const checkVestTransactionStatus = async (target: 'success' | 'error', summary: string) => {
+    const status = page.getByTestId('transaction-status');
+
+    await expect(status).toHaveText(`Transaction ${target === 'success' ? 'completed' : target}`);
+    await expect(page.getByTestId('transaction-summary')).toHaveText(summary);
   };
 
   type Stream = {
@@ -126,6 +153,8 @@ export default function (page: Page) {
     waitForSubmitToBeReady,
     submit,
     waitForVestTransaction,
+    checkVestTransactionStatus,
+    closeVestTransaction,
     checkStream,
     claimStream,
     waitForClaimStreamTransaction,

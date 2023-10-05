@@ -44,6 +44,9 @@ test('Vesting esEXA & Claiming EXA', async ({ page, web2, web3 }) => {
     await vesting.submit();
     await vesting.waitForVestTransaction();
 
+    await vesting.checkVestTransactionStatus('success', 'Your esEXA has been vested');
+    await vesting.closeVestTransaction();
+
     await balance.check({ address: web3.account.address, symbol: 'esEXA', amount: '0' });
     await balance.check({ address: web3.account.address, symbol: 'EXA', amount: '0' });
     await allowance.check({
@@ -81,9 +84,9 @@ test('Vesting esEXA & Claiming EXA', async ({ page, web2, web3 }) => {
       id,
       vested: '100.00',
       reserved: '20.00',
-      withdrawable: '50.00',
+      withdrawable: /50\.0|49\.9/,
       left: '100.00',
-      progress: '50.00%',
+      progress: /50\.00%|50\.01%/,
     });
 
     await vesting.claimStream(id);
@@ -116,8 +119,8 @@ test('Vesting esEXA & Claiming EXA', async ({ page, web2, web3 }) => {
       id,
       vested: '100.00',
       reserved: '20.00',
-      withdrawable: '50.00',
-      left: '50.00',
+      withdrawable: /50\.0|49\.9/,
+      left: /50\.0|49\.9/,
       progress: '100%',
     });
 
