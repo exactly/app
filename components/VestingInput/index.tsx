@@ -1,11 +1,27 @@
-import React, { useCallback, useMemo, useState } from 'react';
-import { Box, Button, Skeleton, Typography } from '@mui/material';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogContent,
+  IconButton,
+  Paper,
+  PaperProps,
+  Skeleton,
+  Slide,
+  Typography,
+  useMediaQuery,
+  useTheme,
+} from '@mui/material';
+import { TransitionProps } from '@mui/material/transitions';
 import dayjs from 'dayjs';
 import { splitSignature } from '@ethersproject/bytes';
 import { type Hex, formatEther, parseEther } from 'viem';
 import { waitForTransaction } from '@wagmi/core';
 import { escrowedExaABI } from 'types/abi';
 import { AbiParametersToPrimitiveTypes, ExtractAbiFunction, ExtractAbiFunctionNames } from 'abitype';
+import Draggable from 'react-draggable';
+import CloseIcon from '@mui/icons-material/Close';
 
 import { ModalBox } from 'components/common/modal/ModalBox';
 
@@ -24,10 +40,92 @@ import Link from 'next/link';
 import useIsContract from 'hooks/useIsContract';
 import { gasLimit } from 'utils/gas';
 import { Transaction } from 'types/Transaction';
+import LoadingTransaction from 'components/common/modal/Loading';
 
 type Params<T extends ExtractAbiFunctionNames<typeof escrowedExaABI>> = AbiParametersToPrimitiveTypes<
   ExtractAbiFunction<typeof escrowedExaABI, T>['inputs']
 >;
+
+function PaperComponent(props: PaperProps | undefined) {
+  const ref = useRef<HTMLDivElement>(null);
+  return (
+    <Draggable nodeRef={ref} cancel={'[class*="MuiDialogContent-root"]'}>
+      <Paper {...props} ref={ref} />
+    </Draggable>
+  );
+}
+
+const Transition = React.forwardRef(function Transition(
+  props: TransitionProps & {
+    children: React.ReactElement;
+  },
+  ref: React.Ref<unknown>,
+) {
+  return <Slide direction="up" ref={ref} {...props} />;
+});
+
+function LoadingModal({ tx, onClose }: { tx: Transaction; onClose: () => void }) {
+  const { t } = useTranslation();
+  const { breakpoints, spacing, palette } = useTheme();
+  const isMobile = useMediaQuery(breakpoints.down('sm'));
+  const loadingTx = useMemo(() => tx && (tx.status === 'loading' || tx.status === 'processing'), [tx]);
+
+  return (
+    <Dialog
+      data-testid="vesting-vest-modal"
+      open={!!tx}
+      onClose={loadingTx ? undefined : onClose}
+      PaperComponent={isMobile ? undefined : PaperComponent}
+      PaperProps={{
+        sx: {
+          borderRadius: 1,
+          minWidth: '375px',
+          maxWidth: '488px !important',
+          width: '100%',
+          overflowY: 'hidden !important',
+        },
+      }}
+      TransitionComponent={isMobile ? Transition : undefined}
+      fullScreen={isMobile}
+      sx={isMobile ? { top: 'auto' } : { backdropFilter: tx ? 'blur(1.5px)' : '' }}
+      disableEscapeKeyDown={loadingTx}
+    >
+      {!loadingTx && (
+        <IconButton
+          aria-label="close"
+          onClick={onClose}
+          sx={{
+            position: 'absolute',
+            right: 4,
+            top: 8,
+            color: 'grey.500',
+          }}
+          data-testid="vesting-vest-modal-close"
+        >
+          <CloseIcon sx={{ fontSize: 19 }} />
+        </IconButton>
+      )}
+      <Box
+        sx={{
+          padding: { xs: spacing(3, 2, 2), sm: spacing(5, 4, 4) },
+          borderTop: tx ? '' : `4px ${palette.mode === 'light' ? 'black' : 'white'} solid`,
+          overflowY: 'auto',
+        }}
+      >
+        <DialogContent sx={{ p: 0, overflow: 'hidden' }}>
+          <LoadingTransaction
+            tx={tx}
+            messages={{
+              pending: t('You are vesting your esEXA'),
+              success: t('Your esEXA has been vested'),
+              error: t('Something went wrong'),
+            }}
+          />
+        </DialogContent>
+      </Box>
+    </Dialog>
+  );
+}
 
 function VestingInput() {
   const { t } = useTranslation();
@@ -144,7 +242,7 @@ function VestingInput() {
 
       const { status, transactionHash } = await waitForTransaction({ hash });
 
-      setTx({ status: status ? 'success' : 'error', hash: transactionHash });
+      setTx({ status: status === 'success' ? 'success' : 'error', hash: transactionHash });
 
       await waitForTransaction({ hash });
     } catch (e) {
@@ -154,8 +252,14 @@ function VestingInput() {
     }
   }, [walletAddress, reserveRatio, escrowedEXA, exa, opts, qty, isContract, sign]);
 
+  const onClose = useCallback(() => {
+    setTx(undefined);
+    setQty('');
+  }, []);
+
   return (
     <Box display="flex" flexDirection="column" gap={2}>
+      {tx && <LoadingModal tx={tx} onClose={onClose} />}
       <Box>
         <ModalBox
           sx={{
