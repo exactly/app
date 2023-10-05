@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import type { NextPage } from 'next';
 
 import { usePageView } from 'hooks/useAnalytics';
@@ -11,6 +11,10 @@ import { useWeb3 } from 'hooks/useWeb3';
 import { useNetwork, useSwitchNetwork } from 'wagmi';
 import { LoadingButton } from '@mui/lab';
 import { waitForTransaction } from '@wagmi/core';
+import useRewards from 'hooks/useRewards';
+import { useModal } from 'contexts/ModalContext';
+import formatNumber from 'utils/formatNumber';
+import { formatEther } from 'viem';
 
 const Vesting: NextPage = () => {
   usePageView('/vesting', 'Vesting');
@@ -23,7 +27,14 @@ const Vesting: NextPage = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const escrowedEXA = useEscrowedEXA();
 
-  const handleClick = useCallback(async () => {
+  const { rewards } = useRewards();
+  const { open: openRewards } = useModal('rewards');
+
+  const unclaimedTokens = useMemo(() => {
+    return rewards['esEXA']?.amount || 0n;
+  }, [rewards]);
+
+  const handleClaimAll = useCallback(async () => {
     if (!activeStreams || !escrowedEXA || !opts) return;
     setLoading(true);
     try {
@@ -79,8 +90,10 @@ const Vesting: NextPage = () => {
             <Typography variant="h6">{t('Claim your esEXA Rewards')}</Typography>
           </Grid>
           <Grid item xs={6} display="flex" alignItems="center">
-            <Button variant="contained" fullWidth>
-              {t('Claim {{amount}} esEXA', { amount: 218.46 })}
+            <Button variant="contained" fullWidth disabled={unclaimedTokens === 0n} onClick={openRewards}>
+              {unclaimedTokens === 0n
+                ? t('No esEXA to claim')
+                : t('Claim {{amount}} esEXA', { amount: formatNumber(formatEther(unclaimedTokens)) })}
             </Button>
           </Grid>
         </Grid>
@@ -151,7 +164,7 @@ const Vesting: NextPage = () => {
                       <LoadingButton
                         fullWidth
                         variant="contained"
-                        onClick={handleClick}
+                        onClick={handleClaimAll}
                         loading={loading}
                         data-testid="vesting-claim-all"
                       >
