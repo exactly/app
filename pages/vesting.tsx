@@ -33,8 +33,9 @@ const Vesting: NextPage = () => {
       // if request fails, don't do anything
     } finally {
       setLoading(false);
+      refetch();
     }
-  }, [activeStreams, escrowedEXA, opts]);
+  }, [activeStreams, escrowedEXA, opts, refetch]);
 
   return (
     <Box display="flex" flexDirection="column" gap={6} maxWidth={800} mx="auto" my={5}>
@@ -174,6 +175,7 @@ const Vesting: NextPage = () => {
                   startTime={Number(startTime)}
                   endTime={Number(endTime)}
                   cancellable={cancelable}
+                  refetch={refetch}
                 />
                 {index !== activeStreams.length - 1 && <Divider key={`divider-${tokenId}`} />}
               </>
