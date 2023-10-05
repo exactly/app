@@ -33,6 +33,7 @@ export function useUpdateStreams() {
 
   const fetchStreams = useCallback(async () => {
     if (EXA && walletAddress) {
+      setLoading(true);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const data = await request<any>(getStreams(EXA.address.toLowerCase(), walletAddress, false), true);
 
@@ -45,7 +46,7 @@ export function useUpdateStreams() {
     fetchStreams();
   }, [fetchStreams]);
 
-  return { activeStreams, loading };
+  return { activeStreams, loading, refetch: fetchStreams };
 }
 
 export const useEscrowedEXAReserves = (stream: bigint) => {

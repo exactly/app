@@ -127,7 +127,11 @@ function LoadingModal({ tx, onClose }: { tx: Transaction; onClose: () => void })
   );
 }
 
-function VestingInput() {
+type Props = {
+  refetch: () => void;
+};
+
+function VestingInput({ refetch }: Props) {
   const { t } = useTranslation();
 
   const { chain } = useNetwork();
@@ -255,7 +259,8 @@ function VestingInput() {
   const onClose = useCallback(() => {
     setTx(undefined);
     setQty('');
-  }, []);
+    refetch();
+  }, [refetch]);
 
   return (
     <Box display="flex" flexDirection="column" gap={2}>
