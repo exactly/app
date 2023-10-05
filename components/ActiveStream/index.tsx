@@ -75,6 +75,7 @@ type ActiveStreamProps = {
   startTime: number;
   endTime: number;
   cancellable: boolean;
+  refetch: () => void;
 };
 
 const ActiveStream: FC<ActiveStreamProps> = ({
@@ -84,6 +85,7 @@ const ActiveStream: FC<ActiveStreamProps> = ({
   startTime,
   endTime,
   cancellable,
+  refetch,
 }) => {
   const { t } = useTranslation();
   const { impersonateActive, chain: displayNetwork, opts } = useWeb3();
@@ -106,8 +108,9 @@ const ActiveStream: FC<ActiveStreamProps> = ({
       // if request fails, don't do anything
     } finally {
       setLoading(false);
+      refetch();
     }
-  }, [escrowedEXA, opts, tokenId]);
+  }, [escrowedEXA, opts, refetch, tokenId]);
 
   const elapsed = useMemo(() => {
     const now = Math.floor(Date.now() / 1000);
