@@ -83,13 +83,13 @@ const Vesting: NextPage = () => {
         boxShadow={({ palette }) => (palette.mode === 'light' ? '0px 3px 4px 0px rgba(97, 102, 107, 0.25)' : '')}
       >
         <Grid container spacing={3}>
-          <Grid item xs={6} display="flex" flexDirection="column" justifyContent="center" gap={0.5}>
+          <Grid item xs={12} sm={6} display="flex" flexDirection="column" justifyContent="center" gap={0.5}>
             <Typography textTransform="uppercase" fontSize={14}>
               {t('Step {{number}}', { number: 1 })}
             </Typography>
             <Typography variant="h6">{t('Claim your esEXA Rewards')}</Typography>
           </Grid>
-          <Grid item xs={6} display="flex" alignItems="center">
+          <Grid item xs={12} sm={6} display="flex" alignItems="center">
             <Button variant="contained" fullWidth disabled={unclaimedTokens === 0n} onClick={openRewards}>
               {unclaimedTokens === 0n
                 ? t('No esEXA to claim')
@@ -99,7 +99,7 @@ const Vesting: NextPage = () => {
         </Grid>
         <Divider flexItem />
         <Grid container spacing={3}>
-          <Grid item xs={6} display="flex" flexDirection="column" justifyContent="center" gap={0.5}>
+          <Grid item xs={12} sm={6} display="flex" flexDirection="column" justifyContent="center" gap={0.5}>
             <Typography textTransform="uppercase" fontSize={14}>
               {t('Step {{number}}', { number: 2 })}
             </Typography>
@@ -110,7 +110,7 @@ const Vesting: NextPage = () => {
               )}
             </Typography>
           </Grid>
-          <Grid item xs={6} display="flex" justifyContent="center" alignItems="center">
+          <Grid item xs={12} sm={6} display="flex" justifyContent="center" alignItems="center">
             <VestingInput refetch={refetch} />
           </Grid>
         </Grid>
@@ -138,41 +138,43 @@ const Vesting: NextPage = () => {
           <Box borderRadius="8px" bgcolor="components.bg">
             <Box display="flex" flexDirection="column" gap={4} px={4} py={3.5} pb={3}>
               <Box display="flex" alignItems="center" justifyContent="space-between" gap={3}>
-                <Box display="flex" alignItems="center" gap={3}>
-                  <Box display="flex" flexDirection="column" gap={0.5}>
+                <Grid container spacing={3}>
+                  <Grid item xs={12} sm={9}>
                     <Typography fontSize={14} fontWeight={500}>
                       {t('You can claim all streams at once.')}
                     </Typography>
-                  </Box>
-                </Box>
-                <Box display="flex" flexDirection="column" gap={2} alignItems="center">
-                  {impersonateActive ? (
-                    <Button fullWidth variant="contained">
-                      {t('Exit Read-Only Mode')}
-                    </Button>
-                  ) : chain && chain.id !== displayNetwork.id ? (
-                    <LoadingButton
-                      fullWidth
-                      onClick={() => switchNetwork?.(displayNetwork.id)}
-                      variant="contained"
-                      loading={switchIsLoading}
-                    >
-                      {t('Please switch to {{network}} network', { network: displayNetwork.name })}
-                    </LoadingButton>
-                  ) : (
-                    <>
-                      <LoadingButton
-                        fullWidth
-                        variant="contained"
-                        onClick={handleClaimAll}
-                        loading={loading}
-                        data-testid="vesting-claim-all"
-                      >
-                        {t('Claim All')}
-                      </LoadingButton>
-                    </>
-                  )}
-                </Box>
+                  </Grid>
+                  <Grid item xs={12} sm={3}>
+                    <Box display="flex" flexDirection="column" gap={2} alignItems="center">
+                      {impersonateActive ? (
+                        <Button fullWidth variant="contained">
+                          {t('Exit Read-Only Mode')}
+                        </Button>
+                      ) : chain && chain.id !== displayNetwork.id ? (
+                        <LoadingButton
+                          fullWidth
+                          onClick={() => switchNetwork?.(displayNetwork.id)}
+                          variant="contained"
+                          loading={switchIsLoading}
+                        >
+                          {t('Please switch to {{network}} network', { network: displayNetwork.name })}
+                        </LoadingButton>
+                      ) : (
+                        <>
+                          <LoadingButton
+                            fullWidth
+                            variant="contained"
+                            onClick={handleClaimAll}
+                            loading={loading}
+                            data-testid="vesting-claim-all"
+                          >
+                            {t('Claim All')}
+                          </LoadingButton>
+                        </>
+                      )}
+                    </Box>
+                  </Grid>
+                </Grid>
               </Box>
             </Box>
           </Box>
