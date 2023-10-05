@@ -23,6 +23,7 @@ import { toPercentage } from 'utils/utils';
 import Link from 'next/link';
 import useIsContract from 'hooks/useIsContract';
 import { gasLimit } from 'utils/gas';
+import { Transaction } from 'types/Transaction';
 
 type Params<T extends ExtractAbiFunctionNames<typeof escrowedExaABI>> = AbiParametersToPrimitiveTypes<
   ExtractAbiFunction<typeof escrowedExaABI, T>['inputs']
@@ -43,6 +44,7 @@ function VestingInput() {
   const isContract = useIsContract();
   const { signTypedDataAsync } = useSignTypedData();
   const [isLoading, setIsLoading] = useState(false);
+  const [tx, setTx] = useState<Transaction>();
 
   const [qty, setQty] = useState<string>('');
 
@@ -108,32 +110,49 @@ function VestingInput() {
   }, [displayNetwork.id, escrowedEXA, exa, opts, qty, reserveRatio, signTypedDataAsync, walletAddress]);
 
   const submit = useCallback(async () => {
-    if (!walletAddress || reserve === undefined || !escrowedEXA || !opts || !qty) return;
+    if (!walletAddress || reserveRatio === undefined || !escrowedEXA || !exa || !opts || !qty) return;
 
     setIsLoading(true);
+    let hash;
     try {
       const amount = parseEther(qty);
+      const res = (amount * reserveRatio) / WEI_PER_ETHER;
 
       let args: Params<'vest'> = [amount, walletAddress] as const;
 
       if (await isContract(walletAddress)) {
-        // TODO
-        return;
+        const allowance = await exa.read.allowance([walletAddress, escrowedEXA.address]);
+
+        if (allowance < res) {
+          const approve = [escrowedEXA.address, res] as const;
+          const gas = await exa.estimateGas.approve(approve, opts);
+          const approveHash = await exa.write.approve(approve, { ...opts, gasLimit: gasLimit(gas) });
+          await waitForTransaction({ hash: approveHash });
+        }
+
+        const gas = await escrowedEXA.estimateGas.vest(args, opts);
+        hash = await escrowedEXA.write.vest(args, { ...opts, gasLimit: gasLimit(gas) });
+      } else {
+        const p = await sign();
+        if (!p) return;
+        args = [...args, p] as const;
+        const gas = await escrowedEXA.estimateGas.vest(args, opts);
+        hash = await escrowedEXA.write.vest(args, { ...opts, gasLimit: gasLimit(gas) });
       }
 
-      const p = await sign();
-      if (!p) return;
-      args = [...args, p] as const;
-      const gas = await escrowedEXA.estimateGas.vest(args, opts);
-      const hash = await escrowedEXA.write.vest(args, { ...opts, gasLimit: gasLimit(gas) });
+      setTx({ status: 'processing', hash });
+
+      const { status, transactionHash } = await waitForTransaction({ hash });
+
+      setTx({ status: status ? 'success' : 'error', hash: transactionHash });
 
       await waitForTransaction({ hash });
     } catch (e) {
-      // TODO
+      if (hash) setTx({ status: 'error', hash });
     } finally {
       setIsLoading(false);
     }
-  }, [walletAddress, reserve, escrowedEXA, qty, isContract, sign, opts]);
+  }, [walletAddress, reserveRatio, escrowedEXA, exa, opts, qty, isContract, sign]);
 
   return (
     <Box display="flex" flexDirection="column" gap={2}>
