@@ -26,7 +26,7 @@ const Footer = () => {
             fontWeight: '500',
           }}
         >
-          <Typography fontSize="0.85em">© Exactly {date.getFullYear()}</Typography>
+          <Typography fontSize="0.85em">Exactly Protocol © {date.getFullYear()}</Typography>
           <Box sx={{ display: onlyDesktopFlex, gap: 1.5, alignItems: 'center' }}>
             <Typography fontSize="0.85em">
               <a

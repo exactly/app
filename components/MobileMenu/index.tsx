@@ -190,7 +190,7 @@ function MobileMenu({ open, handleClose }: Props) {
           </Box>
           <Box mt={4}>
             <Typography fontSize={14} sx={{ color: 'figma.grey.300' }}>
-              © Exactly {date.getFullYear()}
+              Exactly Protocol © {date.getFullYear()}
             </Typography>
           </Box>
         </Box>
