@@ -54,7 +54,7 @@ const RouteSteps = () => {
   ];
 
   return (
-    <Box display="flex" alignItems="center" gap={1}>
+    <Box display="flex" alignItems="center" gap={1} data-testid="get-exa-route">
       {displaySteps.map((step, index) => (
         <>
           {index !== 0 && (

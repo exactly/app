@@ -13,6 +13,7 @@ import { optimism, type Chain } from 'viem/chains';
 
 import { type Tenderly, tenderly } from '../utils/tenderly';
 import actions, { type Actions } from './actions';
+import socket, { type Socket } from './socket';
 import graph, { type Graph } from './graph';
 import time, { type Time } from './time';
 
@@ -39,6 +40,7 @@ const defaultTestParams = {
 } as const;
 
 type Web2 = {
+  socket: Socket;
   graph: Graph;
   time: Time;
 };
@@ -66,7 +68,7 @@ const base = (params: TestParams = defaultTestParams) =>
   test.extend<TestProps>({
     bypassCSP: true,
     web2: async ({ page }, use) => {
-      await use({ graph: graph(page), time: time(page) });
+      await use({ graph: graph(page), time: time(page), socket: socket(page) });
     },
     web3: async ({ page }, use) => {
       const { privateKey, options } = {

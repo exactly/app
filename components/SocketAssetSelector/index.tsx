@@ -13,13 +13,20 @@ type AssetOptionProps = {
   option?: boolean;
   optionSize?: number;
   selectedSize?: number;
+  'data-testid'?: string;
 };
 
-function AssetOption({ asset, option = false, optionSize = 20, selectedSize = 20 }: AssetOptionProps) {
+function AssetOption({
+  asset,
+  option = false,
+  optionSize = 20,
+  selectedSize = 20,
+  'data-testid': testId,
+}: AssetOptionProps) {
   const size = option ? optionSize : selectedSize;
 
   return (
-    <Box display="flex" gap={1} my={0.5} mx={option ? 0.5 : 0} alignItems="center" flex={1}>
+    <Box display="flex" gap={1} my={0.5} mx={option ? 0.5 : 0} alignItems="center" flex={1} data-testid={testId}>
       {asset.logoURI && (
         <Image
           src={asset.logoURI}
@@ -80,9 +87,10 @@ function SocketAssetSelector({ options, onChange, asset, disabled = false, onCli
       options={options}
       onChange={onChange}
       renderValue={<AssetOption asset={asset} />}
-      renderOption={(o: AssetBalance) => <AssetOption option asset={o} />}
+      renderOption={(o: AssetBalance) => <AssetOption option asset={o} data-testid={`get-exa-asset-${o.symbol}`} />}
       disabled={disabled}
       onClick={onClick}
+      data-testid="get-exa-asset"
     />
   );
 }

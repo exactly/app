@@ -41,7 +41,7 @@ function ChainOption({ chain, option = false, optionSize = 17, selectedSize = 14
           }}
         />
       )}
-      <Typography fontWeight={600} fontSize={size} color="grey.900">
+      <Typography fontWeight={600} fontSize={size} color="grey.900" data-testid="get-exa-chain">
         {chain.name}
       </Typography>
     </Box>
@@ -71,7 +71,7 @@ const ChainSelector = ({ disabled }: { disabled?: boolean }) => {
       onChange={handleChainChange}
       renderValue={<ChainOption chain={chain} />}
       renderOption={(o: string) => <ChainOption option chain={chains.find(({ name }) => o === name)} />}
-      data-testid="modal-asset-selector"
+      data-testid="get-exa-chain"
       disabled={disabled}
     />
   );

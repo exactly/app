@@ -207,7 +207,7 @@ export const GetEXAProvider: FC<PropsWithChildren> = ({ children }) => {
       const approvePermit2 = !(await isPermit(asset.address));
 
       if (await isMultiSig(walletAddress)) {
-        const allowance = await erc20.read.allowance([walletAddress, swapper?.address], opts);
+        const allowance = await erc20.read.allowance([walletAddress, swapper.address], opts);
 
         if (allowance < minimumApprovalAmount) {
           const args = [swapper.address, minimumApprovalAmount] as const;
@@ -479,10 +479,12 @@ export const GetEXAProvider: FC<PropsWithChildren> = ({ children }) => {
         data,
         value: parseEther(qtyIn),
       });
+
+      setScreen(Screen.TX_STATUS);
+
       setTX({ status: 'processing', hash: txHash_ });
       const { status, transactionHash } = await waitForTransaction({ hash: txHash_ });
       setTX({ status: status ? 'success' : 'error', hash: transactionHash });
-      setScreen(Screen.TX_STATUS);
     } catch (err) {
       setTXError({ status: true, message: handleOperationError(err) });
     } finally {

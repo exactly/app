@@ -63,10 +63,10 @@ const SpinnerThing = ({
         />
       )}
       <Box display="flex" flexDirection="column" alignItems="center">
-        <Typography variant="h6" fontSize="16px" data-testid="modal-transaction-status">
-          {isLoading && t('Transaction processing...')}
-          {status === 'success' && t('Transaction Success')}
-          {status === 'error' && t('Transaction Error')}
+        <Typography variant="h6" fontSize="16px" data-testid="transaction-status">
+          {isLoading && t('Processing transaction...')}
+          {status === 'success' && t('Transaction success')}
+          {status === 'error' && t('Transaction error')}
         </Typography>
         <Box display="flex" flexDirection="column" alignItems="center" gap="8px" pt={1}>
           <Button
@@ -118,6 +118,7 @@ const BridgeTXStatus = () => {
       position="relative"
       justifyContent="space-around"
       alignItems="center"
+      data-testid="get-exa-view-tx-status"
     >
       <SpinnerThing {...(isBridge ? bridgeTXProps : swapTXProps)} />
     </Box>

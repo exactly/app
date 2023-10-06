@@ -53,7 +53,7 @@ const SelectRoute = () => {
 
   return (
     <>
-      <Box display={'flex'} gap={2} flexDirection="column">
+      <Box display={'flex'} gap={2} flexDirection="column" data-testid="get-exa-view-route">
         <Box p={[2, 2, 3]} flexDirection="column" bgcolor="grey.100" borderRadius={1}>
           <Typography color="grey.400" fontWeight={500} fontSize={14} pb={1}>
             {t('Pay with')}:
@@ -91,6 +91,9 @@ const SelectRoute = () => {
               placeholder="0.0"
               value={qtyIn || ''}
               onChange={({ target: { value } }) => setQtyIn(value)}
+              inputProps={{
+                'data-testid': 'get-exa-input',
+              }}
             />
             {asset ? (
               <Typography
@@ -105,6 +108,7 @@ const SelectRoute = () => {
                     cursor: 'pointer',
                   },
                 }}
+                data-testid="get-exa-balance"
               >
                 {t('Balance')}: {formatNumber(asset.amount, asset.symbol)}
               </Typography>
@@ -203,7 +207,6 @@ const SelectRoute = () => {
             onClick={() => switchNetwork?.(chain?.chainId)}
             variant="contained"
             loading={switchIsLoading}
-            data-testid="modal-switch-network"
           >
             {t('Please switch to {{network}} network', { network: chain?.name })}
           </LoadingButton>
@@ -213,6 +216,7 @@ const SelectRoute = () => {
             variant="contained"
             onClick={handleSubmit}
             loading={txStep === TXStep.CONFIRM_PENDING}
+            data-testid={nativeSwap ? 'get-exa-submit' : 'get-exa-review'}
           >
             {insufficientBalance
               ? t('Insufficient {{symbol}} balance', { symbol: asset?.symbol })

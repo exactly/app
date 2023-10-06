@@ -33,5 +33,13 @@ export default function ({ test, publicClient }: CommonTest & { publicClient: Pu
     });
   };
 
-  return { check };
+  const exists = async ({ address, symbol }: Pick<BalanceParams, 'address' | 'symbol'>) => {
+    await test.step(`checks that ${address} has some ${symbol} balance`, async () => {
+      const erc20Contract = await erc20(symbol, { publicClient });
+      const balance = await erc20Contract.read.balanceOf([address]);
+      expect(balance).toBeGreaterThan(0n);
+    });
+  };
+
+  return { check, exists };
 }

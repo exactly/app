@@ -5,6 +5,7 @@ import debtManagerContract from '@exactly/protocol/deployments/optimism/DebtMana
 import permit2Contract from '@exactly/protocol/deployments/optimism/Permit2.json' assert { type: 'json' };
 import sablierV2LockupLinearContract from '@exactly/protocol/deployments/optimism/SablierV2LockupLinear.json' assert { type: 'json' };
 import escrowedEXAContract from '@exactly/protocol/deployments/optimism/esEXA.json' assert { type: 'json' };
+import swapperContract from '@exactly/protocol/deployments/optimism/Swapper.json' assert { type: 'json' };
 
 import type {
   Auditor,
@@ -15,6 +16,7 @@ import type {
   Permit2,
   SablierV2LockupLinear,
   EscrowedEXA,
+  Swapper,
 } from '../../types/contracts';
 import {
   auditorABI,
@@ -25,6 +27,7 @@ import {
   permit2ABI,
   sablierV2LockupLinearABI,
   escrowedExaABI,
+  swapperABI,
 } from '../../types/abi';
 
 const ERC20TokenSymbols = ['WETH', 'USDC', 'OP', 'esEXA', 'EXA'] as const;
@@ -84,4 +87,9 @@ export const sablierV2LockupLinear = async (clients: Clients = {}): Promise<Sabl
 export const escrowedEXA = async (clients: Clients = {}): Promise<EscrowedEXA> => {
   if (!isAddress(escrowedEXAContract.address)) throw new Error('Invalid address');
   return getContract({ address: escrowedEXAContract.address, abi: escrowedExaABI, ...clients });
+};
+
+export const swapper = async (clients: Clients = {}): Promise<Swapper> => {
+  if (!isAddress(swapperContract.address)) throw new Error('Invalid address');
+  return getContract({ address: swapperContract.address, abi: swapperABI, ...clients });
 };

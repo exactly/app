@@ -23,7 +23,7 @@ const ReviewRoute = () => {
   }
 
   return (
-    <Box display="flex" flexDirection="column" gap={3}>
+    <Box display="flex" flexDirection="column" gap={3} data-testid="get-exa-view-review">
       <Typography fontSize={19} fontWeight={700}>
         {t('Transaction Summary')}
       </Typography>
@@ -177,11 +177,22 @@ const ReviewRoute = () => {
 
       {txError?.status && <ModalAlert message={txError.message} variant={txError.variant} mb={1} />}
       {txStep === TXStep.CONFIRM || txStep === TXStep.CONFIRM_PENDING ? (
-        <LoadingButton variant="contained" onClick={socketSubmit} loading={txStep === TXStep.CONFIRM_PENDING}>
+        <LoadingButton
+          variant="contained"
+          onClick={socketSubmit}
+          loading={txStep === TXStep.CONFIRM_PENDING}
+          data-testid="get-exa-submit"
+        >
           {t('Confirm')}
         </LoadingButton>
       ) : (
-        <LoadingButton fullWidth onClick={approve} variant="contained" loading={txStep === TXStep.APPROVE_PENDING}>
+        <LoadingButton
+          fullWidth
+          onClick={approve}
+          variant="contained"
+          loading={txStep === TXStep.APPROVE_PENDING}
+          data-testid="get-exa-approve"
+        >
           {t('Approve')}
         </LoadingButton>
       )}
