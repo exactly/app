@@ -33,7 +33,7 @@ test('WETH fixed borrow/repay', async ({ page, web3, setup }) => {
   await borrow.execute({
     type: 'fixed',
     symbol: 'WETH',
-    amount: '5',
+    amount: '0.5',
     maturity: pool,
     shouldApprove: true,
   });
@@ -46,7 +46,7 @@ test('WETH fixed borrow/repay', async ({ page, web3, setup }) => {
   await repay.execute({
     type: 'fixed',
     symbol: 'WETH',
-    amount: '2.5',
+    amount: '0.25',
     maturity: pool,
   });
 });
