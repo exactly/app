@@ -28,7 +28,7 @@ import { toPercentage } from 'utils/utils';
 import { useWeb3 } from 'hooks/useWeb3';
 import { useNetwork, useSwitchNetwork } from 'wagmi';
 import { useEscrowedEXA, useEscrowedEXAReserves } from 'hooks/useEscrowedEXA';
-import { useSablierV2LockupLinearWithdrawableAmountOf } from 'hooks/useSablier';
+import { useSablierV2LockupLinearWithdrawableAmountOf, useSablierV2NftDescriptorTokenUri } from 'hooks/useSablier';
 import Draggable from 'react-draggable';
 import CloseIcon from '@mui/icons-material/Close';
 import { TransitionProps } from '@mui/material/transitions';
@@ -81,16 +81,6 @@ const CustomProgressBar: React.FC<{ value: number; 'data-testid'?: string }> = (
   );
 };
 
-type ActiveStreamProps = {
-  tokenId: number;
-  depositAmount: bigint;
-  withdrawnAmount: bigint;
-  startTime: number;
-  endTime: number;
-  cancellable: boolean;
-  refetch: () => void;
-};
-
 function PaperComponent(props: PaperProps | undefined) {
   const ref = useRef<HTMLDivElement>(null);
   return (
@@ -121,10 +111,8 @@ function Modal({ open, onClose, content }: { open: boolean; onClose: () => void;
       PaperComponent={PaperComponent}
       PaperProps={{
         sx: {
-          borderRadius: 1,
+          borderRadius: 2,
           minWidth: '375px',
-
-          width: '100%',
         },
       }}
       TransitionComponent={isMobile ? Transition : undefined}
@@ -148,6 +136,16 @@ function Modal({ open, onClose, content }: { open: boolean; onClose: () => void;
     </Dialog>
   );
 }
+
+type ActiveStreamProps = {
+  tokenId: number;
+  depositAmount: bigint;
+  withdrawnAmount: bigint;
+  startTime: number;
+  endTime: number;
+  cancellable: boolean;
+  refetch: () => void;
+};
 
 const ActiveStream: FC<ActiveStreamProps> = ({
   tokenId,
@@ -173,6 +171,7 @@ const ActiveStream: FC<ActiveStreamProps> = ({
   const [modalContent, setModalContent] = useState<ReactNode | null>(null);
   const { breakpoints } = useTheme();
   const isMobile = useMediaQuery(breakpoints.down('sm'));
+  const { data: nft } = useSablierV2NftDescriptorTokenUri(BigInt(tokenId));
 
   const WhitdrawAndCancel = () => {
     return (
@@ -235,6 +234,31 @@ const ActiveStream: FC<ActiveStreamProps> = ({
           </DialogContent>
         </Box>
       </>
+    );
+  };
+
+  const NFT = () => {
+    const b64 = nft?.split(',')[1] ?? '';
+    const json = atob(b64) || '{}';
+    const { image, name } = JSON.parse(json);
+
+    return (
+      <Box
+        display="flex"
+        sx={{
+          padding: { xs: spacing(2, 1, 1), sm: spacing(4, 4) },
+        }}
+      >
+        <Image
+          style={{
+            borderRadius: '16px',
+          }}
+          src={image}
+          alt={name}
+          width={360}
+          height={360}
+        />
+      </Box>
     );
   };
 
@@ -338,7 +362,9 @@ const ActiveStream: FC<ActiveStreamProps> = ({
               px={0.5}
               borderRadius="2px"
               alignItems="center"
-              onClick={() => handleContent(WhitdrawAndCancel())}
+              onClick={() => {
+                handleContent(NFT());
+              }}
               sx={{ cursor: 'pointer' }}
             >
               <Typography fontFamily="IBM Plex Mono" fontSize={12} fontWeight={500} textTransform="uppercase">
