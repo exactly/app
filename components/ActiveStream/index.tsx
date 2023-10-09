@@ -123,9 +123,8 @@ function Modal({ open, onClose, content }: { open: boolean; onClose: () => void;
         sx: {
           borderRadius: 1,
           minWidth: '375px',
-          maxWidth: '488px !important',
+
           width: '100%',
-          overflowY: 'hidden !important',
         },
       }}
       TransitionComponent={isMobile ? Transition : undefined}
@@ -183,22 +182,28 @@ const ActiveStream: FC<ActiveStreamProps> = ({
             cursor: { xs: '', sm: 'move' },
           }}
         >
-          <Typography fontWeight={700} fontSize={24}>
-            {t('Whitdraw Reserved EXA')}
-          </Typography>
+          <Box
+            sx={{
+              padding: { xs: spacing(2, 1, 1), sm: spacing(1, 2, 0, 2) },
+            }}
+          >
+            <Typography fontWeight={700} fontSize={24}>
+              {t('Whitdraw Reserved EXA')}
+            </Typography>
+          </Box>
         </DialogTitle>
         <Box
           sx={{
-            padding: { xs: spacing(2, 1, 1), sm: spacing(2, 3, 3) },
+            padding: { xs: spacing(2, 1, 1), sm: spacing(2, 4, 4) },
           }}
         >
-          <DialogContent sx={{ p: 0, overflow: 'hidden' }}>
-            <Box>
+          <DialogContent sx={{ p: 1, overflow: 'hidden' }}>
+            <Typography fontSize={14} fontWeight={500}>
               {t(
                 'When you withdraw the reserved EXA, the associated vesting stream will be cancelled automatically. You’ll be able to claim the earned EXA and will get back all remaining esEXA.',
               )}
-            </Box>
-            <Box display="flex" gap={2} alignItems="center">
+            </Typography>
+            <Box display="flex" gap={2} mt={4} alignItems="center">
               {impersonateActive ? (
                 <Button fullWidth variant="contained">
                   {t('Exit Read-Only Mode')}

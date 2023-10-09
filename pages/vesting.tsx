@@ -138,13 +138,13 @@ const Vesting: NextPage = () => {
           <Box borderRadius="8px" bgcolor="components.bg">
             <Box display="flex" flexDirection="column" gap={4} px={4} py={3.5} pb={3}>
               <Box display="flex" alignItems="center" justifyContent="space-between" gap={3}>
-                <Grid container spacing={3}>
-                  <Grid item xs={12} sm={9}>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm>
                     <Typography fontSize={14} fontWeight={500}>
                       {t('You can claim all streams at once.')}
                     </Typography>
                   </Grid>
-                  <Grid item xs={12} sm={3}>
+                  <Grid item xs={12} sm={4}>
                     <Box display="flex" flexDirection="column" gap={2} alignItems="center">
                       {impersonateActive ? (
                         <Button fullWidth variant="contained">
