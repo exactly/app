@@ -112,7 +112,7 @@ const Security: NextPage = () => {
         name: 'MarketETHRouter.sol',
         audited: true,
         description: t(
-          'To be used by Exactly’s web-app, so accounts can operate with ETH on MarketWETH. Wraps ETH or unwraps WETH before and after interacting with MarketWETH. It saves one step for the user.',
+          'To be used by Exactly Protocol’s web-app, so accounts can operate with ETH on MarketWETH. Wraps ETH or unwraps WETH before and after interacting with MarketWETH. It saves one step for the user.',
         ),
         reports: ['ABDK', 'Coinspect'],
         information: [`150 ${t('lines')} (126 ${t('lines of code')}), 6.24 kb`],

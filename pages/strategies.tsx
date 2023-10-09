@@ -310,7 +310,7 @@ const Strategies: NextPage = () => {
         </Box>
         <Box display="flex" flexDirection="column" gap={3}>
           <Typography component="h2" variant="h6">
-            {t('Exactly Powered')}
+            {t('Exactly Protocol Powered')}
           </Typography>
           <Box
             bgcolor="components.bg"

@@ -74,14 +74,16 @@ const Security: NextPage = () => {
         )}
       </Box>
       <Divider flexItem sx={{ my: 3 }} />
-      <Typography variant="h6">{t('Connecting to Exactly, Spending Limits and Revoking Allowances')}</Typography>
+      <Typography variant="h6">
+        {t('Connecting to Exactly Protocol, Spending Limits and Revoking Allowances')}
+      </Typography>
       <Box display="flex" flexDirection="column" gap={1}>
         <Typography>
           {t(
-            "Connecting your wallet to Exactly (or any dapp) is different from allowing a smart contract to spend your tokens. Here, we'll explore these processes and their security distinctions.",
+            "Connecting your wallet to Exactly Protocol (or any dapp) is different from allowing a smart contract to spend your tokens. Here, we'll explore these processes and their security distinctions.",
           )}
         </Typography>
-        <Typography>{t('When you connect your wallet to Exactly, you authorize the Protocol to:')}</Typography>
+        <Typography>{t('When you connect your wallet to Exactly Protocol, you authorize the Protocol to:')}</Typography>
         <Typography component="div">
           <ul>
             <li>{t('Access your public address.')}</li>
@@ -96,7 +98,7 @@ const Security: NextPage = () => {
         </Typography>
         <Typography>
           {t(
-            "For deposit assets in Exactly, you provide the Protocol's smart contracts with spending permission. This allowance process empowers the Protocol's smart contracts to utilize your tokens. You control the permitted amount per token via wallet-signed on-chain transactions, incurring gas fees. To minimize fees and enhance your experience, we introduced the Permits model. More details can be found here.",
+            "For deposit assets in Exactly Protocol, you provide the Protocol's smart contracts with spending permission. This allowance process empowers the Protocol's smart contracts to utilize your tokens. You control the permitted amount per token via wallet-signed on-chain transactions, incurring gas fees. To minimize fees and enhance your experience, we introduced the Permits model. More details can be found here.",
           )}
         </Typography>
         <Typography>
@@ -114,7 +116,7 @@ const Security: NextPage = () => {
         </Typography>
         <Typography>
           {t(
-            'At Exactly, user security is paramount, that’s why we offer a revoke tool for allowances within the app:',
+            'At Exactly Protocol, user security is paramount, that’s why we offer a revoke tool for allowances within the app:',
           )}
         </Typography>
         <Typography component="div">

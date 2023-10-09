@@ -110,9 +110,9 @@ function MobileMenu({ open, handleClose }: Props) {
           <Box display="flex" flexDirection="column" gap="20px">
             <Box display="flex" justifyContent="space-between">
               <Image
-                src={palette.mode === 'light' ? '/img/logo.svg' : '/img/logo-white.png'}
-                alt="Exactly Logo"
-                width={103}
+                src={palette.mode === 'light' ? '/img/logo.png' : '/img/logo-white.png'}
+                alt="Exactly Protocol Logo"
+                width={30}
                 height={30}
               />
               {!isE2E && <SecondaryChain />}

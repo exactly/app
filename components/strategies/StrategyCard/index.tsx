@@ -46,7 +46,7 @@ function StrategyCard({ title, description, button, tags, imgPath, isNew, source
                 textTransform: 'uppercase',
               }}
             >
-              {source === 'exactly' ? t('Exactly') : t('Third-Party')}
+              {source === 'exactly' ? t('Exactly Protocol') : t('Third-Party')}
             </Typography>
           )}
           {isNew && (

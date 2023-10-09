@@ -32,7 +32,7 @@ const BridgeContent = () => {
         </Typography>
         <Typography variant="body1" fontSize={16}>
           {t(
-            "Seamlessly bridge and swap assets to OP Mainnet from many different networks with ease. Experience a unified and streamlined approach to managing your assets effortlessly and start using Exactly's features.",
+            "Seamlessly bridge and swap assets to OP Mainnet from many different networks with ease. Experience a unified and streamlined approach to managing your assets effortlessly and start using Exactly Protocol's features.",
           )}
         </Typography>
       </Box>

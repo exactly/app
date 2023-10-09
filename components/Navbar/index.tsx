@@ -144,11 +144,11 @@ function Navbar() {
       >
         <Toolbar disableGutters sx={{ padding: '0 0', gap: '8px' }}>
           <Link href={{ pathname: '/', query }}>
-            <Box display="flex" alignItems="center">
+            <Box display="flex" alignItems="center" mr={2}>
               <Image
-                src={palette.mode === 'light' ? '/img/logo.svg' : '/img/logo-white.png'}
-                alt="Exactly Logo"
-                width={103}
+                src={palette.mode === 'light' ? '/img/logo.png' : '/img/logo-white.png'}
+                alt="Exactly Protocol Logo"
+                width={30}
                 height={30}
                 style={{
                   maxWidth: '100%',

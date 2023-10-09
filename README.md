@@ -1,10 +1,10 @@
-# Exactly
+# Exactly Protocol
 
 [App](https://app.exact.ly) - [Twitter](https://twitter.com/ExactlyProtocol) - [Discord](https://exact.ly/discord)
 
 Decentralizing the credit market, today.
 
-Exactly is a decentralized, non-custodial and open-source protocol that provides
+Exactly Protocol is a decentralized, non-custodial and open-source protocol that provides
 an autonomous fixed and variable interest rate market enabling users to
 frictionlessly exchange the time value of their assets and completing the DeFi
 credit market.

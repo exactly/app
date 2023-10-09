@@ -22,7 +22,7 @@ const Governance: NextPage = () => {
     <Box display="flex" flexDirection="column" mx="auto" gap={5} my={5} maxWidth={480}>
       <Box display="flex" flexDirection="column" gap={3}>
         <Typography fontSize={24} fontWeight={700}>
-          {t('Exactly DAO Governance')}
+          {t('Exactly Protocol DAO Governance')}
         </Typography>
         <Typography>
           <Trans
