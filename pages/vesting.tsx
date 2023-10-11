@@ -135,50 +135,52 @@ const Vesting: NextPage = () => {
           bgcolor="components.bg"
           boxShadow={({ palette }) => (palette.mode === 'light' ? '0px 3px 4px 0px rgba(97, 102, 107, 0.25)' : '')}
         >
-          <Box borderRadius="8px" bgcolor="components.bg">
-            <Box display="flex" flexDirection="column" gap={4} px={4} py={3.5} pb={3}>
-              <Box display="flex" alignItems="center" justifyContent="space-between" gap={3}>
-                <Grid container spacing={2}>
-                  <Grid item xs={12} sm>
-                    <Typography fontSize={14} fontWeight={500}>
-                      {t('You can claim all streams at once.')}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={12} sm={4}>
-                    <Box display="flex" flexDirection="column" gap={2} alignItems="center">
-                      {impersonateActive ? (
-                        <Button fullWidth variant="contained">
-                          {t('Exit Read-Only Mode')}
-                        </Button>
-                      ) : chain && chain.id !== displayNetwork.id ? (
-                        <LoadingButton
-                          fullWidth
-                          onClick={() => switchNetwork?.(displayNetwork.id)}
-                          variant="contained"
-                          loading={switchIsLoading}
-                        >
-                          {t('Please switch to {{network}} network', { network: displayNetwork.name })}
-                        </LoadingButton>
-                      ) : (
-                        <>
+          {activeStreams.length > 1 && (
+            <Box borderRadius="8px" bgcolor="components.bg">
+              <Box display="flex" flexDirection="column" gap={4} px={4} py={3.5} pb={3}>
+                <Box display="flex" alignItems="center" justifyContent="space-between" gap={3}>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} sm>
+                      <Typography fontSize={14} fontWeight={500}>
+                        {t('You can claim all streams at once.')}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={12} sm={4}>
+                      <Box display="flex" flexDirection="column" gap={2} alignItems="center">
+                        {impersonateActive ? (
+                          <Button fullWidth variant="contained">
+                            {t('Exit Read-Only Mode')}
+                          </Button>
+                        ) : chain && chain.id !== displayNetwork.id ? (
                           <LoadingButton
                             fullWidth
+                            onClick={() => switchNetwork?.(displayNetwork.id)}
                             variant="contained"
-                            onClick={handleClaimAll}
-                            loading={loading}
-                            data-testid="vesting-claim-all"
+                            loading={switchIsLoading}
                           >
-                            {t('Claim All')}
+                            {t('Please switch to {{network}} network', { network: displayNetwork.name })}
                           </LoadingButton>
-                        </>
-                      )}
-                    </Box>
+                        ) : (
+                          <>
+                            <LoadingButton
+                              fullWidth
+                              variant="contained"
+                              onClick={handleClaimAll}
+                              loading={loading}
+                              data-testid="vesting-claim-all"
+                            >
+                              {t('Claim All')}
+                            </LoadingButton>
+                          </>
+                        )}
+                      </Box>
+                    </Grid>
                   </Grid>
-                </Grid>
+                </Box>
               </Box>
+              <Divider />
             </Box>
-          </Box>
-          <Divider />
+          )}
           {activeStreams.map(
             ({ id, tokenId, depositAmount, withdrawnAmount, startTime, endTime, cancelable }, index) => (
               <>

@@ -25,6 +25,7 @@ type Stream = {
 
 export function useUpdateStreams() {
   const EXA = useEXA();
+  const esEXA = useEscrowedEXA();
   const { walletAddress } = useWeb3();
   const request = useGraphClient();
 
@@ -32,15 +33,28 @@ export function useUpdateStreams() {
   const [loading, setLoading] = useState<boolean>(true);
 
   const fetchStreams = useCallback(async () => {
-    if (EXA && walletAddress) {
+    if (EXA && walletAddress && esEXA) {
       setLoading(true);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const data = await request<any>(getStreams(EXA.address.toLowerCase(), walletAddress, false), true);
+      const data = await request<any>(
+        getStreams(EXA.address.toLowerCase(), walletAddress, esEXA.address.toLowerCase(), false),
+        true,
+      );
 
-      setActiveStreams(data.streams);
+      const filteredStreams = data.streams.filter(
+        (stream: { startTime: string; duration: string; endTime: string; intactAmount: string }) => {
+          const startTime = Number(stream.startTime);
+          const endTime = Number(stream.endTime);
+          const duration = Number(stream.duration);
+          const intactAmount = BigInt(stream.intactAmount);
+          return startTime + duration === endTime && intactAmount > BigInt(0);
+        },
+      );
+
+      setActiveStreams(filteredStreams);
       setLoading(false);
     }
-  }, [EXA, request, walletAddress]);
+  }, [EXA, esEXA, request, walletAddress]);
 
   useEffect(() => {
     fetchStreams();

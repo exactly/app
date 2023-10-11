@@ -343,8 +343,8 @@ const ActiveStream: FC<ActiveStreamProps> = ({
           <Typography fontSize={14} fontWeight={700}>
             {t('esEXA Vested')}
           </Typography>
-          <Box display="flex" alignItems="center" gap={0.5} justifyContent="space-between">
-            <Box display="flex">
+          <Box display="flex" alignItems="center" gap={0.5}>
+            <Box display="flex" gap={0.5}>
               <Image
                 src={`/img/assets/EXA.svg`}
                 alt="EXA"
@@ -352,7 +352,7 @@ const ActiveStream: FC<ActiveStreamProps> = ({
                 height={20}
                 style={{ maxWidth: '100%', height: 'auto' }}
               />
-              <Typography variant="h6" fontWeight={400} data-testid={`vesting-stream-${tokenId}-vested`}>
+              <Typography fontSize={18} fontWeight={500} data-testid={`vesting-stream-${tokenId}-vested`}>
                 {formatNumber(Number(depositAmount) / 1e18)}
               </Typography>
             </Box>
@@ -373,13 +373,13 @@ const ActiveStream: FC<ActiveStreamProps> = ({
             </Box>
           </Box>
         </Grid>
-        <Divider orientation="vertical" sx={{ borderColor: 'grey.200', my: 0.6 }} flexItem />
+        {!isMobile && <Divider orientation="vertical" sx={{ borderColor: 'grey.200', my: 0.6 }} flexItem />}
         <Grid item xs={12} sm={2.5} display="flex" flexDirection="column" justifyContent="center" gap={0.5}>
           <Typography fontSize={14} fontWeight={700}>
             {t('Reserved EXA')}
           </Typography>
-          <Box display="flex" alignItems="center" gap={0.5} justifyContent="space-between">
-            <Box display="flex">
+          <Box display="flex" alignItems="center" gap={0.5}>
+            <Box display="flex" gap={0.5}>
               <Image
                 src={`/img/assets/EXA.svg`}
                 alt="EXA"
@@ -390,7 +390,7 @@ const ActiveStream: FC<ActiveStreamProps> = ({
               {reserveIsLoading ? (
                 <Skeleton width={30} />
               ) : (
-                <Typography variant="h6" fontWeight={400} data-testid={`vesting-stream-${tokenId}-reserved`}>
+                <Typography fontSize={18} fontWeight={500} data-testid={`vesting-stream-${tokenId}-reserved`}>
                   {formatNumber(Number(reserve ?? 0n) / 1e18)}
                 </Typography>
               )}
@@ -406,20 +406,20 @@ const ActiveStream: FC<ActiveStreamProps> = ({
                 sx={{ cursor: 'pointer' }}
               >
                 <Typography fontFamily="IBM Plex Mono" fontSize={12} fontWeight={500} textTransform="uppercase">
-                  {t('Whitdraw')}
+                  {progress === 100 ? t('Whitdraw') : t('Cancel')}
                 </Typography>
               </Box>
             )}
           </Box>
           {modalOpen && modalContent && <Modal open={modalOpen} onClose={onClose} content={modalContent} />}
         </Grid>
-        <Divider orientation="vertical" sx={{ borderColor: 'grey.200', my: 0.6 }} flexItem />
-        <Grid item xs={12} sm display="flex" flexDirection="column" justifyContent="center" gap={0.5}>
-          <Typography fontSize={14} fontWeight={700}>
-            {t('Claimable EXA')}
-          </Typography>
-          <Box display="flex" alignItems="center" gap={0.5} justifyContent="space-between">
-            <Box display="flex" alignItems="center">
+        {!isMobile && <Divider orientation="vertical" sx={{ borderColor: 'grey.200', my: 0.6 }} flexItem />}
+        <Grid item xs sm display="flex" flexDirection="column" justifyContent="center" gap={0.5}>
+          <Box display="flex" flexDirection="column" gap={0.5} justifyContent="space-between">
+            <Typography fontSize={14} fontWeight={700}>
+              {t('Claimable EXA')}
+            </Typography>
+            <Box display="flex" alignItems="center" gap={0.5}>
               <Image
                 src={`/img/assets/EXA.svg`}
                 alt="EXA"
@@ -430,7 +430,7 @@ const ActiveStream: FC<ActiveStreamProps> = ({
               {withdrawableIsLoading ? (
                 <Skeleton width={30} />
               ) : (
-                <Typography variant="h6" fontWeight={400} data-testid={`vesting-stream-${tokenId}-withdrawable`}>
+                <Typography fontSize={18} fontWeight={500} data-testid={`vesting-stream-${tokenId}-withdrawable`}>
                   {formatNumber(Number(withdrawable) / 1e18)}
                 </Typography>
               )}
@@ -438,36 +438,36 @@ const ActiveStream: FC<ActiveStreamProps> = ({
                 / {formatNumber(Number(depositAmount - withdrawnAmount) / 1e18)}
               </Typography>
             </Box>
-            <Box display="flex">
-              {impersonateActive ? (
-                <Button fullWidth variant="contained">
-                  {t('Exit Read-Only Mode')}
-                </Button>
-              ) : chain && chain.id !== displayNetwork.id ? (
-                <LoadingButton
-                  fullWidth
-                  onClick={() => switchNetwork?.(displayNetwork.id)}
-                  variant="contained"
-                  loading={switchIsLoading}
-                >
-                  {t('Please switch to {{network}} network', { network: displayNetwork.name })}
-                </LoadingButton>
-              ) : (
-                <>
-                  <LoadingButton
-                    fullWidth
-                    variant="contained"
-                    onClick={handleClick}
-                    loading={loading}
-                    data-testid={`vesting-stream-${tokenId}-claim`}
-                  >
-                    {progress === 100 ? t('Claim & Whitdraw EXA') : t('Claim EXA')}
-                  </LoadingButton>
-                </>
-              )}
-            </Box>
           </Box>
         </Grid>
+        <Box display="flex" alignItems="center">
+          {impersonateActive ? (
+            <Button fullWidth variant="contained">
+              {t('Exit Read-Only Mode')}
+            </Button>
+          ) : chain && chain.id !== displayNetwork.id ? (
+            <LoadingButton
+              fullWidth
+              onClick={() => switchNetwork?.(displayNetwork.id)}
+              variant="contained"
+              loading={switchIsLoading}
+            >
+              {t('Please switch to {{network}} network', { network: displayNetwork.name })}
+            </LoadingButton>
+          ) : (
+            <>
+              <LoadingButton
+                fullWidth
+                variant="contained"
+                onClick={handleClick}
+                loading={loading}
+                data-testid={`vesting-stream-${tokenId}-claim`}
+              >
+                {t('Whitdraw EXA')}
+              </LoadingButton>
+            </>
+          )}
+        </Box>
       </Grid>
 
       <Box display="flex" justifyContent="space-between">
