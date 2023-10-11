@@ -168,6 +168,10 @@ function VestingInput({ refetch }: Props) {
     return [formatEther(_reserve), _reserve > exaBalance];
   }, [reserveRatio, qty, exaBalance]);
 
+  const insuficentFunds = useMemo(() => {
+    return parseEther(qty) > (balance || 0n) || !qty || moreThanBalance;
+  }, [balance, moreThanBalance, qty]);
+
   const sign = useCallback(async () => {
     if (!walletAddress || reserveRatio === undefined || !exa || !escrowedEXA) return;
 
@@ -273,7 +277,7 @@ function VestingInput({ refetch }: Props) {
             p: 1,
             px: 2,
             alignItems: 'center',
-            zIndex: 420,
+            zIndex: 69,
             position: 'relative',
             backgroundColor: 'components.bg',
           }}
@@ -384,8 +388,9 @@ function VestingInput({ refetch }: Props) {
             loading={isLoading}
             onClick={submit}
             data-testid="vesting-submit"
+            disabled={insuficentFunds}
           >
-            {t('Vest esEXA')}
+            {insuficentFunds ? t('Insuficent esEXA balance') : t('Vest esEXA')}
           </LoadingButton>
         )}
       </Box>

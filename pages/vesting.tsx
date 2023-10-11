@@ -3,7 +3,7 @@ import type { NextPage } from 'next';
 
 import { usePageView } from 'hooks/useAnalytics';
 import { useTranslation } from 'react-i18next';
-import { Box, Button, Divider, Grid, Typography } from '@mui/material';
+import { Box, Button, Divider, Grid, Skeleton, Typography } from '@mui/material';
 import VestingInput from 'components/VestingInput';
 import ActiveStream from 'components/ActiveStream';
 import { useUpdateStreams, useEscrowedEXA } from 'hooks/useEscrowedEXA';
@@ -127,7 +127,7 @@ const Vesting: NextPage = () => {
         </Typography>
       </Box>
 
-      {streamsLoading && <Box>loading...</Box>}
+      {streamsLoading && <Skeleton height={150} />}
 
       {activeStreams.length > 0 && !streamsLoading && (
         <Box

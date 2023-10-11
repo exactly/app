@@ -33,11 +33,11 @@ export function useUpdateStreams() {
   const [loading, setLoading] = useState<boolean>(true);
 
   const fetchStreams = useCallback(async () => {
-    if (EXA && walletAddress && esEXA) {
+    if (EXA && esEXA) {
       setLoading(true);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const data = await request<any>(
-        getStreams(EXA.address.toLowerCase(), walletAddress, esEXA.address.toLowerCase(), false),
+        getStreams(EXA.address.toLowerCase(), walletAddress || zeroAddress, esEXA.address.toLowerCase(), false),
         true,
       );
 
