@@ -146,7 +146,7 @@ function Navbar() {
           <Link href={{ pathname: '/', query }}>
             <Box display="flex" alignItems="center" mr={2}>
               <Image
-                src={palette.mode === 'light' ? '/img/logo.png' : '/img/logo-white.png'}
+                src={palette.mode === 'light' ? '/img/logo-black.svg' : '/img/logo-white.svg'}
                 alt="Exactly Protocol Logo"
                 width={30}
                 height={30}
