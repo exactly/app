@@ -26,9 +26,16 @@ const Governance: NextPage = () => {
         </Typography>
         <Typography>
           <Trans
-            i18nKey="All EXA token-holders will have voting power, enabling them to actively participate in discussions, propose enhancements, and cast votes to shape the protocol's evolution. More information will soon be available on our <1>docs</1>."
+            i18nKey="All EXA token-holders will have voting power, enabling them to actively participate in discussions, propose enhancements, and cast votes to shape the protocol's evolution. More information in our docs <1>docs</1>."
             components={{
-              1: <a href="https://docs.exact.ly" style={{ textDecoration: 'underline' }}></a>,
+              1: (
+                <a
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  href="https://docs.exact.ly/governance/exactly-protocol-governance"
+                  style={{ textDecoration: 'underline' }}
+                ></a>
+              ),
             }}
           />
         </Typography>
