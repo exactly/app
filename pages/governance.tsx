@@ -39,7 +39,19 @@ const Governance: NextPage = () => {
             }}
           />
         </Typography>
+
+        <Box
+          display="flex"
+          flexDirection="column"
+          p={4}
+          gap={4}
+          borderRadius="8px"
+          bgcolor={({ palette }) => (palette.mode === 'dark' ? 'grey.100' : 'white')}
+        >
+          <Proposals />
+        </Box>
       </Box>
+
       {isConnected || impersonateActive ? (
         <Box
           display="flex"
@@ -51,7 +63,6 @@ const Governance: NextPage = () => {
         >
           {mTree.canClaim && <Claimable amount={mTree.amount} proof={mTree.proof} />}
           <Delegation />
-          <Proposals />
         </Box>
       ) : (
         <ConnectWalletGovernance />

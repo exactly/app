@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Box, Button, Divider, Typography } from '@mui/material';
+import { Box, Button, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { optimism } from 'wagmi/chains';
 import { useWeb3 } from 'hooks/useWeb3';
@@ -15,22 +15,19 @@ const Proposals = () => {
 
   return (
     <Box display="flex" flexDirection="column" gap={4}>
-      <Divider flexItem />
-      <Box display="flex" flexDirection="column" gap={4}>
-        <Box display="flex" flexDirection="column" gap={3}>
-          <Typography variant="h6">{t('Proposals')}</Typography>
-          <Typography fontSize={14}>
-            {t(
-              "Use your voting power to participate in discussions, propose enhancements, and cast votes to shape the Protocol's evolution on Snapchat",
-            )}
-          </Typography>
-        </Box>
-        <a href={spaceURL} target="_blank" rel="noreferrer noopener">
-          <Button variant="contained" fullWidth>
-            {t('View Proposals')}
-          </Button>
-        </a>
+      <Box display="flex" flexDirection="column" gap={3}>
+        <Typography variant="h6">{t('Proposals')}</Typography>
+        <Typography fontSize={14}>
+          {t(
+            "Use your voting power to participate in discussions, propose enhancements, and cast votes to shape the Protocol's evolution on Snapchat",
+          )}
+        </Typography>
       </Box>
+      <a href={spaceURL} target="_blank" rel="noreferrer noopener">
+        <Button variant="contained" fullWidth>
+          {t('View Proposals')}
+        </Button>
+      </a>
     </Box>
   );
 };
