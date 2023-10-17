@@ -144,6 +144,31 @@ export default function (page: Page) {
     );
   };
 
+  const cancelStream = async (streamId: number) => {
+    const button = page.getByTestId(`vesting-stream-${streamId}-cancel`);
+    await expect(button).not.toBeDisabled();
+    await button.click();
+
+    const confirm = page.getByTestId(`vesting-stream-${streamId}-cancel-submit`);
+    await expect(confirm).not.toBeDisabled();
+    await confirm.click();
+  };
+
+  const waitForStreamCancelTransaction = async (streamId: number) => {
+    await page.waitForFunction(
+      (id: number) => {
+        const button = document.querySelector(`[data-testid="vesting-stream-${id}-cancel-submit"]`);
+        if (!button) return true;
+        return !button.classList.contains('MuiLoadingButton-loading');
+      },
+      streamId,
+      {
+        timeout: 30_000,
+        polling: 1_000,
+      },
+    );
+  };
+
   return {
     waitForPageToBeReady,
     checkBalanceAvailable,
@@ -160,5 +185,7 @@ export default function (page: Page) {
     waitForClaimStreamTransaction,
     claimAllStreams,
     waitForClaimAllTransaction,
+    cancelStream,
+    waitForStreamCancelTransaction,
   };
 }

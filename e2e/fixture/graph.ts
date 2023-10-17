@@ -11,6 +11,9 @@ function graph(page: Page) {
     depositAmount: string;
     withdrawnAmount: string;
     canceled: boolean;
+    cancelable: boolean;
+    intactAmount: string;
+    duration: string;
   };
 
   const streams = async (body: Stream[]) => {

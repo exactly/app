@@ -18,7 +18,7 @@ import {
   useMediaQuery,
   useTheme,
 } from '@mui/material';
-import React, { FC, ReactNode, useCallback, useMemo, useRef, useState } from 'react';
+import React, { FC, type PropsWithChildren, useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { waitForTransaction } from '@wagmi/core';
 import { LoadingButton } from '@mui/lab';
@@ -99,7 +99,7 @@ const Transition = React.forwardRef(function Transition(
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-function Modal({ open, onClose, content }: { open: boolean; onClose: () => void; content: ReactNode }) {
+function Modal({ open, onClose, children }: PropsWithChildren<{ open: boolean; onClose: () => void }>) {
   const { breakpoints } = useTheme();
   const isMobile = useMediaQuery(breakpoints.down('sm'));
 
@@ -117,7 +117,7 @@ function Modal({ open, onClose, content }: { open: boolean; onClose: () => void;
       }}
       TransitionComponent={isMobile ? Transition : undefined}
       fullScreen={isMobile}
-      sx={isMobile ? { top: 'auto' } : { backdropFilter: content ? 'blur(1.5px)' : '' }}
+      sx={isMobile ? { top: 'auto' } : { backdropFilter: 'blur(1.5px)' }}
     >
       <IconButton
         aria-label="close"
@@ -132,7 +132,7 @@ function Modal({ open, onClose, content }: { open: boolean; onClose: () => void;
       >
         <CloseIcon sx={{ fontSize: 19 }} />
       </IconButton>
-      {content}
+      {children}
     </Dialog>
   );
 }
@@ -168,12 +168,12 @@ const ActiveStream: FC<ActiveStreamProps> = ({
   const escrowedEXA = useEscrowedEXA();
   const [loading, setLoading] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
-  const [modalContent, setModalContent] = useState<ReactNode | null>(null);
+  const [modalContent, setModalContent] = useState<'nft' | 'cancel'>('nft');
   const { breakpoints } = useTheme();
   const isMobile = useMediaQuery(breakpoints.down('sm'));
   const { data: nft } = useSablierV2NftDescriptorTokenUri(BigInt(tokenId));
 
-  const WhitdrawAndCancel = () => {
+  const WithdrawAndCancel = () => {
     return (
       <>
         <DialogTitle
@@ -187,7 +187,7 @@ const ActiveStream: FC<ActiveStreamProps> = ({
             }}
           >
             <Typography fontWeight={700} fontSize={24}>
-              {t('Whitdraw Reserved EXA')}
+              {t('Withdraw Reserved EXA')}
             </Typography>
           </Box>
         </DialogTitle>
@@ -222,11 +222,11 @@ const ActiveStream: FC<ActiveStreamProps> = ({
                     fullWidth
                     variant="contained"
                     color="error"
-                    onClick={handleWithdraw}
+                    onClick={handleCancel}
                     loading={loading}
-                    data-testid={`vesting-stream-${tokenId}-claim`}
+                    data-testid={`vesting-stream-${tokenId}-cancel-submit`}
                   >
-                    {t('Whitdraw and Cancel Stream')}
+                    {t('Withdraw and Cancel Stream')}
                   </LoadingButton>
                 </>
               )}
@@ -266,12 +266,12 @@ const ActiveStream: FC<ActiveStreamProps> = ({
     setModalOpen(false);
   }, []);
 
-  function handleContent(contentComponent: ReactNode) {
-    setModalContent(contentComponent);
+  const handleContent = useCallback((content: 'nft' | 'cancel') => {
     setModalOpen(true);
-  }
+    setModalContent(content);
+  }, []);
 
-  const handleWithdraw = useCallback(async () => {
+  const handleCancel = useCallback(async () => {
     if (!escrowedEXA || !opts) return;
     setLoading(true);
     try {
@@ -363,7 +363,7 @@ const ActiveStream: FC<ActiveStreamProps> = ({
               borderRadius="2px"
               alignItems="center"
               onClick={() => {
-                handleContent(NFT());
+                handleContent('nft');
               }}
               sx={{ cursor: 'pointer' }}
             >
@@ -402,16 +402,21 @@ const ActiveStream: FC<ActiveStreamProps> = ({
                 px={0.5}
                 borderRadius="2px"
                 alignItems="center"
-                onClick={() => (progress === 100 ? handleClick() : handleContent(WhitdrawAndCancel()))}
+                data-testid={
+                  progress === 100 ? `vesting-stream-${tokenId}-withdraw` : `vesting-stream-${tokenId}-cancel`
+                }
+                onClick={() => (progress === 100 ? handleClick() : handleContent('cancel'))}
                 sx={{ cursor: 'pointer' }}
               >
                 <Typography fontFamily="IBM Plex Mono" fontSize={12} fontWeight={500} textTransform="uppercase">
-                  {progress === 100 ? t('Whitdraw') : t('Cancel')}
+                  {progress === 100 ? t('Withdraw') : t('Cancel')}
                 </Typography>
               </Box>
             )}
           </Box>
-          {modalOpen && modalContent && <Modal open={modalOpen} onClose={onClose} content={modalContent} />}
+          <Modal open={modalOpen} onClose={onClose}>
+            {modalContent === 'nft' ? <NFT /> : <WithdrawAndCancel />}
+          </Modal>
         </Grid>
         {!isMobile && <Divider orientation="vertical" sx={{ borderColor: 'grey.200', my: 0.6 }} flexItem />}
         <Grid item xs sm display="flex" flexDirection="column" justifyContent="center" gap={0.5}>
@@ -463,7 +468,7 @@ const ActiveStream: FC<ActiveStreamProps> = ({
                 loading={loading}
                 data-testid={`vesting-stream-${tokenId}-claim`}
               >
-                {t('Whitdraw EXA')}
+                {t('Withdraw EXA')}
               </LoadingButton>
             </>
           )}
