@@ -32,7 +32,12 @@ import { useTranslation, Trans } from 'react-i18next';
 import { LoadingButton } from '@mui/lab';
 import Image from 'next/image';
 import { useEXA, useEXABalance, useEXAPrice } from 'hooks/useEXA';
-import { useEscrowedEXA, useEscrowedEXABalance, useEscrowedEXAReserveRatio } from 'hooks/useEscrowedEXA';
+import {
+  useEscrowedEXA,
+  useEscrowedEXABalance,
+  useEscrowedEXAReserveRatio,
+  useEscrowedEXAVestingPeriod,
+} from 'hooks/useEscrowedEXA';
 import formatNumber from 'utils/formatNumber';
 import { WEI_PER_ETHER } from 'utils/const';
 import { toPercentage } from 'utils/utils';
@@ -140,6 +145,7 @@ function VestingInput({ refetch }: Props) {
   const { data: balance, isLoading: balanceIsLoading } = useEscrowedEXABalance();
   const { data: exaBalance } = useEXABalance();
   const { data: reserveRatio } = useEscrowedEXAReserveRatio();
+  const { data: vestingPeriod } = useEscrowedEXAVestingPeriod();
   const EXAPrice = useEXAPrice();
   const { impersonateActive, chain: displayNetwork, isConnected, opts, walletAddress } = useWeb3();
   const { isLoading: switchIsLoading, switchNetwork } = useSwitchNetwork();
@@ -216,7 +222,16 @@ function VestingInput({ refetch }: Props) {
   }, [displayNetwork.id, escrowedEXA, exa, opts, qty, reserveRatio, signTypedDataAsync, walletAddress]);
 
   const submit = useCallback(async () => {
-    if (!walletAddress || reserveRatio === undefined || !escrowedEXA || !exa || !opts || !qty) return;
+    if (
+      !walletAddress ||
+      reserveRatio === undefined ||
+      vestingPeriod === undefined ||
+      !escrowedEXA ||
+      !exa ||
+      !opts ||
+      !qty
+    )
+      return;
 
     setIsLoading(true);
     let hash;
@@ -224,7 +239,7 @@ function VestingInput({ refetch }: Props) {
       const amount = parseEther(qty);
       const res = (amount * reserveRatio) / WEI_PER_ETHER;
 
-      let args: Params<'vest'> = [amount, walletAddress] as const;
+      let args: Params<'vest'> = [amount, walletAddress, reserveRatio, BigInt(vestingPeriod)] as const;
 
       if (await isContract(walletAddress)) {
         const allowance = await exa.read.allowance([walletAddress, escrowedEXA.address]);
@@ -258,7 +273,7 @@ function VestingInput({ refetch }: Props) {
     } finally {
       setIsLoading(false);
     }
-  }, [walletAddress, reserveRatio, escrowedEXA, exa, opts, qty, isContract, sign]);
+  }, [walletAddress, reserveRatio, vestingPeriod, escrowedEXA, exa, opts, qty, isContract, sign]);
 
   const onClose = useCallback(() => {
     setTx(undefined);
@@ -285,7 +300,7 @@ function VestingInput({ refetch }: Props) {
           <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <Box display="flex" gap={1} alignItems="center" justifyContent="center">
-                <Image src={`/img/assets/EXA.svg`} alt="" width={24} height={24} />
+                <Image src={`/img/assets/esEXA.svg`} alt="" width={24} height={24} />
                 <Typography fontWeight={700} fontSize={19} color="grey.900">
                   esEXA
                 </Typography>

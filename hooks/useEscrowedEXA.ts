@@ -1,6 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Address, zeroAddress } from 'viem';
-import { escrowedExaABI, useEscrowedExaBalanceOf, useEscrowedExaReserveRatio, useEscrowedExaReserves } from 'types/abi';
+import {
+  escrowedExaABI,
+  useEscrowedExaBalanceOf,
+  useEscrowedExaReserveRatio,
+  useEscrowedExaReserves,
+  useEscrowedExaVestingPeriod,
+} from 'types/abi';
 import useContract from './useContract';
 import { useEXA } from './useEXA';
 import useGraphClient from './useGraphClient';
@@ -92,6 +98,17 @@ export const useEscrowedEXAReserveRatio = () => {
   const esEXA = useEscrowedEXA();
 
   return useEscrowedExaReserveRatio({
+    chainId: chain.id,
+    address: esEXA?.address,
+    staleTime: 30_000,
+  });
+};
+
+export const useEscrowedEXAVestingPeriod = () => {
+  const { chain } = useWeb3();
+  const esEXA = useEscrowedEXA();
+
+  return useEscrowedExaVestingPeriod({
     chainId: chain.id,
     address: esEXA?.address,
     staleTime: 30_000,
