@@ -346,7 +346,7 @@ const ActiveStream: FC<ActiveStreamProps> = ({
           <Box display="flex" alignItems="center" gap={0.5}>
             <Box display="flex" gap={0.5}>
               <Image
-                src={`/img/assets/EXA.svg`}
+                src={`/img/assets/esEXA.svg`}
                 alt="EXA"
                 width={20}
                 height={20}
