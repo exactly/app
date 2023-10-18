@@ -174,7 +174,7 @@ function VestingInput({ refetch }: Props) {
     return [formatEther(_reserve), _reserve > exaBalance];
   }, [reserveRatio, qty, exaBalance]);
 
-  const insuficentFunds = useMemo(() => {
+  const insufficientFunds = useMemo(() => {
     return parseEther(qty) > (balance || 0n) || !qty || moreThanBalance;
   }, [balance, moreThanBalance, qty]);
 
@@ -403,9 +403,9 @@ function VestingInput({ refetch }: Props) {
             loading={isLoading}
             onClick={submit}
             data-testid="vesting-submit"
-            disabled={insuficentFunds}
+            disabled={insufficientFunds}
           >
-            {insuficentFunds ? t('Insuficent esEXA balance') : t('Vest esEXA')}
+            {insufficientFunds ? t('Insufficient esEXA balance') : t('Vest esEXA')}
           </LoadingButton>
         )}
       </Box>
