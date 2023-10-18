@@ -36,20 +36,14 @@ export default async function (req: NextApiRequest, res: NextApiResponse) {
     transport: http(`https://opt-mainnet.g.alchemy.com/v2/${PRIVATE_ALCHEMY_API_KEY}`),
   });
 
-  const [{ result: totalSupply }, ...balancesResult] = await client.multicall({
+  const [{ result: decimals }, { result: totalSupply }, ...balancesResult] = await client.multicall({
     contracts: [
-      {
-        ...exa,
-        functionName: 'totalSupply',
-      },
-      ...EXCLUDED_ADDRESSES.map((address) => ({
-        ...exa,
-        functionName: 'balanceOf',
-        args: [address],
-      })),
+      { ...exa, functionName: 'decimals' },
+      { ...exa, functionName: 'totalSupply' },
+      ...EXCLUDED_ADDRESSES.map((address) => ({ ...exa, functionName: 'balanceOf', args: [address] })),
     ],
   });
   const nonCirculatingSupply = balancesResult.reduce((total, { result }) => total + (result as bigint), 0n);
   const circulatingSupply = (totalSupply as bigint) - nonCirculatingSupply;
-  res.status(200).send(circulatingSupply.toString());
+  res.status(200).send(String(Number(circulatingSupply) / 10 ** Number(decimals)));
 }
