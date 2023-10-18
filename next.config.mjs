@@ -17,10 +17,11 @@ export default withSentryConfig(
         headers: [
           { key: 'X-DNS-Prefetch-Control', value: 'on' },
           { key: 'X-XSS-Protection', value: '1; mode=block' },
+          { key: 'Strict-Transport-Security', value: 'max-age=604800' },
           { key: 'Content-Security-Policy', value: 'frame-ancestors https://app.safe.global' },
-          { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(), interest-cohort=()' },
           { key: 'X-Content-Type-Options', value: 'nosniff' },
           { key: 'Referrer-Policy', value: 'strict-origin' },
+          { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(), interest-cohort=()' },
           { key: 'Access-Control-Allow-Origin', value: '*' },
           { key: 'Access-Control-Allow-Methods', value: 'GET' },
           { key: 'Access-Control-Allow-Headers', value: 'X-Requested-With, content-type, Authorization' },
