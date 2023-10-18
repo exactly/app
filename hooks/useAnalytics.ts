@@ -16,8 +16,19 @@ import { formatUnits } from 'viem';
 import { isBridgeInput } from 'components/BridgeContent/utils';
 import { BridgeInput } from 'types/Bridge';
 import { Operation } from 'types/Operation';
+import { VestInput } from 'types/Vest';
+import { isVestInput } from 'components/vesting/utils';
 
-type ItemVariant = 'operation' | 'approve' | 'enterMarket' | 'exitMarket' | 'claimAll' | 'claim' | 'roll' | 'bridge';
+type ItemVariant =
+  | 'operation'
+  | 'approve'
+  | 'enterMarket'
+  | 'exitMarket'
+  | 'claimAll'
+  | 'claim'
+  | 'roll'
+  | 'bridge'
+  | 'vest';
 type TrackItem = { eventName: string; variant: ItemVariant };
 type OperationInput = { operation: Operation; symbol: string; qty: string };
 
@@ -116,7 +127,19 @@ function useAnalyticsContext(assetSymbol?: string) {
     };
   }, []);
 
-  return { appContext: useSnapshot(appContext), itemContext, rolloverContext, bridgeContext };
+  const vestContext = useCallback((input: VestInput) => {
+    const operationLabel = 'vest';
+
+    return {
+      item_id: operationLabel,
+      item_name: operationLabel,
+      symbol: input.destinationToken,
+      quantity: input.destinationToken,
+      ...input,
+    };
+  }, []);
+
+  return { appContext: useSnapshot(appContext), itemContext, rolloverContext, bridgeContext, vestContext };
 }
 
 export function usePageView(pathname: string, title: string) {
@@ -139,7 +162,7 @@ export default function useAnalytics({
   rewards,
   operationInput,
 }: { symbol?: string; rewards?: Rewards; operationInput?: OperationInput } = {}) {
-  const { appContext, itemContext, rolloverContext, bridgeContext } = useAnalyticsContext(symbol);
+  const { appContext, itemContext, rolloverContext, bridgeContext, vestContext } = useAnalyticsContext(symbol);
   const { isDisable } = useActionButton();
 
   const trackWithContext = useCallback(
@@ -315,6 +338,10 @@ export default function useAnalytics({
     (eventName: string, input: BridgeInput) => trackWithContext(eventName, { items: [bridgeContext(input)] }),
     [bridgeContext, trackWithContext],
   );
+  const trackVest = useCallback(
+    (eventName: string, input: VestInput) => trackWithContext(eventName, { items: [vestContext(input)] }),
+    [trackWithContext, vestContext],
+  );
 
   const buildTransactionTrack = useCallback(
     (variant: ItemVariant = 'operation', eventName: string, input?: object) => {
@@ -331,12 +358,18 @@ export default function useAnalytics({
           }
           break;
         }
+        case 'vest': {
+          if (isVestInput(input)) {
+            trackVest(eventName, input);
+          }
+          break;
+        }
         default: {
           trackItem({ eventName, variant });
         }
       }
     },
-    [trackBridge, trackItem, trackRollover],
+    [trackBridge, trackItem, trackRollover, trackVest],
   );
 
   const addToCart = useCallback(

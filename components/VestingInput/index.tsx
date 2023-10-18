@@ -46,6 +46,7 @@ import useIsContract from 'hooks/useIsContract';
 import { gasLimit } from 'utils/gas';
 import { Transaction } from 'types/Transaction';
 import LoadingTransaction from 'components/common/modal/Loading';
+import useAnalytics from 'hooks/useAnalytics';
 
 type Params<T extends ExtractAbiFunctionNames<typeof escrowedExaABI>> = AbiParametersToPrimitiveTypes<
   ExtractAbiFunction<typeof escrowedExaABI, T>['inputs']
@@ -153,6 +154,7 @@ function VestingInput({ refetch }: Props) {
   const { signTypedDataAsync } = useSignTypedData();
   const [isLoading, setIsLoading] = useState(false);
   const [tx, setTx] = useState<Transaction>();
+  const { transaction } = useAnalytics();
 
   const [qty, setQty] = useState<string>('');
 
@@ -234,11 +236,17 @@ function VestingInput({ refetch }: Props) {
       return;
 
     setIsLoading(true);
+    const amount = parseEther(qty);
+    const res = (amount * reserveRatio) / WEI_PER_ETHER;
+
+    const vestInput = {
+      chainId: displayNetwork?.id,
+      amount: amount,
+      reserve: res,
+    };
+    transaction.addToCart('vest', vestInput);
     let hash;
     try {
-      const amount = parseEther(qty);
-      const res = (amount * reserveRatio) / WEI_PER_ETHER;
-
       let args: Params<'vest'> = [amount, walletAddress, reserveRatio, BigInt(vestingPeriod)] as const;
 
       if (await isContract(walletAddress)) {
@@ -261,19 +269,34 @@ function VestingInput({ refetch }: Props) {
         hash = await escrowedEXA.write.vest(args, { ...opts, gasLimit: gasLimit(gas) });
       }
 
+      transaction.beginCheckout('vest', vestInput);
+
       setTx({ status: 'processing', hash });
 
       const { status, transactionHash } = await waitForTransaction({ hash });
 
       setTx({ status: status === 'success' ? 'success' : 'error', hash: transactionHash });
 
-      await waitForTransaction({ hash });
+      if (status) transaction.purchase('vest', vestInput);
     } catch (e) {
+      transaction.removeFromCart('vest', vestInput);
       if (hash) setTx({ status: 'error', hash });
     } finally {
       setIsLoading(false);
     }
-  }, [walletAddress, reserveRatio, vestingPeriod, escrowedEXA, exa, opts, qty, isContract, sign]);
+  }, [
+    walletAddress,
+    reserveRatio,
+    vestingPeriod,
+    escrowedEXA,
+    exa,
+    opts,
+    qty,
+    displayNetwork?.id,
+    transaction,
+    isContract,
+    sign,
+  ]);
 
   const onClose = useCallback(() => {
     setTx(undefined);
