@@ -298,6 +298,12 @@ function VestingInput({ refetch }: Props) {
     sign,
   ]);
 
+  const onMax = useCallback(() => {
+    if (balance) {
+      setQty(formatEther(balance || 0n));
+    }
+  }, [balance]);
+
   const onClose = useCallback(() => {
     setTx(undefined);
     setQty('');
@@ -351,9 +357,32 @@ function VestingInput({ refetch }: Props) {
                 balanceIsLoading ? (
                   <Skeleton variant="text" width={80} />
                 ) : (
-                  <Typography color="figma.grey.500" fontSize={12} fontWeight={500} data-testid="vesting-balance">
-                    {t('Available')}: {formatNumber(formatEther(balance || 0n))} esEXA
-                  </Typography>
+                  <Box display="flex">
+                    <Typography
+                      color="figma.grey.500"
+                      fontSize={12}
+                      fontWeight={500}
+                      alignSelf="center"
+                      data-testid="vesting-balance"
+                    >
+                      {t('Available')}: {formatNumber(formatEther(balance || 0n))}
+                    </Typography>
+                    <Button
+                      onClick={onMax}
+                      sx={{
+                        textTransform: 'uppercase',
+                        borderRadius: 1,
+                        p: 0.5,
+                        minWidth: 'fit-content',
+                        height: 'fit-content',
+                        color: 'figma.grey.500',
+                        fontWeight: 600,
+                        fontSize: 12,
+                      }}
+                    >
+                      Max
+                    </Button>
+                  </Box>
                 )
               ) : null}
               <Typography color="figma.grey.500" fontWeight={500} fontSize={13} fontFamily="fontFamilyMonospaced">
