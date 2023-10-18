@@ -62,6 +62,7 @@ const ChainSelector = ({ disabled }: { disabled?: boolean }) => {
   );
 
   if (!chains) return <Skeleton width={100} />;
+  if (disabled) return <ChainOption chain={chain} />;
 
   return (
     <DropdownMenu

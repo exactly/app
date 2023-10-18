@@ -11,6 +11,7 @@ interface Props<T> extends Pick<MenuProps, 'anchorOrigin' | 'transformOrigin'> {
   'data-testid'?: string;
   disabled?: boolean;
   buttonSx?: ButtonProps['sx'];
+  onClick?: () => void;
 }
 
 function InnerButton({ children }: PropsWithChildren) {
@@ -55,6 +56,7 @@ const DropdownMenu = <T,>({
   transformOrigin = { vertical: 'top', horizontal: 'left' },
   disabled = false,
   buttonSx,
+  onClick,
 }: Props<T>) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -75,7 +77,7 @@ const DropdownMenu = <T,>({
         aria-controls={open ? `${id}-menu` : undefined}
         aria-haspopup="true"
         aria-expanded={open ? 'true' : undefined}
-        onClick={handleClick}
+        onClick={onClick || handleClick}
         sx={{ borderRadius: '16px', p: 1, ml: -1, ...buttonSx }}
         data-testid={testId}
         disabled={disabled}

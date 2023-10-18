@@ -68,9 +68,10 @@ type Props = {
   onChange: (asset: AssetBalance) => void;
   asset: AssetBalance;
   disabled?: boolean;
+  onClick?: () => void;
 };
 
-function SocketAssetSelector({ options, onChange, asset, disabled = false }: Props) {
+function SocketAssetSelector({ options, onChange, asset, disabled = false, onClick }: Props) {
   const { t } = useTranslation();
 
   return (
@@ -81,6 +82,7 @@ function SocketAssetSelector({ options, onChange, asset, disabled = false }: Pro
       renderValue={<AssetOption asset={asset} />}
       renderOption={(o: AssetBalance) => <AssetOption option asset={o} />}
       disabled={disabled}
+      onClick={onClick}
     />
   );
 }

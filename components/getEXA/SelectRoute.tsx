@@ -38,9 +38,8 @@ const SelectRoute = () => {
   } = useGetEXA();
   const { t } = useTranslation();
   const { chain: walletChain } = useNetwork();
-  const { connect } = useWeb3();
+  const { connect, walletAddress } = useWeb3();
   const isConnected = !!walletChain;
-  const { walletAddress } = useWeb3();
   const exaPrice = useEXAPrice();
   const nativeSwap = asset?.symbol === 'ETH' && chain?.chainId === optimism.id;
   const { data: exaBalance } = useEXABalance({ watch: true });
@@ -72,7 +71,12 @@ const SelectRoute = () => {
                   {t('Asset')}:
                 </Typography>
                 {assets && asset ? (
-                  <SocketAssetSelector asset={asset} onChange={setAsset} options={assets} disabled={!walletAddress} />
+                  <SocketAssetSelector
+                    asset={asset}
+                    onChange={setAsset}
+                    options={assets}
+                    onClick={walletAddress ? undefined : connect}
+                  />
                 ) : (
                   <Skeleton width={200} />
                 )}
