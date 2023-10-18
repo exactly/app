@@ -27,7 +27,7 @@ function socket(page: Page) {
     },
   };
 
-  type Balances = {
+  type Balance = {
     account: Address;
     balances: {
       symbol: 'ETH' | 'OP';
@@ -35,7 +35,7 @@ function socket(page: Page) {
     }[];
   };
 
-  const balances = async (params: Balances) => {
+  const balances = async (params: Balance) => {
     await page.route(/api\.socket\.tech\/v2\/balances/, async (route) => {
       const json = {
         success: true,
