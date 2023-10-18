@@ -5,14 +5,13 @@ import 'i18n';
 
 import React from 'react';
 import Head from 'next/head';
-import { Web3Modal } from '@web3modal/react';
 import { WagmiConfig } from 'wagmi';
 import type { AppProps } from 'next/app';
-import { Box, useTheme } from '@mui/material';
+import { Box } from '@mui/material';
 
 import { AccountDataProvider } from 'contexts/AccountDataContext';
 import { ThemeProvider } from 'contexts/ThemeContext';
-import { wagmi, walletConnectId, web3modal, isE2E } from 'utils/client';
+import { wagmi, isE2E } from 'utils/client';
 import Footer from 'components/Footer';
 import Navbar from 'components/Navbar';
 import { globals } from 'styles/theme';
@@ -30,20 +29,6 @@ import NewsModal from 'components/NewsModal';
 
 const { maxWidth } = globals;
 
-const Web3ModalWrapper = () => {
-  const { palette } = useTheme();
-  return (
-    <Web3Modal
-      projectId={walletConnectId}
-      ethereumClient={web3modal}
-      themeMode={palette.mode}
-      themeVariables={{ '--w3m-background-color': '#0D0E0F' }}
-      walletImages={{ safe: '/img/wallets/safe.png' }}
-      chainImages={{ 1: '/img/networks/1.svg' }}
-    />
-  );
-};
-
 const Modals = () => (
   <>
     <OperationsModal />
@@ -52,9 +37,7 @@ const Modals = () => (
     <LeveragerModal />
     <StakingModal />
     <FaucetModal />
-    <Web3ModalWrapper />
     {!isE2E && <NewsModal />}
-    {!isE2E && <Web3ModalWrapper />}
   </>
 );
 

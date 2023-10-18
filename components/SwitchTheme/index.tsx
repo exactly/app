@@ -2,6 +2,7 @@ import React, { FC } from 'react';
 import { styled } from '@mui/material/styles';
 import Switch, { type Props } from 'components/Switch';
 import { useCustomTheme } from 'contexts/ThemeContext';
+import { useWeb3ModalTheme } from '@web3modal/wagmi/react';
 
 const StyledSwitch = styled((props: Props) => (
   <Switch focusVisibleClassName=".Mui-focusVisible" disableRipple {...props} />
@@ -40,7 +41,18 @@ const StyledSwitch = styled((props: Props) => (
 
 const SwitchTheme: FC<Props> = (props) => {
   const { theme, changeTheme } = useCustomTheme();
-  return <StyledSwitch {...props} checked={theme === 'light'} onChange={changeTheme} />;
+  const { setThemeMode } = useWeb3ModalTheme();
+  return (
+    <StyledSwitch
+      {...props}
+      checked={theme === 'light'}
+      onChange={(e) => {
+        const light = e.target.checked;
+        setThemeMode(light ? 'light' : 'dark');
+        changeTheme();
+      }}
+    />
+  );
 };
 
 export default SwitchTheme;

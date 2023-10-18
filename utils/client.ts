@@ -1,11 +1,17 @@
-import { EthereumClient, w3mConnectors, w3mProvider } from '@web3modal/ethereum';
 import { createConfig, configureChains, ChainProviderFn, Chain, createStorage, Address } from 'wagmi';
+import { optimism } from 'wagmi/chains';
 import * as wagmiChains from 'wagmi/chains';
 import { jsonRpcProvider } from 'wagmi/providers/jsonRpc';
 import { alchemyProvider } from 'wagmi/providers/alchemy';
 import { publicProvider } from 'wagmi/providers/public';
 import { SafeConnector } from 'wagmi/connectors/safe';
-import { optimism } from 'wagmi/chains';
+import { CoinbaseWalletConnector } from 'wagmi/connectors/coinbaseWallet';
+import { LedgerConnector } from 'wagmi/connectors/ledger';
+import { InjectedConnector } from 'wagmi/connectors/injected';
+import { WalletConnectConnector } from 'wagmi/connectors/walletConnect';
+
+import { createWeb3Modal } from '@web3modal/wagmi/react';
+import { walletConnectProvider } from '@web3modal/wagmi';
 
 import E2EConnector from './connectors';
 
@@ -34,7 +40,7 @@ const providers: ChainProviderFn<Chain>[] =
     : [
         ...(alchemyKey ? [alchemyProvider({ apiKey: alchemyKey })] : []),
         publicProvider(),
-        w3mProvider({ projectId: walletConnectId }),
+        walletConnectProvider({ projectId: walletConnectId }),
       ];
 
 const { chains, publicClient } = configureChains<Chain>(sortedChains, providers);
@@ -49,10 +55,32 @@ export const wagmi = createConfig({
   connectors: [
     ...(isE2E && e2e
       ? [new E2EConnector({ chains, ...e2e })]
-      : [...w3mConnectors({ projectId: walletConnectId, chains }), new SafeConnector({ chains })]),
+      : [
+          new InjectedConnector({ chains, options: { shimDisconnect: true } }),
+          new CoinbaseWalletConnector({
+            chains,
+            options: {
+              appName: 'Exactly Protocol',
+              appLogoUrl: 'https://app.exact.ly/img/logo-black.svg',
+              chainId: defaultChain.id,
+            },
+          }),
+          new WalletConnectConnector({ chains, options: { projectId: walletConnectId, showQrModal: false } }),
+          new SafeConnector({ chains }),
+          new LedgerConnector({ chains, options: { walletConnectVersion: 2, projectId: walletConnectId } }),
+        ]),
   ],
   publicClient,
   ...(isE2E ? { storage: createStorage({ storage: noopStorage }) } : {}),
 });
 
-export const web3modal = new EthereumClient(wagmi, chains);
+if (!isE2E) {
+  createWeb3Modal({
+    wagmiConfig: wagmi,
+    projectId: walletConnectId,
+    chains,
+    themeVariables: {
+      '--w3m-font-family': 'Inter',
+    },
+  });
+}

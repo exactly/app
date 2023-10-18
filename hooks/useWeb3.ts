@@ -1,7 +1,7 @@
 import { useMemo, useCallback } from 'react';
 import { isAddress } from 'viem';
 import { Address, Chain, useAccount, useConnect } from 'wagmi';
-import { useWeb3Modal } from '@web3modal/react';
+import { useWeb3Modal } from '@web3modal/wagmi/react';
 import { isE2E, defaultChain } from 'utils/client';
 import useRouter from './useRouter';
 import networkData from 'config/networkData.json' assert { type: 'json' };
@@ -47,7 +47,7 @@ export const useWeb3 = (): Web3 => {
       const injected = connectors.find(({ id, ready, name }) => ready && id === 'mock' && name === 'Mock');
       connect({ connector: injected, chainId: defaultChain.id });
     } else {
-      open({ route: 'ConnectWallet' });
+      open({ view: 'Connect' });
     }
   }, [open, connect, connectors]);
 
