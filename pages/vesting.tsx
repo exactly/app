@@ -2,8 +2,8 @@ import React, { useCallback, useMemo, useState } from 'react';
 import type { NextPage } from 'next';
 
 import { usePageView } from 'hooks/useAnalytics';
-import { useTranslation } from 'react-i18next';
-import { Box, Button, Divider, Grid, Skeleton, Typography } from '@mui/material';
+import { Trans, useTranslation } from 'react-i18next';
+import { Box, Button, Divider, Grid, Link, Skeleton, Typography } from '@mui/material';
 import VestingInput from 'components/VestingInput';
 import ActiveStream from 'components/ActiveStream';
 import { useUpdateStreams, useEscrowedEXA } from 'hooks/useEscrowedEXA';
@@ -57,18 +57,13 @@ const Vesting: NextPage = () => {
         <Box display="flex" flexDirection="column" gap={1}>
           <Typography>
             {t(
-              "We've created the esEXA Vesting Program to reward the Protocol’s active participants. Whenever you use the Protocol, you'll receive esEXA tokens that you can vest to earn EXA.",
+              'The esEXA program provides rewards equivalent to EXA with a linear vesting period, ensuring that the Exactly protocol remains sustainable and rewarding for long-term community members.',
             )}
           </Typography>
-          <Typography>
-            {t(
-              'In just two simple steps, you can start unlocking EXA tokens while contributing to the growth and improvement of the Protocol.',
-            ) + ' '}
-            <Typography sx={{ textDecoration: 'underline' }} component="span">
-              <a target="_blank" rel="noreferrer noopener" href="https://docs.exact.ly/">
-                {t('Learn more about the esEXA Vesting Program.')}
-              </a>
-            </Typography>
+          <Typography sx={{ textDecoration: 'underline' }} component="span">
+            <a target="_blank" rel="noreferrer noopener" href="https://docs.exact.ly/">
+              {t('Learn more about the esEXA Vesting Program.')}
+            </a>
           </Typography>
         </Box>
       </Box>
@@ -103,11 +98,15 @@ const Vesting: NextPage = () => {
             <Typography textTransform="uppercase" fontSize={14}>
               {t('Step {{number}}', { number: 2 })}
             </Typography>
-            <Typography variant="h6">{t('Initiate Vesting Your esEXA')}</Typography>
+            <Typography variant="h6">{t('Initiate the vesting of your esEXA')}</Typography>
+            <Typography>{t('You must deposit 10% of the total esEXA you want to vest as an EXA reserve.')}</Typography>
             <Typography>
-              {t(
-                "You'll need to deposit 10% of the total esEXA you want to vest as an EXA reserve. You can get EXA if you don’t have the required amount.",
-              )}
+              <Trans
+                i18nKey="You can <1>get EXA</1> if you don’t have the required reserve amount."
+                components={{
+                  1: <Link href="/get-exa" style={{ textDecoration: 'underline' }} />,
+                }}
+              />
             </Typography>
           </Grid>
           <Grid item xs={12} sm={6} display="flex" justifyContent="center" alignItems="center">

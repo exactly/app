@@ -509,14 +509,10 @@
   "No routes": "No hay rutas",
   "Terms and Conditions": "Términos y Condiciones",
   "esEXA Vesting Program": "Programa de Vesting de esEXA",
-  "We've created the esEXA Vesting Program to reward the Protocol’s active participants. Whenever you use the Protocol, you'll receive esEXA tokens that you can vest to earn EXA.": "Hemos creado el Programa de Vesting de esEXA para recompensar a los participantes activos del Protocolo. Cada vez que uses el Protocolo, recibirás tokens esEXA que puedes depositar para ganar EXA.",
-  "In just two simple steps, you can start unlocking EXA tokens while contributing to the growth and improvement of the Protocol.": "__STRING_NOT_TRANSLATED__",
   "Learn more about the esEXA Vesting Program.": "Aprende más sobre el Programa de Vesting de esEXA.",
   "Step {{number}}": "Paso {{number}}",
   "Claim your esEXA Rewards": "Reclama tus recompensas esEXA",
   "Claim {{amount}} esEXA": "Reclama {{amount}} esEXA",
-  "Initiate Vesting Your esEXA": "Inicia el Vesting de tus esEXA",
-  "You'll need to deposit 10% of the total esEXA you want to vest as an EXA reserve. You can get EXA if you don’t have the required amount.": "Deberás depositar el 10% del total de esEXA que deseas vestear como reserva de EXA. Puedes obtener EXA si no tienes la cantidad requerida.",
   "Active Vesting Streams": "Streams de Vesting Activos",
   "Here, you can monitor all your active vesting streams, allowing you to easily track your current EXA earnings. Each vesting stream is represented by an NFT and comes with a 12-month vesting period.": "Aquí puedes monitorear todos tus streams de vesting activos, lo que te permite realizar un seguimiento fácil de tus ganancias actuales de EXA. Cada stream de vesting está representado por un NFT y viene con un período de vesting de 12 meses.",
   "No vesting streams active yet.": "Aún no hay streams de vesting activos.",
@@ -541,5 +537,8 @@
   "Vest esEXA": "Consolidar esEXA",
   "No esEXA to claim": "No hay esEXA que reclamar.",
   "You can claim all streams at once.": "Puedes reclamar todos los streams a la vez.",
-  "Claim All": "Reclamar Todos"
+  "Claim All": "Reclamar Todos",
+  "The esEXA program provides rewards equivalent to EXA with a linear vesting period, ensuring that the Exactly protocol remains sustainable and rewarding for long-term community members.": "El programa esEXA proporciona recompensas equivalentes a EXA con un período de consolidación lineal, asegurando que el protocolo Exactly siga siendo sostenible y gratificante para los miembros de la comunidad a largo plazo.",
+  "Initiate the vesting of your esEXA": "Inicia la consolidación de tus esEXA",
+  "You must deposit 10% of the total esEXA you want to vest as an EXA reserve.": "Debes depositar el 10% del total de esEXA que deseas consolidar como reserva de EXA."
 }
