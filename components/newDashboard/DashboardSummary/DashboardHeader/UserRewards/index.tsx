@@ -17,9 +17,10 @@ type RewardProps = {
   amount: string;
   amountInUSD?: string;
   xsDirection?: 'row' | 'column';
+  dense: boolean;
 };
 
-const Reward: FC<RewardProps> = ({ assetSymbol, amount, amountInUSD, xsDirection = 'column' }) => {
+const Reward: FC<RewardProps> = ({ assetSymbol, amount, amountInUSD, xsDirection = 'column', dense }) => {
   const { breakpoints } = useTheme();
   const isMobile = useMediaQuery(breakpoints.down('lg'));
 
@@ -29,14 +30,14 @@ const Reward: FC<RewardProps> = ({ assetSymbol, amount, amountInUSD, xsDirection
         <Image
           src={`/img/assets/${assetSymbol}.svg`}
           alt={assetSymbol}
-          width={isMobile ? 32 : 24}
-          height={isMobile ? 32 : 24}
+          width={isMobile ? 32 : dense ? 20 : 24}
+          height={isMobile ? 32 : dense ? 20 : 24}
           style={{
             maxWidth: '100%',
             height: 'auto',
           }}
         />
-        <Typography fontSize={28}>{amountInUSD ? `$${amountInUSD}` : amount}</Typography>
+        <Typography fontSize={dense ? 19 : 28}>{amountInUSD ? `$${amountInUSD}` : amount}</Typography>
       </Box>
     </Box>
   );
@@ -111,6 +112,7 @@ const UserRewards = () => {
                 amount={amount}
                 amountInUSD={amountInUSD}
                 xsDirection={rewards.length > 1 ? 'column' : 'row'}
+                dense={rewards.length > 2}
               />
             </Box>
           ))

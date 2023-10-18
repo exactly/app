@@ -69,7 +69,7 @@ const CustomProgressBar: React.FC<{ value: number; 'data-testid'?: string }> = (
             borderRadius: '4px',
           }}
         >
-          <Typography variant="body2" color="white" data-testid={testId}>
+          <Typography variant="body2" color="secondary.main" data-testid={testId}>
             {toPercentage(value / 100, value === 100 ? 0 : 2)}
           </Typography>
         </Box>

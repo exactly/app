@@ -135,6 +135,7 @@ export const lightTheme = createTheme({
       '100': '#d4d4fa',
       '200': '#a6a6f4',
     },
+    secondary: { main: '#fafafa' },
     grey: {
       '50': '#fafafa',
       '100': '#F9FAFB',
@@ -369,6 +370,7 @@ export const darkTheme = createTheme({
       '100': '#9a9a9a',
       '200': '#62666A',
     },
+    secondary: { main: '#0E0E0E' },
     grey: {
       '900': '#fafafa',
       '700': '#F9FAFB',
