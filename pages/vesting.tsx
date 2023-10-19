@@ -6,7 +6,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { Box, Button, Divider, Grid, Link, Skeleton, Typography } from '@mui/material';
 import VestingInput from 'components/VestingInput';
 import ActiveStream from 'components/ActiveStream';
-import { useUpdateStreams, useEscrowedEXA } from 'hooks/useEscrowedEXA';
+import { useUpdateStreams, useEscrowedEXA, useEscrowedEXAReserveRatio } from 'hooks/useEscrowedEXA';
 import { useWeb3 } from 'hooks/useWeb3';
 import { useNetwork, useSwitchNetwork } from 'wagmi';
 import { LoadingButton } from '@mui/lab';
@@ -15,6 +15,7 @@ import useRewards from 'hooks/useRewards';
 import { useModal } from 'contexts/ModalContext';
 import formatNumber from 'utils/formatNumber';
 import { formatEther } from 'viem';
+import { toPercentage } from 'utils/utils';
 
 const Vesting: NextPage = () => {
   usePageView('/vesting', 'Vesting');
@@ -23,6 +24,7 @@ const Vesting: NextPage = () => {
   const { chain } = useNetwork();
   const { activeStreams, loading: streamsLoading, refetch } = useUpdateStreams();
   const { switchNetwork, isLoading: switchIsLoading } = useSwitchNetwork();
+  const { data: reserveRatio } = useEscrowedEXAReserveRatio();
 
   const [loading, setLoading] = useState<boolean>(false);
   const escrowedEXA = useEscrowedEXA();
@@ -99,7 +101,11 @@ const Vesting: NextPage = () => {
               {t('Step {{number}}', { number: 2 })}
             </Typography>
             <Typography variant="h6">{t('Initiate the vesting of your esEXA')}</Typography>
-            <Typography>{t('You must deposit 10% of the total esEXA you want to vest as an EXA reserve.')}</Typography>
+            <Typography>
+              {t('You must deposit {{reserveRatio}} of the total esEXA you want to vest as an EXA reserve.', {
+                reserveRatio: toPercentage(Number(reserveRatio) / 1e18, 0),
+              })}
+            </Typography>
             <Typography>
               <Trans
                 i18nKey="You can <1>get EXA</1> if you don’t have the required reserve amount."
