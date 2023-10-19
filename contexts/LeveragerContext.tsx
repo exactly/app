@@ -206,8 +206,9 @@ export const LeveragerContextProvider: FC<PropsWithChildren> = ({ children }) =>
         healthFactor && healthFactor.debt > 0
           ? (healthFactor.collateral * WEI_PER_ETHER) / healthFactor.debt
           : undefined;
+      const truncatedHF = currentHF ? (currentHF / 10n ** 13n) * 10n ** 13n : undefined;
       const marketsMinHF = minHealthFactorMarkets(_maIn, _maOut);
-      return currentHF && currentHF < marketsMinHF ? currentHF : marketsMinHF;
+      return truncatedHF && truncatedHF < marketsMinHF ? truncatedHF : marketsMinHF;
     },
     [healthFactor],
   );
