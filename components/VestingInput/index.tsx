@@ -158,13 +158,11 @@ function VestingInput({ refetch }: Props) {
 
   const [qty, setQty] = useState<string>('');
 
-  const errorData = false;
-
   const usdValue = useMemo(() => {
     if (!qty || !EXAPrice) return;
 
-    const parsedqty = parseEther(qty);
-    const usd = (parsedqty * EXAPrice) / WEI_PER_ETHER;
+    const parsedQty = parseEther(qty);
+    const usd = (parsedQty * EXAPrice) / WEI_PER_ETHER;
 
     return formatEther(usd);
   }, [EXAPrice, qty]);
@@ -241,7 +239,7 @@ function VestingInput({ refetch }: Props) {
 
     const vestInput = {
       chainId: displayNetwork?.id,
-      amount: amount,
+      amount,
       reserve: res,
     };
     transaction.addToCart('vest', vestInput);
@@ -298,9 +296,9 @@ function VestingInput({ refetch }: Props) {
     sign,
   ]);
 
-  const onMax = useCallback(() => {
+  const setMaxBalance = useCallback(() => {
     if (balance) {
-      setQty(formatEther(balance || 0n));
+      setQty(formatEther(balance));
     }
   }, [balance]);
 
@@ -368,7 +366,7 @@ function VestingInput({ refetch }: Props) {
                       {t('Available')}: {formatNumber(formatEther(balance || 0n))}
                     </Typography>
                     <Button
-                      onClick={onMax}
+                      onClick={setMaxBalance}
                       sx={{
                         textTransform: 'uppercase',
                         borderRadius: 1,
@@ -434,7 +432,7 @@ function VestingInput({ refetch }: Props) {
         ) : null}
       </Box>
 
-      <Box mt={errorData ? 0 : 2} display="flex" flexDirection="column" gap={1}>
+      <Box mt={0} display="flex" flexDirection="column" gap={1}>
         {impersonateActive ? (
           <Button fullWidth variant="contained">
             {t('Exit Read-Only Mode')}

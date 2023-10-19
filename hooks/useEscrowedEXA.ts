@@ -25,6 +25,8 @@ type Stream = {
   endTime: string;
   depositAmount: string;
   withdrawnAmount: string;
+  duration: string;
+  intactAmount: string;
   canceled: boolean;
   cancelable: boolean;
 };
@@ -41,21 +43,18 @@ export function useUpdateStreams() {
   const fetchStreams = useCallback(async () => {
     if (EXA && esEXA) {
       setLoading(true);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const data = await request<any>(
+      const data = await request<{ streams: Stream[] }>(
         getStreams(EXA.address.toLowerCase(), walletAddress || zeroAddress, esEXA.address.toLowerCase(), false),
         true,
       );
-
-      const filteredStreams = data.streams.filter(
-        (stream: { startTime: string; duration: string; endTime: string; intactAmount: string }) => {
-          const startTime = Number(stream.startTime);
-          const endTime = Number(stream.endTime);
-          const duration = Number(stream.duration);
-          const intactAmount = BigInt(stream.intactAmount);
-          return startTime + duration === endTime && intactAmount > BigInt(0);
-        },
-      );
+      if (!data) return;
+      const filteredStreams = data.streams.filter((stream: Stream) => {
+        const startTime = Number(stream.startTime);
+        const endTime = Number(stream.endTime);
+        const duration = Number(stream.duration);
+        const intactAmount = BigInt(stream.intactAmount);
+        return startTime + duration === endTime && intactAmount > BigInt(0);
+      });
 
       setActiveStreams(filteredStreams);
       setLoading(false);

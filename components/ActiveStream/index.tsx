@@ -18,7 +18,7 @@ import {
   useMediaQuery,
   useTheme,
 } from '@mui/material';
-import React, { FC, type PropsWithChildren, useCallback, useMemo, useRef, useState } from 'react';
+import React, { FC, useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { waitForTransaction } from '@wagmi/core';
 import { LoadingButton } from '@mui/lab';
@@ -99,9 +99,15 @@ const Transition = React.forwardRef(function Transition(
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-function Modal({ open, onClose, children }: PropsWithChildren<{ open: boolean; onClose: () => void }>) {
+const NFT: React.FC<{ tokenId: number; open: boolean; onClose: () => void }> = ({ tokenId, open, onClose }) => {
   const { breakpoints } = useTheme();
   const isMobile = useMediaQuery(breakpoints.down('sm'));
+  const { data: nft } = useSablierV2NftDescriptorTokenUri(BigInt(tokenId));
+  const { spacing } = useTheme();
+
+  const b64 = nft?.split(',')[1] ?? '';
+  const json = atob(b64) || '{}';
+  const { image, name } = JSON.parse(json);
 
   return (
     <Dialog
@@ -132,10 +138,129 @@ function Modal({ open, onClose, children }: PropsWithChildren<{ open: boolean; o
       >
         <CloseIcon sx={{ fontSize: 19 }} />
       </IconButton>
-      {children}
+      <Box
+        display="flex"
+        sx={{
+          padding: { xs: spacing(2, 1, 1), sm: spacing(4, 4) },
+        }}
+      >
+        <Image
+          style={{
+            borderRadius: '16px',
+          }}
+          src={image}
+          alt={name}
+          width={360}
+          height={360}
+        />
+      </Box>
     </Dialog>
   );
-}
+};
+
+const WithdrawAndCancel: React.FC<{
+  tokenId: number;
+  open: boolean;
+  onClose: () => void;
+  cancel: () => void;
+  loading: boolean;
+}> = ({ tokenId, open, onClose, cancel, loading }) => {
+  const { spacing } = useTheme();
+  const { chain } = useNetwork();
+  const { impersonateActive, chain: displayNetwork } = useWeb3();
+  const { switchNetwork, isLoading: switchIsLoading } = useSwitchNetwork();
+  const { t } = useTranslation();
+
+  const { breakpoints } = useTheme();
+  const isMobile = useMediaQuery(breakpoints.down('sm'));
+  return (
+    <Dialog
+      data-testid="vesting-vest-modal"
+      open={open}
+      onClose={onClose}
+      PaperComponent={PaperComponent}
+      PaperProps={{
+        sx: {
+          borderRadius: 2,
+          minWidth: '375px',
+        },
+      }}
+      TransitionComponent={isMobile ? Transition : undefined}
+      fullScreen={isMobile}
+      sx={isMobile ? { top: 'auto' } : { backdropFilter: 'blur(1.5px)' }}
+    >
+      <IconButton
+        aria-label="close"
+        onClick={onClose}
+        sx={{
+          position: 'absolute',
+          right: 4,
+          top: 8,
+          color: 'grey.500',
+        }}
+        data-testid="vesting-vest-modal-close"
+      >
+        <CloseIcon sx={{ fontSize: 19 }} />
+      </IconButton>
+
+      <DialogTitle
+        sx={{
+          cursor: { xs: '', sm: 'move' },
+        }}
+      >
+        <Box
+          sx={{
+            padding: { xs: spacing(2, 1, 1), sm: spacing(1, 2, 0, 2) },
+          }}
+        >
+          <Typography fontWeight={700} fontSize={24}>
+            {t('Withdraw Reserved EXA')}
+          </Typography>
+        </Box>
+      </DialogTitle>
+      <Box
+        sx={{
+          padding: { xs: spacing(2, 1, 1), sm: spacing(2, 4, 4) },
+        }}
+      >
+        <DialogContent sx={{ p: 1, overflow: 'hidden' }}>
+          <Typography fontSize={14} fontWeight={500}>
+            {t(
+              'When you withdraw the reserved EXA, the associated vesting stream will be cancelled automatically. You’ll be able to claim the earned EXA and will get back all remaining esEXA.',
+            )}
+          </Typography>
+          <Box display="flex" gap={2} mt={4} alignItems="center">
+            {impersonateActive ? (
+              <Button fullWidth variant="contained">
+                {t('Exit Read-Only Mode')}
+              </Button>
+            ) : chain && chain.id !== displayNetwork.id ? (
+              <LoadingButton
+                fullWidth
+                onClick={() => switchNetwork?.(displayNetwork.id)}
+                variant="contained"
+                loading={switchIsLoading}
+              >
+                {t('Please switch to {{network}} network', { network: displayNetwork.name })}
+              </LoadingButton>
+            ) : (
+              <LoadingButton
+                fullWidth
+                variant="contained"
+                color="error"
+                onClick={cancel}
+                loading={loading}
+                data-testid={`vesting-stream-${tokenId}-cancel-submit`}
+              >
+                {t('Withdraw and Cancel Stream')}
+              </LoadingButton>
+            )}
+          </Box>
+        </DialogContent>
+      </Box>
+    </Dialog>
+  );
+};
 
 type ActiveStreamProps = {
   tokenId: number;
@@ -159,7 +284,6 @@ const ActiveStream: FC<ActiveStreamProps> = ({
   const { t } = useTranslation();
   const { impersonateActive, chain: displayNetwork, opts } = useWeb3();
   const { chain } = useNetwork();
-  const { spacing } = useTheme();
   const { switchNetwork, isLoading: switchIsLoading } = useSwitchNetwork();
   const { data: reserve, isLoading: reserveIsLoading } = useEscrowedEXAReserves(BigInt(tokenId));
   const { data: withdrawable, isLoading: withdrawableIsLoading } = useSablierV2LockupLinearWithdrawableAmountOf(
@@ -167,111 +291,20 @@ const ActiveStream: FC<ActiveStreamProps> = ({
   );
   const escrowedEXA = useEscrowedEXA();
   const [loading, setLoading] = useState(false);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [modalContent, setModalContent] = useState<'nft' | 'cancel'>('nft');
+  const [NFTModalOpen, setNFTModalOpen] = useState(false);
+  const [CancelModalOpen, setCancelModalOpen] = useState(false);
   const { breakpoints } = useTheme();
   const isMobile = useMediaQuery(breakpoints.down('sm'));
-  const { data: nft } = useSablierV2NftDescriptorTokenUri(BigInt(tokenId));
 
-  const WithdrawAndCancel = () => {
-    return (
-      <>
-        <DialogTitle
-          sx={{
-            cursor: { xs: '', sm: 'move' },
-          }}
-        >
-          <Box
-            sx={{
-              padding: { xs: spacing(2, 1, 1), sm: spacing(1, 2, 0, 2) },
-            }}
-          >
-            <Typography fontWeight={700} fontSize={24}>
-              {t('Withdraw Reserved EXA')}
-            </Typography>
-          </Box>
-        </DialogTitle>
-        <Box
-          sx={{
-            padding: { xs: spacing(2, 1, 1), sm: spacing(2, 4, 4) },
-          }}
-        >
-          <DialogContent sx={{ p: 1, overflow: 'hidden' }}>
-            <Typography fontSize={14} fontWeight={500}>
-              {t(
-                'When you withdraw the reserved EXA, the associated vesting stream will be cancelled automatically. You’ll be able to claim the earned EXA and will get back all remaining esEXA.',
-              )}
-            </Typography>
-            <Box display="flex" gap={2} mt={4} alignItems="center">
-              {impersonateActive ? (
-                <Button fullWidth variant="contained">
-                  {t('Exit Read-Only Mode')}
-                </Button>
-              ) : chain && chain.id !== displayNetwork.id ? (
-                <LoadingButton
-                  fullWidth
-                  onClick={() => switchNetwork?.(displayNetwork.id)}
-                  variant="contained"
-                  loading={switchIsLoading}
-                >
-                  {t('Please switch to {{network}} network', { network: displayNetwork.name })}
-                </LoadingButton>
-              ) : (
-                <>
-                  <LoadingButton
-                    fullWidth
-                    variant="contained"
-                    color="error"
-                    onClick={handleCancel}
-                    loading={loading}
-                    data-testid={`vesting-stream-${tokenId}-cancel-submit`}
-                  >
-                    {t('Withdraw and Cancel Stream')}
-                  </LoadingButton>
-                </>
-              )}
-            </Box>
-          </DialogContent>
-        </Box>
-      </>
-    );
-  };
-
-  const NFT = () => {
-    const b64 = nft?.split(',')[1] ?? '';
-    const json = atob(b64) || '{}';
-    const { image, name } = JSON.parse(json);
-
-    return (
-      <Box
-        display="flex"
-        sx={{
-          padding: { xs: spacing(2, 1, 1), sm: spacing(4, 4) },
-        }}
-      >
-        <Image
-          style={{
-            borderRadius: '16px',
-          }}
-          src={image}
-          alt={name}
-          width={360}
-          height={360}
-        />
-      </Box>
-    );
-  };
-
-  const onClose = useCallback(() => {
-    setModalOpen(false);
+  const closeNFTModal = useCallback(() => {
+    setNFTModalOpen(false);
   }, []);
 
-  const handleContent = useCallback((content: 'nft' | 'cancel') => {
-    setModalOpen(true);
-    setModalContent(content);
+  const closeCancelModal = useCallback(() => {
+    setCancelModalOpen(false);
   }, []);
 
-  const handleCancel = useCallback(async () => {
+  const cancel = useCallback(async () => {
     if (!escrowedEXA || !opts) return;
     setLoading(true);
     try {
@@ -285,7 +318,7 @@ const ActiveStream: FC<ActiveStreamProps> = ({
     }
   }, [escrowedEXA, opts, refetch, tokenId]);
 
-  const handleClick = useCallback(async () => {
+  const withdraw = useCallback(async () => {
     if (!escrowedEXA || !opts) return;
     setLoading(true);
     try {
@@ -363,7 +396,7 @@ const ActiveStream: FC<ActiveStreamProps> = ({
               borderRadius="2px"
               alignItems="center"
               onClick={() => {
-                handleContent('nft');
+                setNFTModalOpen(true);
               }}
               sx={{ cursor: 'pointer' }}
             >
@@ -405,7 +438,7 @@ const ActiveStream: FC<ActiveStreamProps> = ({
                 data-testid={
                   progress === 100 ? `vesting-stream-${tokenId}-withdraw` : `vesting-stream-${tokenId}-cancel`
                 }
-                onClick={() => (progress === 100 ? handleClick() : handleContent('cancel'))}
+                onClick={() => (progress === 100 ? withdraw() : setCancelModalOpen(true))}
                 sx={{ cursor: 'pointer' }}
               >
                 <Typography fontFamily="IBM Plex Mono" fontSize={12} fontWeight={500} textTransform="uppercase">
@@ -414,9 +447,14 @@ const ActiveStream: FC<ActiveStreamProps> = ({
               </Box>
             )}
           </Box>
-          <Modal open={modalOpen} onClose={onClose}>
-            {modalContent === 'nft' ? <NFT /> : <WithdrawAndCancel />}
-          </Modal>
+          <NFT tokenId={tokenId} open={NFTModalOpen} onClose={closeNFTModal} />
+          <WithdrawAndCancel
+            tokenId={tokenId}
+            open={CancelModalOpen}
+            onClose={closeCancelModal}
+            cancel={cancel}
+            loading={loading}
+          />
         </Grid>
         {!isMobile && <Divider orientation="vertical" sx={{ borderColor: 'grey.200', my: 0.6 }} flexItem />}
         <Grid item xs sm display="flex" flexDirection="column" justifyContent="center" gap={0.5}>
@@ -464,7 +502,7 @@ const ActiveStream: FC<ActiveStreamProps> = ({
               <LoadingButton
                 fullWidth
                 variant="contained"
-                onClick={handleClick}
+                onClick={withdraw}
                 loading={loading}
                 data-testid={`vesting-stream-${tokenId}-claim`}
               >

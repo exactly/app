@@ -205,6 +205,22 @@ const Strategies: NextPage = () => {
           ),
         },
         {
+          title: 'esEXA',
+          description: t('Unlock your EXA rewards for being an active participant in the Protocol'),
+          tags: [
+            { prefix: t('EARN'), text: 'EXA' },
+            { text: t('Basic'), size: 'small' as const },
+          ],
+          button: (
+            <Link href={{ pathname: '/vesting', query }} style={{ width: '100%' }}>
+              <Button fullWidth variant="contained">
+                {t('Vest esEXA')}
+              </Button>
+            </Link>
+          ),
+          isNew: true,
+        },
+        {
           chainId: optimism.id,
           title: t('Get EXA'),
           description: t(
