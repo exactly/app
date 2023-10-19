@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { Abi, getAddress } from 'viem';
+import { Abi, Address, getAddress } from 'viem';
 import type { GetStaticProps } from 'next';
 import { Box, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
@@ -16,10 +16,12 @@ type Props = {
   contracts: Contracts;
 };
 
-const multisig = {
+const multisigs: Record<number, Address> = {
   [optimism.id]: getAddress('0xC0d6Bc5d052d1e74523AD79dD5A954276c9286D3'),
   [mainnet.id]: getAddress('0x7A65824d74B0C20730B6eE4929ABcc41Cbe843Aa'),
-}[defaultChain.id];
+};
+
+const multisig = multisigs[defaultChain.id];
 
 const Activity = ({ contracts }: Props) => {
   usePageView('/activity', 'Activity');
