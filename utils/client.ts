@@ -54,7 +54,10 @@ const noopStorage = {
 export const wagmi = createConfig({
   connectors: [
     ...(isE2E && e2e
-      ? [new E2EConnector({ chains, ...e2e })]
+      ? [
+          new E2EConnector({ chains, ...e2e }),
+          new WalletConnectConnector({ chains, options: { projectId: walletConnectId, showQrModal: false } }),
+        ]
       : [
           new InjectedConnector({ chains, options: { shimDisconnect: true } }),
           new CoinbaseWalletConnector({
@@ -74,13 +77,11 @@ export const wagmi = createConfig({
   ...(isE2E ? { storage: createStorage({ storage: noopStorage }) } : {}),
 });
 
-if (!isE2E) {
-  createWeb3Modal({
-    wagmiConfig: wagmi,
-    projectId: walletConnectId,
-    chains,
-    themeVariables: {
-      '--w3m-font-family': 'Inter',
-    },
-  });
-}
+createWeb3Modal({
+  wagmiConfig: wagmi,
+  projectId: walletConnectId,
+  chains,
+  themeVariables: {
+    '--w3m-font-family': 'Inter',
+  },
+});

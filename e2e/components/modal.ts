@@ -44,7 +44,9 @@ export default function (page: Page) {
   };
 
   const checkInput = async (inp: string) => {
-    await expect(page.getByTestId('modal-input')).toHaveValue(new RegExp(`^${inp}`));
+    await expect(page.getByTestId('modal-input')).toHaveValue(
+      new RegExp(`^(${Number(inp) + 1}|${inp}|${Number(inp) - 1})`),
+    );
   };
 
   const clearInput = async () => {

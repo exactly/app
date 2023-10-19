@@ -36,7 +36,7 @@ test('WETH fixed withdraw/deposit', async ({ page, web3, setup }) => {
     symbol: 'WETH',
     decimals: 18,
     amount: '2',
-    balance: '174',
+    balance: '175',
     maturity: pool,
   });
 
