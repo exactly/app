@@ -38,7 +38,7 @@ export default () => {
         {} as Record<string, bigint>,
       );
 
-    return accountData
+    const initialRewards = accountData
       .flatMap(({ claimableRewards }) => claimableRewards)
       .reduce((acc, { asset, assetSymbol, amount }) => {
         if (assetSymbol === '') return acc;
@@ -49,6 +49,23 @@ export default () => {
         acc[assetSymbol].amount += amount;
         return acc;
       }, {} as Rewards);
+
+    const excludedSymbols = accountData
+      .flatMap(({ rewardRates }) => rewardRates)
+      .filter(({ borrow, floatingDeposit }) => borrow !== 0n && floatingDeposit !== 0n)
+      .map(({ assetSymbol }) => assetSymbol);
+
+    const rewardSymbolsFiltered = accountData
+      .flatMap(({ rewardRates }) => rewardRates)
+      .filter(({ assetSymbol }) => !excludedSymbols.includes(assetSymbol))
+      .map(({ assetSymbol }) => assetSymbol)
+      .filter((symbol, index, self) => self.indexOf(symbol) === index);
+
+    const filteredRewards = Object.fromEntries(
+      Object.entries(initialRewards).filter(([key]) => !rewardSymbolsFiltered.includes(key)),
+    );
+
+    return filteredRewards;
   }, [accountData, getMarketAccount]);
 
   const { transaction } = useAnalytics({ rewards });
