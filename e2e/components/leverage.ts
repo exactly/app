@@ -3,7 +3,23 @@ import { type Page, expect } from '@playwright/test';
 import type { ERC20TokenSymbol } from '../utils/contracts';
 
 export default function (page: Page) {
+  const waitForSkeletons = async () => {
+    await page.waitForFunction(
+      () => {
+        const modal = document.querySelector('[data-testid="leverage-modal"]');
+        return modal && modal.querySelectorAll('.MuiSkeleton-root').length === 0;
+      },
+      null,
+      {
+        timeout: 30_000,
+        polling: 1_000,
+      },
+    );
+  };
+
   const waitSummaryToBeReady = async () => {
+    await page.waitForTimeout(2_000);
+    await waitForSkeletons();
     await page.waitForFunction(
       () => {
         return ['approve', 'submit'].every((value) => {
@@ -22,21 +38,8 @@ export default function (page: Page) {
     );
   };
 
-  const waitForSkeletons = async () => {
-    await page.waitForFunction(
-      () => {
-        const modal = document.querySelector('[data-testid="leverage-modal"]');
-        return modal && modal.querySelectorAll('.MuiSkeleton-root').length === 0;
-      },
-      null,
-      {
-        timeout: 30_000,
-        polling: 1_000,
-      },
-    );
-  };
-
   const waitForStepToContinue = async () => {
+    await page.waitForTimeout(2_000);
     await waitForSkeletons();
     await page.waitForFunction(
       () => {
