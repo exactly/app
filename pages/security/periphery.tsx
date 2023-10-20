@@ -51,10 +51,10 @@ const Security: NextPage = () => {
               reports: ['ABDK'],
               information: [`24 ${t('lines')} (20 ${t('lines of code')}), 674 bytes`],
               proxy: async () => {
-                return [{ name: '', address: await getContractAddress('EXA_Proxy') }];
+                return [{ name: '', address: await getContractAddress('Airdrop_Proxy') }];
               },
               implementation: async () => {
-                return [{ name: '', address: await getContractAddress('EXA_Implementation') }];
+                return [{ name: '', address: await getContractAddress('Airdrop_Implementation') }];
               },
               codeLink: 'https://github.com/exactly/protocol/blob/main/contracts/periphery/EXA.sol',
             },
@@ -67,12 +67,28 @@ const Security: NextPage = () => {
               reports: ['ABDK'],
               information: [`79 ${t('lines')} (65 ${t('lines of code')}), 2.25 kb`],
               proxy: async () => {
-                return [{ name: '', address: await getContractAddress('Airdrop_Proxy') }];
+                return [{ name: '', address: await getContractAddress('EXA_Proxy') }];
               },
               implementation: async () => {
-                return [{ name: '', address: await getContractAddress('Airdrop_Implementation') }];
+                return [{ name: '', address: await getContractAddress('EXA_Implementation') }];
               },
               codeLink: 'https://github.com/exactly/protocol/blob/main/contracts/periphery/Airdrop.sol',
+            },
+            {
+              name: 'EscrowedEXA.sol',
+              audited: true,
+              description: t(
+                'The EscrowedEXA contract is an ERC-20 token that allows anyone to mint esEXA tokens in exchange for EXA tokens.',
+              ),
+              reports: ['ABDK', 'OpenZeppelin'],
+              information: [`279 ${t('lines')} (242 ${t('lines of code')}), 10.5 kb`],
+              proxy: async () => {
+                return [{ name: '', address: await getContractAddress('EscrowedEXA_Proxy') }];
+              },
+              implementation: async () => {
+                return [{ name: '', address: await getContractAddress('EscrowedEXA_Implementation') }];
+              },
+              codeLink: 'https://github.com/exactly/protocol/blob/main/contracts/periphery/EscrowedEXA.sol',
             },
           ]
         : []),
