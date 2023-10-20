@@ -75,7 +75,7 @@ const Security: NextPage = () => {
               codeLink: 'https://github.com/exactly/protocol/blob/main/contracts/periphery/Airdrop.sol',
             },
             {
-              name: 'EscrowedEXA.sol',
+              name: 'esEXA.sol',
               audited: true,
               description: t(
                 'The EscrowedEXA contract is an ERC-20 token that allows anyone to mint esEXA tokens in exchange for EXA tokens.',

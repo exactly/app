@@ -4,7 +4,7 @@ import { optimism } from 'viem/chains';
 import { address as sablierV2LockupLinear } from '@exactly/protocol/deployments/optimism/SablierV2LockupLinear.json';
 import { address as timelockController } from '@exactly/protocol/deployments/optimism/TimelockController.json';
 import { address as rewardsController } from '@exactly/protocol/deployments/optimism/RewardsController.json';
-import { address as escrowedEXA } from '@exactly/protocol/deployments/optimism/EscrowedEXA.json';
+import { address as escrowedEXA } from '@exactly/protocol/deployments/optimism/esEXA.json';
 import { address as airdrop } from '@exactly/protocol/deployments/optimism/Airdrop.json';
 import { address as exaAddress } from '@exactly/protocol/deployments/optimism/EXA.json';
 import { exaABI } from '../../types/abi';

@@ -14,7 +14,7 @@ import { useWeb3 } from './useWeb3';
 import { getStreams } from 'queries/getStreams';
 
 export const useEscrowedEXA = () => {
-  return useContract('EscrowedEXA', escrowedExaABI);
+  return useContract('esEXA', escrowedExaABI);
 };
 
 type Stream = {

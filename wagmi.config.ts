@@ -22,7 +22,7 @@ import SablierV2LockupLinear from '@exactly/protocol/deployments/goerli/SablierV
 import SablierV2NFTDescriptor from '@exactly/protocol/deployments/goerli/SablierV2NFTDescriptor.json' assert { type: 'json' };
 import ExtraFinanceLendingABI from './abi/extraFinanceLending.json' assert { type: 'json' };
 import DelegateRegistryABI from './abi/DelegateRegistry.json' assert { type: 'json' };
-import EscrowedEXA from '@exactly/protocol/deployments/goerli/EscrowedEXA.json' assert { type: 'json' };
+import EscrowedEXA from '@exactly/protocol/deployments/goerli/esEXA.json' assert { type: 'json' };
 
 import { Abi } from 'viem';
 
