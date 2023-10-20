@@ -103,7 +103,7 @@ const Vesting: NextPage = () => {
             <Typography variant="h6">{t('Initiate the vesting of your esEXA')}</Typography>
             <Typography>
               {t('You must deposit {{reserveRatio}} of the total esEXA you want to vest as an EXA reserve.', {
-                reserveRatio: toPercentage(Number(reserveRatio) / 1e18, 0),
+                reserveRatio: toPercentage(reserveRatio !== undefined ? Number(reserveRatio) / 1e18 : 0.15, 0),
               })}
             </Typography>
             <Typography>

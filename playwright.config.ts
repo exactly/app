@@ -6,7 +6,7 @@ dotenv.config();
 const config: PlaywrightTestConfig = {
   testDir: './e2e/specs',
   testMatch: [/.*spec\.ts/],
-  timeout: 180_000,
+  timeout: process.env.CI ? 180_000 : 600_000,
   expect: {
     timeout: 30_000,
   },

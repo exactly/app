@@ -15,7 +15,7 @@ test('Vesting esEXA & Claiming EXA', async ({ page, web2, web3 }) => {
   await web3.fork.setBalance(web3.account.address, {
     ETH: 1,
     esEXA: 100,
-    EXA: 20,
+    EXA: 15,
   });
 
   const esEXA = await escrowedEXA({ publicClient: web3.publicClient });
@@ -38,7 +38,7 @@ test('Vesting esEXA & Claiming EXA', async ({ page, web2, web3 }) => {
     await vesting.checkError('Not enough EXA for reserve. Get EXA.');
 
     await vesting.input('100');
-    await vesting.checkReserveNeeded('20%', '20');
+    await vesting.checkReserveNeeded('15%', '15');
 
     await vesting.waitForSubmitToBeReady();
     await vesting.submit();
@@ -87,7 +87,7 @@ test('Vesting esEXA & Claiming EXA', async ({ page, web2, web3 }) => {
     await vesting.checkStream({
       id,
       vested: '100.00',
-      reserved: '20.00',
+      reserved: '15.00',
       withdrawable: /50\.0|49\.9/,
       left: '100.00',
       progress: /50\.00%|50\.01%/,
@@ -125,7 +125,7 @@ test('Vesting esEXA & Claiming EXA', async ({ page, web2, web3 }) => {
     await vesting.checkStream({
       id,
       vested: '100.00',
-      reserved: '20.00',
+      reserved: '15.00',
       withdrawable: /50\.0|49\.9/,
       left: /50\.0|49\.9/,
       progress: '100%',
@@ -134,7 +134,7 @@ test('Vesting esEXA & Claiming EXA', async ({ page, web2, web3 }) => {
     await vesting.claimStream(id);
     await vesting.waitForClaimStreamTransaction(id);
 
-    await balance.check({ address: web3.account.address, symbol: 'EXA', amount: '120' });
+    await balance.check({ address: web3.account.address, symbol: 'EXA', amount: '115' });
   });
 });
 
@@ -142,7 +142,7 @@ test('Claiming multiple streams', async ({ page, web2, web3 }) => {
   await web3.fork.setBalance(web3.account.address, {
     ETH: 1,
     esEXA: 100,
-    EXA: 20,
+    EXA: 15,
   });
 
   const exa = await erc20('EXA', { walletClient: web3.walletClient });
@@ -150,10 +150,17 @@ test('Claiming multiple streams', async ({ page, web2, web3 }) => {
   const sablier = await sablierV2LockupLinear({ publicClient: web3.publicClient });
   const stream = await sablier.read.nextStreamId();
   const period = await esEXA.read.vestingPeriod();
+  const reserveRatio = await esEXA.read.reserveRatio();
 
   await exa.write.approve([esEXA.address, 2n ** 256n - 1n], { account: web3.account, chain });
-  await esEXA.write.vest([parseEther('50'), web3.account.address], { account: web3.account, chain });
-  await esEXA.write.vest([parseEther('50'), web3.account.address], { account: web3.account, chain });
+  await esEXA.write.vest([parseEther('50'), web3.account.address, reserveRatio, BigInt(period)], {
+    account: web3.account,
+    chain,
+  });
+  await esEXA.write.vest([parseEther('50'), web3.account.address, reserveRatio, BigInt(period)], {
+    account: web3.account,
+    chain,
+  });
 
   const [stream0, stream1] = [stream, stream + 1n];
 
@@ -203,7 +210,7 @@ test('Claiming multiple streams', async ({ page, web2, web3 }) => {
     await vesting.checkStream({
       id: id0,
       vested: '50.00',
-      reserved: '10.00',
+      reserved: '7.50',
       withdrawable: '50.00',
       left: '50.00',
       progress: '100%',
@@ -212,7 +219,7 @@ test('Claiming multiple streams', async ({ page, web2, web3 }) => {
     await vesting.checkStream({
       id: id1,
       vested: '50.00',
-      reserved: '10.00',
+      reserved: '7.50',
       withdrawable: '50.00',
       left: '50.00',
       progress: '100%',
@@ -221,7 +228,7 @@ test('Claiming multiple streams', async ({ page, web2, web3 }) => {
     await vesting.claimAllStreams();
     await vesting.waitForClaimAllTransaction();
 
-    await balance.check({ address: web3.account.address, symbol: 'EXA', amount: '120' });
+    await balance.check({ address: web3.account.address, symbol: 'EXA', amount: '115' });
   });
 });
 
@@ -229,7 +236,7 @@ test('Stream cancellation', async ({ page, web2, web3 }) => {
   await web3.fork.setBalance(web3.account.address, {
     ETH: 1,
     esEXA: 100,
-    EXA: 20,
+    EXA: 15,
   });
 
   const exa = await erc20('EXA', { walletClient: web3.walletClient });
@@ -237,9 +244,13 @@ test('Stream cancellation', async ({ page, web2, web3 }) => {
   const sablier = await sablierV2LockupLinear({ publicClient: web3.publicClient });
   const stream = await sablier.read.nextStreamId();
   const period = await esEXA.read.vestingPeriod();
+  const reserveRatio = await esEXA.read.reserveRatio();
 
   await exa.write.approve([esEXA.address, 2n ** 256n - 1n], { account: web3.account, chain });
-  await esEXA.write.vest([parseEther('100'), web3.account.address], { account: web3.account, chain });
+  await esEXA.write.vest([parseEther('100'), web3.account.address, reserveRatio, BigInt(period)], {
+    account: web3.account,
+    chain,
+  });
 
   const balance = _balance({ test, page, publicClient: web3.publicClient });
   const vesting = _vesting(page);
@@ -270,7 +281,7 @@ test('Stream cancellation', async ({ page, web2, web3 }) => {
     await vesting.checkStream({
       id,
       vested: '100.00',
-      reserved: '20.00',
+      reserved: '15.00',
       withdrawable: '0.00',
       left: '100.00',
       progress: '0%',
@@ -279,7 +290,7 @@ test('Stream cancellation', async ({ page, web2, web3 }) => {
     await vesting.cancelStream(id);
     await vesting.waitForStreamCancelTransaction(id);
 
-    await balance.check({ address: web3.account.address, symbol: 'EXA', amount: '20', delta: '0.001' });
+    await balance.check({ address: web3.account.address, symbol: 'EXA', amount: '15', delta: '0.001' });
     await balance.check({ address: web3.account.address, symbol: 'esEXA', amount: '100', delta: '0.001' });
   });
 });

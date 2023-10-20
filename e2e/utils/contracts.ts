@@ -4,7 +4,7 @@ import marketETHRouter from '@exactly/protocol/deployments/optimism/MarketETHRou
 import debtManagerContract from '@exactly/protocol/deployments/optimism/DebtManager.json' assert { type: 'json' };
 import permit2Contract from '@exactly/protocol/deployments/optimism/Permit2.json' assert { type: 'json' };
 import sablierV2LockupLinearContract from '@exactly/protocol/deployments/optimism/SablierV2LockupLinear.json' assert { type: 'json' };
-import escrowedEXAContract from '@exactly/protocol/deployments/optimism/EscrowedEXA.json' assert { type: 'json' };
+import escrowedEXAContract from '@exactly/protocol/deployments/optimism/esEXA.json' assert { type: 'json' };
 
 import type {
   Auditor,
@@ -39,7 +39,7 @@ type Clients = {
 export const erc20 = async (symbol: ERC20TokenSymbol, clients: Clients = {}): Promise<ERC20> => {
   const {
     default: { address },
-  } = await import(`@exactly/protocol/deployments/optimism/${symbol === 'esEXA' ? 'EscrowedEXA' : symbol}.json`, {
+  } = await import(`@exactly/protocol/deployments/optimism/${symbol}.json`, {
     assert: { type: 'json' },
   });
   if (!isAddress(address)) throw new Error('Invalid address');
