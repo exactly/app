@@ -1,4 +1,4 @@
-import React, { type FC } from 'react';
+import React, { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import ModalTxCost from 'components/OperationsModal/ModalTxCost';
@@ -24,7 +24,7 @@ import { toPercentage } from 'utils/utils';
 import ModalInfoAPR from 'components/OperationsModal/Info/ModalInfoAPR';
 import useTranslateOperation from 'hooks/useTranslateOperation';
 
-const Deposit: FC = () => {
+const Deposit = ({ children }: { children?: ReactNode }) => {
   const { t } = useTranslation();
   const translateOperation = useTranslateOperation();
   const { symbol, errorData, qty, gasCost, tx, assetContract } = useOperationContext();
@@ -84,6 +84,7 @@ const Deposit: FC = () => {
           <ModalAlert variant={errorData.variant} message={errorData.message} />
         </Grid>
       )}
+      {children}
 
       <Grid item mt={{ xs: 2, sm: 3 }}>
         <ModalSubmit

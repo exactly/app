@@ -8,7 +8,7 @@ import React, {
   useEffect,
   useMemo,
 } from 'react';
-import { parseUnits } from 'viem';
+import { Address, parseUnits } from 'viem';
 
 import useAccountData from 'hooks/useAccountData';
 import useDelayedEffect from 'hooks/useDelayedEffect';
@@ -63,6 +63,9 @@ type ContextValues = {
   setLoadingButton: (loading: LoadingButton) => void;
   errorButton?: string;
   setErrorButton: (error?: string) => void;
+
+  receiver?: Address;
+  setReceiver: React.Dispatch<React.SetStateAction<Address | undefined>>;
 };
 
 const OperationContext = createContext<ContextValues | null>(null);
@@ -98,6 +101,7 @@ export const OperationContextProvider: FC<PropsWithChildren<Props>> = ({ args, c
   const [errorButton, setErrorButton] = useState<string | undefined>();
   const [requiresApproval, setRequiresApproval] = useState(false);
   const [rawSlippage, setRawSlippage] = useState(DEFAULT_SLIPPAGE);
+  const [receiver, setReceiver] = useState<Address>();
 
   const slippage = useMemo(() => {
     return ['deposit', 'depositAtMaturity', 'withdraw', 'withdrawAtMaturity'].includes(operation)
@@ -144,6 +148,8 @@ export const OperationContextProvider: FC<PropsWithChildren<Props>> = ({ args, c
     setLoadingButton,
     errorButton,
     setErrorButton,
+    receiver,
+    setReceiver,
   };
 
   return <OperationContext.Provider value={value}>{children}</OperationContext.Provider>;

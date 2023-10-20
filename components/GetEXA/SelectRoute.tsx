@@ -8,7 +8,7 @@ import Image from 'next/image';
 import { Screen, TXStep, useGetEXA } from 'contexts/GetEXAContext';
 import { useNetwork, useSwitchNetwork } from 'wagmi';
 import { useWeb3 } from 'hooks/useWeb3';
-import RouteSteps from './RouteSteps';
+import RouteStepsWrapper from './RouteSteps';
 import Routes from './Routes';
 import SocketAssetSelector from 'components/SocketAssetSelector';
 import { optimism } from 'wagmi/chains';
@@ -194,7 +194,7 @@ const SelectRoute = () => {
           ) : route === undefined ? (
             <Skeleton width={'100%'} height={24} variant="rectangular" sx={{ borderRadius: 1 }} />
           ) : (
-            <RouteSteps />
+            <RouteStepsWrapper />
           )}
         </Box>
       )}

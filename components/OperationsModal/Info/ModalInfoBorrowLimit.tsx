@@ -30,15 +30,16 @@ function ModalInfoBorrowLimit({ qty, symbol, operation, variant = 'column' }: Pr
   }, [marketAccount, symbol, qty]);
 
   const [beforeBorrowLimit, afterBorrowLimit] = useMemo(() => {
-    if (!marketAccount || !newQty) return [undefined, undefined];
+    if (!marketAccount) return [undefined, undefined];
 
     const { usdPrice, decimals, adjustFactor, isCollateral } = marketAccount;
 
     const beforeBorrowLimitUSD = getBeforeBorrowLimit(marketAccount, operation);
+    const newBeforeBorrowLimit = Number(formatUnits(beforeBorrowLimitUSD, 18)).toFixed(2);
+    if (!newQty) return [newBeforeBorrowLimit, undefined];
 
     const newQtyUsd = (newQty * usdPrice) / 10n ** BigInt(decimals);
 
-    const newBeforeBorrowLimit = Number(formatUnits(beforeBorrowLimitUSD, 18)).toFixed(2);
     let newAfterBorrowLimit = newBeforeBorrowLimit;
 
     switch (operation) {

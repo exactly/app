@@ -1,4 +1,4 @@
-import React, { FC, useEffect } from 'react';
+import React, { FC, PropsWithChildren, useEffect } from 'react';
 
 import ModalTxCost from 'components/OperationsModal/ModalTxCost';
 import ModalGif from 'components/OperationsModal/ModalGif';
@@ -25,7 +25,7 @@ import ModalPenaltyRate from 'components/OperationsModal/ModalPenaltyRate';
 import { useTranslation } from 'react-i18next';
 import useTranslateOperation from 'hooks/useTranslateOperation';
 
-const BorrowAtMaturity: FC = () => {
+const BorrowAtMaturity: FC<PropsWithChildren> = ({ children }) => {
   const { t } = useTranslation();
   const translateOperation = useTranslateOperation();
   const { symbol, errorData, setErrorData, qty, gasCost, tx } = useOperationContext();
@@ -112,6 +112,7 @@ const BorrowAtMaturity: FC = () => {
             fixedRate={fixedRate}
           />
         </ModalAdvancedSettings>
+        {children}
       </Grid>
 
       {errorData?.status && (

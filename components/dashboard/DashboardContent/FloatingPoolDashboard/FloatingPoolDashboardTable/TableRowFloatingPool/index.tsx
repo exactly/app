@@ -23,9 +23,10 @@ type Props = {
   depositedAmount?: bigint;
   borrowedAmount?: bigint;
   apr?: number;
+  simple?: boolean;
 };
 
-function TableRowFloatingPool({ symbol, valueUSD, depositedAmount, borrowedAmount, type, apr }: Props) {
+function TableRowFloatingPool({ symbol, valueUSD, depositedAmount, borrowedAmount, type, apr, simple }: Props) {
   const { t } = useTranslation();
   const { query } = useRouter();
   const { marketAccount } = useAccountData(symbol);
@@ -58,26 +59,30 @@ function TableRowFloatingPool({ symbol, valueUSD, depositedAmount, borrowedAmoun
           </Stack>
         </TableCell>
       </Link>
-      <TableCell align="left" size="small">
-        <Typography>
-          {(depositedAmount !== undefined &&
-            borrowedAmount !== undefined &&
-            `${formatNumber(
-              formatUnits(type === 'deposit' ? depositedAmount : borrowedAmount, marketAccount?.decimals ?? 18),
-              symbol,
-            )}`) || <Skeleton width={40} />}
-        </Typography>
-      </TableCell>
+      {!simple && (
+        <TableCell align="left" size="small">
+          <Typography>
+            {(depositedAmount !== undefined &&
+              borrowedAmount !== undefined &&
+              `${formatNumber(
+                formatUnits(type === 'deposit' ? depositedAmount : borrowedAmount, marketAccount?.decimals ?? 18),
+                symbol,
+              )}`) || <Skeleton width={40} />}
+          </Typography>
+        </TableCell>
+      )}
       <TableCell align="left" size="small">
         <Typography>
           {(valueUSD !== undefined && `$${formatNumber(valueUSD, 'USD', true)}`) || <Skeleton width={70} />}
         </Typography>
       </TableCell>
-      <TableCell align="left" size="small">
-        <Box display="flex" width="fit-content" gap={1}>
-          <Rates symbol={symbol} apr={apr} type={type} />
-        </Box>
-      </TableCell>
+      {!simple && (
+        <TableCell align="left" size="small">
+          <Box display="flex" width="fit-content" gap={1}>
+            <Rates symbol={symbol} apr={apr} type={type} />
+          </Box>
+        </TableCell>
+      )}
       {type === 'deposit' ? (
         <TableCell align="left" size="small">
           <SwitchCollateral symbol={symbol} />
@@ -86,55 +91,58 @@ function TableRowFloatingPool({ symbol, valueUSD, depositedAmount, borrowedAmoun
         <TableCell align="left" size="small" />
       )}
 
-      <TableCell align="left" width={50} size="small" sx={{ px: 0.5 }}>
-        <Button
-          variant="contained"
-          onClick={(e) => handleActionClick(e, type, symbol)}
-          sx={{ whiteSpace: 'nowrap' }}
-          data-testid={`floating-${type}-${symbol}`}
-        >
-          {type === 'deposit' ? t('Deposit') : t('Borrow')}
-        </Button>
-      </TableCell>
-
-      <TableCell align="left" width={50} size="small" sx={{ pr: 1.5 }}>
-        {type === 'deposit' ? (
-          <Button
-            variant="outlined"
-            sx={{ backgroundColor: 'components.bg', whiteSpace: 'nowrap' }}
-            onClick={(e) => handleActionClick(e, 'withdraw', symbol)}
-            data-testid={`floating-withdraw-${symbol}`}
-          >
-            {t('Withdraw')}
-          </Button>
-        ) : (
-          <ButtonGroup>
+      {!simple && (
+        <>
+          <TableCell align="left" width={50} size="small" sx={{ px: 0.5 }}>
             <Button
-              variant="outlined"
-              sx={{ backgroundColor: 'components.bg', whiteSpace: 'nowrap', '&:hover': { zIndex: 1 } }}
-              onClick={(e) => handleActionClick(e, 'repay', symbol)}
-              data-testid={`floating-repay-${symbol}`}
+              variant="contained"
+              onClick={(e) => handleActionClick(e, type, symbol)}
+              sx={{ whiteSpace: 'nowrap' }}
+              data-testid={`floating-${type}-${symbol}`}
             >
-              {t('Repay')}
+              {type === 'deposit' ? t('Deposit') : t('Borrow')}
             </Button>
-            <Button
-              variant="outlined"
-              sx={{
-                backgroundColor: 'components.bg',
-                whiteSpace: 'nowrap',
-                '&:disabled': {
-                  borderLeftColor: ({ palette }) => palette.grey[palette.mode === 'light' ? 500 : 300],
-                },
-              }}
-              onClick={() => startDebtManager({ from: { symbol } })}
-              disabled={isRolloverDisabled(borrowedAmount)}
-              data-testid={`floating-rollover-${symbol}`}
-            >
-              {t('Rollover')}
-            </Button>
-          </ButtonGroup>
-        )}
-      </TableCell>
+          </TableCell>
+          <TableCell align="left" width={50} size="small" sx={{ pr: 1.5 }}>
+            {type === 'deposit' ? (
+              <Button
+                variant="outlined"
+                sx={{ backgroundColor: 'components.bg', whiteSpace: 'nowrap' }}
+                onClick={(e) => handleActionClick(e, 'withdraw', symbol)}
+                data-testid={`floating-withdraw-${symbol}`}
+              >
+                {t('Withdraw')}
+              </Button>
+            ) : (
+              <ButtonGroup>
+                <Button
+                  variant="outlined"
+                  sx={{ backgroundColor: 'components.bg', whiteSpace: 'nowrap', '&:hover': { zIndex: 1 } }}
+                  onClick={(e) => handleActionClick(e, 'repay', symbol)}
+                  data-testid={`floating-repay-${symbol}`}
+                >
+                  {t('Repay')}
+                </Button>
+                <Button
+                  variant="outlined"
+                  sx={{
+                    backgroundColor: 'components.bg',
+                    whiteSpace: 'nowrap',
+                    '&:disabled': {
+                      borderLeftColor: ({ palette }) => palette.grey[palette.mode === 'light' ? 500 : 300],
+                    },
+                  }}
+                  onClick={() => startDebtManager({ from: { symbol } })}
+                  disabled={isRolloverDisabled(borrowedAmount)}
+                  data-testid={`floating-rollover-${symbol}`}
+                >
+                  {t('Rollover')}
+                </Button>
+              </ButtonGroup>
+            )}
+          </TableCell>
+        </>
+      )}
     </TableRow>
   );
 }

@@ -69,13 +69,13 @@ export const socketQuote = async ({
     toTokenAddress,
     userAddress,
     sort: 'output',
-    singleTxOnly: 'true',
-    defaultSwapSlippage: '1',
-    uniqueRoutesPerBridge: 'true',
+    singleTxOnly: 'false',
+    defaultSwapSlippage: '5',
+    uniqueRoutesPerBridge: 'false',
     isContractCall: String(!!destinationPayload),
     ...(recipient ? { recipient } : {}),
     ...(destinationPayload && { destinationPayload }),
-    ...(destinationGasLimit && { destinationGasLimit: destinationGasLimit.toString() }),
+    ...(destinationPayload ? destinationGasLimit && { destinationGasLimit: destinationGasLimit.toString() } : {}),
   });
 
 export const socketBuildTX = async (body: { route: Route; destinationCallData?: DestinationCallData }) =>

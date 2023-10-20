@@ -49,6 +49,7 @@ export default (): BorrowAtMaturity => {
     rawSlippage,
     setRawSlippage,
     slippage,
+    receiver,
   } = useOperationContext();
 
   const { transaction } = useAnalytics({
@@ -221,8 +222,8 @@ export default (): BorrowAtMaturity => {
       } else {
         if (!marketContract) return;
 
-        const args = [date, amount, maxAmount, walletAddress, walletAddress] as const;
-
+        const borrower = walletAddress;
+        const args = [date, amount, maxAmount, receiver || walletAddress, borrower] as const;
         const gasEstimation = await marketContract.estimateGas.borrowAtMaturity(args, opts);
 
         hash = await marketContract.write.borrowAtMaturity(args, {
@@ -258,12 +259,13 @@ export default (): BorrowAtMaturity => {
     qty,
     walletAddress,
     opts,
-    setErrorData,
     t,
     transaction,
-    setTx,
     ETHRouterContract,
     marketContract,
+    receiver,
+    setErrorData,
+    setTx,
     handleOperationError,
   ]);
 

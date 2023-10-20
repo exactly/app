@@ -12,9 +12,10 @@ import useTranslateOperation from 'hooks/useTranslateOperation';
 type Props = {
   type: 'deposit' | 'borrow';
   rows: FloatingPoolItemData[];
+  simple?: boolean;
 };
 
-function FloatingPoolDashboardTable({ type, rows }: Props) {
+function FloatingPoolDashboardTable({ type, rows, simple }: Props) {
   const { t } = useTranslation();
   const translateOperation = useTranslateOperation();
   const { setOrderBy, sortData, direction: sortDirection, isActive: sortActive } = useSorting<FloatingPoolItemData>();
@@ -35,6 +36,7 @@ function FloatingPoolDashboardTable({ type, rows }: Props) {
           action: type === 'deposit' ? t('deposited') : t('borrowed'),
         }),
         align: 'left',
+        hidden: simple,
       },
       {
         title: t('Value'),
@@ -47,6 +49,7 @@ function FloatingPoolDashboardTable({ type, rows }: Props) {
         key: 'apr',
         align: 'left',
         sortKey: 'apr',
+        hidden: simple,
       },
       {
         title: t('Collateral'),
@@ -58,35 +61,40 @@ function FloatingPoolDashboardTable({ type, rows }: Props) {
         title: '',
         key: 'deposit',
         align: 'left',
+        hidden: simple,
       },
       {
         title: '',
         key: 'borrow',
         align: 'left',
+        hidden: simple,
       },
     ];
-  }, [translateOperation, type, t]);
+  }, [t, translateOperation, type, simple]);
 
   return (
     <TableContainer>
       <Table>
         <TableHead>
           <TableRow>
-            {headers.map(({ key, title, align, hidden, tooltipTitle, tooltipPlacement, sortKey }) => (
-              <TableHeadCell
-                key={`header_${key}_${type}`}
-                title={title}
-                tooltipTitle={tooltipTitle}
-                align={align}
-                hidden={hidden}
-                tooltipPlacement={tooltipPlacement}
-                sortActive={sortKey && sortActive(sortKey)}
-                sortDirection={sortKey && sortDirection(sortKey)}
-                sort={() => setOrderBy(sortKey)}
-                isSortEnabled={!!sortKey}
-                sx={{ '&:first-child': { pl: 1.5 }, '&:last-child': { pr: 1.5 } }}
-              />
-            ))}
+            {headers.map(({ key, title, align, hidden, tooltipTitle, tooltipPlacement, sortKey }) => {
+              if (hidden) return;
+              return (
+                <TableHeadCell
+                  key={`header_${key}_${type}`}
+                  title={title}
+                  tooltipTitle={tooltipTitle}
+                  align={align}
+                  hidden={hidden}
+                  tooltipPlacement={tooltipPlacement}
+                  sortActive={sortKey && sortActive(sortKey)}
+                  sortDirection={sortKey && sortDirection(sortKey)}
+                  sort={() => setOrderBy(sortKey)}
+                  isSortEnabled={!!sortKey}
+                  sx={{ '&:first-child': { pl: 1.5 }, '&:last-child': { pr: 1.5 } }}
+                />
+              );
+            })}
           </TableRow>
         </TableHead>
         <TableBody>
@@ -99,6 +107,7 @@ function FloatingPoolDashboardTable({ type, rows }: Props) {
               borrowedAmount={borrowedAmount}
               type={type}
               apr={apr}
+              simple={simple}
             />
           ))}
         </TableBody>
