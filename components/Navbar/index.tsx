@@ -23,7 +23,6 @@ import Link from 'next/link';
 import Wallet from 'components/Wallet';
 import SelectMarketsView from 'components/SelectMarketsView';
 import { useTranslation } from 'react-i18next';
-import MaturityDateReminder from 'components/MaturityDateReminder';
 import { RewardsButton } from 'components/RewardsModal';
 import { useCustomTheme } from 'contexts/ThemeContext';
 import { useModal } from 'contexts/ModalContext';
@@ -135,7 +134,6 @@ function Navbar() {
 
   return (
     <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-      <MaturityDateReminder />
       <AppBar
         position="static"
         color="transparent"

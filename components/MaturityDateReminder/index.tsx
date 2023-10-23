@@ -1,57 +1,63 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import Snackbar from '@mui/material/Snackbar';
 import dayjs from 'dayjs';
 import { useTranslation } from 'react-i18next';
-import { Alert, Slide, SlideProps } from '@mui/material';
+import { Alert, Box, IconButton, Slide, SlideProps } from '@mui/material';
 import useAccountData from 'hooks/useAccountData';
 import parseTimestamp from 'utils/parseTimestamp';
+import CloseIcon from '@mui/icons-material/Close';
+
+const SECONDS_IN_A_DAY = 86400n;
+const RANGE_IN_SECONDS = SECONDS_IN_A_DAY * 5n;
 
 export default function MaturityDateReminder() {
   const { t } = useTranslation();
   const { accountData } = useAccountData();
-  const [openReminder, setOpenReminder] = useState<boolean>(false);
-  const [date, setDate] = useState<string>('');
+  const [isReminderOpen, setIsReminderOpen] = useState(false);
 
-  useEffect(() => {
-    if (!accountData) return;
+  const [date] = useMemo(
+    () =>
+      accountData
+        ? accountData.flatMap(({ fixedBorrowPositions }) =>
+            fixedBorrowPositions.map(({ maturity }) => {
+              const currentTimestamp = BigInt(dayjs().unix());
+              if (maturity <= currentTimestamp) return;
+              const differenceInSeconds = maturity - currentTimestamp;
+              if (RANGE_IN_SECONDS <= differenceInSeconds) return;
+              return parseTimestamp(maturity.toString(), 'MMM DD, YYYY, HH:mm:ss');
+            }),
+          )
+        : [],
+    [accountData],
+  );
 
-    accountData.forEach((fixedLender) => {
-      fixedLender.fixedBorrowPositions.forEach((borrowPosition) => {
-        const { maturity } = borrowPosition;
-
-        const secondsInADay = 86_400n;
-        const rangeInSeconds = secondsInADay * 5n;
-        const currentTimestamp = BigInt(dayjs().unix());
-
-        if (maturity > currentTimestamp) {
-          const differenceInSeconds = maturity - currentTimestamp;
-
-          if (rangeInSeconds > differenceInSeconds) {
-            setDate(parseTimestamp(maturity.toString(), 'MMM DD, YYYY, HH:mm:ss'));
-            setOpenReminder(true);
-          }
-        }
-      });
-    });
-  }, [accountData]);
+  useEffect(() => setIsReminderOpen(!!date), [date]);
 
   const handleClose = useCallback(() => {
-    setOpenReminder(false);
+    setIsReminderOpen(false);
   }, []);
 
   function SlideTransition(props: SlideProps) {
     return <Slide {...props} direction="down" />;
   }
 
-  return openReminder ? (
+  console.log({ isReminderOpen, date });
+
+  return isReminderOpen ? (
     <Snackbar
-      open={openReminder}
+      open={isReminderOpen}
+      autoHideDuration={10_000}
       onClose={handleClose}
       TransitionComponent={SlideTransition}
       anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
     >
-      <Alert severity="warning">
-        {t('Make sure to repay your fixed borrows before {{date}} to avoid penalty fees.', { date })}
+      <Alert severity="warning" sx={{ display: 'flex', alignItems: 'center' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Box>{t('Make sure to repay your fixed borrows before {{date}} to avoid penalty fees.', { date })}</Box>
+          <IconButton size="small" aria-label="close" color="inherit" onClick={handleClose}>
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        </Box>
       </Alert>
     </Snackbar>
   ) : null;

@@ -26,6 +26,8 @@ import StakingModal from 'components/StakingModal';
 import DebtManagerModal from 'components/DebtManager';
 import FaucetModal from 'components/operations/Faucet/Modal';
 import NewsModal from 'components/NewsModal';
+import GetEXA from 'components/GetEXA';
+import MaturityDateReminder from '../components/MaturityDateReminder';
 
 const { maxWidth } = globals;
 
@@ -38,6 +40,7 @@ const Modals = () => (
     <StakingModal />
     <FaucetModal />
     {!isE2E && <NewsModal />}
+    <GetEXA />
   </>
 );
 
@@ -101,6 +104,7 @@ export default function App({ Component, pageProps, router }: AppProps) {
                   <Footer />
                 </Box>
                 <Modals />
+                <MaturityDateReminder />
               </AccountDataProvider>
             </GlobalErrorProvider>
           </ModalContextProvider>
