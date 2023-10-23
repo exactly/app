@@ -22,6 +22,7 @@ import { useVELOPoolAPR } from 'hooks/useVELO';
 import { useExtraDepositAPR } from 'hooks/useExtra';
 import { useWeb3 } from 'hooks/useWeb3';
 import FeaturedStrategies from 'components/strategies/FeaturedStrategies';
+import { useModal } from '../contexts/ModalContext';
 
 const Strategies: NextPage = () => {
   usePageView('/strategies', 'Strategies');
@@ -29,6 +30,7 @@ const Strategies: NextPage = () => {
   const { query } = useRouter();
   const { startLeverager } = useStartLeverager();
   const { startDebtManager } = useStartDebtManagerButton();
+  const { open: openGetEXA } = useModal('get-exa');
 
   const { chain } = useWeb3();
 
@@ -227,16 +229,16 @@ const Strategies: NextPage = () => {
             { text: t('Basic'), size: 'small' as const },
           ],
           button: (
-            <Link href={{ pathname: '/get-exa', query }} style={{ width: '100%' }}>
-              <Button fullWidth variant="contained">
+            <a style={{ width: '100%' }}>
+              <Button fullWidth variant="contained" onClick={openGetEXA}>
                 {t('Get EXA')}
               </Button>
-            </Link>
+            </a>
           ),
           isNew: true,
         },
       ].filter((s) => s.chainId === chain.id || s.chainId === undefined),
-    [chain.id, hfLabel, lowestBorrowAPR, maxYield, query, startDebtManager, startLeverager, t],
+    [chain.id, hfLabel, lowestBorrowAPR, maxYield, openGetEXA, query, startDebtManager, startLeverager, t],
   );
 
   const thirdPartyStrategies: (Strategy & { chainId?: number })[] = useMemo(

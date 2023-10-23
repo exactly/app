@@ -26,7 +26,7 @@ import StakingModal from 'components/StakingModal';
 import DebtManagerModal from 'components/DebtManager';
 import FaucetModal from 'components/operations/Faucet/Modal';
 import NewsModal from 'components/NewsModal';
-import GetEXA from 'components/GetEXA';
+import GetEXAModal from 'components/GetEXA/ModalWrapper';
 import MaturityDateReminder from '../components/MaturityDateReminder';
 
 const { maxWidth } = globals;
@@ -39,8 +39,8 @@ const Modals = () => (
     <LeveragerModal />
     <StakingModal />
     <FaucetModal />
+    <GetEXAModal />
     {!isE2E && <NewsModal />}
-    <GetEXA />
   </>
 );
 

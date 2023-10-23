@@ -41,12 +41,12 @@ import {
 import formatNumber from 'utils/formatNumber';
 import { WEI_PER_ETHER } from 'utils/const';
 import { toPercentage } from 'utils/utils';
-import Link from 'next/link';
 import useIsContract from 'hooks/useIsContract';
 import { gasLimit } from 'utils/gas';
 import { Transaction } from 'types/Transaction';
 import LoadingTransaction from 'components/common/modal/Loading';
 import useAnalytics from 'hooks/useAnalytics';
+import { useModal } from '../../contexts/ModalContext';
 
 type Params<T extends ExtractAbiFunctionNames<typeof escrowedExaABI>> = AbiParametersToPrimitiveTypes<
   ExtractAbiFunction<typeof escrowedExaABI, T>['inputs']
@@ -153,6 +153,7 @@ function VestingInput({ refetch }: Props) {
   const [isLoading, setIsLoading] = useState(false);
   const [tx, setTx] = useState<Transaction>();
   const { transaction } = useAnalytics();
+  const { open: openGetEXA } = useModal('get-exa');
 
   const [qty, setQty] = useState<string>('');
 
@@ -406,7 +407,12 @@ function VestingInput({ refetch }: Props) {
                 <Trans
                   i18nKey="Not enough EXA for reserve. <1>Get EXA</1>."
                   components={{
-                    1: <Link href="/get-exa" style={{ fontWeight: 700, textDecoration: 'underline' }} />,
+                    1: (
+                      <a
+                        onClick={openGetEXA}
+                        style={{ fontWeight: 700, textDecoration: 'underline', cursor: 'pointer' }}
+                      />
+                    ),
                   }}
                 />
               </Typography>

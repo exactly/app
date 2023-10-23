@@ -41,8 +41,6 @@ export default function MaturityDateReminder() {
     return <Slide {...props} direction="down" />;
   }
 
-  console.log({ isReminderOpen, date });
-
   return isReminderOpen ? (
     <Snackbar
       open={isReminderOpen}

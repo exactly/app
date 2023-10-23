@@ -4,7 +4,7 @@ import type { FC, PropsWithChildren } from 'react';
 import type { Operation } from 'types/Operation';
 import type { Position } from 'components/DebtManager/types';
 
-type Identifier = 'operation' | 'rewards' | 'rollover' | 'leverager' | 'proto-staker' | 'faucet';
+type Identifier = 'operation' | 'rewards' | 'rollover' | 'leverager' | 'proto-staker' | 'faucet' | 'get-exa';
 
 export type Args<T extends Identifier> = T extends 'operation'
   ? { operation: Operation; symbol: string; maturity?: bigint }

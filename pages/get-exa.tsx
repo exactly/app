@@ -4,7 +4,7 @@ import { Box, Typography } from '@mui/material';
 import { Trans, useTranslation } from 'react-i18next';
 import { GetEXAProvider } from '../contexts/GetEXAContext';
 import { usePageView } from '../hooks/useAnalytics';
-import GetEXA from '../components/getEXA';
+import GetEXA from '../components/GetEXA';
 import Link from 'next/link';
 
 const GetExaPage: NextPage = () => {

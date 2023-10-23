@@ -3,7 +3,7 @@ import type { NextPage } from 'next';
 
 import { usePageView } from 'hooks/useAnalytics';
 import { Trans, useTranslation } from 'react-i18next';
-import { Box, Button, Divider, Grid, Link, Skeleton, Typography } from '@mui/material';
+import { Box, Button, Divider, Grid, Skeleton, Typography } from '@mui/material';
 import VestingInput from 'components/VestingInput';
 import ActiveStream from 'components/ActiveStream';
 import { useUpdateStreams, useEscrowedEXA, useEscrowedEXAReserveRatio } from 'hooks/useEscrowedEXA';
@@ -31,6 +31,7 @@ const Vesting: NextPage = () => {
 
   const { rewards } = useRewards();
   const { open: openRewards } = useModal('rewards');
+  const { open: openGetEXA } = useModal('get-exa');
 
   const unclaimedTokens = useMemo(() => {
     return rewards['esEXA']?.amount || 0n;
@@ -114,7 +115,12 @@ const Vesting: NextPage = () => {
               <Trans
                 i18nKey="You can <1>get EXA</1> if you don’t have the required reserve amount."
                 components={{
-                  1: <Link href="/get-exa" style={{ textDecoration: 'underline' }} />,
+                  1: (
+                    <a
+                      onClick={openGetEXA}
+                      style={{ textDecoration: 'underline', fontWeight: 700, cursor: 'pointer' }}
+                    />
+                  ),
                 }}
               />
             </Typography>
