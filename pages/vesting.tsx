@@ -63,7 +63,11 @@ const Vesting: NextPage = () => {
             )}
           </Typography>
           <Typography sx={{ textDecoration: 'underline' }} component="span">
-            <a target="_blank" rel="noreferrer noopener" href="https://docs.exact.ly/">
+            <a
+              target="_blank"
+              rel="noreferrer noopener"
+              href="https://docs.exact.ly/governance/exactly-token-exa/escrowedexa-esexa"
+            >
               {t('Learn more about the esEXA Vesting Program.')}
             </a>
           </Typography>

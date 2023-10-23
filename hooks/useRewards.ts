@@ -11,6 +11,7 @@ import { AbiParametersToPrimitiveTypes, ExtractAbiFunction } from 'abitype';
 import { previewerABI } from 'types/abi';
 import { Transaction } from 'types/Transaction';
 import { gasLimit } from 'utils/gas';
+import { parseEther } from 'viem';
 
 export type RewardRates = AbiParametersToPrimitiveTypes<
   ExtractAbiFunction<typeof previewerABI, 'exactly'>['outputs']
@@ -52,7 +53,9 @@ export default () => {
 
     const excludedSymbols = accountData
       .flatMap(({ rewardRates }) => rewardRates)
-      .filter(({ borrow, floatingDeposit }) => borrow !== 0n && floatingDeposit !== 0n)
+      .filter(
+        ({ borrow, floatingDeposit }) => borrow >= parseEther('0.00005') && floatingDeposit >= parseEther('0.00005'),
+      )
       .map(({ assetSymbol }) => assetSymbol);
 
     const rewardSymbolsFiltered = accountData
