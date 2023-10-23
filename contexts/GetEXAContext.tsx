@@ -398,6 +398,7 @@ export const GetEXAProvider: FC<PropsWithChildren> = ({ children }) => {
       setTX({ status: 'processing', hash: txHash_ });
       const { status, transactionHash } = await waitForTransaction({ hash: txHash_ });
       setTX({ status: status ? 'success' : 'error', hash: transactionHash });
+      setScreen(Screen.TX_STATUS);
     } catch (err) {
       setTXError({ status: true, message: handleOperationError(err) });
       setTXStep(TXStep.CONFIRM);
