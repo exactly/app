@@ -21,6 +21,11 @@ export default function ModalWrapper() {
         appear: true,
         direction: 'right',
       }}
+      PaperProps={{
+        sx: {
+          bgcolor: ({ palette: { mode } }) => (mode === 'light' ? 'grey.100' : 'black'),
+        },
+      }}
     >
       <IconButton onClick={close} sx={{ position: 'absolute', right: 8, top: 8 }}>
         <CloseIcon />

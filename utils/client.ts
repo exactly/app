@@ -83,5 +83,6 @@ createWeb3Modal({
   chains,
   themeVariables: {
     '--w3m-font-family': 'Inter',
+    '--w3m-z-index': 1201,
   },
 });
