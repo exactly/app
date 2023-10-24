@@ -115,26 +115,22 @@ const Strategies: NextPage = () => {
         },
         {
           chainId: optimism.id,
-          title: t('Deposit EXA on Extra Finance'),
-          description: t('Deposit EXA on Extra Finance and earn interest on it.'),
+          title: t('esEXA Vesting'),
+          description: t('Unlock your EXA rewards for being an active participant in the Protocol'),
           tags: [
-            { prefix: t('up to'), text: `${extraRate} APR` },
+            { prefix: t('EARN'), text: 'EXA' },
             { text: t('Basic'), size: 'small' as const },
           ],
           button: (
-            <a
-              href="https://app.extrafi.io/lend/EXA"
-              target="_blank"
-              rel="noreferrer noopener"
-              style={{ width: '100%' }}
-            >
+            <Link href={{ pathname: '/vesting', query }} style={{ width: '100%' }}>
               <Button fullWidth variant="contained">
-                {t('Go to Extra Finance')}
+                {t('Vest esEXA')}
               </Button>
-            </a>
+            </Link>
           ),
-          source: 'third-party' as const,
-          imgPath: '/img/strategies/featured_extra.svg',
+          source: 'exactly' as const,
+          isNew: true,
+          imgPath: '/img/strategies/featured_esEXA.svg',
         },
         {
           title: t('Reduce Exposure'),
@@ -155,7 +151,7 @@ const Strategies: NextPage = () => {
       ]
         .filter((s) => s.chainId === chain.id || s.chainId === undefined)
         .slice(0, 3),
-    [chain.id, extraRate, hfLabel, lowestBorrowAPR, maxYield, startDebtManager, startLeverager, t],
+    [chain.id, hfLabel, lowestBorrowAPR, maxYield, query, startDebtManager, startLeverager, t],
   );
 
   const exactlyStrategies = useMemo(

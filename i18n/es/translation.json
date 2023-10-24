@@ -168,7 +168,6 @@
   "{{operation}} maturity date (In {{daysLeft}})": "Fecha de vencimiento del {{operation}} (en {{daysLeft}})",
   "Due at {{hour}}": "Vence a las {{hour}}",
   "All fixed pools are due at {{hour}}.": "Todos los pools fijos vencen a las {{hour}}.",
-  "Fixed borrows are due at {{hour}} on maturity date.": "Los préstamos a tasa fija vencen a las {{hour}} en la fecha de vencimiento.",
   "Optimal deposit amount": "Monto de depósito óptimo",
   "You can't repay more than you have in your wallet": "No puedes pagar más de lo que hay en tu billetera",
   "Debt amount": "Monto deuda",
@@ -495,9 +494,6 @@
   "No routes where found": "No se encontraron rutas",
   "Insufficient {{symbol}} balance": "Saldo de {{symbol}} insuficiente",
   "Get": "Obtener",
-  "Transaction processing...": "Procesando transacción...",
-  "Transaction Success": "Transacción exitosa",
-  "Transaction Error": "Error en la transacción",
   "Error fetching routes from socket": "Error al obtener rutas desde Socket",
   "Error approving token": "Error al aprobar token",
   "Ready to take part in the Protocol's Governance, Vesting Program, or simply hold EXA? Begin by getting EXA today.": "¿Listo para participar en la Gobernanza del Protocolo, el Programa de Vencimiento o simplemente mantener EXA? Comienza obteniendo EXA hoy.",
@@ -543,5 +539,8 @@
   "Unlock your EXA rewards for being an active participant in the Protocol": "Desbloquea tus recompensas EXA por ser un participante activo en el Protocolo",
   "EARN": "GANA",
   "You must deposit {{reserveRatio}} of the total esEXA you want to vest as an EXA reserve.": "Debes depositar {{reserveRatio}} del total de esEXA que deseas consolidar como reserva de EXA.",
-  "The EscrowedEXA contract is an ERC-20 token that allows anyone to mint esEXA tokens in exchange for EXA tokens.": "El contrato EscrowedEXA es un token ERC-20 que permite a cualquiera acuñar tokens esEXA a cambio de tokens EXA."
+  "The EscrowedEXA contract is an ERC-20 token that allows anyone to mint esEXA tokens in exchange for EXA tokens.": "El contrato EscrowedEXA es un token ERC-20 que permite a cualquiera acuñar tokens esEXA a cambio de tokens EXA.",
+  "Fixed {{type}} are due at {{hour}} local time on maturity date.": "Los {{type}} fijos vencen a las {{hour}} hora local en la fecha de vencimiento.",
+  "Transaction success": "Transacción exitosa",
+  "esEXA Vesting": "Vesting de esEXA"
 }
