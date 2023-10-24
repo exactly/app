@@ -41,7 +41,7 @@ function ChainOption({ chain, option = false, optionSize = 17, selectedSize = 14
           }}
         />
       )}
-      <Typography fontWeight={600} fontSize={size} color="grey.900" data-testid="get-exa-chain">
+      <Typography fontWeight={600} fontSize={size} color="grey.900">
         {chain.name}
       </Typography>
     </Box>
