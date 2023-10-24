@@ -308,11 +308,13 @@ export function RewardsButton() {
 
   const rewards = useMemo(
     () =>
-      Object.entries(rs).map(([symbol, { amount, usdPrice }]) => ({
-        symbol,
-        amount: formatEther(amount),
-        valueUSD: usdPrice ? formatEther((amount * usdPrice) / WEI_PER_ETHER) : undefined,
-      })),
+      Object.entries(rs)
+        .map(([symbol, { amount, usdPrice }]) => ({
+          symbol,
+          amount: formatEther(amount),
+          valueUSD: usdPrice ? formatEther((amount * usdPrice) / WEI_PER_ETHER) : undefined,
+        }))
+        .sort((a, b) => (b.valueUSD ? parseFloat(b.valueUSD) : 0) - (a.valueUSD ? parseFloat(a.valueUSD) : 0)),
     [rs],
   );
 

@@ -94,14 +94,16 @@ const APRBreakdownItem: FC<APRBreakdownItemProps> = ({ title, values }) => {
         </Typography>
       </Box>
       <Box display="flex" flexDirection="column" gap={1}>
-        {values.map(({ symbol, apr }) => (
-          <Box key={`${symbol}${apr}`} display="flex" alignItems="center" gap={0.5}>
-            <Typography fontWeight={500} fontSize={14}>
-              {apr && apr > 999 ? '∞' : toPercentage(apr)}
-            </Typography>
-            <SymbolGroup symbols={[symbol]} />
-          </Box>
-        ))}
+        {values
+          .sort((a, b) => (b.apr ?? 0) - (a.apr ?? 0))
+          .map(({ symbol, apr }) => (
+            <Box key={`${symbol}${apr}`} display="flex" alignItems="center" gap={0.5}>
+              <Typography fontWeight={500} fontSize={14}>
+                {apr && apr > 999 ? '∞' : toPercentage(apr)}
+              </Typography>
+              <SymbolGroup symbols={[symbol]} />
+            </Box>
+          ))}
       </Box>
     </Box>
   );
