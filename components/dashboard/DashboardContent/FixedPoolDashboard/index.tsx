@@ -39,12 +39,17 @@ function FixedPoolDashboard({ type }: Props) {
     >
       <Box display="flex" justifyContent="space-between" flexWrap="wrap" mx={1.5}>
         <Typography variant="h6">{t('Fixed Interest Rate')}</Typography>
-        <Box display="flex" alignItems="center">
-          <InfoIcon sx={{ color: 'blue', height: 14 }} />
-          <Typography fontSize={13} fontWeight={500} color="blue">
-            {t('Fixed borrows are due at {{hour}} on maturity date.', { hour: getHourUTC2Local() })}
-          </Typography>
-        </Box>
+        {fixedRows.length > 0 && (
+          <Box display="flex" alignItems="center">
+            <InfoIcon sx={{ color: 'blue', height: 14 }} />
+            <Typography fontSize={13} fontWeight={500} color="blue">
+              {t('Fixed {{type}} are due at {{hour}} local time on maturity date.', {
+                hour: getHourUTC2Local(),
+                type: type === 'deposit' ? t('deposits') : t('borrows'),
+              })}
+            </Typography>
+          </Box>
+        )}
       </Box>
 
       {fixedRows.length === 0 ? (
