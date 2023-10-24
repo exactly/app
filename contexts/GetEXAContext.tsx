@@ -58,7 +58,7 @@ import useIsContract from 'hooks/useIsContract';
 import useIsPermit from 'hooks/useIsPermit';
 import usePermit2 from 'hooks/usePermit2';
 import { MAX_UINT256, WEI_PER_ETHER } from 'utils/const';
-import { waitForTransaction } from '@wagmi/core';
+import waitForTransaction from 'utils/waitForTransaction';
 import dayjs from 'dayjs';
 import { splitSignature } from '@ethersproject/bytes';
 import useDelayedEffect from 'hooks/useDelayedEffect';

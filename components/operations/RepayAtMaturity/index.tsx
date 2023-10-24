@@ -36,7 +36,7 @@ import { CustomError } from 'types/Error';
 import useEstimateGas from 'hooks/useEstimateGas';
 import { formatUnits, parseUnits, zeroAddress } from 'viem';
 import dayjs from 'dayjs';
-import { waitForTransaction } from '@wagmi/core';
+import waitForTransaction from 'utils/waitForTransaction';
 import { gasLimit } from 'utils/gas';
 
 type RepayWithDiscount = {

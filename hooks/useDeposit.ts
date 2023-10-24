@@ -11,7 +11,7 @@ import useAnalytics from './useAnalytics';
 import { CustomError } from 'types/Error';
 import useEstimateGas from './useEstimateGas';
 import { parseUnits } from 'viem';
-import { waitForTransaction } from '@wagmi/core';
+import waitForTransaction from 'utils/waitForTransaction';
 import { gasLimit } from 'utils/gas';
 
 type Deposit = {

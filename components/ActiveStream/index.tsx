@@ -20,7 +20,7 @@ import {
 } from '@mui/material';
 import React, { FC, useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { waitForTransaction } from '@wagmi/core';
+import waitForTransaction from 'utils/waitForTransaction';
 import { LoadingButton } from '@mui/lab';
 import Image from 'next/image';
 import formatNumber from 'utils/formatNumber';

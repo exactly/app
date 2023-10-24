@@ -8,7 +8,7 @@ import React, {
   useReducer,
 } from 'react';
 import { useWalletClient } from 'wagmi';
-import { waitForTransaction } from '@wagmi/core';
+import waitForTransaction from 'utils/waitForTransaction';
 
 import type { ErrorData } from 'types/Error';
 import type { PopulatedTransaction, Transaction } from 'types/Transaction';

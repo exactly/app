@@ -1,7 +1,7 @@
 import React, { memo, useCallback, useState } from 'react';
 import { LoadingButton } from '@mui/lab';
 import { useNetwork, useSwitchNetwork } from 'wagmi';
-import { waitForTransaction } from '@wagmi/core';
+import waitForTransaction from 'utils/waitForTransaction';
 import { useTranslation } from 'react-i18next';
 import { Allowance } from 'hooks/useAllowances';
 import { useWeb3 } from 'hooks/useWeb3';

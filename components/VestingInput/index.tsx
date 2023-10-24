@@ -17,7 +17,7 @@ import { TransitionProps } from '@mui/material/transitions';
 import dayjs from 'dayjs';
 import { splitSignature } from '@ethersproject/bytes';
 import { type Hex, formatEther, parseEther } from 'viem';
-import { waitForTransaction } from '@wagmi/core';
+import waitForTransaction from 'utils/waitForTransaction';
 import { escrowedExaABI } from 'types/abi';
 import { AbiParametersToPrimitiveTypes, ExtractAbiFunction, ExtractAbiFunctionNames } from 'abitype';
 import Draggable from 'react-draggable';

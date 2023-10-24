@@ -13,7 +13,7 @@ import { WEI_PER_ETHER } from 'utils/const';
 import { CustomError } from 'types/Error';
 import useEstimateGas from './useEstimateGas';
 import { parseUnits } from 'viem';
-import { waitForTransaction } from '@wagmi/core';
+import waitForTransaction from 'utils/waitForTransaction';
 import dayjs from 'dayjs';
 import { gasLimit } from 'utils/gas';
 

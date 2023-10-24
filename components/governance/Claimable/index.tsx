@@ -1,7 +1,8 @@
 import React, { FC, useMemo } from 'react';
 import { Hex, formatEther, parseEther } from 'viem';
 import Image from 'next/image';
-import { useNetwork, useWaitForTransaction, useSwitchNetwork } from 'wagmi';
+import { useNetwork, useSwitchNetwork } from 'wagmi';
+import useWaitForTransaction from 'hooks/useWaitForTransaction';
 import { Box, Button, Divider, Skeleton, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { LoadingButton } from '@mui/lab';

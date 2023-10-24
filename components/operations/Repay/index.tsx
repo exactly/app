@@ -27,7 +27,7 @@ import { ETH_ROUTER_SLIPPAGE, WEI_PER_ETHER } from 'utils/const';
 import { CustomError } from 'types/Error';
 import useEstimateGas from 'hooks/useEstimateGas';
 import { formatUnits, parseUnits } from 'viem';
-import { waitForTransaction } from '@wagmi/core';
+import waitForTransaction from 'utils/waitForTransaction';
 import { gasLimit } from 'utils/gas';
 
 function Repay() {

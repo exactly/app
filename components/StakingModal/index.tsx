@@ -36,7 +36,7 @@ import { MAX_UINT256, WEI_PER_ETHER } from 'utils/const';
 import { LoadingButton } from '@mui/lab';
 import { useWeb3 } from 'hooks/useWeb3';
 import { useNetwork, useSwitchNetwork, useSignTypedData, useWalletClient } from 'wagmi';
-import { waitForTransaction } from '@wagmi/core';
+import waitForTransaction from 'utils/waitForTransaction';
 import { ModalBox, ModalBoxCell, ModalBoxRow } from 'components/common/modal/ModalBox';
 import SocketAssetSelector from 'components/SocketAssetSelector';
 import useSocketAssets from 'hooks/useSocketAssets';

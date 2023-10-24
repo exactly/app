@@ -9,7 +9,7 @@ import React, {
   useMemo,
 } from 'react';
 import { useSignTypedData, usePublicClient } from 'wagmi';
-import { waitForTransaction } from '@wagmi/core';
+import waitForTransaction from 'utils/waitForTransaction';
 import {
   formatEther,
   formatUnits,

@@ -10,7 +10,7 @@ import { useUpdateStreams, useEscrowedEXA, useEscrowedEXAReserveRatio } from 'ho
 import { useWeb3 } from 'hooks/useWeb3';
 import { useNetwork, useSwitchNetwork } from 'wagmi';
 import { LoadingButton } from '@mui/lab';
-import { waitForTransaction } from '@wagmi/core';
+import waitForTransaction from 'utils/waitForTransaction';
 import useRewards from 'hooks/useRewards';
 import { useModal } from 'contexts/ModalContext';
 import formatNumber from 'utils/formatNumber';

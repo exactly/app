@@ -24,7 +24,7 @@ import { useTranslation } from 'react-i18next';
 import useTranslateOperation from 'hooks/useTranslateOperation';
 import useEstimateGas from 'hooks/useEstimateGas';
 import { formatUnits, parseUnits } from 'viem';
-import { waitForTransaction } from '@wagmi/core';
+import waitForTransaction from 'utils/waitForTransaction';
 import { gasLimit } from 'utils/gas';
 
 const Withdraw: FC = () => {

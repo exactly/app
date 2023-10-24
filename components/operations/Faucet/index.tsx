@@ -1,5 +1,6 @@
 import React, { useCallback, useState } from 'react';
-import { useAccount, useContractWrite, useWaitForTransaction } from 'wagmi';
+import { useAccount, useContractWrite } from 'wagmi';
+import useWaitForTransaction from 'hooks/useWaitForTransaction';
 import Image from 'next/image';
 import imageToBase64 from 'utils/imageToBase64';
 import { useTranslation } from 'react-i18next';

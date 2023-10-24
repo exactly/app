@@ -5,7 +5,7 @@ import { useWeb3 } from './useWeb3';
 import { useOperationContext } from 'contexts/OperationContext';
 import useAccountData from './useAccountData';
 import handleOperationError from 'utils/handleOperationError';
-import { waitForTransaction } from '@wagmi/core';
+import waitForTransaction from 'utils/waitForTransaction';
 import { useTranslation } from 'react-i18next';
 
 import { MAX_UINT256 } from 'utils/const';

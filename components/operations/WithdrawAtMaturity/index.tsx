@@ -30,7 +30,7 @@ import useTranslateOperation from 'hooks/useTranslateOperation';
 import { WEI_PER_ETHER } from 'utils/const';
 import useEstimateGas from 'hooks/useEstimateGas';
 import { formatUnits, parseUnits, zeroAddress } from 'viem';
-import { waitForTransaction } from '@wagmi/core';
+import waitForTransaction from 'utils/waitForTransaction';
 import { gasLimit } from 'utils/gas';
 
 const WithdrawAtMaturity: FC = () => {

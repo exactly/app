@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { CircularProgress, Tooltip, Typography } from '@mui/material';
 import { useNetwork } from 'wagmi';
-import { waitForTransaction } from '@wagmi/core';
+import waitForTransaction from 'utils/waitForTransaction';
 
 import StyledSwitch from 'components/Switch';
 import parseHealthFactor from 'utils/parseHealthFactor';
