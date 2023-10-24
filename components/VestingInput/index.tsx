@@ -96,21 +96,19 @@ function LoadingModal({ tx, onClose }: { tx: Transaction; onClose: () => void })
       sx={isMobile ? { top: 'auto' } : { backdropFilter: tx ? 'blur(1.5px)' : '' }}
       disableEscapeKeyDown={loadingTx}
     >
-      {!loadingTx && (
-        <IconButton
-          aria-label="close"
-          onClick={onClose}
-          sx={{
-            position: 'absolute',
-            right: 4,
-            top: 8,
-            color: 'grey.500',
-          }}
-          data-testid="vesting-vest-modal-close"
-        >
-          <CloseIcon sx={{ fontSize: 19 }} />
-        </IconButton>
-      )}
+      <IconButton
+        aria-label="close"
+        onClick={onClose}
+        sx={{
+          position: 'absolute',
+          right: 4,
+          top: 8,
+          color: 'grey.500',
+        }}
+        data-testid="vesting-vest-modal-close"
+      >
+        <CloseIcon sx={{ fontSize: 19 }} />
+      </IconButton>
       <Box
         sx={{
           padding: { xs: spacing(3, 2, 2), sm: spacing(5, 4, 4) },

@@ -72,20 +72,18 @@ export default function Loading({ isOpen, tx, close }: Props) {
       BackdropProps={{ style: { backgroundColor: tx ? 'rgb(100, 100, 100 , 0.1)' : '' } }}
       disableEscapeKeyDown={loadingTx}
     >
-      {!loadingTx && (
-        <IconButton
-          aria-label="close"
-          onClick={close}
-          sx={{
-            position: 'absolute',
-            right: 4,
-            top: 8,
-            color: 'grey.500',
-          }}
-        >
-          <CloseIcon sx={{ fontSize: 19 }} />
-        </IconButton>
-      )}
+      <IconButton
+        aria-label="close"
+        onClick={close}
+        sx={{
+          position: 'absolute',
+          right: 4,
+          top: 8,
+          color: 'grey.500',
+        }}
+      >
+        <CloseIcon sx={{ fontSize: 19 }} />
+      </IconButton>
       <Box
         sx={{
           padding: { xs: spacing(3, 2, 2), sm: spacing(5, 4, 4) },

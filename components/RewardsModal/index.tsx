@@ -143,20 +143,18 @@ const RewardsModal: FC<RewardsModalProps> = ({ isOpen, close }) => {
       sx={isMobile ? { top: 'auto' } : { backdropFilter: tx ? 'blur(1.5px)' : '' }}
       disableEscapeKeyDown={loadingTx}
     >
-      {!loadingTx && (
-        <IconButton
-          aria-label="close"
-          onClick={closeAndReset}
-          sx={{
-            position: 'absolute',
-            right: 16,
-            top: 16,
-            color: 'grey.400',
-          }}
-        >
-          <CloseIcon sx={{ fontSize: 24 }} />
-        </IconButton>
-      )}
+      <IconButton
+        aria-label="close"
+        onClick={closeAndReset}
+        sx={{
+          position: 'absolute',
+          right: 16,
+          top: 16,
+          color: 'grey.400',
+        }}
+      >
+        <CloseIcon sx={{ fontSize: 24 }} />
+      </IconButton>
       <Box p={4}>
         {!tx && (
           <DialogTitle
