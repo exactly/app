@@ -54,7 +54,7 @@ test('Vesting esEXA & Claiming EXA', async ({ page, web2, web3 }) => {
       type: 'erc20',
       symbol: 'EXA',
       spender: esEXA.address,
-      less: '0',
+      less: '0.000000000000000001',
     });
   });
 
