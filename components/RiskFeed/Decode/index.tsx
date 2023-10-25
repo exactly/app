@@ -1,12 +1,13 @@
 import React, { type PropsWithChildren, createContext, useContext } from 'react';
 import { decodeFunctionData, type Abi, type Address, isHex, isAddress, Hex } from 'viem';
-import { Box, ButtonBase } from '@mui/material';
+import { Box, ButtonBase, IconButton } from '@mui/material';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { useTranslation } from 'react-i18next';
 import Link from 'next/link';
 
 import { DataDecoded } from '../api';
 import useEtherscanLink from 'hooks/useEtherscanLink';
-import { formatWallet } from 'utils/utils';
+import { formatWallet, formatHex } from 'utils/utils';
 
 export type Contracts = Record<Address, { name: string; abi: Abi }>;
 
@@ -27,7 +28,20 @@ export default function Decode({ to, data }: Props) {
   }
 
   const contract = contracts[to];
-  if (!contract || contract.name !== 'TimelockController') {
+  const target = data.parameters.find((p) => p.name === 'target');
+  const payload = data.parameters.find((p) => p.name === 'payload' || p.name === 'data');
+
+  const targetContract = target?.value !== undefined && isAddress(target.value) ? contracts[target.value] : undefined;
+
+  if (
+    !contract ||
+    contract.name !== 'TimelockController' ||
+    !target ||
+    !payload ||
+    !isAddress(target.value) ||
+    !isHex(payload.value) ||
+    !targetContract
+  ) {
     return (
       <FunctionDecode name={contract?.name || to} method={data.method}>
         {data.parameters.map((p) => (
@@ -36,6 +50,12 @@ export default function Decode({ to, data }: Props) {
               <Link href={address(p.value)} target="_blank" rel="noopener noreferrer">
                 {formatWallet(p.value)}
               </Link>
+            ) : isHex(p.value) ? (
+              <CopyHex value={p.value} />
+            ) : Array.isArray(p.value) && p.value.every((x) => !Array.isArray(x)) ? (
+              JSON.stringify(p.value)
+            ) : Array.isArray(p.value) ? (
+              <CopyTuple value={stringifyTuple(p.value)} />
             ) : (
               p.value
             )}
@@ -43,22 +63,6 @@ export default function Decode({ to, data }: Props) {
         ))}
       </FunctionDecode>
     );
-  }
-
-  const target = data.parameters.find((p) => p.name === 'target');
-  const payload = data.parameters.find((p) => p.name === 'payload' || p.name === 'data');
-
-  if (!target || !payload) {
-    return null;
-  }
-
-  if (!isHex(payload.value) || !isAddress(target.value)) {
-    return null;
-  }
-
-  const targetContract = contracts[target.value];
-  if (!targetContract) {
-    return null;
   }
 
   return (
@@ -72,6 +76,33 @@ export default function Decode({ to, data }: Props) {
         <FunctionCall contract={targetContract.name} abi={targetContract.abi} data={payload.value} />
       </Argument>
     </FunctionDecode>
+  );
+}
+
+function stringifyTuple(tuple: unknown) {
+  return JSON.stringify(tuple, (_, value) => (typeof value === 'bigint' ? String(value) : value), 2);
+}
+
+function CopyTuple({ value }: { value: string }) {
+  const { t } = useTranslation();
+  return (
+    <Box display="flex" alignItems="center" gap={0.5}>
+      <Box>{t('Tuple')}</Box>
+      <IconButton onClick={() => void navigator.clipboard.writeText(value)} size="small">
+        <ContentCopyIcon sx={{ fontSize: '11px', color: 'grey.400' }} />
+      </IconButton>
+    </Box>
+  );
+}
+
+function CopyHex({ value }: { value: Hex }) {
+  return (
+    <Box display="flex" alignItems="center" gap={0.5}>
+      <Box>{formatHex(value)}</Box>
+      <IconButton onClick={() => void navigator.clipboard.writeText(value)} size="small">
+        <ContentCopyIcon sx={{ fontSize: '11px', color: 'grey.400' }} />
+      </IconButton>
+    </Box>
   );
 }
 
@@ -110,19 +141,16 @@ function FunctionCall({ contract, abi, data }: { contract: string; abi: Abi; dat
               <ButtonBase
                 disableRipple
                 sx={{ fontSize: 14, fontWeight: 500, fontFamily: 'fontFamilyMonospaced' }}
-                onClick={() =>
-                  download(
-                    input.name ?? 'data',
-                    JSON.stringify(arg, (_, value) => (typeof value === 'bigint' ? String(value) : value), 2),
-                  )
-                }
+                onClick={() => download(input.name ?? 'data', stringifyTuple(arg))}
               >
                 {t('Download')}
               </ButtonBase>
-            ) : input.type === 'address' ? (
-              <Link href={address(arg as Address)} target="_blank" rel="noopener noreferrer">
+            ) : input.type === 'address' && isAddress(String(arg)) ? (
+              <Link href={address(String(arg) as Address)} target="_blank" rel="noopener noreferrer">
                 {formatWallet(arg as Address)}
               </Link>
+            ) : isHex(arg) ? (
+              <CopyHex value={arg} />
             ) : (
               String(arg)
             )}
@@ -143,7 +171,7 @@ function Bold({ children }: PropsWithChildren) {
 
 function Argument({ name, children }: PropsWithChildren<{ name: string }>) {
   return (
-    <Box display="flex" gap={1}>
+    <Box display="flex" gap={1} alignItems="center">
       <Box fontFamily="fontFamilyMonospaced" color="grey.700" minWidth={64} fontSize={14}>
         {name}:
       </Box>

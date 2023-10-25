@@ -13,6 +13,10 @@ export function formatTx(hash: Hex): string {
   return `${hash.substring(0, 6)}...${hash.substring(48)}`;
 }
 
+export function formatHex(hex: Hex): string {
+  return `${hex.substring(0, 8)}...${hex.substring(hex.length - 16)}`;
+}
+
 export const toPercentage = (value?: number, fractionDigits = 2): string => {
   if (value != null) {
     return value.toLocaleString(undefined, {
