@@ -28,7 +28,7 @@ export default function useHistoricalRates(symbol: string, initialCount = 30, in
     async (type: 'borrow' | 'deposit', count: number, interval: number, offset: number) => {
       if (!accountData || !chain) return emptyBatch;
 
-      const subgraphUrl = networkData[String(chain.id) as keyof typeof networkData]?.subgraph;
+      const subgraphUrl = networkData[String(chain.id) as keyof typeof networkData]?.subgraph.exactly;
       if (!subgraphUrl) return emptyBatch;
 
       const { market: marketAddress, maxFuturePools } = getMarketAccount(symbol) ?? {};

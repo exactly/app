@@ -20,7 +20,7 @@ type Web3 = {
   };
 };
 
-const subgraphURL = networkData[String(defaultChain.id) as keyof typeof networkData]?.subgraph;
+const subgraphURL = networkData[String(defaultChain.id) as keyof typeof networkData]?.subgraph.exactly;
 
 export const useWeb3 = (): Web3 => {
   const { query, replace } = useRouter();

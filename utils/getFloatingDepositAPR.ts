@@ -7,7 +7,7 @@ export default async function getFloatingDepositAPR(
   maxFuturePools: number,
   eMarketAddress: string,
 ) {
-  const subgraphUrl = networkData[String(chainId) as keyof typeof networkData]?.subgraph;
+  const subgraphUrl = networkData[String(chainId) as keyof typeof networkData]?.subgraph.exactly;
 
   if (!subgraphUrl) return;
 

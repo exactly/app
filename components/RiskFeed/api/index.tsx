@@ -2,6 +2,8 @@ import { Address, Hex } from 'viem';
 
 import { defaultChain } from 'utils/client';
 import useAsyncLoad from 'hooks/useAsyncLoad';
+import useGraphClient from 'hooks/useGraphClient';
+import { getTimelockControllerCalls } from 'queries/getTimelockControllerCalls';
 
 export type SafeResponse = {
   count: number;
@@ -136,4 +138,41 @@ export function useHistory(addr: Address) {
 
 export function useTransaction(id: TxID) {
   return useAsyncLoad(() => transaction(id));
+}
+
+export type Call = {
+  id: Hex;
+  operations: {
+    index: number;
+    target: Address;
+    data: Hex;
+  }[];
+  scheduler: Address;
+  scheduledAt: number;
+  executor: Address | null;
+  executedAt: number | null;
+  canceller: Address | null;
+  cancelledAt: number | null;
+};
+
+export function useTimelockControllerEvents() {
+  const request = useGraphClient();
+  return useAsyncLoad(async () => {
+    const response = await request<{ timelockControllerCalls: Call[] }>(getTimelockControllerCalls());
+    if (!response) return;
+    return response.timelockControllerCalls.reduce(
+      (state, call) => {
+        if (call.cancelledAt) {
+          state.cancelled.push(call);
+        } else if (call.executedAt) {
+          state.executed.push(call);
+        } else {
+          state.scheduled.push(call);
+        }
+
+        return state;
+      },
+      { scheduled: [] as Call[], executed: [] as Call[], cancelled: [] as Call[] },
+    );
+  });
 }

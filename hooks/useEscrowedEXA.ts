@@ -45,7 +45,7 @@ export function useUpdateStreams() {
       setLoading(true);
       const data = await request<{ streams: Stream[] }>(
         getStreams(EXA.address.toLowerCase(), walletAddress || zeroAddress, esEXA.address.toLowerCase(), false),
-        true,
+        'sablier',
       );
       if (!data) return;
       const filteredStreams = data.streams.filter((stream: Stream) => {

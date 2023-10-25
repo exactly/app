@@ -1,5 +1,5 @@
 import React, { type PropsWithChildren, createContext, useContext } from 'react';
-import { decodeFunctionData, type Abi, type Address, isHex, isAddress, Hex } from 'viem';
+import { decodeFunctionData, type Abi, type Address, isHex, isAddress, Hex, getAddress } from 'viem';
 import { Box, ButtonBase, IconButton } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { useTranslation } from 'react-i18next';
@@ -104,6 +104,29 @@ function CopyHex({ value }: { value: Hex }) {
       </IconButton>
     </Box>
   );
+}
+
+export function DecodeCall({ target, data }: { target: Address; data: Hex }) {
+  const contracts = useContext(ABIContext);
+  const { address } = useEtherscanLink();
+
+  const contract = contracts[getAddress(target)];
+  if (!contract) {
+    return (
+      <Box display="flex" flexDirection="column">
+        <Argument name="target">
+          <Link href={address(target)} target="_blank" rel="noopener noreferrer">
+            {formatWallet(target)}
+          </Link>
+        </Argument>
+        <Argument name="data">
+          <CopyHex value={data} />
+        </Argument>
+      </Box>
+    );
+  }
+
+  return <FunctionCall contract={contract.name} abi={contract.abi} data={data} />;
 }
 
 function FunctionCall({ contract, abi, data }: { contract: string; abi: Abi; data: Hex }) {

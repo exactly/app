@@ -5,15 +5,15 @@ import networkData from 'config/networkData.json' assert { type: 'json' };
 import { useWeb3 } from './useWeb3';
 import { useGlobalError } from 'contexts/GlobalErrorContext';
 
+type Subgraph = 'exactly' | 'sablier';
+
 export default function useGraphClient() {
   const { chain } = useWeb3();
   const { setIndexerError } = useGlobalError();
 
   return useCallback(
-    async <T>(query: string, sablier: boolean = false): Promise<T | undefined> => {
-      const subgraphType = sablier ? 'sablierSubgraph' : 'subgraph';
-
-      const subgraphUrl = networkData[String(chain.id) as keyof typeof networkData]?.[subgraphType];
+    async <T>(query: string, subgraph: Subgraph = 'exactly'): Promise<T | undefined> => {
+      const subgraphUrl = networkData[String(chain.id) as keyof typeof networkData]?.subgraph[subgraph];
       if (!subgraphUrl) return undefined;
 
       try {

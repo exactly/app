@@ -61,7 +61,7 @@ export default (
       if (!marketAccount || !chain) return setDepositAPR(undefined);
 
       try {
-        const subgraphUrl = networkData[String(chain.id) as keyof typeof networkData]?.subgraph;
+        const subgraphUrl = networkData[String(chain.id) as keyof typeof networkData]?.subgraph.exactly;
         if (!subgraphUrl) return;
         const [{ apr: depositAPRRate }] = await queryRates(subgraphUrl, marketAccount.market, 'deposit', {
           maxFuturePools: marketAccount.maxFuturePools,
