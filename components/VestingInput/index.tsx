@@ -183,7 +183,7 @@ function VestingInput({ refetch }: Props) {
 
     const deadline = BigInt(dayjs().unix() + 3_600);
     const _qty = parseEther(qty);
-    const value = (_qty * reserveRatio) / WEI_PER_ETHER;
+    const value = (_qty * reserveRatio) / WEI_PER_ETHER + 1n;
 
     const nonce = await exa.read.nonces([walletAddress], opts);
     const name = await exa.read.name(opts);
@@ -235,7 +235,7 @@ function VestingInput({ refetch }: Props) {
 
     setIsLoading(true);
     const amount = parseEther(qty);
-    const res = (amount * reserveRatio) / WEI_PER_ETHER;
+    const res = (amount * reserveRatio) / WEI_PER_ETHER + 1n;
 
     const vestInput = {
       chainId: displayNetwork?.id,
