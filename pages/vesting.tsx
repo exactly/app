@@ -116,9 +116,18 @@ const Vesting: NextPage = () => {
                 i18nKey="You can <1>get EXA</1> if you don’t have the required reserve amount."
                 components={{
                   1: (
-                    <a
+                    <button
                       onClick={openGetEXA}
-                      style={{ textDecoration: 'underline', fontWeight: 700, cursor: 'pointer' }}
+                      style={{
+                        fontWeight: 700,
+                        textDecoration: 'underline',
+                        cursor: 'pointer',
+                        padding: 'unset',
+                        background: 'unset',
+                        border: 'unset',
+                        fontSize: 'unset',
+                        color: 'unset',
+                      }}
                     />
                   ),
                 }}

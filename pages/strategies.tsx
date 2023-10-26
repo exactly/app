@@ -229,11 +229,9 @@ const Strategies: NextPage = () => {
             { text: t('Basic'), size: 'small' as const },
           ],
           button: (
-            <a style={{ width: '100%' }}>
-              <Button fullWidth variant="contained" onClick={openGetEXA}>
-                {t('Get EXA')}
-              </Button>
-            </a>
+            <Button fullWidth variant="contained" onClick={openGetEXA}>
+              {t('Get EXA')}
+            </Button>
           ),
           isNew: true,
         },

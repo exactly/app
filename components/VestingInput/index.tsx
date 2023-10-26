@@ -408,9 +408,18 @@ function VestingInput({ refetch }: Props) {
                   i18nKey="Not enough EXA for reserve. <1>Get EXA</1>."
                   components={{
                     1: (
-                      <a
+                      <button
                         onClick={openGetEXA}
-                        style={{ fontWeight: 700, textDecoration: 'underline', cursor: 'pointer' }}
+                        style={{
+                          fontWeight: 700,
+                          textDecoration: 'underline',
+                          cursor: 'pointer',
+                          padding: 'unset',
+                          background: 'unset',
+                          border: 'unset',
+                          fontSize: 'unset',
+                          color: 'unset',
+                        }}
                       />
                     ),
                   }}
