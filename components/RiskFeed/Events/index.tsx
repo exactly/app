@@ -360,13 +360,15 @@ function EventSummary({ tx }: EventProps) {
 
   return (
     <Box display="flex" flexDirection="column">
-      <Row title={t('Transaction Hash')}>
-        <Value>
-          <Link href={transaction(data.txHash)} target="_blank" rel="noopener noreferrer">
-            {formatTx(data.txHash)}
-          </Link>
-        </Value>
-      </Row>
+      {data.txHash && (
+        <Row title={t('Transaction Hash')}>
+          <Value>
+            <Link href={transaction(data.txHash)} target="_blank" rel="noopener noreferrer">
+              {formatTx(data.txHash)}
+            </Link>
+          </Value>
+        </Row>
+      )}
       <Row title={t('Submited At')}>
         <Value>{parseTimestamp(data.detailedExecutionInfo.submittedAt / 1000, 'YYYY-MM-DD HH:mm:ss')}</Value>
       </Row>
@@ -386,13 +388,15 @@ function EventSummary({ tx }: EventProps) {
           ))}
         </Box>
       </Row>
-      <Row title={t('Executor')}>
-        <Value>
-          <Link href={address(data.detailedExecutionInfo.executor.value)} target="_blank" rel="noopener noreferrer">
-            {format(data.detailedExecutionInfo.executor.value)}
-          </Link>
-        </Value>
-      </Row>
+      {data.detailedExecutionInfo.executor && (
+        <Row title={t('Executor')}>
+          <Value>
+            <Link href={address(data.detailedExecutionInfo.executor.value)} target="_blank" rel="noopener noreferrer">
+              {format(data.detailedExecutionInfo.executor.value)}
+            </Link>
+          </Value>
+        </Row>
+      )}
       {isMultiSend ? (
         data.txData.dataDecoded?.parameters?.[0]?.valueDecoded?.map((v, i) => (
           <Row key={i} title={`${t('Action')} #${i + 1}`}>

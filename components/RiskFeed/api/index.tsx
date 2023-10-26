@@ -54,7 +54,7 @@ export type SafeTransaction = {
   txStatus: 'SUCCESS' | 'AWAITING_EXECUTION';
   txInfo: TxInfo;
   txData: null | TxData;
-  txHash: Hex;
+  txHash: null | Hex;
   detailedExecutionInfo: DetailedExecutionInfo;
 };
 
@@ -62,7 +62,7 @@ type DetailedExecutionInfo = {
   submittedAt: number;
   refundReceiver: Wallet;
   safeTxHash: Hex;
-  executor: Wallet;
+  executor: null | Wallet;
   signers: Wallet[];
   confirmationsRequired: number;
   confirmations: Confirmation[];
