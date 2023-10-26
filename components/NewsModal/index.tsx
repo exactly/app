@@ -23,6 +23,18 @@ const NewsModal = () => {
   const news = useMemo(
     () => [
       {
+        id: 'esEXA Vesting',
+        title: t('esEXA Vesting'),
+        description: [
+          t('Step 1: Claim your esEXA'),
+          t('Step 2: Initiate the vesting of your esEXA by depositing 15% as an EXA reserve'),
+        ],
+        image: 'img/news/4.png',
+        buttonTitle: t('Start vesting now'),
+        pathname: '/vesting',
+        until: '2023-11-30T23:59:59.000Z',
+      },
+      {
         id: 'Security Hub',
         title: t('Security Hub'),
         description: [

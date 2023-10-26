@@ -82,6 +82,25 @@ const Strategies: NextPage = () => {
     () =>
       [
         {
+          chainId: optimism.id,
+          title: t('esEXA Vesting'),
+          description: t('Unlock your EXA rewards for being an active participant in the Protocol'),
+          tags: [
+            { prefix: t('EARN'), text: 'EXA' },
+            { text: t('Basic'), size: 'small' as const },
+          ],
+          button: (
+            <Link href={{ pathname: '/vesting', query }} style={{ width: '100%' }}>
+              <Button fullWidth variant="contained">
+                {t('Vest esEXA')}
+              </Button>
+            </Link>
+          ),
+          source: 'exactly' as const,
+          isNew: true,
+          imgPath: '/img/strategies/featured_esEXA.svg',
+        },
+        {
           title: t('Maximize your yield'),
           description: t(
             'Amplify gains or mitigate risk with the power of leverage and deleverage in your investments.',
@@ -114,25 +133,6 @@ const Strategies: NextPage = () => {
           ),
           source: 'exactly' as const,
           imgPath: '/img/strategies/featured_rollover.svg',
-        },
-        {
-          chainId: optimism.id,
-          title: t('esEXA Vesting'),
-          description: t('Unlock your EXA rewards for being an active participant in the Protocol'),
-          tags: [
-            { prefix: t('EARN'), text: 'EXA' },
-            { text: t('Basic'), size: 'small' as const },
-          ],
-          button: (
-            <Link href={{ pathname: '/vesting', query }} style={{ width: '100%' }}>
-              <Button fullWidth variant="contained">
-                {t('Vest esEXA')}
-              </Button>
-            </Link>
-          ),
-          source: 'exactly' as const,
-          isNew: true,
-          imgPath: '/img/strategies/featured_esEXA.svg',
         },
         {
           title: t('Reduce Exposure'),
@@ -176,6 +176,40 @@ const Strategies: NextPage = () => {
           isNew: true,
         },
         {
+          chainId: optimism.id,
+          title: t('Get EXA'),
+          description: t(
+            "Ready to take part in the Protocol's Governance, Vesting Program, or simply hold EXA? Begin by getting EXA today.",
+          ),
+          tags: [
+            { prefix: t('GET'), text: 'EXA' },
+            { text: t('Basic'), size: 'small' as const },
+          ],
+          button: (
+            <Button fullWidth variant="contained" onClick={openGetEXA}>
+              {t('Get EXA')}
+            </Button>
+          ),
+        },
+        {
+          chainId: optimism.id,
+          title: t('Get EXA'),
+          description: t(
+            "Ready to take part in the Protocol's Governance, Vesting Program, or simply hold EXA? Begin by getting EXA today.",
+          ),
+          tags: [
+            { prefix: t('GET'), text: 'EXA' },
+            { text: t('Basic'), size: 'small' as const },
+          ],
+          button: (
+            <Link href={{ pathname: '/get-exa', query }} style={{ width: '100%' }}>
+              <Button fullWidth variant="contained">
+                {t('Get EXA')}
+              </Button>
+            </Link>
+          ),
+        },
+        {
           title: t('Maximize your yield'),
           description: t(
             'Amplify gains or mitigate risk with the power of leverage and deleverage in your investments.',
@@ -217,23 +251,6 @@ const Strategies: NextPage = () => {
               {t('Rollover')}
             </Button>
           ),
-        },
-        {
-          chainId: optimism.id,
-          title: t('Get EXA'),
-          description: t(
-            "Ready to take part in the Protocol's Governance, Vesting Program, or simply hold EXA? Begin by getting EXA today.",
-          ),
-          tags: [
-            { prefix: t('GET'), text: 'EXA' },
-            { text: t('Basic'), size: 'small' as const },
-          ],
-          button: (
-            <Button fullWidth variant="contained" onClick={openGetEXA}>
-              {t('Get EXA')}
-            </Button>
-          ),
-          isNew: true,
         },
       ].filter((s) => s.chainId === chain.id || s.chainId === undefined),
     [chain.id, hfLabel, lowestBorrowAPR, maxYield, openGetEXA, query, startDebtManager, startLeverager, t],
