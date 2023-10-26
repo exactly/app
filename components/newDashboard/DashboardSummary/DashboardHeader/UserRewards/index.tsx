@@ -1,16 +1,15 @@
 import React, { FC, useMemo } from 'react';
 import { formatUnits } from 'viem';
-import { Box, Skeleton, Typography, useMediaQuery, useTheme } from '@mui/material';
+import { Box, Button, Skeleton, Typography, useMediaQuery, useTheme } from '@mui/material';
 import StarsIcon from '@mui/icons-material/Stars';
+import Link from 'next/link';
 import formatNumber from 'utils/formatNumber';
 import Image from 'next/image';
 import { useTranslation } from 'react-i18next';
 import useRewards from 'hooks/useRewards';
 import { WEI_PER_ETHER } from 'utils/const';
-import { LoadingButton } from '@mui/lab';
-import { useWeb3 } from 'hooks/useWeb3';
-import { useModal } from 'contexts/ModalContext';
 import useAccountData from 'hooks/useAccountData';
+import useRouter from 'hooks/useRouter';
 
 type RewardProps = {
   assetSymbol: string;
@@ -46,11 +45,8 @@ const Reward: FC<RewardProps> = ({ assetSymbol, amount, amountInUSD, xsDirection
 const UserRewards = () => {
   const { t } = useTranslation();
   const { isFetching } = useAccountData();
-  const { impersonateActive } = useWeb3();
-  const { breakpoints } = useTheme();
-  const isMobile = useMediaQuery(breakpoints.down('lg'));
-  const { rewards: rs, rates, claimable, isLoading } = useRewards();
-  const { open } = useModal('rewards');
+  const { rewards: rs, rates } = useRewards();
+  const { query } = useRouter();
 
   const rewards = useMemo(() => {
     if (!Object.keys(rates).length) return undefined;
@@ -94,7 +90,7 @@ const UserRewards = () => {
     >
       <Box display="flex" gap={1} alignItems="center">
         <StarsIcon sx={{ fontSize: 16 }} />
-        <Typography variant="dashboardTitle">{t('Rewards')}</Typography>
+        <Typography variant="dashboardTitle">{t('esEXA Vesting')}</Typography>
       </Box>
 
       <Box
@@ -105,35 +101,30 @@ const UserRewards = () => {
         mb={{ xs: 0.5, lg: 0 }}
       >
         {!isFetching && rewards ? (
-          rewards.map(({ assetSymbol, amount, amountInUSD }) => (
-            <Box key={`${assetSymbol}_${amount}_${amountInUSD}`} display="flex" gap={2} alignItems="center">
-              <Reward
-                assetSymbol={assetSymbol}
-                amount={amount}
-                amountInUSD={amountInUSD}
-                xsDirection={rewards.length > 1 ? 'column' : 'row'}
-                dense={rewards.length > 2}
-              />
-            </Box>
-          ))
+          rewards.map(
+            ({ assetSymbol, amount, amountInUSD }) =>
+              assetSymbol === 'esEXA' && (
+                <Box key={`${assetSymbol}_${amount}_${amountInUSD}`} display="flex" gap={2} alignItems="center">
+                  <Reward
+                    assetSymbol={assetSymbol}
+                    amount={amount}
+                    amountInUSD={amountInUSD}
+                    xsDirection={rewards.length > 1 ? 'column' : 'row'}
+                    dense={false}
+                  />
+                </Box>
+              ),
+          )
         ) : (
-          <>
-            <Skeleton width={120} height={42} />
-            <Skeleton width={120} height={42} />
-          </>
+          <Skeleton width={120} height={42} />
         )}
       </Box>
 
-      <LoadingButton
-        variant="contained"
-        fullWidth={isMobile}
-        sx={{ px: 3 }}
-        disabled={isLoading || !claimable || impersonateActive}
-        onClick={open}
-        loading={isLoading}
-      >
-        {t('Claim')}
-      </LoadingButton>
+      <Link href={{ pathname: '/vesting', query }} style={{ width: '100%' }}>
+        <Button fullWidth variant="contained">
+          {t('Vest esEXA')}
+        </Button>
+      </Link>
     </Box>
   );
 };
