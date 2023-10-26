@@ -3,6 +3,7 @@ import React, { FC, PropsWithChildren, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toPercentage } from 'utils/utils';
 import MultiRewardPill from 'components/markets/MultiRewardPill';
+import numbers from 'config/numbers.json';
 
 type APR = {
   apr?: number;
@@ -19,6 +20,8 @@ type APRWithBreakdownProps = {
   rewardAPR?: string;
 };
 
+const { minRewardsRate } = numbers;
+
 const APRWithBreakdown: FC<PropsWithChildren & APRWithBreakdownProps> = ({
   directionMobile = 'row-reverse',
   directionDesktop = 'row',
@@ -29,9 +32,11 @@ const APRWithBreakdown: FC<PropsWithChildren & APRWithBreakdownProps> = ({
   natives = [],
   rewardAPR,
 }) => {
+  const filteredRewards = useMemo(() => rewards.filter(({ apr }) => (apr ? apr >= minRewardsRate : 0)), [rewards]);
+
   const symbols = useMemo(
-    () => [...rewards.map(({ symbol }) => symbol), ...natives.map(({ symbol }) => symbol)],
-    [natives, rewards],
+    () => [...filteredRewards.map(({ symbol }) => symbol), ...natives.map(({ symbol }) => symbol)],
+    [natives, filteredRewards],
   );
 
   return (
@@ -60,14 +65,15 @@ const APRWithBreakdown: FC<PropsWithChildren & APRWithBreakdownProps> = ({
 
 const APRBreakdown: FC<Omit<APRWithBreakdownProps, 'rewardAPR'>> = ({ markets, rewards = [], natives = [] }) => {
   const { t } = useTranslation();
+  const filteredRewards = useMemo(() => rewards.filter(({ apr }) => (apr ? apr >= minRewardsRate : 0)), [rewards]);
 
   return (
     <Box display="flex" flexDirection="column" gap={1}>
       {Boolean(markets.length) && <APRBreakdownItem title={t('Market APR')} values={markets} />}
-      {Boolean(rewards.length) && (
+      {Boolean(filteredRewards.length) && (
         <>
           {Boolean(markets.length) && <Divider flexItem sx={{ mx: 0.5 }} />}
-          <APRBreakdownItem title={t('Rewards APR')} values={rewards} />
+          <APRBreakdownItem title={t('Rewards APR')} values={filteredRewards} />
         </>
       )}
       {Boolean(natives.length) && (
