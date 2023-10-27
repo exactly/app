@@ -4,6 +4,7 @@ import type { ERC20TokenSymbol } from '../utils/contracts';
 
 export default function (page: Page) {
   const waitForSkeletons = async () => {
+    await page.waitForTimeout(10_000);
     await page.waitForFunction(
       () => {
         const modal = document.querySelector('[data-testid="leverage-modal"]');
@@ -11,14 +12,14 @@ export default function (page: Page) {
       },
       null,
       {
-        timeout: 30_000,
+        timeout: 20_000,
         polling: 1_000,
       },
     );
   };
 
   const waitSummaryToBeReady = async () => {
-    await page.waitForTimeout(2_000);
+    await page.waitForTimeout(10_000);
     await waitForSkeletons();
     await page.waitForFunction(
       () => {
@@ -32,14 +33,14 @@ export default function (page: Page) {
       },
       null,
       {
-        timeout: 30_000,
+        timeout: 20_000,
         polling: 1_000,
       },
     );
   };
 
   const waitForStepToContinue = async () => {
-    await page.waitForTimeout(2_000);
+    await page.waitForTimeout(10_000);
     await waitForSkeletons();
     await page.waitForFunction(
       () => {
@@ -50,7 +51,7 @@ export default function (page: Page) {
       },
       null,
       {
-        timeout: 30_000,
+        timeout: 20_000,
         polling: 1_000,
       },
     );
