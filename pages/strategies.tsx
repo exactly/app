@@ -192,24 +192,6 @@ const Strategies: NextPage = () => {
           ),
         },
         {
-          chainId: optimism.id,
-          title: t('Get EXA'),
-          description: t(
-            "Ready to take part in the Protocol's Governance, Vesting Program, or simply hold EXA? Begin by getting EXA today.",
-          ),
-          tags: [
-            { prefix: t('GET'), text: 'EXA' },
-            { text: t('Basic'), size: 'small' as const },
-          ],
-          button: (
-            <Link href={{ pathname: '/get-exa', query }} style={{ width: '100%' }}>
-              <Button fullWidth variant="contained">
-                {t('Get EXA')}
-              </Button>
-            </Link>
-          ),
-        },
-        {
           title: t('Maximize your yield'),
           description: t(
             'Amplify gains or mitigate risk with the power of leverage and deleverage in your investments.',
