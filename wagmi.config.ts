@@ -22,6 +22,7 @@ import SablierV2LockupLinear from '@exactly/protocol/deployments/goerli/SablierV
 import SablierV2NFTDescriptor from '@exactly/protocol/deployments/goerli/SablierV2NFTDescriptor.json' assert { type: 'json' };
 import ExtraFinanceLendingABI from './abi/extraFinanceLending.json' assert { type: 'json' };
 import DelegateRegistryABI from './abi/DelegateRegistry.json' assert { type: 'json' };
+import GasPriceOracle from './abi/GasPriceOracle.json' assert { type: 'json' };
 import EscrowedEXA from '@exactly/protocol/deployments/goerli/esEXA.json' assert { type: 'json' };
 
 import { Abi } from 'viem';
@@ -51,6 +52,7 @@ export default defineConfig({
     { name: 'ExtraFinanceLending', abi: ExtraFinanceLendingABI as Abi },
     { name: 'DelegateRegistry', abi: DelegateRegistryABI as Abi },
     { name: 'EscrowedEXA', abi: EscrowedEXA.abi as Abi },
+    { name: 'L1GasPriceOracle', abi: GasPriceOracle as Abi },
   ],
   plugins: [
     react({

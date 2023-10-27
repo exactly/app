@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { parseUnits, type Address, type EstimateGasParameters, type Hex } from 'viem';
+import { parseUnits, type Address, type EstimateContractGasParameters, type Hex } from 'viem';
 import { ERC20, Market } from 'types/contracts';
 import { useWeb3 } from './useWeb3';
 import { useOperationContext } from 'contexts/OperationContext';
@@ -37,7 +37,7 @@ function useApprove({
   const estimateGas = useCallback(async () => {
     if (!contract || !spender || !walletAddress || !opts) return;
 
-    let params: EstimateGasParameters;
+    let params: EstimateContractGasParameters;
     switch (operation) {
       case 'deposit':
       case 'depositAtMaturity':
