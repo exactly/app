@@ -12,6 +12,8 @@ import {
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMoreRounded';
 import { useTranslation } from 'react-i18next';
+import { getAddress } from 'viem';
+import Link from 'next/link';
 
 import { type SafeResponse, type Transaction, useTransaction, type Call } from '../api';
 import Decode, { DecodeCall } from '../Decode';
@@ -19,19 +21,23 @@ import Decode, { DecodeCall } from '../Decode';
 import { formatTx, formatWallet } from 'utils/utils';
 import parseTimestamp from 'utils/parseTimestamp';
 import useEtherscanLink from 'hooks/useEtherscanLink';
-import Link from 'next/link';
 import Pill from 'components/common/Pill';
-import { getAddress } from 'viem';
+
+export type Entry = {
+  schedule?: Transaction;
+  events?: Call[];
+  execution?: Transaction;
+  timestamp: number;
+};
 
 type Props = {
   title: string;
   empty: string;
   isLoading: boolean;
-  data?: SafeResponse;
-  calls?: Call[];
+  data: Entry[];
 };
 
-export default function Events({ title, empty, data, calls, isLoading }: Props) {
+export default function Events({ title, empty, data, isLoading }: Props) {
   return (
     <Box>
       <Typography
@@ -43,21 +49,21 @@ export default function Events({ title, empty, data, calls, isLoading }: Props) 
         {title}
       </Typography>
       <Box mt={6}>
-        {isLoading || data === undefined || calls === undefined ? (
+        {isLoading ? (
           <>
             <Skeleton variant="rectangular" height={48} sx={{ borderRadius: 2 }} />
           </>
-        ) : data.count === 0 && calls.length === 0 ? (
+        ) : data.length === 0 ? (
           <Typography textAlign="center" color="grey.400">
             {empty}
           </Typography>
         ) : (
-          merge(data.results, calls).flatMap((e) =>
-            e.type === 'transaction'
-              ? [<Event key={e.data.id} tx={e.data} />]
-              : e.type === 'call'
-              ? [<EventCall key={e.data.id} call={e.data} />]
-              : [],
+          data.flatMap((e) =>
+            !e.execution && !e.schedule && e.events && e.events.length > 0 ? (
+              <EventCall calls={e.events} />
+            ) : e.execution || e.schedule ? (
+              <Event entry={e} />
+            ) : null,
           )
         )}
       </Box>
@@ -65,43 +71,51 @@ export default function Events({ title, empty, data, calls, isLoading }: Props) 
   );
 }
 
-function merge(
-  safe: SafeResponse['results'],
-  calls: Call[],
-): ({ type: 'transaction'; data: Transaction } | { type: 'call'; data: Call })[] {
-  const transactions = safe.flatMap((tx) => (tx.type === 'TRANSACTION' ? [tx.transaction] : []));
-  return [
-    ...transactions.map((tx) => ({ type: 'transaction', data: tx }) as const),
-    ...calls.map((c) => ({ type: 'call', data: c }) as const),
-  ].sort((x, y) => {
-    if (x.type === 'call' && y.type === 'call') {
-      if (x.data.executedAt && y.data.executedAt) {
-        return y.data.executedAt - x.data.executedAt;
-      }
-      return y.data.scheduledAt - x.data.scheduledAt;
-    }
-    if (x.type === 'call' && y.type === 'transaction') {
-      if (x.data.executedAt) {
-        return y.data.timestamp / 1000 - x.data.executedAt;
-      }
-      return y.data.timestamp / 1000 - x.data.scheduledAt;
-    }
-    if (x.type === 'transaction' && y.type === 'call') {
-      if (y.data.executedAt) {
-        return y.data.executedAt - x.data.timestamp / 1000;
-      }
-      return y.data.scheduledAt - x.data.timestamp / 1000;
-    }
-    if (x.type === 'transaction' && y.type === 'transaction') {
-      return y.data.timestamp - x.data.timestamp;
+export function group(safe: SafeResponse, calls: Call[]): Entry[] {
+  const grouped = calls.reduce(
+    (store, call) => {
+      const timestamp = call.executedAt ?? call.scheduledAt;
+      store[timestamp] = store[timestamp] ? [...store[timestamp], call] : [call];
+      return store;
+    },
+    {} as Record<number, Call[]>,
+  );
+
+  const transactions = safe.results.flatMap((tx) => (tx.type === 'TRANSACTION' ? [tx.transaction] : []));
+  const leftovers = new Set(transactions);
+
+  const entries: Entry[] = [];
+
+  for (const events of Object.values(grouped)) {
+    if (events.length === 0) {
+      continue;
     }
 
-    return 0;
-  });
+    const call = events[0];
+    const entry: Entry = { events, timestamp: call.executedAt ?? call.scheduledAt };
+
+    entry.schedule = transactions.find((tx) => tx.timestamp / 1000 === call.scheduledAt);
+    if (call.executedAt) {
+      entry.execution = transactions.find((tx) => tx.timestamp / 1000 === call.executedAt);
+    }
+
+    if (entry.schedule) leftovers.delete(entry.schedule);
+    if (entry.execution) leftovers.delete(entry.execution);
+
+    entries.push(entry);
+  }
+
+  const rest = [...leftovers].map<Entry>((tx) => ({
+    execution: tx,
+    timestamp: tx.timestamp / 1000,
+  }));
+
+  return [...entries, ...rest].sort((x, y) => y.timestamp - x.timestamp);
 }
 
-function EventCall({ call }: { call: Call }) {
+function EventCall({ calls }: { calls: Call[] }) {
   const { t } = useTranslation();
+  const call = calls[0];
   return (
     <Accordion
       disableGutters
@@ -150,25 +164,25 @@ function EventCall({ call }: { call: Call }) {
         </Box>
         <Box display="flex" flexDirection="column" alignItems="flex-end">
           <Typography component="div" variant="h6" textAlign="right" mb={0.2} whiteSpace="nowrap">
-            {call.operations.length} {call.operations.length === 1 ? t('Action') : t('Actions')}
+            {calls.length} {calls.length === 1 ? t('Action') : t('Actions')}
           </Typography>
           {call.executedAt !== null && <Pill text={t('Executed')} />}
         </Box>
       </AccordionSummary>
       <AccordionDetails sx={{ p: 0 }}>
-        <EventSummaryCall call={call} />
+        <EventSummaryCall calls={calls} />
       </AccordionDetails>
     </Accordion>
   );
 }
 
-type EventProps = {
-  tx: Transaction;
-};
-
-function Event({ tx }: EventProps) {
+function Event({ entry }: { entry: Entry }) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
+  const tx = entry?.execution || entry?.schedule;
+
+  if (!tx) return null;
+
   const actions = tx.txInfo.actionCount ?? 1;
 
   const method = (methodName: string | null, txType: string | null) => {
@@ -268,16 +282,19 @@ function Event({ tx }: EventProps) {
           {tx.txStatus === 'SUCCESS' && <Pill text={t('Executed')} />}
         </Box>
       </AccordionSummary>
-      <AccordionDetails sx={{ p: 0 }}>{open && <EventSummary tx={tx} />}</AccordionDetails>
+      <AccordionDetails sx={{ p: 0 }}>
+        {open && <EventSummary tx={tx} entry={entry} isExecution={Boolean(entry.execution)} />}
+      </AccordionDetails>
     </Accordion>
   );
 }
 
 type TitleProps = PropsWithChildren<{
-  title: React.ReactNode;
+  title: string;
+  inner?: boolean;
 }>;
 
-function Row({ title, children }: TitleProps) {
+function Row({ title, inner = false, children }: TitleProps) {
   return (
     <Box
       sx={{
@@ -288,6 +305,13 @@ function Row({ title, children }: TitleProps) {
         borderTop: '1px solid',
         borderColor: 'grey.300',
         gap: 2,
+        ...(inner
+          ? {
+              '&:first-of-type': { paddingTop: 0, borderTop: 0 },
+              '&:last-of-type': { paddingBottom: 0 },
+              pl: 0,
+            }
+          : {}),
       }}
     >
       <Typography
@@ -326,7 +350,17 @@ function Skel() {
   );
 }
 
-function EventSummary({ tx }: EventProps) {
+function EventSummary({
+  entry,
+  tx,
+  isExecution,
+  inner = false,
+}: {
+  entry: Entry;
+  tx: Transaction;
+  isExecution: boolean;
+  inner?: boolean;
+}) {
   const { t } = useTranslation();
   const { data, isLoading } = useTransaction(tx.id);
 
@@ -359,60 +393,69 @@ function EventSummary({ tx }: EventProps) {
   };
 
   return (
-    <Box display="flex" flexDirection="column">
-      {data.txHash && (
-        <Row title={t('Transaction Hash')}>
-          <Value>
-            <Link href={transaction(data.txHash)} target="_blank" rel="noopener noreferrer">
-              {formatTx(data.txHash)}
-            </Link>
-          </Value>
-        </Row>
-      )}
-      <Row title={t('Submited At')}>
-        <Value>{parseTimestamp(data.detailedExecutionInfo.submittedAt / 1000, 'YYYY-MM-DD HH:mm:ss')}</Value>
-      </Row>
-      {data.executedAt && (
-        <Row title={t('Executed At')}>
-          <Value>{parseTimestamp(data.executedAt / 1000, 'YYYY-MM-DD HH:mm:ss')}</Value>
-        </Row>
-      )}
-      <Row title={t('Signers')}>
-        <Box>
-          {data.detailedExecutionInfo.confirmations.map((confirmation) => (
-            <Value key={confirmation.signature}>
-              <Link href={address(confirmation.signer.value)} target="_blank" rel="noopener noreferrer">
-                {format(confirmation.signer.value)}
+    <>
+      <Box display="flex" flexDirection="column">
+        {data.txHash && (
+          <Row title={t('Transaction Hash')} inner={inner}>
+            <Value>
+              <Link href={transaction(data.txHash)} target="_blank" rel="noopener noreferrer">
+                {formatTx(data.txHash)}
               </Link>
             </Value>
-          ))}
-        </Box>
-      </Row>
-      {data.detailedExecutionInfo.executor && (
-        <Row title={t('Executor')}>
-          <Value>
-            <Link href={address(data.detailedExecutionInfo.executor.value)} target="_blank" rel="noopener noreferrer">
-              {format(data.detailedExecutionInfo.executor.value)}
-            </Link>
-          </Value>
-        </Row>
-      )}
-      {isMultiSend ? (
-        data.txData.dataDecoded?.parameters?.[0]?.valueDecoded?.map((v, i) => (
-          <Row key={i} title={`${t('Action')} #${i + 1}`}>
-            <Decode to={v.to} data={v.dataDecoded} />
           </Row>
-        ))
-      ) : (
-        <Row title={t('Action')}>
-          <Decode to={data.txData.to.value} data={data.txData.dataDecoded} />
+        )}
+        <Row title={t('Submited At')} inner={inner}>
+          <Value>{parseTimestamp(data.detailedExecutionInfo.submittedAt / 1000, 'YYYY-MM-DD HH:mm:ss')}</Value>
         </Row>
-      )}
-    </Box>
+        {data.executedAt && (
+          <Row title={t('Executed At')} inner={inner}>
+            <Value>{parseTimestamp(data.executedAt / 1000, 'YYYY-MM-DD HH:mm:ss')}</Value>
+          </Row>
+        )}
+        <Row title={t('Signers')} inner={inner}>
+          <Box>
+            {data.detailedExecutionInfo.confirmations.map((confirmation) => (
+              <Value key={confirmation.signature}>
+                <Link href={address(confirmation.signer.value)} target="_blank" rel="noopener noreferrer">
+                  {format(confirmation.signer.value)}
+                </Link>
+              </Value>
+            ))}
+          </Box>
+        </Row>
+        {data.detailedExecutionInfo.executor && (
+          <Row title={t('Executor')} inner={inner}>
+            <Value>
+              <Link href={address(data.detailedExecutionInfo.executor.value)} target="_blank" rel="noopener noreferrer">
+                {format(data.detailedExecutionInfo.executor.value)}
+              </Link>
+            </Value>
+          </Row>
+        )}
+        {isMultiSend ? (
+          <Row title={t('Actions')} inner={inner}>
+            <Box display="flex" flexDirection="column" gap={2}>
+              {data.txData.dataDecoded?.parameters?.[0]?.valueDecoded?.map((v, i) => (
+                <Decode key={i} to={v.to} data={v.dataDecoded} />
+              ))}
+            </Box>
+          </Row>
+        ) : (
+          <Row title={t('Action')} inner={inner}>
+            <Decode to={data.txData.to.value} data={data.txData.dataDecoded} />
+          </Row>
+        )}
+        {isExecution && entry.schedule && (
+          <Row title={t('Schedule')}>
+            <EventSummary tx={entry.schedule} entry={entry} isExecution={false} inner />
+          </Row>
+        )}
+      </Box>
+    </>
   );
 }
 
-function EventSummaryCall({ call }: { call: Call }) {
+function EventSummaryCall({ calls }: { calls: Call[] }) {
   const { t } = useTranslation();
 
   const { breakpoints } = useTheme();
@@ -424,6 +467,8 @@ function EventSummaryCall({ call }: { call: Call }) {
     const addr = getAddress(value);
     return isMobile ? formatWallet(addr) : addr;
   };
+
+  const call = calls[0];
 
   return (
     <Box display="flex" flexDirection="column">
@@ -454,11 +499,19 @@ function EventSummaryCall({ call }: { call: Call }) {
           </Row>
         </>
       )}
-      {call.operations.map((operation, i) => (
-        <Row key={operation.index} title={call.operations.length === 1 ? t('Action') : `${t('Action')} #${i + 1}`}>
-          <DecodeCall target={operation.target} data={operation.data} />
-        </Row>
-      ))}
+      <Row title={calls.length === 1 ? t('Action') : t('Actions')}>
+        <Box display="flex" flexDirection="column" gap={2}>
+          {calls
+            .flatMap((c) => c.operations)
+            .map((operation) => (
+              <DecodeCall
+                key={`${operation.index}-${operation.target}-${operation.data}`}
+                target={operation.target}
+                data={operation.data}
+              />
+            ))}
+        </Box>
+      </Row>
     </Box>
   );
 }

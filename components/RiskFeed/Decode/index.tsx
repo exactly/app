@@ -194,7 +194,7 @@ function Bold({ children }: PropsWithChildren) {
 
 function Argument({ name, children }: PropsWithChildren<{ name: string }>) {
   return (
-    <Box display="flex" gap={1} alignItems="center">
+    <Box display="flex" gap={1} alignItems="flex-start">
       <Box fontFamily="fontFamilyMonospaced" color="grey.700" minWidth={64} fontSize={14}>
         {name}:
       </Box>

@@ -117,11 +117,15 @@ function safeUrl(addr: Address): string {
 }
 
 async function queued(addr: Address): Promise<SafeResponse> {
-  return await fetch(`${safeUrl(addr)}/transactions/queued`).then((res) => res.json());
+  const sp = new URLSearchParams();
+  sp.set('cursor', 'limit=40&offset=0');
+  return await fetch(`${safeUrl(addr)}/transactions/queued?${sp}`).then((res) => res.json());
 }
 
 async function history(addr: Address): Promise<SafeResponse> {
-  return await fetch(`${safeUrl(addr)}/transactions/history`).then((res) => res.json());
+  const sp = new URLSearchParams();
+  sp.set('cursor', 'limit=40&offset=0');
+  return await fetch(`${safeUrl(addr)}/transactions/history?${sp}`).then((res) => res.json());
 }
 
 async function transaction(id: TxID): Promise<SafeTransaction> {
@@ -158,7 +162,7 @@ export type Call = {
 export function useTimelockControllerEvents() {
   const request = useGraphClient();
   return useAsyncLoad(async () => {
-    const response = await request<{ timelockControllerCalls: Call[] }>(getTimelockControllerCalls());
+    const response = await request<{ timelockControllerCalls: Call[] }>(getTimelockControllerCalls(150));
     if (!response) return;
     return response.timelockControllerCalls.reduce(
       (state, call) => {
