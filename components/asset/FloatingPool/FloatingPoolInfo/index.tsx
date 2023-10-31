@@ -14,6 +14,7 @@ import useFloatingPoolAPR from 'hooks/useFloatingPoolAPR';
 import useRewards from 'hooks/useRewards';
 import ItemCell from 'components/common/ItemCell';
 import { WEI_PER_ETHER } from 'utils/const';
+import numbers from 'config/numbers.json';
 
 type FloatingPoolInfoProps = {
   symbol: string;
@@ -25,7 +26,7 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol }) => {
   const { marketAccount } = useAccountData(symbol);
 
   const { rates } = useRewards();
-
+  const { minRewardsRate } = numbers;
   const { deposited, borrowed } = useMemo(() => {
     if (!marketAccount) return {};
     const {
@@ -88,13 +89,16 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol }) => {
               label: t('Deposit Rewards APR'),
               value: (
                 <>
-                  {rates[symbol].map((r) => (
-                    <ItemCell
-                      key={r.asset}
-                      value={toPercentage(Number(r.floatingDeposit) / 1e18)}
-                      symbol={r.assetSymbol}
-                    />
-                  ))}
+                  {rates[symbol].map(
+                    (r) =>
+                      Number(r.floatingDeposit) / 1e18 > minRewardsRate && (
+                        <ItemCell
+                          key={r.asset}
+                          value={toPercentage(Number(r.floatingDeposit) / 1e18)}
+                          symbol={r.assetSymbol}
+                        />
+                      ),
+                  )}
                 </>
               ),
               tooltipTitle: t('This APR assumes a constant price for the OP token and distribution rate.'),
@@ -107,9 +111,12 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol }) => {
               label: t('Borrow Rewards APR'),
               value: (
                 <>
-                  {rates[symbol].map((r) => (
-                    <ItemCell key={r.asset} value={toPercentage(Number(r.borrow) / 1e18)} symbol={r.assetSymbol} />
-                  ))}
+                  {rates[symbol].map(
+                    (r) =>
+                      Number(r.borrow) / 1e18 > minRewardsRate && (
+                        <ItemCell key={r.asset} value={toPercentage(Number(r.borrow) / 1e18)} symbol={r.assetSymbol} />
+                      ),
+                  )}
                 </>
               ),
               tooltipTitle: t('This APR assumes a constant price for the OP token and distribution rate.'),

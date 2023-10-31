@@ -35,7 +35,7 @@ const MaturityPoolInfo: FC<MaturityPoolInfoProps> = ({
   adjustFactor,
 }) => {
   const { t } = useTranslation();
-  const { minAPRValue } = numbers;
+  const { minAPRValue, minRewardsRate } = numbers;
 
   const { rates } = useRewards();
 
@@ -86,9 +86,12 @@ const MaturityPoolInfo: FC<MaturityPoolInfoProps> = ({
               label: t('Borrow Rewards APR'),
               value: (
                 <>
-                  {rates[symbol].map((r) => (
-                    <ItemCell key={r.asset} value={toPercentage(Number(r.borrow) / 1e18)} symbol={r.assetSymbol} />
-                  ))}
+                  {rates[symbol].map(
+                    (r) =>
+                      Number(r.borrow) / 1e18 > minRewardsRate && (
+                        <ItemCell key={r.asset} value={toPercentage(Number(r.borrow) / 1e18)} symbol={r.assetSymbol} />
+                      ),
+                  )}
                 </>
               ),
               tooltipTitle: t('This APR assumes a constant price for the OP token and distribution rate.'),
