@@ -131,7 +131,7 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol }) => {
         ),
       },
     ],
-    [deposited, borrowed, depositAPR, marketAccount, symbol, borrowAPR, rates, t],
+    [t, deposited, borrowed, depositAPR, marketAccount, symbol, borrowAPR, rates, minRewardsRate],
   );
 
   return (

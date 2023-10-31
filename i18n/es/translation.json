@@ -529,8 +529,6 @@
   "Insufficient esEXA balance": "Balance esEXA insuficiente",
   "Vest esEXA": "Consolidar esEXA",
   "No esEXA to claim": "No hay esEXA que reclamar.",
-  "You can claim all streams at once.": "Puedes reclamar todos los streams a la vez.",
-  "Claim All": "Reclamar Todos",
   "The esEXA program provides rewards equivalent to EXA with a linear vesting period, ensuring that the Exactly protocol remains sustainable and rewarding for long-term community members.": "El programa esEXA proporciona recompensas equivalentes a EXA con un período de consolidación lineal, asegurando que el protocolo Exactly siga siendo sostenible y gratificante para los miembros de la comunidad a largo plazo.",
   "Initiate the vesting of your esEXA": "Inicia la consolidación de tus esEXA",
   "Unlock your EXA rewards for being an active participant in the Protocol": "Desbloquea tus recompensas EXA por ser un participante activo en el Protocolo",
@@ -551,5 +549,7 @@
   "Scheduler": "Programador",
   "Scheduled At": "Programado en",
   "Scheduled Transactions": "Transacciones Programadas",
-  "Executed Transactions": "Transacciones Ejecutadas"
+  "Executed Transactions": "Transacciones Ejecutadas",
+  "You can withdraw all streams at once.": "Puedes retirar todos los streams a la vez.",
+  "Whitdraw All": "Retirar Todo"
 }
