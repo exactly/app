@@ -3,7 +3,7 @@ import type { NextPage } from 'next';
 
 import { usePageView } from 'hooks/useAnalytics';
 import { useTranslation } from 'react-i18next';
-import { Box, Button, Typography } from '@mui/material';
+import { Box, Button, Skeleton, Typography } from '@mui/material';
 import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
 import Link from 'next/link';
 import useRouter from 'hooks/useRouter';
@@ -83,10 +83,10 @@ const Security: NextPage = () => {
               reports: ['ABDK', 'OpenZeppelin'],
               information: [`279 ${t('lines')} (242 ${t('lines of code')}), 10.5 kb`],
               proxy: async () => {
-                return [{ name: '', address: await getContractAddress('EscrowedEXA_Proxy') }];
+                return [{ name: '', address: await getContractAddress('esEXA_Proxy') }];
               },
               implementation: async () => {
-                return [{ name: '', address: await getContractAddress('EscrowedEXA_Implementation') }];
+                return [{ name: '', address: await getContractAddress('esEXA_Implementation') }];
               },
               codeLink: 'https://github.com/exactly/protocol/blob/main/contracts/periphery/EscrowedEXA.sol',
             },
@@ -139,19 +139,27 @@ const Security: NextPage = () => {
         </Typography>
       </Box>
       <Box my={3}>
-        {contractsData.map((contract) => (
-          <ContractInfo
-            key={contract.name}
-            name={contract.name}
-            audited={contract.audited}
-            description={contract.description}
-            reports={contract.reports}
-            information={contract.information}
-            proxy={contract.proxy}
-            implementation={contract.implementation}
-            codeLink={contract.codeLink}
-          />
-        ))}
+        {contractsData.length > 0 ? (
+          contractsData.map((contract) => (
+            <ContractInfo
+              key={contract.name}
+              name={contract.name}
+              audited={contract.audited}
+              description={contract.description}
+              reports={contract.reports}
+              information={contract.information}
+              proxy={contract.proxy}
+              implementation={contract.implementation}
+              codeLink={contract.codeLink}
+            />
+          ))
+        ) : (
+          <>
+            <Skeleton height={80} />
+            <Skeleton height={80} />
+            <Skeleton height={80} />
+          </>
+        )}
       </Box>
       <Link href={{ pathname: `/security/protocol`, query }} legacyBehavior>
         <Box

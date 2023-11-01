@@ -3,7 +3,7 @@ import type { NextPage } from 'next';
 
 import { usePageView } from 'hooks/useAnalytics';
 import { useTranslation } from 'react-i18next';
-import { Box, Button, Typography } from '@mui/material';
+import { Box, Button, Skeleton, Typography } from '@mui/material';
 import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
 import Link from 'next/link';
 import useRouter from 'hooks/useRouter';
@@ -19,6 +19,7 @@ const Security: NextPage = () => {
   const { t } = useTranslation();
   const { query } = useRouter();
   const [contractsData, setContractsData] = useState<ContractInfoType[]>([]);
+
   const getContractAddress = useContractAddress();
   const { chain: displayNetwork } = useWeb3();
 
@@ -187,20 +188,28 @@ const Security: NextPage = () => {
         </Typography>
       </Box>
       <Box my={3}>
-        {contractsData.map((contract, index) => (
-          <ContractInfo
-            key={contract.name}
-            name={contract.name}
-            audited={contract.audited}
-            description={contract.description}
-            reports={contract.reports}
-            information={contract.information}
-            proxy={contract.proxy}
-            implementation={contract.implementation}
-            codeLink={contract.codeLink}
-            withBorder={index !== contracts.length - 1}
-          />
-        ))}
+        {contractsData.length > 0 ? (
+          contractsData.map((contract, index) => (
+            <ContractInfo
+              key={contract.name}
+              name={contract.name}
+              audited={contract.audited}
+              description={contract.description}
+              reports={contract.reports}
+              information={contract.information}
+              proxy={contract.proxy}
+              implementation={contract.implementation}
+              codeLink={contract.codeLink}
+              withBorder={index !== contracts.length - 1}
+            />
+          ))
+        ) : (
+          <>
+            <Skeleton height={80} />
+            <Skeleton height={80} />
+            <Skeleton height={80} />
+          </>
+        )}
       </Box>
       <Link href={{ pathname: `/security/periphery`, query }} legacyBehavior>
         <Box
