@@ -435,8 +435,8 @@ function EventSummary({
         {isMultiSend ? (
           <Row title={t('Actions')} inner={inner}>
             <Box display="flex" flexDirection="column" gap={2}>
-              {data.txData.dataDecoded?.parameters?.[0]?.valueDecoded?.map((v, i) => (
-                <Decode key={i} to={v.to} data={v.dataDecoded} />
+              {data.txData.dataDecoded?.parameters?.[0]?.valueDecoded?.map((v) => (
+                <Decode key={`${v.operation}-${v.to}-${v.data}`} to={v.to} data={v.dataDecoded} />
               ))}
             </Box>
           </Row>
