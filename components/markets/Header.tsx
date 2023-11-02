@@ -1,20 +1,16 @@
 import React, { type FC, useMemo } from 'react';
 import { formatUnits, parseUnits } from 'viem';
 import { useTranslation } from 'react-i18next';
-import Image from 'next/image';
-import { Box } from '@mui/material';
 
 import HeaderInfo from 'components/common/HeaderInfo';
 import { ItemInfoProps } from 'components/common/ItemInfo';
 
 import formatNumber from 'utils/formatNumber';
-import { useWeb3 } from 'hooks/useWeb3';
 import useAccountData from 'hooks/useAccountData';
 
 const MarketsHeader: FC = () => {
   const { t } = useTranslation();
   const { accountData } = useAccountData();
-  const { chain } = useWeb3();
 
   const { totalDeposited, totalBorrowed, totalAvailable } = useMemo<{
     totalDeposited?: bigint;
@@ -67,28 +63,7 @@ const MarketsHeader: FC = () => {
     },
   ];
 
-  const network = chain?.name;
-
-  return (
-    <HeaderInfo
-      itemsInfo={itemsInfo}
-      title={
-        <Box display="flex" gap={0.5}>
-          <Image
-            src={`/img/networks/${chain?.id}.svg`}
-            alt=""
-            width={24}
-            height={24}
-            style={{
-              maxWidth: '100%',
-              height: 'auto',
-            }}
-          />
-          <Box>{network}</Box>
-        </Box>
-      }
-    />
-  );
+  return <HeaderInfo itemsInfo={itemsInfo} />;
 };
 
 export default MarketsHeader;

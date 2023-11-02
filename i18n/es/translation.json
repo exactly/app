@@ -551,5 +551,6 @@
   "Scheduled Transactions": "Transacciones Programadas",
   "Executed Transactions": "Transacciones Ejecutadas",
   "You can withdraw all streams at once.": "Puedes retirar todos los streams a la vez.",
-  "Whitdraw All": "Retirar Todo"
+  "Withdraw All": "Retirar Todo",
+  "Connected to {{network}}": "Conectado a {{network}}"
 }

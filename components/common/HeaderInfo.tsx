@@ -5,7 +5,7 @@ import ItemInfo, { ItemInfoProps } from './ItemInfo';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 type HeaderInfoProps = {
-  title: ReactNode;
+  title?: ReactNode;
   itemsInfo: ItemInfoProps[];
   variant?:
     | 'h2'
@@ -37,9 +37,11 @@ const HeaderInfo: FC<HeaderInfoProps> = ({ title, itemsInfo, variant = 'h6', sha
       p={isMobile ? '16px' : '24px'}
       boxShadow={({ palette }) => (palette.mode === 'light' && shadow ? '0px 4px 12px rgba(175, 177, 182, 0.2)' : '')}
     >
-      <Grid item mb="20px">
-        <Typography variant={variant}>{title}</Typography>
-      </Grid>
+      {title && (
+        <Grid item mb="20px">
+          <Typography variant={variant}>{title}</Typography>
+        </Grid>
+      )}
       <Grid item container spacing={isMobile ? 2 : xs ? 1 : 4}>
         {itemsInfo.map(({ label, value, underLabel, tooltipTitle }) => (
           <ItemInfo

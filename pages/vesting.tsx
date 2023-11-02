@@ -193,7 +193,7 @@ const Vesting: NextPage = () => {
                               loading={loading}
                               data-testid="vesting-claim-all"
                             >
-                              {t('Whitdraw All')}
+                              {t('Withdraw All')}
                             </LoadingButton>
                           </>
                         )}

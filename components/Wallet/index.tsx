@@ -5,6 +5,7 @@ import { useWeb3 } from 'hooks/useWeb3';
 import { formatWallet } from 'utils/utils';
 import SettingsIcon from '@mui/icons-material/Settings';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
+import Image from 'next/image';
 
 import { Avatar, Badge, Box, Button, List, ListItem, ListItemButton, Menu, Typography } from '@mui/material';
 
@@ -25,7 +26,7 @@ function Wallet() {
   const openMenu = (event: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget);
   const closeMenu = () => setAnchorEl(null);
 
-  const { walletAddress, connect, impersonateActive, exitImpersonate } = useWeb3();
+  const { walletAddress, connect, impersonateActive, exitImpersonate, chain } = useWeb3();
   const { disconnect } = useDisconnect();
   const { data: ens, error: ensError } = useEnsName({ address: walletAddress, chainId: mainnet.id });
   const { data: ensAvatar, error: ensAvatarError } = useEnsAvatar({
@@ -35,6 +36,7 @@ function Wallet() {
   const { query } = useRouter();
 
   const formattedWallet = formatWallet(walletAddress);
+  const network = chain?.name;
 
   const avatarImgSrc = useMemo(() => {
     if (!walletAddress) return '';
@@ -46,6 +48,17 @@ function Wallet() {
     return (
       <Button onClick={connect} variant="contained" sx={{ fontSize: { xs: 10, sm: 13 } }} data-testid="connect-wallet">
         {t('Connect wallet')}
+        <Image
+          src={`/img/networks/${chain?.id}.svg`}
+          alt=""
+          width={20}
+          height={20}
+          style={{
+            maxWidth: '100%',
+            height: 'auto',
+            marginLeft: '5px',
+          }}
+        />
       </Button>
     );
   }
@@ -74,6 +87,17 @@ function Wallet() {
         }}
         data-testid="wallet-menu"
       >
+        <Image
+          src={`/img/networks/${chain?.id}.svg`}
+          alt=""
+          width={20}
+          height={20}
+          style={{
+            maxWidth: '100%',
+            height: 'auto',
+            marginRight: '5px',
+          }}
+        />
         <Avatar alt="Address avatar" src={avatarImgSrc} sx={{ width: 20, height: 20, mr: { xs: 0, sm: '5px' } }} />
         <Typography variant="subtitle1" color="grey.900" display={onlyDesktop} data-testid="user-address">
           {ens && !ensError ? ens : formattedWallet}
@@ -116,11 +140,26 @@ function Wallet() {
               </Typography>
             )}
             {impersonateActive && <Typography fontSize={12}>{t('Viewing as')}:</Typography>}
-            <Box display="flex">
+            <Box display="flex" mb={2} alignSelf={'center'}>
               <Typography variant="subtitle1" fontSize="16px" color="grey.500">
                 {formattedWallet}
               </Typography>
               <CopyToClipboardButton text={walletAddress} sx={{ width: 16, height: 16 }} />
+            </Box>
+            <Box display="flex" gap={0.5}>
+              <Image
+                src={`/img/networks/${chain?.id}.svg`}
+                alt=""
+                width={20}
+                height={20}
+                style={{
+                  maxWidth: '100%',
+                  height: 'auto',
+                }}
+              />
+              <Typography fontSize="14px" fontWeight={500} color="grey.500">
+                {t('Connected to {{network}}', { network })}
+              </Typography>
             </Box>
           </Box>
           {impersonateActive && (
