@@ -426,7 +426,9 @@ export const GetEXAProvider: FC<PropsWithChildren> = ({ children }) => {
       const { status, transactionHash } = await waitForTransaction({ hash: txHash_ });
       setTX({ status: status ? 'success' : 'error', hash: transactionHash });
       setScreen(Screen.TX_STATUS);
-      transaction.purchase('getEXA', input);
+      if (status === 'success') {
+        transaction.purchase('getEXA', input);
+      }
     } catch (err) {
       setTXError({ status: true, message: handleOperationError(err) });
       setTXStep(TXStep.CONFIRM);
@@ -486,7 +488,9 @@ export const GetEXAProvider: FC<PropsWithChildren> = ({ children }) => {
         setScreen(Screen.TX_STATUS);
         setTX({ status: 'processing', hash });
         const { status, transactionHash } = await waitForTransaction({ hash });
-        transaction.purchase('getEXA', input);
+        if (status === 'success') {
+          transaction.purchase('getEXA', input);
+        }
         setTX({ status: status ? 'success' : 'error', hash: transactionHash });
       }
     } catch (err) {
