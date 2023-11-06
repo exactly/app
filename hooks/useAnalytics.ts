@@ -28,7 +28,8 @@ type ItemVariant =
   | 'claim'
   | 'roll'
   | 'bridge'
-  | 'vest';
+  | 'vest'
+  | 'getEXA';
 type TrackItem = { eventName: string; variant: ItemVariant };
 type OperationInput = { operation: Operation; symbol: string; qty: string };
 
@@ -127,6 +128,17 @@ function useAnalyticsContext(assetSymbol?: string) {
     };
   }, []);
 
+  const getEXAContext = useCallback((input: BridgeInput) => {
+    const operationLabel = 'getEXA';
+    return {
+      item_id: operationLabel,
+      item_name: operationLabel,
+      symbol: input.destinationToken,
+      quantity: input.destinationToken,
+      ...input,
+    };
+  }, []);
+
   const vestContext = useCallback((input: VestInput) => {
     const operationLabel = 'vest';
 
@@ -139,7 +151,14 @@ function useAnalyticsContext(assetSymbol?: string) {
     };
   }, []);
 
-  return { appContext: useSnapshot(appContext), itemContext, rolloverContext, bridgeContext, vestContext };
+  return {
+    appContext: useSnapshot(appContext),
+    itemContext,
+    rolloverContext,
+    bridgeContext,
+    vestContext,
+    getEXAContext,
+  };
 }
 
 export function usePageView(pathname: string, title: string) {
@@ -162,7 +181,8 @@ export default function useAnalytics({
   rewards,
   operationInput,
 }: { symbol?: string; rewards?: Rewards; operationInput?: OperationInput } = {}) {
-  const { appContext, itemContext, rolloverContext, bridgeContext, vestContext } = useAnalyticsContext(symbol);
+  const { appContext, itemContext, rolloverContext, bridgeContext, vestContext, getEXAContext } =
+    useAnalyticsContext(symbol);
   const { isDisable } = useActionButton();
 
   const trackWithContext = useCallback(
@@ -342,6 +362,10 @@ export default function useAnalytics({
     (eventName: string, input: VestInput) => trackWithContext(eventName, { items: [vestContext(input)] }),
     [trackWithContext, vestContext],
   );
+  const trackGetEXA = useCallback(
+    (eventName: string, input: BridgeInput) => trackWithContext(eventName, { items: [getEXAContext(input)] }),
+    [trackWithContext, getEXAContext],
+  );
 
   const buildTransactionTrack = useCallback(
     (variant: ItemVariant = 'operation', eventName: string, input?: object) => {
@@ -364,12 +388,18 @@ export default function useAnalytics({
           }
           break;
         }
+        case 'getEXA': {
+          if (isBridgeInput(input)) {
+            trackGetEXA(eventName, input);
+          }
+          break;
+        }
         default: {
           trackItem({ eventName, variant });
         }
       }
     },
-    [trackBridge, trackItem, trackRollover, trackVest],
+    [trackBridge, trackGetEXA, trackItem, trackRollover, trackVest],
   );
 
   const addToCart = useCallback(

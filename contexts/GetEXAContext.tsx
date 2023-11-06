@@ -34,6 +34,7 @@ import {
   Protocol,
   ActiveRoute,
   BridgeStatus,
+  BridgeInput,
 } from 'types/Bridge';
 import useSocketAssets from 'hooks/useSocketAssets';
 import handleOperationError from 'utils/handleOperationError';
@@ -62,6 +63,7 @@ import waitForTransaction from 'utils/waitForTransaction';
 import dayjs from 'dayjs';
 import { splitSignature } from '@ethersproject/bytes';
 import useDelayedEffect from 'hooks/useDelayedEffect';
+import useAnalytics from '../hooks/useAnalytics';
 
 const DESTINATION_CHAIN = optimism.id;
 
@@ -139,6 +141,7 @@ export const GetEXAProvider: FC<PropsWithChildren> = ({ children }) => {
     () => assets.filter(({ chainId }) => chainId === chain?.chainId),
     [assets, chain?.chainId],
   );
+  const { transaction } = useAnalytics();
 
   const exaPrice = useEXAPrice();
   const isBridge = chain?.chainId !== appChain.id;
@@ -383,6 +386,30 @@ export const GetEXAProvider: FC<PropsWithChildren> = ({ children }) => {
     }
   }, [asset?.symbol, chain?.chainId, erc20, opts, route, screen, walletAddress, walletClient]);
 
+  const nativeSwap = asset?.symbol === 'ETH' && chain?.chainId === optimism.id;
+  const qtyOut =
+    qtyIn === ''
+      ? 0n
+      : exaethPrice !== undefined
+      ? nativeSwap
+        ? (parseEther(qtyIn) * WEI_PER_ETHER) / exaethPrice
+        : route
+        ? (BigInt(route.toAmount) * WEI_PER_ETHER) / exaethPrice
+        : 0n
+      : undefined;
+
+  const input: BridgeInput = useMemo(
+    () => ({
+      destinationAmount: qtyOut?.toString() || '',
+      destinationToken: 'EXA',
+      sourceAmount: qtyIn,
+      sourceToken: asset?.symbol || '',
+      destinationChainId: DESTINATION_CHAIN,
+      sourceChainId: chain?.chainId,
+    }),
+    [asset?.symbol, chain?.chainId, qtyIn, qtyOut],
+  );
+
   const confirmBridge = useCallback(async () => {
     if (txStep !== TXStep.CONFIRM || !walletClient || !route) return;
 
@@ -399,15 +426,18 @@ export const GetEXAProvider: FC<PropsWithChildren> = ({ children }) => {
       const { status, transactionHash } = await waitForTransaction({ hash: txHash_ });
       setTX({ status: status ? 'success' : 'error', hash: transactionHash });
       setScreen(Screen.TX_STATUS);
+      transaction.purchase('getEXA', input);
     } catch (err) {
       setTXError({ status: true, message: handleOperationError(err) });
       setTXStep(TXStep.CONFIRM);
+      transaction.removeFromCart('getEXA', input);
     }
-  }, [destinationCallData, route, txStep, walletClient]);
+  }, [destinationCallData, input, route, transaction, txStep, walletClient]);
 
   const socketSubmit = useCallback(async () => {
     const minEXA = 0n;
     const keepETH = 0n;
+    transaction.beginCheckout('getEXA', input);
     if (isBridge) return confirmBridge();
 
     if (!walletAddress || !route || !swapper || !erc20?.address || !opts || !asset) return;
@@ -456,14 +486,30 @@ export const GetEXAProvider: FC<PropsWithChildren> = ({ children }) => {
         setScreen(Screen.TX_STATUS);
         setTX({ status: 'processing', hash });
         const { status, transactionHash } = await waitForTransaction({ hash });
+        transaction.purchase('getEXA', input);
         setTX({ status: status ? 'success' : 'error', hash: transactionHash });
       }
     } catch (err) {
       setTXError({ status: true, message: handleOperationError(err) });
+      transaction.removeFromCart('getEXA', input);
     } finally {
       setTXStep(undefined);
     }
-  }, [asset, isBridge, confirmBridge, erc20, isMultiSig, opts, qtyIn, route, sign, swapper, walletAddress]);
+  }, [
+    transaction,
+    input,
+    isBridge,
+    confirmBridge,
+    walletAddress,
+    route,
+    swapper,
+    erc20,
+    opts,
+    asset,
+    isMultiSig,
+    qtyIn,
+    sign,
+  ]);
 
   const submit = useCallback(async () => {
     if (!walletClient || !walletAddress || !swapper) return;
@@ -549,18 +595,6 @@ export const GetEXAProvider: FC<PropsWithChildren> = ({ children }) => {
   useEffect(() => {
     fetchActiveRoutes();
   }, [fetchActiveRoutes]);
-
-  const nativeSwap = asset?.symbol === 'ETH' && chain?.chainId === optimism.id;
-  const qtyOut =
-    qtyIn === ''
-      ? 0n
-      : exaethPrice !== undefined
-      ? nativeSwap
-        ? (parseEther(qtyIn) * WEI_PER_ETHER) / exaethPrice
-        : route
-        ? (BigInt(route.toAmount) * WEI_PER_ETHER) / exaethPrice
-        : 0n
-      : undefined;
 
   const value: ContextValues = {
     setScreen: (s: ContextValues['screen']) => {
