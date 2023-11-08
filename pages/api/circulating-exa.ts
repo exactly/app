@@ -26,7 +26,7 @@ const exa = {
   address: getAddress(exaAddress),
 } as const;
 
-export default async function (req: NextApiRequest, res: NextApiResponse) {
+export default async function (_: NextApiRequest, res: NextApiResponse) {
   const { PRIVATE_ALCHEMY_API_KEY } = process.env;
   if (!PRIVATE_ALCHEMY_API_KEY) throw new Error('No Alchemy API key');
   res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate=3600');
@@ -45,5 +45,5 @@ export default async function (req: NextApiRequest, res: NextApiResponse) {
   });
   const nonCirculatingSupply = balancesResult.reduce((total, { result }) => total + (result as bigint), 0n);
   const circulatingSupply = (totalSupply as bigint) - nonCirculatingSupply;
-  res.status(200).send(String(Number(circulatingSupply) / 10 ** Number(decimals)));
+  res.status(200).json(Number(circulatingSupply) / 10 ** Number(decimals));
 }
