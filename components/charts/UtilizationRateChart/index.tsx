@@ -1,15 +1,14 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { Typography, useTheme, Box } from '@mui/material';
 import { LineChart, XAxis, Tooltip, Line, ResponsiveContainer, CartesianGrid, YAxis } from 'recharts';
+import { useTranslation } from 'react-i18next';
 
 import { toPercentage } from 'utils/utils';
-import useUtilizationRate from 'hooks/useUtilizationRate';
+import useUtilizationRate, { useCurrentUtilizationRate, INTERVAL, STEP } from 'hooks/useUtilizationRate';
 import TooltipChart, { TooltipChartProps } from '../TooltipChart';
 import LoadingChart from '../LoadingChart';
-import numbers from 'config/numbers.json';
-import parseTimestamp from 'utils/parseTimestamp';
 import ButtonsChart from '../ButtonsChart';
-import { useTranslation } from 'react-i18next';
+import { bmin, bmax, abs } from 'utils/fixedMath';
 
 type Props = {
   type: 'floating' | 'fixed';
@@ -22,60 +21,36 @@ function UtilizationRateChart({ type, symbol }: Props) {
   const { t } = useTranslation();
   const { palette } = useTheme();
   const [zoom, setZoom] = useState<boolean>(true);
-  const { currentUtilization } = useUtilizationRate(type, symbol);
-  const [hoverUtilizations, setHoverUtilizations] = useState<number[]>([]);
+  const currentUtilization = useCurrentUtilizationRate(type, symbol);
 
   const [currentMin, currentMax, interval] = useMemo(() => {
-    if (!zoom || !currentUtilization) return [undefined, undefined, numbers.chartInterval];
-    if (!currentUtilization.length) return [numbers.chartInterval, undefined, undefined];
-    if (currentUtilization.length === 1)
+    if (!zoom || !currentUtilization || !currentUtilization.length) return [undefined, undefined, INTERVAL];
+    if (currentUtilization.length === 1) {
       return [
-        Math.max(0, currentUtilization[0].utilization - 10 * numbers.chartInterval),
-        currentUtilization[0].utilization + 9 * numbers.chartInterval,
-        numbers.chartInterval,
+        bmax(0n, currentUtilization[0].utilization - 10n * INTERVAL),
+        currentUtilization[0].utilization + 9n * INTERVAL,
+        INTERVAL,
       ];
+    }
 
-    const min = Math.min(...currentUtilization.map((item) => item.utilization));
-    const max = Math.max(...currentUtilization.map((item) => item.utilization));
-    const gap = Math.abs(max - min) / numbers.dataPointsInChart || numbers.chartInterval;
+    const min = bmin(...currentUtilization.map((item) => item.utilization));
+    const max = bmax(...currentUtilization.map((item) => item.utilization));
+    const gap = abs(max - min) / 100n || INTERVAL;
 
-    return [
-      Math.max(0, min - gap * Math.floor(numbers.dataPointsInChart * 0.05)),
-      max + gap * Math.floor(numbers.dataPointsInChart * 0.05),
-      gap,
-    ];
+    return [bmax(0n, min - gap * 5n), max + gap * 5n, gap];
   }, [currentUtilization, zoom]);
 
-  const { data, loading } = useUtilizationRate(
-    type,
-    symbol,
-    currentMin,
-    currentMax,
-    interval,
-    currentUtilization ? currentUtilization?.map((item) => item.utilization) : [],
-  );
+  const { data, loading } = useUtilizationRate(symbol, currentMin, currentMax, interval);
 
   const [cursorStyle, setCursorStyle] = useState('default');
 
-  const handleMouseEnter = (utilization: number) => {
-    setHoverUtilizations((currentHoverPools) => [...currentHoverPools.filter((u) => u !== utilization), utilization]);
+  const handleMouseEnter = () => {
     setCursorStyle('pointer');
   };
 
-  const handleMouseLeave = (utilization: number) => {
-    setHoverUtilizations((currentHoverPools) => currentHoverPools.filter((u) => u !== utilization));
+  const handleMouseLeave = () => {
     setCursorStyle('default');
   };
-
-  const maturitiesOnTooltip = useMemo(
-    () =>
-      currentUtilization
-        ? currentUtilization
-            .filter(({ utilization }) => hoverUtilizations.includes(utilization))
-            .map(({ maturity }) => maturity)
-        : [],
-    [currentUtilization, hoverUtilizations],
-  );
 
   const buttons = useMemo(
     () => [
@@ -91,6 +66,11 @@ function UtilizationRateChart({ type, symbol }: Props) {
     [t],
   );
 
+  const curves = data.reduce((max, p) => {
+    const keys = Object.keys(p).filter((k) => k.startsWith('curve'));
+    return keys.length > max ? keys.length : max;
+  }, 0);
+
   return (
     <Box display="flex" flexDirection="column" width="100%" height="100%" gap={2}>
       <Box display="flex" justifyContent="space-between">
@@ -102,7 +82,7 @@ function UtilizationRateChart({ type, symbol }: Props) {
         </Box>
       </Box>
       <ResponsiveContainer width="100%" height="100%">
-        {loading || !currentUtilization ? (
+        {loading ? (
           <LoadingChart />
         ) : (
           <LineChart data={data} margin={{ top: 5, bottom: 5 }} style={{ cursor: cursorStyle }}>
@@ -164,14 +144,7 @@ function UtilizationRateChart({ type, symbol }: Props) {
             <Tooltip
               labelFormatter={formatEmpty}
               formatter={(value) => toPercentage(value as number)}
-              content={
-                <CustomTooltipChart
-                  highlighted={currentUtilization}
-                  maturitiesOnTooltip={maturitiesOnTooltip}
-                  type={type}
-                  zoom={zoom}
-                />
-              }
+              content={<CustomTooltipChart highlighted={currentUtilization || []} zoom={zoom} />}
               cursor={{ strokeWidth: 1, fill: palette.grey[500], strokeDasharray: '3' }}
             />
 
@@ -187,20 +160,37 @@ function UtilizationRateChart({ type, symbol }: Props) {
               animationDuration={2000}
             />
 
+            {Array.from({ length: curves }).map((_, i) => {
+              const curve = `curve${i}`;
+              return (
+                <Line
+                  key={curve}
+                  dot={false}
+                  name={t('APR (U Global = {{utilization}})', { utilization: `${STEP * i}%` })}
+                  yAxisId="yaxis"
+                  type="monotone"
+                  dataKey={curve}
+                  stroke={palette.colors[i] ?? (palette.mode === 'light' ? 'black' : 'white')}
+                  strokeWidth={2}
+                  isAnimationActive={false}
+                  activeDot={false}
+                />
+              );
+            })}
+
             <Line
               dot={(props) => (
                 <CustomDot
                   {...props}
                   color={palette.operation.variable}
-                  dotsToHighlight={currentUtilization.map((item) => item.utilization)}
                   onMouseEnter={handleMouseEnter}
                   onMouseLeave={handleMouseLeave}
                 />
               )}
-              name={t('Borrow APR')}
+              name={t('APR (Current)')}
               yAxisId="yaxis"
               type="monotone"
-              dataKey="apr"
+              dataKey="current"
               stroke={palette.mode === 'light' ? 'black' : 'white'}
               strokeWidth={2}
               isAnimationActive={false}
@@ -216,34 +206,33 @@ function UtilizationRateChart({ type, symbol }: Props) {
 const CustomDot = ({
   cx,
   cy,
-  payload: { utilization },
+  payload: { highlight },
   color,
-  dotsToHighlight,
   onMouseEnter,
   onMouseLeave,
 }: {
   cx: number;
   cy: number;
-  payload: { utilization: number; apr: number };
+  payload: { highlight: boolean };
   color: string;
   dotsToHighlight?: number[];
-  onMouseEnter: (utilization: number) => void;
-  onMouseLeave: (utilization: number) => void;
+  onMouseEnter: () => void;
+  onMouseLeave: () => void;
 }) => {
   const { palette } = useTheme();
   const [fillColor, setFillColor] = useState<string | undefined>();
 
   const onHover = useCallback(() => {
     setFillColor(color);
-    onMouseEnter(utilization);
-  }, [color, onMouseEnter, utilization]);
+    onMouseEnter();
+  }, [color, onMouseEnter]);
 
   const onLeave = useCallback(() => {
     setFillColor(undefined);
-    onMouseLeave(utilization);
-  }, [onMouseLeave, utilization]);
+    onMouseLeave();
+  }, [onMouseLeave]);
 
-  if (!dotsToHighlight || !dotsToHighlight.includes(utilization)) return null;
+  if (!highlight) return null;
 
   return (
     <circle
@@ -261,15 +250,12 @@ const CustomDot = ({
 
 const CustomTooltipChart = ({
   highlighted,
-  maturitiesOnTooltip,
-  type,
   payload,
   zoom,
   ...props
-}: TooltipChartProps & {
-  highlighted: Record<string, number>[];
-  maturitiesOnTooltip: number[];
-  type: 'fixed' | 'floating';
+}: Omit<TooltipChartProps, 'payload'> & {
+  payload?: (NonNullable<TooltipChartProps['payload']>[number] & { payload: Record<string, number | boolean> })[];
+  highlighted: { utilization: bigint }[];
   zoom: boolean;
 }) => {
   const { t } = useTranslation();
@@ -280,13 +266,11 @@ const CustomTooltipChart = ({
   const round = useCallback((value: number) => parseFloat(value.toFixed(zoom ? 5 : 2)), [zoom]);
 
   const matches = useMemo(
-    () => highlighted.filter(({ utilization }) => round(utilization) === round(utilizationPayload?.value || 0)),
+    () =>
+      highlighted.filter(
+        ({ utilization }) => round(Number(utilization) / 1e18) === round(utilizationPayload?.value || 0),
+      ).length > 0,
     [highlighted, round, utilizationPayload?.value],
-  );
-
-  const maturitiesToShow = useMemo(
-    () => [...new Set([...maturitiesOnTooltip, ...matches.map(({ maturity }) => maturity)])].sort(),
-    [matches, maturitiesOnTooltip],
   );
 
   if (!matches) return <TooltipChart payload={payload} {...props} />;
@@ -296,13 +280,11 @@ const CustomTooltipChart = ({
       payload={payload}
       {...props}
       additionalInfoPosition="top"
-      additionalInfo={maturitiesToShow.map((maturity) => (
-        <Typography key={`maturity_${maturity}}`} variant="h6" fontSize="12px" color={palette.operation.variable}>
-          {type === 'floating'
-            ? t('Current Utilization')
-            : `${t('Maturity Date')}: ${parseTimestamp(maturity, 'MMM DD')}`}
+      additionalInfo={
+        <Typography variant="h6" fontSize="12px" color={palette.operation.variable}>
+          {t('Current')}
         </Typography>
-      ))}
+      }
     />
   );
 };

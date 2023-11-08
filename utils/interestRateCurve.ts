@@ -1,15 +1,37 @@
-import { WEI_PER_ETHER } from './const';
+import { WAD, expWad, lnWad } from './fixedMath';
 
-type InterestRateCurve = (u: number) => number;
-type InverseInterestRateCurve = (apr: bigint) => bigint;
+type FloatingInterestRateCurve = (uFloating: bigint, uGlobal: bigint) => bigint;
 
-const abs = (n: bigint): bigint => (n < 0n ? -n : n);
+export type FloatingParameters = {
+  a: bigint;
+  b: bigint;
+  floatingNaturalUtilization: bigint;
+  maxUtilization: bigint;
+  sigmoidSpeed: bigint;
+  growthSpeed: bigint;
+  maxRate: bigint;
+};
 
-export function inverseInterestRateCurve(a: bigint, b: bigint, uMax: bigint): InverseInterestRateCurve {
-  return (apr: bigint) =>
-    abs((((apr * uMax) / WEI_PER_ETHER - (b * uMax) / WEI_PER_ETHER - a) * WEI_PER_ETHER) / (b - apr));
-}
+export function floatingInterestRateCurve(parameters: FloatingParameters): FloatingInterestRateCurve {
+  return (uFloating: bigint, uGlobal: bigint): bigint => {
+    const { a, b, maxUtilization, floatingNaturalUtilization, sigmoidSpeed, growthSpeed, maxRate } = parameters;
 
-export default function interestRateCurve(a: number, b: number, uMax: number): InterestRateCurve {
-  return (u: number) => (uMax >= u ? a / (uMax - u) + b : Infinity);
+    const r = (a * WAD) / (maxUtilization - uFloating) + b;
+    if (uGlobal === WAD) return maxRate;
+    if (uGlobal === 0n) return r;
+    if (uGlobal >= uFloating) {
+      const sig =
+        (WAD * WAD) /
+        (WAD +
+          expWad(
+            (-sigmoidSpeed *
+              (lnWad((uGlobal * WAD) / (WAD - uGlobal)) -
+                lnWad((floatingNaturalUtilization * WAD) / (WAD - floatingNaturalUtilization)))) /
+              WAD,
+          ));
+      const rate = (expWad((-growthSpeed * lnWad(WAD - (sig * uGlobal) / WAD)) / WAD) * r) / WAD;
+      return rate > maxRate ? maxRate : rate;
+    }
+    return r;
+  };
 }

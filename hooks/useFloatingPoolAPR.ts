@@ -29,28 +29,29 @@ export default (
 
   const borrowAPR = useMemo((): number | undefined => {
     if (!marketAccount) return undefined;
-    const { totalFloatingDepositAssets, totalFloatingBorrowAssets, decimals } = marketAccount;
+    // const { totalFloatingDepositAssets, totalFloatingBorrowAssets, decimals } = marketAccount;
 
-    const decimalWAD = parseUnits('1', decimals);
-    const delta = parseUnits(qty || '0', decimals);
+    // const decimalWAD = parseUnits('1', decimals);
+    // const delta = parseUnits(qty || '0', decimals);
 
-    const deposited = totalFloatingDepositAssets ?? 0n;
-    const borrowed = (totalFloatingBorrowAssets ?? 0n) + delta;
+    // const deposited = totalFloatingDepositAssets ?? 0n;
+    // const borrowed = (totalFloatingBorrowAssets ?? 0n) + delta;
 
-    const t = deposited === 0n ? 0n : (borrowed * decimalWAD) / deposited;
-    const toUtilization = Number(formatUnits(t, decimals));
+    // const t = deposited === 0n ? 0n : (borrowed * decimalWAD) / deposited;
+    // const toUtilization = Number(formatUnits(t, decimals));
 
-    const { interestRateModel } = marketAccount;
-    const { A, B, UMax } = {
-      A: interestRateModel.floatingCurveA,
-      B: interestRateModel.floatingCurveB,
-      UMax: interestRateModel.floatingMaxUtilization,
-    };
+    // const { interestRateModel } = marketAccount;
+    // const { A, B, UMax } = {
+    //   A: interestRateModel.floatingCurveA,
+    //   B: interestRateModel.floatingCurveB,
+    //   UMax: interestRateModel.floatingMaxUtilization,
+    // };
 
-    const curve = interestRateCurve(Number(A) / 1e18, Number(B) / 1e18, Number(UMax) / 1e18);
-    const rate = curve(toUtilization);
+    // const curve = interestRateCurve(Number(A) / 1e18, Number(B) / 1e18, Number(UMax) / 1e18);
+    // const rate = curve(toUtilization);
+    // return rate;
 
-    return rate;
+    return 0;
   }, [marketAccount, qty]);
 
   const fetchAPRs = useCallback(
