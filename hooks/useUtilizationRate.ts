@@ -1,68 +1,20 @@
 import { useMemo } from 'react';
+import { parseEther } from 'viem';
 
 import useAccountData from './useAccountData';
-import interestRateCurve, { inverseInterestRateCurve } from 'utils/interestRateCurve';
-import numbers from 'config/numbers.json';
+import { floatingInterestRateCurve } from 'utils/interestRateCurve';
+import { WAD } from 'utils/fixedMath';
+import { useMarketFloatingAssets, useMarketFloatingBackupBorrowed, useMarketFloatingDebt } from 'types/abi';
 
-const MAX = 1;
-const INTERVAL = numbers.chartInterval;
+export const MAX = 10n ** 18n;
+export const INTERVAL = parseEther('0.0005');
+export const STEP = 10;
+const uGlobals = Array.from({ length: Math.ceil(100 / STEP) }).map((_, i) => parseEther(String(i * STEP)) / 100n);
 
-export default function useUtilizationRate(
-  type: 'floating' | 'fixed',
-  symbol: string,
-  from = 0,
-  to = MAX,
-  interval = INTERVAL,
-  mandatoryPoints: number[] = [],
-  inversePoints: bigint[] = [],
-) {
+export function useCurrentUtilizationRate(type: 'floating' | 'fixed', symbol: string) {
   const { marketAccount } = useAccountData(symbol);
 
-  const data = useMemo(() => {
-    if (!marketAccount) {
-      return [];
-    }
-
-    const { interestRateModel } = marketAccount;
-
-    const { A, B, UMax } =
-      type === 'floating'
-        ? {
-            A: interestRateModel.floatingCurveA,
-            B: interestRateModel.floatingCurveB,
-            UMax: interestRateModel.floatingMaxUtilization,
-          }
-        : {
-            A: interestRateModel.fixedCurveA,
-            B: interestRateModel.fixedCurveB,
-            UMax: interestRateModel.fixedMaxUtilization,
-          };
-
-    const curve = interestRateCurve(Number(A) / 1e18, Number(B) / 1e18, Number(UMax) / 1e18);
-    const points = Array.from({ length: Math.ceil(Math.abs(to - from) / interval) + 1 }).map((_, i) => {
-      const utilization = from + i * interval;
-      return { utilization, apr: curve(utilization) };
-    });
-
-    if (mandatoryPoints.length) {
-      points.push(...mandatoryPoints.map((utilization) => ({ utilization, apr: curve(utilization) })));
-    }
-
-    if (inversePoints.length) {
-      const inverseCurve = inverseInterestRateCurve(A, B, UMax);
-      points.push(
-        ...inversePoints.map((apr) => ({ utilization: Number(inverseCurve(apr)) / 1e18, apr: Number(apr) / 1e18 })),
-      );
-    }
-
-    if (mandatoryPoints.length || inversePoints.length) {
-      points.sort((a, b) => a.utilization - b.utilization);
-    }
-
-    return points;
-  }, [marketAccount, type, from, to, interval, mandatoryPoints, inversePoints]);
-
-  const currentUtilization = useMemo(() => {
+  return useMemo(() => {
     if (!marketAccount) return undefined;
 
     const { floatingUtilization, fixedPools } = marketAccount;
@@ -70,19 +22,105 @@ export default function useUtilizationRate(
       return undefined;
     }
 
-    const allUtilizations: Record<string, number>[] = [];
+    const allUtilizations: { utilization: bigint; maturity?: number }[] = [];
 
     if (type === 'fixed') {
       fixedPools.forEach((pool) => {
-        allUtilizations.push({ maturity: Number(pool.maturity), utilization: Number(pool.utilization) / 1e18 });
+        allUtilizations.push({ maturity: Number(pool.maturity), utilization: pool.utilization });
       });
     }
 
     if (type === 'floating') {
-      allUtilizations.push({ utilization: Number(floatingUtilization) / 1e18 });
+      allUtilizations.push({ utilization: floatingUtilization });
     }
     return allUtilizations;
   }, [marketAccount, type]);
+}
 
-  return { currentUtilization, data, loading: !currentUtilization || !marketAccount };
+export default function useUtilizationRate(symbol: string, from = 0n, to = MAX, interval = INTERVAL) {
+  const { marketAccount } = useAccountData(symbol);
+
+  const { data: floatingDebt } = useMarketFloatingDebt({ address: marketAccount?.market });
+  const { data: floatingAssets } = useMarketFloatingAssets({ address: marketAccount?.market });
+  const { data: floatingBackupBorrowed } = useMarketFloatingBackupBorrowed({ address: marketAccount?.market });
+
+  const data = useMemo(() => {
+    if (
+      !marketAccount ||
+      floatingDebt === undefined ||
+      floatingAssets === undefined ||
+      floatingBackupBorrowed === undefined
+    ) {
+      return [];
+    }
+
+    const { interestRateModel } = marketAccount;
+
+    const { A, B, uMax } = {
+      A: interestRateModel.floatingCurveA,
+      B: interestRateModel.floatingCurveB,
+      uMax: interestRateModel.floatingMaxUtilization,
+    };
+
+    const points: Record<string, number>[] = [];
+
+    const curve = floatingInterestRateCurve({
+      a: A,
+      b: B,
+      maxUtilization: uMax,
+      // TODO
+      floatingNaturalUtilization: 700000000000000000n,
+      sigmoidSpeed: 2500000000000000000n,
+      growthSpeed: 1000000000000000000n,
+      maxRate: 150000000000000000000n,
+    });
+
+    const currentUFloating = floatingAssets > 0n ? (floatingDebt * WAD) / floatingAssets : 0n;
+    const currentUGlobal =
+      floatingAssets > 0n
+        ? WAD - ((floatingAssets - floatingDebt - floatingBackupBorrowed) * WAD) / floatingAssets
+        : 0n;
+
+    const globalUtilizations = [...uGlobals, currentUGlobal].sort();
+
+    for (let u = from; u < to; u = u + interval) {
+      const curves: Record<string, number> = {};
+
+      for (const uGlobal of globalUtilizations) {
+        if (u > uGlobal) continue;
+        const r = curve(u, uGlobal);
+        curves[uGlobal === currentUGlobal ? 'current' : `curve${uGlobals.indexOf(uGlobal)}`] = Number(r) / 1e18;
+      }
+
+      points.push({ utilization: Number(u) / 1e18, ...curves });
+    }
+
+    const curves: Record<string, number> = {};
+    for (const uGlobal of globalUtilizations) {
+      if (currentUFloating > uGlobal) continue;
+      const r = curve(currentUFloating, uGlobal);
+      curves[uGlobal === currentUGlobal ? 'current' : `curve${uGlobals.indexOf(uGlobal)}`] = Number(r) / 1e18;
+      if (uGlobal === currentUGlobal) {
+        curves['highlight'] = 1;
+      }
+    }
+
+    points.push({
+      utilization: Number(currentUFloating) / 1e18,
+      ...curves,
+    });
+
+    points.sort((x, y) => x.utilization - y.utilization);
+
+    return points;
+  }, [marketAccount, floatingDebt, floatingAssets, floatingBackupBorrowed, from, to, interval]);
+
+  return {
+    data,
+    loading:
+      !marketAccount ||
+      floatingDebt === undefined ||
+      floatingAssets === undefined ||
+      floatingBackupBorrowed === undefined,
+  };
 }
