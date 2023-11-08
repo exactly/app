@@ -61,18 +61,6 @@ function ModalInfoFloatingUtilizationRate({ qty, symbol, operation, variant = 'c
       <ModalInfo label={t('Pool Utilization Rate')} icon={PieChartOutlineRoundedIcon} variant={variant}>
         <FromTo from={from} to={to} variant={variant} />
       </ModalInfo>
-      {variant === 'row' && (
-        <Box height={150} maxWidth="86vw" p={1} mx="auto">
-          <UtilizationRateWithAreaChart
-            type="floating"
-            operation={operation}
-            symbol={symbol}
-            from={rawFrom}
-            to={rawTo}
-            floatingRate={operation === 'borrow' ? borrowAPR : undefined}
-          />
-        </Box>
-      )}
     </>
   );
 }

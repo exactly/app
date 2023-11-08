@@ -1,14 +1,15 @@
 import { useCallback, useMemo, useState } from 'react';
-import { formatUnits, parseUnits } from 'viem';
+import { parseUnits } from 'viem';
 import networkData from 'config/networkData.json' assert { type: 'json' };
 import type { Operation } from 'types/Operation';
-import interestRateCurve from 'utils/interestRateCurve';
+import { floatingInterestRateCurve, uGlobal, uFloating } from 'utils/interestRateCurve';
 import queryRates from 'utils/queryRates';
 import useAccountData from './useAccountData';
 import useDelayedEffect from './useDelayedEffect';
 import { useWeb3 } from './useWeb3';
 import { useGlobalError } from 'contexts/GlobalErrorContext';
 import { WEI_PER_ETHER } from 'utils/const';
+import { useMarketFloatingBackupBorrowed } from 'types/abi';
 
 type FloatingPoolAPR = {
   depositAPR: number | undefined;
@@ -23,35 +24,43 @@ export default (
 ): FloatingPoolAPR => {
   const { chain } = useWeb3();
   const { marketAccount } = useAccountData(symbol);
+  const { data: floatingBackupBorrowed } = useMarketFloatingBackupBorrowed({ address: marketAccount?.market });
   const [depositAPR, setDepositAPR] = useState<number | undefined>();
   const [loading, setLoading] = useState<boolean>(true);
   const { setIndexerError } = useGlobalError();
 
   const borrowAPR = useMemo((): number | undefined => {
-    if (!marketAccount) return undefined;
-    const { totalFloatingDepositAssets, totalFloatingBorrowAssets, decimals } = marketAccount;
+    if (!marketAccount || floatingBackupBorrowed === undefined) {
+      return undefined;
+    }
 
-    const decimalWAD = parseUnits('1', decimals);
+    const { interestRateModel, totalFloatingDepositAssets, totalFloatingBorrowAssets, decimals } = marketAccount;
     const delta = parseUnits(qty || '0', decimals);
 
-    const deposited = totalFloatingDepositAssets ?? 0n;
-    const borrowed = (totalFloatingBorrowAssets ?? 0n) + delta;
+    const debt = totalFloatingBorrowAssets + delta;
 
-    const t = deposited === 0n ? 0n : (borrowed * decimalWAD) / deposited;
-    const toUtilization = Number(formatUnits(t, decimals));
-
-    const { interestRateModel } = marketAccount;
-    const { A, B, UMax } = {
+    const { A, B, uMax } = {
       A: interestRateModel.floatingCurveA,
       B: interestRateModel.floatingCurveB,
-      UMax: interestRateModel.floatingMaxUtilization,
+      uMax: interestRateModel.floatingMaxUtilization,
     };
 
-    const curve = interestRateCurve(Number(A) / 1e18, Number(B) / 1e18, Number(UMax) / 1e18);
-    const rate = curve(toUtilization);
+    const curve = floatingInterestRateCurve({
+      a: A,
+      b: B,
+      maxUtilization: uMax,
+      // TODO
+      floatingNaturalUtilization: 700000000000000000n,
+      sigmoidSpeed: 2500000000000000000n,
+      growthSpeed: 1000000000000000000n,
+      maxRate: 150000000000000000000n,
+    });
 
-    return rate;
-  }, [marketAccount, qty]);
+    const uF = uFloating(debt, totalFloatingDepositAssets);
+    const uG = uGlobal(totalFloatingDepositAssets, debt, floatingBackupBorrowed);
+
+    return Number(curve(uF, uG)) / 1e18;
+  }, [floatingBackupBorrowed, marketAccount, qty]);
 
   const fetchAPRs = useCallback(
     async (cancelled: () => boolean) => {

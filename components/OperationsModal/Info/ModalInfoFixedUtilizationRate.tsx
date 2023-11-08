@@ -110,18 +110,6 @@ function ModalInfoFixedUtilizationRate({ qty, symbol, operation, variant = 'colu
       <ModalInfo label={t('Pool Utilization Rate')} icon={PieChartOutlineRoundedIcon} variant={variant}>
         <FromTo from={from} to={isLoading ? undefined : to} variant={variant} />
       </ModalInfo>
-      {variant === 'row' && (
-        <Box height={150} maxWidth="86vw" p={1} mx="auto">
-          <UtilizationRateWithAreaChart
-            type="fixed"
-            operation={operation}
-            symbol={symbol}
-            from={rawFrom}
-            to={rawTo}
-            fixedRate={fixedRate}
-          />
-        </Box>
-      )}
     </>
   );
 }
