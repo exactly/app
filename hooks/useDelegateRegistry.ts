@@ -25,11 +25,12 @@ export const useDelegation = () => {
 };
 
 export const usePrepareDelegate = (address: Address) => {
-  const { chain, walletAddress } = useWeb3();
+  const { chain, walletAddress, opts } = useWeb3();
   const space = useMemo(() => (chain.id === optimism.id ? SNAPSHOT_SPACE_OPTIMISM : SNAPSHOT_SPACE_GOERLI), [chain.id]);
   const encodedSpace = useMemo(() => stringToHex(space, { size: 32 }), [space]);
 
   return usePrepareDelegateRegistrySetDelegate({
+    ...opts,
     enabled: address !== zeroAddress && address !== walletAddress,
     chainId: chain.id,
     address: DELEGATE_REGISTRY_ADDRESS,
@@ -39,11 +40,12 @@ export const usePrepareDelegate = (address: Address) => {
 };
 
 export const usePrepareClearDelegate = (enabled: boolean) => {
-  const { chain, walletAddress } = useWeb3();
+  const { chain, walletAddress, opts } = useWeb3();
   const space = useMemo(() => (chain.id === optimism.id ? SNAPSHOT_SPACE_OPTIMISM : SNAPSHOT_SPACE_GOERLI), [chain.id]);
   const encodedSpace = useMemo(() => stringToHex(space, { size: 32 }), [space]);
 
   return usePrepareDelegateRegistryClearDelegate({
+    ...opts,
     enabled,
     chainId: chain.id,
     address: DELEGATE_REGISTRY_ADDRESS,
