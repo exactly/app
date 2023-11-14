@@ -55,6 +55,19 @@ const USDC_MAINNET = {
 
 export const apps = () => [
   {
+    name: 'Belo',
+    imgURL: '/img/debit2credit/belo.svg',
+    link: 'https://app.adjust.com/11d2v0px?label=https://simple.belo.app/app/referral',
+    steps: [
+      i18n.t('Select Receive -> Cryptocurrencies'),
+      i18n.t('Select Tether USD -> Optimism'),
+      i18n.t('Copy address and paste it below'),
+    ],
+    finishInstructions:
+      'Now wait ~10 min to receive your funds. Remember to have USDT enabled in your payments profile going to My Cards -> More Options -> Payment Profile',
+    depositConfig: USDT_OP_MAINNET,
+  },
+  {
     name: 'Binance',
     imgURL: '/img/debit2credit/binance.svg',
     link: 'https://app.binance.com',
@@ -67,6 +80,20 @@ export const apps = () => [
     depositConfig: NATIVE_USDC_OP_MAINNET,
   },
   {
+    name: 'Bitso',
+    imgURL: '/img/debit2credit/bitso.svg',
+    link: 'https://bit.so/organicar',
+    steps: [
+      i18n.t('Tap "Deposit"'),
+      i18n.t('Select Crypto -> USD stablecoins'),
+      i18n.t('Choose USD Coin'),
+      i18n.t('Copy address and paste it below'),
+    ],
+    finishInstructions:
+      'Transaction pending, in short you will receive the funds. Remember to have USDC set as payment currency. Do this by going to the "Card" tab -> Pay with other currencies and select USDC for main or backup currency',
+    depositConfig: USDC_MAINNET,
+  },
+  {
     name: 'Coinbase',
     imgURL: '/img/debit2credit/coinbase.svg',
     link: 'https://coinbase.com',
@@ -77,15 +104,6 @@ export const apps = () => [
       ),
     ],
     finishInstructions: 'All done! Now wait a bit to receive the funds.',
-    depositConfig: NATIVE_USDC_OP_MAINNET,
-  },
-  {
-    name: 'Ripio',
-    imgURL: '/img/debit2credit/ripio.svg',
-    link: 'https://auth.ripio.com',
-    steps: [i18n.t('Go to "Wallet" Tab'), i18n.t('Select USDC'), i18n.t('Receive -> Optimism'), i18n.t('Copy address')],
-    finishInstructions:
-      'All done! Now wait a bit to receive the funds. Remember to set USDT as payment currency on Products -> Ripio Card',
     depositConfig: NATIVE_USDC_OP_MAINNET,
   },
   {
@@ -102,17 +120,13 @@ export const apps = () => [
     depositConfig: BRIDGED_USDC_OP_MAINNET,
   },
   {
-    name: 'Belo',
-    imgURL: '/img/debit2credit/belo.svg',
-    link: 'https://app.adjust.com/11d2v0px?label=https://simple.belo.app/app/referral',
-    steps: [
-      i18n.t('Select Receive -> Cryptocurrencies'),
-      i18n.t('Select Tether USD -> Optimism'),
-      i18n.t('Copy address and paste it below'),
-    ],
+    name: 'Ripio',
+    imgURL: '/img/debit2credit/ripio.svg',
+    link: 'https://auth.ripio.com',
+    steps: [i18n.t('Go to "Wallet" Tab'), i18n.t('Select USDC'), i18n.t('Receive -> Optimism'), i18n.t('Copy address')],
     finishInstructions:
-      'Now wait ~10 min to receive your funds. Remember to have USDT enabled in your payments profile going to My Cards -> More Options -> Payment Profile',
-    depositConfig: USDT_OP_MAINNET,
+      'All done! Now wait a bit to receive the funds. Remember to set USDT as payment currency on Products -> Ripio Card',
+    depositConfig: NATIVE_USDC_OP_MAINNET,
   },
   {
     name: 'Xapo',
@@ -122,20 +136,6 @@ export const apps = () => [
       i18n.t('Tap "Receive"'),
       i18n.t('Select USD Coin on Ethereum'),
       i18n.t('Scroll to bottom and tap on "Copy", then paste it here'),
-    ],
-    finishInstructions:
-      'Transaction pending, in short you will receive the funds. Remember to have USDC set as payment currency. Do this by going to the "Card" tab -> Pay with other currencies and select USDC for main or backup currency',
-    depositConfig: USDC_MAINNET,
-  },
-  {
-    name: 'Bitso',
-    imgURL: '/img/debit2credit/bitso.svg',
-    link: 'https://bit.so/organicar',
-    steps: [
-      i18n.t('Tap "Deposit"'),
-      i18n.t('Select Crypto -> USD stablecoins'),
-      i18n.t('Choose USD Coin'),
-      i18n.t('Copy address and paste it below'),
     ],
     finishInstructions:
       'Transaction pending, in short you will receive the funds. Remember to have USDC set as payment currency. Do this by going to the "Card" tab -> Pay with other currencies and select USDC for main or backup currency',
