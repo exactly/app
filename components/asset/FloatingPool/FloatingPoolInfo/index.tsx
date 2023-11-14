@@ -14,7 +14,6 @@ import useFloatingPoolAPR from 'hooks/useFloatingPoolAPR';
 import useRewards from 'hooks/useRewards';
 import ItemCell from 'components/common/ItemCell';
 import { WEI_PER_ETHER } from 'utils/const';
-import numbers from 'config/numbers.json';
 
 type FloatingPoolInfoProps = {
   symbol: string;
@@ -26,7 +25,6 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol }) => {
   const { marketAccount } = useAccountData(symbol);
 
   const { rates } = useRewards();
-  const { minRewardsRate } = numbers;
   const { deposited, borrowed } = useMemo(() => {
     if (!marketAccount) return {};
     const {
@@ -41,6 +39,9 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol }) => {
       borrowed: Number((totalBorrowed * usdPrice) / WEI_PER_ETHER) / 10 ** decimals,
     };
   }, [marketAccount]);
+
+  const depositRewards = rates[symbol]?.filter((r) => r.floatingDeposit > 0n);
+  const borrowRewards = rates[symbol]?.filter((r) => r.borrow > 0n);
 
   const itemsInfo: ItemInfoProps[] = useMemo(
     () => [
@@ -83,40 +84,34 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol }) => {
             ? toPercentage(deposited > 0 ? borrowed / deposited : undefined)
             : undefined,
       },
-      ...(rates[symbol] && rates[symbol].some((r) => r.floatingDeposit > 0n)
+      ...(depositRewards?.length > 0
         ? [
             {
               label: t('Deposit Rewards APR'),
               value: (
                 <>
-                  {rates[symbol].map(
-                    (r) =>
-                      Number(r.floatingDeposit) / 1e18 > minRewardsRate && (
-                        <ItemCell
-                          key={r.asset}
-                          value={toPercentage(Number(r.floatingDeposit) / 1e18)}
-                          symbol={r.assetSymbol}
-                        />
-                      ),
-                  )}
+                  {depositRewards.map((r) => (
+                    <ItemCell
+                      key={r.asset}
+                      value={toPercentage(Number(r.floatingDeposit) / 1e18)}
+                      symbol={r.assetSymbol}
+                    />
+                  ))}
                 </>
               ),
               tooltipTitle: t('This APR assumes a constant price for the OP token and distribution rate.'),
             },
           ]
         : []),
-      ...(rates[symbol] && rates[symbol].some((r) => r.borrow > 0n)
+      ...(borrowRewards?.length > 0
         ? [
             {
               label: t('Borrow Rewards APR'),
               value: (
                 <>
-                  {rates[symbol].map(
-                    (r) =>
-                      Number(r.borrow) / 1e18 > minRewardsRate && (
-                        <ItemCell key={r.asset} value={toPercentage(Number(r.borrow) / 1e18)} symbol={r.assetSymbol} />
-                      ),
-                  )}
+                  {borrowRewards.map((r) => (
+                    <ItemCell key={r.asset} value={toPercentage(Number(r.borrow) / 1e18)} symbol={r.assetSymbol} />
+                  ))}
                 </>
               ),
               tooltipTitle: t('This APR assumes a constant price for the OP token and distribution rate.'),
@@ -131,7 +126,18 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol }) => {
         ),
       },
     ],
-    [t, deposited, borrowed, depositAPR, marketAccount, symbol, borrowAPR, rates, minRewardsRate],
+    [
+      t,
+      deposited,
+      borrowed,
+      depositAPR,
+      marketAccount?.assetSymbol,
+      marketAccount?.adjustFactor,
+      symbol,
+      borrowAPR,
+      depositRewards,
+      borrowRewards,
+    ],
   );
 
   return (

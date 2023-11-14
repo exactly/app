@@ -39,7 +39,7 @@ export default () => {
         {} as Record<string, bigint>,
       );
 
-    const initialRewards = accountData
+    return accountData
       .flatMap(({ claimableRewards }) => claimableRewards)
       .reduce((acc, { asset, assetSymbol, amount }) => {
         if (assetSymbol === '') return acc;
@@ -50,25 +50,6 @@ export default () => {
         acc[assetSymbol].amount += amount;
         return acc;
       }, {} as Rewards);
-
-    const excludedSymbols = accountData
-      .flatMap(({ rewardRates }) => rewardRates)
-      .filter(
-        ({ borrow, floatingDeposit }) => borrow >= parseEther('0.00005') && floatingDeposit >= parseEther('0.00005'),
-      )
-      .map(({ assetSymbol }) => assetSymbol);
-
-    const rewardSymbolsFiltered = accountData
-      .flatMap(({ rewardRates }) => rewardRates)
-      .filter(({ assetSymbol }) => !excludedSymbols.includes(assetSymbol))
-      .map(({ assetSymbol }) => assetSymbol)
-      .filter((symbol, index, self) => self.indexOf(symbol) === index);
-
-    const filteredRewards = Object.fromEntries(
-      Object.entries(initialRewards).filter(([key]) => !rewardSymbolsFiltered.includes(key)),
-    );
-
-    return filteredRewards;
   }, [accountData, getMarketAccount]);
 
   const { transaction } = useAnalytics({ rewards });
@@ -104,10 +85,21 @@ export default () => {
 
   const rates = useMemo<Rates>(() => {
     if (!accountData) return {};
+
+    const min = parseEther('0.00005');
     return Object.fromEntries(
       accountData.map(({ assetSymbol, rewardRates }) => [
         assetSymbol,
-        rewardRates.filter(({ assetSymbol: _assetSymbol }) => _assetSymbol !== ''),
+        rewardRates
+          .filter(
+            ({ assetSymbol: _assetSymbol, borrow, floatingDeposit }) =>
+              _assetSymbol !== '' && (borrow >= min || floatingDeposit >= min),
+          )
+          .map(({ borrow, floatingDeposit, ...reward }) => ({
+            floatingDeposit: floatingDeposit < min ? 0n : floatingDeposit,
+            borrow: borrow < min ? 0n : borrow,
+            ...reward,
+          })),
       ]),
     );
   }, [accountData]);

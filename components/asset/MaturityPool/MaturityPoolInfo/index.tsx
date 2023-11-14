@@ -35,9 +35,11 @@ const MaturityPoolInfo: FC<MaturityPoolInfoProps> = ({
   adjustFactor,
 }) => {
   const { t } = useTranslation();
-  const { minAPRValue, minRewardsRate } = numbers;
+  const { minAPRValue } = numbers;
 
   const { rates } = useRewards();
+
+  const borrowRewards = rates[symbol]?.filter((r) => r.borrow > 0n);
 
   const itemsInfo: ItemInfoProps[] = useMemo(
     () => [
@@ -80,18 +82,15 @@ const MaturityPoolInfo: FC<MaturityPoolInfoProps> = ({
           'The lowest fixed borrowing interest APR at current utilization levels for all the Fixed Rate Pools.',
         ),
       },
-      ...(rates[symbol] && rates[symbol].some((r) => r.borrow > 0n)
+      ...(borrowRewards?.length > 0
         ? [
             {
               label: t('Borrow Rewards APR'),
               value: (
                 <>
-                  {rates[symbol].map(
-                    (r) =>
-                      Number(r.borrow) / 1e18 > minRewardsRate && (
-                        <ItemCell key={r.asset} value={toPercentage(Number(r.borrow) / 1e18)} symbol={r.assetSymbol} />
-                      ),
-                  )}
+                  {borrowRewards.map((r) => (
+                    <ItemCell key={r.asset} value={toPercentage(Number(r.borrow) / 1e18)} symbol={r.assetSymbol} />
+                  ))}
                 </>
               ),
               tooltipTitle: t('This APR assumes a constant price for the OP token and distribution rate.'),
@@ -110,8 +109,7 @@ const MaturityPoolInfo: FC<MaturityPoolInfoProps> = ({
       bestDepositMaturity,
       bestBorrowRate,
       bestBorrowMaturity,
-      rates,
-      minRewardsRate,
+      borrowRewards,
     ],
   );
 
