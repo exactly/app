@@ -101,6 +101,24 @@ const Strategies: NextPage = () => {
           imgPath: '/img/strategies/featured_esEXA.svg',
         },
         {
+          title: t('Debit to Credit'),
+          description: t(
+            'Easily turn your current crypto-funded debit card into a credit card by getting a USDC borrow at a fixed rate.',
+          ),
+          tags: [{ text: t('Advanced'), size: 'small' as const }],
+          button: (
+            <Link href={{ pathname: '/debit2credit' }} style={{ width: '100%' }}>
+              <Button fullWidth variant="contained">
+                {t('Get Started')}
+              </Button>
+            </Link>
+          ),
+          isNew: true,
+          source: 'exactly' as const,
+          imgPath: '/img/strategies/featured_debit2credit.svg',
+          chainId: optimism.id,
+        },
+        {
           title: t('Maximize your yield'),
           description: t(
             'Amplify gains or mitigate risk with the power of leverage and deleverage in your investments.',
@@ -147,7 +165,7 @@ const Strategies: NextPage = () => {
             </Button>
           ),
           isNew: true,
-          soruce: 'exactly' as const,
+          source: 'exactly' as const,
           imgPath: '/img/strategies/featured_leverage.svg',
         },
       ]
@@ -233,6 +251,22 @@ const Strategies: NextPage = () => {
               {t('Rollover')}
             </Button>
           ),
+        },
+        {
+          title: t('Debit to Credit'),
+          description: t(
+            'Easily turn your current crypto-funded debit card into a credit card by getting a USDC borrow at a fixed rate.',
+          ),
+          tags: [{ text: t('Advanced'), size: 'small' as const }],
+          button: (
+            <Link href={{ pathname: '/debit2credit' }} style={{ width: '100%' }}>
+              <Button fullWidth variant="contained">
+                {t('Get Started')}
+              </Button>
+            </Link>
+          ),
+          isNew: true,
+          chainId: optimism.id,
         },
       ].filter((s) => s.chainId === chain.id || s.chainId === undefined),
     [chain.id, hfLabel, lowestBorrowAPR, maxYield, openGetEXA, query, startDebtManager, startLeverager, t],

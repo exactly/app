@@ -30,34 +30,30 @@ const Address = ({ value, app, onNextStep, onChange }: Props) => {
   const { t } = useTranslation();
   useEffect(() => setAddress(value), [value]);
   useEffect(() => {
-    onChange(localStorage.getItem(`${app.name}_${app.depositConfig.tokenSymbol}_address`) as Address);
+    const localAddress = localStorage.getItem(`${app.name}_${app.depositConfig.tokenSymbol}_address`);
+    if (localAddress && isAddress(localAddress)) onChange(localAddress);
   }, [onChange, app.name, app.depositConfig.tokenSymbol]);
 
-  const handleChange = useCallback(
-    (value_?: string) => {
-      setAddress(value_);
-      localStorage.setItem(`${app.name}_${app.depositConfig.tokenSymbol}_address`, value_ || '');
-    },
-    [app.depositConfig.tokenSymbol, app.name],
-  );
-
-  const handleInputChange = useCallback(
-    ({ target: { value: value_ } }: ChangeEvent<HTMLInputElement>) => {
-      handleChange(value_);
-    },
-    [handleChange],
-  );
+  const handleInputChange = useCallback(({ target: { value: value_ } }: ChangeEvent<HTMLInputElement>) => {
+    setAddress(value_);
+  }, []);
 
   const handleChangeClick = useCallback(() => {
-    handleChange('');
+    setAddress('');
     onChange(undefined);
-  }, [handleChange, onChange]);
+  }, [onChange]);
 
   const handleNext = useCallback(() => {
     if (!address) return;
     onChange(getAddress(address));
+    localStorage.setItem(`${app.name}_${app.depositConfig.tokenSymbol}_address`, address);
     onNextStep();
-  }, [address, onChange, onNextStep]);
+  }, [address, app.depositConfig.tokenSymbol, app.name, onChange, onNextStep]);
+
+  const handlePaste = useCallback(async () => {
+    const text = await navigator.clipboard.readText();
+    if (isAddress(text)) setAddress(text);
+  }, []);
 
   return (
     <>
@@ -106,7 +102,7 @@ const Address = ({ value, app, onNextStep, onChange }: Props) => {
                       setHasOpenedApp(true);
                     }}
                   >
-                    Open {app.name}
+                    {t('Open')} {app.name}
                   </Button>
                 </Link>
               </StepLabel>
@@ -129,18 +125,10 @@ const Address = ({ value, app, onNextStep, onChange }: Props) => {
           endAdornment={
             value ? (
               <Button onClick={handleChangeClick} sx={{ ml: 'auto' }}>
-                Change
+                {t('Change')}
               </Button>
             ) : (
-              <IconButton
-                onClick={() => {
-                  navigator.clipboard.readText().then((text) => {
-                    if (!isAddress(text)) return;
-                    handleChange(text);
-                    localStorage.setItem(`${app.name}_${app.depositConfig}_address`, text);
-                  });
-                }}
-              >
+              <IconButton onClick={handlePaste}>
                 <ContentPasteIcon />
               </IconButton>
             )

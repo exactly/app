@@ -613,5 +613,10 @@
   "It could be in 28 days or even in 140 days with low interest rates.": "Podría ser en 28 días o incluso en 140 días con tasas de interés bajas.",
   "Earn passive yield": "Gana rendimiento pasivo",
   "As soon as you deposit collateral, you'll start earning annual interest on it plus some extra rewards.": "Tan pronto como deposites colateral, comenzarás a ganar intereses anuales sobre él más algunas recompensas adicionales.",
-  "Get Started": "Comenzar"
+  "Get Started": "Comenzar",
+  "Change": "Cambiar",
+  "Connected to {{network}}": "Conectado a {{network}}",
+  "Easily turn your current crypto-funded debit card into a credit card by getting a USDC borrow at a fixed rate.": "Transforma fácilmente tu tarjeta de débito cripto actual en una tarjeta de crédito obteniendo un préstamo USDC a tasa fija.",
+  "You can withdraw all streams at once.": "Puedes retirar todos los streams a la vez.",
+  "Withdraw All": "Retirar Todo"
 }

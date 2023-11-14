@@ -252,7 +252,6 @@ const Credit = () => {
         ? { width: '100%', height: '100%' }
         : {
             width: 500,
-            minHeight: 500,
             p: 2,
             pt: 3,
           })}

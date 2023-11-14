@@ -45,7 +45,7 @@ const Welcome = ({ onNextStep }: Props) => {
           </Typography>
         </Box>
       </Box>
-      <Button variant="contained" onClick={onNextStep} sx={{ mt: 'auto' }}>
+      <Button variant="contained" onClick={onNextStep} sx={{ mt: 4 }}>
         {t('Get Started')}
       </Button>
     </>
