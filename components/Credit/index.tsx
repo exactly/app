@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Box, useMediaQuery, useTheme } from '@mui/material';
 import { type Address as AddressType, getAddress } from 'viem';
 import { mainnet, optimism } from 'viem/chains';
@@ -6,7 +6,6 @@ import { OperationContextProvider, useOperationContext } from '../../contexts/Op
 import { SocketSwapProvider, useSocketSwap } from '../../contexts/SocketSwapContext';
 import { useWeb3 } from '../../hooks/useWeb3';
 import useAccountData from '../../hooks/useAccountData';
-import useDashboard from '../../hooks/useDashboard';
 import i18n from '../../i18n';
 import Welcome from './Welcome';
 import Apps from './Apps';
@@ -162,8 +161,7 @@ const Credit = () => {
   const [appIndex, setAppIndex] = useState<number>(0);
   const { isConnected, chain } = useWeb3();
   const { symbol, qty } = useOperationContext();
-  const { marketAccount } = useAccountData(symbol);
-  const { getMarketAccount } = useAccountData();
+  const { marketAccount, refreshAccountData } = useAccountData(symbol);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const {
@@ -174,12 +172,7 @@ const Credit = () => {
     setFromAssetAddress,
     setQtyIn,
   } = useSocketSwap();
-  const { floatingRows } = useDashboard('deposit');
-  const deposits = useMemo(() => floatingRows.filter(({ valueUSD }) => valueUSD !== 0), [floatingRows]);
-  const hasCollateral = useMemo(
-    () => deposits.some((row) => getMarketAccount(row.symbol)?.isCollateral),
-    [getMarketAccount, deposits],
-  );
+
   const app = apps()[appIndex];
   const direct = app.depositConfig.chainId === chain.id && app.depositConfig.tokenAddress === marketAccount?.asset;
 
@@ -188,17 +181,27 @@ const Credit = () => {
     setQtyIn(qty);
   }, [marketAccount, qty, setFromAssetAddress, setQtyIn]);
 
-  const handleConnectedNextStep = useCallback(() => {
+  const handleConnectedNextStep = useCallback(async () => {
+    const accountData = await refreshAccountData(0);
+    if (!accountData) return;
+    const hasDeposits = accountData.some(({ floatingDepositAssets }) => floatingDepositAssets > 0n);
+    const hasCollateral = accountData.some(
+      ({ floatingDepositAssets, isCollateral }) => floatingDepositAssets > 0n && isCollateral,
+    );
     if (hasCollateral) {
       setStep(Step.BORROW);
-    } else if (deposits.length !== 0) {
+    } else if (hasDeposits) {
       setStep(Step.COLLATERAL);
     } else {
       setStep(Step.DEPOSIT);
     }
-  }, [deposits.length, hasCollateral]);
+  }, [refreshAccountData]);
 
-  const handleNextStep = useCallback(() => {
+  const handleNextStep = useCallback(async () => {
+    const accountData_ = await refreshAccountData(0);
+    const hasCollateral = accountData_?.some(
+      ({ floatingDepositAssets, isCollateral }) => floatingDepositAssets > 0n && isCollateral,
+    );
     switch (step) {
       case Step.WELCOME:
         setStep(Step.APPS);
@@ -224,8 +227,11 @@ const Credit = () => {
         if (direct) setStep(Step.STATUS);
         else setStep(Step.SWAP);
         break;
+      case Step.SWAP:
+        setStep(Step.STATUS);
+        break;
     }
-  }, [direct, handleConnectedNextStep, hasCollateral, isConnected, step]);
+  }, [direct, handleConnectedNextStep, isConnected, refreshAccountData, step]);
 
   const handleAppChange = useCallback(
     (index: number) => {
@@ -262,9 +268,7 @@ const Credit = () => {
           [Step.APPS]: <Apps onNextStep={handleNextStep} onChange={handleAppChange} />,
           [Step.ADDRESS]: <Address onNextStep={handleNextStep} onChange={setReceiver} value={receiver} app={app} />,
           [Step.CONNECT]: <Connect onNextStep={handleNextStep} />,
-          [Step.COLLATERAL]: (
-            <Collateral onNextStep={handleNextStep} deposits={deposits} hasCollateral={hasCollateral} />
-          ),
+          [Step.COLLATERAL]: <Collateral onNextStep={handleNextStep} />,
           [Step.DEPOSIT]: <Deposit onNextStep={handleNextStep} />,
           [Step.BORROW]: (
             <Borrow

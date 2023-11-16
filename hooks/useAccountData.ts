@@ -15,7 +15,7 @@ type AccountDataHook = {
   lastSync?: number;
   isFetching: boolean;
   getMarketAccount: (symbol: string) => MarketAccount | undefined;
-  refreshAccountData: (delay?: number) => Promise<void>;
+  refreshAccountData: (delay?: number) => Promise<readonly MarketAccount[] | undefined>;
 };
 
 function useAccountData(symbol: string): Omit<AccountDataHook, 'getMarketAccount'>;
@@ -36,12 +36,12 @@ function useAccountData(
 
   const refreshAccountData = useCallback(
     async (delay = 250) =>
-      new Promise<void>((r) =>
+      new Promise<readonly MarketAccount[] | undefined>((r) =>
         setTimeout(
           () =>
-            refetch().then(() => {
+            refetch().then((marketAccounts) => {
               ctx?.resetLastSync();
-              r();
+              r(marketAccounts.data);
             }),
           delay,
         ),

@@ -1,17 +1,23 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Box, Button, Typography } from '@mui/material';
-import { type FloatingPoolItemData } from '../../types/FloatingPoolItemData';
 import FloatingPoolDashboardTable from '../dashboard/DashboardContent/FloatingPoolDashboard/FloatingPoolDashboardTable';
+import useDashboard from '../../hooks/useDashboard';
+import useAccountData from '../../hooks/useAccountData';
 
 type Props = {
   onNextStep: () => void;
-  hasCollateral: boolean;
-  deposits: FloatingPoolItemData[];
 };
 
-const Collateral = ({ onNextStep, hasCollateral, deposits }: Props) => {
+const Collateral = ({ onNextStep }: Props) => {
   const { t } = useTranslation();
+  const { floatingRows } = useDashboard('deposit');
+  const { getMarketAccount } = useAccountData();
+  const deposits = useMemo(() => floatingRows.filter(({ valueUSD }) => valueUSD !== 0), [floatingRows]);
+  const hasCollateral = useMemo(
+    () => deposits.some((row) => getMarketAccount(row.symbol)?.isCollateral),
+    [deposits, getMarketAccount],
+  );
   return (
     <Box display="flex" flexDirection="column" gap={6}>
       <Box>
