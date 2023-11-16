@@ -26,19 +26,25 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
 
   const nativeAPR = useStETHNativeAPR();
 
-  const { floatingDeposits, floatingBorrows } = useMemo(() => {
+  const { floatingDeposits, floatingBorrows, backupBorrows } = useMemo(() => {
     if (!marketAccount) return {};
 
     const {
       totalFloatingDepositAssets: totalDeposited,
       totalFloatingBorrowAssets: totalBorrowed,
+      floatingBackupBorrowed: totalBackupBorrowed,
       usdPrice: exchangeRate,
     } = marketAccount;
 
     const totalFloatingDepositUSD = (totalDeposited * exchangeRate) / WEI_PER_ETHER;
     const totalFloatingBorrowUSD = (totalBorrowed * exchangeRate) / WEI_PER_ETHER;
+    const totalBackupBorrowUSD = (totalBackupBorrowed * exchangeRate) / WEI_PER_ETHER;
 
-    return { floatingDeposits: totalFloatingDepositUSD, floatingBorrows: totalFloatingBorrowUSD };
+    return {
+      floatingDeposits: totalFloatingDepositUSD,
+      floatingBorrows: totalFloatingBorrowUSD,
+      backupBorrows: totalBackupBorrowUSD,
+    };
   }, [marketAccount]);
 
   const { fixedDeposits, fixedBorrows } = useMemo(() => {
@@ -90,6 +96,19 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
             : undefined,
       },
       {
+        label: t('Global Utilization'),
+        value:
+          backupBorrows !== undefined &&
+          floatingBorrows !== undefined &&
+          floatingDeposits !== undefined &&
+          fixedDeposits !== undefined &&
+          decimals
+            ? toPercentage(
+                Number(((floatingBorrows + backupBorrows) * WEI_PER_ETHER) / (floatingDeposits + fixedDeposits)) / 1e18,
+              )
+            : undefined,
+      },
+      {
         label: t('Oracle Price'),
         value: usdPrice ? `$${formatNumber(formatUnits(usdPrice, 18), '', true)}` : undefined,
         tooltipTitle: t('The price displayed here is obtained from Chainlink.'),
@@ -104,7 +123,17 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
           ]
         : []),
     ];
-  }, [marketAccount, t, floatingDeposits, fixedDeposits, floatingBorrows, fixedBorrows, symbol, nativeAPR]);
+  }, [
+    marketAccount,
+    t,
+    floatingDeposits,
+    fixedDeposits,
+    floatingBorrows,
+    fixedBorrows,
+    backupBorrows,
+    symbol,
+    nativeAPR,
+  ]);
 
   const onChangeAssetDropdown = useCallback(
     (newSymbol: string) => {

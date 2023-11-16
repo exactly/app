@@ -552,5 +552,6 @@
   "Executed Transactions": "Transacciones Ejecutadas",
   "You can withdraw all streams at once.": "Puedes retirar todos los streams a la vez.",
   "Withdraw All": "Retirar Todo",
-  "Connected to {{network}}": "Conectado a {{network}}"
+  "Connected to {{network}}": "Conectado a {{network}}",
+  "Global Utilization": "Utilización Global"
 }
