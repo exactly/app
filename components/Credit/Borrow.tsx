@@ -44,7 +44,7 @@ const Borrow = ({ onDeposit, direct, receiver, depositConfig, onNextStep }: Prop
         {t('Choose borrow amount')}
       </Typography>
       <Typography mb={1}>
-        {t('Keep in mind that your borrow limit is set based on the collateral you have deposited on the Protocol.')}
+        {t('Remember that your borrow limit is set based on the collateral you deposited on the Protocol.')}
       </Typography>
       <Typography mb={2}>
         {t("To borrow more money, you'll have to ")}

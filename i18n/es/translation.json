@@ -564,7 +564,6 @@
   "Select card provider": "Selecciona el proveedor de la tarjeta",
   "This is the current list of supported providers. Select the one you want to use.": "Esta es la lista actual de proveedores compatibles. Selecciona el que deseas usar.",
   "Choose borrow amount": "Elige el monto a pedir prestado",
-  "Keep in mind that your borrow limit is set based on the collateral you have deposited on the Protocol.": "Ten en cuenta que tu límite de préstamo se establece en función del colateral que has depositado en el Protocolo.",
   "deposit more collateral": "deposita más colateral",
   "Enable Collateral": "Habilitar Colateral",
   "Enable one of your deposited assets as collateral to continue.": "Habilita uno de tus activos depositados como colateral para continuar.",
@@ -607,16 +606,13 @@
   "Swap successful": "Swap exitoso",
   "Retry": "Reintentar",
   "Debit to Credit": "Débito a Crédito",
-  "Transform your current crypto-funded debit card into a credit card by getting a borrow on USDC at a fixed interest rate on the Protocol.": "Transforma tu tarjeta de débito cripto actual en una tarjeta de crédito obteniendo un préstamo en USDC a una tasa de interés fija en el Protocolo.",
-  "In just a few steps you'll be able to finish the process and take advantage of a true DeFi solution.": "En solo unos pocos pasos podrás finalizar el proceso y aprovechar una verdadera solución DeFi.",
   "Choose when to repay": "Elige cuándo pagar",
-  "It could be in 28 days or even in 140 days with low interest rates.": "Podría ser en 28 días o incluso en 140 días con tasas de interés bajas.",
   "Earn passive yield": "Gana rendimiento pasivo",
   "As soon as you deposit collateral, you'll start earning annual interest on it plus some extra rewards.": "Tan pronto como deposites colateral, comenzarás a ganar intereses anuales sobre él más algunas recompensas adicionales.",
   "Get Started": "Comenzar",
   "Change": "Cambiar",
-  "Connected to {{network}}": "Conectado a {{network}}",
   "Easily turn your current crypto-funded debit card into a credit card by getting a USDC borrow at a fixed rate.": "Transforma fácilmente tu tarjeta de débito cripto actual en una tarjeta de crédito obteniendo un préstamo USDC a tasa fija.",
-  "You can withdraw all streams at once.": "Puedes retirar todos los streams a la vez.",
-  "Withdraw All": "Retirar Todo"
+  "Transform your current crypto-funded debit card into a credit card by getting a borrow on USDC at a fixed rate.": "Transforma tu tarjeta de débito cripto actual en una tarjeta de crédito obteniendo un préstamo en USDC a tasa fija.",
+  "Remember that your borrow limit is set based on the collateral you deposited on the Protocol.": "Recuerda que tu límite de préstamo se establece en función del colateral que depositaste en el Protocolo.",
+  "It could be up to 6 months with fixed interest rates.": "Podría ser hasta 6 meses con tasas de interés fijas."
 }

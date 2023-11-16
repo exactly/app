@@ -15,30 +15,27 @@ const Welcome = ({ onNextStep }: Props) => {
           {t('Debit to Credit')}
         </Typography>
         <Box>
-          <Typography fontSize={16} fontWeight={500} mb={1}>
-            {t(
-              'Transform your current crypto-funded debit card into a credit card by getting a borrow on USDC at a fixed interest rate on the Protocol.',
-            )}
-          </Typography>
           <Typography fontSize={16} fontWeight={500} mb={2}>
-            {t("In just a few steps you'll be able to finish the process and take advantage of a true DeFi solution.")}
+            {t(
+              'Transform your current crypto-funded debit card into a credit card by getting a borrow on USDC at a fixed rate.',
+            )}
           </Typography>
         </Box>
       </Box>
-      <Box display="flex" mb={2} gap={2} flexWrap="wrap">
-        <Box display="flex" flexDirection="column" minWidth={200} flex={1} alignItems="center">
-          <Typography fontSize={16} fontWeight={700} mb={2} mt={2}>
+      <Box display="flex" mb={2} gap={2} flexDirection="column">
+        <Box display="flex" flexDirection="column" minWidth={200} flex={1}>
+          <Typography fontSize={16} fontWeight={700}>
             {t('Choose when to repay')}
           </Typography>
-          <Typography fontSize={16} fontWeight={500} textAlign="center">
-            {t('It could be in 28 days or even in 140 days with low interest rates.')}
+          <Typography fontSize={16} fontWeight={500}>
+            {t('It could be up to 6 months with fixed interest rates.')}
           </Typography>
         </Box>
-        <Box display="flex" flexDirection="column" minWidth={200} flex={1} alignItems="center">
-          <Typography fontSize={16} fontWeight={700} mb={2} mt={2}>
+        <Box display="flex" flexDirection="column" minWidth={200} flex={1}>
+          <Typography fontSize={16} fontWeight={700}>
             {t('Earn passive yield')}
           </Typography>
-          <Typography fontSize={16} fontWeight={500} textAlign="center">
+          <Typography fontSize={16} fontWeight={500}>
             {t(
               "As soon as you deposit collateral, you'll start earning annual interest on it plus some extra rewards.",
             )}
