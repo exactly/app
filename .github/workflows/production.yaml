@@ -12,6 +12,7 @@ jobs:
       SENTRY_ORG: exactly
       SENTRY_PROJECT: webapp
       SENTRY_ENVIRONMENT: production
+      NEXT_PUBLIC_NETWORK: 10
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
