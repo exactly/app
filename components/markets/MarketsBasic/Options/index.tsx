@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import React, { ChangeEvent, FC } from 'react';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import LockIcon from '@mui/icons-material/Lock';
 import SwapVertIcon from '@mui/icons-material/SwapVert';
@@ -8,6 +8,7 @@ import { MarketsBasicOperation, MarketsBasicOption } from 'contexts/MarketsBasic
 import { useTranslation } from 'react-i18next';
 import BestPill from 'components/common/BestPill';
 import Rates from 'components/Rates';
+import { track } from '../../../../utils/segment';
 
 type Props = {
   symbol: string;
@@ -35,8 +36,20 @@ const Options: FC<Props> = ({
 
   const bottomIconSx = { fontSize: '10px', my: 'auto', color: 'figma.grey.500' };
 
+  const handleClick = (e: ChangeEvent<HTMLInputElement>) => {
+    setSelected(BigInt(e.target.value));
+
+    track('Option Selected', {
+      location: 'Markets Basic',
+      name: 'maturity',
+      value: e.target.value,
+      prevValue: String(selected),
+      bestOption: String(bestOption),
+      isBestOption: e.target.value === String(bestOption),
+    });
+  };
   return (
-    <RadioGroup value={selected} onChange={(e) => setSelected(BigInt(e.target.value))} sx={{ pt: 1 }}>
+    <RadioGroup value={selected} onChange={handleClick} sx={{ pt: 1 }}>
       {allOptions.map(({ maturity, depositAPR, borrowAPR }, index) => {
         const apr = (operation === 'deposit' ? depositAPR : borrowAPR) ?? 0;
 

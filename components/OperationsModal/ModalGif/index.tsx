@@ -1,4 +1,4 @@
-import React, { ReactNode, useMemo } from 'react';
+import React, { ReactNode, useCallback, useMemo } from 'react';
 import { Transaction } from 'types/Transaction';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
@@ -10,6 +10,7 @@ import parseTimestamp from 'utils/parseTimestamp';
 import { useTranslation } from 'react-i18next';
 import useTranslateOperation from 'hooks/useTranslateOperation';
 import useEtherscanLink from 'hooks/useEtherscanLink';
+import { track } from '../../../utils/segment';
 
 type Props = {
   tx: Transaction;
@@ -31,6 +32,19 @@ function ModalGif({ tx, tryAgain }: Props) {
   const reminder = useMemo(() => ['borrowAtMaturity', 'depositAtMaturity'].includes(operation), [operation]);
 
   const { tx: txLink } = useEtherscanLink();
+
+  const handleTryAgainClick = useCallback(() => {
+    track('Button Clicked', {
+      location: 'Operations Modal',
+      name: 'try again',
+      status: tx.status,
+    });
+    tryAgain?.();
+  }, [tryAgain, tx.status]);
+
+  const trackViewOnEtherscan = useCallback(() => {
+    track('Button Clicked', { location: 'Operations Modal', name: 'view on etherscan' });
+  }, []);
 
   return (
     <Box display="flex" minWidth="340px" minHeight="240px">
@@ -69,7 +83,7 @@ function ModalGif({ tx, tryAgain }: Props) {
           </Typography>
           <Box display="flex" flexDirection="column" alignItems="center" gap="8px" pt={1}>
             {isError && tryAgain && (
-              <Button variant="contained" sx={{ width: '220px', height: '38px' }} onClick={tryAgain}>
+              <Button variant="contained" sx={{ width: '220px', height: '38px' }} onClick={handleTryAgainClick}>
                 {t('Try again')}
               </Button>
             )}
@@ -79,6 +93,7 @@ function ModalGif({ tx, tryAgain }: Props) {
               sx={{ width: '150px', height: '32px', fontWeight: 500, whiteSpace: 'nowrap' }}
               target="_blank"
               href={txLink(tx.hash ?? '0x')}
+              onClick={trackViewOnEtherscan}
               disabled={!tx.hash}
             >
               {t('View on Etherscan')}

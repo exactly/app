@@ -1,8 +1,9 @@
-import React, { useState, PropsWithChildren } from 'react';
+import React, { useState, PropsWithChildren, useCallback } from 'react';
 import { Button, Grid, Box, Typography, type GridProps } from '@mui/material';
 import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownRounded';
 import KeyboardArrowRightRoundedIcon from '@mui/icons-material/KeyboardArrowRightRounded';
 import { useTranslation } from 'react-i18next';
+import { track } from '../../../../utils/segment';
 
 type Props = {
   bgColor?: string;
@@ -12,6 +13,15 @@ function ModalAdvancedSettings({ children, bgColor, ...props }: PropsWithChildre
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
 
+  const handleClick = useCallback(() => {
+    setOpen(!open);
+    track('Button Clicked', {
+      location: 'Modal',
+      name: 'advanced settings',
+      value: !open,
+      prevValue: open,
+    });
+  }, [open]);
   return (
     <Grid container flexDirection="column" {...props}>
       <Grid item>
@@ -19,7 +29,7 @@ function ModalAdvancedSettings({ children, bgColor, ...props }: PropsWithChildre
           variant="text"
           disableRipple
           disableTouchRipple
-          onClick={() => setOpen(!open)}
+          onClick={handleClick}
           sx={{
             '&:hover': { backgroundColor: 'transparent' },
             px: 1,

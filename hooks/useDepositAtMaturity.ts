@@ -16,6 +16,7 @@ import { parseUnits } from 'viem';
 import waitForTransaction from 'utils/waitForTransaction';
 import dayjs from 'dayjs';
 import { gasLimit } from 'utils/gas';
+import { track } from '../utils/segment';
 
 type DepositAtMaturity = {
   deposit: () => void;
@@ -189,6 +190,12 @@ export default (): DepositAtMaturity => {
           value: amount,
           gasLimit: gasLimit(gasEstimation),
         });
+        track('Wallet Signed TX', {
+          contractName: 'ETHRouter',
+          method: 'depositAtMaturity',
+          symbol,
+          qty,
+        });
       } else {
         const args = [date, amount, minAmount, walletAddress] as const;
         const gasEstimation = await marketContract.estimateGas.depositAtMaturity(args, opts);
@@ -196,12 +203,26 @@ export default (): DepositAtMaturity => {
           ...opts,
           gasLimit: gasLimit(gasEstimation),
         });
+        track('Wallet Signed TX', {
+          contractName: 'Market',
+          method: 'depositAtMaturity',
+          symbol,
+          qty,
+          hash,
+        });
       }
 
       transaction.beginCheckout();
       setTx({ status: 'processing', hash });
 
       const { status, transactionHash } = await waitForTransaction({ hash });
+      track('TX Completed', {
+        symbol,
+        qty,
+        status,
+        hash: transactionHash,
+      });
+
       setTx({ status: status ? 'success' : 'error', hash: transactionHash });
 
       if (status) transaction.purchase();
@@ -226,6 +247,7 @@ export default (): DepositAtMaturity => {
     setTx,
     setErrorData,
     handleOperationError,
+    symbol,
   ]);
 
   const handleSubmitAction = useCallback(async () => {

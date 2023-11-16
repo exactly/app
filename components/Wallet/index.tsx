@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useDisconnect, useEnsAvatar, useEnsName } from 'wagmi';
 import { mainnet } from 'wagmi/chains';
 import { useWeb3 } from 'hooks/useWeb3';
@@ -15,6 +15,7 @@ import { globals } from 'styles/theme';
 import { useTranslation } from 'react-i18next';
 import Link from 'next/link';
 import useRouter from 'hooks/useRouter';
+import { track } from '../../utils/segment';
 
 const { onlyDesktop } = globals;
 
@@ -23,7 +24,13 @@ function Wallet() {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const isMenuOpen = Boolean(anchorEl);
 
-  const openMenu = (event: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget);
+  const openMenu = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+    track('Button Clicked', {
+      location: 'Navbar',
+      name: 'wallet',
+    });
+  }, []);
   const closeMenu = () => setAnchorEl(null);
 
   const { walletAddress, connect, impersonateActive, exitImpersonate, chain } = useWeb3();
@@ -44,9 +51,35 @@ function Wallet() {
     return blockies.create({ seed: walletAddress.toLocaleLowerCase() }).toDataURL();
   }, [ensAvatar, ensAvatarError, walletAddress]);
 
+  const handleConnectButtonClick = useCallback(() => {
+    track('Button Clicked', {
+      location: 'Navbar',
+      name: 'connect wallet',
+      chainId: chain?.id,
+      impersonateActive,
+    });
+    connect();
+  }, [chain?.id, connect, impersonateActive]);
+
+  const handleDisconnectClick = useCallback(() => {
+    closeMenu();
+    impersonateActive ? exitImpersonate() : disconnect();
+    track('Button Clicked', {
+      name: 'disconnect wallet',
+      location: 'Wallet',
+      chainId: chain?.id,
+      impersonateActive,
+    });
+  }, [chain, disconnect, exitImpersonate, impersonateActive]);
+
   if (!walletAddress) {
     return (
-      <Button onClick={connect} variant="contained" sx={{ fontSize: { xs: 10, sm: 13 } }} data-testid="connect-wallet">
+      <Button
+        onClick={handleConnectButtonClick}
+        variant="contained"
+        sx={{ fontSize: { xs: 10, sm: 13 } }}
+        data-testid="connect-wallet"
+      >
         {t('Connect wallet')}
         <Image
           src={`/img/networks/${chain?.id}.svg`}
@@ -173,7 +206,17 @@ function Wallet() {
             </Box>
           )}
           <List disablePadding sx={{ borderTop: 1, borderColor: 'grey.300', pt: 1, px: 1 }}>
-            <Link href={{ pathname: 'revoke', query }} legacyBehavior>
+            <Link
+              href={{ pathname: 'revoke', query }}
+              legacyBehavior
+              onClick={() =>
+                track('Link Clicked', {
+                  href: '/revoke',
+                  location: 'Wallet',
+                  name: 'manage allowances',
+                })
+              }
+            >
               <ListItem disablePadding>
                 <ListItemButton sx={{ borderRadius: 1, p: 1 }}>
                   <SettingsIcon sx={{ width: '16px', height: '16px' }} />
@@ -184,13 +227,7 @@ function Wallet() {
               </ListItem>
             </Link>
             <ListItem disablePadding>
-              <ListItemButton
-                sx={{ borderRadius: 1, p: 1 }}
-                onClick={() => {
-                  closeMenu();
-                  impersonateActive ? exitImpersonate() : disconnect();
-                }}
-              >
+              <ListItemButton sx={{ borderRadius: 1, p: 1 }} onClick={handleDisconnectClick}>
                 <PowerSettingsNewIcon sx={{ width: '16px', height: '16px' }} />
                 <Typography fontSize={14} fontWeight={700} marginLeft={0.5}>
                   {impersonateActive ? t('Exit Read-Only Mode') : t('Disconnect')}

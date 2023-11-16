@@ -1,8 +1,9 @@
-import React, { FC } from 'react';
+import React, { ChangeEvent, FC, useCallback } from 'react';
 import { styled } from '@mui/material/styles';
 import Switch, { type Props } from 'components/Switch';
 import { useCustomTheme } from 'contexts/ThemeContext';
 import { useWeb3ModalTheme } from '@web3modal/wagmi/react';
+import { track } from '../../utils/segment';
 
 const StyledSwitch = styled((props: Props) => (
   <Switch focusVisibleClassName=".Mui-focusVisible" disableRipple {...props} />
@@ -42,17 +43,23 @@ const StyledSwitch = styled((props: Props) => (
 const SwitchTheme: FC<Props> = (props) => {
   const { theme, changeTheme } = useCustomTheme();
   const { setThemeMode } = useWeb3ModalTheme();
-  return (
-    <StyledSwitch
-      {...props}
-      checked={theme === 'light'}
-      onChange={(e) => {
-        const light = e.target.checked;
-        setThemeMode(light ? 'light' : 'dark');
-        changeTheme();
-      }}
-    />
+  const handleChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>): void => {
+      const light = e.target.checked;
+      const value = light ? 'light' : 'dark';
+      track('Toggle Clicked', {
+        name: 'theme',
+        location: 'Settings',
+        value,
+        prevValue: theme,
+      });
+      setThemeMode(value);
+      changeTheme();
+    },
+    [changeTheme, setThemeMode, theme],
   );
+
+  return <StyledSwitch {...props} checked={theme === 'light'} onChange={handleChange} />;
 };
 
 export default SwitchTheme;

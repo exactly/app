@@ -27,6 +27,7 @@
     "@mui/icons-material": "^5.14.3",
     "@mui/lab": "^5.0.0-alpha.138",
     "@mui/material": "^5.14.3",
+    "@segment/analytics-next": "^1.60.0",
     "@sentry/integrations": "^7.80.0",
     "@sentry/nextjs": "^7.80.0",
     "@snapshot-labs/snapshot.js": "^0.6.1",

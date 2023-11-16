@@ -6,6 +6,7 @@ import LinkIcon from '@mui/icons-material/Link';
 import { useTranslation } from 'react-i18next';
 import useEtherscanLink from 'hooks/useEtherscanLink';
 import { Address } from 'viem';
+import { track } from '../../../utils/segment';
 
 type Props = {
   symbol: string;
@@ -22,6 +23,11 @@ const ExplorerMenu: FC<Props> = ({ symbol, assetAddress, eMarketAddress, rateMod
   const open = Boolean(anchorEl);
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
+    track('Button Clicked', {
+      name: 'view on etherscan',
+      location: 'Explorer Menu',
+      symbol,
+    });
   };
   const handleClose = () => {
     setAnchorEl(null);
@@ -86,7 +92,19 @@ const ExplorerMenu: FC<Props> = ({ symbol, assetAddress, eMarketAddress, rateMod
           horizontal: 'right',
         }}
       >
-        <a href={address(assetAddress)} target="_blank" rel="noopener noreferrer">
+        <a
+          href={address(assetAddress)}
+          onClick={() =>
+            track('Link Clicked', {
+              href: address(assetAddress),
+              name: 'view asset contract',
+              location: 'Explorer Menu',
+              symbol,
+            })
+          }
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           <MenuItem>
             <Image
               src={`/img/assets/${symbol}.svg`}
@@ -102,7 +120,19 @@ const ExplorerMenu: FC<Props> = ({ symbol, assetAddress, eMarketAddress, rateMod
           </MenuItem>
         </a>
 
-        <a href={address(eMarketAddress)} target="_blank" rel="noopener noreferrer">
+        <a
+          href={address(eMarketAddress)}
+          onClick={() =>
+            track('Link Clicked', {
+              href: address(eMarketAddress),
+              name: 'view market contract',
+              location: 'Explorer Menu',
+              symbol,
+            })
+          }
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           <MenuItem>
             <Image
               src={`/img/exaTokens/exa${symbol}.svg`}
@@ -118,7 +148,19 @@ const ExplorerMenu: FC<Props> = ({ symbol, assetAddress, eMarketAddress, rateMod
           </MenuItem>
         </a>
 
-        <a href={address(rateModelAddress)} target="_blank" rel="noopener noreferrer">
+        <a
+          href={address(rateModelAddress)}
+          onClick={() => {
+            track('Link Clicked', {
+              href: address(rateModelAddress),
+              name: 'view interest rate model contract',
+              location: 'Explorer Menu',
+              symbol,
+            });
+          }}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           <MenuItem>
             <LinkIcon fontSize="small" />
             <Box ml={1}>{t('Interest Rate Model')}</Box>

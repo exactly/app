@@ -24,6 +24,7 @@ import useTranslateOperation from 'hooks/useTranslateOperation';
 import useAnalytics from 'hooks/useAnalytics';
 import useDelayedEffect from 'hooks/useDelayedEffect';
 import { useModal } from 'contexts/ModalContext';
+import { track } from '../../utils/segment';
 
 function PaperComponent(props: PaperProps | undefined) {
   const { tx } = useOperationContext();
@@ -79,6 +80,15 @@ function OperationsModal({ isOpen, close }: Props) {
 
   useDelayedEffect({ effect: viewEffect });
 
+  const handleCloseButtonClick = useCallback(() => {
+    track('Icon Clicked', {
+      location: 'Operations Modal',
+      icon: 'Close',
+      name: 'close',
+    });
+    close();
+  }, [close]);
+
   return (
     <Dialog
       open={isOpen}
@@ -93,7 +103,7 @@ function OperationsModal({ isOpen, close }: Props) {
     >
       <IconButton
         aria-label="close"
-        onClick={close}
+        onClick={handleCloseButtonClick}
         sx={{
           position: 'absolute',
           right: 4,

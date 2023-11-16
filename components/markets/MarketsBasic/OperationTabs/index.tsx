@@ -1,8 +1,9 @@
-import React, { FC } from 'react';
+import React, { FC, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Box, ButtonBase, Typography } from '@mui/material';
 import { MarketsBasicOperation, useMarketsBasic } from 'contexts/MarketsBasicContext';
 import { useOperationContext } from 'contexts/OperationContext';
+import { track } from '../../../../utils/segment';
 
 type OperationTabProps = {
   label: string;
@@ -11,9 +12,17 @@ type OperationTabProps = {
 };
 
 const OperationTab: FC<OperationTabProps> = ({ label, isSelected, onClick }) => {
+  const handleClick = useCallback(() => {
+    onClick();
+    track('Button Clicked', {
+      location: 'Markets Basic',
+      name: 'operation',
+      operation: label,
+    });
+  }, [label, onClick]);
   return (
     <ButtonBase
-      onClick={onClick}
+      onClick={handleClick}
       disableRipple
       data-testid={`simple-view-${label.toLowerCase()}-tab`}
       data-active={isSelected}

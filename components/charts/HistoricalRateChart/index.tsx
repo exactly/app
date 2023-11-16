@@ -7,6 +7,7 @@ import { toPercentage } from 'utils/utils';
 import ButtonsChart from '../ButtonsChart';
 import LoadingChart from '../LoadingChart';
 import TooltipChart from '../TooltipChart';
+import { track } from '../../../utils/segment';
 
 type Props = {
   symbol: string;
@@ -44,7 +45,13 @@ const HistoricalRateChart: FC<Props> = ({ symbol }) => {
 
   const onShowUtilizationChange = useCallback(() => {
     setShowUtilization((prev) => !prev);
-  }, []);
+    track('Toggle Clicked', {
+      name: 'show utilization',
+      location: 'Historical Rate Chart',
+      symbol,
+      value: !showUtilization,
+    });
+  }, [showUtilization, symbol]);
 
   return (
     <Box display="flex" flexDirection="column" width="100%" height="100%" gap={2}>

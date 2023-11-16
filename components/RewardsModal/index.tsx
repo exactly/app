@@ -1,4 +1,4 @@
-import React, { FC, forwardRef, ReactElement, Ref, useCallback, useMemo, useRef, useState } from 'react';
+import React, { FC, forwardRef, MouseEvent, ReactElement, Ref, useCallback, useMemo, useRef, useState } from 'react';
 import {
   Box,
   Dialog,
@@ -39,6 +39,7 @@ import { useWeb3 } from 'hooks/useWeb3';
 import { useNetwork, useSwitchNetwork } from 'wagmi';
 import RewardsTooltip from 'components/RewardsTooltip';
 import { useModal } from 'contexts/ModalContext';
+import { track } from '../../utils/segment';
 
 function PaperComponent(props: PaperProps | undefined) {
   const ref = useRef<HTMLDivElement>(null);
@@ -89,13 +90,23 @@ const RewardsModal: FC<RewardsModalProps> = ({ isOpen, close }) => {
     [differentAddress, selected, showInput],
   );
 
-  const submit = useCallback(async () => {
-    const assets = Object.entries(selected)
-      .filter(([, v]) => v)
-      .map(([symbol]) => symbol);
-    setLoading(true);
-    claim({ assets, to: showInput && isAddress(input) ? input : undefined, setTx }).finally(() => setLoading(false));
-  }, [claim, input, selected, showInput]);
+  const submit = useCallback(
+    (event: MouseEvent<HTMLButtonElement>) => {
+      const to = showInput && isAddress(input) ? input : undefined;
+      const assets = Object.entries(selected)
+        .filter(([, v]) => v)
+        .map(([symbol]) => symbol);
+      setLoading(true);
+      claim({ assets, to, setTx }).finally(() => setLoading(false));
+      track('Button Clicked', {
+        name: 'claim',
+        location: 'Rewards',
+        to,
+        text: event.currentTarget.innerText,
+      });
+    },
+    [claim, input, selected, showInput],
+  );
 
   const rewards = useMemo(
     () =>
@@ -113,12 +124,30 @@ const RewardsModal: FC<RewardsModalProps> = ({ isOpen, close }) => {
     setSelected(Object.fromEntries(Object.keys(rs).map((k) => [k, true])));
     setInput('');
     setTx(undefined);
+    track('Icon Clicked', {
+      icon: 'Close',
+      location: 'Rewards',
+      name: 'close',
+    });
   }, [close, rs]);
 
   const exitAndClose = useCallback(() => {
     exitImpersonate();
     closeAndReset();
   }, [closeAndReset, exitImpersonate]);
+
+  const handleSecondaryClaim = useCallback(
+    (event: MouseEvent<HTMLButtonElement>) => {
+      setShowInput(!showInput);
+      track('Link Clicked', {
+        href: '',
+        location: 'Rewards',
+        name: showInput ? 'claim to connected wallet' : 'claim to a different address',
+        text: event.currentTarget.innerText,
+      });
+    },
+    [showInput],
+  );
 
   if (!walletAddress) {
     return null;
@@ -280,7 +309,7 @@ const RewardsModal: FC<RewardsModalProps> = ({ isOpen, close }) => {
                     >
                       {showInput ? `${t('Claim to')} ${differentAddress}` : t('Claim to connected wallet')}
                     </LoadingButton>
-                    <ButtonBase onClick={() => setShowInput(!showInput)} disableRipple>
+                    <ButtonBase onClick={handleSecondaryClaim} disableRipple>
                       <Typography fontSize={12} color="grey.500" sx={{ cursor: 'pointer' }}>
                         {t('or')}{' '}
                         <span style={{ textDecoration: 'underline' }}>
@@ -320,10 +349,17 @@ export function RewardsButton() {
     () => Object.values(rs).reduce((acc, { amount, usdPrice }) => acc + (amount * usdPrice) / WEI_PER_ETHER, 0n),
     [rs],
   );
+  const handleClick = useCallback(() => {
+    open();
+    track('Button Clicked', {
+      location: 'Navbar',
+      name: 'rewards',
+    });
+  }, [open]);
 
   return (
     <Tooltip title={<RewardsTooltip rewards={rewards} />} arrow placement="bottom">
-      <Button variant="outlined" onClick={open}>
+      <Button variant="outlined" onClick={handleClick}>
         <Box display="flex" gap={0.5} alignItems="center">
           <AvatarGroup
             max={6}

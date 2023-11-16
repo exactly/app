@@ -3,6 +3,7 @@ import { Box, Button, useTheme, type ButtonProps } from '@mui/material';
 import { useOperationContext } from 'contexts/OperationContext';
 import { useTranslation } from 'react-i18next';
 import { isFixedOperation, isValidOperation } from 'types/Operation';
+import { track } from '../../../utils/segment';
 
 type SelectorProps = {
   label: string;
@@ -43,6 +44,12 @@ function TypeSwitch() {
 
   const toggle = useCallback(() => {
     const op = isFixedOperation(operation) ? operation.replaceAll('AtMaturity', '') : `${operation}AtMaturity`;
+    track('Toggle Clicked', {
+      location: 'Operations Modal',
+      name: 'type switch',
+      prevValue: operation,
+      value: op,
+    });
     if (isValidOperation(op)) {
       setOperation(op);
     }

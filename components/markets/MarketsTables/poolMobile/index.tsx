@@ -1,4 +1,4 @@
-import React, { FC, useMemo } from 'react';
+import React, { FC, useCallback, useMemo } from 'react';
 import { Box, Button, Divider, Grid, Skeleton, SxProps, Tooltip, Typography } from '@mui/material';
 
 import useActionButton from 'hooks/useActionButton';
@@ -10,6 +10,7 @@ import parseTimestamp from 'utils/parseTimestamp';
 import { TableHeader } from 'components/common/TableHeadCell';
 import useTranslateOperation from 'hooks/useTranslateOperation';
 import Rates from 'components/Rates';
+import { track } from '../../../../utils/segment';
 
 const sxButton: SxProps = {
   whiteSpace: 'nowrap',
@@ -23,6 +24,36 @@ const PoolMobile: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) 
   const defaultRows = useMemo<TableRow[]>(() => assets.map((s) => ({ symbol: s })), [assets]);
   const tempRows = isLoading ? defaultRows : rows;
   const isFloating = rateType === 'floating';
+
+  const handleDepositClick = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, symbol: string, depositMaturity?: bigint) => {
+      const operation = isFloating ? 'deposit' : 'depositAtMaturity';
+      handleActionClick(e, operation, symbol, depositMaturity);
+      track('Button Clicked', {
+        name: 'deposit',
+        location: 'poolMobile',
+        symbol,
+        maturity: Number(depositMaturity),
+        operation,
+      });
+    },
+    [handleActionClick, isFloating],
+  );
+
+  const handleBorrowClick = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, symbol: string, borrowMaturity?: bigint) => {
+      const operation = isFloating ? 'borrow' : 'borrowAtMaturity';
+      handleActionClick(e, operation, symbol, borrowMaturity);
+      track('Button Clicked', {
+        name: 'borrow',
+        location: 'poolMobile',
+        symbol,
+        maturity: Number(borrowMaturity),
+        operation,
+      });
+    },
+    [handleActionClick, isFloating],
+  );
 
   return (
     <Box width="100%" display="flex" flexDirection="column" gap={1}>
@@ -58,9 +89,7 @@ const PoolMobile: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) 
                   fullWidth
                   variant="contained"
                   sx={sxButton}
-                  onClick={(e) =>
-                    handleActionClick(e, isFloating ? 'deposit' : 'depositAtMaturity', symbol, depositMaturity)
-                  }
+                  onClick={(e) => handleDepositClick(e, symbol, depositMaturity)}
                   disabled={isDisable(rateType, depositAPR)}
                 >
                   {translateOperation('deposit', { capitalize: true })}
@@ -69,9 +98,7 @@ const PoolMobile: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) 
                   variant="outlined"
                   fullWidth
                   sx={sxButton}
-                  onClick={(e) =>
-                    handleActionClick(e, isFloating ? 'borrow' : 'borrowAtMaturity', symbol, borrowMaturity)
-                  }
+                  onClick={(e) => handleBorrowClick(e, symbol, depositMaturity)}
                 >
                   {translateOperation('borrow', { capitalize: true })}
                 </Button>

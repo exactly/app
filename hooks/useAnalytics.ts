@@ -2,7 +2,6 @@ import { useMemo, useCallback, useEffect } from 'react';
 import ReactGA from 'react-ga4';
 import { useTranslation } from 'react-i18next';
 import { useAccount } from 'wagmi';
-
 import { isRolloverInput, type RolloverInput } from 'contexts/DebtManagerContext';
 import { useWeb3 } from './useWeb3';
 import { useCustomTheme } from 'contexts/ThemeContext';
@@ -18,6 +17,8 @@ import { BridgeInput } from 'types/Bridge';
 import { Operation } from 'types/Operation';
 import { VestInput } from 'types/Vest';
 import { isVestInput } from 'components/vesting/utils';
+import { useRouter } from 'next/router';
+import { page } from '../utils/segment';
 
 type ItemVariant =
   | 'operation'
@@ -426,4 +427,12 @@ export default function useAnalytics({
     transaction: { addToCart, removeFromCart, beginCheckout, purchase },
     list: { viewItem, selectItem, viewItemList, viewItemListAdvance, viewItemListDashboard },
   };
+}
+
+export function usePageTracking() {
+  const router = useRouter();
+  useEffect(() => {
+    router.events.on('routeChangeComplete', page);
+    return () => router.events.off('routeChangeComplete', page);
+  }, [router.events]);
 }

@@ -17,6 +17,7 @@ import { formatUnits, parseUnits } from 'viem';
 import waitForTransaction from 'utils/waitForTransaction';
 import dayjs from 'dayjs';
 import { gasLimit } from 'utils/gas';
+import { track } from '../utils/segment';
 
 type BorrowAtMaturity = {
   borrow: () => void;
@@ -219,6 +220,12 @@ export default (): BorrowAtMaturity => {
           ...opts,
           gasLimit: gasLimit(gasEstimation),
         });
+        track('Wallet Signed TX', {
+          contractName: 'ETHRouter',
+          method: 'borrowAtMaturity',
+          symbol,
+          qty,
+        });
       } else {
         if (!marketContract) return;
 
@@ -230,12 +237,25 @@ export default (): BorrowAtMaturity => {
           ...opts,
           gasLimit: gasLimit(gasEstimation),
         });
+        track('Wallet Signed TX', {
+          contractName: 'Market',
+          method: 'borrowAtMaturity',
+          symbol,
+          qty,
+          hash,
+        });
       }
 
       transaction.beginCheckout();
       setTx({ status: 'processing', hash });
 
       const { status, transactionHash } = await waitForTransaction({ hash });
+      track('TX Completed', {
+        symbol,
+        qty,
+        status,
+        hash: transactionHash,
+      });
       setTx({ status: status ? 'success' : 'error', hash: transactionHash });
 
       if (status) transaction.purchase();
@@ -267,6 +287,7 @@ export default (): BorrowAtMaturity => {
     setErrorData,
     setTx,
     handleOperationError,
+    symbol,
   ]);
 
   const updateAPR = useCallback(async () => {

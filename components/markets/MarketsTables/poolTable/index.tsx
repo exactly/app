@@ -1,4 +1,4 @@
-import React, { FC, useMemo } from 'react';
+import React, { FC, MouseEvent, useCallback, useMemo } from 'react';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -24,6 +24,7 @@ import TableHeadCell, { TableHeader } from 'components/common/TableHeadCell';
 import useRouter from 'hooks/useRouter';
 import { useTranslation } from 'react-i18next';
 import Rates from 'components/Rates';
+import { track } from '../../../../utils/segment';
 
 export type PoolTableProps = {
   isLoading: boolean;
@@ -51,6 +52,40 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
   const { setOrderBy, sortData, direction: sortDirection, isActive: sortActive } = useSorting<TableRow>();
   const tempRows = isLoading ? defaultRows : rows;
 
+  const trackRowClick = useCallback((symbol: string) => {
+    track('Link Clicked', {
+      href: `/${symbol}`,
+      name: 'market',
+      symbol,
+      location: 'Markets',
+    });
+  }, []);
+
+  const handleDepositClick = useCallback(
+    (e: MouseEvent<HTMLButtonElement>, symbol: string, depositMaturity?: bigint): void => {
+      const action = rateType === 'floating' ? 'deposit' : 'depositAtMaturity';
+      track('Button Clicked', {
+        location: 'Markets',
+        name: 'deposit',
+        action,
+        symbol,
+        maturity: Number(depositMaturity),
+      });
+      handleActionClick(e, rateType === 'floating' ? 'deposit' : 'depositAtMaturity', symbol, depositMaturity);
+    },
+    [handleActionClick, rateType],
+  );
+  const handleBorrowClick = (e: MouseEvent<HTMLButtonElement>, symbol: string, borrowMaturity?: bigint): void => {
+    const action = rateType === 'floating' ? 'borrow' : 'borrowAtMaturity';
+    track('Button Clicked', {
+      location: 'Markets',
+      name: 'borrow',
+      action,
+      symbol,
+      maturity: Number(borrowMaturity),
+    });
+    handleActionClick(e, action, symbol, borrowMaturity);
+  };
   return (
     <TableContainer>
       <Table>
@@ -76,7 +111,13 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
         <TableBody>
           {sortData(tempRows).map(
             ({ symbol, totalDeposited, totalBorrowed, depositAPR, borrowAPR, depositMaturity, borrowMaturity }) => (
-              <Link href={{ pathname: `/${symbol}`, query }} key={symbol} rel="noopener noreferrer" legacyBehavior>
+              <Link
+                href={{ pathname: `/${symbol}`, query }}
+                key={symbol}
+                rel="noopener noreferrer"
+                legacyBehavior
+                onClick={() => trackRowClick(symbol)}
+              >
                 <TableRow
                   key={symbol}
                   sx={{
@@ -172,14 +213,7 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
                       ) : (
                         <Button
                           variant="contained"
-                          onClick={(e) =>
-                            handleActionClick(
-                              e,
-                              rateType === 'floating' ? 'deposit' : 'depositAtMaturity',
-                              symbol,
-                              depositMaturity,
-                            )
-                          }
+                          onClick={(e) => handleDepositClick(e, symbol, depositMaturity)}
                           disabled={isDisable(rateType, depositAPR)}
                           data-testid={`${rateType}-deposit-${symbol}`}
                           sx={{ whiteSpace: 'nowrap' }}
@@ -215,14 +249,7 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
                         <Button
                           variant="outlined"
                           sx={{ backgroundColor: 'components.bg', whiteSpace: 'nowrap' }}
-                          onClick={(e) =>
-                            handleActionClick(
-                              e,
-                              rateType === 'floating' ? 'borrow' : 'borrowAtMaturity',
-                              symbol,
-                              borrowMaturity,
-                            )
-                          }
+                          onClick={(e) => handleBorrowClick(e, symbol, borrowMaturity)}
                           data-testid={`${rateType}-borrow-${symbol}`}
                         >
                           {t('Borrow')}

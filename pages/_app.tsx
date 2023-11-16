@@ -16,7 +16,7 @@ import Footer from 'components/Footer';
 import Navbar from 'components/Navbar';
 import { globals } from 'styles/theme';
 import { GlobalErrorProvider } from 'contexts/GlobalErrorContext';
-import { useInitGA } from 'hooks/useAnalytics';
+import { useInitGA, usePageTracking } from 'hooks/useAnalytics';
 
 import { ModalContextProvider } from 'contexts/ModalContext';
 import OperationsModal from 'components/OperationsModal';
@@ -46,6 +46,7 @@ const Modals = () => (
 
 export default function App({ Component, pageProps, router }: AppProps) {
   useInitGA();
+  usePageTracking();
 
   return (
     <>

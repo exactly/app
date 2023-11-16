@@ -15,6 +15,7 @@ import { WEI_PER_ETHER } from 'utils/const';
 import useEstimateGas from './useEstimateGas';
 import { parseUnits, formatUnits } from 'viem';
 import { gasLimit } from 'utils/gas';
+import { track } from '../utils/segment';
 
 type Borrow = {
   handleBasicInputChange: (value: string) => void;
@@ -209,6 +210,12 @@ export default (): Borrow => {
           ...opts,
           gasLimit: gasLimit(gasEstimation),
         });
+        track('Wallet Signed TX', {
+          contractName: 'ETHRouter',
+          method: 'borrow',
+          symbol,
+          qty,
+        });
       } else {
         if (!marketContract) return;
         const args = [amount, walletAddress, walletAddress] as const;
@@ -219,12 +226,25 @@ export default (): Borrow => {
           ...opts,
           gasLimit: gasLimit(gasEstimation),
         });
+        track('Wallet Signed TX', {
+          contractName: 'Market',
+          method: 'borrow',
+          symbol,
+          qty,
+          hash,
+        });
       }
 
       transaction.beginCheckout();
       setTx({ status: 'processing', hash });
 
       const { status, transactionHash } = await waitForTransaction({ hash });
+      track('TX Completed', {
+        symbol,
+        qty,
+        status,
+        hash: transactionHash,
+      });
 
       setTx({ status: status ? 'success' : 'error', hash: transactionHash });
 
@@ -250,6 +270,7 @@ export default (): Borrow => {
     ETHRouterContract,
     qty,
     marketContract,
+    symbol,
     setErrorData,
     handleOperationError,
   ]);

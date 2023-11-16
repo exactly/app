@@ -19,6 +19,7 @@ import { useTheme } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import getHourUTC2Local from 'utils/getHourUTC2Local';
 import useAnalytics from 'hooks/useAnalytics';
+import { track } from '../../../../utils/segment';
 
 type MaturityPoolsTableProps = {
   symbol: string;
@@ -114,7 +115,15 @@ const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ symbol }) => {
                   data-testid={`fixed-${maturity}-deposit-${symbol}`}
                   disabled={depositAPR < minAPRValue}
                   variant="contained"
-                  onClick={(e) => handleActionClick(e, 'depositAtMaturity', symbol, maturity)}
+                  onClick={(e) => {
+                    handleActionClick(e, 'depositAtMaturity', symbol, maturity);
+                    track('Button Clicked', {
+                      name: 'deposit',
+                      location: 'Maturity Pools Table',
+                      symbol,
+                      maturity: Number(maturity),
+                    });
+                  }}
                   sx={{ whiteSpace: 'nowrap', mr: 0.5 }}
                 >
                   {t('Deposit')}
@@ -124,7 +133,15 @@ const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ symbol }) => {
                   disabled={borrowAPR < minAPRValue}
                   variant="outlined"
                   sx={{ backgroundColor: 'components.bg', whiteSpace: 'nowrap' }}
-                  onClick={(e) => handleActionClick(e, 'borrowAtMaturity', symbol, maturity)}
+                  onClick={(e) => {
+                    handleActionClick(e, 'borrowAtMaturity', symbol, maturity);
+                    track('Button Clicked', {
+                      name: 'borrow',
+                      location: 'Maturity Pools Table',
+                      symbol,
+                      maturity: Number(maturity),
+                    });
+                  }}
                 >
                   {t('Borrow')}
                 </Button>

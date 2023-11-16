@@ -1,4 +1,4 @@
-import React, { FC, useCallback } from 'react';
+import React, { FC, MouseEvent, useCallback } from 'react';
 import { LoadingButton } from '@mui/lab';
 import { Button, CircularProgress, Typography } from '@mui/material';
 import { Box } from '@mui/system';
@@ -8,6 +8,7 @@ import { useWeb3 } from 'hooks/useWeb3';
 import { useTranslation } from 'react-i18next';
 import useTranslateOperation from 'hooks/useTranslateOperation';
 import useAccountData from 'hooks/useAccountData';
+import { track } from '../../../utils/segment';
 
 type Props = {
   symbol: string;
@@ -33,9 +34,61 @@ function ModalSubmit({ isLoading = false, disabled = false, submit, symbol, labe
     }
   }, [submit, refreshAccountData, requiresApproval]);
 
+  const handleExitImpersonate = useCallback(() => {
+    track('Button Clicked', {
+      location: 'Operations Modal',
+      name: 'exit impersonate',
+    });
+    exitImpersonate();
+  }, [exitImpersonate]);
+
+  const handleConnect = useCallback(() => {
+    track('Button Clicked', {
+      location: 'Operations Modal',
+      name: 'connect',
+    });
+    connect();
+  }, [connect]);
+
+  const handleSwitchNetwork = useCallback(() => {
+    track('Button Clicked', {
+      location: 'Operations Modal',
+      name: 'switch network',
+      prevValue: chain?.name,
+      value: displayNetwork.name,
+    });
+    switchNetwork?.(displayNetwork.id);
+  }, [chain?.name, displayNetwork.id, displayNetwork.name, switchNetwork]);
+
+  const handleApproveClick = useCallback(
+    (event: MouseEvent<HTMLButtonElement>) => {
+      track('Button Clicked', {
+        location: 'Operations Modal',
+        name: 'approve',
+        symbol,
+        text: event.currentTarget.innerText,
+      });
+      handleSubmit();
+    },
+    [handleSubmit, symbol],
+  );
+
+  const handleSubmitClick = useCallback(
+    (event: MouseEvent<HTMLButtonElement>) => {
+      track('Button Clicked', {
+        location: 'Operations Modal',
+        name: 'submit',
+        symbol,
+        text: event.currentTarget.innerText,
+      });
+      handleSubmit();
+    },
+    [handleSubmit, symbol],
+  );
+
   if (impersonateActive) {
     return (
-      <Button fullWidth onClick={exitImpersonate} variant="contained" data-testid="modal-exit-impersonate">
+      <Button fullWidth onClick={handleExitImpersonate} variant="contained" data-testid="modal-exit-impersonate">
         {t('Exit Read-Only Mode')}
       </Button>
     );
@@ -43,7 +96,7 @@ function ModalSubmit({ isLoading = false, disabled = false, submit, symbol, labe
 
   if (!isConnected) {
     return (
-      <Button fullWidth onClick={connect} variant="contained" data-testid="modal-connect-wallet">
+      <Button fullWidth onClick={handleConnect} variant="contained" data-testid="modal-connect-wallet">
         {t('Connect wallet')}
       </Button>
     );
@@ -53,7 +106,7 @@ function ModalSubmit({ isLoading = false, disabled = false, submit, symbol, labe
     return (
       <LoadingButton
         fullWidth
-        onClick={() => switchNetwork?.(displayNetwork.id)}
+        onClick={handleSwitchNetwork}
         variant="contained"
         loading={switchIsLoading}
         data-testid="modal-switch-network"
@@ -74,7 +127,7 @@ function ModalSubmit({ isLoading = false, disabled = false, submit, symbol, labe
             label={loadingButton.label}
           />
         }
-        onClick={handleSubmit}
+        onClick={handleApproveClick}
         color="primary"
         variant="contained"
         disabled={disabled}
@@ -100,7 +153,7 @@ function ModalSubmit({ isLoading = false, disabled = false, submit, symbol, labe
           }
         />
       }
-      onClick={handleSubmit}
+      onClick={handleSubmitClick}
       color="primary"
       variant="contained"
       disabled={disabled || Boolean(errorButton)}
@@ -116,7 +169,7 @@ type LoadingIndicatorProps = {
   label?: string;
 };
 
-const LoadingIndicator: FC<LoadingIndicatorProps> = ({ withCircularProgress, label }) => {
+export const LoadingIndicator: FC<LoadingIndicatorProps> = ({ withCircularProgress, label }) => {
   return (
     <Box display="flex" gap={0.5} alignItems="center" width="max-content">
       {withCircularProgress && <CircularProgress color="inherit" size={16} />}

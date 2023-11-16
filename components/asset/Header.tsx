@@ -13,6 +13,7 @@ import { WEI_PER_ETHER } from 'utils/const';
 import { formatEther, formatUnits } from 'viem';
 import useStETHNativeAPR from 'hooks/useStETHNativeAPR';
 import { toPercentage } from 'utils/utils';
+import { track } from '../../utils/segment';
 
 type Props = {
   symbol: string;
@@ -137,6 +138,13 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
 
   const onChangeAssetDropdown = useCallback(
     (newSymbol: string) => {
+      track('Option Selected', {
+        location: 'Asset Header Info',
+        name: 'asset',
+        value: newSymbol,
+        prevValue: symbol,
+      });
+
       if (newSymbol === symbol) return;
       push({ pathname: `/${newSymbol}`, query });
     },

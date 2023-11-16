@@ -13,6 +13,7 @@ import useEstimateGas from './useEstimateGas';
 import { parseUnits } from 'viem';
 import waitForTransaction from 'utils/waitForTransaction';
 import { gasLimit } from 'utils/gas';
+import { track } from '../utils/segment';
 
 type Deposit = {
   deposit: () => void;
@@ -144,6 +145,12 @@ export default (): Deposit => {
           value: amount,
           gasLimit: gasLimit(gasEstimation),
         });
+        track('Wallet Signed TX', {
+          contractName: 'ETHRouter',
+          method: 'deposit',
+          symbol,
+          qty,
+        });
       } else {
         const args = [amount, walletAddress] as const;
         const gasEstimation = await marketContract.estimateGas.deposit(args, opts);
@@ -152,6 +159,13 @@ export default (): Deposit => {
           ...opts,
           gasLimit: gasLimit(gasEstimation),
         });
+        track('Wallet Signed TX', {
+          contractName: 'Market',
+          method: 'deposit',
+          symbol,
+          qty,
+          hash,
+        });
       }
 
       transaction.beginCheckout();
@@ -159,6 +173,12 @@ export default (): Deposit => {
       setTx({ status: 'processing', hash });
 
       const { status, transactionHash } = await waitForTransaction({ hash });
+      track('TX Completed', {
+        symbol,
+        qty,
+        status,
+        hash: transactionHash,
+      });
 
       setTx({ status: status ? 'success' : 'error', hash: transactionHash });
 
@@ -182,6 +202,7 @@ export default (): Deposit => {
     ETHRouterContract,
     setErrorData,
     handleOperationError,
+    symbol,
   ]);
 
   const handleSubmitAction = useCallback(async () => {

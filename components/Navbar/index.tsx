@@ -1,4 +1,4 @@
-import React, { ReactNode, useEffect, useMemo, useState } from 'react';
+import React, { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 import { setContext, setUser } from '@sentry/nextjs';
 import { mainnet, useConfig } from 'wagmi';
 import { goerli } from 'wagmi/chains';
@@ -28,6 +28,7 @@ import { useCustomTheme } from 'contexts/ThemeContext';
 import { useModal } from 'contexts/ModalContext';
 import CustomMenu from './CustomMenu';
 import Settings from 'components/Settings';
+import { identify, track } from '../../utils/segment';
 
 const { onlyMobile, onlyDesktopFlex } = globals;
 
@@ -42,6 +43,15 @@ function Navbar() {
   const { view } = useCustomTheme();
   const [openMenu, setOpenMenu] = useState<boolean>(false);
   const isMobile = useMediaQuery(breakpoints.down('sm'));
+
+  useEffect(() => {
+    if (!walletAddress) return;
+    identify(walletAddress);
+    track('Wallet Connected', {
+      connectorId: connector?.id,
+      connectorName: connector?.name,
+    });
+  }, [connector?.id, connector?.name, walletAddress]);
 
   useEffect(() => {
     if (!walletAddress) return;
@@ -132,6 +142,15 @@ function Navbar() {
 
   const { open: openFaucet } = useModal('faucet');
 
+  const handleMenuIconClick = useCallback(() => {
+    setOpenMenu(true);
+    track('Icon Clicked', {
+      location: 'Navbar',
+      icon: 'Menu',
+      name: 'mobile menu',
+    });
+  }, []);
+
   return (
     <Box sx={{ display: 'flex', justifyContent: 'center' }}>
       <AppBar
@@ -207,7 +226,7 @@ function Navbar() {
             edge="start"
             aria-label="menu"
             sx={{ display: onlyMobile }}
-            onClick={() => setOpenMenu(true)}
+            onClick={handleMenuIconClick}
           >
             <MenuIcon sx={{ color: 'figma.grey.300' }} />
           </IconButton>

@@ -5,13 +5,21 @@ import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
 import AdvancedViewSwitch from 'components/AdvancedSwitch';
 import SwitchTheme from 'components/SwitchTheme';
 import SelectLanguage from 'components/SelectLanguage';
+import { track } from '../../utils/segment';
 
 const Settings = () => {
   const { t } = useTranslation();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 
   const open = Boolean(anchorEl);
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget);
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    track('Icon Clicked', {
+      icon: 'Settings',
+      location: 'Navbar',
+      name: 'settings',
+    });
+    setAnchorEl(event.currentTarget);
+  };
   const handleClose = () => setAnchorEl(null);
 
   return (

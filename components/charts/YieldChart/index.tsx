@@ -9,6 +9,7 @@ import ButtonsChart from '../ButtonsChart';
 import LoadingChart from '../LoadingChart';
 import TooltipChart from '../TooltipChart';
 import { useTranslation } from 'react-i18next';
+import { track } from '../../../utils/segment';
 
 type Props = {
   symbol: string;
@@ -52,7 +53,13 @@ const YieldChart: FC<Props> = ({ symbol }) => {
 
   const onShowComparisonChange = useCallback(() => {
     setShowComparison((prev) => !prev);
-  }, []);
+    track('Toggle Clicked', {
+      location: 'Yield Chart',
+      name: 'show comparison',
+      symbol,
+      value: !showComparison,
+    });
+  }, [showComparison, symbol]);
 
   return (
     <Box display="flex" flexDirection="column" width="100%" height="100%" gap={2}>

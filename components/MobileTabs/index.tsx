@@ -1,5 +1,6 @@
 import React, { ReactNode, useState } from 'react';
 import { Box, Button } from '@mui/material';
+import { track } from '../../utils/segment';
 
 export type MobileTab = {
   title: string;
@@ -28,7 +29,15 @@ function MobileTabs({ tabs }: Props) {
               whiteSpace: 'nowrap',
               fontSize: 12,
             }}
-            onClick={() => setSelected(i)}
+            onClick={() => {
+              setSelected(i);
+              track('Option Selected', {
+                name: 'rate type',
+                location: 'Mobile Tabs',
+                value: tabs[i].title,
+                prevValue: tabs[selected].title,
+              });
+            }}
           >
             {title}
           </Button>

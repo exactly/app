@@ -12,6 +12,7 @@ import { MAX_UINT256 } from 'utils/const';
 import useEstimateGas from './useEstimateGas';
 import useAnalytics from './useAnalytics';
 import { gasLimit } from 'utils/gas';
+import { track } from '../utils/segment';
 
 function useApprove({
   operation,
@@ -150,6 +151,13 @@ function useApprove({
           break;
         }
       }
+      track('Wallet Signed TX', {
+        operation,
+        method: 'approve',
+        contractName: 'Market',
+        spender,
+        quantity: Number(quantity),
+      });
 
       if (!hash) return;
 
@@ -158,6 +166,13 @@ function useApprove({
       setLoadingButton({ withCircularProgress: true, label: t('Approving {{symbol}}', { symbol }) });
       const { status } = await waitForTransaction({ hash });
       if (status === 'reverted') throw new Error('Transaction reverted');
+      track('TX Completed', {
+        symbol,
+        qty,
+        status,
+        hash,
+        operation,
+      });
 
       transaction.purchase('approve');
     } catch (error) {

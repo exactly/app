@@ -1,7 +1,8 @@
-import React, { MouseEventHandler } from 'react';
+import React, { MouseEvent, MouseEventHandler, useCallback } from 'react';
 import { Box, Typography, Button, Skeleton, Tooltip } from '@mui/material';
 
 import formatNumber from 'utils/formatNumber';
+import { track } from '../../../utils/segment';
 
 export type Props = {
   symbol: string;
@@ -12,6 +13,18 @@ export type Props = {
 };
 
 function AvailableAmount({ symbol, amount, label, onMax, tooltip }: Props) {
+  const handleMaxClick = useCallback(
+    (e: MouseEvent<HTMLButtonElement>): void => {
+      track('Button Clicked', {
+        location: 'Operations Modal',
+        name: 'max',
+        symbol,
+      });
+      onMax?.(e);
+    },
+    [onMax, symbol],
+  );
+
   return amount ? (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25 }}>
       <Tooltip title={tooltip} placement="bottom" arrow>
@@ -21,7 +34,7 @@ function AvailableAmount({ symbol, amount, label, onMax, tooltip }: Props) {
       </Tooltip>
       {Boolean(parseFloat(amount)) && (
         <Button
-          onClick={onMax}
+          onClick={handleMaxClick}
           sx={{
             textTransform: 'uppercase',
             borderRadius: 1,

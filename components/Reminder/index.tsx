@@ -6,6 +6,7 @@ import { atcb_action } from 'add-to-calendar-button';
 import parseTimestamp from 'utils/parseTimestamp';
 import useTranslateOperation from 'hooks/useTranslateOperation';
 import type { Operation } from 'types/Operation';
+import { track } from '../../utils/segment';
 
 type Props = {
   operation: Operation;
@@ -20,7 +21,7 @@ const Reminder: FC<Props> = ({ operation, maturity }) => {
 
   const isBorrow = useMemo(() => operation?.startsWith('borrow'), [operation]);
 
-  const onClick = useCallback(() => {
+  const handleClick = useCallback(() => {
     const config: Parameters<typeof atcb_action>[0] = {
       name: t(`[Exactly Protocol] {{operationName}} maturity date reminder`, {
         operationName: translateOperation(operation, { capitalize: true, variant: 'noun' }),
@@ -33,6 +34,12 @@ const Reminder: FC<Props> = ({ operation, maturity }) => {
       timeZone: 'UTC',
       lightMode: palette.mode,
     };
+    track('Button Clicked', {
+      location: 'Reminder',
+      name: 'add reminder to calendar',
+      maturity: Number(maturity),
+      operation,
+    });
 
     if (buttonRef.current) atcb_action(config, buttonRef.current);
   }, [maturity, operation, palette.mode, t, translateOperation]);
@@ -65,7 +72,7 @@ const Reminder: FC<Props> = ({ operation, maturity }) => {
       </Box>
       <Box mt={1}>
         <div ref={buttonRef}>
-          <Button variant="contained" onClick={onClick}>
+          <Button variant="contained" onClick={handleClick}>
             <Box display="flex" justifyContent="center" alignItems="center" gap={1}>
               <CalendarTodayIcon sx={{ fontSize: '15px' }} />
               <Typography fontSize={13} fontWeight={700}>

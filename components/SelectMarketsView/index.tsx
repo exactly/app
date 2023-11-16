@@ -10,6 +10,7 @@ import { Timeout } from 'react-number-format/types/types';
 import { SimpleViewIcon, AdvancedViewIcon } from 'components/Icons';
 import { useTranslation } from 'react-i18next';
 import { type MarketView, useCustomTheme } from 'contexts/ThemeContext';
+import { track } from '../../utils/segment';
 
 type ViewOption = {
   type: MarketView;
@@ -64,6 +65,19 @@ const SelectMarketsView: FC = () => {
       },
     ],
     [t],
+  );
+
+  const handleOptionClick = useCallback(
+    (type: MarketView) => {
+      onSelectType(type);
+      track('Option Selected', {
+        location: 'Navbar',
+        name: 'market view',
+        value: type,
+        prevValue: view,
+      });
+    },
+    [onSelectType, view],
   );
 
   return (
@@ -147,7 +161,7 @@ const SelectMarketsView: FC = () => {
           <MenuItem
             key={`mainnnet_chain_${type}`}
             value={type}
-            onClick={() => onSelectType(type)}
+            onClick={() => handleOptionClick(type)}
             selected={view === type}
             sx={{
               bgcolor: view === type ? 'grey.100' : 'transparent',

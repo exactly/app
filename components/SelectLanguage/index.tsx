@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import i18n from 'i18n';
 
 import DropdownMenu from 'components/DropdownMenu';
+import { track } from '../../utils/segment';
 
 const sx: SxProps = {
   fontSize: 13.6,
@@ -23,10 +24,19 @@ function SelectLanguage() {
     es: t('Spanish'),
   } as const;
 
-  const onChange = useCallback((option: string) => {
-    i18n.changeLanguage(option);
-    setLng(option);
-  }, []);
+  const onChange = useCallback(
+    (option: string) => {
+      i18n.changeLanguage(option);
+      setLng(option);
+      track('Option Selected', {
+        name: 'language',
+        location: 'Settings',
+        value: option,
+        prevValue: lng,
+      });
+    },
+    [lng],
+  );
 
   const languages = useMemo(() => Object.keys(i18n.services.resourceStore.data), []);
 

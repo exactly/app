@@ -1,9 +1,10 @@
-import React, { ChangeEventHandler, useState } from 'react';
+import React, { ChangeEventHandler, useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Box, Button, ClickAwayListener, InputBase, Typography } from '@mui/material';
 import ModeEditRoundedIcon from '@mui/icons-material/ModeEditRounded';
 
 import ModalInfo from 'components/common/modal/ModalInfo';
+import { track } from '../../../utils/segment';
 
 type Props = {
   value: string;
@@ -21,11 +22,19 @@ function ModalInfoEditableSlippage({ value, onChange }: Props) {
   const { t } = useTranslation();
   const [editable, setEditable] = useState(false);
   const blockedCharacters = ['e', 'E', '+', '-', ','];
+  const handleClick = useCallback(() => {
+    track('Icon Clicked', {
+      location: 'Operations Modal',
+      icon: 'Edit',
+      name: 'edit slippage',
+    });
+    setEditable(true);
+  }, []);
 
   return (
     <ModalInfo label={t('Slippage Tolerance')} variant="row">
       <ClickAwayListener onClickAway={() => setEditable(false)}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }} onClick={() => setEditable(true)}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }} onClick={handleClick}>
           {editable ? (
             <>
               <InputBase

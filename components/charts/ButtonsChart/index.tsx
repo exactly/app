@@ -1,5 +1,6 @@
 import { Box, Button, Typography, useTheme } from '@mui/material';
 import React, { FC, useState } from 'react';
+import { track } from '../../../utils/segment';
 
 type Props = {
   buttons: ButtonChart[];
@@ -19,6 +20,11 @@ const ButtonsChart: FC<Props> = ({ buttons, defaultSelected }) => {
     if (selected === index) return;
     setSelected(index);
     buttons[index].onClick();
+    track('Button Clicked', {
+      location: 'Chart',
+      name: 'chart',
+      label: buttons[index].label,
+    });
   };
 
   return (
