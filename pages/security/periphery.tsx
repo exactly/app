@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import type { NextPage } from 'next';
 
-import { usePageView } from 'hooks/useAnalytics';
 import { useTranslation } from 'react-i18next';
 import { Box, Button, Skeleton, Typography } from '@mui/material';
 import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
@@ -15,7 +14,6 @@ import { optimism } from 'viem/chains';
 import { useWeb3 } from 'hooks/useWeb3';
 
 const Security: NextPage = () => {
-  usePageView('/security', 'Security');
   const { t } = useTranslation();
   const { query } = useRouter();
   const getContractAddress = useGetContractAddress();

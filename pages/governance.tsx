@@ -1,7 +1,6 @@
 import React from 'react';
 import type { NextPage } from 'next';
 
-import { usePageView } from 'hooks/useAnalytics';
 import { Box, Typography } from '@mui/material';
 import { useTranslation, Trans } from 'react-i18next';
 import { useWeb3 } from 'hooks/useWeb3';
@@ -15,8 +14,6 @@ const Governance: NextPage = () => {
   const { t } = useTranslation();
   const { isConnected, walletAddress, impersonateActive } = useWeb3();
   const mTree = useMerkleTree(walletAddress);
-
-  usePageView('/governance', 'Governance');
 
   return (
     <Box display="flex" flexDirection="column" mx="auto" gap={5} my={5} maxWidth={480}>

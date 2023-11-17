@@ -1,4 +1,4 @@
-import React, { FC, useEffect } from 'react';
+import React, { FC } from 'react';
 import Button from '@mui/material/Button';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -18,7 +18,6 @@ import useMaturityPools from 'hooks/useMaturityPools';
 import { useTheme } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import getHourUTC2Local from 'utils/getHourUTC2Local';
-import useAnalytics from 'hooks/useAnalytics';
 import { track } from '../../../../utils/segment';
 
 type MaturityPoolsTableProps = {
@@ -43,19 +42,6 @@ const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ symbol }) => {
   const { handleActionClick } = useActionButton();
   const { minAPRValue } = numbers;
   const rows = useMaturityPools(symbol);
-
-  const {
-    list: { viewItemListAdvance },
-  } = useAnalytics();
-
-  useEffect(() => {
-    if (rows.length) {
-      viewItemListAdvance(
-        rows.map((r) => ({ ...r, symbol })),
-        'fixed',
-      );
-    }
-  }, [viewItemListAdvance, rows, symbol]);
 
   return (
     <TableContainer>

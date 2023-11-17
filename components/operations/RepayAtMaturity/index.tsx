@@ -25,7 +25,6 @@ import ModalAlert from 'components/common/modal/ModalAlert';
 import ModalSubmit from 'components/OperationsModal/ModalSubmit';
 import ModalInfoBorrowLimit from 'components/OperationsModal/Info/ModalInfoBorrowLimit';
 import useHandleOperationError from 'hooks/useHandleOperationError';
-import useAnalytics from 'hooks/useAnalytics';
 import { useTranslation } from 'react-i18next';
 import useTranslateOperation from 'hooks/useTranslateOperation';
 import ModalInfoRepayWithDiscount from 'components/OperationsModal/Info/ModalInfoRepayWithDiscount';
@@ -54,7 +53,6 @@ const RepayAtMaturity: FC = () => {
 
   const {
     symbol,
-    operation,
     errorData,
     setErrorData,
     qty,
@@ -74,10 +72,6 @@ const RepayAtMaturity: FC = () => {
     setRawSlippage,
     slippage,
   } = useOperationContext();
-
-  const { transaction } = useAnalytics({
-    operationInput: useMemo(() => ({ operation, symbol, qty }), [operation, symbol, qty]),
-  });
 
   const [previewData, setPreviewData] = useState<RepayWithDiscount | undefined>();
 
@@ -264,8 +258,6 @@ const RepayAtMaturity: FC = () => {
     let hash;
     setIsLoadingOp(true);
     try {
-      transaction.addToCart();
-
       if (marketAccount.assetSymbol === 'WETH') {
         const args = [date, positionAssetsAmount] as const;
         const gasEstimation = await ETHRouterContract.estimateGas.repayAtMaturity(args, {
@@ -287,17 +279,12 @@ const RepayAtMaturity: FC = () => {
         });
       }
 
-      transaction.beginCheckout();
-
       setTx({ status: 'processing', hash });
 
       const { status, transactionHash } = await waitForTransaction({ hash });
 
       setTx({ status: status ? 'success' : 'error', hash: transactionHash });
-
-      if (status) transaction.purchase();
     } catch (error) {
-      transaction.removeFromCart();
       if (hash) setTx({ status: 'error', hash });
       setErrorData({ status: true, message: handleOperationError(error) });
     } finally {
@@ -312,7 +299,6 @@ const RepayAtMaturity: FC = () => {
     walletAddress,
     opts,
     setIsLoadingOp,
-    transaction,
     setTx,
     positionAssetsAmount,
     maxAmountToRepay,

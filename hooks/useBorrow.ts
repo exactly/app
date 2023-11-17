@@ -10,7 +10,6 @@ import { useWeb3 } from 'hooks/useWeb3';
 import { OperationHook } from 'types/OperationHook';
 import getBeforeBorrowLimit from 'utils/getBeforeBorrowLimit';
 import useHealthFactor from './useHealthFactor';
-import useAnalytics from './useAnalytics';
 import { WEI_PER_ETHER } from 'utils/const';
 import useEstimateGas from './useEstimateGas';
 import { parseUnits, formatUnits } from 'viem';
@@ -29,7 +28,6 @@ export default (): Borrow => {
 
   const {
     symbol,
-    operation,
     setErrorData,
     qty,
     setQty,
@@ -41,10 +39,6 @@ export default (): Borrow => {
     marketContract,
     ETHRouterContract,
   } = useOperationContext();
-
-  const { transaction } = useAnalytics({
-    operationInput: useMemo(() => ({ operation, symbol, qty }), [operation, symbol, qty]),
-  });
 
   const { marketAccount, accountData } = useAccountData(symbol);
   const handleOperationError = useHandleOperationError();
@@ -200,7 +194,6 @@ export default (): Borrow => {
     setIsLoadingOp(true);
     let hash;
     try {
-      transaction.addToCart();
       const amount = parseUnits(qty, marketAccount.decimals);
       if (marketAccount.assetSymbol === 'WETH') {
         if (!ETHRouterContract) return;
@@ -236,7 +229,6 @@ export default (): Borrow => {
         });
       }
 
-      transaction.beginCheckout();
       setTx({ status: 'processing', hash });
 
       const { status, transactionHash } = await waitForTransaction({ hash });
@@ -248,10 +240,7 @@ export default (): Borrow => {
       });
 
       setTx({ status: status ? 'success' : 'error', hash: transactionHash });
-
-      if (status) transaction.purchase();
     } catch (error: unknown) {
-      transaction.removeFromCart();
       if (hash) setTx({ status: 'error', hash });
 
       setErrorData({
@@ -266,7 +255,6 @@ export default (): Borrow => {
     walletAddress,
     opts,
     setIsLoadingOp,
-    transaction,
     setTx,
     ETHRouterContract,
     qty,

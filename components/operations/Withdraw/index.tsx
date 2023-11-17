@@ -19,7 +19,6 @@ import ModalAlert from 'components/common/modal/ModalAlert';
 import ModalSubmit from 'components/OperationsModal/ModalSubmit';
 import useAccountData from 'hooks/useAccountData';
 import useHandleOperationError from 'hooks/useHandleOperationError';
-import useAnalytics from 'hooks/useAnalytics';
 import { useTranslation } from 'react-i18next';
 import useTranslateOperation from 'hooks/useTranslateOperation';
 import useEstimateGas from 'hooks/useEstimateGas';
@@ -34,7 +33,6 @@ const Withdraw: FC = () => {
 
   const {
     symbol,
-    operation,
     errorData,
     setErrorData,
     qty,
@@ -49,10 +47,6 @@ const Withdraw: FC = () => {
     marketContract,
     ETHRouterContract,
   } = useOperationContext();
-
-  const { transaction } = useAnalytics({
-    operationInput: useMemo(() => ({ operation, symbol, qty }), [operation, symbol, qty]),
-  });
 
   const handleOperationError = useHandleOperationError();
 
@@ -149,7 +143,6 @@ const Withdraw: FC = () => {
     let hash;
     setIsLoadingOp(true);
     try {
-      transaction.addToCart();
       const { floatingDepositShares, decimals } = marketAccount;
 
       const amount = parseUnits(qty, decimals);
@@ -190,17 +183,12 @@ const Withdraw: FC = () => {
         }
       }
 
-      transaction.beginCheckout();
-
       setTx({ status: 'processing', hash });
 
       const { status, transactionHash } = await waitForTransaction({ hash });
 
       setTx({ status: status ? 'success' : 'error', hash: transactionHash });
-
-      if (status) transaction.purchase();
     } catch (error) {
-      transaction.removeFromCart();
       if (hash) setTx({ status: 'error', hash });
       setErrorData({ status: true, message: handleOperationError(error) });
     } finally {
@@ -212,7 +200,6 @@ const Withdraw: FC = () => {
     marketContract,
     opts,
     setIsLoadingOp,
-    transaction,
     qty,
     setTx,
     ETHRouterContract,

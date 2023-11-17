@@ -5,7 +5,6 @@ import { useTranslation } from 'react-i18next';
 import Link from 'next/link';
 import { optimism } from 'wagmi/chains';
 
-import { usePageView } from 'hooks/useAnalytics';
 import { useStartDebtManagerButton, useStartLeverager } from 'hooks/useActionButton';
 import StrategyRowCard from 'components/strategies/StrategyRowCard';
 import useRouter from 'hooks/useRouter';
@@ -25,7 +24,6 @@ import FeaturedStrategies from 'components/strategies/FeaturedStrategies';
 import { useModal } from '../contexts/ModalContext';
 
 const Strategies: NextPage = () => {
-  usePageView('/strategies', 'Strategies');
   const { t } = useTranslation();
   const { query } = useRouter();
   const { startLeverager } = useStartLeverager();

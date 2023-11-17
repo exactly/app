@@ -20,7 +20,6 @@ import ModalAlert from 'components/common/modal/ModalAlert';
 import ModalSubmit from 'components/OperationsModal/ModalSubmit';
 import useAccountData from 'hooks/useAccountData';
 import useHandleOperationError from 'hooks/useHandleOperationError';
-import useAnalytics from 'hooks/useAnalytics';
 import { useTranslation } from 'react-i18next';
 import useTranslateOperation from 'hooks/useTranslateOperation';
 import { ETH_ROUTER_SLIPPAGE, WEI_PER_ETHER } from 'utils/const';
@@ -53,10 +52,6 @@ function Repay() {
     assetContract,
     ETHRouterContract,
   } = useOperationContext();
-
-  const { transaction } = useAnalytics({
-    operationInput: useMemo(() => ({ operation, symbol, qty }), [operation, symbol, qty]),
-  });
 
   const handleOperationError = useHandleOperationError();
 
@@ -118,7 +113,6 @@ function Repay() {
     let hash;
     setIsLoadingOp(true);
     try {
-      transaction.addToCart();
       const { floatingBorrowShares, floatingBorrowAssets, decimals } = marketAccount;
 
       const amount = parseUnits(qty, decimals);
@@ -168,16 +162,12 @@ function Repay() {
         }
       }
 
-      transaction.beginCheckout();
-
       setTx({ status: 'processing', hash });
 
       const { status, transactionHash } = await waitForTransaction({ hash });
 
       setTx({ status: status ? 'success' : 'error', hash: transactionHash });
-      if (status) transaction.purchase();
     } catch (error) {
-      transaction.removeFromCart();
       if (hash) setTx({ status: 'error', hash });
       setErrorData({ status: true, message: handleOperationError(error) });
     } finally {
@@ -190,7 +180,6 @@ function Repay() {
     walletAddress,
     opts,
     setIsLoadingOp,
-    transaction,
     setTx,
     ETHRouterContract,
     isMax,

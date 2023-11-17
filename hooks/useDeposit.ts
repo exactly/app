@@ -7,7 +7,6 @@ import { useWeb3 } from 'hooks/useWeb3';
 import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { OperationHook } from 'types/OperationHook';
-import useAnalytics from './useAnalytics';
 import { CustomError } from 'types/Error';
 import useEstimateGas from './useEstimateGas';
 import { parseUnits } from 'viem';
@@ -25,7 +24,6 @@ export default (): Deposit => {
 
   const {
     symbol,
-    operation,
     setErrorData,
     qty,
     setQty,
@@ -39,10 +37,6 @@ export default (): Deposit => {
     ETHRouterContract,
     setErrorButton,
   } = useOperationContext();
-
-  const { transaction } = useAnalytics({
-    operationInput: useMemo(() => ({ operation, symbol, qty }), [operation, symbol, qty]),
-  });
 
   const handleOperationError = useHandleOperationError();
 
@@ -132,8 +126,6 @@ export default (): Deposit => {
     let hash;
     setIsLoadingOp(true);
     try {
-      transaction.addToCart();
-
       const amount = parseUnits(qty, marketAccount.decimals);
       if (marketAccount.assetSymbol === 'WETH') {
         if (!ETHRouterContract) return;
@@ -169,8 +161,6 @@ export default (): Deposit => {
         });
       }
 
-      transaction.beginCheckout();
-
       setTx({ status: 'processing', hash });
 
       const { status, transactionHash } = await waitForTransaction({ hash });
@@ -182,10 +172,7 @@ export default (): Deposit => {
       });
 
       setTx({ status: status ? 'success' : 'error', hash: transactionHash });
-
-      if (status) transaction.purchase();
     } catch (error) {
-      transaction.removeFromCart();
       if (hash) setTx({ status: 'error', hash });
       setErrorData({ status: true, message: handleOperationError(error) });
     } finally {
@@ -199,7 +186,6 @@ export default (): Deposit => {
     setIsLoadingOp,
     qty,
     setTx,
-    transaction,
     ETHRouterContract,
     setErrorData,
     handleOperationError,

@@ -2,7 +2,6 @@ import type { FC, PropsWithChildren } from 'react';
 import React, { createContext, useContext, useState, useMemo, useCallback } from 'react';
 
 import type { Operation } from 'types/Operation';
-import useAnalytics from 'hooks/useAnalytics';
 import { useOperationContext, DEFAULT_SLIPPAGE } from './OperationContext';
 
 export type MarketsBasicOperation = 'borrow' | 'deposit';
@@ -29,9 +28,6 @@ type ContextValues = {
 const MarketsBasicContext = createContext<ContextValues | null>(null);
 
 export const MarketsBasicProvider: FC<PropsWithChildren> = ({ children }) => {
-  const {
-    list: { selectItem },
-  } = useAnalytics();
   const {
     symbol,
     setDate,
@@ -60,9 +56,8 @@ export const MarketsBasicProvider: FC<PropsWithChildren> = ({ children }) => {
     (option: MarketsBasicOption['maturity']) => {
       setSelected(option);
       setDate(BigInt(option || 0n));
-      selectItem(BigInt(option || 0n));
     },
-    [setDate, selectItem],
+    [setDate],
   );
 
   const reset = useCallback(() => {

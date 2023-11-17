@@ -21,8 +21,6 @@ import Draggable from 'react-draggable';
 import { TransitionProps } from '@mui/material/transitions';
 import { OperationContextProvider, useOperationContext } from 'contexts/OperationContext';
 import useTranslateOperation from 'hooks/useTranslateOperation';
-import useAnalytics from 'hooks/useAnalytics';
-import useDelayedEffect from 'hooks/useDelayedEffect';
 import { useModal } from 'contexts/ModalContext';
 import { track } from '../../utils/segment';
 
@@ -65,20 +63,9 @@ type Props = {
 function OperationsModal({ isOpen, close }: Props) {
   const translateOperation = useTranslateOperation();
   const { breakpoints, spacing, palette } = useTheme();
-  const { operation, tx, date } = useOperationContext();
+  const { operation, tx } = useOperationContext();
   const isMobile = useMediaQuery(breakpoints.down('sm'));
   const loadingTx = useMemo(() => tx && (tx.status === 'loading' || tx.status === 'processing'), [tx]);
-  const {
-    list: { viewItem },
-  } = useAnalytics();
-
-  const viewEffect = useCallback(() => {
-    if (isOpen && date) {
-      viewItem(date);
-    }
-  }, [date, isOpen, viewItem]);
-
-  useDelayedEffect({ effect: viewEffect });
 
   const handleCloseButtonClick = useCallback(() => {
     track('Button Clicked', {

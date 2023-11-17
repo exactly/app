@@ -5,11 +5,10 @@ import { useNetwork } from 'wagmi';
 import { useTranslation } from 'react-i18next';
 import { Box, useMediaQuery, useTheme } from '@mui/material';
 
-import { Network, transactionDetails } from '@socket.tech/plugin';
+import { Network } from '@socket.tech/plugin';
 import useEthersProvider from 'hooks/useEthersProvider';
 import { optimism } from 'viem/chains';
 
-import useAnalytics from 'hooks/useAnalytics';
 import { hexToRgb } from './utils';
 import useAssetAddresses from 'hooks/useAssetAddresses';
 import { Asset, NATIVE_TOKEN_ADDRESS, TokensResponse } from 'types/Bridge';
@@ -27,7 +26,6 @@ const SocketPlugIn = ({ updateRoutes }: Props) => {
   const { palette } = useTheme();
   const { t } = useTranslation();
   const provider = useEthersProvider();
-  const { transaction } = useAnalytics();
   const [destinationNetwork, setDestinationNetwork] = useState<Network | undefined>();
   const [sourceNetwork, setSourceNetwork] = useState<Network | undefined>();
   const theme = useTheme();
@@ -71,38 +69,13 @@ const SocketPlugIn = ({ updateRoutes }: Props) => {
 
   const handleDestinationNetworkChange = useCallback(setDestinationNetwork, [setDestinationNetwork]);
 
-  const handleSubmit = useCallback(
-    ({ sourceToken, destinationToken, sourceAmount, destinationAmount }: transactionDetails) => {
-      updateRoutes();
-      const bridgeInput = {
-        sourceChainId: sourceNetwork?.chainId,
-        sourceToken: sourceToken.symbol,
-        destinationChainId: destinationNetwork?.chainId,
-        destinationToken: destinationToken.symbol,
-        sourceAmount,
-        destinationAmount,
-      };
-      transaction.addToCart('bridge', bridgeInput);
-    },
-    [destinationNetwork?.chainId, updateRoutes, sourceNetwork?.chainId, transaction],
-  );
+  const handleSubmit = useCallback(() => {
+    updateRoutes();
+  }, [updateRoutes]);
 
-  const handleSuccess = useCallback(
-    ({ sourceToken, destinationToken, sourceAmount, destinationAmount }: transactionDetails) => {
-      updateRoutes();
-      const bridgeInput = {
-        sourceChainId: sourceNetwork?.chainId,
-        sourceToken: sourceToken.symbol,
-        destinationChainId: destinationNetwork?.chainId,
-        destinationToken: destinationToken.symbol,
-        sourceAmount,
-        destinationAmount,
-      };
-
-      transaction.purchase('bridge', bridgeInput);
-    },
-    [destinationNetwork?.chainId, updateRoutes, sourceNetwork?.chainId, transaction],
-  );
+  const handleSuccess = useCallback(() => {
+    updateRoutes();
+  }, [updateRoutes]);
 
   return (
     <Box

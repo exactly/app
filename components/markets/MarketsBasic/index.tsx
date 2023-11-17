@@ -22,16 +22,12 @@ import InfoOutlined from '@mui/icons-material/InfoOutlined';
 import useTranslateOperation from 'hooks/useTranslateOperation';
 import { toPercentage } from 'utils/utils';
 import usePreviousValue from 'hooks/usePreviousValue';
-import useAnalytics from 'hooks/useAnalytics';
 import Loading from './Loading';
 
 const { minAPRValue } = numbers;
 
 const MarketsBasic: FC = () => {
   const { t } = useTranslation();
-  const {
-    list: { viewItemList },
-  } = useAnalytics();
   const translateOperation = useTranslateOperation();
   const { palette } = useTheme();
   const { errorData, qty, assetContract, tx } = useOperationContext();
@@ -129,9 +125,6 @@ const MarketsBasic: FC = () => {
   );
 
   useEffect(() => {
-    if (allOptions !== previousAllOptions && !loadingFixedOptions && !loadingFloatingOption) {
-      viewItemList(allOptions);
-    }
     if (bestOption !== undefined && previousBestOption !== bestOption) {
       setSelected(bestOption);
     }
@@ -143,7 +136,6 @@ const MarketsBasic: FC = () => {
     previousAllOptions,
     loadingFixedOptions,
     loadingFloatingOption,
-    viewItemList,
   ]);
 
   return (

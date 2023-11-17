@@ -20,7 +20,6 @@ import { useWeb3 } from 'hooks/useWeb3';
 import type { DebtManager, Market } from 'types/contracts';
 import handleOperationError from 'utils/handleOperationError';
 import useIsContract from 'hooks/useIsContract';
-import useAnalytics from 'hooks/useAnalytics';
 import { gasLimit } from 'utils/gas';
 import { Args } from './ModalContext';
 
@@ -83,7 +82,6 @@ type Props = {
 };
 
 export const DebtManagerContextProvider: FC<PropsWithChildren<Props>> = ({ args, children }) => {
-  const { transaction: track } = useAnalytics();
   const { walletAddress, opts } = useWeb3();
   const { data: walletClient } = useWalletClient();
   const { getMarketAccount, refreshAccountData } = useAccountData();
@@ -150,26 +148,21 @@ export const DebtManagerContextProvider: FC<PropsWithChildren<Props>> = ({ args,
 
       setIsLoading(true);
       try {
-        track.addToCart('roll', input);
         const transaction = await populate();
         if (!transaction) return;
         const hash = await walletClient.writeContract(transaction);
-        track.beginCheckout('roll', input);
         setTx({ status: 'processing', hash });
         const { status, transactionHash } = await waitForTransaction({ hash });
         setTx({ status: status ? 'success' : 'error', hash: transactionHash });
 
-        if (status) track.purchase('roll', input);
-
         await refreshAccountData();
       } catch (e: unknown) {
-        track.removeFromCart('roll', input);
         setErrorData({ status: true, message: handleOperationError(e) });
       } finally {
         setIsLoading(false);
       }
     },
-    [walletClient, track, input, refreshAccountData],
+    [walletClient, refreshAccountData],
   );
 
   const value: ContextValues = {

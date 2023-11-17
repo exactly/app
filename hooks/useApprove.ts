@@ -10,7 +10,6 @@ import { useTranslation } from 'react-i18next';
 
 import { MAX_UINT256 } from 'utils/const';
 import useEstimateGas from './useEstimateGas';
-import useAnalytics from './useAnalytics';
 import { gasLimit } from 'utils/gas';
 import { track } from '../utils/segment';
 
@@ -29,7 +28,6 @@ function useApprove({
   const { walletAddress, opts } = useWeb3();
   const { qty, symbol, setErrorData, setLoadingButton } = useOperationContext();
   const [isLoading, setIsLoading] = useState(false);
-  const { transaction } = useAnalytics();
 
   const { marketAccount } = useAccountData(symbol);
 
@@ -121,8 +119,6 @@ function useApprove({
       }
 
       setIsLoading(true);
-      transaction.addToCart('approve');
-
       setLoadingButton({ label: t('Sign the transaction on your wallet') });
       const args = [spender, quantity] as const;
 
@@ -162,8 +158,6 @@ function useApprove({
 
       if (!hash) return;
 
-      transaction.beginCheckout('approve');
-
       setLoadingButton({ withCircularProgress: true, label: t('Approving {{symbol}}', { symbol }) });
       const { status } = await waitForTransaction({ hash });
       if (status === 'reverted') throw new Error('Transaction reverted');
@@ -174,11 +168,7 @@ function useApprove({
         hash,
         operation,
       });
-
-      transaction.purchase('approve');
     } catch (error) {
-      transaction.removeFromCart('approve');
-
       setErrorData({ status: true, message: handleOperationError(error) });
     } finally {
       setIsLoading(false);
@@ -190,7 +180,6 @@ function useApprove({
     walletAddress,
     marketAccount,
     opts,
-    transaction,
     setLoadingButton,
     t,
     operation,

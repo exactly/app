@@ -11,7 +11,6 @@ import useHealthFactor from 'hooks/useHealthFactor';
 import useAccountData from 'hooks/useAccountData';
 import { useWeb3 } from 'hooks/useWeb3';
 import { useTranslation } from 'react-i18next';
-import useAnalytics from 'hooks/useAnalytics';
 import { WEI_PER_ETHER } from 'utils/const';
 
 type Props = {
@@ -23,7 +22,6 @@ function SwitchCollateral({ symbol }: Props) {
   const { marketAccount, refreshAccountData } = useAccountData(symbol);
   const auditor = useAuditor();
   const { chain } = useNetwork();
-  const { transaction } = useAnalytics({ symbol });
   const { chain: displayNetwork, opts } = useWeb3();
 
   const healthFactor = useHealthFactor();
@@ -72,26 +70,21 @@ function SwitchCollateral({ symbol }: Props) {
     let target = !checked;
 
     setLoading(true);
-    const variant = checked ? 'exitMarket' : 'enterMarket';
     try {
-      transaction.addToCart(variant);
       const hash = await (checked
         ? auditor.write.exitMarket([market], opts)
         : auditor.write.enterMarket([market], opts));
-      transaction.beginCheckout(variant);
-      const { status } = await waitForTransaction({ hash });
-      if (status) transaction.purchase(variant);
+      await waitForTransaction({ hash });
 
       await refreshAccountData();
     } catch (error) {
-      transaction.removeFromCart(variant);
       target = checked;
       handleOperationError(error);
     } finally {
       setOptimistic(target);
       setLoading(false);
     }
-  }, [marketAccount, auditor, opts, checked, transaction, refreshAccountData]);
+  }, [marketAccount, auditor, opts, checked, refreshAccountData]);
 
   if (loading) {
     return (

@@ -1,7 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import type { NextPage } from 'next';
 
-import { usePageView } from 'hooks/useAnalytics';
 import { Trans, useTranslation } from 'react-i18next';
 import { Box, Button, Divider, Grid, Skeleton, Typography } from '@mui/material';
 import VestingInput from 'components/VestingInput';
@@ -18,7 +17,6 @@ import { formatEther } from 'viem';
 import { toPercentage } from 'utils/utils';
 
 const Vesting: NextPage = () => {
-  usePageView('/vesting', 'Vesting');
   const { t } = useTranslation();
   const { impersonateActive, chain: displayNetwork, opts } = useWeb3();
   const { chain } = useNetwork();

@@ -24,7 +24,6 @@ import formatNumber from 'utils/formatNumber';
 import ModalInfo from 'components/common/modal/ModalInfo';
 import ModalInfoMaturityStatus from 'components/OperationsModal/Info/ModalInfoMaturityStatus';
 import useHandleOperationError from 'hooks/useHandleOperationError';
-import useAnalytics from 'hooks/useAnalytics';
 import { useTranslation } from 'react-i18next';
 import useTranslateOperation from 'hooks/useTranslateOperation';
 import { WEI_PER_ETHER } from 'utils/const';
@@ -40,7 +39,6 @@ const WithdrawAtMaturity: FC = () => {
 
   const {
     symbol,
-    operation,
     errorData,
     setErrorData,
     qty,
@@ -59,10 +57,6 @@ const WithdrawAtMaturity: FC = () => {
     setRawSlippage,
     slippage,
   } = useOperationContext();
-
-  const { transaction } = useAnalytics({
-    operationInput: useMemo(() => ({ operation, symbol, qty }), [operation, symbol, qty]),
-  });
 
   const handleOperationError = useHandleOperationError();
 
@@ -202,7 +196,6 @@ const WithdrawAtMaturity: FC = () => {
     let hash;
     setIsLoadingOp(true);
     try {
-      transaction.addToCart();
       const amount = parseUnits(qty, marketAccount.decimals);
       if (marketAccount.assetSymbol === 'WETH') {
         if (!ETHRouterContract) return;
@@ -223,17 +216,12 @@ const WithdrawAtMaturity: FC = () => {
         });
       }
 
-      transaction.beginCheckout();
-
       setTx({ status: 'processing', hash });
 
       const { status, transactionHash } = await waitForTransaction({ hash });
 
       setTx({ status: status ? 'success' : 'error', hash: transactionHash });
-
-      if (status) transaction.purchase();
     } catch (error) {
-      transaction.removeFromCart();
       if (hash) setTx({ status: 'error', hash });
       setErrorData({ status: true, message: handleOperationError(error) });
     } finally {
@@ -246,7 +234,6 @@ const WithdrawAtMaturity: FC = () => {
     walletAddress,
     qty,
     setIsLoadingOp,
-    transaction,
     setTx,
     ETHRouterContract,
     minAmountToWithdraw,

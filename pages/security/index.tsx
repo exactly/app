@@ -1,7 +1,6 @@
 import React from 'react';
 import type { NextPage } from 'next';
 
-import { usePageView } from 'hooks/useAnalytics';
 import { useTranslation } from 'react-i18next';
 import { Box, Divider, Typography } from '@mui/material';
 import KeyboardArrowRightRoundedIcon from '@mui/icons-material/KeyboardArrowRightRounded';
@@ -11,7 +10,6 @@ import { useWeb3 } from 'hooks/useWeb3';
 import { optimism } from 'viem/chains';
 
 const Security: NextPage = () => {
-  usePageView('/security', 'Security');
   const { t } = useTranslation();
   const { query } = useRouter();
   const { chain: displayNetwork } = useWeb3();

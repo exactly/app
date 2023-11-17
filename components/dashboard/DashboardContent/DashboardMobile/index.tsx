@@ -1,4 +1,4 @@
-import React, { FC, PropsWithChildren, useEffect } from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { formatUnits } from 'viem';
 
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
@@ -13,7 +13,7 @@ import SwitchCollateral from '../FloatingPoolDashboard/FloatingPoolDashboardTabl
 import APRItem from '../FixedPoolDashboard/FixedPoolDashboardTable/APRItem';
 import useAccountData from 'hooks/useAccountData';
 import { useTranslation } from 'react-i18next';
-import useAnalytics from 'hooks/useAnalytics';
+
 import Rates from 'components/Rates';
 
 type Props = {
@@ -27,22 +27,6 @@ const DashboardMobile: FC<Props> = ({ type }) => {
   const { startDebtManager, isRolloverDisabled } = useStartDebtManagerButton();
   const { floatingRows, fixedRows } = useDashboard(type);
   const isDeposit = type === 'deposit';
-
-  const {
-    list: { viewItemListDashboard },
-  } = useAnalytics();
-
-  useEffect(() => {
-    if (floatingRows?.[0]?.apr) {
-      viewItemListDashboard(floatingRows, 'floating', type);
-    }
-  }, [floatingRows, viewItemListDashboard, type]);
-
-  useEffect(() => {
-    if (fixedRows.length) {
-      viewItemListDashboard(fixedRows, 'fixed', type);
-    }
-  }, [fixedRows, viewItemListDashboard, type]);
 
   return (
     <Box width="100%" display="flex" flexDirection="column" gap={1}>

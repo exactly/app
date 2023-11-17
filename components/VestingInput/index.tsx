@@ -45,9 +45,8 @@ import useIsContract from 'hooks/useIsContract';
 import { gasLimit } from 'utils/gas';
 import { Transaction } from 'types/Transaction';
 import LoadingTransaction from 'components/common/modal/Loading';
-import useAnalytics from 'hooks/useAnalytics';
-import { useModal } from '../../contexts/ModalContext';
 import { track } from '../../utils/segment';
+import { useModal } from '../../contexts/ModalContext';
 
 type Params<T extends ExtractAbiFunctionNames<typeof escrowedExaABI>> = AbiParametersToPrimitiveTypes<
   ExtractAbiFunction<typeof escrowedExaABI, T>['inputs']
@@ -161,7 +160,6 @@ function VestingInput({ refetch }: Props) {
   const { signTypedDataAsync } = useSignTypedData();
   const [isLoading, setIsLoading] = useState(false);
   const [tx, setTx] = useState<Transaction>();
-  const { transaction } = useAnalytics();
   const { open: openGetEXA } = useModal('get-exa');
 
   const [qty, setQty] = useState<string>('');
@@ -245,12 +243,6 @@ function VestingInput({ refetch }: Props) {
     const amount = parseEther(qty);
     const res = (amount * reserveRatio) / WEI_PER_ETHER + 1n;
 
-    const vestInput = {
-      chainId: displayNetwork?.id,
-      amount,
-      reserve: res,
-    };
-    transaction.addToCart('vest', vestInput);
     let hash;
     try {
       let args: Params<'vest'> = [amount, walletAddress, reserveRatio, BigInt(vestingPeriod)] as const;
@@ -275,34 +267,17 @@ function VestingInput({ refetch }: Props) {
         hash = await escrowedEXA.write.vest(args, { ...opts, gasLimit: gasLimit(gas) });
       }
 
-      transaction.beginCheckout('vest', vestInput);
-
       setTx({ status: 'processing', hash });
 
       const { status, transactionHash } = await waitForTransaction({ hash });
 
       setTx({ status: status === 'success' ? 'success' : 'error', hash: transactionHash });
-
-      if (status) transaction.purchase('vest', vestInput);
     } catch (e) {
-      transaction.removeFromCart('vest', vestInput);
       if (hash) setTx({ status: 'error', hash });
     } finally {
       setIsLoading(false);
     }
-  }, [
-    walletAddress,
-    reserveRatio,
-    vestingPeriod,
-    escrowedEXA,
-    exa,
-    opts,
-    qty,
-    displayNetwork?.id,
-    transaction,
-    isContract,
-    sign,
-  ]);
+  }, [walletAddress, reserveRatio, vestingPeriod, escrowedEXA, exa, opts, qty, isContract, sign]);
 
   const setMaxBalance = useCallback(() => {
     if (balance) {

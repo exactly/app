@@ -5,7 +5,6 @@ import { useWeb3 } from './useWeb3';
 import useRewardsController from './useRewardsController';
 import handleOperationError from 'utils/handleOperationError';
 import useAccountData from './useAccountData';
-import useAnalytics from './useAnalytics';
 
 import { AbiParametersToPrimitiveTypes, ExtractAbiFunction } from 'abitype';
 import { previewerABI } from 'types/abi';
@@ -52,8 +51,6 @@ export default () => {
       }, {} as Rewards);
   }, [accountData, getMarketAccount]);
 
-  const { transaction } = useAnalytics({ rewards });
-
   const claimable = useMemo<boolean>(() => {
     return Object.values(rewards).some(({ amount }) => amount > 0n);
   }, [rewards]);
@@ -63,25 +60,21 @@ export default () => {
 
     try {
       setIsLoading(true);
-      transaction.addToCart('claimAll');
       const args = [walletAddress] as const;
       const gas = await controller.estimateGas.claimAll(args, opts);
       const hash = await controller.write.claimAll(args, {
         ...opts,
         gasLimit: gasLimit(gas),
       });
-      transaction.beginCheckout('claimAll');
-      const { status } = await waitForTransaction({ hash });
-      if (status) transaction.purchase('claimAll');
+      await waitForTransaction({ hash });
 
       await refreshAccountData();
     } catch (e) {
-      transaction.removeFromCart('claimAll');
       handleOperationError(e);
     } finally {
       setIsLoading(false);
     }
-  }, [claimable, controller, walletAddress, transaction, refreshAccountData, opts]);
+  }, [claimable, controller, walletAddress, refreshAccountData, opts]);
 
   const rates = useMemo<Rates>(() => {
     if (!accountData) return {};
@@ -125,28 +118,24 @@ export default () => {
           return;
         }
 
-        transaction.addToCart('claim');
         const args = [marketOps, to, tokens] as const;
         const gas = await controller.estimateGas.claim(args, opts);
         const hash = await controller.write.claim(args, {
           ...opts,
           gasLimit: gasLimit(gas),
         });
-        transaction.beginCheckout('claim');
         setTx && setTx({ hash, status: 'loading' });
         const { status } = await waitForTransaction({ hash });
         setTx && setTx({ hash, status: status ? 'success' : 'error' });
-        if (status) transaction.purchase('claim');
 
         await refreshAccountData();
       } catch (e) {
-        transaction.removeFromCart('claim');
         handleOperationError(e);
       } finally {
         setIsLoading(false);
       }
     },
-    [controller, isConnected, opts, refreshAccountData, rewards, transaction, walletAddress],
+    [controller, isConnected, opts, refreshAccountData, rewards, walletAddress],
   );
 
   return { rewards, rates, claimable, claim, claimAll, isLoading };

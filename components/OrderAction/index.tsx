@@ -1,11 +1,10 @@
-import React, { FC, MouseEvent, useCallback, useEffect } from 'react';
+import React, { FC, MouseEvent, useCallback } from 'react';
 import Button from '@mui/material/Button';
 import Box from '@mui/system/Box';
 import { useTranslation } from 'react-i18next';
 
 import useActionButton from 'hooks/useActionButton';
 import useAccountData from 'hooks/useAccountData';
-import useAnalytics from 'hooks/useAnalytics';
 import { track } from '../../utils/segment';
 
 type Props = {
@@ -16,14 +15,6 @@ const OrderAction: FC<Props> = ({ symbol }) => {
   const { t } = useTranslation();
   const { marketAccount } = useAccountData(symbol);
   const { handleActionClick } = useActionButton();
-
-  const {
-    list: { viewItemListAdvance },
-  } = useAnalytics({ symbol });
-
-  useEffect(() => {
-    viewItemListAdvance([{ symbol }], 'floating');
-  }, [symbol, viewItemListAdvance]);
 
   const handleDepositButtonClick = useCallback(
     (e: MouseEvent<HTMLButtonElement>) => {

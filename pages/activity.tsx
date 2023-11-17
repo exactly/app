@@ -9,7 +9,6 @@ import { goerli, mainnet, optimism } from 'wagmi/chains';
 
 import { defaultChain } from 'utils/client';
 import Feed from 'components/RiskFeed/Feed';
-import { usePageView } from 'hooks/useAnalytics';
 import { Contracts } from 'components/RiskFeed/Decode';
 
 type Props = {
@@ -24,7 +23,6 @@ const multisigs: Record<number, Address> = {
 const multisig = multisigs[defaultChain.id];
 
 const Activity = ({ contracts }: Props) => {
-  usePageView('/activity', 'Activity');
   const { t } = useTranslation();
 
   return (

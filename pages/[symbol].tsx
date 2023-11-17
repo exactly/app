@@ -9,7 +9,6 @@ import AssetHeaderInfo from 'components/asset/Header';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { Box, IconButton, Tooltip, Typography, Grid } from '@mui/material';
 import Link from 'next/link';
-import { usePageView } from 'hooks/useAnalytics';
 import useRouter from 'hooks/useRouter';
 import { useTranslation } from 'react-i18next';
 
@@ -20,8 +19,6 @@ type Props = {
 const Market: NextPage<Props> = ({ symbol }: Props) => {
   const { t } = useTranslation();
   const { query } = useRouter();
-
-  usePageView(`/${symbol}`, `${symbol} Asset Page`);
 
   return (
     <Grid container mt={-1}>

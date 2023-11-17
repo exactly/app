@@ -8,7 +8,6 @@ import usePreviewer from 'hooks/usePreviewer';
 import { useWeb3 } from 'hooks/useWeb3';
 import { useTranslation } from 'react-i18next';
 import { OperationHook } from 'types/OperationHook';
-import useAnalytics from './useAnalytics';
 import { WEI_PER_ETHER } from 'utils/const';
 import { CustomError } from 'types/Error';
 import useEstimateGas from './useEstimateGas';
@@ -34,7 +33,6 @@ export default (): DepositAtMaturity => {
 
   const {
     symbol,
-    operation,
     setErrorData,
     qty,
     setQty,
@@ -52,10 +50,6 @@ export default (): DepositAtMaturity => {
     slippage,
     setErrorButton,
   } = useOperationContext();
-
-  const { transaction } = useAnalytics({
-    operationInput: useMemo(() => ({ operation, symbol, qty }), [operation, symbol, qty]),
-  });
 
   const { marketAccount } = useAccountData(symbol);
 
@@ -176,7 +170,6 @@ export default (): DepositAtMaturity => {
     let hash;
     setIsLoadingOp(true);
     try {
-      transaction.addToCart();
       const amount = parseUnits(qty, marketAccount.decimals);
       const minAmount = (amount * slippage) / WEI_PER_ETHER;
       if (marketAccount.assetSymbol === 'WETH') {
@@ -213,7 +206,6 @@ export default (): DepositAtMaturity => {
         });
       }
 
-      transaction.beginCheckout();
       setTx({ status: 'processing', hash });
 
       const { status, transactionHash } = await waitForTransaction({ hash });
@@ -225,10 +217,7 @@ export default (): DepositAtMaturity => {
       });
 
       setTx({ status: status ? 'success' : 'error', hash: transactionHash });
-
-      if (status) transaction.purchase();
     } catch (error) {
-      transaction.removeFromCart();
       if (hash) setTx({ status: 'error', hash });
       setErrorData({ status: true, message: handleOperationError(error) });
     } finally {
@@ -243,7 +232,6 @@ export default (): DepositAtMaturity => {
     walletAddress,
     opts,
     setIsLoadingOp,
-    transaction,
     slippage,
     setTx,
     setErrorData,
