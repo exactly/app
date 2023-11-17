@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import useRouter from 'hooks/useRouter';
 import { useTranslation } from 'react-i18next';
+import { track } from '../../utils/segment';
 
 const NEWS_READ_KEY = 'news_read';
 
@@ -92,6 +93,9 @@ const NewsModal = () => {
   const closeModal = useCallback(() => {
     markNewsAsRead(readIds);
     setOpen(false);
+    track('Modal Closed', {
+      name: 'news',
+    });
   }, [markNewsAsRead, readIds]);
 
   const selectedNews = useMemo(() => filteredNews[selected], [filteredNews, selected]);

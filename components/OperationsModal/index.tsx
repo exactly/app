@@ -81,7 +81,7 @@ function OperationsModal({ isOpen, close }: Props) {
   useDelayedEffect({ effect: viewEffect });
 
   const handleCloseButtonClick = useCallback(() => {
-    track('Icon Clicked', {
+    track('Button Clicked', {
       location: 'Operations Modal',
       icon: 'Close',
       name: 'close',
@@ -89,10 +89,19 @@ function OperationsModal({ isOpen, close }: Props) {
     close();
   }, [close]);
 
+  const handleClose = useCallback(() => {
+    if (loadingTx) return;
+    close();
+    track('Modal Closed', {
+      name: 'operations',
+      operation,
+    });
+  }, [close, loadingTx, operation]);
+
   return (
     <Dialog
       open={isOpen}
-      onClose={loadingTx ? undefined : close}
+      onClose={handleClose}
       PaperComponent={isMobile ? undefined : PaperComponent}
       TransitionComponent={isMobile ? Transition : undefined}
       fullScreen={isMobile}

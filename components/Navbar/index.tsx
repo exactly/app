@@ -144,7 +144,7 @@ function Navbar() {
 
   const handleMenuIconClick = useCallback(() => {
     setOpenMenu(true);
-    track('Icon Clicked', {
+    track('Button Clicked', {
       location: 'Navbar',
       icon: 'Menu',
       name: 'mobile menu',

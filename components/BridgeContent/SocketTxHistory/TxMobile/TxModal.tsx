@@ -1,4 +1,4 @@
-import React, { ReactElement, Ref, forwardRef, memo } from 'react';
+import React, { ReactElement, Ref, forwardRef, memo, useCallback } from 'react';
 
 import Image from 'next/image';
 import Link from 'next/link';
@@ -11,6 +11,7 @@ import { TransitionProps } from '@mui/material/transitions';
 import i18n from 'i18n';
 import dayjs from 'dayjs';
 import { useTranslation } from 'react-i18next';
+import { track } from '../../../../utils/segment';
 
 type Props = {
   open: boolean;
@@ -42,8 +43,16 @@ const TxModal = ({
 }: Props) => {
   const { t } = useTranslation();
 
+  const handleClose = useCallback(() => {
+    closeModal();
+    track('Modal Closed', {
+      name: 'tx modal ',
+      location: 'Socket TX History',
+    });
+  }, [closeModal]);
+
   return (
-    <Dialog open={open} onClose={closeModal} fullScreen TransitionComponent={Transition} sx={{ top: 'auto' }}>
+    <Dialog open={open} onClose={handleClose} fullScreen TransitionComponent={Transition} sx={{ top: 'auto' }}>
       <IconButton
         aria-label="close"
         onClick={closeModal}

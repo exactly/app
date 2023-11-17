@@ -190,9 +190,10 @@ export default (): DepositAtMaturity => {
           value: amount,
           gasLimit: gasLimit(gasEstimation),
         });
-        track('Wallet Signed TX', {
+        track('TX Signed', {
           contractName: 'ETHRouter',
           method: 'depositAtMaturity',
+          hash,
           symbol,
           qty,
         });
@@ -203,7 +204,7 @@ export default (): DepositAtMaturity => {
           ...opts,
           gasLimit: gasLimit(gasEstimation),
         });
-        track('Wallet Signed TX', {
+        track('TX Signed', {
           contractName: 'Market',
           method: 'depositAtMaturity',
           symbol,

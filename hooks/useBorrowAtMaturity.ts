@@ -220,11 +220,12 @@ export default (): BorrowAtMaturity => {
           ...opts,
           gasLimit: gasLimit(gasEstimation),
         });
-        track('Wallet Signed TX', {
+        track('TX Signed', {
           contractName: 'ETHRouter',
           method: 'borrowAtMaturity',
           symbol,
           qty,
+          hash,
         });
       } else {
         if (!marketContract) return;
@@ -237,7 +238,7 @@ export default (): BorrowAtMaturity => {
           ...opts,
           gasLimit: gasLimit(gasEstimation),
         });
-        track('Wallet Signed TX', {
+        track('TX Signed', {
           contractName: 'Market',
           method: 'borrowAtMaturity',
           symbol,

@@ -151,12 +151,13 @@ function useApprove({
           break;
         }
       }
-      track('Wallet Signed TX', {
+      track('TX Signed', {
         operation,
+        hash,
         method: 'approve',
         contractName: 'Market',
         spender,
-        quantity: Number(quantity),
+        qty: Number(quantity),
       });
 
       if (!hash) return;

@@ -44,7 +44,7 @@ function TypeSwitch() {
 
   const toggle = useCallback(() => {
     const op = isFixedOperation(operation) ? operation.replaceAll('AtMaturity', '') : `${operation}AtMaturity`;
-    track('Toggle Clicked', {
+    track('Option Selected', {
       location: 'Operations Modal',
       name: 'type switch',
       prevValue: operation,

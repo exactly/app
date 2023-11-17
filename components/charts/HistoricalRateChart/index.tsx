@@ -45,11 +45,12 @@ const HistoricalRateChart: FC<Props> = ({ symbol }) => {
 
   const onShowUtilizationChange = useCallback(() => {
     setShowUtilization((prev) => !prev);
-    track('Toggle Clicked', {
+    track('Option Selected', {
       name: 'show utilization',
       location: 'Historical Rate Chart',
       symbol,
       value: !showUtilization,
+      prevValue: showUtilization,
     });
   }, [showUtilization, symbol]);
 

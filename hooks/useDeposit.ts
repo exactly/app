@@ -145,9 +145,10 @@ export default (): Deposit => {
           value: amount,
           gasLimit: gasLimit(gasEstimation),
         });
-        track('Wallet Signed TX', {
+        track('TX Signed', {
           contractName: 'ETHRouter',
           method: 'deposit',
+          hash,
           symbol,
           qty,
         });
@@ -159,7 +160,7 @@ export default (): Deposit => {
           ...opts,
           gasLimit: gasLimit(gasEstimation),
         });
-        track('Wallet Signed TX', {
+        track('TX Signed', {
           contractName: 'Market',
           method: 'deposit',
           symbol,

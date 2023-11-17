@@ -1,4 +1,4 @@
-import React, { forwardRef, ReactElement, Ref, useMemo, useRef } from 'react';
+import React, { forwardRef, ReactElement, Ref, useCallback, useMemo, useRef } from 'react';
 import {
   Box,
   Dialog,
@@ -21,6 +21,7 @@ import { LeveragerContextProvider, useLeveragerContext } from 'contexts/Leverage
 import Operation from '../Operation';
 import Summary from '../Summary';
 import { useModal } from 'contexts/ModalContext';
+import { track } from '../../../utils/segment';
 
 function PaperComponent(props: PaperProps | undefined) {
   const ref = useRef<HTMLDivElement>(null);
@@ -51,12 +52,19 @@ function LeveragerModal({ isOpen, close }: Props) {
   const { breakpoints, spacing, palette } = useTheme();
   const isMobile = useMediaQuery(breakpoints.down('sm'));
   const loadingTx = useMemo(() => tx && (tx.status === 'loading' || tx.status === 'processing'), [tx]);
+  const handleClose = useCallback(() => {
+    if (loadingTx) return;
+    close();
+    track('Modal Closed', {
+      name: 'leverager',
+    });
+  }, [close, loadingTx]);
 
   return (
     <Dialog
       data-testid="leverage-modal"
       open={isOpen}
-      onClose={loadingTx ? undefined : close}
+      onClose={handleClose}
       PaperComponent={isMobile ? undefined : PaperComponent}
       PaperProps={{
         sx: {

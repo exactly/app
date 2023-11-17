@@ -16,7 +16,7 @@ const CopyToClipboardButton: FC<Props> = ({ text, sx }) => {
   const handleClick = useCallback(() => {
     setCopied(true);
     void navigator.clipboard.writeText(text);
-    track('Icon Clicked', {
+    track('Button Clicked', {
       icon: 'Copy',
       location: 'Navbar',
       name: 'copy address',

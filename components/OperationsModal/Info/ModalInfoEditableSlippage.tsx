@@ -23,7 +23,7 @@ function ModalInfoEditableSlippage({ value, onChange }: Props) {
   const [editable, setEditable] = useState(false);
   const blockedCharacters = ['e', 'E', '+', '-', ','];
   const handleClick = useCallback(() => {
-    track('Icon Clicked', {
+    track('Button Clicked', {
       location: 'Operations Modal',
       icon: 'Edit',
       name: 'edit slippage',

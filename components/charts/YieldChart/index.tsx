@@ -53,11 +53,12 @@ const YieldChart: FC<Props> = ({ symbol }) => {
 
   const onShowComparisonChange = useCallback(() => {
     setShowComparison((prev) => !prev);
-    track('Toggle Clicked', {
+    track('Option Selected', {
       location: 'Yield Chart',
       name: 'show comparison',
       symbol,
       value: !showComparison,
+      prevValue: showComparison,
     });
   }, [showComparison, symbol]);
 

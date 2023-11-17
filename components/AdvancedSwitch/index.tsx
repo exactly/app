@@ -16,7 +16,7 @@ const AdvancedViewSwitch: FC<Props> = ({ sx, fontSize = 14 }) => {
 
   const handleChange = useCallback(() => {
     const value = view === 'advanced' ? 'simple' : 'advanced';
-    track('Toggle Clicked', {
+    track('Option Selected', {
       name: 'advanced View',
       location: 'Settings',
       value,

@@ -210,7 +210,7 @@ function Wallet() {
               href={{ pathname: 'revoke', query }}
               legacyBehavior
               onClick={() =>
-                track('Link Clicked', {
+                track('Button Clicked', {
                   href: '/revoke',
                   location: 'Wallet',
                   name: 'manage allowances',

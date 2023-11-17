@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import CloseIcon from '@mui/icons-material/Close';
 import { Dialog, useTheme, IconButton, DialogTitle, DialogContent, Typography, Box } from '@mui/material';
 import { useTranslation } from 'react-i18next';
@@ -7,6 +7,7 @@ import { goerli } from 'wagmi/chains';
 import Faucet from './';
 import { useModal } from 'contexts/ModalContext';
 import { useWeb3 } from 'hooks/useWeb3';
+import { track } from '../../../utils/segment';
 
 type Props = {
   isOpen: boolean;
@@ -16,9 +17,15 @@ type Props = {
 function Modal({ isOpen, onClose }: Props) {
   const { t } = useTranslation();
   const { palette, spacing } = useTheme();
+  const handleClose = useCallback(() => {
+    onClose();
+    track('Modal Closed', {
+      name: 'faucet',
+    });
+  }, [onClose]);
 
   return (
-    <Dialog open={isOpen} onClose={onClose}>
+    <Dialog open={isOpen} onClose={handleClose}>
       <IconButton
         aria-label="close"
         onClick={onClose}

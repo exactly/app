@@ -23,7 +23,7 @@ const ButtonsChart: FC<Props> = ({ buttons, defaultSelected }) => {
     track('Button Clicked', {
       location: 'Chart',
       name: 'chart',
-      label: buttons[index].label,
+      text: buttons[index].label,
     });
   };
 

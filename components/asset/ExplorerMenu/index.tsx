@@ -95,7 +95,7 @@ const ExplorerMenu: FC<Props> = ({ symbol, assetAddress, eMarketAddress, rateMod
         <a
           href={address(assetAddress)}
           onClick={() =>
-            track('Link Clicked', {
+            track('Button Clicked', {
               href: address(assetAddress),
               name: 'view asset contract',
               location: 'Explorer Menu',
@@ -123,7 +123,7 @@ const ExplorerMenu: FC<Props> = ({ symbol, assetAddress, eMarketAddress, rateMod
         <a
           href={address(eMarketAddress)}
           onClick={() =>
-            track('Link Clicked', {
+            track('Button Clicked', {
               href: address(eMarketAddress),
               name: 'view market contract',
               location: 'Explorer Menu',
@@ -151,7 +151,7 @@ const ExplorerMenu: FC<Props> = ({ symbol, assetAddress, eMarketAddress, rateMod
         <a
           href={address(rateModelAddress)}
           onClick={() => {
-            track('Link Clicked', {
+            track('Button Clicked', {
               href: address(rateModelAddress),
               name: 'view interest rate model contract',
               location: 'Explorer Menu',

@@ -32,6 +32,7 @@ import { useSablierV2LockupLinearWithdrawableAmountOf, useSablierV2NftDescriptor
 import Draggable from 'react-draggable';
 import CloseIcon from '@mui/icons-material/Close';
 import { TransitionProps } from '@mui/material/transitions';
+import { track } from '../../utils/segment';
 
 const StyledLinearProgress = styled(LinearProgress, {
   shouldForwardProp: (prop) => prop !== 'barColor',
@@ -108,12 +109,19 @@ const NFT: React.FC<{ tokenId: number; open: boolean; onClose: () => void }> = (
   const b64 = nft?.split(',')[1] ?? '';
   const json = atob(b64) || '{}';
   const { image, name } = JSON.parse(json);
+  const handleClose = useCallback(() => {
+    onClose();
+    track('Modal Closed', {
+      name: 'nft',
+      location: 'Active Stream',
+    });
+  }, [onClose]);
 
   return (
     <Dialog
       data-testid="vesting-vest-modal"
       open={open}
-      onClose={onClose}
+      onClose={handleClose}
       PaperComponent={PaperComponent}
       PaperProps={{
         sx: {
@@ -173,11 +181,20 @@ const WithdrawAndCancel: React.FC<{
 
   const { breakpoints } = useTheme();
   const isMobile = useMediaQuery(breakpoints.down('sm'));
+
+  const handleClose = useCallback(() => {
+    onClose();
+    track('Modal Closed', {
+      name: 'withdraw and cancel',
+      location: 'Active Stream',
+    });
+  }, [onClose]);
+
   return (
     <Dialog
       data-testid="vesting-vest-modal"
       open={open}
-      onClose={onClose}
+      onClose={handleClose}
       PaperComponent={PaperComponent}
       PaperProps={{
         sx: {

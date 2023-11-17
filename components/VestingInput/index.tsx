@@ -47,6 +47,7 @@ import { Transaction } from 'types/Transaction';
 import LoadingTransaction from 'components/common/modal/Loading';
 import useAnalytics from 'hooks/useAnalytics';
 import { useModal } from '../../contexts/ModalContext';
+import { track } from '../../utils/segment';
 
 type Params<T extends ExtractAbiFunctionNames<typeof escrowedExaABI>> = AbiParametersToPrimitiveTypes<
   ExtractAbiFunction<typeof escrowedExaABI, T>['inputs']
@@ -76,11 +77,19 @@ function LoadingModal({ tx, onClose }: { tx: Transaction; onClose: () => void })
   const isMobile = useMediaQuery(breakpoints.down('sm'));
   const loadingTx = useMemo(() => tx && (tx.status === 'loading' || tx.status === 'processing'), [tx]);
 
+  const handleClose = useCallback(() => {
+    if (loadingTx) return;
+    onClose();
+    track('Modal Closed', {
+      name: 'vest',
+    });
+  }, [loadingTx, onClose]);
+
   return (
     <Dialog
       data-testid="vesting-vest-modal"
       open={!!tx}
-      onClose={loadingTx ? undefined : onClose}
+      onClose={handleClose}
       PaperComponent={isMobile ? undefined : PaperComponent}
       PaperProps={{
         sx: {

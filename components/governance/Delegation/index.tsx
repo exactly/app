@@ -27,6 +27,7 @@ import * as blockies from 'blockies-ts';
 import { useDelegation, usePrepareClearDelegate, usePrepareDelegate } from 'hooks/useDelegateRegistry';
 import formatNumber from 'utils/formatNumber';
 import useGovernance from 'hooks/useGovernance';
+import { track } from '../../../utils/segment';
 
 const Delegation = () => {
   const { votingPower: yourVotes } = useGovernance(false);
@@ -219,11 +220,18 @@ const DelegateInputDialog: FC<DelegateInputDialogProps> = ({
   const { t } = useTranslation();
   const { breakpoints } = useTheme();
   const isMobile = useMediaQuery(breakpoints.down('md'));
+  const handleClose = useCallback(() => {
+    onClose();
+    track('Modal Closed', {
+      name: 'delegation',
+      location: 'Governance',
+    });
+  }, [onClose]);
 
   return (
     <Dialog
       open={open}
-      onClose={onClose}
+      onClose={handleClose}
       maxWidth="xs"
       PaperProps={{ sx: { borderRadius: { xs: '0px', md: '16px' } } }}
       TransitionComponent={Slide}

@@ -124,10 +124,13 @@ const RewardsModal: FC<RewardsModalProps> = ({ isOpen, close }) => {
     setSelected(Object.fromEntries(Object.keys(rs).map((k) => [k, true])));
     setInput('');
     setTx(undefined);
-    track('Icon Clicked', {
+    track('Button Clicked', {
       icon: 'Close',
       location: 'Rewards',
       name: 'close',
+    });
+    track('Modal Closed', {
+      name: 'rewards',
     });
   }, [close, rs]);
 
@@ -139,7 +142,7 @@ const RewardsModal: FC<RewardsModalProps> = ({ isOpen, close }) => {
   const handleSecondaryClaim = useCallback(
     (event: MouseEvent<HTMLButtonElement>) => {
       setShowInput(!showInput);
-      track('Link Clicked', {
+      track('Button Clicked', {
         href: '',
         location: 'Rewards',
         name: showInput ? 'claim to connected wallet' : 'claim to a different address',

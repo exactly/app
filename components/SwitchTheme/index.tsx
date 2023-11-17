@@ -47,7 +47,7 @@ const SwitchTheme: FC<Props> = (props) => {
     (e: ChangeEvent<HTMLInputElement>): void => {
       const light = e.target.checked;
       const value = light ? 'light' : 'dark';
-      track('Toggle Clicked', {
+      track('Option Selected', {
         name: 'theme',
         location: 'Settings',
         value,

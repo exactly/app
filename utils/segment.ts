@@ -1,77 +1,61 @@
 import { AnalyticsBrowser } from '@segment/analytics-next';
 import { Address } from 'abitype';
-import { Hash } from 'viem';
+import { Hash, TransactionReceipt } from 'viem';
+import { Transaction } from '../types/Transaction';
 
-type TrackEvent =
-  | {
-      name: 'Button Clicked';
-      properties: {
-        name: string;
-        location: string;
-      };
-    }
-  | {
-      name: 'Icon Clicked';
-      properties: {
-        icon: 'Close' | 'Edit' | 'Settings' | 'Copy' | 'Menu';
-        name: string;
-        location: string;
-      };
-    }
-  | {
-      name: 'Link Clicked';
-      properties: {
-        name: string;
-        location: string;
-        href: string;
-      };
-    }
-  | {
-      name: 'Page Viewed';
-      properties: {
-        name: string;
-      };
-    }
-  | {
-      name: 'Toggle Clicked';
-      properties: {
-        name: string;
-        location: string;
-        value: unknown;
-      };
-    }
-  | {
-      name: 'Option Selected';
-      properties: {
-        name: string;
-        location: string;
-        value: string;
-        prevValue?: string;
-      };
-    }
-  | {
-      name: 'Wallet Connected';
-      properties: {
-        connectorName?: string;
-        connectorId?: string;
-      };
-    }
-  | {
-      name: 'Wallet Signed TX';
-      properties: {
-        contractName: string;
-        method: string;
-      };
-    }
-  | {
-      name: 'TX Completed';
-      properties: {
-        symbol: string;
-        qty: string;
-        status: 'success' | 'reverted';
-        hash: Hash;
-      };
-    };
+type Stringifiable = string | number | null | boolean;
+
+type TrackEvent = {
+  'Page Viewed': {
+    name: string;
+  };
+  'Button Clicked': {
+    name: string;
+    location: string;
+    icon?: 'Close' | 'Edit' | 'Settings' | 'Copy' | 'Menu';
+    href?: string;
+  };
+  'Option Selected': {
+    name: string;
+    location: string;
+    value: Stringifiable;
+    prevValue: Stringifiable | undefined;
+  };
+  'Modal Closed': {
+    name: string;
+    location?: string;
+  };
+  'Wallet Connected': {
+    connectorName?: string;
+    connectorId?: string;
+  };
+  'TX Signed': {
+    contractName: string;
+    method: string;
+    hash: Hash;
+  };
+  'TX Completed': {
+    status: TransactionReceipt['status'];
+    hash: Hash;
+  };
+};
+
+type ExtraContext = {
+  symbol: string;
+  maturity: number;
+  text: string;
+  value: Stringifiable;
+  prevValue: Stringifiable;
+  operation: string;
+  bestOption: Stringifiable;
+  isBestOption: boolean;
+  status: TransactionReceipt['status'] | Transaction['status'];
+  to: Address;
+  chainId: number;
+  impersonateActive: boolean;
+  spender: Address;
+  qty: string | number;
+};
 
 const analyticsApiKey = process.env.NEXT_PUBLIC_SEGMENT_WRITE_KEY || '';
 
@@ -80,10 +64,9 @@ export function getAnalytics() {
   return analytics;
 }
 
-export function track<Name extends TrackEvent['name']>(
+export function track<Name extends keyof TrackEvent>(
   name: Name,
-  properties: Extract<TrackEvent, { name: Name }>['properties'] &
-    Record<string, string | number | undefined | null | boolean>,
+  properties: TrackEvent[Name] & Partial<ExtraContext>,
 ): void {
   try {
     const analytics = getAnalytics();
@@ -91,7 +74,7 @@ export function track<Name extends TrackEvent['name']>(
       return;
     }
     analytics.track(name, properties);
-  } catch (error) {
+  } catch {
     // probably, analytics not enabled, or other issue sending the report
   }
 }

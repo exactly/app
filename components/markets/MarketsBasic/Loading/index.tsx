@@ -1,4 +1,4 @@
-import React, { forwardRef, ReactElement, Ref, useMemo, useRef } from 'react';
+import React, { forwardRef, ReactElement, Ref, useCallback, useMemo, useRef } from 'react';
 
 import {
   Box,
@@ -18,6 +18,7 @@ import { TransitionProps } from '@mui/material/transitions';
 import { useOperationContext } from 'contexts/OperationContext';
 import ModalGif from 'components/OperationsModal/ModalGif';
 import { Transaction } from 'types/Transaction';
+import { track } from '../../../../utils/segment';
 
 function PaperComponent(props: PaperProps | undefined) {
   const { tx } = useOperationContext();
@@ -60,11 +61,19 @@ export default function Loading({ isOpen, tx, close }: Props) {
   const { breakpoints, spacing, palette } = useTheme();
   const isMobile = useMediaQuery(breakpoints.down('sm'));
   const loadingTx = useMemo(() => tx && (tx.status === 'loading' || tx.status === 'processing'), [tx]);
+  const handleClose = useCallback(() => {
+    if (loadingTx) return;
+    close();
+    track('Modal Closed', {
+      name: 'loading',
+      location: 'Markets Basic',
+    });
+  }, [close, loadingTx]);
 
   return (
     <Dialog
       open={isOpen}
-      onClose={loadingTx ? undefined : close}
+      onClose={handleClose}
       PaperComponent={isMobile ? undefined : PaperComponent}
       TransitionComponent={isMobile ? Transition : undefined}
       fullScreen={isMobile}

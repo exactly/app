@@ -13,7 +13,7 @@ const Settings = () => {
 
   const open = Boolean(anchorEl);
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    track('Icon Clicked', {
+    track('Button Clicked', {
       icon: 'Settings',
       location: 'Navbar',
       name: 'settings',

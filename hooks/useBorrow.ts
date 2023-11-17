@@ -210,10 +210,11 @@ export default (): Borrow => {
           ...opts,
           gasLimit: gasLimit(gasEstimation),
         });
-        track('Wallet Signed TX', {
+        track('TX Signed', {
           contractName: 'ETHRouter',
           method: 'borrow',
           symbol,
+          hash,
           qty,
         });
       } else {
@@ -226,7 +227,7 @@ export default (): Borrow => {
           ...opts,
           gasLimit: gasLimit(gasEstimation),
         });
-        track('Wallet Signed TX', {
+        track('TX Signed', {
           contractName: 'Market',
           method: 'borrow',
           symbol,

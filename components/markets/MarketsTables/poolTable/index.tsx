@@ -53,7 +53,7 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
   const tempRows = isLoading ? defaultRows : rows;
 
   const trackRowClick = useCallback((symbol: string) => {
-    track('Link Clicked', {
+    track('Button Clicked', {
       href: `/${symbol}`,
       name: 'market',
       symbol,
@@ -63,15 +63,15 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
 
   const handleDepositClick = useCallback(
     (e: MouseEvent<HTMLButtonElement>, symbol: string, depositMaturity?: bigint): void => {
-      const action = rateType === 'floating' ? 'deposit' : 'depositAtMaturity';
+      const operation = rateType === 'floating' ? 'deposit' : 'depositAtMaturity';
       track('Button Clicked', {
         location: 'Markets',
         name: 'deposit',
-        action,
+        operation,
         symbol,
         maturity: Number(depositMaturity),
       });
-      handleActionClick(e, rateType === 'floating' ? 'deposit' : 'depositAtMaturity', symbol, depositMaturity);
+      handleActionClick(e, operation, symbol, depositMaturity);
     },
     [handleActionClick, rateType],
   );
@@ -80,7 +80,7 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
     track('Button Clicked', {
       location: 'Markets',
       name: 'borrow',
-      action,
+      operation: action,
       symbol,
       maturity: Number(borrowMaturity),
     });
