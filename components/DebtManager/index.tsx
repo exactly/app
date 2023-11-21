@@ -20,7 +20,7 @@ import { useTranslation } from 'react-i18next';
 import { DebtManagerContextProvider, useDebtManagerContext } from 'contexts/DebtManagerContext';
 import Operation from './Operation';
 import { useModal } from 'contexts/ModalContext';
-import { track } from '../../utils/segment';
+import { track } from 'utils/segment';
 
 function PaperComponent(props: PaperProps | undefined) {
   const ref = useRef<HTMLDivElement>(null);

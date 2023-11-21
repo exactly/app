@@ -1,6 +1,6 @@
 import { Box, Button, Typography, useTheme } from '@mui/material';
 import React, { FC, useState } from 'react';
-import { track } from '../../../utils/segment';
+import { track } from 'utils/segment';
 
 type Props = {
   buttons: ButtonChart[];

@@ -6,7 +6,7 @@ import { atcb_action } from 'add-to-calendar-button';
 import parseTimestamp from 'utils/parseTimestamp';
 import useTranslateOperation from 'hooks/useTranslateOperation';
 import type { Operation } from 'types/Operation';
-import { track } from '../../utils/segment';
+import { track } from 'utils/segment';
 
 type Props = {
   operation: Operation;

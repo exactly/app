@@ -22,7 +22,7 @@ import { TransitionProps } from '@mui/material/transitions';
 import { OperationContextProvider, useOperationContext } from 'contexts/OperationContext';
 import useTranslateOperation from 'hooks/useTranslateOperation';
 import { useModal } from 'contexts/ModalContext';
-import { track } from '../../utils/segment';
+import { track } from 'utils/segment';
 
 function PaperComponent(props: PaperProps | undefined) {
   const { tx } = useOperationContext();

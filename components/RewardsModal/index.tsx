@@ -39,7 +39,7 @@ import { useWeb3 } from 'hooks/useWeb3';
 import { useNetwork, useSwitchNetwork } from 'wagmi';
 import RewardsTooltip from 'components/RewardsTooltip';
 import { useModal } from 'contexts/ModalContext';
-import { track } from '../../utils/segment';
+import { track } from 'utils/segment';
 
 function PaperComponent(props: PaperProps | undefined) {
   const ref = useRef<HTMLDivElement>(null);

@@ -63,7 +63,7 @@ import usePermit2 from 'hooks/usePermit2';
 import useDelayedEffect from 'hooks/useDelayedEffect';
 import { gasLimit } from 'utils/gas';
 import { useModal } from 'contexts/ModalContext';
-import { track } from '../../utils/segment';
+import { track } from 'utils/segment';
 
 const MIN_SUPPLY = parseEther('0.002');
 const PROTO_STAKER_DOCS = 'https://docs.exact.ly/guides/periphery/proto-staker';

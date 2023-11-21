@@ -2,7 +2,7 @@ import React, { FC, useCallback, useState } from 'react';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { IconButton, SxProps, Theme, Tooltip } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { track } from '../../../utils/segment';
+import { track } from 'utils/segment';
 
 type Props = {
   text: string;

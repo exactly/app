@@ -3,7 +3,7 @@ import { Button, Grid, Box, Typography, type GridProps } from '@mui/material';
 import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownRounded';
 import KeyboardArrowRightRoundedIcon from '@mui/icons-material/KeyboardArrowRightRounded';
 import { useTranslation } from 'react-i18next';
-import { track } from '../../../../utils/segment';
+import { track } from 'utils/segment';
 
 type Props = {
   bgColor?: string;

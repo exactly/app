@@ -7,7 +7,7 @@ import ModalInfo from 'components/common/modal/ModalInfo';
 import { useTranslation } from 'react-i18next';
 import { useOperationContext } from 'contexts/OperationContext';
 import getHourUTC2Local from 'utils/getHourUTC2Local';
-import { track } from '../../../utils/segment';
+import { track } from 'utils/segment';
 
 type DateOptionProps = {
   label: string;

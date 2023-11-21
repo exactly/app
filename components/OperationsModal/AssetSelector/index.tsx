@@ -5,7 +5,7 @@ import DropdownMenu from 'components/DropdownMenu';
 import useAssets from 'hooks/useAssets';
 import AssetOption from 'components/asset/AssetOption';
 import { useOperationContext } from 'contexts/OperationContext';
-import { track } from '../../../utils/segment';
+import { track } from 'utils/segment';
 
 function AssetSelector() {
   const { t } = useTranslation();

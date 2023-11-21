@@ -3,7 +3,7 @@ import { styled } from '@mui/material/styles';
 import Switch, { type Props } from 'components/Switch';
 import { useCustomTheme } from 'contexts/ThemeContext';
 import { useWeb3ModalTheme } from '@web3modal/wagmi/react';
-import { track } from '../../utils/segment';
+import { track } from 'utils/segment';
 
 const StyledSwitch = styled((props: Props) => (
   <Switch focusVisibleClassName=".Mui-focusVisible" disableRipple {...props} />

@@ -27,7 +27,7 @@ import * as blockies from 'blockies-ts';
 import { useDelegation, usePrepareClearDelegate, usePrepareDelegate } from 'hooks/useDelegateRegistry';
 import formatNumber from 'utils/formatNumber';
 import useGovernance from 'hooks/useGovernance';
-import { track } from '../../../utils/segment';
+import { track } from 'utils/segment';
 
 const Delegation = () => {
   const { votingPower: yourVotes } = useGovernance(false);

@@ -6,7 +6,7 @@ import LinkIcon from '@mui/icons-material/Link';
 import { useTranslation } from 'react-i18next';
 import useEtherscanLink from 'hooks/useEtherscanLink';
 import { Address } from 'viem';
-import { track } from '../../../utils/segment';
+import { track } from 'utils/segment';
 
 type Props = {
   symbol: string;

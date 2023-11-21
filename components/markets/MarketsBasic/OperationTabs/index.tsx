@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Box, ButtonBase, Typography } from '@mui/material';
 import { MarketsBasicOperation, useMarketsBasic } from 'contexts/MarketsBasicContext';
 import { useOperationContext } from 'contexts/OperationContext';
-import { track } from '../../../../utils/segment';
+import { track } from 'utils/segment';
 
 type OperationTabProps = {
   label: string;

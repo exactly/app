@@ -14,7 +14,7 @@ import { WEI_PER_ETHER } from 'utils/const';
 import useEstimateGas from './useEstimateGas';
 import { parseUnits, formatUnits } from 'viem';
 import { gasLimit } from 'utils/gas';
-import { track } from '../utils/segment';
+import { track } from 'utils/segment';
 
 type Borrow = {
   handleBasicInputChange: (value: string) => void;

@@ -11,7 +11,7 @@ import { TransitionProps } from '@mui/material/transitions';
 import i18n from 'i18n';
 import dayjs from 'dayjs';
 import { useTranslation } from 'react-i18next';
-import { track } from '../../../../utils/segment';
+import { track } from 'utils/segment';
 
 type Props = {
   open: boolean;

@@ -8,7 +8,7 @@ import { MarketsBasicOperation, MarketsBasicOption } from 'contexts/MarketsBasic
 import { useTranslation } from 'react-i18next';
 import BestPill from 'components/common/BestPill';
 import Rates from 'components/Rates';
-import { track } from '../../../../utils/segment';
+import { track } from 'utils/segment';
 
 type Props = {
   symbol: string;

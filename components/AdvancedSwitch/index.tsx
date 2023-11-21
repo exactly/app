@@ -3,7 +3,7 @@ import { Box, BoxProps, Typography } from '@mui/material';
 import { useCustomTheme } from 'contexts/ThemeContext';
 import { useTranslation } from 'react-i18next';
 import Switch from 'components/Switch';
-import { track } from '../../utils/segment';
+import { track } from 'utils/segment';
 
 type Props = {
   sx?: BoxProps['sx'];
