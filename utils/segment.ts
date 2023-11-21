@@ -33,40 +33,49 @@ type TrackEvent = {
     contractName: string;
     method: string;
     hash: Hash;
+    amount: string;
+    usdAmount: string;
   };
   'TX Completed': {
     status: TransactionReceipt['status'];
     hash: Hash;
+    amount: string;
+    usdAmount: string;
   };
 };
 
-type ExtraContext = {
+type Global = {
+  impersonateActive: boolean;
   symbol: string;
   maturity: number;
+  operation: string;
+};
+type Component = {
   text: string;
   value: Stringifiable;
   prevValue: Stringifiable;
-  operation: string;
   bestOption: Stringifiable;
   isBestOption: boolean;
+};
+type TX = {
   status: TransactionReceipt['status'] | Transaction['status'];
   to: Address;
   chainId: number;
-  impersonateActive: boolean;
   spender: Address;
-  qty: string | number;
+  amount: string;
+  usdAmount: string;
 };
 
-const analyticsApiKey = process.env.NEXT_PUBLIC_SEGMENT_WRITE_KEY || '';
-
 export function getAnalytics() {
-  const analytics = AnalyticsBrowser.load({ writeKey: analyticsApiKey });
+  const { NEXT_PUBLIC_SEGMENT_WRITE_KEY } = process.env;
+  if (!NEXT_PUBLIC_SEGMENT_WRITE_KEY) throw new Error('Missing NEXT_PUBLIC_SEGMENT_WRITE_KEY');
+  const analytics = AnalyticsBrowser.load({ writeKey: NEXT_PUBLIC_SEGMENT_WRITE_KEY });
   return analytics;
 }
 
 export function track<Name extends keyof TrackEvent>(
   name: Name,
-  properties: TrackEvent[Name] & Partial<ExtraContext>,
+  properties: TrackEvent[Name] & Partial<Global & Component & TX>,
 ): void {
   try {
     const analytics = getAnalytics();

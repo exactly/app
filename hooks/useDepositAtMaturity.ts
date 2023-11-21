@@ -11,7 +11,7 @@ import { OperationHook } from 'types/OperationHook';
 import { WEI_PER_ETHER } from 'utils/const';
 import { CustomError } from 'types/Error';
 import useEstimateGas from './useEstimateGas';
-import { parseUnits } from 'viem';
+import { formatUnits, parseUnits } from 'viem';
 import waitForTransaction from 'utils/waitForTransaction';
 import dayjs from 'dayjs';
 import { gasLimit } from 'utils/gas';
@@ -188,7 +188,8 @@ export default (): DepositAtMaturity => {
           method: 'depositAtMaturity',
           hash,
           symbol,
-          qty,
+          amount: qty,
+          usdAmount: formatUnits((amount * marketAccount.usdPrice) / WEI_PER_ETHER, marketAccount.decimals),
         });
       } else {
         const args = [date, amount, minAmount, walletAddress] as const;
@@ -201,7 +202,8 @@ export default (): DepositAtMaturity => {
           contractName: 'Market',
           method: 'depositAtMaturity',
           symbol,
-          qty,
+          amount: qty,
+          usdAmount: formatUnits((amount * marketAccount.usdPrice) / WEI_PER_ETHER, marketAccount.decimals),
           hash,
         });
       }
@@ -211,7 +213,8 @@ export default (): DepositAtMaturity => {
       const { status, transactionHash } = await waitForTransaction({ hash });
       track('TX Completed', {
         symbol,
-        qty,
+        amount: qty,
+        usdAmount: formatUnits((amount * marketAccount.usdPrice) / WEI_PER_ETHER, marketAccount.decimals),
         status,
         hash: transactionHash,
       });

@@ -217,7 +217,8 @@ export default (): BorrowAtMaturity => {
           contractName: 'ETHRouter',
           method: 'borrowAtMaturity',
           symbol,
-          qty,
+          amount: qty,
+          usdAmount: formatUnits((amount * marketAccount.usdPrice) / WEI_PER_ETHER, marketAccount.decimals),
           hash,
         });
       } else {
@@ -235,7 +236,8 @@ export default (): BorrowAtMaturity => {
           contractName: 'Market',
           method: 'borrowAtMaturity',
           symbol,
-          qty,
+          amount: qty,
+          usdAmount: formatUnits((amount * marketAccount.usdPrice) / WEI_PER_ETHER, marketAccount.decimals),
           hash,
         });
       }
@@ -245,7 +247,8 @@ export default (): BorrowAtMaturity => {
       const { status, transactionHash } = await waitForTransaction({ hash });
       track('TX Completed', {
         symbol,
-        qty,
+        amount: qty,
+        usdAmount: formatUnits((amount * marketAccount.usdPrice) / WEI_PER_ETHER, marketAccount.decimals),
         status,
         hash: transactionHash,
       });

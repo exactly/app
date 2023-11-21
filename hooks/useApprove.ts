@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { parseUnits, type Address, type EstimateContractGasParameters, type Hex } from 'viem';
+import { parseUnits, type Address, type EstimateContractGasParameters, type Hex, formatUnits } from 'viem';
 import { ERC20, Market } from 'types/contracts';
 import { useWeb3 } from './useWeb3';
 import { useOperationContext } from 'contexts/OperationContext';
@@ -8,7 +8,7 @@ import handleOperationError from 'utils/handleOperationError';
 import waitForTransaction from 'utils/waitForTransaction';
 import { useTranslation } from 'react-i18next';
 
-import { MAX_UINT256 } from 'utils/const';
+import { MAX_UINT256, WEI_PER_ETHER } from 'utils/const';
 import useEstimateGas from './useEstimateGas';
 import { gasLimit } from 'utils/gas';
 import { track } from 'utils/segment';
@@ -153,7 +153,8 @@ function useApprove({
         method: 'approve',
         contractName: 'Market',
         spender,
-        qty: Number(quantity),
+        amount: formatUnits(quantity, marketAccount.decimals),
+        usdAmount: formatUnits((quantity * marketAccount.usdPrice) / WEI_PER_ETHER, marketAccount.decimals),
       });
 
       if (!hash) return;
@@ -163,7 +164,8 @@ function useApprove({
       if (status === 'reverted') throw new Error('Transaction reverted');
       track('TX Completed', {
         symbol,
-        qty,
+        amount: formatUnits(quantity, marketAccount.decimals),
+        usdAmount: formatUnits((quantity * marketAccount.usdPrice) / WEI_PER_ETHER, marketAccount.decimals),
         status,
         hash,
         operation,

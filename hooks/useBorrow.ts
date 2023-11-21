@@ -208,7 +208,8 @@ export default (): Borrow => {
           method: 'borrow',
           symbol,
           hash,
-          qty,
+          amount: qty,
+          usdAmount: formatUnits((amount * marketAccount.usdPrice) / WEI_PER_ETHER, marketAccount.decimals),
         });
       } else {
         if (!marketContract) return;
@@ -224,7 +225,8 @@ export default (): Borrow => {
           contractName: 'Market',
           method: 'borrow',
           symbol,
-          qty,
+          amount: qty,
+          usdAmount: formatUnits((amount * marketAccount.usdPrice) / WEI_PER_ETHER, marketAccount.decimals),
           hash,
         });
       }
@@ -234,7 +236,8 @@ export default (): Borrow => {
       const { status, transactionHash } = await waitForTransaction({ hash });
       track('TX Completed', {
         symbol,
-        qty,
+        amount: qty,
+        usdAmount: formatUnits((amount * marketAccount.usdPrice) / WEI_PER_ETHER, marketAccount.decimals),
         status,
         hash: transactionHash,
       });

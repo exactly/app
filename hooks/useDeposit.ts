@@ -9,10 +9,11 @@ import { useTranslation } from 'react-i18next';
 import { OperationHook } from 'types/OperationHook';
 import { CustomError } from 'types/Error';
 import useEstimateGas from './useEstimateGas';
-import { parseUnits } from 'viem';
+import { formatUnits, parseUnits } from 'viem';
 import waitForTransaction from 'utils/waitForTransaction';
 import { gasLimit } from 'utils/gas';
 import { track } from 'utils/segment';
+import { WEI_PER_ETHER } from 'utils/const';
 
 type Deposit = {
   deposit: () => void;
@@ -142,7 +143,8 @@ export default (): Deposit => {
           method: 'deposit',
           hash,
           symbol,
-          qty,
+          amount: qty,
+          usdAmount: formatUnits((amount * marketAccount.usdPrice) / WEI_PER_ETHER, marketAccount.decimals),
         });
       } else {
         const args = [amount, walletAddress] as const;
@@ -156,7 +158,8 @@ export default (): Deposit => {
           contractName: 'Market',
           method: 'deposit',
           symbol,
-          qty,
+          amount: qty,
+          usdAmount: formatUnits((amount * marketAccount.usdPrice) / WEI_PER_ETHER, marketAccount.decimals),
           hash,
         });
       }
@@ -166,7 +169,8 @@ export default (): Deposit => {
       const { status, transactionHash } = await waitForTransaction({ hash });
       track('TX Completed', {
         symbol,
-        qty,
+        amount: qty,
+        usdAmount: formatUnits((amount * marketAccount.usdPrice) / WEI_PER_ETHER, marketAccount.decimals),
         status,
         hash: transactionHash,
       });
