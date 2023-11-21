@@ -66,10 +66,10 @@ type TX = {
   usdAmount: string;
 };
 
+const analyticsApiKey = process.env.NEXT_PUBLIC_SEGMENT_WRITE_KEY || '';
+
 export function getAnalytics() {
-  const { NEXT_PUBLIC_SEGMENT_WRITE_KEY } = process.env;
-  if (!NEXT_PUBLIC_SEGMENT_WRITE_KEY) throw new Error('Missing NEXT_PUBLIC_SEGMENT_WRITE_KEY');
-  const analytics = AnalyticsBrowser.load({ writeKey: NEXT_PUBLIC_SEGMENT_WRITE_KEY });
+  const analytics = AnalyticsBrowser.load({ writeKey: analyticsApiKey });
   return analytics;
 }
 
