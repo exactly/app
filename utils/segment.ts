@@ -56,6 +56,7 @@ type Component = {
   prevValue: Stringifiable;
   bestOption: Stringifiable;
   isBestOption: boolean;
+  isNew: boolean;
 };
 type TX = {
   status: TransactionReceipt['status'] | Transaction['status'];

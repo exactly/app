@@ -22,6 +22,7 @@ import { useExtraDepositAPR } from 'hooks/useExtra';
 import { useWeb3 } from 'hooks/useWeb3';
 import FeaturedStrategies from 'components/strategies/FeaturedStrategies';
 import { useModal } from '../contexts/ModalContext';
+import { track } from 'utils/segment';
 
 const Strategies: NextPage = () => {
   const { t } = useTranslation();
@@ -89,7 +90,18 @@ const Strategies: NextPage = () => {
           ],
           button: (
             <Link href={{ pathname: '/vesting', query }} style={{ width: '100%' }}>
-              <Button fullWidth variant="contained">
+              <Button
+                fullWidth
+                variant="contained"
+                onClick={() =>
+                  track('Button Clicked', {
+                    location: 'Strategies',
+                    name: 'vest',
+                    href: '/vesting',
+                    isNew: true,
+                  })
+                }
+              >
                 {t('Vest esEXA')}
               </Button>
             </Link>
@@ -106,7 +118,18 @@ const Strategies: NextPage = () => {
           tags: [{ text: t('Advanced'), size: 'small' as const }],
           button: (
             <Link href={{ pathname: '/debit2credit' }} style={{ width: '100%' }}>
-              <Button fullWidth variant="contained">
+              <Button
+                fullWidth
+                variant="contained"
+                onClick={() =>
+                  track('Button Clicked', {
+                    location: 'Strategies',
+                    name: 'debit to credit',
+                    href: '/debit2credit',
+                    isNew: true,
+                  })
+                }
+              >
                 {t('Get Started')}
               </Button>
             </Link>
@@ -126,7 +149,19 @@ const Strategies: NextPage = () => {
             { text: t('Advanced'), size: 'small' as const },
           ],
           button: (
-            <Button fullWidth variant="contained" onClick={() => startLeverager()} data-testid="leverage">
+            <Button
+              fullWidth
+              variant="contained"
+              onClick={() => {
+                startLeverager();
+                track('Button Clicked', {
+                  location: 'Strategies',
+                  name: 'leverage',
+                  isNew: false,
+                });
+              }}
+              data-testid="leverage"
+            >
               {t('Leverage')}
             </Button>
           ),
@@ -143,7 +178,19 @@ const Strategies: NextPage = () => {
             { text: t('Basic'), size: 'small' as const },
           ],
           button: (
-            <Button fullWidth variant="contained" onClick={() => startDebtManager({})} data-testid="rollover">
+            <Button
+              fullWidth
+              variant="contained"
+              onClick={() => {
+                startDebtManager({});
+                track('Button Clicked', {
+                  location: 'Strategies',
+                  name: 'rollover',
+                  isNew: false,
+                });
+              }}
+              data-testid="rollover"
+            >
               {t('Rollover')}
             </Button>
           ),
@@ -158,7 +205,18 @@ const Strategies: NextPage = () => {
             { text: t('Advanced'), size: 'small' as const },
           ],
           button: (
-            <Button fullWidth variant="contained" onClick={() => startLeverager()}>
+            <Button
+              fullWidth
+              variant="contained"
+              onClick={() => {
+                startLeverager();
+                track('Button Clicked', {
+                  location: 'Strategies',
+                  name: 'deleverage',
+                  isNew: false,
+                });
+              }}
+            >
               {t('Deleverage')}
             </Button>
           ),
@@ -184,7 +242,18 @@ const Strategies: NextPage = () => {
           ],
           button: (
             <Link href={{ pathname: '/vesting', query }} style={{ width: '100%' }}>
-              <Button fullWidth variant="contained">
+              <Button
+                fullWidth
+                variant="contained"
+                onClick={() => {
+                  track('Button Clicked', {
+                    location: 'Strategies',
+                    name: 'vest',
+                    isNew: true,
+                    href: '/vesting',
+                  });
+                }}
+              >
                 {t('Vest esEXA')}
               </Button>
             </Link>
@@ -202,7 +271,18 @@ const Strategies: NextPage = () => {
             { text: t('Basic'), size: 'small' as const },
           ],
           button: (
-            <Button fullWidth variant="contained" onClick={openGetEXA}>
+            <Button
+              fullWidth
+              variant="contained"
+              onClick={() => {
+                openGetEXA();
+                track('Button Clicked', {
+                  location: 'Strategies',
+                  name: 'get exa',
+                  isNew: false,
+                });
+              }}
+            >
               {t('Get EXA')}
             </Button>
           ),
@@ -217,7 +297,18 @@ const Strategies: NextPage = () => {
             { text: t('Advanced'), size: 'small' as const },
           ],
           button: (
-            <Button fullWidth variant="contained" onClick={() => startLeverager()}>
+            <Button
+              fullWidth
+              variant="contained"
+              onClick={() => {
+                startLeverager();
+                track('Button Clicked', {
+                  location: 'Strategies',
+                  name: 'leverage',
+                  isNew: false,
+                });
+              }}
+            >
               {t('Leverage')}
             </Button>
           ),
@@ -230,7 +321,18 @@ const Strategies: NextPage = () => {
             { text: t('Advanced'), size: 'small' as const },
           ],
           button: (
-            <Button fullWidth variant="contained" onClick={() => startLeverager()}>
+            <Button
+              fullWidth
+              variant="contained"
+              onClick={() => {
+                startLeverager();
+                track('Button Clicked', {
+                  location: 'Strategies',
+                  name: 'deleverage',
+                  isNew: false,
+                });
+              }}
+            >
               {t('Deleverage')}
             </Button>
           ),
@@ -245,7 +347,18 @@ const Strategies: NextPage = () => {
             { text: t('Basic'), size: 'small' as const },
           ],
           button: (
-            <Button fullWidth variant="contained" onClick={() => startDebtManager({})}>
+            <Button
+              fullWidth
+              variant="contained"
+              onClick={() => {
+                startDebtManager({});
+                track('Button Clicked', {
+                  location: 'Strategies',
+                  name: 'rollover',
+                  isNew: false,
+                });
+              }}
+            >
               {t('Rollover')}
             </Button>
           ),
@@ -258,7 +371,18 @@ const Strategies: NextPage = () => {
           tags: [{ text: t('Advanced'), size: 'small' as const }],
           button: (
             <Link href={{ pathname: '/debit2credit' }} style={{ width: '100%' }}>
-              <Button fullWidth variant="contained">
+              <Button
+                fullWidth
+                variant="contained"
+                onClick={() => {
+                  track('Button Clicked', {
+                    location: 'Strategies',
+                    name: 'debit to credit',
+                    isNew: true,
+                    href: '/debit2credit',
+                  });
+                }}
+              >
                 {t('Get Started')}
               </Button>
             </Link>
@@ -288,7 +412,18 @@ const Strategies: NextPage = () => {
               rel="noreferrer noopener"
               style={{ width: '100%' }}
             >
-              <Button fullWidth variant="contained">
+              <Button
+                fullWidth
+                variant="contained"
+                onClick={() =>
+                  track('Button Clicked', {
+                    location: 'Strategies',
+                    name: 'extra finance',
+                    isNew: false,
+                    href: 'https://app.extrafi.io/lend/EXA',
+                  })
+                }
+              >
                 {t('Go to Extra Finance')}
               </Button>
             </a>
@@ -310,7 +445,18 @@ const Strategies: NextPage = () => {
               rel="noreferrer noopener"
               style={{ width: '100%' }}
             >
-              <Button fullWidth variant="contained">
+              <Button
+                fullWidth
+                variant="contained"
+                onClick={() =>
+                  track('Button Clicked', {
+                    location: 'Strategies',
+                    name: 'velodrome',
+                    isNew: false,
+                    href: 'https://velodrome.finance/deposit?token0=0x1e925de1c68ef83bd98ee3e130ef14a50309c01b&token1=eth',
+                  })
+                }
+              >
                 {t('Go to Velodrome')}
               </Button>
             </a>
