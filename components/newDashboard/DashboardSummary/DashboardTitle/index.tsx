@@ -5,6 +5,7 @@ import ReplayIcon from '@mui/icons-material/Replay';
 import { useTranslation } from 'react-i18next';
 import useAccountData from 'hooks/useAccountData';
 import dayjs from 'dayjs';
+import { track } from 'utils/segment';
 
 const DashboardTitle = () => {
   const { t } = useTranslation();
@@ -16,6 +17,11 @@ const DashboardTitle = () => {
     setLoading(true);
     await refreshAccountData();
     setLoading(false);
+    track('Button Clicked', {
+      name: 'refresh',
+      location: 'Dashboard',
+      icon: 'Replay',
+    });
   };
 
   useEffect(() => {

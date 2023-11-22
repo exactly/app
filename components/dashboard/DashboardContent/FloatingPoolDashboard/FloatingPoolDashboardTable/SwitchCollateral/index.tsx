@@ -12,6 +12,7 @@ import useAccountData from 'hooks/useAccountData';
 import { useWeb3 } from 'hooks/useWeb3';
 import { useTranslation } from 'react-i18next';
 import { WEI_PER_ETHER } from 'utils/const';
+import { track } from 'utils/segment';
 
 type Props = {
   symbol: string;
@@ -68,6 +69,13 @@ function SwitchCollateral({ symbol }: Props) {
     if (!marketAccount || !auditor || !opts) return;
     const { market } = marketAccount;
     let target = !checked;
+    track('Option Selected', {
+      name: 'switch collateral',
+      location: 'Dashboard',
+      value: target,
+      prevValue: checked,
+      symbol,
+    });
 
     setLoading(true);
     try {
@@ -84,7 +92,7 @@ function SwitchCollateral({ symbol }: Props) {
       setOptimistic(target);
       setLoading(false);
     }
-  }, [marketAccount, auditor, opts, checked, refreshAccountData]);
+  }, [marketAccount, auditor, opts, checked, symbol, refreshAccountData]);
 
   if (loading) {
     return (

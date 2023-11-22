@@ -7,6 +7,7 @@ import useAssets from 'hooks/useAssets';
 import imageToBase64 from 'utils/imageToBase64';
 import useAccountData from 'hooks/useAccountData';
 import { useTranslation } from 'react-i18next';
+import { track } from 'utils/segment';
 
 const AddExaTokensButton = () => {
   const { t } = useTranslation();
@@ -18,6 +19,10 @@ const AddExaTokensButton = () => {
     if (!accountData) return;
 
     const imagesBase64: Record<string, string> = {};
+    track('Button Clicked', {
+      name: 'add exa vouchers',
+      location: 'Dashboard',
+    });
 
     await Promise.all(
       assets.map(

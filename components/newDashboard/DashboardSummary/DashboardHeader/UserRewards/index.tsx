@@ -1,4 +1,4 @@
-import React, { FC, useMemo } from 'react';
+import React, { FC, useCallback, useMemo } from 'react';
 import { formatUnits } from 'viem';
 import { Box, Button, Skeleton, Typography, useMediaQuery, useTheme } from '@mui/material';
 import StarsIcon from '@mui/icons-material/Stars';
@@ -10,6 +10,7 @@ import useRewards from 'hooks/useRewards';
 import { WEI_PER_ETHER } from 'utils/const';
 import useAccountData from 'hooks/useAccountData';
 import useRouter from 'hooks/useRouter';
+import { track } from 'utils/segment';
 
 type RewardProps = {
   assetSymbol: string;
@@ -76,6 +77,14 @@ const UserRewards = () => {
     });
   }, [rates, rs]);
 
+  const trackClick = useCallback(() => {
+    track('Button Clicked', {
+      name: 'vest',
+      location: 'Dashboard',
+      href: '/vesting',
+    });
+  }, []);
+
   return (
     <Box
       display="flex"
@@ -121,7 +130,7 @@ const UserRewards = () => {
       </Box>
 
       <Link href={{ pathname: '/vesting', query }} style={{ width: '100%' }}>
-        <Button fullWidth variant="contained">
+        <Button fullWidth variant="contained" onClick={trackClick}>
           {t('Vest esEXA')}
         </Button>
       </Link>

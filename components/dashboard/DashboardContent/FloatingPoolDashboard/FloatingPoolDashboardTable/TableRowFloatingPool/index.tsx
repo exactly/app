@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { MouseEvent, useCallback } from 'react';
 import Image from 'next/image';
 import { formatUnits } from 'viem';
 
@@ -15,6 +15,7 @@ import useActionButton, { useStartDebtManagerButton } from 'hooks/useActionButto
 import useRouter from 'hooks/useRouter';
 import { useTranslation } from 'react-i18next';
 import Rates from 'components/Rates';
+import { track } from 'utils/segment';
 
 type Props = {
   symbol: string;
@@ -34,13 +35,89 @@ function TableRowFloatingPool({ symbol, valueUSD, depositedAmount, borrowedAmoun
   const { handleActionClick } = useActionButton();
   const { startDebtManager, isRolloverDisabled } = useStartDebtManagerButton();
 
+  const handleClick = useCallback(() => {
+    track('Button Clicked', {
+      name: 'Table Row Floating Pool',
+      location: 'Dashboard',
+      symbol,
+      href: `/${symbol}`,
+      amount: formatUnits(
+        type === 'deposit' ? depositedAmount || 0n : borrowedAmount || 0n,
+        marketAccount?.decimals ?? 18,
+      ),
+      usdAmount: String(valueUSD),
+    });
+  }, [borrowedAmount, depositedAmount, marketAccount?.decimals, symbol, type, valueUSD]);
+
+  const handleOperationClick = useCallback(
+    (e: MouseEvent<HTMLButtonElement>): void => {
+      handleActionClick(e, type, symbol);
+      track('Button Clicked', {
+        name: type,
+        location: 'Dashboard',
+        symbol,
+        amount: formatUnits(
+          type === 'deposit' ? depositedAmount || 0n : borrowedAmount || 0n,
+          marketAccount?.decimals ?? 18,
+        ),
+        usdAmount: String(valueUSD),
+      });
+    },
+    [borrowedAmount, depositedAmount, handleActionClick, marketAccount?.decimals, symbol, type, valueUSD],
+  );
+  const handleWithdrawClick = useCallback(
+    (e: MouseEvent<HTMLButtonElement>): void => {
+      handleActionClick(e, 'withdraw', symbol);
+      track('Button Clicked', {
+        name: 'withdraw',
+        location: 'Dashboard',
+        symbol,
+        amount: formatUnits(
+          type === 'deposit' ? depositedAmount || 0n : borrowedAmount || 0n,
+          marketAccount?.decimals ?? 18,
+        ),
+        usdAmount: String(valueUSD),
+      });
+    },
+    [borrowedAmount, depositedAmount, handleActionClick, marketAccount?.decimals, symbol, type, valueUSD],
+  );
+  const handleRepayClick = useCallback(
+    (e: MouseEvent<HTMLButtonElement>): void => {
+      handleActionClick(e, 'repay', symbol);
+      track('Button Clicked', {
+        name: 'repay',
+        location: 'Dashboard',
+        symbol,
+        amount: formatUnits(
+          type === 'deposit' ? depositedAmount || 0n : borrowedAmount || 0n,
+          marketAccount?.decimals ?? 18,
+        ),
+        usdAmount: String(valueUSD),
+      });
+    },
+    [borrowedAmount, depositedAmount, handleActionClick, marketAccount?.decimals, symbol, type, valueUSD],
+  );
+  const handleRolloverClick = useCallback(() => {
+    startDebtManager({ from: { symbol } });
+    track('Button Clicked', {
+      name: 'rollover',
+      location: 'Dashboard',
+      symbol,
+      amount: formatUnits(
+        type === 'deposit' ? depositedAmount || 0n : borrowedAmount || 0n,
+        marketAccount?.decimals ?? 18,
+      ),
+      usdAmount: String(valueUSD),
+    });
+  }, [borrowedAmount, depositedAmount, marketAccount?.decimals, startDebtManager, symbol, type, valueUSD]);
+
   return (
     <TableRow
       sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
       hover
       data-testid={`dashboard-floating-${type}-row-${symbol}`}
     >
-      <Link href={{ pathname: `/${symbol}`, query }} legacyBehavior>
+      <Link href={{ pathname: `/${symbol}`, query }} onClick={handleClick} legacyBehavior>
         <TableCell component="th" align="left" sx={{ cursor: 'pointer', pl: 1.5 }} width={240}>
           <Stack direction="row" spacing={1}>
             <Image
@@ -96,7 +173,7 @@ function TableRowFloatingPool({ symbol, valueUSD, depositedAmount, borrowedAmoun
           <TableCell align="left" width={50} size="small" sx={{ px: 0.5 }}>
             <Button
               variant="contained"
-              onClick={(e) => handleActionClick(e, type, symbol)}
+              onClick={handleOperationClick}
               sx={{ whiteSpace: 'nowrap' }}
               data-testid={`floating-${type}-${symbol}`}
             >
@@ -108,7 +185,7 @@ function TableRowFloatingPool({ symbol, valueUSD, depositedAmount, borrowedAmoun
               <Button
                 variant="outlined"
                 sx={{ backgroundColor: 'components.bg', whiteSpace: 'nowrap' }}
-                onClick={(e) => handleActionClick(e, 'withdraw', symbol)}
+                onClick={handleWithdrawClick}
                 data-testid={`floating-withdraw-${symbol}`}
               >
                 {t('Withdraw')}
@@ -118,7 +195,7 @@ function TableRowFloatingPool({ symbol, valueUSD, depositedAmount, borrowedAmoun
                 <Button
                   variant="outlined"
                   sx={{ backgroundColor: 'components.bg', whiteSpace: 'nowrap', '&:hover': { zIndex: 1 } }}
-                  onClick={(e) => handleActionClick(e, 'repay', symbol)}
+                  onClick={handleRepayClick}
                   data-testid={`floating-repay-${symbol}`}
                 >
                   {t('Repay')}
@@ -132,7 +209,7 @@ function TableRowFloatingPool({ symbol, valueUSD, depositedAmount, borrowedAmoun
                       borderLeftColor: ({ palette }) => palette.grey[palette.mode === 'light' ? 500 : 300],
                     },
                   }}
-                  onClick={() => startDebtManager({ from: { symbol } })}
+                  onClick={handleRolloverClick}
                   disabled={isRolloverDisabled(borrowedAmount)}
                   data-testid={`floating-rollover-${symbol}`}
                 >

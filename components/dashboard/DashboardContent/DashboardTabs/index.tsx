@@ -1,10 +1,11 @@
-import React, { ReactNode, useState } from 'react';
+import React, { ReactNode, useCallback, useState } from 'react';
 import Box from '@mui/material/Box';
 import Tab from '@mui/material/Tab';
 import TabContext from '@mui/lab/TabContext';
 import TabList from '@mui/lab/TabList';
 import TabPanel from '@mui/lab/TabPanel';
 import { Typography } from '@mui/material';
+import { track } from 'utils/segment';
 
 type Tab = {
   label: string;
@@ -20,11 +21,24 @@ type Props = {
 function DashboardTabs({ initialTab, allTabs }: Props) {
   const [currentTab, setCurrentTab] = useState<Tab['value']>(initialTab);
 
+  const handleChange = useCallback(
+    (_: React.SyntheticEvent, newTab: string) => {
+      setCurrentTab(newTab);
+      track('Option Selected', {
+        location: 'Dashboard',
+        name: 'operation',
+        value: newTab,
+        prevValue: currentTab,
+      });
+    },
+    [currentTab],
+  );
+
   return (
     <TabContext value={currentTab}>
       <Box>
         <TabList
-          onChange={(_: React.SyntheticEvent, newTab: string) => setCurrentTab(newTab)}
+          onChange={handleChange}
           TabIndicatorProps={{ sx: { height: 0 } }}
           textColor="inherit"
           sx={{

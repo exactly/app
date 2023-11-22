@@ -12,7 +12,7 @@ type TrackEvent = {
   'Button Clicked': {
     name: string;
     location: string;
-    icon?: 'Close' | 'Edit' | 'Settings' | 'Copy' | 'Menu';
+    icon?: 'Close' | 'Edit' | 'Settings' | 'Copy' | 'Menu' | 'Replay';
     href?: string;
   };
   'Option Selected': {
