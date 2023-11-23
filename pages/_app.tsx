@@ -22,7 +22,6 @@ import { ModalContextProvider } from 'contexts/ModalContext';
 import OperationsModal from 'components/OperationsModal';
 import LeveragerModal from 'components/Leverager/Modal';
 import RewardsModal from 'components/RewardsModal';
-import StakingModal from 'components/StakingModal';
 import DebtManagerModal from 'components/DebtManager';
 import FaucetModal from 'components/operations/Faucet/Modal';
 import NewsModal from 'components/NewsModal';
@@ -37,7 +36,6 @@ const Modals = () => (
     <RewardsModal />
     <DebtManagerModal />
     <LeveragerModal />
-    <StakingModal />
     <FaucetModal />
     <GetEXAModal />
     {!isE2E && <NewsModal />}
