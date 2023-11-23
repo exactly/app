@@ -1,4 +1,4 @@
-import React, { FC, useMemo } from 'react';
+import React, { FC, useCallback, useMemo } from 'react';
 import { Hex, formatEther, parseEther } from 'viem';
 import Image from 'next/image';
 import { useNetwork, useSwitchNetwork } from 'wagmi';
@@ -15,6 +15,7 @@ import {
 } from 'hooks/useSablier';
 import { useAirdropClaim, useSablierV2LockupLinearWithdrawMax } from 'types/abi';
 import formatNumber from 'utils/formatNumber';
+import { track } from 'utils/segment';
 
 type ClaimableProps = {
   amount: bigint;
@@ -86,12 +87,20 @@ const Claim: FC<ClaimableProps & { refresh: () => void }> = ({ amount, proof, re
     hash: claimData?.hash,
     onSettled: refresh,
   });
+  const handleClick = useCallback(() => {
+    claim?.();
+    track('Button Clicked', {
+      location: 'Governance',
+      name: 'claim',
+      value: formatNumber(formatEther(amount)),
+    });
+  }, [amount, claim]);
 
   return (
     <LoadingButton
       variant="contained"
       fullWidth
-      onClick={claim}
+      onClick={handleClick}
       disabled={claimLoading || waitingClaim}
       loading={claimLoading || waitingClaim}
     >

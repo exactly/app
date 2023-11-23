@@ -1,8 +1,9 @@
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Box, Button, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { optimism } from 'wagmi/chains';
 import { useWeb3 } from 'hooks/useWeb3';
+import { track } from 'utils/segment';
 
 const Proposals = () => {
   const { t } = useTranslation();
@@ -12,6 +13,13 @@ const Proposals = () => {
     () => (chain.id === optimism.id ? 'https://gov.exact.ly/' : 'https://demo.snapshot.org/#/exa.eth'),
     [chain],
   );
+  const handleClick = useCallback(() => {
+    track('Button Clicked', {
+      location: 'Governance',
+      name: 'view proposals',
+      href: spaceURL,
+    });
+  }, [spaceURL]);
 
   return (
     <Box display="flex" flexDirection="column" gap={4}>
@@ -24,7 +32,7 @@ const Proposals = () => {
         </Typography>
       </Box>
       <a href={spaceURL} target="_blank" rel="noreferrer noopener">
-        <Button variant="contained" fullWidth>
+        <Button variant="contained" onClick={handleClick} fullWidth>
           {t('View Proposals')}
         </Button>
       </a>

@@ -80,12 +80,21 @@ const Delegation = () => {
       .toDataURL();
   }, [delegate, delegateENSAvatar, ensAvatarError, walletAddress]);
 
-  const openDialog = useCallback(() => {
+  const handleDelegateClick = useCallback(() => {
     setOpen(true);
-  }, []);
+    track('Button Clicked', {
+      location: 'Governance',
+      name: 'delegate',
+      value: votingPower,
+    });
+  }, [votingPower]);
 
-  const closeDialog = useCallback(() => {
+  const handleModalClose = useCallback(() => {
     setOpen(false);
+    track('Modal Closed', {
+      name: 'delegation',
+      location: 'Governance',
+    });
   }, []);
 
   const delegatedToYou = useMemo(() => {
@@ -107,7 +116,7 @@ const Delegation = () => {
     <Box display="flex" flexDirection="column" gap={4}>
       <DelegateInputDialog
         open={open}
-        onClose={closeDialog}
+        onClose={handleModalClose}
         input={input}
         setInput={setInput}
         onDelegate={write}
@@ -175,7 +184,12 @@ const Delegation = () => {
         </LoadingButton>
       ) : (
         <Box display="flex" gap={1}>
-          <LoadingButton variant="contained" fullWidth onClick={openDialog} loading={submitLoading || waitingDelegate}>
+          <LoadingButton
+            variant="contained"
+            fullWidth
+            onClick={handleDelegateClick}
+            loading={submitLoading || waitingDelegate}
+          >
             {t('Delegate votes')}
           </LoadingButton>
           {delegate !== zeroAddress && (
@@ -227,6 +241,22 @@ const DelegateInputDialog: FC<DelegateInputDialogProps> = ({
       location: 'Governance',
     });
   }, [onClose]);
+  const handleBlur = useCallback(() => {
+    track('Input Unfocused', {
+      name: 'delegation address',
+      location: 'Governance',
+      value: input,
+    });
+  }, [input]);
+
+  const handleDelegateClick = useCallback(() => {
+    onDelegate?.();
+    track('Button Clicked', {
+      location: 'Governance',
+      name: 'delegate',
+      value: input,
+    });
+  }, [input, onDelegate]);
 
   return (
     <Dialog
@@ -274,13 +304,14 @@ const DelegateInputDialog: FC<DelegateInputDialogProps> = ({
           }}
           disabled={isLoading}
           onChange={(e) => setInput(e.target.value)}
+          onBlur={handleBlur}
         />
         <LoadingButton
           variant="contained"
           fullWidth
           loading={isLoading}
           disabled={!input || !isAddress(input) || input === walletAddress}
-          onClick={onDelegate}
+          onClick={handleDelegateClick}
         >
           {t('Delegate votes')}
         </LoadingButton>
