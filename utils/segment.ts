@@ -25,6 +25,11 @@ type TrackEvent = {
     name: string;
     location?: string;
   };
+  'Input Unfocused': {
+    name: string;
+    location: string;
+    value: Stringifiable;
+  };
   'Wallet Connected': {
     connectorName?: string;
     connectorId?: string;

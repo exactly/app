@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { FocusEventHandler } from 'react';
 import { InputBase, InputBaseComponentProps, InputBaseProps } from '@mui/material';
 import { NumericFormat } from 'react-number-format';
 
@@ -47,6 +47,7 @@ type Props = {
   align?: 'left' | 'center' | 'right';
   disabled?: boolean;
   sx?: InputBaseProps['sx'];
+  onBlur: FocusEventHandler<HTMLInputElement>;
 } & CustomProps;
 
 function ModalInput({
@@ -59,6 +60,7 @@ function ModalInput({
   align = 'right',
   disabled = false,
   'data-testid': testId = 'modal-input',
+  onBlur,
   ...props
 }: Props) {
   return (
@@ -86,6 +88,7 @@ function ModalInput({
         ...props.sx,
       }}
       inputComponent={NumberFormatCustom}
+      onBlur={onBlur}
     />
   );
 }

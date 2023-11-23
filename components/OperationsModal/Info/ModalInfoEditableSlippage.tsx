@@ -31,6 +31,14 @@ function ModalInfoEditableSlippage({ value, onChange }: Props) {
     setEditable(true);
   }, []);
 
+  const handleBlur = useCallback(() => {
+    track('Input Unfocused', {
+      name: 'slippage',
+      location: 'Operations Modal',
+      value,
+    });
+  }, [value]);
+
   return (
     <ModalInfo label={t('Slippage Tolerance')} variant="row">
       <ClickAwayListener onClickAway={() => setEditable(false)}>
@@ -49,6 +57,7 @@ function ModalInfoEditableSlippage({ value, onChange }: Props) {
                   step: 'any',
                   autoFocus: true,
                   style: { textAlign: 'right', padding: 0, height: 'fit-content', maxWidth: 50 },
+                  onBlur: handleBlur,
                 }}
                 sx={(theme) => ({ fontSize: 13, lineHeight: 1, borderBottom: `1px solid ${theme.palette.grey[500]}` })}
               />

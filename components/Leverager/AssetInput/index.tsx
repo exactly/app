@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Box, Button } from '@mui/material';
 
 import ModalInput from 'components/OperationsModal/ModalInput';
@@ -7,6 +7,7 @@ import useAccountData from 'hooks/useAccountData';
 import Image from 'next/image';
 import formatSymbol from 'utils/formatSymbol';
 import { useLeveragerContext } from 'contexts/LeveragerContext';
+import { track } from 'utils/segment';
 
 type Props = {
   symbol?: string;
@@ -16,6 +17,14 @@ function AssetInput({ symbol }: Props) {
   const { input, handleInputChange, onMax, available, blockModal } = useLeveragerContext();
   const { marketAccount } = useAccountData(symbol || 'USDC');
   const { decimals = 18 } = marketAccount ?? {};
+  const handleBlur = useCallback(() => {
+    track('Input Unfocused', {
+      name: 'asset',
+      location: 'Leverager',
+      symbol,
+      value: input.userInput,
+    });
+  }, [input.userInput, symbol]);
 
   return (
     <Box display="flex" flexDirection="column">
@@ -40,6 +49,7 @@ function AssetInput({ symbol }: Props) {
           maxWidth="100%"
           align="left"
           disabled={!input.collateralSymbol || !input.borrowSymbol || blockModal}
+          onBlur={handleBlur}
         />
       </Box>
       <Box display="flex" justifyContent="left" alignItems="center" marginTop={0.25} height={20} gap={1.5} pl={3}>

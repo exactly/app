@@ -291,6 +291,14 @@ function VestingInput({ refetch }: Props) {
     refetch();
   }, [refetch]);
 
+  const handleBlur = useCallback(() => {
+    track('Input Unfocused', {
+      name: 'vesting',
+      location: 'Vesting',
+      value: qty,
+    });
+  }, [qty]);
+
   return (
     <Box display="flex" flexDirection="column" gap={2}>
       {tx && <LoadingModal tx={tx} onClose={onClose} />}
@@ -323,6 +331,7 @@ function VestingInput({ refetch }: Props) {
                 maxWidth="100%"
                 sx={{ paddingTop: 0, fontSize: 21 }}
                 data-testid="vesting-input"
+                onBlur={handleBlur}
               />
             </Box>
             <Box
