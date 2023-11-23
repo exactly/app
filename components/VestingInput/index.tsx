@@ -279,10 +279,15 @@ function VestingInput({ refetch }: Props) {
     }
   }, [walletAddress, reserveRatio, vestingPeriod, escrowedEXA, exa, opts, qty, isContract, sign]);
 
-  const setMaxBalance = useCallback(() => {
+  const handleMaxClick = useCallback(() => {
     if (balance) {
       setQty(formatEther(balance));
     }
+    track('Button Clicked', {
+      location: 'Vesting',
+      name: 'max',
+      value: formatNumber(formatEther(balance || 0n)),
+    });
   }, [balance]);
 
   const onClose = useCallback(() => {
@@ -358,7 +363,7 @@ function VestingInput({ refetch }: Props) {
                       {t('Available')}: {formatNumber(formatEther(balance || 0n))}
                     </Typography>
                     <Button
-                      onClick={setMaxBalance}
+                      onClick={handleMaxClick}
                       sx={{
                         textTransform: 'uppercase',
                         borderRadius: 1,
@@ -402,7 +407,13 @@ function VestingInput({ refetch }: Props) {
                   components={{
                     1: (
                       <button
-                        onClick={openGetEXA}
+                        onClick={() => {
+                          openGetEXA();
+                          track('Button Clicked', {
+                            location: 'Vesting',
+                            name: 'get EXA',
+                          });
+                        }}
                         style={{
                           fontWeight: 700,
                           textDecoration: 'underline',
@@ -440,7 +451,16 @@ function VestingInput({ refetch }: Props) {
 
       <Box mt={0} display="flex" flexDirection="column" gap={1}>
         {impersonateActive ? (
-          <Button fullWidth variant="contained">
+          <Button
+            fullWidth
+            variant="contained"
+            onClick={() =>
+              track('Button Clicked', {
+                location: 'Vesting',
+                name: 'exit read-only mode',
+              })
+            }
+          >
             {t('Exit Read-Only Mode')}
           </Button>
         ) : displayNetwork.id !== chain?.id ? (
@@ -448,7 +468,14 @@ function VestingInput({ refetch }: Props) {
             fullWidth
             variant="contained"
             loading={switchIsLoading}
-            onClick={() => switchNetwork?.(displayNetwork.id)}
+            onClick={() => {
+              switchNetwork?.(displayNetwork.id);
+              track('Button Clicked', {
+                location: 'Vesting',
+                name: 'switch network',
+                value: displayNetwork.name,
+              });
+            }}
           >
             {t('Please switch to {{network}} network', { network: displayNetwork.name })}
           </LoadingButton>
@@ -457,7 +484,15 @@ function VestingInput({ refetch }: Props) {
             fullWidth
             variant="contained"
             loading={isLoading}
-            onClick={submit}
+            onClick={() => {
+              submit();
+              track('Button Clicked', {
+                location: 'Vesting',
+                name: 'vest',
+                value: qty,
+                text: insufficientFunds ? t('Insufficient esEXA balance') : t('Vest esEXA'),
+              });
+            }}
             data-testid="vesting-submit"
             disabled={insufficientFunds}
           >

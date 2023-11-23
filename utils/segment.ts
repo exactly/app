@@ -38,14 +38,16 @@ type TrackEvent = {
     contractName: string;
     method: string;
     hash: Hash;
-    amount: string;
-    usdAmount: string;
+    amount?: string;
+    usdAmount?: string;
   };
   'TX Completed': {
+    contractName?: string;
+    method?: string;
     status: TransactionReceipt['status'];
     hash: Hash;
-    amount: string;
-    usdAmount: string;
+    amount?: string;
+    usdAmount?: string;
   };
 };
 

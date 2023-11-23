@@ -15,6 +15,7 @@ import { useModal } from 'contexts/ModalContext';
 import formatNumber from 'utils/formatNumber';
 import { formatEther } from 'viem';
 import { toPercentage } from 'utils/utils';
+import { track } from 'utils/segment';
 
 const Vesting: NextPage = () => {
   const { t } = useTranslation();
@@ -36,11 +37,27 @@ const Vesting: NextPage = () => {
   }, [rewards]);
 
   const handleClaimAll = useCallback(async () => {
+    track('Button Clicked', {
+      location: 'Vesting',
+      name: 'withdraw all',
+      value: activeStreams.length,
+    });
     if (!activeStreams || !escrowedEXA || !opts) return;
     setLoading(true);
     try {
       const tx = await escrowedEXA.write.withdrawMax([activeStreams.map(({ tokenId }) => BigInt(tokenId))], opts);
-      await waitForTransaction({ hash: tx });
+      track('TX Signed', {
+        contractName: 'EscrowedEXA',
+        method: 'withdrawMax',
+        hash: tx,
+      });
+      const { status } = await waitForTransaction({ hash: tx });
+      track('TX Completed', {
+        contractName: 'EscrowedEXA',
+        method: 'withdrawMax',
+        hash: tx,
+        status,
+      });
     } catch {
       // if request fails, don't do anything
     } finally {
@@ -66,6 +83,13 @@ const Vesting: NextPage = () => {
               target="_blank"
               rel="noreferrer noopener"
               href="https://docs.exact.ly/governance/exactly-token-exa/escrowedexa-esexa"
+              onClick={() =>
+                track('Button Clicked', {
+                  location: 'Vesting',
+                  name: 'learn more ',
+                  href: 'https://docs.exact.ly/governance/exactly-token-exa/escrowedexa-esexa',
+                })
+              }
             >
               {t('Learn more about the esEXA Vesting Program.')}
             </a>
@@ -115,7 +139,13 @@ const Vesting: NextPage = () => {
                 components={{
                   1: (
                     <button
-                      onClick={openGetEXA}
+                      onClick={() => {
+                        openGetEXA();
+                        track('Button Clicked', {
+                          location: 'Vesting',
+                          name: 'get EXA',
+                        });
+                      }}
                       style={{
                         fontWeight: 700,
                         textDecoration: 'underline',

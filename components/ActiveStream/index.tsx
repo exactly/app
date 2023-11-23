@@ -335,20 +335,6 @@ const ActiveStream: FC<ActiveStreamProps> = ({
     }
   }, [escrowedEXA, opts, refetch, tokenId]);
 
-  const withdraw = useCallback(async () => {
-    if (!escrowedEXA || !opts) return;
-    setLoading(true);
-    try {
-      const tx = await escrowedEXA.write.withdrawMax([[BigInt(tokenId)]], opts);
-      await waitForTransaction({ hash: tx });
-    } catch {
-      // if request fails, don't do anything
-    } finally {
-      setLoading(false);
-      refetch();
-    }
-  }, [escrowedEXA, opts, refetch, tokenId]);
-
   const elapsed = useMemo(() => {
     const now = Math.floor(Date.now() / 1000);
     return now - startTime;
@@ -362,6 +348,37 @@ const ActiveStream: FC<ActiveStreamProps> = ({
     if (elapsed >= duration) return 100;
     return (elapsed / duration) * 100;
   }, [elapsed, duration]);
+
+  const handleWithdrawClick = useCallback(async () => {
+    track('Button Clicked', {
+      name: 'withdraw',
+      location: 'Active Stream',
+      value: progress,
+    });
+
+    if (!escrowedEXA || !opts) return;
+    setLoading(true);
+    try {
+      const tx = await escrowedEXA.write.withdrawMax([[BigInt(tokenId)]], opts);
+      track('TX Signed', {
+        contractName: 'EscrowedEXA',
+        method: 'withdrawMax',
+        hash: tx,
+      });
+      const { status } = await waitForTransaction({ hash: tx });
+      track('TX Completed', {
+        contractName: 'EscrowedEXA',
+        method: 'withdrawMax',
+        hash: tx,
+        status,
+      });
+    } catch {
+      // if request fails, don't do anything
+    } finally {
+      setLoading(false);
+      refetch();
+    }
+  }, [escrowedEXA, opts, progress, refetch, tokenId]);
 
   const timeLeft = useMemo(() => {
     const now = Math.floor(Date.now() / 1000);
@@ -455,7 +472,7 @@ const ActiveStream: FC<ActiveStreamProps> = ({
                 data-testid={
                   progress === 100 ? `vesting-stream-${tokenId}-withdraw` : `vesting-stream-${tokenId}-cancel`
                 }
-                onClick={() => (progress === 100 ? withdraw() : setCancelModalOpen(true))}
+                onClick={() => (progress === 100 ? handleWithdrawClick() : setCancelModalOpen(true))}
                 sx={{ cursor: 'pointer' }}
               >
                 <Typography fontFamily="IBM Plex Mono" fontSize={12} fontWeight={500} textTransform="uppercase">
@@ -519,7 +536,7 @@ const ActiveStream: FC<ActiveStreamProps> = ({
               <LoadingButton
                 fullWidth
                 variant="contained"
-                onClick={withdraw}
+                onClick={handleWithdrawClick}
                 loading={loading}
                 data-testid={`vesting-stream-${tokenId}-claim`}
               >
