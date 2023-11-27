@@ -1,4 +1,4 @@
-import React, { memo, useCallback } from 'react';
+import React, { MouseEvent, memo, useCallback } from 'react';
 
 import { ArrowBack, ChevronRight, Edit } from '@mui/icons-material';
 import { Box, Typography, Input, Skeleton, Button, Alert } from '@mui/material';
@@ -16,6 +16,8 @@ import { useEXABalance, useEXAPrice } from 'hooks/useEXA';
 import { formatEther, formatUnits } from 'viem';
 import formatNumber from 'utils/formatNumber';
 import { LoadingButton } from '@mui/lab';
+import { track } from 'utils/segment';
+import { AssetBalance } from 'types/Bridge';
 
 const SelectRoute = () => {
   const {
@@ -46,11 +48,74 @@ const SelectRoute = () => {
   const insufficientBalance = Boolean(asset && qtyIn && Number(qtyIn) > asset.amount);
   const { switchNetwork, isLoading: switchIsLoading } = useSwitchNetwork();
 
-  const handleSubmit = useCallback(() => {
-    if (nativeSwap) return submit();
-    setScreen(Screen.REVIEW_ROUTE);
-  }, [nativeSwap, setScreen, submit]);
+  const handleSubmit = useCallback(
+    ({ currentTarget }: MouseEvent<HTMLButtonElement>) => {
+      track('Button Clicked', {
+        location: 'Get EXA',
+        name: 'submit',
+        text: currentTarget.innerText,
+        symbol: asset?.symbol,
+      });
 
+      if (nativeSwap) return submit();
+      setScreen(Screen.REVIEW_ROUTE);
+    },
+    [asset, nativeSwap, setScreen, submit],
+  );
+
+  const handleAssetChange = useCallback(
+    (a: AssetBalance) => {
+      setAsset(a);
+      track('Option Selected', {
+        location: 'Get EXA',
+        name: 'asset',
+        value: a.symbol,
+        prevValue: asset?.symbol,
+      });
+    },
+    [asset, setAsset],
+  );
+
+  const handleBalanceClick = useCallback(() => {
+    setQtyIn(String(asset?.amount));
+    track('Button Clicked', {
+      location: 'Get EXA',
+      name: 'from balance',
+      value: asset && formatNumber(asset.amount, asset.symbol),
+    });
+  }, [asset, setQtyIn]);
+
+  const handleAmountBlur = useCallback(
+    () => track('Input Unfocused', { location: 'Get EXA', name: 'amount in', value: qtyIn }),
+    [qtyIn],
+  );
+  const handleSwitchNetworkClick = useCallback(() => {
+    switchNetwork?.(chain?.chainId);
+    track('Button Clicked', {
+      location: 'Get EXA',
+      name: 'switch network',
+      value: chain?.name,
+    });
+  }, [chain?.chainId, chain?.name, switchNetwork]);
+  const handleConnectWallet = useCallback(() => {
+    connect();
+    track('Button Clicked', {
+      location: 'Get EXA',
+      name: 'connect wallet',
+    });
+  }, [connect]);
+
+  const handleEditClick = useCallback(() => {
+    track('Option Selected', {
+      name: 'edit route',
+      value: !route,
+      prevValue: !!route,
+      location: 'Get EXA',
+    });
+
+    if (route) setRoute(null);
+    if (routes) setRoute(routes[0]);
+  }, [route, routes, setRoute]);
   return (
     <>
       <Box display={'flex'} gap={2} flexDirection="column" data-testid="get-exa-view-route">
@@ -73,7 +138,7 @@ const SelectRoute = () => {
                 {assets && asset ? (
                   <SocketAssetSelector
                     asset={asset}
-                    onChange={setAsset}
+                    onChange={handleAssetChange}
                     options={assets}
                     onClick={walletAddress ? undefined : connect}
                   />
@@ -94,6 +159,7 @@ const SelectRoute = () => {
               inputProps={{
                 'data-testid': 'get-exa-input',
               }}
+              onBlur={handleAmountBlur}
             />
             {asset ? (
               <Typography
@@ -101,7 +167,7 @@ const SelectRoute = () => {
                 color="grey.400"
                 fontWeight={400}
                 whiteSpace="nowrap"
-                onClick={() => setQtyIn(String(asset?.amount))}
+                onClick={handleBalanceClick}
                 sx={{
                   '&:hover': {
                     textDecoration: 'underline',
@@ -180,7 +246,7 @@ const SelectRoute = () => {
               {t('Route')}
             </Typography>
             {routes && routes.length > 1 && (
-              <Button variant="text" onClick={() => (route ? setRoute(null) : setRoute(routes[0]))}>
+              <Button variant="text" onClick={handleEditClick}>
                 {route ? <Edit fontSize={'small'} /> : <ArrowBack fontSize={'small'} />}
               </Button>
             )}
@@ -202,12 +268,7 @@ const SelectRoute = () => {
 
       {isConnected ? (
         walletChain?.id !== chain?.chainId ? (
-          <LoadingButton
-            fullWidth
-            onClick={() => switchNetwork?.(chain?.chainId)}
-            variant="contained"
-            loading={switchIsLoading}
-          >
+          <LoadingButton fullWidth onClick={handleSwitchNetworkClick} variant="contained" loading={switchIsLoading}>
             {t('Please switch to {{network}} network', { network: chain?.name })}
           </LoadingButton>
         ) : (
@@ -224,7 +285,7 @@ const SelectRoute = () => {
           </LoadingButton>
         )
       ) : (
-        <Button fullWidth onClick={connect} variant="contained">
+        <Button fullWidth onClick={handleConnectWallet} variant="contained">
           {t('Connect wallet')}
         </Button>
       )}

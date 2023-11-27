@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React, { memo, useCallback } from 'react';
 
 import { Box, IconButton } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
@@ -7,9 +7,22 @@ import ReviewRoute from './ReviewRoute';
 import SelectRoute from './SelectRoute';
 import { useGetEXA, Screen } from 'contexts/GetEXAContext';
 import TXStatus from './TXStatus';
+import { track } from 'utils/segment';
 
 const GetEXA = () => {
   const { screen, setScreen } = useGetEXA();
+  const handleClose = useCallback(() => {
+    setScreen(Screen.SELECT_ROUTE);
+    track('Button Clicked', {
+      location: 'Get EXA',
+      name: 'close',
+      icon: 'Close',
+    });
+    track('Modal Closed', {
+      name: 'Get EXA',
+    });
+  }, [setScreen]);
+
   return (
     <Box
       position="relative"
@@ -25,7 +38,7 @@ const GetEXA = () => {
       {screen !== Screen.SELECT_ROUTE && (
         <IconButton
           aria-label="close"
-          onClick={() => setScreen(Screen.SELECT_ROUTE)}
+          onClick={handleClose}
           sx={{
             padding: 0,
             ml: 'auto',

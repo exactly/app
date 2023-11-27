@@ -1,13 +1,14 @@
 import { Box, Typography } from '@mui/material';
 import { useGetEXA } from 'contexts/GetEXAContext';
 import Image from 'next/image';
-import React, { memo } from 'react';
+import React, { memo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Route } from 'types/Bridge';
+import { type Route as RouteType } from 'types/Bridge';
 import formatNumber from 'utils/formatNumber';
+import { track } from 'utils/segment';
 
 type Props = {
-  route: Route;
+  route: RouteType;
   tags: ('fastest' | 'best return')[];
 };
 
@@ -24,6 +25,20 @@ const Route = ({ route, tags }: Props) => {
 
   const isSelected = selectedRoute?.routeId === routeId;
 
+  const handleRouteClick = useCallback(() => {
+    setRoute(route);
+    track('Option Selected', {
+      location: 'Get EXA',
+      name: 'route',
+      value: protocol?.displayName || 'no option',
+      prevValue:
+        (
+          selectedRoute?.userTxs?.[selectedRoute?.userTxs.length - 1] ||
+          selectedRoute?.userTxs?.[0].steps?.[(selectedRoute?.userTxs[0]?.stepCount || 0) - 1]
+        )?.protocol?.displayName || 'no option',
+    });
+  }, [protocol?.displayName, route, selectedRoute, setRoute]);
+
   return (
     <Box
       display="flex"
@@ -33,7 +48,7 @@ const Route = ({ route, tags }: Props) => {
       borderColor={isSelected ? 'ActiveBorder' : 'grey.200'}
       padding={2}
       borderRadius={1}
-      onClick={() => setRoute(route)}
+      onClick={handleRouteClick}
       sx={{ cursor: 'pointer' }}
     >
       <Image

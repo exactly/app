@@ -19,6 +19,7 @@ import {
   hexToBigInt,
   keccak256,
   encodeAbiParameters,
+  formatUnits,
 } from 'viem';
 import * as wagmiChains from 'wagmi/chains';
 
@@ -62,6 +63,7 @@ import waitForTransaction from 'utils/waitForTransaction';
 import dayjs from 'dayjs';
 import { splitSignature } from '@ethersproject/bytes';
 import useDelayedEffect from 'hooks/useDelayedEffect';
+import { track } from 'utils/segment';
 
 const DESTINATION_CHAIN = optimism.id;
 
@@ -215,7 +217,21 @@ export const GetEXAProvider: FC<PropsWithChildren> = ({ children }) => {
             ...opts,
             gasLimit: gasLimit(gas),
           });
-          await waitForTransaction({ hash });
+          track('TX Signed', {
+            contractName: 'ERC20',
+            method: 'approve',
+            amount: qtyIn,
+            hash,
+          });
+          const { status } = await waitForTransaction({ hash });
+          track('TX Completed', {
+            contractName: 'ERC20',
+            method: 'approve',
+            amount: qtyIn,
+            hash,
+            status,
+            symbol: asset.symbol,
+          });
         }
       } else if (approvePermit2) {
         const allowance = await erc20.read.allowance([walletAddress, permit2.address], opts);
@@ -228,7 +244,24 @@ export const GetEXAProvider: FC<PropsWithChildren> = ({ children }) => {
             gasLimit: gasLimit(gas),
           });
           setTX({ status: 'processing', hash });
+          track('TX Signed', {
+            contractName: 'ERC20',
+            method: 'approve',
+            amount: 'MAX_UINT256',
+            hash,
+            to: permit2.address,
+            symbol: asset.symbol,
+          });
           const { status, transactionHash } = await waitForTransaction({ hash });
+          track('TX Completed', {
+            contractName: 'ERC20',
+            method: 'approve',
+            amount: 'MAX_UINT256',
+            hash,
+            status,
+            to: permit2.address,
+            symbol: asset.symbol,
+          });
           setTX({ status: status ? 'success' : 'error', hash: transactionHash });
         }
       }
@@ -371,7 +404,25 @@ export const GetEXAProvider: FC<PropsWithChildren> = ({ children }) => {
           ...crossChainOpts,
           gasLimit: gasLimit(gas),
         });
-        await waitForTransaction({ hash });
+        track('TX Signed', {
+          contractName: 'ERC20',
+          method: 'approve',
+          amount: formatUnits(minimumApprovalAmount, asset?.decimals || 18),
+          hash,
+          to: approvalData.allowanceTarget,
+          symbol: asset?.symbol,
+        });
+        const { status } = await waitForTransaction({ hash });
+
+        track('TX Completed', {
+          contractName: 'ERC20',
+          method: 'approve',
+          amount: formatUnits(minimumApprovalAmount, asset?.decimals || 18),
+          hash,
+          to: approvalData.allowanceTarget,
+          status,
+          symbol: asset?.symbol,
+        });
       }
       setTXStep(TXStep.CONFIRM);
     } catch (err) {
@@ -380,7 +431,7 @@ export const GetEXAProvider: FC<PropsWithChildren> = ({ children }) => {
       }
       setTXStep(TXStep.APPROVE);
     }
-  }, [asset?.symbol, chain?.chainId, erc20, opts, route, screen, walletAddress, walletClient]);
+  }, [asset, chain?.chainId, erc20, opts, route, screen, walletAddress, walletClient]);
 
   const nativeSwap = asset?.symbol === 'ETH' && chain?.chainId === optimism.id;
   const qtyOut =
@@ -407,14 +458,34 @@ export const GetEXAProvider: FC<PropsWithChildren> = ({ children }) => {
       });
 
       setTX({ status: 'processing', hash: txHash_ });
+
+      track('TX Signed', {
+        contractName: 'SocketGateway',
+        method: 'swap',
+        amount: qtyIn,
+        symbol: asset?.symbol,
+        hash: txHash_,
+        to: txTarget,
+      });
+
       const { status, transactionHash } = await waitForTransaction({ hash: txHash_ });
+
+      track('TX Completed', {
+        contractName: 'ERC20',
+        method: 'approve',
+        amount: qtyIn,
+        symbol: asset?.symbol,
+        hash: transactionHash,
+        to: txTarget,
+        status,
+      });
       setTX({ status: status ? 'success' : 'error', hash: transactionHash });
       setScreen(Screen.TX_STATUS);
     } catch (err) {
       setTXError({ status: true, message: handleOperationError(err) });
       setTXStep(TXStep.CONFIRM);
     }
-  }, [destinationCallData, route, txStep, walletClient]);
+  }, [asset?.symbol, destinationCallData, qtyIn, route, txStep, walletClient]);
 
   const socketSubmit = useCallback(async () => {
     const minEXA = 0n;

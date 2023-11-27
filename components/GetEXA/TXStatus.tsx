@@ -8,6 +8,7 @@ import { Box, Button, CircularProgress, Typography } from '@mui/material';
 import { CircularProgressWithIcon } from 'components/OperationsModal/ModalGif';
 import { useGetEXA } from 'contexts/GetEXAContext';
 import { Hash } from 'viem';
+import { track } from 'utils/segment';
 
 const SpinnerThing = ({
   status,
@@ -80,6 +81,13 @@ const SpinnerThing = ({
             }}
             target="_blank"
             href={url}
+            onClick={() =>
+              track('Button Clicked', {
+                href: url,
+                location: 'Get EXA',
+                name: 'view tx',
+              })
+            }
             disabled={!hash}
           >
             {t('View TX')}
