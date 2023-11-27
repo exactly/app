@@ -14,10 +14,6 @@ export default function Home() {
         flexDirection: "column",
       }}
     >
-      <Box position="absolute" top={24} left={24} bgcolor={"black"} zIndex={3}>
-        <img src="exactly.svg" style={{ height: "25px" }} />
-      </Box>
-
       <Box
         component="main"
         display={"flex"}
