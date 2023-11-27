@@ -1,0 +1,144 @@
+:root {
+  /* GRID */
+  --smallestUnit: 2px;
+  --smallUnit: 4px;
+  --u: 8px;
+  --u2: 16px;
+  --u3: 24px;
+  --u4: 32px;
+  --u5: 40px;
+  --u6: 48px;
+  --u7: 56px;
+  --u8: 64px;
+  --u9: 72px;
+  --u10: 80px;
+
+  /* WIDTH */
+  --maxWidth: 1250px;
+
+  /* FONT SIZES */
+  --font-10: 0.625rem;
+  --font-12: 0.75rem;
+  --font-14: 0.875rem;
+  --font-15: 0.938rem;
+  --font-16: 1rem;
+  --font-18: 1.125rem;
+  --font-20: 1.25rem;
+  --font-24: 1.5rem;
+  --font-32: 2rem;
+  --font-36: 2.25rem;
+  --font-42: 2.625rem;
+  --font-64: 4rem;
+  --font-80: 5rem;
+
+  /* COLORS */
+  --white: #fff;
+
+  --primary: #008cf4;
+  --primary-50: #d3ecff;
+  --primary-hover: #016bbd;
+  --primary-100: #d4d4fa;
+  --primary-200: #a6a6f4;
+
+  --secondary-brand: #34c53a;
+  --secondary: #34c53a;
+  --secondary-hover: #26952a;
+
+  /* z-index */
+  --layer-0: -1;
+  --layer-1: 1;
+  --layer-2: 2;
+  --layer-3: 3;
+  --layer-4: 4;
+  --layer-5: 5;
+  --layer-6: 6;
+  --layer-7: 7;
+  --layer-10: 10;
+
+  /* NAVBAR */
+  --navbarHeight: 88px;
+
+  /* Current Network or Wallet Disconected */
+  --currentNetwork: 48px;
+
+  /* OPACITY */
+  --defaultOpacity: 50%;
+
+  /* TOOLTIP*/
+  --tooltip-background: #1f1939;
+
+  /* FONT */
+  --secondary-font: "IBM Plex Mono", monospace;
+}
+
+body[data-theme="light"] {
+  /* GRAYS */
+  --gray-50: #fafafa;
+  --gray-100: #e1e1e1;
+  --gray-200: #cccccc;
+  --gray-500: #9a9a9a;
+  --gray-900: #1f1939;
+
+  /* SHADOWS */
+  --shadow-tables: 0px 0px 10px rgba(0, 0, 0, 0.15);
+  --shadow-header-mob: 0px 2px 4px rgba(0, 0, 0, 0.15);
+  --dropdown-shadow: 0px 2px 2px rgba(0, 0, 0, 0.1);
+
+  /* BACKGROUND */
+  --background: black;
+
+  /* LINES */
+  --solid-line: 1px solid#e0e0e0;
+  --dashed-line: 1px dashed #d9d9d9;
+
+  /* TEXT */
+  --text-color: #0e0e0e;
+  --secondary-text-color: #9a9a9a;
+
+  /* OVERLAY */
+  --overlay-background: black;
+
+  /* SKELETON */
+  --skeleton-base: #ebebeb;
+  --skeleton-highlight: #f5f5f5;
+
+  /*STATUS */
+  --error: #b00020;
+  --success: #63ca10;
+}
+
+body[data-theme="dark"] {
+  /* GRAYS */
+  --gray-50: #1d1c1c;
+  --gray-100: #8f8c9c;
+  --gray-200: #1d1c1c;
+  --gray-500: #e1e1e1;
+  --gray-900: #fafafa;
+
+  /* SHADOWS */
+  --shadow-tables: 0px 0px 5px rgba(143, 140, 156, 0.1);
+  --shadow-header-mob: 0px 2px 4px rgba(143, 140, 156, 0.1);
+  --dropdown-shadow: 0px 2px 2px rgba(143, 140, 156, 0.1);
+
+  /* BACKGROUND */
+  --background: #121212;
+
+  /* LINES */
+  --solid-line: 1px solid#e0e0e0;
+  --dashed-line: 1px dashed #d9d9d9;
+
+  /* TEXT */
+  --text-color: #fafafad4;
+  --secondary-text-color: #e1e1e1;
+
+  /* OVERLAY */
+  --overlay-background: #121212;
+
+  /* SKELETON */
+  --skeleton-base: #202020;
+  --skeleton-highlight: #444;
+
+  /*STATUS */
+  --error: #b00020;
+  --success: #63ca10;
+}
