@@ -8,6 +8,7 @@ import { Box, Drawer, IconButton, Typography } from '@mui/material';
 import GetEXA from '.';
 import { useModal } from '../../contexts/ModalContext';
 import { GetEXAProvider } from 'contexts/GetEXAContext';
+import { track } from 'utils/segment';
 
 export default function ModalWrapper() {
   const { isOpen, close } = useModal('get-exa');
@@ -46,6 +47,13 @@ export default function ModalWrapper() {
                   style={{
                     textDecoration: 'underline',
                   }}
+                  onClick={() =>
+                    track('Button Clicked', {
+                      location: 'Get EXA ',
+                      name: 'governance',
+                      href: '/governance',
+                    })
+                  }
                 >
                   {t('Governance')}
                 </Link>

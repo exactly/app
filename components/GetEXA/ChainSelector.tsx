@@ -6,6 +6,7 @@ import DropdownMenu from 'components/DropdownMenu';
 import { useGetEXA } from 'contexts/GetEXAContext';
 import Image from 'next/image';
 import { Chain } from 'types/Bridge';
+import { track } from 'utils/segment';
 type AssetOptionProps = {
   chain?: Chain;
   option?: boolean;
@@ -57,8 +58,14 @@ const ChainSelector = ({ disabled }: { disabled?: boolean }) => {
     (value: string) => {
       const c = chains?.find(({ name }) => value === name);
       if (c) onChainChange(c);
+      track('Option Selected', {
+        location: 'Get EXA',
+        name: 'chain',
+        value,
+        prevValue: chain?.name,
+      });
     },
-    [chains, onChainChange],
+    [chain, chains, onChainChange],
   );
 
   if (!chains) return <Skeleton width={100} />;

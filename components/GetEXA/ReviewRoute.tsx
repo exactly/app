@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React, { memo, useCallback } from 'react';
 
 import { Box, Typography, Table, TableBody, TableRow, TableCell, Avatar, useTheme, Skeleton } from '@mui/material';
 import { optimism } from 'wagmi/chains';
@@ -12,6 +12,7 @@ import { formatEther } from 'viem';
 import ModalAlert from 'components/common/modal/ModalAlert';
 import { ArrowForward } from '@mui/icons-material';
 import { Protocol, Route } from '../../types/Bridge';
+import { track } from 'utils/segment';
 
 export const RouteTable = ({
   route,
@@ -124,6 +125,21 @@ const ReviewRoute = () => {
   const { t } = useTranslation();
   const { chain, asset, route, qtyOut, qtyOutUSD, qtyIn, txStep, protocol, txError, approve, socketSubmit } =
     useGetEXA();
+  const handleConfirmClick = useCallback(() => {
+    socketSubmit();
+    track('Button Clicked', {
+      location: 'Get EXA',
+      name: 'confirm',
+    });
+  }, [socketSubmit]);
+
+  const handleApproveClick = useCallback(() => {
+    approve();
+    track('Button Clicked', {
+      location: 'Get EXA',
+      name: 'approve',
+    });
+  }, [approve]);
 
   if (!asset?.logoURI || !chain || !qtyOut || !protocol) {
     return;
@@ -200,7 +216,7 @@ const ReviewRoute = () => {
       {txStep === TXStep.CONFIRM || txStep === TXStep.CONFIRM_PENDING ? (
         <LoadingButton
           variant="contained"
-          onClick={socketSubmit}
+          onClick={handleConfirmClick}
           loading={txStep === TXStep.CONFIRM_PENDING}
           data-testid="get-exa-submit"
         >
@@ -209,7 +225,7 @@ const ReviewRoute = () => {
       ) : (
         <LoadingButton
           fullWidth
-          onClick={approve}
+          onClick={handleApproveClick}
           variant="contained"
           loading={txStep === TXStep.APPROVE_PENDING}
           data-testid="get-exa-approve"
