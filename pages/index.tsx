@@ -24,7 +24,9 @@ export default function Home() {
         justifyItems={"center"}
         sx={{
           [breakpoints.down("md")]: {
-            flexDirection: "column-reverse",
+            flexDirection: "column",
+            height:'unset',
+            gap: '48px'
           },
         }}
       >
