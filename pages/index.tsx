@@ -25,8 +25,8 @@ export default function Home() {
         sx={{
           [breakpoints.down("md")]: {
             flexDirection: "column",
-            height:'unset',
-            gap: '48px'
+            height: "unset",
+            gap: "48px",
           },
         }}
       >
@@ -40,17 +40,15 @@ export default function Home() {
         >
           <Box display="flex" flexDirection="column" gap={1}>
             <Typography fontSize={14}>Introducing</Typography>
-            <img
-              src="exaApp.png"
-              width={250}
-              style={{
-                marginLeft: -8,
-              }}
-            />
+            <img src="exaApp.svg" width={250} style={{ marginTop: 10 }} />
           </Box>
           <Typography>
-            Deposit and borrow on-chain.
-            <br /> The first self-custodial debit and credit card.
+            Decentralizing your financial life, today:
+            <ul>
+              <li>Deposit and borrow on-chain.</li>
+              <li>Get your self-custodial debit and credit card.</li>
+              <li>Receive cashback in esEXA tokens.</li>
+            </ul>
           </Typography>
           <Box display="flex" gap={2}>
             <Button
