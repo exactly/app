@@ -1,0 +1,4 @@
+.gitattributes @cruzdanilo
+bun.lockb @cruzdanilo
+package*.json @cruzdanilo
+public/.well-known/ @cruzdanilo
