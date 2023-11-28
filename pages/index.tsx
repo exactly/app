@@ -3,7 +3,7 @@ import type { NextPage } from 'next';
 import { Box, Grid } from '@mui/material';
 
 import MarketsHeader from 'components/markets/Header';
-import MarketTables from 'components/markets/MarketsTables';
+import MarketTables from 'components/markets/MarketsSingleTable';
 import MarketsBasic from 'components/markets/MarketsBasic';
 import BackgroundCircle from 'components/BackgroundCircle';
 
