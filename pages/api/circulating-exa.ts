@@ -36,14 +36,19 @@ export default async function (_: NextApiRequest, res: NextApiResponse) {
     transport: http(`https://opt-mainnet.g.alchemy.com/v2/${PRIVATE_ALCHEMY_API_KEY}`),
   });
 
-  const [{ result: decimals }, { result: totalSupply }, ...balancesResult] = await client.multicall({
-    contracts: [
-      { ...exa, functionName: 'decimals' },
-      { ...exa, functionName: 'totalSupply' },
-      ...EXCLUDED_ADDRESSES.map((address) => ({ ...exa, functionName: 'balanceOf', args: [address] })),
-    ],
-  });
-  const nonCirculatingSupply = balancesResult.reduce((total, { result }) => total + (result as bigint), 0n);
-  const circulatingSupply = (totalSupply as bigint) - nonCirculatingSupply;
-  res.status(200).json(Number(circulatingSupply) / 10 ** Number(decimals));
+  try {
+    const [{ result: decimals }, { result: totalSupply }, ...balancesResult] = await client.multicall({
+      contracts: [
+        { ...exa, functionName: 'decimals' },
+        { ...exa, functionName: 'totalSupply' },
+        ...EXCLUDED_ADDRESSES.map((address) => ({ ...exa, functionName: 'balanceOf', args: [address] })),
+      ],
+    });
+    const nonCirculatingSupply = balancesResult.reduce((total, { result }) => total + (result as bigint), 0n);
+    const circulatingSupply = (totalSupply as bigint) - nonCirculatingSupply;
+    res.status(200).json(Number(circulatingSupply) / 10 ** Number(decimals));
+  } catch (error) {
+    res.status(502).json({ message: 'There was an error fetching the circulating supply' });
+    throw error;
+  }
 }
