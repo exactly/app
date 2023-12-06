@@ -83,7 +83,7 @@ export default function App({ Component, pageProps, router }: AppProps) {
           <ModalContextProvider>
             <GlobalErrorProvider>
               <AccountDataProvider>
-                <Box display="flex" flexDirection="column" mx={2} height="100%">
+                <Box display="flex" flexDirection="column" px={2} height="100%">
                   <Navbar />
                   {router.pathname === '/strategies' && (
                     <Box position="relative" zIndex={-1} mx={-2}>

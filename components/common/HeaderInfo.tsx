@@ -24,16 +24,24 @@ type HeaderInfoProps = {
     | 'overline'
     | undefined;
   shadow?: boolean;
+  transparent?: boolean;
   xs?: number;
 };
 
-const HeaderInfo: FC<HeaderInfoProps> = ({ title, itemsInfo, variant = 'h6', shadow = true, xs }) => {
+const HeaderInfo: FC<HeaderInfoProps> = ({
+  title,
+  itemsInfo,
+  variant = 'h6',
+  shadow = true,
+  xs,
+  transparent = false,
+}) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   return (
     <Grid
-      sx={{ bgcolor: 'components.bg' }}
+      sx={{ ...(transparent && { bgcolor: 'components.bg' }) }}
       p={isMobile ? '16px' : '24px'}
       boxShadow={({ palette }) => (palette.mode === 'light' && shadow ? '0px 4px 12px rgba(175, 177, 182, 0.2)' : '')}
     >
