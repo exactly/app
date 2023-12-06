@@ -17,7 +17,7 @@ const sxButton: SxProps = {
   height: '34px',
 };
 
-const PoolMobile: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) => {
+const PoolMobile: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType = 'floating' }) => {
   const translateOperation = useTranslateOperation();
   const { handleActionClick, isDisable } = useActionButton();
   const assets = useAssets();

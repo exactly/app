@@ -32,6 +32,7 @@ export type PoolTableProps = {
   isLoading: boolean;
   headers: TableHeader<TableRow>[];
   rows: TableRow[];
+  rateType?: 'fixed' | 'floating';
 };
 
 export type TableRow = {
