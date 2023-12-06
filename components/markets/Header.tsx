@@ -63,7 +63,7 @@ const MarketsHeader: FC = () => {
     },
   ];
 
-  return <HeaderInfo itemsInfo={itemsInfo} />;
+  return <HeaderInfo shadow={false} itemsInfo={itemsInfo} />;
 };
 
 export default MarketsHeader;
