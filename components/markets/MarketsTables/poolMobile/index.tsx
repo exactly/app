@@ -192,7 +192,7 @@ const GridAPRItem: FC<{
                 <ImportExportIcon sx={{ fontSize: 14, color: palette.operation.variable }} />
               )}
               <Typography width="fit-content" variant="subtitle2" color="grey.500">
-                {maturity ? parseTimestamp(maturity) : 'Open-endened'}
+                {maturity ? parseTimestamp(maturity) : 'Open-ended'}
               </Typography>
             </Grid>
           </Grid>

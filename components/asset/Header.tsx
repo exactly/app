@@ -14,6 +14,8 @@ import { formatEther, formatUnits } from 'viem';
 import useStETHNativeAPR from 'hooks/useStETHNativeAPR';
 import { toPercentage } from 'utils/utils';
 import { track } from 'utils/segment';
+import { Typography } from '@mui/material';
+import getSymbolDescription from 'utils/getSymbolDescription';
 
 type Props = {
   symbol: string;
@@ -26,6 +28,14 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
   const { push, query } = useRouter();
 
   const nativeAPR = useStETHNativeAPR();
+
+  const assetDescription = useCallback(
+    (s: string) => {
+      if (!marketAccount) return '';
+      return getSymbolDescription(marketAccount, s);
+    },
+    [marketAccount],
+  );
 
   const { floatingDeposits, floatingBorrows, backupBorrows } = useMemo(() => {
     if (!marketAccount) return {};
@@ -175,6 +185,9 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
             exaToken={marketAccount.symbol}
           />
         )}
+        <Typography sx={{ width: '100%' }} variant="dashboardMainSubtitle">
+          {assetDescription(symbol)}
+        </Typography>
       </Grid>
       <Grid item container spacing={4}>
         {itemsInfo.map(({ label, value, underLabel, tooltipTitle }) => (

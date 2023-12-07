@@ -194,7 +194,7 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows }) => {
                             <ImportExportIcon sx={{ fontSize: 16, color: palette.operation.variable }} />
                           )}
                           <Typography width="fit-content" variant="subtitle2" color="grey.500">
-                            {depositMaturity ? parseTimestamp(depositMaturity) : 'Open-endened'}
+                            {depositMaturity ? parseTimestamp(depositMaturity) : 'Open-ended'}
                           </Typography>
                         </Grid>
                       </Box>
@@ -255,7 +255,7 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows }) => {
                             <ImportExportIcon sx={{ fontSize: 16, color: palette.operation.variable }} />
                           )}
                           <Typography width="fit-content" variant="subtitle2" color="grey.500">
-                            {borrowMaturity ? parseTimestamp(borrowMaturity) : 'Open-endened'}
+                            {borrowMaturity ? parseTimestamp(borrowMaturity) : 'Open-ended'}
                           </Typography>
                         </Grid>
                       </Box>
