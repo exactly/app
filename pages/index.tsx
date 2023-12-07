@@ -1,6 +1,6 @@
 import React from 'react';
 import type { NextPage } from 'next';
-import { Box, Grid } from '@mui/material';
+import { Box, Grid, useTheme } from '@mui/material';
 
 import MarketsHeader from 'components/markets/Header';
 import MarketTables from 'components/markets/MarketsTables';
@@ -11,6 +11,7 @@ import { useCustomTheme } from 'contexts/ThemeContext';
 
 const Markets: NextPage = () => {
   const { view } = useCustomTheme();
+  const { palette } = useTheme();
 
   if (!view) return null;
 
@@ -23,7 +24,7 @@ const Markets: NextPage = () => {
           width: '100%',
           left: 0,
           top: 0,
-          backgroundColor: 'grey.300',
+          backgroundColor: palette.mode === 'light' ? 'grey.300' : '#181A1B',
           zIndex: -1,
         }}
       />

@@ -56,10 +56,10 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows }) => {
   const { setOrderBy, sortData, direction: sortDirection, isActive: sortActive } = useSorting<TableRow>();
   const tempRows = isLoading ? defaultRows : rows;
 
-  const getRateType = useCallback((maturity: bigint | undefined) => {
-    if (maturity === undefined) return 'floating';
-    return maturity === 0n ? 'floating' : 'fixed';
-  }, []);
+  const getRateType = useCallback(
+    (maturity: bigint | undefined) => (maturity === undefined || maturity === 0n ? 'floating' : 'fixed'),
+    [],
+  );
 
   const trackRowClick = useCallback((symbol: string) => {
     track('Button Clicked', {
@@ -200,26 +200,27 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows }) => {
                       </Box>
                     )}
                   </TableCell>
-                  <Tooltip
-                    title={
-                      getRateType(depositMaturity) === 'fixed' &&
-                      t(
-                        'In order to deposit at a fixed rate, there must have been fixed rate loans at the same maturity previously to ensure the solvency condition',
-                      )
-                    }
-                    arrow
-                    placement="top"
+
+                  <TableCell
+                    align="left"
+                    size="small"
+                    width={50}
+                    onClick={(e) => e.preventDefault()}
+                    sx={{ cursor: 'default', pl: 1.5, pr: 3, width: '200px' }}
                   >
-                    <TableCell
-                      align="left"
-                      size="small"
-                      width={50}
-                      onClick={(e) => e.preventDefault()}
-                      sx={{ cursor: 'default', pl: 1.5, pr: 3, width: '200px' }}
-                    >
-                      {isLoading ? (
-                        <Skeleton sx={{ borderRadius: '32px' }} variant="rounded" height={34} width={80} />
-                      ) : (
+                    {isLoading ? (
+                      <Skeleton sx={{ borderRadius: '32px' }} variant="rounded" height={34} width={80} />
+                    ) : (
+                      <Tooltip
+                        title={
+                          getRateType(depositMaturity) === 'fixed' &&
+                          t(
+                            'In order to deposit at a fixed rate, there must have been fixed rate loans at the same maturity previously to ensure the solvency condition',
+                          )
+                        }
+                        arrow
+                        placement="top"
+                      >
                         <Button
                           variant="contained"
                           onClick={(e) => handleDepositClick(e, symbol, depositMaturity)}
@@ -229,9 +230,9 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows }) => {
                         >
                           {t('Deposit')}
                         </Button>
-                      )}
-                    </TableCell>
-                  </Tooltip>
+                      </Tooltip>
+                    )}
+                  </TableCell>
                   <TableCell align="left" sx={{ width: '170px', py: 3, pl: 3, pr: 1.5 }}>
                     <Typography fontWeight={700}>
                       {isLoading ? <Skeleton width={80} /> : `$${totalBorrowed}`}
