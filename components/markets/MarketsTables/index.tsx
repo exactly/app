@@ -2,22 +2,22 @@ import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import Grid from '@mui/material/Grid';
 import PoolTable, { TableRow } from './poolTable';
 import { useTranslation } from 'react-i18next';
-import { formatUnits } from 'viem';
+import { formatEther, formatUnits } from 'viem';
 
 import formatNumber from 'utils/formatNumber';
 import getFloatingDepositAPR from 'utils/getFloatingDepositAPR';
 
-import { Box, Typography } from '@mui/material';
+import { Box } from '@mui/material';
 
 import { globals } from 'styles/theme';
 import { useWeb3 } from 'hooks/useWeb3';
 import useAssets from 'hooks/useAssets';
 import PoolMobile from './poolMobile';
-import MobileTabs from 'components/MobileTabs';
 import { TableHeader } from 'components/common/TableHeadCell';
 import useAccountData from 'hooks/useAccountData';
 import { useGlobalError } from 'contexts/GlobalErrorContext';
 import { MAX_UINT256, WEI_PER_ETHER } from 'utils/const';
+import useRewards from 'hooks/useRewards';
 
 const { smOrLess, mdOrMore } = globals;
 
@@ -33,11 +33,11 @@ const MarketTables: FC = () => {
   const { t } = useTranslation();
   const { chain } = useWeb3();
   const { accountData } = useAccountData();
+  const { rates } = useRewards();
   const assets = useAssets();
   const defaultRows = useMemo<TableRow[]>(() => assets.map((s) => ({ symbol: s })), [assets]);
 
-  const [floatingRows, setFloatingRows] = useState<TableRow[]>([...defaultRows]);
-  const [fixedRows, setFixedRows] = useState<TableRow[]>([...defaultRows]);
+  const [rows, setRows] = useState<TableRow[]>([...defaultRows]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const { setIndexerError } = useGlobalError();
 
@@ -46,24 +46,39 @@ const MarketTables: FC = () => {
       title: t('Asset'),
       width: '130px',
       sortKey: 'symbol',
+      sx: { pl: 1.5, pr: 3, pt: 1, pb: 1 },
     },
     {
       title: t('Total Deposits'),
       sortKey: 'totalDeposited',
+      sx: { pl: 3, pr: 1.5, pt: 1, pb: 1 },
+    },
+    {
+      title: t('Best Deposit APR'),
+      tooltipTitle: t('Change in the underlying Variable Rate Pool shares value over the last 15 minutes, annualized.'),
+      sortKey: 'depositAPR',
+      sx: { pl: 1.5, pr: 1.5, pt: 1, pb: 1 },
+    },
+    {
+      title: '',
+      width: '130px',
+      sx: { pl: 1.5, pr: 3, pt: 1, pb: 1 },
     },
     {
       title: t('Total Borrows'),
       sortKey: 'totalBorrowed',
+      sx: { pl: 3, pr: 1.5, pt: 1, pb: 1 },
     },
     {
-      title: t('Deposit APR'),
-      tooltipTitle: t('Change in the underlying Variable Rate Pool shares value over the last 15 minutes, annualized.'),
-      sortKey: 'depositAPR',
-    },
-    {
-      title: t('Borrow APR'),
+      title: t('Best Borrow APR'),
       tooltipTitle: t('The borrowing interest APR related to the current utilization rate in the Variable Rate Pool.'),
       sortKey: 'borrowAPR',
+      sx: { pl: 1.5, pr: 1.5, pt: 1, pb: 1 },
+    },
+    {
+      title: '',
+      width: '130px',
+      sx: { pl: 1.5, pr: 3, pt: 1, pb: 1 },
     },
   ];
 
@@ -102,8 +117,7 @@ const MarketTables: FC = () => {
 
     if (!accountData || !chain) return;
 
-    const tempFloatingRows: TableRow[] = [];
-    const tempFixedRows: TableRow[] = [];
+    const tempRows: TableRow[] = [];
 
     await Promise.all(
       accountData.map(
@@ -118,12 +132,16 @@ const MarketTables: FC = () => {
           floatingBorrowRate,
           fixedPools,
         }) => {
-          const totalFloatingDeposited = formatNumber(
-            formatUnits((totalFloatingDepositAssets * usdPrice) / WEI_PER_ETHER, decimals),
-          );
-          const totalFloatingBorrowed = formatNumber(
-            formatUnits((totalFloatingBorrowAssets * usdPrice) / WEI_PER_ETHER, decimals),
-          );
+          let totalDeposited = 0n;
+          let totalBorrowed = 0n;
+
+          totalDeposited += totalFloatingDepositAssets;
+          totalBorrowed += totalFloatingBorrowAssets;
+
+          fixedPools.forEach(({ supplied, borrowed }) => {
+            totalDeposited += supplied;
+            totalBorrowed += borrowed;
+          });
 
           const floatingDepositAPR = await getFloatingDepositAPR(
             chain.id,
@@ -135,50 +153,58 @@ const MarketTables: FC = () => {
             return undefined;
           });
 
-          tempFloatingRows.push({
-            symbol,
-            totalDeposited: totalFloatingDeposited,
-            totalBorrowed: totalFloatingBorrowed,
-            depositAPR: floatingDepositAPR,
-            borrowAPR: Number(floatingBorrowRate) / 1e18,
-          });
+          const depositRewards =
+            rates[symbol]?.map(({ floatingDeposit }) => floatingDeposit).reduce((sum, reward) => sum + reward, 0n) ||
+            0n;
 
-          let totalDeposited = 0n;
-          let totalBorrowed = 0n;
-
-          // Set deposits and borrows total of fixed pools
-          fixedPools.forEach(({ supplied, borrowed }) => {
-            totalDeposited += supplied;
-            totalBorrowed += borrowed;
-          });
-
-          const bestBorrow = fixedPools.reduce(
-            (best, { maturity, minBorrowRate: rate }) => (rate < best.rate ? { maturity, rate } : best),
-            { maturity: 0n, rate: MAX_UINT256 },
-          );
-          const bestDeposit = fixedPools.reduce(
-            (best, { maturity, depositRate: rate }) => (rate > best.rate ? { maturity, rate } : best),
-            { maturity: 0n, rate: 0n },
+          const bestFixedDeposit = fixedPools.reduce(
+            (best, { maturity, depositRate }) =>
+              Number(formatEther(depositRate)) > best.rate
+                ? { maturity: maturity, rate: Number(formatEther(depositRate)) }
+                : best,
+            { maturity: 0n, rate: 0 },
           );
 
-          tempFixedRows.push({
+          const bestFixedBorrow = fixedPools.reduce(
+            (best, { maturity, minBorrowRate }) =>
+              (Number(formatEther(minBorrowRate)) === best.rate && maturity > best.maturity) ||
+              Number(formatEther(minBorrowRate)) < best.rate
+                ? { maturity: maturity, rate: Number(formatEther(minBorrowRate)) }
+                : best,
+            { maturity: 0n, rate: Number(formatEther(MAX_UINT256)) },
+          );
+
+          const bestDeposit =
+            floatingDepositAPR === undefined
+              ? { maturity: bestFixedDeposit.maturity, rate: Number(bestFixedDeposit.rate) }
+              : bestFixedDeposit.rate > floatingDepositAPR + Number(depositRewards)
+              ? { maturity: bestFixedDeposit.maturity, rate: bestFixedDeposit.rate }
+              : { maturity: 0n, rate: floatingDepositAPR };
+
+          const bestBorrow =
+            bestFixedBorrow.rate < Number(formatEther(floatingBorrowRate))
+              ? { maturity: bestFixedBorrow.maturity, rate: bestFixedBorrow.rate }
+              : { maturity: 0n, rate: Number(formatEther(floatingBorrowRate)) };
+
+          tempRows.push({
             symbol,
             totalDeposited: formatNumber(formatUnits((totalDeposited * usdPrice) / WEI_PER_ETHER, decimals)),
             totalBorrowed: formatNumber(formatUnits((totalBorrowed * usdPrice) / WEI_PER_ETHER, decimals)),
-            borrowAPR: Number(bestBorrow.rate) / 1e18,
-            depositAPR: Number(bestDeposit.rate) / 1e18,
-            borrowMaturity: bestBorrow.maturity,
+            depositAPR: bestDeposit.rate,
             depositMaturity: bestDeposit.maturity,
+            borrowAPR: bestBorrow.rate,
+            borrowMaturity: bestBorrow.maturity,
+            depositedAssets: formatNumber(formatUnits(totalDeposited, decimals), symbol),
+            borrowedAssets: formatNumber(formatUnits(totalBorrowed, decimals), symbol),
           });
         },
       ),
     );
 
-    setFloatingRows(sortByDefault(defaultRows, tempFloatingRows));
-    setFixedRows(sortByDefault(defaultRows, tempFixedRows));
+    setRows(sortByDefault(defaultRows, tempRows));
 
     setIsLoading(false);
-  }, [accountData, chain, defaultRows, setIndexerError]);
+  }, [accountData, chain, defaultRows, rates, setIndexerError]);
 
   useEffect(() => {
     void defineRows();
@@ -189,63 +215,17 @@ const MarketTables: FC = () => {
       <Grid
         my={2}
         px={1.5}
-        py={3}
+        pb={1}
         boxShadow={({ palette }) => (palette.mode === 'light' ? '0px 4px 12px rgba(175, 177, 182, 0.2)' : '')}
-        borderRadius="0px 0px 6px 6px"
+        borderRadius="8px 8px 0px 0px"
         bgcolor="components.bg"
-        borderTop="4px solid #34C53A"
         display={mdOrMore}
       >
-        <Typography variant="h6" mb={2} ml={1.5}>
-          {t('Variable Interest Rate')}
-        </Typography>
-        <PoolTable isLoading={isLoading} headers={floatingHeaders} rows={floatingRows} rateType="floating" />
+        <PoolTable isLoading={isLoading} headers={floatingHeaders} rows={...rows} />
       </Grid>
-      <Grid
-        width="100%"
-        mb={2}
-        px={1.5}
-        py={3}
-        boxShadow={({ palette }) => (palette.mode === 'light' ? '0px 4px 12px rgba(175, 177, 182, 0.2)' : '')}
-        borderRadius="0px 0px 6px 6px"
-        bgcolor="components.bg"
-        borderTop="4px solid #008CF4"
-        display={mdOrMore}
-      >
-        <Typography variant="h6" mb={2} ml={1.5}>
-          {t('Fixed Interest Rate')}
-        </Typography>
-        <PoolTable isLoading={isLoading} headers={fixedHeaders} rows={fixedRows} rateType="fixed" />
-      </Grid>
+
       <Box display={smOrLess} my={2}>
-        <MobileTabs
-          tabs={[
-            {
-              title: t('Variable Interest Rate'),
-              content: (
-                <PoolMobile
-                  key={`markets_pool_mobile_floating`}
-                  isLoading={isLoading}
-                  headers={floatingHeaders}
-                  rows={floatingRows}
-                  rateType="floating"
-                />
-              ),
-            },
-            {
-              title: t('Fixed Interest Rate'),
-              content: (
-                <PoolMobile
-                  key={`markets_pool_mobile_fixed`}
-                  isLoading={isLoading}
-                  headers={fixedHeaders}
-                  rows={fixedRows}
-                  rateType="fixed"
-                />
-              ),
-            },
-          ]}
-        />
+        <PoolMobile key={`markets_pool_mobile_fixed`} isLoading={isLoading} headers={fixedHeaders} rows={...rows} />
       </Box>
     </>
   );

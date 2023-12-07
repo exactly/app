@@ -3,7 +3,7 @@ import type { NextPage } from 'next';
 import { Box, Grid } from '@mui/material';
 
 import MarketsHeader from 'components/markets/Header';
-import MarketTables from 'components/markets/MarketsSingleTable';
+import MarketTables from 'components/markets/MarketsTables';
 import MarketsBasic from 'components/markets/MarketsBasic';
 import BackgroundCircle from 'components/BackgroundCircle';
 
@@ -19,7 +19,7 @@ const Markets: NextPage = () => {
       <Box
         sx={{
           position: 'absolute',
-          height: '27%',
+          height: '30%',
           width: '100%',
           left: 0,
           top: 0,

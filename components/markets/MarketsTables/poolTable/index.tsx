@@ -8,7 +8,9 @@ import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Grid';
 import Button from '@mui/material/Button';
-import { Box, Skeleton, Tooltip } from '@mui/material';
+import { Box, Skeleton, Tooltip, useTheme } from '@mui/material';
+import LockIcon from '@mui/icons-material/Lock';
+import ImportExportIcon from '@mui/icons-material/ImportExport';
 
 import Image from 'next/image';
 
@@ -30,7 +32,6 @@ export type PoolTableProps = {
   isLoading: boolean;
   headers: TableHeader<TableRow>[];
   rows: TableRow[];
-  rateType: 'floating' | 'fixed';
 };
 
 export type TableRow = {
@@ -41,16 +42,24 @@ export type TableRow = {
   depositMaturity?: bigint;
   borrowAPR?: number;
   borrowMaturity?: bigint;
+  depositedAssets?: string;
+  borrowedAssets?: string;
 };
 
-const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) => {
+const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows }) => {
   const { t } = useTranslation();
   const { query } = useRouter();
   const { handleActionClick, isDisable } = useActionButton();
   const assets = useAssets();
+  const { palette } = useTheme();
   const defaultRows = useMemo<TableRow[]>(() => assets.map((s) => ({ symbol: s })), [assets]);
   const { setOrderBy, sortData, direction: sortDirection, isActive: sortActive } = useSorting<TableRow>();
   const tempRows = isLoading ? defaultRows : rows;
+
+  const getRateType = useCallback((maturity: bigint | undefined) => {
+    if (maturity === undefined) return 'floating';
+    return maturity === 0n ? 'floating' : 'fixed';
+  }, []);
 
   const trackRowClick = useCallback((symbol: string) => {
     track('Button Clicked', {
@@ -63,7 +72,7 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
 
   const handleDepositClick = useCallback(
     (e: MouseEvent<HTMLButtonElement>, symbol: string, depositMaturity?: bigint): void => {
-      const operation = rateType === 'floating' ? 'deposit' : 'depositAtMaturity';
+      const operation = getRateType(depositMaturity) === 'floating' ? 'deposit' : 'depositAtMaturity';
       track('Button Clicked', {
         location: 'Markets',
         name: 'deposit',
@@ -73,10 +82,10 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
       });
       handleActionClick(e, operation, symbol, depositMaturity);
     },
-    [handleActionClick, rateType],
+    [getRateType, handleActionClick],
   );
   const handleBorrowClick = (e: MouseEvent<HTMLButtonElement>, symbol: string, borrowMaturity?: bigint): void => {
-    const action = rateType === 'floating' ? 'borrow' : 'borrowAtMaturity';
+    const action = getRateType(borrowMaturity) === 'floating' ? 'borrow' : 'borrowAtMaturity';
     track('Button Clicked', {
       location: 'Markets',
       name: 'borrow',
@@ -86,12 +95,13 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
     });
     handleActionClick(e, action, symbol, borrowMaturity);
   };
+
   return (
     <TableContainer>
       <Table>
         <TableHead>
           <TableRow>
-            {headers.map(({ title, tooltipTitle, width, sortKey }) => (
+            {headers.map(({ title, tooltipTitle, width, sortKey, sx }) => (
               <TableHeadCell
                 key={title.trim()}
                 title={title}
@@ -101,16 +111,24 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
                 sortDirection={sortKey && sortDirection(sortKey)}
                 sort={() => setOrderBy(sortKey)}
                 isSortEnabled={!!sortKey}
-                sx={{ '&:first-child': { pl: 1.5 }, '&:last-child': { pr: 1.5 } }}
+                sx={sx}
               />
             ))}
-            <TableCell />
-            <TableCell />
           </TableRow>
         </TableHead>
         <TableBody>
           {sortData(tempRows).map(
-            ({ symbol, totalDeposited, totalBorrowed, depositAPR, borrowAPR, depositMaturity, borrowMaturity }) => (
+            ({
+              symbol,
+              totalDeposited,
+              totalBorrowed,
+              depositAPR,
+              borrowAPR,
+              depositMaturity,
+              borrowMaturity,
+              depositedAssets,
+              borrowedAssets,
+            }) => (
               <Link
                 href={{ pathname: `/${symbol}`, query }}
                 key={symbol}
@@ -125,9 +143,9 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
                     cursor: 'pointer',
                   }}
                   hover
-                  data-testid={`markets-${rateType}-pool-row-${symbol}`}
+                  data-testid={`markets-pool-row-${symbol}`}
                 >
-                  <TableCell component="th" scope="row" sx={{ pl: 1.5 }}>
+                  <TableCell component="th" scope="row" sx={{ pr: 3, pl: 1.5 }}>
                     <Grid container alignItems="center">
                       {isLoading ? (
                         <Skeleton variant="circular" width={24} height={24} />
@@ -148,47 +166,43 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
                       </Typography>
                     </Grid>
                   </TableCell>
-                  <TableCell align="left" sx={{ width: '200px' }}>
-                    <Typography>{isLoading ? <Skeleton width={80} /> : `$${totalDeposited}`}</Typography>
+                  <TableCell align="left" sx={{ width: '170px', py: 3, pl: 3, pr: 1.5 }}>
+                    <Typography fontWeight={700}>
+                      {isLoading ? <Skeleton width={80} /> : `$${totalDeposited}`}
+                    </Typography>
+                    <Typography variant="subtitle2" color="grey.500">
+                      {isLoading ? <Skeleton width={80} /> : `${depositedAssets} ${formatSymbol(symbol)}`}
+                    </Typography>
                   </TableCell>
-                  <TableCell align="left" sx={{ width: '200px' }}>
-                    <Typography>{isLoading ? <Skeleton width={80} /> : `$${totalBorrowed}`}</Typography>
-                  </TableCell>
-                  <TableCell align="left" sx={{ width: '200px', py: 1 }}>
+                  <TableCell align="left" sx={{ width: '170px', py: 3, px: 1.5 }}>
                     {isLoading || depositAPR === undefined ? (
-                      <Skeleton width={80} />
+                      <Skeleton width={110} height={50} />
                     ) : (
-                      <Box display="flex" flexDirection="column" width="fit-content">
+                      <Box display="flex" flexDirection="column">
                         <Grid container alignItems="center" gap={1}>
-                          <Rates symbol={symbol} apr={depositAPR} type="deposit" rateType={rateType} />
+                          <Rates
+                            symbol={symbol}
+                            apr={depositAPR}
+                            type="deposit"
+                            rateType={getRateType(depositMaturity)}
+                          />
                         </Grid>
-                        {rateType === 'fixed' && (
+                        <Grid container alignItems="center" gap={0.5}>
+                          {depositMaturity ? (
+                            <LockIcon sx={{ fontSize: 16, color: palette.operation.fixed }} />
+                          ) : (
+                            <ImportExportIcon sx={{ fontSize: 16, color: palette.operation.variable }} />
+                          )}
                           <Typography width="fit-content" variant="subtitle2" color="grey.500">
-                            {depositMaturity ? parseTimestamp(depositMaturity) : ''}
+                            {depositMaturity ? parseTimestamp(depositMaturity) : 'Open-endened'}
                           </Typography>
-                        )}
-                      </Box>
-                    )}
-                  </TableCell>
-                  <TableCell align="left" sx={{ width: '200px', py: 1 }}>
-                    {isLoading || borrowAPR === undefined ? (
-                      <Skeleton width={80} />
-                    ) : (
-                      <Box display="flex" flexDirection="column" width="fit-content">
-                        <Grid container alignItems="center" gap={1}>
-                          <Rates symbol={symbol} apr={borrowAPR} type="borrow" rateType={rateType} />
                         </Grid>
-                        {rateType === 'fixed' && (
-                          <Typography width="fit-content" variant="subtitle2" color="grey.500">
-                            {borrowMaturity ? parseTimestamp(borrowMaturity) : ''}
-                          </Typography>
-                        )}
                       </Box>
                     )}
                   </TableCell>
                   <Tooltip
                     title={
-                      rateType === 'fixed' &&
+                      getRateType(depositMaturity) === 'fixed' &&
                       t(
                         'In order to deposit at a fixed rate, there must have been fixed rate loans at the same maturity previously to ensure the solvency condition',
                       )
@@ -201,21 +215,16 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
                       size="small"
                       width={50}
                       onClick={(e) => e.preventDefault()}
-                      sx={{ cursor: 'default', px: 0.5 }}
+                      sx={{ cursor: 'default', pl: 1.5, pr: 3, width: '200px' }}
                     >
                       {isLoading ? (
-                        <Skeleton
-                          sx={{ margin: 'auto', borderRadius: '32px' }}
-                          variant="rounded"
-                          height={34}
-                          width={80}
-                        />
+                        <Skeleton sx={{ borderRadius: '32px' }} variant="rounded" height={34} width={80} />
                       ) : (
                         <Button
                           variant="contained"
                           onClick={(e) => handleDepositClick(e, symbol, depositMaturity)}
-                          disabled={isDisable(rateType, depositAPR)}
-                          data-testid={`${rateType}-deposit-${symbol}`}
+                          disabled={isDisable(getRateType(depositMaturity), depositAPR)}
+                          data-testid={`${getRateType(depositMaturity)}-deposit-${symbol}`}
                           sx={{ whiteSpace: 'nowrap' }}
                         >
                           {t('Deposit')}
@@ -223,13 +232,41 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
                       )}
                     </TableCell>
                   </Tooltip>
-
+                  <TableCell align="left" sx={{ width: '170px', py: 3, pl: 3, pr: 1.5 }}>
+                    <Typography fontWeight={700}>
+                      {isLoading ? <Skeleton width={80} /> : `$${totalBorrowed}`}
+                    </Typography>
+                    <Typography variant="subtitle2" color="grey.500">
+                      {isLoading ? <Skeleton width={80} /> : `${borrowedAssets} ${formatSymbol(symbol)}`}
+                    </Typography>
+                  </TableCell>
+                  <TableCell align="left" sx={{ width: '170px', py: 3, px: 1.5 }}>
+                    {isLoading || borrowAPR === undefined ? (
+                      <Skeleton width={80} />
+                    ) : (
+                      <Box display="flex" flexDirection="column" width="fit-content">
+                        <Grid container alignItems="center" gap={1}>
+                          <Rates symbol={symbol} apr={borrowAPR} type="borrow" rateType={getRateType(borrowMaturity)} />
+                        </Grid>
+                        <Grid container alignItems="center" gap={0.5}>
+                          {borrowMaturity ? (
+                            <LockIcon sx={{ fontSize: 16, color: palette.operation.fixed }} />
+                          ) : (
+                            <ImportExportIcon sx={{ fontSize: 16, color: palette.operation.variable }} />
+                          )}
+                          <Typography width="fit-content" variant="subtitle2" color="grey.500">
+                            {borrowMaturity ? parseTimestamp(borrowMaturity) : 'Open-endened'}
+                          </Typography>
+                        </Grid>
+                      </Box>
+                    )}
+                  </TableCell>
                   <TableCell
                     align="left"
                     size="small"
                     width={50}
                     onClick={(e) => e.preventDefault()}
-                    sx={{ cursor: 'default', pr: 1.5 }}
+                    sx={{ cursor: 'default', pl: 1.5, pr: 3, width: 'fit-content' }}
                   >
                     {isLoading ? (
                       <Skeleton
@@ -250,7 +287,7 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows, rateType }) =
                           variant="outlined"
                           sx={{ backgroundColor: 'components.bg', whiteSpace: 'nowrap' }}
                           onClick={(e) => handleBorrowClick(e, symbol, borrowMaturity)}
-                          data-testid={`${rateType}-borrow-${symbol}`}
+                          data-testid={`${getRateType(borrowMaturity)}-borrow-${symbol}`}
                         >
                           {t('Borrow')}
                         </Button>
