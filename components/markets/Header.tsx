@@ -7,19 +7,32 @@ import { ItemInfoProps } from 'components/common/ItemInfo';
 
 import formatNumber from 'utils/formatNumber';
 import useAccountData from 'hooks/useAccountData';
+import { toPercentage } from 'utils/utils';
+import { WEI_PER_ETHER } from 'utils/const';
 
 const MarketsHeader: FC = () => {
   const { t } = useTranslation();
   const { accountData } = useAccountData();
 
-  const { totalDeposited, totalBorrowed, totalAvailable } = useMemo<{
+  const { totalDeposited, totalBorrowed, totalAvailable, totalBackup } = useMemo<{
     totalDeposited?: bigint;
     totalBorrowed?: bigint;
     totalAvailable?: bigint;
+    totalBackup?: bigint;
   }>(() => {
     if (!accountData) return {};
-    const { totalDepositedUSD, totalBorrowedUSD } = accountData.reduce(
-      (acc, { totalFloatingDepositAssets, totalFloatingBorrowAssets, usdPrice, fixedPools, decimals }) => {
+    const { totalDepositedUSD, totalBorrowedUSD, backupBorrowsUSD } = accountData.reduce(
+      (
+        acc,
+        {
+          totalFloatingDepositAssets,
+          totalFloatingBorrowAssets,
+          usdPrice,
+          fixedPools,
+          decimals,
+          floatingBackupBorrowed,
+        },
+      ) => {
         // iterate through fixed pools to get totals
         const { fixedTotalDeposited, fixedTotalBorrowed } = fixedPools.reduce(
           (fixedPoolStats, pool) => {
@@ -36,15 +49,17 @@ const MarketsHeader: FC = () => {
         const WADDecimals = parseUnits('1', decimals);
         acc.totalDepositedUSD += ((totalFloatingDepositAssets + fixedTotalDeposited) * usdPrice) / WADDecimals;
         acc.totalBorrowedUSD += ((totalFloatingBorrowAssets + fixedTotalBorrowed) * usdPrice) / WADDecimals;
+        acc.backupBorrowsUSD += (floatingBackupBorrowed * usdPrice) / WADDecimals;
         return acc;
       },
-      { totalDepositedUSD: 0n, totalBorrowedUSD: 0n },
+      { totalDepositedUSD: 0n, totalBorrowedUSD: 0n, backupBorrowsUSD: 0n },
     );
 
     return {
       totalDeposited: totalDepositedUSD,
       totalBorrowed: totalBorrowedUSD,
       totalAvailable: totalDepositedUSD - totalBorrowedUSD,
+      totalBackup: backupBorrowsUSD,
     };
   }, [accountData]);
 
@@ -60,6 +75,13 @@ const MarketsHeader: FC = () => {
     {
       label: t('Total Available'),
       value: totalAvailable ? `$${formatNumber(formatUnits(totalAvailable, 18))}` : undefined,
+    },
+    {
+      label: t('Total Utilization'),
+      value:
+        totalBorrowed && totalDeposited && totalBackup
+          ? toPercentage(Number(((totalBorrowed + totalBackup) * WEI_PER_ETHER) / totalDeposited) / 1e18)
+          : undefined,
     },
   ];
 
