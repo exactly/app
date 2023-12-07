@@ -97,7 +97,7 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
             : undefined,
       },
       {
-        label: t('Global Utilization'),
+        label: t('Total Utilization'),
         value:
           backupBorrows !== undefined &&
           floatingBorrows !== undefined &&

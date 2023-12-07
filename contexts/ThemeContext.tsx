@@ -15,7 +15,7 @@ type ContextValues = {
 const defaultValues: ContextValues = {
   theme: 'light',
   changeTheme: () => undefined,
-  view: 'simple',
+  view: 'advanced',
   setView: () => undefined,
 };
 

@@ -46,15 +46,15 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol }) => {
   const itemsInfo: ItemInfoProps[] = useMemo(
     () => [
       {
-        label: t('Total Deposits'),
+        label: t('Deposits'),
         value: deposited !== undefined ? `$${formatNumber(deposited)}` : undefined,
       },
       {
-        label: t('Total Borrows'),
+        label: t('Borrows'),
         value: borrowed !== undefined ? `$${formatNumber(borrowed)}` : undefined,
       },
       {
-        label: t('Total Available'),
+        label: t('Available'),
         value: deposited !== undefined && borrowed !== undefined ? `$${formatNumber(deposited - borrowed)}` : undefined,
       },
       {

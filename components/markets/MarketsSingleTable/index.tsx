@@ -13,7 +13,6 @@ import { globals } from 'styles/theme';
 import { useWeb3 } from 'hooks/useWeb3';
 import useAssets from 'hooks/useAssets';
 import PoolMobile from './poolMobile';
-import MobileTabs from 'components/MobileTabs';
 import { TableHeader } from 'components/common/TableHeadCell';
 import useAccountData from 'hooks/useAccountData';
 import { useGlobalError } from 'contexts/GlobalErrorContext';
@@ -168,6 +167,7 @@ const MarketTables: FC = () => {
 
           const bestFixedBorrow = fixedPools.reduce(
             (best, { maturity, minBorrowRate }) =>
+              (Number(formatEther(minBorrowRate)) === best.rate && maturity > best.maturity) ||
               Number(formatEther(minBorrowRate)) < best.rate
                 ? { maturity: maturity, rate: Number(formatEther(minBorrowRate)) }
                 : best,
@@ -225,32 +225,7 @@ const MarketTables: FC = () => {
       </Grid>
 
       <Box display={smOrLess} my={2}>
-        <MobileTabs
-          tabs={[
-            {
-              title: t('Variable Interest Rate'),
-              content: (
-                <PoolMobile
-                  key={`markets_pool_mobile_floating`}
-                  isLoading={isLoading}
-                  headers={floatingHeaders}
-                  rows={...rows}
-                />
-              ),
-            },
-            {
-              title: t('Fixed Interest Rate'),
-              content: (
-                <PoolMobile
-                  key={`markets_pool_mobile_fixed`}
-                  isLoading={isLoading}
-                  headers={fixedHeaders}
-                  rows={...rows}
-                />
-              ),
-            },
-          ]}
-        />
+        <PoolMobile key={`markets_pool_mobile_fixed`} isLoading={isLoading} headers={fixedHeaders} rows={...rows} />
       </Box>
     </>
   );

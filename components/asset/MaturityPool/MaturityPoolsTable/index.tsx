@@ -52,8 +52,8 @@ const MaturityPoolsTable: FC<MaturityPoolsTableProps> = ({ symbol }) => {
               title={t('Maturity')}
               tooltipTitle={t('All fixed pools are due at {{hour}}.', { hour: getHourUTC2Local() })}
             />
-            <HeadCell title={t('Total Deposits')} />
-            <HeadCell title={t('Total Borrows')} />
+            <HeadCell title={t('Deposits')} />
+            <HeadCell title={t('Borrows')} />
             <HeadCell
               title={t('Deposit APR')}
               tooltipTitle={t('The fixed interest APR for a deposit up to the optimal deposit size.')}

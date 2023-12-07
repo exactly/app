@@ -30,16 +30,8 @@ const MaturityPoolsMobile: FC<Props> = ({ symbol }) => {
           <Box display="flex" flexDirection="column" gap={2} mt={2}>
             <Typography variant="h6">{parseTimestamp(maturity)}</Typography>
             <Grid container>
-              <GridItem
-                title={t('Total Deposits')}
-                value={`$${totalDeposited}`}
-                isLoading={totalDeposited === undefined}
-              />
-              <GridItem
-                title={t('Total Borrows')}
-                value={`$${totalBorrowed}`}
-                isLoading={totalBorrowed === undefined}
-              />
+              <GridItem title={t('Deposits')} value={`$${totalDeposited}`} isLoading={totalDeposited === undefined} />
+              <GridItem title={t('Borrows')} value={`$${totalBorrowed}`} isLoading={totalBorrowed === undefined} />
               <Grid item xs={12} my={0.5} />
               <GridItem
                 title={t('Deposit APR')}

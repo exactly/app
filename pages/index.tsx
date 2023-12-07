@@ -16,6 +16,17 @@ const Markets: NextPage = () => {
 
   return (
     <Grid>
+      <Box
+        sx={{
+          position: 'absolute',
+          height: '27%',
+          width: '100%',
+          left: 0,
+          top: 0,
+          backgroundColor: 'grey.300',
+          zIndex: -1,
+        }}
+      />
       {view === 'advanced' ? (
         <>
           <MarketsHeader />

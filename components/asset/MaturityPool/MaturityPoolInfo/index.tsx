@@ -44,11 +44,11 @@ const MaturityPoolInfo: FC<MaturityPoolInfoProps> = ({
   const itemsInfo: ItemInfoProps[] = useMemo(
     () => [
       {
-        label: t('Total Deposits'),
+        label: t('Deposits'),
         value: totalDeposited !== undefined ? `$${formatNumber(totalDeposited)}` : undefined,
       },
       {
-        label: t('Total Borrows'),
+        label: t('Borrows'),
         value: totalBorrowed !== undefined ? `$${formatNumber(totalBorrowed)}` : undefined,
       },
       {
