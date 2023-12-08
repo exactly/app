@@ -14,7 +14,7 @@ const MarketsHeader: FC = () => {
   const { t } = useTranslation();
   const { accountData } = useAccountData();
 
-  const { totalDeposited, totalBorrowed, totalAvailable, totalBackup } = useMemo<{
+  const { totalDeposited, totalBorrowed, totalAvailable } = useMemo<{
     totalDeposited?: bigint;
     totalBorrowed?: bigint;
     totalAvailable?: bigint;
@@ -79,8 +79,8 @@ const MarketsHeader: FC = () => {
     {
       label: t('Total Utilization'),
       value:
-        totalBorrowed && totalDeposited && totalBackup
-          ? toPercentage(Number(((totalBorrowed + totalBackup) * WEI_PER_ETHER) / totalDeposited) / 1e18)
+        totalBorrowed && totalDeposited
+          ? toPercentage(Number((totalBorrowed * WEI_PER_ETHER) / totalDeposited) / 1e18)
           : undefined,
     },
   ];
