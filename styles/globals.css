@@ -22,10 +22,14 @@ body {
   padding: 0;
   margin: 0;
   font-family: "Inter";
-  background-color: black;
+  background: conic-gradient(
+    from 190deg at 74.58% 43.66%,
+    #0d0e0f 0deg,
+    #212325 360deg
+  );
   color: white;
   height: 100%;
-  overflow-y: scroll;
+  overflow-y: auto;
 }
 
 #__next {

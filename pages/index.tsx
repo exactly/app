@@ -1,69 +1,123 @@
-import { Box, Button, Typography, useTheme } from "@mui/material";
-import ExaCard from "../components/ExaCard";
+import {
+  Box,
+  Button,
+  Typography,
+  useMediaQuery,
+  useTheme,
+} from "@mui/material";
+import styles from "./styles.module.css";
 
 export default function Home() {
   const { breakpoints } = useTheme();
+  const mobile = useMediaQuery(breakpoints.down("sm"));
 
   return (
     <Box
-      sx={{
-        position: "relative",
-
-        height: "100vh",
-        display: "flex",
-        flexDirection: "column",
-      }}
+      display="flex"
+      alignItems="center"
+      minHeight="90vh"
+      sx={mobile ? {} : { justifyContent: "center" }}
     >
-      <Box
-        component="main"
-        display={"flex"}
-        alignItems={"center"}
-        justifyContent={"space-evenly"}
-        height={"100%"}
-        p={10}
-        justifyItems={"center"}
-        sx={{
-          [breakpoints.down("md")]: {
-            flexDirection: "column",
-            height: "unset",
-            gap: "48px",
-          },
-        }}
-      >
+      <Box display="flex" flexWrap="wrap" gap={2}>
         <Box
-          sx={{
-            maxWidth: 500,
-            display: "flex",
-            flexDirection: "column",
-            gap: 3,
-          }}
+          sx={
+            mobile
+              ? { marginTop: 8, marginX: 2 }
+              : {
+                  display: "flex",
+                  flexDirection: "column",
+                  maxWidth: 632,
+                  marginLeft: 8,
+                  marginY: 14,
+                }
+          }
         >
-          <Box display="flex" flexDirection="column" gap={1}>
-            <Typography fontSize={14}>Introducing</Typography>
-            <img src="exaApp.svg" width={250} style={{ marginTop: 10 }} />
+          <Box
+            component="main"
+            display={"flex"}
+            alignItems={"center"}
+            justifyContent={"space-evenly"}
+            justifyItems={"center"}
+          >
+            <Box mb={mobile ? 7 : 10}>
+              <img src="exaApp.svg" width={168} style={{ marginBottom: 64 }} />
+              <Typography fontSize={16} fontWeight={700} mb={4}>
+                REDEFINING GLOBAL PAYMENTS
+              </Typography>
+              <Box display="flex" flexDirection="column" gap={mobile ? 6 : 7}>
+                <Typography
+                  fontWeight={700}
+                  lineHeight={"50px"}
+                  sx={mobile ? { fontSize: 32 } : { fontSize: 44 }}
+                >
+                  Introducing the first digital self-custodial credit card
+                </Typography>
+                <Typography fontSize={16}>
+                  Pay and earn safely with on-chain secured transactions using
+                  our unique digital self-custodial credit card.{" "}
+                  <strong>Decentralize your financial life, today.</strong>
+                </Typography>
+
+                <Box display="flex">
+                  <Button
+                    href="https://docs.google.com/forms/d/e/1FAIpQLSer9ldKEw9mFmImaBxkJzSBwIVY63-dJAObRlfF7zVnZk1KFQ/viewform?usp=sf_link"
+                    variant="contained"
+                    fullWidth={!!mobile}
+                  >
+                    Join the Waitlist
+                  </Button>
+                </Box>
+              </Box>
+            </Box>
           </Box>
-          <Typography>
-            Decentralizing your financial life, today:
-            <ul>
-              <li>Deposit and borrow on-chain.</li>
-              <li>Get your self-custodial debit and credit card.</li>
-              <li>Receive cashback in esEXA tokens.</li>
-            </ul>
-          </Typography>
-          <Box display="flex" gap={2}>
-            <Button
-              href="https://docs.google.com/forms/d/e/1FAIpQLSer9ldKEw9mFmImaBxkJzSBwIVY63-dJAObRlfF7zVnZk1KFQ/viewform?usp=sf_link"
-              variant="contained"
+          <Box>
+            <Box
+              className={styles.marquee}
+              sx={{
+                backgroundColor: "#303336",
+              }}
             >
-              Join the Waitlist
-            </Button>
+              <Typography
+                sx={{
+                  fontSize: mobile ? 24 : 44,
+                  fontWeight: 400,
+                  fontFamily: "Bebas Neue",
+                }}
+              >
+                {`• SELF-CUSTODIAL • ON-CHAIN SECURED • UP TO 2.7% APR • BORROW AS LOW AS 1.8% APR • 12 installment payments • CASHBACK • DEPOSIT & Borrow on-chain • SELF-CUSTODIAL • ON-CHAIN SECURED • UP TO 2.7% APR • BORROW AS LOW AS 1.8% APR • 12 installment payments • CASHBACK • DEPOSIT & Borrow on-chain`}
+                {`• SELF-CUSTODIAL • ON-CHAIN SECURED • UP TO 2.7% APR • BORROW AS LOW AS 1.8% APR • 12 installment payments • CASHBACK • DEPOSIT & Borrow on-chain • SELF-CUSTODIAL • ON-CHAIN SECURED • UP TO 2.7% APR • BORROW AS LOW AS 1.8% APR • 12 installment payments • CASHBACK • DEPOSIT & Borrow on-chain`}
+              </Typography>
+            </Box>
           </Box>
         </Box>
-        <Box display="flex" justifyContent="center">
-          <ExaCard />
+
+        <Box
+          flex={1}
+          display="flex"
+          justifyContent="center"
+          zIndex={2}
+          sx={mobile ? {} : { mr: 17, mt: "89px" }}
+        >
+          <img src="card-black-and-white.svg" width={mobile ? 364 : 500} />
+          <Box
+            sx={
+              mobile
+                ? {
+                    position: "absolute",
+                    top: 64,
+                    right: 16,
+                  }
+                : {
+                    mt: 8,
+                  }
+            }
+          >
+            <a href="https://twitter.com/Exa_App">
+              <img src="x.svg" width={24} />
+            </a>
+          </Box>
         </Box>
       </Box>
-      <Box></Box>
     </Box>
   );
 }
