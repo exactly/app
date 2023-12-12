@@ -42,7 +42,7 @@ export default function Home() {
             <Box mb={mobile ? 7 : 10}>
               <img src="exaApp.svg" width={168} style={{ marginBottom: 64 }} />
               <Typography fontSize={16} fontWeight={700} mb={4}>
-                REDEFINING GLOBAL PAYMENTS
+                DECENTRALIZE YOUR FINANCIAL LIFE, TODAY
               </Typography>
               <Box display="flex" flexDirection="column" gap={mobile ? 6 : 7}>
                 <Typography
@@ -55,16 +55,30 @@ export default function Home() {
                 <Typography fontSize={16}>
                   Pay and earn safely with on-chain secured transactions using
                   our unique digital self-custodial credit card.{" "}
-                  <strong>Decentralize your financial life, today.</strong>
                 </Typography>
 
-                <Box display="flex">
+                <Box
+                  display="flex"
+                  gap={1}
+                  flexDirection={mobile ? "column" : "row"}
+                >
                   <Button
                     href="https://docs.google.com/forms/d/e/1FAIpQLSer9ldKEw9mFmImaBxkJzSBwIVY63-dJAObRlfF7zVnZk1KFQ/viewform?usp=sf_link"
                     variant="contained"
                     fullWidth={!!mobile}
                   >
-                    Join the Waitlist
+                    Join the waitlist
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    fullWidth={!!mobile}
+                    href="https://twitter.com/Exa_App"
+                    sx={{
+                      display: "flex",
+                      gap: 0.75,
+                    }}
+                  >
+                    Follow us on <img src="x.svg" width={12} />
                   </Button>
                 </Box>
               </Box>
@@ -84,38 +98,20 @@ export default function Home() {
                   fontFamily: "Bebas Neue",
                 }}
               >
-                {`• SELF-CUSTODIAL • ON-CHAIN SECURED • UP TO 2.7% APR • BORROW AS LOW AS 1.8% APR • 12 installment payments • CASHBACK • DEPOSIT & Borrow on-chain • SELF-CUSTODIAL • ON-CHAIN SECURED • UP TO 2.7% APR • BORROW AS LOW AS 1.8% APR • 12 installment payments • CASHBACK • DEPOSIT & Borrow on-chain`}
-                {`• SELF-CUSTODIAL • ON-CHAIN SECURED • UP TO 2.7% APR • BORROW AS LOW AS 1.8% APR • 12 installment payments • CASHBACK • DEPOSIT & Borrow on-chain • SELF-CUSTODIAL • ON-CHAIN SECURED • UP TO 2.7% APR • BORROW AS LOW AS 1.8% APR • 12 installment payments • CASHBACK • DEPOSIT & Borrow on-chain`}
+                {`• SELF-CUSTODIAL • ON-CHAIN SECURED • earn yearly interest on your deposits • CASHBACK • BORROW at low interest rates • 12 installment payments • CASHBACK • DEPOSIT & Borrow on-chain • SELF-CUSTODIAL • ON-CHAIN SECURED • earn yearly interest on your deposits • CASHBACK • BORROW at low interest rates • 12 installment payments • CASHBACK • DEPOSIT & Borrow on-chain`}
+                {`• SELF-CUSTODIAL • ON-CHAIN SECURED • earn yearly interest on your deposits • CASHBACK • BORROW at low interest rates • 12 installment payments • CASHBACK • DEPOSIT & Borrow on-chain • SELF-CUSTODIAL • ON-CHAIN SECURED • earn yearly interest on your deposits • CASHBACK • BORROW at low interest rates • 12 installment payments • CASHBACK • DEPOSIT & Borrow on-chain`}
               </Typography>
             </Box>
           </Box>
         </Box>
 
         <Box
-          flex={1}
           display="flex"
           justifyContent="center"
           zIndex={2}
           sx={mobile ? {} : { mr: 17, mt: "89px" }}
         >
           <img src="card-black-and-white.svg" width={mobile ? 364 : 500} />
-          <Box
-            sx={
-              mobile
-                ? {
-                    position: "absolute",
-                    top: 64,
-                    right: 16,
-                  }
-                : {
-                    mt: 8,
-                  }
-            }
-          >
-            <a href="https://twitter.com/Exa_App">
-              <img src="x.svg" width={24} />
-            </a>
-          </Box>
         </Box>
       </Box>
     </Box>
