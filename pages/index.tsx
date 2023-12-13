@@ -18,7 +18,7 @@ export default function Home() {
       minHeight="90vh"
       sx={mobile ? {} : { justifyContent: "center" }}
     >
-      <Box display="flex" flexWrap="wrap" gap={2}>
+      <Box display="flex" gap={2} flexWrap={mobile ? "wrap" : "nowrap"}>
         <Box
           sx={
             mobile
@@ -26,7 +26,7 @@ export default function Home() {
               : {
                   display: "flex",
                   flexDirection: "column",
-                  maxWidth: 632,
+                  width: 632,
                   marginLeft: 8,
                   marginY: 14,
                 }
@@ -108,9 +108,10 @@ export default function Home() {
           display="flex"
           justifyContent="center"
           zIndex={2}
-          sx={mobile ? {} : { mr: 17, mt: "89px" }}
+          sx={mobile ? {} : { flexGrow: 1 }}
+          maxWidth={580}
         >
-          <img src="card-black-and-white.svg" width={mobile ? 364 : 500} />
+          <img src="card-black-and-white.svg" width={mobile ? 364 : "100%"} />
         </Box>
       </Box>
     </Box>
