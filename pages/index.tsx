@@ -39,7 +39,7 @@ export default function Home() {
             justifyContent={"space-evenly"}
             justifyItems={"center"}
           >
-            <Box mb={mobile ? 7 : 10}>
+            <Box mb={mobile ? 2 : 10}>
               <img
                 src="exaApp.svg"
                 width={mobile ? 125 : 168}
@@ -54,7 +54,7 @@ export default function Home() {
                   lineHeight={mobile ? "40px" : "50px"}
                   sx={mobile ? { fontSize: 32 } : { fontSize: 44 }}
                 >
-                  The first digital self-custodial credit card
+                  The first self-custodial digital credit card
                 </Typography>
                 <Typography fontSize={mobile ? 14 : 16}>
                   Buy now, hold your crypto, and pay later.
@@ -93,6 +93,9 @@ export default function Home() {
               sx={{
                 backgroundColor: "#303336",
               }}
+              position={mobile ? "fixed" : "absolute"}
+              bottom={mobile && 0}
+              zIndex={mobile ? 3 : 0}
             >
               <Typography
                 sx={{

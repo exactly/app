@@ -1,6 +1,5 @@
 .marquee {
   width: 100vw;
-  position: absolute;
   left: 0;
   overflow: hidden;
   border: 1px solid #000;
