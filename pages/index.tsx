@@ -53,8 +53,7 @@ export default function Home() {
                   Introducing the first digital self-custodial credit card
                 </Typography>
                 <Typography fontSize={16}>
-                  Pay and earn safely with on-chain secured transactions using
-                  our unique digital self-custodial credit card.{" "}
+                  Buy now, hold your crypto, and pay later.
                 </Typography>
 
                 <Box
