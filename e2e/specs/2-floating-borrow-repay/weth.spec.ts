@@ -12,7 +12,7 @@ test('WETH floating borrow/repay', async ({ page, web3, setup }) => {
     ETH: 100,
   });
 
-  await page.goto('/');
+  await page.goto('/WETH');
 
   const borrow = _borrow({ test, page });
   const repay = _repay({ test, page });

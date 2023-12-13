@@ -13,7 +13,7 @@ test('USDC floating deposit/withdraw', async ({ page, web3 }) => {
     USDC: 5,
   });
 
-  await page.goto('/');
+  await page.goto('/USDC');
 
   const deposit = _deposit({ test, page });
   const withdraw = _withdraw({ test, page });

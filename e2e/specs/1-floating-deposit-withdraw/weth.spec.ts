@@ -11,7 +11,7 @@ test('WETH floating deposit/withdraw', async ({ page, web3 }) => {
     ETH: 100,
   });
 
-  await page.goto('/');
+  await page.goto('/WETH');
 
   const deposit = _deposit({ test, page });
   const withdraw = _withdraw({ test, page });

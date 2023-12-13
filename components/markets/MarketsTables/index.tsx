@@ -221,11 +221,11 @@ const MarketTables: FC = () => {
         bgcolor="components.bg"
         display={mdOrMore}
       >
-        <PoolTable isLoading={isLoading} headers={floatingHeaders} rows={...rows} />
+        <PoolTable isLoading={isLoading} headers={floatingHeaders} rows={rows} />
       </Grid>
 
       <Box display={smOrLess} my={2}>
-        <PoolMobile key={`markets_pool_mobile_fixed`} isLoading={isLoading} headers={fixedHeaders} rows={...rows} />
+        <PoolMobile key={`markets_pool_mobile_fixed`} isLoading={isLoading} headers={fixedHeaders} rows={rows} />
       </Box>
     </>
   );

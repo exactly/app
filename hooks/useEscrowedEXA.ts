@@ -43,10 +43,18 @@ export function useUpdateStreams() {
   const fetchStreams = useCallback(async () => {
     if (EXA && esEXA) {
       setLoading(true);
-      const data = await request<{ streams: Stream[] }>(
-        getStreams(EXA.address.toLowerCase(), walletAddress || zeroAddress, esEXA.address.toLowerCase(), false),
-        'sablier',
-      );
+
+      let data;
+
+      try {
+        data = await request<{ streams: Stream[] }>(
+          getStreams(EXA.address.toLowerCase(), walletAddress || zeroAddress, esEXA.address.toLowerCase(), false),
+          'sablier',
+        );
+      } catch (error) {
+        data = null;
+        setLoading(false);
+      }
       if (!data) return;
       const filteredStreams = data.streams.filter((stream: Stream) => {
         const startTime = Number(stream.startTime);

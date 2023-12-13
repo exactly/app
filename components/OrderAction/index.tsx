@@ -41,10 +41,22 @@ const OrderAction: FC<Props> = ({ symbol }) => {
   );
   return (
     <Box display="flex" gap={1}>
-      <Button disabled={!marketAccount} variant="contained" onClick={handleDepositButtonClick} fullWidth>
+      <Button
+        disabled={!marketAccount}
+        variant="contained"
+        onClick={handleDepositButtonClick}
+        fullWidth
+        data-testid={`floating-deposit-${symbol}`}
+      >
         {t('Deposit')}
       </Button>
-      <Button disabled={!marketAccount} variant="outlined" onClick={handleBorrowButtonClick} fullWidth>
+      <Button
+        disabled={!marketAccount}
+        variant="outlined"
+        onClick={handleBorrowButtonClick}
+        fullWidth
+        data-testid={`floating-borrow-${symbol}`}
+      >
         {t('Borrow')}
       </Button>
     </Box>

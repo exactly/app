@@ -15,7 +15,7 @@ test('USDC floating borrow/repay', async ({ page, web3, setup }) => {
     ETH: 100,
   });
 
-  await page.goto('/');
+  await page.goto('/USDC');
 
   const balance = _balance({ test, page, publicClient: web3.publicClient });
   const borrow = _borrow({ test, page });

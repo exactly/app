@@ -225,7 +225,9 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows }) => {
                           variant="contained"
                           onClick={(e) => handleDepositClick(e, symbol, depositMaturity)}
                           disabled={isDisable(getRateType(depositMaturity), depositAPR)}
-                          data-testid={`${getRateType(depositMaturity)}-deposit-${symbol}`}
+                          data-testid={`${getRateType(depositMaturity)}-${
+                            depositMaturity ? Number(depositMaturity) : ''
+                          }deposit-${symbol}`}
                           sx={{ whiteSpace: 'nowrap' }}
                         >
                           {t('Deposit')}
@@ -288,7 +290,9 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows }) => {
                           variant="outlined"
                           sx={{ backgroundColor: 'components.bg', whiteSpace: 'nowrap' }}
                           onClick={(e) => handleBorrowClick(e, symbol, borrowMaturity)}
-                          data-testid={`${getRateType(borrowMaturity)}-borrow-${symbol}`}
+                          data-testid={`${getRateType(borrowMaturity)}-${
+                            borrowMaturity ? Number(borrowMaturity) : ''
+                          }borrow-${symbol}`}
                         >
                           {t('Borrow')}
                         </Button>
