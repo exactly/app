@@ -22,7 +22,7 @@ export default function Home() {
         <Box
           sx={
             mobile
-              ? { marginTop: 8, marginX: 2 }
+              ? { marginTop: 4, marginX: 2 }
               : {
                   display: "flex",
                   flexDirection: "column",
@@ -40,25 +40,29 @@ export default function Home() {
             justifyItems={"center"}
           >
             <Box mb={mobile ? 7 : 10}>
-              <img src="exaApp.svg" width={168} style={{ marginBottom: 64 }} />
-              <Typography fontSize={16} fontWeight={700} mb={4}>
-                DECENTRALIZE YOUR FINANCIAL LIFE, TODAY
+              <img
+                src="exaApp.svg"
+                width={mobile ? 125 : 168}
+                style={{ marginBottom: mobile ? 32 : 64 }}
+              />
+              <Typography fontSize={16} fontWeight={700} mb={mobile ? 2 : 4}>
+                Decentralize your financial life, today
               </Typography>
-              <Box display="flex" flexDirection="column" gap={mobile ? 6 : 7}>
+              <Box display="flex" flexDirection="column" gap={mobile ? 4 : 7}>
                 <Typography
                   fontWeight={700}
-                  lineHeight={"50px"}
+                  lineHeight={mobile ? "40px" : "50px"}
                   sx={mobile ? { fontSize: 32 } : { fontSize: 44 }}
                 >
-                  Introducing the first digital self-custodial credit card
+                  The first digital self-custodial credit card
                 </Typography>
-                <Typography fontSize={16}>
+                <Typography fontSize={mobile ? 14 : 16}>
                   Buy now, hold your crypto, and pay later.
                 </Typography>
 
                 <Box
                   display="flex"
-                  gap={1}
+                  gap={2}
                   flexDirection={mobile ? "column" : "row"}
                 >
                   <Button
@@ -93,12 +97,12 @@ export default function Home() {
               <Typography
                 sx={{
                   fontSize: mobile ? 24 : 44,
-                  fontWeight: 400,
+                  fontWeight: 200,
                   fontFamily: "Bebas Neue",
                 }}
               >
-                {`• SELF-CUSTODIAL • ON-CHAIN SECURED • earn yearly interest on your deposits • CASHBACK • BORROW at low interest rates • 12 installment payments • CASHBACK • DEPOSIT & Borrow on-chain • SELF-CUSTODIAL • ON-CHAIN SECURED • earn yearly interest on your deposits • CASHBACK • BORROW at low interest rates • 12 installment payments • CASHBACK • DEPOSIT & Borrow on-chain`}
-                {`• SELF-CUSTODIAL • ON-CHAIN SECURED • earn yearly interest on your deposits • CASHBACK • BORROW at low interest rates • 12 installment payments • CASHBACK • DEPOSIT & Borrow on-chain • SELF-CUSTODIAL • ON-CHAIN SECURED • earn yearly interest on your deposits • CASHBACK • BORROW at low interest rates • 12 installment payments • CASHBACK • DEPOSIT & Borrow on-chain`}
+                {`• Pay in up-to 12 installments • On-chain secured transactions • Multiple digital credit cards • Earn interest on deposited assets • Cashback • Borrow at low interest rates • Deposit and borrow on-chain`}
+                {`• Pay in up-to 12 installments • On-chain secured transactions • Multiple digital credit cards • Earn interest on deposited assets • Cashback • Borrow at low interest rates • Deposit and borrow on-chain`}
               </Typography>
             </Box>
           </Box>

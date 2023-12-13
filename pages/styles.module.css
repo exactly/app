@@ -9,7 +9,7 @@
 .marquee p {
   white-space: nowrap;
   display: inline-block;
-  animation: marquee 50s linear infinite;
+  animation: marquee 80s linear infinite;
 }
 
 @keyframes marquee {
