@@ -6,7 +6,7 @@ import { alchemyProvider } from 'wagmi/providers/alchemy';
 import { publicProvider } from 'wagmi/providers/public';
 import { SafeConnector } from 'wagmi/connectors/safe';
 import { CoinbaseWalletConnector } from 'wagmi/connectors/coinbaseWallet';
-import { LedgerConnector } from 'wagmi/connectors/ledger';
+// import { LedgerConnector } from 'wagmi/connectors/ledger';
 import { InjectedConnector } from 'wagmi/connectors/injected';
 import { WalletConnectConnector } from 'wagmi/connectors/walletConnect';
 
@@ -70,7 +70,7 @@ export const wagmi = createConfig({
           }),
           new WalletConnectConnector({ chains, options: { projectId: walletConnectId, showQrModal: false } }),
           new SafeConnector({ chains }),
-          new LedgerConnector({ chains, options: { walletConnectVersion: 2, projectId: walletConnectId } }),
+          // new LedgerConnector({ chains, options: { walletConnectVersion: 2, projectId: walletConnectId } }),
         ]),
   ],
   publicClient,
