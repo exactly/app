@@ -52,7 +52,7 @@
     "react-number-format": "^5.2.2",
     "recharts": "^2.7.2",
     "viem": "^1.16.6",
-    "wagmi": "^1.4.4"
+    "wagmi": "^1.4.12"
   },
   "devDependencies": {
     "@next/eslint-plugin-next": "^13.5.4",
