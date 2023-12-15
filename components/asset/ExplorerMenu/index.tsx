@@ -13,10 +13,18 @@ type Props = {
   assetAddress: Address;
   eMarketAddress: Address;
   rateModelAddress: Address;
+  priceFeedAddress: Address;
   exaToken: string;
 };
 
-const ExplorerMenu: FC<Props> = ({ symbol, assetAddress, eMarketAddress, rateModelAddress, exaToken }) => {
+const ExplorerMenu: FC<Props> = ({
+  symbol,
+  assetAddress,
+  eMarketAddress,
+  rateModelAddress,
+  priceFeedAddress,
+  exaToken,
+}) => {
   const { t } = useTranslation();
   const { palette } = useTheme();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -164,6 +172,25 @@ const ExplorerMenu: FC<Props> = ({ symbol, assetAddress, eMarketAddress, rateMod
           <MenuItem>
             <LinkIcon fontSize="small" />
             <Box ml={1}>{t('Interest Rate Model')}</Box>
+          </MenuItem>
+        </a>
+
+        <a
+          href={address(priceFeedAddress)}
+          onClick={() => {
+            track('Button Clicked', {
+              href: address(priceFeedAddress),
+              name: 'view price feed contract',
+              location: 'Explorer Menu',
+              symbol,
+            });
+          }}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <MenuItem>
+            <LinkIcon fontSize="small" />
+            <Box ml={1}>{t('Price Feed')}</Box>
           </MenuItem>
         </a>
       </Menu>

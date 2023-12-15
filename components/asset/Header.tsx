@@ -1,4 +1,4 @@
-import React, { type FC, useMemo, useCallback } from 'react';
+import React, { type FC, useMemo, useCallback, useEffect, useState } from 'react';
 import Grid from '@mui/material/Grid';
 import ItemInfo, { ItemInfoProps } from 'components/common/ItemInfo';
 import formatNumber from 'utils/formatNumber';
@@ -10,12 +10,13 @@ import useAssets from 'hooks/useAssets';
 import AssetOption from './AssetOption';
 import useRouter from 'hooks/useRouter';
 import { WEI_PER_ETHER } from 'utils/const';
-import { formatEther, formatUnits } from 'viem';
+import { Address, formatEther, formatUnits } from 'viem';
 import useStETHNativeAPR from 'hooks/useStETHNativeAPR';
 import { toPercentage } from 'utils/utils';
 import { track } from 'utils/segment';
 import { Typography } from '@mui/material';
 import getSymbolDescription from 'utils/getSymbolDescription';
+import useContractAddress from 'hooks/useContractAddress';
 
 type Props = {
   symbol: string;
@@ -26,6 +27,8 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
   const { marketAccount } = useAccountData(symbol);
   const options = useAssets();
   const { push, query } = useRouter();
+  const getContractAddress = useContractAddress();
+  const [priceFeedAddress, setPriceFeedAddress] = useState<Address | undefined>(undefined);
 
   const nativeAPR = useStETHNativeAPR();
 
@@ -36,6 +39,15 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
     },
     [marketAccount],
   );
+
+  useEffect(() => {
+    const fetchPriceFeedAddress = async () => {
+      const address = await getContractAddress(`PriceFeed${symbol}`);
+      setPriceFeedAddress(address);
+    };
+
+    fetchPriceFeedAddress();
+  }, [getContractAddress, symbol]);
 
   const { floatingDeposits, floatingBorrows, backupBorrows } = useMemo(() => {
     if (!marketAccount) return {};
@@ -176,12 +188,13 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
           renderValue={<AssetOption assetSymbol={symbol} optionSize={22} selectedSize={30} />}
           renderOption={(o: string) => <AssetOption option assetSymbol={o} optionSize={22} selectedSize={30} />}
         />
-        {marketAccount && (
+        {marketAccount && priceFeedAddress && (
           <ExplorerMenu
             symbol={symbol}
             assetAddress={marketAccount.asset}
             eMarketAddress={marketAccount.market}
             rateModelAddress={marketAccount.interestRateModel.id}
+            priceFeedAddress={priceFeedAddress}
             exaToken={marketAccount.symbol}
           />
         )}
