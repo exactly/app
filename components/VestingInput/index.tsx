@@ -324,7 +324,7 @@ function VestingInput({ refetch }: Props) {
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <Box display="flex" gap={1} alignItems="center" justifyContent="center">
                 <Image src={`/img/assets/esEXA.svg`} alt="" width={24} height={24} />
-                <Typography fontWeight={700} fontSize={19} color="grey.900">
+                <Typography fontWeight={700} fontSize={19} color="grey.900" mr={1}>
                   esEXA
                 </Typography>
               </Box>
@@ -356,7 +356,7 @@ function VestingInput({ refetch }: Props) {
                     <Typography
                       color="figma.grey.500"
                       fontSize={12}
-                      fontWeight={500}
+                      fontWeight={700}
                       alignSelf="center"
                       data-testid="vesting-balance"
                     >
@@ -496,7 +496,7 @@ function VestingInput({ refetch }: Props) {
             data-testid="vesting-submit"
             disabled={insufficientFunds}
           >
-            {insufficientFunds ? t('Insufficient esEXA balance') : t('Vest esEXA')}
+            {insufficientFunds && parseEther(qty) > 0n ? t('Insufficient esEXA balance') : t('Vest esEXA')}
           </LoadingButton>
         )}
       </Box>

@@ -194,7 +194,7 @@ const Vesting: NextPage = () => {
                   <Grid container spacing={2}>
                     <Grid item xs={12} sm>
                       <Typography fontSize={14} fontWeight={500}>
-                        {t('You can withdraw all streams at once.')}
+                        {t('You can claim all streams at once.')}
                       </Typography>
                     </Grid>
                     <Grid item xs={12} sm={4}>
@@ -221,7 +221,7 @@ const Vesting: NextPage = () => {
                               loading={loading}
                               data-testid="vesting-claim-all"
                             >
-                              {t('Withdraw All')}
+                              {t('Claim All')}
                             </LoadingButton>
                           </>
                         )}

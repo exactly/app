@@ -509,7 +509,6 @@
   "Reserved EXA": "EXA Reservado",
   "Cancel": "Cancelar",
   "Claimable EXA": "EXA Reclamable",
-  "Withdraw EXA": "Retirar EXA",
   "Progress": "Progreso",
   "You are vesting your esEXA": "Estás consolidando tus esEXA.",
   "Your esEXA has been vested": "Tu esEXA ha sido consolidado.",
@@ -538,8 +537,6 @@
   "Scheduled At": "Programado en",
   "Scheduled Transactions": "Transacciones Programadas",
   "Executed Transactions": "Transacciones Ejecutadas",
-  "You can withdraw all streams at once.": "Puedes retirar todos los streams a la vez.",
-  "Withdraw All": "Retirar Todo",
   "Connected to {{network}}": "Conectado a {{network}}",
   "To borrow more money, you'll have to ": "Para pedir prestado más dinero, tendrás que ",
   "This borrowing process will include a token swap from {{from}} to {{to}}; you will find the swap details below.": "Este proceso de préstamo incluirá un swap de tokens de {{from}} a {{to}}; encontrarás los detalles del swap a continuación.",
@@ -604,5 +601,10 @@
   "It could be up to 6 months with fixed interest rates.": "Podría ser hasta 6 meses con tasas de interés fijas.",
   "Deposits": "Depósitos",
   "Borrows": "Préstamos",
-  "Total Utilization": "Utilización Total"
+  "Total Utilization": "Utilización Total",
+  "Claim EXA": "Reclamar EXA",
+  "Price Feed": "Feed de Precios",
+  "All EXA token holders will have voting power to participate actively in discussions, propose enhancements, and cast votes to shape the protocol's evolution.": "Todos los titulares de tokens EXA tendrán poder de voto para participar activamente en discusiones, proponer mejoras y emitir votos para dar forma a la evolución del protocolo.",
+  "You can claim all streams at once.": "Puedes reclamar todos los streams a la vez.",
+  "Claim All": "Reclamar Todo"
 }

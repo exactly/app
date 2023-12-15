@@ -408,7 +408,7 @@ const ActiveStream: FC<ActiveStreamProps> = ({
       <Grid container gap={2} mb={1}>
         <Grid item xs={12} sm={2.5} display="flex" flexDirection="column" justifyContent="center" gap={0.5}>
           <Typography fontSize={14} fontWeight={700}>
-            {t('esEXA Vested')}
+            {progress === 100 ? t('esEXA Vested') : t('esEXA Vesting')}
           </Typography>
           <Box display="flex" alignItems="center" gap={0.5}>
             <Box display="flex" gap={0.5}>
@@ -540,7 +540,7 @@ const ActiveStream: FC<ActiveStreamProps> = ({
                 loading={loading}
                 data-testid={`vesting-stream-${tokenId}-claim`}
               >
-                {t('Withdraw EXA')}
+                {t('Claim EXA')}
               </LoadingButton>
             </>
           )}

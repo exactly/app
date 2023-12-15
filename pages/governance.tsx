@@ -9,21 +9,57 @@ import Claimable from 'components/governance/Claimable';
 import Delegation from 'components/governance/Delegation';
 import Proposals from 'components/governance/Proposals';
 import useMerkleTree from 'hooks/useMerkleTree';
+import { useModal } from 'contexts/ModalContext';
+import { track } from 'utils/segment';
 
 const Governance: NextPage = () => {
   const { t } = useTranslation();
   const { isConnected, walletAddress, impersonateActive } = useWeb3();
   const mTree = useMerkleTree(walletAddress);
+  const { open: openGetEXA } = useModal('get-exa');
 
   return (
     <Box display="flex" flexDirection="column" mx="auto" gap={5} my={5} maxWidth={480}>
-      <Box display="flex" flexDirection="column" gap={3}>
+      <Box display="flex" flexDirection="column" gap={1}>
         <Typography fontSize={24} fontWeight={700}>
           {t('Exactly Protocol DAO Governance')}
         </Typography>
         <Typography>
+          {t(
+            "All EXA token holders will have voting power to participate actively in discussions, propose enhancements, and cast votes to shape the protocol's evolution.",
+          )}
+        </Typography>
+        <Typography>
           <Trans
-            i18nKey="All EXA token-holders will have voting power, enabling them to actively participate in discussions, propose enhancements, and cast votes to shape the protocol's evolution. More information in our <1>docs</1>."
+            i18nKey="You can <1>get EXA</1> if you are not a token holder or need more to create a proposal."
+            components={{
+              1: (
+                <button
+                  onClick={() => {
+                    openGetEXA();
+                    track('Button Clicked', {
+                      location: 'Vesting',
+                      name: 'get EXA',
+                    });
+                  }}
+                  style={{
+                    fontWeight: 700,
+                    textDecoration: 'underline',
+                    cursor: 'pointer',
+                    padding: 'unset',
+                    background: 'unset',
+                    border: 'unset',
+                    fontSize: 'unset',
+                    color: 'unset',
+                  }}
+                />
+              ),
+            }}
+          />
+        </Typography>
+        <Typography>
+          <Trans
+            i18nKey="More information in our <1>docs</1>."
             components={{
               1: (
                 <a
