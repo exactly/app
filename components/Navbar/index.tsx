@@ -16,6 +16,7 @@ import GppGoodRoundedIcon from '@mui/icons-material/GppGoodRounded';
 
 import MenuIcon from '@mui/icons-material/Menu';
 import GavelIcon from '@mui/icons-material/Gavel';
+import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import { globals } from 'styles/theme';
 import MobileMenu from 'components/MobileMenu';
@@ -135,6 +136,11 @@ function Navbar() {
             ]}
           />
         ),
+      },
+      {
+        pathname: '/bridge',
+        name: t('Bridge & Swap'),
+        icon: <SwapHorizIcon sx={{ fontSize: '13px' }} />,
       },
     ],
     [isEthereum, t],

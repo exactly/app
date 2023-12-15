@@ -3,7 +3,7 @@ import type { NextPage } from 'next';
 import { Box, Button, Divider, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import Link from 'next/link';
-import { optimism } from 'wagmi/chains';
+import { goerli, optimism } from 'wagmi/chains';
 
 import { useStartDebtManagerButton, useStartLeverager } from 'hooks/useActionButton';
 import StrategyRowCard from 'components/strategies/StrategyRowCard';
@@ -75,13 +75,12 @@ const Strategies: NextPage = () => {
   }, [getMarketAccount, rates, usdcDepositAPR]);
 
   const veloRate = useVELOPoolAPR() ?? '0%';
-  const extraRate = toPercentage(Number(useExtraDepositAPR() ?? 0) / 1e18);
+  const extraRate = useExtraDepositAPR();
 
   const featured: (Strategy & { chainId?: number })[] = useMemo(
     () =>
       [
         {
-          chainId: optimism.id,
           title: t('esEXA Vesting'),
           description: t('Unlock your EXA rewards for being an active participant in the Protocol'),
           tags: [
@@ -98,7 +97,7 @@ const Strategies: NextPage = () => {
                     location: 'Strategies',
                     name: 'vest',
                     href: '/vesting',
-                    isNew: true,
+                    isNew: false,
                   })
                 }
               >
@@ -107,8 +106,9 @@ const Strategies: NextPage = () => {
             </Link>
           ),
           source: 'exactly' as const,
-          isNew: true,
+          isNew: false,
           imgPath: '/img/strategies/featured_esEXA.svg',
+          chainId: optimism.id,
         },
         {
           title: t('Debit to Credit'),
@@ -126,7 +126,7 @@ const Strategies: NextPage = () => {
                     location: 'Strategies',
                     name: 'debit to credit',
                     href: '/debit2credit',
-                    isNew: true,
+                    isNew: false,
                   })
                 }
               >
@@ -134,7 +134,7 @@ const Strategies: NextPage = () => {
               </Button>
             </Link>
           ),
-          isNew: true,
+          isNew: false,
           source: 'exactly' as const,
           imgPath: '/img/strategies/featured_debit2credit.svg',
           chainId: optimism.id,
@@ -220,7 +220,7 @@ const Strategies: NextPage = () => {
               {t('Deleverage')}
             </Button>
           ),
-          isNew: true,
+          isNew: false,
           source: 'exactly' as const,
           imgPath: '/img/strategies/featured_leverage.svg',
         },
@@ -233,6 +233,34 @@ const Strategies: NextPage = () => {
   const exactlyStrategies = useMemo(
     () =>
       [
+        {
+          title: t('Debit to Credit'),
+          description: t(
+            'Easily turn your current crypto-funded debit card into a credit card by getting a USDC borrow at a fixed rate.',
+          ),
+          tags: [{ text: t('Advanced'), size: 'small' as const }],
+          button: (
+            <Link href={{ pathname: '/debit2credit' }} style={{ width: '100%' }}>
+              <Button
+                fullWidth
+                variant="contained"
+                onClick={() => {
+                  track('Button Clicked', {
+                    location: 'Strategies',
+                    name: 'debit to credit',
+                    isNew: false,
+                    href: '/debit2credit',
+                  });
+                }}
+              >
+                {t('Get Started')}
+              </Button>
+            </Link>
+          ),
+          isNew: false,
+          chainId: optimism.id,
+          visibleChainId: [optimism.id] as number[],
+        },
         {
           title: 'esEXA',
           description: t('Unlock your EXA rewards for being an active participant in the Protocol'),
@@ -249,7 +277,7 @@ const Strategies: NextPage = () => {
                   track('Button Clicked', {
                     location: 'Strategies',
                     name: 'vest',
-                    isNew: true,
+                    isNew: false,
                     href: '/vesting',
                   });
                 }}
@@ -258,10 +286,10 @@ const Strategies: NextPage = () => {
               </Button>
             </Link>
           ),
-          isNew: true,
+          isNew: false,
+          visibleChainId: [optimism.id, goerli.id] as number[],
         },
         {
-          chainId: optimism.id,
           title: t('Get EXA'),
           description: t(
             "Ready to take part in the Protocol's Governance, Vesting Program, or simply hold EXA? Begin by getting EXA today.",
@@ -286,6 +314,8 @@ const Strategies: NextPage = () => {
               {t('Get EXA')}
             </Button>
           ),
+          chainId: optimism.id,
+          visibleChainId: [optimism.id, goerli.id] as number[],
         },
         {
           title: t('Maximize your yield'),
@@ -363,34 +393,7 @@ const Strategies: NextPage = () => {
             </Button>
           ),
         },
-        {
-          title: t('Debit to Credit'),
-          description: t(
-            'Easily turn your current crypto-funded debit card into a credit card by getting a USDC borrow at a fixed rate.',
-          ),
-          tags: [{ text: t('Advanced'), size: 'small' as const }],
-          button: (
-            <Link href={{ pathname: '/debit2credit' }} style={{ width: '100%' }}>
-              <Button
-                fullWidth
-                variant="contained"
-                onClick={() => {
-                  track('Button Clicked', {
-                    location: 'Strategies',
-                    name: 'debit to credit',
-                    isNew: true,
-                    href: '/debit2credit',
-                  });
-                }}
-              >
-                {t('Get Started')}
-              </Button>
-            </Link>
-          ),
-          isNew: true,
-          chainId: optimism.id,
-        },
-      ].filter((s) => s.chainId === chain.id || s.chainId === undefined),
+      ].filter((s) => s.visibleChainId === undefined || s.visibleChainId.includes(chain.id)),
     [chain.id, hfLabel, lowestBorrowAPR, maxYield, openGetEXA, query, startDebtManager, startLeverager, t],
   );
 
@@ -398,37 +401,17 @@ const Strategies: NextPage = () => {
     () =>
       [
         {
-          chainId: optimism.id,
-          title: t('Deposit EXA on Extra Finance'),
-          description: t('Deposit EXA on Extra Finance and earn interest on it.'),
-          tags: [
-            { prefix: t('up to'), text: `${extraRate} APR` },
-            { text: t('Basic'), size: 'small' as const },
-          ],
+          title: t('Bridge & Swap with Socket'),
+          description: t('Seamlessly bridge and swap assets to OP Mainnet from many different networks.'),
+          tags: [{ text: t('Cross Network') }, { text: t('Basic'), size: 'small' as const }],
           button: (
-            <a
-              href="https://app.extrafi.io/lend/EXA"
-              target="_blank"
-              rel="noreferrer noopener"
-              style={{ width: '100%' }}
-            >
-              <Button
-                fullWidth
-                variant="contained"
-                onClick={() =>
-                  track('Button Clicked', {
-                    location: 'Strategies',
-                    name: 'extra finance',
-                    isNew: false,
-                    href: 'https://app.extrafi.io/lend/EXA',
-                  })
-                }
-              >
-                {t('Go to Extra Finance')}
+            <Link href={{ pathname: `/bridge`, query }} style={{ width: '100%' }}>
+              <Button fullWidth variant="contained">
+                {t('Bridge & Swap')}
               </Button>
-            </a>
+            </Link>
           ),
-          imgPath: '/img/assets/EXTRA.svg',
+          imgPath: '/img/strategies/socket-logo.svg',
         },
         {
           chainId: optimism.id,
@@ -463,18 +446,41 @@ const Strategies: NextPage = () => {
           ),
           imgPath: '/img/assets/VELO.svg',
         },
+
         {
-          title: t('Bridge & Swap with Socket'),
-          description: t('Seamlessly bridge and swap assets to OP Mainnet from many different networks.'),
-          tags: [{ text: t('Cross Network') }, { text: t('Basic'), size: 'small' as const }],
+          chainId: optimism.id,
+          title: t('Deposit EXA on Extra Finance'),
+          description: t('Deposit EXA on Extra Finance and earn interest on it.'),
+          tags: [
+            ...(extraRate && extraRate > 10n ** 18n
+              ? [{ prefix: t('up to'), text: `${toPercentage(Number(extraRate ?? 0) / 1e18)} APR` }]
+              : []),
+            { text: t('Basic'), size: 'small' as const },
+          ],
           button: (
-            <Link href={{ pathname: `/bridge`, query }} style={{ width: '100%' }}>
-              <Button fullWidth variant="contained">
-                {t('Bridge & Swap')}
+            <a
+              href="https://app.extrafi.io/lend/EXA"
+              target="_blank"
+              rel="noreferrer noopener"
+              style={{ width: '100%' }}
+            >
+              <Button
+                fullWidth
+                variant="contained"
+                onClick={() =>
+                  track('Button Clicked', {
+                    location: 'Strategies',
+                    name: 'extra finance',
+                    isNew: false,
+                    href: 'https://app.extrafi.io/lend/EXA',
+                  })
+                }
+              >
+                {t('Go to Extra Finance')}
               </Button>
-            </Link>
+            </a>
           ),
-          imgPath: '/img/strategies/socket-logo.svg',
+          imgPath: '/img/assets/EXTRA.svg',
         },
       ].filter((s) => s.chainId === chain.id || s.chainId === undefined),
     [chain.id, extraRate, query, t, veloRate],
