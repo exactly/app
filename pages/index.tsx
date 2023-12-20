@@ -27,7 +27,7 @@ export default function Home() {
             ? { marginTop: 4, marginX: 2 }
             : {
                 marginLeft: 8,
-                marginY: 14,
+                marginY: 10,
               }
         }
       >
@@ -50,7 +50,7 @@ export default function Home() {
               justifyContent={"space-evenly"}
               justifyItems={"center"}
             >
-              <Box mb={mobile ? 2 : 10}>
+              <Box mb={mobile ? 2 : 8}>
                 <img
                   src="exaApp.svg"
                   width={mobile ? 125 : 168}
@@ -80,6 +80,7 @@ export default function Home() {
                       href="https://docs.google.com/forms/d/e/1FAIpQLSer9ldKEw9mFmImaBxkJzSBwIVY63-dJAObRlfF7zVnZk1KFQ/viewform?usp=sf_link"
                       variant="contained"
                       fullWidth={!!mobile}
+                      target="_blank"
                     >
                       Join the waitlist
                     </Button>
@@ -87,6 +88,7 @@ export default function Home() {
                       variant="outlined"
                       fullWidth={!!mobile}
                       href="https://twitter.com/Exa_App"
+                      target="_blank"
                       sx={{
                         display: "flex",
                         gap: 0.75,
@@ -95,6 +97,16 @@ export default function Home() {
                       Follow us on <img src="x.svg" width={12} />
                     </Button>
                   </Box>
+                  {!mobile && (
+                    <Typography
+                      color="grey.300"
+                      fontSize={12}
+                      position="absolute"
+                      bottom={40}
+                    >
+                      Exa App - 2023
+                    </Typography>
+                  )}
                 </Box>
               </Box>
             </Box>
@@ -128,25 +140,32 @@ export default function Home() {
             zIndex={2}
             sx={mobile ? {} : { flexGrow: 1 }}
             maxWidth={580}
+            flexDirection="column"
+            width={mobile ? "100%" : undefined}
           >
             <img src="card-black-and-white.svg" width={mobile ? 364 : "100%"} />
+            {mobile ? (
+              <Box display="flex" justifyContent="space-between" mb={6}>
+                <Typography color="grey.300" fontSize={12}>
+                  Exa App - 2023
+                </Typography>
+                <Typography color="grey.300" fontSize={12}>
+                  *The credit is powered by Exactly Protocol.
+                </Typography>
+              </Box>
+            ) : (
+              <Typography
+                color="grey.300"
+                fontSize={12}
+                position="absolute"
+                bottom={40}
+                right={40}
+              >
+                *The credit is powered by Exactly Protocol.
+              </Typography>
+            )}
           </Box>
         </Box>
-      </Box>
-      <Box
-        display="flex"
-        justifyContent="space-between"
-        pb={mobile ? 4 : 5}
-        pl={mobile ? 2 : 8}
-        pr={mobile ? 2 : 8}
-        width="100%"
-      >
-        <Typography color="grey.300" fontSize={12}>
-          Exa App - 2023
-        </Typography>
-        <Typography color="grey.300" fontSize={12}>
-          *The credit is powered by Exactly Protocol.
-        </Typography>
       </Box>
     </Box>
   );
