@@ -10,6 +10,18 @@ export default withSentryConfig(
       { source: '/markets', destination: '/', permanent: true },
       { source: '/assets/:symbol*', destination: '/:symbol*', permanent: true },
     ],
+    async rewrites() {
+      return [
+        {
+          source: '/api/a-cdn/:path*',
+          destination: 'https://cdn.segment.com/:path*',
+        },
+        {
+          source: '/api/a-api/:path*',
+          destination: 'https://api.segment.io/v1/:path*',
+        },
+      ];
+    },
 
     headers: () => [
       {

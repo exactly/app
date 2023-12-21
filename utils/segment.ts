@@ -77,7 +77,16 @@ type TX = {
 const analyticsApiKey = process.env.NEXT_PUBLIC_SEGMENT_WRITE_KEY || '';
 
 export function getAnalytics() {
-  const analytics = AnalyticsBrowser.load({ writeKey: analyticsApiKey });
+  const analytics = AnalyticsBrowser.load(
+    { writeKey: analyticsApiKey, cdnURL: '/api/a-cdn' },
+    {
+      integrations: {
+        'Segment.io': {
+          apiHost: `${window.location.host}/api/a-api`,
+        },
+      },
+    },
+  );
   return analytics;
 }
 
