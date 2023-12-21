@@ -68,7 +68,7 @@ export default function Home() {
                     The first self-custodial digital credit card
                   </Typography>
                   <Typography fontSize={mobile ? 14 : 16}>
-                    Buy now, hold your crypto, and pay later.*
+                    Buy now, pay later, and hold your crypto.*
                   </Typography>
 
                   <Box
@@ -161,7 +161,11 @@ export default function Home() {
                 bottom={40}
                 right={40}
               >
-                *The credit is powered by Exactly Protocol.
+                *The credit is powered by{" "}
+                <a href="https://exact.ly/" target="_blank">
+                  Exactly Protocol
+                </a>
+                .
               </Typography>
             )}
           </Box>
