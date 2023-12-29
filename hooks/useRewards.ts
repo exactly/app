@@ -43,6 +43,7 @@ export default () => {
       .reduce((acc, { asset, assetSymbol, amount }) => {
         if (assetSymbol === '') return acc;
         if (!acc[assetSymbol]) {
+          if (amount === 0n && assetSymbol !== 'esEXA') return acc;
           acc[assetSymbol] = { address: asset, amount, usdPrice: price[assetSymbol] };
           return acc;
         }
