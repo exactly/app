@@ -7,9 +7,6 @@ import ModalInfo, { FromTo, Variant } from 'components/common/modal/ModalInfo';
 import type { Operation } from 'types/Operation';
 import useAccountData from 'hooks/useAccountData';
 import { toPercentage } from 'utils/utils';
-import UtilizationRateWithAreaChart from 'components/charts/UtilizationRateWithAreaChart';
-import { Box } from '@mui/material';
-import useFloatingPoolAPR from 'hooks/useFloatingPoolAPR';
 
 type Props = {
   qty: string;
@@ -21,9 +18,8 @@ type Props = {
 function ModalInfoFloatingUtilizationRate({ qty, symbol, operation, variant = 'column' }: Props) {
   const { t } = useTranslation();
   const { marketAccount } = useAccountData(symbol);
-  const { borrowAPR } = useFloatingPoolAPR(symbol, qty, 'borrow');
 
-  const [from, to, rawFrom, rawTo] = useMemo(() => {
+  const [from, to] = useMemo(() => {
     if (!marketAccount) return [undefined, undefined, undefined, undefined];
     const { totalFloatingDepositAssets, totalFloatingBorrowAssets, decimals } = marketAccount;
     try {
@@ -54,7 +50,7 @@ function ModalInfoFloatingUtilizationRate({ qty, symbol, operation, variant = 'c
       const fromUtilization = Number(formatUnits(f, decimals));
       const toUtilization = Number(formatUnits(utilization, decimals));
 
-      return [toPercentage(fromUtilization), toPercentage(toUtilization), fromUtilization, toUtilization];
+      return [toPercentage(fromUtilization), toPercentage(toUtilization)];
     } catch {
       return [undefined, undefined, undefined, undefined];
     }

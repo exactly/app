@@ -8,8 +8,6 @@ import { toPercentage } from 'utils/utils';
 import usePreviewer from 'hooks/usePreviewer';
 import useDelayedEffect from 'hooks/useDelayedEffect';
 import { useWeb3 } from 'hooks/useWeb3';
-import { Box } from '@mui/material';
-import UtilizationRateWithAreaChart from 'components/charts/UtilizationRateWithAreaChart';
 import { useTranslation } from 'react-i18next';
 import { formatEther, formatUnits, parseUnits, zeroAddress } from 'viem';
 import { useOperationContext } from 'contexts/OperationContext';
@@ -19,27 +17,25 @@ type Props = {
   symbol: string;
   operation: Extract<Operation, 'depositAtMaturity' | 'withdrawAtMaturity' | 'borrowAtMaturity' | 'repayAtMaturity'>;
   variant?: Variant;
-  fixedRate?: bigint;
 };
 
-function ModalInfoFixedUtilizationRate({ qty, symbol, operation, variant = 'column', fixedRate }: Props) {
+function ModalInfoFixedUtilizationRate({ qty, symbol, operation, variant = 'column' }: Props) {
   const { t } = useTranslation();
   const previewerContract = usePreviewer();
   const { walletAddress } = useWeb3();
   const { marketAccount } = useAccountData(symbol);
   const { date } = useOperationContext();
 
-  const [rawFrom, from] = useMemo(() => {
-    if (!date) return [undefined, undefined];
+  const from = useMemo(() => {
+    if (!date) return undefined;
 
     const pool = marketAccount?.fixedPools?.find(({ maturity }) => maturity === date);
-    if (!pool) return [undefined, undefined];
+    if (!pool) return undefined;
 
-    return [Number(formatEther(pool.utilization)), toPercentage(Number(formatEther(pool.utilization)))];
+    return toPercentage(Number(formatEther(pool.utilization)));
   }, [date, marketAccount]);
 
   const [to, setTo] = useState<string | undefined>();
-  const [rawTo, setRawTo] = useState<number | undefined>();
 
   const preview = useCallback(
     async (cancelled: () => boolean) => {
@@ -48,12 +44,10 @@ function ModalInfoFixedUtilizationRate({ qty, symbol, operation, variant = 'colu
       }
       if (!qty) {
         setTo(from);
-        setRawTo(rawFrom);
         return;
       }
 
       setTo(undefined);
-      setRawTo(undefined);
 
       try {
         const initialAssets = parseUnits(qty, marketAccount.decimals);
@@ -102,13 +96,11 @@ function ModalInfoFixedUtilizationRate({ qty, symbol, operation, variant = 'colu
 
         if (cancelled()) return;
         setTo(toPercentage(Number(formatUnits(uti, 18))));
-        setRawTo(Number(formatUnits(uti, 18)));
       } catch {
         setTo('N/A');
-        setRawTo(undefined);
       }
     },
-    [date, from, marketAccount, operation, previewerContract, qty, rawFrom, walletAddress],
+    [date, from, marketAccount, operation, previewerContract, qty, walletAddress],
   );
 
   const { isLoading } = useDelayedEffect({ effect: preview });
