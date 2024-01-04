@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { parseEther } from 'viem';
 
 import useAccountData from './useAccountData';
-import { floatingInterestRateCurve } from 'utils/interestRateCurve';
+import { floatingInterestRateCurve, uFloating, uGlobal } from 'utils/interestRateCurve';
 import { WAD } from 'utils/fixedMath';
 import { useMarketFloatingAssets, useMarketFloatingBackupBorrowed, useMarketFloatingDebt } from 'types/abi';
 
@@ -75,32 +75,29 @@ export default function useUtilizationRate(symbol: string, from = 0n, to = MAX, 
       maxRate: 150000000000000000000n,
     });
 
-    const currentUFloating = floatingAssets > 0n ? (floatingDebt * WAD) / floatingAssets : 0n;
-    const currentUGlobal =
-      floatingAssets > 0n
-        ? WAD - ((floatingAssets - floatingDebt - floatingBackupBorrowed) * WAD) / floatingAssets
-        : 0n;
+    const currentUFloating = uFloating(floatingDebt, floatingAssets);
+    const currentUGlobal = uGlobal(floatingAssets, floatingDebt, floatingBackupBorrowed);
 
     const globalUtilizations = [...uGlobals, currentUGlobal].sort();
 
     for (let u = from; u < to; u = u + interval) {
       const curves: Record<string, number> = {};
 
-      for (const uGlobal of globalUtilizations) {
-        if (u > uGlobal) continue;
-        const r = curve(u, uGlobal);
-        curves[uGlobal === currentUGlobal ? 'current' : `curve${uGlobals.indexOf(uGlobal)}`] = Number(r) / 1e18;
+      for (const uG of globalUtilizations) {
+        if (u > uG) continue;
+        const r = curve(u, uG);
+        curves[uG === currentUGlobal ? 'current' : `curve${uGlobals.indexOf(uG)}`] = Number(r) / 1e18;
       }
 
       points.push({ utilization: Number(u) / 1e18, ...curves });
     }
 
     const curves: Record<string, number> = {};
-    for (const uGlobal of globalUtilizations) {
-      if (currentUFloating > uGlobal) continue;
-      const r = curve(currentUFloating, uGlobal);
-      curves[uGlobal === currentUGlobal ? 'current' : `curve${uGlobals.indexOf(uGlobal)}`] = Number(r) / 1e18;
-      if (uGlobal === currentUGlobal) {
+    for (const uG of globalUtilizations) {
+      if (currentUFloating > uG) continue;
+      const r = curve(currentUFloating, uG);
+      curves[uG === currentUGlobal ? 'current' : `curve${uGlobals.indexOf(uG)}`] = Number(r) / 1e18;
+      if (uG === currentUGlobal) {
         curves['highlight'] = 1;
       }
     }
