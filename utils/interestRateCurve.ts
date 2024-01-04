@@ -12,24 +12,32 @@ export type FloatingParameters = {
   maxRate: bigint;
 };
 
+export function uFloating(debt: bigint, assets: bigint): bigint {
+  return assets > 0n ? (debt * WAD) / assets : 0n;
+}
+
+export function uGlobal(assets: bigint, debt: bigint, backupBorrowed: bigint): bigint {
+  return assets > 0n ? WAD - ((assets - debt - backupBorrowed) * WAD) / assets : 0n;
+}
+
 export function floatingInterestRateCurve(parameters: FloatingParameters): FloatingInterestRateCurve {
-  return (uFloating: bigint, uGlobal: bigint): bigint => {
+  return (uF: bigint, uG: bigint): bigint => {
     const { a, b, maxUtilization, floatingNaturalUtilization, sigmoidSpeed, growthSpeed, maxRate } = parameters;
 
-    const r = (a * WAD) / (maxUtilization - uFloating) + b;
-    if (uGlobal === WAD) return maxRate;
-    if (uGlobal === 0n) return r;
-    if (uGlobal >= uFloating) {
+    const r = (a * WAD) / (maxUtilization - uF) + b;
+    if (uG === WAD) return maxRate;
+    if (uG === 0n) return r;
+    if (uG >= uF) {
       const sig =
         (WAD * WAD) /
         (WAD +
           expWad(
             (-sigmoidSpeed *
-              (lnWad((uGlobal * WAD) / (WAD - uGlobal)) -
+              (lnWad((uG * WAD) / (WAD - uG)) -
                 lnWad((floatingNaturalUtilization * WAD) / (WAD - floatingNaturalUtilization)))) /
               WAD,
           ));
-      const rate = (expWad((-growthSpeed * lnWad(WAD - (sig * uGlobal) / WAD)) / WAD) * r) / WAD;
+      const rate = (expWad((-growthSpeed * lnWad(WAD - (sig * uG) / WAD)) / WAD) * r) / WAD;
       return rate > maxRate ? maxRate : rate;
     }
     return r;
