@@ -31,13 +31,6 @@ const NATIVE_USDC_OP_MAINNET = {
   decimals: 6,
 } as const satisfies DepositConfig;
 
-const BRIDGED_USDC_OP_MAINNET = {
-  chainId: optimism.id,
-  tokenAddress: getAddress('0x7F5c764cBc14f9669B88837ca1490cCa17c31607'),
-  tokenSymbol: 'USDC.e',
-  decimals: 6,
-} as const satisfies DepositConfig;
-
 const USDT_OP_MAINNET = {
   chainId: optimism.id,
   tokenAddress: getAddress('0x94b008aA00579c1307B0EF2c499aD98a8ce58e58'),
