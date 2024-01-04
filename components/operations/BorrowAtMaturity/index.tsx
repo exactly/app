@@ -104,13 +104,7 @@ const BorrowAtMaturity: FC<PropsWithChildren> = ({ children }) => {
         <ModalPenaltyRate symbol={symbol} />
         <ModalAdvancedSettings>
           <ModalInfoEditableSlippage value={rawSlippage} onChange={(e) => setRawSlippage(e.target.value)} />
-          <ModalInfoFixedUtilizationRate
-            qty={qty}
-            symbol={symbol}
-            operation="borrowAtMaturity"
-            variant="row"
-            fixedRate={fixedRate}
-          />
+          <ModalInfoFixedUtilizationRate qty={qty} symbol={symbol} operation="borrowAtMaturity" variant="row" />
         </ModalAdvancedSettings>
         {children}
       </Grid>
