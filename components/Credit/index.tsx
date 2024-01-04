@@ -116,7 +116,7 @@ export const apps = () => [
     ],
     finishInstructions:
       'Transaction pending, in short you will receive the funds. Remember to have USDC set as payment currency. Do this by going to the "Card" tab -> Pay with other currencies and select USDC for main or backup currency',
-    depositConfig: BRIDGED_USDC_OP_MAINNET,
+    depositConfig: NATIVE_USDC_OP_MAINNET,
   },
   {
     name: 'Ripio',
