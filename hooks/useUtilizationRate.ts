@@ -2,14 +2,15 @@ import { useMemo } from 'react';
 import { parseEther } from 'viem';
 
 import useAccountData from './useAccountData';
-import { floatingInterestRateCurve, uFloating, uGlobal } from 'utils/interestRateCurve';
-import { WAD } from 'utils/fixedMath';
+import { floatingInterestRateCurve, floatingUtilization, globalUtilization } from 'utils/interestRateCurve';
 import { useMarketFloatingAssets, useMarketFloatingBackupBorrowed, useMarketFloatingDebt } from 'types/abi';
 
 export const MAX = 10n ** 18n;
 export const INTERVAL = parseEther('0.0005');
 export const STEP = 10;
-const uGlobals = Array.from({ length: Math.ceil(100 / STEP) }).map((_, i) => parseEther(String(i * STEP)) / 100n);
+const uGlobals = Array.from({ length: 100 % STEP === 0 ? 100 / STEP + 1 : Math.ceil(100 / STEP) }).map(
+  (_, i) => parseEther(String(i * STEP)) / 100n,
+);
 
 export function useCurrentUtilizationRate(type: 'floating' | 'fixed', symbol: string) {
   const { marketAccount } = useAccountData(symbol);
@@ -17,7 +18,7 @@ export function useCurrentUtilizationRate(type: 'floating' | 'fixed', symbol: st
   return useMemo(() => {
     if (!marketAccount) return undefined;
 
-    const { floatingUtilization, fixedPools } = marketAccount;
+    const { floatingUtilization: utilization, fixedPools } = marketAccount;
     if (!floatingUtilization || fixedPools === undefined) {
       return undefined;
     }
@@ -31,7 +32,7 @@ export function useCurrentUtilizationRate(type: 'floating' | 'fixed', symbol: st
     }
 
     if (type === 'floating') {
-      allUtilizations.push({ utilization: floatingUtilization });
+      allUtilizations.push({ utilization });
     }
     return allUtilizations;
   }, [marketAccount, type]);
@@ -75,8 +76,8 @@ export default function useUtilizationRate(symbol: string, from = 0n, to = MAX, 
       maxRate: 150000000000000000000n,
     });
 
-    const currentUFloating = uFloating(floatingDebt, floatingAssets);
-    const currentUGlobal = uGlobal(floatingAssets, floatingDebt, floatingBackupBorrowed);
+    const currentUFloating = floatingUtilization(floatingAssets, floatingDebt);
+    const currentUGlobal = globalUtilization(floatingAssets, floatingDebt, floatingBackupBorrowed);
 
     const globalUtilizations = [...uGlobals, currentUGlobal].sort();
 
