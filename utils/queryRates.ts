@@ -1,10 +1,12 @@
 import request from 'graphql-request';
 import { formatUnits } from 'viem';
+import { floatingInterestRateCurve, floatingUtilization, globalUtilization } from './interestRateCurve';
 
 export const WAD = 1000000000000000000n;
 
 const FIXED_INTERVAL = 86_400 * 7 * 4;
 
+// Old model
 const floatingRate = (interestRateModel: InterestRateModel, utilization: bigint) => {
   const curveA = BigInt(interestRateModel.floatingCurveA);
   const curveB = BigInt(interestRateModel.floatingCurveB);
@@ -14,12 +16,31 @@ const floatingRate = (interestRateModel: InterestRateModel, utilization: bigint)
 
 const totalFloatingBorrowAssets = (
   timestamp: number,
-  { floatingAssets, floatingDebt }: MarketState,
+  { floatingAssets, floatingDebt, floatingBackupBorrowed }: MarketState,
   { timestamp: debtUpdate }: State = { timestamp: 0 },
-  interestRateModel: InterestRateModel,
+  irm: InterestRateModel,
 ) => {
-  const utilization = BigInt(floatingAssets) > 0n ? (BigInt(floatingDebt) * WAD) / BigInt(floatingAssets) : 0n;
-  const borrowRate = floatingRate(interestRateModel, utilization);
+  const utilization = floatingUtilization(BigInt(floatingAssets), BigInt(floatingDebt));
+
+  let borrowRate: bigint;
+  if (BigInt(irm.floatingNaturalUtilization) === 0n) {
+    borrowRate = floatingRate(irm, utilization);
+  } else {
+    const interestRateCurve = floatingInterestRateCurve({
+      a: BigInt(irm.floatingCurveA),
+      b: BigInt(irm.floatingCurveB),
+      maxUtilization: BigInt(irm.floatingMaxUtilization),
+      floatingNaturalUtilization: BigInt(irm.floatingNaturalUtilization),
+      sigmoidSpeed: BigInt(irm.sigmoidSpeed),
+      growthSpeed: BigInt(irm.growthSpeed),
+      maxRate: BigInt(irm.maxRate),
+    });
+    borrowRate = interestRateCurve(
+      utilization,
+      globalUtilization(BigInt(floatingAssets), BigInt(floatingDebt), BigInt(floatingBackupBorrowed)),
+    );
+  }
+
   return (
     BigInt(floatingDebt) + (BigInt(floatingDebt) * ((borrowRate * BigInt(timestamp - debtUpdate)) / 31_536_000n)) / WAD
   );
@@ -101,6 +122,7 @@ export default async (
         floatingBorrowShares
         floatingDebt
         earningsAccumulator
+        floatingBackupBorrowed
       }
       ${key}_floatingDebtState: floatingDebtUpdates(
         first: 1
@@ -119,6 +141,10 @@ export default async (
         floatingCurveA
         floatingCurveB
         floatingMaxUtilization
+        floatingNaturalUtilization
+        sigmoidSpeed
+        growthSpeed
+        maxRate
       }
       ${
         type === 'deposit'
@@ -239,6 +265,7 @@ interface MarketState extends State {
   floatingBorrowShares: string;
   floatingDebt: string;
   earningsAccumulator: string;
+  floatingBackupBorrowed: string;
 }
 
 interface FixedPool extends State {
@@ -250,4 +277,8 @@ interface InterestRateModel {
   floatingCurveA: string;
   floatingCurveB: string;
   floatingMaxUtilization: string;
+  floatingNaturalUtilization: string;
+  sigmoidSpeed: string;
+  growthSpeed: string;
+  maxRate: string;
 }

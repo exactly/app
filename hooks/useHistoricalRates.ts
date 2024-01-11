@@ -19,19 +19,19 @@ const emptyBatch: Awaited<ReturnType<typeof queryRates>> = [];
 
 export default function useHistoricalRates(symbol: string, initialCount = 30, initialInterval = 3_600 * 6) {
   const { chain } = useWeb3();
-  const { accountData, getMarketAccount } = useAccountData();
+  const { marketAccount } = useAccountData(symbol);
   const [loading, setLoading] = useState<boolean>(true);
   const [rates, setRates] = useState<HistoricalRateData[]>([]);
   const { setIndexerError } = useGlobalError();
 
   const getRatesBatch = useCallback(
     async (type: 'borrow' | 'deposit', count: number, interval: number, offset: number) => {
-      if (!accountData || !chain) return emptyBatch;
+      if (!marketAccount || !chain) return emptyBatch;
 
       const subgraphUrl = networkData[String(chain.id) as keyof typeof networkData]?.subgraph.exactly;
       if (!subgraphUrl) return emptyBatch;
 
-      const { market: marketAddress, maxFuturePools } = getMarketAccount(symbol) ?? {};
+      const { market: marketAddress, maxFuturePools } = marketAccount;
       if (!marketAddress || !maxFuturePools) return emptyBatch;
 
       try {
@@ -47,7 +47,7 @@ export default function useHistoricalRates(symbol: string, initialCount = 30, in
         return emptyBatch;
       }
     },
-    [accountData, chain, getMarketAccount, symbol, setIndexerError],
+    [chain, marketAccount, setIndexerError],
   );
 
   const getRates = useCallback(

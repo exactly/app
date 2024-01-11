@@ -5,19 +5,19 @@ type FloatingInterestRateCurve = (uFloating: bigint, uGlobal: bigint) => bigint;
 export type FloatingParameters = {
   a: bigint;
   b: bigint;
-  floatingNaturalUtilization: bigint;
   maxUtilization: bigint;
+  floatingNaturalUtilization: bigint;
   sigmoidSpeed: bigint;
   growthSpeed: bigint;
   maxRate: bigint;
 };
 
-export function uFloating(debt: bigint, assets: bigint): bigint {
+export function floatingUtilization(assets: bigint, debt: bigint): bigint {
   return assets > 0n ? (debt * WAD) / assets : 0n;
 }
 
-export function uGlobal(assets: bigint, debt: bigint, backupBorrowed: bigint): bigint {
-  return assets > 0n ? WAD - ((assets - debt - backupBorrowed) * WAD) / assets : 0n;
+export function globalUtilization(assets: bigint, debt: bigint, backupBorrowed: bigint): bigint {
+  return assets > 0n ? ((debt + backupBorrowed) * WAD) / assets : 0n;
 }
 
 export function floatingInterestRateCurve(parameters: FloatingParameters): FloatingInterestRateCurve {
