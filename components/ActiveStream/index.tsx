@@ -243,7 +243,7 @@ const WithdrawAndCancel: React.FC<{
         <DialogContent sx={{ p: 1, overflow: 'hidden' }}>
           <Typography fontSize={14} fontWeight={500}>
             {t(
-              'When you withdraw the reserved EXA, the associated vesting stream will be cancelled automatically. You’ll be able to claim the earned EXA and will get back all remaining esEXA.',
+              'When you withdraw the reserved EXA, the associated vesting stream will be cancelled automatically. You’ll get back the earned EXA and all remaining esEXA',
             )}
           </Typography>
           <Box display="flex" gap={2} mt={4} alignItems="center">

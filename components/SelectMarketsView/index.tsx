@@ -52,16 +52,16 @@ const SelectMarketsView: FC = () => {
   const views: ViewOption[] = useMemo(
     () => [
       {
-        type: 'simple',
-        title: t('Simple view'),
-        description: t('Intuitive and user-friendly interface'),
-        icon: <SimpleViewIcon />,
-      },
-      {
         type: 'advanced',
         title: t('Advanced view'),
         description: t('An in-depth look at APR values'),
         icon: <AdvancedViewIcon />,
+      },
+      {
+        type: 'simple',
+        title: t('Simple view'),
+        description: t('Intuitive and user-friendly interface'),
+        icon: <SimpleViewIcon />,
       },
     ],
     [t],

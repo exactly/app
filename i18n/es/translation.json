@@ -501,7 +501,6 @@
   "esEXA Vested": "esEXA Vesteados",
   "View NFT": "Ver NFT",
   "Withdraw Reserved EXA": "Retirar EXA Reservado",
-  "When you withdraw the reserved EXA, the associated vesting stream will be cancelled automatically. You’ll be able to claim the earned EXA and will get back all remaining esEXA.": "Cuando retires el EXA reservado, el flujo de consolidación asociado se cancelará automáticamente. Podrás reclamar el EXA ganado y recuperarás todos los esEXA restantes.",
   "Withdraw and Cancel Stream": "Retirar y Cancelar Stream",
   "{{daysLeft}} days left": "{{daysLeft}} días restantes",
   "{{daysLeft}} day left": "{{daysLeft}} día restante",
@@ -605,6 +604,15 @@
   "Claim EXA": "Reclamar EXA",
   "Price Feed": "Feed de Precios",
   "All EXA token holders will have voting power to participate actively in discussions, propose enhancements, and cast votes to shape the protocol's evolution.": "Todos los titulares de tokens EXA tendrán poder de voto para participar activamente en discusiones, proponer mejoras y emitir votos para dar forma a la evolución del protocolo.",
-  "You can claim all streams at once.": "Puedes reclamar todos los streams a la vez.",
-  "Claim All": "Reclamar Todo"
+  "Claim All": "Reclamar Todo",
+  "When you withdraw the reserved EXA, the associated vesting stream will be cancelled automatically. You’ll get back the earned EXA and all remaining esEXA": "Cuando retires el EXA reservado, el stream de vesting asociado se cancelará automáticamente. Recibirás de vuelta el EXA ganado y todo el esEXA restante",
+  "When you withdraw the reserved EXA, the associated vestings streams will be cancelled automatically. You’ll get back the earned EXA and all remaining esEXA": "Cuando retires el EXA reservado, los streams de vesting asociados se cancelarán automáticamente. Recibirás de vuelta el EXA ganado y todo el esEXA restante",
+  "Total esEXA Vested": "Total esEXA Consolidados",
+  "Active Streams": "Streams Activos",
+  "Active Stream": "Stream Activo",
+  "Total Reserved EXA": "Total EXA Reservados",
+  "Withdraw All": "Retirar Todo",
+  "Total Claimable EXA": "Total EXA Reclamables",
+  "Hide": "Ocultar",
+  "Show All": "Mostrar Todo"
 }

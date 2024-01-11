@@ -1,18 +1,21 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Address, zeroAddress } from 'viem';
+import { Address, zeroAddress, getAddress } from 'viem';
 import {
   escrowedExaABI,
   useEscrowedExaBalanceOf,
   useEscrowedExaReserveRatio,
   useEscrowedExaReserves,
   useEscrowedExaVestingPeriod,
+  sablierV2LockupLinearABI,
 } from 'types/abi';
+
 import useContract from './useContract';
 import { useEXA } from './useEXA';
 import useGraphClient from './useGraphClient';
 import { useWeb3 } from './useWeb3';
 import { getStreams } from 'queries/getStreams';
-
+import { useContractReads } from 'wagmi';
+import { useSablierV2LockupLinear } from './useSablier';
 export const useEscrowedEXA = () => {
   return useContract('esEXA', escrowedExaABI);
 };
@@ -121,3 +124,28 @@ export const useEscrowedEXAVestingPeriod = () => {
     staleTime: 30_000,
   });
 };
+
+export function useEscrowEXATotals(streams: number[]) {
+  const sablier = useSablierV2LockupLinear();
+  const esEXA = useEscrowedEXA();
+
+  const { data: reservedData, isLoading: reservedIsLoading } = useContractReads({
+    contracts: streams.map((stream) => ({
+      abi: escrowedExaABI,
+      address: esEXA && getAddress(esEXA.address),
+      functionName: 'reserves',
+      args: [stream],
+    })),
+  });
+
+  const { data: withdrawableAmount, isLoading: withdrawableAmountIsLoading } = useContractReads({
+    contracts: streams.map((stream) => ({
+      abi: sablierV2LockupLinearABI,
+      address: sablier && getAddress(sablier.address),
+      functionName: 'withdrawableAmountOf',
+      args: [stream],
+    })),
+  });
+
+  return { reservedData, reservedIsLoading, withdrawableAmount, withdrawableAmountIsLoading };
+}
