@@ -2,7 +2,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { parseUnits } from 'viem';
 import networkData from 'config/networkData.json' assert { type: 'json' };
 import type { Operation } from 'types/Operation';
-import { floatingInterestRateCurve, uGlobal, uFloating } from 'utils/interestRateCurve';
+import { floatingInterestRateCurve, globalUtilization, floatingUtilization } from 'utils/interestRateCurve';
 import queryRates from 'utils/queryRates';
 import useAccountData from './useAccountData';
 import useDelayedEffect from './useDelayedEffect';
@@ -56,8 +56,8 @@ export default (
       maxRate: 150000000000000000000n,
     });
 
-    const uF = uFloating(debt, totalFloatingDepositAssets);
-    const uG = uGlobal(totalFloatingDepositAssets, debt, floatingBackupBorrowed);
+    const uF = floatingUtilization(totalFloatingDepositAssets, debt);
+    const uG = globalUtilization(totalFloatingDepositAssets, debt, floatingBackupBorrowed);
 
     return Number(curve(uF, uG)) / 1e18;
   }, [floatingBackupBorrowed, marketAccount, qty]);
