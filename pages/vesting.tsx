@@ -41,6 +41,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import Image from 'next/image';
 import Draggable from 'react-draggable';
 import { TransitionProps } from '@mui/material/transitions';
+import { WEI_PER_ETHER } from 'utils/const';
 
 function PaperComponent(props: PaperProps | undefined) {
   const ref = useRef<HTMLDivElement>(null);
@@ -186,6 +187,13 @@ const Vesting: NextPage = () => {
 
   const unclaimedTokens = useMemo(() => {
     return rewards['esEXA']?.amount || 0n;
+  }, [rewards]);
+
+  const { exaPrice, esEXAPrice } = useMemo(() => {
+    return {
+      exaPrice: rewards?.['EXA']?.usdPrice || 0n,
+      esEXAPrice: rewards?.['esEXA']?.usdPrice || 0n,
+    };
   }, [rewards]);
 
   const totalReservedEXA = useMemo(() => {
@@ -431,9 +439,18 @@ const Vesting: NextPage = () => {
                         height={20}
                         style={{ maxWidth: '100%', height: 'auto' }}
                       />
-                      <Typography fontSize={19} fontWeight={500}>
-                        {formatNumber(Number(totalVestedEsEXA) / 1e18)}
-                      </Typography>
+                      <Box display="flex" flexDirection="column">
+                        <Box display="flex" gap={0.5}>
+                          <Typography fontSize={19} fontWeight={500}>
+                            {formatNumber(Number(totalVestedEsEXA) / 1e18)}
+                          </Typography>
+                        </Box>
+                        <Box display="flex" gap={0.5} justifyContent="space-around">
+                          <Typography fontSize={12} fontWeight={500}>
+                            ${formatNumber(formatEther((esEXAPrice * totalVestedEsEXA) / WEI_PER_ETHER), 'USD')}
+                          </Typography>
+                        </Box>
+                      </Box>
                     </Box>
                     <Box display="flex">
                       <Typography fontSize={14} fontWeight={700}>
@@ -468,9 +485,18 @@ const Vesting: NextPage = () => {
                       {reservedIsLoading ? (
                         <Skeleton width={30} />
                       ) : (
-                        <Typography fontSize={18} fontWeight={500}>
-                          {formatNumber(Number(totalReservedEXA) / 1e18)}
-                        </Typography>
+                        <Box display="flex" flexDirection="column">
+                          <Box display="flex" gap={0.5}>
+                            <Typography fontSize={19} fontWeight={500}>
+                              {formatNumber(Number(totalReservedEXA) / 1e18)}
+                            </Typography>
+                          </Box>
+                          <Box display="flex" gap={0.5} justifyContent="space-around">
+                            <Typography fontSize={12} fontWeight={500}>
+                              ${formatNumber(formatEther((exaPrice * totalReservedEXA) / WEI_PER_ETHER), 'USD')}
+                            </Typography>
+                          </Box>
+                        </Box>
                       )}
                     </Box>
                     <Box display="flex" flexDirection="column" gap={2} alignItems="center">
@@ -529,14 +555,31 @@ const Vesting: NextPage = () => {
                       {withdrawableAmountIsLoading ? (
                         <Skeleton width={30} />
                       ) : (
-                        <>
-                          <Typography fontSize={18} fontWeight={500}>
-                            {formatNumber(Number(totalWithdrawableAmount) / 1e18)}
-                          </Typography>
-                          <Typography fontSize={18} fontWeight={500} color="grey.400">
-                            / {formatNumber(Number(totalVestedEsEXA - totalWithdrawnEXA) / 1e18)}
-                          </Typography>
-                        </>
+                        <Box display="flex" flexDirection="column">
+                          <Box display="flex" gap={0.5}>
+                            <Typography fontSize={19} fontWeight={500}>
+                              {formatNumber(Number(totalWithdrawableAmount) / 1e18)}
+                            </Typography>
+                            <Typography fontSize={19} fontWeight={500} color="grey.400">
+                              / {formatNumber(Number(totalVestedEsEXA - totalWithdrawnEXA) / 1e18)}
+                            </Typography>
+                          </Box>
+                          <Box display="flex" gap={0.5} justifyContent="space-around">
+                            <Typography fontSize={12} fontWeight={500}>
+                              ${formatNumber(formatEther((exaPrice * totalWithdrawableAmount) / WEI_PER_ETHER), 'USD')}
+                            </Typography>
+                            <Typography fontSize={12} fontWeight={500}>
+                              /
+                            </Typography>
+                            <Typography fontSize={12} fontWeight={500} color="grey.400">
+                              $
+                              {formatNumber(
+                                formatEther((exaPrice * (totalVestedEsEXA - totalWithdrawnEXA)) / WEI_PER_ETHER),
+                                'USD',
+                              )}
+                            </Typography>
+                          </Box>
+                        </Box>
                       )}
                     </Box>
                     <Box display="flex" flexDirection="column" gap={2} alignItems="center">

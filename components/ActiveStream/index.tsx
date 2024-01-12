@@ -406,7 +406,7 @@ const ActiveStream: FC<ActiveStreamProps> = ({
   return (
     <Box display="flex" flexDirection="column" px={4} py={3.5} pb={3} data-testid={`vesting-stream-${tokenId}`}>
       <Grid container gap={2} mb={1}>
-        <Grid item xs={12} sm={2.5} display="flex" flexDirection="column" justifyContent="center" gap={0.5}>
+        <Grid item xs={12} sm={3} display="flex" flexDirection="column" justifyContent="center" gap={0.5}>
           <Typography fontSize={14} fontWeight={700}>
             {progress === 100 ? t('esEXA Vested') : t('esEXA Vesting')}
           </Typography>
