@@ -170,7 +170,7 @@ const Vesting: NextPage = () => {
   const { activeStreams, loading: streamsLoading, refetch } = useUpdateStreams();
   const { switchNetwork, isLoading: switchIsLoading } = useSwitchNetwork();
   const { data: reserveRatio } = useEscrowedEXAReserveRatio();
-  const { reservedData, reservedIsLoading, withdrawableAmount, withdrawableAmountIsLoading } = useEscrowEXATotals(
+  const { totalReserve, reserveIsLoading, totalWithdrawable, withdrawableIsLoading } = useEscrowEXATotals(
     activeStreams.map(({ tokenId }) => Number(tokenId)),
   );
 
@@ -196,12 +196,6 @@ const Vesting: NextPage = () => {
     };
   }, [rewards]);
 
-  const totalReservedEXA = useMemo(() => {
-    if (reservedData === undefined) return 0n;
-
-    return reservedData.reduce((acc, { result }) => acc + BigInt(result as bigint), 0n) || 0n;
-  }, [reservedData]);
-
   const totalsStreamData = useMemo(() => {
     if (!activeStreams) return { totalVestedEsEXA: 0n, totalWithdrawnEXA: 0n };
 
@@ -215,12 +209,6 @@ const Vesting: NextPage = () => {
       { totalVestedEsEXA: 0n, totalWithdrawnEXA: 0n },
     );
   }, [activeStreams]);
-
-  const totalWithdrawableAmount = useMemo(() => {
-    if (!withdrawableAmount) return 0n;
-
-    return withdrawableAmount.reduce((acc, { result }) => acc + BigInt(result as bigint), 0n) || 0n;
-  }, [withdrawableAmount]);
 
   const allCancelabelStreamsIds = useMemo(() => {
     if (!activeStreams) return [];
@@ -482,18 +470,18 @@ const Vesting: NextPage = () => {
                         height={20}
                         style={{ maxWidth: '100%', height: 'auto' }}
                       />
-                      {reservedIsLoading ? (
+                      {reserveIsLoading || totalReserve === undefined ? (
                         <Skeleton width={30} />
                       ) : (
                         <Box display="flex" flexDirection="column">
                           <Box display="flex" gap={0.5}>
                             <Typography fontSize={19} fontWeight={500}>
-                              {formatNumber(Number(totalReservedEXA) / 1e18)}
+                              {formatNumber(Number(totalReserve) / 1e18)}
                             </Typography>
                           </Box>
                           <Box display="flex" gap={0.5} justifyContent="space-around">
                             <Typography fontSize={12} fontWeight={500}>
-                              ${formatNumber(formatEther((exaPrice * totalReservedEXA) / WEI_PER_ETHER), 'USD')}
+                              ${formatNumber(formatEther((exaPrice * totalReserve) / WEI_PER_ETHER), 'USD')}
                             </Typography>
                           </Box>
                         </Box>
@@ -552,13 +540,13 @@ const Vesting: NextPage = () => {
                         height={20}
                         style={{ maxWidth: '100%', height: 'auto' }}
                       />
-                      {withdrawableAmountIsLoading ? (
+                      {withdrawableIsLoading || totalWithdrawable === undefined ? (
                         <Skeleton width={30} />
                       ) : (
                         <Box display="flex" flexDirection="column">
                           <Box display="flex" gap={0.5}>
                             <Typography fontSize={19} fontWeight={500}>
-                              {formatNumber(Number(totalWithdrawableAmount) / 1e18)}
+                              {formatNumber(Number(totalWithdrawable) / 1e18)}
                             </Typography>
                             <Typography fontSize={19} fontWeight={500} color="grey.400">
                               / {formatNumber(Number(totalVestedEsEXA - totalWithdrawnEXA) / 1e18)}
@@ -566,7 +554,7 @@ const Vesting: NextPage = () => {
                           </Box>
                           <Box display="flex" gap={0.5} justifyContent="space-around">
                             <Typography fontSize={12} fontWeight={500}>
-                              ${formatNumber(formatEther((exaPrice * totalWithdrawableAmount) / WEI_PER_ETHER), 'USD')}
+                              ${formatNumber(formatEther((exaPrice * totalWithdrawable) / WEI_PER_ETHER), 'USD')}
                             </Typography>
                             <Typography fontSize={12} fontWeight={500}>
                               /

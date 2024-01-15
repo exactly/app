@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from 'react';
-import { Address, zeroAddress, getAddress } from 'viem';
+import { useCallback, useEffect, useState, useMemo } from 'react';
+import { Address, zeroAddress, getAddress, type ContractFunctionConfig } from 'viem';
 import {
   escrowedExaABI,
   useEscrowedExaBalanceOf,
@@ -16,6 +16,7 @@ import { useWeb3 } from './useWeb3';
 import { getStreams } from 'queries/getStreams';
 import { useContractReads } from 'wagmi';
 import { useSablierV2LockupLinear } from './useSablier';
+
 export const useEscrowedEXA = () => {
   return useContract('esEXA', escrowedExaABI);
 };
@@ -129,23 +130,37 @@ export function useEscrowEXATotals(streams: number[]) {
   const sablier = useSablierV2LockupLinear();
   const esEXA = useEscrowedEXA();
 
-  const { data: reservedData, isLoading: reservedIsLoading } = useContractReads({
+  const { data: reserves, isLoading: reserveIsLoading } = useContractReads<
+    ContractFunctionConfig<typeof escrowedExaABI, 'reserves'>[]
+  >({
     contracts: streams.map((stream) => ({
       abi: escrowedExaABI,
       address: esEXA && getAddress(esEXA.address),
       functionName: 'reserves',
-      args: [stream],
+      args: [BigInt(stream)],
     })),
   });
 
-  const { data: withdrawableAmount, isLoading: withdrawableAmountIsLoading } = useContractReads({
+  const { data: withdrawables, isLoading: withdrawableIsLoading } = useContractReads<
+    ContractFunctionConfig<typeof sablierV2LockupLinearABI, 'withdrawableAmountOf'>[]
+  >({
     contracts: streams.map((stream) => ({
       abi: sablierV2LockupLinearABI,
       address: sablier && getAddress(sablier.address),
       functionName: 'withdrawableAmountOf',
-      args: [stream],
+      args: [BigInt(stream)],
     })),
   });
 
-  return { reservedData, reservedIsLoading, withdrawableAmount, withdrawableAmountIsLoading };
+  const sum = useCallback((arr: typeof reserves): bigint | undefined => {
+    if (arr === undefined) return undefined;
+    if (arr.some(({ status }) => status === 'failure')) return undefined;
+    return arr.reduce((total, { status, result }) => (status === 'success' ? total + result : total), 0n);
+  }, []);
+
+  const totalReserve = useMemo(() => sum(reserves), [reserves, sum]);
+
+  const totalWithdrawable = useMemo(() => sum(withdrawables), [withdrawables, sum]);
+
+  return { totalReserve, reserveIsLoading, totalWithdrawable, withdrawableIsLoading };
 }
