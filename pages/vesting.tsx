@@ -199,7 +199,7 @@ const Vesting: NextPage = () => {
   const totalReservedEXA = useMemo(() => {
     if (reservedData === undefined) return 0n;
 
-    return reservedData.reduce((acc, { result }) => acc + (result as bigint), 0n) || 0n;
+    return reservedData.reduce((acc, { result }) => acc + BigInt(result as bigint), 0n) || 0n;
   }, [reservedData]);
 
   const totalsStreamData = useMemo(() => {
@@ -219,7 +219,7 @@ const Vesting: NextPage = () => {
   const totalWithdrawableAmount = useMemo(() => {
     if (!withdrawableAmount) return 0n;
 
-    return withdrawableAmount.reduce((acc, { result }) => acc + (result as bigint), 0n) || 0n;
+    return withdrawableAmount.reduce((acc, { result }) => acc + BigInt(result as bigint), 0n) || 0n;
   }, [withdrawableAmount]);
 
   const allCancelabelStreamsIds = useMemo(() => {
