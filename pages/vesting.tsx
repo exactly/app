@@ -185,16 +185,10 @@ const Vesting: NextPage = () => {
   const { open: openRewards } = useModal('rewards');
   const { open: openGetEXA } = useModal('get-exa');
 
-  const unclaimedTokens = useMemo(() => {
-    return rewards['esEXA']?.amount || 0n;
-  }, [rewards]);
-
-  const { exaPrice, esEXAPrice } = useMemo(() => {
-    return {
-      exaPrice: rewards?.['EXA']?.usdPrice || 0n,
-      esEXAPrice: rewards?.['esEXA']?.usdPrice || 0n,
-    };
-  }, [rewards]);
+  const { usdPrice, unclaimedTokens } = {
+    usdPrice: rewards['esEXA']?.usdPrice || 0n,
+    unclaimedTokens: rewards['esEXA']?.amount || 0n,
+  };
 
   const totalsStreamData = useMemo(() => {
     if (!activeStreams) return { totalVestedEsEXA: 0n, totalWithdrawnEXA: 0n };
@@ -435,7 +429,7 @@ const Vesting: NextPage = () => {
                         </Box>
                         <Box display="flex" gap={0.5} justifyContent="space-around">
                           <Typography fontSize={12} fontWeight={500}>
-                            ${formatNumber(formatEther((esEXAPrice * totalVestedEsEXA) / WEI_PER_ETHER), 'USD')}
+                            ${formatNumber(formatEther((usdPrice * totalVestedEsEXA) / WEI_PER_ETHER), 'USD')}
                           </Typography>
                         </Box>
                       </Box>
@@ -481,7 +475,7 @@ const Vesting: NextPage = () => {
                           </Box>
                           <Box display="flex" gap={0.5} justifyContent="space-around">
                             <Typography fontSize={12} fontWeight={500}>
-                              ${formatNumber(formatEther((exaPrice * totalReserve) / WEI_PER_ETHER), 'USD')}
+                              ${formatNumber(formatEther((usdPrice * totalReserve) / WEI_PER_ETHER), 'USD')}
                             </Typography>
                           </Box>
                         </Box>
@@ -554,7 +548,7 @@ const Vesting: NextPage = () => {
                           </Box>
                           <Box display="flex" gap={0.5} justifyContent="space-around">
                             <Typography fontSize={12} fontWeight={500}>
-                              ${formatNumber(formatEther((exaPrice * totalWithdrawable) / WEI_PER_ETHER), 'USD')}
+                              ${formatNumber(formatEther((usdPrice * totalWithdrawable) / WEI_PER_ETHER), 'USD')}
                             </Typography>
                             <Typography fontSize={12} fontWeight={500}>
                               /
@@ -562,7 +556,7 @@ const Vesting: NextPage = () => {
                             <Typography fontSize={12} fontWeight={500} color="grey.400">
                               $
                               {formatNumber(
-                                formatEther((exaPrice * (totalVestedEsEXA - totalWithdrawnEXA)) / WEI_PER_ETHER),
+                                formatEther((usdPrice * (totalVestedEsEXA - totalWithdrawnEXA)) / WEI_PER_ETHER),
                                 'USD',
                               )}
                             </Typography>
