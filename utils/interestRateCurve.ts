@@ -1,6 +1,14 @@
-import { WAD, expWad, lnWad } from './fixedMath';
+import { WAD, expWad, lnWad, sqrtWad } from './fixedMath';
 
 type FloatingInterestRateCurve = (uFloating: bigint, uGlobal: bigint) => bigint;
+
+export function floatingUtilization(assets: bigint, debt: bigint): bigint {
+  return assets > 0n ? (debt * WAD) / assets : 0n;
+}
+
+export function globalUtilization(assets: bigint, debt: bigint, backupBorrowed: bigint): bigint {
+  return assets > 0n ? ((debt + backupBorrowed) * WAD) / assets : 0n;
+}
 
 export type FloatingParameters = {
   a: bigint;
@@ -11,14 +19,6 @@ export type FloatingParameters = {
   growthSpeed: bigint;
   maxRate: bigint;
 };
-
-export function floatingUtilization(assets: bigint, debt: bigint): bigint {
-  return assets > 0n ? (debt * WAD) / assets : 0n;
-}
-
-export function globalUtilization(assets: bigint, debt: bigint, backupBorrowed: bigint): bigint {
-  return assets > 0n ? ((debt + backupBorrowed) * WAD) / assets : 0n;
-}
 
 export function floatingInterestRateCurve(parameters: FloatingParameters): FloatingInterestRateCurve {
   return (uF: bigint, uG: bigint): bigint => {
@@ -42,4 +42,43 @@ export function floatingInterestRateCurve(parameters: FloatingParameters): Float
     }
     return r;
   };
+}
+
+export type FixedParameters = FloatingParameters & {
+  maxPools: bigint;
+  maturity: bigint;
+  timestamp?: bigint;
+  spreadFactor: bigint;
+  timePreference: bigint;
+  maturitySpeed: bigint;
+};
+
+export function fixedRate(parameters: FixedParameters, uFixed: bigint, uFloating: bigint, uGlobal: bigint): bigint {
+  const { maxPools, spreadFactor, timePreference, maturitySpeed, floatingNaturalUtilization, maturity, timestamp } =
+    parameters;
+  const base = floatingInterestRateCurve(parameters)(uFloating, uGlobal);
+  if (uFixed === 0n) return base;
+
+  const fixedNaturalUtilization = WAD - floatingNaturalUtilization;
+  const sqAlpha = (maxPools * WAD * WAD) / fixedNaturalUtilization;
+  const alpha = sqrtWad(sqAlpha * WAD);
+  const sqX = (maxPools * uFixed * WAD * WAD) / (uGlobal * fixedNaturalUtilization);
+  const x = sqrtWad(sqX * WAD);
+  const a = ((2n * WAD - sqAlpha) * WAD) / ((alpha * (WAD - alpha)) / WAD);
+  const z = (a * x) / WAD + ((WAD - a) * sqX) / WAD - WAD;
+
+  const time = timestamp !== undefined ? timestamp : BigInt(Math.floor(Date.now() / 1000));
+  if (time >= maturity) throw new Error('Already matured');
+
+  const ttm = maturity - time;
+  const interval = 4n * 7n * 24n * 60n * 60n;
+  const ttMaxM = maxPools * interval - (time % interval);
+
+  return (
+    (base *
+      (WAD +
+        (expWad((maturitySpeed * lnWad((ttm * WAD) / ttMaxM)) / WAD) * (timePreference + (spreadFactor * z) / WAD)) /
+          WAD)) /
+    WAD
+  );
 }
