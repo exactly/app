@@ -405,11 +405,9 @@ const Strategies: NextPage = () => {
           description: t('Seamlessly bridge and swap assets to OP Mainnet from many different networks.'),
           tags: [{ text: t('Cross Network') }, { text: t('Basic'), size: 'small' as const }],
           button: (
-            <Link href={{ pathname: `/bridge`, query }} style={{ width: '100%' }}>
-              <Button fullWidth variant="contained">
-                {t('Bridge & Swap')}
-              </Button>
-            </Link>
+            <Button fullWidth variant="contained" disabled>
+              {t('Bridge & Swap')}
+            </Button>
           ),
           imgPath: '/img/strategies/socket-logo.svg',
         },
