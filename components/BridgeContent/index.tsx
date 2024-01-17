@@ -36,14 +36,7 @@ const BridgeContent = () => {
           )}
         </Typography>
       </Box>
-      <Box
-        my={4}
-        display="flex"
-        gap={2}
-        flexWrap="wrap"
-        justifyContent="center"
-        sx={{ pointerEvents: 'none', opacity: 0.5 }}
-      >
+      <Box my={4} display="flex" gap={2} flexWrap="wrap" justifyContent="center">
         <SocketPlugIn updateRoutes={updateRoutes} />
         <SocketTxHistory activeRoutes={activeRoutes} />
       </Box>
