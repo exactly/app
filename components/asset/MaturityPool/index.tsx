@@ -9,6 +9,7 @@ import YieldChart from 'components/charts/YieldChart';
 import useAccountData from 'hooks/useAccountData';
 import { MAX_UINT256, WEI_PER_ETHER } from 'utils/const';
 import { formatUnits } from 'viem';
+import SpreadModelChart from 'components/charts/SpreadModelChart';
 
 type Rate = {
   maturity: bigint;
@@ -101,6 +102,15 @@ const AssetMaturityPools: FC<Props> = ({ symbol }) => {
         height={280}
       >
         <YieldChart symbol={symbol} />
+      </Box>
+      <Box
+        boxShadow={({ palette }) => (palette.mode === 'light' ? '0px 4px 12px rgba(175, 177, 182, 0.2)' : '')}
+        borderRadius="0px 0px 6px 6px"
+        bgcolor="components.bg"
+        p="16px"
+        height={280}
+      >
+        <SpreadModelChart symbol={symbol} />
       </Box>
     </Box>
   );

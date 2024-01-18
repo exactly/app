@@ -1,7 +1,7 @@
 import React, { ReactNode, useMemo } from 'react';
 import { alpha, Box, Typography } from '@mui/material';
 
-type Entry = {
+export type Entry = {
   dataKey: string;
   name: string;
   value: number;
