@@ -4,6 +4,7 @@ import { parseEther } from 'viem';
 import useAccountData from './useAccountData';
 import { floatingInterestRateCurve, floatingUtilization, globalUtilization } from 'utils/interestRateCurve';
 import { useMarketFloatingAssets, useMarketFloatingBackupBorrowed, useMarketFloatingDebt } from 'types/abi';
+import { useWeb3 } from './useWeb3';
 
 export const MAX = 10n ** 18n;
 export const INTERVAL = parseEther('0.0005');
@@ -39,11 +40,15 @@ export function useCurrentUtilizationRate(type: 'floating' | 'fixed', symbol: st
 }
 
 export default function useUtilizationRate(symbol: string, from = 0n, to = MAX, interval = INTERVAL) {
+  const { chain } = useWeb3();
   const { marketAccount } = useAccountData(symbol);
 
-  const { data: floatingDebt } = useMarketFloatingDebt({ address: marketAccount?.market });
-  const { data: floatingAssets } = useMarketFloatingAssets({ address: marketAccount?.market });
-  const { data: floatingBackupBorrowed } = useMarketFloatingBackupBorrowed({ address: marketAccount?.market });
+  const { data: floatingDebt } = useMarketFloatingDebt({ address: marketAccount?.market, chainId: chain.id });
+  const { data: floatingAssets } = useMarketFloatingAssets({ address: marketAccount?.market, chainId: chain.id });
+  const { data: floatingBackupBorrowed } = useMarketFloatingBackupBorrowed({
+    address: marketAccount?.market,
+    chainId: chain.id,
+  });
 
   const data = useMemo(() => {
     if (
