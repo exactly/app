@@ -3,11 +3,15 @@ import { WAD, expWad, lnWad, sqrtWad } from './fixedMath';
 type FloatingInterestRateCurve = (uFloating: bigint, uGlobal: bigint) => bigint;
 
 export function floatingUtilization(assets: bigint, debt: bigint): bigint {
-  return assets > 0n ? (debt * WAD) / assets : 0n;
+  return assets !== 0n ? (debt * WAD) / assets : 0n;
 }
 
 export function globalUtilization(assets: bigint, debt: bigint, backupBorrowed: bigint): bigint {
-  return assets > 0n ? ((debt + backupBorrowed) * WAD) / assets : 0n;
+  return assets !== 0n ? ((debt + backupBorrowed) * WAD) / assets : 0n;
+}
+
+export function fixedUtilization(supplied: bigint, borrowed: bigint, assets: bigint): bigint {
+  return assets !== 0n && borrowed > supplied ? ((borrowed - supplied) * WAD) / assets : 0n;
 }
 
 export type FloatingParameters = {
@@ -47,8 +51,8 @@ export function floatingInterestRateCurve(parameters: FloatingParameters): Float
 export type FixedParameters = FloatingParameters & {
   maxPools: bigint;
   maturity: bigint;
-  timestamp?: bigint;
   spreadFactor: bigint;
+  timestamp?: bigint;
   timePreference: bigint;
   maturitySpeed: bigint;
 };
@@ -81,4 +85,26 @@ export function fixedRate(parameters: FixedParameters, uFixed: bigint, uFloating
           WAD)) /
     WAD
   );
+}
+
+export function spreadModel(parameters: Omit<FixedParameters, 'maturity'>, uFloating: bigint, uGlobal: bigint) {
+  const time = parameters.timestamp ? parameters.timestamp : BigInt(Math.floor(Date.now() / 1000));
+
+  return (maturity: bigint, z: bigint) => {
+    const { maxPools, spreadFactor, timePreference, maturitySpeed } = parameters;
+    const base = floatingInterestRateCurve(parameters)(uFloating, uGlobal);
+    if (maturity === time) return base;
+
+    const ttm = maturity - time;
+    const interval = 4n * 7n * 24n * 60n * 60n;
+    const ttMaxM = maxPools * interval - (time % interval);
+
+    return (
+      (base *
+        (WAD +
+          (expWad((maturitySpeed * lnWad((ttm * WAD) / ttMaxM)) / WAD) * (timePreference + (spreadFactor * z) / WAD)) /
+            WAD)) /
+      WAD
+    );
+  };
 }

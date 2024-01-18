@@ -24,7 +24,10 @@ export default (
 ): FloatingPoolAPR => {
   const { chain } = useWeb3();
   const { marketAccount } = useAccountData(symbol);
-  const { data: floatingBackupBorrowed } = useMarketFloatingBackupBorrowed({ address: marketAccount?.market });
+  const { data: floatingBackupBorrowed } = useMarketFloatingBackupBorrowed({
+    address: marketAccount?.market,
+    chainId: chain.id,
+  });
   const [depositAPR, setDepositAPR] = useState<number | undefined>();
   const [loading, setLoading] = useState<boolean>(true);
   const { setIndexerError } = useGlobalError();
