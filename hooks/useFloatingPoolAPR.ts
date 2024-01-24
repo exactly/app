@@ -10,6 +10,7 @@ import { useWeb3 } from './useWeb3';
 import { useGlobalError } from 'contexts/GlobalErrorContext';
 import { WEI_PER_ETHER } from 'utils/const';
 import { useMarketFloatingBackupBorrowed } from 'types/abi';
+import useIRM from './useIRM';
 
 type FloatingPoolAPR = {
   depositAPR: number | undefined;
@@ -28,12 +29,15 @@ export default (
     address: marketAccount?.market,
     chainId: chain.id,
   });
+
+  const irmParams = useIRM(symbol);
+
   const [depositAPR, setDepositAPR] = useState<number | undefined>();
   const [loading, setLoading] = useState<boolean>(true);
   const { setIndexerError } = useGlobalError();
 
   const borrowAPR = useMemo((): number | undefined => {
-    if (!marketAccount || floatingBackupBorrowed === undefined) {
+    if (!marketAccount || floatingBackupBorrowed === undefined || irmParams === undefined) {
       return undefined;
     }
 
@@ -52,18 +56,14 @@ export default (
       a: A,
       b: B,
       maxUtilization: uMax,
-      // TODO
-      naturalUtilization: 700000000000000000n,
-      sigmoidSpeed: 2500000000000000000n,
-      growthSpeed: 1000000000000000000n,
-      maxRate: 150000000000000000000n,
+      ...irmParams,
     });
 
     const uF = floatingUtilization(totalFloatingDepositAssets, debt);
     const uG = globalUtilization(totalFloatingDepositAssets, debt, floatingBackupBorrowed);
 
     return Number(curve(uF, uG)) / 1e18;
-  }, [floatingBackupBorrowed, marketAccount, qty]);
+  }, [floatingBackupBorrowed, marketAccount, qty, irmParams]);
 
   const fetchAPRs = useCallback(
     async (cancelled: () => boolean) => {

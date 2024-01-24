@@ -12,6 +12,7 @@ import {
   spreadModel,
 } from 'utils/interestRateCurve';
 import { WAD, bmax } from 'utils/fixedMath';
+import useIRM from './useIRM';
 
 export const MAX = 10n ** 18n;
 export const INTERVAL = parseEther('0.0005');
@@ -27,27 +28,26 @@ export default function useSpreadModel(symbol: string) {
     chainId: chain.id,
   });
 
+  const irmParams = useIRM(symbol);
+
   const data = useMemo(() => {
     if (
       !marketAccount ||
       floatingDebt === undefined ||
       floatingAssets === undefined ||
-      floatingBackupBorrowed === undefined
+      floatingBackupBorrowed === undefined ||
+      irmParams === undefined
     ) {
       return [];
     }
 
-    const {
-      // interestRateModel,
-      maxFuturePools,
-      fixedPools,
-    } = marketAccount;
+    const { interestRateModel, maxFuturePools, fixedPools } = marketAccount;
 
-    // const { A, B, uMax } = {
-    //   A: interestRateModel.floatingCurveA,
-    //   B: interestRateModel.floatingCurveB,
-    //   uMax: interestRateModel.floatingMaxUtilization,
-    // };
+    const { A, B, uMax } = {
+      A: interestRateModel.floatingCurveA,
+      B: interestRateModel.floatingCurveB,
+      uMax: interestRateModel.floatingMaxUtilization,
+    };
 
     const currentUFloating = floatingUtilization(floatingAssets, floatingDebt);
     const currentUGlobal = globalUtilization(floatingAssets, floatingDebt, floatingBackupBorrowed);
@@ -62,19 +62,10 @@ export default function useSpreadModel(symbol: string) {
     const parameters = {
       timestamp: now,
       maxPools: BigInt(maxFuturePools),
-      // TODO
-      a: 12111000000000000n,
-      b: 25683000000000000n,
-      maxUtilization: 1300000000000000000n,
-      naturalUtilization: 750000000000000000n,
-      sigmoidSpeed: 2500000000000000000n,
-      growthSpeed: 1100000000000000000n,
-      maxRate: 150000000000000000000n,
-
-      spreadFactor: 200000000000000000n,
-      timePreference: 10000000000000000n,
-      fixedAllocation: WAD - 2500000000000000000n,
-      maturitySpeed: 500000000000000000n,
+      a: A,
+      b: B,
+      maxUtilization: uMax,
+      ...irmParams,
     };
 
     const model = spreadModel(parameters, currentUFloating, currentUGlobal);
@@ -116,7 +107,7 @@ export default function useSpreadModel(symbol: string) {
     }
 
     return points;
-  }, [floatingAssets, floatingBackupBorrowed, floatingDebt, marketAccount]);
+  }, [floatingAssets, floatingBackupBorrowed, floatingDebt, irmParams, marketAccount]);
 
   return { data, loading: data.length === 0 };
 }

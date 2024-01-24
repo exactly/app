@@ -141,7 +141,7 @@ export default async (
         floatingCurveA
         floatingCurveB
         floatingMaxUtilization
-        floatingNaturalUtilization
+        naturalUtilization
         sigmoidSpeed
         growthSpeed
         maxRate
