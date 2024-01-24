@@ -75,7 +75,7 @@ export default function useUtilizationRate(symbol: string, from = 0n, to = MAX, 
       b: B,
       maxUtilization: uMax,
       // TODO
-      floatingNaturalUtilization: 700000000000000000n,
+      naturalUtilization: 700000000000000000n,
       sigmoidSpeed: 2500000000000000000n,
       growthSpeed: 1000000000000000000n,
       maxRate: 150000000000000000000n,
