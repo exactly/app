@@ -18,7 +18,7 @@ export type FloatingParameters = {
   a: bigint;
   b: bigint;
   maxUtilization: bigint;
-  floatingNaturalUtilization: bigint;
+  naturalUtilization: bigint;
   sigmoidSpeed: bigint;
   growthSpeed: bigint;
   maxRate: bigint;
@@ -26,7 +26,7 @@ export type FloatingParameters = {
 
 export function floatingInterestRateCurve(parameters: FloatingParameters): FloatingInterestRateCurve {
   return (uF: bigint, uG: bigint): bigint => {
-    const { a, b, maxUtilization, floatingNaturalUtilization, sigmoidSpeed, growthSpeed, maxRate } = parameters;
+    const { a, b, maxUtilization, naturalUtilization, sigmoidSpeed, growthSpeed, maxRate } = parameters;
 
     const r = (a * WAD) / (maxUtilization - uF) + b;
     if (uG === WAD) return maxRate;
@@ -37,8 +37,7 @@ export function floatingInterestRateCurve(parameters: FloatingParameters): Float
         (WAD +
           expWad(
             (-sigmoidSpeed *
-              (lnWad((uG * WAD) / (WAD - uG)) -
-                lnWad((floatingNaturalUtilization * WAD) / (WAD - floatingNaturalUtilization)))) /
+              (lnWad((uG * WAD) / (WAD - uG)) - lnWad((naturalUtilization * WAD) / (WAD - naturalUtilization)))) /
               WAD,
           ));
       const rate = (expWad((-growthSpeed * lnWad(WAD - (sig * uG) / WAD)) / WAD) * r) / WAD;
@@ -54,19 +53,18 @@ export type FixedParameters = FloatingParameters & {
   spreadFactor: bigint;
   timestamp?: bigint;
   timePreference: bigint;
+  fixedAllocation: bigint;
   maturitySpeed: bigint;
 };
 
 export function fixedRate(parameters: FixedParameters, uFixed: bigint, uFloating: bigint, uGlobal: bigint): bigint {
-  const { maxPools, spreadFactor, timePreference, maturitySpeed, floatingNaturalUtilization, maturity, timestamp } =
-    parameters;
+  const { maxPools, spreadFactor, timePreference, maturitySpeed, fixedAllocation, maturity, timestamp } = parameters;
   const base = floatingInterestRateCurve(parameters)(uFloating, uGlobal);
   if (uFixed === 0n) return base;
 
-  const fixedNaturalUtilization = WAD - floatingNaturalUtilization;
-  const sqAlpha = (maxPools * WAD * WAD) / fixedNaturalUtilization;
+  const sqAlpha = (maxPools * WAD * WAD) / fixedAllocation;
   const alpha = sqrtWad(sqAlpha * WAD);
-  const sqX = (maxPools * uFixed * WAD * WAD) / (uGlobal * fixedNaturalUtilization);
+  const sqX = (maxPools * uFixed * WAD * WAD) / (uGlobal * fixedAllocation);
   const x = sqrtWad(sqX * WAD);
   const a = ((2n * WAD - sqAlpha) * WAD) / ((alpha * (WAD - alpha)) / WAD);
   const z = (a * x) / WAD + ((WAD - a) * sqX) / WAD - WAD;
@@ -76,7 +74,7 @@ export function fixedRate(parameters: FixedParameters, uFixed: bigint, uFloating
 
   const ttm = maturity - time;
   const interval = 4n * 7n * 24n * 60n * 60n;
-  const ttMaxM = maxPools * interval - (time % interval);
+  const ttMaxM = time + maxPools * interval - (time % interval);
 
   return (
     (base *
@@ -97,7 +95,7 @@ export function spreadModel(parameters: Omit<FixedParameters, 'maturity'>, uFloa
 
     const ttm = maturity - time;
     const interval = 4n * 7n * 24n * 60n * 60n;
-    const ttMaxM = maxPools * interval - (time % interval);
+    const ttMaxM = time + maxPools * interval - (time % interval);
 
     return (
       (base *

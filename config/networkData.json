@@ -9,7 +9,7 @@
   "5": {
     "etherscan": "https://goerli.etherscan.io",
     "subgraph": {
-      "exactly": "https://api.thegraph.com/subgraphs/name/exactly/goerli",
+      "exactly": "https://api.thegraph.com/subgraphs/name/jgalat/gggggggggggggggg",
       "sablier": "https://api.thegraph.com/subgraphs/name/sablier-labs/sablier-v2-goerli"
     }
   },
