@@ -23,14 +23,14 @@ const totalFloatingBorrowAssets = (
   const utilization = floatingUtilization(BigInt(floatingAssets), BigInt(floatingDebt));
 
   let borrowRate: bigint;
-  if (BigInt(irm.floatingNaturalUtilization) === 0n) {
+  if (BigInt(irm.naturalUtilization) === 0n) {
     borrowRate = floatingRate(irm, utilization);
   } else {
     const interestRateCurve = floatingInterestRateCurve({
       a: BigInt(irm.floatingCurveA),
       b: BigInt(irm.floatingCurveB),
       maxUtilization: BigInt(irm.floatingMaxUtilization),
-      floatingNaturalUtilization: BigInt(irm.floatingNaturalUtilization),
+      naturalUtilization: BigInt(irm.naturalUtilization),
       sigmoidSpeed: BigInt(irm.sigmoidSpeed),
       growthSpeed: BigInt(irm.growthSpeed),
       maxRate: BigInt(irm.maxRate),
@@ -277,7 +277,7 @@ interface InterestRateModel {
   floatingCurveA: string;
   floatingCurveB: string;
   floatingMaxUtilization: string;
-  floatingNaturalUtilization: string;
+  naturalUtilization: string;
   sigmoidSpeed: string;
   growthSpeed: string;
   maxRate: string;

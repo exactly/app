@@ -66,13 +66,14 @@ export default function useSpreadModel(symbol: string) {
       a: 12111000000000000n,
       b: 25683000000000000n,
       maxUtilization: 1300000000000000000n,
-      floatingNaturalUtilization: 750000000000000000n,
+      naturalUtilization: 750000000000000000n,
       sigmoidSpeed: 2500000000000000000n,
       growthSpeed: 1100000000000000000n,
       maxRate: 150000000000000000000n,
 
       spreadFactor: 200000000000000000n,
       timePreference: 10000000000000000n,
+      fixedAllocation: WAD - 2500000000000000000n,
       maturitySpeed: 500000000000000000n,
     };
 
