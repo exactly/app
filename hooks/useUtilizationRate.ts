@@ -5,6 +5,7 @@ import useAccountData from './useAccountData';
 import { floatingInterestRateCurve, floatingUtilization, globalUtilization } from 'utils/interestRateCurve';
 import { useMarketFloatingAssets, useMarketFloatingBackupBorrowed, useMarketFloatingDebt } from 'types/abi';
 import { useWeb3 } from './useWeb3';
+import useIRM from './useIRM';
 
 export const MAX = 10n ** 18n;
 export const INTERVAL = parseEther('0.0005');
@@ -50,12 +51,15 @@ export default function useUtilizationRate(symbol: string, from = 0n, to = MAX, 
     chainId: chain.id,
   });
 
+  const irmParams = useIRM(symbol);
+
   const data = useMemo(() => {
     if (
       !marketAccount ||
       floatingDebt === undefined ||
       floatingAssets === undefined ||
-      floatingBackupBorrowed === undefined
+      floatingBackupBorrowed === undefined ||
+      irmParams === undefined
     ) {
       return [];
     }
@@ -74,11 +78,7 @@ export default function useUtilizationRate(symbol: string, from = 0n, to = MAX, 
       a: A,
       b: B,
       maxUtilization: uMax,
-      // TODO
-      naturalUtilization: 700000000000000000n,
-      sigmoidSpeed: 2500000000000000000n,
-      growthSpeed: 1000000000000000000n,
-      maxRate: 150000000000000000000n,
+      ...irmParams,
     });
 
     const currentUFloating = floatingUtilization(floatingAssets, floatingDebt);
@@ -116,7 +116,7 @@ export default function useUtilizationRate(symbol: string, from = 0n, to = MAX, 
     points.sort((x, y) => x.utilization - y.utilization);
 
     return points;
-  }, [marketAccount, floatingDebt, floatingAssets, floatingBackupBorrowed, from, to, interval]);
+  }, [marketAccount, floatingDebt, floatingAssets, floatingBackupBorrowed, irmParams, from, to, interval]);
 
   return {
     data,
