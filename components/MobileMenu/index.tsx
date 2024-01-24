@@ -29,6 +29,7 @@ import RemoveCircleOutlineRoundedIcon from '@mui/icons-material/RemoveCircleOutl
 import MonitorHeartRoundedIcon from '@mui/icons-material/MonitorHeartRounded';
 import GppGoodRoundedIcon from '@mui/icons-material/GppGoodRounded';
 import AdvancedViewSwitch from 'components/AdvancedSwitch';
+import ReadOnlySwitch from 'components/ReadOnlySwitch';
 
 type Props = {
   open: boolean;
@@ -154,6 +155,7 @@ function MobileMenu({ open, handleClose }: Props) {
               {t('Settings')}
             </Typography>
             <AdvancedViewSwitch sx={{ width: '100%' }} fontSize={16} />
+            <ReadOnlySwitch sx={{ width: '100%' }} fontSize={16} onSubmit={handleClose} />
             <Box width="100%" display="flex" alignItems="center" justifyContent="space-between" gap={1}>
               <Typography fontSize={16}>{t('Theme')}</Typography>
               <SwitchTheme />

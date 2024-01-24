@@ -7,8 +7,8 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 import Image from 'next/image';
 
-import { Avatar, Badge, Box, Button, List, ListItem, ListItemButton, Menu, Typography } from '@mui/material';
-
+import { Avatar, Box, Button, List, ListItem, ListItemButton, Menu, Typography } from '@mui/material';
+import { Visibility } from '@mui/icons-material';
 import * as blockies from 'blockies-ts';
 import CopyToClipboardButton from 'components/common/CopyToClipboardButton';
 import { globals } from 'styles/theme';
@@ -97,15 +97,7 @@ function Wallet() {
   }
 
   return (
-    <Badge
-      variant="dot"
-      sx={{
-        '& .MuiBadge-badge': {
-          backgroundColor: 'red',
-        },
-      }}
-      invisible={!impersonateActive}
-    >
+    <>
       <Button
         variant="outlined"
         onClick={openMenu}
@@ -131,10 +123,13 @@ function Wallet() {
             marginRight: '5px',
           }}
         />
-        <Avatar alt="Address avatar" src={avatarImgSrc} sx={{ width: 20, height: 20, mr: { xs: 0, sm: '5px' } }} />
-        <Typography variant="subtitle1" color="grey.900" display={onlyDesktop} data-testid="user-address">
-          {ens && !ensError ? ens : formattedWallet}
-        </Typography>
+        <Avatar alt="Address avatar" src={avatarImgSrc} sx={{ width: 20, height: 20, mr: '5px' }} />
+        <Box display="flex" gap={1} flexDirection="row">
+          <Typography variant="subtitle1" color="grey.900" display={onlyDesktop} data-testid="user-address">
+            {ens && !ensError ? ens : formattedWallet}
+          </Typography>
+          {impersonateActive && <Visibility />}
+        </Box>
       </Button>
       <Menu
         id="wallet-menu"
@@ -166,14 +161,13 @@ function Wallet() {
       >
         <Box display="flex" flexDirection="column" gap={1} paddingTop={2}>
           <Avatar alt="Blocky Avatar" src={avatarImgSrc} sx={{ mx: 'auto', width: 40, height: 40 }} />
-          <Box display="flex" flexDirection="column" my={1} mx="auto" textAlign="center">
+          <Box display="flex" flexDirection="column" my={1} mx="auto" textAlign="center" gap={2} alignItems="center">
             {ens && !ensError && (
               <Typography variant="h6" lineHeight="16px">
                 {ens}
               </Typography>
             )}
-            {impersonateActive && <Typography fontSize={12}>{t('Viewing as')}:</Typography>}
-            <Box display="flex" mb={2} alignSelf={'center'}>
+            <Box display="flex" alignSelf={'center'}>
               <Typography variant="subtitle1" fontSize="16px" color="grey.500">
                 {formattedWallet}
               </Typography>
@@ -191,41 +185,50 @@ function Wallet() {
                 }}
               />
               <Typography fontSize="14px" fontWeight={500} color="grey.500">
-                {t('Connected to {{network}}', { network })}
+                {t('{{network}} Address', { network })}
               </Typography>
             </Box>
+            {impersonateActive && (
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  backgroundColor: 'figma.grey.100',
+                  padding: 0.5,
+                  gap: 1,
+                  borderRadius: 1,
+                }}
+              >
+                <Visibility fontSize={'small'} />
+                <Typography fontSize={12} fontWeight={500}>
+                  {t('Read-only mode')}
+                </Typography>
+              </Box>
+            )}
           </Box>
-          {impersonateActive && (
-            <Box textAlign="center" mb={1} mt={-1}>
-              <Typography fontSize={12} fontWeight={600} textTransform="uppercase">
-                {t('Read-Only Mode')}
-              </Typography>
-              <Typography fontSize={14} fontWeight={400}>
-                {t('Features may be limited')}
-              </Typography>
-            </Box>
-          )}
           <List disablePadding sx={{ borderTop: 1, borderColor: 'grey.300', pt: 1, px: 1 }}>
-            <Link
-              href={{ pathname: 'revoke', query }}
-              legacyBehavior
-              onClick={() =>
-                track('Button Clicked', {
-                  href: '/revoke',
-                  location: 'Wallet',
-                  name: 'manage allowances',
-                })
-              }
-            >
-              <ListItem disablePadding>
-                <ListItemButton sx={{ borderRadius: 1, p: 1 }}>
-                  <SettingsIcon sx={{ width: '16px', height: '16px' }} />
-                  <Typography fontSize={14} fontWeight={700} marginLeft={0.5}>
-                    {t('Manage Allowances')}
-                  </Typography>
-                </ListItemButton>
-              </ListItem>
-            </Link>
+            {!impersonateActive && (
+              <Link
+                href={{ pathname: 'revoke', query }}
+                legacyBehavior
+                onClick={() =>
+                  track('Button Clicked', {
+                    href: '/revoke',
+                    location: 'Wallet',
+                    name: 'manage allowances',
+                  })
+                }
+              >
+                <ListItem disablePadding>
+                  <ListItemButton sx={{ borderRadius: 1, p: 1 }}>
+                    <SettingsIcon sx={{ width: '16px', height: '16px' }} />
+                    <Typography fontSize={14} fontWeight={700} marginLeft={0.5}>
+                      {t('Manage Allowances')}
+                    </Typography>
+                  </ListItemButton>
+                </ListItem>
+              </Link>
+            )}
             <ListItem disablePadding>
               <ListItemButton sx={{ borderRadius: 1, p: 1 }} onClick={handleDisconnectClick}>
                 <PowerSettingsNewIcon sx={{ width: '16px', height: '16px' }} />
@@ -237,7 +240,7 @@ function Wallet() {
           </List>
         </Box>
       </Menu>
-    </Badge>
+    </>
   );
 }
 

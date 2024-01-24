@@ -203,9 +203,7 @@
   "An in-depth look at APR values": "Un vistazo en profundidad a las TNA",
   "Disconnect": "Desconectar",
   "Exit Read-Only Mode": "Finalizar Modo Sólo Lectura",
-  "Read-Only Mode": "Modo Sólo Lectura",
-  "Viewing as": "Viendo como",
-  "Features may be limited": "Las funcionalidades pueden estar limitadas",
+  "Read-only mode": "Modo de sólo lectura",
   "Give us feedback": "Déjanos tu comentario",
   "Variable Rate": "Tasa Variable",
   "Fixed Rate": "Tasa Fija",
@@ -536,7 +534,7 @@
   "Scheduled At": "Programado en",
   "Scheduled Transactions": "Transacciones Programadas",
   "Executed Transactions": "Transacciones Ejecutadas",
-  "Connected to {{network}}": "Conectado a {{network}}",
+  "{{network}} Address": "Dirección de {{network}}",
   "To borrow more money, you'll have to ": "Para pedir prestado más dinero, tendrás que ",
   "This borrowing process will include a token swap from {{from}} to {{to}}; you will find the swap details below.": "Este proceso de préstamo incluirá un swap de tokens de {{from}} a {{to}}; encontrarás los detalles del swap a continuación.",
   "Swap Cost": "Costo del Swap",
@@ -614,5 +612,9 @@
   "Withdraw All": "Retirar Todo",
   "Total Claimable EXA": "Total EXA Reclamables",
   "Hide": "Ocultar",
-  "Show All": "Mostrar Todo"
+  "Show All": "Mostrar Todo",
+  "Switch Read Only mode {{state}} ": "Cambiar modo de solo lectura a {{state}} ",
+  "on": "encendido",
+  "off": "apagado",
+  "Search address": "Buscar dirección"
 }

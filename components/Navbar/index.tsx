@@ -30,6 +30,8 @@ import { useModal } from 'contexts/ModalContext';
 import CustomMenu from './CustomMenu';
 import Settings from 'components/Settings';
 import { identify, track } from '../../utils/segment';
+import useReadOnly from 'hooks/useReadOnly';
+import { AccountInput } from 'components/AccountInput';
 
 const { onlyMobile, onlyDesktopFlex } = globals;
 
@@ -38,7 +40,8 @@ function Navbar() {
   const { connector } = useConfig();
   const { walletAddress } = useWeb3();
   const { pathname: currentPathname, query } = useRouter();
-  const { chain, isConnected } = useWeb3();
+  const { chain, isConnected, impersonateActive } = useWeb3();
+  const { isReadOnly } = useReadOnly();
 
   const { palette, breakpoints } = useTheme();
   const { view } = useCustomTheme();
@@ -223,7 +226,7 @@ function Navbar() {
             )}
             <Box display="flex" gap={0.5}>
               {!isMobile && !isEthereum && <RewardsButton />}
-              <Wallet />
+              {isReadOnly && !impersonateActive ? <AccountInput /> : <Wallet />}
               {!isMobile && <Settings />}
             </Box>
           </Box>
