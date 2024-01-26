@@ -35,7 +35,7 @@ test('Vesting esEXA & Claiming EXA', async ({ page, web2, web3 }) => {
     await vesting.checkBalanceAvailable('100.00');
 
     await vesting.input('1000');
-    await vesting.checkError('Not enough EXA for reserve. Get EXA.');
+    await vesting.checkError('You need 225.00 more EXA for reserve. Get EXA.');
 
     await vesting.input('100');
     await vesting.checkReserveNeeded('25%', '25');

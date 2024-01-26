@@ -173,11 +173,13 @@ function VestingInput({ refetch }: Props) {
     return formatEther(usd);
   }, [EXAPrice, qty]);
 
-  const [reserve, moreThanBalance] = useMemo(() => {
+  const [reserve, moreThanBalance, exaRemaining] = useMemo(() => {
     if (reserveRatio === undefined || exaBalance === undefined || !qty) return [undefined, false];
     const parsed = parseEther(qty);
     const _reserve = (parsed * reserveRatio) / WEI_PER_ETHER;
-    return [formatEther(_reserve), _reserve > exaBalance];
+    const _exaRemaining = _reserve - exaBalance;
+
+    return [formatEther(_reserve), _reserve > exaBalance, _exaRemaining];
   }, [reserveRatio, qty, exaBalance]);
 
   const insufficientFunds = useMemo(() => {
@@ -403,7 +405,7 @@ function VestingInput({ refetch }: Props) {
             {moreThanBalance ? (
               <Typography color="#d92626" fontSize={14} fontWeight={500} data-testid="vesting-error">
                 <Trans
-                  i18nKey="Not enough EXA for reserve. <1>Get EXA</1>."
+                  i18nKey={`You need ${formatNumber(formatEther(exaRemaining))} more EXA for reserve. <1>Get EXA</1>.`}
                   components={{
                     1: (
                       <button
