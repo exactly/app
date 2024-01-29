@@ -1,3 +1,4 @@
+import { MAX_UINT256 } from './const';
 import { WAD, expWad, lnWad, sqrtWad } from './fixedMath';
 
 type FloatingInterestRateCurve = (uFloating: bigint, uGlobal: bigint) => bigint;
@@ -24,6 +25,8 @@ export type FloatingParameters = {
   maxRate: bigint;
 };
 
+const EXP_THRESHOLD = 135305999368893231588n;
+
 export function floatingInterestRateCurve(parameters: FloatingParameters): FloatingInterestRateCurve {
   return (uF: bigint, uG: bigint): bigint => {
     const { a, b, maxUtilization, naturalUtilization, sigmoidSpeed, growthSpeed, maxRate } = parameters;
@@ -31,18 +34,23 @@ export function floatingInterestRateCurve(parameters: FloatingParameters): Float
     const r = (a * WAD) / (maxUtilization - uF) + b;
     if (uG === WAD) return maxRate;
     if (uG === 0n) return r;
+
     if (uG >= uF) {
-      const sig =
-        (WAD * WAD) /
-        (WAD +
-          expWad(
-            (-sigmoidSpeed *
-              (lnWad((uG * WAD) / (WAD - uG)) - lnWad((naturalUtilization * WAD) / (WAD - naturalUtilization)))) /
-              WAD,
-          ));
-      const rate = (expWad((-growthSpeed * lnWad(WAD - (sig * uG) / WAD)) / WAD) * r) / WAD;
+      const auxSigmoid = lnWad((naturalUtilization * WAD) / (WAD - naturalUtilization));
+      let x = -((sigmoidSpeed * (lnWad((uG * WAD) / (WAD - uG)) - auxSigmoid)) / WAD);
+      const sigmoid = x > EXP_THRESHOLD ? 0n : (WAD * WAD) / (WAD + expWad(x));
+
+      x = (-growthSpeed * lnWad(WAD - (sigmoid * uG) / WAD)) / WAD;
+      const globalFactor = expWad(x > EXP_THRESHOLD ? EXP_THRESHOLD : x);
+
+      if (globalFactor > MAX_UINT256 / r) {
+        return maxRate;
+      }
+
+      const rate = (r * globalFactor) / WAD;
       return rate > maxRate ? maxRate : rate;
     }
+
     return r;
   };
 }
