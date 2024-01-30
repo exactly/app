@@ -69,6 +69,7 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
       floatingBorrows !== undefined &&
       floatingDeposits !== undefined &&
       fixedDeposits !== undefined &&
+      floatingDeposits + fixedDeposits > 0n &&
       decimals
         ? Number(((floatingBorrows + backupBorrows) * WEI_PER_ETHER) / (floatingDeposits + fixedDeposits)) / 1e18
         : undefined;

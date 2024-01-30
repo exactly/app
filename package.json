@@ -13,7 +13,7 @@
     "start": "NODE_ENV=production next start",
     "start:e2e": "npm run build:e2e && NODE_ENV=production next start",
     "export": "NODE_ENV=production next export",
-    "postinstall": "wagmi generate",
+    "prepare": "wagmi generate",
     "lint": "eslint --max-warnings=0 .",
     "i18n:scan": "i18next-scanner --config i18next-scanner.config.cjs"
   },

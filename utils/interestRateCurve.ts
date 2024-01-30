@@ -32,7 +32,7 @@ export function floatingInterestRateCurve(parameters: FloatingParameters): Float
     const { A, B, maxUtilization, naturalUtilization, sigmoidSpeed, growthSpeed, maxRate } = parameters;
 
     const r = (A * WAD) / (maxUtilization - uF) + B;
-    if (uG === WAD) return maxRate;
+    if (uG >= WAD) return maxRate;
     if (uG === 0n) return r;
 
     if (uG >= uF) {
@@ -68,7 +68,7 @@ export type FixedParameters = FloatingParameters & {
 export function fixedRate(parameters: FixedParameters, uFixed: bigint, uFloating: bigint, uGlobal: bigint) {
   const { maxPools, spreadFactor, timePreference, maturitySpeed, fixedAllocation, maturity, timestamp } = parameters;
   const base = floatingInterestRateCurve(parameters)(uFloating, uGlobal);
-  // if (uFixed === 0n) return { rate: base, z: 0n };
+  if (uGlobal === 0n) return { rate: base, z: WAD };
 
   const sqAlpha = (maxPools * WAD * WAD) / fixedAllocation;
   const alpha = sqrtWad(sqAlpha * WAD);

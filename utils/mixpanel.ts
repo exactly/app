@@ -89,13 +89,13 @@ export function track<Name extends keyof TrackEvent>(
   name: Name,
   properties: TrackEvent[Name] & Partial<Global & Component & TX>,
 ): void {
-  mixpanel.track(name, properties);
+  if (process.env.NEXT_PUBLIC_MIXPANEL_PROJECT_TOKEN) mixpanel.track(name, properties);
 }
 
 export function page() {
-  mixpanel.track_pageview();
+  if (process.env.NEXT_PUBLIC_MIXPANEL_PROJECT_TOKEN) mixpanel.track_pageview();
 }
 
 export function identify(address: Address) {
-  mixpanel.identify(address);
+  if (process.env.NEXT_PUBLIC_MIXPANEL_PROJECT_TOKEN) mixpanel.identify(address);
 }

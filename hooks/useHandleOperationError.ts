@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { goerli } from 'wagmi/chains';
+import { optimismSepolia } from 'wagmi/chains';
 import { ErrorCode } from '@ethersproject/logger';
 import { captureException as sentryCaptureException } from '@sentry/nextjs';
 
@@ -18,7 +18,7 @@ export default function useHandleOperationError(): HandleOperationErrorFunc {
   const captureException = useCallback<typeof sentryCaptureException>(
     (exception) => {
       if (
-        chain?.id === goerli.id &&
+        chain?.id === optimismSepolia.id &&
         symbol === 'WETH' &&
         ['withdraw', 'withdrawAtMaturity', 'borrow', 'borrowAtMaturity'].includes(operation) &&
         exception &&

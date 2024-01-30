@@ -2,14 +2,13 @@ import snapshot from '@snapshot-labs/snapshot.js';
 import { useWeb3 } from './useWeb3';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import optimismEXA from '@exactly/protocol/deployments/optimism/EXA.json';
-import goerliEXA from '@exactly/protocol/deployments/goerli/EXA.json';
 import { optimism } from 'wagmi/chains';
 
 export default function useGovernance(delegation = true) {
   const [votingPower, setVotingPower] = useState<number | undefined>(undefined);
   const { chain, walletAddress } = useWeb3();
 
-  const exaAddress = useMemo(() => (chain.id === optimism.id ? optimismEXA.address : goerliEXA.address), [chain.id]);
+  const exaAddress = useMemo(() => (chain.id === optimism.id ? optimismEXA.address : optimismEXA.address), [chain.id]);
   const space = useMemo(() => (chain.id === optimism.id ? 'gov.exa.eth' : 'exa.eth'), [chain.id]);
 
   const strategies = useMemo(

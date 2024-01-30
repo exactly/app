@@ -2,7 +2,7 @@ import React, { useCallback } from 'react';
 import CloseIcon from '@mui/icons-material/Close';
 import { Dialog, useTheme, IconButton, DialogTitle, DialogContent, Typography, Box } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { goerli } from 'wagmi/chains';
+import { optimismSepolia } from 'wagmi/chains';
 
 import Faucet from './';
 import { useModal } from 'contexts/ModalContext';
@@ -66,7 +66,7 @@ function Modal({ isOpen, onClose }: Props) {
 export default function ModalWrapper() {
   const { chain } = useWeb3();
   const { isOpen, close } = useModal('faucet');
-  if (!isOpen || chain.id !== goerli.id) return null;
+  if (!isOpen || chain.id !== optimismSepolia.id) return null;
 
   return <Modal isOpen={isOpen} onClose={close} />;
 }

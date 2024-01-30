@@ -4,7 +4,7 @@ export type AlchemyProvider = ReturnType<typeof createPublicClient>;
 
 const alchemyProvidersHost: Record<number, string> = {
   1: 'eth-mainnet.alchemyapi.io/v2/',
-  5: 'eth-goerli.g.alchemy.com/v2/',
+  11155420: 'opt-sepolia.g.alchemy.com/v2/',
   10: 'opt-mainnet.g.alchemy.com/v2/',
 };
 
