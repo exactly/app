@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useWalletClient, usePublicClient } from 'wagmi';
 import { Abi } from 'viem';
-import { mainnet } from 'wagmi/chains';
+import { mainnet, optimismSepolia } from 'wagmi/chains';
 import { getContract } from '@wagmi/core';
 import { ContractType } from 'types/contracts';
 import { useWeb3 } from './useWeb3';
@@ -17,7 +17,12 @@ export default function <T extends Abi>(contractName: string, abi: T) {
     const loadContract = async () => {
       setContract(undefined);
       const { address } = await import(
-        `@exactly/protocol/deployments/${{ [mainnet.id]: 'ethereum' }[chain.id] ?? chain.network}/${contractName}.json`,
+        `@exactly/protocol/deployments/${
+          {
+            [mainnet.id]: 'ethereum',
+            [optimismSepolia.id]: 'op-sepolia',
+          }[chain.id] ?? chain.network
+        }/${contractName}.json`,
         { assert: { type: 'json' } }
       );
 

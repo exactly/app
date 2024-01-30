@@ -1,58 +1,33 @@
 import snapshot from '@snapshot-labs/snapshot.js';
 import { useWeb3 } from './useWeb3';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import optimismEXA from '@exactly/protocol/deployments/optimism/EXA.json';
-import goerliEXA from '@exactly/protocol/deployments/goerli/EXA.json';
+import { useCallback, useEffect, useState } from 'react';
+import exa from '@exactly/protocol/deployments/optimism/EXA.json';
 import { optimism } from 'wagmi/chains';
 
 export default function useGovernance(delegation = true) {
   const [votingPower, setVotingPower] = useState<number | undefined>(undefined);
   const { chain, walletAddress } = useWeb3();
 
-  const exaAddress = useMemo(() => (chain.id === optimism.id ? optimismEXA.address : goerliEXA.address), [chain.id]);
-  const space = useMemo(() => (chain.id === optimism.id ? 'gov.exa.eth' : 'exa.eth'), [chain.id]);
-
-  const strategies = useMemo(
-    () => [
-      {
-        name: 'erc20-balance-of',
-        params: {
-          symbol: 'EXA',
-          address: exaAddress,
-          decimals: 18,
-        },
-      },
-      {
-        name: 'sablier-v2',
-        params: {
-          policy: 'reserved-recipient',
-          symbol: 'EXA',
-          address: exaAddress,
-          decimals: 18,
-        },
-      },
-    ],
-    [exaAddress],
-  );
-
-  const url = 'https://score.snapshot.org/';
-
   const fetchVotingPower = useCallback(async () => {
     if (!walletAddress) return;
     const { vp } = await snapshot.utils.getVp(
       walletAddress,
       String(chain.id),
-      strategies,
+      [
+        { name: 'erc20-balance-of', params: { symbol: 'EXA', address: exa.address, decimals: 18 } },
+        {
+          name: 'sablier-v2',
+          params: { policy: 'reserved-recipient', symbol: 'EXA', address: exa.address, decimals: 18 },
+        },
+      ],
       'latest',
-      space,
+      chain.id === optimism.id ? 'gov.exa.eth' : 'exa.eth',
       delegation,
-      {
-        url,
-      },
+      { url: 'https://score.snapshot.org/' },
     );
     setVotingPower(vp);
     return vp;
-  }, [chain.id, delegation, space, strategies, walletAddress]);
+  }, [chain.id, delegation, walletAddress]);
 
   useEffect(() => {
     fetchVotingPower();

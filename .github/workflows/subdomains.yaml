@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        network: ['ethereum', 'goerli']
+        network: ['ethereum', 'testnet']
     steps:
       - uses: actions/checkout@v3
         with:

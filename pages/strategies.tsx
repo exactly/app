@@ -3,7 +3,7 @@ import type { NextPage } from 'next';
 import { Box, Button, Divider, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import Link from 'next/link';
-import { goerli, optimism } from 'wagmi/chains';
+import { optimismSepolia, optimism } from 'wagmi/chains';
 
 import { useStartDebtManagerButton, useStartLeverager } from 'hooks/useActionButton';
 import StrategyRowCard from 'components/strategies/StrategyRowCard';
@@ -287,7 +287,7 @@ const Strategies: NextPage = () => {
             </Link>
           ),
           isNew: false,
-          visibleChainId: [optimism.id, goerli.id] as number[],
+          visibleChainId: [optimism.id, optimismSepolia.id] as number[],
         },
         {
           title: t('Get EXA'),
@@ -315,7 +315,7 @@ const Strategies: NextPage = () => {
             </Button>
           ),
           chainId: optimism.id,
-          visibleChainId: [optimism.id, goerli.id] as number[],
+          visibleChainId: [optimism.id, optimismSepolia.id] as number[],
         },
         {
           title: t('Maximize your yield'),

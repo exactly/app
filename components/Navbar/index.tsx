@@ -1,7 +1,7 @@
 import React, { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 import { setContext, setUser } from '@sentry/nextjs';
 import { mainnet, useConfig } from 'wagmi';
-import { goerli } from 'wagmi/chains';
+import { optimismSepolia } from 'wagmi/chains';
 import Image from 'next/image';
 import useRouter from 'hooks/useRouter';
 
@@ -221,8 +221,8 @@ function Navbar() {
             ))}
           </Box>
           <Box display="flex" gap={0.5} ml="auto" flexDirection={{ xs: 'row-reverse', sm: 'row' }}>
-            {isConnected && chain?.id === goerli.id && (
-              <Chip label="Goerli Faucet" onClick={openFaucet} sx={{ my: 'auto', display: onlyDesktopFlex }} />
+            {isConnected && chain?.id === optimismSepolia.id && (
+              <Chip label="OP Sepolia Faucet" onClick={openFaucet} sx={{ my: 'auto', display: onlyDesktopFlex }} />
             )}
             <Box display="flex" gap={0.5}>
               {!isMobile && !isEthereum && <RewardsButton />}

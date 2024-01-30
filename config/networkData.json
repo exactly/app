@@ -6,11 +6,11 @@
       "sablier": "https://api.thegraph.com/subgraphs/name/sablier-labs/sablier-v2"
     }
   },
-  "5": {
-    "etherscan": "https://goerli.etherscan.io",
+  "11155420": {
+    "etherscan": "https://sepolia-optimistic.etherscan.io/",
     "subgraph": {
-      "exactly": "https://api.thegraph.com/subgraphs/name/jgalat/gggggggggggggggg",
-      "sablier": "https://api.thegraph.com/subgraphs/name/sablier-labs/sablier-v2-goerli"
+      "exactly": "https://api.thegraph.com/subgraphs/name/exactly/op-sepolia",
+      "sablier": "https://api.thegraph.com/subgraphs/name/sablier-labs/sablier-v2-optimism-sepolia"
     }
   },
   "10": {

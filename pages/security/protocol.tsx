@@ -11,7 +11,7 @@ import ContractInfo from 'components/ContractInfo';
 import { ContractInfoType } from 'types/ContractInfoType';
 import useContractAddress from 'hooks/useContractAddress';
 import { useWeb3 } from 'hooks/useWeb3';
-import { mainnet, goerli, optimism } from 'viem/chains';
+import { mainnet, optimismSepolia, optimism } from 'viem/chains';
 
 const Security: NextPage = () => {
   const { t } = useTranslation();
@@ -56,7 +56,7 @@ const Security: NextPage = () => {
             { name: 'wstETH', address: await getContractAddress('InterestRateModelwstETH') },
             ...(displayNetworkId === optimism.id
               ? [{ name: 'OP', address: await getContractAddress('InterestRateModelOP') }]
-              : displayNetworkId === mainnet.id || displayNetworkId === goerli.id
+              : displayNetworkId === mainnet.id || displayNetworkId === optimismSepolia.id
               ? [
                   { name: 'DAI', address: await getContractAddress('InterestRateModelDAI') },
                   { name: 'WBTC', address: await getContractAddress('InterestRateModelWBTC') },
@@ -84,7 +84,7 @@ const Security: NextPage = () => {
             { name: 'wstETH', address: await getContractAddress('MarketwstETH_Proxy') },
             ...(displayNetworkId === optimism.id
               ? [{ name: 'OP', address: await getContractAddress('MarketOP_Proxy') }]
-              : displayNetworkId === mainnet.id || displayNetworkId === goerli.id
+              : displayNetworkId === mainnet.id || displayNetworkId === optimismSepolia.id
               ? [
                   { name: 'DAI', address: await getContractAddress('MarketDAI_Proxy') },
                   { name: 'WBTC', address: await getContractAddress('InterestRateModelWBTC') },
@@ -99,7 +99,7 @@ const Security: NextPage = () => {
             { name: 'wstETH', address: await getContractAddress('MarketwstETH_Implementation') },
             ...(displayNetworkId === optimism.id
               ? [{ name: 'OP', address: await getContractAddress('MarketOP_Implementation') }]
-              : displayNetworkId === mainnet.id || displayNetworkId === goerli.id
+              : displayNetworkId === mainnet.id || displayNetworkId === optimismSepolia.id
               ? [
                   { name: 'DAI', address: await getContractAddress('MarketDAI_Implementation') },
                   { name: 'WBTC', address: await getContractAddress('MarketWBTC_Implementation') },
