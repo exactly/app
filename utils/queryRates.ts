@@ -27,8 +27,8 @@ const totalFloatingBorrowAssets = (
     borrowRate = floatingRate(irm, utilization);
   } else {
     const interestRateCurve = floatingInterestRateCurve({
-      a: BigInt(irm.floatingCurveA),
-      b: BigInt(irm.floatingCurveB),
+      A: BigInt(irm.floatingCurveA),
+      B: BigInt(irm.floatingCurveB),
       maxUtilization: BigInt(irm.floatingMaxUtilization),
       naturalUtilization: BigInt(irm.naturalUtilization),
       sigmoidSpeed: BigInt(irm.sigmoidSpeed),

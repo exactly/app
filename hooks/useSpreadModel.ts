@@ -1,9 +1,7 @@
 import { useMemo } from 'react';
 import { parseEther } from 'viem';
 
-import { useMarketFloatingAssets, useMarketFloatingBackupBorrowed, useMarketFloatingDebt } from 'types/abi';
 import useAccountData from './useAccountData';
-import { useWeb3 } from './useWeb3';
 import {
   fixedRate,
   fixedUtilization,
@@ -18,36 +16,16 @@ export const MAX = 10n ** 18n;
 export const INTERVAL = parseEther('0.0005');
 
 export default function useSpreadModel(symbol: string) {
-  const { chain } = useWeb3();
   const { marketAccount } = useAccountData(symbol);
 
-  const { data: floatingDebt } = useMarketFloatingDebt({ address: marketAccount?.market, chainId: chain.id });
-  const { data: floatingAssets } = useMarketFloatingAssets({ address: marketAccount?.market, chainId: chain.id });
-  const { data: floatingBackupBorrowed } = useMarketFloatingBackupBorrowed({
-    address: marketAccount?.market,
-    chainId: chain.id,
-  });
-
-  const irmParams = useIRM(symbol);
+  const irm = useIRM(symbol);
 
   const data = useMemo(() => {
-    if (
-      !marketAccount ||
-      floatingDebt === undefined ||
-      floatingAssets === undefined ||
-      floatingBackupBorrowed === undefined ||
-      irmParams === undefined
-    ) {
+    if (!marketAccount || !irm) {
       return [];
     }
 
-    const { interestRateModel, maxFuturePools, fixedPools } = marketAccount;
-
-    const { A, B, uMax } = {
-      A: interestRateModel.floatingCurveA,
-      B: interestRateModel.floatingCurveB,
-      uMax: interestRateModel.floatingMaxUtilization,
-    };
+    const { maxFuturePools, fixedPools, floatingDebt, floatingAssets, floatingBackupBorrowed } = marketAccount;
 
     const currentUFloating = floatingUtilization(floatingAssets, floatingDebt);
     const currentUGlobal = globalUtilization(floatingAssets, floatingDebt, floatingBackupBorrowed);
@@ -62,10 +40,9 @@ export default function useSpreadModel(symbol: string) {
     const parameters = {
       timestamp: now,
       maxPools: BigInt(maxFuturePools),
-      a: A,
-      b: B,
-      maxUtilization: uMax,
-      ...irmParams,
+      a: irm.A,
+      b: irm.B,
+      ...irm,
     };
 
     const model = spreadModel(parameters, currentUFloating, currentUGlobal);
@@ -107,7 +84,7 @@ export default function useSpreadModel(symbol: string) {
     }
 
     return points;
-  }, [floatingAssets, floatingBackupBorrowed, floatingDebt, irmParams, marketAccount]);
+  }, [irm, marketAccount]);
 
   return { data, loading: data.length === 0 };
 }

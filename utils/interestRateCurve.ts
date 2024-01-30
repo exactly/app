@@ -16,8 +16,8 @@ export function fixedUtilization(supplied: bigint, borrowed: bigint, assets: big
 }
 
 export type FloatingParameters = {
-  a: bigint;
-  b: bigint;
+  A: bigint;
+  B: bigint;
   maxUtilization: bigint;
   naturalUtilization: bigint;
   sigmoidSpeed: bigint;
@@ -29,9 +29,9 @@ const EXP_THRESHOLD = 135305999368893231588n;
 
 export function floatingInterestRateCurve(parameters: FloatingParameters): FloatingInterestRateCurve {
   return (uF: bigint, uG: bigint): bigint => {
-    const { a, b, maxUtilization, naturalUtilization, sigmoidSpeed, growthSpeed, maxRate } = parameters;
+    const { A, B, maxUtilization, naturalUtilization, sigmoidSpeed, growthSpeed, maxRate } = parameters;
 
-    const r = (a * WAD) / (maxUtilization - uF) + b;
+    const r = (A * WAD) / (maxUtilization - uF) + B;
     if (uG === WAD) return maxRate;
     if (uG === 0n) return r;
 

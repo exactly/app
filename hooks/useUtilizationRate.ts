@@ -3,8 +3,6 @@ import { parseEther } from 'viem';
 
 import useAccountData from './useAccountData';
 import { floatingInterestRateCurve, floatingUtilization, globalUtilization } from 'utils/interestRateCurve';
-import { useMarketFloatingAssets, useMarketFloatingBackupBorrowed, useMarketFloatingDebt } from 'types/abi';
-import { useWeb3 } from './useWeb3';
 import useIRM from './useIRM';
 
 export const MAX = 10n ** 18n;
@@ -41,45 +39,20 @@ export function useCurrentUtilizationRate(type: 'floating' | 'fixed', symbol: st
 }
 
 export default function useUtilizationRate(symbol: string, from = 0n, to = MAX, interval = INTERVAL) {
-  const { chain } = useWeb3();
   const { marketAccount } = useAccountData(symbol);
 
-  const { data: floatingDebt } = useMarketFloatingDebt({ address: marketAccount?.market, chainId: chain.id });
-  const { data: floatingAssets } = useMarketFloatingAssets({ address: marketAccount?.market, chainId: chain.id });
-  const { data: floatingBackupBorrowed } = useMarketFloatingBackupBorrowed({
-    address: marketAccount?.market,
-    chainId: chain.id,
-  });
-
-  const irmParams = useIRM(symbol);
+  const irm = useIRM(symbol);
 
   const data = useMemo(() => {
-    if (
-      !marketAccount ||
-      floatingDebt === undefined ||
-      floatingAssets === undefined ||
-      floatingBackupBorrowed === undefined ||
-      irmParams === undefined
-    ) {
+    if (!marketAccount || !irm) {
       return [];
     }
 
-    const { interestRateModel } = marketAccount;
-
-    const { A, B, uMax } = {
-      A: interestRateModel.floatingCurveA,
-      B: interestRateModel.floatingCurveB,
-      uMax: interestRateModel.floatingMaxUtilization,
-    };
+    const { floatingAssets, floatingDebt, floatingBackupBorrowed } = marketAccount;
 
     const points: Record<string, number>[] = [];
 
-    const curve = floatingInterestRateCurve({
-      a: A,
-      b: B,
-      maxUtilization: uMax,
-      ...irmParams,
-    });
+    const curve = floatingInterestRateCurve(irm);
 
     const currentUFloating = floatingUtilization(floatingAssets, floatingDebt);
     const currentUGlobal = globalUtilization(floatingAssets, floatingDebt, floatingBackupBorrowed);
@@ -116,14 +89,10 @@ export default function useUtilizationRate(symbol: string, from = 0n, to = MAX, 
     points.sort((x, y) => x.utilization - y.utilization);
 
     return points;
-  }, [marketAccount, floatingDebt, floatingAssets, floatingBackupBorrowed, irmParams, from, to, interval]);
+  }, [marketAccount, irm, from, to, interval]);
 
   return {
     data,
-    loading:
-      !marketAccount ||
-      floatingDebt === undefined ||
-      floatingAssets === undefined ||
-      floatingBackupBorrowed === undefined,
+    loading: !marketAccount,
   };
 }
