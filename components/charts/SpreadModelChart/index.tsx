@@ -1,15 +1,15 @@
-import React, { CSSProperties, FC, Fragment, useCallback, useMemo, useState } from 'react';
+import React, { FC, Fragment, useMemo } from 'react';
 import { Box, Typography, useTheme } from '@mui/material';
 import {
   ResponsiveContainer,
   XAxis,
   Tooltip,
-  Scatter,
   ComposedChart,
   Area,
   CartesianGrid,
   YAxis,
   Line,
+  Scatter,
 } from 'recharts';
 
 import parseTimestamp from 'utils/parseTimestamp';
@@ -23,29 +23,29 @@ type Props = {
   symbol: string;
 };
 
-const formatTimestampLabel = (value: string | number) => parseTimestamp(value);
+const formatTimestampLabel = (value: string | number) => parseTimestamp(value, 'MMM DD');
+const formatTimestamp = (value: string | number) => parseTimestamp(value);
 const formatPercentage = (value: number) => toPercentage(value as number);
 
 const SpreadModel: FC<Props> = ({ symbol }) => {
   const { t } = useTranslation();
   const { palette } = useTheme();
 
-  const [cursor, setCursor] = useState<CSSProperties['cursor']>('default');
-  const handleMouseEnter = () => {
-    setCursor('pointer');
-  };
-  const handleMouseLeave = () => {
-    setCursor('default');
-  };
-
   const { data, loading } = useSpreadModel(symbol);
-  const highlights = useMemo(() => data.filter((entry) => entry.highlight), [data]);
+  const highlights = useMemo(() => data.filter((entry, i) => entry.highlight || i === 0), [data]);
+  const ticks = useMemo(
+    () =>
+      data
+        .filter((entry, i) => entry.highlight || i === 0)
+        .map((entry) => (Array.isArray(entry.date) ? entry.date[0] : entry.date)),
+    [data],
+  );
 
   return (
     <Box display="flex" flexDirection="column" width="100%" height="100%" gap={2}>
       <Box display="flex" justifyContent="space-between">
         <Typography variant="h6" fontSize="16px">
-          {t('Spread Model')}
+          {t('Term Structure of Interest Rates')}
         </Typography>
       </Box>
 
@@ -53,16 +53,18 @@ const SpreadModel: FC<Props> = ({ symbol }) => {
         {loading ? (
           <LoadingChart />
         ) : (
-          <ComposedChart data={data} style={{ cursor }}>
+          <ComposedChart data={data}>
             <XAxis
-              dataKey="maturity"
+              xAxisId="xaxis"
+              dataKey="date"
               type="number"
-              stroke="#8f8c9c"
               interval={0}
-              padding={{ left: 10, right: 10 }}
-              domain={[0, 1]}
-              tick={{ fill: palette.grey[500], fontWeight: 500, fontSize: 11 }}
+              domain={['dataMin', 'dataMax']}
+              tickFormatter={formatTimestampLabel}
+              padding={{ left: 20, right: 20 }}
+              ticks={ticks}
               allowDataOverflow
+              tick={{ fill: palette.grey[500], fontWeight: 500, fontSize: 11 }}
               fontSize="12px"
               height={20}
             />
@@ -78,17 +80,8 @@ const SpreadModel: FC<Props> = ({ symbol }) => {
             />
             <Tooltip content={<CustomTooltip highlights={highlights} highlightColor={palette.colors[0]} />} />
             <CartesianGrid stroke={palette.grey[300]} vertical={false} />
-            <Line
-              dataKey="mid"
-              dot={false}
-              yAxisId="yaxis"
-              type="monotone"
-              stroke={palette.colors[0]}
-              strokeWidth={2}
-              isAnimationActive={false}
-              activeDot={false}
-            />
             <Area
+              xAxisId="xaxis"
               type="monotone"
               yAxisId="yaxis"
               dataKey="area"
@@ -99,66 +92,25 @@ const SpreadModel: FC<Props> = ({ symbol }) => {
               strokeDasharray="10 10"
               isAnimationActive={false}
             />
-            <Scatter
+            <Line
+              xAxisId="xaxis"
               yAxisId="yaxis"
               dataKey="rate"
-              shape={(props) => (
-                <CustomDot
-                  {...props}
-                  color={palette.colors[0]}
-                  onMouseEnter={handleMouseEnter}
-                  onMouseLeave={handleMouseLeave}
-                />
-              )}
+              connectNulls
+              strokeWidth={2}
+              strokeDasharray="5 5"
+              dot={{ r: 5, fill: palette.background.paper, strokeDasharray: '0' }}
+            />
+            <Scatter
+              dataKey="vrate"
+              xAxisId="xaxis"
+              yAxisId="yaxis"
+              fill={palette.mode === 'dark' ? 'white' : 'black'}
             />
           </ComposedChart>
         )}
       </ResponsiveContainer>
     </Box>
-  );
-};
-
-const CustomDot = ({
-  cx,
-  cy,
-  payload: { highlight },
-  color,
-  onMouseEnter,
-  onMouseLeave,
-}: {
-  cx: number;
-  cy: number;
-  payload: Record<string, number>;
-  color: string;
-  onMouseEnter: () => void;
-  onMouseLeave: () => void;
-}) => {
-  const { palette } = useTheme();
-  const [fillColor, setFillColor] = useState<string | undefined>();
-
-  const onHover = useCallback(() => {
-    setFillColor(color);
-    onMouseEnter();
-  }, [color, onMouseEnter]);
-
-  const onLeave = useCallback(() => {
-    setFillColor(undefined);
-    onMouseLeave();
-  }, [onMouseLeave]);
-
-  if (!highlight) return null;
-
-  return (
-    <circle
-      cx={cx}
-      cy={cy}
-      r={5}
-      stroke={color}
-      strokeWidth={2}
-      fill={fillColor || palette.background.paper}
-      onMouseEnter={onHover}
-      onMouseLeave={onLeave}
-    />
   );
 };
 
@@ -171,8 +123,9 @@ const CustomTooltip = ({
   highlights: Record<string, number | number[]>[];
   highlightColor: string;
 }) => {
+  const { t } = useTranslation();
   const highlight = useMemo(() => {
-    const mid = payload?.find((p) => p.dataKey === 'mid')?.payload;
+    const mid = payload?.find((p) => p.dataKey === 'area')?.payload;
     if (!mid) return undefined;
     const date = mid['date'];
     if (Array.isArray(date)) return undefined;
@@ -186,10 +139,12 @@ const CustomTooltip = ({
 
   const date =
     highlight && highlight['date'] && !Array.isArray(highlight['date'])
-      ? formatTimestampLabel(highlight['date'])
+      ? formatTimestamp(highlight['date'])
       : undefined;
   const rate =
     highlight && highlight['rate'] && !Array.isArray(highlight['rate']) ? toPercentage(highlight['rate']) : undefined;
+
+  const isVR = highlight?.date === highlights[0].date;
 
   return (
     <Box
@@ -207,18 +162,25 @@ const CustomTooltip = ({
       )}
       {rate && (
         <Typography variant="h6" fontSize="12px" color={highlightColor}>
-          Rate: {rate}
+          {t('Rate')}: {rate}
         </Typography>
       )}
       {(payload || []).map(({ dataKey, value, color }) => {
         if (dataKey !== 'area') return null;
+        if (isVR) {
+          return (
+            <Typography key={dataKey} variant="h6" fontSize="12px" color={color}>
+              {t('Variable Rate')}: {Array.isArray(value) ? toPercentage(value[0]) : value}
+            </Typography>
+          );
+        }
         return (
           <Fragment key={dataKey}>
             <Typography variant="h6" fontSize="12px" color={color}>
-              Min: {Array.isArray(value) ? toPercentage(value[0]) : value}
+              {t('Min')}: {Array.isArray(value) ? toPercentage(value[0]) : value}
             </Typography>
             <Typography variant="h6" fontSize="12px" color={color}>
-              Max: {Array.isArray(value) ? toPercentage(value[1]) : value}
+              {t('Max')}: {Array.isArray(value) ? toPercentage(value[1]) : value}
             </Typography>
           </Fragment>
         );

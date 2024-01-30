@@ -13,7 +13,7 @@ import { WAD, bmax } from 'utils/fixedMath';
 import useIRM from './useIRM';
 
 export const MAX = 10n ** 18n;
-export const INTERVAL = parseEther('0.0005');
+export const INTERVAL = parseEther('0.005');
 
 export default function useSpreadModel(symbol: string) {
   const { marketAccount } = useAccountData(symbol);
@@ -40,8 +40,6 @@ export default function useSpreadModel(symbol: string) {
     const parameters = {
       timestamp: now,
       maxPools: BigInt(maxFuturePools),
-      a: irm.A,
-      b: irm.B,
       ...irm,
     };
 
@@ -57,7 +55,6 @@ export default function useSpreadModel(symbol: string) {
 
     for (const m of ms) {
       const lo = model(m, -WAD);
-      const mid = model(m, 0n);
       const hi = model(m, WAD);
 
       const extend: Record<string, number | number[]> = {};
@@ -74,11 +71,13 @@ export default function useSpreadModel(symbol: string) {
         extend['highlight'] = 1;
       }
 
+      if (m === ms[0]) {
+        extend['vrate'] = Number(lo) / 1e18;
+      }
+
       points.push({
         date: Number(m),
-        maturity: Number(((m - now) / step) * INTERVAL) / 1e18,
         area: [Number(lo) / 1e18, Number(hi) / 1e18],
-        mid: Number(mid) / 1e18,
         ...extend,
       });
     }

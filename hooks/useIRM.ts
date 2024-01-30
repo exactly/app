@@ -1,4 +1,3 @@
-import { useContractReads } from 'wagmi';
 import { AbiParametersToPrimitiveTypes, ExtractAbiFunction } from 'abitype';
 
 import { interestRateModelABI } from 'types/abi';
