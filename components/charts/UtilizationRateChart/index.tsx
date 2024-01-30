@@ -4,7 +4,7 @@ import { LineChart, XAxis, Tooltip, Line, ResponsiveContainer, CartesianGrid, YA
 import { useTranslation } from 'react-i18next';
 
 import { toPercentage } from 'utils/utils';
-import useUtilizationRate, { useCurrentUtilizationRate, INTERVAL, STEP } from 'hooks/useUtilizationRate';
+import useUtilizationRate, { useCurrentUtilizationRate, INTERVAL } from 'hooks/useUtilizationRate';
 import TooltipChart, { TooltipChartProps } from '../TooltipChart';
 import LoadingChart from '../LoadingChart';
 import ButtonsChart from '../ButtonsChart';
@@ -40,7 +40,7 @@ function UtilizationRateChart({ type, symbol }: Props) {
     return [bmax(0n, min - gap * 5n), max + gap * 5n, gap];
   }, [currentUtilization, zoom]);
 
-  const { data, loading } = useUtilizationRate(symbol, currentMin, currentMax, interval);
+  const { data, globalUtilization, loading } = useUtilizationRate(symbol, currentMin, currentMax, interval);
 
   const [cursorStyle, setCursorStyle] = useState('default');
 
@@ -65,11 +65,6 @@ function UtilizationRateChart({ type, symbol }: Props) {
     ],
     [t],
   );
-
-  const curves = data.reduce((max, p) => {
-    const keys = Object.keys(p).filter((k) => k.startsWith('curve'));
-    return keys.length > max ? keys.length : max;
-  }, 0);
 
   return (
     <Box display="flex" flexDirection="column" width="100%" height="100%" gap={2}>
@@ -144,7 +139,13 @@ function UtilizationRateChart({ type, symbol }: Props) {
             <Tooltip
               labelFormatter={formatEmpty}
               formatter={(value) => toPercentage(value as number)}
-              content={<CustomTooltipChart highlighted={currentUtilization || []} zoom={zoom} />}
+              content={
+                <CustomTooltipChart
+                  highlighted={currentUtilization || []}
+                  zoom={zoom}
+                  globalUtilization={globalUtilization}
+                />
+              }
               cursor={{ strokeWidth: 1, fill: palette.grey[500], strokeDasharray: '3' }}
             />
 
@@ -160,24 +161,6 @@ function UtilizationRateChart({ type, symbol }: Props) {
               animationDuration={2000}
             />
 
-            {Array.from({ length: curves }).map((_, i) => {
-              const curve = `curve${i}`;
-              return (
-                <Line
-                  key={curve}
-                  dot={false}
-                  name={t('APR (U Global = {{utilization}})', { utilization: `${STEP * i}%` })}
-                  yAxisId="yaxis"
-                  type="monotone"
-                  dataKey={curve}
-                  stroke={palette.colors[i] ?? (palette.mode === 'light' ? 'black' : 'white')}
-                  strokeWidth={2}
-                  isAnimationActive={false}
-                  activeDot={false}
-                />
-              );
-            })}
-
             <Line
               dot={(props) => (
                 <CustomDot
@@ -190,7 +173,7 @@ function UtilizationRateChart({ type, symbol }: Props) {
               name={t('APR (Current)')}
               yAxisId="yaxis"
               type="monotone"
-              dataKey="current"
+              dataKey="apr"
               stroke={palette.mode === 'light' ? 'black' : 'white'}
               strokeWidth={2}
               isAnimationActive={false}
@@ -252,11 +235,13 @@ const CustomTooltipChart = ({
   highlighted,
   payload,
   zoom,
+  globalUtilization,
   ...props
 }: Omit<TooltipChartProps, 'payload'> & {
   payload?: (NonNullable<TooltipChartProps['payload']>[number] & { payload: Record<string, number | boolean> })[];
   highlighted: { utilization: bigint }[];
   zoom: boolean;
+  globalUtilization: bigint;
 }) => {
   const { t } = useTranslation();
   const { palette } = useTheme();
@@ -273,17 +258,22 @@ const CustomTooltipChart = ({
     [highlighted, round, utilizationPayload?.value],
   );
 
-  if (!matches) return <TooltipChart payload={payload} {...props} />;
-
   return (
     <TooltipChart
       payload={payload}
       {...props}
       additionalInfoPosition="top"
       additionalInfo={
-        <Typography variant="h6" fontSize="12px" color={palette.operation.variable}>
-          {t('Current')}
-        </Typography>
+        <>
+          {matches && (
+            <Typography variant="h6" fontSize="12px" color={palette.operation.variable}>
+              {t('Current')}
+            </Typography>
+          )}
+          <Typography variant="h6" fontSize="12px">
+            {t('Global Utilization')}: {toPercentage(Number(globalUtilization) / 1e18)}
+          </Typography>
+        </>
       }
     />
   );
