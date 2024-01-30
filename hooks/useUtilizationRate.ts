@@ -2,11 +2,11 @@ import { useMemo } from 'react';
 import { parseEther } from 'viem';
 
 import useAccountData from './useAccountData';
-import { floatingInterestRateCurve, floatingUtilization, globalUtilization } from 'utils/interestRateCurve';
+import { floatingUtilization, floatingInterestRateCurve } from 'utils/interestRateCurve';
 import useIRM from './useIRM';
 
 export const MAX = 10n ** 18n;
-export const INTERVAL = parseEther('0.0005');
+export const INTERVAL = parseEther('0.005');
 export const STEP = 10;
 
 export function useCurrentUtilizationRate(type: 'floating' | 'fixed', symbol: string) {
@@ -36,47 +36,46 @@ export function useCurrentUtilizationRate(type: 'floating' | 'fixed', symbol: st
 }
 
 export default function useUtilizationRate(symbol: string, from = 0n, to = MAX, interval = INTERVAL) {
-  const { marketAccount } = useAccountData(symbol);
-
   const irm = useIRM(symbol);
 
-  const [data, gu] = useMemo(() => {
-    if (!marketAccount || !irm) {
-      return [undefined, 0n] as const;
+  const data = useMemo(() => {
+    if (!irm) {
+      return;
     }
-
-    const { floatingAssets, floatingDebt, floatingBackupBorrowed } = marketAccount;
-
-    const points: Record<string, number>[] = [];
 
     const curve = floatingInterestRateCurve(irm);
 
-    const currentUFloating = floatingUtilization(floatingAssets, floatingDebt);
-    const currentUGlobal = globalUtilization(floatingAssets, floatingDebt, floatingBackupBorrowed);
+    const utilizations: bigint[] = [];
+    const globalUtilizations: bigint[] = [];
 
-    for (let u = from; u < to; u = u + interval) {
-      if (u > currentUGlobal) {
-        break;
-      }
-      const r = curve(u, currentUGlobal);
-      points.push({ utilization: Number(u) / 1e18, apr: Number(r) / 1e18 });
+    const z: (bigint | typeof NaN)[][] = [];
+
+    for (let i = from; i < to; i = i + interval) {
+      utilizations.push(i);
+      globalUtilizations.push(i);
     }
 
-    const r = curve(currentUFloating, currentUGlobal);
-    points.push({
-      utilization: Number(currentUFloating) / 1e18,
-      apr: Number(r) / 1e18,
-      highlight: 1,
-    });
+    for (const globalUtilization of globalUtilizations) {
+      const row: (bigint | typeof NaN)[] = [];
+      for (const utilization of utilizations) {
+        if (utilization > globalUtilization) {
+          row.push(NaN);
+          continue;
+        }
+        row.push(curve(utilization, globalUtilization));
+      }
+      z.push(row);
+    }
 
-    points.sort((x, y) => x.utilization - y.utilization);
-
-    return [points, currentUGlobal] as const;
-  }, [marketAccount, irm, from, to, interval]);
+    return [
+      utilizations.map((v) => Number(v) / 1e18),
+      globalUtilizations.map((v) => Number(v) / 1e18),
+      z.map((vs) => vs.map((v) => (typeof v === 'bigint' ? Number(v) / 1e18 : v))),
+    ] as const;
+  }, [irm, from, to, interval]);
 
   return {
     data,
-    globalUtilization: gu,
-    loading: !marketAccount,
+    loading: !irm,
   };
 }
