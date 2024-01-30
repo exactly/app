@@ -8,9 +8,6 @@ import useIRM from './useIRM';
 export const MAX = 10n ** 18n;
 export const INTERVAL = parseEther('0.0005');
 export const STEP = 10;
-const uGlobals = Array.from({ length: 100 % STEP === 0 ? 100 / STEP + 1 : Math.ceil(100 / STEP) }).map(
-  (_, i) => parseEther(String(i * STEP)) / 100n,
-);
 
 export function useCurrentUtilizationRate(type: 'floating' | 'fixed', symbol: string) {
   const { marketAccount } = useAccountData(symbol);
@@ -43,9 +40,9 @@ export default function useUtilizationRate(symbol: string, from = 0n, to = MAX, 
 
   const irm = useIRM(symbol);
 
-  const data = useMemo(() => {
+  const [data, gu] = useMemo(() => {
     if (!marketAccount || !irm) {
-      return [];
+      return [undefined, 0n] as const;
     }
 
     const { floatingAssets, floatingDebt, floatingBackupBorrowed } = marketAccount;
@@ -57,42 +54,29 @@ export default function useUtilizationRate(symbol: string, from = 0n, to = MAX, 
     const currentUFloating = floatingUtilization(floatingAssets, floatingDebt);
     const currentUGlobal = globalUtilization(floatingAssets, floatingDebt, floatingBackupBorrowed);
 
-    const globalUtilizations = [...uGlobals, currentUGlobal].sort();
-
     for (let u = from; u < to; u = u + interval) {
-      const curves: Record<string, number> = {};
-
-      for (const uG of globalUtilizations) {
-        if (u > uG) continue;
-        const r = curve(u, uG);
-        curves[uG === currentUGlobal ? 'current' : `curve${uGlobals.indexOf(uG)}`] = Number(r) / 1e18;
+      if (u > currentUGlobal) {
+        break;
       }
-
-      points.push({ utilization: Number(u) / 1e18, ...curves });
+      const r = curve(u, currentUGlobal);
+      points.push({ utilization: Number(u) / 1e18, apr: Number(r) / 1e18 });
     }
 
-    const curves: Record<string, number> = {};
-    for (const uG of globalUtilizations) {
-      if (currentUFloating > uG) continue;
-      const r = curve(currentUFloating, uG);
-      curves[uG === currentUGlobal ? 'current' : `curve${uGlobals.indexOf(uG)}`] = Number(r) / 1e18;
-      if (uG === currentUGlobal) {
-        curves['highlight'] = 1;
-      }
-    }
-
+    const r = curve(currentUFloating, currentUGlobal);
     points.push({
       utilization: Number(currentUFloating) / 1e18,
-      ...curves,
+      apr: Number(r) / 1e18,
+      highlight: 1,
     });
 
     points.sort((x, y) => x.utilization - y.utilization);
 
-    return points;
+    return [points, currentUGlobal] as const;
   }, [marketAccount, irm, from, to, interval]);
 
   return {
     data,
+    globalUtilization: gu,
     loading: !marketAccount,
   };
 }
