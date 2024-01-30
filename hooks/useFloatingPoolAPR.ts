@@ -9,7 +9,6 @@ import useDelayedEffect from './useDelayedEffect';
 import { useWeb3 } from './useWeb3';
 import { useGlobalError } from 'contexts/GlobalErrorContext';
 import { WEI_PER_ETHER } from 'utils/const';
-import { useMarketFloatingBackupBorrowed } from 'types/abi';
 import useIRM from './useIRM';
 
 type FloatingPoolAPR = {
@@ -25,52 +24,37 @@ export default (
 ): FloatingPoolAPR => {
   const { chain } = useWeb3();
   const { marketAccount } = useAccountData(symbol);
-  const { data: floatingBackupBorrowed } = useMarketFloatingBackupBorrowed({
-    address: marketAccount?.market,
-    chainId: chain.id,
-  });
 
-  const irmParams = useIRM(symbol);
+  const irm = useIRM(symbol);
 
   const [depositAPR, setDepositAPR] = useState<number | undefined>();
   const [loading, setLoading] = useState<boolean>(true);
   const { setIndexerError } = useGlobalError();
 
   const borrowAPR = useMemo((): number | undefined => {
-    if (!marketAccount || floatingBackupBorrowed === undefined || irmParams === undefined) {
+    if (!marketAccount || !irm) {
       return undefined;
     }
 
-    const { interestRateModel, totalFloatingDepositAssets, totalFloatingBorrowAssets, decimals } = marketAccount;
+    const { totalFloatingDepositAssets, totalFloatingBorrowAssets, decimals, floatingBackupBorrowed } = marketAccount;
     const delta = parseUnits(qty || '0', decimals);
 
     const debt = totalFloatingBorrowAssets + delta;
 
-    const { A, B, uMax } = {
-      A: interestRateModel.floatingCurveA,
-      B: interestRateModel.floatingCurveB,
-      uMax: interestRateModel.floatingMaxUtilization,
-    };
-
-    const curve = floatingInterestRateCurve({
-      a: A,
-      b: B,
-      maxUtilization: uMax,
-      ...irmParams,
-    });
+    const curve = floatingInterestRateCurve(irm);
 
     const uF = floatingUtilization(totalFloatingDepositAssets, debt);
     const uG = globalUtilization(totalFloatingDepositAssets, debt, floatingBackupBorrowed);
 
     return Number(curve(uF, uG)) / 1e18;
-  }, [floatingBackupBorrowed, marketAccount, qty, irmParams]);
+  }, [marketAccount, irm, qty]);
 
   const fetchAPRs = useCallback(
     async (cancelled: () => boolean) => {
       if (operation === 'borrow') return;
       setLoading(true);
 
-      if (!marketAccount || !chain) return setDepositAPR(undefined);
+      if (!marketAccount) return setDepositAPR(undefined);
 
       try {
         const subgraphUrl = networkData[String(chain.id) as keyof typeof networkData]?.subgraph.exactly;
