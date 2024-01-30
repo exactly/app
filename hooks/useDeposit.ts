@@ -168,6 +168,8 @@ export default (): Deposit => {
 
       const { status, transactionHash } = await waitForTransaction({ hash });
       track('TX Completed', {
+        contractName: 'Market',
+        method: 'deposit',
         symbol,
         amount: qty,
         usdAmount: formatUnits((amount * marketAccount.usdPrice) / WEI_PER_ETHER, marketAccount.decimals),

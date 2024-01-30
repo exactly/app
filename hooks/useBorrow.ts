@@ -235,6 +235,8 @@ export default (): Borrow => {
 
       const { status, transactionHash } = await waitForTransaction({ hash });
       track('TX Completed', {
+        contractName: 'Market',
+        method: 'borrow',
         symbol,
         amount: qty,
         usdAmount: formatUnits((amount * marketAccount.usdPrice) / WEI_PER_ETHER, marketAccount.decimals),
