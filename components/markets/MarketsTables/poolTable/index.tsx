@@ -101,9 +101,9 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows }) => {
       <Table>
         <TableHead>
           <TableRow>
-            {headers.map(({ title, tooltipTitle, width, sortKey, sx }) => (
+            {headers.map(({ title, key, tooltipTitle, width, sortKey, sx }) => (
               <TableHeadCell
-                key={title.trim()}
+                key={key}
                 title={title}
                 tooltipTitle={tooltipTitle}
                 width={width}

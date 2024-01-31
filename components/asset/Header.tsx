@@ -17,6 +17,7 @@ import { track } from 'utils/segment';
 import { Typography } from '@mui/material';
 import getSymbolDescription from 'utils/getSymbolDescription';
 import useContractAddress from 'hooks/useContractAddress';
+import { useWeb3 } from 'hooks/useWeb3';
 
 type Props = {
   symbol: string;
@@ -29,15 +30,16 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
   const { push, query } = useRouter();
   const getContractAddress = useContractAddress();
   const [priceFeedAddress, setPriceFeedAddress] = useState<Address | undefined>(undefined);
+  const { chain: displayNetwork } = useWeb3();
 
   const nativeAPR = useStETHNativeAPR();
 
   const assetDescription = useCallback(
     (s: string) => {
       if (!marketAccount) return '';
-      return getSymbolDescription(marketAccount, s);
+      return getSymbolDescription(marketAccount, s, displayNetwork.id);
     },
-    [marketAccount],
+    [displayNetwork.id, marketAccount],
   );
 
   useEffect(() => {
