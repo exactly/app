@@ -112,7 +112,8 @@ function UtilizationRateChart({ type, symbol }: Props) {
               tickLine={false}
               domain={[
                 (dataMin: number) => dataMin,
-                (dataMax: number) => (type === 'floating' && !zoom ? 1.5 : Math.min(1.5, dataMax)),
+                (dataMax: number) =>
+                  type === 'floating' && !zoom ? Math.min(1.25, 1.5 * dataMax) : Math.min(1.25, dataMax),
               ]}
               label={{
                 value: t('APR'),
