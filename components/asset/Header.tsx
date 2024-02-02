@@ -30,16 +30,18 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
   const { push, query } = useRouter();
   const getContractAddress = useContractAddress();
   const [priceFeedAddress, setPriceFeedAddress] = useState<Address | undefined>(undefined);
-  const { chain: displayNetwork } = useWeb3();
+  const {
+    chain: { id: displayNetworkId },
+  } = useWeb3();
 
   const nativeAPR = useStETHNativeAPR();
 
   const assetDescription = useCallback(
     (s: string) => {
       if (!marketAccount) return '';
-      return getSymbolDescription(marketAccount, s, displayNetwork.id);
+      return getSymbolDescription(marketAccount, s, displayNetworkId);
     },
-    [displayNetwork.id, marketAccount],
+    [displayNetworkId, marketAccount],
   );
 
   useEffect(() => {

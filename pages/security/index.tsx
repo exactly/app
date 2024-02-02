@@ -12,7 +12,9 @@ import { optimism } from 'viem/chains';
 const Security: NextPage = () => {
   const { t } = useTranslation();
   const { query } = useRouter();
-  const { chain: displayNetwork } = useWeb3();
+  const {
+    chain: { id: displayNetworkId },
+  } = useWeb3();
 
   return (
     <Box display="flex" flexDirection="column" gap={3} maxWidth={640} mx="auto" my={3}>
@@ -46,7 +48,7 @@ const Security: NextPage = () => {
             </Box>
           </Box>
         </Link>
-        {displayNetwork.id === optimism.id && (
+        {displayNetworkId === optimism.id && (
           <>
             <Divider />
             <Link href={{ pathname: `/security/periphery`, query }} legacyBehavior>

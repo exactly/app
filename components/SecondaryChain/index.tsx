@@ -8,9 +8,11 @@ import usePreviewerExactly from 'hooks/usePreviewerExactly';
 
 const SecondaryChain = () => {
   const { t } = useTranslation();
-  const { chain: displayNetwork } = useWeb3();
+  const {
+    chain: { id: displayNetworkId },
+  } = useWeb3();
 
-  const overrideChain = displayNetwork.id === optimism.id ? mainnet.id : optimism.id;
+  const overrideChain = displayNetworkId === optimism.id ? mainnet.id : optimism.id;
   const { data } = usePreviewerExactly(overrideChain);
 
   const secondaryChain = useMemo(
@@ -41,9 +43,9 @@ const SecondaryChain = () => {
         color: 'grey.900',
       }}
       target="_blank"
-      href={`https://${displayNetwork.id === optimism.id ? 'ethereum' : 'app'}.exact.ly`}
+      href={`https://${displayNetworkId === optimism.id ? 'ethereum' : 'app'}.exact.ly`}
     >
-      {t('Go to')} {displayNetwork.id === optimism.id ? mainnet.name : optimism.name}
+      {t('Go to')} {displayNetworkId === optimism.id ? mainnet.name : optimism.name}
     </Button>
   ) : null;
 };

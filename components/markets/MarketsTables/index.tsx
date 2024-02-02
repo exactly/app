@@ -43,20 +43,20 @@ const MarketTables: FC = () => {
 
   const floatingHeaders: TableHeader<TableRow>[] = [
     {
-      key: t('Asset'),
+      key: 'Asset',
       title: t('Asset'),
       width: '130px',
       sortKey: 'symbol',
       sx: { pl: 1.5, pr: 3, pt: 1, pb: 1 },
     },
     {
-      key: t('Total Deposits'),
+      key: 'Total Deposits',
       title: t('Total Deposits'),
       sortKey: 'totalDeposited',
       sx: { pl: 3, pr: 1.5, pt: 1, pb: 1 },
     },
     {
-      key: t('Best Deposit APR'),
+      key: 'Best Deposit APR',
       title: t('Best Deposit APR'),
       tooltipTitle: t('Change in the underlying Variable Rate Pool shares value over the last 15 minutes, annualized.'),
       sortKey: 'depositAPR',
@@ -69,13 +69,13 @@ const MarketTables: FC = () => {
       sx: { pl: 1.5, pr: 3, pt: 1, pb: 1 },
     },
     {
-      key: t('Total Borrows'),
+      key: 'Total Borrows',
       title: t('Total Borrows'),
       sortKey: 'totalBorrowed',
       sx: { pl: 3, pr: 1.5, pt: 1, pb: 1 },
     },
     {
-      key: t('Best Borrow APR'),
+      key: 'Best Borrow APR',
       title: t('Best Borrow APR'),
       tooltipTitle: t('The borrowing interest APR related to the current utilization rate in the Variable Rate Pool.'),
       sortKey: 'borrowAPR',
@@ -91,31 +91,31 @@ const MarketTables: FC = () => {
 
   const fixedHeaders: TableHeader<TableRow>[] = [
     {
-      key: t('Asset'),
+      key: 'Asset',
       title: t('Asset'),
       width: '130px',
       sortKey: 'symbol',
     },
     {
-      key: t('Total Deposits'),
+      key: 'Total Deposits',
       title: t('Total Deposits'),
       tooltipTitle: t('Sum of all the deposits in all the Fixed Rate Pools.'),
       sortKey: 'totalDeposited',
     },
     {
-      key: t('Total Borrows'),
+      key: 'Total Borrows',
       title: t('Total Borrows'),
       tooltipTitle: t('Sum of all the borrows in all the Fixed Rate Pools.'),
       sortKey: 'totalBorrowed',
     },
     {
-      key: t('Best Deposit APR'),
+      key: 'Best Deposit APR',
       title: t('Best Deposit APR'),
       tooltipTitle: t('The highest fixed interest APR for a deposit up to the optimal deposit size.'),
       sortKey: 'depositAPR',
     },
     {
-      key: t('Best Borrow APR'),
+      key: 'Best Borrow APR',
       title: t('Best Borrow APR'),
       tooltipTitle: t(
         'The lowest fixed borrowing interest APR at current utilization levels for all the Fixed Rate Pools.',

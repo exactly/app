@@ -21,14 +21,16 @@ const MobileAssetCard: FC<Props> = ({ symbol, isFloating, children, isMarkets = 
   const { query } = useRouter();
   const { marketAccount } = useAccountData(symbol);
   const { palette } = useTheme();
-  const { chain: displayNetwork } = useWeb3();
+  const {
+    chain: { id: displayNetworkId },
+  } = useWeb3();
 
   const assetDescription = useCallback(
     (s: string) => {
       if (!marketAccount) return '';
-      return getSymbolDescription(marketAccount, s, displayNetwork.id);
+      return getSymbolDescription(marketAccount, s, displayNetworkId);
     },
-    [displayNetwork.id, marketAccount],
+    [displayNetworkId, marketAccount],
   );
 
   return (

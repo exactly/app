@@ -23,7 +23,10 @@ function SwitchCollateral({ symbol }: Props) {
   const { marketAccount, refreshAccountData } = useAccountData(symbol);
   const auditor = useAuditor();
   const { chain } = useNetwork();
-  const { chain: displayNetwork, opts } = useWeb3();
+  const {
+    chain: { id: displayNetworkId },
+    opts,
+  } = useWeb3();
 
   const healthFactor = useHealthFactor();
 
@@ -37,7 +40,7 @@ function SwitchCollateral({ symbol }: Props) {
   const { disabled, disabledText } = useMemo<{ disabled: boolean; disabledText?: string }>(() => {
     if (!marketAccount || !healthFactor) return { disabled: true };
 
-    if (chain && displayNetwork.id !== chain.id) {
+    if (chain && displayNetworkId !== chain.id) {
       return { disabled: true, disabledText: t('You are connected to a different network') };
     }
 
@@ -61,7 +64,7 @@ function SwitchCollateral({ symbol }: Props) {
     }
 
     return { disabled: false };
-  }, [marketAccount, healthFactor, chain, displayNetwork.id, t]);
+  }, [marketAccount, healthFactor, chain, displayNetworkId, t]);
 
   const [loading, setLoading] = useState<boolean>(false);
 

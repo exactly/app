@@ -9,7 +9,6 @@
   "Borrow APR": "TNA del Préstamo",
   "Utilization Rate": "Tasa de Utilización",
   "Deposit Rewards APR": "TNA Recompensa por Depósito",
-  "This APR assumes a constant price for the OP token and distribution rate.": "Esta TNA asume un precio constante para el token OP y su tasa de distribución en el tiempo.",
   "Borrow Rewards APR": "TNA Recompensas por Préstamo",
   "Risk-Adjust Factor": "Factor de Riesgo",
   "The Deposit and Borrow risk-adjust factor is a measure that helps evaluate how risky an asset is compared to others. The higher the number, the safer the asset is considered to be, making it more valuable as collateral when requesting a loan.": "El factor de ajuste por riesgo de Depósito y Préstamo es una medida que ayuda a evaluar cuán riesgoso es un activo en comparación con otros. Cuanto mayor sea el número, se considera que el activo es más seguro, lo que lo hace más valioso como garantía al solicitar un préstamo.",
@@ -616,5 +615,6 @@
   "Switch Read Only mode {{state}} ": "Cambiar modo de solo lectura a {{state}} ",
   "on": "encendido",
   "off": "apagado",
-  "Search address": "Buscar dirección"
+  "Search address": "Buscar dirección",
+  "This APR assumes a constant price for the EXA token during the vesting period of the esEXA reward": "Esta TNA asume un precio constante para el token EXA durante el período de consolidación de la recompensa esEXA"
 }

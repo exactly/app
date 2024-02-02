@@ -19,7 +19,9 @@ const Security: NextPage = () => {
   const [contractsData, setContractsData] = useState<ContractInfoType[]>([]);
 
   const getContractAddress = useContractAddress();
-  const { chain: displayNetwork } = useWeb3();
+  const {
+    chain: { id: displayNetworkId },
+  } = useWeb3();
 
   const contracts = useMemo(
     () => [
@@ -52,9 +54,9 @@ const Security: NextPage = () => {
             { name: 'USDC', address: await getContractAddress('InterestRateModelUSDC') },
             { name: 'WETH', address: await getContractAddress('InterestRateModelWETH') },
             { name: 'wstETH', address: await getContractAddress('InterestRateModelwstETH') },
-            ...(displayNetwork.id === optimism.id
+            ...(displayNetworkId === optimism.id
               ? [{ name: 'OP', address: await getContractAddress('InterestRateModelOP') }]
-              : displayNetwork.id === mainnet.id || displayNetwork.id === goerli.id
+              : displayNetworkId === mainnet.id || displayNetworkId === goerli.id
               ? [
                   { name: 'DAI', address: await getContractAddress('InterestRateModelDAI') },
                   { name: 'WBTC', address: await getContractAddress('InterestRateModelWBTC') },
@@ -80,9 +82,9 @@ const Security: NextPage = () => {
             { name: 'USDC', address: await getContractAddress('MarketUSDC_Proxy') },
             { name: 'WETH', address: await getContractAddress('MarketWETH_Proxy') },
             { name: 'wstETH', address: await getContractAddress('MarketwstETH_Proxy') },
-            ...(displayNetwork.id === optimism.id
+            ...(displayNetworkId === optimism.id
               ? [{ name: 'OP', address: await getContractAddress('MarketOP_Proxy') }]
-              : displayNetwork.id === mainnet.id || displayNetwork.id === goerli.id
+              : displayNetworkId === mainnet.id || displayNetworkId === goerli.id
               ? [
                   { name: 'DAI', address: await getContractAddress('MarketDAI_Proxy') },
                   { name: 'WBTC', address: await getContractAddress('InterestRateModelWBTC') },
@@ -95,9 +97,9 @@ const Security: NextPage = () => {
             { name: 'USDC', address: await getContractAddress('MarketUSDC_Implementation') },
             { name: 'WETH', address: await getContractAddress('MarketWETH_Implementation') },
             { name: 'wstETH', address: await getContractAddress('MarketwstETH_Implementation') },
-            ...(displayNetwork.id === optimism.id
+            ...(displayNetworkId === optimism.id
               ? [{ name: 'OP', address: await getContractAddress('MarketOP_Implementation') }]
-              : displayNetwork.id === mainnet.id || displayNetwork.id === goerli.id
+              : displayNetworkId === mainnet.id || displayNetworkId === goerli.id
               ? [
                   { name: 'DAI', address: await getContractAddress('MarketDAI_Implementation') },
                   { name: 'WBTC', address: await getContractAddress('MarketWBTC_Implementation') },
@@ -140,7 +142,7 @@ const Security: NextPage = () => {
         codeLink: '',
       },
     ],
-    [displayNetwork.id, getContractAddress, t],
+    [displayNetworkId, getContractAddress, t],
   );
 
   useEffect(() => {

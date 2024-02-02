@@ -18,11 +18,13 @@ const Security: NextPage = () => {
   const { query } = useRouter();
   const getContractAddress = useGetContractAddress();
   const [contractsData, setContractsData] = useState<ContractInfoType[]>([]);
-  const { chain: displayNetwork } = useWeb3();
+  const {
+    chain: { id: displayNetworkId },
+  } = useWeb3();
 
   const contracts = useMemo(
     () => [
-      ...(displayNetwork.id === optimism.id
+      ...(displayNetworkId === optimism.id
         ? [
             {
               name: 'DebtManager.sol',
@@ -91,7 +93,7 @@ const Security: NextPage = () => {
           ]
         : []),
     ],
-    [displayNetwork.id, getContractAddress, t],
+    [displayNetworkId, getContractAddress, t],
   );
 
   useEffect(() => {

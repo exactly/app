@@ -11,7 +11,9 @@ const { onlyDesktopFlex } = globals;
 
 const Footer = () => {
   const { t } = useTranslation();
-  const { chain: displayNetwork } = useWeb3();
+  const {
+    chain: { id: displayNetworkId },
+  } = useWeb3();
   const date = new Date();
   return (
     <Box sx={{ display: 'flex', justifyContent: 'center' }}>
@@ -42,9 +44,9 @@ const Footer = () => {
               <a
                 target="_blank"
                 rel="noreferrer noopener"
-                href={`https://${displayNetwork.id === optimism.id ? 'ethereum' : 'app'}.exact.ly`}
+                href={`https://${displayNetworkId === optimism.id ? 'ethereum' : 'app'}.exact.ly`}
               >
-                {t('Go to')} {displayNetwork.id === optimism.id ? mainnet.name : optimism.name}
+                {t('Go to')} {displayNetworkId === optimism.id ? mainnet.name : optimism.name}
               </a>
             </Typography>
             <Typography fontSize="0.85em">|</Typography>

@@ -93,7 +93,9 @@ const MaturityPoolInfo: FC<MaturityPoolInfoProps> = ({
                   ))}
                 </>
               ),
-              tooltipTitle: t('This APR assumes a constant price for the OP token and distribution rate.'),
+              tooltipTitle: t(
+                'This APR assumes a constant price for the EXA token during the vesting period of the esEXA reward',
+              ),
             },
           ]
         : []),
