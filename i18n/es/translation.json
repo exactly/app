@@ -616,5 +616,9 @@
   "on": "encendido",
   "off": "apagado",
   "Search address": "Buscar dirección",
-  "This APR assumes a constant price for the EXA token during the vesting period of the esEXA reward": "Esta TNA asume un precio constante para el token EXA durante el período de consolidación de la recompensa esEXA"
+  "This APR assumes a constant price for the EXA token during the vesting period of the esEXA reward": "Esta TNA asume un precio constante para el token EXA durante el período de consolidación de la recompensa esEXA",
+  "Tap the green button in the bottom middle (⇄) -> \"Deposit\"": "Tocá el botón verde en la parte inferior del medio (⇄) -> \"Depositar\"",
+  "Select \"Tether\" on the list": "Seleccioná \"Tether\" en la lista",
+  "Select a network -> check \"Optimism\"": "Selecciona una red -> tocá \"Optimism\"",
+  "Transaction pending, in short you will receive the funds. Remember to have USDT set as payment currency. Do this by going to the \"Card\" tab -> \"Pay with\" and select Tether": "Transacción pendiente, en breve recibirás los fondos. Recordá tener USDT configurado como moneda de pago. Haz esto yendo a la pestaña \"Tarjeta\" -> \"Pagar con\" y selecciona Tether"
 }

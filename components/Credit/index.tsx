@@ -86,6 +86,21 @@ export const apps = () => [
     depositConfig: USDC_MAINNET,
   },
   {
+    name: 'Buenbit',
+    imgURL: '/img/debit2credit/buenbit.png',
+    steps: [
+      i18n.t('Tap the green button in the bottom middle (⇄) -> "Deposit"'),
+      i18n.t('Select "Tether" on the list'),
+      i18n.t('Select a network -> check "Optimism"'),
+      i18n.t('Copy address'),
+    ],
+    link: 'https://app.buenbit.com/deposit/crypto',
+    finishInstructions: i18n.t(
+      'Transaction pending, in short you will receive the funds. Remember to have USDT set as payment currency. Do this by going to the "Card" tab -> "Pay with" and select Tether',
+    ),
+    depositConfig: USDT_OP_MAINNET,
+  },
+  {
     name: 'Coinbase',
     imgURL: '/img/debit2credit/coinbase.svg',
     link: 'https://coinbase.com',
