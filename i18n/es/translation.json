@@ -620,5 +620,6 @@
   "Tap the green button in the bottom middle (⇄) -> \"Deposit\"": "Tocá el botón verde en la parte inferior del medio (⇄) -> \"Depositar\"",
   "Select \"Tether\" on the list": "Seleccioná \"Tether\" en la lista",
   "Select a network -> check \"Optimism\"": "Selecciona una red -> tocá \"Optimism\"",
-  "Transaction pending, in short you will receive the funds. Remember to have USDT set as payment currency. Do this by going to the \"Card\" tab -> \"Pay with\" and select Tether": "Transacción pendiente, en breve recibirás los fondos. Recordá tener USDT configurado como moneda de pago. Haz esto yendo a la pestaña \"Tarjeta\" -> \"Pagar con\" y selecciona Tether"
+  "Transaction pending, in short you will receive the funds. Remember to have USDT set as payment currency. Do this by going to the \"Card\" tab -> \"Pay with\" and select Tether": "Transacción pendiente, en breve recibirás los fondos. Recordá tener USDT configurado como moneda de pago. Haz esto yendo a la pestaña \"Tarjeta\" -> \"Pagar con\" y selecciona Tether",
+  "The Total Utilization is above 90%, and the remaining liquidity is established as a Liquidity Reserve that can't be borrowed and is only available for withdrawals.": "La Utilización Total está por encima del 90%, y la liquidez restante se establece como una Reserva de Liquidez que no se puede pedir prestada y solo está disponible para retiros."
 }

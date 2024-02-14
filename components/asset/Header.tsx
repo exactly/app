@@ -4,7 +4,7 @@ import ItemInfo, { ItemInfoProps } from 'components/common/ItemInfo';
 import formatNumber from 'utils/formatNumber';
 import useAccountData from 'hooks/useAccountData';
 import ExplorerMenu from './ExplorerMenu';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import DropdownMenu from 'components/DropdownMenu';
 import useAssets from 'hooks/useAssets';
 import AssetOption from './AssetOption';
@@ -18,6 +18,7 @@ import { Typography } from '@mui/material';
 import getSymbolDescription from 'utils/getSymbolDescription';
 import useContractAddress from 'hooks/useContractAddress';
 import { useWeb3 } from 'hooks/useWeb3';
+import Alert from '@mui/material/Alert';
 
 type Props = {
   symbol: string;
@@ -92,9 +93,22 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
     return { fixedDeposits: totalDepositedUSD, fixedBorrows: totalBorrowedUSD };
   }, [marketAccount]);
 
-  const itemsInfo: ItemInfoProps[] = useMemo((): ItemInfoProps[] => {
+  const { itemsInfo, totalUtilization } = useMemo((): {
+    itemsInfo: ItemInfoProps[];
+    totalUtilization: number | undefined;
+  } => {
     const { decimals, usdPrice } = marketAccount ?? {};
-    return [
+
+    const totalUti =
+      backupBorrows !== undefined &&
+      floatingBorrows !== undefined &&
+      floatingDeposits !== undefined &&
+      fixedDeposits !== undefined &&
+      decimals
+        ? Number(((floatingBorrows + backupBorrows) * WEI_PER_ETHER) / (floatingDeposits + fixedDeposits)) / 1e18
+        : undefined;
+
+    const items = [
       {
         label: t('Total Deposits'),
         value:
@@ -124,16 +138,7 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
       },
       {
         label: t('Total Utilization'),
-        value:
-          backupBorrows !== undefined &&
-          floatingBorrows !== undefined &&
-          floatingDeposits !== undefined &&
-          fixedDeposits !== undefined &&
-          decimals
-            ? toPercentage(
-                Number(((floatingBorrows + backupBorrows) * WEI_PER_ETHER) / (floatingDeposits + fixedDeposits)) / 1e18,
-              )
-            : undefined,
+        value: toPercentage(totalUti),
       },
       {
         label: t('Oracle Price'),
@@ -150,6 +155,8 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
           ]
         : []),
     ];
+
+    return { itemsInfo: items, totalUtilization: totalUti };
   }, [
     marketAccount,
     t,
@@ -178,46 +185,72 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
   );
 
   return (
-    <Grid
-      sx={{ bgcolor: 'components.bg' }}
-      width="100%"
-      p="24px"
-      boxShadow={({ palette }) => (palette.mode === 'light' ? '0px 4px 12px rgba(175, 177, 182, 0.2)' : '')}
-    >
-      <Grid item container mb="24px" alignItems="center">
-        <DropdownMenu
-          label={t('Asset')}
-          options={options}
-          onChange={onChangeAssetDropdown}
-          renderValue={<AssetOption assetSymbol={symbol} optionSize={22} selectedSize={30} />}
-          renderOption={(o: string) => <AssetOption option assetSymbol={o} optionSize={22} selectedSize={30} />}
-        />
-        {marketAccount && priceFeedAddress && (
-          <ExplorerMenu
-            symbol={symbol}
-            assetAddress={marketAccount.asset}
-            eMarketAddress={marketAccount.market}
-            rateModelAddress={marketAccount.interestRateModel.id}
-            priceFeedAddress={priceFeedAddress}
-            exaToken={marketAccount.symbol}
+    <>
+      <Grid
+        sx={{ bgcolor: 'components.bg' }}
+        width="100%"
+        p="24px"
+        boxShadow={({ palette }) => (palette.mode === 'light' ? '0px 4px 12px rgba(175, 177, 182, 0.2)' : '')}
+      >
+        <Grid item container mb="24px" alignItems="center">
+          <DropdownMenu
+            label={t('Asset')}
+            options={options}
+            onChange={onChangeAssetDropdown}
+            renderValue={<AssetOption assetSymbol={symbol} optionSize={22} selectedSize={30} />}
+            renderOption={(o: string) => <AssetOption option assetSymbol={o} optionSize={22} selectedSize={30} />}
           />
-        )}
-        <Typography sx={{ width: '100%' }} variant="dashboardMainSubtitle">
-          {assetDescription(symbol)}
-        </Typography>
+          {marketAccount && priceFeedAddress && (
+            <ExplorerMenu
+              symbol={symbol}
+              assetAddress={marketAccount.asset}
+              eMarketAddress={marketAccount.market}
+              rateModelAddress={marketAccount.interestRateModel.id}
+              priceFeedAddress={priceFeedAddress}
+              exaToken={marketAccount.symbol}
+            />
+          )}
+          <Typography sx={{ width: '100%' }} variant="dashboardMainSubtitle">
+            {assetDescription(symbol)}
+          </Typography>
+        </Grid>
+        <Grid item container spacing={4}>
+          {itemsInfo.map(({ label, value, underLabel, tooltipTitle }) => (
+            <ItemInfo
+              key={label.trim()}
+              label={label}
+              value={value}
+              underLabel={underLabel}
+              tooltipTitle={tooltipTitle}
+            />
+          ))}
+        </Grid>
       </Grid>
-      <Grid item container spacing={4}>
-        {itemsInfo.map(({ label, value, underLabel, tooltipTitle }) => (
-          <ItemInfo
-            key={label.trim()}
-            label={label}
-            value={value}
-            underLabel={underLabel}
-            tooltipTitle={tooltipTitle}
-          />
-        ))}
-      </Grid>
-    </Grid>
+      {totalUtilization && totalUtilization > 0.9 && (
+        <Alert sx={{ width: '100%' }} severity="info">
+          <Typography variant="body2">
+            {t(
+              "The Total Utilization is above 90%, and the remaining liquidity is established as a Liquidity Reserve that can't be borrowed and is only available for withdrawals.",
+            )}
+          </Typography>
+          <Typography variant="body2">
+            <Trans
+              i18nKey="More info here: <1>reserve-factor</1>."
+              components={{
+                1: (
+                  <a
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    href="https://docs.exact.ly/guides/parameters#a.-reserve-factor"
+                    style={{ textDecoration: 'underline' }}
+                  ></a>
+                ),
+              }}
+            />
+          </Typography>
+        </Alert>
+      )}
+    </>
   );
 };
 

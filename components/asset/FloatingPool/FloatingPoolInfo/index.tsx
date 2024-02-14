@@ -54,8 +54,11 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol }) => {
         value: borrowed !== undefined ? `$${formatNumber(borrowed)}` : undefined,
       },
       {
-        label: t('Available'),
-        value: deposited !== undefined && borrowed !== undefined ? `$${formatNumber(deposited - borrowed)}` : undefined,
+        label: t('Risk-Adjust Factor'),
+        value: marketAccount?.adjustFactor ? formatUnits(marketAccount.adjustFactor, 18) : undefined,
+        tooltipTitle: t(
+          'The Deposit and Borrow risk-adjust factor is a measure that helps evaluate how risky an asset is compared to others. The higher the number, the safer the asset is considered to be, making it more valuable as collateral when requesting a loan.',
+        ),
       },
       {
         label: t('Deposit APR'),
@@ -122,13 +125,6 @@ const FloatingPoolInfo: FC<FloatingPoolInfoProps> = ({ symbol }) => {
             },
           ]
         : []),
-      {
-        label: t('Risk-Adjust Factor'),
-        value: marketAccount?.adjustFactor ? formatUnits(marketAccount.adjustFactor, 18) : undefined,
-        tooltipTitle: t(
-          'The Deposit and Borrow risk-adjust factor is a measure that helps evaluate how risky an asset is compared to others. The higher the number, the safer the asset is considered to be, making it more valuable as collateral when requesting a loan.',
-        ),
-      },
     ],
     [
       t,
