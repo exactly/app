@@ -6,6 +6,9 @@ import {
   useTheme,
 } from "@mui/material";
 import styles from "./styles.module.css";
+import Link from "next/link";
+
+const COPYRIGHT = `© ${new Date().getFullYear()} Exa Labs SAS`;
 
 export default function Home() {
   const { breakpoints } = useTheme();
@@ -98,14 +101,12 @@ export default function Home() {
                     </Button>
                   </Box>
                   {!mobile && (
-                    <Typography
-                      color="grey.300"
-                      fontSize={12}
-                      position="absolute"
-                      bottom={40}
-                    >
-                      Exa App - 2023
-                    </Typography>
+                    <Box position="absolute" bottom={40} color="grey.300">
+                      <Typography fontSize={12}>{COPYRIGHT}</Typography>
+                      <Link href={"/t&c"} style={{ fontSize: 12 }}>
+                        Terms and Conditions
+                      </Link>
+                    </Box>
                   )}
                 </Box>
               </Box>
@@ -146,9 +147,13 @@ export default function Home() {
             <img src="card-black-and-white.svg" width={mobile ? 364 : "100%"} />
             {mobile ? (
               <Box display="flex" justifyContent="space-between" mb={6}>
-                <Typography color="grey.300" fontSize={12}>
-                  Exa App - 2023
-                </Typography>
+                <Box color="grey.300">
+                  <Typography fontSize={12}>{COPYRIGHT}</Typography>
+                  <Link href={"/t&c"} style={{ fontSize: 12 }}>
+                    Terms and Conditions
+                  </Link>
+                </Box>
+
                 <Typography color="grey.300" fontSize={12}>
                   *The credit is powered by Exactly Protocol.
                 </Typography>
