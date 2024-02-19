@@ -15,6 +15,8 @@ import useIRM from './useIRM';
 export const MAX = 10n ** 18n;
 export const INTERVAL = parseEther('0.005');
 
+const levels = 8;
+
 export default function useSpreadModel(symbol: string) {
   const { marketAccount } = useAccountData(symbol);
 
@@ -25,13 +27,21 @@ export default function useSpreadModel(symbol: string) {
       return [];
     }
 
-    const { maxFuturePools, fixedPools, floatingDebt, floatingAssets, floatingBackupBorrowed } = marketAccount;
+    const {
+      maxFuturePools,
+      fixedPools,
+      totalFloatingBorrowAssets,
+      totalFloatingDepositAssets,
+      floatingBackupBorrowed,
+    } = marketAccount;
 
-    const currentUFloating = floatingUtilization(floatingAssets, floatingDebt);
-    const currentUGlobal = globalUtilization(floatingAssets, floatingDebt, floatingBackupBorrowed);
-    const pools: Record<number, (typeof fixedPools)[number]> = Object.fromEntries(
-      fixedPools.map((pool) => [Number(pool.maturity), pool]),
+    const currentUFloating = floatingUtilization(totalFloatingDepositAssets, totalFloatingBorrowAssets);
+    const currentUGlobal = globalUtilization(
+      totalFloatingDepositAssets,
+      totalFloatingBorrowAssets,
+      floatingBackupBorrowed,
     );
+    const pools = Object.fromEntries(fixedPools.map((pool) => [Number(pool.maturity), pool]));
     const maturities = fixedPools.map(({ maturity }) => maturity);
     const end = bmax(...maturities);
 
@@ -54,30 +64,30 @@ export default function useSpreadModel(symbol: string) {
     ms.sort((x, y) => Number(x - y));
 
     for (const m of ms) {
-      const lo = model(m, -WAD);
-      const hi = model(m, WAD);
-
       const extend: Record<string, number | number[]> = {};
       if (pools[Number(m)]) {
         const pool = pools[Number(m)];
-        const fr = fixedRate(
+        const { rate, z } = fixedRate(
           { ...parameters, maturity: m },
-          fixedUtilization(pool.supplied, pool.borrowed, floatingAssets),
+          fixedUtilization(pool.supplied, pool.borrowed, totalFloatingDepositAssets),
           currentUFloating,
           currentUGlobal,
         );
 
-        extend['rate'] = Number(fr) / 1e18;
-        extend['highlight'] = 1;
-      }
-
-      if (m === ms[0]) {
-        extend['vrate'] = Number(lo) / 1e18;
+        extend.z = Number(z) / 1e18;
+        extend.rate = Number(rate) / 1e18;
+        extend.highlight = 1;
       }
 
       points.push({
         date: Number(m),
-        area: [Number(lo) / 1e18, Number(hi) / 1e18],
+        area: [Number(model(m, -WAD)) / 1e18, Number(model(m, WAD)) / 1e18],
+        ...Object.fromEntries(
+          [...Array(levels)].map((_, i, { length }) => {
+            const z = WAD - (BigInt(i) * WAD) / BigInt(length);
+            return [`area${i}`, [Number(model(m, -z)) / 1e18, Number(model(m, z)) / 1e18]];
+          }),
+        ),
         ...extend,
       });
     }
@@ -85,5 +95,5 @@ export default function useSpreadModel(symbol: string) {
     return points;
   }, [irm, marketAccount]);
 
-  return { data, loading: data.length === 0 };
+  return { data, levels, loading: data.length === 0 };
 }

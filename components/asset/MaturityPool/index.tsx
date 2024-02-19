@@ -98,7 +98,7 @@ const AssetMaturityPools: FC<Props> = ({ symbol }) => {
         borderRadius="0px 0px 6px 6px"
         bgcolor="components.bg"
         p="16px"
-        height={280}
+        height={480}
       >
         <SpreadModelChart symbol={symbol} />
       </Box>

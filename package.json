@@ -23,7 +23,8 @@
   "dependencies": {
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
-    "@exactly/protocol": "exactly/protocol#deploy",
+    "@exactly/lib": "exactly/lib#7faf98f",
+    "@exactly/protocol": "exactly/protocol#c62a0c5",
     "@mui/icons-material": "^5.14.3",
     "@mui/lab": "^5.0.0-alpha.138",
     "@mui/material": "^5.14.3",
@@ -52,7 +53,7 @@
     "react-i18next": "^13.0.3",
     "react-number-format": "^5.2.2",
     "react-plotly.js": "^2.6.0",
-    "recharts": "^2.7.2",
+    "recharts": "^2.12.1",
     "viem": "^1.16.6",
     "wagmi": "^1.4.12"
   },
