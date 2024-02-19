@@ -65,7 +65,7 @@ export type FixedParameters = FloatingParameters & {
   maturitySpeed: bigint;
 };
 
-export function fixedRate(parameters: FixedParameters, uFixed: bigint, uFloating: bigint, uGlobal: bigint): bigint {
+export function fixedRate(parameters: FixedParameters, uFixed: bigint, uFloating: bigint, uGlobal: bigint) {
   const { maxPools, spreadFactor, timePreference, maturitySpeed, fixedAllocation, maturity, timestamp } = parameters;
   const base = floatingInterestRateCurve(parameters)(uFloating, uGlobal);
   if (uFixed === 0n) return base;
@@ -84,13 +84,15 @@ export function fixedRate(parameters: FixedParameters, uFixed: bigint, uFloating
   const interval = 4n * 7n * 24n * 60n * 60n;
   const ttMaxM = time + maxPools * interval - (time % interval);
 
-  return (
-    (base *
-      (WAD +
-        (expWad((maturitySpeed * lnWad((ttm * WAD) / ttMaxM)) / WAD) * (timePreference + (spreadFactor * z) / WAD)) /
-          WAD)) /
-    WAD
-  );
+  return {
+    rate:
+      (base *
+        (WAD +
+          (expWad((maturitySpeed * lnWad((ttm * WAD) / ttMaxM)) / WAD) * (timePreference + (spreadFactor * z) / WAD)) /
+            WAD)) /
+      WAD,
+    z,
+  };
 }
 
 export function spreadModel(parameters: Omit<FixedParameters, 'maturity'>, uFloating: bigint, uGlobal: bigint) {

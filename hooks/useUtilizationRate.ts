@@ -7,7 +7,6 @@ import useIRM from './useIRM';
 
 export const MAX = 10n ** 18n;
 export const INTERVAL = parseEther('0.005');
-export const STEP = 10;
 
 export function useCurrentUtilizationRate(type: 'floating' | 'fixed', symbol: string) {
   const { marketAccount } = useAccountData(symbol);
@@ -77,5 +76,6 @@ export default function useUtilizationRate(symbol: string, from = 0n, to = MAX, 
   return {
     data,
     loading: !irm,
+    irm,
   };
 }

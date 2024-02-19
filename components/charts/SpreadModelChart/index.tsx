@@ -9,7 +9,7 @@ import {
   CartesianGrid,
   YAxis,
   Line,
-  Scatter,
+  ReferenceLine,
 } from 'recharts';
 
 import parseTimestamp from 'utils/parseTimestamp';
@@ -18,6 +18,7 @@ import LoadingChart from '../LoadingChart';
 import { type Entry } from '../TooltipChart';
 import { useTranslation } from 'react-i18next';
 import useSpreadModel from 'hooks/useSpreadModel';
+import useFloatingPoolAPR from 'hooks/useFloatingPoolAPR';
 
 type Props = {
   symbol: string;
@@ -30,15 +31,13 @@ const formatPercentage = (value: number) => toPercentage(value as number);
 const SpreadModel: FC<Props> = ({ symbol }) => {
   const { t } = useTranslation();
   const { palette } = useTheme();
+  const { borrowAPR } = useFloatingPoolAPR(symbol);
 
-  const { data, loading } = useSpreadModel(symbol);
-  const highlights = useMemo(() => data.filter((entry, i) => entry.highlight || i === 0), [data]);
+  const { data, levels, loading } = useSpreadModel(symbol);
+  const highlights = useMemo(() => data.filter(({ highlight }) => highlight), [data]);
   const ticks = useMemo(
-    () =>
-      data
-        .filter((entry, i) => entry.highlight || i === 0)
-        .map((entry) => (Array.isArray(entry.date) ? entry.date[0] : entry.date)),
-    [data],
+    () => highlights.map((entry) => (Array.isArray(entry.date) ? entry.date[0] : entry.date)),
+    [highlights],
   );
 
   return (
@@ -56,19 +55,22 @@ const SpreadModel: FC<Props> = ({ symbol }) => {
           <ComposedChart data={data}>
             <XAxis
               xAxisId="xaxis"
+              scale="auto"
               dataKey="date"
               type="number"
               interval={0}
               domain={['dataMin', 'dataMax']}
               tickFormatter={formatTimestampLabel}
-              padding={{ left: 20, right: 20 }}
               ticks={ticks}
               allowDataOverflow
               tick={{ fill: palette.grey[500], fontWeight: 500, fontSize: 11 }}
+              padding={{ right: 16, left: 16 }}
               fontSize="12px"
               height={20}
             />
             <YAxis
+              scale="auto"
+              type="number"
               tickFormatter={formatPercentage}
               yAxisId="yaxis"
               axisLine={false}
@@ -76,36 +78,51 @@ const SpreadModel: FC<Props> = ({ symbol }) => {
               tickLine={false}
               domain={['dataMin', 'dataMax']}
               width={50}
-              padding={{ bottom: 8 }}
+              interval={0}
+              tickCount={7}
             />
-            <Tooltip content={<CustomTooltip highlights={highlights} highlightColor={palette.colors[0]} />} />
+            <Tooltip
+              content={
+                <CustomTooltip highlights={highlights} highlightColor={palette.colors[0]} variableRate={borrowAPR} />
+              }
+            />
             <CartesianGrid stroke={palette.grey[300]} vertical={false} />
-            <Area
-              xAxisId="xaxis"
-              type="monotone"
-              yAxisId="yaxis"
-              dataKey="area"
-              strokeWidth={2}
-              stroke={palette.mode === 'light' ? 'black' : 'white'}
-              fillOpacity={0.05}
-              fill={palette.colors[0]}
-              strokeDasharray="10 10"
-              isAnimationActive={false}
-            />
+            {[...Array(levels)].map((_, i) => {
+              const factor = i / (levels - 1);
+              return (
+                <Area
+                  key={i}
+                  type="monotone"
+                  xAxisId="xaxis"
+                  yAxisId="yaxis"
+                  dataKey={`area${i}`}
+                  fillOpacity={0.2 + 0.1 * factor}
+                  fill={`hsl(0 100% ${50 + 12 * (1 - factor)}%)`}
+                  stroke="none"
+                  isAnimationActive={false}
+                  dot={false}
+                  activeDot={false}
+                />
+              );
+            })}
             <Line
+              type="monotone"
               xAxisId="xaxis"
               yAxisId="yaxis"
               dataKey="rate"
               connectNulls
               strokeWidth={2}
               strokeDasharray="5 5"
+              stroke={palette.text.primary}
               dot={{ r: 5, fill: palette.background.paper, strokeDasharray: '0' }}
+              isAnimationActive={false}
             />
-            <Scatter
-              dataKey="vrate"
+            <ReferenceLine
               xAxisId="xaxis"
               yAxisId="yaxis"
-              fill={palette.mode === 'dark' ? 'white' : 'black'}
+              y={borrowAPR}
+              stroke={palette.text.primary}
+              strokeDasharray="5 5"
             />
           </ComposedChart>
         )}
@@ -118,35 +135,32 @@ const CustomTooltip = ({
   payload,
   highlights,
   highlightColor,
+  variableRate,
 }: {
   payload?: (Omit<Entry, 'value'> & { value: number | number[]; payload: Record<string, number | number[]> })[];
   highlights: Record<string, number | number[]>[];
   highlightColor: string;
+  variableRate: number | undefined;
 }) => {
   const { t } = useTranslation();
   const highlight = useMemo(() => {
-    const mid = payload?.find((p) => p.dataKey === 'area')?.payload;
+    const mid = payload?.find((p) => p.dataKey === 'area0')?.payload;
     if (!mid) return undefined;
-    const date = mid['date'];
+    const date = mid.date;
     if (Array.isArray(date)) return undefined;
     const entry = highlights.find((e) => {
-      const maturity = e['date'];
+      const maturity = e.date;
       if (Array.isArray(maturity)) return false;
       return Math.abs(maturity - date) < 86_400;
     });
     return entry;
   }, [highlights, payload]);
+  const { palette } = useTheme();
 
-  const date =
-    highlight && highlight['date'] && !Array.isArray(highlight['date'])
-      ? formatTimestamp(highlight['date'])
-      : undefined;
-  const rate =
-    highlight && highlight['rate'] && !Array.isArray(highlight['rate']) ? toPercentage(highlight['rate']) : undefined;
+  const date = highlight?.date && !Array.isArray(highlight.date) ? formatTimestamp(highlight.date) : undefined;
+  const rate = highlight?.rate && !Array.isArray(highlight.rate) ? toPercentage(highlight.rate) : undefined;
 
-  const isVR = highlight?.date === highlights[0].date;
-
-  return (
+  return rate ? (
     <Box
       display="flex"
       flexDirection="column"
@@ -165,28 +179,24 @@ const CustomTooltip = ({
           {t('Rate')}: {rate}
         </Typography>
       )}
-      {(payload || []).map(({ dataKey, value, color }) => {
-        if (dataKey !== 'area') return null;
-        if (isVR) {
-          return (
-            <Typography key={dataKey} variant="h6" fontSize="12px" color={color}>
-              {t('Variable Rate')}: {Array.isArray(value) ? toPercentage(value[0]) : value}
-            </Typography>
-          );
-        }
+      {(payload || []).map(({ dataKey, value }) => {
+        if (dataKey !== 'area0' || !rate) return null;
         return (
           <Fragment key={dataKey}>
-            <Typography variant="h6" fontSize="12px" color={color}>
+            <Typography variant="h6" fontSize="12px">
               {t('Min')}: {Array.isArray(value) ? toPercentage(value[0]) : value}
             </Typography>
-            <Typography variant="h6" fontSize="12px" color={color}>
+            <Typography variant="h6" fontSize="12px">
               {t('Max')}: {Array.isArray(value) ? toPercentage(value[1]) : value}
+            </Typography>
+            <Typography variant="h6" fontSize="12px" color={palette.green}>
+              {t('Variable Rate')}: {toPercentage(variableRate)}
             </Typography>
           </Fragment>
         );
       })}
     </Box>
-  );
+  ) : null;
 };
 
 export default React.memo(SpreadModel);

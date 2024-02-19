@@ -28,7 +28,6 @@ const AssetFloatingPool: FC<AssetFloatingPoolProps> = ({ symbol }) => {
         borderRadius="0px 0px 6px 6px"
         bgcolor="components.bg"
         p="16px"
-        width={{ sm: 610 }}
         height={280}
       >
         <HistoricalRateChart symbol={symbol} />
@@ -38,8 +37,6 @@ const AssetFloatingPool: FC<AssetFloatingPoolProps> = ({ symbol }) => {
         borderRadius="0px 0px 6px 6px"
         bgcolor="components.bg"
         p="16px"
-        width={{ sm: 610 }}
-        height={320}
       >
         <UtilizationRateChart type="floating" symbol={symbol} />
       </Box>

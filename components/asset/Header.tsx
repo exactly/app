@@ -19,6 +19,8 @@ import getSymbolDescription from 'utils/getSymbolDescription';
 import useContractAddress from 'hooks/useContractAddress';
 import { useWeb3 } from 'hooks/useWeb3';
 import Alert from '@mui/material/Alert';
+import { useFloatingBalances } from 'hooks/useFloatingBalances';
+import { useFixedBalances } from 'hooks/useFixedBalances';
 
 type Props = {
   symbol: string;
@@ -30,6 +32,8 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
   const options = useAssets();
   const { push, query } = useRouter();
   const getContractAddress = useContractAddress();
+  const { floatingDeposits, floatingBorrows, backupBorrows } = useFloatingBalances(symbol);
+  const { fixedDeposits, fixedBorrows } = useFixedBalances(symbol);
   const [priceFeedAddress, setPriceFeedAddress] = useState<Address | undefined>(undefined);
   const {
     chain: { id: displayNetworkId },
@@ -53,45 +57,6 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
 
     fetchPriceFeedAddress();
   }, [getContractAddress, symbol]);
-
-  const { floatingDeposits, floatingBorrows, backupBorrows } = useMemo(() => {
-    if (!marketAccount) return {};
-
-    const {
-      totalFloatingDepositAssets: totalDeposited,
-      totalFloatingBorrowAssets: totalBorrowed,
-      floatingBackupBorrowed: totalBackupBorrowed,
-      usdPrice: exchangeRate,
-    } = marketAccount;
-
-    const totalFloatingDepositUSD = (totalDeposited * exchangeRate) / WEI_PER_ETHER;
-    const totalFloatingBorrowUSD = (totalBorrowed * exchangeRate) / WEI_PER_ETHER;
-    const totalBackupBorrowUSD = (totalBackupBorrowed * exchangeRate) / WEI_PER_ETHER;
-
-    return {
-      floatingDeposits: totalFloatingDepositUSD,
-      floatingBorrows: totalFloatingBorrowUSD,
-      backupBorrows: totalBackupBorrowUSD,
-    };
-  }, [marketAccount]);
-
-  const { fixedDeposits, fixedBorrows } = useMemo(() => {
-    if (!marketAccount) return {};
-
-    const { fixedPools, usdPrice: exchangeRate } = marketAccount;
-
-    let tempTotalFixedDeposited = 0n;
-    let tempTotalFixedBorrowed = 0n;
-    fixedPools.forEach(({ borrowed, supplied: deposited }) => {
-      tempTotalFixedDeposited = tempTotalFixedDeposited + deposited;
-      tempTotalFixedBorrowed = tempTotalFixedBorrowed + borrowed;
-    });
-
-    const totalDepositedUSD = (tempTotalFixedDeposited * exchangeRate) / WEI_PER_ETHER;
-    const totalBorrowedUSD = (tempTotalFixedBorrowed * exchangeRate) / WEI_PER_ETHER;
-
-    return { fixedDeposits: totalDepositedUSD, fixedBorrows: totalBorrowedUSD };
-  }, [marketAccount]);
 
   const { itemsInfo, totalUtilization } = useMemo((): {
     itemsInfo: ItemInfoProps[];
