@@ -12,7 +12,7 @@ import useEstimateGas from './useEstimateGas';
 import { formatUnits, parseUnits } from 'viem';
 import waitForTransaction from 'utils/waitForTransaction';
 import { gasLimit } from 'utils/gas';
-import { track } from 'utils/segment';
+import { track } from 'utils/mixpanel';
 import { WEI_PER_ETHER } from 'utils/const';
 
 type Deposit = {

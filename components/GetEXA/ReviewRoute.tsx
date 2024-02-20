@@ -12,7 +12,7 @@ import { formatEther } from 'viem';
 import ModalAlert from 'components/common/modal/ModalAlert';
 import { ArrowForward } from '@mui/icons-material';
 import { Protocol, Route } from '../../types/Bridge';
-import { track } from 'utils/segment';
+import { track } from 'utils/mixpanel';
 
 export const RouteTable = ({
   route,

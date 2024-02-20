@@ -1,6 +1,6 @@
 import React, { ReactNode, useState } from 'react';
 import { Box, Button } from '@mui/material';
-import { track } from 'utils/segment';
+import { track } from 'utils/mixpanel';
 
 export type MobileTab = {
   title: string;

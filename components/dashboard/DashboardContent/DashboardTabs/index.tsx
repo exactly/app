@@ -5,7 +5,7 @@ import TabContext from '@mui/lab/TabContext';
 import TabList from '@mui/lab/TabList';
 import TabPanel from '@mui/lab/TabPanel';
 import { Typography } from '@mui/material';
-import { track } from 'utils/segment';
+import { track } from 'utils/mixpanel';
 
 type Tab = {
   label: string;

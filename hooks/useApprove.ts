@@ -11,7 +11,7 @@ import { useTranslation } from 'react-i18next';
 import { MAX_UINT256, WEI_PER_ETHER } from 'utils/const';
 import useEstimateGas from './useEstimateGas';
 import { gasLimit } from 'utils/gas';
-import { track } from 'utils/segment';
+import { track } from 'utils/mixpanel';
 
 function useApprove({
   operation,

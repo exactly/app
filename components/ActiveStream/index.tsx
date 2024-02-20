@@ -32,7 +32,7 @@ import { useSablierV2LockupLinearWithdrawableAmountOf, useSablierV2NftDescriptor
 import Draggable from 'react-draggable';
 import CloseIcon from '@mui/icons-material/Close';
 import { TransitionProps } from '@mui/material/transitions';
-import { track } from 'utils/segment';
+import { track } from 'utils/mixpanel';
 
 const StyledLinearProgress = styled(LinearProgress, {
   shouldForwardProp: (prop) => prop !== 'barColor',

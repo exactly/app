@@ -13,7 +13,7 @@ import { WEI_PER_ETHER } from 'utils/const';
 import { Address, formatEther, formatUnits } from 'viem';
 import useStETHNativeAPR from 'hooks/useStETHNativeAPR';
 import { toPercentage } from 'utils/utils';
-import { track } from 'utils/segment';
+import { track } from 'utils/mixpanel';
 import { Typography } from '@mui/material';
 import getSymbolDescription from 'utils/getSymbolDescription';
 import useContractAddress from 'hooks/useContractAddress';

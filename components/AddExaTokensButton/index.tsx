@@ -7,7 +7,7 @@ import useAssets from 'hooks/useAssets';
 import imageToBase64 from 'utils/imageToBase64';
 import useAccountData from 'hooks/useAccountData';
 import { useTranslation } from 'react-i18next';
-import { track } from 'utils/segment';
+import { track } from 'utils/mixpanel';
 
 const AddExaTokensButton = () => {
   const { t } = useTranslation();

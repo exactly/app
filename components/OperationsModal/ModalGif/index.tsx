@@ -10,7 +10,7 @@ import parseTimestamp from 'utils/parseTimestamp';
 import { useTranslation } from 'react-i18next';
 import useTranslateOperation from 'hooks/useTranslateOperation';
 import useEtherscanLink from 'hooks/useEtherscanLink';
-import { track } from 'utils/segment';
+import { track } from 'utils/mixpanel';
 
 type Props = {
   tx: Transaction;

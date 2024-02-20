@@ -8,7 +8,7 @@ import { Box, Drawer, IconButton, Typography } from '@mui/material';
 import GetEXA from '.';
 import { useModal } from '../../contexts/ModalContext';
 import { GetEXAProvider } from 'contexts/GetEXAContext';
-import { track } from 'utils/segment';
+import { track } from 'utils/mixpanel';
 
 export default function ModalWrapper() {
   const { isOpen, close } = useModal('get-exa');

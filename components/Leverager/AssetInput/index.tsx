@@ -7,7 +7,7 @@ import useAccountData from 'hooks/useAccountData';
 import Image from 'next/image';
 import formatSymbol from 'utils/formatSymbol';
 import { useLeveragerContext } from 'contexts/LeveragerContext';
-import { track } from 'utils/segment';
+import { track } from 'utils/mixpanel';
 
 type Props = {
   symbol?: string;

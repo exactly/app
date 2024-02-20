@@ -7,7 +7,7 @@ import { goerli } from 'wagmi/chains';
 import Faucet from './';
 import { useModal } from 'contexts/ModalContext';
 import { useWeb3 } from 'hooks/useWeb3';
-import { track } from 'utils/segment';
+import { track } from 'utils/mixpanel';
 
 type Props = {
   isOpen: boolean;

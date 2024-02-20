@@ -21,7 +21,7 @@ import { LeveragerContextProvider, useLeveragerContext } from 'contexts/Leverage
 import Operation from '../Operation';
 import Summary from '../Summary';
 import { useModal } from 'contexts/ModalContext';
-import { track } from 'utils/segment';
+import { track } from 'utils/mixpanel';
 
 function PaperComponent(props: PaperProps | undefined) {
   const ref = useRef<HTMLDivElement>(null);

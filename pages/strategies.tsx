@@ -22,7 +22,7 @@ import { useExtraDepositAPR } from 'hooks/useExtra';
 import { useWeb3 } from 'hooks/useWeb3';
 import FeaturedStrategies from 'components/strategies/FeaturedStrategies';
 import { useModal } from '../contexts/ModalContext';
-import { track } from 'utils/segment';
+import { track } from 'utils/mixpanel';
 
 const Strategies: NextPage = () => {
   const { t } = useTranslation();

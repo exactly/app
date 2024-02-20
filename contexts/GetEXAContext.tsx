@@ -63,7 +63,7 @@ import waitForTransaction from 'utils/waitForTransaction';
 import dayjs from 'dayjs';
 import { splitSignature } from '@ethersproject/bytes';
 import useDelayedEffect from 'hooks/useDelayedEffect';
-import { track } from 'utils/segment';
+import { track } from 'utils/mixpanel';
 
 const DESTINATION_CHAIN = optimism.id;
 

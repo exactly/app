@@ -7,7 +7,7 @@ import ReviewRoute from './ReviewRoute';
 import SelectRoute from './SelectRoute';
 import { useGetEXA, Screen } from 'contexts/GetEXAContext';
 import TXStatus from './TXStatus';
-import { track } from 'utils/segment';
+import { track } from 'utils/mixpanel';
 
 const GetEXA = () => {
   const { screen, setScreen } = useGetEXA();

@@ -16,7 +16,7 @@ import { formatUnits, parseUnits } from 'viem';
 import waitForTransaction from 'utils/waitForTransaction';
 import dayjs from 'dayjs';
 import { gasLimit } from 'utils/gas';
-import { track } from 'utils/segment';
+import { track } from 'utils/mixpanel';
 
 type BorrowAtMaturity = {
   borrow: () => void;

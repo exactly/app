@@ -45,7 +45,7 @@ import useIsContract from 'hooks/useIsContract';
 import { gasLimit } from 'utils/gas';
 import { Transaction } from 'types/Transaction';
 import LoadingTransaction from 'components/common/modal/Loading';
-import { track } from 'utils/segment';
+import { track } from 'utils/mixpanel';
 import { useModal } from '../../contexts/ModalContext';
 
 type Params<T extends ExtractAbiFunctionNames<typeof escrowedExaABI>> = AbiParametersToPrimitiveTypes<

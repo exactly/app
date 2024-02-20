@@ -16,7 +16,7 @@ import { useEXABalance, useEXAPrice } from 'hooks/useEXA';
 import { formatEther, formatUnits } from 'viem';
 import formatNumber from 'utils/formatNumber';
 import { LoadingButton } from '@mui/lab';
-import { track } from 'utils/segment';
+import { track } from 'utils/mixpanel';
 import { AssetBalance } from 'types/Bridge';
 
 const SelectRoute = () => {

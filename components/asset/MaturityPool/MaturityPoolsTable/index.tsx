@@ -18,7 +18,7 @@ import useMaturityPools from 'hooks/useMaturityPools';
 import { useTheme } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import getHourUTC2Local from 'utils/getHourUTC2Local';
-import { track } from 'utils/segment';
+import { track } from 'utils/mixpanel';
 
 type MaturityPoolsTableProps = {
   symbol: string;

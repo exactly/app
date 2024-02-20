@@ -8,7 +8,7 @@ import { Box, Button, CircularProgress, Typography } from '@mui/material';
 import { CircularProgressWithIcon } from 'components/OperationsModal/ModalGif';
 import { useGetEXA } from 'contexts/GetEXAContext';
 import { Hash } from 'viem';
-import { track } from 'utils/segment';
+import { track } from 'utils/mixpanel';
 
 const SpinnerThing = ({
   status,

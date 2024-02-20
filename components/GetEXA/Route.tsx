@@ -5,7 +5,7 @@ import React, { memo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { type Route as RouteType } from 'types/Bridge';
 import formatNumber from 'utils/formatNumber';
-import { track } from 'utils/segment';
+import { track } from 'utils/mixpanel';
 
 type Props = {
   route: RouteType;

@@ -3,7 +3,7 @@ import { Box, Button, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { optimism } from 'wagmi/chains';
 import { useWeb3 } from 'hooks/useWeb3';
-import { track } from 'utils/segment';
+import { track } from 'utils/mixpanel';
 
 const Proposals = () => {
   const { t } = useTranslation();

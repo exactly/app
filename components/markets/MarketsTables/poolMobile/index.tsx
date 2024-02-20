@@ -10,7 +10,7 @@ import parseTimestamp from 'utils/parseTimestamp';
 import { TableHeader } from 'components/common/TableHeadCell';
 import useTranslateOperation from 'hooks/useTranslateOperation';
 import Rates from 'components/Rates';
-import { track } from 'utils/segment';
+import { track } from 'utils/mixpanel';
 import formatSymbol from 'utils/formatSymbol';
 import LockIcon from '@mui/icons-material/Lock';
 import ImportExportIcon from '@mui/icons-material/ImportExport';

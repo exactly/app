@@ -10,7 +10,7 @@ import Delegation from 'components/governance/Delegation';
 import Proposals from 'components/governance/Proposals';
 import useMerkleTree from 'hooks/useMerkleTree';
 import { useModal } from 'contexts/ModalContext';
-import { track } from 'utils/segment';
+import { track } from 'utils/mixpanel';
 
 const Governance: NextPage = () => {
   const { t } = useTranslation();

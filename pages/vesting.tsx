@@ -31,7 +31,7 @@ import useRewards from 'hooks/useRewards';
 import waitForTransaction from 'utils/waitForTransaction';
 import formatNumber from 'utils/formatNumber';
 import { toPercentage } from 'utils/utils';
-import { track } from 'utils/segment';
+import { track } from 'utils/mixpanel';
 import { formatEther } from 'viem';
 import { TransitionGroup } from 'react-transition-group';
 import Collapse from '@mui/material/Collapse';

@@ -6,7 +6,7 @@ import DropdownMenu from 'components/DropdownMenu';
 import { useGetEXA } from 'contexts/GetEXAContext';
 import Image from 'next/image';
 import { Chain } from 'types/Bridge';
-import { track } from 'utils/segment';
+import { track } from 'utils/mixpanel';
 type AssetOptionProps = {
   chain?: Chain;
   option?: boolean;

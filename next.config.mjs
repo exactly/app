@@ -13,12 +13,20 @@ export default withSentryConfig(
     async rewrites() {
       return [
         {
-          source: '/api/a-cdn/:path*',
-          destination: 'https://cdn.segment.com/:path*',
+          source: '/api/a-api/lib.min.js',
+          destination: 'https://cdn.mxpnl.com/libs/mixpanel-2-latest.min.js',
         },
         {
-          source: '/api/a-api/:path*',
-          destination: 'https://api.segment.io/v1/:path*',
+          source: '/api/a-api/lib.js',
+          destination: 'https://cdn.mxpnl.com/libs/mixpanel-2-latest.js',
+        },
+        {
+          source: '/api/a-api/decide',
+          destination: 'https://decide.mixpanel.com/decide',
+        },
+        {
+          source: '/api/a-api/:slug',
+          destination: 'https://api.mixpanel.com/:slug',
         },
       ];
     },

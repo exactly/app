@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next';
 import i18n from 'i18n';
 
 import DropdownMenu from 'components/DropdownMenu';
-import { track } from 'utils/segment';
+import { track } from 'utils/mixpanel';
 
 const sx: SxProps = {
   fontSize: 13.6,

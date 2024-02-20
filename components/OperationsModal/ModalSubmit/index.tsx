@@ -8,7 +8,7 @@ import { useWeb3 } from 'hooks/useWeb3';
 import { useTranslation } from 'react-i18next';
 import useTranslateOperation from 'hooks/useTranslateOperation';
 import useAccountData from 'hooks/useAccountData';
-import { track } from 'utils/segment';
+import { track } from 'utils/mixpanel';
 
 type Props = {
   symbol: string;

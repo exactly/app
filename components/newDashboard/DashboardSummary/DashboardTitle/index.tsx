@@ -5,7 +5,7 @@ import ReplayIcon from '@mui/icons-material/Replay';
 import { useTranslation } from 'react-i18next';
 import useAccountData from 'hooks/useAccountData';
 import dayjs from 'dayjs';
-import { track } from 'utils/segment';
+import { track } from 'utils/mixpanel';
 
 const DashboardTitle = () => {
   const { t } = useTranslation();

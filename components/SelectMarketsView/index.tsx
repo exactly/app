@@ -10,7 +10,7 @@ import { Timeout } from 'react-number-format/types/types';
 import { SimpleViewIcon, AdvancedViewIcon } from 'components/Icons';
 import { useTranslation } from 'react-i18next';
 import { type MarketView, useCustomTheme } from 'contexts/ThemeContext';
-import { track } from 'utils/segment';
+import { track } from 'utils/mixpanel';
 
 type ViewOption = {
   type: MarketView;

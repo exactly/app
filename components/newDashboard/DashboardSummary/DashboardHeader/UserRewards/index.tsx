@@ -10,7 +10,7 @@ import useRewards from 'hooks/useRewards';
 import { WEI_PER_ETHER } from 'utils/const';
 import useAccountData from 'hooks/useAccountData';
 import useRouter from 'hooks/useRouter';
-import { track } from 'utils/segment';
+import { track } from 'utils/mixpanel';
 
 type RewardProps = {
   assetSymbol: string;

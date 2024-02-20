@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 
 import { useRouter } from 'next/router';
-import { page } from '../utils/segment';
+import { page } from '../utils/mixpanel';
 
 export function usePageTracking() {
   const router = useRouter();

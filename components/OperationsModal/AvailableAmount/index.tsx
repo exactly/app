@@ -2,7 +2,7 @@ import React, { MouseEvent, MouseEventHandler, useCallback } from 'react';
 import { Box, Typography, Button, Skeleton, Tooltip } from '@mui/material';
 
 import formatNumber from 'utils/formatNumber';
-import { track } from 'utils/segment';
+import { track } from 'utils/mixpanel';
 
 export type Props = {
   symbol: string;

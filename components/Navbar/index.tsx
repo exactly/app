@@ -29,7 +29,7 @@ import { useCustomTheme } from 'contexts/ThemeContext';
 import { useModal } from 'contexts/ModalContext';
 import CustomMenu from './CustomMenu';
 import Settings from 'components/Settings';
-import { identify, track } from '../../utils/segment';
+import { identify, track } from '../../utils/mixpanel';
 import useReadOnly from 'hooks/useReadOnly';
 import { AccountInput } from 'components/AccountInput';
 

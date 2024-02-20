@@ -4,7 +4,7 @@ import { Box, Button, ClickAwayListener, InputBase, Typography } from '@mui/mate
 import ModeEditRoundedIcon from '@mui/icons-material/ModeEditRounded';
 
 import ModalInfo from 'components/common/modal/ModalInfo';
-import { track } from 'utils/segment';
+import { track } from 'utils/mixpanel';
 
 type Props = {
   value: string;

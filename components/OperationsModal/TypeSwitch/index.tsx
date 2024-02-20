@@ -3,7 +3,7 @@ import { Box, Button, useTheme, type ButtonProps } from '@mui/material';
 import { useOperationContext } from 'contexts/OperationContext';
 import { useTranslation } from 'react-i18next';
 import { isFixedOperation, isValidOperation } from 'types/Operation';
-import { track } from 'utils/segment';
+import { track } from 'utils/mixpanel';
 
 type SelectorProps = {
   label: string;

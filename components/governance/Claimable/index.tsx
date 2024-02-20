@@ -15,7 +15,7 @@ import {
 } from 'hooks/useSablier';
 import { useAirdropClaim, useSablierV2LockupLinearWithdrawMax } from 'types/abi';
 import formatNumber from 'utils/formatNumber';
-import { track } from 'utils/segment';
+import { track } from 'utils/mixpanel';
 
 type ClaimableProps = {
   amount: bigint;

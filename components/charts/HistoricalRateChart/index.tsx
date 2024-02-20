@@ -7,7 +7,7 @@ import { toPercentage } from 'utils/utils';
 import ButtonsChart from '../ButtonsChart';
 import LoadingChart from '../LoadingChart';
 import TooltipChart from '../TooltipChart';
-import { track } from 'utils/segment';
+import { track } from 'utils/mixpanel';
 
 type Props = {
   symbol: string;

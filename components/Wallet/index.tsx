@@ -15,7 +15,7 @@ import { globals } from 'styles/theme';
 import { useTranslation } from 'react-i18next';
 import Link from 'next/link';
 import useRouter from 'hooks/useRouter';
-import { track } from 'utils/segment';
+import { track } from 'utils/mixpanel';
 
 const { onlyDesktop } = globals;
 

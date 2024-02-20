@@ -15,7 +15,7 @@ import useActionButton, { useStartDebtManagerButton } from 'hooks/useActionButto
 import useRouter from 'hooks/useRouter';
 import { useTranslation } from 'react-i18next';
 import Rates from 'components/Rates';
-import { track } from 'utils/segment';
+import { track } from 'utils/mixpanel';
 
 type Props = {
   symbol: string;

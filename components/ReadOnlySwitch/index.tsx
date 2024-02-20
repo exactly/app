@@ -1,7 +1,7 @@
 import React, { FC, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { type SxProps, Box, Typography, useMediaQuery, useTheme } from '@mui/material';
-import { track } from 'utils/segment';
+import { track } from 'utils/mixpanel';
 import { useWeb3 } from 'hooks/useWeb3';
 import useReadOnly from 'hooks/useReadOnly';
 import { AccountInput } from 'components/AccountInput';

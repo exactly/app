@@ -18,7 +18,7 @@ import { TransitionProps } from '@mui/material/transitions';
 import { useOperationContext } from 'contexts/OperationContext';
 import ModalGif from 'components/OperationsModal/ModalGif';
 import { Transaction } from 'types/Transaction';
-import { track } from 'utils/segment';
+import { track } from 'utils/mixpanel';
 
 function PaperComponent(props: PaperProps | undefined) {
   const { tx } = useOperationContext();

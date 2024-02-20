@@ -1,4 +1,5 @@
-import { AnalyticsBrowser } from '@segment/analytics-next';
+import mixpanel from 'mixpanel-browser';
+
 import { Address } from 'abitype';
 import { Hash, TransactionReceipt } from 'viem';
 import { Transaction } from '../types/Transaction';
@@ -74,57 +75,27 @@ type TX = {
   usdAmount: string;
 };
 
-const analyticsApiKey = process.env.NEXT_PUBLIC_SEGMENT_WRITE_KEY || '';
-
-export function getAnalytics() {
-  const analytics = AnalyticsBrowser.load(
-    { writeKey: analyticsApiKey, cdnURL: '/api/a-cdn' },
-    {
-      integrations: {
-        'Segment.io': {
-          apiHost: `${window.location.host}/api/a-api`,
-        },
-      },
-    },
-  );
-  return analytics;
+if (process.env.NEXT_PUBLIC_MIXPANEL_PROJECT_TOKEN) {
+  mixpanel.init(process.env.NEXT_PUBLIC_MIXPANEL_PROJECT_TOKEN, {
+    debug: true,
+    track_pageview: true,
+    persistence: 'localStorage',
+    api_host: '/api/a-api',
+    ignore_dnt: true,
+  });
 }
 
 export function track<Name extends keyof TrackEvent>(
   name: Name,
   properties: TrackEvent[Name] & Partial<Global & Component & TX>,
 ): void {
-  try {
-    const analytics = getAnalytics();
-    if (typeof analytics.track !== 'function') {
-      return;
-    }
-    analytics.track(name, properties);
-  } catch {
-    // probably, analytics not enabled, or other issue sending the report
-  }
+  mixpanel.track(name, properties);
 }
 
 export function page() {
-  try {
-    const analytics = getAnalytics();
-    if (typeof analytics.page !== 'function') {
-      return;
-    }
-    analytics.page();
-  } catch {
-    //
-  }
+  mixpanel.track_pageview();
 }
 
 export function identify(address: Address) {
-  try {
-    const analytics = getAnalytics();
-    if (typeof analytics.identify !== 'function') {
-      return;
-    }
-    analytics.identify(address);
-  } catch {
-    //
-  }
+  mixpanel.identify(address);
 }

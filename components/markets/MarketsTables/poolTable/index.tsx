@@ -26,7 +26,7 @@ import TableHeadCell, { TableHeader } from 'components/common/TableHeadCell';
 import useRouter from 'hooks/useRouter';
 import { useTranslation } from 'react-i18next';
 import Rates from 'components/Rates';
-import { track } from 'utils/segment';
+import { track } from 'utils/mixpanel';
 
 export type PoolTableProps = {
   isLoading: boolean;

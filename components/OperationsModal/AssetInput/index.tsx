@@ -6,7 +6,7 @@ import AvailableAmount, { Props as AAProps } from '../AvailableAmount';
 import USDValue from '../USDValue';
 import AssetSelector from '../AssetSelector';
 import { useWeb3 } from 'hooks/useWeb3';
-import { track } from 'utils/segment';
+import { track } from 'utils/mixpanel';
 
 type Props = {
   qty: string;
