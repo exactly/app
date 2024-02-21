@@ -27,6 +27,7 @@ import FaucetModal from 'components/operations/Faucet/Modal';
 import NewsModal from 'components/NewsModal';
 import GetEXAModal from 'components/GetEXA/ModalWrapper';
 import MaturityDateReminder from '../components/MaturityDateReminder';
+import NewIRMBanner from '../components/NewIRMBanner';
 
 const { maxWidth } = globals;
 
@@ -83,6 +84,7 @@ export default function App({ Component, pageProps, router }: AppProps) {
           <ModalContextProvider>
             <GlobalErrorProvider>
               <AccountDataProvider>
+                <NewIRMBanner />
                 <Box display="flex" flexDirection="column" px={2} height="100%">
                   <Navbar />
                   {router.pathname === '/strategies' && (
