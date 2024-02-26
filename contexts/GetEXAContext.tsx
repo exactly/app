@@ -64,6 +64,7 @@ import dayjs from 'dayjs';
 import { splitSignature } from '@ethersproject/bytes';
 import useDelayedEffect from 'hooks/useDelayedEffect';
 import { track } from 'utils/mixpanel';
+import useContractVersion from 'hooks/useContractVersion';
 
 const DESTINATION_CHAIN = optimism.id;
 
@@ -199,6 +200,7 @@ export const GetEXAProvider: FC<PropsWithChildren> = ({ children }) => {
 
   const isMultiSig = useIsContract();
   const isPermit = useIsPermit();
+  const contractVersion = useContractVersion();
   const permit2 = usePermit2();
 
   const approveSameChain = useCallback(async () => {
@@ -283,12 +285,13 @@ export const GetEXAProvider: FC<PropsWithChildren> = ({ children }) => {
     if (await isPermit(asset.address)) {
       const nonce = await erc20.read.nonces([walletAddress], opts);
       const name = await erc20.read.name(opts);
+      const version = await contractVersion(asset.address);
 
       const { v, r, s } = await signTypedDataAsync({
         primaryType: 'Permit',
         domain: {
           name,
-          version: '1',
+          version,
           chainId,
           verifyingContract: erc20.address,
         },
@@ -368,7 +371,19 @@ export const GetEXAProvider: FC<PropsWithChildren> = ({ children }) => {
     } as const;
 
     return { type: 'permit2', value: permit } as const;
-  }, [appChain.id, asset, erc20, isPermit, opts, permit2, qtyIn, signTypedDataAsync, swapper, walletAddress]);
+  }, [
+    appChain.id,
+    asset,
+    contractVersion,
+    erc20,
+    isPermit,
+    opts,
+    permit2,
+    qtyIn,
+    signTypedDataAsync,
+    swapper,
+    walletAddress,
+  ]);
 
   const approveCrossChain = useCallback(async () => {
     if (asset?.symbol === 'ETH') setTXStep(TXStep.CONFIRM);
