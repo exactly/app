@@ -68,7 +68,7 @@ export default function Home() {
                     lineHeight={mobile ? "40px" : "50px"}
                     sx={mobile ? { fontSize: 32 } : { fontSize: 44 }}
                   >
-                    The first self-custodial digital credit card
+                    The first onchain digital credit card
                   </Typography>
                   <Typography fontSize={mobile ? 14 : 16}>
                     Buy now, pay later, and hold your crypto.*
