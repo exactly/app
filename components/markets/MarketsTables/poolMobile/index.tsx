@@ -77,6 +77,7 @@ const PoolMobile: FC<PoolTableProps> = ({ isLoading, headers, rows }) => {
             borrowMaturity,
             depositedAssets,
             borrowedAssets,
+            upcomingMaturity,
           },
           index,
         ) => (
@@ -135,7 +136,7 @@ const PoolMobile: FC<PoolTableProps> = ({ isLoading, headers, rows }) => {
                   variant="outlined"
                   fullWidth
                   sx={sxButton}
-                  onClick={(e) => handleBorrowClick(e, symbol, borrowMaturity)}
+                  onClick={(e) => handleBorrowClick(e, symbol, upcomingMaturity)}
                 >
                   {translateOperation('borrow', { capitalize: true })}
                 </Button>
