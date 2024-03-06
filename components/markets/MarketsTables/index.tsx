@@ -19,6 +19,7 @@ import { TableHeader } from 'components/common/TableHeadCell';
 import useAccountData from 'hooks/useAccountData';
 import { useGlobalError } from 'contexts/GlobalErrorContext';
 import useRewards from 'hooks/useRewards';
+import { WEEK } from 'utils/utils';
 
 const { smOrLess, mdOrMore } = globals;
 
@@ -199,6 +200,9 @@ const MarketTables: FC = () => {
               ? { maturity: bestFixedBorrow.maturity, rate: bestFixedBorrow.rate }
               : { maturity: 0n, rate: Number(formatEther(floatingBorrowRate)) };
 
+          const [first, second] = [...fixedPools].sort((a, b) => Number(a.maturity) - Number(b.maturity));
+          const now = BigInt(Math.round(Date.now() / 1000));
+          const upcomingMaturity = first.maturity - now < WEEK ? second.maturity : first.maturity;
           tempRows.push({
             symbol,
             totalDeposited: formatNumber(formatUnits((totalDeposited * usdPrice) / WAD, decimals)),
@@ -207,6 +211,7 @@ const MarketTables: FC = () => {
             depositMaturity: bestDeposit.maturity,
             borrowAPR: bestBorrow.rate,
             borrowMaturity: bestBorrow.maturity,
+            upcomingMaturity,
             depositedAssets: formatNumber(formatUnits(totalDeposited, decimals), symbol),
             borrowedAssets: formatNumber(formatUnits(totalBorrowed, decimals), symbol),
           });
