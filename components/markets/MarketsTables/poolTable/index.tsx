@@ -42,6 +42,7 @@ export type TableRow = {
   depositMaturity?: bigint;
   borrowAPR?: number;
   borrowMaturity?: bigint;
+  upcomingMaturity?: bigint;
   depositedAssets?: string;
   borrowedAssets?: string;
 };
@@ -128,6 +129,7 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows }) => {
               borrowMaturity,
               depositedAssets,
               borrowedAssets,
+              upcomingMaturity,
             }) => (
               <Link
                 href={{ pathname: `/${symbol}`, query }}
@@ -289,7 +291,7 @@ const PoolTable: FC<PoolTableProps> = ({ isLoading, headers, rows }) => {
                         <Button
                           variant="outlined"
                           sx={{ backgroundColor: 'components.bg', whiteSpace: 'nowrap' }}
-                          onClick={(e) => handleBorrowClick(e, symbol, borrowMaturity)}
+                          onClick={(e) => handleBorrowClick(e, symbol, upcomingMaturity)}
                           data-testid={`${getRateType(borrowMaturity)}-${
                             borrowMaturity ? Number(borrowMaturity) : ''
                           }borrow-${symbol}`}
