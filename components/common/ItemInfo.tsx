@@ -1,7 +1,7 @@
 import React, { FC } from 'react';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
-import { Box, Skeleton, Tooltip } from '@mui/material';
+import { Box, BoxProps, Skeleton, Tooltip } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import InfoOutlined from '@mui/icons-material/InfoOutlined';
@@ -12,9 +12,10 @@ export type ItemInfoProps = {
   underLabel?: string;
   tooltipTitle?: string;
   xs?: number;
+  sx?: BoxProps['sx'];
 };
 
-const ItemInfo: FC<ItemInfoProps> = ({ label, value, underLabel, tooltipTitle, xs }) => {
+const ItemInfo: FC<ItemInfoProps> = ({ label, value, underLabel, tooltipTitle, xs, sx }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -30,7 +31,7 @@ const ItemInfo: FC<ItemInfoProps> = ({ label, value, underLabel, tooltipTitle, x
       </Tooltip>
       {value ? (
         typeof value === 'string' ? (
-          <Typography variant="h5" fontWeight={700} component="p">
+          <Typography variant="h5" fontWeight={700} component="p" sx={sx}>
             {value}
           </Typography>
         ) : (

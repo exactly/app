@@ -124,7 +124,7 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
             : undefined,
       },
       {
-        label: t('Total Available'),
+        label: t('Available for Withdrawal'),
         value:
           floatingBorrows !== undefined &&
           fixedBorrows !== undefined &&
@@ -135,9 +135,10 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
                 formatUnits(floatingDeposits + fixedDeposits - (floatingBorrows + fixedBorrows), decimals),
               )}`
             : undefined,
+        sx: { textAlign: 'center' },
       },
       {
-        label: t('Total Utilization'),
+        label: t('Global Utilization'),
         value: toPercentage(totalUti),
       },
       {
@@ -215,13 +216,14 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
           </Typography>
         </Grid>
         <Grid item container spacing={4}>
-          {itemsInfo.map(({ label, value, underLabel, tooltipTitle }) => (
+          {itemsInfo.map(({ label, value, underLabel, tooltipTitle, sx }) => (
             <ItemInfo
               key={label.trim()}
               label={label}
               value={value}
               underLabel={underLabel}
               tooltipTitle={tooltipTitle}
+              sx={sx}
             />
           ))}
         </Grid>
@@ -230,7 +232,7 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
         <Alert sx={{ width: '100%' }} severity="info">
           <Typography variant="body2">
             {t(
-              "The Total Utilization is above 90%, and the remaining liquidity is established as a Liquidity Reserve that can't be borrowed and is only available for withdrawals.",
+              "The Global Utilization is above 90%, and the remaining liquidity is established as a Liquidity Reserve that can't be borrowed and is only available for withdrawals.",
             )}
           </Typography>
           <Typography variant="body2">

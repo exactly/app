@@ -3,7 +3,6 @@
   "Interest Rate Model": "Modelo de tasa de interés",
   "Total Deposits": "Depósitos Totales",
   "Total Borrows": "Préstamos Totales",
-  "Total Available": "Total Disponible",
   "Deposit APR": "TNA del Depósito",
   "Change in the underlying Variable Rate Pool shares value over the last 15 minutes, annualized.": "Cambio en el valor de las acciones del pool de tasa variable subyacente durante los últimos 15 minutos, anualizado.",
   "Borrow APR": "TNA del Préstamo",
@@ -597,7 +596,6 @@
   "It could be up to 6 months with fixed interest rates.": "Podría ser hasta 6 meses con tasas de interés fijas.",
   "Deposits": "Depósitos",
   "Borrows": "Préstamos",
-  "Total Utilization": "Utilización Total",
   "Claim EXA": "Reclamar EXA",
   "Price Feed": "Feed de Precios",
   "All EXA token holders will have voting power to participate actively in discussions, propose enhancements, and cast votes to shape the protocol's evolution.": "Todos los titulares de tokens EXA tendrán poder de voto para participar activamente en discusiones, proponer mejoras y emitir votos para dar forma a la evolución del protocolo.",
@@ -621,6 +619,8 @@
   "Select \"Tether\" on the list": "Seleccioná \"Tether\" en la lista",
   "Select a network -> check \"Optimism\"": "Selecciona una red -> tocá \"Optimism\"",
   "Transaction pending, in short you will receive the funds. Remember to have USDT set as payment currency. Do this by going to the \"Card\" tab -> \"Pay with\" and select Tether": "Transacción pendiente, en breve recibirás los fondos. Recordá tener USDT configurado como moneda de pago. Haz esto yendo a la pestaña \"Tarjeta\" -> \"Pagar con\" y selecciona Tether",
-  "The Total Utilization is above 90%, and the remaining liquidity is established as a Liquidity Reserve that can't be borrowed and is only available for withdrawals.": "La Utilización Total está por encima del 90%, y la liquidez restante se establece como una Reserva de Liquidez que no se puede pedir prestada y solo está disponible para retiros.",
-  "The upgrade to the new Interest Rate Model (EXAIP-08) is scheduled for execution today at 8:30 PM UTC": "La actualización al nuevo Modelo de Tasa de Interés (EXAIP-08) está programada para ejecutarse hoy a las 8:30 PM UTC"
+  "The upgrade to the new Interest Rate Model (EXAIP-08) is scheduled for execution today at 8:30 PM UTC": "La actualización al nuevo Modelo de Tasa de Interés (EXAIP-08) está programada para ejecutarse hoy a las 8:30 PM UTC",
+  "Available for Withdrawal": "Disponible para Retiro",
+  "Global Utilization": "Utilización Global",
+  "The Global Utilization is above 90%, and the remaining liquidity is established as a Liquidity Reserve that can't be borrowed and is only available for withdrawals.": "La Utilización Global está por encima del 90%, y la liquidez restante se establece como una Reserva de Liquidez que no se puede pedir prestada y solo está disponible para retiros."
 }

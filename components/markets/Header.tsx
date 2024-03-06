@@ -73,11 +73,12 @@ const MarketsHeader: FC = () => {
       value: totalBorrowed ? `$${formatNumber(formatUnits(totalBorrowed, 18))}` : undefined,
     },
     {
-      label: t('Total Available'),
+      label: t('Available for Withdrawal'),
       value: totalAvailable ? `$${formatNumber(formatUnits(totalAvailable, 18))}` : undefined,
+      sx: { textAlign: 'center' },
     },
     {
-      label: t('Total Utilization'),
+      label: t('Global Utilization'),
       value:
         totalBorrowed && totalDeposited
           ? toPercentage(Number((totalBorrowed * WEI_PER_ETHER) / totalDeposited) / 1e18)

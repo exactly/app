@@ -4,6 +4,7 @@ import Typography from '@mui/material/Typography';
 import ItemInfo, { ItemInfoProps } from './ItemInfo';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
+import { BoxProps } from '@mui/material';
 type HeaderInfoProps = {
   title?: ReactNode;
   itemsInfo: ItemInfoProps[];
@@ -26,6 +27,7 @@ type HeaderInfoProps = {
   shadow?: boolean;
   transparent?: boolean;
   xs?: number;
+  sx?: BoxProps['sx'];
 };
 
 const HeaderInfo: FC<HeaderInfoProps> = ({
@@ -51,7 +53,7 @@ const HeaderInfo: FC<HeaderInfoProps> = ({
         </Grid>
       )}
       <Grid item container spacing={isMobile ? 2 : xs ? 1 : 4}>
-        {itemsInfo.map(({ label, value, underLabel, tooltipTitle }) => (
+        {itemsInfo.map(({ label, value, underLabel, tooltipTitle, sx }) => (
           <ItemInfo
             key={label.trim()}
             label={label}
@@ -59,6 +61,7 @@ const HeaderInfo: FC<HeaderInfoProps> = ({
             underLabel={underLabel}
             tooltipTitle={tooltipTitle}
             xs={xs}
+            sx={sx}
           />
         ))}
       </Grid>
