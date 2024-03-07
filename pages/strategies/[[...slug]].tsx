@@ -1,4 +1,4 @@
-import React, { useMemo, Fragment } from 'react';
+import React, { useMemo, Fragment, useEffect } from 'react';
 import type { NextPage } from 'next';
 import { Box, Button, Divider, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
@@ -21,15 +21,27 @@ import { useVELOPoolAPR } from 'hooks/useVELO';
 import { useExtraDepositAPR } from 'hooks/useExtra';
 import { useWeb3 } from 'hooks/useWeb3';
 import FeaturedStrategies from 'components/strategies/FeaturedStrategies';
-import { useModal } from '../contexts/ModalContext';
+import { useModal } from 'contexts/ModalContext';
 import { track } from 'utils/mixpanel';
 
 const Strategies: NextPage = () => {
   const { t } = useTranslation();
-  const { query } = useRouter();
+  const { query, push } = useRouter();
   const { startLeverager } = useStartLeverager();
   const { startDebtManager } = useStartDebtManagerButton();
-  const { open: openGetEXA } = useModal('get-exa');
+  const { open: openGetEXA, close: closeGetEXA } = useModal('get-exa');
+  const isGetEXAPath = query.slug?.[0] === 'get-exa';
+
+  useEffect(
+    function pushRouteChange() {
+      if (isGetEXAPath) {
+        openGetEXA();
+        return;
+      }
+      closeGetEXA();
+    },
+    [closeGetEXA, isGetEXAPath, openGetEXA],
+  );
 
   const { chain } = useWeb3();
 
@@ -304,6 +316,7 @@ const Strategies: NextPage = () => {
               variant="contained"
               onClick={() => {
                 openGetEXA();
+                push('/strategies/get-exa', undefined, { shallow: true });
                 track('Button Clicked', {
                   location: 'Strategies',
                   name: 'get exa',

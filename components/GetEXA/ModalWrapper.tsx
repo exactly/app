@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 
 import Link from 'next/link';
 import CloseIcon from '@mui/icons-material/Close';
@@ -9,15 +9,23 @@ import GetEXA from '.';
 import { useModal } from '../../contexts/ModalContext';
 import { GetEXAProvider } from 'contexts/GetEXAContext';
 import { track } from 'utils/mixpanel';
+import { useRouter } from 'next/router';
 
 export default function ModalWrapper() {
   const { isOpen, close } = useModal('get-exa');
   const { t } = useTranslation();
+  const { push } = useRouter();
+
+  const handleClose = useCallback(() => {
+    close();
+    push('/strategies', undefined, { shallow: true });
+  }, [close, push]);
+
   if (!isOpen) return null;
   return (
     <Drawer
       open={isOpen}
-      onClose={close}
+      onClose={handleClose}
       SlideProps={{
         appear: true,
         direction: 'right',
@@ -28,7 +36,7 @@ export default function ModalWrapper() {
         },
       }}
     >
-      <IconButton onClick={close} sx={{ position: 'absolute', right: 8, top: 8 }}>
+      <IconButton onClick={handleClose} sx={{ position: 'absolute', right: 8, top: 8 }}>
         <CloseIcon />
       </IconButton>
       <Box maxWidth={576} paddingX={6} paddingY={7}>
