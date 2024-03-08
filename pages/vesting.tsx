@@ -410,7 +410,7 @@ const Vesting: NextPage = () => {
               <Grid container spacing={2}>
                 <Grid item xs={12} sm={4} display="flex" flexDirection="column" alignItems="center" gap={0.5}>
                   <Typography fontSize={14} fontWeight={700}>
-                    {t('Total esEXA Vested')}
+                    {t('Total esEXA Vesting')}
                   </Typography>
                   <Box display="flex" flexDirection={isMobile ? 'row' : 'column'} alignItems="center" gap={2.5}>
                     <Box display="flex" gap={0.5}>
