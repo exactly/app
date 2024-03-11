@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { Box, SxProps, Typography } from '@mui/material';
 import InfoIcon from '@mui/icons-material/InfoRounded';
 import WarningIcon from '@mui/icons-material/ErrorRounded';
@@ -11,7 +11,7 @@ type Variant = 'info' | 'warning' | 'error' | 'success';
 
 type Props = {
   variant?: Variant;
-  message: string;
+  message: ReactNode;
   mb?: number;
 };
 
