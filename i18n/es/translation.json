@@ -617,5 +617,17 @@
   "Term Structure of Interest Rates": "Estructura de Plazos de Tasas de Interés",
   "Rate": "Tasa",
   "Min": "Mín",
-  "Variable APR, Utilization and Global Utilization": "TNA Variable, Utilización y Utilización Global"
+  "Variable APR, Utilization and Global Utilization": "TNA Variable, Utilización y Utilización Global",
+  "The Total Utilization is above 90%, and the remaining liquidity is established as a Liquidity Reserve that can't be borrowed and is only available for withdrawals.": "La Utilización Total está por encima del 90%, y la liquidez restante se establece como una Reserva de Liquidez que no se puede pedir prestada y solo está disponible para retiros.",
+  "New!": "Nuevo!",
+  "Installments": "Cuotas",
+  "Each installment is due every {{interval}} days.": "Cada cuota vence cada {{interval}} días.",
+  "Payment schedule": "Calendario de pagos",
+  "First Payment Due Date": "Fecha de Vencimiento del Primer Pago",
+  "at {{hour}}": "a las {{hour}}",
+  "Dues in 1 day.": "Vence en 1 día.",
+  "Dues in {{daysToMaturity}} days.": "Vence en {{daysToMaturity}} días.",
+  "For optimal benefits, consider selecting a pool with a longer remaining duration.": "Para obtener beneficios óptimos, considera seleccionar un pool con una duración restante más larga.",
+  "Total": "Total",
+  " In {{installments}} installments": "En {{installments}} cuotas"
 }

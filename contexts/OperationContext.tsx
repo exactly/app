@@ -7,6 +7,7 @@ import React, {
   useCallback,
   useEffect,
   useMemo,
+  SetStateAction,
 } from 'react';
 import { Address, parseUnits } from 'viem';
 
@@ -23,6 +24,7 @@ import { Transaction } from 'types/Transaction';
 import numbers from 'config/numbers.json';
 import type { Operation } from 'types/Operation';
 import { Args } from './ModalContext';
+import useInstallmentsData from '../hooks/useInstallmentsData';
 
 type LoadingButton = { withCircularProgress?: boolean; label?: string };
 
@@ -66,6 +68,12 @@ type ContextValues = {
 
   receiver?: Address;
   setReceiver: React.Dispatch<React.SetStateAction<Address | undefined>>;
+
+  installments: number;
+  onInstallmentsChange: (installments: number) => void;
+
+  installmentsOptions: ReturnType<typeof useInstallmentsData>['installmentsOptions'];
+  installmentsDetails: ReturnType<typeof useInstallmentsData>['installmentsDetails'];
 };
 
 const OperationContext = createContext<ContextValues | null>(null);
@@ -102,6 +110,7 @@ export const OperationContextProvider: FC<PropsWithChildren<Props>> = ({ args, c
   const [requiresApproval, setRequiresApproval] = useState(false);
   const [rawSlippage, setRawSlippage] = useState(DEFAULT_SLIPPAGE);
   const [receiver, setReceiver] = useState<Address>();
+  const [installments, setInstallments] = useState<number>(1);
 
   const slippage = useMemo(() => {
     return ['deposit', 'depositAtMaturity', 'withdraw', 'withdrawAtMaturity'].includes(operation)
@@ -112,6 +121,25 @@ export const OperationContextProvider: FC<PropsWithChildren<Props>> = ({ args, c
   const assetContract = useERC20(marketAccount?.asset);
   const marketContract = useMarket(marketAccount?.market);
   const ETHRouterContract = useETHRouter();
+  const { installmentsOptions, installmentsDetails } = useInstallmentsData({
+    qty,
+    date,
+    symbol: marketSymbol,
+    installments,
+  });
+  const handleInstallmentsChange = useCallback(
+    (installments_: number) => {
+      setInstallments(installments_);
+      if (!installmentsOptions) return;
+      setDate(installmentsOptions[installments_ - 1].startingDate);
+    },
+    [installmentsOptions],
+  );
+
+  const handleDateChange = useCallback((date_: SetStateAction<bigint | undefined>) => {
+    setDate(date_);
+    setInstallments(1);
+  }, []);
 
   const value: ContextValues = {
     operation,
@@ -134,7 +162,7 @@ export const OperationContextProvider: FC<PropsWithChildren<Props>> = ({ args, c
 
     date,
     dates,
-    setDate,
+    setDate: handleDateChange,
 
     assetContract,
     marketContract,
@@ -150,6 +178,10 @@ export const OperationContextProvider: FC<PropsWithChildren<Props>> = ({ args, c
     setErrorButton,
     receiver,
     setReceiver,
+    installments,
+    onInstallmentsChange: handleInstallmentsChange,
+    installmentsOptions,
+    installmentsDetails,
   };
 
   return <OperationContext.Provider value={value}>{children}</OperationContext.Provider>;
