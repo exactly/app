@@ -20,7 +20,7 @@ type Props = {
 function ModalGif({ tx, tryAgain }: Props) {
   const { t } = useTranslation();
   const translateOperation = useTranslateOperation();
-  const { operation, symbol, qty, date } = useOperationContext();
+  const { operation, symbol, qty, date, installments } = useOperationContext();
 
   const isLoading = useMemo(() => tx.status === 'processing' || tx.status === 'loading', [tx]);
   const isSuccess = useMemo(() => tx.status === 'success', [tx]);
@@ -78,7 +78,14 @@ function ModalGif({ tx, tryAgain }: Props) {
                 pastAction: translateOperation(operation, { variant: 'past' }),
                 qty,
                 symbol: formatSymbol(symbol),
-              }) + (reminder && date ? t(' until {{daysLeft}}', { daysLeft: parseTimestamp(date) }) : '')}
+              }) +
+                (reminder && date
+                  ? installments > 1
+                    ? t(' In {{installments}} installments', {
+                        installments,
+                      })
+                    : t(' until {{daysLeft}}', { daysLeft: parseTimestamp(date) })
+                  : '')}
             {isError && t('Something went wrong')}
           </Typography>
           <Box display="flex" flexDirection="column" alignItems="center" gap="8px" pt={1}>

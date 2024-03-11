@@ -1,20 +1,16 @@
-import React, { FC, PropsWithChildren, useEffect } from 'react';
-
+import React, { FC, PropsWithChildren, useCallback, useEffect, useRef, useState } from 'react';
 import ModalTxCost from 'components/OperationsModal/ModalTxCost';
 import ModalGif from 'components/OperationsModal/ModalGif';
-
 import { toPercentage } from 'utils/utils';
-
 import { useOperationContext, usePreviewTx } from 'contexts/OperationContext';
 import { Grid } from '@mui/material';
 import { ModalBox, ModalBoxCell, ModalBoxRow } from 'components/common/modal/ModalBox';
 import AssetInput from 'components/OperationsModal/AssetInput';
-import DateSelector from 'components/OperationsModal/DateSelector';
+import BorrowDateSelector from 'components/OperationsModal/BorrowDateSelector';
 import ModalInfoAPR from 'components/OperationsModal/Info/ModalInfoAPR';
 import ModalInfoHealthFactor from 'components/OperationsModal/Info/ModalInfoHealthFactor';
 import ModalInfoFixedUtilizationRate from 'components/OperationsModal/Info/ModalInfoFixedUtilizationRate';
 import ModalAdvancedSettings from 'components/common/modal/ModalAdvancedSettings';
-import ModalInfoBorrowLimit from 'components/OperationsModal/Info/ModalInfoBorrowLimit';
 import ModalInfoEditableSlippage from 'components/OperationsModal/Info/ModalInfoEditableSlippage';
 import ModalAlert from 'components/common/modal/ModalAlert';
 import ModalSubmit from 'components/OperationsModal/ModalSubmit';
@@ -24,16 +20,20 @@ import ModalRewards from 'components/OperationsModal/ModalRewards';
 import ModalPenaltyRate from 'components/OperationsModal/ModalPenaltyRate';
 import { useTranslation } from 'react-i18next';
 import useTranslateOperation from 'hooks/useTranslateOperation';
+import ModalSheet from 'components/common/modal/ModalSheet';
+import useBorrowInInstallments from 'hooks/useBorrowInInstallments';
+import InstallmentsBreakdown from './InstallmentsBreakdown';
+import Installments from './Installments';
 
 const BorrowAtMaturity: FC<PropsWithChildren> = ({ children }) => {
   const { t } = useTranslation();
   const translateOperation = useTranslateOperation();
-  const { symbol, errorData, setErrorData, qty, gasCost, tx } = useOperationContext();
+  const { symbol, errorData, setErrorData, qty, gasCost, tx, installments } = useOperationContext();
   const {
-    isLoading,
+    isLoading: borrowAtMaturityLoading,
     onMax,
     handleInputChange,
-    handleSubmitAction,
+    handleSubmitAction: borrowAtMaturity,
     borrow,
     updateAPR,
     rawSlippage,
@@ -44,7 +44,14 @@ const BorrowAtMaturity: FC<PropsWithChildren> = ({ children }) => {
     needsApproval,
     previewGasCost,
   } = useBorrowAtMaturity();
+
+  const { handleSubmitAction: borrowInInstallments, isLoading: borrowInInstallmentsLoading } =
+    useBorrowInInstallments();
+
   const { marketAccount } = useAccountData(symbol);
+  const container = useRef<HTMLDivElement>(null);
+  const breakdownSheetRef = useRef<HTMLDivElement>(null);
+  const [breakdownSheetOpen, setBreakdownSheetOpen] = useState(false);
 
   useEffect(() => void updateAPR(), [updateAPR]);
   useEffect(() => {
@@ -60,11 +67,20 @@ const BorrowAtMaturity: FC<PropsWithChildren> = ({ children }) => {
   }, [hasCollateral, setErrorData, t]);
 
   const { isLoading: previewIsLoading } = usePreviewTx({ qty, needsApproval, previewGasCost });
+  const handleBreakdownSheetClose = useCallback(() => {
+    setBreakdownSheetOpen(false);
+  }, []);
+  const loading = installments > 1 ? borrowInInstallmentsLoading : borrowAtMaturityLoading || previewIsLoading;
 
   if (tx) return <ModalGif tx={tx} tryAgain={borrow} />;
 
   return (
-    <Grid container flexDirection="column">
+    <Grid
+      container
+      ref={container}
+      flexDirection="column"
+      height={breakdownSheetOpen ? breakdownSheetRef.current?.clientHeight : 'auto'}
+    >
       <Grid item>
         <ModalBox>
           <ModalBoxRow>
@@ -80,19 +96,17 @@ const BorrowAtMaturity: FC<PropsWithChildren> = ({ children }) => {
             />
           </ModalBoxRow>
           <ModalBoxRow>
-            <ModalBoxCell>
-              <DateSelector />
-            </ModalBoxCell>
-            <ModalBoxCell>
-              <ModalInfoAPR apr={toPercentage(Number(fixedRate) / 1e18)} symbol={symbol} />
-            </ModalBoxCell>
+            <Installments setBreakdownSheetOpen={setBreakdownSheetOpen} />
+          </ModalBoxRow>
+          <ModalBoxRow>
+            <BorrowDateSelector />
           </ModalBoxRow>
           <ModalBoxRow>
             <ModalBoxCell>
               <ModalInfoHealthFactor qty={qty} symbol={symbol} operation="borrowAtMaturity" />
             </ModalBoxCell>
             <ModalBoxCell divisor>
-              <ModalInfoBorrowLimit qty={qty} symbol={symbol} operation="borrowAtMaturity" />
+              <ModalInfoAPR withIcon apr={toPercentage(Number(fixedRate) / 1e18)} symbol={symbol} />
             </ModalBoxCell>
           </ModalBoxRow>
         </ModalBox>
@@ -119,11 +133,20 @@ const BorrowAtMaturity: FC<PropsWithChildren> = ({ children }) => {
         <ModalSubmit
           label={translateOperation('borrowAtMaturity', { capitalize: true })}
           symbol={symbol === 'WETH' && marketAccount ? marketAccount.symbol : symbol}
-          submit={handleSubmitAction}
-          isLoading={isLoading || previewIsLoading}
-          disabled={!qty || parseFloat(qty) <= 0 || isLoading || previewIsLoading || errorData?.status}
+          submit={installments > 1 ? borrowInInstallments : borrowAtMaturity}
+          isLoading={loading}
+          disabled={!qty || parseFloat(qty) <= 0 || loading || previewIsLoading || errorData?.status}
         />
       </Grid>
+      <ModalSheet
+        container={container.current}
+        ref={breakdownSheetRef}
+        open={breakdownSheetOpen}
+        title={t('Payment schedule')}
+        onClose={handleBreakdownSheetClose}
+      >
+        <InstallmentsBreakdown onClose={handleBreakdownSheetClose} />
+      </ModalSheet>
     </Grid>
   );
 };
