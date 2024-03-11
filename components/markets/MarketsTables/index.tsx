@@ -199,10 +199,10 @@ const MarketTables: FC = () => {
             bestFixedBorrow.rate < Number(formatEther(floatingBorrowRate))
               ? { maturity: bestFixedBorrow.maturity, rate: bestFixedBorrow.rate }
               : { maturity: 0n, rate: Number(formatEther(floatingBorrowRate)) };
-
           const [first, second] = [...fixedPools].sort((a, b) => Number(a.maturity) - Number(b.maturity));
           const now = BigInt(Math.round(Date.now() / 1000));
           const upcomingMaturity = first.maturity - now < WEEK ? second.maturity : first.maturity;
+
           tempRows.push({
             symbol,
             totalDeposited: formatNumber(formatUnits((totalDeposited * usdPrice) / WAD, decimals)),

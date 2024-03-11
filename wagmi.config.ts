@@ -21,10 +21,10 @@ import InterestRateModel from '@exactly/protocol/deployments/op-sepolia/Interest
 import ExtraFinanceLendingABI from './abi/extraFinanceLending.json' assert { type: 'json' };
 import DelegateRegistryABI from './abi/DelegateRegistry.json' assert { type: 'json' };
 import GasPriceOracle from './abi/GasPriceOracle.json' assert { type: 'json' };
-
 import EscrowedEXA from '@exactly/protocol/deployments/optimism/esEXA.json' assert { type: 'json' };
 import SablierV2LockupLinear from '@exactly/protocol/deployments/optimism/SablierV2LockupLinear.json' assert { type: 'json' };
 import SablierV2NFTDescriptor from '@exactly/protocol/deployments/optimism/SablierV2NFTDescriptor.json' assert { type: 'json' };
+import InstallmentsRouter from '@exactly/protocol/deployments/op-sepolia/InstallmentsRouter.json' assert { type: 'json' };
 
 import { Abi } from 'viem';
 
@@ -54,6 +54,7 @@ export default defineConfig({
     { name: 'DelegateRegistry', abi: DelegateRegistryABI as Abi },
     { name: 'EscrowedEXA', abi: EscrowedEXA.abi as Abi },
     { name: 'L1GasPriceOracle', abi: GasPriceOracle as Abi },
+    { name: 'InstallmentsRouter', abi: InstallmentsRouter.abi as Abi },
   ],
   plugins: [
     react({
