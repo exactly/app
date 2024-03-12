@@ -1,10 +1,16 @@
-import React, { createContext, useContext, useState, useMemo, useCallback } from 'react';
+import React, { createContext, useContext, useState, useMemo, useCallback, useEffect } from 'react';
 import type { FC, PropsWithChildren } from 'react';
 
 import type { Operation } from 'types/Operation';
 import type { Position } from 'components/DebtManager/types';
+import { useRouter } from 'next/router';
 
-type Identifier = 'operation' | 'rewards' | 'rollover' | 'leverager' | 'proto-staker' | 'faucet' | 'get-exa';
+const IDENTIFIERS = ['operation', 'rewards', 'rollover', 'leverager', 'proto-staker', 'faucet', 'get-exa'] as const;
+type Identifier = (typeof IDENTIFIERS)[number];
+
+function isModalIdentifier(value: string): value is Identifier {
+  return IDENTIFIERS.includes(value as Identifier);
+}
 
 export type Args<T extends Identifier> = T extends 'operation'
   ? { operation: Operation; symbol: string; maturity?: bigint }
@@ -26,15 +32,33 @@ const ModalContext = createContext<Value | null>(null);
 export const ModalContextProvider: FC<PropsWithChildren> = ({ children }) => {
   const [current, setCurrent] = useState<Identifier>();
   const [args, setArgs] = useState<Args<Identifier>>();
-  const open = useCallback((identifier: Identifier, _args: Args<Identifier>) => {
-    setArgs(_args);
-    setCurrent(identifier);
-  }, []);
+  const router = useRouter();
+  const open = useCallback(
+    (identifier: Identifier, _args: Args<Identifier>) => {
+      setArgs(_args);
+      setCurrent(identifier);
+      router.replace({
+        pathname: router.pathname,
+        query: { ...router.query, [identifier]: null },
+      });
+    },
+    [router],
+  );
 
   const close = useCallback(() => {
     setArgs(undefined);
     setCurrent(undefined);
-  }, []);
+    if (!current) return;
+    const { query } = router;
+    const { [current]: _, ...rest } = query;
+    router.push({ pathname: router.pathname, query: rest }, undefined, { shallow: true });
+  }, [current, router]);
+
+  useEffect(() => {
+    const [modal] = Object.keys(router.query);
+    if (!isModalIdentifier(modal)) return;
+    setCurrent(modal);
+  }, [router.query]);
 
   const value: Value = {
     current,
