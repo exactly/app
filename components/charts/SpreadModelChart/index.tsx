@@ -64,7 +64,7 @@ const SpreadModel: FC<Props> = ({ symbol }) => {
               ticks={ticks}
               allowDataOverflow
               tick={{ fill: palette.grey[500], fontWeight: 500, fontSize: 11 }}
-              padding={{ right: 10 }}
+              padding={{ right: 16, left: 16 }}
               fontSize="12px"
               height={20}
             />
