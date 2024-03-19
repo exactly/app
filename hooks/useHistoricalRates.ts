@@ -14,7 +14,7 @@ type HistoricalRateData = {
 };
 
 // This is the maximum number of data points we can get from the subgraph
-const MAX_COUNT = 24;
+const MAX_COUNT = 20;
 const emptyBatch: Awaited<ReturnType<typeof queryRates>> = [];
 
 export default function useHistoricalRates(symbol: string, initialCount = 30, initialInterval = 3_600 * 6) {
