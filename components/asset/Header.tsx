@@ -151,6 +151,11 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
     [push, query, symbol],
   );
 
+  const borrowableUtilization = useMemo(() => {
+    if (!marketAccount) return;
+    return Number(WEI_PER_ETHER - marketAccount.reserveFactor) / 1e18;
+  }, [marketAccount]);
+
   return (
     <>
       <Grid
@@ -194,11 +199,14 @@ const AssetHeaderInfo: FC<Props> = ({ symbol }) => {
           ))}
         </Grid>
       </Grid>
-      {totalUtilization && totalUtilization > 0.9 && (
+      {totalUtilization && borrowableUtilization && totalUtilization > borrowableUtilization && (
         <Alert sx={{ width: '100%' }} severity="info">
           <Typography variant="body2">
             {t(
-              "The Global Utilization is above 90%, and the remaining liquidity is established as a Liquidity Reserve that can't be borrowed and is only available for withdrawals.",
+              "The Global Utilization is above {{borrowableUtilization}}, and the remaining liquidity is established as a Liquidity Reserve that can't be borrowed and is only available for withdrawals.",
+              {
+                borrowableUtilization: toPercentage(borrowableUtilization, 0),
+              },
             )}
           </Typography>
           <Typography variant="body2">
