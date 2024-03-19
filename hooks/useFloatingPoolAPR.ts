@@ -32,7 +32,7 @@ export default (
   const { setIndexerError } = useGlobalError();
 
   const borrowAPR = useMemo((): number | undefined => {
-    if (!marketAccount || !irm) {
+    if (!marketAccount || !irm || operation === 'deposit') {
       return undefined;
     }
 
@@ -47,7 +47,7 @@ export default (
     const uG = globalUtilization(totalFloatingDepositAssets, debt, floatingBackupBorrowed);
 
     return Number(curve(uF, uG)) / 1e18;
-  }, [marketAccount, irm, qty]);
+  }, [marketAccount, irm, operation, qty]);
 
   const fetchAPRs = useCallback(
     async (cancelled: () => boolean) => {
