@@ -32,7 +32,7 @@ export function floatingInterestRateCurve(parameters: FloatingParameters): Float
     const { A, B, maxUtilization, naturalUtilization, sigmoidSpeed, growthSpeed, maxRate } = parameters;
 
     const r = (A * WAD) / (maxUtilization - uF) + B;
-    if (uG === WAD) return maxRate;
+    if (uG >= WAD) return maxRate;
     if (uG === 0n) return r;
 
     if (uG >= uF) {
