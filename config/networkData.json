@@ -16,7 +16,7 @@
   "10": {
     "etherscan": "https://optimistic.etherscan.io",
     "subgraph": {
-      "exactly": "https://api.thegraph.com/subgraphs/name/jgalat/eeeeeeee",
+      "exactly": "https://api.thegraph.com/subgraphs/name/exactly/optimism",
       "sablier": "https://api.thegraph.com/subgraphs/name/sablier-labs/sablier-v2-optimism"
     }
   }
