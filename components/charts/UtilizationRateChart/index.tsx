@@ -43,7 +43,8 @@ function UtilizationRateChart({ type, symbol }: Props) {
       backupBorrows !== undefined &&
       floatingBorrows !== undefined &&
       floatingDeposits !== undefined &&
-      fixedDeposits !== undefined
+      fixedDeposits !== undefined &&
+      floatingDeposits + fixedDeposits > 0n
         ? Number(((floatingBorrows + backupBorrows) * WEI_PER_ETHER) / (floatingDeposits + fixedDeposits)) / 1e18
         : 0;
 
