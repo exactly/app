@@ -17,6 +17,8 @@ import Navbar from 'components/Navbar';
 import { globals } from 'styles/theme';
 import { GlobalErrorProvider } from 'contexts/GlobalErrorContext';
 import { usePageTracking } from 'hooks/usePageTracking';
+import dayjs from 'dayjs';
+import isToday from 'dayjs/plugin/isToday';
 
 import { ModalContextProvider } from 'contexts/ModalContext';
 import OperationsModal from 'components/OperationsModal';
@@ -29,6 +31,7 @@ import GetEXAModal from 'components/GetEXA/ModalWrapper';
 import MaturityDateReminder from '../components/MaturityDateReminder';
 import NewIRMBanner from '../components/NewIRMBanner';
 
+dayjs.extend(isToday);
 const { maxWidth } = globals;
 
 const Modals = () => (

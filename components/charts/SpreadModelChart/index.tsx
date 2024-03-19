@@ -1,16 +1,7 @@
 import React, { FC, Fragment, useMemo } from 'react';
 import { Box, Typography, useTheme } from '@mui/material';
-import {
-  ResponsiveContainer,
-  XAxis,
-  Tooltip,
-  ComposedChart,
-  Area,
-  CartesianGrid,
-  YAxis,
-  Line,
-  ReferenceLine,
-} from 'recharts';
+import { ResponsiveContainer, XAxis, Tooltip, ComposedChart, Area, CartesianGrid, YAxis, Line } from 'recharts';
+import dayjs from 'dayjs';
 
 import parseTimestamp from 'utils/parseTimestamp';
 import { toPercentage } from 'utils/utils';
@@ -18,20 +9,18 @@ import LoadingChart from '../LoadingChart';
 import { type Entry } from '../TooltipChart';
 import { useTranslation } from 'react-i18next';
 import useSpreadModel from 'hooks/useSpreadModel';
-import useFloatingPoolAPR from 'hooks/useFloatingPoolAPR';
 
 type Props = {
   symbol: string;
 };
 
-const formatTimestampLabel = (value: string | number) => parseTimestamp(value, 'MMM DD');
-const formatTimestamp = (value: string | number) => parseTimestamp(value);
+const formatTimestampLabel = (value: number) => (dayjs.unix(value).isToday() ? 'Now' : parseTimestamp(value, 'MMM DD'));
+const formatTimestamp = (value: number) => (dayjs.unix(value).isToday() ? 'Now' : parseTimestamp(value));
 const formatPercentage = (value: number) => toPercentage(value as number);
 
 const SpreadModel: FC<Props> = ({ symbol }) => {
   const { t } = useTranslation();
   const { palette } = useTheme();
-  const { borrowAPR } = useFloatingPoolAPR(symbol);
 
   const { data, levels, loading } = useSpreadModel(symbol);
   const highlights = useMemo(() => data.filter(({ highlight }) => highlight), [data]);
@@ -81,11 +70,7 @@ const SpreadModel: FC<Props> = ({ symbol }) => {
               interval={0}
               tickCount={7}
             />
-            <Tooltip
-              content={
-                <CustomTooltip highlights={highlights} highlightColor={palette.colors[0]} variableRate={borrowAPR} />
-              }
-            />
+            <Tooltip content={<CustomTooltip highlights={highlights} highlightColor={palette.colors[0]} />} />
             <CartesianGrid stroke={palette.grey[300]} vertical={false} />
             {[...Array(levels)].map((_, i) => {
               const factor = i / (levels - 1);
@@ -117,13 +102,6 @@ const SpreadModel: FC<Props> = ({ symbol }) => {
               dot={{ r: 5, fill: palette.background.paper, strokeDasharray: '0' }}
               isAnimationActive={false}
             />
-            <ReferenceLine
-              xAxisId="xaxis"
-              yAxisId="yaxis"
-              y={borrowAPR}
-              stroke={palette.text.primary}
-              strokeDasharray="5 5"
-            />
           </ComposedChart>
         )}
       </ResponsiveContainer>
@@ -135,16 +113,14 @@ const CustomTooltip = ({
   payload,
   highlights,
   highlightColor,
-  variableRate,
 }: {
   payload?: (Omit<Entry, 'value'> & { value: number | number[]; payload: Record<string, number | number[]> })[];
   highlights: Record<string, number | number[]>[];
   highlightColor: string;
-  variableRate: number | undefined;
 }) => {
   const { t } = useTranslation();
   const highlight = useMemo(() => {
-    const mid = payload?.find((p) => p.dataKey === 'area0')?.payload;
+    const mid = payload?.find((p) => p.dataKey === 'rate')?.payload;
     if (!mid) return undefined;
     const date = mid.date;
     if (Array.isArray(date)) return undefined;
@@ -155,9 +131,8 @@ const CustomTooltip = ({
     });
     return entry;
   }, [highlights, payload]);
-  const { palette } = useTheme();
 
-  const date = highlight?.date && !Array.isArray(highlight.date) ? formatTimestamp(highlight.date) : undefined;
+  const date = highlight?.date && !Array.isArray(highlight.date) ? t(formatTimestamp(highlight.date)) : undefined;
   const rate = highlight?.rate && !Array.isArray(highlight.rate) ? toPercentage(highlight.rate) : undefined;
 
   return rate ? (
@@ -181,6 +156,7 @@ const CustomTooltip = ({
       )}
       {(payload || []).map(({ dataKey, value }) => {
         if (dataKey !== 'area0' || !rate) return null;
+        if (Array.isArray(value) && value[0] === value[1]) return null;
         return (
           <Fragment key={dataKey}>
             <Typography variant="h6" fontSize="12px">
@@ -188,9 +164,6 @@ const CustomTooltip = ({
             </Typography>
             <Typography variant="h6" fontSize="12px">
               {t('Max')}: {Array.isArray(value) ? toPercentage(value[1]) : value}
-            </Typography>
-            <Typography variant="h6" fontSize="12px" color={palette.green}>
-              {t('Variable Rate')}: {toPercentage(variableRate)}
             </Typography>
           </Fragment>
         );

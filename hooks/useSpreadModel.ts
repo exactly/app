@@ -5,6 +5,7 @@ import useAccountData from './useAccountData';
 import {
   fixedRate,
   fixedUtilization,
+  floatingInterestRateCurve,
   floatingUtilization,
   globalUtilization,
   spreadModel,
@@ -76,6 +77,11 @@ export default function useSpreadModel(symbol: string) {
 
         extend.z = Number(z) / 1e18;
         extend.rate = Number(rate) / 1e18;
+        extend.highlight = 1;
+      }
+
+      if (m === now) {
+        extend.rate = Number(floatingInterestRateCurve(irm)(currentUFloating, currentUGlobal)) / 1e18;
         extend.highlight = 1;
       }
 
