@@ -1,10 +1,12 @@
 import { useCallback, useMemo, useState } from 'react';
 import { parseUnits } from 'viem';
 import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
+import floatingRate from '@exactly/lib/esm/interest-rate-model/floatingRate';
+import floatingUtilization from '@exactly/lib/esm/interest-rate-model/floatingUtilization';
+import globalUtilization from '@exactly/lib/esm/interest-rate-model/globalUtilization';
 
 import networkData from 'config/networkData.json' assert { type: 'json' };
 import type { Operation } from 'types/Operation';
-import { floatingInterestRateCurve, globalUtilization, floatingUtilization } from 'utils/interestRateCurve';
 import queryRates from 'utils/queryRates';
 import useAccountData from './useAccountData';
 import useDelayedEffect from './useDelayedEffect';
@@ -42,12 +44,15 @@ export default (
 
     const debt = totalFloatingBorrowAssets + delta;
 
-    const curve = floatingInterestRateCurve(irm);
-
-    const uF = floatingUtilization(totalFloatingDepositAssets, debt);
-    const uG = globalUtilization(totalFloatingDepositAssets, debt, floatingBackupBorrowed);
-
-    return Number(curve(uF, uG)) / 1e18;
+    return (
+      Number(
+        floatingRate(
+          floatingUtilization(totalFloatingDepositAssets, debt),
+          globalUtilization(totalFloatingDepositAssets, debt, floatingBackupBorrowed),
+          irm,
+        ),
+      ) / 1e18
+    );
   }, [marketAccount, irm, operation, qty]);
 
   const fetchAPRs = useCallback(

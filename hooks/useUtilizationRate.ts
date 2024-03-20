@@ -1,8 +1,8 @@
 import { useMemo } from 'react';
 import { parseEther } from 'viem';
+import floatingRate from '@exactly/lib/esm/interest-rate-model/floatingRate';
 
 import useAccountData from './useAccountData';
-import { floatingUtilization, floatingInterestRateCurve } from 'utils/interestRateCurve';
 import useIRM from './useIRM';
 
 export const MAX = 10n ** 18n;
@@ -15,7 +15,7 @@ export function useCurrentUtilizationRate(type: 'floating' | 'fixed', symbol: st
     if (!marketAccount) return undefined;
 
     const { floatingUtilization: utilization, fixedPools } = marketAccount;
-    if (!floatingUtilization || fixedPools === undefined) {
+    if (!utilization || fixedPools === undefined) {
       return undefined;
     }
 
@@ -42,8 +42,6 @@ export default function useUtilizationRate(symbol: string, from = 0n, to = MAX, 
       return;
     }
 
-    const curve = floatingInterestRateCurve(irm);
-
     const utilizations: bigint[] = [];
     const globalUtilizations: bigint[] = [];
 
@@ -61,7 +59,7 @@ export default function useUtilizationRate(symbol: string, from = 0n, to = MAX, 
           row.push(NaN);
           continue;
         }
-        row.push(curve(utilization, globalUtilization));
+        row.push(floatingRate(utilization, globalUtilization, irm));
       }
       z.push(row);
     }

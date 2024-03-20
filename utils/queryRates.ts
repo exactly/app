@@ -1,13 +1,14 @@
 import request from 'graphql-request';
 import { formatUnits } from 'viem';
-import { floatingInterestRateCurve, floatingUtilization, globalUtilization } from './interestRateCurve';
-
-export const WAD = 1000000000000000000n;
+import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
+import floatingRate from '@exactly/lib/esm/interest-rate-model/floatingRate';
+import floatingUtilization from '@exactly/lib/esm/interest-rate-model/floatingUtilization';
+import globalUtilization from '@exactly/lib/esm/interest-rate-model/globalUtilization';
 
 const FIXED_INTERVAL = 86_400 * 7 * 4;
 
 // Old model
-const floatingRate = (interestRateModel: InterestRateModel, utilization: bigint) => {
+const floatingRateLegacy = (interestRateModel: InterestRateModel, utilization: bigint) => {
   const curveA = BigInt(interestRateModel.floatingCurveA);
   const curveB = BigInt(interestRateModel.floatingCurveB);
   const maxUtilization = BigInt(interestRateModel.floatingMaxUtilization);
@@ -22,24 +23,22 @@ const totalFloatingBorrowAssets = (
 ) => {
   const utilization = floatingUtilization(BigInt(floatingAssets), BigInt(floatingDebt));
 
-  let borrowRate: bigint;
-  if (BigInt(irm.naturalUtilization) === 0n) {
-    borrowRate = floatingRate(irm, utilization);
-  } else {
-    const interestRateCurve = floatingInterestRateCurve({
-      A: BigInt(irm.floatingCurveA),
-      B: BigInt(irm.floatingCurveB),
-      maxUtilization: BigInt(irm.floatingMaxUtilization),
-      naturalUtilization: BigInt(irm.naturalUtilization),
-      sigmoidSpeed: BigInt(irm.sigmoidSpeed),
-      growthSpeed: BigInt(irm.growthSpeed),
-      maxRate: BigInt(irm.maxRate),
-    });
-    borrowRate = interestRateCurve(
-      utilization,
-      globalUtilization(BigInt(floatingAssets), BigInt(floatingDebt), BigInt(floatingBackupBorrowed)),
-    );
-  }
+  const borrowRate =
+    BigInt(irm.naturalUtilization) === 0n
+      ? floatingRateLegacy(irm, utilization)
+      : floatingRate(
+          utilization,
+          globalUtilization(BigInt(floatingAssets), BigInt(floatingDebt), BigInt(floatingBackupBorrowed)),
+          {
+            curveA: BigInt(irm.floatingCurveA),
+            curveB: BigInt(irm.floatingCurveB),
+            maxUtilization: BigInt(irm.floatingMaxUtilization),
+            naturalUtilization: BigInt(irm.naturalUtilization),
+            sigmoidSpeed: BigInt(irm.sigmoidSpeed),
+            growthSpeed: BigInt(irm.growthSpeed),
+            maxRate: BigInt(irm.maxRate),
+          },
+        );
 
   return (
     BigInt(floatingDebt) + (BigInt(floatingDebt) * ((borrowRate * BigInt(timestamp - debtUpdate)) / 31_536_000n)) / WAD

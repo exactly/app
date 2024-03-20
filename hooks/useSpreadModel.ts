@@ -1,20 +1,17 @@
 import { useMemo } from 'react';
-import { parseEther } from 'viem';
+import WAD from '@exactly/lib/esm/fixed-point-math/WAD';
+import baseRate from '@exactly/lib/esm/interest-rate-model/baseRate';
+import fixedRate from '@exactly/lib/esm/interest-rate-model/fixedRate';
+import fixedUtilization from '@exactly/lib/esm/interest-rate-model/fixedUtilization';
+import floatingRate from '@exactly/lib/esm/interest-rate-model/floatingRate';
+import floatingUtilization from '@exactly/lib/esm/interest-rate-model/floatingUtilization';
+import globalUtilization from '@exactly/lib/esm/interest-rate-model/globalUtilization';
 
 import useAccountData from './useAccountData';
-import {
-  fixedRate,
-  fixedUtilization,
-  floatingInterestRateCurve,
-  floatingUtilization,
-  globalUtilization,
-  spreadModel,
-} from 'utils/interestRateCurve';
-import { WAD, bmax } from 'utils/fixedMath';
 import useIRM from './useIRM';
 
-export const MAX = 10n ** 18n;
-export const INTERVAL = parseEther('0.005');
+export const MAX = 1;
+export const INTERVAL = 0.005;
 
 const levels = 8;
 
@@ -36,62 +33,57 @@ export default function useSpreadModel(symbol: string) {
       floatingBackupBorrowed,
     } = marketAccount;
 
-    const currentUFloating = floatingUtilization(totalFloatingDepositAssets, totalFloatingBorrowAssets);
-    const currentUGlobal = globalUtilization(
-      totalFloatingDepositAssets,
-      totalFloatingBorrowAssets,
-      floatingBackupBorrowed,
-    );
-    const pools = Object.fromEntries(fixedPools.map((pool) => [Number(pool.maturity), pool]));
-    const maturities = fixedPools.map(({ maturity }) => maturity);
-    const end = bmax(...maturities);
-
-    const now = BigInt(Math.floor(Date.now() / 1000));
-
-    const parameters = {
-      timestamp: now,
-      maxPools: BigInt(maxFuturePools),
-      ...irm,
-    };
-
-    const model = spreadModel(parameters, currentUFloating, currentUGlobal);
-
+    const uFloating = floatingUtilization(totalFloatingDepositAssets, totalFloatingBorrowAssets);
+    const uGlobal = globalUtilization(totalFloatingDepositAssets, totalFloatingBorrowAssets, floatingBackupBorrowed);
+    const pools = Object.fromEntries(fixedPools.map((pool) => [String(pool.maturity), pool]));
+    const maturities = fixedPools.map(({ maturity }) => Number(maturity));
+    const end = Math.max(...maturities);
+    const now = Math.floor(Date.now() / 1000);
     const steps = MAX / INTERVAL;
-    const step = (BigInt(end) - now) / steps;
 
     const points: Record<string, number | number[]>[] = [];
 
-    const ms = [...maturities, ...Array.from({ length: Number(steps) }).map((_, i) => now + BigInt(i) * step)];
-    ms.sort((x, y) => Number(x - y));
+    const base = baseRate(uFloating, uGlobal, irm);
 
-    for (const m of ms) {
+    for (const date of [
+      ...maturities,
+      ...Array.from({ length: Number(steps) }).map((_, i) => Math.floor(now + i * ((end - now) / steps))),
+    ].sort()) {
       const extend: Record<string, number | number[]> = {};
-      if (pools[Number(m)]) {
-        const pool = pools[Number(m)];
-        const { rate, z } = fixedRate(
-          { ...parameters, maturity: m },
-          fixedUtilization(pool.supplied, pool.borrowed, totalFloatingDepositAssets),
-          currentUFloating,
-          currentUGlobal,
-        );
-
-        extend.z = Number(z) / 1e18;
-        extend.rate = Number(rate) / 1e18;
+      if (pools[date]) {
+        extend.rate =
+          Number(
+            fixedRate(
+              date,
+              maxFuturePools,
+              fixedUtilization(pools[date].supplied, pools[date].borrowed, totalFloatingDepositAssets),
+              uFloating,
+              uGlobal,
+              irm,
+              now,
+              base,
+            ),
+          ) / 1e18;
         extend.highlight = 1;
-      }
-
-      if (m === now) {
-        extend.rate = Number(floatingInterestRateCurve(irm)(currentUFloating, currentUGlobal)) / 1e18;
+      } else if (date === now) {
+        extend.rate = Number(floatingRate(uFloating, uGlobal, irm)) / 1e18;
         extend.highlight = 1;
       }
 
       points.push({
-        date: Number(m),
-        area: [Number(model(m, -WAD)) / 1e18, Number(model(m, WAD)) / 1e18],
+        date: date,
         ...Object.fromEntries(
           [...Array(levels)].map((_, i, { length }) => {
             const z = WAD - (BigInt(i) * WAD) / BigInt(length);
-            return [`area${i}`, [Number(model(m, -z)) / 1e18, Number(model(m, z)) / 1e18]];
+            return [
+              `area${i}`,
+              date <= now
+                ? [Number(base) / 1e18, Number(base) / 1e18]
+                : [
+                    Number(fixedRate(date, maxFuturePools, 0n, uFloating, uGlobal, irm, now, base, -z)) / 1e18,
+                    Number(fixedRate(date, maxFuturePools, 0n, uFloating, uGlobal, irm, now, base, z)) / 1e18,
+                  ],
+            ];
           }),
         ),
         ...extend,
