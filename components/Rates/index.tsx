@@ -106,8 +106,8 @@ const Rates: FC<Props> = ({
             hideMarket
               ? ''
               : apr > 999
-              ? '∞'
-              : toPercentage(type === 'borrow' ? apr : apr < minAPRValue ? undefined : apr)
+                ? '∞'
+                : toPercentage(type === 'borrow' ? apr : apr < minAPRValue ? undefined : apr)
           }${label ? ' ' + label : ''}`
         ) : (
           <Skeleton width={70} />

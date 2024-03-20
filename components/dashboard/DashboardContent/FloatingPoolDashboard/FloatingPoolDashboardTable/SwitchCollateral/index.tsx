@@ -113,8 +113,8 @@ function SwitchCollateral({ symbol }: Props) {
     disabled && disabledText
       ? disabledText
       : checked
-      ? t('Disabling this asset as collateral affects your borrowing power and Health Factor')
-      : t('Enable this asset as collateral');
+        ? t('Disabling this asset as collateral affects your borrowing power and Health Factor')
+        : t('Enable this asset as collateral');
 
   return (
     <Tooltip

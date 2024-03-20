@@ -35,9 +35,8 @@ const AddExaTokensButton = () => {
 
     try {
       await Promise.all(
-        accountData.map(
-          ({ market, decimals, assetSymbol, symbol }) =>
-            connector?.watchAsset?.({ address: market, decimals, symbol, image: imagesBase64[assetSymbol] }),
+        accountData.map(({ market, decimals, assetSymbol, symbol }) =>
+          connector?.watchAsset?.({ address: market, decimals, symbol, image: imagesBase64[assetSymbol] }),
         ),
       );
     } catch (error) {

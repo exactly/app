@@ -57,11 +57,11 @@ const Security: NextPage = () => {
             ...(displayNetworkId === optimism.id
               ? [{ name: 'OP', address: await getContractAddress('InterestRateModelOP') }]
               : displayNetworkId === mainnet.id || displayNetworkId === optimismSepolia.id
-              ? [
-                  { name: 'DAI', address: await getContractAddress('InterestRateModelDAI') },
-                  { name: 'WBTC', address: await getContractAddress('InterestRateModelWBTC') },
-                ]
-              : []),
+                ? [
+                    { name: 'DAI', address: await getContractAddress('InterestRateModelDAI') },
+                    { name: 'WBTC', address: await getContractAddress('InterestRateModelWBTC') },
+                  ]
+                : []),
           ];
         },
         implementation: (): null => {
@@ -85,11 +85,11 @@ const Security: NextPage = () => {
             ...(displayNetworkId === optimism.id
               ? [{ name: 'OP', address: await getContractAddress('MarketOP_Proxy') }]
               : displayNetworkId === mainnet.id || displayNetworkId === optimismSepolia.id
-              ? [
-                  { name: 'DAI', address: await getContractAddress('MarketDAI_Proxy') },
-                  { name: 'WBTC', address: await getContractAddress('InterestRateModelWBTC') },
-                ]
-              : []),
+                ? [
+                    { name: 'DAI', address: await getContractAddress('MarketDAI_Proxy') },
+                    { name: 'WBTC', address: await getContractAddress('InterestRateModelWBTC') },
+                  ]
+                : []),
           ];
         },
         implementation: async () => {
@@ -100,11 +100,11 @@ const Security: NextPage = () => {
             ...(displayNetworkId === optimism.id
               ? [{ name: 'OP', address: await getContractAddress('MarketOP_Implementation') }]
               : displayNetworkId === mainnet.id || displayNetworkId === optimismSepolia.id
-              ? [
-                  { name: 'DAI', address: await getContractAddress('MarketDAI_Implementation') },
-                  { name: 'WBTC', address: await getContractAddress('MarketWBTC_Implementation') },
-                ]
-              : []),
+                ? [
+                    { name: 'DAI', address: await getContractAddress('MarketDAI_Implementation') },
+                    { name: 'WBTC', address: await getContractAddress('MarketWBTC_Implementation') },
+                  ]
+                : []),
           ];
         },
         codeLink: 'https://github.com/exactly/protocol/blob/main/contracts/Market.sol',

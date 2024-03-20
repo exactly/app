@@ -505,8 +505,8 @@ function Operation() {
           height: fromSheetOpen
             ? fromSheetRef.current?.clientHeight
             : toSheetOpen
-            ? toSheetRef.current?.clientHeight
-            : 'auto',
+              ? toSheetRef.current?.clientHeight
+              : 'auto',
         }}
       >
         <ModalBox sx={{ p: 2 }}>

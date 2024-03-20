@@ -9,10 +9,10 @@ type Identifier = 'operation' | 'rewards' | 'rollover' | 'leverager' | 'proto-st
 export type Args<T extends Identifier> = T extends 'operation'
   ? { operation: Operation; symbol: string; maturity?: bigint }
   : T extends 'rollover'
-  ? { from?: Position }
-  : T extends 'rewards' | 'leverager' | 'proto-staker' | 'faucet'
-  ? undefined
-  : never;
+    ? { from?: Position }
+    : T extends 'rewards' | 'leverager' | 'proto-staker' | 'faucet'
+      ? undefined
+      : never;
 
 type Value = {
   current?: Identifier;

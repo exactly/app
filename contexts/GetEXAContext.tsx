@@ -453,12 +453,12 @@ export const GetEXAProvider: FC<PropsWithChildren> = ({ children }) => {
     qtyIn === ''
       ? 0n
       : exaethPrice !== undefined
-      ? nativeSwap
-        ? (parseEther(qtyIn) * WEI_PER_ETHER) / exaethPrice
-        : route
-        ? (BigInt(route.toAmount) * WEI_PER_ETHER) / exaethPrice
-        : 0n
-      : undefined;
+        ? nativeSwap
+          ? (parseEther(qtyIn) * WEI_PER_ETHER) / exaethPrice
+          : route
+            ? (BigInt(route.toAmount) * WEI_PER_ETHER) / exaethPrice
+            : 0n
+        : undefined;
 
   const confirmBridge = useCallback(async () => {
     if (txStep !== TXStep.CONFIRM || !walletClient || !route) return;

@@ -46,8 +46,8 @@ const DashboardTitle = () => {
             {minutes < 1
               ? t('Updated <1 minute ago')
               : minutes < 2
-              ? t('Updated 1 minute ago')
-              : t('Updated {{minutes}} minutes ago', { minutes })}
+                ? t('Updated 1 minute ago')
+                : t('Updated {{minutes}} minutes ago', { minutes })}
           </Typography>
         )}
 

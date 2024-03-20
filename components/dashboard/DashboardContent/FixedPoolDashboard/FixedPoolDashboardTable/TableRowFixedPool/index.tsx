@@ -62,8 +62,8 @@ function TableRowFixedPool({ symbol, valueUSD, type, maturityDate, market, decim
             ? t('Borrow')
             : t('Deposit')
           : type === 'borrow'
-          ? t('Repay')
-          : t('Withdraw');
+            ? t('Repay')
+            : t('Withdraw');
 
       const transactionAPR =
         'fee' in transaction

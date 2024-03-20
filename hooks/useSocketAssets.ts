@@ -67,20 +67,20 @@ export default (disableFetch?: boolean, chainId?: number) => {
                   logoURI: '/img/assets/WETH.svg',
                 }
               : asset.symbol === 'VELO'
-              ? {
-                  usdAmount: veloPrice ? amount * veloPrice : undefined,
-                }
-              : {}),
+                ? {
+                    usdAmount: veloPrice ? amount * veloPrice : undefined,
+                  }
+                : {}),
           };
         })
         .sort((a, b) =>
           a.usdAmount === undefined && b.usdAmount === undefined
             ? a.symbol.localeCompare(b.symbol)
             : a.usdAmount === undefined
-            ? 1
-            : b.usdAmount === undefined
-            ? -1
-            : b.usdAmount - a.usdAmount,
+              ? 1
+              : b.usdAmount === undefined
+                ? -1
+                : b.usdAmount - a.usdAmount,
         ),
     );
   }, [chainId, disableFetch, prices, veloBalance, veloPrice, walletAddress]);

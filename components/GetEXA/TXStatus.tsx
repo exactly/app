@@ -112,8 +112,8 @@ const BridgeTXStatus = () => {
       sourceTxStatus === 'PENDING' || destinationTxStatus === 'PENDING'
         ? 'loading'
         : sourceTxStatus === 'COMPLETED' && destinationTxStatus === 'COMPLETED'
-        ? 'success'
-        : 'error',
+          ? 'success'
+          : 'error',
     hash: sourceTransactionHash,
     url: socketScanURL,
   } as const;

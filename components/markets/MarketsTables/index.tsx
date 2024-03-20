@@ -190,8 +190,8 @@ const MarketTables: FC = () => {
             floatingDepositAPR === undefined
               ? { maturity: bestFixedDeposit.maturity, rate: Number(bestFixedDeposit.rate) }
               : bestFixedDeposit.rate > floatingDepositAPR + Number(depositRewards)
-              ? { maturity: bestFixedDeposit.maturity, rate: bestFixedDeposit.rate }
-              : { maturity: 0n, rate: floatingDepositAPR };
+                ? { maturity: bestFixedDeposit.maturity, rate: bestFixedDeposit.rate }
+                : { maturity: 0n, rate: floatingDepositAPR };
 
           const bestBorrow =
             bestFixedBorrow.rate < Number(formatEther(floatingBorrowRate))

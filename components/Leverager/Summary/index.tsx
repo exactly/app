@@ -267,8 +267,8 @@ const Summary = () => {
                 {requiresApproval
                   ? approvalMessage[approvalStatus] ?? t('Approve')
                   : input.secondaryOperation === 'deposit'
-                  ? t('Confirm Leverage')
-                  : t('Confirm Deleverage')}
+                    ? t('Confirm Leverage')
+                    : t('Confirm Deleverage')}
               </LoadingButton>
             )}
           </Grid>
