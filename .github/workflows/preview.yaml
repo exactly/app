@@ -16,15 +16,15 @@ jobs:
       SENTRY_ENVIRONMENT: development
       NEXT_PUBLIC_NETWORK: 5
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: 18
-          cache: npm
-      - run: npm ci
-      - run: npm run lint
-      - run: npm run build
-      - run: npx unimported
+          node-version: 20
+      - uses: oven-sh/setup-bun@v1
+      - run: bun install
+      - run: bun lint
+      - run: bun run build
+      - run: bun unimported
 
   e2e:
     needs: [check]
@@ -43,23 +43,22 @@ jobs:
       matrix:
         shard: [1/4, 2/4, 3/4, 4/4]
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: 18
-          cache: npm
+          node-version: 20
+      - uses: oven-sh/setup-bun@v1
       - uses: actions/cache@v3
         with:
           path: |
-            ~/.npm
             ${{ github.workspace }}/.next/cache
           key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**/*.js', '**/*.jsx', '**/*.ts', '**/*.tsx') }}
           restore-keys: |
             ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
-      - run: npm ci --audit false
-      - run: npm run build:e2e
-      - run: npx playwright install chromium --with-deps
-      - run: npx playwright test --project=chromium --shard ${{ matrix.shard }}
+      - run: bun install
+      - run: bun build:e2e
+      - run: bun playwright install chromium --with-deps
+      - run: bun playwright test --project=chromium --shard ${{ matrix.shard }}
       - if: always()
         uses: actions/upload-artifact@v3
         with:
@@ -72,16 +71,17 @@ jobs:
     if: ${{ !github.event.pull_request.draft }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: 18
-      - run: npm ci --audit false
+          node-version: 20
+      - uses: oven-sh/setup-bun@v1
+      - run: bun install
       - uses: actions/download-artifact@v3
         with:
           name: blob-reports
           path: blob-reports
-      - run: npx playwright merge-reports --reporter html ./blob-reports
+      - run: bun playwright merge-reports --reporter html ./blob-reports
       - uses: actions/upload-artifact@v3
         with:
           name: html-report

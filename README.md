@@ -20,7 +20,7 @@ git clone git@github.com:exactly/app.git
 and install its dependencies with
 
 ```bash
-npm install
+bun install
 ```
 
 ## Running the app locally
@@ -28,7 +28,7 @@ npm install
 The app can be started locally with
 
 ```bash
-npm run dev
+bun dev
 ```
 
 and the instance should be accessible at `http://localhost:3000`.
@@ -45,7 +45,7 @@ NEXT_PUBLIC_NETWORK=5  # Network to use by default
 A development server can be started at `http://localhost:3000` with
 
 ```bash
-npm run dev
+bun dev
 ```
 
 ## Testing
@@ -65,19 +65,19 @@ TENDERLY_USER=<tenderly user>
 The full suite can be run using
 
 ```bash
-npm run start:e2e             # Or `npm run dev:e2e` for a dev server
+bun start:e2e             # Or `bun dev:e2e` for a dev server
 ```
 
 to start the app and in another terminal
 
 ```bash
-npm run test
+bun run test
 ```
 
 To run a single test use the same above but specifiy the spec to run with
 
 ```bash
-npm run test -- [spec path] # e.g. e2e/specs/0-enter-exit-market/weth.spec.ts
+bun run test -- [spec path] # e.g. e2e/specs/0-enter-exit-market/weth.spec.ts
 ```
 
 Use the `--headed` flag to review the test running in the browser.
